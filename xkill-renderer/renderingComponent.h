@@ -1,17 +1,28 @@
+/** \defgroup xkill-renderer xkill-renderer
+ *
+ * \brief Rendering package of XKILL
+ */
+
+/**
+ * \class RenderingComponent
+ * \ingroup xkill-renderer
+ * \brief Main rendering class
+ * This class renders stuff
+ * \note This is a note.
+ * \author (last to touch it) $Author: David Grelsson, Eric Nilsson $
+ */
+
 #ifndef XKILL_RENDERER_RENDERINGCOMPONENT_H
 #define XKILL_RENDERER_RENDERINGCOMPONENT_H
 
-#ifdef DLL_EXPORT
-#define DLL __declspec(dllexport)
-#else
-#define DLL __declspec(dllimport)
-#endif //DLL_EXPORT
+#include "dllRenderer.h"
 
 class DLL RenderingComponent
 {
 private:
 protected:
 public:
+	/// Short description: Mock function
 	void youJustKissedABoomBoomBaby();
 
 	RenderingComponent();
