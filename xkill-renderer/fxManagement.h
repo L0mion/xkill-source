@@ -13,21 +13,25 @@ public:
 
 	HRESULT init(ID3D11Device* device);
 
-	ID3D11VertexShader* getDefaultVertexShader() const;
-	ID3D11PixelShader* getDefaultPixelShader() const;
+	ID3D11VertexShader* getDefaultVS() const;
+	ID3D11PixelShader* getDefaultPS() const;
+	ID3D11PixelShader* getDefaultDeferredPS() const;
 
 private:
 	HRESULT initShaders(ID3D11Device* device);
-	HRESULT initDefaultVertexShader(ID3D11Device* device);
-	HRESULT initDefaultPixelShader(ID3D11Device* device);
+	HRESULT initDefaultVS(ID3D11Device* device);
+	HRESULT initDefaultPS(ID3D11Device* device);
+	HRESULT initDefaultDeferredPS(ID3D11Device* device);
 	HRESULT initInputLayout(ID3D11Device* device);
 
-	ID3D11VertexShader* defaultVertexShader;
-	ID3D11PixelShader* defaultPixelShader;
+	ID3D11VertexShader* defaultVS;
+	ID3D11PixelShader* defaultPS;
+	ID3D11PixelShader* defaultDeferredPS;
 	
-	ID3D10Blob* defaultVS;
-	ID3D10Blob* defaultPS;
-	ID3D10Blob* error;
+	ID3D10Blob* blobDefaultVS;
+	ID3D10Blob* blobDefaultPS;
+	ID3D10Blob* blobDefaultDeferredPS;
+	ID3D10Blob* blobError;
 
 	ID3D11InputLayout* inputLayout;
 

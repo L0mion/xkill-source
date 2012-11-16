@@ -2,29 +2,33 @@
 
 FXManagement::FXManagement()
 {
-	defaultVertexShader = nullptr;
-	defaultPixelShader	= nullptr;
+	defaultVS			= nullptr;
+	defaultPS			= nullptr;
+	defaultDeferredPS	= nullptr;
 	inputLayout			= nullptr;
 
-	defaultVS	= nullptr;
-	defaultPS	= nullptr;
-	error		= nullptr;
+	blobDefaultVS			= nullptr;
+	blobDefaultPS			= nullptr;
+	blobDefaultDeferredPS	= nullptr;
+	blobError				= nullptr;
 }
 
 FXManagement::~FXManagement()
 {
-	if(defaultVertexShader)
-		defaultVertexShader->Release();
-	if(defaultPixelShader)
-		defaultPixelShader->Release();
-	if(inputLayout)
-		inputLayout->Release();
 	if(defaultVS)
 		defaultVS->Release();
 	if(defaultPS)
 		defaultPS->Release();
-	if(error)
-		error->Release();
+	if(inputLayout)
+		inputLayout->Release();
+	if(blobDefaultVS)
+		blobDefaultVS->Release();
+	if(blobDefaultPS)
+		blobDefaultPS->Release();
+	if(blobDefaultDeferredPS)
+		blobDefaultDeferredPS->Release();
+	if(blobError)
+		blobError->Release();
 }
 
 HRESULT FXManagement::init(ID3D11Device* device)
@@ -38,28 +42,35 @@ HRESULT FXManagement::init(ID3D11Device* device)
 	return hr;
 }
 
-ID3D11VertexShader* FXManagement::getDefaultVertexShader() const
+ID3D11VertexShader* FXManagement::getDefaultVS() const
 {
-	return defaultVertexShader;
+	return defaultVS;
 }
 
-ID3D11PixelShader* FXManagement::getDefaultPixelShader() const
+ID3D11PixelShader* FXManagement::getDefaultPS() const
 {
-	return defaultPixelShader;
+	return defaultPS;
+}
+
+ID3D11PixelShader* FXManagement::getDefaultDeferredPS() const
+{
+	return defaultDeferredPS;
 }
 
 HRESULT FXManagement::initShaders(ID3D11Device* device)
 {
 	HRESULT hr = S_OK;
 
-	hr = initDefaultVertexShader(device);
+	hr = initDefaultVS(device);
 	if(hr == S_OK)
-		hr = initDefaultPixelShader(device);
+		hr = initDefaultPS(device);
+	if(hr == S_OK)
+		hr = initDefaultDeferredPS(device);
 
 	return hr;
 }
 
-HRESULT FXManagement::initDefaultVertexShader(ID3D11Device* device)
+HRESULT FXManagement::initDefaultVS(ID3D11Device* device)
 {
 	HRESULT hr = S_OK;
 
@@ -68,31 +79,48 @@ HRESULT FXManagement::initDefaultVertexShader(ID3D11Device* device)
 	flags |= D3DCOMPILE_DEBUG;
 #endif
 	
-	hr = D3DReadFileToBlob(L"../../xkill-build/bin-Debug/defaultVertexShader.cso", &defaultVS);
+	hr = D3DReadFileToBlob(L"../../xkill-build/bin-Debug/defaultVertexShader.cso", &blobDefaultVS);
 	if(hr == S_OK)
 	{
 		hr = device->CreateVertexShader(
-			defaultVS->GetBufferPointer(),
-			defaultVS->GetBufferSize(),
+			blobDefaultVS->GetBufferPointer(),
+			blobDefaultVS->GetBufferSize(),
 			nullptr,
-			&defaultVertexShader);
+			&defaultVS);
 	}
 
 	return hr;
 }
 
-HRESULT FXManagement::initDefaultPixelShader(ID3D11Device* device)
+HRESULT FXManagement::initDefaultPS(ID3D11Device* device)
 {
 	HRESULT hr = S_OK;
 
-	hr = D3DReadFileToBlob(L"../../xkill-build/bin-Debug/defaultPixelShader.cso", &defaultPS);
+	hr = D3DReadFileToBlob(L"../../xkill-build/bin-Debug/defaultPixelShader.cso", &blobDefaultPS);
 	if(hr == S_OK)
 	{
 		hr = device->CreatePixelShader(
-			defaultPS->GetBufferPointer(),
-			defaultPS->GetBufferSize(),
+			blobDefaultPS->GetBufferPointer(),
+			blobDefaultPS->GetBufferSize(),
 			nullptr,
-			&defaultPixelShader);
+			&defaultPS);
+	}
+
+	return hr;
+}
+
+HRESULT FXManagement::initDefaultDeferredPS(ID3D11Device* device)
+{
+	HRESULT hr = S_OK;
+
+	hr = D3DReadFileToBlob(L"../../xkill-build/bin-Debug/defaultDeferredPS.cso", &blobDefaultDeferredPS);
+	if(hr == S_OK)
+	{
+		hr = device->CreatePixelShader(
+			blobDefaultDeferredPS->GetBufferPointer(),
+			blobDefaultDeferredPS->GetBufferSize(),
+			nullptr,
+			&defaultDeferredPS);
 	}
 
 	return hr;
@@ -109,7 +137,7 @@ HRESULT FXManagement::initInputLayout(ID3D11Device* device)
 		{"TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0},
 	};
 
-	hr = device->CreateInputLayout(ied, 3, defaultVS->GetBufferPointer(), defaultVS->GetBufferSize(), &inputLayout);
+	hr = device->CreateInputLayout(ied, 3, blobDefaultVS->GetBufferPointer(), blobDefaultVS->GetBufferSize(), &inputLayout);
 
 	return hr;
 }
