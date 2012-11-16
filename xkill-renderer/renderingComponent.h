@@ -38,9 +38,10 @@ private:
 	HRESULT createDeviceAndSwapChain(const DXGI_SWAP_CHAIN_DESC swapChainDesc);
 	HRESULT initDepthBuffer();
 	HRESULT initRenderTargets();
-	HRESULT initBackBuffer();
 	void initViewport();
 	HRESULT initRasterizerState();
+	HRESULT initDefaultSamplerState();
+	HRESULT initShaderResourceViews(D3D11_TEXTURE2D_DESC desc);
 	HRESULT initFXManagement();
 
 	HWND windowHandle;
@@ -58,6 +59,14 @@ private:
 	ID3D11RenderTargetView*	backBuffer;
 	ID3D11DepthStencilView*	zBuffer;
 	ID3D11RasterizerState*	rasterizerState;
+	ID3D11SamplerState*		defaultSamplerState;
+
+	ID3D11ShaderResourceView* normalSRV;
+	ID3D11ShaderResourceView* diffuseSRV;
+
+	ID3D11Texture2D* backBufferTex;
+	ID3D11Texture2D* normalTex;
+	ID3D11Texture2D* diffuseTex;
 };
 
 #endif //XKILL_RENDERER_RENDERINGCOMPONENT_H

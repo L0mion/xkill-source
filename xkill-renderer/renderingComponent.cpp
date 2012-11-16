@@ -16,6 +16,10 @@ RenderingComponent::RenderingComponent(HWND windowHandle, UINT screenWidth, UINT
 	backBuffer		= nullptr;
 	zBuffer			= nullptr;
 	rasterizerState = nullptr;
+
+	backBufferTex	= nullptr;
+	normalTex		= nullptr;
+	diffuseTex		= nullptr;
 }
 RenderingComponent::~RenderingComponent()
 {
@@ -37,6 +41,13 @@ RenderingComponent::~RenderingComponent()
 		zBuffer->Release();
 	if(rasterizerState)
 		rasterizerState->Release();
+
+	if(backBufferTex)
+		backBufferTex->Release();
+	if(normalTex)
+		normalTex->Release();
+	if(diffuseTex)
+		diffuseTex->Release();
 }
 
 HRESULT RenderingComponent::init()
@@ -49,11 +60,11 @@ HRESULT RenderingComponent::init()
 	if(hr == S_OK)
 		hr = initRenderTargets();
 	if(hr == S_OK)
-		hr = initBackBuffer();
-	if(hr == S_OK)
 		initViewport();
 	if(hr == S_OK)
 		hr = initRasterizerState();
+	if(hr == S_OK)
+		hr = initDefaultSamplerState();
 	if(hr == S_OK)
 		hr = initFXManagement();
 
@@ -62,14 +73,42 @@ HRESULT RenderingComponent::init()
 
 void RenderingComponent::render()
 {
-	devcon->OMSetRenderTargets(1, &backBuffer, zBuffer);
-	FLOAT color[] = {0.0f, 0.0f, 0.0f, 1.0f };
-	devcon->ClearRenderTargetView(backBuffer, color);
+	FLOAT black[]	= {0.0f, 0.0f, 0.0f, 1.0f };
+	FLOAT red[]		= {1.0f, 0.0f, 0.0f, 1.0f };
+	FLOAT green[]	= {0.0f, 1.0f, 0.0f, 1.0f };
+	FLOAT blue[]	= {0.0f, 0.0f, 1.0f, 1.0f };
+
+	/*Render to G-Buffers*/
+	devcon->VSSetShader(fxManagement->getDefaultVS(), nullptr, 0);
+	devcon->PSSetShader(fxManagement->getDefaultPS(), nullptr, 0);
+	devcon->PSSetSamplers(0, 1, &defaultSamplerState);
+	devcon->OMSetRenderTargets(2, renderTargets, zBuffer); 
+	devcon->ClearRenderTargetView(renderTargets[0], green);
+	devcon->ClearRenderTargetView(renderTargets[1], blue);
 	devcon->ClearDepthStencilView(zBuffer, D3D11_CLEAR_DEPTH, 1.0f, 0);
+	devcon->RSSetState(rasterizerState);
+	devcon->IASetVertexBuffers(0, 0, NULL, 0, 0);
+	devcon->IASetInputLayout(NULL);
+	devcon->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
+	devcon->Draw(4, 0);
 
-	devcon->VSSetShader(fxManagement->getDefaultVertexShader(), nullptr, 0);
-	devcon->PSSetShader(fxManagement->getDefaultPixelShader(), nullptr, 0);
+	/*Render to backbuffer*/
+	devcon->VSSetShader(fxManagement->getDefaultVS(), nullptr, 0);
+	devcon->PSSetShader(fxManagement->getDefaultDeferredPS(), nullptr, 0);
+	devcon->OMSetRenderTargets(1, &backBuffer, NULL);
+	devcon->OMSetDepthStencilState(0, 0);
+	devcon->ClearRenderTargetView(backBuffer, red);
+	devcon->RSSetState(rasterizerState);
+	devcon->IASetVertexBuffers(0, 0, NULL, 0, 0);
+	devcon->IASetInputLayout(NULL);
 
+	devcon->PSSetShaderResources(0, 1, &normalSRV);
+	devcon->PSSetShaderResources(1, 1, &diffuseSRV);
+
+	devcon->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
+	devcon->Draw(4, 0);
+	
+	
 	swapChain->Present(0, 0);
 }
 
@@ -162,7 +201,7 @@ HRESULT RenderingComponent::initDepthBuffer()
 	texd.Height = screenHeight;
 	texd.ArraySize = 1;
 	texd.MipLevels = 1;
-	texd.SampleDesc.Count = 4;
+	texd.SampleDesc.Count = aliasingCount;
 	texd.Format = DXGI_FORMAT_D32_FLOAT;
 	texd.BindFlags = D3D11_BIND_DEPTH_STENCIL;
 
@@ -194,45 +233,29 @@ HRESULT RenderingComponent::initRenderTargets()
 	desc.MipLevels = 1;
 	desc.ArraySize = 1;
 	desc.Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
-	desc.SampleDesc.Count = 1;
+	desc.SampleDesc.Count = aliasingCount;
 	desc.Usage = D3D11_USAGE_DEFAULT;
 	desc.BindFlags = D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE;
-
-	ID3D11Texture2D* backBufferTex;
-	ID3D11Texture2D* normalTex;
-	ID3D11Texture2D* diffuseTex;
 
 	device->CreateTexture2D(&desc, NULL, &backBufferTex);
 	device->CreateTexture2D(&desc, NULL, &normalTex);
 	device->CreateTexture2D(&desc, NULL, &diffuseTex);
 
-	swapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), (LPVOID*)&backBuffer);
+	swapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), (LPVOID*)&backBufferTex);
 	device->CreateRenderTargetView(backBufferTex, NULL, &backBuffer);
 
 	D3D11_RENDER_TARGET_VIEW_DESC rtvDesc;
 	rtvDesc.Format = desc.Format;
 	rtvDesc.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE2D;
 	rtvDesc.Texture2D.MipSlice = 0;
-
+	
 	device->CreateRenderTargetView(normalTex, &rtvDesc, &renderTargets[0]);
 	device->CreateRenderTargetView(diffuseTex, NULL, &renderTargets[1]);
 
 	devcon->OMSetRenderTargets(2, renderTargets, zBuffer);
 
-	return hr;
-}
-
-HRESULT RenderingComponent::initBackBuffer()
-{
-	HRESULT hr = S_OK;
-
-	ID3D11Texture2D *texBackBuffer;
-	swapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), (LPVOID*)&texBackBuffer);
-
-	device->CreateRenderTargetView(texBackBuffer, NULL, &backBuffer);
-	texBackBuffer->Release();
-
-	devcon->OMSetRenderTargets(1, &backBuffer, zBuffer);
+	/*Init SRVs*/
+	initShaderResourceViews(desc);
 
 	return hr;
 }
@@ -257,7 +280,7 @@ HRESULT RenderingComponent::initRasterizerState()
 	HRESULT hr = S_OK;
 
 	D3D11_RASTERIZER_DESC rsd;
-	rsd.CullMode = D3D11_CULL_BACK;
+	rsd.CullMode = D3D11_CULL_NONE;
 	rsd.FillMode = D3D11_FILL_SOLID;
 	rsd.FrontCounterClockwise = false;
 	rsd.DepthBias = false;
@@ -265,12 +288,50 @@ HRESULT RenderingComponent::initRasterizerState()
 	rsd.SlopeScaledDepthBias = 0;
 	rsd.DepthClipEnable = true;
 	rsd.ScissorEnable = false;
-	rsd.MultisampleEnable = false;
+	rsd.MultisampleEnable = true;
 	rsd.AntialiasedLineEnable = true;
 
 	hr = device->CreateRasterizerState(&rsd, &rasterizerState);
 	devcon->RSSetState(rasterizerState);
 	
+	return hr;
+}
+
+HRESULT RenderingComponent::initDefaultSamplerState()
+{
+	HRESULT hr = S_OK;
+
+	D3D11_SAMPLER_DESC sampDesc;
+    ZeroMemory( &sampDesc, sizeof(sampDesc) );
+    
+	sampDesc.Filter	= D3D11_FILTER_MIN_MAG_MIP_LINEAR;
+    sampDesc.AddressU	= D3D11_TEXTURE_ADDRESS_WRAP;
+    sampDesc.AddressV	= D3D11_TEXTURE_ADDRESS_WRAP;
+    sampDesc.AddressW	= D3D11_TEXTURE_ADDRESS_WRAP;
+    sampDesc.ComparisonFunc = D3D11_COMPARISON_NEVER;
+    sampDesc.MinLOD	= 0;
+    sampDesc.MaxLOD	= D3D11_FLOAT32_MAX;
+
+	hr = device->CreateSamplerState(&sampDesc, &defaultSamplerState);
+
+	return hr;
+}
+
+HRESULT RenderingComponent::initShaderResourceViews(D3D11_TEXTURE2D_DESC desc)
+{
+	HRESULT hr = S_OK;
+	
+	D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc;
+	ZeroMemory(&srvDesc, sizeof(srvDesc));
+	srvDesc.Format						= desc.Format;
+	srvDesc.ViewDimension				= D3D11_SRV_DIMENSION_TEXTURE2D;
+	srvDesc.Texture2D.MostDetailedMip	= 0;
+	srvDesc.Texture2D.MipLevels			= 1;
+
+	hr = device->CreateShaderResourceView(normalTex, &srvDesc, &normalSRV);
+	if(hr == S_OK)
+		hr = device->CreateShaderResourceView(diffuseTex, &srvDesc, &diffuseSRV);
+
 	return hr;
 }
 
