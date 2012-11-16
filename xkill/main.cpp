@@ -10,16 +10,27 @@
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int cmdShow)
 {
-	RenderingComponent renderingComponent;
-	renderingComponent.youJustKissedABoomBoomBaby();
+	UINT screenWidth = 800;
+	UINT screenHeight = 800;
 
-	Window window(hInstance, cmdShow, 800, 800);
-	window.init();
-	
-	while(window.getIsActive())
+	Window* window = new Window(hInstance, cmdShow, screenWidth, screenHeight);
+	window->init();
+
+	RenderingComponent* renderingComponent = new RenderingComponent(
+		window->getWindowHandle(), 
+		screenWidth, 
+		screenHeight, 
+		1);
+	renderingComponent->init();
+
+	while(window->getIsActive())
 	{
-		window.checkMessages();
+		window->checkMessages();
+		renderingComponent->render();
 	}
+
+	delete renderingComponent;
+	delete window;
 
 
 	return 0;
