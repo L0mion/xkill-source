@@ -88,7 +88,7 @@ RenderingComponent::~RenderingComponent()
 	}
 	if(dxgiDebug)
 	{
-		dxgiDebug->ReportLiveObjects(DXGI_DEBUG_ALL, DXGI_DEBUG_RLO_DETAIL);
+		//dxgiDebug->ReportLiveObjects(DXGI_DEBUG_ALL, DXGI_DEBUG_RLO_DETAIL);
 		dxgiDebug->Release();
 	}
 }

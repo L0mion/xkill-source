@@ -35,8 +35,8 @@ HRESULT FXManagement::init(ID3D11Device* device)
 	HRESULT hr = S_OK;
 
 	hr = initShaders(device);
-	if(hr == S_OK)
-		initInputLayout(device);
+//	if(hr == S_OK)
+//		initInputLayout(device);
 
 	return hr;
 }
@@ -131,12 +131,17 @@ HRESULT FXManagement::initInputLayout(ID3D11Device* device)
 
 	D3D11_INPUT_ELEMENT_DESC ied[] =
 	{
-		{"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0},
-		{"NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0},
-		{"TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0},
+		{"POSITION",	0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0},
+		{"NORMAL",		0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0},
+		{"TEXCOORD",	0, DXGI_FORMAT_R32G32_FLOAT,	0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0},
 	};
 
-	hr = device->CreateInputLayout(ied, 3, blobDefaultVS->GetBufferPointer(), blobDefaultVS->GetBufferSize(), &inputLayout);
+	hr = device->CreateInputLayout(
+		ied, 
+		3, 
+		blobDefaultVS->GetBufferPointer(), 
+		blobDefaultVS->GetBufferSize(), 
+		&inputLayout);
 
 	return hr;
 }
