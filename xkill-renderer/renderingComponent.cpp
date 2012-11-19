@@ -3,31 +3,32 @@
 
 RenderingComponent::RenderingComponent(HWND windowHandle, UINT screenWidth, UINT screenHeight, UINT aliasingCount)
 {
-	this->windowHandle = windowHandle;
-	this->screenWidth = screenWidth;
-	this->screenHeight = screenHeight;
-	this->aliasingCount = aliasingCount;
+	this->windowHandle	= windowHandle;
+	this->screenWidth	= screenWidth;
+	this->screenHeight	= screenHeight;
+	this->aliasingCount	= aliasingCount;
 
-	device			= nullptr;
-	devcon			= nullptr;
+	device	= nullptr;
+	devcon	= nullptr;
 
-	fxManagement	= nullptr;
+	fxManagement = nullptr;
 
-	swapChain		= nullptr;
+	swapChain = nullptr;
 	for(unsigned int i=0; i<2; i++)
-		renderTargets[i] = nullptr;
+		rtvGBuffers[i] = nullptr;
 
-	backBuffer			= nullptr;
-	zBuffer				= nullptr;
-	rasterizerState		= nullptr;
-	defaultSamplerState = nullptr;
+	rtvBackBuffer	= nullptr;
+	dsvDepthBuffer	= nullptr;
+	rsDefault		= nullptr;
+	ssDefault		= nullptr;
 
-	normalSRV	= nullptr;
-	diffuseSRV	= nullptr;
-
-	backBufferTex	= nullptr;
-	normalTex		= nullptr;
-	diffuseTex		= nullptr;
+	srvAlbedoG	= nullptr;
+	srvNormalG	= nullptr;
+	
+	texBackBuffer	= nullptr;
+	texDepthBuffer	= nullptr;
+	texAlbedo		= nullptr;
+	texNormal		= nullptr;
 
 	/*debug*/
 	dxgiFactory		= nullptr;
@@ -39,42 +40,6 @@ RenderingComponent::~RenderingComponent()
 {
 	if(fxManagement)
 		delete fxManagement;
-
-	if(swapChain)
-	{
-		swapChain->SetFullscreenState(false, nullptr);
-		swapChain->Release();
-	}
-	if(device)
-		device->Release();
-	if(devcon)
-		devcon->Release();
-	if(backBuffer)
-		backBuffer->Release();
-	if(zBuffer)
-		zBuffer->Release();
-	if(rasterizerState)
-		rasterizerState->Release();
-	if(defaultSamplerState)
-		defaultSamplerState->Release();
-
-	for(unsigned int i=0; i<2; i++)
-	{
-		if(renderTargets[i])
-			renderTargets[i]->Release();
-	}
-
-	if(normalSRV)
-		normalSRV->Release();
-	if(diffuseSRV)
-		diffuseSRV->Release();
-
-	if(backBufferTex)
-		backBufferTex->Release();
-	if(normalTex)
-		normalTex->Release();
-	if(diffuseTex)
-		diffuseTex->Release();
 
 	/*debug*/
 	if(dxgiInfoQueue)
@@ -111,10 +76,53 @@ HRESULT RenderingComponent::init()
 		hr = initDefaultSamplerState();
 	if(hr == S_OK)
 		hr = initFXManagement();
-	if(hr == S_OK)
-		hr = initDebug();
+	//if(hr == S_OK)
+	//	hr = initDebug();
 
 	return hr;
+}
+
+void RenderingComponent::cleanUp()
+{
+	if(swapChain)
+	{
+		swapChain->SetFullscreenState(false, nullptr);
+		swapChain->Release();
+	}
+	
+	if(device)
+		device->Release();
+	if(devcon)
+		devcon->Release();
+
+	if(rtvBackBuffer)
+		rtvBackBuffer->Release();
+	if(dsvDepthBuffer)
+		dsvDepthBuffer->Release();
+	if(rsDefault)
+		rsDefault->Release();
+	if(ssDefault)
+		ssDefault->Release();
+
+	for(unsigned int i=0; i<2; i++)
+	{
+		if(rtvGBuffers[i])
+			rtvGBuffers[i]->Release();
+	}
+
+	if(srvNormalG)
+		srvNormalG->Release();
+	if(srvAlbedoG)
+		srvAlbedoG->Release();
+
+	if(texBackBuffer)
+		texBackBuffer->Release();
+	if(texDepthBuffer)
+		texDepthBuffer->Release();
+	if(texNormal)
+		texNormal->Release();
+	if(texAlbedo)
+		texAlbedo->Release();
 }
 
 void RenderingComponent::render()
@@ -127,12 +135,12 @@ void RenderingComponent::render()
 	/*Render to G-Buffers*/
 	devcon->VSSetShader(fxManagement->getDefaultVS(), nullptr, 0);
 	devcon->PSSetShader(fxManagement->getDefaultPS(), nullptr, 0);
-	devcon->PSSetSamplers(0, 1, &defaultSamplerState);
-	devcon->OMSetRenderTargets(2, renderTargets, zBuffer); 
-	devcon->ClearRenderTargetView(renderTargets[0], green);
-	devcon->ClearRenderTargetView(renderTargets[1], blue);
-	devcon->ClearDepthStencilView(zBuffer, D3D11_CLEAR_DEPTH, 1.0f, 0);
-	devcon->RSSetState(rasterizerState);
+	devcon->PSSetSamplers(0, 1, &ssDefault);
+	devcon->OMSetRenderTargets(2, rtvGBuffers, dsvDepthBuffer); 
+	devcon->ClearRenderTargetView(rtvGBuffers[0], green);
+	devcon->ClearRenderTargetView(rtvGBuffers[1], blue);
+	devcon->ClearDepthStencilView(dsvDepthBuffer, D3D11_CLEAR_DEPTH, 1.0f, 0);
+	devcon->RSSetState(rsDefault);
 	devcon->IASetVertexBuffers(0, 0, NULL, 0, 0);
 	devcon->IASetInputLayout(NULL);
 	devcon->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
@@ -146,15 +154,15 @@ void RenderingComponent::render()
 	/*Render to backbuffer*/
 	devcon->VSSetShader(fxManagement->getDefaultVS(), nullptr, 0);
 	devcon->PSSetShader(fxManagement->getDefaultDeferredPS(), nullptr, 0);
-	devcon->OMSetRenderTargets(1, &backBuffer, NULL);
+	devcon->OMSetRenderTargets(1, &rtvBackBuffer, NULL);
 	devcon->OMSetDepthStencilState(0, 0);
-	devcon->ClearRenderTargetView(backBuffer, red);
-	devcon->RSSetState(rasterizerState);
+	devcon->ClearRenderTargetView(rtvBackBuffer, red);
+	devcon->RSSetState(rsDefault);
 	devcon->IASetVertexBuffers(0, 0, NULL, 0, 0);
 	devcon->IASetInputLayout(NULL);
 
-	devcon->PSSetShaderResources(0, 1, &normalSRV);
-	devcon->PSSetShaderResources(1, 1, &diffuseSRV);
+	devcon->PSSetShaderResources(1, 1, &srvAlbedoG);
+	devcon->PSSetShaderResources(0, 1, &srvNormalG);
 
 	devcon->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
 	devcon->Draw(4, 0);
@@ -204,15 +212,15 @@ HRESULT RenderingComponent::initDeviceAndSwapChain()
 
 	DXGI_SWAP_CHAIN_DESC swapChainDesc;
 	ZeroMemory(&swapChainDesc, sizeof(swapChainDesc));
-	swapChainDesc.BufferCount = 1;
-	swapChainDesc.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
-	swapChainDesc.BufferDesc.Width = screenWidth;
-	swapChainDesc.BufferDesc.Height = screenHeight;
-	swapChainDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
-	swapChainDesc.OutputWindow = windowHandle;
-	swapChainDesc.SampleDesc.Count = aliasingCount;
-	swapChainDesc.Windowed = true;
-	swapChainDesc.Flags = DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH;
+	swapChainDesc.BufferCount		= 1;
+	swapChainDesc.BufferDesc.Format	= DXGI_FORMAT_R8G8B8A8_UNORM;
+	swapChainDesc.BufferDesc.Width	= screenWidth;
+	swapChainDesc.BufferDesc.Height	= screenHeight;
+	swapChainDesc.BufferUsage		= DXGI_USAGE_RENDER_TARGET_OUTPUT;
+	swapChainDesc.OutputWindow		= windowHandle;
+	swapChainDesc.SampleDesc.Count	= aliasingCount;
+	swapChainDesc.Windowed			= true;
+	swapChainDesc.Flags				= DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH;
 
 	hr = createDeviceAndSwapChain(swapChainDesc);
 
@@ -269,27 +277,24 @@ HRESULT RenderingComponent::initDepthBuffer()
 
 	D3D11_TEXTURE2D_DESC texd;
 	ZeroMemory(&texd, sizeof(texd));
-
-	texd.Width = screenWidth;
-	texd.Height = screenHeight;
-	texd.ArraySize = 1;
-	texd.MipLevels = 1;
+	texd.Width		= screenWidth;
+	texd.Height		= screenHeight;
+	texd.ArraySize	= 1;
+	texd.MipLevels	= 1;
 	texd.SampleDesc.Count = aliasingCount;
-	texd.Format = DXGI_FORMAT_D32_FLOAT;
-	texd.BindFlags = D3D11_BIND_DEPTH_STENCIL;
+	texd.Format		= DXGI_FORMAT_D32_FLOAT;
+	texd.BindFlags	= D3D11_BIND_DEPTH_STENCIL;
 
-	ID3D11Texture2D *depthBuffer;
-	hr = device->CreateTexture2D(&texd, NULL, &depthBuffer);
+	hr = device->CreateTexture2D(&texd, NULL, &texDepthBuffer);
 
 	if(hr == S_OK)
 	{
 		D3D11_DEPTH_STENCIL_VIEW_DESC dsvd;
 		ZeroMemory(&dsvd, sizeof(dsvd));
-		dsvd.Format = DXGI_FORMAT_D32_FLOAT;
-		dsvd.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2DMS;
+		dsvd.Format			= DXGI_FORMAT_D32_FLOAT;
+		dsvd.ViewDimension	= D3D11_DSV_DIMENSION_TEXTURE2DMS;
 
-		hr = device->CreateDepthStencilView(depthBuffer, &dsvd, &zBuffer);
-		depthBuffer->Release();
+		hr = device->CreateDepthStencilView(texDepthBuffer, &dsvd, &dsvDepthBuffer);
 	}
 
 	return hr;
@@ -300,35 +305,39 @@ HRESULT RenderingComponent::initRenderTargets()
 	HRESULT hr = S_OK;
 
 	D3D11_TEXTURE2D_DESC desc;
-	ZeroMemory( &desc, sizeof(desc) );
-	desc.Width = screenWidth;
-	desc.Height = screenHeight;
-	desc.MipLevels = 1;
-	desc.ArraySize = 1;
-	desc.Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
+	ZeroMemory(&desc, sizeof(desc));
+	desc.Width		= screenWidth;
+	desc.Height		= screenHeight;
+	desc.MipLevels	= 1;
+	desc.ArraySize	= 1;
+	desc.Format		= DXGI_FORMAT_R32G32B32A32_FLOAT;
 	desc.SampleDesc.Count = aliasingCount;
-	desc.Usage = D3D11_USAGE_DEFAULT;
-	desc.BindFlags = D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE;
+	desc.Usage		= D3D11_USAGE_DEFAULT;
+	desc.BindFlags	= D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE;
 
-	device->CreateTexture2D(&desc, NULL, &backBufferTex);
-	device->CreateTexture2D(&desc, NULL, &normalTex);
-	device->CreateTexture2D(&desc, NULL, &diffuseTex);
-
-	swapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), (LPVOID*)&backBufferTex);
-	device->CreateRenderTargetView(backBufferTex, NULL, &backBuffer);
-
-	D3D11_RENDER_TARGET_VIEW_DESC rtvDesc;
-	rtvDesc.Format = desc.Format;
-	rtvDesc.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE2D;
-	rtvDesc.Texture2D.MipSlice = 0;
+	device->CreateTexture2D(&desc, NULL, &texNormal);
+	if(hr == S_OK)
+		device->CreateTexture2D(&desc, NULL, &texAlbedo);
+	if(hr == S_OK)
+	{
+		swapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), (LPVOID*)&texBackBuffer);
+		hr = device->CreateRenderTargetView(texBackBuffer, NULL, &rtvBackBuffer);
+	}
+	if(hr == S_OK)
+	{
+		D3D11_RENDER_TARGET_VIEW_DESC rtvDesc;
+		rtvDesc.Format				= desc.Format;
+		rtvDesc.ViewDimension		= D3D11_RTV_DIMENSION_TEXTURE2D;
+		rtvDesc.Texture2D.MipSlice	= 0;
 	
-	device->CreateRenderTargetView(normalTex, &rtvDesc, &renderTargets[0]);
-	device->CreateRenderTargetView(diffuseTex, NULL, &renderTargets[1]);
-
-	devcon->OMSetRenderTargets(2, renderTargets, zBuffer);
+		hr = device->CreateRenderTargetView(texAlbedo, NULL, &rtvGBuffers[0]);
+		if(hr == S_OK)
+			hr = device->CreateRenderTargetView(texNormal, &rtvDesc, &rtvGBuffers[1]);
+	}
+	
 
 	/*Init SRVs*/
-	initShaderResourceViews(desc);
+	hr = initShaderResourceViews(desc);
 
 	return hr;
 }
@@ -338,12 +347,12 @@ void RenderingComponent::initViewport()
 	D3D11_VIEWPORT viewport;
 	ZeroMemory(&viewport, sizeof(D3D11_VIEWPORT));
 
-	viewport.TopLeftX = 0;
-	viewport.TopLeftY = 0;
-	viewport.Width = static_cast<FLOAT>(screenWidth);
-	viewport.Height = static_cast<FLOAT>(screenHeight);
-	viewport.MinDepth = 0;
-	viewport.MaxDepth = 1;
+	viewport.TopLeftX	= 0;
+	viewport.TopLeftY	= 0;
+	viewport.Width		= static_cast<FLOAT>(screenWidth);
+	viewport.Height		= static_cast<FLOAT>(screenHeight);
+	viewport.MinDepth	= 0;
+	viewport.MaxDepth	= 1;
 
 	devcon->RSSetViewports(1, &viewport);
 }
@@ -353,19 +362,18 @@ HRESULT RenderingComponent::initRasterizerState()
 	HRESULT hr = S_OK;
 
 	D3D11_RASTERIZER_DESC rsd;
-	rsd.CullMode = D3D11_CULL_NONE;
-	rsd.FillMode = D3D11_FILL_SOLID;
-	rsd.FrontCounterClockwise = false;
-	rsd.DepthBias = false;
-	rsd.DepthBiasClamp = 0;
-	rsd.SlopeScaledDepthBias = 0;
-	rsd.DepthClipEnable = true;
-	rsd.ScissorEnable = false;
-	rsd.MultisampleEnable = true;
-	rsd.AntialiasedLineEnable = true;
+	rsd.CullMode				= D3D11_CULL_NONE;
+	rsd.FillMode				= D3D11_FILL_SOLID;
+	rsd.FrontCounterClockwise	= false;
+	rsd.DepthBias				= false;
+	rsd.DepthBiasClamp			= 0;
+	rsd.SlopeScaledDepthBias	= 0;
+	rsd.DepthClipEnable			= true;
+	rsd.ScissorEnable			= false;
+	rsd.MultisampleEnable		= true;
+	rsd.AntialiasedLineEnable	= true;
 
-	hr = device->CreateRasterizerState(&rsd, &rasterizerState);
-	devcon->RSSetState(rasterizerState);
+	hr = device->CreateRasterizerState(&rsd, &rsDefault);
 	
 	return hr;
 }
@@ -375,17 +383,16 @@ HRESULT RenderingComponent::initDefaultSamplerState()
 	HRESULT hr = S_OK;
 
 	D3D11_SAMPLER_DESC sampDesc;
-    ZeroMemory( &sampDesc, sizeof(sampDesc) );
-    
-	sampDesc.Filter	= D3D11_FILTER_MIN_MAG_MIP_LINEAR;
+    ZeroMemory(&sampDesc, sizeof(sampDesc));
+	sampDesc.Filter		= D3D11_FILTER_MIN_MAG_MIP_LINEAR;
     sampDesc.AddressU	= D3D11_TEXTURE_ADDRESS_WRAP;
     sampDesc.AddressV	= D3D11_TEXTURE_ADDRESS_WRAP;
     sampDesc.AddressW	= D3D11_TEXTURE_ADDRESS_WRAP;
     sampDesc.ComparisonFunc = D3D11_COMPARISON_NEVER;
-    sampDesc.MinLOD	= 0;
-    sampDesc.MaxLOD	= D3D11_FLOAT32_MAX;
+    sampDesc.MinLOD		= 0;
+    sampDesc.MaxLOD		= D3D11_FLOAT32_MAX;
 
-	hr = device->CreateSamplerState(&sampDesc, &defaultSamplerState);
+	hr = device->CreateSamplerState(&sampDesc, &ssDefault);
 
 	return hr;
 }
@@ -401,9 +408,9 @@ HRESULT RenderingComponent::initShaderResourceViews(D3D11_TEXTURE2D_DESC desc)
 	srvDesc.Texture2D.MostDetailedMip	= 0;
 	srvDesc.Texture2D.MipLevels			= 1;
 
-	hr = device->CreateShaderResourceView(normalTex, &srvDesc, &normalSRV);
+	hr = device->CreateShaderResourceView(texAlbedo, &srvDesc, &srvAlbedoG);
 	if(hr == S_OK)
-		hr = device->CreateShaderResourceView(diffuseTex, &srvDesc, &diffuseSRV);
+		hr = device->CreateShaderResourceView(texNormal, &srvDesc, &srvNormalG);
 
 	return hr;
 }

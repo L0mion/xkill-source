@@ -4,7 +4,6 @@
 #include <stdio.h>
 #include <d3d11.h>
 
-/*debug*/
 #if defined(DEBUG) || defined(_DEBUG)
 #include <DXGI.h> 
 #include <Initguid.h> 
@@ -19,11 +18,15 @@ class FXManagement;
 class DLL RenderingComponent
 {
 public:
-	/// Short description: Mock function
-	RenderingComponent(HWND windowHandle, UINT screenWidth, UINT screenHeight, UINT aliasingCount);
+	RenderingComponent(
+		HWND windowHandle, 
+		UINT screenWidth, 
+		UINT screenHeight, 
+		UINT aliasingCount);
 	~RenderingComponent();
 
 	HRESULT init();
+	void cleanUp();
 	void render();
 protected:
 private:
@@ -51,18 +54,19 @@ private:
 	FXManagement* fxManagement;
 
 	IDXGISwapChain*			swapChain;
-	ID3D11RenderTargetView*	renderTargets[2];
-	ID3D11RenderTargetView*	backBuffer;
-	ID3D11DepthStencilView*	zBuffer;
-	ID3D11RasterizerState*	rasterizerState;
-	ID3D11SamplerState*		defaultSamplerState;
+	ID3D11RenderTargetView*	rtvGBuffers[2];
+	ID3D11RenderTargetView*	rtvBackBuffer;
+	ID3D11DepthStencilView*	dsvDepthBuffer;
+	ID3D11RasterizerState*	rsDefault;
+	ID3D11SamplerState*		ssDefault;
 
-	ID3D11ShaderResourceView* normalSRV;
-	ID3D11ShaderResourceView* diffuseSRV;
+	ID3D11ShaderResourceView* srvAlbedoG;
+	ID3D11ShaderResourceView* srvNormalG;
 
-	ID3D11Texture2D* backBufferTex;
-	ID3D11Texture2D* normalTex;
-	ID3D11Texture2D* diffuseTex;
+	ID3D11Texture2D* texBackBuffer;
+	ID3D11Texture2D* texDepthBuffer;
+	ID3D11Texture2D* texNormal;
+	ID3D11Texture2D* texAlbedo;
 
 	/*debug*/
 	IDXGIFactory1*	dxgiFactory;

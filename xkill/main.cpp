@@ -26,9 +26,10 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	while(window->getIsActive())
 	{
 		window->checkMessages();
-		renderingComponent->render();
+		//renderingComponent->render();
 	}
 
+	renderingComponent->cleanUp();
 	delete renderingComponent;
 	delete window;
 
