@@ -9,7 +9,7 @@ struct PSOut
 
 SamplerState ss : register(s0);
 
-PSOut defaultPixelShader(VSOut pIn)
+PSOut defaultPS(VSOut pIn)
 {
 	float4 white = float4(1.0f, 1.0f, 1.0f, 1.0f);
 
