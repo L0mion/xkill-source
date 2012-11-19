@@ -31,10 +31,8 @@ private:
 	ID3D10Blob* blobDefaultVS;
 	ID3D10Blob* blobDefaultPS;
 	ID3D10Blob* blobDefaultDeferredPS;
-	ID3D10Blob* blobError;
 
 	ID3D11InputLayout* inputLayout;
-
 };
 
 #endif //XKILL_RENDERER_FXMANAGEMENT_H

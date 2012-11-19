@@ -1,25 +1,20 @@
-/** \defgroup xkill-renderer xkill-renderer
- *
- * \brief Rendering package of XKILL
- */
-
-/**
- * \class RenderingComponent
- * \ingroup xkill-renderer
- * \brief Main rendering class
- * This class renders stuff
- * \note This is a note.
- * \author (last to touch it) $Author: David Grelsson, Eric Nilsson $
- */
-
 #ifndef XKILL_RENDERER_RENDERINGCOMPONENT_H
 #define XKILL_RENDERER_RENDERINGCOMPONENT_H
 
 #include <stdio.h>
 #include <d3d11.h>
 
+/*debug*/
+#if defined(DEBUG) || defined(_DEBUG)
+#include <DXGI.h> 
+#include <Initguid.h> 
+#include <DXGIDebug.h>
+#include <D3D11SDKLayers.h>
+#endif //DEBUG || _DEBUG
+
 #include "dllRenderer.h"
-#include "fxManagement.h"
+
+class FXManagement;
 
 class DLL RenderingComponent
 {
@@ -34,6 +29,7 @@ protected:
 private:
 
 	LPCWSTR featureLevelToString(const D3D_FEATURE_LEVEL featureLevel);
+	HRESULT initDebug();
 	HRESULT initDeviceAndSwapChain();
 	HRESULT createDeviceAndSwapChain(const DXGI_SWAP_CHAIN_DESC swapChainDesc);
 	HRESULT initDepthBuffer();
@@ -67,6 +63,12 @@ private:
 	ID3D11Texture2D* backBufferTex;
 	ID3D11Texture2D* normalTex;
 	ID3D11Texture2D* diffuseTex;
+
+	/*debug*/
+	IDXGIFactory1*	dxgiFactory;
+	ID3D11Debug*	d3d11Debug;
+	IDXGIDebug*		dxgiDebug;
+	IDXGIInfoQueue* dxgiInfoQueue;
 };
 
 #endif //XKILL_RENDERER_RENDERINGCOMPONENT_H

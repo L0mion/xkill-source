@@ -1,4 +1,5 @@
 #include <renderingComponent.h>
+#include <fxManagement.h>
 
 RenderingComponent::RenderingComponent(HWND windowHandle, UINT screenWidth, UINT screenHeight, UINT aliasingCount)
 {
@@ -13,13 +14,26 @@ RenderingComponent::RenderingComponent(HWND windowHandle, UINT screenWidth, UINT
 	fxManagement	= nullptr;
 
 	swapChain		= nullptr;
-	backBuffer		= nullptr;
-	zBuffer			= nullptr;
-	rasterizerState = nullptr;
+	for(unsigned int i=0; i<2; i++)
+		renderTargets[i] = nullptr;
+
+	backBuffer			= nullptr;
+	zBuffer				= nullptr;
+	rasterizerState		= nullptr;
+	defaultSamplerState = nullptr;
+
+	normalSRV	= nullptr;
+	diffuseSRV	= nullptr;
 
 	backBufferTex	= nullptr;
 	normalTex		= nullptr;
 	diffuseTex		= nullptr;
+
+	/*debug*/
+	dxgiFactory		= nullptr;
+	d3d11Debug		= nullptr;
+	dxgiDebug		= nullptr;
+	dxgiInfoQueue	= nullptr;
 }
 RenderingComponent::~RenderingComponent()
 {
@@ -41,6 +55,19 @@ RenderingComponent::~RenderingComponent()
 		zBuffer->Release();
 	if(rasterizerState)
 		rasterizerState->Release();
+	if(defaultSamplerState)
+		defaultSamplerState->Release();
+
+	for(unsigned int i=0; i<2; i++)
+	{
+		if(renderTargets[i])
+			renderTargets[i]->Release();
+	}
+
+	if(normalSRV)
+		normalSRV->Release();
+	if(diffuseSRV)
+		diffuseSRV->Release();
 
 	if(backBufferTex)
 		backBufferTex->Release();
@@ -48,13 +75,30 @@ RenderingComponent::~RenderingComponent()
 		normalTex->Release();
 	if(diffuseTex)
 		diffuseTex->Release();
+
+	/*debug*/
+	if(dxgiInfoQueue)
+		dxgiInfoQueue->Release();
+	if(dxgiFactory)
+		dxgiFactory->Release();
+	if(d3d11Debug)
+	{
+		d3d11Debug->ReportLiveDeviceObjects(D3D11_RLDO_DETAIL);
+		d3d11Debug->Release();
+	}
+	if(dxgiDebug)
+	{
+		dxgiDebug->ReportLiveObjects(DXGI_DEBUG_ALL, DXGI_DEBUG_RLO_DETAIL);
+		dxgiDebug->Release();
+	}
 }
 
 HRESULT RenderingComponent::init()
 {
 	HRESULT hr = S_OK;
 
-	hr = initDeviceAndSwapChain();
+	if(hr == S_OK)
+		hr = initDeviceAndSwapChain();
 	if(hr == S_OK)
 		hr = initDepthBuffer();
 	if(hr == S_OK)
@@ -67,6 +111,8 @@ HRESULT RenderingComponent::init()
 		hr = initDefaultSamplerState();
 	if(hr == S_OK)
 		hr = initFXManagement();
+	if(hr == S_OK)
+		hr = initDebug();
 
 	return hr;
 }
@@ -92,6 +138,11 @@ void RenderingComponent::render()
 	devcon->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
 	devcon->Draw(4, 0);
 
+	devcon->VSSetShader(NULL, NULL, 0);
+	devcon->PSSetShader(NULL, NULL, 0);
+	devcon->OMSetRenderTargets(0, NULL, NULL);
+
+
 	/*Render to backbuffer*/
 	devcon->VSSetShader(fxManagement->getDefaultVS(), nullptr, 0);
 	devcon->PSSetShader(fxManagement->getDefaultDeferredPS(), nullptr, 0);
@@ -108,6 +159,11 @@ void RenderingComponent::render()
 	devcon->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
 	devcon->Draw(4, 0);
 	
+	ID3D11ShaderResourceView* resetSRV[2] = {NULL};
+	devcon->PSSetShaderResources(0, 2, resetSRV);
+	devcon->VSSetShader(NULL, NULL, 0);
+	devcon->PSSetShader(NULL, NULL, 0);
+	devcon->OMSetRenderTargets(0, NULL, NULL);
 	
 	swapChain->Present(0, 0);
 }
@@ -123,6 +179,23 @@ LPCWSTR RenderingComponent::featureLevelToString(D3D_FEATURE_LEVEL featureLevel)
 		featureString = L"XKILL | Direct3D 11.0 device initiated with Direct3D 10.0 feature level";
 	
 	return featureString;
+}
+
+HRESULT RenderingComponent::initDebug()
+{
+	HRESULT hr = S_OK;
+
+	hr = CreateDXGIFactory1(__uuidof(IDXGIFactory1), (void**)(&dxgiFactory));
+	typedef HRESULT(__stdcall *fPtr)(const IID&, void**); 
+	HMODULE hDll = GetModuleHandleW(L"dxgidebug.dll"); 
+    fPtr DXGIGetDebugInterface = (fPtr)GetProcAddress(hDll, "DXGIGetDebugInterface");
+	
+	DXGIGetDebugInterface(__uuidof(IDXGIDebug), (void**)&dxgiDebug);
+	DXGIGetDebugInterface(__uuidof(IDXGIInfoQueue), (void**)&dxgiInfoQueue);
+
+	device->QueryInterface(__uuidof(ID3D11Debug), (void**)(&d3d11Debug));
+
+	return hr;
 }
 
 HRESULT RenderingComponent::initDeviceAndSwapChain()

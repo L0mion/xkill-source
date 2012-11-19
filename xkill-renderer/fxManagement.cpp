@@ -10,7 +10,6 @@ FXManagement::FXManagement()
 	blobDefaultVS			= nullptr;
 	blobDefaultPS			= nullptr;
 	blobDefaultDeferredPS	= nullptr;
-	blobError				= nullptr;
 }
 
 FXManagement::~FXManagement()
@@ -19,6 +18,8 @@ FXManagement::~FXManagement()
 		defaultVS->Release();
 	if(defaultPS)
 		defaultPS->Release();
+	if(defaultDeferredPS)
+		defaultDeferredPS->Release();
 	if(inputLayout)
 		inputLayout->Release();
 	if(blobDefaultVS)
@@ -27,8 +28,6 @@ FXManagement::~FXManagement()
 		blobDefaultPS->Release();
 	if(blobDefaultDeferredPS)
 		blobDefaultDeferredPS->Release();
-	if(blobError)
-		blobError->Release();
 }
 
 HRESULT FXManagement::init(ID3D11Device* device)
@@ -79,7 +78,7 @@ HRESULT FXManagement::initDefaultVS(ID3D11Device* device)
 	flags |= D3DCOMPILE_DEBUG;
 #endif
 	
-	hr = D3DReadFileToBlob(L"../../xkill-build/bin-Debug/defaultVertexShader.cso", &blobDefaultVS);
+	hr = D3DReadFileToBlob(L"../../xkill-build/bin-Debug/defaultVS.cso", &blobDefaultVS);
 	if(hr == S_OK)
 	{
 		hr = device->CreateVertexShader(
@@ -96,7 +95,7 @@ HRESULT FXManagement::initDefaultPS(ID3D11Device* device)
 {
 	HRESULT hr = S_OK;
 
-	hr = D3DReadFileToBlob(L"../../xkill-build/bin-Debug/defaultPixelShader.cso", &blobDefaultPS);
+	hr = D3DReadFileToBlob(L"../../xkill-build/bin-Debug/defaultPS.cso", &blobDefaultPS);
 	if(hr == S_OK)
 	{
 		hr = device->CreatePixelShader(
