@@ -1,50 +1,19 @@
 
 #include "structs.hlsl"
 
-VSOut defaultVS(quad_vertex vertex)
+cbuffer cbPerFrame : register (b0)
+{
+	float4x4 worldViewProj;
+}
+
+VSOut defaultVS(DefaultVSIn vsIn)
 {
 	VSOut output;
 
-	if(vertex.id == 0)
-	{
-		output.position		= float4(-1.0, -1.0f, 0.0f, 1.0f);
-		output.texcoord		= float2(0.0f, 1.0f);
-
-		output.positionW	= float3(-1.0, -1.0f, 0.0f);
-		output.normalW		= float3(0.0f, 0.0f, -1.0f);
-	}
-	else if(vertex.id == 1)
-	{
-		output.position	= float4(-1.0, 1.0f, 0.0f, 1.0f);
-		output.texcoord	= float2(0.0f, 0.0f);
-
-		output.positionW= float3(-1.0, 1.0f, 0.0f);
-		output.normalW		= float3(0.0f, 0.0f, -1.0f);
-	}
-	else if(vertex.id == 2)
-	{
-		output.position	= float4(1.0, -1.0f, 0.0f, 1.0f);
-		output.texcoord	= float2(1.0f, 1.0f);
-
-		output.positionW= float3(-1.0, 1.0f, 0.0f);
-		output.normalW		= float3(0.0f, 0.0f, -1.0f);
-	}
-	else if(vertex.id == 3)
-	{
-		output.position	 = float4(1.0, 1.0f, 0.0f, 1.0f);
-		output.texcoord	= float2(1.0f, 0.0f);
-
-		output.positionW= float3(1.0, 1.0f, 0.0f);
-		output.normalW		= float3(0.0f, 0.0f, -1.0f);
-	}
-	else
-	{
-		output.position	= float4(1.0, 1.0f, 1.0f, 1.0f);
-		output.texcoord	= float2(1.0f, 1.0f);
-
-		output.positionW= float3(1.0, 1.0f, 1.0f);
-		output.normalW		= float3(0.0f, 0.0f, -1.0f);
-	}
+	output.position		= mul(worldViewProj, float4(vsIn.position, 1.0f));
+	output.positionW	= vsIn.position;
+	output.normalW		= vsIn.normal;
+	output.texcoord		= vsIn.texcoord;
 
 	return output;
 }

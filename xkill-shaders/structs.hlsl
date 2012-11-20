@@ -7,6 +7,13 @@ struct VSOut
 	float3 normalW : NORMAL;
 };
 
+struct DefaultVSIn
+{
+	float3 position : POSITION;
+	float3 normal	: NORMAL;
+	float2 texcoord	: TEXCOORD;
+};
+
 struct quad_vertex
 {
 	uint id : SV_VertexID;
