@@ -12,7 +12,6 @@ struct PositionAttribute
 {
 	vec4 position;
 };
-
 struct SpatialAttribute
 {
 	PositionAttribute* pa;
@@ -21,6 +20,7 @@ struct SpatialAttribute
 };
 
 struct PhysicsAttribute
+
 {
 	SpatialAttribute* sa;
 	vec4 velocity;

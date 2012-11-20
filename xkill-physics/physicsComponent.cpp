@@ -1,20 +1,25 @@
 #include "physicsComponent.h"
 
 #include <btBulletDynamicsCommon.h>
-#include <iostream>
 
 #include "attributes.h"
+#include "physicsObject.h"
 
 PhysicsComponent::PhysicsComponent()
 {
+	broadphase = nullptr;
+	collisionConfiguration = nullptr;
+	dispatcher = nullptr;
+	solver = nullptr;
+	dynamicsWorld = nullptr;
+	physicsAttributes = nullptr;
+	physicsObjects = nullptr;
+	numPhysicsAttributes = 0;
 }
 
 PhysicsComponent::~PhysicsComponent()
 {
-	fall->Clean(dynamicsWorld);
-	ground->Clean(dynamicsWorld);
-	delete fall;
-    delete ground;
+	//delete local objects etc.
  
     delete dynamicsWorld;
     delete solver;
@@ -33,51 +38,60 @@ bool PhysicsComponent::Init()
 		dynamicsWorld = new btDiscreteDynamicsWorld(dispatcher,broadphase,solver,collisionConfiguration);
         dynamicsWorld->setGravity(btVector3(0,-10,0));
 		
-		ground = new PhysicsObject;
-		ground->Init(new btStaticPlaneShape(btVector3(0,1,0),1),
-					 new btDefaultMotionState(btTransform(btQuaternion(0,0,0,1),btVector3(0,-1,0))),
-					 0,
-					 btVector3(0,0,0),
-					 dynamicsWorld);
+		//ground = new PhysicsObject;
+		//ground->Init(new btStaticPlaneShape(btVector3(0,1,0),1),
+		//			 new btDefaultMotionState(btTransform(btQuaternion(0,0,0,1),btVector3(0,-1,0))),
+		//			 0,
+		//			 btVector3(0,0,0),
+		//			 dynamicsWorld);
 
-		fall = new PhysicsObject;
-		fall->Init(new btSphereShape(1),
-				   new btDefaultMotionState(btTransform(btQuaternion(0,0,0,1),btVector3(0,50,0))),
-				   1,
-				   btVector3(0,0,0),
-				   dynamicsWorld);
+		//fall = new PhysicsObject;
+		//fall->Init(new btSphereShape(1),
+		//		   new btDefaultMotionState(btTransform(btQuaternion(0,0,0,1),btVector3(0,50,0))),
+		//		   1,
+		//		   btVector3(0,0,0),
+		//		   dynamicsWorld);
 
         return true;
 }
 
 void PhysicsComponent::onUpdate(float delta)
 {
-	for(unsigned int i = 0; i < numPhysicsAttribute; i++)
+	for(unsigned int i = 0; i < numPhysicsAttributes; i++)
 	{
-		if(physicsAttributes[i].alive)
+		if((*physicsAttributes)[i].alive)
 		{
-			if(physicsAttributes[i].added)
+			if((*physicsAttributes)[i].added)
 			{
-				physicsObjects[i]->preStep(&physicsAttributes[i]);
+				(*physicsObjects)[i]->preStep(&(*physicsAttributes)[i]);
 			}
 			else
 			{
-				
+				if((*physicsAttributes).size()>i)
+				{
+					(*physicsAttributes)[i].added = true;
+					//init??
+				}
+				else
+				{
+					physicsObjects->push_back(new PhysicsObject());
+				}
 			}
 		}
-		else if(physicsAttributes[i].added)
+		else if((*physicsAttributes)[i].added)
 		{
-			//remove
+			(*physicsObjects)[i]->Clean(dynamicsWorld);
+			(*physicsAttributes)[i].added = false;
 		}
 	}
 
 	dynamicsWorld->stepSimulation(delta,10);
 
-	for(unsigned int i = 0; i < numPhysicsAttribute; i++)
+	for(unsigned int i = 0; i < numPhysicsAttributes; i++)
 	{
-		if(physicsAttributes[i].alive && physicsAttributes[i].added)
+		if((*physicsAttributes)[i].alive && (*physicsAttributes)[i].added)
 		{
-			physicsObjects[i]->postStep(&physicsAttributes[i]);
+			(*physicsObjects)[i]->postStep(&(*physicsAttributes)[i]);
 		}
 	}
 }

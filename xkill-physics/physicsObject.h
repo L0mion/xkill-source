@@ -1,9 +1,9 @@
 #ifndef XKILL_PHYSICS_PHYSICSOBJECT
 #define XKILL_PHYSICS_PHYSICSOBJECT
 
-class btCollisionShape;
-class btDefaultMotionState;
-class btRigidBody;
+#include <btBulletDynamicsCommon.h>
+#include "physicsObject.h"
+
 struct PhysicsAttribute;
 
 class PhysicsObject
@@ -14,10 +14,10 @@ protected:
 public:
 	PhysicsObject();
 	~PhysicsObject();
-	bool Init(btCollisionShape* collisionShape,
+	void Init(btCollisionShape* collisionShape,
 			  btDefaultMotionState* motionState,
 			  btScalar mass,
-			  btVector3 localInerta,
+			  btVector3& localInerta,
 			  btDiscreteDynamicsWorld* dynamicsWorld);
 	void Clean(btDiscreteDynamicsWorld* dynamicsWorld);
 	void preStep(PhysicsAttribute* physicsAttribute);

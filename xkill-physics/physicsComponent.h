@@ -12,22 +12,21 @@ A more elaborate description of documented class.
 #ifndef XKILL_PHYSICS_PHYSICSCOMPONENT_H
 #define XKILL_PHYSICS_PHYSICSCOMPONENT_H
 
+#include "dllPhysics.h"
+
 #include <vector>
 
-#include "dllPhysics.h"
-#include "physicsObject.h"
+class PhysicsObject;
+struct PhysicsAttribute;
 
 class btBroadphaseInterface;
 class btDefaultCollisionConfiguration;
 class btCollisionDispatcher;
 class btSequentialImpulseConstraintSolver;
 class btDiscreteDynamicsWorld;
-class btCollisionShape;
-class btCollisionShape;
-class btDefaultMotionState;
-class btDefaultMotionState;
-class btRigidBody;
-class btRigidBody;
+
+template<class T>
+class btAlignedObjectArray;
 
 class DLL PhysicsComponent
 {
@@ -38,14 +37,10 @@ private:
 	btSequentialImpulseConstraintSolver* solver;
 	btDiscreteDynamicsWorld* dynamicsWorld;
 
-	PhysicsAttribute* physicsAttributes;
-	unsigned int numPhysicsAttribute;
+	std::vector<PhysicsAttribute>* physicsAttributes;
+	unsigned int numPhysicsAttributes;
 
-
-	std::vector<PhysicsObject*> physicsObjects;
-	PhysicsObject* ground;
-	PhysicsObject* fall;
-
+	btAlignedObjectArray<PhysicsObject*>* physicsObjects;
 
 protected:
 public:
