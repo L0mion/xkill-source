@@ -20,11 +20,12 @@ struct SpatialAttribute
 };
 
 struct PhysicsAttribute
-
 {
 	SpatialAttribute* sa;
 	vec4 velocity;
 	vec4 rotationVelocity;
+	float mass;
+
 	bool added;
 	bool alive;
 };

@@ -14,11 +14,15 @@ protected:
 public:
 	PhysicsObject();
 	~PhysicsObject();
+	void Init(PhysicsAttribute* physicsAttribute,
+			  btDiscreteDynamicsWorld* dynamicsWorld);
+	// Decrepated
 	void Init(btCollisionShape* collisionShape,
 			  btDefaultMotionState* motionState,
 			  btScalar mass,
 			  btVector3& localInerta,
 			  btDiscreteDynamicsWorld* dynamicsWorld);
+	// ---
 	void Clean(btDiscreteDynamicsWorld* dynamicsWorld);
 	void preStep(PhysicsAttribute* physicsAttribute);
 	void postStep(PhysicsAttribute* physicsAttribute);

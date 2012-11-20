@@ -30,6 +30,8 @@ PhysicsComponent::~PhysicsComponent()
 
 bool PhysicsComponent::Init()
 {
+		physicsObjects = new btAlignedObjectArray<PhysicsObject*>();
+		
         broadphase = new btDbvtBroadphase();
         collisionConfiguration = new btDefaultCollisionConfiguration();
         dispatcher = new btCollisionDispatcher(collisionConfiguration);
@@ -37,7 +39,7 @@ bool PhysicsComponent::Init()
         
 		dynamicsWorld = new btDiscreteDynamicsWorld(dispatcher,broadphase,solver,collisionConfiguration);
         dynamicsWorld->setGravity(btVector3(0,-10,0));
-		
+
 		//ground = new PhysicsObject;
 		//ground->Init(new btStaticPlaneShape(btVector3(0,1,0),1),
 		//			 new btDefaultMotionState(btTransform(btQuaternion(0,0,0,1),btVector3(0,-1,0))),
@@ -57,6 +59,10 @@ bool PhysicsComponent::Init()
 
 void PhysicsComponent::onUpdate(float delta)
 {
+	for(int i = (*physicsObjects).size(); i < numPhysicsAttributes; i++)
+	{
+		physicsObjects->push_back(new PhysicsObject());
+	}
 	for(unsigned int i = 0; i < numPhysicsAttributes; i++)
 	{
 		if((*physicsAttributes)[i].alive)
@@ -67,15 +73,8 @@ void PhysicsComponent::onUpdate(float delta)
 			}
 			else
 			{
-				if((*physicsAttributes).size()>i)
-				{
-					(*physicsAttributes)[i].added = true;
-					//init??
-				}
-				else
-				{
-					physicsObjects->push_back(new PhysicsObject());
-				}
+				(*physicsObjects)[i]->Init(&(*physicsAttributes)[i],dynamicsWorld);
+				(*physicsAttributes)[i].added = true;
 			}
 		}
 		else if((*physicsAttributes)[i].added)
