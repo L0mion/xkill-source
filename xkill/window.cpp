@@ -1,4 +1,4 @@
-#include <window.h>
+#include "window.h"
 
 std::vector<bool>* Window::keys;
 int Window::mouseDeltaX;

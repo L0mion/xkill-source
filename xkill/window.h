@@ -1,20 +1,10 @@
-/**
- * \class Window
- * \ingroup xkill-renderer
- * \brief Temporary Window using WINAPI.
- * \note It shall be noted that this class is temporary.
- * \author (last to touch it) $Author: David Grelsson, Eric Nilsson $
- */
-
-#ifndef XKILL_RENDERER_WINDOW_H
-#define XKILL_RENDERER_WINDOW_H
+#ifndef XKILL_WINDOW_H
+#define XKILL_WINDOW_H
 
 #include <Windows.h>
 #include <windowsx.h>
 
 #include <vector>
-
-#include "dllRenderer.h"
 
 struct InputContainer
 {
@@ -30,7 +20,7 @@ struct InputContainer
 	}
 };
 
-class DLL Window
+class Window
 {
 public:
 	Window(HINSTANCE hInstance, int cmdShow, int screenWidth, int screenHeight);
@@ -47,15 +37,6 @@ private:
 	void initCursor();
 	static void mouseDeltaMove(LPARAM lParam);
 
-	/** \brief Messaging callback loop
-      * \param hWnd Derp
-	  * \param message Derp
-	  * \param wParam Derp
-	  * \param lParam Derp
-	  * \return derp
-      * 
-      * Callback function to recieve messages from Windows.
-      */
 	static LRESULT CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
 
 	static std::vector<bool>* keys;	///< This attribute has caused us trouble.
@@ -72,4 +53,4 @@ private:
 };
 
 
-#endif //XKILL_RENDERER_WINDOW_H
+#endif //XKILL_WINDOW_H
