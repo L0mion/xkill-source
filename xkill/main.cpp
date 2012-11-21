@@ -35,7 +35,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 		run(renderingComponent, window, camera);
 
 	delete camera;
-	renderingComponent->cleanUp();
 	delete renderingComponent;
 	delete window;
 
