@@ -3,15 +3,19 @@
 
 #include "dllArchitecture.h"
 
+#include "GameManager.h"
+
 class DLL Architecture
 {
 public:
 	Architecture();
 	~Architecture();
 
-	unsigned int getTest();
-private:
-	unsigned int test;
+	void run()
+	{
+		GameManager gm;
+		gm.run();
+	}
 };
 
 #endif //XKILL_ARCHITECTURE_ARCHITECTURE_H

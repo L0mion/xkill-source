@@ -15,31 +15,36 @@ void run(RenderingComponent* renderingComponent, Window* window, CameraBasic* ca
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int cmdShow)
 {
-	Architecture architecture;
-	unsigned int test = architecture.getTest();
-
 	UINT screenWidth = 800;
 	UINT screenHeight = 800;
 
 	Window* window = new Window(hInstance, cmdShow, screenWidth, screenHeight);
 	window->init();
 
-	RenderingComponent* renderingComponent = new RenderingComponent(
-		window->getWindowHandle(), 
-		screenWidth, 
-		screenHeight, 
-		1);
-	HRESULT hr = renderingComponent->init();
+	AllocConsole();
+	SetStdHandle(STD_INPUT_HANDLE |STD_OUTPUT_HANDLE, window->getWindowHandle());
+	
 
-	float aspect = (float)screenWidth/(float)screenHeight;
-	CameraBasic* camera = new CameraBasic(aspect, 0.78f, 1000.0f, 0.1f, screenWidth, screenHeight);
-	camera->updateProj();
+	Architecture architecture;
+	architecture.run();
 
-	if(SUCCEEDED(hr))
-		run(renderingComponent, window, camera);
-
-	delete camera;
-	delete renderingComponent;
+	//RenderingComponent* renderingComponent = new RenderingComponent(
+	//	window->getWindowHandle(), 
+	//	screenWidth, 
+	//	screenHeight, 
+	//	1);
+	//HRESULT hr = renderingComponent->init();
+	//
+	//float aspect = (float)screenWidth/(float)screenHeight;
+	//CameraBasic* camera = new CameraBasic(aspect, 0.78f, 1000.0f, 0.1f, screenWidth, screenHeight);
+	//camera->updateProj();
+	//
+	//if(SUCCEEDED(hr))
+	//	run(renderingComponent, window, camera);
+	//
+	//delete camera;
+	//delete renderingComponent;
+	FreeConsole();
 	delete window;
 
 	return 0;
