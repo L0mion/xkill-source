@@ -7,9 +7,14 @@
 
 #include <string>
 
+/*! \defgroup xkill-renderer-shader xkill-renderer-shader
+	Package wrapping shader-objects in DirectX.
+	\ingroup xkill-renderer
+	*/
+
 //! Class responsible for loading a shader.
 /*!
-\ingroup xkill-renderer
+\ingroup xkill-renderer-shader
 */
 
 class Shader : public D3DInterface
@@ -18,7 +23,7 @@ public:
 	//! Sets Shader to default state.
 	Shader();
 	//! Releases all memory and returns Shader to default state
-	~Shader();
+	virtual ~Shader();
 
 	//! Releases all memory and returns Shader to default state
 	virtual void reset();
@@ -28,6 +33,17 @@ public:
 	\param shaderPath File path to a precompiled shader.
 	*/
 	virtual HRESULT init(ID3D11Device* device, LPCWSTR shaderPath) = 0;
+
+	//! Sets corresponding shader.
+	/*!
+	\param devcon DirectX Device Context pointer.
+	*/
+	virtual void set(ID3D11DeviceContext* devcon)	= 0;
+	//! Unsets corresponding shader.
+	/*!
+	\param devcon DirectX Device Context pointer
+	*/
+	virtual void unset(ID3D11DeviceContext* devcon)	= 0;
 
 	ID3D10Blob* getBlob();
 

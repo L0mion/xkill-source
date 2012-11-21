@@ -7,7 +7,7 @@
 
 //! Class derived from class Shader responsible for loading a vertex shader.
 /*!
-\ingroup xkill-renderer
+\ingroup xkill-renderer-shader
 */
 class ShaderVS : public Shader
 {
@@ -15,7 +15,7 @@ public:
 	//! Sets ShaderVS to default state.
 	ShaderVS();
 	//! Releases all memory and returns ShaderVS to default state
-	~ShaderVS();
+	virtual ~ShaderVS();
 
 	//! Releases all memory and returns ShaderVS to default state
 	virtual void reset();
@@ -25,6 +25,17 @@ public:
 	\param shaderPath File path to a precompiled shader.
 	*/
 	virtual HRESULT init(ID3D11Device* device, LPCWSTR shaderPath);
+
+	//! Sets Vertex Shader.
+	/*!
+	\param devcon DirectX Device Context pointer.
+	*/
+	virtual void set(ID3D11DeviceContext* devcon);
+	//! Unsets Vertex Shader.
+	/*!
+	\param devcon DirectX Device Context pointer
+	*/
+	virtual void unset(ID3D11DeviceContext* devcon);
 	
 	ID3D11VertexShader* getVertexShader() const;
 

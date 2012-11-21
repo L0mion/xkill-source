@@ -47,6 +47,15 @@ HRESULT ShaderPS::init(ID3D11Device* device, LPCWSTR shaderPath)
 	return hr;
 }
 
+void ShaderPS::set(ID3D11DeviceContext* devcon)
+{
+	devcon->PSSetShader(pixelShader, nullptr, 0);
+}
+void ShaderPS::unset(ID3D11DeviceContext* devcon)
+{
+	devcon->PSSetShader(nullptr, nullptr, 0);
+}
+
 ID3D11PixelShader* ShaderPS::getPixelShader()
 {
 	return pixelShader;

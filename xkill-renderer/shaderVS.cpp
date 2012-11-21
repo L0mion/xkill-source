@@ -47,6 +47,16 @@ HRESULT ShaderVS::init(ID3D11Device* device, LPCWSTR shaderPath)
 	return hr;
 }
 
+void ShaderVS::set(ID3D11DeviceContext* devcon)
+{
+	devcon->VSSetShader(vertexShader, nullptr, 0);
+}
+
+void ShaderVS::unset(ID3D11DeviceContext* devcon)
+{
+	devcon->VSSetShader(nullptr, nullptr, 0);
+}
+
 ID3D11VertexShader* ShaderVS::getVertexShader() const
 {
 	return vertexShader;
