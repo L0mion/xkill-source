@@ -20,7 +20,7 @@ GBuffer::~GBuffer()
 {
 }
 
-void GBuffer::cleanUp()
+void GBuffer::reset()
 {
 	SAFE_RELEASE(tex);
 	SAFE_RELEASE(srv);

@@ -42,14 +42,29 @@ RenderingComponent::RenderingComponent(HWND windowHandle,
 }
 RenderingComponent::~RenderingComponent()
 {
+	if(swapChain)
+	{
+		swapChain->SetFullscreenState(false, nullptr);
+		SAFE_RELEASE(swapChain);
+	}
+	
+	SAFE_RELEASE(device);
+	SAFE_RELEASE(devcon);
+	SAFE_RELEASE(rtvBackBuffer);
+	SAFE_RELEASE(dsvDepthBuffer);
+	SAFE_RELEASE(rsDefault);
+	SAFE_RELEASE(ssDefault);
+	SAFE_RELEASE(texBackBuffer);
+	SAFE_RELEASE(texDepthBuffer);
+	SAFE_RELEASE(cbPerFrame);
+
+	SAFE_RELEASE(vertexBuffer); //temp
+
 	SAFE_DELETE(fxManagement);
 	for(unsigned int i = 0; i < GBUFFERID_NUM_BUFFERS; i++)
 		SAFE_DELETE(gBuffers[i]);
 	
-	#if defined(DEBUG) || defined(_DEBUG)
 	//d3dDebug->reportLiveDeviceObjects();
-	#endif //DEBUG || _DEBUG
-	SAFE_CLEAN(d3dDebug);
 	SAFE_DELETE(d3dDebug);
 
 	//temp
@@ -94,11 +109,13 @@ void RenderingComponent::reset()
 		swapChain->SetFullscreenState(false, nullptr);
 		SAFE_RELEASE(swapChain);
 	}
-
-	SAFE_CLEAN(fxManagement);
+	
+	if(fxManagement)
+		fxManagement->reset();
 
 	for(unsigned int i = 0; i < GBUFFERID_NUM_BUFFERS; i++)
-		SAFE_CLEAN(gBuffers[i]);
+		if(gBuffers[i])
+			gBuffers[i]->reset();
 	
 	SAFE_RELEASE(device);
 	SAFE_RELEASE(devcon);
