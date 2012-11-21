@@ -143,8 +143,8 @@ void RenderingComponent::renderToGBuffer(MatF4 view, MatF4 projection)
 	FLOAT green[]	= {0.0f, 1.0f, 0.0f, 1.0f };
 	FLOAT blue[]	= {0.0f, 0.0f, 1.0f, 1.0f };
 
-	devcon->VSSetShader(fxManagement->getDefaultVS(), nullptr, 0);
-	devcon->PSSetShader(fxManagement->getDefaultPS(), nullptr, 0);
+	devcon->VSSetShader(fxManagement->getDefaultVS()->getVertexShader(), nullptr, 0);
+	devcon->PSSetShader(fxManagement->getDefaultPS()->getPixelShader(), nullptr, 0);
 	devcon->PSSetSamplers(0, 1, &ssDefault);
 
 	CBPerFrame cbPerFrame;
@@ -180,8 +180,8 @@ void RenderingComponent::renderToBackBuffer()
 	FLOAT green[]	= {0.0f, 1.0f, 0.0f, 1.0f };
 	FLOAT blue[]	= {0.0f, 0.0f, 1.0f, 1.0f };
 
-	devcon->VSSetShader(fxManagement->getDefaultDeferredVS(), nullptr, 0);
-	devcon->PSSetShader(fxManagement->getDefaultDeferredPS(), nullptr, 0);
+	devcon->VSSetShader(fxManagement->getDefaultDeferredVS()->getVertexShader(), nullptr, 0);
+	devcon->PSSetShader(fxManagement->getDefaultDeferredPS()->getPixelShader(), nullptr, 0);
 	devcon->OMSetRenderTargets(1, &rtvBackBuffer, NULL);
 	devcon->OMSetDepthStencilState(0, 0);
 	devcon->ClearRenderTargetView(rtvBackBuffer, red);

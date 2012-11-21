@@ -1,6 +1,7 @@
 #include "fxManagement.h"
 #include "renderingUtilities.h"
 
+
 FXManagement::FXManagement()
 {
 	defaultVS			= nullptr;
@@ -8,41 +9,26 @@ FXManagement::FXManagement()
 	defaultDeferredVS	= nullptr;
 	defaultDeferredPS	= nullptr;
 	inputLayout			= nullptr;
-
-	blobDefaultVS			= nullptr;
-	blobDefaultPS			= nullptr;
-	blobDefaultDeferredVS	= nullptr;
-	blobDefaultDeferredPS	= nullptr;
 }
 
 FXManagement::~FXManagement()
 {
-	SAFE_RELEASE(defaultVS);
-	SAFE_RELEASE(defaultPS);
-	SAFE_RELEASE(defaultDeferredVS);
-	SAFE_RELEASE(defaultDeferredPS);
+	SAFE_DELETE(defaultVS);
+	SAFE_DELETE(defaultPS);
+	SAFE_DELETE(defaultDeferredVS);
+	SAFE_DELETE(defaultDeferredPS);
 	
 	SAFE_RELEASE(inputLayout);
-	
-	SAFE_RELEASE(blobDefaultVS);
-	SAFE_RELEASE(blobDefaultPS);
-	SAFE_RELEASE(blobDefaultDeferredVS);
-	SAFE_RELEASE(blobDefaultDeferredPS);
 }
 
 void FXManagement::reset()
 {
-	SAFE_RELEASE(defaultVS);
-	SAFE_RELEASE(defaultPS);
-	SAFE_RELEASE(defaultDeferredVS);
-	SAFE_RELEASE(defaultDeferredPS);
+	defaultVS->reset();
+	defaultPS->reset();
+	defaultDeferredVS->reset();
+	defaultDeferredPS->reset();
 	
 	SAFE_RELEASE(inputLayout);
-	
-	SAFE_RELEASE(blobDefaultVS);
-	SAFE_RELEASE(blobDefaultPS);
-	SAFE_RELEASE(blobDefaultDeferredVS);
-	SAFE_RELEASE(blobDefaultDeferredPS);
 }
 
 HRESULT FXManagement::init(ID3D11Device* device)
@@ -67,7 +53,7 @@ HRESULT FXManagement::initShaders(ID3D11Device* device)
 		hr = initDefaultDeferredVS(device);
 	if(SUCCEEDED(hr))
 		hr = initDefaultDeferredPS(device);
-
+	
 	return hr;
 }
 
@@ -75,24 +61,8 @@ HRESULT FXManagement::initDefaultVS(ID3D11Device* device)
 {
 	HRESULT hr = S_OK;
 
-	UINT flags = D3DCOMPILE_ENABLE_STRICTNESS;
-#if defined( DEBUG ) || defined( _DEBUG )
-	flags |= D3DCOMPILE_DEBUG;
-#endif
-	
-	hr = D3DReadFileToBlob(L"../../xkill-build/bin-Debug/defaultVS.cso", &blobDefaultVS);
-	if(FAILED(hr))
-		ERROR_MSG(L"FXManagement::initDefaultVS D3DReadFileToBlob failed");
-	else
-	{
-		hr = device->CreateVertexShader(
-			blobDefaultVS->GetBufferPointer(),
-			blobDefaultVS->GetBufferSize(),
-			nullptr,
-			&defaultVS);
-		if(FAILED(hr))
-			ERROR_MSG(L"FXManagement::initDefaultVS CreateVertexShader failed");
-	}
+	defaultVS = new ShaderVS();
+	hr = defaultVS->init(device, L"../../xkill-build/bin-Debug/defaultVS.cso");
 
 	return hr;
 }
@@ -101,19 +71,8 @@ HRESULT FXManagement::initDefaultPS(ID3D11Device* device)
 {
 	HRESULT hr = S_OK;
 
-	hr = D3DReadFileToBlob(L"../../xkill-build/bin-Debug/defaultPS.cso", &blobDefaultPS);
-	if(FAILED(hr))
-		ERROR_MSG(L"FXManagement::initDefaultPS D3DReadFileToBlob failed");
-	if(hr == S_OK)
-	{
-		hr = device->CreatePixelShader(
-			blobDefaultPS->GetBufferPointer(),
-			blobDefaultPS->GetBufferSize(),
-			nullptr,
-			&defaultPS);
-		if(FAILED(hr))
-			ERROR_MSG(L"FXManagement::initDefaultPS CreatePixelShader failed");
-	}
+	defaultPS = new ShaderPS();
+	hr = defaultPS->init(device, L"../../xkill-build/bin-Debug/defaultPS.cso");
 
 	return hr;
 }
@@ -122,24 +81,8 @@ HRESULT FXManagement::initDefaultDeferredVS(ID3D11Device* device)
 {
 	HRESULT hr = S_OK;
 
-	UINT flags = D3DCOMPILE_ENABLE_STRICTNESS;
-#if defined( DEBUG ) || defined( _DEBUG )
-	flags |= D3DCOMPILE_DEBUG;
-#endif
-	
-	hr = D3DReadFileToBlob(L"../../xkill-build/bin-Debug/defaultDeferredVS.cso", &blobDefaultDeferredVS);
-	if(FAILED(hr))
-		ERROR_MSG(L"FXManagement::initDefaultDeferredVS D3DReadFileToBlob failed");
-	if(hr == S_OK)
-	{
-		hr = device->CreateVertexShader(
-			blobDefaultDeferredVS->GetBufferPointer(),
-			blobDefaultDeferredVS->GetBufferSize(),
-			nullptr,
-			&defaultDeferredVS);
-		if(FAILED(hr))
-			ERROR_MSG(L"FXManagement::initDefaultDeferredVS CreateVertexShader failed");
-	}
+	defaultDeferredVS = new ShaderVS();
+	hr = defaultDeferredVS->init(device, L"../../xkill-build/bin-Debug/defaultDeferredVS.cso");
 
 	return hr;
 }
@@ -148,19 +91,8 @@ HRESULT FXManagement::initDefaultDeferredPS(ID3D11Device* device)
 {
 	HRESULT hr = S_OK;
 
-	hr = D3DReadFileToBlob(L"../../xkill-build/bin-Debug/defaultDeferredPS.cso", &blobDefaultDeferredPS);
-	if(FAILED(hr))
-		ERROR_MSG(L"FXManagement::initDefaultDeferredPS D3DReadFileToBlob failed");
-	if(hr == S_OK)
-	{
-		hr = device->CreatePixelShader(
-			blobDefaultDeferredPS->GetBufferPointer(),
-			blobDefaultDeferredPS->GetBufferSize(),
-			nullptr,
-			&defaultDeferredPS);
-		if(FAILED(hr))
-			ERROR_MSG(L"FXManagement::initDefaultDeferredPS CreatePixelShader failed");
-	}
+	defaultDeferredPS = new ShaderPS();
+	hr = defaultDeferredPS->init(device, L"../../xkill-build/bin-Debug/defaultDeferredPS.cso");
 
 	return hr;
 }
@@ -179,30 +111,30 @@ HRESULT FXManagement::initInputLayout(ID3D11Device* device)
 	hr = device->CreateInputLayout(
 		ied, 
 		3, 
-		blobDefaultVS->GetBufferPointer(), 
-		blobDefaultVS->GetBufferSize(), 
+		defaultVS->getBlob()->GetBufferPointer(), 
+		defaultVS->getBlob()->GetBufferSize(), 
 		&inputLayout);
 	if(FAILED(hr))
 		ERROR_MSG(L"FXManagement::initInputLayout CreateInputLayout failed");
 	return hr;
 }
 
-ID3D11VertexShader* FXManagement::getDefaultVS() const
+ShaderVS* FXManagement::getDefaultVS() const
 {
 	return defaultVS;
 }
 
-ID3D11PixelShader* FXManagement::getDefaultPS() const
+ShaderPS* FXManagement::getDefaultPS() const
 {
 	return defaultPS;
 }
 
-ID3D11VertexShader* FXManagement::getDefaultDeferredVS()	const
+ShaderVS* FXManagement::getDefaultDeferredVS()	const
 {
 	return defaultDeferredVS;
 }
 
-ID3D11PixelShader* FXManagement::getDefaultDeferredPS() const
+ShaderPS* FXManagement::getDefaultDeferredPS() const
 {
 	return defaultDeferredPS;
 }

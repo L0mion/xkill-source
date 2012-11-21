@@ -7,6 +7,9 @@
 
 #include <d3dInterface.h>
 
+#include "shaderVS.h"
+#include "shaderPS.h"
+
 //! Class maintaing shaders and input layout.
 /*!
 \ingroup xkill-renderer
@@ -31,10 +34,10 @@ public:
 	*/
 	HRESULT init(ID3D11Device* device);
 
-	ID3D11VertexShader*	getDefaultVS()			const;
-	ID3D11PixelShader*	getDefaultPS()			const;
-	ID3D11VertexShader* getDefaultDeferredVS()	const;
-	ID3D11PixelShader*	getDefaultDeferredPS()	const;
+	ShaderVS* getDefaultVS()			const;
+	ShaderPS* getDefaultPS()			const;
+	ShaderVS* getDefaultDeferredVS()	const;
+	ShaderPS* getDefaultDeferredPS()	const;
 
 	ID3D11InputLayout* getInputLayout() const;
 
@@ -85,16 +88,11 @@ private:
 	*/
 	HRESULT initInputLayout(ID3D11Device* device);
 
-	ID3D11VertexShader*	defaultVS;			//!< Default vertex shader.
-	ID3D11PixelShader*	defaultPS;			//!< Default pixel shader.
-	ID3D11VertexShader*	defaultDeferredVS;	//!< Default vertex shader used by the deferred renderer.
-	ID3D11PixelShader*	defaultDeferredPS;	//!< Default pixel shader used by the deferred renderer.
+	ShaderVS*	defaultVS;			//!< Default vertex shader.
+	ShaderPS*	defaultPS;			//!< Default pixel shader.
+	ShaderVS*	defaultDeferredVS;	//!< Default vertex shader used by the deferred renderer.
+	ShaderPS*	defaultDeferredPS;	//!< Default pixel shader used by the deferred renderer.
 	
-	ID3D10Blob* blobDefaultVS;			//!< Used to load pre-compiled default vertex shader.
-	ID3D10Blob* blobDefaultPS;			//!< Used to load pre-compiled default pixel shader.
-	ID3D10Blob* blobDefaultDeferredVS;	//!< Used to load pre-compiled default deferred vertex shader.
-	ID3D10Blob* blobDefaultDeferredPS;	//!< Used to load pre-compiled default deferred pixel shader.
-
 	ID3D11InputLayout* inputLayout; //!< Standard input layout used in default vertex shader.
 };
 
