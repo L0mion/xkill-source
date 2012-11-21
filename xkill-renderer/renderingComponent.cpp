@@ -26,6 +26,7 @@ RenderingComponent::RenderingComponent(HWND windowHandle,
 	swapChain = nullptr;
 
 	rtvBackBuffer	= nullptr;
+	uavBackBuffer	= nullptr;
 	dsvDepthBuffer	= nullptr;
 	rsDefault		= nullptr;
 	ssDefault		= nullptr;
@@ -51,6 +52,7 @@ RenderingComponent::~RenderingComponent()
 	SAFE_RELEASE(device);
 	SAFE_RELEASE(devcon);
 	SAFE_RELEASE(rtvBackBuffer);
+	SAFE_RELEASE(uavBackBuffer);
 	SAFE_RELEASE(dsvDepthBuffer);
 	SAFE_RELEASE(rsDefault);
 	SAFE_RELEASE(ssDefault);
@@ -120,6 +122,7 @@ void RenderingComponent::reset()
 	SAFE_RELEASE(device);
 	SAFE_RELEASE(devcon);
 	SAFE_RELEASE(rtvBackBuffer);
+	SAFE_RELEASE(uavBackBuffer);
 	SAFE_RELEASE(dsvDepthBuffer);
 	SAFE_RELEASE(rsDefault);
 	SAFE_RELEASE(ssDefault);
@@ -171,7 +174,12 @@ void RenderingComponent::renderToGBuffer(MatF4 view, MatF4 projection)
 
 	devcon->VSSetShader(NULL, NULL, 0);
 	devcon->PSSetShader(NULL, NULL, 0);
-	devcon->OMSetRenderTargets(0, NULL, NULL);
+	for(int i=0; i<GBUFFERID_NUM_BUFFERS; i++)
+		renderTargets[i] = nullptr;
+	devcon->OMSetRenderTargets(GBUFFERID_NUM_BUFFERS, renderTargets, nullptr);
+	devcon->PSSetSamplers(0, 0, nullptr);
+	devcon->IASetInputLayout(nullptr);
+	devcon->RSSetState(nullptr);
 }
 void RenderingComponent::renderToBackBuffer()
 {
@@ -179,30 +187,28 @@ void RenderingComponent::renderToBackBuffer()
 	FLOAT red[]		= {1.0f, 0.0f, 0.0f, 1.0f };
 	FLOAT green[]	= {0.0f, 1.0f, 0.0f, 1.0f };
 	FLOAT blue[]	= {0.0f, 0.0f, 1.0f, 1.0f };
-
-	devcon->VSSetShader(fxManagement->getDefaultDeferredVS()->getVertexShader(), nullptr, 0);
-	devcon->PSSetShader(fxManagement->getDefaultDeferredPS()->getPixelShader(), nullptr, 0);
-	devcon->OMSetRenderTargets(1, &rtvBackBuffer, NULL);
-	devcon->OMSetDepthStencilState(0, 0);
-	devcon->ClearRenderTargetView(rtvBackBuffer, red);
-	devcon->RSSetState(rsDefault);
-	devcon->IASetVertexBuffers(0, 0, NULL, 0, 0);
-	devcon->IASetInputLayout(NULL);
+	
+	//Compute Shader
+	ID3D11UnorderedAccessView* uav[] = { uavBackBuffer };
+	devcon->CSSetUnorderedAccessViews(0, 1, uav, nullptr);
 
 	ID3D11ShaderResourceView* resourceViews[GBUFFERID_NUM_BUFFERS];
 	for(int i=0; i<GBUFFERID_NUM_BUFFERS; i++)
 		resourceViews[i] = gBuffers[i]->getSRV();
-	devcon->PSSetShaderResources(0, 2, resourceViews);
-	
-	devcon->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
-	devcon->Draw(4, 0);
-	
-	ID3D11ShaderResourceView* resetSRV[2] = {NULL};
-	devcon->PSSetShaderResources(0, 2, resetSRV);
-	devcon->VSSetShader(NULL, NULL, 0);
-	devcon->PSSetShader(NULL, NULL, 0);
-	devcon->OMSetRenderTargets(0, NULL, NULL);
-	
+	devcon->CSSetShaderResources(0, GBUFFERID_NUM_BUFFERS, resourceViews);
+	devcon->CSSetSamplers(0, 1, &ssDefault);
+
+	fxManagement->getDefaultCS()->set(devcon);
+	devcon->Dispatch(25, 25, 1);
+	fxManagement->getDefaultCS()->unset(devcon);
+
+	ID3D11UnorderedAccessView* uav2[] = { nullptr };
+	devcon->CSSetUnorderedAccessViews(0, 1, uav2, NULL);
+	for(int i=0; i<GBUFFERID_NUM_BUFFERS; i++)
+		resourceViews[i] = nullptr;
+	devcon->CSSetShaderResources(0, GBUFFERID_NUM_BUFFERS, resourceViews);
+	devcon->CSSetSamplers(0, 0, nullptr);
+
 	swapChain->Present(0, 0);
 }
 
@@ -229,7 +235,7 @@ HRESULT RenderingComponent::initDeviceAndSwapChain()
 	swapChainDesc.BufferDesc.Format	= DXGI_FORMAT_R8G8B8A8_UNORM;
 	swapChainDesc.BufferDesc.Width	= screenWidth;
 	swapChainDesc.BufferDesc.Height	= screenHeight;
-	swapChainDesc.BufferUsage		= DXGI_USAGE_RENDER_TARGET_OUTPUT;
+	swapChainDesc.BufferUsage		= DXGI_USAGE_RENDER_TARGET_OUTPUT | DXGI_USAGE_UNORDERED_ACCESS;
 	swapChainDesc.OutputWindow		= windowHandle;
 	swapChainDesc.SampleDesc.Count	= aliasingCount;
 	swapChainDesc.Windowed			= true;
@@ -325,6 +331,10 @@ HRESULT RenderingComponent::initBackBuffer()
 	hr = device->CreateRenderTargetView(texBackBuffer, NULL, &rtvBackBuffer);
 	if(FAILED(hr))
 		ERROR_MSG(L"RenderingComponent::initBackBuffer CreateRenderTargetView failed");
+
+	hr = device->CreateUnorderedAccessView(texBackBuffer, NULL, &uavBackBuffer);
+	if(FAILED(hr))
+		ERROR_MSG(L"RenderingComponent::initBackBuffer CreateUnorderedAccessView failed");
 
 	return hr;
 }

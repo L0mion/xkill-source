@@ -8,6 +8,7 @@ FXManagement::FXManagement()
 	defaultPS			= nullptr;
 	defaultDeferredVS	= nullptr;
 	defaultDeferredPS	= nullptr;
+	defaultCS			= nullptr;
 	inputLayout			= nullptr;
 }
 
@@ -17,6 +18,7 @@ FXManagement::~FXManagement()
 	SAFE_DELETE(defaultPS);
 	SAFE_DELETE(defaultDeferredVS);
 	SAFE_DELETE(defaultDeferredPS);
+	SAFE_DELETE(defaultCS);
 	
 	SAFE_RELEASE(inputLayout);
 }
@@ -27,6 +29,7 @@ void FXManagement::reset()
 	defaultPS->reset();
 	defaultDeferredVS->reset();
 	defaultDeferredPS->reset();
+	defaultCS->reset();
 	
 	SAFE_RELEASE(inputLayout);
 }
@@ -53,6 +56,8 @@ HRESULT FXManagement::initShaders(ID3D11Device* device)
 		hr = initDefaultDeferredVS(device);
 	if(SUCCEEDED(hr))
 		hr = initDefaultDeferredPS(device);
+	if(SUCCEEDED(hr))
+		hr = initDefaultCS(device);
 	
 	return hr;
 }
@@ -97,6 +102,16 @@ HRESULT FXManagement::initDefaultDeferredPS(ID3D11Device* device)
 	return hr;
 }
 
+HRESULT FXManagement::initDefaultCS(ID3D11Device* device)
+{
+	HRESULT hr = S_OK;
+
+	defaultCS = new ShaderCS();
+	hr = defaultCS->init(device, L"../../xkill-build/bin-Debug/defaultCS.cso");
+
+	return hr;
+}
+
 HRESULT FXManagement::initInputLayout(ID3D11Device* device)
 {
 	HRESULT hr = S_OK;
@@ -137,6 +152,11 @@ ShaderVS* FXManagement::getDefaultDeferredVS()	const
 ShaderPS* FXManagement::getDefaultDeferredPS() const
 {
 	return defaultDeferredPS;
+}
+
+ShaderCS* FXManagement::getDefaultCS() const
+{
+	return defaultCS;
 }
 
 ID3D11InputLayout* FXManagement::getInputLayout() const

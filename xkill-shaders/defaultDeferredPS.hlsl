@@ -4,17 +4,17 @@
 struct PSOut
 {
 	float4 normal	: SV_TARGET0;
-	float4 diffuse	: SV_TARGET1;
+	float4 albedo	: SV_TARGET1;
 };
 
 Texture2D gBufferNormal : register( t0 );
-Texture2D gBufferDiffuse : register( t1 );
+Texture2D gBufferAlbedo : register( t1 );
 
 SamplerState ss : register(s0);
 
 float4 defaultDeferredPS(VSOut pIn) : SV_TARGET
 {
-	float4 color = gBufferDiffuse.Sample(ss, pIn.texcoord);
+	float4 color = gBufferAlbedo.Sample(ss, pIn.texcoord);
 
 	return color;
 }

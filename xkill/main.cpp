@@ -2,7 +2,7 @@
 #include <windowsx.h>
 #include <tchar.h>
 #include <xkill-renderer/renderingComponent.h>
-#include <xkill-renderer/cameraBasic.h>
+#include "cameraBasic.h"
 #include "window.h"
 
 #if defined( DEBUG ) || defined( _DEBUG )

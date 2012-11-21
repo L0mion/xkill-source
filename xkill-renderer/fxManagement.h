@@ -9,6 +9,7 @@
 
 #include "shaderVS.h"
 #include "shaderPS.h"
+#include "shaderCS.h"
 
 //! Class maintaing shaders and input layout.
 /*!
@@ -38,6 +39,7 @@ public:
 	ShaderPS* getDefaultPS()			const;
 	ShaderVS* getDefaultDeferredVS()	const;
 	ShaderPS* getDefaultDeferredPS()	const;
+	ShaderCS* getDefaultCS()			const;
 
 	ID3D11InputLayout* getInputLayout() const;
 
@@ -80,6 +82,9 @@ private:
 	\sa defaultDeferredPS
 	*/
 	HRESULT initDefaultDeferredPS(ID3D11Device* device);
+	
+	HRESULT initDefaultCS(ID3D11Device* device);
+
 	//! Initializes an input-layout for defaultVS.
 	/*!
 	\param device DirectX Device-pointer.
@@ -92,6 +97,7 @@ private:
 	ShaderPS*	defaultPS;			//!< Default pixel shader.
 	ShaderVS*	defaultDeferredVS;	//!< Default vertex shader used by the deferred renderer.
 	ShaderPS*	defaultDeferredPS;	//!< Default pixel shader used by the deferred renderer.
+	ShaderCS*	defaultCS;			//!< Default compute shader.
 	
 	ID3D11InputLayout* inputLayout; //!< Standard input layout used in default vertex shader.
 };

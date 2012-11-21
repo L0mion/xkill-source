@@ -76,9 +76,9 @@ private:
 	\param projection Projection-matrix from camera.
 	*/
 	void renderToGBuffer(MatF4 view, MatF4 projection);
-	//! Samples from g-buffers and creates a final image in in backbuffer.
+	//! Samples from g-buffers and creates a final image using DirectCompute.
 	/*!
-	\sa rtvBackBuffer
+	\sa uavBackBuffer
 	*/
 	void renderToBackBuffer();
 
@@ -106,7 +106,7 @@ private:
 	\return Any error encountered during initialization.
 	*/
 	HRESULT initDepthBuffer();
-	//! Gets texture from swapchain and creates corresponding render target view.
+	//! Gets texture from swapchain and creates corresponding render target view and UAV.
 	/*!
 	\return Any error encountered during initialization.
 	*/
@@ -177,6 +177,9 @@ private:
 	ID3D11Texture2D* texDepthBuffer;	//!< Saves the depth of each rendered pixel
 
 	ID3D11Buffer* cbPerFrame;	//!< Buffer sending final matrix to shader
+
+	//direct compute
+	ID3D11UnorderedAccessView* uavBackBuffer; //!< Used to render to texBackBuffer using DirectCompute
 
 	//temp
 	ID3D11Buffer* vertexBuffer;		//!< Mock buffer sending vertices to shader
