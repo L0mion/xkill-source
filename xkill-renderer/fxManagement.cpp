@@ -19,7 +19,7 @@ FXManagement::~FXManagement()
 {
 }
 
-void FXManagement::cleanUp()
+void FXManagement::reset()
 {
 	SAFE_RELEASE(defaultVS);
 	SAFE_RELEASE(defaultPS);

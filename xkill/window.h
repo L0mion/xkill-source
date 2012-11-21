@@ -6,10 +6,16 @@
 
 #include <vector>
 
+/*! \defgroup xkill xkill
+   Main xkill package.
+*/
+
+
+//! Used to send input from the window message loop.
 struct InputContainer
 {
-	std::vector<bool>* keys;
-	int mouseDeltaX;
+	std::vector<bool>* keys; //!< Each index maps to a key and is true or false depending on whether or not the key is currently pressed. 
+	int mouseDeltaX;		//!< Delta movement of the mouse along 
 	int mouseDeltaY;
 
 	InputContainer(std::vector<bool>* keys, int mouseDeltaX, int mouseDeltaY)

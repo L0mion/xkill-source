@@ -87,7 +87,7 @@ HRESULT RenderingComponent::init()
 	return hr;
 }
 
-void RenderingComponent::cleanUp()
+void RenderingComponent::reset()
 {
 	if(swapChain)
 	{
