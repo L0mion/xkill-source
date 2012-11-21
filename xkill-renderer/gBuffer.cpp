@@ -18,6 +18,9 @@ GBuffer::GBuffer(
 }
 GBuffer::~GBuffer()
 {
+	SAFE_RELEASE(tex);
+	SAFE_RELEASE(srv);
+	SAFE_RELEASE(rtv);
 }
 
 void GBuffer::reset()

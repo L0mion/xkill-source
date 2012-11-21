@@ -17,6 +17,17 @@ FXManagement::FXManagement()
 
 FXManagement::~FXManagement()
 {
+	SAFE_RELEASE(defaultVS);
+	SAFE_RELEASE(defaultPS);
+	SAFE_RELEASE(defaultDeferredVS);
+	SAFE_RELEASE(defaultDeferredPS);
+	
+	SAFE_RELEASE(inputLayout);
+	
+	SAFE_RELEASE(blobDefaultVS);
+	SAFE_RELEASE(blobDefaultPS);
+	SAFE_RELEASE(blobDefaultDeferredVS);
+	SAFE_RELEASE(blobDefaultDeferredPS);
 }
 
 void FXManagement::reset()
