@@ -13,10 +13,15 @@ D3DDebug::D3DDebug()
 }
 D3DDebug::~D3DDebug()
 {
-	cleanUp();
+	#if defined(DEBUG) || defined(_DEBUG)
+	SAFE_RELEASE(dxgiFactory);
+	SAFE_RELEASE(d3d11Debug);
+	SAFE_RELEASE(dxgiDebug);
+	SAFE_RELEASE(dxgiInfoQueue);
+	#endif //DEBUG || _DEBUG
 }
 
-void D3DDebug::cleanUp()
+void D3DDebug::reset()
 {
 	#if defined(DEBUG) || defined(_DEBUG)
 	SAFE_RELEASE(dxgiFactory);
