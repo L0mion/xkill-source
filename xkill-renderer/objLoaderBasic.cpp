@@ -9,7 +9,7 @@ ObjLoaderBasic::~ObjLoaderBasic()
 {
 }
 
-void ObjLoaderBasic::parseObjectFile(std::string filename, std::vector<Vertex>* vertices)
+void ObjLoaderBasic::parseObjectFile(std::string filename, std::vector<VertexPosNormTex>* vertices)
 {
 	std::fstream infile(filename);
 	std::string temp;
@@ -61,10 +61,10 @@ void ObjLoaderBasic::parseTexcoord(std::fstream& infile)
 	texcoords_.push_back(VecF2(u, v));
 }
 
-void ObjLoaderBasic::parseFace(std::fstream& infile, std::vector<Vertex>* vertices)
+void ObjLoaderBasic::parseFace(std::fstream& infile, std::vector<VertexPosNormTex>* vertices)
 {
 	unsigned int iPosition, iNormal, iTexcoord;
-	Vertex vertex;
+	VertexPosNormTex vertex;
 
 	for(unsigned int i=0; i<3; i++)
 	{

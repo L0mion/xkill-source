@@ -12,7 +12,7 @@
 //! Basic three-member vertex
 /*!
 \ingroup xkill-renderer-vertices*/
-struct Vertex
+struct VertexPosNormTex
 {
 	VecF3 position_;	//!< float3 vector specifying position in model-space of vertex.
 	VecF3 normal_;	//!< float3 vector specifying normal in model-space of vertex.
@@ -25,7 +25,7 @@ struct Vertex
 		normal		= 0, 0, 0
 		texcoord	= 0, 0
 	*/
-	Vertex()
+	VertexPosNormTex()
 	{
 		this->position_	= VecF3(0.0f, 0.0f, 0.0f);
 		this->normal_	= VecF3(0.0f, 0.0f, 0.0f);
@@ -37,7 +37,7 @@ struct Vertex
 	\param normal	Normal in model-space of vertex.
 	\param texcoord	Texture-coordinates.
 	*/
-	Vertex(VecF3 position, VecF3 normal, VecF2 texcoord)
+	VertexPosNormTex(VecF3 position, VecF3 normal, VecF2 texcoord)
 	{
 		this->position_	= position;
 		this->normal_	= normal;

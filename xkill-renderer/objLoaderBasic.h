@@ -13,7 +13,7 @@ class ObjLoaderBasic
 public:
 	ObjLoaderBasic();
 	virtual ~ObjLoaderBasic();
-	void parseObjectFile(std::string filename, std::vector<Vertex>* vertices);
+	void parseObjectFile(std::string filename, std::vector<VertexPosNormTex>* vertices);
 
 private:
 	
@@ -24,7 +24,7 @@ private:
 	void parsePosition(std::fstream& infile);
 	void parseNormal(std::fstream& infile);
 	void parseTexcoord(std::fstream& infile);
-	void parseFace(std::fstream& infile, std::vector<Vertex>* vertices);
+	void parseFace(std::fstream& infile, std::vector<VertexPosNormTex>* vertices);
 	void parseMaterial(std::fstream& infile);
 };
 
