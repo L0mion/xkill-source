@@ -40,7 +40,7 @@ public:
 	ID3D11VertexShader* getVertexShader() const;
 
 private:
-	ID3D11VertexShader* vertexShader; //!< Contains vertex shader.
+	ID3D11VertexShader* vertexShader_; //!< Contains vertex shader.
 };
 
 #endif //XKILL_RENDERER_SHADERVS_H

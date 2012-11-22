@@ -11,67 +11,67 @@ RenderingComponent::RenderingComponent(HWND windowHandle,
 									   unsigned int screenHeight,
 									   unsigned int aliasingCount)
 {
-	this->windowHandle	= windowHandle;
-	this->screenWidth	= screenWidth;
-	this->screenHeight	= screenHeight;
-	this->aliasingCount	= aliasingCount;
+	this->windowHandle_	= windowHandle;
+	this->screenWidth_	= screenWidth;
+	this->screenHeight_	= screenHeight;
+	this->aliasingCount_	= aliasingCount;
 
-	fxManagement	= nullptr;
+	fxManagement_	= nullptr;
 	for(unsigned int i = 0; i < GBUFFERID_NUM_BUFFERS; i++)
-		gBuffers[i] = nullptr;
-	d3dDebug		= nullptr;
+		gBuffers_[i] = nullptr;
+	d3dDebug_		= nullptr;
 
-	device	= nullptr;
-	devcon	= nullptr;
-	swapChain = nullptr;
+	device_	= nullptr;
+	devcon_	= nullptr;
+	swapChain_ = nullptr;
 
-	rtvBackBuffer	= nullptr;
-	uavBackBuffer	= nullptr;
-	dsvDepthBuffer	= nullptr;
-	rsDefault		= nullptr;
-	ssDefault		= nullptr;
+	rtvBackBuffer_	= nullptr;
+	uavBackBuffer_	= nullptr;
+	dsvDepthBuffer_	= nullptr;
+	rsDefault_		= nullptr;
+	ssDefault_		= nullptr;
 	
-	texBackBuffer	= nullptr;
-	texDepthBuffer	= nullptr;
+	texBackBuffer_	= nullptr;
+	texDepthBuffer_	= nullptr;
 
-	cbPerFrame	= nullptr;
+	cbPerFrame_	= nullptr;
 
 	//temp
-	vertexBuffer = nullptr;
-	vertices = nullptr;
-	objLoader = nullptr;
+	vertexBuffer_ = nullptr;
+	vertices_ = nullptr;
+	objLoader_ = nullptr;
 }
 RenderingComponent::~RenderingComponent()
 {
-	if(swapChain)
+	if(swapChain_)
 	{
-		swapChain->SetFullscreenState(false, nullptr);
-		SAFE_RELEASE(swapChain);
+		swapChain_->SetFullscreenState(false, nullptr);
+		SAFE_RELEASE(swapChain_);
 	}
 	
-	SAFE_RELEASE(device);
-	SAFE_RELEASE(devcon);
-	SAFE_RELEASE(rtvBackBuffer);
-	SAFE_RELEASE(uavBackBuffer);
-	SAFE_RELEASE(dsvDepthBuffer);
-	SAFE_RELEASE(rsDefault);
-	SAFE_RELEASE(ssDefault);
-	SAFE_RELEASE(texBackBuffer);
-	SAFE_RELEASE(texDepthBuffer);
-	SAFE_RELEASE(cbPerFrame);
+	SAFE_RELEASE(device_);
+	SAFE_RELEASE(devcon_);
+	SAFE_RELEASE(rtvBackBuffer_);
+	SAFE_RELEASE(uavBackBuffer_);
+	SAFE_RELEASE(dsvDepthBuffer_);
+	SAFE_RELEASE(rsDefault_);
+	SAFE_RELEASE(ssDefault_);
+	SAFE_RELEASE(texBackBuffer_);
+	SAFE_RELEASE(texDepthBuffer_);
+	SAFE_RELEASE(cbPerFrame_);
 
-	SAFE_RELEASE(vertexBuffer); //temp
+	SAFE_RELEASE(vertexBuffer_); //temp
 
-	SAFE_DELETE(fxManagement);
+	SAFE_DELETE(fxManagement_);
 	for(unsigned int i = 0; i < GBUFFERID_NUM_BUFFERS; i++)
-		SAFE_DELETE(gBuffers[i]);
+		SAFE_DELETE(gBuffers_[i]);
 	
 	//d3dDebug->reportLiveDeviceObjects();
-	SAFE_DELETE(d3dDebug);
+	SAFE_DELETE(d3dDebug_);
 
 	//temp
-	SAFE_DELETE(vertices);
-	SAFE_DELETE(objLoader);
+	SAFE_DELETE(vertices_);
+	SAFE_DELETE(objLoader_);
 }
 
 HRESULT RenderingComponent::init()
@@ -106,32 +106,32 @@ HRESULT RenderingComponent::init()
 
 void RenderingComponent::reset()
 {
-	if(swapChain)
+	if(swapChain_)
 	{
-		swapChain->SetFullscreenState(false, nullptr);
-		SAFE_RELEASE(swapChain);
+		swapChain_->SetFullscreenState(false, nullptr);
+		SAFE_RELEASE(swapChain_);
 	}
 	
-	if(fxManagement)
-		fxManagement->reset();
+	if(fxManagement_)
+		fxManagement_->reset();
 
 	for(unsigned int i = 0; i < GBUFFERID_NUM_BUFFERS; i++)
-		if(gBuffers[i])
-			gBuffers[i]->reset();
+		if(gBuffers_[i])
+			gBuffers_[i]->reset();
 	
-	SAFE_RELEASE(device);
-	SAFE_RELEASE(devcon);
-	SAFE_RELEASE(rtvBackBuffer);
-	SAFE_RELEASE(uavBackBuffer);
-	SAFE_RELEASE(dsvDepthBuffer);
-	SAFE_RELEASE(rsDefault);
-	SAFE_RELEASE(ssDefault);
-	SAFE_RELEASE(texBackBuffer);
-	SAFE_RELEASE(texDepthBuffer);
-	SAFE_RELEASE(cbPerFrame);
+	SAFE_RELEASE(device_);
+	SAFE_RELEASE(devcon_);
+	SAFE_RELEASE(rtvBackBuffer_);
+	SAFE_RELEASE(uavBackBuffer_);
+	SAFE_RELEASE(dsvDepthBuffer_);
+	SAFE_RELEASE(rsDefault_);
+	SAFE_RELEASE(ssDefault_);
+	SAFE_RELEASE(texBackBuffer_);
+	SAFE_RELEASE(texDepthBuffer_);
+	SAFE_RELEASE(cbPerFrame_);
 
 	//temp
-	SAFE_RELEASE(vertexBuffer);
+	SAFE_RELEASE(vertexBuffer_);
 }
 
 void RenderingComponent::render(MatF4 view, MatF4 projection)
@@ -146,40 +146,40 @@ void RenderingComponent::renderToGBuffer(MatF4 view, MatF4 projection)
 	FLOAT green[]	= {0.0f, 1.0f, 0.0f, 1.0f };
 	FLOAT blue[]	= {0.0f, 0.0f, 1.0f, 1.0f };
 
-	devcon->VSSetShader(fxManagement->getDefaultVS()->getVertexShader(), nullptr, 0);
-	devcon->PSSetShader(fxManagement->getDefaultPS()->getPixelShader(), nullptr, 0);
-	devcon->PSSetSamplers(0, 1, &ssDefault);
+	devcon_->VSSetShader(fxManagement_->getDefaultVS()->getVertexShader(), nullptr, 0);
+	devcon_->PSSetShader(fxManagement_->getDefaultPS()->getPixelShader(), nullptr, 0);
+	devcon_->PSSetSamplers(0, 1, &ssDefault_);
 
 	CBPerFrame cbPerFrame;
-	cbPerFrame.worldViewProj = view * projection;
-	devcon->UpdateSubresource(this->cbPerFrame, 0, 0, &cbPerFrame, 0, 0);
-	devcon->VSSetConstantBuffers(0, 1, &this->cbPerFrame);
+	cbPerFrame.worldViewProj_ = view * projection;
+	devcon_->UpdateSubresource(this->cbPerFrame_, 0, 0, &cbPerFrame, 0, 0);
+	devcon_->VSSetConstantBuffers(0, 1, &this->cbPerFrame_);
 
 	ID3D11RenderTargetView* renderTargets[GBUFFERID_NUM_BUFFERS];
 	for(int i=0; i<GBUFFERID_NUM_BUFFERS; i++)
-		renderTargets[i] = gBuffers[i]->getRTV();
-	devcon->OMSetRenderTargets(GBUFFERID_NUM_BUFFERS, renderTargets, dsvDepthBuffer);
-	devcon->ClearRenderTargetView(renderTargets[GBUFFERID_ALBEDO], green);
-	devcon->ClearRenderTargetView(renderTargets[GBUFFERID_NORMAL], blue);
+		renderTargets[i] = gBuffers_[i]->getRTV();
+	devcon_->OMSetRenderTargets(GBUFFERID_NUM_BUFFERS, renderTargets, dsvDepthBuffer_);
+	devcon_->ClearRenderTargetView(renderTargets[GBUFFERID_ALBEDO], green);
+	devcon_->ClearRenderTargetView(renderTargets[GBUFFERID_NORMAL], blue);
 
-	devcon->ClearDepthStencilView(dsvDepthBuffer, D3D11_CLEAR_DEPTH, 1.0f, 0);
-	devcon->RSSetState(rsDefault);
+	devcon_->ClearDepthStencilView(dsvDepthBuffer_, D3D11_CLEAR_DEPTH, 1.0f, 0);
+	devcon_->RSSetState(rsDefault_);
 	//devcon->IASetVertexBuffers(0, 0, NULL, 0, 0);
 	UINT stride = sizeof(Vertex);
 	UINT offset = 0;
-	devcon->IASetVertexBuffers(0, 1, &vertexBuffer, &stride, &offset);
-	devcon->IASetInputLayout(fxManagement->getInputLayout());
-	devcon->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-	devcon->Draw(vertices->size(), 0);
+	devcon_->IASetVertexBuffers(0, 1, &vertexBuffer_, &stride, &offset);
+	devcon_->IASetInputLayout(fxManagement_->getInputLayout());
+	devcon_->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	devcon_->Draw(vertices_->size(), 0);
 
-	devcon->VSSetShader(NULL, NULL, 0);
-	devcon->PSSetShader(NULL, NULL, 0);
+	devcon_->VSSetShader(NULL, NULL, 0);
+	devcon_->PSSetShader(NULL, NULL, 0);
 	for(int i=0; i<GBUFFERID_NUM_BUFFERS; i++)
 		renderTargets[i] = nullptr;
-	devcon->OMSetRenderTargets(GBUFFERID_NUM_BUFFERS, renderTargets, nullptr);
-	devcon->PSSetSamplers(0, 0, nullptr);
-	devcon->IASetInputLayout(nullptr);
-	devcon->RSSetState(nullptr);
+	devcon_->OMSetRenderTargets(GBUFFERID_NUM_BUFFERS, renderTargets, nullptr);
+	devcon_->PSSetSamplers(0, 0, nullptr);
+	devcon_->IASetInputLayout(nullptr);
+	devcon_->RSSetState(nullptr);
 }
 void RenderingComponent::renderToBackBuffer()
 {
@@ -189,27 +189,27 @@ void RenderingComponent::renderToBackBuffer()
 	FLOAT blue[]	= {0.0f, 0.0f, 1.0f, 1.0f };
 	
 	//Compute Shader
-	ID3D11UnorderedAccessView* uav[] = { uavBackBuffer };
-	devcon->CSSetUnorderedAccessViews(0, 1, uav, nullptr);
+	ID3D11UnorderedAccessView* uav[] = { uavBackBuffer_ };
+	devcon_->CSSetUnorderedAccessViews(0, 1, uav, nullptr);
 
 	ID3D11ShaderResourceView* resourceViews[GBUFFERID_NUM_BUFFERS];
 	for(int i=0; i<GBUFFERID_NUM_BUFFERS; i++)
-		resourceViews[i] = gBuffers[i]->getSRV();
-	devcon->CSSetShaderResources(0, GBUFFERID_NUM_BUFFERS, resourceViews);
-	devcon->CSSetSamplers(0, 1, &ssDefault);
+		resourceViews[i] = gBuffers_[i]->getSRV();
+	devcon_->CSSetShaderResources(0, GBUFFERID_NUM_BUFFERS, resourceViews);
+	devcon_->CSSetSamplers(0, 1, &ssDefault_);
 
-	fxManagement->getDefaultCS()->set(devcon);
-	devcon->Dispatch(25, 25, 1);
-	fxManagement->getDefaultCS()->unset(devcon);
+	fxManagement_->getDefaultCS()->set(devcon_);
+	devcon_->Dispatch(25, 25, 1);
+	fxManagement_->getDefaultCS()->unset(devcon_);
 
 	ID3D11UnorderedAccessView* uav2[] = { nullptr };
-	devcon->CSSetUnorderedAccessViews(0, 1, uav2, NULL);
+	devcon_->CSSetUnorderedAccessViews(0, 1, uav2, NULL);
 	for(int i=0; i<GBUFFERID_NUM_BUFFERS; i++)
 		resourceViews[i] = nullptr;
-	devcon->CSSetShaderResources(0, GBUFFERID_NUM_BUFFERS, resourceViews);
-	devcon->CSSetSamplers(0, 0, nullptr);
+	devcon_->CSSetShaderResources(0, GBUFFERID_NUM_BUFFERS, resourceViews);
+	devcon_->CSSetSamplers(0, 0, nullptr);
 
-	swapChain->Present(0, 0);
+	swapChain_->Present(0, 0);
 }
 
 LPCWSTR RenderingComponent::featureLevelToString(D3D_FEATURE_LEVEL featureLevel)
@@ -233,11 +233,11 @@ HRESULT RenderingComponent::initDeviceAndSwapChain()
 	ZeroMemory(&swapChainDesc, sizeof(swapChainDesc));
 	swapChainDesc.BufferCount		= 1;
 	swapChainDesc.BufferDesc.Format	= DXGI_FORMAT_R8G8B8A8_UNORM;
-	swapChainDesc.BufferDesc.Width	= screenWidth;
-	swapChainDesc.BufferDesc.Height	= screenHeight;
+	swapChainDesc.BufferDesc.Width	= screenWidth_;
+	swapChainDesc.BufferDesc.Height	= screenHeight_;
 	swapChainDesc.BufferUsage		= DXGI_USAGE_RENDER_TARGET_OUTPUT | DXGI_USAGE_UNORDERED_ACCESS;
-	swapChainDesc.OutputWindow		= windowHandle;
-	swapChainDesc.SampleDesc.Count	= aliasingCount;
+	swapChainDesc.OutputWindow		= windowHandle_;
+	swapChainDesc.SampleDesc.Count	= aliasingCount_;
 	swapChainDesc.Windowed			= true;
 	swapChainDesc.Flags				= DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH;
 
@@ -277,12 +277,12 @@ HRESULT RenderingComponent::createDeviceAndSwapChain(const DXGI_SWAP_CHAIN_DESC 
 											numFeatureLevels,
 											D3D11_SDK_VERSION, 
 											&swapChainDesc,
-											&swapChain,
-											&device,
+											&swapChain_,
+											&device_,
 											&initiatedFeatureLevel,
-											&devcon);
+											&devcon_);
 		if(SUCCEEDED(hr))
-			SetWindowText(windowHandle, featureLevelToString(initiatedFeatureLevel));
+			SetWindowText(windowHandle_, featureLevelToString(initiatedFeatureLevel));
 
 		index++;
 	}
@@ -297,15 +297,15 @@ HRESULT RenderingComponent::initDepthBuffer()
 
 	D3D11_TEXTURE2D_DESC texd;
 	ZeroMemory(&texd, sizeof(texd));
-	texd.Width		= screenWidth;
-	texd.Height		= screenHeight;
+	texd.Width		= screenWidth_;
+	texd.Height		= screenHeight_;
 	texd.ArraySize	= 1;
 	texd.MipLevels	= 1;
-	texd.SampleDesc.Count = aliasingCount;
+	texd.SampleDesc.Count = aliasingCount_;
 	texd.Format		= DXGI_FORMAT_D32_FLOAT;
 	texd.BindFlags	= D3D11_BIND_DEPTH_STENCIL;
 
-	hr = device->CreateTexture2D(&texd, NULL, &texDepthBuffer);
+	hr = device_->CreateTexture2D(&texd, NULL, &texDepthBuffer_);
 	if(FAILED(hr))
 		ERROR_MSG(L"RenderingComponent::initDepthBuffer CreateTexture2D failed");
 
@@ -316,7 +316,7 @@ HRESULT RenderingComponent::initDepthBuffer()
 		dsvd.Format			= DXGI_FORMAT_D32_FLOAT;
 		dsvd.ViewDimension	= D3D11_DSV_DIMENSION_TEXTURE2DMS;
 
-		hr = device->CreateDepthStencilView(texDepthBuffer, &dsvd, &dsvDepthBuffer);
+		hr = device_->CreateDepthStencilView(texDepthBuffer_, &dsvd, &dsvDepthBuffer_);
 		if(FAILED(hr))
 		ERROR_MSG(L"RenderingComponent::initDepthBuffer CreateDepthStencilView failed");
 	}
@@ -327,12 +327,12 @@ HRESULT RenderingComponent::initBackBuffer()
 {
 	HRESULT hr = S_OK;
 
-	swapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), (LPVOID*)&texBackBuffer);
-	hr = device->CreateRenderTargetView(texBackBuffer, NULL, &rtvBackBuffer);
+	swapChain_->GetBuffer(0, __uuidof(ID3D11Texture2D), (LPVOID*)&texBackBuffer_);
+	hr = device_->CreateRenderTargetView(texBackBuffer_, NULL, &rtvBackBuffer_);
 	if(FAILED(hr))
 		ERROR_MSG(L"RenderingComponent::initBackBuffer CreateRenderTargetView failed");
 
-	hr = device->CreateUnorderedAccessView(texBackBuffer, NULL, &uavBackBuffer);
+	hr = device_->CreateUnorderedAccessView(texBackBuffer_, NULL, &uavBackBuffer_);
 	if(FAILED(hr))
 		ERROR_MSG(L"RenderingComponent::initBackBuffer CreateUnorderedAccessView failed");
 
@@ -345,16 +345,16 @@ HRESULT RenderingComponent::initGBuffers()
 	GBuffer* gBuffer = nullptr;
 
 	/*Albedo*/
-	gBuffer = new GBuffer(screenWidth, screenHeight, aliasingCount, DXGI_FORMAT_R32G32B32A32_FLOAT);
-	hr = gBuffer->init(device);
-	gBuffers[GBUFFERID_ALBEDO] = gBuffer;
+	gBuffer = new GBuffer(screenWidth_, screenHeight_, aliasingCount_, DXGI_FORMAT_R32G32B32A32_FLOAT);
+	hr = gBuffer->init(device_);
+	gBuffers_[GBUFFERID_ALBEDO] = gBuffer;
 
 	/*Normals*/
 	if(hr == S_OK)
 	{
-		gBuffer = new GBuffer(screenWidth, screenHeight, aliasingCount, DXGI_FORMAT_R32G32B32A32_FLOAT);
-		hr = gBuffer->init(device);
-		gBuffers[GBUFFERID_NORMAL] = gBuffer;
+		gBuffer = new GBuffer(screenWidth_, screenHeight_, aliasingCount_, DXGI_FORMAT_R32G32B32A32_FLOAT);
+		hr = gBuffer->init(device_);
+		gBuffers_[GBUFFERID_NORMAL] = gBuffer;
 	}
 
 	return hr;
@@ -366,12 +366,12 @@ void RenderingComponent::initViewport()
 
 	viewport.TopLeftX	= 0;
 	viewport.TopLeftY	= 0;
-	viewport.Width		= static_cast<FLOAT>(screenWidth);
-	viewport.Height		= static_cast<FLOAT>(screenHeight);
+	viewport.Width		= static_cast<FLOAT>(screenWidth_);
+	viewport.Height		= static_cast<FLOAT>(screenHeight_);
 	viewport.MinDepth	= 0;
 	viewport.MaxDepth	= 1;
 
-	devcon->RSSetViewports(1, &viewport);
+	devcon_->RSSetViewports(1, &viewport);
 }
 HRESULT RenderingComponent::initRSDefault()
 {
@@ -389,7 +389,7 @@ HRESULT RenderingComponent::initRSDefault()
 	rsd.MultisampleEnable		= true;
 	rsd.AntialiasedLineEnable	= true;
 
-	hr = device->CreateRasterizerState(&rsd, &rsDefault);
+	hr = device_->CreateRasterizerState(&rsd, &rsDefault_);
 	if(FAILED(hr))
 		ERROR_MSG(L"RenderingComponent::initRSDefault CreateRasterizerState failed");
 	
@@ -409,7 +409,7 @@ HRESULT RenderingComponent::initSSDefault()
     sampDesc.MinLOD		= 0;
     sampDesc.MaxLOD		= D3D11_FLOAT32_MAX;
 
-	hr = device->CreateSamplerState(&sampDesc, &ssDefault);
+	hr = device_->CreateSamplerState(&sampDesc, &ssDefault_);
 	if(FAILED(hr))
 		ERROR_MSG(L"RenderingComponent::initSSDefault CreateSamplerState failed");
 
@@ -419,8 +419,8 @@ HRESULT RenderingComponent::initFXManagement()
 {
 	HRESULT hr = S_OK;
 
-	fxManagement = new FXManagement();
-	hr = fxManagement->init(device);
+	fxManagement_ = new FXManagement();
+	hr = fxManagement_->init(device_);
 
 	return hr;
 }
@@ -428,8 +428,8 @@ HRESULT RenderingComponent::initDebug()
 {
 	HRESULT hr = S_OK;
 
-	d3dDebug = new D3DDebug();
-	hr = d3dDebug->init(device);
+	d3dDebug_ = new D3DDebug();
+	hr = d3dDebug_->init(device_);
 
 	return hr;
 }
@@ -444,7 +444,7 @@ HRESULT RenderingComponent::initConstantBuffers()
 	bd.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
 	bd.CPUAccessFlags = 0;
 	
-	hr = device->CreateBuffer(&bd, NULL, &cbPerFrame);
+	hr = device_->CreateBuffer(&bd, NULL, &cbPerFrame_);
 	if(FAILED(hr))
 		ERROR_MSG(L"RenderingComponent::initConstantBuffers CreateBuffer failed");
 
@@ -454,20 +454,20 @@ HRESULT RenderingComponent::initVertexBuffer()
 {
 	HRESULT hr = S_OK;
 
-	vertices = new std::vector<Vertex>();
-	objLoader = new ObjLoaderBasic();
-	objLoader->parseObjectFile("../../xkill-resources/xkill-models/bth.obj", vertices);
+	vertices_ = new std::vector<Vertex>();
+	objLoader_ = new ObjLoaderBasic();
+	objLoader_->parseObjectFile("../../xkill-resources/xkill-models/bth.obj", vertices_);
 
 	D3D11_BUFFER_DESC vbd;
 	vbd.Usage = D3D11_USAGE_DYNAMIC;
-	vbd.ByteWidth = sizeof(Vertex) * vertices->size();
+	vbd.ByteWidth = sizeof(Vertex) * vertices_->size();
 	vbd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
 	vbd.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
 	vbd.MiscFlags = 0;
 	
 	D3D11_SUBRESOURCE_DATA vinitData;
-	vinitData.pSysMem = &vertices->at(0);
-	device->CreateBuffer(&vbd, &vinitData, &vertexBuffer);
+	vinitData.pSysMem = &vertices_->at(0);
+	device_->CreateBuffer(&vbd, &vinitData, &vertexBuffer_);
 	if(FAILED(hr))
 		ERROR_MSG(L"RenderingComponent::initVertexBuffer CreateBuffer failed");
 

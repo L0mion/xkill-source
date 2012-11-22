@@ -14,9 +14,9 @@
 \ingroup xkill-renderer-vertices*/
 struct Vertex
 {
-	VecF3 position;	//!< float3 vector specifying position in model-space of vertex.
-	VecF3 normal;	//!< float3 vector specifying normal in model-space of vertex.
-	VecF2 texcoord;	//!< float3 vector specifying texture-coordinates.
+	VecF3 position_;	//!< float3 vector specifying position in model-space of vertex.
+	VecF3 normal_;	//!< float3 vector specifying normal in model-space of vertex.
+	VecF2 texcoord_;	//!< float3 vector specifying texture-coordinates.
 
 	//! Default constructor of Vertex.
 	/*!
@@ -27,9 +27,9 @@ struct Vertex
 	*/
 	Vertex()
 	{
-		this->position	= VecF3(0.0f, 0.0f, 0.0f);
-		this->normal	= VecF3(0.0f, 0.0f, 0.0f);
-		this->texcoord	= VecF2(0.0f, 0.0f);
+		this->position_	= VecF3(0.0f, 0.0f, 0.0f);
+		this->normal_	= VecF3(0.0f, 0.0f, 0.0f);
+		this->texcoord_	= VecF2(0.0f, 0.0f);
 	}
 	//! Constructor setting members to specific values.
 	/*!
@@ -39,9 +39,9 @@ struct Vertex
 	*/
 	Vertex(VecF3 position, VecF3 normal, VecF2 texcoord)
 	{
-		this->position	= position;
-		this->normal	= normal;
-		this->texcoord	= texcoord;
+		this->position_	= position;
+		this->normal_	= normal;
+		this->texcoord_	= texcoord;
 	}
 };
 

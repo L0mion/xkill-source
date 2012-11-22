@@ -40,7 +40,7 @@ public:
 
 	ID3D11ComputeShader* getComputeShader() const;
 private:
-	ID3D11ComputeShader* computeShader; //!< Contains compute shader.
+	ID3D11ComputeShader* computeShader_; //!< Contains compute shader.
 
 };
 

@@ -1,32 +1,32 @@
 #include "window.h"
 
-std::vector<bool>* Window::keys;
-int Window::mouseDeltaX;
-int Window::mouseDeltaY;
+std::vector<bool>* Window::keys_;
+int Window::mouseDeltaX_;
+int Window::mouseDeltaY_;
 
-int Window::screenWidth;
-int Window::screenHeight;
+int Window::screenWidth_;
+int Window::screenHeight_;
 
-HWND Window::hWnd;
+HWND Window::hWnd_;
 
 Window::Window(HINSTANCE hInstance, int cmdShow, int screenWidth, int screenHeight)
 {
-	this->hInstance = hInstance;
-	this->cmdShow = cmdShow;
-	this->screenWidth = screenWidth;
-	this->screenHeight = screenHeight;
+	this->hInstance_ = hInstance;
+	this->cmdShow_ = cmdShow;
+	this->screenWidth_ = screenWidth;
+	this->screenHeight_ = screenHeight;
 
-	keys = new std::vector<bool>();
-	keys->resize(256);
+	keys_ = new std::vector<bool>();
+	keys_->resize(256);
 
-	isActive = true;
+	isActive_ = true;
 }
 
 Window::~Window()
 {
 	//DANGER!!!!!!!!
 	//deleting static member variable in class instance
-	delete keys;
+	delete keys_;
 }
 
 void Window::init()
@@ -45,23 +45,23 @@ void Window::checkMessages()
 		DispatchMessage(&msg);
 
 		if(msg.message == WM_QUIT)
-			isActive = false;
+			isActive_ = false;
 	}
 }
 
 InputContainer Window::getInput() const
 {
-	return InputContainer(keys, mouseDeltaX, mouseDeltaY);
+	return InputContainer(keys_, mouseDeltaX_, mouseDeltaY_);
 }
 
 HWND Window::getWindowHandle() const
 {
-	return hWnd;
+	return hWnd_;
 }
 
 bool Window::getIsActive() const
 {
-	return isActive;
+	return isActive_;
 }
 
 void Window::createWindow()
@@ -73,34 +73,34 @@ void Window::createWindow()
 	wc.cbSize = sizeof(WNDCLASSEX);
 	wc.style = CS_HREDRAW | CS_VREDRAW;
 	wc.lpfnWndProc = WindowProc;
-	wc.hInstance = hInstance;
+	wc.hInstance = hInstance_;
 	wc.hCursor = LoadCursor(NULL, IDC_ARROW);
 	wc.lpszClassName = L"WindowClass";
 
 	RegisterClassEx(&wc);
 
-	hWnd = CreateWindowEx(NULL,
+	hWnd_ = CreateWindowEx(NULL,
 						  L"WindowClass",
 						  L"Temp",
 						  WS_OVERLAPPEDWINDOW,
 						  100,
 						  100,
-						  screenWidth,
-						  screenHeight,
+						  screenWidth_,
+						  screenHeight_,
 						  NULL,
 						  NULL,
-						  hInstance,
+						  hInstance_,
 						  NULL);
 
-	ShowWindow(hWnd, cmdShow);
+	ShowWindow(hWnd_, cmdShow_);
 }
 
 void Window::initCursor()
 {
-	SetCursorPos(screenWidth/2, screenHeight/2);
+	SetCursorPos(screenWidth_/2, screenHeight_/2);
 	
 	//Capture the cursor to this window
-	SetCapture(hWnd);
+	SetCapture(hWnd_);
 
 	//Hide the cursor from the user
 	ShowCursor(false);
@@ -112,18 +112,18 @@ void Window::mouseDeltaMove(LPARAM lParam)
 	POINT point;
 	point.x = 0;
 	point.y = 0;
-	MapWindowPoints(hWnd, NULL, &point, 1);
+	MapWindowPoints(hWnd_, NULL, &point, 1);
 	
 	//Get current mouse position
 	int mouseX = GET_X_LPARAM(lParam)+point.x;
 	int mouseY = GET_Y_LPARAM(lParam)+point.y;
 
 	//Calculate relative mouse movement
-	mouseDeltaX = mouseX - screenWidth/2;
-	mouseDeltaY = mouseY - screenHeight/2;
+	mouseDeltaX_ = mouseX - screenWidth_/2;
+	mouseDeltaY_ = mouseY - screenHeight_/2;
 
 	//Return cursor to screen center
-	SetCursorPos(screenWidth/2, screenHeight/2);
+	SetCursorPos(screenWidth_/2, screenHeight_/2);
 }
 
 LRESULT CALLBACK Window::WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
@@ -143,14 +143,14 @@ LRESULT CALLBACK Window::WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPAR
 			DestroyWindow(hWnd);
 		}
 		
-		keys->at(wParam) = true;
+		keys_->at(wParam) = true;
 
 		return 0;
 	}break;
 
 	case WM_KEYUP:
 	{
-		keys->at(wParam) = false;
+		keys_->at(wParam) = false;
 
 		return 0;
 	}break;

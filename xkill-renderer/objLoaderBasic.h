@@ -17,9 +17,9 @@ public:
 
 private:
 	
-	std::vector<VecF3> positions;
-	std::vector<VecF3> normals;
-	std::vector<VecF2> texcoords;
+	std::vector<VecF3> positions_;
+	std::vector<VecF3> normals_;
+	std::vector<VecF2> texcoords_;
 
 	void parsePosition(std::fstream& infile);
 	void parseNormal(std::fstream& infile);

@@ -4,26 +4,26 @@
 
 ShaderPS::ShaderPS()
 {
-	pixelShader = nullptr;
+	pixelShader_ = nullptr;
 }
 
 ShaderPS::~ShaderPS()
 {
-	SAFE_RELEASE(pixelShader);
+	SAFE_RELEASE(pixelShader_);
 }
 
 void ShaderPS::reset()
 {
 	Shader::reset();
 
-	SAFE_RELEASE(pixelShader);
+	SAFE_RELEASE(pixelShader_);
 }
 
 HRESULT ShaderPS::init(ID3D11Device* device, LPCWSTR shaderPath)
 {
 	HRESULT hr = S_OK;
 
-	hr = D3DReadFileToBlob(shaderPath, &blob);
+	hr = D3DReadFileToBlob(shaderPath, &blob_);
 
 	std::wstring location = L"ShaderPS::init D3DReadFileToBlob ";
 	std::wstring failed = L" Failed!";
@@ -33,10 +33,10 @@ HRESULT ShaderPS::init(ID3D11Device* device, LPCWSTR shaderPath)
 	else
 	{
 		hr = device->CreatePixelShader(
-			blob->GetBufferPointer(),
-			blob->GetBufferSize(),
+			blob_->GetBufferPointer(),
+			blob_->GetBufferSize(),
 			nullptr,
-			&pixelShader);
+			&pixelShader_);
 		
 		location = L"ShaderVS::init CreateVertexShader ";
 		errorMsg = location + static_cast<std::wstring>(shaderPath) + failed;
@@ -49,7 +49,7 @@ HRESULT ShaderPS::init(ID3D11Device* device, LPCWSTR shaderPath)
 
 void ShaderPS::set(ID3D11DeviceContext* devcon)
 {
-	devcon->PSSetShader(pixelShader, nullptr, 0);
+	devcon->PSSetShader(pixelShader_, nullptr, 0);
 }
 void ShaderPS::unset(ID3D11DeviceContext* devcon)
 {
@@ -58,5 +58,5 @@ void ShaderPS::unset(ID3D11DeviceContext* devcon)
 
 ID3D11PixelShader* ShaderPS::getPixelShader()
 {
-	return pixelShader;
+	return pixelShader_;
 }

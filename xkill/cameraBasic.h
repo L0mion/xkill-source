@@ -75,21 +75,21 @@ public:
 	MatF4 getView();
 	MatF4 getProjection();
 private:
-	float fov;					//!< The cameras field of view.
-	float aspect;				//!< Aspect ratio of the window.
-	float zNear;				//!< The far viewing plane.
-	float zFar;					//!< The near viewing plane.
-	unsigned int screenWidth;	//!< screenWidth Width of the window/viewport.
-	unsigned int screenHeight;	//!< screenHeight Height of the window/viewport.
+	float fov_;					//!< The cameras field of view.
+	float aspect_;				//!< Aspect ratio of the window.
+	float zNear_;				//!< The far viewing plane.
+	float zFar_;					//!< The near viewing plane.
+	unsigned int screenWidth_;	//!< screenWidth Width of the window/viewport.
+	unsigned int screenHeight_;	//!< screenHeight Height of the window/viewport.
 
-	float STEP_SCALE;	//!< How far the camera will move while a key is pressed.
-	VecF3 position;		//!< Where the camera is located.
-	VecF3 right;		//!< Always aims to the right of the camera, perpendicular to look.
-	VecF3 up;			//!< Always aims up from the camera, perpendicular to look.
-	VecF3 look;			//!< The direction in which the camera is aimed. 
+	float STEP_SCALE_;	//!< How far the camera will move while a key is pressed.
+	VecF3 position_;		//!< Where the camera is located.
+	VecF3 right_;		//!< Always aims to the right of the camera, perpendicular to look.
+	VecF3 up_;			//!< Always aims up from the camera, perpendicular to look.
+	VecF3 look_;			//!< The direction in which the camera is aimed. 
 	
-	MatF4 view;			//!< The view matrix. Used to transform objects to view space.
-	MatF4 projection;	//!< The projection matrix. Defines the camera's frustum.
+	MatF4 view_;			//!< The view matrix. Used to transform objects to view space.
+	MatF4 projection_;	//!< The projection matrix. Defines the camera's frustum.
 };
 
 #endif //XKILL_CAMERABASIC_H

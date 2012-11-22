@@ -14,9 +14,9 @@ void ObjLoaderBasic::parseObjectFile(std::string filename, std::vector<Vertex>* 
 	std::fstream infile(filename);
 	std::string temp;
 
-	positions.clear();
-	normals.clear();
-	texcoords.clear();
+	positions_.clear();
+	normals_.clear();
+	texcoords_.clear();
 
 	if(infile)
 	{
@@ -44,21 +44,21 @@ void ObjLoaderBasic::parsePosition(std::fstream& infile)
 {
 	float x, y, z;
 	infile >> x >> y >> z;
-	positions.push_back(VecF3(x, y, z));
+	positions_.push_back(VecF3(x, y, z));
 }
 
 void ObjLoaderBasic::parseNormal(std::fstream& infile)
 {
 	float x, y, z;
 	infile >> x >> y >> z;
-	normals.push_back(VecF3(x, y, z));
+	normals_.push_back(VecF3(x, y, z));
 }
 
 void ObjLoaderBasic::parseTexcoord(std::fstream& infile)
 {
 	float u, v;
 	infile >> u >> v;
-	texcoords.push_back(VecF2(u, v));
+	texcoords_.push_back(VecF2(u, v));
 }
 
 void ObjLoaderBasic::parseFace(std::fstream& infile, std::vector<Vertex>* vertices)
@@ -69,7 +69,7 @@ void ObjLoaderBasic::parseFace(std::fstream& infile, std::vector<Vertex>* vertic
 	for(unsigned int i=0; i<3; i++)
 	{
 		infile >> iPosition;
-		vertex.position = positions[iPosition-1];
+		vertex.position_ = positions_[iPosition-1];
 
 		if(infile.peek() == '/')
 		{
@@ -77,13 +77,13 @@ void ObjLoaderBasic::parseFace(std::fstream& infile, std::vector<Vertex>* vertic
 			if(infile.peek() != '/')
 			{
 				infile >> iTexcoord;
-				vertex.texcoord = texcoords[iTexcoord-1];
+				vertex.texcoord_ = texcoords_[iTexcoord-1];
 			}
 			if(infile.peek() == '/')
 			{
 				infile.ignore();
 				infile >> iNormal;
-				vertex.normal = normals[iNormal-1];
+				vertex.normal_ = normals_[iNormal-1];
 			}
 		}
 		vertices->push_back(vertex);

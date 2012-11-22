@@ -41,7 +41,7 @@ public:
 	ID3D11PixelShader* getPixelShader();
 
 private:
-	ID3D11PixelShader* pixelShader; //!< Contains pixel shader
+	ID3D11PixelShader* pixelShader_; //!< Contains pixel shader
 };
 
 #endif //XKILL_RENDERER_SHADERPS_H

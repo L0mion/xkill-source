@@ -74,14 +74,14 @@ private:
 	*/
 	HRESULT initRTV(ID3D11Device* device);
 
-	unsigned int	texWidth;		//!< Width of texture.
-	unsigned int	texHeight;		//!< Height of texture.
-	unsigned int	texAliasing;	//!< Anti-aliasing samples of texture.
-	DXGI_FORMAT		texFormat;		//!< Format of texture.
+	unsigned int	texWidth_;		//!< Width of texture.
+	unsigned int	texHeight_;		//!< Height of texture.
+	unsigned int	texAliasing_;	//!< Anti-aliasing samples of texture.
+	DXGI_FORMAT		texFormat_;		//!< Format of texture.
 
-	ID3D11Texture2D*			tex;	//!< Texture of GBuffer.
-	ID3D11ShaderResourceView*	srv;	//!< Handle to texture used by shader.
-	ID3D11RenderTargetView*		rtv;	//!< Used by shader to render to texture.
+	ID3D11Texture2D*			tex_;	//!< Texture of GBuffer.
+	ID3D11ShaderResourceView*	srv_;	//!< Handle to texture used by shader.
+	ID3D11RenderTargetView*		rtv_;	//!< Used by shader to render to texture.
 };
 
 #endif

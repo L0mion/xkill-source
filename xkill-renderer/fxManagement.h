@@ -93,13 +93,13 @@ private:
 	*/
 	HRESULT initInputLayout(ID3D11Device* device);
 
-	ShaderVS*	defaultVS;			//!< Default vertex shader.
-	ShaderPS*	defaultPS;			//!< Default pixel shader.
-	ShaderVS*	defaultDeferredVS;	//!< Default vertex shader used by the deferred renderer.
-	ShaderPS*	defaultDeferredPS;	//!< Default pixel shader used by the deferred renderer.
-	ShaderCS*	defaultCS;			//!< Default compute shader.
+	ShaderVS*	defaultVS_;			//!< Default vertex shader.
+	ShaderPS*	defaultPS_;			//!< Default pixel shader.
+	ShaderVS*	defaultDeferredVS_;	//!< Default vertex shader used by the deferred renderer.
+	ShaderPS*	defaultDeferredPS_;	//!< Default pixel shader used by the deferred renderer.
+	ShaderCS*	defaultCS_;			//!< Default compute shader.
 	
-	ID3D11InputLayout* inputLayout; //!< Standard input layout used in default vertex shader.
+	ID3D11InputLayout* inputLayout_; //!< Standard input layout used in default vertex shader.
 };
 
 #endif //XKILL_RENDERER_FXMANAGEMENT_H

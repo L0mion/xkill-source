@@ -4,22 +4,22 @@
 
 Shader::Shader()
 {
-	shaderPath	= L"Default";
-	blob		= nullptr;
+	shaderPath_	= L"Default";
+	blob_		= nullptr;
 }
 Shader::~Shader()
 {
-	SAFE_RELEASE(blob);
+	SAFE_RELEASE(blob_);
 }
 
 void Shader::reset()
 {
-	shaderPath = L"Default";
+	shaderPath_ = L"Default";
 
-	SAFE_RELEASE(blob);
+	SAFE_RELEASE(blob_);
 }
 
 ID3D10Blob* Shader::getBlob()
 {
-	return blob;
+	return blob_;
 }

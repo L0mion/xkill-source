@@ -48,8 +48,8 @@ public:
 	ID3D10Blob* getBlob();
 
 protected:
-	ID3D10Blob*	blob;		//!< DirectX blob object, contains compiled shader code.
-	LPCWSTR		shaderPath; //!< Path to a precompiled shader. 
+	ID3D10Blob*	blob_;		//!< DirectX blob object, contains compiled shader code.
+	LPCWSTR		shaderPath_; //!< Path to a precompiled shader. 
 };
 
 #endif //XKILL_RENDERER_SHADER_H

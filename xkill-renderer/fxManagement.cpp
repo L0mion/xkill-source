@@ -1,37 +1,36 @@
 #include "fxManagement.h"
 #include "renderingUtilities.h"
 
-
 FXManagement::FXManagement()
 {
-	defaultVS			= nullptr;
-	defaultPS			= nullptr;
-	defaultDeferredVS	= nullptr;
-	defaultDeferredPS	= nullptr;
-	defaultCS			= nullptr;
-	inputLayout			= nullptr;
+	defaultVS_			= nullptr;
+	defaultPS_			= nullptr;
+	defaultDeferredVS_	= nullptr;
+	defaultDeferredPS_	= nullptr;
+	defaultCS_			= nullptr;
+	inputLayout_			= nullptr;
 }
 
 FXManagement::~FXManagement()
 {
-	SAFE_DELETE(defaultVS);
-	SAFE_DELETE(defaultPS);
-	SAFE_DELETE(defaultDeferredVS);
-	SAFE_DELETE(defaultDeferredPS);
-	SAFE_DELETE(defaultCS);
+	SAFE_DELETE(defaultVS_);
+	SAFE_DELETE(defaultPS_);
+	SAFE_DELETE(defaultDeferredVS_);
+	SAFE_DELETE(defaultDeferredPS_);
+	SAFE_DELETE(defaultCS_);
 	
-	SAFE_RELEASE(inputLayout);
+	SAFE_RELEASE(inputLayout_);
 }
 
 void FXManagement::reset()
 {
-	defaultVS->reset();
-	defaultPS->reset();
-	defaultDeferredVS->reset();
-	defaultDeferredPS->reset();
-	defaultCS->reset();
+	defaultVS_->reset();
+	defaultPS_->reset();
+	defaultDeferredVS_->reset();
+	defaultDeferredPS_->reset();
+	defaultCS_->reset();
 	
-	SAFE_RELEASE(inputLayout);
+	SAFE_RELEASE(inputLayout_);
 }
 
 HRESULT FXManagement::init(ID3D11Device* device)
@@ -66,8 +65,8 @@ HRESULT FXManagement::initDefaultVS(ID3D11Device* device)
 {
 	HRESULT hr = S_OK;
 
-	defaultVS = new ShaderVS();
-	hr = defaultVS->init(device, L"../../xkill-build/bin-Debug/defaultVS.cso");
+	defaultVS_ = new ShaderVS();
+	hr = defaultVS_->init(device, L"../../xkill-build/bin-Debug/defaultVS.cso");
 
 	return hr;
 }
@@ -76,8 +75,8 @@ HRESULT FXManagement::initDefaultPS(ID3D11Device* device)
 {
 	HRESULT hr = S_OK;
 
-	defaultPS = new ShaderPS();
-	hr = defaultPS->init(device, L"../../xkill-build/bin-Debug/defaultPS.cso");
+	defaultPS_ = new ShaderPS();
+	hr = defaultPS_->init(device, L"../../xkill-build/bin-Debug/defaultPS.cso");
 
 	return hr;
 }
@@ -86,8 +85,8 @@ HRESULT FXManagement::initDefaultDeferredVS(ID3D11Device* device)
 {
 	HRESULT hr = S_OK;
 
-	defaultDeferredVS = new ShaderVS();
-	hr = defaultDeferredVS->init(device, L"../../xkill-build/bin-Debug/defaultDeferredVS.cso");
+	defaultDeferredVS_ = new ShaderVS();
+	hr = defaultDeferredVS_->init(device, L"../../xkill-build/bin-Debug/defaultDeferredVS.cso");
 
 	return hr;
 }
@@ -96,8 +95,8 @@ HRESULT FXManagement::initDefaultDeferredPS(ID3D11Device* device)
 {
 	HRESULT hr = S_OK;
 
-	defaultDeferredPS = new ShaderPS();
-	hr = defaultDeferredPS->init(device, L"../../xkill-build/bin-Debug/defaultDeferredPS.cso");
+	defaultDeferredPS_ = new ShaderPS();
+	hr = defaultDeferredPS_->init(device, L"../../xkill-build/bin-Debug/defaultDeferredPS.cso");
 
 	return hr;
 }
@@ -106,8 +105,8 @@ HRESULT FXManagement::initDefaultCS(ID3D11Device* device)
 {
 	HRESULT hr = S_OK;
 
-	defaultCS = new ShaderCS();
-	hr = defaultCS->init(device, L"../../xkill-build/bin-Debug/defaultCS.cso");
+	defaultCS_ = new ShaderCS();
+	hr = defaultCS_->init(device, L"../../xkill-build/bin-Debug/defaultCS.cso");
 
 	return hr;
 }
@@ -126,9 +125,9 @@ HRESULT FXManagement::initInputLayout(ID3D11Device* device)
 	hr = device->CreateInputLayout(
 		ied, 
 		3, 
-		defaultVS->getBlob()->GetBufferPointer(), 
-		defaultVS->getBlob()->GetBufferSize(), 
-		&inputLayout);
+		defaultVS_->getBlob()->GetBufferPointer(), 
+		defaultVS_->getBlob()->GetBufferSize(), 
+		&inputLayout_);
 	if(FAILED(hr))
 		ERROR_MSG(L"FXManagement::initInputLayout CreateInputLayout failed");
 	return hr;
@@ -136,30 +135,30 @@ HRESULT FXManagement::initInputLayout(ID3D11Device* device)
 
 ShaderVS* FXManagement::getDefaultVS() const
 {
-	return defaultVS;
+	return defaultVS_;
 }
 
 ShaderPS* FXManagement::getDefaultPS() const
 {
-	return defaultPS;
+	return defaultPS_;
 }
 
 ShaderVS* FXManagement::getDefaultDeferredVS()	const
 {
-	return defaultDeferredVS;
+	return defaultDeferredVS_;
 }
 
 ShaderPS* FXManagement::getDefaultDeferredPS() const
 {
-	return defaultDeferredPS;
+	return defaultDeferredPS_;
 }
 
 ShaderCS* FXManagement::getDefaultCS() const
 {
-	return defaultCS;
+	return defaultCS_;
 }
 
 ID3D11InputLayout* FXManagement::getInputLayout() const
 {
-	return inputLayout;
+	return inputLayout_;
 }

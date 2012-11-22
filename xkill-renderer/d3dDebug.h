@@ -50,10 +50,10 @@ public:
 	HRESULT reportLiveObjects();
 private:
 	#if defined(DEBUG) || defined(_DEBUG)
-	IDXGIFactory1*	dxgiFactory;	//!< Will not be created if DEBUG- or _DEBUG-flags are not set.
-	ID3D11Debug*	d3d11Debug;		//!< Will not be created if DEBUG- or _DEBUG-flags are not set.
-	IDXGIDebug*		dxgiDebug;		//!< Will not be created if DEBUG- or _DEBUG-flags are not set.
-	IDXGIInfoQueue* dxgiInfoQueue;	//!< Will not be created if DEBUG- or _DEBUG-flags are not set.
+	IDXGIFactory1*	dxgiFactory_;	//!< Will not be created if DEBUG- or _DEBUG-flags are not set.
+	ID3D11Debug*	d3d11Debug_;		//!< Will not be created if DEBUG- or _DEBUG-flags are not set.
+	IDXGIDebug*		dxgiDebug_;		//!< Will not be created if DEBUG- or _DEBUG-flags are not set.
+	IDXGIInfoQueue* dxgiInfoQueue_;	//!< Will not be created if DEBUG- or _DEBUG-flags are not set.
 	#endif //DEBUG || _DEBUG
 };
 

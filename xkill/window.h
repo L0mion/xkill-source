@@ -17,16 +17,16 @@
 */
 struct InputContainer
 {
-	std::vector<bool>* keys; //!< Each index maps to a key and is true or false depending on whether or not the key is currently pressed. 
-	int mouseDeltaX;		//!< Delta movement of the mouse along the x-axis.
-	int mouseDeltaY;		//!< Delta movement of the mouse along the y axis.
+	std::vector<bool>* keys_; //!< Each index maps to a key and is true or false depending on whether or not the key is currently pressed. 
+	int mouseDeltaX_;		//!< Delta movement of the mouse along the x-axis.
+	int mouseDeltaY_;		//!< Delta movement of the mouse along the y axis.
 
 	//! All member variables must be set in the constructor. 
 	InputContainer(std::vector<bool>* keys, int mouseDeltaX, int mouseDeltaY)
 	{
-		this->keys = keys;
-		this->mouseDeltaX = mouseDeltaX;
-		this->mouseDeltaY = mouseDeltaY;
+		this->keys_ = keys;
+		this->mouseDeltaX_ = mouseDeltaX;
+		this->mouseDeltaY_ = mouseDeltaY;
 	}
 };
 
@@ -77,17 +77,17 @@ private:
 	//! Windows callback function.
 	static LRESULT CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
 
-	static std::vector<bool>* keys;		//!< Each index maps to a key and is true or false depending on whether or not the key is currently pressed. 
-	static int mouseDeltaX;				//!< Delta movement of the mouse along the x-axis.
-	static int mouseDeltaY;				//!< Delta movement of the mouse along the y axis.
+	static std::vector<bool>* keys_;		//!< Each index maps to a key and is true or false depending on whether or not the key is currently pressed. 
+	static int mouseDeltaX_;				//!< Delta movement of the mouse along the x-axis.
+	static int mouseDeltaY_;				//!< Delta movement of the mouse along the y axis.
 
-	static int screenWidth;		//!< Width of the window
-	static int screenHeight;	//!< Height of the window
+	static int screenWidth_;		//!< Width of the window
+	static int screenHeight_;	//!< Height of the window
 
-	static HWND hWnd;		//!< Handle to the window
-	HINSTANCE hInstance;	//!< Provided by the operating system, used to create the window
-	int cmdShow;			//!< Provided by the operating system, used to create the window
-	bool isActive;			//!< Changes to false when the window is shutting down.
+	static HWND hWnd_;		//!< Handle to the window
+	HINSTANCE hInstance_;	//!< Provided by the operating system, used to create the window
+	int cmdShow_;			//!< Provided by the operating system, used to create the window
+	bool isActive_;			//!< Changes to false when the window is shutting down.
 };
 
 

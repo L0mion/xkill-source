@@ -5,26 +5,26 @@
 
 ShaderCS::ShaderCS()
 {
-	computeShader = nullptr;
+	computeShader_ = nullptr;
 }
 
 ShaderCS::~ShaderCS()
 {
-	SAFE_RELEASE(computeShader);
+	SAFE_RELEASE(computeShader_);
 }
 
 void ShaderCS::reset()
 {
 	Shader::reset();
 
-	SAFE_RELEASE(computeShader);
+	SAFE_RELEASE(computeShader_);
 }
 
 HRESULT ShaderCS::init(ID3D11Device* device, LPCWSTR shaderPath)
 {
 	HRESULT hr = S_OK;
 
-	hr = D3DReadFileToBlob(shaderPath, &blob);
+	hr = D3DReadFileToBlob(shaderPath, &blob_);
 
 	std::wstring location = L"ShaderCS::init D3DReadFileToBlob ";
 	std::wstring failed = L" Failed!";
@@ -34,10 +34,10 @@ HRESULT ShaderCS::init(ID3D11Device* device, LPCWSTR shaderPath)
 	else
 	{
 		hr = device->CreateComputeShader(
-			blob->GetBufferPointer(),
-			blob->GetBufferSize(),
+			blob_->GetBufferPointer(),
+			blob_->GetBufferSize(),
 			nullptr,
-			&computeShader);
+			&computeShader_);
 		
 		location = L"ShaderCS::init CreateComputeShader ";
 		errorMsg = location + static_cast<std::wstring>(shaderPath) + failed;
@@ -50,7 +50,7 @@ HRESULT ShaderCS::init(ID3D11Device* device, LPCWSTR shaderPath)
 
 void ShaderCS::set(ID3D11DeviceContext* devcon)
 {
-	devcon->CSSetShader(computeShader, nullptr, 0);
+	devcon->CSSetShader(computeShader_, nullptr, 0);
 }
 void ShaderCS::unset(ID3D11DeviceContext* devcon)
 {
@@ -59,5 +59,5 @@ void ShaderCS::unset(ID3D11DeviceContext* devcon)
 
 ID3D11ComputeShader* ShaderCS::getComputeShader() const
 {
-	return computeShader;
+	return computeShader_;
 }

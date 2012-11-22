@@ -4,26 +4,26 @@
 
 ShaderVS::ShaderVS()
 {
-	vertexShader = nullptr;
+	vertexShader_ = nullptr;
 }
 
 ShaderVS::~ShaderVS()
 {
-	SAFE_RELEASE(vertexShader);
+	SAFE_RELEASE(vertexShader_);
 }
 
 void ShaderVS::reset()
 {
 	Shader::reset();
 
-	SAFE_RELEASE(vertexShader);
+	SAFE_RELEASE(vertexShader_);
 }
 
 HRESULT ShaderVS::init(ID3D11Device* device, LPCWSTR shaderPath)
 {
 	HRESULT hr = S_OK;
 
-	hr = D3DReadFileToBlob(shaderPath, &blob);
+	hr = D3DReadFileToBlob(shaderPath, &blob_);
 
 	std::wstring location = L"ShaderVS::init D3DReadFileToBlob ";
 	std::wstring failed = L" Failed!";
@@ -33,10 +33,10 @@ HRESULT ShaderVS::init(ID3D11Device* device, LPCWSTR shaderPath)
 	else
 	{
 		hr = device->CreateVertexShader(
-			blob->GetBufferPointer(),
-			blob->GetBufferSize(),
+			blob_->GetBufferPointer(),
+			blob_->GetBufferSize(),
 			nullptr,
-			&vertexShader);
+			&vertexShader_);
 		
 		location = L"ShaderVS::init CreateVertexShader ";
 		errorMsg = location + static_cast<std::wstring>(shaderPath) + failed;
@@ -49,7 +49,7 @@ HRESULT ShaderVS::init(ID3D11Device* device, LPCWSTR shaderPath)
 
 void ShaderVS::set(ID3D11DeviceContext* devcon)
 {
-	devcon->VSSetShader(vertexShader, nullptr, 0);
+	devcon->VSSetShader(vertexShader_, nullptr, 0);
 }
 
 void ShaderVS::unset(ID3D11DeviceContext* devcon)
@@ -59,5 +59,5 @@ void ShaderVS::unset(ID3D11DeviceContext* devcon)
 
 ID3D11VertexShader* ShaderVS::getVertexShader() const
 {
-	return vertexShader;
+	return vertexShader_;
 }

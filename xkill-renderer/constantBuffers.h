@@ -10,7 +10,7 @@ Contains data that will be sent to shader every frame.
 */
 struct CBPerFrame
 {
-	MatF4 worldViewProj; //!< Final matrix.
+	MatF4 worldViewProj_; //!< Final matrix.
 };
 static const unsigned int cbPerFrameSize = 64; //!< Size of Per-Frame constant buffer. Must have a size of a multiple of 16 bytes.
 
