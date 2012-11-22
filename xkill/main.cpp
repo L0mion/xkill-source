@@ -27,8 +27,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	RenderingComponent* renderingComponent = new RenderingComponent(
 		window->getWindowHandle(), 
 		screenWidth, 
-		screenHeight, 
-		1);
+		screenHeight);
 	HRESULT hr = renderingComponent->init();
 
 	float aspect = (float)screenWidth/(float)screenHeight;
