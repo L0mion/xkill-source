@@ -3,6 +3,7 @@
 #include <tchar.h>
 #include <xkill-renderer/renderingComponent.h>
 #include "cameraBasic.h"
+#include <xkill-architecture/architecture.h>
 #include "window.h"
 
 #if defined( DEBUG ) || defined( _DEBUG )
@@ -14,6 +15,9 @@ void run(RenderingComponent* renderingComponent, Window* window, CameraBasic* ca
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int cmdShow)
 {
+	Architecture architecture;
+	unsigned int test = architecture.getTest();
+
 	UINT screenWidth = 800;
 	UINT screenHeight = 800;
 
