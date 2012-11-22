@@ -3,23 +3,27 @@
 
 FXManagement::FXManagement()
 {
-	defaultVS_			= nullptr;
-	defaultPS_			= nullptr;
-	defaultDeferredVS_	= nullptr;
-	defaultDeferredPS_	= nullptr;
-	defaultCS_			= nullptr;
-	inputLayout_			= nullptr;
+	ilManagement = nullptr;
+
+	defaultVS_				= nullptr;
+	defaultPS_				= nullptr;
+	defaultDeferredVS_		= nullptr;
+	defaultDeferredPS_		= nullptr;
+	defaultCS_				= nullptr;
+	ilDefaultVSPosNormTex_	= nullptr;
 }
 
 FXManagement::~FXManagement()
 {
+	SAFE_DELETE(ilManagement);
+
 	SAFE_DELETE(defaultVS_);
 	SAFE_DELETE(defaultPS_);
 	SAFE_DELETE(defaultDeferredVS_);
 	SAFE_DELETE(defaultDeferredPS_);
 	SAFE_DELETE(defaultCS_);
 	
-	SAFE_RELEASE(inputLayout_);
+	SAFE_RELEASE(ilDefaultVSPosNormTex_);
 }
 
 void FXManagement::reset()
@@ -30,16 +34,18 @@ void FXManagement::reset()
 	defaultDeferredPS_->reset();
 	defaultCS_->reset();
 	
-	SAFE_RELEASE(inputLayout_);
+	SAFE_RELEASE(ilDefaultVSPosNormTex_);
 }
 
 HRESULT FXManagement::init(ID3D11Device* device)
 {
 	HRESULT hr = S_OK;
 
+	initILManagement();
+
 	hr = initShaders(device);
 	if(SUCCEEDED(hr))
-		hr = initInputLayout(device);
+		hr = initILs(device);
 
 	return hr;
 }
@@ -60,7 +66,6 @@ HRESULT FXManagement::initShaders(ID3D11Device* device)
 	
 	return hr;
 }
-
 HRESULT FXManagement::initDefaultVS(ID3D11Device* device)
 {
 	HRESULT hr = S_OK;
@@ -70,7 +75,6 @@ HRESULT FXManagement::initDefaultVS(ID3D11Device* device)
 
 	return hr;
 }
-
 HRESULT FXManagement::initDefaultPS(ID3D11Device* device)
 {
 	HRESULT hr = S_OK;
@@ -80,7 +84,6 @@ HRESULT FXManagement::initDefaultPS(ID3D11Device* device)
 
 	return hr;
 }
-
 HRESULT FXManagement::initDefaultDeferredVS(ID3D11Device* device)
 {
 	HRESULT hr = S_OK;
@@ -90,7 +93,6 @@ HRESULT FXManagement::initDefaultDeferredVS(ID3D11Device* device)
 
 	return hr;
 }
-
 HRESULT FXManagement::initDefaultDeferredPS(ID3D11Device* device)
 {
 	HRESULT hr = S_OK;
@@ -100,7 +102,6 @@ HRESULT FXManagement::initDefaultDeferredPS(ID3D11Device* device)
 
 	return hr;
 }
-
 HRESULT FXManagement::initDefaultCS(ID3D11Device* device)
 {
 	HRESULT hr = S_OK;
@@ -111,25 +112,37 @@ HRESULT FXManagement::initDefaultCS(ID3D11Device* device)
 	return hr;
 }
 
-HRESULT FXManagement::initInputLayout(ID3D11Device* device)
+HRESULT FXManagement::initILs(ID3D11Device* device)
 {
 	HRESULT hr = S_OK;
 
-	D3D11_INPUT_ELEMENT_DESC ied[] =
-	{
-		{"POSITION",	0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0},
-		{"NORMAL",		0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0},
-		{"TEXCOORD",	0, DXGI_FORMAT_R32G32_FLOAT,	0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0},
-	};
+	initILManagement();
+
+	hr = initILDefaultVSPosNormTex(device);
+	
+	return hr;
+}
+void FXManagement::initILManagement()
+{
+	ilManagement = new ILManagement();
+	ilManagement->init();
+}
+HRESULT FXManagement::initILDefaultVSPosNormTex(ID3D11Device* device)
+{
+	HRESULT hr = S_OK;
+
+	unsigned int iedPosNormTexNumElements	= ilManagement->getIEDPosNormTexNumElements();
+	D3D11_INPUT_ELEMENT_DESC* iedPosNormTex = ilManagement->getIEDPosNormTex();
 
 	hr = device->CreateInputLayout(
-		ied, 
-		3, 
+		iedPosNormTex, 
+		iedPosNormTexNumElements, 
 		defaultVS_->getBlob()->GetBufferPointer(), 
 		defaultVS_->getBlob()->GetBufferSize(), 
-		&inputLayout_);
+		&ilDefaultVSPosNormTex_);
 	if(FAILED(hr))
-		ERROR_MSG(L"FXManagement::initInputLayout CreateInputLayout failed");
+		ERROR_MSG(L"FXManagement::initILDefaultVSPosNormTex CreateInputLayout failed");
+
 	return hr;
 }
 
@@ -137,28 +150,24 @@ ShaderVS* FXManagement::getDefaultVS() const
 {
 	return defaultVS_;
 }
-
 ShaderPS* FXManagement::getDefaultPS() const
 {
 	return defaultPS_;
 }
-
 ShaderVS* FXManagement::getDefaultDeferredVS()	const
 {
 	return defaultDeferredVS_;
 }
-
 ShaderPS* FXManagement::getDefaultDeferredPS() const
 {
 	return defaultDeferredPS_;
 }
-
 ShaderCS* FXManagement::getDefaultCS() const
 {
 	return defaultCS_;
 }
 
-ID3D11InputLayout* FXManagement::getInputLayout() const
+ID3D11InputLayout* FXManagement::getILDefaultVSPosNormTex() const
 {
-	return inputLayout_;
+	return ilDefaultVSPosNormTex_;
 }

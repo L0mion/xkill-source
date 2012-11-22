@@ -8,23 +8,22 @@
 
 RenderingComponent::RenderingComponent(HWND windowHandle,
 									   unsigned int screenWidth,
-									   unsigned int screenHeight,
-									   unsigned int aliasingCount)
+									   unsigned int screenHeight)
 {
-	this->windowHandle_	= windowHandle;
-	this->screenWidth_	= screenWidth;
-	this->screenHeight_	= screenHeight;
-	this->aliasingCount_	= aliasingCount;
+	windowHandle_		= windowHandle;
+	screenWidth_		= screenWidth;
+	screenHeight_		= screenHeight;
 
 	fxManagement_	= nullptr;
 	cbManagement_	= nullptr; 
+
 	for(unsigned int i = 0; i < GBUFFERID_NUM_BUFFERS; i++)
 		gBuffers_[i] = nullptr;
-	d3dDebug_		= nullptr;
+	d3dDebug_ = nullptr;
 
-	device_	= nullptr;
-	devcon_	= nullptr;
-	swapChain_ = nullptr;
+	device_		= nullptr;
+	devcon_		= nullptr;
+	swapChain_	= nullptr;
 
 	rtvBackBuffer_	= nullptr;
 	uavBackBuffer_	= nullptr;
@@ -36,9 +35,9 @@ RenderingComponent::RenderingComponent(HWND windowHandle,
 	texDepthBuffer_	= nullptr;
 
 	//temp
-	vertexBuffer_ = nullptr;
-	vertices_ = nullptr;
-	objLoader_ = nullptr;
+	vertexBuffer_	= nullptr;
+	vertices_		= nullptr;
+	objLoader_		= nullptr;
 }
 RenderingComponent::~RenderingComponent()
 {
@@ -164,10 +163,10 @@ void RenderingComponent::renderToGBuffer(MatF4 view, MatF4 projection)
 	devcon_->ClearDepthStencilView(dsvDepthBuffer_, D3D11_CLEAR_DEPTH, 1.0f, 0);
 	devcon_->RSSetState(rsDefault_);
 	//devcon->IASetVertexBuffers(0, 0, NULL, 0, 0);
-	UINT stride = sizeof(Vertex);
+	UINT stride = sizeof(VertexPosNormTex);
 	UINT offset = 0;
 	devcon_->IASetVertexBuffers(0, 1, &vertexBuffer_, &stride, &offset);
-	devcon_->IASetInputLayout(fxManagement_->getInputLayout());
+	devcon_->IASetInputLayout(fxManagement_->getILDefaultVSPosNormTex());
 	devcon_->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 	devcon_->Draw(vertices_->size(), 0);
 
@@ -234,19 +233,20 @@ HRESULT RenderingComponent::initDeviceAndSwapChain()
 {
 	HRESULT hr = S_OK;
 
-	DXGI_SWAP_CHAIN_DESC swapChainDesc;
-	ZeroMemory(&swapChainDesc, sizeof(swapChainDesc));
-	swapChainDesc.BufferCount		= 1;
-	swapChainDesc.BufferDesc.Format	= DXGI_FORMAT_R8G8B8A8_UNORM;
-	swapChainDesc.BufferDesc.Width	= screenWidth_;
-	swapChainDesc.BufferDesc.Height	= screenHeight_;
-	swapChainDesc.BufferUsage		= DXGI_USAGE_RENDER_TARGET_OUTPUT | DXGI_USAGE_UNORDERED_ACCESS;
-	swapChainDesc.OutputWindow		= windowHandle_;
-	swapChainDesc.SampleDesc.Count	= aliasingCount_;
-	swapChainDesc.Windowed			= true;
-	swapChainDesc.Flags				= DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH;
+	DXGI_SWAP_CHAIN_DESC scDesc;
+	ZeroMemory(&scDesc, sizeof(scDesc));
+	scDesc.BufferCount			= 1;
+	scDesc.BufferDesc.Format	= DXGI_FORMAT_R8G8B8A8_UNORM;
+	scDesc.BufferDesc.Width		= (UINT)screenWidth_;
+	scDesc.BufferDesc.Height	= (UINT)screenHeight_;
+	scDesc.BufferUsage			= DXGI_USAGE_RENDER_TARGET_OUTPUT | DXGI_USAGE_UNORDERED_ACCESS;
+	scDesc.OutputWindow			= windowHandle_;
+	scDesc.SampleDesc.Count		= (UINT)MULTISAMPLES_BACKBUFFER;
+	scDesc.SampleDesc.Quality	= (UINT)0;
+	scDesc.Windowed				= true;
+	scDesc.Flags				= DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH;
 
-	hr = createDeviceAndSwapChain(swapChainDesc);
+	hr = createDeviceAndSwapChain(scDesc);
 
 	return hr;
 }
@@ -302,13 +302,14 @@ HRESULT RenderingComponent::initDepthBuffer()
 
 	D3D11_TEXTURE2D_DESC texd;
 	ZeroMemory(&texd, sizeof(texd));
-	texd.Width		= screenWidth_;
-	texd.Height		= screenHeight_;
-	texd.ArraySize	= 1;
-	texd.MipLevels	= 1;
-	texd.SampleDesc.Count = aliasingCount_;
-	texd.Format		= DXGI_FORMAT_D32_FLOAT;
-	texd.BindFlags	= D3D11_BIND_DEPTH_STENCIL;
+	texd.Width				= (UINT)screenWidth_;
+	texd.Height				= (UINT)screenHeight_;
+	texd.ArraySize			= (UINT)1;
+	texd.MipLevels			= (UINT)1;
+	texd.SampleDesc.Count	= (UINT)MULTISAMPLES_DEPTHBUFFER;
+	texd.SampleDesc.Quality	= (UINT)0;
+	texd.Format				= DXGI_FORMAT_D32_FLOAT;
+	texd.BindFlags			= D3D11_BIND_DEPTH_STENCIL;
 
 	hr = device_->CreateTexture2D(&texd, NULL, &texDepthBuffer_);
 	if(FAILED(hr))
@@ -350,14 +351,22 @@ HRESULT RenderingComponent::initGBuffers()
 	GBuffer* gBuffer = nullptr;
 
 	/*Albedo*/
-	gBuffer = new GBuffer(screenWidth_, screenHeight_, aliasingCount_, DXGI_FORMAT_R32G32B32A32_FLOAT);
+	gBuffer = new GBuffer(
+		screenWidth_, 
+		screenHeight_, 
+		MULTISAMPLES_GBUFFERS, 
+		DXGI_FORMAT_R32G32B32A32_FLOAT);
 	hr = gBuffer->init(device_);
 	gBuffers_[GBUFFERID_ALBEDO] = gBuffer;
 
 	/*Normals*/
 	if(hr == S_OK)
 	{
-		gBuffer = new GBuffer(screenWidth_, screenHeight_, aliasingCount_, DXGI_FORMAT_R32G32B32A32_FLOAT);
+		gBuffer = new GBuffer(
+			screenWidth_, 
+			screenHeight_, 
+			MULTISAMPLES_GBUFFERS, 
+			DXGI_FORMAT_R32G32B32A32_FLOAT);
 		hr = gBuffer->init(device_);
 		gBuffers_[GBUFFERID_NORMAL] = gBuffer;
 	}
@@ -451,13 +460,13 @@ HRESULT RenderingComponent::initVertexBuffer()
 {
 	HRESULT hr = S_OK;
 
-	vertices_ = new std::vector<Vertex>();
+	vertices_ = new std::vector<VertexPosNormTex>();
 	objLoader_ = new ObjLoaderBasic();
 	objLoader_->parseObjectFile("../../xkill-resources/xkill-models/bth.obj", vertices_);
 
 	D3D11_BUFFER_DESC vbd;
 	vbd.Usage = D3D11_USAGE_DYNAMIC;
-	vbd.ByteWidth = sizeof(Vertex) * vertices_->size();
+	vbd.ByteWidth = sizeof(VertexPosNormTex) * vertices_->size();
 	vbd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
 	vbd.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
 	vbd.MiscFlags = 0;
