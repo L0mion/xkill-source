@@ -3,6 +3,15 @@ RWTexture2D<float4> output : register(u0);
 Texture2D gBufferNormal		: register( t0 );
 Texture2D gBufferAlbedo		: register( t1 );
 
+cbuffer cbPerFrame : register (b1)
+{
+	uint screenWidth;
+	uint screenHeight;
+	uint tileWidth;
+	uint tileHeight;
+}
+
+
 SamplerState ss : register(s0);
 
 [numthreads(32, 32, 1)]

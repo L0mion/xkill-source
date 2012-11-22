@@ -156,34 +156,35 @@ private:
 
 	/*desc*/
 	HWND windowHandle_;			//!< WINAPI-handle to window.
-	unsigned int screenWidth_;	//!< Width of screen
-	unsigned int screenHeight_;	//!< Height of screen
-	unsigned int aliasingCount_;	//!< Number of samples used in Anti Aliasing
+	unsigned int screenWidth_;	//!< Width of screen.
+	unsigned int screenHeight_;	//!< Height of screen.
+	unsigned int aliasingCount_;	//!< Number of samples used in Anti Aliasing.
 
-	FXManagement*	fxManagement_;						//!< Maintaining shaders and input-layouts
-	GBuffer*		gBuffers_[GBUFFERID_NUM_BUFFERS];	//!< Containing data for deferred rendering 
-	D3DDebug*		d3dDebug_;							//!< Used for detecting live COM-objects
+	FXManagement*	fxManagement_;						//!< Maintaining shaders and input-layouts.
+	GBuffer*		gBuffers_[GBUFFERID_NUM_BUFFERS];	//!< Containing data for deferred rendering.
+	D3DDebug*		d3dDebug_;							//!< Used for detecting live COM-objects.
 
-	ID3D11Device*			device_;	//!< DirectX device pointer
-	ID3D11DeviceContext*	devcon_;	//!< DirectX device context pointer
+	ID3D11Device*			device_;	//!< DirectX device pointer.
+	ID3D11DeviceContext*	devcon_;	//!< DirectX device context pointer.
 
-	IDXGISwapChain*			swapChain_;		//!< DirectX swap chain
-	ID3D11RenderTargetView*	rtvBackBuffer_;	//!< Used to render to texBackBuffer
-	ID3D11DepthStencilView*	dsvDepthBuffer_;	//!< Used to render to texDepthBuffer
-	ID3D11RasterizerState*	rsDefault_;		//!< Defines settings for the rasterizer
-	ID3D11SamplerState*		ssDefault_;		//!< Used to sample from texture in shader
+	IDXGISwapChain*			swapChain_;		//!< DirectX swap chain.
+	ID3D11RenderTargetView*	rtvBackBuffer_;	//!< Used to render to texBackBuffer.
+	ID3D11DepthStencilView*	dsvDepthBuffer_;	//!< Used to render to texDepthBuffer.
+	ID3D11RasterizerState*	rsDefault_;		//!< Defines settings for the rasterizer.
+	ID3D11SamplerState*		ssDefault_;		//!< Used to sample from texture in shader.
 
-	ID3D11Texture2D* texBackBuffer_;		//!< Contains the final image
-	ID3D11Texture2D* texDepthBuffer_;	//!< Saves the depth of each rendered pixel
+	ID3D11Texture2D* texBackBuffer_;		//!< Contains the final image.
+	ID3D11Texture2D* texDepthBuffer_;	//!< Saves the depth of each rendered pixel.
 
-	ID3D11Buffer* cbPerFrame_;	//!< Buffer sending final matrix to shader
+	ID3D11Buffer* cbPerFrame_;		//!< Buffer sending final matrix to shader.
+	ID3D11Buffer* cbPerInstance_;	//!< Buffer sending per instance data to shader.
 
 	//direct compute
-	ID3D11UnorderedAccessView* uavBackBuffer_; //!< Used to render to texBackBuffer using DirectCompute
+	ID3D11UnorderedAccessView* uavBackBuffer_; //!< Used to render to texBackBuffer using DirectCompute.
 
 	//temp
-	ID3D11Buffer* vertexBuffer_;		//!< Mock buffer sending vertices to shader
-	std::vector<Vertex>* vertices_;	//!< Mock vertices
+	ID3D11Buffer* vertexBuffer_;		//!< Mock buffer sending vertices to shader.
+	std::vector<Vertex>* vertices_;	//!< Mock vertices.
 	ObjLoaderBasic* objLoader_;		//!< Basic obj-loader used to debug renderer. 
 };
 

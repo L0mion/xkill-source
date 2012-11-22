@@ -34,7 +34,8 @@ RenderingComponent::RenderingComponent(HWND windowHandle,
 	texBackBuffer_	= nullptr;
 	texDepthBuffer_	= nullptr;
 
-	cbPerFrame_	= nullptr;
+	cbPerFrame_		= nullptr;
+	cbPerInstance_	= nullptr;
 
 	//temp
 	vertexBuffer_ = nullptr;
@@ -58,7 +59,9 @@ RenderingComponent::~RenderingComponent()
 	SAFE_RELEASE(ssDefault_);
 	SAFE_RELEASE(texBackBuffer_);
 	SAFE_RELEASE(texDepthBuffer_);
+	
 	SAFE_RELEASE(cbPerFrame_);
+	SAFE_RELEASE(cbPerInstance_);
 
 	SAFE_RELEASE(vertexBuffer_); //temp
 
@@ -188,6 +191,14 @@ void RenderingComponent::renderToBackBuffer()
 	FLOAT green[]	= {0.0f, 1.0f, 0.0f, 1.0f };
 	FLOAT blue[]	= {0.0f, 0.0f, 1.0f, 1.0f };
 	
+	CBPerInstance cbPerInstance;
+	cbPerInstance.screenHeight_ = screenHeight_;
+	cbPerInstance.screenWidth_	= screenWidth_;
+	cbPerInstance.tileHeight_	= 32;
+	cbPerInstance.tileWidth_	= 32;
+	devcon_->UpdateSubresource(this->cbPerInstance_, 0, 0, &cbPerInstance, 0, 0);
+	devcon_->CSSetConstantBuffers(1, 1, &this->cbPerInstance_);
+
 	//Compute Shader
 	ID3D11UnorderedAccessView* uav[] = { uavBackBuffer_ };
 	devcon_->CSSetUnorderedAccessViews(0, 1, uav, nullptr);
@@ -446,7 +457,12 @@ HRESULT RenderingComponent::initConstantBuffers()
 	
 	hr = device_->CreateBuffer(&bd, NULL, &cbPerFrame_);
 	if(FAILED(hr))
-		ERROR_MSG(L"RenderingComponent::initConstantBuffers CreateBuffer failed");
+		ERROR_MSG(L"RenderingComponent::initConstantBuffers CreateBuffer cbPerFrame failed");
+
+	bd.ByteWidth = 64;
+	hr = device_->CreateBuffer(&bd, NULL, &cbPerInstance_);
+	if(FAILED(hr))
+		ERROR_MSG(L"RenderingComponent::initConstantBuffers CreateBuffer cbPerInstance failed");
 
 	return hr;
 }

@@ -3,15 +3,41 @@
 
 #include "mathBasic.h"
 
+/*! \defgroup xkill-renderer-constant-buffers xkill-renderer-constant-buffers
+	\ingroup xkill-renderer
+	Constant buffers transferring data to shaders in batches. */
+
 //! Per-Frame constant buffer
 /*!
 Contains data that will be sent to shader every frame.
-\ingroup xkill-renderer
+\ingroup xkill-renderer-constant-buffers
 */
 struct CBPerFrame
 {
 	MatF4 worldViewProj_; //!< Final matrix.
 };
-static const unsigned int cbPerFrameSize = 64; //!< Size of Per-Frame constant buffer. Must have a size of a multiple of 16 bytes.
+//! Size of Per-Frame constant buffer. Must have a size of a multiple of 16 bytes.
+/*!
+\ingroup xkill-renderer-constant-buffers
+*/
+static const unsigned int cbPerFrameSize = 64;
+
+//! Per-Instance constant buffer
+/*!
+Contains data that will be sent to shader for every new instance.
+\ingroup xkill-renderer-constant-buffers
+*/
+struct CBPerInstance
+{
+	unsigned int screenWidth_;
+	unsigned int screenHeight_;
+	unsigned int tileWidth_;
+	unsigned int tileHeight_;
+};
+//! Size of Per-Instance constant buffer. Transfers data only changed during initialization to shader. Must have a size of a multiple of 16 bytes.
+/*!
+\ingroup xkill-renderer-constant-buffers
+*/
+static const unsigned int cbPerInstanceSize = 64;
 
 #endif //XKILL_RENDERER_CONSTANTBUFFER_H
