@@ -37,23 +37,11 @@ void CB::vsSet(ID3D11DeviceContext* devcon)
 {
 	devcon->VSSetConstantBuffers(0, 1, &constantBuffer_);
 }
-void CB::vsUnset(ID3D11DeviceContext* devcon)
-{
-	devcon->VSSetConstantBuffers(0, 1, nullptr);
-}
 void CB::psSet(ID3D11DeviceContext* devcon)
 {
 	devcon->PSSetConstantBuffers(0, 1, &constantBuffer_);
 }
-void CB::psUnset(ID3D11DeviceContext* devcon)
-{
-	devcon->PSSetConstantBuffers(0, 1, nullptr);
-}
 void CB::csSet(ID3D11DeviceContext* devcon)
 {
 	devcon->CSSetConstantBuffers(0, 1, &constantBuffer_);
-}
-void CB::csUnset(ID3D11DeviceContext* devcon)
-{
-	devcon->CSSetConstantBuffers(0, 1, nullptr);
 }

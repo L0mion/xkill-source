@@ -23,7 +23,7 @@ public:
 	virtual ~CB();
 	//! Releases all memory and returns CB to default state
 	virtual void reset();
-	//! Initializes Shader
+	//! Initializes CB
 	/*!
 	\param device DirectX device pointer
 	\param size The size of the constant buffer which has to be a multiple of 16 bytes.
