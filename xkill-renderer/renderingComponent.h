@@ -19,11 +19,16 @@ class GBuffer;
 class D3DDebug;
 class ObjLoaderBasic;
 
+static const unsigned int MULTISAMPLES_GBUFFERS		= 1;
+static const unsigned int MULTISAMPLES_BACKBUFFER	= 1;
+static const unsigned int MULTISAMPLES_DEPTHBUFFER	= 1;
+
 //! Rendering Component of XKILL.
 /*!
 Main rendering component of XKILL utilizing Deferred Rendering with 2 G-buffers:
 * Albedo
 * Normals
+Warning: RenderingComponent may not be created with an anti-aliasing MSAA-count of +0!
 \ingroup xkill-renderer
 */
 class DLL RenderingComponent : public D3DInterface
@@ -31,16 +36,15 @@ class DLL RenderingComponent : public D3DInterface
 public:
 	//! Initializes RenderingComponent to default values. init()-method need be called in order for RenderingComponent to get proper values.
 	/*!
-	\param windowHandle Handle to WINAPI-window to which it will render.
-	\param screenWidth Width of backbuffer, depthbuffer and g-buffers.
-	\param screenHeight Height of backbuffer, depthbuffer and g-buffers.
-	\param texAliasing Aliasing-count of backbuffer, depthbuffer and g-buffers.
+	\param windowHandle	Handle to WINAPI-window to which it will render.
+	\param screenWidth	Width of backbuffer, depthbuffer and g-buffers.
+	\param screenHeight	Height of backbuffer, depthbuffer and g-buffers.
+	\param texAliasing	Aliasing-count of backbuffer, depthbuffer and g-buffers.
 	*/
 	RenderingComponent(
 		HWND windowHandle, 
 		unsigned int screenWidth, 
-		unsigned int screenHeight, 
-		unsigned int texAliasing);
+		unsigned int screenHeight);
 	//! Releases all memory and returns to default state.
 	~RenderingComponent();
 
@@ -155,10 +159,9 @@ private:
 	HRESULT initVertexBuffer();
 
 	/*desc*/
-	HWND windowHandle_;			//!< WINAPI-handle to window.
-	unsigned int screenWidth_;	//!< Width of screen.
-	unsigned int screenHeight_;	//!< Height of screen.
-	unsigned int aliasingCount_;	//!< Number of samples used in Anti Aliasing.
+	HWND windowHandle_;				//!< WINAPI-handle to window.
+	unsigned int screenWidth_;		//!< Width of screen.
+	unsigned int screenHeight_;		//!< Height of screen.
 
 	FXManagement*	fxManagement_;						//!< Maintaining shaders and input-layouts.
 	GBuffer*		gBuffers_[GBUFFERID_NUM_BUFFERS];	//!< Containing data for deferred rendering.
@@ -167,13 +170,13 @@ private:
 	ID3D11Device*			device_;	//!< DirectX device pointer.
 	ID3D11DeviceContext*	devcon_;	//!< DirectX device context pointer.
 
-	IDXGISwapChain*			swapChain_;		//!< DirectX swap chain.
-	ID3D11RenderTargetView*	rtvBackBuffer_;	//!< Used to render to texBackBuffer.
+	IDXGISwapChain*			swapChain_;			//!< DirectX swap chain.
+	ID3D11RenderTargetView*	rtvBackBuffer_;		//!< Used to render to texBackBuffer.
 	ID3D11DepthStencilView*	dsvDepthBuffer_;	//!< Used to render to texDepthBuffer.
-	ID3D11RasterizerState*	rsDefault_;		//!< Defines settings for the rasterizer.
-	ID3D11SamplerState*		ssDefault_;		//!< Used to sample from texture in shader.
+	ID3D11RasterizerState*	rsDefault_;			//!< Defines settings for the rasterizer.
+	ID3D11SamplerState*		ssDefault_;			//!< Used to sample from texture in shader.
 
-	ID3D11Texture2D* texBackBuffer_;		//!< Contains the final image.
+	ID3D11Texture2D* texBackBuffer_;	//!< Contains the final image.
 	ID3D11Texture2D* texDepthBuffer_;	//!< Saves the depth of each rendered pixel.
 
 	ID3D11Buffer* cbPerFrame_;		//!< Buffer sending final matrix to shader.
@@ -183,9 +186,9 @@ private:
 	ID3D11UnorderedAccessView* uavBackBuffer_; //!< Used to render to texBackBuffer using DirectCompute.
 
 	//temp
-	ID3D11Buffer* vertexBuffer_;		//!< Mock buffer sending vertices to shader.
-	std::vector<Vertex>* vertices_;	//!< Mock vertices.
-	ObjLoaderBasic* objLoader_;		//!< Basic obj-loader used to debug renderer. 
+	ID3D11Buffer*			vertexBuffer_;	//!< Mock buffer sending vertices to shader.
+	std::vector<VertexPosNormTex>*	vertices_;		//!< Mock vertices.
+	ObjLoaderBasic*			objLoader_;		//!< Basic obj-loader used to debug renderer. 
 };
 
 #endif //XKILL_RENDERER_RENDERINGCOMPONENT_H
