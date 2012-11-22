@@ -6,10 +6,10 @@
 #include <d3dcompiler.h>
 
 #include <d3dInterface.h>
-
-#include "shaderVS.h"
-#include "shaderPS.h"
-#include "shaderCS.h"
+#include <ILManagement.h>
+#include <shaderVS.h>
+#include <shaderPS.h>
+#include <shaderCS.h>
 
 //! Class maintaing shaders and input layout.
 /*!
@@ -31,7 +31,7 @@ public:
 	\param device DirectX Device-pointer.
 	\return Any error encountered.
 	\sa initShaders
-	\sa initInputLayout
+	\sa initILs
 	*/
 	HRESULT init(ID3D11Device* device);
 
@@ -41,8 +41,7 @@ public:
 	ShaderPS* getDefaultDeferredPS()	const;
 	ShaderCS* getDefaultCS()			const;
 
-	ID3D11InputLayout* getInputLayout() const;
-
+	ID3D11InputLayout* getILDefaultVSPosNormTex() const;
 private:
 	//! Initializes all shaders handled by FXManagement.
 	/*!
@@ -89,9 +88,13 @@ private:
 	/*!
 	\param device DirectX Device-pointer.
 	\return Any error encountered.
-	\sa inputLayout
+	\sa initILManagement
 	*/
-	HRESULT initInputLayout(ID3D11Device* device);
+	HRESULT initILs(ID3D11Device* device);
+	void initILManagement();
+	HRESULT initILDefaultVSPosNormTex(ID3D11Device* device);
+
+	ILManagement* ilManagement;
 
 	ShaderVS*	defaultVS_;			//!< Default vertex shader.
 	ShaderPS*	defaultPS_;			//!< Default pixel shader.
@@ -99,7 +102,7 @@ private:
 	ShaderPS*	defaultDeferredPS_;	//!< Default pixel shader used by the deferred renderer.
 	ShaderCS*	defaultCS_;			//!< Default compute shader.
 	
-	ID3D11InputLayout* inputLayout_; //!< Standard input layout used in default vertex shader.
+	ID3D11InputLayout* ilDefaultVSPosNormTex_; //!< Standard input layout used in default vertex shader.
 };
 
 #endif //XKILL_RENDERER_FXMANAGEMENT_H
