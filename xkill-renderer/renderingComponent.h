@@ -15,6 +15,7 @@
 #include "vertices.h"
 
 class FXManagement;
+class CBManagement;
 class GBuffer;
 class D3DDebug;
 class ObjLoaderBasic;
@@ -135,18 +136,18 @@ private:
 	\sa FXManagement
 	*/
 	HRESULT initFXManagement();
+	//! Initializes CBManagement-object which will maintain constant buffers.
+	/*!
+	\return Any error encountered during initialization.
+	\sa CBManagement
+	*/
+	HRESULT initCBManagement();
 	//! Creates D3DDebug-object which is used for detecting live COM-objects at end of application.
 	/*! Warning: D3DDebug recognizes it's own members as live COM-objects, thusly reporting 'false' live objects.
 	\return Any error encountered during initialization.
 	\sa D3DDebug
 	*/
 	HRESULT initDebug();
-	//! Creates a lone constant buffer that is used to send final matrix to shader.
-	/*!
-	\return Any error encountered during initialization.
-	\sa CBPerFrame
-	*/
-	HRESULT initConstantBuffers();
 	//! Creates a mockup vertexbuffer that loads it's vertices from a basic .obj-loader using bth.obj.
 	/*!
 	\return Any error encountered during initialization.
@@ -161,6 +162,7 @@ private:
 	unsigned int aliasingCount_;	//!< Number of samples used in Anti Aliasing.
 
 	FXManagement*	fxManagement_;						//!< Maintaining shaders and input-layouts.
+	CBManagement*	cbManagement_;						//!< Maintaining constant buffers.
 	GBuffer*		gBuffers_[GBUFFERID_NUM_BUFFERS];	//!< Containing data for deferred rendering.
 	D3DDebug*		d3dDebug_;							//!< Used for detecting live COM-objects.
 
@@ -175,9 +177,6 @@ private:
 
 	ID3D11Texture2D* texBackBuffer_;		//!< Contains the final image.
 	ID3D11Texture2D* texDepthBuffer_;	//!< Saves the depth of each rendered pixel.
-
-	ID3D11Buffer* cbPerFrame_;		//!< Buffer sending final matrix to shader.
-	ID3D11Buffer* cbPerInstance_;	//!< Buffer sending per instance data to shader.
 
 	//direct compute
 	ID3D11UnorderedAccessView* uavBackBuffer_; //!< Used to render to texBackBuffer using DirectCompute.

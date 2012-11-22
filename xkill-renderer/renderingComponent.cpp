@@ -3,7 +3,7 @@
 #include <gBuffer.h>
 #include <renderingUtilities.h>
 #include <d3dDebug.h>
-#include <constantBuffers.h>
+#include <CBManagement.h>
 #include <objLoaderBasic.h>
 
 RenderingComponent::RenderingComponent(HWND windowHandle,
@@ -17,6 +17,7 @@ RenderingComponent::RenderingComponent(HWND windowHandle,
 	this->aliasingCount_	= aliasingCount;
 
 	fxManagement_	= nullptr;
+	cbManagement_	= nullptr; 
 	for(unsigned int i = 0; i < GBUFFERID_NUM_BUFFERS; i++)
 		gBuffers_[i] = nullptr;
 	d3dDebug_		= nullptr;
@@ -33,9 +34,6 @@ RenderingComponent::RenderingComponent(HWND windowHandle,
 	
 	texBackBuffer_	= nullptr;
 	texDepthBuffer_	= nullptr;
-
-	cbPerFrame_		= nullptr;
-	cbPerInstance_	= nullptr;
 
 	//temp
 	vertexBuffer_ = nullptr;
@@ -59,12 +57,10 @@ RenderingComponent::~RenderingComponent()
 	SAFE_RELEASE(ssDefault_);
 	SAFE_RELEASE(texBackBuffer_);
 	SAFE_RELEASE(texDepthBuffer_);
-	
-	SAFE_RELEASE(cbPerFrame_);
-	SAFE_RELEASE(cbPerInstance_);
 
 	SAFE_RELEASE(vertexBuffer_); //temp
 
+	SAFE_DELETE(cbManagement_);
 	SAFE_DELETE(fxManagement_);
 	for(unsigned int i = 0; i < GBUFFERID_NUM_BUFFERS; i++)
 		SAFE_DELETE(gBuffers_[i]);
@@ -98,7 +94,7 @@ HRESULT RenderingComponent::init()
 	if(SUCCEEDED(hr))
 		hr = initFXManagement();
 	if(SUCCEEDED(hr))
-		hr = initConstantBuffers();
+		hr = initCBManagement();
 	if(SUCCEEDED(hr)) //temp
 		hr = initVertexBuffer();
 	if(SUCCEEDED(hr))
@@ -117,6 +113,8 @@ void RenderingComponent::reset()
 	
 	if(fxManagement_)
 		fxManagement_->reset();
+	if(cbManagement_)
+		cbManagement_->reset();
 
 	for(unsigned int i = 0; i < GBUFFERID_NUM_BUFFERS; i++)
 		if(gBuffers_[i])
@@ -131,7 +129,7 @@ void RenderingComponent::reset()
 	SAFE_RELEASE(ssDefault_);
 	SAFE_RELEASE(texBackBuffer_);
 	SAFE_RELEASE(texDepthBuffer_);
-	SAFE_RELEASE(cbPerFrame_);
+	//SAFE_RELEASE(cbPerFrame_);
 
 	//temp
 	SAFE_RELEASE(vertexBuffer_);
@@ -153,10 +151,8 @@ void RenderingComponent::renderToGBuffer(MatF4 view, MatF4 projection)
 	devcon_->PSSetShader(fxManagement_->getDefaultPS()->getPixelShader(), nullptr, 0);
 	devcon_->PSSetSamplers(0, 1, &ssDefault_);
 
-	CBPerFrame cbPerFrame;
-	cbPerFrame.worldViewProj_ = view * projection;
-	devcon_->UpdateSubresource(this->cbPerFrame_, 0, 0, &cbPerFrame, 0, 0);
-	devcon_->VSSetConstantBuffers(0, 1, &this->cbPerFrame_);
+	cbManagement_->getCBPerFrame()->update(devcon_, view * projection);
+	cbManagement_->getCBPerFrame()->vsSet(devcon_);
 
 	ID3D11RenderTargetView* renderTargets[GBUFFERID_NUM_BUFFERS];
 	for(int i=0; i<GBUFFERID_NUM_BUFFERS; i++)
@@ -183,6 +179,8 @@ void RenderingComponent::renderToGBuffer(MatF4 view, MatF4 projection)
 	devcon_->PSSetSamplers(0, 0, nullptr);
 	devcon_->IASetInputLayout(nullptr);
 	devcon_->RSSetState(nullptr);
+
+
 }
 void RenderingComponent::renderToBackBuffer()
 {
@@ -191,13 +189,8 @@ void RenderingComponent::renderToBackBuffer()
 	FLOAT green[]	= {0.0f, 1.0f, 0.0f, 1.0f };
 	FLOAT blue[]	= {0.0f, 0.0f, 1.0f, 1.0f };
 	
-	CBPerInstance cbPerInstance;
-	cbPerInstance.screenHeight_ = screenHeight_;
-	cbPerInstance.screenWidth_	= screenWidth_;
-	cbPerInstance.tileHeight_	= 32;
-	cbPerInstance.tileWidth_	= 32;
-	devcon_->UpdateSubresource(this->cbPerInstance_, 0, 0, &cbPerInstance, 0, 0);
-	devcon_->CSSetConstantBuffers(1, 1, &this->cbPerInstance_);
+	cbManagement_->getCBPerInstance()->update(devcon_, screenWidth_, screenHeight_, 32, 32);
+	cbManagement_->getCBPerInstance()->csSet(devcon_);
 
 	//Compute Shader
 	ID3D11UnorderedAccessView* uav[] = { uavBackBuffer_ };
@@ -220,6 +213,8 @@ void RenderingComponent::renderToBackBuffer()
 	devcon_->CSSetShaderResources(0, GBUFFERID_NUM_BUFFERS, resourceViews);
 	devcon_->CSSetSamplers(0, 0, nullptr);
 
+	cbManagement_->getCBPerInstance()->csUnset(devcon_);
+
 	swapChain_->Present(0, 0);
 }
 
@@ -235,7 +230,6 @@ LPCWSTR RenderingComponent::featureLevelToString(D3D_FEATURE_LEVEL featureLevel)
 	
 	return featureString;
 }
-
 HRESULT RenderingComponent::initDeviceAndSwapChain()
 {
 	HRESULT hr = S_OK;
@@ -435,34 +429,21 @@ HRESULT RenderingComponent::initFXManagement()
 
 	return hr;
 }
+HRESULT RenderingComponent::initCBManagement()
+{
+	HRESULT hr = S_OK;
+
+	cbManagement_ = new CBManagement();
+	hr = cbManagement_->init(device_);
+
+	return hr;
+}
 HRESULT RenderingComponent::initDebug()
 {
 	HRESULT hr = S_OK;
 
 	d3dDebug_ = new D3DDebug();
 	hr = d3dDebug_->init(device_);
-
-	return hr;
-}
-HRESULT RenderingComponent::initConstantBuffers()
-{
-	HRESULT hr = S_OK;
-
-	D3D11_BUFFER_DESC bd;
-	ZeroMemory(&bd, sizeof(bd));
-	bd.Usage = D3D11_USAGE_DEFAULT;
-	bd.ByteWidth = 64; //Must be a multiple of 16 bytes for constant buffers!
-	bd.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-	bd.CPUAccessFlags = 0;
-	
-	hr = device_->CreateBuffer(&bd, NULL, &cbPerFrame_);
-	if(FAILED(hr))
-		ERROR_MSG(L"RenderingComponent::initConstantBuffers CreateBuffer cbPerFrame failed");
-
-	bd.ByteWidth = 64;
-	hr = device_->CreateBuffer(&bd, NULL, &cbPerInstance_);
-	if(FAILED(hr))
-		ERROR_MSG(L"RenderingComponent::initConstantBuffers CreateBuffer cbPerInstance failed");
 
 	return hr;
 }
