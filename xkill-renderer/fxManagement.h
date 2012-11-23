@@ -6,7 +6,7 @@
 #include <d3dcompiler.h>
 
 #include <d3dInterface.h>
-#include <ILManagement.h>
+#include <IEDManagement.h>
 #include <shaderVS.h>
 #include <shaderPS.h>
 #include <shaderCS.h>
@@ -94,7 +94,7 @@ private:
 	void initILManagement();
 	HRESULT initILDefaultVSPosNormTex(ID3D11Device* device);
 
-	ILManagement* ilManagement;
+	IEDManagement* ilManagement;
 
 	ShaderVS*	defaultVS_;			//!< Default vertex shader.
 	ShaderPS*	defaultPS_;			//!< Default pixel shader.

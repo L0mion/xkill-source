@@ -3,11 +3,11 @@
 
 #include <d3d11.h>
 
-class ILManagement
+class IEDManagement
 {
 public:
-	ILManagement();
-	virtual ~ILManagement();
+	IEDManagement();
+	virtual ~IEDManagement();
 
 	void init();
 

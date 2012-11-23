@@ -124,7 +124,7 @@ HRESULT FXManagement::initILs(ID3D11Device* device)
 }
 void FXManagement::initILManagement()
 {
-	ilManagement = new ILManagement();
+	ilManagement = new IEDManagement();
 	ilManagement->init();
 }
 HRESULT FXManagement::initILDefaultVSPosNormTex(ID3D11Device* device)
