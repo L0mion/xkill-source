@@ -8,9 +8,60 @@
 #include <queue>
 using namespace std;
 
-#define ATTRIBUTE_CAST(a,b,c) &((std::vector<a>*)c->b.host)->at(c->b.index)
+template <class T>
+class AttributePointer
+{
+private:
+public:
+	vector<T>* host;
+	int index;
 
-class IAttributeStorage
+	AttributePointer()
+	{
+	}
+
+	void init(vector<T>* host, int index)
+	{
+		this->host = host;
+		this->index = index;
+	}
+
+	T* getAttribute()
+	{
+		return &host->at(index);
+	}
+};
+
+
+// ==========
+// Attributes
+//
+
+struct PositionAttribute
+{
+	float position;
+};
+
+struct SpatialAttribute
+{
+	AttributePointer<PositionAttribute> positionAttribute;
+
+	float rotation;
+	float scale;
+};
+
+struct RenderAttribute
+{
+	AttributePointer<SpatialAttribute> spatialAttribute;
+
+	bool transparent;
+	bool tessellation;
+	int meshID;
+	int textureID;
+};
+
+
+class IAttributes
 {
 public:
 	virtual void deleteAttribute(int index) = 0;
@@ -19,10 +70,10 @@ public:
 class AttributeController
 {
 private:
-	IAttributeStorage* host;
+	IAttributes* host;
 	int index;
 public:
-	AttributeController(IAttributeStorage* host, int index)
+	AttributeController(IAttributes* host, int index)
 	{
 		this->host = host;
 		this->index = index;
@@ -41,7 +92,7 @@ public:
 
 class Entity;
 template <class T>
-class AttributeStorage : public IAttributeStorage
+class AttributeStorage : public IAttributes
 {
 private:
 	vector<T> attributes;
@@ -101,9 +152,9 @@ public:
 		deleted.push(index);
 	}
 
-	AttributePointer getAttributePointer()
+	AttributePointer<T> getAttributePointer()
 	{
-		AttributePointer a;
+		AttributePointer<T> a;
 		a.init(&attributes, index);
 		return a;
 	}

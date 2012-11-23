@@ -1,6 +1,6 @@
 #pragma once
 
-#include <xkill-utilities/AttributeType.h>
+#include "AttributeStorage.h"
 #include "AttributeType.h"
 
 class AttributeManager
@@ -10,9 +10,6 @@ public:
 	AttributeStorage<SpatialAttribute> spatialAttributes;
 	AttributeStorage<RenderAttribute>	renderAttributes;
 
-	static AttributeManager* getInstance()
-	{
-		static AttributeManager instance;
-		return &instance;
-	}
+	static AttributeManager* getInstance();
 };
+

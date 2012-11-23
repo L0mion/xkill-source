@@ -7,7 +7,7 @@
 #include "window.h"
 
 #if defined( DEBUG ) || defined( _DEBUG )
-#include <vld.h>
+//#include <vld.h>
 #endif
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int cmdShow);
