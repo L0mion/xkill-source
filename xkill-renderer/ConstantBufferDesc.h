@@ -12,7 +12,7 @@
 Contains data that will be sent to shader every frame.
 \ingroup xkill-renderer-constant-buffers
 */
-struct CBPerFrame
+struct CBPerFrameDesc
 {
 	MatF4 worldViewProj_; //!< Final matrix.
 };
@@ -27,7 +27,7 @@ static const unsigned int cbPerFrameSize = 64;
 Contains data that will be sent to shader for every new instance.
 \ingroup xkill-renderer-constant-buffers
 */
-struct CBPerInstance
+struct CBPerInstanceDesc
 {
 	unsigned int screenWidth_;
 	unsigned int screenHeight_;

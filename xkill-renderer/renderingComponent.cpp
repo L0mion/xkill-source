@@ -3,25 +3,28 @@
 #include <gBuffer.h>
 #include <renderingUtilities.h>
 #include <d3dDebug.h>
-#include <constantBuffers.h>
+#include <CBManagement.h>
 #include <objLoaderBasic.h>
 
 RenderingComponent::RenderingComponent(HWND windowHandle,
 									   unsigned int screenWidth,
-									   unsigned int screenHeight)
+									   unsigned int screenHeight,
+									   unsigned int aliasingCount)
 {
-	windowHandle_		= windowHandle;
-	screenWidth_		= screenWidth;
-	screenHeight_		= screenHeight;
+	this->windowHandle_	= windowHandle;
+	this->screenWidth_	= screenWidth;
+	this->screenHeight_	= screenHeight;
+	this->aliasingCount_	= aliasingCount;
 
-	fxManagement_ = nullptr;
+	fxManagement_	= nullptr;
+	cbManagement_	= nullptr; 
 	for(unsigned int i = 0; i < GBUFFERID_NUM_BUFFERS; i++)
 		gBuffers_[i] = nullptr;
-	d3dDebug_ = nullptr;
+	d3dDebug_		= nullptr;
 
-	device_		= nullptr;
-	devcon_		= nullptr;
-	swapChain_	= nullptr;
+	device_	= nullptr;
+	devcon_	= nullptr;
+	swapChain_ = nullptr;
 
 	rtvBackBuffer_	= nullptr;
 	uavBackBuffer_	= nullptr;
@@ -32,13 +35,10 @@ RenderingComponent::RenderingComponent(HWND windowHandle,
 	texBackBuffer_	= nullptr;
 	texDepthBuffer_	= nullptr;
 
-	cbPerFrame_		= nullptr;
-	cbPerInstance_	= nullptr;
-
 	//temp
-	vertexBuffer_	= nullptr;
-	vertices_		= nullptr;
-	objLoader_		= nullptr;
+	vertexBuffer_ = nullptr;
+	vertices_ = nullptr;
+	objLoader_ = nullptr;
 }
 RenderingComponent::~RenderingComponent()
 {
@@ -57,12 +57,10 @@ RenderingComponent::~RenderingComponent()
 	SAFE_RELEASE(ssDefault_);
 	SAFE_RELEASE(texBackBuffer_);
 	SAFE_RELEASE(texDepthBuffer_);
-	
-	SAFE_RELEASE(cbPerFrame_);
-	SAFE_RELEASE(cbPerInstance_);
 
 	SAFE_RELEASE(vertexBuffer_); //temp
 
+	SAFE_DELETE(cbManagement_);
 	SAFE_DELETE(fxManagement_);
 	for(unsigned int i = 0; i < GBUFFERID_NUM_BUFFERS; i++)
 		SAFE_DELETE(gBuffers_[i]);
@@ -96,7 +94,7 @@ HRESULT RenderingComponent::init()
 	if(SUCCEEDED(hr))
 		hr = initFXManagement();
 	if(SUCCEEDED(hr))
-		hr = initConstantBuffers();
+		hr = initCBManagement();
 	if(SUCCEEDED(hr)) //temp
 		hr = initVertexBuffer();
 	if(SUCCEEDED(hr))
@@ -115,6 +113,8 @@ void RenderingComponent::reset()
 	
 	if(fxManagement_)
 		fxManagement_->reset();
+	if(cbManagement_)
+		cbManagement_->reset();
 
 	for(unsigned int i = 0; i < GBUFFERID_NUM_BUFFERS; i++)
 		if(gBuffers_[i])
@@ -129,7 +129,7 @@ void RenderingComponent::reset()
 	SAFE_RELEASE(ssDefault_);
 	SAFE_RELEASE(texBackBuffer_);
 	SAFE_RELEASE(texDepthBuffer_);
-	SAFE_RELEASE(cbPerFrame_);
+	//SAFE_RELEASE(cbPerFrame_);
 
 	//temp
 	SAFE_RELEASE(vertexBuffer_);
@@ -151,10 +151,8 @@ void RenderingComponent::renderToGBuffer(MatF4 view, MatF4 projection)
 	devcon_->PSSetShader(fxManagement_->getDefaultPS()->getPixelShader(), nullptr, 0);
 	devcon_->PSSetSamplers(0, 1, &ssDefault_);
 
-	CBPerFrame cbPerFrame;
-	cbPerFrame.worldViewProj_ = view * projection;
-	devcon_->UpdateSubresource(this->cbPerFrame_, 0, 0, &cbPerFrame, 0, 0);
-	devcon_->VSSetConstantBuffers(0, 1, &this->cbPerFrame_);
+	cbManagement_->getCBPerFrame()->update(devcon_, view * projection);
+	cbManagement_->getCBPerFrame()->vsSet(devcon_);
 
 	ID3D11RenderTargetView* renderTargets[GBUFFERID_NUM_BUFFERS];
 	for(int i=0; i<GBUFFERID_NUM_BUFFERS; i++)
@@ -166,10 +164,10 @@ void RenderingComponent::renderToGBuffer(MatF4 view, MatF4 projection)
 	devcon_->ClearDepthStencilView(dsvDepthBuffer_, D3D11_CLEAR_DEPTH, 1.0f, 0);
 	devcon_->RSSetState(rsDefault_);
 	//devcon->IASetVertexBuffers(0, 0, NULL, 0, 0);
-	UINT stride = sizeof(VertexPosNormTex);
+	UINT stride = sizeof(Vertex);
 	UINT offset = 0;
 	devcon_->IASetVertexBuffers(0, 1, &vertexBuffer_, &stride, &offset);
-	devcon_->IASetInputLayout(fxManagement_->getILDefaultVSPosNormTex());
+	devcon_->IASetInputLayout(fxManagement_->getInputLayout());
 	devcon_->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 	devcon_->Draw(vertices_->size(), 0);
 
@@ -181,6 +179,8 @@ void RenderingComponent::renderToGBuffer(MatF4 view, MatF4 projection)
 	devcon_->PSSetSamplers(0, 0, nullptr);
 	devcon_->IASetInputLayout(nullptr);
 	devcon_->RSSetState(nullptr);
+
+
 }
 void RenderingComponent::renderToBackBuffer()
 {
@@ -189,13 +189,8 @@ void RenderingComponent::renderToBackBuffer()
 	FLOAT green[]	= {0.0f, 1.0f, 0.0f, 1.0f };
 	FLOAT blue[]	= {0.0f, 0.0f, 1.0f, 1.0f };
 	
-	CBPerInstance cbPerInstance;
-	cbPerInstance.screenHeight_ = screenHeight_;
-	cbPerInstance.screenWidth_	= screenWidth_;
-	cbPerInstance.tileHeight_	= 32;
-	cbPerInstance.tileWidth_	= 32;
-	devcon_->UpdateSubresource(this->cbPerInstance_, 0, 0, &cbPerInstance, 0, 0);
-	devcon_->CSSetConstantBuffers(1, 1, &this->cbPerInstance_);
+	cbManagement_->getCBPerInstance()->update(devcon_, screenWidth_, screenHeight_, 32, 32);
+	cbManagement_->getCBPerInstance()->csSet(devcon_);
 
 	//Compute Shader
 	ID3D11UnorderedAccessView* uav[] = { uavBackBuffer_ };
@@ -233,25 +228,23 @@ LPCWSTR RenderingComponent::featureLevelToString(D3D_FEATURE_LEVEL featureLevel)
 	
 	return featureString;
 }
-
 HRESULT RenderingComponent::initDeviceAndSwapChain()
 {
 	HRESULT hr = S_OK;
 
-	DXGI_SWAP_CHAIN_DESC scDesc;
-	ZeroMemory(&scDesc, sizeof(scDesc));
-	scDesc.BufferCount			= 1;
-	scDesc.BufferDesc.Format	= DXGI_FORMAT_R8G8B8A8_UNORM;
-	scDesc.BufferDesc.Width		= (UINT)screenWidth_;
-	scDesc.BufferDesc.Height	= (UINT)screenHeight_;
-	scDesc.BufferUsage			= DXGI_USAGE_RENDER_TARGET_OUTPUT | DXGI_USAGE_UNORDERED_ACCESS;
-	scDesc.OutputWindow			= windowHandle_;
-	scDesc.SampleDesc.Count		= (UINT)MULTISAMPLES_BACKBUFFER;
-	scDesc.SampleDesc.Quality	= (UINT)0;
-	scDesc.Windowed				= true;
-	scDesc.Flags				= DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH;
+	DXGI_SWAP_CHAIN_DESC swapChainDesc;
+	ZeroMemory(&swapChainDesc, sizeof(swapChainDesc));
+	swapChainDesc.BufferCount		= 1;
+	swapChainDesc.BufferDesc.Format	= DXGI_FORMAT_R8G8B8A8_UNORM;
+	swapChainDesc.BufferDesc.Width	= screenWidth_;
+	swapChainDesc.BufferDesc.Height	= screenHeight_;
+	swapChainDesc.BufferUsage		= DXGI_USAGE_RENDER_TARGET_OUTPUT | DXGI_USAGE_UNORDERED_ACCESS;
+	swapChainDesc.OutputWindow		= windowHandle_;
+	swapChainDesc.SampleDesc.Count	= aliasingCount_;
+	swapChainDesc.Windowed			= true;
+	swapChainDesc.Flags				= DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH;
 
-	hr = createDeviceAndSwapChain(scDesc);
+	hr = createDeviceAndSwapChain(swapChainDesc);
 
 	return hr;
 }
@@ -307,14 +300,13 @@ HRESULT RenderingComponent::initDepthBuffer()
 
 	D3D11_TEXTURE2D_DESC texd;
 	ZeroMemory(&texd, sizeof(texd));
-	texd.Width				= (UINT)screenWidth_;
-	texd.Height				= (UINT)screenHeight_;
-	texd.ArraySize			= (UINT)1;
-	texd.MipLevels			= (UINT)1;
-	texd.SampleDesc.Count	= (UINT)MULTISAMPLES_DEPTHBUFFER;
-	texd.SampleDesc.Quality	= (UINT)0;
-	texd.Format				= DXGI_FORMAT_D32_FLOAT;
-	texd.BindFlags			= D3D11_BIND_DEPTH_STENCIL;
+	texd.Width		= screenWidth_;
+	texd.Height		= screenHeight_;
+	texd.ArraySize	= 1;
+	texd.MipLevels	= 1;
+	texd.SampleDesc.Count = aliasingCount_;
+	texd.Format		= DXGI_FORMAT_D32_FLOAT;
+	texd.BindFlags	= D3D11_BIND_DEPTH_STENCIL;
 
 	hr = device_->CreateTexture2D(&texd, NULL, &texDepthBuffer_);
 	if(FAILED(hr))
@@ -356,22 +348,14 @@ HRESULT RenderingComponent::initGBuffers()
 	GBuffer* gBuffer = nullptr;
 
 	/*Albedo*/
-	gBuffer = new GBuffer(
-		screenWidth_, 
-		screenHeight_, 
-		MULTISAMPLES_GBUFFERS, 
-		DXGI_FORMAT_R32G32B32A32_FLOAT);
+	gBuffer = new GBuffer(screenWidth_, screenHeight_, aliasingCount_, DXGI_FORMAT_R32G32B32A32_FLOAT);
 	hr = gBuffer->init(device_);
 	gBuffers_[GBUFFERID_ALBEDO] = gBuffer;
 
 	/*Normals*/
 	if(hr == S_OK)
 	{
-		gBuffer = new GBuffer(
-			screenWidth_, 
-			screenHeight_, 
-			MULTISAMPLES_GBUFFERS, 
-			DXGI_FORMAT_R32G32B32A32_FLOAT);
+		gBuffer = new GBuffer(screenWidth_, screenHeight_, aliasingCount_, DXGI_FORMAT_R32G32B32A32_FLOAT);
 		hr = gBuffer->init(device_);
 		gBuffers_[GBUFFERID_NORMAL] = gBuffer;
 	}
@@ -443,6 +427,15 @@ HRESULT RenderingComponent::initFXManagement()
 
 	return hr;
 }
+HRESULT RenderingComponent::initCBManagement()
+{
+	HRESULT hr = S_OK;
+
+	cbManagement_ = new CBManagement();
+	hr = cbManagement_->init(device_);
+
+	return hr;
+}
 HRESULT RenderingComponent::initDebug()
 {
 	HRESULT hr = S_OK;
@@ -452,39 +445,17 @@ HRESULT RenderingComponent::initDebug()
 
 	return hr;
 }
-HRESULT RenderingComponent::initConstantBuffers()
-{
-	HRESULT hr = S_OK;
-
-	D3D11_BUFFER_DESC bd;
-	ZeroMemory(&bd, sizeof(bd));
-	bd.Usage = D3D11_USAGE_DEFAULT;
-	bd.ByteWidth = 64; //Must be a multiple of 16 bytes for constant buffers!
-	bd.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-	bd.CPUAccessFlags = 0;
-	
-	hr = device_->CreateBuffer(&bd, NULL, &cbPerFrame_);
-	if(FAILED(hr))
-		ERROR_MSG(L"RenderingComponent::initConstantBuffers CreateBuffer cbPerFrame failed");
-
-	bd.ByteWidth = 64;
-	hr = device_->CreateBuffer(&bd, NULL, &cbPerInstance_);
-	if(FAILED(hr))
-		ERROR_MSG(L"RenderingComponent::initConstantBuffers CreateBuffer cbPerInstance failed");
-
-	return hr;
-}
 HRESULT RenderingComponent::initVertexBuffer()
 {
 	HRESULT hr = S_OK;
 
-	vertices_ = new std::vector<VertexPosNormTex>();
+	vertices_ = new std::vector<Vertex>();
 	objLoader_ = new ObjLoaderBasic();
 	objLoader_->parseObjectFile("../../xkill-resources/xkill-models/bth.obj", vertices_);
 
 	D3D11_BUFFER_DESC vbd;
 	vbd.Usage = D3D11_USAGE_DYNAMIC;
-	vbd.ByteWidth = sizeof(VertexPosNormTex) * vertices_->size();
+	vbd.ByteWidth = sizeof(Vertex) * vertices_->size();
 	vbd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
 	vbd.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
 	vbd.MiscFlags = 0;

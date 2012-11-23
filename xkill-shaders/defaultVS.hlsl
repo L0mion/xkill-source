@@ -1,10 +1,8 @@
 
+#include "constantBuffers.hlsl"
 #include "structs.hlsl"
 
-cbuffer cbPerFrame : register (b0)
-{
-	float4x4 worldViewProj;
-}
+
 
 VSOut defaultVS(DefaultVSIn vsIn)
 {
