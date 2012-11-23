@@ -8,13 +8,11 @@
 
 RenderingComponent::RenderingComponent(HWND windowHandle,
 									   unsigned int screenWidth,
-									   unsigned int screenHeight,
-									   unsigned int aliasingCount)
+									   unsigned int screenHeight)
 {
 	this->windowHandle_	= windowHandle;
 	this->screenWidth_	= screenWidth;
 	this->screenHeight_	= screenHeight;
-	this->aliasingCount_	= aliasingCount;
 
 	fxManagement_	= nullptr;
 	cbManagement_	= nullptr; 
@@ -164,10 +162,10 @@ void RenderingComponent::renderToGBuffer(MatF4 view, MatF4 projection)
 	devcon_->ClearDepthStencilView(dsvDepthBuffer_, D3D11_CLEAR_DEPTH, 1.0f, 0);
 	devcon_->RSSetState(rsDefault_);
 	//devcon->IASetVertexBuffers(0, 0, NULL, 0, 0);
-	UINT stride = sizeof(Vertex);
+	UINT stride = sizeof(VertexPosNormTex);
 	UINT offset = 0;
 	devcon_->IASetVertexBuffers(0, 1, &vertexBuffer_, &stride, &offset);
-	devcon_->IASetInputLayout(fxManagement_->getInputLayout());
+	devcon_->IASetInputLayout(fxManagement_->getILDefaultVSPosNormTex());
 	devcon_->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 	devcon_->Draw(vertices_->size(), 0);
 
@@ -240,7 +238,7 @@ HRESULT RenderingComponent::initDeviceAndSwapChain()
 	swapChainDesc.BufferDesc.Height	= screenHeight_;
 	swapChainDesc.BufferUsage		= DXGI_USAGE_RENDER_TARGET_OUTPUT | DXGI_USAGE_UNORDERED_ACCESS;
 	swapChainDesc.OutputWindow		= windowHandle_;
-	swapChainDesc.SampleDesc.Count	= aliasingCount_;
+	swapChainDesc.SampleDesc.Count	= MULTISAMPLES_BACKBUFFER;
 	swapChainDesc.Windowed			= true;
 	swapChainDesc.Flags				= DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH;
 
@@ -304,7 +302,7 @@ HRESULT RenderingComponent::initDepthBuffer()
 	texd.Height		= screenHeight_;
 	texd.ArraySize	= 1;
 	texd.MipLevels	= 1;
-	texd.SampleDesc.Count = aliasingCount_;
+	texd.SampleDesc.Count = MULTISAMPLES_DEPTHBUFFER;
 	texd.Format		= DXGI_FORMAT_D32_FLOAT;
 	texd.BindFlags	= D3D11_BIND_DEPTH_STENCIL;
 
@@ -348,14 +346,14 @@ HRESULT RenderingComponent::initGBuffers()
 	GBuffer* gBuffer = nullptr;
 
 	/*Albedo*/
-	gBuffer = new GBuffer(screenWidth_, screenHeight_, aliasingCount_, DXGI_FORMAT_R32G32B32A32_FLOAT);
+	gBuffer = new GBuffer(screenWidth_, screenHeight_, MULTISAMPLES_GBUFFERS, DXGI_FORMAT_R32G32B32A32_FLOAT);
 	hr = gBuffer->init(device_);
 	gBuffers_[GBUFFERID_ALBEDO] = gBuffer;
 
 	/*Normals*/
 	if(hr == S_OK)
 	{
-		gBuffer = new GBuffer(screenWidth_, screenHeight_, aliasingCount_, DXGI_FORMAT_R32G32B32A32_FLOAT);
+		gBuffer = new GBuffer(screenWidth_, screenHeight_, MULTISAMPLES_GBUFFERS, DXGI_FORMAT_R32G32B32A32_FLOAT);
 		hr = gBuffer->init(device_);
 		gBuffers_[GBUFFERID_NORMAL] = gBuffer;
 	}
@@ -449,13 +447,13 @@ HRESULT RenderingComponent::initVertexBuffer()
 {
 	HRESULT hr = S_OK;
 
-	vertices_ = new std::vector<Vertex>();
+	vertices_ = new std::vector<VertexPosNormTex>();
 	objLoader_ = new ObjLoaderBasic();
 	objLoader_->parseObjectFile("../../xkill-resources/xkill-models/bth.obj", vertices_);
 
 	D3D11_BUFFER_DESC vbd;
 	vbd.Usage = D3D11_USAGE_DYNAMIC;
-	vbd.ByteWidth = sizeof(Vertex) * vertices_->size();
+	vbd.ByteWidth = sizeof(VertexPosNormTex) * vertices_->size();
 	vbd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
 	vbd.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
 	vbd.MiscFlags = 0;
