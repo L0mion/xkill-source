@@ -185,9 +185,9 @@ private:
 	ID3D11UnorderedAccessView* uavBackBuffer_; //!< Used to render to texBackBuffer using DirectCompute.
 
 	//temp
-	ID3D11Buffer*			vertexBuffer_;	//!< Mock buffer sending vertices to shader.
-	std::vector<VertexPosNormTex>*	vertices_;		//!< Mock vertices.
-	ObjLoaderBasic*			objLoader_;		//!< Basic obj-loader used to debug renderer. 
+	ID3D11Buffer*			vertexBuffer_;		//!< Mock buffer sending vertices to shader.
+	std::vector<VertexPosNormTex>*	vertices_;	//!< Mock vertices.
+	ObjLoaderBasic*			objLoader_;			//!< Basic obj-loader used to debug renderer. 
 };
 
 #endif //XKILL_RENDERER_RENDERINGCOMPONENT_H
