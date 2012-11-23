@@ -21,18 +21,18 @@ public:
 		//Do nothing.
 	}
 
-	const std::vector<Vertex>			getMGVertices()
+	const std::vector<Vertex>		getMGVertices()
 	{
 		return mgVertices_;
 	}
-	const std::vector<unsigned int>		getMGIndices()
+	const std::vector<unsigned int>	getMGIndices()
 	{
 		return mgIndices_;
 	}
 protected:
 private:
-	std::vector<Vertex>				mgVertices_;
-	std::vector<unsigned int>		mgIndices_;
+	std::vector<Vertex>			mgVertices_;
+	std::vector<unsigned int>	mgIndices_;
 };
 
 /*
