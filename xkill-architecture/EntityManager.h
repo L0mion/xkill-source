@@ -6,7 +6,7 @@
 class EntityManager
 {
 private:
-	vector<Entity*> entities;
+	std::vector<Entity*> entities;
 	EntityFactory entityFactory;
 
 	void addEntity(Entity* e)
@@ -21,7 +21,7 @@ public:
 
 	void removeEntity(int id)
 	{
-		cout << "ENTITYMANAGER: Removed Entity " << entities[id]->getID() << endl;
+		std::cout << "ENTITYMANAGER: Removed Entity " << entities[id]->getID() << std::endl;
 		entities[id]->deleteAttributes();
 		delete entities[id];
 		entities.erase(entities.begin()+id);	
@@ -29,10 +29,10 @@ public:
 
 	~EntityManager()
 	{
-		for each(Entity *e in entities)
+		for(unsigned int i = 0; i < entities.size(); i++)
 		{
-			e->deleteAttributes();
-			delete e;
+			entities[i]->deleteAttributes();
+			delete entities[i];
 		}
 	}
 
@@ -40,6 +40,6 @@ public:
 	{
 		Entity* e = entityFactory.createEntity_TypeA();
 		addEntity(e);
-		cout << "ENTITYMANAGER: Created Entity " << e->getID() << endl;
+		std::cout << "ENTITYMANAGER: Created Entity " << e->getID() << std::endl;
 	}
 };

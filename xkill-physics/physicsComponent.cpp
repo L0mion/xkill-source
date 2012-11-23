@@ -2,100 +2,88 @@
 
 #include <btBulletDynamicsCommon.h>
 
-#include "attributes.h"
+#include <xkill-utilities/AttributeType.h>
+
 #include "physicsObject.h"
 
-PhysicsComponent::PhysicsComponent()
+BulletPhysicsComponent::BulletPhysicsComponent()
 {
-	broadphase = nullptr;
-	collisionConfiguration = nullptr;
-	dispatcher = nullptr;
-	solver = nullptr;
-	dynamicsWorld = nullptr;
-	physicsAttributes = nullptr;
-	physicsObjects = nullptr;
-	numPhysicsAttributes = 0;
+	broadphase_ = nullptr;
+	collisionConfiguration_ = nullptr;
+	dispatcher_ = nullptr;
+	solver_ = nullptr;
+	dynamicsWorld_ = nullptr;
+	physicsAttributes_ = nullptr;
+	physicsObjects_ = nullptr;
+	numPhysicsAttributes_ = 0;
 }
 
-PhysicsComponent::~PhysicsComponent()
+BulletPhysicsComponent::~BulletPhysicsComponent()
 {
 	//delete local objects etc.
  
-    delete dynamicsWorld;
-    delete solver;
-    delete collisionConfiguration;
-    delete dispatcher;
-    delete broadphase;
+    delete dynamicsWorld_;
+    delete solver_;
+    delete collisionConfiguration_;
+    delete dispatcher_;
+    delete broadphase_;
 }
 
-bool PhysicsComponent::Init()
+bool BulletPhysicsComponent::Init(std::vector<PhysicsAttribute>* physicsAttributes)
 {
-		physicsObjects = new btAlignedObjectArray<PhysicsObject*>();
+		physicsAttributes_ = physicsAttributes; 
+		physicsObjects_ = new btAlignedObjectArray<PhysicsObject*>();
 		
-        broadphase = new btDbvtBroadphase();
-        collisionConfiguration = new btDefaultCollisionConfiguration();
-        dispatcher = new btCollisionDispatcher(collisionConfiguration);
-        solver = new btSequentialImpulseConstraintSolver;
+        broadphase_ = new btDbvtBroadphase();
+        collisionConfiguration_ = new btDefaultCollisionConfiguration();
+        dispatcher_ = new btCollisionDispatcher(collisionConfiguration_);
+        solver_ = new btSequentialImpulseConstraintSolver;
         
-		dynamicsWorld = new btDiscreteDynamicsWorld(dispatcher,broadphase,solver,collisionConfiguration);
-        dynamicsWorld->setGravity(btVector3(0,-10,0));
-
-		//ground = new PhysicsObject;
-		//ground->Init(new btStaticPlaneShape(btVector3(0,1,0),1),
-		//			 new btDefaultMotionState(btTransform(btQuaternion(0,0,0,1),btVector3(0,-1,0))),
-		//			 0,
-		//			 btVector3(0,0,0),
-		//			 dynamicsWorld);
-
-		//fall = new PhysicsObject;
-		//fall->Init(new btSphereShape(1),
-		//		   new btDefaultMotionState(btTransform(btQuaternion(0,0,0,1),btVector3(0,50,0))),
-		//		   1,
-		//		   btVector3(0,0,0),
-		//		   dynamicsWorld);
+		dynamicsWorld_ = new btDiscreteDynamicsWorld(dispatcher_,broadphase_,solver_,collisionConfiguration_);
+        dynamicsWorld_->setGravity(btVector3(0,-10,0));
 
         return true;
 }
 
-void PhysicsComponent::onUpdate(float delta)
+void BulletPhysicsComponent::onUpdate(float delta)
 {
-	for(int i = (*physicsObjects).size(); i < numPhysicsAttributes; i++)
+	for(unsigned int i = (*physicsObjects_).size(); i < numPhysicsAttributes_; i++)
 	{
-		physicsObjects->push_back(new PhysicsObject());
+		physicsObjects_->push_back(new PhysicsObject());
 	}
-	for(unsigned int i = 0; i < numPhysicsAttributes; i++)
+	for(unsigned int i = 0; i < numPhysicsAttributes_; i++)
 	{
-		if((*physicsAttributes)[i].alive)
+		if((*physicsAttributes_)[i].alive)
 		{
-			if((*physicsAttributes)[i].added)
+			if((*physicsAttributes_)[i].added)
 			{
-				(*physicsObjects)[i]->preStep(&(*physicsAttributes)[i]);
+				(*physicsObjects_)[i]->preStep(&(*physicsAttributes_)[i]);
 			}
 			else
 			{
-				(*physicsObjects)[i]->Init(&(*physicsAttributes)[i],dynamicsWorld);
-				(*physicsAttributes)[i].added = true;
+				(*physicsObjects_)[i]->Init(&(*physicsAttributes_)[i],dynamicsWorld_);
+				(*physicsAttributes_)[i].added = true;
 			}
 		}
-		else if((*physicsAttributes)[i].added)
+		else if((*physicsAttributes_)[i].added)
 		{
-			(*physicsObjects)[i]->Clean(dynamicsWorld);
-			(*physicsAttributes)[i].added = false;
+			(*physicsObjects_)[i]->Clean(dynamicsWorld_);
+			(*physicsAttributes_)[i].added = false;
 		}
 	}
 
-	dynamicsWorld->stepSimulation(delta,10);
+	dynamicsWorld_->stepSimulation(delta,10);
 
-	for(unsigned int i = 0; i < numPhysicsAttributes; i++)
+	for(unsigned int i = 0; i < numPhysicsAttributes_; i++)
 	{
-		if((*physicsAttributes)[i].alive && (*physicsAttributes)[i].added)
+		if((*physicsAttributes_)[i].alive && (*physicsAttributes_)[i].added)
 		{
-			(*physicsObjects)[i]->postStep(&(*physicsAttributes)[i]);
+			(*physicsObjects_)[i]->postStep(&(*physicsAttributes_)[i]);
 		}
 	}
 }
 
-void PhysicsComponent::onEvent(/*Event* e*/)
+void BulletPhysicsComponent::onEvent(Event* e)
 {
 
 }

@@ -1,6 +1,12 @@
 #pragma once
 
-#include "IComponent.h"
+#include <xkill-utilities/IComponent.h>
+#include <xkill-utilities/EventType.h>
+#include <xkill-utilities/AttributeType.h>
+#include <vector>
+#include <iostream>
+
+#include "AttributeManager.h"
 
 class RenderComponent : public IComponent
 {
@@ -26,15 +32,15 @@ public:
 	void onUpdate(float delta)
 	{
 		// Setup
-		vector<RenderAttribute>* attributes = AttributeManager::getInstance()->renderAttributes.getAllAttributes();
+		std::vector<RenderAttribute>* attributes = AttributeManager::getInstance()->renderAttributes.getAllAttributes();
 
 
 		//subcomponent.onUpdate(delta);
 
-		vector<int>* owners = AttributeManager::getInstance()->renderAttributes.getAllOwners();
+		std::vector<int>* owners = AttributeManager::getInstance()->renderAttributes.getAllOwners();
 
 		// Write test
-		cout << "RENDERCOMPONENT: Write test" << endl;
+		std::cout << "RENDERCOMPONENT: Write test" << std::endl;
 		for(int i=0; i<(int)(*attributes).size(); i++)
 		{
 			if(owners->at(i)!=0)

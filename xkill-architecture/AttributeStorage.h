@@ -5,7 +5,6 @@
 
 #include "IAttributeStorage.h"
 #include "AttributeController.h"
-#include "AttributePointer.h"
 
 class Entity;
 template <class T>
@@ -69,10 +68,11 @@ public:
 		deleted.push(index);
 	}
 
-	AttributePointer<T> getAttributePointer()
+	AttributePointer getAttributePointer()
 	{
-		AttributePointer<T> a;
+		AttributePointer a;
 		a.init(&attributes, index);
 		return a;
 	}
 };
+

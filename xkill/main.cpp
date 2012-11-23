@@ -3,7 +3,7 @@
 #include <tchar.h>
 #include <xkill-renderer/renderingComponent.h>
 #include <xkill-renderer/cameraBasic.h>
-#include <xkill-architecture/architecture.h>
+#include <xkill-architecture/GameManager.h>
 #include "window.h"
 
 #if defined( DEBUG ) || defined( _DEBUG )
@@ -25,8 +25,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	SetStdHandle(STD_INPUT_HANDLE |STD_OUTPUT_HANDLE, window->getWindowHandle());
 	
 
-	Architecture architecture;
-	architecture.run();
+	GameManager gm;
+	gm.run();
 
 	//RenderingComponent* renderingComponent = new RenderingComponent(
 	//	window->getWindowHandle(), 

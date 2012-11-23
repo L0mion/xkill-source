@@ -1,13 +1,13 @@
 #pragma once
 
-#include "EventManager.h"
-#include "AttributeType.h"
+#include <xkill-utilities/EventManager.h>
+#include "AttributeController.h"
 
 class Entity
 {
 private:
 	int id;
-	vector<AttributeController> attributes;
+	std::vector<AttributeController> attributes;
 
 public:
 	Entity(int id)
@@ -21,8 +21,8 @@ public:
 
 	void deleteAttributes()
 	{
-		for each(AttributeController c in attributes)
-			c.remove();
+		for(unsigned int i = 0; i < attributes.size(); i++)
+			attributes[i].remove();
 	}
 
 	void addAttribute(AttributeController attribute)

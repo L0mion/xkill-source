@@ -2,6 +2,7 @@
 
 #include "RenderComponent.h"
 #include "SoundComponent.h"
+#include "PhysicsComponent.h"
 #include <vector>
 
 class ComponentManager
@@ -9,7 +10,7 @@ class ComponentManager
 private:
 	SoundComponent sound;
 	RenderComponent render;
-
+	PhysicsComponent physics;
 public:
 	ComponentManager()
 	{
@@ -20,5 +21,6 @@ public:
 	{
 		sound.onUpdate(delta);
 		render.onUpdate(delta);
+		physics.onUpdate(delta);
 	}
 };

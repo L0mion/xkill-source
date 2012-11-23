@@ -1,6 +1,7 @@
 #pragma once
 
-#include "IComponent.h"
+#include <xkill-utilities/IComponent.h>
+#include <xkill-utilities/EventManager.h>
 
 
 class SoundComponent : public IComponent

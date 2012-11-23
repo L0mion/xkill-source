@@ -1,11 +1,19 @@
 #pragma once
 
-#include "dllUtilities.h"
 
+#include "dllUtilities.h"
+#define ATTRIBUTE_CAST(Type,Object,Parent) &((std::vector<Type>*)Parent->Object.host)->at(Parent->Object.index)
+
+
+//! Attribute Pointer
+/*!
+Used to gain access to a specifc attribute in the attibute memory space
+\ingroup xkill-utilities
+*/
 class DLL AttributePointer
 {
 public:
-	void* host;
+	void* host; //!< A void pointer to a std::vector with attributes of an specific type, manual casting of void
 	unsigned int index;
 
 	AttributePointer()
@@ -19,35 +27,33 @@ public:
 	}
 };
 
+
+//! IAttribute
+/*!
+Simple/empty attribute supplying an interface for simpler
+grouping of attributes.
+\ingroup xkill-utilities
+*/
 struct DLL IAttribute
 {
 };
 
-struct DLL AttributeLock
-{
-	IAttribute* attributes;
-	// Mutex
-	IAttribute* getAttributes()
-	{
-		//if(Mutex.aquire())
-		return attributes;
-	}
-};
 
-enum AttributeType
-{
-	Position = 0,
-	Spatial,
-	Render
-};
-
-
-
+//! PositionAttribute
+/*!
+Storing a position attribute
+\ingroup xkill-utilities
+*/
 struct DLL PositionAttribute : public IAttribute
 {
 	float position;
 };
 
+//! SpatialAttribute
+/*!
+Storing a spatial attribute
+\ingroup xkill-utilities
+*/
 struct DLL SpatialAttribute : public IAttribute
 {
 	AttributePointer positionAttribute;
@@ -56,6 +62,12 @@ struct DLL SpatialAttribute : public IAttribute
 	float scale;
 };
 
+
+//! RenderAttribute
+/*!
+Storing a render attribute
+\ingroup xkill-utilities
+*/
 struct DLL RenderAttribute : public IAttribute
 {
 	AttributePointer spatialAttribute;
@@ -66,3 +78,18 @@ struct DLL RenderAttribute : public IAttribute
 	int textureID;
 };
 
+//! PhysicsAttribute
+/*!
+Storing a physics attribute
+\ingroup xkill-utilities
+*/
+struct DLL PhysicsAttribute : public IAttribute
+{
+	AttributePointer spatialAttribute;
+	float velocity[4];
+	float rotationVelocity[4];
+	float mass;
+
+	bool added;
+	bool alive;
+};

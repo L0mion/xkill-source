@@ -47,8 +47,7 @@ void PhysicsObject::Init(btCollisionShape* collisionShape,
 
 void PhysicsObject::preStep(PhysicsAttribute* physicsAttribute)
 {
-	btTransform transform;
-	rigidBody_->setWorldTransform(transform);
+	
 }
 
 void PhysicsObject::postStep(PhysicsAttribute* physicsAttribute)

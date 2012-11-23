@@ -1,5 +1,8 @@
 #pragma once
 
+#include <vector>
+#include <queue>
+
 class IAttributeStorage
 {
 public:

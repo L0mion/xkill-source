@@ -13,10 +13,12 @@ A more elaborate description of documented class.
 #define XKILL_PHYSICS_PHYSICSCOMPONENT_H
 
 #include "dllPhysics.h"
+#include <xkill-utilities/IComponent.h>
 
 #include <vector>
 
 class PhysicsObject;
+class Event;
 struct PhysicsAttribute;
 
 class btBroadphaseInterface;
@@ -28,27 +30,29 @@ class btDiscreteDynamicsWorld;
 template<class T>
 class btAlignedObjectArray;
 
-class DLL PhysicsComponent
+class DLL BulletPhysicsComponent : public IComponent
 {
 private:
-	btBroadphaseInterface* broadphase;
-	btDefaultCollisionConfiguration* collisionConfiguration;
-	btCollisionDispatcher* dispatcher;
-	btSequentialImpulseConstraintSolver* solver;
-	btDiscreteDynamicsWorld* dynamicsWorld;
+	btBroadphaseInterface* broadphase_;
+	btDefaultCollisionConfiguration* collisionConfiguration_;
+	btCollisionDispatcher* dispatcher_;
+	btSequentialImpulseConstraintSolver* solver_;
+	btDiscreteDynamicsWorld* dynamicsWorld_;
 
-	std::vector<PhysicsAttribute>* physicsAttributes;
-	unsigned int numPhysicsAttributes;
+	std::vector<PhysicsAttribute>* physicsAttributes_;
+	unsigned int numPhysicsAttributes_;
 
-	btAlignedObjectArray<PhysicsObject*>* physicsObjects;
+	btAlignedObjectArray<PhysicsObject*>* physicsObjects_;
+
+
 
 protected:
 public:
-	PhysicsComponent();
-	~PhysicsComponent();
-	bool Init();
+	BulletPhysicsComponent();
+	~BulletPhysicsComponent();
+	bool Init(std::vector<PhysicsAttribute>* physicsAttributes);
 	void onUpdate(float delta);
-	void onEvent(/*Event* e*/);
+	void onEvent(Event* e);
 };
 
 #endif //XKILL_PHYSICS_PHYSICSCOMPONENT_H
