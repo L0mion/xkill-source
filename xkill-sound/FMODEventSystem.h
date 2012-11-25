@@ -19,7 +19,7 @@
 //fmodex.dll
 //fmod_event.dll
 
-/** \defgroup xkill-sound xkill-sound
+/** \defgroup xkill-sound XKILL - Sound
  *
  * \brief Sound package of XKILL
  */

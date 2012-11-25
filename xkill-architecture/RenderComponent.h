@@ -8,6 +8,15 @@
 
 #include "AttributeManager.h"
 
+/// Component to process RenderAttribute
+/** 
+Some other attribute associated with rendering such
+as CameraAttribute should probably be processed 
+here as well.
+
+\ingroup components
+*/
+
 class RenderComponent : public IComponent
 {
 private:

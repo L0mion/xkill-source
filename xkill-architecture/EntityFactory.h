@@ -5,10 +5,21 @@
 #include "AttributeManager.h"
 #include <vector>
 
+
+/// A factory for creating Entity and assigning multiple Attribute in a flexible way
+/** 
+Filling out each Attribute and connecting chains of 
+Attribute is the responsibility of the EntityFactory.
+
+\ingroup achitecture
+*/
+
 class EntityFactory 
 {
-public:
-	// Create entity and assigns unique ID
+private:
+	/** 
+	Creates an entity and assigns a unique ID
+	*/
 	Entity* createEntity()
 	{
 		static int id = 1;
@@ -19,6 +30,7 @@ public:
 		return e;
 	}
 
+public:
 	Entity* createEntity_TypeA()
 	{
 		Entity* e = createEntity();

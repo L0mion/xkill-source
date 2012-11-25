@@ -33,10 +33,6 @@ void EventManager::addObserver(IObserver* o, EventType type)
 	std::cout << "EVENTMANAGER: New subscriber on Events of Enum " << index << std::endl;
 }
 
-	// Adds observer to every event queue,
-	// observers shouldn't waste traffic by
-	// subscribing to events they're not using
-	// so this should only be used for testing purposes
 void EventManager::addObserverToAll(IObserver* o)
 {
 	for(int i=0; i<(int)event_queues->size(); i++)
@@ -46,17 +42,12 @@ void EventManager::addObserverToAll(IObserver* o)
 	std::cout << "EVENTMANAGER: New subscriber on Events of All Enum " << std::endl;
 }
 
-	// Removes all instances of Observer
 void EventManager::removeObserver(IObserver* observer)
 {
 	for(int i=0; i<(int)event_queues->size(); i++)
 		removeObserver(observer, (EventType)i);
 }
 
-	// Removes instance of Observer from a specific event
-	// NOTE: Order is not important, uses "swap trick" 
-	// to swap "last element" with "removed"
-	// This gives O(n) performance for remove instead of O(n^2)
 void EventManager::removeObserver(IObserver* observer, EventType type)
 {
 	int index = type;

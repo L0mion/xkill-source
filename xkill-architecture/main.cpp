@@ -2,6 +2,11 @@
 #include "GameManager.h"
 #include <iostream>
 
+/// If you can't tell what the main() is for you should have your programming license revoked
+/** 
+\ingroup achitecture
+*/
+
 int main()
 {
 	// Detect memory leaks

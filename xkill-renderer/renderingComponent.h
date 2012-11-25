@@ -1,7 +1,7 @@
 #ifndef XKILL_RENDERER_RENDERINGCOMPONENT_H
 #define XKILL_RENDERER_RENDERINGCOMPONENT_H
 
-/*! \defgroup xkill-renderer xkill-renderer
+/*! \defgroup xkill-renderer XKILL - Renderer
 	Rendering Component of XKILL. */
 
 #include <stdio.h>

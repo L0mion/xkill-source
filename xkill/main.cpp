@@ -1,4 +1,4 @@
-#include <Windows.h>
+﻿#include <Windows.h>
 #include <windowsx.h>
 #include <tchar.h>
 #include <xkill-renderer/renderingComponent.h>
@@ -61,3 +61,62 @@ void run(RenderingComponent* renderingComponent, Window* window, CameraBasic* ca
 		renderingComponent->render(camera->getView(), camera->getProjection());
 	}
 }
+
+
+
+
+
+////////////////////////////
+// Main page
+////////////////////////////
+
+/** 
+\mainpage Index
+\htmlonly
+<h1>XKILL</h1>
+<h2>Heartaches by the Cycle</h2>
+<p style="width: 500px;">
+In a forgotten store-room rests an ancient single-core processor. In this harsh land-
+scape, before multicore-technology, fierce gladiator tournaments are fough by processes
+struggling to be granted execution time by The Scheduler. These tournaments consist of
+deadly combat as The Processes battle to destroy one another.
+</p>
+
+<img src="http://fc07.deviantart.net/fs70/i/2012/275/6/7/concepting_by_wolfgan-d5gjy81.jpg" style="width: 20%;"/>
+
+<h3>Developer Team</h3>
+<ul>
+<li>Mattias Andersson	</li>
+<li>Nils Forsman		</li>
+<li>David Grelsson		</li>
+<li>Henrik Nell		 	</li>
+<li>Eric Nilsson		</li>
+<li>Viktor Sid&eacute;n	</li>
+<li>Jon Wid&eacute;n	</li>
+</ul>
+
+<h3>Graphics Team</h3>
+<ul>
+<li>Oliver Blomgren		</li>
+<li>Jimmy Johnsson		</li>
+<li>Daniel Oldberg		</li>
+<li>Adam Aberg			</li>
+</ul>
+
+<h3>Audio Team</h3>
+<ul>
+<li>Audio Team			</li>
+<li>Johan Mauritzson	</li>
+<li>Jesper Palm			</li>
+</ul>
+
+<h3>Level Design</h3>
+<ul>
+<li>Olle Karlsson		</li>
+</ul>
+
+\endhtmlonly
+
+
+
+*/

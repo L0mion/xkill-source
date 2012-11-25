@@ -3,6 +3,11 @@
 #include "EntityFactory.h"
 #include <vector>
 
+/// Manages multiple Entity in a uniform way
+/** 
+\ingroup achitecture
+*/
+
 class EntityManager
 {
 private:

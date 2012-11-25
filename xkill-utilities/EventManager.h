@@ -7,11 +7,12 @@
 class IObserver;
 enum EventType;
 class Event;
-//
-// Convenient delete macro
-//
 
-
+/// Redirect events to each appropriate IObserver
+/** 
+\ingroup utilities
+\ingroup events
+*/
 
 class DLL EventManager
 {
@@ -26,21 +27,30 @@ public:
 
 	void addObserver(IObserver* o, EventType type);
 
-	// Adds observer to every event queue,
-	// observers shouldn't waste traffic by
-	// subscribing to events they're not using
-	// so this should only be used for testing purposes
+	/** 
+	Adds observer to every event queue,
+	observers shouldn't waste traffic by
+	subscribing to events they're not using
+	so this should only be used for testing purposes
+	Redirect events to each appropriate IObserver
+	*/
 	void addObserverToAll(IObserver* o);
 
-	// Removes all instances of Observer
+	/** 
+	Removes all instances of Observer
+	*/
 	void removeObserver(IObserver* observer);
 
-	// Removes instance of Observer from a specific event
-	// NOTE: Order is not important, uses "swap trick" 
-	// to swap "last element" with "removed"
-	// This gives O(n) performance for remove instead of O(n^2)
+	/** 
+	Removes instance of Observer from a specific event
+	NOTE: Order is not important, uses "swap trick" 
+	to swap "last element" with "removed"
+	This gives O(n) performance for remove instead of O(n^2)
+	*/
 	void removeObserver(IObserver* observer, EventType type);
 
-	// Send event to all relevant observers
+	/** 
+	Sends event to all relevant observers
+	*/
 	void sendEvent(Event* e);
 };

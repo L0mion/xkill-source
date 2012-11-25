@@ -4,6 +4,11 @@
 #include <xkill-utilities/IComponent.h>
 #include "AttributeManager.h"
 
+/// Component to process PhysicsAttribute
+/** 
+\ingroup components
+*/
+
 class PhysicsComponent : public IComponent
 {
 private:

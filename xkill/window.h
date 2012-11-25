@@ -6,7 +6,7 @@
 
 #include <vector>
 
-/*! \defgroup xkill xkill
+/*! \defgroup xkill XKILL
    Main xkill package.
 */
 

@@ -4,6 +4,11 @@
 
 class Event;
 
+/// Interface needed for receiving Events
+/** 
+\ingroup utilities
+*/
+
 class DLL IObserver
 {
 public:

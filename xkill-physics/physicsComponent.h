@@ -1,4 +1,4 @@
-/*! \defgroup xkill-physics xkill-physics
+/*! \defgroup xkill-physics XKILL - Physics
    The component of the xkill engine which handles physics through wrapping the bullet physics lib.
    \brief Physics package of XKILL
 */

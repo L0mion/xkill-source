@@ -3,6 +3,11 @@
 #include <xkill-utilities/AttributeType.h>
 #include "AttributeStorage.h"
 
+/// Singleton responsible for providing access to each Attribute.
+/** 
+\ingroup achitecture
+*/
+
 class AttributeManager
 {
 public:

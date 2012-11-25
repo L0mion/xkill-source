@@ -1,7 +1,9 @@
 #pragma once
 
-#include <vector>
-#include <queue>
+/// Interface to group AttributeStorage of different types togheter.
+/** 
+\ingroup achitecture
+*/
 
 class IAttributeStorage
 {
