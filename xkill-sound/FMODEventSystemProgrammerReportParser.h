@@ -8,7 +8,7 @@
  * \note friend class of "FMODEventSystem".
  * \author (last to touch it) $Author: Henrik Nell $
  */
-class DLL FMODEventSystemProgrammerReportParser
+class DLL_S FMODEventSystemProgrammerReportParser
 {
 public:
 	FMODEventSystemProgrammerReportParser(void);

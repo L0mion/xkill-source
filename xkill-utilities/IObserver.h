@@ -9,8 +9,14 @@ class Event;
 \ingroup utilities
 */
 
-class DLL IObserver
+class DLL_U IObserver
 {
 public:
 	virtual void onEvent(Event* e) = 0;
+};
+
+class DLL_U IObserver2
+{
+public:
+	virtual void onUpdate(float delta) = 0;
 };

@@ -13,7 +13,8 @@ A more elaborate description of documented class.
 #define XKILL_PHYSICS_PHYSICSCOMPONENT_H
 
 #include "dllPhysics.h"
-#include <xkill-utilities/IComponent.h>
+//#include <xkill-utilities/IComponent.h>
+#include <xkill-utilities/IObserver.h>
 
 #include <vector>
 
@@ -30,7 +31,9 @@ class btDiscreteDynamicsWorld;
 template<class T>
 class btAlignedObjectArray;
 
-class DLL BulletPhysicsComponent : public IComponent
+
+
+class DLL_P BulletPhysicsComponent : public IObserver
 {
 private:
 	btBroadphaseInterface* broadphase_;
@@ -44,9 +47,10 @@ private:
 
 	btAlignedObjectArray<PhysicsObject*>* physicsObjects_;
 
+	
+	//IComponent t;
 
-
-protected:
+//protected:
 public:
 	BulletPhysicsComponent();
 	~BulletPhysicsComponent();

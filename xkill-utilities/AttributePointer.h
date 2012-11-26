@@ -16,7 +16,7 @@ Manual casting is neccissary since DLLs doesn't support Templates.
 \ingroup xkill-utilities
 */
 
-class DLL AttributePointer
+class DLL_U AttributePointer
 {
 public:
 	

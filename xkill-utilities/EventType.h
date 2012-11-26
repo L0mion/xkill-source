@@ -28,7 +28,7 @@ NOTE: DOXYGEN can not detect Enums combined with DLL
 for some reason
 */
 
-enum DLL EventType
+enum DLL_U EventType
 {
 	EVENT_A,
 	EVENT_B,
@@ -47,7 +47,7 @@ enum DLL EventType
 \ingroup events
 */
 
-class DLL Event
+class DLL_U Event
 {
 private:
 	EventType type;
@@ -72,7 +72,7 @@ public:
 /**
 \ingroup events
 */
-class DLL Event_A : public Event
+class DLL_U Event_A : public Event
 {
 public:
 	Event_A() : Event(EVENT_A){}
@@ -83,7 +83,7 @@ public:
 /**
 \ingroup events
 */
-class DLL Event_B : public Event
+class DLL_U Event_B : public Event
 {
 public:
 	Event_B() : Event(EVENT_B){}

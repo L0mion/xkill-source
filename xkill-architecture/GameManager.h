@@ -24,7 +24,7 @@ the use of events (which is part of XKILL-Utilities). However,
 creating events for everything is cumbersome and hard to maintain 
 so every component should strive to work indepentently from eachother.
 
-\defgroup achitecture XKILL - Achitecture
+\defgroup ARCHITECTURE XKILL - Achitecture
 \image html https://dl.dropbox.com/u/12273871/DOXYGEN/Architectur.png
 */
 
@@ -41,7 +41,7 @@ in turn updates most of the game logic.
 It can also be used as an early testing environment for simulating 
 the game by sending a Event, creating and deleting a Entity and such.
 
-\ingroup achitecture
+\ingroup ARCHITECTURE
 */
 
 class DLL GameManager

@@ -6,10 +6,10 @@
 \defgroup utilities XKILL - Utilities 
 */
 
-#ifdef DLL_EXPORT
-#define DLL __declspec(dllexport)
+#ifdef DLL_UTILITIES
+#define DLL_U __declspec(dllexport)
 #else
-#define DLL __declspec(dllimport)
-#endif //DLL_EXPORT
+#define DLL_U __declspec(dllimport)
+#endif //DLL_UTILITIES
 
 #endif //XKILL_UTILITIES_DLLUTILITIES_H

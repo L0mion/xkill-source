@@ -9,7 +9,7 @@
 Describing the virtual eye through which the 3D-world is viewed.
 \ingroup xkill-renderer
 */
-class DLL CameraBasic
+class DLL_R CameraBasic
 {
 public:
 	//! Initializes camera member variables to default values.

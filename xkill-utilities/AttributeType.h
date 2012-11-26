@@ -24,7 +24,7 @@ be modified to suit the need of each Component.
 /** 
 \ingroup attributes
 */
-struct DLL IAttribute
+struct DLL_U IAttribute
 {
 };
 
@@ -37,7 +37,7 @@ struct DLL IAttribute
 /** 
 \ingroup attributes
 */
-struct DLL PositionAttribute : public IAttribute
+struct DLL_U PositionAttribute : public IAttribute
 {
 	float position;
 };
@@ -46,7 +46,7 @@ struct DLL PositionAttribute : public IAttribute
 /** 
 \ingroup attributes
 */
-struct DLL SpatialAttribute : public IAttribute
+struct DLL_U SpatialAttribute : public IAttribute
 {
 	AttributePointer positionAttribute;
 
@@ -64,7 +64,7 @@ throught the use of Instancing.
 
 \ingroup attributes
 */
-struct DLL RenderAttribute : public IAttribute
+struct DLL_U RenderAttribute : public IAttribute
 {
 	AttributePointer spatialAttribute;
 
@@ -78,7 +78,7 @@ struct DLL RenderAttribute : public IAttribute
 /** 
 \ingroup attributes
 */
-struct DLL PhysicsAttribute : public IAttribute
+struct DLL_U PhysicsAttribute : public IAttribute
 {
 	AttributePointer spatialAttribute;
 	float velocity[4];
@@ -93,7 +93,7 @@ struct DLL PhysicsAttribute : public IAttribute
 /** 
 \ingroup attributes
 */
-struct DLL SoundAttribute : public IAttribute
+struct DLL_U SoundAttribute : public IAttribute
 {
 	AttributePointer positionAttribute;
 };
@@ -102,7 +102,7 @@ struct DLL SoundAttribute : public IAttribute
 /** 
 \ingroup attributes
 */
-struct DLL CameraAttribute : public IAttribute
+struct DLL_U CameraAttribute : public IAttribute
 {
 	AttributePointer spatialAttribute;
 	float mat_viewProj;

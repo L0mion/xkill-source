@@ -14,7 +14,7 @@ class Event;
 \ingroup events
 */
 
-class DLL EventManager
+class DLL_U EventManager
 {
 private:
 	std::vector<std::vector<IObserver*>>* event_queues;

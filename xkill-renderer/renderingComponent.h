@@ -26,7 +26,7 @@ Main rendering component of XKILL utilizing Deferred Rendering with 2 G-buffers:
 * Normals
 \ingroup xkill-renderer
 */
-class DLL RenderingComponent : public D3DInterface
+class DLL_R RenderingComponent : public D3DInterface
 {
 public:
 	//! Initializes RenderingComponent to default values. init()-method need be called in order for RenderingComponent to get proper values.

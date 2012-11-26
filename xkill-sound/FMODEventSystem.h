@@ -4,15 +4,15 @@
 
 #include <string>
 #include <vector>
-#include "../xkill-dependencies/include/fmod_event.hpp"
-#include "../xkill-dependencies/include/fmod_errors.h"
+#include <fmod_event.hpp>
+#include <fmod_errors.h>
 
 //#if defined( DEBUG ) || defined( _DEBUG )
 //#pragma comment(lib, "../xkill-dependencies/lib/fmodexL_vc.lib")
 //#pragma comment(lib, "../xkill-dependencies/lib/fmod_eventL.lib")
 //#else
-#pragma comment(lib, "../xkill-dependencies/lib/fmodex_vc.lib")
-#pragma comment(lib, "../xkill-dependencies/lib/fmod_event.lib")
+//#pragma comment(lib, "../xkill-dependencies/lib/fmodex_vc.lib")
+//#pragma comment(lib, "../xkill-dependencies/lib/fmod_event.lib")
 //#endif
 
 //dll files:
@@ -32,7 +32,9 @@
  * \note This is a note.
  * \author (last to touch it) $Author: Henrik Nell $
  */
-class DLL FMODEventSystem
+
+
+class DLL_S FMODEventSystem
 {
 	friend class FMODEventSystemProgrammerReportParser;
 
