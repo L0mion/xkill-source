@@ -1,6 +1,8 @@
 #ifndef XKILL_RENDERER_CBPERFRAME_H
 #define XKILL_RENDERER_CBPERFRAME_H
 
+#include <DirectXMath.h>
+
 #include "CB.h"
 
 #include "MathBasic.h"
@@ -23,7 +25,7 @@ public:
 	\param devcon DirectX Decive Context pointer.
 	\param worldViewProj Final transformation matrix that will be used by the shader.
 	*/
-	void update(ID3D11DeviceContext* devcon, MatF4 worldViewProj);
+	void update(ID3D11DeviceContext* devcon, DirectX::XMFLOAT4X4 worldViewProj);
 };
 
 #endif //XKILL_RENDERER_CBPERFRAME_H

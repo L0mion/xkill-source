@@ -18,10 +18,13 @@ CameraBasic::CameraBasic(
 	this->screenWidth_	= screenWidth;
 	this->screenHeight_	= screenHeight;
 
-	position_	= VecF3(0.0f, 0.0f, -150.0f);
-	right_		= VecF3(1.0f, 0.0f, 0.0f);
-	up_			= VecF3(0.0f, 1.0f, 0.0f);
-	look_		= VecF3(0.0f, 0.0f, 1.0f);
+	velocity_			= 0.01f;
+	mouseSensitivity_	= 0.001f;
+
+	position_	= DirectX::XMFLOAT3(0.0f, 0.0f, -150.0f);
+	right_		= DirectX::XMFLOAT3(1.0f, 0.0f, 0.0f);
+	up_			= DirectX::XMFLOAT3(0.0f, 1.0f, 0.0f);
+	look_		= DirectX::XMFLOAT3(0.0f, 0.0f, 1.0f);
 }
 
 CameraBasic::~CameraBasic()
@@ -34,109 +37,178 @@ void CameraBasic::mouse(const float dX, const float dY)
 	pitch(dY);
 }
 
-void CameraBasic::keyboard()
+void CameraBasic::keyboard(std::vector<bool>* keys)
 {
-	//switch(key)
-	//{
-	//case KEY_W:
-	// walk(STEP_SCALE);
-	// break;
-	//case KEY_A:
-	// strafe(-STEP_SCALE);
-	// break;
-	//case KEY_S:
-	// walk(-STEP_SCALE);
-	// break;
-	//case KEY_D:
-	// //strafe(STEP_SCALE);
-	// break;
-	//default:
-	// break;
-	//}
+	if(keys->at(VK_A))
+		strafe(-velocity_);
+	if(keys->at(VK_D))
+		strafe(velocity_);
+	if(keys->at(VK_S))
+		walk(-velocity_);
+	if(keys->at(VK_W))
+		walk(velocity_);
 }
 
 void CameraBasic::updateView()
 {
-	look_.normalize();
+	DirectX::XMVECTOR vLook		= DirectX::XMLoadFloat3(&look_); 
+	DirectX::XMVECTOR vUp		= DirectX::XMLoadFloat3(&up_);
+	DirectX::XMVECTOR vRight	= DirectX::XMLoadFloat3(&right_);
 
-	up_ = look_.cross(right_);
-	up_.normalize();
+	vLook = DirectX::XMVector3Normalize(vLook);
 
-	right_ = up_.cross(look_);
-	right_.normalize();
+	vUp = DirectX::XMVector3Cross(vLook, vRight);
+	vUp = DirectX::XMVector3Normalize(vUp);
 
-	float x = -position_.dot(right_);
-	float y = -position_.dot(up_);
-	float z = -position_.dot(look_);
+	vRight = DirectX::XMVector3Cross(vUp, vLook);
+	vRight = DirectX::XMVector3Normalize(vRight);
+	
+	DirectX::XMVECTOR vPosition = DirectX::XMVectorSet( position_.x*-1.0f,
+														position_.y*-1.0f,
+														position_.z*-1.0f,
+					 									1.0f);
 
-	view_.m[0][0] = right_.x;
-	view_.m[1][0] = right_.y;
-	view_.m[2][0] = right_.z;
-	view_.m[3][0] = x;
+	DirectX::XMVECTOR vResult;
+	DirectX::XMFLOAT3 fResult;
+	vResult = DirectX::XMVector3Dot(vPosition, vRight);
+	DirectX::XMStoreFloat3(&fResult, vResult);
+	float x = fResult.x;
+	vResult = DirectX::XMVector3Dot(vPosition, vUp);
+	DirectX::XMStoreFloat3(&fResult, vResult);
+	float y = fResult.y;
+	vResult = DirectX::XMVector3Dot(vPosition, vLook);
+	DirectX::XMStoreFloat3(&fResult, vResult);
+	float z = fResult.z;
 
-	view_.m[0][1] = up_.x;
-	view_.m[1][1] = up_.y;
-	view_.m[2][1] = up_.z;
-	view_.m[3][1] = y;
+	DirectX::XMStoreFloat3(&right_, vRight);
+	DirectX::XMStoreFloat3(&up_, vUp);
+	DirectX::XMStoreFloat3(&look_, vLook);
 
-	view_.m[0][2] = look_.x;
-	view_.m[1][2] = look_.y;
-	view_.m[2][2] = look_.z;
-	view_.m[3][2] = z;
+	view_(0, 0) = right_.x;
+	view_(1, 0) = right_.y;
+	view_(2, 0) = right_.z;
+	view_(3, 0) = x;
 
-	view_.m[0][3] = 0.0f;
-	view_.m[1][3] = 0.0f;
-	view_.m[2][3] = 0.0f;
-	view_.m[3][3] = 1.0f;
+	view_(0, 1) = up_.x;
+	view_(1, 1) = up_.y;
+	view_(2, 1) = up_.z;
+	view_(3, 1) = y;
+
+	view_(0, 2) = look_.x;
+	view_(1, 2) = look_.y;
+	view_(2, 2) = look_.z;
+	view_(3, 2) = z;
+
+	view_(0, 3) = 0.0f;
+	view_(1, 3) = 0.0f;
+	view_(2, 3) = 0.0f;
+	view_(3, 3) = 1.0f;
 }
 
 void CameraBasic::updateProj()
 {
-	MatF4 perspective;
-	ZeroMemory(&perspective, sizeof(MatF4));
+	ZeroMemory(&projection_, sizeof(projection_));
 
-	perspective.m[0][0] = 1/(aspect_*(tan(fov_/2)));
-	perspective.m[1][1] = 1/(tan(fov_/2));
-	perspective.m[2][2] = zFar_/(zFar_ - zNear_);
-	perspective.m[2][3] = 1.0f;
-	perspective.m[3][2] = (-zNear_ * zFar_)/(zFar_ - zNear_);
-
-	projection_ = perspective;
+	projection_(0, 0) = 1/(aspect_*(tan(fov_/2)));
+	projection_(1, 1) = 1/(tan(fov_/2));
+	projection_(2, 2) = zFar_/(zFar_ - zNear_);
+	projection_(2, 3) = 1.0f;
+	projection_(3, 2) = (-zNear_ * zFar_)/(zFar_ - zNear_);
 }
 
 void CameraBasic::strafe(const float velocity)
 {
-	position_ += right_*velocity;
+	position_.x += right_.x * velocity;
+	position_.y += right_.y * velocity;
+	position_.z += right_.z * velocity;
 }
 
 void CameraBasic::walk(const float velocity)
 {
-	position_ += look_*velocity;
+	position_.x += look_.x * velocity;
+	position_.y += look_.y * velocity;
+	position_.z += look_.z * velocity;
 }
 
 void CameraBasic::pitch(const float angle)
 {
-	up_.rotate(angle, right_);
-	look_.rotate(angle, right_);
+	//Load vectors in to XMVECTORs to utilize SIMD.
+	DirectX::XMVECTOR vLook		= DirectX::XMLoadFloat3(&look_); 
+	DirectX::XMVECTOR vUp		= DirectX::XMLoadFloat3(&up_);
+
+	DirectX::XMVECTOR vLimitUp = DirectX::XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
+	DirectX::XMVECTOR vLimitDown = DirectX::XMVectorSet(0.0f, -1.0f, 0.0f, 0.0f);
+	DirectX::XMVECTOR vResult;
+	DirectX::XMFLOAT3 result;
+	
+	//Check that the camera does not tip over. 
+	vResult = DirectX::XMVector3AngleBetweenVectors(vLook, vLimitUp);
+	DirectX::XMStoreFloat3(&result, vResult);
+	float angleUp = result.x;
+	vResult = DirectX::XMVector3AngleBetweenVectors(vLook, vLimitDown);
+	DirectX::XMStoreFloat3(&result, vResult);
+	float angleDown = result.x;
+	bool canRotate = true;
+	if(angleUp < 0.1f && angle < 0)
+		canRotate = false;
+	if(angleDown < 0.1f && angle > 0)
+		canRotate = false;
+	
+	if(canRotate)
+	{
+		//Create a Quaternian that describes the rotation.
+		float cosAngle = cos((angle*mouseSensitivity_)/2);
+		float sinAngle = sin((angle*mouseSensitivity_)/2);
+		DirectX::XMFLOAT4 fQuaternion = DirectX::XMFLOAT4(right_.x*sinAngle, right_.y*sinAngle, right_.z*sinAngle, cosAngle);
+		DirectX::XMVECTOR vQuaternion = DirectX::XMLoadFloat4(&fQuaternion);
+		vQuaternion = DirectX::XMQuaternionNormalize(vQuaternion);
+
+		//Rotate all vectors that are affected by the transform. 
+		vUp		= DirectX::XMVector3Rotate(vUp, vQuaternion);
+		vLook	= DirectX::XMVector3Rotate(vLook, vQuaternion);
+
+		//Store the results in member variables.
+		DirectX::XMStoreFloat3(&up_, vUp);
+		DirectX::XMStoreFloat3(&look_, vLook);
+	}
 }
 
 void CameraBasic::yaw(const float angle)
 {
-	VecF3 axis = VecF3(0.0f, 1.0f, 0.0f);
-	right_.rotate(angle, axis);
-	up_.rotate(angle, axis);
-	look_.rotate(angle, axis);
+	//Load vectors in to XMVECTORs to utilize SIMD.
+	DirectX::XMVECTOR vLook		= DirectX::XMLoadFloat3(&look_); 
+	DirectX::XMVECTOR vUp		= DirectX::XMLoadFloat3(&up_);
+	DirectX::XMVECTOR vRight	= DirectX::XMLoadFloat3(&right_);
+
+	
+	float cosAngle = cos((angle*mouseSensitivity_)/2);
+	float sinAngle = sin((angle*mouseSensitivity_)/2);
+	
+	//Create a Quaternian that describes the rotation.
+	DirectX::XMFLOAT4 fQuaternion = DirectX::XMFLOAT4(0.0f*sinAngle, 1.0f*sinAngle, 0.0f*sinAngle, cosAngle);
+	DirectX::XMVECTOR vQuaternion = DirectX::XMLoadFloat4(&fQuaternion);
+	vQuaternion = DirectX::XMQuaternionNormalize(vQuaternion);
+	
+	//Rotate all vectors that are affected by the transform. 
+	vRight	= DirectX::XMVector3Rotate(vRight, vQuaternion);
+	vUp		= DirectX::XMVector3Rotate(vUp, vQuaternion);
+	vLook	= DirectX::XMVector3Rotate(vLook, vQuaternion);
+
+	//Store the results in member variables.
+	DirectX::XMStoreFloat3(&right_, vRight);
+	DirectX::XMStoreFloat3(&up_, vUp);
+	DirectX::XMStoreFloat3(&look_, vLook);
 }
 
-VecF3 CameraBasic::getPosition()
+DirectX::XMFLOAT3 CameraBasic::getPosition()
 {
 	return position_;
 }
-MatF4 CameraBasic::getView()
+DirectX::XMFLOAT4X4 CameraBasic::getView()
 {
 	return view_;
 }
-MatF4 CameraBasic::getProjection()
+DirectX::XMFLOAT4X4 CameraBasic::getProjection()
 {
 	return projection_;
 }

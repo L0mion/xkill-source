@@ -15,7 +15,7 @@ void CBPerFrame::reset()
 	CB::reset();
 }
 
-void CBPerFrame::update(ID3D11DeviceContext* devcon, MatF4 worldViewProj)
+void CBPerFrame::update(ID3D11DeviceContext* devcon, DirectX::XMFLOAT4X4 worldViewProj)
 {
 	CBPerFrameDesc cbDesc;
 	cbDesc.worldViewProj_ = worldViewProj;

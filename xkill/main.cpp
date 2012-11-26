@@ -49,8 +49,9 @@ void run(RenderingComponent* renderingComponent, Window* window, CameraBasic* ca
 	while(window->getIsActive())
 	{
 		window->checkMessages();
-
-		//move cam
+		InputContainer input = window->getInput();
+		camera->mouse(input.mouseDeltaX_, input.mouseDeltaY_);
+		camera->keyboard(input.keys_);
 		camera->updateView();
 		renderingComponent->render(camera->getView(), camera->getProjection());
 	}

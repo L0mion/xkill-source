@@ -6,6 +6,7 @@
 
 #include <stdio.h>
 #include <d3d11.h>
+#include <DirectXMath.h>
 #include <vector>
 
 #include "dllRenderer.h"
@@ -73,14 +74,14 @@ public:
 	\sa renderToGBuffer
 	\sa renderToBackBuffer
 	*/
-	void render(MatF4 view, MatF4 projection);
+	void render(DirectX::XMFLOAT4X4 view, DirectX::XMFLOAT4X4 projection);
 private:
 	//! Renders to g-buffers, storing albedo and normals till later.
 	/*!
 	\param view View-matrix from camera.
 	\param projection Projection-matrix from camera.
 	*/
-	void renderToGBuffer(MatF4 view, MatF4 projection);
+	void renderToGBuffer(DirectX::XMFLOAT4X4 view, DirectX::XMFLOAT4X4 projection);
 	//! Samples from g-buffers and creates a final image using DirectCompute.
 	/*!
 	\sa uavBackBuffer

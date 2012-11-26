@@ -1,6 +1,8 @@
 #ifndef XKILL_RENDERER_CONSTANTBUFFERS_H
 #define XKILL_RENDERER_CONSTANTBUFFERS_H
 
+#include <DirectXMath.h>
+
 #include "mathBasic.h"
 
 /*! \defgroup xkill-renderer-constant-buffers xkill-renderer-constant-buffers
@@ -14,7 +16,7 @@ Contains data that will be sent to shader every frame.
 */
 struct CBPerFrameDesc
 {
-	MatF4 worldViewProj_; //!< Final matrix.
+	DirectX::XMFLOAT4X4 worldViewProj_; //!< Final matrix.
 };
 //! Size of Per-Frame constant buffer. Must have a size of a multiple of 16 bytes.
 /*!

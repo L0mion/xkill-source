@@ -133,12 +133,12 @@ void RenderingComponent::reset()
 	SAFE_RELEASE(vertexBuffer_);
 }
 
-void RenderingComponent::render(MatF4 view, MatF4 projection)
+void RenderingComponent::render(DirectX::XMFLOAT4X4 view, DirectX::XMFLOAT4X4 projection)
 {
 	renderToGBuffer(view, projection);
 	renderToBackBuffer();
 }
-void RenderingComponent::renderToGBuffer(MatF4 view, MatF4 projection)
+void RenderingComponent::renderToGBuffer(DirectX::XMFLOAT4X4 view, DirectX::XMFLOAT4X4 projection)
 {
 	FLOAT black[]	= {0.0f, 0.0f, 0.0f, 1.0f };
 	FLOAT red[]		= {1.0f, 0.0f, 0.0f, 1.0f };
@@ -149,7 +149,13 @@ void RenderingComponent::renderToGBuffer(MatF4 view, MatF4 projection)
 	devcon_->PSSetShader(fxManagement_->getDefaultPS()->getPixelShader(), nullptr, 0);
 	devcon_->PSSetSamplers(0, 1, &ssDefault_);
 
-	cbManagement_->getCBPerFrame()->update(devcon_, view * projection);
+	DirectX::CXMMATRIX mView		= DirectX::XMLoadFloat4x4(&view);
+	DirectX::CXMMATRIX mProjection	= DirectX::XMLoadFloat4x4(&projection);
+	DirectX::XMMATRIX mViewProj		= DirectX::XMMatrixMultiply(mView, mProjection);
+	DirectX::XMFLOAT4X4 viewProj;
+	DirectX::XMStoreFloat4x4(&viewProj, mViewProj);
+
+	cbManagement_->getCBPerFrame()->update(devcon_, viewProj);
 	cbManagement_->getCBPerFrame()->vsSet(devcon_);
 
 	ID3D11RenderTargetView* renderTargets[GBUFFERID_NUM_BUFFERS];
