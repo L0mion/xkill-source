@@ -7,6 +7,7 @@
 #include <xkill-architecture/GameManager.h>
 #include "window.h"
 
+
 #if defined( DEBUG ) || defined( _DEBUG )
 //#include <vld.h>
 #endif

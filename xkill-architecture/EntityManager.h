@@ -3,7 +3,7 @@
 #include "EntityFactory.h"
 #include <vector>
 
-/// Manages multiple Entity in a uniform way
+/// Manages multiple Entities in a uniform way.
 /** 
 \ingroup achitecture
 */

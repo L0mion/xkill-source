@@ -10,7 +10,7 @@
 
 /// Component to process RenderAttribute
 /** 
-Some other attribute associated with rendering such
+Some other attributes associated with rendering, such
 as CameraAttribute should probably be processed 
 here as well.
 
