@@ -21,7 +21,7 @@ CameraBasic::CameraBasic(
 	velocity_			= 0.01f;
 	mouseSensitivity_	= 0.001f;
 
-	position_	= DirectX::XMFLOAT3(0.0f, 0.0f, -150.0f);
+	position_	= DirectX::XMFLOAT3(0.0f, 0.0f, -50.0f);
 	right_		= DirectX::XMFLOAT3(1.0f, 0.0f, 0.0f);
 	up_			= DirectX::XMFLOAT3(0.0f, 1.0f, 0.0f);
 	look_		= DirectX::XMFLOAT3(0.0f, 0.0f, 1.0f);
