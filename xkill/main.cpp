@@ -25,11 +25,13 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	Window* window = new Window(hInstance, cmdShow, screenWidth, screenHeight);
 	window->init();
 
-	/*RenderingComponent* renderingComponent = new RenderingComponent(
-		window->getWindowHandle(), 
-		screenWidth, 
-		screenHeight);
-	HRESULT hr = renderingComponent->init();*/
+	//RenderingComponent* renderingComponent = new RenderingComponent(
+	//	window->getWindowHandle(), 
+	//	screenWidth, 
+	//	screenHeight,
+	//	numPlayers);
+	//HRESULT hr = renderingComponent->init();
+
 
 	float aspect = (float)screenWidth/(float)screenHeight;
 	//CameraBasic* camera = new CameraBasic(aspect, 0.78f, 1000.0f, 0.1f, screenWidth, screenHeight);
@@ -55,6 +57,6 @@ void run(RenderingComponent* renderingComponent, Window* window/*, CameraBasic* 
 		//camera->keyboard(input.keys_);
 		//camera->updateView();
 		//renderingComponent->render(&camera->getView(), &camera->getProjection());
-		renderingComponent->onUpdate(2.0f);
+		renderingComponent->onUpdate(1.0f);
 	}
 }
