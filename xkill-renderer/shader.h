@@ -3,7 +3,7 @@
 
 #include <d3d11.h>
 #include <d3d10.h>
-#include <d3dInterface.h>
+#include "d3dInterface.h"
 
 #include <string>
 

@@ -10,10 +10,8 @@
 #include <vector>
 
 #include "dllRenderer.h"
-#include "gBufferID.h"
-#include "d3dInterface.h"
-#include "mathBasic.h"
-#include "vertices.h"
+//#include "d3dInterface.h"
+#include <xkill-utilities/IObserver.h>
 
 class FXManagement;
 class CBManagement;
@@ -25,6 +23,8 @@ static const unsigned int MULTISAMPLES_GBUFFERS		= 1;
 static const unsigned int MULTISAMPLES_BACKBUFFER	= 1;
 static const unsigned int MULTISAMPLES_DEPTHBUFFER	= 1;
 
+struct VertexPosNormTex;
+
 //! Rendering Component of XKILL.
 /*!
 Main rendering component of XKILL utilizing Deferred Rendering with 2 G-buffers:
@@ -33,7 +33,7 @@ Main rendering component of XKILL utilizing Deferred Rendering with 2 G-buffers:
 Warning: RenderingComponent may not be created with an anti-aliasing MSAA-count of +0!
 \ingroup xkill-renderer
 */
-class DLL RenderingComponent : public D3DInterface
+class DLL_R RenderingComponent : public IObserver
 {
 public:
 	//! Initializes RenderingComponent to default values. init()-method need be called in order for RenderingComponent to get proper values.
@@ -67,6 +67,8 @@ public:
 	HRESULT init();
 	//! Resets RenderingComponent to default state.
 	void reset();
+	//! Runs a frame for RenderingComponent.
+	void onUpdate(float delta);
 	//! Main render-method of RenderingComponent.
 	/*!
 	\param view View-matrix from camera.
@@ -167,7 +169,7 @@ private:
 
 	FXManagement*	fxManagement_;						//!< Maintaining shaders and input-layouts.
 	CBManagement*	cbManagement_;						//!< Maintaining constant buffers.
-	GBuffer*		gBuffers_[GBUFFERID_NUM_BUFFERS];	//!< Containing data for deferred rendering.
+	GBuffer*		gBuffers_[2/*GBUFFERID_NUM_BUFFERS*/];	//!< Containing data for deferred rendering.
 	D3DDebug*		d3dDebug_;							//!< Used for detecting live COM-objects.
 
 	ID3D11Device*			device_;	//!< DirectX device pointer.

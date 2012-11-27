@@ -1,6 +1,6 @@
-#include <renderingUtilities.h>
+#include "renderingUtilities.h"
 
-#include <shaderVS.h>
+#include "shaderVS.h"
 
 ShaderVS::ShaderVS()
 {

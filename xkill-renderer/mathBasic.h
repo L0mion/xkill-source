@@ -35,7 +35,7 @@ inline int round(float value)
 	return (int)(value+roundDirection);
 }
 
-struct DLL VecI2
+struct VecI2
 {
 	int x;
 	int y;
@@ -83,7 +83,7 @@ inline bool operator==(const VecI2& left, const VecI2& right)
 		left.y == right.y);
 }
 
-struct DLL VecF2
+struct VecF2
 {
 	float x;
 	float y;
@@ -100,7 +100,7 @@ struct DLL VecF2
 	}
 };
 
-struct DLL VecF3
+struct VecF3
 {
 	float x;
 	float y;
@@ -189,7 +189,7 @@ inline VecF3 operator*(const VecF3& left, float scalar)
 	return ret;
 }
 
-struct DLL VecF4
+struct VecF4
 {
 	float x;
 	float y;
@@ -213,7 +213,7 @@ struct DLL VecF4
 	}
 };
 
-class DLL MatF4
+class MatF4
 {
 public:
 	float m[4][4];
@@ -264,7 +264,7 @@ public:
 	void transpose();
 };
 
-struct DLL Quaternion
+struct Quaternion
 {
 	float x, y, z, w;
 
