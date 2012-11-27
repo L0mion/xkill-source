@@ -7,16 +7,16 @@
 	Various types of Vertices used by xkill-renderer
 */
 
-#include "mathBasic.h"
+#include <DirectXMath.h>
 
 //! Basic three-member vertex
 /*!
 \ingroup xkill-renderer-vertices*/
 struct VertexPosNormTex
 {
-	VecF3 position_;	//!< float3 vector specifying position in model-space of vertex.
-	VecF3 normal_;	//!< float3 vector specifying normal in model-space of vertex.
-	VecF2 texcoord_;	//!< float3 vector specifying texture-coordinates.
+	DirectX::XMFLOAT3 position_;	//!< float3 vector specifying position in model-space of vertex.
+	DirectX::XMFLOAT3 normal_;	//!< float3 vector specifying normal in model-space of vertex.
+	DirectX::XMFLOAT2 texcoord_;	//!< float3 vector specifying texture-coordinates.
 
 	//! Default constructor of Vertex.
 	/*!
@@ -27,9 +27,9 @@ struct VertexPosNormTex
 	*/
 	VertexPosNormTex()
 	{
-		this->position_	= VecF3(0.0f, 0.0f, 0.0f);
-		this->normal_	= VecF3(0.0f, 0.0f, 0.0f);
-		this->texcoord_	= VecF2(0.0f, 0.0f);
+		this->position_	= DirectX::XMFLOAT3(0.0f, 0.0f, 0.0f);
+		this->normal_	= DirectX::XMFLOAT3(0.0f, 0.0f, 0.0f);
+		this->texcoord_	= DirectX::XMFLOAT2(0.0f, 0.0f);
 	}
 	//! Constructor setting members to specific values.
 	/*!
@@ -37,7 +37,10 @@ struct VertexPosNormTex
 	\param normal	Normal in model-space of vertex.
 	\param texcoord	Texture-coordinates.
 	*/
-	VertexPosNormTex(VecF3 position, VecF3 normal, VecF2 texcoord)
+	VertexPosNormTex(
+		DirectX::XMFLOAT3 position, 
+		DirectX::XMFLOAT3 normal, 
+		DirectX::XMFLOAT2 texcoord)
 	{
 		this->position_	= position;
 		this->normal_	= normal;
