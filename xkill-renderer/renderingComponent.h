@@ -14,6 +14,7 @@
 #include "d3dInterface.h"
 #include "mathBasic.h"
 #include "vertices.h"
+#include "MeshLoaderObj.h"
 
 class FXManagement;
 class CBManagement;
@@ -186,9 +187,13 @@ private:
 	ID3D11UnorderedAccessView* uavBackBuffer_; //!< Used to render to texBackBuffer using DirectCompute.
 
 	//temp
-	ID3D11Buffer*			vertexBuffer_;		//!< Mock buffer sending vertices to shader.
-	std::vector<VertexPosNormTex>*	vertices_;	//!< Mock vertices.
-	ObjLoaderBasic*			objLoader_;			//!< Basic obj-loader used to debug renderer. 
+	ID3D11Buffer*	vertexBuffer_;		//!< Mock buffer sending vertices to shader.
+	ID3D11Buffer*	indexBuffer_;
+	//std::vector<VertexPosNormTex>*	vertices_;	//!< Mock vertices.
+	unsigned int tempVerticesSize;
+	unsigned int tempIndicesSize;
+	//ObjLoaderBasic*			objLoader_;			//!< Basic obj-loader used to debug renderer.
+	MeshLoaderObj*			objLoader_;
 };
 
 #endif //XKILL_RENDERER_RENDERINGCOMPONENT_H

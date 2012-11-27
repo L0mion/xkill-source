@@ -2,7 +2,7 @@
 
 MeshLoader::MeshLoader(const LPCWSTR mlFileName)
 {
-	mlFileName_ = mlFileName;
+	mlFilePath_ = mlFileName;
 }
 MeshLoader::~MeshLoader()
 {
@@ -10,7 +10,7 @@ MeshLoader::~MeshLoader()
 		mlIFS_.close();
 }
 
-const LPCWSTR MeshLoader::getMLFileName()
+const LPCWSTR MeshLoader::getMLFilePath()
 {
-	return mlFileName_;
+	return mlFilePath_;
 }

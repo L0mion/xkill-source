@@ -1,19 +1,36 @@
 #include <MeshLoaderObj.h>
 
-MeshLoaderObj::MeshLoaderObj(LPCWSTR mlFileName)
-	: MeshLoader(mlFileName)
+MeshLoaderObj::MeshLoaderObj(LPCWSTR mlFilePath)
+	: MeshLoader(mlFilePath)
 {
-	lineNum_ = 0;
+	lineNum_		= 0;
+	curLine_		= "";	
+	curSymbol_		= SYMBOL_IGNORE;
+
+	curLineSplit_.clear();
+	mlPosition_.clear();
+	mlNormal_.clear();
+	mlTex_.clear();
+	mlFaces_.clear();
+	mlVertices_.clear();
+	mlIndices_.clear();
 }
 MeshLoaderObj::~MeshLoaderObj()
 {
+	curLineSplit_.clear();
+	mlPosition_.clear();
+	mlNormal_.clear();
+	mlTex_.clear();
+	mlFaces_.clear();
+	mlVertices_.clear();
+	mlIndices_.clear();
 }
 
 bool MeshLoaderObj::init()
 {
 	bool sucessfulLoad = true;
 
-	LPCWSTR filename = getMLFileName();
+	LPCWSTR filename = getMLFilePath();
 	mlIFS_.open(filename);
 
 	if(mlIFS_.is_open())
@@ -28,10 +45,6 @@ bool MeshLoaderObj::init()
 	return sucessfulLoad;
 }
 
-bool MeshLoaderObj::mlLoadMesh()
-{
-	return mlParseSymbols();
-}
 bool MeshLoaderObj::mlParseSymbols()
 {
 	bool sucessfulLoad = true;
@@ -49,16 +62,16 @@ bool MeshLoaderObj::mlParseSymbols()
 			switch(curSymbol_)
 			{
 			case SYMBOL_VERTEX:
-				sucessfulLoad = mlLoadVertex();
+				mlLoadVertex();
 				break;
 			case SYMBOL_TEX:
-				sucessfulLoad = mlLoadTex();
+				mlLoadTex();
 				break;
 			case SYMBOL_NORM:
-				sucessfulLoad = mlLoadNorm();
+				mlLoadNorm();
 				break;
 			case SYMBOL_FACE:
-				sucessfulLoad = mlLoadFaces();
+				mlLoadFaces();
 			case SYMBOL_IGNORE:
 				//Do nothing.
 				break;
@@ -104,13 +117,13 @@ bool MeshLoaderObj::mlParseParams()
 	switch(curSymbol_)
 	{
 	case SYMBOL_VERTEX:
-		sucessfulParse = mlParseParam(SYMBOL_VERTEX);
+		sucessfulParse = mlParseParam();
 		break;
 	case SYMBOL_TEX:
-		sucessfulParse = mlParseParam(SYMBOL_TEX);
+		sucessfulParse = mlParseParam();
 		break;
 	case SYMBOL_NORM:
-		sucessfulParse = mlParseParam(SYMBOL_NORM);
+		sucessfulParse = mlParseParam();
 		break;
 	case SYMBOL_FACE:
 		sucessfulParse = true; //Faces are special case and are not parsed here.
@@ -122,7 +135,7 @@ bool MeshLoaderObj::mlParseParams()
 
 	return sucessfulParse;
 }
-bool MeshLoaderObj::mlParseParam(ObjSymbol symbol)
+bool MeshLoaderObj::mlParseParam()
 {
 	bool sucessfulParse = true;
 
@@ -137,7 +150,7 @@ bool MeshLoaderObj::mlParseParam(ObjSymbol symbol)
 	return sucessfulParse;
 }
 
-bool MeshLoaderObj::mlLoadVertex()
+void MeshLoaderObj::mlLoadVertex()
 {
 	float x, y, z;
 	float w = 1.0f; //optional
@@ -152,10 +165,8 @@ bool MeshLoaderObj::mlLoadVertex()
 
 	DirectX::XMFLOAT3 mlPosition(x, y, z);
 	mlPosition_.push_back(mlPosition);
-
-	return true;
 }
-bool MeshLoaderObj::mlLoadNorm()
+void MeshLoaderObj::mlLoadNorm()
 {
 	float x, y, z;
 	x = (float)::atof(curLineSplit_[OBJ_PARAMS_INDEX_VERTEX_X].c_str());
@@ -164,10 +175,8 @@ bool MeshLoaderObj::mlLoadNorm()
 
 	DirectX::XMFLOAT3 mlNormal(x, y, z);
 	mlNormal_.push_back(mlNormal);
-
-	return true;
 }
-bool MeshLoaderObj::mlLoadTex()
+void MeshLoaderObj::mlLoadTex()
 {
 	float u, v;
 	float w = 0.0f; //optional
@@ -178,9 +187,7 @@ bool MeshLoaderObj::mlLoadTex()
 		w = (float)::atof(curLineSplit_[OBJ_PARAMS_INDEX_TEX_W].c_str());
 
 	DirectX::XMFLOAT2 mlTexCoord(u, v);
-	mlTexCoord_.push_back(mlTexCoord);
-
-	return true;
+	mlTex_.push_back(mlTexCoord);
 }
 bool MeshLoaderObj::mlLoadFaces()
 {
@@ -231,7 +238,7 @@ void MeshLoaderObj::mlLoadFace(std::vector<std::string>& face)
 		/*Create new vertex*/
 		VertexPosNormTex vertex;
 		vertex.position_	= mlPosition_[iPos	- 1];
-		vertex.texcoord_	= mlTexCoord_[iTex	- 1];
+		vertex.texcoord_	= mlTex_[iTex	- 1];
 		vertex.normal_		= mlNormal_[iNorm	- 1];
 		mlVertices_.push_back(vertex);
 
@@ -272,7 +279,7 @@ void MeshLoaderObj::mlPrintFail()
 	std::wstring lineW;
 	lineW.assign(line.begin(), line.end());
 
-	std::wstring file		= getMLFileName();
+	std::wstring file		= getMLFilePath();
 	std::wstring failed		= L" parsing failed at line ";
 	std::wstring errorMsg	= file + failed + lineW;
 	ERROR_MSG(errorMsg.c_str());
