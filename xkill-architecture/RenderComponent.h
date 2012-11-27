@@ -61,14 +61,6 @@ public:
 				PositionAttribute* p = ATTRIBUTE_CAST(PositionAttribute,positionAttribute,s);
 				//SpatialAttribute* s = r->spatialAttribute.getAttribute();
 
-				/*struct MyStruct
-				{
-				transparent* r;
-				SpatialAttribute* s;
-				PositionAttribute* p;
-				};
-				SubRenderComponent;*/
-
 				p->position = i
 					+ r->transparent 
 					+ r->tessellation 

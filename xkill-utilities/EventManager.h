@@ -20,6 +20,7 @@ private:
 	std::vector<std::vector<IObserver*>>* event_queues;
 
 	EventManager();
+	~EventManager();
 
 
 public:

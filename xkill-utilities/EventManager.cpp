@@ -8,15 +8,15 @@
 
 
 EventManager::EventManager()
+{
+	event_queues = new std::vector<std::vector<IObserver*>>;
+	// Build vectors with all events
+	for(int i=0; i<EVENT_LAST; i++)
 	{
-		event_queues = new std::vector<std::vector<IObserver*>>;
-		// Build vectors with all events
-		for(int i=0; i<EVENT_LAST; i++)
-		{
-			std::vector<IObserver*> v;
-			event_queues->push_back(v);
-		}
+		std::vector<IObserver*> v;
+		event_queues->push_back(v);
 	}
+}
 
 
 EventManager* EventManager::getInstance()
@@ -67,7 +67,7 @@ void EventManager::removeObserver(IObserver* observer, EventType type)
 }
 
 
-void EventManager::sendEvent( Event* e )
+void EventManager::sendEvent(Event* e)
 {
 	int index = e->getType();
 	std::cout << "EVENTMANAGER: Sends Event of Enum " << index << std::endl;
@@ -75,6 +75,11 @@ void EventManager::sendEvent( Event* e )
 	{
 		(*event_queues)[index][i]->onEvent(e);
 	}
+}
+
+EventManager::~EventManager()
+{
+	delete event_queues;
 }
 
 
