@@ -12,6 +12,8 @@ ViewportManagement::ViewportManagement(	unsigned int numViewports,
 	viewportHeight_ = viewportHeight;
 	screenWidth_	= screenWidth;
 	screenHeight_	= screenHeight;
+
+	border_ = 4.0f;
 }
 
 ViewportManagement::~ViewportManagement()
@@ -90,20 +92,21 @@ HRESULT ViewportManagement::initViewportDouble()
 		hr = E_FAIL;
 		ERROR_MSG(L"RenderingComponent::initViewportDouble() failed! Viewport size exceeds screen size!");
 	}
+
 	D3D11_VIEWPORT viewport;
 	ZeroMemory(&viewport, sizeof(D3D11_VIEWPORT));
 	
 	viewport.TopLeftX	= 0;
 	viewport.TopLeftY	= 0;
 	viewport.Width		= static_cast<FLOAT>(viewportWidth_);
-	viewport.Height		= static_cast<FLOAT>(viewportHeight_);
+	viewport.Height		= static_cast<FLOAT>(viewportHeight_)-border_;
 	viewport.MinDepth	= 0;
 	viewport.MaxDepth	= 1;
 
 	viewports->push_back(viewport);
 
 	viewport.TopLeftX	= 0;
-	viewport.TopLeftY	= static_cast<FLOAT>(viewportHeight_);
+	viewport.TopLeftY	= static_cast<FLOAT>(viewportHeight_)+border_;
 
 	viewports->push_back(viewport);
 
@@ -119,6 +122,7 @@ HRESULT ViewportManagement::initViewportGrid(unsigned int gridSize)
 		hr = E_FAIL;
 		ERROR_MSG(L"RenderingComponent::initViewportDouble() failed! Viewport size exceeds screen size!");
 	}
+
 	D3D11_VIEWPORT viewport;
 	ZeroMemory(&viewport, sizeof(D3D11_VIEWPORT));
 	
@@ -135,6 +139,11 @@ HRESULT ViewportManagement::initViewportGrid(unsigned int gridSize)
 		{
 			viewport.TopLeftX = static_cast<FLOAT>(row*viewportWidth_);
 			viewport.TopLeftY = static_cast<FLOAT>(column*viewportHeight_);
+
+			if(column != 0)
+				viewport.TopLeftY += border_;
+			if(row != 0)
+				viewport.TopLeftX += border_;
 
 			viewports->push_back(viewport);
 		}

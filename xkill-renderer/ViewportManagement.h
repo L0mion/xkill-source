@@ -52,6 +52,8 @@ private:
 	unsigned int screenWidth_;		//!< Width of the screen.
 	unsigned int screenHeight_;		//!< Height of the screen.
 
+	float border_;	//<! Adds space between viewports.
+
 	std::vector<D3D11_VIEWPORT>* viewports;	//!< Vector containing all the viewport objects.
 };
 
