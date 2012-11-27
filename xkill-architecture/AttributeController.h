@@ -4,7 +4,7 @@
 
 /// A handle used by Entity to modify one of its Attribute
 /** 
-The most commond usage is to delete all assosiated Attribute
+The most common usage is to delete all associated Attributes
 upon deletion of an Entity.
 
 \ingroup achitecture
