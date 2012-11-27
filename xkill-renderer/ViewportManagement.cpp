@@ -9,6 +9,9 @@ ViewportManagement::ViewportManagement(	unsigned int numViewports,
 	screenWidth_	= screenWidth;
 	screenHeight_	= screenHeight;
 
+	viewportWidth_	= 0;
+	viewportHeight_ = 0;
+
 	border_ = 4.0f;
 }
 
@@ -141,4 +144,14 @@ HRESULT ViewportManagement::initViewportGrid(unsigned int gridSize)
 	}
 
 	return hr;
+}
+
+unsigned int ViewportManagement::getViewportWidth() const
+{
+	return viewportWidth_;
+}
+
+unsigned int ViewportManagement::getViewportHeight() const
+{
+	return viewportHeight_;
 }

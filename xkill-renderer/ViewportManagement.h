@@ -33,6 +33,9 @@ public:
 	//! Initializes ViewportManagement.
 	HRESULT init();
 
+	unsigned int getViewportWidth() const;
+	unsigned int getViewportHeight() const;
+
 private:
 	//! Creates a single viewport that covers the entire window.
 	HRESULT initViewportSingle();
