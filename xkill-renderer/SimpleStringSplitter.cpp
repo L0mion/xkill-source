@@ -11,9 +11,15 @@ std::vector<std::string> SimpleStringSplitter::splitString(
 	char		splitter,
 	std::string	splitting)
 {
-	split.clear();
+	split_.clear();
+	ss_ = std::stringstream(splitting);
 
-	//ss_.
+	while(std::getline(ss_, intermediate_, splitter))
+	{
+		if(!intermediate_.empty())
+			if(intermediate_.front() != splitter)
+				split_.push_back(intermediate_); //avoid duplicate splitter-chars
+	}
 
-	return split; 
+	return split_;
 }
