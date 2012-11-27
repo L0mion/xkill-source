@@ -3,14 +3,15 @@
 #include <xkill-utilities/EventManager.h>
 #include "AttributeController.h"
 
-/// Provies a unique id and keeps track of \ref attributes associated with that id.
+/// Provies a unique id and keeps track of \ref ATTRIBUTES associated with that id.
 /** 
 Created by EntityFactory and stored in a EntityManager.
 
 An Entity represents a barebone game object and can be
-almost anything based on its \ref attributes and 
-the \ref components working on each attribute.
-\ingroup achitecture
+almost anything based on its \ref ATTRIBUTES and 
+the \ref COMPONENTS working on each attribute.
+
+\ingroup ARCHITECTURE
 */
 
 class Entity

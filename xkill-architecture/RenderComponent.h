@@ -14,7 +14,7 @@ Some other attributes associated with rendering, such
 as CameraAttribute should probably be processed 
 here as well.
 
-\ingroup components
+\ingroup COMPONENTS
 */
 
 class RenderComponent : public IObserver

@@ -5,7 +5,7 @@
 
 /// Manages multiple Entities in a uniform way.
 /** 
-\ingroup achitecture
+\ingroup ARCHITECTURE
 */
 
 class EntityManager

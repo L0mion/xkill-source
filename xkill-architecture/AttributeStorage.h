@@ -9,12 +9,13 @@
 class Entity;
 
 
-/// Template class for storing and creating \ref attributes in a uniform manner.
+/// Template class for storing and creating \ref ATTRIBUTES in a uniform manner.
 /** 
 IMPORTANT: The owner (Entity) of each attribute is stored in "owners".
 If owner is 0 it means the attribute is deleted and ready to be reused
 when a new Entity is created.
-\ingroup achitecture
+
+\ingroup ARCHITECTURE
 */
 
 template <class T>
