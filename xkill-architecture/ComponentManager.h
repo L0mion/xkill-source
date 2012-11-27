@@ -21,7 +21,7 @@ class ComponentManager
 {
 private:
 	RenderComponent render;
-	PhysicsComponent physics;
+	//PhysicsComponent physics;
 	SoundComponent sound;
 public:
 	ComponentManager()
@@ -33,6 +33,6 @@ public:
 	{
 		sound.onUpdate(delta);
 		render.onUpdate(delta);
-		physics.onUpdate(delta);
+		//physics.onUpdate(delta);
 	}
 };
