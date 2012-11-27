@@ -21,9 +21,9 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	UINT screenWidth = 800;
 	UINT screenHeight = 800;
 
-	UINT viewportWidth = screenWidth/2;
+	UINT viewportWidth = screenWidth;
 	UINT viewportHeight = screenHeight/2;
-	UINT numViewports = 4;
+	UINT numViewports = 2;
 
 	Window* window = new Window(hInstance, cmdShow, screenWidth, screenHeight);
 	window->init();
