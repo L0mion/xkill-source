@@ -17,6 +17,7 @@
 
 class FXManagement;
 class CBManagement;
+class ViewportManagement;
 class GBuffer;
 class D3DDebug;
 class ObjLoaderBasic;
@@ -41,14 +42,22 @@ public:
 	\param windowHandle	Handle to WINAPI-window to which it will render.
 	\param screenWidth	Width of backbuffer, depthbuffer and g-buffers.
 	\param screenHeight	Height of backbuffer, depthbuffer and g-buffers.
-	\param texAliasing	Aliasing-count of backbuffer, depthbuffer and g-buffers.
+	\param viewportWidth Width of each viewport.
+	\param viewportHeight Height of each viewport. 
 	*/
 	RenderingComponent(
 		HWND windowHandle, 
 		unsigned int screenWidth, 
-		unsigned int screenHeight);
+		unsigned int screenHeight,
+		unsigned int viewportWidth,
+		unsigned int viewportHeight,
+		unsigned int numViewports);
 	//! Releases all memory and returns to default state.
 	~RenderingComponent();
+
+	
+	
+
 
 	//! Initializes RenderingComponent's members and prepares render.
 	/*!	\return First encountered error.
@@ -75,7 +84,6 @@ public:
 	\sa renderToBackBuffer
 	*/
 	void render(DirectX::XMFLOAT4X4 view, DirectX::XMFLOAT4X4 projection);
-private:
 	//! Renders to g-buffers, storing albedo and normals till later.
 	/*!
 	\param view View-matrix from camera.
@@ -87,6 +95,16 @@ private:
 	\sa uavBackBuffer
 	*/
 	void renderToBackBuffer();
+	//! Sets which viewport to draw to.
+	/*!
+	\param index The index of the viewport to draw to. 
+	*/
+	void setViewport(unsigned int index);
+	//! Clears the GBuffers with a single color. 
+	void clearGBuffers();
+
+private:
+	
 
 	//! Translates the initiated feature-level to string which may be presented in window.
 	/*!
@@ -124,7 +142,8 @@ private:
 	*/
 	HRESULT initGBuffers();
 	//! Creates a single viewport onto which the scene will render.
-	void initViewport();
+	HRESULT initViewport();
+	
 	//! Creates rasterizer-state.
 	/*!
 	\return Any error encountered during initialization.
@@ -164,9 +183,14 @@ private:
 	HWND windowHandle_;				//!< WINAPI-handle to window.
 	unsigned int screenWidth_;		//!< Width of screen.
 	unsigned int screenHeight_;		//!< Height of screen.
+	unsigned int viewportWidth_;	//!< Width of each viewport.
+	unsigned int viewportHeight_;	//!< Height of each viewport.
+	unsigned int numViewports_;		//!< NUmber of viewports that will be used.
 
-	FXManagement*	fxManagement_;						//!< Maintaining shaders and input-layouts.
-	CBManagement*	cbManagement_;						//!< Maintaining constant buffers.
+	
+	FXManagement*		fxManagement_;				//!< Maintaining shaders and input-layouts.
+	CBManagement*		cbManagement_;				//!< Maintaining constant buffers.
+	ViewportManagement* viewportManagement_;		//!< Maintaining viewports.
 	GBuffer*		gBuffers_[GBUFFERID_NUM_BUFFERS];	//!< Containing data for deferred rendering.
 	D3DDebug*		d3dDebug_;							//!< Used for detecting live COM-objects.
 

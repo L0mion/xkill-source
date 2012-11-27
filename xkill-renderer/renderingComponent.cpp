@@ -1,5 +1,6 @@
 #include <renderingComponent.h>
 #include <fxManagement.h>
+#include "ViewportManagement.h"
 #include <gBuffer.h>
 #include <renderingUtilities.h>
 #include <d3dDebug.h>
@@ -8,21 +9,30 @@
 
 RenderingComponent::RenderingComponent(HWND windowHandle,
 									   unsigned int screenWidth,
-									   unsigned int screenHeight)
+									   unsigned int screenHeight,
+									   unsigned int viewportWidth,
+									   unsigned int viewportHeight,
+									   unsigned int numViewports)
 {
-	this->windowHandle_	= windowHandle;
-	this->screenWidth_	= screenWidth;
-	this->screenHeight_	= screenHeight;
+	windowHandle_	= windowHandle;
+	screenWidth_	= screenWidth;
+	screenHeight_	= screenHeight;
+	viewportWidth_	= viewportWidth;
+	viewportHeight_ = viewportHeight;
+	numViewports_	= numViewports;
 
-	fxManagement_	= nullptr;
-	cbManagement_	= nullptr; 
+	fxManagement_		= nullptr;
+	cbManagement_		= nullptr; 
+	viewportManagement_ = nullptr;
+	
 	for(unsigned int i = 0; i < GBUFFERID_NUM_BUFFERS; i++)
 		gBuffers_[i] = nullptr;
+	
 	d3dDebug_		= nullptr;
 
-	device_	= nullptr;
-	devcon_	= nullptr;
-	swapChain_ = nullptr;
+	device_		= nullptr;
+	devcon_		= nullptr;
+	swapChain_	= nullptr;
 
 	rtvBackBuffer_	= nullptr;
 	uavBackBuffer_	= nullptr;
@@ -34,9 +44,9 @@ RenderingComponent::RenderingComponent(HWND windowHandle,
 	texDepthBuffer_	= nullptr;
 
 	//temp
-	vertexBuffer_ = nullptr;
-	vertices_ = nullptr;
-	objLoader_ = nullptr;
+	vertexBuffer_	= nullptr;
+	vertices_		= nullptr;
+	objLoader_		= nullptr;
 }
 RenderingComponent::~RenderingComponent()
 {
@@ -60,6 +70,8 @@ RenderingComponent::~RenderingComponent()
 
 	SAFE_DELETE(cbManagement_);
 	SAFE_DELETE(fxManagement_);
+	SAFE_DELETE(viewportManagement_);
+
 	for(unsigned int i = 0; i < GBUFFERID_NUM_BUFFERS; i++)
 		SAFE_DELETE(gBuffers_[i]);
 	
@@ -84,7 +96,7 @@ HRESULT RenderingComponent::init()
 	if(SUCCEEDED(hr))
 		hr = initGBuffers();
 	if(SUCCEEDED(hr))
-		initViewport();
+		hr = initViewport();
 	if(SUCCEEDED(hr))
 		hr = initRSDefault();
 	if(SUCCEEDED(hr))
@@ -111,6 +123,8 @@ void RenderingComponent::reset()
 	
 	if(fxManagement_)
 		fxManagement_->reset();
+	if(viewportManagement_)
+		viewportManagement_->reset();
 	if(cbManagement_)
 		cbManagement_->reset();
 
@@ -162,12 +176,10 @@ void RenderingComponent::renderToGBuffer(DirectX::XMFLOAT4X4 view, DirectX::XMFL
 	for(int i=0; i<GBUFFERID_NUM_BUFFERS; i++)
 		renderTargets[i] = gBuffers_[i]->getRTV();
 	devcon_->OMSetRenderTargets(GBUFFERID_NUM_BUFFERS, renderTargets, dsvDepthBuffer_);
-	devcon_->ClearRenderTargetView(renderTargets[GBUFFERID_ALBEDO], green);
-	devcon_->ClearRenderTargetView(renderTargets[GBUFFERID_NORMAL], blue);
 
 	devcon_->ClearDepthStencilView(dsvDepthBuffer_, D3D11_CLEAR_DEPTH, 1.0f, 0);
 	devcon_->RSSetState(rsDefault_);
-	//devcon->IASetVertexBuffers(0, 0, NULL, 0, 0);
+	
 	UINT stride = sizeof(VertexPosNormTex);
 	UINT offset = 0;
 	devcon_->IASetVertexBuffers(0, 1, &vertexBuffer_, &stride, &offset);
@@ -196,7 +208,6 @@ void RenderingComponent::renderToBackBuffer()
 	cbManagement_->getCBPerInstance()->update(devcon_, screenWidth_, screenHeight_, 32, 32);
 	cbManagement_->getCBPerInstance()->csSet(devcon_);
 
-	//Compute Shader
 	ID3D11UnorderedAccessView* uav[] = { uavBackBuffer_ };
 	devcon_->CSSetUnorderedAccessViews(0, 1, uav, nullptr);
 
@@ -218,6 +229,24 @@ void RenderingComponent::renderToBackBuffer()
 	devcon_->CSSetSamplers(0, 0, nullptr);
 
 	swapChain_->Present(0, 0);
+}
+void RenderingComponent::setViewport(unsigned int index)
+{
+	viewportManagement_->setViewport(devcon_, index);
+}
+void RenderingComponent::clearGBuffers()
+{
+	FLOAT black[]	= {0.0f, 0.0f, 0.0f, 1.0f };
+	FLOAT red[]		= {1.0f, 0.0f, 0.0f, 1.0f };
+	FLOAT green[]	= {0.0f, 1.0f, 0.0f, 1.0f };
+	FLOAT blue[]	= {0.0f, 0.0f, 1.0f, 1.0f };
+
+	ID3D11RenderTargetView* renderTargets[GBUFFERID_NUM_BUFFERS];
+	for(int i=0; i<GBUFFERID_NUM_BUFFERS; i++)
+		renderTargets[i] = gBuffers_[i]->getRTV();
+	
+	devcon_->ClearRenderTargetView(renderTargets[GBUFFERID_ALBEDO], green);
+	devcon_->ClearRenderTargetView(renderTargets[GBUFFERID_NORMAL], blue);
 }
 
 LPCWSTR RenderingComponent::featureLevelToString(D3D_FEATURE_LEVEL featureLevel)
@@ -366,19 +395,17 @@ HRESULT RenderingComponent::initGBuffers()
 
 	return hr;
 }
-void RenderingComponent::initViewport()
+HRESULT RenderingComponent::initViewport()
 {
-	D3D11_VIEWPORT viewport;
-	ZeroMemory(&viewport, sizeof(D3D11_VIEWPORT));
+	HRESULT hr = S_OK;
+	viewportManagement_ = new ViewportManagement(numViewports_,
+												 viewportWidth_,
+												 viewportHeight_,
+												 screenWidth_,
+												 screenHeight_);
+	hr = viewportManagement_->init();
 
-	viewport.TopLeftX	= 0;
-	viewport.TopLeftY	= 0;
-	viewport.Width		= static_cast<FLOAT>(screenWidth_);
-	viewport.Height		= static_cast<FLOAT>(screenHeight_);
-	viewport.MinDepth	= 0;
-	viewport.MaxDepth	= 1;
-
-	devcon_->RSSetViewports(1, &viewport);
+	return hr;
 }
 HRESULT RenderingComponent::initRSDefault()
 {
