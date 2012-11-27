@@ -2,14 +2,10 @@
 #include "renderingUtilities.h"
 
 ViewportManagement::ViewportManagement(	unsigned int numViewports,
-										unsigned int viewportWidth,
-										unsigned int viewportHeight,
 										unsigned int screenWidth,
 										unsigned int screenHeight)
 {
 	numViewports_	= numViewports;
-	viewportWidth_	= viewportWidth;
-	viewportHeight_ = viewportHeight;
 	screenWidth_	= screenWidth;
 	screenHeight_	= screenHeight;
 
@@ -65,17 +61,16 @@ HRESULT ViewportManagement::init()
 HRESULT ViewportManagement::initViewportSingle()
 {
 	HRESULT hr = S_OK;
-	if(viewportWidth_ > screenWidth_ || viewportHeight_ > screenHeight_)
-	{
-		hr = E_FAIL;
-		ERROR_MSG(L"RenderingComponent::initViewportSingle() failed! Viewport size exceeds screen size!");
-	}
+	
+	viewportWidth_	= screenWidth_;
+	viewportHeight_ = screenHeight_;
+
 	D3D11_VIEWPORT viewport;
 	ZeroMemory(&viewport, sizeof(D3D11_VIEWPORT));
 	
 	viewport.TopLeftX	= 0;
 	viewport.TopLeftY	= 0;
-	viewport.Width		= static_cast<FLOAT>(viewportWidth_);
+	viewport.Width		= static_cast<FLOAT>(screenHeight_);
 	viewport.Height		= static_cast<FLOAT>(viewportHeight_);
 	viewport.MinDepth	= 0;
 	viewport.MaxDepth	= 1;
@@ -87,11 +82,9 @@ HRESULT ViewportManagement::initViewportSingle()
 HRESULT ViewportManagement::initViewportDouble()
 {
 	HRESULT hr = S_OK;
-	if(viewportWidth_ > screenWidth_ || (viewportHeight_*2) > screenHeight_)
-	{
-		hr = E_FAIL;
-		ERROR_MSG(L"RenderingComponent::initViewportDouble() failed! Viewport size exceeds screen size!");
-	}
+
+	viewportWidth_	= screenWidth_;
+	viewportHeight_ = screenHeight_/2;
 
 	D3D11_VIEWPORT viewport;
 	ZeroMemory(&viewport, sizeof(D3D11_VIEWPORT));
@@ -117,11 +110,9 @@ HRESULT ViewportManagement::initViewportGrid(unsigned int gridSize)
 
 	HRESULT hr = S_OK;
 	unsigned int width = static_cast<unsigned int>(sqrt(gridSize));
-	if((viewportWidth_*width) > screenWidth_ || (viewportHeight_*width) > screenHeight_)
-	{
-		hr = E_FAIL;
-		ERROR_MSG(L"RenderingComponent::initViewportDouble() failed! Viewport size exceeds screen size!");
-	}
+	
+	viewportWidth_	= screenWidth_/width;
+	viewportHeight_ = screenHeight_/width;
 
 	D3D11_VIEWPORT viewport;
 	ZeroMemory(&viewport, sizeof(D3D11_VIEWPORT));

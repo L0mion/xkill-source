@@ -12,15 +12,11 @@
 RenderingComponent::RenderingComponent(HWND windowHandle,
 									   unsigned int screenWidth,
 									   unsigned int screenHeight,
-									   unsigned int viewportWidth,
-									   unsigned int viewportHeight,
 									   unsigned int numViewports)
 {
 	windowHandle_	= windowHandle;
 	screenWidth_	= screenWidth;
 	screenHeight_	= screenHeight;
-	viewportWidth_	= viewportWidth;
-	viewportHeight_ = viewportHeight;
 	numViewports_	= numViewports;
 
 	fxManagement_		= nullptr;
@@ -405,8 +401,6 @@ HRESULT RenderingComponent::initViewport()
 {
 	HRESULT hr = S_OK;
 	viewportManagement_ = new ViewportManagement(numViewports_,
-												 viewportWidth_,
-												 viewportHeight_,
 												 screenWidth_,
 												 screenHeight_);
 	hr = viewportManagement_->init();

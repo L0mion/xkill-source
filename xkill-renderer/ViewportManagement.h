@@ -22,8 +22,6 @@ public:
 	\param screenHeight The height of the screen in which the viewports reside.
 	*/
 	ViewportManagement(unsigned int numViewports,
-						unsigned int viewportWidth,
-						unsigned int viewportHeight,
 						unsigned int screenWidth,
 						unsigned int screenHeight);
 	//! Releases all memory and returns ViewportManagement to default state.
