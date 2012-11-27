@@ -10,11 +10,6 @@ MeshLoader::~MeshLoader()
 		mlIFS_.close();
 }
 
-bool MeshLoader::mlLoad()
-{
-	return mlLoadMesh();
-}
-
 const LPCWSTR MeshLoader::getMLFileName()
 {
 	return mlFileName_;

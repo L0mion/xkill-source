@@ -11,10 +11,7 @@ public:
 	~MeshLoader();
 
 	virtual bool init()			= 0;
-	bool mlLoad();
 protected:
-	virtual bool mlLoadMesh()	= 0;
-
 	const LPCWSTR getMLFileName();
 
 	std::ifstream	mlIFS_;
