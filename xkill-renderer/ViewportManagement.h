@@ -6,35 +6,53 @@
 
 #include "d3dInterface.h"
 
+//! Class for maintaining viewports.
+/*!
+\ingroup xkill-renderer
+*/
 class ViewportManagement : public D3DInterface
 {
 public:
+	//! Sets ViewportManagement to its default state.
+	/*!
+	\param numViewports The number of viewports that will be used.
+	\param viewportWidth The width of each viewport.
+	\param viewportHeight The height of each viewport.
+	\param screenWidth The width of the screen in which the viewports reside.
+	\param screenHeight The height of the screen in which the viewports reside.
+	*/
 	ViewportManagement(unsigned int numViewports,
 						unsigned int viewportWidth,
 						unsigned int viewportHeight,
 						unsigned int screenWidth,
 						unsigned int screenHeight);
+	//! Releases all memory and returns ViewportManagement to default state.
 	~ViewportManagement();
-
+	//! Releases all memory and returns ViewportManagement to default state.
 	virtual void reset();
-	
+	//! Set the viewport that the renderer will draw to. 
 	void setViewport(ID3D11DeviceContext* devcon, unsigned int index);
-
+	//! Initializes ViewportManagement.
 	HRESULT init();
 
 private:
-
+	//! Creates a single viewport that covers the entire window.
 	HRESULT initViewportSingle();
+	//! Creates two viewports that splits the window horizontally
 	HRESULT initViewportDouble();
+	//! Creates a specified amount of viewports in a grid pattern.
+	/*!
+	\param gridSize Total number of viewports in the grid. Must be a perfect square!
+	*/
 	HRESULT initViewportGrid(unsigned int gridSize);
 
-	unsigned int numViewports_;
-	unsigned int viewportWidth_;
-	unsigned int viewportHeight_;
-	unsigned int screenWidth_;
-	unsigned int screenHeight_;
+	unsigned int numViewports_;		//!< Number of viewports that will be used.
+	unsigned int viewportWidth_;	//!< Width of each viewport.
+	unsigned int viewportHeight_;	//!< Height of each viewport.
+	unsigned int screenWidth_;		//!< Width of the screen.
+	unsigned int screenHeight_;		//!< Height of the screen.
 
-	std::vector<D3D11_VIEWPORT>* viewports;
+	std::vector<D3D11_VIEWPORT>* viewports;	//!< Vector containing all the viewport objects.
 };
 
 #endif //XKILL_RENDERER_VIEWPORTMANAGEMENT_H

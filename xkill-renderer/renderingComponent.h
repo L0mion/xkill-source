@@ -141,7 +141,10 @@ private:
 	\sa GBuffer
 	*/
 	HRESULT initGBuffers();
-	//! Creates a single viewport onto which the scene will render.
+	//! Creates a ViewportManagement object that in turn will create the specified amount of viewports.
+	/*!
+	\return Any error encountered during initialization.
+	*/
 	HRESULT initViewport();
 	
 	//! Creates rasterizer-state.
@@ -188,11 +191,11 @@ private:
 	unsigned int numViewports_;		//!< NUmber of viewports that will be used.
 
 	
-	FXManagement*		fxManagement_;				//!< Maintaining shaders and input-layouts.
-	CBManagement*		cbManagement_;				//!< Maintaining constant buffers.
-	ViewportManagement* viewportManagement_;		//!< Maintaining viewports.
-	GBuffer*		gBuffers_[GBUFFERID_NUM_BUFFERS];	//!< Containing data for deferred rendering.
-	D3DDebug*		d3dDebug_;							//!< Used for detecting live COM-objects.
+	FXManagement*		fxManagement_;						//!< Maintaining shaders and input-layouts.
+	CBManagement*		cbManagement_;						//!< Maintaining constant buffers.
+	ViewportManagement* viewportManagement_;				//!< Maintaining viewports.
+	GBuffer*			gBuffers_[GBUFFERID_NUM_BUFFERS];	//!< Containing data for deferred rendering.
+	D3DDebug*			d3dDebug_;							//!< Used for detecting live COM-objects.
 
 	ID3D11Device*			device_;	//!< DirectX device pointer.
 	ID3D11DeviceContext*	devcon_;	//!< DirectX device context pointer.
