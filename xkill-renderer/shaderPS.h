@@ -3,7 +3,7 @@
 
 #include <d3d11.h>
 #include <d3dcompiler.h>
-#include <shader.h>
+#include "shader.h"
 
 
 //! Class derived from class Shader responsible for loading a pixel shader.

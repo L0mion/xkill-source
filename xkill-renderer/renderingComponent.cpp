@@ -1,11 +1,13 @@
-#include <renderingComponent.h>
-#include <fxManagement.h>
+#include "renderingComponent.h"
+#include "fxManagement.h"
 #include "ViewportManagement.h"
-#include <gBuffer.h>
-#include <renderingUtilities.h>
-#include <d3dDebug.h>
-#include <CBManagement.h>
-#include <objLoaderBasic.h>
+#include "gBuffer.h"
+#include "renderingUtilities.h"
+#include "d3dDebug.h"
+#include "CBManagement.h"
+#include "objLoaderBasic.h"
+#include "mathBasic.h"
+#include "vertices.h"
 
 RenderingComponent::RenderingComponent(HWND windowHandle,
 									   unsigned int screenWidth,
@@ -145,6 +147,10 @@ void RenderingComponent::reset()
 
 	//temp
 	SAFE_RELEASE(vertexBuffer_);
+}
+
+void RenderingComponent::onUpdate(float delta)
+{
 }
 
 void RenderingComponent::render(DirectX::XMFLOAT4X4 view, DirectX::XMFLOAT4X4 projection)

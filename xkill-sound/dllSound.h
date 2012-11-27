@@ -1,10 +1,10 @@
 #ifndef XKILL_SOUND_DLLSOUND_H
 #define XKILL_SOUND_DLLSOUND_H
 
-#ifdef DLL_EXPORT
-#define DLL __declspec(dllexport)
+#ifdef DLL_SOUND
+#define DLL_S __declspec(dllexport)
 #else
-#define DLL __declspec(dllimport)
-#endif //DLL_EXPORT
+#define DLL_S __declspec(dllimport)
+#endif //DLL_SOUND
 
 #endif //XKILL_SOUND_DLLSOUND_H

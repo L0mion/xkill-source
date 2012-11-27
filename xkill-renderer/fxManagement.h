@@ -5,11 +5,11 @@
 #include <d3d10.h>
 #include <d3dcompiler.h>
 
-#include <d3dInterface.h>
-#include <IEDManagement.h>
-#include <shaderVS.h>
-#include <shaderPS.h>
-#include <shaderCS.h>
+#include "d3dInterface.h"
+#include "IEDManagement.h"
+#include "shaderVS.h"
+#include "shaderPS.h"
+#include "shaderCS.h"
 
 //! Class maintaing shaders and input layout.
 /*!

@@ -1,10 +1,10 @@
 #ifndef XKILL_RENDERER_DLLRENDERER_H
 #define XKILL_RENDERER_DLLRENDERER_H
 
-#ifdef DLL_EXPORT
-#define DLL __declspec(dllexport)
+#ifdef DLL_RENDERER
+#define DLL_R __declspec(dllexport)
 #else
-#define DLL __declspec(dllimport)
-#endif //DLL_EXPORT
+#define DLL_R __declspec(dllimport)
+#endif //DLL_RENDERER
 
 #endif //XKILL_RENDERER_DLLRENDERER_H

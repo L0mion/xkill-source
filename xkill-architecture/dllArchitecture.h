@@ -1,10 +1,10 @@
 #ifndef XKILL_ARCHITECTURE_DLLARCHITECTURE_H
 #define XKILL_ARCHITECTURE_DLLARCHITECTURE_H
 
-#ifdef DLL_EXPORT
-#define DLL __declspec(dllexport)
+#ifdef DLL_ARCHITECTURE
+#define DLL_A __declspec(dllexport)
 #else
-#define DLL __declspec(dllimport)
-#endif //DLL_EXPORT
+#define DLL_A __declspec(dllimport)
+#endif //DLL_ARCHITECTURE
 
 #endif //XKILL_ARCHITECTURE_DLLARCHITECTURE_H

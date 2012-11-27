@@ -1,6 +1,6 @@
-#include <renderingUtilities.h>
+#include "renderingUtilities.h"
 
-#include <d3dDebug.h>
+#include "d3dDebug.h"
 
 D3DDebug::D3DDebug()
 {

@@ -10,7 +10,7 @@
 #include <D3D11SDKLayers.h>
 #endif //DEBUG || _DEBUG
 
-#include <d3dInterface.h>
+#include "d3dInterface.h"
 
 //! Wraps d3d-debug COM-objects that allow detailed printing of live objects at run-time.
 /*!
