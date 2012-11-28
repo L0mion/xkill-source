@@ -16,13 +16,13 @@ with minimal overhead.
 The attributes listed is currently only placeholders and should
 be modified to suit the need of each Component.
 
-\defgroup attributes Attributes
-\ingroup utilities
+\defgroup ATTRIBUTES Attributes
+\ingroup UTILITIES
 */
 
 /// Attribute interface to facilitate grouping of attributes.
 /** 
-\ingroup attributes
+\ingroup ATTRIBUTES
 */
 struct DLL_U IAttribute
 {
@@ -37,7 +37,7 @@ struct DLL_U IAttribute
 
 /// Stores the position of an Entity 
 /** 
-\ingroup attributes
+\ingroup ATTRIBUTES
 */
 struct DLL_U PositionAttribute : public IAttribute
 {
@@ -48,7 +48,7 @@ struct DLL_U PositionAttribute : public IAttribute
 
 /// Stores detailed Spatial informaiton about an Entity 
 /** 
-\ingroup attributes
+\ingroup ATTRIBUTES
 */
 struct DLL_U SpatialAttribute : public IAttribute
 {
@@ -69,7 +69,7 @@ that should be transparent or not, tesselated or not, use the same
 meshID and textureID, and the Render each Queue in a orderly fashion 
 throught the use of Instancing.
 
-\ingroup attributes
+\ingroup ATTRIBUTES
 */
 struct DLL_U RenderAttribute : public IAttribute
 {
@@ -86,7 +86,7 @@ struct DLL_U RenderAttribute : public IAttribute
 
 /// Stores everything PhysicsComponent needs to know about an entity
 /** 
-\ingroup attributes
+\ingroup ATTRIBUTES
 */
 struct DLL_U PhysicsAttribute : public IAttribute
 {
@@ -104,7 +104,7 @@ struct DLL_U PhysicsAttribute : public IAttribute
 
 /// Stores everything SoundComponent needs to know to play a 3D sound
 /** 
-\ingroup attributes
+\ingroup ATTRIBUTES
 */
 struct DLL_U SoundAttribute : public IAttribute
 {
@@ -116,7 +116,7 @@ struct DLL_U SoundAttribute : public IAttribute
 
 /// Stores everything RenderComponent needs to know to manage multiple Cameras in the world
 /** 
-\ingroup attributes
+\ingroup ATTRIBUTES
 */
 struct DLL_U CameraAttribute : public IAttribute
 {

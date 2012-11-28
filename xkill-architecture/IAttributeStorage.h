@@ -2,7 +2,7 @@
 
 /// Interface to group AttributeStorage of different types togheter.
 /** 
-\ingroup achitecture
+\ingroup ARCHITECTURE
 */
 
 class IAttributeStorage

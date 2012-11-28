@@ -7,7 +7,7 @@
 The most common usage is to delete all associated Attributes
 upon deletion of an Entity.
 
-\ingroup achitecture
+\ingroup ARCHITECTURE
 */
 
 class AttributeController

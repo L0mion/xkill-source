@@ -5,7 +5,7 @@
 
 /// Singleton responsible for providing access to each Attribute.
 /** 
-\ingroup achitecture
+\ingroup ARCHITECTURE
 */
 
 class AttributeManager

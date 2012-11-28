@@ -11,7 +11,7 @@
 Filling out each Attribute and connecting chains of 
 Attribute is the responsibility of the EntityFactory.
 
-\ingroup achitecture
+\ingroup ARCHITECTURE
 */
 
 class EntityFactory 
