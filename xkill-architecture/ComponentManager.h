@@ -3,6 +3,7 @@
 #include "RenderComponent.h"
 #include "SoundComponent.h"
 #include "PhysicsComponent.h"
+#include "GameComponent.h"
 #include <vector>
 
 
@@ -20,9 +21,10 @@ be the responsibility of the ComponentManager.
 class ComponentManager
 {
 private:
-	RenderComponent render;
+	RenderComponent renderComponent;
 	//PhysicsComponent physics;
-	SoundComponent sound;
+	SoundComponent soundComponent;
+	GameComponent gameComponent;
 public:
 	ComponentManager()
 	{
@@ -33,9 +35,9 @@ public:
 
 	void update(float delta)
 	{
-		sound.onUpdate(delta);
+		gameComponent.onUpdate(delta);
+		//soundComponent.onUpdate(delta);
 		//physics.onUpdate(delta);
-		render.onUpdate(delta);
-	
+		//renderComponent.onUpdate(delta);
 	}
 };

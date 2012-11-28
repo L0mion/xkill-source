@@ -55,12 +55,12 @@ public:
 				SpatialAttribute* s = ATTRIBUTE_CAST(SpatialAttribute,spatialAttribute,r);
 				PositionAttribute* p = ATTRIBUTE_CAST(PositionAttribute,positionAttribute,s);
 
-				p->position =
+				p->positionX =
 					+ r->transparent 
 					+ r->tessellation 
 					+ r->meshID 
 					+ r->textureID
-					+ p->position
+					+ p->positionX
 					+ s->rotation
 					+ s->scale;
 			}
@@ -83,7 +83,7 @@ public:
 					<< r->tessellation		<< "\t"
 					<< r->meshID			<< "\t"
 					<< r->textureID			<< "\t"
-					<< p->position			<< "\t"
+					<< p->positionX			<< "\t"
 					<< s->rotation			<< "\t"
 					<< s->scale 
 					<< std::endl;
