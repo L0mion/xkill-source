@@ -2,7 +2,7 @@
 
 #include "AttributeStorage.h"
 
-/// A handle used by Entity to modify one of its Attribute
+/// A handle used by Entity to modify one of its Attributes
 /** 
 The most common usage is to delete all associated Attributes
 upon deletion of an Entity.

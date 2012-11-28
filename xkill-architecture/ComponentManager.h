@@ -21,18 +21,21 @@ class ComponentManager
 {
 private:
 	RenderComponent render;
-	//PhysicsComponent physics;
+	PhysicsComponent physics;
 	SoundComponent sound;
 public:
 	ComponentManager()
 	{
-
+		std::vector<PhysicsAttribute>* attributes = AttributeManager::getInstance()->physicsAttributes.getAllAttributes();
+		
+		//physics.init(attributes);
 	}
 
 	void update(float delta)
 	{
 		sound.onUpdate(delta);
-		render.onUpdate(delta);
 		//physics.onUpdate(delta);
+		render.onUpdate(delta);
+	
 	}
 };

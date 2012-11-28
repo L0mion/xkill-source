@@ -45,6 +45,5 @@ public:
 	{
 		Entity* e = entityFactory.createEntity_TypeA();
 		addEntity(e);
-		std::cout << "ENTITYMANAGER: Created Entity " << e->getID() << std::endl;
 	}
 };
