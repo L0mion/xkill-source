@@ -3,9 +3,9 @@
 #include "EntityFactory.h"
 #include <vector>
 
-/// Manages multiple Entity in a uniform way
+/// Manages multiple Entities in a uniform way.
 /** 
-\ingroup achitecture
+\ingroup ARCHITECTURE
 */
 
 class EntityManager
@@ -45,6 +45,5 @@ public:
 	{
 		Entity* e = entityFactory.createEntity_TypeA();
 		addEntity(e);
-		std::cout << "ENTITYMANAGER: Created Entity " << e->getID() << std::endl;
 	}
 };

@@ -6,12 +6,12 @@
 #include <vector>
 
 
-/// A factory for creating Entity and assigning multiple Attribute in a flexible way
+/// A factory for creating Entities and assigning multiple attributes in a flexible way.
 /** 
 Filling out each Attribute and connecting chains of 
 Attribute is the responsibility of the EntityFactory.
 
-\ingroup achitecture
+\ingroup ARCHITECTURE
 */
 
 class EntityFactory 
@@ -55,6 +55,7 @@ public:
 
 
 		// Return entity
+		std::cout << "ENTITYFACTORY: Created Entity " << e->getID() << std::endl;
 		return e;
 	}
 };

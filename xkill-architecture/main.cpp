@@ -4,7 +4,7 @@
 
 /// If you can't tell what the main() is for you should have your programming license revoked
 /** 
-\ingroup achitecture
+\ingroup ARCHITECTURE
 */
 
 int main()

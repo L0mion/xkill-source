@@ -2,12 +2,12 @@
 
 #include "AttributeStorage.h"
 
-/// A handle used by Entity to modify one of its Attribute
+/// A handle used by Entity to modify one of its Attributes
 /** 
-The most commond usage is to delete all assosiated Attribute
+The most common usage is to delete all associated Attributes
 upon deletion of an Entity.
 
-\ingroup achitecture
+\ingroup ARCHITECTURE
 */
 
 class AttributeController
