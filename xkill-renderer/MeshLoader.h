@@ -26,6 +26,7 @@ public:
 	//! Purely abstract functions to be used by all loaders to load respective files.
 	virtual bool init()	= 0;
 protected:
+
 	const LPCWSTR getMLFilePath();
 
 	std::ifstream	mlIFS_;			//!< ifstream used to load files.
