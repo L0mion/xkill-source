@@ -1,5 +1,6 @@
 #pragma once
 
+#include <xkill-physics/BulletPhysicsComponent.h>
 #include "RenderComponent.h"
 #include "SoundComponent.h"
 #include "PhysicsComponent.h"
@@ -21,18 +22,19 @@ class ComponentManager
 {
 private:
 	RenderComponent render;
-	//PhysicsComponent physics;
+	BulletPhysicsComponent* physics;
 	SoundComponent sound;
 public:
 	ComponentManager()
 	{
-
+		physics = new BulletPhysicsComponent(nullptr);
+		physics->init();
 	}
 
 	void update(float delta)
 	{
 		sound.onUpdate(delta);
 		render.onUpdate(delta);
-		//physics.onUpdate(delta);
+		physics->onUpdate(delta);
 	}
 };
