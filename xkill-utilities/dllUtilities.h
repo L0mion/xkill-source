@@ -3,7 +3,7 @@
 
 /// Utility class used by everyone.
 /** 
-\defgroup utilities XKILL - Utilities 
+\defgroup UTILITIES XKILL - Utilities 
 */
 
 #ifdef DLL_UTILITIES

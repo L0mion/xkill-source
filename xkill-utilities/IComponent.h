@@ -7,7 +7,7 @@
 //// Components info
 ////
 //
-///// Components execute \ref attributes in a orderly fashion.
+///// Components execute \ref ATTRIBUTES in a orderly fashion.
 ///** 
 //Most funcitonallity should be implemented as a Component.
 //
@@ -16,14 +16,14 @@
 //from multiple Components even during Runtime we retain the benefits of a
 //Component-Oriented approach without sacrificing performance.
 //
-//\defgroup components Components
-//\ingroup achitecture
+//\defgroup COMPONENTS Components
+//\ingroup ARCHITECTURE
 //*/
 //
 //
 ///// Interface needed as a Component. Used in ComponentManager
 ///** 
-//\ingroup utilities
+//\ingroup UTILITIES
 //*/
 //
 //class DLL_U IComponent
@@ -31,25 +31,25 @@
 //public:
 //	virtual void onUpdate(float delta) = 0;
 //};
-
-
-
-
+//
+//
+//
+//
 //#pragma once
 //
 //#include "dllUtilities.h"
 //
 //class Event;
-
-/// Interface needed for receiving Events
-/** 
-\ingroup utilities
-*/
-
-/*
-class DLL_U IComponent
-{
-public:
-	virtual void onEvent(Event* e) = 0;
-};
-*/
+//
+// Interface needed for receiving Events
+///** 
+//\ingroup UTILITIES
+//*/
+//
+///*
+//class DLL_U IComponent
+//{
+//public:
+//	virtual void onEvent(Event* e) = 0;
+//};
+//*/

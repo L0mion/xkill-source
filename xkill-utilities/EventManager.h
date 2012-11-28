@@ -10,8 +10,8 @@ class Event;
 
 /// Redirect events to each appropriate IObserver.
 /** 
-\ingroup utilities
-\ingroup events
+\ingroup UTILITIES
+\ingroup EVENTS
 */
 
 class DLL_U EventManager
