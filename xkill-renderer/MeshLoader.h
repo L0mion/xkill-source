@@ -19,7 +19,7 @@ public:
 	/*!
 	\param mlFilePath Path to desired file.
 	*/
-	MeshLoader(LPCWSTR mlFilePath);
+	MeshLoader(const LPCWSTR mlFilePath);
 	//! Closes ifstream if open.
 	~MeshLoader();
 
