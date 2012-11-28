@@ -145,12 +145,12 @@ private:
 	/*! \return True if entirely numeric, False if not. */
 	bool mlIsNumeric(std::string value);
 
-	unsigned int lineNum_;	//!< Line number previously read from file.
+	unsigned int mlLineNum_;	//!< Line number previously read from file.
 
-	std::string					curLine_;		//!< Current line being read and interpreted.
-	SimpleStringSplitter		sss_;			//!< Helper class used to split strings when reading these from file.
-	std::vector<std::string>	curLineSplit_;	//!< Split version of current line.
-	ObjSymbol					curSymbol_;		//!< Symbol previously read.
+	std::string					mlCurLine_;		//!< Current line being read and interpreted.
+	SimpleStringSplitter		mlSSS_;			//!< Helper class used to split strings when reading these from file.
+	std::vector<std::string>	mlCurLineSplit_;	//!< Split version of current line.
+	ObjSymbol					mlCurSymbol_;		//!< Symbol previously read.
 
 	std::vector<DirectX::XMFLOAT3> mlPosition_;	//!< Spatial attributes read from file.
 	std::vector<DirectX::XMFLOAT3> mlNormal_;	//!< Normal attributes read from file.
