@@ -16,14 +16,20 @@ void run(RenderingComponent* renderingComponent, Window* window/*, CameraBasic* 
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int cmdShow)
 {
-	GameManager gm;
-	gm.run();
-
 	UINT screenWidth = 800;
 	UINT screenHeight = 800;
 
 	Window* window = new Window(hInstance, cmdShow, screenWidth, screenHeight);
 	window->init();
+
+	GameManager gm;
+	gm.init(window->getWindowHandle(),screenWidth,screenHeight);
+	
+	while(window->getIsActive())
+	{
+		window->checkMessages();
+		gm.run();
+	}
 
 	//RenderingComponent* renderingComponent = new RenderingComponent(
 	//	window->getWindowHandle(), 

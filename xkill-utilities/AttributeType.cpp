@@ -49,3 +49,10 @@ CameraAttribute::CameraAttribute()
 CameraAttribute::~CameraAttribute()
 {
 }
+
+InputAttribute::InputAttribute()
+{
+}
+InputAttribute::~InputAttribute()
+{
+}

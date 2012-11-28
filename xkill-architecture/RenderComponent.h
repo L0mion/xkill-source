@@ -69,14 +69,14 @@ public:
 				};
 				SubRenderComponent;*/
 
-				p->position = i
-					+ r->transparent 
-					+ r->tessellation 
-					//+ r->meshid 
-					//+ r->textureid
-					+ p->position
-					+ s->rotation
-					+ s->scale;
+				//p->position = i
+				//	+ r->transparent 
+				//	+ r->tessellation 
+				//	//+ r->meshid 
+				//	//+ r->textureid
+				//	+ p->position
+				//	+ s->rotation
+				//	+ s->scale;
 			}
 		}
 

@@ -2,6 +2,7 @@
 
 #include "EntityFactory.h"
 #include <vector>
+#include <iostream>
 
 /// Manages multiple Entity in a uniform way
 /** 
@@ -46,5 +47,12 @@ public:
 		Entity* e = entityFactory.createEntity_TypeA();
 		addEntity(e);
 		std::cout << "ENTITYMANAGER: Created Entity " << e->getID() << std::endl;
+	}
+
+	void createCamera()
+	{
+		Entity* e = entityFactory.createEntity_Camera();
+		addEntity(e);
+		std::cout << "ENTITYMANAGER: Created Camera " << e->getID() << std::endl;
 	}
 };

@@ -1,4 +1,7 @@
 #include "renderingComponent.h"
+
+#include <xkill-utilities/AttributeType.h>
+
 #include "fxManagement.h"
 #include "ViewportManagement.h"
 #include "gBuffer.h"
@@ -9,12 +12,15 @@
 #include "mathBasic.h"
 #include "vertices.h"
 
-RenderingComponent::RenderingComponent(HWND windowHandle,
-									   unsigned int screenWidth,
-									   unsigned int screenHeight,
-									   unsigned int viewportWidth,
-									   unsigned int viewportHeight,
-									   unsigned int numViewports)
+RenderingComponent::RenderingComponent(
+		HWND windowHandle,
+		unsigned int screenWidth, 
+		unsigned int screenHeight,
+		unsigned int viewportWidth,
+		unsigned int viewportHeight,
+		unsigned int numViewports,
+		std::vector<RenderAttribute>* renderAttributes,
+		std::vector<CameraAttribute>* cameraAttributes)
 {
 	windowHandle_	= windowHandle;
 	screenWidth_	= screenWidth;
@@ -49,6 +55,9 @@ RenderingComponent::RenderingComponent(HWND windowHandle,
 	vertexBuffer_	= nullptr;
 	vertices_		= nullptr;
 	objLoader_		= nullptr;
+
+	renderAttributes_ = renderAttributes;
+	cameraAttributes_ = cameraAttributes;
 }
 RenderingComponent::~RenderingComponent()
 {
@@ -151,6 +160,12 @@ void RenderingComponent::reset()
 
 void RenderingComponent::onUpdate(float delta)
 {
+	setViewport(0);
+	clearGBuffers();
+	renderToGBuffer(DirectX::XMFLOAT4X4(cameraAttributes_->at(0).mat_view),
+		DirectX::XMFLOAT4X4(cameraAttributes_->at(0).mat_projection));
+
+	renderToBackBuffer();
 }
 
 void RenderingComponent::render(DirectX::XMFLOAT4X4 view, DirectX::XMFLOAT4X4 projection)

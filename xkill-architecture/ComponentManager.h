@@ -1,8 +1,10 @@
 #pragma once
 
-#include "RenderComponent.h"
+#include <xkill-renderer/renderingComponent.h>
 #include "SoundComponent.h"
 #include "PhysicsComponent.h"
+#include "CameraComponent.h"
+#include "AttributeManager.h"
 #include <vector>
 
 
@@ -20,19 +22,32 @@ be the responsiblity of the ComponentManager.
 class ComponentManager
 {
 private:
-	RenderComponent render;
-	PhysicsComponent physics;
-	SoundComponent sound;
+	RenderingComponent* render_;
+	PhysicsComponent	physics_;
+	SoundComponent		sound_;
+	CameraComponent		camera_;
 public:
 	ComponentManager()
 	{
+		
+	}
 
+	void init(HWND windowHandle, unsigned int screenWidth, unsigned int screenHeight)
+	{
+		render_ = new RenderingComponent(windowHandle,screenWidth,screenHeight,800,800,1,
+										AttributeManager::getInstance()->renderAttributes.getAllAttributes(),
+										AttributeManager::getInstance()->cameraAttributes.getAllAttributes());
+		render_->init();
+		camera_.init(AttributeManager::getInstance()->cameraAttributes.getAllAttributes(),
+					AttributeManager::getInstance()->inputAttributes.getAllAttributes(),
+					static_cast<float>(screenWidth)/static_cast<float>(screenHeight));
 	}
 
 	void update(float delta)
 	{
-		sound.onUpdate(delta);
-		render.onUpdate(delta);
-		physics.onUpdate(delta);
+		sound_.onUpdate(delta);
+		camera_.onUpdate(delta);
+		physics_.onUpdate(delta);
+		render_->onUpdate(delta);
 	}
 };
