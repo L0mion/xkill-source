@@ -6,15 +6,16 @@
 #include "IAttributeStorage.h"
 #include "AttributeController.h"
 #include <xkill-utilities/AttributePointer.h>
-class Entity;
+#include "Entity.h"
 
 
-/// Template class for storing and creating \ref attributes in a uniform manner.
+/// Template class for storing and creating \ref ATTRIBUTES in a uniform manner.
 /** 
 IMPORTANT: The owner (Entity) of each attribute is stored in "owners".
 If owner is 0 it means the attribute is deleted and ready to be reused
 when a new Entity is created.
-\ingroup achitecture
+
+\ingroup ARCHITECTURE
 */
 
 template <class T>
@@ -83,7 +84,7 @@ public:
 		deleted.push(index);
 	}
 
-	AttributePointer getAttributePointer()
+	AttributePointer createAttributePointer()
 	{
 		AttributePointer a;
 		a.init(&attributes, index);

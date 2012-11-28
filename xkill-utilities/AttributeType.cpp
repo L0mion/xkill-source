@@ -49,3 +49,10 @@ CameraAttribute::CameraAttribute()
 CameraAttribute::~CameraAttribute()
 {
 }
+
+PlayerAttribute::PlayerAttribute()
+{
+}
+PlayerAttribute::~PlayerAttribute()
+{
+}

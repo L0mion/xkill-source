@@ -5,7 +5,7 @@
 
 /// Singleton responsible for providing access to each Attribute.
 /** 
-\ingroup achitecture
+\ingroup ARCHITECTURE
 */
 
 class AttributeManager
@@ -15,6 +15,7 @@ public:
 	AttributeStorage<SpatialAttribute> spatialAttributes;
 	AttributeStorage<RenderAttribute>	renderAttributes;
 	AttributeStorage<PhysicsAttribute>	physicsAttributes;
+	AttributeStorage<PlayerAttribute>	playerAttributes;
 
 	static AttributeManager* getInstance()
 	{

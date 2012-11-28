@@ -6,7 +6,7 @@
 
 /// Component to process PhysicsAttribute
 /** 
-\ingroup components
+\ingroup COMPONENTS
 */
 
 class PhysicsComponent : public IObserver

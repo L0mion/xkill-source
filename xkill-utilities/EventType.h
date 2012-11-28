@@ -6,7 +6,7 @@
 // Events info
 //
 
-/// Used to communicate with \ref components and other IObserver throught the use of EventManager.
+/// Used to communicate with \ref COMPONENTS and other IObserver throught the use of EventManager.
 /** 
 Memory deletion should be made by the funciton sending the Event.
 
@@ -14,8 +14,8 @@ The following usage i prefered:
 Event_A event;
 EventManager::getInstance()->sendEvent(&event);
 
-\defgroup events Events
-\ingroup utilities
+\defgroup EVENTS Events
+\ingroup UTILITIES
 \sa EventManager
 */
 
@@ -36,6 +36,7 @@ enum DLL_U EventType
 	EVENT_D,
 	EVENT_E,
 	EVENT_F,
+	PLAYSOUND,
 
 	// this is needed, don't touch!
 	EVENT_LAST 
@@ -44,7 +45,7 @@ enum DLL_U EventType
 
 /// Base class
 /**
-\ingroup events
+\ingroup EVENTS
 */
 
 class DLL_U Event
@@ -70,7 +71,7 @@ public:
 ////////////////////////////////////////////
 
 /**
-\ingroup events
+\ingroup EVENTS
 */
 class DLL_U Event_A : public Event
 {
@@ -81,7 +82,7 @@ public:
 };
 
 /**
-\ingroup events
+\ingroup EVENTS
 */
 class DLL_U Event_B : public Event
 {
@@ -89,4 +90,14 @@ public:
 	Event_B() : Event(EVENT_B){}
 
 	int b;
+};
+
+/**
+\ingroup events
+*/
+class DLL_U Event_PlaySound : public Event
+{
+public:
+	Event_PlaySound(int soundId) : Event(PLAYSOUND){this->soundId=soundId;}
+	int soundId;
 };
