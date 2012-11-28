@@ -96,6 +96,15 @@ public:
 		componentManager->update(1.0f);
 		std::cin.ignore();
 
+		Event_PlaySound playSound(0);
+
+		while(1)
+		{
+			EventManager::getInstance()->sendEvent(&playSound);
+			componentManager->update(1.0f);
+		}
+		std::cin.ignore();
+
 
 		//
 		// End game

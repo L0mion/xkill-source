@@ -36,6 +36,7 @@ enum DLL_U EventType
 	EVENT_D,
 	EVENT_E,
 	EVENT_F,
+	PLAYSOUND,
 
 	// this is needed, don't touch!
 	EVENT_LAST 
@@ -89,4 +90,14 @@ public:
 	Event_B() : Event(EVENT_B){}
 
 	int b;
+};
+
+/**
+\ingroup events
+*/
+class DLL_U Event_PlaySound : public Event
+{
+public:
+	Event_PlaySound(int soundId) : Event(PLAYSOUND){this->soundId=soundId;}
+	int soundId;
 };
