@@ -55,6 +55,7 @@ public:
 
 
 		// Return entity
+		std::cout << "ENTITYFACTORY: Created Entity " << e->getID() << std::endl;
 		return e;
 	}
 };
