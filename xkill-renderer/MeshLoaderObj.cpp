@@ -1,29 +1,12 @@
 #include <MeshLoaderObj.h>
 
-MeshLoaderObj::MeshLoaderObj(LPCWSTR mlFilePath)
+MeshLoaderObj::MeshLoaderObj(const LPCWSTR mlFilePath)
 	: MeshLoader(mlFilePath)
 {
 	mlLineNum_		= 0;
-	mlCurLine_		= "";	
-	mlCurSymbol_		= SYMBOL_IGNORE;
-
-	mlCurLineSplit_.clear();
-	mlPosition_.clear();
-	mlNormal_.clear();
-	mlTex_.clear();
-	mlFaces_.clear();
-	mlVertices_.clear();
-	mlIndices_.clear();
 }
 MeshLoaderObj::~MeshLoaderObj()
 {
-	mlCurLineSplit_.clear();
-	mlPosition_.clear();
-	mlNormal_.clear();
-	mlTex_.clear();
-	mlFaces_.clear();
-	mlVertices_.clear();
-	mlIndices_.clear();
 }
 
 bool MeshLoaderObj::init()
@@ -35,7 +18,7 @@ bool MeshLoaderObj::init()
 
 	if(mlIFS_.is_open())
 	{
-		sucessfulLoad = mlParseSymbols();
+		sucessfulLoad = mlParseObj();
 		if(mlIFS_.is_open())
 			mlIFS_.close();
 	}
@@ -45,37 +28,24 @@ bool MeshLoaderObj::init()
 	return sucessfulLoad;
 }
 
-bool MeshLoaderObj::mlParseSymbols()
+bool MeshLoaderObj::mlParseObj()
 {
 	bool sucessfulLoad = true;
 
+	ObjSymbol curSymbol = SYMBOL_INVALID;
+	std::string curLine = "";
+	std::vector<std::string> curLineSplit;
 	while(!mlIFS_.eof() && sucessfulLoad)
 	{
-		mlGetLine(mlCurLine_);
-		mlCurLineSplit_ = mlSSS_.splitString(OBJ_SEPARATOR_DEFAULT, mlCurLine_);
+		mlGetLine(curLine);
+		curLineSplit = mlSSS_.splitString(OBJ_SEPARATOR_DEFAULT, curLine);
 
-		sucessfulLoad = mlParseSymbol();
-		sucessfulLoad = mlParseParams();
-
-		if(sucessfulLoad)
+		curSymbol = mlParseSymbol(curLineSplit);
+		if(curSymbol != SYMBOL_IGNORE)
 		{
-			switch(mlCurSymbol_)
-			{
-			case SYMBOL_VERTEX:
-				mlLoadVertex();
-				break;
-			case SYMBOL_TEX:
-				mlLoadTex();
-				break;
-			case SYMBOL_NORM:
-				mlLoadNorm();
-				break;
-			case SYMBOL_FACE:
-				mlLoadFaces();
-			case SYMBOL_IGNORE:
-				//Do nothing.
-				break;
-			}
+			sucessfulLoad	= mlParseParams(curSymbol, curLineSplit);
+			if(sucessfulLoad)
+				mlLoadSymbol(curSymbol, curLineSplit);
 		}
 		
 		if(!sucessfulLoad)
@@ -84,131 +54,186 @@ bool MeshLoaderObj::mlParseSymbols()
 
 	return sucessfulLoad;
 }
-bool MeshLoaderObj::mlParseSymbol()
+ObjSymbol MeshLoaderObj::mlParseSymbol(const std::vector<std::string>& params)
 {
-	bool sucessfulLoad = true;
-
-	mlCurSymbol_ = SYMBOL_IGNORE;
-	if(mlCurLineSplit_.size() > 0)
+	ObjSymbol symbol = SYMBOL_IGNORE;
+	if(params.size() > 0)
 	{
-		if(mlCurLineSplit_.front()		== OBJ_INDICATOR_VERTEX)
-			mlCurSymbol_ = SYMBOL_VERTEX;
-		else if(mlCurLineSplit_.front()	== OBJ_INDICATOR_TEX)
-			mlCurSymbol_ = SYMBOL_TEX;
-		else if(mlCurLineSplit_.front()	== OBJ_INDICATOR_NORM)
-			mlCurSymbol_ = SYMBOL_NORM;
-		else if(mlCurLineSplit_.front()	== OBJ_INDICATOR_FACE)
-			mlCurSymbol_ = SYMBOL_FACE;
+		if(params.front()		== OBJ_INDICATOR_VERTEX)
+			symbol = SYMBOL_VERTEX;
+		else if(params.front()	== OBJ_INDICATOR_TEX)
+			symbol = SYMBOL_TEX;
+		else if(params.front()	== OBJ_INDICATOR_NORM)
+			symbol = SYMBOL_NORM;
+		else if(params.front()	== OBJ_INDICATOR_FACE)
+			symbol = SYMBOL_FACE;
+		else if(params.front()	== OBJ_INDICATOR_GROUP)
+			symbol = SYMBOL_GROUP;
 	}
 
-	/*
-	else if(symbol == OBJ_INDICATOR_SMOOTH)
-	else if(symbol == OBJ_INDICATOR_GROUP)
-	else if(symbol == OBJ_INDICATOR_LIB)
-	*/
-
-	return sucessfulLoad;
+	return symbol;
 }
 
-bool MeshLoaderObj::mlParseParams()
-{
-	bool sucessfulParse = false;
-
-	switch(mlCurSymbol_)
-	{
-	case SYMBOL_VERTEX:
-		sucessfulParse = mlParseParam();
-		break;
-	case SYMBOL_TEX:
-		sucessfulParse = mlParseParam();
-		break;
-	case SYMBOL_NORM:
-		sucessfulParse = mlParseParam();
-		break;
-	case SYMBOL_FACE:
-		sucessfulParse = true; //Faces are special case and are not parsed here.
-		break;
-	case SYMBOL_IGNORE:
-		sucessfulParse = true;
-		break;
-	}
-
-	return sucessfulParse;
-}
-bool MeshLoaderObj::mlParseParam()
+bool MeshLoaderObj::mlParseParams(
+	const ObjSymbol symbol,
+	const std::vector<std::string>& params)
 {
 	bool sucessfulParse = true;
 
-	unsigned int numParams = mlCurLineSplit_.size();
+	int		numExpectedParams	= 0;
+	int		numOptionalParams	= 0;
+	bool	expectedNumeric		= true;
+	switch(symbol)
+	{
+	case SYMBOL_VERTEX:
+		numExpectedParams = OBJ_PARAMS_NUM_VERTEX;
+		numOptionalParams = OBJ_PARAMS_NUM_VERTEX_OPTIONAL;
+		break;
+	case SYMBOL_TEX:
+		numExpectedParams = OBJ_PARAMS_NUM_TEX; //at least NUM_TEX params
+		numOptionalParams = OBJ_PARAMS_NUM_TEX_OPTIONAL;
+		break;
+	case SYMBOL_NORM:
+		numExpectedParams = OBJ_PARAMS_NUM_NORM;
+		break;
+	case SYMBOL_FACE:
+		numExpectedParams	= OBJ_PARAMS_NUM_FACES;
+		expectedNumeric		= false;
+		break;
+	case SYMBOL_GROUP:
+		numExpectedParams	= OBJ_PARAMS_NUM_GROUP;
+		expectedNumeric		= false;
+		break;
+	case SYMBOL_IGNORE:
+		//Do nothing.
+		break;
+	}
+
+	unsigned int numParams = params.size();
+	if(
+		numParams == numExpectedParams ||
+		numParams == numExpectedParams + numOptionalParams)
+	{
+		if(expectedNumeric)
+			sucessfulParse = mlParseParamsNumeric(params);
+	}
+	else
+		sucessfulParse = false;
+
+	return sucessfulParse;
+}
+bool MeshLoaderObj::mlParseParamsNumeric(const std::vector<std::string>& params)
+{
+	bool sucessfulParse = true;
+
+	unsigned int numParams = params.size();
 	if(numParams)
 	{
 		for(unsigned int i = OBJ_PARAMS; i < numParams; i++)
-			if(!mlIsNumeric(mlCurLineSplit_[i]))
+			if(!mlIsNumeric(params[i]))
 				sucessfulParse = false;
 	}
 
 	return sucessfulParse;
 }
 
-void MeshLoaderObj::mlLoadVertex()
+void MeshLoaderObj::mlLoadSymbol(
+		const ObjSymbol symbol,
+		const std::vector<std::string>& params)
+{
+	switch(symbol)
+	{
+	case SYMBOL_VERTEX:
+		mlLoadVertex(params);
+		break;
+	case SYMBOL_TEX:
+		mlLoadTex(params);
+		break;
+	case SYMBOL_NORM:
+		mlLoadNorm(params);
+		break;
+	case SYMBOL_FACE:
+		mlLoadFaces(params);
+		break;
+	case SYMBOL_GROUP:
+		mlLoadGroup(params);
+		break;
+	}
+}
+void MeshLoaderObj::mlLoadVertex(const std::vector<std::string>& params)
 {
 	float x, y, z;
 	float w = 1.0f; //optional
-	x = (float)::atof(mlCurLineSplit_[OBJ_PARAMS_INDEX_VERTEX_X].c_str());
-	y = (float)::atof(mlCurLineSplit_[OBJ_PARAMS_INDEX_VERTEX_Y].c_str());
-	z = (float)::atof(mlCurLineSplit_[OBJ_PARAMS_INDEX_VERTEX_Z].c_str());
+	x = (float)::atof(params[OBJ_PARAMS_INDEX_VERTEX_X].c_str());
+	y = (float)::atof(params[OBJ_PARAMS_INDEX_VERTEX_Y].c_str());
+	z = (float)::atof(params[OBJ_PARAMS_INDEX_VERTEX_Z].c_str());
 
-	if(mlCurLineSplit_.size() == OBJ_PARAMS_NUM_VERTEX_OPTIONAL)
-		w = (float)::atof(mlCurLineSplit_[OBJ_PARAMS_INDEX_VERTEX_W].c_str());
+	if(params.size() == OBJ_PARAMS_NUM_VERTEX_OPTIONAL)
+		w = (float)::atof(params[OBJ_PARAMS_INDEX_VERTEX_W].c_str());
 
 	//do what with w?
 
 	DirectX::XMFLOAT3 mlPosition(x, y, z);
 	mlPosition_.push_back(mlPosition);
 }
-void MeshLoaderObj::mlLoadNorm()
+void MeshLoaderObj::mlLoadNorm(const std::vector<std::string>& params)
 {
 	float x, y, z;
-	x = (float)::atof(mlCurLineSplit_[OBJ_PARAMS_INDEX_VERTEX_X].c_str());
-	y = (float)::atof(mlCurLineSplit_[OBJ_PARAMS_INDEX_VERTEX_Y].c_str());
-	z = (float)::atof(mlCurLineSplit_[OBJ_PARAMS_INDEX_VERTEX_Z].c_str());
+	x = (float)::atof(params[OBJ_PARAMS_INDEX_VERTEX_X].c_str());
+	y = (float)::atof(params[OBJ_PARAMS_INDEX_VERTEX_Y].c_str());
+	z = (float)::atof(params[OBJ_PARAMS_INDEX_VERTEX_Z].c_str());
 
 	DirectX::XMFLOAT3 mlNormal(x, y, z);
 	mlNormal_.push_back(mlNormal);
 }
-void MeshLoaderObj::mlLoadTex()
+void MeshLoaderObj::mlLoadTex(const std::vector<std::string>& params)
 {
 	float u, v;
 	float w = 0.0f; //optional
-	u = (float)::atof(mlCurLineSplit_[OBJ_PARAMS_INDEX_TEX_U].c_str());
-	v = (float)::atof(mlCurLineSplit_[OBJ_PARAMS_INDEX_TEX_V].c_str());
+	u = (float)::atof(params[OBJ_PARAMS_INDEX_TEX_U].c_str());
+	v = (float)::atof(params[OBJ_PARAMS_INDEX_TEX_V].c_str());
 
-	if(mlCurLineSplit_.size() > OBJ_PARAMS_NUM_TEX)
-		w = (float)::atof(mlCurLineSplit_[OBJ_PARAMS_INDEX_TEX_W].c_str());
+	if(params.size() > OBJ_PARAMS_NUM_TEX)
+		w = (float)::atof(params[OBJ_PARAMS_INDEX_TEX_W].c_str());
 
 	DirectX::XMFLOAT2 mlTexCoord(u, v);
 	mlTex_.push_back(mlTexCoord);
 }
-bool MeshLoaderObj::mlLoadFaces()
+bool MeshLoaderObj::mlLoadFaces(const std::vector<std::string>& params)
 {
 	bool sucessfulLoad = true;
 
-	std::string v;
-	std::vector<std::string> vSplit;
+	std::string face;
+	std::vector<std::string> faceSplit;
 	
 	for(unsigned int i = 0; i < 3 && sucessfulLoad; i++)
 	{
-		v = mlCurLineSplit_[1 + i];
-		vSplit = mlSSS_.splitString(OBJ_SEPARATOR_FACE, v);
+		face = params[1 + i];
+		faceSplit = mlSSS_.splitString(OBJ_SEPARATOR_FACE, face);
 
-		sucessfulLoad = mlParseFace(vSplit);
+		sucessfulLoad = mlParseFace(faceSplit);
 		if(sucessfulLoad)
-			mlLoadFace(vSplit);
+			mlLoadFace(faceSplit);
 	}
 
 	return sucessfulLoad;
 }
-void MeshLoaderObj::mlLoadFace(std::vector<std::string>& face)
+bool MeshLoaderObj::mlParseFace(const std::vector<std::string>& splitFaces)
+{
+	bool sucessfulParse = true;
+
+	if(splitFaces.size() == OBJ_PARAMS_NUM_FACE)
+	{
+		for(unsigned int i = 0; i < OBJ_PARAMS_NUM_FACE; i++)
+			if(!mlIsNumeric(splitFaces[i]))
+				sucessfulParse = false;
+	}
+	else
+		sucessfulParse = false;
+
+	return sucessfulParse;
+}
+void MeshLoaderObj::mlLoadFace(const std::vector<std::string>& face)
 {
 	unsigned int iPos, iTex, iNorm;
 	iPos	= ::atoi(face[OBJ_PARAMS_INDEX_FACE_X].c_str());
@@ -218,7 +243,7 @@ void MeshLoaderObj::mlLoadFace(std::vector<std::string>& face)
 
 	MeshFace preFace;
 	bool foundFace = false;
-	for(unsigned int i = 0; i < mlFaces_.size(); i++)
+	for(int i = mlFaces_.size() - 1; i >= 0; i--)
 	{
 		if(mlFaces_[i] == newFace)
 		{
@@ -238,7 +263,7 @@ void MeshLoaderObj::mlLoadFace(std::vector<std::string>& face)
 		/*Create new vertex*/
 		VertexPosNormTex vertex;
 		vertex.position_	= mlPosition_[iPos	- 1];
-		vertex.texcoord_	= mlTex_[iTex	- 1];
+		vertex.texcoord_	= mlTex_[iTex		- 1];
 		vertex.normal_		= mlNormal_[iNorm	- 1];
 		mlVertices_.push_back(vertex);
 
@@ -250,20 +275,18 @@ void MeshLoaderObj::mlLoadFace(std::vector<std::string>& face)
 
 	mlIndices_.push_back(index);
 }
-bool MeshLoaderObj::mlParseFace(std::vector<std::string>& splitFaces)
+void MeshLoaderObj::mlLoadGroup(const std::vector<std::string>& params)
 {
-	bool sucessfulParse = true;
+	std::string groupName;
+	groupName = params[OBJ_PARAMS_INDEX_GROUP_NAME];
+	
+	MeshGroup newGroup(groupName);
+	mlGroups_.push_back(groupName);
+}
 
-	if(splitFaces.size() == OBJ_PARAMS_NUM_FACE_V)
-	{
-		for(unsigned int i = 0; i < OBJ_PARAMS_NUM_FACE_V; i++)
-			if(!mlIsNumeric(splitFaces[i]))
-				sucessfulParse = false;
-	}
-	else
-		sucessfulParse = false;
-
-	return sucessfulParse;
+bool MeshLoaderObj::mlLoadIndex(unsigned int)
+{
+	return true; //temp
 }
 
 void MeshLoaderObj::mlGetLine(std::string& line)
