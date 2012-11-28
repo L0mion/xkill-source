@@ -31,6 +31,11 @@ public:
 	{
 		
 	}
+	~ComponentManager()
+	{
+		if(render_)
+			delete render_;
+	}
 
 	void init(HWND windowHandle, unsigned int screenWidth, unsigned int screenHeight)
 	{

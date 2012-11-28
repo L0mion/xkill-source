@@ -5,10 +5,16 @@
 
 CameraComponent::CameraComponent()
 {
+	cameraAttributes_	= nullptr;
+	inputAttributes_	= nullptr;
 }
 
 CameraComponent::~CameraComponent()
 {
+	//if(cameraAttributes_)
+	//	delete cameraAttributes_;
+	//if(inputAttributes_)
+	//	delete inputAttributes_;
 }
 void CameraComponent::init(std::vector<CameraAttribute>* cameraAttributes, std::vector<InputAttribute>* inputAttributes, float aspectRatio)
 {

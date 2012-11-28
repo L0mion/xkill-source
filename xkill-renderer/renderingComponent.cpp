@@ -86,7 +86,7 @@ RenderingComponent::~RenderingComponent()
 	for(unsigned int i = 0; i < GBUFFERID_NUM_BUFFERS; i++)
 		SAFE_DELETE(gBuffers_[i]);
 	
-	//d3dDebug->reportLiveDeviceObjects();
+	//d3dDebug_->reportLiveDeviceObjects();
 	SAFE_DELETE(d3dDebug_);
 
 	//temp
@@ -118,8 +118,8 @@ HRESULT RenderingComponent::init()
 		hr = initCBManagement();
 	if(SUCCEEDED(hr)) //temp
 		hr = initVertexBuffer();
-	if(SUCCEEDED(hr))
-		hr = initDebug();
+//	if(SUCCEEDED(hr))
+//		hr = initDebug();
 
 	return hr;
 }
