@@ -1,15 +1,15 @@
 #pragma once
 
-/// The duct tape that allow all parts of the game to communicate.
+/// The duct tape allowing all parts of the game to communicate.
 /** 
-The achitecture is heaviliy based around the flexibility of Component-Based
+The architecture is heaviliy based around the flexibility of Component-Based
 Programming and Event passing, but at the same time tries to embrace a
-Data-Oriented philosphy in which each Entity is broken down into multiple 
-\ref COMPONENTS, grouped together in memory and processed in batches which allows
+Data-Oriented philosophy in which each Entity is broken down into multiple 
+Components, grouped together in memory and processed in batches, allowing
 for some serious optimizations.
 
-The bread and butter of the architecture is the use of \ref ATTRIBUTES.
-An Attribute is basically just a Struct which holds Data, however 
+The bread and butter of the architecture is the use of attributes.
+An Attribute is basically just a Struct holding Data, however 
 each Attribute can be shared among multiple Components allowing
 each Component to work with the same data independently of eachother
 with minimal overhead.
@@ -95,6 +95,14 @@ public:
 		entityManager->removeEntity(1);
 		componentManager->update(1.0f);
 		std::cin.ignore();
+
+		//Event_PlaySound playSound(0);
+		//while(1)
+		//{
+		//	EventManager::getInstance()->sendEvent(&playSound);
+		//	componentManager->update(1.0f);
+		//}
+		//std::cin.ignore();
 
 
 		//

@@ -21,7 +21,7 @@ class ComponentManager
 {
 private:
 	RenderComponent render;
-	PhysicsComponent physics;
+	//PhysicsComponent physics;
 	SoundComponent sound;
 public:
 	ComponentManager()

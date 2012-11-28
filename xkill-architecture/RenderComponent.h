@@ -88,6 +88,13 @@ public:
 					<< s->scale 
 					<< std::endl;
 			}
+			else
+			{
+				std::cout
+					<< i		<< "\t"
+					<< "DELETED"
+					<< std::endl;
+			}
 		}
 	}
 };
