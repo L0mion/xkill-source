@@ -160,12 +160,12 @@ void RenderingComponent::reset()
 
 void RenderingComponent::onUpdate(float delta)
 {
-	//setViewport(0);
-	//clearGBuffers();
-	//renderToGBuffer(DirectX::XMFLOAT4X4(cameraAttributes_->at(0).mat_view),
-	//	DirectX::XMFLOAT4X4(cameraAttributes_->at(0).mat_projection));
-	//
-	//renderToBackBuffer();
+	setViewport(0);
+	clearGBuffers();
+	renderToGBuffer(DirectX::XMFLOAT4X4(cameraAttributes_->at(0).mat_view),
+		DirectX::XMFLOAT4X4(cameraAttributes_->at(0).mat_projection));
+	
+	renderToBackBuffer();
 }
 
 void RenderingComponent::render(DirectX::XMFLOAT4X4 view, DirectX::XMFLOAT4X4 projection)

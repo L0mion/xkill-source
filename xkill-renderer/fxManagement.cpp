@@ -15,10 +15,8 @@ FXManagement::FXManagement()
 
 FXManagement::~FXManagement()
 {
-	//SAFE_DELETE(ilManagement);
-	int debug = sizeof((*ilManagement));
-
-	delete ilManagement;
+	SAFE_DELETE(ilManagement);
+	//delete ilManagement;
 
 	SAFE_DELETE(defaultVS_);
 	SAFE_DELETE(defaultPS_);
@@ -43,8 +41,6 @@ void FXManagement::reset()
 HRESULT FXManagement::init(ID3D11Device* device)
 {
 	HRESULT hr = S_OK;
-
-	initILManagement();
 
 	hr = initShaders(device);
 	if(SUCCEEDED(hr))
@@ -121,7 +117,7 @@ HRESULT FXManagement::initILs(ID3D11Device* device)
 
 	initILManagement();
 
-//	hr = initILDefaultVSPosNormTex(device);
+	hr = initILDefaultVSPosNormTex(device);
 	
 	return hr;
 }
