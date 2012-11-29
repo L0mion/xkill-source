@@ -1,11 +1,9 @@
 #pragma once
 
 #include "RenderComponent.h"
-#include "SoundComponent.h"
 #include "PhysicsComponent.h"
+#include <xkill-sound/SoundComponent.h>
 #include "GameComponent.h"
-#include <vector>
-
 
 /// Is responsible for updating Components in a certain order
 /** 
@@ -18,21 +16,49 @@ be the responsibility of the ComponentManager.
 \ingroup ARCHITECTURE
 */
 
+//#define SAFE_DELETE(x) if( x ) { delete(x); (x) = NULL; }
+
 class ComponentManager
 {
 private:
 	RenderComponent renderComponent;
-	//PhysicsComponent physics;
+	//PhysicsComponent physicsComponent;
 	SoundComponent soundComponent;
 	GameComponent gameComponent;
+
 public:
 	ComponentManager()
 	{
-		std::vector<PhysicsAttribute>* attributes = AttributeManager::getInstance()->physicsAttributes.getAllAttributes();
-		
-		//physics.init(attributes);
+		//renderComponent = NULL;
+		//physicsComponent = NULL;
+		//soundComponent = NULL;
+		//gameComponent = NULL;
+	}
+	~ComponentManager()
+	{
+		//SAFE_DELETE(renderComponent);
+		//SAFE_DELETE(physicsComponent);
+		//SAFE_DELETE(soundComponent);
+		//SAFE_DELETE(gameComponent);
 	}
 
+	bool init()
+	{
+		//gameComponent = new GameComponent();
+		if(!gameComponent.init())
+			return false;
+
+		//soundComponent = new SoundComponent();
+		if(!soundComponent.init())
+			return false;
+
+		//physicsComponent = new PhysicsComponent();
+		//if(!physics.init(attributes))
+		//	return false;
+		//std::vector<PhysicsAttribute>* attributes = AttributeManager::getInstance()->physicsAttributes.getAllAttributes();
+
+		return true;
+	}
 	void update(float delta)
 	{
 		gameComponent.onUpdate(delta);

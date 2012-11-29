@@ -52,15 +52,18 @@ public:
 	{
 		componentManager = new ComponentManager();
 		entityManager = new EntityManager();
-
-		gameComponent = new GameComponent();
-		gameComponent->init();
 	}
 	~GameManager()
 	{
 		delete componentManager;
 		delete entityManager;
-		delete gameComponent;
+	}
+
+	bool init()
+	{
+		if(!componentManager->init())
+			return false;
+		return true;
 	}
 
 	void run()
@@ -69,6 +72,11 @@ public:
 		// Setup Game
 		//
 
+		if(!componentManager->init())
+		{
+			std::cout << "Component manager failed to init" << std::endl;
+			std::cin.ignore();
+		}
 		entityManager->createEntity(PLAYER);
 
 		//while(true)
