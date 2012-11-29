@@ -6,7 +6,7 @@
 #include <QMouseEvent>
 
 #include <QTime>
-#include <QTimer> // needed to implement framerate
+#include <QTimer> // needed to implement frame rate
 
 #include "GameTimer.h"
 
@@ -23,13 +23,15 @@ private:
 public:
 	GameWidget(QWidget* parent = 0, Qt::WFlags flags = 0) : QWidget(parent, flags)
 	{
-		// Make widget non-transparent & draw directly onto screen
-		setAttribute(Qt::WA_OpaquePaintEvent);
-		setAttribute(Qt::WA_PaintOnScreen);
+		// make widget non-transparent & draw directly onto screen
+		QWidget::setAttribute(Qt::WA_OpaquePaintEvent);
+		QWidget::setAttribute(Qt::WA_PaintOnScreen);
 
 		// init updateTimer
 		updateTimer = new QTimer(this);
-		connect(updateTimer, SIGNAL(timeout()), this, SLOT(onUpdate()));
+		updateTimer->setInterval(0);
+		connect(updateTimer, SIGNAL(timeout()), this, SLOT(slot_onUpdate()));
+		updateTimer->start();
 
 		// init gameTimer
 		gameTimer.reset();
@@ -37,16 +39,17 @@ public:
 	~GameWidget()
 	{
 	};
+	
+	QPaintEngine* paintEngine() const {return 0;}; // overrides Qt:s own paint engine; prevents flicker
 
+public slots:
 	// Runs every time gameTimer times out
-	void onUpdate()
+	void slot_onUpdate()
 	{
 		gameTimer.tick();
 		float delta = gameTimer.getDeltaTime();
-		calcFPS();
+		computeFPS();
 	};
-	
-	QPaintEngine* paintEngine() const {return 0;}; // overrides Qt:s own paint engine; prevents flicker
 
 protected:
 	void paintEvent(QPaintEvent* e){}; // should not be implemented
@@ -59,10 +62,35 @@ protected:
 	};
 
 private:
-	void calcFPS()
+	void computeFPS()
 	{
-		//stringstream ss()
+		static int num_frames = 0;
+		static float timeElapsed = 0.0f;
+		num_frames++;
+
+		// Compute averages FPS and MS over one second period.
+		if((gameTimer.getTotalTime()-timeElapsed) >= 1.0f)
+		{
+			// calculate statistics
+			float fps = (float)num_frames; // fps = frameCnt / 1
+			float msPerFrame = 1000.0f/fps;
+
+			// convert statistics into QString
+			QString stats;
+			stats = "FPS:  %1  Frame Time:  %2 (ms)";
+			stats = stats.arg(fps).arg(msPerFrame);
+
+			// send signal
+			emit signal_fpsChanged(stats);
+
+			// reset stats for next average.
+			num_frames = 0;
+			timeElapsed += 1.0f;
+		}
 	}
+
+signals:
+	void signal_fpsChanged(QString value);
 };
 
 #endif
