@@ -1,10 +1,12 @@
-#include <renderingComponent.h>
-#include <fxManagement.h>
-#include <gBuffer.h>
-#include <renderingUtilities.h>
-#include <d3dDebug.h>
-#include <CBManagement.h>
-#include <objLoaderBasic.h>
+#include "renderingComponent.h"
+#include "fxManagement.h"
+#include "gBuffer.h"
+#include "renderingUtilities.h"
+#include "d3dDebug.h"
+#include "CBManagement.h"
+#include "objLoaderBasic.h"
+#include "MeshLoaderMTL.h"
+
 
 RenderingComponent::RenderingComponent(HWND windowHandle,
 									   unsigned int screenWidth,
@@ -34,9 +36,9 @@ RenderingComponent::RenderingComponent(HWND windowHandle,
 	texDepthBuffer_	= nullptr;
 
 	//temp
-	vertexBuffer_ = nullptr;
-	//vertices_ = nullptr;
-	objLoader_ = nullptr;
+	vertexBuffer_	= nullptr;
+	indexBuffer_	= nullptr;
+	objLoader_		= nullptr;
 }
 RenderingComponent::~RenderingComponent()
 {
@@ -56,8 +58,6 @@ RenderingComponent::~RenderingComponent()
 	SAFE_RELEASE(texBackBuffer_);
 	SAFE_RELEASE(texDepthBuffer_);
 
-	SAFE_RELEASE(vertexBuffer_); //temp
-
 	SAFE_DELETE(cbManagement_);
 	SAFE_DELETE(fxManagement_);
 	for(unsigned int i = 0; i < GBUFFERID_NUM_BUFFERS; i++)
@@ -67,7 +67,8 @@ RenderingComponent::~RenderingComponent()
 	SAFE_DELETE(d3dDebug_);
 
 	//temp
-	//SAFE_DELETE(vertices_);
+	SAFE_RELEASE(vertexBuffer_);
+	SAFE_RELEASE(indexBuffer_);
 	SAFE_DELETE(objLoader_);
 }
 
@@ -456,10 +457,20 @@ HRESULT RenderingComponent::initVertexBuffer()
 	HRESULT hr = S_OK;
 
 	//vertices_ = new std::vector<VertexPosNormTex>();
-	objLoader_ = new MeshLoaderObj(L"../../xkill-resources/xkill-models/bth.obj");
+	objLoader_ = new MeshLoaderObj(L"bth.obj", L"../../xkill-resources/xkill-models/bth.obj");
 	bool sucessfullLoad = objLoader_->init();
+	Obj mo = objLoader_->getMLObj();
+	MeshGeometry<VertexPosNormTex> mg = mo.getMeshGeometry();
+	std::vector<VertexPosNormTex> vertices = mg.getMGVertices();
+	std::vector<MeshGroup> groups = mg.getMGGroups();
+	std::vector<unsigned int> indices = groups[1].getMGIndices();
 
-	std::vector<VertexPosNormTex> vertices = objLoader_->getMLVertices();
+	std::vector<std::string> mtlFiles = mo.getMTLs();
+
+	MeshLoaderMTL mtlLoader(L"../../xkill-resources/xkill-models/bth.mtl");
+	sucessfullLoad = mtlLoader.init();
+	MTL mtl = mtlLoader.getMTL();
+
 	//objLoader_ = new ObjLoaderBasic();
 	//objLoader_->parseObjectFile("../../xkill-resources/xkill-models/bth.obj", vertices_);
 
@@ -478,10 +489,8 @@ HRESULT RenderingComponent::initVertexBuffer()
 	if(FAILED(hr))
 		ERROR_MSG(L"RenderingComponent::initVertexBuffer CreateBuffer failed");
 
-	std::vector<unsigned int> indices = objLoader_->getMLIndices();
-
 	tempIndicesSize = indices.size();
-
+	
 	D3D11_BUFFER_DESC anIndexBuffer;
 	anIndexBuffer.Usage	= D3D11_USAGE_IMMUTABLE;
 	anIndexBuffer.ByteWidth	= sizeof(unsigned int) * indices.size();
@@ -490,7 +499,7 @@ HRESULT RenderingComponent::initVertexBuffer()
 	anIndexBuffer.MiscFlags	= 0;
 	D3D11_SUBRESOURCE_DATA iinitData;
 	iinitData.pSysMem = &indices.at(0);
-
+	
 	device_->CreateBuffer(&anIndexBuffer, &iinitData, &indexBuffer_);
 
 	return hr;

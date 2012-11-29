@@ -1,14 +1,14 @@
-#ifndef XKILL_RENDERER_MESHFACE_H
-#define XKILL_RENDERER_MESHFACE_H
+#ifndef XKILL_RENDERER_OBJFACE_H
+#define XKILL_RENDERER_OBJFACE_H
 
-class MeshFace
+class ObjFace
 {
 public:
-	MeshFace()
+	ObjFace()
 	{
 		//Do nothing.
 	}
-	MeshFace(
+	ObjFace(
 		unsigned int v,
 		unsigned int t,
 		unsigned int n,
@@ -19,19 +19,19 @@ public:
 		this->n_		= n;
 		this->index_	= index;
 	}
-	~MeshFace()
+	~ObjFace()
 	{
 		//Do nothing.
 	}
 
-	friend bool operator== (MeshFace &mf1, MeshFace &mf2)
+	friend bool operator== (ObjFace &mf1, ObjFace &mf2)
 	{
 		return (
 			mf1.v_ == mf2.v_ &&
 			mf1.t_ == mf2.t_ &&
 			mf1.n_ == mf2.n_);
 	}
-	friend bool operator!= (MeshFace &mf1, MeshFace &mf2)
+	friend bool operator!= (ObjFace &mf1, ObjFace &mf2)
 	{
 		return !(mf1 == mf2);
 	}
@@ -51,4 +51,4 @@ private:
 	unsigned int index_;
 };
 
-#endif //XKILL_RENDERER_MESHFACE_H
+#endif //XKILL_RENDERER_OBJFACE_H

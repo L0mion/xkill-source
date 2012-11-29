@@ -10,11 +10,27 @@
 #include <vld.h>
 #endif
 
+#define _CRTDBG_MAP_ALLOC
+#include <stdlib.h>
+#include <crtdbg.h>
+
+//#ifdef _DEBUG   
+#ifndef DBG_NEW
+#define DBG_NEW new ( _NORMAL_BLOCK , __FILE__ , __LINE__ )      
+#define new DBG_NEW   
+#endif
+//#endif  // _DEBUG
+
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int cmdShow);
 void run(RenderingComponent* renderingComponent, Window* window, CameraBasic* camera);
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int cmdShow)
 {
+	// Detect memory leaks
+	#if defined(DEBUG) | defined(_DEBUG)
+		_CrtSetDbgFlag( _CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF );
+	#endif
+
 	Architecture architecture;
 	unsigned int test = architecture.getTest();
 
@@ -40,6 +56,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	delete camera;
 	delete renderingComponent;
 	delete window;
+
+	//_CrtDumpMemoryLeaks();
 
 	return 0;
 }
