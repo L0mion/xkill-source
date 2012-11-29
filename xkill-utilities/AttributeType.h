@@ -2,14 +2,14 @@
 
 #include "dllUtilities.h"
 #include "AttributePointer.h"
+#include <string>
 
 
-/// Used inside \ref components for data processing 
+/// Used inside \ref COMPONENTS for data processing.
 /** 
 Created by AttributeManager and stored in a AttributeStorage.
 
-An attribute is basically just a Struct which holds Data, however 
-each attribute can be shared among multiple Components which allows
+An attribute can be shared among multiple Components which allows
 each Component to work with the same data independently of eachother
 with minimal overhead.
 
@@ -133,4 +133,21 @@ struct DLL_U CameraAttribute : public IAttribute
 	AttributePointer spatialAttribute;
 	float mat_view[16];
 	float mat_projection[16];
+};
+
+/// Stores everything GameComponent needs to know about a player
+/** 
+\ingroup ATTRIBUTES
+*/
+struct DLL_U PlayerAttribute : public IAttribute
+{
+	PlayerAttribute();
+	~PlayerAttribute();
+
+	std::string name;		//!< Name of the player process.
+	int priority;			//!< Priority of the player process. Higher value means higher priority. The scheduler will choose the process with the highest priority for execution.
+	int cycleSteals;		//!< Total number of cycle steals for the player process. Cycle steals steal priority from other player processes.
+	int totalExecutionTime; //!< Total execution time of the player process. The player with the most total execution time as awared by the scheduler.
+
+	AttributePointer renderAttribute;
 };

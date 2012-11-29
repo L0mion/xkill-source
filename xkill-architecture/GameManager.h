@@ -4,27 +4,25 @@
 /** 
 The architecture is heaviliy based around the flexibility of Component-Based
 Programming and Event passing, but at the same time tries to embrace a
-Data-Oriented philosophy in which each Entity is broken down into multiple 
-Components, grouped together in memory and processed in batches, allowing
+Data-Oriented philosphy in which each Entity is broken down into multiple 
+\ref COMPONENTS, grouped together in memory and processed in batches allowing
 for some serious optimizations.
 
-The bread and butter of the architecture is the use of attributes.
-An Attribute is basically just a Struct holding Data, however 
-each Attribute can be shared among multiple Components allowing
-each Component to work with the same data independently of eachother
-with minimal overhead.
+The bread and butter of the architecture is the use of \ref ATTRIBUTES.
+An Attribute can be shared among multiple Components allowing
+each Component to work with the same data independently with minimal overhead.
 
 A Component is the workhorse of the game and processes all of its associated
-attributes in an orderly fashion. Since every Entity can be added or removed 
-from multiple Components even during Runtime we retain the benefits of a
+\ref ATTRIBUTES in an orderly fashion. Since every Entity can be added or removed 
+from multiple Components even during runtime we retain the benefits of a
 Component-Oriented approach without sacrificing performance.
 
-If needed Components can communicate with other Components through
+\ref COMPONENTS can communicate with other Components through
 the use of events (which is part of xkill-utilities). However, 
 creating events for everything is cumbersome and hard to maintain 
-so every component should strive to work indepentently from eachother.
+so every component should strive to work indepentently.
 
-\defgroup ARCHITECTURE XKILL - Achitecture
+\defgroup ARCHITECTURE XKILL - Architecture
 \image html https://dl.dropbox.com/u/12273871/DOXYGEN/Architectur.png
 */
 
@@ -48,15 +46,16 @@ class DLL_A GameManager
 {
 	ComponentManager* componentManager;
 	EntityManager* entityManager;
+	GameComponent* gameComponent;
 public:
 	GameManager()
 	{
-		
 	}
 	~GameManager()
 	{
 		delete componentManager;
 		delete entityManager;
+		delete gameComponent;
 	}
 
 	void init(HWND windowHandle, unsigned int screenWidth, unsigned int screenHeight)
@@ -66,9 +65,13 @@ public:
 		{
 			entityManager->createCamera();
 		};
+		entityManager->createEntity(PLAYER);
 		
 		componentManager = new ComponentManager();
 		componentManager->init(windowHandle, screenWidth, screenHeight);
+		
+		gameComponent = new GameComponent();
+		gameComponent->init();
 	}
 
 	void run()
@@ -77,22 +80,10 @@ public:
 
 		componentManager->update(0.5f);
 
-		//
-		// Setup Game
-		//
 
-		
-		/*for(int i=0; i<2; i++)
-		{
-			entityManager->createEntity();
-		};*/
-
-
-		//
-		// Run game
-		//
 
 		/*std::cout << std::endl << "Run 1" << std::endl;
+
 		Event_A e_A;
 		EventManager::getInstance()->sendEvent(&e_A);
 		componentManager->update(1.0f);
@@ -111,6 +102,7 @@ public:
 		entityManager->removeEntity(1);
 		componentManager->update(1.0f);
 		std::cin.ignore();*/
+
 
 		//Event_PlaySound playSound(0);
 		//while(1)

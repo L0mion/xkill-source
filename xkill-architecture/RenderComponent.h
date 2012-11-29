@@ -63,6 +63,7 @@ public:
 				//	+ p->position
 				//	+ s->rotation
 				//	+ s->scale;
+
 			}
 		}
 
@@ -83,7 +84,7 @@ public:
 					<< r->tessellation		<< "\t"
 					<< r->meshID			<< "\t"
 					<< r->textureID			<< "\t"
-					<< p->position			<< "\t"
+					<< p->positionX			<< "\t"
 					<< s->rotation			<< "\t"
 					<< s->scale 
 					<< std::endl;

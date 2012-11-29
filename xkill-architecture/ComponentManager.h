@@ -5,6 +5,7 @@
 #include "PhysicsComponent.h"
 #include "CameraComponent.h"
 #include "AttributeManager.h"
+#include "GameComponent.h"
 #include <vector>
 
 
@@ -27,6 +28,8 @@ private:
 	PhysicsComponent	physics_;
 	SoundComponent		sound_;
 	CameraComponent		camera_;
+	GameComponent gameComponent;
+
 public:
 	ComponentManager()
 	{
@@ -55,6 +58,8 @@ public:
 		camera_.onUpdate(delta);
 		physics_.onUpdate(delta);
 		render_->onUpdate(delta);
+
+		gameComponent.onUpdate(delta);
 
 	}
 };
