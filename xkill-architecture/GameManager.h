@@ -74,12 +74,9 @@ public:
 		gameComponent->init();
 	}
 
-	void run()
+	void update(float delta)
 	{
-		
-
-		componentManager->update(0.5f);
-
+		componentManager->update(delta);
 
 
 		/*std::cout << std::endl << "Run 1" << std::endl;

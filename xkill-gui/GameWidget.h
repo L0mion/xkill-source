@@ -8,6 +8,9 @@
 #include <QTime>
 #include <QTimer> // needed to implement frame rate
 
+#include <xkill-architecture/GameManager.h>
+//#include <xkill-renderer/renderingComponent.h>
+
 #include "GameTimer.h"
 
 
@@ -16,9 +19,9 @@ class GameWidget : public QWidget
 	Q_OBJECT
 
 private:
+	GameManager gameManager;
 	GameTimer gameTimer;
 	QTimer* updateTimer;
-	bool hasMouseLock;
 
 public:
 	GameWidget(QWidget* parent = 0, Qt::WFlags flags = 0) : QWidget(parent, flags)
@@ -26,6 +29,7 @@ public:
 		// make widget non-transparent & draw directly onto screen
 		QWidget::setAttribute(Qt::WA_OpaquePaintEvent);
 		QWidget::setAttribute(Qt::WA_PaintOnScreen);
+		resize(800, 600);
 
 		// init updateTimer
 		updateTimer = new QTimer(this);
@@ -35,6 +39,9 @@ public:
 
 		// init gameTimer
 		gameTimer.reset();
+
+		// init game
+		gameManager.init(this->winId(), 800, 800);
 	};
 	~GameWidget()
 	{
@@ -49,6 +56,7 @@ public slots:
 		gameTimer.tick();
 		float delta = gameTimer.getDeltaTime();
 		computeFPS();
+		gameManager.update(delta);
 	};
 
 protected:
@@ -58,7 +66,6 @@ protected:
 		QWidget::resizeEvent(e);
 		int width = size().width();
 		int height = size().height();
-		//renderer->onResize(width, height);
 	};
 
 private:

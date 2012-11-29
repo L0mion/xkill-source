@@ -1,6 +1,7 @@
 #include "renderingComponent.h"
 
 #include <xkill-utilities/AttributeType.h>
+#include <DirectXMath.h>
 
 #include "fxManagement.h"
 #include "ViewportManagement.h"

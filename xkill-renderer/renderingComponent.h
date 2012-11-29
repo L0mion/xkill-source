@@ -6,7 +6,6 @@
 
 #include <stdio.h>
 #include <d3d11.h>
-#include <DirectXMath.h>
 #include <vector>
 
 #include "dllRenderer.h"
@@ -23,6 +22,8 @@ class ObjLoaderBasic;
 
 struct RenderAttribute;
 struct CameraAttribute;
+
+namespace DirectX{struct XMFLOAT4X4;};
 
 static const unsigned int MULTISAMPLES_GBUFFERS		= 1;
 static const unsigned int MULTISAMPLES_BACKBUFFER	= 1;

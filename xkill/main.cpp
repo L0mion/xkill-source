@@ -1,4 +1,4 @@
-#include <DirectXMath.h>
+//#include <DirectXMath.h>
 #include <Windows.h>
 #include <windowsx.h>
 #include <tchar.h>
@@ -13,7 +13,7 @@
 #define _CRTDBG_MAP_ALLOC
 #include <stdlib.h>
 #include <crtdbg.h>
-#include <vld.h>
+//#include <vld.h>
 #endif
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int cmdShow);
@@ -42,7 +42,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	while(window->getIsActive())
 	{
 		window->checkMessages();
-		gm.run();
+		gm.update(1.0f);
 	}
 
 	//RenderingComponent* renderingComponent = new RenderingComponent(

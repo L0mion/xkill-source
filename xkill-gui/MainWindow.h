@@ -25,7 +25,6 @@ public:
 		// init gameWidget
 		gameWidget = new GameWidget(this);
 
-
 		// show fps-counter on title bar
 		connect(gameWidget, SIGNAL(signal_fpsChanged(QString)), this, SLOT(slot_setTitle(QString)));
 	}
