@@ -20,6 +20,7 @@ BulletPhysicsComponent::BulletPhysicsComponent()
 
 BulletPhysicsComponent::~BulletPhysicsComponent()
 {
+	delete physicsObjects_;
 	//delete local objects etc.
  
     delete dynamicsWorld_;

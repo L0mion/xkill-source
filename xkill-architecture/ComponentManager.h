@@ -1,8 +1,10 @@
 #pragma once
 
-#include "RenderComponent.h"
-#include "PhysicsComponent.h"
 #include <xkill-sound/SoundComponent.h>
+#include <xkill-renderer/renderingComponent.h>
+#include "PhysicsComponent.h"
+#include "CameraComponent.h"
+#include "AttributeManager.h"
 #include "GameComponent.h"
 
 /// Is responsible for updating Components in a certain order
@@ -16,40 +18,46 @@ be the responsibility of the ComponentManager.
 \ingroup ARCHITECTURE
 */
 
-//#define SAFE_DELETE(x) if( x ) { delete(x); (x) = NULL; }
+#define SAFE_DELETE(x) if( x ) { delete(x); (x) = NULL; }
 
 class ComponentManager
 {
 private:
-	RenderComponent renderComponent;
-	//PhysicsComponent physicsComponent;
-	SoundComponent soundComponent;
-	GameComponent gameComponent;
+	RenderingComponent* render_;
+	PhysicsComponent	physics_;
+	SoundComponent		sound_;
+	CameraComponent		camera_;
+	GameComponent		game_;
 
 public:
 	ComponentManager()
 	{
-		//renderComponent = NULL;
-		//physicsComponent = NULL;
-		//soundComponent = NULL;
-		//gameComponent = NULL;
+		render_ = NULL;
 	}
 	~ComponentManager()
 	{
-		//SAFE_DELETE(renderComponent);
+		SAFE_DELETE(render_);
 		//SAFE_DELETE(physicsComponent);
 		//SAFE_DELETE(soundComponent);
 		//SAFE_DELETE(gameComponent);
 	}
 
-	bool init()
+	bool init(HWND windowHandle, unsigned int screenWidth, unsigned int screenHeight)
 	{
+		render_ = new RenderingComponent(windowHandle,screenWidth,screenHeight,800,800,1,
+										AttributeManager::getInstance()->renderAttributes.getAllAttributes(),
+										AttributeManager::getInstance()->cameraAttributes.getAllAttributes());
+		render_->init();
+		camera_.init(AttributeManager::getInstance()->cameraAttributes.getAllAttributes(),
+					AttributeManager::getInstance()->inputAttributes.getAllAttributes(),
+					static_cast<float>(screenWidth)/static_cast<float>(screenHeight));
+
 		//gameComponent = new GameComponent();
-		if(!gameComponent.init())
+		if(!game_.init())
 			return false;
 
 		//soundComponent = new SoundComponent();
-		if(!soundComponent.init())
+		if(!sound_.init())
 			return false;
 
 		//physicsComponent = new PhysicsComponent();
@@ -61,9 +69,10 @@ public:
 	}
 	void update(float delta)
 	{
-		gameComponent.onUpdate(delta);
-		//soundComponent.onUpdate(delta);
-		//physics.onUpdate(delta);
-		//renderComponent.onUpdate(delta);
+		sound_.onUpdate(delta);
+		camera_.onUpdate(delta);
+		physics_.onUpdate(delta);
+		render_->onUpdate(delta);
+		game_.onUpdate(delta);
 	}
 };

@@ -11,6 +11,7 @@ IEDManagement::IEDManagement() :
 }
 IEDManagement::~IEDManagement()
 {
+
 }
 
 void IEDManagement::init()
@@ -58,7 +59,7 @@ D3D11_INPUT_ELEMENT_DESC IEDManagement::IED(
 	ied.AlignedByteOffset		= (UINT)alignedByteOffset;
 	ied.InputSlotClass			= inputSlotClass;
 	ied.InstanceDataStepRate	= (UINT)instanceDataStepRate;
-	
+
 	return ied;
 }
 
