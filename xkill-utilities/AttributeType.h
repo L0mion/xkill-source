@@ -2,27 +2,27 @@
 
 #include "dllUtilities.h"
 #include "AttributePointer.h"
+#include <string>
 
 
-/// Used inside \ref components for data processing 
+/// Used inside \ref COMPONENTS for data processing.
 /** 
 Created by AttributeManager and stored in a AttributeStorage.
 
-An attribute is basically just a Struct which holds Data, however 
-each attribute can be shared among multiple Components which allows
+An attribute can be shared among multiple Components which allows
 each Component to work with the same data independently of eachother
 with minimal overhead.
 
 The attributes listed is currently only placeholders and should
 be modified to suit the need of each Component.
 
-\defgroup attributes Attributes
-\ingroup utilities
+\defgroup ATTRIBUTES Attributes
+\ingroup UTILITIES
 */
 
 /// Attribute interface to facilitate grouping of attributes.
 /** 
-\ingroup attributes
+\ingroup ATTRIBUTES
 */
 struct DLL_U IAttribute
 {
@@ -37,18 +37,18 @@ struct DLL_U IAttribute
 
 /// Stores the position of an Entity 
 /** 
-\ingroup attributes
+\ingroup ATTRIBUTES
 */
 struct DLL_U PositionAttribute : public IAttribute
 {
 	PositionAttribute();
 	~PositionAttribute();
-	float position;
+	float position[3];
 };
 
 /// Stores detailed Spatial informaiton about an Entity 
 /** 
-\ingroup attributes
+\ingroup ATTRIBUTES
 */
 struct DLL_U SpatialAttribute : public IAttribute
 {
@@ -57,8 +57,16 @@ struct DLL_U SpatialAttribute : public IAttribute
 
 	AttributePointer positionAttribute;
 
-	float rotation;
-	float scale;
+	float rotation[4];
+	float scale[3];
+};
+
+struct DLL_U InputAttribute : public IAttribute
+{
+	InputAttribute();
+	~InputAttribute();
+	float position[3];
+	float rotation[2];
 };
 
 /// Stores everything RenderComponent needs to know about an entity
@@ -69,7 +77,7 @@ that should be transparent or not, tesselated or not, use the same
 meshID and textureID, and the Render each Queue in a orderly fashion 
 throught the use of Instancing.
 
-\ingroup attributes
+\ingroup ATTRIBUTES
 */
 struct DLL_U RenderAttribute : public IAttribute
 {
@@ -86,7 +94,7 @@ struct DLL_U RenderAttribute : public IAttribute
 
 /// Stores everything PhysicsComponent needs to know about an entity
 /** 
-\ingroup attributes
+\ingroup ATTRIBUTES
 */
 struct DLL_U PhysicsAttribute : public IAttribute
 {
@@ -104,7 +112,7 @@ struct DLL_U PhysicsAttribute : public IAttribute
 
 /// Stores everything SoundComponent needs to know to play a 3D sound
 /** 
-\ingroup attributes
+\ingroup ATTRIBUTES
 */
 struct DLL_U SoundAttribute : public IAttribute
 {
@@ -116,14 +124,30 @@ struct DLL_U SoundAttribute : public IAttribute
 
 /// Stores everything RenderComponent needs to know to manage multiple Cameras in the world
 /** 
-\ingroup attributes
+\ingroup ATTRIBUTES
 */
 struct DLL_U CameraAttribute : public IAttribute
 {
 	CameraAttribute();
 	~CameraAttribute();
-
 	AttributePointer spatialAttribute;
-	float mat_viewProj;
-	float fieldOfView;
+	float mat_view[16];
+	float mat_projection[16];
+};
+
+/// Stores everything GameComponent needs to know about a player
+/** 
+\ingroup ATTRIBUTES
+*/
+struct DLL_U PlayerAttribute : public IAttribute
+{
+	PlayerAttribute();
+	~PlayerAttribute();
+
+	std::string name;		//!< Name of the player process.
+	int priority;			//!< Priority of the player process. Higher value means higher priority. The scheduler will choose the process with the highest priority for execution.
+	int cycleSteals;		//!< Total number of cycle steals for the player process. Cycle steals steal priority from other player processes.
+	int totalExecutionTime; //!< Total execution time of the player process. The player with the most total execution time as awared by the scheduler.
+
+	AttributePointer renderAttribute;
 };

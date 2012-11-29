@@ -1,4 +1,7 @@
 #include "renderingComponent.h"
+
+#include <xkill-utilities/AttributeType.h>
+
 #include "fxManagement.h"
 #include "ViewportManagement.h"
 #include "gBuffer.h"
@@ -9,10 +12,13 @@
 #include "mathBasic.h"
 #include "vertices.h"
 
-RenderingComponent::RenderingComponent(HWND windowHandle,
-									   unsigned int screenWidth,
-									   unsigned int screenHeight,
-									   unsigned int numViewports)
+RenderingComponent::RenderingComponent(
+		HWND windowHandle,
+		unsigned int screenWidth, 
+		unsigned int screenHeight,
+		unsigned int numViewports,
+		std::vector<RenderAttribute>* renderAttributes,
+		std::vector<CameraAttribute>* cameraAttributes)
 {
 	windowHandle_	= windowHandle;
 	screenWidth_	= screenWidth;
@@ -45,6 +51,9 @@ RenderingComponent::RenderingComponent(HWND windowHandle,
 	vertexBuffer_	= nullptr;
 	vertices_		= nullptr;
 	objLoader_		= nullptr;
+
+	renderAttributes_ = renderAttributes;
+	cameraAttributes_ = cameraAttributes;
 }
 RenderingComponent::~RenderingComponent()
 {
@@ -73,7 +82,7 @@ RenderingComponent::~RenderingComponent()
 	for(unsigned int i = 0; i < GBUFFERID_NUM_BUFFERS; i++)
 		SAFE_DELETE(gBuffers_[i]);
 	
-	//d3dDebug->reportLiveDeviceObjects();
+	//d3dDebug_->reportLiveDeviceObjects();
 	SAFE_DELETE(d3dDebug_);
 
 	//temp
@@ -105,8 +114,8 @@ HRESULT RenderingComponent::init()
 		hr = initCBManagement();
 	if(SUCCEEDED(hr)) //temp
 		hr = initVertexBuffer();
-	if(SUCCEEDED(hr))
-		hr = initDebug();
+//	if(SUCCEEDED(hr))
+//		hr = initDebug();
 
 	return hr;
 }
@@ -147,6 +156,12 @@ void RenderingComponent::reset()
 
 void RenderingComponent::onUpdate(float delta)
 {
+	setViewport(0);
+	clearGBuffers();
+	renderToGBuffer(DirectX::XMFLOAT4X4(cameraAttributes_->at(0).mat_view),
+		DirectX::XMFLOAT4X4(cameraAttributes_->at(0).mat_projection));
+	
+	renderToBackBuffer();
 }
 
 void RenderingComponent::render(DirectX::XMFLOAT4X4 view, DirectX::XMFLOAT4X4 projection)

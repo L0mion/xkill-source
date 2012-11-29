@@ -6,15 +6,16 @@
 #include "IAttributeStorage.h"
 #include "AttributeController.h"
 #include <xkill-utilities/AttributePointer.h>
-class Entity;
+#include "Entity.h"
 
 
-/// Template class for storing and creating \ref attributes in a uniform manner.
+/// Template class for storing and creating \ref ATTRIBUTES in a uniform manner.
 /** 
 IMPORTANT: The owner (Entity) of each attribute is stored in "owners".
-if owner is 0 it means the attribute is deleted and ready to be reasused
-when a new Entity is created. 
-\ingroup achitecture
+If owner is 0 it means the attribute is deleted and ready to be reused
+when a new Entity is created.
+
+\ingroup ARCHITECTURE
 */
 
 template <class T>
@@ -23,8 +24,8 @@ class AttributeStorage : public IAttributeStorage
 private:
 	std::vector<T> attributes;		//!< Each attribute.
 	std::vector<int> owners;		//!< Owner of each attribute.
-									//!< owner 0 means no owner, and means the attribute
-									//!< is deleted and ready to be reause
+									//!< Owner 0 means no owner, and means the attribute.
+									//!< Is deleted and ready to be reused.
 	std::queue<int> deleted;		//!< Queue to keep track of deleted Indexe e.g. Indexes with "owner 0".
 	int index;
 
@@ -46,9 +47,9 @@ public:
 	}
 
 	/** 
-	Creates space for attribute and return 
+	Creates space for an attribute and returns a
 	pointer to that space.
-	The caller is then responsible to fill
+	The caller is responsible for filling
 	out the attribute.
 	*/
 	T* createAttribute(Entity* owner)
@@ -83,7 +84,7 @@ public:
 		deleted.push(index);
 	}
 
-	AttributePointer getAttributePointer()
+	AttributePointer createAttributePointer()
 	{
 		AttributePointer a;
 		a.init(&attributes, index);

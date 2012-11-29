@@ -1,30 +1,28 @@
 #pragma once
 
-/// The duct and tape that allows all part of the game to communicate
+/// The duct tape allowing all parts of the game to communicate.
 /** 
-The achitecture heaviliy based around the flexibility of Component-Based
-Programming and Event passing, but at the same time tries to embrase a
-Data-Oriented philosphy in which each entity is broken down into multiple 
-componets, grouped together in memory and processed in batches which allows
+The architecture is heaviliy based around the flexibility of Component-Based
+Programming and Event passing, but at the same time tries to embrace a
+Data-Oriented philosphy in which each Entity is broken down into multiple 
+\ref COMPONENTS, grouped together in memory and processed in batches allowing
 for some serious optimizations.
 
-The bread and butter of the architecture is the use of Attributes.
-An attribute is basically just a Struct which holds Data, however 
-each attribute can be shared among multiple Components which allows
-each Component to work with the same data independently of eachother
-with minimal overhead.
+The bread and butter of the architecture is the use of \ref ATTRIBUTES.
+An Attribute can be shared among multiple Components allowing
+each Component to work with the same data independently with minimal overhead.
 
 A Component is the workhorse of the game and processes all of its associated
-attributes in a orderly fashion. Since every Entity can be added or removed 
-from multiple Components even during Runtime we retain the benefits of a
+\ref ATTRIBUTES in an orderly fashion. Since every Entity can be added or removed 
+from multiple Components even during runtime we retain the benefits of a
 Component-Oriented approach without sacrificing performance.
 
-If needed Components can communicate with other Components through
-the use of events (which is part of XKILL-Utilities). However, 
+\ref COMPONENTS can communicate with other Components through
+the use of events (which is part of xkill-utilities). However, 
 creating events for everything is cumbersome and hard to maintain 
-so every component should strive to work indepentently from eachother.
+so every component should strive to work indepentently.
 
-\defgroup ARCHITECTURE XKILL - Achitecture
+\defgroup ARCHITECTURE XKILL - Architecture
 \image html https://dl.dropbox.com/u/12273871/DOXYGEN/Architectur.png
 */
 
@@ -32,14 +30,14 @@ so every component should strive to work indepentently from eachother.
 #include "EntityManager.h"
 #include "dllArchitecture.h"
 
-/// The Entry Point of the architecture
+/// The entry point of the architecture
 /** 
-GameManager is responsible for Setting up the inital game state.
+GameManager is responsible for setting up the initial game state.
 It is also responsible for refreshing the ComponentManager which
 in turn updates most of the game logic.
 
 It can also be used as an early testing environment for simulating 
-the game by sending a Event, creating and deleting a Entity and such.
+the game by sending an Event, creating and deleting an Entity and such.
 
 \ingroup ARCHITECTURE
 */
@@ -48,35 +46,44 @@ class DLL_A GameManager
 {
 	ComponentManager* componentManager;
 	EntityManager* entityManager;
+	GameComponent* gameComponent;
 public:
 	GameManager()
 	{
-		componentManager = new ComponentManager();
-		entityManager = new EntityManager();
 	}
 	~GameManager()
 	{
 		delete componentManager;
 		delete entityManager;
+		delete gameComponent;
+	}
+
+	void init(HWND windowHandle, unsigned int screenWidth, unsigned int screenHeight)
+	{
+		entityManager = new EntityManager();
+		for(int i=0; i<1; i++)
+		{
+			entityManager->createCamera();
+		};
+		entityManager->createEntity(PLAYER);
+		
+		componentManager = new ComponentManager();
+		componentManager->init(windowHandle, screenWidth, screenHeight);
+		
+		gameComponent = new GameComponent();
+		gameComponent->init();
 	}
 
 	void run()
 	{
-		//
-		// Setup Game
-		//
+		
 
-		for(int i=0; i<2; i++)
-		{
-			entityManager->createEntity();
-		};
+		componentManager->update(0.5f);
 
 
-		//
-		// Run game
-		//
 
-		std::cout << std::endl << "Run 1" << std::endl;
+		/*std::cout << std::endl << "Run 1" << std::endl;
+
 		Event_A e_A;
 		EventManager::getInstance()->sendEvent(&e_A);
 		componentManager->update(1.0f);
@@ -94,7 +101,16 @@ public:
 		std::cout << std::endl << "Run 3" << std::endl;
 		entityManager->removeEntity(1);
 		componentManager->update(1.0f);
-		std::cin.ignore();
+		std::cin.ignore();*/
+
+
+		//Event_PlaySound playSound(0);
+		//while(1)
+		//{
+		//	EventManager::getInstance()->sendEvent(&playSound);
+		//	componentManager->update(1.0f);
+		//}
+		//std::cin.ignore();
 
 
 		//

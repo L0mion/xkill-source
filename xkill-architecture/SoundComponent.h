@@ -3,16 +3,18 @@
 //#include <xkill-utilities/IComponent.h> //check
 #include <xkill-utilities/IObserver.h>
 #include <xkill-utilities/EventManager.h>
-
+#include <xkill-utilities/EventType.h>
 
 /// Component responsible for playing Sound based on which Event is sent
 /** 
 If 3D positioning of sound is needed, creating an Entity 
-with SoundAttribute and process each Attribute here is 
+with a SoundAttribute and process each Attribute here is 
 probably the best approach.
 
-\ingroup components
+\ingroup COMPONENTS
 */
+
+class Event;
 
 class SoundComponent : public IObserver
 {

@@ -1,12 +1,19 @@
 #pragma once
 
 #include "EntityFactory.h"
-#include <vector>
 
-/// Manages multiple Entity in a uniform way
+#include <vector>
+#include <iostream>
+
+/// Manages multiple Entities in a uniform way.
 /** 
-\ingroup achitecture
+\ingroup ARCHITECTURE
 */
+
+enum ENTITYTYPE
+{
+	PLAYER
+};
 
 class EntityManager
 {
@@ -20,16 +27,20 @@ private:
 	}
 
 public:
+	EntityManager()
+	{
+	}
+
 	void update(float delta)
 	{
 	}
 
-	void removeEntity(int id)
+	void removeEntity(int index)
 	{
-		std::cout << "ENTITYMANAGER: Removed Entity " << entities[id]->getID() << std::endl;
-		entities[id]->deleteAttributes();
-		delete entities[id];
-		entities.erase(entities.begin()+id);	
+		std::cout << "ENTITYMANAGER: Removed Entity " << entities[index]->getID() << std::endl;
+		entities[index]->deleteAttributes();
+		delete entities[index];
+		entities.erase(entities.begin()+index);	
 	}
 
 	~EntityManager()
@@ -41,10 +52,22 @@ public:
 		}
 	}
 
-	void createEntity()
+	void createEntity(ENTITYTYPE entityType)
 	{
-		Entity* e = entityFactory.createEntity_TypeA();
+		Entity* entity;
+		switch(entityType)
+		{
+		case PLAYER:
+			entity = entityFactory.createPlayerEntity();
+			addEntity(entity);
+			break;
+		}
+	}
+
+	void createCamera()
+	{
+		Entity* e = entityFactory.createEntity_Camera();
 		addEntity(e);
-		std::cout << "ENTITYMANAGER: Created Entity " << e->getID() << std::endl;
+		std::cout << "ENTITYMANAGER: Created Camera " << e->getID() << std::endl;
 	}
 };

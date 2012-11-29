@@ -1,17 +1,17 @@
 #pragma once
 
 #include "dllUtilities.h"
-// Macro for accessing a attribute vector
-// a useful and convinent macrot that only occasionally scares little children
+// Extract the Object (variable name inside Parent) vector from Parent (class name) and cast it to Type (class name).
+// Used when extracting attributes from inside another attribute.
+// A useful and convenient macro that only occasionally scares little children.
 #define ATTRIBUTE_CAST(Type,Object,Parent) &((std::vector<Type>*)Parent->Object.host)->at(Parent->Object.index)
 
-
-/// Used to gain access to a specifc attribute in the attibute memory space
+/// Used to gain access to a specifc attribute in the attribute memory space
 /** 
-Stores a pointer to a std::vector with attributes of an specific type that needs
+Stores a pointer to a std::vector with attributes of a specific type that needs
 to be cast manually. A specific attribute can then be accessed through index.
 
-Manual casting is neccissary since DLLs doesn't support Templates.
+Manual casting is necessary since DLLs does not support Templates.
 
 \ingroup xkill-utilities
 */
@@ -20,7 +20,7 @@ class DLL_U AttributePointer
 {
 public:
 	void* host;		//!< A void pointer to a std::vector holding attributes of a specific type.
-	int index;		//!< A index to a attribute in host
+	int index;		//!< An index to an attribute in host.
 
 	AttributePointer();
 

@@ -7,7 +7,15 @@
 #include <xkill-architecture/GameManager.h>
 #include "window.h"
 
+
 #if defined( DEBUG ) || defined( _DEBUG )
+<<<<<<< HEAD
+=======
+
+#define _CRTDBG_MAP_ALLOC
+#include <stdlib.h>
+#include <crtdbg.h>
+>>>>>>> dev1
 #include <vld.h>
 #endif
 
@@ -16,14 +24,29 @@ void run(RenderingComponent* renderingComponent, Window* window/*, CameraBasic* 
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int cmdShow)
 {
-	GameManager gm;
-	gm.run();
+		// Detect memory leaks
+#if defined(DEBUG) | defined(_DEBUG)
+	_CrtSetDbgFlag( _CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF );
+#endif
 
 	UINT screenWidth = 800;
 	UINT screenHeight = 800;
 
+
 	Window* window = new Window(hInstance, cmdShow, screenWidth, screenHeight);
 	window->init();
+
+	AllocConsole();
+	SetStdHandle(STD_INPUT_HANDLE |STD_OUTPUT_HANDLE, window->getWindowHandle());
+
+	GameManager gm;
+	gm.init(window->getWindowHandle(),screenWidth,screenHeight);
+	
+	while(window->getIsActive())
+	{
+		window->checkMessages();
+		gm.run();
+	}
 
 	//RenderingComponent* renderingComponent = new RenderingComponent(
 	//	window->getWindowHandle(), 
@@ -31,6 +54,12 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	//	screenHeight,
 	//	numPlayers);
 	//HRESULT hr = renderingComponent->init();
+
+	/*RenderingComponent* renderingComponent = new RenderingComponent(
+		window->getWindowHandle(), 
+		screenWidth, 
+		screenHeight);
+	HRESULT hr = renderingComponent->init();*/
 
 
 	float aspect = (float)screenWidth/(float)screenHeight;
@@ -42,7 +71,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
 	//delete camera;
 	/*delete renderingComponent;*/
-	delete window;
+	if(window)
+		delete window;
 
 	return 0;
 }
@@ -60,3 +90,71 @@ void run(RenderingComponent* renderingComponent, Window* window/*, CameraBasic* 
 		renderingComponent->onUpdate(1.0f);
 	}
 }
+
+
+
+
+
+
+
+
+
+
+
+
+////////////////////////////
+// Main page
+////////////////////////////
+
+/** 
+\mainpage Index
+\htmlonly
+<h1>XKILL</h1>
+<h2>Heartaches by the Cycle</h2>
+<p style="width: 500px;">
+In a forgotten store-room rests an ancient single-core processor. In this harsh land-
+scape, before multicore-technology, fierce gladiator tournaments are fough by processes
+struggling to be granted execution time by The Scheduler. These tournaments consist of
+deadly combat as The Processes battle to destroy one another.
+</p>
+
+<img src="http://fc07.deviantart.net/fs70/i/2012/275/6/7/concepting_by_wolfgan-d5gjy81.jpg" style="width: 20%;"/>
+
+<iframe width="46" height="23" style="position: relative; display: block; width: 46px; height: 23px;" src="http://bandcamp.com/EmbeddedPlayer/v=2/track=1053150290/size=short/bgcol=FFFFFF/linkcol=4285BB/" allowtransparency="true" frameborder="0"><a href="http://sioum.bandcamp.com/track/chambers">Chambers by Sioum</a></iframe>
+
+<h3>Developer Team</h3>
+<ul>
+<li>Mattias Andersson	</li>
+<li>Nils Forsman		</li>
+<li>David Grelsson		</li>
+<li>Henrik Nell		 	</li>
+<li>Eric Nilsson		</li>
+<li>Viktor Sid&eacute;n	</li>
+<li>Jon Wid&eacute;n	</li>
+</ul>
+
+<h3>Graphics Team</h3>
+<ul>
+<li>Oliver Blomgren		</li>
+<li>Jimmy Johnsson		</li>
+<li>Daniel Oldberg		</li>
+<li>Adam Aberg			</li>
+</ul>
+
+<h3>Audio Team</h3>
+<ul>
+<li>Audio Team			</li>
+<li>Johan Mauritzson	</li>
+<li>Jesper Palm			</li>
+</ul>
+
+<h3>Level Design</h3>
+<ul>
+<li>Olle Karlsson		</li>
+</ul>
+
+\endhtmlonly
+
+
+
+*/
