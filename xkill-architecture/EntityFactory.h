@@ -39,13 +39,16 @@ public:
 
 		// Position attribute
 		PositionAttribute* position = AttributeManager::getInstance()->positionAttributes.createAttribute(e);
-		position->positionX		= 0.0f;
+		position->position[0] = position->position[1] = position->position[2] = 0.0f;
+			
 
 		// Spatial attribute
 		SpatialAttribute* spatial = AttributeManager::getInstance()->spatialAttributes.createAttribute(e);
-		spatial->rotation		= 360;
-		spatial->scale			= 1.0f;
+		spatial->rotation[0] = spatial->rotation[1] = spatial->rotation[2] = 0.0f;
+		spatial->rotation[3] = 1.0f;
+		spatial->scale[0] = spatial->scale[1] = spatial->scale[2] = 1.0f;
 		spatial->positionAttribute = AttributeManager::getInstance()->positionAttributes.createAttributePointer();
+
 
 		// Render attribute
 		RenderAttribute* render = AttributeManager::getInstance()->renderAttributes.createAttribute(e);
@@ -61,20 +64,49 @@ public:
 		return e;
 	}
 
+	Entity* createEntity_Camera()
+	{
+		Entity* e = createEntity();
+
+		// Position attribute
+		PositionAttribute* position = AttributeManager::getInstance()->positionAttributes.createAttribute(e);
+		position->position[0] = position->position[1] = position->position[2] = 0.0f;
+			
+
+		// Spatial attribute
+		SpatialAttribute* spatial = AttributeManager::getInstance()->spatialAttributes.createAttribute(e);
+		spatial->rotation[0] = spatial->rotation[1] = spatial->rotation[2] = 0.0f;
+		spatial->rotation[3] = 1.0f;
+		spatial->scale[0] = spatial->scale[1] = spatial->scale[2] = 1.0f;
+		spatial->positionAttribute = AttributeManager::getInstance()->positionAttributes.createAttributePointer();
+
+		// Render attribute
+		CameraAttribute* camera = AttributeManager::getInstance()->cameraAttributes.createAttribute(e);
+
+
+		AttributeManager::getInstance()->cameraAttributes.getAllAttributes()->size();
+		ZeroMemory(camera->mat_projection, sizeof(camera->mat_projection));
+		ZeroMemory(camera->mat_view, sizeof(camera->mat_view));
+		camera->spatialAttribute = AttributeManager::getInstance()->spatialAttributes.createAttributePointer();
+
+
+		// Return entity
+		return e;
+	}
 	Entity* EntityFactory::createPlayerEntity()
 	{
 		Entity* entity = createEntity();
 		
 		// Position attribute
 		PositionAttribute* position = AttributeManager::getInstance()->positionAttributes.createAttribute(entity);
-		position->positionX = 0.0f;
-		position->positionY = 0.0f;
-		position->positionZ = 0.0f;
+		position->position[0] = 0.0f;
+		position->position[0] = 0.0f;
+		position->position[0] = 0.0f;
 
 		// Spatial attribute
 		SpatialAttribute* spatial = AttributeManager::getInstance()->spatialAttributes.createAttribute(entity);
-		spatial->rotation = 0;
-		spatial->scale = 1.0f;
+		spatial->rotation[0] = spatial->rotation[1] = spatial->rotation[2] = 0;
+		spatial->scale[0] = spatial->scale[1] = spatial->scale[2] = 1.0f;
 		spatial->positionAttribute = AttributeManager::getInstance()->positionAttributes.createAttributePointer();
 
 		// Render attribute

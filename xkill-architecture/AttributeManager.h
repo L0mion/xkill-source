@@ -12,10 +12,13 @@ class AttributeManager
 {
 public:
 	AttributeStorage<PositionAttribute> positionAttributes;
-	AttributeStorage<SpatialAttribute> spatialAttributes;
+	AttributeStorage<SpatialAttribute>	spatialAttributes;
 	AttributeStorage<RenderAttribute>	renderAttributes;
 	AttributeStorage<PhysicsAttribute>	physicsAttributes;
+	AttributeStorage<CameraAttribute>	cameraAttributes;
+	AttributeStorage<InputAttribute>	inputAttributes;
 	AttributeStorage<PlayerAttribute>	playerAttributes;
+
 
 	static AttributeManager* getInstance()
 	{

@@ -43,9 +43,7 @@ struct DLL_U PositionAttribute : public IAttribute
 {
 	PositionAttribute();
 	~PositionAttribute();
-	float positionX;
-	float positionY;
-	float positionZ;
+	float position[3];
 };
 
 /// Stores detailed Spatial informaiton about an Entity 
@@ -59,8 +57,16 @@ struct DLL_U SpatialAttribute : public IAttribute
 
 	AttributePointer positionAttribute;
 
-	float rotation;
-	float scale;
+	float rotation[4];
+	float scale[3];
+};
+
+struct DLL_U InputAttribute : public IAttribute
+{
+	InputAttribute();
+	~InputAttribute();
+	float position[3];
+	float rotation[2];
 };
 
 /// Stores everything RenderComponent needs to know about an entity
@@ -124,10 +130,9 @@ struct DLL_U CameraAttribute : public IAttribute
 {
 	CameraAttribute();
 	~CameraAttribute();
-
 	AttributePointer spatialAttribute;
-	float mat_viewProj;
-	float fieldOfView;
+	float mat_view[16];
+	float mat_projection[16];
 };
 
 /// Stores everything GameComponent needs to know about a player

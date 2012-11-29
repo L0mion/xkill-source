@@ -37,14 +37,14 @@ void GameComponent::onUpdate(float delta)
 			PositionAttribute* positionAttribute = ATTRIBUTE_CAST(PositionAttribute,positionAttribute, spatialAttribute);
 			
 			// The player moves
-			positionAttribute->positionX++;
+			positionAttribute->position[0]++;
 
 			std::cout 
 				<< owners->at(i)			<< "\t"
 				<< playerAttribute->name	<< "\t"
-				<< positionAttribute->positionX				<< "\t"
-				<< positionAttribute->positionY				<< "\t"
-				<< positionAttribute->positionZ				<< "\t"
+				<< positionAttribute->position[0]				<< "\t"
+				<< positionAttribute->position[1]				<< "\t"
+				<< positionAttribute->position[2]				<< "\t"
 				<< std::endl;
 		}
 	}

@@ -1,8 +1,10 @@
 #pragma once
 
-#include "RenderComponent.h"
+#include <xkill-renderer/renderingComponent.h>
 #include "SoundComponent.h"
 #include "PhysicsComponent.h"
+#include "CameraComponent.h"
+#include "AttributeManager.h"
 #include "GameComponent.h"
 #include <vector>
 
@@ -21,23 +23,43 @@ be the responsibility of the ComponentManager.
 class ComponentManager
 {
 private:
-	RenderComponent renderComponent;
-	//PhysicsComponent physics;
-	SoundComponent soundComponent;
+
+	RenderingComponent* render_;
+	PhysicsComponent	physics_;
+	SoundComponent		sound_;
+	CameraComponent		camera_;
 	GameComponent gameComponent;
+
 public:
 	ComponentManager()
 	{
-		std::vector<PhysicsAttribute>* attributes = AttributeManager::getInstance()->physicsAttributes.getAllAttributes();
 		
-		//physics.init(attributes);
+	}
+	~ComponentManager()
+	{
+		if(render_)
+			delete render_;
+	}
+
+	void init(HWND windowHandle, unsigned int screenWidth, unsigned int screenHeight)
+	{
+		render_ = new RenderingComponent(windowHandle,screenWidth,screenHeight,800,800,1,
+										AttributeManager::getInstance()->renderAttributes.getAllAttributes(),
+										AttributeManager::getInstance()->cameraAttributes.getAllAttributes());
+		render_->init();
+		camera_.init(AttributeManager::getInstance()->cameraAttributes.getAllAttributes(),
+					AttributeManager::getInstance()->inputAttributes.getAllAttributes(),
+					static_cast<float>(screenWidth)/static_cast<float>(screenHeight));
 	}
 
 	void update(float delta)
 	{
+		sound_.onUpdate(delta);
+		camera_.onUpdate(delta);
+		physics_.onUpdate(delta);
+		render_->onUpdate(delta);
+
 		gameComponent.onUpdate(delta);
-		//soundComponent.onUpdate(delta);
-		//physics.onUpdate(delta);
-		//renderComponent.onUpdate(delta);
+
 	}
 };

@@ -50,11 +50,6 @@ class DLL_A GameManager
 public:
 	GameManager()
 	{
-		componentManager = new ComponentManager();
-		entityManager = new EntityManager();
-
-		gameComponent = new GameComponent();
-		gameComponent->init();
 	}
 	~GameManager()
 	{
@@ -63,27 +58,32 @@ public:
 		delete gameComponent;
 	}
 
+	void init(HWND windowHandle, unsigned int screenWidth, unsigned int screenHeight)
+	{
+		entityManager = new EntityManager();
+		for(int i=0; i<1; i++)
+		{
+			entityManager->createCamera();
+		};
+		entityManager->createEntity(PLAYER);
+		
+		componentManager = new ComponentManager();
+		componentManager->init(windowHandle, screenWidth, screenHeight);
+		
+		gameComponent = new GameComponent();
+		gameComponent->init();
+	}
+
 	void run()
 	{
-		//
-		// Setup Game
-		//
+		
 
-		entityManager->createEntity(PLAYER);
-
-		//while(true)
-		{
-			componentManager->update(1.0f);
-			std::cin.ignore();
-		}
+		componentManager->update(0.5f);
 
 
-		//
-		// Run game
-		//
 
-		/*
-		std::cout << std::endl << "Run 1" << std::endl;
+		/*std::cout << std::endl << "Run 1" << std::endl;
+
 		Event_A e_A;
 		EventManager::getInstance()->sendEvent(&e_A);
 		componentManager->update(1.0f);
@@ -101,8 +101,8 @@ public:
 		std::cout << std::endl << "Run 3" << std::endl;
 		entityManager->removeEntity(1);
 		componentManager->update(1.0f);
-		std::cin.ignore();
-		*/
+		std::cin.ignore();*/
+
 
 		//Event_PlaySound playSound(0);
 		//while(1)
