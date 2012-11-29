@@ -43,7 +43,8 @@ public:
 
 	void init(HWND windowHandle, unsigned int screenWidth, unsigned int screenHeight)
 	{
-		render_ = new RenderingComponent(windowHandle,screenWidth,screenHeight,1,
+		render_ = new RenderingComponent(windowHandle,screenWidth,screenHeight,
+										AttributeManager::getInstance()->cameraAttributes.getAllAttributes()->size(),
 										AttributeManager::getInstance()->renderAttributes.getAllAttributes(),
 										AttributeManager::getInstance()->cameraAttributes.getAllAttributes());
 		render_->init();

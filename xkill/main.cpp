@@ -9,13 +9,10 @@
 
 
 #if defined( DEBUG ) || defined( _DEBUG )
-<<<<<<< HEAD
-=======
 
 #define _CRTDBG_MAP_ALLOC
 #include <stdlib.h>
 #include <crtdbg.h>
->>>>>>> dev1
 #include <vld.h>
 #endif
 

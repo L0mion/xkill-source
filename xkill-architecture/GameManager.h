@@ -61,7 +61,7 @@ public:
 	void init(HWND windowHandle, unsigned int screenWidth, unsigned int screenHeight)
 	{
 		entityManager = new EntityManager();
-		for(int i=0; i<1; i++)
+		for(int i=0; i<9; i++)
 		{
 			entityManager->createCamera();
 		};

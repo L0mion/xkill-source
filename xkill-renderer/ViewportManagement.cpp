@@ -12,7 +12,7 @@ ViewportManagement::ViewportManagement(	unsigned int numViewports,
 	viewportWidth_	= 0;
 	viewportHeight_ = 0;
 
-	border_ = 4.0f;
+	borderSize_ = 2.0f;
 }
 
 ViewportManagement::~ViewportManagement()
@@ -95,14 +95,14 @@ HRESULT ViewportManagement::initViewportDouble()
 	viewport.TopLeftX	= 0;
 	viewport.TopLeftY	= 0;
 	viewport.Width		= static_cast<FLOAT>(viewportWidth_);
-	viewport.Height		= static_cast<FLOAT>(viewportHeight_)-border_;
+	viewport.Height		= static_cast<FLOAT>(viewportHeight_)-borderSize_;
 	viewport.MinDepth	= 0;
 	viewport.MaxDepth	= 1;
 
 	viewports->push_back(viewport);
 
 	viewport.TopLeftX	= 0;
-	viewport.TopLeftY	= static_cast<FLOAT>(viewportHeight_)+border_;
+	viewport.TopLeftY	= static_cast<FLOAT>(viewportHeight_)+borderSize_;
 
 	viewports->push_back(viewport);
 
@@ -110,16 +110,16 @@ HRESULT ViewportManagement::initViewportDouble()
 }
 HRESULT ViewportManagement::initViewportGrid(unsigned int gridSize)
 {
-
 	HRESULT hr = S_OK;
-	unsigned int width = static_cast<unsigned int>(sqrt(gridSize));
-	
-	viewportWidth_	= screenWidth_/width;
-	viewportHeight_ = screenHeight_/width;
+
+	unsigned int numGridColumns = static_cast<unsigned int>(sqrt(gridSize));
+
+	unsigned int viewportSize = screenWidth_ - ((numGridColumns-1) * borderSize_);
+	viewportWidth_ = viewportSize / numGridColumns;
+	viewportHeight_ = viewportWidth_;
 
 	D3D11_VIEWPORT viewport;
 	ZeroMemory(&viewport, sizeof(D3D11_VIEWPORT));
-	
 	viewport.TopLeftX	= 0;
 	viewport.TopLeftY	= 0;
 	viewport.Width		= static_cast<FLOAT>(viewportWidth_);
@@ -127,17 +127,12 @@ HRESULT ViewportManagement::initViewportGrid(unsigned int gridSize)
 	viewport.MinDepth	= 0;
 	viewport.MaxDepth	= 1;
 
-	for(unsigned int row = 0; row<width; row++)
+	for(unsigned int row = 0; row < numGridColumns; row++)
 	{
-		for(unsigned int column=0; column<width; column++)
+		for(unsigned int column = 0; column < numGridColumns; column++)
 		{
-			viewport.TopLeftX = static_cast<FLOAT>(row*viewportWidth_);
-			viewport.TopLeftY = static_cast<FLOAT>(column*viewportHeight_);
-
-			if(column != 0)
-				viewport.TopLeftY += border_;
-			if(row != 0)
-				viewport.TopLeftX += border_;
+			viewport.TopLeftX = column * (viewportWidth_ + borderSize_);
+			viewport.TopLeftY = row * (viewportHeight_ + borderSize_);
 
 			viewports->push_back(viewport);
 		}
