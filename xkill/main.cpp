@@ -9,7 +9,11 @@
 
 
 #if defined( DEBUG ) || defined( _DEBUG )
-//#include <vld.h>
+
+#define _CRTDBG_MAP_ALLOC
+#include <stdlib.h>
+#include <crtdbg.h>
+#include <vld.h>
 #endif
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int cmdShow);
@@ -22,21 +26,24 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	_CrtSetDbgFlag( _CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF );
 #endif
 
-	Window window(hInstance, cmdShow, 200, 200);
-	window.init();
-
-	AllocConsole();
-	SetStdHandle(STD_INPUT_HANDLE |STD_OUTPUT_HANDLE, window.getWindowHandle());
-
-	GameManager gm;
-	gm.run();
-
 	UINT screenWidth = 800;
 	UINT screenHeight = 800;
 
 
 	Window* window = new Window(hInstance, cmdShow, screenWidth, screenHeight);
 	window->init();
+
+	AllocConsole();
+	SetStdHandle(STD_INPUT_HANDLE |STD_OUTPUT_HANDLE, window->getWindowHandle());
+
+	GameManager gm;
+	gm.init(window->getWindowHandle(),screenWidth,screenHeight);
+	
+	while(window->getIsActive())
+	{
+		window->checkMessages();
+		gm.run();
+	}
 
 	//RenderingComponent* renderingComponent = new RenderingComponent(
 	//	window->getWindowHandle(), 
@@ -61,6 +68,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
 	//delete camera;
 	/*delete renderingComponent;*/
+	if(window)
+		delete window;
 
 	return 0;
 }

@@ -55,14 +55,14 @@ public:
 				SpatialAttribute* s = ATTRIBUTE_CAST(SpatialAttribute,spatialAttribute,r);
 				PositionAttribute* p = ATTRIBUTE_CAST(PositionAttribute,positionAttribute,s);
 
-				p->position =
-					+ r->transparent 
-					+ r->tessellation 
-					+ r->meshID 
-					+ r->textureID
-					+ p->position
-					+ s->rotation
-					+ s->scale;
+				//p->position = i
+				//	+ r->transparent 
+				//	+ r->tessellation 
+				//	//+ r->meshid 
+				//	//+ r->textureid
+				//	+ p->position
+				//	+ s->rotation
+				//	+ s->scale;
 			}
 		}
 

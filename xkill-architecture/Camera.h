@@ -1,9 +1,8 @@
-#ifndef XKILL_CAMERABASIC_H
-#define XKILL_CAMERABASIC_H
+#ifndef XKILL_CAMERA_H
+#define XKILL_CAMERA_H
 
 #include <Windows.h>
 #include <DirectXMath.h>
-#include <DirectXMathVector.inl>
 #include <vector>
 
 #include <xkill-renderer/mathBasic.h>
@@ -18,7 +17,7 @@
 Describing the virtual eye through which the 3D-world is viewed.
 \ingroup xkill-renderer
 */
-class CameraBasic
+class Camera
 {
 public:
 	//! Initializes camera member variables to default values.
@@ -30,15 +29,13 @@ public:
 	\param screenWidth Width of the window/viewport
 	\param screenHeight Height of the window/viewport
 	*/
-	CameraBasic(
+	Camera(
 		float aspect, 
-		float fov, 
-		float zFar, 
-		float zNear,
-		unsigned int screenWidth,
-		unsigned int screenHeight);
+		float fov = 0.785f, 
+		float zFar = 1.0f, 
+		float zNear = 100.0f);
 	//! Does nothing since the camera does not alocate any memory.
-	virtual ~CameraBasic();
+	virtual ~Camera();
 
 	//! Moves the camera depending on input from the mouse.
 	/*!
@@ -82,6 +79,8 @@ public:
 	*/
 	virtual void yaw(const float angle);
 
+	void setPosition(float position[3]);
+
 	DirectX::XMFLOAT3 getPosition();
 	DirectX::XMFLOAT4X4 getView();
 	DirectX::XMFLOAT4X4 getProjection();
@@ -90,8 +89,6 @@ private:
 	float aspect_;				//!< Aspect ratio of the window.
 	float zNear_;				//!< The far viewing plane.
 	float zFar_;				//!< The near viewing plane.
-	unsigned int screenWidth_;	//!< screenWidth Width of the window/viewport.
-	unsigned int screenHeight_;	//!< screenHeight Height of the window/viewport.
 
 	float velocity_;				//!< How far the camera will move while a key is pressed.
 	float mouseSensitivity_;		//!< How sensitive the mouse is.

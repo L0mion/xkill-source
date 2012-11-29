@@ -3,7 +3,7 @@
 //#include <xkill-utilities/IComponent.h> //check
 #include <xkill-utilities/IObserver.h>
 #include <xkill-utilities/EventManager.h>
-
+#include <xkill-utilities/EventType.h>
 
 /// Component responsible for playing Sound based on which Event is sent
 /** 
@@ -13,6 +13,8 @@ probably the best approach.
 
 \ingroup COMPONENTS
 */
+
+class Event;
 
 class SoundComponent : public IObserver
 {

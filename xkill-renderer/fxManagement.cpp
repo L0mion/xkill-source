@@ -15,7 +15,10 @@ FXManagement::FXManagement()
 
 FXManagement::~FXManagement()
 {
-	SAFE_DELETE(ilManagement);
+	//SAFE_DELETE(ilManagement);
+	int debug = sizeof((*ilManagement));
+
+	delete ilManagement;
 
 	SAFE_DELETE(defaultVS_);
 	SAFE_DELETE(defaultPS_);
@@ -118,7 +121,7 @@ HRESULT FXManagement::initILs(ID3D11Device* device)
 
 	initILManagement();
 
-	hr = initILDefaultVSPosNormTex(device);
+//	hr = initILDefaultVSPosNormTex(device);
 	
 	return hr;
 }
@@ -133,6 +136,8 @@ HRESULT FXManagement::initILDefaultVSPosNormTex(ID3D11Device* device)
 
 	unsigned int iedPosNormTexNumElements	= ilManagement->getIEDPosNormTexNumElements();
 	D3D11_INPUT_ELEMENT_DESC* iedPosNormTex = ilManagement->getIEDPosNormTex();
+
+	int debug = sizeof(D3D11_INPUT_ELEMENT_DESC);
 
 	hr = device->CreateInputLayout(
 		iedPosNormTex, 
