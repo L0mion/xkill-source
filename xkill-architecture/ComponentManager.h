@@ -2,6 +2,7 @@
 
 #include <xkill-sound/SoundComponent.h>
 #include <xkill-renderer/renderingComponent.h>
+#include <xkill-input/InputComponent.h>
 #include "PhysicsComponent.h"
 #include "CameraComponent.h"
 #include "AttributeManager.h"
@@ -27,6 +28,7 @@ private:
 	PhysicsComponent	physics_;
 	SoundComponent		sound_;
 	CameraComponent		camera_;
+	InputComponent		input_;
 	GameComponent		game_;
 
 public:
@@ -60,6 +62,9 @@ public:
 		if(!sound_.init())
 			return false;
 
+		if(!input_.init(windowHandle))
+			return false;
+
 		//physicsComponent = new PhysicsComponent();
 		//if(!physics.init(attributes))
 		//	return false;
@@ -73,6 +78,7 @@ public:
 		camera_.onUpdate(delta);
 		physics_.onUpdate(delta);
 		render_->onUpdate(delta);
+		input_.onUpdate(delta);
 		game_.onUpdate(delta);
 	}
 };
