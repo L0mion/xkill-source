@@ -22,8 +22,6 @@ public:
 	\param screenHeight The height of the screen in which the viewports reside.
 	*/
 	ViewportManagement(unsigned int numViewports,
-						unsigned int viewportWidth,
-						unsigned int viewportHeight,
 						unsigned int screenWidth,
 						unsigned int screenHeight);
 	//! Releases all memory and returns ViewportManagement to default state.
@@ -34,6 +32,9 @@ public:
 	void setViewport(ID3D11DeviceContext* devcon, unsigned int index);
 	//! Initializes ViewportManagement.
 	HRESULT init();
+
+	unsigned int getViewportWidth() const;
+	unsigned int getViewportHeight() const;
 
 private:
 	//! Creates a single viewport that covers the entire window.
@@ -52,7 +53,7 @@ private:
 	unsigned int screenWidth_;		//!< Width of the screen.
 	unsigned int screenHeight_;		//!< Height of the screen.
 
-	float border_;	//<! Adds space between viewports.
+	float borderSize_;	//<! Adds space between viewports.
 
 	std::vector<D3D11_VIEWPORT>* viewports;	//!< Vector containing all the viewport objects.
 };

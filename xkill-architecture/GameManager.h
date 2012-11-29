@@ -64,7 +64,8 @@ public:
 	{
 		entityManager_ = new EntityManager();
 		entityManager_->createEntity(PLAYER);
-		for(int i=0; i<1; i++)
+
+		for(int i=0; i<9; i++)
 		{
 			entityManager_->createCamera();
 		};

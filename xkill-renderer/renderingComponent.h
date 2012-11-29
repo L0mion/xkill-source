@@ -53,8 +53,6 @@ public:
 		HWND windowHandle, 
 		unsigned int screenWidth, 
 		unsigned int screenHeight,
-		unsigned int viewportWidth,
-		unsigned int viewportHeight,
 		unsigned int numViewports,
 		std::vector<RenderAttribute>* renderAttributes,
 		std::vector<CameraAttribute>* cameraAttributes);
@@ -194,8 +192,6 @@ private:
 	HWND windowHandle_;				//!< WINAPI-handle to window.
 	unsigned int screenWidth_;		//!< Width of screen.
 	unsigned int screenHeight_;		//!< Height of screen.
-	unsigned int viewportWidth_;	//!< Width of each viewport.
-	unsigned int viewportHeight_;	//!< Height of each viewport.
 	unsigned int numViewports_;		//!< NUmber of viewports that will be used.
 	
 	FXManagement*		fxManagement_;						//!< Maintaining shaders and input-layouts.
