@@ -63,12 +63,19 @@ public:
 	bool init(HWND windowHandle, unsigned int screenWidth, unsigned int screenHeight)
 	{
 		entityManager_ = new EntityManager();
-		entityManager_->createEntity(PLAYER);
-		for(int i=0; i<1; i++)
+		ENTITYTYPE listOfEntitiesToBeCreated[] =
 		{
-			entityManager_->createCamera();
+			PLAYER
 		};
+		int nrOfListOfEntitiesToBeCreated = sizeof(listOfEntitiesToBeCreated)/4;
+		
+		//Create all entities as given by of the above enum array
+		for(int i=0;i<nrOfListOfEntitiesToBeCreated;i++)
+		{
+			entityManager_->createEntity(listOfEntitiesToBeCreated[i]);
+		}
 
+		//Initialize components
 		componentManager_ = new ComponentManager();
 		if(!componentManager_->init(windowHandle, screenWidth, screenHeight))
 		{

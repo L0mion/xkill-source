@@ -83,7 +83,7 @@ public:
 		// Render attribute
 		CameraAttribute* camera = AttributeManager::getInstance()->cameraAttributes.createAttribute(e);
 
-
+		// Camera attribute
 		AttributeManager::getInstance()->cameraAttributes.getAllAttributes()->size();
 		ZeroMemory(camera->mat_projection, sizeof(camera->mat_projection));
 		ZeroMemory(camera->mat_view, sizeof(camera->mat_view));
@@ -100,8 +100,8 @@ public:
 		// Position attribute
 		PositionAttribute* position = AttributeManager::getInstance()->positionAttributes.createAttribute(entity);
 		position->position[0] = 0.0f;
-		position->position[0] = 0.0f;
-		position->position[0] = 0.0f;
+		position->position[1] = 0.0f;
+		position->position[2] = -100.0f;
 
 		// Spatial attribute
 		SpatialAttribute* spatial = AttributeManager::getInstance()->spatialAttributes.createAttribute(entity);
@@ -119,11 +119,19 @@ public:
 
 		// Player attribute
 		PlayerAttribute* playerAttribute = AttributeManager::getInstance()->playerAttributes.createAttribute(entity);
-		playerAttribute->name = "LoccaShock";
+		playerAttribute->name = "ScrambleRamble";
+		playerAttribute->health = 100;
 		playerAttribute->priority = 0;
 		playerAttribute->cycleSteals = 0;
 		playerAttribute->totalExecutionTime = 0;
 		playerAttribute->renderAttribute = AttributeManager::getInstance()->renderAttributes.createAttributePointer();
+
+
+		CameraAttribute* camera = AttributeManager::getInstance()->cameraAttributes.createAttribute(entity);
+		AttributeManager::getInstance()->cameraAttributes.getAllAttributes()->size();
+		ZeroMemory(camera->mat_projection, sizeof(camera->mat_projection));
+		ZeroMemory(camera->mat_view, sizeof(camera->mat_view));
+		camera->spatialAttribute = AttributeManager::getInstance()->spatialAttributes.createAttributePointer();
 
 		return entity;
 	}
