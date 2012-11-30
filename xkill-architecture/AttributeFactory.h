@@ -35,7 +35,7 @@ public:
 	void create_PositionAttribute(Entity* e)
 	{
 		// Position attribute
-		PositionAttribute* position = AttributeManager::getInstance()->positionAttributes.createAttribute(e);
+		PositionAttribute* position = AttributeManager::getInstance()->positionAttributes_.createAttribute(e);
 		fillFloat3(position->position);
 	}
 
@@ -45,10 +45,10 @@ public:
 		create_PositionAttribute(e);
 
 		// Spatial attribute
-		SpatialAttribute* spatial = AttributeManager::getInstance()->spatialAttributes.createAttribute(e);
+		SpatialAttribute* spatial = AttributeManager::getInstance()->spatialAttributes_.createAttribute(e);
 		fillQuaternion(spatial->rotation);
 		fillFloat3(spatial->scale);
-		spatial->positionAttribute = AttributeManager::getInstance()->positionAttributes.getLatestAttributeAsAttributePointer();
+		spatial->positionAttribute = AttributeManager::getInstance()->positionAttributes_.getLatestAttributeAsAttributePointer();
 	}
 
 	void create_RenderAttribute(Entity* e)
@@ -57,11 +57,28 @@ public:
 		create_SpatialAttribute(e);
 
 		// Render attribute
-		RenderAttribute* render = AttributeManager::getInstance()->renderAttributes.createAttribute(e);
+		RenderAttribute* render = AttributeManager::getInstance()->renderAttributes_.createAttribute(e);
 		render->transparent		= false;
 		render->tessellation	= true;
 		render->meshID			= e->getID();
 		render->textureID		= 42;
-		render->spatialAttribute = AttributeManager::getInstance()->spatialAttributes.getLatestAttributeAsAttributePointer();
+		render->spatialAttribute = AttributeManager::getInstance()->spatialAttributes_.getLatestAttributeAsAttributePointer();
+	}
+
+	void create_PhysicsAttribute(Entity* e)
+	{
+		// PhysicsAttribute
+		PhysicsAttribute* physics = AttributeManager::getInstance()->physicsAttributes_.createAttribute(e);
+		physics->added = false;
+		physics->alive = true;
+		physics->mass = 1.0f;
+		physics->rotationVelocity[0] = 0; 
+		physics->rotationVelocity[1] = 0;
+		physics->rotationVelocity[2] = 0;
+		physics->rotationVelocity[3] = 1;
+		physics->velocity[0] = 0;
+		physics->velocity[1] = 0;
+		physics->velocity[2] = 0;
+		physics->spatialAttribute = AttributeManager::getInstance()->spatialAttributes_.getLatestAttributeAsAttributePointer();
 	}
 };

@@ -6,7 +6,7 @@
 
 class Camera;
 struct CameraAttribute;
-struct InputAttribute;
+struct CameraMovementAttribute;
 
 //! Component to process Cameras
 /** 
@@ -21,7 +21,7 @@ public:
 	virtual ~CameraComponent();
 	//! Initializes CameraCompnent.
 	void init(std::vector<CameraAttribute>* cameraAttributes,
-			std::vector<InputAttribute>* inputAttributes,
+			std::vector<CameraMovementAttribute>* cameraMovementAttribute,
 			float aspectRatio);
 	//! Methods that will be called on events. 
 	void onEvent(Event* e);
@@ -32,5 +32,7 @@ public:
 private:
 	std::vector<Camera> cameras_;						//!< Holds camera objects.
 	std::vector<CameraAttribute>* cameraAttributes_;	//!< Holds camera attributes.
-	std::vector<InputAttribute>* inputAttributes_;		//!< Holds input attributes.
+	std::vector<CameraMovementAttribute>* cameraMovementAttribute_;		//!< Holds input attributes.
+
+	float temp;
 };

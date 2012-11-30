@@ -61,13 +61,14 @@ struct DLL_U SpatialAttribute : public IAttribute
 	float scale[3];
 };
 
-struct DLL_U InputAttribute : public IAttribute
+struct DLL_U CameraMovementAttribute : public IAttribute
 {
-	InputAttribute();
-	~InputAttribute();
+	CameraMovementAttribute();
+	~CameraMovementAttribute();
 	float position[3];
 	float rotation[2];
 };
+
 
 /// Stores the points for both a bounding box and a convex mesh
 /** 
@@ -115,7 +116,7 @@ struct DLL_U PhysicsAttribute : public IAttribute
 	~PhysicsAttribute();
 
 	AttributePointer spatialAttribute;
-	float velocity[4];
+	float velocity[3];
 	float rotationVelocity[4];
 	float mass;
 	//CollisionShape
@@ -126,7 +127,17 @@ struct DLL_U PhysicsAttribute : public IAttribute
 	bool alive;
 };
 
-/// Stores everything SoundComponent needs to know to play a 3D sound (not used)
+struct DLL_U InputAttribute : public IAttribute
+{
+	InputAttribute();
+	~InputAttribute();
+
+	AttributePointer physicsAttribute;
+	float position[2];
+	float rotation[2];
+};
+
+/// Stores everything SoundComponent needs to know to play a 3D sound
 /** 
 \ingroup ATTRIBUTES
 */

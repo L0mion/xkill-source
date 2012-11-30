@@ -50,15 +50,16 @@ public:
 	bool init(HWND windowHandle, unsigned int screenWidth, unsigned int screenHeight)
 	{
 		render_ = new RenderingComponent(windowHandle,screenWidth,screenHeight,
-										AttributeManager::getInstance()->cameraAttributes.getAllAttributes()->size(),
-										AttributeManager::getInstance()->renderAttributes.getAllAttributes(),
-										AttributeManager::getInstance()->cameraAttributes.getAllAttributes());
+										AttributeManager::getInstance()->cameraAttributes_.getAllAttributes()->size(),
+										AttributeManager::getInstance()->renderAttributes_.getAllAttributes(),
+										AttributeManager::getInstance()->cameraAttributes_.getAllAttributes());
 		render_->init();
-		physics_ = new BulletPhysicsComponent(AttributeManager::getInstance()->physicsAttributes.getAllAttributes(),
-											 AttributeManager::getInstance()->BoundingAttributes.getAllAttributes());
+		physics_ = new BulletPhysicsComponent(AttributeManager::getInstance()->physicsAttributes_.getAllAttributes(),
+											  AttributeManager::getInstance()->boundingAttributes_.getAllAttributes(),
+											  AttributeManager::getInstance()->inputAttributes_.getAllAttributes());
 		physics_->init();
-		camera_.init(AttributeManager::getInstance()->cameraAttributes.getAllAttributes(),
-					AttributeManager::getInstance()->inputAttributes.getAllAttributes(),
+		camera_.init(AttributeManager::getInstance()->cameraAttributes_.getAllAttributes(),
+					AttributeManager::getInstance()->cameraMovementAttribute_.getAllAttributes(),
 					static_cast<float>(screenWidth)/static_cast<float>(screenHeight));
 
 		//gameComponent = new GameComponent();
@@ -69,7 +70,7 @@ public:
 		//if(!sound_.init())
 			//return false;
 
-		if(!input_.init(windowHandle))
+		if(!input_.init(windowHandle, AttributeManager::getInstance()->inputAttributes_.getAllAttributes()))
 			return false;
 
 		//physicsComponent = new PhysicsComponent();

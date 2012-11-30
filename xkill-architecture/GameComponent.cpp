@@ -22,8 +22,10 @@ void GameComponent::onEvent(Event* e)
 
 void GameComponent::onUpdate(float delta)
 {
-	std::vector<PlayerAttribute>* attributesOfPlayer = AttributeManager::getInstance()->playerAttributes.getAllAttributes();
-	std::vector<int>* attributesOfPlayerOwners = AttributeManager::getInstance()->playerAttributes.getAllOwners();
+
+	std::vector<PlayerAttribute>* attributesOfPlayer = AttributeManager::getInstance()->playerAttributes_.getAllAttributes();
+	std::vector<int>* attributesOfPlayerOwners = AttributeManager::getInstance()->playerAttributes_.getAllOwners();
+
 
 	for(int i=0; i<static_cast<int>(attributesOfPlayer->size()); i++)
 	{

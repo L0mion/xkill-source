@@ -65,7 +65,6 @@ public:
 		entityManager_ = new EntityManager();
 		ENTITYTYPE listOfEntitiesToBeCreated[] =
 		{
-			PLAYER, 
 			PLAYER,
 			PLAYER,
 			PLAYER
