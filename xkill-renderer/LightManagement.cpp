@@ -5,54 +5,108 @@
 #include "renderingUtilities.h"
 
 
-RendererLight::LightManagement::LightManagement()
+LightManagement::LightManagement()
 {
-	lightBuffer = nullptr;
-	lightUAV	= nullptr;
+	maxNumLights_	= 20;
+	numLights_		= 0;
+	lights_.resize(maxNumLights_);
+
+	lightBuffer_ = nullptr;
+	lightSRV_	= nullptr;
 }
 
-RendererLight::LightManagement::~LightManagement()
+LightManagement::~LightManagement()
 {
-	SAFE_RELEASE(lightBuffer);
-	SAFE_RELEASE(lightUAV);
+	SAFE_RELEASE(lightBuffer_);
+	SAFE_RELEASE(lightSRV_);
 }
 
-void RendererLight::LightManagement::reset()
+void LightManagement::reset()
 {
-	SAFE_RELEASE(lightBuffer);
-	SAFE_RELEASE(lightUAV);
+	SAFE_RELEASE(lightBuffer_);
+	SAFE_RELEASE(lightSRV_);
 }
 
-void RendererLight::LightManagement::init(ID3D11Device* device)
+HRESULT LightManagement::init(ID3D11Device* device)
 {
-	createDirectionalLight();
-	createLightBuffer(device);
-	createLightUAV(device);
+	HRESULT hr = S_OK;
+	createDirectionalLight(device);
+	
+	hr = createLightBuffer(device);
+	if(SUCCEEDED(hr))
+		hr = createLightSRV(device);
+
+	return hr;
 }
 
-void RendererLight::LightManagement::setLightUAVCS(ID3D11DeviceContext* devcon)
+HRESULT LightManagement::updateBufferData(ID3D11DeviceContext* devcon)
 {
-	devcon->CSGetUnorderedAccessViews(0, 1, &lightUAV);
+	HRESULT hr = S_OK;
+	if(lights_.size() == 0)
+		hr = E_FAIL;
+	if(SUCCEEDED(hr))
+	{
+		D3D11_MAPPED_SUBRESOURCE map;
+		hr = devcon->Map(lightBuffer_, NULL, D3D11_MAP_WRITE_DISCARD, NULL, &map);
+		if(SUCCEEDED(hr))
+		{
+			memcpy(map.pData, &lights_[0], lights_.size() * sizeof(LightDesc));
+			devcon->Unmap(lightBuffer_, NULL);
+		}
+	}
+
+	return hr;
 }
 
-void RendererLight::LightManagement::createDirectionalLight()
+void LightManagement::setLightSRVCS(ID3D11DeviceContext* devcon, unsigned int shaderRegister)
 {
-	RendererLight::LightDesc lightDesc;
+	devcon->CSSetShaderResources(shaderRegister, 1, &lightSRV_);
+}
+
+void LightManagement::addLight(LightDesc light, ID3D11Device* device, ID3D11DeviceContext* devcon)
+{
+	if(numLights_ == maxNumLights_)
+		resizeLights(device);
+	lights_[numLights_] = light;
+	numLights_++;
+
+	updateBufferData(devcon);
+}
+
+void LightManagement::createDirectionalLight(ID3D11Device* device)
+{
+	if(lights_.size() == maxNumLights_)
+		resizeLights( device);
+
+	LightDesc lightDesc;
 	ZeroMemory(&lightDesc, sizeof(lightDesc));
 
 	lightDesc.direction = DirectX::XMFLOAT3(0.57735f, -0.57735f, 0.57735f);
 	lightDesc.ambient	= DirectX::XMFLOAT4(0.2f, 0.2f, 0.2f, 1.0f);
 	lightDesc.diffuse	= DirectX::XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
 	lightDesc.specular	= DirectX::XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
-	lightDesc.type		= RendererLight::LIGHT_DIRECTIONAL;
+	lightDesc.type		= LIGHT_DIRECTIONAL;
 
-	lights.push_back(lightDesc);
+	lights_[numLights_] = lightDesc;
+	numLights_++;
 }
 
-HRESULT RendererLight::LightManagement::createLightBuffer(ID3D11Device* device)
+void LightManagement::resizeLights(ID3D11Device* device)
+{
+	maxNumLights_ *= 2;
+	lights_.resize(maxNumLights_);
+
+	SAFE_RELEASE(lightBuffer_);
+	SAFE_RELEASE(lightBuffer_);
+
+	createLightBuffer(device);
+	createLightSRV(device);
+}
+
+HRESULT LightManagement::createLightBuffer(ID3D11Device* device)
 {
 	HRESULT hr = E_FAIL;
-	if(lights.size() > 0)
+	if(lights_.size() > 0)
 		hr = S_OK;
 	else
 		ERROR_MSG(L"RendererLight::LightManagement::createLightBuffer failed! The vector lights is empty");
@@ -62,41 +116,42 @@ HRESULT RendererLight::LightManagement::createLightBuffer(ID3D11Device* device)
 		D3D11_BUFFER_DESC bufferDesc;
 		ZeroMemory(&bufferDesc, sizeof(bufferDesc));
 
-		bufferDesc.BindFlags = D3D11_BIND_UNORDERED_ACCESS | D3D11_BIND_SHADER_RESOURCE;
-		bufferDesc.ByteWidth = sizeof(RendererLight::LightDesc) * lights.size();
+		bufferDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
+		bufferDesc.ByteWidth = sizeof(LightDesc) * lights_.size();
 		bufferDesc.MiscFlags = D3D11_RESOURCE_MISC_BUFFER_STRUCTURED;
-		bufferDesc.StructureByteStride = sizeof(RendererLight::LightDesc);
+		bufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+		bufferDesc.Usage = D3D11_USAGE_DYNAMIC;
+		bufferDesc.StructureByteStride = sizeof(LightDesc);
 
 		D3D11_SUBRESOURCE_DATA initialData;
-		initialData.pSysMem = &lights.at(0);
+		initialData.pSysMem = &lights_.at(0);
 
-		hr = device->CreateBuffer(&bufferDesc, &initialData, &lightBuffer);
+		hr = device->CreateBuffer(&bufferDesc, &initialData, &lightBuffer_);
 		if(FAILED(hr))
 			ERROR_MSG(L"RendererLight::LightManagement::createLightBuffer device->CreateBuffer failed!");
 	}
 	return hr;
 }
 
-HRESULT RendererLight::LightManagement::createLightUAV(ID3D11Device* device)
+HRESULT LightManagement::createLightSRV(ID3D11Device* device)
 {
 	HRESULT hr = S_OK;
 
-	D3D11_BUFFER_DESC bufferDesc;
-	ZeroMemory(&bufferDesc, sizeof(bufferDesc));
-	
-	lightBuffer->GetDesc(&bufferDesc);
+		D3D11_BUFFER_DESC bufferDesc;
+		ZeroMemory(&bufferDesc, sizeof(bufferDesc));
+		lightBuffer_->GetDesc(&bufferDesc);
+		
+		D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc;
+		ZeroMemory(&srvDesc, sizeof(srvDesc));
+		
+		srvDesc.ViewDimension	= D3D11_SRV_DIMENSION_BUFFEREX;
+		srvDesc.BufferEx.FirstElement = 0;
+		srvDesc.Format	= DXGI_FORMAT_UNKNOWN;
+		srvDesc.BufferEx.NumElements = bufferDesc.ByteWidth / bufferDesc.StructureByteStride;
 
-	D3D11_UNORDERED_ACCESS_VIEW_DESC uavDesc;
-	ZeroMemory(&uavDesc, sizeof(uavDesc));
-	
-	uavDesc.ViewDimension = D3D11_UAV_DIMENSION_BUFFER;
-	uavDesc.Buffer.FirstElement = 0;
-	uavDesc.Format = DXGI_FORMAT_UNKNOWN;
-	uavDesc.Buffer.NumElements = bufferDesc.ByteWidth / bufferDesc.StructureByteStride;
-
-	hr = device->CreateUnorderedAccessView(lightBuffer, &uavDesc, &lightUAV);
+	hr = device->CreateShaderResourceView(lightBuffer_, &srvDesc, &lightSRV_);
 	if(FAILED(hr))
-		ERROR_MSG(L"RendererLight::LightManagement::createLightUAV device->CreateUnorderedAccessView failed!");
+		ERROR_MSG(L"RendererLight::LightManagement::createLightSRV device->CreateShaderResourceView failed!");
 
 	return hr;
 }

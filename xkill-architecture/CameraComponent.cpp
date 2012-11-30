@@ -54,7 +54,7 @@ void CameraComponent::onUpdate(float delta)
 	for(unsigned int i = 0; i < cameraAttributes_->size(); i++)
 	{
 		cameras_[i].updateView();
-
+		
 		memcpy(cameraAttributes_->at(i).mat_view, cameras_[i].getView().m, 16*4);
 
 	//	cameras_[i].yaw(inputAttributes_->at(i).rotation[0]);

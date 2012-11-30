@@ -12,30 +12,33 @@ struct ID3D11Device;
 struct ID3D11DeviceContext;
 //typedef HRESULT;
 
-namespace RendererLight
+
+
+class LightManagement : public D3DInterface
 {
+public:
+	LightManagement();
+	~LightManagement();
 
-	class LightManagement : public D3DInterface
-	{
-	public:
-		LightManagement();
-		~LightManagement();
+	virtual void reset();
+
+	HRESULT init(ID3D11Device* device);
+
+	HRESULT updateBufferData(ID3D11DeviceContext* devcon);
+	void setLightSRVCS(ID3D11DeviceContext* devcon, unsigned int shaderRegister);
+	void addLight(LightDesc light, ID3D11Device* device, ID3D11DeviceContext* devcon);
+private:
+	void createDirectionalLight(ID3D11Device* device);
+	void resizeLights(ID3D11Device* device);
+	HRESULT createLightBuffer(ID3D11Device* device);
+	HRESULT createLightSRV(ID3D11Device* device);
 	
-		virtual void reset();
-	
-		void init(ID3D11Device* device);
+	unsigned int maxNumLights_;
+	unsigned int numLights_;
+	std::vector<LightDesc>		lights_;
+	ID3D11Buffer*				lightBuffer_;
+	ID3D11ShaderResourceView*	lightSRV_;
+};
 
-		void setLightUAVCS(ID3D11DeviceContext* devcon);
-	private:
-		void createDirectionalLight();
-
-		HRESULT createLightBuffer(ID3D11Device* device);
-		HRESULT createLightUAV(ID3D11Device* device);
-		
-		std::vector<LightDesc>		lights;
-		ID3D11Buffer*				lightBuffer;
-		ID3D11UnorderedAccessView*	lightUAV;
-	};
-}  //namespace RendererLight
 
 #endif //XKILL_RENDERER_LIGHTMANAGEMENT_H
