@@ -50,9 +50,12 @@ void CameraComponent::onEvent(Event* e)
 
 void CameraComponent::onUpdate(float delta)
 {
-
 	for(unsigned int i = 0; i < cameraAttributes_->size(); i++)
 	{
+		CameraAttribute* camera = &cameraAttributes_->at(i);
+		SpatialAttribute* spatial = ATTRIBUTE_CAST(SpatialAttribute, spatialAttribute, camera);
+		PositionAttribute* position = ATTRIBUTE_CAST(PositionAttribute, positionAttribute, spatial);
+		cameras_[i].setPosition(position->position);
 		cameras_[i].updateView();
 
 		memcpy(cameraAttributes_->at(i).mat_view, cameras_[i].getView().m, 16*4);
