@@ -8,7 +8,7 @@
 
 //! Prints an error-msg depending on current configuration.
 	/*!
-	Will output a MessageBox if DEBUG- or _DEBUG-flags are set. Will otherwize simply return without printing.
+	Will output a MessageBox if DEBUG- or _DEBUG-flags are set. Will otherwise simply return without printing.
 	\param clue Used to, in some way, signify where the error occured. A good practice is to input location of the function call in question, e.g. ERROR_MSG("BrokenClass::brokenFunc brokenCall"); 
 	\sa MessageBox */
 static void ERROR_MSG(LPCWSTR clue)
