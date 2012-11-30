@@ -23,10 +23,9 @@ void PhysicsObject::Init(PhysicsAttribute* physicsAttribute, btDiscreteDynamicsW
 																	physicsAttribute->sa->pa->position.z))
 								 new btSphereShape(1),
 								 btVector3(0,0,0));*/
-	
-	
-	// Create new rigidbody etc base on physicsAttribute
-	//dynamicsWorld->addRigidBody(rigidBody_);
+		
+	preStep(physicsAttribute);
+	dynamicsWorld->addRigidBody(rigidBody_);
 }
 
 void PhysicsObject::Clean(btDiscreteDynamicsWorld* dynamicsWorld)
@@ -34,16 +33,7 @@ void PhysicsObject::Clean(btDiscreteDynamicsWorld* dynamicsWorld)
 	dynamicsWorld->removeRigidBody(rigidBody_);
 }
 
-void PhysicsObject::Init(btCollisionShape* collisionShape,
-						 btDefaultMotionState* motionState,
-						 btScalar mass,
-						 btVector3 &localInertia,
-						 btDiscreteDynamicsWorld* dynamicsWorld)
-{
-	btRigidBody::btRigidBodyConstructionInfo rigidBodyCI(mass,motionState,collisionShape,localInertia);
-	rigidBody_ = new btRigidBody(rigidBodyCI);
-	dynamicsWorld->addRigidBody(rigidBody_);
-}
+
 
 void PhysicsObject::preStep(PhysicsAttribute* physicsAttribute)
 {

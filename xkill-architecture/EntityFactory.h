@@ -3,14 +3,17 @@
 #include "Entity.h"
 #include "EntityManager.h"
 #include "AttributeManager.h"
+#include "AttributeFactory.h"
 
 #include <vector>
 #include <iostream>
 
-/// A factory for creating Entities and assigning multiple attributes in a flexible way.
+/// A factory for creating Entities and assigning multiple \ref ATTRIBUTES in a flexible way.
 /** 
 Filling out each Attribute and connecting chains of 
 Attribute is the responsibility of the EntityFactory.
+
+The AttributeFactory can be used to facilitate creation of \ref ATTRIBUTES.
 
 \ingroup ARCHITECTURE
 */
@@ -18,10 +21,12 @@ Attribute is the responsibility of the EntityFactory.
 class EntityFactory 
 {
 private:
+	AttributeFactory attributeFactory;	//!< AttributeFactory to speed up creaton of \ref ATTRIBUTES.
+
 	/** 
 	Creates an entity and assigns a unique ID
 	*/
-	Entity* EntityFactory::createEntity()
+	Entity* createEntity()
 	{
 		static int id = 1;
 
@@ -32,99 +37,70 @@ private:
 	}
 
 public:
-
-	Entity* EntityFactory::createEntity_TypeA()
+	//! Example entity
+	Entity* createEntity_TypeA()
 	{
 		Entity* e = createEntity();
 
-		// Position attribute
-		PositionAttribute* position = AttributeManager::getInstance()->positionAttributes.createAttribute(e);
-		position->position[0] = position->position[1] = position->position[2] = 0.0f;
-			
-
-		// Spatial attribute
-		SpatialAttribute* spatial = AttributeManager::getInstance()->spatialAttributes.createAttribute(e);
-		spatial->rotation[0] = spatial->rotation[1] = spatial->rotation[2] = 0.0f;
-		spatial->rotation[3] = 1.0f;
-		spatial->scale[0] = spatial->scale[1] = spatial->scale[2] = 1.0f;
-		spatial->positionAttribute = AttributeManager::getInstance()->positionAttributes.createAttributePointer();
-
-
 		// Render attribute
-		RenderAttribute* render = AttributeManager::getInstance()->renderAttributes.createAttribute(e);
-		render->transparent		= false;
-		render->tessellation	= true;
-		render->meshID			= e->getID();
-		render->textureID		= 42;
-		render->spatialAttribute = AttributeManager::getInstance()->spatialAttributes.createAttributePointer();
-
+		attributeFactory.create_RenderAttribute(e);
 
 		// Return entity
-		std::cout << "ENTITYFACTORY: Created Entity " << e->getID() << std::endl;
 		return e;
 	}
 
+	//! Not used for now (refer to createPlayerEntity)
 	Entity* createEntity_Camera()
 	{
 		Entity* e = createEntity();
 
-		// Position attribute
-		PositionAttribute* position = AttributeManager::getInstance()->positionAttributes.createAttribute(e);
-		position->position[0] = position->position[1] = position->position[2] = 0.0f;
-			
-
-		// Spatial attribute
-		SpatialAttribute* spatial = AttributeManager::getInstance()->spatialAttributes.createAttribute(e);
-		spatial->rotation[0] = spatial->rotation[1] = spatial->rotation[2] = 0.0f;
-		spatial->rotation[3] = 1.0f;
-		spatial->scale[0] = spatial->scale[1] = spatial->scale[2] = 1.0f;
-		spatial->positionAttribute = AttributeManager::getInstance()->positionAttributes.createAttributePointer();
-
 		// Render attribute
+		attributeFactory.create_RenderAttribute(e);
+
+		// Camera attribute
 		CameraAttribute* camera = AttributeManager::getInstance()->cameraAttributes.createAttribute(e);
-
-
 		AttributeManager::getInstance()->cameraAttributes.getAllAttributes()->size();
 		ZeroMemory(camera->mat_projection, sizeof(camera->mat_projection));
 		ZeroMemory(camera->mat_view, sizeof(camera->mat_view));
-		camera->spatialAttribute = AttributeManager::getInstance()->spatialAttributes.createAttributePointer();
-
+		camera->spatialAttribute = AttributeManager::getInstance()->spatialAttributes.getLatestAttributeAsAttributePointer();
 
 		// Return entity
 		return e;
 	}
-	Entity* EntityFactory::createPlayerEntity()
+
+	//! A player entity has the following attributes: position attribute, spatial attribute, render attribute, player attribute and camera attribute.
+	//! Bindings:
+	//! camera attribute --> spatial attribute --> position attribute
+	//! player attribute --> render attribute --> spatial attribute --> position attribute
+	//! Note: the player has the same spatial attribute as the camera.
+	Entity* createPlayerEntity()
 	{
+		static int playerId = 0;
 		Entity* entity = createEntity();
 		
-		// Position attribute
-		PositionAttribute* position = AttributeManager::getInstance()->positionAttributes.createAttribute(entity);
-		position->position[0] = 0.0f;
-		position->position[0] = 0.0f;
-		position->position[0] = 0.0f;
-
-		// Spatial attribute
-		SpatialAttribute* spatial = AttributeManager::getInstance()->spatialAttributes.createAttribute(entity);
-		spatial->rotation[0] = spatial->rotation[1] = spatial->rotation[2] = 0;
-		spatial->scale[0] = spatial->scale[1] = spatial->scale[2] = 1.0f;
-		spatial->positionAttribute = AttributeManager::getInstance()->positionAttributes.createAttributePointer();
-
 		// Render attribute
-		RenderAttribute* render = AttributeManager::getInstance()->renderAttributes.createAttribute(entity);
-		render->transparent = false;
-		render->tessellation = true;
-		render->meshID = entity->getID();
-		render->textureID = -1;
-		render->spatialAttribute = AttributeManager::getInstance()->spatialAttributes.createAttributePointer();
+		attributeFactory.create_RenderAttribute(entity);
+
+		// Camera attribute
+		CameraAttribute* camera = AttributeManager::getInstance()->cameraAttributes.createAttribute(entity);
+		ZeroMemory(camera->mat_projection, sizeof(camera->mat_projection));
+		ZeroMemory(camera->mat_view, sizeof(camera->mat_view));
+		camera->spatialAttribute = AttributeManager::getInstance()->spatialAttributes.getLatestAttributeAsAttributePointer(); //Bind the last created spatial attribute to the camera attribute (NOTE: the last created spatial attribute should be the same attribute as bound to the player attribute)
 
 		// Player attribute
 		PlayerAttribute* playerAttribute = AttributeManager::getInstance()->playerAttributes.createAttribute(entity);
-		playerAttribute->name = "LoccaShock";
+		playerAttribute->id = 0;
+		playerAttribute->name = "PrinterTerror";
+		playerAttribute->health = 100;
 		playerAttribute->priority = 0;
 		playerAttribute->cycleSteals = 0;
 		playerAttribute->totalExecutionTime = 0;
-		playerAttribute->renderAttribute = AttributeManager::getInstance()->renderAttributes.createAttributePointer();
+		playerAttribute->renderAttribute = AttributeManager::getInstance()->renderAttributes.getLatestAttributeAsAttributePointer(); //Bind the last created render attribute to the player attribut
 
+		//Increment local static variable
+		playerId++;
+
+		// Return entity
 		return entity;
 	}
 };

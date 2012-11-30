@@ -69,6 +69,18 @@ struct DLL_U InputAttribute : public IAttribute
 	float rotation[2];
 };
 
+/// Stores the points for both a bounding box and a convex mesh
+/** 
+\ingroup ATTRIBUTES
+*/
+struct DLL_U BoundingAttribute : public IAttribute
+{
+	float BoxPoints[8*3];
+	float ConvexPoints[42*3];
+};
+
+
+
 /// Stores everything RenderComponent needs to know about an entity
 /** 
 A good approach for the RenderComponent would be to step through all 
@@ -85,6 +97,7 @@ struct DLL_U RenderAttribute : public IAttribute
 	~RenderAttribute();
 
 	AttributePointer spatialAttribute;
+	AttributePointer boundingAttribute;
 
 	bool transparent;
 	bool tessellation;
@@ -144,10 +157,15 @@ struct DLL_U PlayerAttribute : public IAttribute
 	PlayerAttribute();
 	~PlayerAttribute();
 
+	int id;					//!< The id of the player process. Used to identify a player attribute in GameComponent.
 	std::string name;		//!< Name of the player process.
+	int health;				//!< Health of the player process. If less or equal to zero, the player process is terminated.
 	int priority;			//!< Priority of the player process. Higher value means higher priority. The scheduler will choose the process with the highest priority for execution.
 	int cycleSteals;		//!< Total number of cycle steals for the player process. Cycle steals steal priority from other player processes.
-	int totalExecutionTime; //!< Total execution time of the player process. The player with the most total execution time as awared by the scheduler.
+	int totalExecutionTime; //!< Total execution time of the player process. The game session winner is the player with the most total execution time as awared by the scheduler.
 
 	AttributePointer renderAttribute;
 };
+
+
+

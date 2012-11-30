@@ -1,12 +1,14 @@
 #pragma once
 
+#include <xkill-physics/BulletPhysicsComponent.h>
 #include <xkill-sound/SoundComponent.h>
 #include <xkill-renderer/renderingComponent.h>
 #include <xkill-input/InputComponent.h>
-#include "PhysicsComponent.h"
+
 #include "CameraComponent.h"
-#include "AttributeManager.h"
 #include "GameComponent.h"
+#include "AttributeManager.h"
+
 
 /// Is responsible for updating Components in a certain order
 /** 
@@ -25,8 +27,8 @@ class ComponentManager
 {
 private:
 	RenderingComponent* render_;
-	PhysicsComponent	physics_;
-	SoundComponent		sound_;
+	BulletPhysicsComponent* physics_;
+	//SoundComponent		sound_;
 	CameraComponent		camera_;
 	InputComponent		input_;
 	GameComponent		game_;
@@ -39,6 +41,7 @@ public:
 	~ComponentManager()
 	{
 		SAFE_DELETE(render_);
+		SAFE_DELETE(physics_);
 		//SAFE_DELETE(physicsComponent);
 		//SAFE_DELETE(soundComponent);
 		//SAFE_DELETE(gameComponent);
@@ -51,6 +54,9 @@ public:
 										AttributeManager::getInstance()->renderAttributes.getAllAttributes(),
 										AttributeManager::getInstance()->cameraAttributes.getAllAttributes());
 		render_->init();
+		physics_ = new BulletPhysicsComponent(AttributeManager::getInstance()->physicsAttributes.getAllAttributes(),
+											 AttributeManager::getInstance()->BoundingAttributes.getAllAttributes());
+		physics_->init();
 		camera_.init(AttributeManager::getInstance()->cameraAttributes.getAllAttributes(),
 					AttributeManager::getInstance()->inputAttributes.getAllAttributes(),
 					static_cast<float>(screenWidth)/static_cast<float>(screenHeight));
@@ -60,8 +66,8 @@ public:
 			return false;
 
 		//soundComponent = new SoundComponent();
-		if(!sound_.init())
-			return false;
+		//if(!sound_.init())
+			//return false;
 
 		if(!input_.init(windowHandle))
 			return false;
@@ -75,9 +81,9 @@ public:
 	}
 	void update(float delta)
 	{
-		sound_.onUpdate(delta);
+		//sound_.onUpdate(delta);
 		camera_.onUpdate(delta);
-		physics_.onUpdate(delta);
+		physics_->onUpdate(delta);
 		render_->onUpdate(delta);
 		input_.onUpdate(delta);
 		game_.onUpdate(delta);

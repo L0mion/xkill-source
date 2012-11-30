@@ -12,12 +12,12 @@
 class PhysicsComponent : public IObserver
 {
 private:
-	BulletPhysicsComponent bullet_;
+	//BulletPhysicsComponent* bullet_;
 
 public:
 	PhysicsComponent()
 	{
-		bullet_.Init(AttributeManager::getInstance()->physicsAttributes.getAllAttributes());
+		//bullet_->init(AttributeManager::getInstance()->physicsAttributes.getAllAttributes());
 	}
 
 	void onEvent(Event* e)
@@ -27,6 +27,6 @@ public:
 
 	void onUpdate(float delta)
 	{
-		bullet_.onUpdate(delta);
+		//bullet_.onUpdate(delta);
 	}
 };

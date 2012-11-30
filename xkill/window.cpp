@@ -32,7 +32,7 @@ Window::~Window()
 void Window::init()
 {
 	createWindow();
-	initCursor();
+//	initCursor();
 }
 
 void Window::checkMessages()
@@ -157,8 +157,8 @@ LRESULT CALLBACK Window::WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPAR
 
 	case WM_MOUSEMOVE:
 	{
-		mouseDeltaMove(lParam);
-		return 0;
+		//mouseDeltaMove(lParam);
+		//return 0;
 	}break;
 	
 	}

@@ -1,12 +1,5 @@
-/*! \defgroup xkill-physics XKILL - Physics
-   The component of the xkill engine which handles physics through wrapping the bullet physics lib.
-   \brief Physics package of XKILL
-*/
-
-//! Brief description of documented class.
-/*!
-A more elaborate description of documented class.
-\ingroup DocumentedProject
+/*! \defgroup xkill-physics xkill-physics
+   The component of the xkill-engine which handles physics through wrapping the bullet physics lib.
 */
 
 #ifndef XKILL_PHYSICS_PHYSICSCOMPONENT_H
@@ -20,6 +13,8 @@ A more elaborate description of documented class.
 class PhysicsObject;
 class Event;
 struct PhysicsAttribute;
+struct BoundingAttribute;
+
 
 class btBroadphaseInterface;
 class btDefaultCollisionConfiguration;
@@ -30,31 +25,53 @@ class btDiscreteDynamicsWorld;
 template<class T>
 class btAlignedObjectArray;
 
+class CollisionShapeManager;
+
+
+//! Physics Component of XKILL.
+/*!
+The physics component of XKILL, implements BulletPhysics to simulate the world.
+\ingroup xkill-physics
+*/
+
 
 
 class DLL_P BulletPhysicsComponent : public IObserver
 {
 private:
-	btBroadphaseInterface* broadphase_;
-	btDefaultCollisionConfiguration* collisionConfiguration_;
-	btCollisionDispatcher* dispatcher_;
-	btSequentialImpulseConstraintSolver* solver_;
-	btDiscreteDynamicsWorld* dynamicsWorld_;
+	btBroadphaseInterface* broadphase_; //!< Used to cull collisions
+	btDefaultCollisionConfiguration* collisionConfiguration_; //!< Used to setup allocators
+	btCollisionDispatcher* dispatcher_; //!< Used to deliver collision information to objects
+	btSequentialImpulseConstraintSolver* solver_; //<! Solve impulse equations
+	btDiscreteDynamicsWorld* dynamicsWorld_; //<! Used to step simulation
+	CollisionShapeManager* collisionShapeManager_;
 
-	std::vector<PhysicsAttribute>* physicsAttributes_;
-	unsigned int numPhysicsAttributes_;
 
-	btAlignedObjectArray<PhysicsObject*>* physicsObjects_;
+	std::vector<PhysicsAttribute>* physicsAttributes_; //<! A pointer to the attribute storage containing PhysicsAttributes, external representation of world
+	std::vector<BoundingAttribute>* boundingAttributes_; //<! A pointer to the attribute storage containing a copy of bounding volumes for the renderer
 
-	
-	//IComponent t;
-
-//protected:
+	btAlignedObjectArray<PhysicsObject*>* physicsObjects_; //<! A vector of PhysicsObjects, internal representation of world
+		
 public:
-	BulletPhysicsComponent();
+	//! Creates a BulletPhysicsComponent, gives it pointers to attribute storages required by the component and sets all pointer to null_ptr
+	/*!
+	\param physicsAttributes A pointer to the vector containing physicsAttributes
+	*/
+	BulletPhysicsComponent(std::vector<PhysicsAttribute>* physicsAttributes,
+						   std::vector<BoundingAttribute>* boundingAttributes);
+	//! Deletes all objects created within the component
 	~BulletPhysicsComponent();
-	bool Init(std::vector<PhysicsAttribute>* physicsAttributes);
+	//! Initialize the physics component, creates bullet objects and storage for internal representation
+	bool init();
+	//! Runs every frame and step simulation a number of fixed-length time-steps depending on delta
+	/*!
+	\param delta The time which the frame should simulate
+	*/
 	void onUpdate(float delta);
+	//! Called when a event is being passed to the component
+	/*!
+	\param e A pointer to the event that is being passed
+	*/
 	void onEvent(Event* e);
 };
 
