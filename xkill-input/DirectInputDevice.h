@@ -13,6 +13,8 @@
 #define DIDFT_OPTIONAL 0x80000000
 #endif
 
+#define SAFE_RELEASE(x) {if(x != NULL) x->Release(); x = NULL;} //Should probably not be here, needed for isXInputDevice
+
 //! A wrapper of a Direct Input device
 /*!
 
@@ -27,7 +29,7 @@ public:
 	virtual ~DirectInputDevice(void);
 
 	//! Initiates the Direct Input device
-	virtual void Init(HWND hWindow);
+	virtual bool Init(HWND hWindow);
 
 	virtual void Update(float deltaTime);
 

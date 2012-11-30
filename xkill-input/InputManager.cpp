@@ -105,8 +105,8 @@ bool InputManager::addNewDevice(HWND hWindow, GUID guid, std::string name)
 			return DIENUM_CONTINUE;
 
 		DirectInputDevice* device = new DirectInputDevice(dInputDevice, guid, name);
-		device->Init(hWindow);
-		devices_.push_back(device);
+		if(device->Init(hWindow))
+			devices_.push_back(device);
 
 		deviceAdded = true;
 	}

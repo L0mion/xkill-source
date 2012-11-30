@@ -14,7 +14,7 @@ public:
 	DirectInputMouse(LPDIRECTINPUTDEVICE8 device, GUID deviceGUID, std::string name);
 	virtual ~DirectInputMouse(void);
 
-	virtual void Init(HWND hWindow);
+	virtual bool Init(HWND hWindow);
 
 	virtual void Update(float deltaTime);
 
