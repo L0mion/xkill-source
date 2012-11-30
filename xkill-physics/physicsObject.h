@@ -20,6 +20,7 @@ protected:
 public:
 	//! Creates a Physics Object with a rigidbody pointer set to nullptr
 	PhysicsObject();
+
 	//! Deletes all subobjects of the contained rigidbody and the rigidbody itself
 	~PhysicsObject();
 	//! Initialize rigidbody from physicsAttribute and add object to simulation

@@ -6,6 +6,7 @@
 #include "PhysicsComponent.h"
 #include "GameComponent.h"
 #include <vector>
+#include "AttributeManager.h"
 
 
 /// Is responsible for updating Components in a certain order
@@ -25,18 +26,23 @@ private:
 	RenderComponent render;
 	BulletPhysicsComponent* physics;
 	SoundComponent sound;
+	GameComponent gameComponent;
 public:
 	ComponentManager()
 	{
-		physics = new BulletPhysicsComponent(nullptr);
+		physics = new BulletPhysicsComponent(AttributeManager::getInstance()->physicsAttributes.getAllAttributes(),
+											 AttributeManager::getInstance()->BoundingAttributes.getAllAttributes());
 		physics->init();
 	}
-
+	~ComponentManager()
+	{
+		delete physics;
+	}
 	void update(float delta)
 	{
 		sound.onUpdate(delta);
 		render.onUpdate(delta);
-		physics->onUpdate(delta);
+		//physics->onUpdate(delta);
 		gameComponent.onUpdate(delta);
 	}
 };

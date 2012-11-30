@@ -13,6 +13,8 @@
 class PhysicsObject;
 class Event;
 struct PhysicsAttribute;
+struct BoundingAttribute;
+
 
 class btBroadphaseInterface;
 class btDefaultCollisionConfiguration;
@@ -23,12 +25,17 @@ class btDiscreteDynamicsWorld;
 template<class T>
 class btAlignedObjectArray;
 
+class CollisionShapeManager;
+
 
 //! Physics Component of XKILL.
 /*!
 The physics component of XKILL, implements BulletPhysics to simulate the world.
 \ingroup xkill-physics
 */
+
+
+
 class DLL_P BulletPhysicsComponent : public IObserver
 {
 private:
@@ -37,8 +44,11 @@ private:
 	btCollisionDispatcher* dispatcher_; //!< Used to deliver collision information to objects
 	btSequentialImpulseConstraintSolver* solver_; //<! Solve impulse equations
 	btDiscreteDynamicsWorld* dynamicsWorld_; //<! Used to step simulation
+	CollisionShapeManager* collisionShapeManager_;
 
-	std::vector<PhysicsAttribute*>* physicsAttributes_; //<! A pointer to the attribute storage containing PhysicsAttributes, external representation of world
+
+	std::vector<PhysicsAttribute>* physicsAttributes_; //<! A pointer to the attribute storage containing PhysicsAttributes, external representation of world
+	std::vector<BoundingAttribute>* boundingAttributes_; //<! A pointer to the attribute storage containing a copy of bounding volumes for the renderer
 
 	btAlignedObjectArray<PhysicsObject*>* physicsObjects_; //<! A vector of PhysicsObjects, internal representation of world
 		
@@ -47,7 +57,8 @@ public:
 	/*!
 	\param physicsAttributes A pointer to the vector containing physicsAttributes
 	*/
-	BulletPhysicsComponent(std::vector<PhysicsAttribute*>* physicsAttributes);
+	BulletPhysicsComponent(std::vector<PhysicsAttribute>* physicsAttributes,
+						   std::vector<BoundingAttribute>* boundingAttributes);
 	//! Deletes all objects created within the component
 	~BulletPhysicsComponent();
 	//! Initialize the physics component, creates bullet objects and storage for internal representation
