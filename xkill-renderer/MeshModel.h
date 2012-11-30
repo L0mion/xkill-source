@@ -3,20 +3,28 @@
 
 #include <vector>
 
-class MeshDependencies;
-class ObjGeometry;
+#include "MeshGeometry.h"
+#include "MeshDependencies.h"
+
 class MeshMaterial;
 class MeshSubset;
+
+struct VertexPosNormTex;
 
 class MeshModel
 {
 public:
-	MeshModel();
+	MeshModel(
+		MeshGeometry<VertexPosNormTex>*	geometry,
+		MeshDependencies*				dependencies);
 	~MeshModel();
+
+	MeshGeometry<VertexPosNormTex>*	getGeometry();
+	MeshDependencies*				getDependencies();
 protected:
 private:
-	std::vector<MeshMaterial>	materials_;
-	std::vector<MeshSubset>		subsets_;
+	MeshGeometry<VertexPosNormTex>*	geometry_;
+	MeshDependencies*				dependencies_;
 };
 
 #endif //XKILL_RENDERER_MESHMODEL_H

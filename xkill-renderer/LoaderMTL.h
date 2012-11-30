@@ -9,6 +9,11 @@
 #include "SimpleStringSplitter.h"
 #include "MTL.h"
 
+namespace DirectX
+{
+	struct XMFLOAT3;
+}
+
 class MTLMaterial;
 
 static const char MTL_SEPARATOR_DEFAULT = ' ';

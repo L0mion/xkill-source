@@ -8,8 +8,12 @@
 #include "Obj.h"
 #include "SimpleStringSplitter.h"
 
-struct DirectX::XMFLOAT2;
-struct DirectX::XMFLOAT3;
+namespace DirectX
+{
+	struct XMFLOAT2;
+	struct XMFLOAT3;
+}
+
 struct VertexPosNormTex;
 
 class ObjFace;

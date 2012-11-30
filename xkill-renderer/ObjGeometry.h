@@ -27,8 +27,8 @@ public:
 		objGroups_.push_back(mg);
 	}
 
-	const std::vector<Vertex>		getVertices()	{ return vertices_;	}
-	const std::vector<ObjGroup>		getObjGroups()	{ return objGroups_;		}
+	const std::vector<Vertex>		getVertices()	{ return vertices_;		}
+	const std::vector<ObjGroup>		getObjGroups()	{ return objGroups_;	}
 protected:
 private:
 	std::vector<Vertex>			vertices_;
