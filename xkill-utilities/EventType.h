@@ -37,6 +37,7 @@ enum DLL_U EventType
 	EVENT_E,
 	EVENT_F,
 	PLAYSOUND,
+	RUMBLE,
 
 	// this is needed, don't touch!
 	EVENT_LAST 
@@ -100,4 +101,14 @@ class DLL_U Event_PlaySound : public Event
 public:
 	Event_PlaySound(int soundId) : Event(PLAYSOUND){this->soundId=soundId;}
 	int soundId;
+};
+
+//! 
+class DLL_U Event_Rumble : public Event
+{
+public:
+	Event_Rumble(float duration, float leftScale, float rightScale) : Event(RUMBLE){this->duration = duration; this->leftScale = leftScale; this->rightScale = rightScale;}
+	float duration;
+	float leftScale;
+	float rightScale;
 };

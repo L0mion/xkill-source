@@ -30,7 +30,10 @@ bool InputComponent::init(HWND windowHandle, std::vector<InputAttribute>* inputA
 
 void InputComponent::onEvent(Event* e)
 {
-	
+	if(e->getType() == EventType::RUMBLE)
+	{
+
+	}
 }
 
 void InputComponent::onUpdate(float delta)
@@ -50,5 +53,25 @@ void InputComponent::onUpdate(float delta)
 void InputComponent::handleInput(float delta)
 {
 	for(unsigned int i = 0; i < inputAttributes_->size(); i++)
-		inputManager_->FillAttribute(inputAttributes_->at(i), i, delta);
+	{
+		InputDevice* device = inputManager_->GetDevice(i);
+
+		if(device == NULL)
+			continue;
+
+		InputDevice::InputState state =device->GetState();
+
+		int nrAxes = state.axes.size();
+		if(nrAxes >= 1)
+			inputAttributes_->at(i).position[0] += state.axes[0].GetValue() * delta;
+
+		if(nrAxes >= 2)
+			inputAttributes_->at(i).position[1] += state.axes[1].GetValue() * delta;
+
+		if(nrAxes >= 3)
+			inputAttributes_->at(i).rotation[0] += state.axes[2].GetValue() * delta;
+
+		if(nrAxes >= 4)
+			inputAttributes_->at(i).rotation[1] += state.axes[3].GetValue() * delta;
+	}
 }
