@@ -87,9 +87,9 @@ public:
 		return true;
 	}
 
-	void run()
+	void update(float delta)
 	{
-		componentManager_->update(0.5f);
+		componentManager_->update(delta);
 
 		//Event_PlaySound playSound(0);
 		//while(1)

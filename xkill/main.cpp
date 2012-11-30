@@ -42,7 +42,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	while(window->getIsActive())
 	{
 		window->checkMessages();
-		gm.run();
+		gm.update(1.0f);
 	}
 
 	//RenderingComponent* renderingComponent = new RenderingComponent(
