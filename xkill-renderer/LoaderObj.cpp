@@ -4,35 +4,35 @@
 #include "ObjFace.h"
 #include "MeshGroup.h"
 #include "MeshGeometry.h"
-#include "MeshLoaderMTL.h"
+#include "LoaderMTL.h"
 #include "renderingUtilities.h"
-#include "MeshLoaderObj.h"
+#include "LoaderObj.h"
 
-MeshLoaderObj::MeshLoaderObj(
+LoaderObj::LoaderObj(
 	const LPCWSTR mlFileName,
 	const LPCWSTR mlFilePath)
-	: MeshLoader(mlFilePath)
+	: Loader(mlFilePath)
 {
 	mlFileName_		= mlFileName;
 }
-MeshLoaderObj::~MeshLoaderObj()
+LoaderObj::~LoaderObj()
 {
 }
 
-bool MeshLoaderObj::init()
+bool LoaderObj::init()
 {
 	bool sucessfulLoad = true;
 
 	mlLineNum_ = 0;
 
-	LPCWSTR filename = getMLFilePath();
-	mlIFS_.open(filename);
+	LPCWSTR filename = getFilePath();
+	ifstream_.open(filename);
 
-	if(mlIFS_.is_open())
+	if(ifstream_.is_open())
 	{
 		sucessfulLoad = mlParseObj();
-		if(mlIFS_.is_open())
-			mlIFS_.close();
+		if(ifstream_.is_open())
+			ifstream_.close();
 	}
 	else
 		sucessfulLoad = false;
@@ -43,14 +43,14 @@ bool MeshLoaderObj::init()
 	return sucessfulLoad;
 }
 
-bool MeshLoaderObj::mlParseObj()
+bool LoaderObj::mlParseObj()
 {
 	bool sucessfulLoad = true;
 
 	ObjSymbol curSymbol = OBJSYMBOL_INVALID;
 	std::string curLine = "";
 	std::vector<std::string> curLineSplit;
-	while(!mlIFS_.eof() && sucessfulLoad)
+	while(!ifstream_.eof() && sucessfulLoad)
 	{
 		mlGetLine(curLine);
 		curLineSplit = mlSSS_.splitString(OBJ_SEPARATOR_DEFAULT, curLine);
@@ -69,7 +69,7 @@ bool MeshLoaderObj::mlParseObj()
 
 	return sucessfulLoad;
 }
-ObjSymbol MeshLoaderObj::mlParseSymbol(const std::vector<std::string>& params)
+ObjSymbol LoaderObj::mlParseSymbol(const std::vector<std::string>& params)
 {
 	ObjSymbol symbol = OBJSYMBOL_IGNORE;
 	if(params.size() > 0)
@@ -93,7 +93,7 @@ ObjSymbol MeshLoaderObj::mlParseSymbol(const std::vector<std::string>& params)
 	return symbol;
 }
 
-bool MeshLoaderObj::mlParseParams(
+bool LoaderObj::mlParseParams(
 	const ObjSymbol symbol,
 	const std::vector<std::string>& params)
 {
@@ -149,7 +149,7 @@ bool MeshLoaderObj::mlParseParams(
 
 	return sucessfulParse;
 }
-bool MeshLoaderObj::mlParseParamsNumeric(const std::vector<std::string>& params)
+bool LoaderObj::mlParseParamsNumeric(const std::vector<std::string>& params)
 {
 	bool sucessfulParse = true;
 
@@ -164,7 +164,7 @@ bool MeshLoaderObj::mlParseParamsNumeric(const std::vector<std::string>& params)
 	return sucessfulParse;
 }
 
-bool MeshLoaderObj::mlLoadSymbol(
+bool LoaderObj::mlLoadSymbol(
 		const ObjSymbol symbol,
 		const std::vector<std::string>& params)
 {
@@ -197,7 +197,7 @@ bool MeshLoaderObj::mlLoadSymbol(
 
 	return sucessfulLoad;
 }
-void MeshLoaderObj::mlLoadPos(const std::vector<std::string>& params)
+void LoaderObj::mlLoadPos(const std::vector<std::string>& params)
 {
 	float x, y, z;
 	float w = 1.0f; //optional
@@ -213,7 +213,7 @@ void MeshLoaderObj::mlLoadPos(const std::vector<std::string>& params)
 	DirectX::XMFLOAT3 mlPosition(x, y, z);
 	mlPosition_.push_back(mlPosition);
 }
-void MeshLoaderObj::mlLoadNorm(const std::vector<std::string>& params)
+void LoaderObj::mlLoadNorm(const std::vector<std::string>& params)
 {
 	float x, y, z;
 	x = (float)::atof(params[OBJ_PARAMS_INDEX_VERTEX_X].c_str());
@@ -223,7 +223,7 @@ void MeshLoaderObj::mlLoadNorm(const std::vector<std::string>& params)
 	DirectX::XMFLOAT3 mlNormal(x, y, z);
 	mlNormal_.push_back(mlNormal);
 }
-void MeshLoaderObj::mlLoadTex(const std::vector<std::string>& params)
+void LoaderObj::mlLoadTex(const std::vector<std::string>& params)
 {
 	float u, v;
 	float w = 0.0f; //optional
@@ -236,7 +236,7 @@ void MeshLoaderObj::mlLoadTex(const std::vector<std::string>& params)
 	DirectX::XMFLOAT2 mlTexCoord(u, v);
 	mlTex_.push_back(mlTexCoord);
 }
-bool MeshLoaderObj::mlLoadFaces(const std::vector<std::string>& params)
+bool LoaderObj::mlLoadFaces(const std::vector<std::string>& params)
 {
 	bool sucessfulLoad = true;
 
@@ -255,7 +255,7 @@ bool MeshLoaderObj::mlLoadFaces(const std::vector<std::string>& params)
 
 	return sucessfulLoad;
 }
-bool MeshLoaderObj::mlParseFace(const std::vector<std::string>& splitFaces)
+bool LoaderObj::mlParseFace(const std::vector<std::string>& splitFaces)
 {
 	bool sucessfulParse = true;
 
@@ -270,7 +270,7 @@ bool MeshLoaderObj::mlParseFace(const std::vector<std::string>& splitFaces)
 
 	return sucessfulParse;
 }
-bool MeshLoaderObj::mlLoadFace(const std::vector<std::string>& face)
+bool LoaderObj::mlLoadFace(const std::vector<std::string>& face)
 {
 	unsigned int iPos, iTex, iNorm;
 	iPos	= ::atoi(face[OBJ_PARAMS_INDEX_FACE_X].c_str());
@@ -305,7 +305,7 @@ bool MeshLoaderObj::mlLoadFace(const std::vector<std::string>& face)
 
 	return mlLoadIndex(index);
 }
-void MeshLoaderObj::mlLoadGroup(const std::vector<std::string>& params)
+void LoaderObj::mlLoadGroup(const std::vector<std::string>& params)
 {
 	std::string groupName;
 	groupName = params[OBJ_PARAMS_INDEX_GROUP_NAME];
@@ -313,14 +313,14 @@ void MeshLoaderObj::mlLoadGroup(const std::vector<std::string>& params)
 	MeshGroup newGroup(groupName);
 	mlGroups_.push_back(groupName);
 }
-void MeshLoaderObj::mlLoadMaterial(const std::vector<std::string>& params)
+void LoaderObj::mlLoadMaterial(const std::vector<std::string>& params)
 {
 	std::string matFile = "";
 	matFile = params[OBJ_PARAMS_INDEX_MATERIAL_NAME];
 
 	mlMtlLib_.push_back(matFile); //store filename to read from later.
 }
-bool MeshLoaderObj::mlLoadMaterialUse(const std::vector<std::string>& params)
+bool LoaderObj::mlLoadMaterialUse(const std::vector<std::string>& params)
 {
 	bool sucessfulLoad = true;
 
@@ -332,7 +332,7 @@ bool MeshLoaderObj::mlLoadMaterialUse(const std::vector<std::string>& params)
 
 	return sucessfulLoad;
 }
-const unsigned int MeshLoaderObj::mlLoadVertex(
+const unsigned int LoaderObj::mlLoadVertex(
 	const unsigned int iPos,
 	const unsigned int iTex,
 	const unsigned int iNorm)
@@ -346,7 +346,7 @@ const unsigned int MeshLoaderObj::mlLoadVertex(
 
 	return mlVertices_.size() - 1;
 }
-bool MeshLoaderObj::mlLoadIndex(unsigned int index)
+bool LoaderObj::mlLoadIndex(unsigned int index)
 {
 	bool sucessfulLoad = true;
 
@@ -358,12 +358,12 @@ bool MeshLoaderObj::mlLoadIndex(unsigned int index)
 	return sucessfulLoad;
 }
 
-void MeshLoaderObj::mlGetLine(std::string& line)
+void LoaderObj::mlGetLine(std::string& line)
 {
-	std::getline(mlIFS_, line);
+	std::getline(ifstream_, line);
 	mlLineNum_++;
 }
-void MeshLoaderObj::mlPrintFail()
+void LoaderObj::mlPrintFail()
 {
 	std::stringstream ss;
 	ss << mlLineNum_;
@@ -371,12 +371,12 @@ void MeshLoaderObj::mlPrintFail()
 	std::wstring lineW;
 	lineW.assign(line.begin(), line.end());
 
-	std::wstring file		= getMLFilePath();
+	std::wstring file		= getFilePath();
 	std::wstring failed		= L" parsing failed at line ";
 	std::wstring errorMsg	= file + failed + lineW;
 	ERROR_MSG(errorMsg.c_str());
 }
-bool MeshLoaderObj::mlIsNumeric(std::string value)
+bool LoaderObj::mlIsNumeric(std::string value)
 {
 	std::stringstream conv;
 	double tmp;
@@ -385,7 +385,7 @@ bool MeshLoaderObj::mlIsNumeric(std::string value)
 	return conv.eof();
 }
 
-void MeshLoaderObj::mlLoadObj()
+void LoaderObj::mlLoadObj()
 {
 	MeshGeometry<VertexPosNormTex> mlGeometry(mlVertices_);
 	for(unsigned int i = 0; i < mlGroups_.size(); i++)
@@ -397,7 +397,7 @@ void MeshLoaderObj::mlLoadObj()
 	mlObj_ = Obj(mlFileName_, dependencies, mlGeometry);
 }
 
-Obj MeshLoaderObj::getMLObj()
+Obj LoaderObj::getMLObj()
 {
 	return mlObj_;
 }

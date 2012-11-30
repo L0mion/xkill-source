@@ -14,7 +14,7 @@
 #include "d3dInterface.h"
 #include "mathBasic.h"
 #include "vertices.h"
-#include "MeshLoaderObj.h"
+#include "LoaderObj.h"
 
 class FXManagement;
 class CBManagement;
@@ -193,7 +193,7 @@ private:
 	unsigned int tempVerticesSize;
 	unsigned int tempIndicesSize;
 	//ObjLoaderBasic*			objLoader_;			//!< Basic obj-loader used to debug renderer.
-	MeshLoaderObj*			objLoader_;
+	LoaderObj*			objLoader_;
 };
 
 #endif //XKILL_RENDERER_RENDERINGCOMPONENT_H

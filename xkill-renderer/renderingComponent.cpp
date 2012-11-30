@@ -5,7 +5,7 @@
 #include "d3dDebug.h"
 #include "CBManagement.h"
 #include "objLoaderBasic.h"
-#include "MeshLoaderMTL.h"
+#include "LoaderMTL.h"
 
 
 RenderingComponent::RenderingComponent(HWND windowHandle,
@@ -457,7 +457,7 @@ HRESULT RenderingComponent::initVertexBuffer()
 	HRESULT hr = S_OK;
 
 	//vertices_ = new std::vector<VertexPosNormTex>();
-	objLoader_ = new MeshLoaderObj(L"bth.obj", L"../../xkill-resources/xkill-models/bth.obj");
+	objLoader_ = new LoaderObj(L"bth.obj", L"../../xkill-resources/xkill-models/bth.obj");
 	bool sucessfullLoad = objLoader_->init();
 	Obj mo = objLoader_->getMLObj();
 	MeshGeometry<VertexPosNormTex> mg = mo.getMeshGeometry();
@@ -467,7 +467,7 @@ HRESULT RenderingComponent::initVertexBuffer()
 
 	std::vector<std::string> mtlFiles = mo.getMTLs();
 
-	MeshLoaderMTL mtlLoader(L"../../xkill-resources/xkill-models/bth.mtl");
+	LoaderMTL mtlLoader(L"../../xkill-resources/xkill-models/bth.mtl");
 	sucessfullLoad = mtlLoader.init();
 	MTL mtl = mtlLoader.getMTL();
 

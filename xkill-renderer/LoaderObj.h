@@ -1,10 +1,10 @@
-#ifndef XKILL_RENDERER_MESHLOADEROBJ_H
-#define XKILL_RENDERER_MESHLOADEROBJ_H
+#ifndef XKILL_RENDERER_LOADEROBJ_H
+#define XKILL_RENDERER_LOADEROBJ_H
 
 #include <vector>
 #include <string>
 
-#include "MeshLoader.h"
+#include "Loader.h"
 #include "Obj.h"
 #include "SimpleStringSplitter.h"
 
@@ -73,16 +73,16 @@ Derived from basic MeshLoader-class.
 \ingroup xkill-renderer-mesh
 \sa MeshLoader
 */
-class MeshLoaderObj : public MeshLoader
+class LoaderObj : public Loader
 {
 public:
 	//! Forwards path to .obj to parent MeshLoader-class.
 	/*!
 	\param mlFilePath Path to desired .obj-file.
 	*/
-	MeshLoaderObj(const LPCWSTR mlFileName, const LPCWSTR mlFilePath);
+	LoaderObj(const LPCWSTR mlFileName, const LPCWSTR mlFilePath);
 	//! Clears all vectors.
-	~MeshLoaderObj();
+	~LoaderObj();
 
 	//! Function initializing MeshLoaderObj and loading specified .obj-file.
 	/*!
@@ -165,7 +165,7 @@ private:
 	void mlLoadMaterial(const std::vector<std::string>& params);
 	bool mlLoadMaterialUse(const std::vector<std::string>& params);
 	
-	const unsigned int MeshLoaderObj::mlLoadVertex(
+	const unsigned int LoaderObj::mlLoadVertex(
 		const unsigned int iPos, 
 		const unsigned int iTex, 
 		const unsigned int iNorm);
@@ -199,4 +199,4 @@ private:
 	Obj mlObj_;
 };
 
-#endif //XKILL_RENDERER_MESHLOADEROBJ_H
+#endif //XKILL_RENDERER_LOADEROBJ_H

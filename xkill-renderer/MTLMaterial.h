@@ -5,7 +5,7 @@
 #include <vector>
 #include <string>
 
-#include "MeshMTLIllum.h"
+#include "MTLIllum.h"
 
 class MTLMaterial
 {

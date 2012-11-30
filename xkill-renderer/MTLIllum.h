@@ -1,5 +1,5 @@
-#ifndef XKILL_RENDERER_MESHMTLILLUM_H
-#define XKILL_RENDERER_MESHMTLILLUM_H
+#ifndef XKILL_RENDERER_MTLILLUM_H
+#define XKILL_RENDERER_MTLILLUM_H
 
 enum IlluminationModel 
 {
@@ -76,4 +76,4 @@ static const IlluminationModel integerToIllum(unsigned int integer)
 10. Casts shadows onto invisible surfaces
 */
 
-#endif //XKILL_RENDERER_MESHMTLILLUM_H
+#endif //XKILL_RENDERER_MTLILLUM_H

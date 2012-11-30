@@ -1,5 +1,5 @@
-#ifndef XKILL_RENDERER_MESHLOADER_H
-#define XKILL_RENDERER_MESHLOADER_H
+#ifndef XKILL_RENDERER_LOADER_H
+#define XKILL_RENDERER_LOADER_H
 
 /*! \defgroup xkill-renderer-mesh xkill-renderer-mesh
 	Group responsible for defining and loading meshes
@@ -12,26 +12,26 @@
 /*!
 \ingroup xkill-renderer
 */
-class MeshLoader
+class Loader
 {
 public:
 	//! Passes path of desired file to the loader.
 	/*!
 	\param mlFilePath Path to desired file.
 	*/
-	MeshLoader(const LPCWSTR mlFilePath);
+	Loader(const LPCWSTR filePath);
 	//! Closes ifstream if open.
-	~MeshLoader();
+	~Loader();
 
 	//! Purely abstract functions to be used by all loaders to load respective files.
 	virtual bool init()	= 0;
 protected:
 
-	const LPCWSTR getMLFilePath();
+	const LPCWSTR getFilePath();
 
-	std::ifstream	mlIFS_;			//!< ifstream used to load files.
+	std::ifstream	ifstream_;			//!< ifstream used to load files.
 private:
-	LPCWSTR			mlFilePath_;	//!< Path to desired file.
+	LPCWSTR			filePath_;	//!< Path to desired file.
 };
 
-#endif //XKILL_RENDERER_MESHLOADER_H
+#endif //XKILL_RENDERER_LOADER_H

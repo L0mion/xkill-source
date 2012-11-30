@@ -3,9 +3,9 @@
 
 #include <Windows.h>
 
-#include "MeshLoader.h"
+#include "Loader.h"
 #include "renderingUtilities.h"
-#include "MeshMTLIllum.h"
+#include "MTLIllum.h"
 #include "SimpleStringSplitter.h"
 #include "MTL.h"
 
@@ -65,11 +65,11 @@ enum MtlSymbol
 	MTLSYMBOL_INVALID
 };
 
-class MeshLoaderMTL : public MeshLoader
+class LoaderMTL : public Loader
 {
 public:
-	MeshLoaderMTL(LPCWSTR mtlPath);
-	~MeshLoaderMTL();
+	LoaderMTL(LPCWSTR mtlPath);
+	~LoaderMTL();
 
 	bool init();
 

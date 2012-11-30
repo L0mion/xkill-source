@@ -1,29 +1,29 @@
 #include "MTLMaterial.h"
-#include "MeshLoaderMTL.h"
+#include "LoaderMTL.h"
 
-MeshLoaderMTL::MeshLoaderMTL(LPCWSTR mtlPath) : MeshLoader(mtlPath)
+LoaderMTL::LoaderMTL(LPCWSTR mtlPath) : Loader(mtlPath)
 {
 	//Do nothing.
 }
-MeshLoaderMTL::~MeshLoaderMTL()
+LoaderMTL::~LoaderMTL()
 {
 	//Do nothing.
 }
 
-bool MeshLoaderMTL::init()
+bool LoaderMTL::init()
 {
 	bool sucessfulLoad = true;
 
 	lineNum_ = 0;
 
-	LPCWSTR filename = getMLFilePath();
-	mlIFS_.open(filename);
+	LPCWSTR filename = getFilePath();
+	ifstream_.open(filename);
 
-	if(mlIFS_.is_open())
+	if(ifstream_.is_open())
 	{
 		sucessfulLoad = parseMTL();
-		if(mlIFS_.is_open())
-			mlIFS_.close();
+		if(ifstream_.is_open())
+			ifstream_.close();
 	}
 	else
 		sucessfulLoad = false;
@@ -34,14 +34,14 @@ bool MeshLoaderMTL::init()
 	return sucessfulLoad;
 }
 
-bool MeshLoaderMTL::parseMTL()
+bool LoaderMTL::parseMTL()
 {
 	bool sucessfulLoad = true;
 
 	MtlSymbol curSymbol = MTLSYMBOL_INVALID;
 	std::string curLine = "";
 	std::vector<std::string> curLineSplit;
-	while(!mlIFS_.eof() && sucessfulLoad)
+	while(!ifstream_.eof() && sucessfulLoad)
 	{
 		getLine(curLine);
 		curLineSplit = sss_.splitString(MTL_SEPARATOR_DEFAULT, curLine);
@@ -65,7 +65,7 @@ bool MeshLoaderMTL::parseMTL()
 
 	return sucessfulLoad;
 }
-MtlSymbol MeshLoaderMTL::parseSymbol(std::vector<std::string>& params)
+MtlSymbol LoaderMTL::parseSymbol(std::vector<std::string>& params)
 {
 	MtlSymbol symbol = MTLSYMBOL_IGNORE;
 	if(params.size() > 0)
@@ -102,7 +102,7 @@ MtlSymbol MeshLoaderMTL::parseSymbol(std::vector<std::string>& params)
 
 	return symbol;
 }
-bool MeshLoaderMTL::parseParams(
+bool LoaderMTL::parseParams(
 	MtlSymbol symbol, 
 	std::vector<std::string>& params)
 {
@@ -157,7 +157,7 @@ bool MeshLoaderMTL::parseParams(
 
 	return sucessfulParse;
 }
-bool MeshLoaderMTL::parseParamsNumeric(const std::vector<std::string>& params)
+bool LoaderMTL::parseParamsNumeric(const std::vector<std::string>& params)
 {
 	bool sucessfulParse = true;
 
@@ -171,7 +171,7 @@ bool MeshLoaderMTL::parseParamsNumeric(const std::vector<std::string>& params)
 
 	return sucessfulParse;
 }
-bool MeshLoaderMTL::parsePrerequisites(
+bool LoaderMTL::parsePrerequisites(
 	MtlSymbol symbol, 
 	const std::vector<std::string>& params)
 {
@@ -192,7 +192,7 @@ bool MeshLoaderMTL::parsePrerequisites(
 	return sucessfulParse;
 }
 
-void MeshLoaderMTL::loadSymbol(
+void LoaderMTL::loadSymbol(
 	const MtlSymbol symbol, 
 	const std::vector<std::string>& params)
 {
@@ -221,7 +221,7 @@ void MeshLoaderMTL::loadSymbol(
 	}
 }
 
-void MeshLoaderMTL::loadNewMTL(const std::vector<std::string>& params)
+void LoaderMTL::loadNewMTL(const std::vector<std::string>& params)
 {
 	std::string newMat;
 	newMat = params[MTL_PARAMS_INDEX_NEWMTL_NAME];
@@ -229,14 +229,14 @@ void MeshLoaderMTL::loadNewMTL(const std::vector<std::string>& params)
 	MTLMaterial mtl(newMat);
 	materials_.push_back(newMat);
 }
-void MeshLoaderMTL::loadIllum(const std::vector<std::string>& params)
+void LoaderMTL::loadIllum(const std::vector<std::string>& params)
 {
 	unsigned int illum;
 	illum = ::atoi(params[MTL_PARAMS_INDEX_ILLUM_ID].c_str());
 	
 	materials_.back().addIllum(integerToIllum(illum));
 }
-void MeshLoaderMTL::loadColor(
+void LoaderMTL::loadColor(
 	const MtlSymbol symbol,
 	const std::vector<std::string>& params)
 {
@@ -258,7 +258,7 @@ void MeshLoaderMTL::loadColor(
 	};
 	
 }
-DirectX::XMFLOAT3 MeshLoaderMTL::loadVector(const std::vector<std::string>& params)
+DirectX::XMFLOAT3 LoaderMTL::loadVector(const std::vector<std::string>& params)
 {
 	float x, y, z;
 	x = (float)::atof(params[MTL_PARAMS_INDEX_COLOR_X].c_str());
@@ -267,7 +267,7 @@ DirectX::XMFLOAT3 MeshLoaderMTL::loadVector(const std::vector<std::string>& para
 
 	return DirectX::XMFLOAT3(x, y, z);
 }
-void MeshLoaderMTL::loadTex(
+void LoaderMTL::loadTex(
 		const MtlSymbol symbol,
 		const std::vector<std::string>& params)
 {
@@ -291,31 +291,31 @@ void MeshLoaderMTL::loadTex(
 		break;
 	};
 }
-std::string MeshLoaderMTL::loadFilename(const std::vector<std::string>& params)
+std::string LoaderMTL::loadFilename(const std::vector<std::string>& params)
 {
 	std::string filename;
 	filename = params[MTL_PARAMS_INDEX_TEX_FILENAME];
 
 	return filename;
 }
-void MeshLoaderMTL::loadOptical(const std::vector<std::string>& params)
+void LoaderMTL::loadOptical(const std::vector<std::string>& params)
 {
 	float opticalDensity = (float)::atof(params[MTL_PARAMS_INDEX_OPTICAL_DENSITY].c_str());
 
 	materials_.back().setOpticalDensity(opticalDensity);
 }
 
-void MeshLoaderMTL::loadMTL()
+void LoaderMTL::loadMTL()
 {
 	mtl_ = MTL(materials_);
 }
 
-void MeshLoaderMTL::getLine(std::string& line)
+void LoaderMTL::getLine(std::string& line)
 {
-	std::getline(mlIFS_, line);
+	std::getline(ifstream_, line);
 	lineNum_++;
 }
-void MeshLoaderMTL::printFail()
+void LoaderMTL::printFail()
 {
 	std::stringstream ss;
 	ss << lineNum_;
@@ -323,12 +323,12 @@ void MeshLoaderMTL::printFail()
 	std::wstring lineW;
 	lineW.assign(line.begin(), line.end());
 
-	std::wstring file		= getMLFilePath();
+	std::wstring file		= getFilePath();
 	std::wstring failed		= L" parsing failed at line ";
 	std::wstring errorMsg	= file + failed + lineW;
 	ERROR_MSG(errorMsg.c_str());
 }
-bool MeshLoaderMTL::isNumeric(std::string value)
+bool LoaderMTL::isNumeric(std::string value)
 {
 	std::stringstream conv;
 	double tmp;
@@ -337,7 +337,7 @@ bool MeshLoaderMTL::isNumeric(std::string value)
 	return conv.eof();
 }
 
-MTL MeshLoaderMTL::getMTL()
+MTL LoaderMTL::getMTL()
 {
 	return mtl_;
 }
