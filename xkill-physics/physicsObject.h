@@ -50,7 +50,7 @@ public:
 	/*! 
 	\param inputAttribute The attribute containing player controller information
 	*/
-	void input(InputAttribute* inputAttribute);
+	void input(InputAttribute* inputAttribute, float delta);
 };
 
 #endif //XKILL_PHYSICS_PHYSICSOBJECT

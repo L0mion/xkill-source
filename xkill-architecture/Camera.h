@@ -32,8 +32,8 @@ public:
 	Camera(
 		float aspect, 
 		float fov = 0.785f, 
-		float zFar = 1.0f, 
-		float zNear = 100.0f);
+		float zFar = 1000.0f, 
+		float zNear = 1.0f);
 	//! Does nothing since the camera does not alocate any memory.
 	virtual ~Camera();
 

@@ -18,11 +18,13 @@ PhysicsObject::~PhysicsObject()
 
 void PhysicsObject::Init(PhysicsAttribute* physicsAttribute, btDiscreteDynamicsWorld* dynamicsWorld)
 {
+	btTransform a;
+	a.setOrigin(btVector3(0,0,-90));
 	rigidBody_ = new btRigidBody(physicsAttribute->mass,
-								 new btDefaultMotionState(),
+								 new btDefaultMotionState(a),
 								 new btSphereShape(1),
 								 btVector3(0,0,0));
-		
+	rigidBody_->updateInertiaTensor();
 	preStep(physicsAttribute);
 	dynamicsWorld->addRigidBody(rigidBody_);
 }
@@ -46,11 +48,17 @@ void PhysicsObject::postStep(PhysicsAttribute* physicsAttribute)
 	memcpy(position->position,rigidBody_->getWorldTransform().getOrigin().get128().m128_f32,sizeof(float)*3);
 }
 
-void PhysicsObject::input(InputAttribute* inputAttribute)
+#include <iostream>
+void PhysicsObject::input(InputAttribute* inputAttribute,float delta)
 {
 	
 	btVector3 force(inputAttribute->position[0],0,inputAttribute->position[1]);
 	btVector3 torque(0,inputAttribute->rotation[0],0);
-	rigidBody_->applyForce(force,btVector3(0,0,0));
-	rigidBody_->applyTorque(torque);
+	inputAttribute->position[1]=inputAttribute->position[0] = 0;
+	rigidBody_->setGravity(btVector3(0,0,0)+100*force);
+	//rigidBody_->applyTorque(torque);
+	rigidBody_->applyDamping(delta*10);
+	std::cout << "force:" << force.x() << " " << force.y() << " " << force.z() << std::endl;
+	btVector3 f = rigidBody_->getTotalForce();
+	rigidBody_->activate(true);
 }

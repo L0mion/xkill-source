@@ -28,7 +28,8 @@ BulletPhysicsComponent::~BulletPhysicsComponent()
 {
 	while(physicsObjects_->size() > 0)
 	{
-		delete physicsObjects_->at(physicsObjects_->size());
+		physicsObjects_->at(physicsObjects_->size()-1)->Clean(dynamicsWorld_);
+		delete physicsObjects_->at(physicsObjects_->size()-1);
 		physicsObjects_->pop_back();
 	}
 	delete physicsObjects_;
@@ -51,7 +52,7 @@ bool BulletPhysicsComponent::init()
 	dynamicsWorld_ = new btDiscreteDynamicsWorld(dispatcher_,broadphase_,solver_,collisionConfiguration_);
 	collisionShapeManager_ = new CollisionShapeManager;
 
-	dynamicsWorld_->setGravity(btVector3(0,-10,0));
+	dynamicsWorld_->setGravity(btVector3(0,0,0));
 
 
 	//////
@@ -88,7 +89,7 @@ void BulletPhysicsComponent::onUpdate(float delta)
 	for(unsigned int i = 0; i < inputAttributes_->size(); i++)
 	{
 		if(i < physicsObjects_->size())
-			physicsObjects_->at(inputAttributes_->at(i).physicsAttribute.index)->input(&inputAttributes_->at(i));
+			physicsObjects_->at(inputAttributes_->at(i).physicsAttribute.index)->input(&inputAttributes_->at(i),delta);
 	}
 
 
@@ -117,7 +118,7 @@ void BulletPhysicsComponent::onUpdate(float delta)
 		}
 	}
 
-	dynamicsWorld_->stepSimulation(delta,10);
+	dynamicsWorld_->stepSimulation(delta,1);
 
 	for(unsigned int i = 0; i < physicsObjects_->size(); i++)
 	{

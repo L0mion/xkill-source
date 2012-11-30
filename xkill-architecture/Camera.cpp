@@ -3,10 +3,10 @@
 #include "Camera.h"
 
 Camera::Camera(
-	float aspect, 
-	float fov, 
-	float zFar, 
-	float zNear)
+		float aspect, 
+		float fov, 
+		float zFar, 
+		float zNear)
 {
 	this->aspect_	= aspect;
 	this->fov_		= fov;
