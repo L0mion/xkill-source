@@ -65,10 +65,10 @@ public:
 		entityManager_ = new EntityManager();
 		ENTITYTYPE listOfEntitiesToBeCreated[] =
 		{
+			PLAYER, 
 			PLAYER
 		};
 		int nrOfListOfEntitiesToBeCreated = sizeof(listOfEntitiesToBeCreated)/4;
-		
 		//Create all entities as given by of the above enum array
 		for(int i=0;i<nrOfListOfEntitiesToBeCreated;i++)
 		{
@@ -90,28 +90,6 @@ public:
 	void run()
 	{
 		componentManager_->update(0.5f);
-
-		/*std::cout << std::endl << "Run 1" << std::endl;
-
-		Event_A e_A;
-		EventManager::getInstance()->sendEvent(&e_A);
-		componentManager->update(1.0f);
-		std::cin.ignore();
-
-		std::cout << std::endl << "Run 2" << std::endl;
-		entityManager->removeEntity(0);
-		entityManager->createEntity();
-		entityManager->createEntity();
-		Event_B e_B;
-		EventManager::getInstance()->sendEvent(&e_B);
-		componentManager->update(1.0f);
-		std::cin.ignore();
-
-		std::cout << std::endl << "Run 3" << std::endl;
-		entityManager->removeEntity(1);
-		componentManager->update(1.0f);
-		std::cin.ignore();*/
-
 
 		//Event_PlaySound playSound(0);
 		//while(1)

@@ -2,6 +2,7 @@
 
 #include <xkill-sound/SoundComponent.h>
 #include <xkill-renderer/renderingComponent.h>
+#include <xkill-input/InputComponent.h>
 #include "PhysicsComponent.h"
 #include "CameraComponent.h"
 #include "AttributeManager.h"
@@ -27,6 +28,7 @@ private:
 	PhysicsComponent	physics_;
 	SoundComponent		sound_;
 	CameraComponent		camera_;
+	InputComponent		input_;
 	GameComponent		game_;
 
 public:
@@ -44,7 +46,8 @@ public:
 
 	bool init(HWND windowHandle, unsigned int screenWidth, unsigned int screenHeight)
 	{
-		render_ = new RenderingComponent(windowHandle,screenWidth,screenHeight,800,800,1,
+		render_ = new RenderingComponent(windowHandle,screenWidth,screenHeight,
+										AttributeManager::getInstance()->cameraAttributes.getAllAttributes()->size(),
 										AttributeManager::getInstance()->renderAttributes.getAllAttributes(),
 										AttributeManager::getInstance()->cameraAttributes.getAllAttributes());
 		render_->init();
@@ -60,6 +63,9 @@ public:
 		if(!sound_.init())
 			return false;
 
+		if(!input_.init(windowHandle))
+			return false;
+
 		//physicsComponent = new PhysicsComponent();
 		//if(!physics.init(attributes))
 		//	return false;
@@ -73,6 +79,7 @@ public:
 		camera_.onUpdate(delta);
 		physics_.onUpdate(delta);
 		render_->onUpdate(delta);
+		input_.onUpdate(delta);
 		game_.onUpdate(delta);
 	}
 };

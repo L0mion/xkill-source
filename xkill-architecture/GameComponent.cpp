@@ -25,7 +25,7 @@ void GameComponent::onUpdate(float delta)
 	std::vector<PlayerAttribute>* attributesOfPlayer = AttributeManager::getInstance()->playerAttributes.getAllAttributes();
 	std::vector<int>* attributesOfPlayerOwners = AttributeManager::getInstance()->playerAttributes.getAllOwners();
 
-	for(int i=0; i<(int)(*attributesOfPlayer).size(); i++)
+	for(int i=0; i<static_cast<int>(attributesOfPlayer->size()); i++)
 	{
 		if(attributesOfPlayerOwners->at(i)!=0)
 		{
@@ -37,6 +37,8 @@ void GameComponent::onUpdate(float delta)
 
 			//AttributeManager::getInstance()->cameraAttributes.getAllAttributes()->at(playerAttribute->cameraId).spatialAttribute = spatialAttribute;
 			//AttributeManager::getInstance()->cameraAttributes.getAllAttributes()->at(playerAttribute->cameraId).spatialAttribute
+
+			//playerAttribute->playerID
 
 			// The player moves
 			positionAttribute->position[0];
