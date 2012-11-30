@@ -460,9 +460,9 @@ HRESULT RenderingComponent::initVertexBuffer()
 	objLoader_ = new LoaderObj(L"bth.obj", L"../../xkill-resources/xkill-models/bth.obj");
 	bool sucessfullLoad = objLoader_->init();
 	Obj mo = objLoader_->getMLObj();
-	MeshGeometry<VertexPosNormTex> mg = mo.getMeshGeometry();
-	std::vector<VertexPosNormTex> vertices = mg.getMGVertices();
-	std::vector<ObjGroup> groups = mg.getMGGroups();
+	ObjGeometry<VertexPosNormTex> mg = mo.getMeshGeometry();
+	std::vector<VertexPosNormTex> vertices = mg.getVertices();
+	std::vector<ObjGroup> groups = mg.getObjGroups();
 	std::vector<unsigned int> indices = groups[1].getIndices();
 
 	std::vector<std::string> mtlFiles = mo.getMTLs();

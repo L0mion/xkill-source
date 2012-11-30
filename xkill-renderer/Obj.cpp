@@ -8,7 +8,7 @@ Obj::Obj()
 Obj::Obj(
 	const LPCWSTR moFilename,
 	const ObjDependencies objDependencies,
-	const MeshGeometry<VertexPosNormTex> moMeshGeometry)
+	const ObjGeometry<VertexPosNormTex> moMeshGeometry)
 {
 	this->fileName_			= moFilename;
 	this->objDependencies_	= objDependencies;
@@ -27,7 +27,7 @@ std::vector<std::string> Obj::getMTLs()
 {
 	return objDependencies_.getMTLFiles();
 }
-MeshGeometry<VertexPosNormTex> Obj::getMeshGeometry()
+ObjGeometry<VertexPosNormTex> Obj::getMeshGeometry()
 {
 	return meshGeometry_;
 }

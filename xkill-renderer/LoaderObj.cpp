@@ -3,7 +3,7 @@
 #include "vertices.h"
 #include "ObjFace.h"
 #include "ObjGroup.h"
-#include "MeshGeometry.h"
+#include "ObjGeometry.h"
 #include "LoaderMTL.h"
 #include "renderingUtilities.h"
 #include "LoaderObj.h"
@@ -387,9 +387,9 @@ bool LoaderObj::mlIsNumeric(std::string value)
 
 void LoaderObj::mlLoadObj()
 {
-	MeshGeometry<VertexPosNormTex> mlGeometry(mlVertices_);
+	ObjGeometry<VertexPosNormTex> mlGeometry(mlVertices_);
 	for(unsigned int i = 0; i < mlGroups_.size(); i++)
-		mlGeometry.mgPushGroup(mlGroups_[i]);
+		mlGeometry.pushGroup(mlGroups_[i]);
 
 	ObjDependencies dependencies;
 	for(unsigned int i = 0; i < mlMtlLib_.size(); i++)

@@ -5,7 +5,7 @@
 #include <vector>
 #include <string>
 
-#include "MeshGeometry.h"
+#include "ObjGeometry.h"
 #include "ObjDependencies.h"
 
 struct VertexPosNormTex;
@@ -17,17 +17,17 @@ public:
 	Obj(
 		const LPCWSTR filename,
 		const ObjDependencies objDependencies,
-		const MeshGeometry<VertexPosNormTex> meshGeometry);
+		const ObjGeometry<VertexPosNormTex> meshGeometry);
 	~Obj();
 
 	LPCWSTR getFileName();
 	std::vector<std::string> getMTLs();
-	MeshGeometry<VertexPosNormTex> getMeshGeometry();
+	ObjGeometry<VertexPosNormTex> getMeshGeometry();
 protected:
 private:
 	LPCWSTR fileName_;
 	ObjDependencies objDependencies_;
-	MeshGeometry<VertexPosNormTex> meshGeometry_;
+	ObjGeometry<VertexPosNormTex> meshGeometry_;
 };
 
 #endif //XKILL_RENDERER_OBJ_H
