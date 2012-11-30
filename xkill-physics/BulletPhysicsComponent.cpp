@@ -52,7 +52,6 @@ bool BulletPhysicsComponent::init()
 
 	dynamicsWorld_->setGravity(btVector3(0,-10,0));
 
-
 	//////
 
 	//////
@@ -127,5 +126,8 @@ void BulletPhysicsComponent::onEvent(Event* e)
 
 void BulletPhysicsComponent::shootBox()
 {
+	//PhysicsObject class not yet completed (wrapper for btRigidBody)
 
+		
+		//this->localCreateRigidBody(mass, startTransform, m_shootBoxShape);
 }

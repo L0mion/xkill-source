@@ -53,7 +53,7 @@ private:
 	std::vector<BoundingAttribute>* boundingAttributes_; //<! A pointer to the attribute storage containing a copy of bounding volumes for the renderer
 
 	btAlignedObjectArray<PhysicsObject*>* physicsObjects_; //<! A vector of PhysicsObjects, internal representation of world
-		
+
 public:
 	//! Creates a BulletPhysicsComponent, gives it pointers to attribute storages required by the component and sets all pointer to null_ptr
 	/*!
@@ -76,7 +76,7 @@ public:
 	*/
 	void onEvent(Event* e);
 
-	//! Example projectile from the Bullet Demos
+	//! Example projectile from the Bullet Demos: Creates a rigid body used as a projectile
 	void shootBox();
 };
 

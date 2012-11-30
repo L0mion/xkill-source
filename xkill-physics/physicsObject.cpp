@@ -23,7 +23,7 @@ void PhysicsObject::Init(PhysicsAttribute* physicsAttribute, btDiscreteDynamicsW
 																	physicsAttribute->sa->pa->position.z))
 								 new btSphereShape(1),
 								 btVector3(0,0,0));*/
-		
+	
 	preStep(physicsAttribute);
 	dynamicsWorld->addRigidBody(rigidBody_);
 }
