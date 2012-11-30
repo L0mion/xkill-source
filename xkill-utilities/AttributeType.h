@@ -65,6 +65,7 @@ struct DLL_U InputAttribute : public IAttribute
 {
 	InputAttribute();
 	~InputAttribute();
+	AttributePointer physicsAttribute;
 	float position[3];
 	float rotation[2];
 };

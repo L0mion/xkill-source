@@ -56,11 +56,11 @@ public:
 		attributeFactory.create_RenderAttribute(e);
 
 		// Render attribute
-		CameraAttribute* camera = AttributeManager::getInstance()->cameraAttributes.createAttribute(e);
-		AttributeManager::getInstance()->cameraAttributes.getAllAttributes()->size();
+		CameraAttribute* camera = AttributeManager::getInstance()->cameraAttributes_.createAttribute(e);
+		AttributeManager::getInstance()->cameraAttributes_.getAllAttributes()->size();
 		ZeroMemory(camera->mat_projection, sizeof(camera->mat_projection));
 		ZeroMemory(camera->mat_view, sizeof(camera->mat_view));
-		camera->spatialAttribute = AttributeManager::getInstance()->spatialAttributes.createAttributePointer();
+		camera->spatialAttribute = AttributeManager::getInstance()->spatialAttributes_.createAttributePointer();
 
 		// Return entity
 		return e;
@@ -73,12 +73,12 @@ public:
 		attributeFactory.create_RenderAttribute(entity);
 
 		// Player attribute
-		PlayerAttribute* playerAttribute = AttributeManager::getInstance()->playerAttributes.createAttribute(entity);
+		PlayerAttribute* playerAttribute = AttributeManager::getInstance()->playerAttributes_.createAttribute(entity);
 		playerAttribute->name = "LoccaShock";
 		playerAttribute->priority = 0;
 		playerAttribute->cycleSteals = 0;
 		playerAttribute->totalExecutionTime = 0;
-		playerAttribute->renderAttribute = AttributeManager::getInstance()->renderAttributes.createAttributePointer();
+		playerAttribute->renderAttribute = AttributeManager::getInstance()->renderAttributes_.createAttributePointer();
 
 		// Return entity
 		return entity;

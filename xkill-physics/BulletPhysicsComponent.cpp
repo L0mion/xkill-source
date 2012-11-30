@@ -8,10 +8,12 @@
 #include "physicsObject.h"
 
 BulletPhysicsComponent::BulletPhysicsComponent(std::vector<PhysicsAttribute>* physicsAttributes,
-											   std::vector<BoundingAttribute>* boundingAttributes)
+											   std::vector<BoundingAttribute>* boundingAttributes,
+											   std::vector<InputAttribute>* inputAttributes)
 {
 	physicsAttributes_ = physicsAttributes; 
 	boundingAttributes_ = boundingAttributes;
+	inputAttributes_ = inputAttributes;
 	broadphase_ = nullptr;
 	collisionConfiguration_ = nullptr;
 	dispatcher_ = nullptr;
@@ -84,6 +86,12 @@ bool BulletPhysicsComponent::init()
 
 void BulletPhysicsComponent::onUpdate(float delta)
 {
+	for(unsigned int i = 0; i < inputAttributes_->size(); i++)
+	{
+		physicsObjects_->at(inputAttributes_->at(i).physicsAttribute.index)->input(&inputAttributes_->at(i));
+	}
+
+
 	for(unsigned int i = (*physicsObjects_).size(); i < physicsObjects_->size(); i++)
 	{
 		physicsObjects_->push_back(new PhysicsObject());

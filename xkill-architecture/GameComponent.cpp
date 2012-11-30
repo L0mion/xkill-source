@@ -22,8 +22,8 @@ void GameComponent::onEvent(Event* e)
 
 void GameComponent::onUpdate(float delta)
 {
-	std::vector<PlayerAttribute>* attributes = AttributeManager::getInstance()->playerAttributes.getAllAttributes();
-	std::vector<int>* owners = AttributeManager::getInstance()->playerAttributes.getAllOwners();
+	std::vector<PlayerAttribute>* attributes = AttributeManager::getInstance()->playerAttributes_.getAllAttributes();
+	std::vector<int>* owners = AttributeManager::getInstance()->playerAttributes_.getAllOwners();
 
 	// Write test
 	std::cout << "PLAYERCOMPONENT: Write test" << std::endl;

@@ -35,7 +35,7 @@ public:
 	void create_PositionAttribute(Entity* e)
 	{
 		// Position attribute
-		PositionAttribute* position = AttributeManager::getInstance()->positionAttributes.createAttribute(e);
+		PositionAttribute* position = AttributeManager::getInstance()->positionAttributes_.createAttribute(e);
 		fillFloat3(position->position);
 	}
 
@@ -45,10 +45,10 @@ public:
 		create_PositionAttribute(e);
 
 		// Spatial attribute
-		SpatialAttribute* spatial = AttributeManager::getInstance()->spatialAttributes.createAttribute(e);
+		SpatialAttribute* spatial = AttributeManager::getInstance()->spatialAttributes_.createAttribute(e);
 		fillQuaternion(spatial->rotation);
 		fillFloat3(spatial->scale);
-		spatial->positionAttribute = AttributeManager::getInstance()->positionAttributes.createAttributePointer();
+		spatial->positionAttribute = AttributeManager::getInstance()->positionAttributes_.createAttributePointer();
 	}
 
 	void create_RenderAttribute(Entity* e)
@@ -57,11 +57,11 @@ public:
 		create_SpatialAttribute(e);
 
 		// Render attribute
-		RenderAttribute* render = AttributeManager::getInstance()->renderAttributes.createAttribute(e);
+		RenderAttribute* render = AttributeManager::getInstance()->renderAttributes_.createAttribute(e);
 		render->transparent		= false;
 		render->tessellation	= true;
 		render->meshID			= e->getID();
 		render->textureID		= 42;
-		render->spatialAttribute = AttributeManager::getInstance()->spatialAttributes.createAttributePointer();
+		render->spatialAttribute = AttributeManager::getInstance()->spatialAttributes_.createAttributePointer();
 	}
 };

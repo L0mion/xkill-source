@@ -1,6 +1,6 @@
 #include "physicsObject.h"
 
-#include "attributes.h"
+#include <xkill-utilities/AttributeType.h>
 
 PhysicsObject::PhysicsObject()
 {
@@ -43,4 +43,13 @@ void PhysicsObject::preStep(PhysicsAttribute* physicsAttribute)
 void PhysicsObject::postStep(PhysicsAttribute* physicsAttribute)
 {
 	
+}
+
+void PhysicsObject::input(InputAttribute* inputAttribute)
+{
+	
+	btVector3 force(inputAttribute->position[0],0,inputAttribute->position[1]);
+	btVector3 torque(0,inputAttribute->rotation[0],0);
+	rigidBody_->applyForce(force,btVector3(0,0,0));
+	rigidBody_->applyTorque(torque);
 }
