@@ -94,7 +94,7 @@ public:
 	*/
 	bool init();
 
-	Obj getMLObj();
+	Obj getObj();
 protected:
 private:
 	//! Method loading .obj-file.
@@ -108,21 +108,21 @@ private:
 		\sa mlLoadNorm
 		\sa mlLoadFaces
 	*/
-	bool mlParseObj();
+	bool parseObj();
 	//! Interprets symbol of first string recieved from splitting line.
 	/*!
 		Stores correct symbol in member variable curSymbol_.
 		\return A boolean dictating whether or not the method was sucessful.
 		\sa curSymbol_
 	*/
-	ObjSymbol mlParseSymbol(const std::vector<std::string>& params);
+	ObjSymbol parseSymbol(const std::vector<std::string>& params);
 	//! Based on symbol, this method calls a mlParseParam.
 	/*!
 		Method does not call a parse-method for faces, as this is done later during the loading process.
 		\return A boolean dictating whether or not the method was sucessful.
 		\sa mlParseParam
 	*/
-	bool mlParseParams(
+	bool parseParams(
 		const ObjSymbol symbol,
 		const std::vector<std::string>& params);
 	//! Checks if all parameters for a certain symbol are numeric.
@@ -131,31 +131,31 @@ private:
 		\sa mlParseParam
 		\sa mlIsNumeric
 	*/
-	bool mlParseParamsNumeric(const std::vector<std::string>& params);
+	bool parseParamsNumeric(const std::vector<std::string>& params);
 
-	bool mlLoadSymbol(
+	bool loadSymbol(
 		const ObjSymbol symbol,
 		const std::vector<std::string>& params);
 
 	//! Loads parameters previously parsed as being entirely numeric and valid, and creates a new Position-attribute in mlPosition_.
-	void mlLoadPos(const std::vector<std::string>& params);
+	void loadPos(const std::vector<std::string>& params);
 	//! Loads parameters previously parsed as being entirely numeric and valid, and creates a new Normal-element in mlNormal_.
-	void mlLoadNorm(const std::vector<std::string>& params);
+	void loadNorm(const std::vector<std::string>& params);
 	//! Loads parameters previously parsed as being entirely numeric and valid, and creates a new Tex-element in mlTex_.
-	void mlLoadTex(const std::vector<std::string>& params);
+	void loadTex(const std::vector<std::string>& params);
 	//! Further splits the read line into seperate face-attributes, parses them to ensure valid values - and calls loading of these.
 	/*!
 		\return A boolean dictating whether or not the method was sucessful.
 		\sa mlParseFace
 		\sa mlLoadFace
 	*/
-	bool mlLoadFaces(const std::vector<std::string>& params);
+	bool loadFaces(const std::vector<std::string>& params);
 	//! Parses faces and ensures that these values are the correct number and entirely numeric.
 	/*!
 		\return A boolean dictating whether or not the method was sucessful.
 		\sa mlIsNumeric
 	*/
-	bool mlParseFace(const std::vector<std::string>& splitFaces);
+	bool parseFace(const std::vector<std::string>& splitFaces);
 	//! Loads faces.
 	/*!
 		Based on a vector of intermediate MeshFace-types, the method loads vertices from file and creates a vector of indices to save on memory.
@@ -163,44 +163,44 @@ private:
 		\sa mlIndices_
 		\sa mlVertices_
 	*/
-	bool mlLoadFace(const std::vector<std::string>& face);
+	bool loadFace(const std::vector<std::string>& face);
 
-	void mlLoadGroup(const std::vector<std::string>& params);
-	void mlLoadMaterial(const std::vector<std::string>& params);
-	bool mlLoadMaterialUse(const std::vector<std::string>& params);
+	void loadGroup(const std::vector<std::string>& params);
+	void loadMaterial(const std::vector<std::string>& params);
+	bool loadMaterialUse(const std::vector<std::string>& params);
 	
-	const unsigned int LoaderObj::mlLoadVertex(
+	const unsigned int LoaderObj::loadVertex(
 		const unsigned int iPos, 
 		const unsigned int iTex, 
 		const unsigned int iNorm);
-	bool mlLoadIndex(unsigned int index);
+	bool loadIndex(unsigned int index);
 
 	//! Used to, for each read line, increment a counter so that an error may report a line number.
-	void mlGetLine(std::string& line);
+	void getLine(std::string& line);
 	//! If something were to go avry, this method prints an error based on line number.
 	/*! \sa lineNum_ */
-	void mlPrintFail();
+	void printFail();
 	//! Checks whether or not a string contains an numeric value.
 	/*! \return True if entirely numeric, False if not. */
-	bool mlIsNumeric(std::string value);
+	bool isNumeric(std::string value);
 
-	void mlLoadObj();
+	void loadObj();
 
-	LPCWSTR						mlFileName_;
-	unsigned int				mlLineNum_;			//!< Line number previously read from file.
-	SimpleStringSplitter		mlSSS_;				//!< Helper class used to split strings when reading these from file.
+	LPCWSTR						fileName_;
+	unsigned int				lineNum_;			//!< Line number previously read from file.
+	SimpleStringSplitter		sss_;				//!< Helper class used to split strings when reading these from file.
 
 	/*Intermediate vectors to hold data whilst loading .obj*/
-	std::vector<DirectX::XMFLOAT3>	mlPosition_;	//!< Spatial attributes read from file.
-	std::vector<DirectX::XMFLOAT3>	mlNormal_;		//!< Normal attributes read from file.
-	std::vector<DirectX::XMFLOAT2>	mlTex_;			//!< Texture elements read from file.
-	std::vector<ObjFace>			mlFaces_;		//!< Utility-vector holding faces read form file to save on memory.
-	std::vector<VertexPosNormTex>	mlVertices_;	//!< Result: Vertices read from file.
-	std::vector<ObjGroup>			mlGroups_;
-	std::vector<std::string>		mlMtlLib_;
+	std::vector<DirectX::XMFLOAT3>	position_;	//!< Spatial attributes read from file.
+	std::vector<DirectX::XMFLOAT3>	normal_;		//!< Normal attributes read from file.
+	std::vector<DirectX::XMFLOAT2>	tex_;			//!< Texture elements read from file.
+	std::vector<ObjFace>			faces_;		//!< Utility-vector holding faces read form file to save on memory.
+	std::vector<VertexPosNormTex>	vertices_;	//!< Result: Vertices read from file.
+	std::vector<ObjGroup>			groups_;
+	std::vector<std::string>		mtlLib_;
 
 	/*Result*/
-	Obj mlObj_;
+	Obj obj_;
 };
 
 #endif //XKILL_RENDERER_LOADEROBJ_H
