@@ -54,6 +54,8 @@ bool BulletPhysicsComponent::init()
 
 	dynamicsWorld_->setGravity(btVector3(0,0,0));
 
+	dasfloor_ = new PhysicsObject();
+	dasfloor_->Init(nullptr,dynamicsWorld_,true);
 
 	//////
 
@@ -107,7 +109,7 @@ void BulletPhysicsComponent::onUpdate(float delta)
 			}
 			else
 			{
-				physicsObjects_->at(i)->Init(&physicsAttributes_->at(i),dynamicsWorld_);
+				physicsObjects_->at(i)->Init(&physicsAttributes_->at(i),dynamicsWorld_,false);
 				physicsAttributes_->at(i).added = true;
 			}
 		}

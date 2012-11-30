@@ -41,7 +41,7 @@ public:
 		gameTimer.reset();
 
 		// init game
-		gameManager.init(this->winId(), 800, 800);
+		gameManager.init(this->winId(),this->parentWidget()->winId(), 800, 800);
 	};
 	~GameWidget()
 	{

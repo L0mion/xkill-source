@@ -47,7 +47,7 @@ public:
 		//SAFE_DELETE(gameComponent);
 	}
 
-	bool init(HWND windowHandle, unsigned int screenWidth, unsigned int screenHeight)
+	bool init(HWND windowHandle, HWND consoleHandle, unsigned int screenWidth, unsigned int screenHeight)
 	{
 		render_ = new RenderingComponent(windowHandle,screenWidth,screenHeight,
 										AttributeManager::getInstance()->cameraAttributes_.getAllAttributes()->size(),
@@ -70,7 +70,7 @@ public:
 		//if(!sound_.init())
 			//return false;
 
-		if(!input_.init(windowHandle, AttributeManager::getInstance()->inputAttributes_.getAllAttributes()))
+		if(!input_.init(consoleHandle, AttributeManager::getInstance()->inputAttributes_.getAllAttributes()))
 			return false;
 
 		//physicsComponent = new PhysicsComponent();

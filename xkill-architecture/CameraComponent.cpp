@@ -29,7 +29,7 @@ void CameraComponent::init(std::vector<CameraAttribute>* cameraAttributes, std::
 	}
 	else
 	{
-		aspectRatio /= 2;
+		aspectRatio *= 2;
 		for(unsigned int i = 0; i < cameraAttributes_->size(); i++)
 		{	
 			cameras_.push_back(Camera(aspectRatio));
