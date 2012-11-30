@@ -4,12 +4,9 @@
 #include <QWidget.h>
 #include <QResizeEvent>
 #include <QMouseEvent>
-
 #include <QTime>
 #include <QTimer> // needed to implement frame rate
-
 #include <xkill-architecture/GameManager.h>
-//#include <xkill-renderer/renderingComponent.h>
 
 #include "GameTimer.h"
 

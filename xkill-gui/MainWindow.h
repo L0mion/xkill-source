@@ -2,11 +2,12 @@
 #define MAINWINDOW_H
 
 #include <QtGui/QMainWindow>
+#include <xkill-utilities/IObserver.h>
 #include "ui_MainWindow.h"
 
 #include "GameWidget.h"
 
-class MainWindow : public QMainWindow
+class MainWindow : public QMainWindow, public IObserver
 {
 	Q_OBJECT
 
@@ -36,6 +37,14 @@ public:
 	~MainWindow()
 	{
 		delete gameWidget;
+	}
+
+	void onUpdate(float delta)
+	{
+	}
+
+	void onEvent(Event* e)
+	{
 	}
 
 public slots:

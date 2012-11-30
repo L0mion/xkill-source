@@ -14,7 +14,7 @@ class IObserver
 public:
 	IObserver(){}
 	~IObserver(){}
-	virtual void onEvent(Event* e){}
+	virtual void onEvent(Event* e) = 0;
 	virtual void onUpdate(float delta){}
 };
 

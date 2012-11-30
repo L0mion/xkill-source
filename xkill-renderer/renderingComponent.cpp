@@ -518,3 +518,8 @@ HRESULT RenderingComponent::initVertexBuffer()
 
 	return hr;
 }
+
+void RenderingComponent::onEvent( Event* e )
+{
+
+}

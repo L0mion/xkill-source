@@ -82,6 +82,8 @@ public:
 	void reset();
 	//! Runs a frame for RenderingComponent.
 	void onUpdate(float delta);
+	//! Receives events for RenderingComponent.
+	void onEvent(Event* e);
 	//! Main render-method of RenderingComponent.
 	/*!
 	\param view View-matrix from camera.
