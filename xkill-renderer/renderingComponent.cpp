@@ -462,8 +462,8 @@ HRESULT RenderingComponent::initVertexBuffer()
 	Obj mo = objLoader_->getMLObj();
 	MeshGeometry<VertexPosNormTex> mg = mo.getMeshGeometry();
 	std::vector<VertexPosNormTex> vertices = mg.getMGVertices();
-	std::vector<MeshGroup> groups = mg.getMGGroups();
-	std::vector<unsigned int> indices = groups[1].getMGIndices();
+	std::vector<ObjGroup> groups = mg.getMGGroups();
+	std::vector<unsigned int> indices = groups[1].getIndices();
 
 	std::vector<std::string> mtlFiles = mo.getMTLs();
 

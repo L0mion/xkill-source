@@ -3,7 +3,7 @@
 
 #include <vector>
 
-#include "MeshGroup.h"
+#include "ObjGroup.h"
 
 template <typename Vertex>
 class MeshGeometry
@@ -22,7 +22,7 @@ public:
 		//Do nothing.
 	}
 
-	void mgPushGroup(const MeshGroup mg)
+	void mgPushGroup(const ObjGroup mg)
 	{
 		mgGroups_.push_back(mg);
 	}
@@ -40,11 +40,11 @@ public:
 	}
 
 	const std::vector<Vertex>		getMGVertices()	{ return mgVertices_;	}
-	const std::vector<MeshGroup>	getMGGroups()	{ return mgGroups_;		}
+	const std::vector<ObjGroup>	getMGGroups()	{ return mgGroups_;		}
 protected:
 private:
 	std::vector<Vertex>			mgVertices_;
-	std::vector<MeshGroup>		mgGroups_;
+	std::vector<ObjGroup>		mgGroups_;
 };
 
 /*

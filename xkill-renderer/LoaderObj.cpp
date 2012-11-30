@@ -2,7 +2,7 @@
 
 #include "vertices.h"
 #include "ObjFace.h"
-#include "MeshGroup.h"
+#include "ObjGroup.h"
 #include "MeshGeometry.h"
 #include "LoaderMTL.h"
 #include "renderingUtilities.h"
@@ -310,7 +310,7 @@ void LoaderObj::mlLoadGroup(const std::vector<std::string>& params)
 	std::string groupName;
 	groupName = params[OBJ_PARAMS_INDEX_GROUP_NAME];
 	
-	MeshGroup newGroup(groupName);
+	ObjGroup newGroup(groupName);
 	mlGroups_.push_back(groupName);
 }
 void LoaderObj::mlLoadMaterial(const std::vector<std::string>& params)
@@ -328,7 +328,7 @@ bool LoaderObj::mlLoadMaterialUse(const std::vector<std::string>& params)
 	mat = params[OBJ_PARAMS_INDEX_MATERIAL_USE_NAME];
 
 	if(mlGroups_.size() > 0)
-		mlGroups_.back().setMGMaterial(mat);
+		mlGroups_.back().setMaterialName(mat);
 
 	return sucessfulLoad;
 }
@@ -351,7 +351,7 @@ bool LoaderObj::mlLoadIndex(unsigned int index)
 	bool sucessfulLoad = true;
 
 	if(mlGroups_.size() > 0)
-		mlGroups_.back().mgPushIndex(index);
+		mlGroups_.back().pushIndex(index);
 	else
 		sucessfulLoad = false; //no specified groups to push to
 

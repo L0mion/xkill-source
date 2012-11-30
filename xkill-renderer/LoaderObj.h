@@ -13,7 +13,7 @@ struct DirectX::XMFLOAT3;
 struct VertexPosNormTex;
 
 class ObjFace;
-class MeshGroup;
+class ObjGroup;
 
 static const char OBJ_SEPARATOR_DEFAULT	= ' ';
 static const char OBJ_SEPARATOR_FACE	= '/';
@@ -192,7 +192,7 @@ private:
 	std::vector<DirectX::XMFLOAT2>	mlTex_;			//!< Texture elements read from file.
 	std::vector<ObjFace>			mlFaces_;		//!< Utility-vector holding faces read form file to save on memory.
 	std::vector<VertexPosNormTex>	mlVertices_;	//!< Result: Vertices read from file.
-	std::vector<MeshGroup>			mlGroups_;
+	std::vector<ObjGroup>			mlGroups_;
 	std::vector<std::string>		mlMtlLib_;
 
 	/*Result*/
