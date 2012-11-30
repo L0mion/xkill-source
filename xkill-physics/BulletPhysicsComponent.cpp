@@ -124,3 +124,8 @@ void BulletPhysicsComponent::onEvent(Event* e)
 {
 
 }
+
+void BulletPhysicsComponent::shootBox()
+{
+
+}

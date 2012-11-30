@@ -118,12 +118,15 @@ struct DLL_U PhysicsAttribute : public IAttribute
 	float velocity[4];
 	float rotationVelocity[4];
 	float mass;
+	//CollisionShape
+	//friction
+	//restitution
 
 	bool added;
 	bool alive;
 };
 
-/// Stores everything SoundComponent needs to know to play a 3D sound
+/// Stores everything SoundComponent needs to know to play a 3D sound (not used)
 /** 
 \ingroup ATTRIBUTES
 */
@@ -148,7 +151,7 @@ struct DLL_U CameraAttribute : public IAttribute
 	float mat_projection[16];
 };
 
-/// Stores everything GameComponent needs to know about a player
+/// Stores everything GameComponent needs to know about a player (also refer to createPlayerEntity)
 /** 
 \ingroup ATTRIBUTES
 */

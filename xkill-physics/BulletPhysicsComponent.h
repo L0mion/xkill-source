@@ -31,6 +31,8 @@ class CollisionShapeManager;
 //! Physics Component of XKILL.
 /*!
 The physics component of XKILL, implements BulletPhysics to simulate the world.
+From the Bullet documentation: "The entire physics pipeline computation and its data structures are represented in Bullet by a dynamics world"
+"The default dynamics world implementation is the btDiscreteDynamicsWorld."
 \ingroup xkill-physics
 */
 
@@ -73,6 +75,9 @@ public:
 	\param e A pointer to the event that is being passed
 	*/
 	void onEvent(Event* e);
+
+	//! Example projectile from the Bullet Demos
+	void shootBox();
 };
 
 #endif //XKILL_PHYSICS_PHYSICSCOMPONENT_H

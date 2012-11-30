@@ -89,7 +89,7 @@ public:
 
 		// Player attribute
 		PlayerAttribute* playerAttribute = AttributeManager::getInstance()->playerAttributes.createAttribute(entity);
-		playerAttribute->id = 0;
+		playerAttribute->id = playerId;
 		playerAttribute->name = "PrinterTerror";
 		playerAttribute->health = 100;
 		playerAttribute->priority = 0;

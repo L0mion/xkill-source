@@ -36,7 +36,7 @@ void GameComponent::onUpdate(float delta)
 			
 			if(playerAttribute->id == 0) //Handle player 1 (test)
 			{
-				//positionAttribute->position[0] = positionAttribute->position[0]+1.0f;
+				positionAttribute->position[0] = positionAttribute->position[0]+1.0f;
 			}
 			else if(playerAttribute->id == 1) //Handle player 2 (test)
 			{
