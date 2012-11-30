@@ -48,7 +48,7 @@ public:
 		SpatialAttribute* spatial = AttributeManager::getInstance()->spatialAttributes.createAttribute(e);
 		fillQuaternion(spatial->rotation);
 		fillFloat3(spatial->scale);
-		spatial->positionAttribute = AttributeManager::getInstance()->positionAttributes.createAttributePointer();
+		spatial->positionAttribute = AttributeManager::getInstance()->positionAttributes.getLatestAttributeAsAttributePointer();
 	}
 
 	void create_RenderAttribute(Entity* e)
@@ -62,6 +62,6 @@ public:
 		render->tessellation	= true;
 		render->meshID			= e->getID();
 		render->textureID		= 42;
-		render->spatialAttribute = AttributeManager::getInstance()->spatialAttributes.createAttributePointer();
+		render->spatialAttribute = AttributeManager::getInstance()->spatialAttributes.getLatestAttributeAsAttributePointer();
 	}
 };

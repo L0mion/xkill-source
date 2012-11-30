@@ -37,6 +37,7 @@ private:
 	}
 
 public:
+	//! Example entity
 	Entity* createEntity_TypeA()
 	{
 		Entity* e = createEntity();
@@ -48,37 +49,56 @@ public:
 		return e;
 	}
 
+	//! Not used for now (refer to createPlayerEntity)
 	Entity* createEntity_Camera()
 	{
 		Entity* e = createEntity();
 
-		// Spatial attribute
+		// Render attribute
 		attributeFactory.create_RenderAttribute(e);
 
-		// Render attribute
+		// Camera attribute
 		CameraAttribute* camera = AttributeManager::getInstance()->cameraAttributes.createAttribute(e);
 		AttributeManager::getInstance()->cameraAttributes.getAllAttributes()->size();
 		ZeroMemory(camera->mat_projection, sizeof(camera->mat_projection));
 		ZeroMemory(camera->mat_view, sizeof(camera->mat_view));
-		camera->spatialAttribute = AttributeManager::getInstance()->spatialAttributes.createAttributePointer();
+		camera->spatialAttribute = AttributeManager::getInstance()->spatialAttributes.getLatestAttributeAsAttributePointer();
 
 		// Return entity
 		return e;
 	}
+
+	//! A player entity has the following attributes: position attribute, spatial attribute, render attribute, player attribute and camera attribute.
+	//! Bindings:
+	//! camera attribute --> spatial attribute --> position attribute
+	//! player attribute --> render attribute --> spatial attribute --> position attribute
+	//! Note: the player has the same spatial attribute as the camera.
 	Entity* createPlayerEntity()
 	{
+		static int playerId = 0;
 		Entity* entity = createEntity();
 		
 		// Render attribute
 		attributeFactory.create_RenderAttribute(entity);
 
+		// Camera attribute
+		CameraAttribute* camera = AttributeManager::getInstance()->cameraAttributes.createAttribute(entity);
+		ZeroMemory(camera->mat_projection, sizeof(camera->mat_projection));
+		ZeroMemory(camera->mat_view, sizeof(camera->mat_view));
+		camera->spatialAttribute = AttributeManager::getInstance()->spatialAttributes.getLatestAttributeAsAttributePointer(); //Bind the last created spatial attribute to the camera attribute (NOTE: the last created spatial attribute should be the same attribute as bound to the player attribute)
+
 		// Player attribute
 		PlayerAttribute* playerAttribute = AttributeManager::getInstance()->playerAttributes.createAttribute(entity);
-		playerAttribute->name = "LoccaShock";
+		playerAttribute->id = 0;
+		playerAttribute->name = "PrinterTerror";
+		playerAttribute->health = 100;
 		playerAttribute->priority = 0;
 		playerAttribute->cycleSteals = 0;
 		playerAttribute->totalExecutionTime = 0;
-		playerAttribute->renderAttribute = AttributeManager::getInstance()->renderAttributes.createAttributePointer();
+		playerAttribute->renderAttribute = AttributeManager::getInstance()->renderAttributes.getLatestAttributeAsAttributePointer(); //Bind the last created render attribute to the player attribut
+
+		//Increment local static variable
+		playerId++;
 
 		// Return entity
 		return entity;
