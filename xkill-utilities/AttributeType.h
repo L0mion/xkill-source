@@ -144,6 +144,7 @@ struct DLL_U PlayerAttribute : public IAttribute
 	PlayerAttribute();
 	~PlayerAttribute();
 
+	int playerID;
 	std::string name;		//!< Name of the player process.
 	int health;				//!< Health of the player process. If less or equal to zero, the player process is terminated.
 	int priority;			//!< Priority of the player process. Higher value means higher priority. The scheduler will choose the process with the highest priority for execution.

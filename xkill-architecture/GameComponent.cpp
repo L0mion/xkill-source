@@ -34,6 +34,7 @@ void GameComponent::onUpdate(float delta)
 			SpatialAttribute* spatialAttribute = ATTRIBUTE_CAST(SpatialAttribute, spatialAttribute, renderAttribute);
 			PositionAttribute* positionAttribute = ATTRIBUTE_CAST(PositionAttribute, positionAttribute, spatialAttribute);
 			
+
 			//AttributeManager::getInstance()->cameraAttributes.getAllAttributes()->at(playerAttribute->cameraId).spatialAttribute = spatialAttribute;
 			//AttributeManager::getInstance()->cameraAttributes.getAllAttributes()->at(playerAttribute->cameraId).spatialAttribute
 

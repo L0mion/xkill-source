@@ -84,7 +84,7 @@ public:
 		deleted.push(index);
 	}
 
-	AttributePointer createAttributePointer()
+	AttributePointer getLatestAttributeAsAttributePointer()
 	{
 		AttributePointer a;
 		a.init(&attributes, index);
