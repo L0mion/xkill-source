@@ -6,7 +6,6 @@
 
 #include <stdio.h>
 #include <d3d11.h>
-#include <DirectXMath.h>
 #include <vector>
 
 #include "dllRenderer.h"
@@ -21,6 +20,7 @@ class GBuffer;
 class D3DDebug;
 class ObjLoaderBasic;
 
+namespace DirectX{struct XMFLOAT4X4;};
 struct RenderAttribute;
 struct CameraAttribute;
 

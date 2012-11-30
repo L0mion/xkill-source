@@ -28,7 +28,7 @@ class ComponentManager
 private:
 	RenderingComponent* render_;
 	BulletPhysicsComponent* physics_;
-	SoundComponent		sound_;
+	//SoundComponent		sound_;
 	CameraComponent		camera_;
 	InputComponent		input_;
 	GameComponent		game_;
@@ -66,8 +66,8 @@ public:
 			return false;
 
 		//soundComponent = new SoundComponent();
-		if(!sound_.init())
-			return false;
+		//if(!sound_.init())
+			//return false;
 
 		if(!input_.init(windowHandle))
 			return false;
@@ -81,7 +81,7 @@ public:
 	}
 	void update(float delta)
 	{
-		sound_.onUpdate(delta);
+		//sound_.onUpdate(delta);
 		camera_.onUpdate(delta);
 		physics_->onUpdate(delta);
 		render_->onUpdate(delta);

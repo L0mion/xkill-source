@@ -81,9 +81,9 @@ public:
 		return true;
 	}
 
-	void run()
+	void update(float delta)
 	{
-		componentManager_->update(0.5f);
+		componentManager_->update(delta);
 
 		/*std::cout << std::endl << "Run 1" << std::endl;
 
