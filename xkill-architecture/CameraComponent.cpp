@@ -1,6 +1,8 @@
 #include "CameraComponent.h"
 
 #include <xkill-utilities/AttributeType.h>
+#include <xkill-utilities/EventType.h>
+#include <xkill-utilities/EventManager.h>
 #include "Camera.h"
 
 CameraComponent::CameraComponent()
@@ -41,11 +43,22 @@ void CameraComponent::init(std::vector<CameraAttribute>* cameraAttributes, std::
 		cameras_[i].updateProj();
 		memcpy(cameraAttributes_->at(i).mat_projection, cameras_[i].getProjection().m, 16*4);
 	}
+
+	// listen to mouseMove events
+	EventManager::getInstance()->addObserver(this, EVENT_MOUSE_MOVE);
 }
 
 void CameraComponent::onEvent(Event* e)
 {
-
+	EventType type = e->getType();
+	switch (type) 
+	{
+	case EVENT_MOUSE_MOVE:
+		event_MouseMove((Event_MouseMove*)e);
+		break;
+	default:
+		break;
+	}
 }
 
 void CameraComponent::onUpdate(float delta)
@@ -64,4 +77,17 @@ void CameraComponent::onUpdate(float delta)
 	//	cameras_[i].pitch(inputAttributes_->at(i).rotation[1]);
 	//	cameras_[i].setPosition(inputAttributes_->at(i).position);
 	}
+}
+
+void CameraComponent::event_MouseMove(Event_MouseMove* e)
+{
+	// Set 1 pixel = 0.25 degrees
+	//float x = XMConvertToRadians(0.20f*(float)e->dx);
+	//float y = XMConvertToRadians(0.20f*(float)e->dy);
+
+	// Test camera movement
+	float x = 5.0f*(float)e->dx;
+	float y = 5.0f*(float)e->dy;
+	cameras_[0].pitch(y);
+	cameras_[0].yaw(x);
 }

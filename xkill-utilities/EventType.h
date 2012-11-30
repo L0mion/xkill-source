@@ -11,8 +11,10 @@
 Memory deletion should be made by the funciton sending the Event.
 
 The following usage i prefered:
+\code
 Event_A event;
 EventManager::getInstance()->sendEvent(&event);
+\endcode
 
 \defgroup EVENTS Events
 \ingroup UTILITIES
@@ -36,6 +38,7 @@ enum DLL_U EventType
 	EVENT_D,
 	EVENT_E,
 	EVENT_F,
+	EVENT_MOUSE_MOVE,
 	PLAYSOUND,
 
 	// this is needed, don't touch!
@@ -90,6 +93,22 @@ public:
 	Event_B() : Event(EVENT_B){}
 
 	int b;
+};
+
+/**
+\ingroup EVENTS
+*/
+class DLL_U Event_MouseMove : public Event
+{
+public:
+	Event_MouseMove(int dx, int dy) : Event(EVENT_MOUSE_MOVE)
+	{
+		this->dx = dx;
+		this->dy = dy;
+	}
+
+	int dx;
+	int dy;
 };
 
 /**

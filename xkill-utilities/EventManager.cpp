@@ -70,7 +70,7 @@ void EventManager::removeObserver(IObserver* observer, EventType type)
 void EventManager::sendEvent(Event* e)
 {
 	int index = e->getType();
-	std::cout << "EVENTMANAGER: Sends Event of Enum " << index << std::endl;
+	//std::cout << "EVENTMANAGER: Sends Event of Enum " << index << std::endl;
 	for(int i=0; i < (int)(*event_queues)[index].size(); i++)
 	{
 		(*event_queues)[index][i]->onEvent(e);

@@ -7,15 +7,18 @@
 #include <QTime>
 #include <QTimer> // needed to implement frame rate
 #include <xkill-architecture/GameManager.h>
+#include <xkill-utilities/IObserver.h>
 
+#include "ui_MainWindow.h"
 #include "GameTimer.h"
 
 
-class GameWidget : public QWidget
+class GameWidget : public QWidget, public IObserver
 {
 	Q_OBJECT
 
 private:
+	Ui::MainWindowClass ui;
 	GameManager gameManager;
 	GameTimer gameTimer;
 	QTimer* updateTimer;
@@ -39,12 +42,23 @@ public:
 
 		// init game
 		gameManager.init(this->winId(), 800, 800);
+		
+		// connect functionality with buttons
+	
 	};
 	~GameWidget()
 	{
 	};
 	
 	QPaintEngine* paintEngine() const {return 0;}; // overrides Qt:s own paint engine; prevents flicker
+
+	void onUpdate(float delta)
+	{
+	}
+
+	void onEvent(Event* e)
+	{
+	}
 
 public slots:
 	// Runs every time gameTimer times out
@@ -54,6 +68,18 @@ public slots:
 		float delta = gameTimer.getDeltaTime();
 		computeFPS();
 		gameManager.update(delta);
+	};
+
+	void slot_toggleCapFPS(bool isChecked)
+	{
+		if(isChecked)
+		{
+			updateTimer->setInterval(10);
+		}
+		else
+		{
+			updateTimer->setInterval(0);
+		}
 	};
 
 protected:
