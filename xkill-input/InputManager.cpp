@@ -53,6 +53,27 @@ void InputManager::Update(float deltaTime)
 	handleInput();
 }
 
+void InputManager::FillAttribute(InputAttribute& inputAttribute, unsigned int deviceNr, float deltaTime)
+{
+	if(deviceNr >= devices_.size() || deviceNr < 0)
+		return;
+
+	InputDevice::InputState state = devices_[deviceNr]->GetState();
+
+	int nrAxes = state.axes.size();
+	if(nrAxes >= 1)
+		inputAttribute.position[0] += state.axes[0].GetValue() * deltaTime;
+
+	if(nrAxes >= 2)
+		inputAttribute.position[1] += state.axes[1].GetValue() * deltaTime;
+
+	if(nrAxes >= 3)
+		inputAttribute.rotation[0] += state.axes[2].GetValue() * deltaTime;
+
+	if(nrAxes >= 4)
+		inputAttribute.rotation[1] += state.axes[3].GetValue() * deltaTime;
+}
+
 int InputManager::UpdateNumberOfGamepads(HWND hWindow)
 {
 	int nrOfGamepadsAdded = 0;

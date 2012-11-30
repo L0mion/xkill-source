@@ -61,11 +61,19 @@ struct DLL_U SpatialAttribute : public IAttribute
 	float scale[3];
 };
 
+struct DLL_U CameraMovementAttribute : public IAttribute
+{
+	CameraMovementAttribute();
+	~CameraMovementAttribute();
+	float position[3];
+	float rotation[2];
+};
+
 struct DLL_U InputAttribute : public IAttribute
 {
 	InputAttribute();
 	~InputAttribute();
-	float position[3];
+	float position[2];
 	float rotation[2];
 };
 

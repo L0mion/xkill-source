@@ -83,6 +83,8 @@ public:
 		// Render attribute
 		CameraAttribute* camera = AttributeManager::getInstance()->cameraAttributes.createAttribute(e);
 
+		CameraMovementAttribute* input = AttributeManager::getInstance()->cameraMovementAttribute.createAttribute(e);
+
 
 		AttributeManager::getInstance()->cameraAttributes.getAllAttributes()->size();
 		ZeroMemory(camera->mat_projection, sizeof(camera->mat_projection));

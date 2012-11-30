@@ -51,7 +51,7 @@ public:
 										AttributeManager::getInstance()->cameraAttributes.getAllAttributes());
 		render_->init();
 		camera_.init(AttributeManager::getInstance()->cameraAttributes.getAllAttributes(),
-					AttributeManager::getInstance()->inputAttributes.getAllAttributes(),
+					AttributeManager::getInstance()->cameraMovementAttribute.getAllAttributes(),
 					static_cast<float>(screenWidth)/static_cast<float>(screenHeight));
 
 		//gameComponent = new GameComponent();
@@ -62,7 +62,7 @@ public:
 		if(!sound_.init())
 			return false;
 
-		if(!input_.init(windowHandle))
+		if(!input_.init(windowHandle, AttributeManager::getInstance()->inputAttributes.getAllAttributes()))
 			return false;
 
 		//physicsComponent = new PhysicsComponent();

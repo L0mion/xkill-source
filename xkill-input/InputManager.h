@@ -1,5 +1,7 @@
 #pragma once
 
+#include <xkill-utilities/AttributeType.h>
+
 #include "InputDevice.h"
 #include "DirectInputDevice.h"
 #include "DirectInputMouse.h"
@@ -82,6 +84,8 @@ public:
 	\param deltaTime Time since last call
 	*/
 	void Update(float deltaTime);
+
+	void FillAttribute(InputAttribute& inputAttribute, unsigned int deviceNr, float deltaTime);
 
 	//! Generates a string with the states of all devices
 	std::string GetInputInformationString();
