@@ -49,8 +49,6 @@ void InputComponent::onUpdate(float delta)
 
 void InputComponent::handleInput(float delta)
 {
-	if(inputAttributes_->size() >= 1)
-		inputManager_->FillAttribute(inputAttributes_->at(0), 0, delta);
-
-	int t = 0;
+	for(unsigned int i = 0; i < inputAttributes_->size(); i++)
+		inputManager_->FillAttribute(inputAttributes_->at(i), i, delta);
 }

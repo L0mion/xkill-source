@@ -81,6 +81,10 @@ public:
 		// Render attribute
 		attributeFactory.create_RenderAttribute(entity);
 
+		//Input attribute
+		InputAttribute* input  = AttributeManager::getInstance()->inputAttributes.createAttribute(entity);
+		ZeroMemory(&input, sizeof(input));
+
 		// Camera attribute
 		CameraAttribute* camera = AttributeManager::getInstance()->cameraAttributes.createAttribute(entity);
 		ZeroMemory(camera->mat_projection, sizeof(camera->mat_projection));
