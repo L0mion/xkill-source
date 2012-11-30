@@ -21,7 +21,11 @@ class D3DDebug;
 class ObjLoaderBasic;
 class LightManagement;
 
-namespace DirectX{struct XMFLOAT4X4;};
+namespace DirectX
+{
+	struct XMFLOAT3;
+	struct XMFLOAT4X4;
+};
 struct RenderAttribute;
 struct CameraAttribute;
 

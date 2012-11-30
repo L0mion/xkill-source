@@ -162,8 +162,8 @@ void RenderingComponent::reset()
 
 void RenderingComponent::onUpdate(float delta)
 {
-	//LightDesc light;
-	//lightManagement_->addLight(light, device_, devcon_);
+//	LightDesc light;
+//	lightManagement_->addLight(light, device_, devcon_);
 
 	clearGBuffers();
 	for(unsigned int i=0; i<cameraAttributes_->size(); i++)
@@ -516,8 +516,8 @@ HRESULT RenderingComponent::initLightManagement()
 {
 	HRESULT hr = S_OK;
 
-	//lightManagement_ = new LightManagement();
-	//hr = lightManagement_->init(device_);
+//	lightManagement_ = new LightManagement();
+//	hr = lightManagement_->init(device_);
 
 	return hr;
 }
