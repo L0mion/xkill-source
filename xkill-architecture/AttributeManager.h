@@ -15,8 +15,11 @@ public:
 	AttributeStorage<SpatialAttribute>  spatialAttributes;
 	AttributeStorage<RenderAttribute>	renderAttributes;
 	AttributeStorage<PhysicsAttribute>	physicsAttributes;
+	AttributeStorage<CameraAttribute>	cameraAttributes;
+	AttributeStorage<InputAttribute>	inputAttributes;
 	AttributeStorage<PlayerAttribute>	playerAttributes;
 	AttributeStorage<BoundingAttribute> BoundingAttributes;
+
 
 	static AttributeManager* getInstance()
 	{

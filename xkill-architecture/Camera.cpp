@@ -1,22 +1,17 @@
 #include <Windows.h>
 
-#include "CameraBasic.h"
+#include "Camera.h"
 
-CameraBasic::CameraBasic(
+Camera::Camera(
 	float aspect, 
 	float fov, 
 	float zFar, 
-	float zNear, 
-	unsigned int screenWidth, 
-	unsigned int screenHeight)
+	float zNear)
 {
 	this->aspect_	= aspect;
 	this->fov_		= fov;
 	this->zFar_		= zFar;
 	this->zNear_		= zNear;
-
-	this->screenWidth_	= screenWidth;
-	this->screenHeight_	= screenHeight;
 
 	velocity_			= 0.01f;
 	mouseSensitivity_	= 0.001f;
@@ -27,17 +22,17 @@ CameraBasic::CameraBasic(
 	look_		= DirectX::XMFLOAT3(0.0f, 0.0f, 1.0f);
 }
 
-CameraBasic::~CameraBasic()
+Camera::~Camera()
 {
 }
 
-void CameraBasic::mouse(const float dX, const float dY)
+void Camera::mouse(const float dX, const float dY)
 {
 	yaw(dX);
 	pitch(dY);
 }
 
-void CameraBasic::keyboard(std::vector<bool>* keys)
+void Camera::keyboard(std::vector<bool>* keys)
 {
 	if(keys->at(VK_A))
 		strafe(-velocity_);
@@ -49,7 +44,7 @@ void CameraBasic::keyboard(std::vector<bool>* keys)
 		walk(velocity_);
 }
 
-void CameraBasic::updateView()
+void Camera::updateView()
 {
 	DirectX::XMVECTOR vLook		= DirectX::XMLoadFloat3(&look_); 
 	DirectX::XMVECTOR vUp		= DirectX::XMLoadFloat3(&up_);
@@ -105,7 +100,7 @@ void CameraBasic::updateView()
 	view_(3, 3) = 1.0f;
 }
 
-void CameraBasic::updateProj()
+void Camera::updateProj()
 {
 	ZeroMemory(&projection_, sizeof(projection_));
 
@@ -116,21 +111,21 @@ void CameraBasic::updateProj()
 	projection_(3, 2) = (-zNear_ * zFar_)/(zFar_ - zNear_);
 }
 
-void CameraBasic::strafe(const float velocity)
+void Camera::strafe(const float velocity)
 {
 	position_.x += right_.x * velocity;
 	position_.y += right_.y * velocity;
 	position_.z += right_.z * velocity;
 }
 
-void CameraBasic::walk(const float velocity)
+void Camera::walk(const float velocity)
 {
 	position_.x += look_.x * velocity;
 	position_.y += look_.y * velocity;
 	position_.z += look_.z * velocity;
 }
 
-void CameraBasic::pitch(const float angle)
+void Camera::pitch(const float angle)
 {
 	//Load vectors in to XMVECTORs to utilize SIMD.
 	DirectX::XMVECTOR vLook		= DirectX::XMLoadFloat3(&look_); 
@@ -173,7 +168,7 @@ void CameraBasic::pitch(const float angle)
 	}
 }
 
-void CameraBasic::yaw(const float angle)
+void Camera::yaw(const float angle)
 {
 	//Load vectors in to XMVECTORs to utilize SIMD.
 	DirectX::XMVECTOR vLook		= DirectX::XMLoadFloat3(&look_); 
@@ -200,15 +195,22 @@ void CameraBasic::yaw(const float angle)
 	DirectX::XMStoreFloat3(&look_, vLook);
 }
 
-DirectX::XMFLOAT3 CameraBasic::getPosition()
+void Camera::setPosition(float position[3])
+{
+	position_.x = position[0];
+	position_.y = position[1];
+	position_.z = position[2];
+}
+
+DirectX::XMFLOAT3 Camera::getPosition()
 {
 	return position_;
 }
-DirectX::XMFLOAT4X4 CameraBasic::getView()
+DirectX::XMFLOAT4X4 Camera::getView()
 {
 	return view_;
 }
-DirectX::XMFLOAT4X4 CameraBasic::getProjection()
+DirectX::XMFLOAT4X4 Camera::getProjection()
 {
 	return projection_;
 }

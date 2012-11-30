@@ -63,4 +63,11 @@ public:
 			break;
 		}
 	}
+
+	void createCamera()
+	{
+		Entity* e = entityFactory.createEntity_Camera();
+		addEntity(e);
+		std::cout << "ENTITYMANAGER: Created Camera " << e->getID() << std::endl;
+	}
 };

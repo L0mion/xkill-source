@@ -21,6 +21,9 @@ class GBuffer;
 class D3DDebug;
 class ObjLoaderBasic;
 
+struct RenderAttribute;
+struct CameraAttribute;
+
 static const unsigned int MULTISAMPLES_GBUFFERS		= 1;
 static const unsigned int MULTISAMPLES_BACKBUFFER	= 1;
 static const unsigned int MULTISAMPLES_DEPTHBUFFER	= 1;
@@ -50,9 +53,9 @@ public:
 		HWND windowHandle, 
 		unsigned int screenWidth, 
 		unsigned int screenHeight,
-		unsigned int viewportWidth,
-		unsigned int viewportHeight,
-		unsigned int numViewports);
+		unsigned int numViewports,
+		std::vector<RenderAttribute>* renderAttributes,
+		std::vector<CameraAttribute>* cameraAttributes);
 	//! Releases all memory and returns to default state.
 	~RenderingComponent();
 
@@ -189,8 +192,6 @@ private:
 	HWND windowHandle_;				//!< WINAPI-handle to window.
 	unsigned int screenWidth_;		//!< Width of screen.
 	unsigned int screenHeight_;		//!< Height of screen.
-	unsigned int viewportWidth_;	//!< Width of each viewport.
-	unsigned int viewportHeight_;	//!< Height of each viewport.
 	unsigned int numViewports_;		//!< NUmber of viewports that will be used.
 	
 	FXManagement*		fxManagement_;						//!< Maintaining shaders and input-layouts.
@@ -198,6 +199,9 @@ private:
 	ViewportManagement* viewportManagement_;				//!< Maintaining viewports.
 	GBuffer*			gBuffers_[GBUFFERID_NUM_BUFFERS];	//!< Containing data for deferred rendering.
 	D3DDebug*			d3dDebug_;							//!< Used for detecting live COM-objects.
+
+	std::vector<RenderAttribute>* renderAttributes_;
+	std::vector<CameraAttribute>* cameraAttributes_;
 
 	ID3D11Device*			device_;	//!< DirectX device pointer.
 	ID3D11DeviceContext*	devcon_;	//!< DirectX device context pointer.

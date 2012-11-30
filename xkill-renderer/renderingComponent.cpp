@@ -1,4 +1,7 @@
 #include "renderingComponent.h"
+
+#include <xkill-utilities/AttributeType.h>
+
 #include "fxManagement.h"
 #include "ViewportManagement.h"
 #include "gBuffer.h"
@@ -9,18 +12,17 @@
 #include "mathBasic.h"
 #include "vertices.h"
 
-RenderingComponent::RenderingComponent(HWND windowHandle,
-									   unsigned int screenWidth,
-									   unsigned int screenHeight,
-									   unsigned int viewportWidth,
-									   unsigned int viewportHeight,
-									   unsigned int numViewports)
+RenderingComponent::RenderingComponent(
+		HWND windowHandle,
+		unsigned int screenWidth, 
+		unsigned int screenHeight,
+		unsigned int numViewports,
+		std::vector<RenderAttribute>* renderAttributes,
+		std::vector<CameraAttribute>* cameraAttributes)
 {
 	windowHandle_	= windowHandle;
 	screenWidth_	= screenWidth;
 	screenHeight_	= screenHeight;
-	viewportWidth_	= viewportWidth;
-	viewportHeight_ = viewportHeight;
 	numViewports_	= numViewports;
 
 	fxManagement_		= nullptr;
@@ -49,6 +51,9 @@ RenderingComponent::RenderingComponent(HWND windowHandle,
 	vertexBuffer_	= nullptr;
 	vertices_		= nullptr;
 	objLoader_		= nullptr;
+
+	renderAttributes_ = renderAttributes;
+	cameraAttributes_ = cameraAttributes;
 }
 RenderingComponent::~RenderingComponent()
 {
@@ -77,7 +82,7 @@ RenderingComponent::~RenderingComponent()
 	for(unsigned int i = 0; i < GBUFFERID_NUM_BUFFERS; i++)
 		SAFE_DELETE(gBuffers_[i]);
 	
-	//d3dDebug->reportLiveDeviceObjects();
+	//d3dDebug_->reportLiveDeviceObjects();
 	SAFE_DELETE(d3dDebug_);
 
 	//temp
@@ -109,8 +114,8 @@ HRESULT RenderingComponent::init()
 		hr = initCBManagement();
 	if(SUCCEEDED(hr)) //temp
 		hr = initVertexBuffer();
-	if(SUCCEEDED(hr))
-		hr = initDebug();
+//	if(SUCCEEDED(hr))
+//		hr = initDebug();
 
 	return hr;
 }
@@ -151,6 +156,15 @@ void RenderingComponent::reset()
 
 void RenderingComponent::onUpdate(float delta)
 {
+	clearGBuffers();
+	for(unsigned int i=0; i<cameraAttributes_->size(); i++)
+	{
+		setViewport(i);
+		renderToGBuffer(DirectX::XMFLOAT4X4(cameraAttributes_->at(i).mat_view),
+			DirectX::XMFLOAT4X4(cameraAttributes_->at(i).mat_projection));
+	}
+	
+	renderToBackBuffer();
 }
 
 void RenderingComponent::render(DirectX::XMFLOAT4X4 view, DirectX::XMFLOAT4X4 projection)
@@ -405,8 +419,6 @@ HRESULT RenderingComponent::initViewport()
 {
 	HRESULT hr = S_OK;
 	viewportManagement_ = new ViewportManagement(numViewports_,
-												 viewportWidth_,
-												 viewportHeight_,
 												 screenWidth_,
 												 screenHeight_);
 	hr = viewportManagement_->init();

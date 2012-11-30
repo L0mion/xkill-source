@@ -3,14 +3,17 @@
 #include "Entity.h"
 #include "EntityManager.h"
 #include "AttributeManager.h"
+#include "AttributeFactory.h"
 
 #include <vector>
 #include <iostream>
 
-/// A factory for creating Entities and assigning multiple attributes in a flexible way.
+/// A factory for creating Entities and assigning multiple \ref ATTRIBUTES in a flexible way.
 /** 
 Filling out each Attribute and connecting chains of 
 Attribute is the responsibility of the EntityFactory.
+
+The AttributeFactory can be used to facilitate creation of \ref ATTRIBUTES.
 
 \ingroup ARCHITECTURE
 */
@@ -18,10 +21,12 @@ Attribute is the responsibility of the EntityFactory.
 class EntityFactory 
 {
 private:
+	AttributeFactory attributeFactory;	//!< AttributeFactory to speed up creaton of \ref ATTRIBUTES.
+
 	/** 
 	Creates an entity and assigns a unique ID
 	*/
-	Entity* EntityFactory::createEntity()
+	Entity* createEntity()
 	{
 		static int id = 1;
 
@@ -32,58 +37,40 @@ private:
 	}
 
 public:
-
-	Entity* EntityFactory::createEntity_TypeA()
+	Entity* createEntity_TypeA()
 	{
 		Entity* e = createEntity();
 
-		// Position attribute
-		PositionAttribute* position = AttributeManager::getInstance()->positionAttributes.createAttribute(e);
-		position->positionX		= 0.0f;
-
-		// Spatial attribute
-		SpatialAttribute* spatial = AttributeManager::getInstance()->spatialAttributes.createAttribute(e);
-		spatial->rotation		= 360;
-		spatial->scale			= 1.0f;
-		spatial->positionAttribute = AttributeManager::getInstance()->positionAttributes.createAttributePointer();
-
 		// Render attribute
-		RenderAttribute* render = AttributeManager::getInstance()->renderAttributes.createAttribute(e);
-		render->transparent		= false;
-		render->tessellation	= true;
-		render->meshID			= e->getID();
-		render->textureID		= 42;
-		render->spatialAttribute = AttributeManager::getInstance()->spatialAttributes.createAttributePointer();
-
+		attributeFactory.create_RenderAttribute(e);
 
 		// Return entity
-		std::cout << "ENTITYFACTORY: Created Entity " << e->getID() << std::endl;
 		return e;
 	}
 
-	Entity* EntityFactory::createPlayerEntity()
+	Entity* createEntity_Camera()
+	{
+		Entity* e = createEntity();
+
+		// Spatial attribute
+		attributeFactory.create_RenderAttribute(e);
+
+		// Render attribute
+		CameraAttribute* camera = AttributeManager::getInstance()->cameraAttributes.createAttribute(e);
+		AttributeManager::getInstance()->cameraAttributes.getAllAttributes()->size();
+		ZeroMemory(camera->mat_projection, sizeof(camera->mat_projection));
+		ZeroMemory(camera->mat_view, sizeof(camera->mat_view));
+		camera->spatialAttribute = AttributeManager::getInstance()->spatialAttributes.createAttributePointer();
+
+		// Return entity
+		return e;
+	}
+	Entity* createPlayerEntity()
 	{
 		Entity* entity = createEntity();
 		
-		// Position attribute
-		PositionAttribute* position = AttributeManager::getInstance()->positionAttributes.createAttribute(entity);
-		position->positionX = 0.0f;
-		position->positionY = 0.0f;
-		position->positionZ = 0.0f;
-
-		// Spatial attribute
-		SpatialAttribute* spatial = AttributeManager::getInstance()->spatialAttributes.createAttribute(entity);
-		spatial->rotation = 0;
-		spatial->scale = 1.0f;
-		spatial->positionAttribute = AttributeManager::getInstance()->positionAttributes.createAttributePointer();
-
 		// Render attribute
-		RenderAttribute* render = AttributeManager::getInstance()->renderAttributes.createAttribute(entity);
-		render->transparent = false;
-		render->tessellation = true;
-		render->meshID = entity->getID();
-		render->textureID = -1;
-		render->spatialAttribute = AttributeManager::getInstance()->spatialAttributes.createAttributePointer();
+		attributeFactory.create_RenderAttribute(entity);
 
 		// Player attribute
 		PlayerAttribute* playerAttribute = AttributeManager::getInstance()->playerAttributes.createAttribute(entity);
@@ -93,6 +80,7 @@ public:
 		playerAttribute->totalExecutionTime = 0;
 		playerAttribute->renderAttribute = AttributeManager::getInstance()->renderAttributes.createAttributePointer();
 
+		// Return entity
 		return entity;
 	}
 };

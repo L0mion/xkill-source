@@ -1,23 +1,9 @@
 #pragma once
 
-#include "dllSound.h"
-
 #include <string>
 #include <vector>
 #include <fmod_event.hpp>
 #include <fmod_errors.h>
-
-//#if defined( DEBUG ) || defined( _DEBUG )
-//#pragma comment(lib, "../xkill-dependencies/lib/fmodexL_vc.lib")
-//#pragma comment(lib, "../xkill-dependencies/lib/fmod_eventL.lib")
-//#else
-//#pragma comment(lib, "../xkill-dependencies/lib/fmodex_vc.lib")
-//#pragma comment(lib, "../xkill-dependencies/lib/fmod_event.lib")
-//#endif
-
-//dll files:
-//fmodex.dll
-//fmod_event.dll
 
 /** \defgroup xkill-sound XKILL - Sound
  *
@@ -28,13 +14,15 @@
  * \class FMODEventSystem
  * \ingroup xkill-sound
  * \brief Wrapper for an FMOD::EventSystem.
- * Stores sound event parsed from an sound event file (.fev).
- * \note This is a note.
+ * Stores sound events parsed from an sound event file (.fev).
+ * FMOD dll file dependencies:
+ * fmodex.dll
+ * fmod_event.dll
  * \author (last to touch it) $Author: Henrik Nell $
  */
 
 
-class DLL_S FMODEventSystem
+class FMODEventSystem
 {
 	friend class FMODEventSystemProgrammerReportParser;
 
@@ -51,13 +39,11 @@ public:
 
 	/** \brief Must be called for the event system to work as intended.*/
 	void Update();
+	/** \brief Start a sound event at index in the mSoundEvents vector.*/
 	void StartSoundEventAt(int index);
 
 private:
 	void FMODErrorCheck(FMOD_RESULT result);
-
-	/** \brief Loads a sound event from the sound event file (.fev).*/
-	//void loadSoundEvent(std::string pathInsideSoundEventFile);
 
 	FMOD::EventSystem* mEventsystem;
 	std::vector<FMOD::Event*>* mSoundEvents;

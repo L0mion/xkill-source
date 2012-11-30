@@ -42,48 +42,51 @@ the game by sending an Event, creating and deleting an Entity and such.
 \ingroup ARCHITECTURE
 */
 
+#define SAFE_DELETE(x) if( x ) { delete(x); (x) = NULL; }
+
 class DLL_A GameManager
 {
-	ComponentManager* componentManager;
-	EntityManager* entityManager;
-	GameComponent* gameComponent;
+	ComponentManager* componentManager_;
+	EntityManager* entityManager_;
 public:
 	GameManager()
 	{
-		componentManager = new ComponentManager();
-		entityManager = new EntityManager();
-
-		gameComponent = new GameComponent();
-		gameComponent->init();
+		componentManager_ = NULL;
+		entityManager_ = NULL;
 	}
 	~GameManager()
 	{
-		delete componentManager;
-		delete entityManager;
-		delete gameComponent;
+		SAFE_DELETE(componentManager_);
+		SAFE_DELETE(entityManager_);
+	}
+
+	bool init(HWND windowHandle, unsigned int screenWidth, unsigned int screenHeight)
+	{
+		entityManager_ = new EntityManager();
+		entityManager_->createEntity(PLAYER);
+
+		for(int i=0; i<9; i++)
+		{
+			entityManager_->createCamera();
+		};
+
+		componentManager_ = new ComponentManager();
+		if(!componentManager_->init(windowHandle, screenWidth, screenHeight))
+		{
+			std::cout << "Component manager failed to init" << std::endl;
+			std::cin.ignore();
+
+			return false;
+		}
+		return true;
 	}
 
 	void run()
 	{
-		//
-		// Setup Game
-		//
+		componentManager_->update(0.5f);
 
-		entityManager->createEntity(PLAYER);
+		/*std::cout << std::endl << "Run 1" << std::endl;
 
-		//while(true)
-		{
-			componentManager->update(1.0f);
-			std::cin.ignore();
-		}
-
-
-		//
-		// Run game
-		//
-
-		/*
-		std::cout << std::endl << "Run 1" << std::endl;
 		Event_A e_A;
 		EventManager::getInstance()->sendEvent(&e_A);
 		componentManager->update(1.0f);
@@ -101,8 +104,8 @@ public:
 		std::cout << std::endl << "Run 3" << std::endl;
 		entityManager->removeEntity(1);
 		componentManager->update(1.0f);
-		std::cin.ignore();
-		*/
+		std::cin.ignore();*/
+
 
 		//Event_PlaySound playSound(0);
 		//while(1)

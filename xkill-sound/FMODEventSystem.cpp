@@ -48,7 +48,14 @@ void FMODEventSystem::Update()
 
 void FMODEventSystem::StartSoundEventAt(int index)
 {
-	FMOD::Event* soundEvent;
-	soundEvent = mSoundEvents->at(index);
-	soundEvent->start();
+	if(index < mSoundEvents->size())
+	{
+		FMOD::Event* soundEvent;
+		soundEvent = mSoundEvents->at(index);
+		soundEvent->start();
+	}
+	else
+	{
+		std::cout << "error in \"FMODEventSystem.h\" in function \"void FMODEventSystem::StartSoundEventAt(int index)\"" << std::endl;
+	}
 }
