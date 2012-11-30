@@ -133,10 +133,7 @@ void BulletPhysicsComponent::onEvent(Event* e)
 
 }
 
-void BulletPhysicsComponent::shootBox()
+void BulletPhysicsComponent::shootSphere()
 {
-	//PhysicsObject class not yet completed (wrapper for btRigidBody)
 
-		
-		//this->localCreateRigidBody(mass, startTransform, m_shootBoxShape);
 }

@@ -78,8 +78,8 @@ public:
 	*/
 	void onEvent(Event* e);
 
-	//! Example projectile from the Bullet Demos: Creates a rigid body used as a projectile
-	void shootBox();
+	//! Creates a rigid body used as a projectile
+	void shootSphere();
 };
 
 #endif //XKILL_PHYSICS_PHYSICSCOMPONENT_H
