@@ -34,21 +34,22 @@ void GameComponent::onUpdate(float delta)
 			SpatialAttribute* spatialAttribute = ATTRIBUTE_CAST(SpatialAttribute, spatialAttribute, renderAttribute);
 			PositionAttribute* positionAttribute = ATTRIBUTE_CAST(PositionAttribute, positionAttribute, spatialAttribute);
 			
-
-			//AttributeManager::getInstance()->cameraAttributes.getAllAttributes()->at(playerAttribute->cameraId).spatialAttribute = spatialAttribute;
-			//AttributeManager::getInstance()->cameraAttributes.getAllAttributes()->at(playerAttribute->cameraId).spatialAttribute
-
-			//playerAttribute->playerID
-
-			// The player moves
-			positionAttribute->position[0];
+			if(playerAttribute->id == 0) //Handle player 1 (test)
+			{
+				//positionAttribute->position[0] = positionAttribute->position[0]+1.0f;
+			}
+			else if(playerAttribute->id == 1) //Handle player 2 (test)
+			{
+				//positionAttribute->position[2] = positionAttribute->position[2]+1.0f; 
+			}
 
 			std::cout 
+				<< playerAttribute->id						<< "\t"
 				<< attributesOfPlayerOwners->at(i)			<< "\t"
-				<< playerAttribute->name	<< "\t"
-				<< positionAttribute->position[0]				<< "\t"
-				<< positionAttribute->position[1]				<< "\t"
-				<< positionAttribute->position[2]				<< "\t"
+				<< playerAttribute->name					<< "\t"
+				<< positionAttribute->position[0]			<< "\t"
+				<< positionAttribute->position[1]			<< "\t"
+				<< positionAttribute->position[2]			<< "\t"
 				<< std::endl;
 		}
 	}
