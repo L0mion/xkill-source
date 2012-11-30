@@ -37,6 +37,7 @@ private:
 	}
 
 public:
+	//! Example entity
 	Entity* createEntity_TypeA()
 	{
 		Entity* e = createEntity();
@@ -48,11 +49,12 @@ public:
 		return e;
 	}
 
+	//! Not used for now (refer to createPlayerEntity)
 	Entity* createEntity_Camera()
 	{
 		Entity* e = createEntity();
 
-		// Spatial attribute
+		// Render attribute
 		attributeFactory.create_RenderAttribute(e);
 
 		// Render attribute
@@ -60,25 +62,52 @@ public:
 		AttributeManager::getInstance()->cameraAttributes_.getAllAttributes()->size();
 		ZeroMemory(camera->mat_projection, sizeof(camera->mat_projection));
 		ZeroMemory(camera->mat_view, sizeof(camera->mat_view));
-		camera->spatialAttribute = AttributeManager::getInstance()->spatialAttributes_.createAttributePointer();
+		camera->spatialAttribute = AttributeManager::getInstance()->spatialAttributes_.getLatestAttributeAsAttributePointer();
 
 		// Return entity
 		return e;
 	}
+
+	//! A player entity has the following attributes: position attribute, spatial attribute, render attribute, player attribute and camera attribute.
+	//! Bindings:
+	//! camera attribute --> spatial attribute --> position attribute
+	//! player attribute --> render attribute --> spatial attribute --> position attribute
+	//! Note: the player has the same spatial attribute as the camera.
 	Entity* createPlayerEntity()
 	{
+		static int playerId = 0;
 		Entity* entity = createEntity();
 		
 		// Render attribute
 		attributeFactory.create_RenderAttribute(entity);
 
+		// Physics attribute
+		attributeFactory.create_PhysicsAttribute(entity);
+
+		//Input attribute
+		InputAttribute* input  = AttributeManager::getInstance()->inputAttributes_.createAttribute(entity);
+		ZeroMemory(&input->position,(2*sizeof(float)));
+		ZeroMemory(&input->rotation,(2*sizeof(float)));
+		input->physicsAttribute = AttributeManager::getInstance()->physicsAttributes_.getLatestAttributeAsAttributePointer();
+
+		// Camera attribute
+		CameraAttribute* camera = AttributeManager::getInstance()->cameraAttributes_.createAttribute(entity);
+		ZeroMemory(camera->mat_projection, sizeof(camera->mat_projection));
+		ZeroMemory(camera->mat_view, sizeof(camera->mat_view));
+		camera->spatialAttribute = AttributeManager::getInstance()->spatialAttributes_.getLatestAttributeAsAttributePointer(); //Bind the last created spatial attribute to the camera attribute (NOTE: the last created spatial attribute should be the same attribute as bound to the player attribute)
+
 		// Player attribute
 		PlayerAttribute* playerAttribute = AttributeManager::getInstance()->playerAttributes_.createAttribute(entity);
-		playerAttribute->name = "LoccaShock";
+		playerAttribute->id = 0;
+		playerAttribute->name = "PrinterTerror";
+		playerAttribute->health = 100;
 		playerAttribute->priority = 0;
 		playerAttribute->cycleSteals = 0;
 		playerAttribute->totalExecutionTime = 0;
-		playerAttribute->renderAttribute = AttributeManager::getInstance()->renderAttributes_.createAttributePointer();
+		playerAttribute->renderAttribute = AttributeManager::getInstance()->renderAttributes_.getLatestAttributeAsAttributePointer(); //Bind the last created render attribute to the player attribut
+
+		//Increment local static variable
+		playerId++;
 
 		// Return entity
 		return entity;

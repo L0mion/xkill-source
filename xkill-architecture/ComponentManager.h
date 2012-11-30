@@ -28,7 +28,7 @@ class ComponentManager
 private:
 	RenderingComponent* render_;
 	BulletPhysicsComponent* physics_;
-	SoundComponent		sound_;
+	//SoundComponent		sound_;
 	CameraComponent		camera_;
 	InputComponent		input_;
 	GameComponent		game_;
@@ -59,7 +59,7 @@ public:
 											  AttributeManager::getInstance()->inputAttributes_.getAllAttributes());
 		physics_->init();
 		camera_.init(AttributeManager::getInstance()->cameraAttributes_.getAllAttributes(),
-					AttributeManager::getInstance()->inputAttributes_.getAllAttributes(),
+					AttributeManager::getInstance()->cameraMovementAttribute_.getAllAttributes(),
 					static_cast<float>(screenWidth)/static_cast<float>(screenHeight));
 
 		//gameComponent = new GameComponent();
@@ -67,10 +67,10 @@ public:
 			return false;
 
 		//soundComponent = new SoundComponent();
-		if(!sound_.init())
-			return false;
+		//if(!sound_.init())
+			//return false;
 
-		if(!input_.init(windowHandle))
+		if(!input_.init(windowHandle, AttributeManager::getInstance()->inputAttributes_.getAllAttributes()))
 			return false;
 
 		//physicsComponent = new PhysicsComponent();
@@ -82,7 +82,7 @@ public:
 	}
 	void update(float delta)
 	{
-		sound_.onUpdate(delta);
+		//sound_.onUpdate(delta);
 		camera_.onUpdate(delta);
 		physics_->onUpdate(delta);
 		render_->onUpdate(delta);

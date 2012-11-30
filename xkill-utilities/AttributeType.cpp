@@ -49,6 +49,12 @@ CameraAttribute::CameraAttribute()
 CameraAttribute::~CameraAttribute()
 {
 }
+CameraMovementAttribute::CameraMovementAttribute()
+{
+}
+CameraMovementAttribute::~CameraMovementAttribute()
+{
+}
 InputAttribute::InputAttribute()
 {
 }

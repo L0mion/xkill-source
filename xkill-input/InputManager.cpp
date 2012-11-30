@@ -25,22 +25,22 @@ bool InputManager::InitInput(HWND hWindow)
 
 	UpdateNumberOfGamepads(hWindow);
 
-	LPDIRECTINPUTDEVICE8 dInputDevice;
-	result = dInput_->CreateDevice(GUID_SysMouse, &dInputDevice, NULL);
-	if(FAILED(result))
-		return false;
+	//LPDIRECTINPUTDEVICE8 dInputDevice;
+	//result = dInput_->CreateDevice(GUID_SysMouse, &dInputDevice, NULL);
+	//if(FAILED(result))
+	//	return false;
 
-	DirectInputDevice* device = new DirectInputMouse(dInputDevice, GUID_SysMouse, "Mouse"); //Kolla ifall musen är inkopplad genom att köra en enum med guid:et
-	device->Init(hWindow);
-	devices_.push_back(device);
+	//DirectInputDevice* device = new DirectInputMouse(dInputDevice, GUID_SysMouse, "Mouse"); //Kolla ifall musen är inkopplad genom att köra en enum med guid:et
+	//device->Init(hWindow);
+	//devices_.push_back(device);
 
-	result = dInput_->CreateDevice(GUID_SysKeyboard, &dInputDevice, NULL);
-	if(FAILED(result))
-		return false;
+	//result = dInput_->CreateDevice(GUID_SysKeyboard, &dInputDevice, NULL);
+	//if(FAILED(result))
+	//	return false;
 
-	device = new DirectInputKeyboard(dInputDevice, GUID_SysKeyboard, "Keyboard"); //Kolla ifall tangentbordet är inkopplad genom att köra en enum med guid:et
-	device->Init(hWindow);
-	devices_.push_back(device);
+	//device = new DirectInputKeyboard(dInputDevice, GUID_SysKeyboard, "Keyboard"); //Kolla ifall tangentbordet är inkopplad genom att köra en enum med guid:et
+	//device->Init(hWindow);
+	//devices_.push_back(device);
 
 	return true;
 }
@@ -50,7 +50,15 @@ void InputManager::Update(float deltaTime)
 	for(unsigned int i = 0; i < devices_.size(); i++)
 		devices_[i]->Update(deltaTime);
 
-	handleInput();
+	//handleInput();
+}
+
+InputDevice* InputManager::GetDevice(unsigned int deviceIndex)
+{
+	if(deviceIndex < 0 || deviceIndex >= devices_.size())
+		return NULL;
+
+	return devices_[deviceIndex];
 }
 
 int InputManager::UpdateNumberOfGamepads(HWND hWindow)

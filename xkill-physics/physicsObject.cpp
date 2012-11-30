@@ -1,6 +1,7 @@
 #include "physicsObject.h"
 
 #include <xkill-utilities/AttributeType.h>
+#include <vector>
 
 PhysicsObject::PhysicsObject()
 {
@@ -17,12 +18,10 @@ PhysicsObject::~PhysicsObject()
 
 void PhysicsObject::Init(PhysicsAttribute* physicsAttribute, btDiscreteDynamicsWorld* dynamicsWorld)
 {
-	/*rigidBody_ = new btRigidBody(physicsAttribute->mass,
-								 new btDefaultMotionState(btVector3(physicsAttribute->sa->pa->position.x,
-															        physicsAttribute->sa->pa->position.y,
-																	physicsAttribute->sa->pa->position.z))
+	rigidBody_ = new btRigidBody(physicsAttribute->mass,
+								 new btDefaultMotionState(),
 								 new btSphereShape(1),
-								 btVector3(0,0,0));*/
+								 btVector3(0,0,0));
 		
 	preStep(physicsAttribute);
 	dynamicsWorld->addRigidBody(rigidBody_);
@@ -42,7 +41,9 @@ void PhysicsObject::preStep(PhysicsAttribute* physicsAttribute)
 
 void PhysicsObject::postStep(PhysicsAttribute* physicsAttribute)
 {
-	
+	SpatialAttribute* spatial = ATTRIBUTE_CAST(SpatialAttribute, spatialAttribute, physicsAttribute);
+	PositionAttribute* position = ATTRIBUTE_CAST(PositionAttribute, positionAttribute, spatial);
+	memcpy(position->position,rigidBody_->getWorldTransform().getOrigin().get128().m128_f32,sizeof(float)*3);
 }
 
 void PhysicsObject::input(InputAttribute* inputAttribute)

@@ -11,15 +11,15 @@
 class AttributeManager
 {
 public:
-	AttributeStorage<PositionAttribute> positionAttributes_;
-	AttributeStorage<SpatialAttribute>  spatialAttributes_;
-	AttributeStorage<RenderAttribute>	renderAttributes_;
-	AttributeStorage<PhysicsAttribute>	physicsAttributes_;
-	AttributeStorage<CameraAttribute>	cameraAttributes_;
-	AttributeStorage<InputAttribute>	inputAttributes_;
-	AttributeStorage<PlayerAttribute>	playerAttributes_;
-	AttributeStorage<BoundingAttribute> boundingAttributes_;
-
+	AttributeStorage<PositionAttribute>			positionAttributes_;
+	AttributeStorage<SpatialAttribute>			spatialAttributes_;
+	AttributeStorage<RenderAttribute>			renderAttributes_;
+	AttributeStorage<PhysicsAttribute>			physicsAttributes_;
+	AttributeStorage<CameraAttribute>			cameraAttributes_;
+	AttributeStorage<InputAttribute>			inputAttributes_;
+	AttributeStorage<PlayerAttribute>			playerAttributes_;
+	AttributeStorage<CameraMovementAttribute>	cameraMovementAttribute_;
+	AttributeStorage<BoundingAttribute>			boundingAttributes_;
 
 	static AttributeManager* getInstance()
 	{

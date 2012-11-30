@@ -61,14 +61,14 @@ struct DLL_U SpatialAttribute : public IAttribute
 	float scale[3];
 };
 
-struct DLL_U InputAttribute : public IAttribute
+struct DLL_U CameraMovementAttribute : public IAttribute
 {
-	InputAttribute();
-	~InputAttribute();
-	AttributePointer physicsAttribute;
+	CameraMovementAttribute();
+	~CameraMovementAttribute();
 	float position[3];
 	float rotation[2];
 };
+
 
 /// Stores the points for both a bounding box and a convex mesh
 /** 
@@ -116,12 +116,22 @@ struct DLL_U PhysicsAttribute : public IAttribute
 	~PhysicsAttribute();
 
 	AttributePointer spatialAttribute;
-	float velocity[4];
+	float velocity[3];
 	float rotationVelocity[4];
 	float mass;
 
 	bool added;
 	bool alive;
+};
+
+struct DLL_U InputAttribute : public IAttribute
+{
+	InputAttribute();
+	~InputAttribute();
+
+	AttributePointer physicsAttribute;
+	float position[2];
+	float rotation[2];
 };
 
 /// Stores everything SoundComponent needs to know to play a 3D sound
@@ -158,10 +168,12 @@ struct DLL_U PlayerAttribute : public IAttribute
 	PlayerAttribute();
 	~PlayerAttribute();
 
+	int id;					//!< The id of the player process. Used to identify a player attribute in GameComponent.
 	std::string name;		//!< Name of the player process.
+	int health;				//!< Health of the player process. If less or equal to zero, the player process is terminated.
 	int priority;			//!< Priority of the player process. Higher value means higher priority. The scheduler will choose the process with the highest priority for execution.
 	int cycleSteals;		//!< Total number of cycle steals for the player process. Cycle steals steal priority from other player processes.
-	int totalExecutionTime; //!< Total execution time of the player process. The player with the most total execution time as awared by the scheduler.
+	int totalExecutionTime; //!< Total execution time of the player process. The game session winner is the player with the most total execution time as awared by the scheduler.
 
 	AttributePointer renderAttribute;
 };

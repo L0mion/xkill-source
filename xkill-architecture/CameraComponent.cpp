@@ -6,20 +6,20 @@
 CameraComponent::CameraComponent()
 {
 	cameraAttributes_	= nullptr;
-	inputAttributes_	= nullptr;
+	cameraMovementAttribute_	= nullptr;
 }
 
 CameraComponent::~CameraComponent()
 {
 	//if(cameraAttributes_)
 	//	delete cameraAttributes_;
-	//if(inputAttributes_)
-	//	delete inputAttributes_;
+	//if(cameraMovementAttribute_)
+	//	delete cameraMovementAttribute_;
 }
-void CameraComponent::init(std::vector<CameraAttribute>* cameraAttributes, std::vector<InputAttribute>* inputAttributes, float aspectRatio)
+void CameraComponent::init(std::vector<CameraAttribute>* cameraAttributes, std::vector<CameraMovementAttribute>* cameraMovementAttribute, float aspectRatio)
 {
 	cameraAttributes_ = cameraAttributes;
-	inputAttributes_ = inputAttributes;
+	cameraMovementAttribute_ = cameraMovementAttribute;
 	if(cameraAttributes_->size()!=2)
 	{
 		for(unsigned int i = 0; i < cameraAttributes_->size(); i++)
@@ -50,15 +50,18 @@ void CameraComponent::onEvent(Event* e)
 
 void CameraComponent::onUpdate(float delta)
 {
-
 	for(unsigned int i = 0; i < cameraAttributes_->size(); i++)
 	{
+		CameraAttribute* camera = &cameraAttributes_->at(i);
+		SpatialAttribute* spatial = ATTRIBUTE_CAST(SpatialAttribute, spatialAttribute, camera);
+		PositionAttribute* position = ATTRIBUTE_CAST(PositionAttribute, positionAttribute, spatial);
+		cameras_[i].setPosition(position->position);
 		cameras_[i].updateView();
 
 		memcpy(cameraAttributes_->at(i).mat_view, cameras_[i].getView().m, 16*4);
 
-	//	cameras_[i].yaw(inputAttributes_->at(i).rotation[0]);
-	//	cameras_[i].pitch(inputAttributes_->at(i).rotation[1]);
-	//	cameras_[i].setPosition(inputAttributes_->at(i).position);
+		//cameras_[i].yaw(cameraMovementAttribute_->at(i).rotation[0]);
+		//cameras_[i].pitch(cameraMovementAttribute_->at(i).rotation[1]);
+		//cameras_[i].setPosition(cameraMovementAttribute_->at(i).position);
 	}
 }
