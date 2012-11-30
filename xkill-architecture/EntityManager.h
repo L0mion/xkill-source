@@ -13,7 +13,7 @@
 enum ENTITYTYPE
 {
 	PLAYER,
-	CAMERA
+	//CAMERA (refer to createPlayerEntity)
 };
 
 class EntityManager
@@ -62,10 +62,10 @@ public:
 			entity = entityFactory.createPlayerEntity();
 			std::cout << "ENTITYMANAGER: Created player entity " << entity->getID() << std::endl;
 			break;
-		case CAMERA:
-			entity = entityFactory.createEntity_Camera();
-			std::cout << "ENTITYMANAGER: Created camera entity " << entity->getID() << std::endl;
-			break;
+		//case CAMERA:
+		//	entity = entityFactory.createEntity_Camera();
+		//	std::cout << "ENTITYMANAGER: Created camera entity " << entity->getID() << std::endl;
+		//	break;
 		}
 		addEntity(entity);
 	}

@@ -93,12 +93,16 @@ public:
 
 		// Player attribute
 		PlayerAttribute* playerAttribute = AttributeManager::getInstance()->playerAttributes.createAttribute(entity);
-		playerAttribute->name = "ScrambleRamble";
+		playerAttribute->id = 0;
+		playerAttribute->name = "PrinterTerror";
 		playerAttribute->health = 100;
 		playerAttribute->priority = 0;
 		playerAttribute->cycleSteals = 0;
 		playerAttribute->totalExecutionTime = 0;
 		playerAttribute->renderAttribute = AttributeManager::getInstance()->renderAttributes.getLatestAttributeAsAttributePointer(); //Bind the last created render attribute to the player attribut
+
+		//Increment local static variable
+		playerId++;
 
 		// Return entity
 		return entity;

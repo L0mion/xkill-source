@@ -77,6 +77,18 @@ struct DLL_U InputAttribute : public IAttribute
 	float rotation[2];
 };
 
+/// Stores the points for both a bounding box and a convex mesh
+/** 
+\ingroup ATTRIBUTES
+*/
+struct DLL_U BoundingAttribute : public IAttribute
+{
+	float BoxPoints[8*3];
+	float ConvexPoints[42*3];
+};
+
+
+
 /// Stores everything RenderComponent needs to know about an entity
 /** 
 A good approach for the RenderComponent would be to step through all 
@@ -93,6 +105,7 @@ struct DLL_U RenderAttribute : public IAttribute
 	~RenderAttribute();
 
 	AttributePointer spatialAttribute;
+	AttributePointer boundingAttribute;
 
 	bool transparent;
 	bool tessellation;
@@ -161,3 +174,6 @@ struct DLL_U PlayerAttribute : public IAttribute
 
 	AttributePointer renderAttribute;
 };
+
+
+
