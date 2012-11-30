@@ -1,8 +1,13 @@
+#include <string>
+
 #include <Loader.h>
 
-Loader::Loader(const LPCWSTR mlFileName)
+Loader::Loader(
+	const LPCWSTR filePath,
+	const LPCWSTR fileName)
 {
-	filePath_ = mlFileName;
+	filePath_ = filePath;
+	fileName_ = fileName;
 }
 Loader::~Loader()
 {
@@ -13,4 +18,8 @@ Loader::~Loader()
 const LPCWSTR Loader::getFilePath()
 {
 	return filePath_;
+}
+const LPCWSTR Loader::getFileName()
+{
+	return fileName_;
 }

@@ -5,25 +5,21 @@
 #include "MeshModel.h"
 
 MeshModel::MeshModel(
-	MeshGeometry<VertexPosNormTex>*	geometry,
-	MeshDependencies*					dependencies)
+	const MeshGeometry<VertexPosNormTex>	geometry,
+	const std::vector<MeshMaterial>			materials)
 {
-	geometry_		= geometry;
-	dependencies_	= dependencies;
+	geometry_	= geometry;
+	materials_	= materials;
 }
 MeshModel::~MeshModel()
 {
-	if(geometry_)
-		delete geometry_;
-	if(dependencies_)
-		delete dependencies_;
 }
 
-MeshGeometry<VertexPosNormTex>* MeshModel::getGeometry()
+MeshGeometry<VertexPosNormTex> MeshModel::getGeometry()
 {
 	return geometry_;
 }
-MeshDependencies* MeshModel::getDependencies()
+std::vector<MeshMaterial> MeshModel::getMaterials()
 {
-	return dependencies_;
+	return materials_;
 }

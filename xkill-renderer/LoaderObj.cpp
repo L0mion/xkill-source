@@ -9,11 +9,10 @@
 #include "LoaderObj.h"
 
 LoaderObj::LoaderObj(
-	const LPCWSTR mlFileName,
-	const LPCWSTR mlFilePath)
-	: Loader(mlFilePath)
+	const LPCWSTR filePath,
+	const LPCWSTR fileName)
+	: Loader(filePath, fileName)
 {
-	fileName_		= mlFileName;
 }
 LoaderObj::~LoaderObj()
 {
@@ -25,8 +24,11 @@ bool LoaderObj::init()
 
 	lineNum_ = 0;
 
-	LPCWSTR filename = getFilePath();
-	ifstream_.open(filename);
+	std::wstring path = static_cast<std::wstring>(getFilePath());
+	std::wstring name = static_cast<std::wstring>(getFileName());
+	std::wstring fullPath = path + name;
+
+	ifstream_.open(fullPath);
 
 	if(ifstream_.is_open())
 	{
@@ -394,7 +396,7 @@ void LoaderObj::loadObj()
 	ObjDependencies dependencies;
 	for(unsigned int i = 0; i < mtlLib_.size(); i++)
 		dependencies.pushDependencyMTL(mtlLib_[i]);
-	obj_ = Obj(fileName_, dependencies, mlGeometry);
+	obj_ = Obj(getFileName(), dependencies, mlGeometry);
 }
 
 Obj LoaderObj::getObj()

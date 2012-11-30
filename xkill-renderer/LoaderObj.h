@@ -84,7 +84,9 @@ public:
 	/*!
 	\param mlFilePath Path to desired .obj-file.
 	*/
-	LoaderObj(const LPCWSTR mlFileName, const LPCWSTR mlFilePath);
+	LoaderObj(
+		const LPCWSTR filePath, 
+		const LPCWSTR fileName);
 	//! Clears all vectors.
 	~LoaderObj();
 
@@ -186,7 +188,6 @@ private:
 
 	void loadObj();
 
-	LPCWSTR						fileName_;
 	unsigned int				lineNum_;			//!< Line number previously read from file.
 	SimpleStringSplitter		sss_;				//!< Helper class used to split strings when reading these from file.
 

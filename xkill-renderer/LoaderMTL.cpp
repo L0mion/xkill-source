@@ -1,7 +1,9 @@
 #include "MTLMaterial.h"
 #include "LoaderMTL.h"
 
-LoaderMTL::LoaderMTL(LPCWSTR mtlPath) : Loader(mtlPath)
+LoaderMTL::LoaderMTL(
+	const LPCWSTR pathMTL,
+	const LPCWSTR fileNameMTL) : Loader(pathMTL, fileNameMTL)
 {
 	//Do nothing.
 }
@@ -16,8 +18,10 @@ bool LoaderMTL::init()
 
 	lineNum_ = 0;
 
-	LPCWSTR filename = getFilePath();
-	ifstream_.open(filename);
+	std::wstring path = static_cast<std::wstring>(getFilePath());
+	std::wstring name = static_cast<std::wstring>(getFileName());
+	std::wstring fullPath = path + name;
+	ifstream_.open(fullPath);
 
 	if(ifstream_.is_open())
 	{

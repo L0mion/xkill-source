@@ -5,8 +5,7 @@
 #include "d3dDebug.h"
 #include "CBManagement.h"
 #include "objLoaderBasic.h"
-#include "LoaderMTL.h"
-
+#include "MeshMakerObj.h"
 
 RenderingComponent::RenderingComponent(HWND windowHandle,
 									   unsigned int screenWidth,
@@ -456,20 +455,21 @@ HRESULT RenderingComponent::initVertexBuffer()
 {
 	HRESULT hr = S_OK;
 
-	//vertices_ = new std::vector<VertexPosNormTex>();
-	objLoader_ = new LoaderObj(L"bth.obj", L"../../xkill-resources/xkill-models/bth.obj");
-	bool sucessfullLoad = objLoader_->init();
-	Obj mo = objLoader_->getObj();
-	ObjGeometry<VertexPosNormTex> mg = mo.getMeshGeometry();
-	std::vector<VertexPosNormTex> vertices = mg.getVertices();
-	std::vector<ObjGroup> groups = mg.getObjGroups();
-	std::vector<unsigned int> indices = groups[1].getIndices();
+	MeshMakerObj* meshMaker = new MeshMakerObj(
+		L"../../xkill-resources/xkill-models/",
+		L"bth.obj",
+		L"../../xkill-resources/xkill-models/");
+	bool sucessfullLoad = meshMaker->init();
 
-	std::vector<std::string> mtlFiles = mo.getMTLs();
+	MeshModel* mesh = meshMaker->getMesh();
 
-	LoaderMTL mtlLoader(L"../../xkill-resources/xkill-models/bth.mtl");
-	sucessfullLoad = mtlLoader.init();
-	MTL mtl = mtlLoader.getMTL();
+	std::vector<VertexPosNormTex> vertices = mesh->getGeometry().getVertices();
+	std::vector<MeshSubset> subsets = mesh->getGeometry().getSubsets();
+
+	std::vector<unsigned int> indices = subsets.at(1).getIndices();
+
+	//delete meshMaker;
+	//delete mesh;
 
 	//objLoader_ = new ObjLoaderBasic();
 	//objLoader_->parseObjectFile("../../xkill-resources/xkill-models/bth.obj", vertices_);

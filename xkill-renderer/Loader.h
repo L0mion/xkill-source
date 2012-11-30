@@ -19,19 +19,22 @@ public:
 	/*!
 	\param mlFilePath Path to desired file.
 	*/
-	Loader(const LPCWSTR filePath);
+	Loader(
+		const LPCWSTR filePath,
+		const LPCWSTR fileName);
 	//! Closes ifstream if open.
 	~Loader();
 
 	//! Purely abstract functions to be used by all loaders to load respective files.
 	virtual bool init()	= 0;
 protected:
-
 	const LPCWSTR getFilePath();
+	const LPCWSTR getFileName();
 
-	std::ifstream	ifstream_;			//!< ifstream used to load files.
+	std::ifstream	ifstream_;	//!< ifstream used to load files.
 private:
 	LPCWSTR			filePath_;	//!< Path to desired file.
+	LPCWSTR			fileName_;
 };
 
 #endif //XKILL_RENDERER_LOADER_H

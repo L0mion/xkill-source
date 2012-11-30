@@ -12,22 +12,22 @@ Obj::Obj(
 {
 	this->fileName_			= moFilename;
 	this->objDependencies_	= objDependencies;
-	this->meshGeometry_		= moMeshGeometry;
+	this->objGeometry_		= moMeshGeometry;
 }
 Obj::~Obj()
 {
 	//Do nothing.
 }
 
-LPCWSTR Obj::getFileName()
+const LPCWSTR Obj::getFileName()
 {
 	return fileName_;
 }
-std::vector<std::string> Obj::getMTLs()
+const std::vector<std::string> Obj::getMTLs()
 {
 	return objDependencies_.getMTLFiles();
 }
-ObjGeometry<VertexPosNormTex> Obj::getMeshGeometry()
+const ObjGeometry<VertexPosNormTex> Obj::getObjGeometry()
 {
-	return meshGeometry_;
+	return objGeometry_;
 }

@@ -9,6 +9,10 @@ template <typename Vertex>
 class MeshGeometry
 {
 public:
+	MeshGeometry()
+	{
+		//Get rid of this
+	}
 	MeshGeometry(
 		const std::vector<Vertex>		vertices,
 		const std::vector<MeshSubset>	subsets)
@@ -21,8 +25,8 @@ public:
 		//Do nothing.
 	}
 	
-	const std::vector<Vertex>		getVertices()	{ return vertices_;	}
-	const std::vector<MeshSubset>	getSubsets()	{ return subsets_;	}
+	std::vector<Vertex>		getVertices()	{ return vertices_;	}
+	std::vector<MeshSubset>	getSubsets()	{ return subsets_;	}
 protected:
 private:
 	std::vector<Vertex>		vertices_;

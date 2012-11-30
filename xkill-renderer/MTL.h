@@ -11,8 +11,9 @@ public:
 	MTL();
 	MTL(std::vector<MTLMaterial> materials);
 	~MTL();
-protected:
+
 	const std::vector<MTLMaterial> getMaterials();
+protected:
 private:
 	std::vector<MTLMaterial> materials_;
 };

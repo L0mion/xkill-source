@@ -17,17 +17,17 @@ public:
 	Obj(
 		const LPCWSTR filename,
 		const ObjDependencies objDependencies,
-		const ObjGeometry<VertexPosNormTex> meshGeometry);
+		const ObjGeometry<VertexPosNormTex> objGeometry);
 	~Obj();
 
-	LPCWSTR getFileName();
-	std::vector<std::string> getMTLs();
-	ObjGeometry<VertexPosNormTex> getMeshGeometry();
+	const LPCWSTR getFileName();
+	const std::vector<std::string> getMTLs();
+	const ObjGeometry<VertexPosNormTex> getObjGeometry();
 protected:
 private:
 	LPCWSTR fileName_;
 	ObjDependencies objDependencies_;
-	ObjGeometry<VertexPosNormTex> meshGeometry_;
+	ObjGeometry<VertexPosNormTex> objGeometry_;
 };
 
 #endif //XKILL_RENDERER_OBJ_H

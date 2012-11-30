@@ -73,7 +73,9 @@ enum MtlSymbol
 class LoaderMTL : public Loader
 {
 public:
-	LoaderMTL(LPCWSTR mtlPath);
+	LoaderMTL(
+		const LPCWSTR pathMTL,
+		const LPCWSTR fileNameMTL);
 	~LoaderMTL();
 
 	bool init();
