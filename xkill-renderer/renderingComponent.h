@@ -50,12 +50,7 @@ public:
 	\param viewportHeight Height of each viewport. 
 	*/
 	RenderingComponent(
-		HWND windowHandle, 
-		unsigned int screenWidth, 
-		unsigned int screenHeight,
-		unsigned int numViewports,
-		std::vector<RenderAttribute>* renderAttributes,
-		std::vector<CameraAttribute>* cameraAttributes);
+		HWND windowHandle);
 	//! Releases all memory and returns to default state.
 	~RenderingComponent();
 

@@ -1,7 +1,7 @@
 #pragma once
 
 #include <xkill-utilities/IObserver.h>
-#include <xkill-utilities/EventType.h>
+#include <xkill-utilities/EventManager.h>
 #include <xkill-utilities/AttributeType.h>
 #include <vector>
 #include <iostream>
@@ -41,60 +41,55 @@ public:
 	void onUpdate(float delta)
 	{
 		// Setup
-		std::vector<RenderAttribute>* attributes = AttributeManager::getInstance()->renderAttributes.getAllAttributes();
-		std::vector<int>* owners = AttributeManager::getInstance()->renderAttributes.getAllOwners();
+		std::vector<int>* renderOwners;					GET_ATTRIBUTE_OWNERS(renderOwners, ATT_PLAYER);
+		std::vector<RenderAttribute>* allRender;		GET_ATTRIBUTES(allRender, RenderAttribute, ATT_RENDER);
+		std::vector<SpatialAttribute>* allSpatial;		GET_ATTRIBUTES(allSpatial, SpatialAttribute, ATT_SPATIAL);
+		std::vector<PositionAttribute>* allPosition;	GET_ATTRIBUTES(allPosition, PositionAttribute, ATT_POSITION);
 
 		// Write test
 		std::cout << "RENDERCOMPONENT: Write test" << std::endl;
-		for(int i=0; i<(int)(*attributes).size(); i++)
+		for(unsigned i=0; i<allRender->size(); i++)
 		{
-			if(owners->at(i)!=0)
+			if(renderOwners->at(i)!=0)
 			{
-				
-				RenderAttribute* r = &attributes->at(i);
-				SpatialAttribute* s = ATTRIBUTE_CAST(SpatialAttribute,spatialAttribute,r);
-				PositionAttribute* p = ATTRIBUTE_CAST(PositionAttribute,positionAttribute,s);
+				// Fetch attributes
+				RenderAttribute* render		=	&allRender		->	at(i);
+				SpatialAttribute* spatial	=	&allSpatial		->	at(render->spatialAttribute.index);
+				PositionAttribute* position	=	&allPosition	->	at(spatial->positionAttribute.index);
 
-				//p->position = i
-				//	+ r->transparent 
-				//	+ r->tessellation 
-				//	//+ r->meshid 
-				//	//+ r->textureid
-				//	+ p->position
-				//	+ s->rotation
-				//	+ s->scale;
-
+				position->position[0] = i
+					+ render->transparent 
+					+ render->tessellation 
+					+ position->position;
 			}
 		}
 
 		// Read test
 		std::cout << "RENDERCOMPONENT: Read test" << std::endl; 
 		std::cout << "Owner\tTransp\tTess\tMesh\tTex\tPos\tRot\tScale" << std::endl;
-		for(int i=0; i<(int)(*attributes).size(); i++)
+		for(unsigned i=0; i<allRender->size(); i++)
 		{
-			if(owners->at(i)!=0)
+			if(renderOwners->at(i)!=0)
 			{
-				RenderAttribute* r = &attributes->at(i);
-				SpatialAttribute* s = ATTRIBUTE_CAST(SpatialAttribute,spatialAttribute,r);
-				PositionAttribute* p = ATTRIBUTE_CAST(PositionAttribute,positionAttribute,s);
+				// Fetch attributes
+				RenderAttribute* render		=	&allRender		->	at(i);
+				SpatialAttribute* spatial	=	&allSpatial		->	at(render->spatialAttribute.index);
+				PositionAttribute* position	=	&allPosition	->	at(spatial->positionAttribute.index);
 
 				std::cout
-					<< owners->at(i)		<< "\t"
-					<< r->transparent		<< "\t"
-					<< r->tessellation		<< "\t"
-					<< r->meshID			<< "\t"
-					<< r->textureID			<< "\t"
-					<< p->positionX			<< "\t"
-					<< s->rotation			<< "\t"
-					<< s->scale 
+					<< renderOwners->at(i)		<< "\t"
+					<< render->transparent		<< "\t"
+					<< render->tessellation		<< "\t"
+					<< render->meshID			<< "\t"
+					<< render->textureID		<< "\t"
+					<< position->position[0]	<< "\t"
+					<< spatial->rotation[0]		<< "\t"
+					<< spatial->scale[0]
 					<< std::endl;
 			}
 			else
 			{
-				std::cout
-					<< i		<< "\t"
-					<< "DELETED"
-					<< std::endl;
+				std::cout << i << "\t" << "DELETED" << std::endl;
 			}
 		}
 	}

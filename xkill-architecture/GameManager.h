@@ -77,7 +77,7 @@ public:
 
 		//Initialize components
 		componentManager_ = new ComponentManager();
-		if(!componentManager_->init(windowHandle, screenWidth, screenHeight))
+		if(!componentManager_->init(windowHandle))
 		{
 			std::cout << "Component manager failed to init" << std::endl;
 			std::cin.ignore();

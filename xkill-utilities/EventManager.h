@@ -3,6 +3,7 @@
 #include <vector>
 
 #include "dllUtilities.h"
+#include "EventType.h"
 
 class IObserver;
 enum EventType;
@@ -21,7 +22,6 @@ private:
 
 	EventManager();
 	~EventManager();
-
 
 public:
 	static EventManager* getInstance();
@@ -54,3 +54,35 @@ public:
 	*/
 	void sendEvent(Event* e);
 };
+
+
+//
+// EVIL MACROS
+//
+
+// Macro for sending Events
+#define SEND_EVENT(EventPointer)									\
+EventManager::getInstance()->sendEvent(EventPointer);
+
+// Subscribes a IObserver to events of EventType.
+#define SUBSCRIBE_TO_EVENT(Subscriber,EventType)					\
+EventManager::getInstance()->addObserver(Subscriber, EventType);
+
+// Fetches a vector<AttributeType>* of a specific Attribute
+// from AttributeManager.
+#define GET_ATTRIBUTES(AttributePointer, AttributeType, Enum)		\
+{																	\
+	Event_getAttribute e(Enum);										\
+	EventManager::getInstance()->sendEvent(&e);						\
+	AttributePointer = (std::vector<AttributeType>*)e.hostVector;	\
+}
+
+// Fetches a owners of a specific Attribute from AttributeManager
+#define GET_ATTRIBUTE_OWNERS(OwnerPointer, Enum)					\
+{																	\
+	Event_getAttribute e(Enum);										\
+	EventManager::getInstance()->sendEvent(&e);						\
+	OwnerPointer = e.owners;										\
+}
+
+// END OF EVIL

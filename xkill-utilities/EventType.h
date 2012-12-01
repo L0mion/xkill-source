@@ -1,6 +1,9 @@
 #pragma once
 
+#include <vector>
 #include "dllUtilities.h"
+
+
 
 //
 // Events info
@@ -22,7 +25,7 @@ EventManager::getInstance()->sendEvent(&event);
 */
 
 
-/// Enums over each Event Type
+// Enums over each Event Type
 /*
 Used by EventManager to build each of its queues.
 
@@ -34,12 +37,13 @@ enum DLL_U EventType
 {
 	EVENT_A,
 	EVENT_B,
-	EVENT_C,
-	EVENT_D,
-	EVENT_E,
-	EVENT_F,
 	EVENT_MOUSE_MOVE,
 	PLAYSOUND,
+
+	// Get events
+	EVENT_GET_ATTRIBUTE,
+	EVENT_GET_WINDOW_RESOLUTION,
+	EVENT_GET_WINDOW_HANDLE,
 
 	// this is needed, don't touch!
 	EVENT_LAST 
@@ -117,6 +121,54 @@ public:
 class DLL_U Event_PlaySound : public Event
 {
 public:
-	Event_PlaySound(int soundId) : Event(PLAYSOUND){this->soundId=soundId;}
+	Event_PlaySound(int soundId) : Event(PLAYSOUND)
+	{
+		this->soundId = soundId;
+	}
+
 	int soundId;
+};
+
+/// Returns acces to \ref ATTRIBUTES.
+/**
+\ingroup events
+*/
+class DLL_U Event_getAttribute : public Event
+{
+public:
+	Event_getAttribute(int attributeEnum) : Event(EVENT_GET_ATTRIBUTE)
+	{
+		this->attributeEnum = attributeEnum;
+		
+		hostVector = 0;
+		owners = 0;
+	}
+
+	int attributeEnum;			//!< An enums stored as an Int since we can't forward declare Enums.
+	void* hostVector;			//!< Void pointer to a vector holding Attributes.
+								//!< Requires manual casting.
+	std::vector<int>* owners;	//!< A std::vector<int> of owners correspoinding to each
+								//!< attribute.
+};
+
+/// Returns window resolution.
+/**
+\ingroup events
+*/
+class DLL_U Event_getWindowResolution : public Event
+{
+public:
+	int width;		
+	int height;		
+
+	Event_getWindowResolution() : Event(EVENT_GET_WINDOW_RESOLUTION)
+	{
+		width = 320;
+		height = 240;
+	}
+
+	float getAspectRatio()
+	{
+		return (float)width/(float)height;
+	}
 };

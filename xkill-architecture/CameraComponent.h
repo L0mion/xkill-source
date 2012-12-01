@@ -21,9 +21,7 @@ public:
 	//! Releases all allocated memory.
 	virtual ~CameraComponent();
 	//! Initializes CameraCompnent.
-	void init(std::vector<CameraAttribute>* cameraAttributes,
-			std::vector<InputAttribute>* inputAttributes,
-			float aspectRatio);
+	void init();
 	//! Methods that will be called on events. 
 	void onEvent(Event* e);
 	

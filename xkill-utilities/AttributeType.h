@@ -35,6 +35,30 @@ struct DLL_U IAttribute
 // Attributes
 ///////////////////////////////////////////
 
+// Enums over each Attribute Type
+/*
+Just something that can be used if "casting" of
+\ref ATTRIBTUES is needed.
+
+NOTE: DOXYGEN can not detect Enums combined with DLL
+for some reason
+*/
+
+enum DLL_U AttributeType
+{
+	ATT_POSITION,
+	ATT_SPATIAL,
+	ATT_RENDER,
+	ATT_PHYSICS,
+	ATT_CAMERA,
+	ATT_INPUT,
+	ATT_PLAYER,
+	ATT_BOUNDING,
+
+	// this is needed, don't touch!
+	ATT_LAST
+};
+
 /// Stores the position of an Entity 
 /** 
 \ingroup ATTRIBUTES
@@ -65,6 +89,7 @@ struct DLL_U InputAttribute : public IAttribute
 {
 	InputAttribute();
 	~InputAttribute();
+
 	float position[3];
 	float rotation[2];
 };

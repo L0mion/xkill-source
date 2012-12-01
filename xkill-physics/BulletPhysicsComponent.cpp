@@ -7,11 +7,10 @@
 #include "CollisionShapeManager.h"
 #include "physicsObject.h"
 
-BulletPhysicsComponent::BulletPhysicsComponent(std::vector<PhysicsAttribute>* physicsAttributes,
-											   std::vector<BoundingAttribute>* boundingAttributes)
+#include <xkill-utilities/EventManager.h>
+
+BulletPhysicsComponent::BulletPhysicsComponent()
 {
-	physicsAttributes_ = physicsAttributes; 
-	boundingAttributes_ = boundingAttributes;
 	broadphase_ = nullptr;
 	collisionConfiguration_ = nullptr;
 	dispatcher_ = nullptr;
@@ -20,6 +19,7 @@ BulletPhysicsComponent::BulletPhysicsComponent(std::vector<PhysicsAttribute>* ph
 	physicsAttributes_ = nullptr;
 	physicsObjects_ = nullptr;
 	collisionShapeManager_ = nullptr;
+	EventManager::getInstance();
 
 }
 
@@ -42,6 +42,10 @@ BulletPhysicsComponent::~BulletPhysicsComponent()
 
 bool BulletPhysicsComponent::init()
 {
+	// Fetch attributes
+	GET_ATTRIBUTES(physicsAttributes_, PhysicsAttribute, ATT_PHYSICS);
+	GET_ATTRIBUTES(boundingAttributes_, BoundingAttribute, ATT_PHYSICS);
+
 	physicsObjects_ = new btAlignedObjectArray<PhysicsObject*>();
 	broadphase_ = new btDbvtBroadphase();
 	collisionConfiguration_ = new btDefaultCollisionConfiguration();
@@ -84,11 +88,11 @@ bool BulletPhysicsComponent::init()
 
 void BulletPhysicsComponent::onUpdate(float delta)
 {
-	for(unsigned int i = (*physicsObjects_).size(); i < physicsObjects_->size(); i++)
+	for(int i = physicsObjects_->size(); i < physicsObjects_->size(); i++)
 	{
 		physicsObjects_->push_back(new PhysicsObject());
 	}
-	for(unsigned int i = 0; i < physicsObjects_->size(); i++)
+	for(int i = 0; i < physicsObjects_->size(); i++)
 	{
 		if(physicsAttributes_->at(i).alive)
 		{
@@ -111,7 +115,7 @@ void BulletPhysicsComponent::onUpdate(float delta)
 
 	dynamicsWorld_->stepSimulation(delta,10);
 
-	for(unsigned int i = 0; i < physicsObjects_->size(); i++)
+	for(int i = 0; i < physicsObjects_->size(); i++)
 	{
 		if(physicsAttributes_->at(i).alive && physicsAttributes_->at(i).added)
 		{

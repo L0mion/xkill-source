@@ -8,6 +8,7 @@
 #include <QTimer> // needed to implement frame rate
 #include <xkill-architecture/GameManager.h>
 #include <xkill-utilities/IObserver.h>
+#include <xkill-utilities/EventManager.h>
 
 #include "ui_MainWindow.h"
 #include "GameTimer.h"
@@ -29,22 +30,18 @@ public:
 		// make widget non-transparent & draw directly onto screen
 		QWidget::setAttribute(Qt::WA_OpaquePaintEvent);
 		QWidget::setAttribute(Qt::WA_PaintOnScreen);
-		resize(800, 600);
+		resize(800, 800);
+		
+		// subscribe to events
+		SUBSCRIBE_TO_EVENT(this, EVENT_GET_WINDOW_RESOLUTION);
 
-		// init updateTimer
+		// init game
+		gameManager.init(this->winId(), 800, 800);
+		gameTimer.reset();
 		updateTimer = new QTimer(this);
 		updateTimer->setInterval(0);
 		connect(updateTimer, SIGNAL(timeout()), this, SLOT(slot_onUpdate()));
 		updateTimer->start();
-
-		// init gameTimer
-		gameTimer.reset();
-
-		// init game
-		gameManager.init(this->winId(), 800, 800);
-		
-		// connect functionality with buttons
-	
 	};
 	~GameWidget()
 	{
@@ -58,6 +55,15 @@ public:
 
 	void onEvent(Event* e)
 	{
+		EventType type = e->getType();
+		switch (type) 
+		{
+		case EVENT_GET_WINDOW_RESOLUTION:
+			event_getWindowResolution((Event_getWindowResolution*)e);
+			break;
+		default:
+			break;
+		}
 	}
 
 public slots:
@@ -117,6 +123,16 @@ private:
 			num_frames = 0;
 			timeElapsed += 1.0f;
 		}
+	}
+
+	void event_getWindowResolution(Event_getWindowResolution* e)
+	{
+		e->width = size().width();
+		e->height = size().height();
+
+		// splitscreen gets wrong if we don't use 600x600 resolution
+		e->width = 800;
+		e->height = 800;
 	}
 
 signals:

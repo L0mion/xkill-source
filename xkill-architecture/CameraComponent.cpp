@@ -13,15 +13,18 @@ CameraComponent::CameraComponent()
 
 CameraComponent::~CameraComponent()
 {
-	//if(cameraAttributes_)
-	//	delete cameraAttributes_;
-	//if(inputAttributes_)
-	//	delete inputAttributes_;
 }
-void CameraComponent::init(std::vector<CameraAttribute>* cameraAttributes, std::vector<InputAttribute>* inputAttributes, float aspectRatio)
+void CameraComponent::init()
 {
-	cameraAttributes_ = cameraAttributes;
-	inputAttributes_ = inputAttributes;
+	// Fetch attributes
+	GET_ATTRIBUTES(cameraAttributes_, CameraAttribute, ATT_CAMERA);
+	GET_ATTRIBUTES(inputAttributes_, InputAttribute, ATT_INPUT);
+
+	// fetch aspects ratio
+	Event_getWindowResolution windowResolution;
+	SEND_EVENT(&windowResolution);
+	float aspectRatio = windowResolution.getAspectRatio();
+
 	if(cameraAttributes_->size()!=2)
 	{
 		for(unsigned int i = 0; i < cameraAttributes_->size(); i++)

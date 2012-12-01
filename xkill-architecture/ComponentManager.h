@@ -27,7 +27,7 @@ class ComponentManager
 {
 private:
 	RenderingComponent* render_;
-	BulletPhysicsComponent* physics_;
+	BulletPhysicsComponent physics_;
 	//SoundComponent		sound_;
 	CameraComponent		camera_;
 	InputComponent		input_;
@@ -41,49 +41,33 @@ public:
 	~ComponentManager()
 	{
 		SAFE_DELETE(render_);
-		SAFE_DELETE(physics_);
 		//SAFE_DELETE(physicsComponent);
 		//SAFE_DELETE(soundComponent);
 		//SAFE_DELETE(gameComponent);
 	}
 
-	bool init(HWND windowHandle, unsigned int screenWidth, unsigned int screenHeight)
+	bool init(HWND windowHandle)
 	{
-		render_ = new RenderingComponent(windowHandle,screenWidth,screenHeight,
-										AttributeManager::getInstance()->cameraAttributes.getAllAttributes()->size(),
-										AttributeManager::getInstance()->renderAttributes.getAllAttributes(),
-										AttributeManager::getInstance()->cameraAttributes.getAllAttributes());
+		render_ = new RenderingComponent(windowHandle);
 		render_->init();
-		physics_ = new BulletPhysicsComponent(AttributeManager::getInstance()->physicsAttributes.getAllAttributes(),
-											 AttributeManager::getInstance()->BoundingAttributes.getAllAttributes());
-		physics_->init();
-		camera_.init(AttributeManager::getInstance()->cameraAttributes.getAllAttributes(),
-					AttributeManager::getInstance()->inputAttributes.getAllAttributes(),
-					static_cast<float>(screenWidth)/static_cast<float>(screenHeight));
+		physics_.init();
+		camera_.init();
 
-		//gameComponent = new GameComponent();
 		if(!game_.init())
 			return false;
-
-		//soundComponent = new SoundComponent();
-		//if(!sound_.init())
-			//return false;
-
+		/*if(!sound_.init())
+			return false;*/
 		if(!input_.init(windowHandle))
 			return false;
 
-		//physicsComponent = new PhysicsComponent();
-		//if(!physics.init(attributes))
-		//	return false;
-		//std::vector<PhysicsAttribute>* attributes = AttributeManager::getInstance()->physicsAttributes.getAllAttributes();
-
+		// Returns that everything went ok
 		return true;
 	}
 	void update(float delta)
 	{
 		//sound_.onUpdate(delta);
 		camera_.onUpdate(delta);
-		physics_->onUpdate(delta);
+		physics_.onUpdate(delta);
 		render_->onUpdate(delta);
 		input_.onUpdate(delta);
 		game_.onUpdate(delta);

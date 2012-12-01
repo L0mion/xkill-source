@@ -1,7 +1,6 @@
 #pragma once
 #include "EventManager.h"
 
-#include "EventType.h"
 #include <vector>
 #include <iostream>
 #include "IObserver.h"

@@ -7,7 +7,6 @@
 
 #include "dllPhysics.h"
 #include <xkill-utilities/IObserver.h>
-
 #include <vector>
 
 class PhysicsObject;
@@ -57,8 +56,7 @@ public:
 	/*!
 	\param physicsAttributes A pointer to the vector containing physicsAttributes
 	*/
-	BulletPhysicsComponent(std::vector<PhysicsAttribute>* physicsAttributes,
-						   std::vector<BoundingAttribute>* boundingAttributes);
+	BulletPhysicsComponent();
 	//! Deletes all objects created within the component
 	~BulletPhysicsComponent();
 	//! Initialize the physics component, creates bullet objects and storage for internal representation
