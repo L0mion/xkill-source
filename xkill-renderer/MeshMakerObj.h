@@ -17,8 +17,6 @@
 class LoaderObj;
 class LoaderMTL;
 
-static const std::string PGY = ".pgy";
-
 class MeshMakerObj
 {
 public:
@@ -47,7 +45,7 @@ private:
 	MeshGeometry<VertexPosNormTex> objGeoToMeshGeo(ObjGeometry<VertexPosNormTex> objGeo);
 	MeshSubset objGroupToMeshSubset(ObjGroup objGroup);
 
-	std::string getExpectedFileNamePGY();
+	std::string getFileNamePGY();
 
 	std::string pathObj_;
 	std::string pathMTL_;

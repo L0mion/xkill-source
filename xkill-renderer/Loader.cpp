@@ -23,3 +23,7 @@ const std::string Loader::getFileName()
 {
 	return fileName_;
 }
+const std::string Loader::getFullPath()
+{
+	return filePath_ + fileName_;
+}

@@ -31,6 +31,7 @@ public:
 protected:
 	const std::string getFilePath();
 	const std::string getFileName();
+	const std::string getFullPath();
 
 	std::ifstream	ifstream_;	//!< ifstream used to load files.
 private:

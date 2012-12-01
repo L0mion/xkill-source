@@ -36,7 +36,7 @@ bool MeshMakerObj::init()
 {
 	bool sucessfulLoad = true;
 
-	fileNamePGY_ = getExpectedFileNamePGY();
+	fileNamePGY_ = getFileNamePGY();
 
 	if(!existingPGY(pathPGY_, fileNamePGY_))
 	{
@@ -51,7 +51,7 @@ bool MeshMakerObj::init()
 	}
 	else
 	{
-		//Load binary
+		//Pase pgy
 	}
 
 	return sucessfulLoad;
@@ -85,6 +85,19 @@ MeshModel* MeshMakerObj::makeMesh(Obj obj)
 }
 void MeshMakerObj::makePGY(MeshModel* model)
 {
+	std::ofstream pgy(
+		fileNamePGY_, 
+		std::ios::out | std::ios::binary);
+	
+	char fileType[4] = "pgy";
+	PGYHeader header;
+	for(unsigned int i = 0; i < 4; i++)
+		header.fileType[i] = fileType[i];
+	header.versionNum = 0.1f;
+
+	pgy.write(reinterpret_cast<const char*>(&header), sizeof(PGYHeader));
+
+	pgy.close();
 }
 
 bool MeshMakerObj::loadMTLs()
@@ -157,7 +170,7 @@ MeshSubset MeshMakerObj::objGroupToMeshSubset(ObjGroup objGroup)
 	return MeshSubset(ssName, ssMaterial, ssIndices);
 }
 
-std::string MeshMakerObj::getExpectedFileNamePGY()
+std::string MeshMakerObj::getFileNamePGY()
 {
 	return fileNameObj_ + PGY;
 }

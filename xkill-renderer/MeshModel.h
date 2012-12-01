@@ -19,7 +19,7 @@ public:
 	~MeshModel();
 
 	MeshGeometry<VertexPosNormTex>	getGeometry();
-	std::vector<MeshMaterial>			getMaterials();
+	std::vector<MeshMaterial>		getMaterials();
 protected:
 private:
 	MeshGeometry<VertexPosNormTex>	geometry_;
