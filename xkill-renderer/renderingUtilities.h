@@ -5,6 +5,7 @@
 #define SAFE_DELETE(obj)	if(obj != nullptr) { delete obj;		obj = nullptr; }
 
 #include <Windows.h>
+#include <string>
 
 //! Prints an error-msg depending on current configuration.
 	/*!
@@ -23,6 +24,19 @@ static void ERROR_MSG(LPCWSTR clue)
 			clue,
 			L"HRESULT failed!",
 			MB_OK | MB_ICONEXCLAMATION);
+#else
+	//Print message to error log.
+#endif //DEBUG || _DEBUG
+}
+
+static void ERROR_MSG(std::string clue)
+{
+#if defined( DEBUG ) || defined( _DEBUG )
+	MessageBoxA(
+		NULL, 
+		clue.c_str(),
+		"Something failed!",
+		MB_OK | MB_ICONEXCLAMATION);
 #else
 	//Print message to error log.
 #endif //DEBUG || _DEBUG

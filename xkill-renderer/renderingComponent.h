@@ -18,6 +18,7 @@
 
 class FXManagement;
 class CBManagement;
+class MeshManagement;
 class GBuffer;
 class D3DDebug;
 class ObjLoaderBasic;
@@ -159,7 +160,7 @@ private:
 	\return Any error encountered during initialization.
 	\sa ObjLoaderBasic
 	*/
-	HRESULT initVertexBuffer();
+	HRESULT initMeshManagement();
 
 	/*desc*/
 	HWND windowHandle_;				//!< WINAPI-handle to window.
@@ -168,6 +169,7 @@ private:
 
 	FXManagement*	fxManagement_;						//!< Maintaining shaders and input-layouts.
 	CBManagement*	cbManagement_;						//!< Maintaining constant buffers.
+	MeshManagement* meshManagement_;
 	GBuffer*		gBuffers_[GBUFFERID_NUM_BUFFERS];	//!< Containing data for deferred rendering.
 	D3DDebug*		d3dDebug_;							//!< Used for detecting live COM-objects.
 
@@ -189,11 +191,8 @@ private:
 	//temp
 	ID3D11Buffer*	vertexBuffer_;		//!< Mock buffer sending vertices to shader.
 	ID3D11Buffer*	indexBuffer_;
-	//std::vector<VertexPosNormTex>*	vertices_;	//!< Mock vertices.
 	unsigned int tempVerticesSize;
 	unsigned int tempIndicesSize;
-	//ObjLoaderBasic*			objLoader_;			//!< Basic obj-loader used to debug renderer.
-	LoaderObj*			objLoader_;
 };
 
 #endif //XKILL_RENDERER_RENDERINGCOMPONENT_H

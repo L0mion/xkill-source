@@ -7,7 +7,7 @@
 #include "window.h"
 
 #if defined( DEBUG ) || defined( _DEBUG )
-#include <vld.h>
+//#include <vld.h>
 #endif
 
 #define _CRTDBG_MAP_ALLOC

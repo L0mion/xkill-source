@@ -74,8 +74,8 @@ class LoaderMTL : public Loader
 {
 public:
 	LoaderMTL(
-		const LPCWSTR pathMTL,
-		const LPCWSTR fileNameMTL);
+		const std::string pathMTL,
+		const std::string fileNameMTL);
 	~LoaderMTL();
 
 	bool init();
@@ -112,8 +112,8 @@ private:
 	void loadMTL();
 
 	void getLine(std::string& line);
-	void printFail();
-	bool isNumeric(std::string value);
+	void printFail(const std::string curLine);
+	bool isNumeric(const std::string value);
 
 	/*helper*/
 	unsigned int lineNum_;

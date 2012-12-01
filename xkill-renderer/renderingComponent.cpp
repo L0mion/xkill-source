@@ -1,11 +1,14 @@
-#include "renderingComponent.h"
 #include "fxManagement.h"
+#include "CBManagement.h"
+#include "MeshManagement.h"
 #include "gBuffer.h"
 #include "renderingUtilities.h"
 #include "d3dDebug.h"
-#include "CBManagement.h"
-#include "objLoaderBasic.h"
-#include "MeshMakerObj.h"
+
+#include "MeshModel.h" //remove me
+#include "MeshSubset.h" //remove me
+
+#include "renderingComponent.h"
 
 RenderingComponent::RenderingComponent(HWND windowHandle,
 									   unsigned int screenWidth,
@@ -17,6 +20,7 @@ RenderingComponent::RenderingComponent(HWND windowHandle,
 
 	fxManagement_	= nullptr;
 	cbManagement_	= nullptr; 
+	meshManagement_ = nullptr;
 	for(unsigned int i = 0; i < GBUFFERID_NUM_BUFFERS; i++)
 		gBuffers_[i] = nullptr;
 	d3dDebug_		= nullptr;
@@ -37,7 +41,6 @@ RenderingComponent::RenderingComponent(HWND windowHandle,
 	//temp
 	vertexBuffer_	= nullptr;
 	indexBuffer_	= nullptr;
-	objLoader_		= nullptr;
 }
 RenderingComponent::~RenderingComponent()
 {
@@ -59,6 +62,7 @@ RenderingComponent::~RenderingComponent()
 
 	SAFE_DELETE(cbManagement_);
 	SAFE_DELETE(fxManagement_);
+	SAFE_DELETE(meshManagement_);
 	for(unsigned int i = 0; i < GBUFFERID_NUM_BUFFERS; i++)
 		SAFE_DELETE(gBuffers_[i]);
 	
@@ -68,7 +72,6 @@ RenderingComponent::~RenderingComponent()
 	//temp
 	SAFE_RELEASE(vertexBuffer_);
 	SAFE_RELEASE(indexBuffer_);
-	SAFE_DELETE(objLoader_);
 }
 
 HRESULT RenderingComponent::init()
@@ -93,8 +96,8 @@ HRESULT RenderingComponent::init()
 		hr = initFXManagement();
 	if(SUCCEEDED(hr))
 		hr = initCBManagement();
-	if(SUCCEEDED(hr)) //temp
-		hr = initVertexBuffer();
+	if(SUCCEEDED(hr))
+		hr = initMeshManagement();
 	if(SUCCEEDED(hr))
 		hr = initDebug();
 
@@ -451,28 +454,19 @@ HRESULT RenderingComponent::initDebug()
 
 	return hr;
 }
-HRESULT RenderingComponent::initVertexBuffer()
+HRESULT RenderingComponent::initMeshManagement()
 {
 	HRESULT hr = S_OK;
 
-	MeshMakerObj* meshMaker = new MeshMakerObj(
-		L"../../xkill-resources/xkill-models/",
-		L"bth.obj",
-		L"../../xkill-resources/xkill-models/");
-	bool sucessfullLoad = meshMaker->init();
+	meshManagement_ = new MeshManagement();
+	bool sucessfulInit = meshManagement_->init();
 
-	MeshModel* mesh = meshMaker->getMesh();
+	MeshModel* mesh = meshManagement_->getTempModel();
 
 	std::vector<VertexPosNormTex> vertices = mesh->getGeometry().getVertices();
 	std::vector<MeshSubset> subsets = mesh->getGeometry().getSubsets();
 
 	std::vector<unsigned int> indices = subsets.at(1).getIndices();
-
-	//delete meshMaker;
-	//delete mesh;
-
-	//objLoader_ = new ObjLoaderBasic();
-	//objLoader_->parseObjectFile("../../xkill-resources/xkill-models/bth.obj", vertices_);
 
 	tempVerticesSize = vertices.size();
 
@@ -482,7 +476,7 @@ HRESULT RenderingComponent::initVertexBuffer()
 	vbd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
 	vbd.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
 	vbd.MiscFlags = 0;
-	
+
 	D3D11_SUBRESOURCE_DATA vinitData;
 	vinitData.pSysMem = &vertices.at(0);
 	device_->CreateBuffer(&vbd, &vinitData, &vertexBuffer_);
@@ -490,7 +484,7 @@ HRESULT RenderingComponent::initVertexBuffer()
 		ERROR_MSG(L"RenderingComponent::initVertexBuffer CreateBuffer failed");
 
 	tempIndicesSize = indices.size();
-	
+
 	D3D11_BUFFER_DESC anIndexBuffer;
 	anIndexBuffer.Usage	= D3D11_USAGE_IMMUTABLE;
 	anIndexBuffer.ByteWidth	= sizeof(unsigned int) * indices.size();
@@ -499,7 +493,7 @@ HRESULT RenderingComponent::initVertexBuffer()
 	anIndexBuffer.MiscFlags	= 0;
 	D3D11_SUBRESOURCE_DATA iinitData;
 	iinitData.pSysMem = &indices.at(0);
-	
+
 	device_->CreateBuffer(&anIndexBuffer, &iinitData, &indexBuffer_);
 
 	return hr;

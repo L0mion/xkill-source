@@ -9,8 +9,8 @@
 #include "LoaderObj.h"
 
 LoaderObj::LoaderObj(
-	const LPCWSTR filePath,
-	const LPCWSTR fileName)
+	const std::string filePath,
+	const std::string fileName)
 	: Loader(filePath, fileName)
 {
 }
@@ -24,10 +24,7 @@ bool LoaderObj::init()
 
 	lineNum_ = 0;
 
-	std::wstring path = static_cast<std::wstring>(getFilePath());
-	std::wstring name = static_cast<std::wstring>(getFileName());
-	std::wstring fullPath = path + name;
-
+	std::string fullPath = getFilePath() + getFileName();
 	ifstream_.open(fullPath);
 
 	if(ifstream_.is_open())
@@ -66,7 +63,7 @@ bool LoaderObj::parseObj()
 		}
 		
 		if(!sucessfulLoad)
-			printFail();
+			printFail(curLine);
 	}
 
 	return sucessfulLoad;
@@ -365,20 +362,15 @@ void LoaderObj::getLine(std::string& line)
 	std::getline(ifstream_, line);
 	lineNum_++;
 }
-void LoaderObj::printFail()
+void LoaderObj::printFail(const std::string curLine)
 {
-	std::stringstream ss;
-	ss << lineNum_;
-	std::string line = ss.str();
-	std::wstring lineW;
-	lineW.assign(line.begin(), line.end());
+	std::string file	= getFilePath() + getFileName();
+	std::string lineNum = std::to_string(lineNum_);
+	std::string failed	= " parsing failed at line " + lineNum + ": " + curLine;
 
-	std::wstring file		= getFilePath();
-	std::wstring failed		= L" parsing failed at line ";
-	std::wstring errorMsg	= file + failed + lineW;
-	ERROR_MSG(errorMsg.c_str());
+	ERROR_MSG(failed);
 }
-bool LoaderObj::isNumeric(std::string value)
+bool LoaderObj::isNumeric(const std::string value)
 {
 	std::stringstream conv;
 	double tmp;

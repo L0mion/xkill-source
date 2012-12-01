@@ -7,6 +7,7 @@
 
 #include <Windows.h>
 #include <fstream>
+#include <string>
 
 //! Base class for a Mesh-loading component.
 /*!
@@ -20,21 +21,21 @@ public:
 	\param mlFilePath Path to desired file.
 	*/
 	Loader(
-		const LPCWSTR filePath,
-		const LPCWSTR fileName);
+		const std::string filePath,
+		const std::string fileName);
 	//! Closes ifstream if open.
 	~Loader();
 
 	//! Purely abstract functions to be used by all loaders to load respective files.
 	virtual bool init()	= 0;
 protected:
-	const LPCWSTR getFilePath();
-	const LPCWSTR getFileName();
+	const std::string getFilePath();
+	const std::string getFileName();
 
 	std::ifstream	ifstream_;	//!< ifstream used to load files.
 private:
-	LPCWSTR			filePath_;	//!< Path to desired file.
-	LPCWSTR			fileName_;
+	std::string	filePath_;	//!< Path to desired file.
+	std::string	fileName_;
 };
 
 #endif //XKILL_RENDERER_LOADER_H

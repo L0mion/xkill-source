@@ -15,17 +15,17 @@ class Obj
 public:
 	Obj();
 	Obj(
-		const LPCWSTR filename,
+		const std::string filename,
 		const ObjDependencies objDependencies,
 		const ObjGeometry<VertexPosNormTex> objGeometry);
 	~Obj();
 
-	const LPCWSTR getFileName();
+	const std::string getFileName();
 	const std::vector<std::string> getMTLs();
 	const ObjGeometry<VertexPosNormTex> getObjGeometry();
 protected:
 private:
-	LPCWSTR fileName_;
+	std::string fileName_;
 	ObjDependencies objDependencies_;
 	ObjGeometry<VertexPosNormTex> objGeometry_;
 };

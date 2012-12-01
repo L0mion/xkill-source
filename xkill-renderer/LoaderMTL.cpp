@@ -2,8 +2,8 @@
 #include "LoaderMTL.h"
 
 LoaderMTL::LoaderMTL(
-	const LPCWSTR pathMTL,
-	const LPCWSTR fileNameMTL) : Loader(pathMTL, fileNameMTL)
+	const std::string pathMTL,
+	const std::string fileNameMTL) : Loader(pathMTL, fileNameMTL)
 {
 	//Do nothing.
 }
@@ -18,9 +18,7 @@ bool LoaderMTL::init()
 
 	lineNum_ = 0;
 
-	std::wstring path = static_cast<std::wstring>(getFilePath());
-	std::wstring name = static_cast<std::wstring>(getFileName());
-	std::wstring fullPath = path + name;
+	std::string fullPath = getFilePath() + getFileName();
 	ifstream_.open(fullPath);
 
 	if(ifstream_.is_open())
@@ -61,7 +59,7 @@ bool LoaderMTL::parseMTL()
 		}
 		
 		if(!sucessfulLoad)
-			printFail();
+			printFail(curLine);
 	}
 
 	if(sucessfulLoad)
@@ -319,20 +317,15 @@ void LoaderMTL::getLine(std::string& line)
 	std::getline(ifstream_, line);
 	lineNum_++;
 }
-void LoaderMTL::printFail()
+void LoaderMTL::printFail(const std::string curLine)
 {
-	std::stringstream ss;
-	ss << lineNum_;
-	std::string line = ss.str();
-	std::wstring lineW;
-	lineW.assign(line.begin(), line.end());
+	std::string file	= getFilePath() + getFileName();
+	std::string lineNum = std::to_string(lineNum_);
+	std::string failed	= " parsing failed at line " + lineNum + ": " + curLine;
 
-	std::wstring file		= getFilePath();
-	std::wstring failed		= L" parsing failed at line ";
-	std::wstring errorMsg	= file + failed + lineW;
-	ERROR_MSG(errorMsg.c_str());
+	ERROR_MSG(failed);
 }
-bool LoaderMTL::isNumeric(std::string value)
+bool LoaderMTL::isNumeric(const std::string value)
 {
 	std::stringstream conv;
 	double tmp;

@@ -3,6 +3,7 @@
 
 #include <Windows.h>
 #include <fstream>
+#include <string>
 
 #include "MeshModel.h"
 #include "MeshGeometry.h"
@@ -11,17 +12,21 @@
 
 #include "MTL.h"
 #include "ObjGeometry.h"
+#include "Obj.h"
 
 class LoaderObj;
 class LoaderMTL;
+
+static const std::string PGY = ".pgy";
 
 class MeshMakerObj
 {
 public:
 	MeshMakerObj(
-		const LPCWSTR pathObj,
-		const LPCWSTR fileNameObj,
-		const LPCWSTR pathMTL);
+		const std::string pathObj,
+		const std::string pathPGY,
+		const std::string fileNameObj,
+		const std::string pathMTL);
 	~MeshMakerObj();
 
 	bool init();
@@ -30,19 +35,25 @@ public:
 protected:
 private:
 	bool loadObj();
-	bool parsePGY();
-	void makeMesh(Obj obj);
-	MeshGeometry<VertexPosNormTex> objGeoToMeshGeo(ObjGeometry<VertexPosNormTex> objGeo);
-	MeshSubset objGroupToMeshSubset(ObjGroup objGroup);
-
+	bool existingPGY(std::string pathPGY, std::string fileNamePGY);
+	MeshModel* makeMesh(Obj obj);
+	void makePGY(MeshModel* model);
+	
 	bool loadMTLs();
 	bool loadMTL(std::string fileNameMTL);
 	void loadMTLMaterials(MTL mtl);
+	
 	MeshMaterial MTLToMeshMaterial(MTLMaterial mtl);
+	MeshGeometry<VertexPosNormTex> objGeoToMeshGeo(ObjGeometry<VertexPosNormTex> objGeo);
+	MeshSubset objGroupToMeshSubset(ObjGroup objGroup);
 
-	LPCWSTR pathObj_;
-	LPCWSTR pathMTL_;
-	LPCWSTR fileNameObj_;
+	std::string getExpectedFileNamePGY();
+
+	std::string pathObj_;
+	std::string pathMTL_;
+	std::string pathPGY_;
+	std::string fileNameObj_;
+	std::string fileNamePGY_;
 
 	LoaderObj* loaderObj_;
 	LoaderMTL* loaderMtl_;

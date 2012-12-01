@@ -1,16 +1,22 @@
+#include <fstream>
+
 #include "LoaderObj.h"
 #include "LoaderMTL.h"
 #include "vertices.h"
 #include "MTLMaterial.h"
+#include "SimpleStringSplitter.h"
+
 #include "MeshMakerObj.h"
 
 MeshMakerObj::MeshMakerObj(
-	const LPCWSTR pathObj,
-	const LPCWSTR fileNameObj,
-	const LPCWSTR pathMTL)
+	const std::string pathObj,
+	const std::string pathPGY,
+	const std::string fileNameObj,
+	const std::string pathMTL)
 {
 	pathObj_		= pathObj;
 	pathMTL_		= pathMTL;
+	pathPGY_		= pathPGY;
 	fileNameObj_	= fileNameObj;
 
 	loaderObj_ = nullptr;
@@ -22,21 +28,26 @@ MeshMakerObj::~MeshMakerObj()
 {
 	if(loaderObj_)
 		delete loaderObj_;
-	if(loaderMtl_)
-		delete loaderMtl_;
+
+	//loaderMTL_ not deleted here, as it is managed in loadMTL.
 }
 
 bool MeshMakerObj::init()
 {
 	bool sucessfulLoad = true;
 
-	if(!parsePGY())
+	fileNamePGY_ = getExpectedFileNamePGY();
+
+	if(!existingPGY(pathPGY_, fileNamePGY_))
 	{
 		sucessfulLoad = loadObj();
 		if(sucessfulLoad)
 			sucessfulLoad = loadMTLs();
 		if(sucessfulLoad)
-			makeMesh(loaderObj_->getObj());
+		{
+			meshModel_ = makeMesh(loaderObj_->getObj());
+			makePGY(meshModel_);
+		}
 	}
 	else
 	{
@@ -60,14 +71,71 @@ bool MeshMakerObj::loadObj()
 
 	return sucessfulLoad;
 }
-bool MeshMakerObj::parsePGY()
+bool MeshMakerObj::existingPGY(std::string pathPGY, std::string fileNamePGY)
 {
-	return false; //tmep
+	std::string fullPathPGY = pathPGY + fileNamePGY; 
+
+	std::ifstream ifile(fullPathPGY);
+	return ifile.good();
 }
-void MeshMakerObj::makeMesh(Obj obj)
+MeshModel* MeshMakerObj::makeMesh(Obj obj)
 {
 	MeshGeometry<VertexPosNormTex> meshGeo = objGeoToMeshGeo(obj.getObjGeometry());
-	meshModel_ = new MeshModel(meshGeo, materials_);
+	return new MeshModel(meshGeo, materials_);
+}
+void MeshMakerObj::makePGY(MeshModel* model)
+{
+}
+
+bool MeshMakerObj::loadMTLs()
+{
+	bool sucessfulLoad = true;
+
+	std::vector<std::string> mtls = loaderObj_->getObj().getMTLs();
+	for(unsigned int i = 0; i < mtls.size() && sucessfulLoad; i++)
+		sucessfulLoad = loadMTL(mtls[i]);
+
+	return sucessfulLoad;
+}
+bool MeshMakerObj::loadMTL(std::string fileNameMTL)
+{
+	bool sucessfulLoad = true;
+
+	loaderMtl_ = new LoaderMTL(pathMTL_, fileNameMTL);
+	sucessfulLoad = loaderMtl_->init();
+
+	if(sucessfulLoad)
+		loadMTLMaterials(loaderMtl_->getMTL());
+
+	delete loaderMtl_; //clear memory
+
+	return sucessfulLoad;
+}
+void MeshMakerObj::loadMTLMaterials(MTL mtl)
+{
+	std::vector<MTLMaterial> mtlMats = mtl.getMaterials();
+	for(unsigned int i = 0; i < mtlMats.size(); i++)
+		materials_.push_back(MTLToMeshMaterial(mtlMats[i]));
+}
+
+MeshMaterial MeshMakerObj::MTLToMeshMaterial(MTLMaterial mtl)
+{
+	DirectX::XMFLOAT3 ambientColor	= mtl.getAmbientColor();
+	DirectX::XMFLOAT3 diffuseColor	= mtl.getDiffuseColor();
+	DirectX::XMFLOAT3 specularColor	= mtl.getSpecularColor();
+	DirectX::XMFLOAT3 reflectivity	= DirectX::XMFLOAT3(0.0f, 0.0f, 0.0f); //not defined in .obj?
+	float specPow	= mtl.getSpecularPow();
+	float alpha		= mtl.getAlpha();
+	
+	MeshMaterial meshMaterial(
+		ambientColor,
+		diffuseColor,
+		specularColor,
+		specPow,
+		reflectivity,
+		alpha != 0); //obs, float to bool convertion
+
+	return meshMaterial;
 }
 MeshGeometry<VertexPosNormTex> MeshMakerObj::objGeoToMeshGeo(ObjGeometry<VertexPosNormTex> objGeo)
 {
@@ -89,55 +157,7 @@ MeshSubset MeshMakerObj::objGroupToMeshSubset(ObjGroup objGroup)
 	return MeshSubset(ssName, ssMaterial, ssIndices);
 }
 
-bool MeshMakerObj::loadMTLs()
+std::string MeshMakerObj::getExpectedFileNamePGY()
 {
-	bool sucessfulLoad = true;
-
-	std::vector<std::string> mtls = loaderObj_->getObj().getMTLs();
-	for(unsigned int i = 0; i < mtls.size() && sucessfulLoad; i++)
-		sucessfulLoad = loadMTL(mtls[i]);
-
-	return sucessfulLoad;
-}
-bool MeshMakerObj::loadMTL(std::string fileNameMTL)
-{
-	bool sucessfulLoad = true;
-
-	std::wstring stemp = std::wstring(fileNameMTL.begin(), fileNameMTL.end());
-	LPCWSTR sw = stemp.c_str(); //get rid of this
-
-	loaderMtl_ = new LoaderMTL(pathMTL_, sw);
-	sucessfulLoad = loaderMtl_->init();
-
-	if(sucessfulLoad)
-		loadMTLMaterials(loaderMtl_->getMTL());
-
-	delete loaderMtl_; //clear memory
-
-	return sucessfulLoad;
-}
-void MeshMakerObj::loadMTLMaterials(MTL mtl)
-{
-	std::vector<MTLMaterial> mtlMats = mtl.getMaterials();
-	for(unsigned int i = 0; i < mtlMats.size(); i++)
-		materials_.push_back(MTLToMeshMaterial(mtlMats[i]));
-}
-MeshMaterial MeshMakerObj::MTLToMeshMaterial(MTLMaterial mtl)
-{
-	DirectX::XMFLOAT3 ambientColor	= mtl.getAmbientColor();
-	DirectX::XMFLOAT3 diffuseColor	= mtl.getDiffuseColor();
-	DirectX::XMFLOAT3 specularColor	= mtl.getSpecularColor();
-	DirectX::XMFLOAT3 reflectivity	= DirectX::XMFLOAT3(0.0f, 0.0f, 0.0f); //not defined in .obj?
-	float specPow	= mtl.getSpecularPow();
-	float alpha		= mtl.getAlpha();
-	
-	MeshMaterial meshMaterial(
-		ambientColor,
-		diffuseColor,
-		specularColor,
-		specPow,
-		reflectivity,
-		alpha != 0); //obs, float to bool convertion
-
-	return meshMaterial;
+	return fileNameObj_ + PGY;
 }

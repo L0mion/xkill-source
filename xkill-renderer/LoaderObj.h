@@ -85,8 +85,8 @@ public:
 	\param mlFilePath Path to desired .obj-file.
 	*/
 	LoaderObj(
-		const LPCWSTR filePath, 
-		const LPCWSTR fileName);
+		const std::string filePath, 
+		const std::string fileName);
 	//! Clears all vectors.
 	~LoaderObj();
 
@@ -181,10 +181,10 @@ private:
 	void getLine(std::string& line);
 	//! If something were to go avry, this method prints an error based on line number.
 	/*! \sa lineNum_ */
-	void printFail();
+	void printFail(const std::string curLine);
 	//! Checks whether or not a string contains an numeric value.
 	/*! \return True if entirely numeric, False if not. */
-	bool isNumeric(std::string value);
+	bool isNumeric(const std::string value);
 
 	void loadObj();
 

@@ -3,8 +3,8 @@
 #include <Loader.h>
 
 Loader::Loader(
-	const LPCWSTR filePath,
-	const LPCWSTR fileName)
+	const std::string filePath,
+	const std::string fileName)
 {
 	filePath_ = filePath;
 	fileName_ = fileName;
@@ -15,11 +15,11 @@ Loader::~Loader()
 		ifstream_.close();
 }
 
-const LPCWSTR Loader::getFilePath()
+const std::string Loader::getFilePath()
 {
 	return filePath_;
 }
-const LPCWSTR Loader::getFileName()
+const std::string Loader::getFileName()
 {
 	return fileName_;
 }

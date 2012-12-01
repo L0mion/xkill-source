@@ -6,7 +6,7 @@ Obj::Obj()
 	//Do nothing.
 }
 Obj::Obj(
-	const LPCWSTR moFilename,
+	const std::string moFilename,
 	const ObjDependencies objDependencies,
 	const ObjGeometry<VertexPosNormTex> moMeshGeometry)
 {
@@ -19,7 +19,7 @@ Obj::~Obj()
 	//Do nothing.
 }
 
-const LPCWSTR Obj::getFileName()
+const std::string Obj::getFileName()
 {
 	return fileName_;
 }
