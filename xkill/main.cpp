@@ -36,13 +36,13 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	AllocConsole();
 	SetStdHandle(STD_INPUT_HANDLE |STD_OUTPUT_HANDLE, window->getWindowHandle());
 
-	GameManager gm;
-	gm.init(window->getWindowHandle(),screenWidth,screenHeight);
+	//GameManager gm;
+	//gm.init(window->getWindowHandle(),screenWidth,screenHeight);
 	
 	while(window->getIsActive())
 	{
 		window->checkMessages();
-		gm.update(1.0f);
+		//gm.update(1.0f);
 	}
 
 	//RenderingComponent* renderingComponent = new RenderingComponent(

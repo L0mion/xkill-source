@@ -35,6 +35,7 @@ for some reason
 
 enum DLL_U EventType
 {
+	// Inform events
 	EVENT_A,
 	EVENT_B,
 	EVENT_MOUSE_MOVE,
@@ -44,6 +45,9 @@ enum DLL_U EventType
 	EVENT_GET_ATTRIBUTE,
 	EVENT_GET_WINDOW_RESOLUTION,
 	EVENT_GET_WINDOW_HANDLE,
+
+	// Utilities
+	EVENT_SHOW_MESSAGEBOX,
 
 	// this is needed, don't touch!
 	EVENT_LAST 
@@ -170,5 +174,20 @@ public:
 	float getAspectRatio()
 	{
 		return (float)width/(float)height;
+	}
+};
+
+/// Displays a messagebox with the message specified
+/**
+\ingroup events
+*/
+class DLL_U Event_showMessageBox : public Event
+{
+public:
+	std::string message;
+
+	Event_showMessageBox(std::string message) : Event(EVENT_SHOW_MESSAGEBOX)
+	{
+		this->message = message;
 	}
 };

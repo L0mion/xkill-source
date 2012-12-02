@@ -36,7 +36,7 @@ public:
 		SUBSCRIBE_TO_EVENT(this, EVENT_GET_WINDOW_RESOLUTION);
 
 		// init game
-		gameManager.init(this->winId(), 800, 800);
+		gameManager.init(this->winId());
 		gameTimer.reset();
 		updateTimer = new QTimer(this);
 		updateTimer->setInterval(0);

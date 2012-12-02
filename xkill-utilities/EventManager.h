@@ -68,6 +68,13 @@ EventManager::getInstance()->sendEvent(EventPointer);
 #define SUBSCRIBE_TO_EVENT(Subscriber,EventType)					\
 EventManager::getInstance()->addObserver(Subscriber, EventType);
 
+// Fetches a owners of a specific Attribute from AttributeManager
+#define SHOW_MESSAGEBOX(Message)									\
+{																	\
+	Event_showMessageBox e(Message);								\
+	EventManager::getInstance()->sendEvent(&e);						\
+}
+
 // Fetches a vector<AttributeType>* of a specific Attribute
 // from AttributeManager.
 #define GET_ATTRIBUTES(AttributePointer, AttributeType, Enum)		\

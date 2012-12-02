@@ -5,6 +5,7 @@
 
 GameComponent::GameComponent(void)
 {
+	//SHOW_MESSAGEBOX("Game has started");
 }
 
 GameComponent::~GameComponent(void)

@@ -19,8 +19,6 @@ BulletPhysicsComponent::BulletPhysicsComponent()
 	physicsAttributes_ = nullptr;
 	physicsObjects_ = nullptr;
 	collisionShapeManager_ = nullptr;
-	EventManager::getInstance();
-
 }
 
 BulletPhysicsComponent::~BulletPhysicsComponent()

@@ -3,6 +3,7 @@
 
 #include <QtGui/QMainWindow>
 #include <QMouseEvent> // needed to grab mouse input
+#include <QMessageBox> // used to display info dialogs
 #include <xkill-utilities/IObserver.h>
 #include <xkill-utilities/EventManager.h>
 #include "ui_MainWindow.h"
@@ -26,22 +27,23 @@ public:
 		MainWindow::setWindowTitle("XKILL");
 		resize(800, 600);
 
-		// setup signals and slots
-		connect(ui.actionFullscreen, SIGNAL(toggled(bool)), this, SLOT(toggleFullScreen(bool)));
-		connect(ui.actionCap_FPS, SIGNAL(toggled(bool)), gameWidget, SLOT(slot_toggleCapFPS(bool)));
-		ui.actionCap_FPS->setChecked(true);
-		connect(ui.actionQuit, SIGNAL(triggered()), this, SLOT(close()));
-		connect(gameWidget, SIGNAL(signal_fpsChanged(QString)), this, SLOT(slot_setTitle(QString)));
+		// subscribe to events
+		SUBSCRIBE_TO_EVENT(this, EVENT_SHOW_MESSAGEBOX);
 
 		// init game
 		AllocConsole();
 		SetStdHandle(STD_INPUT_HANDLE |STD_OUTPUT_HANDLE, this->winId());
 		gameWidget = new GameWidget(this);
 		this->setCentralWidget(gameWidget);
-
-		// enable mouse tracking
 		setMouseTracking(true);
 		hasMouseLock = false;
+
+		// setup signals and slots
+		connect(ui.actionFullscreen, SIGNAL(toggled(bool)), this, SLOT(toggleFullScreen(bool)));
+		connect(ui.actionCap_FPS, SIGNAL(toggled(bool)), gameWidget, SLOT(slot_toggleCapFPS(bool)));
+		ui.actionCap_FPS->setChecked(true);
+		connect(ui.actionQuit, SIGNAL(triggered()), this, SLOT(close()));
+		connect(gameWidget, SIGNAL(signal_fpsChanged(QString)), this, SLOT(slot_setTitle(QString)));
 	}
 	~MainWindow()
 	{
@@ -54,6 +56,22 @@ public:
 
 	void onEvent(Event* e)
 	{
+		EventType type = e->getType();
+		switch (type) 
+		{
+		case EVENT_SHOW_MESSAGEBOX:
+			event_showMessageBox((Event_showMessageBox*)e);
+			break;
+		default:
+			break;
+		}
+	}
+
+	void event_showMessageBox(Event_showMessageBox* e)
+	{
+		QString message(e->message.c_str());
+		
+		QMessageBox::information(0, "Error", message);
 	}
 
 protected:
@@ -67,7 +85,6 @@ protected:
 			QCursor::setPos(mouseAnchor.x(), mouseAnchor.y()); // anchor mouse again
 			int dx = e->globalX() - mouseAnchor.x();
 			int dy = e->globalY() - mouseAnchor.y();
-			
 
 			// send mouse move event to relevant observers
 			Event_MouseMove e(dx, dy);

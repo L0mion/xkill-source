@@ -30,6 +30,7 @@ so every component should strive to work indepentently.
 #include "EntityManager.h"
 #include "dllArchitecture.h"
 
+
 /// The entry point of the architecture
 /** 
 GameManager is responsible for setting up the initial game state.
@@ -60,7 +61,7 @@ public:
 		SAFE_DELETE(entityManager_);
 	}
 
-	bool init(HWND windowHandle, unsigned int screenWidth, unsigned int screenHeight)
+	bool init(HWND windowHandle)
 	{
 		entityManager_ = new EntityManager();
 		ENTITYTYPE listOfEntitiesToBeCreated[] =
