@@ -4,6 +4,10 @@
 
 #include "MeshModel.h"
 
+MeshModel::MeshModel()
+{
+	//Do nothing
+}
 MeshModel::MeshModel(
 	const MeshGeometry<VertexPosNormTex>	geometry,
 	const std::vector<MeshMaterial>			materials)

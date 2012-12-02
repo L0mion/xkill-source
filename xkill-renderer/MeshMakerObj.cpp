@@ -5,6 +5,9 @@
 #include "vertices.h"
 #include "MTLMaterial.h"
 #include "SimpleStringSplitter.h"
+#include "WriterPGY.h"
+#include "LoaderPGY.h"
+#include "PGYFormat.h"
 
 #include "MeshMakerObj.h"
 
@@ -21,8 +24,6 @@ MeshMakerObj::MeshMakerObj(
 
 	loaderObj_ = nullptr;
 	loaderMtl_ = nullptr;
-
-	meshModel_ = nullptr;
 }
 MeshMakerObj::~MeshMakerObj()
 {
@@ -36,28 +37,26 @@ bool MeshMakerObj::init()
 {
 	bool sucessfulLoad = true;
 
-	fileNamePGY_ = getFileNamePGY();
+	std::string fileNamePGY = getFileNamePGY();
 
-	if(!existingPGY(pathPGY_, fileNamePGY_))
+	if(!existingPGY(pathPGY_, fileNamePGY))
 	{
 		sucessfulLoad = loadObj();
 		if(sucessfulLoad)
 			sucessfulLoad = loadMTLs();
 		if(sucessfulLoad)
 		{
-			meshModel_ = makeMesh(loaderObj_->getObj());
-			makePGY(meshModel_);
+			meshModel_		= makeMesh(loaderObj_->getObj());
+			sucessfulLoad	= makePGY(meshModel_);
 		}
 	}
 	else
-	{
-		//Pase pgy
-	}
+		meshModel_ = loadPGY();
 
 	return sucessfulLoad;
 }
 
-MeshModel* MeshMakerObj::getMesh()
+MeshModel MeshMakerObj::getMesh()
 {
 	return meshModel_;
 }
@@ -71,6 +70,23 @@ bool MeshMakerObj::loadObj()
 
 	return sucessfulLoad;
 }
+MeshModel MeshMakerObj::loadPGY()
+{
+	MeshModel loadedMesh;
+	bool sucessfulLoad = true;
+	
+	std::string fileNamePgy = getFileNamePGY();
+	LoaderPGY pgyLoader(
+		pathPGY_,
+		fileNamePgy);
+	sucessfulLoad = pgyLoader.init();
+
+	if(sucessfulLoad)
+		loadedMesh = pgyLoader.getMeshModel();
+
+	return loadedMesh; //ugly, fix this
+}
+
 bool MeshMakerObj::existingPGY(std::string pathPGY, std::string fileNamePGY)
 {
 	std::string fullPathPGY = pathPGY + fileNamePGY; 
@@ -78,26 +94,23 @@ bool MeshMakerObj::existingPGY(std::string pathPGY, std::string fileNamePGY)
 	std::ifstream ifile(fullPathPGY);
 	return ifile.good();
 }
-MeshModel* MeshMakerObj::makeMesh(Obj obj)
+MeshModel MeshMakerObj::makeMesh(Obj obj)
 {
 	MeshGeometry<VertexPosNormTex> meshGeo = objGeoToMeshGeo(obj.getObjGeometry());
-	return new MeshModel(meshGeo, materials_);
-}
-void MeshMakerObj::makePGY(MeshModel* model)
-{
-	std::ofstream pgy(
-		fileNamePGY_, 
-		std::ios::out | std::ios::binary);
 	
-	char fileType[4] = "pgy";
-	PGYHeader header;
-	for(unsigned int i = 0; i < 4; i++)
-		header.fileType[i] = fileType[i];
-	header.versionNum = 0.1f;
+	MeshModel model(meshGeo, materials_);
+	return model;
+}
+bool MeshMakerObj::makePGY(MeshModel model)
+{
+	std::string fileNamePgy = getFileNamePGY();
+	WriterPGY pgyWriter(
+		meshModel_,
+		pathPGY_,
+		fileNamePgy);
+	bool sucessfulWrite = pgyWriter.init();
 
-	pgy.write(reinterpret_cast<const char*>(&header), sizeof(PGYHeader));
-
-	pgy.close();
+	return sucessfulWrite;
 }
 
 bool MeshMakerObj::loadMTLs()
@@ -172,5 +185,5 @@ MeshSubset MeshMakerObj::objGroupToMeshSubset(ObjGroup objGroup)
 
 std::string MeshMakerObj::getFileNamePGY()
 {
-	return fileNameObj_ + PGY;
+	return fileNameObj_ + PGY_SUFFIX;
 }

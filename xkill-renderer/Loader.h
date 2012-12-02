@@ -5,7 +5,6 @@
 	Group responsible for defining and loading meshes
 	\ingroup xkill-renderer*/
 
-#include <Windows.h>
 #include <fstream>
 #include <string>
 

@@ -3,7 +3,7 @@
 
 #include <vector>
 
-class MeshSubset;
+#include "MeshSubset.h"
 
 template <typename Vertex>
 class MeshGeometry

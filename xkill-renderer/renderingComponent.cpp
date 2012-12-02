@@ -461,10 +461,10 @@ HRESULT RenderingComponent::initMeshManagement()
 	meshManagement_ = new MeshManagement();
 	bool sucessfulInit = meshManagement_->init();
 
-	MeshModel* mesh = meshManagement_->getTempModel();
+	MeshModel mesh = meshManagement_->getTempModel();
 
-	std::vector<VertexPosNormTex> vertices = mesh->getGeometry().getVertices();
-	std::vector<MeshSubset> subsets = mesh->getGeometry().getSubsets();
+	std::vector<VertexPosNormTex> vertices = mesh.getGeometry().getVertices();
+	std::vector<MeshSubset> subsets = mesh.getGeometry().getSubsets();
 
 	std::vector<unsigned int> indices = subsets.at(1).getIndices();
 

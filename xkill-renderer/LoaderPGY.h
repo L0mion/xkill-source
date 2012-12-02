@@ -2,6 +2,8 @@
 #define XKILL_RENDERER_LOADERPGY_H
 
 #include "Loader.h"
+#include "MeshModel.h"
+#include "PGYFormat.h"
 
 class LoaderPGY : public Loader
 {
@@ -11,9 +13,13 @@ public:
 		const std::string fileName);
 	~LoaderPGY();
 
-	void init();
+	bool init();
+	const PGYHeader loadHeader();
+
+	const MeshModel getMeshModel();
 protected:
 private:
+	MeshModel meshModel_;
 };
 
 #endif //XKILL_RENDERER_LOADERPGY_H

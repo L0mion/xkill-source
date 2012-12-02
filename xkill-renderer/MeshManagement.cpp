@@ -12,9 +12,6 @@ MeshManagement::~MeshManagement()
 {
 	if(makerObj_)
 		delete makerObj_;
-
-	for(unsigned int i = 0; i < models_.size(); i++)
-		SAFE_DELETE(models_[i]);
 }
 
 bool MeshManagement::init()

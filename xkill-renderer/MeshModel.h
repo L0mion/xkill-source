@@ -4,15 +4,13 @@
 #include <vector>
 
 #include "MeshGeometry.h"
-
-class MeshMaterial;
-class MeshSubset;
-
-struct VertexPosNormTex;
+#include "MeshMaterial.h"
+#include "vertices.h"
 
 class MeshModel
 {
 public:
+	MeshModel();
 	MeshModel(
 		const MeshGeometry<VertexPosNormTex>	geometry,
 		const std::vector<MeshMaterial>			materials);

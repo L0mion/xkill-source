@@ -29,13 +29,16 @@ public:
 
 	bool init();
 
-	MeshModel* getMesh();
+	MeshModel getMesh();
 protected:
 private:
-	bool loadObj();
+	bool		loadObj();
+	MeshModel	loadPGY();
+
 	bool existingPGY(std::string pathPGY, std::string fileNamePGY);
-	MeshModel* makeMesh(Obj obj);
-	void makePGY(MeshModel* model);
+	
+	MeshModel	makeMesh(Obj obj);
+	bool		makePGY(MeshModel model);
 	
 	bool loadMTLs();
 	bool loadMTL(std::string fileNameMTL);
@@ -51,7 +54,6 @@ private:
 	std::string pathMTL_;
 	std::string pathPGY_;
 	std::string fileNameObj_;
-	std::string fileNamePGY_;
 
 	LoaderObj* loaderObj_;
 	LoaderMTL* loaderMtl_;
@@ -60,7 +62,7 @@ private:
 	std::vector<MeshMaterial> materials_;
 
 	/*Result*/
-	MeshModel* meshModel_;
+	MeshModel meshModel_;
 };
 
 #endif //XKILL_RENDERER_MESHMAKER_H

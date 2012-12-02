@@ -5,8 +5,9 @@
 #include <d3dInterface.h>
 #include <vector>
 
+#include "MeshModel.h"
+
 class MeshMakerObj;
-class MeshModel;
 
 static const std::string bthPath		= "../../xkill-resources/xkill-models/";
 static const std::string pgyPath		= "";
@@ -22,14 +23,14 @@ public:
 	bool init();
 	void reset();
 
-	MeshModel* getTempModel() { return models_.at(0); } //totally temp
+	MeshModel getTempModel() { return models_.at(0); } //totally temp
 protected:
 private:
 	/*Makers*/
 	MeshMakerObj* makerObj_;
 
 	/*Loaded models*/
-	std::vector<MeshModel*> models_;
+	std::vector<MeshModel> models_;
 };
 
 #endif //XKILL_RENDERER_MESHMANAGEMENT_H
