@@ -21,32 +21,27 @@ private:
 public:
 	MainWindow(QWidget *parent = 0, Qt::WFlags flags = 0) : QMainWindow(parent, flags)
 	{
-		// enable mouse tracking
-		setMouseTracking(true);
-		hasMouseLock = false;
-
 		// create UI generated from XML file
 		ui.setupUi(this);
 		MainWindow::setWindowTitle("XKILL");
 		resize(800, 600);
 
-		// init console
-		AllocConsole();
-
-		// init gameWidget
-		gameWidget = new GameWidget(this);
-		this->setCentralWidget(gameWidget);
-
-		SetStdHandle(STD_INPUT_HANDLE |STD_OUTPUT_HANDLE, this->winId());
-
-		// show fps-counter on title bar
-		connect(gameWidget, SIGNAL(signal_fpsChanged(QString)), this, SLOT(slot_setTitle(QString)));
-		
-		// connect functionality with buttons
+		// setup signals and slots
 		connect(ui.actionFullscreen, SIGNAL(toggled(bool)), this, SLOT(toggleFullScreen(bool)));
 		connect(ui.actionCap_FPS, SIGNAL(toggled(bool)), gameWidget, SLOT(slot_toggleCapFPS(bool)));
 		ui.actionCap_FPS->setChecked(true);
 		connect(ui.actionQuit, SIGNAL(triggered()), this, SLOT(close()));
+		connect(gameWidget, SIGNAL(signal_fpsChanged(QString)), this, SLOT(slot_setTitle(QString)));
+
+		// init game
+		AllocConsole();
+		SetStdHandle(STD_INPUT_HANDLE |STD_OUTPUT_HANDLE, this->winId());
+		gameWidget = new GameWidget(this);
+		this->setCentralWidget(gameWidget);
+
+		// enable mouse tracking
+		setMouseTracking(true);
+		hasMouseLock = false;
 	}
 	~MainWindow()
 	{
