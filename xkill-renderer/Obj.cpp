@@ -6,9 +6,9 @@ Obj::Obj()
 	//Do nothing.
 }
 Obj::Obj(
-	const std::string moFilename,
-	const ObjDependencies objDependencies,
-	const ObjGeometry<VertexPosNormTex> moMeshGeometry)
+	const std::string		moFilename,
+	const ObjDependencies	objDependencies,
+	const ObjGeometry		moMeshGeometry)
 {
 	this->fileName_			= moFilename;
 	this->objDependencies_	= objDependencies;
@@ -27,7 +27,7 @@ const std::vector<std::string> Obj::getMTLs()
 {
 	return objDependencies_.getMTLFiles();
 }
-const ObjGeometry<VertexPosNormTex> Obj::getObjGeometry()
+const ObjGeometry Obj::getObjGeometry()
 {
 	return objGeometry_;
 }

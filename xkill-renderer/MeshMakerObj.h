@@ -45,7 +45,7 @@ private:
 	void loadMTLMaterials(MTL mtl);
 	
 	MeshMaterial MTLToMeshMaterial(MTLMaterial mtl);
-	MeshGeometry<VertexPosNormTex> objGeoToMeshGeo(ObjGeometry<VertexPosNormTex> objGeo);
+	MeshGeometry<VertexPosNormTex> objGeoToMeshGeo(ObjGeometry objGeo);
 	MeshSubset objGroupToMeshSubset(ObjGroup objGroup);
 
 	std::string getFileNamePGY();

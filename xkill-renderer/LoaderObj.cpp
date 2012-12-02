@@ -381,7 +381,7 @@ bool LoaderObj::isNumeric(const std::string value)
 
 void LoaderObj::loadObj()
 {
-	ObjGeometry<VertexPosNormTex> mlGeometry(vertices_);
+	ObjGeometry mlGeometry(vertices_);
 	for(unsigned int i = 0; i < groups_.size(); i++)
 		mlGeometry.pushGroup(groups_[i]);
 

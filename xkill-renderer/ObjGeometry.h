@@ -4,8 +4,8 @@
 #include <vector>
 
 #include "ObjGroup.h"
+#include "vertices.h"
 
-template <typename Vertex>
 class ObjGeometry
 {
 public:
@@ -13,7 +13,7 @@ public:
 	{
 		//Do nothing.
 	}
-	ObjGeometry(const std::vector<Vertex> vertices)
+	ObjGeometry(const std::vector<VertexPosNormTex> vertices)
 	{
 		this->vertices_ = vertices;
 	}
@@ -27,12 +27,12 @@ public:
 		objGroups_.push_back(mg);
 	}
 
-	const std::vector<Vertex>		getVertices()	{ return vertices_;		}
-	const std::vector<ObjGroup>		getObjGroups()	{ return objGroups_;	}
+	const std::vector<VertexPosNormTex>		getVertices()	{ return vertices_;		}
+	const std::vector<ObjGroup>				getObjGroups()	{ return objGroups_;	}
 protected:
 private:
-	std::vector<Vertex>			vertices_;
-	std::vector<ObjGroup>		objGroups_;
+	std::vector<VertexPosNormTex>			vertices_;
+	std::vector<ObjGroup>					objGroups_;
 };
 
 /*

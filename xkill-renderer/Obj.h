@@ -15,19 +15,19 @@ class Obj
 public:
 	Obj();
 	Obj(
-		const std::string filename,
-		const ObjDependencies objDependencies,
-		const ObjGeometry<VertexPosNormTex> objGeometry);
+		const std::string		filename,
+		const ObjDependencies	objDependencies,
+		const ObjGeometry		objGeometry);
 	~Obj();
 
 	const std::string getFileName();
 	const std::vector<std::string> getMTLs();
-	const ObjGeometry<VertexPosNormTex> getObjGeometry();
+	const ObjGeometry getObjGeometry();
 protected:
 private:
-	std::string fileName_;
-	ObjDependencies objDependencies_;
-	ObjGeometry<VertexPosNormTex> objGeometry_;
+	std::string		fileName_;
+	ObjDependencies	objDependencies_;
+	ObjGeometry		objGeometry_;
 };
 
 #endif //XKILL_RENDERER_OBJ_H

@@ -163,7 +163,7 @@ MeshMaterial MeshMakerObj::MTLToMeshMaterial(MTLMaterial mtl)
 
 	return meshMaterial;
 }
-MeshGeometry<VertexPosNormTex> MeshMakerObj::objGeoToMeshGeo(ObjGeometry<VertexPosNormTex> objGeo)
+MeshGeometry<VertexPosNormTex> MeshMakerObj::objGeoToMeshGeo(ObjGeometry objGeo)
 {
 	std::vector<ObjGroup>			objGroups	= objGeo.getObjGroups();
 	std::vector<VertexPosNormTex>	objVertices = objGeo.getVertices();
