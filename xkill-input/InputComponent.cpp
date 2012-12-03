@@ -35,7 +35,7 @@ bool InputComponent::init(HWND windowHandle, std::vector<InputAttribute>* inputA
 
 void InputComponent::onEvent(Event* e)
 {
-	if(e->getType() == EventType::RUMBLE)
+	if(e->getType() == EventType::EVENT_RUMBLE)
 	{
 		Event_Rumble* er = (Event_Rumble*)e;
 
@@ -104,5 +104,9 @@ void InputComponent::handleInput(float delta)
 			EventManager::getInstance()->sendEvent(er);
 			delete er;
 		}
+
+		//Projectile test
+		if(state.buttons[0].isReleased())													   
+			inputAttributes_->at(i).fire = true;
 	}
 }

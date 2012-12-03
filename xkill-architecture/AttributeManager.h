@@ -26,7 +26,6 @@ public:
 	AttributeStorage<CameraAttribute>			cameraAttributes_;
 	AttributeStorage<InputAttribute>			inputAttributes_;
 	AttributeStorage<PlayerAttribute>			playerAttributes_;
-	AttributeStorage<CameraMovementAttribute>	cameraMovementAttribute_;
 	AttributeStorage<BoundingAttribute>			boundingAttributes_;
 
 	static AttributeManager* getInstance()

@@ -8,7 +8,6 @@
 CameraComponent::CameraComponent()
 {
 	cameraAttributes_	= nullptr;
-	cameraMovementAttribute_	= nullptr;
 }
 
 CameraComponent::~CameraComponent()
@@ -75,10 +74,6 @@ void CameraComponent::onUpdate(float delta)
 		cameras_[i].updateView();
 		
 		memcpy(cameraAttributes_->at(i).mat_view, cameras_[i].getView().m, 16*4);
-
-		//cameras_[i].yaw(cameraMovementAttribute_->at(i).rotation[0]);
-		//cameras_[i].pitch(cameraMovementAttribute_->at(i).rotation[1]);
-		//cameras_[i].setPosition(cameraMovementAttribute_->at(i).position);
 	}
 }
 
