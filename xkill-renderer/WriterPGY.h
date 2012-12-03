@@ -19,6 +19,7 @@ public:
 protected:
 private:
 	void writeHeader();
+	void writeMaterials();
 
 	MeshModel subject_;
 };

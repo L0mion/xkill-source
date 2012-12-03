@@ -1,4 +1,4 @@
-#include "PGYFormat.h"
+#include "SpecsPGY.h"
 
 #include "WriterPGY.h"
 
@@ -43,4 +43,8 @@ void WriterPGY::writeHeader()
 	header.versionNum = 0.1f;
 
 	ofstream_.write(reinterpret_cast<const char*>(&header), sizeof(header));
+}
+void WriterPGY::writeMaterials()
+{
+	//MeshMaterial;
 }

@@ -7,7 +7,7 @@
 #include "SimpleStringSplitter.h"
 #include "WriterPGY.h"
 #include "LoaderPGY.h"
-#include "PGYFormat.h"
+#include "SpecsPGY.h"
 
 #include "MeshMakerObj.h"
 
@@ -185,5 +185,5 @@ MeshSubset MeshMakerObj::objGroupToMeshSubset(ObjGroup objGroup)
 
 std::string MeshMakerObj::getFileNamePGY()
 {
-	return fileNameObj_ + PGY_SUFFIX;
+	return fileNameObj_ + PGY_SPECS_SUFFIX;
 }

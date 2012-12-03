@@ -3,7 +3,7 @@
 
 #include "Loader.h"
 #include "MeshModel.h"
-#include "PGYFormat.h"
+#include "SpecsPGY.h"
 
 class LoaderPGY : public Loader
 {

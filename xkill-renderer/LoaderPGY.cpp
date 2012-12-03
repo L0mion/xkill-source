@@ -1,6 +1,6 @@
 #include "LoaderPGY.h"
 
-#include "PGYFormat.h"
+#include "SpecsPGY.h"
 
 LoaderPGY::LoaderPGY(
 	const std::string filePath, 
