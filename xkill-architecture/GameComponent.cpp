@@ -41,6 +41,8 @@ void GameComponent::onUpdate(float delta)
 			SpatialAttribute* spatial	=	&allSpatial		->	at(render->spatialAttribute.index);
 			PositionAttribute* position	=	&allPosition	->	at(spatial->positionAttribute.index);
 			
+
+
 			
 			//
 			// Proceed with calculation as normal

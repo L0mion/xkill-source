@@ -205,6 +205,7 @@ struct DLL_U PlayerAttribute : public IAttribute
 	int totalExecutionTime; //!< Total execution time of the player process. The game session winner is the player with the most total execution time as awared by the scheduler.
 
 	AttributePointer renderAttribute;
+	AttributePointer inputAttribute;
 };
 
 

@@ -105,6 +105,7 @@ public:
 		playerAttribute->cycleSteals = 0;
 		playerAttribute->totalExecutionTime = 0;
 		playerAttribute->renderAttribute = AttributeManager::getInstance()->renderAttributes_.getLatestAttributeAsAttributePointer(); //Bind the last created render attribute to the player attribut
+		playerAttribute->inputAttribute = AttributeManager::getInstance()->inputAttributes_.getLatestAttributeAsAttributePointer();
 
 		//Increment local static variable
 		playerId++;

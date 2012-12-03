@@ -41,7 +41,6 @@ enum DLL_U EventType
 	EVENT_MOUSE_MOVE,
 	PLAYSOUND,
 	RUMBLE,
-	FIREPROJECTILE,
 
 	// Get events
 	EVENT_GET_ATTRIBUTE,
@@ -201,16 +200,5 @@ public:
 	Event_showMessageBox(std::string message) : Event(EVENT_SHOW_MESSAGEBOX)
 	{
 		this->message = message;
-	}
-};
-
-class DLL_U Event_fireProjectile : public Event
-{
-public:
-	int playerId;
-
-	Event_fireProjectile(int playerId) : Event(FIREPROJECTILE)
-	{
-		this->playerId = playerId;
 	}
 };
