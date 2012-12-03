@@ -96,7 +96,6 @@ public:
 		physicsAttribute->spatialAttribute = AttributeManager::getInstance()->spatialAttributes_.getLatestAttributeAsAttributePointer();
 		
 		physicsAttribute->velocity[0] = 1.0f;
-		e->position3;
 		
 		return entity;
 	}
