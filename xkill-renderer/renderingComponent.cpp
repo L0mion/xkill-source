@@ -9,6 +9,7 @@
 #include "renderingUtilities.h"
 #include "d3dDebug.h"
 #include "CBManagement.h"
+#include "LightManagement.h"
 #include "objLoaderBasic.h"
 #include "mathBasic.h"
 #include "vertices.h"
@@ -32,11 +33,12 @@ RenderingComponent::RenderingComponent(
 	fxManagement_		= nullptr;
 	cbManagement_		= nullptr; 
 	viewportManagement_ = nullptr;
+	lightManagement_	= nullptr;
 	
 	for(unsigned int i = 0; i < GBUFFERID_NUM_BUFFERS; i++)
 		gBuffers_[i] = nullptr;
 	
-	d3dDebug_		= nullptr;
+	d3dDebug_	= nullptr;
 
 	device_		= nullptr;
 	devcon_		= nullptr;
@@ -79,6 +81,7 @@ RenderingComponent::~RenderingComponent()
 	SAFE_DELETE(cbManagement_);
 	SAFE_DELETE(fxManagement_);
 	SAFE_DELETE(viewportManagement_);
+	SAFE_DELETE(lightManagement_);
 
 	for(unsigned int i = 0; i < GBUFFERID_NUM_BUFFERS; i++)
 		SAFE_DELETE(gBuffers_[i]);
@@ -90,7 +93,6 @@ RenderingComponent::~RenderingComponent()
 	SAFE_DELETE(vertices_);
 	SAFE_DELETE(objLoader_);
 }
-
 HRESULT RenderingComponent::init()
 {
 	HRESULT hr = S_OK;
@@ -113,6 +115,8 @@ HRESULT RenderingComponent::init()
 		hr = initFXManagement();
 	if(SUCCEEDED(hr))
 		hr = initCBManagement();
+	if(SUCCEEDED(hr))
+		hr = initLightManagement();
 	if(SUCCEEDED(hr)) //temp
 		hr = initVertexBuffer();
 //	if(SUCCEEDED(hr))
@@ -120,7 +124,6 @@ HRESULT RenderingComponent::init()
 
 	return hr;
 }
-
 void RenderingComponent::reset()
 {
 	if(swapChain_)
@@ -135,6 +138,8 @@ void RenderingComponent::reset()
 		viewportManagement_->reset();
 	if(cbManagement_)
 		cbManagement_->reset();
+	if(lightManagement_)
+		lightManagement_->reset();
 
 	for(unsigned int i = 0; i < GBUFFERID_NUM_BUFFERS; i++)
 		if(gBuffers_[i])
@@ -162,9 +167,22 @@ void RenderingComponent::onUpdate(float delta)
 	clearGBuffers();
 	for(unsigned int i=0; i<cameraAttributes_->size(); i++)
 	{
+		DirectX::XMFLOAT4X4 view(cameraAttributes_->at(i).mat_view);
+		DirectX::XMFLOAT4X4 projection(cameraAttributes_->at(i).mat_projection);
+
+		DirectX::CXMMATRIX	cxmView = DirectX::XMLoadFloat4x4(&view);
+		DirectX::XMVECTOR	vDeterminant = DirectX::XMMatrixDeterminant(cxmView);
+		DirectX::XMMATRIX	xmViewInverse = DirectX::XMMatrixInverse(&vDeterminant, cxmView);
+		DirectX::XMFLOAT4X4 viewInverse;
+		DirectX::XMStoreFloat4x4(&viewInverse, xmViewInverse);
+		
+		SpatialAttribute*	spatialAttribute = static_cast<SpatialAttribute*>(cameraAttributes_->at(i).spatialAttribute.host);
+		PositionAttribute*	positionAttribute = static_cast<PositionAttribute*>(spatialAttribute->positionAttribute.host);
+		DirectX::XMFLOAT3	eyePosition(positionAttribute->position);
+		//DirectX::XMFLOAT3 eyePosition(0.0f, 0.0f, -50.0f);
+
 		setViewport(i);
-		renderToGBuffer(DirectX::XMFLOAT4X4(cameraAttributes_->at(i).mat_view),
-			DirectX::XMFLOAT4X4(cameraAttributes_->at(i).mat_projection));
+		renderToGBuffer(view, viewInverse, projection, eyePosition);
 	}
 	
 	renderToBackBuffer();
@@ -172,10 +190,13 @@ void RenderingComponent::onUpdate(float delta)
 
 void RenderingComponent::render(DirectX::XMFLOAT4X4 view, DirectX::XMFLOAT4X4 projection)
 {
-	renderToGBuffer(view, projection);
+	//renderToGBuffer(view, projection);
 	renderToBackBuffer();
 }
-void RenderingComponent::renderToGBuffer(DirectX::XMFLOAT4X4 view, DirectX::XMFLOAT4X4 projection)
+void RenderingComponent::renderToGBuffer(DirectX::XMFLOAT4X4 view,
+										 DirectX::XMFLOAT4X4 viewInverse,
+										 DirectX::XMFLOAT4X4 projection,
+										 DirectX::XMFLOAT3	eyePosition)
 {
 	FLOAT black[]	= {0.0f, 0.0f, 0.0f, 1.0f };
 	FLOAT red[]		= {1.0f, 0.0f, 0.0f, 1.0f };
@@ -192,7 +213,7 @@ void RenderingComponent::renderToGBuffer(DirectX::XMFLOAT4X4 view, DirectX::XMFL
 	DirectX::XMFLOAT4X4 viewProj;
 	DirectX::XMStoreFloat4x4(&viewProj, mViewProj);
 
-	cbManagement_->getCBPerFrame()->update(devcon_, viewProj);
+	cbManagement_->getCBPerFrame()->update(devcon_, viewProj, view, viewInverse, projection, eyePosition);
 	cbManagement_->getCBPerFrame()->vsSet(devcon_);
 
 	ID3D11RenderTargetView* renderTargets[GBUFFERID_NUM_BUFFERS];
@@ -234,6 +255,8 @@ void RenderingComponent::renderToBackBuffer()
 	ID3D11UnorderedAccessView* uav[] = { uavBackBuffer_ };
 	devcon_->CSSetUnorderedAccessViews(0, 1, uav, nullptr);
 
+	lightManagement_->setLightSRVCS(devcon_, 2);
+
 	ID3D11ShaderResourceView* resourceViews[GBUFFERID_NUM_BUFFERS];
 	for(int i=0; i<GBUFFERID_NUM_BUFFERS; i++)
 		resourceViews[i] = gBuffers_[i]->getSRV();
@@ -268,8 +291,8 @@ void RenderingComponent::clearGBuffers()
 	for(int i=0; i<GBUFFERID_NUM_BUFFERS; i++)
 		renderTargets[i] = gBuffers_[i]->getRTV();
 	
-	devcon_->ClearRenderTargetView(renderTargets[GBUFFERID_ALBEDO], green);
-	devcon_->ClearRenderTargetView(renderTargets[GBUFFERID_NORMAL], blue);
+	devcon_->ClearRenderTargetView(renderTargets[GBUFFERID_ALBEDO], black);
+	devcon_->ClearRenderTargetView(renderTargets[GBUFFERID_NORMAL], black);
 }
 
 LPCWSTR RenderingComponent::featureLevelToString(D3D_FEATURE_LEVEL featureLevel)
@@ -457,9 +480,9 @@ HRESULT RenderingComponent::initSSDefault()
 	D3D11_SAMPLER_DESC sampDesc;
     ZeroMemory(&sampDesc, sizeof(sampDesc));
 	sampDesc.Filter		= D3D11_FILTER_MIN_MAG_MIP_LINEAR;
-    sampDesc.AddressU	= D3D11_TEXTURE_ADDRESS_WRAP;
-    sampDesc.AddressV	= D3D11_TEXTURE_ADDRESS_WRAP;
-    sampDesc.AddressW	= D3D11_TEXTURE_ADDRESS_WRAP;
+    sampDesc.AddressU	= D3D11_TEXTURE_ADDRESS_CLAMP;
+    sampDesc.AddressV	= D3D11_TEXTURE_ADDRESS_CLAMP;
+    sampDesc.AddressW	= D3D11_TEXTURE_ADDRESS_CLAMP;
     sampDesc.ComparisonFunc = D3D11_COMPARISON_NEVER;
     sampDesc.MinLOD		= 0;
     sampDesc.MaxLOD		= D3D11_FLOAT32_MAX;
@@ -485,6 +508,15 @@ HRESULT RenderingComponent::initCBManagement()
 
 	cbManagement_ = new CBManagement();
 	hr = cbManagement_->init(device_);
+
+	return hr;
+}
+HRESULT RenderingComponent::initLightManagement()
+{
+	HRESULT hr = S_OK;
+
+	lightManagement_ = new LightManagement();
+	hr = lightManagement_->init(device_);
 
 	return hr;
 }
