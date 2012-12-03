@@ -9,34 +9,18 @@
 class ObjGeometry
 {
 public:
-	ObjGeometry()
-	{
-		//Do nothing.
-	}
-	ObjGeometry(const std::vector<VertexPosNormTex> vertices)
-	{
-		this->vertices_ = vertices;
-	}
-	~ObjGeometry()
-	{
-		//Do nothing.
-	}
+	ObjGeometry();
+	ObjGeometry(const std::vector<VertexPosNormTex> vertices);
+	~ObjGeometry();
 
-	void pushGroup(const ObjGroup mg)
-	{
-		objGroups_.push_back(mg);
-	}
+	void pushGroup(const ObjGroup mg);
 
-	const std::vector<VertexPosNormTex>		getVertices()	{ return vertices_;		}
-	const std::vector<ObjGroup>				getObjGroups()	{ return objGroups_;	}
+	const std::vector<VertexPosNormTex>		getVertices();
+	const std::vector<ObjGroup>				getObjGroups();
 protected:
 private:
 	std::vector<VertexPosNormTex>			vertices_;
 	std::vector<ObjGroup>					objGroups_;
 };
-
-/*
-Template vertex-type?
-*/
 
 #endif //XKILL_RENDERER_OBJGEOMETRY_H

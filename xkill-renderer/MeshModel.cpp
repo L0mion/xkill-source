@@ -9,8 +9,8 @@ MeshModel::MeshModel()
 	//Do nothing
 }
 MeshModel::MeshModel(
-	const MeshGeometry<VertexPosNormTex>	geometry,
-	const std::vector<MeshMaterial>			materials)
+	const MeshGeometry				geometry,
+	const std::vector<MeshMaterial>	materials)
 {
 	geometry_	= geometry;
 	materials_	= materials;
@@ -19,9 +19,13 @@ MeshModel::~MeshModel()
 {
 }
 
-MeshGeometry<VertexPosNormTex> MeshModel::getGeometry()
+MeshGeometry MeshModel::getGeometry()
 {
 	return geometry_;
+}
+unsigned int MeshModel::getNumMaterials()
+{
+	return materials_.size();
 }
 std::vector<MeshMaterial> MeshModel::getMaterials()
 {

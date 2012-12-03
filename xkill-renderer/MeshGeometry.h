@@ -4,33 +4,23 @@
 #include <vector>
 
 #include "MeshSubset.h"
+#include "vertices.h"
 
-template <typename Vertex>
 class MeshGeometry
 {
 public:
-	MeshGeometry()
-	{
-		//Get rid of this
-	}
+	MeshGeometry();
 	MeshGeometry(
-		const std::vector<Vertex>		vertices,
-		const std::vector<MeshSubset>	subsets)
-	{
-		vertices_	= vertices;
-		subsets_	= subsets;
-	}
-	~MeshGeometry()
-	{
-		//Do nothing.
-	}
+		const std::vector<VertexPosNormTex>	vertices,
+		const std::vector<MeshSubset>		subsets);
+	~MeshGeometry();
 	
-	std::vector<Vertex>		getVertices()	{ return vertices_;	}
-	std::vector<MeshSubset>	getSubsets()	{ return subsets_;	}
+	std::vector<VertexPosNormTex>	getVertices();
+	std::vector<MeshSubset>			getSubsets();
 protected:
 private:
-	std::vector<Vertex>		vertices_;
-	std::vector<MeshSubset>	subsets_;
+	std::vector<VertexPosNormTex>	vertices_;
+	std::vector<MeshSubset>			subsets_;
 };
 
 #endif //XKILL_RENDERER_MESHGEOMETRY_H

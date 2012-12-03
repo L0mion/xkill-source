@@ -96,7 +96,7 @@ bool MeshMakerObj::existingPGY(std::string pathPGY, std::string fileNamePGY)
 }
 MeshModel MeshMakerObj::makeMesh(Obj obj)
 {
-	MeshGeometry<VertexPosNormTex> meshGeo = objGeoToMeshGeo(obj.getObjGeometry());
+	MeshGeometry meshGeo = objGeoToMeshGeo(obj.getObjGeometry());
 	
 	MeshModel model(meshGeo, materials_);
 	return model;
@@ -163,7 +163,7 @@ MeshMaterial MeshMakerObj::MTLToMeshMaterial(MTLMaterial mtl)
 
 	return meshMaterial;
 }
-MeshGeometry<VertexPosNormTex> MeshMakerObj::objGeoToMeshGeo(ObjGeometry objGeo)
+MeshGeometry MeshMakerObj::objGeoToMeshGeo(ObjGeometry objGeo)
 {
 	std::vector<ObjGroup>			objGroups	= objGeo.getObjGroups();
 	std::vector<VertexPosNormTex>	objVertices = objGeo.getVertices();
@@ -172,7 +172,7 @@ MeshGeometry<VertexPosNormTex> MeshMakerObj::objGeoToMeshGeo(ObjGeometry objGeo)
 	for(unsigned int i = 0; i < objGroups.size(); i++)
 		meshSubsets.push_back(objGroupToMeshSubset(objGroups[i]));
 
-	return MeshGeometry<VertexPosNormTex>(objVertices, meshSubsets); //format of vertices the same
+	return MeshGeometry(objVertices, meshSubsets); //format of vertices the same
 }
 MeshSubset MeshMakerObj::objGroupToMeshSubset(ObjGroup objGroup)
 {

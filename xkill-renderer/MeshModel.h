@@ -12,16 +12,18 @@ class MeshModel
 public:
 	MeshModel();
 	MeshModel(
-		const MeshGeometry<VertexPosNormTex>	geometry,
-		const std::vector<MeshMaterial>			materials);
+		const MeshGeometry				geometry,
+		const std::vector<MeshMaterial>	materials);
 	~MeshModel();
 
-	MeshGeometry<VertexPosNormTex>	getGeometry();
-	std::vector<MeshMaterial>		getMaterials();
+	MeshGeometry getGeometry();
+	
+	unsigned int				getNumMaterials();
+	std::vector<MeshMaterial>	getMaterials();
 protected:
 private:
-	MeshGeometry<VertexPosNormTex>	geometry_;
-	std::vector<MeshMaterial>		materials_;
+	MeshGeometry				geometry_;
+	std::vector<MeshMaterial>	materials_;
 };
 
 #endif //XKILL_RENDERER_MESHMODEL_H
