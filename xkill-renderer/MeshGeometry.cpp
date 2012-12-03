@@ -24,3 +24,12 @@ std::vector<MeshSubset>	MeshGeometry::getSubsets()
 {
 	return subsets_;
 }
+
+unsigned int MeshGeometry::getNumVertices()
+{
+	return vertices_.size();
+}
+unsigned int MeshGeometry::getNumSubsets()
+{
+	return subsets_.size();
+}

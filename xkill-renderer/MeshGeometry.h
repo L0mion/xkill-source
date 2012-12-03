@@ -17,6 +17,9 @@ public:
 	
 	std::vector<VertexPosNormTex>	getVertices();
 	std::vector<MeshSubset>			getSubsets();
+
+	unsigned int getNumVertices();
+	unsigned int getNumSubsets();
 protected:
 private:
 	std::vector<VertexPosNormTex>	vertices_;

@@ -4,6 +4,7 @@
 #include <string>
 
 #include "MeshMaterial.h"
+#include "MeshSubset.h"
 
 enum PGY_SPECS_VERTEX
 {
@@ -12,15 +13,24 @@ enum PGY_SPECS_VERTEX
 
 struct PGYHeader
 {
-	char			fileType[4];
-	float			versionNum;
-	unsigned int	vertexType;		//PGY_SPECS_VERTEX
-	unsigned int	materialsNum;
+	char						fileType_[4];
+	float						versionNum_;
+	unsigned int				vertexType_;		//PGY_SPECS_VERTEX
+	unsigned int				numMaterials_;
+	unsigned int				numVertices_;
+	unsigned int				numSubsets_;
+};
+struct PGYHeaderSubset
+{
+	unsigned int numIndices_;
 };
 
-static const std::string	PGY_SPECS_SUFFIX			= ".pgy";
-static const char			PGY_SPECS_FILETYPE[4]		= "pgy";
-static const unsigned int	PGY_SPECS_HEADER_SIZE		= sizeof(PGYHeader);
-static const unsigned int	PGY_SPECS_MATERIAL_SIZE		= sizeof(MeshMaterial);
+static const std::string	PGY_SPECS_SUFFIX				= ".pgy";
+static const char			PGY_SPECS_FILETYPE[4]			= "pgy";
+
+static const unsigned int	PGY_SPECS_SIZE_HEADER			= sizeof(PGYHeader);
+static const unsigned int	PGY_SPECS_SIZE_HEADER_SUBSET	= sizeof(PGYHeaderSubset);
+static const unsigned int	PGY_SPECS_SIZE_MATERIAL			= sizeof(MeshMaterial);
+static const unsigned int	PGY_SPECS_SIZE_VERTEXPOSNORMTEX	= sizeof(VertexPosNormTex);
 
 #endif //XKILL_RENDERER_SPECSPGY_H

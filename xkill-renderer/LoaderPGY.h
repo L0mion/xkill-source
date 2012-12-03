@@ -18,9 +18,17 @@ public:
 	const MeshModel getMeshModel();
 protected:
 private:
-	const MeshModel		loadPGY();
-	const PGYHeader		loadHeader();
-	const MeshMaterial	loadMaterial();
+	const MeshModel						loadPGY();
+	const PGYHeader						loadHeader();
+	const std::vector<MeshMaterial>		loadMaterials(const unsigned int numMaterials);
+	const MeshMaterial					loadMaterial();
+	const MeshGeometry					loadGeometry(
+		const unsigned int			numVertices,
+		const unsigned int			numSubsets);
+	const std::vector<VertexPosNormTex>	loadVertices(const unsigned int numVertices);
+	const VertexPosNormTex				loadVertex();
+	const std::vector<MeshSubset>		loadSubsets(const unsigned int numSubsets);
+	const MeshSubset					loadSubset();
 
 	MeshModel meshModel_;
 };

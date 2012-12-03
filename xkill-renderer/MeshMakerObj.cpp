@@ -141,10 +141,13 @@ void MeshMakerObj::loadMTLMaterials(MTL mtl)
 {
 	std::vector<MTLMaterial> mtlMats = mtl.getMaterials();
 	for(unsigned int i = 0; i < mtlMats.size(); i++)
+	{
 		materials_.push_back(MTLToMeshMaterial(mtlMats[i]));
+		materialID_.push_back(mtlMats[i].getName());
+	}
 }
 
-MeshMaterial MeshMakerObj::MTLToMeshMaterial(MTLMaterial mtl)
+const MeshMaterial MeshMakerObj::MTLToMeshMaterial(MTLMaterial mtl)
 {
 	DirectX::XMFLOAT3 ambientColor	= mtl.getAmbientColor();
 	DirectX::XMFLOAT3 diffuseColor	= mtl.getDiffuseColor();
@@ -163,7 +166,7 @@ MeshMaterial MeshMakerObj::MTLToMeshMaterial(MTLMaterial mtl)
 
 	return meshMaterial;
 }
-MeshGeometry MeshMakerObj::objGeoToMeshGeo(ObjGeometry objGeo)
+const MeshGeometry MeshMakerObj::objGeoToMeshGeo(ObjGeometry objGeo)
 {
 	std::vector<ObjGroup>			objGroups	= objGeo.getObjGroups();
 	std::vector<VertexPosNormTex>	objVertices = objGeo.getVertices();
@@ -174,13 +177,22 @@ MeshGeometry MeshMakerObj::objGeoToMeshGeo(ObjGeometry objGeo)
 
 	return MeshGeometry(objVertices, meshSubsets); //format of vertices the same
 }
-MeshSubset MeshMakerObj::objGroupToMeshSubset(ObjGroup objGroup)
+const MeshSubset MeshMakerObj::objGroupToMeshSubset(ObjGroup objGroup)
 {
-	std::string ssName					= objGroup.getName();
-	std::string ssMaterial				= objGroup.getMaterial();
-	std::vector<unsigned int> ssIndices	= objGroup.getIndices();
+	std::vector<unsigned int> indices	= objGroup.getIndices();
+	int materialIndex = MTLNameToMaterialIndex(objGroup.getMaterial());
 
-	return MeshSubset(ssName, ssMaterial, ssIndices);
+	return MeshSubset(materialIndex, indices);
+}
+const int MeshMakerObj::MTLNameToMaterialIndex(std::string mtlName)
+{
+	int materialIndex = 0;
+
+	for(unsigned int i = 0; i < materialID_.size(); i++)
+		if(materialID_[i] == mtlName)
+			materialIndex = i;
+
+	return materialIndex;
 }
 
 std::string MeshMakerObj::getFileNamePGY()

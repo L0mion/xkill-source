@@ -44,9 +44,10 @@ private:
 	bool loadMTL(std::string fileNameMTL);
 	void loadMTLMaterials(MTL mtl);
 	
-	MeshMaterial	MTLToMeshMaterial(MTLMaterial mtl);
-	MeshGeometry	objGeoToMeshGeo(ObjGeometry objGeo);
-	MeshSubset		objGroupToMeshSubset(ObjGroup objGroup);
+	const MeshMaterial	MTLToMeshMaterial(MTLMaterial mtl);
+	const MeshGeometry	objGeoToMeshGeo(ObjGeometry objGeo);
+	const MeshSubset	objGroupToMeshSubset(ObjGroup objGroup);
+	const int			MTLNameToMaterialIndex(std::string mtlName);
 
 	std::string getFileNamePGY();
 
@@ -59,7 +60,8 @@ private:
 	LoaderMTL* loaderMtl_;
 
 	/*Intermediate*/
-	std::vector<MeshMaterial> materials_;
+	std::vector<MeshMaterial>	materials_;
+	std::vector<std::string>	materialID_; //used to locate index of material-type
 
 	/*Result*/
 	MeshModel meshModel_;

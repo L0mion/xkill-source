@@ -1,12 +1,14 @@
 #include <MeshSubset.h>
 
+MeshSubset::MeshSubset()
+{
+	//Do nothing.
+}
 MeshSubset::MeshSubset(
-	const std::string name,
-	const std::string materialName,
+	const unsigned int materialIndex,
 	const std::vector<unsigned int> indices)
 {
-	name_			= name;
-	materialName_	= materialName;
+	materialIndex_	= materialIndex;
 	indices_		= indices;
 }
 MeshSubset::~MeshSubset()
@@ -14,13 +16,13 @@ MeshSubset::~MeshSubset()
 	//Do nothing.
 }
 
-const std::string MeshSubset::getName()
+const unsigned int MeshSubset::getMaterialIndex()
 {
-	return name_;
+	return materialIndex_;
 }
-const std::string MeshSubset::getMaterialName()
+const unsigned int MeshSubset::getNumIndices()
 {
-	return materialName_;
+	return indices_.size();
 }
 const std::vector<unsigned int> MeshSubset::getIndices()
 {

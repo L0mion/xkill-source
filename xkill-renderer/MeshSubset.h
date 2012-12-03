@@ -7,19 +7,18 @@
 class MeshSubset
 {
 public:
+	MeshSubset();
 	MeshSubset(
-		const std::string name,
-		const std::string materialName,
+		const unsigned int materialIndex,
 		const std::vector<unsigned int> indices);
 	~MeshSubset();
 
-	const std::string getName();
-	const std::string getMaterialName();
+	const unsigned int getMaterialIndex();
+	const unsigned int getNumIndices();
 	const std::vector<unsigned int> getIndices();
 protected:
 private:
-	std::string name_;
-	std::string materialName_;
+	unsigned int materialIndex_;
 	std::vector<unsigned int> indices_;
 };
 
