@@ -19,8 +19,13 @@ class ViewportManagement;
 class GBuffer;
 class D3DDebug;
 class ObjLoaderBasic;
+class LightManagement;
 
-namespace DirectX{struct XMFLOAT4X4;};
+namespace DirectX
+{
+	struct XMFLOAT3;
+	struct XMFLOAT4X4;
+};
 struct RenderAttribute;
 struct CameraAttribute;
 
@@ -50,12 +55,7 @@ public:
 	\param viewportHeight Height of each viewport. 
 	*/
 	RenderingComponent(
-		HWND windowHandle, 
-		unsigned int screenWidth, 
-		unsigned int screenHeight,
-		unsigned int numViewports,
-		std::vector<RenderAttribute>* renderAttributes,
-		std::vector<CameraAttribute>* cameraAttributes);
+		HWND windowHandle);
 	//! Releases all memory and returns to default state.
 	~RenderingComponent();
 
@@ -82,6 +82,8 @@ public:
 	void reset();
 	//! Runs a frame for RenderingComponent.
 	void onUpdate(float delta);
+	//! Receives events for RenderingComponent.
+	void onEvent(Event* e);
 	//! Main render-method of RenderingComponent.
 	/*!
 	\param view View-matrix from camera.
@@ -95,7 +97,10 @@ public:
 	\param view View-matrix from camera.
 	\param projection Projection-matrix from camera.
 	*/
-	void renderToGBuffer(DirectX::XMFLOAT4X4 view, DirectX::XMFLOAT4X4 projection);
+	void renderToGBuffer(DirectX::XMFLOAT4X4 view,
+						 DirectX::XMFLOAT4X4 viewInverse,
+						 DirectX::XMFLOAT4X4 projection,
+						 DirectX::XMFLOAT3	eyePosition);
 	//! Samples from g-buffers and creates a final image using DirectCompute.
 	/*!
 	\sa uavBackBuffer
@@ -175,6 +180,12 @@ private:
 	\sa CBManagement
 	*/
 	HRESULT initCBManagement();
+	//! Initializes LightManagement-object which will maintain lights.
+	/*!
+	\return Any error encountered during initialization.
+	\sa LightManagement
+	*/
+	HRESULT initLightManagement();
 	//! Creates D3DDebug-object which is used for detecting live COM-objects at end of application.
 	/*! Warning: D3DDebug recognizes it's own members as live COM-objects, thusly reporting 'false' live objects.
 	\return Any error encountered during initialization.
@@ -196,6 +207,7 @@ private:
 	
 	FXManagement*		fxManagement_;						//!< Maintaining shaders and input-layouts.
 	CBManagement*		cbManagement_;						//!< Maintaining constant buffers.
+	LightManagement*	lightManagement_;					//!< Maintaining lights.
 	ViewportManagement* viewportManagement_;				//!< Maintaining viewports.
 	GBuffer*			gBuffers_[GBUFFERID_NUM_BUFFERS];	//!< Containing data for deferred rendering.
 	D3DDebug*			d3dDebug_;							//!< Used for detecting live COM-objects.

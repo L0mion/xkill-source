@@ -98,18 +98,29 @@ public:
 
 		// Player attribute
 		PlayerAttribute* playerAttribute = AttributeManager::getInstance()->playerAttributes_.createAttribute(entity);
-		playerAttribute->id = 0;
+		playerAttribute->id = playerId;
 		playerAttribute->name = "PrinterTerror";
 		playerAttribute->health = 100;
 		playerAttribute->priority = 0;
 		playerAttribute->cycleSteals = 0;
 		playerAttribute->totalExecutionTime = 0;
 		playerAttribute->renderAttribute = AttributeManager::getInstance()->renderAttributes_.getLatestAttributeAsAttributePointer(); //Bind the last created render attribute to the player attribut
+		playerAttribute->inputAttribute = AttributeManager::getInstance()->inputAttributes_.getLatestAttributeAsAttributePointer();
 
 		//Increment local static variable
 		playerId++;
 
 		// Return entity
+		return entity;
+	}
+
+	Entity* createProjectileEntity()
+	{
+		Entity* entity = createEntity();
+
+		attributeFactory.create_RenderAttribute(entity);
+		attributeFactory.create_PhysicsAttribute(entity);
+
 		return entity;
 	}
 };

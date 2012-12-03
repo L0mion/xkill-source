@@ -35,6 +35,30 @@ struct DLL_U IAttribute
 // Attributes
 ///////////////////////////////////////////
 
+// Enums over each Attribute Type
+/*
+Just something that can be used if "casting" of
+\ref ATTRIBTUES is needed.
+
+NOTE: DOXYGEN can not detect Enums combined with DLL
+for some reason
+*/
+
+enum DLL_U AttributeType
+{
+	ATTRIBUTE_POSITION,
+	ATTRIBUTE_SPATIAL,
+	ATTRIBUTE_RENDER,
+	ATTRIBUTE_PHYSICS,
+	ATTRIBUTE_CAMERA,
+	ATTRIBUTE_INPUT,
+	ATTRIBUTE_PLAYER,
+	ATTRIBUTE_BOUNDING,
+
+	// this is needed, don't touch!
+	ATTRIBUTE_LAST
+};
+
 /// Stores the position of an Entity 
 /** 
 \ingroup ATTRIBUTES
@@ -65,6 +89,7 @@ struct DLL_U CameraMovementAttribute : public IAttribute
 {
 	CameraMovementAttribute();
 	~CameraMovementAttribute();
+
 	float position[3];
 	float rotation[2];
 };
@@ -119,6 +144,9 @@ struct DLL_U PhysicsAttribute : public IAttribute
 	float velocity[3];
 	float rotationVelocity[4];
 	float mass;
+	//CollisionShape
+	//friction
+	//restitution
 
 	bool added;
 	bool alive;
@@ -132,6 +160,7 @@ struct DLL_U InputAttribute : public IAttribute
 	AttributePointer physicsAttribute;
 	float position[2];
 	float rotation[2];
+	bool fire;
 };
 
 /// Stores everything SoundComponent needs to know to play a 3D sound
@@ -159,7 +188,7 @@ struct DLL_U CameraAttribute : public IAttribute
 	float mat_projection[16];
 };
 
-/// Stores everything GameComponent needs to know about a player
+/// Stores everything GameComponent needs to know about a player (also refer to createPlayerEntity)
 /** 
 \ingroup ATTRIBUTES
 */
@@ -176,6 +205,7 @@ struct DLL_U PlayerAttribute : public IAttribute
 	int totalExecutionTime; //!< Total execution time of the player process. The game session winner is the player with the most total execution time as awared by the scheduler.
 
 	AttributePointer renderAttribute;
+	AttributePointer inputAttribute;
 };
 
 

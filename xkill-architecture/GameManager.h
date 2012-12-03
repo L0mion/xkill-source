@@ -30,6 +30,7 @@ so every component should strive to work indepentently.
 #include "EntityManager.h"
 #include "dllArchitecture.h"
 
+
 /// The entry point of the architecture
 /** 
 GameManager is responsible for setting up the initial game state.
@@ -60,11 +61,12 @@ public:
 		SAFE_DELETE(entityManager_);
 	}
 
-	bool init(HWND windowHandle, HWND consoleHandle, unsigned int screenWidth, unsigned int screenHeight)
+	bool init(HWND windowHandle)
 	{
 		entityManager_ = new EntityManager();
 		ENTITYTYPE listOfEntitiesToBeCreated[] =
 		{
+			PLAYER,
 			PLAYER,
 			PLAYER
 		};
@@ -77,7 +79,7 @@ public:
 
 		//Initialize components
 		componentManager_ = new ComponentManager();
-		if(!componentManager_->init(windowHandle, consoleHandle, screenWidth, screenHeight))
+		if(!componentManager_->init(windowHandle))
 		{
 			std::cout << "Component manager failed to init" << std::endl;
 			std::cin.ignore();

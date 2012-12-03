@@ -7,7 +7,6 @@
 
 #include "dllPhysics.h"
 #include <xkill-utilities/IObserver.h>
-
 #include <vector>
 
 class PhysicsObject;
@@ -31,6 +30,8 @@ class CollisionShapeManager;
 //! Physics Component of XKILL.
 /*!
 The physics component of XKILL, implements BulletPhysics to simulate the world.
+From the Bullet documentation: "The entire physics pipeline computation and its data structures are represented in Bullet by a dynamics world"
+"The default dynamics world implementation is the btDiscreteDynamicsWorld."
 \ingroup xkill-physics
 */
 
@@ -59,9 +60,7 @@ public:
 	/*!
 	\param physicsAttributes A pointer to the vector containing physicsAttributes
 	*/
-	BulletPhysicsComponent(std::vector<PhysicsAttribute>* physicsAttributes,
-						   std::vector<BoundingAttribute>* boundingAttributes,
-						   std::vector<InputAttribute>* inputAttributes);
+	BulletPhysicsComponent();
 	//! Deletes all objects created within the component
 	~BulletPhysicsComponent();
 	//! Initialize the physics component, creates bullet objects and storage for internal representation
@@ -76,6 +75,9 @@ public:
 	\param e A pointer to the event that is being passed
 	*/
 	void onEvent(Event* e);
+
+	//! Creates a rigid body used as a projectile
+	void shootSphere();
 };
 
 #endif //XKILL_PHYSICS_PHYSICSCOMPONENT_H

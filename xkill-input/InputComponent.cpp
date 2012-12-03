@@ -20,6 +20,9 @@ bool InputComponent::init(HWND windowHandle, std::vector<InputAttribute>* inputA
 {
 	inputAttributes_ = inputAttributes;
 
+	
+	//EventManager::getInstance()->sendEvent
+
 	windowHandle_ = windowHandle;
 	searchTime_ = searchTime;
 

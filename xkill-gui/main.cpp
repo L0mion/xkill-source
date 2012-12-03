@@ -1,10 +1,3 @@
-//#include <DirectXMath.h>
-#include <Windows.h>
-#include <windowsx.h>
-#include <tchar.h>
-//#include <xkill-renderer/renderingComponent.h>
-//#include "cameraBasic.h"
-
 
 #include "MainWindow.h"
 #include <QtGui/QApplication>
