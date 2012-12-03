@@ -6,7 +6,6 @@
 
 class Camera;
 struct CameraAttribute;
-struct CameraMovementAttribute;
 class Event_MouseMove;
 
 //! Component to process Cameras
@@ -34,7 +33,6 @@ public:
 private:
 	std::vector<Camera> cameras_;						//!< Holds camera objects.
 	std::vector<CameraAttribute>* cameraAttributes_;	//!< Holds camera attributes.
-	std::vector<CameraMovementAttribute>* cameraMovementAttribute_;		//!< Holds input attributes.
 
 	float temp;
 };

@@ -85,16 +85,6 @@ struct DLL_U SpatialAttribute : public IAttribute
 	float scale[3];
 };
 
-struct DLL_U CameraMovementAttribute : public IAttribute
-{
-	CameraMovementAttribute();
-	~CameraMovementAttribute();
-
-	float position[3];
-	float rotation[2];
-};
-
-
 /// Stores the points for both a bounding box and a convex mesh
 /** 
 \ingroup ATTRIBUTES

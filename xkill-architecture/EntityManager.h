@@ -13,11 +13,10 @@
 enum ENTITYTYPE
 {
 	PLAYER,
-	//CAMERA (refer to createPlayerEntity)
 	PROJECTILE
 };
 
-class EntityManager
+class EntityManager: public IObserver
 {
 private:
 	std::vector<Entity*> entities;
@@ -31,6 +30,26 @@ private:
 public:
 	EntityManager()
 	{
+		SUBSCRIBE_TO_EVENT(this, EVENT_CREATEPROJECTILE);
+	}
+
+	/**
+	Handles Events for EntityManager.
+	*/
+	void onEvent(Event* e)
+	{
+		Entity* entity;
+		EventType type = e->getType();
+		switch (type) 
+		{
+		case EVENT_CREATEPROJECTILE:
+			entity = entityFactory.createProjectileEntity(static_cast<Event_createProjectile*>(e));
+			addEntity(entity);
+			std::cout << "ENTITYMANAGER: Created projectile entity " << entity->getID() << std::endl;
+			break;
+		default:
+			break;
+		}
 	}
 
 	void update(float delta)
@@ -62,14 +81,6 @@ public:
 		case PLAYER:
 			entity = entityFactory.createPlayerEntity();
 			std::cout << "ENTITYMANAGER: Created player entity " << entity->getID() << std::endl;
-			break;
-		//case CAMERA:
-		//	entity = entityFactory.createEntity_Camera();
-		//	std::cout << "ENTITYMANAGER: Created camera entity " << entity->getID() << std::endl;
-		//	break;
-		case PROJECTILE:
-			entity = entityFactory.createProjectileEntity();
-			std::cout << "ENTITYMANAGER: Created projectile entity " << entity->getID() << std::endl;
 			break;
 		}
 		addEntity(entity);
