@@ -16,13 +16,17 @@ Contains data that will be sent to shader every frame.
 */
 struct CBPerFrameDesc
 {
-	DirectX::XMFLOAT4X4 worldViewProj_; //!< Final matrix.
+	DirectX::XMFLOAT4X4 worldViewProj_;		//!< Final matrix.
+	DirectX::XMFLOAT4X4	view_;				//!< View matrix.
+	DirectX::XMFLOAT4X4 viewInverse_;		//!< Inverse of the view matrix;
+	DirectX::XMFLOAT4X4 projection_;		//!< Projection matrix.
+	DirectX::XMFLOAT3	eyePosition_;		//!< The camera's position;
 };
 //! Size of Per-Frame constant buffer. Must have a size of a multiple of 16 bytes.
 /*!
 \ingroup xkill-renderer-constant-buffers
 */
-static const unsigned int cbPerFrameSize = 64;
+static const unsigned int cbPerFrameSize = 272;
 
 //! Per-Instance constant buffer
 /*!
