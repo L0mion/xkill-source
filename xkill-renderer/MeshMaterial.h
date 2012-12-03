@@ -6,6 +6,7 @@
 class MeshMaterial
 {
 public:
+	MeshMaterial();
 	MeshMaterial(
 		const DirectX::XMFLOAT3	mmAmbientTerm,
 		const DirectX::XMFLOAT3	mmDiffuseTerm,

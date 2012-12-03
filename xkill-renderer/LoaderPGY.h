@@ -14,11 +14,14 @@ public:
 	~LoaderPGY();
 
 	bool init();
-	const PGYHeader loadHeader();
 
 	const MeshModel getMeshModel();
 protected:
 private:
+	const MeshModel		loadPGY();
+	const PGYHeader		loadHeader();
+	const MeshMaterial	loadMaterial();
+
 	MeshModel meshModel_;
 };
 

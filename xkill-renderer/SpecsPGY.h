@@ -5,9 +5,6 @@
 
 #include "MeshMaterial.h"
 
-static const std::string	PGY_SPECS_SUFFIX			= ".pgy";
-static const unsigned int	PGY_SPECS_MATERIAL_SIZE		= sizeof(MeshMaterial);
-
 enum PGY_SPECS_VERTEX
 {
 	POS_NORM_TEX
@@ -20,5 +17,10 @@ struct PGYHeader
 	unsigned int	vertexType;		//PGY_SPECS_VERTEX
 	unsigned int	materialsNum;
 };
+
+static const std::string	PGY_SPECS_SUFFIX			= ".pgy";
+static const char			PGY_SPECS_FILETYPE[4]		= "pgy";
+static const unsigned int	PGY_SPECS_HEADER_SIZE		= sizeof(PGYHeader);
+static const unsigned int	PGY_SPECS_MATERIAL_SIZE		= sizeof(MeshMaterial);
 
 #endif //XKILL_RENDERER_SPECSPGY_H

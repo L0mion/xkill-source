@@ -26,7 +26,7 @@ bool LoaderPGY::init()
 		sucessfulLoad = false;
 	else
 	{
-		PGYHeader header = loadHeader();
+		meshModel_ = loadPGY();
 
 		ifstream_.close();
 	}
@@ -43,11 +43,33 @@ bool LoaderPGY::init()
 	return true;
 }
 
+const MeshModel LoaderPGY::loadPGY()
+{
+	/*Load PGY header*/
+	PGYHeader header = loadHeader();
+
+	/*Load PGY materials*/
+	std::vector<MeshMaterial> materials;
+	unsigned int numMaterials = header.materialsNum;
+	for(unsigned int i = 0; i < numMaterials; i++)
+		materials.push_back(loadMaterial());
+
+	MeshGeometry temp;
+
+	MeshModel model(temp, materials);
+	return model;
+}
 const PGYHeader LoaderPGY::loadHeader()
 {
 	PGYHeader header;
-	ifstream_.read((char*)&header, sizeof(header));
+	ifstream_.read((char*)&header, PGY_SPECS_HEADER_SIZE);
 	return header;
+}
+const MeshMaterial LoaderPGY::loadMaterial()
+{
+	MeshMaterial material;
+	ifstream_.read((char*)&material, PGY_SPECS_MATERIAL_SIZE);
+	return material;
 }
 
 const MeshModel LoaderPGY::getMeshModel()

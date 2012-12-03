@@ -19,7 +19,7 @@ public:
 protected:
 private:
 	void writeHeader();
-	void writeMaterials();
+	void writeMaterials(const std::vector<MeshMaterial> materials);
 
 	MeshModel subject_;
 };
