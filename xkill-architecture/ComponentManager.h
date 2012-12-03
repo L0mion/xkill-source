@@ -46,7 +46,7 @@ public:
 		//SAFE_DELETE(gameComponent);
 	}
 
-	bool init(HWND windowHandle)
+	bool init(HWND windowHandle, HWND parentWindowHandle)
 	{
 		render_ = new RenderingComponent(windowHandle);
 		render_->init();
@@ -57,7 +57,7 @@ public:
 			return false;
 		/*if(!sound_.init())
 			return false;*/
-		if(!input_.init(windowHandle, AttributeManager::getInstance()->inputAttributes_.getAllAttributes()))
+		if(!input_.init(parentWindowHandle, AttributeManager::getInstance()->inputAttributes_.getAllAttributes()))
 			return false;
 
 		// Returns that everything went ok

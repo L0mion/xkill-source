@@ -63,7 +63,7 @@ void PhysicsObject::input(InputAttribute* inputAttribute,float delta)
 	btVector3 force(inputAttribute->position[0],0,inputAttribute->position[1]);
 	btVector3 torque(0,inputAttribute->rotation[0],0);
 	inputAttribute->position[1]=inputAttribute->position[0] = 0;
-	rigidBody_->setGravity(btVector3(0,-10,0)+100*force);
+	rigidBody_->setGravity(btVector3(0,0,0)+100*force);
 	//rigidBody_->applyTorque(torque);
 	rigidBody_->applyDamping(delta*10);
 	std::cout << "force:" << force.x() << " " << force.y() << " " << force.z() << std::endl;
