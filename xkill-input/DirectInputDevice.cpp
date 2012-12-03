@@ -1,8 +1,8 @@
 #include "DirectInputDevice.h"
 
 
-DirectInputDevice::DirectInputDevice(LPDIRECTINPUTDEVICE8 device, GUID deviceGUID, std::string name) : 
-	InputDevice(deviceGUID, name)
+DirectInputDevice::DirectInputDevice(LPDIRECTINPUTDEVICE8 device, GUID deviceGUID, std::string name, unsigned int playerID) : 
+	InputDevice(deviceGUID, name, playerID)
 {
 	device_ = device;
 	hasFF_ = false;

@@ -53,12 +53,23 @@ void InputManager::Update(float deltaTime)
 	//handleInput();
 }
 
-InputDevice* InputManager::GetDevice(unsigned int deviceIndex)
+InputDevice* InputManager::GetDevice(unsigned int playerID)
 {
-	if(deviceIndex < 0 || deviceIndex >= devices_.size())
+	unsigned int index = 1;
+
+	for(; index <= devices_.size(); index++)
+	{
+		if(playerID == devices_[index-1]->getPlayerID())
+		{
+			index--;
+			break;
+		}
+	}
+
+	if(index < 0 || index >= devices_.size())
 		return nullptr;
 
-	return devices_[deviceIndex];
+	return devices_[index];
 }
 
 int InputManager::UpdateNumberOfGamepads(HWND hWindow)
@@ -106,7 +117,7 @@ bool InputManager::addNewDevice(HWND hWindow, GUID guid, std::string name)
 		if(FAILED(result))
 			return DIENUM_CONTINUE;
 
-		DirectInputDevice* device = new DirectInputDevice(dInputDevice, guid, name);
+		DirectInputDevice* device = new DirectInputDevice(dInputDevice, guid, name, devices_.size());
 		if(device->Init(hWindow))
 			devices_.push_back(device);
 
@@ -114,7 +125,7 @@ bool InputManager::addNewDevice(HWND hWindow, GUID guid, std::string name)
 	}
 	else
 	{
-		InputDevice* device = new XInputDevice(nrOfXInputDevices_++, guid, name);
+		InputDevice* device = new XInputDevice(nrOfXInputDevices_++, guid, name, devices_.size());
 		devices_.push_back(device);
 
 		deviceAdded = true;
@@ -139,7 +150,7 @@ int InputManager::checkForNewXInputDevices()
 		{
 			GUID guid;
 			ZeroMemory(&guid, sizeof(guid));
-			InputDevice* device = new XInputDevice(nrOfXInputDevices_++, guid, "Xbox Controller (non DI)");
+			InputDevice* device = new XInputDevice(nrOfXInputDevices_++, guid, "Xbox Controller (non DI)", devices_.size());
 			nrOfControllersAdded++;
 			devices_.push_back(device);
 		}

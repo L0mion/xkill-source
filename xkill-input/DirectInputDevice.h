@@ -25,7 +25,7 @@ Some code should probably be refactored to a DirectInputGamepad class.
 class DirectInputDevice : public InputDevice
 {
 public:
-	DirectInputDevice(LPDIRECTINPUTDEVICE8 device, GUID deviceGUID, std::string name);
+	DirectInputDevice(LPDIRECTINPUTDEVICE8 device, GUID deviceGUID, std::string name, unsigned int playerID);
 	virtual ~DirectInputDevice(void);
 
 	//! Initiates the Direct Input device

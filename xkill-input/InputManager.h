@@ -86,7 +86,7 @@ public:
 	*/
 	void Update(float deltaTime);
 
-	InputDevice* GetDevice(unsigned int deviceIndex);
+	InputDevice* GetDevice(unsigned int playerID);
 	
 	//! Generates a string with the states of all devices
 	std::string GetInputInformationString();

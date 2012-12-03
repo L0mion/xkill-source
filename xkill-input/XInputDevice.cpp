@@ -1,7 +1,7 @@
 #include "XInputDevice.h"
 
-XInputDevice::XInputDevice(int deviceNr, GUID deviceGUID, std::string name) : 
-	InputDevice(deviceGUID, name)
+XInputDevice::XInputDevice(int deviceNr, GUID deviceGUID, std::string name, unsigned int playerID) : 
+	InputDevice(deviceGUID, name, playerID)
 {
 	deviceNr_ = deviceNr;
 	rightFFMotor_ = 0xFFFF;

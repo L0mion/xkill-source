@@ -38,7 +38,7 @@ public:
 		// init game
 		HWND parentWindowHandle = this->winId();
 		if(parent != 0)
-			HWND parentWindowHandle = parent->winId();
+			parentWindowHandle = this->parentWidget()->winId();
 
 		gameManager.init(this->winId(), parentWindowHandle);
 		gameTimer.reset();

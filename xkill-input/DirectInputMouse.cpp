@@ -1,7 +1,7 @@
 #include "DirectInputMouse.h"
 
-DirectInputMouse::DirectInputMouse(LPDIRECTINPUTDEVICE8 device, GUID deviceGUID, std::string name) : 
-	DirectInputDevice(device, deviceGUID, name)
+DirectInputMouse::DirectInputMouse(LPDIRECTINPUTDEVICE8 device, GUID deviceGUID, std::string name, unsigned int playerID) : 
+	DirectInputDevice(device, deviceGUID, name, playerID)
 {
 	hasFF_ = false;
 }

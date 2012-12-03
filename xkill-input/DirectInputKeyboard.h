@@ -11,7 +11,7 @@ as input from Direct Input instead of a JoyState struct.
 class DirectInputKeyboard : public DirectInputDevice
 {
 public:
-	DirectInputKeyboard(LPDIRECTINPUTDEVICE8 device, GUID deviceGUID, std::string name);
+	DirectInputKeyboard(LPDIRECTINPUTDEVICE8 device, GUID deviceGUID, std::string name, unsigned int playerID);
 	virtual ~DirectInputKeyboard(void);
 
 	virtual bool Init(HWND hWindow);
