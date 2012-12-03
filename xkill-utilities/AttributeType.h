@@ -135,6 +135,7 @@ struct DLL_U InputAttribute : public IAttribute
 	AttributePointer physicsAttribute;
 	float position[2];
 	float rotation[2];
+	bool fire;
 };
 
 /// Stores everything SoundComponent needs to know to play a 3D sound

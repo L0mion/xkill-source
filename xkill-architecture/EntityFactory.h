@@ -112,4 +112,14 @@ public:
 		// Return entity
 		return entity;
 	}
+
+	Entity* createProjectileEntity()
+	{
+		Entity* entity = createEntity();
+
+		attributeFactory.create_RenderAttribute(entity);
+		attributeFactory.create_PhysicsAttribute(entity);
+
+		return entity;
+	}
 };
