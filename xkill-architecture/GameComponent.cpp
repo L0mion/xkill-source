@@ -53,17 +53,17 @@ void GameComponent::onUpdate(float delta)
 				//delete position;
 				//delete direction;
 
-				float pos[3];
-				pos[0] = position->position[0];
-				pos[1] = position->position[1];
-				pos[2] = position->position[2];
+				Float3 pos;
+				pos.x = position->position.x;
+				pos.y = position->position.y;
+				pos.z = position->position.z;
 
-				float direction4[4];
-				direction4[0] = spatial->rotation[0];
-				direction4[1] = spatial->rotation[1];
-				direction4[2] = spatial->rotation[2];
-				direction4[3] = spatial->rotation[3];
-				Event_createProjectile projectile(pos, direction4);
+				Float4 direction;
+				direction.x = spatial->rotation.x;
+				direction.y = spatial->rotation.y;
+				direction.z = spatial->rotation.z;
+				direction.w = spatial->rotation.w;
+				Event_createProjectile projectile(pos, direction);
 				SEND_EVENT(&projectile);
 				input->fire = false;
 			}

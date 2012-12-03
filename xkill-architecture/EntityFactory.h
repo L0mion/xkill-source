@@ -78,16 +78,16 @@ public:
 		Entity* entity = createEntity();
 
 		PositionAttribute* positionAttribute = AttributeManager::getInstance()->positionAttributes_.createAttribute(entity);
-		positionAttribute->position[0] = e->position3[0];
-		positionAttribute->position[1] = e->position3[1];
-		positionAttribute->position[2] = e->position3[2];
+		positionAttribute->position.x = e->position.x;
+		positionAttribute->position.y = e->position.y;
+		positionAttribute->position.z = e->position.z;
 
 		SpatialAttribute* spatialAttribute = AttributeManager::getInstance()->spatialAttributes_.createAttribute(entity);
 		spatialAttribute->positionAttribute = AttributeManager::getInstance()->positionAttributes_.getLatestAttributeAsAttributePointer();
-		spatialAttribute->rotation[0] = e->direction4[0];
-		spatialAttribute->rotation[1] = e->direction4[1];
-		spatialAttribute->rotation[2] = e->direction4[2];
-		spatialAttribute->rotation[3] = e->direction4[3];
+		spatialAttribute->rotation.x = e->direction.x;
+		spatialAttribute->rotation.y = e->direction.y;
+		spatialAttribute->rotation.z = e->direction.z;
+		spatialAttribute->rotation.w = e->direction.w;
 
 		RenderAttribute* renderAttribute = AttributeManager::getInstance()->renderAttributes_.createAttribute(entity);
 		renderAttribute->spatialAttribute = AttributeManager::getInstance()->spatialAttributes_.getLatestAttributeAsAttributePointer();
@@ -95,7 +95,7 @@ public:
 		PhysicsAttribute* physicsAttribute = AttributeManager::getInstance()->physicsAttributes_.createAttribute(entity);
 		physicsAttribute->spatialAttribute = AttributeManager::getInstance()->spatialAttributes_.getLatestAttributeAsAttributePointer();
 		
-		physicsAttribute->velocity[0] = 1.0f;
+		physicsAttribute->velocity.x = 1.0f;
 		
 		return entity;
 	}

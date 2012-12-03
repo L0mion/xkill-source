@@ -2,6 +2,7 @@
 
 #include "dllUtilities.h"
 #include "AttributePointer.h"
+#include "Math.h"
 #include <string>
 
 
@@ -67,7 +68,7 @@ struct DLL_U PositionAttribute : public IAttribute
 {
 	PositionAttribute();
 	~PositionAttribute();
-	float position[3];
+	Float3 position;
 };
 
 /// Stores detailed Spatial informaiton about an Entity 
@@ -81,8 +82,8 @@ struct DLL_U SpatialAttribute : public IAttribute
 
 	AttributePointer positionAttribute;
 
-	float rotation[4];
-	float scale[3];
+	Float4 rotation;
+	Float3 scale;
 };
 
 /// Stores the points for both a bounding box and a convex mesh
@@ -131,8 +132,8 @@ struct DLL_U PhysicsAttribute : public IAttribute
 	~PhysicsAttribute();
 
 	AttributePointer spatialAttribute;
-	float velocity[3];
-	float rotationVelocity[4];
+	Float3 velocity;
+	Float4 rotationVelocity;
 	float mass;
 	//CollisionShape
 	//friction
@@ -148,8 +149,8 @@ struct DLL_U InputAttribute : public IAttribute
 	~InputAttribute();
 
 	AttributePointer physicsAttribute;
-	float position[2];
-	float rotation[2];
+	Float2 position;
+	Float2 rotation;
 	bool fire;
 };
 
@@ -174,8 +175,8 @@ struct DLL_U CameraAttribute : public IAttribute
 	CameraAttribute();
 	~CameraAttribute();
 	AttributePointer spatialAttribute;
-	float mat_view[16];
-	float mat_projection[16];
+	Float4x4 mat_view;
+	Float4x4 mat_projection;
 };
 
 /// Stores everything GameComponent needs to know about a player (also refer to createPlayerEntity)

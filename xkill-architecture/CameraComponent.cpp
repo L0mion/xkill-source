@@ -13,6 +13,7 @@ CameraComponent::CameraComponent()
 CameraComponent::~CameraComponent()
 {
 }
+
 void CameraComponent::init()
 {
 	// Fetch attributes
@@ -43,7 +44,7 @@ void CameraComponent::init()
 	for(unsigned int i=0; i<cameraAttributes_->size(); i++)
 	{
 		cameras_[i].updateProj();
-		memcpy(cameraAttributes_->at(i).mat_projection, cameras_[i].getProjection().m, 16*4);
+		cameraAttributes_->at(i).mat_projection.copy((float*)&cameras_[i].getProjection());
 	}
 
 	// listen to mouseMove events
@@ -65,15 +66,15 @@ void CameraComponent::onEvent(Event* e)
 
 void CameraComponent::onUpdate(float delta)
 {
-	for(unsigned int i = 0; i < cameraAttributes_->size(); i++)
+	for(unsigned int i=0; i<cameraAttributes_->size(); i++)
 	{
 		CameraAttribute* camera = &cameraAttributes_->at(i);
 		SpatialAttribute* spatial = ATTRIBUTE_CAST(SpatialAttribute, spatialAttribute, camera);
 		PositionAttribute* position = ATTRIBUTE_CAST(PositionAttribute, positionAttribute, spatial);
-		cameras_[i].setPosition(position->position);
+		cameras_[i].setPosition((float*)&position->position);
 		cameras_[i].updateView();
 		
-		memcpy(cameraAttributes_->at(i).mat_view, cameras_[i].getView().m, 16*4);
+		cameraAttributes_->at(i).mat_view.copy((float*)&cameras_[i].getView());
 	}
 }
 

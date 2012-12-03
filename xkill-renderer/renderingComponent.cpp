@@ -167,8 +167,8 @@ void RenderingComponent::onUpdate(float delta)
 	clearGBuffers();
 	for(unsigned int i=0; i<cameraAttributes_->size(); i++)
 	{
-		DirectX::XMFLOAT4X4 view(cameraAttributes_->at(i).mat_view);
-		DirectX::XMFLOAT4X4 projection(cameraAttributes_->at(i).mat_projection);
+		DirectX::XMFLOAT4X4 view((float*)&cameraAttributes_->at(i).mat_view);
+		DirectX::XMFLOAT4X4 projection((float*)&cameraAttributes_->at(i).mat_projection);
 
 		DirectX::CXMMATRIX	cxmView = DirectX::XMLoadFloat4x4(&view);
 		DirectX::XMVECTOR	vDeterminant = DirectX::XMMatrixDeterminant(cxmView);
@@ -178,7 +178,7 @@ void RenderingComponent::onUpdate(float delta)
 		
 		SpatialAttribute*	spatialAttribute = static_cast<SpatialAttribute*>(cameraAttributes_->at(i).spatialAttribute.host);
 		PositionAttribute*	positionAttribute = static_cast<PositionAttribute*>(spatialAttribute->positionAttribute.host);
-		DirectX::XMFLOAT3	eyePosition(positionAttribute->position);
+		DirectX::XMFLOAT3	eyePosition = *(DirectX::XMFLOAT3*)&positionAttribute->position;
 		//DirectX::XMFLOAT3 eyePosition(0.0f, 0.0f, -50.0f);
 
 		setViewport(i);
