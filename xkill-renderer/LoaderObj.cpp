@@ -328,6 +328,8 @@ bool LoaderObj::loadMaterialUse(const std::vector<std::string>& params)
 
 	if(groups_.size() > 0)
 		groups_.back().setMaterialName(mat);
+	else
+		sucessfulLoad = false;
 
 	return sucessfulLoad;
 }

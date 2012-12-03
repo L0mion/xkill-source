@@ -57,41 +57,46 @@ static const unsigned int OBJ_PARAMS_INDEX_GROUP_NAME	= 0 + OBJ_PARAMS;
 static const unsigned int OBJ_PARAMS_INDEX_MATERIAL_NAME		= 0 + OBJ_PARAMS;
 static const unsigned int OBJ_PARAMS_INDEX_MATERIAL_USE_NAME	= 0 + OBJ_PARAMS;
 
+ /** Describes read symbol so that pretty switch-cases may be used.
+* An action is based of this Enum, and then proceeds to select an appropriate function.
+*/
 enum ObjSymbol 
 { 
-	OBJSYMBOL_VERTEX, 
-	OBJSYMBOL_TEX, 
-	OBJSYMBOL_NORM, 
-	OBJSYMBOL_FACE, 
-	OBJSYMBOL_GROUP, 
-	OBJSYMBOL_MATERIAL,
-	OBJSYMBOL_MATERIAL_USE,
+	OBJSYMBOL_VERTEX,			/**< v */
+	OBJSYMBOL_TEX,				/**< vt */
+	OBJSYMBOL_NORM,				/**< vn */
+	OBJSYMBOL_FACE,				/**< f */
+	OBJSYMBOL_GROUP,			/**< g */
+	OBJSYMBOL_MATERIAL,			/**< mtllib */
+	OBJSYMBOL_MATERIAL_USE,		/**< usemtl */
 
-	OBJSYMBOL_IGNORE,
-	OBJSYMBOL_INVALID 
+	OBJSYMBOL_IGNORE,			/**< ...if not any of the above. */
+	OBJSYMBOL_INVALID			/**< This value should never, ever - except occationally - occur. (No, seriously, never.) */
 };
 
 //! MeshLoader with functionality to load .obj-files.
 /*!
-Derived from basic MeshLoader-class.
-\ingroup xkill-renderer-mesh
-\sa MeshLoader
+\ingroup xkill-mesh-io-obj
 */
 class LoaderObj : public Loader
 {
 public:
-	//! Forwards path to .obj to parent MeshLoader-class.
+	//! Forwards path to .obj to parent Loader-class.
 	/*!
-	\param mlFilePath Path to desired .obj-file.
+	\param filePath Path up to desired .obj-file.
+	\param fileName Name of desired .obj-file.
 	*/
 	LoaderObj(
 		const std::string filePath, 
 		const std::string fileName);
-	//! Clears all vectors.
+	//! Does nothing.
 	~LoaderObj();
 
 	//! Function initializing MeshLoaderObj and loading specified .obj-file.
 	/*!
+	Method attempts to open specified .obj-file and proceeds to parse this file if suceeded. If suceeded, the method will then call loading of this .obj.
+	\sa parseObj
+	\sa loadObj
 	\return A boolean dictating whether or not the method was sucessful.
 	*/
 	bool init();
@@ -99,42 +104,45 @@ public:
 	Obj getObj();
 protected:
 private:
-	//! Method loading .obj-file.
+	//! Loops through read symbols, parses these, parses parameters and then proceeds to load appropriate symbol.
 	/*!
-		Reads line from file, interprets symbol, parses parameters and calls correct load-function.
-		\return A boolean dictating whether or not the method was sucessful.
-		\sa mlParseSymbol
-		\sa mlParseParams
-		\sa mlLoadVertex
-		\sa mlLoadTex
-		\sa mlLoadNorm
-		\sa mlLoadFaces
+	\sa parseSymbol
+	\sa parseParams
+	\sa loadSymbol
+	\return A boolean dictating whether or not the method was sucessful.
 	*/
 	bool parseObj();
-	//! Interprets symbol of first string recieved from splitting line.
+	//! Translates read symbol into ObjSymbol-type enum.
 	/*!
-		Stores correct symbol in member variable curSymbol_.
-		\return A boolean dictating whether or not the method was sucessful.
-		\sa curSymbol_
+		\return ObjSymbol-enum-type specifying read symbol.
 	*/
 	ObjSymbol parseSymbol(const std::vector<std::string>& params);
-	//! Based on symbol, this method calls a mlParseParam.
+	//! Checks whether the number of current parameters read from file corresponds to expected parameters. Also checks if expected numeric values indeed are numeric.
 	/*!
-		Method does not call a parse-method for faces, as this is done later during the loading process.
+		\sa parseParamsNumeric
 		\return A boolean dictating whether or not the method was sucessful.
-		\sa mlParseParam
 	*/
 	bool parseParams(
 		const ObjSymbol symbol,
 		const std::vector<std::string>& params);
-	//! Checks if all parameters for a certain symbol are numeric.
+	//! Checks if parameters passed to functions are numeric.
 	/*!
 		\return A boolean dictating whether or not parameters contain only numeric values.
-		\sa mlParseParam
-		\sa mlIsNumeric
+		\sa isNumeric
 	*/
 	bool parseParamsNumeric(const std::vector<std::string>& params);
 
+	//! Based on passed symbol, this functions forwards loading request to correct function.
+	/*!
+		\return Whether or not load was sucessful.
+		\sa loadPos
+		\sa loadTex
+		\sa loadNorm
+		\sa loadFaces
+		\sa loadGroup
+		\sa loadMaterial
+		\sa loadMaterialUse
+	*/
 	bool loadSymbol(
 		const ObjSymbol symbol,
 		const std::vector<std::string>& params);
@@ -148,29 +156,33 @@ private:
 	//! Further splits the read line into seperate face-attributes, parses them to ensure valid values - and calls loading of these.
 	/*!
 		\return A boolean dictating whether or not the method was sucessful.
-		\sa mlParseFace
-		\sa mlLoadFace
+		\sa parseFace
+		\sa loadFace
 	*/
 	bool loadFaces(const std::vector<std::string>& params);
 	//! Parses faces and ensures that these values are the correct number and entirely numeric.
 	/*!
 		\return A boolean dictating whether or not the method was sucessful.
-		\sa mlIsNumeric
+		\sa isNumeric
 	*/
 	bool parseFace(const std::vector<std::string>& splitFaces);
 	//! Loads faces.
 	/*!
-		Based on a vector of intermediate MeshFace-types, the method loads vertices from file and creates a vector of indices to save on memory.
+		Based on a vector of intermediate ObjFace-types, the method loads vertices from file and creates a vector of indices to save on memory.
 		If a face is found to be equal to a previously loaded face, an index from this face is loaded as an index instead of a new one.
-		\sa mlIndices_
-		\sa mlVertices_
+		\sa ObjFace
+		\return Whether or not load was sucessful. (method requires previously added ObjGroup in order to be able to push faces to.)
 	*/
 	bool loadFace(const std::vector<std::string>& face);
 
+	//! Loads ObjGroup into groups_-vector.
 	void loadGroup(const std::vector<std::string>& params);
+	//! Loads filename of .mtl-dependency into mtlLib_-vector.
 	void loadMaterial(const std::vector<std::string>& params);
+	//! Sets material name in previously added ObjGroup to read .mtl-name.
 	bool loadMaterialUse(const std::vector<std::string>& params);
 	
+	//! Loads vertex into vertices_-vector.
 	const unsigned int LoaderObj::loadVertex(
 		const unsigned int iPos, 
 		const unsigned int iTex, 
@@ -188,20 +200,20 @@ private:
 
 	void loadObj();
 
-	unsigned int				lineNum_;			//!< Line number previously read from file.
-	SimpleStringSplitter		sss_;				//!< Helper class used to split strings when reading these from file.
+	unsigned int				lineNum_;		//!< Line number previously read from file.
+	SimpleStringSplitter		sss_;			//!< Helper class used to split strings when reading these from file.
 
 	/*Intermediate vectors to hold data whilst loading .obj*/
 	std::vector<DirectX::XMFLOAT3>	position_;	//!< Spatial attributes read from file.
-	std::vector<DirectX::XMFLOAT3>	normal_;		//!< Normal attributes read from file.
-	std::vector<DirectX::XMFLOAT2>	tex_;			//!< Texture elements read from file.
+	std::vector<DirectX::XMFLOAT3>	normal_;	//!< Normal attributes read from file.
+	std::vector<DirectX::XMFLOAT2>	tex_;		//!< Texture elements read from file.
 	std::vector<ObjFace>			faces_;		//!< Utility-vector holding faces read form file to save on memory.
 	std::vector<VertexPosNormTex>	vertices_;	//!< Result: Vertices read from file.
-	std::vector<ObjGroup>			groups_;
-	std::vector<std::string>		mtlLib_;
+	std::vector<ObjGroup>			groups_;	//!< Groups read from file.
+	std::vector<std::string>		mtlLib_;	//!< Filenames referencing to external .mtl-files read from file.
 
 	/*Result*/
-	Obj obj_;
+	Obj obj_;	//!< Resulting .obj-file.
 };
 
 #endif //XKILL_RENDERER_LOADEROBJ_H
