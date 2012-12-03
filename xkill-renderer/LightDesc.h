@@ -8,22 +8,27 @@ static const unsigned int LIGHT_DIRECTIONAL = 1;
 static const unsigned int LIGHT_POINT		= 2;
 static const unsigned int LIGHT_SPOT		= 3;
 
+//! Struct describing a single light source.
+/*!
+\ingroup xkill-renderer
+*/
 struct LightDesc
 {
-	DirectX::XMFLOAT3 position;
-	float range;
-	DirectX::XMFLOAT3 direction;
-	float spotPower;
-	DirectX::XMFLOAT4 ambient;
-	DirectX::XMFLOAT4 diffuse;
-	DirectX::XMFLOAT4 specular;
-	DirectX::XMFLOAT3 attenuation;
-	unsigned int type;
-
+	//! Initializes LightDesc to its default state.
 	LightDesc()
 	{
 		ZeroMemory(this, sizeof(LightDesc));
 	}
+
+	DirectX::XMFLOAT3 position;		//!< Position of the light source.
+	float range;					//!< How far the light can reach.
+	DirectX::XMFLOAT3 direction;	//!< The lights direction.
+	float spotPower;				//!< Controls the spotlight cone.
+	DirectX::XMFLOAT4 ambient;		//!< The ambient color.
+	DirectX::XMFLOAT4 diffuse;		//!< The diffuse color.
+	DirectX::XMFLOAT4 specular;		//!< The specular color.
+	DirectX::XMFLOAT3 attenuation;	//!< How fast the light intensity will diminish
+	unsigned int type;				//!< Type of light i.e. Directional, Point or Spot.
 };
 
 #endif //XKILL_RENDERER_LIGHTDESC_H
