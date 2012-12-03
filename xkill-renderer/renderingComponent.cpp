@@ -13,18 +13,21 @@
 #include "mathBasic.h"
 #include "vertices.h"
 
+#include <xkill-utilities/EventManager.h>
+
 RenderingComponent::RenderingComponent(
-		HWND windowHandle,
-		unsigned int screenWidth, 
-		unsigned int screenHeight,
-		unsigned int numViewports,
-		std::vector<RenderAttribute>* renderAttributes,
-		std::vector<CameraAttribute>* cameraAttributes)
+		HWND windowHandle)
 {
+	GET_ATTRIBUTES(renderAttributes_, RenderAttribute, ATTRIBUTE_RENDER);
+	GET_ATTRIBUTES(cameraAttributes_, CameraAttribute, ATTRIBUTE_CAMERA);
+
+	Event_getWindowResolution windowResolution;
+	SEND_EVENT(&windowResolution);
+
 	windowHandle_	= windowHandle;
-	screenWidth_	= screenWidth;
-	screenHeight_	= screenHeight;
-	numViewports_	= numViewports;
+	screenWidth_	= windowResolution.width;
+	screenHeight_	= windowResolution.height;
+	numViewports_	= cameraAttributes_->size();
 
 	fxManagement_		= nullptr;
 	cbManagement_		= nullptr; 
@@ -52,9 +55,6 @@ RenderingComponent::RenderingComponent(
 	vertexBuffer_	= nullptr;
 	vertices_		= nullptr;
 	objLoader_		= nullptr;
-
-	renderAttributes_ = renderAttributes;
-	cameraAttributes_ = cameraAttributes;
 }
 RenderingComponent::~RenderingComponent()
 {
@@ -153,6 +153,8 @@ void RenderingComponent::reset()
 
 	//temp
 	SAFE_RELEASE(vertexBuffer_);
+
+	EventManager::getInstance();
 }
 
 void RenderingComponent::onUpdate(float delta)
@@ -517,4 +519,9 @@ HRESULT RenderingComponent::initVertexBuffer()
 		ERROR_MSG(L"RenderingComponent::initVertexBuffer CreateBuffer failed");
 
 	return hr;
+}
+
+void RenderingComponent::onEvent( Event* e )
+{
+
 }

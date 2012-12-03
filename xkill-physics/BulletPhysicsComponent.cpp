@@ -7,13 +7,13 @@
 #include "CollisionShapeManager.h"
 #include "physicsObject.h"
 
-BulletPhysicsComponent::BulletPhysicsComponent(std::vector<PhysicsAttribute>* physicsAttributes,
-											   std::vector<BoundingAttribute>* boundingAttributes,
-											   std::vector<InputAttribute>* inputAttributes)
+#include <xkill-utilities/EventManager.h>
+
+BulletPhysicsComponent::BulletPhysicsComponent()
 {
-	physicsAttributes_ = physicsAttributes; 
-	boundingAttributes_ = boundingAttributes;
-	inputAttributes_ = inputAttributes;
+	inputAttributes_ = nullptr;
+	physicsAttributes_ = nullptr;
+	boundingAttributes_ = nullptr;
 	broadphase_ = nullptr;
 	collisionConfiguration_ = nullptr;
 	dispatcher_ = nullptr;
@@ -21,7 +21,6 @@ BulletPhysicsComponent::BulletPhysicsComponent(std::vector<PhysicsAttribute>* ph
 	dynamicsWorld_ = nullptr;
 	physicsObjects_ = nullptr;
 	collisionShapeManager_ = nullptr;
-
 }
 
 BulletPhysicsComponent::~BulletPhysicsComponent()
@@ -44,6 +43,11 @@ BulletPhysicsComponent::~BulletPhysicsComponent()
 
 bool BulletPhysicsComponent::init()
 {
+	// Fetch attributes
+	GET_ATTRIBUTES(inputAttributes_, InputAttribute, ATTRIBUTE_INPUT);
+	GET_ATTRIBUTES(physicsAttributes_, PhysicsAttribute, ATTRIBUTE_PHYSICS);
+	GET_ATTRIBUTES(boundingAttributes_, BoundingAttribute, ATTRIBUTE_BOUNDING);
+
 	physicsObjects_ = new btAlignedObjectArray<PhysicsObject*>();
 	broadphase_ = new btDbvtBroadphase();
 	collisionConfiguration_ = new btDefaultCollisionConfiguration();
@@ -139,6 +143,6 @@ void BulletPhysicsComponent::onEvent(Event* e)
 
 void BulletPhysicsComponent::shootSphere()
 {
-	PhysicsObject* projectile = new PhysicsObject();
-	projectile->Init(
+	//PhysicsObject* projectile = new PhysicsObject();
+	//projectile->Init(
 }

@@ -4,21 +4,22 @@
 #include <QWidget.h>
 #include <QResizeEvent>
 #include <QMouseEvent>
-
 #include <QTime>
 #include <QTimer> // needed to implement frame rate
-
 #include <xkill-architecture/GameManager.h>
-//#include <xkill-renderer/renderingComponent.h>
+#include <xkill-utilities/IObserver.h>
+#include <xkill-utilities/EventManager.h>
 
+#include "ui_MainWindow.h"
 #include "GameTimer.h"
 
 
-class GameWidget : public QWidget
+class GameWidget : public QWidget, public IObserver
 {
 	Q_OBJECT
 
 private:
+	Ui::MainWindowClass ui;
 	GameManager gameManager;
 	GameTimer gameTimer;
 	QTimer* updateTimer;
@@ -29,25 +30,41 @@ public:
 		// make widget non-transparent & draw directly onto screen
 		QWidget::setAttribute(Qt::WA_OpaquePaintEvent);
 		QWidget::setAttribute(Qt::WA_PaintOnScreen);
-		resize(800, 600);
+		resize(800, 800);
+		
+		// subscribe to events
+		SUBSCRIBE_TO_EVENT(this, EVENT_GET_WINDOW_RESOLUTION);
 
-		// init updateTimer
+		// init game
+		gameManager.init(this->winId());
+		gameTimer.reset();
 		updateTimer = new QTimer(this);
 		updateTimer->setInterval(0);
 		connect(updateTimer, SIGNAL(timeout()), this, SLOT(slot_onUpdate()));
 		updateTimer->start();
-
-		// init gameTimer
-		gameTimer.reset();
-
-		// init game
-		gameManager.init(this->winId(), 800, 800);
 	};
 	~GameWidget()
 	{
 	};
 	
 	QPaintEngine* paintEngine() const {return 0;}; // overrides Qt:s own paint engine; prevents flicker
+
+	void onUpdate(float delta)
+	{
+	}
+
+	void onEvent(Event* e)
+	{
+		EventType type = e->getType();
+		switch (type) 
+		{
+		case EVENT_GET_WINDOW_RESOLUTION:
+			event_getWindowResolution((Event_getWindowResolution*)e);
+			break;
+		default:
+			break;
+		}
+	}
 
 public slots:
 	// Runs every time gameTimer times out
@@ -57,6 +74,18 @@ public slots:
 		float delta = gameTimer.getDeltaTime();
 		computeFPS();
 		gameManager.update(delta);
+	};
+
+	void slot_toggleCapFPS(bool isChecked)
+	{
+		if(isChecked)
+		{
+			updateTimer->setInterval(10);
+		}
+		else
+		{
+			updateTimer->setInterval(0);
+		}
 	};
 
 protected:
@@ -94,6 +123,16 @@ private:
 			num_frames = 0;
 			timeElapsed += 1.0f;
 		}
+	}
+
+	void event_getWindowResolution(Event_getWindowResolution* e)
+	{
+		e->width = size().width();
+		e->height = size().height();
+
+		// splitscreen gets wrong if we don't use 600x600 resolution
+		e->width = 800;
+		e->height = 800;
 	}
 
 signals:

@@ -1,6 +1,9 @@
 #pragma once
 
+#include <vector>
 #include "dllUtilities.h"
+
+
 
 //
 // Events info
@@ -11,8 +14,10 @@
 Memory deletion should be made by the funciton sending the Event.
 
 The following usage i prefered:
+\code
 Event_A event;
 EventManager::getInstance()->sendEvent(&event);
+\endcode
 
 \defgroup EVENTS Events
 \ingroup UTILITIES
@@ -20,7 +25,7 @@ EventManager::getInstance()->sendEvent(&event);
 */
 
 
-/// Enums over each Event Type
+// Enums over each Event Type
 /*
 Used by EventManager to build each of its queues.
 
@@ -30,14 +35,21 @@ for some reason
 
 enum DLL_U EventType
 {
+	// Inform events
 	EVENT_A,
 	EVENT_B,
-	EVENT_C,
-	EVENT_D,
-	EVENT_E,
-	EVENT_F,
+	EVENT_MOUSE_MOVE,
 	PLAYSOUND,
 	RUMBLE,
+	FIREPROJECTILE,
+
+	// Get events
+	EVENT_GET_ATTRIBUTE,
+	EVENT_GET_WINDOW_RESOLUTION,
+	EVENT_GET_WINDOW_HANDLE,
+
+	// Utilities
+	EVENT_SHOW_MESSAGEBOX,
 
 	// this is needed, don't touch!
 	EVENT_LAST 
@@ -94,12 +106,32 @@ public:
 };
 
 /**
+\ingroup EVENTS
+*/
+class DLL_U Event_MouseMove : public Event
+{
+public:
+	Event_MouseMove(int dx, int dy) : Event(EVENT_MOUSE_MOVE)
+	{
+		this->dx = dx;
+		this->dy = dy;
+	}
+
+	int dx;
+	int dy;
+};
+
+/**
 \ingroup events
 */
 class DLL_U Event_PlaySound : public Event
 {
 public:
-	Event_PlaySound(int soundId) : Event(PLAYSOUND){this->soundId=soundId;}
+	Event_PlaySound(int soundId) : Event(PLAYSOUND)
+	{
+		this->soundId = soundId;
+	}
+
 	int soundId;
 };
 
@@ -111,4 +143,74 @@ public:
 	float duration;
 	float leftScale;
 	float rightScale;
+};
+
+/// Returns acces to \ref ATTRIBUTES.
+/**
+\ingroup events
+*/
+class DLL_U Event_getAttribute : public Event
+{
+public:
+	Event_getAttribute(int attributeEnum) : Event(EVENT_GET_ATTRIBUTE)
+	{
+		this->attributeEnum = attributeEnum;
+		
+		hostVector = 0;
+		owners = 0;
+	}
+
+	int attributeEnum;			//!< An enums stored as an Int since we can't forward declare Enums.
+	void* hostVector;			//!< Void pointer to a vector holding Attributes.
+								//!< Requires manual casting.
+	std::vector<int>* owners;	//!< A std::vector<int> of owners correspoinding to each
+								//!< attribute.
+};
+
+/// Returns window resolution.
+/**
+\ingroup events
+*/
+class DLL_U Event_getWindowResolution : public Event
+{
+public:
+	int width;		
+	int height;		
+
+	Event_getWindowResolution() : Event(EVENT_GET_WINDOW_RESOLUTION)
+	{
+		width = 320;
+		height = 240;
+	}
+
+	float getAspectRatio()
+	{
+		return (float)width/(float)height;
+	}
+};
+
+/// Displays a messagebox with the message specified
+/**
+\ingroup events
+*/
+class DLL_U Event_showMessageBox : public Event
+{
+public:
+	std::string message;
+
+	Event_showMessageBox(std::string message) : Event(EVENT_SHOW_MESSAGEBOX)
+	{
+		this->message = message;
+	}
+};
+
+class DLL_U Event_fireProjectile : public Event
+{
+public:
+	int playerId;
+
+	Event_fireProjectile(int playerId) : Event(FIREPROJECTILE)
+	{
+		this->playerId = playerId;
+	}
 };

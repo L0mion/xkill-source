@@ -5,6 +5,7 @@
 
 GameComponent::GameComponent(void)
 {
+	//SHOW_MESSAGEBOX("Game has started");
 }
 
 GameComponent::~GameComponent(void)
@@ -22,37 +23,48 @@ void GameComponent::onEvent(Event* e)
 
 void GameComponent::onUpdate(float delta)
 {
+	// Fetches attributes from AttributeManager through the use of EventManager.
+	// This can be used from everywhere EventManager is known. 
+	std::vector<int>* playerOwners;					GET_ATTRIBUTE_OWNERS(playerOwners, ATTRIBUTE_PLAYER);
+	std::vector<PlayerAttribute>* allPlayer;		GET_ATTRIBUTES(allPlayer, PlayerAttribute, ATTRIBUTE_PLAYER);
+	std::vector<RenderAttribute>* allRender;		GET_ATTRIBUTES(allRender, RenderAttribute, ATTRIBUTE_RENDER);
+	std::vector<SpatialAttribute>* allSpatial;		GET_ATTRIBUTES(allSpatial, SpatialAttribute, ATTRIBUTE_SPATIAL);
+	std::vector<PositionAttribute>* allPosition;	GET_ATTRIBUTES(allPosition, PositionAttribute, ATTRIBUTE_POSITION);
 
-	std::vector<PlayerAttribute>* attributesOfPlayer = AttributeManager::getInstance()->playerAttributes_.getAllAttributes();
-	std::vector<int>* attributesOfPlayerOwners = AttributeManager::getInstance()->playerAttributes_.getAllOwners();
-
-
-	for(int i=0; i<static_cast<int>(attributesOfPlayer->size()); i++)
+	for(unsigned i=0; i<playerOwners->size(); i++)
 	{
-		if(attributesOfPlayerOwners->at(i)!=0)
+		if(playerOwners->at(i)!=0)
 		{
-			PlayerAttribute* playerAttribute = &attributesOfPlayer->at(i);
-			RenderAttribute* renderAttribute = ATTRIBUTE_CAST(RenderAttribute, renderAttribute, playerAttribute); //Extract render attribute from player attribute
-			SpatialAttribute* spatialAttribute = ATTRIBUTE_CAST(SpatialAttribute, spatialAttribute, renderAttribute);
-			PositionAttribute* positionAttribute = ATTRIBUTE_CAST(PositionAttribute, positionAttribute, spatialAttribute);
+			// Fetch attributes
+			PlayerAttribute* player		=	&allPlayer		->	at(i);
+			RenderAttribute* render		=	&allRender		->	at(player->renderAttribute.index);
+			SpatialAttribute* spatial	=	&allSpatial		->	at(render->spatialAttribute.index);
+			PositionAttribute* position	=	&allPosition	->	at(spatial->positionAttribute.index);
 			
-			if(playerAttribute->id == 0) //Handle player 1 (test)
-			{
-				positionAttribute->position[0] = positionAttribute->position[0]+1.0f;
-			}
-			else if(playerAttribute->id == 1) //Handle player 2 (test)
-			{
-				//positionAttribute->position[2] = positionAttribute->position[2]+1.0f; 
-			}
+			
+			//
+			// Proceed with calculation as normal
+			//
 
-			std::cout 
-				<< playerAttribute->id						<< "\t"
-				<< attributesOfPlayerOwners->at(i)			<< "\t"
-				<< playerAttribute->name					<< "\t"
-				<< positionAttribute->position[0]			<< "\t"
-				<< positionAttribute->position[1]			<< "\t"
-				<< positionAttribute->position[2]			<< "\t"
-				<< std::endl;
+			/*
+			if(player->id == 0) //Handle player 1 (test)
+			{
+				position->position[0] = position->position[0]+1.0f;
+			}
+			else if(player->id == 1) //Handle player 2 (test)
+			{
+				position->position[2] = position->position[2]+1.0f; 
+			}
+			/*
+
+			/*std::cout 
+				<< player->id				<< "\t"
+				<< playerOwners->at(i)		<< "\t"
+				<< player->name				<< "\t"
+				<< position->position[0]	<< "\t"
+				<< position->position[1]	<< "\t"
+				<< position->position[2]	<< "\t"
+				<< std::endl;*/
 		}
 	}
 }
