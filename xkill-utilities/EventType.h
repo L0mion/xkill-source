@@ -40,6 +40,7 @@ enum DLL_U EventType
 	EVENT_B,
 	EVENT_MOUSE_MOVE,
 	PLAYSOUND,
+	RUMBLE,
 
 	// Get events
 	EVENT_GET_ATTRIBUTE,
@@ -131,6 +132,16 @@ public:
 	}
 
 	int soundId;
+};
+
+//! 
+class DLL_U Event_Rumble : public Event
+{
+public:
+	Event_Rumble(float duration, float leftScale, float rightScale) : Event(RUMBLE){this->duration = duration; this->leftScale = leftScale; this->rightScale = rightScale;}
+	float duration;
+	float leftScale;
+	float rightScale;
 };
 
 /// Returns acces to \ref ATTRIBUTES.

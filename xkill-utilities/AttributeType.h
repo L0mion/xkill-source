@@ -46,17 +46,17 @@ for some reason
 
 enum DLL_U AttributeType
 {
-	ATT_POSITION,
-	ATT_SPATIAL,
-	ATT_RENDER,
-	ATT_PHYSICS,
-	ATT_CAMERA,
-	ATT_INPUT,
-	ATT_PLAYER,
-	ATT_BOUNDING,
+	ATTRIBUTE_POSITION,
+	ATTRIBUTE_SPATIAL,
+	ATTRIBUTE_RENDER,
+	ATTRIBUTE_PHYSICS,
+	ATTRIBUTE_CAMERA,
+	ATTRIBUTE_INPUT,
+	ATTRIBUTE_PLAYER,
+	ATTRIBUTE_BOUNDING,
 
 	// this is needed, don't touch!
-	ATT_LAST
+	ATTRIBUTE_LAST
 };
 
 /// Stores the position of an Entity 
@@ -85,14 +85,15 @@ struct DLL_U SpatialAttribute : public IAttribute
 	float scale[3];
 };
 
-struct DLL_U InputAttribute : public IAttribute
+struct DLL_U CameraMovementAttribute : public IAttribute
 {
-	InputAttribute();
-	~InputAttribute();
+	CameraMovementAttribute();
+	~CameraMovementAttribute();
 
 	float position[3];
 	float rotation[2];
 };
+
 
 /// Stores the points for both a bounding box and a convex mesh
 /** 
@@ -140,12 +141,26 @@ struct DLL_U PhysicsAttribute : public IAttribute
 	~PhysicsAttribute();
 
 	AttributePointer spatialAttribute;
-	float velocity[4];
+	float velocity[3];
 	float rotationVelocity[4];
 	float mass;
+	//CollisionShape
+	//friction
+	//restitution
 
 	bool added;
 	bool alive;
+};
+
+struct DLL_U InputAttribute : public IAttribute
+{
+	InputAttribute();
+	~InputAttribute();
+
+	AttributePointer physicsAttribute;
+	float position[2];
+	float rotation[2];
+	bool fire;
 };
 
 /// Stores everything SoundComponent needs to know to play a 3D sound
@@ -173,7 +188,7 @@ struct DLL_U CameraAttribute : public IAttribute
 	float mat_projection[16];
 };
 
-/// Stores everything GameComponent needs to know about a player
+/// Stores everything GameComponent needs to know about a player (also refer to createPlayerEntity)
 /** 
 \ingroup ATTRIBUTES
 */
@@ -190,6 +205,7 @@ struct DLL_U PlayerAttribute : public IAttribute
 	int totalExecutionTime; //!< Total execution time of the player process. The game session winner is the player with the most total execution time as awared by the scheduler.
 
 	AttributePointer renderAttribute;
+	AttributePointer inputAttribute;
 };
 
 

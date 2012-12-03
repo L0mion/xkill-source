@@ -11,12 +11,14 @@
 
 BulletPhysicsComponent::BulletPhysicsComponent()
 {
+	inputAttributes_ = nullptr;
+	physicsAttributes_ = nullptr;
+	boundingAttributes_ = nullptr;
 	broadphase_ = nullptr;
 	collisionConfiguration_ = nullptr;
 	dispatcher_ = nullptr;
 	solver_ = nullptr;
 	dynamicsWorld_ = nullptr;
-	physicsAttributes_ = nullptr;
 	physicsObjects_ = nullptr;
 	collisionShapeManager_ = nullptr;
 }
@@ -25,7 +27,8 @@ BulletPhysicsComponent::~BulletPhysicsComponent()
 {
 	while(physicsObjects_->size() > 0)
 	{
-		delete physicsObjects_->at(physicsObjects_->size());
+		physicsObjects_->at(physicsObjects_->size()-1)->Clean(dynamicsWorld_);
+		delete physicsObjects_->at(physicsObjects_->size()-1);
 		physicsObjects_->pop_back();
 	}
 	delete physicsObjects_;
@@ -41,8 +44,9 @@ BulletPhysicsComponent::~BulletPhysicsComponent()
 bool BulletPhysicsComponent::init()
 {
 	// Fetch attributes
-	GET_ATTRIBUTES(physicsAttributes_, PhysicsAttribute, ATT_PHYSICS);
-	GET_ATTRIBUTES(boundingAttributes_, BoundingAttribute, ATT_PHYSICS);
+	GET_ATTRIBUTES(inputAttributes_, InputAttribute, ATTRIBUTE_INPUT);
+	GET_ATTRIBUTES(physicsAttributes_, PhysicsAttribute, ATTRIBUTE_PHYSICS);
+	GET_ATTRIBUTES(boundingAttributes_, BoundingAttribute, ATTRIBUTE_BOUNDING);
 
 	physicsObjects_ = new btAlignedObjectArray<PhysicsObject*>();
 	broadphase_ = new btDbvtBroadphase();
@@ -52,8 +56,7 @@ bool BulletPhysicsComponent::init()
 	dynamicsWorld_ = new btDiscreteDynamicsWorld(dispatcher_,broadphase_,solver_,collisionConfiguration_);
 	collisionShapeManager_ = new CollisionShapeManager;
 
-	dynamicsWorld_->setGravity(btVector3(0,-10,0));
-
+	dynamicsWorld_->setGravity(btVector3(0,0,0));
 
 	//////
 
@@ -86,34 +89,45 @@ bool BulletPhysicsComponent::init()
 
 void BulletPhysicsComponent::onUpdate(float delta)
 {
-	for(int i = physicsObjects_->size(); i < physicsObjects_->size(); i++)
+	for(unsigned int i = 0; i < inputAttributes_->size(); i++)
+	{
+		if(i < physicsObjects_->size())
+			physicsObjects_->at(inputAttributes_->at(i).physicsAttribute.index)->input(&inputAttributes_->at(i),delta);
+	}
+
+
+	//Checks if new physiscs attributes were created since last call to this function
+	for(unsigned int i = physicsObjects_->size(); i < physicsAttributes_->size(); i++)
 	{
 		physicsObjects_->push_back(new PhysicsObject());
 	}
-	for(int i = 0; i < physicsObjects_->size(); i++)
+
+	//Synchronize the internal represenation of physics objects with the physics attributes
+	for(unsigned int i = 0; i < physicsObjects_->size(); i++)
 	{
 		if(physicsAttributes_->at(i).alive)
 		{
 			if(physicsAttributes_->at(i).added)
 			{
-				(*physicsObjects_)[i]->preStep(&physicsAttributes_->at(i));
+				physicsObjects_->at(i)->preStep(&physicsAttributes_->at(i));
 			}
 			else
 			{
-				(*physicsObjects_)[i]->Init(&physicsAttributes_->at(i),dynamicsWorld_);
+				physicsObjects_->at(i)->Init(&physicsAttributes_->at(i),dynamicsWorld_);
 				physicsAttributes_->at(i).added = true;
 			}
 		}
 		else if(physicsAttributes_->at(i).added)
 		{
-			(*physicsObjects_)[i]->Clean(dynamicsWorld_);
+			physicsObjects_->at(i)->Clean(dynamicsWorld_);
 			physicsAttributes_->at(i).added = false;
 		}
 	}
 
-	dynamicsWorld_->stepSimulation(delta,10);
+	dynamicsWorld_->stepSimulation(delta,1);
 
-	for(int i = 0; i < physicsObjects_->size(); i++)
+	//Copy the physics simulation result to the physics attributes
+	for(unsigned int i = 0; i < physicsObjects_->size(); i++)
 	{
 		if(physicsAttributes_->at(i).alive && physicsAttributes_->at(i).added)
 		{
@@ -125,4 +139,10 @@ void BulletPhysicsComponent::onUpdate(float delta)
 void BulletPhysicsComponent::onEvent(Event* e)
 {
 
+}
+
+void BulletPhysicsComponent::shootSphere()
+{
+	//PhysicsObject* projectile = new PhysicsObject();
+	//projectile->Init(
 }

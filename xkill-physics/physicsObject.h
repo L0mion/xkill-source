@@ -5,11 +5,11 @@
 #include "physicsObject.h"
 
 struct PhysicsAttribute;
-
+struct InputAttribute;
 
 //! Physics Object
 /*!
-An object that wrapp object specific funtionality for rigidbodies;
+An object that wraps object specific functionality for rigid bodies.
 \ingroup xkill-physics
 */
 class PhysicsObject
@@ -46,6 +46,11 @@ public:
 	\param physicsAttribute The physics attribute which contain object data
 	*/
 	void postStep(PhysicsAttribute* physicsAttribute);
+	//! Runs after simulation is stepped to copy data from rigidbody to attribute
+	/*! 
+	\param inputAttribute The attribute containing player controller information
+	*/
+	void input(InputAttribute* inputAttribute, float delta);
 };
 
 #endif //XKILL_PHYSICS_PHYSICSOBJECT

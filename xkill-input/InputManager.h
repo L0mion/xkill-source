@@ -1,5 +1,8 @@
 #pragma once
 
+#include <xkill-utilities/AttributeType.h>
+#include <xkill-utilities/EventType.h>
+
 #include "InputDevice.h"
 #include "DirectInputDevice.h"
 #include "DirectInputMouse.h"
@@ -83,6 +86,8 @@ public:
 	*/
 	void Update(float deltaTime);
 
+	InputDevice* GetDevice(unsigned int deviceIndex);
+	
 	//! Generates a string with the states of all devices
 	std::string GetInputInformationString();
 

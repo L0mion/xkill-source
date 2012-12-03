@@ -66,7 +66,8 @@ public:
 		entityManager_ = new EntityManager();
 		ENTITYTYPE listOfEntitiesToBeCreated[] =
 		{
-			PLAYER, 
+			PLAYER,
+			PLAYER,
 			PLAYER
 		};
 		int nrOfListOfEntitiesToBeCreated = sizeof(listOfEntitiesToBeCreated)/4;

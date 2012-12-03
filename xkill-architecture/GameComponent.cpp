@@ -25,11 +25,11 @@ void GameComponent::onUpdate(float delta)
 {
 	// Fetches attributes from AttributeManager through the use of EventManager.
 	// This can be used from everywhere EventManager is known. 
-	std::vector<int>* playerOwners;					GET_ATTRIBUTE_OWNERS(playerOwners, ATT_PLAYER);
-	std::vector<PlayerAttribute>* allPlayer;		GET_ATTRIBUTES(allPlayer, PlayerAttribute, ATT_PLAYER);
-	std::vector<RenderAttribute>* allRender;		GET_ATTRIBUTES(allRender, RenderAttribute, ATT_RENDER);
-	std::vector<SpatialAttribute>* allSpatial;		GET_ATTRIBUTES(allSpatial, SpatialAttribute, ATT_SPATIAL);
-	std::vector<PositionAttribute>* allPosition;	GET_ATTRIBUTES(allPosition, PositionAttribute, ATT_POSITION);
+	std::vector<int>* playerOwners;					GET_ATTRIBUTE_OWNERS(playerOwners, ATTRIBUTE_PLAYER);
+	std::vector<PlayerAttribute>* allPlayer;		GET_ATTRIBUTES(allPlayer, PlayerAttribute, ATTRIBUTE_PLAYER);
+	std::vector<RenderAttribute>* allRender;		GET_ATTRIBUTES(allRender, RenderAttribute, ATTRIBUTE_RENDER);
+	std::vector<SpatialAttribute>* allSpatial;		GET_ATTRIBUTES(allSpatial, SpatialAttribute, ATTRIBUTE_SPATIAL);
+	std::vector<PositionAttribute>* allPosition;	GET_ATTRIBUTES(allPosition, PositionAttribute, ATTRIBUTE_POSITION);
 
 	for(unsigned i=0; i<playerOwners->size(); i++)
 	{
@@ -41,6 +41,8 @@ void GameComponent::onUpdate(float delta)
 			SpatialAttribute* spatial	=	&allSpatial		->	at(render->spatialAttribute.index);
 			PositionAttribute* position	=	&allPosition	->	at(spatial->positionAttribute.index);
 			
+
+
 			
 			//
 			// Proceed with calculation as normal

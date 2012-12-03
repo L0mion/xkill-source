@@ -57,7 +57,7 @@ public:
 			return false;
 		/*if(!sound_.init())
 			return false;*/
-		if(!input_.init(windowHandle))
+		if(!input_.init(windowHandle, AttributeManager::getInstance()->inputAttributes_.getAllAttributes()))
 			return false;
 
 		// Returns that everything went ok

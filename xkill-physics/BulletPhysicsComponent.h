@@ -13,7 +13,7 @@ class PhysicsObject;
 class Event;
 struct PhysicsAttribute;
 struct BoundingAttribute;
-
+struct InputAttribute;
 
 class btBroadphaseInterface;
 class btDefaultCollisionConfiguration;
@@ -30,6 +30,8 @@ class CollisionShapeManager;
 //! Physics Component of XKILL.
 /*!
 The physics component of XKILL, implements BulletPhysics to simulate the world.
+From the Bullet documentation: "The entire physics pipeline computation and its data structures are represented in Bullet by a dynamics world"
+"The default dynamics world implementation is the btDiscreteDynamicsWorld."
 \ingroup xkill-physics
 */
 
@@ -48,9 +50,10 @@ private:
 
 	std::vector<PhysicsAttribute>* physicsAttributes_; //<! A pointer to the attribute storage containing PhysicsAttributes, external representation of world
 	std::vector<BoundingAttribute>* boundingAttributes_; //<! A pointer to the attribute storage containing a copy of bounding volumes for the renderer
+	std::vector<InputAttribute>* inputAttributes_; //<! A pointer to the attribute storage containing the input data from the input component
 
 	btAlignedObjectArray<PhysicsObject*>* physicsObjects_; //<! A vector of PhysicsObjects, internal representation of world
-		
+
 public:
 	//! Creates a BulletPhysicsComponent, gives it pointers to attribute storages required by the component and sets all pointer to null_ptr
 	/*!
@@ -71,6 +74,9 @@ public:
 	\param e A pointer to the event that is being passed
 	*/
 	void onEvent(Event* e);
+
+	//! Creates a rigid body used as a projectile
+	void shootSphere();
 };
 
 #endif //XKILL_PHYSICS_PHYSICSCOMPONENT_H

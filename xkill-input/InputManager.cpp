@@ -50,7 +50,15 @@ void InputManager::Update(float deltaTime)
 	for(unsigned int i = 0; i < devices_.size(); i++)
 		devices_[i]->Update(deltaTime);
 
-	handleInput();
+	//handleInput();
+}
+
+InputDevice* InputManager::GetDevice(unsigned int deviceIndex)
+{
+	if(deviceIndex < 0 || deviceIndex >= devices_.size())
+		return NULL;
+
+	return devices_[deviceIndex];
 }
 
 int InputManager::UpdateNumberOfGamepads(HWND hWindow)

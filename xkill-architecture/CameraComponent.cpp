@@ -8,7 +8,7 @@
 CameraComponent::CameraComponent()
 {
 	cameraAttributes_	= nullptr;
-	inputAttributes_	= nullptr;
+	cameraMovementAttribute_	= nullptr;
 }
 
 CameraComponent::~CameraComponent()
@@ -17,10 +17,10 @@ CameraComponent::~CameraComponent()
 void CameraComponent::init()
 {
 	// Fetch attributes
-	GET_ATTRIBUTES(cameraAttributes_, CameraAttribute, ATT_CAMERA);
-	GET_ATTRIBUTES(inputAttributes_, InputAttribute, ATT_INPUT);
+	GET_ATTRIBUTES(cameraAttributes_, CameraAttribute, ATTRIBUTE_CAMERA);
+	//GET_ATTRIBUTES(inputAttributes_, InputAttribute, ATTRIBUTE_INPUT);
 
-	// fetch aspects ratio
+	// fetch aspect ratio
 	Event_getWindowResolution windowResolution;
 	SEND_EVENT(&windowResolution);
 	float aspectRatio = windowResolution.getAspectRatio();
@@ -76,9 +76,9 @@ void CameraComponent::onUpdate(float delta)
 		
 		memcpy(cameraAttributes_->at(i).mat_view, cameras_[i].getView().m, 16*4);
 
-	//	cameras_[i].yaw(inputAttributes_->at(i).rotation[0]);
-	//	cameras_[i].pitch(inputAttributes_->at(i).rotation[1]);
-	//	cameras_[i].setPosition(inputAttributes_->at(i).position);
+		//cameras_[i].yaw(cameraMovementAttribute_->at(i).rotation[0]);
+		//cameras_[i].pitch(cameraMovementAttribute_->at(i).rotation[1]);
+		//cameras_[i].setPosition(cameraMovementAttribute_->at(i).position);
 	}
 }
 
