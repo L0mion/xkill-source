@@ -8,16 +8,17 @@
 #include "physicsObject.h"
 
 BulletPhysicsComponent::BulletPhysicsComponent(std::vector<PhysicsAttribute>* physicsAttributes,
-											   std::vector<BoundingAttribute>* boundingAttributes)
+											   std::vector<BoundingAttribute>* boundingAttributes,
+											   std::vector<InputAttribute>* inputAttributes)
 {
 	physicsAttributes_ = physicsAttributes; 
 	boundingAttributes_ = boundingAttributes;
+	inputAttributes_ = inputAttributes;
 	broadphase_ = nullptr;
 	collisionConfiguration_ = nullptr;
 	dispatcher_ = nullptr;
 	solver_ = nullptr;
 	dynamicsWorld_ = nullptr;
-	physicsAttributes_ = nullptr;
 	physicsObjects_ = nullptr;
 	collisionShapeManager_ = nullptr;
 
@@ -27,7 +28,8 @@ BulletPhysicsComponent::~BulletPhysicsComponent()
 {
 	while(physicsObjects_->size() > 0)
 	{
-		delete physicsObjects_->at(physicsObjects_->size());
+		physicsObjects_->at(physicsObjects_->size()-1)->Clean(dynamicsWorld_);
+		delete physicsObjects_->at(physicsObjects_->size()-1);
 		physicsObjects_->pop_back();
 	}
 	delete physicsObjects_;
@@ -50,8 +52,10 @@ bool BulletPhysicsComponent::init()
 	dynamicsWorld_ = new btDiscreteDynamicsWorld(dispatcher_,broadphase_,solver_,collisionConfiguration_);
 	collisionShapeManager_ = new CollisionShapeManager;
 
-	dynamicsWorld_->setGravity(btVector3(0,-10,0));
+	dynamicsWorld_->setGravity(btVector3(0,0,0));
 
+	dasfloor_ = new PhysicsObject();
+	dasfloor_->Init(nullptr,dynamicsWorld_,true);
 
 	//////
 
@@ -84,7 +88,14 @@ bool BulletPhysicsComponent::init()
 
 void BulletPhysicsComponent::onUpdate(float delta)
 {
-	for(unsigned int i = (*physicsObjects_).size(); i < physicsObjects_->size(); i++)
+	for(unsigned int i = 0; i < inputAttributes_->size(); i++)
+	{
+		if(i < physicsObjects_->size())
+			physicsObjects_->at(inputAttributes_->at(i).physicsAttribute.index)->input(&inputAttributes_->at(i),delta);
+	}
+
+
+	for(unsigned int i = physicsObjects_->size(); i < physicsAttributes_->size(); i++)
 	{
 		physicsObjects_->push_back(new PhysicsObject());
 	}
@@ -94,22 +105,22 @@ void BulletPhysicsComponent::onUpdate(float delta)
 		{
 			if(physicsAttributes_->at(i).added)
 			{
-				(*physicsObjects_)[i]->preStep(&physicsAttributes_->at(i));
+				physicsObjects_->at(i)->preStep(&physicsAttributes_->at(i));
 			}
 			else
 			{
-				(*physicsObjects_)[i]->Init(&physicsAttributes_->at(i),dynamicsWorld_);
+				physicsObjects_->at(i)->Init(&physicsAttributes_->at(i),dynamicsWorld_,false);
 				physicsAttributes_->at(i).added = true;
 			}
 		}
 		else if(physicsAttributes_->at(i).added)
 		{
-			(*physicsObjects_)[i]->Clean(dynamicsWorld_);
+			physicsObjects_->at(i)->Clean(dynamicsWorld_);
 			physicsAttributes_->at(i).added = false;
 		}
 	}
 
-	dynamicsWorld_->stepSimulation(delta,10);
+	dynamicsWorld_->stepSimulation(delta,1);
 
 	for(unsigned int i = 0; i < physicsObjects_->size(); i++)
 	{

@@ -14,7 +14,7 @@ class PhysicsObject;
 class Event;
 struct PhysicsAttribute;
 struct BoundingAttribute;
-
+struct InputAttribute;
 
 class btBroadphaseInterface;
 class btDefaultCollisionConfiguration;
@@ -49,8 +49,10 @@ private:
 
 	std::vector<PhysicsAttribute>* physicsAttributes_; //<! A pointer to the attribute storage containing PhysicsAttributes, external representation of world
 	std::vector<BoundingAttribute>* boundingAttributes_; //<! A pointer to the attribute storage containing a copy of bounding volumes for the renderer
+	std::vector<InputAttribute>* inputAttributes_; //<! A pointer to the attribute storage containing the input data from the input component
 
 	btAlignedObjectArray<PhysicsObject*>* physicsObjects_; //<! A vector of PhysicsObjects, internal representation of world
+	PhysicsObject*						  dasfloor_;
 		
 public:
 	//! Creates a BulletPhysicsComponent, gives it pointers to attribute storages required by the component and sets all pointer to null_ptr
@@ -58,7 +60,8 @@ public:
 	\param physicsAttributes A pointer to the vector containing physicsAttributes
 	*/
 	BulletPhysicsComponent(std::vector<PhysicsAttribute>* physicsAttributes,
-						   std::vector<BoundingAttribute>* boundingAttributes);
+						   std::vector<BoundingAttribute>* boundingAttributes,
+						   std::vector<InputAttribute>* inputAttributes);
 	//! Deletes all objects created within the component
 	~BulletPhysicsComponent();
 	//! Initialize the physics component, creates bullet objects and storage for internal representation

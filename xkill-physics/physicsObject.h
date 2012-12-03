@@ -5,7 +5,7 @@
 #include "physicsObject.h"
 
 struct PhysicsAttribute;
-
+struct InputAttribute;
 
 //! Physics Object
 /*!
@@ -21,6 +21,7 @@ public:
 	//! Creates a Physics Object with a rigidbody pointer set to nullptr
 	PhysicsObject();
 
+
 	//! Deletes all subobjects of the contained rigidbody and the rigidbody itself
 	~PhysicsObject();
 	//! Initialize rigidbody from physicsAttribute and add object to simulation
@@ -30,7 +31,8 @@ public:
 	\sa preStep
 	*/
 	void Init(PhysicsAttribute* physicsAttribute,
-			  btDiscreteDynamicsWorld* dynamicsWorld);
+			  btDiscreteDynamicsWorld* dynamicsWorld,
+			  bool ground);
 	//! Remove the rigidbody from the simulation but do not delete the rigidbody or the object
 	/*! 
 	\param dynamicsWorld The simulation object, used to the the object from the simulation 
@@ -46,6 +48,11 @@ public:
 	\param physicsAttribute The physics attribute which contain object data
 	*/
 	void postStep(PhysicsAttribute* physicsAttribute);
+	//! Runs after simulation is stepped to copy data from rigidbody to attribute
+	/*! 
+	\param inputAttribute The attribute containing player controller information
+	*/
+	void input(InputAttribute* inputAttribute, float delta);
 };
 
 #endif //XKILL_PHYSICS_PHYSICSOBJECT
