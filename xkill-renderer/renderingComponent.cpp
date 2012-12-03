@@ -213,8 +213,8 @@ void RenderingComponent::renderToGBuffer(DirectX::XMFLOAT4X4 view,
 	DirectX::XMFLOAT4X4 viewProj;
 	DirectX::XMStoreFloat4x4(&viewProj, mViewProj);
 
-	cbManagement_->getCBPerFrame()->update(devcon_, viewProj, view, viewInverse, projection, eyePosition);
-	cbManagement_->getCBPerFrame()->vsSet(devcon_);
+	cbManagement_->vsSet(CB_FRAME_INDEX, 0, devcon_);
+	cbManagement_->updateCBFrame(devcon_, viewProj, view, viewInverse, projection, projection, eyePosition);
 
 	ID3D11RenderTargetView* renderTargets[GBUFFERID_NUM_BUFFERS];
 	for(int i=0; i<GBUFFERID_NUM_BUFFERS; i++)
@@ -248,12 +248,13 @@ void RenderingComponent::renderToBackBuffer()
 	FLOAT red[]		= {1.0f, 0.0f, 0.0f, 1.0f };
 	FLOAT green[]	= {0.0f, 1.0f, 0.0f, 1.0f };
 	FLOAT blue[]	= {0.0f, 0.0f, 1.0f, 1.0f };
-	
-	cbManagement_->getCBPerInstance()->update(devcon_, screenWidth_, screenHeight_, 32, 32);
-	cbManagement_->getCBPerInstance()->csSet(devcon_);
 
 	ID3D11UnorderedAccessView* uav[] = { uavBackBuffer_ };
 	devcon_->CSSetUnorderedAccessViews(0, 1, uav, nullptr);
+
+	cbManagement_->csSet(CB_FRAME_INDEX, 0, devcon_);
+	cbManagement_->csSet(CB_INSTANCE_INDEX, 1, devcon_);
+	cbManagement_->updateCBInstance(devcon_, screenWidth_, screenHeight_);
 
 	lightManagement_->setLightSRVCS(devcon_, 2);
 
@@ -507,7 +508,7 @@ HRESULT RenderingComponent::initCBManagement()
 	HRESULT hr = S_OK;
 
 	cbManagement_ = new CBManagement();
-	hr = cbManagement_->init(device_);
+	cbManagement_->init(device_);
 
 	return hr;
 }

@@ -12,18 +12,19 @@ StructuredBuffer<Light> lights : register( t2 );
 
 SamplerState ss : register(s0);
 
+
 [numthreads(32, 32, 1)]
 void defaultCS( uint3 threadID : SV_DispatchThreadID )
 {
-	float2 texCoord = float2(threadID.x/800.0f, threadID.y/800.0f);
+	float2 texCoord = float2((float)threadID.x/(float)screenWidth,(float)threadID.y/(float)screenHeight);
 	float4 color = gBufferAlbedo.SampleLevel(ss, texCoord, 0);
 	
 	float screenX = threadID.x;
 	float screenY = threadID.y;
 
 	// Transform coordinates from screen space to view space.
-	float viewX = (((2.0f*screenX)/screenWidth)-1.0f)/projection._11;
-	float viewY = (((-2.0f*screenY)/screenHeight)+1.0f)/projection._22;
+	//float viewX = (((2.0f*screenX)/screenWidth)-1.0f)/projection._11;
+	//float viewY = (((-2.0f*screenY)/screenHeight)+1.0f)/projection._22;
 	//float viewZ = 1.0f;
 
 
