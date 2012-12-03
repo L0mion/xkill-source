@@ -35,7 +35,7 @@ RenderingComponent::RenderingComponent(
 	for(unsigned int i = 0; i < GBUFFERID_NUM_BUFFERS; i++)
 		gBuffers_[i] = nullptr;
 	
-	d3dDebug_		= nullptr;
+	d3dDebug_	= nullptr;
 
 	device_		= nullptr;
 	devcon_		= nullptr;
@@ -162,9 +162,6 @@ void RenderingComponent::reset()
 
 void RenderingComponent::onUpdate(float delta)
 {
-//	LightDesc light;
-//	lightManagement_->addLight(light, device_, devcon_);
-
 	clearGBuffers();
 	for(unsigned int i=0; i<cameraAttributes_->size(); i++)
 	{
@@ -255,8 +252,8 @@ void RenderingComponent::renderToBackBuffer()
 
 	ID3D11UnorderedAccessView* uav[] = { uavBackBuffer_ };
 	devcon_->CSSetUnorderedAccessViews(0, 1, uav, nullptr);
-	
-	//lightManagement_->setLightSRVCS(devcon_, 2);
+
+	lightManagement_->setLightSRVCS(devcon_, 2);
 
 	ID3D11ShaderResourceView* resourceViews[GBUFFERID_NUM_BUFFERS];
 	for(int i=0; i<GBUFFERID_NUM_BUFFERS; i++)
@@ -516,8 +513,8 @@ HRESULT RenderingComponent::initLightManagement()
 {
 	HRESULT hr = S_OK;
 
-//	lightManagement_ = new LightManagement();
-//	hr = lightManagement_->init(device_);
+	lightManagement_ = new LightManagement();
+	hr = lightManagement_->init(device_);
 
 	return hr;
 }

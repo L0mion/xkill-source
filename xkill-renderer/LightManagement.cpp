@@ -75,7 +75,7 @@ void LightManagement::addLight(LightDesc light, ID3D11Device* device, ID3D11Devi
 
 void LightManagement::createDirectionalLight(ID3D11Device* device)
 {
-	if(lights_.size() == maxNumLights_)
+	if(numLights_ == maxNumLights_)
 		resizeLights( device);
 
 	LightDesc lightDesc;
@@ -97,7 +97,7 @@ void LightManagement::resizeLights(ID3D11Device* device)
 	lights_.resize(maxNumLights_);
 
 	SAFE_RELEASE(lightBuffer_);
-	SAFE_RELEASE(lightBuffer_);
+	SAFE_RELEASE(lightSRV_);
 
 	createLightBuffer(device);
 	createLightSRV(device);

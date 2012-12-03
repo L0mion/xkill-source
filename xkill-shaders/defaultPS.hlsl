@@ -14,7 +14,7 @@ PSOut defaultPS(VSOut pIn)
 	float4 white = float4(0.0f, 1.0f, 1.0f, 1.0f);
 
 	PSOut output;
-	output.normal = white;
+	output.normal.xyz = pIn.normalW;
 	output.albedo = white;
 
 	return output;
