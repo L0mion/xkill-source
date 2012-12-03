@@ -7,6 +7,8 @@ InputComponent::InputComponent()
 	newDeviceSearchTimer_ = 0.0f;
 
 	ZeroMemory(&pos, sizeof(pos));
+
+	EventManager::getInstance()->addObserver(this, RUMBLE);
 }
 
 InputComponent::~InputComponent()
@@ -32,7 +34,19 @@ void InputComponent::onEvent(Event* e)
 {
 	if(e->getType() == EventType::RUMBLE)
 	{
+		Event_Rumble* er = (Event_Rumble*)e;
 
+		InputDevice* device = inputManager_->GetDevice(er->deviceNr);
+
+		if(device != nullptr)
+		{
+			if(er->runRumble)
+				device->RunForceFeedback();
+			else
+				device->StopForceFeedback();
+
+			device->SetForceFeedback(er->leftScale, er->rightScale);
+		}
 	}
 }
 
@@ -56,7 +70,7 @@ void InputComponent::handleInput(float delta)
 	{
 		InputDevice* device = inputManager_->GetDevice(i);
 
-		if(device == NULL)
+		if(device == nullptr)
 			continue;
 
 		InputDevice::InputState state =device->GetState();
@@ -73,5 +87,19 @@ void InputComponent::handleInput(float delta)
 																		   
 		if(nrAxes >= 4)													   
 			inputAttributes_->at(i).rotation[1] += state.axes[3].GetValue();// * delta;
+
+		if(state.buttons[0].isReleased())
+		{
+			Event_Rumble* er = new Event_Rumble(i, true, 100.0f, 1.0f, 1.0f);
+			EventManager::getInstance()->sendEvent(er);
+			delete er;
+		}
+
+		if(state.buttons[1].isReleased())
+		{
+			Event_Rumble* er = new Event_Rumble(i, false, 100.0f, 0.0f, 0.0f);
+			EventManager::getInstance()->sendEvent(er);
+			delete er;
+		}
 	}
 }

@@ -125,6 +125,8 @@ private:
 	*/
 	bool addNewDevice(HWND hWindow, GUID guid, std::string name);
 
+	int checkForNewXInputDevices();
+
 	//! Handle input
 	/*!
 	Currently this is only listening to button presses and joystick positions and give force feedback accordingly. This
