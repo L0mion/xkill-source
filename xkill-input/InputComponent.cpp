@@ -102,16 +102,16 @@ void InputComponent::handleInput(float delta)
 
 		int nrAxes = state.axes.size();
 		if(nrAxes >= 1)
-			inputAttributes_->at(i).position.x += state.axes[0].GetValue()  * delta * moveSpeed;
-																		   
-		if(nrAxes >= 2)													   
-			inputAttributes_->at(i).position.y += state.axes[1].GetValue()  * delta * moveSpeed;
-																		   
-		if(nrAxes >= 3)													   
-			inputAttributes_->at(i).rotation.x += state.axes[2].GetValue()  * delta;
-																		   
-		if(nrAxes >= 4)													   
-			inputAttributes_->at(i).rotation.y += (-1) * state.axes[3].GetValue()  * delta;
+			inputAttributes_->at(i).position.x += state.axes[0].GetValue() * delta * moveSpeed;
+																		    
+		if(nrAxes >= 2)													    
+			inputAttributes_->at(i).position.y += state.axes[1].GetValue() * delta * moveSpeed;
+																		    
+		if(nrAxes >= 3)													    
+			inputAttributes_->at(i).rotation.x += state.axes[2].GetValue() * delta;
+																		    
+		if(nrAxes >= 4)													    
+			inputAttributes_->at(i).rotation.y += state.axes[3].GetValue() * delta;
 
 		if(state.buttons.size() > 3)
 		{

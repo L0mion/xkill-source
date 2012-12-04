@@ -416,10 +416,9 @@ void DirectInputDevice::createAxes()
 	while(axesIndexArray_.size() > axes_.size())
 		axes_.push_back(InputAxisObject(0, 0xFFFF));
 
-	if(axesIndexArray_.size() >= 4)
+	if(axesIndexArray_.size() >= 2)
 	{
 		axes_[1].SetInverted(true);
-		axes_[3].SetInverted(true);
 	}
 
 	inputLayout_.nrOfAxes = axes_.size();

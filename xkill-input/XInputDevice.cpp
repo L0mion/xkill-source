@@ -112,6 +112,9 @@ void XInputDevice::createInputObjectsFromLayout()
 {
 	for(int i = 0; i < inputLayout_.nrOfAxes; i++)
 		axes_.push_back(InputAxisObject(-0x7FFF, 0x7FFF));
+
+	if(axes_.size() > 4)
+		axes_[3].SetInverted(true);
 	
 	for(int i = 0; i < inputLayout_.nrOfButtons; i++)
 		buttons_.push_back(InputButtonObject());
