@@ -58,9 +58,6 @@ bool BulletPhysicsComponent::init()
 
 	dynamicsWorld_->setGravity(btVector3(0,0,0));
 
-	dasfloor_ = new PhysicsObject();
-	dasfloor_->Init(nullptr,dynamicsWorld_,true);
-
 	//////
 
 	//////
@@ -97,14 +94,11 @@ void BulletPhysicsComponent::onUpdate(float delta)
 		if(i < physicsObjects_->size())
 			physicsObjects_->at(inputAttributes_->at(i).physicsAttribute.index)->input(&inputAttributes_->at(i),delta);
 	}
-
-
 	//Checks if new physiscs attributes were created since last call to this function
 	for(unsigned int i = physicsObjects_->size(); i < physicsAttributes_->size(); i++)
 	{
 		physicsObjects_->push_back(new PhysicsObject());
 	}
-
 	//Synchronize the internal represenation of physics objects with the physics attributes
 	for(unsigned int i = 0; i < physicsObjects_->size(); i++)
 	{
@@ -116,7 +110,7 @@ void BulletPhysicsComponent::onUpdate(float delta)
 			}
 			else
 			{
-				physicsObjects_->at(i)->Init(&physicsAttributes_->at(i),dynamicsWorld_,false);
+				physicsObjects_->at(i)->Init(&physicsAttributes_->at(i),dynamicsWorld_);
 				physicsAttributes_->at(i).added = true;
 			}
 		}
@@ -126,8 +120,8 @@ void BulletPhysicsComponent::onUpdate(float delta)
 			physicsAttributes_->at(i).added = false;
 		}
 	}
-
-	dynamicsWorld_->stepSimulation(delta,1);
+	
+	dynamicsWorld_->stepSimulation(delta,10);
 
 	//Copy the physics simulation result to the physics attributes
 	for(unsigned int i = 0; i < physicsObjects_->size(); i++)

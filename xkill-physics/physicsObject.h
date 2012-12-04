@@ -15,7 +15,8 @@ An object that wraps object specific functionality for rigid bodies.
 class PhysicsObject
 {
 private:
-	btRigidBody* rigidBody_; //!< a pointer to a rigidbody object 
+	btRigidBody* rigidBody_; //!< a pointer to a rigidbody object
+	btVector3 forces_;
 protected:
 public:
 	//! Creates a Physics Object with a rigidbody pointer set to nullptr
@@ -31,8 +32,7 @@ public:
 	\sa preStep
 	*/
 	void Init(PhysicsAttribute* physicsAttribute,
-			  btDiscreteDynamicsWorld* dynamicsWorld,
-			  bool ground);
+			  btDiscreteDynamicsWorld* dynamicsWorld);
 	//! Remove the rigidbody from the simulation but do not delete the rigidbody or the object
 	/*! 
 	\param dynamicsWorld The simulation object, used to the the object from the simulation 
