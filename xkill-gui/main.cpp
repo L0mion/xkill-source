@@ -2,6 +2,10 @@
 #include "MainWindow.h"
 #include <QtGui/QApplication>
 
+/// If you can't tell what the main() is for you should have your programming license revoked
+/** 
+*/
+
 int main(int argc, char *argv[])
 {
 	// Detect memory leaks

@@ -2,8 +2,7 @@
 
 #include <vector>
 #include "dllUtilities.h"
-
-
+#include "Math.h"
 
 //
 // Events info
@@ -39,8 +38,9 @@ enum DLL_U EventType
 	EVENT_A,
 	EVENT_B,
 	EVENT_MOUSE_MOVE,
-	PLAYSOUND,
-	RUMBLE,
+	EVENT_PLAYSOUND,
+	EVENT_RUMBLE,
+	EVENT_CREATEPROJECTILE,
 
 	// Get events
 	EVENT_GET_ATTRIBUTE,
@@ -126,7 +126,7 @@ public:
 class DLL_U Event_PlaySound : public Event
 {
 public:
-	Event_PlaySound(int soundId) : Event(PLAYSOUND)
+	Event_PlaySound(int soundId) : Event(EVENT_PLAYSOUND)
 	{
 		this->soundId = soundId;
 	}
@@ -138,7 +138,7 @@ public:
 class DLL_U Event_Rumble : public Event
 {
 public:
-	Event_Rumble(float duration, float leftScale, float rightScale) : Event(RUMBLE){this->duration = duration; this->leftScale = leftScale; this->rightScale = rightScale;}
+	Event_Rumble(float duration, float leftScale, float rightScale) : Event(EVENT_RUMBLE){this->duration = duration; this->leftScale = leftScale; this->rightScale = rightScale;}
 	float duration;
 	float leftScale;
 	float rightScale;
@@ -200,5 +200,18 @@ public:
 	Event_showMessageBox(std::string message) : Event(EVENT_SHOW_MESSAGEBOX)
 	{
 		this->message = message;
+	}
+};
+
+class DLL_U Event_createProjectile : public Event
+{
+public:
+	Float3 position;
+	Float4 direction;
+
+	Event_createProjectile(Float3 position, Float4 direction) : Event(EVENT_CREATEPROJECTILE)
+	{
+		this->position = position;
+		this->direction = direction;
 	}
 };
