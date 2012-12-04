@@ -72,13 +72,12 @@ public:
 		physics->added = false;
 		physics->alive = true;
 		physics->mass = 1.0f;
-		physics->rotationVelocity[0] = 0; 
-		physics->rotationVelocity[1] = 0;
-		physics->rotationVelocity[2] = 0;
-		physics->rotationVelocity[3] = 1;
-		physics->velocity[0] = 0;
-		physics->velocity[1] = 0;
-		physics->velocity[2] = 0;
+		physics->angularVelocity[0] = 0; 
+		physics->angularVelocity[1] = 0;
+		physics->angularVelocity[2] = 0;
+		physics->linearVelocity[0] = 0;
+		physics->linearVelocity[1] = 0;
+		physics->linearVelocity[2] = 0;
 		physics->spatialAttribute = AttributeManager::getInstance()->spatialAttributes_.getLatestAttributeAsAttributePointer();
 	}
 };

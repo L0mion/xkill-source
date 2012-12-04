@@ -25,8 +25,11 @@ void PhysicsObject::Init(PhysicsAttribute* physicsAttribute, btDiscreteDynamicsW
 								 new btSphereShape(1),
 								 btVector3(0,0,0));
 	rigidBody_->updateInertiaTensor();
-	preStep(physicsAttribute);
 	dynamicsWorld->addRigidBody(rigidBody_);
+	forces_ = btVector3(0,0,0);
+	rigidBody_->activate(true);
+
+	preStep(physicsAttribute);
 }
 
 void PhysicsObject::Clean(btDiscreteDynamicsWorld* dynamicsWorld)
@@ -38,27 +41,47 @@ void PhysicsObject::Clean(btDiscreteDynamicsWorld* dynamicsWorld)
 
 void PhysicsObject::preStep(PhysicsAttribute* physicsAttribute)
 {
-	
+	btVector3 position;
+	btQuaternion rotation;
+	btVector3 linearVelocity;
+	btVector3 angularVelocity;
+	SpatialAttribute* spatialAttribute = ATTRIBUTE_CAST(SpatialAttribute,spatialAttribute,physicsAttribute);
+	PositionAttribute* positionAttribute = ATTRIBUTE_CAST(PositionAttribute,positionAttribute,spatialAttribute);
+
+	memcpy(position,positionAttribute->position,3*sizeof(float));
+	memcpy(rotation,spatialAttribute->rotation,4*sizeof(float));
+	memcpy(linearVelocity,physicsAttribute->linearVelocity,3*sizeof(float));
+	memcpy(angularVelocity,physicsAttribute->angularVelocity,3*sizeof(float));
+
+	btVector3 gravity(0,0,0);
+	//btVector3 drag(linearVelocity*-100);
+
+	rigidBody_->setWorldTransform(btTransform(rotation,position));
+	rigidBody_->setLinearVelocity((linearVelocity*0.1f));
+	rigidBody_->setAngularVelocity(angularVelocity);
+	rigidBody_->setMassProps(physicsAttribute->mass,btVector3(0,0,0));
+	rigidBody_->setGravity(gravity+forces_);
 }
 
 void PhysicsObject::postStep(PhysicsAttribute* physicsAttribute)
 {
-	SpatialAttribute* spatial = ATTRIBUTE_CAST(SpatialAttribute, spatialAttribute, physicsAttribute);
-	PositionAttribute* position = ATTRIBUTE_CAST(PositionAttribute, positionAttribute, spatial);
-	memcpy(position->position,rigidBody_->getWorldTransform().getOrigin().get128().m128_f32,sizeof(float)*3);
+	SpatialAttribute* spatialAttribute = ATTRIBUTE_CAST(SpatialAttribute,spatialAttribute,physicsAttribute);
+	PositionAttribute* positionAttribute = ATTRIBUTE_CAST(PositionAttribute,positionAttribute,spatialAttribute);
+
+	memcpy(positionAttribute->position,rigidBody_->getWorldTransform().getOrigin(),3*sizeof(float));
+	memcpy(spatialAttribute->rotation,rigidBody_->getWorldTransform().getRotation(),3*sizeof(float));
+	memcpy(physicsAttribute->linearVelocity,rigidBody_->getLinearVelocity(),3*sizeof(float));
+	memcpy(physicsAttribute->angularVelocity,rigidBody_->getAngularVelocity(),3*sizeof(float));
+	forces_ = btVector3(0,0,0);
 }
 
-#include <iostream>
 void PhysicsObject::input(InputAttribute* inputAttribute,float delta)
 {
+	btQuaternion rotation = rigidBody_->getWorldTransform().getRotation();
+	float yaw = asin(-2*(rotation.x()*rotation.z() - rotation.w()*rotation.y()));
+	btVector3 movement = 50*btVector3(inputAttribute->position[0], 0, inputAttribute->position[1]);
+	btMatrix3x3 a(btQuaternion(yaw,0,0));
+	movement = movement*a;
+	forces_ = movement;
 	
-	btVector3 force(inputAttribute->position[0],0,inputAttribute->position[1]);
-	btVector3 torque(0,inputAttribute->rotation[0],0);
-	inputAttribute->position[1]=inputAttribute->position[0] = 0;
-	rigidBody_->setGravity(btVector3(0,0,0)+100*force);
-	//rigidBody_->applyTorque(torque);
-	rigidBody_->applyDamping(delta*10);
-	std::cout << "force:" << force.x() << " " << force.y() << " " << force.z() << std::endl;
-	btVector3 f = rigidBody_->getTotalForce();
-	rigidBody_->activate(true);
 }
