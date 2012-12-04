@@ -132,8 +132,8 @@ struct DLL_U PhysicsAttribute : public IAttribute
 	~PhysicsAttribute();
 
 	AttributePointer spatialAttribute;
-	Float3 velocity;
-	Float4 rotationVelocity;
+	float linearVelocity[3];
+	float angularVelocity[3];
 	float mass;
 	//CollisionShape
 	//friction
