@@ -202,12 +202,8 @@ void RenderingComponent::renderToGBuffer(DirectX::XMFLOAT4X4 view,
 	devcon_->PSSetSamplers(0, 1, &ssDefault_);
 	devcon_->RSSetState(rsDefault_);
 
-	
-
-	
 	gBufferRenderSetRenderTargets();
 	
-
 	devcon_->ClearDepthStencilView(dsvDepthBuffer_, D3D11_CLEAR_DEPTH, 1.0f, 0);
 
 	// Fetch attributes
@@ -338,7 +334,7 @@ DirectX::XMFLOAT4X4 RenderingComponent::calculateFinalMatrix(DirectX::XMFLOAT4X4
 
 	DirectX::XMMATRIX translation = DirectX::XMMatrixTranslation(positionAttribute.position.x,
 																 positionAttribute.position.y,
-																 positionAttribute.position.z);
+																 40);//positionAttribute.position.z);
 
 	DirectX::XMMATRIX scaling = DirectX::XMMatrixScaling(spatialAttribute.scale.x,
 														 spatialAttribute.scale.y,
