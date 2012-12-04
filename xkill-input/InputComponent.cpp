@@ -98,7 +98,7 @@ void InputComponent::handleInput(float delta)
 
 		InputDevice::InputState state = device->GetState();
 
-		float moveSpeed = 30.0f;
+		float moveSpeed = 3000.0f;
 
 		int nrAxes = state.axes.size();
 		if(nrAxes >= 1)

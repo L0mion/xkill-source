@@ -55,7 +55,7 @@ public:
 
 		PhysicsAttribute* physics = AttributeManager::getInstance()->physicsAttributes_.createAttribute(entity);
 		physics->spatialAttribute = AttributeManager::getInstance()->spatialAttributes_.getLatestAttributeAsAttributePointer();
-		physics->linearVelocity.z = -25;
+		//physics->linearVelocity.z = -25;
 
 		InputAttribute* input  = AttributeManager::getInstance()->inputAttributes_.createAttribute(entity);
 		input->physicsAttribute = AttributeManager::getInstance()->physicsAttributes_.getLatestAttributeAsAttributePointer();

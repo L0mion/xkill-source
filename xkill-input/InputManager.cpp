@@ -30,7 +30,7 @@ bool InputManager::InitInput(HWND hWindow)
 	//if(FAILED(result))
 	//	return false;
 
-	//DirectInputDevice* device = new DirectInputMouse(dInputDevice, GUID_SysMouse, "Mouse"); //Kolla ifall musen är inkopplad genom att köra en enum med guid:et
+	//DirectInputDevice* device = new DirectInputMouse(dInputDevice, GUID_SysMouse, "Mouse", 0); //Kolla ifall musen är inkopplad genom att köra en enum med guid:et
 	//device->Init(hWindow);
 	//devices_.push_back(device);
 
