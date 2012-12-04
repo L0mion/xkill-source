@@ -47,6 +47,15 @@ public:
 
 		PositionAttribute* position = AttributeManager::getInstance()->positionAttributes_.createAttribute(entity);
 		
+		if(playerId == 0)
+		{
+			position->position.z = 10.0f;
+		}
+		else
+		{
+			position->position.z = 0.0f;
+		}
+
 		SpatialAttribute* spatial = AttributeManager::getInstance()->spatialAttributes_.createAttribute(entity);
 		spatial->positionAttribute = AttributeManager::getInstance()->positionAttributes_.getLatestAttributeAsAttributePointer();
 		

@@ -41,6 +41,7 @@ Component-Oriented approach without sacrificing performance.
 \ingroup UTILITIES
 */
 
+/*
 class IComponent
 {
 public:
@@ -48,3 +49,4 @@ public:
 	~IComponent();
 	virtual void onUpdate(float delta) = 0;
 };
+*/
