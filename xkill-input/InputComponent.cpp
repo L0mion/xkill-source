@@ -75,7 +75,7 @@ void InputComponent::handleInput(float delta)
 			inputAttributes_->at(i).rotation.y += state.axes[3].GetValue();// * delta;
 
 		//Projectile test
-		if(state.buttons[0].isReleased())													   
-			inputAttributes_->at(i).fire = true;
+		//if(state.buttons[0].isReleased())													   
+		//	inputAttributes_->at(i).fire = true;
 	}
 }
