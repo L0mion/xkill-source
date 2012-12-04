@@ -51,19 +51,12 @@ PhysicsAttribute::PhysicsAttribute()
 	alive = true;
 	mass = 1.0f;
 
-	angularVelocity[0] = 0; 
-	angularVelocity[1] = 0;
-	angularVelocity[2] = 0;
-	linearVelocity[0] = 0;
-	linearVelocity[1] = 0;
-	linearVelocity[2] = 0;
-
-	//angularVelocity.x = 0; 
-	//angularVelocity.y = 0;
-	//angularVelocity.z = 0;
-	//linearVelocity.x = 0;
-	//linearVelocity.y = 0;
-	//linearVelocity.z = 0;
+	angularVelocity.x = 0; 
+	angularVelocity.y = 0;
+	angularVelocity.z = 0;
+	linearVelocity.x = 0;
+	linearVelocity.y = 0;
+	linearVelocity.z = 0;
 }
 PhysicsAttribute::~PhysicsAttribute()
 {

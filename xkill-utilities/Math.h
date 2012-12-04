@@ -20,7 +20,7 @@ struct Float3
     float z;
 
 	Float3(){};
-	void copy(float* float3)
+	void copy(const float* float3)
 	{
 		memcpy(this, float3, sizeof(Float3));
 	}
