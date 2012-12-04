@@ -28,6 +28,8 @@ namespace DirectX
 };
 struct RenderAttribute;
 struct CameraAttribute;
+struct SpatialAttribute;
+struct PositionAttribute;
 
 static const unsigned int MULTISAMPLES_GBUFFERS		= 1;
 static const unsigned int MULTISAMPLES_BACKBUFFER	= 1;
@@ -59,10 +61,6 @@ public:
 	//! Releases all memory and returns to default state.
 	~RenderingComponent();
 
-	
-	
-
-
 	//! Initializes RenderingComponent's members and prepares render.
 	/*!	\return First encountered error.
 		\sa initDeviceAndSwapChain
@@ -84,6 +82,10 @@ public:
 	void onUpdate(float delta);
 	//! Receives events for RenderingComponent.
 	void onEvent(Event* e);
+	
+
+private:
+	
 	//! Main render-method of RenderingComponent.
 	/*!
 	\param view View-matrix from camera.
@@ -115,8 +117,20 @@ public:
 	//! Clears the GBuffers with a single color. 
 	void clearGBuffers();
 
-private:
-	
+	void gBufferRenderUpdateConstantBuffers(DirectX::XMFLOAT4X4 finalMatrix,
+											DirectX::XMFLOAT4X4 viewMatrix,
+											DirectX::XMFLOAT4X4 viewInverseMatrix,
+											DirectX::XMFLOAT4X4 projectionMatrix,
+											DirectX::XMFLOAT4X4 projectionInverseMatrix,
+											DirectX::XMFLOAT3	eyePosition);
+	void gBufferRenderClean();
+	void gBufferRenderSetRenderTargets();
+	DirectX::XMFLOAT4X4 calculateFinalMatrix(DirectX::XMFLOAT4X4 viewMatrix,
+											 DirectX::XMFLOAT4X4 projectionMatrix,
+											 SpatialAttribute spatialAttribute,
+											 PositionAttribute positionAttribute,
+											 unsigned int attributeIndex);
+	DirectX::XMFLOAT4X4 calculateMatrixInverse(DirectX::XMFLOAT4X4 matrix);
 
 	//! Translates the initiated feature-level to string which may be presented in window.
 	/*!
