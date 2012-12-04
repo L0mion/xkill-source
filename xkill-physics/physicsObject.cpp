@@ -80,8 +80,5 @@ void PhysicsObject::input(InputAttribute* inputAttribute,float delta)
 	btQuaternion rotation = rigidBody_->getWorldTransform().getRotation();
 	float yaw = asin(-2*(rotation.x()*rotation.z() - rotation.w()*rotation.y()));
 	btVector3 movement = 50*btVector3(inputAttribute->position[0], 0, inputAttribute->position[1]);
-	btMatrix3x3 a(btQuaternion(yaw,0,0));
-	movement = movement*a;
-	forces_ = movement;
-	
+	forces_ = movement.rotate(btVector3(0,1,0),yaw);	
 }
