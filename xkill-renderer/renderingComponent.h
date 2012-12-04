@@ -8,10 +8,12 @@
 #include <d3d11.h>
 #include <vector>
 
+#include <xkill-utilities/IObserver.h>
+
 #include "dllRenderer.h"
 #include "gBufferID.h"
-//#include "d3dInterface.h"
-#include <xkill-utilities/IObserver.h>
+#include "vertices.h"
+#include "LoaderObj.h"
 
 class FXManagement;
 class CBManagement;
@@ -192,12 +194,6 @@ private:
 	\sa D3DDebug
 	*/
 	HRESULT initDebug();
-	//! Creates a mockup vertexbuffer that loads it's vertices from a basic .obj-loader using bth.obj.
-	/*!
-	\return Any error encountered during initialization.
-	\sa ObjLoaderBasic
-	*/
-	HRESULT initVertexBuffer();
 
 	/*desc*/
 	HWND windowHandle_;				//!< WINAPI-handle to window.
@@ -231,9 +227,10 @@ private:
 	ID3D11UnorderedAccessView* uavBackBuffer_; //!< Used to render to texBackBuffer using DirectCompute.
 
 	//temp
-	ID3D11Buffer*			vertexBuffer_;		//!< Mock buffer sending vertices to shader.
-	std::vector<VertexPosNormTex>*	vertices_;	//!< Mock vertices.
-	ObjLoaderBasic*			objLoader_;			//!< Basic obj-loader used to debug renderer. 
+	ID3D11Buffer*	vertexBuffer_;		//!< Mock buffer sending vertices to shader.
+	ID3D11Buffer*	indexBuffer_;
+	unsigned int tempVerticesSize;
+	unsigned int tempIndicesSize;
 };
 
 #endif //XKILL_RENDERER_RENDERINGCOMPONENT_H

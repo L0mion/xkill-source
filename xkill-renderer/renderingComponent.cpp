@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 #include "renderingComponent.h"
 
 #include <xkill-utilities/AttributeType.h>
@@ -21,7 +22,7 @@ RenderingComponent::RenderingComponent(
 {
 	GET_ATTRIBUTES(renderAttributes_, RenderAttribute, ATTRIBUTE_RENDER);
 	GET_ATTRIBUTES(cameraAttributes_, CameraAttribute, ATTRIBUTE_CAMERA);
-
+	
 	Event_getWindowResolution windowResolution;
 	SEND_EVENT(&windowResolution);
 
@@ -76,13 +77,12 @@ RenderingComponent::~RenderingComponent()
 	SAFE_RELEASE(texBackBuffer_);
 	SAFE_RELEASE(texDepthBuffer_);
 
-	SAFE_RELEASE(vertexBuffer_); //temp
-
 	SAFE_DELETE(cbManagement_);
 	SAFE_DELETE(fxManagement_);
+	
 	SAFE_DELETE(viewportManagement_);
 	SAFE_DELETE(lightManagement_);
-
+	
 	for(unsigned int i = 0; i < GBUFFERID_NUM_BUFFERS; i++)
 		SAFE_DELETE(gBuffers_[i]);
 	
@@ -90,8 +90,8 @@ RenderingComponent::~RenderingComponent()
 	SAFE_DELETE(d3dDebug_);
 
 	//temp
-	SAFE_DELETE(vertices_);
-	SAFE_DELETE(objLoader_);
+	SAFE_RELEASE(vertexBuffer_);
+	SAFE_RELEASE(indexBuffer_);
 }
 HRESULT RenderingComponent::init()
 {
@@ -227,9 +227,11 @@ void RenderingComponent::renderToGBuffer(DirectX::XMFLOAT4X4 view,
 	UINT stride = sizeof(VertexPosNormTex);
 	UINT offset = 0;
 	devcon_->IASetVertexBuffers(0, 1, &vertexBuffer_, &stride, &offset);
+	devcon_->IASetIndexBuffer(indexBuffer_, DXGI_FORMAT_R32_UINT, 0);
 	devcon_->IASetInputLayout(fxManagement_->getILDefaultVSPosNormTex());
 	devcon_->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-	devcon_->Draw(vertices_->size(), 0);
+	devcon_->DrawIndexed(tempIndicesSize, 0, 0);
+	//devcon_->Draw(tempVerticesSize, 0);
 
 	devcon_->VSSetShader(NULL, NULL, 0);
 	devcon_->PSSetShader(NULL, NULL, 0);
@@ -526,29 +528,6 @@ HRESULT RenderingComponent::initDebug()
 
 	d3dDebug_ = new D3DDebug();
 	hr = d3dDebug_->init(device_);
-
-	return hr;
-}
-HRESULT RenderingComponent::initVertexBuffer()
-{
-	HRESULT hr = S_OK;
-
-	vertices_ = new std::vector<VertexPosNormTex>();
-	objLoader_ = new ObjLoaderBasic();
-	objLoader_->parseObjectFile("../../xkill-resources/xkill-models/bth.obj", vertices_);
-
-	D3D11_BUFFER_DESC vbd;
-	vbd.Usage = D3D11_USAGE_DYNAMIC;
-	vbd.ByteWidth = sizeof(VertexPosNormTex) * vertices_->size();
-	vbd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-	vbd.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
-	vbd.MiscFlags = 0;
-	
-	D3D11_SUBRESOURCE_DATA vinitData;
-	vinitData.pSysMem = &vertices_->at(0);
-	device_->CreateBuffer(&vbd, &vinitData, &vertexBuffer_);
-	if(FAILED(hr))
-		ERROR_MSG(L"RenderingComponent::initVertexBuffer CreateBuffer failed");
 
 	return hr;
 }
