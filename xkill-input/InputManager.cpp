@@ -115,7 +115,7 @@ bool InputManager::addNewDevice(HWND hWindow, GUID guid, std::string name)
 		LPDIRECTINPUTDEVICE8 dInputDevice;
 		HRESULT result = dInput_->CreateDevice(guid, &dInputDevice, NULL);
 		if(FAILED(result))
-			return DIENUM_CONTINUE;
+			return false;
 
 		DirectInputDevice* device = new DirectInputDevice(dInputDevice, guid, name, devices_.size());
 		if(device->Init(hWindow))
