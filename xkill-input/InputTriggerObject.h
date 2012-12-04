@@ -22,6 +22,9 @@ public:
 	float GetValue();
 	bool IsTriggered();
 
+	float getValueFloat();
+	bool getValueBool();
+
 	virtual InputObjectType GetType();
 
 	void SetDeadZone(float deadZone);
