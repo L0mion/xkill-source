@@ -2,6 +2,7 @@
 
 #include <vector>
 #include "dllUtilities.h"
+#include "Math.h"
 
 //
 // Events info
@@ -208,13 +209,12 @@ public:
 class DLL_U Event_createProjectile : public Event
 {
 public:
-	float* position3; // size 3
-	float* direction4; // size 4
+	Float3 position;
+	Float4 direction;
 
-
-	Event_createProjectile(float* position3, float* direction4) : Event(EVENT_CREATEPROJECTILE)
+	Event_createProjectile(Float3 position, Float4 direction) : Event(EVENT_CREATEPROJECTILE)
 	{
-		this->position3 = position3;
-		this->direction4 = direction4;
+		this->position = position;
+		this->direction = direction;
 	}
 };

@@ -11,9 +11,9 @@ IAttribute::~IAttribute()
 
 PositionAttribute::PositionAttribute()
 {
-	position[0] = 0.0f;
-	position[1] = 0.0f;
-	position[2] = 0.0f;
+	position.x = 0.0f;
+	position.y = 0.0f;
+	position.z = 0.0f;
 }
 PositionAttribute::~PositionAttribute()
 {
@@ -21,14 +21,14 @@ PositionAttribute::~PositionAttribute()
 
 SpatialAttribute::SpatialAttribute()
 {
-	rotation[0] = 0.0f;
-	rotation[1] = 0.0f;
-	rotation[2] = 0.0f;
-	rotation[3] = 1.0f;
+	rotation.x = 0.0f;
+	rotation.y = 0.0f;
+	rotation.z = 0.0f;
+	rotation.w = 1.0f;
 
-	scale[0] = 1.0f;
-	scale[1] = 1.0f;
-	scale[2] = 1.0f;
+	scale.x = 1.0f;
+	scale.y = 1.0f;
+	scale.z = 1.0f;
 }
 SpatialAttribute::~SpatialAttribute()
 {
@@ -50,13 +50,13 @@ PhysicsAttribute::PhysicsAttribute()
 	added = false;
 	alive = true;
 	mass = 1.0f;
-	rotationVelocity[0] = 0; 
-	rotationVelocity[1] = 0;
-	rotationVelocity[2] = 0;
-	rotationVelocity[3] = 1;
-	velocity[0] = 0;
-	velocity[1] = 0;
-	velocity[2] = 0;
+	rotationVelocity.x = 0; 
+	rotationVelocity.y = 0;
+	rotationVelocity.z = 0;
+	rotationVelocity.w = 1;
+	velocity.x = 0;
+	velocity.y = 0;
+	velocity.z = 0;
 }
 PhysicsAttribute::~PhysicsAttribute()
 {
@@ -71,29 +71,19 @@ SoundAttribute::~SoundAttribute()
 
 CameraAttribute::CameraAttribute()
 {
-	ZeroMemory(mat_projection, sizeof(mat_projection));
-	ZeroMemory(mat_view, sizeof(mat_view));
+	ZeroMemory(&mat_projection, sizeof(mat_projection));
+	ZeroMemory(&mat_view, sizeof(mat_view));
 }
 CameraAttribute::~CameraAttribute()
 {
 }
 
-struct float3
-{
-	float f1, f2, f3;
-	float3(float f1, float f2, float f3)
-	{
-		this->f1 = f1; this->f2 = f2; this->f3 = f3;
-	}
-	~float3();
-};
 InputAttribute::InputAttribute()
 {
 	fire = false;
-	ZeroMemory(position,(2*sizeof(float)));
-	ZeroMemory(rotation,(2*sizeof(float)));
+	ZeroMemory(&position,sizeof(position));
+	ZeroMemory(&rotation,sizeof(rotation));
 	DirectX::XMFLOAT3 test;
-	test.x = 1.0f;
 }
 InputAttribute::~InputAttribute()
 {

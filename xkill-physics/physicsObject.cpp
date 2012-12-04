@@ -53,16 +53,16 @@ void PhysicsObject::postStep(PhysicsAttribute* physicsAttribute)
 {
 	SpatialAttribute* spatial = ATTRIBUTE_CAST(SpatialAttribute, spatialAttribute, physicsAttribute);
 	PositionAttribute* position = ATTRIBUTE_CAST(PositionAttribute, positionAttribute, spatial);
-	memcpy(position->position,rigidBody_->getWorldTransform().getOrigin().get128().m128_f32,sizeof(float)*3);
+	memcpy(&position->position, rigidBody_->getWorldTransform().getOrigin().get128().m128_f32, sizeof(float)*3);
 }
 
 #include <iostream>
 void PhysicsObject::input(InputAttribute* inputAttribute,float delta)
 {
 	
-	btVector3 force(inputAttribute->position[0],0,inputAttribute->position[1]);
-	btVector3 torque(0,inputAttribute->rotation[0],0);
-	inputAttribute->position[1]=inputAttribute->position[0] = 0;
+	btVector3 force(inputAttribute->position.x,0,inputAttribute->position.y);
+	btVector3 torque(0,inputAttribute->rotation.x,0);
+	inputAttribute->position.y=inputAttribute->position.x = 0;
 	rigidBody_->setGravity(btVector3(0,0,0)+100*force);
 	//rigidBody_->applyTorque(torque);
 	rigidBody_->applyDamping(delta*10);
