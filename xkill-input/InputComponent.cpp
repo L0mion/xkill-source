@@ -1,5 +1,9 @@
 #include "InputComponent.h"
 
+#include <xkill-utilities/EventManager.h>
+#include <xkill-utilities/EventType.h>
+#include <xkill-architecture/AttributeManager.h>
+
 #include "InputManager.h"
 
 InputComponent::InputComponent()
@@ -77,16 +81,16 @@ void InputComponent::handleInput(float delta)
 
 		int nrAxes = state.axes.size();
 		if(nrAxes >= 1)
-			inputAttributes_->at(i).position[0] += state.axes[0].GetValue() ;// * delta;
+			inputAttributes_->at(i).position.x += state.axes[0].GetValue() ;// * delta;
 																		   
 		if(nrAxes >= 2)													   
-			inputAttributes_->at(i).position[1] += state.axes[1].GetValue() ;// * delta;
+			inputAttributes_->at(i).position.y += state.axes[1].GetValue() ;// * delta;
 																		   
 		if(nrAxes >= 3)													   
-			inputAttributes_->at(i).rotation[0] += state.axes[2].GetValue() ;// * delta;
+			inputAttributes_->at(i).rotation.x += state.axes[2].GetValue() ;// * delta;
 																		   
 		if(nrAxes >= 4)													   
-			inputAttributes_->at(i).rotation[1] += state.axes[3].GetValue() ;// * delta;
+			inputAttributes_->at(i).rotation.y += state.axes[3].GetValue() ;// * delta;
 
 		if(state.buttons[0].isReleased())
 		{

@@ -18,7 +18,7 @@ void CameraComponent::init()
 {
 	// Fetch attributes
 	GET_ATTRIBUTES(cameraAttributes_, CameraAttribute, ATTRIBUTE_CAMERA);
-	//GET_ATTRIBUTES(inputAttributes_, InputAttribute, ATTRIBUTE_INPUT);
+	GET_ATTRIBUTES(inputAttributes_, InputAttribute, ATTRIBUTE_INPUT);
 
 	// fetch aspect ratio
 	Event_getWindowResolution windowResolution;
@@ -75,6 +75,21 @@ void CameraComponent::onUpdate(float delta)
 		cameras_[i].updateView();
 		
 		cameraAttributes_->at(i).mat_view.copy((float*)&cameras_[i].getView());
+	}
+
+	unsigned int nrOfCamerasWithInput = cameras_.size();
+	if(nrOfCamerasWithInput > inputAttributes_->size())
+		nrOfCamerasWithInput = inputAttributes_->size();
+
+	for(unsigned int i = 0; i < nrOfCamerasWithInput; i++)
+	{
+		float turnSpeed = 30.0f;
+
+		cameras_[i].yaw(inputAttributes_->at(i).rotation.x * turnSpeed);
+		cameras_[i].pitch((-1) * inputAttributes_->at(i).rotation.y * turnSpeed);
+
+		inputAttributes_->at(i).rotation.x = 0.0f;
+		inputAttributes_->at(i).rotation.y = 0.0f;
 	}
 }
 
