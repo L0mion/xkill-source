@@ -73,7 +73,6 @@ void CameraComponent::onUpdate(float delta)
 		PositionAttribute* position = ATTRIBUTE_CAST(PositionAttribute, positionAttribute, spatial);
 		cameras_[i].setPosition(position->position);
 		cameras_[i].updateView();
-		
 		memcpy(cameraAttributes_->at(i).mat_view, cameras_[i].getView().m, 16*4);
 
 		//cameras_[i].yaw(cameraMovementAttribute_->at(i).rotation[0]);

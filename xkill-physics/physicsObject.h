@@ -17,6 +17,7 @@ class PhysicsObject
 private:
 	btRigidBody* rigidBody_; //!< a pointer to a rigidbody object
 	btVector3 forces_;
+	btVector3 movement_;
 protected:
 public:
 	//! Creates a Physics Object with a rigidbody pointer set to nullptr
