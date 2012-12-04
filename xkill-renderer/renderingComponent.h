@@ -195,6 +195,9 @@ private:
 	*/
 	HRESULT initDebug();
 
+	//temp
+	HRESULT initVertexBuffer();
+
 	/*desc*/
 	HWND windowHandle_;				//!< WINAPI-handle to window.
 	unsigned int screenWidth_;		//!< Width of screen.
@@ -227,10 +230,9 @@ private:
 	ID3D11UnorderedAccessView* uavBackBuffer_; //!< Used to render to texBackBuffer using DirectCompute.
 
 	//temp
+	std::vector<VertexPosNormTex>* vertices_;
+	ObjLoaderBasic* objLoader_;
 	ID3D11Buffer*	vertexBuffer_;		//!< Mock buffer sending vertices to shader.
-	ID3D11Buffer*	indexBuffer_;
-	unsigned int tempVerticesSize;
-	unsigned int tempIndicesSize;
 };
 
 #endif //XKILL_RENDERER_RENDERINGCOMPONENT_H
