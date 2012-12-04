@@ -1,28 +1,30 @@
 #ifndef XKILL_RENDERER_OBJFACE_H
 #define XKILL_RENDERER_OBJFACE_H
 
+//! Describes a face read from .obj.
+/*!
+Used to filter duplicate faces, and create lists of indices.
+\ingroup xkill-mesh-io-obj
+*/
 class ObjFace
 {
 public:
-	ObjFace()
-	{
-		//Do nothing.
-	}
+	//!Does nothing.
+	ObjFace();
+	//! Passes required face-values to object.
+	/*!
+	\param v Vertex-index.
+	\param t Texture-coordinates-index.
+	\param n Normal-index.
+	\param index Index to face.
+	*/
 	ObjFace(
 		unsigned int v,
 		unsigned int t,
 		unsigned int n,
-		unsigned int index)
-	{
-		this->v_		= v;
-		this->t_		= t;
-		this->n_		= n;
-		this->index_	= index;
-	}
-	~ObjFace()
-	{
-		//Do nothing.
-	}
+		unsigned int index);
+	//!Does nothing.
+	~ObjFace();
 
 	friend bool operator== (ObjFace &mf1, ObjFace &mf2)
 	{
@@ -36,19 +38,19 @@ public:
 		return !(mf1 == mf2);
 	}
 
-	unsigned int getV()		{ return v_;		}
-	unsigned int getT()		{ return t_;		}
-	unsigned int getN()		{ return n_;		}
-	unsigned int getIndex()	{ return index_;	}
+	unsigned int getV();	
+	unsigned int getT();	
+	unsigned int getN();
+	unsigned int getIndex();
 
-	void setIndex(unsigned int index) {this->index_ = index; }
+	void setIndex(unsigned int index);
 protected:
 private:
-	unsigned int v_;
-	unsigned int t_;
-	unsigned int n_;
+	unsigned int v_;		//!< Vertex-index.
+	unsigned int t_;		//!< Texture-coordinates-index.
+	unsigned int n_;		//!< Normal-index.
 
-	unsigned int index_;
+	unsigned int index_;	//!< Index to face.
 };
 
 #endif //XKILL_RENDERER_OBJFACE_H

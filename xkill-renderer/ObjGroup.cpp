@@ -1,9 +1,9 @@
 #include "ObjGroup.h"
 
-ObjGroup::ObjGroup(const std::string mgName)
+ObjGroup::ObjGroup(const std::string groupName)
 {
-	this->name_	= mgName;
-	materialName_		= "";
+	this->name_		= groupName;
+	materialName_	= "";
 }
 ObjGroup::~ObjGroup()
 {
@@ -15,9 +15,9 @@ void ObjGroup::pushIndex(unsigned int index)
 	indices_.push_back(index);
 }
 
-void ObjGroup::setMaterialName(std::string mgMaterial)
+void ObjGroup::setMaterialName(std::string materialName)
 {
-	materialName_ = mgMaterial;
+	materialName_ = materialName;
 }
 
 const std::string ObjGroup::getName()

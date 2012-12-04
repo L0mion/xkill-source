@@ -57,7 +57,7 @@ static const unsigned int OBJ_PARAMS_INDEX_GROUP_NAME	= 0 + OBJ_PARAMS;
 static const unsigned int OBJ_PARAMS_INDEX_MATERIAL_NAME		= 0 + OBJ_PARAMS;
 static const unsigned int OBJ_PARAMS_INDEX_MATERIAL_USE_NAME	= 0 + OBJ_PARAMS;
 
- /** Describes read symbol so that pretty switch-cases may be used.
+/** Describes read symbol so that pretty switch-cases may be used.
 * An action is based of this Enum, and then proceeds to select an appropriate function.
 */
 enum ObjSymbol 
@@ -74,7 +74,7 @@ enum ObjSymbol
 	OBJSYMBOL_INVALID			/**< This value should never, ever - except occationally - occur. (No, seriously, never.) */
 };
 
-//! MeshLoader with functionality to load .obj-files.
+//! Loader with functionality to load .obj-files.
 /*!
 \ingroup xkill-mesh-io-obj
 */
@@ -92,7 +92,7 @@ public:
 	//! Does nothing.
 	~LoaderObj();
 
-	//! Function initializing MeshLoaderObj and loading specified .obj-file.
+	//! Function initializing object and loading specified .obj-file.
 	/*!
 	Method attempts to open specified .obj-file and proceeds to parse this file if suceeded. If suceeded, the method will then call loading of this .obj.
 	\sa parseObj

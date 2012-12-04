@@ -7,12 +7,19 @@
 
 #include "MTLIllum.h"
 
+//! Describes a single material read from .mtl.
+/*!
+\ingroup xkill-mesh-io-mtl
+*/
 class MTLMaterial
 {
 public:
+	//! Initializes material with passed name.
 	MTLMaterial(const std::string name);
+	//! Does nothing.
 	~MTLMaterial();
 
+	//! Adds an illumination model-type to material. This type is pushed to a vector as a material may have several.
 	void addIllum(const IlluminationModel im);
 
 	/*sets*/
@@ -60,27 +67,27 @@ protected:
 private:
 	std::string name_;
 
-	DirectX::XMFLOAT3 ambientColor_;		// Ka
-	DirectX::XMFLOAT3 diffuseColor_;		// Kd
-	DirectX::XMFLOAT3 specularColor_;		// Ks
-	DirectX::XMFLOAT3 tf_;					// Tf
+	DirectX::XMFLOAT3 ambientColor_;		//!< Ka
+	DirectX::XMFLOAT3 diffuseColor_;		//!< Kd
+	DirectX::XMFLOAT3 specularColor_;		//!< Ks
+	DirectX::XMFLOAT3 tf_;					//!< Tf
 	/*^ Transmission Filter*/
-	
-	float specularPow_;						// Ns
-	float alpha_;							// d/Tr
-	float opticalDensity_;					//Ni
-	
-	std::vector<IlluminationModel> illums_;	// illum
-	
+
+	float specularPow_;						//!< Ns
+	float alpha_;							//!< d/Tr
+	float opticalDensity_;					//!< Ni
+
+	std::vector<IlluminationModel> illums_;	//!< illum
+
 	/*Textures*/
-	std::string texAmbient_;				//	map_Ka
-	std::string texDiffuse_;				//	map_Kd
-	std::string texSpecular_;				//	map_Ks
-	std::string texSpecularPow_;			//	map_Ns
-	std::string texAlpha_;					//	map_d / map_Tr
-	std::string texBump_;					//	bump / map_bump
-	std::string texDisplacement_;			//	disp
-	std::string texStencil_;				//	decal
+	std::string texAmbient_;				//!< map_Ka
+	std::string texDiffuse_;				//!< map_Kd
+	std::string texSpecular_;				//!< map_Ks
+	std::string texSpecularPow_;			//!< map_Ns
+	std::string texAlpha_;					//!< map_d / map_Tr
+	std::string texBump_;					//!< bump / map_bump
+	std::string texDisplacement_;			//!< disp
+	std::string texStencil_;				//!< decal
 };
 
 #endif //XKILL_RENDERER_MTLMATERIAL_H

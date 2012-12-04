@@ -341,8 +341,8 @@ const unsigned int LoaderObj::loadVertex(
 	/*Create new vertex*/
 	VertexPosNormTex vertex;
 	vertex.position_	= position_[iPos	- 1];
-	vertex.texcoord_	= tex_[iTex		- 1];
-	vertex.normal_		= normal_[iNorm	- 1];
+	vertex.texcoord_	= tex_[iTex			- 1];
+	vertex.normal_		= normal_[iNorm		- 1];
 	vertices_.push_back(vertex);
 
 	return vertices_.size() - 1;

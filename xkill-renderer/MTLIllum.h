@@ -1,6 +1,9 @@
 #ifndef XKILL_RENDERER_MTLILLUM_H
 #define XKILL_RENDERER_MTLILLUM_H
 
+/** Describes illumination models used by .mtl-format.
+* Passed in .mtl as unsigned integers.
+*/
 enum IlluminationModel 
 {
 	ILLUM_COLOR_ON_AMBIENT_OFF,
@@ -18,6 +21,7 @@ enum IlluminationModel
 	ILLUM_INVALID
 };
 
+//! Translates given integer into IlluminationModel-type.
 static const IlluminationModel integerToIllum(unsigned int integer)
 {
 	IlluminationModel illum = ILLUM_INVALID;

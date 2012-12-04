@@ -40,7 +40,7 @@ bool LoaderMTL::parseMTL()
 {
 	bool sucessfulLoad = true;
 
-	MtlSymbol curSymbol = MTLSYMBOL_INVALID;
+	MTLSymbol curSymbol = MTLSYMBOL_INVALID;
 	std::string curLine = "";
 	std::vector<std::string> curLineSplit;
 	while(!ifstream_.eof() && sucessfulLoad)
@@ -62,14 +62,11 @@ bool LoaderMTL::parseMTL()
 			printFail(curLine);
 	}
 
-	if(sucessfulLoad)
-		loadMTL();
-
 	return sucessfulLoad;
 }
-MtlSymbol LoaderMTL::parseSymbol(std::vector<std::string>& params)
+MTLSymbol LoaderMTL::parseSymbol(std::vector<std::string>& params)
 {
-	MtlSymbol symbol = MTLSYMBOL_IGNORE;
+	MTLSymbol symbol = MTLSYMBOL_IGNORE;
 	if(params.size() > 0)
 	{
 		std::string front = params.front();
@@ -105,7 +102,7 @@ MtlSymbol LoaderMTL::parseSymbol(std::vector<std::string>& params)
 	return symbol;
 }
 bool LoaderMTL::parseParams(
-	MtlSymbol symbol, 
+	MTLSymbol symbol, 
 	std::vector<std::string>& params)
 {
 	bool sucessfulParse = true;
@@ -174,7 +171,7 @@ bool LoaderMTL::parseParamsNumeric(const std::vector<std::string>& params)
 	return sucessfulParse;
 }
 bool LoaderMTL::parsePrerequisites(
-	MtlSymbol symbol, 
+	MTLSymbol symbol, 
 	const std::vector<std::string>& params)
 {
 	bool sucessfulParse = true;
@@ -195,7 +192,7 @@ bool LoaderMTL::parsePrerequisites(
 }
 
 void LoaderMTL::loadSymbol(
-	const MtlSymbol symbol, 
+	const MTLSymbol symbol, 
 	const std::vector<std::string>& params)
 {
 	if(symbol == MTLSYMBOL_NEWMTL)
@@ -239,7 +236,7 @@ void LoaderMTL::loadIllum(const std::vector<std::string>& params)
 	materials_.back().addIllum(integerToIllum(illum));
 }
 void LoaderMTL::loadColor(
-	const MtlSymbol symbol,
+	const MTLSymbol symbol,
 	const std::vector<std::string>& params)
 {
 	DirectX::XMFLOAT3 color = loadVector(params);
@@ -270,7 +267,7 @@ DirectX::XMFLOAT3 LoaderMTL::loadVector(const std::vector<std::string>& params)
 	return DirectX::XMFLOAT3(x, y, z);
 }
 void LoaderMTL::loadTex(
-		const MtlSymbol symbol,
+		const MTLSymbol symbol,
 		const std::vector<std::string>& params)
 {
 	std::string filename = loadFilename(params);
