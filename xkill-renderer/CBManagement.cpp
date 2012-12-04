@@ -25,7 +25,8 @@ void CBManagement::updateCBFrame(ID3D11DeviceContext* devcon,
 								 DirectX::XMFLOAT4X4 viewMatrixInverse,
 								 DirectX::XMFLOAT4X4 projectionMatrix,
 								 DirectX::XMFLOAT4X4 projectionMatrixInverse,
-								 DirectX::XMFLOAT3	 eyePosition)
+								 DirectX::XMFLOAT3	 eyePosition,
+								 unsigned int		 numLights)
 {
 	CBFrameDesc cbDesc;
 	cbDesc.finalMatrix				= finalMatrix;
@@ -34,6 +35,7 @@ void CBManagement::updateCBFrame(ID3D11DeviceContext* devcon,
 	cbDesc.projectionMatrix			= projectionMatrix;
 	cbDesc.projectionMatrixInverse	= projectionMatrixInverse;
 	cbDesc.eyePosition				= eyePosition;
+	cbDesc.numLights				= numLights;
 
 	devcon->UpdateSubresource(cbFrame_, 0, 0, &cbDesc, 0, 0);
 }

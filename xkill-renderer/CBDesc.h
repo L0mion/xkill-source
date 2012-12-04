@@ -11,7 +11,7 @@ struct CBFrameDesc
 	DirectX::XMFLOAT4X4 projectionMatrix;
 	DirectX::XMFLOAT4X4 projectionMatrixInverse;
 	DirectX::XMFLOAT3	eyePosition;
-	int					pad1;
+	unsigned int		numLights;
 };
 static const unsigned int CB_FRAME_DESC_SIZE = 336;
 

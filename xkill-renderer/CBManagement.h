@@ -17,12 +17,13 @@ public:
 	void reset();
 
 	void updateCBFrame(ID3D11DeviceContext* devcon,
-					   DirectX::XMFLOAT4X4 finalMatrix,
-					   DirectX::XMFLOAT4X4 viewMatrix,
-					   DirectX::XMFLOAT4X4 viewMatrixInverse,
-					   DirectX::XMFLOAT4X4 projectionMatrix,
-					   DirectX::XMFLOAT4X4 projectionMatrixInverse,
-					   DirectX::XMFLOAT3	eyePosition);
+					   DirectX::XMFLOAT4X4	finalMatrix,
+					   DirectX::XMFLOAT4X4	viewMatrix,
+					   DirectX::XMFLOAT4X4	viewMatrixInverse,
+					   DirectX::XMFLOAT4X4	projectionMatrix,
+					   DirectX::XMFLOAT4X4	projectionMatrixInverse,
+					   DirectX::XMFLOAT3	eyePosition,
+					   unsigned int			numLights);
 	void updateCBInstance(ID3D11DeviceContext* devcon,
 						  unsigned int screenWidth,
 						  unsigned int screenHeight);

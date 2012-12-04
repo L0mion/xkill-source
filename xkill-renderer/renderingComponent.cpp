@@ -170,11 +170,18 @@ void RenderingComponent::onUpdate(float delta)
 		DirectX::XMFLOAT4X4 view(cameraAttributes_->at(i).mat_view);
 		DirectX::XMFLOAT4X4 projection(cameraAttributes_->at(i).mat_projection);
 
-		DirectX::CXMMATRIX	cxmView = DirectX::XMLoadFloat4x4(&view);
-		DirectX::XMVECTOR	vDeterminant = DirectX::XMMatrixDeterminant(cxmView);
-		DirectX::XMMATRIX	xmViewInverse = DirectX::XMMatrixInverse(&vDeterminant, cxmView);
+		DirectX::CXMMATRIX	cxmView				= DirectX::XMLoadFloat4x4(&view);
+		DirectX::XMMATRIX	cxmProjection		= DirectX::XMLoadFloat4x4(&projection);
+		DirectX::XMVECTOR	vDeterminant		= DirectX::XMMatrixDeterminant(cxmView);
+		DirectX::XMMATRIX	xmViewInverse		= DirectX::XMMatrixInverse(&vDeterminant, cxmView);
+							vDeterminant		= DirectX::XMMatrixDeterminant(cxmProjection);
+		DirectX::XMMATRIX	xmProjectionInverse = DirectX::XMMatrixInverse(&vDeterminant, cxmProjection);
+
+		
 		DirectX::XMFLOAT4X4 viewInverse;
+		DirectX::XMFLOAT4X4 projectionInverse;
 		DirectX::XMStoreFloat4x4(&viewInverse, xmViewInverse);
+		DirectX::XMStoreFloat4x4(&projectionInverse, xmProjectionInverse);
 		
 		SpatialAttribute*	spatialAttribute = static_cast<SpatialAttribute*>(cameraAttributes_->at(i).spatialAttribute.host);
 		PositionAttribute*	positionAttribute = static_cast<PositionAttribute*>(spatialAttribute->positionAttribute.host);
@@ -182,7 +189,7 @@ void RenderingComponent::onUpdate(float delta)
 		//DirectX::XMFLOAT3 eyePosition(0.0f, 0.0f, -50.0f);
 
 		setViewport(i);
-		renderToGBuffer(view, viewInverse, projection, eyePosition);
+		renderToGBuffer(view, viewInverse, projection, projectionInverse, eyePosition);
 	}
 	
 	renderToBackBuffer();
@@ -196,6 +203,7 @@ void RenderingComponent::render(DirectX::XMFLOAT4X4 view, DirectX::XMFLOAT4X4 pr
 void RenderingComponent::renderToGBuffer(DirectX::XMFLOAT4X4 view,
 										 DirectX::XMFLOAT4X4 viewInverse,
 										 DirectX::XMFLOAT4X4 projection,
+										 DirectX::XMFLOAT4X4 projectionInverse,
 										 DirectX::XMFLOAT3	eyePosition)
 {
 	FLOAT black[]	= {0.0f, 0.0f, 0.0f, 1.0f };
@@ -214,7 +222,14 @@ void RenderingComponent::renderToGBuffer(DirectX::XMFLOAT4X4 view,
 	DirectX::XMStoreFloat4x4(&viewProj, mViewProj);
 
 	cbManagement_->vsSet(CB_FRAME_INDEX, 0, devcon_);
-	cbManagement_->updateCBFrame(devcon_, viewProj, view, viewInverse, projection, projection, eyePosition);
+	cbManagement_->updateCBFrame(devcon_,
+								 viewProj,
+								 view,
+								 viewInverse,
+								 projection,
+								 projectionInverse,
+								 eyePosition, 
+								 lightManagement_->getNumLights());
 
 	ID3D11RenderTargetView* renderTargets[GBUFFERID_NUM_BUFFERS];
 	for(int i=0; i<GBUFFERID_NUM_BUFFERS; i++)

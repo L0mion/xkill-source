@@ -59,6 +59,8 @@ public:
 	\sa LightDesc
 	*/
 	void addLight(LightDesc light, ID3D11Device* device, ID3D11DeviceContext* devcon);
+
+	unsigned int getNumLights() const;
 private:
 	//! Fills a LightDesc with data necessary for a directionalLight
 	/*!

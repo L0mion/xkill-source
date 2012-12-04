@@ -100,6 +100,7 @@ public:
 	void renderToGBuffer(DirectX::XMFLOAT4X4 view,
 						 DirectX::XMFLOAT4X4 viewInverse,
 						 DirectX::XMFLOAT4X4 projection,
+						 DirectX::XMFLOAT4X4 projectionInverse,
 						 DirectX::XMFLOAT3	eyePosition);
 	//! Samples from g-buffers and creates a final image using DirectCompute.
 	/*!
