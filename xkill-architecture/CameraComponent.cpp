@@ -46,26 +46,33 @@ void CameraComponent::init()
 		cameras_[i].updateProj();
 		cameraAttributes_->at(i).mat_projection.copy((float*)&cameras_[i].getProjection());
 	}
-
-	// listen to mouseMove events
-	EventManager::getInstance()->addObserver(this, EVENT_MOUSE_MOVE);
 }
 
 void CameraComponent::onEvent(Event* e)
 {
-	EventType type = e->getType();
-	switch (type) 
-	{
-	case EVENT_MOUSE_MOVE:
-		event_MouseMove((Event_MouseMove*)e);
-		break;
-	default:
-		break;
-	}
+	//EventType type = e->getType();
+	//switch (type) 
+	//{
+	//default:
+	//	break;
+	//}
 }
 
 void CameraComponent::onUpdate(float delta)
 {
+	unsigned int nrOfCamerasWithInput = cameras_.size();
+	if(nrOfCamerasWithInput > inputAttributes_->size())
+		nrOfCamerasWithInput = inputAttributes_->size();
+
+	for(unsigned int i = 0; i < nrOfCamerasWithInput; i++)
+	{
+		cameras_[i].yaw(inputAttributes_->at(i).rotation.x);
+		cameras_[i].pitch(inputAttributes_->at(i).rotation.y);
+
+		inputAttributes_->at(i).rotation.x = 0.0f;
+		inputAttributes_->at(i).rotation.y = 0.0f;
+	}
+
 	for(unsigned int i=0; i<cameraAttributes_->size(); i++)
 	{
 		CameraAttribute* camera = &cameraAttributes_->at(i);
@@ -76,32 +83,4 @@ void CameraComponent::onUpdate(float delta)
 		
 		cameraAttributes_->at(i).mat_view.copy((float*)&cameras_[i].getView());
 	}
-
-	unsigned int nrOfCamerasWithInput = cameras_.size();
-	if(nrOfCamerasWithInput > inputAttributes_->size())
-		nrOfCamerasWithInput = inputAttributes_->size();
-
-	for(unsigned int i = 0; i < nrOfCamerasWithInput; i++)
-	{
-		float turnSpeed = 30.0f;
-
-		cameras_[i].yaw(inputAttributes_->at(i).rotation.x * turnSpeed);
-		cameras_[i].pitch((-1) * inputAttributes_->at(i).rotation.y * turnSpeed);
-
-		inputAttributes_->at(i).rotation.x = 0.0f;
-		inputAttributes_->at(i).rotation.y = 0.0f;
-	}
-}
-
-void CameraComponent::event_MouseMove(Event_MouseMove* e)
-{
-	// Set 1 pixel = 0.25 degrees
-	//float x = XMConvertToRadians(0.20f*(float)e->dx);
-	//float y = XMConvertToRadians(0.20f*(float)e->dy);
-
-	// Test camera movement
-	float x = 5.0f*(float)e->dx;
-	float y = 5.0f*(float)e->dy;
-	cameras_[0].pitch(y);
-	cameras_[0].yaw(x);
 }
