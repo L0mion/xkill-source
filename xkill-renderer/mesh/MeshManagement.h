@@ -14,7 +14,7 @@ static const std::string pgyPath		= "";
 static const std::string bthName		= "bth.obj";
 static const std::string bthMTLPath		= bthPath;
 
-class MeshManagement : public D3DInterface
+class DLL_M MeshManagement //: public D3DInterface
 {
 public:
 	MeshManagement();
