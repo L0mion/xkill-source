@@ -17,6 +17,7 @@ class D3DManagement;
 class FXManagement;
 class CBManagement;
 class ViewportManagement;
+class SSManagement;
 class GBuffer;
 class D3DDebug;
 class ObjLoaderBasic;
@@ -133,20 +134,12 @@ private:
 											 unsigned int attributeIndex);
 	DirectX::XMFLOAT4X4 calculateMatrixInverse(DirectX::XMFLOAT4X4 matrix);
 
+	//! Initializes D3DManagement-object which will maintain core DirectX objects, e.g. device and device context.
+	/*!
+	\return Any error encountered during initialization.
+	\sa D3DManagement
+	*/
 	HRESULT initD3DManagement();
-
-	//! Creates GBuffer-objects for each desired g-buffer.
-	/*!
-	\return Any error encountered during initialization.
-	\sa GBuffer
-	*/
-	HRESULT initGBuffers();
-	//! Creates a ViewportManagement object that in turn will create the specified amount of viewports.
-	/*!
-	\return Any error encountered during initialization.
-	*/
-	HRESULT initViewport();
-	
 	//! Initializes FXManagement-object which will maintain shaders and input-layouts throughout application.
 	/*!
 	\return Any error encountered during initialization.
@@ -165,6 +158,23 @@ private:
 	\sa LightManagement
 	*/
 	HRESULT initLightManagement();
+	//! Creates a ViewportManagement object that in turn will create the specified amount of viewports.
+	/*!
+	\return Any error encountered during initialization.
+	*/
+	HRESULT initViewport();
+	//! Creates a SSManaegement object that will maintain sampler states.
+	/*!
+	\return Any error encountered during initialization.
+	\sa SSManagement
+	*/
+	HRESULT initSSManagement();
+	//! Creates GBuffer-objects for each desired g-buffer.
+	/*!
+	\return Any error encountered during initialization.
+	\sa GBuffer
+	*/
+	HRESULT initGBuffers();
 	//! Creates D3DDebug-object which is used for detecting live COM-objects at end of application.
 	/*! Warning: D3DDebug recognizes it's own members as live COM-objects, thusly reporting 'false' live objects.
 	\return Any error encountered during initialization.
@@ -189,6 +199,7 @@ private:
 	CBManagement*		cbManagement_;						//!< Maintaining constant buffers.
 	LightManagement*	lightManagement_;					//!< Maintaining lights.
 	ViewportManagement* viewportManagement_;				//!< Maintaining viewports.
+	SSManagement*		ssManagement_;						//!< Maintaining sampler states.
 	D3DDebug*			d3dDebug_;							//!< Used for detecting live COM-objects.
 	GBuffer*			gBuffers_[GBUFFERID_NUM_BUFFERS];	//!< Containing data for deferred rendering.
 

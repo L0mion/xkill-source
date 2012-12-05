@@ -21,13 +21,11 @@ class D3DManagement : public D3DInterface
 {
 public:
 	D3DManagement(HWND windowHandle, unsigned int screenWidth, unsigned int screenHeight);
-	~D3DManagement();
+	virtual ~D3DManagement();
 
 	virtual void reset();
 
 	void setRSDefault();
-	void setSSDefaultPS();
-	void setSSDefaultCS();
 	void setUAVBackBufferCS();
 
 	void present();
@@ -81,11 +79,6 @@ private:
 	\return Any error encountered during initialization.
 	*/
 	HRESULT initRSDefault();
-	//! Creates a single samplerstate in order to sample textures in shaders.
-	/*!
-	\return Any error encountered during initialization.
-	*/
-	HRESULT initSSDefault();
 	//! Translates the initiated feature-level to string which may be presented in window.
 	/*!
 	\return The feature-level if known or "Default" otherwize.
@@ -108,7 +101,6 @@ private:
 	ID3D11Texture2D*			texDepthBuffer_;					//!< Saves the depth of each rendered pixel.
 
 	ID3D11RasterizerState*		rsDefault_;							//!< Defines settings for the rasterizer.
-	ID3D11SamplerState*			ssDefault_;							//!< Used to sample from texture in shader.
 };
 
 #endif //XKILL_RENDERER_D3DMANAGEMENT_H

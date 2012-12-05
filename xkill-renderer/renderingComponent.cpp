@@ -6,6 +6,7 @@
 #include "D3DManagement.h"
 #include "fxManagement.h"
 #include "ViewportManagement.h"
+#include "SSManagement.h"
 #include "gBuffer.h"
 #include "renderingUtilities.h"
 #include "d3dDebug.h"
@@ -38,6 +39,8 @@ RenderingComponent::RenderingComponent(HWND windowHandle)
 	cbManagement_		= nullptr; 
 	lightManagement_	= nullptr;
 	viewportManagement_ = nullptr;
+	ssManagement_		= nullptr;
+
 	d3dDebug_	= nullptr;
 	
 	for(unsigned int i = 0; i < GBUFFERID_NUM_BUFFERS; i++)
@@ -55,6 +58,7 @@ RenderingComponent::~RenderingComponent()
 	SAFE_DELETE(cbManagement_);
 	SAFE_DELETE(lightManagement_);
 	SAFE_DELETE(viewportManagement_);
+	SAFE_DELETE(ssManagement_);
 	
 	//d3dDebug_->reportLiveDeviceObjects();
 	SAFE_DELETE(d3dDebug_);
@@ -80,6 +84,8 @@ HRESULT RenderingComponent::init()
 		hr = initLightManagement();
 	if(SUCCEEDED(hr))
 		hr = initViewport();
+	if(SUCCEEDED(hr))
+		hr = initSSManagement();
 //	if(SUCCEEDED(hr))
 //		hr = initDebug();
 	if(SUCCEEDED(hr))
@@ -97,12 +103,14 @@ void RenderingComponent::reset()
 		d3dManagement_->reset();
 	if(fxManagement_)
 		fxManagement_->reset();
-	if(viewportManagement_)
-		viewportManagement_->reset();
 	if(cbManagement_)
 		cbManagement_->reset();
 	if(lightManagement_)
 		lightManagement_->reset();
+	if(viewportManagement_)
+		viewportManagement_->reset();
+	if(ssManagement_)
+		ssManagement_->reset();
 
 	for(unsigned int i = 0; i < GBUFFERID_NUM_BUFFERS; i++)
 		if(gBuffers_[i])
@@ -153,7 +161,7 @@ void RenderingComponent::renderToGBuffer(DirectX::XMFLOAT4X4 view,
 
 	d3dManagement_->getDeviceContext()->VSSetShader(fxManagement_->getDefaultVS()->getVertexShader(), nullptr, 0);
 	d3dManagement_->getDeviceContext()->PSSetShader(fxManagement_->getDefaultPS()->getPixelShader(), nullptr, 0);
-	d3dManagement_->setSSDefaultPS();
+	ssManagement_->setPS(d3dManagement_->getDeviceContext(), SS_ID_DEFAULT, 0);
 	d3dManagement_->setRSDefault();
 
 	gBufferRenderSetRenderTargets();
@@ -199,7 +207,8 @@ void RenderingComponent::renderToBackBuffer()
 	for(int i=0; i<GBUFFERID_NUM_BUFFERS; i++)
 		resourceViews[i] = gBuffers_[i]->getSRV();
 	d3dManagement_->getDeviceContext()->CSSetShaderResources(0, GBUFFERID_NUM_BUFFERS, resourceViews);
-	d3dManagement_->setSSDefaultCS();
+	
+	ssManagement_->setCS(d3dManagement_->getDeviceContext(), SS_ID_DEFAULT, 0);
 
 	fxManagement_->getDefaultCS()->set(d3dManagement_->getDeviceContext());
 	d3dManagement_->getDeviceContext()->Dispatch(25, 25, 1);
@@ -331,37 +340,6 @@ HRESULT RenderingComponent::initD3DManagement()
 	hr = d3dManagement_->init();
 	return hr;
 }
-HRESULT RenderingComponent::initGBuffers()
-{
-	HRESULT hr = S_OK;
-
-	GBuffer* gBuffer = nullptr;
-
-	/*Albedo*/
-	gBuffer = new GBuffer(screenWidth_, screenHeight_, MULTISAMPLES_GBUFFERS, DXGI_FORMAT_R32G32B32A32_FLOAT);
-	hr = gBuffer->init(d3dManagement_->getDevice());
-	gBuffers_[GBUFFERID_ALBEDO] = gBuffer;
-
-	/*Normals*/
-	if(hr == S_OK)
-	{
-		gBuffer = new GBuffer(screenWidth_, screenHeight_, MULTISAMPLES_GBUFFERS, DXGI_FORMAT_R32G32B32A32_FLOAT);
-		hr = gBuffer->init(d3dManagement_->getDevice());
-		gBuffers_[GBUFFERID_NORMAL] = gBuffer;
-	}
-
-	return hr;
-}
-HRESULT RenderingComponent::initViewport()
-{
-	HRESULT hr = S_OK;
-	viewportManagement_ = new ViewportManagement(numViewports_,
-												 screenWidth_,
-												 screenHeight_);
-	hr = viewportManagement_->init();
-
-	return hr;
-}
 HRESULT RenderingComponent::initFXManagement()
 {
 	HRESULT hr = S_OK;
@@ -389,6 +367,25 @@ HRESULT RenderingComponent::initLightManagement()
 
 	return hr;
 }
+HRESULT RenderingComponent::initViewport()
+{
+	HRESULT hr = S_OK;
+	viewportManagement_ = new ViewportManagement(numViewports_,
+												 screenWidth_,
+												 screenHeight_);
+	hr = viewportManagement_->init();
+
+	return hr;
+}
+HRESULT RenderingComponent::initSSManagement()
+{
+	HRESULT hr = S_OK;
+
+	ssManagement_ = new SSManagement();
+	hr = ssManagement_->init(d3dManagement_->getDevice());
+
+	return hr;
+}
 HRESULT RenderingComponent::initDebug()
 {
 	HRESULT hr = S_OK;
@@ -398,6 +395,28 @@ HRESULT RenderingComponent::initDebug()
 
 	return hr;
 }
+HRESULT RenderingComponent::initGBuffers()
+{
+	HRESULT hr = S_OK;
+
+	GBuffer* gBuffer = nullptr;
+
+	/*Albedo*/
+	gBuffer = new GBuffer(screenWidth_, screenHeight_, MULTISAMPLES_GBUFFERS, DXGI_FORMAT_R32G32B32A32_FLOAT);
+	hr = gBuffer->init(d3dManagement_->getDevice());
+	gBuffers_[GBUFFERID_ALBEDO] = gBuffer;
+
+	/*Normals*/
+	if(hr == S_OK)
+	{
+		gBuffer = new GBuffer(screenWidth_, screenHeight_, MULTISAMPLES_GBUFFERS, DXGI_FORMAT_R32G32B32A32_FLOAT);
+		hr = gBuffer->init(d3dManagement_->getDevice());
+		gBuffers_[GBUFFERID_NORMAL] = gBuffer;
+	}
+
+	return hr;
+}
+
 HRESULT RenderingComponent::initVertexBuffer()
 {
 	HRESULT hr = S_OK;
