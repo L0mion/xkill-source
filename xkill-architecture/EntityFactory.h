@@ -7,14 +7,6 @@
 #include <vector>
 #include <iostream>
 
-// Macro to create an Attribute
-#define CREATE_ATTRIBUTE(AttributeType, AttributeName, OwnerEntity)									\
-		AttributeType* AttributeName = AttributeName = AttributeManager::getInstance()->AttributeName##Attributes_.createAttribute(OwnerEntity);
-// Macro to create connect the pointer of name PointerName inside AttributeName 
-#define CONNECT_ATTRIBUTES(AttributeName, PointerName)												\
-		AttributeName->PointerName##Attribute = AttributeManager::getInstance()->PointerName##Attributes_.getLatestAttributeAsAttributePointer();
-
-
 
 /// A factory for creating Entities and assigning multiple \ref ATTRIBUTES in a flexible way.
 /** 
@@ -44,6 +36,21 @@ private:
 	}
 
 public:
+	// Creates an AttributeType (e.g. PositionAttribute) with name AttributeName (e.g. position) owned by Entity OwnerEntity.
+	// IMPORTANT: AttributeName (e.g. position) is used to access attributes from AttributeManager (e.g. positionAttributes_).
+	// if a longer name is used, such as positionAttribute, it will "copy paste" the name when accessing AttributeManager.
+	// An AttributeName such as "positionAttribute" will result in accessing "positionAttributeAttributes_" inside
+	// AttributeManager instead of "'positionAttributes_" which will result in error. As long as a shorter naming convention
+	// such as "position" is used, this will not be a problem.
+#define CREATE_ATTRIBUTE(AttributeType, AttributeName, OwnerEntity)						\
+	AttributeType* AttributeName = AttributeName = AttributeManager::getInstance()->AttributeName##Attributes_.createAttribute(OwnerEntity)
+	
+	// Connects the AttributePointer by the name PointerName inside AttributeName with a AttributePointer created inside AttributeManager.
+	// IMPORTANT: The following formula is used to access AttributeManager, "PointerName+Attributes".
+	// PointerName "position" will result in "positionAttributes" which will work.
+	// PointerName "positionAttribute" will result in "positionAttributeAttributes" which will fail.
+#define CONNECT_ATTRIBUTES(AttributeName, PointerName)									\
+	AttributeName->PointerName##Attribute = AttributeManager::getInstance()->PointerName##Attributes_.getLatestAttributeAsAttributePointer()
 
 	//! A player entity has the following attributes: position attribute, spatial attribute, render attribute, physics attribute, input attribute, camera attribute and player attribute
 	//! Bindings:
@@ -74,6 +81,7 @@ public:
 		CREATE_ATTRIBUTE(PlayerAttribute, player, entity);
 		CONNECT_ATTRIBUTES(player, render);
 		CONNECT_ATTRIBUTES(player, input);
+
 		static int playerId = 0;
 		player->name = "Printer Terror";
 		player->id = playerId;
@@ -109,12 +117,13 @@ public:
 		
 		return entity;
 	}
-};
 
-
-//
-// Undefine evil macros
-//
+	//
+	// Undefine evil macros
+	//
 
 #undef CREATE_ATTRIBUTE
 #undef CONNECT_ATTRIBUTES
+};
+
+
