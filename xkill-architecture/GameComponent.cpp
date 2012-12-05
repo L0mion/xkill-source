@@ -85,14 +85,14 @@ void GameComponent::onUpdate(float delta)
 			}
 			*/
 
-			std::cout 
-				<< player->id				<< "\t"
-				<< playerOwners->at(i)		<< "\t"
-				<< player->name				<< "\t"
-				<< position->position.x		<< "\t"
-				<< position->position.y		<< "\t"
-				<< position->position.z		<< "\t"
-				<< std::endl;
+			/*std::cout 
+			<< player->id				<< "\t"
+			<< playerOwners->at(i)		<< "\t"
+			<< player->name				<< "\t"
+			<< position->position.x		<< "\t"
+			<< position->position.y		<< "\t"
+			<< position->position.z		<< "\t"
+			<< std::endl;*/
 		}
 	}
 }

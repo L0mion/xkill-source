@@ -5,6 +5,7 @@
 #include <xkill-architecture/AttributeManager.h>
 
 #include "InputManager.h"
+#include <iostream>
 
 InputComponent::InputComponent()
 {
@@ -12,8 +13,10 @@ InputComponent::InputComponent()
 
 	ZeroMemory(&pos, sizeof(pos));
 
-	EventManager::getInstance()->addObserver(this, EVENT_RUMBLE);
-	EventManager::getInstance()->addObserver(this, EVENT_MOUSE_MOVE);
+	SUBSCRIBE_TO_EVENT(this, EVENT_RUMBLE);
+	SUBSCRIBE_TO_EVENT(this, EVENT_MOUSEMOVE);
+	SUBSCRIBE_TO_EVENT(this, EVENT_KEYPRESS);
+	SUBSCRIBE_TO_EVENT(this, EVENT_KEYRELEASE);
 }
 
 InputComponent::~InputComponent()
@@ -37,10 +40,10 @@ bool InputComponent::init(HWND windowHandle, std::vector<InputAttribute>* inputA
 
 void InputComponent::onEvent(Event* e)
 {
-	if(e->getType() == EventType::EVENT_RUMBLE)
+	EventType type = e->getType();
+	if(type == EVENT_RUMBLE)
 	{
 		Event_Rumble* er = static_cast<Event_Rumble*>(e);
-
 		InputDevice* device = inputManager_->GetDevice(er->deviceNr);
 
 		if(device != nullptr)
@@ -53,23 +56,31 @@ void InputComponent::onEvent(Event* e)
 			device->SetForceFeedback(er->leftScale, er->rightScale);
 		}
 	}
-	if(e->getType() == EventType::EVENT_MOUSE_MOVE)
+	if(type == EVENT_MOUSEMOVE)
 	{
 		Event_MouseMove* emm = static_cast<Event_MouseMove*>(e);
-
-		// Set 1 pixel = 0.25 degrees
-		//float x = XMConvertToRadians(0.20f*(float)e->dx);
-		//float y = XMConvertToRadians(0.20f*(float)e->dy);
 
 		// Test camera movement
 		float x = 5.0f*(float)emm->dx;
 		float y = 5.0f*(float)emm->dy;
-		//cameras_[0].pitch(y);
-		//cameras_[0].yaw(x);
 
 		float mouseSensitivity = 0.001f;
 		inputAttributes_->at(0).rotation.x += x * mouseSensitivity;
 		inputAttributes_->at(0).rotation.y += y * mouseSensitivity;
+	}
+	if(type == EVENT_KEYPRESS)
+	{
+		Event_KeyPress* ekp = static_cast<Event_KeyPress*>(e);
+		
+		// TODO: Handle key press
+		std::cout << "Key " << ekp->keyEnum << " pressed"<< std::endl;
+	}
+	if(type == EVENT_KEYRELEASE)
+	{
+		Event_KeyRelease* ekr = static_cast<Event_KeyRelease*>(e);
+
+		// TODO: Handle key release
+		std::cout << "Key " << ekr->keyEnum << " release"<< std::endl;
 	}
 }
 
