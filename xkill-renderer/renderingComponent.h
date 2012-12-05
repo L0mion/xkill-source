@@ -13,6 +13,7 @@
 //#include "d3dInterface.h"
 #include <xkill-utilities/IObserver.h>
 
+class D3DManagement;
 class FXManagement;
 class CBManagement;
 class ViewportManagement;
@@ -31,9 +32,9 @@ struct CameraAttribute;
 struct SpatialAttribute;
 struct PositionAttribute;
 
-static const unsigned int MULTISAMPLES_GBUFFERS		= 1;
-static const unsigned int MULTISAMPLES_BACKBUFFER	= 1;
-static const unsigned int MULTISAMPLES_DEPTHBUFFER	= 1;
+//static const unsigned int MULTISAMPLES_GBUFFERS		= 1;
+//static const unsigned int MULTISAMPLES_BACKBUFFER	= 1;
+//static const unsigned int MULTISAMPLES_DEPTHBUFFER	= 1;
 
 struct VertexPosNormTex;
 
@@ -123,7 +124,7 @@ private:
 											DirectX::XMFLOAT4X4 projectionMatrix,
 											DirectX::XMFLOAT4X4 projectionInverseMatrix,
 											DirectX::XMFLOAT3	eyePosition);
-	void gBufferRenderClean();
+	void renderClean();
 	void gBufferRenderSetRenderTargets();
 	DirectX::XMFLOAT4X4 calculateFinalMatrix(DirectX::XMFLOAT4X4 viewMatrix,
 											 DirectX::XMFLOAT4X4 projectionMatrix,
@@ -132,35 +133,8 @@ private:
 											 unsigned int attributeIndex);
 	DirectX::XMFLOAT4X4 calculateMatrixInverse(DirectX::XMFLOAT4X4 matrix);
 
-	//! Translates the initiated feature-level to string which may be presented in window.
-	/*!
-	\return The feature-level if known or "Default" otherwize.
-	\param featureLevel The initiated feature-level.
-	*/
-	LPCWSTR featureLevelToString(const D3D_FEATURE_LEVEL featureLevel);
-	
-	//! Initializes struct describing swapchain using values passed in constructor.
-	/*!
-	\return Any error encountered during initialization.
-	\sa createDeviceAndSwapChain
-	*/
-	HRESULT initDeviceAndSwapChain();
-	//! Creates device and swap chain using correct feature-level based on hardware.
-	/*!
-	\param swapChainDesc Description of d3dswapchain.
-	\return Any error encountered during initialization.
-	*/
-	HRESULT createDeviceAndSwapChain(const DXGI_SWAP_CHAIN_DESC swapChainDesc);
-	//! Creates depth-buffer texture with it's corresponding depth stencil view.
-	/*!
-	\return Any error encountered during initialization.
-	*/
-	HRESULT initDepthBuffer();
-	//! Gets texture from swapchain and creates corresponding render target view and UAV.
-	/*!
-	\return Any error encountered during initialization.
-	*/
-	HRESULT initBackBuffer();
+	HRESULT initD3DManagement();
+
 	//! Creates GBuffer-objects for each desired g-buffer.
 	/*!
 	\return Any error encountered during initialization.
@@ -173,16 +147,6 @@ private:
 	*/
 	HRESULT initViewport();
 	
-	//! Creates rasterizer-state.
-	/*!
-	\return Any error encountered during initialization.
-	*/
-	HRESULT initRSDefault();
-	//! Creates a single samplerstate in order to sample textures in shaders.
-	/*!
-	\return Any error encountered during initialization.
-	*/
-	HRESULT initSSDefault();
 	//! Initializes FXManagement-object which will maintain shaders and input-layouts throughout application.
 	/*!
 	\return Any error encountered during initialization.
@@ -220,30 +184,17 @@ private:
 	unsigned int screenHeight_;		//!< Height of screen.
 	unsigned int numViewports_;		//!< NUmber of viewports that will be used.
 	
+	D3DManagement*		d3dManagement_;
 	FXManagement*		fxManagement_;						//!< Maintaining shaders and input-layouts.
 	CBManagement*		cbManagement_;						//!< Maintaining constant buffers.
 	LightManagement*	lightManagement_;					//!< Maintaining lights.
 	ViewportManagement* viewportManagement_;				//!< Maintaining viewports.
-	GBuffer*			gBuffers_[GBUFFERID_NUM_BUFFERS];	//!< Containing data for deferred rendering.
 	D3DDebug*			d3dDebug_;							//!< Used for detecting live COM-objects.
+	GBuffer*			gBuffers_[GBUFFERID_NUM_BUFFERS];	//!< Containing data for deferred rendering.
 
 	std::vector<RenderAttribute>* renderAttributes_;
 	std::vector<CameraAttribute>* cameraAttributes_;
-
-	ID3D11Device*			device_;	//!< DirectX device pointer.
-	ID3D11DeviceContext*	devcon_;	//!< DirectX device context pointer.
-
-	IDXGISwapChain*			swapChain_;			//!< DirectX swap chain.
-	ID3D11RenderTargetView*	rtvBackBuffer_;		//!< Used to render to texBackBuffer.
-	ID3D11DepthStencilView*	dsvDepthBuffer_;	//!< Used to render to texDepthBuffer.
-	ID3D11RasterizerState*	rsDefault_;			//!< Defines settings for the rasterizer.
-	ID3D11SamplerState*		ssDefault_;			//!< Used to sample from texture in shader.
-
-	ID3D11Texture2D* texBackBuffer_;	//!< Contains the final image.
-	ID3D11Texture2D* texDepthBuffer_;	//!< Saves the depth of each rendered pixel.
-
-	//direct compute
-	ID3D11UnorderedAccessView* uavBackBuffer_; //!< Used to render to texBackBuffer using DirectCompute.
+	
 
 	//temp
 	ID3D11Buffer*			vertexBuffer_;		//!< Mock buffer sending vertices to shader.
