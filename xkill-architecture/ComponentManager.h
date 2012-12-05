@@ -66,8 +66,8 @@ public:
 	void update(float delta)
 	{
 		//sound_.onUpdate(delta);
-		camera_.onUpdate(delta);
 		physics_.onUpdate(delta);
+		camera_.onUpdate(delta);
 		render_->onUpdate(delta);
 		input_.onUpdate(delta);
 		game_.onUpdate(delta);

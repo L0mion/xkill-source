@@ -25,15 +25,15 @@ struct quad_vertex
 
 struct Light
 {
-	float3 position;
-	float range;
-	float3 direction;
-	float spotPower;
-	float4 ambient;
-	float4 diffuse;
-	float4 specular;
-	float3 attenuation;
-	uint type;
+	float3	position;
+	float	range;
+	float3	direction;
+	float	spotPower;
+	float4	ambient;
+	float4	diffuse;
+	float4	specular;
+	float3	attenuation;
+	uint	type;
 };
 
 struct SurfaceInfo

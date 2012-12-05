@@ -31,7 +31,7 @@ HRESULT LightManagement::init(ID3D11Device* device)
 {
 	HRESULT hr = S_OK;
 	createDirectionalLight(device);
-	
+
 	hr = createLightBuffer(device);
 	if(SUCCEEDED(hr))
 		hr = createLightSRV(device);
@@ -80,13 +80,13 @@ void LightManagement::createDirectionalLight(ID3D11Device* device)
 
 	LightDesc lightDesc;
 	ZeroMemory(&lightDesc, sizeof(lightDesc));
-
+	
 	lightDesc.direction = DirectX::XMFLOAT3(0.57735f, -0.57735f, 0.57735f);
 	lightDesc.ambient	= DirectX::XMFLOAT4(0.2f, 0.2f, 0.2f, 1.0f);
 	lightDesc.diffuse	= DirectX::XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
 	lightDesc.specular	= DirectX::XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
 	lightDesc.type		= LIGHT_DIRECTIONAL;
-
+	
 	lights_[numLights_] = lightDesc;
 	numLights_++;
 }
@@ -154,4 +154,9 @@ HRESULT LightManagement::createLightSRV(ID3D11Device* device)
 		ERROR_MSG(L"RendererLight::LightManagement::createLightSRV device->CreateShaderResourceView failed!");
 
 	return hr;
+}
+
+unsigned int LightManagement::getNumLights() const
+{
+	return numLights_;
 }

@@ -12,7 +12,7 @@ ViewportManagement::ViewportManagement(	unsigned int numViewports,
 	viewportWidth_	= 0;
 	viewportHeight_ = 0;
 
-	borderSize_ = 2.0f;
+	borderSize_ = 2;
 }
 
 ViewportManagement::~ViewportManagement()
