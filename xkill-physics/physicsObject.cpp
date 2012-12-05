@@ -116,7 +116,7 @@ void PhysicsObject::input(InputAttribute* inputAttribute,float delta)
 {
 	yaw_ += inputAttribute->rotation.x;
 	movement_ = btVector3(inputAttribute->position.x, 0, inputAttribute->position.y);
-	movement_ = 100*movement_.rotate(btVector3(0,1,0),yaw_);
+	movement_ = 20*movement_.rotate(btVector3(0,1,0),yaw_);
 	//forces_ =movement_;
 	inputAttribute->position.x = inputAttribute->position.y = 0;
 }
