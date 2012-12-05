@@ -1,3 +1,5 @@
+#include <xkill-utilities/EventManager.h>
+
 #include "MTLMaterial.h"
 #include "LoaderMTL.h"
 
@@ -239,7 +241,7 @@ void LoaderMTL::loadColor(
 	const MTLSymbol symbol,
 	const std::vector<std::string>& params)
 {
-	DirectX::XMFLOAT3 color = loadVector(params);
+	Float3 color = loadVector(params);
 	switch(symbol)
 	{
 	case MTLSYMBOL_COLOR_DIFFUSE:
@@ -257,14 +259,14 @@ void LoaderMTL::loadColor(
 	};
 	
 }
-DirectX::XMFLOAT3 LoaderMTL::loadVector(const std::vector<std::string>& params)
+Float3 LoaderMTL::loadVector(const std::vector<std::string>& params)
 {
 	float x, y, z;
 	x = (float)::atof(params[MTL_PARAMS_INDEX_COLOR_X].c_str());
 	y = (float)::atof(params[MTL_PARAMS_INDEX_COLOR_Y].c_str());
 	z = (float)::atof(params[MTL_PARAMS_INDEX_COLOR_Z].c_str());
 
-	return DirectX::XMFLOAT3(x, y, z);
+	return Float3(x, y, z);
 }
 void LoaderMTL::loadTex(
 		const MTLSymbol symbol,
@@ -320,7 +322,7 @@ void LoaderMTL::printFail(const std::string curLine)
 	std::string lineNum = std::to_string(lineNum_);
 	std::string failed	= " parsing failed at line " + lineNum + ": " + curLine;
 
-	ERROR_MSG(failed);
+	SHOW_MESSAGEBOX(failed);
 }
 bool LoaderMTL::isNumeric(const std::string value)
 {

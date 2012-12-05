@@ -2,6 +2,8 @@
 #include <DirectXMath.h>
 #include <windows.h>
 
+#include "MeshModel.h"
+
 IAttribute::IAttribute()
 {
 }
@@ -98,5 +100,15 @@ PlayerAttribute::PlayerAttribute()
 	totalExecutionTime = 0;
 }
 PlayerAttribute::~PlayerAttribute()
+{
+}
+
+MeshAttribute::~MeshAttribute()
+{
+	//if(mesh)
+	//	delete mesh;
+}
+
+void MeshAttribute::clean()
 {
 }

@@ -1,12 +1,12 @@
 #include "MeshMaterial.h"
 #include "MeshSubset.h"
-#include "vertices.h"
+#include "MeshVertices.h"
 
 #include "MeshModel.h"
 
 MeshModel::MeshModel()
 {
-	//Do nothing
+	//Do nothing.
 }
 MeshModel::MeshModel(
 	const MeshGeometry				geometry,

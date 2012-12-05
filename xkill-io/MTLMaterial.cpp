@@ -4,9 +4,9 @@ MTLMaterial::MTLMaterial(const std::string name)
 {
 	this->name_ = name;
 
-	ambientColor_	= DirectX::XMFLOAT3(0.0f, 0.0f, 0.0f);
-	diffuseColor_	= DirectX::XMFLOAT3(0.0f, 0.0f, 0.0f);
-	specularColor_	= DirectX::XMFLOAT3(0.0f, 0.0f, 0.0f);
+	ambientColor_	= Float3(0.0f, 0.0f, 0.0f);
+	diffuseColor_	= Float3(0.0f, 0.0f, 0.0f);
+	specularColor_	= Float3(0.0f, 0.0f, 0.0f);
 	
 	specularPow_	= 0.0f;
 	alpha_			= 0.0f;
@@ -32,19 +32,19 @@ void MTLMaterial::addIllum(const IlluminationModel im)
 }
 
 /*sets*/
-void MTLMaterial::setAmbientColor(const DirectX::XMFLOAT3 ambientColor)
+void MTLMaterial::setAmbientColor(const Float3 ambientColor)
 {
 	this->ambientColor_ = ambientColor;
 }
-void MTLMaterial::setDiffuseColor(const DirectX::XMFLOAT3 diffuseColor)
+void MTLMaterial::setDiffuseColor(const Float3 diffuseColor)
 {
 	this->diffuseColor_ = diffuseColor;
 }
-void MTLMaterial::setSpecularColor(const DirectX::XMFLOAT3 specularColor)	
+void MTLMaterial::setSpecularColor(const Float3 specularColor)	
 {
 	this->specularColor_ = specularColor;
 }
-void MTLMaterial::setTF(const DirectX::XMFLOAT3 tf)
+void MTLMaterial::setTF(const Float3 tf)
 {
 	this->tf_ = tf;
 }
@@ -101,19 +101,19 @@ const std::string MTLMaterial::getName()
 	return name_;
 }
 
-const DirectX::XMFLOAT3 MTLMaterial::getAmbientColor()
+const Float3 MTLMaterial::getAmbientColor()
 {
 	return ambientColor_;
 }
-const DirectX::XMFLOAT3 MTLMaterial::getDiffuseColor()
+const Float3 MTLMaterial::getDiffuseColor()
 {
 	return diffuseColor_;
 }
-const DirectX::XMFLOAT3 MTLMaterial::getSpecularColor()
+const Float3 MTLMaterial::getSpecularColor()
 {
 	return specularColor_;
 }
-const DirectX::XMFLOAT3 MTLMaterial::getTF()
+const Float3 MTLMaterial::getTF()
 {
 	return tf_;
 }

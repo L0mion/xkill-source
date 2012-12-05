@@ -12,15 +12,12 @@
 
 #include "dllRenderer.h"
 #include "gBufferID.h"
-#include "vertices.h"
-#include "LoaderObj.h"
 
 class FXManagement;
 class CBManagement;
 class ViewportManagement;
 class GBuffer;
 class D3DDebug;
-class ObjLoaderBasic;
 class LightManagement;
 
 namespace DirectX
@@ -209,6 +206,9 @@ private:
 	\sa D3DDebug
 	*/
 	HRESULT initDebug();
+
+	//temp
+	HRESULT initVertexBuffer();
 
 	/*desc*/
 	HWND windowHandle_;				//!< WINAPI-handle to window.

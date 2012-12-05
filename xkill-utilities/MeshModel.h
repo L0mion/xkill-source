@@ -6,16 +6,18 @@
 
 #include <vector>
 
+#include "dllUtilities.h"
+
 #include "MeshGeometry.h"
 #include "MeshMaterial.h"
-#include "vertices.h"
+#include "MeshVertices.h"
 
 //! Generalized Model describing mesh of renderable objects.
 /*!
 Contains Geometry in terms of vertices and indices subdivided into subsets and material data.
 \ingroup xkill-mesh
 */
-class MeshModel
+class DLL_U MeshModel
 {
 public:
 	//! Does nothing.

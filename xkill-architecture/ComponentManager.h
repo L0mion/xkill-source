@@ -4,6 +4,7 @@
 #include <xkill-sound/SoundComponent.h>
 #include <xkill-renderer/renderingComponent.h>
 #include <xkill-input/InputComponent.h>
+#include <xkill-io/IOComponent.h>
 
 #include "CameraComponent.h"
 #include "GameComponent.h"
@@ -26,12 +27,13 @@ be the responsibility of the ComponentManager.
 class ComponentManager
 {
 private:
-	RenderingComponent* render_;
-	BulletPhysicsComponent physics_;
+	IOComponent				ioComponent_;
+	RenderingComponent*		render_;
+	BulletPhysicsComponent	physics_;
 	//SoundComponent		sound_;
-	CameraComponent		camera_;
-	InputComponent		input_;
-	GameComponent		game_;
+	CameraComponent			camera_;
+	InputComponent			input_;
+	GameComponent			game_;
 
 public:
 	ComponentManager()
@@ -48,6 +50,9 @@ public:
 
 	bool init(HWND windowHandle, HWND parentWindowHandle)
 	{
+		if(!ioComponent_.init())
+			return false;
+		
 		render_ = new RenderingComponent(windowHandle);
 		render_->init();
 		physics_.init();

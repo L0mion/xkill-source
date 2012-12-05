@@ -31,6 +31,7 @@ public:
 	EntityManager()
 	{
 		SUBSCRIBE_TO_EVENT(this, EVENT_CREATEPROJECTILE);
+		SUBSCRIBE_TO_EVENT(this, EVENT_CREATEMESH);
 	}
 
 	/**
@@ -47,6 +48,9 @@ public:
 			addEntity(entity);
 			std::cout << "ENTITYMANAGER: Created projectile entity " << entity->getID() << std::endl;
 			break;
+		case EVENT_CREATEMESH:
+			event_createmesh(static_cast<Event_createMesh*>(e));
+			break;
 		default:
 			break;
 		}
@@ -54,6 +58,12 @@ public:
 
 	void update(float delta)
 	{
+	}
+
+	void event_createmesh(Event_createMesh* e)
+	{
+		Entity* entity = entityFactory.createMesh(e);
+		addEntity(entity);
 	}
 
 	void removeEntity(int index)

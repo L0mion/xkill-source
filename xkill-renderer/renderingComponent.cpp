@@ -1,7 +1,9 @@
 #include "renderingComponent.h"
 
 #include <xkill-utilities/AttributeType.h>
-#include <DirectXMath.h>
+#include <xkill-utilities/EventManager.h>
+#include <xkill-utilities/MeshVertices.h>
+#include <xkill-utilities/MeshModel.h>
 
 #include "fxManagement.h"
 #include "ViewportManagement.h"
@@ -10,11 +12,8 @@
 #include "d3dDebug.h"
 #include "CBManagement.h"
 #include "LightManagement.h"
-#include "objLoaderBasic.h"
-#include "mathBasic.h"
-#include "vertices.h"
 
-#include <xkill-utilities/EventManager.h>
+#include "renderingComponent.h"
 
 RenderingComponent::RenderingComponent(
 		HWND windowHandle)
@@ -85,6 +84,7 @@ RenderingComponent::~RenderingComponent()
 }
 HRESULT RenderingComponent::init()
 {
+	//float* f = new float();
 	HRESULT hr = S_OK;
 
 	if(SUCCEEDED(hr))
@@ -187,14 +187,21 @@ void RenderingComponent::renderToGBuffer(DirectX::XMFLOAT4X4 view,
 	devcon_->PSSetSamplers(0, 1, &ssDefault_);
 	devcon_->RSSetState(rsDefault_);
 	
+	//UINT stride = sizeof(VertexPosNormTex);
+	//UINT offset = 0;
+	//devcon_->IASetVertexBuffers(0, 1, &vertexBuffer_, &stride, &offset);
+	//devcon_->IASetIndexBuffer(indexBuffer_, DXGI_FORMAT_R32_UINT, 0);
+	//devcon_->IASetInputLayout(fxManagement_->getILDefaultVSPosNormTex());
+	//devcon_->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	//devcon_->DrawIndexed(tempIndicesSize, 0, 0);
+	//devcon_->Draw(tempVerticesSize, 0);
+
 	UINT stride = sizeof(VertexPosNormTex);
 	UINT offset = 0;
 	devcon_->IASetVertexBuffers(0, 1, &vertexBuffer_, &stride, &offset);
-	devcon_->IASetIndexBuffer(indexBuffer_, DXGI_FORMAT_R32_UINT, 0);
 	devcon_->IASetInputLayout(fxManagement_->getILDefaultVSPosNormTex());
 	devcon_->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-	devcon_->DrawIndexed(tempIndicesSize, 0, 0);
-	//devcon_->Draw(tempVerticesSize, 0);
+	devcon_->Draw(vertexNum, 0);
 
 	gBufferRenderSetRenderTargets();
 	
@@ -593,6 +600,44 @@ HRESULT RenderingComponent::initDebug()
 
 	d3dDebug_ = new D3DDebug();
 	hr = d3dDebug_->init(device_);
+
+	return hr;
+}
+
+HRESULT RenderingComponent::initVertexBuffer()
+{
+	HRESULT hr = S_OK;
+
+	std::vector<VertexPosNormTex> vertices;
+	std::vector<MeshAttribute>* allModels; GET_ATTRIBUTES(allModels, MeshAttribute, ATTRIBUTE_MESH);
+	for(unsigned i=0; i<allModels->size(); i++)
+	{
+		MeshAttribute* mesh = &allModels->at(i);
+		MeshModel* model = mesh->mesh;
+
+		vertices = model->getGeometry().getVertices();
+		vertexNum = vertices.size();
+
+		delete model; //OH; MY; GOD;
+	}
+	
+
+	//vertices_ = new std::vector<VertexPosNormTex>();
+	//objLoader_ = new ObjLoaderBasic();
+	//objLoader_->parseObjectFile("../../xkill-resources/xkill-models/bth.obj", vertices_);
+
+	D3D11_BUFFER_DESC vbd;
+	vbd.Usage = D3D11_USAGE_DYNAMIC;
+	vbd.ByteWidth = sizeof(VertexPosNormTex) * vertices.size();
+	vbd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+	vbd.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+	vbd.MiscFlags = 0;
+
+	D3D11_SUBRESOURCE_DATA vinitData;
+	vinitData.pSysMem = &vertices.at(0);
+	device_->CreateBuffer(&vbd, &vinitData, &vertexBuffer_);
+	if(FAILED(hr))
+		ERROR_MSG(L"RenderingComponent::initVertexBuffer CreateBuffer failed");
 
 	return hr;
 }

@@ -1,8 +1,9 @@
 #include <fstream>
 
+#include <xkill-utilities/MeshVertices.h>
+
 #include "LoaderObj.h"
 #include "LoaderMTL.h"
-#include "vertices.h"
 #include "MTLMaterial.h"
 #include "SimpleStringSplitter.h"
 #include "WriterPGY.h"
@@ -24,6 +25,8 @@ MeshMakerObj::MeshMakerObj(
 
 	loaderObj_ = nullptr;
 	loaderMtl_ = nullptr;
+
+	meshModel_ = nullptr;
 }
 MeshMakerObj::~MeshMakerObj()
 {
@@ -56,7 +59,7 @@ bool MeshMakerObj::init()
 	return sucessfulLoad;
 }
 
-MeshModel MeshMakerObj::getMesh()
+MeshModel* MeshMakerObj::getMesh()
 {
 	return meshModel_;
 }
@@ -70,9 +73,9 @@ bool MeshMakerObj::loadObj()
 
 	return sucessfulLoad;
 }
-MeshModel MeshMakerObj::loadPGY()
+MeshModel* MeshMakerObj::loadPGY()
 {
-	MeshModel loadedMesh;
+	MeshModel* loadedMesh = nullptr;
 	bool sucessfulLoad = true;
 	
 	std::string fileNamePgy = getFileNamePGY();
@@ -94,18 +97,18 @@ bool MeshMakerObj::existingPGY(std::string pathPGY, std::string fileNamePGY)
 	std::ifstream ifile(fullPathPGY);
 	return ifile.good();
 }
-MeshModel MeshMakerObj::makeMesh(Obj obj)
+MeshModel* MeshMakerObj::makeMesh(Obj obj)
 {
 	MeshGeometry meshGeo = objGeoToMeshGeo(obj.getObjGeometry());
 	
-	MeshModel model(meshGeo, materials_);
+	MeshModel* model = new MeshModel(meshGeo, materials_);
 	return model;
 }
-bool MeshMakerObj::makePGY(MeshModel model)
+bool MeshMakerObj::makePGY(MeshModel* model)
 {
 	std::string fileNamePgy = getFileNamePGY();
 	WriterPGY pgyWriter(
-		meshModel_,
+		*meshModel_,
 		pathPGY_,
 		fileNamePgy);
 	bool sucessfulWrite = pgyWriter.init();
@@ -149,12 +152,12 @@ void MeshMakerObj::loadMTLMaterials(MTL mtl)
 
 const MeshMaterial MeshMakerObj::MTLToMeshMaterial(MTLMaterial mtl)
 {
-	DirectX::XMFLOAT3 ambientColor	= mtl.getAmbientColor();
-	DirectX::XMFLOAT3 diffuseColor	= mtl.getDiffuseColor();
-	DirectX::XMFLOAT3 specularColor	= mtl.getSpecularColor();
-	DirectX::XMFLOAT3 reflectivity	= DirectX::XMFLOAT3(0.0f, 0.0f, 0.0f); //not defined in .obj?
-	float specPow	= mtl.getSpecularPow();
-	float alpha		= mtl.getAlpha();
+	Float3 ambientColor		= mtl.getAmbientColor();
+	Float3 diffuseColor		= mtl.getDiffuseColor();
+	Float3 specularColor	= mtl.getSpecularColor();
+	Float3 reflectivity		= Float3(0.0f, 0.0f, 0.0f); //not defined in .obj?
+	float specPow			= mtl.getSpecularPow();
+	float alpha				= mtl.getAlpha();
 	
 	MeshMaterial meshMaterial(
 		ambientColor,

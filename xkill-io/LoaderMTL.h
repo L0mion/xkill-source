@@ -1,18 +1,10 @@
 #ifndef XKILL_RENDERER_MESHLOADERMTL_H
 #define XKILL_RENDERER_MESHLOADERMTL_H
 
-#include <Windows.h>
-
 #include "Loader.h"
-#include "renderingUtilities.h"
 #include "MTLIllum.h"
 #include "SimpleStringSplitter.h"
 #include "MTL.h"
-
-namespace DirectX
-{
-	struct XMFLOAT3;
-}
 
 class MTLMaterial;
 
@@ -179,7 +171,7 @@ private:
 	\return Loaded vector.
 	\sa loadVector
 	*/
-	DirectX::XMFLOAT3 loadVector(const std::vector<std::string>& params);
+	Float3 loadVector(const std::vector<std::string>& params);
 	//! Loads a texture identifier from .mtl into correct slot of previously added material.
 	/*!
 	E.g. diffuse texture if such a texture is read.

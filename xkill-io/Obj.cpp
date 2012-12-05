@@ -1,5 +1,5 @@
 #include "Obj.h"
-#include "vertices.h"
+#include <xkill-utilities/MeshVertices.h>
 
 Obj::Obj()
 {

@@ -8,8 +8,8 @@
 
 #include <string>
 
-#include "MeshMaterial.h"
-#include "MeshSubset.h"
+#include <xkill-utilities/MeshMaterial.h>
+#include <xkill-utilities/MeshSubset.h>
 
 /** Types of vertices that one may read from .pgy.
 * Currently supports only one vertex-type.
@@ -25,12 +25,12 @@ enum PGY_SPECS_VERTEX
 */
 struct PGYHeader
 {
-	char						fileType_[4];
-	float						versionNum_;
-	unsigned int				vertexType_;		//PGY_SPECS_VERTEX
-	unsigned int				numMaterials_;
-	unsigned int				numVertices_;
-	unsigned int				numSubsets_;
+	char			fileType_[4];
+	float			versionNum_;
+	unsigned int	vertexType_;		//PGY_SPECS_VERTEX
+	unsigned int	numMaterials_;
+	unsigned int	numVertices_;
+	unsigned int	numSubsets_;
 };
 
 //! Specifies header of subset. This header may be found before each consecutive subset.

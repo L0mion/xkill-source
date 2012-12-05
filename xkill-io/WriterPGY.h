@@ -2,9 +2,9 @@
 #define XKILL_RENDERER_WRITERPGY_H
 
 #include <string>
+#include <xkill-utilities/MeshModel.h>
 
 #include "Writer.h"
-#include "MeshModel.h"
 #include "SpecsPGY.h"
 
 static const float WRITER_PGY_VERSION = 0.1f;
