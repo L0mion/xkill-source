@@ -28,6 +28,7 @@ be modified to suit the need of each Component.
 struct DLL_U IAttribute
 {
 	IAttribute();
+	virtual void clean(){};
 	virtual ~IAttribute();
 };
 
@@ -210,7 +211,7 @@ class MeshModel;
 struct DLL_U MeshAttribute : public IAttribute
 {
 	MeshModel* mesh;
-
+	void clean();
 	MeshAttribute(){};
 	~MeshAttribute();;
 };

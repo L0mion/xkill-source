@@ -87,16 +87,6 @@ RenderingComponent::~RenderingComponent()
 
 	//temp
 	SAFE_RELEASE(vertexBuffer_);
-
-	//std::vector<MeshAttribute>* allModels; GET_ATTRIBUTES(allModels, MeshAttribute, ATTRIBUTE_MESH);
-	//for(unsigned i=0; i<allModels->size(); i++)
-	//{
-	//	MeshAttribute* mesh = &allModels->at(i);
-	//	MeshModel* model = mesh->mesh;
-	//
-	//	delete model;
-	//	delete mesh;
-	//}
 }
 HRESULT RenderingComponent::init()
 {
@@ -559,7 +549,7 @@ HRESULT RenderingComponent::initVertexBuffer()
 		vertices = model->getGeometry().getVertices();
 		vertexNum = vertices.size();
 
-		delete model;
+		delete model; //OH; MY; GOD;
 	}
 	
 
