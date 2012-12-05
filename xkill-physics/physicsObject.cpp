@@ -24,13 +24,13 @@ void PhysicsObject::Init(PhysicsAttribute* physicsAttribute, btDiscreteDynamicsW
 	transform.setRotation(btQuaternion(0.0f, 0.0f, 0.0f, 1.0f)); //Important
 	rigidBody_ = new btRigidBody(physicsAttribute->mass,
 								 new btDefaultMotionState(transform),
-								 new btSphereShape(1),
+								 new btSphereShape(50),
 								 btVector3(0,0,0));
 	//rigidBody_->updateInertiaTensor();
 	dynamicsWorld->addRigidBody(rigidBody_);
 	forces_ = btVector3(0,0,0);
-	rigidBody_->activate(true);
-
+	movement_ = btVector3(0,0,0);
+	yaw_ = 0;
 	preStep(physicsAttribute);
 }
 
@@ -69,15 +69,35 @@ void PhysicsObject::preStep(PhysicsAttribute* physicsAttribute)
 	angularVelocity.setY(physicsAttribute->angularVelocity.y);
 	angularVelocity.setZ(physicsAttribute->angularVelocity.z);
 
+	//memcpy(position,positionAttribute->position,3*sizeof(float));
+	//memcpy(rotation,spatialAttribute->rotation,4*sizeof(float));
+	//memcpy(linearVelocity,physicsAttribute->linearVelocity,3*sizeof(float));
+	//memcpy(angularVelocity,physicsAttribute->angularVelocity,3*sizeof(float));
+
+	position = btVector3(positionAttribute->position.x,
+						 positionAttribute->position.y,
+						 positionAttribute->position.z);
+	rotation = btQuaternion(yaw_,0,0);
+	linearVelocity = btVector3(physicsAttribute->linearVelocity.x,
+							   physicsAttribute->linearVelocity.y,
+							   physicsAttribute->linearVelocity.z);
+	angularVelocity = btVector3(physicsAttribute->angularVelocity.x,
+							    physicsAttribute->angularVelocity.y,
+							    physicsAttribute->angularVelocity.z);
+
 	btVector3 gravity(0,0,0);
-	//btVector3 drag(linearVelocity*-100);
+	movement_.setY(linearVelocity.y());
+	linearVelocity = movement_;
+	forces_ = linearVelocity;
 	rigidBody_->setWorldTransform(btTransform(rotation,position));
-	rigidBody_->setLinearVelocity((linearVelocity));
+	rigidBody_->setLinearVelocity(linearVelocity);
 	rigidBody_->setAngularVelocity(angularVelocity);
 	rigidBody_->setMassProps(physicsAttribute->mass,btVector3(0,0,0));
 	rigidBody_->setGravity(gravity+forces_);
+	rigidBody_->activate(true);
 }
 
+#include <iostream>
 void PhysicsObject::postStep(PhysicsAttribute* physicsAttribute)
 {
 	SpatialAttribute* spatialAttribute = ATTRIBUTE_CAST(SpatialAttribute,spatialAttribute,physicsAttribute);
@@ -104,9 +124,9 @@ void PhysicsObject::postStep(PhysicsAttribute* physicsAttribute)
 
 void PhysicsObject::input(InputAttribute* inputAttribute,float delta)
 {
-	btQuaternion rotation = rigidBody_->getWorldTransform().getRotation();
-	float yaw = asin(-2*(rotation.x()*rotation.z() - rotation.w()*rotation.y()));
-	//btVector3 movement = 50*btVector3(inputAttribute->position[0], 0, inputAttribute->position[1]);
-	btVector3 movement = 50*btVector3(inputAttribute->position.x, 0, inputAttribute->position.y);
-	forces_ = movement.rotate(btVector3(0,1,0),yaw);	
+	yaw_ += inputAttribute->rotation.x;
+	movement_ = btVector3(inputAttribute->position.x, 0, inputAttribute->position.y);
+	movement_ = 100*movement_.rotate(btVector3(0,1,0),yaw_);
+	//forces_ =movement_;
+	inputAttribute->position.x = inputAttribute->position.y = 0;
 }

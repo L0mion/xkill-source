@@ -2,8 +2,6 @@
 #include "constantBuffers.hlsl"
 #include "structs.hlsl"
 
-
-
 VSOut defaultVS(DefaultVSIn vsIn)
 {
 	VSOut output;

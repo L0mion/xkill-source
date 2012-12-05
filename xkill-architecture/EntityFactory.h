@@ -46,19 +46,16 @@ public:
 		Entity* entity = createEntity();
 
 		PositionAttribute* position = AttributeManager::getInstance()->positionAttributes_.createAttribute(entity);
-		
-		if(playerId == 0)
-		{
-			position->position.z = 10.0f;
-		}
-		else
-		{
-			position->position.z = 0.0f;
-		}
+		position->position.x = 0.0f;
+		position->position.y = 0.0f;
+		position->position.z = 0.0f;
 
 		SpatialAttribute* spatial = AttributeManager::getInstance()->spatialAttributes_.createAttribute(entity);
 		spatial->positionAttribute = AttributeManager::getInstance()->positionAttributes_.getLatestAttributeAsAttributePointer();
-		
+		spatial->scale.x = 1.0f;
+		spatial->scale.y = 1.0f;
+		spatial->scale.z = 1.0f;
+
 		RenderAttribute* render = AttributeManager::getInstance()->renderAttributes_.createAttribute(entity);
 		render->spatialAttribute = AttributeManager::getInstance()->spatialAttributes_.getLatestAttributeAsAttributePointer();
 
