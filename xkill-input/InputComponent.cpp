@@ -102,10 +102,10 @@ void InputComponent::handleInput(float delta)
 
 		int nrAxes = state.axes.size();
 		if(nrAxes >= 1)
-			inputAttributes_->at(i).position.x += state.axes[0].GetValue() * delta * moveSpeed;
+			inputAttributes_->at(i).position.x += state.axes[0].GetValue() * moveSpeed;
 																		    
 		if(nrAxes >= 2)													    
-			inputAttributes_->at(i).position.y += state.axes[1].GetValue() * delta * moveSpeed;
+			inputAttributes_->at(i).position.y += state.axes[1].GetValue() * moveSpeed;
 																		    
 		if(nrAxes >= 3)													    
 			inputAttributes_->at(i).rotation.x += state.axes[2].GetValue() * delta;
