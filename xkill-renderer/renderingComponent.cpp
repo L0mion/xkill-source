@@ -17,6 +17,9 @@
 
 #include <xkill-utilities/EventManager.h>
 
+
+#include <iostream>
+
 RenderingComponent::RenderingComponent(HWND windowHandle)
 {
 	GET_ATTRIBUTES(renderAttributes_, RenderAttribute, ATTRIBUTE_RENDER);
@@ -123,10 +126,13 @@ void RenderingComponent::onUpdate(float delta)
 		DirectX::XMFLOAT4X4 viewInverse			= calculateMatrixInverse(view);
 		DirectX::XMFLOAT4X4 projectionInverse	= calculateMatrixInverse(projection);
 		
-		SpatialAttribute*	spatialAttribute = static_cast<SpatialAttribute*>(cameraAttributes_->at(i).spatialAttribute.host);
-		PositionAttribute*	positionAttribute = static_cast<PositionAttribute*>(spatialAttribute->positionAttribute.host);
+		CameraAttribute* cameraAttribute = &cameraAttributes_->at(i);
+		SpatialAttribute* spatialAttribute = ATTRIBUTE_CAST(SpatialAttribute, spatialAttribute, cameraAttribute);
+		PositionAttribute* positionAttribute = ATTRIBUTE_CAST(PositionAttribute, positionAttribute, spatialAttribute);
+
 		DirectX::XMFLOAT3	eyePosition = *(DirectX::XMFLOAT3*)&positionAttribute->position;
-		//DirectX::XMFLOAT3 eyePosition(0.0f, 0.0f, -50.0f);
+
+		std::cout << "eyePosition: " << eyePosition.x  << " " << eyePosition.y << " " << eyePosition.z << "\n";
 
 		setViewport(i);
 		renderToGBuffer(view, viewInverse, projection, projectionInverse, eyePosition);
