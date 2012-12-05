@@ -14,7 +14,6 @@ Camera::Camera(
 	this->zNear_		= zNear;
 
 	velocity_			= 0.01f;
-	mouseSensitivity_	= 0.001f;
 
 	position_	= DirectX::XMFLOAT3(0.0f, 0.0f, -50.0f);
 	right_		= DirectX::XMFLOAT3(1.0f, 0.0f, 0.0f);
@@ -152,8 +151,8 @@ void Camera::pitch(const float angle)
 	if(canRotate)
 	{
 		//Create a Quaternian that describes the rotation.
-		float cosAngle = cos((angle*mouseSensitivity_)/2);
-		float sinAngle = sin((angle*mouseSensitivity_)/2);
+		float cosAngle = cos((angle)/2);
+		float sinAngle = sin((angle)/2);
 		DirectX::XMFLOAT4 fQuaternion = DirectX::XMFLOAT4(right_.x*sinAngle, right_.y*sinAngle, right_.z*sinAngle, cosAngle);
 		DirectX::XMVECTOR vQuaternion = DirectX::XMLoadFloat4(&fQuaternion);
 		vQuaternion = DirectX::XMQuaternionNormalize(vQuaternion);
@@ -176,8 +175,8 @@ void Camera::yaw(const float angle)
 	DirectX::XMVECTOR vRight	= DirectX::XMLoadFloat3(&right_);
 
 	
-	float cosAngle = cos((angle*mouseSensitivity_)/2);
-	float sinAngle = sin((angle*mouseSensitivity_)/2);
+	float cosAngle = cos((angle)/2);
+	float sinAngle = sin((angle)/2);
 	
 	//Create a Quaternian that describes the rotation.
 	DirectX::XMFLOAT4 fQuaternion = DirectX::XMFLOAT4(0.0f*sinAngle, 1.0f*sinAngle, 0.0f*sinAngle, cosAngle);
@@ -197,9 +196,9 @@ void Camera::yaw(const float angle)
 
 void Camera::setPosition(float position[3])
 {
-	position_.x = position[0];
-	position_.y = position[1];
-	position_.z = position[2];
+	position_.x = position[0] + look_.x*10;
+	position_.y = position[1] + look_.y*10;
+	position_.z = position[2] + look_.z*10;
 }
 
 DirectX::XMFLOAT3 Camera::getPosition()

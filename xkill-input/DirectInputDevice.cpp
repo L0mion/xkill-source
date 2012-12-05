@@ -1,8 +1,8 @@
 #include "DirectInputDevice.h"
 
 
-DirectInputDevice::DirectInputDevice(LPDIRECTINPUTDEVICE8 device, GUID deviceGUID, std::string name) : 
-	InputDevice(deviceGUID, name)
+DirectInputDevice::DirectInputDevice(LPDIRECTINPUTDEVICE8 device, GUID deviceGUID, std::string name, unsigned int playerID) : 
+	InputDevice(deviceGUID, name, playerID)
 {
 	device_ = device;
 	hasFF_ = false;
@@ -14,10 +14,10 @@ DirectInputDevice::~DirectInputDevice(void)
 	if(hasFF_)
 	{
 		StopForceFeedback();
-		effect_->Release();
+		SAFE_RELEASE(effect_);
 	}
 	device_->Unacquire();
-	device_->Release();
+	SAFE_RELEASE(device_);
 }
 
 void DirectInputDevice::RunForceFeedback()
@@ -104,7 +104,7 @@ void DirectInputDevice::Update(float deltaTime)
 	updateState();
 }
 
-void DirectInputDevice::Init(HWND hWindow)
+bool DirectInputDevice::Init(HWND hWindow)
 {
 	HRESULT result;
 
@@ -112,17 +112,17 @@ void DirectInputDevice::Init(HWND hWindow)
 	//enumObjectsStruct.device = device_;
 	result = device_->EnumObjects(EnumObjectsCallback, &enumObjectsStruct, DIDFT_ALL);
 	if(FAILED(result))
-		return;
+		return false;
 
 	hasFF_ = (enumObjectsStruct.nrOfFFObjects > 0);
 
 	result = device_->SetCooperativeLevel(hWindow, DISCL_BACKGROUND | DISCL_EXCLUSIVE);
 	if(FAILED(result))
-		return;
+		return false;
 
 	result = device_->SetDataFormat(&c_dfDIJoystick);
 	if(FAILED(result))
-		return;
+		return false;
 
 	if(hasFF_)
 	{
@@ -136,7 +136,7 @@ void DirectInputDevice::Init(HWND hWindow)
 
 		result = device_->SetProperty(DIPROP_AUTOCENTER, &DIPropAutoCenter.diph);
 		if(FAILED(result))
-			return;
+			return false;
 	}
 
 	//result = enumDevicesStruct.devices[i]->CreateEffect(GUID_Square, NULL, &(mEffects[i]), NULL);
@@ -157,6 +157,8 @@ void DirectInputDevice::Init(HWND hWindow)
 
 	createInputLayout();
 	createInputObjectsFromLayout();
+
+	return true;
 }
 
 InputDevice::InputDeviceType DirectInputDevice::GetType()
@@ -414,10 +416,9 @@ void DirectInputDevice::createAxes()
 	while(axesIndexArray_.size() > axes_.size())
 		axes_.push_back(InputAxisObject(0, 0xFFFF));
 
-	if(axesIndexArray_.size() >= 4)
+	if(axesIndexArray_.size() >= 2)
 	{
 		axes_[1].SetInverted(true);
-		axes_[3].SetInverted(true);
 	}
 
 	inputLayout_.nrOfAxes = axes_.size();

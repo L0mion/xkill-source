@@ -91,7 +91,6 @@ private:
 	float zFar_;				//!< The near viewing plane.
 
 	float velocity_;				//!< How far the camera will move while a key is pressed.
-	float mouseSensitivity_;		//!< How sensitive the mouse is.
 	DirectX::XMFLOAT3 position_;	//!< Where the camera is located.
 	DirectX::XMFLOAT3 right_;		//!< Always aims to the right of the camera, perpendicular to look.
 	DirectX::XMFLOAT3 up_;			//!< Always aims up from the camera, perpendicular to look.

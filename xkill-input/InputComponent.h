@@ -1,14 +1,13 @@
 #pragma once
 
 #include <xkill-utilities/IObserver.h>
-#include <xkill-utilities/EventManager.h>
-#include <xkill-utilities/EventType.h>
-#include <xkill-architecture/AttributeManager.h>
 #include "dllInput.h"
 
 #include <Windows.h>
+#include <vector>
 
 class InputManager;
+struct InputAttribute;
 
 //! Handles input devices and their input
 

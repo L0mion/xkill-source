@@ -286,7 +286,7 @@ DirectX::XMFLOAT4X4 RenderingComponent::calculateFinalMatrix(DirectX::XMFLOAT4X4
 
 	DirectX::XMMATRIX translation = DirectX::XMMatrixTranslation(positionAttribute.position.x,
 																 positionAttribute.position.y,
-																 40);//positionAttribute.position.z);
+																 positionAttribute.position.z);
 
 	DirectX::XMMATRIX scaling = DirectX::XMMatrixScaling(spatialAttribute.scale.x,
 														 spatialAttribute.scale.y,

@@ -50,13 +50,13 @@ PhysicsAttribute::PhysicsAttribute()
 	added = false;
 	alive = true;
 	mass = 1.0f;
-	rotationVelocity.x = 0; 
-	rotationVelocity.y = 0;
-	rotationVelocity.z = 0;
-	rotationVelocity.w = 1;
-	velocity.x = 0;
-	velocity.y = 0;
-	velocity.z = 0;
+
+	angularVelocity.x = 0; 
+	angularVelocity.y = 0;
+	angularVelocity.z = 0;
+	linearVelocity.x = 0;
+	linearVelocity.y = 0;
+	linearVelocity.z = 0;
 }
 PhysicsAttribute::~PhysicsAttribute()
 {

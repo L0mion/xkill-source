@@ -138,7 +138,10 @@ public:
 class DLL_U Event_Rumble : public Event
 {
 public:
-	Event_Rumble(float duration, float leftScale, float rightScale) : Event(EVENT_RUMBLE){this->duration = duration; this->leftScale = leftScale; this->rightScale = rightScale;}
+	Event_Rumble(unsigned int deviceNr, bool runRumble, float duration, float leftScale, float rightScale) : 
+		Event(EVENT_RUMBLE){this->deviceNr = deviceNr; this->runRumble = runRumble; this->duration = duration; this->leftScale = leftScale; this->rightScale = rightScale;}
+	unsigned int deviceNr;
+	bool runRumble;
 	float duration;
 	float leftScale;
 	float rightScale;

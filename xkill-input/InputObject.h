@@ -23,5 +23,8 @@ public:
 	virtual ~InputObject(void);
 
 	virtual InputObjectType GetType() = 0;
+
+	virtual float getValueFloat() = 0;
+	virtual bool getValueBool() = 0;
 };
 
