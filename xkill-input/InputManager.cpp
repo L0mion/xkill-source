@@ -81,13 +81,13 @@ int InputManager::UpdateNumberOfGamepads(HWND hWindow)
 	if(FAILED(result))
 		return nrOfGamepadsAdded;
 
-	for(unsigned int i = 0; i < enumDevicesStruct.deviceGUIDs.size(); i++)
+	for(unsigned int i = 0; i < enumDevicesStruct.deviceInstanceGUIDs.size(); i++)
 	{
 		bool deviceAlreadyAdded = false;
 
 		for(unsigned int j = 0; j < devices_.size(); j++)
 		{
-			if(devices_[j]->GetGUID() == enumDevicesStruct.deviceGUIDs[i])
+			if(devices_[j]->GetGUID() == enumDevicesStruct.deviceInstanceGUIDs[i])
 			{
 				deviceAlreadyAdded = true;
 				break;
@@ -96,7 +96,7 @@ int InputManager::UpdateNumberOfGamepads(HWND hWindow)
 
 		if(!deviceAlreadyAdded)
 		{
-			addNewDevice(hWindow, enumDevicesStruct.deviceGUIDs[i], enumDevicesStruct.deviceNames[i]);
+			addNewDevice(hWindow, enumDevicesStruct.deviceInstanceGUIDs[i], enumDevicesStruct.deviceProductGUIDs[i], enumDevicesStruct.deviceNames[i]);
 			nrOfGamepadsAdded++;
 		}
 	}
@@ -106,18 +106,18 @@ int InputManager::UpdateNumberOfGamepads(HWND hWindow)
 	return nrOfGamepadsAdded;
 }
 
-bool InputManager::addNewDevice(HWND hWindow, GUID guid, std::string name)
+bool InputManager::addNewDevice(HWND hWindow, GUID instanceGUID, GUID productGUID, std::string name)
 {
 	bool deviceAdded = false;
 
-	if(nrOfXInputDevices_ >= XUSER_MAX_COUNT || !isXInputDevice(&guid))
+	if(nrOfXInputDevices_ >= XUSER_MAX_COUNT || !isXInputDevice(&productGUID))
 	{
 		LPDIRECTINPUTDEVICE8 dInputDevice;
-		HRESULT result = dInput_->CreateDevice(guid, &dInputDevice, NULL);
+		HRESULT result = dInput_->CreateDevice(instanceGUID, &dInputDevice, NULL);
 		if(FAILED(result))
 			return false;
 
-		DirectInputDevice* device = new DirectInputDevice(dInputDevice, guid, name, devices_.size());
+		DirectInputDevice* device = new DirectInputDevice(dInputDevice, instanceGUID, name, devices_.size());
 		if(device->Init(hWindow))
 			devices_.push_back(device);
 
@@ -125,7 +125,7 @@ bool InputManager::addNewDevice(HWND hWindow, GUID guid, std::string name)
 	}
 	else
 	{
-		InputDevice* device = new XInputDevice(nrOfXInputDevices_++, guid, name, devices_.size());
+		InputDevice* device = new XInputDevice(nrOfXInputDevices_++, instanceGUID, name, devices_.size());
 		devices_.push_back(device);
 
 		deviceAdded = true;
@@ -191,7 +191,8 @@ BOOL CALLBACK InputManager::EnumDevicesCallback(const DIDEVICEINSTANCE* device, 
 {
 	EnumDevicesStruct* eds = (EnumDevicesStruct*)pvRef;
 
-	eds->deviceGUIDs.push_back(device->guidProduct);
+	eds->deviceInstanceGUIDs.push_back(device->guidInstance);
+	eds->deviceProductGUIDs.push_back(device->guidProduct);
 	eds->deviceNames.push_back(device->tszProductName);
 
 	return DIENUM_CONTINUE;
