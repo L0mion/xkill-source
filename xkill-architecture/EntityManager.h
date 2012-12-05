@@ -31,6 +31,7 @@ public:
 	EntityManager()
 	{
 		SUBSCRIBE_TO_EVENT(this, EVENT_CREATEPROJECTILE);
+		SUBSCRIBE_TO_EVENT(this, EVENT_REMOVE_ENTITY);
 	}
 
 	/**
@@ -40,12 +41,17 @@ public:
 	{
 		Entity* entity;
 		EventType type = e->getType();
+		int entityId;
 		switch (type) 
 		{
 		case EVENT_CREATEPROJECTILE:
 			entity = entityFactory.createProjectileEntity(static_cast<Event_createProjectile*>(e));
 			addEntity(entity);
 			std::cout << "ENTITYMANAGER: Created projectile entity " << entity->getID() << std::endl;
+			break;
+		case EVENT_REMOVE_ENTITY:
+			entityId = static_cast<Event_Remove_Entity*>(e)->entityId;
+			removeEntity(entityId);
 			break;
 		default:
 			break;
@@ -58,10 +64,10 @@ public:
 
 	void removeEntity(int index)
 	{
-		std::cout << "ENTITYMANAGER: Removed Entity " << entities[index]->getID() << std::endl;
-		entities[index]->deleteAttributes();
-		delete entities[index];
-		entities.erase(entities.begin()+index);	
+		//std::cout << "ENTITYMANAGER: Removed Entity (may not work yet) " << entities[index]->getID() << std::endl;
+		//entities[index]->deleteAttributes();
+		//delete entities[index];
+		//entities.erase(entities.begin()+index);	
 	}
 
 	~EntityManager()

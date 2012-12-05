@@ -3,6 +3,7 @@
 #include <btBulletDynamicsCommon.h>
 
 #include <xkill-utilities/AttributeType.h>
+#include <xkill-utilities/EventManager.h>
 
 #include "CollisionShapeManager.h"
 #include "physicsObject.h"
@@ -101,20 +102,20 @@ void BulletPhysicsComponent::onUpdate(float delta)
 	{
 		std::cout << "Creating new Physics Object" << std::endl;
 		physicsObjects_->push_back(new PhysicsObject());
+		if(physicsAttributes_->at(i).alive)
+		{
+				physicsObjects_->at(i)->Init(&physicsAttributes_->at(i),dynamicsWorld_);
+				physicsAttributes_->at(i).added = true;
+		}
 	}
-	//Synchronize the internal represenation of physics objects with the physics attributes
 	for(unsigned int i = 0; i < physicsObjects_->size(); i++)
 	{
 		if(physicsAttributes_->at(i).alive)
 		{
 			if(physicsAttributes_->at(i).added)
 			{
+				//Synchronize the PhysicsAttributes with the internal represenation of physics objects
 				physicsObjects_->at(i)->preStep(&physicsAttributes_->at(i));
-			}
-			else
-			{
-				physicsObjects_->at(i)->Init(&physicsAttributes_->at(i),dynamicsWorld_);
-				physicsAttributes_->at(i).added = true;
 			}
 		}
 		else if(physicsAttributes_->at(i).added)
@@ -124,14 +125,49 @@ void BulletPhysicsComponent::onUpdate(float delta)
 		}
 	}
 	
-	dynamicsWorld_->stepSimulation(delta,10);
+	//When data have been tranferred from PhysicsAttributes to the internal representation
+	dynamicsWorld_->stepSimulation(delta,10);//Perform Bullet Physics simulation
 
 	//Copy the physics simulation result to the physics attributes
 	for(unsigned int i = 0; i < physicsObjects_->size(); i++)
 	{
+		//If a PhysicsAttribute exists as a PhysicsAttribute and have been initialized as a PhysicsObject
 		if(physicsAttributes_->at(i).alive && physicsAttributes_->at(i).added)
 		{
+			//Extract from the internal represenation in Bullet Physics to the physicsAttributes
 			(*physicsObjects_)[i]->postStep(&physicsAttributes_->at(i));
+
+			//Check collisions between players and projectiles
+			for(unsigned int j = i+1; j < physicsObjects_->size(); j++)
+			{
+				//^ = xor. If one of the 2 physics objects (at i and j in physicsAttributes_) is a projectile, and the other object is not a projectile.
+				if(physicsAttributes_->at(i).isProjectile ^ physicsAttributes_->at(j).isProjectile)
+				{
+					if((*physicsObjects_)[i]->contactTest(dynamicsWorld_,*(*physicsObjects_)[j]))
+					{
+						std::vector<int>* allPhysicsOwner; GET_ATTRIBUTE_OWNERS(allPhysicsOwner, ATTRIBUTE_PHYSICS);
+						int physicsAttributeOwnersI = allPhysicsOwner->at(i);
+						int physicsAttributeOwnersJ = allPhysicsOwner->at(j);
+					
+						//Find out which of the 2 physics objects (at i and j in physicsAttributes_) is a projectile.
+						int projectileId = -1;
+						int playerId = -1;
+						if(physicsAttributes_->at(i).isProjectile)
+						{
+							projectileId = physicsAttributeOwnersI;
+							playerId = physicsAttributeOwnersJ;
+						}
+						else if(physicsAttributes_->at(j).isProjectile)
+						{
+							playerId = physicsAttributeOwnersI;
+							projectileId = physicsAttributeOwnersJ;
+						}
+
+						Event_ProjectileCollidingWithPlayer projectileCollidingWithPlayer(projectileId, playerId);
+						SEND_EVENT(&projectileCollidingWithPlayer);
+					}
+				}
+			}
 		}
 	}
 }
@@ -140,3 +176,4 @@ void BulletPhysicsComponent::onEvent(Event* e)
 {
 
 }
+

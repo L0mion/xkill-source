@@ -53,7 +53,7 @@ public:
 	/**
 	Provides access to AttributeManager's \ref ATTRIBUTES through 
 	the use of Event_getAttributeVector. The data inside
-	vent_getAttributeVector can then be accessed by the sender.
+	event_getAttributeVector can then be accessed by the sender.
 	*/
 	void event_getAttributeVector(Event_getAttribute* e)
 	{

@@ -41,6 +41,8 @@ enum DLL_U EventType
 	EVENT_PLAYSOUND,
 	EVENT_RUMBLE,
 	EVENT_CREATEPROJECTILE,
+	EVENT_PROJECTILECOLLIDINGWITHPLAYER,
+	EVENT_REMOVE_ENTITY,
 
 	// Get events
 	EVENT_GET_ATTRIBUTE,
@@ -206,6 +208,10 @@ public:
 	}
 };
 
+// Tells EntityManager to create a projectile entity
+/**
+\ingroup events
+*/
 class DLL_U Event_createProjectile : public Event
 {
 public:
@@ -218,3 +224,36 @@ public:
 		this->direction = direction;
 	}
 };
+
+// Used in GameComponent
+/**
+\ingroup events
+*/
+class DLL_U Event_ProjectileCollidingWithPlayer : public Event
+{
+public:
+	int projectileId;
+	int playerId;
+
+	Event_ProjectileCollidingWithPlayer(int projectileId, int playerId) : Event(EVENT_PROJECTILECOLLIDINGWITHPLAYER)
+	{
+		this->projectileId = projectileId;
+		this->playerId = playerId;
+	}
+};
+
+// Creates EntityManager to remove an entity with id
+/**
+\ingroup events
+*/
+class DLL_U Event_Remove_Entity : public Event
+{
+public:
+	int entityId;
+
+	Event_Remove_Entity(int entityId) : Event(EVENT_REMOVE_ENTITY)
+	{
+		this->entityId = entityId;
+	}
+};
+

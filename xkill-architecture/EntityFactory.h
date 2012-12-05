@@ -101,7 +101,8 @@ public:
 
 		PhysicsAttribute* physicsAttribute = AttributeManager::getInstance()->physicsAttributes_.createAttribute(entity);
 		physicsAttribute->spatialAttribute = AttributeManager::getInstance()->spatialAttributes_.getLatestAttributeAsAttributePointer();
-		
+		physicsAttribute->isProjectile = true;
+
 		physicsAttribute->linearVelocity.y = 1.0f;
 		
 		return entity;
