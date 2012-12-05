@@ -21,6 +21,9 @@ public:
 	*/
 	virtual InputObjectType GetType();
 
+	float getValueFloat();
+	bool getValueBool();
+
 	//! Returns if the button is down
 	bool isDown();
 	//! Returns if the button was since last update

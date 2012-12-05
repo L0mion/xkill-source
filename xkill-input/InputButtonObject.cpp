@@ -38,3 +38,13 @@ bool InputButtonObject::isReleased()
 {
 	return (!value_ && prevValue_);
 }
+
+float InputButtonObject::getValueFloat()
+{
+	return (float)value_;
+}
+
+bool InputButtonObject::getValueBool()
+{
+	return value_;
+}

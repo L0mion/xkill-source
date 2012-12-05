@@ -1,9 +1,10 @@
 #include "InputDevice.h"
 
-InputDevice::InputDevice(GUID deviceGUID, std::string name)
+InputDevice::InputDevice(GUID deviceGUID, std::string name, unsigned int playerID)
 {
 	deviceGUID_ = deviceGUID;
 	name_ = name;
+	playerID_ = playerID;
 }
 
 InputDevice::~InputDevice()
@@ -35,4 +36,14 @@ GUID InputDevice::GetGUID()
 std::string InputDevice::GetName()
 {
 	return name_;
+}
+
+void InputDevice::setPlayerID(int playerID)
+{
+	playerID_ = playerID;
+}
+
+int InputDevice::getPlayerID()
+{
+	return playerID_;
 }
