@@ -22,6 +22,10 @@ private:
 public:
 	MainWindow(QWidget *parent = 0, Qt::WFlags flags = 0) : QMainWindow(parent, flags)
 	{
+		// Create console
+		AllocConsole();
+		SetStdHandle(STD_INPUT_HANDLE |STD_OUTPUT_HANDLE, this->winId());
+
 		// create UI generated from XML file
 		ui.setupUi(this);
 		MainWindow::setWindowTitle("XKILL");
@@ -31,8 +35,6 @@ public:
 		SUBSCRIBE_TO_EVENT(this, EVENT_SHOW_MESSAGEBOX);
 
 		// init game
-		AllocConsole();
-		SetStdHandle(STD_INPUT_HANDLE |STD_OUTPUT_HANDLE, this->winId());
 		gameWidget = new GameWidget(this);
 		this->setCentralWidget(gameWidget);
 		setMouseTracking(true);

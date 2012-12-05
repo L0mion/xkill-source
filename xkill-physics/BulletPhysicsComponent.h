@@ -76,9 +76,6 @@ public:
 	\param e A pointer to the event that is being passed
 	*/
 	void onEvent(Event* e);
-
-	//! Creates a rigid body used as a projectile
-	void shootSphere();
 };
 
 #endif //XKILL_PHYSICS_PHYSICSCOMPONENT_H

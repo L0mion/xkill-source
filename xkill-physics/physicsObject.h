@@ -21,6 +21,7 @@ private:
 	btScalar yaw_;
 protected:
 public:
+
 	//! Creates a Physics Object with a rigidbody pointer set to nullptr
 	PhysicsObject();
 
