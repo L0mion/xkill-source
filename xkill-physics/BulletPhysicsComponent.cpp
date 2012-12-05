@@ -60,29 +60,8 @@ bool BulletPhysicsComponent::init()
 
 	//////
 
+	collisionShapeManager_->createConvexHull(nullptr,0);
 	//////
-	struct vec3
-	{
-		float x_,y_,z_;
-		vec3(){}
-		vec3(float x, float y, float z)	{ x_=x;y_=y;z_=z; }
-	};
-	vec3* v = new vec3[9];
-	
-	v[0] = vec3(-1,-1,-1);	v[1] = vec3(-1,-1,1);
-	v[2] = vec3(1,-1,-1);	v[3] = vec3(1,-1,1);
-
-	v[4] = vec3(-1,1,-1);	v[5] = vec3(-1,1,1);
-	v[6] = vec3(1,1,-1);	v[7] = vec3(1,1,1);
-
-	v[8] = vec3(0.5f,0.5f,0.5f);
-	//For each mesh create a bounding volume
-	collisionShapeManager_->createConvexHull(&v[0].x_,3*9);
-	delete [] v;
-	
-	//////
-
-	//////	
 	
 	return true;
 }
