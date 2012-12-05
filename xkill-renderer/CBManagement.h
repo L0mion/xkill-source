@@ -2,51 +2,44 @@
 #define XKILL_RENDERER_CBMANAGEMENT_H
 
 #include <d3d11.h>
+#include <DirectXMath.h>
+#include "d3dInterface.h"
 
-#include "D3DInterface.h"
+static const unsigned int CB_FRAME_INDEX	= 1;
+static const unsigned int CB_INSTANCE_INDEX = 2;
 
-#include "CBPerFrame.h"
-#include "CBPerInstance.h"
-
-//! Class for a constant buffer that will be updated every frame.
-/*!
-\ingroup xkill-renderer-constant-buffer
-*/
-class CBManagement
+class CBManagement : public D3DInterface
 {
 public:
-	//! Sets CBManagement to its default state.
 	CBManagement();
-	//! Releases all memory and returns CBManagement to default state
 	~CBManagement();
-	//! Releases all memory and returns CBManagement to default state
-	virtual void reset();
-	//! Initializes CBManagement
-	/*!
-	\param device DirectX device pointer
-	\return Any error that was encountered during initialization.
-	*/
+
+	void reset();
+
+	void updateCBFrame(ID3D11DeviceContext* devcon,
+					   DirectX::XMFLOAT4X4	finalMatrix,
+					   DirectX::XMFLOAT4X4	viewMatrix,
+					   DirectX::XMFLOAT4X4	viewMatrixInverse,
+					   DirectX::XMFLOAT4X4	projectionMatrix,
+					   DirectX::XMFLOAT4X4	projectionMatrixInverse,
+					   DirectX::XMFLOAT3	eyePosition,
+					   unsigned int			numLights);
+	void updateCBInstance(ID3D11DeviceContext* devcon,
+						  unsigned int screenWidth,
+						  unsigned int screenHeight);
+
+	void vsSet(unsigned int cbIndex, unsigned int shaderRegister, ID3D11DeviceContext* devcon);
+	void psSet(unsigned int cbIndex, unsigned int shaderRegister, ID3D11DeviceContext* devcon);
+	void csSet(unsigned int cbIndex, unsigned int shaderRegister, ID3D11DeviceContext* devcon);
+
 	HRESULT init(ID3D11Device* device);
-
-	CBPerFrame*		getCBPerFrame()		const;
-	CBPerInstance*	getCBPerInstance()	const;
-
 private:
-	//! Initializes cbPerFrame
-	/*!
-	\param device DirectX device pointer
-	\return Any error that was encountered during initialization.
-	*/
-	HRESULT initCBPerFrame(ID3D11Device* device);
-	//! Initializes cbPerInstance
-	/*!
-	\param device DirectX device pointer
-	\return Any error that was encountered during initialization.
-	*/
-	HRESULT initCBPerInstance(ID3D11Device* device);
 
-	CBPerFrame*		cbPerFrame_;	//!< Object containing a constant buffer that will be updated every frame.
-	CBPerInstance*	cbPerInstance_;	//!< Object containing a constant buffer that will be update on initialization of the application.
+	HRESULT initCBFrame(ID3D11Device* device);
+	HRESULT initCBInstance(ID3D11Device* device);
+
+	ID3D11Buffer* cbFrame_;
+	ID3D11Buffer* cbInstance_;
 };
 
-#endif //XKILL_RENDERER_CBMANAGEMENT_H
+#endif

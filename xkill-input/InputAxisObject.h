@@ -33,6 +33,9 @@ public:
 	void SetValue(int value);
 	float GetValue();
 
+	virtual float getValueFloat();
+	virtual bool getValueBool();
+
 	/*!
 	\return AXIS_OBJECT
 	*/

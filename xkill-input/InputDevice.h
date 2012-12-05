@@ -49,7 +49,7 @@ public:
 		DIRECT_INPUT_KEYBOARD
 	};
 
-	InputDevice(GUID deviceGUID, std::string name);
+	InputDevice(GUID deviceGUID, std::string name, unsigned int playerID = -1);
 	virtual ~InputDevice(void);
 
 	//! Updates the device
@@ -76,10 +76,14 @@ public:
 	virtual GUID GetGUID();
 	virtual std::string GetName();
 
+	virtual void setPlayerID(int playerID);
+	virtual int getPlayerID();
+
 protected:
 	InputDeviceLayout inputLayout_;
 	GUID deviceGUID_;
 	std::string name_;
+	unsigned int playerID_;
 
 	std::vector<InputAxisObject> axes_;				//Should perhaps use an inputstate to store this isntead?
 	std::vector<InputButtonObject> buttons_;

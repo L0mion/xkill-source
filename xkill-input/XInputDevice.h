@@ -14,7 +14,7 @@
 class XInputDevice : public InputDevice
 {
 public:
-	XInputDevice(int deviceNr, GUID deviceGUID, std::string name);
+	XInputDevice(int deviceNr, GUID deviceGUID, std::string name, unsigned int playerID);
 	virtual ~XInputDevice(void);
 
 	virtual void Update(float deltaTime);

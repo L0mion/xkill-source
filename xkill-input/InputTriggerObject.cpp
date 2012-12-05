@@ -40,6 +40,16 @@ bool InputTriggerObject::IsTriggered()
 	return (value_ > triggerValue_);
 }
 
+float InputTriggerObject::getValueFloat()
+{
+	return value_;
+}
+
+bool InputTriggerObject::getValueBool()
+{
+	return IsTriggered();
+}
+
 InputObject::InputObjectType InputTriggerObject::GetType()
 {
 	return TRIGGER_OBJECT;

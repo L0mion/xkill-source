@@ -61,11 +61,12 @@ public:
 		SAFE_DELETE(entityManager_);
 	}
 
-	bool init(HWND windowHandle)
+	bool init(HWND windowHandle, HWND parentWindowHandle)
 	{
 		entityManager_ = new EntityManager();
 		ENTITYTYPE listOfEntitiesToBeCreated[] =
 		{
+			PLAYER,
 			PLAYER,
 			PLAYER,
 			PLAYER
@@ -79,7 +80,7 @@ public:
 
 		//Initialize components
 		componentManager_ = new ComponentManager();
-		if(!componentManager_->init(windowHandle))
+		if(!componentManager_->init(windowHandle, parentWindowHandle))
 		{
 			std::cout << "Component manager failed to init" << std::endl;
 			std::cin.ignore();

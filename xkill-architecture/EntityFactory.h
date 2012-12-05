@@ -46,16 +46,23 @@ public:
 		Entity* entity = createEntity();
 
 		PositionAttribute* position = AttributeManager::getInstance()->positionAttributes_.createAttribute(entity);
-		
+		position->position.x = 0.0f;
+		position->position.y = 0.0f;
+		position->position.z = 0.0f;
+
 		SpatialAttribute* spatial = AttributeManager::getInstance()->spatialAttributes_.createAttribute(entity);
 		spatial->positionAttribute = AttributeManager::getInstance()->positionAttributes_.getLatestAttributeAsAttributePointer();
-		
+		spatial->scale.x = 1.0f;
+		spatial->scale.y = 1.0f;
+		spatial->scale.z = 1.0f;
+
 		RenderAttribute* render = AttributeManager::getInstance()->renderAttributes_.createAttribute(entity);
 		render->spatialAttribute = AttributeManager::getInstance()->spatialAttributes_.getLatestAttributeAsAttributePointer();
 
 		PhysicsAttribute* physics = AttributeManager::getInstance()->physicsAttributes_.createAttribute(entity);
 		physics->spatialAttribute = AttributeManager::getInstance()->spatialAttributes_.getLatestAttributeAsAttributePointer();
-		
+		//physics->linearVelocity.z = -25;
+
 		InputAttribute* input  = AttributeManager::getInstance()->inputAttributes_.createAttribute(entity);
 		input->physicsAttribute = AttributeManager::getInstance()->physicsAttributes_.getLatestAttributeAsAttributePointer();
 
@@ -95,7 +102,7 @@ public:
 		PhysicsAttribute* physicsAttribute = AttributeManager::getInstance()->physicsAttributes_.createAttribute(entity);
 		physicsAttribute->spatialAttribute = AttributeManager::getInstance()->spatialAttributes_.getLatestAttributeAsAttributePointer();
 		
-		physicsAttribute->velocity.x = 1.0f;
+		physicsAttribute->linearVelocity.y = 1.0f;
 		
 		return entity;
 	}

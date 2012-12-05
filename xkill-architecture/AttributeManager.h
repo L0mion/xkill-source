@@ -72,14 +72,14 @@ public:
 			// If Enum matches, fetch information from the correspoinding
 			// AttributeStorage and store that information inside 
 			// Event_getAttribute
-			PUT_ATTRIBUTES_INSIDE_EVENT(ATTRIBUTE_POSITION,	positionAttributes_,	e);
-			PUT_ATTRIBUTES_INSIDE_EVENT(ATTRIBUTE_SPATIAL,	spatialAttributes_,		e);
-			PUT_ATTRIBUTES_INSIDE_EVENT(ATTRIBUTE_RENDER,		renderAttributes_,		e);
-			PUT_ATTRIBUTES_INSIDE_EVENT(ATTRIBUTE_PHYSICS,	physicsAttributes_,		e);
-			PUT_ATTRIBUTES_INSIDE_EVENT(ATTRIBUTE_CAMERA,		cameraAttributes_,		e);
-			PUT_ATTRIBUTES_INSIDE_EVENT(ATTRIBUTE_INPUT,		inputAttributes_,		e);
-			PUT_ATTRIBUTES_INSIDE_EVENT(ATTRIBUTE_PLAYER,		playerAttributes_,		e);
-			PUT_ATTRIBUTES_INSIDE_EVENT(ATTRIBUTE_BOUNDING,	boundingAttributes_,	e);
+			PUT_ATTRIBUTES_INSIDE_EVENT(ATTRIBUTE_POSITION,	positionAttributes_, e);
+			PUT_ATTRIBUTES_INSIDE_EVENT(ATTRIBUTE_SPATIAL, spatialAttributes_, e);
+			PUT_ATTRIBUTES_INSIDE_EVENT(ATTRIBUTE_RENDER, renderAttributes_, e);
+			PUT_ATTRIBUTES_INSIDE_EVENT(ATTRIBUTE_PHYSICS, physicsAttributes_, e);
+			PUT_ATTRIBUTES_INSIDE_EVENT(ATTRIBUTE_CAMERA, cameraAttributes_, e);
+			PUT_ATTRIBUTES_INSIDE_EVENT(ATTRIBUTE_INPUT, inputAttributes_, e);
+			PUT_ATTRIBUTES_INSIDE_EVENT(ATTRIBUTE_PLAYER, playerAttributes_, e);
+			PUT_ATTRIBUTES_INSIDE_EVENT(ATTRIBUTE_BOUNDING, boundingAttributes_, e);
 
 			// undefine dirty macro
 #undef PUT_ATTRIBUTES_INSIDE_EVENT
