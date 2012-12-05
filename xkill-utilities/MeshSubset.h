@@ -25,7 +25,7 @@ public:
 
 	const unsigned int getMaterialIndex();
 	const unsigned int getNumIndices();
-	const std::vector<unsigned int> getIndices();
+	const std::vector<unsigned int>& getIndices();
 protected:
 private:
 	unsigned int materialIndex_;		//!< Index of MeshMaterial subset corresponds to.

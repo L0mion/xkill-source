@@ -117,11 +117,10 @@ struct DLL_U RenderAttribute : public IAttribute
 
 	AttributePointer spatialAttribute;
 	AttributePointer boundingAttribute;
-	AttributePointer meshAttribute;
-
+	
 	bool transparent;
 	bool tessellation;
-	int meshID;
+	int meshIndex;
 	int textureID;
 };
 

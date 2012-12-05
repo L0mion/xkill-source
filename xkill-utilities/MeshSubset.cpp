@@ -24,7 +24,7 @@ const unsigned int MeshSubset::getNumIndices()
 {
 	return indices_.size();
 }
-const std::vector<unsigned int> MeshSubset::getIndices()
+const std::vector<unsigned int>& MeshSubset::getIndices()
 {
 	return indices_;
 }

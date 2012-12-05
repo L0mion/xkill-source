@@ -19,6 +19,7 @@ class ViewportManagement;
 class GBuffer;
 class D3DDebug;
 class LightManagement;
+class MeshManagement;
 
 namespace DirectX
 {
@@ -200,6 +201,9 @@ private:
 	\sa LightManagement
 	*/
 	HRESULT initLightManagement();
+
+	HRESULT initMeshManagement();
+
 	//! Creates D3DDebug-object which is used for detecting live COM-objects at end of application.
 	/*! Warning: D3DDebug recognizes it's own members as live COM-objects, thusly reporting 'false' live objects.
 	\return Any error encountered during initialization.
@@ -217,6 +221,7 @@ private:
 	CBManagement*		cbManagement_;						//!< Maintaining constant buffers.
 	LightManagement*	lightManagement_;					//!< Maintaining lights.
 	ViewportManagement* viewportManagement_;				//!< Maintaining viewports.
+	MeshManagement*		meshManagement_;
 	GBuffer*			gBuffers_[GBUFFERID_NUM_BUFFERS];	//!< Containing data for deferred rendering.
 	D3DDebug*			d3dDebug_;							//!< Used for detecting live COM-objects.
 
@@ -238,7 +243,7 @@ private:
 	//direct compute
 	ID3D11UnorderedAccessView* uavBackBuffer_; //!< Used to render to texBackBuffer using DirectCompute.
 
-	//std::vector<
+	
 };
 
 #endif //XKILL_RENDERER_RENDERINGCOMPONENT_H

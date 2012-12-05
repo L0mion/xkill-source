@@ -40,7 +40,7 @@ RenderAttribute::RenderAttribute()
 {
 	transparent		= false;
 	tessellation	= false;
-	meshID			= 0;
+	meshIndex		= 0;
 	textureID		= 0;
 }
 RenderAttribute::~RenderAttribute()

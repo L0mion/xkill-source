@@ -80,7 +80,7 @@ public:
 					<< renderOwners->at(i)		<< "\t"
 					<< render->transparent		<< "\t"
 					<< render->tessellation		<< "\t"
-					<< render->meshID			<< "\t"
+					<< render->meshIndex			<< "\t"
 					<< render->textureID		<< "\t"
 					<< position->position[0]	<< "\t"
 					<< spatial->rotation[0]		<< "\t"

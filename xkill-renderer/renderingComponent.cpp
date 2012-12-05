@@ -12,13 +12,14 @@
 #include "d3dDebug.h"
 #include "CBManagement.h"
 #include "LightManagement.h"
+#include "MeshManagement.h"
+#include "MeshModelD3D.h"
 
 #include "renderingComponent.h"
 
 RenderingComponent::RenderingComponent(
 		HWND windowHandle)
 {
-	GET_ATTRIBUTES(renderAttributes_, RenderAttribute, ATTRIBUTE_RENDER);
 	GET_ATTRIBUTES(cameraAttributes_, CameraAttribute, ATTRIBUTE_CAMERA);
 	
 	Event_getWindowResolution windowResolution;
@@ -33,6 +34,7 @@ RenderingComponent::RenderingComponent(
 	cbManagement_		= nullptr; 
 	viewportManagement_ = nullptr;
 	lightManagement_	= nullptr;
+	meshManagement_		= nullptr;
 	
 	for(unsigned int i = 0; i < GBUFFERID_NUM_BUFFERS; i++)
 		gBuffers_[i] = nullptr;
@@ -107,6 +109,8 @@ HRESULT RenderingComponent::init()
 		hr = initCBManagement();
 	if(SUCCEEDED(hr))
 		hr = initLightManagement();
+	if(SUCCEEDED(hr))
+		hr = initMeshManagement();
 //	if(SUCCEEDED(hr))
 //		hr = initDebug();
 
@@ -186,43 +190,37 @@ void RenderingComponent::renderToGBuffer(DirectX::XMFLOAT4X4 view,
 	devcon_->PSSetShader(fxManagement_->getDefaultPS()->getPixelShader(), nullptr, 0);
 	devcon_->PSSetSamplers(0, 1, &ssDefault_);
 	devcon_->RSSetState(rsDefault_);
-	
-	//UINT stride = sizeof(VertexPosNormTex);
-	//UINT offset = 0;
-	//devcon_->IASetVertexBuffers(0, 1, &vertexBuffer_, &stride, &offset);
-	//devcon_->IASetIndexBuffer(indexBuffer_, DXGI_FORMAT_R32_UINT, 0);
-	//devcon_->IASetInputLayout(fxManagement_->getILDefaultVSPosNormTex());
-	//devcon_->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-	//devcon_->DrawIndexed(tempIndicesSize, 0, 0);
-	//devcon_->Draw(tempVerticesSize, 0);
-
-	UINT stride = sizeof(VertexPosNormTex);
-	UINT offset = 0;
-	devcon_->IASetVertexBuffers(0, 1, &vertexBuffer_, &stride, &offset);
-	devcon_->IASetInputLayout(fxManagement_->getILDefaultVSPosNormTex());
-	devcon_->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-	devcon_->Draw(vertexNum, 0);
 
 	gBufferRenderSetRenderTargets();
 	
 	devcon_->ClearDepthStencilView(dsvDepthBuffer_, D3D11_CLEAR_DEPTH, 1.0f, 0);
 
 	// Fetch attributes
-	std::vector<RenderAttribute>* allRender;		GET_ATTRIBUTES(allRender, RenderAttribute, ATTRIBUTE_RENDER);
-	std::vector<SpatialAttribute>* allSpatial;		GET_ATTRIBUTES(allSpatial, SpatialAttribute, ATTRIBUTE_SPATIAL);
-	std::vector<PositionAttribute>* allPosition;	GET_ATTRIBUTES(allPosition, PositionAttribute, ATTRIBUTE_POSITION);
+	std::vector<RenderAttribute>*	allRender;		GET_ATTRIBUTES(allRender,	RenderAttribute,	ATTRIBUTE_RENDER);
+	std::vector<SpatialAttribute>*	allSpatial;		GET_ATTRIBUTES(allSpatial,	SpatialAttribute,	ATTRIBUTE_SPATIAL);
+	std::vector<PositionAttribute>*	allPosition;	GET_ATTRIBUTES(allPosition,	PositionAttribute,	ATTRIBUTE_POSITION);
 	
-	for(unsigned int i=0; i<renderAttributes_->size(); i++)
+	DirectX::XMFLOAT4X4 finalMatrix; unsigned int meshIndex; MeshModelD3D* meshModelD3D;
+	RenderAttribute* renderAt; SpatialAttribute* spatialAt; PositionAttribute* positionAt;
+	for(unsigned int i=0; i<allRender->size(); i++)
 	{
-		DirectX::XMFLOAT4X4 finalMatrix = calculateFinalMatrix(view, projection, allSpatial->at(i), allPosition->at(i),  i);
+		renderAt	= &allRender->at(i);
+		meshIndex	= renderAt->meshIndex;
+		spatialAt	= &allSpatial->at(renderAt->spatialAttribute.index);
+		positionAt	= &allPosition->at(spatialAt->positionAttribute.index);
+		
+		meshModelD3D = meshManagement_->getMeshModelD3D(meshIndex, device_);
+		ID3D11Buffer* vertexBuffer =  meshModelD3D->getVertexBuffer();
+
+		finalMatrix = calculateFinalMatrix(view, projection, *spatialAt, *positionAt,  i);
 		gBufferRenderUpdateConstantBuffers(finalMatrix, view, viewInverse, projection, projectionInverse, eyePosition);
 
 		UINT stride = sizeof(VertexPosNormTex);
 		UINT offset = 0;
-		devcon_->IASetVertexBuffers(0, 1, &vertexBuffer_, &stride, &offset);
+		devcon_->IASetVertexBuffers(0, 1, &vertexBuffer, &stride, &offset);
 		devcon_->IASetInputLayout(fxManagement_->getILDefaultVSPosNormTex());
 		devcon_->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-		devcon_->Draw(vertices_->size(), 0);
+		devcon_->Draw(5000, 0);
 	}
 
 	gBufferRenderClean();
@@ -594,6 +592,14 @@ HRESULT RenderingComponent::initLightManagement()
 
 	return hr;
 }
+HRESULT RenderingComponent::initMeshManagement()
+{
+	HRESULT hr = S_OK;
+
+	meshManagement_ = new MeshManagement();
+
+	return hr;
+}
 HRESULT RenderingComponent::initDebug()
 {
 	HRESULT hr = S_OK;
@@ -603,45 +609,6 @@ HRESULT RenderingComponent::initDebug()
 
 	return hr;
 }
-
-HRESULT RenderingComponent::initVertexBuffer()
-{
-	HRESULT hr = S_OK;
-
-	std::vector<VertexPosNormTex> vertices;
-	std::vector<MeshAttribute>* allModels; GET_ATTRIBUTES(allModels, MeshAttribute, ATTRIBUTE_MESH);
-	for(unsigned i=0; i<allModels->size(); i++)
-	{
-		MeshAttribute* mesh = &allModels->at(i);
-		MeshModel* model = mesh->mesh;
-
-		vertices = model->getGeometry().getVertices();
-		vertexNum = vertices.size();
-
-		delete model; //OH; MY; GOD;
-	}
-	
-
-	//vertices_ = new std::vector<VertexPosNormTex>();
-	//objLoader_ = new ObjLoaderBasic();
-	//objLoader_->parseObjectFile("../../xkill-resources/xkill-models/bth.obj", vertices_);
-
-	D3D11_BUFFER_DESC vbd;
-	vbd.Usage = D3D11_USAGE_DYNAMIC;
-	vbd.ByteWidth = sizeof(VertexPosNormTex) * vertices.size();
-	vbd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-	vbd.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
-	vbd.MiscFlags = 0;
-
-	D3D11_SUBRESOURCE_DATA vinitData;
-	vinitData.pSysMem = &vertices.at(0);
-	device_->CreateBuffer(&vbd, &vinitData, &vertexBuffer_);
-	if(FAILED(hr))
-		ERROR_MSG(L"RenderingComponent::initVertexBuffer CreateBuffer failed");
-
-	return hr;
-}
-
 void RenderingComponent::onEvent( Event* e )
 {
 

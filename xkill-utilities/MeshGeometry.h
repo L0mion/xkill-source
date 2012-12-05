@@ -30,8 +30,8 @@ public:
 	unsigned int getNumSubsets();
 protected:
 private:
-	std::vector<VertexPosNormTex>	vertices_;	//!< Vertices of mesh.
-	std::vector<MeshSubset>			subsets_;	//!< Subsets of mesh. \sa MeshSubset
+	std::vector<VertexPosNormTex>&	vertices_;	//!< Vertices of mesh.
+	std::vector<MeshSubset>&		subsets_;	//!< Subsets of mesh. \sa MeshSubset
 };
 
 #endif //XKILL_RENDERER_MESHGEOMETRY_H
