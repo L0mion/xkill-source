@@ -2,18 +2,8 @@
 #define XKILL_RENDERER_D3DMANAGEMENT_H
 
 #include <d3d11.h>
-#include <vector>
 
 #include "d3dInterface.h"
-#include "gBufferID.h"
-
-class FXManagement;
-class CBManagement;
-class ViewportManagement;
-class LightManagement;
-class GBuffer;
-class D3DDebug;
-class ObjLoaderBasic;
 
 namespace DirectX
 {
@@ -26,20 +16,6 @@ struct VertexPosNormTex;
 static const unsigned int MULTISAMPLES_GBUFFERS		= 1;
 static const unsigned int MULTISAMPLES_BACKBUFFER	= 1;
 static const unsigned int MULTISAMPLES_DEPTHBUFFER	= 1;
-
-enum ShaderID
-{
-	SHADER_ID_DEFAULT_VS,
-	SHADER_ID_DEFAULT_DEFERRED_VS,
-	SHADER_ID_DEFAULT_PS,
-	SHADER_ID_DEFAULT_DEFERRED_PS,
-	SHADER_ID_DEFAULT_CS
-};
-
-enum InputLayoutID
-{
-	INPUT_LAYOUT_ID_DEFAULT
-};
 
 class D3DManagement : public D3DInterface
 {
