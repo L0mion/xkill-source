@@ -21,11 +21,12 @@ void PhysicsObject::Init(PhysicsAttribute* physicsAttribute, btDiscreteDynamicsW
 {
 	btTransform a;
 	a.setOrigin(btVector3(0,0,-90));
+	a.setRotation(btQuaternion(0.0f, 0.0f, 0.0f, 1.0f)); //Important
 	rigidBody_ = new btRigidBody(physicsAttribute->mass,
 								 new btDefaultMotionState(a),
 								 new btSphereShape(1),
 								 btVector3(0,0,0));
-	rigidBody_->updateInertiaTensor();
+	//rigidBody_->updateInertiaTensor();
 	dynamicsWorld->addRigidBody(rigidBody_);
 	forces_ = btVector3(0,0,0);
 	rigidBody_->activate(true);
@@ -49,17 +50,16 @@ void PhysicsObject::preStep(PhysicsAttribute* physicsAttribute)
 	SpatialAttribute* spatialAttribute = ATTRIBUTE_CAST(SpatialAttribute,spatialAttribute,physicsAttribute);
 	PositionAttribute* positionAttribute = ATTRIBUTE_CAST(PositionAttribute,positionAttribute,spatialAttribute);
 	
-
 	//Copy from attributes to Bullet Physics internal representation
 	//memcpy(position,&positionAttribute->position,3*sizeof(float));
 	position.setX(positionAttribute->position.x);
 	position.setY(positionAttribute->position.y);
 	position.setZ(positionAttribute->position.z);
 	//memcpy(rotation,&spatialAttribute->rotation,4*sizeof(float));
-	rotation.setX(0.0f);//spatialAttribute->rotation.x);
-	rotation.setY(0.0f);//spatialAttribute->rotation.y);
-	rotation.setZ(0.0f);//spatialAttribute->rotation.z);
-	rotation.setW(1.0f);//spatialAttribute->rotation.w);
+	rotation.setX(spatialAttribute->rotation.x);
+	rotation.setY(spatialAttribute->rotation.y);
+	rotation.setZ(spatialAttribute->rotation.z);
+	rotation.setW(spatialAttribute->rotation.w);
 	//memcpy(linearVelocity,&physicsAttribute->linearVelocity,3*sizeof(float));
 	linearVelocity.setX(physicsAttribute->linearVelocity.x);
 	linearVelocity.setY(physicsAttribute->linearVelocity.y);
@@ -69,19 +69,8 @@ void PhysicsObject::preStep(PhysicsAttribute* physicsAttribute)
 	angularVelocity.setY(physicsAttribute->angularVelocity.y);
 	angularVelocity.setZ(physicsAttribute->angularVelocity.z);
 
-	//std::cout << "positionAttribute->position.x " << positionAttribute->position.x << std::endl;
-
-	//std::cout << "position.x() " << position.x() << std::endl;
-
-	//std::cout << "spatialAttribute->rotation.x " << spatialAttribute->rotation.x << std::endl;
-
-	//std::cout << "physicsAttribute->linearVelocity.x " << physicsAttribute->linearVelocity.x << std::endl;
-
-	//std::cout << "physicsAttribute->angularVelocity.x " << physicsAttribute->angularVelocity.x << std::endl;
-
 	btVector3 gravity(0,0,0);
 	//btVector3 drag(linearVelocity*-100);
-
 	rigidBody_->setWorldTransform(btTransform(rotation,position));
 	rigidBody_->setLinearVelocity((linearVelocity));
 	rigidBody_->setAngularVelocity(angularVelocity);
@@ -104,13 +93,9 @@ void PhysicsObject::postStep(PhysicsAttribute* physicsAttribute)
 	spatialAttribute->rotation.x = rigidBody_->getWorldTransform().getRotation().getX();
 	spatialAttribute->rotation.y = rigidBody_->getWorldTransform().getRotation().getY();
 	spatialAttribute->rotation.z = rigidBody_->getWorldTransform().getRotation().getZ();
+	spatialAttribute->rotation.w = rigidBody_->getWorldTransform().getRotation().getW();
 
-	std::cout << "Position " << rigidBody_->getWorldTransform().getOrigin().getX() << std::endl;
-
-	std::cout << "Rotation " << rigidBody_->getWorldTransform().getRotation().getX() << std::endl;
-
-
-	////Convert btVector3 to Float3 and save in attributes
+	//Convert btVector3 to Float3 and save in attributes
 	physicsAttribute->angularVelocity.copy(static_cast<float*>(btVector3(rigidBody_->getAngularVelocity())));
 	physicsAttribute->linearVelocity.copy(static_cast<float*>(btVector3(rigidBody_->getLinearVelocity())));
 

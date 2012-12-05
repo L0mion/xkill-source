@@ -19,6 +19,7 @@ private:
 	btVector3 forces_;
 protected:
 public:
+
 	//! Creates a Physics Object with a rigidbody pointer set to nullptr
 	PhysicsObject();
 

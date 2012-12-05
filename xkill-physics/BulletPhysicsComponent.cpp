@@ -87,6 +87,7 @@ bool BulletPhysicsComponent::init()
 	return true;
 }
 
+#include <iostream> //check
 void BulletPhysicsComponent::onUpdate(float delta)
 {
 	for(unsigned int i = 0; i < inputAttributes_->size(); i++)
@@ -94,9 +95,11 @@ void BulletPhysicsComponent::onUpdate(float delta)
 		if(i < physicsObjects_->size())
 			physicsObjects_->at(inputAttributes_->at(i).physicsAttribute.index)->input(&inputAttributes_->at(i),delta);
 	}
+
 	//Checks if new physiscs attributes were created since last call to this function
 	for(unsigned int i = physicsObjects_->size(); i < physicsAttributes_->size(); i++)
 	{
+		std::cout << "Creating new Physics Object" << std::endl;
 		physicsObjects_->push_back(new PhysicsObject());
 	}
 	//Synchronize the internal represenation of physics objects with the physics attributes
@@ -136,10 +139,4 @@ void BulletPhysicsComponent::onUpdate(float delta)
 void BulletPhysicsComponent::onEvent(Event* e)
 {
 
-}
-
-void BulletPhysicsComponent::shootSphere()
-{
-	//PhysicsObject* projectile = new PhysicsObject();
-	//projectile->Init(
 }
