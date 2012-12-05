@@ -21,6 +21,7 @@ void PhysicsObject::Init(PhysicsAttribute* physicsAttribute, btDiscreteDynamicsW
 {
 	btTransform a;
 	a.setOrigin(btVector3(0,0,-90));
+	a.setRotation(btQuaternion(0,0,0,1));
 	rigidBody_ = new btRigidBody(physicsAttribute->mass,
 								 new btDefaultMotionState(a),
 								 new btSphereShape(50),
