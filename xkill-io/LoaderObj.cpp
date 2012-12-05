@@ -1,3 +1,8 @@
+#include <xkill-utilities/EventManager.h>
+
+#include "ObjFace.h"
+#include "LoaderObj.h"
+
 LoaderObj::LoaderObj(
 	const std::string filePath,
 	const std::string fileName)
@@ -360,7 +365,7 @@ void LoaderObj::printFail(const std::string curLine)
 	std::string lineNum = std::to_string(lineNum_);
 	std::string failed	= " parsing failed at line " + lineNum + ": " + curLine;
 
-	ERROR_MSG(failed);
+	SHOW_MESSAGEBOX(failed);
 }
 bool LoaderObj::isNumeric(const std::string value)
 {

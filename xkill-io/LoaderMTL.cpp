@@ -1,3 +1,5 @@
+#include <xkill-utilities/EventManager.h>
+
 #include "MTLMaterial.h"
 #include "LoaderMTL.h"
 
@@ -320,7 +322,7 @@ void LoaderMTL::printFail(const std::string curLine)
 	std::string lineNum = std::to_string(lineNum_);
 	std::string failed	= " parsing failed at line " + lineNum + ": " + curLine;
 
-	ERROR_MSG(failed);
+	SHOW_MESSAGEBOX(failed);
 }
 bool LoaderMTL::isNumeric(const std::string value)
 {

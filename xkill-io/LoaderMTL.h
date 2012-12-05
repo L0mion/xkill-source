@@ -1,18 +1,10 @@
 #ifndef XKILL_RENDERER_MESHLOADERMTL_H
 #define XKILL_RENDERER_MESHLOADERMTL_H
 
-#include <Windows.h>
-
 #include "Loader.h"
-#include "../renderingUtilities.h"
 #include "MTLIllum.h"
 #include "SimpleStringSplitter.h"
 #include "MTL.h"
-
-namespace DirectX
-{
-	struct XMFLOAT3;
-}
 
 class MTLMaterial;
 

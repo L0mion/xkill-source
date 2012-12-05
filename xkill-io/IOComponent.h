@@ -1,13 +1,13 @@
-#ifndef XKILL_RENDERER_MESHMANAGEMENT_H
-#define XKILL_RENDERER_MESHMANAGEMENT_H
+#ifndef XKILL_RENDERER_IOCOMPONENT_H
+#define XKILL_RENDERER_IOCOMPONENT_H
 
 #include <vector>
 
-#include <xkill-utilities/IObserver.h>
-#include <xkill-utilities/EventManager.h>
-#include <xkill-utilities/AttributeType.h>
+//#include <xkill-utilities/IObserver.h>
+//#include <xkill-utilities/EventManager.h>
+//#include <xkill-utilities/AttributeType.h>
 
-#include "../dllRenderer.h"
+#include "dllIO.h"
 
 class MeshMakerObj;
 class MeshModel;
@@ -17,11 +17,11 @@ static const std::string pgyPath		= "";
 static const std::string bthName		= "bth.obj";
 static const std::string bthMTLPath		= bthPath;
 
-class MeshComponent
+class DLL_IO IOComponent
 {
 public:
-	MeshComponent();
-	~MeshComponent();
+	IOComponent();
+	~IOComponent();
 
 	bool init();
 	void reset();
@@ -36,7 +36,7 @@ private:
 	std::vector<MeshModel*> models_;
 };
 
-#endif //XKILL_RENDERER_MESHMANAGEMENT_H
+#endif //XKILL_RENDERER_IOCOMPONENT_H
 
 /*
 void onEvent(Event* e);

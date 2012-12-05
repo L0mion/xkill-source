@@ -13,7 +13,7 @@
 #include <xkill-utilities/MeshVertices.h>
 
 //temp
-#include "mesh/MeshComponent.h"
+#include <xkill-io/IOComponent.h>
 #include <xkill-utilities/MeshModel.h>
 
 #include "renderingComponent.h"
@@ -552,7 +552,7 @@ HRESULT RenderingComponent::initVertexBuffer()
 {
 	HRESULT hr = S_OK;
 
-	MeshComponent component;
+	IOComponent component;
 	bool temp = component.init();
 
 	std::vector<VertexPosNormTex> vertices;

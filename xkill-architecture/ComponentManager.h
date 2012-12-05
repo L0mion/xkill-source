@@ -4,6 +4,7 @@
 #include <xkill-sound/SoundComponent.h>
 #include <xkill-renderer/renderingComponent.h>
 #include <xkill-input/InputComponent.h>
+//#include <xkill-io/MeshComponent>
 
 #include "CameraComponent.h"
 #include "GameComponent.h"

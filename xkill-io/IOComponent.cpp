@@ -2,18 +2,18 @@
 #include <xkill-utilities/MeshModel.h>
 
 #include "MeshMakerObj.h"
-#include "MeshComponent.h"
+#include "IOComponent.h"
 
-MeshComponent::MeshComponent()
+IOComponent::IOComponent()
 {
 	makerObj_ = nullptr;
 }
-MeshComponent::~MeshComponent()
+IOComponent::~IOComponent()
 {
 	if(makerObj_)
 		delete makerObj_;
 }
-bool MeshComponent::init()
+bool IOComponent::init()
 {
 	makerObj_ = new MeshMakerObj(
 		bthPath,
@@ -30,6 +30,6 @@ bool MeshComponent::init()
 
 	return sucessfulMake;
 }
-void MeshComponent::reset()
+void IOComponent::reset()
 {
 }
