@@ -27,6 +27,7 @@ public:
 	AttributeStorage<InputAttribute>			inputAttributes_;
 	AttributeStorage<PlayerAttribute>			playerAttributes_;
 	AttributeStorage<BoundingAttribute>			boundingAttributes_;
+	AttributeStorage<MeshAttribute>				meshAttributes_;
 
 	static AttributeManager* getInstance()
 	{
@@ -74,12 +75,13 @@ public:
 			// Event_getAttribute
 			PUT_ATTRIBUTES_INSIDE_EVENT(ATTRIBUTE_POSITION,	positionAttributes_,	e);
 			PUT_ATTRIBUTES_INSIDE_EVENT(ATTRIBUTE_SPATIAL,	spatialAttributes_,		e);
-			PUT_ATTRIBUTES_INSIDE_EVENT(ATTRIBUTE_RENDER,		renderAttributes_,		e);
+			PUT_ATTRIBUTES_INSIDE_EVENT(ATTRIBUTE_RENDER,	renderAttributes_,		e);
 			PUT_ATTRIBUTES_INSIDE_EVENT(ATTRIBUTE_PHYSICS,	physicsAttributes_,		e);
-			PUT_ATTRIBUTES_INSIDE_EVENT(ATTRIBUTE_CAMERA,		cameraAttributes_,		e);
-			PUT_ATTRIBUTES_INSIDE_EVENT(ATTRIBUTE_INPUT,		inputAttributes_,		e);
-			PUT_ATTRIBUTES_INSIDE_EVENT(ATTRIBUTE_PLAYER,		playerAttributes_,		e);
+			PUT_ATTRIBUTES_INSIDE_EVENT(ATTRIBUTE_CAMERA,	cameraAttributes_,		e);
+			PUT_ATTRIBUTES_INSIDE_EVENT(ATTRIBUTE_INPUT,	inputAttributes_,		e);
+			PUT_ATTRIBUTES_INSIDE_EVENT(ATTRIBUTE_PLAYER,	playerAttributes_,		e);
 			PUT_ATTRIBUTES_INSIDE_EVENT(ATTRIBUTE_BOUNDING,	boundingAttributes_,	e);
+			PUT_ATTRIBUTES_INSIDE_EVENT(ATTRIBUTE_MESH,		meshAttributes_,		e);
 
 			// undefine dirty macro
 #undef PUT_ATTRIBUTES_INSIDE_EVENT

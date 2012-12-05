@@ -8,8 +8,8 @@
 
 #include <string>
 
-#include "MeshMaterial.h"
-#include "MeshSubset.h"
+#include <xkill-utilities/MeshMaterial.h>
+#include <xkill-utilities/MeshSubset.h>
 
 /** Types of vertices that one may read from .pgy.
 * Currently supports only one vertex-type.

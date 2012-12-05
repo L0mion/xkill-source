@@ -6,7 +6,7 @@ LoaderPGY::LoaderPGY(
 	const std::string filePath, 
 	const std::string fileName) : Loader(filePath, fileName)
 {
-
+	meshModel_ = nullptr;
 }
 LoaderPGY::~LoaderPGY()
 {
@@ -33,7 +33,7 @@ bool LoaderPGY::init()
 	return sucessfulLoad;
 }
 
-const MeshModel LoaderPGY::loadPGY()
+MeshModel* LoaderPGY::loadPGY()
 {
 	PGYHeader header = loadHeader();
 
@@ -45,8 +45,7 @@ const MeshModel LoaderPGY::loadPGY()
 		header.numVertices_,
 		header.numSubsets_);
 
-	MeshModel model(geometry, materials);
-	return model;
+	return new MeshModel(geometry, materials);
 }
 const PGYHeader LoaderPGY::loadHeader()
 {
@@ -137,7 +136,7 @@ const MeshSubset LoaderPGY::loadSubset()
 	return MeshSubset(materialIndex, indices);
 }
 
-const MeshModel LoaderPGY::getMeshModel()
+MeshModel* LoaderPGY::getMeshModel()
 {
 	return meshModel_;
 }

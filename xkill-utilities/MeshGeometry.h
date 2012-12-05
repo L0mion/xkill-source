@@ -3,15 +3,16 @@
 
 #include <vector>
 
+#include "dllUtilities.h"
 #include "MeshSubset.h"
-#include "vertices.h"
+#include "MeshVertices.h"
 
 //! Encapsulates geometric data of a mesh.
 /*!
 Encapsulates vertices and subsets.
 \ingroup xkill-mesh
 */
-class MeshGeometry
+class DLL_U MeshGeometry
 {
 public:
 	//! Does nothing.

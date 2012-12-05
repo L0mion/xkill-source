@@ -12,15 +12,12 @@
 
 #include "dllRenderer.h"
 #include "gBufferID.h"
-#include "vertices.h"
-#include "LoaderObj.h"
 
 class FXManagement;
 class CBManagement;
 class ViewportManagement;
 class GBuffer;
 class D3DDebug;
-class ObjLoaderBasic;
 class LightManagement;
 
 namespace DirectX
@@ -60,10 +57,6 @@ public:
 		HWND windowHandle);
 	//! Releases all memory and returns to default state.
 	~RenderingComponent();
-
-	
-	
-
 
 	//! Initializes RenderingComponent's members and prepares render.
 	/*!	\return First encountered error.
@@ -229,9 +222,7 @@ private:
 	//direct compute
 	ID3D11UnorderedAccessView* uavBackBuffer_; //!< Used to render to texBackBuffer using DirectCompute.
 
-	//temp
-	std::vector<VertexPosNormTex>* vertices_;
-	ObjLoaderBasic* objLoader_;
+	unsigned int vertexNum;
 	ID3D11Buffer*	vertexBuffer_;		//!< Mock buffer sending vertices to shader.
 };
 

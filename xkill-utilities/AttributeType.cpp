@@ -100,3 +100,7 @@ PlayerAttribute::PlayerAttribute()
 PlayerAttribute::~PlayerAttribute()
 {
 }
+
+MeshAttribute::~MeshAttribute()
+{
+}

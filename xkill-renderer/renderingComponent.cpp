@@ -1,7 +1,7 @@
-#include "renderingComponent.h"
+#include <DirectXMath.h>
 
 #include <xkill-utilities/AttributeType.h>
-#include <DirectXMath.h>
+#include <xkill-utilities/EventManager.h>
 
 #include "fxManagement.h"
 #include "ViewportManagement.h"
@@ -10,11 +10,13 @@
 #include "d3dDebug.h"
 #include "CBManagement.h"
 #include "LightManagement.h"
-#include "objLoaderBasic.h"
-#include "mathBasic.h"
-#include "vertices.h"
+#include <xkill-utilities/MeshVertices.h>
 
-#include <xkill-utilities/EventManager.h>
+//temp
+#include "mesh/MeshComponent.h"
+#include <xkill-utilities/MeshModel.h>
+
+#include "renderingComponent.h"
 
 RenderingComponent::RenderingComponent(
 		HWND windowHandle)
@@ -88,9 +90,20 @@ RenderingComponent::~RenderingComponent()
 
 	//temp
 	SAFE_RELEASE(vertexBuffer_);
+
+	std::vector<MeshAttribute>* allModels; GET_ATTRIBUTES(allModels, MeshAttribute, ATTRIBUTE_MESH);
+	for(unsigned i=0; i<allModels->size(); i++)
+	{
+		MeshAttribute* mesh = &allModels->at(i);
+		MeshModel* model = mesh->mesh;
+
+		delete model;
+		delete mesh;
+	}
 }
 HRESULT RenderingComponent::init()
 {
+	//float* f = new float();
 	HRESULT hr = S_OK;
 
 	if(SUCCEEDED(hr))
@@ -234,7 +247,7 @@ void RenderingComponent::renderToGBuffer(DirectX::XMFLOAT4X4 view,
 	devcon_->IASetVertexBuffers(0, 1, &vertexBuffer_, &stride, &offset);
 	devcon_->IASetInputLayout(fxManagement_->getILDefaultVSPosNormTex());
 	devcon_->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-	devcon_->Draw(vertices_->size(), 0);
+	devcon_->Draw(vertexNum, 0);
 
 	devcon_->VSSetShader(NULL, NULL, 0);
 	devcon_->PSSetShader(NULL, NULL, 0);
@@ -539,19 +552,36 @@ HRESULT RenderingComponent::initVertexBuffer()
 {
 	HRESULT hr = S_OK;
 
-	vertices_ = new std::vector<VertexPosNormTex>();
-	objLoader_ = new ObjLoaderBasic();
-	objLoader_->parseObjectFile("../../xkill-resources/xkill-models/bth.obj", vertices_);
+	MeshComponent component;
+	bool temp = component.init();
+
+	std::vector<VertexPosNormTex> vertices;
+	std::vector<MeshAttribute>* allModels; GET_ATTRIBUTES(allModels, MeshAttribute, ATTRIBUTE_MESH);
+	for(unsigned i=0; i<allModels->size(); i++)
+	{
+		MeshAttribute* mesh = &allModels->at(i);
+		MeshModel* model = mesh->mesh;
+
+		vertices = model->getGeometry().getVertices();
+		vertexNum = vertices.size();
+
+		delete model;
+	}
+	
+
+	//vertices_ = new std::vector<VertexPosNormTex>();
+	//objLoader_ = new ObjLoaderBasic();
+	//objLoader_->parseObjectFile("../../xkill-resources/xkill-models/bth.obj", vertices_);
 
 	D3D11_BUFFER_DESC vbd;
 	vbd.Usage = D3D11_USAGE_DYNAMIC;
-	vbd.ByteWidth = sizeof(VertexPosNormTex) * vertices_->size();
+	vbd.ByteWidth = sizeof(VertexPosNormTex) * vertices.size();
 	vbd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
 	vbd.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
 	vbd.MiscFlags = 0;
 
 	D3D11_SUBRESOURCE_DATA vinitData;
-	vinitData.pSysMem = &vertices_->at(0);
+	vinitData.pSysMem = &vertices.at(0);
 	device_->CreateBuffer(&vbd, &vinitData, &vertexBuffer_);
 	if(FAILED(hr))
 		ERROR_MSG(L"RenderingComponent::initVertexBuffer CreateBuffer failed");

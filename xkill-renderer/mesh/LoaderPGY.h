@@ -1,8 +1,9 @@
 #ifndef XKILL_RENDERER_LOADERPGY_H
 #define XKILL_RENDERER_LOADERPGY_H
 
+#include <xkill-utilities/MeshModel.h>
+
 #include "Loader.h"
-#include "MeshModel.h"
 #include "SpecsPGY.h"
 
 //! MeshLoader with functionality to load .obj-files.
@@ -30,7 +31,7 @@ public:
 	*/
 	bool init();
 
-	const MeshModel getMeshModel();
+	MeshModel* getMeshModel();
 protected:
 private:
 	//! Loads binary .pgy-format.
@@ -40,7 +41,7 @@ private:
 	\sa loadMaterials
 	\sa loadGeometry
 	*/
-	const MeshModel						loadPGY();
+	MeshModel*						loadPGY();
 	//! Loads static size PGYHeader from binary .pgy-format.
 	/*!
 	This header describes the rest of the file, and how to parse it correctly.
@@ -91,7 +92,7 @@ private:
 	/*! \return Read subset. */
 	const MeshSubset					loadSubset();
 
-	MeshModel meshModel_; //!< Resulting model read from .pgy.
+	MeshModel* meshModel_; //!< Resulting model read from .pgy.
 };
 
 #endif //XKILL_RENDERER_LOADERPGY_H

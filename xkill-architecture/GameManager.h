@@ -63,6 +63,11 @@ public:
 
 	bool init(HWND windowHandle)
 	{
+		// Detect memory leaks
+#if defined(DEBUG) | defined(_DEBUG)
+		_CrtSetDbgFlag( _CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF );
+#endif
+
 		entityManager_ = new EntityManager();
 		ENTITYTYPE listOfEntitiesToBeCreated[] =
 		{
@@ -86,21 +91,14 @@ public:
 
 			return false;
 		}
+
+
 		return true;
 	}
 
 	void update(float delta)
 	{
 		componentManager_->update(delta);
-
-		//Event_PlaySound playSound(0);
-		//while(1)
-		//{
-		//	EventManager::getInstance()->sendEvent(&playSound);
-		//	componentManager->update(1.0f);
-		//}
-		//std::cin.ignore();
-
 
 		//
 		// End game

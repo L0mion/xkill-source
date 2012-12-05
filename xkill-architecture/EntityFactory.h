@@ -99,4 +99,14 @@ public:
 		
 		return entity;
 	}
+
+	Entity* createMesh(Event_createMesh* e)
+	{
+		Entity* entity = createEntity();
+
+		MeshAttribute* meshAttribute = AttributeManager::getInstance()->meshAttributes_.createAttribute(entity);
+		meshAttribute->mesh = e->mesh;
+
+		return entity;
+	}
 };

@@ -1,4 +1,4 @@
-#include <SimpleStringSplitter.h>
+#include "SimpleStringSplitter.h"
 
 SimpleStringSplitter::SimpleStringSplitter()
 {

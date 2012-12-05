@@ -1,9 +1,10 @@
 #ifndef XKILL_RENDERER_MTLMATERIAL_H
 #define XKILL_RENDERER_MTLMATERIAL_H
 
-#include <DirectXMath.h>
 #include <vector>
 #include <string>
+
+#include <xkill-utilities/Math.h>
 
 #include "MTLIllum.h"
 
@@ -23,10 +24,10 @@ public:
 	void addIllum(const IlluminationModel im);
 
 	/*sets*/
-	void setAmbientColor(const DirectX::XMFLOAT3 ambientColor);	
-	void setDiffuseColor(const DirectX::XMFLOAT3 diffuseColor);	
-	void setSpecularColor(const DirectX::XMFLOAT3 specularColor);
-	void setTF(const DirectX::XMFLOAT3 tf);
+	void setAmbientColor(const Float3 ambientColor);	
+	void setDiffuseColor(const Float3 diffuseColor);	
+	void setSpecularColor(const Float3 specularColor);
+	void setTF(const Float3 tf);
 	
 	void setSpecularPow(const float specularPow);				
 	void setAlpha(const float alpha);		
@@ -44,10 +45,10 @@ public:
 	/*gets*/
 	const std::string getName();
 
-	const DirectX::XMFLOAT3 getAmbientColor();	
-	const DirectX::XMFLOAT3 getDiffuseColor();	
-	const DirectX::XMFLOAT3 getSpecularColor();		
-	const DirectX::XMFLOAT3 getTF();
+	const Float3 getAmbientColor();	
+	const Float3 getDiffuseColor();	
+	const Float3 getSpecularColor();		
+	const Float3 getTF();
 	
 	const float getSpecularPow();				
 	const float getAlpha();			
@@ -67,10 +68,10 @@ protected:
 private:
 	std::string name_;
 
-	DirectX::XMFLOAT3 ambientColor_;		//!< Ka
-	DirectX::XMFLOAT3 diffuseColor_;		//!< Kd
-	DirectX::XMFLOAT3 specularColor_;		//!< Ks
-	DirectX::XMFLOAT3 tf_;					//!< Tf
+	Float3 ambientColor_;		//!< Ka
+	Float3 diffuseColor_;		//!< Kd
+	Float3 specularColor_;		//!< Ks
+	Float3 tf_;					//!< Tf
 	/*^ Transmission Filter*/
 
 	float specularPow_;						//!< Ns

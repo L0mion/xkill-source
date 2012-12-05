@@ -8,12 +8,6 @@
 #include "Obj.h"
 #include "SimpleStringSplitter.h"
 
-namespace DirectX
-{
-	struct XMFLOAT2;
-	struct XMFLOAT3;
-}
-
 struct VertexPosNormTex;
 
 class ObjFace;
@@ -204,9 +198,9 @@ private:
 	SimpleStringSplitter		sss_;			//!< Helper class used to split strings when reading these from file.
 
 	/*Intermediate vectors to hold data whilst loading .obj*/
-	std::vector<DirectX::XMFLOAT3>	position_;	//!< Spatial attributes read from file.
-	std::vector<DirectX::XMFLOAT3>	normal_;	//!< Normal attributes read from file.
-	std::vector<DirectX::XMFLOAT2>	tex_;		//!< Texture elements read from file.
+	std::vector<Float3>	position_;	//!< Spatial attributes read from file.
+	std::vector<Float3>	normal_;	//!< Normal attributes read from file.
+	std::vector<Float2>	tex_;		//!< Texture elements read from file.
 	std::vector<ObjFace>			faces_;		//!< Utility-vector holding faces read form file to save on memory.
 	std::vector<VertexPosNormTex>	vertices_;	//!< Result: Vertices read from file.
 	std::vector<ObjGroup>			groups_;	//!< Groups read from file.

@@ -4,7 +4,7 @@
 #include <vector>
 
 #include "ObjGroup.h"
-#include "vertices.h"
+#include <xkill-utilities/MeshVertices.h>
 
 //! Describes geometry of an .obj-model.
 /*!

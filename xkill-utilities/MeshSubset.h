@@ -4,12 +4,14 @@
 #include <vector>
 #include <string>
 
+#include "dllUtilities.h"
+
 //! Subset denoting part of the mesh.
 /*!
 Corresponds to a single MeshMaterial.
 \ingroup xkill-mesh
 */
-class MeshSubset
+class DLL_U MeshSubset
 {
 public:
 	//! Does nothing.

@@ -1,13 +1,3 @@
-#include <DirectXMath.h>
-
-#include "vertices.h"
-#include "ObjFace.h"
-#include "ObjGroup.h"
-#include "ObjGeometry.h"
-#include "LoaderMTL.h"
-#include "renderingUtilities.h"
-#include "LoaderObj.h"
-
 LoaderObj::LoaderObj(
 	const std::string filePath,
 	const std::string fileName)
@@ -209,7 +199,7 @@ void LoaderObj::loadPos(const std::vector<std::string>& params)
 
 	//do what with w?
 
-	DirectX::XMFLOAT3 mlPosition(x, y, z);
+	Float3 mlPosition(x, y, z);
 	position_.push_back(mlPosition);
 }
 void LoaderObj::loadNorm(const std::vector<std::string>& params)
@@ -219,7 +209,7 @@ void LoaderObj::loadNorm(const std::vector<std::string>& params)
 	y = (float)::atof(params[OBJ_PARAMS_INDEX_VERTEX_Y].c_str());
 	z = (float)::atof(params[OBJ_PARAMS_INDEX_VERTEX_Z].c_str());
 
-	DirectX::XMFLOAT3 mlNormal(x, y, z);
+	Float3 mlNormal(x, y, z);
 	normal_.push_back(mlNormal);
 }
 void LoaderObj::loadTex(const std::vector<std::string>& params)
@@ -232,7 +222,7 @@ void LoaderObj::loadTex(const std::vector<std::string>& params)
 	if(params.size() > OBJ_PARAMS_NUM_TEX)
 		w = (float)::atof(params[OBJ_PARAMS_INDEX_TEX_W].c_str());
 
-	DirectX::XMFLOAT2 mlTexCoord(u, v);
+	Float2 mlTexCoord(u, v);
 	tex_.push_back(mlTexCoord);
 }
 bool LoaderObj::loadFaces(const std::vector<std::string>& params)

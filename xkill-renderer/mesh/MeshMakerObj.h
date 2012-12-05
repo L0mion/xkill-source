@@ -1,14 +1,12 @@
 #ifndef XKILL_RENDERER_MESHMAKER_H
 #define XKILL_RENDERER_MESHMAKER_H
 
-#include <Windows.h>
-#include <fstream>
 #include <string>
 
-#include "MeshModel.h"
-#include "MeshGeometry.h"
-#include "MeshSubset.h"
-#include "MeshMaterial.h"
+#include <xkill-utilities/MeshModel.h>
+#include <xkill-utilities/MeshGeometry.h>
+#include <xkill-utilities/MeshSubset.h>
+#include <xkill-utilities/MeshMaterial.h>
 
 #include "MTL.h"
 #include "ObjGeometry.h"
@@ -29,16 +27,16 @@ public:
 
 	bool init();
 
-	MeshModel getMesh();
+	MeshModel* getMesh();
 protected:
 private:
 	bool		loadObj();
-	MeshModel	loadPGY();
+	MeshModel*	loadPGY();
 
 	bool existingPGY(std::string pathPGY, std::string fileNamePGY);
 	
-	MeshModel	makeMesh(Obj obj);
-	bool		makePGY(MeshModel model);
+	MeshModel*	makeMesh(Obj obj);
+	bool		makePGY(MeshModel* model);
 	
 	bool loadMTLs();
 	bool loadMTL(std::string fileNameMTL);
@@ -64,7 +62,7 @@ private:
 	std::vector<std::string>	materialID_; //used to locate index of material-type
 
 	/*Result*/
-	MeshModel meshModel_;
+	MeshModel* meshModel_;
 };
 
 #endif //XKILL_RENDERER_MESHMAKER_H
