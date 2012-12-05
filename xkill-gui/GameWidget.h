@@ -80,7 +80,7 @@ public slots:
 	{
 		if(isChecked)
 		{
-			updateTimer->setInterval(1000);
+			updateTimer->setInterval(10);
 		}
 		else
 		{
