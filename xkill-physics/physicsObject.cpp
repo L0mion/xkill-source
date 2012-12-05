@@ -4,6 +4,8 @@
 #include <vector>
 #include <iostream>
 
+#include "CollisionShapeManager.h"
+
 PhysicsObject::PhysicsObject()
 {
 	rigidBody_ = nullptr;
@@ -47,6 +49,7 @@ void PhysicsObject::preStep(PhysicsAttribute* physicsAttribute)
 	btQuaternion rotation;
 	btVector3 linearVelocity;
 	btVector3 angularVelocity;
+	btCollisionShape* collisionShape;
 	SpatialAttribute* spatialAttribute = ATTRIBUTE_CAST(SpatialAttribute,spatialAttribute,physicsAttribute);
 	PositionAttribute* positionAttribute = ATTRIBUTE_CAST(PositionAttribute,positionAttribute,spatialAttribute);
 	
@@ -71,6 +74,7 @@ void PhysicsObject::preStep(PhysicsAttribute* physicsAttribute)
 	angularVelocity = btVector3(physicsAttribute->angularVelocity.x,
 							    physicsAttribute->angularVelocity.y,
 							    physicsAttribute->angularVelocity.z);
+	collisionShape = CollisionShapeManager::getInstance()->getCollisionShape(physicsAttribute->collisionShapeIndex);
 
 	btVector3 gravity(0,0,0);
 	movement_.setY(linearVelocity.y());
@@ -80,6 +84,7 @@ void PhysicsObject::preStep(PhysicsAttribute* physicsAttribute)
 	rigidBody_->setWorldTransform(btTransform(rotation,position));
 	rigidBody_->setLinearVelocity(linearVelocity);
 	rigidBody_->setAngularVelocity(angularVelocity);
+	rigidBody_->setCollisionShape(collisionShape);
 	rigidBody_->setMassProps(physicsAttribute->mass,btVector3(0,0,0));
 	rigidBody_->setGravity(gravity+forces_);
 	rigidBody_->activate(true);

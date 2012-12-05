@@ -55,3 +55,9 @@ void CollisionShapeManager::createConvexHull(float* verticeData,unsigned int num
 	}
 	collisionShapes_.push_back(convexShape);
 }
+
+CollisionShapeManager* CollisionShapeManager::getInstance()
+{
+	static CollisionShapeManager instance;
+	return &instance;
+}

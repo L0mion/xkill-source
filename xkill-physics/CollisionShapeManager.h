@@ -13,9 +13,11 @@ class CollisionShapeManager
 {
 private:
 	btAlignedObjectArray<btCollisionShape*> collisionShapes_; //!< An vector for holding all collision shapes
-public:
 	//! Creates a empty CollisionShapeManager
 	CollisionShapeManager();
+public:
+	
+	
 	//! Destroys the CollisionShapeManager and all collisionShapes within
 	~CollisionShapeManager();
 	//! Get a pointer to a specific CollisionShape
@@ -29,6 +31,8 @@ public:
 	\param numVertices The number of vertices sent in
 	*/
 	void createConvexHull(float* verticeData,unsigned int numVertices);
+	//! Gets a singletoned CollisionShapeManager
+	static CollisionShapeManager* getInstance();
 };
 
 #endif //XKILL_PHYSICS_COLLISIONSHAPEMANAGER

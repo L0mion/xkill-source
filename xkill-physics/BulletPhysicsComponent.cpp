@@ -58,7 +58,7 @@ bool BulletPhysicsComponent::init()
 	dispatcher_ = new btCollisionDispatcher(collisionConfiguration_);
 	solver_ = new btSequentialImpulseConstraintSolver;
 	dynamicsWorld_ = new btDiscreteDynamicsWorld(dispatcher_,broadphase_,solver_,collisionConfiguration_);
-	collisionShapeManager_ = new CollisionShapeManager;
+	collisionShapeManager_ = CollisionShapeManager::getInstance();
 
 	dynamicsWorld_->setGravity(btVector3(0,0,0));
 
