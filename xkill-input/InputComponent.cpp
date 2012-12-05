@@ -74,8 +74,11 @@ void InputComponent::handleInput(float delta)
 		if(nrAxes >= 4)													   
 			inputAttributes_->at(i).rotation.y += state.axes[3].GetValue();// * delta;
 
-		//Projectile test
-		if(state.buttons[0].isReleased())													   
-			inputAttributes_->at(i).fire = true;
+		if(state.buttons.size() >= 1)
+		{
+			//Projectile test
+			if(state.buttons[0].isReleased())													   
+				inputAttributes_->at(i).fire = true;
+		}
 	}
 }
