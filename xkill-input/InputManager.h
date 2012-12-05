@@ -53,7 +53,8 @@ public:
 
 	struct EnumDevicesStruct
 	{
-		std::vector<GUID> deviceGUIDs;
+		std::vector<GUID> deviceInstanceGUIDs;
+		std::vector<GUID> deviceProductGUIDs;
 		std::vector<std::string> deviceNames;
 	};
 
@@ -86,7 +87,7 @@ public:
 	*/
 	void Update(float deltaTime);
 
-	InputDevice* GetDevice(unsigned int deviceIndex);
+	InputDevice* GetDevice(unsigned int playerID);
 	
 	//! Generates a string with the states of all devices
 	std::string GetInputInformationString();
@@ -123,7 +124,9 @@ private:
 	\param guid The GUID to the device to be added
 	\param name The name of the device to be added
 	*/
-	bool addNewDevice(HWND hWindow, GUID guid, std::string name);
+	bool addNewDevice(HWND hWindow, GUID instanceGUID, GUID productGUID, std::string name);
+
+	int checkForNewXInputDevices();
 
 	//! Handle input
 	/*!

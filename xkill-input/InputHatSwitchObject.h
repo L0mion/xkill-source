@@ -24,6 +24,9 @@ public:
 	bool buttonDown(int button);
 	bool buttonReleased(int button);
 
+	virtual float getValueFloat() {return 0.0f;};
+	virtual bool getValueBool() {return false;};
+
 private:
 	bool buttonStates[4];
 	bool prevButtonStates[4];

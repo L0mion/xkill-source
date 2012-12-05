@@ -35,6 +35,16 @@ float InputAxisObject::GetValue()
 	return value_;
 }
 
+float InputAxisObject::getValueFloat()
+{
+	return value_;
+}
+
+bool InputAxisObject::getValueBool()
+{
+	return (std::abs(value_) >= 0.9f);
+}
+
 InputObject::InputObjectType InputAxisObject::GetType()
 {
 	return AXIS_OBJECT;

@@ -1,7 +1,7 @@
 #include "DirectInputMouse.h"
 
-DirectInputMouse::DirectInputMouse(LPDIRECTINPUTDEVICE8 device, GUID deviceGUID, std::string name) : 
-	DirectInputDevice(device, deviceGUID, name)
+DirectInputMouse::DirectInputMouse(LPDIRECTINPUTDEVICE8 device, GUID deviceGUID, std::string name, unsigned int playerID) : 
+	DirectInputDevice(device, deviceGUID, name, playerID)
 {
 	hasFF_ = false;
 }
@@ -20,7 +20,7 @@ InputDevice::InputDeviceType DirectInputMouse::GetType()
 	return DIRECT_INPUT_MOUSE;
 }
 
-void DirectInputMouse::Init(HWND hWindow)
+bool DirectInputMouse::Init(HWND hWindow)
 {
 	HRESULT result;
 
@@ -28,18 +28,20 @@ void DirectInputMouse::Init(HWND hWindow)
 	//enumObjectsStruct.device = device_;
 	result = device_->EnumObjects(EnumObjectsCallback, &enumObjectsStruct, DIDFT_ALL);
 	if(FAILED(result))
-		return;
+		return false;
 
 	result = device_->SetCooperativeLevel(hWindow, DISCL_FOREGROUND | DISCL_EXCLUSIVE);
 	if(FAILED(result))
-		return;
+		return false;
 
 	result = device_->SetDataFormat(&c_dfDIMouse2);
 	if(FAILED(result))
-		return;
+		return false;
 
 	createInputLayout();
 	createInputObjectsFromLayout();
+
+	return true;
 }
 
 void DirectInputMouse::updateState()

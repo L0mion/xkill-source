@@ -1,7 +1,7 @@
 #include "XInputDevice.h"
 
-XInputDevice::XInputDevice(int deviceNr, GUID deviceGUID, std::string name) : 
-	InputDevice(deviceGUID, name)
+XInputDevice::XInputDevice(int deviceNr, GUID deviceGUID, std::string name, unsigned int playerID) : 
+	InputDevice(deviceGUID, name, playerID)
 {
 	deviceNr_ = deviceNr;
 	rightFFMotor_ = 0xFFFF;
@@ -112,6 +112,9 @@ void XInputDevice::createInputObjectsFromLayout()
 {
 	for(int i = 0; i < inputLayout_.nrOfAxes; i++)
 		axes_.push_back(InputAxisObject(-0x7FFF, 0x7FFF));
+
+	if(axes_.size() >= 4)
+		axes_[3].SetInverted(true);
 	
 	for(int i = 0; i < inputLayout_.nrOfButtons; i++)
 		buttons_.push_back(InputButtonObject());

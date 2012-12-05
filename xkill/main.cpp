@@ -54,7 +54,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	SetStdHandle(STD_INPUT_HANDLE |STD_OUTPUT_HANDLE, window->getWindowHandle());
 
 	//GameManager gm;
-	//gm.init(window->getWindowHandle(),screenWidth,screenHeight);
+	//gm.init(window->getWindowHandle(),window->getWindowHandle(),screenWidth,screenHeight);
 	
 	while(window->getIsActive())
 	{
