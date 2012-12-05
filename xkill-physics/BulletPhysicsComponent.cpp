@@ -91,7 +91,7 @@ void BulletPhysicsComponent::onUpdate(float delta)
 {
 	for(unsigned int i = 0; i < inputAttributes_->size(); i++)
 	{
-		if(i < physicsObjects_->size())
+		if(i < static_cast<unsigned int>(physicsObjects_->size()))
 			physicsObjects_->at(inputAttributes_->at(i).physicsAttribute.index)->input(&inputAttributes_->at(i),delta);
 	}
 	//Checks if new physiscs attributes were created since last call to this function
@@ -100,7 +100,7 @@ void BulletPhysicsComponent::onUpdate(float delta)
 		physicsObjects_->push_back(new PhysicsObject());
 	}
 	//Synchronize the internal represenation of physics objects with the physics attributes
-	for(unsigned int i = 0; i < physicsObjects_->size(); i++)
+	for(unsigned int i = 0; i < static_cast<unsigned int>(physicsObjects_->size()); i++)
 	{
 		if(physicsAttributes_->at(i).alive)
 		{
@@ -124,7 +124,7 @@ void BulletPhysicsComponent::onUpdate(float delta)
 	dynamicsWorld_->stepSimulation(delta,10);
 
 	//Copy the physics simulation result to the physics attributes
-	for(unsigned int i = 0; i < physicsObjects_->size(); i++)
+	for(unsigned int i = 0; i < static_cast<unsigned int>(physicsObjects_->size()); i++)
 	{
 		if(physicsAttributes_->at(i).alive && physicsAttributes_->at(i).added)
 		{

@@ -16,7 +16,7 @@ CollisionShapeManager::~CollisionShapeManager()
 
 btCollisionShape* CollisionShapeManager::getCollisionShape(unsigned int index)
 {
-	if(index < collisionShapes_.size())
+	if(index < static_cast<unsigned int>(collisionShapes_.size()))
 	{
 		return collisionShapes_.at(index);
 	}
@@ -29,7 +29,7 @@ btCollisionShape* CollisionShapeManager::getCollisionShape(unsigned int index)
 void CollisionShapeManager::createConvexHull(float* verticeData,unsigned int numVertices)
 {
 	btTriangleMesh trimesh;
-	for(int i=0;i<numVertices;i+=9)
+	for(unsigned int i=0;i<numVertices;i+=9)
 	{
 		trimesh.addTriangle(btVector3(verticeData[i],   verticeData[i+1], verticeData[i+2]),
 						    btVector3(verticeData[i+3], verticeData[i+4], verticeData[i+5]),
