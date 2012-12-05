@@ -2,6 +2,8 @@
 
 #include <xkill-utilities/AttributeType.h>
 #include <xkill-utilities/EventManager.h>
+#include <xkill-utilities/MeshVertices.h>
+#include <xkill-utilities/MeshModel.h>
 
 #include "fxManagement.h"
 #include "ViewportManagement.h"
@@ -10,11 +12,6 @@
 #include "d3dDebug.h"
 #include "CBManagement.h"
 #include "LightManagement.h"
-#include <xkill-utilities/MeshVertices.h>
-
-//temp
-#include <xkill-io/IOComponent.h>
-#include <xkill-utilities/MeshModel.h>
 
 #include "renderingComponent.h"
 
@@ -91,15 +88,15 @@ RenderingComponent::~RenderingComponent()
 	//temp
 	SAFE_RELEASE(vertexBuffer_);
 
-	std::vector<MeshAttribute>* allModels; GET_ATTRIBUTES(allModels, MeshAttribute, ATTRIBUTE_MESH);
-	for(unsigned i=0; i<allModels->size(); i++)
-	{
-		MeshAttribute* mesh = &allModels->at(i);
-		MeshModel* model = mesh->mesh;
-
-		delete model;
-		delete mesh;
-	}
+	//std::vector<MeshAttribute>* allModels; GET_ATTRIBUTES(allModels, MeshAttribute, ATTRIBUTE_MESH);
+	//for(unsigned i=0; i<allModels->size(); i++)
+	//{
+	//	MeshAttribute* mesh = &allModels->at(i);
+	//	MeshModel* model = mesh->mesh;
+	//
+	//	delete model;
+	//	delete mesh;
+	//}
 }
 HRESULT RenderingComponent::init()
 {
@@ -551,9 +548,6 @@ HRESULT RenderingComponent::initDebug()
 HRESULT RenderingComponent::initVertexBuffer()
 {
 	HRESULT hr = S_OK;
-
-	IOComponent component;
-	bool temp = component.init();
 
 	std::vector<VertexPosNormTex> vertices;
 	std::vector<MeshAttribute>* allModels; GET_ATTRIBUTES(allModels, MeshAttribute, ATTRIBUTE_MESH);

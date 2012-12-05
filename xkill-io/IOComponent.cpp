@@ -33,3 +33,7 @@ bool IOComponent::init()
 void IOComponent::reset()
 {
 }
+
+void IOComponent::onEvent(Event* e)
+{
+}
