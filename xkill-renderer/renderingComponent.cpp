@@ -7,6 +7,7 @@
 #include "fxManagement.h"
 #include "ViewportManagement.h"
 #include "SSManagement.h"
+#include "RSManagement.h"
 #include "gBuffer.h"
 #include "renderingUtilities.h"
 #include "d3dDebug.h"
@@ -40,6 +41,7 @@ RenderingComponent::RenderingComponent(HWND windowHandle)
 	lightManagement_	= nullptr;
 	viewportManagement_ = nullptr;
 	ssManagement_		= nullptr;
+	rsManagement_		= nullptr;
 
 	d3dDebug_	= nullptr;
 	
@@ -59,6 +61,7 @@ RenderingComponent::~RenderingComponent()
 	SAFE_DELETE(lightManagement_);
 	SAFE_DELETE(viewportManagement_);
 	SAFE_DELETE(ssManagement_);
+	SAFE_DELETE(rsManagement_);
 	
 	//d3dDebug_->reportLiveDeviceObjects();
 	SAFE_DELETE(d3dDebug_);
@@ -70,6 +73,35 @@ RenderingComponent::~RenderingComponent()
 	SAFE_RELEASE(vertexBuffer_);
 	SAFE_DELETE(objLoader_);
 }
+
+void RenderingComponent::reset()
+{
+	if(d3dManagement_)
+		d3dManagement_->reset();
+	if(fxManagement_)
+		fxManagement_->reset();
+	if(cbManagement_)
+		cbManagement_->reset();
+	if(lightManagement_)
+		lightManagement_->reset();
+	if(viewportManagement_)
+		viewportManagement_->reset();
+	if(ssManagement_)
+		ssManagement_->reset();
+	if(rsManagement_)
+		rsManagement_->reset();
+
+	for(unsigned int i = 0; i < GBUFFERID_NUM_BUFFERS; i++)
+		if(gBuffers_[i])
+			gBuffers_[i]->reset();
+	
+
+	//temp
+	SAFE_RELEASE(vertexBuffer_);
+
+	EventManager::getInstance();
+}
+
 HRESULT RenderingComponent::init()
 {
 	HRESULT hr = S_OK;
@@ -86,6 +118,8 @@ HRESULT RenderingComponent::init()
 		hr = initViewport();
 	if(SUCCEEDED(hr))
 		hr = initSSManagement();
+	if(SUCCEEDED(hr))
+		hr = initRSManagement();
 //	if(SUCCEEDED(hr))
 //		hr = initDebug();
 	if(SUCCEEDED(hr))
@@ -96,31 +130,6 @@ HRESULT RenderingComponent::init()
 		hr = initVertexBuffer();
 
 	return hr;
-}
-void RenderingComponent::reset()
-{
-	if(d3dManagement_)
-		d3dManagement_->reset();
-	if(fxManagement_)
-		fxManagement_->reset();
-	if(cbManagement_)
-		cbManagement_->reset();
-	if(lightManagement_)
-		lightManagement_->reset();
-	if(viewportManagement_)
-		viewportManagement_->reset();
-	if(ssManagement_)
-		ssManagement_->reset();
-
-	for(unsigned int i = 0; i < GBUFFERID_NUM_BUFFERS; i++)
-		if(gBuffers_[i])
-			gBuffers_[i]->reset();
-	
-
-	//temp
-	SAFE_RELEASE(vertexBuffer_);
-
-	EventManager::getInstance();
 }
 
 void RenderingComponent::onUpdate(float delta)
@@ -146,12 +155,6 @@ void RenderingComponent::onUpdate(float delta)
 	
 	renderToBackBuffer();
 }
-
-void RenderingComponent::render(DirectX::XMFLOAT4X4 view, DirectX::XMFLOAT4X4 projection)
-{
-	//renderToGBuffer(view, projection);
-	renderToBackBuffer();
-}
 void RenderingComponent::renderToGBuffer(DirectX::XMFLOAT4X4 view,
 										 DirectX::XMFLOAT4X4 viewInverse,
 										 DirectX::XMFLOAT4X4 projection,
@@ -162,7 +165,7 @@ void RenderingComponent::renderToGBuffer(DirectX::XMFLOAT4X4 view,
 	d3dManagement_->getDeviceContext()->VSSetShader(fxManagement_->getDefaultVS()->getVertexShader(), nullptr, 0);
 	d3dManagement_->getDeviceContext()->PSSetShader(fxManagement_->getDefaultPS()->getPixelShader(), nullptr, 0);
 	ssManagement_->setPS(d3dManagement_->getDeviceContext(), SS_ID_DEFAULT, 0);
-	d3dManagement_->setRSDefault();
+	rsManagement_->setRS(d3dManagement_->getDeviceContext(), RS_ID_DEFAULT);
 
 	gBufferRenderSetRenderTargets();
 	
@@ -383,6 +386,15 @@ HRESULT RenderingComponent::initSSManagement()
 
 	ssManagement_ = new SSManagement();
 	hr = ssManagement_->init(d3dManagement_->getDevice());
+
+	return hr;
+}
+HRESULT RenderingComponent::initRSManagement()
+{
+	HRESULT hr = S_OK;
+
+	rsManagement_ = new RSManagement();
+	rsManagement_->init(d3dManagement_->getDevice());
 
 	return hr;
 }

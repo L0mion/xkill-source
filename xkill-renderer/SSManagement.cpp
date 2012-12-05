@@ -77,7 +77,7 @@ HRESULT SSManagement::initSSDefault(ID3D11Device* device)
 
 	hr = device->CreateSamplerState(&sampDesc, &ssDefault_);
 	if(FAILED(hr))
-		ERROR_MSG(L"RenderingComponent::initSSDefault CreateSamplerState failed");
+		ERROR_MSG(L"SSManagement::initSSDefault CreateSamplerState failed");
 
 	return hr;
 }

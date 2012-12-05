@@ -18,6 +18,7 @@ class FXManagement;
 class CBManagement;
 class ViewportManagement;
 class SSManagement;
+class RSManagement;
 class GBuffer;
 class D3DDebug;
 class ObjLoaderBasic;
@@ -62,7 +63,9 @@ public:
 		HWND windowHandle);
 	//! Releases all memory and returns to default state.
 	~RenderingComponent();
-
+	//! Resets RenderingComponent to default state.
+	void reset();
+	
 	//! Initializes RenderingComponent's members and prepares render.
 	/*!	\return First encountered error.
 		\sa initDeviceAndSwapChain
@@ -78,24 +81,13 @@ public:
 		\sa initVertexBuffer
 	*/
 	HRESULT init();
-	//! Resets RenderingComponent to default state.
-	void reset();
 	//! Runs a frame for RenderingComponent.
 	void onUpdate(float delta);
 	//! Receives events for RenderingComponent.
 	void onEvent(Event* e);
-	
 
 private:
 	
-	//! Main render-method of RenderingComponent.
-	/*!
-	\param view View-matrix from camera.
-	\param projection Projection-matrix from camera.
-	\sa renderToGBuffer
-	\sa renderToBackBuffer
-	*/
-	void render(DirectX::XMFLOAT4X4 view, DirectX::XMFLOAT4X4 projection);
 	//! Renders to g-buffers, storing albedo and normals till later.
 	/*!
 	\param view View-matrix from camera.
@@ -169,6 +161,12 @@ private:
 	\sa SSManagement
 	*/
 	HRESULT initSSManagement();
+	//! Creates a RSManaegement object that will maintain rasterizer states.
+	/*!
+	\return Any error encountered during initialization.
+	\sa RSManagement
+	*/
+	HRESULT initRSManagement();
 	//! Creates GBuffer-objects for each desired g-buffer.
 	/*!
 	\return Any error encountered during initialization.
@@ -200,6 +198,7 @@ private:
 	LightManagement*	lightManagement_;					//!< Maintaining lights.
 	ViewportManagement* viewportManagement_;				//!< Maintaining viewports.
 	SSManagement*		ssManagement_;						//!< Maintaining sampler states.
+	RSManagement*		rsManagement_;						//!< Maintaining rasterizer states.
 	D3DDebug*			d3dDebug_;							//!< Used for detecting live COM-objects.
 	GBuffer*			gBuffers_[GBUFFERID_NUM_BUFFERS];	//!< Containing data for deferred rendering.
 

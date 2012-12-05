@@ -25,7 +25,6 @@ public:
 
 	virtual void reset();
 
-	void setRSDefault();
 	void setUAVBackBufferCS();
 
 	void present();
@@ -74,11 +73,6 @@ private:
 	\return Any error encountered during initialization.
 	*/
 	HRESULT initDepthBuffer();
-	//! Creates rasterizer-state.
-	/*!
-	\return Any error encountered during initialization.
-	*/
-	HRESULT initRSDefault();
 	//! Translates the initiated feature-level to string which may be presented in window.
 	/*!
 	\return The feature-level if known or "Default" otherwize.
@@ -99,8 +93,6 @@ private:
 	
 	ID3D11Texture2D*			texBackBuffer_;						//!< Contains the final image.
 	ID3D11Texture2D*			texDepthBuffer_;					//!< Saves the depth of each rendered pixel.
-
-	ID3D11RasterizerState*		rsDefault_;							//!< Defines settings for the rasterizer.
 };
 
 #endif //XKILL_RENDERER_D3DMANAGEMENT_H
