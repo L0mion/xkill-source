@@ -3,6 +3,10 @@
 
 #include <DirectXMath.h>
 
+//! Struct describing a constant buffer.
+/*!
+\ingroup xkill-renderer
+*/
 struct CBFrameDesc
 {
 	DirectX::XMFLOAT4X4 finalMatrix;
@@ -15,6 +19,22 @@ struct CBFrameDesc
 };
 static const unsigned int CB_FRAME_DESC_SIZE = 336;
 
+//! Struct describing a constant buffer.
+/*!
+\ingroup xkill-renderer
+*/
+struct CBObjectDesc
+{
+	DirectX::XMFLOAT4X4 finalMatrix;
+	DirectX::XMFLOAT4X4 worldMatrix;
+	DirectX::XMFLOAT4X4 worldMatrixInverse;
+};
+static const unsigned int CB_OBJECT_DESC_SIZE = 192;
+
+//! Struct describing a constant buffer.
+/*!
+\ingroup xkill-renderer
+*/
 struct CBInstanceDesc
 {
 	unsigned int screenWidth;
