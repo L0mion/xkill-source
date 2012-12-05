@@ -14,7 +14,6 @@ PhysicsObject::PhysicsObject()
 PhysicsObject::~PhysicsObject()
 {
 	delete rigidBody_->getMotionState();
-	delete rigidBody_->getCollisionShape();
 	delete rigidBody_;
 	rigidBody_ = nullptr;
 }
@@ -76,7 +75,7 @@ void PhysicsObject::preStep(PhysicsAttribute* physicsAttribute)
 							    physicsAttribute->angularVelocity.z);
 	collisionShape = CollisionShapeManager::getInstance()->getCollisionShape(physicsAttribute->collisionShapeIndex);
 
-	btVector3 gravity(0,0,0);
+	btVector3 gravity(0,-10,0);
 	movement_.setY(linearVelocity.y());
 	linearVelocity = movement_;
 	forces_ = linearVelocity;

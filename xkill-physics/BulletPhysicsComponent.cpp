@@ -37,12 +37,13 @@ BulletPhysicsComponent::~BulletPhysicsComponent()
 	dynamicsWorld_->removeRigidBody(floor_);
 	delete floor_;
 
+
     delete dynamicsWorld_;
     delete solver_;
     delete collisionConfiguration_;
     delete dispatcher_;
     delete broadphase_;
-	delete collisionShapeManager_;
+	collisionShapeManager_->clean();
 }
 
 bool BulletPhysicsComponent::init()

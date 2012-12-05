@@ -8,11 +8,7 @@ CollisionShapeManager::CollisionShapeManager()
 
 CollisionShapeManager::~CollisionShapeManager()
 {
-	while(collisionShapes_.size()!=0)
-	{
-		delete collisionShapes_.at(collisionShapes_.size()-1);
-		collisionShapes_.pop_back();
-	}
+	clean();
 }
 
 btCollisionShape* CollisionShapeManager::getCollisionShape(unsigned int index)
@@ -61,3 +57,12 @@ CollisionShapeManager* CollisionShapeManager::getInstance()
 	static CollisionShapeManager instance;
 	return &instance;
 }
+
+void CollisionShapeManager::clean()
+{
+	while(collisionShapes_.size()!=0)
+	{
+		delete collisionShapes_.at(collisionShapes_.size()-1);
+		collisionShapes_.pop_back();
+	}
+};

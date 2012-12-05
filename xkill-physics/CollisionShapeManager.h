@@ -20,6 +20,8 @@ public:
 	
 	//! Destroys the CollisionShapeManager and all collisionShapes within
 	~CollisionShapeManager();
+	//! Destroys all collisionshapes within
+	void clean();
 	//! Get a pointer to a specific CollisionShape
 	/*
 	\param index The index of the desired CollisionShape
