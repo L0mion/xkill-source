@@ -7,7 +7,9 @@ cbuffer cbPerFrame : register (b0)
 	float4x4	view;
 	float4x4	viewInverse;
 	float4x4	projection;
+	float4x4	projectionInverse;
 	float3		eyePosition;
+	uint		numLights;
 }
 
 cbuffer cbPerInstance : register (b1)

@@ -170,11 +170,8 @@ void RenderingComponent::onUpdate(float delta)
 		DirectX::XMFLOAT4X4 view((float*)&cameraAttributes_->at(i).mat_view);
 		DirectX::XMFLOAT4X4 projection((float*)&cameraAttributes_->at(i).mat_projection);
 
-		DirectX::CXMMATRIX	cxmView = DirectX::XMLoadFloat4x4(&view);
-		DirectX::XMVECTOR	vDeterminant = DirectX::XMMatrixDeterminant(cxmView);
-		DirectX::XMMATRIX	xmViewInverse = DirectX::XMMatrixInverse(&vDeterminant, cxmView);
-		DirectX::XMFLOAT4X4 viewInverse;
-		DirectX::XMStoreFloat4x4(&viewInverse, xmViewInverse);
+		DirectX::XMFLOAT4X4 viewInverse			= calculateMatrixInverse(view);
+		DirectX::XMFLOAT4X4 projectionInverse	= calculateMatrixInverse(projection);
 		
 		SpatialAttribute*	spatialAttribute = static_cast<SpatialAttribute*>(cameraAttributes_->at(i).spatialAttribute.host);
 		PositionAttribute*	positionAttribute = static_cast<PositionAttribute*>(spatialAttribute->positionAttribute.host);
@@ -182,7 +179,7 @@ void RenderingComponent::onUpdate(float delta)
 		//DirectX::XMFLOAT3 eyePosition(0.0f, 0.0f, -50.0f);
 
 		setViewport(i);
-		renderToGBuffer(view, viewInverse, projection, eyePosition);
+		renderToGBuffer(view, viewInverse, projection, projectionInverse, eyePosition);
 	}
 	
 	renderToBackBuffer();
@@ -196,51 +193,38 @@ void RenderingComponent::render(DirectX::XMFLOAT4X4 view, DirectX::XMFLOAT4X4 pr
 void RenderingComponent::renderToGBuffer(DirectX::XMFLOAT4X4 view,
 										 DirectX::XMFLOAT4X4 viewInverse,
 										 DirectX::XMFLOAT4X4 projection,
+										 DirectX::XMFLOAT4X4 projectionInverse,
 										 DirectX::XMFLOAT3	eyePosition)
 {
-	FLOAT black[]	= {0.0f, 0.0f, 0.0f, 1.0f };
-	FLOAT red[]		= {1.0f, 0.0f, 0.0f, 1.0f };
-	FLOAT green[]	= {0.0f, 1.0f, 0.0f, 1.0f };
-	FLOAT blue[]	= {0.0f, 0.0f, 1.0f, 1.0f };
 
 	devcon_->VSSetShader(fxManagement_->getDefaultVS()->getVertexShader(), nullptr, 0);
 	devcon_->PSSetShader(fxManagement_->getDefaultPS()->getPixelShader(), nullptr, 0);
 	devcon_->PSSetSamplers(0, 1, &ssDefault_);
-
-	DirectX::CXMMATRIX mView		= DirectX::XMLoadFloat4x4(&view);
-	DirectX::CXMMATRIX mProjection	= DirectX::XMLoadFloat4x4(&projection);
-	DirectX::XMMATRIX mViewProj		= DirectX::XMMatrixMultiply(mView, mProjection);
-	DirectX::XMFLOAT4X4 viewProj;
-	DirectX::XMStoreFloat4x4(&viewProj, mViewProj);
-
-	cbManagement_->getCBPerFrame()->update(devcon_, viewProj, view, viewInverse, projection, eyePosition);
-	cbManagement_->getCBPerFrame()->vsSet(devcon_);
-
-	ID3D11RenderTargetView* renderTargets[GBUFFERID_NUM_BUFFERS];
-	for(int i=0; i<GBUFFERID_NUM_BUFFERS; i++)
-		renderTargets[i] = gBuffers_[i]->getRTV();
-	devcon_->OMSetRenderTargets(GBUFFERID_NUM_BUFFERS, renderTargets, dsvDepthBuffer_);
-
-	devcon_->ClearDepthStencilView(dsvDepthBuffer_, D3D11_CLEAR_DEPTH, 1.0f, 0);
 	devcon_->RSSetState(rsDefault_);
+
+	gBufferRenderSetRenderTargets();
 	
-	UINT stride = sizeof(VertexPosNormTex);
-	UINT offset = 0;
-	devcon_->IASetVertexBuffers(0, 1, &vertexBuffer_, &stride, &offset);
-	devcon_->IASetInputLayout(fxManagement_->getILDefaultVSPosNormTex());
-	devcon_->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-	devcon_->Draw(vertices_->size(), 0);
+	devcon_->ClearDepthStencilView(dsvDepthBuffer_, D3D11_CLEAR_DEPTH, 1.0f, 0);
 
-	devcon_->VSSetShader(NULL, NULL, 0);
-	devcon_->PSSetShader(NULL, NULL, 0);
-	for(int i=0; i<GBUFFERID_NUM_BUFFERS; i++)
-		renderTargets[i] = nullptr;
-	devcon_->OMSetRenderTargets(GBUFFERID_NUM_BUFFERS, renderTargets, nullptr);
-	devcon_->PSSetSamplers(0, 0, nullptr);
-	devcon_->IASetInputLayout(nullptr);
-	devcon_->RSSetState(nullptr);
+	// Fetch attributes
+	std::vector<RenderAttribute>* allRender;		GET_ATTRIBUTES(allRender, RenderAttribute, ATTRIBUTE_RENDER);
+	std::vector<SpatialAttribute>* allSpatial;		GET_ATTRIBUTES(allSpatial, SpatialAttribute, ATTRIBUTE_SPATIAL);
+	std::vector<PositionAttribute>* allPosition;	GET_ATTRIBUTES(allPosition, PositionAttribute, ATTRIBUTE_POSITION);
+	
+	for(unsigned int i=0; i<renderAttributes_->size(); i++)
+	{
+		DirectX::XMFLOAT4X4 finalMatrix = calculateFinalMatrix(view, projection, allSpatial->at(i), allPosition->at(i),  i);
+		gBufferRenderUpdateConstantBuffers(finalMatrix, view, viewInverse, projection, projectionInverse, eyePosition);
 
+		UINT stride = sizeof(VertexPosNormTex);
+		UINT offset = 0;
+		devcon_->IASetVertexBuffers(0, 1, &vertexBuffer_, &stride, &offset);
+		devcon_->IASetInputLayout(fxManagement_->getILDefaultVSPosNormTex());
+		devcon_->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+		devcon_->Draw(vertices_->size(), 0);
+	}
 
+	gBufferRenderClean();
 }
 void RenderingComponent::renderToBackBuffer()
 {
@@ -248,12 +232,13 @@ void RenderingComponent::renderToBackBuffer()
 	FLOAT red[]		= {1.0f, 0.0f, 0.0f, 1.0f };
 	FLOAT green[]	= {0.0f, 1.0f, 0.0f, 1.0f };
 	FLOAT blue[]	= {0.0f, 0.0f, 1.0f, 1.0f };
-	
-	cbManagement_->getCBPerInstance()->update(devcon_, screenWidth_, screenHeight_, 32, 32);
-	cbManagement_->getCBPerInstance()->csSet(devcon_);
 
 	ID3D11UnorderedAccessView* uav[] = { uavBackBuffer_ };
 	devcon_->CSSetUnorderedAccessViews(0, 1, uav, nullptr);
+
+	cbManagement_->csSet(CB_FRAME_INDEX, 0, devcon_);
+	cbManagement_->csSet(CB_INSTANCE_INDEX, 1, devcon_);
+	cbManagement_->updateCBInstance(devcon_, screenWidth_, screenHeight_);
 
 	lightManagement_->setLightSRVCS(devcon_, 2);
 
@@ -293,6 +278,94 @@ void RenderingComponent::clearGBuffers()
 	
 	devcon_->ClearRenderTargetView(renderTargets[GBUFFERID_ALBEDO], black);
 	devcon_->ClearRenderTargetView(renderTargets[GBUFFERID_NORMAL], black);
+}
+
+void RenderingComponent::gBufferRenderUpdateConstantBuffers(DirectX::XMFLOAT4X4 finalMatrix,
+															DirectX::XMFLOAT4X4 viewMatrix,
+															DirectX::XMFLOAT4X4 viewInverseMatrix,
+															DirectX::XMFLOAT4X4 projectionMatrix,
+															DirectX::XMFLOAT4X4 projectionInverseMatrix,
+															DirectX::XMFLOAT3	eyePosition)
+{
+	cbManagement_->vsSet(CB_FRAME_INDEX, 0, devcon_);
+	cbManagement_->updateCBFrame(devcon_,
+								 finalMatrix,
+								 viewMatrix,
+								 viewInverseMatrix,
+								 projectionMatrix,
+								 projectionInverseMatrix,
+								 eyePosition, 
+								 lightManagement_->getNumLights());
+}
+void RenderingComponent::gBufferRenderClean()
+{
+	ID3D11RenderTargetView* renderTargets[GBUFFERID_NUM_BUFFERS];
+	for(int i=0; i<GBUFFERID_NUM_BUFFERS; i++)
+		renderTargets[i] = gBuffers_[i]->getRTV();
+
+	devcon_->VSSetShader(NULL, NULL, 0);
+	devcon_->PSSetShader(NULL, NULL, 0);
+	
+	for(int i=0; i<GBUFFERID_NUM_BUFFERS; i++)
+		renderTargets[i] = nullptr;
+	
+	devcon_->OMSetRenderTargets(GBUFFERID_NUM_BUFFERS, renderTargets, nullptr);
+	devcon_->PSSetSamplers(0, 0, nullptr);
+	devcon_->IASetInputLayout(nullptr);
+	devcon_->RSSetState(nullptr);
+}
+void RenderingComponent::gBufferRenderSetRenderTargets()
+{
+	ID3D11RenderTargetView* renderTargets[GBUFFERID_NUM_BUFFERS];
+	for(int i=0; i<GBUFFERID_NUM_BUFFERS; i++)
+		renderTargets[i] = gBuffers_[i]->getRTV();
+	devcon_->OMSetRenderTargets(GBUFFERID_NUM_BUFFERS, renderTargets, dsvDepthBuffer_);
+}
+
+DirectX::XMFLOAT4X4 RenderingComponent::calculateFinalMatrix(DirectX::XMFLOAT4X4 viewMatrix,
+															 DirectX::XMFLOAT4X4 projectionMatrix,
+															 SpatialAttribute spatialAttribute,
+															 PositionAttribute positionAttribute,
+															 unsigned int attributeIndex)
+{
+	DirectX::CXMMATRIX mView		= DirectX::XMLoadFloat4x4(&viewMatrix);
+	DirectX::CXMMATRIX mProjection	= DirectX::XMLoadFloat4x4(&projectionMatrix);
+
+
+	DirectX::XMMATRIX translation = DirectX::XMMatrixTranslation(positionAttribute.position.x,
+																 positionAttribute.position.y,
+																 40);//positionAttribute.position.z);
+
+	DirectX::XMMATRIX scaling = DirectX::XMMatrixScaling(spatialAttribute.scale.x,
+														 spatialAttribute.scale.y,
+														 spatialAttribute.scale.z);
+
+	DirectX::XMFLOAT4 fRotation = DirectX::XMFLOAT4(spatialAttribute.rotation.x,
+													spatialAttribute.rotation.y,
+													spatialAttribute.rotation.z,
+													spatialAttribute.rotation.w);
+
+	DirectX::XMVECTOR qRotation = DirectX::XMLoadFloat4(&fRotation);
+	DirectX::XMMATRIX rotation = DirectX::XMMatrixRotationQuaternion(qRotation);
+
+	DirectX::XMMATRIX mWorldMatrix = scaling * rotation * translation;
+	DirectX::XMMATRIX mFinalMatrix = mWorldMatrix * mView * mProjection;
+	
+	DirectX::XMFLOAT4X4 finalMatrix;
+	DirectX::XMStoreFloat4x4(&finalMatrix, mFinalMatrix);
+
+	return finalMatrix;
+}
+DirectX::XMFLOAT4X4 RenderingComponent::calculateMatrixInverse(DirectX::XMFLOAT4X4 matrix)
+{
+	DirectX::CXMMATRIX	cxmMatrix		= DirectX::XMLoadFloat4x4(&matrix);
+	DirectX::XMVECTOR	vDeterminant	= DirectX::XMMatrixDeterminant(cxmMatrix);
+	DirectX::XMMATRIX	xmMatrixInverse = DirectX::XMMatrixInverse(&vDeterminant, cxmMatrix);
+	
+	DirectX::XMFLOAT4X4 matrixInverse;
+	DirectX::XMStoreFloat4x4(&matrixInverse, xmMatrixInverse);
+	
+	return matrixInverse;
 }
 
 LPCWSTR RenderingComponent::featureLevelToString(D3D_FEATURE_LEVEL featureLevel)
@@ -507,7 +580,7 @@ HRESULT RenderingComponent::initCBManagement()
 	HRESULT hr = S_OK;
 
 	cbManagement_ = new CBManagement();
-	hr = cbManagement_->init(device_);
+	cbManagement_->init(device_);
 
 	return hr;
 }
