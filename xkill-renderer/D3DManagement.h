@@ -17,25 +17,32 @@ static const unsigned int MULTISAMPLES_GBUFFERS		= 1;
 static const unsigned int MULTISAMPLES_BACKBUFFER	= 1;
 static const unsigned int MULTISAMPLES_DEPTHBUFFER	= 1;
 
+//! Class for maintaining DirectX core objects.
+/*!
+\ingroup xkill-renderer
+*/
 class D3DManagement : public D3DInterface
 {
 public:
+	//! Sets D3DManagement to its default state.
+	/*!
+	\param windowHandle A handle to a WIN-API window.
+	\param screenWidth Width of the screen.
+	\param screenHeight Height of the screen.
+	*/
 	D3DManagement(HWND windowHandle, unsigned int screenWidth, unsigned int screenHeight);
+	//!Releases all memory and resets D3DManagement to its default state.
 	virtual ~D3DManagement();
-
+	//!Releases all memory and resets D3DManagement to its default state.
 	virtual void reset();
-
+	
+	//! Set the variable uavBackBuffer to the compute shader stage.
 	void setUAVBackBufferCS();
-
+	//! Presents the back buffer.
 	void present();
-
+	//! Clears the depth buffer in preparation for rendering. 
 	void clearDepthBuffer();
-
-	ID3D11Device*			getDevice()			const;
-	ID3D11DeviceContext*	getDeviceContext()	const;
-	ID3D11DepthStencilView* getDepthBuffer()	const;
-
-	//! Initializes RenderingComponent's members and prepares render.
+	//! Initializes D3DManagement's members.
 	/*!	\return First encountered error.
 		\sa initDeviceAndSwapChain
 		\sa initDepthBuffer
@@ -50,6 +57,10 @@ public:
 		\sa initVertexBuffer
 	*/
 	HRESULT init();
+
+	ID3D11Device*			getDevice()			const;
+	ID3D11DeviceContext*	getDeviceContext()	const;
+	ID3D11DepthStencilView* getDepthBuffer()	const;
 private:
 	//! Initializes struct describing swapchain using values passed in constructor.
 	/*!
