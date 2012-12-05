@@ -19,11 +19,11 @@ PhysicsObject::~PhysicsObject()
 
 void PhysicsObject::Init(PhysicsAttribute* physicsAttribute, btDiscreteDynamicsWorld* dynamicsWorld)
 {
-	btTransform a;
-	a.setOrigin(btVector3(0,0,-90));
-	a.setRotation(btQuaternion(0.0f, 0.0f, 0.0f, 1.0f)); //Important
+	btTransform transform;
+	transform.setOrigin(btVector3(0,0,-90));
+	transform.setRotation(btQuaternion(0.0f, 0.0f, 0.0f, 1.0f)); //Important
 	rigidBody_ = new btRigidBody(physicsAttribute->mass,
-								 new btDefaultMotionState(a),
+								 new btDefaultMotionState(transform),
 								 new btSphereShape(1),
 								 btVector3(0,0,0));
 	//rigidBody_->updateInertiaTensor();
