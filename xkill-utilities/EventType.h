@@ -41,6 +41,7 @@ enum DLL_U EventType
 	EVENT_PLAYSOUND,
 	EVENT_RUMBLE,
 	EVENT_CREATEPROJECTILE,
+	EVENT_PLAYERKILLED,
 
 	// Get events
 	EVENT_GET_ATTRIBUTE,
@@ -134,7 +135,15 @@ public:
 	int soundId;
 };
 
-//! 
+//! Will trigger rumble in devices[deviceNr]
+/*!
+\param deviceNr The device to be triggered
+\param runRumble If rumble should run or not
+\param duration Duration the effect will be active (currently not handled)
+\param leftScale Power of the left motor
+\param rightScale Power of the right motor
+\ingroup events
+*/
 class DLL_U Event_Rumble : public Event
 {
 public:
@@ -145,6 +154,23 @@ public:
 	float duration;
 	float leftScale;
 	float rightScale;
+};
+
+//! Sent when a player was killed
+/*!
+Currently only used in scoreboard for testing
+
+\param playerKilled The id of the player that was killed
+\param killer The id of the killer
+\ingroup events
+*/
+class DLL_U Event_PlayerKilled : public Event
+{
+public:
+	Event_PlayerKilled(unsigned int playerKilled, unsigned int killer) : 
+		Event(EVENT_RUMBLE){this->playerKilled = playerKilled; this->killer = killer;}
+	unsigned int playerKilled;
+	unsigned int killer;
 };
 
 /// Returns acces to \ref ATTRIBUTES.

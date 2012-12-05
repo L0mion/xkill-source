@@ -1,8 +1,6 @@
 #include "InputComponent.h"
 
 #include <xkill-utilities/EventManager.h>
-#include <xkill-utilities/EventType.h>
-#include <xkill-architecture/AttributeManager.h>
 
 #include "InputManager.h"
 
@@ -39,37 +37,11 @@ void InputComponent::onEvent(Event* e)
 {
 	if(e->getType() == EventType::EVENT_RUMBLE)
 	{
-		Event_Rumble* er = static_cast<Event_Rumble*>(e);
-
-		InputDevice* device = inputManager_->GetDevice(er->deviceNr);
-
-		if(device != nullptr)
-		{
-			if(er->runRumble)
-				device->RunForceFeedback();
-			else
-				device->StopForceFeedback();
-
-			device->SetForceFeedback(er->leftScale, er->rightScale);
-		}
+		handleRumbleEvent(static_cast<Event_Rumble*>(e));
 	}
 	if(e->getType() == EventType::EVENT_MOUSE_MOVE)
 	{
-		Event_MouseMove* emm = static_cast<Event_MouseMove*>(e);
-
-		// Set 1 pixel = 0.25 degrees
-		//float x = XMConvertToRadians(0.20f*(float)e->dx);
-		//float y = XMConvertToRadians(0.20f*(float)e->dy);
-
-		// Test camera movement
-		float x = 5.0f*(float)emm->dx;
-		float y = 5.0f*(float)emm->dy;
-		//cameras_[0].pitch(y);
-		//cameras_[0].yaw(x);
-
-		float mouseSensitivity = 0.001f;
-		inputAttributes_->at(0).rotation.x += x * mouseSensitivity;
-		inputAttributes_->at(0).rotation.y += y * mouseSensitivity;
+		handleMouseMoveEvent(static_cast<Event_MouseMove*>(e));
 	}
 }
 
@@ -103,7 +75,7 @@ void InputComponent::handleInput(float delta)
 		int nrAxes = state.axes.size();
 		if(nrAxes >= 1)
 			inputAttributes_->at(i).position.x += state.axes[0].GetValue() * moveSpeed;
-																		    
+
 		if(nrAxes >= 2)													    
 			inputAttributes_->at(i).position.y += state.axes[1].GetValue() * moveSpeed;
 																		    
@@ -134,4 +106,29 @@ void InputComponent::handleInput(float delta)
 				inputAttributes_->at(i).fire = true;
 		}
 	}
+}
+
+void InputComponent::handleRumbleEvent(Event_Rumble* e)
+{
+	InputDevice* device = inputManager_->GetDevice(e->deviceNr);
+
+	if(device != nullptr)
+	{
+		if(e->runRumble)
+			device->RunForceFeedback();
+		else
+			device->StopForceFeedback();
+
+		device->SetForceFeedback(e->leftScale, e->rightScale);
+	}
+}
+
+void InputComponent::handleMouseMoveEvent(Event_MouseMove* e)
+{
+	float x = 5.0f*(float)e->dx;
+	float y = 5.0f*(float)e->dy;
+
+	float mouseSensitivity = 0.001f;
+	inputAttributes_->at(0).rotation.x += x * mouseSensitivity;
+	inputAttributes_->at(0).rotation.y += y * mouseSensitivity;
 }

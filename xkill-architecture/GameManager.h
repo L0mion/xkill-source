@@ -69,7 +69,7 @@ public:
 			PLAYER,
 			PLAYER,
 			PLAYER,
-			PLAYER
+			PLAYER,
 		};
 		int nrOfListOfEntitiesToBeCreated = sizeof(listOfEntitiesToBeCreated)/4;
 		//Create all entities as given by of the above enum array

@@ -7,6 +7,7 @@
 
 #include "CameraComponent.h"
 #include "GameComponent.h"
+#include "ScoreComponent.h"
 #include "AttributeManager.h"
 
 
@@ -32,6 +33,7 @@ private:
 	CameraComponent		camera_;
 	InputComponent		input_;
 	GameComponent		game_;
+	ScoreComponent		score_;
 
 public:
 	ComponentManager()
@@ -58,6 +60,9 @@ public:
 		/*if(!sound_.init())
 			return false;*/
 		if(!input_.init(parentWindowHandle, AttributeManager::getInstance()->inputAttributes_.getAllAttributes()))
+			return false;
+
+		if(!score_.init(AttributeManager::getInstance()->playerAttributes_.getAllAttributes()))
 			return false;
 
 		// Returns that everything went ok
