@@ -132,8 +132,6 @@ void RenderingComponent::onUpdate(float delta)
 
 		DirectX::XMFLOAT3	eyePosition = *(DirectX::XMFLOAT3*)&positionAttribute->position;
 
-		std::cout << "eyePosition: " << eyePosition.x  << " " << eyePosition.y << " " << eyePosition.z << "\n";
-
 		setViewport(i);
 		renderToGBuffer(view, viewInverse, projection, projectionInverse, eyePosition);
 	}
