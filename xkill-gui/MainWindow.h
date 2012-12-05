@@ -22,6 +22,7 @@ private:
 public:
 	MainWindow(QWidget *parent = 0, Qt::WFlags flags = 0) : QMainWindow(parent, flags)
 	{
+		// Create console
 		AllocConsole();
 		SetStdHandle(STD_INPUT_HANDLE |STD_OUTPUT_HANDLE, this->winId());
 
@@ -34,7 +35,6 @@ public:
 		SUBSCRIBE_TO_EVENT(this, EVENT_SHOW_MESSAGEBOX);
 
 		// init game
-		
 		gameWidget = new GameWidget(this);
 		this->setCentralWidget(gameWidget);
 		setMouseTracking(true);
