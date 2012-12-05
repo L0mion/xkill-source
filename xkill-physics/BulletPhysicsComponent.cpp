@@ -21,6 +21,7 @@ BulletPhysicsComponent::BulletPhysicsComponent()
 	dynamicsWorld_ = nullptr;
 	physicsObjects_ = nullptr;
 	collisionShapeManager_ = nullptr;
+	floor_ = nullptr;
 }
 
 BulletPhysicsComponent::~BulletPhysicsComponent()
@@ -32,6 +33,9 @@ BulletPhysicsComponent::~BulletPhysicsComponent()
 		physicsObjects_->pop_back();
 	}
 	delete physicsObjects_;
+
+	dynamicsWorld_->removeRigidBody(floor_);
+	delete floor_;
 
     delete dynamicsWorld_;
     delete solver_;
@@ -58,6 +62,12 @@ bool BulletPhysicsComponent::init()
 
 	dynamicsWorld_->setGravity(btVector3(0,0,0));
 
+
+	floor_ = new btRigidBody(0,
+							 new btDefaultMotionState(btTransform(btQuaternion(0,0,0,1),btVector3(0,0,0))),
+							 new btStaticPlaneShape(btVector3(0,1,0),0),
+							 btVector3(0,0,0));
+	dynamicsWorld_->addRigidBody(floor_);
 	//////
 
 	collisionShapeManager_->createConvexHull(nullptr,0);

@@ -20,6 +20,7 @@ class btDefaultCollisionConfiguration;
 class btCollisionDispatcher;
 class btSequentialImpulseConstraintSolver;
 class btDiscreteDynamicsWorld;
+class btRigidBody;
 
 template<class T>
 class btAlignedObjectArray;
@@ -53,6 +54,7 @@ private:
 	std::vector<InputAttribute>* inputAttributes_; //<! A pointer to the attribute storage containing the input data from the input component
 
 	btAlignedObjectArray<PhysicsObject*>* physicsObjects_; //<! A vector of PhysicsObjects, internal representation of world
+	btRigidBody* floor_; //<! The absolute floor plane, no object may pass bellow this plane
 
 public:
 	//! Creates a BulletPhysicsComponent, gives it pointers to attribute storages required by the component and sets all pointer to null_ptr
