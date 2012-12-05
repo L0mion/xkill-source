@@ -63,7 +63,7 @@ void PhysicsObject::preStep(PhysicsAttribute* physicsAttribute)
 	position = btVector3(positionAttribute->position.x,
 						 positionAttribute->position.y,
 						 positionAttribute->position.z);
-	rotation = btQuaternion(0,yaw_,0);
+	rotation = btQuaternion(yaw_,0,0);
 	linearVelocity = btVector3(physicsAttribute->linearVelocity.x,
 							   physicsAttribute->linearVelocity.y,
 							   physicsAttribute->linearVelocity.z);
