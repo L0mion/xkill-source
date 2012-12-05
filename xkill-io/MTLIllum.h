@@ -1,5 +1,5 @@
-#ifndef XKILL_RENDERER_MTLILLUM_H
-#define XKILL_RENDERER_MTLILLUM_H
+#ifndef XKILL_IO_MTLILLUM_H
+#define XKILL_IO_MTLILLUM_H
 
 /** Describes illumination models used by .mtl-format.
 * Passed in .mtl as unsigned integers.
@@ -80,4 +80,4 @@ static const IlluminationModel integerToIllum(unsigned int integer)
 10. Casts shadows onto invisible surfaces
 */
 
-#endif //XKILL_RENDERER_MTLILLUM_H
+#endif //XKILL_IO_MTLILLUM_H

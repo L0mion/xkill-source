@@ -1,5 +1,5 @@
-#ifndef XKILL_RENDERER_OBJDEPENDENCIES_H
-#define XKILL_RENDERER_OBJDEPENDENCIES_H
+#ifndef XKILL_IO_OBJDEPENDENCIES_H
+#define XKILL_IO_OBJDEPENDENCIES_H
 
 #include <vector>
 
@@ -25,4 +25,4 @@ private:
 	std::vector<std::string> mtlFiles_;	//!< Dependencies to .mtl-files referenced in .obj-file.
 };
 
-#endif //XKILL_RENDERER_OBJDEPENDENCIES_H
+#endif //XKILL_IO_OBJDEPENDENCIES_H

@@ -1,5 +1,5 @@
-#ifndef XKILL_RENDERER_LOADER_H
-#define XKILL_RENDERER_LOADER_H
+#ifndef XKILL_IO_LOADER_H
+#define XKILL_IO_LOADER_H
 
 /*! \defgroup xkill-mesh-io xkill-mesh-io
 	Loading, writing and management of meshes.
@@ -40,4 +40,4 @@ private:
 	std::string	fileName_;	//!< Name of desired file.
 };
 
-#endif //XKILL_RENDERER_LOADER_H
+#endif //XKILL_IO_LOADER_H

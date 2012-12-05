@@ -1,5 +1,5 @@
-#ifndef XKILL_RENDERER_MESHLOADERMTL_H
-#define XKILL_RENDERER_MESHLOADERMTL_H
+#ifndef XKILL_IO_MESHLOADERMTL_H
+#define XKILL_IO_MESHLOADERMTL_H
 
 #include "Loader.h"
 #include "MTLIllum.h"
@@ -215,4 +215,4 @@ private:
 	MTL mtl_;								//!< Resulting MTL-type.
 };
 
-#endif //XKILL_RENDERER_MESHLOADERMTL_H
+#endif //XKILL_IO_MESHLOADERMTL_H

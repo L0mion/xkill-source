@@ -1,5 +1,5 @@
-#ifndef XKILL_RENDERER_OBJFACE_H
-#define XKILL_RENDERER_OBJFACE_H
+#ifndef XKILL_IO_OBJFACE_H
+#define XKILL_IO_OBJFACE_H
 
 //! Describes a face read from .obj.
 /*!
@@ -53,4 +53,4 @@ private:
 	unsigned int index_;	//!< Index to face.
 };
 
-#endif //XKILL_RENDERER_OBJFACE_H
+#endif //XKILL_IO_OBJFACE_H

@@ -1,5 +1,5 @@
-#ifndef XKILL_RENDERER_OBJGEOMETRY_H
-#define XKILL_RENDERER_OBJGEOMETRY_H
+#ifndef XKILL_IO_OBJGEOMETRY_H
+#define XKILL_IO_OBJGEOMETRY_H
 
 #include <vector>
 
@@ -31,4 +31,4 @@ private:
 	std::vector<ObjGroup>					objGroups_;	//!< Subsets of vertices, binding parts of the mesh to corresponding materials.
 };
 
-#endif //XKILL_RENDERER_OBJGEOMETRY_H
+#endif //XKILL_IO_OBJGEOMETRY_H

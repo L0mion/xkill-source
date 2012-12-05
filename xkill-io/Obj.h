@@ -1,5 +1,5 @@
-#ifndef XKILL_RENDERER_OBJ_H
-#define XKILL_RENDERER_OBJ_H
+#ifndef XKILL_IO_OBJ_H
+#define XKILL_IO_OBJ_H
 
 /*! \defgroup xkill-mesh-io-obj xkill-mesh-io-obj
 	Loading of .obj-format.
@@ -42,4 +42,4 @@ private:
 	ObjGeometry		objGeometry_;		//!< Geometry of mesh read from .obj.
 };
 
-#endif //XKILL_RENDERER_OBJ_H
+#endif //XKILL_IO_OBJ_H

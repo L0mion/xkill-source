@@ -1,5 +1,5 @@
-#ifndef XKILL_RENDERER_MTLMATERIAL_H
-#define XKILL_RENDERER_MTLMATERIAL_H
+#ifndef XKILL_IO_MTLMATERIAL_H
+#define XKILL_IO_MTLMATERIAL_H
 
 #include <vector>
 #include <string>
@@ -91,4 +91,4 @@ private:
 	std::string texStencil_;				//!< decal
 };
 
-#endif //XKILL_RENDERER_MTLMATERIAL_H
+#endif //XKILL_IO_MTLMATERIAL_H

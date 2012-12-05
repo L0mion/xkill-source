@@ -1,5 +1,5 @@
-#ifndef XKILL_RENDERER_MESHMAKER_H
-#define XKILL_RENDERER_MESHMAKER_H
+#ifndef XKILL_IO_MESHMAKER_H
+#define XKILL_IO_MESHMAKER_H
 
 #include <string>
 
@@ -65,4 +65,4 @@ private:
 	MeshModel* meshModel_;
 };
 
-#endif //XKILL_RENDERER_MESHMAKER_H
+#endif //XKILL_IO_MESHMAKER_H

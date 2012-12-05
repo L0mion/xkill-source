@@ -1,5 +1,5 @@
-#ifndef XKILL_RENDERER_SIMPLESTRINGSPLITTER_H
-#define XKILL_RENDERER_SIMPLESTRINGSPLITTER_H
+#ifndef XKILL_IO_SIMPLESTRINGSPLITTER_H
+#define XKILL_IO_SIMPLESTRINGSPLITTER_H
 
 #include <string>
 #include <sstream>
@@ -34,4 +34,4 @@ private:
 	std::vector<std::string> split_;	//!< Result returned to user.
 };
 
-#endif //XKILL_RENDERER_SIMPLESTRINGSPLITTER_H
+#endif //XKILL_IO_SIMPLESTRINGSPLITTER_H

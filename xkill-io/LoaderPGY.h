@@ -1,5 +1,5 @@
-#ifndef XKILL_RENDERER_LOADERPGY_H
-#define XKILL_RENDERER_LOADERPGY_H
+#ifndef XKILL_IO_LOADERPGY_H
+#define XKILL_IO_LOADERPGY_H
 
 #include <xkill-utilities/MeshModel.h>
 
@@ -95,4 +95,4 @@ private:
 	MeshModel* meshModel_; //!< Resulting model read from .pgy.
 };
 
-#endif //XKILL_RENDERER_LOADERPGY_H
+#endif //XKILL_IO_LOADERPGY_H

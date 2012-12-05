@@ -117,6 +117,7 @@ struct DLL_U RenderAttribute : public IAttribute
 
 	AttributePointer spatialAttribute;
 	AttributePointer boundingAttribute;
+	AttributePointer meshAttribute;
 
 	bool transparent;
 	bool tessellation;
@@ -202,15 +203,11 @@ struct DLL_U PlayerAttribute : public IAttribute
 };
 
 
-/// Stores everything GameComponent needs to know about a player (also refer to createPlayerEntity)
-/** 
-\ingroup ATTRIBUTES
-*/
-
 class MeshModel;
 struct DLL_U MeshAttribute : public IAttribute
 {
 	MeshModel* mesh;
+
 	void clean();
 	MeshAttribute(){};
 	~MeshAttribute();;

@@ -1,5 +1,5 @@
-#ifndef XKILL_RENDERER_OBJGROUP_H
-#define XKILL_RENDERER_OBJGROUP_H
+#ifndef XKILL_IO_OBJGROUP_H
+#define XKILL_IO_OBJGROUP_H
 
 #include <vector>
 
@@ -33,4 +33,4 @@ private:
 	std::vector<unsigned int>	indices_;		//!< Indices making out group.
 };
 
-#endif //XKILL_RENDERER_OBJGROUP_H
+#endif //XKILL_IO_OBJGROUP_H

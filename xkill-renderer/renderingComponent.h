@@ -207,9 +207,6 @@ private:
 	*/
 	HRESULT initDebug();
 
-	//temp
-	HRESULT initVertexBuffer();
-
 	/*desc*/
 	HWND windowHandle_;				//!< WINAPI-handle to window.
 	unsigned int screenWidth_;		//!< Width of screen.
@@ -240,6 +237,8 @@ private:
 
 	//direct compute
 	ID3D11UnorderedAccessView* uavBackBuffer_; //!< Used to render to texBackBuffer using DirectCompute.
+
+	//std::vector<
 };
 
 #endif //XKILL_RENDERER_RENDERINGCOMPONENT_H

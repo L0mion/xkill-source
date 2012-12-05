@@ -1,5 +1,5 @@
-#ifndef XKILL_RENDERER_SPECSPGY_H
-#define XKILL_RENDERER_SPECSPGY_H
+#ifndef XKILL_IO_SPECSPGY_H
+#define XKILL_IO_SPECSPGY_H
 
 /*! \defgroup xkill-mesh-io-pgy xkill-mesh-io-pgy
 	Loading and writing of binary .pgy-files.
@@ -50,4 +50,4 @@ static const unsigned int	PGY_SPECS_SIZE_HEADER_SUBSET	= sizeof(PGYHeaderSubset)
 static const unsigned int	PGY_SPECS_SIZE_MATERIAL			= sizeof(MeshMaterial);
 static const unsigned int	PGY_SPECS_SIZE_VERTEXPOSNORMTEX	= sizeof(VertexPosNormTex);
 
-#endif //XKILL_RENDERER_SPECSPGY_H
+#endif //XKILL_IO_SPECSPGY_H

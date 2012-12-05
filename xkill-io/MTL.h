@@ -1,5 +1,5 @@
-#ifndef XKILL_RENDERER_MTL_H
-#define XKILL_RENDERER_MTL_H
+#ifndef XKILL_IO_MTL_H
+#define XKILL_IO_MTL_H
 
 /*! \defgroup xkill-mesh-io-mtl xkill-mesh-io-mtl
 	Loading of .mtl-format.
@@ -29,4 +29,4 @@ private:
 	std::vector<MTLMaterial> materials_; //!< Materials read from .mtl.
 };
 
-#endif //XKILL_RENDERER_MTL_H
+#endif //XKILL_IO_MTL_H

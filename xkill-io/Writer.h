@@ -1,5 +1,5 @@
-#ifndef XKILL_RENDERER_WRITER_H
-#define XKILL_RENDERER_WRITER_H
+#ifndef XKILL_IO_WRITER_H
+#define XKILL_IO_WRITER_H
 
 #include <fstream>
 #include <string>
@@ -35,4 +35,4 @@ private:
 	std::string fileName_;	//!< Name of desired file.
 };
 
-#endif //XKILL_RENDERER_WRITER_H
+#endif //XKILL_IO_WRITER_H

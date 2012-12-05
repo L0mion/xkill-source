@@ -1,5 +1,5 @@
-#ifndef XKILL_RENDERER_LOADEROBJ_H
-#define XKILL_RENDERER_LOADEROBJ_H
+#ifndef XKILL_IO_LOADEROBJ_H
+#define XKILL_IO_LOADEROBJ_H
 
 #include <vector>
 #include <string>
@@ -210,4 +210,4 @@ private:
 	Obj obj_;	//!< Resulting .obj-file.
 };
 
-#endif //XKILL_RENDERER_LOADEROBJ_H
+#endif //XKILL_IO_LOADEROBJ_H

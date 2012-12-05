@@ -1,5 +1,5 @@
-#ifndef XKILL_RENDERER_WRITERPGY_H
-#define XKILL_RENDERER_WRITERPGY_H
+#ifndef XKILL_IO_WRITERPGY_H
+#define XKILL_IO_WRITERPGY_H
 
 #include <string>
 #include <xkill-utilities/MeshModel.h>
@@ -82,4 +82,4 @@ private:
 	MeshModel subject_; //!< Model to be written to .pgy.
 };
 
-#endif //XKILL_RENDERER_WRITERPGY_H
+#endif //XKILL_IO_WRITERPGY_H

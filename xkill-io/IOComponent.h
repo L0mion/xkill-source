@@ -1,5 +1,5 @@
-#ifndef XKILL_RENDERER_IOCOMPONENT_H
-#define XKILL_RENDERER_IOCOMPONENT_H
+#ifndef XKILL_IO_IOCOMPONENT_H
+#define XKILL_IO_IOCOMPONENT_H
 
 #include <vector>
 
@@ -33,4 +33,4 @@ private:
 	MeshMakerObj* makerObj_;
 };
 
-#endif //XKILL_RENDERER_IOCOMPONENT_H
+#endif //XKILL_IO_IOCOMPONENT_H
