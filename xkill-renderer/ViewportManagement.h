@@ -30,6 +30,8 @@ public:
 	virtual void reset();
 	//! Set the viewport that the renderer will draw to. 
 	void setViewport(ID3D11DeviceContext* devcon, unsigned int index);
+	
+	HRESULT resize(unsigned int screenWidth, unsigned int screenHeight);
 	//! Initializes ViewportManagement.
 	HRESULT init();
 

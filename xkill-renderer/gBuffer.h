@@ -37,6 +37,8 @@ public:
 	//! Clears memory and sets Gbuffer to default state.
 	void reset();
 
+	HRESULT resize(ID3D11Device* device, unsigned int texWidth, unsigned int texHeight);
+
 	//! Initializes g-buffer. Creates a texture-, shader resource view- and a render target view-object.
 	/*!
 	\param device DirectX Device pointer.

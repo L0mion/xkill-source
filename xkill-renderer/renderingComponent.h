@@ -66,6 +66,9 @@ public:
 	//! Resets RenderingComponent to default state.
 	void reset();
 	
+	
+	HRESULT resize(unsigned int screenWidth, unsigned int screenHeight);
+
 	//! Runs a frame for RenderingComponent.
 	void onUpdate(float delta);
 	//! Receives events for RenderingComponent.

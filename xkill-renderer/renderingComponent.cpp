@@ -102,6 +102,22 @@ void RenderingComponent::reset()
 	EventManager::getInstance();
 }
 
+HRESULT RenderingComponent::resize(unsigned int screenWidth, unsigned int screenHeight)
+{
+	HRESULT hr = S_OK;
+
+	hr = d3dManagement_->resize(screenWidth, screenHeight);
+	if(SUCCEEDED(hr))
+		hr = viewportManagement_->resize(screenWidth, screenHeight);
+	for(unsigned int i=0; i<GBUFFERID_NUM_BUFFERS; i++)
+	{
+		if(SUCCEEDED(hr))
+			hr = gBuffers_[i]->resize(d3dManagement_->getDevice(), screenWidth, screenHeight);
+	}
+	
+	return hr;
+}
+
 HRESULT RenderingComponent::init()
 {
 	HRESULT hr = S_OK;

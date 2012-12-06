@@ -30,6 +30,20 @@ void ViewportManagement::setViewport(ID3D11DeviceContext* devcon, unsigned int i
 	devcon->RSSetViewports(1, &viewports->at(index));
 }
 
+HRESULT ViewportManagement::resize(unsigned int screenWidth, unsigned int screenHeight)
+{
+	HRESULT hr = S_OK;
+
+	screenWidth_	= screenWidth;
+	screenHeight_	= screenHeight;
+
+	viewports->clear();
+
+	hr = init();
+
+	return hr;
+}
+
 HRESULT ViewportManagement::init()
 {
 	viewports = new std::vector<D3D11_VIEWPORT>();

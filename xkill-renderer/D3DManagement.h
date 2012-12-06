@@ -36,6 +36,8 @@ public:
 	//!Releases all memory and resets D3DManagement to its default state.
 	virtual void reset();
 	
+	HRESULT resize(unsigned int screenWidth, unsigned int screenHeight);
+
 	//! Set the variable uavBackBuffer to the compute shader stage.
 	void setUAVBackBufferCS();
 	//! Presents the back buffer.
