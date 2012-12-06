@@ -22,6 +22,7 @@ private:
 public:
 	MainWindow(QWidget *parent = 0, Qt::WFlags flags = 0) : QMainWindow(parent, flags)
 	{
+		// Create console
 		AllocConsole();
 		SetStdHandle(STD_INPUT_HANDLE |STD_OUTPUT_HANDLE, this->winId());
 
@@ -34,7 +35,6 @@ public:
 		SUBSCRIBE_TO_EVENT(this, EVENT_SHOW_MESSAGEBOX);
 
 		// init game
-		
 		gameWidget = new GameWidget(this);
 		this->setCentralWidget(gameWidget);
 		setMouseTracking(true);
@@ -109,22 +109,24 @@ protected:
 	// Behavior on keyboard input
 	void keyPressEvent(QKeyEvent* e)
 	{
-		if(e->key() == Qt::Key_Escape)
+
+		switch (e->key()) 
 		{
+		case Qt::Key_Escape:
 			ui.actionFullscreen->setChecked(false);
+			break;
+		default:
+			break;
 		}
-		if(e->key() == Qt::Key_W)
-		{
-		}
-		if(e->key() == Qt::Key_A)
-		{
-		}
-		if(e->key() == Qt::Key_S)
-		{
-		}
-		if(e->key() == Qt::Key_D)
-		{
-		}
+
+		// Inform about key press
+		SEND_EVENT(&Event_KeyPress(e->key()));
+	};
+
+	void keyReleaseEvent(QKeyEvent* e)
+	{
+		// Inform about key release
+		SEND_EVENT(&Event_KeyRelease(e->key()));
 	};
 
 	public slots:

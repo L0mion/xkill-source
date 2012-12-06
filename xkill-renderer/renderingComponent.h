@@ -17,9 +17,12 @@
 #include <vld.h>
 #endif //DEBUG || DEBUG_
 
+class D3DManagement;
 class FXManagement;
 class CBManagement;
 class ViewportManagement;
+class SSManagement;
+class RSManagement;
 class GBuffer;
 class D3DDebug;
 class LightManagement;
@@ -34,10 +37,6 @@ struct RenderAttribute;
 struct CameraAttribute;
 struct SpatialAttribute;
 struct PositionAttribute;
-
-static const unsigned int MULTISAMPLES_GBUFFERS		= 1;
-static const unsigned int MULTISAMPLES_BACKBUFFER	= 1;
-static const unsigned int MULTISAMPLES_DEPTHBUFFER	= 1;
 
 struct VertexPosNormTex;
 
@@ -64,6 +63,13 @@ public:
 		HWND windowHandle);
 	//! Releases all memory and returns to default state.
 	~RenderingComponent();
+	//! Resets RenderingComponent to default state.
+	void reset();
+	
+	//! Runs a frame for RenderingComponent.
+	void onUpdate(float delta);
+	//! Receives events for RenderingComponent.
+	void onEvent(Event* e);
 
 	//! Initializes RenderingComponent's members and prepares render.
 	/*!	\return First encountered error.
@@ -80,113 +86,13 @@ public:
 		\sa initVertexBuffer
 	*/
 	HRESULT init();
-	//! Resets RenderingComponent to default state.
-	void reset();
-	//! Runs a frame for RenderingComponent.
-	void onUpdate(float delta);
-	//! Receives events for RenderingComponent.
-	void onEvent(Event* e);
-	
-
 private:
-	
-	//! Main render-method of RenderingComponent.
-	/*!
-	\param view View-matrix from camera.
-	\param projection Projection-matrix from camera.
-	\sa renderToGBuffer
-	\sa renderToBackBuffer
-	*/
-	void render(DirectX::XMFLOAT4X4 view, DirectX::XMFLOAT4X4 projection);
-	//! Renders to g-buffers, storing albedo and normals till later.
-	/*!
-	\param view View-matrix from camera.
-	\param projection Projection-matrix from camera.
-	*/
-	void renderToGBuffer(DirectX::XMFLOAT4X4 view,
-						 DirectX::XMFLOAT4X4 viewInverse,
-						 DirectX::XMFLOAT4X4 projection,
-						 DirectX::XMFLOAT4X4 projectionInverse,
-						 DirectX::XMFLOAT3	eyePosition);
-	//! Samples from g-buffers and creates a final image using DirectCompute.
-	/*!
-	\sa uavBackBuffer
-	*/
-	void renderToBackBuffer();
-	//! Sets which viewport to draw to.
-	/*!
-	\param index The index of the viewport to draw to. 
-	*/
-	void setViewport(unsigned int index);
-	//! Clears the GBuffers with a single color. 
-	void clearGBuffers();
-
-	void gBufferRenderUpdateConstantBuffers(DirectX::XMFLOAT4X4 finalMatrix,
-											DirectX::XMFLOAT4X4 viewMatrix,
-											DirectX::XMFLOAT4X4 viewInverseMatrix,
-											DirectX::XMFLOAT4X4 projectionMatrix,
-											DirectX::XMFLOAT4X4 projectionInverseMatrix,
-											DirectX::XMFLOAT3	eyePosition);
-	void gBufferRenderClean();
-	void gBufferRenderSetRenderTargets();
-	DirectX::XMFLOAT4X4 calculateFinalMatrix(DirectX::XMFLOAT4X4 viewMatrix,
-											 DirectX::XMFLOAT4X4 projectionMatrix,
-											 SpatialAttribute spatialAttribute,
-											 PositionAttribute positionAttribute,
-											 unsigned int attributeIndex);
-	DirectX::XMFLOAT4X4 calculateMatrixInverse(DirectX::XMFLOAT4X4 matrix);
-
-	//! Translates the initiated feature-level to string which may be presented in window.
-	/*!
-	\return The feature-level if known or "Default" otherwize.
-	\param featureLevel The initiated feature-level.
-	*/
-	LPCWSTR featureLevelToString(const D3D_FEATURE_LEVEL featureLevel);
-	
-	//! Initializes struct describing swapchain using values passed in constructor.
+	//! Initializes D3DManagement-object which will maintain core DirectX objects, e.g. device and device context.
 	/*!
 	\return Any error encountered during initialization.
-	\sa createDeviceAndSwapChain
+	\sa D3DManagement
 	*/
-	HRESULT initDeviceAndSwapChain();
-	//! Creates device and swap chain using correct feature-level based on hardware.
-	/*!
-	\param swapChainDesc Description of d3dswapchain.
-	\return Any error encountered during initialization.
-	*/
-	HRESULT createDeviceAndSwapChain(const DXGI_SWAP_CHAIN_DESC swapChainDesc);
-	//! Creates depth-buffer texture with it's corresponding depth stencil view.
-	/*!
-	\return Any error encountered during initialization.
-	*/
-	HRESULT initDepthBuffer();
-	//! Gets texture from swapchain and creates corresponding render target view and UAV.
-	/*!
-	\return Any error encountered during initialization.
-	*/
-	HRESULT initBackBuffer();
-	//! Creates GBuffer-objects for each desired g-buffer.
-	/*!
-	\return Any error encountered during initialization.
-	\sa GBuffer
-	*/
-	HRESULT initGBuffers();
-	//! Creates a ViewportManagement object that in turn will create the specified amount of viewports.
-	/*!
-	\return Any error encountered during initialization.
-	*/
-	HRESULT initViewport();
-	
-	//! Creates rasterizer-state.
-	/*!
-	\return Any error encountered during initialization.
-	*/
-	HRESULT initRSDefault();
-	//! Creates a single samplerstate in order to sample textures in shaders.
-	/*!
-	\return Any error encountered during initialization.
-	*/
-	HRESULT initSSDefault();
+	HRESULT initD3DManagement();
 	//! Initializes FXManagement-object which will maintain shaders and input-layouts throughout application.
 	/*!
 	\return Any error encountered during initialization.
@@ -205,9 +111,32 @@ private:
 	\sa LightManagement
 	*/
 	HRESULT initLightManagement();
-
+	//! Creates a ViewportManagement object that in turn will create the specified amount of viewports.
+	/*!
+	\return Any error encountered during initialization.
+	*/
+	
 	HRESULT initMeshManagement();
-
+	
+	HRESULT initViewport();
+	//! Creates a SSManaegement object that will maintain sampler states.
+	/*!
+	\return Any error encountered during initialization.
+	\sa SSManagement
+	*/
+	HRESULT initSSManagement();
+	//! Creates a RSManaegement object that will maintain rasterizer states.
+	/*!
+	\return Any error encountered during initialization.
+	\sa RSManagement
+	*/
+	HRESULT initRSManagement();
+	//! Creates GBuffer-objects for each desired g-buffer.
+	/*!
+	\return Any error encountered during initialization.
+	\sa GBuffer
+	*/
+	HRESULT initGBuffers();
 	//! Creates D3DDebug-object which is used for detecting live COM-objects at end of application.
 	/*! Warning: D3DDebug recognizes it's own members as live COM-objects, thusly reporting 'false' live objects.
 	\return Any error encountered during initialization.
@@ -215,39 +144,79 @@ private:
 	*/
 	HRESULT initDebug();
 
+	//! Sets which viewport to draw to.
+	/*!
+	\param index The index of the viewport to draw to. 
+	*/
+	void setViewport(unsigned int index);
+	//! Clears the GBuffers with a single color. 
+	void clearGBuffers();
+	//! Sets the gbuffers as render targets.
+	void renderGBufferSetRenderTargets();
+	//! Clears all render targets, buffers, shaders etc after render to gbuffers.
+	void renderGBufferClean();
+	//! Renders to g-buffers, storing albedo and normals till later.
+	/*!
+	\param view View-matrix from camera.
+	\param projection Projection-matrix from camera.
+	*/
+	void renderToGBuffer(DirectX::XMFLOAT4X4 viewMatrix, DirectX::XMFLOAT4X4 projectionMatrix);
+	//! Samples from g-buffers and creates a final image using DirectCompute.
+	/*!
+	\sa uavBackBuffer
+	*/
+	void renderToBackBuffer();
+	//! Clears all render targets, buffers, shaders etc after render to back buffer.
+	void renderBackBufferClean();
+
+	//! Calculates an objects world matrix.
+	/*!
+	\return The world matrix
+	\param spatialAttribute Contains scale and rotation to be used in calculation.
+	\param postionAttribute Contains position to be used in calculation.
+	*/
+	DirectX::XMFLOAT4X4 calculateWorldMatrix(SpatialAttribute spatialAttribute,
+											 PositionAttribute positionAttribute);
+
+	//! Calculates a final matrix that is used to transform an object from local space to homogeneous clip space.
+	/*!
+	\return The calculated matrix
+	\param worldMatrix An object's world matrix.
+	\param viewMatrix The camera's view matrix.
+	\param projectionMatrix The camera's projection matrix.
+	*/
+	DirectX::XMFLOAT4X4 calculateFinalMatrix(DirectX::XMFLOAT4X4 worldMatrix,
+											 DirectX::XMFLOAT4X4 viewMatrix,
+											 DirectX::XMFLOAT4X4 projectionMatrix);
+	//! Calculates the inverse of a matrix.
+	/*!
+	\return The inverse of the input matrix.
+	\param matrix The matrix to invert.
+	*/
+	DirectX::XMFLOAT4X4 calculateMatrixInverse(DirectX::XMFLOAT4X4 matrix);
+	
 	/*desc*/
 	HWND windowHandle_;				//!< WINAPI-handle to window.
 	unsigned int screenWidth_;		//!< Width of screen.
 	unsigned int screenHeight_;		//!< Height of screen.
 	unsigned int numViewports_;		//!< NUmber of viewports that will be used.
 	
+	D3DManagement*		d3dManagement_;
 	FXManagement*		fxManagement_;						//!< Maintaining shaders and input-layouts.
 	CBManagement*		cbManagement_;						//!< Maintaining constant buffers.
 	LightManagement*	lightManagement_;					//!< Maintaining lights.
 	ViewportManagement* viewportManagement_;				//!< Maintaining viewports.
+
 	MeshManagement*		meshManagement_;
-	GBuffer*			gBuffers_[GBUFFERID_NUM_BUFFERS];	//!< Containing data for deferred rendering.
+	
+	SSManagement*		ssManagement_;						//!< Maintaining sampler states.
+	RSManagement*		rsManagement_;						//!< Maintaining rasterizer states.
+	
 	D3DDebug*			d3dDebug_;							//!< Used for detecting live COM-objects.
+	GBuffer*			gBuffers_[GBUFFERID_NUM_BUFFERS];	//!< Containing data for deferred rendering.
 
 	std::vector<RenderAttribute>* renderAttributes_;
 	std::vector<CameraAttribute>* cameraAttributes_;
-
-	ID3D11Device*			device_;	//!< DirectX device pointer.
-	ID3D11DeviceContext*	devcon_;	//!< DirectX device context pointer.
-
-	IDXGISwapChain*			swapChain_;			//!< DirectX swap chain.
-	ID3D11RenderTargetView*	rtvBackBuffer_;		//!< Used to render to texBackBuffer.
-	ID3D11DepthStencilView*	dsvDepthBuffer_;	//!< Used to render to texDepthBuffer.
-	ID3D11RasterizerState*	rsDefault_;			//!< Defines settings for the rasterizer.
-	ID3D11SamplerState*		ssDefault_;			//!< Used to sample from texture in shader.
-
-	ID3D11Texture2D* texBackBuffer_;	//!< Contains the final image.
-	ID3D11Texture2D* texDepthBuffer_;	//!< Saves the depth of each rendered pixel.
-
-	//direct compute
-	ID3D11UnorderedAccessView* uavBackBuffer_; //!< Used to render to texBackBuffer using DirectCompute.
-
-	
 };
 
 #endif //XKILL_RENDERER_RENDERINGCOMPONENT_H

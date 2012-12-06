@@ -143,6 +143,7 @@ struct DLL_U PhysicsAttribute : public IAttribute
 
 	bool added;
 	bool alive;
+	bool isProjectile;
 };
 
 struct DLL_U InputAttribute : public IAttribute

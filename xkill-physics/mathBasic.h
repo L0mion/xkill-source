@@ -3,8 +3,6 @@
 
 #include <math.h>
 
-#include "dllRenderer.h"
-
 #define PI 3.141592654
 
 #define RADIAN(x) ((x) * PI / 180.0f)

@@ -54,7 +54,7 @@ public:
 	/**
 	Provides access to AttributeManager's \ref ATTRIBUTES through 
 	the use of Event_getAttributeVector. The data inside
-	vent_getAttributeVector can then be accessed by the sender.
+	event_getAttributeVector can then be accessed by the sender.
 	*/
 	void event_getAttributeVector(Event_getAttribute* e)
 	{
@@ -70,9 +70,10 @@ public:
 			EventObject->owners = AttributeStorage.getAllOwners();			\
 			break;
 
-			// If Enum matches, fetch information from the correspoinding
+			// If Enum matches, fetch information from the corresponding
 			// AttributeStorage and store that information inside 
 			// Event_getAttribute
+			
 			PUT_ATTRIBUTES_INSIDE_EVENT(ATTRIBUTE_POSITION,	positionAttributes_,	e);
 			PUT_ATTRIBUTES_INSIDE_EVENT(ATTRIBUTE_SPATIAL,	spatialAttributes_,		e);
 			PUT_ATTRIBUTES_INSIDE_EVENT(ATTRIBUTE_RENDER,	renderAttributes_,		e);

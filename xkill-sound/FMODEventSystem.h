@@ -40,7 +40,7 @@ public:
 	/** \brief Must be called for the event system to work as intended.*/
 	void Update();
 	/** \brief Start a sound event at index in the mSoundEvents vector.*/
-	void StartSoundEventAt(int index);
+	void StartSoundEventAt(unsigned int index);
 
 private:
 	void FMODErrorCheck(FMOD_RESULT result);
