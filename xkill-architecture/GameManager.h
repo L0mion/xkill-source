@@ -30,7 +30,6 @@ so every component should strive to work indepentently.
 #include "EntityManager.h"
 #include "dllArchitecture.h"
 
-
 /// The entry point of the architecture
 /** 
 GameManager is responsible for setting up the initial game state.

@@ -16,11 +16,11 @@ MeshGeometry::~MeshGeometry()
 	//Do nothing.
 }
 
-std::vector<VertexPosNormTex>& MeshGeometry::getVertices()
+std::vector<VertexPosNormTex> MeshGeometry::getVertices()
 {
 	return vertices_;
 }
-std::vector<MeshSubset>&	MeshGeometry::getSubsets()
+std::vector<MeshSubset> MeshGeometry::getSubsets()
 {
 	return subsets_;
 }

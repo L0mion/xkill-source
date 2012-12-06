@@ -14,6 +14,8 @@
 #include "LightManagement.h"
 #include "MeshManagement.h"
 #include "MeshModelD3D.h"
+#include "VB.h"
+#include "IB.h"
 
 #include "renderingComponent.h"
 
@@ -74,9 +76,9 @@ RenderingComponent::~RenderingComponent()
 
 	SAFE_DELETE(cbManagement_);
 	SAFE_DELETE(fxManagement_);
-	
 	SAFE_DELETE(viewportManagement_);
 	SAFE_DELETE(lightManagement_);
+	SAFE_DELETE(meshManagement_);
 	
 	for(unsigned int i = 0; i < GBUFFERID_NUM_BUFFERS; i++)
 		SAFE_DELETE(gBuffers_[i]);
@@ -210,17 +212,26 @@ void RenderingComponent::renderToGBuffer(DirectX::XMFLOAT4X4 view,
 		positionAt	= &allPosition->at(spatialAt->positionAttribute.index);
 		
 		meshModelD3D = meshManagement_->getMeshModelD3D(meshIndex, device_);
-		ID3D11Buffer* vertexBuffer =  meshModelD3D->getVertexBuffer();
+		VB*					vb	= meshModelD3D->getVB();
+		std::vector<IB*>	ibs	= meshModelD3D->getIBs();
 
 		finalMatrix = calculateFinalMatrix(view, projection, *spatialAt, *positionAt,  i);
 		gBufferRenderUpdateConstantBuffers(finalMatrix, view, viewInverse, projection, projectionInverse, eyePosition);
 
 		UINT stride = sizeof(VertexPosNormTex);
 		UINT offset = 0;
+		
+		ID3D11Buffer* vertexBuffer = vb->getVB();
 		devcon_->IASetVertexBuffers(0, 1, &vertexBuffer, &stride, &offset);
-		devcon_->IASetInputLayout(fxManagement_->getILDefaultVSPosNormTex());
-		devcon_->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-		devcon_->Draw(5000, 0);
+
+		for(unsigned int i = 0; i < ibs.size(); i++)
+		{
+			devcon_->IASetIndexBuffer(ibs[i]->getIB(), DXGI_FORMAT_R32_UINT, offset);
+
+			devcon_->IASetInputLayout(fxManagement_->getILDefaultVSPosNormTex());
+			devcon_->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+			devcon_->DrawIndexed(ibs[i]->getNumIndices(), 0, 0);
+		}
 	}
 
 	gBufferRenderClean();

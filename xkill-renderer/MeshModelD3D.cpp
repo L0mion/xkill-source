@@ -1,29 +1,32 @@
-#include <d3d11.h>
-
+#include "VB.h"
+#include "IB.h"
 #include "renderingUtilities.h"
 
 #include "MeshModelD3D.h"
 
 MeshModelD3D::MeshModelD3D(
-	ID3D11Buffer*						vertexBuffer,
-	const std::vector<ID3D11Buffer*>	indexBuffers)
+	VB* vb,
+	const std::vector<IB*> ibs)
 {
-	vertexBuffer_ = vertexBuffer;
-	indexBuffers_ = indexBuffers;
+	vb_		= vb;
+	ibs_	= ibs;
 }
 MeshModelD3D::~MeshModelD3D()
 {
-	SAFE_RELEASE(vertexBuffer_);
-	
-	for(unsigned int i = 0; i < indexBuffers_.size(); i++)
-		SAFE_RELEASE(indexBuffers_[i]);
+	if(vb_)
+		delete vb_;
+	for(unsigned int i = 0; i < ibs_.size(); i++)
+	{
+		if(ibs_[i])
+			delete ibs_[i];
+	}
 }
 
-const std::vector<ID3D11Buffer*>&	MeshModelD3D::getIndexBuffers()
+VB* MeshModelD3D::getVB()
 {
-	return indexBuffers_;
+	return vb_;
 }
-ID3D11Buffer*					MeshModelD3D::getVertexBuffer()
+const std::vector<IB*>& MeshModelD3D::getIBs()
 {
-	return vertexBuffer_;
+	return ibs_;
 }

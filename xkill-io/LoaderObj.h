@@ -192,6 +192,10 @@ private:
 	/*! \return True if entirely numeric, False if not. */
 	bool isNumeric(const std::string value);
 
+	//! Loads resulting Obj from intermediate vectors. 
+	/*!
+	OBS: Also checks if a group has zero indices. If so removes it. 
+	*/
 	void loadObj();
 
 	unsigned int				lineNum_;		//!< Line number previously read from file.

@@ -3,22 +3,23 @@
 
 #include <vector>
 
-struct ID3D11Buffer;
+class VB;
+class IB;
 
 class MeshModelD3D
 {
 public:
 	MeshModelD3D(
-		ID3D11Buffer*						vertexBuffer,
-		const std::vector<ID3D11Buffer*>	indexBuffers);
+		VB* vb,
+		const std::vector<IB*> ibs);
 	~MeshModelD3D();
 
-	const std::vector<ID3D11Buffer*>&	getIndexBuffers();
-	ID3D11Buffer*						getVertexBuffer();
+	VB* getVB();
+	const std::vector<IB*>&	getIBs();
 protected:
 private:
-	ID3D11Buffer*				vertexBuffer_;
-	std::vector<ID3D11Buffer*>	indexBuffers_;
+	VB* vb_;
+	std::vector<IB*> ibs_;
 };
 
 #endif //XKILL_RENDERER_MESHMODELD3D_H

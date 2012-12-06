@@ -5,6 +5,8 @@
 #include <xkill-utilities/AttributeType.h>
 #include <xkill-utilities/MeshModel.h>
 
+#include "VB.h"
+#include "IB.h"
 #include "renderingUtilities.h"
 #include "MeshModelD3D.h"
 #include "MeshManagement.h"
@@ -32,7 +34,8 @@ MeshModelD3D* MeshManagement::getMeshModelD3D(
 		hr = createMeshModelD3D(index, device);
 	}
 
-	return meshModelD3Ds_[getMeshModelD3DIndex(index)];
+	unsigned int meshModelD3DIndex = getMeshModelD3DIndex(index);
+	return meshModelD3Ds_[meshModelD3DIndex];
 }
 
 HRESULT MeshManagement::createMeshModelD3D(
@@ -44,28 +47,29 @@ HRESULT MeshManagement::createMeshModelD3D(
 	std::vector<MeshAttribute>*	allMesh; GET_ATTRIBUTES(allMesh, MeshAttribute,	ATTRIBUTE_MESH);
 	if(index < allMesh->size())
 	{
-		MeshAttribute* meshAt	= &allMesh->at(index);
-		MeshModel* model		= meshAt->mesh;
+		MeshAttribute*	meshAt	= &allMesh->at(index);
+		MeshModel*		model	= meshAt->mesh;
 
-		ID3D11Buffer* vertexBuffer = nullptr;
-		std::vector<ID3D11Buffer*> indexBuffers;
+		VB*					vb = new VB();
+		std::vector<IB*>	ibs;
+
 		hr = createVertexBuffer(
 			index, 
 			model->getGeometry(), 
-			vertexBuffer, 
+			vb,
 			device);
 		if(SUCCEEDED(hr))
 		{
 			hr = createIndexBuffers(
 				index, 
 				model->getGeometry(), 
-				indexBuffers, 
+				ibs, 
 				device);
 		}
 		if(SUCCEEDED(hr))
 		{
 			pushMeshModelD3D(index,
-			new MeshModelD3D(vertexBuffer, indexBuffers));
+			new MeshModelD3D(vb, ibs));
 		}
 	}
 	else
@@ -79,23 +83,12 @@ HRESULT MeshManagement::createMeshModelD3D(
 HRESULT MeshManagement::createVertexBuffer(
 		const unsigned int	index, 
 		MeshGeometry&		geometry,
-		ID3D11Buffer*		vertexBuffer,
+		VB*					vb,
 		ID3D11Device*		device)
 {
 	HRESULT hr = S_OK;
 
-	std::vector<VertexPosNormTex> vertices = geometry.getVertices();
-
-	D3D11_BUFFER_DESC vbd;
-	vbd.Usage			= D3D11_USAGE_DYNAMIC;
-	vbd.ByteWidth		= sizeof(VertexPosNormTex) * vertices.size();
-	vbd.BindFlags		= D3D11_BIND_VERTEX_BUFFER;
-	vbd.CPUAccessFlags	= D3D11_CPU_ACCESS_WRITE;
-	vbd.MiscFlags		= 0;
-
-	D3D11_SUBRESOURCE_DATA vinitData;
-	vinitData.pSysMem = &vertices.at(0);
-	hr = device->CreateBuffer(&vbd, &vinitData, &vertexBuffer);
+	hr = vb->init(geometry.getVertices(), device);
 	if(FAILED(hr))
 	{
 		std::string failed = "Failed to create Vertex Buffer from MeshModel at index: " + index;
@@ -107,7 +100,7 @@ HRESULT MeshManagement::createVertexBuffer(
 HRESULT MeshManagement::createIndexBuffers(
 	const unsigned int				index, 
 	MeshGeometry&					geometry, 
-	std::vector<ID3D11Buffer*>&		indexBuffers,
+	std::vector<IB*>&				ibs,
 	ID3D11Device*					device)
 {
 	HRESULT hr = S_OK;
@@ -115,14 +108,14 @@ HRESULT MeshManagement::createIndexBuffers(
 	std::vector<MeshSubset> subsets = geometry.getSubsets();
 	for(unsigned int i = 0; i < subsets.size() && !FAILED(hr); i++)
 	{
-		ID3D11Buffer* indexBuffer = nullptr;
+		IB* ib = new IB();
 		hr = createIndexBuffer(
 			index,
 			subsets[i],
-			indexBuffer,
+			ib,
 			device);
 		if(SUCCEEDED(hr))
-			indexBuffers.push_back(indexBuffer);
+			ibs.push_back(ib);
 	}
 
 	return hr;
@@ -130,23 +123,12 @@ HRESULT MeshManagement::createIndexBuffers(
 HRESULT MeshManagement::createIndexBuffer(
 	const unsigned int	index,
 	MeshSubset&			subset,
-	ID3D11Buffer*		indexBuffer,
+	IB*					ib,
 	ID3D11Device*		device)
 {
 	HRESULT hr = S_OK;
 
-	std::vector<unsigned int> indices = subset.getIndices();
-
-	D3D11_BUFFER_DESC ibd;
-	ibd.Usage			= D3D11_USAGE_DYNAMIC;
-	ibd.ByteWidth		= sizeof(unsigned int) * indices.size();
-	ibd.BindFlags		= D3D11_BIND_INDEX_BUFFER;
-	ibd.CPUAccessFlags	= D3D11_CPU_ACCESS_WRITE;
-	ibd.MiscFlags		= 0;
-
-	D3D11_SUBRESOURCE_DATA vinitData;
-	vinitData.pSysMem = &indices.at(0);
-	hr = device->CreateBuffer(&ibd, &vinitData, &indexBuffer);
+	hr = ib->init(subset.getIndices(), device);
 	if(FAILED(hr))
 	{
 		std::string failed = "Failed to create Index Buffer from MeshModel at index: " + index;
@@ -161,7 +143,9 @@ void MeshManagement::pushMeshModelD3D(
 	MeshModelD3D*		meshModelD3D)
 {
 	meshModelD3Ds_.push_back(meshModelD3D);
-	map.insert(std::pair<unsigned int, unsigned int>(index, meshModelD3Ds_.size()));
+
+	unsigned int meshModelD3DIndex = meshModelD3Ds_.size() - 1;
+	map.insert(std::pair<unsigned int, unsigned int>(index, meshModelD3DIndex));
 }
 
 bool MeshManagement::existingMeshModelD3DIndex(const int unsigned index)

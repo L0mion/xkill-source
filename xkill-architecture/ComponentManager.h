@@ -27,7 +27,7 @@ be the responsibility of the ComponentManager.
 class ComponentManager
 {
 private:
-	IOComponent				ioComponent_;
+	IOComponent*			ioComponent_;
 	RenderingComponent*		render_;
 	BulletPhysicsComponent	physics_;
 	//SoundComponent		sound_;
@@ -38,11 +38,13 @@ private:
 public:
 	ComponentManager()
 	{
-		render_ = NULL;
+		render_			= NULL;
+		ioComponent_	= NULL;
 	}
 	~ComponentManager()
 	{
 		SAFE_DELETE(render_);
+		SAFE_DELETE(ioComponent_);
 		//SAFE_DELETE(physicsComponent);
 		//SAFE_DELETE(soundComponent);
 		//SAFE_DELETE(gameComponent);
@@ -50,7 +52,10 @@ public:
 
 	bool init(HWND windowHandle, HWND parentWindowHandle)
 	{
-		if(!ioComponent_.init())
+		bool sucessfulInit = true;
+
+		ioComponent_ = new IOComponent();
+		if(!ioComponent_->init())
 			return false;
 		
 		render_ = new RenderingComponent(windowHandle);

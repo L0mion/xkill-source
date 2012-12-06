@@ -380,7 +380,10 @@ void LoaderObj::loadObj()
 {
 	ObjGeometry mlGeometry(vertices_);
 	for(unsigned int i = 0; i < groups_.size(); i++)
-		mlGeometry.pushGroup(groups_[i]);
+	{
+		if(groups_[i].getNumIndices() > 0)
+			mlGeometry.pushGroup(groups_[i]);
+	}
 
 	ObjDependencies dependencies;
 	for(unsigned int i = 0; i < mtlLib_.size(); i++)

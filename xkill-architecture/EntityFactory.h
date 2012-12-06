@@ -113,7 +113,6 @@ public:
 
 		MeshAttribute* meshAttribute = AttributeManager::getInstance()->meshAttributes_.createAttribute(entity);
 		meshAttribute->mesh = e->mesh;
-		meshAttribute->
 
 		return entity;
 	}

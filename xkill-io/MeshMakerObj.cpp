@@ -33,6 +33,9 @@ MeshMakerObj::~MeshMakerObj()
 	if(loaderObj_)
 		delete loaderObj_;
 
+	if(meshModel_)
+		delete meshModel_;
+
 	//loaderMTL_ not deleted here, as it is managed in loadMTL.
 }
 

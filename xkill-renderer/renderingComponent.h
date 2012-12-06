@@ -13,6 +13,10 @@
 #include "dllRenderer.h"
 #include "gBufferID.h"
 
+#if defined (DEBUG) || (DEBUG_)
+#include <vld.h>
+#endif //DEBUG || DEBUG_
+
 class FXManagement;
 class CBManagement;
 class ViewportManagement;

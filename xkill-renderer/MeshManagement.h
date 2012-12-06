@@ -6,6 +6,8 @@
 #include <xkill-utilities\MeshGeometry.h>
 
 class MeshModelD3D;
+class VB;
+class IB;
 
 class MeshManagement
 {
@@ -24,17 +26,17 @@ private:
 	HRESULT createVertexBuffer(
 		const unsigned int	index, 
 		MeshGeometry&		geometry,
-		ID3D11Buffer*		vertexBuffer,
+		VB*					vb,
 		ID3D11Device*		device);
 	HRESULT createIndexBuffers(
 		const unsigned int			index, 
 		MeshGeometry&				geometry, 
-		std::vector<ID3D11Buffer*>&	indexBuffers,
+		std::vector<IB*>&			ibs,
 		ID3D11Device*				device);
 	HRESULT createIndexBuffer(
 		const unsigned int	index,
 		MeshSubset&			subset,
-		ID3D11Buffer*		indexBuffer,
+		IB*					ib,
 		ID3D11Device*		device);
 
 	void pushMeshModelD3D(
