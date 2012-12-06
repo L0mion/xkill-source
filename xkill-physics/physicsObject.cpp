@@ -6,115 +6,69 @@
 
 #include "CollisionShapeManager.h"
 
-PhysicsObject::PhysicsObject()
+PhysicsObject::PhysicsObject() : btRigidBody(1,
+											 new btDefaultMotionState(),
+											 CollisionShapeManager::getInstance()->getCollisionShape(0),
+											 btVector3(0,0,0))
 {
-	rigidBody_ = nullptr;
+	gravity_.setZero();
+	forces_.setZero();
+	movement_.setZero();
+	yaw_ = 0.0f;
 }
 
 PhysicsObject::~PhysicsObject()
 {
-	delete rigidBody_->getMotionState();
-	delete rigidBody_;
-	rigidBody_ = nullptr;
+	delete getMotionState();
 }
 
-void PhysicsObject::Init(PhysicsAttribute* physicsAttribute, btDiscreteDynamicsWorld* dynamicsWorld)
+void PhysicsObject::addToWorld(btDiscreteDynamicsWorld* dynamicsWorld)
 {
-	btTransform a;
-	a.setOrigin(btVector3(0,0,-90));
-	a.setRotation(btQuaternion(0,0,0,1));
-	rigidBody_ = new btRigidBody(physicsAttribute->mass,
-								 new btDefaultMotionState(a),
-								 new btSphereShape(50),
-								 btVector3(0,0,0));
-	//rigidBody_->updateInertiaTensor();
-	dynamicsWorld->addRigidBody(rigidBody_);
-	forces_ = btVector3(0,0,0);
-	movement_ = btVector3(0,0,0);
-	yaw_ = 0;
-	preStep(physicsAttribute);
+	dynamicsWorld->addRigidBody(this);
 }
 
-void PhysicsObject::Clean(btDiscreteDynamicsWorld* dynamicsWorld)
+void PhysicsObject::removeFromWorld(btDiscreteDynamicsWorld* dynamicsWorld)
 {
-	dynamicsWorld->removeRigidBody(rigidBody_);
+	dynamicsWorld->removeRigidBody(this);
 }
-
-
 
 void PhysicsObject::preStep(PhysicsAttribute* physicsAttribute)
 {
-	btVector3 position;
-	btQuaternion rotation;
-	btVector3 linearVelocity;
-	btVector3 angularVelocity;
-	btCollisionShape* collisionShape;
-	SpatialAttribute* spatialAttribute = ATTRIBUTE_CAST(SpatialAttribute,spatialAttribute,physicsAttribute);
-	PositionAttribute* positionAttribute = ATTRIBUTE_CAST(PositionAttribute,positionAttribute,spatialAttribute);
-	
-	//Copy from attributes to Bullet Physics internal representation
-	memcpy(position,&positionAttribute->position,3*sizeof(float));
-	memcpy(rotation,&spatialAttribute->rotation,4*sizeof(float));
-	memcpy(linearVelocity,&physicsAttribute->linearVelocity,3*sizeof(float));
-	memcpy(angularVelocity,&physicsAttribute->angularVelocity,3*sizeof(float));
-
-	//memcpy(position,positionAttribute->position,3*sizeof(float));
-	//memcpy(rotation,spatialAttribute->rotation,4*sizeof(float));
-	//memcpy(linearVelocity,physicsAttribute->linearVelocity,3*sizeof(float));
-	//memcpy(angularVelocity,physicsAttribute->angularVelocity,3*sizeof(float));
-
-	position = btVector3(positionAttribute->position.x,
-						 positionAttribute->position.y,
-						 positionAttribute->position.z);
-	rotation = btQuaternion(yaw_,0,0);
-	linearVelocity = btVector3(physicsAttribute->linearVelocity.x,
-							   physicsAttribute->linearVelocity.y,
-							   physicsAttribute->linearVelocity.z);
-	angularVelocity = btVector3(physicsAttribute->angularVelocity.x,
-							    physicsAttribute->angularVelocity.y,
-							    physicsAttribute->angularVelocity.z);
-	collisionShape = CollisionShapeManager::getInstance()->getCollisionShape(physicsAttribute->collisionShapeIndex);
-
-	btVector3 gravity(0,-10,0);
-	movement_.setY(linearVelocity.y());
-	linearVelocity = movement_;
-	forces_ = linearVelocity;
-
-	rigidBody_->setWorldTransform(btTransform(rotation,position));
-	rigidBody_->setLinearVelocity(linearVelocity);
-	rigidBody_->setAngularVelocity(angularVelocity);
-	rigidBody_->setCollisionShape(collisionShape);
-	rigidBody_->setMassProps(physicsAttribute->mass,btVector3(0,0,0));
-	rigidBody_->setGravity(gravity+forces_);
-	rigidBody_->activate(true);
+	SpatialAttribute* spatialAttribute = ATTRIBUTE_CAST(SpatialAttribute,
+														spatialAttribute,
+														physicsAttribute);
+	PositionAttribute* positionAttribute = ATTRIBUTE_CAST(PositionAttribute,
+														  positionAttribute,
+														  spatialAttribute);
+	setMassProps(physicsAttribute->mass,btVector3(0,0,0));
+	movement_.setY(physicsAttribute->linearVelocity.y);
+	m_worldTransform.setOrigin(btVector3(positionAttribute->position.x,
+										 positionAttribute->position.y,
+										 positionAttribute->position.z));
+	m_worldTransform.setRotation(btQuaternion(yaw_,0,0));
+	setLinearVelocity(movement_);
+	setAngularVelocity(btVector3(physicsAttribute->angularVelocity.x,
+					   physicsAttribute->angularVelocity.y,
+					   physicsAttribute->angularVelocity.z));
+	m_collisionShape = CollisionShapeManager::getInstance()
+						->getCollisionShape(physicsAttribute->collisionShapeIndex);
+	setGravity(gravity_+forces_);
+	activate(true);
 }
 
-#include <iostream>
 void PhysicsObject::postStep(PhysicsAttribute* physicsAttribute)
 {
-	SpatialAttribute* spatialAttribute = ATTRIBUTE_CAST(SpatialAttribute,spatialAttribute,physicsAttribute);
-	PositionAttribute* positionAttribute = ATTRIBUTE_CAST(PositionAttribute,positionAttribute,spatialAttribute);
-
-	//memcpy(positionAttribute->position,rigidBody_->getWorldTransform().getOrigin(),3*sizeof(float));
-	//memcpy(spatialAttribute->rotation,rigidBody_->getWorldTransform().getRotation(),4*sizeof(float));
-	//memcpy(physicsAttribute->linearVelocity,rigidBody_->getLinearVelocity(),3*sizeof(float));
-	//memcpy(physicsAttribute->angularVelocity,rigidBody_->getAngularVelocity(),3*sizeof(float));
-
-	positionAttribute->position.x = rigidBody_->getCenterOfMassPosition().x();
-	positionAttribute->position.y = rigidBody_->getCenterOfMassPosition().y();
-	positionAttribute->position.z = rigidBody_->getCenterOfMassPosition().z();
-	spatialAttribute->rotation.x = rigidBody_->getWorldTransform().getRotation().x();
-	spatialAttribute->rotation.y = rigidBody_->getWorldTransform().getRotation().y();
-	spatialAttribute->rotation.z = rigidBody_->getWorldTransform().getRotation().z();
-	spatialAttribute->rotation.w = rigidBody_->getWorldTransform().getRotation().w();
-	physicsAttribute->linearVelocity.x = rigidBody_->getLinearVelocity().x();
-	physicsAttribute->linearVelocity.y = rigidBody_->getLinearVelocity().y();
-	physicsAttribute->linearVelocity.z = rigidBody_->getLinearVelocity().z();
-	physicsAttribute->angularVelocity.x = rigidBody_->getAngularVelocity().x();
-	physicsAttribute->angularVelocity.y = rigidBody_->getAngularVelocity().y();
-	physicsAttribute->angularVelocity.z = rigidBody_->getAngularVelocity().z();
-
-	forces_ = btVector3(0,0,0);
+	SpatialAttribute* spatialAttribute = ATTRIBUTE_CAST(SpatialAttribute,
+														spatialAttribute,
+														physicsAttribute);
+	PositionAttribute* positionAttribute = ATTRIBUTE_CAST(PositionAttribute,
+														  positionAttribute,
+														  spatialAttribute);
+	positionAttribute->position.copy(m_worldTransform.getOrigin().m_floats);
+	spatialAttribute->rotation.copy(m_worldTransform.getRotation().get128().m128_f32);
+	physicsAttribute->linearVelocity.copy(getLinearVelocity().m_floats);
+	physicsAttribute->angularVelocity.copy(getAngularVelocity().m_floats);
+	forces_.setZero();
 }
 
 void PhysicsObject::input(InputAttribute* inputAttribute,float delta)
@@ -122,6 +76,5 @@ void PhysicsObject::input(InputAttribute* inputAttribute,float delta)
 	yaw_ += inputAttribute->rotation.x;
 	movement_ = btVector3(inputAttribute->position.x, 0, inputAttribute->position.y);
 	movement_ = 20*movement_.rotate(btVector3(0,1,0),yaw_);
-	//forces_ =movement_;
 	inputAttribute->position.x = inputAttribute->position.y = 0;
 }

@@ -52,6 +52,7 @@ private:
 	std::vector<PhysicsAttribute>* physicsAttributes_; //<! A pointer to the attribute storage containing PhysicsAttributes, external representation of world
 	std::vector<BoundingAttribute>* boundingAttributes_; //<! A pointer to the attribute storage containing a copy of bounding volumes for the renderer
 	std::vector<InputAttribute>* inputAttributes_; //<! A pointer to the attribute storage containing the input data from the input component
+	std::vector<int>* physicsOwners_; //! Owners of physicsAttributes
 
 	btAlignedObjectArray<PhysicsObject*>* physicsObjects_; //<! A vector of PhysicsObjects, internal representation of world
 	btRigidBody* floor_; //<! The absolute floor plane, no object may pass bellow this plane

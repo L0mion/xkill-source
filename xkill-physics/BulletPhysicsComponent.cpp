@@ -28,7 +28,7 @@ BulletPhysicsComponent::~BulletPhysicsComponent()
 {
 	while(physicsObjects_->size() > 0)
 	{
-		physicsObjects_->at(physicsObjects_->size()-1)->Clean(dynamicsWorld_);
+		physicsObjects_->at(physicsObjects_->size()-1)->removeFromWorld(dynamicsWorld_);
 		delete physicsObjects_->at(physicsObjects_->size()-1);
 		physicsObjects_->pop_back();
 	}
@@ -46,12 +46,16 @@ BulletPhysicsComponent::~BulletPhysicsComponent()
 	collisionShapeManager_->clean();
 }
 
+
+
+
 bool BulletPhysicsComponent::init()
 {
 	// Fetch attributes
 	GET_ATTRIBUTES(inputAttributes_, InputAttribute, ATTRIBUTE_INPUT);
 	GET_ATTRIBUTES(physicsAttributes_, PhysicsAttribute, ATTRIBUTE_PHYSICS);
 	GET_ATTRIBUTES(boundingAttributes_, BoundingAttribute, ATTRIBUTE_BOUNDING);
+	GET_ATTRIBUTE_OWNERS(physicsOwners_, ATTRIBUTE_PHYSICS);
 
 	physicsObjects_ = new btAlignedObjectArray<PhysicsObject*>();
 	broadphase_ = new btDbvtBroadphase();
@@ -63,21 +67,20 @@ bool BulletPhysicsComponent::init()
 
 	dynamicsWorld_->setGravity(btVector3(0,0,0));
 
-
 	floor_ = new btRigidBody(0,
 							 new btDefaultMotionState(btTransform(btQuaternion(0,0,0,1),btVector3(0,0,0))),
 							 new btStaticPlaneShape(btVector3(0,1,0),0),
 							 btVector3(0,0,0));
 	dynamicsWorld_->addRigidBody(floor_);
-	//////
 
 	collisionShapeManager_->createConvexHull(nullptr,0);
-	//////
-	
+
 	return true;
 }
 
-#include <iostream> //check
+
+
+
 void BulletPhysicsComponent::onUpdate(float delta)
 {
 	for(unsigned int i = 0; i < inputAttributes_->size(); i++)
@@ -89,28 +92,25 @@ void BulletPhysicsComponent::onUpdate(float delta)
 	//Checks if new physiscs attributes were created since last call to this function
 	for(unsigned int i = physicsObjects_->size(); i < physicsAttributes_->size(); i++)
 	{
-		std::cout << "Creating new Physics Object" << std::endl;
 		physicsObjects_->push_back(new PhysicsObject());
 	}
+	
 	//Synchronize the internal represenation of physics objects with the physics attributes
 	for(unsigned int i = 0; i < static_cast<unsigned int>(physicsObjects_->size()); i++)
 	{
-		if(physicsAttributes_->at(i).alive)
+		PhysicsObject* physicsObject = physicsObjects_->at(i);
+		PhysicsAttribute* physicsAttribute = &physicsAttributes_->at(i);
+		if(physicsOwners_->at(i)!=0)
 		{
-			if(physicsAttributes_->at(i).added)
+			if(!physicsObject->isInWorld())
 			{
-				physicsObjects_->at(i)->preStep(&physicsAttributes_->at(i));
+				physicsObject->addToWorld(dynamicsWorld_);
 			}
-			else
-			{
-				physicsObjects_->at(i)->Init(&physicsAttributes_->at(i),dynamicsWorld_);
-				physicsAttributes_->at(i).added = true;
-			}
+			physicsObject->preStep(physicsAttribute);
 		}
-		else if(physicsAttributes_->at(i).added)
+		else if(physicsObject->isInWorld())
 		{
-			physicsObjects_->at(i)->Clean(dynamicsWorld_);
-			physicsAttributes_->at(i).added = false;
+			physicsObject->removeFromWorld(dynamicsWorld_);
 		}
 	}
 	
@@ -119,9 +119,11 @@ void BulletPhysicsComponent::onUpdate(float delta)
 	//Copy the physics simulation result to the physics attributes
 	for(unsigned int i = 0; i < static_cast<unsigned int>(physicsObjects_->size()); i++)
 	{
-		if(physicsAttributes_->at(i).alive && physicsAttributes_->at(i).added)
+		PhysicsObject* physicsObject = physicsObjects_->at(i);
+		PhysicsAttribute* physicsAttribute = &physicsAttributes_->at(i);
+		if(physicsOwners_->at(i)!=0 && physicsObject->isInWorld())
 		{
-			(*physicsObjects_)[i]->postStep(&physicsAttributes_->at(i));
+			physicsObject->postStep(physicsAttribute);
 		}
 	}
 }
@@ -130,3 +132,4 @@ void BulletPhysicsComponent::onEvent(Event* e)
 {
 
 }
+

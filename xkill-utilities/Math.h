@@ -11,7 +11,7 @@ struct Float2
 		x = 0.0f;
 		y = 0.0f;
 	};
-	void copy(float* float2)
+	void copy(const float* float2)
 	{
 		//memcpy(this, float2, sizeof(Float2));
 		x = float2[0];
@@ -31,7 +31,7 @@ struct Float3
 		y = 0.0f;
 		z = 0.0f;
 	};
-	void copy(float* float3)
+	void copy(const float* float3)
 	{
 		//memcpy(this, float3, sizeof(Float3));
 		x = float3[0];
@@ -54,7 +54,7 @@ struct Float4
 		z = 0.0f;
 		w = 1.0f;
 	};
-	void copy(float* float4)
+	void copy(const float* float4)
 	{
 		//memcpy(this, float4, sizeof(Float4));
 		x = float4[0];
@@ -80,21 +80,22 @@ struct Float4x4
 
 	Float4x4()
 	{
+		
 		m[0][0] = 0.0f;
 		m[0][1] = 0.0f;
 		m[0][2] = 0.0f;
 		m[0][3] = 0.0f;
-				  0.0f;
+				  
 		m[1][0] = 0.0f;
 		m[1][1] = 0.0f;
 		m[1][2] = 0.0f;
 		m[1][3] = 0.0f;
-				  0.0f;
+				  
 		m[2][0] = 0.0f;
 		m[2][1] = 0.0f;
 		m[2][2] = 0.0f;
 		m[2][3] = 0.0f;
-				  0.0f;
+				  
 		m[3][0] = 0.0f;
 		m[3][1] = 0.0f;
 		m[3][2] = 0.0f;

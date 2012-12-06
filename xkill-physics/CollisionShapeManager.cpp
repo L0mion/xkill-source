@@ -4,6 +4,8 @@
 
 CollisionShapeManager::CollisionShapeManager()
 {
+	//if(collisionShapes_.size()==0)
+		//collisionShapes_.push_back(new btSphereShape(50));
 }
 
 CollisionShapeManager::~CollisionShapeManager()

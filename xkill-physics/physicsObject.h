@@ -12,10 +12,10 @@ struct InputAttribute;
 An object that wraps object specific functionality for rigid bodies.
 \ingroup xkill-physics
 */
-class PhysicsObject
+class PhysicsObject : public btRigidBody
 {
 private:
-	btRigidBody* rigidBody_; //!< a pointer to a rigidbody object
+	btVector3 gravity_;
 	btVector3 forces_;
 	btVector3 movement_;
 	btScalar yaw_;
@@ -24,8 +24,6 @@ public:
 
 	//! Creates a Physics Object with a rigidbody pointer set to nullptr
 	PhysicsObject();
-
-
 	//! Deletes all subobjects of the contained rigidbody and the rigidbody itself
 	~PhysicsObject();
 	//! Initialize rigidbody from physicsAttribute and add object to simulation
@@ -34,13 +32,12 @@ public:
 	\param dynamicsWorld The simulation object, used to add the object to the simulation 
 	\sa preStep
 	*/
-	void Init(PhysicsAttribute* physicsAttribute,
-			  btDiscreteDynamicsWorld* dynamicsWorld);
+	void addToWorld(btDiscreteDynamicsWorld* dynamicsWorld);
 	//! Remove the rigidbody from the simulation but do not delete the rigidbody or the object
 	/*! 
 	\param dynamicsWorld The simulation object, used to the the object from the simulation 
 	*/
-	void Clean(btDiscreteDynamicsWorld* dynamicsWorld);
+	void removeFromWorld(btDiscreteDynamicsWorld* dynamicsWorld);
 	//! Runs before simulation is stepped to copy data from attribute to rigidbody
 	/*! 
 	\param physicsAttribute The physics attribute which contain object data
