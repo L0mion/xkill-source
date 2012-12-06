@@ -21,27 +21,20 @@ bool GameComponent::init()
 void GameComponent::onEvent(Event* e)
 {
 	EventType type = e->getType();
-	Event_ProjectileCollidingWithPlayer* projectileCollidingWithPlayer;
-	Event_Remove_Entity* removeEntityEvent;
-	switch (type) 
+	if(type == EVENT_PROJECTILECOLLIDINGWITHPLAYER) 
 	{
-	case EVENT_PROJECTILECOLLIDINGWITHPLAYER:
-		projectileCollidingWithPlayer = static_cast<Event_ProjectileCollidingWithPlayer*>(e);
-		
-		//Remove projectile entity
 		std::cout << "GameComponent::onEvent, EVENT_PROJECTILECOLLIDINGWITHPLAYER" << std::endl;
 
-		removeEntityEvent = new Event_Remove_Entity(projectileCollidingWithPlayer->projectileId);
-		SEND_EVENT(removeEntityEvent);
-		delete removeEntityEvent;
+		//Remove projectile entity
+		Event_ProjectileCollidingWithPlayer* projectileCollidingWithPlayer = static_cast<Event_ProjectileCollidingWithPlayer*>(e);
+		Event_Remove_Entity removeEntityEvent(projectileCollidingWithPlayer->projectileId);
+		SEND_EVENT(&removeEntityEvent);
 
 		//Lower player health
+		//AttributeManager::getInstance()->playerAttributes_
+		//PlayerAttribute* playerAttribute = AttributeManager::getInstance()->playerAttributes_.getAllAttributes();
 
 		projectileCollidingWithPlayer->playerId;
-
-		break;
-	default:
-		break;
 	}
 }
 

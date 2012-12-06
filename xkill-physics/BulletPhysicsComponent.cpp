@@ -143,27 +143,28 @@ void BulletPhysicsComponent::onUpdate(float delta)
 				//^ = xor. If one of the 2 physics objects (at i and j in physicsAttributes_) is a projectile, and the other object is not a projectile.
 				if(physicsAttributes_->at(i).isProjectile ^ physicsAttributes_->at(j).isProjectile)
 				{
+					//Collision test
 					if((*physicsObjects_)[i]->contactTest(dynamicsWorld_,*(*physicsObjects_)[j]))
 					{
 						std::vector<int>* allPhysicsOwner; GET_ATTRIBUTE_OWNERS(allPhysicsOwner, ATTRIBUTE_PHYSICS);
 						int physicsAttributeOwnersI = allPhysicsOwner->at(i);
 						int physicsAttributeOwnersJ = allPhysicsOwner->at(j);
 					
-						//Find out which of the 2 physics objects (at i and j in physicsAttributes_) is a projectile.
-						int projectileId = -1;
-						int playerId = -1;
+						//Find out which one of the 2 physics objects (at i and j in physicsAttributes_) that is a projectile.
+						int projectileEntityId = -1;
+						int playerEntityId = -1;
 						if(physicsAttributes_->at(i).isProjectile)
 						{
-							projectileId = physicsAttributeOwnersI;
-							playerId = physicsAttributeOwnersJ;
+							projectileEntityId = physicsAttributeOwnersI;
+							playerEntityId = physicsAttributeOwnersJ;
 						}
 						else if(physicsAttributes_->at(j).isProjectile)
 						{
-							playerId = physicsAttributeOwnersI;
-							projectileId = physicsAttributeOwnersJ;
+							playerEntityId = physicsAttributeOwnersI;
+							projectileEntityId = physicsAttributeOwnersJ;
 						}
 
-						Event_ProjectileCollidingWithPlayer projectileCollidingWithPlayer(projectileId, playerId);
+						Event_ProjectileCollidingWithPlayer projectileCollidingWithPlayer(projectileEntityId, playerEntityId);
 						SEND_EVENT(&projectileCollidingWithPlayer);
 					}
 				}
