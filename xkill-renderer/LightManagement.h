@@ -13,7 +13,7 @@ struct ID3D11DeviceContext;
 //typedef HRESULT;
 
 
-//! Class for maintaining viewports.
+//! Class for maintaining lights.
 /*!
 \ingroup xkill-renderer
 */
