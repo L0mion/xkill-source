@@ -101,7 +101,6 @@ public:
 		physics->linearVelocity.y = 1.0f;
 	}
 
-
 	//
 	// Undefine evil macros
 	//

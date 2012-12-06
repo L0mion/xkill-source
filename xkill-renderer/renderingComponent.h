@@ -23,6 +23,7 @@ class GBuffer;
 class D3DDebug;
 class ObjLoaderBasic;
 class LightManagement;
+class Event_WindowResize;
 
 namespace DirectX
 {
@@ -224,6 +225,9 @@ private:
 	\sa ObjLoaderBasic
 	*/
 	HRESULT initVertexBuffer();
+
+	//! Methods that will be called on events. 
+	void event_WindowResize(Event_WindowResize* e);
 };
 
 #endif //XKILL_RENDERER_RENDERINGCOMPONENT_H

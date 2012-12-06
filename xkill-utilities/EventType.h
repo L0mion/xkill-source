@@ -46,6 +46,7 @@ enum DLL_U EventType
 	EVENT_MOUSEMOVE,
 	EVENT_KEYPRESS,
 	EVENT_KEYRELEASE,
+	EVENT_WINDOW_RESIZE,
 
 	// Get events
 	EVENT_GET_ATTRIBUTE,
@@ -195,6 +196,30 @@ public:
 		return (float)width/(float)height;
 	}
 };
+
+/// Alerts about change in window resolution
+/**
+\ingroup events
+*/
+class DLL_U Event_WindowResize : public Event
+{
+public:
+	int width;		
+	int height;		
+
+	Event_WindowResize(int width, int height) : Event(EVENT_WINDOW_RESIZE)
+	{
+		this->width = width;
+		this->height = height;
+	}
+
+	float getAspectRatio()
+	{
+		return (float)width/(float)height;
+	}
+};
+
+
 
 /// Displays a messagebox with the message specified
 /**

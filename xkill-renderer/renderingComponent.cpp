@@ -104,8 +104,11 @@ void RenderingComponent::reset()
 
 HRESULT RenderingComponent::init()
 {
-	HRESULT hr = S_OK;
+	// subscribe to events
+	SUBSCRIBE_TO_EVENT(this, EVENT_WINDOW_RESIZE);
 
+	// init component
+	HRESULT hr = S_OK;
 	if(SUCCEEDED(hr))
 		hr = initD3DManagement();
 	if(SUCCEEDED(hr))
@@ -452,5 +455,21 @@ HRESULT RenderingComponent::initVertexBuffer()
 
 void RenderingComponent::onEvent( Event* e )
 {
+	EventType type = e->getType();
+	switch (type) 
+	{
+	case EVENT_WINDOW_RESIZE:
+		event_WindowResize((Event_WindowResize*)e);
+		break;
+	default:
+		break;
+	}
+}
 
+void RenderingComponent::event_WindowResize( Event_WindowResize* e )
+{
+	int width = e->width;
+	int height = e->height;
+
+	// TODO: resize render window
 }
