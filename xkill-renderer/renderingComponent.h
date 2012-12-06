@@ -26,7 +26,9 @@ class RSManagement;
 class GBuffer;
 class D3DDebug;
 class LightManagement;
+class Event_WindowResize;
 class MeshManagement;
+class ObjLoaderBasic;
 
 namespace DirectX
 {
@@ -66,6 +68,14 @@ public:
 	//! Resets RenderingComponent to default state.
 	void reset();
 	
+	//! Resizes all management objects that are affected by a change in screen resolution.
+	/*!
+	\param screenWidth The new screen width.
+	\param screenHeight the new screen height.
+	\return Any error encountered.
+	*/
+	HRESULT resize(unsigned int screenWidth, unsigned int screenHeight);
+
 	//! Runs a frame for RenderingComponent.
 	void onUpdate(float delta);
 	//! Receives events for RenderingComponent.
@@ -217,6 +227,22 @@ private:
 
 	std::vector<RenderAttribute>* renderAttributes_;
 	std::vector<CameraAttribute>* cameraAttributes_;
+	
+
+	//temp
+	ID3D11Buffer*			vertexBuffer_;		//!< Mock buffer sending vertices to shader.
+	std::vector<VertexPosNormTex>*	vertices_;	//!< Mock vertices.
+	ObjLoaderBasic*			objLoader_;			//!< Basic obj-loader used to debug renderer.
+
+	//! Creates a mockup vertexbuffer that loads it's vertices from a basic .obj-loader using bth.obj.
+	/*!
+	\return Any error encountered during initialization.
+	\sa ObjLoaderBasic
+	*/
+	HRESULT initVertexBuffer();
+
+	//! Methods that will be called on events. 
+	void event_WindowResize(Event_WindowResize* e);
 };
 
 #endif //XKILL_RENDERER_RENDERINGCOMPONENT_H

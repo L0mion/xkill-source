@@ -94,11 +94,30 @@ void RenderingComponent::reset()
 	EventManager::getInstance();
 }
 
-HRESULT RenderingComponent::init()
+HRESULT RenderingComponent::resize(unsigned int screenWidth, unsigned int screenHeight)
 {
-	//float* f = new float();
 	HRESULT hr = S_OK;
 
+	hr = d3dManagement_->resize(screenWidth, screenHeight);
+	if(SUCCEEDED(hr))
+		hr = viewportManagement_->resize(screenWidth, screenHeight);
+	for(unsigned int i=0; i<GBUFFERID_NUM_BUFFERS; i++)
+	{
+		if(SUCCEEDED(hr))
+			hr = gBuffers_[i]->resize(d3dManagement_->getDevice(), screenWidth, screenHeight);
+	}
+	
+	return hr;
+}
+
+HRESULT RenderingComponent::init()
+{
+	// subscribe to events
+	SUBSCRIBE_TO_EVENT(this, EVENT_WINDOW_RESIZE);
+
+	// init component
+	//float* f = new float();
+	HRESULT hr = S_OK;
 	if(SUCCEEDED(hr))
 		hr = initD3DManagement();
 	if(SUCCEEDED(hr))
@@ -453,5 +472,21 @@ HRESULT RenderingComponent::initGBuffers()
 }
 void RenderingComponent::onEvent( Event* e )
 {
+	EventType type = e->getType();
+	switch (type) 
+	{
+	case EVENT_WINDOW_RESIZE:
+		event_WindowResize((Event_WindowResize*)e);
+		break;
+	default:
+		break;
+	}
+}
 
+void RenderingComponent::event_WindowResize( Event_WindowResize* e )
+{
+	int width = e->width;
+	int height = e->height;
+
+	// TODO: resize render window
 }
