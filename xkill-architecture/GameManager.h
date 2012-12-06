@@ -68,7 +68,6 @@ public:
 		{
 			PLAYER,
 			PLAYER,
-			PLAYER,
 			PLAYER
 		};
 		int nrOfListOfEntitiesToBeCreated = sizeof(listOfEntitiesToBeCreated)/4;

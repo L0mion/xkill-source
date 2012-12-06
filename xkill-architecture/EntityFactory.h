@@ -7,6 +7,7 @@
 #include <vector>
 #include <iostream>
 
+
 /// A factory for creating Entities and assigning multiple \ref ATTRIBUTES in a flexible way.
 /** 
 Filling out each Attribute and connecting chains of 
@@ -16,6 +17,7 @@ The AttributeFactory can be used to facilitate creation of \ref ATTRIBUTES.
 
 \ingroup ARCHITECTURE
 */
+
 
 class EntityFactory 
 {
@@ -34,6 +36,21 @@ private:
 	}
 
 public:
+	// Creates an AttributeType (e.g. PositionAttribute) with name AttributeName (e.g. position) owned by Entity OwnerEntity.
+	// IMPORTANT: AttributeName (e.g. position) is used to access attributes from AttributeManager (e.g. positionAttributes_).
+	// if a longer name is used, such as positionAttribute, it will "copy paste" the name when accessing AttributeManager.
+	// An AttributeName such as "positionAttribute" will result in accessing "positionAttributeAttributes_" inside
+	// AttributeManager instead of "'positionAttributes_" which will result in error. As long as a shorter naming convention
+	// such as "position" is used, this will not be a problem.
+#define CREATE_ATTRIBUTE(AttributeType, AttributeName, OwnerEntity)						\
+	AttributeType* AttributeName = AttributeName = AttributeManager::getInstance()->AttributeName##Attributes_.createAttribute(OwnerEntity)
+	
+	// Connects the AttributePointer by the name PointerName inside AttributeName with a AttributePointer created inside AttributeManager.
+	// IMPORTANT: The following formula is used to access AttributeManager, "PointerName+Attributes".
+	// PointerName "position" will result in "positionAttributes" which will work.
+	// PointerName "positionAttribute" will result in "positionAttributeAttributes" which will fail.
+#define CONNECT_ATTRIBUTES(AttributeName, PointerName)									\
+	AttributeName->PointerName##Attribute = AttributeManager::getInstance()->PointerName##Attributes_.getLatestAttributeAsAttributePointer()
 
 	//! A player entity has the following attributes: position attribute, spatial attribute, render attribute, physics attribute, input attribute, camera attribute and player attribute
 	//! Bindings:
@@ -42,39 +59,40 @@ public:
 	//! Note: the player has the same spatial attribute as the camera.
 	Entity* createPlayerEntity()
 	{
-		static int playerId = 0;
 		Entity* entity = createEntity();
 
-		PositionAttribute* position = AttributeManager::getInstance()->positionAttributes_.createAttribute(entity);
+		CREATE_ATTRIBUTE(PositionAttribute, position, entity);
 		position->position.x = 0.0f;
 		position->position.y = 0.0f;
 		position->position.z = 0.0f;
 
-		SpatialAttribute* spatial = AttributeManager::getInstance()->spatialAttributes_.createAttribute(entity);
-		spatial->positionAttribute = AttributeManager::getInstance()->positionAttributes_.getLatestAttributeAsAttributePointer();
+		CREATE_ATTRIBUTE(SpatialAttribute, spatial, entity);
+		CONNECT_ATTRIBUTES(spatial, position);
 		spatial->scale.x = 1.0f;
 		spatial->scale.y = 1.0f;
 		spatial->scale.z = 1.0f;
 
-		RenderAttribute* render = AttributeManager::getInstance()->renderAttributes_.createAttribute(entity);
-		render->spatialAttribute = AttributeManager::getInstance()->spatialAttributes_.getLatestAttributeAsAttributePointer();
+		CREATE_ATTRIBUTE(RenderAttribute, render, entity);
+		CONNECT_ATTRIBUTES(render, spatial);
 
-		PhysicsAttribute* physics = AttributeManager::getInstance()->physicsAttributes_.createAttribute(entity);
-		physics->spatialAttribute = AttributeManager::getInstance()->spatialAttributes_.getLatestAttributeAsAttributePointer();
-		//physics->linearVelocity.z = -25;
+		CREATE_ATTRIBUTE(PhysicsAttribute, physics, entity);
+		CONNECT_ATTRIBUTES(physics, spatial);
 
-		InputAttribute* input  = AttributeManager::getInstance()->inputAttributes_.createAttribute(entity);
-		input->physicsAttribute = AttributeManager::getInstance()->physicsAttributes_.getLatestAttributeAsAttributePointer();
+		CREATE_ATTRIBUTE(InputAttribute, input, entity);
+		CONNECT_ATTRIBUTES(input, physics);
 
-		CameraAttribute* camera = AttributeManager::getInstance()->cameraAttributes_.createAttribute(entity);
-		camera->spatialAttribute = AttributeManager::getInstance()->spatialAttributes_.getLatestAttributeAsAttributePointer(); //Bind the most recently created spatial attribute to the camera attribute (NOTE: the last created spatial attribute should be the same attribute as bound to the player attribute)
+		CREATE_ATTRIBUTE(CameraAttribute, camera, entity);
+		CONNECT_ATTRIBUTES(camera, spatial);
 
-		PlayerAttribute* playerAttribute = AttributeManager::getInstance()->playerAttributes_.createAttribute(entity);
-		playerAttribute->renderAttribute = AttributeManager::getInstance()->renderAttributes_.getLatestAttributeAsAttributePointer(); //Bind the most recently created render attribute to the player attribute
-		playerAttribute->inputAttribute = AttributeManager::getInstance()->inputAttributes_.getLatestAttributeAsAttributePointer();
+		CREATE_ATTRIBUTE(PlayerAttribute, player, entity);
+		CONNECT_ATTRIBUTES(player, render);
+		CONNECT_ATTRIBUTES(player, input);
 
-		//Increment local static variable
+		static int playerId = 0;
+		player->name = "Printer Terror";
+		player->id = playerId;
 		playerId++;
+
 
 		// Return entity
 		return entity;
@@ -84,27 +102,35 @@ public:
 	{
 		Entity* entity = createEntity();
 
-		PositionAttribute* positionAttribute = AttributeManager::getInstance()->positionAttributes_.createAttribute(entity);
-		positionAttribute->position.x = e->position.x;
-		positionAttribute->position.y = e->position.y;
-		positionAttribute->position.z = e->position.z;
+		CREATE_ATTRIBUTE(PositionAttribute, position, entity);
+		position->position.x = e->position.x;
+		position->position.y = e->position.y;
+		position->position.z = e->position.z;
 
-		SpatialAttribute* spatialAttribute = AttributeManager::getInstance()->spatialAttributes_.createAttribute(entity);
-		spatialAttribute->positionAttribute = AttributeManager::getInstance()->positionAttributes_.getLatestAttributeAsAttributePointer();
-		spatialAttribute->rotation.x = e->direction.x;
-		spatialAttribute->rotation.y = e->direction.y;
-		spatialAttribute->rotation.z = e->direction.z;
-		spatialAttribute->rotation.w = e->direction.w;
+		CREATE_ATTRIBUTE(SpatialAttribute, spatial, entity);
+		CONNECT_ATTRIBUTES(spatial, position);
+		spatial->rotation.x = e->direction.x;
+		spatial->rotation.y = e->direction.y;
+		spatial->rotation.z = e->direction.z;
+		spatial->rotation.w = e->direction.w;
 
-		RenderAttribute* renderAttribute = AttributeManager::getInstance()->renderAttributes_.createAttribute(entity);
-		renderAttribute->spatialAttribute = AttributeManager::getInstance()->spatialAttributes_.getLatestAttributeAsAttributePointer();
+		CREATE_ATTRIBUTE(RenderAttribute, render, entity);
+		CONNECT_ATTRIBUTES(render, spatial);
 
-		PhysicsAttribute* physicsAttribute = AttributeManager::getInstance()->physicsAttributes_.createAttribute(entity);
-		physicsAttribute->spatialAttribute = AttributeManager::getInstance()->spatialAttributes_.getLatestAttributeAsAttributePointer();
-		physicsAttribute->isProjectile = true;
-
-		physicsAttribute->linearVelocity.y = 1.0f;
+		CREATE_ATTRIBUTE(PhysicsAttribute, physics, entity);
+		CONNECT_ATTRIBUTES(physics, spatial);
+		physics->isProjectile = true;
+		physics->linearVelocity.y = 1.0f;
 		
 		return entity;
 	}
+
+	//
+	// Undefine evil macros
+	//
+
+#undef CREATE_ATTRIBUTE
+#undef CONNECT_ATTRIBUTES
 };
+
+

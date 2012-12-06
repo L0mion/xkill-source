@@ -37,12 +37,15 @@ enum DLL_U EventType
 	// Inform events
 	EVENT_A,
 	EVENT_B,
-	EVENT_MOUSE_MOVE,
 	EVENT_PLAYSOUND,
 	EVENT_RUMBLE,
 	EVENT_CREATEPROJECTILE,
 	EVENT_PROJECTILECOLLIDINGWITHPLAYER,
 	EVENT_REMOVE_ENTITY,
+
+	EVENT_MOUSEMOVE,
+	EVENT_KEYPRESS,
+	EVENT_KEYRELEASE,
 
 	// Get events
 	EVENT_GET_ATTRIBUTE,
@@ -112,7 +115,7 @@ public:
 class DLL_U Event_MouseMove : public Event
 {
 public:
-	Event_MouseMove(int dx, int dy) : Event(EVENT_MOUSE_MOVE)
+	Event_MouseMove(int dx, int dy) : Event(EVENT_MOUSEMOVE)
 	{
 		this->dx = dx;
 		this->dy = dy;
@@ -208,7 +211,7 @@ public:
 	}
 };
 
-// Tells EntityManager to create a projectile entity
+/// Tells EntityManager to create a projectile entity
 /**
 \ingroup events
 */
@@ -225,7 +228,7 @@ public:
 	}
 };
 
-// Used in GameComponent
+/// Used in GameComponent
 /**
 \ingroup events
 */
@@ -242,7 +245,7 @@ public:
 	}
 };
 
-// Creates EntityManager to remove an entity with id
+/// Alerts EntityManager to remove an entity with specified id
 /**
 \ingroup events
 */
@@ -257,3 +260,32 @@ public:
 	}
 };
 
+/// Alerts InputComponent about key press
+/**
+\ingroup events
+*/
+class DLL_U Event_KeyPress : public Event
+{
+public:
+	int keyEnum;
+
+	Event_KeyPress(int keyEnum) : Event(EVENT_KEYPRESS)
+	{
+		this->keyEnum = keyEnum;
+	}
+};
+
+/// Alerts InputComponent about key release
+/**
+\ingroup events
+*/
+class DLL_U Event_KeyRelease : public Event
+{
+public:
+	int keyEnum;
+
+	Event_KeyRelease(int keyEnum) : Event(EVENT_KEYRELEASE)
+	{
+		this->keyEnum = keyEnum;
+	}
+};

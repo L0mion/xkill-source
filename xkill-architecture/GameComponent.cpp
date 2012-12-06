@@ -60,6 +60,13 @@ void GameComponent::onUpdate(float delta)
 			SpatialAttribute* spatial	=	&allSpatial->at(render->spatialAttribute.index);
 			PositionAttribute* position	=	&allPosition->at(spatial->positionAttribute.index);
 
+			static int tmp = 0;
+			if(tmp == 0)
+			{
+				input->fire = true;
+				tmp++;
+			}
+
 			if(input->fire)
 			{
 				//float* position = new float[3];
@@ -100,16 +107,16 @@ void GameComponent::onUpdate(float delta)
 			{
 				position->position[2] = position->position[2]+1.0f; 
 			}
-			/*
+			*/
 
 			/*std::cout 
-				<< player->id				<< "\t"
-				<< playerOwners->at(i)		<< "\t"
-				<< player->name				<< "\t"
-				<< position->position[0]	<< "\t"
-				<< position->position[1]	<< "\t"
-				<< position->position[2]	<< "\t"
-				<< std::endl;*/
+			<< player->id				<< "\t"
+			<< playerOwners->at(i)		<< "\t"
+			<< player->name				<< "\t"
+			<< position->position.x		<< "\t"
+			<< position->position.y		<< "\t"
+			<< position->position.z		<< "\t"
+			<< std::endl;*/
 		}
 	}
 }
