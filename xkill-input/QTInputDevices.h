@@ -21,7 +21,6 @@ public:
 	void setButton(char key, bool value);
 
 	void setAxesToZero();
-	void setButtonsToNotReleased();
 
 protected:
 

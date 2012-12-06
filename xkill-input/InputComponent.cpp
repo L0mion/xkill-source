@@ -163,6 +163,8 @@ void InputComponent::handleInput(float delta)
 			if(state.buttons[0].isReleased())													   
 				inputAttributes_->at(i).fire = true;
 
+			device->setButtonsToNotReleased();
+
 			if(state.buttons.size() > 7)
 			{
 				if(state.buttons[3].isDown())
@@ -184,7 +186,6 @@ void InputComponent::handleInput(float delta)
 			QTInputDevices* qtDevice = static_cast<QTInputDevices*>(device);
 
 			qtDevice->setAxesToZero();
-			qtDevice->setButtonsToNotReleased();
 		}
 	}
 }

@@ -80,6 +80,8 @@ public:
 	virtual void setPlayerID(int playerID);
 	virtual int getPlayerID();
 
+	void setButtonsToNotReleased();
+
 protected:
 	InputDeviceLayout inputLayout_;
 	GUID deviceGUID_;

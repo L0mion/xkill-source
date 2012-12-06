@@ -79,12 +79,6 @@ void QTInputDevices::setAxesToZero()
 		axes_[i].SetValue(0.0f);
 	}
 }
-
-void QTInputDevices::setButtonsToNotReleased()
-{
-	for(unsigned int i = 0; i < buttons_.size(); i++)
-		buttons_[i].setChecked();
-}
   
 void QTInputDevices::RunForceFeedback()
 {
