@@ -137,11 +137,11 @@ void RenderingComponent::onUpdate(float delta)
 	clearGBuffers();
 	for(unsigned int i=0; i<cameraAttributes_->size(); i++)
 	{
-		DirectX::XMFLOAT4X4 view((float*)&cameraAttributes_->at(i).mat_view);
-		DirectX::XMFLOAT4X4 projection((float*)&cameraAttributes_->at(i).mat_projection);
+		DirectX::XMFLOAT4X4 viewMatrix((float*)&cameraAttributes_->at(i).mat_view);
+		DirectX::XMFLOAT4X4 projectionMatrix((float*)&cameraAttributes_->at(i).mat_projection);
 
-		DirectX::XMFLOAT4X4 viewInverse			= calculateMatrixInverse(view);
-		DirectX::XMFLOAT4X4 projectionInverse	= calculateMatrixInverse(projection);
+		DirectX::XMFLOAT4X4 viewMatrixInverse		= calculateMatrixInverse(viewMatrix);
+		DirectX::XMFLOAT4X4 projectionMatrixInverse	= calculateMatrixInverse(projectionMatrix);
 		
 		CameraAttribute* cameraAttribute = &cameraAttributes_->at(i);
 		SpatialAttribute* spatialAttribute = ATTRIBUTE_CAST(SpatialAttribute, spatialAttribute, cameraAttribute);
@@ -149,17 +149,24 @@ void RenderingComponent::onUpdate(float delta)
 
 		DirectX::XMFLOAT3	eyePosition = *(DirectX::XMFLOAT3*)&positionAttribute->position;
 
+		cbManagement_->vsSet(CB_FRAME_INDEX, 0, d3dManagement_->getDeviceContext());
+		cbManagement_->updateCBFrame(d3dManagement_->getDeviceContext(),
+									 viewMatrix,
+									 viewMatrixInverse,
+									 projectionMatrix,
+									 projectionMatrixInverse,
+									 eyePosition, 
+									 lightManagement_->getNumLights());
+
 		setViewport(i);
-		renderToGBuffer(view, viewInverse, projection, projectionInverse, eyePosition);
+		renderToGBuffer(viewMatrix, projectionMatrix);
 	}
 	
 	renderToBackBuffer();
 }
-void RenderingComponent::renderToGBuffer(DirectX::XMFLOAT4X4 view,
-										 DirectX::XMFLOAT4X4 viewInverse,
-										 DirectX::XMFLOAT4X4 projection,
-										 DirectX::XMFLOAT4X4 projectionInverse,
-										 DirectX::XMFLOAT3	eyePosition)
+void RenderingComponent::renderToGBuffer(DirectX::XMFLOAT4X4 viewMatrix,
+										 DirectX::XMFLOAT4X4 projectionMatrix)
+										
 {
 
 	d3dManagement_->getDeviceContext()->VSSetShader(fxManagement_->getDefaultVS()->getVertexShader(), nullptr, 0);
@@ -176,10 +183,17 @@ void RenderingComponent::renderToGBuffer(DirectX::XMFLOAT4X4 view,
 	std::vector<SpatialAttribute>* allSpatial;		GET_ATTRIBUTES(allSpatial, SpatialAttribute, ATTRIBUTE_SPATIAL);
 	std::vector<PositionAttribute>* allPosition;	GET_ATTRIBUTES(allPosition, PositionAttribute, ATTRIBUTE_POSITION);
 	
+	DirectX::XMFLOAT4X4 worldMatrix;  
+	DirectX::XMFLOAT4X4 worldMatrixInverse;
+	DirectX::XMFLOAT4X4 finalMatrix;
 	for(unsigned int i=0; i<renderAttributes_->size(); i++)
 	{
-		DirectX::XMFLOAT4X4 finalMatrix = calculateFinalMatrix(view, projection, allSpatial->at(i), allPosition->at(i),  i);
-		gBufferRenderUpdateConstantBuffers(finalMatrix, view, viewInverse, projection, projectionInverse, eyePosition);
+		worldMatrix			= calculateWorldMatrix(allSpatial->at(i), allPosition->at(i));
+		worldMatrixInverse	= calculateMatrixInverse(worldMatrix);
+		finalMatrix			= calculateFinalMatrix(worldMatrix, viewMatrix, projectionMatrix);
+		
+		cbManagement_->vsSet(CB_OBJECT_INDEX, 2, d3dManagement_->getDeviceContext());
+		cbManagement_->updateCBObject(d3dManagement_->getDeviceContext(), finalMatrix, worldMatrix, worldMatrixInverse);
 
 		UINT stride = sizeof(VertexPosNormTex);
 		UINT offset = 0;
@@ -247,23 +261,6 @@ void RenderingComponent::clearGBuffers()
 	d3dManagement_->getDeviceContext()->ClearRenderTargetView(renderTargets[GBUFFERID_NORMAL], black);
 }
 
-void RenderingComponent::gBufferRenderUpdateConstantBuffers(DirectX::XMFLOAT4X4 finalMatrix,
-															DirectX::XMFLOAT4X4 viewMatrix,
-															DirectX::XMFLOAT4X4 viewInverseMatrix,
-															DirectX::XMFLOAT4X4 projectionMatrix,
-															DirectX::XMFLOAT4X4 projectionInverseMatrix,
-															DirectX::XMFLOAT3	eyePosition)
-{
-	cbManagement_->vsSet(CB_FRAME_INDEX, 0, d3dManagement_->getDeviceContext());
-	cbManagement_->updateCBFrame(d3dManagement_->getDeviceContext(),
-								 finalMatrix,
-								 viewMatrix,
-								 viewInverseMatrix,
-								 projectionMatrix,
-								 projectionInverseMatrix,
-								 eyePosition, 
-								 lightManagement_->getNumLights());
-}
 void RenderingComponent::renderClean()
 {
 	ID3D11RenderTargetView* renderTargets[GBUFFERID_NUM_BUFFERS];
@@ -290,16 +287,9 @@ void RenderingComponent::gBufferRenderSetRenderTargets()
 	d3dManagement_->getDeviceContext()->OMSetRenderTargets(GBUFFERID_NUM_BUFFERS, renderTargets, d3dManagement_->getDepthBuffer());
 }
 
-DirectX::XMFLOAT4X4 RenderingComponent::calculateFinalMatrix(DirectX::XMFLOAT4X4 viewMatrix,
-															 DirectX::XMFLOAT4X4 projectionMatrix,
-															 SpatialAttribute spatialAttribute,
-															 PositionAttribute positionAttribute,
-															 unsigned int attributeIndex)
+DirectX::XMFLOAT4X4 RenderingComponent::calculateWorldMatrix(SpatialAttribute spatialAttribute,
+															 PositionAttribute positionAttribute)
 {
-	DirectX::CXMMATRIX mView		= DirectX::XMLoadFloat4x4(&viewMatrix);
-	DirectX::CXMMATRIX mProjection	= DirectX::XMLoadFloat4x4(&projectionMatrix);
-
-
 	DirectX::XMMATRIX translation = DirectX::XMMatrixTranslation(positionAttribute.position.x,
 																 positionAttribute.position.y,
 																 positionAttribute.position.z);
@@ -317,7 +307,20 @@ DirectX::XMFLOAT4X4 RenderingComponent::calculateFinalMatrix(DirectX::XMFLOAT4X4
 	DirectX::XMMATRIX rotation = DirectX::XMMatrixRotationQuaternion(qRotation);
 
 	DirectX::XMMATRIX mWorldMatrix = scaling * rotation * translation;
-	DirectX::XMMATRIX mFinalMatrix = mWorldMatrix * mView * mProjection;
+	DirectX::XMFLOAT4X4 worldMatrix;
+	DirectX::XMStoreFloat4x4(&worldMatrix, mWorldMatrix);
+
+	return worldMatrix;
+}
+DirectX::XMFLOAT4X4 RenderingComponent::calculateFinalMatrix(DirectX::XMFLOAT4X4 worldMatrix,
+															 DirectX::XMFLOAT4X4 viewMatrix,
+															 DirectX::XMFLOAT4X4 projectionMatrix)
+{
+	DirectX::CXMMATRIX mView		= DirectX::XMLoadFloat4x4(&viewMatrix);
+	DirectX::CXMMATRIX mProjection	= DirectX::XMLoadFloat4x4(&projectionMatrix);
+	DirectX::CXMMATRIX mWorld		= DirectX::XMLoadFloat4x4(&worldMatrix);
+
+	DirectX::XMMATRIX mFinalMatrix = mWorld * mView * mProjection;
 	
 	DirectX::XMFLOAT4X4 finalMatrix;
 	DirectX::XMStoreFloat4x4(&finalMatrix, mFinalMatrix);

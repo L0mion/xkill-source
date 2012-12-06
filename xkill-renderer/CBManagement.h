@@ -7,6 +7,7 @@
 
 static const unsigned int CB_FRAME_INDEX	= 1;
 static const unsigned int CB_INSTANCE_INDEX = 2;
+static const unsigned int CB_OBJECT_INDEX	= 3;
 
 //! Class for maintaining constant buffers.
 /*!
@@ -23,7 +24,6 @@ public:
 	void reset();
 	//! Updates the constant buffer cbFrame.
 	void updateCBFrame(ID3D11DeviceContext* devcon,
-					   DirectX::XMFLOAT4X4	finalMatrix,
 					   DirectX::XMFLOAT4X4	viewMatrix,
 					   DirectX::XMFLOAT4X4	viewMatrixInverse,
 					   DirectX::XMFLOAT4X4	projectionMatrix,
@@ -34,6 +34,12 @@ public:
 	void updateCBInstance(ID3D11DeviceContext* devcon,
 						  unsigned int screenWidth,
 						  unsigned int screenHeight);
+
+	//! Updates the constant buffer cbObject.
+	void updateCBObject(ID3D11DeviceContext* devcon,
+						DirectX::XMFLOAT4X4 finalMatrix,
+						DirectX::XMFLOAT4X4 worldMatrix,
+						DirectX::XMFLOAT4X4 worldMatrixInverse);
 
 	//!Sets a constant buffer the vertex shader stage.
 	/*!
@@ -81,9 +87,17 @@ private:
 	\sa cbInstance_
 	*/
 	HRESULT initCBInstance(ID3D11Device* device);
+	//! Initializes a the buffer cbObject_.
+	/*!
+	\return Any error encountered.
+	\param device Pointer to DirectX Device.
+	\sa cbObject_
+	*/
+	HRESULT initCBObject(ID3D11Device* device);
 
 	ID3D11Buffer* cbFrame_;		//!< A constant buffer that will be updated every frame.
 	ID3D11Buffer* cbInstance_;	//!< A constant buffer that will be updated once per instance.
+	ID3D11Buffer* cbObject_;	//!< Aconstant buffer that will be updated once per object every frame.
 };
 
 #endif

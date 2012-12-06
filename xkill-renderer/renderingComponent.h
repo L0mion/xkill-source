@@ -93,11 +93,8 @@ private:
 	\param view View-matrix from camera.
 	\param projection Projection-matrix from camera.
 	*/
-	void renderToGBuffer(DirectX::XMFLOAT4X4 view,
-						 DirectX::XMFLOAT4X4 viewInverse,
-						 DirectX::XMFLOAT4X4 projection,
-						 DirectX::XMFLOAT4X4 projectionInverse,
-						 DirectX::XMFLOAT3	eyePosition);
+	void renderToGBuffer(DirectX::XMFLOAT4X4 viewMatrix,
+						 DirectX::XMFLOAT4X4 projectionMatrix);
 	//! Samples from g-buffers and creates a final image using DirectCompute.
 	/*!
 	\sa uavBackBuffer
@@ -111,19 +108,16 @@ private:
 	//! Clears the GBuffers with a single color. 
 	void clearGBuffers();
 
-	void gBufferRenderUpdateConstantBuffers(DirectX::XMFLOAT4X4 finalMatrix,
-											DirectX::XMFLOAT4X4 viewMatrix,
-											DirectX::XMFLOAT4X4 viewInverseMatrix,
-											DirectX::XMFLOAT4X4 projectionMatrix,
-											DirectX::XMFLOAT4X4 projectionInverseMatrix,
-											DirectX::XMFLOAT3	eyePosition);
 	void renderClean();
 	void gBufferRenderSetRenderTargets();
-	DirectX::XMFLOAT4X4 calculateFinalMatrix(DirectX::XMFLOAT4X4 viewMatrix,
-											 DirectX::XMFLOAT4X4 projectionMatrix,
-											 SpatialAttribute spatialAttribute,
-											 PositionAttribute positionAttribute,
-											 unsigned int attributeIndex);
+	
+	DirectX::XMFLOAT4X4 calculateWorldMatrix(SpatialAttribute spatialAttribute,
+											 PositionAttribute positionAttribute);
+
+	DirectX::XMFLOAT4X4 calculateFinalMatrix(DirectX::XMFLOAT4X4 worldMatrix,
+											 DirectX::XMFLOAT4X4 viewMatrix,
+											 DirectX::XMFLOAT4X4 projectionMatrix);
+
 	DirectX::XMFLOAT4X4 calculateMatrixInverse(DirectX::XMFLOAT4X4 matrix);
 
 	//! Initializes D3DManagement-object which will maintain core DirectX objects, e.g. device and device context.
