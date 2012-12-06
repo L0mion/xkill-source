@@ -80,7 +80,7 @@ void InputComponent::onEvent(Event* e)
 		Event_KeyRelease* ekr = static_cast<Event_KeyRelease*>(e);
 
 		// TODO: Handle key release
-		std::cout << "Key " << ekr->keyEnum << " release"<< std::endl;
+		std::cout << "Key " << ekr->keyEnum << " released"<< std::endl;
 	}
 }
 

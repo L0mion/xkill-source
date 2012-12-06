@@ -63,6 +63,16 @@ PhysicsAttribute::~PhysicsAttribute()
 {
 }
 
+ProjectileAttribute::ProjectileAttribute()
+{
+	owner = -1;
+	totalLifeTime = 3.0f;
+	currentLifeTimeLeft = totalLifeTime;
+}
+ProjectileAttribute::~ProjectileAttribute()
+{
+}
+
 SoundAttribute::SoundAttribute()
 {
 }

@@ -27,6 +27,7 @@ public:
 	AttributeStorage<InputAttribute>			inputAttributes_;
 	AttributeStorage<PlayerAttribute>			playerAttributes_;
 	AttributeStorage<BoundingAttribute>			boundingAttributes_;
+	AttributeStorage<ProjectileAttribute>		projectileAttributes_;
 
 	static AttributeManager* getInstance()
 	{

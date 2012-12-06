@@ -40,7 +40,7 @@ public:
 		}
 	}
 
-	// Creates a Entity with a unuique ID
+	// Creates an Entity with a unique ID
 	Entity* createEntity()
 	{
 		// TRUE: Reuse Entity

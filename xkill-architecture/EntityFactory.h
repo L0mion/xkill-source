@@ -31,7 +31,7 @@ public:
 #define CREATE_ATTRIBUTE(AttributeType, AttributeName, OwnerEntity)						\
 	AttributeType* AttributeName = AttributeName = AttributeManager::getInstance()->AttributeName##Attributes_.createAttribute(OwnerEntity)
 	
-	// Connects the AttributePointer by the name PointerName inside AttributeName with a AttributePointer created inside AttributeManager.
+	// Connects the AttributePointer by the name PointerName inside AttributeName with latest AttributePointer created inside AttributeManager.
 	// IMPORTANT: The following formula is used to access AttributeManager, "PointerName+Attributes".
 	// PointerName "position" will result in "positionAttributes" which will work.
 	// PointerName "positionAttribute" will result in "positionAttributeAttributes" which will fail.
@@ -46,15 +46,9 @@ public:
 	void createPlayerEntity(Entity* entity)
 	{
 		CREATE_ATTRIBUTE(PositionAttribute, position, entity);
-		position->position.x = 0.0f;
-		position->position.y = 0.0f;
-		position->position.z = 0.0f;
 
 		CREATE_ATTRIBUTE(SpatialAttribute, spatial, entity);
 		CONNECT_ATTRIBUTES(spatial, position);
-		spatial->scale.x = 1.0f;
-		spatial->scale.y = 1.0f;
-		spatial->scale.z = 1.0f;
 
 		CREATE_ATTRIBUTE(RenderAttribute, render, entity);
 		CONNECT_ATTRIBUTES(render, spatial);
@@ -71,9 +65,8 @@ public:
 		CREATE_ATTRIBUTE(PlayerAttribute, player, entity);
 		CONNECT_ATTRIBUTES(player, render);
 		CONNECT_ATTRIBUTES(player, input);
-
+		CONNECT_ATTRIBUTES(player, camera);
 		static int playerId = 0;
-		player->name = "Printer Terror";
 		player->id = playerId;
 		playerId++;
 	}
@@ -99,6 +92,9 @@ public:
 		CONNECT_ATTRIBUTES(physics, spatial);
 		physics->isProjectile = true;
 		physics->linearVelocity.y = 1.0f;
+
+		//CREATE_ATTRIBUTE(ProjectileAttribute, projectile, entity);
+		//CONNECT_ATTRIBUTES(physics, projectile);
 	}
 
 

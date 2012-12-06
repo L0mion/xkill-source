@@ -41,20 +41,23 @@ void GameComponent::onEvent(Event* e)
 void GameComponent::onUpdate(float delta)
 {
 	// Fetches attributes from AttributeManager through the use of EventManager.
-	// This can be used from everywhere EventManager is known. 
-	std::vector<int>* playerOwners;					GET_ATTRIBUTE_OWNERS(playerOwners, ATTRIBUTE_PLAYER);
+	// This can be used from everywhere EventManager is known.
 	std::vector<PlayerAttribute>* allPlayer;		GET_ATTRIBUTES(allPlayer, PlayerAttribute, ATTRIBUTE_PLAYER);
+	std::vector<CameraAttribute>* allCameras;		GET_ATTRIBUTES(allCameras, CameraAttribute, ATTRIBUTE_CAMERA);
 	std::vector<InputAttribute>* allInput;			GET_ATTRIBUTES(allInput, InputAttribute, ATTRIBUTE_INPUT);
 	std::vector<RenderAttribute>* allRender;		GET_ATTRIBUTES(allRender, RenderAttribute, ATTRIBUTE_RENDER);
 	std::vector<SpatialAttribute>* allSpatial;		GET_ATTRIBUTES(allSpatial, SpatialAttribute, ATTRIBUTE_SPATIAL);
 	std::vector<PositionAttribute>* allPosition;	GET_ATTRIBUTES(allPosition, PositionAttribute, ATTRIBUTE_POSITION);
+	std::vector<CameraAttribute>* allCamera;		GET_ATTRIBUTES(allCamera, CameraAttribute, ATTRIBUTE_CAMERA);
 
-	for(unsigned i=0; i<playerOwners->size(); i++)
+	std::vector<int>* playerAttributesOwners;		GET_ATTRIBUTE_OWNERS(playerAttributesOwners, ATTRIBUTE_PLAYER);
+	for(unsigned i=0; i<playerAttributesOwners->size(); i++)
 	{
-		if(playerOwners->at(i)!=0)
+		if(playerAttributesOwners->at(i)!=0)
 		{
 			// Fetch attributes
 			PlayerAttribute* player		=	&allPlayer->at(i);
+			CameraAttribute* camera		=	&allCameras->at(player->cameraAttribute.index);
 			InputAttribute* input		=	&allInput->at(player->inputAttribute.index);
 			RenderAttribute* render		=	&allRender->at(player->renderAttribute.index);
 			SpatialAttribute* spatial	=	&allSpatial->at(render->spatialAttribute.index);
@@ -62,24 +65,21 @@ void GameComponent::onUpdate(float delta)
 
 			if(input->fire)
 			{
-				//float* position = new float[3];
-				//position[0] = 0.0f; position[1] = 0.0f; position[2] = 0.0f;
-				//float* direction = new float[3];
-				//direction[0] = 1.0f; position[1] = 0.0f; position[2] = 0.0f;
-				//Event_createProjectile projectile(position, direction);
-				//delete position;
-				//delete direction;
-
 				Float3 pos;
 				pos.x = position->position.x;
 				pos.y = position->position.y;
 				pos.z = position->position.z;
 
-				Float4 direction;
-				direction.x = spatial->rotation.x;
-				direction.y = spatial->rotation.y;
-				direction.z = spatial->rotation.z;
-				direction.w = spatial->rotation.w;
+				float lookAtX = camera->mat_view._11;
+				float lookAtY = camera->mat_view._12;
+				float lookAtZ = camera->mat_view._13;
+				//float ffff = camera->mat_view._13;
+				Float4 direction(lookAtX, lookAtY, lookAtZ, 1.0f);
+				
+				//direction.x = spatial->rotation.x;
+				//direction.y = spatial->rotation.y;
+				//direction.z = spatial->rotation.z;
+				//direction.w = spatial->rotation.w;
 				Event_createProjectile projectile(pos, direction);
 				SEND_EVENT(&projectile);
 				input->fire = false;
