@@ -1,6 +1,6 @@
 #include "CollisionShapeManager.h"
 #include <BulletCollision/CollisionShapes/btShapeHull.h>
-#include <xkill-renderer\objLoaderBasic.h>
+#include "objLoaderBasic.h"
 
 CollisionShapeManager::CollisionShapeManager()
 {
@@ -52,12 +52,6 @@ void CollisionShapeManager::createConvexHull(float* verticeData,unsigned int num
 		convexShape->addPoint(hull.getVertexPointer()[i]);
 	}
 	collisionShapes_.push_back(convexShape);
-}
-
-CollisionShapeManager* CollisionShapeManager::getInstance()
-{
-	static CollisionShapeManager instance;
-	return &instance;
 }
 
 void CollisionShapeManager::clean()

@@ -2,6 +2,8 @@
 #include <DirectXMath.h>
 #include <windows.h>
 
+#include "MeshModel.h"
+
 IAttribute::IAttribute()
 {
 }
@@ -38,7 +40,7 @@ RenderAttribute::RenderAttribute()
 {
 	transparent		= false;
 	tessellation	= false;
-	meshID			= 0;
+	meshIndex		= 0;
 	textureID		= 0;
 }
 RenderAttribute::~RenderAttribute()
@@ -51,6 +53,7 @@ PhysicsAttribute::PhysicsAttribute()
 	alive = true;
 	mass = 1.0f;
 	collisionShapeIndex = 0;
+	isProjectile = false;
 
 	angularVelocity.x = 0; 
 	angularVelocity.y = 0;
@@ -99,5 +102,15 @@ PlayerAttribute::PlayerAttribute()
 	totalExecutionTime = 0;
 }
 PlayerAttribute::~PlayerAttribute()
+{
+}
+
+MeshAttribute::~MeshAttribute()
+{
+	//if(mesh)
+	//	delete mesh;
+}
+
+void MeshAttribute::clean()
 {
 }

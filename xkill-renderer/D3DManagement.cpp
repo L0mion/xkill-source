@@ -17,8 +17,6 @@ D3DManagement::D3DManagement(HWND windowHandle, unsigned int screenWidth, unsign
 	rtvBackBuffer_	= nullptr;
 	uavBackBuffer_	= nullptr;
 	dsvDepthBuffer_	= nullptr;
-	rsDefault_		= nullptr;
-	ssDefault_		= nullptr;
 	
 	texBackBuffer_	= nullptr;
 	texDepthBuffer_	= nullptr;
@@ -31,9 +29,6 @@ D3DManagement::~D3DManagement()
 	SAFE_RELEASE(rtvBackBuffer_);
 	SAFE_RELEASE(uavBackBuffer_);
 	SAFE_RELEASE(dsvDepthBuffer_);
-	
-	SAFE_RELEASE(rsDefault_);
-	SAFE_RELEASE(ssDefault_);
 
 	SAFE_RELEASE(texBackBuffer_);
 	SAFE_RELEASE(texDepthBuffer_);
@@ -46,9 +41,6 @@ void D3DManagement::reset()
 	SAFE_RELEASE(rtvBackBuffer_);
 	SAFE_RELEASE(uavBackBuffer_);
 	SAFE_RELEASE(dsvDepthBuffer_);
-	
-	SAFE_RELEASE(rsDefault_);
-	SAFE_RELEASE(ssDefault_);
 
 	SAFE_RELEASE(texBackBuffer_);
 	SAFE_RELEASE(texDepthBuffer_);
@@ -64,10 +56,6 @@ HRESULT D3DManagement::init()
 		hr = initBackBuffer();
 	if(SUCCEEDED(hr))
 		hr = initDepthBuffer();
-	if(SUCCEEDED(hr))
-		hr = initRSDefault();
-	if(SUCCEEDED(hr))
-		hr = initSSDefault();
 //	if(SUCCEEDED(hr))
 //		hr = initDebug();
 
@@ -186,48 +174,6 @@ HRESULT D3DManagement::initDepthBuffer()
 
 	return hr;
 }
-HRESULT D3DManagement::initRSDefault()
-{
-	HRESULT hr = S_OK;
-
-	D3D11_RASTERIZER_DESC rsd;
-	rsd.CullMode				= D3D11_CULL_NONE;
-	rsd.FillMode				= D3D11_FILL_SOLID;
-	rsd.FrontCounterClockwise	= false;
-	rsd.DepthBias				= false;
-	rsd.DepthBiasClamp			= 0;
-	rsd.SlopeScaledDepthBias	= 0;
-	rsd.DepthClipEnable			= true;
-	rsd.ScissorEnable			= false;
-	rsd.MultisampleEnable		= true;
-	rsd.AntialiasedLineEnable	= true;
-
-	hr = device_->CreateRasterizerState(&rsd, &rsDefault_);
-	if(FAILED(hr))
-		ERROR_MSG(L"RenderingComponent::initRSDefault CreateRasterizerState failed");
-	
-	return hr;
-}
-HRESULT D3DManagement::initSSDefault()
-{
-	HRESULT hr = S_OK;
-
-	D3D11_SAMPLER_DESC sampDesc;
-    ZeroMemory(&sampDesc, sizeof(sampDesc));
-	sampDesc.Filter		= D3D11_FILTER_MIN_MAG_MIP_LINEAR;
-    sampDesc.AddressU	= D3D11_TEXTURE_ADDRESS_CLAMP;
-    sampDesc.AddressV	= D3D11_TEXTURE_ADDRESS_CLAMP;
-    sampDesc.AddressW	= D3D11_TEXTURE_ADDRESS_CLAMP;
-    sampDesc.ComparisonFunc = D3D11_COMPARISON_NEVER;
-    sampDesc.MinLOD		= 0;
-    sampDesc.MaxLOD		= D3D11_FLOAT32_MAX;
-
-	hr = device_->CreateSamplerState(&sampDesc, &ssDefault_);
-	if(FAILED(hr))
-		ERROR_MSG(L"RenderingComponent::initSSDefault CreateSamplerState failed");
-
-	return hr;
-}
 LPCWSTR D3DManagement::featureLevelToString(D3D_FEATURE_LEVEL featureLevel)
 {
 	LPCWSTR featureString = L"Default";
@@ -241,18 +187,6 @@ LPCWSTR D3DManagement::featureLevelToString(D3D_FEATURE_LEVEL featureLevel)
 	return featureString;
 }
 
-void D3DManagement::setRSDefault()
-{
-	devcon_->RSSetState(rsDefault_);
-}
-void D3DManagement::setSSDefaultPS()
-{
-	devcon_->PSSetSamplers(0, 1, &ssDefault_);
-}
-void D3DManagement::setSSDefaultCS()
-{
-	devcon_->CSSetSamplers(0, 1, &ssDefault_);
-}
 void D3DManagement::setUAVBackBufferCS()
 {
 	devcon_->CSSetUnorderedAccessViews(0, 1, &uavBackBuffer_, nullptr);

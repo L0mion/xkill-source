@@ -1,7 +1,9 @@
 #pragma once
 #include <cstring>
 
-struct Float2
+#include "dllUtilities.h"
+
+struct DLL_U Float2
 {
 	float x;
     float y;
@@ -11,6 +13,7 @@ struct Float2
 		x = 0.0f;
 		y = 0.0f;
 	};
+	Float2(float x, float y){ this->x = x; this->y = y; };
 	void copy(const float* float2)
 	{
 		//memcpy(this, float2, sizeof(Float2));
@@ -19,7 +22,7 @@ struct Float2
 	}
 };
 
-struct Float3
+struct DLL_U Float3
 {
 	float x;
     float y;
@@ -31,6 +34,7 @@ struct Float3
 		y = 0.0f;
 		z = 0.0f;
 	};
+	Float3(float x, float y, float z) { this->x = x; this->y = y; this->z = z; }
 	void copy(const float* float3)
 	{
 		//memcpy(this, float3, sizeof(Float3));
@@ -40,7 +44,7 @@ struct Float3
 	}
 };
 
-struct Float4
+struct DLL_U Float4
 {
 	float x;
 	float y;
@@ -64,7 +68,7 @@ struct Float4
 	}
 };
 
-struct Float4x4
+struct DLL_U Float4x4
 {
 	union
     {

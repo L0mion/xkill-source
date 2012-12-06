@@ -6,10 +6,10 @@
 
 #include "CollisionShapeManager.h"
 
-PhysicsObject::PhysicsObject() : btRigidBody(1,
-											 new btDefaultMotionState(),
-											 CollisionShapeManager::getInstance()->getCollisionShape(0),
-											 btVector3(0,0,0))
+PhysicsObject::PhysicsObject(CollisionShapeManager* collisionShapeManager) : btRigidBody(1,
+																						 new btDefaultMotionState(),
+																						 collisionShapeManager->getCollisionShape(0),
+																						 btVector3(0,0,0))
 {
 	gravity_.setZero();
 	forces_.setZero();
@@ -32,7 +32,7 @@ void PhysicsObject::removeFromWorld(btDiscreteDynamicsWorld* dynamicsWorld)
 	dynamicsWorld->removeRigidBody(this);
 }
 
-void PhysicsObject::preStep(PhysicsAttribute* physicsAttribute)
+void PhysicsObject::preStep(CollisionShapeManager* collisionShapeManager,PhysicsAttribute* physicsAttribute)
 {
 	SpatialAttribute* spatialAttribute = ATTRIBUTE_CAST(SpatialAttribute,
 														spatialAttribute,
@@ -50,8 +50,7 @@ void PhysicsObject::preStep(PhysicsAttribute* physicsAttribute)
 	setAngularVelocity(btVector3(physicsAttribute->angularVelocity.x,
 					   physicsAttribute->angularVelocity.y,
 					   physicsAttribute->angularVelocity.z));
-	m_collisionShape = CollisionShapeManager::getInstance()
-						->getCollisionShape(physicsAttribute->collisionShapeIndex);
+	m_collisionShape = collisionShapeManager->getCollisionShape(physicsAttribute->collisionShapeIndex);
 	setGravity(gravity_+forces_);
 	activate(true);
 }
@@ -77,4 +76,14 @@ void PhysicsObject::input(InputAttribute* inputAttribute,float delta)
 	movement_ = btVector3(inputAttribute->position.x, 0, inputAttribute->position.y);
 	movement_ = 20*movement_.rotate(btVector3(0,1,0),yaw_);
 	inputAttribute->position.x = inputAttribute->position.y = 0;
+}
+
+bool PhysicsObject::contactTest(btDiscreteDynamicsWorld* dynamicsWorld, PhysicsObject& otherPhysicsObject)
+{
+	//check convexSweepTest
+	
+	CollisionResult collisionResult;
+	dynamicsWorld->contactPairTest(this,&otherPhysicsObject, collisionResult);
+
+	return collisionResult.collision;
 }
