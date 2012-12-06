@@ -21,21 +21,34 @@ bool GameComponent::init()
 void GameComponent::onEvent(Event* e)
 {
 	EventType type = e->getType();
-	if(type == EVENT_PROJECTILECOLLIDINGWITHPLAYER) 
+	switch (type) 
 	{
-		std::cout << "GameComponent::onEvent, EVENT_PROJECTILECOLLIDINGWITHPLAYER" << std::endl;
-
-		//Remove projectile entity
-		Event_ProjectileCollidingWithPlayer* projectileCollidingWithPlayer = static_cast<Event_ProjectileCollidingWithPlayer*>(e);
-		Event_Remove_Entity removeEntityEvent(projectileCollidingWithPlayer->projectileId);
-		SEND_EVENT(&removeEntityEvent);
-
-		//Lower player health
-		//AttributeManager::getInstance()->playerAttributes_
-		//PlayerAttribute* playerAttribute = AttributeManager::getInstance()->playerAttributes_.getAllAttributes();
-
-		projectileCollidingWithPlayer->playerId;
+	case EVENT_PROJECTILECOLLIDINGWITHPLAYER:
+		event_EntitiesColliding(static_cast<Event_ProjectileCollidingWithPlayer*>(e));
+		break;
+	default:
+		break;
 	}
+}
+
+void GameComponent::event_EntitiesColliding(Event_ProjectileCollidingWithPlayer* e)
+{
+	//std::cout << "GameComponent::onEvent, EVENT_PROJECTILECOLLIDINGWITHPLAYER" << std::endl;
+
+	//// First we need to fetch a list of Entities and inspect their attributes to determine
+	//// what to do with them
+	//GET_ENTITIES
+
+	//// Remove projectile entity
+	//e->playerId;
+	//Event_Remove_Entity removeEntityEvent(projectileCollidingWithPlayer->projectileId);
+	//SEND_EVENT(&removeEntityEvent);
+
+	////Lower player health
+	////AttributeManager::getInstance()->playerAttributes_
+	////PlayerAttribute* playerAttribute = AttributeManager::getInstance()->playerAttributes_.getAllAttributes();
+
+	//projectileCollidingWithPlayer->playerId;
 }
 
 void GameComponent::onUpdate(float delta)
