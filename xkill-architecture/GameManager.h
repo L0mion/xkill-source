@@ -63,10 +63,14 @@ public:
 
 	bool init(HWND windowHandle, HWND parentWindowHandle)
 	{
+		// Detect memory leaks
+#if defined(DEBUG) | defined(_DEBUG)
+	_CrtSetDbgFlag( _CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF );
+#endif
+
 		entityManager_ = new EntityManager();
 		ENTITYTYPE listOfEntitiesToBeCreated[] =
 		{
-			PLAYER,
 			PLAYER,
 			PLAYER,
 			PLAYER
@@ -75,7 +79,7 @@ public:
 		//Create all entities as given by of the above enum array
 		for(int i=0;i<nrOfListOfEntitiesToBeCreated;i++)
 		{
-			entityManager_->createEntity(listOfEntitiesToBeCreated[i]);
+			entityManager_->createSpecificEntity(listOfEntitiesToBeCreated[i]);
 		}
 
 		//Initialize components

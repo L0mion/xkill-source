@@ -12,6 +12,26 @@ struct InputAttribute;
 An object that wraps object specific functionality for rigid bodies.
 \ingroup xkill-physics
 */
+
+struct CollisionResult : public btCollisionWorld::ContactResultCallback
+{
+	bool collision;
+
+	CollisionResult()
+	{
+		collision = false;
+	}
+	virtual	btScalar addSingleResult(btManifoldPoint& cp, const btCollisionObjectWrapper* colObj0Wrap,int partId0,int index0,const btCollisionObjectWrapper* colObj1Wrap,int partId1,int index1)
+	{
+		btVector3 ptA = cp.getPositionWorldOnA();
+		btVector3 ptB = cp.getPositionWorldOnB();
+
+		collision = true;
+
+		return 0;
+	}
+};
+
 class PhysicsObject
 {
 private:
@@ -56,6 +76,12 @@ public:
 	\param inputAttribute The attribute containing player controller information
 	*/
 	void input(InputAttribute* inputAttribute, float delta);
+	//! See if an object has been involved in a collision and send an event.
+	/*! 
+	\param dynamicsWorld The simulation object, used to the the object from the simulation
+	\return truthvalue of collision
+	*/
+	bool contactTest(btDiscreteDynamicsWorld* dynamicsWorld, const PhysicsObject& otherPhysicsObject);
 };
 
 #endif //XKILL_PHYSICS_PHYSICSOBJECT
