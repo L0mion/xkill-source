@@ -97,6 +97,7 @@ public:
 	EntityManager()
 	{
 		SUBSCRIBE_TO_EVENT(this, EVENT_CREATEPROJECTILE);
+		SUBSCRIBE_TO_EVENT(this, EVENT_CREATEMESH);
 		SUBSCRIBE_TO_EVENT(this, EVENT_REMOVE_ENTITY);
 	}
 
@@ -114,9 +115,22 @@ public:
 		case EVENT_REMOVE_ENTITY:
 			deleteEntity(static_cast<Event_Remove_Entity*>(e)->entityId);
 			break;
+		case EVENT_CREATEMESH:
+			event_createmesh(static_cast<Event_createMesh*>(e));
+			break;
 		default:
 			break;
 		}
+	}
+
+	void update(float delta)
+	{
+	}
+
+	void event_createmesh(Event_createMesh* e)
+	{
+		Entity* entity = createEntity();
+		entityFactory.createMesh(entity, e);
 	}
 
 	void createSpecificEntity(ENTITYTYPE entityType)

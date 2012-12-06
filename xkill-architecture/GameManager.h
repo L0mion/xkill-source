@@ -30,7 +30,6 @@ so every component should strive to work indepentently.
 #include "EntityManager.h"
 #include "dllArchitecture.h"
 
-
 /// The entry point of the architecture
 /** 
 GameManager is responsible for setting up the initial game state.
@@ -52,8 +51,8 @@ class DLL_A GameManager
 public:
 	GameManager()
 	{
-		componentManager_ = NULL;
-		entityManager_ = NULL;
+		componentManager_	= NULL;
+		entityManager_		= NULL;
 	}
 	~GameManager()
 	{
@@ -64,8 +63,8 @@ public:
 	bool init(HWND windowHandle, HWND parentWindowHandle)
 	{
 		// Detect memory leaks
-#if defined(DEBUG) | defined(_DEBUG)
-	_CrtSetDbgFlag( _CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF );
+#if defined(DEBUG) || defined(_DEBUG)
+		_CrtSetDbgFlag( _CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF );
 #endif
 
 		entityManager_ = new EntityManager();
@@ -92,21 +91,14 @@ public:
 
 			return false;
 		}
+
+
 		return true;
 	}
 
 	void update(float delta)
 	{
 		componentManager_->update(delta);
-
-		//Event_PlaySound playSound(0);
-		//while(1)
-		//{
-		//	EventManager::getInstance()->sendEvent(&playSound);
-		//	componentManager->update(1.0f);
-		//}
-		//std::cin.ignore();
-
 
 		//
 		// End game

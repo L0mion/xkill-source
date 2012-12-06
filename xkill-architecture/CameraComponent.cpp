@@ -16,7 +16,10 @@ CameraComponent::~CameraComponent()
 
 void CameraComponent::init()
 {
-	// Fetch attributes
+	// subscribe to events
+	SUBSCRIBE_TO_EVENT(this, EVENT_WINDOW_RESIZE);
+
+	// fetch attributes
 	GET_ATTRIBUTES(cameraAttributes_, CameraAttribute, ATTRIBUTE_CAMERA);
 	GET_ATTRIBUTES(inputAttributes_, InputAttribute, ATTRIBUTE_INPUT);
 
@@ -50,12 +53,15 @@ void CameraComponent::init()
 
 void CameraComponent::onEvent(Event* e)
 {
-	//EventType type = e->getType();
-	//switch (type) 
-	//{
-	//default:
-	//	break;
-	//}
+	EventType type = e->getType();
+	switch (type) 
+	{
+	case EVENT_WINDOW_RESIZE:
+		event_WindowResize((Event_WindowResize*)e);
+		break;
+	default:
+		break;
+	}
 }
 
 void CameraComponent::onUpdate(float delta)
@@ -83,4 +89,11 @@ void CameraComponent::onUpdate(float delta)
 		
 		cameraAttributes_->at(i).mat_view.copy((float*)&cameras_[i].getView());
 	}
+}
+
+void CameraComponent::event_WindowResize(Event_WindowResize* e)
+{
+	float aspectRatio = e->getAspectRatio();
+
+	// TODO: resize aspect ratios of all cameras 
 }

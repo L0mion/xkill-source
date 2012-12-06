@@ -1,7 +1,9 @@
 #pragma once
 #include <cstring>
 
-struct Float2
+#include "dllUtilities.h"
+
+struct DLL_U Float2
 {
 	float x;
     float y;
@@ -24,7 +26,7 @@ struct Float2
 	}
 };
 
-struct Float3
+struct DLL_U Float3
 {
 	float x;
     float y;
@@ -51,7 +53,7 @@ struct Float3
 	}
 };
 
-struct Float4
+struct DLL_U Float4
 {
 	float x;
 	float y;
@@ -82,7 +84,7 @@ struct Float4
 	}
 };
 
-struct Float4x4
+struct DLL_U Float4x4
 {
 	union
     {

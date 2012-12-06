@@ -1,6 +1,6 @@
 #include "CollisionShapeManager.h"
 #include <BulletCollision/CollisionShapes/btShapeHull.h>
-#include <xkill-renderer\objLoaderBasic.h>
+#include "objLoaderBasic.h"
 
 CollisionShapeManager::CollisionShapeManager()
 {
