@@ -23,9 +23,12 @@ D3DManagement::D3DManagement(HWND windowHandle, unsigned int screenWidth, unsign
 }
 D3DManagement::~D3DManagement()
 {
+	if(swapChain_)
+		swapChain_->SetFullscreenState(false, nullptr);
+	SAFE_RELEASE(swapChain_);
+
 	SAFE_RELEASE(device_);
 	SAFE_RELEASE(devcon_);
-	SAFE_RELEASE(swapChain_);
 	SAFE_RELEASE(rtvBackBuffer_);
 	SAFE_RELEASE(uavBackBuffer_);
 	SAFE_RELEASE(dsvDepthBuffer_);
@@ -44,6 +47,31 @@ void D3DManagement::reset()
 
 	SAFE_RELEASE(texBackBuffer_);
 	SAFE_RELEASE(texDepthBuffer_);
+}
+
+HRESULT D3DManagement::resize(unsigned int screenWidth, unsigned int screenHeight)
+{
+	HRESULT hr = S_OK;
+
+	screenWidth_	= screenWidth;
+	screenHeight_	= screenHeight;
+
+	SAFE_RELEASE(rtvBackBuffer_);
+	SAFE_RELEASE(uavBackBuffer_);
+	SAFE_RELEASE(dsvDepthBuffer_);
+	SAFE_RELEASE(texBackBuffer_);
+	SAFE_RELEASE(texDepthBuffer_);
+
+	hr = swapChain_->ResizeBuffers(1, screenWidth_, screenHeight_, DXGI_FORMAT_R8G8B8A8_UNORM, 0);
+	if(FAILED(hr))
+		ERROR_MSG(L"D3DManagement::resize | swapChain_->ResizeBuffers | Failed!");
+
+	if(SUCCEEDED(hr))
+		hr = initBackBuffer();
+	if(SUCCEEDED(hr))
+		hr = initDepthBuffer();
+
+	return hr;
 }
 
 HRESULT D3DManagement::init()

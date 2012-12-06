@@ -1,18 +1,16 @@
 #include "CollisionShapeManager.h"
 #include <BulletCollision/CollisionShapes/btShapeHull.h>
-#include <xkill-renderer\objLoaderBasic.h>
+#include "objLoaderBasic.h"
 
 CollisionShapeManager::CollisionShapeManager()
 {
+	//if(collisionShapes_.size()==0)
+		//collisionShapes_.push_back(new btSphereShape(50));
 }
 
 CollisionShapeManager::~CollisionShapeManager()
 {
-	while(collisionShapes_.size()!=0)
-	{
-		delete collisionShapes_.at(collisionShapes_.size()-1);
-		collisionShapes_.pop_back();
-	}
+	clean();
 }
 
 btCollisionShape* CollisionShapeManager::getCollisionShape(unsigned int index)
@@ -55,3 +53,12 @@ void CollisionShapeManager::createConvexHull(float* verticeData,unsigned int num
 	}
 	collisionShapes_.push_back(convexShape);
 }
+
+void CollisionShapeManager::clean()
+{
+	while(collisionShapes_.size()!=0)
+	{
+		delete collisionShapes_.at(collisionShapes_.size()-1);
+		collisionShapes_.pop_back();
+	}
+};

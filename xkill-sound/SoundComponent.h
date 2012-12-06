@@ -26,6 +26,8 @@ private:
 
 	void fillEventsToFModVector();
 
+	std::string configMessage();
+
 public:
 	SoundComponent();
 	~SoundComponent();

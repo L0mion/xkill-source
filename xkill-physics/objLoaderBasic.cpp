@@ -44,21 +44,21 @@ void ObjLoaderBasic::parsePosition(std::fstream& infile)
 {
 	float x, y, z;
 	infile >> x >> y >> z;
-	positions_.push_back(VecF3(x, y, z));
+	positions_.push_back(Float3(x, y, z));
 }
 
 void ObjLoaderBasic::parseNormal(std::fstream& infile)
 {
 	float x, y, z;
 	infile >> x >> y >> z;
-	normals_.push_back(VecF3(x, y, z));
+	normals_.push_back(Float3(x, y, z));
 }
 
 void ObjLoaderBasic::parseTexcoord(std::fstream& infile)
 {
 	float u, v;
 	infile >> u >> v;
-	texcoords_.push_back(VecF2(u, v));
+	texcoords_.push_back(Float2(u, v));
 }
 
 void ObjLoaderBasic::parseFace(std::fstream& infile, std::vector<VertexPosNormTex>* vertices)

@@ -101,6 +101,12 @@ public:
 		physics->linearVelocity.y = 1.0f;
 	}
 
+	void createMesh(Entity* entity, Event_createMesh* e)
+	{
+		MeshAttribute* meshAttribute = AttributeManager::getInstance()->meshAttributes_.createAttribute(entity);
+		meshAttribute->mesh = e->mesh;
+	}
+};
 
 	//
 	// Undefine evil macros
@@ -108,6 +114,3 @@ public:
 
 #undef CREATE_ATTRIBUTE
 #undef CONNECT_ATTRIBUTES
-};
-
-

@@ -2,10 +2,11 @@
 
 #include <fstream>
 
-FileParser::FileParser()
+FileParser::FileParser(std::string message)
 {
 	filename_ = "";
 	filepath_ = "";
+	message_ = message;
 	reading_ = true;
 	endOfFile_ = true;
 }
@@ -53,6 +54,7 @@ bool FileParser::startReading(unsigned int startRowNumber)
 		if(!file.is_open())
 		{
 			endOfFile_ = true;
+			createFile();
 			return false;
 		}
 
@@ -167,4 +169,18 @@ bool FileParser::doneWriting(bool append)
 	}
 
 	return true;
+}
+
+void FileParser::createFile()
+{
+	std::string completeFileName = filepath_ + filename_;
+
+	std::ofstream file;
+	file.open(completeFileName, file.app);
+	if(file.is_open())
+	{	
+		file << message_;
+
+		file.close();
+	}
 }

@@ -6,7 +6,7 @@
 class FileParser
 {
 public:
-	FileParser();
+	FileParser(std::string message = "");
 	~FileParser();
 
 	void setFileName(std::string filename);
@@ -26,9 +26,10 @@ private:
 	std::queue<std::string> rows_;
 	std::string filename_;
 	std::string filepath_;
+	std::string message_;
 	bool endOfFile_;
 	bool reading_;
 
 	bool startReading(unsigned int startRowNumber);
-
+	void createFile();
 };

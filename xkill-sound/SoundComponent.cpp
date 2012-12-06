@@ -58,7 +58,7 @@ void SoundComponent::onUpdate(float delta)
 
 void SoundComponent::fillEventsToFModVector()
 {
-	FileParser fp;
+	FileParser fp(configMessage());
 	fp.setFileName("sound.cfg");
 	fp.setFilePath("../../xkill-resources/xkill-configs/");
 	if(fp.startReading())
@@ -70,4 +70,17 @@ void SoundComponent::fillEventsToFModVector()
 		}
 	}
 
+}
+
+std::string SoundComponent::configMessage()
+{
+	std::string message = "";
+
+	message += "// Define a binding between events by using this format\n";
+	message += "// <Fmod event number> = <game event number>\n";
+	message += "// Example:\n";
+	message += "// 0 = 4";
+	message += "// This will bind fmod event '0' to game event '4'";
+
+	return message;
 }

@@ -47,6 +47,7 @@ enum DLL_U EventType
 	EVENT_MOUSEMOVE,
 	EVENT_KEYPRESS,
 	EVENT_KEYRELEASE,
+	EVENT_WINDOW_RESIZE,
 
 	// Get events
 	EVENT_GET_ATTRIBUTE,
@@ -54,6 +55,7 @@ enum DLL_U EventType
 	EVENT_GET_WINDOW_HANDLE,
 
 	// Utilities
+	EVENT_CREATEMESH,
 	EVENT_SHOW_MESSAGEBOX,
 
 	// this is needed, don't touch!
@@ -222,6 +224,30 @@ public:
 	}
 };
 
+/// Alerts about change in window resolution
+/**
+\ingroup events
+*/
+class DLL_U Event_WindowResize : public Event
+{
+public:
+	int width;		
+	int height;		
+
+	Event_WindowResize(int width, int height) : Event(EVENT_WINDOW_RESIZE)
+	{
+		this->width = width;
+		this->height = height;
+	}
+
+	float getAspectRatio()
+	{
+		return (float)width/(float)height;
+	}
+};
+
+
+
 /// Displays a messagebox with the message specified
 /**
 \ingroup events
@@ -251,6 +277,18 @@ public:
 	{
 		this->position = position;
 		this->direction = direction;
+	}
+};
+
+class MeshModel;
+class DLL_U Event_createMesh : public Event
+{
+public:
+	MeshModel* mesh;
+
+	Event_createMesh(MeshModel* mesh) : Event(EVENT_CREATEMESH)
+	{
+		this->mesh = mesh;
 	}
 };
 
