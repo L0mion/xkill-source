@@ -51,8 +51,8 @@ class DLL_A GameManager
 public:
 	GameManager()
 	{
-		componentManager_ = NULL;
-		entityManager_ = NULL;
+		componentManager_	= NULL;
+		entityManager_		= NULL;
 	}
 	~GameManager()
 	{
@@ -63,7 +63,7 @@ public:
 	bool init(HWND windowHandle, HWND parentWindowHandle)
 	{
 		// Detect memory leaks
-#if defined(DEBUG) | defined(_DEBUG)
+#if defined(DEBUG) || defined(_DEBUG)
 		_CrtSetDbgFlag( _CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF );
 #endif
 

@@ -22,7 +22,6 @@
 
 #include "renderingComponent.h"
 
-
 #include <iostream>
 
 RenderingComponent::RenderingComponent(HWND windowHandle)
@@ -50,6 +49,8 @@ RenderingComponent::RenderingComponent(HWND windowHandle)
 	
 	for(unsigned int i = 0; i < GBUFFERID_NUM_BUFFERS; i++)
 		gBuffers_[i] = nullptr;
+
+	float* temp = new float;
 }
 RenderingComponent::~RenderingComponent()
 {
