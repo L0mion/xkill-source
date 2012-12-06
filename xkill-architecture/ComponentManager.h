@@ -29,7 +29,7 @@ class ComponentManager
 private:
 	RenderingComponent* render_;
 	BulletPhysicsComponent physics_;
-	//SoundComponent		sound_;
+	SoundComponent		sound_;
 	CameraComponent		camera_;
 	InputComponent		input_;
 	GameComponent		game_;
@@ -57,8 +57,8 @@ public:
 
 		if(!game_.init())
 			return false;
-		/*if(!sound_.init())
-			return false;*/
+		if(!sound_.init())
+			return false;
 		if(!input_.init(parentWindowHandle, AttributeManager::getInstance()->inputAttributes_.getAllAttributes()))
 			return false;
 
