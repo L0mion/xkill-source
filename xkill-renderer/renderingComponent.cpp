@@ -100,15 +100,23 @@ HRESULT RenderingComponent::resize(unsigned int screenWidth, unsigned int screen
 {
 	HRESULT hr = S_OK;
 
+	d3dManagement_->getDeviceContext()->RSSetViewports(0, 0);
+
+	for(unsigned int i=0; i<GBUFFERID_NUM_BUFFERS; i++)
+	{
+		gBuffers_[i]->reset();
+	}
+
 	hr = d3dManagement_->resize(screenWidth, screenHeight);
-	if(SUCCEEDED(hr))
-		hr = viewportManagement_->resize(screenWidth, screenHeight);
 	for(unsigned int i=0; i<GBUFFERID_NUM_BUFFERS; i++)
 	{
 		if(SUCCEEDED(hr))
 			hr = gBuffers_[i]->resize(d3dManagement_->getDevice(), screenWidth, screenHeight);
 	}
 	
+	if(SUCCEEDED(hr))
+		hr = viewportManagement_->resize(screenWidth, screenHeight);
+
 	return hr;
 }
 
@@ -489,6 +497,8 @@ void RenderingComponent::event_WindowResize( Event_WindowResize* e )
 {
 	int width = e->width;
 	int height = e->height;
+
+	resize(width, height);
 
 	// TODO: resize render window
 }

@@ -78,6 +78,7 @@ public:
 	virtual void yaw(const float angle);
 
 	void setPosition(float position[3]);
+	void setAspectRatio(float aspectRatio);
 
 	DirectX::XMFLOAT3 getPosition();
 	DirectX::XMFLOAT4X4 getView();
