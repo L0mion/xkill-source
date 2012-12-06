@@ -1,33 +1,33 @@
-#include <DirectXMath.h>
-#include <Windows.h>
-#include <windowsx.h>
-#include <tchar.h>
-#include <xkill-renderer/renderingComponent.h>
-//#include "cameraBasic.h"
-#include <xkill-architecture/GameManager.h>
-#include "window.h"
-
-
-#if defined( DEBUG ) || defined( _DEBUG )
-<<<<<<< HEAD
-
-#define _CRTDBG_MAP_ALLOC
-#include <stdlib.h>
-#include <crtdbg.h>
-=======
->>>>>>> Sprint1-SimpleRendering-MeshLoader
-//#include <vld.h>
-#endif
-
-#define _CRTDBG_MAP_ALLOC
-#include <stdlib.h>
-#include <crtdbg.h>
-
-//#ifdef _DEBUG   
-#ifndef DBG_NEW
-#define DBG_NEW new ( _NORMAL_BLOCK , __FILE__ , __LINE__ )      
-#define new DBG_NEW   
-#endif
+//#include <DirectXMath.h>
+//#include <Windows.h>
+//#include <windowsx.h>
+//#include <tchar.h>
+//#include <xkill-renderer/renderingComponent.h>
+////#include "cameraBasic.h"
+//#include <xkill-architecture/GameManager.h>
+//#include "window.h"
+//
+//
+//#if defined( DEBUG ) || defined( _DEBUG )
+//<<<<<<< HEAD
+//
+//#define _CRTDBG_MAP_ALLOC
+//#include <stdlib.h>
+//#include <crtdbg.h>
+//=======
+//>>>>>>> Sprint1-SimpleRendering-MeshLoader
+////#include <vld.h>
+//#endif
+//
+//#define _CRTDBG_MAP_ALLOC
+//#include <stdlib.h>
+//#include <crtdbg.h>
+//
+////#ifdef _DEBUG   
+//#ifndef DBG_NEW
+//#define DBG_NEW new ( _NORMAL_BLOCK , __FILE__ , __LINE__ )      
+//#define new DBG_NEW   
+//#endif
 //#endif  // _DEBUG
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int cmdShow);
@@ -35,24 +35,25 @@ void run(RenderingComponent* renderingComponent, Window* window/*, CameraBasic* 
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int cmdShow)
 {
-	// Detect memory leaks
-	#if defined(DEBUG) | defined(_DEBUG)
-		_CrtSetDbgFlag( _CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF );
-	#endif
+	//// Detect memory leaks
+	//#if defined(DEBUG) | defined(_DEBUG)
+	//	_CrtSetDbgFlag( _CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF );
+	//#endif
 
-	Architecture architecture;
-	unsigned int test = architecture.getTest();
+	//Architecture architecture;
+	//unsigned int test = architecture.getTest();
 
-	UINT screenWidth = 800;
-	UINT screenHeight = 800;
+	//UINT screenWidth = 800;
+	//UINT screenHeight = 800;
 
 
-	Window* window = new Window(hInstance, cmdShow, screenWidth, screenHeight);
-	window->init();
+	//Window* window = new Window(hInstance, cmdShow, screenWidth, screenHeight);
+	//window->init();
 
-	AllocConsole();
-	SetStdHandle(STD_INPUT_HANDLE |STD_OUTPUT_HANDLE, window->getWindowHandle());
+	//AllocConsole();
+	//SetStdHandle(STD_INPUT_HANDLE |STD_OUTPUT_HANDLE, window->getWindowHandle());
 
+<<<<<<< HEAD
 	//GameManager gm;
 	//gm.init(window->getWindowHandle(),window->getWindowHandle(),screenWidth,screenHeight);
 	
@@ -61,6 +62,16 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 		window->checkMessages();
 		//gm.update(1.0f);
 	}
+=======
+	////GameManager gm;
+	////gm.init(window->getWindowHandle(),screenWidth,screenHeight);
+	//
+	//while(window->getIsActive())
+	//{
+	//	window->checkMessages();
+	//	//gm.update(1.0f);
+	//}
+>>>>>>> Sprint1-MeshLoader-MergeConf
 
 	//RenderingComponent* renderingComponent = new RenderingComponent(
 	//	window->getWindowHandle(), 
@@ -76,7 +87,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	HRESULT hr = renderingComponent->init();*/
 
 
-	float aspect = (float)screenWidth/(float)screenHeight;
+	//float aspect = (float)screenWidth/(float)screenHeight;
 	//CameraBasic* camera = new CameraBasic(aspect, 0.78f, 1000.0f, 0.1f, screenWidth, screenHeight);
 	//camera->updateProj();
 
@@ -85,8 +96,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
 	//delete camera;
 	/*delete renderingComponent;*/
-	if(window)
-		delete window;
+	//if(window)
+		//delete window;
 
 	//_CrtDumpMemoryLeaks();
 

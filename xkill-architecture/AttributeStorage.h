@@ -6,6 +6,7 @@
 #include "IAttributeStorage.h"
 #include "AttributeController.h"
 #include <xkill-utilities/AttributePointer.h>
+#include <xkill-utilities/AttributeType.h>
 #include "Entity.h"
 
 
@@ -35,7 +36,6 @@ private:
 	}
 
 public:
-
 	std::vector<T>* getAllAttributes()
 	{
 		return &attributes;
