@@ -16,6 +16,15 @@ private:
 	AttributeManager()
 	{
 		SUBSCRIBE_TO_EVENT(this, EVENT_GET_ATTRIBUTE);
+
+		positionAttributes_		.init(ATTRIBUTE_POSITION);
+		spatialAttributes_		.init(ATTRIBUTE_SPATIAL);
+		renderAttributes_		.init(ATTRIBUTE_RENDER);
+		physicsAttributes_		.init(ATTRIBUTE_PHYSICS);
+		cameraAttributes_		.init(ATTRIBUTE_CAMERA);
+		inputAttributes_		.init(ATTRIBUTE_INPUT);
+		playerAttributes_		.init(ATTRIBUTE_PLAYER);
+		boundingAttributes_		.init(ATTRIBUTE_BOUNDING);
 	}
 
 public:
@@ -63,8 +72,8 @@ public:
 		switch(type) 
 		{
 			// Macro to facilitate adding and refactoring attributes
-#define PUT_ATTRIBUTES_INSIDE_EVENT(Enum, AttributeStorage, EventObject)	\
-		case Enum:															\
+#define PUT_ATTRIBUTES_INSIDE_EVENT(AttributeStorage, EventObject)	\
+		case AttributeStorage.type:											\
 			EventObject->hostVector = AttributeStorage.getAllAttributes();	\
 			EventObject->owners = AttributeStorage.getAllOwners();			\
 			break;
@@ -73,14 +82,14 @@ public:
 			// AttributeStorage and store that information inside 
 			// Event_getAttribute
 
-			PUT_ATTRIBUTES_INSIDE_EVENT(ATTRIBUTE_POSITION,	positionAttributes_,	e);
-			PUT_ATTRIBUTES_INSIDE_EVENT(ATTRIBUTE_SPATIAL,	spatialAttributes_,		e);
-			PUT_ATTRIBUTES_INSIDE_EVENT(ATTRIBUTE_RENDER,	renderAttributes_,		e);
-			PUT_ATTRIBUTES_INSIDE_EVENT(ATTRIBUTE_PHYSICS,	physicsAttributes_,		e);
-			PUT_ATTRIBUTES_INSIDE_EVENT(ATTRIBUTE_CAMERA,	cameraAttributes_,		e);
-			PUT_ATTRIBUTES_INSIDE_EVENT(ATTRIBUTE_INPUT,	inputAttributes_,		e);
-			PUT_ATTRIBUTES_INSIDE_EVENT(ATTRIBUTE_PLAYER,	playerAttributes_,		e);
-			PUT_ATTRIBUTES_INSIDE_EVENT(ATTRIBUTE_BOUNDING,	boundingAttributes_,	e);
+			PUT_ATTRIBUTES_INSIDE_EVENT(positionAttributes_,	e);
+			PUT_ATTRIBUTES_INSIDE_EVENT(spatialAttributes_,		e);
+			PUT_ATTRIBUTES_INSIDE_EVENT(renderAttributes_,		e);
+			PUT_ATTRIBUTES_INSIDE_EVENT(physicsAttributes_,		e);
+			PUT_ATTRIBUTES_INSIDE_EVENT(cameraAttributes_,		e);
+			PUT_ATTRIBUTES_INSIDE_EVENT(inputAttributes_,		e);
+			PUT_ATTRIBUTES_INSIDE_EVENT(playerAttributes_,		e);
+			PUT_ATTRIBUTES_INSIDE_EVENT(boundingAttributes_,	e);
 
 			// undefine dirty macro
 #undef PUT_ATTRIBUTES_INSIDE_EVENT
