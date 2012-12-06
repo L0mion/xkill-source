@@ -5,8 +5,6 @@
 #include <DirectXMath.h>
 #include <vector>
 
-#include <xkill-renderer/mathBasic.h>
-
 #define VK_A 0x41
 #define VK_D 0x44
 #define VK_S 0x53

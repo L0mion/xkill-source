@@ -8,10 +8,14 @@
 #include <d3d11.h>
 #include <vector>
 
+#include <xkill-utilities/IObserver.h>
+
 #include "dllRenderer.h"
 #include "gBufferID.h"
-//#include "d3dInterface.h"
-#include <xkill-utilities/IObserver.h>
+
+#if defined (DEBUG) || (DEBUG_)
+#include <vld.h>
+#endif //DEBUG || DEBUG_
 
 class D3DManagement;
 class FXManagement;
@@ -21,8 +25,8 @@ class SSManagement;
 class RSManagement;
 class GBuffer;
 class D3DDebug;
-class ObjLoaderBasic;
 class LightManagement;
+class MeshManagement;
 
 namespace DirectX
 {
@@ -33,10 +37,6 @@ struct RenderAttribute;
 struct CameraAttribute;
 struct SpatialAttribute;
 struct PositionAttribute;
-
-//static const unsigned int MULTISAMPLES_GBUFFERS		= 1;
-//static const unsigned int MULTISAMPLES_BACKBUFFER	= 1;
-//static const unsigned int MULTISAMPLES_DEPTHBUFFER	= 1;
 
 struct VertexPosNormTex;
 
@@ -123,6 +123,9 @@ private:
 	/*!
 	\return Any error encountered during initialization.
 	*/
+	
+	HRESULT initMeshManagement();
+	
 	HRESULT initViewport();
 	//! Creates a SSManaegement object that will maintain sampler states.
 	/*!
@@ -182,6 +185,7 @@ private:
 	*/
 	DirectX::XMFLOAT4X4 calculateWorldMatrix(SpatialAttribute spatialAttribute,
 											 PositionAttribute positionAttribute);
+
 	//! Calculates a final matrix that is used to transform an object from local space to homogeneous clip space.
 	/*!
 	\return The calculated matrix
@@ -198,9 +202,7 @@ private:
 	\param matrix The matrix to invert.
 	*/
 	DirectX::XMFLOAT4X4 calculateMatrixInverse(DirectX::XMFLOAT4X4 matrix);
-
 	
-
 	/*desc*/
 	HWND windowHandle_;				//!< WINAPI-handle to window.
 	unsigned int screenWidth_;		//!< Width of screen.
@@ -212,26 +214,17 @@ private:
 	CBManagement*		cbManagement_;						//!< Maintaining constant buffers.
 	LightManagement*	lightManagement_;					//!< Maintaining lights.
 	ViewportManagement* viewportManagement_;				//!< Maintaining viewports.
+
+	MeshManagement*		meshManagement_;
+	
 	SSManagement*		ssManagement_;						//!< Maintaining sampler states.
 	RSManagement*		rsManagement_;						//!< Maintaining rasterizer states.
+	
 	D3DDebug*			d3dDebug_;							//!< Used for detecting live COM-objects.
 	GBuffer*			gBuffers_[GBUFFERID_NUM_BUFFERS];	//!< Containing data for deferred rendering.
 
 	std::vector<RenderAttribute>* renderAttributes_;
 	std::vector<CameraAttribute>* cameraAttributes_;
-	
-
-	//temp
-	ID3D11Buffer*			vertexBuffer_;		//!< Mock buffer sending vertices to shader.
-	std::vector<VertexPosNormTex>*	vertices_;	//!< Mock vertices.
-	ObjLoaderBasic*			objLoader_;			//!< Basic obj-loader used to debug renderer.
-
-	//! Creates a mockup vertexbuffer that loads it's vertices from a basic .obj-loader using bth.obj.
-	/*!
-	\return Any error encountered during initialization.
-	\sa ObjLoaderBasic
-	*/
-	HRESULT initVertexBuffer();
 };
 
 #endif //XKILL_RENDERER_RENDERINGCOMPONENT_H

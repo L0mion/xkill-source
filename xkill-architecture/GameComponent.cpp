@@ -14,11 +14,28 @@ GameComponent::~GameComponent(void)
 
 bool GameComponent::init()
 {
+	SUBSCRIBE_TO_EVENT(this, EVENT_PROJECTILECOLLIDINGWITHPLAYER);
 	return true;
 }
 
 void GameComponent::onEvent(Event* e)
 {
+	EventType type = e->getType();
+	if(type == EVENT_PROJECTILECOLLIDINGWITHPLAYER) 
+	{
+		std::cout << "GameComponent::onEvent, EVENT_PROJECTILECOLLIDINGWITHPLAYER" << std::endl;
+
+		//Remove projectile entity
+		Event_ProjectileCollidingWithPlayer* projectileCollidingWithPlayer = static_cast<Event_ProjectileCollidingWithPlayer*>(e);
+		Event_Remove_Entity removeEntityEvent(projectileCollidingWithPlayer->projectileId);
+		SEND_EVENT(&removeEntityEvent);
+
+		//Lower player health
+		//AttributeManager::getInstance()->playerAttributes_
+		//PlayerAttribute* playerAttribute = AttributeManager::getInstance()->playerAttributes_.getAllAttributes();
+
+		projectileCollidingWithPlayer->playerId;
+	}
 }
 
 void GameComponent::onUpdate(float delta)

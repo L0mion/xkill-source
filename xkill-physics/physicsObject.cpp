@@ -19,15 +19,17 @@ PhysicsObject::~PhysicsObject()
 
 void PhysicsObject::Init(PhysicsAttribute* physicsAttribute, btDiscreteDynamicsWorld* dynamicsWorld)
 {
-	btTransform a;
-	a.setOrigin(btVector3(0,0,-90));
-	a.setRotation(btQuaternion(0,0,0,1));
+	btTransform transform;
+	transform.setOrigin(btVector3(0,0,-90));
+	transform.setRotation(btQuaternion(0,0,0,1));
 	rigidBody_ = new btRigidBody(physicsAttribute->mass,
-								 new btDefaultMotionState(a),
-								 new btSphereShape(50),
-								 btVector3(0,0,0));
+		new btDefaultMotionState(transform),
+		new btSphereShape(50), //CollisionShape
+		btVector3(0,0,0));
 	//rigidBody_->updateInertiaTensor();
+
 	dynamicsWorld->addRigidBody(rigidBody_);
+
 	forces_ = btVector3(0,0,0);
 	movement_ = btVector3(0,0,0);
 	yaw_ = 0;
@@ -85,7 +87,6 @@ void PhysicsObject::preStep(PhysicsAttribute* physicsAttribute)
 	rigidBody_->activate(true);
 }
 
-#include <iostream>
 void PhysicsObject::postStep(PhysicsAttribute* physicsAttribute)
 {
 	SpatialAttribute* spatialAttribute = ATTRIBUTE_CAST(SpatialAttribute,spatialAttribute,physicsAttribute);
@@ -120,4 +121,14 @@ void PhysicsObject::input(InputAttribute* inputAttribute,float delta)
 	movement_ = 20*movement_.rotate(btVector3(0,1,0),yaw_);
 	//forces_ =movement_;
 	inputAttribute->position.x = inputAttribute->position.y = 0;
+}
+
+bool PhysicsObject::contactTest(btDiscreteDynamicsWorld* dynamicsWorld, const PhysicsObject& otherPhysicsObject)
+{
+	//check convexSweepTest
+	
+	CollisionResult collisionResult;
+	dynamicsWorld->contactPairTest(rigidBody_,otherPhysicsObject.rigidBody_, collisionResult);
+
+	return collisionResult.collision;
 }

@@ -6,7 +6,8 @@
 #include <fstream>
 
 #include "mathBasic.h"
-#include "vertices.h"
+#include <xkill-utilities/MeshVertices.h>
+#include <xkill-utilities/Math.h>
 
 class ObjLoaderBasic
 {
@@ -17,9 +18,9 @@ public:
 
 private:
 	
-	std::vector<VecF3> positions_;
-	std::vector<VecF3> normals_;
-	std::vector<VecF2> texcoords_;
+	std::vector<Float3> positions_;
+	std::vector<Float3> normals_;
+	std::vector<Float2> texcoords_;
 
 	void parsePosition(std::fstream& infile);
 	void parseNormal(std::fstream& infile);

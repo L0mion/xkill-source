@@ -1,7 +1,9 @@
 #include "renderingComponent.h"
 
 #include <xkill-utilities/AttributeType.h>
-#include <DirectXMath.h>
+#include <xkill-utilities/EventManager.h>
+#include <xkill-utilities/MeshVertices.h>
+#include <xkill-utilities/MeshModel.h>
 
 #include "D3DManagement.h"
 #include "fxManagement.h"
@@ -13,20 +15,19 @@
 #include "d3dDebug.h"
 #include "CBManagement.h"
 #include "LightManagement.h"
-#include "objLoaderBasic.h"
-#include "mathBasic.h"
-#include "vertices.h"
+#include "MeshManagement.h"
+#include "MeshModelD3D.h"
+#include "VB.h"
+#include "IB.h"
 
-#include <xkill-utilities/EventManager.h>
-
+#include "renderingComponent.h"
 
 #include <iostream>
 
 RenderingComponent::RenderingComponent(HWND windowHandle)
 {
-	GET_ATTRIBUTES(renderAttributes_, RenderAttribute, ATTRIBUTE_RENDER);
 	GET_ATTRIBUTES(cameraAttributes_, CameraAttribute, ATTRIBUTE_CAMERA);
-
+	
 	Event_getWindowResolution windowResolution;
 	SEND_EVENT(&windowResolution);
 
@@ -39,6 +40,7 @@ RenderingComponent::RenderingComponent(HWND windowHandle)
 	fxManagement_		= nullptr;
 	cbManagement_		= nullptr; 
 	lightManagement_	= nullptr;
+	meshManagement_		= nullptr;
 	viewportManagement_ = nullptr;
 	ssManagement_		= nullptr;
 	rsManagement_		= nullptr;
@@ -47,18 +49,17 @@ RenderingComponent::RenderingComponent(HWND windowHandle)
 	
 	for(unsigned int i = 0; i < GBUFFERID_NUM_BUFFERS; i++)
 		gBuffers_[i] = nullptr;
-	
-	//temp
-	vertexBuffer_	= nullptr;
-	vertices_		= nullptr;
-	objLoader_		= nullptr;
+
+	float* temp = new float;
 }
 RenderingComponent::~RenderingComponent()
 {
 	SAFE_DELETE(d3dManagement_);
 	SAFE_DELETE(fxManagement_);
+
 	SAFE_DELETE(cbManagement_);
 	SAFE_DELETE(lightManagement_);
+	SAFE_DELETE(meshManagement_);
 	SAFE_DELETE(viewportManagement_);
 	SAFE_DELETE(ssManagement_);
 	SAFE_DELETE(rsManagement_);
@@ -68,10 +69,6 @@ RenderingComponent::~RenderingComponent()
 
 	for(unsigned int i = 0; i < GBUFFERID_NUM_BUFFERS; i++)
 		SAFE_DELETE(gBuffers_[i]);
-
-	//temp
-	SAFE_RELEASE(vertexBuffer_);
-	SAFE_DELETE(objLoader_);
 }
 
 void RenderingComponent::reset()
@@ -96,9 +93,6 @@ void RenderingComponent::reset()
 			gBuffers_[i]->reset();
 	
 
-	//temp
-	SAFE_RELEASE(vertexBuffer_);
-
 	EventManager::getInstance();
 }
 
@@ -120,6 +114,7 @@ HRESULT RenderingComponent::resize(unsigned int screenWidth, unsigned int screen
 
 HRESULT RenderingComponent::init()
 {
+	//float* f = new float();
 	HRESULT hr = S_OK;
 
 	if(SUCCEEDED(hr))
@@ -131,6 +126,8 @@ HRESULT RenderingComponent::init()
 	if(SUCCEEDED(hr))
 		hr = initLightManagement();
 	if(SUCCEEDED(hr))
+		hr = initMeshManagement();
+	if(SUCCEEDED(hr))
 		hr = initViewport();
 	if(SUCCEEDED(hr))
 		hr = initSSManagement();
@@ -140,10 +137,6 @@ HRESULT RenderingComponent::init()
 //		hr = initDebug();
 	if(SUCCEEDED(hr))
 		hr = initGBuffers();
-	
-	//temp
-	if(SUCCEEDED(hr)) 
-		hr = initVertexBuffer();
 
 	return hr;
 }
@@ -180,9 +173,11 @@ void RenderingComponent::onUpdate(float delta)
 	
 	renderToBackBuffer();
 }
-void RenderingComponent::renderToGBuffer(DirectX::XMFLOAT4X4 viewMatrix, DirectX::XMFLOAT4X4 projectionMatrix)
-										
+void RenderingComponent::renderToGBuffer(DirectX::XMFLOAT4X4 viewMatrix, DirectX::XMFLOAT4X4 projectionMatrix)									
 {
+	ID3D11Device*			device = d3dManagement_->getDevice();
+	ID3D11DeviceContext*	devcon = d3dManagement_->getDeviceContext();
+
 	fxManagement_->getDefaultVS()->set(d3dManagement_->getDeviceContext());
 	fxManagement_->getDefaultPS()->set(d3dManagement_->getDeviceContext());
 	ssManagement_->setPS(d3dManagement_->getDeviceContext(), SS_ID_DEFAULT, 0);
@@ -193,28 +188,53 @@ void RenderingComponent::renderToGBuffer(DirectX::XMFLOAT4X4 viewMatrix, DirectX
 	d3dManagement_->clearDepthBuffer();
 
 	// Fetch attributes
-	std::vector<RenderAttribute>* allRender;		GET_ATTRIBUTES(allRender, RenderAttribute, ATTRIBUTE_RENDER);
-	std::vector<SpatialAttribute>* allSpatial;		GET_ATTRIBUTES(allSpatial, SpatialAttribute, ATTRIBUTE_SPATIAL);
-	std::vector<PositionAttribute>* allPosition;	GET_ATTRIBUTES(allPosition, PositionAttribute, ATTRIBUTE_POSITION);
+	std::vector<RenderAttribute>*	allRender;		GET_ATTRIBUTES(allRender,	RenderAttribute,	ATTRIBUTE_RENDER);
+	std::vector<SpatialAttribute>*	allSpatial;		GET_ATTRIBUTES(allSpatial,	SpatialAttribute,	ATTRIBUTE_SPATIAL);
+	std::vector<PositionAttribute>*	allPosition;	GET_ATTRIBUTES(allPosition,	PositionAttribute,	ATTRIBUTE_POSITION);
 	
 	DirectX::XMFLOAT4X4 worldMatrix;  
 	DirectX::XMFLOAT4X4 worldMatrixInverse;
 	DirectX::XMFLOAT4X4 finalMatrix;
-	for(unsigned int i=0; i<renderAttributes_->size(); i++)
+	
+	unsigned int meshIndex; MeshModelD3D* meshModelD3D;
+	RenderAttribute* renderAt; SpatialAttribute* spatialAt; PositionAttribute* positionAt;
+	for(unsigned int i=0; i<allRender->size(); i++)
 	{
+		renderAt	= &allRender->at(i);
+		meshIndex	= renderAt->meshIndex;
+		spatialAt	= &allSpatial->at(renderAt->spatialAttribute.index);
+		positionAt	= &allPosition->at(spatialAt->positionAttribute.index);
+		
+		meshModelD3D = meshManagement_->getMeshModelD3D(meshIndex, d3dManagement_->getDevice());
+		VB*					vb	= meshModelD3D->getVB();
+		std::vector<IB*>	ibs	= meshModelD3D->getIBs();
+
 		worldMatrix			= calculateWorldMatrix(allSpatial->at(i), allPosition->at(i));
 		worldMatrixInverse	= calculateMatrixInverse(worldMatrix);
 		finalMatrix			= calculateFinalMatrix(worldMatrix, viewMatrix, projectionMatrix);
 		
-		cbManagement_->vsSet(CB_OBJECT_INDEX, 2, d3dManagement_->getDeviceContext());
-		cbManagement_->updateCBObject(d3dManagement_->getDeviceContext(), finalMatrix, worldMatrix, worldMatrixInverse);
+		cbManagement_->vsSet(CB_OBJECT_INDEX, 2, devcon);
+		cbManagement_->updateCBObject(devcon, finalMatrix, worldMatrix, worldMatrixInverse);
 
 		UINT stride = sizeof(VertexPosNormTex);
 		UINT offset = 0;
-		d3dManagement_->getDeviceContext()->IASetVertexBuffers(0, 1, &vertexBuffer_, &stride, &offset);
-		d3dManagement_->getDeviceContext()->IASetInputLayout(fxManagement_->getILDefaultVSPosNormTex());
-		d3dManagement_->getDeviceContext()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-		d3dManagement_->getDeviceContext()->Draw(vertices_->size(), 0);
+		
+		ID3D11Buffer* vertexBuffer = vb->getVB();
+		devcon->IASetVertexBuffers(
+			0, 
+			1, 
+			&vertexBuffer, 
+			&stride, 
+			&offset);
+
+		for(unsigned int i = 0; i < ibs.size(); i++)
+		{
+			devcon->IASetIndexBuffer(ibs[i]->getIB(), DXGI_FORMAT_R32_UINT, offset);
+
+			devcon->IASetInputLayout(fxManagement_->getILDefaultVSPosNormTex());
+			devcon->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+			devcon->DrawIndexed(ibs[i]->getNumIndices(), 0, 0);
+		}
 	}
 
 	renderGBufferClean();
@@ -383,6 +403,14 @@ HRESULT RenderingComponent::initLightManagement()
 
 	return hr;
 }
+HRESULT RenderingComponent::initMeshManagement()
+{
+	HRESULT hr = S_OK;
+
+	meshManagement_ = new MeshManagement();
+
+	return hr;
+}
 HRESULT RenderingComponent::initViewport()
 {
 	HRESULT hr = S_OK;
@@ -441,31 +469,6 @@ HRESULT RenderingComponent::initGBuffers()
 
 	return hr;
 }
-
-HRESULT RenderingComponent::initVertexBuffer()
-{
-	HRESULT hr = S_OK;
-
-	vertices_ = new std::vector<VertexPosNormTex>();
-	objLoader_ = new ObjLoaderBasic();
-	objLoader_->parseObjectFile("../../xkill-resources/xkill-models/bth.obj", vertices_);
-
-	D3D11_BUFFER_DESC vbd;
-	vbd.Usage = D3D11_USAGE_DYNAMIC;
-	vbd.ByteWidth = sizeof(VertexPosNormTex) * vertices_->size();
-	vbd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-	vbd.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
-	vbd.MiscFlags = 0;
-	
-	D3D11_SUBRESOURCE_DATA vinitData;
-	vinitData.pSysMem = &vertices_->at(0);
-	d3dManagement_->getDevice()->CreateBuffer(&vbd, &vinitData, &vertexBuffer_);
-	if(FAILED(hr))
-		ERROR_MSG(L"RenderingComponent::initVertexBuffer CreateBuffer failed");
-
-	return hr;
-}
-
 void RenderingComponent::onEvent( Event* e )
 {
 

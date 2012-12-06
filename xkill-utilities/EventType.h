@@ -40,6 +40,8 @@ enum DLL_U EventType
 	EVENT_PLAYSOUND,
 	EVENT_RUMBLE,
 	EVENT_CREATEPROJECTILE,
+	EVENT_PROJECTILECOLLIDINGWITHPLAYER,
+	EVENT_REMOVE_ENTITY,
 
 	EVENT_MOUSEMOVE,
 	EVENT_KEYPRESS,
@@ -51,6 +53,7 @@ enum DLL_U EventType
 	EVENT_GET_WINDOW_HANDLE,
 
 	// Utilities
+	EVENT_CREATEMESH,
 	EVENT_SHOW_MESSAGEBOX,
 
 	// this is needed, don't touch!
@@ -209,6 +212,10 @@ public:
 	}
 };
 
+/// Tells EntityManager to create a projectile entity
+/**
+\ingroup events
+*/
 class DLL_U Event_createProjectile : public Event
 {
 public:
@@ -222,6 +229,54 @@ public:
 	}
 };
 
+class MeshModel;
+class DLL_U Event_createMesh : public Event
+{
+public:
+	MeshModel* mesh;
+
+	Event_createMesh(MeshModel* mesh) : Event(EVENT_CREATEMESH)
+	{
+		this->mesh = mesh;
+	}
+};
+
+/// Used in GameComponent
+/**
+\ingroup events
+*/
+class DLL_U Event_ProjectileCollidingWithPlayer : public Event
+{
+public:
+	int projectileId;
+	int playerId;
+
+	Event_ProjectileCollidingWithPlayer(int projectileId, int playerId) : Event(EVENT_PROJECTILECOLLIDINGWITHPLAYER)
+	{
+		this->projectileId = projectileId;
+		this->playerId = playerId;
+	}
+};
+
+/// Alerts EntityManager to remove an entity with specified id
+/**
+\ingroup events
+*/
+class DLL_U Event_Remove_Entity : public Event
+{
+public:
+	int entityId;
+
+	Event_Remove_Entity(int entityId) : Event(EVENT_REMOVE_ENTITY)
+	{
+		this->entityId = entityId;
+	}
+};
+
+/// Alerts InputComponent about key press
+/**
+\ingroup events
+*/
 class DLL_U Event_KeyPress : public Event
 {
 public:
@@ -233,6 +288,10 @@ public:
 	}
 };
 
+/// Alerts InputComponent about key release
+/**
+\ingroup events
+*/
 class DLL_U Event_KeyRelease : public Event
 {
 public:

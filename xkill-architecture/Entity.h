@@ -34,6 +34,7 @@ public:
 	{
 		for(unsigned int i = 0; i < attributes.size(); i++)
 			attributes[i].remove();
+		attributes.clear();
 	}
 
 	void addAttribute(AttributeController attribute)

@@ -47,3 +47,9 @@ int InputDevice::getPlayerID()
 {
 	return playerID_;
 }
+
+void InputDevice::setButtonsToNotReleased()
+{
+	for(unsigned int i = 0; i < buttons_.size(); i++)
+		buttons_[i].setChecked();
+}

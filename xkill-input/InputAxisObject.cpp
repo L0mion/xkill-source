@@ -15,6 +15,11 @@ InputAxisObject::~InputAxisObject(void)
 {
 }
 
+void InputAxisObject::AddValue(float value)
+{
+	value_ += value;
+}
+
 void InputAxisObject::SetValue(float value)
 {
 	if(value > 1.0f)

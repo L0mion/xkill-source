@@ -21,6 +21,8 @@ public:
 	InputAxisObject(int minValue, int maxValue);
 	virtual ~InputAxisObject(void);
 
+	void AddValue(float value);
+
 	//! Sets value without formatting
 	/*!
 	Value should be within -1.0f and 1.0f and will be capped if not.

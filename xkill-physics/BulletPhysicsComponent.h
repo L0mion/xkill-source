@@ -66,7 +66,7 @@ public:
 	~BulletPhysicsComponent();
 	//! Initialize the physics component, creates bullet objects and storage for internal representation
 	bool init();
-	//! Runs every frame and step simulation a number of fixed-length time-steps depending on delta
+	//! Runs every frame and step simulation a number of fixed-length time-steps depending on delta. Transfers data to and from the internal represenation in Bullet Physics and the PhysicsAttributes.
 	/*!
 	\param delta The time which the frame should simulate
 	*/

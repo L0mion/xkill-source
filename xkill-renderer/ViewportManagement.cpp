@@ -145,8 +145,8 @@ HRESULT ViewportManagement::initViewportGrid(unsigned int gridSize)
 	{
 		for(unsigned int column = 0; column < numGridColumns; column++)
 		{
-			viewport.TopLeftX = column * (viewportWidth_ + borderSize_);
-			viewport.TopLeftY = row * (viewportHeight_ + borderSize_);
+			viewport.TopLeftX = static_cast<FLOAT>(column * (viewportWidth_ + borderSize_));
+			viewport.TopLeftY = static_cast<FLOAT>(row * (viewportHeight_ + borderSize_));
 
 			viewports->push_back(viewport);
 		}
