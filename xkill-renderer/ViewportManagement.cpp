@@ -30,6 +30,20 @@ void ViewportManagement::setViewport(ID3D11DeviceContext* devcon, unsigned int i
 	devcon->RSSetViewports(1, &viewports->at(index));
 }
 
+HRESULT ViewportManagement::resize(unsigned int screenWidth, unsigned int screenHeight)
+{
+	HRESULT hr = S_OK;
+
+	screenWidth_	= screenWidth;
+	screenHeight_	= screenHeight;
+
+	viewports->clear();
+
+	hr = init();
+
+	return hr;
+}
+
 HRESULT ViewportManagement::init()
 {
 	viewports = new std::vector<D3D11_VIEWPORT>();
@@ -131,8 +145,8 @@ HRESULT ViewportManagement::initViewportGrid(unsigned int gridSize)
 	{
 		for(unsigned int column = 0; column < numGridColumns; column++)
 		{
-			viewport.TopLeftX = column * (viewportWidth_ + borderSize_);
-			viewport.TopLeftY = row * (viewportHeight_ + borderSize_);
+			viewport.TopLeftX = static_cast<FLOAT>(column * (viewportWidth_ + borderSize_));
+			viewport.TopLeftY = static_cast<FLOAT>(row * (viewportHeight_ + borderSize_));
 
 			viewports->push_back(viewport);
 		}

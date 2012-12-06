@@ -1,30 +1,33 @@
 #include "renderingComponent.h"
 
 #include <xkill-utilities/AttributeType.h>
-#include <DirectXMath.h>
+#include <xkill-utilities/EventManager.h>
+#include <xkill-utilities/MeshVertices.h>
+#include <xkill-utilities/MeshModel.h>
 
 #include "D3DManagement.h"
 #include "fxManagement.h"
 #include "ViewportManagement.h"
+#include "SSManagement.h"
+#include "RSManagement.h"
 #include "gBuffer.h"
 #include "renderingUtilities.h"
 #include "d3dDebug.h"
 #include "CBManagement.h"
 #include "LightManagement.h"
-#include "objLoaderBasic.h"
-#include "mathBasic.h"
-#include "vertices.h"
+#include "MeshManagement.h"
+#include "MeshModelD3D.h"
+#include "VB.h"
+#include "IB.h"
 
-#include <xkill-utilities/EventManager.h>
-
+#include "renderingComponent.h"
 
 #include <iostream>
 
 RenderingComponent::RenderingComponent(HWND windowHandle)
 {
-	GET_ATTRIBUTES(renderAttributes_, RenderAttribute, ATTRIBUTE_RENDER);
 	GET_ATTRIBUTES(cameraAttributes_, CameraAttribute, ATTRIBUTE_CAMERA);
-
+	
 	Event_getWindowResolution windowResolution;
 	SEND_EVENT(&windowResolution);
 
@@ -37,39 +40,84 @@ RenderingComponent::RenderingComponent(HWND windowHandle)
 	fxManagement_		= nullptr;
 	cbManagement_		= nullptr; 
 	lightManagement_	= nullptr;
+	meshManagement_		= nullptr;
 	viewportManagement_ = nullptr;
+	ssManagement_		= nullptr;
+	rsManagement_		= nullptr;
+
 	d3dDebug_	= nullptr;
 	
 	for(unsigned int i = 0; i < GBUFFERID_NUM_BUFFERS; i++)
 		gBuffers_[i] = nullptr;
-	
-	//temp
-	vertexBuffer_	= nullptr;
-	vertices_		= nullptr;
-	objLoader_		= nullptr;
 }
 RenderingComponent::~RenderingComponent()
 {
 	SAFE_DELETE(d3dManagement_);
 	SAFE_DELETE(fxManagement_);
+
 	SAFE_DELETE(cbManagement_);
 	SAFE_DELETE(lightManagement_);
+	SAFE_DELETE(meshManagement_);
 	SAFE_DELETE(viewportManagement_);
+	SAFE_DELETE(ssManagement_);
+	SAFE_DELETE(rsManagement_);
 	
 	//d3dDebug_->reportLiveDeviceObjects();
 	SAFE_DELETE(d3dDebug_);
 
 	for(unsigned int i = 0; i < GBUFFERID_NUM_BUFFERS; i++)
 		SAFE_DELETE(gBuffers_[i]);
-
-	//temp
-	SAFE_RELEASE(vertexBuffer_);
-	SAFE_DELETE(objLoader_);
 }
-HRESULT RenderingComponent::init()
+
+void RenderingComponent::reset()
+{
+	if(d3dManagement_)
+		d3dManagement_->reset();
+	if(fxManagement_)
+		fxManagement_->reset();
+	if(cbManagement_)
+		cbManagement_->reset();
+	if(lightManagement_)
+		lightManagement_->reset();
+	if(viewportManagement_)
+		viewportManagement_->reset();
+	if(ssManagement_)
+		ssManagement_->reset();
+	if(rsManagement_)
+		rsManagement_->reset();
+
+	for(unsigned int i = 0; i < GBUFFERID_NUM_BUFFERS; i++)
+		if(gBuffers_[i])
+			gBuffers_[i]->reset();
+	
+
+	EventManager::getInstance();
+}
+
+HRESULT RenderingComponent::resize(unsigned int screenWidth, unsigned int screenHeight)
 {
 	HRESULT hr = S_OK;
 
+	hr = d3dManagement_->resize(screenWidth, screenHeight);
+	if(SUCCEEDED(hr))
+		hr = viewportManagement_->resize(screenWidth, screenHeight);
+	for(unsigned int i=0; i<GBUFFERID_NUM_BUFFERS; i++)
+	{
+		if(SUCCEEDED(hr))
+			hr = gBuffers_[i]->resize(d3dManagement_->getDevice(), screenWidth, screenHeight);
+	}
+	
+	return hr;
+}
+
+HRESULT RenderingComponent::init()
+{
+	// subscribe to events
+	SUBSCRIBE_TO_EVENT(this, EVENT_WINDOW_RESIZE);
+
+	// init component
+	//float* f = new float();
+	HRESULT hr = S_OK;
 	if(SUCCEEDED(hr))
 		hr = initD3DManagement();
 	if(SUCCEEDED(hr))
@@ -79,40 +127,19 @@ HRESULT RenderingComponent::init()
 	if(SUCCEEDED(hr))
 		hr = initLightManagement();
 	if(SUCCEEDED(hr))
+		hr = initMeshManagement();
+	if(SUCCEEDED(hr))
 		hr = initViewport();
+	if(SUCCEEDED(hr))
+		hr = initSSManagement();
+	if(SUCCEEDED(hr))
+		hr = initRSManagement();
 //	if(SUCCEEDED(hr))
 //		hr = initDebug();
 	if(SUCCEEDED(hr))
 		hr = initGBuffers();
-	
-	//temp
-	if(SUCCEEDED(hr)) 
-		hr = initVertexBuffer();
 
 	return hr;
-}
-void RenderingComponent::reset()
-{
-	if(d3dManagement_)
-		d3dManagement_->reset();
-	if(fxManagement_)
-		fxManagement_->reset();
-	if(viewportManagement_)
-		viewportManagement_->reset();
-	if(cbManagement_)
-		cbManagement_->reset();
-	if(lightManagement_)
-		lightManagement_->reset();
-
-	for(unsigned int i = 0; i < GBUFFERID_NUM_BUFFERS; i++)
-		if(gBuffers_[i])
-			gBuffers_[i]->reset();
-	
-
-	//temp
-	SAFE_RELEASE(vertexBuffer_);
-
-	EventManager::getInstance();
 }
 
 void RenderingComponent::onUpdate(float delta)
@@ -120,11 +147,11 @@ void RenderingComponent::onUpdate(float delta)
 	clearGBuffers();
 	for(unsigned int i=0; i<cameraAttributes_->size(); i++)
 	{
-		DirectX::XMFLOAT4X4 view((float*)&cameraAttributes_->at(i).mat_view);
-		DirectX::XMFLOAT4X4 projection((float*)&cameraAttributes_->at(i).mat_projection);
+		DirectX::XMFLOAT4X4 viewMatrix((float*)&cameraAttributes_->at(i).mat_view);
+		DirectX::XMFLOAT4X4 projectionMatrix((float*)&cameraAttributes_->at(i).mat_projection);
 
-		DirectX::XMFLOAT4X4 viewInverse			= calculateMatrixInverse(view);
-		DirectX::XMFLOAT4X4 projectionInverse	= calculateMatrixInverse(projection);
+		DirectX::XMFLOAT4X4 viewMatrixInverse		= calculateMatrixInverse(viewMatrix);
+		DirectX::XMFLOAT4X4 projectionMatrixInverse	= calculateMatrixInverse(projectionMatrix);
 		
 		CameraAttribute* cameraAttribute = &cameraAttributes_->at(i);
 		SpatialAttribute* spatialAttribute = ATTRIBUTE_CAST(SpatialAttribute, spatialAttribute, cameraAttribute);
@@ -132,61 +159,89 @@ void RenderingComponent::onUpdate(float delta)
 
 		DirectX::XMFLOAT3	eyePosition = *(DirectX::XMFLOAT3*)&positionAttribute->position;
 
+		cbManagement_->vsSet(CB_FRAME_INDEX, 0, d3dManagement_->getDeviceContext());
+		cbManagement_->updateCBFrame(d3dManagement_->getDeviceContext(),
+									 viewMatrix,
+									 viewMatrixInverse,
+									 projectionMatrix,
+									 projectionMatrixInverse,
+									 eyePosition, 
+									 lightManagement_->getNumLights());
+
 		setViewport(i);
-		renderToGBuffer(view, viewInverse, projection, projectionInverse, eyePosition);
+		renderToGBuffer(viewMatrix, projectionMatrix);
 	}
 	
 	renderToBackBuffer();
 }
-
-void RenderingComponent::render(DirectX::XMFLOAT4X4 view, DirectX::XMFLOAT4X4 projection)
+void RenderingComponent::renderToGBuffer(DirectX::XMFLOAT4X4 viewMatrix, DirectX::XMFLOAT4X4 projectionMatrix)									
 {
-	//renderToGBuffer(view, projection);
-	renderToBackBuffer();
-}
-void RenderingComponent::renderToGBuffer(DirectX::XMFLOAT4X4 view,
-										 DirectX::XMFLOAT4X4 viewInverse,
-										 DirectX::XMFLOAT4X4 projection,
-										 DirectX::XMFLOAT4X4 projectionInverse,
-										 DirectX::XMFLOAT3	eyePosition)
-{
+	ID3D11Device*			device = d3dManagement_->getDevice();
+	ID3D11DeviceContext*	devcon = d3dManagement_->getDeviceContext();
 
-	d3dManagement_->getDeviceContext()->VSSetShader(fxManagement_->getDefaultVS()->getVertexShader(), nullptr, 0);
-	d3dManagement_->getDeviceContext()->PSSetShader(fxManagement_->getDefaultPS()->getPixelShader(), nullptr, 0);
-	d3dManagement_->setSSDefaultPS();
-	d3dManagement_->setRSDefault();
+	fxManagement_->getDefaultVS()->set(d3dManagement_->getDeviceContext());
+	fxManagement_->getDefaultPS()->set(d3dManagement_->getDeviceContext());
+	ssManagement_->setPS(d3dManagement_->getDeviceContext(), SS_ID_DEFAULT, 0);
+	rsManagement_->setRS(d3dManagement_->getDeviceContext(), RS_ID_DEFAULT);
 
-	gBufferRenderSetRenderTargets();
+	renderGBufferSetRenderTargets();
 	
 	d3dManagement_->clearDepthBuffer();
 
 	// Fetch attributes
-	std::vector<RenderAttribute>* allRender;		GET_ATTRIBUTES(allRender, RenderAttribute, ATTRIBUTE_RENDER);
-	std::vector<SpatialAttribute>* allSpatial;		GET_ATTRIBUTES(allSpatial, SpatialAttribute, ATTRIBUTE_SPATIAL);
-	std::vector<PositionAttribute>* allPosition;	GET_ATTRIBUTES(allPosition, PositionAttribute, ATTRIBUTE_POSITION);
+	std::vector<RenderAttribute>*	allRender;		GET_ATTRIBUTES(allRender,	RenderAttribute,	ATTRIBUTE_RENDER);
+	std::vector<SpatialAttribute>*	allSpatial;		GET_ATTRIBUTES(allSpatial,	SpatialAttribute,	ATTRIBUTE_SPATIAL);
+	std::vector<PositionAttribute>*	allPosition;	GET_ATTRIBUTES(allPosition,	PositionAttribute,	ATTRIBUTE_POSITION);
 	
-	for(unsigned int i=0; i<renderAttributes_->size(); i++)
+	DirectX::XMFLOAT4X4 worldMatrix;  
+	DirectX::XMFLOAT4X4 worldMatrixInverse;
+	DirectX::XMFLOAT4X4 finalMatrix;
+	
+	unsigned int meshIndex; MeshModelD3D* meshModelD3D;
+	RenderAttribute* renderAt; SpatialAttribute* spatialAt; PositionAttribute* positionAt;
+	for(unsigned int i=0; i<allRender->size(); i++)
 	{
-		DirectX::XMFLOAT4X4 finalMatrix = calculateFinalMatrix(view, projection, allSpatial->at(i), allPosition->at(i),  i);
-		gBufferRenderUpdateConstantBuffers(finalMatrix, view, viewInverse, projection, projectionInverse, eyePosition);
+		renderAt	= &allRender->at(i);
+		meshIndex	= renderAt->meshIndex;
+		spatialAt	= &allSpatial->at(renderAt->spatialAttribute.index);
+		positionAt	= &allPosition->at(spatialAt->positionAttribute.index);
+		
+		meshModelD3D = meshManagement_->getMeshModelD3D(meshIndex, d3dManagement_->getDevice());
+		VB*					vb	= meshModelD3D->getVB();
+		std::vector<IB*>	ibs	= meshModelD3D->getIBs();
+
+		worldMatrix			= calculateWorldMatrix(allSpatial->at(i), allPosition->at(i));
+		worldMatrixInverse	= calculateMatrixInverse(worldMatrix);
+		finalMatrix			= calculateFinalMatrix(worldMatrix, viewMatrix, projectionMatrix);
+		
+		cbManagement_->vsSet(CB_OBJECT_INDEX, 2, devcon);
+		cbManagement_->updateCBObject(devcon, finalMatrix, worldMatrix, worldMatrixInverse);
 
 		UINT stride = sizeof(VertexPosNormTex);
 		UINT offset = 0;
-		d3dManagement_->getDeviceContext()->IASetVertexBuffers(0, 1, &vertexBuffer_, &stride, &offset);
-		d3dManagement_->getDeviceContext()->IASetInputLayout(fxManagement_->getILDefaultVSPosNormTex());
-		d3dManagement_->getDeviceContext()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-		d3dManagement_->getDeviceContext()->Draw(vertices_->size(), 0);
+		
+		ID3D11Buffer* vertexBuffer = vb->getVB();
+		devcon->IASetVertexBuffers(
+			0, 
+			1, 
+			&vertexBuffer, 
+			&stride, 
+			&offset);
+
+		for(unsigned int i = 0; i < ibs.size(); i++)
+		{
+			devcon->IASetIndexBuffer(ibs[i]->getIB(), DXGI_FORMAT_R32_UINT, offset);
+
+			devcon->IASetInputLayout(fxManagement_->getILDefaultVSPosNormTex());
+			devcon->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+			devcon->DrawIndexed(ibs[i]->getNumIndices(), 0, 0);
+		}
 	}
 
-	renderClean();
+	renderGBufferClean();
 }
 void RenderingComponent::renderToBackBuffer()
 {
-	FLOAT black[]	= {0.0f, 0.0f, 0.0f, 1.0f };
-	FLOAT red[]		= {1.0f, 0.0f, 0.0f, 1.0f };
-	FLOAT green[]	= {0.0f, 1.0f, 0.0f, 1.0f };
-	FLOAT blue[]	= {0.0f, 0.0f, 1.0f, 1.0f };
-
 	d3dManagement_->setUAVBackBufferCS();
 
 	cbManagement_->csSet(CB_FRAME_INDEX, 0, d3dManagement_->getDeviceContext());
@@ -199,23 +254,18 @@ void RenderingComponent::renderToBackBuffer()
 	for(int i=0; i<GBUFFERID_NUM_BUFFERS; i++)
 		resourceViews[i] = gBuffers_[i]->getSRV();
 	d3dManagement_->getDeviceContext()->CSSetShaderResources(0, GBUFFERID_NUM_BUFFERS, resourceViews);
-	d3dManagement_->setSSDefaultCS();
+	
+	ssManagement_->setCS(d3dManagement_->getDeviceContext(), SS_ID_DEFAULT, 0);
 
 	fxManagement_->getDefaultCS()->set(d3dManagement_->getDeviceContext());
 	d3dManagement_->getDeviceContext()->Dispatch(25, 25, 1);
 	fxManagement_->getDefaultCS()->unset(d3dManagement_->getDeviceContext());
 
-	ID3D11UnorderedAccessView* uav2[] = { nullptr };
-	d3dManagement_->getDeviceContext()->CSSetUnorderedAccessViews(0, 1, uav2, NULL);
-	for(int i=0; i<GBUFFERID_NUM_BUFFERS; i++)
-		resourceViews[i] = nullptr;
-	d3dManagement_->getDeviceContext()->CSSetShaderResources(0, GBUFFERID_NUM_BUFFERS, resourceViews);
-	d3dManagement_->getDeviceContext()->CSSetSamplers(0, 0, nullptr);
+	renderBackBufferClean();
 
 	d3dManagement_->present();
-
-	renderClean();
 }
+
 void RenderingComponent::setViewport(unsigned int index)
 {
 	viewportManagement_->setViewport(d3dManagement_->getDeviceContext(), index);
@@ -234,25 +284,7 @@ void RenderingComponent::clearGBuffers()
 	d3dManagement_->getDeviceContext()->ClearRenderTargetView(renderTargets[GBUFFERID_ALBEDO], black);
 	d3dManagement_->getDeviceContext()->ClearRenderTargetView(renderTargets[GBUFFERID_NORMAL], black);
 }
-
-void RenderingComponent::gBufferRenderUpdateConstantBuffers(DirectX::XMFLOAT4X4 finalMatrix,
-															DirectX::XMFLOAT4X4 viewMatrix,
-															DirectX::XMFLOAT4X4 viewInverseMatrix,
-															DirectX::XMFLOAT4X4 projectionMatrix,
-															DirectX::XMFLOAT4X4 projectionInverseMatrix,
-															DirectX::XMFLOAT3	eyePosition)
-{
-	cbManagement_->vsSet(CB_FRAME_INDEX, 0, d3dManagement_->getDeviceContext());
-	cbManagement_->updateCBFrame(d3dManagement_->getDeviceContext(),
-								 finalMatrix,
-								 viewMatrix,
-								 viewInverseMatrix,
-								 projectionMatrix,
-								 projectionInverseMatrix,
-								 eyePosition, 
-								 lightManagement_->getNumLights());
-}
-void RenderingComponent::renderClean()
+void RenderingComponent::renderGBufferClean()
 {
 	ID3D11RenderTargetView* renderTargets[GBUFFERID_NUM_BUFFERS];
 	for(int i=0; i<GBUFFERID_NUM_BUFFERS; i++)
@@ -270,24 +302,38 @@ void RenderingComponent::renderClean()
 	d3dManagement_->getDeviceContext()->IASetInputLayout(nullptr);
 	d3dManagement_->getDeviceContext()->RSSetState(nullptr);
 }
-void RenderingComponent::gBufferRenderSetRenderTargets()
+void RenderingComponent::renderGBufferSetRenderTargets()
 {
 	ID3D11RenderTargetView* renderTargets[GBUFFERID_NUM_BUFFERS];
 	for(int i=0; i<GBUFFERID_NUM_BUFFERS; i++)
 		renderTargets[i] = gBuffers_[i]->getRTV();
 	d3dManagement_->getDeviceContext()->OMSetRenderTargets(GBUFFERID_NUM_BUFFERS, renderTargets, d3dManagement_->getDepthBuffer());
 }
-
-DirectX::XMFLOAT4X4 RenderingComponent::calculateFinalMatrix(DirectX::XMFLOAT4X4 viewMatrix,
-															 DirectX::XMFLOAT4X4 projectionMatrix,
-															 SpatialAttribute spatialAttribute,
-															 PositionAttribute positionAttribute,
-															 unsigned int attributeIndex)
+void RenderingComponent::renderBackBufferClean()
 {
-	DirectX::CXMMATRIX mView		= DirectX::XMLoadFloat4x4(&viewMatrix);
-	DirectX::CXMMATRIX mProjection	= DirectX::XMLoadFloat4x4(&projectionMatrix);
+	ID3D11UnorderedAccessView* uav2[] = { nullptr };
+	d3dManagement_->getDeviceContext()->CSSetUnorderedAccessViews(0, 1, uav2, NULL);
 
+	ID3D11ShaderResourceView* resourceViews[GBUFFERID_NUM_BUFFERS];
+	for(int i=0; i<GBUFFERID_NUM_BUFFERS; i++)
+		resourceViews[i] = nullptr;
+	d3dManagement_->getDeviceContext()->CSSetShaderResources(0, GBUFFERID_NUM_BUFFERS, resourceViews);
+	d3dManagement_->getDeviceContext()->CSSetSamplers(0, 0, nullptr);
+}
 
+DirectX::XMFLOAT4X4 RenderingComponent::calculateMatrixInverse(DirectX::XMFLOAT4X4 matrix)
+{
+	DirectX::CXMMATRIX	cxmMatrix		= DirectX::XMLoadFloat4x4(&matrix);
+	DirectX::XMVECTOR	vDeterminant	= DirectX::XMMatrixDeterminant(cxmMatrix);
+	DirectX::XMMATRIX	xmMatrixInverse = DirectX::XMMatrixInverse(&vDeterminant, cxmMatrix);
+	
+	DirectX::XMFLOAT4X4 matrixInverse;
+	DirectX::XMStoreFloat4x4(&matrixInverse, xmMatrixInverse);
+	
+	return matrixInverse;
+}
+DirectX::XMFLOAT4X4 RenderingComponent::calculateWorldMatrix(SpatialAttribute spatialAttribute, PositionAttribute positionAttribute)
+{
 	DirectX::XMMATRIX translation = DirectX::XMMatrixTranslation(positionAttribute.position.x,
 																 positionAttribute.position.y,
 																 positionAttribute.position.z);
@@ -305,23 +351,23 @@ DirectX::XMFLOAT4X4 RenderingComponent::calculateFinalMatrix(DirectX::XMFLOAT4X4
 	DirectX::XMMATRIX rotation = DirectX::XMMatrixRotationQuaternion(qRotation);
 
 	DirectX::XMMATRIX mWorldMatrix = scaling * rotation * translation;
-	DirectX::XMMATRIX mFinalMatrix = mWorldMatrix * mView * mProjection;
+	DirectX::XMFLOAT4X4 worldMatrix;
+	DirectX::XMStoreFloat4x4(&worldMatrix, mWorldMatrix);
+
+	return worldMatrix;
+}
+DirectX::XMFLOAT4X4 RenderingComponent::calculateFinalMatrix(DirectX::XMFLOAT4X4 worldMatrix, DirectX::XMFLOAT4X4 viewMatrix, DirectX::XMFLOAT4X4 projectionMatrix)
+{
+	DirectX::CXMMATRIX mView		= DirectX::XMLoadFloat4x4(&viewMatrix);
+	DirectX::CXMMATRIX mProjection	= DirectX::XMLoadFloat4x4(&projectionMatrix);
+	DirectX::CXMMATRIX mWorld		= DirectX::XMLoadFloat4x4(&worldMatrix);
+
+	DirectX::XMMATRIX mFinalMatrix = mWorld * mView * mProjection;
 	
 	DirectX::XMFLOAT4X4 finalMatrix;
 	DirectX::XMStoreFloat4x4(&finalMatrix, mFinalMatrix);
 
 	return finalMatrix;
-}
-DirectX::XMFLOAT4X4 RenderingComponent::calculateMatrixInverse(DirectX::XMFLOAT4X4 matrix)
-{
-	DirectX::CXMMATRIX	cxmMatrix		= DirectX::XMLoadFloat4x4(&matrix);
-	DirectX::XMVECTOR	vDeterminant	= DirectX::XMMatrixDeterminant(cxmMatrix);
-	DirectX::XMMATRIX	xmMatrixInverse = DirectX::XMMatrixInverse(&vDeterminant, cxmMatrix);
-	
-	DirectX::XMFLOAT4X4 matrixInverse;
-	DirectX::XMStoreFloat4x4(&matrixInverse, xmMatrixInverse);
-	
-	return matrixInverse;
 }
 
 HRESULT RenderingComponent::initD3DManagement()
@@ -329,37 +375,6 @@ HRESULT RenderingComponent::initD3DManagement()
 	HRESULT hr;
 	d3dManagement_ = new D3DManagement(windowHandle_, screenWidth_, screenHeight_);
 	hr = d3dManagement_->init();
-	return hr;
-}
-HRESULT RenderingComponent::initGBuffers()
-{
-	HRESULT hr = S_OK;
-
-	GBuffer* gBuffer = nullptr;
-
-	/*Albedo*/
-	gBuffer = new GBuffer(screenWidth_, screenHeight_, MULTISAMPLES_GBUFFERS, DXGI_FORMAT_R32G32B32A32_FLOAT);
-	hr = gBuffer->init(d3dManagement_->getDevice());
-	gBuffers_[GBUFFERID_ALBEDO] = gBuffer;
-
-	/*Normals*/
-	if(hr == S_OK)
-	{
-		gBuffer = new GBuffer(screenWidth_, screenHeight_, MULTISAMPLES_GBUFFERS, DXGI_FORMAT_R32G32B32A32_FLOAT);
-		hr = gBuffer->init(d3dManagement_->getDevice());
-		gBuffers_[GBUFFERID_NORMAL] = gBuffer;
-	}
-
-	return hr;
-}
-HRESULT RenderingComponent::initViewport()
-{
-	HRESULT hr = S_OK;
-	viewportManagement_ = new ViewportManagement(numViewports_,
-												 screenWidth_,
-												 screenHeight_);
-	hr = viewportManagement_->init();
-
 	return hr;
 }
 HRESULT RenderingComponent::initFXManagement()
@@ -389,6 +404,42 @@ HRESULT RenderingComponent::initLightManagement()
 
 	return hr;
 }
+HRESULT RenderingComponent::initMeshManagement()
+{
+	HRESULT hr = S_OK;
+
+	meshManagement_ = new MeshManagement();
+
+	return hr;
+}
+HRESULT RenderingComponent::initViewport()
+{
+	HRESULT hr = S_OK;
+	viewportManagement_ = new ViewportManagement(numViewports_,
+												 screenWidth_,
+												 screenHeight_);
+	hr = viewportManagement_->init();
+
+	return hr;
+}
+HRESULT RenderingComponent::initSSManagement()
+{
+	HRESULT hr = S_OK;
+
+	ssManagement_ = new SSManagement();
+	hr = ssManagement_->init(d3dManagement_->getDevice());
+
+	return hr;
+}
+HRESULT RenderingComponent::initRSManagement()
+{
+	HRESULT hr = S_OK;
+
+	rsManagement_ = new RSManagement();
+	rsManagement_->init(d3dManagement_->getDevice());
+
+	return hr;
+}
 HRESULT RenderingComponent::initDebug()
 {
 	HRESULT hr = S_OK;
@@ -398,31 +449,44 @@ HRESULT RenderingComponent::initDebug()
 
 	return hr;
 }
-HRESULT RenderingComponent::initVertexBuffer()
+HRESULT RenderingComponent::initGBuffers()
 {
 	HRESULT hr = S_OK;
 
-	vertices_ = new std::vector<VertexPosNormTex>();
-	objLoader_ = new ObjLoaderBasic();
-	objLoader_->parseObjectFile("../../xkill-resources/xkill-models/bth.obj", vertices_);
+	GBuffer* gBuffer = nullptr;
 
-	D3D11_BUFFER_DESC vbd;
-	vbd.Usage = D3D11_USAGE_DYNAMIC;
-	vbd.ByteWidth = sizeof(VertexPosNormTex) * vertices_->size();
-	vbd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-	vbd.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
-	vbd.MiscFlags = 0;
-	
-	D3D11_SUBRESOURCE_DATA vinitData;
-	vinitData.pSysMem = &vertices_->at(0);
-	d3dManagement_->getDevice()->CreateBuffer(&vbd, &vinitData, &vertexBuffer_);
-	if(FAILED(hr))
-		ERROR_MSG(L"RenderingComponent::initVertexBuffer CreateBuffer failed");
+	/*Albedo*/
+	gBuffer = new GBuffer(screenWidth_, screenHeight_, MULTISAMPLES_GBUFFERS, DXGI_FORMAT_R32G32B32A32_FLOAT);
+	hr = gBuffer->init(d3dManagement_->getDevice());
+	gBuffers_[GBUFFERID_ALBEDO] = gBuffer;
+
+	/*Normals*/
+	if(hr == S_OK)
+	{
+		gBuffer = new GBuffer(screenWidth_, screenHeight_, MULTISAMPLES_GBUFFERS, DXGI_FORMAT_R32G32B32A32_FLOAT);
+		hr = gBuffer->init(d3dManagement_->getDevice());
+		gBuffers_[GBUFFERID_NORMAL] = gBuffer;
+	}
 
 	return hr;
 }
-
 void RenderingComponent::onEvent( Event* e )
 {
+	EventType type = e->getType();
+	switch (type) 
+	{
+	case EVENT_WINDOW_RESIZE:
+		event_WindowResize((Event_WindowResize*)e);
+		break;
+	default:
+		break;
+	}
+}
 
+void RenderingComponent::event_WindowResize( Event_WindowResize* e )
+{
+	int width = e->width;
+	int height = e->height;
+
+	// TODO: resize render window
 }

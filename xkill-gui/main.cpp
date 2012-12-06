@@ -2,6 +2,8 @@
 #include "MainWindow.h"
 #include <QtGui/QApplication>
 
+//#include <vld.h>
+
 /// If you can't tell what the main() is for you should have your programming license revoked
 /** 
 */

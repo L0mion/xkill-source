@@ -109,22 +109,29 @@ protected:
 	// Behavior on keyboard input
 	void keyPressEvent(QKeyEvent* e)
 	{
-		if(e->key() == Qt::Key_Escape)
+
+		switch (e->key()) 
 		{
-			ui.actionFullscreen->setChecked(false);
+		case Qt::Key_Escape:
+			// TRUE: Quit program
+			if(ui.actionFullscreen->isChecked())
+				ui.actionFullscreen->setChecked(false);
+			// ELSE: Quit fullscreen
+			else
+				MainWindow::close();
+			break;
+		default:
+			break;
 		}
-		if(e->key() == Qt::Key_W)
-		{
-		}
-		if(e->key() == Qt::Key_A)
-		{
-		}
-		if(e->key() == Qt::Key_S)
-		{
-		}
-		if(e->key() == Qt::Key_D)
-		{
-		}
+
+		// Inform about key press
+		SEND_EVENT(&Event_KeyPress(e->key()));
+	};
+
+	void keyReleaseEvent(QKeyEvent* e)
+	{
+		// Inform about key release
+		SEND_EVENT(&Event_KeyRelease(e->key()));
 	};
 
 	public slots:

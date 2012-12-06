@@ -8,19 +8,27 @@
 #include <d3d11.h>
 #include <vector>
 
+#include <xkill-utilities/IObserver.h>
+
 #include "dllRenderer.h"
 #include "gBufferID.h"
-//#include "d3dInterface.h"
-#include <xkill-utilities/IObserver.h>
+
+#if defined (DEBUG) || (DEBUG_)
+#include <vld.h>
+#endif //DEBUG || DEBUG_
 
 class D3DManagement;
 class FXManagement;
 class CBManagement;
 class ViewportManagement;
+class SSManagement;
+class RSManagement;
 class GBuffer;
 class D3DDebug;
-class ObjLoaderBasic;
 class LightManagement;
+class Event_WindowResize;
+class MeshManagement;
+class ObjLoaderBasic;
 
 namespace DirectX
 {
@@ -31,10 +39,6 @@ struct RenderAttribute;
 struct CameraAttribute;
 struct SpatialAttribute;
 struct PositionAttribute;
-
-//static const unsigned int MULTISAMPLES_GBUFFERS		= 1;
-//static const unsigned int MULTISAMPLES_BACKBUFFER	= 1;
-//static const unsigned int MULTISAMPLES_DEPTHBUFFER	= 1;
 
 struct VertexPosNormTex;
 
@@ -61,6 +65,21 @@ public:
 		HWND windowHandle);
 	//! Releases all memory and returns to default state.
 	~RenderingComponent();
+	//! Resets RenderingComponent to default state.
+	void reset();
+	
+	//! Resizes all management objects that are affected by a change in screen resolution.
+	/*!
+	\param screenWidth The new screen width.
+	\param screenHeight the new screen height.
+	\return Any error encountered.
+	*/
+	HRESULT resize(unsigned int screenWidth, unsigned int screenHeight);
+
+	//! Runs a frame for RenderingComponent.
+	void onUpdate(float delta);
+	//! Receives events for RenderingComponent.
+	void onEvent(Event* e);
 
 	//! Initializes RenderingComponent's members and prepares render.
 	/*!	\return First encountered error.
@@ -77,76 +96,13 @@ public:
 		\sa initVertexBuffer
 	*/
 	HRESULT init();
-	//! Resets RenderingComponent to default state.
-	void reset();
-	//! Runs a frame for RenderingComponent.
-	void onUpdate(float delta);
-	//! Receives events for RenderingComponent.
-	void onEvent(Event* e);
-	
-
 private:
-	
-	//! Main render-method of RenderingComponent.
+	//! Initializes D3DManagement-object which will maintain core DirectX objects, e.g. device and device context.
 	/*!
-	\param view View-matrix from camera.
-	\param projection Projection-matrix from camera.
-	\sa renderToGBuffer
-	\sa renderToBackBuffer
+	\return Any error encountered during initialization.
+	\sa D3DManagement
 	*/
-	void render(DirectX::XMFLOAT4X4 view, DirectX::XMFLOAT4X4 projection);
-	//! Renders to g-buffers, storing albedo and normals till later.
-	/*!
-	\param view View-matrix from camera.
-	\param projection Projection-matrix from camera.
-	*/
-	void renderToGBuffer(DirectX::XMFLOAT4X4 view,
-						 DirectX::XMFLOAT4X4 viewInverse,
-						 DirectX::XMFLOAT4X4 projection,
-						 DirectX::XMFLOAT4X4 projectionInverse,
-						 DirectX::XMFLOAT3	eyePosition);
-	//! Samples from g-buffers and creates a final image using DirectCompute.
-	/*!
-	\sa uavBackBuffer
-	*/
-	void renderToBackBuffer();
-	//! Sets which viewport to draw to.
-	/*!
-	\param index The index of the viewport to draw to. 
-	*/
-	void setViewport(unsigned int index);
-	//! Clears the GBuffers with a single color. 
-	void clearGBuffers();
-
-	void gBufferRenderUpdateConstantBuffers(DirectX::XMFLOAT4X4 finalMatrix,
-											DirectX::XMFLOAT4X4 viewMatrix,
-											DirectX::XMFLOAT4X4 viewInverseMatrix,
-											DirectX::XMFLOAT4X4 projectionMatrix,
-											DirectX::XMFLOAT4X4 projectionInverseMatrix,
-											DirectX::XMFLOAT3	eyePosition);
-	void renderClean();
-	void gBufferRenderSetRenderTargets();
-	DirectX::XMFLOAT4X4 calculateFinalMatrix(DirectX::XMFLOAT4X4 viewMatrix,
-											 DirectX::XMFLOAT4X4 projectionMatrix,
-											 SpatialAttribute spatialAttribute,
-											 PositionAttribute positionAttribute,
-											 unsigned int attributeIndex);
-	DirectX::XMFLOAT4X4 calculateMatrixInverse(DirectX::XMFLOAT4X4 matrix);
-
 	HRESULT initD3DManagement();
-
-	//! Creates GBuffer-objects for each desired g-buffer.
-	/*!
-	\return Any error encountered during initialization.
-	\sa GBuffer
-	*/
-	HRESULT initGBuffers();
-	//! Creates a ViewportManagement object that in turn will create the specified amount of viewports.
-	/*!
-	\return Any error encountered during initialization.
-	*/
-	HRESULT initViewport();
-	
 	//! Initializes FXManagement-object which will maintain shaders and input-layouts throughout application.
 	/*!
 	\return Any error encountered during initialization.
@@ -165,19 +121,90 @@ private:
 	\sa LightManagement
 	*/
 	HRESULT initLightManagement();
+	//! Creates a ViewportManagement object that in turn will create the specified amount of viewports.
+	/*!
+	\return Any error encountered during initialization.
+	*/
+	
+	HRESULT initMeshManagement();
+	
+	HRESULT initViewport();
+	//! Creates a SSManaegement object that will maintain sampler states.
+	/*!
+	\return Any error encountered during initialization.
+	\sa SSManagement
+	*/
+	HRESULT initSSManagement();
+	//! Creates a RSManaegement object that will maintain rasterizer states.
+	/*!
+	\return Any error encountered during initialization.
+	\sa RSManagement
+	*/
+	HRESULT initRSManagement();
+	//! Creates GBuffer-objects for each desired g-buffer.
+	/*!
+	\return Any error encountered during initialization.
+	\sa GBuffer
+	*/
+	HRESULT initGBuffers();
 	//! Creates D3DDebug-object which is used for detecting live COM-objects at end of application.
 	/*! Warning: D3DDebug recognizes it's own members as live COM-objects, thusly reporting 'false' live objects.
 	\return Any error encountered during initialization.
 	\sa D3DDebug
 	*/
 	HRESULT initDebug();
-	//! Creates a mockup vertexbuffer that loads it's vertices from a basic .obj-loader using bth.obj.
-	/*!
-	\return Any error encountered during initialization.
-	\sa ObjLoaderBasic
-	*/
-	HRESULT initVertexBuffer();
 
+	//! Sets which viewport to draw to.
+	/*!
+	\param index The index of the viewport to draw to. 
+	*/
+	void setViewport(unsigned int index);
+	//! Clears the GBuffers with a single color. 
+	void clearGBuffers();
+	//! Sets the gbuffers as render targets.
+	void renderGBufferSetRenderTargets();
+	//! Clears all render targets, buffers, shaders etc after render to gbuffers.
+	void renderGBufferClean();
+	//! Renders to g-buffers, storing albedo and normals till later.
+	/*!
+	\param view View-matrix from camera.
+	\param projection Projection-matrix from camera.
+	*/
+	void renderToGBuffer(DirectX::XMFLOAT4X4 viewMatrix, DirectX::XMFLOAT4X4 projectionMatrix);
+	//! Samples from g-buffers and creates a final image using DirectCompute.
+	/*!
+	\sa uavBackBuffer
+	*/
+	void renderToBackBuffer();
+	//! Clears all render targets, buffers, shaders etc after render to back buffer.
+	void renderBackBufferClean();
+
+	//! Calculates an objects world matrix.
+	/*!
+	\return The world matrix
+	\param spatialAttribute Contains scale and rotation to be used in calculation.
+	\param postionAttribute Contains position to be used in calculation.
+	*/
+	DirectX::XMFLOAT4X4 calculateWorldMatrix(SpatialAttribute spatialAttribute,
+											 PositionAttribute positionAttribute);
+
+	//! Calculates a final matrix that is used to transform an object from local space to homogeneous clip space.
+	/*!
+	\return The calculated matrix
+	\param worldMatrix An object's world matrix.
+	\param viewMatrix The camera's view matrix.
+	\param projectionMatrix The camera's projection matrix.
+	*/
+	DirectX::XMFLOAT4X4 calculateFinalMatrix(DirectX::XMFLOAT4X4 worldMatrix,
+											 DirectX::XMFLOAT4X4 viewMatrix,
+											 DirectX::XMFLOAT4X4 projectionMatrix);
+	//! Calculates the inverse of a matrix.
+	/*!
+	\return The inverse of the input matrix.
+	\param matrix The matrix to invert.
+	*/
+	DirectX::XMFLOAT4X4 calculateMatrixInverse(DirectX::XMFLOAT4X4 matrix);
+	
 	/*desc*/
 	HWND windowHandle_;				//!< WINAPI-handle to window.
 	unsigned int screenWidth_;		//!< Width of screen.
@@ -189,6 +216,12 @@ private:
 	CBManagement*		cbManagement_;						//!< Maintaining constant buffers.
 	LightManagement*	lightManagement_;					//!< Maintaining lights.
 	ViewportManagement* viewportManagement_;				//!< Maintaining viewports.
+
+	MeshManagement*		meshManagement_;
+	
+	SSManagement*		ssManagement_;						//!< Maintaining sampler states.
+	RSManagement*		rsManagement_;						//!< Maintaining rasterizer states.
+	
 	D3DDebug*			d3dDebug_;							//!< Used for detecting live COM-objects.
 	GBuffer*			gBuffers_[GBUFFERID_NUM_BUFFERS];	//!< Containing data for deferred rendering.
 
@@ -199,7 +232,17 @@ private:
 	//temp
 	ID3D11Buffer*			vertexBuffer_;		//!< Mock buffer sending vertices to shader.
 	std::vector<VertexPosNormTex>*	vertices_;	//!< Mock vertices.
-	ObjLoaderBasic*			objLoader_;			//!< Basic obj-loader used to debug renderer. 
+	ObjLoaderBasic*			objLoader_;			//!< Basic obj-loader used to debug renderer.
+
+	//! Creates a mockup vertexbuffer that loads it's vertices from a basic .obj-loader using bth.obj.
+	/*!
+	\return Any error encountered during initialization.
+	\sa ObjLoaderBasic
+	*/
+	HRESULT initVertexBuffer();
+
+	//! Methods that will be called on events. 
+	void event_WindowResize(Event_WindowResize* e);
 };
 
 #endif //XKILL_RENDERER_RENDERINGCOMPONENT_H

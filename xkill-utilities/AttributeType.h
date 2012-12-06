@@ -28,6 +28,7 @@ be modified to suit the need of each Component.
 struct DLL_U IAttribute
 {
 	IAttribute();
+	virtual void clean(){};
 	virtual ~IAttribute();
 };
 
@@ -55,6 +56,7 @@ enum DLL_U AttributeType
 	ATTRIBUTE_INPUT,
 	ATTRIBUTE_PLAYER,
 	ATTRIBUTE_BOUNDING,
+	ATTRIBUTE_MESH,
 
 	// this is needed, don't touch!
 	ATTRIBUTE_LAST
@@ -115,10 +117,10 @@ struct DLL_U RenderAttribute : public IAttribute
 
 	AttributePointer spatialAttribute;
 	AttributePointer boundingAttribute;
-
+	
 	bool transparent;
 	bool tessellation;
-	int meshID;
+	int meshIndex;
 	int textureID;
 };
 
@@ -142,6 +144,7 @@ struct DLL_U PhysicsAttribute : public IAttribute
 
 	bool added;
 	bool alive;
+	bool isProjectile;
 };
 
 struct DLL_U InputAttribute : public IAttribute
@@ -201,4 +204,12 @@ struct DLL_U PlayerAttribute : public IAttribute
 };
 
 
+class MeshModel;
+struct DLL_U MeshAttribute : public IAttribute
+{
+	MeshModel* mesh;
 
+	void clean();
+	MeshAttribute(){};
+	~MeshAttribute();;
+};

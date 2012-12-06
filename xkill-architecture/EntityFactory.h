@@ -21,20 +21,6 @@ The AttributeFactory can be used to facilitate creation of \ref ATTRIBUTES.
 
 class EntityFactory 
 {
-private:
-	/** 
-	Creates an entity and assigns a unique ID
-	*/
-	Entity* createEntity()
-	{
-		static int id = 1;
-
-		Entity* e = new Entity(id);
-		id++;
-
-		return e;
-	}
-
 public:
 	// Creates an AttributeType (e.g. PositionAttribute) with name AttributeName (e.g. position) owned by Entity OwnerEntity.
 	// IMPORTANT: AttributeName (e.g. position) is used to access attributes from AttributeManager (e.g. positionAttributes_).
@@ -57,10 +43,8 @@ public:
 	//! camera attribute --> spatial attribute --> position attribute
 	//! player attribute --> render attribute --> spatial attribute --> position attribute
 	//! Note: the player has the same spatial attribute as the camera.
-	Entity* createPlayerEntity()
+	void createPlayerEntity(Entity* entity)
 	{
-		Entity* entity = createEntity();
-
 		CREATE_ATTRIBUTE(PositionAttribute, position, entity);
 		position->position.x = 0.0f;
 		position->position.y = 0.0f;
@@ -92,16 +76,10 @@ public:
 		player->name = "Printer Terror";
 		player->id = playerId;
 		playerId++;
-
-
-		// Return entity
-		return entity;
 	}
 
-	Entity* createProjectileEntity(Event_createProjectile* e)
+	void createProjectileEntity(Entity* entity, Event_createProjectile* e)
 	{
-		Entity* entity = createEntity();
-
 		CREATE_ATTRIBUTE(PositionAttribute, position, entity);
 		position->position.x = e->position.x;
 		position->position.y = e->position.y;
@@ -119,10 +97,16 @@ public:
 
 		CREATE_ATTRIBUTE(PhysicsAttribute, physics, entity);
 		CONNECT_ATTRIBUTES(physics, spatial);
+		physics->isProjectile = true;
 		physics->linearVelocity.y = 1.0f;
-		
-		return entity;
 	}
+
+	void createMesh(Entity* entity, Event_createMesh* e)
+	{
+		MeshAttribute* meshAttribute = AttributeManager::getInstance()->meshAttributes_.createAttribute(entity);
+		meshAttribute->mesh = e->mesh;
+	}
+};
 
 	//
 	// Undefine evil macros
@@ -130,6 +114,3 @@ public:
 
 #undef CREATE_ATTRIBUTE
 #undef CONNECT_ATTRIBUTES
-};
-
-

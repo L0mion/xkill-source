@@ -4,6 +4,8 @@
 class GameComponent :
 	public IObserver
 {
+private:
+
 public:
 	GameComponent(void);
 	~GameComponent(void);

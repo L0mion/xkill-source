@@ -17,28 +17,40 @@ static const unsigned int MULTISAMPLES_GBUFFERS		= 1;
 static const unsigned int MULTISAMPLES_BACKBUFFER	= 1;
 static const unsigned int MULTISAMPLES_DEPTHBUFFER	= 1;
 
+//! Class for maintaining DirectX core objects.
+/*!
+\ingroup xkill-renderer
+*/
 class D3DManagement : public D3DInterface
 {
 public:
+	//! Sets D3DManagement to its default state.
+	/*!
+	\param windowHandle A handle to a WIN-API window.
+	\param screenWidth Width of the screen.
+	\param screenHeight Height of the screen.
+	*/
 	D3DManagement(HWND windowHandle, unsigned int screenWidth, unsigned int screenHeight);
-	~D3DManagement();
-
+	//!Releases all memory and resets D3DManagement to its default state.
+	virtual ~D3DManagement();
+	//!Releases all memory and resets D3DManagement to its default state.
 	virtual void reset();
+	
+	//! Resizes textures and back buffers to fit the new screen size.
+	/*!
+	\param screenWidth The new screen width.
+	\param screenHeight the new screen height.
+	\return Any error encountered.
+	*/
+	HRESULT resize(unsigned int screenWidth, unsigned int screenHeight);
 
-	void setRSDefault();
-	void setSSDefaultPS();
-	void setSSDefaultCS();
+	//! Set the variable uavBackBuffer to the compute shader stage.
 	void setUAVBackBufferCS();
-
+	//! Presents the back buffer.
 	void present();
-
+	//! Clears the depth buffer in preparation for rendering. 
 	void clearDepthBuffer();
-
-	ID3D11Device*			getDevice()			const;
-	ID3D11DeviceContext*	getDeviceContext()	const;
-	ID3D11DepthStencilView* getDepthBuffer()	const;
-
-	//! Initializes RenderingComponent's members and prepares render.
+	//! Initializes D3DManagement's members.
 	/*!	\return First encountered error.
 		\sa initDeviceAndSwapChain
 		\sa initDepthBuffer
@@ -53,6 +65,10 @@ public:
 		\sa initVertexBuffer
 	*/
 	HRESULT init();
+
+	ID3D11Device*			getDevice()			const;
+	ID3D11DeviceContext*	getDeviceContext()	const;
+	ID3D11DepthStencilView* getDepthBuffer()	const;
 private:
 	//! Initializes struct describing swapchain using values passed in constructor.
 	/*!
@@ -76,16 +92,6 @@ private:
 	\return Any error encountered during initialization.
 	*/
 	HRESULT initDepthBuffer();
-	//! Creates rasterizer-state.
-	/*!
-	\return Any error encountered during initialization.
-	*/
-	HRESULT initRSDefault();
-	//! Creates a single samplerstate in order to sample textures in shaders.
-	/*!
-	\return Any error encountered during initialization.
-	*/
-	HRESULT initSSDefault();
 	//! Translates the initiated feature-level to string which may be presented in window.
 	/*!
 	\return The feature-level if known or "Default" otherwize.
@@ -106,9 +112,6 @@ private:
 	
 	ID3D11Texture2D*			texBackBuffer_;						//!< Contains the final image.
 	ID3D11Texture2D*			texDepthBuffer_;					//!< Saves the depth of each rendered pixel.
-
-	ID3D11RasterizerState*		rsDefault_;							//!< Defines settings for the rasterizer.
-	ID3D11SamplerState*			ssDefault_;							//!< Used to sample from texture in shader.
 };
 
 #endif //XKILL_RENDERER_D3DMANAGEMENT_H
