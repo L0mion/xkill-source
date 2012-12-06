@@ -4,15 +4,13 @@
 
 CollisionShapeManager::CollisionShapeManager()
 {
+	//if(collisionShapes_.size()==0)
+		//collisionShapes_.push_back(new btSphereShape(50));
 }
 
 CollisionShapeManager::~CollisionShapeManager()
 {
-	while(collisionShapes_.size()!=0)
-	{
-		delete collisionShapes_.at(collisionShapes_.size()-1);
-		collisionShapes_.pop_back();
-	}
+	clean();
 }
 
 btCollisionShape* CollisionShapeManager::getCollisionShape(unsigned int index)
@@ -56,8 +54,11 @@ void CollisionShapeManager::createConvexHull(float* verticeData,unsigned int num
 	collisionShapes_.push_back(convexShape);
 }
 
-CollisionShapeManager* CollisionShapeManager::getInstance()
+void CollisionShapeManager::clean()
 {
-	static CollisionShapeManager instance;
-	return &instance;
-}
+	while(collisionShapes_.size()!=0)
+	{
+		delete collisionShapes_.at(collisionShapes_.size()-1);
+		collisionShapes_.pop_back();
+	}
+};
