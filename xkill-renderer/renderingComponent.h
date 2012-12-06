@@ -66,6 +66,11 @@ public:
 	//! Resets RenderingComponent to default state.
 	void reset();
 	
+	//! Runs a frame for RenderingComponent.
+	void onUpdate(float delta);
+	//! Receives events for RenderingComponent.
+	void onEvent(Event* e);
+
 	//! Initializes RenderingComponent's members and prepares render.
 	/*!	\return First encountered error.
 		\sa initDeviceAndSwapChain
@@ -81,45 +86,7 @@ public:
 		\sa initVertexBuffer
 	*/
 	HRESULT init();
-	//! Runs a frame for RenderingComponent.
-	void onUpdate(float delta);
-	//! Receives events for RenderingComponent.
-	void onEvent(Event* e);
-
 private:
-	
-	//! Renders to g-buffers, storing albedo and normals till later.
-	/*!
-	\param view View-matrix from camera.
-	\param projection Projection-matrix from camera.
-	*/
-	void renderToGBuffer(DirectX::XMFLOAT4X4 viewMatrix,
-						 DirectX::XMFLOAT4X4 projectionMatrix);
-	//! Samples from g-buffers and creates a final image using DirectCompute.
-	/*!
-	\sa uavBackBuffer
-	*/
-	void renderToBackBuffer();
-	//! Sets which viewport to draw to.
-	/*!
-	\param index The index of the viewport to draw to. 
-	*/
-	void setViewport(unsigned int index);
-	//! Clears the GBuffers with a single color. 
-	void clearGBuffers();
-
-	void renderClean();
-	void gBufferRenderSetRenderTargets();
-	
-	DirectX::XMFLOAT4X4 calculateWorldMatrix(SpatialAttribute spatialAttribute,
-											 PositionAttribute positionAttribute);
-
-	DirectX::XMFLOAT4X4 calculateFinalMatrix(DirectX::XMFLOAT4X4 worldMatrix,
-											 DirectX::XMFLOAT4X4 viewMatrix,
-											 DirectX::XMFLOAT4X4 projectionMatrix);
-
-	DirectX::XMFLOAT4X4 calculateMatrixInverse(DirectX::XMFLOAT4X4 matrix);
-
 	//! Initializes D3DManagement-object which will maintain core DirectX objects, e.g. device and device context.
 	/*!
 	\return Any error encountered during initialization.
@@ -173,12 +140,58 @@ private:
 	\sa D3DDebug
 	*/
 	HRESULT initDebug();
-	//! Creates a mockup vertexbuffer that loads it's vertices from a basic .obj-loader using bth.obj.
+
+	//! Sets which viewport to draw to.
 	/*!
-	\return Any error encountered during initialization.
-	\sa ObjLoaderBasic
+	\param index The index of the viewport to draw to. 
 	*/
-	HRESULT initVertexBuffer();
+	void setViewport(unsigned int index);
+	//! Clears the GBuffers with a single color. 
+	void clearGBuffers();
+	//! Sets the gbuffers as render targets.
+	void renderGBufferSetRenderTargets();
+	//! Clears all render targets, buffers, shaders etc after render to gbuffers.
+	void renderGBufferClean();
+	//! Renders to g-buffers, storing albedo and normals till later.
+	/*!
+	\param view View-matrix from camera.
+	\param projection Projection-matrix from camera.
+	*/
+	void renderToGBuffer(DirectX::XMFLOAT4X4 viewMatrix, DirectX::XMFLOAT4X4 projectionMatrix);
+	//! Samples from g-buffers and creates a final image using DirectCompute.
+	/*!
+	\sa uavBackBuffer
+	*/
+	void renderToBackBuffer();
+	//! Clears all render targets, buffers, shaders etc after render to back buffer.
+	void renderBackBufferClean();
+
+	//! Calculates an objects world matrix.
+	/*!
+	\return The world matrix
+	\param spatialAttribute Contains scale and rotation to be used in calculation.
+	\param postionAttribute Contains position to be used in calculation.
+	*/
+	DirectX::XMFLOAT4X4 calculateWorldMatrix(SpatialAttribute spatialAttribute,
+											 PositionAttribute positionAttribute);
+	//! Calculates a final matrix that is used to transform an object from local space to homogeneous clip space.
+	/*!
+	\return The calculated matrix
+	\param worldMatrix An object's world matrix.
+	\param viewMatrix The camera's view matrix.
+	\param projectionMatrix The camera's projection matrix.
+	*/
+	DirectX::XMFLOAT4X4 calculateFinalMatrix(DirectX::XMFLOAT4X4 worldMatrix,
+											 DirectX::XMFLOAT4X4 viewMatrix,
+											 DirectX::XMFLOAT4X4 projectionMatrix);
+	//! Calculates the inverse of a matrix.
+	/*!
+	\return The inverse of the input matrix.
+	\param matrix The matrix to invert.
+	*/
+	DirectX::XMFLOAT4X4 calculateMatrixInverse(DirectX::XMFLOAT4X4 matrix);
+
+	
 
 	/*desc*/
 	HWND windowHandle_;				//!< WINAPI-handle to window.
@@ -203,7 +216,14 @@ private:
 	//temp
 	ID3D11Buffer*			vertexBuffer_;		//!< Mock buffer sending vertices to shader.
 	std::vector<VertexPosNormTex>*	vertices_;	//!< Mock vertices.
-	ObjLoaderBasic*			objLoader_;			//!< Basic obj-loader used to debug renderer. 
+	ObjLoaderBasic*			objLoader_;			//!< Basic obj-loader used to debug renderer.
+
+	//! Creates a mockup vertexbuffer that loads it's vertices from a basic .obj-loader using bth.obj.
+	/*!
+	\return Any error encountered during initialization.
+	\sa ObjLoaderBasic
+	*/
+	HRESULT initVertexBuffer();
 };
 
 #endif //XKILL_RENDERER_RENDERINGCOMPONENT_H

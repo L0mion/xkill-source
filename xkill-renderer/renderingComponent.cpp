@@ -164,17 +164,15 @@ void RenderingComponent::onUpdate(float delta)
 	
 	renderToBackBuffer();
 }
-void RenderingComponent::renderToGBuffer(DirectX::XMFLOAT4X4 viewMatrix,
-										 DirectX::XMFLOAT4X4 projectionMatrix)
+void RenderingComponent::renderToGBuffer(DirectX::XMFLOAT4X4 viewMatrix, DirectX::XMFLOAT4X4 projectionMatrix)
 										
 {
-
-	d3dManagement_->getDeviceContext()->VSSetShader(fxManagement_->getDefaultVS()->getVertexShader(), nullptr, 0);
-	d3dManagement_->getDeviceContext()->PSSetShader(fxManagement_->getDefaultPS()->getPixelShader(), nullptr, 0);
+	fxManagement_->getDefaultVS()->set(d3dManagement_->getDeviceContext());
+	fxManagement_->getDefaultPS()->set(d3dManagement_->getDeviceContext());
 	ssManagement_->setPS(d3dManagement_->getDeviceContext(), SS_ID_DEFAULT, 0);
 	rsManagement_->setRS(d3dManagement_->getDeviceContext(), RS_ID_DEFAULT);
 
-	gBufferRenderSetRenderTargets();
+	renderGBufferSetRenderTargets();
 	
 	d3dManagement_->clearDepthBuffer();
 
@@ -203,15 +201,10 @@ void RenderingComponent::renderToGBuffer(DirectX::XMFLOAT4X4 viewMatrix,
 		d3dManagement_->getDeviceContext()->Draw(vertices_->size(), 0);
 	}
 
-	renderClean();
+	renderGBufferClean();
 }
 void RenderingComponent::renderToBackBuffer()
 {
-	FLOAT black[]	= {0.0f, 0.0f, 0.0f, 1.0f };
-	FLOAT red[]		= {1.0f, 0.0f, 0.0f, 1.0f };
-	FLOAT green[]	= {0.0f, 1.0f, 0.0f, 1.0f };
-	FLOAT blue[]	= {0.0f, 0.0f, 1.0f, 1.0f };
-
 	d3dManagement_->setUAVBackBufferCS();
 
 	cbManagement_->csSet(CB_FRAME_INDEX, 0, d3dManagement_->getDeviceContext());
@@ -231,17 +224,11 @@ void RenderingComponent::renderToBackBuffer()
 	d3dManagement_->getDeviceContext()->Dispatch(25, 25, 1);
 	fxManagement_->getDefaultCS()->unset(d3dManagement_->getDeviceContext());
 
-	ID3D11UnorderedAccessView* uav2[] = { nullptr };
-	d3dManagement_->getDeviceContext()->CSSetUnorderedAccessViews(0, 1, uav2, NULL);
-	for(int i=0; i<GBUFFERID_NUM_BUFFERS; i++)
-		resourceViews[i] = nullptr;
-	d3dManagement_->getDeviceContext()->CSSetShaderResources(0, GBUFFERID_NUM_BUFFERS, resourceViews);
-	d3dManagement_->getDeviceContext()->CSSetSamplers(0, 0, nullptr);
+	renderBackBufferClean();
 
 	d3dManagement_->present();
-
-	renderClean();
 }
+
 void RenderingComponent::setViewport(unsigned int index)
 {
 	viewportManagement_->setViewport(d3dManagement_->getDeviceContext(), index);
@@ -260,8 +247,7 @@ void RenderingComponent::clearGBuffers()
 	d3dManagement_->getDeviceContext()->ClearRenderTargetView(renderTargets[GBUFFERID_ALBEDO], black);
 	d3dManagement_->getDeviceContext()->ClearRenderTargetView(renderTargets[GBUFFERID_NORMAL], black);
 }
-
-void RenderingComponent::renderClean()
+void RenderingComponent::renderGBufferClean()
 {
 	ID3D11RenderTargetView* renderTargets[GBUFFERID_NUM_BUFFERS];
 	for(int i=0; i<GBUFFERID_NUM_BUFFERS; i++)
@@ -279,16 +265,37 @@ void RenderingComponent::renderClean()
 	d3dManagement_->getDeviceContext()->IASetInputLayout(nullptr);
 	d3dManagement_->getDeviceContext()->RSSetState(nullptr);
 }
-void RenderingComponent::gBufferRenderSetRenderTargets()
+void RenderingComponent::renderGBufferSetRenderTargets()
 {
 	ID3D11RenderTargetView* renderTargets[GBUFFERID_NUM_BUFFERS];
 	for(int i=0; i<GBUFFERID_NUM_BUFFERS; i++)
 		renderTargets[i] = gBuffers_[i]->getRTV();
 	d3dManagement_->getDeviceContext()->OMSetRenderTargets(GBUFFERID_NUM_BUFFERS, renderTargets, d3dManagement_->getDepthBuffer());
 }
+void RenderingComponent::renderBackBufferClean()
+{
+	ID3D11UnorderedAccessView* uav2[] = { nullptr };
+	d3dManagement_->getDeviceContext()->CSSetUnorderedAccessViews(0, 1, uav2, NULL);
 
-DirectX::XMFLOAT4X4 RenderingComponent::calculateWorldMatrix(SpatialAttribute spatialAttribute,
-															 PositionAttribute positionAttribute)
+	ID3D11ShaderResourceView* resourceViews[GBUFFERID_NUM_BUFFERS];
+	for(int i=0; i<GBUFFERID_NUM_BUFFERS; i++)
+		resourceViews[i] = nullptr;
+	d3dManagement_->getDeviceContext()->CSSetShaderResources(0, GBUFFERID_NUM_BUFFERS, resourceViews);
+	d3dManagement_->getDeviceContext()->CSSetSamplers(0, 0, nullptr);
+}
+
+DirectX::XMFLOAT4X4 RenderingComponent::calculateMatrixInverse(DirectX::XMFLOAT4X4 matrix)
+{
+	DirectX::CXMMATRIX	cxmMatrix		= DirectX::XMLoadFloat4x4(&matrix);
+	DirectX::XMVECTOR	vDeterminant	= DirectX::XMMatrixDeterminant(cxmMatrix);
+	DirectX::XMMATRIX	xmMatrixInverse = DirectX::XMMatrixInverse(&vDeterminant, cxmMatrix);
+	
+	DirectX::XMFLOAT4X4 matrixInverse;
+	DirectX::XMStoreFloat4x4(&matrixInverse, xmMatrixInverse);
+	
+	return matrixInverse;
+}
+DirectX::XMFLOAT4X4 RenderingComponent::calculateWorldMatrix(SpatialAttribute spatialAttribute, PositionAttribute positionAttribute)
 {
 	DirectX::XMMATRIX translation = DirectX::XMMatrixTranslation(positionAttribute.position.x,
 																 positionAttribute.position.y,
@@ -312,9 +319,7 @@ DirectX::XMFLOAT4X4 RenderingComponent::calculateWorldMatrix(SpatialAttribute sp
 
 	return worldMatrix;
 }
-DirectX::XMFLOAT4X4 RenderingComponent::calculateFinalMatrix(DirectX::XMFLOAT4X4 worldMatrix,
-															 DirectX::XMFLOAT4X4 viewMatrix,
-															 DirectX::XMFLOAT4X4 projectionMatrix)
+DirectX::XMFLOAT4X4 RenderingComponent::calculateFinalMatrix(DirectX::XMFLOAT4X4 worldMatrix, DirectX::XMFLOAT4X4 viewMatrix, DirectX::XMFLOAT4X4 projectionMatrix)
 {
 	DirectX::CXMMATRIX mView		= DirectX::XMLoadFloat4x4(&viewMatrix);
 	DirectX::CXMMATRIX mProjection	= DirectX::XMLoadFloat4x4(&projectionMatrix);
@@ -326,17 +331,6 @@ DirectX::XMFLOAT4X4 RenderingComponent::calculateFinalMatrix(DirectX::XMFLOAT4X4
 	DirectX::XMStoreFloat4x4(&finalMatrix, mFinalMatrix);
 
 	return finalMatrix;
-}
-DirectX::XMFLOAT4X4 RenderingComponent::calculateMatrixInverse(DirectX::XMFLOAT4X4 matrix)
-{
-	DirectX::CXMMATRIX	cxmMatrix		= DirectX::XMLoadFloat4x4(&matrix);
-	DirectX::XMVECTOR	vDeterminant	= DirectX::XMMatrixDeterminant(cxmMatrix);
-	DirectX::XMMATRIX	xmMatrixInverse = DirectX::XMMatrixInverse(&vDeterminant, cxmMatrix);
-	
-	DirectX::XMFLOAT4X4 matrixInverse;
-	DirectX::XMStoreFloat4x4(&matrixInverse, xmMatrixInverse);
-	
-	return matrixInverse;
 }
 
 HRESULT RenderingComponent::initD3DManagement()
