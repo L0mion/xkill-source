@@ -15,11 +15,13 @@ class AttributeController
 private:
 	IAttributeStorage* host;
 	int index;
+	AttributeType type;
 public:
-	AttributeController(IAttributeStorage* host, int index)
+	AttributeController(IAttributeStorage* host, int index, AttributeType type)
 	{
 		this->host = host;
 		this->index = index;
+		this->type = type;
 	}
 
 	void remove()

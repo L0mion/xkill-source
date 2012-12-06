@@ -33,7 +33,7 @@ private:
 
 	AttributeController getAttributeController()
 	{
-		return AttributeController(this, index);
+		return AttributeController(this, index, type);
 	}
 
 public:
