@@ -46,7 +46,7 @@ void FMODEventSystem::Update()
 	FMODErrorCheck(mEventsystem->update());
 }
 
-void FMODEventSystem::StartSoundEventAt(int index)
+void FMODEventSystem::StartSoundEventAt(unsigned int index)
 {
 	if(index < mSoundEvents->size())
 	{

@@ -6,9 +6,9 @@ VSOut defaultVS(DefaultVSIn vsIn)
 {
 	VSOut output;
 
-	output.position		= mul(worldViewProj, float4(vsIn.position, 1.0f));
-	output.positionW	= vsIn.position;
-	output.normalW		= vsIn.normal;
+	output.position		= mul(finalMatrix, float4(vsIn.position, 1.0f));
+	output.positionW	= mul(worldMatrix, float4(vsIn.position, 1.0f)).xyz;
+	output.normalW		= mul(worldMatrix, float4(vsIn.normal, 0.0f)).xyz;
 	output.texcoord		= vsIn.texcoord;
 
 	return output;

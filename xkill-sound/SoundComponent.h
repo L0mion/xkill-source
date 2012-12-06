@@ -2,8 +2,12 @@
 
 #include "dllSound.h"
 #include <xkill-utilities/IObserver.h>
+#include <xkill-utilities/EventType.h>
+
+#include <vector>
 
 class FMODEventSystem;
+class EventToFModConverter;
 
 /// Component responsible for playing Sound based on which Event is sent
 /** 
@@ -18,6 +22,9 @@ class DLL_S SoundComponent : public IObserver
 {
 private:
 	FMODEventSystem* mFMODEventSystem;
+	EventToFModConverter* converter;
+
+	void fillEventsToFModVector();
 
 public:
 	SoundComponent();

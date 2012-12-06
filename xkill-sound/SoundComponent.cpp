@@ -8,17 +8,22 @@
 #include <iostream>
 
 #include "FileParser.h"
+#include "EventToFModConverter.h"
 
 #define SAFE_DELETE(x) if( x ) { delete(x); (x) = NULL; }
 
 SoundComponent::SoundComponent()
 {
 	mFMODEventSystem = NULL;
+	converter = NULL;
+
+	SUBSCRIBE_TO_EVENT(this, EVENT_CREATEPROJECTILE);
 }
 
 SoundComponent::~SoundComponent()
 {
 	SAFE_DELETE(mFMODEventSystem);
+	SAFE_DELETE(converter);
 }
 
 bool SoundComponent::init()
@@ -33,6 +38,26 @@ bool SoundComponent::init()
 		return false;
 	}
 
+	converter = new EventToFModConverter();
+
+	fillEventsToFModVector();
+
+	return true;
+}
+
+void SoundComponent::onEvent(Event* e)
+{
+	EventType type = e->getType();
+	mFMODEventSystem->StartSoundEventAt(converter->getFModIndex((int)type));
+}
+
+void SoundComponent::onUpdate(float delta)
+{
+	mFMODEventSystem->Update();
+}
+
+void SoundComponent::fillEventsToFModVector()
+{
 	FileParser fp;
 	fp.setFileName("sound.cfg");
 	fp.setFilePath("../../xkill-resources/xkill-configs/");
@@ -41,27 +66,8 @@ bool SoundComponent::init()
 		while(!fp.isEmpty())
 		{
 			std::string tmp = fp.getNextRow();
+			converter->addConversion(tmp);
 		}
 	}
 
-	fp.startWriting();
-	fp.writeRow("Hej");
-	fp.writeRow("Här är vi");
-	fp.writeRow("Sveriges bästa lag");
-	fp.writeRow("Vi ska ta guld än en gång");
-	fp.writeRow("Och vi firar hela natten lång");
-	fp.writeRow("Tillsammans");
-	fp.doneWriting();
-
-	return true;
-}
-
-void SoundComponent::onEvent(Event* e)
-{
-	//mFMODEventSystem->StartSoundEventAt(0);
-}
-
-void SoundComponent::onUpdate(float delta)
-{
-	mFMODEventSystem->Update();
 }

@@ -20,6 +20,7 @@ class btDefaultCollisionConfiguration;
 class btCollisionDispatcher;
 class btSequentialImpulseConstraintSolver;
 class btDiscreteDynamicsWorld;
+class btRigidBody;
 
 template<class T>
 class btAlignedObjectArray;
@@ -53,6 +54,7 @@ private:
 	std::vector<InputAttribute>* inputAttributes_; //<! A pointer to the attribute storage containing the input data from the input component
 
 	btAlignedObjectArray<PhysicsObject*>* physicsObjects_; //<! A vector of PhysicsObjects, internal representation of world
+	btRigidBody* floor_; //<! The absolute floor plane, no object may pass bellow this plane
 
 public:
 	//! Creates a BulletPhysicsComponent, gives it pointers to attribute storages required by the component and sets all pointer to null_ptr
@@ -64,7 +66,7 @@ public:
 	~BulletPhysicsComponent();
 	//! Initialize the physics component, creates bullet objects and storage for internal representation
 	bool init();
-	//! Runs every frame and step simulation a number of fixed-length time-steps depending on delta
+	//! Runs every frame and step simulation a number of fixed-length time-steps depending on delta. Transfers data to and from the internal represenation in Bullet Physics and the PhysicsAttributes.
 	/*!
 	\param delta The time which the frame should simulate
 	*/
