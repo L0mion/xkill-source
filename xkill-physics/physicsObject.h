@@ -32,6 +32,8 @@ struct CollisionResult : public btCollisionWorld::ContactResultCallback
 		return 0;
 	}
 };
+
+
 class PhysicsObject : public btRigidBody
 {
 private:
@@ -39,6 +41,7 @@ private:
 	btVector3 forces_;
 	btVector3 movement_;
 	btScalar yaw_;
+	unsigned int index_;
 protected:
 public:
 
@@ -46,7 +49,7 @@ public:
 	/*!
 	\param collisionShapeManager A pointer used to access collision shapes
 	*/
-	PhysicsObject(CollisionShapeManager* collisionShapeManager);
+	PhysicsObject(CollisionShapeManager* collisionShapeManager, unsigned int index);
 	//! Deletes all subobjects of the contained rigidbody and the rigidbody itself
 	~PhysicsObject();
 	//! Initialize rigidbody from physicsAttribute and add object to simulation
@@ -82,6 +85,8 @@ public:
 	\return truthvalue of collision
 	*/
 	bool contactTest(btDiscreteDynamicsWorld* dynamicsWorld, PhysicsObject& otherPhysicsObject);
+	//! return index of physicsobject
+	unsigned int getIndex() const;
 };
 
 #endif //XKILL_PHYSICS_PHYSICSOBJECT

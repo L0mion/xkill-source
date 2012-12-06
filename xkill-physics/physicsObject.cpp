@@ -6,11 +6,12 @@
 
 #include "CollisionShapeManager.h"
 
-PhysicsObject::PhysicsObject(CollisionShapeManager* collisionShapeManager) : btRigidBody(1,
-																						 new btDefaultMotionState(),
-																						 collisionShapeManager->getCollisionShape(0),
-																						 btVector3(0,0,0))
+PhysicsObject::PhysicsObject(CollisionShapeManager* collisionShapeManager, unsigned int index) : btRigidBody(1,
+																											 new btDefaultMotionState(),
+																											 collisionShapeManager->getCollisionShape(0),
+																											 btVector3(0,0,0))
 {
+	index_ = index;
 	gravity_.setZero();
 	forces_.setZero();
 	movement_.setZero();
@@ -86,4 +87,9 @@ bool PhysicsObject::contactTest(btDiscreteDynamicsWorld* dynamicsWorld, PhysicsO
 	dynamicsWorld->contactPairTest(this,&otherPhysicsObject, collisionResult);
 
 	return collisionResult.collision;
+}
+
+unsigned int PhysicsObject::getIndex() const
+{
+	return index_;
 }

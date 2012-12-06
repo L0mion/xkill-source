@@ -10,6 +10,8 @@
 
 #include <xkill-utilities/EventManager.h>
 
+#include <iostream>
+
 #define SAFE_DELETE(obj)	if(obj != nullptr) { delete obj;		obj = nullptr; }
 BulletPhysicsComponent::BulletPhysicsComponent()
 {
@@ -54,7 +56,11 @@ BulletPhysicsComponent::~BulletPhysicsComponent()
 	SAFE_DELETE(collisionShapeManager_);
 }
 
-
+void wrapTickCallback(btDynamicsWorld *world, btScalar timeStep)
+{
+    BulletPhysicsComponent *component = static_cast<BulletPhysicsComponent *>(world->getWorldUserInfo());
+	component->tickCallback(timeStep);
+}
 
 
 bool BulletPhysicsComponent::init()
@@ -74,6 +80,8 @@ bool BulletPhysicsComponent::init()
 	collisionShapeManager_ = new CollisionShapeManager();
 
 	dynamicsWorld_->setGravity(btVector3(0,0,0));
+	dynamicsWorld_->setInternalTickCallback(wrapTickCallback,static_cast<void*>(this));
+
 
 	floor_ = new btRigidBody(0,
 							 new btDefaultMotionState(btTransform(btQuaternion(0,0,0,1),btVector3(0,0,0))),
@@ -81,12 +89,11 @@ bool BulletPhysicsComponent::init()
 							 btVector3(0,0,0));
 	dynamicsWorld_->addRigidBody(floor_);
 
+
 	collisionShapeManager_->createConvexHull(nullptr,0);
 
 	return true;
 }
-
-
 
 
 void BulletPhysicsComponent::onUpdate(float delta)
@@ -100,7 +107,7 @@ void BulletPhysicsComponent::onUpdate(float delta)
 	//Checks if new physiscs attributes were created since last call to this function
 	for(unsigned int i = physicsObjects_->size(); i < physicsAttributes_->size(); i++)
 	{
-		physicsObjects_->push_back(new PhysicsObject(collisionShapeManager_));
+		physicsObjects_->push_back(new PhysicsObject(collisionShapeManager_,i));
 	}
 	
 	//Synchronize the internal represenation of physics objects with the physics attributes
@@ -134,43 +141,43 @@ void BulletPhysicsComponent::onUpdate(float delta)
 		{
 			physicsObject->postStep(physicsAttribute);
 
-			//Check collisions between players and projectiles
-			for(unsigned int j = i+1; j < physicsObjects_->size(); j++)
-			{
-				if(physicsAttributes_->at(j).alive && physicsAttributes_->at(j).added)
-				{
-					//^ = xor. If one of the 2 physics objects (at i and j in physicsAttributes_) is a projectile, and the other object is not a projectile.
-					if(physicsAttributes_->at(i).isProjectile ^ physicsAttributes_->at(j).isProjectile)
-					{
-						//Collision test
-						if((*physicsObjects_)[i]->contactTest(dynamicsWorld_,*(*physicsObjects_)[j]))
-						{
-							std::vector<int>* allPhysicsOwner; GET_ATTRIBUTE_OWNERS(allPhysicsOwner, ATTRIBUTE_PHYSICS);
-							int physicsAttributeOwnersI = allPhysicsOwner->at(i);
-							int physicsAttributeOwnersJ = allPhysicsOwner->at(j);
+			////Check collisions between players and projectiles
+			//for(unsigned int j = i+1; j < static_cast<unsigned int>(physicsObjects_->size()); j++)
+			//{
+			//	if(physicsAttributes_->at(j).alive && physicsAttributes_->at(j).added)
+			//	{
+			//		//^ = xor. If one of the 2 physics objects (at i and j in physicsAttributes_) is a projectile, and the other object is not a projectile.
+			//		if(physicsAttributes_->at(i).isProjectile ^ physicsAttributes_->at(j).isProjectile)
+			//		{
+			//			//Collision test
+			//			if((*physicsObjects_)[i]->contactTest(dynamicsWorld_,*(*physicsObjects_)[j]))
+			//			{
+			//				std::vector<int>* allPhysicsOwner; GET_ATTRIBUTE_OWNERS(allPhysicsOwner, ATTRIBUTE_PHYSICS);
+			//				int physicsAttributeOwnersI = allPhysicsOwner->at(i);
+			//				int physicsAttributeOwnersJ = allPhysicsOwner->at(j);
 
-							//Find out which one of the 2 physics objects (at i and j in physicsAttributes_) that is a projectile.
-							int projectileEntityId = -1;
-							int playerEntityId = -1;
-							if(physicsAttributes_->at(i).isProjectile)
-							{
-								physicsAttributes_->at(i).alive = false;
-								projectileEntityId = physicsAttributeOwnersI;
-								playerEntityId = physicsAttributeOwnersJ;
-							}
-							else if(physicsAttributes_->at(j).isProjectile)
-							{
-								physicsAttributes_->at(j).alive = false;
-								playerEntityId = physicsAttributeOwnersI;
-								projectileEntityId = physicsAttributeOwnersJ;
-							}
+			//				//Find out which one of the 2 physics objects (at i and j in physicsAttributes_) that is a projectile.
+			//				int projectileEntityId = -1;
+			//				int playerEntityId = -1;
+			//				if(physicsAttributes_->at(i).isProjectile)
+			//				{
+			//					physicsAttributes_->at(i).alive = false;
+			//					projectileEntityId = physicsAttributeOwnersI;
+			//					playerEntityId = physicsAttributeOwnersJ;
+			//				}
+			//				else if(physicsAttributes_->at(j).isProjectile)
+			//				{
+			//					physicsAttributes_->at(j).alive = false;
+			//					playerEntityId = physicsAttributeOwnersI;
+			//					projectileEntityId = physicsAttributeOwnersJ;
+			//				}
 
-							Event_ProjectileCollidingWithPlayer projectileCollidingWithPlayer(projectileEntityId, playerEntityId);
-							SEND_EVENT(&projectileCollidingWithPlayer);
-						}
-					}
-				}
-			}
+			//				Event_ProjectileCollidingWithPlayer projectileCollidingWithPlayer(projectileEntityId, playerEntityId);
+			//				SEND_EVENT(&projectileCollidingWithPlayer);
+			//			}
+			//		}
+			//	}
+			//}
 		}
 	}
 }
@@ -178,4 +185,36 @@ void BulletPhysicsComponent::onUpdate(float delta)
 void BulletPhysicsComponent::onEvent(Event* e)
 {
 
+}
+
+void BulletPhysicsComponent::tickCallback(btScalar timeStep)
+{
+	btPersistentManifold* persistentManifold;
+	btDispatcher* dispatcher = dynamicsWorld_->getDispatcher();
+	unsigned int numManifolds = dynamicsWorld_->getDispatcher()->getNumManifolds();
+	for(unsigned int i = 0; i < numManifolds; i++)
+	{
+		persistentManifold = dispatcher_->getManifoldByIndexInternal(i);
+		if(persistentManifold->getNumContacts() > 0)
+		{
+			const PhysicsObject* objectA = static_cast<const PhysicsObject*>(persistentManifold->getBody0());
+			const PhysicsObject* objectB = static_cast<const PhysicsObject*>(persistentManifold->getBody1());
+			unsigned int ownerA = physicsOwners_->at(objectA->getIndex());
+			unsigned int ownerB = physicsOwners_->at(objectB->getIndex());
+			objectB->getIndex();
+			std::cout << "\nCollision between " << ownerA << " & " << ownerB;
+			for(int j=0;j<persistentManifold->getNumContacts();j++)
+				std::cout << "\nDistance " << persistentManifold->getContactPoint(j).getDistance();
+			if(physicsAttributes_->at(objectA->getIndex()).isProjectile)
+			{
+				Event_ProjectileCollidingWithPlayer projectileCollidingWithPlayer(ownerA,ownerB);
+				SEND_EVENT(&projectileCollidingWithPlayer);
+			}
+			else if(physicsAttributes_->at(objectB->getIndex()).isProjectile)
+			{
+				Event_ProjectileCollidingWithPlayer projectileCollidingWithPlayer(ownerB,ownerA);
+				SEND_EVENT(&projectileCollidingWithPlayer);
+			}
+		}
+	}
 }
