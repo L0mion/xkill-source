@@ -66,7 +66,12 @@ public:
 	//! Resets RenderingComponent to default state.
 	void reset();
 	
-	
+	//! Resizes all management objects that are affected by a change in screen resolution.
+	/*!
+	\param screenWidth The new screen width.
+	\param screenHeight the new screen height.
+	\return Any error encountered.
+	*/
 	HRESULT resize(unsigned int screenWidth, unsigned int screenHeight);
 
 	//! Runs a frame for RenderingComponent.
