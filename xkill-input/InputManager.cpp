@@ -25,6 +25,12 @@ bool InputManager::InitInput(HWND hWindow)
 
 	UpdateNumberOfGamepads(hWindow);
 
+	GUID guid;
+	memset(&guid, 0, sizeof(guid));
+	QTInputDevices* mouseAndKeyboard = new QTInputDevices(guid, "Mouse & Keyboard", devices_.size());
+	devices_.push_back(mouseAndKeyboard);
+	mouseAndKeyboard_ = mouseAndKeyboard;
+
 	//LPDIRECTINPUTDEVICE8 dInputDevice;
 	//result = dInput_->CreateDevice(GUID_SysMouse, &dInputDevice, NULL);
 	//if(FAILED(result))
@@ -70,6 +76,11 @@ InputDevice* InputManager::GetDevice(unsigned int playerID)
 		return nullptr;
 
 	return devices_[index];
+}
+
+QTInputDevices* InputManager::GetMouseAndKeyboard()
+{
+	return mouseAndKeyboard_;
 }
 
 int InputManager::UpdateNumberOfGamepads(HWND hWindow)
