@@ -7,16 +7,19 @@ CBManagement::CBManagement()
 {
 	cbFrame_	= nullptr;
 	cbInstance_ = nullptr;
+	cbObject_	= nullptr;
 }
 CBManagement::~CBManagement()
 {
 	SAFE_RELEASE(cbFrame_);
 	SAFE_RELEASE(cbInstance_);
+	SAFE_RELEASE(cbObject_);
 }
 void CBManagement::reset()
 {
 	SAFE_RELEASE(cbFrame_);
 	SAFE_RELEASE(cbInstance_);
+	SAFE_RELEASE(cbObject_);
 }
 
 void CBManagement::updateCBFrame(ID3D11DeviceContext* devcon,
