@@ -54,6 +54,7 @@ enum DLL_U EventType
 	EVENT_GET_WINDOW_HANDLE,
 
 	// Utilities
+	EVENT_CREATEMESH,
 	EVENT_SHOW_MESSAGEBOX,
 
 	// this is needed, don't touch!
@@ -250,6 +251,18 @@ public:
 	{
 		this->position = position;
 		this->direction = direction;
+	}
+};
+
+class MeshModel;
+class DLL_U Event_createMesh : public Event
+{
+public:
+	MeshModel* mesh;
+
+	Event_createMesh(MeshModel* mesh) : Event(EVENT_CREATEMESH)
+	{
+		this->mesh = mesh;
 	}
 };
 

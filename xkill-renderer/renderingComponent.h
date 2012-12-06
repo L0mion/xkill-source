@@ -8,10 +8,14 @@
 #include <d3d11.h>
 #include <vector>
 
+#include <xkill-utilities/IObserver.h>
+
 #include "dllRenderer.h"
 #include "gBufferID.h"
-//#include "d3dInterface.h"
-#include <xkill-utilities/IObserver.h>
+
+#if defined (DEBUG) || (DEBUG_)
+#include <vld.h>
+#endif //DEBUG || DEBUG_
 
 class D3DManagement;
 class FXManagement;
@@ -21,9 +25,10 @@ class SSManagement;
 class RSManagement;
 class GBuffer;
 class D3DDebug;
-class ObjLoaderBasic;
 class LightManagement;
 class Event_WindowResize;
+class MeshManagement;
+class ObjLoaderBasic;
 
 namespace DirectX
 {
@@ -34,10 +39,6 @@ struct RenderAttribute;
 struct CameraAttribute;
 struct SpatialAttribute;
 struct PositionAttribute;
-
-//static const unsigned int MULTISAMPLES_GBUFFERS		= 1;
-//static const unsigned int MULTISAMPLES_BACKBUFFER	= 1;
-//static const unsigned int MULTISAMPLES_DEPTHBUFFER	= 1;
 
 struct VertexPosNormTex;
 
@@ -67,6 +68,14 @@ public:
 	//! Resets RenderingComponent to default state.
 	void reset();
 	
+	//! Resizes all management objects that are affected by a change in screen resolution.
+	/*!
+	\param screenWidth The new screen width.
+	\param screenHeight the new screen height.
+	\return Any error encountered.
+	*/
+	HRESULT resize(unsigned int screenWidth, unsigned int screenHeight);
+
 	//! Runs a frame for RenderingComponent.
 	void onUpdate(float delta);
 	//! Receives events for RenderingComponent.
@@ -116,6 +125,9 @@ private:
 	/*!
 	\return Any error encountered during initialization.
 	*/
+	
+	HRESULT initMeshManagement();
+	
 	HRESULT initViewport();
 	//! Creates a SSManaegement object that will maintain sampler states.
 	/*!
@@ -175,6 +187,7 @@ private:
 	*/
 	DirectX::XMFLOAT4X4 calculateWorldMatrix(SpatialAttribute spatialAttribute,
 											 PositionAttribute positionAttribute);
+
 	//! Calculates a final matrix that is used to transform an object from local space to homogeneous clip space.
 	/*!
 	\return The calculated matrix
@@ -191,9 +204,7 @@ private:
 	\param matrix The matrix to invert.
 	*/
 	DirectX::XMFLOAT4X4 calculateMatrixInverse(DirectX::XMFLOAT4X4 matrix);
-
 	
-
 	/*desc*/
 	HWND windowHandle_;				//!< WINAPI-handle to window.
 	unsigned int screenWidth_;		//!< Width of screen.
@@ -205,8 +216,12 @@ private:
 	CBManagement*		cbManagement_;						//!< Maintaining constant buffers.
 	LightManagement*	lightManagement_;					//!< Maintaining lights.
 	ViewportManagement* viewportManagement_;				//!< Maintaining viewports.
+
+	MeshManagement*		meshManagement_;
+	
 	SSManagement*		ssManagement_;						//!< Maintaining sampler states.
 	RSManagement*		rsManagement_;						//!< Maintaining rasterizer states.
+	
 	D3DDebug*			d3dDebug_;							//!< Used for detecting live COM-objects.
 	GBuffer*			gBuffers_[GBUFFERID_NUM_BUFFERS];	//!< Containing data for deferred rendering.
 

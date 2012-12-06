@@ -8,6 +8,7 @@
 #include "DirectInputMouse.h"
 #include "DirectInputKeyboard.h"
 #include "XInputDevice.h"
+#include "QTInputDevices.h"
 
 #include "Converter.h"
 
@@ -88,6 +89,7 @@ public:
 	void Update(float deltaTime);
 
 	InputDevice* GetDevice(unsigned int playerID);
+	QTInputDevices* GetMouseAndKeyboard();
 	
 	//! Generates a string with the states of all devices
 	std::string GetInputInformationString();
@@ -109,6 +111,7 @@ private:
 	LPDIRECTINPUT8 dInput_;
 	//! Array of wrapped input devices
 	std::vector<InputDevice*> devices_;
+	QTInputDevices* mouseAndKeyboard_;
 	//! Number of XInput devices added
 	/*!
 	Shouldn't be able to go above four. Four is the limit that XInput sets on how many gamepads that can be handled.
