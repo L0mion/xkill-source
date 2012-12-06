@@ -17,7 +17,7 @@ class MeshMakerObj;
 class MeshModel;
 
 static const std::string bthPath		= "../../xkill-resources/xkill-models/";
-static const std::string pgyPath		= "";
+static const std::string pgyPath		= "../../xkill-resources/xkill-models/";
 static const std::string bthName		= "bth.obj";
 static const std::string bthMTLPath		= bthPath;
 
