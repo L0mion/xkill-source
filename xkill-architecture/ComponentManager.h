@@ -45,9 +45,7 @@ public:
 	{
 		SAFE_DELETE(render_);
 		SAFE_DELETE(ioComponent_);
-		//SAFE_DELETE(physicsComponent);
 		//SAFE_DELETE(soundComponent);
-		//SAFE_DELETE(gameComponent);
 	}
 
 	bool init(HWND windowHandle, HWND parentWindowHandle)
