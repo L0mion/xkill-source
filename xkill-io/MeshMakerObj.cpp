@@ -1,5 +1,6 @@
 #include <fstream>
 
+#include <xkill-utilities/EventManager.h>
 #include <xkill-utilities/MeshVertices.h>
 
 #include "LoaderObj.h"
@@ -74,6 +75,9 @@ bool MeshMakerObj::loadObj()
 	loaderObj_ = new LoaderObj(pathObj_, fileNameObj_);
 	sucessfulLoad = loaderObj_->init();
 
+	if(!sucessfulLoad)
+		SHOW_MESSAGEBOX("Failed to load .obj-file: " + pathObj_ + fileNameObj_);
+
 	return sucessfulLoad;
 }
 MeshModel* MeshMakerObj::loadPGY()
@@ -138,6 +142,8 @@ bool MeshMakerObj::loadMTL(std::string fileNameMTL)
 
 	if(sucessfulLoad)
 		loadMTLMaterials(loaderMtl_->getMTL());
+	else
+		SHOW_MESSAGEBOX("Failed to load .mtl-file: " + pathMTL_ + fileNameMTL);
 
 	delete loaderMtl_; //clear memory
 
