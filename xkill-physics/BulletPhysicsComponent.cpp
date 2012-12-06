@@ -130,32 +130,37 @@ void BulletPhysicsComponent::onUpdate(float delta)
 			//Check collisions between players and projectiles
 			for(unsigned int j = i+1; j < physicsObjects_->size(); j++)
 			{
-				//^ = xor. If one of the 2 physics objects (at i and j in physicsAttributes_) is a projectile, and the other object is not a projectile.
-				if(physicsAttributes_->at(i).isProjectile ^ physicsAttributes_->at(j).isProjectile)
+				if(physicsAttributes_->at(j).alive && physicsAttributes_->at(j).added)
 				{
-					//Collision test
-					if((*physicsObjects_)[i]->contactTest(dynamicsWorld_,*(*physicsObjects_)[j]))
+					//^ = xor. If one of the 2 physics objects (at i and j in physicsAttributes_) is a projectile, and the other object is not a projectile.
+					if(physicsAttributes_->at(i).isProjectile ^ physicsAttributes_->at(j).isProjectile)
 					{
-						std::vector<int>* allPhysicsOwner; GET_ATTRIBUTE_OWNERS(allPhysicsOwner, ATTRIBUTE_PHYSICS);
-						int physicsAttributeOwnersI = allPhysicsOwner->at(i);
-						int physicsAttributeOwnersJ = allPhysicsOwner->at(j);
-					
-						//Find out which one of the 2 physics objects (at i and j in physicsAttributes_) that is a projectile.
-						int projectileEntityId = -1;
-						int playerEntityId = -1;
-						if(physicsAttributes_->at(i).isProjectile)
+						//Collision test
+						if((*physicsObjects_)[i]->contactTest(dynamicsWorld_,*(*physicsObjects_)[j]))
 						{
-							projectileEntityId = physicsAttributeOwnersI;
-							playerEntityId = physicsAttributeOwnersJ;
-						}
-						else if(physicsAttributes_->at(j).isProjectile)
-						{
-							playerEntityId = physicsAttributeOwnersI;
-							projectileEntityId = physicsAttributeOwnersJ;
-						}
+							std::vector<int>* allPhysicsOwner; GET_ATTRIBUTE_OWNERS(allPhysicsOwner, ATTRIBUTE_PHYSICS);
+							int physicsAttributeOwnersI = allPhysicsOwner->at(i);
+							int physicsAttributeOwnersJ = allPhysicsOwner->at(j);
 
-						Event_ProjectileCollidingWithPlayer projectileCollidingWithPlayer(projectileEntityId, playerEntityId);
-						SEND_EVENT(&projectileCollidingWithPlayer);
+							//Find out which one of the 2 physics objects (at i and j in physicsAttributes_) that is a projectile.
+							int projectileEntityId = -1;
+							int playerEntityId = -1;
+							if(physicsAttributes_->at(i).isProjectile)
+							{
+								physicsAttributes_->at(i).alive = false;
+								projectileEntityId = physicsAttributeOwnersI;
+								playerEntityId = physicsAttributeOwnersJ;
+							}
+							else if(physicsAttributes_->at(j).isProjectile)
+							{
+								physicsAttributes_->at(j).alive = false;
+								playerEntityId = physicsAttributeOwnersI;
+								projectileEntityId = physicsAttributeOwnersJ;
+							}
+
+							Event_ProjectileCollidingWithPlayer projectileCollidingWithPlayer(projectileEntityId, playerEntityId);
+							SEND_EVENT(&projectileCollidingWithPlayer);
+						}
 					}
 				}
 			}

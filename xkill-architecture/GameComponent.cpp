@@ -60,13 +60,6 @@ void GameComponent::onUpdate(float delta)
 			SpatialAttribute* spatial	=	&allSpatial->at(render->spatialAttribute.index);
 			PositionAttribute* position	=	&allPosition->at(spatial->positionAttribute.index);
 
-			static int tmp = 0;
-			if(tmp == 0)
-			{
-				input->fire = true;
-				tmp++;
-			}
-
 			if(input->fire)
 			{
 				//float* position = new float[3];
