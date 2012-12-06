@@ -8,6 +8,7 @@ class Camera;
 struct CameraAttribute;
 struct InputAttribute;
 class Event_MouseMove;
+class Event_WindowResize;
 
 //! Component to process Cameras
 /** 
@@ -24,6 +25,8 @@ public:
 	void init();
 	//! Methods that will be called on events. 
 	void onEvent(Event* e);
+	//! Methods that will be called on events. 
+	void event_WindowResize(Event_WindowResize* e);
 	
 	//! Update method that will be called every frame.
 	void onUpdate(float delta);

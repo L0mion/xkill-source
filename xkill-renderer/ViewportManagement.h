@@ -30,6 +30,13 @@ public:
 	virtual void reset();
 	//! Set the viewport that the renderer will draw to. 
 	void setViewport(ID3D11DeviceContext* devcon, unsigned int index);
+	//! Resizes the viewports to fit the new screen size.
+	/*!
+	\param screenWidth The new screen width.
+	\param screenHeight the new screen height.
+	\return Any error encountered.
+	*/
+	HRESULT resize(unsigned int screenWidth, unsigned int screenHeight);
 	//! Initializes ViewportManagement.
 	HRESULT init();
 

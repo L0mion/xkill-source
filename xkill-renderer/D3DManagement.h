@@ -36,6 +36,14 @@ public:
 	//!Releases all memory and resets D3DManagement to its default state.
 	virtual void reset();
 	
+	//! Resizes textures and back buffers to fit the new screen size.
+	/*!
+	\param screenWidth The new screen width.
+	\param screenHeight the new screen height.
+	\return Any error encountered.
+	*/
+	HRESULT resize(unsigned int screenWidth, unsigned int screenHeight);
+
 	//! Set the variable uavBackBuffer to the compute shader stage.
 	void setUAVBackBufferCS();
 	//! Presents the back buffer.

@@ -97,8 +97,12 @@ protected:
 	void resizeEvent(QResizeEvent* e)
 	{
 		QWidget::resizeEvent(e);
+
+		// Inform about resize
 		int width = size().width();
 		int height = size().height();
+		Event_WindowResize event_windowResize(width, height);
+		SEND_EVENT(&event_windowResize);
 	};
 
 private:
@@ -133,10 +137,6 @@ private:
 	{
 		e->width = size().width();
 		e->height = size().height();
-
-		// splitscreen gets wrong if we don't use 600x600 resolution
-		e->width = 800;
-		e->height = 800;
 	}
 
 signals:
