@@ -25,6 +25,7 @@ private:
 		inputAttributes_		.init(ATTRIBUTE_INPUT);
 		playerAttributes_		.init(ATTRIBUTE_PLAYER);
 		boundingAttributes_		.init(ATTRIBUTE_BOUNDING);
+		meshAttributes_			.init(ATTRIBUTE_MESH);
 	}
 
 public:
@@ -36,6 +37,7 @@ public:
 	AttributeStorage<InputAttribute>			inputAttributes_;
 	AttributeStorage<PlayerAttribute>			playerAttributes_;
 	AttributeStorage<BoundingAttribute>			boundingAttributes_;
+	AttributeStorage<MeshAttribute>				meshAttributes_;
 
 	static AttributeManager* getInstance()
 	{
@@ -72,24 +74,24 @@ public:
 		switch(type) 
 		{
 			// Macro to facilitate adding and refactoring attributes
-#define PUT_ATTRIBUTES_INSIDE_EVENT(AttributeStorage, EventObject)	\
-		case AttributeStorage.type:											\
-			EventObject->hostVector = AttributeStorage.getAllAttributes();	\
-			EventObject->owners = AttributeStorage.getAllOwners();			\
+#define PUT_ATTRIBUTES_INSIDE_EVENT(Enum, AttributeStorage)	\
+		case Enum:															\
+			e->hostVector = AttributeStorage.getAllAttributes();	\
+			e->owners = AttributeStorage.getAllOwners();			\
 			break;
 
 			// If Enum matches, fetch information from the corresponding
 			// AttributeStorage and store that information inside 
 			// Event_getAttribute
-
-			PUT_ATTRIBUTES_INSIDE_EVENT(positionAttributes_,	e);
-			PUT_ATTRIBUTES_INSIDE_EVENT(spatialAttributes_,		e);
-			PUT_ATTRIBUTES_INSIDE_EVENT(renderAttributes_,		e);
-			PUT_ATTRIBUTES_INSIDE_EVENT(physicsAttributes_,		e);
-			PUT_ATTRIBUTES_INSIDE_EVENT(cameraAttributes_,		e);
-			PUT_ATTRIBUTES_INSIDE_EVENT(inputAttributes_,		e);
-			PUT_ATTRIBUTES_INSIDE_EVENT(playerAttributes_,		e);
-			PUT_ATTRIBUTES_INSIDE_EVENT(boundingAttributes_,	e);
+			PUT_ATTRIBUTES_INSIDE_EVENT(ATTRIBUTE_POSITION,	positionAttributes_	);
+			PUT_ATTRIBUTES_INSIDE_EVENT(ATTRIBUTE_SPATIAL,	spatialAttributes_	);
+			PUT_ATTRIBUTES_INSIDE_EVENT(ATTRIBUTE_RENDER,	renderAttributes_	);
+			PUT_ATTRIBUTES_INSIDE_EVENT(ATTRIBUTE_PHYSICS,	physicsAttributes_	);
+			PUT_ATTRIBUTES_INSIDE_EVENT(ATTRIBUTE_CAMERA,	cameraAttributes_	);
+			PUT_ATTRIBUTES_INSIDE_EVENT(ATTRIBUTE_INPUT,	inputAttributes_	);
+			PUT_ATTRIBUTES_INSIDE_EVENT(ATTRIBUTE_PLAYER,	playerAttributes_	);
+			PUT_ATTRIBUTES_INSIDE_EVENT(ATTRIBUTE_BOUNDING,	boundingAttributes_	);
+			PUT_ATTRIBUTES_INSIDE_EVENT(ATTRIBUTE_MESH,		meshAttributes_		);
 
 			// undefine dirty macro
 #undef PUT_ATTRIBUTES_INSIDE_EVENT

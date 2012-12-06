@@ -29,6 +29,20 @@ void GBuffer::reset()
 	SAFE_RELEASE(srv_);
 	SAFE_RELEASE(rtv_);
 }
+
+HRESULT GBuffer::resize(ID3D11Device* device, unsigned int texWidth, unsigned int texHeight)
+{
+	HRESULT hr = S_OK;
+	
+	reset();
+	texWidth_	= texWidth;
+	texHeight_	= texHeight;
+
+	hr = init(device);
+
+	return hr;
+}
+
 HRESULT GBuffer::init(ID3D11Device* device)
 {
 	HRESULT hr = S_OK;

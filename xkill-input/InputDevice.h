@@ -46,7 +46,8 @@ public:
 		XINPUT_DEVICE,
 		DIRECT_INPUT_DEVICE,
 		DIRECT_INPUT_MOUSE,
-		DIRECT_INPUT_KEYBOARD
+		DIRECT_INPUT_KEYBOARD,
+		QT_INPUT_DEVICE,
 	};
 
 	InputDevice(GUID deviceGUID, std::string name, unsigned int playerID = -1);
@@ -79,13 +80,15 @@ public:
 	virtual void setPlayerID(int playerID);
 	virtual int getPlayerID();
 
+	void setButtonsToNotReleased();
+
 protected:
 	InputDeviceLayout inputLayout_;
 	GUID deviceGUID_;
 	std::string name_;
 	unsigned int playerID_;
 
-	std::vector<InputAxisObject> axes_;				//Should perhaps use an inputstate to store this isntead?
+	std::vector<InputAxisObject> axes_;				//Should perhaps use an inputstate to store this instead?
 	std::vector<InputButtonObject> buttons_;
 	std::vector<InputHatSwitchObject> hatSwitches_;
 	std::vector<InputTriggerObject> triggers_;

@@ -6,6 +6,7 @@
 #include "IAttributeStorage.h"
 #include "AttributeController.h"
 #include <xkill-utilities/AttributePointer.h>
+#include <xkill-utilities/AttributeType.h>
 #include "Entity.h"
 
 
@@ -28,7 +29,7 @@ private:
 									//!< Is deleted and ready to be reused.
 	std::queue<int> deleted;		//!< Queue to keep track of deleted Indexe e.g. Indexes with "owner 0".
 	int index;
-	
+	AttributeType type;				//!< The AttributeType contained in AttributeStorage
 
 	AttributeController getAttributeController()
 	{
@@ -36,8 +37,6 @@ private:
 	}
 
 public:
-	AttributeType type;				//!< The AttributeType contained in AttributeStorage
-
 	AttributeStorage()
 	{
 	}
@@ -45,11 +44,6 @@ public:
 	void init(AttributeType type)
 	{
 		this->type = type;
-	}
-
-	AttributeType getType()
-	{
-		returnAttributeType type;
 	}
 
 	std::vector<T>* getAllAttributes()

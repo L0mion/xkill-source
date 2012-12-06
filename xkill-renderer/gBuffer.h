@@ -37,6 +37,14 @@ public:
 	//! Clears memory and sets Gbuffer to default state.
 	void reset();
 
+	//! Resizes textures and views to fit the new screen size.
+	/*!
+	\param screenWidth The new screen width.
+	\param screenHeight the new screen height.
+	\return Any error encountered.
+	*/
+	HRESULT resize(ID3D11Device* device, unsigned int texWidth, unsigned int texHeight);
+
 	//! Initializes g-buffer. Creates a texture-, shader resource view- and a render target view-object.
 	/*!
 	\param device DirectX Device pointer.
