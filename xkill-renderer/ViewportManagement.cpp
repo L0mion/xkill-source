@@ -28,6 +28,10 @@ void ViewportManagement::reset()
 void ViewportManagement::setViewport(ID3D11DeviceContext* devcon, unsigned int index)
 {
 	devcon->RSSetViewports(1, &viewports->at(index));
+
+	D3D11_VIEWPORT debug;
+	UINT numDebugs = 1;
+	devcon->RSGetViewports(&numDebugs, &debug);
 }
 
 HRESULT ViewportManagement::resize(unsigned int screenWidth, unsigned int screenHeight)
@@ -37,7 +41,7 @@ HRESULT ViewportManagement::resize(unsigned int screenWidth, unsigned int screen
 	screenWidth_	= screenWidth;
 	screenHeight_	= screenHeight;
 
-	viewports->clear();
+	SAFE_DELETE(viewports);
 
 	hr = init();
 
@@ -128,9 +132,10 @@ HRESULT ViewportManagement::initViewportGrid(unsigned int gridSize)
 
 	unsigned int numGridColumns = static_cast<unsigned int>(sqrt(gridSize));
 
-	unsigned int viewportSize = screenWidth_ - ((numGridColumns-1) * borderSize_);
-	viewportWidth_ = viewportSize / numGridColumns;
-	viewportHeight_ = viewportWidth_;
+	unsigned int viewportTotalWidth = screenWidth_ - ((numGridColumns-1) * borderSize_);
+	unsigned int viewportTotalHeight = screenHeight_ - ((numGridColumns-1) * borderSize_);
+	viewportWidth_ = viewportTotalWidth / numGridColumns;
+	viewportHeight_ = viewportTotalHeight / numGridColumns;
 
 	D3D11_VIEWPORT viewport;
 	ZeroMemory(&viewport, sizeof(D3D11_VIEWPORT));

@@ -201,6 +201,11 @@ void Camera::setPosition(float position[3])
 	position_.z = position[2] + look_.z*10;
 }
 
+void Camera::setAspectRatio(float aspectRatio)
+{
+	aspect_ = aspectRatio;
+}
+
 DirectX::XMFLOAT3 Camera::getPosition()
 {
 	return position_;
