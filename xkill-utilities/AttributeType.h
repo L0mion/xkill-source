@@ -137,6 +137,7 @@ struct DLL_U PhysicsAttribute : public IAttribute
 	Float3 linearVelocity;
 	Float3 angularVelocity;
 	float mass;
+	unsigned int collisionShapeIndex;
 	//CollisionShape
 	//friction
 	//restitution

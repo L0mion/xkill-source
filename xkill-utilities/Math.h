@@ -18,7 +18,7 @@ struct DLL_U Float2
 		this->x = x;
 		this->y = y;
 	}
-	void copy(float* float2)
+	void copy(const float* float2)
 	{
 		//memcpy(this, float2, sizeof(Float2));
 		x = float2[0];
@@ -44,7 +44,7 @@ struct DLL_U Float3
 		this->y = y;
 		this->z = z;
 	};
-	void copy(float* float3)
+	void copy(const float* float3)
 	{
 		//memcpy(this, float3, sizeof(Float3));
 		x = float3[0];
@@ -74,7 +74,7 @@ struct DLL_U Float4
 		this->z = z;
 		this->w = w;
 	};
-	void copy(float* float4)
+void copy(const float* float4)
 	{
 		//memcpy(this, float4, sizeof(Float4));
 		x = float4[0];
@@ -100,6 +100,7 @@ struct DLL_U Float4x4
 
 	Float4x4()
 	{
+		
 		m[0][0] = 0.0f;
 		m[0][1] = 0.0f;
 		m[0][2] = 0.0f;
