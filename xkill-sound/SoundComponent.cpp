@@ -85,7 +85,7 @@ std::string SoundComponent::configMessage()
 	message += "// \n";
 	message += "// 1 = CreateProjectile\n";
 	message += "// This will bind fmod event '1' to the 'CreateProjectile' game event\n";
-	message += "// Event names can be found in 'Events.cfg'\n";
+	message += "// Event names can be found in 'events.cfg'\n";
 
 	return message;
 }
