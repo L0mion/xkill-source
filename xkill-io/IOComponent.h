@@ -2,7 +2,7 @@
 #define XKILL_IO_IOCOMPONENT_H
 
 #if defined (DEBUG) || (DEBUG_)
-#include <vld.h>
+//#include <vld.h>
 #endif //DEBUG || DEBUG_
 
 #include <vector>

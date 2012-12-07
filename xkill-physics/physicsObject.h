@@ -6,6 +6,7 @@
 
 struct PhysicsAttribute;
 struct InputAttribute;
+class CollisionShapeManager;
 
 //! Physics Object
 /*!
@@ -31,11 +32,10 @@ struct CollisionResult : public btCollisionWorld::ContactResultCallback
 		return 0;
 	}
 };
-
-class PhysicsObject
+class PhysicsObject : public btRigidBody
 {
 private:
-	btRigidBody* rigidBody_; //!< a pointer to a rigidbody object
+	btVector3 gravity_;
 	btVector3 forces_;
 	btVector3 movement_;
 	btScalar yaw_;
@@ -43,9 +43,10 @@ protected:
 public:
 
 	//! Creates a Physics Object with a rigidbody pointer set to nullptr
-	PhysicsObject();
-
-
+	/*!
+	\param collisionShapeManager A pointer used to access collision shapes
+	*/
+	PhysicsObject(CollisionShapeManager* collisionShapeManager);
 	//! Deletes all subobjects of the contained rigidbody and the rigidbody itself
 	~PhysicsObject();
 	//! Initialize rigidbody from physicsAttribute and add object to simulation
@@ -54,18 +55,17 @@ public:
 	\param dynamicsWorld The simulation object, used to add the object to the simulation 
 	\sa preStep
 	*/
-	void Init(PhysicsAttribute* physicsAttribute,
-			  btDiscreteDynamicsWorld* dynamicsWorld);
+	void addToWorld(btDiscreteDynamicsWorld* dynamicsWorld);
 	//! Remove the rigidbody from the simulation but do not delete the rigidbody or the object
 	/*! 
 	\param dynamicsWorld The simulation object, used to the the object from the simulation 
 	*/
-	void Clean(btDiscreteDynamicsWorld* dynamicsWorld);
+	void removeFromWorld(btDiscreteDynamicsWorld* dynamicsWorld);
 	//! Runs before simulation is stepped to copy data from attribute to rigidbody
 	/*! 
 	\param physicsAttribute The physics attribute which contain object data
 	*/
-	void preStep(PhysicsAttribute* physicsAttribute);
+	void preStep(CollisionShapeManager* collisionShapeManager, PhysicsAttribute* physicsAttribute);
 	//! Runs after simulation is stepped to copy data from rigidbody to attribute
 	/*! 
 	\param physicsAttribute The physics attribute which contain object data
@@ -81,7 +81,7 @@ public:
 	\param dynamicsWorld The simulation object, used to the the object from the simulation
 	\return truthvalue of collision
 	*/
-	bool contactTest(btDiscreteDynamicsWorld* dynamicsWorld, const PhysicsObject& otherPhysicsObject);
+	bool contactTest(btDiscreteDynamicsWorld* dynamicsWorld, PhysicsObject& otherPhysicsObject);
 };
 
 #endif //XKILL_PHYSICS_PHYSICSOBJECT
