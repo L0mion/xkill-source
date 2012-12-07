@@ -9,6 +9,8 @@ public:
 	EventToFModConverter();
 	~EventToFModConverter();
 
+	bool init(std::string filepath);
+
 	int getFModIndex(int eventIndex);
 
 	//! Takes a formatted string and makes an conversion between events and fmod
@@ -24,6 +26,13 @@ public:
 
 private:
 	std::vector<std::pair<int, int>> eventToFModArray_;
+	std::vector<std::pair<std::string, int>> eventNameToNumberEvent_;
+
+	void fillNameConversionArray(std::string filepath);
+
+	bool splitRowIntoValues(std::string row, int& number, std::string& name);
+	std::string removeWhiteSpaceAtBeginningAndEnd(std::string str);
 
 	int stringToInt(std::string str);
+	std::string configMessage();
 };

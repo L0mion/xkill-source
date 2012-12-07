@@ -39,6 +39,7 @@ bool SoundComponent::init()
 	}
 
 	converter = new EventToFModConverter();
+	converter->init("../../xkill-resources/xkill-configs/");
 
 	fillEventsToFModVector();
 
@@ -69,7 +70,6 @@ void SoundComponent::fillEventsToFModVector()
 			converter->addConversion(tmp);
 		}
 	}
-
 }
 
 std::string SoundComponent::configMessage()
@@ -78,9 +78,14 @@ std::string SoundComponent::configMessage()
 
 	message += "// Define a binding between events by using this format\n";
 	message += "// <Fmod event number> = <game event number>\n";
+	message += "// <Fmod event number> = <game event name>\n";
 	message += "// Example:\n";
 	message += "// 0 = 4";
-	message += "// This will bind fmod event '0' to game event '4'";
+	message += "// This will bind fmod event '0' to game event '4'\n";
+	message += "// \n";
+	message += "// 1 = CreateProjectile\n";
+	message += "// This will bind fmod event '1' to the 'CreateProjectile' game event\n";
+	message += "// Event names can be found in 'Events.cfg'\n";
 
 	return message;
 }
