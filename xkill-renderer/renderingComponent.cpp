@@ -170,6 +170,8 @@ void RenderingComponent::onUpdate(float delta)
 
 		DirectX::XMFLOAT3	eyePosition = *(DirectX::XMFLOAT3*)&positionAttribute->position;
 		
+		unsigned int viewportTopX = viewportManagement_->getViewport(i).TopLeftX;
+		unsigned int viewportTopY = viewportManagement_->getViewport(i).TopLeftY;
 		cbManagement_->vsSet(CB_TYPE_CAMERA, CB_REGISTER_CAMERA, d3dManagement_->getDeviceContext());
 		cbManagement_->updateCBCamera(d3dManagement_->getDeviceContext(),
 									  viewMatrix,
@@ -177,16 +179,16 @@ void RenderingComponent::onUpdate(float delta)
 									  projectionMatrix,
 									  projectionMatrixInverse,
 									  eyePosition,
-									  0,
-									  0);
+									  viewportTopX,
+									  viewportTopY);
 
 		setViewport(i);
-		renderToGBuffer(viewMatrix, projectionMatrix);
+		
+		renderViewportToGBuffer(viewMatrix, projectionMatrix);
+		renderViewportToBackBuffer();
 	}
-	
-	renderToBackBuffer();
 }
-void RenderingComponent::renderToGBuffer(DirectX::XMFLOAT4X4 viewMatrix, DirectX::XMFLOAT4X4 projectionMatrix)									
+void RenderingComponent::renderViewportToGBuffer(DirectX::XMFLOAT4X4 viewMatrix, DirectX::XMFLOAT4X4 projectionMatrix)									
 {
 	ID3D11Device*			device = d3dManagement_->getDevice();
 	ID3D11DeviceContext*	devcon = d3dManagement_->getDeviceContext();
@@ -240,19 +242,19 @@ void RenderingComponent::renderToGBuffer(DirectX::XMFLOAT4X4 viewMatrix, DirectX
 			&stride, 
 			&offset);
 
-		for(unsigned int i = 0; i < ibs.size(); i++)
+		for(unsigned int j = 0; j < ibs.size(); j++)
 		{
-			devcon->IASetIndexBuffer(ibs[i]->getIB(), DXGI_FORMAT_R32_UINT, offset);
+			devcon->IASetIndexBuffer(ibs[j]->getIB(), DXGI_FORMAT_R32_UINT, offset);
 
 			devcon->IASetInputLayout(fxManagement_->getILDefaultVSPosNormTex());
 			devcon->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-			devcon->DrawIndexed(ibs[i]->getNumIndices(), 0, 0);
+			devcon->DrawIndexed(ibs[j]->getNumIndices(), 0, 0);
 		}
 	}
 
 	renderGBufferClean();
 }
-void RenderingComponent::renderToBackBuffer()
+void RenderingComponent::renderViewportToBackBuffer()
 {
 	d3dManagement_->setUAVBackBufferCS();
 
@@ -271,7 +273,11 @@ void RenderingComponent::renderToBackBuffer()
 	ssManagement_->setCS(d3dManagement_->getDeviceContext(), SS_ID_DEFAULT, 0);
 
 	fxManagement_->getDefaultCS()->set(d3dManagement_->getDeviceContext());
-	d3dManagement_->getDeviceContext()->Dispatch(csDispatchX_, csDispatchY_, 1);
+
+	unsigned int dispatchX = csDispatchX_ / viewportManagement_->getNumViewportsX();
+	unsigned int dispatchY = csDispatchY_ / viewportManagement_->getNumViewportsY();
+
+	d3dManagement_->getDeviceContext()->Dispatch(dispatchX, dispatchY, 1);
 	fxManagement_->getDefaultCS()->unset(d3dManagement_->getDeviceContext());
 
 	renderBackBufferClean();

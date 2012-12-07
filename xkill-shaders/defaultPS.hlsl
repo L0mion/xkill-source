@@ -3,8 +3,8 @@
 
 struct PSOut
 {
-	float4 albedo	: SV_TARGET0;
-	float4 normal	: SV_TARGET1;
+	float4 normal	: SV_TARGET0;
+	float4 albedo	: SV_TARGET1;
 };
 
 SamplerState ss : register(s0);

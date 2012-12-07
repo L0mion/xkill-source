@@ -42,6 +42,10 @@ public:
 
 	unsigned int getViewportWidth() const;
 	unsigned int getViewportHeight() const;
+	unsigned int getNumViewportsX() const;
+	unsigned int getNumViewportsY() const;
+
+	D3D11_VIEWPORT getViewport(unsigned int index) const;
 
 private:
 	//! Creates a single viewport that covers the entire window.
@@ -55,6 +59,8 @@ private:
 	HRESULT initViewportGrid(unsigned int gridSize);
 
 	unsigned int numViewports_;		//!< Number of viewports that will be used.
+	unsigned int numViewportsX_;
+	unsigned int numViewportsY_;
 	unsigned int viewportWidth_;	//!< Width of each viewport.
 	unsigned int viewportHeight_;	//!< Height of each viewport.
 	unsigned int screenWidth_;		//!< Width of the screen.
@@ -62,7 +68,7 @@ private:
 
 	unsigned int borderSize_;	//<! Adds space between viewports.
 
-	std::vector<D3D11_VIEWPORT>* viewports;	//!< Vector containing all the viewport objects.
+	std::vector<D3D11_VIEWPORT>* viewports_;	//!< Vector containing all the viewport objects.
 };
 
 #endif //XKILL_RENDERER_VIEWPORTMANAGEMENT_H
