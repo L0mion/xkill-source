@@ -57,6 +57,7 @@ enum DLL_U AttributeType
 	ATTRIBUTE_PLAYER,
 	ATTRIBUTE_BOUNDING,
 	ATTRIBUTE_MESH,
+	ATTRIBUTE_PROJECTILE,
 
 	// this is needed, don't touch!
 	ATTRIBUTE_LAST
@@ -157,8 +158,7 @@ struct DLL_U ProjectileAttribute : public IAttribute
 	~ProjectileAttribute();
 
 	AttributePointer physicsAttribute;
-	int owner;					//!< Entity id of the projectil owner.
-	float totalLifeTime;		//!< Total lifetime of the projectile.
+	int creator;				//!< Entity id of the entity that created the projectile.
 	float currentLifeTimeLeft;	//!< Counter counting down the lifetime of the projectile. Is initialized to totalLifeTime. When equal or less than zero, the projectile attribute shall be destroyed.
 };
 

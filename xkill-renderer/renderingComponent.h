@@ -14,7 +14,7 @@
 #include "gBufferID.h"
 
 #if defined (DEBUG) || (DEBUG_)
-#include <vld.h>
+//#include <vld.h>
 #endif //DEBUG || DEBUG_
 
 #define TILE_SIZE 32

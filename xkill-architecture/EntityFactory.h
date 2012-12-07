@@ -88,7 +88,7 @@ public:
 		physics->linearVelocity = e->velocity;
 
 		CREATE_ATTRIBUTE(ProjectileAttribute, projectile, entity);
-		projectile->owner = e->entityIdOfOwner;
+		projectile->creator = e->entityIdOfOwner;
 		CONNECT_ATTRIBUTES(projectile, physics);
 	}
 
