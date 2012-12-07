@@ -52,6 +52,7 @@ PhysicsAttribute::PhysicsAttribute()
 	added = false;
 	alive = true;
 	mass = 1.0f;
+	collisionShapeIndex = 0;
 	isProjectile = false;
 
 	angularVelocity.x = 0; 
