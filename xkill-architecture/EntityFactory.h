@@ -127,7 +127,8 @@ public:
 	void createMesh(Entity* entity, Event_createMesh* e)
 	{
 		MeshAttribute* meshAttribute = AttributeManager::getInstance()->meshAttributes_.createAttribute(entity);
-		meshAttribute->mesh = e->mesh;
+		meshAttribute->mesh		= e->mesh;
+		meshAttribute->dynamic	= e->dynamic;
 	}
 };
 
