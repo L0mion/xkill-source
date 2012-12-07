@@ -12,7 +12,18 @@ PhysicsObject::PhysicsObject(CollisionShapeManager* collisionShapeManager, unsig
 																											 btVector3(0,0,0))
 {
 	index_ = index;
-	gravity_.setZero();
+	gravity_ = btVector3(0,-10,0);
+	forces_.setZero();
+	movement_.setZero();
+	yaw_ = 0.0f;
+}
+PhysicsObject::PhysicsObject(btCollisionShape* collisionShape, unsigned int index) : btRigidBody(0,
+																											 new btDefaultMotionState(),
+																											 collisionShape,
+																											 btVector3(0,0,0))
+{
+	index_ = index;
+	gravity_ = btVector3(0,-10,0);
 	forces_.setZero();
 	movement_.setZero();
 	yaw_ = 0.0f;
@@ -58,6 +69,7 @@ void PhysicsObject::preStep(CollisionShapeManager* collisionShapeManager,Physics
 
 void PhysicsObject::postStep(PhysicsAttribute* physicsAttribute)
 {
+	//std::cout << "\n" << m_worldTransform.getOrigin().x() << " " << m_worldTransform.getOrigin().y() << m_worldTransform.getOrigin().z();
 	SpatialAttribute* spatialAttribute = ATTRIBUTE_CAST(SpatialAttribute,
 														spatialAttribute,
 														physicsAttribute);
@@ -77,16 +89,6 @@ void PhysicsObject::input(InputAttribute* inputAttribute,float delta)
 	movement_ = btVector3(inputAttribute->position.x, 0, inputAttribute->position.y);
 	movement_ = 20*movement_.rotate(btVector3(0,1,0),yaw_);
 	inputAttribute->position.x = inputAttribute->position.y = 0;
-}
-
-bool PhysicsObject::contactTest(btDiscreteDynamicsWorld* dynamicsWorld, PhysicsObject& otherPhysicsObject)
-{
-	//check convexSweepTest
-	
-	CollisionResult collisionResult;
-	dynamicsWorld->contactPairTest(this,&otherPhysicsObject, collisionResult);
-
-	return collisionResult.collision;
 }
 
 unsigned int PhysicsObject::getIndex() const

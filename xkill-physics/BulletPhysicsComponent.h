@@ -58,7 +58,7 @@ private:
 	std::vector<int>* physicsOwners_; //! Owners of physicsAttributes
 
 	btAlignedObjectArray<PhysicsObject*>* physicsObjects_; //<! A vector of PhysicsObjects, internal representation of world
-	btRigidBody* floor_; //<! The absolute floor plane, no object may pass bellow this plane
+	PhysicsObject* floor_; //<! The absolute floor plane, no object may pass bellow this plane
 
 public:
 	//! Creates a BulletPhysicsComponent, gives it pointers to attribute storages required by the component and sets all pointer to null_ptr
