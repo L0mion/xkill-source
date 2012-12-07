@@ -17,6 +17,8 @@
 #include <vld.h>
 #endif //DEBUG || DEBUG_
 
+#define TILE_SIZE 16
+
 class D3DManagement;
 class FXManagement;
 class CBManagement;

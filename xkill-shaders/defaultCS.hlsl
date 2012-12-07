@@ -3,6 +3,8 @@
 #include "constantBuffers.hlsl"
 #include "lightFunctions.hlsl"
 
+#define TILE_SIZE 16
+
 RWTexture2D<float4> output : register( u0 );
 
 Texture2D gBufferNormal		: register( t0 );
@@ -25,7 +27,7 @@ float3 reconstructViewSpacePosition(float2 texCoord)
 	return position.xyz;
 }
 
-[numthreads(32, 32, 1)]
+[numthreads(TILE_SIZE, TILE_SIZE, 1)]
 void defaultCS( uint3 threadID : SV_DispatchThreadID )
 {
 	float2 texCoord = float2((float)threadID.x/(float)screenWidth,(float)threadID.y/(float)screenHeight);
