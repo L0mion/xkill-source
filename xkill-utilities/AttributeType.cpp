@@ -52,6 +52,7 @@ PhysicsAttribute::PhysicsAttribute()
 	added = false;
 	alive = true;
 	mass = 1.0f;
+	collisionShapeIndex = 0;
 	isProjectile = false;
 
 	angularVelocity.x = 0; 
@@ -106,8 +107,6 @@ PlayerAttribute::~PlayerAttribute()
 
 MeshAttribute::~MeshAttribute()
 {
-	//if(mesh)
-	//	delete mesh;
 }
 
 void MeshAttribute::clean()

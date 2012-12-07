@@ -16,6 +16,9 @@ class ObjGroup;
 static const char OBJ_SEPARATOR_DEFAULT	= ' ';
 static const char OBJ_SEPARATOR_FACE	= '/';
 
+//todoist: add comment-symbol '#'
+//add support for varying faces
+//s off
 static const std::string OBJ_INDICATOR_VERTEX			= "v";		//Vertex
 static const std::string OBJ_INDICATOR_TEX				= "vt";		//Texture coordinates
 static const std::string OBJ_INDICATOR_NORM				= "vn";		//Normal

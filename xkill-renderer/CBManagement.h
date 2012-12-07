@@ -31,9 +31,12 @@ public:
 					   DirectX::XMFLOAT3	eyePosition,
 					   unsigned int			numLights);
 	//! Updates the constant buffer cbInstance.
-	void updateCBInstance(ID3D11DeviceContext* devcon,
-						  unsigned int screenWidth,
-						  unsigned int screenHeight);
+	void updateCBInstance(
+		ID3D11DeviceContext*	devcon,
+		const unsigned int		screenWidth,
+		const unsigned int		screenHeight,
+		const unsigned int		tileWidth,
+		const unsigned int		tileHeight);
 
 	//! Updates the constant buffer cbObject.
 	void updateCBObject(ID3D11DeviceContext* devcon,

@@ -274,11 +274,13 @@ class MeshModel;
 class DLL_U Event_CreateMesh : public Event
 {
 public:
-	MeshModel* mesh;
+	MeshModel*	mesh;
+	bool		dynamic;
 
-	Event_CreateMesh(MeshModel* mesh) : Event(EVENT_CREATE_MESH)
+	Event_CreateMesh(MeshModel* mesh, bool dynamic) : Event(EVENT_CREATE_MESH)
 	{
-		this->mesh = mesh;
+		this->mesh		= mesh;
+		this->dynamic	= dynamic;
 	}
 };
 

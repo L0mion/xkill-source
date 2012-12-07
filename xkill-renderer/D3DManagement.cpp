@@ -62,6 +62,8 @@ HRESULT D3DManagement::resize(unsigned int screenWidth, unsigned int screenHeigh
 	SAFE_RELEASE(texBackBuffer_);
 	SAFE_RELEASE(texDepthBuffer_);
 
+	devcon_->OMSetRenderTargets(0, 0, 0);
+
 	hr = swapChain_->ResizeBuffers(1, screenWidth_, screenHeight_, DXGI_FORMAT_R8G8B8A8_UNORM, 0);
 	if(FAILED(hr))
 		ERROR_MSG(L"D3DManagement::resize | swapChain_->ResizeBuffers | Failed!");

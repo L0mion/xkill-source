@@ -95,5 +95,10 @@ void CameraComponent::event_WindowResize(Event_WindowResize* e)
 {
 	float aspectRatio = e->getAspectRatio();
 
+	for(unsigned int i=0; i<cameras_.size(); i++)
+	{
+		cameras_[i].setAspectRatio(aspectRatio);
+		cameras_[i].updateProj();
+	}
 	// TODO: resize aspect ratios of all cameras 
 }
