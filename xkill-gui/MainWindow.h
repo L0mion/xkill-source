@@ -113,7 +113,12 @@ protected:
 		switch (e->key()) 
 		{
 		case Qt::Key_Escape:
-			ui.actionFullscreen->setChecked(false);
+			// TRUE: Quit program
+			if(ui.actionFullscreen->isChecked())
+				ui.actionFullscreen->setChecked(false);
+			// ELSE: Quit fullscreen
+			else
+				MainWindow::close();
 			break;
 		default:
 			break;

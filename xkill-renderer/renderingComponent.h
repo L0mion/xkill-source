@@ -14,8 +14,10 @@
 #include "gBufferID.h"
 
 #if defined (DEBUG) || (DEBUG_)
-#include <vld.h>
+//#include <vld.h>
 #endif //DEBUG || DEBUG_
+
+#define TILE_SIZE 32
 
 class D3DManagement;
 class FXManagement;
@@ -209,7 +211,9 @@ private:
 	HWND windowHandle_;				//!< WINAPI-handle to window.
 	unsigned int screenWidth_;		//!< Width of screen.
 	unsigned int screenHeight_;		//!< Height of screen.
-	unsigned int numViewports_;		//!< NUmber of viewports that will be used.
+	unsigned int numViewports_;		//!< Number of viewports that will be used.
+	unsigned int csDispatchX_;		//!< Number of threads along the x-axis that will be dispatched by the compute shader.
+	unsigned int csDispatchY_;		//!< Number of threads along the y-axis that will be dispatched by the compute shader.
 	
 	D3DManagement*		d3dManagement_;
 	FXManagement*		fxManagement_;						//!< Maintaining shaders and input-layouts.
