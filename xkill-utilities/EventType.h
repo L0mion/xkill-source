@@ -50,6 +50,7 @@ enum DLL_U EventType
 
 	// Get events
 	EVENT_GET_ATTRIBUTE,
+	EVENT_GET_ENTITIES,
 	EVENT_GET_WINDOW_RESOLUTION,
 	EVENT_GET_WINDOW_HANDLE,
 
@@ -154,7 +155,7 @@ public:
 	float rightScale;
 };
 
-/// Returns acces to \ref ATTRIBUTES.
+/// Returns access to \ref ATTRIBUTES.
 /**
 \ingroup events
 */
@@ -172,8 +173,23 @@ public:
 	int attributeEnum;			//!< An enums stored as an Int since we can't forward declare Enums.
 	void* hostVector;			//!< Void pointer to a vector holding Attributes.
 								//!< Requires manual casting.
-	std::vector<int>* owners;	//!< A std::vector<int> of owners correspoinding to each
+	std::vector<int>* owners;	//!< A std::vector<int> of owners corresponding to each
 								//!< attribute.
+};
+
+/// Returns access to a vector of Entity from EntityManager.
+/**
+\ingroup events
+*/
+class Entity;
+class DLL_U Event_GetEntities : public Event
+{
+public:
+	Event_GetEntities() : Event(EVENT_GET_ENTITIES)
+	{
+	}
+
+	std::vector<Entity>* entities;
 };
 
 /// Returns window resolution.

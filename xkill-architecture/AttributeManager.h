@@ -15,6 +15,7 @@ class AttributeManager: public IObserver
 private:
 	AttributeManager()
 	{
+		// subscribe to events
 		SUBSCRIBE_TO_EVENT(this, EVENT_GET_ATTRIBUTE);
 
 		positionAttributes_		.init(ATTRIBUTE_POSITION);

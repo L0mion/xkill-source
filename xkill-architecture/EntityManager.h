@@ -16,7 +16,7 @@ enum ENTITYTYPE
 	PROJECTILE
 };
 
-class EntityStorage
+class EntityStorage : public IObserver
 {
 private:
 	std::vector<Entity> entities;
@@ -30,6 +30,9 @@ public:
 		// IMPORTANT: Entity 0 is used to mark deleted
 		// Attributes and shouldn't be used in the game.
 		createEntity();
+
+		// subscribe to events
+		SUBSCRIBE_TO_EVENT(this, EVENT_GET_ENTITIES);
 	}
 
 	~EntityStorage()
@@ -40,7 +43,33 @@ public:
 		}
 	}
 
-	// Creates a Entity with a unuique ID
+	/**
+	Gives access to Entities through a Event_GetEntities.
+	*/
+	void event_GetEntities(Event_GetEntities* e)
+	{
+		e->entities = &entities;
+	}
+
+	/**
+	Handles Events for EntityStorage.
+	*/
+	void onEvent(Event* e)
+	{
+		EventType type = e->getType();
+		switch (type) 
+		{
+		case EVENT_GET_ENTITIES:
+			event_GetEntities(static_cast<Event_GetEntities*>(e));
+			break;
+		default:
+			break;
+		}
+	}
+
+	/**
+	Creates an Entity with a unique ID.
+	*/
 	Entity* createEntity()
 	{
 		// TRUE: Reuse Entity
@@ -59,6 +88,9 @@ public:
 		return &entities[index];
 	}
 
+	/**
+	Deletes an Entity based on its unique ID.
+	*/
 	void deleteEntity(int id)
 	{
 		// TRUE: Make sure no one is trying to delete "Entity 0"
@@ -96,6 +128,7 @@ private:
 public:
 	EntityManager()
 	{
+		// subscribe to events
 		SUBSCRIBE_TO_EVENT(this, EVENT_CREATEPROJECTILE);
 		SUBSCRIBE_TO_EVENT(this, EVENT_CREATEMESH);
 		SUBSCRIBE_TO_EVENT(this, EVENT_REMOVE_ENTITY);

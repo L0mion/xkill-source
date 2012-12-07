@@ -14,9 +14,10 @@ class AttributeController
 {
 private:
 	IAttributeStorage* host;
+public:
 	int index;
 	AttributeType type;
-public:
+
 	AttributeController(IAttributeStorage* host, int index, AttributeType type)
 	{
 		this->host = host;
