@@ -1,9 +1,9 @@
 #ifndef XKILL_IO_IOCOMPONENT_H
 #define XKILL_IO_IOCOMPONENT_H
 
-#if defined (DEBUG) || (DEBUG_)
-#include <vld.h>
-#endif //DEBUG || DEBUG_
+//#if defined (DEBUG) || (DEBUG_)
+//#include <vld.h>
+//#endif //DEBUG || DEBUG_
 
 #include <vector>
 

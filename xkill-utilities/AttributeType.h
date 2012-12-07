@@ -155,8 +155,8 @@ struct DLL_U ProjectileAttribute : public IAttribute
 	ProjectileAttribute();
 	~ProjectileAttribute();
 
-	AttributePointer PhysicsAttribute;
-	int owner;					//!< Entity id of the owner of the projectile.
+	AttributePointer physicsAttribute;
+	int owner;					//!< Entity id of the projectil owner.
 	float totalLifeTime;		//!< Total lifetime of the projectile.
 	float currentLifeTimeLeft;	//!< Counter counting down the lifetime of the projectile. Is initialized to totalLifeTime. When equal or less than zero, the projectile attribute shall be destroyed.
 };
@@ -211,7 +211,7 @@ struct DLL_U PlayerAttribute : public IAttribute
 	int health;				//!< Health of the player process. If less or equal to zero, the player process is terminated.
 	int priority;			//!< Priority of the player process. Higher value means higher priority. The scheduler will choose the process with the highest priority for execution.
 	int cycleSteals;		//!< Total number of cycle steals for the player process. Cycle steals steal priority from other player processes.
-	int totalExecutionTime; //!< Total execution time of the player process. The game session winner is the player with the most total execution time as awared by the scheduler.
+	int totalExecutionTime; //!< Total execution time of the player process. The game session winner is the player with the most total execution time as awarded by the scheduler.
 
 	AttributePointer renderAttribute;
 	AttributePointer inputAttribute;

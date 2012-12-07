@@ -72,7 +72,7 @@ public:
 		{
 			entities[id].deleteAttributes();
 			deleted.push(id);
-			std::cout << "ENTITYMANAGER: Removed Entity" << id << std::endl;
+			std::cout << "ENTITYMANAGER: Removed Entity " << id << std::endl;
 		}
 	}
 };
@@ -110,7 +110,7 @@ public:
 		switch (type) 
 		{
 		case EVENT_CREATEPROJECTILE:
-			event_CreateProjectile(static_cast<Event_createProjectile*>(e));
+			event_CreateProjectile(static_cast<Event_createProjectileEntity*>(e));
 			break;
 		case EVENT_REMOVE_ENTITY:
 			deleteEntity(static_cast<Event_Remove_Entity*>(e)->entityId);
@@ -145,7 +145,7 @@ public:
 		}
 	}
 
-	void event_CreateProjectile(Event_createProjectile* e)
+	void event_CreateProjectile(Event_createProjectileEntity* e)
 	{
 		Entity* entity = createEntity();
 		entityFactory.createProjectileEntity(entity, e);

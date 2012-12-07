@@ -24,17 +24,17 @@ void GameComponent::onEvent(Event* e)
 	if(type == EVENT_PROJECTILECOLLIDINGWITHPLAYER) 
 	{
 		std::cout << "GameComponent::onEvent, EVENT_PROJECTILECOLLIDINGWITHPLAYER" << std::endl;
-
-		//Remove projectile entity
 		Event_ProjectileCollidingWithPlayer* projectileCollidingWithPlayer = static_cast<Event_ProjectileCollidingWithPlayer*>(e);
-		Event_Remove_Entity removeEntityEvent(projectileCollidingWithPlayer->projectileId);
+		
+		//Remove projectile entity
+		Event_Remove_Entity removeEntityEvent(projectileCollidingWithPlayer->projectileEntityId);
 		SEND_EVENT(&removeEntityEvent);
 
-		//Lower player health
-		//AttributeManager::getInstance()->playerAttributes_
-		//PlayerAttribute* playerAttribute = AttributeManager::getInstance()->playerAttributes_.getAllAttributes();
+		//Lower player health of the playerId
+		//projectileCollidingWithPlayer->projectileCollidingWithPlayerWithId;
 
-		projectileCollidingWithPlayer->playerId;
+		//Check the owner of the projectile
+		//Award owner of the projectile
 	}
 }
 
@@ -63,6 +63,7 @@ void GameComponent::onUpdate(float delta)
 			SpatialAttribute* spatial	=	&allSpatial->at(render->spatialAttribute.index);
 			PositionAttribute* position	=	&allPosition->at(spatial->positionAttribute.index);
 
+			//If inputAttribute
 			if(input->fire)
 			{
 				Float3 pos;
@@ -70,46 +71,19 @@ void GameComponent::onUpdate(float delta)
 				pos.y = position->position.y;
 				pos.z = position->position.z;
 
-				float lookAtX = camera->mat_view._11;
+				float lookAtX = camera->mat_view._13;
 				float lookAtY = camera->mat_view._12;
-				float lookAtZ = camera->mat_view._13;
-				//float ffff = camera->mat_view._13;
-				Float4 direction(lookAtX, lookAtY, lookAtZ, 1.0f);
-				
-				//direction.x = spatial->rotation.x;
-				//direction.y = spatial->rotation.y;
-				//direction.z = spatial->rotation.z;
-				//direction.w = spatial->rotation.w;
-				Event_createProjectile projectile(pos, direction);
+				float lookAtZ = camera->mat_view._11;
+				Float3 velocity(1.0f/lookAtX, 1.0f/lookAtY, 1.0f/lookAtZ);
+				velocity.x *= 1.5f;
+				velocity.y *= 1.5f;
+				velocity.z *= 1.5f;
+
+				//id of player or id of player entity?
+				Event_createProjectileEntity projectile(pos, velocity, playerAttributesOwners->at(i));
 				SEND_EVENT(&projectile);
 				input->fire = false;
 			}
-
-
-			
-			//
-			// Proceed with calculation as normal
-			//
-
-			/*
-			if(player->id == 0) //Handle player 1 (test)
-			{
-				position->position[0] = position->position[0]+1.0f;
-			}
-			else if(player->id == 1) //Handle player 2 (test)
-			{
-				position->position[2] = position->position[2]+1.0f; 
-			}
-			*/
-
-			/*std::cout 
-			<< player->id				<< "\t"
-			<< playerOwners->at(i)		<< "\t"
-			<< player->name				<< "\t"
-			<< position->position.x		<< "\t"
-			<< position->position.y		<< "\t"
-			<< position->position.z		<< "\t"
-			<< std::endl;*/
 		}
 	}
 }

@@ -241,16 +241,18 @@ public:
 /**
 \ingroup events
 */
-class DLL_U Event_createProjectile : public Event
+class DLL_U Event_createProjectileEntity : public Event
 {
 public:
+	int entityIdOfOwner;
 	Float3 position;
-	Float4 direction;
+	Float3 velocity;
 
-	Event_createProjectile(Float3 position, Float4 direction) : Event(EVENT_CREATEPROJECTILE)
+	Event_createProjectileEntity(Float3 position, Float3 velocity, int entityIdOfOwner) : Event(EVENT_CREATEPROJECTILE)
 	{
+		this->entityIdOfOwner = entityIdOfOwner;
 		this->position = position;
-		this->direction = direction;
+		this->velocity = velocity;
 	}
 };
 
@@ -273,13 +275,13 @@ public:
 class DLL_U Event_ProjectileCollidingWithPlayer : public Event
 {
 public:
-	int projectileId;
-	int playerId;
+	int projectileEntityId;
+	int projectileCollidingWithPlayerWithId;
 
-	Event_ProjectileCollidingWithPlayer(int projectileId, int playerId) : Event(EVENT_PROJECTILECOLLIDINGWITHPLAYER)
+	Event_ProjectileCollidingWithPlayer(int projectileEntityId, int projectileCollidingWithPlayerWithId) : Event(EVENT_PROJECTILECOLLIDINGWITHPLAYER)
 	{
-		this->projectileId = projectileId;
-		this->playerId = playerId;
+		this->projectileEntityId = projectileEntityId;
+		this->projectileCollidingWithPlayerWithId = projectileCollidingWithPlayerWithId;
 	}
 };
 

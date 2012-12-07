@@ -13,9 +13,9 @@
 #include "dllRenderer.h"
 #include "gBufferID.h"
 
-#if defined (DEBUG) || (DEBUG_)
-#include <vld.h>
-#endif //DEBUG || DEBUG_
+//#if defined (DEBUG) || (DEBUG_)
+//#include <vld.h>
+//#endif //DEBUG || DEBUG_
 
 class D3DManagement;
 class FXManagement;

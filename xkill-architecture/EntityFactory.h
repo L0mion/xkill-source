@@ -71,19 +71,13 @@ public:
 		playerId++;
 	}
 
-	void createProjectileEntity(Entity* entity, Event_createProjectile* e)
+	void createProjectileEntity(Entity* entity, Event_createProjectileEntity* e)
 	{
 		CREATE_ATTRIBUTE(PositionAttribute, position, entity);
-		position->position.x = e->position.x;
-		position->position.y = e->position.y;
-		position->position.z = e->position.z;
+		position->position = e->position;
 
 		CREATE_ATTRIBUTE(SpatialAttribute, spatial, entity);
 		CONNECT_ATTRIBUTES(spatial, position);
-		spatial->rotation.x = e->direction.x;
-		spatial->rotation.y = e->direction.y;
-		spatial->rotation.z = e->direction.z;
-		spatial->rotation.w = e->direction.w;
 
 		CREATE_ATTRIBUTE(RenderAttribute, render, entity);
 		CONNECT_ATTRIBUTES(render, spatial);
@@ -91,10 +85,11 @@ public:
 		CREATE_ATTRIBUTE(PhysicsAttribute, physics, entity);
 		CONNECT_ATTRIBUTES(physics, spatial);
 		physics->isProjectile = true;
-		physics->linearVelocity.y = 1.0f;
+		physics->linearVelocity = e->velocity;
 
-		//CREATE_ATTRIBUTE(ProjectileAttribute, projectile, entity);
-		//CONNECT_ATTRIBUTES(physics, projectile);
+		CREATE_ATTRIBUTE(ProjectileAttribute, projectile, entity);
+		projectile->owner = e->entityIdOfOwner;
+		CONNECT_ATTRIBUTES(projectile, physics);
 	}
 
 	void createMesh(Entity* entity, Event_createMesh* e)
