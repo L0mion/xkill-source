@@ -12,9 +12,9 @@ InputComponent::InputComponent()
 	ZeroMemory(&pos, sizeof(pos));
 
 	SUBSCRIBE_TO_EVENT(this, EVENT_RUMBLE);
-	SUBSCRIBE_TO_EVENT(this, EVENT_MOUSEMOVE);
-	SUBSCRIBE_TO_EVENT(this, EVENT_KEYPRESS);
-	SUBSCRIBE_TO_EVENT(this, EVENT_KEYRELEASE);
+	SUBSCRIBE_TO_EVENT(this, EVENT_MOUSE_MOVE);
+	SUBSCRIBE_TO_EVENT(this, EVENT_KEY_PRESS);
+	SUBSCRIBE_TO_EVENT(this, EVENT_KEY_RELEASE);
 }
 
 InputComponent::~InputComponent()
@@ -54,7 +54,7 @@ void InputComponent::onEvent(Event* e)
 			device->SetForceFeedback(er->leftScale, er->rightScale);
 		}
 	}
-	if(type == EVENT_MOUSEMOVE)
+	if(type == EVENT_MOUSE_MOVE)
 	{
 		Event_MouseMove* emm = static_cast<Event_MouseMove*>(e);
 		QTInputDevices* device = inputManager_->GetMouseAndKeyboard();
@@ -73,7 +73,7 @@ void InputComponent::onEvent(Event* e)
 			device->setAxis(3, y * mouseSensitivity);
 		}
 	}
-	if(type == EVENT_KEYPRESS)
+	if(type == EVENT_KEY_PRESS)
 	{
 		Event_KeyPress* ekp = static_cast<Event_KeyPress*>(e);
 		QTInputDevices* device = inputManager_->GetMouseAndKeyboard();
@@ -86,7 +86,7 @@ void InputComponent::onEvent(Event* e)
 		// TODO: Handle key press
 		//std::cout << "Key " << ekp->keyEnum << " pressed"<< std::endl;
 	}
-	if(type == EVENT_KEYRELEASE)
+	if(type == EVENT_KEY_RELEASE)
 	{
 		Event_KeyRelease* ekr = static_cast<Event_KeyRelease*>(e);
 		QTInputDevices* device = inputManager_->GetMouseAndKeyboard();

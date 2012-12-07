@@ -46,15 +46,9 @@ public:
 	void createPlayerEntity(Entity* entity)
 	{
 		CREATE_ATTRIBUTE(PositionAttribute, position, entity);
-		position->position.x = 0.0f;
-		position->position.y = 0.0f;
-		position->position.z = 0.0f;
 
 		CREATE_ATTRIBUTE(SpatialAttribute, spatial, entity);
 		CONNECT_ATTRIBUTES(spatial, position);
-		spatial->scale.x = 1.0f;
-		spatial->scale.y = 1.0f;
-		spatial->scale.z = 1.0f;
 
 		CREATE_ATTRIBUTE(RenderAttribute, render, entity);
 		CONNECT_ATTRIBUTES(render, spatial);
@@ -81,17 +75,10 @@ public:
 
 	void createWorldEntity(Entity* entity)
 	{
-		
 		CREATE_ATTRIBUTE(PositionAttribute, position, entity);
-		position->position.x = 0.0f;
-		position->position.y = 0.0f;
-		position->position.z = 0.0f;
 
 		CREATE_ATTRIBUTE(SpatialAttribute, spatial, entity);
 		CONNECT_ATTRIBUTES(spatial, position);
-		spatial->scale.x = 1.0f;
-		spatial->scale.y = 1.0f;
-		spatial->scale.z = 1.0f;
 
 		CREATE_ATTRIBUTE(RenderAttribute, render, entity);
 		CONNECT_ATTRIBUTES(render, spatial);
@@ -101,7 +88,7 @@ public:
 		//CONNECT_ATTRIBUTES(physics, spatial);
 	}
 
-	void createProjectileEntity(Entity* entity, Event_createProjectile* e)
+	void createProjectileEntity(Entity* entity, Event_CreateProjectile* e)
 	{
 		CREATE_ATTRIBUTE(PositionAttribute, position, entity);
 		position->position.x = e->position.x;
@@ -124,7 +111,7 @@ public:
 		physics->linearVelocity.y = 1.0f;
 	}
 
-	void createMesh(Entity* entity, Event_createMesh* e)
+	void createMesh(Entity* entity, Event_CreateMesh* e)
 	{
 		MeshAttribute* meshAttribute = AttributeManager::getInstance()->meshAttributes_.createAttribute(entity);
 		meshAttribute->mesh		= e->mesh;

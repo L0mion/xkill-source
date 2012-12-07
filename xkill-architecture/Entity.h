@@ -3,11 +3,11 @@
 #include <xkill-utilities/EventManager.h>
 #include "AttributeController.h"
 
-/// Provies a unique id and keeps track of \ref ATTRIBUTES associated with that id.
+/// Provides a unique id and keeps track of \ref ATTRIBUTES associated with that id.
 /** 
 Created by EntityFactory and stored in a EntityManager.
 
-An Entity represents a barebone game object and can be
+An Entity represents a bare bone game object and can be
 almost anything based on its \ref ATTRIBUTES and 
 the \ref COMPONENTS working on each attribute.
 
@@ -40,6 +40,41 @@ public:
 	void addAttribute(AttributeController attribute)
 	{
 		attributes.push_back(attribute);
+	}
+
+	
+	/**
+	Returns true if Entity contains an Attribute
+	matching AttributeType. 
+	*/
+	bool hasAttribute(AttributeType type)
+	{
+		for(unsigned i=0; i<attributes.size(); i++)
+		{
+			if(type == attributes[i].type)
+			{
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/**
+	Returns a std:vector<int> of all the matching index 
+	of Attributes matching AttributeType. If Entity
+	contains no matching Attributes, vector size is 0.
+	*/
+	std::vector<int> getAttributes(AttributeType type)
+	{
+		std::vector<int> matchingAttributes;
+		for(unsigned i=0; i<attributes.size(); i++)
+		{
+			if(type == attributes[i].type)
+			{
+				matchingAttributes.push_back( attributes[i].index);
+			}
+		}
+		return matchingAttributes;
 	}
 
 	int getID()

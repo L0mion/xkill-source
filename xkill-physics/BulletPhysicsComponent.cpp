@@ -165,7 +165,7 @@ void BulletPhysicsComponent::onUpdate(float delta)
 								projectileEntityId = physicsAttributeOwnersJ;
 							}
 
-							Event_ProjectileCollidingWithPlayer projectileCollidingWithPlayer(projectileEntityId, playerEntityId);
+							Event_EntitiesColliding projectileCollidingWithPlayer(projectileEntityId, playerEntityId);
 							SEND_EVENT(&projectileCollidingWithPlayer);
 						}
 					}

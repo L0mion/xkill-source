@@ -39,23 +39,24 @@ enum DLL_U EventType
 	EVENT_B,
 	EVENT_PLAYSOUND,
 	EVENT_RUMBLE,
-	EVENT_CREATEPROJECTILE,
-	EVENT_PROJECTILECOLLIDINGWITHPLAYER,
+	EVENT_CREATE_PROJECTILE,
+	EVENT_ENTITIES_COLLIDING,
 	EVENT_REMOVE_ENTITY,
 	EVENT_PLAYERKILLED,
 
-	EVENT_MOUSEMOVE,
-	EVENT_KEYPRESS,
-	EVENT_KEYRELEASE,
+	EVENT_MOUSE_MOVE,
+	EVENT_KEY_PRESS,
+	EVENT_KEY_RELEASE,
 	EVENT_WINDOW_RESIZE,
 
 	// Get events
 	EVENT_GET_ATTRIBUTE,
+	EVENT_GET_ENTITIES,
 	EVENT_GET_WINDOW_RESOLUTION,
 	EVENT_GET_WINDOW_HANDLE,
 
 	// Utilities
-	EVENT_CREATEMESH,
+	EVENT_CREATE_MESH,
 	EVENT_SHOW_MESSAGEBOX,
 
 	// this is needed, don't touch!
@@ -118,7 +119,7 @@ public:
 class DLL_U Event_MouseMove : public Event
 {
 public:
-	Event_MouseMove(int dx, int dy) : Event(EVENT_MOUSEMOVE)
+	Event_MouseMove(int dx, int dy) : Event(EVENT_MOUSE_MOVE)
 	{
 		this->dx = dx;
 		this->dy = dy;
@@ -163,31 +164,14 @@ public:
 	float rightScale;
 };
 
-//! Sent when a player was killed
-/*!
-Currently only used in scoreboard for testing
-
-\param playerKilled The id of the player that was killed
-\param killer The id of the killer
-\ingroup events
-*/
-class DLL_U Event_PlayerKilled : public Event
-{
-public:
-	Event_PlayerKilled(unsigned int playerKilled, unsigned int killer) : 
-		Event(EVENT_RUMBLE){this->playerKilled = playerKilled; this->killer = killer;}
-	unsigned int playerKilled;
-	unsigned int killer;
-};
-
-/// Returns acces to \ref ATTRIBUTES.
+/// Returns access to \ref ATTRIBUTES.
 /**
 \ingroup events
 */
-class DLL_U Event_getAttribute : public Event
+class DLL_U Event_GetAttribute : public Event
 {
 public:
-	Event_getAttribute(int attributeEnum) : Event(EVENT_GET_ATTRIBUTE)
+	Event_GetAttribute(int attributeEnum) : Event(EVENT_GET_ATTRIBUTE)
 	{
 		this->attributeEnum = attributeEnum;
 		
@@ -198,21 +182,36 @@ public:
 	int attributeEnum;			//!< An enums stored as an Int since we can't forward declare Enums.
 	void* hostVector;			//!< Void pointer to a vector holding Attributes.
 								//!< Requires manual casting.
-	std::vector<int>* owners;	//!< A std::vector<int> of owners correspoinding to each
+	std::vector<int>* owners;	//!< A std::vector<int> of owners corresponding to each
 								//!< attribute.
+};
+
+/// Returns access to a vector of Entity from EntityManager.
+/**
+\ingroup events
+*/
+class Entity;
+class DLL_U Event_GetEntities : public Event
+{
+public:
+	Event_GetEntities() : Event(EVENT_GET_ENTITIES)
+	{
+	}
+
+	std::vector<Entity>* entities;
 };
 
 /// Returns window resolution.
 /**
 \ingroup events
 */
-class DLL_U Event_getWindowResolution : public Event
+class DLL_U Event_GetWindowResolution : public Event
 {
 public:
 	int width;		
 	int height;		
 
-	Event_getWindowResolution() : Event(EVENT_GET_WINDOW_RESOLUTION)
+	Event_GetWindowResolution() : Event(EVENT_GET_WINDOW_RESOLUTION)
 	{
 		width = 320;
 		height = 240;
@@ -252,12 +251,12 @@ public:
 /**
 \ingroup events
 */
-class DLL_U Event_showMessageBox : public Event
+class DLL_U Event_ShowMessageBox : public Event
 {
 public:
 	std::string message;
 
-	Event_showMessageBox(std::string message) : Event(EVENT_SHOW_MESSAGEBOX)
+	Event_ShowMessageBox(std::string message) : Event(EVENT_SHOW_MESSAGEBOX)
 	{
 		this->message = message;
 	}
@@ -267,13 +266,13 @@ public:
 /**
 \ingroup events
 */
-class DLL_U Event_createProjectile : public Event
+class DLL_U Event_CreateProjectile : public Event
 {
 public:
 	Float3 position;
 	Float4 direction;
 
-	Event_createProjectile(Float3 position, Float4 direction) : Event(EVENT_CREATEPROJECTILE)
+	Event_CreateProjectile(Float3 position, Float4 direction) : Event(EVENT_CREATE_PROJECTILE)
 	{
 		this->position = position;
 		this->direction = direction;
@@ -281,13 +280,13 @@ public:
 };
 
 class MeshModel;
-class DLL_U Event_createMesh : public Event
+class DLL_U Event_CreateMesh : public Event
 {
 public:
 	MeshModel*	mesh;
 	bool		dynamic;
 
-	Event_createMesh(MeshModel* mesh, bool dynamic) : Event(EVENT_CREATEMESH)
+	Event_CreateMesh(MeshModel* mesh, bool dynamic) : Event(EVENT_CREATE_MESH)
 	{
 		this->mesh		= mesh;
 		this->dynamic	= dynamic;
@@ -298,16 +297,16 @@ public:
 /**
 \ingroup events
 */
-class DLL_U Event_ProjectileCollidingWithPlayer : public Event
+class DLL_U Event_EntitiesColliding : public Event
 {
 public:
-	int projectileId;
-	int playerId;
+	int e1_index;
+	int e2_index;
 
-	Event_ProjectileCollidingWithPlayer(int projectileId, int playerId) : Event(EVENT_PROJECTILECOLLIDINGWITHPLAYER)
+	Event_EntitiesColliding(int e1_index, int e2_index) : Event(EVENT_ENTITIES_COLLIDING)
 	{
-		this->projectileId = projectileId;
-		this->playerId = playerId;
+		this->e1_index = e1_index;
+		this->e2_index = e2_index;
 	}
 };
 
@@ -315,12 +314,12 @@ public:
 /**
 \ingroup events
 */
-class DLL_U Event_Remove_Entity : public Event
+class DLL_U Event_RemoveEntity : public Event
 {
 public:
 	int entityId;
 
-	Event_Remove_Entity(int entityId) : Event(EVENT_REMOVE_ENTITY)
+	Event_RemoveEntity(int entityId) : Event(EVENT_REMOVE_ENTITY)
 	{
 		this->entityId = entityId;
 	}
@@ -335,7 +334,7 @@ class DLL_U Event_KeyPress : public Event
 public:
 	int keyEnum;
 
-	Event_KeyPress(int keyEnum) : Event(EVENT_KEYPRESS)
+	Event_KeyPress(int keyEnum) : Event(EVENT_KEY_PRESS)
 	{
 		this->keyEnum = keyEnum;
 	}
@@ -350,7 +349,7 @@ class DLL_U Event_KeyRelease : public Event
 public:
 	int keyEnum;
 
-	Event_KeyRelease(int keyEnum) : Event(EVENT_KEYRELEASE)
+	Event_KeyRelease(int keyEnum) : Event(EVENT_KEY_RELEASE)
 	{
 		this->keyEnum = keyEnum;
 	}
