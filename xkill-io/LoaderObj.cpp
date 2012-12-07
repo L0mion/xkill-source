@@ -176,7 +176,7 @@ bool LoaderObj::loadSymbol(
 		loadNorm(params);
 		break;
 	case OBJSYMBOL_FACE:
-		loadFaces(params);
+		sucessfulLoad = loadFaces(params);
 		break;
 	case OBJSYMBOL_GROUP:
 		loadGroup(params);

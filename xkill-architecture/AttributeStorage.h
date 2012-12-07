@@ -29,13 +29,23 @@ private:
 									//!< Is deleted and ready to be reused.
 	std::queue<int> deleted;		//!< Queue to keep track of deleted Indexe e.g. Indexes with "owner 0".
 	int index;
+	AttributeType type;				//!< The AttributeType contained in AttributeStorage
 
 	AttributeController getAttributeController()
 	{
-		return AttributeController(this, index);
+		return AttributeController(this, index, type);
 	}
 
 public:
+	AttributeStorage()
+	{
+	}
+
+	void init(AttributeType type)
+	{
+		this->type = type;
+	}
+
 	std::vector<T>* getAllAttributes()
 	{
 		return &attributes;

@@ -28,7 +28,7 @@ RenderingComponent::RenderingComponent(HWND windowHandle)
 {
 	GET_ATTRIBUTES(cameraAttributes_, CameraAttribute, ATTRIBUTE_CAMERA);
 	
-	Event_getWindowResolution windowResolution;
+	Event_GetWindowResolution windowResolution;
 	SEND_EVENT(&windowResolution);
 
 	windowHandle_	= windowHandle;
@@ -254,7 +254,7 @@ void RenderingComponent::renderToBackBuffer()
 
 	cbManagement_->csSet(CB_FRAME_INDEX, 0, d3dManagement_->getDeviceContext());
 	cbManagement_->csSet(CB_INSTANCE_INDEX, 1, d3dManagement_->getDeviceContext());
-	cbManagement_->updateCBInstance(d3dManagement_->getDeviceContext(), screenWidth_, screenHeight_);
+	cbManagement_->updateCBInstance(d3dManagement_->getDeviceContext(), screenWidth_, screenHeight_, 0, 0); //tmep
 
 	lightManagement_->setLightSRVCS(d3dManagement_->getDeviceContext(), 2);
 

@@ -40,13 +40,18 @@ void CBManagement::updateCBFrame(ID3D11DeviceContext* devcon,
 
 	devcon->UpdateSubresource(cbFrame_, 0, 0, &cbDesc, 0, 0);
 }
-void CBManagement::updateCBInstance(ID3D11DeviceContext* devcon,
-									unsigned int screenWidth,
-									unsigned int screenHeight)
+void CBManagement::updateCBInstance(
+	ID3D11DeviceContext*	devcon,
+	const unsigned int		screenWidth,
+	const unsigned int		screenHeight,
+	const unsigned int		tileWidth,
+	const unsigned int		tileHeight)
 {
 	CBInstanceDesc cbDesc;
-	cbDesc.screenWidth_  = screenWidth;
-	cbDesc.screenHeight_ = screenHeight;
+	cbDesc.screenWidth_		= screenWidth;
+	cbDesc.screenHeight_	= screenHeight;
+	cbDesc.tileWidth_		= tileWidth;
+	cbDesc.tileHeight_		= tileHeight;
 
 	devcon->UpdateSubresource(cbInstance_, 0, 0, &cbDesc, 0, 0);
 }

@@ -52,6 +52,7 @@ public:
 
 		CREATE_ATTRIBUTE(RenderAttribute, render, entity);
 		CONNECT_ATTRIBUTES(render, spatial);
+		render->meshIndex = 0;
 
 		CREATE_ATTRIBUTE(PhysicsAttribute, physics, entity);
 		CONNECT_ATTRIBUTES(physics, spatial);
@@ -71,7 +72,22 @@ public:
 		playerId++;
 	}
 
-	void createProjectileEntity(Entity* entity, Event_createProjectileEntity* e)
+	void createWorldEntity(Entity* entity)
+	{
+		CREATE_ATTRIBUTE(PositionAttribute, position, entity);
+
+		CREATE_ATTRIBUTE(SpatialAttribute, spatial, entity);
+		CONNECT_ATTRIBUTES(spatial, position);
+
+		CREATE_ATTRIBUTE(RenderAttribute, render, entity);
+		CONNECT_ATTRIBUTES(render, spatial);
+		render->meshIndex = 1;
+
+		//CREATE_ATTRIBUTE(PhysicsAttribute, physics, entity);
+		//CONNECT_ATTRIBUTES(physics, spatial);
+	}
+
+	void createProjectileEntity(Entity* entity, Event_CreateProjectile* e)
 	{
 		CREATE_ATTRIBUTE(PositionAttribute, position, entity);
 		position->position = e->position;
@@ -92,10 +108,11 @@ public:
 		CONNECT_ATTRIBUTES(projectile, physics);
 	}
 
-	void createMesh(Entity* entity, Event_createMesh* e)
+	void createMesh(Entity* entity, Event_CreateMesh* e)
 	{
 		MeshAttribute* meshAttribute = AttributeManager::getInstance()->meshAttributes_.createAttribute(entity);
-		meshAttribute->mesh = e->mesh;
+		meshAttribute->mesh		= e->mesh;
+		meshAttribute->dynamic	= e->dynamic;
 	}
 };
 

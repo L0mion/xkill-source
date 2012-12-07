@@ -24,7 +24,7 @@ void CameraComponent::init()
 	GET_ATTRIBUTES(inputAttributes_, InputAttribute, ATTRIBUTE_INPUT);
 
 	// fetch aspect ratio
-	Event_getWindowResolution windowResolution;
+	Event_GetWindowResolution windowResolution;
 	SEND_EVENT(&windowResolution);
 	float aspectRatio = windowResolution.getAspectRatio();
 

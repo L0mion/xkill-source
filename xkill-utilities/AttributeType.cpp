@@ -116,8 +116,6 @@ PlayerAttribute::~PlayerAttribute()
 
 MeshAttribute::~MeshAttribute()
 {
-	//if(mesh)
-	//	delete mesh;
 }
 
 void MeshAttribute::clean()

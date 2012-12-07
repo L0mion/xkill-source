@@ -24,10 +24,10 @@ static const unsigned int CB_FRAME_DESC_SIZE = 272;
 */
 struct CBInstanceDesc
 {
-	unsigned int screenWidth_;
-	unsigned int screenHeight_;
-	unsigned int pad1_;
-	unsigned int pad2_;
+	unsigned int screenWidth_;	//4 bytes
+	unsigned int screenHeight_;	//4 bytes
+	unsigned int tileWidth_;	//4 bytes
+	unsigned int tileHeight_;	//4 bytes
 };
 static const unsigned int CB_INSTANCE_DESC_SIZE = 16;
 

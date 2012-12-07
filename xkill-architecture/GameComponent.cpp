@@ -6,7 +6,6 @@
 
 GameComponent::GameComponent(void)
 {
-	//SHOW_MESSAGEBOX("Game has started");
 }
 
 GameComponent::~GameComponent(void)
@@ -15,29 +14,52 @@ GameComponent::~GameComponent(void)
 
 bool GameComponent::init()
 {
-	SUBSCRIBE_TO_EVENT(this, EVENT_PROJECTILECOLLIDINGWITHPLAYER);
+	SUBSCRIBE_TO_EVENT(this, EVENT_ENTITIES_COLLIDING);
 	return true;
 }
 
 void GameComponent::onEvent(Event* e)
 {
 	EventType type = e->getType();
-	if(type == EVENT_PROJECTILECOLLIDINGWITHPLAYER) 
+	switch (type) 
 	{
-		std::cout << "GameComponent::onEvent, EVENT_PROJECTILECOLLIDINGWITHPLAYER" << std::endl;
-		Event_ProjectileCollidingWithPlayer* projectileCollidingWithPlayer = static_cast<Event_ProjectileCollidingWithPlayer*>(e);
-		
-		//Remove projectile entity
-		Event_Remove_Entity removeEntityEvent(projectileCollidingWithPlayer->projectileEntityId);
-		SEND_EVENT(&removeEntityEvent);
-
-		//Lower player health of the playerId
-		//projectileCollidingWithPlayer->projectileCollidingWithPlayerWithId;
-
-		//Check the owner of the projectile
-		//Award owner of the projectile
+	case EVENT_ENTITIES_COLLIDING:
+		event_PhysicsAttributesColliding(static_cast<Event_PhysicsAttributesColliding*>(e));
+		break;
+	default:
+		break;
 	}
 }
+
+void GameComponent::event_PhysicsAttributesColliding(Event_PhysicsAttributesColliding* e)
+{
+	std::cout << "GameComponent::onEvent, EVENT_PROJECTILECOLLIDINGWITHPLAYER" << std::endl;
+
+	// Fetch Entities so we can inspect their attributes
+	std::vector<Entity>* allEntities; GET_ENTITIES(allEntities);
+	Entity* e1 = &allEntities->at(e->e1_index);
+	Entity* e2 = &allEntities->at(e->e2_index);
+
+	//Event_Remove_Entity removeEntityEvent(projectileCollidingWithPlayer->projectileEntityId);
+	//SEND_EVENT(&removeEntityEvent);
+	// check bullet logic
+
+	if(e1->hasAttribute(ATTRIBUTE_PLAYER) ^ e2->hasAttribute(ATTRIBUTE_PROJECTILE))
+	{
+
+	}
+		
+	//if(e1->hasAttribute(ATTRIBUTE_PRO))
+	// Remove projectile entity
+	SEND_EVENT(&Event_RemoveEntity(0));
+
+	//Lower player health
+	//AttributeManager::getInstance()->playerAttributes_
+	//PlayerAttribute* playerAttribute = AttributeManager::getInstance()->playerAttributes_.getAllAttributes();
+
+	//projectileCollidingWithPlayer->playerId;
+}
+
 
 void GameComponent::onUpdate(float delta)
 {
@@ -88,7 +110,7 @@ void GameComponent::onUpdate(float delta)
 				velocity.z *= 1.5f;
 
 				//id of player or id of player entity?
-				Event_createProjectileEntity projectile(pos, velocity, playerAttributesOwners->at(i));
+				Event_CreateProjectile projectile(pos, velocity, playerAttributesOwners->at(i));
 				SEND_EVENT(&projectile);
 				input->fire = false;
 			}
@@ -109,7 +131,7 @@ void GameComponent::onUpdate(float delta)
 				std::cout << "Projectile entity " << projectileAttributesOwners->at(i) << " has no lifetime left" << std::endl;
 				
 				//Remove projectile entity
-				Event_Remove_Entity removeEntityEvent(projectileAttributesOwners->at(i));
+				Event_RemoveEntity removeEntityEvent(projectileAttributesOwners->at(i));
 				SEND_EVENT(&removeEntityEvent);
 			}
 		}

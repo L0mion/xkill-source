@@ -224,6 +224,7 @@ class MeshModel;
 struct DLL_U MeshAttribute : public IAttribute
 {
 	MeshModel* mesh;
+	bool dynamic;
 
 	void clean();
 	MeshAttribute(){};
