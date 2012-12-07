@@ -38,25 +38,54 @@ void CollisionShapeManager::loadCollisionShapes()
 	for(unsigned int i = collisionShapes_.size(); i < meshAttributes_->size(); i++)
 	{
 		meshAttribute = &meshAttributes_->at(i);
-		vertices = meshAttribute->mesh->getGeometry().getVertices();
+		
 		btTriangleMesh triangleMesh;
-		for(unsigned int i = 0; i+2 < vertices.size();i+=3)
+		vertices = meshAttribute->mesh->getGeometry().getVertices();
+		unsigned int numSubsets = meshAttribute->mesh->getGeometry().getNumSubsets();
+		std::vector<unsigned int> indices;
+		for(unsigned int j = 0; j < numSubsets; j++)
 		{
-			triangleMesh.addTriangle(btVector3(vertices.at(i).position_.x,   vertices.at(i).position_.y,   vertices.at(i).position_.z),
-									 btVector3(vertices.at(i+1).position_.x, vertices.at(i+1).position_.y, vertices.at(i+1).position_.z),
-									 btVector3(vertices.at(i+2).position_.x, vertices.at(i+2).position_.y, vertices.at(i+2).position_.z));
+			indices = meshAttribute->mesh->getGeometry().getSubsets().at(j).getIndices();
+			unsigned int numIndices = indices.size();
+			for(unsigned int k = 0; k+2 < numIndices; k+=3)
+			{
+				btVector3 a = 100*btVector3(vertices[indices[k]].position_.x,
+													vertices[indices[k]].position_.y,
+													vertices[indices[k]].position_.z);
+				triangleMesh.addTriangle(100*btVector3(vertices[indices[k]].position_.x,
+													vertices[indices[k]].position_.y,
+													vertices[indices[k]].position_.z),
+											100*btVector3(vertices[indices[k+1]].position_.x,
+													vertices[indices[k+1]].position_.y,
+													vertices[indices[k+1]].position_.z),
+											100*btVector3(vertices[indices[k+2]].position_.x,
+													vertices[indices[k+2]].position_.y,
+													vertices[indices[k+2]].position_.z));
+			}
 		}
-		btConvexTriangleMeshShape tcs(&triangleMesh);
-		btShapeHull hull(&tcs);
-		hull.buildHull(0);
-		tcs.setUserPointer(&hull);
-		btConvexHullShape* convexShape = new btConvexHullShape;
-		for(int i=0; i< hull.numVertices(); i++)
+
+		if(meshAttribute->dynamic || true)
 		{
-			btVector3 test = hull.getVertexPointer()[i];
-			convexShape->addPoint(hull.getVertexPointer()[i]);
+			btConvexTriangleMeshShape tcs(&triangleMesh);
+			
+			btShapeHull hull(&tcs);
+			hull.buildHull(0);
+			tcs.setUserPointer(&hull);
+			btConvexHullShape* convexShape = new btConvexHullShape;
+			for(int i=0; i< hull.numVertices(); i++)
+			{
+				btVector3 test = hull.getVertexPointer()[i];
+				convexShape->addPoint(hull.getVertexPointer()[i]);
+			}
+			//convexShape->setMargin(0.004f);
+			collisionShapes_.push_back(convexShape);
+
 		}
-		collisionShapes_.push_back(convexShape);
+		else
+		{
+			btBvhTriangleMeshShape* staticShape = new btBvhTriangleMeshShape(&triangleMesh,true);
+			collisionShapes_.push_back(staticShape);
+		}	
 	}
 }
 
