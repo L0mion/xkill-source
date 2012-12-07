@@ -70,6 +70,7 @@ public:
 		entityManager_ = new EntityManager();
 		ENTITYTYPE listOfEntitiesToBeCreated[] =
 		{
+			WORLD,
 			PLAYER,
 			PLAYER,
 			PLAYER

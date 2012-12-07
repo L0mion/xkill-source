@@ -24,7 +24,7 @@ void PhysicsObject::Init(PhysicsAttribute* physicsAttribute, btDiscreteDynamicsW
 	transform.setRotation(btQuaternion(0,0,0,1));
 	rigidBody_ = new btRigidBody(physicsAttribute->mass,
 		new btDefaultMotionState(transform),
-		new btSphereShape(50), //CollisionShape
+		new btSphereShape(1), //CollisionShape
 		btVector3(0,0,0));
 	//rigidBody_->updateInertiaTensor();
 
@@ -74,7 +74,7 @@ void PhysicsObject::preStep(PhysicsAttribute* physicsAttribute)
 							    physicsAttribute->angularVelocity.y,
 							    physicsAttribute->angularVelocity.z);
 
-	btVector3 gravity(0,0,0);
+	btVector3 gravity(0,-10,0);
 	movement_.setY(linearVelocity.y());
 	linearVelocity = movement_;
 	forces_ = linearVelocity;
@@ -118,7 +118,7 @@ void PhysicsObject::input(InputAttribute* inputAttribute,float delta)
 {
 	yaw_ += inputAttribute->rotation.x;
 	movement_ = btVector3(inputAttribute->position.x, 0, inputAttribute->position.y);
-	movement_ = 20*movement_.rotate(btVector3(0,1,0),yaw_);
+	movement_ = movement_.rotate(btVector3(0,1,0),yaw_);
 	//forces_ =movement_;
 	inputAttribute->position.x = inputAttribute->position.y = 0;
 }

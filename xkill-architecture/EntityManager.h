@@ -12,6 +12,7 @@
 
 enum ENTITYTYPE
 {
+	WORLD,
 	PLAYER,
 	PROJECTILE
 };
@@ -141,6 +142,10 @@ public:
 		case PLAYER:
 			entityFactory.createPlayerEntity(entity);
 			std::cout << "ENTITYMANAGER: Created player entity " << entity->getID() << std::endl;
+			break;
+		case WORLD:
+			entityFactory.createWorldEntity(entity);
+			std::cout << "ENTITYMANAGER: Created World in 7 cycles " << entity->getID() << std::endl;
 			break;
 		}
 	}
