@@ -35,6 +35,8 @@ RenderingComponent::RenderingComponent(HWND windowHandle)
 	screenWidth_	= windowResolution.width;
 	screenHeight_	= windowResolution.height;
 	numViewports_	= cameraAttributes_->size();
+	csDispatchX_	= screenWidth_ / TILE_SIZE;
+	csDispatchY_	= screenHeight_ / TILE_SIZE;
 
 	d3dManagement_		= nullptr;
 	fxManagement_		= nullptr;
@@ -100,12 +102,10 @@ HRESULT RenderingComponent::resize(unsigned int screenWidth, unsigned int screen
 {
 	HRESULT hr = S_OK;
 
-	d3dManagement_->getDeviceContext()->RSSetViewports(0, 0);
-
-	for(unsigned int i=0; i<GBUFFERID_NUM_BUFFERS; i++)
-	{
-		gBuffers_[i]->reset();
-	}
+	screenWidth_	= screenWidth;	
+	screenHeight_	= screenHeight;
+	csDispatchX_	= screenWidth_ / TILE_SIZE;
+	csDispatchY_	= screenHeight_ / TILE_SIZE;
 
 	hr = d3dManagement_->resize(screenWidth, screenHeight);
 	for(unsigned int i=0; i<GBUFFERID_NUM_BUFFERS; i++)
@@ -268,7 +268,7 @@ void RenderingComponent::renderToBackBuffer()
 	ssManagement_->setCS(d3dManagement_->getDeviceContext(), SS_ID_DEFAULT, 0);
 
 	fxManagement_->getDefaultCS()->set(d3dManagement_->getDeviceContext());
-	d3dManagement_->getDeviceContext()->Dispatch(25, 25, 1);
+	d3dManagement_->getDeviceContext()->Dispatch(csDispatchX_, csDispatchY_, 1);
 	fxManagement_->getDefaultCS()->unset(d3dManagement_->getDeviceContext());
 
 	renderBackBufferClean();
