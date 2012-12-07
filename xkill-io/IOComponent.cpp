@@ -39,7 +39,7 @@ bool IOComponent::initBth()
 
 	if(sucessfulMake)
 	{
-		Event_createMesh e(makerBTH_->getMesh());
+		Event_createMesh e(makerBTH_->getMesh(), true);
 		SEND_EVENT(&e);
 	}
 
@@ -58,7 +58,7 @@ bool IOComponent::initArena()
 
 	if(sucessfulMake)
 	{
-		Event_createMesh e(makerArena_->getMesh());
+		Event_createMesh e(makerArena_->getMesh(), false);
 		SEND_EVENT(&e);
 	}
 
