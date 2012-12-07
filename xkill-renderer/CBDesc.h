@@ -7,29 +7,36 @@
 /*!
 \ingroup xkill-renderer
 */
+struct CBInstanceDesc
+{
+	unsigned int screenWidth_;	//4 bytes
+	unsigned int screenHeight_;	//4 bytes
+	unsigned int pad1;			//4 bytes
+	unsigned int pad2;			//4 bytes
+};
+static const unsigned int CB_INSTANCE_DESC_SIZE = 16;
+
+//! Struct describing a constant buffer.
+/*!
+\ingroup xkill-renderer
+*/
 struct CBFrameDesc
+{
+	unsigned int numLights_;
+};
+static const unsigned int CB_FRAME_DESC_SIZE = 16;
+
+struct CBCameraDesc
 {
 	DirectX::XMFLOAT4X4 viewMatrix_;
 	DirectX::XMFLOAT4X4 viewMatrixInverse_;
 	DirectX::XMFLOAT4X4 projectionMatrix_;
 	DirectX::XMFLOAT4X4 projectionMatrixInverse_;
 	DirectX::XMFLOAT3	eyePosition_;
-	unsigned int		numLights_;
+	unsigned int		viewportTopX_;
+	unsigned int		viewportTopY_;
 };
-static const unsigned int CB_FRAME_DESC_SIZE = 272;
-
-//! Struct describing a constant buffer.
-/*!
-\ingroup xkill-renderer
-*/
-struct CBInstanceDesc
-{
-	unsigned int screenWidth_;	//4 bytes
-	unsigned int screenHeight_;	//4 bytes
-	unsigned int tileWidth_;	//4 bytes
-	unsigned int tileHeight_;	//4 bytes
-};
-static const unsigned int CB_INSTANCE_DESC_SIZE = 16;
+static const unsigned int CB_CAMERA_DESC_SIZE = 288;
 
 //! Struct describing a constant buffer.
 /*!

@@ -1,25 +1,31 @@
 #ifndef XKILL_RENDERER_CONSTANTBUFFERS_HLSL
 #define XKILL_RENDERER_CONSTANTBUFFERS_HLSL
 
-cbuffer cbPerFrame : register (b0)
+cbuffer cbPerInstance : register (b0)
+{
+	uint screenWidth;
+	uint screenHeight;
+	uint pad1;
+	uint pad2;
+};
+
+cbuffer cbPerFrame : register (b1)
+{
+	uint numLights;
+};
+
+cbuffer cbPerCamera : register (b2)
 {
 	float4x4	view;
 	float4x4	viewInverse;
 	float4x4	projection;
 	float4x4	projectionInverse;
 	float3		eyePosition;
-	uint		numLights;
+	uint		viewportTopX;
+	uint		viewportTopY;
 };
 
-cbuffer cbPerInstance : register (b1)
-{
-	uint screenWidth;
-	uint screenHeight;
-	uint tileWidth;
-	uint tileHeight;
-};
-
-cbuffer cbPerObject : register (b2)
+cbuffer cbPerObject : register (b3)
 {
 	float4x4 finalMatrix;
 	float4x4 worldMatrix;

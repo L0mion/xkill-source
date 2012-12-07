@@ -145,6 +145,9 @@ HRESULT RenderingComponent::init()
 void RenderingComponent::onUpdate(float delta)
 {
 	clearGBuffers();
+
+	cbManagement_->vsSet(CB_TYPE_FRAME, CB_REGISTER_FRAME, d3dManagement_->getDeviceContext());
+	cbManagement_->updateCBFrame(d3dManagement_->getDeviceContext(), lightManagement_->getNumLights());
 	for(unsigned int i=0; i<cameraAttributes_->size(); i++)
 	{
 		DirectX::XMFLOAT4X4 viewMatrix((float*)&cameraAttributes_->at(i).mat_view);
@@ -158,15 +161,16 @@ void RenderingComponent::onUpdate(float delta)
 		PositionAttribute* positionAttribute = ATTRIBUTE_CAST(PositionAttribute, positionAttribute, spatialAttribute);
 
 		DirectX::XMFLOAT3	eyePosition = *(DirectX::XMFLOAT3*)&positionAttribute->position;
-
-		cbManagement_->vsSet(CB_FRAME_INDEX, 0, d3dManagement_->getDeviceContext());
-		cbManagement_->updateCBFrame(d3dManagement_->getDeviceContext(),
-									 viewMatrix,
-									 viewMatrixInverse,
-									 projectionMatrix,
-									 projectionMatrixInverse,
-									 eyePosition, 
-									 lightManagement_->getNumLights());
+		
+		cbManagement_->vsSet(CB_TYPE_CAMERA, CB_REGISTER_CAMERA, d3dManagement_->getDeviceContext());
+		cbManagement_->updateCBCamera(d3dManagement_->getDeviceContext(),
+									  viewMatrix,
+									  viewMatrixInverse,
+									  projectionMatrix,
+									  projectionMatrixInverse,
+									  eyePosition,
+									  0,
+									  0);
 
 		setViewport(i);
 		renderToGBuffer(viewMatrix, projectionMatrix);
@@ -214,7 +218,7 @@ void RenderingComponent::renderToGBuffer(DirectX::XMFLOAT4X4 viewMatrix, DirectX
 		worldMatrixInverse	= calculateMatrixInverse(worldMatrix);
 		finalMatrix			= calculateFinalMatrix(worldMatrix, viewMatrix, projectionMatrix);
 		
-		cbManagement_->vsSet(CB_OBJECT_INDEX, 2, devcon);
+		cbManagement_->vsSet(CB_TYPE_OBJECT, CB_REGISTER_OBJECT, devcon);
 		cbManagement_->updateCBObject(devcon, finalMatrix, worldMatrix, worldMatrixInverse);
 
 		UINT stride = sizeof(VertexPosNormTex);
@@ -244,9 +248,10 @@ void RenderingComponent::renderToBackBuffer()
 {
 	d3dManagement_->setUAVBackBufferCS();
 
-	cbManagement_->csSet(CB_FRAME_INDEX, 0, d3dManagement_->getDeviceContext());
-	cbManagement_->csSet(CB_INSTANCE_INDEX, 1, d3dManagement_->getDeviceContext());
-	cbManagement_->updateCBInstance(d3dManagement_->getDeviceContext(), screenWidth_, screenHeight_, 0, 0); //tmep
+	cbManagement_->csSet(CB_TYPE_FRAME,		CB_REGISTER_FRAME,		d3dManagement_->getDeviceContext());
+	cbManagement_->csSet(CB_TYPE_INSTANCE,	CB_REGISTER_INSTANCE,	d3dManagement_->getDeviceContext());
+	cbManagement_->csSet(CB_TYPE_CAMERA,	CB_REGISTER_CAMERA,		d3dManagement_->getDeviceContext());
+	cbManagement_->updateCBInstance(d3dManagement_->getDeviceContext(), screenWidth_, screenHeight_);
 
 	lightManagement_->setLightSRVCS(d3dManagement_->getDeviceContext(), 2);
 

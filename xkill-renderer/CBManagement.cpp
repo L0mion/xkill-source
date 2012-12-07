@@ -22,38 +22,42 @@ void CBManagement::reset()
 	SAFE_RELEASE(cbObject_);
 }
 
-void CBManagement::updateCBFrame(ID3D11DeviceContext* devcon,
-								 DirectX::XMFLOAT4X4 viewMatrix,
-								 DirectX::XMFLOAT4X4 viewMatrixInverse,
-								 DirectX::XMFLOAT4X4 projectionMatrix,
-								 DirectX::XMFLOAT4X4 projectionMatrixInverse,
-								 DirectX::XMFLOAT3	 eyePosition,
-								 unsigned int		 numLights)
+void CBManagement::updateCBInstance(ID3D11DeviceContext*	devcon,
+									const unsigned int		screenWidth,
+									const unsigned int		screenHeight)
+{
+	CBInstanceDesc cbDesc;
+	cbDesc.screenWidth_		= screenWidth;
+	cbDesc.screenHeight_	= screenHeight;
+
+	devcon->UpdateSubresource(cbInstance_, 0, 0, &cbDesc, 0, 0);
+}
+void CBManagement::updateCBFrame(ID3D11DeviceContext* devcon, unsigned int numLights)
 {
 	CBFrameDesc cbDesc;
+	cbDesc.numLights_ = numLights;
+
+	devcon->UpdateSubresource(cbFrame_, 0, 0, &cbDesc, 0, 0);
+}
+void CBManagement::updateCBCamera(ID3D11DeviceContext*	devcon,
+								  DirectX::XMFLOAT4X4	viewMatrix,
+								  DirectX::XMFLOAT4X4	viewMatrixInverse,
+								  DirectX::XMFLOAT4X4	projectionMatrix,
+								  DirectX::XMFLOAT4X4	projectionMatrixInverse,
+								  DirectX::XMFLOAT3		eyePosition,
+								  unsigned int			viewportTopX,
+								  unsigned int			viewportTopY)
+{
+	CBCameraDesc cbDesc;
 	cbDesc.viewMatrix_				= viewMatrix;
 	cbDesc.viewMatrixInverse_		= viewMatrixInverse;
 	cbDesc.projectionMatrix_		= projectionMatrix;
 	cbDesc.projectionMatrixInverse_	= projectionMatrixInverse;
 	cbDesc.eyePosition_				= eyePosition;
-	cbDesc.numLights_				= numLights;
+	cbDesc.viewportTopX_			= viewportTopX;
+	cbDesc.viewportTopY_			= viewportTopY;
 
-	devcon->UpdateSubresource(cbFrame_, 0, 0, &cbDesc, 0, 0);
-}
-void CBManagement::updateCBInstance(
-	ID3D11DeviceContext*	devcon,
-	const unsigned int		screenWidth,
-	const unsigned int		screenHeight,
-	const unsigned int		tileWidth,
-	const unsigned int		tileHeight)
-{
-	CBInstanceDesc cbDesc;
-	cbDesc.screenWidth_		= screenWidth;
-	cbDesc.screenHeight_	= screenHeight;
-	cbDesc.tileWidth_		= tileWidth;
-	cbDesc.tileHeight_		= tileHeight;
-
-	devcon->UpdateSubresource(cbInstance_, 0, 0, &cbDesc, 0, 0);
+	devcon->UpdateSubresource(cbCamera_, 0, 0, &cbDesc, 0, 0);
 }
 void CBManagement::updateCBObject(ID3D11DeviceContext* devcon,
 								  DirectX::XMFLOAT4X4 finalMatrix,
@@ -68,17 +72,20 @@ void CBManagement::updateCBObject(ID3D11DeviceContext* devcon,
 	devcon->UpdateSubresource(cbObject_, 0, 0, &cbDesc, 0, 0);
 }
 
-void CBManagement::vsSet(unsigned int cbIndex, unsigned int shaderRegister, ID3D11DeviceContext* devcon)
+void CBManagement::vsSet(CB_TYPE cbType, unsigned int shaderRegister, ID3D11DeviceContext* devcon)
 {
-	switch(cbIndex)
+	switch(cbType)
 	{
-	case CB_FRAME_INDEX:
-		devcon->VSSetConstantBuffers(shaderRegister, 1, &cbFrame_);
-		break;
-	case CB_INSTANCE_INDEX:
+	case CB_TYPE_INSTANCE:
 		devcon->VSSetConstantBuffers(shaderRegister, 1, &cbInstance_);
 		break;
-	case CB_OBJECT_INDEX:
+	case CB_TYPE_FRAME:
+		devcon->VSSetConstantBuffers(shaderRegister, 1, &cbFrame_);
+		break;
+	case CB_TYPE_CAMERA:
+		devcon->VSSetConstantBuffers(shaderRegister, 1, &cbCamera_);
+		break;
+	case CB_TYPE_OBJECT:
 		devcon->VSSetConstantBuffers(shaderRegister, 1, &cbObject_);
 		break;
 	default:
@@ -86,17 +93,20 @@ void CBManagement::vsSet(unsigned int cbIndex, unsigned int shaderRegister, ID3D
 		break;
 	}
 }
-void CBManagement::psSet(unsigned int cbIndex, unsigned int shaderRegister, ID3D11DeviceContext* devcon)
+void CBManagement::psSet(CB_TYPE cbType, unsigned int shaderRegister, ID3D11DeviceContext* devcon)
 {
-	switch(cbIndex)
+	switch(cbType)
 	{
-	case CB_FRAME_INDEX:
-		devcon->PSSetConstantBuffers(shaderRegister, 1, &cbFrame_);
-		break;
-	case CB_INSTANCE_INDEX:
+	case CB_TYPE_INSTANCE:
 		devcon->PSSetConstantBuffers(shaderRegister, 1, &cbInstance_);
 		break;
-	case CB_OBJECT_INDEX:
+	case CB_TYPE_FRAME:
+		devcon->PSSetConstantBuffers(shaderRegister, 1, &cbFrame_);
+		break;
+	case CB_TYPE_CAMERA:
+		devcon->PSSetConstantBuffers(shaderRegister, 1, &cbCamera_);
+		break;
+	case CB_TYPE_OBJECT:
 		devcon->PSSetConstantBuffers(shaderRegister, 1, &cbObject_);
 		break;
 	default:
@@ -104,17 +114,20 @@ void CBManagement::psSet(unsigned int cbIndex, unsigned int shaderRegister, ID3D
 		break;
 	}
 }
-void CBManagement::csSet(unsigned int cbIndex, unsigned int shaderRegister, ID3D11DeviceContext* devcon)
+void CBManagement::csSet(CB_TYPE cbType, unsigned int shaderRegister, ID3D11DeviceContext* devcon)
 {
-	switch(cbIndex)
+	switch(cbType)
 	{
-	case CB_FRAME_INDEX:
-		devcon->CSSetConstantBuffers(shaderRegister, 1, &cbFrame_);
-		break;
-	case CB_INSTANCE_INDEX:
+	case CB_TYPE_INSTANCE:
 		devcon->CSSetConstantBuffers(shaderRegister, 1, &cbInstance_);
 		break;
-	case CB_OBJECT_INDEX:
+	case CB_TYPE_FRAME:
+		devcon->CSSetConstantBuffers(shaderRegister, 1, &cbFrame_);
+		break;
+	case CB_TYPE_CAMERA:
+		devcon->CSSetConstantBuffers(shaderRegister, 1, &cbCamera_);
+		break;
+	case CB_TYPE_OBJECT:
 		devcon->CSSetConstantBuffers(shaderRegister, 1, &cbObject_);
 		break;
 	default:
@@ -127,11 +140,31 @@ HRESULT CBManagement::init(ID3D11Device* device)
 {
 	HRESULT hr = S_OK;
 
-	hr = initCBFrame(device);
+	hr = initCBInstance(device);
 	if(SUCCEEDED(hr))
-		hr = initCBInstance(device);
+		hr = initCBFrame(device);
+	if(SUCCEEDED(hr))
+		hr = initCBCamera(device);
 	if(SUCCEEDED(hr))
 		hr = initCBObject(device);
+
+	return hr;
+}
+HRESULT CBManagement::initCBInstance(ID3D11Device* device)
+{
+	HRESULT hr = S_OK;
+
+	D3D11_BUFFER_DESC bufferDesc;
+	ZeroMemory(&bufferDesc, sizeof(bufferDesc));
+	
+	bufferDesc.Usage			= D3D11_USAGE_DEFAULT;
+	bufferDesc.ByteWidth		= CB_INSTANCE_DESC_SIZE;
+	bufferDesc.BindFlags		= D3D11_BIND_CONSTANT_BUFFER;
+	bufferDesc.CPUAccessFlags	= 0;
+
+	hr = device->CreateBuffer(&bufferDesc, NULL, &cbInstance_);
+	if(FAILED(hr))
+		ERROR_MSG(L"CBManagement::initCBInstance | device->CreateBuffer | Failed!");
 
 	return hr;
 }
@@ -153,7 +186,7 @@ HRESULT CBManagement::initCBFrame(ID3D11Device* device)
 
 	return hr;
 }
-HRESULT CBManagement::initCBInstance(ID3D11Device* device)
+HRESULT CBManagement::initCBCamera(ID3D11Device* device)
 {
 	HRESULT hr = S_OK;
 
@@ -161,13 +194,13 @@ HRESULT CBManagement::initCBInstance(ID3D11Device* device)
 	ZeroMemory(&bufferDesc, sizeof(bufferDesc));
 	
 	bufferDesc.Usage			= D3D11_USAGE_DEFAULT;
-	bufferDesc.ByteWidth		= CB_INSTANCE_DESC_SIZE;
+	bufferDesc.ByteWidth		= CB_CAMERA_DESC_SIZE;
 	bufferDesc.BindFlags		= D3D11_BIND_CONSTANT_BUFFER;
 	bufferDesc.CPUAccessFlags	= 0;
 
-	hr = device->CreateBuffer(&bufferDesc, NULL, &cbInstance_);
+	hr = device->CreateBuffer(&bufferDesc, NULL, &cbCamera_);
 	if(FAILED(hr))
-		ERROR_MSG(L"CBManagement::initCBInstance | device->CreateBuffer | Failed!");
+		ERROR_MSG(L"CBManagement::initCBCamera | device->CreateBuffer | Failed!");
 
 	return hr;
 }
