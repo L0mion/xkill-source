@@ -17,7 +17,7 @@ SoundComponent::SoundComponent()
 	mFMODEventSystem = NULL;
 	converter = NULL;
 
-	SUBSCRIBE_TO_EVENT(this, EVENT_CREATEPROJECTILE);
+	SUBSCRIBE_TO_EVENT(this, EVENT_CREATE_PROJECTILE);
 }
 
 SoundComponent::~SoundComponent()
