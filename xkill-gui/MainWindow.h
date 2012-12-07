@@ -62,14 +62,14 @@ public:
 		switch (type) 
 		{
 		case EVENT_SHOW_MESSAGEBOX:
-			event_showMessageBox((Event_showMessageBox*)e);
+			event_showMessageBox((Event_ShowMessageBox*)e);
 			break;
 		default:
 			break;
 		}
 	}
 
-	void event_showMessageBox(Event_showMessageBox* e)
+	void event_showMessageBox(Event_ShowMessageBox* e)
 	{
 		QString message(e->message.c_str());
 		

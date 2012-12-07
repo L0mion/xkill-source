@@ -78,7 +78,7 @@ public:
 		playerId++;
 	}
 
-	void createProjectileEntity(Entity* entity, Event_createProjectile* e)
+	void createProjectileEntity(Entity* entity, Event_CreateProjectile* e)
 	{
 		CREATE_ATTRIBUTE(PositionAttribute, position, entity);
 		position->position.x = e->position.x;
@@ -101,7 +101,7 @@ public:
 		physics->linearVelocity.y = 1.0f;
 	}
 
-	void createMesh(Entity* entity, Event_createMesh* e)
+	void createMesh(Entity* entity, Event_CreateMesh* e)
 	{
 		MeshAttribute* meshAttribute = AttributeManager::getInstance()->meshAttributes_.createAttribute(entity);
 		meshAttribute->mesh = e->mesh;

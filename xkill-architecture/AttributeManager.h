@@ -55,7 +55,7 @@ public:
 		switch (type) 
 		{
 		case EVENT_GET_ATTRIBUTE:
-			event_getAttributeVector((Event_getAttribute*)e);
+			event_getAttributeVector((Event_GetAttribute*)e);
 			break;
 		default:
 			break;
@@ -67,7 +67,7 @@ public:
 	the use of Event_getAttributeVector. The data inside
 	event_getAttributeVector can then be accessed by the sender.
 	*/
-	void event_getAttributeVector(Event_getAttribute* e)
+	void event_getAttributeVector(Event_GetAttribute* e)
 	{
 
 		AttributeType type = (AttributeType)e->attributeEnum;

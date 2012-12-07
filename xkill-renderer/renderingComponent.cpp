@@ -28,7 +28,7 @@ RenderingComponent::RenderingComponent(HWND windowHandle)
 {
 	GET_ATTRIBUTES(cameraAttributes_, CameraAttribute, ATTRIBUTE_CAMERA);
 	
-	Event_getWindowResolution windowResolution;
+	Event_GetWindowResolution windowResolution;
 	SEND_EVENT(&windowResolution);
 
 	windowHandle_	= windowHandle;

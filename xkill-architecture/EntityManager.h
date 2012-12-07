@@ -129,8 +129,8 @@ public:
 	EntityManager()
 	{
 		// subscribe to events
-		SUBSCRIBE_TO_EVENT(this, EVENT_CREATEPROJECTILE);
-		SUBSCRIBE_TO_EVENT(this, EVENT_CREATEMESH);
+		SUBSCRIBE_TO_EVENT(this, EVENT_CREATE_PROJECTILE);
+		SUBSCRIBE_TO_EVENT(this, EVENT_CREATE_MESH);
 		SUBSCRIBE_TO_EVENT(this, EVENT_REMOVE_ENTITY);
 	}
 
@@ -142,14 +142,14 @@ public:
 		EventType type = e->getType();
 		switch (type) 
 		{
-		case EVENT_CREATEPROJECTILE:
-			event_CreateProjectile(static_cast<Event_createProjectile*>(e));
+		case EVENT_CREATE_PROJECTILE:
+			event_CreateProjectile(static_cast<Event_CreateProjectile*>(e));
 			break;
 		case EVENT_REMOVE_ENTITY:
-			deleteEntity(static_cast<Event_Remove_Entity*>(e)->entityId);
+			deleteEntity(static_cast<Event_RemoveEntity*>(e)->entityId);
 			break;
-		case EVENT_CREATEMESH:
-			event_createmesh(static_cast<Event_createMesh*>(e));
+		case EVENT_CREATE_MESH:
+			event_createmesh(static_cast<Event_CreateMesh*>(e));
 			break;
 		default:
 			break;
@@ -160,7 +160,7 @@ public:
 	{
 	}
 
-	void event_createmesh(Event_createMesh* e)
+	void event_createmesh(Event_CreateMesh* e)
 	{
 		Entity* entity = createEntity();
 		entityFactory.createMesh(entity, e);
@@ -178,7 +178,7 @@ public:
 		}
 	}
 
-	void event_CreateProjectile(Event_createProjectile* e)
+	void event_CreateProjectile(Event_CreateProjectile* e)
 	{
 		Entity* entity = createEntity();
 		entityFactory.createProjectileEntity(entity, e);

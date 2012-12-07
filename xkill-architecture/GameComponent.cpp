@@ -5,7 +5,6 @@
 
 GameComponent::GameComponent(void)
 {
-	//SHOW_MESSAGEBOX("Game has started");
 }
 
 GameComponent::~GameComponent(void)
@@ -14,29 +13,46 @@ GameComponent::~GameComponent(void)
 
 bool GameComponent::init()
 {
-	SUBSCRIBE_TO_EVENT(this, EVENT_PROJECTILECOLLIDINGWITHPLAYER);
+	SUBSCRIBE_TO_EVENT(this, EVENT_ENTITIES_COLLIDING);
 	return true;
 }
 
 void GameComponent::onEvent(Event* e)
 {
 	EventType type = e->getType();
-	if(type == EVENT_PROJECTILECOLLIDINGWITHPLAYER) 
+	switch (type) 
 	{
-		std::cout << "GameComponent::onEvent, EVENT_PROJECTILECOLLIDINGWITHPLAYER" << std::endl;
-
-		//Remove projectile entity
-		Event_ProjectileCollidingWithPlayer* projectileCollidingWithPlayer = static_cast<Event_ProjectileCollidingWithPlayer*>(e);
-		Event_Remove_Entity removeEntityEvent(projectileCollidingWithPlayer->projectileId);
-		SEND_EVENT(&removeEntityEvent);
-
-		//Lower player health
-		//AttributeManager::getInstance()->playerAttributes_
-		//PlayerAttribute* playerAttribute = AttributeManager::getInstance()->playerAttributes_.getAllAttributes();
-
-		projectileCollidingWithPlayer->playerId;
+	case EVENT_ENTITIES_COLLIDING:
+		event_EntitiesColliding(static_cast<Event_EntitiesColliding*>(e));
+		break;
+	default:
+		break;
 	}
 }
+
+void GameComponent::event_EntitiesColliding(Event_EntitiesColliding* e)
+{
+	std::cout << "GameComponent::onEvent, EVENT_PROJECTILECOLLIDINGWITHPLAYER" << std::endl;
+
+	// fetch Entities so we can inspect their attributes
+	std::vector<Entity>* allEntity; GET_ENTITIES(allEntity);
+	Entity* e1 = &allEntity->at(e->e1_index);
+	Entity* e2 = &allEntity->at(e->e2_index);
+
+	// check bullet logic
+	if(e1->hasAttribute(ATTRIBUTE_PLAYER))
+		
+	//if(e1->hasAttribute(ATTRIBUTE_PRO))
+	// Remove projectile entity
+	SEND_EVENT(&Event_RemoveEntity(0));
+
+	//Lower player health
+	//AttributeManager::getInstance()->playerAttributes_
+	//PlayerAttribute* playerAttribute = AttributeManager::getInstance()->playerAttributes_.getAllAttributes();
+
+	//projectileCollidingWithPlayer->playerId;
+}
+
 
 void GameComponent::onUpdate(float delta)
 {
@@ -80,7 +96,7 @@ void GameComponent::onUpdate(float delta)
 				direction.y = spatial->rotation.y;
 				direction.z = spatial->rotation.z;
 				direction.w = spatial->rotation.w;
-				Event_createProjectile projectile(pos, direction);
+				Event_CreateProjectile projectile(pos, direction);
 				SEND_EVENT(&projectile);
 				input->fire = false;
 			}

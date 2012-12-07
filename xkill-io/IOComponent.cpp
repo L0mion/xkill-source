@@ -24,7 +24,7 @@ bool IOComponent::init()
 
 	if(sucessfulMake)
 	{
-		Event_createMesh e(makerObj_->getMesh());
+		Event_CreateMesh e(makerObj_->getMesh());
 		SEND_EVENT(&e);
 	}
 

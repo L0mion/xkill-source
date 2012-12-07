@@ -63,7 +63,7 @@ public:
 		switch (type) 
 		{
 		case EVENT_GET_WINDOW_RESOLUTION:
-			event_getWindowResolution((Event_getWindowResolution*)e);
+			event_getWindowResolution((Event_GetWindowResolution*)e);
 			break;
 		default:
 			break;
@@ -133,7 +133,7 @@ private:
 		}
 	}
 
-	void event_getWindowResolution(Event_getWindowResolution* e)
+	void event_getWindowResolution(Event_GetWindowResolution* e)
 	{
 		e->width = size().width();
 		e->height = size().height();
