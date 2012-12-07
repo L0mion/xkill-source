@@ -16,10 +16,12 @@
 class MeshMakerObj;
 class MeshModel;
 
-static const std::string bthPath		= "../../xkill-resources/xkill-models/";
-static const std::string pgyPath		= "../../xkill-resources/xkill-models/";
-static const std::string bthName		= "bth.obj";
-static const std::string bthMTLPath		= bthPath;
+static const std::string objPath = "../../xkill-resources/xkill-models/";
+static const std::string pgyPath = "../../xkill-resources/xkill-models/";
+static const std::string mtlPath = "../../xkill-resources/xkill-models/";
+
+static const std::string bthName	= "bth.obj";
+static const std::string arenaName	= "xkillArena.obj";
 
 class DLL_IO IOComponent : public IObserver
 {
@@ -33,8 +35,12 @@ public:
 	void onEvent(Event* e);
 protected:
 private:
+	bool initBth(); //temp
+	bool initArena(); //temp
+
 	/*Makers*/
-	MeshMakerObj* makerObj_;
+	MeshMakerObj* makerBTH_;
+	MeshMakerObj* makerArena_;
 };
 
 #endif //XKILL_IO_IOCOMPONENT_H
