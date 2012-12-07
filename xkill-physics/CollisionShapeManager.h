@@ -2,17 +2,20 @@
 #define XKILL_PHYSICS_COLLISIONSHAPEMANAGER
 
 #include <btBulletDynamicsCommon.h>
-
+#include <vector>
 //! CollisionShapeManager
 /*!
 Responsible for creating collision shapes and storing them for
 the physics component.
 \ingroup xkill-physics
 */
+class MeshAttribute;
+
 class CollisionShapeManager
 {
 private:
 	btAlignedObjectArray<btCollisionShape*> collisionShapes_; //!< An vector for holding all collision shapes
+	std::vector<MeshAttribute>* meshAttributes_;
 public:
 	//! Creates a empty CollisionShapeManager
 	CollisionShapeManager();
@@ -30,7 +33,7 @@ public:
 	\param vertices A pointer to a list of 3 float groups
 	\param numVertices The number of vertices sent in
 	*/
-	void createConvexHull(float* verticeData,unsigned int numVertices);
+	void loadCollisionShapes();
 };
 
 #endif //XKILL_PHYSICS_COLLISIONSHAPEMANAGER

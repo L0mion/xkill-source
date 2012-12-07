@@ -20,7 +20,10 @@ class btDefaultCollisionConfiguration;
 class btCollisionDispatcher;
 class btSequentialImpulseConstraintSolver;
 class btDiscreteDynamicsWorld;
+class btDynamicsWorld;
 class btRigidBody;
+
+typedef float btScalar;
 
 template<class T>
 class btAlignedObjectArray;
@@ -36,7 +39,7 @@ From the Bullet documentation: "The entire physics pipeline computation and its 
 \ingroup xkill-physics
 */
 
-
+static void wrapTickCallback(btDynamicsWorld *world, btScalar timeStep);
 
 class DLL_P BulletPhysicsComponent : public IObserver
 {
@@ -55,7 +58,7 @@ private:
 	std::vector<int>* physicsOwners_; //! Owners of physicsAttributes
 
 	btAlignedObjectArray<PhysicsObject*>* physicsObjects_; //<! A vector of PhysicsObjects, internal representation of world
-	btRigidBody* floor_; //<! The absolute floor plane, no object may pass bellow this plane
+	PhysicsObject* floor_; //<! The absolute floor plane, no object may pass bellow this plane
 
 public:
 	//! Creates a BulletPhysicsComponent, gives it pointers to attribute storages required by the component and sets all pointer to null_ptr
@@ -77,6 +80,13 @@ public:
 	\param e A pointer to the event that is being passed
 	*/
 	void onEvent(Event* e);
+
+	//!
+	/*!
+	\param world A pointer to the dynamicsWorld
+	\param timeStep The delta of the past timestep
+	*/
+	void tickCallback(btScalar timeStep);
 };
 
 #endif //XKILL_PHYSICS_PHYSICSCOMPONENT_H

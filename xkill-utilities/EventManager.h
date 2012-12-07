@@ -84,7 +84,7 @@ EventManager::getInstance()->addObserver(Subscriber, EventType);
 	AttributePointer = (std::vector<AttributeType>*)e.hostVector;	\
 }
 
-// Fetches owners of a specific Attribute from AttributeManager
+// Fetches the owners of a specific Attribute from AttributeManager
 #define GET_ATTRIBUTE_OWNERS(OwnerPointer, Enum)					\
 {																	\
 	Event_GetAttribute e(Enum);										\

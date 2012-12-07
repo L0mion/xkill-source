@@ -27,6 +27,7 @@ private:
 		playerAttributes_		.init(ATTRIBUTE_PLAYER);
 		boundingAttributes_		.init(ATTRIBUTE_BOUNDING);
 		meshAttributes_			.init(ATTRIBUTE_MESH);
+		projectileAttributes_	.init(ATTRIBUTE_PROJECTILE);
 	}
 
 public:
@@ -38,6 +39,7 @@ public:
 	AttributeStorage<InputAttribute>			inputAttributes_;
 	AttributeStorage<PlayerAttribute>			playerAttributes_;
 	AttributeStorage<BoundingAttribute>			boundingAttributes_;
+	AttributeStorage<ProjectileAttribute>		projectileAttributes_;
 	AttributeStorage<MeshAttribute>				meshAttributes_;
 
 	static AttributeManager* getInstance()
@@ -84,15 +86,16 @@ public:
 			// If Enum matches, fetch information from the corresponding
 			// AttributeStorage and store that information inside 
 			// Event_getAttribute
-			PUT_ATTRIBUTES_INSIDE_EVENT(ATTRIBUTE_POSITION,	positionAttributes_	);
-			PUT_ATTRIBUTES_INSIDE_EVENT(ATTRIBUTE_SPATIAL,	spatialAttributes_	);
-			PUT_ATTRIBUTES_INSIDE_EVENT(ATTRIBUTE_RENDER,	renderAttributes_	);
-			PUT_ATTRIBUTES_INSIDE_EVENT(ATTRIBUTE_PHYSICS,	physicsAttributes_	);
-			PUT_ATTRIBUTES_INSIDE_EVENT(ATTRIBUTE_CAMERA,	cameraAttributes_	);
-			PUT_ATTRIBUTES_INSIDE_EVENT(ATTRIBUTE_INPUT,	inputAttributes_	);
-			PUT_ATTRIBUTES_INSIDE_EVENT(ATTRIBUTE_PLAYER,	playerAttributes_	);
-			PUT_ATTRIBUTES_INSIDE_EVENT(ATTRIBUTE_BOUNDING,	boundingAttributes_	);
-			PUT_ATTRIBUTES_INSIDE_EVENT(ATTRIBUTE_MESH,		meshAttributes_		);
+			PUT_ATTRIBUTES_INSIDE_EVENT(ATTRIBUTE_POSITION,		positionAttributes_		);
+			PUT_ATTRIBUTES_INSIDE_EVENT(ATTRIBUTE_SPATIAL,		spatialAttributes_		);
+			PUT_ATTRIBUTES_INSIDE_EVENT(ATTRIBUTE_RENDER,		renderAttributes_		);
+			PUT_ATTRIBUTES_INSIDE_EVENT(ATTRIBUTE_PHYSICS,		physicsAttributes_		);
+			PUT_ATTRIBUTES_INSIDE_EVENT(ATTRIBUTE_CAMERA,		cameraAttributes_		);
+			PUT_ATTRIBUTES_INSIDE_EVENT(ATTRIBUTE_INPUT,		inputAttributes_		);
+			PUT_ATTRIBUTES_INSIDE_EVENT(ATTRIBUTE_PLAYER,		playerAttributes_		);
+			PUT_ATTRIBUTES_INSIDE_EVENT(ATTRIBUTE_BOUNDING,		boundingAttributes_		);
+			PUT_ATTRIBUTES_INSIDE_EVENT(ATTRIBUTE_MESH,			meshAttributes_			);
+			PUT_ATTRIBUTES_INSIDE_EVENT(ATTRIBUTE_PROJECTILE,	projectileAttributes_	);
 
 			// undefine dirty macro
 #undef PUT_ATTRIBUTES_INSIDE_EVENT
