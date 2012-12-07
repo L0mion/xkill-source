@@ -12,6 +12,9 @@ cbuffer cbPerInstance : register (b0)
 cbuffer cbPerFrame : register (b1)
 {
 	uint numLights;
+	uint pad3;
+	uint pad4;
+	uint pad5;
 };
 
 cbuffer cbPerCamera : register (b2)
