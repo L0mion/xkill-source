@@ -6,30 +6,65 @@
 
 IOComponent::IOComponent()
 {
-	makerObj_ = nullptr;
+	makerBTH_ = nullptr;
+	makerArena_ = nullptr;
 }
 IOComponent::~IOComponent()
 {
-	if(makerObj_)
-		delete makerObj_;
+	if(makerBTH_)
+		delete makerBTH_;
+	if(makerArena_)
+		delete makerArena_;
 }
 bool IOComponent::init()
 {
-	makerObj_ = new MeshMakerObj(
-		bthPath,
+	bool sucessfulInit = true;
+
+	sucessfulInit = initBth();
+	if(sucessfulInit)
+		sucessfulInit = initArena();
+
+	return sucessfulInit;
+}
+bool IOComponent::initBth()
+{
+	bool sucessfulMake = true;
+
+	makerBTH_ = new MeshMakerObj(
+		objPath,
 		pgyPath,
 		bthName,
-		bthMTLPath);
-	bool sucessfulMake = makerObj_->init();
+		mtlPath);
+	sucessfulMake = makerBTH_->init();
 
 	if(sucessfulMake)
 	{
-		Event_createMesh e(makerObj_->getMesh());
+		Event_createMesh e(makerBTH_->getMesh());
 		SEND_EVENT(&e);
 	}
 
 	return sucessfulMake;
 }
+bool IOComponent::initArena()
+{
+	bool sucessfulMake = true;
+
+	makerArena_ = new MeshMakerObj(
+		objPath,
+		pgyPath,
+		arenaName,
+		mtlPath);
+	sucessfulMake = makerArena_->init();
+
+	if(sucessfulMake)
+	{
+		Event_createMesh e(makerArena_->getMesh());
+		SEND_EVENT(&e);
+	}
+
+	return sucessfulMake;
+}
+
 void IOComponent::reset()
 {
 }

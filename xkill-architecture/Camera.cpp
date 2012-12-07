@@ -196,9 +196,14 @@ void Camera::yaw(const float angle)
 
 void Camera::setPosition(float position[3])
 {
-	position_.x = position[0] + look_.x*10;
-	position_.y = position[1] + look_.y*10;
-	position_.z = position[2] + look_.z*10;
+	position_.x = position[0] + look_.x*0;
+	position_.y = position[1] + look_.y*0;
+	position_.z = position[2] + look_.z*0;
+}
+
+void Camera::setAspectRatio(float aspectRatio)
+{
+	aspect_ = aspectRatio;
 }
 
 DirectX::XMFLOAT3 Camera::getPosition()
