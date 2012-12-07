@@ -56,6 +56,7 @@ public:
 
 		CREATE_ATTRIBUTE(PhysicsAttribute, physics, entity);
 		CONNECT_ATTRIBUTES(physics, spatial);
+		physics->collisionShapeIndex = 0;
 
 		CREATE_ATTRIBUTE(InputAttribute, input, entity);
 		CONNECT_ATTRIBUTES(input, physics);
@@ -83,8 +84,10 @@ public:
 		CONNECT_ATTRIBUTES(render, spatial);
 		render->meshIndex = 1;
 
-		//CREATE_ATTRIBUTE(PhysicsAttribute, physics, entity);
-		//CONNECT_ATTRIBUTES(physics, spatial);
+		CREATE_ATTRIBUTE(PhysicsAttribute, physics, entity);
+		CONNECT_ATTRIBUTES(physics, spatial);
+		physics->collisionShapeIndex = 1;
+		physics->mass = 0;
 	}
 
 	void createProjectileEntity(Entity* entity, Event_CreateProjectile* e)
@@ -104,7 +107,7 @@ public:
 		physics->linearVelocity = e->velocity;
 
 		CREATE_ATTRIBUTE(ProjectileAttribute, projectile, entity);
-		projectile->creator = e->entityIdOfOwner;
+		projectile->entityIdOfCreator = e->entityIdOfCreator;
 		CONNECT_ATTRIBUTES(projectile, physics);
 	}
 

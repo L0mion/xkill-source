@@ -6,6 +6,7 @@
 
 GameComponent::GameComponent(void)
 {
+	
 }
 
 GameComponent::~GameComponent(void)
@@ -15,6 +16,11 @@ GameComponent::~GameComponent(void)
 bool GameComponent::init()
 {
 	SUBSCRIBE_TO_EVENT(this, EVENT_ENTITIES_COLLIDING);
+
+	// Fetch list of stuff used in logic
+	GET_ENTITIES(allEntity);
+	GET_ATTRIBUTE_OWNERS(allPhysicsOwner, ATTRIBUTE_PHYSICS);
+
 	return true;
 }
 
@@ -33,31 +39,44 @@ void GameComponent::onEvent(Event* e)
 
 void GameComponent::event_PhysicsAttributesColliding(Event_PhysicsAttributesColliding* e)
 {
-	std::cout << "GameComponent::onEvent, EVENT_PROJECTILECOLLIDINGWITHPLAYER" << std::endl;
-
 	// Fetch Entities so we can inspect their attributes
-	std::vector<Entity>* allEntities; GET_ENTITIES(allEntities);
-	Entity* e1 = &allEntities->at(e->e1_index);
-	Entity* e2 = &allEntities->at(e->e2_index);
+	Entity* e1 = &allEntity->at(allPhysicsOwner->at(e->attribute1_index)); //entityOfCollidingAttribute
+	Entity* e2 = &allEntity->at(allPhysicsOwner->at(e->attribute2_index));
 
-	//Event_Remove_Entity removeEntityEvent(projectileCollidingWithPlayer->projectileEntityId);
-	//SEND_EVENT(&removeEntityEvent);
-	// check bullet logic
+	std::cout << "COLLISIONEVENT: Entity " << e1->getID() << " colliding with Entity " << e2->getID() << std::endl;
+	
+	//
+	// Handle collision logic for Entity 1 (e1) 
+	// colliding with with Entity 2 (e2)
+	//
 
-	if(e1->hasAttribute(ATTRIBUTE_PLAYER) ^ e2->hasAttribute(ATTRIBUTE_PROJECTILE))
+	// player
+	if(e1->hasAttribute(ATTRIBUTE_PLAYER))
 	{
+		//
+		// colliding with...
+		//
 
+		// projectile
+		if(e2->hasAttribute(ATTRIBUTE_PROJECTILE))
+		{
+			// TODO: Damage Player
+			
+			// TODO: Reward owner of Projectile
+		}
 	}
-		
-	//if(e1->hasAttribute(ATTRIBUTE_PRO))
-	// Remove projectile entity
-	SEND_EVENT(&Event_RemoveEntity(0));
+	// projectile
+	else if(e1->hasAttribute(ATTRIBUTE_PROJECTILE))
+	{
+		//
+		// colliding with...
+		//
 
-	//Lower player health
-	//AttributeManager::getInstance()->playerAttributes_
-	//PlayerAttribute* playerAttribute = AttributeManager::getInstance()->playerAttributes_.getAllAttributes();
+		// everything
 
-	//projectileCollidingWithPlayer->playerId;
+		// Destroy the owner Entity of the ProjectileAttribute
+		SEND_EVENT(&Event_RemoveEntity(e1->getID()));
+	}
 }
 
 

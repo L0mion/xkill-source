@@ -68,7 +68,7 @@ PhysicsAttribute::~PhysicsAttribute()
 
 ProjectileAttribute::ProjectileAttribute()
 {
-	creator = -1;
+	entityIdOfCreator = -1;
 	currentLifeTimeLeft = 3.0f;
 }
 ProjectileAttribute::~ProjectileAttribute()

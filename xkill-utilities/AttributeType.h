@@ -158,7 +158,7 @@ struct DLL_U ProjectileAttribute : public IAttribute
 	~ProjectileAttribute();
 
 	AttributePointer physicsAttribute;
-	int creator;				//!< Entity id of the entity that created the projectile.
+	int entityIdOfCreator;		//!< Entity id of the entity that created the projectile.
 	float currentLifeTimeLeft;	//!< Counter counting down the lifetime of the projectile. Is initialized to totalLifeTime. When equal or less than zero, the projectile attribute shall be destroyed.
 };
 

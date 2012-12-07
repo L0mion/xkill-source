@@ -10,6 +10,8 @@
 
 #include <xkill-utilities/EventManager.h>
 
+#include <iostream>
+
 #define SAFE_DELETE(obj)	if(obj != nullptr) { delete obj;		obj = nullptr; }
 BulletPhysicsComponent::BulletPhysicsComponent()
 {
@@ -41,7 +43,6 @@ BulletPhysicsComponent::~BulletPhysicsComponent()
 	SAFE_DELETE(physicsObjects_)
 
 	dynamicsWorld_->removeRigidBody(floor_);
-	delete floor_->getMotionState();
 	delete floor_->getCollisionShape();
 
 	SAFE_DELETE(floor_);
@@ -54,7 +55,11 @@ BulletPhysicsComponent::~BulletPhysicsComponent()
 	SAFE_DELETE(collisionShapeManager_);
 }
 
-
+void wrapTickCallback(btDynamicsWorld *world, btScalar timeStep)
+{
+    BulletPhysicsComponent *component = static_cast<BulletPhysicsComponent *>(world->getWorldUserInfo());
+	component->tickCallback(timeStep);
+}
 
 
 bool BulletPhysicsComponent::init()
@@ -74,19 +79,14 @@ bool BulletPhysicsComponent::init()
 	collisionShapeManager_ = new CollisionShapeManager();
 
 	dynamicsWorld_->setGravity(btVector3(0,0,0));
+	dynamicsWorld_->setInternalTickCallback(wrapTickCallback,static_cast<void*>(this));
 
-	floor_ = new btRigidBody(0,
-							 new btDefaultMotionState(btTransform(btQuaternion(0,0,0,1),btVector3(0,0,0))),
-							 new btStaticPlaneShape(btVector3(0,1,0),0),
-							 btVector3(0,0,0));
+
+	floor_ = new PhysicsObject(new btStaticPlaneShape(btVector3(0,1,0),0),1337);
 	dynamicsWorld_->addRigidBody(floor_);
-
-	collisionShapeManager_->createConvexHull(nullptr,0);
 
 	return true;
 }
-
-
 
 
 void BulletPhysicsComponent::onUpdate(float delta)
@@ -100,7 +100,7 @@ void BulletPhysicsComponent::onUpdate(float delta)
 	//Checks if new physiscs attributes were created since last call to this function
 	for(unsigned int i = physicsObjects_->size(); i < physicsAttributes_->size(); i++)
 	{
-		physicsObjects_->push_back(new PhysicsObject(collisionShapeManager_));
+		physicsObjects_->push_back(new PhysicsObject(collisionShapeManager_,i));
 	}
 	
 	//Synchronize the internal represenation of physics objects with the physics attributes
@@ -108,16 +108,20 @@ void BulletPhysicsComponent::onUpdate(float delta)
 	{
 		PhysicsObject* physicsObject = physicsObjects_->at(i);
 		PhysicsAttribute* physicsAttribute = &physicsAttributes_->at(i);
+		// if the objects owner is not 0 it should simulate
 		if(physicsOwners_->at(i)!=0)
 		{
+			// if the object is not in the world, add it
 			if(!physicsObject->isInWorld())
 			{
 				physicsObject->addToWorld(dynamicsWorld_);
 			}
+			// load data from physics attribute
 			physicsObject->preStep(collisionShapeManager_,physicsAttribute);
 		}
 		else if(physicsObject->isInWorld())
 		{
+			// if the objects owner is 0 then remove it from simulation world
 			physicsObject->removeFromWorld(dynamicsWorld_);
 		}
 	}
@@ -133,43 +137,6 @@ void BulletPhysicsComponent::onUpdate(float delta)
 		if(physicsOwners_->at(i)!=0 && physicsObject->isInWorld())
 		{
 			physicsObject->postStep(physicsAttribute);
-
-			//Check collisions between players and projectiles
-			for(unsigned int j = i+1; j < physicsObjects_->size(); j++)
-			{
-				if(physicsAttributes_->at(j).alive && physicsAttributes_->at(j).added)
-				{
-					//^ = xor. If one of the 2 physics objects (at i and j in physicsAttributes_) is a projectile, and the other object is not a projectile.
-					if(physicsAttributes_->at(i).isProjectile ^ physicsAttributes_->at(j).isProjectile)
-					{
-						//Collision test
-						if((*physicsObjects_)[i]->contactTest(dynamicsWorld_,*(*physicsObjects_)[j]))
-						{
-							std::vector<int>* allPhysicsOwner; GET_ATTRIBUTE_OWNERS(allPhysicsOwner, ATTRIBUTE_PHYSICS);
-							int physicsAttributeOwnersI = allPhysicsOwner->at(i);
-							int physicsAttributeOwnersJ = allPhysicsOwner->at(j);
-
-							//Find out which one of the 2 physics objects (at i and j in physicsAttributes_) that is a projectile.
-							int projectileEntityId = -1;
-							int playerEntityId = -1;
-							if(physicsAttributes_->at(i).isProjectile)
-							{
-								physicsAttributes_->at(i).alive = false;
-								projectileEntityId = physicsAttributeOwnersI;
-								playerEntityId = physicsAttributeOwnersJ;
-							}
-							else if(physicsAttributes_->at(j).isProjectile)
-							{
-								physicsAttributes_->at(j).alive = false;
-								playerEntityId = physicsAttributeOwnersI;
-								projectileEntityId = physicsAttributeOwnersJ;
-							}
-
-							SEND_EVENT(&Event_PhysicsAttributesColliding(projectileEntityId, playerEntityId));
-						}
-					}
-				}
-			}
 		}
 	}
 }
@@ -177,4 +144,42 @@ void BulletPhysicsComponent::onUpdate(float delta)
 void BulletPhysicsComponent::onEvent(Event* e)
 {
 
+}
+
+void BulletPhysicsComponent::tickCallback(btScalar timeStep)
+{
+	btPersistentManifold* persistentManifold;
+	btDispatcher* dispatcher = dynamicsWorld_->getDispatcher();
+	unsigned int numManifolds = dynamicsWorld_->getDispatcher()->getNumManifolds();
+	// loop through all manifolds of from last timestep
+	for(unsigned int i = 0; i < numManifolds; i++)
+	{
+		persistentManifold = dispatcher_->getManifoldByIndexInternal(i);
+		unsigned int numContacts = persistentManifold->getNumContacts();
+		// loop through all contact points of manifold
+		for(unsigned int j = 0; j < numContacts; j++)
+		{
+			// ignore contacts where distance is larger than 0
+			if(persistentManifold->getContactPoint(j).getDistance()<0.0f)
+			{
+				const PhysicsObject* objectA = static_cast<const PhysicsObject*>(persistentManifold->getBody0());
+				const PhysicsObject* objectB = static_cast<const PhysicsObject*>(persistentManifold->getBody1());
+				//std::cout << std::endl << objectA->getIndex() << " " << objectB->getIndex() << " " << physicsOwners_->size();
+				if( objectA->getIndex() != 1337 && objectB->getIndex() != 1337) //1337 = floor
+				{
+					unsigned int ownerA = physicsOwners_->at(objectA->getIndex());
+					unsigned int ownerB = physicsOwners_->at(objectB->getIndex());
+					//std::cout << std::endl << ownerA << " " << ownerB;
+					
+					//Two PhysicsObjects colliding
+					if(ownerA != 0 && ownerB != 0) // ignore contacts where one owner is 0
+					{
+						//std::cout << "\nCollision between " << ownerA << " & " << ownerB;
+						SEND_EVENT(&Event_PhysicsAttributesColliding(objectA->getIndex(), objectB->getIndex()));
+						SEND_EVENT(&Event_PhysicsAttributesColliding(objectB->getIndex(), objectA->getIndex()));
+					}
+				}
+			}
+		}
+	}
 }

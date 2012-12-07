@@ -32,6 +32,8 @@ struct CollisionResult : public btCollisionWorld::ContactResultCallback
 		return 0;
 	}
 };
+
+
 class PhysicsObject : public btRigidBody
 {
 private:
@@ -39,6 +41,7 @@ private:
 	btVector3 forces_;
 	btVector3 movement_;
 	btScalar yaw_;
+	unsigned int index_;
 protected:
 public:
 
@@ -46,7 +49,9 @@ public:
 	/*!
 	\param collisionShapeManager A pointer used to access collision shapes
 	*/
-	PhysicsObject(CollisionShapeManager* collisionShapeManager);
+	PhysicsObject(CollisionShapeManager* collisionShapeManager, unsigned int index);
+	PhysicsObject(btCollisionShape* collisionShape, unsigned int index);
+	
 	//! Deletes all subobjects of the contained rigidbody and the rigidbody itself
 	~PhysicsObject();
 	//! Initialize rigidbody from physicsAttribute and add object to simulation
@@ -76,12 +81,8 @@ public:
 	\param inputAttribute The attribute containing player controller information
 	*/
 	void input(InputAttribute* inputAttribute, float delta);
-	//! See if an object has been involved in a collision and send an event.
-	/*! 
-	\param dynamicsWorld The simulation object, used to the the object from the simulation
-	\return truthvalue of collision
-	*/
-	bool contactTest(btDiscreteDynamicsWorld* dynamicsWorld, PhysicsObject& otherPhysicsObject);
+	//! return index of physicsobject
+	unsigned int getIndex() const;
 };
 
 #endif //XKILL_PHYSICS_PHYSICSOBJECT

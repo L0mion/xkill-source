@@ -260,13 +260,13 @@ public:
 class DLL_U Event_CreateProjectile : public Event
 {
 public:
-	int entityIdOfOwner;
+	int entityIdOfCreator;
 	Float3 position;
 	Float3 velocity;
 
-	Event_CreateProjectile(Float3 position, Float3 velocity, int entityIdOfOwner) : Event(EVENT_CREATE_PROJECTILE)
+	Event_CreateProjectile(Float3 position, Float3 velocity, int entityIdOfCreator) : Event(EVENT_CREATE_PROJECTILE)
 	{
-		this->entityIdOfOwner = entityIdOfOwner;
+		this->entityIdOfCreator = entityIdOfCreator;
 		this->position = position;
 		this->velocity = velocity;
 	}
@@ -293,13 +293,13 @@ public:
 class DLL_U Event_PhysicsAttributesColliding : public Event
 {
 public:
-	int e1_index;
-	int e2_index;
+	int attribute1_index;
+	int attribute2_index;
 
-	Event_PhysicsAttributesColliding(int e1_index, int e2_index) : Event(EVENT_ENTITIES_COLLIDING)
+	Event_PhysicsAttributesColliding(int attribute1_index, int attribute2_index) : Event(EVENT_ENTITIES_COLLIDING)
 	{
-		this->e1_index = e1_index;
-		this->e2_index = e2_index;
+		this->attribute1_index = attribute1_index;
+		this->attribute2_index = attribute2_index;
 	}
 };
 
