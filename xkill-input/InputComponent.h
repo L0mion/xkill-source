@@ -1,6 +1,7 @@
 #pragma once
 
 #include <xkill-utilities/IObserver.h>
+#include <xkill-utilities/EventType.h>
 #include "dllInput.h"
 
 #include <Windows.h>
@@ -37,4 +38,7 @@ private:
 	float pos[3];
 
 	virtual void handleInput(float delta);
+
+	virtual void handleRumbleEvent(Event_Rumble* e);
+	virtual void handleMouseMoveEvent(Event_MouseMove* e);
 };

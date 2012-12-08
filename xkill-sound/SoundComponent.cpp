@@ -7,16 +7,23 @@
 
 #include <iostream>
 
+#include "FileParser.h"
+#include "EventToFModConverter.h"
+
 #define SAFE_DELETE(x) if( x ) { delete(x); (x) = NULL; }
 
 SoundComponent::SoundComponent()
 {
 	mFMODEventSystem = NULL;
+	converter = NULL;
+
+	SUBSCRIBE_TO_EVENT(this, EVENT_CREATE_PROJECTILE);
 }
 
 SoundComponent::~SoundComponent()
 {
 	SAFE_DELETE(mFMODEventSystem);
+	SAFE_DELETE(converter);
 }
 
 bool SoundComponent::init()
@@ -31,15 +38,54 @@ bool SoundComponent::init()
 		return false;
 	}
 
+	converter = new EventToFModConverter();
+	converter->init("../../xkill-resources/xkill-configs/");
+
+	fillEventsToFModVector();
+
 	return true;
 }
 
 void SoundComponent::onEvent(Event* e)
 {
-	//mFMODEventSystem->StartSoundEventAt(0);
+	EventType type = e->getType();
+	mFMODEventSystem->StartSoundEventAt(converter->getFModIndex((int)type));
 }
 
 void SoundComponent::onUpdate(float delta)
 {
 	mFMODEventSystem->Update();
+}
+
+void SoundComponent::fillEventsToFModVector()
+{
+	FileParser fp(configMessage());
+	fp.setFileName("sound.cfg");
+	fp.setFilePath("../../xkill-resources/xkill-configs/");
+	if(fp.startReading())
+	{
+		while(!fp.isEmpty())
+		{
+			std::string tmp = fp.getNextRow();
+			converter->addConversion(tmp);
+		}
+	}
+}
+
+std::string SoundComponent::configMessage()
+{
+	std::string message = "";
+
+	message += "// Define a binding between events by using this format\n";
+	message += "// <Fmod event number> = <game event number>\n";
+	message += "// <Fmod event number> = <game event name>\n";
+	message += "// Example:\n";
+	message += "// 0 = 4";
+	message += "// This will bind fmod event '0' to game event '4'\n";
+	message += "// \n";
+	message += "// 1 = CreateProjectile\n";
+	message += "// This will bind fmod event '1' to the 'CreateProjectile' game event\n";
+	message += "// Event names can be found in 'Events.cfg'\n";
+
+	return message;
 }

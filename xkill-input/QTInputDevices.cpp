@@ -79,6 +79,12 @@ void QTInputDevices::setAxesToZero()
 		axes_[i].SetValue(0.0f);
 	}
 }
+
+void QTInputDevices::updateButtons()
+{
+	for(unsigned int i = 0; i < buttons_.size(); i++)
+		buttons_[i].SetValue(buttons_[i].isDown());
+}
   
 void QTInputDevices::RunForceFeedback()
 {

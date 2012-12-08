@@ -66,6 +66,15 @@ PhysicsAttribute::~PhysicsAttribute()
 {
 }
 
+ProjectileAttribute::ProjectileAttribute()
+{
+	entityIdOfCreator = -1;
+	currentLifeTimeLeft = 3.0f;
+}
+ProjectileAttribute::~ProjectileAttribute()
+{
+}
+
 SoundAttribute::SoundAttribute()
 {
 }

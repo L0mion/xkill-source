@@ -1,8 +1,6 @@
 #include "InputComponent.h"
 
 #include <xkill-utilities/EventManager.h>
-#include <xkill-utilities/EventType.h>
-#include <xkill-architecture/AttributeManager.h>
 
 #include "InputManager.h"
 #include <iostream>
@@ -14,9 +12,9 @@ InputComponent::InputComponent()
 	ZeroMemory(&pos, sizeof(pos));
 
 	SUBSCRIBE_TO_EVENT(this, EVENT_RUMBLE);
-	SUBSCRIBE_TO_EVENT(this, EVENT_MOUSEMOVE);
-	SUBSCRIBE_TO_EVENT(this, EVENT_KEYPRESS);
-	SUBSCRIBE_TO_EVENT(this, EVENT_KEYRELEASE);
+	SUBSCRIBE_TO_EVENT(this, EVENT_MOUSE_MOVE);
+	SUBSCRIBE_TO_EVENT(this, EVENT_KEY_PRESS);
+	SUBSCRIBE_TO_EVENT(this, EVENT_KEY_RELEASE);
 }
 
 InputComponent::~InputComponent()
@@ -56,7 +54,7 @@ void InputComponent::onEvent(Event* e)
 			device->SetForceFeedback(er->leftScale, er->rightScale);
 		}
 	}
-	if(type == EVENT_MOUSEMOVE)
+	if(type == EVENT_MOUSE_MOVE)
 	{
 		Event_MouseMove* emm = static_cast<Event_MouseMove*>(e);
 		QTInputDevices* device = inputManager_->GetMouseAndKeyboard();
@@ -75,7 +73,7 @@ void InputComponent::onEvent(Event* e)
 			device->setAxis(3, y * mouseSensitivity);
 		}
 	}
-	if(type == EVENT_KEYPRESS)
+	if(type == EVENT_KEY_PRESS)
 	{
 		Event_KeyPress* ekp = static_cast<Event_KeyPress*>(e);
 		QTInputDevices* device = inputManager_->GetMouseAndKeyboard();
@@ -88,7 +86,7 @@ void InputComponent::onEvent(Event* e)
 		// TODO: Handle key press
 		//std::cout << "Key " << ekp->keyEnum << " pressed"<< std::endl;
 	}
-	if(type == EVENT_KEYRELEASE)
+	if(type == EVENT_KEY_RELEASE)
 	{
 		Event_KeyRelease* ekr = static_cast<Event_KeyRelease*>(e);
 		QTInputDevices* device = inputManager_->GetMouseAndKeyboard();
@@ -99,7 +97,7 @@ void InputComponent::onEvent(Event* e)
 		}
 
 		// TODO: Handle key release
-		//std::cout << "Key " << ekr->keyEnum << " release"<< std::endl;
+		std::cout << "Key " << ekr->keyEnum << " released"<< std::endl;
 	}
 }
 
@@ -161,8 +159,6 @@ void InputComponent::handleInput(float delta)
 			if(state.buttons[0].isReleased())													   
 				inputAttributes_->at(i).fire = true;
 
-			device->setButtonsToNotReleased();
-
 			if(state.buttons.size() > 7)
 			{
 				if(state.buttons[3].isDown())
@@ -184,6 +180,32 @@ void InputComponent::handleInput(float delta)
 			QTInputDevices* qtDevice = static_cast<QTInputDevices*>(device);
 
 			qtDevice->setAxesToZero();
+			qtDevice->updateButtons();
 		}
 	}
+}
+
+void InputComponent::handleRumbleEvent(Event_Rumble* e)
+{
+	InputDevice* device = inputManager_->GetDevice(e->deviceNr);
+
+	if(device != nullptr)
+	{
+		if(e->runRumble)
+			device->RunForceFeedback();
+		else
+			device->StopForceFeedback();
+
+		device->SetForceFeedback(e->leftScale, e->rightScale);
+	}
+}
+
+void InputComponent::handleMouseMoveEvent(Event_MouseMove* e)
+{
+	float x = 5.0f*(float)e->dx;
+	float y = 5.0f*(float)e->dy;
+
+	float mouseSensitivity = 0.001f;
+	inputAttributes_->at(0).rotation.x += x * mouseSensitivity;
+	inputAttributes_->at(0).rotation.y += y * mouseSensitivity;
 }

@@ -160,33 +160,23 @@ void BulletPhysicsComponent::tickCallback(btScalar timeStep)
 		for(unsigned int j = 0; j < numContacts; j++)
 		{
 			// ignore contacts where distance is larger than 0
-			if(persistentManifold->getContactPoint(j).getDistance()<=0.0f)
+			if(persistentManifold->getContactPoint(j).getDistance()<0.0f)
 			{
 				const PhysicsObject* objectA = static_cast<const PhysicsObject*>(persistentManifold->getBody0());
 				const PhysicsObject* objectB = static_cast<const PhysicsObject*>(persistentManifold->getBody1());
 				//std::cout << std::endl << objectA->getIndex() << " " << objectB->getIndex() << " " << physicsOwners_->size();
-				if( objectA->getIndex() != 1337 && objectB->getIndex() != 1337)
+				if( objectA->getIndex() != 1337 && objectB->getIndex() != 1337) //1337 = floor
 				{
 					unsigned int ownerA = physicsOwners_->at(objectA->getIndex());
 					unsigned int ownerB = physicsOwners_->at(objectB->getIndex());
 					//std::cout << std::endl << ownerA << " " << ownerB;
-					// ignore contacts where one owner is B
-					if(ownerA != 0 && ownerB != 0)
+					
+					//Two PhysicsObjects colliding
+					if(ownerA != 0 && ownerB != 0) // ignore contacts where one owner is 0
 					{
 						//std::cout << "\nCollision between " << ownerA << " & " << ownerB;
-						// if one of the object is a projectile send an event with the projectile owner as first argument and the hitee as second
-						if(physicsAttributes_->at(objectA->getIndex()).isProjectile)
-						{
-							Event_ProjectileCollidingWithPlayer projectileCollidingWithPlayer(ownerA,ownerB);
-							SEND_EVENT(&projectileCollidingWithPlayer);
-							break;
-						}
-						else if(physicsAttributes_->at(objectB->getIndex()).isProjectile)
-						{
-							Event_ProjectileCollidingWithPlayer projectileCollidingWithPlayer(ownerB,ownerA);
-							SEND_EVENT(&projectileCollidingWithPlayer);
-							break;
-						}
+						SEND_EVENT(&Event_PhysicsAttributesColliding(objectA->getIndex(), objectB->getIndex()));
+						SEND_EVENT(&Event_PhysicsAttributesColliding(objectB->getIndex(), objectA->getIndex()));
 					}
 				}
 			}

@@ -8,6 +8,7 @@
 
 #include "CameraComponent.h"
 #include "GameComponent.h"
+//#include "ScoreComponent.h"
 #include "AttributeManager.h"
 
 
@@ -30,10 +31,11 @@ private:
 	IOComponent*			ioComponent_;
 	RenderingComponent*		render_;
 	BulletPhysicsComponent	physics_;
-	//SoundComponent		sound_;
+	SoundComponent		sound_;
 	CameraComponent			camera_;
 	InputComponent			input_;
 	GameComponent			game_;
+	//ScoreComponent		score_;
 
 public:
 	ComponentManager()
@@ -63,17 +65,20 @@ public:
 
 		if(!game_.init())
 			return false;
-		/*if(!sound_.init())
-			return false;*/
+		if(!sound_.init())
+			return false;
 		if(!input_.init(parentWindowHandle, AttributeManager::getInstance()->inputAttributes_.getAllAttributes()))
 			return false;
+
+		//if(!score_.init(AttributeManager::getInstance()->playerAttributes_.getAllAttributes()))
+		//	return false;
 
 		// Returns that everything went ok
 		return true;
 	}
 	void update(float delta)
 	{
-		//sound_.onUpdate(delta);
+		sound_.onUpdate(delta);
 		physics_.onUpdate(delta);
 		camera_.onUpdate(delta);
 		render_->onUpdate(delta);

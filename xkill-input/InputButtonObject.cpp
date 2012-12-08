@@ -4,7 +4,6 @@ InputButtonObject::InputButtonObject(void)
 {
 	value_ = false;
 	prevValue_ = false;
-	wasReleasedSinceLastCheck_ = false;
 	keyChar_ = 0;
 }
 
@@ -16,9 +15,6 @@ void InputButtonObject::SetValue(bool value)
 {
 	prevValue_ = value_;
 	value_ = value;
-
-	if(!value_ && prevValue_)
-		wasReleasedSinceLastCheck_ = true;
 }
 
 void InputButtonObject::SetValue(int value)
@@ -38,7 +34,7 @@ bool InputButtonObject::isDown()
 
 bool InputButtonObject::isReleased()
 {
-	return wasReleasedSinceLastCheck_;
+	return (!value_ && prevValue_);
 }
 
 float InputButtonObject::getValueFloat()
@@ -59,10 +55,4 @@ char InputButtonObject::getKey()
 void InputButtonObject::setKey(char key)
 {
 	keyChar_ = key;
-}
-
-void InputButtonObject::setChecked()
-{
-	wasReleasedSinceLastCheck_ = false;
-	prevValue_ = false;
 }

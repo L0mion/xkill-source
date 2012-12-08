@@ -71,7 +71,7 @@ EventManager::getInstance()->addObserver(Subscriber, EventType);
 // Fetches a owners of a specific Attribute from AttributeManager
 #define SHOW_MESSAGEBOX(Message)									\
 {																	\
-	Event_showMessageBox e(Message);								\
+	Event_ShowMessageBox e(Message);								\
 	EventManager::getInstance()->sendEvent(&e);						\
 }
 
@@ -79,17 +79,25 @@ EventManager::getInstance()->addObserver(Subscriber, EventType);
 // from AttributeManager.
 #define GET_ATTRIBUTES(AttributePointer, AttributeType, Enum)		\
 {																	\
-	Event_getAttribute e(Enum);										\
+	Event_GetAttribute e(Enum);										\
 	EventManager::getInstance()->sendEvent(&e);						\
 	AttributePointer = (std::vector<AttributeType>*)e.hostVector;	\
 }
 
-// Fetches a owners of a specific Attribute from AttributeManager
+// Fetches the owners of a specific Attribute from AttributeManager
 #define GET_ATTRIBUTE_OWNERS(OwnerPointer, Enum)					\
 {																	\
-	Event_getAttribute e(Enum);										\
+	Event_GetAttribute e(Enum);										\
 	EventManager::getInstance()->sendEvent(&e);						\
 	OwnerPointer = e.owners;										\
+}
+
+// Fetches a owners of a specific Attribute from AttributeManager
+#define GET_ENTITIES(EntityPointer)									\
+{																	\
+	Event_GetEntities e;											\
+	EventManager::getInstance()->sendEvent(&e);						\
+	EntityPointer = e.entities;										\
 }
 
 // END OF EVIL

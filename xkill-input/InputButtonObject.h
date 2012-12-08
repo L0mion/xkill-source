@@ -32,12 +32,9 @@ public:
 	char getKey();
 	void setKey(char key);
 
-	void setChecked();
-
 private:
 	bool value_;
 	bool prevValue_;
-	bool wasReleasedSinceLastCheck_;
 
 	char keyChar_;	//Make a subclass instead with added functionality
 };
