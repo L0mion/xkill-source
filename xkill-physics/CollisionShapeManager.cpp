@@ -78,10 +78,6 @@ void CollisionShapeManager::loadCollisionShapes()
 				btVector3 test = hull.getVertexPointer()[i];
 				convexShape->addPoint(hull.getVertexPointer()[i]);
 			}
-			btVector3 a;
-			btScalar b;
-			convexShape->getBoundingSphere(a,b);
-			//convexShape->setMargin(0.004f);
 			collisionShapes_.push_back(convexShape);
 			delete triangleMesh;
 		}
@@ -89,6 +85,9 @@ void CollisionShapeManager::loadCollisionShapes()
 		{
 			btBvhTriangleMeshShape* staticShape = new btBvhTriangleMeshShape(triangleMesh,true);
 			collisionShapes_.push_back(staticShape);
+			int a = staticShape->getShapeType();
+			triangleMeshes_.push_back(triangleMesh);
+			
 		}	
 	}
 }
@@ -97,7 +96,15 @@ void CollisionShapeManager::clean()
 {
 	while(collisionShapes_.size()!=0)
 	{
-		delete collisionShapes_.at(collisionShapes_.size()-1);
+		btCollisionShape* collisionShape = collisionShapes_.at(collisionShapes_.size()-1);
+		int shapeType = collisionShape->getShapeType();
+		delete collisionShape;
 		collisionShapes_.pop_back();
+	}
+	while(triangleMeshes_.size()!=0)
+	{
+		btTriangleMesh* triangleMesh = triangleMeshes_.at(triangleMeshes_.size()-1);
+		delete triangleMesh;
+		triangleMeshes_.pop_back();
 	}
 };
