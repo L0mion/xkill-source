@@ -58,12 +58,13 @@ enum ObjParseFlags
 {
 	OBJ_PARSE_FLAGS_CHECK_NUMERIC		= 0x01,	/**< Enables checking of numeric parameters, where LoaderObj expects such. If this flag is not set, LoaderObj is not guaranteed to be stable.*/
 	OBJ_PARSE_FLAGS_CHECK_NUM_PARAMS	= 0x02, /**< Enables checking of correct number of parameters. If this flag is not set, LoaderObj is not guaranteed to be stable. MUST BE SET IN ORDER TO ENABLE NUMERIC CHECKING.*/
-	//= 0x04,
+	OBJ_PARSE_FLAGS_IGNORE_EMPTY_GROUPS = 0x04,	/**< Ignores converting empty (nonexistant indices) ObjGroups to subsets at end of parse.*/
 	//= 0x08,
 	//= 0x10,
 	//= 0x20
 };
 
+/** Used to specify varying parameters read from faces. */
 enum ObjFaceParam
 {
 	OBJ_FACE_PARAM_VERTEX_INDEX		= 0x01,
@@ -90,6 +91,7 @@ enum ObjSymbol
 
 //! Loader with functionality to load .obj-files.
 /*!
+Specify OBJ_PARSE_FLAGS_CHECK_NUMERIC, OBJ_PARSE_FLAGS_CHECK_NUM_PARAMS to ensure sucessfully parsed .obj-file.
 \ingroup xkill-mesh-io-obj
 */
 class LoaderObj : public Loader
@@ -110,6 +112,7 @@ public:
 	//! Function initializing object and loading specified .obj-file.
 	/*!
 	Method attempts to open specified .obj-file and proceeds to parse this file if suceeded. If suceeded, the method will then call loading of this .obj.
+	\sa createDefaultGroup
 	\sa parseObj
 	\sa loadObj
 	\return A boolean dictating whether or not the method was sucessful.
@@ -215,13 +218,11 @@ private:
 	//! Checks whether or not a string contains an numeric value.
 	/*! \return True if entirely numeric, False if not. */
 	bool isNumeric(const std::string value);
-
+	//! Creates a default group which will be used if .obj is missing specified group-symbols.
 	ObjGroup createDefaultGroup();
 
 	//! Loads resulting Obj from intermediate vectors. 
-	/*!
-	OBS: Also checks if a group has zero indices. If so removes it. 
-	*/
+	/*!	OBS: Also checks if a group has zero indices. If so removes it if OBJ_PARSE_FLAGS_IGNORE_EMPTY_GROUPS is set. (this includes the default group) */
 	void loadObj();
 
 	unsigned int flags_;

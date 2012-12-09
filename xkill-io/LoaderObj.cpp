@@ -464,9 +464,10 @@ ObjGroup LoaderObj::createDefaultGroup()
 void LoaderObj::loadObj()
 {
 	ObjGeometry mlGeometry(vertices_);
+
 	for(unsigned int i = 0; i < groups_.size(); i++)
 	{
-		if(groups_[i].getNumIndices() > 0)
+		if(groups_[i].getNumIndices() > 0 || !(flags_ & OBJ_PARSE_FLAGS_IGNORE_EMPTY_GROUPS))
 			mlGeometry.pushGroup(groups_[i]);
 	}
 

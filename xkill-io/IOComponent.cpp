@@ -33,7 +33,7 @@ bool IOComponent::initBth()
 	makerBTH_ = new MeshMakerObj(
 		"../../xkill-resources/xkill-models/", //objPath,
 		"../../xkill-resources/xkill-models/", //pgyPath,
-		"ChessKing.obj",						//bthName,
+		"ChessKing3.obj",						//bthName,
 		"../../xkill-resources/xkill-models/"); //mtlPath);
 	sucessfulMake = makerBTH_->init();
 
