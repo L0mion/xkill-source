@@ -6,12 +6,12 @@
 
 #include "Loader.h"
 #include "Obj.h"
-#include "SimpleStringSplitter.h"
 
 struct VertexPosNormTex;
 
 class ObjFace;
 class ObjGroup;
+class SimpleStringSplitter;
 
 static const char OBJ_SEPARATOR_DEFAULT	= ' ';
 static const char OBJ_SEPARATOR_FACE	= '/';
@@ -90,14 +90,18 @@ enum ObjSymbol
 };
 
 //! Loader with functionality to load .obj-files.
-/*!
+/*! 
+Reads .obj-data into intermediate Obj-format, and then converts this format into generalized Mesh-format. If no groups are specified in target .obj-file, a default group is created.
+If a vector is not specified in target .obj-file. Such as texture coordinates, or normals - these will be initialized to default values of respective vector-type.
+\sa Float2
+\sa Float3
 Specify OBJ_PARSE_FLAGS_CHECK_NUMERIC, OBJ_PARSE_FLAGS_CHECK_NUM_PARAMS to ensure sucessfully parsed .obj-file.
 \ingroup xkill-mesh-io-obj
 */
 class LoaderObj : public Loader
 {
 public:
-	//! Forwards path to .obj to parent Loader-class.
+	//! Forwards path to .obj to parent Loader-class and sets flags.
 	/*!
 	\param filePath Path up to desired .obj-file.
 	\param fileName Name of desired .obj-file.
@@ -106,7 +110,7 @@ public:
 		const std::string	filePath, 
 		const std::string	fileName,
 		const unsigned int	flags);
-	//! Does nothing.
+	//! Clears memory allocated by LoaderObj.
 	~LoaderObj();
 
 	//! Function initializing object and loading specified .obj-file.
@@ -149,7 +153,6 @@ private:
 		\sa isNumeric
 	*/
 	bool parseParamsNumeric(const std::vector<std::string>& params);
-
 	//! Based on passed symbol, this functions forwards loading request to correct function.
 	/*!
 		\return Whether or not load was sucessful.
@@ -164,7 +167,6 @@ private:
 	bool loadSymbol(
 		const ObjSymbol symbol,
 		const std::vector<std::string>& params);
-
 	//! Loads parameters previously parsed as being entirely numeric and valid, and creates a new Position-attribute in mlPosition_.
 	void loadPos(const std::vector<std::string>& params);
 	//! Loads parameters previously parsed as being entirely numeric and valid, and creates a new Normal-element in mlNormal_.
@@ -174,13 +176,14 @@ private:
 	//! Further splits the read line into seperate face-attributes, parses them to ensure valid values - and calls loading of these.
 	/*!
 		\return A boolean dictating whether or not the method was sucessful.
+		\sa parseFaceParams
 		\sa parseFace
 		\sa loadFace
 	*/
 	bool loadFaces(const std::vector<std::string>& params);
-
+	//! Checks what parameters (Vertex, texture coordinates, normals are passed in face.)
+	/*!	\return unsigned integer specifying bitwize which parameters face includes. */
 	unsigned int parseFaceParams(const std::string face);
-
 	//! Parses faces and ensures that these values are the correct number and entirely numeric.
 	/*!
 		\return A boolean dictating whether or not the method was sucessful.
@@ -202,14 +205,12 @@ private:
 	void loadMaterial(const std::vector<std::string>& params);
 	//! Sets material name in previously added ObjGroup to read .mtl-name.
 	bool loadMaterialUse(const std::vector<std::string>& params);
-	
 	//! Loads vertex into vertices_-vector.
 	const unsigned int LoaderObj::loadVertex(
 		const unsigned int iPos, 
 		const unsigned int iTex, 
 		const unsigned int iNorm);
 	bool loadIndex(unsigned int index);
-
 	//! Used to, for each read line, increment a counter so that an error may report a line number.
 	void getLine(std::string& line);
 	//! If something were to go avry, this method prints an error based on line number.
@@ -228,7 +229,7 @@ private:
 	unsigned int flags_;
 
 	unsigned int				lineNum_;		//!< Line number previously read from file.
-	SimpleStringSplitter		sss_;			//!< Helper class used to split strings when reading these from file.
+	SimpleStringSplitter*		sss_;			//!< Helper class used to split strings when reading these from file.
 
 	/*Intermediate vectors to hold data whilst loading .obj*/
 	std::vector<Float3>	position_;	//!< Spatial attributes read from file.

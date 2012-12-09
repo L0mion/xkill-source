@@ -31,10 +31,10 @@ bool IOComponent::initBth()
 	bool sucessfulMake = true;
 
 	makerBTH_ = new MeshMakerObj(
-		"../../xkill-resources/xkill-models/", //objPath,
-		"../../xkill-resources/xkill-models/", //pgyPath,
-		"ChessKing3.obj",						//bthName,
-		"../../xkill-resources/xkill-models/"); //mtlPath);
+		objPath,
+		pgyPath,
+		bthName,
+		mtlPath);
 	sucessfulMake = makerBTH_->init();
 
 	MeshModel* model = makerBTH_->getMesh();

@@ -3,10 +3,10 @@
 
 #include "Loader.h"
 #include "MTLIllum.h"
-#include "SimpleStringSplitter.h"
 #include "MTL.h"
 
 class MTLMaterial;
+class SimpleStringSplitter;
 
 static const char MTL_SEPARATOR_DEFAULT = ' ';
 
@@ -80,7 +80,7 @@ public:
 	LoaderMTL(
 		const std::string pathMTL,
 		const std::string fileNameMTL);
-	//! Does nothing.
+	//! Clears memory allocated by LoaderMTL;
 	~LoaderMTL();
 
 	//! Function initializing object and loading specified .mtl-file.
@@ -206,7 +206,7 @@ private:
 
 	/*helper*/
 	unsigned int lineNum_;					//!< Line-number previously read from .mtl.
-	SimpleStringSplitter sss_;				//!< Helper-object to aid in splitting lines read from .mtl.
+	SimpleStringSplitter* sss_;				//!< Helper-object to aid in splitting lines read from .mtl.
 
 	/*intermediate*/
 	std::vector<MTLMaterial> materials_;	//!< Materials read from .mtl.

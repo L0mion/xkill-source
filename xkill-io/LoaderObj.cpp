@@ -2,6 +2,7 @@
 
 #include "ObjFace.h"
 #include "LoaderObj.h"
+#include "SimpleStringSplitter.h"
 
 LoaderObj::LoaderObj(
 	const std::string	filePath,
@@ -9,10 +10,13 @@ LoaderObj::LoaderObj(
 	const unsigned int	flags)
 	: Loader(filePath, fileName)
 {
-	flags_ = flags;
+	flags_	= flags;
+	sss_	= nullptr;
 }
 LoaderObj::~LoaderObj()
 {
+	if(sss_)
+		delete sss_;
 }
 
 bool LoaderObj::init()
@@ -20,6 +24,7 @@ bool LoaderObj::init()
 	bool sucessfulLoad = true;
 
 	lineNum_ = 0;
+	sss_ = new SimpleStringSplitter();
 	groups_.push_back(createDefaultGroup());
 
 	std::string fullPath = getFilePath() + getFileName();
@@ -50,7 +55,7 @@ bool LoaderObj::parseObj()
 	while(!ifstream_.eof() && sucessfulLoad)
 	{
 		getLine(curLine);
-		curLineSplit = sss_.splitString(OBJ_SEPARATOR_DEFAULT, curLine);
+		curLineSplit = sss_->splitString(OBJ_SEPARATOR_DEFAULT, curLine);
 
 		curSymbol = parseSymbol(curLineSplit);
 		if(curSymbol != OBJSYMBOL_IGNORE)
@@ -248,7 +253,7 @@ bool LoaderObj::loadFaces(const std::vector<std::string>& params)
 	for(unsigned int i = 0; i < 3 && sucessfulLoad; i++)
 	{
 		face = params[1 + i];
-		faceSplit = sss_.splitString(OBJ_SEPARATOR_FACE, face);
+		faceSplit = sss_->splitString(OBJ_SEPARATOR_FACE, face);
 		
 		unsigned int faceParams = OBJ_FACE_PARAM_VERTEX_INDEX | OBJ_FACE_PARAM_TEXCOORD_INDEX | OBJ_FACE_PARAM_NORMAL_INDEX;
 		if(faceSplit.size() < OBJ_PARAMS_NUM_FACE)
@@ -261,7 +266,6 @@ bool LoaderObj::loadFaces(const std::vector<std::string>& params)
 
 	return sucessfulLoad;
 }
-
 unsigned int LoaderObj::parseFaceParams(const std::string face)
 {
 	unsigned int params = 0;
@@ -286,7 +290,6 @@ unsigned int LoaderObj::parseFaceParams(const std::string face)
 
 	return params;
 }
-
 bool LoaderObj::parseFace(const std::vector<std::string>& splitFaces, const unsigned int faceParams)
 {
 	bool sucessfulParse = true;
