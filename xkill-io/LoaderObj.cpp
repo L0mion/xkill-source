@@ -2,15 +2,21 @@
 
 #include "ObjFace.h"
 #include "LoaderObj.h"
+#include "SimpleStringSplitter.h"
 
 LoaderObj::LoaderObj(
-	const std::string filePath,
-	const std::string fileName)
+	const std::string	filePath,
+	const std::string	fileName,
+	const unsigned int	flags)
 	: Loader(filePath, fileName)
 {
+	flags_	= flags;
+	sss_	= nullptr;
 }
 LoaderObj::~LoaderObj()
 {
+	if(sss_)
+		delete sss_;
 }
 
 bool LoaderObj::init()
@@ -18,6 +24,8 @@ bool LoaderObj::init()
 	bool sucessfulLoad = true;
 
 	lineNum_ = 0;
+	sss_ = new SimpleStringSplitter();
+	groups_.push_back(createDefaultGroup());
 
 	std::string fullPath = getFilePath() + getFileName();
 	ifstream_.open(fullPath);
@@ -47,12 +55,13 @@ bool LoaderObj::parseObj()
 	while(!ifstream_.eof() && sucessfulLoad)
 	{
 		getLine(curLine);
-		curLineSplit = sss_.splitString(OBJ_SEPARATOR_DEFAULT, curLine);
+		curLineSplit = sss_->splitString(OBJ_SEPARATOR_DEFAULT, curLine);
 
 		curSymbol = parseSymbol(curLineSplit);
 		if(curSymbol != OBJSYMBOL_IGNORE)
 		{
-			sucessfulLoad	= parseParams(curSymbol, curLineSplit);
+			if(flags_ & OBJ_PARSE_FLAGS_CHECK_NUM_PARAMS)
+				sucessfulLoad	= parseParams(curSymbol, curLineSplit);
 			if(sucessfulLoad)
 				sucessfulLoad = loadSymbol(curSymbol, curLineSplit);
 		}
@@ -135,8 +144,12 @@ bool LoaderObj::parseParams(
 		numParams == numExpectedParams ||
 		numParams == numExpectedParams + numOptionalParams)
 	{
-		if(expectedNumeric)
-			sucessfulParse = parseParamsNumeric(params);
+		sucessfulParse = true;
+		if(flags_ & OBJ_PARSE_FLAGS_CHECK_NUMERIC)
+		{
+			if(expectedNumeric)
+				sucessfulParse = parseParamsNumeric(params);
+		}
 	}
 	else
 		sucessfulParse = false;
@@ -240,36 +253,94 @@ bool LoaderObj::loadFaces(const std::vector<std::string>& params)
 	for(unsigned int i = 0; i < 3 && sucessfulLoad; i++)
 	{
 		face = params[1 + i];
-		faceSplit = sss_.splitString(OBJ_SEPARATOR_FACE, face);
+		faceSplit = sss_->splitString(OBJ_SEPARATOR_FACE, face);
+		
+		unsigned int faceParams = OBJ_FACE_PARAM_VERTEX_INDEX | OBJ_FACE_PARAM_TEXCOORD_INDEX | OBJ_FACE_PARAM_NORMAL_INDEX;
+		if(faceSplit.size() < OBJ_PARAMS_NUM_FACE)
+			faceParams = parseFaceParams(face);
 
-		sucessfulLoad = parseFace(faceSplit);
+		sucessfulLoad = parseFace(faceSplit, faceParams);
 		if(sucessfulLoad)
-			sucessfulLoad = loadFace(faceSplit);
+			sucessfulLoad = loadFace(faceSplit, faceParams);
 	}
 
 	return sucessfulLoad;
 }
-bool LoaderObj::parseFace(const std::vector<std::string>& splitFaces)
+unsigned int LoaderObj::parseFaceParams(const std::string face)
+{
+	unsigned int params = 0;
+
+	unsigned int curParam = 0;
+	for(unsigned int i = 0; i < face.length() && curParam < OBJ_PARAMS_NUM_FACE; i++)
+	{
+		if(face[i] == OBJ_SEPARATOR_FACE)
+			curParam++;
+		else
+		{
+			if(curParam == 0) //Vertex
+				params |= OBJ_FACE_PARAM_VERTEX_INDEX;
+
+			if(curParam == 1) //Texcoord
+				params |= OBJ_FACE_PARAM_TEXCOORD_INDEX;
+
+			if(curParam == 2) //Normal
+				params |= OBJ_FACE_PARAM_NORMAL_INDEX;
+		}
+	}
+
+	return params;
+}
+bool LoaderObj::parseFace(const std::vector<std::string>& splitFaces, const unsigned int faceParams)
 {
 	bool sucessfulParse = true;
 
-	if(splitFaces.size() == OBJ_PARAMS_NUM_FACE)
+	//ewwww, ewwwwwwwwwwwwwwwwwwwww, fix me
+	if(flags_ & OBJ_PARSE_FLAGS_CHECK_NUMERIC)
 	{
-		for(unsigned int i = 0; i < OBJ_PARAMS_NUM_FACE; i++)
-			if(!isNumeric(splitFaces[i]))
+		unsigned int curIndex = OBJ_PARAMS_INDEX_FACE_X;
+		if(faceParams & OBJ_FACE_PARAM_VERTEX_INDEX)
+		{
+			if(!isNumeric(splitFaces[curIndex]))
 				sucessfulParse = false;
+			curIndex++;
+		}
+		if(faceParams & OBJ_FACE_PARAM_TEXCOORD_INDEX)
+		{
+			if(!isNumeric(splitFaces[curIndex]))
+				sucessfulParse = false;
+			curIndex++;
+		}
+		if(faceParams & OBJ_FACE_PARAM_NORMAL_INDEX)
+		{
+			if(!isNumeric(splitFaces[curIndex]))
+				sucessfulParse = false;
+			curIndex++;
+		}
 	}
-	else
-		sucessfulParse = false;
 
 	return sucessfulParse;
 }
-bool LoaderObj::loadFace(const std::vector<std::string>& face)
+bool LoaderObj::loadFace(const std::vector<std::string>& face, const unsigned int faceParams)
 {
-	unsigned int iPos, iTex, iNorm;
-	iPos	= ::atoi(face[OBJ_PARAMS_INDEX_FACE_X].c_str());
-	iTex	= ::atoi(face[OBJ_PARAMS_INDEX_FACE_Y].c_str());
-	iNorm	= ::atoi(face[OBJ_PARAMS_INDEX_FACE_Z].c_str());
+	unsigned int iPos = 0, iTex = 0, iNorm = 0; //Default values
+
+	unsigned int curIndex = OBJ_PARAMS_INDEX_FACE_X;
+	if(faceParams & OBJ_FACE_PARAM_VERTEX_INDEX)
+	{
+		iPos = ::atoi(face[curIndex].c_str());
+		curIndex++;
+	}
+	if(faceParams & OBJ_FACE_PARAM_TEXCOORD_INDEX)
+	{
+		iTex = ::atoi(face[curIndex].c_str());
+		curIndex++;
+	}
+	if(faceParams & OBJ_FACE_PARAM_NORMAL_INDEX)
+	{
+		iNorm = ::atoi(face[curIndex].c_str());
+		curIndex++;
+	}
+
 	ObjFace newFace(iPos, iTex, iNorm, 0);
 
 	ObjFace preFace;
@@ -333,11 +404,21 @@ const unsigned int LoaderObj::loadVertex(
 	const unsigned int iTex,
 	const unsigned int iNorm)
 {
-	/*Create new vertex*/
-	VertexPosNormTex vertex;
-	vertex.position_	= position_[iPos	- 1];
-	vertex.texcoord_	= tex_[iTex			- 1];
-	vertex.normal_		= normal_[iNorm		- 1];
+	unsigned int posIndex	= iPos	- 1;
+	unsigned int texIndex	= iTex	- 1;
+	unsigned int normIndex	= iNorm	- 1;
+
+	Float3 pos, norm;
+	Float2 tex; //Default constructor initializes these to default values
+
+	if(posIndex < position_.size())
+		pos = position_[posIndex];
+	if(texIndex < tex_.size())
+		tex = tex_[texIndex];
+	if(normIndex < normal_.size())
+		norm = normal_[normIndex];
+
+	VertexPosNormTex vertex(pos, norm, tex);
 	vertices_.push_back(vertex);
 
 	return vertices_.size() - 1;
@@ -375,13 +456,21 @@ bool LoaderObj::isNumeric(const std::string value)
 	conv >> tmp;
 	return conv.eof();
 }
+ObjGroup LoaderObj::createDefaultGroup()
+{
+	std::string defaultName = "default";
+	ObjGroup defaultGroup = ObjGroup(defaultName);
+	
+	return defaultGroup;
+}
 
 void LoaderObj::loadObj()
 {
 	ObjGeometry mlGeometry(vertices_);
+
 	for(unsigned int i = 0; i < groups_.size(); i++)
 	{
-		if(groups_[i].getNumIndices() > 0)
+		if(groups_[i].getNumIndices() > 0 || !(flags_ & OBJ_PARSE_FLAGS_IGNORE_EMPTY_GROUPS))
 			mlGeometry.pushGroup(groups_[i]);
 	}
 
