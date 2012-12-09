@@ -16,7 +16,6 @@ class ObjGroup;
 static const char OBJ_SEPARATOR_DEFAULT	= ' ';
 static const char OBJ_SEPARATOR_FACE	= '/';
 
-//todoist: add comment-symbol '#'
 //add support for varying faces
 //s off
 static const std::string OBJ_INDICATOR_VERTEX			= "v";		//Vertex
@@ -54,18 +53,29 @@ static const unsigned int OBJ_PARAMS_INDEX_GROUP_NAME	= 0 + OBJ_PARAMS;
 static const unsigned int OBJ_PARAMS_INDEX_MATERIAL_NAME		= 0 + OBJ_PARAMS;
 static const unsigned int OBJ_PARAMS_INDEX_MATERIAL_USE_NAME	= 0 + OBJ_PARAMS;
 
+/** Flags describing method of parsing .obj. */
+enum ObjParseFlags
+{
+	OBJ_PARSE_FLAGS_CHECK_NUMERIC		= 0x01,	/**< Enables checking of numeric parameters, where LoaderObj expects such. If this flag is not set, LoaderObj is not guaranteed to be stable.*/
+	OBJ_PARSE_FLAGS_CHECK_NUM_PARAMS	= 0x02, /**< Enables checking of correct number of parameters. If this flag is not set, LoaderObj is not guaranteed to be stable. MUST BE SET IN ORDER TO ENABLE NUMERIC CHECKING.*/
+	//= 0x04,
+	//= 0x08,
+	//= 0x10,
+	//= 0x20
+};
+
 /** Describes read symbol so that pretty switch-cases may be used.
 * An action is based of this Enum, and then proceeds to select an appropriate function.
 */
 enum ObjSymbol 
 { 
-	OBJSYMBOL_VERTEX,			/**< v */
-	OBJSYMBOL_TEX,				/**< vt */
-	OBJSYMBOL_NORM,				/**< vn */
-	OBJSYMBOL_FACE,				/**< f */
-	OBJSYMBOL_GROUP,			/**< g */
-	OBJSYMBOL_MATERIAL,			/**< mtllib */
-	OBJSYMBOL_MATERIAL_USE,		/**< usemtl */
+	OBJSYMBOL_VERTEX,			/**< v		*/
+	OBJSYMBOL_TEX,				/**< vt		*/
+	OBJSYMBOL_NORM,				/**< vn		*/
+	OBJSYMBOL_FACE,				/**< f		*/
+	OBJSYMBOL_GROUP,			/**< g		*/
+	OBJSYMBOL_MATERIAL,			/**< mtllib	*/
+	OBJSYMBOL_MATERIAL_USE,		/**< usemtl	*/
 
 	OBJSYMBOL_IGNORE,			/**< ...if not any of the above. */
 	OBJSYMBOL_INVALID			/**< This value should never, ever - except occationally - occur. (No, seriously, never.) */
@@ -84,8 +94,9 @@ public:
 	\param fileName Name of desired .obj-file.
 	*/
 	LoaderObj(
-		const std::string filePath, 
-		const std::string fileName);
+		const std::string	filePath, 
+		const std::string	fileName,
+		const unsigned int	flags);
 	//! Does nothing.
 	~LoaderObj();
 
@@ -200,6 +211,8 @@ private:
 	OBS: Also checks if a group has zero indices. If so removes it. 
 	*/
 	void loadObj();
+
+	unsigned int flags_;
 
 	unsigned int				lineNum_;		//!< Line number previously read from file.
 	SimpleStringSplitter		sss_;			//!< Helper class used to split strings when reading these from file.

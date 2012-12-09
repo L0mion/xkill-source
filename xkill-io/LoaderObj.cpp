@@ -4,10 +4,12 @@
 #include "LoaderObj.h"
 
 LoaderObj::LoaderObj(
-	const std::string filePath,
-	const std::string fileName)
+	const std::string	filePath,
+	const std::string	fileName,
+	const unsigned int	flags)
 	: Loader(filePath, fileName)
 {
+	flags_ = flags;
 }
 LoaderObj::~LoaderObj()
 {
@@ -52,7 +54,8 @@ bool LoaderObj::parseObj()
 		curSymbol = parseSymbol(curLineSplit);
 		if(curSymbol != OBJSYMBOL_IGNORE)
 		{
-			sucessfulLoad	= parseParams(curSymbol, curLineSplit);
+			if(flags_ & OBJ_PARSE_FLAGS_CHECK_NUM_PARAMS)
+				sucessfulLoad	= parseParams(curSymbol, curLineSplit);
 			if(sucessfulLoad)
 				sucessfulLoad = loadSymbol(curSymbol, curLineSplit);
 		}
@@ -135,8 +138,12 @@ bool LoaderObj::parseParams(
 		numParams == numExpectedParams ||
 		numParams == numExpectedParams + numOptionalParams)
 	{
-		if(expectedNumeric)
-			sucessfulParse = parseParamsNumeric(params);
+		sucessfulParse = true;
+		if(flags_ & OBJ_PARSE_FLAGS_CHECK_NUMERIC)
+		{
+			if(expectedNumeric)
+				sucessfulParse = parseParamsNumeric(params);
+		}
 	}
 	else
 		sucessfulParse = false;
