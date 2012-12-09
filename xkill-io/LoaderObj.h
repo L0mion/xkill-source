@@ -64,6 +64,13 @@ enum ObjParseFlags
 	//= 0x20
 };
 
+enum ObjFaceParam
+{
+	OBJ_FACE_PARAM_VERTEX_INDEX		= 0x01,
+	OBJ_FACE_PARAM_TEXCOORD_INDEX	= 0x02,
+	OBJ_FACE_PARAM_NORMAL_INDEX		= 0x04
+};
+
 /** Describes read symbol so that pretty switch-cases may be used.
 * An action is based of this Enum, and then proceeds to select an appropriate function.
 */
@@ -126,7 +133,7 @@ private:
 	*/
 	ObjSymbol parseSymbol(const std::vector<std::string>& params);
 	//! Checks whether the number of current parameters read from file corresponds to expected parameters. Also checks if expected numeric values indeed are numeric.
-	/*!
+	/*! Is only called if OBJ_PARSE_FLAGS_CHECK_NUM_PARAMS is set.
 		\sa parseParamsNumeric
 		\return A boolean dictating whether or not the method was sucessful.
 	*/
@@ -134,7 +141,7 @@ private:
 		const ObjSymbol symbol,
 		const std::vector<std::string>& params);
 	//! Checks if parameters passed to functions are numeric.
-	/*!
+	/*! Is only called if OBJ_PARSE_FLAGS_CHECK_NUMERIC is set.
 		\return A boolean dictating whether or not parameters contain only numeric values.
 		\sa isNumeric
 	*/
@@ -168,12 +175,15 @@ private:
 		\sa loadFace
 	*/
 	bool loadFaces(const std::vector<std::string>& params);
+
+	unsigned int parseFaceParams(const std::string face);
+
 	//! Parses faces and ensures that these values are the correct number and entirely numeric.
 	/*!
 		\return A boolean dictating whether or not the method was sucessful.
 		\sa isNumeric
 	*/
-	bool parseFace(const std::vector<std::string>& splitFaces);
+	bool parseFace(const std::vector<std::string>& splitFaces, const unsigned int faceParams);
 	//! Loads faces.
 	/*!
 		Based on a vector of intermediate ObjFace-types, the method loads vertices from file and creates a vector of indices to save on memory.
@@ -181,7 +191,7 @@ private:
 		\sa ObjFace
 		\return Whether or not load was sucessful. (method requires previously added ObjGroup in order to be able to push faces to.)
 	*/
-	bool loadFace(const std::vector<std::string>& face);
+	bool loadFace(const std::vector<std::string>& face, const unsigned int faceParams);
 
 	//! Loads ObjGroup into groups_-vector.
 	void loadGroup(const std::vector<std::string>& params);
@@ -205,6 +215,8 @@ private:
 	//! Checks whether or not a string contains an numeric value.
 	/*! \return True if entirely numeric, False if not. */
 	bool isNumeric(const std::string value);
+
+	ObjGroup createDefaultGroup();
 
 	//! Loads resulting Obj from intermediate vectors. 
 	/*!

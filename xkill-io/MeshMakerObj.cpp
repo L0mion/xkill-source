@@ -72,7 +72,7 @@ bool MeshMakerObj::loadObj()
 {
 	bool sucessfulLoad = true;
 
-	unsigned int flags = OBJ_PARSE_FLAGS_CHECK_NUMERIC | OBJ_PARSE_FLAGS_CHECK_NUM_PARAMS;
+	unsigned int flags = 0; //OBJ_PARSE_FLAGS_CHECK_NUMERIC | OBJ_PARSE_FLAGS_CHECK_NUM_PARAMS;
 	loaderObj_ = new LoaderObj(pathObj_, fileNameObj_, flags);
 	sucessfulLoad = loaderObj_->init();
 

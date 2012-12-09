@@ -37,6 +37,8 @@ bool IOComponent::initBth()
 		"../../xkill-resources/xkill-models/"); //mtlPath);
 	sucessfulMake = makerBTH_->init();
 
+	MeshModel* model = makerBTH_->getMesh();
+
 	if(sucessfulMake)
 	{
 		Event_CreateMesh e(makerBTH_->getMesh(), true);
