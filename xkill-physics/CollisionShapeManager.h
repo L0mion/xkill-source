@@ -9,7 +9,7 @@ Responsible for creating collision shapes and storing them for
 the physics component.
 \ingroup xkill-physics
 */
-class MeshAttribute;
+struct MeshAttribute;
 
 class CollisionShapeManager
 {

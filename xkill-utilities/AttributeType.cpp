@@ -69,7 +69,7 @@ PhysicsAttribute::~PhysicsAttribute()
 ProjectileAttribute::ProjectileAttribute()
 {
 	entityIdOfCreator = -1;
-	currentLifeTimeLeft = 3.0f;
+	currentLifeTimeLeft = 10.0f;
 }
 ProjectileAttribute::~ProjectileAttribute()
 {
@@ -105,7 +105,6 @@ PlayerAttribute::PlayerAttribute()
 {
 	id = -1;
 	name = "Player";
-	health = 1;
 	priority = 0;
 	cycleSteals = 0;
 	totalExecutionTime = 0;

@@ -42,29 +42,40 @@ void GameComponent::event_PhysicsAttributesColliding(Event_PhysicsAttributesColl
 	// Fetch Entities so we can inspect their attributes
 	Entity* e1 = &allEntity->at(allPhysicsOwner->at(e->attribute1_index)); //entityOfCollidingAttribute
 	Entity* e2 = &allEntity->at(allPhysicsOwner->at(e->attribute2_index));
-
-	std::cout << "COLLISIONEVENT: Entity " << e1->getID() << " colliding with Entity " << e2->getID() << std::endl;
 	
 	//
-	// Handle collision logic for Entity 1 (e1) 
-	// colliding with with Entity 2 (e2)
+	// Handle hit reaction on Entity 1 (e1) 
+	// when colliding with with Entity 2 (e2)
 	//
 
-	// player
-	if(e1->hasAttribute(ATTRIBUTE_PLAYER))
+	// health
+	if(e1->hasAttribute(ATTRIBUTE_HEALTH))
 	{
 		//
 		// colliding with...
 		//
 
-		// projectile
-		if(e2->hasAttribute(ATTRIBUTE_PROJECTILE))
+		// damage
+		if(e2->hasAttribute(ATTRIBUTE_DAMAGE))
 		{
-			// TODO: Damage Player
-			
-			// TODO: Reward owner of Projectile
+			std::vector<DamageAttribute>* allDamage; GET_ATTRIBUTES(allDamage, DamageAttribute, ATTRIBUTE_DAMAGE);
+			std::vector<int> damageId = e2->getAttributes(ATTRIBUTE_DAMAGE);
+			for(unsigned i=0; i<damageId.size(); i++)
+			{
+				DamageAttribute* damage = &allDamage->at(damageId[i]);
+
+				// avoid damage to self
+				if(e1->getID() != damage->owner_enityID)
+				{
+					// TODO: Damage Player
+					std::cout << "COLLISIONEVENT: Entity " << e1->getID() << " damages Entity " << e2->getID() << std::endl;
+
+					// TODO: Reward owner of Projectile
+				}
+			}
 		}
 	}
+
 	// projectile
 	else if(e1->hasAttribute(ATTRIBUTE_PROJECTILE))
 	{
@@ -72,10 +83,22 @@ void GameComponent::event_PhysicsAttributesColliding(Event_PhysicsAttributesColl
 		// colliding with...
 		//
 
-		// everything
+		// destroy projectile on impact with everything except the owner who created the projectile
+		std::vector<ProjectileAttribute>* allProjectile; GET_ATTRIBUTES(allProjectile, ProjectileAttribute, ATTRIBUTE_PROJECTILE);
+		std::vector<int> projectileId = e1->getAttributes(ATTRIBUTE_PROJECTILE);
+		for(unsigned i=0; i<projectileId.size(); i++)
+		{
+			ProjectileAttribute* projectile = &allProjectile->at(projectileId[i]);
 
-		// Destroy the owner Entity of the ProjectileAttribute
-		SEND_EVENT(&Event_RemoveEntity(e1->getID()));
+			// ignore collision with owner
+			if(projectile->entityIdOfCreator != e2->getID())
+			{
+				// Destroy the Entity containing the ProjectileAttribute
+				std::cout << "COLLISIONEVENT: Projectile " << e1->getID() << " collides with Entity " << e2->getID() << std::endl;
+				SEND_EVENT(&Event_RemoveEntity(e1->getID()));
+			}
+		}
+		
 	}
 }
 
@@ -98,7 +121,7 @@ void GameComponent::onUpdate(float delta)
 	{
 		if(playerAttributesOwners->at(i)!=0)
 		{
-			// Extract attributes from a playerAttribute
+			//Extract attributes from a playerAttribute
 			PlayerAttribute* player		=	&allPlayers->at(i);
 			CameraAttribute* camera		=	&allCameras->at(player->cameraAttribute.index);
 			InputAttribute* input		=	&allInput->at(player->inputAttribute.index);
@@ -108,11 +131,15 @@ void GameComponent::onUpdate(float delta)
 
 			if(input->fire)
 			{
+				// Position
 				Float3 pos;
 				pos.x = position->position.x;
 				pos.y = position->position.y;
 				pos.z = position->position.z;
 
+				// Rotation
+				Float4 rot = spatial->rotation;
+				// extract camera rotation to determine velocity
 				DirectX::XMFLOAT3 lookAtFloat3;
 				lookAtFloat3.x = camera->mat_view._13;
 				lookAtFloat3.y = camera->mat_view._12;
@@ -122,14 +149,22 @@ void GameComponent::onUpdate(float delta)
 				float x = DirectX::XMVectorGetX(lookAt);
 				float y = DirectX::XMVectorGetY(lookAt);
 				float z = DirectX::XMVectorGetZ(lookAt);
-
+				// velocity
 				Float3 velocity(x, y, z);
-				velocity.x *= 1.5f;
-				velocity.y *= 1.5f;
-				velocity.z *= 1.5f;
+				velocity.x *= 50.5f;
+				velocity.y *= 50.5f;
+				velocity.z *= 50.5f;
+				// add rotation displacement on position 
+				float d = 1.0f;
+				pos.x += x*d;
+				pos.y += y*d;
+				pos.z += z*d;
+
+				// Velocity
+				
 
 				//id of player or id of player entity?
-				Event_CreateProjectile projectile(pos, velocity, playerAttributesOwners->at(i));
+				Event_CreateProjectile projectile(pos, velocity, rot, playerAttributesOwners->at(i));
 				SEND_EVENT(&projectile);
 				input->fire = false;
 			}

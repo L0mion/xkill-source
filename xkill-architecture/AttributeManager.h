@@ -28,6 +28,9 @@ private:
 		boundingAttributes_		.init(ATTRIBUTE_BOUNDING);
 		meshAttributes_			.init(ATTRIBUTE_MESH);
 		projectileAttributes_	.init(ATTRIBUTE_PROJECTILE);
+
+		healthAttributes_		.init(ATTRIBUTE_HEALTH);
+		damageAttributes_		.init(ATTRIBUTE_DAMAGE);
 	}
 
 public:
@@ -41,6 +44,8 @@ public:
 	AttributeStorage<BoundingAttribute>			boundingAttributes_;
 	AttributeStorage<ProjectileAttribute>		projectileAttributes_;
 	AttributeStorage<MeshAttribute>				meshAttributes_;
+	AttributeStorage<HealthAttribute>			healthAttributes_;
+	AttributeStorage<DamageAttribute>			damageAttributes_;
 
 	static AttributeManager* getInstance()
 	{
@@ -96,6 +101,8 @@ public:
 			PUT_ATTRIBUTES_INSIDE_EVENT(ATTRIBUTE_BOUNDING,		boundingAttributes_		);
 			PUT_ATTRIBUTES_INSIDE_EVENT(ATTRIBUTE_MESH,			meshAttributes_			);
 			PUT_ATTRIBUTES_INSIDE_EVENT(ATTRIBUTE_PROJECTILE,	projectileAttributes_	);
+			PUT_ATTRIBUTES_INSIDE_EVENT(ATTRIBUTE_HEALTH,		healthAttributes_		);
+			PUT_ATTRIBUTES_INSIDE_EVENT(ATTRIBUTE_DAMAGE,		damageAttributes_		);
 
 			// undefine dirty macro
 #undef PUT_ATTRIBUTES_INSIDE_EVENT
