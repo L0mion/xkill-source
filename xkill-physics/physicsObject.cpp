@@ -53,13 +53,23 @@ void PhysicsObject::preStep(CollisionShapeManager* collisionShapeManager,Physics
 														  positionAttribute,
 														  spatialAttribute);
 	setMassProps(physicsAttribute->mass,btVector3(0,0,0));
-	movement_.setY(physicsAttribute->linearVelocity.y);
 	m_worldTransform.setOrigin(btVector3(100.0f*positionAttribute->position.x,
 	 									 100.0f*positionAttribute->position.y,
 	 									 100.0f*positionAttribute->position.z));
 
 	m_worldTransform.setRotation(btQuaternion(yaw_,0,0));
-	setLinearVelocity(movement_);
+	if(physicsAttribute->isProjectile)
+	{
+		setLinearVelocity(btVector3(physicsAttribute->linearVelocity.x,
+									physicsAttribute->linearVelocity.y,
+									physicsAttribute->linearVelocity.z));
+		gravity_.setZero();
+	}
+	else
+	{
+		movement_.setY(physicsAttribute->linearVelocity.y);
+		setLinearVelocity(movement_);
+	}
 	setAngularVelocity(btVector3(physicsAttribute->angularVelocity.x,
 					   physicsAttribute->angularVelocity.y,
 					   physicsAttribute->angularVelocity.z));
@@ -88,7 +98,7 @@ void PhysicsObject::postStep(PhysicsAttribute* physicsAttribute)
 void PhysicsObject::input(InputAttribute* inputAttribute,float delta)
 {
 	yaw_ += inputAttribute->rotation.x;
-	movement_ = 500*btVector3(inputAttribute->position.x, 0, inputAttribute->position.y);
+	movement_ = 300*btVector3(inputAttribute->position.x, 0, inputAttribute->position.y);
 	movement_ = movement_.rotate(btVector3(0,1,0),yaw_);
 
 	inputAttribute->position.x = inputAttribute->position.y = 0;

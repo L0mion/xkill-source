@@ -3,6 +3,8 @@
 #include "constantBuffers.hlsl"
 #include "lightFunctions.hlsl"
 
+#define TILE_SIZE 16
+
 RWTexture2D<float4> output : register( u0 );
 
 Texture2D gBufferNormal		: register( t0 );
@@ -25,10 +27,10 @@ float3 reconstructViewSpacePosition(float2 texCoord)
 	return position.xyz;
 }
 
-[numthreads(32, 32, 1)]
-void defaultCS( uint3 threadID : SV_DispatchThreadID )
+[numthreads(TILE_SIZE, TILE_SIZE, 1)]
+void lightingCS( uint3 threadID : SV_DispatchThreadID )
 {
-	float2 texCoord = float2((float)threadID.x/(float)screenWidth,(float)threadID.y/(float)screenHeight);
+	float2 texCoord = float2((float)(threadID.x + viewportTopX)/(float)screenWidth,(float)(threadID.y + viewportTopY)/(float)screenHeight);
 	float4 albedo	= gBufferAlbedo.SampleLevel(ss, texCoord, 0);
 	float3 normal	= gBufferNormal.SampleLevel(ss, texCoord, 0).xyz;
 	float3 position = reconstructViewSpacePosition(texCoord);
@@ -51,13 +53,8 @@ void defaultCS( uint3 threadID : SV_DispatchThreadID )
 			color += spotLight(surface, lights[i], eyePosition);
 	}
 
-	output[threadID.xy] = float4(color, 1.0f);
+	output[uint2( threadID.x + viewportTopX, threadID.y + viewportTopY)] = float4(color, 1.0f);
 }
-
-
-
-
-
 
 // Transform coordinates from screen space to view space.
 //float viewX = (((2.0f*screenX)/screenWidth)-1.0f)/projection._11;

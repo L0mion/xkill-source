@@ -78,6 +78,8 @@ void GameComponent::event_PhysicsAttributesColliding(Event_PhysicsAttributesColl
 					{
 						HealthAttribute* health = &allHealth->at(healthId[i]);
 						health->health -= damage->damage;
+
+						std::cout << "DAMAGEEVENT Entity " << e2->getID() << " damage: " <<  damage->damage << " Entity " << e1->getID() << " health " << health->health << std::endl;
 					}
 
 					// TODO: Reward owner of Projectile
@@ -166,9 +168,9 @@ void GameComponent::onUpdate(float delta)
 				float z = DirectX::XMVectorGetZ(lookAt);
 				// velocity
 				Float3 velocity(x, y, z);
-				velocity.x *= 50.5f;
-				velocity.y *= 50.5f;
-				velocity.z *= 50.5f;
+				velocity.x *= 750.5f;
+				velocity.y *= 750.5f;
+				velocity.z *= 750.5f;
 				// add rotation displacement on position 
 				float d = 1.0f;
 				pos.x += x*d;

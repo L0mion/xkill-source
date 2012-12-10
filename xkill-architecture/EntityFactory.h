@@ -106,11 +106,14 @@ public:
 
 		CREATE_ATTRIBUTE(RenderAttribute, render, entity);
 		CONNECT_ATTRIBUTES(render, spatial);
+		render->meshIndex = 2;
 
 		CREATE_ATTRIBUTE(PhysicsAttribute, physics, entity);
 		CONNECT_ATTRIBUTES(physics, spatial);
+		physics->collisionShapeIndex = 2;
 		physics->isProjectile = true;
 		physics->linearVelocity = e->velocity;
+		physics->mass = 0.01f;
 
 		CREATE_ATTRIBUTE(ProjectileAttribute, projectile, entity);
 		CONNECT_ATTRIBUTES(projectile, physics);
