@@ -17,17 +17,17 @@ ViewportManagement::ViewportManagement(	unsigned int numViewports,
 
 ViewportManagement::~ViewportManagement()
 {
-	SAFE_DELETE(viewports);
+	SAFE_DELETE(viewports_);
 }
 
 void ViewportManagement::reset()
 {
-	SAFE_DELETE(viewports);
+	SAFE_DELETE(viewports_);
 }
 
 void ViewportManagement::setViewport(ID3D11DeviceContext* devcon, unsigned int index)
 {
-	devcon->RSSetViewports(1, &viewports->at(index));
+	devcon->RSSetViewports(1, &viewports_->at(index));
 
 	D3D11_VIEWPORT debug;
 	UINT numDebugs = 1;
@@ -41,7 +41,7 @@ HRESULT ViewportManagement::resize(unsigned int screenWidth, unsigned int screen
 	screenWidth_	= screenWidth;
 	screenHeight_	= screenHeight;
 
-	SAFE_DELETE(viewports);
+	SAFE_DELETE(viewports_);
 
 	hr = init();
 
@@ -50,7 +50,7 @@ HRESULT ViewportManagement::resize(unsigned int screenWidth, unsigned int screen
 
 HRESULT ViewportManagement::init()
 {
-	viewports = new std::vector<D3D11_VIEWPORT>();
+	viewports_ = new std::vector<D3D11_VIEWPORT>();
 
 	unsigned int gridSizes[] = {1, 2, 4, 9, 16, 25, 36, 49, 64, 81, 100 };
 	unsigned int gridSize = 0;
@@ -96,7 +96,10 @@ HRESULT ViewportManagement::initViewportSingle()
 	viewport.MinDepth	= 0;
 	viewport.MaxDepth	= 1;
 
-	viewports->push_back(viewport);
+	viewports_->push_back(viewport);
+
+	numViewportsX_ = 1;
+	numViewportsY_ = 1;
 
 	return hr;
 }
@@ -117,12 +120,15 @@ HRESULT ViewportManagement::initViewportDouble()
 	viewport.MinDepth	= 0;
 	viewport.MaxDepth	= 1;
 
-	viewports->push_back(viewport);
+	viewports_->push_back(viewport);
 
 	viewport.TopLeftX	= 0;
 	viewport.TopLeftY	= static_cast<FLOAT>(viewportHeight_)+borderSize_;
 
-	viewports->push_back(viewport);
+	viewports_->push_back(viewport);
+
+	numViewportsX_ = 1;
+	numViewportsY_ = 2;
 
 	return hr;
 }
@@ -153,9 +159,12 @@ HRESULT ViewportManagement::initViewportGrid(unsigned int gridSize)
 			viewport.TopLeftX = static_cast<FLOAT>(column * (viewportWidth_ + borderSize_));
 			viewport.TopLeftY = static_cast<FLOAT>(row * (viewportHeight_ + borderSize_));
 
-			viewports->push_back(viewport);
+			viewports_->push_back(viewport);
 		}
 	}
+
+	numViewportsX_ = numGridColumns;
+	numViewportsY_ = numGridColumns;
 
 	return hr;
 }
@@ -168,4 +177,19 @@ unsigned int ViewportManagement::getViewportWidth() const
 unsigned int ViewportManagement::getViewportHeight() const
 {
 	return viewportHeight_;
+}
+
+unsigned int ViewportManagement::getNumViewportsX() const
+{
+	return numViewportsX_;
+}
+
+unsigned int ViewportManagement::getNumViewportsY() const
+{
+	return numViewportsY_;
+}
+
+D3D11_VIEWPORT ViewportManagement::getViewport(unsigned int index) const
+{
+	return viewports_->at(index);
 }

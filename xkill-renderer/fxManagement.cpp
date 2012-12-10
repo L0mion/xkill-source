@@ -106,7 +106,7 @@ HRESULT FXManagement::initDefaultCS(ID3D11Device* device)
 	HRESULT hr = S_OK;
 
 	defaultCS_ = new ShaderCS();
-	hr = defaultCS_->init(device, L"../../xkill-build/bin-Debug/defaultCS.cso");
+	hr = defaultCS_->init(device, L"../../xkill-build/bin-Debug/lightingCS.cso");
 
 	return hr;
 }

@@ -19,11 +19,12 @@ FMODEventSystem::~FMODEventSystem(void)
 
 void FMODEventSystem::FMODErrorCheck(FMOD_RESULT result)
 {
-	if (result != FMOD_OK)
+	static bool error = false;
+	if (!error && result != FMOD_OK)
 	{
 		printf("FMOD error! (%d) %s\n", result, FMOD_ErrorString(result));
-		std::cin.get();
-		exit(-1);
+		error = true;
+
 	}
 }
 
