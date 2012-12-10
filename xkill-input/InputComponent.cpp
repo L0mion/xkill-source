@@ -28,7 +28,7 @@ bool InputComponent::init(HWND windowHandle, std::vector<InputAttribute>* inputA
 	searchTime_ = searchTime;
 
 	inputManager_ = new InputManager();
-	if(!inputManager_->InitInput(windowHandle))
+	if(!inputManager_->InitInput(windowHandle, configFilePath))
 		return false;
 
 	return true;
