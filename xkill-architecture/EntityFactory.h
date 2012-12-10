@@ -116,7 +116,7 @@ public:
 		projectile->entityIdOfCreator = e->entityIdOfCreator;
 
 		CREATE_ATTRIBUTE(DamageAttribute, damage, entity);
-		damage->owner_enityID = e->entityIdOfCreator;
+		damage->owner_entityID = e->entityIdOfCreator;
 	}
 
 	void createMesh(Entity* entity, Event_CreateMesh* e)

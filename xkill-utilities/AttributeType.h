@@ -253,5 +253,5 @@ struct DLL_U DamageAttribute : public IAttribute
 	};
 
 	int damage;
-	int owner_enityID;
+	int owner_entityID;
 };
