@@ -12,7 +12,7 @@ PhysicsObject::PhysicsObject(CollisionShapeManager* collisionShapeManager, unsig
 																											 btVector3(0,0,0))
 {
 	index_ = index;
-	gravity_ = btVector3(0,-10,0);
+	gravity_ = btVector3(0,-1000,0);
 	forces_.setZero();
 	movement_.setZero();
 	yaw_ = 0.0f;
@@ -55,8 +55,9 @@ void PhysicsObject::preStep(CollisionShapeManager* collisionShapeManager,Physics
 	setMassProps(physicsAttribute->mass,btVector3(0,0,0));
 	movement_.setY(physicsAttribute->linearVelocity.y);
 	m_worldTransform.setOrigin(btVector3(100.0f*positionAttribute->position.x,
-										 100.0f*positionAttribute->position.y,
-										 100.0f*positionAttribute->position.z));
+	 									 100.0f*positionAttribute->position.y,
+	 									 100.0f*positionAttribute->position.z));
+
 	m_worldTransform.setRotation(btQuaternion(yaw_,0,0));
 	setLinearVelocity(movement_);
 	setAngularVelocity(btVector3(physicsAttribute->angularVelocity.x,

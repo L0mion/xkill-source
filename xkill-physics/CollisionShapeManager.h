@@ -16,6 +16,7 @@ class CollisionShapeManager
 private:
 	btAlignedObjectArray<btCollisionShape*> collisionShapes_; //!< An vector for holding all collision shapes
 	std::vector<MeshAttribute>* meshAttributes_;
+	std::vector<btTriangleMesh*> triangleMeshes_;
 public:
 	//! Creates a empty CollisionShapeManager
 	CollisionShapeManager();

@@ -9,8 +9,6 @@ InputComponent::InputComponent()
 {
 	newDeviceSearchTimer_ = 0.0f;
 
-	ZeroMemory(&pos, sizeof(pos));
-
 	SUBSCRIBE_TO_EVENT(this, EVENT_RUMBLE);
 	SUBSCRIBE_TO_EVENT(this, EVENT_MOUSE_MOVE);
 	SUBSCRIBE_TO_EVENT(this, EVENT_KEY_PRESS);
@@ -22,7 +20,7 @@ InputComponent::~InputComponent()
 	delete inputManager_;
 }
 
-bool InputComponent::init(HWND windowHandle, std::vector<InputAttribute>* inputAttributes, float searchTime)
+bool InputComponent::init(HWND windowHandle, std::vector<InputAttribute>* inputAttributes, std::string configFilePath, float searchTime)
 {
 	inputAttributes_ = inputAttributes;
 
@@ -30,7 +28,7 @@ bool InputComponent::init(HWND windowHandle, std::vector<InputAttribute>* inputA
 	searchTime_ = searchTime;
 
 	inputManager_ = new InputManager();
-	if(!inputManager_->InitInput(windowHandle))
+	if(!inputManager_->InitInput(windowHandle, configFilePath))
 		return false;
 
 	return true;
@@ -41,63 +39,21 @@ void InputComponent::onEvent(Event* e)
 	EventType type = e->getType();
 	if(type == EVENT_RUMBLE)
 	{
-		Event_Rumble* er = static_cast<Event_Rumble*>(e);
-		InputDevice* device = inputManager_->GetDevice(er->deviceNr);
-
-		if(device != nullptr)
-		{
-			if(er->runRumble)
-				device->RunForceFeedback();
-			else
-				device->StopForceFeedback();
-
-			device->SetForceFeedback(er->leftScale, er->rightScale);
-		}
+		handleRumbleEvent(static_cast<Event_Rumble*>(e));
 	}
 	if(type == EVENT_MOUSE_MOVE)
 	{
-		Event_MouseMove* emm = static_cast<Event_MouseMove*>(e);
-		QTInputDevices* device = inputManager_->GetMouseAndKeyboard();
-
-		// Test camera movement
-		float x = 5.0f*(float)emm->dx;
-		float y = 5.0f*(float)emm->dy;
-
-		float mouseSensitivity = 0.1f;
-		//inputAttributes_->at(0).rotation.x += x * mouseSensitivity;
-		//inputAttributes_->at(0).rotation.y += y * mouseSensitivity;
-
-		if(device != nullptr)
-		{
-			device->setAxis(2, x * mouseSensitivity);
-			device->setAxis(3, y * mouseSensitivity);
-		}
+		handleMouseMoveEvent(static_cast<Event_MouseMove*>(e));
 	}
 	if(type == EVENT_KEY_PRESS)
 	{
 		Event_KeyPress* ekp = static_cast<Event_KeyPress*>(e);
-		QTInputDevices* device = inputManager_->GetMouseAndKeyboard();
-		
-		if(device != nullptr)
-		{
-			device->setButton(ekp->keyEnum, true);
-		}
-
-		// TODO: Handle key press
-		//std::cout << "Key " << ekp->keyEnum << " pressed"<< std::endl;
+		handleKeyEvent(ekp->keyEnum, true);
 	}
 	if(type == EVENT_KEY_RELEASE)
 	{
 		Event_KeyRelease* ekr = static_cast<Event_KeyRelease*>(e);
-		QTInputDevices* device = inputManager_->GetMouseAndKeyboard();
-		
-		if(device != nullptr)
-		{
-			device->setButton(ekr->keyEnum, false);
-		}
-
-		// TODO: Handle key release
-		std::cout << "Key " << ekr->keyEnum << " released"<< std::endl;
+		handleKeyEvent(ekr->keyEnum, false);
 	}
 }
 
@@ -202,10 +158,27 @@ void InputComponent::handleRumbleEvent(Event_Rumble* e)
 
 void InputComponent::handleMouseMoveEvent(Event_MouseMove* e)
 {
+	QTInputDevices* device = inputManager_->GetMouseAndKeyboard();
+
+	// Test camera movement
 	float x = 5.0f*(float)e->dx;
 	float y = 5.0f*(float)e->dy;
 
-	float mouseSensitivity = 0.001f;
-	inputAttributes_->at(0).rotation.x += x * mouseSensitivity;
-	inputAttributes_->at(0).rotation.y += y * mouseSensitivity;
+	float mouseSensitivity = 0.1f;
+
+	if(device != nullptr)
+	{
+		device->setAxis(2, x * mouseSensitivity);
+		device->setAxis(3, y * mouseSensitivity);
+	}
+}
+
+void InputComponent::handleKeyEvent(char key, bool pressed)
+{
+	QTInputDevices* device = inputManager_->GetMouseAndKeyboard();
+		
+	if(device != nullptr)
+	{
+		device->setButton(key, pressed);
+	}
 }
