@@ -71,6 +71,7 @@ void GameComponent::event_PhysicsAttributesColliding(Event_PhysicsAttributesColl
 					std::cout << "COLLISIONEVENT: Entity " << entity1->getID() << " damages Entity " << entity2->getID() << std::endl;
 
 					// TODO: Reward owner of Projectile
+
 				}
 			}
 		}
@@ -113,6 +114,7 @@ void GameComponent::onUpdate(float delta)
 	std::vector<SpatialAttribute>* allSpatial;		GET_ATTRIBUTES(allSpatial, SpatialAttribute, ATTRIBUTE_SPATIAL);
 	std::vector<PositionAttribute>* allPositions;	GET_ATTRIBUTES(allPositions, PositionAttribute, ATTRIBUTE_POSITION);
 	std::vector<ProjectileAttribute>* allProjectiles;	GET_ATTRIBUTES(allProjectiles, ProjectileAttribute, ATTRIBUTE_PROJECTILE);
+	std::vector<HealthAttribute>* allHealth;		GET_ATTRIBUTES(allHealth, HealthAttribute, ATTRIBUTE_HEALTH);
 
 	//Handle updates of player attributes
 	std::vector<int>* playerAttributesOwners;		GET_ATTRIBUTE_OWNERS(playerAttributesOwners, ATTRIBUTE_PLAYER);
@@ -124,9 +126,15 @@ void GameComponent::onUpdate(float delta)
 			PlayerAttribute* player		=	&allPlayers->at(i);
 			CameraAttribute* camera		=	&allCameras->at(player->cameraAttribute.index);
 			InputAttribute* input		=	&allInput->at(player->inputAttribute.index);
-			RenderAttribute* render		=	&allRender->at(player->renderAttribute.index);			
+			RenderAttribute* render		=	&allRender->at(player->renderAttribute.index);
+			HealthAttribute* health		=	&allHealth->at(player->healthAttribute.index);
 			SpatialAttribute* spatial	=	&allSpatial->at(render->spatialAttribute.index); //Extract spatial attribute from the render attribute from the above playerAttribute
 			PositionAttribute* position	=	&allPositions->at(spatial->positionAttribute.index); //Extract position attribute from the above spatial attribute
+
+			if(health->health <= 0)
+			{
+
+			}
 
 			if(input->fire)
 			{
