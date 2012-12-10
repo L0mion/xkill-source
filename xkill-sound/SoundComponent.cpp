@@ -18,6 +18,7 @@ SoundComponent::SoundComponent()
 	converter = NULL;
 
 	SUBSCRIBE_TO_EVENT(this, EVENT_CREATE_PROJECTILE);
+	SUBSCRIBE_TO_EVENT(this, EVENT_PLAYERDEATH);
 }
 
 SoundComponent::~SoundComponent()
