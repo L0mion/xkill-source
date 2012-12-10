@@ -21,6 +21,7 @@ static const std::string pgyPath = "../../xkill-resources/xkill-models/";
 static const std::string mtlPath = "../../xkill-resources/xkill-models/";
 
 static const std::string bthName	= "bth.obj";
+static const std::string projectileName	= "projectile.obj";
 static const std::string arenaName	= "xkillArena.obj";
 
 class DLL_IO IOComponent : public IObserver
@@ -37,10 +38,12 @@ protected:
 private:
 	bool initBth(); //temp
 	bool initArena(); //temp
+	bool initProjectile(); //temp
 
 	/*Makers*/
 	MeshMakerObj* makerBTH_;
 	MeshMakerObj* makerArena_;
+	MeshMakerObj* makerProjectile_;
 };
 
 #endif //XKILL_IO_IOCOMPONENT_H

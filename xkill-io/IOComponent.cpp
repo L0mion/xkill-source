@@ -8,6 +8,7 @@ IOComponent::IOComponent()
 {
 	makerBTH_ = nullptr;
 	makerArena_ = nullptr;
+	makerProjectile_ = nullptr;
 }
 IOComponent::~IOComponent()
 {
@@ -15,6 +16,8 @@ IOComponent::~IOComponent()
 		delete makerBTH_;
 	if(makerArena_)
 		delete makerArena_;
+	if(makerProjectile_)
+		delete makerProjectile_;
 }
 bool IOComponent::init()
 {
@@ -23,6 +26,8 @@ bool IOComponent::init()
 	sucessfulInit = initBth();
 	if(sucessfulInit)
 		sucessfulInit = initArena();
+	if(sucessfulInit)
+		sucessfulInit = initProjectile();
 
 	return sucessfulInit;
 }
@@ -61,6 +66,25 @@ bool IOComponent::initArena()
 	if(sucessfulMake)
 	{
 		Event_CreateMesh e(makerArena_->getMesh(), false);
+		SEND_EVENT(&e);
+	}
+
+	return sucessfulMake;
+}
+bool IOComponent::initProjectile()
+{
+	bool sucessfulMake = true;
+
+	makerProjectile_ = new MeshMakerObj(
+		objPath,
+		pgyPath,
+		projectileName,
+		mtlPath);
+	sucessfulMake = makerProjectile_->init();
+
+	if(sucessfulMake)
+	{
+		Event_CreateMesh e(makerProjectile_->getMesh(), false);
 		SEND_EVENT(&e);
 	}
 

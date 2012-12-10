@@ -151,9 +151,9 @@ void GameComponent::onUpdate(float delta)
 				float z = DirectX::XMVectorGetZ(lookAt);
 				// velocity
 				Float3 velocity(x, y, z);
-				velocity.x *= 50.5f;
-				velocity.y *= 50.5f;
-				velocity.z *= 50.5f;
+				velocity.x *= 750.5f;
+				velocity.y *= 750.5f;
+				velocity.z *= 750.5f;
 				// add rotation displacement on position 
 				float d = 1.0f;
 				pos.x += x*d;
