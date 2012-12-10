@@ -120,12 +120,20 @@ protected:
 			else
 				MainWindow::close();
 			break;
+		case Qt::Key_Tab:
+			showMenu();
+			break;
 		default:
 			break;
 		}
 
 		// Inform about key press
 		SEND_EVENT(&Event_KeyPress(e->key()));
+	};
+
+	void showMenu()
+	{
+		int i = 0;
 	};
 
 	void keyReleaseEvent(QKeyEvent* e)

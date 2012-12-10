@@ -88,7 +88,7 @@ void PhysicsObject::postStep(PhysicsAttribute* physicsAttribute)
 void PhysicsObject::input(InputAttribute* inputAttribute,float delta)
 {
 	yaw_ += inputAttribute->rotation.x;
-	movement_ = 100*btVector3(inputAttribute->position.x, 0, inputAttribute->position.y);
+	movement_ = 500*btVector3(inputAttribute->position.x, 0, inputAttribute->position.y);
 	movement_ = movement_.rotate(btVector3(0,1,0),yaw_);
 
 	inputAttribute->position.x = inputAttribute->position.y = 0;
