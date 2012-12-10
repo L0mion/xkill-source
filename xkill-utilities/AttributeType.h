@@ -122,6 +122,7 @@ struct DLL_U RenderAttribute : public IAttribute
 	AttributePointer spatialAttribute;
 	AttributePointer boundingAttribute;
 	
+	BoolField32 culling[4];
 	bool transparent;
 	bool tessellation;
 	int meshIndex;

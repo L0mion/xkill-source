@@ -22,6 +22,7 @@ class btSequentialImpulseConstraintSolver;
 class btDiscreteDynamicsWorld;
 class btDynamicsWorld;
 class btRigidBody;
+class btPairCachingGhostObject;
 
 typedef float btScalar;
 
@@ -59,6 +60,7 @@ private:
 
 	btAlignedObjectArray<PhysicsObject*>* physicsObjects_; //<! A vector of PhysicsObjects, internal representation of world
 	PhysicsObject* floor_; //<! The absolute floor plane, no object may pass bellow this plane
+	btAlignedObjectArray<btPairCachingGhostObject>* ghostObjects_;
 
 public:
 	//! Creates a BulletPhysicsComponent, gives it pointers to attribute storages required by the component and sets all pointer to null_ptr

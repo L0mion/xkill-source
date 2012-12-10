@@ -76,6 +76,7 @@ void PhysicsObject::preStep(CollisionShapeManager* collisionShapeManager,Physics
 	m_collisionShape = collisionShapeManager->getCollisionShape(physicsAttribute->collisionShapeIndex);
 	setGravity(gravity_+forces_);
 	activate(true);
+
 }
 
 void PhysicsObject::postStep(PhysicsAttribute* physicsAttribute)

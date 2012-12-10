@@ -3,6 +3,33 @@
 
 #include "dllUtilities.h"
 
+class DLL_U BoolField32
+{
+	int values;
+public:
+	BoolField32()
+	{
+		values = 0;
+	}
+	bool getBool(int index)
+	{
+		index = values & (1 << index);
+		if(index)
+			return true;
+		else
+			return false;
+	}
+	void setBool(int index, bool value)
+	{
+		index = (1 << index);
+		if(value)
+			values = values ^ index;
+		else
+			values = values & index;
+			
+	}
+};
+
 struct DLL_U Float2
 {
 	float x;

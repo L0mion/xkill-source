@@ -25,6 +25,7 @@ BulletPhysicsComponent::BulletPhysicsComponent()
 	solver_ = nullptr;
 	dynamicsWorld_ = nullptr;
 	physicsObjects_ = nullptr;
+	ghostObjects_ = nullptr;
 	collisionShapeManager_ = nullptr;
 	floor_ = nullptr;
 }
@@ -41,6 +42,10 @@ BulletPhysicsComponent::~BulletPhysicsComponent()
 		}
 	}
 	SAFE_DELETE(physicsObjects_)
+
+	///////////////////////////////// INSERT DELETION OF ghostobjects
+	SAFE_DELETE(ghostObjects_)
+	
 
 	dynamicsWorld_->removeRigidBody(floor_);
 	delete floor_->getCollisionShape();
