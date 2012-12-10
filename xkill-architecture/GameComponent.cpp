@@ -40,35 +40,35 @@ void GameComponent::onEvent(Event* e)
 void GameComponent::event_PhysicsAttributesColliding(Event_PhysicsAttributesColliding* e)
 {
 	// Fetch Entities so we can inspect their attributes
-	Entity* e1 = &allEntity->at(allPhysicsOwner->at(e->attribute1_index)); //entityOfCollidingAttribute
-	Entity* e2 = &allEntity->at(allPhysicsOwner->at(e->attribute2_index));
+	Entity* entity1 = &allEntity->at(allPhysicsOwner->at(e->attribute1_index)); //entityOfCollidingAttribute
+	Entity* entity2 = &allEntity->at(allPhysicsOwner->at(e->attribute2_index));
 	
 	//
 	// Handle hit reaction on Entity 1 (e1) 
-	// when colliding with with Entity 2 (e2)
+	// when colliding with Entity 2 (e2)
 	//
 
 	// health
-	if(e1->hasAttribute(ATTRIBUTE_HEALTH))
+	if(entity1->hasAttribute(ATTRIBUTE_HEALTH))
 	{
 		//
 		// colliding with...
 		//
 
 		// damage
-		if(e2->hasAttribute(ATTRIBUTE_DAMAGE))
+		if(entity2->hasAttribute(ATTRIBUTE_DAMAGE))
 		{
 			std::vector<DamageAttribute>* allDamage; GET_ATTRIBUTES(allDamage, DamageAttribute, ATTRIBUTE_DAMAGE);
-			std::vector<int> damageId = e2->getAttributes(ATTRIBUTE_DAMAGE);
+			std::vector<int> damageId = entity2->getAttributes(ATTRIBUTE_DAMAGE);
 			for(unsigned i=0; i<damageId.size(); i++)
 			{
 				DamageAttribute* damage = &allDamage->at(damageId[i]);
 
 				// avoid damage to self
-				if(e1->getID() != damage->owner_enityID)
+				if(entity1->getID() != damage->owner_entityID)
 				{
 					// TODO: Damage Player
-					std::cout << "COLLISIONEVENT: Entity " << e1->getID() << " damages Entity " << e2->getID() << std::endl;
+					std::cout << "COLLISIONEVENT: Entity " << entity1->getID() << " damages Entity " << entity2->getID() << std::endl;
 
 					// TODO: Reward owner of Projectile
 				}
@@ -77,7 +77,7 @@ void GameComponent::event_PhysicsAttributesColliding(Event_PhysicsAttributesColl
 	}
 
 	// projectile
-	else if(e1->hasAttribute(ATTRIBUTE_PROJECTILE))
+	else if(entity1->hasAttribute(ATTRIBUTE_PROJECTILE))
 	{
 		//
 		// colliding with...
@@ -85,20 +85,19 @@ void GameComponent::event_PhysicsAttributesColliding(Event_PhysicsAttributesColl
 
 		// destroy projectile on impact with everything except the owner who created the projectile
 		std::vector<ProjectileAttribute>* allProjectile; GET_ATTRIBUTES(allProjectile, ProjectileAttribute, ATTRIBUTE_PROJECTILE);
-		std::vector<int> projectileId = e1->getAttributes(ATTRIBUTE_PROJECTILE);
+		std::vector<int> projectileId = entity1->getAttributes(ATTRIBUTE_PROJECTILE);
 		for(unsigned i=0; i<projectileId.size(); i++)
 		{
 			ProjectileAttribute* projectile = &allProjectile->at(projectileId[i]);
 
 			// ignore collision with owner
-			if(projectile->entityIdOfCreator != e2->getID())
+			if(projectile->entityIdOfCreator != entity2->getID())
 			{
 				// Destroy the Entity containing the ProjectileAttribute
-				std::cout << "COLLISIONEVENT: Projectile " << e1->getID() << " collides with Entity " << e2->getID() << std::endl;
-				SEND_EVENT(&Event_RemoveEntity(e1->getID()));
+				std::cout << "COLLISIONEVENT: Projectile " << entity1->getID() << " collides with Entity " << entity2->getID() << std::endl;
+				SEND_EVENT(&Event_RemoveEntity(entity1->getID()));
 			}
 		}
-		
 	}
 }
 
@@ -144,7 +143,7 @@ void GameComponent::onUpdate(float delta)
 				lookAtFloat3.x = camera->mat_view._13;
 				lookAtFloat3.y = camera->mat_view._12;
 				lookAtFloat3.z = camera->mat_view._11;
-				DirectX::XMVECTOR lookAt = DirectX::XMLoadFloat3(&lookAtFloat3); 
+				DirectX::XMVECTOR lookAt = DirectX::XMLoadFloat3(&lookAtFloat3);
 				lookAt = DirectX::XMVector3Normalize(lookAt);
 				float x = DirectX::XMVectorGetX(lookAt);
 				float y = DirectX::XMVectorGetY(lookAt);
