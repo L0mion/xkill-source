@@ -76,9 +76,10 @@ public:
 		CREATE_ATTRIBUTE(HealthAttribute, health, entity);
 		health->health = 10;
 	}
-
 	void createWorldEntity(Entity* entity)
 	{
+		static int HACKHACK = 1;
+		
 		CREATE_ATTRIBUTE(PositionAttribute, position, entity);
 
 		CREATE_ATTRIBUTE(SpatialAttribute, spatial, entity);
@@ -86,12 +87,14 @@ public:
 
 		CREATE_ATTRIBUTE(RenderAttribute, render, entity);
 		CONNECT_ATTRIBUTES(render, spatial);
-		render->meshIndex = 1;
+		render->meshIndex = HACKHACK;
 
 		CREATE_ATTRIBUTE(PhysicsAttribute, physics, entity);
 		CONNECT_ATTRIBUTES(physics, spatial);
-		physics->collisionShapeIndex = 1;
+		physics->collisionShapeIndex = HACKHACK;
 		physics->mass = 0;
+
+		HACKHACK++;
 	}
 
 	void createProjectileEntity(Entity* entity, Event_CreateProjectile* e)
@@ -105,7 +108,7 @@ public:
 
 		CREATE_ATTRIBUTE(RenderAttribute, render, entity);
 		CONNECT_ATTRIBUTES(render, spatial);
-		render->meshIndex = 2;
+		render->meshIndex = 3;
 
 		CREATE_ATTRIBUTE(PhysicsAttribute, physics, entity);
 		CONNECT_ATTRIBUTES(physics, spatial);

@@ -22,7 +22,8 @@ static const std::string mtlPath = "../../xkill-resources/xkill-models/";
 
 static const std::string bthName	= "bth.obj";
 static const std::string projectileName	= "projectile.obj";
-static const std::string arenaName	= "xkillArena.obj";
+static const std::string arenaName1	= "xkillArena1.obj";
+static const std::string arenaName2	= "xkillArena2.obj";
 
 class DLL_IO IOComponent : public IObserver
 {
@@ -37,12 +38,14 @@ public:
 protected:
 private:
 	bool initBth(); //temp
-	bool initArena(); //temp
+	bool initArena1(); //temp
+	bool initArena2(); //temp
 	bool initProjectile(); //temp
 
 	/*Makers*/
 	MeshMakerObj* makerBTH_;
-	MeshMakerObj* makerArena_;
+	MeshMakerObj* makerArena1_;
+	MeshMakerObj* makerArena2_;
 	MeshMakerObj* makerProjectile_;
 };
 
