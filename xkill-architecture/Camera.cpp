@@ -11,7 +11,7 @@ Camera::Camera(
 	this->aspect_	= aspect;
 	this->fov_		= fov;
 	this->zFar_		= zFar;
-	this->zNear_		= zNear;
+	this->zNear_	= zNear;
 
 	velocity_			= 0.01f;
 
@@ -196,9 +196,9 @@ void Camera::yaw(const float angle)
 
 void Camera::setPosition(float position[3])
 {
-	position_.x = position[0] + look_.x*0;
-	position_.y = position[1] + look_.y*0;
-	position_.z = position[2] + look_.z*0;
+	position_.x = position[0] + look_.x*0.1f;
+	position_.y = position[1] + look_.y*0.1f;
+	position_.z = position[2] + look_.z*0.1f;
 }
 
 void Camera::setAspectRatio(float aspectRatio)

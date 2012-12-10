@@ -105,7 +105,7 @@ public:
 		{
 			entities[id].deleteAttributes();
 			deleted.push(id);
-			std::cout << "ENTITYMANAGER: Removed Entity" << id << std::endl;
+			std::cout << "ENTITYMANAGER: Removed Entity " << id << std::endl;
 		}
 	}
 };

@@ -82,14 +82,12 @@ void InputComponent::handleInput(float delta)
 
 		InputDevice::InputState state = device->GetState();
 
-		float moveSpeed = 30.0f;
-
 		int nrAxes = state.axes.size();
 		if(nrAxes >= 1)
-			inputAttributes_->at(i).position.x = state.axes[0].GetValue() * moveSpeed;
-
+			inputAttributes_->at(i).position.x = state.axes[0].GetValue();
+																		    
 		if(nrAxes >= 2)													    
-			inputAttributes_->at(i).position.y = state.axes[1].GetValue() * moveSpeed;
+			inputAttributes_->at(i).position.y = state.axes[1].GetValue();
 																		    
 		if(nrAxes >= 3)													    
 			inputAttributes_->at(i).rotation.x = state.axes[2].GetValue() * delta;
@@ -120,16 +118,16 @@ void InputComponent::handleInput(float delta)
 			if(state.buttons.size() > 7)
 			{
 				if(state.buttons[3].isDown())
-					inputAttributes_->at(i).position.y = moveSpeed;
+					inputAttributes_->at(i).position.y = 1.0f;
 																		    
 				if(state.buttons[4].isDown())
-					inputAttributes_->at(i).position.x = -moveSpeed;
+					inputAttributes_->at(i).position.x = -1.0f;
 
 				if(state.buttons[5].isDown())
-					inputAttributes_->at(i).position.y = -moveSpeed;
+					inputAttributes_->at(i).position.y = -1.0f;
 
 				if(state.buttons[6].isDown())
-					inputAttributes_->at(i).position.x = moveSpeed;
+					inputAttributes_->at(i).position.x = 1.0f;
 			}
 		}
 		

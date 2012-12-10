@@ -57,6 +57,10 @@ enum DLL_U AttributeType
 	ATTRIBUTE_PLAYER,
 	ATTRIBUTE_BOUNDING,
 	ATTRIBUTE_MESH,
+	ATTRIBUTE_PROJECTILE,
+
+	ATTRIBUTE_HEALTH,
+	ATTRIBUTE_DAMAGE,
 
 	// this is needed, don't touch!
 	ATTRIBUTE_LAST
@@ -147,6 +151,20 @@ struct DLL_U PhysicsAttribute : public IAttribute
 	bool isProjectile;
 };
 
+/// Stores everything GameComponent needs to know when handling 
+/** 
+\ingroup ATTRIBUTES
+*/
+struct DLL_U ProjectileAttribute : public IAttribute
+{
+	ProjectileAttribute();
+	~ProjectileAttribute();
+
+	AttributePointer physicsAttribute;
+	int entityIdOfCreator;		//!< Entity id of the entity that created the projectile.
+	float currentLifeTimeLeft;	//!< Counter counting down the lifetime of the projectile. Is initialized to totalLifeTime. When equal or less than zero, the projectile attribute shall be destroyed.
+};
+
 struct DLL_U InputAttribute : public IAttribute
 {
 	InputAttribute();
@@ -192,15 +210,17 @@ struct DLL_U PlayerAttribute : public IAttribute
 	PlayerAttribute();
 	~PlayerAttribute();
 
-	int id;					//!< The id of the player process. Used to identify a player attribute in GameComponent.
+	int id;					//!< The id of the player process. Used to identify a player attribute in GameComponent when firing projectiles.
 	std::string name;		//!< Name of the player process.
-	int health;				//!< Health of the player process. If less or equal to zero, the player process is terminated.
+	
 	int priority;			//!< Priority of the player process. Higher value means higher priority. The scheduler will choose the process with the highest priority for execution.
 	int cycleSteals;		//!< Total number of cycle steals for the player process. Cycle steals steal priority from other player processes.
-	int totalExecutionTime; //!< Total execution time of the player process. The game session winner is the player with the most total execution time as awared by the scheduler.
+	int totalExecutionTime; //!< Total execution time of the player process. The game session winner is the player with the most total execution time as awarded by the scheduler.
 
 	AttributePointer renderAttribute;
 	AttributePointer inputAttribute;
+	AttributePointer cameraAttribute;
+	AttributePointer healthAttribute;
 };
 
 
@@ -213,4 +233,25 @@ struct DLL_U MeshAttribute : public IAttribute
 	void clean();
 	MeshAttribute(){};
 	~MeshAttribute();;
+};
+
+struct DLL_U HealthAttribute : public IAttribute
+{
+	HealthAttribute()
+	{
+		health = 10;
+	};
+
+	int health;
+};
+
+struct DLL_U DamageAttribute : public IAttribute
+{
+	DamageAttribute()
+	{
+		damage = 1;
+	};
+
+	int damage;
+	int owner_enityID;
 };

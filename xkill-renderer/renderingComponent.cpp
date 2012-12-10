@@ -197,6 +197,7 @@ void RenderingComponent::renderToGBuffer(DirectX::XMFLOAT4X4 viewMatrix, DirectX
 	d3dManagement_->clearDepthBuffer();
 
 	// Fetch attributes
+	std::vector<int>* renderOwners;					GET_ATTRIBUTE_OWNERS(renderOwners, ATTRIBUTE_RENDER);
 	std::vector<RenderAttribute>*	allRender;		GET_ATTRIBUTES(allRender,	RenderAttribute,	ATTRIBUTE_RENDER);
 	std::vector<SpatialAttribute>*	allSpatial;		GET_ATTRIBUTES(allSpatial,	SpatialAttribute,	ATTRIBUTE_SPATIAL);
 	std::vector<PositionAttribute>*	allPosition;	GET_ATTRIBUTES(allPosition,	PositionAttribute,	ATTRIBUTE_POSITION);
@@ -209,40 +210,43 @@ void RenderingComponent::renderToGBuffer(DirectX::XMFLOAT4X4 viewMatrix, DirectX
 	RenderAttribute* renderAt; SpatialAttribute* spatialAt; PositionAttribute* positionAt;
 	for(unsigned int i=0; i<allRender->size(); i++)
 	{
-		renderAt	= &allRender->at(i);
-		meshIndex	= renderAt->meshIndex;
-		spatialAt	= &allSpatial->at(renderAt->spatialAttribute.index);
-		positionAt	= &allPosition->at(spatialAt->positionAttribute.index);
-		
-		meshModelD3D = meshManagement_->getMeshModelD3D(meshIndex, d3dManagement_->getDevice());
-		VB*					vb	= meshModelD3D->getVB();
-		std::vector<IB*>	ibs	= meshModelD3D->getIBs();
-
-		worldMatrix			= calculateWorldMatrix(allSpatial->at(i), allPosition->at(i));
-		worldMatrixInverse	= calculateMatrixInverse(worldMatrix);
-		finalMatrix			= calculateFinalMatrix(worldMatrix, viewMatrix, projectionMatrix);
-		
-		cbManagement_->vsSet(CB_OBJECT_INDEX, 2, devcon);
-		cbManagement_->updateCBObject(devcon, finalMatrix, worldMatrix, worldMatrixInverse);
-
-		UINT stride = sizeof(VertexPosNormTex);
-		UINT offset = 0;
-		
-		ID3D11Buffer* vertexBuffer = vb->getVB();
-		devcon->IASetVertexBuffers(
-			0, 
-			1, 
-			&vertexBuffer, 
-			&stride, 
-			&offset);
-
-		for(unsigned int i = 0; i < ibs.size(); i++)
+		if(renderOwners->at(i)!=0)
 		{
-			devcon->IASetIndexBuffer(ibs[i]->getIB(), DXGI_FORMAT_R32_UINT, offset);
+			renderAt	= &allRender->at(i);
+			meshIndex	= renderAt->meshIndex;
+			spatialAt	= &allSpatial->at(renderAt->spatialAttribute.index);
+			positionAt	= &allPosition->at(spatialAt->positionAttribute.index);
 
-			devcon->IASetInputLayout(fxManagement_->getILDefaultVSPosNormTex());
-			devcon->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-			devcon->DrawIndexed(ibs[i]->getNumIndices(), 0, 0);
+			meshModelD3D = meshManagement_->getMeshModelD3D(meshIndex, d3dManagement_->getDevice());
+			VB*					vb	= meshModelD3D->getVB();
+			std::vector<IB*>	ibs	= meshModelD3D->getIBs();
+
+			worldMatrix			= calculateWorldMatrix(allSpatial->at(i), allPosition->at(i));
+			worldMatrixInverse	= calculateMatrixInverse(worldMatrix);
+			finalMatrix			= calculateFinalMatrix(worldMatrix, viewMatrix, projectionMatrix);
+
+			cbManagement_->vsSet(CB_OBJECT_INDEX, 2, devcon);
+			cbManagement_->updateCBObject(devcon, finalMatrix, worldMatrix, worldMatrixInverse);
+
+			UINT stride = sizeof(VertexPosNormTex);
+			UINT offset = 0;
+
+			ID3D11Buffer* vertexBuffer = vb->getVB();
+			devcon->IASetVertexBuffers(
+				0, 
+				1, 
+				&vertexBuffer, 
+				&stride, 
+				&offset);
+
+			for(unsigned int i = 0; i < ibs.size(); i++)
+			{
+				devcon->IASetIndexBuffer(ibs[i]->getIB(), DXGI_FORMAT_R32_UINT, offset);
+
+				devcon->IASetInputLayout(fxManagement_->getILDefaultVSPosNormTex());
+				devcon->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+				devcon->DrawIndexed(ibs[i]->getNumIndices(), 0, 0);
+			}
 		}
 	}
 
