@@ -238,7 +238,7 @@ struct DLL_U HealthAttribute : public IAttribute
 {
 	HealthAttribute()
 	{
-		health = 10;
+		health = 2;
 	};
 
 	int health;
