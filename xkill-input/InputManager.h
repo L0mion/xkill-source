@@ -33,6 +33,8 @@
 
 #define SAFE_RELEASE(x) {if(x != NULL) x->Release(); x = NULL;} //Should probably not be here, needed for isXInputDevice
 
+class FileParser;
+
 //! Detects and manages devices and their input.
 /*!
 Enumerates all gamepads connected to the computer and sets them up for input. It also adds the system mouse and system
@@ -70,8 +72,9 @@ public:
 	Needs a handle to the instance, but will get this from the window using "GetWindowLong(hWnd, GWL_HINSTANCE)".
 	
 	\param hWindow The handle to current window
+	\param configFilePath The path of the config file directory
 	*/
-	bool InitInput(HWND hWindow);
+	bool InitInput(HWND hWindow, std::string configFilePath);
 
 	//! Adds newly plugged in gamepads
 	/*!
@@ -92,6 +95,10 @@ public:
 	QTInputDevices* GetMouseAndKeyboard();
 	
 	//! Generates a string with the states of all devices
+	/*!
+	A string with information of the states of all devices.
+	Used when debugging.
+	*/
 	std::string GetInputInformationString();
 
 	//! Callback function for the Direct Input EnumDevices function

@@ -1,5 +1,7 @@
 #include "InputManager.h"
 
+#include "FileParser.h"
+
 InputManager::InputManager(void)
 {
 }
@@ -11,7 +13,7 @@ InputManager::~InputManager(void)
 		delete (*it);
 }
 
-bool InputManager::InitInput(HWND hWindow)
+bool InputManager::InitInput(HWND hWindow, std::string configFilePath)
 {
 	HRESULT result;
 	nrOfXInputDevices_ = 0;
@@ -168,34 +170,6 @@ int InputManager::checkForNewXInputDevices()
 	}
 
 	return nrOfControllersAdded;
-}
-
-void InputManager::handleInput()
-{
-	InputDevice::InputState inputState;
-
-	for(unsigned int i = 0; i < devices_.size(); i++)
-	{
-		inputState = devices_[i]->GetState();
-
-		if(inputState.buttons.size() >= 2)
-		{
-			if(inputState.buttons[0].isReleased())
-			{
-				devices_[i]->RunForceFeedback();
-			}
-			else if(inputState.buttons[1].isReleased())
-			{
-				devices_[i]->StopForceFeedback();
-			}
-		}
-
-		if(devices_[i]->IsForceFeedbackCapable())
-		{
-			if(inputState.axes.size() >= 4)
-				devices_[i]->SetForceFeedback(std::abs(inputState.axes[2].GetValue()), std::abs(inputState.axes[3].GetValue()));
-		}
-	}
 }
 
 BOOL CALLBACK InputManager::EnumDevicesCallback(const DIDEVICEINSTANCE* device, LPVOID pvRef)

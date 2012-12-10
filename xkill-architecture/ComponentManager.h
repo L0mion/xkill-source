@@ -65,9 +65,12 @@ public:
 
 		if(!game_.init())
 			return false;
-		if(!sound_.init())
+
+		std::string configPath = "../../xkill-resources/xkill-configs/";
+
+		if(!sound_.init(configPath))
 			return false;
-		if(!input_.init(parentWindowHandle, AttributeManager::getInstance()->inputAttributes_.getAllAttributes()))
+		if(!input_.init(parentWindowHandle, AttributeManager::getInstance()->inputAttributes_.getAllAttributes(), configPath))
 			return false;
 
 		//if(!score_.init(AttributeManager::getInstance()->playerAttributes_.getAllAttributes()))

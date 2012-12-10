@@ -24,14 +24,14 @@ private:
 	FMODEventSystem* mFMODEventSystem;
 	EventToFModConverter* converter;
 
-	void fillEventsToFModVector();
+	void fillEventsToFModVector(std::string configFilePath);
 
 	std::string configMessage();
 
 public:
 	SoundComponent();
 	~SoundComponent();
-	bool init();
+	bool init(std::string configFilePath);
 
 	void onEvent(Event* e);
 	void onUpdate(float delta);

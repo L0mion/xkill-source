@@ -70,7 +70,9 @@ public:
 			// Reuse attribute
 			index = deleted.front();
 			deleted.pop();
+			attributes[index] = T();
 			owners[index]=owner->getID();
+			
 		}
 		// FALSE: Create new attribute
 		else

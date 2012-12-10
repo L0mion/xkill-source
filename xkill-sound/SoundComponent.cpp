@@ -26,7 +26,7 @@ SoundComponent::~SoundComponent()
 	SAFE_DELETE(converter);
 }
 
-bool SoundComponent::init()
+bool SoundComponent::init(std::string configFilePath)
 {
 	mFMODEventSystem = new FMODEventSystem();
 	mFMODEventSystem->Init("../xkill-dependencies/sound/", "testproject.fev", 64);
@@ -39,9 +39,9 @@ bool SoundComponent::init()
 	}
 
 	converter = new EventToFModConverter();
-	converter->init("../../xkill-resources/xkill-configs/");
+	converter->init(configFilePath);
 
-	fillEventsToFModVector();
+	fillEventsToFModVector(configFilePath);
 
 	return true;
 }
@@ -57,11 +57,11 @@ void SoundComponent::onUpdate(float delta)
 	mFMODEventSystem->Update();
 }
 
-void SoundComponent::fillEventsToFModVector()
+void SoundComponent::fillEventsToFModVector(std::string configFilePath)
 {
 	FileParser fp(configMessage());
 	fp.setFileName("sound.cfg");
-	fp.setFilePath("../../xkill-resources/xkill-configs/");
+	fp.setFilePath(configFilePath);
 	if(fp.startReading())
 	{
 		while(!fp.isEmpty())
@@ -85,7 +85,7 @@ std::string SoundComponent::configMessage()
 	message += "// \n";
 	message += "// 1 = CreateProjectile\n";
 	message += "// This will bind fmod event '1' to the 'CreateProjectile' game event\n";
-	message += "// Event names can be found in 'Events.cfg'\n";
+	message += "// Event names can be found in 'events.cfg'\n";
 
 	return message;
 }

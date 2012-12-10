@@ -2,16 +2,18 @@
 
 #include "MTLMaterial.h"
 #include "LoaderMTL.h"
+#include "SimpleStringSplitter.h"
 
 LoaderMTL::LoaderMTL(
 	const std::string pathMTL,
 	const std::string fileNameMTL) : Loader(pathMTL, fileNameMTL)
 {
-	//Do nothing.
+	sss_ = nullptr;
 }
 LoaderMTL::~LoaderMTL()
 {
-	//Do nothing.
+	if(sss_)
+		delete sss_;
 }
 
 bool LoaderMTL::init()
@@ -19,6 +21,7 @@ bool LoaderMTL::init()
 	bool sucessfulLoad = true;
 
 	lineNum_ = 0;
+	sss_ = new SimpleStringSplitter();
 
 	std::string fullPath = getFilePath() + getFileName();
 	ifstream_.open(fullPath);
@@ -48,7 +51,7 @@ bool LoaderMTL::parseMTL()
 	while(!ifstream_.eof() && sucessfulLoad)
 	{
 		getLine(curLine);
-		curLineSplit = sss_.splitString(MTL_SEPARATOR_DEFAULT, curLine);
+		curLineSplit = sss_->splitString(MTL_SEPARATOR_DEFAULT, curLine);
 
 		curSymbol = parseSymbol(curLineSplit);
 		if(curSymbol != MTLSYMBOL_IGNORE)

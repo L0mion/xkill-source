@@ -46,6 +46,7 @@ public:
 	void createPlayerEntity(Entity* entity)
 	{
 		CREATE_ATTRIBUTE(PositionAttribute, position, entity);
+		position->position.z += 0.3f*entity->getID();
 
 		CREATE_ATTRIBUTE(SpatialAttribute, spatial, entity);
 		CONNECT_ATTRIBUTES(spatial, position);
@@ -71,6 +72,9 @@ public:
 		static int playerId = 0;
 		player->id = playerId;
 		playerId++;
+
+		CREATE_ATTRIBUTE(HealthAttribute, health, entity);
+		health->health = 10;
 	}
 
 	void createWorldEntity(Entity* entity)
@@ -97,6 +101,7 @@ public:
 
 		CREATE_ATTRIBUTE(SpatialAttribute, spatial, entity);
 		CONNECT_ATTRIBUTES(spatial, position);
+		spatial->rotation = e->rotation;
 
 		CREATE_ATTRIBUTE(RenderAttribute, render, entity);
 		CONNECT_ATTRIBUTES(render, spatial);
@@ -107,8 +112,11 @@ public:
 		physics->linearVelocity = e->velocity;
 
 		CREATE_ATTRIBUTE(ProjectileAttribute, projectile, entity);
-		projectile->entityIdOfCreator = e->entityIdOfCreator;
 		CONNECT_ATTRIBUTES(projectile, physics);
+		projectile->entityIdOfCreator = e->entityIdOfCreator;
+
+		CREATE_ATTRIBUTE(DamageAttribute, damage, entity);
+		damage->owner_enityID = e->entityIdOfCreator;
 	}
 
 	void createMesh(Entity* entity, Event_CreateMesh* e)
