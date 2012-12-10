@@ -27,4 +27,17 @@ public:
 		ss << f;
 		return ss.str();
 	}
+
+	static int StrToInt(std::string str)
+	{
+		int n;
+		std::stringstream ss(str);
+		ss >> n;
+		if(ss.fail())
+		{
+			n = -1;
+		}
+
+		return n;
+	}
 };
