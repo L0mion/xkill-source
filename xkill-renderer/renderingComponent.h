@@ -17,7 +17,9 @@
 //#include <vld.h>
 #endif //DEBUG || DEBUG_
 
-#define TILE_SIZE 32
+
+#define TILE_SIZE 16
+
 
 class D3DManagement;
 class FXManagement;
@@ -172,12 +174,12 @@ private:
 	\param view View-matrix from camera.
 	\param projection Projection-matrix from camera.
 	*/
-	void renderToGBuffer(DirectX::XMFLOAT4X4 viewMatrix, DirectX::XMFLOAT4X4 projectionMatrix);
+	void renderViewportToGBuffer(DirectX::XMFLOAT4X4 viewMatrix, DirectX::XMFLOAT4X4 projectionMatrix);
 	//! Samples from g-buffers and creates a final image using DirectCompute.
 	/*!
 	\sa uavBackBuffer
 	*/
-	void renderToBackBuffer();
+	void renderViewportToBackBuffer();
 	//! Clears all render targets, buffers, shaders etc after render to back buffer.
 	void renderBackBufferClean();
 
@@ -231,19 +233,6 @@ private:
 
 	std::vector<RenderAttribute>* renderAttributes_;
 	std::vector<CameraAttribute>* cameraAttributes_;
-	
-
-	//temp
-	ID3D11Buffer*			vertexBuffer_;		//!< Mock buffer sending vertices to shader.
-	std::vector<VertexPosNormTex>*	vertices_;	//!< Mock vertices.
-	ObjLoaderBasic*			objLoader_;			//!< Basic obj-loader used to debug renderer.
-
-	//! Creates a mockup vertexbuffer that loads it's vertices from a basic .obj-loader using bth.obj.
-	/*!
-	\return Any error encountered during initialization.
-	\sa ObjLoaderBasic
-	*/
-	HRESULT initVertexBuffer();
 
 	//! Methods that will be called on events. 
 	void event_WindowResize(Event_WindowResize* e);
