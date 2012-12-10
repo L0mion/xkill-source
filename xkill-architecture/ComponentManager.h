@@ -8,7 +8,7 @@
 
 #include "CameraComponent.h"
 #include "GameComponent.h"
-//#include "ScoreComponent.h"
+#include "ScoreComponent.h"
 #include "AttributeManager.h"
 
 
@@ -31,11 +31,11 @@ private:
 	IOComponent*			ioComponent_;
 	RenderingComponent*		render_;
 	BulletPhysicsComponent	physics_;
-	SoundComponent		sound_;
+	SoundComponent			sound_;
 	CameraComponent			camera_;
 	InputComponent			input_;
 	GameComponent			game_;
-	//ScoreComponent		score_;
+	ScoreComponent			score_;
 
 public:
 	ComponentManager()
@@ -73,8 +73,8 @@ public:
 		if(!input_.init(parentWindowHandle, AttributeManager::getInstance()->inputAttributes_.getAllAttributes(), configPath))
 			return false;
 
-		//if(!score_.init(AttributeManager::getInstance()->playerAttributes_.getAllAttributes()))
-		//	return false;
+		if(!score_.init(AttributeManager::getInstance()->playerAttributes_.getAllAttributes()))
+			return false;
 
 		// Returns that everything went ok
 		return true;

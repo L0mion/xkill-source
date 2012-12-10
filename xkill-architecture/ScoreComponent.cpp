@@ -29,7 +29,7 @@ void ScoreComponent::onEvent(Event* e)
 {
 	switch(e->getType())
 	{
-	case EVENT_PLAYERKILLED:
+	case EVENT_PLAYER_KILLED:
 		sort(playerIndices);
 		break;
 	default:
