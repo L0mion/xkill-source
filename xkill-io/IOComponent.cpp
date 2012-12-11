@@ -1,8 +1,13 @@
+#include <windows.h>
+#include <tchar.h>
+#include <stdio.h>
+
 #include <xkill-utilities/EventManager.h>
 #include <xkill-utilities/MeshModel.h>
 
 #include "MeshMakerObj.h"
 #include "IOComponent.h"
+#include "LoaderTexDesc.h"
 
 IOComponent::IOComponent()
 {
@@ -23,6 +28,8 @@ bool IOComponent::init()
 {
 	bool sucessfulInit = true;
 
+	initTexDescs();
+
 	sucessfulInit = initBth();
 	if(sucessfulInit)
 		sucessfulInit = initArena();
@@ -31,6 +38,77 @@ bool IOComponent::init()
 
 	return sucessfulInit;
 }
+
+bool IOComponent::initTexDescs()
+{
+	bool sucessfulLoad = true;
+
+	std::vector<std::string> texDescFiles;
+
+	texDescFiles = getFileNames(PATH_TEXDESC);
+
+	if(texDescFiles.size() > 0)
+	{
+		for(unsigned int i = 0; i < texDescFiles.size() && sucessfulLoad; i++)
+			sucessfulLoad = initTexDesc(texDescFiles.at(i));
+	}
+	else
+		SHOW_MESSAGEBOX("Couldn't locate any .texdesc-files in xkill-resources/.");
+
+	return sucessfulLoad;
+}
+bool IOComponent::initTexDesc(std::string filename)
+{
+	bool sucessfulLoad = true;
+
+	LoaderTexDesc* loader = new LoaderTexDesc(filename, PATH_XKILL_RESOURCES);
+	sucessfulLoad = loader->init();
+	
+	if(sucessfulLoad)
+	{
+		TexDesc* texDesc = loader->claimTexDesc();
+
+		Event_PostDescTex e(texDesc);
+		SEND_EVENT(&e);
+	}
+	
+	//Clear memory allocated
+	delete loader;
+
+	return sucessfulLoad;
+}
+
+std::vector<std::string> IOComponent::getFileNames(const LPCTSTR filename)
+{
+	std::vector<std::string> foundFiles;
+
+	WIN32_FIND_DATA findFileData;
+	HANDLE searchHandleWinAPI;
+
+	searchHandleWinAPI = FindFirstFile(
+		filename,
+		&findFileData);
+
+	if(searchHandleWinAPI != INVALID_HANDLE_VALUE)
+	{
+		do 
+		{
+			WCHAR* foundFile = findFileData.cFileName;
+
+			//convert WCHAR* to char*
+			char ch[260];
+			char DefChar = ' ';
+			WideCharToMultiByte(CP_ACP, 0, foundFile, -1, ch, 260, &DefChar, NULL);
+			
+			foundFiles.push_back(std::string(ch));
+
+		} while(FindNextFile(searchHandleWinAPI, &findFileData));
+		FindClose(searchHandleWinAPI);
+	}
+
+	return foundFiles;
+}
+
 bool IOComponent::initBth()
 {
 	bool sucessfulMake = true;

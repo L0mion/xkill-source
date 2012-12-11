@@ -1,10 +1,6 @@
 #ifndef XKILL_IO_IOCOMPONENT_H
 #define XKILL_IO_IOCOMPONENT_H
 
-#if defined (DEBUG) || (DEBUG_)
-//#include <vld.h>
-#endif //DEBUG || DEBUG_
-
 #include <vector>
 
 #include <xkill-utilities/IObserver.h>
@@ -16,13 +12,17 @@
 class MeshMakerObj;
 class MeshModel;
 
+static const std::string PATH_XKILL_RESOURCES	= "../../xkill-resources/";
+static const LPCTSTR PATH_TEXDESC				= L"../../xkill-resources/*.texdesc";
+
+//temp
 static const std::string objPath = "../../xkill-resources/xkill-models/";
 static const std::string pgyPath = "../../xkill-resources/xkill-models/";
 static const std::string mtlPath = "../../xkill-resources/xkill-models/";
 
-static const std::string bthName	= "bth.obj";
+static const std::string bthName		= "bth.obj";
 static const std::string projectileName	= "projectile.obj";
-static const std::string arenaName	= "xkillArena.obj";
+static const std::string arenaName		= "xkillArena.obj";
 
 class DLL_IO IOComponent : public IObserver
 {
@@ -36,6 +36,11 @@ public:
 	void onEvent(Event* e);
 protected:
 private:
+	bool initTexDescs();
+	bool initTexDesc(std::string filename);
+
+	std::vector<std::string> getFileNames(LPCTSTR filename);
+
 	bool initBth(); //temp
 	bool initArena(); //temp
 	bool initProjectile(); //temp
