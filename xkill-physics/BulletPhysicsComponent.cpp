@@ -167,15 +167,25 @@ void BulletPhysicsComponent::onEvent(Event* e)
 	switch(e->getType())
 	{
 	case EVENT_DO_CULLING:
-		static btConvexHullShape frustumShape;
-		if(frustumShape.getNumPoints()==0 && cameraAttributes_->size()>0)
-		{
-			
-		}
 		while(ghostObjects_->size() < cameraAttributes_->size())
 		{
+			CameraAttribute* cameraAttribute = &cameraAttributes_->at(ghostObjects_->size());
 			btGhostObject *ghost = new btGhostObject;
 			btConvexHullShape* frustumShape = new btConvexHullShape;
+			float far = cameraAttribute->zFar;
+			float near = cameraAttribute->zNear;
+			float fov = cameraAttribute->fov;
+			float aspect = cameraAttribute->aspect;
+			frustumShape->addPoint(btVector3(0,0,near));   //y = far/ tan(fov/2)
+			frustumShape->addPoint(btVector3(0,0,near));
+			frustumShape->addPoint(btVector3(0,0,near));
+			frustumShape->addPoint(btVector3(0,0,near));
+
+			frustumShape->addPoint(btVector3(0,0,far));
+			frustumShape->addPoint(btVector3(0,0,far));
+			frustumShape->addPoint(btVector3(0,0,far));
+			frustumShape->addPoint(btVector3(0,0,far));
+
 			ghost->setCollisionShape(frustumShape);
 			ghostObjects_->push_back(ghost);
 		}
