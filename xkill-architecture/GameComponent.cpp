@@ -189,18 +189,19 @@ void GameComponent::onUpdate(float delta)
 				//TODO: Camera rotation.
 				//TODO: velocity direction fix.
 
-				Float4 rot = spatial->rotation; 
-				// extract camera rotation to determine velocity
+				
+				// extract camera orientation to determine velocity
 				DirectX::XMFLOAT3 lookAtFloat3;
 				lookAtFloat3.x = camera->mat_view._13;
-				lookAtFloat3.y = camera->mat_view._12;
-				lookAtFloat3.z = camera->mat_view._11;
+				lookAtFloat3.y = camera->mat_view._23;
+				lookAtFloat3.z = camera->mat_view._33;
 				DirectX::XMVECTOR lookAt = DirectX::XMLoadFloat3(&lookAtFloat3);
 				lookAt = DirectX::XMVector3Normalize(lookAt);
+
+				//Direction and speed
 				float lookAtX = DirectX::XMVectorGetX(lookAt);
 				float lookAtY = DirectX::XMVectorGetY(lookAt);
 				float lookAtZ = DirectX::XMVectorGetZ(lookAt);
-				// velocity
 				Float3 velocity(lookAtX, lookAtY, lookAtZ);
 				velocity.x *= 750.0f;
 				velocity.y *= 750.0f;
@@ -211,6 +212,16 @@ void GameComponent::onUpdate(float delta)
 				pos.y += lookAtY*d;
 				pos.z += lookAtZ*d;
 				
+				//Retrieve the orientation from the camera look at vector. The projectile will have this orientation.
+				//DirectX::XMVECTOR orientationQuaternionAsVectorFromLookAt = DirectX::XMQuaternionRotationRollPitchYawFromVector(lookAt);
+				//float orientationQuaternionAsVectorFromLookAtX = DirectX::XMVectorGetX(orientationQuaternionAsVectorFromLookAt);
+				//float orientationQuaternionAsVectorFromLookAtY = DirectX::XMVectorGetY(orientationQuaternionAsVectorFromLookAt);
+				//float orientationQuaternionAsVectorFromLookAtZ = DirectX::XMVectorGetZ(orientationQuaternionAsVectorFromLookAt);
+				//float orientationQuaternionAsVectorFromLookAtW = DirectX::XMVectorGetW(orientationQuaternionAsVectorFromLookAt);
+				//Float4 rot = Float4(orientationQuaternionAsVectorFromLookAtX, orientationQuaternionAsVectorFromLookAtY, orientationQuaternionAsVectorFromLookAtZ, orientationQuaternionAsVectorFromLookAtW);
+
+				Float4 rot = spatial->rotation;
+
 				Event_CreateProjectile projectile(pos, velocity, rot, playerAttributesOwners->at(i));
 				SEND_EVENT(&projectile);
 				input->fire = false;
