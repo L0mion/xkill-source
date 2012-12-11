@@ -22,7 +22,7 @@ bool GameComponent::init()
 	GET_ATTRIBUTE_OWNERS(allPhysicsOwner, ATTRIBUTE_PHYSICS);
 
 	//Crate two spawn points
-	SEND_EVENT(&Event_CreateSpawnPoint(Float3(0.0f, 0.0f, 0.0f)));
+	SEND_EVENT(&Event_CreateSpawnPoint(Float3(0.0f, 0.0f, -5.0f)));
 	SEND_EVENT(&Event_CreateSpawnPoint(Float3(0.0f, 5.0f, 0.0f)));
 
 	return true;
@@ -159,8 +159,8 @@ void GameComponent::onUpdate(float delta)
 	std::vector<SpatialAttribute>* allSpatial;		GET_ATTRIBUTES(allSpatial, SpatialAttribute, ATTRIBUTE_SPATIAL);
 	std::vector<PositionAttribute>* allPositions;	GET_ATTRIBUTES(allPositions, PositionAttribute, ATTRIBUTE_POSITION);
 	std::vector<ProjectileAttribute>* allProjectiles;	GET_ATTRIBUTES(allProjectiles, ProjectileAttribute, ATTRIBUTE_PROJECTILE);
+	
 	std::vector<SpawnPointAttribute>* allSpawnPoints;	GET_ATTRIBUTES(allSpawnPoints, SpawnPointAttribute, ATTRIBUTE_SPAWNPOINT);
-
 	std::vector<int>* spawnPointAttributesOwners;		GET_ATTRIBUTE_OWNERS(spawnPointAttributesOwners, ATTRIBUTE_SPAWNPOINT);
 
 	//Handle updates of player attributes
@@ -180,6 +180,8 @@ void GameComponent::onUpdate(float delta)
 
 			if(input->fire) //Create a projectile
 			{
+				input->fire = false;
+
 				// Position
 				Float3 pos;
 				pos.x = position->position.x;
@@ -208,51 +210,38 @@ void GameComponent::onUpdate(float delta)
 				pos.y += lookAtY*d;
 				pos.z += lookAtZ*d;
 				
-				//Retrieve the orientation from the camera look at vector. The projectile will have this orientation.
-				//DirectX::XMVECTOR orientationQuaternionAsVectorFromLookAt = DirectX::XMQuaternionRotationRollPitchYawFromVector(lookAt);
-				//float orientationQuaternionAsVectorFromLookAtX = DirectX::XMVectorGetX(orientationQuaternionAsVectorFromLookAt);
-				//float orientationQuaternionAsVectorFromLookAtY = DirectX::XMVectorGetY(orientationQuaternionAsVectorFromLookAt);
-				//float orientationQuaternionAsVectorFromLookAtZ = DirectX::XMVectorGetZ(orientationQuaternionAsVectorFromLookAt);
-				//float orientationQuaternionAsVectorFromLookAtW = DirectX::XMVectorGetW(orientationQuaternionAsVectorFromLookAt);
-				//Float4 rot = Float4(orientationQuaternionAsVectorFromLookAtX, orientationQuaternionAsVectorFromLookAtY, orientationQuaternionAsVectorFromLookAtZ, orientationQuaternionAsVectorFromLookAtW);
-
 				Float4 rot = spatial->rotation;
 
-				Event_CreateProjectile projectile(pos, velocity, rot, playerAttributesOwners->at(i));
-				SEND_EVENT(&projectile);
-				input->fire = false;
+				SEND_EVENT(&Event_CreateProjectile(pos, velocity, rot, playerAttributesOwners->at(i)));
 			}
 
-			
-			//SpawnPointAttribute* spawnPoint;
-			//int longestTimeSinceLastSpawnIndex = -1;
-			// Health logic for players
-			if(health->health <= 0)
+			//Health and respawn logic for players
+			SpawnPointAttribute* spawnPoint;
+			int longestTimeSinceLastSpawnIndex = -1;
+			float longestTimeSinceLastSpawn = 0.0f;
+			if(health->health <= 0) 
 			{
-				//for(unsigned i=0; i<spawnPointAttributesOwners->size(); i++)
-				//{
-				//	int longestTimeSinceLastSpawn = 0.0f;
-				//	if(spawnPointAttributesOwners->at(i)!=0)
-				//	{
-				//		spawnPoint = &allSpawnPoints->at(i);
-				//		if(spawnPoint->timeSinceLastSpawn > longestTimeSinceLastSpawn)
-				//		{
-				//			longestTimeSinceLastSpawn = spawnPoint->timeSinceLastSpawn;
-				//			longestTimeSinceLastSpawnIndex = i;
-				//		}
-				//	}
-				//}
+				for(unsigned i=0; i<spawnPointAttributesOwners->size(); i++)
+				{
+					if(spawnPointAttributesOwners->at(i)!=0)
+					{
+						spawnPoint = &allSpawnPoints->at(i);
+  						if(spawnPoint->timeSinceLastSpawn > longestTimeSinceLastSpawn)
+						{
+							longestTimeSinceLastSpawn = spawnPoint->timeSinceLastSpawn;
+ 							longestTimeSinceLastSpawnIndex = i;
+						}
+					}
+ 				}
 
-				//spawnPoint = &allSpawnPoints->at(longestTimeSinceLastSpawnIndex);
-				//
-				////Set player position to the spawn point position and reset the spawn point timer
-				//PositionAttribute* newPosition	= &allPositions->at(spawnPoint->positionAttribute.index);
-				//position->position = newPosition->position;
-				//spawnPoint->timeSinceLastSpawn = 0.0f;
+				//Set player position to the spawn point position and reset the spawn point timer
+				spawnPoint = &allSpawnPoints->at(longestTimeSinceLastSpawnIndex);
+				PositionAttribute* newPosition	= &allPositions->at(spawnPoint->positionAttribute.index);
+				position->position = newPosition->position;
+				spawnPoint->timeSinceLastSpawn = 0.0f;
 
-      			position->position = Float3();
 				// restore health player have health on next life
-				health->health = 10;
+				health->health = health->startHealth;
 			}
 		}
 	}
@@ -277,7 +266,6 @@ void GameComponent::onUpdate(float delta)
 		}
 	}
 
-	/*
 	//Handle updates of spawn point attributes (update "timeSinceLastSpawn" timer)
 	for(unsigned i=0; i<spawnPointAttributesOwners->size(); i++)
 	{
@@ -287,5 +275,4 @@ void GameComponent::onUpdate(float delta)
 			spawnPoint->timeSinceLastSpawn += delta;
 		}
 	}
-	*/
 }

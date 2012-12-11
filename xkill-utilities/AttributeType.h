@@ -240,6 +240,7 @@ struct DLL_U HealthAttribute : public IAttribute
 	HealthAttribute();
 	~HealthAttribute();
 
+	int startHealth;
 	int health;
 };
 

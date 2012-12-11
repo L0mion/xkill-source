@@ -189,8 +189,8 @@ private:
 	\param spatialAttribute Contains scale and rotation to be used in calculation.
 	\param postionAttribute Contains position to be used in calculation.
 	*/
-	DirectX::XMFLOAT4X4 calculateWorldMatrix(SpatialAttribute spatialAttribute,
-											 PositionAttribute positionAttribute);
+	DirectX::XMFLOAT4X4 calculateWorldMatrix(SpatialAttribute* spatialAttribute,
+											 PositionAttribute* positionAttribute);
 
 	//! Calculates a final matrix that is used to transform an object from local space to homogeneous clip space.
 	/*!

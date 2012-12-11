@@ -125,7 +125,8 @@ void MeshAttribute::clean()
 
 HealthAttribute::HealthAttribute()
 {
-	health = 2;
+	startHealth = 2;
+	health = startHealth;
 }
 HealthAttribute::~HealthAttribute()
 {
