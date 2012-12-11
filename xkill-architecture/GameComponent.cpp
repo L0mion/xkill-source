@@ -183,12 +183,6 @@ void GameComponent::onUpdate(float delta)
 				pos.x = position->position.x;
 				pos.y = position->position.y;
 				pos.z = position->position.z;
-
-				// Rotation
-
-				//TODO: Camera rotation.
-				//TODO: velocity direction fix.
-
 				
 				// extract camera orientation to determine velocity
 				DirectX::XMFLOAT3 lookAtFloat3;
@@ -211,17 +205,22 @@ void GameComponent::onUpdate(float delta)
 				pos.x += lookAtX*d;
 				pos.y += lookAtY*d;
 				pos.z += lookAtZ*d;
-				
-				//Retrieve the orientation from the camera look at vector. The projectile will have this orientation.
-				//DirectX::XMVECTOR orientationQuaternionAsVectorFromLookAt = DirectX::XMQuaternionRotationRollPitchYawFromVector(lookAt);
-				//float orientationQuaternionAsVectorFromLookAtX = DirectX::XMVectorGetX(orientationQuaternionAsVectorFromLookAt);
-				//float orientationQuaternionAsVectorFromLookAtY = DirectX::XMVectorGetY(orientationQuaternionAsVectorFromLookAt);
-				//float orientationQuaternionAsVectorFromLookAtZ = DirectX::XMVectorGetZ(orientationQuaternionAsVectorFromLookAt);
-				//float orientationQuaternionAsVectorFromLookAtW = DirectX::XMVectorGetW(orientationQuaternionAsVectorFromLookAt);
-				//Float4 rot = Float4(orientationQuaternionAsVectorFromLookAtX, orientationQuaternionAsVectorFromLookAtY, orientationQuaternionAsVectorFromLookAtZ, orientationQuaternionAsVectorFromLookAtW);
 
-				Float4 rot = spatial->rotation;
+				// Rotation
+				DirectX::XMMATRIX rotationMatrix(	camera->mat_view._11,	camera->mat_view._21,	camera->mat_view._31,	0.0f,
+													camera->mat_view._12,	camera->mat_view._22,	camera->mat_view._32,	0.0f, 
+													camera->mat_view._13,	camera->mat_view._23,	camera->mat_view._33,	0.0f,
+													0.0f,					0.0f,					0.0f,					1.0f);
 
+				DirectX::XMVECTOR orientationQuaternion = DirectX::XMQuaternionRotationMatrix(rotationMatrix);
+				float orientationQuaternionX = DirectX::XMVectorGetX(orientationQuaternion);
+				float orientationQuaternionY = DirectX::XMVectorGetY(orientationQuaternion);
+				float orientationQuaternionZ = DirectX::XMVectorGetZ(orientationQuaternion);
+				float orientationQuaternionW = DirectX::XMVectorGetW(orientationQuaternion);
+
+				Float4 rot = Float4(orientationQuaternionX, orientationQuaternionY, orientationQuaternionZ, orientationQuaternionW);
+
+				// Send event
 				Event_CreateProjectile projectile(pos, velocity, rot, playerAttributesOwners->at(i));
 				SEND_EVENT(&projectile);
 				input->fire = false;
