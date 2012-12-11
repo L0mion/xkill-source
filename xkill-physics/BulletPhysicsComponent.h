@@ -14,6 +14,8 @@ class Event;
 struct PhysicsAttribute;
 struct BoundingAttribute;
 struct InputAttribute;
+struct RenderAttribute;
+struct CameraAttribute;
 
 class btBroadphaseInterface;
 class btDefaultCollisionConfiguration;
@@ -22,7 +24,7 @@ class btSequentialImpulseConstraintSolver;
 class btDiscreteDynamicsWorld;
 class btDynamicsWorld;
 class btRigidBody;
-class btPairCachingGhostObject;
+class btGhostObject;
 
 typedef float btScalar;
 
@@ -56,11 +58,13 @@ private:
 	std::vector<PhysicsAttribute>* physicsAttributes_; //<! A pointer to the attribute storage containing PhysicsAttributes, external representation of world
 	std::vector<BoundingAttribute>* boundingAttributes_; //<! A pointer to the attribute storage containing a copy of bounding volumes for the renderer
 	std::vector<InputAttribute>* inputAttributes_; //<! A pointer to the attribute storage containing the input data from the input component
+	std::vector<RenderAttribute>* renderAttributes_;
+	std::vector<CameraAttribute>* cameraAttributes_;
 	std::vector<int>* physicsOwners_; //! Owners of physicsAttributes
 
 	btAlignedObjectArray<PhysicsObject*>* physicsObjects_; //<! A vector of PhysicsObjects, internal representation of world
 	PhysicsObject* floor_; //<! The absolute floor plane, no object may pass bellow this plane
-	btAlignedObjectArray<btPairCachingGhostObject>* ghostObjects_;
+	btAlignedObjectArray<btGhostObject*>* ghostObjects_;
 
 public:
 	//! Creates a BulletPhysicsComponent, gives it pointers to attribute storages required by the component and sets all pointer to null_ptr

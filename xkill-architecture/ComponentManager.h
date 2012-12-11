@@ -84,6 +84,7 @@ public:
 		sound_.onUpdate(delta);
 		physics_.onUpdate(delta);
 		camera_.onUpdate(delta);
+		SEND_EVENT(&Event_DoCulling());
 		render_->onUpdate(delta);
 		input_.onUpdate(delta);
 		game_.onUpdate(delta);

@@ -73,7 +73,6 @@ public:
 			WORLD,
 			WORLD,
 			PLAYER,
-			PLAYER,
 			PLAYER
 		};
 		int nrOfListOfEntitiesToBeCreated = sizeof(listOfEntitiesToBeCreated)/4;

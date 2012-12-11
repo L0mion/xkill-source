@@ -35,8 +35,6 @@ for some reason
 enum DLL_U EventType
 {
 	// Inform events
-	EVENT_A,
-	EVENT_B,
 	EVENT_PLAYSOUND,
 	EVENT_RUMBLE,
 	EVENT_CREATE_PROJECTILE,
@@ -48,6 +46,8 @@ enum DLL_U EventType
 	EVENT_KEY_PRESS,
 	EVENT_KEY_RELEASE,
 	EVENT_WINDOW_RESIZE,
+
+	EVENT_DO_CULLING,
 
 	// Get events
 	EVENT_GET_ATTRIBUTE,
@@ -74,15 +74,9 @@ class DLL_U Event
 private:
 	EventType type;
 public:
-	Event(EventType type) 
-	{ 
-		this->type = type; 
-	}
+	Event(EventType type);
 
-	EventType getType() 
-	{ 
-		return type; 
-	}
+	EventType getType();
 };
 
 
@@ -94,36 +88,10 @@ public:
 /**
 \ingroup EVENTS
 */
-class DLL_U Event_A : public Event
-{
-public:
-	Event_A() : Event(EVENT_A){}
-
-	int a;
-};
-
-/**
-\ingroup EVENTS
-*/
-class DLL_U Event_B : public Event
-{
-public:
-	Event_B() : Event(EVENT_B){}
-
-	int b;
-};
-
-/**
-\ingroup EVENTS
-*/
 class DLL_U Event_MouseMove : public Event
 {
 public:
-	Event_MouseMove(int dx, int dy) : Event(EVENT_MOUSE_MOVE)
-	{
-		this->dx = dx;
-		this->dy = dy;
-	}
+	Event_MouseMove(int dx, int dy);
 
 	int dx;
 	int dy;
@@ -135,10 +103,7 @@ public:
 class DLL_U Event_PlaySound : public Event
 {
 public:
-	Event_PlaySound(int soundId) : Event(EVENT_PLAYSOUND)
-	{
-		this->soundId = soundId;
-	}
+	Event_PlaySound(int soundId);
 
 	int soundId;
 };
@@ -155,8 +120,11 @@ public:
 class DLL_U Event_Rumble : public Event
 {
 public:
-	Event_Rumble(unsigned int deviceNr, bool runRumble, float duration, float leftScale, float rightScale) : 
-		Event(EVENT_RUMBLE){this->deviceNr = deviceNr; this->runRumble = runRumble; this->duration = duration; this->leftScale = leftScale; this->rightScale = rightScale;}
+	Event_Rumble(unsigned int deviceNr,
+				 bool runRumble,
+				 float duration,
+				 float leftScale,
+				 float rightScale);
 	unsigned int deviceNr;
 	bool runRumble;
 	float duration;
@@ -171,13 +139,7 @@ public:
 class DLL_U Event_GetAttribute : public Event
 {
 public:
-	Event_GetAttribute(int attributeEnum) : Event(EVENT_GET_ATTRIBUTE)
-	{
-		this->attributeEnum = attributeEnum;
-		
-		hostVector = 0;
-		owners = 0;
-	}
+	Event_GetAttribute(int attributeEnum);
 
 	int attributeEnum;			//!< An enums stored as an Int since we can't forward declare Enums.
 	void* hostVector;			//!< Void pointer to a vector holding Attributes.
@@ -194,9 +156,7 @@ class Entity;
 class DLL_U Event_GetEntities : public Event
 {
 public:
-	Event_GetEntities() : Event(EVENT_GET_ENTITIES)
-	{
-	}
+	Event_GetEntities();
 
 	std::vector<Entity>* entities;
 };
@@ -211,16 +171,9 @@ public:
 	int width;		
 	int height;		
 
-	Event_GetWindowResolution() : Event(EVENT_GET_WINDOW_RESOLUTION)
-	{
-		width = 320;
-		height = 240;
-	}
+	Event_GetWindowResolution();
 
-	float getAspectRatio()
-	{
-		return (float)width/(float)height;
-	}
+	float getAspectRatio();
 };
 
 /// Alerts about change in window resolution
@@ -233,16 +186,9 @@ public:
 	int width;		
 	int height;		
 
-	Event_WindowResize(int width, int height) : Event(EVENT_WINDOW_RESIZE)
-	{
-		this->width = width;
-		this->height = height;
-	}
+	Event_WindowResize(int width, int height);
 
-	float getAspectRatio()
-	{
-		return (float)width/(float)height;
-	}
+	float getAspectRatio();
 };
 
 
@@ -256,10 +202,7 @@ class DLL_U Event_ShowMessageBox : public Event
 public:
 	std::string message;
 
-	Event_ShowMessageBox(std::string message) : Event(EVENT_SHOW_MESSAGEBOX)
-	{
-		this->message = message;
-	}
+	Event_ShowMessageBox(std::string message);
 };
 
 /// Tells EntityManager to create a projectile entity
@@ -274,13 +217,10 @@ public:
 	Float3 velocity;
 	Float4 rotation;
 
-	Event_CreateProjectile(Float3 position, Float3 velocity, Float4 rotation, int entityIdOfCreator) : Event(EVENT_CREATE_PROJECTILE)
-	{
-		this->entityIdOfCreator = entityIdOfCreator;
-		this->position = position;
-		this->velocity = velocity;
-		this->rotation = rotation;
-	}
+	Event_CreateProjectile(Float3 position,
+						   Float3 velocity,
+						   Float4 rotation,
+						   int entityIdOfCreator);
 };
 
 class MeshModel;
@@ -290,11 +230,7 @@ public:
 	MeshModel*	mesh;
 	bool		dynamic;
 
-	Event_CreateMesh(MeshModel* mesh, bool dynamic) : Event(EVENT_CREATE_MESH)
-	{
-		this->mesh		= mesh;
-		this->dynamic	= dynamic;
-	}
+	Event_CreateMesh(MeshModel* mesh, bool dynamic);
 };
 
 /// Used in GameComponent
@@ -307,11 +243,8 @@ public:
 	int attribute1_index;
 	int attribute2_index;
 
-	Event_PhysicsAttributesColliding(int attribute1_index, int attribute2_index) : Event(EVENT_ENTITIES_COLLIDING)
-	{
-		this->attribute1_index = attribute1_index;
-		this->attribute2_index = attribute2_index;
-	}
+	Event_PhysicsAttributesColliding(int attribute1_index,
+									 int attribute2_index);
 };
 
 /// Alerts EntityManager to remove an entity with specified id
@@ -323,10 +256,7 @@ class DLL_U Event_RemoveEntity : public Event
 public:
 	int entityId;
 
-	Event_RemoveEntity(int entityId) : Event(EVENT_REMOVE_ENTITY)
-	{
-		this->entityId = entityId;
-	}
+	Event_RemoveEntity(int entityId);
 };
 
 /// Alerts InputComponent about key press
@@ -338,10 +268,7 @@ class DLL_U Event_KeyPress : public Event
 public:
 	int keyEnum;
 
-	Event_KeyPress(int keyEnum) : Event(EVENT_KEY_PRESS)
-	{
-		this->keyEnum = keyEnum;
-	}
+	Event_KeyPress(int keyEnum);
 };
 
 /// Alerts InputComponent about key release
@@ -353,8 +280,11 @@ class DLL_U Event_KeyRelease : public Event
 public:
 	int keyEnum;
 
-	Event_KeyRelease(int keyEnum) : Event(EVENT_KEY_RELEASE)
-	{
-		this->keyEnum = keyEnum;
-	}
+	Event_KeyRelease(int keyEnum);
+};
+
+class DLL_U Event_DoCulling : public Event
+{
+public:
+	Event_DoCulling();
 };

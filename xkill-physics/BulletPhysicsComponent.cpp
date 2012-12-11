@@ -1,12 +1,14 @@
 #include "BulletPhysicsComponent.h"
 
 #include <btBulletDynamicsCommon.h>
+#include <BulletCollision/CollisionDispatch\btGhostObject.h>
 
 #include <xkill-utilities/AttributeType.h>
 #include <xkill-utilities/EventManager.h>
 
 #include "CollisionShapeManager.h"
 #include "physicsObject.h"
+#include "physicsUtilities.h"
 
 #include <xkill-utilities/EventManager.h>
 
@@ -41,9 +43,17 @@ BulletPhysicsComponent::~BulletPhysicsComponent()
 			physicsObjects_->pop_back();
 		}
 	}
-	SAFE_DELETE(physicsObjects_)
-
-	///////////////////////////////// INSERT DELETION OF ghostobjects
+	SAFE_DELETE(physicsObjects_);
+	
+	if( ghostObjects_ != nullptr)
+	{
+		while(ghostObjects_->size() > 0)
+		{
+			//remove from world
+			SAFE_DELETE(ghostObjects_->at(ghostObjects_->size()-1));
+			ghostObjects_->pop_back();
+		}
+	}
 	SAFE_DELETE(ghostObjects_)
 	
 
@@ -73,7 +83,11 @@ bool BulletPhysicsComponent::init()
 	GET_ATTRIBUTES(inputAttributes_, InputAttribute, ATTRIBUTE_INPUT);
 	GET_ATTRIBUTES(physicsAttributes_, PhysicsAttribute, ATTRIBUTE_PHYSICS);
 	GET_ATTRIBUTES(boundingAttributes_, BoundingAttribute, ATTRIBUTE_BOUNDING);
+	GET_ATTRIBUTES(renderAttributes_, RenderAttribute, ATTRIBUTE_RENDER);
+	GET_ATTRIBUTES(cameraAttributes_, CameraAttribute, ATTRIBUTE_CAMERA);
 	GET_ATTRIBUTE_OWNERS(physicsOwners_, ATTRIBUTE_PHYSICS);
+	
+	SUBSCRIBE_TO_EVENT(this,EVENT_DO_CULLING);
 
 	physicsObjects_ = new btAlignedObjectArray<PhysicsObject*>();
 	broadphase_ = new btDbvtBroadphase();
@@ -90,6 +104,8 @@ bool BulletPhysicsComponent::init()
 	floor_ = new PhysicsObject(new btStaticPlaneShape(btVector3(0,1,0),0),1337);
 	dynamicsWorld_->addRigidBody(floor_);
 
+	ghostObjects_ = new btAlignedObjectArray<btGhostObject*>;
+	
 	return true;
 }
 
@@ -148,7 +164,49 @@ void BulletPhysicsComponent::onUpdate(float delta)
 
 void BulletPhysicsComponent::onEvent(Event* e)
 {
-
+	switch(e->getType())
+	{
+	case EVENT_DO_CULLING:
+		static btConvexHullShape frustumShape;
+		if(frustumShape.getNumPoints()==0 && cameraAttributes_->size()>0)
+		{
+			
+		}
+		while(ghostObjects_->size() < cameraAttributes_->size())
+		{
+			btGhostObject *ghost = new btGhostObject;
+			btConvexHullShape* frustumShape = new btConvexHullShape;
+			ghost->setCollisionShape(frustumShape);
+			ghostObjects_->push_back(ghost);
+		}
+		for(unsigned int i = 0; i < renderAttributes_->size(); i++)
+		{
+			renderAttributes_->at(i).culling.clear();
+		}
+		for(unsigned int i = 0; i < ghostObjects_->size(); i++)
+		{
+			renderAttributes_->at(i).culling.clear();
+		}
+		for(unsigned int i = 0; i < ghostObjects_->size(); i++)
+		{
+			btGhostObject* ghostObject=  ghostObjects_->at(i);
+			unsigned int numObjects = ghostObject->getNumOverlappingObjects();
+			for(unsigned int j = 0; j < numObjects; j++)
+			{
+				PhysicsObject* physicsObject = static_cast<PhysicsObject*>(ghostObject->getOverlappingObject(j));
+				
+				if(j < BoolField::NUM_INTS*BoolField::NUM_INTS_PER_BOOL)
+				{
+					renderAttributes_->at(physicsObject->getIndex()).culling.setBool(j,true);
+				}
+				else
+				{
+					SHOW_MESSAGEBOX("There are more cameras than allowed by the frustum culling, ask a developer to increase the value of BoolField::NUM_INTS");
+				}
+			}
+		}
+		break;
+	}
 }
 
 void BulletPhysicsComponent::tickCallback(btScalar timeStep)

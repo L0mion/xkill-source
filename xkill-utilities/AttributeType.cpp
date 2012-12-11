@@ -86,7 +86,12 @@ CameraAttribute::CameraAttribute()
 {
 	ZeroMemory(&mat_projection, sizeof(mat_projection));
 	ZeroMemory(&mat_view, sizeof(mat_view));
+	aspect = 0;
+	fov = 0.785f; 
+	zFar = 40.0f;
+	zNear = 0.01f;
 }
+
 CameraAttribute::~CameraAttribute()
 {
 }

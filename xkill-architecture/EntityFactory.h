@@ -65,6 +65,7 @@ public:
 		CREATE_ATTRIBUTE(CameraAttribute, camera, entity);
 		CONNECT_ATTRIBUTES(camera, spatial);
 
+
 		CREATE_ATTRIBUTE(PlayerAttribute, player, entity);
 		CONNECT_ATTRIBUTES(player, render);
 		CONNECT_ATTRIBUTES(player, input);

@@ -21,12 +21,7 @@ struct DLL_U VertexPosNormTex
 	normal		= 0, 0, 0
 	texcoord	= 0, 0
 	*/
-	VertexPosNormTex()
-	{
-		position_	= Float3(0.0f, 0.0f, 0.0f);
-		normal_		= Float3(0.0f, 0.0f, 0.0f);
-		texcoord_	= Float2(0.0f, 0.0f);
-	}
+	VertexPosNormTex();
 	//! Constructor setting members to specific values.
 	/*!
 	\param position	Position in model-space of vertex.
@@ -36,12 +31,7 @@ struct DLL_U VertexPosNormTex
 	VertexPosNormTex(
 		Float3 position, 
 		Float3 normal, 
-		Float2 texcoord)
-	{
-		position_	= position;
-		normal_		= normal;
-		texcoord_	= texcoord;
-	}
+		Float2 texcoord);
 };
 
 #endif //XKILL_RENDERER_MESHVERTICES_H

@@ -122,7 +122,7 @@ struct DLL_U RenderAttribute : public IAttribute
 	AttributePointer spatialAttribute;
 	AttributePointer boundingAttribute;
 	
-	BoolField32 culling[4];
+	BoolField culling;
 	bool transparent;
 	bool tessellation;
 	int meshIndex;
@@ -200,6 +200,10 @@ struct DLL_U CameraAttribute : public IAttribute
 	AttributePointer spatialAttribute;
 	Float4x4 mat_view;
 	Float4x4 mat_projection;
+	float fov;
+	float aspect;
+	float zNear;
+	float zFar;
 };
 
 /// Stores everything GameComponent needs to know about a player (also refer to createPlayerEntity)
