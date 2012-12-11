@@ -65,16 +65,17 @@ public:
 		CREATE_ATTRIBUTE(CameraAttribute, camera, entity);
 		CONNECT_ATTRIBUTES(camera, spatial);
 
+		CREATE_ATTRIBUTE(HealthAttribute, health, entity);
+		health->health = 2;
+
 		CREATE_ATTRIBUTE(PlayerAttribute, player, entity);
 		CONNECT_ATTRIBUTES(player, render);
 		CONNECT_ATTRIBUTES(player, input);
 		CONNECT_ATTRIBUTES(player, camera);
+		CONNECT_ATTRIBUTES(player, health);
 		static int playerId = 0;
 		player->id = playerId;
 		playerId++;
-
-		CREATE_ATTRIBUTE(HealthAttribute, health, entity);
-		health->health = 10;
 	}
 
 	void createWorldEntity(Entity* entity)
@@ -112,14 +113,14 @@ public:
 		physics->collisionShapeIndex = 2;
 		physics->isProjectile = true;
 		physics->linearVelocity = e->velocity;
-		physics->mass = 0.01f;
+		physics->mass = 100.0f;
 
 		CREATE_ATTRIBUTE(ProjectileAttribute, projectile, entity);
 		CONNECT_ATTRIBUTES(projectile, physics);
 		projectile->entityIdOfCreator = e->entityIdOfCreator;
 
 		CREATE_ATTRIBUTE(DamageAttribute, damage, entity);
-		damage->owner_enityID = e->entityIdOfCreator;
+		damage->owner_entityID = e->entityIdOfCreator;
 	}
 
 	void createMesh(Entity* entity, Event_CreateMesh* e)

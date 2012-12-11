@@ -8,11 +8,6 @@
 InputComponent::InputComponent()
 {
 	newDeviceSearchTimer_ = 0.0f;
-
-	SUBSCRIBE_TO_EVENT(this, EVENT_RUMBLE);
-	SUBSCRIBE_TO_EVENT(this, EVENT_MOUSE_MOVE);
-	SUBSCRIBE_TO_EVENT(this, EVENT_KEY_PRESS);
-	SUBSCRIBE_TO_EVENT(this, EVENT_KEY_RELEASE);
 }
 
 InputComponent::~InputComponent()
@@ -22,6 +17,11 @@ InputComponent::~InputComponent()
 
 bool InputComponent::init(HWND windowHandle, std::vector<InputAttribute>* inputAttributes, std::string configFilePath, float searchTime)
 {
+	SUBSCRIBE_TO_EVENT(this, EVENT_RUMBLE);
+	SUBSCRIBE_TO_EVENT(this, EVENT_MOUSE_MOVE);
+	SUBSCRIBE_TO_EVENT(this, EVENT_KEY_PRESS);
+	SUBSCRIBE_TO_EVENT(this, EVENT_KEY_RELEASE);
+
 	inputAttributes_ = inputAttributes;
 
 	windowHandle_ = windowHandle;

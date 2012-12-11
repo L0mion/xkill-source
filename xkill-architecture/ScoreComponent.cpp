@@ -15,6 +15,8 @@ ScoreComponent::~ScoreComponent()
 
 bool ScoreComponent::init(std::vector<PlayerAttribute>* playerAttribute)
 {
+	SUBSCRIBE_TO_EVENT(this, EVENT_PLAYERDEATH);
+
 	playerAttributes_ = playerAttribute;
 
 	for(unsigned int i = 0; i < playerAttributes_->size(); i++)
@@ -29,9 +31,9 @@ void ScoreComponent::onEvent(Event* e)
 {
 	switch(e->getType())
 	{
-	//case EVENT_PLAYER_KILLED:
-	//	sort(playerIndices);
-	//	break;
+	case EVENT_PLAYERDEATH:
+		sort(playerIndices);
+		break;
 	default:
 		break;
 	}

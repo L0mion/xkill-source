@@ -42,7 +42,7 @@ enum DLL_U EventType
 	EVENT_CREATE_PROJECTILE,
 	EVENT_ENTITIES_COLLIDING,
 	EVENT_REMOVE_ENTITY,
-	//EVENT_PLAYER_KILLED,
+	EVENT_PLAYERDEATH,
 
 	EVENT_MOUSE_MOVE,
 	EVENT_KEY_PRESS,
@@ -356,5 +356,13 @@ public:
 	Event_KeyRelease(int keyEnum) : Event(EVENT_KEY_RELEASE)
 	{
 		this->keyEnum = keyEnum;
+	}
+};
+
+class DLL_U Event_PlayerDeath : public Event
+{
+public:
+	Event_PlayerDeath() : Event(EVENT_PLAYERDEATH)
+	{
 	}
 };

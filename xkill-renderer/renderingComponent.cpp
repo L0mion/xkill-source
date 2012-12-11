@@ -170,8 +170,8 @@ void RenderingComponent::onUpdate(float delta)
 
 		DirectX::XMFLOAT3	eyePosition = *(DirectX::XMFLOAT3*)&positionAttribute->position;
 		
-		unsigned int viewportTopX = viewportManagement_->getViewport(i).TopLeftX;
-		unsigned int viewportTopY = viewportManagement_->getViewport(i).TopLeftY;
+		unsigned int viewportTopX = static_cast<unsigned int>(viewportManagement_->getViewport(i).TopLeftX);
+		unsigned int viewportTopY = static_cast<unsigned int>(viewportManagement_->getViewport(i).TopLeftY);
 		cbManagement_->vsSet(CB_TYPE_CAMERA, CB_REGISTER_CAMERA, d3dManagement_->getDeviceContext());
 		cbManagement_->updateCBCamera(d3dManagement_->getDeviceContext(),
 									  viewMatrix,
