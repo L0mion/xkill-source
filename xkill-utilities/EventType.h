@@ -43,6 +43,7 @@ enum DLL_U EventType
 	EVENT_ENTITIES_COLLIDING,
 	EVENT_REMOVE_ENTITY,
 	EVENT_PLAYERDEATH,
+	EVENT_CREATE_SPAWNPOINT,
 
 	EVENT_MOUSE_MOVE,
 	EVENT_KEY_PRESS,
@@ -366,3 +367,15 @@ public:
 	{
 	}
 };
+
+class DLL_U Event_CreateSpawnPoint : public Event
+{
+public:
+	Event_CreateSpawnPoint(Float3 spawnPointPosition) : Event(EVENT_CREATE_SPAWNPOINT)
+	{
+		this->spawnPointPosition = spawnPointPosition;
+	}
+
+	Float3 spawnPointPosition;
+};
+

@@ -31,6 +31,7 @@ private:
 
 		healthAttributes_		.init(ATTRIBUTE_HEALTH);
 		damageAttributes_		.init(ATTRIBUTE_DAMAGE);
+		spawnPointAttributes_	.init(ATTRIBUTE_SPAWNPOINT);
 	}
 
 public:
@@ -46,6 +47,7 @@ public:
 	AttributeStorage<MeshAttribute>				meshAttributes_;
 	AttributeStorage<HealthAttribute>			healthAttributes_;
 	AttributeStorage<DamageAttribute>			damageAttributes_;
+	AttributeStorage<SpawnPointAttribute>		spawnPointAttributes_;
 
 	static AttributeManager* getInstance()
 	{
@@ -103,6 +105,7 @@ public:
 			PUT_ATTRIBUTES_INSIDE_EVENT(ATTRIBUTE_PROJECTILE,	projectileAttributes_	);
 			PUT_ATTRIBUTES_INSIDE_EVENT(ATTRIBUTE_HEALTH,		healthAttributes_		);
 			PUT_ATTRIBUTES_INSIDE_EVENT(ATTRIBUTE_DAMAGE,		damageAttributes_		);
+			PUT_ATTRIBUTES_INSIDE_EVENT(ATTRIBUTE_SPAWNPOINT,	spawnPointAttributes_	);
 
 			// undefine dirty macro
 #undef PUT_ATTRIBUTES_INSIDE_EVENT
