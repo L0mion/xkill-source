@@ -113,10 +113,37 @@ PlayerAttribute::~PlayerAttribute()
 {
 }
 
+MeshAttribute::MeshAttribute()
+{
+}
 MeshAttribute::~MeshAttribute()
 {
 }
-
 void MeshAttribute::clean()
+{
+}
+
+HealthAttribute::HealthAttribute()
+{
+	startHealth = 2;
+	health = startHealth;
+}
+HealthAttribute::~HealthAttribute()
+{
+}
+
+DamageAttribute::DamageAttribute()
+{
+	damage = 1;
+}
+DamageAttribute::~DamageAttribute()
+{
+}
+
+SpawnPointAttribute::SpawnPointAttribute()
+{
+	timeSinceLastSpawn = 0.0f;
+}
+SpawnPointAttribute::~SpawnPointAttribute()
 {
 }
