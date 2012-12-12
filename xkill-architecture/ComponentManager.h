@@ -12,6 +12,7 @@
 #include "AttributeManager.h"
 
 
+
 /// Is responsible for updating Components in a certain order
 /** 
 Some \ref COMPONENTS such as RenderComponent and PhysicsComponent need to run 
@@ -87,5 +88,6 @@ public:
 		render_->onUpdate(delta);
 		input_.onUpdate(delta);
 		game_.onUpdate(delta);
+		SEND_EVENT(&Event(EVENT_UPDATE));
 	}
 };

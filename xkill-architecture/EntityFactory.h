@@ -70,6 +70,7 @@ public:
 		CONNECT_ATTRIBUTES(player, input);
 		CONNECT_ATTRIBUTES(player, camera);
 		CONNECT_ATTRIBUTES(player, health);
+		//player->name = "Process Name";
 		static int playerId = 0;
 		player->id = playerId;
 		playerId++;
