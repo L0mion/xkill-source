@@ -58,16 +58,18 @@ void PhysicsObject::preStep(CollisionShapeManager* collisionShapeManager,Physics
 	 												  positionAttribute->position.y,
 	 												  positionAttribute->position.z));
 
-	m_worldTransform.setRotation(btQuaternion(yaw_,0,0));
+	gravity_ = WorldScaling*btVector3(physicsAttribute->gravity.x, physicsAttribute->gravity.y, physicsAttribute->gravity.z);
+
 	if(physicsAttribute->isProjectile)
 	{
+		m_worldTransform.setRotation(btQuaternion(spatialAttribute->rotation.x, spatialAttribute->rotation.y, spatialAttribute->rotation.z, spatialAttribute->rotation.w));
 		setLinearVelocity(btVector3(physicsAttribute->linearVelocity.x,
 									physicsAttribute->linearVelocity.y,
 									physicsAttribute->linearVelocity.z));
-		gravity_.setZero();
 	}
 	else
 	{
+		m_worldTransform.setRotation(btQuaternion(yaw_,0,0));
 		movement_.setY(physicsAttribute->linearVelocity.y);
 		setLinearVelocity(movement_);
 	}
@@ -92,7 +94,11 @@ void PhysicsObject::postStep(PhysicsAttribute* physicsAttribute)
 	btVector3 position = (1.0f/WorldScaling)*m_worldTransform.getOrigin();
 	positionAttribute->position.copy(position.m_floats);
 	spatialAttribute->rotation.copy(m_worldTransform.getRotation().get128().m128_f32);
+	if(physicsAttribute->isProjectile)
+		int a = 2;
 	physicsAttribute->linearVelocity.copy(getLinearVelocity().m_floats);
+	if(physicsAttribute->isProjectile)
+		int a = 2;
 	physicsAttribute->angularVelocity.copy(getAngularVelocity().m_floats);
 	forces_.setZero();
 }

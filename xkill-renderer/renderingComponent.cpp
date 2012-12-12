@@ -212,23 +212,23 @@ void RenderingComponent::renderViewportToGBuffer(DirectX::XMFLOAT4X4 viewMatrix,
 	DirectX::XMFLOAT4X4 worldMatrixInverse;
 	DirectX::XMFLOAT4X4 finalMatrix;
 	
-	unsigned int meshIndex; MeshModelD3D* meshModelD3D;
-	RenderAttribute* renderAt; SpatialAttribute* spatialAt; PositionAttribute* positionAt;
-	for(unsigned int i=0; i<allRender->size(); i++)
+	
+	for(unsigned int i=0; i<renderOwners->size(); i++)
 	{
 		if(renderOwners->at(i)!=0)
 		{
-
-			renderAt	= &allRender->at(i);
-			meshIndex	= renderAt->meshIndex;
-			spatialAt	= &allSpatial->at(renderAt->spatialAttribute.index);
-			positionAt	= &allPosition->at(spatialAt->positionAttribute.index);
+			// fetch attributes
+			RenderAttribute* renderAt	= &allRender->at(i);
+			SpatialAttribute* spatialAt	= &allSpatial->at(renderAt->spatialAttribute.index);
+			PositionAttribute* positionAt = &allPosition->at(spatialAt->positionAttribute.index);
 			
-			meshModelD3D = meshManagement_->getMeshModelD3D(meshIndex, d3dManagement_->getDevice());
+			// render from attributes
+			int meshIndex	= renderAt->meshIndex;
+			MeshModelD3D* meshModelD3D = meshManagement_->getMeshModelD3D(meshIndex, d3dManagement_->getDevice());
 			VB*					vb	= meshModelD3D->getVB();
 			std::vector<IB*>	ibs	= meshModelD3D->getIBs();
 	
-			worldMatrix			= calculateWorldMatrix(allSpatial->at(i), allPosition->at(i));
+			worldMatrix			= calculateWorldMatrix(spatialAt, positionAt);
 			worldMatrixInverse	= calculateMatrixInverse(worldMatrix);
 			finalMatrix			= calculateFinalMatrix(worldMatrix, viewMatrix, projectionMatrix);
 			
@@ -356,20 +356,20 @@ DirectX::XMFLOAT4X4 RenderingComponent::calculateMatrixInverse(DirectX::XMFLOAT4
 	
 	return matrixInverse;
 }
-DirectX::XMFLOAT4X4 RenderingComponent::calculateWorldMatrix(SpatialAttribute spatialAttribute, PositionAttribute positionAttribute)
+DirectX::XMFLOAT4X4 RenderingComponent::calculateWorldMatrix(SpatialAttribute* spatialAttribute, PositionAttribute* positionAttribute)
 {
-	DirectX::XMMATRIX translation = DirectX::XMMatrixTranslation(positionAttribute.position.x,
-																 positionAttribute.position.y,
-																 positionAttribute.position.z);
+	DirectX::XMMATRIX translation = DirectX::XMMatrixTranslation(positionAttribute->position.x,
+																 positionAttribute->position.y,
+																 positionAttribute->position.z);
 
-	DirectX::XMMATRIX scaling = DirectX::XMMatrixScaling(spatialAttribute.scale.x,
-														 spatialAttribute.scale.y,
-														 spatialAttribute.scale.z);
+	DirectX::XMMATRIX scaling = DirectX::XMMatrixScaling(spatialAttribute->scale.x,
+														 spatialAttribute->scale.y,
+														 spatialAttribute->scale.z);
 
-	DirectX::XMFLOAT4 fRotation = DirectX::XMFLOAT4(spatialAttribute.rotation.x,
-													spatialAttribute.rotation.y,
-													spatialAttribute.rotation.z,
-													spatialAttribute.rotation.w);
+	DirectX::XMFLOAT4 fRotation = DirectX::XMFLOAT4(spatialAttribute->rotation.x,
+													spatialAttribute->rotation.y,
+													spatialAttribute->rotation.z,
+													spatialAttribute->rotation.w);
 
 	DirectX::XMVECTOR qRotation = DirectX::XMLoadFloat4(&fRotation);
 	DirectX::XMMATRIX rotation = DirectX::XMMatrixRotationQuaternion(qRotation);

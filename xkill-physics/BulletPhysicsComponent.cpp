@@ -105,7 +105,7 @@ bool BulletPhysicsComponent::init()
 	dynamicsWorld_->setInternalTickCallback(wrapTickCallback,static_cast<void*>(this));
 
 
-	floor_ = new PhysicsObject(new btStaticPlaneShape(btVector3(0,1,0),0),1337);
+	floor_ = new PhysicsObject(new btStaticPlaneShape(btVector3(0,1,0),0.0f),1337);
 	dynamicsWorld_->addRigidBody(floor_);
 
 	//ghostObjects_ = new btAlignedObjectArray<btGhostObject*>;
@@ -171,8 +171,8 @@ void BulletPhysicsComponent::onUpdate(float delta)
 void BulletPhysicsComponent::onEvent(Event* e)
 {
 
-	dynamicsWorld_->performDiscreteCollisionDetection();
-	tickCallback(0);
+	//dynamicsWorld_->performDiscreteCollisionDetection();
+	//tickCallback(0);
 	//switch(e->getType())
 	//{
 	//case EVENT_DO_CULLING:
@@ -268,7 +268,7 @@ void BulletPhysicsComponent::tickCallback(btScalar timeStep)
 					//std::cout << std::endl << ownerA << " " << ownerB;
 					
 					//Two PhysicsObjects colliding
-					if(ownerA != 0 && ownerB != 0) // ignore contacts where one owner is 0
+					if(ownerA != 0 || ownerB != 0) // ignore contacts where one owner is 0
 					{
 						//std::cout << "\nCollision between " << ownerA << " & " << ownerB;
 						SEND_EVENT(&Event_PhysicsAttributesColliding(objectA->getIndex(), objectB->getIndex()));

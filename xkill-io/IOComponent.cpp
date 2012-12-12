@@ -111,7 +111,7 @@ bool IOComponent::initProjectile()
 
 	if(sucessfulMake)
 	{
-		Event_CreateMesh e(makerProjectile_->getMesh(), false);
+		Event_CreateMesh e(makerProjectile_->getMesh(), true);
 		SEND_EVENT(&e);
 	}
 
