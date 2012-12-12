@@ -1,6 +1,7 @@
 #ifndef XKILL_UTILITIES_TEXDESC_H
 #define XKILL_UTILITIES_TEXDESC_H
 
+#include <string>
 #include <vector>
 
 #include "dllUtilities.h"
@@ -11,14 +12,17 @@ class DLL_U TexDesc
 {
 public:
 	TexDesc(
-		TexDescHeader header,
+		std::string				path,
+		TexDescHeader			header,
 		std::vector<TexDescTex> texDescs);
 	~TexDesc();
 
-	TexDescHeader& getHeader();
-	std::vector<TexDescTex>& getTexDescs();
+	std::string					getPath();
+	TexDescHeader&				getHeader();
+	std::vector<TexDescTex>&	getTexDescs();
 protected:
 private:
+	std::string				path_;
 	TexDescHeader			header_;
 	std::vector<TexDescTex>	texDescs_;
 };

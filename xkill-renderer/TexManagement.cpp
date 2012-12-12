@@ -1,13 +1,18 @@
 #include <Windows.h>
 #include <string>
+#include <sstream>
 #include <vector>
-#include <DDSTextureLoader.h>
 #include <d3d11.h>
+#include <DDSTextureLoader.h>
 
 #include <xkill-utilities/TexDesc.h>
 #include <xkill-utilities/TexDescHeader.h>
 #include <xkill-utilities/TexDescTex.h>
+#include <xkill-utilities/EventManager.h>
 
+#include "Tex.h"
+#include "StringConv.h"
+#include "TexLoader.h"
 #include "TexManagement.h"
 
 TexManagement::TexManagement()
@@ -16,14 +21,21 @@ TexManagement::TexManagement()
 }
 TexManagement::~TexManagement()
 {
-	//Do nothing.
+	if(texLoader_)
+		delete texLoader_;
+
+	for(unsigned int i = 0; i < texs_.size(); i++)
+	{
+		if(texs_[i])
+			delete texs_[i];
+	}
 }
 
 HRESULT TexManagement::init()
 {
 	HRESULT hr = S_OK;
 
-	//Do nothing.
+	texLoader_ = new TexLoader();
 
 	return hr;
 }
@@ -32,22 +44,26 @@ HRESULT TexManagement::handleTexDesc(
 	TexDesc*		texDesc,
 	ID3D11Device*	device)
 {
-	std::string				texPath		= texDesc->getHeader().texPath_;
-	std::vector<TexDescTex>	texDescs	= texDesc->getTexDescs();
+	HRESULT hr = S_OK;
+
+	std::string	path = texDesc->getPath() + texDesc->getHeader().texPath_;
+	std::vector<TexDescTex>	texDescs = texDesc->getTexDescs();
 
 	unsigned int	texID;
 	std::string		texFileName;
-	for(unsigned int i = 0; i < texDescs.size(); i++)
+	for(unsigned int i = 0; i < texDescs.size() && SUCCEEDED(hr); i++)
 	{
 		texID		= texDescs.at(i).id_;
 		texFileName	= texDescs.at(i).fileName_;
 
-		createTex(
+		hr = createTex(
 			texID,
-			texPath,
+			path,
 			texFileName,
 			device);
 	}
+
+	return hr;
 }
 HRESULT TexManagement::createTex(
 		unsigned int	texID, 
@@ -59,18 +75,64 @@ HRESULT TexManagement::createTex(
 
 	std::string fullPath = texPath + texFileName;
 
-	int wchars_num =  MultiByteToWideChar( CP_UTF8 , 0 , fullPath.c_str() , -1, NULL , 0 );
-	wchar_t* wstr = new wchar_t[wchars_num];
-	MultiByteToWideChar( CP_UTF8 , 0 , fullPath.c_str() , -1, wstr , wchars_num );
-
 	ID3D11ShaderResourceView* srv = nullptr;
-	hr = DirectX::CreateDDSTextureFromFile(
+	hr = texLoader_->createTexFromFile(
 		device,
-		wstr, //L"SEAFLOOR.DDS"
-		nullptr,
+		fullPath,
 		&srv);
-	
-	delete[] wstr;
 
+	if(!FAILED(hr))
+		pushTex(texID, srv);
+	
 	return hr;
+}
+void TexManagement::pushTex(
+		unsigned int				texID,
+		ID3D11ShaderResourceView*	srv)
+{
+	/*Create new Tex-object*/
+	Tex* newTex = new Tex(texID, srv);
+
+	texs_.push_back(newTex);
+	unsigned int texsIndex = texs_.size() - 1;
+
+	/*Map index of pushed back element to texture ID*/
+	std::pair<
+		std::map<unsigned int, unsigned int>::iterator,
+		bool> ret;
+	ret = texIDtoIndex_.insert(
+		std::pair<unsigned int, unsigned int>(texID, texsIndex));
+
+	if(!ret.second)
+	{ //Element already exists in vector
+		std::string errorMsg = 
+			"TextureID "									+ 
+			uintToString(texID)								+ 
+			" already exists in TexManagement under Index " + 
+			uintToString(texsIndex)							+ 
+			".";
+		SHOW_MESSAGEBOX(errorMsg);
+	}
+}
+
+ID3D11ShaderResourceView* TexManagement::getTexSrv(const unsigned int texID) const
+{
+	ID3D11ShaderResourceView* srv = nullptr;
+
+	int texsIndex = getTexsIndex(texID);
+	if(texsIndex >= 0)
+		srv = texs_[static_cast<unsigned>(texsIndex)]->getSRV();
+
+	return srv;
+}
+int TexManagement::getTexsIndex(const unsigned int texID) const
+{
+	int foundIndex = -1;
+
+	std::map<unsigned int, unsigned int>::const_iterator it;
+	it = texIDtoIndex_.find(texID);
+	if(it != texIDtoIndex_.end())
+		foundIndex = it->second;
+
+	return foundIndex;
 }

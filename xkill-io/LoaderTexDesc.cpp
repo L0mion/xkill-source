@@ -160,6 +160,11 @@ void LoaderTexDesc::loadTex(const std::vector<std::string>& params)
 
 void LoaderTexDesc::loadTexDesc()
 {
-	TexDesc* texDesc = new TexDesc(header_, texs_);
+	std::string path = this->getFilePath();
+	
+	TexDesc* texDesc = new TexDesc(
+		path, 
+		header_, 
+		texs_);
 	texDesc_->setVar(texDesc);
 }

@@ -225,7 +225,6 @@ void RenderingComponent::renderViewportToGBuffer(DirectX::XMFLOAT4X4 viewMatrix,
 	{
 		if(renderOwners->at(i)!=0)
 		{
-
 			renderAt	= &allRender->at(i);
 			meshIndex	= renderAt->meshIndex;
 			spatialAt	= &allSpatial->at(renderAt->spatialAttribute.index);
@@ -252,6 +251,11 @@ void RenderingComponent::renderViewportToGBuffer(DirectX::XMFLOAT4X4 viewMatrix,
 				&vertexBuffer, 
 				&stride, 
 				&offset);
+
+			ID3D11ShaderResourceView* texAlbedo = texManagement_->getTexSrv(0);
+			ID3D11ShaderResourceView* texNormal = texManagement_->getTexSrv(1);
+			devcon->PSSetShaderResources(0, 1, &texAlbedo);
+			devcon->PSSetShaderResources(1, 1, &texNormal);
 	
 			for(unsigned int j = 0; j < ibs.size(); j++)
 			{

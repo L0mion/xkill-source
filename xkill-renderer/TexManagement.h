@@ -4,9 +4,11 @@
 typedef long HRESULT;
 
 struct ID3D11Device;
+struct ID3D11ShaderResourceView;
 
 class Tex;
 class TexDesc;
+class TexLoader;
 
 #include <map>
 
@@ -21,13 +23,24 @@ public:
 	HRESULT handleTexDesc(
 		TexDesc*		texDesc,
 		ID3D11Device*	device);
+
+	ID3D11ShaderResourceView* getTexSrv(const unsigned int texID) const;
+	int getTexsIndex(const unsigned int texID) const;
+protected:
+private:
 	HRESULT createTex(
 		unsigned int	texID, 
 		std::string		texPath, 
 		std::string		texFileName,
 		ID3D11Device*	device);
-protected:
-private:
+	void pushTex(
+		unsigned int				texID,
+		ID3D11ShaderResourceView*	srv);
+
+	/*intermediate*/
+	TexLoader* texLoader_;
+
+	/*result*/
 	std::vector<Tex*> texs_;
 	std::map<
 		unsigned int, 
