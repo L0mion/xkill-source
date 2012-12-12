@@ -57,13 +57,14 @@ void PhysicsObject::preStep(CollisionShapeManager* collisionShapeManager,Physics
 	 									 100.0f*positionAttribute->position.y,
 	 									 100.0f*positionAttribute->position.z));
 
+	gravity_ = btVector3(physicsAttribute->gravity.x, physicsAttribute->gravity.y, physicsAttribute->gravity.z);
+
 	if(physicsAttribute->isProjectile)
 	{
 		m_worldTransform.setRotation(btQuaternion(spatialAttribute->rotation.x, spatialAttribute->rotation.y, spatialAttribute->rotation.z, spatialAttribute->rotation.w));
 		setLinearVelocity(btVector3(physicsAttribute->linearVelocity.x,
 									physicsAttribute->linearVelocity.y,
 									physicsAttribute->linearVelocity.z));
-		gravity_.setZero();
 	}
 	else
 	{

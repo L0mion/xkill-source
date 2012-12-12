@@ -113,7 +113,7 @@ void GameComponent::event_PhysicsAttributesColliding(Event_PhysicsAttributesColl
 						std::cout << "DAMAGEEVENT Entity " << entity2->getID() << " damage: " <<  damage->damage << " Entity " << entity1->getID() << " health " << health->health << std::endl;
 					}
 
-					// remove projectile
+					// remove damage entity
 					SEND_EVENT(&Event_RemoveEntity(entity2->getID()));
 				}
 			}
@@ -123,6 +123,30 @@ void GameComponent::event_PhysicsAttributesColliding(Event_PhysicsAttributesColl
 	// projectile
 	else if(entity1->hasAttribute(ATTRIBUTE_PROJECTILE))
 	{
+		if(entity2->hasAttribute(ATTRIBUTE_PHYSICS))
+		{
+			//Set gravity on projectiles colliding with physics objects
+			std::vector<PhysicsAttribute>* allPhysics; GET_ATTRIBUTES(allPhysics, PhysicsAttribute, ATTRIBUTE_PHYSICS);
+			std::vector<int> physicsId = entity1->getAttributes(ATTRIBUTE_PHYSICS);
+			for(int i=0;i<physicsId.size();i++)
+			{
+				PhysicsAttribute* physicsAttribute = &allPhysics->at(physicsId.at(i));
+				physicsAttribute->gravity = Float3(0.0f, -1000.0f, 0.0f);
+				physicsAttribute->linearVelocity = Float3(0.0f, 0.0f, 0.0f); //Does not seem to work
+			}
+
+			//Shorten lifetime of projectile colliding with physics objects
+			std::vector<ProjectileAttribute>* allProjectile; GET_ATTRIBUTES(allProjectile, ProjectileAttribute, ATTRIBUTE_PROJECTILE);
+			std::vector<int> projectileId = entity1->getAttributes(ATTRIBUTE_PROJECTILE);
+			for(int i=0;i<projectileId.size();i++)
+			{
+				ProjectileAttribute* projectileAttribute = &allProjectile->at(projectileId.at(i));
+				if(projectileAttribute->currentLifeTimeLeft > 0.2f)
+				{
+					projectileAttribute->currentLifeTimeLeft = 0.15f;
+				}
+			}
+		}
 		//
 		// colliding with...
 		//
@@ -201,9 +225,9 @@ void GameComponent::onUpdate(float delta)
 				float lookAtY = DirectX::XMVectorGetY(lookAt);
 				float lookAtZ = DirectX::XMVectorGetZ(lookAt);
 				Float3 velocity(lookAtX, lookAtY, lookAtZ);
-				velocity.x *= 750.0f;
-				velocity.y *= 750.0f;
-				velocity.z *= 750.0f;
+				velocity.x *= 1000.0f;
+				velocity.y *= 1000.0f;
+				velocity.z *= 1000.0f;
 				// add rotation displacement on position 
 				float d = 1.0f;
 				pos.x += lookAtX*d;
@@ -224,8 +248,10 @@ void GameComponent::onUpdate(float delta)
 
 				Float4 rot = Float4(orientationQuaternionX, orientationQuaternionY, orientationQuaternionZ, orientationQuaternionW);
 
+				Float3 gravity = Float3(0.0f, 0.0f, 0.0f);
+
 				// Send event
-				SEND_EVENT(&Event_CreateProjectile(pos, velocity, rot, playerAttributesOwners->at(i)));
+				SEND_EVENT(&Event_CreateProjectile(pos, velocity, rot, gravity, playerAttributesOwners->at(i)));
 				input->fire = false;
 			}
 
@@ -271,8 +297,9 @@ void GameComponent::onUpdate(float delta)
 
 			if(projectile->currentLifeTimeLeft <= 0)
 			{
+#ifdef XKILL_DEBUG
 				std::cout << "Projectile entity " << projectileAttributesOwners->at(i) << " has no lifetime left" << std::endl;
-				
+#endif
 				//Remove projectile entity
 				Event_RemoveEntity removeEntityEvent(projectileAttributesOwners->at(i));
 				SEND_EVENT(&removeEntityEvent);

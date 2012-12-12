@@ -273,14 +273,16 @@ public:
 	int entityIdOfCreator;
 	Float3 position;
 	Float3 velocity;
+	Float3 gravity;
 	Float4 rotation;
 
-	Event_CreateProjectile(Float3 position, Float3 velocity, Float4 rotation, int entityIdOfCreator) : Event(EVENT_CREATE_PROJECTILE)
+	Event_CreateProjectile(Float3 position, Float3 velocity, Float4 rotation, Float3 gravity, int entityIdOfCreator) : Event(EVENT_CREATE_PROJECTILE)
 	{
-		this->entityIdOfCreator = entityIdOfCreator;
 		this->position = position;
 		this->velocity = velocity;
 		this->rotation = rotation;
+		this->gravity = gravity;
+		this->entityIdOfCreator = entityIdOfCreator;
 	}
 };
 

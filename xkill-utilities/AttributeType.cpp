@@ -53,6 +53,7 @@ PhysicsAttribute::PhysicsAttribute()
 	alive = true;
 	mass = 1.0f;
 	collisionShapeIndex = 0;
+	gravity = Float3(0.0f, -1000.0f, 0.0f);
 	isProjectile = false;
 
 	angularVelocity.x = 0; 
@@ -69,7 +70,7 @@ PhysicsAttribute::~PhysicsAttribute()
 ProjectileAttribute::ProjectileAttribute()
 {
 	entityIdOfCreator = -1;
-	currentLifeTimeLeft = 10.0f;
+	currentLifeTimeLeft = 3.0f;
 }
 ProjectileAttribute::~ProjectileAttribute()
 {
