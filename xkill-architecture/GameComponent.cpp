@@ -141,10 +141,10 @@ void GameComponent::event_PhysicsAttributesColliding(Event_PhysicsAttributesColl
 			for(int i=0;i<projectileId.size();i++)
 			{
 				ProjectileAttribute* projectileAttribute = &allProjectile->at(projectileId.at(i));
-				if(projectileAttribute->currentLifeTimeLeft > 0.2f)
-				{
-					projectileAttribute->currentLifeTimeLeft = 0.15f;
-				}
+				//if(projectileAttribute->currentLifeTimeLeft > 0.2f)
+				//{
+				//	projectileAttribute->currentLifeTimeLeft = 0.15f;
+				//}
 			}
 		}
 		//

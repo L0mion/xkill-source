@@ -112,7 +112,7 @@ void InputComponent::handleInput(float delta)
 			}
 
 			//Projectile test
-			if(state.buttons[0].isReleased())													   
+			if(state.buttons[0].isDown())													   
 				inputAttributes_->at(i).fire = true;
 
 			if(state.buttons.size() > 7)
