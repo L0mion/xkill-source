@@ -66,7 +66,6 @@ public:
 		CONNECT_ATTRIBUTES(camera, spatial);
 
 		CREATE_ATTRIBUTE(HealthAttribute, health, entity);
-		health->health = 2;
 
 		CREATE_ATTRIBUTE(PlayerAttribute, player, entity);
 		CONNECT_ATTRIBUTES(player, render);
