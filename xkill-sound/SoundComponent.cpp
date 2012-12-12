@@ -32,12 +32,12 @@ bool SoundComponent::init(std::string configFilePath)
 	mFMODEventSystem = new FMODEventSystem();
 	mFMODEventSystem->Init("../xkill-dependencies/sound/", "testproject.fev", 64);
 
-	FMODEventSystemProgrammerReportParser fmodEventSystemProgrammerReportParser;
-	if(!fmodEventSystemProgrammerReportParser.parseProgrammerReport(mFMODEventSystem))
-	{
-		std::cout << "parsing of FMOD Designer's programmer's report failed." << std::endl;
-		return false;
-	}
+	//FMODEventSystemProgrammerReportParser fmodEventSystemProgrammerReportParser;
+	//if(!fmodEventSystemProgrammerReportParser.parseProgrammerReport(mFMODEventSystem))
+	//{
+	//	std::cout << "parsing of FMOD Designer's programmer's report failed." << std::endl;
+	//	return false;
+	//}
 
 	converter = new EventToFModConverter();
 	converter->init(configFilePath);
@@ -50,7 +50,9 @@ bool SoundComponent::init(std::string configFilePath)
 void SoundComponent::onEvent(Event* e)
 {
 	EventType type = e->getType();
-	mFMODEventSystem->StartSoundEventAt(converter->getFModIndex((int)type));
+	int fmodEventIndex = converter->getFModIndex((int)type);
+	if(fmodEventIndex >= 0)
+		mFMODEventSystem->StartSoundEventAt(fmodEventIndex);
 }
 
 void SoundComponent::onUpdate(float delta)

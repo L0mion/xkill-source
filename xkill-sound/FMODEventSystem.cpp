@@ -39,6 +39,8 @@ void FMODEventSystem::Init(std::string mediaPath, std::string soundEventFileName
 	mSoundEventFileNameWithoutExtension = soundEventFileName.erase(soundEventFileName.size()-4, soundEventFileName.size());
 	mMediaPath = mediaPath;
 
+	FMODErrorCheck(mEventsystem->getNumEvents(&nrOfEvents_));
+
 	mSoundEvents = new std::vector<FMOD::Event*>();
 }
 
@@ -49,14 +51,17 @@ void FMODEventSystem::Update()
 
 void FMODEventSystem::StartSoundEventAt(unsigned int index)
 {
-	if(index < mSoundEvents->size())
+	if(index < nrOfEvents_)
 	{
 		FMOD::Event* soundEvent;
-		soundEvent = mSoundEvents->at(index);
+		FMODErrorCheck(mEventsystem->getEventBySystemID(index, FMOD_EVENT_NONBLOCKING, &soundEvent));
+		mSoundEvents->push_back(soundEvent);
 		soundEvent->start();
 	}
 	else
 	{
-		std::cout << "error in \"FMODEventSystem.h\" in function \"void FMODEventSystem::StartSoundEventAt(int index)\"" << std::endl;
+#ifdef XKILL_DEBUG
+		std::cout << "No sound event with index: " << index << " In class: FMODEventSystem " << std::endl;
+#endif
 	}
 }

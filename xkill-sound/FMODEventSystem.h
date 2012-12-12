@@ -49,4 +49,5 @@ private:
 	std::vector<FMOD::Event*>* mSoundEvents;
 	std::string mSoundEventFileNameWithoutExtension;
 	std::string mMediaPath;
+	int nrOfEvents_;
 };
