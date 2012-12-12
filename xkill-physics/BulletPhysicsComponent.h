@@ -25,6 +25,7 @@ class btDiscreteDynamicsWorld;
 class btDynamicsWorld;
 class btRigidBody;
 class btGhostObject;
+class btGhostPairCallback;
 
 typedef float btScalar;
 
@@ -47,25 +48,25 @@ static void wrapTickCallback(btDynamicsWorld *world, btScalar timeStep);
 class DLL_P BulletPhysicsComponent : public IObserver
 {
 private:
-	btBroadphaseInterface* broadphase_; //!< Used to cull collisions
-	btDefaultCollisionConfiguration* collisionConfiguration_; //!< Used to setup allocators
-	btCollisionDispatcher* dispatcher_; //!< Used to deliver collision information to objects
+	btBroadphaseInterface*				 broadphase_; //!< Used to cull collisions
+	btDefaultCollisionConfiguration*	 collisionConfiguration_; //!< Used to setup allocators
+	btCollisionDispatcher*				 dispatcher_; //!< Used to deliver collision information to objects
 	btSequentialImpulseConstraintSolver* solver_; //<! Solve impulse equations
-	btDiscreteDynamicsWorld* dynamicsWorld_; //<! Used to step simulation
-	CollisionShapeManager* collisionShapeManager_;
+	btDiscreteDynamicsWorld*			 dynamicsWorld_; //<! Used to step simulation
+	CollisionShapeManager*				 collisionShapeManager_;
 
 
-	std::vector<PhysicsAttribute>* physicsAttributes_; //<! A pointer to the attribute storage containing PhysicsAttributes, external representation of world
+	std::vector<PhysicsAttribute>*	physicsAttributes_; //<! A pointer to the attribute storage containing PhysicsAttributes, external representation of world
 	std::vector<BoundingAttribute>* boundingAttributes_; //<! A pointer to the attribute storage containing a copy of bounding volumes for the renderer
-	std::vector<InputAttribute>* inputAttributes_; //<! A pointer to the attribute storage containing the input data from the input component
-	std::vector<RenderAttribute>* renderAttributes_;
-	std::vector<CameraAttribute>* cameraAttributes_;
-	std::vector<int>* physicsOwners_; //! Owners of physicsAttributes
+	std::vector<InputAttribute>*	inputAttributes_; //<! A pointer to the attribute storage containing the input data from the input component
+	std::vector<RenderAttribute>*	renderAttributes_;
+	std::vector<CameraAttribute>*	cameraAttributes_;
+	std::vector<int>*				physicsOwners_; //! Owners of physicsAttributes
 
 	btAlignedObjectArray<PhysicsObject*>* physicsObjects_; //<! A vector of PhysicsObjects, internal representation of world
-	PhysicsObject* floor_; //<! The absolute floor plane, no object may pass bellow this plane
-	btAlignedObjectArray<btGhostObject*>* ghostObjects_;
-
+	PhysicsObject*						  floor_; //<! The absolute floor plane, no object may pass bellow this plane
+	//btAlignedObjectArray<btGhostObject*>* ghostObjects_;
+	//btGhostPairCallback*				  ghostPairCallback_;
 public:
 	//! Creates a BulletPhysicsComponent, gives it pointers to attribute storages required by the component and sets all pointer to null_ptr
 	/*!
