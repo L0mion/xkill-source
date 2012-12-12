@@ -66,9 +66,6 @@ bool LoaderTexDesc::parseTexDesc()
 			if(sucessfulLoad)
 				sucessfulLoad = loadSymbol(curSymbol, curLineSplit);
 		}
-
-		//if(!sucessfulLoad)
-		//	printFail(curLine);
 	}
 
 	return sucessfulLoad;

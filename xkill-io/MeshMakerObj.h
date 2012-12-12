@@ -11,6 +11,7 @@
 #include "MTL.h"
 #include "ObjGeometry.h"
 #include "Obj.h"
+#include "VarStatus.h"
 
 class LoaderObj;
 class LoaderMTL;
@@ -41,7 +42,7 @@ public:
 	//! Loads mesh from .pgy-format if such exists. If not; the mesh is loaded from an .obj-file and then written to .pgy-format.
 	bool init();
 
-	MeshModel* getMesh();
+	MeshModel* claimMesh();
 protected:
 private:
 	//! Initializes LoaderObj-object and proceeds to load .obj.
@@ -88,7 +89,7 @@ private:
 	std::vector<std::string>	materialID_;	//!< Used to locate index of material-type
 
 	/*Result*/
-	MeshModel* meshModel_;	//!< Resulting Mesh read from file.
+	VarStatus<MeshModel>* meshModel_;	//!< Resulting Mesh read from file.
 };
 
 #endif //XKILL_IO_MESHMAKER_H

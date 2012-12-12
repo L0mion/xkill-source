@@ -18,35 +18,36 @@ public:
 	HRESULT init();
 
 	ModelD3D* getMeshModelD3D(
-		const unsigned int	index, 
+		const unsigned int	modelID, 
 		ID3D11Device*		device);
 protected:
 private:
 	HRESULT createMeshModelD3D(
-		const unsigned int	index, 
+		const unsigned int	modelID, 
 		ID3D11Device*		device);
+	bool getMeshAttribute(unsigned int modelID, MeshAttribute& inout);
 	HRESULT createVertexBuffer(
-		const unsigned int	index, 
+		const unsigned int	modelID, 
 		MeshGeometry&		geometry,
 		VB*					vb,
 		ID3D11Device*		device);
 	HRESULT createIndexBuffers(
-		const unsigned int			index, 
-		MeshGeometry&				geometry, 
-		std::vector<IB*>&			ibs,
-		ID3D11Device*				device);
+		const unsigned int	modelID, 
+		MeshGeometry&		geometry, 
+		std::vector<IB*>&	ibs,
+		ID3D11Device*		device);
 	HRESULT createIndexBuffer(
-		const unsigned int	index,
+		const unsigned int	modelID,
 		MeshSubset&			subset,
 		IB*					ib,
 		ID3D11Device*		device);
 
 	void pushMeshModelD3D(
-		const unsigned int index, 
+		const unsigned int modelID, 
 		ModelD3D* meshModelD3D);
 
-	bool existingMeshModelD3DIndex(const int unsigned index);
-	unsigned int getMeshModelD3DIndex(const int unsigned index);
+	bool existingMeshModelD3D(const int unsigned modelID);
+	unsigned int getMeshModelD3DIndex(const int unsigned modelID);
 
 	std::vector<ModelD3D*>	meshModelD3Ds_;
 	std::map<unsigned int, unsigned int> map;

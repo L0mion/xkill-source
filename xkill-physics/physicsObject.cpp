@@ -73,7 +73,7 @@ void PhysicsObject::preStep(CollisionShapeManager* collisionShapeManager,Physics
 	setAngularVelocity(btVector3(physicsAttribute->angularVelocity.x,
 					   physicsAttribute->angularVelocity.y,
 					   physicsAttribute->angularVelocity.z));
-	m_collisionShape = collisionShapeManager->getCollisionShape(physicsAttribute->collisionShapeIndex);
+	m_collisionShape = collisionShapeManager->getCollisionShape(physicsAttribute->meshID);
 	setGravity(gravity_+forces_);
 	activate(true);
 }

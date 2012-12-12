@@ -8,33 +8,41 @@
 #include "MeshMakerObj.h"
 #include "IOComponent.h"
 #include "LoaderTexDesc.h"
+#include "LoaderMdlDesc.h"
+#include "MdlDesc.h"
+#include "MdlDescModel.h"
 
 IOComponent::IOComponent()
 {
-	makerBTH_ = nullptr;
-	makerArena_ = nullptr;
-	makerProjectile_ = nullptr;
 }
 IOComponent::~IOComponent()
 {
-	if(makerBTH_)
-		delete makerBTH_;
-	if(makerArena_)
-		delete makerArena_;
-	if(makerProjectile_)
-		delete makerProjectile_;
+	for(unsigned int i = 0; i < meshModels_.size(); i++)
+	{
+		if(meshModels_[i])
+			delete meshModels_[i];
+	}
 }
 bool IOComponent::init()
 {
 	bool sucessfulInit = true;
 
-	initTexDescs();
+	sucessfulInit = initTexDescs();
+	if(sucessfulInit)
+		sucessfulInit = initMdlDescs();
 
-	sucessfulInit = initBth();
-	if(sucessfulInit)
-		sucessfulInit = initArena();
-	if(sucessfulInit)
-		sucessfulInit = initProjectile();
+	std::vector<MeshAttribute>*	allMesh; GET_ATTRIBUTES(allMesh, MeshAttribute,	ATTRIBUTE_MESH);
+	for(unsigned int i = 0; i < allMesh->size(); i++)
+	{
+		MeshAttribute mesh = allMesh->at(i);
+	}
+
+	//if(sucessfulInit)
+	//	sucessfulInit = initBth();
+	//if(sucessfulInit)
+	//	sucessfulInit = initArena();
+	//if(sucessfulInit)
+	//	sucessfulInit = initProjectile();
 
 	return sucessfulInit;
 }
@@ -71,11 +79,97 @@ bool IOComponent::initTexDesc(std::string filename)
 		Event_PostDescTex e(texDesc);
 		SEND_EVENT(&e);
 	}
+	else
+	{
+		std::string errorMsg = "Failed to load .texdesc-file: " + filename;
+		SHOW_MESSAGEBOX(errorMsg);
+	}
 	
 	//Clear memory allocated
 	delete loader;
 
 	return sucessfulLoad;
+}
+bool IOComponent::initMdlDescs()
+{
+	bool sucessfulLoad = true;
+
+	std::vector<std::string> mdlDescFiles;
+	mdlDescFiles = getFileNames(PATH_MDLDESC);
+
+	if(mdlDescFiles.size() > 0)
+	{
+		for(unsigned int i = 0; i < mdlDescFiles.size() && sucessfulLoad; i++)
+			sucessfulLoad = initMdlDesc(mdlDescFiles.at(i));
+	}
+	else
+		SHOW_MESSAGEBOX("Couldn't locate any .mdldesc-files in xkill-resources/.");
+
+	return sucessfulLoad;
+}
+bool IOComponent::initMdlDesc(std::string filename)
+{
+	bool sucessfulLoad = true;
+
+	LoaderMdlDesc* loader = new LoaderMdlDesc(filename, PATH_XKILL_RESOURCES);
+	sucessfulLoad = loader->init();
+	
+	if(sucessfulLoad)
+	{
+		MdlDesc* mdlDesc = loader->claimMdlDesc();
+		std::vector<MdlDescModel*> models = mdlDesc->getModels();
+
+		std::string path = mdlDesc->getPath() + mdlDesc->getHeader().path_;
+		for(unsigned int i = 0; i < models.size() && sucessfulLoad; i++)
+		{
+			std::string name = models[i]->modelFileName_;
+			sucessfulLoad = loadModel(name, path, models[i]);
+		}
+
+		delete mdlDesc; //clear when finished
+	}
+	else
+	{
+		std::string errorMsg = "Failed to load .mdldesc-file: " + filename;
+		SHOW_MESSAGEBOX(errorMsg);
+	}
+	
+	//Clear memory allocated
+	delete loader;
+
+	return sucessfulLoad;
+}
+
+bool IOComponent::loadModel(
+	std::string		modelName,
+	std::string		modelPath,
+	MdlDescModel*	modelDesc)
+{
+	bool sucessfulMake = true;
+
+	MeshMakerObj* objMaker = new MeshMakerObj(
+		modelPath, 
+		modelPath, 
+		modelName, 
+		modelPath);
+	sucessfulMake = objMaker->init();
+
+	if(sucessfulMake)
+	{
+		MeshModel* model = objMaker->claimMesh();
+		meshModels_.push_back(model);
+
+		Event_CreateMesh e(modelDesc->modelID_, model, modelDesc->dynamic_);
+		SEND_EVENT(&e);
+	}
+	else
+	{
+		std::string errorMsg = "Could not load model: " + modelPath + modelName;
+		SHOW_MESSAGEBOX(errorMsg);
+	}
+
+	delete objMaker;
+	return sucessfulMake;
 }
 
 std::vector<std::string> IOComponent::getFileNames(const LPCTSTR filename)
@@ -107,66 +201,6 @@ std::vector<std::string> IOComponent::getFileNames(const LPCTSTR filename)
 	}
 
 	return foundFiles;
-}
-
-bool IOComponent::initBth()
-{
-	bool sucessfulMake = true;
-
-	makerBTH_ = new MeshMakerObj(
-		objPath,
-		pgyPath,
-		bthName,
-		mtlPath);
-	sucessfulMake = makerBTH_->init();
-
-	MeshModel* model = makerBTH_->getMesh();
-
-	if(sucessfulMake)
-	{
-		Event_CreateMesh e(makerBTH_->getMesh(), true);
-		SEND_EVENT(&e);
-	}
-
-	return sucessfulMake;
-}
-bool IOComponent::initArena()
-{
-	bool sucessfulMake = true;
-
-	makerArena_ = new MeshMakerObj(
-		objPath,
-		pgyPath,
-		arenaName,
-		mtlPath);
-	sucessfulMake = makerArena_->init();
-
-	if(sucessfulMake)
-	{
-		Event_CreateMesh e(makerArena_->getMesh(), false);
-		SEND_EVENT(&e);
-	}
-
-	return sucessfulMake;
-}
-bool IOComponent::initProjectile()
-{
-	bool sucessfulMake = true;
-
-	makerProjectile_ = new MeshMakerObj(
-		objPath,
-		pgyPath,
-		projectileName,
-		mtlPath);
-	sucessfulMake = makerProjectile_->init();
-
-	if(sucessfulMake)
-	{
-		Event_CreateMesh e(makerProjectile_->getMesh(), false);
-		SEND_EVENT(&e);
-	}
-
-	return sucessfulMake;
 }
 
 void IOComponent::reset()

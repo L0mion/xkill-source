@@ -1,6 +1,11 @@
 #ifndef XKILL_IO_IOCOMPONENT_H
 #define XKILL_IO_IOCOMPONENT_H
 
+struct MdlDescModel;
+
+class MeshMakerObj;
+class MeshModel;
+
 #include <vector>
 
 #include <xkill-utilities/IObserver.h>
@@ -9,20 +14,9 @@
 
 #include "dllIO.h"
 
-class MeshMakerObj;
-class MeshModel;
-
 static const std::string PATH_XKILL_RESOURCES	= "../../xkill-resources/";
 static const LPCTSTR PATH_TEXDESC				= L"../../xkill-resources/*.texdesc";
-
-//temp
-static const std::string objPath = "../../xkill-resources/xkill-models/";
-static const std::string pgyPath = "../../xkill-resources/xkill-models/";
-static const std::string mtlPath = "../../xkill-resources/xkill-models/";
-
-static const std::string bthName		= "bth.obj";
-static const std::string projectileName	= "projectile.obj";
-static const std::string arenaName		= "xkillArena.obj";
+static const LPCTSTR PATH_MDLDESC				= L"../../xkill-resources/*.mdldesc";
 
 class DLL_IO IOComponent : public IObserver
 {
@@ -38,17 +32,17 @@ protected:
 private:
 	bool initTexDescs();
 	bool initTexDesc(std::string filename);
+	bool initMdlDescs();
+	bool initMdlDesc(std::string filename);
+
+	bool loadModel(
+		std::string		modelName,
+		std::string		modelPath,
+		MdlDescModel*	modelDesc);
 
 	std::vector<std::string> getFileNames(LPCTSTR filename);
 
-	bool initBth(); //temp
-	bool initArena(); //temp
-	bool initProjectile(); //temp
-
-	/*Makers*/
-	MeshMakerObj* makerBTH_;
-	MeshMakerObj* makerArena_;
-	MeshMakerObj* makerProjectile_;
+	std::vector<MeshModel*> meshModels_; //temporarily store models until these may be deleted in attribute
 };
 
 #endif //XKILL_IO_IOCOMPONENT_H

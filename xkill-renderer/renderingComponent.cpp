@@ -219,18 +219,18 @@ void RenderingComponent::renderViewportToGBuffer(DirectX::XMFLOAT4X4 viewMatrix,
 	DirectX::XMFLOAT4X4 worldMatrixInverse;
 	DirectX::XMFLOAT4X4 finalMatrix;
 	
-	unsigned int meshIndex; ModelD3D* meshModelD3D;
+	unsigned int meshID; ModelD3D* meshModelD3D;
 	RenderAttribute* renderAt; SpatialAttribute* spatialAt; PositionAttribute* positionAt;
 	for(unsigned int i=0; i<allRender->size(); i++)
 	{
 		if(renderOwners->at(i)!=0)
 		{
 			renderAt	= &allRender->at(i);
-			meshIndex	= renderAt->meshIndex;
+			meshID		= renderAt->meshID;
 			spatialAt	= &allSpatial->at(renderAt->spatialAttribute.index);
 			positionAt	= &allPosition->at(spatialAt->positionAttribute.index);
 			
-			meshModelD3D = modelManagement_->getMeshModelD3D(meshIndex, d3dManagement_->getDevice());
+			meshModelD3D = modelManagement_->getMeshModelD3D(meshID, d3dManagement_->getDevice());
 			VB*					vb	= meshModelD3D->getVB();
 			std::vector<IB*>	ibs	= meshModelD3D->getIBs();
 	

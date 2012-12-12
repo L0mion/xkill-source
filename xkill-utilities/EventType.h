@@ -19,7 +19,7 @@ EventManager::getInstance()->sendEvent(&event);
 \endcode
 
 \defgroup EVENTS Events
-\ingroup UTILITIES
+\ingroup UTILITIE
 \sa EventManager
 */
 
@@ -288,11 +288,13 @@ class MeshModel;
 class DLL_U Event_CreateMesh : public Event
 {
 public:
-	MeshModel*	mesh;
-	bool		dynamic;
+	unsigned int	id;
+	MeshModel*		mesh;
+	bool			dynamic;
 
-	Event_CreateMesh(MeshModel* mesh, bool dynamic) : Event(EVENT_CREATE_MESH)
+	Event_CreateMesh(unsigned int id, MeshModel* mesh, bool dynamic) : Event(EVENT_CREATE_MESH)
 	{
+		this->id		= id;
 		this->mesh		= mesh;
 		this->dynamic	= dynamic;
 	}

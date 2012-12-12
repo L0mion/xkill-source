@@ -40,7 +40,7 @@ RenderAttribute::RenderAttribute()
 {
 	transparent		= false;
 	tessellation	= false;
-	meshIndex		= 0;
+	meshID		= 0;
 	textureID		= 0;
 }
 RenderAttribute::~RenderAttribute()
@@ -52,7 +52,7 @@ PhysicsAttribute::PhysicsAttribute()
 	added = false;
 	alive = true;
 	mass = 1.0f;
-	collisionShapeIndex = 0;
+	meshID = 0;
 	isProjectile = false;
 
 	angularVelocity.x = 0; 
@@ -113,6 +113,21 @@ PlayerAttribute::~PlayerAttribute()
 {
 }
 
+MeshAttribute::MeshAttribute()
+{
+	this->meshID		= 0;
+	this->mesh			= nullptr;
+	this->dynamic		= false;
+}
+MeshAttribute::MeshAttribute(
+	unsigned int	id,
+	MeshModel*		mesh,
+	bool			dynamic)
+{
+	this->meshID		= id;
+	this->mesh			= mesh;
+	this->dynamic		= dynamic;
+}
 MeshAttribute::~MeshAttribute()
 {
 }
