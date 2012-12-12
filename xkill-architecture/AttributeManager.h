@@ -82,8 +82,7 @@ public:
 		switch(type) 
 		{
 			// Macro to facilitate adding and refactoring attributes
-#define PUT_ATTRIBUTES_INSIDE_EVENT(Enum, AttributeStorage)	\
-		case Enum:															\
+#define PUT_ATTRIBUTES_INSIDE_EVENT(AttributeStorage)	\
 			e->hostVector = AttributeStorage.getAllAttributes();	\
 			e->owners = AttributeStorage.getAllOwners();			\
 			break;
@@ -91,18 +90,18 @@ public:
 			// If Enum matches, fetch information from the corresponding
 			// AttributeStorage and store that information inside 
 			// Event_getAttribute
-			PUT_ATTRIBUTES_INSIDE_EVENT(ATTRIBUTE_POSITION,		positionAttributes_		);
-			PUT_ATTRIBUTES_INSIDE_EVENT(ATTRIBUTE_SPATIAL,		spatialAttributes_		);
-			PUT_ATTRIBUTES_INSIDE_EVENT(ATTRIBUTE_RENDER,		renderAttributes_		);
-			PUT_ATTRIBUTES_INSIDE_EVENT(ATTRIBUTE_PHYSICS,		physicsAttributes_		);
-			PUT_ATTRIBUTES_INSIDE_EVENT(ATTRIBUTE_CAMERA,		cameraAttributes_		);
-			PUT_ATTRIBUTES_INSIDE_EVENT(ATTRIBUTE_INPUT,		inputAttributes_		);
-			PUT_ATTRIBUTES_INSIDE_EVENT(ATTRIBUTE_PLAYER,		playerAttributes_		);
-			PUT_ATTRIBUTES_INSIDE_EVENT(ATTRIBUTE_BOUNDING,		boundingAttributes_		);
-			PUT_ATTRIBUTES_INSIDE_EVENT(ATTRIBUTE_MESH,			meshAttributes_			);
-			PUT_ATTRIBUTES_INSIDE_EVENT(ATTRIBUTE_PROJECTILE,	projectileAttributes_	);
-			PUT_ATTRIBUTES_INSIDE_EVENT(ATTRIBUTE_HEALTH,		healthAttributes_		);
-			PUT_ATTRIBUTES_INSIDE_EVENT(ATTRIBUTE_DAMAGE,		damageAttributes_		);
+			case ATTRIBUTE_POSITION:	PUT_ATTRIBUTES_INSIDE_EVENT(positionAttributes_		);
+			case ATTRIBUTE_SPATIAL:		PUT_ATTRIBUTES_INSIDE_EVENT(spatialAttributes_		);
+			case ATTRIBUTE_RENDER:		PUT_ATTRIBUTES_INSIDE_EVENT(renderAttributes_		);
+			case ATTRIBUTE_PHYSICS:		PUT_ATTRIBUTES_INSIDE_EVENT(physicsAttributes_		);
+			case ATTRIBUTE_CAMERA:		PUT_ATTRIBUTES_INSIDE_EVENT(cameraAttributes_		);
+			case ATTRIBUTE_INPUT:		PUT_ATTRIBUTES_INSIDE_EVENT(inputAttributes_		);
+			case ATTRIBUTE_PLAYER:		PUT_ATTRIBUTES_INSIDE_EVENT(playerAttributes_		);
+			case ATTRIBUTE_BOUNDING:	PUT_ATTRIBUTES_INSIDE_EVENT(boundingAttributes_		);
+			case ATTRIBUTE_MESH:		PUT_ATTRIBUTES_INSIDE_EVENT(meshAttributes_			);
+			case ATTRIBUTE_PROJECTILE:	PUT_ATTRIBUTES_INSIDE_EVENT(projectileAttributes_	);
+			case ATTRIBUTE_HEALTH:		PUT_ATTRIBUTES_INSIDE_EVENT(healthAttributes_		);
+			case ATTRIBUTE_DAMAGE:		PUT_ATTRIBUTES_INSIDE_EVENT(damageAttributes_		);
 
 			// undefine dirty macro
 #undef PUT_ATTRIBUTES_INSIDE_EVENT

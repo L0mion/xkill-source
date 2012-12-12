@@ -2,46 +2,42 @@
 
 #include <QtGui>
 #include <QKeyEvent> // needed to grab mouse input
+#include <xkill-utilities/IObserver.h>
 
-class Menu : public QDialog
+class Event;
+
+class Menu : public QDialog, public IObserver
 {
 private:
 	bool show;
+	QStandardItemModel* model;
+	QTableView* view;
 
 public:
-	Menu(QWidget* parent = 0, Qt::WFlags flags = 0) : QDialog(parent, flags)
-	{
-		QWidget::setAttribute(Qt::WA_ShowWithoutActivating);
-		//QWidget::setWindowFlags(Qt::ToolTip);
+	Menu(QWidget* parent = 0, Qt::WFlags flags = 0);
 
-		// Create layout
-		QVBoxLayout* layout = new QVBoxLayout(this);
-		for (int i=0; i<10; i++)
-		{
-			QPushButton* buttons = new QPushButton(tr("Button %1").arg(i + 1));
-			layout->addWidget(buttons);
-		}
-		QWidget::setLayout(layout);
-
-		show = true;
-		toggleMenu();
-	}
-
-	void onUpdate(float delta)
-	{
-	}
+	void onUpdate(float delta);
 
 	void toggleMenu()
 	{
 		show = !show;
 		if(show)
+		{
 			QWidget::show();
+			onUpdate(1.0f);
+		}
 		else
 			QWidget::hide();
 	}
 
-	void onEvent(Event* e)
+	void onEvent(Event* e);
+
+	void parentMoveEvent()
 	{
+		QPoint pos = parentWidget()->pos();
+		int x = pos.x() + 50;
+		int y = pos.y() + 60;
+		move(x, y);
 	}
 
 protected:
@@ -53,6 +49,12 @@ protected:
 		case Qt::Key_Tab:
 			// Quit menu
 			QWidget::hide();
+			show = false;
+			break;
+		case Qt::Key_Escape:
+			// Quit menu
+			QWidget::hide();
+			show = false;
 			break;
 		default:
 			break;

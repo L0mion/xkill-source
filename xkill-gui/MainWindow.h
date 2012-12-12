@@ -17,7 +17,7 @@ class MainWindow : public QMainWindow, public IObserver
 
 private:
 	Ui::MainWindowClass ui;
-	QWidget* gameWidget;
+	GameWidget* gameWidget;
 	Menu* menu;
 	bool hasMouseLock;
 
@@ -41,7 +41,6 @@ public:
 		this->setCentralWidget(gameWidget);
 		setMouseTracking(true);
 		hasMouseLock = false;
-		menu = new Menu(this);
 
 		// setup signals and slots
 		connect(ui.actionFullscreen, SIGNAL(toggled(bool)), this, SLOT(toggleFullScreen(bool)));
@@ -49,7 +48,10 @@ public:
 		ui.actionCap_FPS->setChecked(true);
 		connect(ui.actionQuit, SIGNAL(triggered()), this, SLOT(close()));
 		connect(gameWidget, SIGNAL(signal_fpsChanged(QString)), this, SLOT(slot_setTitle(QString)));
+
+		menu = new Menu(this);
 	}
+
 	~MainWindow()
 	{
 		delete gameWidget;
@@ -133,6 +135,11 @@ protected:
 		SEND_EVENT(&Event_KeyPress(e->key()));
 	};
 
+	void moveEvent(QMoveEvent *e)
+	{
+		menu->parentMoveEvent();
+	}
+
 	void showMenu()
 	{
 		static bool first = true;
@@ -180,12 +187,13 @@ protected:
 		{
 			ui.mainToolBar->hide();
 			this->showFullScreen();
-
+			menu->parentMoveEvent();
 		}
 		else
 		{
 			ui.mainToolBar->show();
 			this->showNormal();
+			menu->parentMoveEvent();
 		}
 	};
 
