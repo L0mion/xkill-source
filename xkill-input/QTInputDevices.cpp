@@ -50,6 +50,7 @@ void QTInputDevices::createInputObjectsFromLayout()
 		buttons_[5].setKey('S');
 		buttons_[6].setKey('D');
 		buttons_[0].setKey(0x20); //Space
+		buttons_[7].setKey(33); //CTRL
 	}
 }
 

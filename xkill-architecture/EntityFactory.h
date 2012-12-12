@@ -46,7 +46,6 @@ public:
 	void createPlayerEntity(Entity* entity)
 	{
 		CREATE_ATTRIBUTE(PositionAttribute, position, entity);
-		position->position.z += 0.3f*entity->getID();
 
 		CREATE_ATTRIBUTE(SpatialAttribute, spatial, entity);
 		CONNECT_ATTRIBUTES(spatial, position);
@@ -66,7 +65,6 @@ public:
 		CONNECT_ATTRIBUTES(camera, spatial);
 
 		CREATE_ATTRIBUTE(HealthAttribute, health, entity);
-		health->health = 2;
 
 		CREATE_ATTRIBUTE(PlayerAttribute, player, entity);
 		CONNECT_ATTRIBUTES(player, render);
