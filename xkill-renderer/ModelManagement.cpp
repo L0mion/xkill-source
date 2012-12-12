@@ -8,14 +8,14 @@
 #include "VB.h"
 #include "IB.h"
 #include "renderingUtilities.h"
-#include "MeshModelD3D.h"
-#include "MeshManagement.h"
+#include "ModelD3D.h"
+#include "ModelManagement.h"
 
-MeshManagement::MeshManagement()
+ModelManagement::ModelManagement()
 {
 	//Do nothing.
 }
-MeshManagement::~MeshManagement()
+ModelManagement::~ModelManagement()
 {
 	for(unsigned int i = 0; i < meshModelD3Ds_.size(); i++)
 	{
@@ -24,7 +24,16 @@ MeshManagement::~MeshManagement()
 	}
 }
 
-MeshModelD3D* MeshManagement::getMeshModelD3D(
+HRESULT ModelManagement::init()
+{
+	HRESULT hr = S_OK;
+
+	//Do nothing.
+
+	return hr;
+}
+
+ModelD3D* ModelManagement::getMeshModelD3D(
 	const unsigned int	index, 
 	ID3D11Device*		device)	
 {
@@ -38,7 +47,7 @@ MeshModelD3D* MeshManagement::getMeshModelD3D(
 	return meshModelD3Ds_[meshModelD3DIndex];
 }
 
-HRESULT MeshManagement::createMeshModelD3D(
+HRESULT ModelManagement::createMeshModelD3D(
 	const unsigned int	index, 
 	ID3D11Device*		device)
 {
@@ -69,7 +78,7 @@ HRESULT MeshManagement::createMeshModelD3D(
 		if(SUCCEEDED(hr))
 		{
 			pushMeshModelD3D(index,
-			new MeshModelD3D(vb, ibs));
+			new ModelD3D(vb, ibs));
 		}
 	}
 	else
@@ -80,7 +89,7 @@ HRESULT MeshManagement::createMeshModelD3D(
 
 	return hr;
 }
-HRESULT MeshManagement::createVertexBuffer(
+HRESULT ModelManagement::createVertexBuffer(
 		const unsigned int	index, 
 		MeshGeometry&		geometry,
 		VB*					vb,
@@ -97,7 +106,7 @@ HRESULT MeshManagement::createVertexBuffer(
 
 	return hr;
 }
-HRESULT MeshManagement::createIndexBuffers(
+HRESULT ModelManagement::createIndexBuffers(
 	const unsigned int				index, 
 	MeshGeometry&					geometry, 
 	std::vector<IB*>&				ibs,
@@ -120,7 +129,7 @@ HRESULT MeshManagement::createIndexBuffers(
 
 	return hr;
 }
-HRESULT MeshManagement::createIndexBuffer(
+HRESULT ModelManagement::createIndexBuffer(
 	const unsigned int	index,
 	MeshSubset&			subset,
 	IB*					ib,
@@ -138,9 +147,9 @@ HRESULT MeshManagement::createIndexBuffer(
 	return hr;
 }
 
-void MeshManagement::pushMeshModelD3D(
+void ModelManagement::pushMeshModelD3D(
 	const unsigned int	index, 
-	MeshModelD3D*		meshModelD3D)
+	ModelD3D*		meshModelD3D)
 {
 	meshModelD3Ds_.push_back(meshModelD3D);
 
@@ -148,7 +157,7 @@ void MeshManagement::pushMeshModelD3D(
 	map.insert(std::pair<unsigned int, unsigned int>(index, meshModelD3DIndex));
 }
 
-bool MeshManagement::existingMeshModelD3DIndex(const int unsigned index)
+bool ModelManagement::existingMeshModelD3DIndex(const int unsigned index)
 {
 	bool valExists = false;
 
@@ -159,7 +168,7 @@ bool MeshManagement::existingMeshModelD3DIndex(const int unsigned index)
 	return valExists;
 }
 
-unsigned int MeshManagement::getMeshModelD3DIndex(const int unsigned index)
+unsigned int ModelManagement::getMeshModelD3DIndex(const int unsigned index)
 {
 	std::map<unsigned int, unsigned int>::iterator it = map.find(index);
 

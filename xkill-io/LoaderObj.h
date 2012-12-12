@@ -211,14 +211,9 @@ private:
 		const unsigned int iTex, 
 		const unsigned int iNorm);
 	bool loadIndex(unsigned int index);
-	//! Used to, for each read line, increment a counter so that an error may report a line number.
-	void getLine(std::string& line);
 	//! If something were to go avry, this method prints an error based on line number.
 	/*! \sa lineNum_ */
 	void printFail(const std::string curLine);
-	//! Checks whether or not a string contains an numeric value.
-	/*! \return True if entirely numeric, False if not. */
-	bool isNumeric(const std::string value);
 	//! Creates a default group which will be used if .obj is missing specified group-symbols.
 	ObjGroup createDefaultGroup();
 
@@ -228,8 +223,7 @@ private:
 
 	unsigned int flags_;
 
-	unsigned int				lineNum_;		//!< Line number previously read from file.
-	SimpleStringSplitter*		sss_;			//!< Helper class used to split strings when reading these from file.
+	SimpleStringSplitter* sss_; //!< Helper class used to split strings when reading these from file.
 
 	/*Intermediate vectors to hold data whilst loading .obj*/
 	std::vector<Float3>	position_;	//!< Spatial attributes read from file.

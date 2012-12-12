@@ -6,13 +6,13 @@
 class VB;
 class IB;
 
-class MeshModelD3D
+class ModelD3D
 {
 public:
-	MeshModelD3D(
+	ModelD3D(
 		VB* vb,
 		const std::vector<IB*> ibs);
-	~MeshModelD3D();
+	~ModelD3D();
 
 	VB* getVB();
 	const std::vector<IB*>&	getIBs();

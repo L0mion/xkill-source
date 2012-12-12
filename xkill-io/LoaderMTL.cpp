@@ -314,11 +314,6 @@ void LoaderMTL::loadMTL()
 	mtl_ = MTL(materials_);
 }
 
-void LoaderMTL::getLine(std::string& line)
-{
-	std::getline(ifstream_, line);
-	lineNum_++;
-}
 void LoaderMTL::printFail(const std::string curLine)
 {
 	std::string file	= getFilePath() + getFileName();
@@ -326,14 +321,6 @@ void LoaderMTL::printFail(const std::string curLine)
 	std::string failed	= " parsing failed at line " + lineNum + ": " + curLine;
 
 	SHOW_MESSAGEBOX(failed);
-}
-bool LoaderMTL::isNumeric(const std::string value)
-{
-	std::stringstream conv;
-	double tmp;
-	conv << value;
-	conv >> tmp;
-	return conv.eof();
 }
 
 MTL LoaderMTL::getMTL()

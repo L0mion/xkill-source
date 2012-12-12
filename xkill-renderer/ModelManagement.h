@@ -1,21 +1,23 @@
-#ifndef XKILL_RENDERER_MESHMANAGEMENT_H
-#define XKILL_RENDERER_MESHMANAGEMENT_H
+#ifndef XKILL_RENDERER_MODELMANAGEMENT_H
+#define XKILL_RENDERER_MODELMANAGEMENT_H
 
 #include <map>
 
 #include <xkill-utilities\MeshGeometry.h>
 
-class MeshModelD3D;
+class ModelD3D;
 class VB;
 class IB;
 
-class MeshManagement
+class ModelManagement
 {
 public:
-	MeshManagement();
-	~MeshManagement();
+	ModelManagement();
+	~ModelManagement();
 
-	MeshModelD3D* getMeshModelD3D(
+	HRESULT init();
+
+	ModelD3D* getMeshModelD3D(
 		const unsigned int	index, 
 		ID3D11Device*		device);
 protected:
@@ -41,13 +43,13 @@ private:
 
 	void pushMeshModelD3D(
 		const unsigned int index, 
-		MeshModelD3D* meshModelD3D);
+		ModelD3D* meshModelD3D);
 
 	bool existingMeshModelD3DIndex(const int unsigned index);
 	unsigned int getMeshModelD3DIndex(const int unsigned index);
 
-	std::vector<MeshModelD3D*>	meshModelD3Ds_;
+	std::vector<ModelD3D*>	meshModelD3Ds_;
 	std::map<unsigned int, unsigned int> map;
 };
 
-#endif //XKILL_RENDERER_MESHMANAGEMENT_H
+#endif //XKILL_RENDERER_MODELMANAGEMENT_H

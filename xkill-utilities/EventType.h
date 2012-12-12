@@ -57,6 +57,7 @@ enum DLL_U EventType
 
 	// Utilities
 	EVENT_CREATE_MESH,
+	EVENT_POST_DESC_TEX,
 	EVENT_SHOW_MESSAGEBOX,
 
 	// this is needed, don't touch!
@@ -294,6 +295,18 @@ public:
 	{
 		this->mesh		= mesh;
 		this->dynamic	= dynamic;
+	}
+};
+
+class TexDesc;
+class DLL_U Event_PostDescTex : public Event
+{
+public:
+	TexDesc* texDesc_;
+
+	Event_PostDescTex(TexDesc* texDesc) : Event(EVENT_POST_DESC_TEX)
+	{
+		texDesc_ = texDesc;
 	}
 };
 

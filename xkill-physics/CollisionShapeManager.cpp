@@ -49,7 +49,7 @@ void CollisionShapeManager::loadCollisionShapes()
 			unsigned int numIndices = indices.size();
 			for(unsigned int k = 0; k+2 < numIndices; k+=3)
 			{
-				int scale = 100;
+				btScalar scale = 100.0f;
 				btVector3 a = scale*btVector3(vertices[indices[k]].position_.x,
 													vertices[indices[k]].position_.y,
 													vertices[indices[k]].position_.z);

@@ -2,16 +2,16 @@
 #include "IB.h"
 #include "renderingUtilities.h"
 
-#include "MeshModelD3D.h"
+#include "ModelD3D.h"
 
-MeshModelD3D::MeshModelD3D(
+ModelD3D::ModelD3D(
 	VB* vb,
 	const std::vector<IB*> ibs)
 {
 	vb_		= vb;
 	ibs_	= ibs;
 }
-MeshModelD3D::~MeshModelD3D()
+ModelD3D::~ModelD3D()
 {
 	if(vb_)
 		delete vb_;
@@ -22,11 +22,11 @@ MeshModelD3D::~MeshModelD3D()
 	}
 }
 
-VB* MeshModelD3D::getVB()
+VB* ModelD3D::getVB()
 {
 	return vb_;
 }
-const std::vector<IB*>& MeshModelD3D::getIBs()
+const std::vector<IB*>& ModelD3D::getIBs()
 {
 	return ibs_;
 }
