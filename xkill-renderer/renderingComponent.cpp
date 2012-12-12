@@ -20,6 +20,11 @@
 #include "VB.h"
 #include "IB.h"
 
+
+#include "M3DLoader.h"
+#include "AnimatedMesh.h"
+
+
 #include "renderingComponent.h"
 
 #include <iostream>
@@ -146,6 +151,9 @@ HRESULT RenderingComponent::init()
 //		hr = initDebug();
 	if(SUCCEEDED(hr))
 		hr = initGBuffers();
+
+	if(SUCCEEDED(hr))
+		initAnimations();
 
 	return hr;
 }
@@ -515,4 +523,15 @@ void RenderingComponent::event_WindowResize( Event_WindowResize* e )
 	resize(width, height);
 
 	// TODO: resize render window
+}
+
+
+
+void RenderingComponent::initAnimations()
+{
+	m3dLoader = new M3DLoader();
+	animatedMesh = new AnimatedMesh();
+
+	m3dLoader->loadM3D("../../xkill-resources/xkill-models/soldier.m3d",
+		animatedMesh->vertices, animatedMesh->indices, animatedMesh->subsets, animatedMesh->materials, animatedMesh->skinInfo);
 }

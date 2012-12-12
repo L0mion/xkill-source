@@ -33,6 +33,20 @@ void M3DLoader::loadM3D(const std::string& filename,
 		infile >> ignore >> numTriangles;
 		infile >> ignore >> numBones;
 		infile >> ignore >> numAnimationClips;
+
+		std::vector<DirectX::XMFLOAT4X4> boneOffsets;
+		std::vector<int> boneIndexToParentIndex;
+		std::map<std::string, AnimationClip> animations;
+
+		parseMaterials(infile, numMaterials, materials);
+		parseSubsetTable(infile, numMaterials, subsets);
+		parseSkinnedVertices(infile, numVertices, vertices);
+		parseTriangles(infile, numTriangles, indices);
+		parseBoneOffsets(infile, numBones, boneOffsets);
+		parseBoneHierarchy(infile, numBones, boneIndexToParentIndex);
+		parseAnimationClips(infile, numAnimationClips, numBones, animations);
+
+		skinInfo.init(boneIndexToParentIndex, boneOffsets, animations);
 	}
 }
 
@@ -58,11 +72,8 @@ void M3DLoader::parseMaterials(std::ifstream& infile, unsigned int numMaterials,
 		infile >> ignore >> diffuseMapName;
 		infile >> ignore >> normalMapName;
 
-		materials[i].diffuseMapName.resize(diffuseMapName.size(), ' ');
-		materials[i].normalMapName.resize(normalMapName.size(), ' ');
-
-		std::copy(diffuseMapName.begin(), diffuseMapName.end(), materials[i].diffuseMapName.begin());
-		std::copy(normalMapName.begin(), normalMapName.end(), materials[i].normalMapName.begin());
+		materials[i].diffuseMapName = diffuseMapName;
+		materials[i].normalMapName = normalMapName;
 	}
 }
 
@@ -95,7 +106,7 @@ void M3DLoader::parseSkinnedVertices(std::ifstream& infile, unsigned int numVert
 	for(unsigned int i=0; i<numVertices; i++)
 	{
 		infile >> ignore >> vertices[i].position_.x >> vertices[i].position_.y >> vertices[i].position_.z;
-		infile >> ignore >> vertices[i].tangent_.x >> vertices[i].tangent_.y >> vertices[i].tangent_.z;
+		infile >> ignore >> vertices[i].tangent_.x >> vertices[i].tangent_.y >> vertices[i].tangent_.z >> vertices[i].tangent_.w;
 		infile >> ignore >> vertices[i].normal_.x >> vertices[i].normal_.y >> vertices[i].normal_.z;
 		infile >> ignore >> vertices[i].texcoord_.x >> vertices[i].texcoord_.y;
 		infile >> ignore >> weights[0] >> weights[1] >> weights[2] >> weights[3];
@@ -110,4 +121,97 @@ void M3DLoader::parseSkinnedVertices(std::ifstream& infile, unsigned int numVert
 		vertices[i].boneIndices_[2] = boneIndices[2]; 
 		vertices[i].boneIndices_[3] = boneIndices[3]; 
 	}
+}
+
+void M3DLoader::parseTriangles(std::ifstream& infile, unsigned int numTriangles, std::vector<unsigned int>& indices)
+{
+	std::string ignore;
+	indices.resize(numTriangles*3);
+
+	infile >> ignore; //Header text
+	for(unsigned int i=0; i<numTriangles; i++)
+	{
+		infile >> indices[i*3+0] >> indices[i*3+1] >> indices[i*3+2];
+	}
+}
+
+void M3DLoader::parseBoneOffsets(std::ifstream& infile, unsigned int numBones, std::vector<DirectX::XMFLOAT4X4>& boneOffsets)
+{
+	std::string ignore;
+	boneOffsets.resize(numBones);
+
+	infile >> ignore; //Header text
+	for(unsigned int i=0; i<numBones; i++)
+	{
+		infile >> ignore >> boneOffsets[i](0,0) >> boneOffsets[i](0,1) >> boneOffsets[i](0,2) >> boneOffsets[i](0,3) >>
+							boneOffsets[i](1,0) >> boneOffsets[i](1,1) >> boneOffsets[i](1,2) >> boneOffsets[i](1,3) >>
+							boneOffsets[i](2,0) >> boneOffsets[i](2,1) >> boneOffsets[i](2,2) >> boneOffsets[i](2,3) >>
+							boneOffsets[i](3,0) >> boneOffsets[i](3,1) >> boneOffsets[i](3,2) >> boneOffsets[i](3,3);
+	}
+}
+
+void M3DLoader::parseBoneHierarchy(std::ifstream& infile, unsigned int numBones, std::vector<int>& boneIndexToParentIndex)
+{
+	std::string ignore;
+	boneIndexToParentIndex.resize(numBones);
+
+	infile >> ignore;
+	for(unsigned int i=0; i<numBones; i++)
+	{
+		infile >> ignore >> boneIndexToParentIndex[i];
+	}
+}
+
+void M3DLoader::parseAnimationClips(std::ifstream& infile, unsigned int numAnimationClips,
+									unsigned int numBones, std::map<std::string, AnimationClip>& animations)
+{
+	std::string ignore;
+	infile >> ignore; //Header Text
+
+	for(unsigned int clipIndex = 0; clipIndex < numAnimationClips; clipIndex++)
+	{
+		std::string clipName;
+		infile >> ignore >> clipName;
+		infile >> ignore; // {
+
+		AnimationClip clip;
+		clip.boneAnimations_.resize(numBones);
+
+		for(unsigned int boneIndex=0; boneIndex<numBones; boneIndex++)
+		{
+			parseBoneKeyframes(infile, numBones, clip.boneAnimations_.at(boneIndex));
+		}
+		infile >> ignore; // {
+
+		animations[clipName] = clip;
+	}
+}
+
+void M3DLoader::parseBoneKeyframes(std::ifstream& infile, unsigned int numBones, BoneAnimation& boneAnimation)
+{
+	std::string ignore;
+	unsigned int numKeyframes = 0;
+	infile >> ignore >> ignore >> numKeyframes;
+	infile >> ignore; // {
+	
+	boneAnimation.keyframes_.resize(numKeyframes);
+	for(unsigned int i=0; i<numKeyframes; i++)
+	{
+		float time = 0.0f;
+		DirectX::XMFLOAT3 translation(0.0f, 0.0f, 0.0f);
+		DirectX::XMFLOAT3 scale(1.0f, 1.0f, 1.0f);
+		DirectX::XMFLOAT4 rotationQuaternion(0.0f, 0.0f, 0.0f, 1.0f);
+
+		infile >> ignore >> time;
+		infile >> ignore >> translation.x >> translation.y >> translation.z;
+		infile >> ignore >> scale.x >> scale.y >> scale.z;
+		infile >> ignore >> rotationQuaternion.x >> rotationQuaternion.y >> rotationQuaternion.z >> rotationQuaternion.w;
+
+		boneAnimation.keyframes_[i].timePosition		= time;
+		boneAnimation.keyframes_[i].translation			= translation;
+		boneAnimation.keyframes_[i].scale				= scale;
+		boneAnimation.keyframes_[i].rotationQuaternion	= rotationQuaternion;	
+	}
+
+	infile >> ignore; // {
 }

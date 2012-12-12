@@ -21,9 +21,9 @@ public:
 	float getClipStartTime()	const;
 	float getClipEndTime()		const;
 	
+	std::vector<BoneAnimation> boneAnimations_;
 private:
 
-	std::vector<BoneAnimation> boneAnimations_;
-};
+};	
 
 #endif //XKILL_RENDERER_ANIMATIONCLIP_H

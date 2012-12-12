@@ -7,7 +7,7 @@ namespace DirectX
 {
 	struct XMFLOAT3;
 	struct XMFLOAT4;
-}
+};
 
 struct Keyframe
 {

@@ -34,6 +34,9 @@ class Event_WindowResize;
 class MeshManagement;
 class ObjLoaderBasic;
 
+class M3DLoader;
+class AnimatedMesh;
+
 namespace DirectX
 {
 	struct XMFLOAT3;
@@ -236,6 +239,13 @@ private:
 
 	//! Methods that will be called on events. 
 	void event_WindowResize(Event_WindowResize* e);
+
+
+	//TEMP
+	M3DLoader* m3dLoader;
+	AnimatedMesh* animatedMesh;
+	void initAnimations();
+
 };
 
 #endif //XKILL_RENDERER_RENDERINGCOMPONENT_H

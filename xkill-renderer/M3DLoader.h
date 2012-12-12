@@ -46,9 +46,9 @@ private:
 							std::vector<int>& boneIndexToParentIndex);
 	
 	void parseAnimationClips(std::ifstream& infile, unsigned int numAnimationClips,
-							 std::map<std::string, AnimationClip>& animations);
+							 unsigned int numBones, std::map<std::string, AnimationClip>& animations);
 	
-	void parseBoneKeyFrames(std::ifstream& infile, unsigned int numBones, BoneAnimation& boneAnimation);
+	void parseBoneKeyframes(std::ifstream& infile, unsigned int numBones, BoneAnimation& boneAnimation);
 };
 
 #endif //XKILL_RENDERER_M3DLOADER_H

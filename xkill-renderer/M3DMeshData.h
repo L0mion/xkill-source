@@ -13,8 +13,8 @@ struct M3DMaterial
 	bool				alphaClip_;
 
 	std::string			effectTypeName;
-	std::wstring		diffuseMapName;
-	std::wstring		normalMapName;
+	std::string			diffuseMapName;
+	std::string			normalMapName;
 
 	M3DMaterial()
 	{
@@ -35,6 +35,6 @@ struct M3DSubset
 		std::memset(this, 0, sizeof(M3DSubset));
 		id_ = -1;
 	}
-}
+};
 
 #endif //XKILL_RENDERER_M3DMESHDATA_H
