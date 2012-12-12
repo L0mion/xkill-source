@@ -17,7 +17,6 @@
 //#include <vld.h>
 #endif //DEBUG || DEBUG_
 
-
 #define TILE_SIZE 16
 
 
@@ -33,6 +32,9 @@ class LightManagement;
 class Event_WindowResize;
 class MeshManagement;
 class ObjLoaderBasic;
+
+class M3DLoader;
+class AnimatedMesh;
 
 namespace DirectX
 {
@@ -236,6 +238,13 @@ private:
 
 	//! Methods that will be called on events. 
 	void event_WindowResize(Event_WindowResize* e);
+
+
+	//TEMP
+	M3DLoader* m3dLoader;
+	AnimatedMesh* animatedMesh;
+	void initAnimations();
+
 };
 
 #endif //XKILL_RENDERER_RENDERINGCOMPONENT_H
