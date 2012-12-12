@@ -44,6 +44,44 @@ struct DLL_U VertexPosNormTex
 	}
 };
 
+//! Vertex for a skinned mesh.
+/*!
+\ingroup xkill-mesh*/
+struct DLL_U VertexPosNormTexTanSkinned
+{
+	Float3		 position_;			//!< Position in model-space.
+	Float3		 normal_;			//!< Normal in model-space.
+	Float2		 texcoord_;			//!< Texture coordinates.
+	Float4		 tangent_;			//!< Tangent in model-space.
+	Float3		 weights_;			//!< How much each bone influences the vertex.
+	unsigned int boneIndices_[4];	//!< Indices of the bones influencing the vertex.
+
+	//! Default constructor setting all member variables to zero.
+	VertexPosNormTexTanSkinned()
+	{
+		std::memset(this, 0, sizeof(VertexPosNormTexTanSkinned));
+	}
+
+	//! Constructor setting members to specific values.
+	/*!
+	\param position Position in model-space.
+	\patam normal Normal in model-space.
+	\param texcoord Texture coordinates.
+	\param weights How much each bone influences the vertex.
+	\param boneIndices[] Array containing indices for each bone influensing the vertex. Max 4!
+	*/
+	VertexPosNormTexTanSkinned(Float3 position, Float3 normal, Float2 texcoord,	Float4 tangent, Float3 weights, unsigned int boneIndices[])
+	{
+		position_	= position;
+		normal_		= normal;
+		texcoord_	= texcoord;
+		tangent_	= tangent;
+		weights_	= weights;
+		for(unsigned int i=0; i<4; i++)
+			boneIndices_[i] = boneIndices[i];
+	}
+};
+
 #endif //XKILL_RENDERER_MESHVERTICES_H
 
 //DirectX::XMFLOAT3 dxfloat((float*)&position_);
