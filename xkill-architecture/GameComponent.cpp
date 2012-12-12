@@ -24,6 +24,8 @@ bool GameComponent::init()
 	//Crate two spawn points
 	SEND_EVENT(&Event_CreateSpawnPoint(Float3(0.0f, 1.0f, -5.0f)));
 	SEND_EVENT(&Event_CreateSpawnPoint(Float3(0.0f, 5.0f, 0.0f)));
+	SEND_EVENT(&Event_CreateSpawnPoint(Float3(1.0f, 4.0f, 0.0f)));
+	SEND_EVENT(&Event_CreateSpawnPoint(Float3(2.0f, 3.0f, 0.0f)));
 
 	return true;
 }
