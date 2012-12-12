@@ -29,7 +29,7 @@ public:
 	// AttributeManager instead of "'positionAttributes_" which will result in error. As long as a shorter naming convention
 	// such as "position" is used, this will not be a problem.
 #define CREATE_ATTRIBUTE(AttributeType, AttributeName, OwnerEntity)						\
-	AttributeType* AttributeName = AttributeName = AttributeManager::getInstance()->AttributeName##Attributes_.createAttribute(OwnerEntity)
+	AttributeType* AttributeName = AttributeManager::getInstance()->AttributeName##Attributes_.createAttribute(OwnerEntity)
 	
 	// Connects the AttributePointer by the name PointerName inside AttributeName with latest AttributePointer created inside AttributeManager.
 	// IMPORTANT: The following formula is used to access AttributeManager, "PointerName+Attributes".
@@ -115,6 +115,7 @@ public:
 		physics->isProjectile = true;
 		physics->linearVelocity = e->velocity;
 		physics->mass = 100.0f;
+		physics->gravity = e->gravity;
 
 		CREATE_ATTRIBUTE(ProjectileAttribute, projectile, entity);
 		CONNECT_ATTRIBUTES(projectile, physics);
@@ -129,6 +130,15 @@ public:
 		MeshAttribute* meshAttribute = AttributeManager::getInstance()->meshAttributes_.createAttribute(entity);
 		meshAttribute->mesh		= e->mesh;
 		meshAttribute->dynamic	= e->dynamic;
+	}
+
+	void createSpawnPointEntity(Entity* entity, Event_CreateSpawnPoint* e)
+	{
+		CREATE_ATTRIBUTE(PositionAttribute, position, entity);
+		position->position = e->spawnPointPosition;
+		
+		CREATE_ATTRIBUTE(SpawnPointAttribute, spawnPoint, entity);
+		CONNECT_ATTRIBUTES(spawnPoint, position);
 	}
 };
 

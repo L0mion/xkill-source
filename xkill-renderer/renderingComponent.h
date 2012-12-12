@@ -17,7 +17,6 @@
 //#include <vld.h>
 #endif //DEBUG || DEBUG_
 
-
 #define TILE_SIZE 16
 
 
@@ -33,6 +32,9 @@ class LightManagement;
 class Event_WindowResize;
 class MeshManagement;
 class ObjLoaderBasic;
+
+class M3DLoader;
+class AnimatedMesh;
 
 namespace DirectX
 {
@@ -189,8 +191,8 @@ private:
 	\param spatialAttribute Contains scale and rotation to be used in calculation.
 	\param postionAttribute Contains position to be used in calculation.
 	*/
-	DirectX::XMFLOAT4X4 calculateWorldMatrix(SpatialAttribute spatialAttribute,
-											 PositionAttribute positionAttribute);
+	DirectX::XMFLOAT4X4 calculateWorldMatrix(SpatialAttribute* spatialAttribute,
+											 PositionAttribute* positionAttribute);
 
 	//! Calculates a final matrix that is used to transform an object from local space to homogeneous clip space.
 	/*!
@@ -236,6 +238,13 @@ private:
 
 	//! Methods that will be called on events. 
 	void event_WindowResize(Event_WindowResize* e);
+
+
+	//TEMP
+	M3DLoader* m3dLoader_;
+	AnimatedMesh* animatedMesh_;
+	void initAnimations();
+
 };
 
 #endif //XKILL_RENDERER_RENDERINGCOMPONENT_H

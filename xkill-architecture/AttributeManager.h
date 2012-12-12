@@ -31,6 +31,7 @@ private:
 
 		healthAttributes_		.init(ATTRIBUTE_HEALTH);
 		damageAttributes_		.init(ATTRIBUTE_DAMAGE);
+		spawnPointAttributes_	.init(ATTRIBUTE_SPAWNPOINT);
 	}
 
 public:
@@ -46,6 +47,7 @@ public:
 	AttributeStorage<MeshAttribute>				meshAttributes_;
 	AttributeStorage<HealthAttribute>			healthAttributes_;
 	AttributeStorage<DamageAttribute>			damageAttributes_;
+	AttributeStorage<SpawnPointAttribute>		spawnPointAttributes_;
 
 	static AttributeManager* getInstance()
 	{
@@ -90,18 +92,19 @@ public:
 			// If Enum matches, fetch information from the corresponding
 			// AttributeStorage and store that information inside 
 			// Event_getAttribute
-			case ATTRIBUTE_POSITION:	PUT_ATTRIBUTES_INSIDE_EVENT(positionAttributes_		);
-			case ATTRIBUTE_SPATIAL:		PUT_ATTRIBUTES_INSIDE_EVENT(spatialAttributes_		);
-			case ATTRIBUTE_RENDER:		PUT_ATTRIBUTES_INSIDE_EVENT(renderAttributes_		);
-			case ATTRIBUTE_PHYSICS:		PUT_ATTRIBUTES_INSIDE_EVENT(physicsAttributes_		);
-			case ATTRIBUTE_CAMERA:		PUT_ATTRIBUTES_INSIDE_EVENT(cameraAttributes_		);
-			case ATTRIBUTE_INPUT:		PUT_ATTRIBUTES_INSIDE_EVENT(inputAttributes_		);
-			case ATTRIBUTE_PLAYER:		PUT_ATTRIBUTES_INSIDE_EVENT(playerAttributes_		);
-			case ATTRIBUTE_BOUNDING:	PUT_ATTRIBUTES_INSIDE_EVENT(boundingAttributes_		);
-			case ATTRIBUTE_MESH:		PUT_ATTRIBUTES_INSIDE_EVENT(meshAttributes_			);
-			case ATTRIBUTE_PROJECTILE:	PUT_ATTRIBUTES_INSIDE_EVENT(projectileAttributes_	);
-			case ATTRIBUTE_HEALTH:		PUT_ATTRIBUTES_INSIDE_EVENT(healthAttributes_		);
-			case ATTRIBUTE_DAMAGE:		PUT_ATTRIBUTES_INSIDE_EVENT(damageAttributes_		);
+		case ATTRIBUTE_POSITION:	PUT_ATTRIBUTES_INSIDE_EVENT(positionAttributes_		);
+		case ATTRIBUTE_SPATIAL:		PUT_ATTRIBUTES_INSIDE_EVENT(spatialAttributes_		);
+		case ATTRIBUTE_RENDER:		PUT_ATTRIBUTES_INSIDE_EVENT(renderAttributes_		);
+		case ATTRIBUTE_PHYSICS:		PUT_ATTRIBUTES_INSIDE_EVENT(physicsAttributes_		);
+		case ATTRIBUTE_CAMERA:		PUT_ATTRIBUTES_INSIDE_EVENT(cameraAttributes_		);
+		case ATTRIBUTE_INPUT:		PUT_ATTRIBUTES_INSIDE_EVENT(inputAttributes_		);
+		case ATTRIBUTE_PLAYER:		PUT_ATTRIBUTES_INSIDE_EVENT(playerAttributes_		);
+		case ATTRIBUTE_BOUNDING:	PUT_ATTRIBUTES_INSIDE_EVENT(boundingAttributes_		);
+		case ATTRIBUTE_MESH:		PUT_ATTRIBUTES_INSIDE_EVENT(meshAttributes_			);
+		case ATTRIBUTE_PROJECTILE:	PUT_ATTRIBUTES_INSIDE_EVENT(projectileAttributes_	);
+		case ATTRIBUTE_HEALTH:		PUT_ATTRIBUTES_INSIDE_EVENT(healthAttributes_		);
+		case ATTRIBUTE_DAMAGE:		PUT_ATTRIBUTES_INSIDE_EVENT(damageAttributes_		);
+		case ATTRIBUTE_SPAWNPOINT:	PUT_ATTRIBUTES_INSIDE_EVENT(spawnPointAttributes_	);
 
 			// undefine dirty macro
 #undef PUT_ATTRIBUTES_INSIDE_EVENT

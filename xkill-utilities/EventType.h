@@ -43,6 +43,7 @@ enum DLL_U EventType
 	EVENT_ENTITIES_COLLIDING,
 	EVENT_REMOVE_ENTITY,
 	EVENT_PLAYERDEATH,
+	EVENT_CREATE_SPAWNPOINT,
 
 	EVENT_UPDATE,
 	EVENT_MOUSE_MOVE,
@@ -273,14 +274,16 @@ public:
 	int entityIdOfCreator;
 	Float3 position;
 	Float3 velocity;
+	Float3 gravity;
 	Float4 rotation;
 
-	Event_CreateProjectile(Float3 position, Float3 velocity, Float4 rotation, int entityIdOfCreator) : Event(EVENT_CREATE_PROJECTILE)
+	Event_CreateProjectile(Float3 position, Float3 velocity, Float4 rotation, Float3 gravity, int entityIdOfCreator) : Event(EVENT_CREATE_PROJECTILE)
 	{
-		this->entityIdOfCreator = entityIdOfCreator;
 		this->position = position;
 		this->velocity = velocity;
 		this->rotation = rotation;
+		this->gravity = gravity;
+		this->entityIdOfCreator = entityIdOfCreator;
 	}
 };
 
@@ -367,3 +370,15 @@ public:
 	{
 	}
 };
+
+class DLL_U Event_CreateSpawnPoint : public Event
+{
+public:
+	Event_CreateSpawnPoint(Float3 spawnPointPosition) : Event(EVENT_CREATE_SPAWNPOINT)
+	{
+		this->spawnPointPosition = spawnPointPosition;
+	}
+
+	Float3 spawnPointPosition;
+};
+

@@ -61,6 +61,7 @@ enum DLL_U AttributeType
 
 	ATTRIBUTE_HEALTH,
 	ATTRIBUTE_DAMAGE,
+	ATTRIBUTE_SPAWNPOINT,
 
 	// this is needed, don't touch!
 	ATTRIBUTE_LAST
@@ -140,6 +141,7 @@ struct DLL_U PhysicsAttribute : public IAttribute
 	AttributePointer spatialAttribute;
 	Float3 linearVelocity;
 	Float3 angularVelocity;
+	Float3 gravity;
 	float mass;
 	unsigned int collisionShapeIndex;
 	//CollisionShape
@@ -225,31 +227,37 @@ struct DLL_U PlayerAttribute : public IAttribute
 class MeshModel;
 struct DLL_U MeshAttribute : public IAttribute
 {
+	MeshAttribute();
+	~MeshAttribute();
+	void clean();
+
 	MeshModel* mesh;
 	bool dynamic;
-
-	void clean();
-	MeshAttribute(){};
-	~MeshAttribute();;
 };
 
 struct DLL_U HealthAttribute : public IAttribute
 {
-	HealthAttribute()
-	{
-		health = 2;
-	};
+	HealthAttribute();
+	~HealthAttribute();
 
+	int startHealth;
 	int health;
 };
 
 struct DLL_U DamageAttribute : public IAttribute
 {
-	DamageAttribute()
-	{
-		damage = 1;
-	};
+	DamageAttribute();
+	~DamageAttribute();
 
 	int damage;
 	int owner_entityID;
+};
+
+struct DLL_U SpawnPointAttribute : public IAttribute
+{
+	SpawnPointAttribute();
+	~SpawnPointAttribute();
+
+	float timeSinceLastSpawn;
+	AttributePointer positionAttribute;
 };
