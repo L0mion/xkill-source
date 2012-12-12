@@ -112,14 +112,16 @@ void InputComponent::handleInput(float delta)
 			}
 
 			//Projectile test
-			if(state.buttons[0].isReleased())													   
+			if(state.buttons[0].isReleased())
+				inputAttributes_->at(i).fire = true;
+			if(state.buttons[7].isDown())
 				inputAttributes_->at(i).fire = true;
 
 			if(state.buttons.size() > 7)
 			{
 				if(state.buttons[3].isDown())
 					inputAttributes_->at(i).position.y = 1.0f;
-																		    
+
 				if(state.buttons[4].isDown())
 					inputAttributes_->at(i).position.x = -1.0f;
 

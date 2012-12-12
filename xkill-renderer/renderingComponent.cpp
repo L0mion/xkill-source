@@ -20,6 +20,10 @@
 #include "VB.h"
 #include "IB.h"
 
+
+#include "M3DLoader.h"
+#include "AnimatedMesh.h"
+
 #include "renderingComponent.h"
 
 #include <iostream>
@@ -51,6 +55,9 @@ RenderingComponent::RenderingComponent(HWND windowHandle)
 	
 	for(unsigned int i = 0; i < GBUFFERID_NUM_BUFFERS; i++)
 		gBuffers_[i] = nullptr;
+
+	m3dLoader_		= nullptr;
+	animatedMesh_	= nullptr;
 }
 RenderingComponent::~RenderingComponent()
 {
@@ -69,6 +76,10 @@ RenderingComponent::~RenderingComponent()
 
 	for(unsigned int i = 0; i < GBUFFERID_NUM_BUFFERS; i++)
 		SAFE_DELETE(gBuffers_[i]);
+
+	
+	SAFE_DELETE(m3dLoader_);
+	SAFE_DELETE(animatedMesh_);
 }
 
 void RenderingComponent::reset()
@@ -146,6 +157,9 @@ HRESULT RenderingComponent::init()
 //		hr = initDebug();
 	if(SUCCEEDED(hr))
 		hr = initGBuffers();
+
+//	if(SUCCEEDED(hr))
+//		initAnimations();
 
 	return hr;
 }
@@ -515,4 +529,22 @@ void RenderingComponent::event_WindowResize( Event_WindowResize* e )
 	resize(width, height);
 
 	// TODO: resize render window
+}
+
+
+
+void RenderingComponent::initAnimations()
+{
+	m3dLoader_ = new M3DLoader();
+	
+	animatedMesh_ = nullptr;
+	animatedMesh_ = new AnimatedMesh();
+	animatedMesh_->init();
+
+	m3dLoader_->loadM3D("../../xkill-resources/xkill-models/soldier.m3d",
+					   animatedMesh_->getVertices(),
+					   animatedMesh_->getIndices(),
+					   animatedMesh_->getSubsets(),
+					   animatedMesh_->getMaterials(),
+					   animatedMesh_->getSkinInfo());
 }
