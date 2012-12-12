@@ -53,11 +53,11 @@ public:
 
 		CREATE_ATTRIBUTE(RenderAttribute, render, entity);
 		CONNECT_ATTRIBUTES(render, spatial);
-		render->meshIndex = 0;
+		render->meshID = 0;
 
 		CREATE_ATTRIBUTE(PhysicsAttribute, physics, entity);
 		CONNECT_ATTRIBUTES(physics, spatial);
-		physics->collisionShapeIndex = 0;
+		physics->meshID = render->meshID;
 
 		CREATE_ATTRIBUTE(InputAttribute, input, entity);
 		CONNECT_ATTRIBUTES(input, physics);
@@ -87,11 +87,11 @@ public:
 
 		CREATE_ATTRIBUTE(RenderAttribute, render, entity);
 		CONNECT_ATTRIBUTES(render, spatial);
-		render->meshIndex = 1;
+		render->meshID = 1;
 
 		CREATE_ATTRIBUTE(PhysicsAttribute, physics, entity);
 		CONNECT_ATTRIBUTES(physics, spatial);
-		physics->collisionShapeIndex = 1;
+		physics->meshID = render->meshID;
 		physics->mass = 0;
 	}
 
@@ -106,11 +106,11 @@ public:
 
 		CREATE_ATTRIBUTE(RenderAttribute, render, entity);
 		CONNECT_ATTRIBUTES(render, spatial);
-		render->meshIndex = 2;
+		render->meshID = 2;
 
 		CREATE_ATTRIBUTE(PhysicsAttribute, physics, entity);
 		CONNECT_ATTRIBUTES(physics, spatial);
-		physics->collisionShapeIndex = 2;
+		physics->meshID = render->meshID;
 		physics->isProjectile = true;
 		physics->linearVelocity = e->velocity;
 		physics->mass = 0.01f;
@@ -128,6 +128,7 @@ public:
 		MeshAttribute* meshAttribute = AttributeManager::getInstance()->meshAttributes_.createAttribute(entity);
 		meshAttribute->mesh		= e->mesh;
 		meshAttribute->dynamic	= e->dynamic;
+		meshAttribute->meshID	= e->id;
 	}
 };
 

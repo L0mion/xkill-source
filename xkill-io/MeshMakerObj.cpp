@@ -27,7 +27,7 @@ MeshMakerObj::MeshMakerObj(
 	loaderObj_ = nullptr;
 	loaderMtl_ = nullptr;
 
-	meshModel_ = nullptr;
+	meshModel_ = new VarStatus<MeshModel>(true);
 }
 MeshMakerObj::~MeshMakerObj()
 {
@@ -53,19 +53,20 @@ bool MeshMakerObj::init()
 			sucessfulLoad = loadMTLs();
 		if(sucessfulLoad)
 		{
-			meshModel_		= makeMesh(loaderObj_->getObj());
-			sucessfulLoad	= makePGY(meshModel_);
+			meshModel_->setVar(makeMesh(loaderObj_->getObj()));
+			sucessfulLoad = makePGY(meshModel_->getVar());
 		}
 	}
 	else
-		meshModel_ = loadPGY();
+		meshModel_->setVar(loadPGY());
 
 	return sucessfulLoad;
 }
 
-MeshModel* MeshMakerObj::getMesh()
+MeshModel* MeshMakerObj::claimMesh()
 {
-	return meshModel_;
+	meshModel_->setStatus(false);
+	return meshModel_->getVar();
 }
 
 bool MeshMakerObj::loadObj()
@@ -119,7 +120,7 @@ bool MeshMakerObj::makePGY(MeshModel* model)
 {
 	std::string fileNamePgy = getFileNamePGY();
 	WriterPGY pgyWriter(
-		*meshModel_,
+		*model,
 		pathPGY_,
 		fileNamePgy);
 	bool sucessfulWrite = pgyWriter.init();
