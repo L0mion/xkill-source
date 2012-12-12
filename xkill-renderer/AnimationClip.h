@@ -3,12 +3,12 @@
 
 #include <vector>
 
-#include "BoneAnimation.h"
-
 namespace DirectX
 {
 	struct XMFLOAT4X4;
 }
+
+class BoneAnimation;
 
 class AnimationClip
 {
@@ -21,9 +21,10 @@ public:
 	float getClipStartTime()	const;
 	float getClipEndTime()		const;
 	
-	std::vector<BoneAnimation> boneAnimations_;
-private:
+	std::vector<BoneAnimation*>* getBoneAnimations() const;
 
+private:
+	std::vector<BoneAnimation*>* boneAnimations_;
 };	
 
 #endif //XKILL_RENDERER_ANIMATIONCLIP_H

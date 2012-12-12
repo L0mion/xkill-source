@@ -17,6 +17,7 @@
 //#include <vld.h>
 #endif //DEBUG || DEBUG_
 
+#include <vld.h>
 
 #define TILE_SIZE 16
 

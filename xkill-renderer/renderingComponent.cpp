@@ -24,7 +24,6 @@
 #include "M3DLoader.h"
 #include "AnimatedMesh.h"
 
-
 #include "renderingComponent.h"
 
 #include <iostream>
@@ -74,6 +73,10 @@ RenderingComponent::~RenderingComponent()
 
 	for(unsigned int i = 0; i < GBUFFERID_NUM_BUFFERS; i++)
 		SAFE_DELETE(gBuffers_[i]);
+
+	
+	SAFE_DELETE(m3dLoader);
+	SAFE_DELETE(animatedMesh);
 }
 
 void RenderingComponent::reset()
@@ -530,8 +533,15 @@ void RenderingComponent::event_WindowResize( Event_WindowResize* e )
 void RenderingComponent::initAnimations()
 {
 	m3dLoader = new M3DLoader();
+	
+	animatedMesh = nullptr;
 	animatedMesh = new AnimatedMesh();
+	animatedMesh->init();
 
 	m3dLoader->loadM3D("../../xkill-resources/xkill-models/soldier.m3d",
-		animatedMesh->vertices, animatedMesh->indices, animatedMesh->subsets, animatedMesh->materials, animatedMesh->skinInfo);
+					   animatedMesh->getVertices(),
+					   animatedMesh->getIndices(),
+					   animatedMesh->getSubsets(),
+					   animatedMesh->getMaterials(),
+					   animatedMesh->getSkinInfo());
 }
