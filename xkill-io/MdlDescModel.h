@@ -3,13 +3,16 @@
 
 #include <string>
 
+//! Describes data used to load a model for use in engine.
 struct MdlDescModel
 {
-	unsigned int	modelID_;
-	std::string		modelFileName_;
-	bool			dynamic_;
+	unsigned int	modelID_;		//!< ID of model.
+	std::string		modelFileName_;	//!< Filename of model.
+	bool			dynamic_;		//!< Specifies whether or not object is to be interpreted as dynamic by physics-component.
 
+	//! Does nothing.
 	MdlDescModel() {}
+	//! Initializes MdlDescModel.
 	MdlDescModel(
 		unsigned int	modelID,
 		std::string		modelFileName,
@@ -19,6 +22,7 @@ struct MdlDescModel
 		modelFileName_	= modelFileName;
 		dynamic_		= dynamic;
 	}
+	//! Does nothing.
 	~MdlDescModel() {}
 };
 

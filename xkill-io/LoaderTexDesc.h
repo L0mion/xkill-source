@@ -25,6 +25,7 @@ static const unsigned int TEXDESC_PARAM_INDEX_HEADER_PATH = 2;
 static const unsigned int TEXDESC_PARAM_INDEX_TEXTURE_ID		= 1;
 static const unsigned int TEXDESC_PARAM_INDEX_TEXTURE_FILENAME	= 2;
 
+/** Describes symbols read from file. */
 enum TexDescSymbol
 {
 	TEXDESC_SYMBOL_HEADER,
@@ -34,6 +35,7 @@ enum TexDescSymbol
 	TEXDESC_SYMBOL_INVALID
 };
 
+//! Used to load .texdesc-files, which are used to establish a list of textures which will then be loaded.
 class LoaderTexDesc : public Loader
 {
 public:

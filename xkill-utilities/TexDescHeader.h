@@ -5,12 +5,12 @@
 
 #include "dllUtilities.h"
 
+//! Describes a header read from a .texdesc-file.
 struct DLL_U TexDescHeader
 {
-	std::string headerName_;
-	std::string texPath_;
-
+	//! Does nothing.
 	TexDescHeader(){}
+	//! Initializes TexDescHeader with passed values.
 	TexDescHeader(
 		std::string headerName,
 		std::string texPath)
@@ -18,7 +18,11 @@ struct DLL_U TexDescHeader
 		headerName_	= headerName;
 		texPath_	= texPath;
 	}
+	//! Does nothing.
 	~TexDescHeader(){}
+
+	std::string headerName_;	//!< Name of .texdesc.
+	std::string texPath_;		//!< Path to collection of textures.
 };
 
 #endif //XKILL_IO_TEXDESCHEADER_H

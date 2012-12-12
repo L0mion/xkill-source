@@ -5,11 +5,10 @@
 
 #include "dllUtilities.h"
 
+//! Description of texture to be loaded.
 struct DLL_U TexDescTex
 {
-	unsigned int	id_;
-	std::string		fileName_;
-
+	//! Initializes TexDescTex-type with passed values.
 	TexDescTex(
 		unsigned int	id,
 		std::string		fileName)
@@ -17,7 +16,11 @@ struct DLL_U TexDescTex
 		id_			= id;
 		fileName_	= fileName;
 	}
+	//! Does nothing.
 	TexDescTex() {}
+
+	unsigned int	id_;		//!< ID of texture.
+	std::string		fileName_;	//!< Filename of texture.
 };
 
 #endif //XKILL_UTILITIES_TEXDESCTEX_H
