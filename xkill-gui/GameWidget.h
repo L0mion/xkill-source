@@ -12,6 +12,7 @@
 
 #include "ui_MainWindow.h"
 #include "GameTimer.h"
+#include "Menu.h"
 
 
 class GameWidget : public QWidget, public IObserver
@@ -69,6 +70,10 @@ public:
 			break;
 		}
 	}
+
+	void toggleMenu()
+	{
+	};
 
 public slots:
 	// Runs every time gameTimer times out

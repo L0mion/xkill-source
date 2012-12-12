@@ -211,7 +211,6 @@ struct DLL_U PlayerAttribute : public IAttribute
 	~PlayerAttribute();
 
 	int id;					//!< The id of the player process. Used to identify a player attribute in GameComponent when firing projectiles.
-	std::string name;		//!< Name of the player process.
 	int priority;			//!< Priority of the player process. Higher value means higher priority. The scheduler will choose the process with the highest priority for execution.
 	int cycleSteals;		//!< Total number of cycle steals for the player process. Cycle steals steal priority from other player processes.
 	int totalExecutionTime; //!< Total execution time of the player process, used ased final score in the deathmatch. The game session winner is the player with the most total execution time as awarded by the scheduler.

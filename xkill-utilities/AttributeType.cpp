@@ -104,7 +104,6 @@ InputAttribute::~InputAttribute()
 PlayerAttribute::PlayerAttribute()
 {
 	id = -1;
-	name = "Player";
 	priority = 0;
 	cycleSteals = 0;
 	totalExecutionTime = 0;

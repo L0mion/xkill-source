@@ -1,7 +1,7 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
-#include <QtGui/QMainWindow>
+#include <QtGui>
 #include <QMouseEvent> // needed to grab mouse input
 #include <QMessageBox> // used to display info dialogs
 #include <xkill-utilities/IObserver.h>
@@ -9,6 +9,7 @@
 #include "ui_MainWindow.h"
 
 #include "GameWidget.h"
+#include "Menu.h"
 
 class MainWindow : public QMainWindow, public IObserver
 {
@@ -16,7 +17,8 @@ class MainWindow : public QMainWindow, public IObserver
 
 private:
 	Ui::MainWindowClass ui;
-	QWidget* gameWidget;
+	GameWidget* gameWidget;
+	Menu* menu;
 	bool hasMouseLock;
 
 public:
@@ -46,7 +48,10 @@ public:
 		ui.actionCap_FPS->setChecked(true);
 		connect(ui.actionQuit, SIGNAL(triggered()), this, SLOT(close()));
 		connect(gameWidget, SIGNAL(signal_fpsChanged(QString)), this, SLOT(slot_setTitle(QString)));
+
+		menu = new Menu(this);
 	}
+
 	~MainWindow()
 	{
 		delete gameWidget;
@@ -109,7 +114,6 @@ protected:
 	// Behavior on keyboard input
 	void keyPressEvent(QKeyEvent* e)
 	{
-
 		switch (e->key()) 
 		{
 		case Qt::Key_Escape:
@@ -121,7 +125,7 @@ protected:
 				MainWindow::close();
 			break;
 		case Qt::Key_Tab:
-			showMenu();
+			menu->toggleMenu();
 			break;
 		default:
 			break;
@@ -131,9 +135,38 @@ protected:
 		SEND_EVENT(&Event_KeyPress(e->key()));
 	};
 
+	void moveEvent(QMoveEvent *e)
+	{
+		menu->parentMoveEvent();
+	}
+
 	void showMenu()
 	{
-		int i = 0;
+		static bool first = true;
+		static QWidget* menu;
+
+		if(first)
+		{
+			first = false;
+
+			menu = new QDialog(this); 
+			menu->setAttribute(Qt::WA_ShowWithoutActivating);
+			menu->setWindowFlags(Qt::ToolTip);
+			QVBoxLayout* layout = new QVBoxLayout(this);
+			for (int i=0; i<10; i++)
+			{
+				QPushButton* buttons = new QPushButton(tr("Button %1").arg(i + 1));
+				layout->addWidget(buttons);
+			}
+			menu->setLayout(layout);
+		}
+
+		static bool show = true;
+		if(show)
+			menu->show();
+		else
+			menu->hide();
+		show = !show;
 	};
 
 	void keyReleaseEvent(QKeyEvent* e)
@@ -154,12 +187,13 @@ protected:
 		{
 			ui.mainToolBar->hide();
 			this->showFullScreen();
-
+			menu->parentMoveEvent();
 		}
 		else
 		{
 			ui.mainToolBar->show();
 			this->showNormal();
+			menu->parentMoveEvent();
 		}
 	};
 
