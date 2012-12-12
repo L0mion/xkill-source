@@ -1,7 +1,7 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
-#include <QtGui/QMainWindow>
+#include <QtGui>
 #include <QMouseEvent> // needed to grab mouse input
 #include <QMessageBox> // used to display info dialogs
 #include <xkill-utilities/IObserver.h>
@@ -9,6 +9,7 @@
 #include "ui_MainWindow.h"
 
 #include "GameWidget.h"
+#include "Menu.h"
 
 class MainWindow : public QMainWindow, public IObserver
 {
@@ -17,6 +18,7 @@ class MainWindow : public QMainWindow, public IObserver
 private:
 	Ui::MainWindowClass ui;
 	QWidget* gameWidget;
+	Menu* menu;
 	bool hasMouseLock;
 
 public:
@@ -39,6 +41,7 @@ public:
 		this->setCentralWidget(gameWidget);
 		setMouseTracking(true);
 		hasMouseLock = false;
+		menu = new Menu(this);
 
 		// setup signals and slots
 		connect(ui.actionFullscreen, SIGNAL(toggled(bool)), this, SLOT(toggleFullScreen(bool)));
@@ -109,7 +112,6 @@ protected:
 	// Behavior on keyboard input
 	void keyPressEvent(QKeyEvent* e)
 	{
-
 		switch (e->key()) 
 		{
 		case Qt::Key_Escape:
@@ -120,12 +122,44 @@ protected:
 			else
 				MainWindow::close();
 			break;
+		case Qt::Key_Tab:
+			menu->toggleMenu();
+			break;
 		default:
 			break;
 		}
 
 		// Inform about key press
 		SEND_EVENT(&Event_KeyPress(e->key()));
+	};
+
+	void showMenu()
+	{
+		static bool first = true;
+		static QWidget* menu;
+
+		if(first)
+		{
+			first = false;
+
+			menu = new QDialog(this); 
+			menu->setAttribute(Qt::WA_ShowWithoutActivating);
+			menu->setWindowFlags(Qt::ToolTip);
+			QVBoxLayout* layout = new QVBoxLayout(this);
+			for (int i=0; i<10; i++)
+			{
+				QPushButton* buttons = new QPushButton(tr("Button %1").arg(i + 1));
+				layout->addWidget(buttons);
+			}
+			menu->setLayout(layout);
+		}
+
+		static bool show = true;
+		if(show)
+			menu->show();
+		else
+			menu->hide();
+		show = !show;
 	};
 
 	void keyReleaseEvent(QKeyEvent* e)

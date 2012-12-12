@@ -58,8 +58,14 @@ void GameComponent::event_PhysicsAttributesColliding(Event_PhysicsAttributesColl
 		// damage
 		if(e2->hasAttribute(ATTRIBUTE_DAMAGE))
 		{
+			// fetch damage from e2
 			std::vector<DamageAttribute>* allDamage; GET_ATTRIBUTES(allDamage, DamageAttribute, ATTRIBUTE_DAMAGE);
 			std::vector<int> damageId = e2->getAttributes(ATTRIBUTE_DAMAGE);
+
+			// fetch health from e1
+			std::vector<HealthAttribute>* allHealth; GET_ATTRIBUTES(allHealth, HealthAttribute, ATTRIBUTE_HEALTH);
+			std::vector<int> healthId = e1->getAttributes(ATTRIBUTE_HEALTH);
+
 			for(unsigned i=0; i<damageId.size(); i++)
 			{
 				DamageAttribute* damage = &allDamage->at(damageId[i]);
@@ -67,39 +73,48 @@ void GameComponent::event_PhysicsAttributesColliding(Event_PhysicsAttributesColl
 				// avoid damage to self
 				if(e1->getID() != damage->owner_enityID)
 				{
-					// TODO: Damage Player
-					std::cout << "COLLISIONEVENT: Entity " << e1->getID() << " damages Entity " << e2->getID() << std::endl;
+					// TODO: Apply damage to all Health attributes
+					for(unsigned i=0; i<healthId.size(); i++)
+					{
+						HealthAttribute* health = &allHealth->at(healthId[i]);
+						health->health -= damage->damage;
+
+						std::cout << "DAMAGEEVENT Entity " << e2->getID() << " damage: " <<  damage->damage << " Entity " << e1->getID() << " health " << health->health << std::endl;
+					}
 
 					// TODO: Reward owner of Projectile
+
+					// remove projectile
+					SEND_EVENT(&Event_RemoveEntity(e2->getID()));
 				}
 			}
 		}
 	}
 
-	// projectile
-	else if(e1->hasAttribute(ATTRIBUTE_PROJECTILE))
-	{
-		//
-		// colliding with...
-		//
+	//// projectile
+	//else if(e1->hasAttribute(ATTRIBUTE_PROJECTILE))
+	//{
+	//	//
+	//	// colliding with...
+	//	//
 
-		// destroy projectile on impact with everything except the owner who created the projectile
-		std::vector<ProjectileAttribute>* allProjectile; GET_ATTRIBUTES(allProjectile, ProjectileAttribute, ATTRIBUTE_PROJECTILE);
-		std::vector<int> projectileId = e1->getAttributes(ATTRIBUTE_PROJECTILE);
-		for(unsigned i=0; i<projectileId.size(); i++)
-		{
-			ProjectileAttribute* projectile = &allProjectile->at(projectileId[i]);
+	//	// destroy projectile on impact with everything except the owner who created the projectile
+	//	std::vector<ProjectileAttribute>* allProjectile; GET_ATTRIBUTES(allProjectile, ProjectileAttribute, ATTRIBUTE_PROJECTILE);
+	//	std::vector<int> projectileId = e1->getAttributes(ATTRIBUTE_PROJECTILE);
+	//	for(unsigned i=0; i<projectileId.size(); i++)
+	//	{
+	//		ProjectileAttribute* projectile = &allProjectile->at(projectileId[i]);
 
-			// ignore collision with owner
-			if(projectile->entityIdOfCreator != e2->getID())
-			{
-				// Destroy the Entity containing the ProjectileAttribute
-				std::cout << "COLLISIONEVENT: Projectile " << e1->getID() << " collides with Entity " << e2->getID() << std::endl;
-				SEND_EVENT(&Event_RemoveEntity(e1->getID()));
-			}
-		}
-		
-	}
+	//		// ignore collision with owner
+	//		if(projectile->entityIdOfCreator != e2->getID())
+	//		{
+	//			// Destroy the Entity containing the ProjectileAttribute
+	//			std::cout << "COLLISIONEVENT: Projectile " << e1->getID() << " collides with Entity " << e2->getID() << std::endl;
+	//			SEND_EVENT(&Event_RemoveEntity(e1->getID()));
+	//		}
+	//	}
+	//	
+	//}
 }
 
 
@@ -108,6 +123,7 @@ void GameComponent::onUpdate(float delta)
 	// Fetches attributes from AttributeManager through the use of EventManager.
 	// This can be used from everywhere EventManager is known.
 	std::vector<PlayerAttribute>* allPlayers;		GET_ATTRIBUTES(allPlayers, PlayerAttribute, ATTRIBUTE_PLAYER);
+	std::vector<HealthAttribute>* allHealth;		GET_ATTRIBUTES(allHealth, HealthAttribute, ATTRIBUTE_HEALTH);
 	std::vector<CameraAttribute>* allCameras;		GET_ATTRIBUTES(allCameras, CameraAttribute, ATTRIBUTE_CAMERA);
 	std::vector<InputAttribute>* allInput;			GET_ATTRIBUTES(allInput, InputAttribute, ATTRIBUTE_INPUT);
 	std::vector<RenderAttribute>* allRender;		GET_ATTRIBUTES(allRender, RenderAttribute, ATTRIBUTE_RENDER);
@@ -123,6 +139,7 @@ void GameComponent::onUpdate(float delta)
 		{
 			//Extract attributes from a playerAttribute
 			PlayerAttribute* player		=	&allPlayers->at(i);
+			HealthAttribute* health		=	&allHealth->at(player->healthAttribute.index);
 			CameraAttribute* camera		=	&allCameras->at(player->cameraAttribute.index);
 			InputAttribute* input		=	&allInput->at(player->inputAttribute.index);
 			RenderAttribute* render		=	&allRender->at(player->renderAttribute.index);			
@@ -167,6 +184,16 @@ void GameComponent::onUpdate(float delta)
 				Event_CreateProjectile projectile(pos, velocity, rot, playerAttributesOwners->at(i));
 				SEND_EVENT(&projectile);
 				input->fire = false;
+			}
+
+			// Health logic for players
+			if(health->health <= 0)
+			{
+				// TODO: Respawn entity
+				position->position = Float3();
+
+				// restore health player have health on next life
+				health->health = 10;
 			}
 		}
 	}

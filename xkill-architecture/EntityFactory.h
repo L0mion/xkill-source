@@ -65,16 +65,17 @@ public:
 		CREATE_ATTRIBUTE(CameraAttribute, camera, entity);
 		CONNECT_ATTRIBUTES(camera, spatial);
 
+		CREATE_ATTRIBUTE(HealthAttribute, health, entity);
+		health->health = 2;
+
 		CREATE_ATTRIBUTE(PlayerAttribute, player, entity);
 		CONNECT_ATTRIBUTES(player, render);
 		CONNECT_ATTRIBUTES(player, input);
 		CONNECT_ATTRIBUTES(player, camera);
+		CONNECT_ATTRIBUTES(player, health);
 		static int playerId = 0;
 		player->id = playerId;
 		playerId++;
-
-		CREATE_ATTRIBUTE(HealthAttribute, health, entity);
-		health->health = 10;
 	}
 
 	void createWorldEntity(Entity* entity)
