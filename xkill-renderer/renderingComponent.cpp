@@ -55,6 +55,9 @@ RenderingComponent::RenderingComponent(HWND windowHandle)
 	
 	for(unsigned int i = 0; i < GBUFFERID_NUM_BUFFERS; i++)
 		gBuffers_[i] = nullptr;
+
+	m3dLoader_		= nullptr;
+	animatedMesh_	= nullptr;
 }
 RenderingComponent::~RenderingComponent()
 {
@@ -75,8 +78,8 @@ RenderingComponent::~RenderingComponent()
 		SAFE_DELETE(gBuffers_[i]);
 
 	
-	SAFE_DELETE(m3dLoader);
-	SAFE_DELETE(animatedMesh);
+	SAFE_DELETE(m3dLoader_);
+	SAFE_DELETE(animatedMesh_);
 }
 
 void RenderingComponent::reset()
@@ -532,16 +535,16 @@ void RenderingComponent::event_WindowResize( Event_WindowResize* e )
 
 void RenderingComponent::initAnimations()
 {
-	m3dLoader = new M3DLoader();
+	m3dLoader_ = new M3DLoader();
 	
-	animatedMesh = nullptr;
-	animatedMesh = new AnimatedMesh();
-	animatedMesh->init();
+	animatedMesh_ = nullptr;
+	animatedMesh_ = new AnimatedMesh();
+	animatedMesh_->init();
 
-	m3dLoader->loadM3D("../../xkill-resources/xkill-models/soldier.m3d",
-					   animatedMesh->getVertices(),
-					   animatedMesh->getIndices(),
-					   animatedMesh->getSubsets(),
-					   animatedMesh->getMaterials(),
-					   animatedMesh->getSkinInfo());
+	m3dLoader_->loadM3D("../../xkill-resources/xkill-models/soldier.m3d",
+					   animatedMesh_->getVertices(),
+					   animatedMesh_->getIndices(),
+					   animatedMesh_->getSubsets(),
+					   animatedMesh_->getMaterials(),
+					   animatedMesh_->getSkinInfo());
 }

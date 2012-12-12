@@ -241,8 +241,8 @@ private:
 
 
 	//TEMP
-	M3DLoader* m3dLoader;
-	AnimatedMesh* animatedMesh;
+	M3DLoader* m3dLoader_;
+	AnimatedMesh* animatedMesh_;
 	void initAnimations();
 
 };
