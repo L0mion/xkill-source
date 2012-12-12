@@ -114,6 +114,7 @@ public:
 		physics->isProjectile = true;
 		physics->linearVelocity = e->velocity;
 		physics->mass = 100.0f;
+		physics->gravity = e->gravity;
 
 		CREATE_ATTRIBUTE(ProjectileAttribute, projectile, entity);
 		CONNECT_ATTRIBUTES(projectile, physics);
