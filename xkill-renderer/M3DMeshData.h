@@ -4,6 +4,10 @@
 #include <DirectXMath.h>
 #include <string>
 
+//! Struct for storing m3d material data.
+/*!
+\ingroup xkill-renderer
+*/
 struct M3DMaterial
 {
 	DirectX::XMFLOAT3	ambient_;
@@ -30,6 +34,10 @@ struct M3DMaterial
 	}
 };
 
+//! Struct for storing m3d subset data
+/*!
+\ingroup xkill-renderer
+*/
 struct M3DSubset
 {
 	unsigned int id_;

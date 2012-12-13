@@ -244,7 +244,7 @@ private:
 	M3DLoader* m3dLoader_;
 	AnimatedMesh* animatedMesh_;
 	void initAnimations();
-
+	void renderAnimatedMesh(DirectX::XMFLOAT4X4 viewMatrix, DirectX::XMFLOAT4X4 projectionMatrix);
 };
 
 #endif //XKILL_RENDERER_RENDERINGCOMPONENT_H
