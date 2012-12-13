@@ -244,13 +244,13 @@ void GameComponent::event_PhysicsAttributesColliding(Event_PhysicsAttributesColl
 							
 								std::vector<int> projectileId = entity2->getAttributes(ATTRIBUTE_PROJECTILE);
 								
-								for(int i=0;i<projectileId.size();i++)
+								for(unsigned i=0;i<projectileId.size();i++)
 								{
 									int entityIdOfProjectileCreator = projectileAttributes_->at(projectileId.at(i)).entityIdOfCreator;
 									Entity* creatorOfProjectilePlayerEntity = &allEntity->at(entityIdOfProjectileCreator);
 									std::vector<int> playerId = creatorOfProjectilePlayerEntity->getAttributes(ATTRIBUTE_PLAYER);
 
-									for(int i=0;i<playerId.size();i++)
+									for(unsigned i=0;i<playerId.size();i++)
 									{
 										PlayerAttribute* player = &allPlayers->at(playerId.at(i));
 										player->priority++;
@@ -285,7 +285,7 @@ void GameComponent::event_PhysicsAttributesColliding(Event_PhysicsAttributesColl
 		{
 			//Shorten lifetime of projectile colliding with physics objects
 
-			for(int i=0;i<projectileId.size();i++)
+			for(unsigned i=0;i<projectileId.size();i++)
 			{
 				ProjectileAttribute* projectileAttribute = &allProjectile->at(projectileId.at(i));
 				if(projectileAttribute->currentLifeTimeLeft > 0.4f)
@@ -297,7 +297,7 @@ void GameComponent::event_PhysicsAttributesColliding(Event_PhysicsAttributesColl
 			//Set gravity on projectiles colliding with physics objects
 			std::vector<PhysicsAttribute>* allPhysics; GET_ATTRIBUTES(allPhysics, PhysicsAttribute, ATTRIBUTE_PHYSICS);
 			std::vector<int> physicsId = entity1->getAttributes(ATTRIBUTE_PHYSICS);
-			for(int i=0;i<physicsId.size();i++)
+			for(unsigned i=0;i<physicsId.size();i++)
 			{
 				PhysicsAttribute* physicsAttribute = &allPhysics->at(physicsId.at(i));
 				physicsAttribute->gravity = Float3(0.0f, -10.0f, 0.0f);
@@ -307,7 +307,7 @@ void GameComponent::event_PhysicsAttributesColliding(Event_PhysicsAttributesColl
 			//Shorten lifetime of projectile colliding with physics objects
 			std::vector<ProjectileAttribute>* allProjectile; GET_ATTRIBUTES(allProjectile, ProjectileAttribute, ATTRIBUTE_PROJECTILE);
 			std::vector<int> projectileId = entity1->getAttributes(ATTRIBUTE_PROJECTILE);
-			for(int i=0;i<projectileId.size();i++)
+			for(unsigned i=0;i<projectileId.size();i++)
 			{
 				ProjectileAttribute* projectileAttribute = &allProjectile->at(projectileId.at(i));
 				if(projectileAttribute->currentLifeTimeLeft > 1.2f)

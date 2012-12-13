@@ -54,4 +54,15 @@ struct CBObjectDesc
 static const unsigned int CB_OBJECT_DESC_SIZE = 192;
 
 
+static const unsigned int CB_BONE_DESC_NUM_BONES = 96;
+//! Struct describing a constant buffer.
+/*!
+\ingroup xkill-renderer
+*/
+struct CBBoneDesc
+{
+	DirectX::XMFLOAT4X4 boneTransforms[CB_BONE_DESC_NUM_BONES];
+};
+static const unsigned int CB_BONE_DESC_SIZE = 6144;
+
 #endif //XKILL_RENDERER_CBDESC_H

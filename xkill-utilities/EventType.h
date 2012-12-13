@@ -19,7 +19,7 @@ EventManager::getInstance()->sendEvent(&event);
 \endcode
 
 \defgroup EVENTS Events
-\ingroup UTILITIES
+\ingroup UTILITIE
 \sa EventManager
 */
 
@@ -60,6 +60,7 @@ enum DLL_U EventType
 
 	// Utilities
 	EVENT_CREATE_MESH,
+	EVENT_POST_DESC_TEX,
 	EVENT_SHOW_MESSAGEBOX,
 
 	// this is needed, don't touch!
@@ -228,10 +229,23 @@ class MeshModel;
 class DLL_U Event_CreateMesh : public Event
 {
 public:
-	MeshModel*	mesh;
-	bool		dynamic;
+	unsigned int	id;
+	MeshModel*		mesh;
+	bool			dynamic;
 
-	Event_CreateMesh(MeshModel* mesh, bool dynamic);
+	Event_CreateMesh(unsigned int id, MeshModel* mesh, bool dynamic);
+};
+
+class TexDesc;
+class DLL_U Event_PostDescTex : public Event
+{
+public:
+	TexDesc* texDesc_;
+
+	Event_PostDescTex(TexDesc* texDesc) : Event(EVENT_POST_DESC_TEX)
+	{
+		texDesc_ = texDesc;
+	}
 };
 
 /// Used in GameComponent

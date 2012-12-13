@@ -126,7 +126,7 @@ struct DLL_U RenderAttribute : public IAttribute
 	BoolField culling;
 	bool transparent;
 	bool tessellation;
-	int meshIndex;
+	int meshID;
 	int textureID;
 };
 
@@ -144,7 +144,7 @@ struct DLL_U PhysicsAttribute : public IAttribute
 	Float3 angularVelocity;
 	Float3 gravity;
 	float mass;
-	unsigned int collisionShapeIndex;
+	unsigned int meshID; //collisionShapeIndex;
 	//CollisionShape
 	//friction
 	//restitution
@@ -232,12 +232,17 @@ struct DLL_U PlayerAttribute : public IAttribute
 class MeshModel;
 struct DLL_U MeshAttribute : public IAttribute
 {
-	MeshAttribute();
-	~MeshAttribute();
-	void clean();
+	unsigned int	meshID;
+	MeshModel*		mesh;
+	bool			dynamic;
 
-	MeshModel* mesh;
-	bool dynamic;
+	void clean();
+	MeshAttribute();
+	MeshAttribute(
+		unsigned int	id,
+		MeshModel*		mesh,
+		bool			dynamic);
+	~MeshAttribute();
 };
 
 struct DLL_U HealthAttribute : public IAttribute

@@ -52,14 +52,14 @@ public:
 
 	bool init(HWND windowHandle, HWND parentWindowHandle)
 	{
-		bool sucessfulInit = true;
+		render_ = new RenderingComponent(windowHandle);
+		if(render_->init() != S_OK)
+			return false;
 
 		ioComponent_ = new IOComponent();
 		if(!ioComponent_->init())
 			return false;
 		
-		render_ = new RenderingComponent(windowHandle);
-		render_->init();
 		physics_.init();
 		camera_.init();
 

@@ -10,7 +10,10 @@ FXManagement::FXManagement()
 	defaultDeferredVS_		= nullptr;
 	defaultDeferredPS_		= nullptr;
 	defaultCS_				= nullptr;
+	animationVS_			= nullptr;
+	animationPS_			= nullptr;
 	ilDefaultVSPosNormTex_	= nullptr;
+	ilPosNormTexTanSkinned_ = nullptr;
 }
 
 FXManagement::~FXManagement()
@@ -23,8 +26,11 @@ FXManagement::~FXManagement()
 	SAFE_DELETE(defaultDeferredVS_);
 	SAFE_DELETE(defaultDeferredPS_);
 	SAFE_DELETE(defaultCS_);
+	SAFE_DELETE(animationVS_);
+	SAFE_DELETE(animationPS_);
 	
 	SAFE_RELEASE(ilDefaultVSPosNormTex_);
+	SAFE_RELEASE(ilPosNormTexTanSkinned_);
 }
 
 void FXManagement::reset()
@@ -34,6 +40,8 @@ void FXManagement::reset()
 	defaultDeferredVS_->reset();
 	defaultDeferredPS_->reset();
 	defaultCS_->reset();
+	animationVS_->reset();
+	animationPS_->reset();
 	
 	SAFE_RELEASE(ilDefaultVSPosNormTex_);
 }
@@ -62,6 +70,10 @@ HRESULT FXManagement::initShaders(ID3D11Device* device)
 		hr = initDefaultDeferredPS(device);
 	if(SUCCEEDED(hr))
 		hr = initDefaultCS(device);
+	if(SUCCEEDED(hr))
+		hr = initAnimationVS(device);
+	if(SUCCEEDED(hr))
+		hr = initAnimationPS(device);
 	
 	return hr;
 }
@@ -110,6 +122,24 @@ HRESULT FXManagement::initDefaultCS(ID3D11Device* device)
 
 	return hr;
 }
+HRESULT FXManagement::initAnimationVS(ID3D11Device* device)
+{
+	HRESULT hr = S_OK;
+
+	animationVS_ = new ShaderVS();
+	hr = animationVS_->init(device, L"../../xkill-build/bin-Debug/animationVS.cso");
+
+	return hr;
+}
+HRESULT FXManagement::initAnimationPS(ID3D11Device* device)
+{
+	HRESULT hr = S_OK;
+
+	animationPS_ = new ShaderPS();
+	hr = animationPS_->init(device, L"../../xkill-build/bin-Debug/animationPS.cso");
+
+	return hr;
+}
 
 HRESULT FXManagement::initILs(ID3D11Device* device)
 {
@@ -118,6 +148,8 @@ HRESULT FXManagement::initILs(ID3D11Device* device)
 	initILManagement();
 
 	hr = initILDefaultVSPosNormTex(device);
+	if(SUCCEEDED(hr))
+		hr = initILPosNormTexTanSkinned(device);
 	
 	return hr;
 }
@@ -146,6 +178,27 @@ HRESULT FXManagement::initILDefaultVSPosNormTex(ID3D11Device* device)
 
 	return hr;
 }
+HRESULT FXManagement::initILPosNormTexTanSkinned(ID3D11Device* device)
+{
+	HRESULT hr = S_OK;
+
+	D3D11_INPUT_ELEMENT_DESC ied[6] = 
+	{
+		{"POSITION",     0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0,  D3D11_INPUT_PER_VERTEX_DATA, 0},
+		{"NORMAL",       0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0},
+		{"TEXCOORD",     0, DXGI_FORMAT_R32G32_FLOAT,    0, 24, D3D11_INPUT_PER_VERTEX_DATA, 0},
+		{"TANGENT",      0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 32, D3D11_INPUT_PER_VERTEX_DATA, 0},
+		{"WEIGHTS",      0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 48, D3D11_INPUT_PER_VERTEX_DATA, 0},
+		{"BONEINDICES",  0, DXGI_FORMAT_R8G8B8A8_UINT,   0, 60, D3D11_INPUT_PER_VERTEX_DATA, 0}
+	};
+
+	device->CreateInputLayout(ied,
+							  6,
+							  animationVS_->getBlob()->GetBufferPointer(),
+							  animationVS_->getBlob()->GetBufferSize(),
+							  &ilPosNormTexTanSkinned_);
+	return hr;
+}
 
 ShaderVS* FXManagement::getDefaultVS() const
 {
@@ -167,8 +220,20 @@ ShaderCS* FXManagement::getDefaultCS() const
 {
 	return defaultCS_;
 }
+ShaderVS* FXManagement::getAnimationVS() const
+{
+	return animationVS_;
+}
+ShaderPS* FXManagement::getAnimationPS() const
+{
+	return animationPS_;
+}
 
 ID3D11InputLayout* FXManagement::getILDefaultVSPosNormTex() const
 {
 	return ilDefaultVSPosNormTex_;
+}
+ID3D11InputLayout* FXManagement::getILPosNormTexTanSkinned() const
+{
+	return ilPosNormTexTanSkinned_;
 }

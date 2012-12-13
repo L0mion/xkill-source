@@ -82,8 +82,9 @@ Event_CreateProjectile::Event_CreateProjectile(Float3 position, Float3 velocity,
 	this->entityIdOfCreator = entityIdOfCreator;
 }
 
-Event_CreateMesh::Event_CreateMesh(MeshModel* mesh, bool dynamic) : Event(EVENT_CREATE_MESH)
+Event_CreateMesh::Event_CreateMesh(unsigned int id, MeshModel* mesh, bool dynamic) : Event(EVENT_CREATE_MESH)
 {
+	this->id		= id;
 	this->mesh		= mesh;
 	this->dynamic	= dynamic;
 }

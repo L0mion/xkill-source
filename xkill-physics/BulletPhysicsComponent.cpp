@@ -167,15 +167,7 @@ void BulletPhysicsComponent::onUpdate(float delta)
 		}
 	}
 
-	//Send the queued events
-	int nrOfQueuedEvents = eventQueue_.size();
-	for(int i=0;i<nrOfQueuedEvents;i++)
-	{
-		Event* e = eventQueue_.front();
-		SEND_EVENT(e);
-		delete e;
-		eventQueue_.pop();
-	}
+	FLUSH_QUEUED_EVENTS(EVENT_ENTITIES_COLLIDING);
 }
 
 void BulletPhysicsComponent::onEvent(Event* e)
@@ -277,11 +269,9 @@ void BulletPhysicsComponent::tickCallback(btScalar timeStep)
 					
 					//Two PhysicsObjects colliding
 					if(ownerA != 0 || ownerB != 0) // ignore contacts where one owner is 0
-					{						
-						eventQueue_.push(new Event_PhysicsAttributesColliding(objectA->getIndex(), objectB->getIndex()));
-						eventQueue_.push(new Event_PhysicsAttributesColliding(objectB->getIndex(), objectA->getIndex()));
-						//SEND_EVENT(&Event_PhysicsAttributesColliding(objectA->getIndex(), objectB->getIndex()));
-						//SEND_EVENT(&Event_PhysicsAttributesColliding(objectB->getIndex(), objectA->getIndex()));
+					{
+						QUEUE_EVENT(new Event_PhysicsAttributesColliding(objectA->getIndex(), objectB->getIndex()));
+						QUEUE_EVENT(new Event_PhysicsAttributesColliding(objectB->getIndex(), objectA->getIndex()));
 					}
 				}
 			}

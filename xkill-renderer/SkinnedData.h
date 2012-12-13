@@ -12,16 +12,33 @@ namespace DirectX
 
 class AnimationClip;
 
+//! Class containing skeleton information.
+/*!
+\ingroup xkill-renderer
+*/
 class SkinnedData
 {
 public:
+	//! Initializes SkinnedData to its default state.
 	SkinnedData();
+	//! Releases all memory and returns SkinnedData to its default state.
 	~SkinnedData();
 
+	//! Sets all of SkinnedData's member variables.
+	/*!
+	\param boneHierarchy A vector containing the hierarchy for a skeleton.
+	\param boneOffsets A vector containing the offset for each bone in the skeleton.
+	\param animations A map containing all animation clips for this skeleteon and thier corresponding names.
+	*/
 	void set(std::vector<int>*						boneHierarchy,
 			  std::vector<DirectX::XMFLOAT4X4>*		boneOffsets,
 			  std::map<std::string, AnimationClip*>* animations);
-
+	//! Calculates the final transformation matrix for each bone for a specified animation.
+	/*!
+	\param clipName The name of the animation.
+	\param timePosition At what point in the animation the character is.
+	\param finalTransforms A vector where the resulting matrices will be stored.
+	*/
 	void getFinalTransforms(const std::string&					clipName,
 							float								timePosition, 
 							std::vector<DirectX::XMFLOAT4X4>*	finalTransforms) const;
@@ -31,9 +48,9 @@ public:
 	float getClipEndTime(const std::string& clipName)	const;
 
 private:
-	std::vector<int>*						boneHierarchy_;
-	std::vector<DirectX::XMFLOAT4X4>*		boneOffsets_;
-	std::map<std::string, AnimationClip*>*	animations_;
+	std::vector<int>*						boneHierarchy_; //!< Vector containing the skeletons hierarchy.
+	std::vector<DirectX::XMFLOAT4X4>*		boneOffsets_;	//!< Vector containing bone offsets.
+	std::map<std::string, AnimationClip*>*	animations_;	//!< Map that holds AnimationClips and thier corresponding names.
 };
 
 #endif //XKILL_RENDERER_SKINNEDDATA_H

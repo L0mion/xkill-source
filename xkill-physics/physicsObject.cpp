@@ -76,7 +76,7 @@ void PhysicsObject::preStep(CollisionShapeManager* collisionShapeManager,Physics
 	setAngularVelocity(btVector3(physicsAttribute->angularVelocity.x,
 					   physicsAttribute->angularVelocity.y,
 					   physicsAttribute->angularVelocity.z));
-	m_collisionShape = collisionShapeManager->getCollisionShape(physicsAttribute->collisionShapeIndex);
+	m_collisionShape = collisionShapeManager->getCollisionShape(physicsAttribute->meshID);
 	setGravity(gravity_+forces_);
 	activate(true);
 
@@ -94,11 +94,7 @@ void PhysicsObject::postStep(PhysicsAttribute* physicsAttribute)
 	btVector3 position = (1.0f/WorldScaling)*m_worldTransform.getOrigin();
 	positionAttribute->position.copy(position.m_floats);
 	spatialAttribute->rotation.copy(m_worldTransform.getRotation().get128().m128_f32);
-	if(physicsAttribute->isProjectile)
-		int a = 2;
 	physicsAttribute->linearVelocity.copy(getLinearVelocity().m_floats);
-	if(physicsAttribute->isProjectile)
-		int a = 2;
 	physicsAttribute->angularVelocity.copy(getAngularVelocity().m_floats);
 	forces_.setZero();
 }

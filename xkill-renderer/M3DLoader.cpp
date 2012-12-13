@@ -183,7 +183,7 @@ void M3DLoader::parseAnimationClips(std::ifstream& infile, unsigned int numAnima
 		for(unsigned int boneIndex=0; boneIndex<numBones; boneIndex++)
 		{
 			clip->getBoneAnimations()->at(boneIndex) = new BoneAnimation();
-			parseBoneKeyframes(infile, numBones, clip->getBoneAnimations()->at(boneIndex));
+			parseBoneKeyframes(infile, clip->getBoneAnimations()->at(boneIndex));
 		}
 		infile >> ignore; // {
 
@@ -192,7 +192,7 @@ void M3DLoader::parseAnimationClips(std::ifstream& infile, unsigned int numAnima
 	}
 }
 
-void M3DLoader::parseBoneKeyframes(std::ifstream& infile, unsigned int numBones, BoneAnimation* boneAnimation)
+void M3DLoader::parseBoneKeyframes(std::ifstream& infile, BoneAnimation* boneAnimation)
 {
 	std::string ignore;
 	unsigned int numKeyframes = 0;

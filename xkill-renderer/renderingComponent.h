@@ -14,24 +14,24 @@
 #include "gBufferID.h"
 
 #if defined (DEBUG) || (DEBUG_)
-//#include <vld.h>
+#include <vld.h>
 #endif //DEBUG || DEBUG_
 
 #define TILE_SIZE 16
 
-
 class D3DManagement;
 class FXManagement;
 class CBManagement;
+class TexManagement;
 class ViewportManagement;
 class SSManagement;
 class RSManagement;
+class LightManagement;
+class ModelManagement;
+
 class GBuffer;
 class D3DDebug;
-class LightManagement;
 class Event_WindowResize;
-class MeshManagement;
-class ObjLoaderBasic;
 
 class M3DLoader;
 class AnimatedMesh;
@@ -132,7 +132,9 @@ private:
 	\return Any error encountered during initialization.
 	*/
 	
-	HRESULT initMeshManagement();
+	HRESULT initModelManagement();
+
+	HRESULT initTexManagement();
 	
 	HRESULT initViewport();
 	//! Creates a SSManaegement object that will maintain sampler states.
@@ -225,7 +227,8 @@ private:
 	LightManagement*	lightManagement_;					//!< Maintaining lights.
 	ViewportManagement* viewportManagement_;				//!< Maintaining viewports.
 
-	MeshManagement*		meshManagement_;
+	ModelManagement*	modelManagement_;
+	TexManagement*		texManagement_;
 	
 	SSManagement*		ssManagement_;						//!< Maintaining sampler states.
 	RSManagement*		rsManagement_;						//!< Maintaining rasterizer states.
@@ -238,12 +241,13 @@ private:
 
 	//! Methods that will be called on events. 
 	void event_WindowResize(Event_WindowResize* e);
-
-
+	void event_PostDescTex(Event_PostDescTex* e);
+	
 	//TEMP
 	M3DLoader* m3dLoader_;
 	AnimatedMesh* animatedMesh_;
 	void initAnimations();
+	void renderAnimatedMesh(DirectX::XMFLOAT4X4 viewMatrix, DirectX::XMFLOAT4X4 projectionMatrix);
 
 };
 

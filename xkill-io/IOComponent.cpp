@@ -1,121 +1,200 @@
+#include <windows.h>
+#include <tchar.h>
+#include <stdio.h>
+
 #include <xkill-utilities/EventManager.h>
 #include <xkill-utilities/MeshModel.h>
 
 #include "MeshMakerObj.h"
 #include "IOComponent.h"
+#include "LoaderTexDesc.h"
+#include "LoaderMdlDesc.h"
+#include "MdlDesc.h"
+#include "MdlDescModel.h"
 
 IOComponent::IOComponent()
 {
-	makerBTH_ = nullptr;
-	makerArena1_ = nullptr;
-	makerArena2_ = nullptr;
-	makerProjectile_ = nullptr;
 }
 IOComponent::~IOComponent()
 {
-	if(makerBTH_)
-		delete makerBTH_;
-	if(makerArena1_)
-		delete makerArena1_;
-	if(makerArena2_)
-		delete makerArena2_;
-	if(makerProjectile_)
-		delete makerProjectile_;
+	for(unsigned int i = 0; i < meshModels_.size(); i++)
+	{
+		if(meshModels_[i])
+			delete meshModels_[i];
+	}
 }
 bool IOComponent::init()
 {
 	bool sucessfulInit = true;
 
-	sucessfulInit = initBth();
+	sucessfulInit = initTexDescs();
 	if(sucessfulInit)
-		sucessfulInit = initArena1();
-	if(sucessfulInit)
-		sucessfulInit = initArena2();
-	if(sucessfulInit)
-		sucessfulInit = initProjectile();
+		sucessfulInit = initMdlDescs();
+
+	//std::vector<MeshAttribute>*	allMesh; GET_ATTRIBUTES(allMesh, MeshAttribute,	ATTRIBUTE_MESH);
+	//for(unsigned int i = 0; i < allMesh->size(); i++)
+	//{
+	//	MeshAttribute mesh = allMesh->at(i);
+	//}
 
 	return sucessfulInit;
 }
-bool IOComponent::initBth()
+
+bool IOComponent::initTexDescs()
+{
+	bool sucessfulLoad = true;
+
+	std::vector<std::string> texDescFiles;
+
+	texDescFiles = getFileNames(PATH_TEXDESC);
+
+	if(texDescFiles.size() > 0)
+	{
+		for(unsigned int i = 0; i < texDescFiles.size() && sucessfulLoad; i++)
+			sucessfulLoad = initTexDesc(texDescFiles.at(i));
+	}
+	else
+		SHOW_MESSAGEBOX("Couldn't locate any .texdesc-files in xkill-resources/.");
+
+	return sucessfulLoad;
+}
+bool IOComponent::initTexDesc(std::string filename)
+{
+	bool sucessfulLoad = true;
+
+	LoaderTexDesc* loader = new LoaderTexDesc(filename, PATH_XKILL_RESOURCES);
+	sucessfulLoad = loader->init();
+	
+	if(sucessfulLoad)
+	{
+		TexDesc* texDesc = loader->claimTexDesc();
+
+		Event_PostDescTex e(texDesc);
+		SEND_EVENT(&e);
+	}
+	else
+	{
+		std::string errorMsg = "Failed to load .texdesc-file: " + filename;
+		SHOW_MESSAGEBOX(errorMsg);
+	}
+	
+	//Clear memory allocated
+	delete loader;
+
+	return sucessfulLoad;
+}
+
+bool IOComponent::initMdlDescs()
+{
+	bool sucessfulLoad = true;
+
+	std::vector<std::string> mdlDescFiles;
+	mdlDescFiles = getFileNames(PATH_MDLDESC);
+
+	if(mdlDescFiles.size() > 0)
+	{
+		for(unsigned int i = 0; i < mdlDescFiles.size() && sucessfulLoad; i++)
+			sucessfulLoad = initMdlDesc(mdlDescFiles.at(i));
+	}
+	else
+		SHOW_MESSAGEBOX("Couldn't locate any .mdldesc-files in xkill-resources/.");
+
+	return sucessfulLoad;
+}
+bool IOComponent::initMdlDesc(std::string filename)
+{
+	bool sucessfulLoad = true;
+
+	LoaderMdlDesc* loader = new LoaderMdlDesc(filename, PATH_XKILL_RESOURCES);
+	sucessfulLoad = loader->init();
+	
+	if(sucessfulLoad)
+	{
+		MdlDesc* mdlDesc = loader->claimMdlDesc();
+		std::vector<MdlDescModel*> models = mdlDesc->getModels();
+
+		std::string path = mdlDesc->getPath() + mdlDesc->getHeader().path_;
+		for(unsigned int i = 0; i < models.size() && sucessfulLoad; i++)
+		{
+			std::string name = models[i]->modelFileName_;
+			sucessfulLoad = loadModel(name, path, models[i]);
+		}
+
+		delete mdlDesc; //clear when finished
+	}
+	else
+	{
+		std::string errorMsg = "Failed to load .mdldesc-file: " + filename;
+		SHOW_MESSAGEBOX(errorMsg);
+	}
+	
+	//Clear memory allocated
+	delete loader;
+
+	return sucessfulLoad;
+}
+
+bool IOComponent::loadModel(
+	std::string		modelName,
+	std::string		modelPath,
+	MdlDescModel*	modelDesc)
 {
 	bool sucessfulMake = true;
 
-	makerBTH_ = new MeshMakerObj(
-		objPath,
-		pgyPath,
-		bthName,
-		mtlPath);
-	sucessfulMake = makerBTH_->init();
-
-	MeshModel* model = makerBTH_->getMesh();
+	MeshMakerObj* objMaker = new MeshMakerObj(
+		modelPath, 
+		modelPath, 
+		modelName, 
+		modelPath);
+	sucessfulMake = objMaker->init();
 
 	if(sucessfulMake)
 	{
-		Event_CreateMesh e(makerBTH_->getMesh(), true);
+		MeshModel* model = objMaker->claimMesh();
+		meshModels_.push_back(model);
+
+		Event_CreateMesh e(modelDesc->modelID_, model, modelDesc->dynamic_);
 		SEND_EVENT(&e);
 	}
+	else
+	{
+		std::string errorMsg = "Could not load model: " + modelPath + modelName;
+		SHOW_MESSAGEBOX(errorMsg);
+	}
 
+	delete objMaker;
 	return sucessfulMake;
 }
 
-bool IOComponent::initArena1()
+std::vector<std::string> IOComponent::getFileNames(const LPCTSTR filename)
 {
-	bool sucessfulMake = true;
+	std::vector<std::string> foundFiles;
 
-	makerArena1_ = new MeshMakerObj(
-		objPath,
-		pgyPath,
-		arenaName1,
-		mtlPath);
-	sucessfulMake = makerArena1_->init();
+	WIN32_FIND_DATA findFileData;
+	HANDLE searchHandleWinAPI;
 
-	if(sucessfulMake)
+	searchHandleWinAPI = FindFirstFile(
+		filename,
+		&findFileData);
+
+	if(searchHandleWinAPI != INVALID_HANDLE_VALUE)
 	{
-		Event_CreateMesh e(makerArena1_->getMesh(), false);
-		SEND_EVENT(&e);
+		do 
+		{
+			WCHAR* foundFile = findFileData.cFileName;
+
+			//convert WCHAR* to char*
+			char ch[260];
+			char DefChar = ' ';
+			WideCharToMultiByte(CP_ACP, 0, foundFile, -1, ch, 260, &DefChar, NULL);
+			
+			foundFiles.push_back(std::string(ch));
+
+		} while(FindNextFile(searchHandleWinAPI, &findFileData));
+		FindClose(searchHandleWinAPI);
 	}
 
-	return sucessfulMake;
-}
-
-bool IOComponent::initArena2()
-{
-	bool sucessfulMake = true;
-
-	makerArena2_ = new MeshMakerObj(
-		objPath,
-		pgyPath,
-		arenaName2,
-		mtlPath);
-	sucessfulMake = makerArena2_->init();
-
-	if(sucessfulMake)
-	{
-		Event_CreateMesh e(makerArena2_->getMesh(), false);
-		SEND_EVENT(&e);
-	}
-
-	return sucessfulMake;
-}
-
-bool IOComponent::initProjectile()
-{
-	bool sucessfulMake = true;
-
-	makerProjectile_ = new MeshMakerObj(
-		objPath,
-		pgyPath,
-		projectileName,
-		mtlPath);
-	sucessfulMake = makerProjectile_->init();
-
-	if(sucessfulMake)
-	{
-		Event_CreateMesh e(makerProjectile_->getMesh(), true);
-		SEND_EVENT(&e);
-	}
-
-	return sucessfulMake;
+	return foundFiles;
 }
 
 void IOComponent::reset()

@@ -40,8 +40,12 @@ public:
 	ShaderVS* getDefaultDeferredVS()	const;
 	ShaderPS* getDefaultDeferredPS()	const;
 	ShaderCS* getDefaultCS()			const;
+	ShaderVS* getAnimationVS()			const;
+	ShaderPS* getAnimationPS()			const;
 
 	ID3D11InputLayout* getILDefaultVSPosNormTex() const;
+	ID3D11InputLayout* getILPosNormTexTanSkinned() const;
+
 private:
 	//! Initializes all shaders handled by FXManagement.
 	/*!
@@ -81,8 +85,28 @@ private:
 	\sa defaultDeferredPS
 	*/
 	HRESULT initDefaultDeferredPS(ID3D11Device* device);
-	
+	//! Initializes defaultCS.
+	/*!
+	\param device DirectX Device-pointer.
+	\return Any error encountered.
+	\sa defaultCS_
+	*/
 	HRESULT initDefaultCS(ID3D11Device* device);
+
+	//! Initializes animationVS.
+	/*!
+	\param device DirectX Device-pointer.
+	\return Any error encountered.
+	\sa animationVS_
+	*/
+	HRESULT initAnimationVS(ID3D11Device* device);
+	//! Initializes animationPS.
+	/*!
+	\param device DirectX Device-pointer.
+	\return Any error encountered.
+	\sa animationVS_
+	*/
+	HRESULT initAnimationPS(ID3D11Device* device);
 
 	//! Initializes an input-layout for defaultVS.
 	/*!
@@ -93,6 +117,7 @@ private:
 	HRESULT initILs(ID3D11Device* device);
 	void initILManagement();
 	HRESULT initILDefaultVSPosNormTex(ID3D11Device* device);
+	HRESULT initILPosNormTexTanSkinned(ID3D11Device* device);
 
 	IEDManagement* ilManagement;
 
@@ -101,8 +126,11 @@ private:
 	ShaderVS*	defaultDeferredVS_;	//!< Default vertex shader used by the deferred renderer.
 	ShaderPS*	defaultDeferredPS_;	//!< Default pixel shader used by the deferred renderer.
 	ShaderCS*	defaultCS_;			//!< Default compute shader.
+	ShaderVS*	animationVS_;		//!< Vertex shader used for animated meshes.
+	ShaderPS*	animationPS_;		//!< Pixel shader used for animated meshes.
 	
 	ID3D11InputLayout* ilDefaultVSPosNormTex_; //!< Standard input layout used in default vertex shader.
+	ID3D11InputLayout* ilPosNormTexTanSkinned_; //!< Input layout for the vertex type VertexPosNormTexTanSkinned.
 };
 
 #endif //XKILL_RENDERER_FXMANAGEMENT_H
