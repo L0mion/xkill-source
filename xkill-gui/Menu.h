@@ -1,9 +1,10 @@
 #pragma once
 
 #include <QtGui>
+#include <QPlastiqueStyle>
 #include <QKeyEvent> // needed to grab mouse input
 #include <xkill-utilities/IObserver.h>
-#include "ui_MainMenu.h"
+#include "ui_MainMenu.h" 
 
 class Event;
 
@@ -16,6 +17,8 @@ public:
 	MainMenu(QWidget *parent = 0, Qt::WFlags flags = 0) : QMainWindow(parent, flags)
 	{
 		ui.setupUi(this);
+		QApplication::setStyle(new QCleanlooksStyle);
+		this->setStyleSheet("background-color: none;");
 	}
 };
 
