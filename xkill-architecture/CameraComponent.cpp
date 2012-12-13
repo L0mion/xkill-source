@@ -27,21 +27,16 @@ void CameraComponent::init()
 	Event_GetWindowResolution windowResolution;
 	SEND_EVENT(&windowResolution);
 	float aspectRatio = windowResolution.getAspectRatio();
-
-	if(cameraAttributes_->size()!=2)
-	{
-		for(unsigned int i = 0; i < cameraAttributes_->size(); i++)
-		{	
-			cameras_.push_back(Camera(aspectRatio));
-		}
-	}
-	else
+	CameraAttribute* cameraAttribute;
+	if(cameraAttributes_->size()==2)
 	{
 		aspectRatio *= 2;
-		for(unsigned int i = 0; i < cameraAttributes_->size(); i++)
-		{	
-			cameras_.push_back(Camera(aspectRatio));
-		}
+	}
+	for(unsigned int i = 0; i < cameraAttributes_->size(); i++)
+	{	
+		cameraAttribute = &cameraAttributes_->at(i);
+		cameraAttribute->aspect = aspectRatio;
+		cameras_.push_back(Camera(cameraAttribute->aspect,cameraAttribute->fov,cameraAttribute->zFar,cameraAttribute->zNear));
 	}
 
 	for(unsigned int i=0; i<cameraAttributes_->size(); i++)

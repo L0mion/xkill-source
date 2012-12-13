@@ -123,9 +123,10 @@ struct DLL_U RenderAttribute : public IAttribute
 	AttributePointer spatialAttribute;
 	AttributePointer boundingAttribute;
 	
+	BoolField culling;
 	bool transparent;
 	bool tessellation;
-	int meshIndex;
+	int meshID;
 	int textureID;
 };
 
@@ -143,7 +144,7 @@ struct DLL_U PhysicsAttribute : public IAttribute
 	Float3 angularVelocity;
 	Float3 gravity;
 	float mass;
-	unsigned int collisionShapeIndex;
+	unsigned int meshID; //collisionShapeIndex;
 	//CollisionShape
 	//friction
 	//restitution
@@ -201,6 +202,10 @@ struct DLL_U CameraAttribute : public IAttribute
 	AttributePointer spatialAttribute;
 	Float4x4 mat_view;
 	Float4x4 mat_projection;
+	float fov;
+	float aspect;
+	float zNear;
+	float zFar;
 };
 
 /// Stores everything GameComponent needs to know about a player (also refer to createPlayerEntity)
@@ -213,7 +218,6 @@ struct DLL_U PlayerAttribute : public IAttribute
 	~PlayerAttribute();
 
 	int id;					//!< The id of the player process. Used to identify a player attribute in GameComponent when firing projectiles.
-	std::string name;		//!< Name of the player process.
 	int priority;			//!< Priority of the player process. Higher value means higher priority. The scheduler will choose the process with the highest priority for execution.
 	int cycleSteals;		//!< Total number of cycle steals for the player process. Cycle steals steal priority from other player processes.
 	int totalExecutionTime; //!< Total execution time of the player process, used ased final score in the deathmatch. The game session winner is the player with the most total execution time as awarded by the scheduler.
@@ -228,12 +232,17 @@ struct DLL_U PlayerAttribute : public IAttribute
 class MeshModel;
 struct DLL_U MeshAttribute : public IAttribute
 {
-	MeshAttribute();
-	~MeshAttribute();
-	void clean();
+	unsigned int	meshID;
+	MeshModel*		mesh;
+	bool			dynamic;
 
-	MeshModel* mesh;
-	bool dynamic;
+	void clean();
+	MeshAttribute();
+	MeshAttribute(
+		unsigned int	id,
+		MeshModel*		mesh,
+		bool			dynamic);
+	~MeshAttribute();
 };
 
 struct DLL_U HealthAttribute : public IAttribute

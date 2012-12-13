@@ -71,7 +71,7 @@ public:
 		ENTITYTYPE listOfEntitiesToBeCreated[] =
 		{
 			WORLD,
-			PLAYER,
+			WORLD,
 			PLAYER,
 			PLAYER
 		};

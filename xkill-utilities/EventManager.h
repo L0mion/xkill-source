@@ -18,7 +18,8 @@ class Event;
 class DLL_U EventManager
 {
 private:
-	std::vector<std::vector<IObserver*>>* event_queues;
+	std::vector<std::vector<IObserver*>>* subscibers;	
+	std::vector<std::vector<Event*>>* queues;		//! Used to queue Events if queue feature is used
 
 	EventManager();
 	~EventManager();
@@ -53,6 +54,22 @@ public:
 	Sends event to all relevant observers.
 	*/
 	void sendEvent(Event* e);
+
+	/** 
+	Queue an event so it can be sent later by using flushEventQueue.
+	*/
+	void queueEvent(Event* e);
+
+	/** 
+	Sends queued Events
+	*/
+	void flushQueuedEvents(EventType type);
+
+	/** 
+	Removes all queued messages without sending them,
+	prevents memory leaks if not all messages is sent.
+	*/
+	void cleanAllQueues();
 };
 
 
@@ -60,9 +77,18 @@ public:
 // EVIL MACROS
 //
 
-// Macro for sending Events
+// Sends Event to relevant listeners.
 #define SEND_EVENT(EventPointer)									\
 EventManager::getInstance()->sendEvent(EventPointer);
+
+// Queue an event so it can be sent later by using FLUSH MACRO.
+// Memory deletion is handled by EventManager. 
+#define QUEUE_EVENT(EventPointer)									\
+EventManager::getInstance()->queueEvent(EventPointer);
+
+// Sends all queued events to relevant listeners.
+#define FLUSH_QUEUED_EVENTS(EventType)								\
+EventManager::getInstance()->flushQueuedEvents(EventType);
 
 // Subscribes a IObserver to events of EventType.
 #define SUBSCRIBE_TO_EVENT(Subscriber,EventType)					\

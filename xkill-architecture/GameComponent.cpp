@@ -22,8 +22,10 @@ bool GameComponent::init()
 	GET_ATTRIBUTE_OWNERS(allPhysicsOwner, ATTRIBUTE_PHYSICS);
 
 	//Crate two spawn points
-	SEND_EVENT(&Event_CreateSpawnPoint(Float3(0.0f, 0.0f, -5.0f)));
+	SEND_EVENT(&Event_CreateSpawnPoint(Float3(0.0f, 1.0f, -5.0f)));
 	SEND_EVENT(&Event_CreateSpawnPoint(Float3(0.0f, 5.0f, 0.0f)));
+	SEND_EVENT(&Event_CreateSpawnPoint(Float3(1.0f, 4.0f, 0.0f)));
+	SEND_EVENT(&Event_CreateSpawnPoint(Float3(2.0f, 3.0f, 0.0f)));
 
 	return true;
 }
@@ -93,13 +95,13 @@ void GameComponent::event_PhysicsAttributesColliding(Event_PhysicsAttributesColl
 							
 								std::vector<int> projectileId = entity2->getAttributes(ATTRIBUTE_PROJECTILE);
 								
-								for(int i=0;i<projectileId.size();i++)
+								for(unsigned i=0;i<projectileId.size();i++)
 								{
 									int entityIdOfProjectileCreator = allProjectiles->at(projectileId.at(i)).entityIdOfCreator;
 									Entity* creatorOfProjectilePlayerEntity = &allEntity->at(entityIdOfProjectileCreator);
 									std::vector<int> playerId = creatorOfProjectilePlayerEntity->getAttributes(ATTRIBUTE_PLAYER);
 
-									for(int i=0;i<playerId.size();i++)
+									for(unsigned i=0;i<playerId.size();i++)
 									{
 										PlayerAttribute* player = &allPlayers->at(playerId.at(i));
 										player->priority++;
@@ -123,33 +125,48 @@ void GameComponent::event_PhysicsAttributesColliding(Event_PhysicsAttributesColl
 	// projectile
 	else if(entity1->hasAttribute(ATTRIBUTE_PROJECTILE))
 	{
-		if(entity2->hasAttribute(ATTRIBUTE_PHYSICS))
+		//
+		// colliding with...
+		//
+
+		std::vector<ProjectileAttribute>* allProjectile; GET_ATTRIBUTES(allProjectile, ProjectileAttribute, ATTRIBUTE_PROJECTILE);
+		std::vector<int> projectileId = entity1->getAttributes(ATTRIBUTE_PROJECTILE);
+
+		if(entity2->hasAttribute(ATTRIBUTE_PHYSICS) && !entity2->hasAttribute(ATTRIBUTE_PROJECTILE))
 		{
+			//Shorten lifetime of projectile colliding with physics objects
+
+			for(unsigned i=0;i<projectileId.size();i++)
+			{
+				ProjectileAttribute* projectileAttribute = &allProjectile->at(projectileId.at(i));
+				if(projectileAttribute->currentLifeTimeLeft > 0.4f)
+				{
+				projectileAttribute->currentLifeTimeLeft = 0.3f;
+				}
+			}
+
 			//Set gravity on projectiles colliding with physics objects
 			std::vector<PhysicsAttribute>* allPhysics; GET_ATTRIBUTES(allPhysics, PhysicsAttribute, ATTRIBUTE_PHYSICS);
 			std::vector<int> physicsId = entity1->getAttributes(ATTRIBUTE_PHYSICS);
-			for(int i=0;i<physicsId.size();i++)
+			for(unsigned i=0;i<physicsId.size();i++)
 			{
 				PhysicsAttribute* physicsAttribute = &allPhysics->at(physicsId.at(i));
-				physicsAttribute->gravity = Float3(0.0f, -1000.0f, 0.0f);
-				physicsAttribute->linearVelocity = Float3(0.0f, 0.0f, 0.0f); //Does not seem to work
+				physicsAttribute->gravity = Float3(0.0f, -10.0f, 0.0f);
+				physicsAttribute->linearVelocity = Float3(0.0f, 0.0f, 0.0f);
 			}
 
 			//Shorten lifetime of projectile colliding with physics objects
 			std::vector<ProjectileAttribute>* allProjectile; GET_ATTRIBUTES(allProjectile, ProjectileAttribute, ATTRIBUTE_PROJECTILE);
 			std::vector<int> projectileId = entity1->getAttributes(ATTRIBUTE_PROJECTILE);
-			for(int i=0;i<projectileId.size();i++)
+			for(unsigned i=0;i<projectileId.size();i++)
 			{
 				ProjectileAttribute* projectileAttribute = &allProjectile->at(projectileId.at(i));
-				if(projectileAttribute->currentLifeTimeLeft > 0.2f)
+				if(projectileAttribute->currentLifeTimeLeft > 1.2f)
 				{
-					projectileAttribute->currentLifeTimeLeft = 0.15f;
+					projectileAttribute->currentLifeTimeLeft = 1.15f;
 				}
 			}
 		}
-		//
-		// colliding with...
-		//
 
 	//	// destroy projectile on impact with everything except the owner who created the projectile
 	//	std::vector<ProjectileAttribute>* allProjectile; GET_ATTRIBUTES(allProjectile, ProjectileAttribute, ATTRIBUTE_PROJECTILE);
@@ -229,7 +246,7 @@ void GameComponent::onUpdate(float delta)
 				velocity.y *= 1000.0f;
 				velocity.z *= 1000.0f;
 				// add rotation displacement on position 
-				float d = 1.0f;
+				float d = 0.2f;
 				pos.x += lookAtX*d;
 				pos.y += lookAtY*d;
 				pos.z += lookAtZ*d;
@@ -266,7 +283,7 @@ void GameComponent::onUpdate(float delta)
 					if(spawnPointAttributesOwners->at(i)!=0)
 					{
 						spawnPoint = &allSpawnPoints->at(i);
-  						if(spawnPoint->timeSinceLastSpawn > longestTimeSinceLastSpawn)
+  						if(spawnPoint->timeSinceLastSpawn >= longestTimeSinceLastSpawn)
 						{
 							longestTimeSinceLastSpawn = spawnPoint->timeSinceLastSpawn;
  							longestTimeSinceLastSpawnIndex = i;
@@ -275,10 +292,17 @@ void GameComponent::onUpdate(float delta)
  				}
 
 				//Set player position to the spawn point position and reset the spawn point timer
-				spawnPoint = &allSpawnPoints->at(longestTimeSinceLastSpawnIndex);
-				PositionAttribute* newPosition	= &allPositions->at(spawnPoint->positionAttribute.index);
-				position->position = newPosition->position;
-				spawnPoint->timeSinceLastSpawn = 0.0f;
+				if(longestTimeSinceLastSpawnIndex > -1)
+				{
+					spawnPoint = &allSpawnPoints->at(longestTimeSinceLastSpawnIndex);
+					PositionAttribute* newPosition	= &allPositions->at(spawnPoint->positionAttribute.index);
+					position->position = newPosition->position;
+					spawnPoint->timeSinceLastSpawn = 0.0f;
+				}
+				else //if no spawn point was found
+				{
+					position->position = Float3();
+				}
 
 				// restore health player have health on next life
 				health->health = health->startHealth;

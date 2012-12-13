@@ -8,15 +8,22 @@
 
 EventManager::EventManager()
 {
-	event_queues = new std::vector<std::vector<IObserver*>>;
 	// Build vectors with all events
+	subscibers = new std::vector<std::vector<IObserver*>>;
 	for(int i=0; i<EVENT_LAST; i++)
 	{
 		std::vector<IObserver*> v;
-		event_queues->push_back(v);
+		subscibers->push_back(v);
+	}
+
+	// Build vectors with all events
+	queues = new std::vector<std::vector<Event*>>;
+	for(int i=0; i<EVENT_LAST; i++)
+	{
+		std::vector<Event*> v;
+		queues->push_back(v);
 	}
 }
-
 
 EventManager* EventManager::getInstance()
 {
@@ -27,37 +34,37 @@ EventManager* EventManager::getInstance()
 void EventManager::addObserver(IObserver* o, EventType type)
 {
 	int index = type;
-	(*event_queues)[index].push_back(o);
+	(*subscibers)[index].push_back(o);
 
 	std::cout << "EVENTMANAGER: New subscriber on Events of Enum " << index << std::endl;
 }
 
 void EventManager::addObserverToAll(IObserver* o)
 {
-	for(int i=0; i<(int)event_queues->size(); i++)
+	for(int i=0; i<(int)subscibers->size(); i++)
 	{
-		(*event_queues)[i].push_back(o);
+		(*subscibers)[i].push_back(o);
 	}
 	std::cout << "EVENTMANAGER: New subscriber on Events of All Enum " << std::endl;
 }
 
 void EventManager::removeObserver(IObserver* observer)
 {
-	for(int i=0; i<(int)event_queues->size(); i++)
+	for(int i=0; i<(int)subscibers->size(); i++)
 		removeObserver(observer, (EventType)i);
 }
 
 void EventManager::removeObserver(IObserver* observer, EventType type)
 {
 	int index = type;
-	for(int i=0; i<(int)event_queues[index].size(); i++)
+	for(int i=0; i<(int)subscibers[index].size(); i++)
 	{
 		// TRUE: Element matches index; erase at index
-		if((*event_queues)[index][i] == observer)
+		if((*subscibers)[index][i] == observer)
 		{
 			// remove using "swap trick"
-			event_queues[index][i] = event_queues[index].back();
-			event_queues[index].pop_back();
+			subscibers[index][i] = subscibers[index].back();
+			subscibers[index].pop_back();
 
 			// avoids unnecessary testing
 			break;
@@ -70,15 +77,44 @@ void EventManager::sendEvent(Event* e)
 {
 	int index = e->getType();
 	//std::cout << "EVENTMANAGER: Sends Event of Enum " << index << std::endl;
-	for(int i=0; i < (int)(*event_queues)[index].size(); i++)
+	for(int i=0; i < (int)(*subscibers)[index].size(); i++)
 	{
-		(*event_queues)[index][i]->onEvent(e);
+		(*subscibers)[index][i]->onEvent(e);
 	}
 }
 
 EventManager::~EventManager()
 {
-	delete event_queues;
+	delete subscibers;
+	delete queues;
+}
+
+void EventManager::queueEvent( Event* e )
+{
+	int index = e->getType();
+	(*queues)[index].push_back(e);
+}
+
+void EventManager::flushQueuedEvents( EventType type )
+{
+	// send events
+	int index = type;
+	for(unsigned i=0; i<(*queues)[index].size(); i++)
+	{
+		sendEvent((*queues)[index][i]);
+	}
+
+	// free memory
+	for(unsigned i=0; i<(*queues)[index].size(); i++)
+	{
+		delete (*queues)[index][i];
+	}
+	(*queues)[index].clear();
+}
+
+void EventManager::cleanAllQueues()
+{
+	// NOT IMPLEMENTED YET
 }
 
 
