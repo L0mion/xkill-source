@@ -27,6 +27,7 @@
 
 #include "M3DLoader.h"
 #include "AnimatedMesh.h"
+#include "SkinnedData.h"
 
 #include "renderingComponent.h"
 
@@ -165,8 +166,8 @@ HRESULT RenderingComponent::init()
 	if(SUCCEEDED(hr))
 		hr = initGBuffers();
 
-//	if(SUCCEEDED(hr))
-//		initAnimations();
+	if(SUCCEEDED(hr))
+		initAnimations();
 
 	return hr;
 }
@@ -602,6 +603,12 @@ void RenderingComponent::renderAnimatedMesh(DirectX::XMFLOAT4X4 viewMatrix, Dire
 	cbManagement_->vsSet(CB_TYPE_OBJECT, CB_REGISTER_OBJECT, devcon);
 	cbManagement_->updateCBObject(devcon, finalMatrix, worldMatrix, worldMatrixInverse);
 	
+	std::vector<DirectX::XMFLOAT4X4> finalTransforms;
+	animatedMesh_->getSkinInfo()->getFinalTransforms("Take1", 1.22351f, &finalTransforms);
+
+	cbManagement_->vsSet(CB_TYPE_BONE, CB_REGISTER_BONE, devcon);
+	cbManagement_->updateCBBone(devcon, finalTransforms);
+
 	fxManagement_->getAnimationVS()->set(devcon);
 	fxManagement_->getAnimationPS()->set(devcon);
 	ssManagement_->setPS(d3dManagement_->getDeviceContext(), SS_ID_DEFAULT, 0);

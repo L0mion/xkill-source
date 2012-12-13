@@ -55,6 +55,8 @@ void SkinnedData::getFinalTransforms(const std::string&					clipName,
 {
 	unsigned int numBones = boneOffsets_->size();
 
+	finalTransforms->resize(numBones);
+
 	std::vector<DirectX::XMFLOAT4X4> toParentTransforms(numBones);
 
 	auto clip = animations_->find(clipName);
@@ -68,7 +70,7 @@ void SkinnedData::getFinalTransforms(const std::string&					clipName,
 	{
 		DirectX::XMMATRIX toParent = DirectX::XMLoadFloat4x4(&toParentTransforms[i]);
 		int parentIndex = boneHierarchy_->at(i);
-		DirectX::XMMATRIX parentToRoot = DirectX::XMLoadFloat4x4(&toRootTransforms[i]);
+		DirectX::XMMATRIX parentToRoot = DirectX::XMLoadFloat4x4(&toRootTransforms[parentIndex]);
 
 		DirectX::XMMATRIX toRoot = DirectX::XMMatrixMultiply(toParent, parentToRoot);
 
@@ -87,13 +89,11 @@ float SkinnedData::getBoneCount() const
 {
 	return boneHierarchy_->size();
 }
-
 float SkinnedData::getClipStartTime(const std::string& clipName) const
 {
 	auto clip = animations_->find(clipName);
 	return clip->second->getClipStartTime();
 }
-
 float SkinnedData::getClipEndTime(const std::string& clipName) const
 {
 	auto clip = animations_->find(clipName);

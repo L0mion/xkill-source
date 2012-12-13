@@ -3,6 +3,7 @@
 
 #include <d3d11.h>
 #include <DirectXMath.h>
+#include <vector>
 #include "d3dInterface.h"
 
 enum CB_TYPE 
@@ -61,8 +62,7 @@ public:
 	
 	//! Updates the constant buffer cbBone.
 	void updateCBBone(ID3D11DeviceContext* devcon,
-					  DirectX::XMFLOAT4X4 boneTransforms,
-					  unsigned int numBones);
+					  std::vector<DirectX::XMFLOAT4X4> boneTransforms);
 
 	//!Sets a constant buffer the vertex shader stage.
 	/*!
