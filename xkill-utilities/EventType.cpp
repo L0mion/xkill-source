@@ -109,6 +109,16 @@ Event_KeyRelease::Event_KeyRelease(int keyEnum) : Event(EVENT_KEY_RELEASE)
 	this->keyEnum = keyEnum;
 }
 
+Event_CreateSpawnPoint::Event_CreateSpawnPoint(Float3 spawnPointPosition, float spawnAreaRadius) : Event(EVENT_CREATE_SPAWNPOINT)
+{
+	this->spawnPointPosition = spawnPointPosition;
+	this->spawnAreaRadius = spawnAreaRadius;
+}
+
 Event_DoCulling::Event_DoCulling() : Event(EVENT_DO_CULLING)
+{
+}
+
+Event_EndDeathmatch::Event_EndDeathmatch() : Event(EVENT_END_DEATHMATCH)
 {
 }

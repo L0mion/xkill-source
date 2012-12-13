@@ -19,7 +19,7 @@ The AttributeFactory can be used to facilitate creation of \ref ATTRIBUTES.
 */
 
 
-class EntityFactory 
+class EntityFactory
 {
 public:
 	// Creates an AttributeType (e.g. PositionAttribute) with name AttributeName (e.g. position) owned by Entity OwnerEntity.
@@ -139,6 +139,8 @@ public:
 		
 		CREATE_ATTRIBUTE(SpawnPointAttribute, spawnPoint, entity);
 		CONNECT_ATTRIBUTES(spawnPoint, position);
+		spawnPoint->timeSinceLastSpawn = 0.1f;
+		spawnPoint->spawnArea = e->spawnAreaRadius;
 	}
 };
 

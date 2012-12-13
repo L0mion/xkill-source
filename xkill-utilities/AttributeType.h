@@ -263,6 +263,7 @@ struct DLL_U SpawnPointAttribute : public IAttribute
 	SpawnPointAttribute();
 	~SpawnPointAttribute();
 
-	float timeSinceLastSpawn;
+	float timeSinceLastSpawn;	//!< Is reset when a player spawn at the spawn point.
+	float spawnArea;			//!< Defines a horisontal circle area wherein no player will spawn if another player resides in the area.
 	AttributePointer positionAttribute;
 };

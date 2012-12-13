@@ -3,7 +3,18 @@
 #include <vector>
 
 class Event_PhysicsAttributesColliding;
+class Event_EndDeathmatch;
 class Entity;
+
+struct PlayerAttribute;
+struct HealthAttribute;
+struct CameraAttribute;
+struct InputAttribute;
+struct RenderAttribute;
+struct SpatialAttribute;
+struct PositionAttribute;
+struct ProjectileAttribute;
+struct SpawnPointAttribute;
 
 class GameComponent :
 	public IObserver
@@ -11,6 +22,16 @@ class GameComponent :
 private:
 	std::vector<Entity>* allEntity;
 	std::vector<int>* allPhysicsOwner;
+
+	std::vector<PlayerAttribute>* playerAttributes_;		
+	std::vector<HealthAttribute>* healthAttributes_;		
+	std::vector<CameraAttribute>* cameraAttributes_;		
+	std::vector<InputAttribute>* inputAttributes_;			
+	std::vector<RenderAttribute>* renderAttributes_;		
+	std::vector<SpatialAttribute>* spatialAttribute_;		
+	std::vector<PositionAttribute>* positionAttributes_;	
+	std::vector<ProjectileAttribute>* projectileAttributes_;
+	std::vector<SpawnPointAttribute>* spawnPointAttributes_;
 
 public:
 	GameComponent(void);
@@ -27,4 +48,14 @@ public:
 	Handle PhysicsAttributes collision for one of two PhysicsAttributes participating in the collision.
 	*/
 	void event_PhysicsAttributesColliding(Event_PhysicsAttributesColliding* e);
+
+	/**
+	Handles ending of a deathmatch.
+	*/
+	void event_EndDeathmatch(Event_EndDeathmatch* e);
+
+	/**
+	Finds an unoccupied spawn point (no other player inside its radius). Prioritizes spawn points that least recently spawned a player. If no unoccupied spawn point is found, one is selected at random. If there exists no spawn points at all, nullptr is returned.
+	*/
+	SpawnPointAttribute* findUnoccupiedSpawnPoint();
 };

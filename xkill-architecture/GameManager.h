@@ -86,7 +86,7 @@ public:
 		componentManager_ = new ComponentManager();
 		if(!componentManager_->init(windowHandle, parentWindowHandle))
 		{
-			std::cout << "Component manager failed to init" << std::endl;
+			DEBUGPRINT("Component manager failed to init");
 			std::cin.ignore();
 
 			return false;

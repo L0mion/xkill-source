@@ -11,7 +11,7 @@ void Menu::onUpdate( float delta )
 		std::vector<HealthAttribute>* allHealth;		GET_ATTRIBUTES(allHealth, HealthAttribute, ATTRIBUTE_HEALTH);
 		std::vector<RenderAttribute>* allRender;		GET_ATTRIBUTES(allRender, RenderAttribute, ATTRIBUTE_RENDER);
 		std::vector<SpatialAttribute>* allSpatial;		GET_ATTRIBUTES(allSpatial, SpatialAttribute, ATTRIBUTE_SPATIAL);
-		std::vector<PositionAttribute>* allPositions;	GET_ATTRIBUTES(allPositions, PositionAttribute, ATTRIBUTE_POSITION);
+		std::vector<PositionAttribute>* positionAttributes_;	GET_ATTRIBUTES(positionAttributes_, PositionAttribute, ATTRIBUTE_POSITION);
 
 
 		// test
@@ -27,7 +27,7 @@ void Menu::onUpdate( float delta )
 				HealthAttribute* health		=	&allHealth->at(player->healthAttribute.index);
 				//RenderAttribute* render		=	&allRender->at(player->renderAttribute.index);			
 				//SpatialAttribute* spatial	=	&allSpatial->at(render->spatialAttribute.index);
-				//PositionAttribute* position	=	&allPositions->at(spatial->positionAttribute.index);
+				//PositionAttribute* position	=	&positionAttributes_->at(spatial->positionAttribute.index);
 
 				QList<QStandardItem*> items;
 				QString s;

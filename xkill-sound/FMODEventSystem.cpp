@@ -57,6 +57,6 @@ void FMODEventSystem::StartSoundEventAt(unsigned int index)
 	}
 	else
 	{
-		std::cout << "error in \"FMODEventSystem.h\" in function \"void FMODEventSystem::StartSoundEventAt(int index)\"" << std::endl;
+		//std::cout << "error in \"FMODEventSystem.h\" in function \"void FMODEventSystem::StartSoundEventAt(int index)\"" << std::endl;
 	}
 }

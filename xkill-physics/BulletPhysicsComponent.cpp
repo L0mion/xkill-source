@@ -270,18 +270,14 @@ void BulletPhysicsComponent::tickCallback(btScalar timeStep)
 			{
 				const PhysicsObject* objectA = static_cast<const PhysicsObject*>(persistentManifold->getBody0());
 				const PhysicsObject* objectB = static_cast<const PhysicsObject*>(persistentManifold->getBody1());
-				//std::cout << std::endl << objectA->getIndex() << " " << objectB->getIndex() << " " << physicsOwners_->size();
 				if( objectA->getIndex() != 1337 && objectB->getIndex() != 1337) //1337 = floor
 				{
 					unsigned int ownerA = physicsOwners_->at(objectA->getIndex());
 					unsigned int ownerB = physicsOwners_->at(objectB->getIndex());
-					//std::cout << std::endl << ownerA << " " << ownerB;
 					
 					//Two PhysicsObjects colliding
 					if(ownerA != 0 || ownerB != 0) // ignore contacts where one owner is 0
-					{
-						//std::cout << "\nCollision between " << ownerA << " & " << ownerB;
-						
+					{						
 						eventQueue_.push(new Event_PhysicsAttributesColliding(objectA->getIndex(), objectB->getIndex()));
 						eventQueue_.push(new Event_PhysicsAttributesColliding(objectB->getIndex(), objectA->getIndex()));
 						//SEND_EVENT(&Event_PhysicsAttributesColliding(objectA->getIndex(), objectB->getIndex()));

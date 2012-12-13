@@ -148,6 +148,7 @@ DamageAttribute::~DamageAttribute()
 SpawnPointAttribute::SpawnPointAttribute()
 {
 	timeSinceLastSpawn = 0.0f;
+	spawnArea = 0.0f;
 }
 SpawnPointAttribute::~SpawnPointAttribute()
 {

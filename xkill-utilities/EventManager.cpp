@@ -29,7 +29,7 @@ void EventManager::addObserver(IObserver* o, EventType type)
 	int index = type;
 	(*event_queues)[index].push_back(o);
 
-	std::cout << "EVENTMANAGER: New subscriber on Events of Enum " << index << std::endl;
+	DEBUGPRINT("EVENTMANAGER: New subscriber on Events of Enum " << index);
 }
 
 void EventManager::addObserverToAll(IObserver* o)
@@ -38,7 +38,7 @@ void EventManager::addObserverToAll(IObserver* o)
 	{
 		(*event_queues)[i].push_back(o);
 	}
-	std::cout << "EVENTMANAGER: New subscriber on Events of All Enum " << std::endl;
+	DEBUGPRINT("EVENTMANAGER: New subscriber on Events of All Enum ");
 }
 
 void EventManager::removeObserver(IObserver* observer)

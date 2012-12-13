@@ -42,6 +42,7 @@ enum DLL_U EventType
 	EVENT_REMOVE_ENTITY,
 	EVENT_PLAYERDEATH,
 	EVENT_CREATE_SPAWNPOINT,
+	EVENT_END_DEATHMATCH,
 
 	EVENT_UPDATE,
 	EVENT_MOUSE_MOVE,
@@ -294,12 +295,10 @@ public:
 class DLL_U Event_CreateSpawnPoint : public Event
 {
 public:
-	Event_CreateSpawnPoint(Float3 spawnPointPosition) : Event(EVENT_CREATE_SPAWNPOINT)
-	{
-		this->spawnPointPosition = spawnPointPosition;
-	}
+	Event_CreateSpawnPoint(Float3 spawnPointPosition, float spawnAreaRadius);
 
 	Float3 spawnPointPosition;
+	float spawnAreaRadius;
 };
 
 
@@ -307,4 +306,10 @@ class DLL_U Event_DoCulling : public Event
 {
 public:
 	Event_DoCulling();
+};
+
+class DLL_U Event_EndDeathmatch : public Event
+{
+public:
+	Event_EndDeathmatch();
 };

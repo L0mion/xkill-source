@@ -100,4 +100,13 @@ EventManager::getInstance()->addObserver(Subscriber, EventType);
 	EntityPointer = e.entities;										\
 }
 
+#ifndef _DEBUG
+	#define DEBUGPRINT()
+#endif
+
+#ifdef _DEBUG
+	#define DEBUGPRINT(dataStream)									\
+	std::cout << dataStream << std::endl;			
+#endif
+
 // END OF EVIL
