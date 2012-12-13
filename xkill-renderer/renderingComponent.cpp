@@ -165,8 +165,8 @@ HRESULT RenderingComponent::init()
 	if(SUCCEEDED(hr))
 		hr = initGBuffers();
 
-	if(SUCCEEDED(hr))
-		initAnimations();
+//	if(SUCCEEDED(hr))
+//		initAnimations();
 
 	return hr;
 }
@@ -204,9 +204,6 @@ void RenderingComponent::onUpdate(float delta)
 									  viewportTopY);
 
 		setViewport(i);
-		
-
-		renderAnimatedMesh(viewMatrix, projectionMatrix);
 
 		renderViewportToGBuffer(viewMatrix, projectionMatrix);
 		renderViewportToBackBuffer();
@@ -217,14 +214,17 @@ void RenderingComponent::renderViewportToGBuffer(DirectX::XMFLOAT4X4 viewMatrix,
 	ID3D11Device*			device = d3dManagement_->getDevice();
 	ID3D11DeviceContext*	devcon = d3dManagement_->getDeviceContext();
 
+	d3dManagement_->clearDepthBuffer();
+
+	if(animatedMesh_)
+		renderAnimatedMesh(viewMatrix, projectionMatrix);
+
 	fxManagement_->getDefaultVS()->set(d3dManagement_->getDeviceContext());
 	fxManagement_->getDefaultPS()->set(d3dManagement_->getDeviceContext());
 	ssManagement_->setPS(d3dManagement_->getDeviceContext(), SS_ID_DEFAULT, 0);
 	rsManagement_->setRS(d3dManagement_->getDeviceContext(), RS_ID_DEFAULT);
 
 	renderGBufferSetRenderTargets();
-	
-	//d3dManagement_->clearDepthBuffer();
 
 	// Fetch attributes
 	std::vector<int>* renderOwners;					GET_ATTRIBUTE_OWNERS(renderOwners, ATTRIBUTE_RENDER);
