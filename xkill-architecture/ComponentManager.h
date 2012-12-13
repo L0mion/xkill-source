@@ -88,6 +88,11 @@ public:
 		render_->onUpdate(delta);
 		input_.onUpdate(delta);
 		game_.onUpdate(delta);
-		SEND_EVENT(&Event(EVENT_UPDATE));
+		for(int i=0; i<10; i++)
+		{
+			QUEUE_EVENT(new Event(EVENT_UPDATE));
+		}
+
+		FLUSH_QUEUED_EVENTS(EVENT_UPDATE);
 	}
 };
