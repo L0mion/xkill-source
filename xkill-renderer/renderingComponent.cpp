@@ -230,7 +230,7 @@ void RenderingComponent::renderViewportToGBuffer(DirectX::XMFLOAT4X4 viewMatrix,
 			spatialAt	= &allSpatial->at(renderAt->spatialAttribute.index);
 			positionAt	= &allPosition->at(spatialAt->positionAttribute.index);
 			
-			meshModelD3D = modelManagement_->getMeshModelD3D(meshID, d3dManagement_->getDevice());
+			meshModelD3D = modelManagement_->getModelD3D(meshID, d3dManagement_->getDevice());
 			VB*					vb	= meshModelD3D->getVB();
 			std::vector<IB*>	ibs	= meshModelD3D->getIBs();
 	

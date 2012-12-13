@@ -42,7 +42,7 @@ bool LoaderMdlDesc::init()
 		sucessfulLoad = false;
 	
 	if(sucessfulLoad)
-		loadTexDesc();
+		loadMdlDesc();
 	
 	return sucessfulLoad;
 }
@@ -165,7 +165,7 @@ void LoaderMdlDesc::loadModel(const std::vector<std::string>& params)
 		modelDynamic != "0"));
 }
 
-void LoaderMdlDesc::loadTexDesc()
+void LoaderMdlDesc::loadMdlDesc()
 {
 	std::string path = this->getFilePath();
 	

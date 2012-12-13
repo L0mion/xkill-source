@@ -39,39 +39,50 @@ enum TexDescSymbol
 class LoaderTexDesc : public Loader
 {
 public:
+	//! Initializes VarStatus-type to true and passes arguments to Loader-type.
 	LoaderTexDesc(
 		std::string fileName,
 		std::string filePath);
+	//! Clears memory allocated by SimpleStringSplitter and VarStatus-object. Observe that memory allocated by VarStatus will only be cleared if VarStatus == true.
 	~LoaderTexDesc();
 
+	//! Begins loading of .texdesc-format. Will return false if method failed, and true otherwize.
 	bool init();
 
+	//! Sets TexDesc to false and returns var hold by TexDesc VarStatus-object.
 	TexDesc* claimTexDesc();
 protected:
 private:
+	//! Parses the .texdesc-format. Reads a line from file, splits said line, interprets first symbol, parses parameters based on symbol and loads into corresponding data-type. 
 	bool parseTexDesc();
+	//! Based on indicator, returns a symbol specifying correct action to be takne.
 	TexDescSymbol parseSymbol(const std::vector<std::string>& params);
+	//! Checks whether or not number of parameters read is corresponding to symbol.
 	bool parseParams(
 		const TexDescSymbol symbol,
 		const std::vector<std::string>& params);
+	//! Based on symbol; correct function is called.
 	bool loadSymbol(
 		const TexDescSymbol symbol,
 		const std::vector<std::string>& params);
 	
+	//! Loads a TexDescHeader-object from file.
 	void loadHeader(const std::vector<std::string>& params);
+	//! Loads a TexDescTex-object from file.
 	void loadTex(const std::vector<std::string>& params);
 
+	//! Loads intermediate data into resulting TexDesc-format.
 	void loadTexDesc();
 
 	/*helper*/
-	SimpleStringSplitter* sss_;
+	SimpleStringSplitter* sss_;			//!< 
 
 	/*intermediate*/
-	TexDescHeader			header_;
-	std::vector<TexDescTex>	texs_;
+	TexDescHeader			header_;	//!< 
+	std::vector<TexDescTex>	texs_;		//!< 
 
 	/*result*/
-	VarStatus<TexDesc>* texDesc_;
+	VarStatus<TexDesc>* texDesc_;		//!< 
 };
 
 #endif //XKILL_IO_LOADERTEXDESC_H

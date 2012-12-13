@@ -17,10 +17,10 @@ ModelManagement::ModelManagement()
 }
 ModelManagement::~ModelManagement()
 {
-	for(unsigned int i = 0; i < meshModelD3Ds_.size(); i++)
+	for(unsigned int i = 0; i < modelD3Ds_.size(); i++)
 	{
-		if(meshModelD3Ds_[i])
-			delete meshModelD3Ds_[i];
+		if(modelD3Ds_[i])
+			delete modelD3Ds_[i];
 	}
 }
 
@@ -33,21 +33,21 @@ HRESULT ModelManagement::init()
 	return hr;
 }
 
-ModelD3D* ModelManagement::getMeshModelD3D(
+ModelD3D* ModelManagement::getModelD3D(
 	const unsigned int	modelID, 
 	ID3D11Device*		device)	
 {
-	if(!existingMeshModelD3D(modelID))
+	if(!existingModelD3D(modelID))
 	{
 		HRESULT hr = S_OK;
-		hr = createMeshModelD3D(modelID, device);
+		hr = createModelD3D(modelID, device);
 	}
 
-	unsigned int meshModelD3DIndex = getMeshModelD3DIndex(modelID);
-	return meshModelD3Ds_[meshModelD3DIndex];
+	unsigned int meshModelD3DIndex = getModelD3DIndex(modelID);
+	return modelD3Ds_[meshModelD3DIndex];
 }
 
-HRESULT ModelManagement::createMeshModelD3D(
+HRESULT ModelManagement::createModelD3D(
 	const unsigned int	modelID, 
 	ID3D11Device*		device)
 {
@@ -76,7 +76,7 @@ HRESULT ModelManagement::createMeshModelD3D(
 		}
 		if(SUCCEEDED(hr))
 		{
-			pushMeshModelD3D(
+			pushModelD3D(
 			modelID,
 			new ModelD3D(vb, ibs));
 		}
@@ -84,6 +84,7 @@ HRESULT ModelManagement::createMeshModelD3D(
 	else
 	{
 		//Could not find mesh loaded, error or warning?
+		//hr = S_FALSE;
 	}
 
 	return hr;
@@ -162,30 +163,30 @@ HRESULT ModelManagement::createIndexBuffer(
 	return hr;
 }
 
-void ModelManagement::pushMeshModelD3D(
+void ModelManagement::pushModelD3D(
 	const unsigned int	modelID, 
 	ModelD3D*		meshModelD3D)
 {
-	meshModelD3Ds_.push_back(meshModelD3D);
+	modelD3Ds_.push_back(meshModelD3D);
 
-	unsigned int meshModelD3DIndex = meshModelD3Ds_.size() - 1;
-	map.insert(std::pair<unsigned int, unsigned int>(modelID, meshModelD3DIndex));
+	unsigned int meshModelD3DIndex = modelD3Ds_.size() - 1;
+	modelIDtoIndex_.insert(std::pair<unsigned int, unsigned int>(modelID, meshModelD3DIndex));
 }
 
-bool ModelManagement::existingMeshModelD3D(const int unsigned modelID)
+bool ModelManagement::existingModelD3D(const int unsigned modelID)
 {
 	bool valExists = false;
 
-	std::map<unsigned int, unsigned int>::iterator it = map.find(modelID);
-	if(it != map.end())
+	std::map<unsigned int, unsigned int>::iterator it = modelIDtoIndex_.find(modelID);
+	if(it != modelIDtoIndex_.end())
 		valExists = true;
 
 	return valExists;
 }
 
-unsigned int ModelManagement::getMeshModelD3DIndex(const int unsigned modelID)
+unsigned int ModelManagement::getModelD3DIndex(const int unsigned modelID)
 {
-	std::map<unsigned int, unsigned int>::iterator it = map.find(modelID);
+	std::map<unsigned int, unsigned int>::iterator it = modelIDtoIndex_.find(modelID);
 
 	return (*it).second;
 }
