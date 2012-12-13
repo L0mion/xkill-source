@@ -270,7 +270,6 @@ void GameComponent::event_PhysicsAttributesColliding(Event_PhysicsAttributesColl
 			}
 		}
 	}
-
 	// projectile
 	else if(entity1->hasAttribute(ATTRIBUTE_PROJECTILE))
 	{

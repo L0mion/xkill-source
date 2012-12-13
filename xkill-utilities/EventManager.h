@@ -127,7 +127,7 @@ EventManager::getInstance()->addObserver(Subscriber, EventType);
 }
 
 #ifndef _DEBUG
-	#define DEBUGPRINT()
+	#define DEBUGPRINT(dataStream)
 #endif
 
 #ifdef _DEBUG
