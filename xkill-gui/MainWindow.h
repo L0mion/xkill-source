@@ -50,6 +50,9 @@ public:
 		connect(gameWidget, SIGNAL(signal_fpsChanged(QString)), this, SLOT(slot_setTitle(QString)));
 
 		menu = new Menu(this);
+
+		QWidget* mainMenu = new MainMenu(this);
+		mainMenu->show();
 	}
 
 	~MainWindow()

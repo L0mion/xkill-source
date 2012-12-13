@@ -3,8 +3,23 @@
 #include <QtGui>
 #include <QKeyEvent> // needed to grab mouse input
 #include <xkill-utilities/IObserver.h>
+#include "ui_MainMenu.h"
 
 class Event;
+
+class MainMenu : public QMainWindow
+{
+private:
+	Ui::MainMenu ui;
+
+public:
+	MainMenu(QWidget *parent = 0, Qt::WFlags flags = 0) : QMainWindow(parent, flags)
+	{
+		ui.setupUi(this);
+	}
+};
+
+
 
 class Menu : public QDialog, public IObserver
 {
