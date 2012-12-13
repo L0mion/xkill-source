@@ -35,29 +35,12 @@ public:
 	void parentMoveEvent()
 	{
 		QPoint pos = parentWidget()->pos();
-		int x = pos.x() + 50;
-		int y = pos.y() + 60;
+		int x = pos.x() + parentWidget()->width()/2 - this->width()/2;
+		int y = pos.y() + parentWidget()->height()/2 - this->height()/2;
 		move(x, y);
 	}
 
 protected:
 	// Behavior on keyboard input
-	void keyPressEvent(QKeyEvent* e)
-	{
-		switch (e->key()) 
-		{
-		case Qt::Key_Tab:
-			// Quit menu
-			QWidget::hide();
-			show = false;
-			break;
-		case Qt::Key_Escape:
-			// Quit menu
-			QWidget::hide();
-			show = false;
-			break;
-		default:
-			break;
-		}
-	}
+	void keyPressEvent(QKeyEvent* e);
 };

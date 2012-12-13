@@ -268,7 +268,7 @@ bool Float4x4::getInverse(Float4x4& inverseOut)
     if (det == 0)
         return false;
 
-    det = 1.0 / det;
+    det = 1.0f / det;
 
     for (i = 0; i < 16; i++)
 		inverseOut.m16[i] = inv[i] * det;

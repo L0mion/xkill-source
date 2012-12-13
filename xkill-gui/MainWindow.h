@@ -140,6 +140,14 @@ protected:
 		menu->parentMoveEvent();
 	}
 
+	void resizeEvent(QResizeEvent* e)
+	{
+		QWidget::resizeEvent(e);
+
+		// Reposition menu
+		menu->parentMoveEvent();
+	};
+
 	void showMenu()
 	{
 		static bool first = true;
@@ -187,13 +195,11 @@ protected:
 		{
 			ui.mainToolBar->hide();
 			this->showFullScreen();
-			menu->parentMoveEvent();
 		}
 		else
 		{
 			ui.mainToolBar->show();
 			this->showNormal();
-			menu->parentMoveEvent();
 		}
 	};
 

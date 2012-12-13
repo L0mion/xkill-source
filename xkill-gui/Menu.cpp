@@ -13,7 +13,6 @@ void Menu::onUpdate( float delta )
 		std::vector<SpatialAttribute>* allSpatial;		GET_ATTRIBUTES(allSpatial, SpatialAttribute, ATTRIBUTE_SPATIAL);
 		std::vector<PositionAttribute>* allPositions;	GET_ATTRIBUTES(allPositions, PositionAttribute, ATTRIBUTE_POSITION);
 
-
 		// test
 		std::vector<int>* playerAttributesOwners;		GET_ATTRIBUTE_OWNERS(playerAttributesOwners, ATTRIBUTE_PLAYER);
 		model->clear();
@@ -111,4 +110,9 @@ Menu::Menu( QWidget* parent /*= 0*/, Qt::WFlags flags /*= 0*/ ) : QDialog(parent
 	toggleMenu();
 
 	SUBSCRIBE_TO_EVENT(this, EVENT_UPDATE);
+}
+
+void Menu::keyPressEvent( QKeyEvent* e )
+{
+	QCoreApplication::sendEvent(parentWidget(), e);
 }
