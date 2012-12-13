@@ -94,11 +94,7 @@ void PhysicsObject::postStep(PhysicsAttribute* physicsAttribute)
 	btVector3 position = (1.0f/WorldScaling)*m_worldTransform.getOrigin();
 	positionAttribute->position.copy(position.m_floats);
 	spatialAttribute->rotation.copy(m_worldTransform.getRotation().get128().m128_f32);
-	if(physicsAttribute->isProjectile)
-		int a = 2;
 	physicsAttribute->linearVelocity.copy(getLinearVelocity().m_floats);
-	if(physicsAttribute->isProjectile)
-		int a = 2;
 	physicsAttribute->angularVelocity.copy(getAngularVelocity().m_floats);
 	forces_.setZero();
 }

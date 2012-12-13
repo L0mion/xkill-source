@@ -88,5 +88,6 @@ public:
 		render_->onUpdate(delta);
 		input_.onUpdate(delta);
 		game_.onUpdate(delta);
+		SEND_EVENT(&Event(EVENT_UPDATE));
 	}
 };

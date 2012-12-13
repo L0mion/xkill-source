@@ -56,8 +56,6 @@ private:
 	btDiscreteDynamicsWorld*			 dynamicsWorld_; //<! Used to step simulation
 	CollisionShapeManager*				 collisionShapeManager_;
 
-	std::queue<Event*> eventQueue_;	//<! Queue events and send them at the end of onUpdate
-
 	std::vector<PhysicsAttribute>*	physicsAttributes_; //<! A pointer to the attribute storage containing PhysicsAttributes, external representation of world
 	std::vector<BoundingAttribute>* boundingAttributes_; //<! A pointer to the attribute storage containing a copy of bounding volumes for the renderer
 	std::vector<InputAttribute>*	inputAttributes_; //<! A pointer to the attribute storage containing the input data from the input component

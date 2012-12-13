@@ -152,8 +152,7 @@ void GameComponent::event_PhysicsAttributesColliding(Event_PhysicsAttributesColl
 			{
 				PhysicsAttribute* physicsAttribute = &allPhysics->at(physicsId.at(i));
 				physicsAttribute->gravity = Float3(0.0f, -10.0f, 0.0f);
-				physicsAttribute->linearVelocity = Float3(0.0f, 0.0f, 0.0f); //Does not seem to work
-				int a = 2;
+				physicsAttribute->linearVelocity = Float3(0.0f, 0.0f, 0.0f);
 			}
 
 			//Shorten lifetime of projectile colliding with physics objects
