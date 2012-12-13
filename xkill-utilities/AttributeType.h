@@ -61,6 +61,7 @@ enum DLL_U AttributeType
 
 	ATTRIBUTE_HEALTH,
 	ATTRIBUTE_DAMAGE,
+	ATTRIBUTE_SPAWNPOINT,
 
 	// this is needed, don't touch!
 	ATTRIBUTE_LAST
@@ -122,6 +123,7 @@ struct DLL_U RenderAttribute : public IAttribute
 	AttributePointer spatialAttribute;
 	AttributePointer boundingAttribute;
 	
+	BoolField culling;
 	bool transparent;
 	bool tessellation;
 	int meshID;
@@ -140,6 +142,7 @@ struct DLL_U PhysicsAttribute : public IAttribute
 	AttributePointer spatialAttribute;
 	Float3 linearVelocity;
 	Float3 angularVelocity;
+	Float3 gravity;
 	float mass;
 	unsigned int meshID; //collisionShapeIndex;
 	//CollisionShape
@@ -199,6 +202,10 @@ struct DLL_U CameraAttribute : public IAttribute
 	AttributePointer spatialAttribute;
 	Float4x4 mat_view;
 	Float4x4 mat_projection;
+	float fov;
+	float aspect;
+	float zNear;
+	float zFar;
 };
 
 /// Stores everything GameComponent needs to know about a player (also refer to createPlayerEntity)
@@ -211,11 +218,9 @@ struct DLL_U PlayerAttribute : public IAttribute
 	~PlayerAttribute();
 
 	int id;					//!< The id of the player process. Used to identify a player attribute in GameComponent when firing projectiles.
-	std::string name;		//!< Name of the player process.
-	
 	int priority;			//!< Priority of the player process. Higher value means higher priority. The scheduler will choose the process with the highest priority for execution.
 	int cycleSteals;		//!< Total number of cycle steals for the player process. Cycle steals steal priority from other player processes.
-	int totalExecutionTime; //!< Total execution time of the player process. The game session winner is the player with the most total execution time as awarded by the scheduler.
+	int totalExecutionTime; //!< Total execution time of the player process, used ased final score in the deathmatch. The game session winner is the player with the most total execution time as awarded by the scheduler.
 
 	AttributePointer renderAttribute;
 	AttributePointer inputAttribute;
@@ -230,7 +235,6 @@ struct DLL_U MeshAttribute : public IAttribute
 	unsigned int	meshID;
 	MeshModel*		mesh;
 	bool			dynamic;
-	
 
 	void clean();
 	MeshAttribute();
@@ -243,21 +247,27 @@ struct DLL_U MeshAttribute : public IAttribute
 
 struct DLL_U HealthAttribute : public IAttribute
 {
-	HealthAttribute()
-	{
-		health = 2;
-	};
+	HealthAttribute();
+	~HealthAttribute();
 
+	int startHealth;
 	int health;
 };
 
 struct DLL_U DamageAttribute : public IAttribute
 {
-	DamageAttribute()
-	{
-		damage = 1;
-	};
+	DamageAttribute();
+	~DamageAttribute();
 
 	int damage;
-	int owner_enityID;
+	int owner_entityID;
+};
+
+struct DLL_U SpawnPointAttribute : public IAttribute
+{
+	SpawnPointAttribute();
+	~SpawnPointAttribute();
+
+	float timeSinceLastSpawn;
+	AttributePointer positionAttribute;
 };

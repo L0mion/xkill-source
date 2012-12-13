@@ -29,7 +29,7 @@ public:
 	// AttributeManager instead of "'positionAttributes_" which will result in error. As long as a shorter naming convention
 	// such as "position" is used, this will not be a problem.
 #define CREATE_ATTRIBUTE(AttributeType, AttributeName, OwnerEntity)						\
-	AttributeType* AttributeName = AttributeName = AttributeManager::getInstance()->AttributeName##Attributes_.createAttribute(OwnerEntity)
+	AttributeType* AttributeName = AttributeManager::getInstance()->AttributeName##Attributes_.createAttribute(OwnerEntity)
 	
 	// Connects the AttributePointer by the name PointerName inside AttributeName with latest AttributePointer created inside AttributeManager.
 	// IMPORTANT: The following formula is used to access AttributeManager, "PointerName+Attributes".
@@ -46,7 +46,6 @@ public:
 	void createPlayerEntity(Entity* entity)
 	{
 		CREATE_ATTRIBUTE(PositionAttribute, position, entity);
-		position->position.z += 0.3f*entity->getID();
 
 		CREATE_ATTRIBUTE(SpatialAttribute, spatial, entity);
 		CONNECT_ATTRIBUTES(spatial, position);
@@ -57,6 +56,7 @@ public:
 
 		CREATE_ATTRIBUTE(PhysicsAttribute, physics, entity);
 		CONNECT_ATTRIBUTES(physics, spatial);
+		
 		physics->meshID = render->meshID;
 
 		CREATE_ATTRIBUTE(InputAttribute, input, entity);
@@ -66,20 +66,20 @@ public:
 		CONNECT_ATTRIBUTES(camera, spatial);
 
 		CREATE_ATTRIBUTE(HealthAttribute, health, entity);
-		health->health = 2;
-
 		CREATE_ATTRIBUTE(PlayerAttribute, player, entity);
 		CONNECT_ATTRIBUTES(player, render);
 		CONNECT_ATTRIBUTES(player, input);
 		CONNECT_ATTRIBUTES(player, camera);
 		CONNECT_ATTRIBUTES(player, health);
+		//player->name = "Process Name";
 		static int playerId = 0;
 		player->id = playerId;
 		playerId++;
 	}
-
 	void createWorldEntity(Entity* entity)
 	{
+		static int HACKHACK = 1;
+		
 		CREATE_ATTRIBUTE(PositionAttribute, position, entity);
 
 		CREATE_ATTRIBUTE(SpatialAttribute, spatial, entity);
@@ -87,12 +87,16 @@ public:
 
 		CREATE_ATTRIBUTE(RenderAttribute, render, entity);
 		CONNECT_ATTRIBUTES(render, spatial);
+		
 		render->meshID = 1;
 
 		CREATE_ATTRIBUTE(PhysicsAttribute, physics, entity);
 		CONNECT_ATTRIBUTES(physics, spatial);
 		physics->meshID = render->meshID;
+		
 		physics->mass = 0;
+
+		HACKHACK++;
 	}
 
 	void createProjectileEntity(Entity* entity, Event_CreateProjectile* e)
@@ -106,21 +110,24 @@ public:
 
 		CREATE_ATTRIBUTE(RenderAttribute, render, entity);
 		CONNECT_ATTRIBUTES(render, spatial);
+		
 		render->meshID = 2;
 
 		CREATE_ATTRIBUTE(PhysicsAttribute, physics, entity);
 		CONNECT_ATTRIBUTES(physics, spatial);
 		physics->meshID = render->meshID;
+		
 		physics->isProjectile = true;
 		physics->linearVelocity = e->velocity;
-		physics->mass = 0.01f;
+		physics->mass = 100.0f;
+		physics->gravity = e->gravity;
 
 		CREATE_ATTRIBUTE(ProjectileAttribute, projectile, entity);
 		CONNECT_ATTRIBUTES(projectile, physics);
 		projectile->entityIdOfCreator = e->entityIdOfCreator;
 
 		CREATE_ATTRIBUTE(DamageAttribute, damage, entity);
-		damage->owner_enityID = e->entityIdOfCreator;
+		damage->owner_entityID = e->entityIdOfCreator;
 	}
 
 	void createMesh(Entity* entity, Event_CreateMesh* e)
@@ -129,6 +136,15 @@ public:
 		meshAttribute->mesh		= e->mesh;
 		meshAttribute->dynamic	= e->dynamic;
 		meshAttribute->meshID	= e->id;
+	}
+
+	void createSpawnPointEntity(Entity* entity, Event_CreateSpawnPoint* e)
+	{
+		CREATE_ATTRIBUTE(PositionAttribute, position, entity);
+		position->position = e->spawnPointPosition;
+		
+		CREATE_ATTRIBUTE(SpawnPointAttribute, spawnPoint, entity);
+		CONNECT_ATTRIBUTES(spawnPoint, position);
 	}
 };
 

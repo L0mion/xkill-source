@@ -52,7 +52,11 @@ PhysicsAttribute::PhysicsAttribute()
 	added = false;
 	alive = true;
 	mass = 1.0f;
+	
 	meshID = 0;
+
+	gravity = Float3(0.0f, -10.0f, 0.0f);
+	
 	isProjectile = false;
 
 	angularVelocity.x = 0; 
@@ -86,7 +90,12 @@ CameraAttribute::CameraAttribute()
 {
 	ZeroMemory(&mat_projection, sizeof(mat_projection));
 	ZeroMemory(&mat_view, sizeof(mat_view));
+	aspect = 0;
+	fov = 0.785f; 
+	zFar = 40.0f;
+	zNear = 0.01f;
 }
+
 CameraAttribute::~CameraAttribute()
 {
 }
@@ -104,7 +113,6 @@ InputAttribute::~InputAttribute()
 PlayerAttribute::PlayerAttribute()
 {
 	id = -1;
-	name = "Player";
 	priority = 0;
 	cycleSteals = 0;
 	totalExecutionTime = 0;
@@ -131,7 +139,31 @@ MeshAttribute::MeshAttribute(
 MeshAttribute::~MeshAttribute()
 {
 }
-
 void MeshAttribute::clean()
+{
+}
+
+HealthAttribute::HealthAttribute()
+{
+	startHealth = 2;
+	health = 0;
+}
+HealthAttribute::~HealthAttribute()
+{
+}
+
+DamageAttribute::DamageAttribute()
+{
+	damage = 1;
+}
+DamageAttribute::~DamageAttribute()
+{
+}
+
+SpawnPointAttribute::SpawnPointAttribute()
+{
+	timeSinceLastSpawn = 0.0f;
+}
+SpawnPointAttribute::~SpawnPointAttribute()
 {
 }

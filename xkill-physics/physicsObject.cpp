@@ -4,6 +4,7 @@
 #include <vector>
 #include <iostream>
 
+#include "physicsUtilities.h"
 #include "CollisionShapeManager.h"
 
 PhysicsObject::PhysicsObject(CollisionShapeManager* collisionShapeManager, unsigned int index) : btRigidBody(1,
@@ -12,7 +13,7 @@ PhysicsObject::PhysicsObject(CollisionShapeManager* collisionShapeManager, unsig
 																											 btVector3(0,0,0))
 {
 	index_ = index;
-	gravity_ = btVector3(0,-1000,0);
+	gravity_.setZero();
 	forces_.setZero();
 	movement_.setZero();
 	yaw_ = 0.0f;
@@ -23,7 +24,7 @@ PhysicsObject::PhysicsObject(btCollisionShape* collisionShape, unsigned int inde
 																											 btVector3(0,0,0))
 {
 	index_ = index;
-	gravity_ = btVector3(0,-10,0);
+	gravity_ = btVector3(0,-10*WorldScaling,0);
 	forces_.setZero();
 	movement_.setZero();
 	yaw_ = 0.0f;
@@ -53,20 +54,22 @@ void PhysicsObject::preStep(CollisionShapeManager* collisionShapeManager,Physics
 														  positionAttribute,
 														  spatialAttribute);
 	setMassProps(physicsAttribute->mass,btVector3(0,0,0));
-	m_worldTransform.setOrigin(btVector3(100.0f*positionAttribute->position.x,
-	 									 100.0f*positionAttribute->position.y,
-	 									 100.0f*positionAttribute->position.z));
+	m_worldTransform.setOrigin(WorldScaling*btVector3(positionAttribute->position.x,
+	 												  positionAttribute->position.y,
+	 												  positionAttribute->position.z));
 
-	m_worldTransform.setRotation(btQuaternion(yaw_,0,0));
+	gravity_ = WorldScaling*btVector3(physicsAttribute->gravity.x, physicsAttribute->gravity.y, physicsAttribute->gravity.z);
+
 	if(physicsAttribute->isProjectile)
 	{
+  		m_worldTransform.setRotation(btQuaternion(spatialAttribute->rotation.x, spatialAttribute->rotation.y, spatialAttribute->rotation.z, spatialAttribute->rotation.w));
 		setLinearVelocity(btVector3(physicsAttribute->linearVelocity.x,
 									physicsAttribute->linearVelocity.y,
 									physicsAttribute->linearVelocity.z));
-		gravity_.setZero();
 	}
 	else
 	{
+		m_worldTransform.setRotation(btQuaternion(yaw_,0,0));
 		movement_.setY(physicsAttribute->linearVelocity.y);
 		setLinearVelocity(movement_);
 	}
@@ -76,6 +79,7 @@ void PhysicsObject::preStep(CollisionShapeManager* collisionShapeManager,Physics
 	m_collisionShape = collisionShapeManager->getCollisionShape(physicsAttribute->meshID);
 	setGravity(gravity_+forces_);
 	activate(true);
+
 }
 
 void PhysicsObject::postStep(PhysicsAttribute* physicsAttribute)
@@ -87,10 +91,14 @@ void PhysicsObject::postStep(PhysicsAttribute* physicsAttribute)
 	PositionAttribute* positionAttribute = ATTRIBUTE_CAST(PositionAttribute,
 														  positionAttribute,
 														  spatialAttribute);
-	btVector3 position = 0.01f*m_worldTransform.getOrigin();
+	btVector3 position = (1.0f/WorldScaling)*m_worldTransform.getOrigin();
 	positionAttribute->position.copy(position.m_floats);
 	spatialAttribute->rotation.copy(m_worldTransform.getRotation().get128().m128_f32);
+	if(physicsAttribute->isProjectile)
+		int a = 2;
 	physicsAttribute->linearVelocity.copy(getLinearVelocity().m_floats);
+	if(physicsAttribute->isProjectile)
+		int a = 2;
 	physicsAttribute->angularVelocity.copy(getAngularVelocity().m_floats);
 	forces_.setZero();
 }
@@ -98,7 +106,7 @@ void PhysicsObject::postStep(PhysicsAttribute* physicsAttribute)
 void PhysicsObject::input(InputAttribute* inputAttribute,float delta)
 {
 	yaw_ += inputAttribute->rotation.x;
-	movement_ = 300*btVector3(inputAttribute->position.x, 0, inputAttribute->position.y);
+	movement_ = 5*WorldScaling*btVector3(inputAttribute->position.x, 0, inputAttribute->position.y);
 	movement_ = movement_.rotate(btVector3(0,1,0),yaw_);
 
 	inputAttribute->position.x = inputAttribute->position.y = 0;

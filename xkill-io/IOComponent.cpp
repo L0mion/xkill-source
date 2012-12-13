@@ -31,18 +31,11 @@ bool IOComponent::init()
 	if(sucessfulInit)
 		sucessfulInit = initMdlDescs();
 
-	std::vector<MeshAttribute>*	allMesh; GET_ATTRIBUTES(allMesh, MeshAttribute,	ATTRIBUTE_MESH);
-	for(unsigned int i = 0; i < allMesh->size(); i++)
-	{
-		MeshAttribute mesh = allMesh->at(i);
-	}
-
-	//if(sucessfulInit)
-	//	sucessfulInit = initBth();
-	//if(sucessfulInit)
-	//	sucessfulInit = initArena();
-	//if(sucessfulInit)
-	//	sucessfulInit = initProjectile();
+	//std::vector<MeshAttribute>*	allMesh; GET_ATTRIBUTES(allMesh, MeshAttribute,	ATTRIBUTE_MESH);
+	//for(unsigned int i = 0; i < allMesh->size(); i++)
+	//{
+	//	MeshAttribute mesh = allMesh->at(i);
+	//}
 
 	return sucessfulInit;
 }
@@ -90,6 +83,7 @@ bool IOComponent::initTexDesc(std::string filename)
 
 	return sucessfulLoad;
 }
+
 bool IOComponent::initMdlDescs()
 {
 	bool sucessfulLoad = true;
