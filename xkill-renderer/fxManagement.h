@@ -19,7 +19,10 @@ class FXManagement : public D3DInterface
 {
 public:
 	//! Sets FXManagement to default state.
-	FXManagement();
+	/*!
+	\param debug True if FXManagement should shaders configured for debug.
+	*/
+	FXManagement(bool debugShaders);
 	//! Releases all memory and returns FXManagement to defualt state.
 	~FXManagement();
 	
@@ -63,35 +66,35 @@ private:
 	\return Any error encountered.
 	\sa defaultVS
 	*/
-	HRESULT initDefaultVS(ID3D11Device* device);
+	HRESULT initDefaultVS(ID3D11Device* device, std::wstring shaderPath);
 	//! Initializes defaultPS.
 	/*!
 	\param device DirectX Device-pointer.
 	\return Any error encountered.
 	\sa defaultPS
 	*/
-	HRESULT initDefaultPS(ID3D11Device* device);
+	HRESULT initDefaultPS(ID3D11Device* device, std::wstring shaderPath);
 	//! Initializes defaultDeferredVS.
 	/*!
 	\param device DirectX Device-pointer.
 	\return Any error encountered.
 	\sa defaultDeferredVS
 	*/
-	HRESULT initDefaultDeferredVS(ID3D11Device* device);
+	HRESULT initDefaultDeferredVS(ID3D11Device* device, std::wstring shaderPath);
 	//! Initializes defaultDeferredPS.
 	/*!
 	\param device DirectX Device-pointer.
 	\return Any error encountered.
 	\sa defaultDeferredPS
 	*/
-	HRESULT initDefaultDeferredPS(ID3D11Device* device);
+	HRESULT initDefaultDeferredPS(ID3D11Device* device, std::wstring shaderPath);
 	//! Initializes defaultCS.
 	/*!
 	\param device DirectX Device-pointer.
 	\return Any error encountered.
 	\sa defaultCS_
 	*/
-	HRESULT initDefaultCS(ID3D11Device* device);
+	HRESULT initDefaultCS(ID3D11Device* device, std::wstring shaderPath);
 
 	//! Initializes animationVS.
 	/*!
@@ -99,14 +102,14 @@ private:
 	\return Any error encountered.
 	\sa animationVS_
 	*/
-	HRESULT initAnimationVS(ID3D11Device* device);
+	HRESULT initAnimationVS(ID3D11Device* device, std::wstring shaderPath);
 	//! Initializes animationPS.
 	/*!
 	\param device DirectX Device-pointer.
 	\return Any error encountered.
 	\sa animationVS_
 	*/
-	HRESULT initAnimationPS(ID3D11Device* device);
+	HRESULT initAnimationPS(ID3D11Device* device, std::wstring shaderPath);
 
 	//! Initializes an input-layout for defaultVS.
 	/*!
@@ -118,6 +121,8 @@ private:
 	void initILManagement();
 	HRESULT initILDefaultVSPosNormTex(ID3D11Device* device);
 	HRESULT initILPosNormTexTanSkinned(ID3D11Device* device);
+
+	bool debugShaders_;					//!< Decides if FXManagement should load debug or release configured shaders.
 
 	IEDManagement* ilManagement;
 

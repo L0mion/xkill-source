@@ -4,6 +4,9 @@
 struct ID3D11ShaderResourceView;
 
 //! Describes a loaded texture. Contains an ID to find correct texture, and a ID3D11ShaderResourceView to link to shader.
+/*!
+\ingroup xkill-renderer
+*/
 class Tex
 {
 public:

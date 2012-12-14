@@ -6,6 +6,9 @@
 #include "dllUtilities.h"
 
 //! Description of texture to be loaded.
+/*!
+\ingroup UTILITIES
+*/
 struct DLL_U TexDescTex
 {
 	//! Initializes TexDescTex-type with passed values.

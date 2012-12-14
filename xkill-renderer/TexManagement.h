@@ -14,6 +14,9 @@ class TexLoader;
 #include <vector>
 
 //! Holds textures which are used in shaders. Recieves TexDesc-objects loaded from file, which specifies what textures to load and what their indices are.
+/*!
+\ingroup xkill-renderer
+*/
 class TexManagement
 {
 public:

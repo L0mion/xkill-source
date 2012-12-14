@@ -49,7 +49,7 @@ struct DLL_U VertexPosNormTexTanSkinned
 	//! Default constructor setting all member variables to zero.
 	VertexPosNormTexTanSkinned()
 	{
-		std::memset(this, 0, sizeof(VertexPosNormTexTanSkinned));
+		//std::memset(this, 0, sizeof(VertexPosNormTexTanSkinned));
 	}
 
 	//! Constructor setting members to specific values.

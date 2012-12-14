@@ -3,6 +3,7 @@
 
 #include <d3d11.h>
 #include <DirectXMath.h>
+#include <vector>
 #include "d3dInterface.h"
 
 enum CB_TYPE 
@@ -11,6 +12,7 @@ enum CB_TYPE
 	CB_TYPE_FRAME,
 	CB_TYPE_CAMERA,
 	CB_TYPE_OBJECT,
+	CB_TYPE_SUBSET,
 	CB_TYPE_BONE
 };
 
@@ -18,7 +20,8 @@ static const unsigned int CB_REGISTER_INSTANCE	= 0;
 static const unsigned int CB_REGISTER_FRAME		= 1;
 static const unsigned int CB_REGISTER_CAMERA	= 2;
 static const unsigned int CB_REGISTER_OBJECT	= 3;
-static const unsigned int CB_REGISTER_BONE		= 4;
+static const unsigned int CB_REGISTER_SUBSET	= 4;
+static const unsigned int CB_REGISTER_BONE		= 5;
 
 //static const unsigned int 
 
@@ -61,8 +64,12 @@ public:
 	
 	//! Updates the constant buffer cbBone.
 	void updateCBBone(ID3D11DeviceContext* devcon,
-					  DirectX::XMFLOAT4X4 boneTransforms,
-					  unsigned int numBones);
+					  std::vector<DirectX::XMFLOAT4X4> boneTransforms);
+
+	//! Updates the constant buffer cbSubset.
+	void updateCBSubset(ID3D11DeviceContext* devcon,
+						DirectX::XMFLOAT3	specularTerm,
+						float				specularPower);
 
 	//!Sets a constant buffer the vertex shader stage.
 	/*!
@@ -132,10 +139,13 @@ private:
 	*/
 	HRESULT initCBBone(ID3D11Device* device);
 
+	HRESULT initCBSubset(ID3D11Device* device);
+
 	ID3D11Buffer* cbInstance_;	//!< A constant buffer that will be updated once per instance.
 	ID3D11Buffer* cbFrame_;		//!< A constant buffer that will be updated every frame.
 	ID3D11Buffer* cbCamera_;	//!< A constant buffer that will be updated for every camera.
 	ID3D11Buffer* cbObject_;	//!< A constant buffer that will be updated once per object every frame.
+	ID3D11Buffer* cbSubset_;	//!< A constant buffer that will be updated once per subset.
 	ID3D11Buffer* cbBone_;		//!< A constant buffer containing bones and will be updated for each animated object.
 };
 

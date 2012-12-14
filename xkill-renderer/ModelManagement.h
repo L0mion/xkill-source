@@ -8,6 +8,7 @@ struct ID3D11Device;
 class ModelD3D;
 class VB;
 class IB;
+class SubsetD3D;
 
 #include <map>
 
@@ -15,6 +16,9 @@ class IB;
 #include <xkill-utilities\AttributeType.h>
 
 //! Holds rendering-view of models, including vertex- and index-buffers.
+/*!
+\ingroup xkill-renderer
+*/
 class ModelManagement
 {
 public:
@@ -51,10 +55,10 @@ private:
 		ID3D11Device*		device);
 	//! Initializes ibs.
 	HRESULT createIndexBuffers(
-		const unsigned int	modelID, 
-		MeshGeometry&		geometry, 
-		std::vector<IB*>&	ibs,
-		ID3D11Device*		device);
+		const unsigned int			modelID, 
+		MeshGeometry&				geometry, 
+		std::vector<SubsetD3D*>&	subsetD3Ds,
+		ID3D11Device*				device);
 	//! Initializes ib.
 	HRESULT createIndexBuffer(
 		const unsigned int	modelID,
