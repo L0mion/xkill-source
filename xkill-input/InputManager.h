@@ -13,6 +13,7 @@
 #include "Converter.h"
 
 #include <Windows.h>
+
 #include <string>
 #include <vector>
 
@@ -20,9 +21,6 @@
 ///////Needed for Direct Input //////
 //#include <InitGuid.h>			   //
 								   //
-
-
-#define SAFE_RELEASE(x) {if(x != NULL) x->Release(); x = NULL;} //Should probably not be here, needed for isXInputDevice
 
 class FileParser;
 

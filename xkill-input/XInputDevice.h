@@ -1,10 +1,8 @@
 #pragma once
 
 #include "InputDevice.h"
-
-#include <windows.h>
-#include <Xinput.h>
-
+#include <xkill-utilities/LeanWindows.h>
+#include <guiddef.h>
 
 //! A wrapper for a XInput device
 /*!

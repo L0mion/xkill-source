@@ -1,33 +1,18 @@
 #pragma once
 
 #include <xkill-utilities/IObserver.h>
+#include <xkill-utilities/LeanWindows.h>
+#include "AttributeManager.h"
 
-class IOComponent;
 class RenderingComponent;
 class BulletPhysicsComponent;
 class SoundComponent;
 class CameraComponent;
 class InputComponent;
-enum StateType;
-
-#include <Windows.h>
-
-//#include <windef.h>
-
-//typedef HWND *HWND;
-
-//struct HWND;
-
-//#include <WinNT.h>
-
-//typedef void* PVOID;
-//typedef PVOID HANDLE;
-//typedef HANDLE HWND;
-
 class GameComponent;
 class ScoreComponent;
-
-#include "AttributeManager.h"
+class IOComponent;
+enum StateType;
 
 /// Is responsible for updating Components in a certain order
 /** 
@@ -43,7 +28,6 @@ be the responsibility of the ComponentManager.
 class ComponentManager : public IObserver
 {
 private:
-	IOComponent*			ioComponent_;
 	RenderingComponent*		render_;
 	BulletPhysicsComponent*	physics_;
 	SoundComponent*			sound_;
@@ -51,6 +35,7 @@ private:
 	InputComponent*			input_;
 	GameComponent*			game_;
 	ScoreComponent*			score_;
+	IOComponent*			ioComponent_;
 	//FiniteStateMachine		stateMachine_;
 	StateType				state_TemporaryVariableUsedAsSubstituteForStateMachine;
 

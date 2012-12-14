@@ -11,6 +11,8 @@
 #include "GameWidget.h"
 #include "Menu.h"
 
+#include <Windows.h> //check. Separates this file into .cpp and .h file to remove windows.h inclusion from this file.
+
 class MainWindow : public QMainWindow, public IObserver
 {
 	Q_OBJECT

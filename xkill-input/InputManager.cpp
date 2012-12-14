@@ -2,6 +2,8 @@
 
 #include "FileParser.h"
 
+#include <Xinput.h>
+
 //Used for IsXInputDevice function//
 #include <wbemidl.h>			  //
 #include <oleauto.h>			  //
@@ -13,6 +15,8 @@
 /////////////////////////////////////
 
 #include <cmath>
+
+#define SAFE_RELEASE(x) {if(x != NULL) x->Release(); x = NULL;} //Should probably not be here, needed for isXInputDevice
 
 InputManager::InputManager(void)
 {

@@ -34,6 +34,10 @@
 
 RenderingComponent::RenderingComponent(HWND windowHandle)
 {
+	// subscribe to events
+	SUBSCRIBE_TO_EVENT(this, EVENT_WINDOW_RESIZE);
+	SUBSCRIBE_TO_EVENT(this, EVENT_POST_DESC_TEX);
+
 	GET_ATTRIBUTES(cameraAttributes_, CameraAttribute, ATTRIBUTE_CAMERA);
 	
 	Event_GetWindowResolution windowResolution;
@@ -137,10 +141,6 @@ HRESULT RenderingComponent::resize(unsigned int screenWidth, unsigned int screen
 
 HRESULT RenderingComponent::init()
 {
-	// subscribe to events
-	SUBSCRIBE_TO_EVENT(this, EVENT_WINDOW_RESIZE);
-	SUBSCRIBE_TO_EVENT(this, EVENT_POST_DESC_TEX);
-
 	// init component
 	//float* f = new float();
 	HRESULT hr = S_OK;

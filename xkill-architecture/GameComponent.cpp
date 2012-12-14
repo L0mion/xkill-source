@@ -7,7 +7,8 @@
 
 GameComponent::GameComponent(void)
 {
-	
+	SUBSCRIBE_TO_EVENT(this, EVENT_ENTITIES_COLLIDING);
+	SUBSCRIBE_TO_EVENT(this, EVENT_END_DEATHMATCH);	
 }
 
 GameComponent::~GameComponent(void)
@@ -16,9 +17,6 @@ GameComponent::~GameComponent(void)
 
 bool GameComponent::init()
 {
-	SUBSCRIBE_TO_EVENT(this, EVENT_ENTITIES_COLLIDING);
-	SUBSCRIBE_TO_EVENT(this, EVENT_END_DEATHMATCH);
-
 	// Fetch list of stuff used in logic
 	GET_ENTITIES(allEntity);
 	GET_ATTRIBUTE_OWNERS(allPhysicsOwner, ATTRIBUTE_PHYSICS);

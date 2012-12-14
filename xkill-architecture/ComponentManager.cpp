@@ -14,15 +14,17 @@
 #include <xkill-utilities/FiniteState.h>
 #include "States.h"
 
-//#include <Windows.h>
-
 #include <iostream>
+
+//#include <windows.h>
 
 #define SAFE_DELETE(x) if( x ) { delete(x); (x) = NULL; }
 
 ComponentManager::ComponentManager()
 {
-	ioComponent_	= NULL;
+	//SUBSCRIBE_TO_EVENT(this, EVENT_END_DEATHMATCH);
+	//SUBSCRIBE_TO_EVENT(this, EVENT_START_DEATHMATCH);
+
 	render_			= NULL;
 	physics_		= NULL;
 	sound_			= NULL;
@@ -30,10 +32,10 @@ ComponentManager::ComponentManager()
 	input_			= NULL;
 	game_			= NULL;
 	score_			= NULL;
+	ioComponent_	= NULL;
 }
 ComponentManager::~ComponentManager()
 {
-	SAFE_DELETE(ioComponent_);
 	SAFE_DELETE(render_);
 	SAFE_DELETE(physics_);
 	SAFE_DELETE(sound_);
@@ -41,12 +43,11 @@ ComponentManager::~ComponentManager()
 	SAFE_DELETE(input_);
 	SAFE_DELETE(game_);
 	SAFE_DELETE(score_)
+	SAFE_DELETE(ioComponent_);
 }
 
 bool ComponentManager::init(HWND windowHandle, HWND parentWindowHandle)
 {
-	//SUBSCRIBE_TO_EVENT(this, EVENT_END_DEATHMATCH);
-	//SUBSCRIBE_TO_EVENT(this, EVENT_START_DEATHMATCH);
 
 //----------ADD STATEMACHINE-----------------------------------------------------------------
 	/*
@@ -60,35 +61,33 @@ bool ComponentManager::init(HWND windowHandle, HWND parentWindowHandle)
 	//Substitute statemchine, enum
 	state_TemporaryVariableUsedAsSubstituteForStateMachine = SPECIAL_STATE_NONE;
 
-	ioComponent_ = new IOComponent();
-	if(!ioComponent_->init())
-	{
-		std::cout << "IOComponent failed to init." << std::endl;
-		return false;
-	}
-
 	render_ = new RenderingComponent(windowHandle);
+	physics_ = new BulletPhysicsComponent();
+	camera_ = new CameraComponent();
+	game_ = new GameComponent();
+	sound_ = new SoundComponent();
+	input_ = new InputComponent();
+	score_ = new ScoreComponent();
+	ioComponent_ = new IOComponent();
+
 	if(render_->init() != S_OK)
 	{
 		std::cout << "RenderingComponent failed to init." << std::endl;
 		return false;
 	}
 
-	physics_ = new BulletPhysicsComponent();
 	if(!physics_->init())
 	{
 		std::cout << "BulletPhysicsComponent failed to init." << std::endl;
 		return false;
 	}
 
-	camera_ = new CameraComponent();
 	if(!camera_->init())
 	{
 		std::cout << "CameraComponent failed to init." << std::endl;
 		return false;
 	}
-
-	game_ = new GameComponent();
+	
 	if(!game_->init())
 	{
 		std::cout << "GameComponent failed to init." << std::endl;
@@ -96,25 +95,27 @@ bool ComponentManager::init(HWND windowHandle, HWND parentWindowHandle)
 	}
 
 	std::string configPath = "../../xkill-resources/xkill-configs/";
-
-	sound_ = new SoundComponent();
 	if(!sound_->init(configPath))
 	{
 		std::cout << "SoundComponent failed to init." << std::endl;
 		return false;
 	}
 
-	input_ = new InputComponent();
 	if(!input_->init(parentWindowHandle, AttributeManager::getInstance()->inputAttributes_.getAllAttributes(), configPath))
 	{
 		std::cout << "InputComponent failed to init." << std::endl;
 		return false;
 	}
 		
-	score_ = new ScoreComponent();
 	if(!score_->init(AttributeManager::getInstance()->playerAttributes_.getAllAttributes()))
 	{
 		std::cout << "ScoreComponent failed to init." << std::endl;
+		return false;
+	}
+
+	if(!ioComponent_->init())
+	{
+		std::cout << "IOComponent failed to init." << std::endl;
 		return false;
 	}
 
