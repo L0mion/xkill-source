@@ -39,6 +39,9 @@ enum MdlDescSymbol
 };
 
 //! Used to load .mdldesc-files, which are used to establish lists of models to be loaded into engine.
+/*!
+\ingroup xkill-io
+*/
 class LoaderMdlDesc : public Loader
 {
 public:

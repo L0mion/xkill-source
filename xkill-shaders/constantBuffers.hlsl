@@ -37,7 +37,13 @@ cbuffer cbPerObject : register (b3)
 	float4x4 worldMatrixInverse;
 };
 
-cbuffer cbBones : register (b4)
+cbuffer cbPerSubset : register (b4)
+{
+	float3	specularTerm;
+	float	specularPower;
+};
+
+cbuffer cbBones : register (b5)
 {
 	float4x4 boneTransforms[MAX_NUM_BONES];
 }

@@ -9,6 +9,9 @@
 #include "TexDescTex.h"
 
 //! Describes a read .texdesc-file.
+/*!
+\ingroup UTILITIES
+*/
 class DLL_U TexDesc
 {
 public:

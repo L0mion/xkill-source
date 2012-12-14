@@ -9,6 +9,7 @@ CBManagement::CBManagement()
 	cbFrame_	= nullptr;
 	cbCamera_	= nullptr;
 	cbObject_	= nullptr;
+	cbSubset_	= nullptr;
 	cbBone_		= nullptr;
 }
 CBManagement::~CBManagement()
@@ -17,6 +18,7 @@ CBManagement::~CBManagement()
 	SAFE_RELEASE(cbFrame_);
 	SAFE_RELEASE(cbCamera_);
 	SAFE_RELEASE(cbObject_);
+	SAFE_RELEASE(cbSubset_);
 	SAFE_RELEASE(cbBone_);
 }
 void CBManagement::reset()
@@ -25,6 +27,7 @@ void CBManagement::reset()
 	SAFE_RELEASE(cbFrame_);
 	SAFE_RELEASE(cbCamera_);
 	SAFE_RELEASE(cbObject_);
+	SAFE_RELEASE(cbSubset_);
 	SAFE_RELEASE(cbBone_);
 }
 
@@ -77,6 +80,16 @@ void CBManagement::updateCBObject(ID3D11DeviceContext* devcon,
 
 	devcon->UpdateSubresource(cbObject_, 0, 0, &cbDesc, 0, 0);
 }
+void CBManagement::updateCBSubset(ID3D11DeviceContext* devcon,
+						DirectX::XMFLOAT3	specularTerm,
+						float				specularPower)
+{
+	CBSubsetDesc cbDesc;
+	cbDesc.specularTerm_	= specularTerm;
+	cbDesc.specularPower_	= specularPower;
+
+	devcon->UpdateSubresource(cbSubset_, 0, 0, &cbDesc, 0, 0);
+}
 
 void CBManagement::vsSet(CB_TYPE cbType, unsigned int shaderRegister, ID3D11DeviceContext* devcon)
 {
@@ -93,6 +106,9 @@ void CBManagement::vsSet(CB_TYPE cbType, unsigned int shaderRegister, ID3D11Devi
 		break;
 	case CB_TYPE_OBJECT:
 		devcon->VSSetConstantBuffers(shaderRegister, 1, &cbObject_);
+		break;
+	case CB_TYPE_SUBSET:
+		devcon->VSSetConstantBuffers(shaderRegister, 1, &cbSubset_);
 		break;
 	default:
 		ERROR_MSG(L"CBManagement::vsSet | Failed! | Index not recognized!");
@@ -115,6 +131,9 @@ void CBManagement::psSet(CB_TYPE cbType, unsigned int shaderRegister, ID3D11Devi
 	case CB_TYPE_OBJECT:
 		devcon->PSSetConstantBuffers(shaderRegister, 1, &cbObject_);
 		break;
+	case CB_TYPE_SUBSET:
+		devcon->PSSetConstantBuffers(shaderRegister, 1, &cbSubset_);
+		break;
 	default:
 		ERROR_MSG(L"CBManagement::vsSet | Failed! | Index not recognized!");
 		break;
@@ -136,6 +155,9 @@ void CBManagement::csSet(CB_TYPE cbType, unsigned int shaderRegister, ID3D11Devi
 	case CB_TYPE_OBJECT:
 		devcon->CSSetConstantBuffers(shaderRegister, 1, &cbObject_);
 		break;
+	case CB_TYPE_SUBSET:
+		devcon->CSSetConstantBuffers(shaderRegister, 1, &cbSubset_);
+		break;
 	default:
 		ERROR_MSG(L"CBManagement::vsSet | Failed! | Index not recognized!");
 		break;
@@ -153,6 +175,8 @@ HRESULT CBManagement::init(ID3D11Device* device)
 		hr = initCBCamera(device);
 	if(SUCCEEDED(hr))
 		hr = initCBObject(device);
+	if(SUCCEEDED(hr))
+		hr = initCBSubset(device);
 	if(SUCCEEDED(hr))
 		hr = initCBBone(device);
 
@@ -228,6 +252,24 @@ HRESULT CBManagement::initCBObject(ID3D11Device* device)
 	if(FAILED(hr))
 		ERROR_MSG(L"CBManagement::initCBObject | device->CreateBuffer | Failed!");
 
+	return hr;
+}
+HRESULT CBManagement::initCBSubset(ID3D11Device* device)
+{
+	HRESULT hr = S_OK;
+
+	D3D11_BUFFER_DESC bufferDesc;
+	ZeroMemory(&bufferDesc, sizeof(bufferDesc));
+	
+	bufferDesc.Usage			= D3D11_USAGE_DEFAULT;
+	bufferDesc.ByteWidth		= CB_SUBSET_DESC_SIZE;
+	bufferDesc.BindFlags		= D3D11_BIND_CONSTANT_BUFFER;
+	bufferDesc.CPUAccessFlags	= 0;
+
+	hr = device->CreateBuffer(&bufferDesc, NULL, &cbSubset_);
+	if(FAILED(hr))
+		ERROR_MSG(L"CBManagement::initCBSubset | device->CreateBuffer | Failed!");
+		
 	return hr;
 }
 HRESULT CBManagement::initCBBone(ID3D11Device* device)

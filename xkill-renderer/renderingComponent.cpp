@@ -23,6 +23,7 @@
 #include "ModelD3D.h"
 #include "VB.h"
 #include "IB.h"
+#include "SubsetD3D.h"
 
 
 #include "M3DLoader.h"
@@ -227,7 +228,7 @@ void RenderingComponent::renderViewportToGBuffer(DirectX::XMFLOAT4X4 viewMatrix,
 	renderGBufferSetRenderTargets();
 
 	// Fetch attributes
-	std::vector<int>* renderOwners;					GET_ATTRIBUTE_OWNERS(renderOwners, ATTRIBUTE_RENDER);
+	std::vector<int>*				renderOwners;	GET_ATTRIBUTE_OWNERS(renderOwners,	ATTRIBUTE_RENDER);
 	std::vector<RenderAttribute>*	allRender;		GET_ATTRIBUTES(allRender,	RenderAttribute,	ATTRIBUTE_RENDER);
 	std::vector<SpatialAttribute>*	allSpatial;		GET_ATTRIBUTES(allSpatial,	SpatialAttribute,	ATTRIBUTE_SPATIAL);
 	std::vector<PositionAttribute>*	allPosition;	GET_ATTRIBUTES(allPosition,	PositionAttribute,	ATTRIBUTE_POSITION);
@@ -236,7 +237,7 @@ void RenderingComponent::renderViewportToGBuffer(DirectX::XMFLOAT4X4 viewMatrix,
 	DirectX::XMFLOAT4X4 worldMatrixInverse;
 	DirectX::XMFLOAT4X4 finalMatrix;
 	
-	unsigned int meshID; ModelD3D* meshModelD3D;
+	unsigned int meshID; ModelD3D* modelD3D;
 	RenderAttribute* renderAt; SpatialAttribute* spatialAt; PositionAttribute* positionAt;
 	for(unsigned int i=0; i<allRender->size(); i++)
 	{
@@ -247,11 +248,9 @@ void RenderingComponent::renderViewportToGBuffer(DirectX::XMFLOAT4X4 viewMatrix,
 			spatialAt	= &allSpatial->at(renderAt->spatialAttribute.index);
 			positionAt	= &allPosition->at(spatialAt->positionAttribute.index);
 			
-			meshModelD3D = modelManagement_->getModelD3D(meshID, d3dManagement_->getDevice());
-			
-			VB*					vb	= meshModelD3D->getVB();
-			std::vector<IB*>	ibs	= meshModelD3D->getIBs();
-	
+			modelD3D = modelManagement_->getModelD3D(meshID, d3dManagement_->getDevice());
+			std::vector<MeshMaterial> materials = modelD3D->getMaterials();
+
 			worldMatrix			= calculateWorldMatrix(spatialAt, positionAt);
 			worldMatrixInverse	= calculateMatrixInverse(worldMatrix);
 			finalMatrix			= calculateFinalMatrix(worldMatrix, viewMatrix, projectionMatrix);
@@ -259,6 +258,9 @@ void RenderingComponent::renderViewportToGBuffer(DirectX::XMFLOAT4X4 viewMatrix,
 			cbManagement_->vsSet(CB_TYPE_OBJECT, CB_REGISTER_OBJECT, devcon);
 			cbManagement_->updateCBObject(devcon, finalMatrix, worldMatrix, worldMatrixInverse);
 	
+			VB* vb	= modelD3D->getVertexBuffer();
+			std::vector<SubsetD3D*> subsetD3Ds = modelD3D->getSubsetD3Ds();
+
 			UINT stride = sizeof(VertexPosNormTex);
 			UINT offset = 0;
 			
@@ -269,19 +271,38 @@ void RenderingComponent::renderViewportToGBuffer(DirectX::XMFLOAT4X4 viewMatrix,
 				&vertexBuffer, 
 				&stride, 
 				&offset);
-
-			ID3D11ShaderResourceView* texAlbedo = texManagement_->getTexSrv(0);
-			ID3D11ShaderResourceView* texNormal = texManagement_->getTexSrv(1);
-			devcon->PSSetShaderResources(0, 1, &texAlbedo);
-			devcon->PSSetShaderResources(1, 1, &texNormal);
 	
-			for(unsigned int j = 0; j < ibs.size(); j++)
+			for(unsigned int j = 0; j < subsetD3Ds.size(); j++)
 			{
-				devcon->IASetIndexBuffer(ibs[j]->getIB(), DXGI_FORMAT_R32_UINT, offset);
+				ID3D11Buffer* indexBuffer = subsetD3Ds[j]->getIndexBuffer()->getIB();
+				unsigned int materialIndex = subsetD3Ds[j]->getMaterialIndex();
+
+				MeshMaterial material = materials[materialIndex];
+
+				ID3D11ShaderResourceView* texAlbedo = texManagement_->getTexSrv(material.getIDAlbedoTex());
+				ID3D11ShaderResourceView* texNormal = texManagement_->getTexSrv(material.getIDNormalTex());
+				devcon->PSSetShaderResources(0, 1, &texAlbedo);
+				devcon->PSSetShaderResources(1, 1, &texNormal);
+
+				cbManagement_->psSet(CB_TYPE_SUBSET, CB_REGISTER_SUBSET, devcon);
+
+				DirectX::XMFLOAT3 dxSpec(1.0f, 1.0f, 1.0f); //((float*)&material.getSpecularTerm());
+				cbManagement_->updateCBSubset(
+					devcon,
+					dxSpec,
+					material.getSpecularPower());
+
+				devcon->IASetIndexBuffer(
+					indexBuffer, 
+					DXGI_FORMAT_R32_UINT, 
+					offset);
 	
 				devcon->IASetInputLayout(fxManagement_->getILDefaultVSPosNormTex());
 				devcon->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-				devcon->DrawIndexed(ibs[j]->getNumIndices(), 0, 0);
+				devcon->DrawIndexed(
+					subsetD3Ds[j]->getIndexBuffer()->getNumIndices(), 
+					0, 
+					0);
 			}
 		}
 	}
@@ -297,7 +318,7 @@ void RenderingComponent::renderViewportToBackBuffer()
 	cbManagement_->csSet(CB_TYPE_CAMERA,	CB_REGISTER_CAMERA,		d3dManagement_->getDeviceContext());
 	cbManagement_->updateCBInstance(d3dManagement_->getDeviceContext(), screenWidth_, screenHeight_);
 
-	lightManagement_->setLightSRVCS(d3dManagement_->getDeviceContext(), 2);
+	lightManagement_->setLightSRVCS(d3dManagement_->getDeviceContext(), 3);
 
 	ID3D11ShaderResourceView* resourceViews[GBUFFERID_NUM_BUFFERS];
 	for(int i=0; i<GBUFFERID_NUM_BUFFERS; i++)
@@ -336,6 +357,7 @@ void RenderingComponent::clearGBuffers()
 	
 	d3dManagement_->getDeviceContext()->ClearRenderTargetView(renderTargets[GBUFFERID_ALBEDO], black);
 	d3dManagement_->getDeviceContext()->ClearRenderTargetView(renderTargets[GBUFFERID_NORMAL], black);
+	d3dManagement_->getDeviceContext()->ClearRenderTargetView(renderTargets[GBUFFERID_MATERIAL], black);
 }
 void RenderingComponent::renderGBufferClean()
 {
@@ -524,11 +546,19 @@ HRESULT RenderingComponent::initGBuffers()
 	gBuffers_[GBUFFERID_ALBEDO] = gBuffer;
 
 	/*Normals*/
-	if(hr == S_OK)
+	if(SUCCEEDED(hr))
 	{
 		gBuffer = new GBuffer(screenWidth_, screenHeight_, MULTISAMPLES_GBUFFERS, DXGI_FORMAT_R32G32B32A32_FLOAT);
 		hr = gBuffer->init(d3dManagement_->getDevice());
 		gBuffers_[GBUFFERID_NORMAL] = gBuffer;
+	}
+
+	/*Material*/
+	if(SUCCEEDED(hr))
+	{
+		gBuffer = new GBuffer(screenWidth_, screenHeight_, MULTISAMPLES_GBUFFERS, DXGI_FORMAT_R32G32B32A32_FLOAT);
+		hr = gBuffer->init(d3dManagement_->getDevice());
+		gBuffers_[GBUFFERID_MATERIAL] = gBuffer;
 	}
 
 	return hr;

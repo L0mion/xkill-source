@@ -36,6 +36,9 @@ enum TexDescSymbol
 };
 
 //! Used to load .texdesc-files, which are used to establish a list of textures which will then be loaded.
+/*!
+\ingroup xkill-io
+*/
 class LoaderTexDesc : public Loader
 {
 public:

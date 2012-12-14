@@ -4,6 +4,9 @@
 #include <string>
 
 //! Describes fundemental data used to load several models into engine.
+/*!
+\ingroup xkill-io
+*/
 struct MdlDescHeader
 {
 	std::string name_;
