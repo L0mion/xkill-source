@@ -17,7 +17,8 @@ MeshMakerObj::MeshMakerObj(
 	const std::string pathObj,
 	const std::string pathPGY,
 	const std::string fileNameObj,
-	const std::string pathMTL)
+	const std::string pathMTL,
+	std::map<std::string, unsigned int>* texNameToID)
 {
 	pathObj_		= pathObj;
 	pathMTL_		= pathMTL;
@@ -26,6 +27,8 @@ MeshMakerObj::MeshMakerObj(
 
 	loaderObj_ = nullptr;
 	loaderMtl_ = nullptr;
+
+	texNameToID_ = texNameToID;
 
 	meshModel_ = new VarStatus<MeshModel>(true);
 }
@@ -50,7 +53,7 @@ bool MeshMakerObj::init()
 	{
 		sucessfulLoad = loadObj();
 		if(sucessfulLoad)
-			sucessfulLoad = loadMTLs();
+			sucessfulLoad = loadMaterials();
 		if(sucessfulLoad)
 		{
 			meshModel_->setVar(makeMesh(loaderObj_->getObj()));
@@ -128,13 +131,22 @@ bool MeshMakerObj::makePGY(MeshModel* model)
 	return sucessfulWrite;
 }
 
-bool MeshMakerObj::loadMTLs()
+bool MeshMakerObj::loadMaterials()
 {
 	bool sucessfulLoad = true;
 
 	std::vector<std::string> mtls = loaderObj_->getObj().getMTLs();
-	for(unsigned int i = 0; i < mtls.size() && sucessfulLoad; i++)
-		sucessfulLoad = loadMTL(mtls[i]);
+	if(mtls.size() > 0)
+	{
+		for(unsigned int i = 0; i < mtls.size() && sucessfulLoad; i++)
+			sucessfulLoad = loadMTL(mtls[i]);
+	}
+	else
+	{ //load default material
+		MeshMaterial default;
+		materials_.push_back(default);
+		materialID_.push_back("default");
+	}
 
 	return sucessfulLoad;
 }
@@ -172,6 +184,9 @@ const MeshMaterial MeshMakerObj::MTLToMeshMaterial(MTLMaterial mtl)
 	Float3 reflectivity		= Float3(0.0f, 0.0f, 0.0f); //not defined in .obj?
 	float specPow			= mtl.getSpecularPow();
 	float alpha				= mtl.getAlpha();
+
+	std::string texAlbedoName = mtl.getTexDiffuse();
+	std::string texNormalName = mtl.getTexBump();
 	
 	MeshMaterial meshMaterial(
 		ambientColor,
@@ -179,7 +194,10 @@ const MeshMaterial MeshMakerObj::MTLToMeshMaterial(MTLMaterial mtl)
 		specularColor,
 		specPow,
 		reflectivity,
-		alpha != 0); //obs, float to bool convertion
+		alpha != 0,
+		
+		getTexIDfromName(texAlbedoName),
+		getTexIDfromName(texNormalName));
 
 	return meshMaterial;
 }
@@ -212,6 +230,17 @@ const int MeshMakerObj::MTLNameToMaterialIndex(std::string mtlName)
 	return materialIndex;
 }
 
+unsigned int MeshMakerObj::getTexIDfromName(std::string texFilename)
+{
+	unsigned int texID = 0;
+
+	std::map<std::string, unsigned int>::iterator it;
+	it = texNameToID_->find(texFilename);
+	if(it != texNameToID_->end())
+		texID = it->second;
+
+	return texID;
+}
 std::string MeshMakerObj::getFileNamePGY()
 {
 	return fileNameObj_ + PGY_SPECS_SUFFIX;

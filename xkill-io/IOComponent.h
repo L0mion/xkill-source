@@ -7,10 +7,9 @@ class MeshMakerObj;
 class MeshModel;
 
 #include <vector>
+#include <map>
 
 #include <xkill-utilities/IObserver.h>
-#include <xkill-utilities/EventManager.h>
-#include <xkill-utilities/AttributeType.h>
 
 #include "dllIO.h"
 
@@ -18,6 +17,10 @@ static const std::string PATH_XKILL_RESOURCES	= "../../xkill-resources/";
 static const LPCTSTR PATH_TEXDESC				= L"../../xkill-resources/*.texdesc";
 static const LPCTSTR PATH_MDLDESC				= L"../../xkill-resources/*.mdldesc";
 
+//! Component loading and writing from/to file.
+/*!
+\ingroup xkill-io
+*/
 class DLL_IO IOComponent : public IObserver
 {
 public:
@@ -42,6 +45,7 @@ private:
 
 	std::vector<std::string> getFileNames(LPCTSTR filename);
 
+	std::map<std::string, unsigned int>* texNameToTexID;
 	std::vector<MeshModel*> meshModels_; //temporarily store models until these may be deleted in attribute
 };
 

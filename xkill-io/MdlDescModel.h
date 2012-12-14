@@ -4,6 +4,9 @@
 #include <string>
 
 //! Describes data used to load a model for use in engine.
+/*!
+\ingroup xkill-io
+*/
 struct MdlDescModel
 {
 	unsigned int	modelID_;		//!< ID of model.

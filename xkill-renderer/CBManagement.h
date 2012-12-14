@@ -10,13 +10,15 @@ enum CB_TYPE
 	CB_TYPE_INSTANCE,
 	CB_TYPE_FRAME,
 	CB_TYPE_CAMERA,
-	CB_TYPE_OBJECT
+	CB_TYPE_OBJECT,
+	CB_TYPE_SUBSET
 };
 
 static const unsigned int CB_REGISTER_INSTANCE	= 0;
 static const unsigned int CB_REGISTER_FRAME		= 1;
 static const unsigned int CB_REGISTER_CAMERA	= 2;
 static const unsigned int CB_REGISTER_OBJECT	= 3;
+static const unsigned int CB_REGISTER_SUBSET	= 4;
 
 //static const unsigned int 
 
@@ -56,6 +58,11 @@ public:
 						DirectX::XMFLOAT4X4 finalMatrix,
 						DirectX::XMFLOAT4X4 worldMatrix,
 						DirectX::XMFLOAT4X4 worldMatrixInverse);
+
+	//! Updates the constant buffer cbSubset.
+	void updateCBSubset(ID3D11DeviceContext* devcon,
+						DirectX::XMFLOAT3	specularTerm,
+						float				specularPower);
 
 	//!Sets a constant buffer the vertex shader stage.
 	/*!
@@ -113,10 +120,13 @@ private:
 	*/
 	HRESULT initCBObject(ID3D11Device* device);
 
+	HRESULT initCBSubset(ID3D11Device* device);
+
 	ID3D11Buffer* cbInstance_;	//!< A constant buffer that will be updated once per instance.
 	ID3D11Buffer* cbFrame_;		//!< A constant buffer that will be updated every frame.
-	ID3D11Buffer* cbCamera_;	//!< penis.
-	ID3D11Buffer* cbObject_;	//!< Aconstant buffer that will be updated once per object every frame.
+	ID3D11Buffer* cbCamera_;	//!< A constant buffer that will be updated for each viewport.
+	ID3D11Buffer* cbObject_;	//!< A constant buffer that will be updated once per object every frame.
+	ID3D11Buffer* cbSubset_;	//!< A constant buffer that will be updated once per subset.
 };
 
 #endif

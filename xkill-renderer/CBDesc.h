@@ -53,5 +53,16 @@ struct CBObjectDesc
 };
 static const unsigned int CB_OBJECT_DESC_SIZE = 192;
 
+//! Struct describing a constant buffer being updated several times per object.
+/*!
+\ingroup xkill-renderer
+*/
+struct CBSubsetDesc
+{
+	DirectX::XMFLOAT3	specularTerm_;
+	float				specularPower_;
+};
+static const unsigned int CB_SUBSET_DESC_SIZE = 16;
+
 
 #endif //XKILL_RENDERER_CBDESC_H

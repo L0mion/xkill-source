@@ -35,4 +35,10 @@ cbuffer cbPerObject : register (b3)
 	float4x4 worldMatrixInverse;
 };
 
+cbuffer cbPerSubset : register (b4)
+{
+	float3	specularTerm;
+	float	specularPower;
+};
+
 #endif //XKILL_RENDERER_CONSTANTBUFFERS_HLSL
