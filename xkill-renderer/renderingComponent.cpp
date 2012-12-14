@@ -2,31 +2,8 @@
 
 #include <xkill-utilities/AttributeType.h>
 #include <xkill-utilities/EventManager.h>
-#include <xkill-utilities/MeshVertices.h>
-#include <xkill-utilities/MeshModel.h>
-#include <xkill-utilities/TexDescHeader.h>
-#include <xkill-utilities/TexDescTex.h>
-#include <xkill-utilities/TexDesc.h>
 
-#include "ManagementD3D.h"
-#include "ManagementFX.h"
-#include "ManagementViewport.h"
-#include "ManagementSS.h"
-#include "ManagementRS.h"
-#include "gBuffer.h"
-#include "renderingUtilities.h"
-#include "d3dDebug.h"
-#include "CBManagement.h"
-#include "ManagementLight.h"
-#include "ManagementModel.h"
-#include "ManagementTex.h"
-#include "ModelD3D.h"
-#include "VB.h"
-#include "IB.h"
-#include "SubsetD3D.h"
-
-#include "M3DLoader.h"
-#include "AnimatedMesh.h"
+#include "Renderer.h"
 
 #include "renderingComponent.h"
 
@@ -464,7 +441,7 @@ HRESULT RenderingComponent::initCBManagement()
 {
 	HRESULT hr = S_OK;
 
-	cbManagement_ = new CBManagement();
+	cbManagement_ = new ManagementCB();
 	cbManagement_->init(d3dManagement_->getDevice());
 
 	return hr;
@@ -528,7 +505,7 @@ HRESULT RenderingComponent::initDebug()
 {
 	HRESULT hr = S_OK;
 
-	d3dDebug_ = new D3DDebug();
+	d3dDebug_ = new ManagementDebug();
 	hr = d3dDebug_->init(d3dManagement_->getDevice());
 
 	return hr;

@@ -1,6 +1,8 @@
 #ifndef XKILL_RENDERER_VIEWPORTMANAGEMENT_H
 #define XKILL_RENDERER_VIEWPORTMANAGEMENT_H
 
+class Winfo;
+
 #include <vector>
 #include <d3d11.h>
 
@@ -21,9 +23,7 @@ public:
 	\param screenWidth The width of the screen in which the viewports reside.
 	\param screenHeight The height of the screen in which the viewports reside.
 	*/
-	ManagementViewport(unsigned int numViewports,
-						unsigned int screenWidth,
-						unsigned int screenHeight);
+	ManagementViewport(Winfo* winfo);
 	//! Releases all memory and returns ViewportManagement to default state.
 	~ManagementViewport();
 	//! Releases all memory and returns ViewportManagement to default state.
@@ -36,7 +36,7 @@ public:
 	\param screenHeight the new screen height.
 	\return Any error encountered.
 	*/
-	HRESULT resize(unsigned int screenWidth, unsigned int screenHeight);
+	HRESULT resize();
 	//! Initializes ViewportManagement.
 	HRESULT init();
 
@@ -58,14 +58,13 @@ private:
 	*/
 	HRESULT initViewportGrid(unsigned int gridSize);
 
-	unsigned int numViewports_;		//!< Number of viewports that will be used.
+	Winfo* winfo_;
+
 	unsigned int numViewportsX_;
 	unsigned int numViewportsY_;
 	unsigned int viewportWidth_;	//!< Width of each viewport.
 	unsigned int viewportHeight_;	//!< Height of each viewport.
-	unsigned int screenWidth_;		//!< Width of the screen.
-	unsigned int screenHeight_;		//!< Height of the screen.
-
+	
 	unsigned int borderSize_;	//<! Adds space between viewports.
 
 	std::vector<D3D11_VIEWPORT>* viewports_;	//!< Vector containing all the viewport objects.

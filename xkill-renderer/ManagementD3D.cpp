@@ -1,14 +1,13 @@
 #include <DirectXMath.h>
 
+#include "renderingUtilities.h"
+#include "Winfo.h"
 #include "ManagementD3D.h"
 
-#include "renderingUtilities.h"
-
-ManagementD3D::ManagementD3D(HWND windowHandle, unsigned int screenWidth, unsigned int screenHeight)
+ManagementD3D::ManagementD3D(HWND windowHandle, Winfo* winfo)
 {
 	windowHandle_	= windowHandle;
-	screenWidth_	= screenWidth;
-	screenHeight_	= screenHeight;
+	winfo_			= winfo;
 
 	device_		= nullptr;
 	devcon_		= nullptr;
@@ -49,12 +48,9 @@ void ManagementD3D::reset()
 	SAFE_RELEASE(texDepthBuffer_);
 }
 
-HRESULT ManagementD3D::resize(unsigned int screenWidth, unsigned int screenHeight)
+HRESULT ManagementD3D::resize()
 {
 	HRESULT hr = S_OK;
-
-	screenWidth_	= screenWidth;
-	screenHeight_	= screenHeight;
 
 	SAFE_RELEASE(rtvBackBuffer_);
 	SAFE_RELEASE(uavBackBuffer_);
@@ -64,7 +60,12 @@ HRESULT ManagementD3D::resize(unsigned int screenWidth, unsigned int screenHeigh
 
 	devcon_->OMSetRenderTargets(0, 0, 0);
 
-	hr = swapChain_->ResizeBuffers(1, screenWidth_, screenHeight_, DXGI_FORMAT_R8G8B8A8_UNORM, 0);
+	hr = swapChain_->ResizeBuffers(
+		1, 
+		winfo_->getScreenWidth(), 
+		winfo_->getScreenHeight(), 
+		DXGI_FORMAT_R8G8B8A8_UNORM, 
+		0);
 	if(FAILED(hr))
 		ERROR_MSG(L"D3DManagement::resize | swapChain_->ResizeBuffers | Failed!");
 
@@ -86,8 +87,6 @@ HRESULT ManagementD3D::init()
 		hr = initBackBuffer();
 	if(SUCCEEDED(hr))
 		hr = initDepthBuffer();
-//	if(SUCCEEDED(hr))
-//		hr = initDebug();
 
 	return hr;
 }
@@ -99,8 +98,8 @@ HRESULT ManagementD3D::initDeviceAndSwapChain()
 	ZeroMemory(&swapChainDesc, sizeof(swapChainDesc));
 	swapChainDesc.BufferCount		= 1;
 	swapChainDesc.BufferDesc.Format	= DXGI_FORMAT_R8G8B8A8_UNORM;
-	swapChainDesc.BufferDesc.Width	= screenWidth_;
-	swapChainDesc.BufferDesc.Height	= screenHeight_;
+	swapChainDesc.BufferDesc.Width	= winfo_->getScreenWidth();
+	swapChainDesc.BufferDesc.Height	= winfo_->getScreenHeight();
 	swapChainDesc.BufferUsage		= DXGI_USAGE_RENDER_TARGET_OUTPUT | DXGI_USAGE_UNORDERED_ACCESS;
 	swapChainDesc.OutputWindow		= windowHandle_;
 	swapChainDesc.SampleDesc.Count	= MULTISAMPLES_BACKBUFFER;
@@ -178,8 +177,8 @@ HRESULT ManagementD3D::initDepthBuffer()
 
 	D3D11_TEXTURE2D_DESC texd;
 	ZeroMemory(&texd, sizeof(texd));
-	texd.Width		= screenWidth_;
-	texd.Height		= screenHeight_;
+	texd.Width		= winfo_->getScreenWidth();
+	texd.Height		= winfo_->getScreenHeight();
 	texd.ArraySize	= 1;
 	texd.MipLevels	= 1;
 	texd.SampleDesc.Count = MULTISAMPLES_DEPTHBUFFER;

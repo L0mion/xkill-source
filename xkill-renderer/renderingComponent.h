@@ -11,75 +11,20 @@
 #include <xkill-utilities/IObserver.h>
 
 #include "dllRenderer.h"
-#include "gBufferID.h"
-
-#if defined (DEBUG) || (DEBUG_)
-//#include <vld.h>
-#endif //DEBUG || DEBUG_
-
-#define TILE_SIZE 16
-
-class ManagementD3D;
-class ManagementFX;
-class CBManagement;
-class ManagementTex;
-class ManagementViewport;
-class ManagementSS;
-class ManagementRS;
-class ManagementLight;
-class ManagementModel;
-
-class GBuffer;
-class D3DDebug;
-class Event_WindowResize;
-
-class M3DLoader;
-class AnimatedMesh;
-
-namespace DirectX
-{
-	struct XMFLOAT3;
-	struct XMFLOAT4X4;
-};
-struct RenderAttribute;
-struct CameraAttribute;
-struct SpatialAttribute;
-struct PositionAttribute;
-
-struct VertexPosNormTex;
+#include "Renderer.h"
 
 //! Rendering Component of XKILL.
 /*!
-Main rendering component of XKILL utilizing Deferred Rendering with 2 G-buffers:
-* Albedo
-* Normals
-Warning: RenderingComponent may not be created with an anti-aliasing MSAA-count of +0!
 \ingroup xkill-renderer
 */
 class DLL_R RenderingComponent : public IObserver
 {
 public:
-	//! Initializes RenderingComponent to default values. init()-method need be called in order for RenderingComponent to get proper values.
-	/*!
-	\param windowHandle	Handle to WINAPI-window to which it will render.
-	\param screenWidth	Width of backbuffer, depthbuffer and g-buffers.
-	\param screenHeight	Height of backbuffer, depthbuffer and g-buffers.
-	\param viewportWidth Width of each viewport.
-	\param viewportHeight Height of each viewport. 
-	*/
 	RenderingComponent(
 		HWND windowHandle);
-	//! Releases all memory and returns to default state.
 	~RenderingComponent();
-	//! Resets RenderingComponent to default state.
+
 	void reset();
-	
-	//! Resizes all management objects that are affected by a change in screen resolution.
-	/*!
-	\param screenWidth The new screen width.
-	\param screenHeight the new screen height.
-	\return Any error encountered.
-	*/
 	HRESULT resize(unsigned int screenWidth, unsigned int screenHeight);
 
 	//! Runs a frame for RenderingComponent.
@@ -223,7 +168,7 @@ private:
 	
 	ManagementD3D*		d3dManagement_;
 	ManagementFX*		fxManagement_;						//!< Maintaining shaders and input-layouts.
-	CBManagement*		cbManagement_;						//!< Maintaining constant buffers.
+	ManagementCB*		cbManagement_;						//!< Maintaining constant buffers.
 	ManagementLight*	lightManagement_;					//!< Maintaining lights.
 	ManagementViewport* viewportManagement_;				//!< Maintaining viewports.
 
@@ -233,7 +178,7 @@ private:
 	ManagementSS*		ssManagement_;						//!< Maintaining sampler states.
 	ManagementRS*		rsManagement_;						//!< Maintaining rasterizer states.
 	
-	D3DDebug*			d3dDebug_;							//!< Used for detecting live COM-objects.
+	ManagementDebug*			d3dDebug_;							//!< Used for detecting live COM-objects.
 	GBuffer*			gBuffers_[GBUFFERID_NUM_BUFFERS];	//!< Containing data for deferred rendering.
 
 	std::vector<RenderAttribute>* renderAttributes_;
