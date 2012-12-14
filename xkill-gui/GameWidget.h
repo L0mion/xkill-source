@@ -12,7 +12,6 @@
 
 #include "ui_MainWindow.h"
 #include "GameTimer.h"
-#include "Menu.h"
 
 
 class GameWidget : public QWidget, public IObserver
@@ -127,7 +126,7 @@ private:
 			// convert statistics into QString
 			QString stats;
 			stats = "FPS:  %1  Frame Time:  %2 (ms)";
-			stats = stats.arg(fps).arg(msPerFrame);
+			stats = stats.arg(fps).arg((int)msPerFrame);
 
 			// send signal
 			emit signal_fpsChanged(stats);
