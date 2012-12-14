@@ -126,10 +126,12 @@ EventManager::getInstance()->addObserver(Subscriber, EventType);
 	EntityPointer = e.entities;										\
 }
 
+// Defines DEBUGPRINT to an empty function in Release configuration
 #ifndef _DEBUG
 	#define DEBUGPRINT(dataStream)
 #endif
 
+// Defines DEBUGPRINT to a cout function in Debug configuration
 #ifdef _DEBUG
 	#define DEBUGPRINT(dataStream)									\
 	std::cout << dataStream << std::endl;			

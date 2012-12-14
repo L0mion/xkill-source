@@ -49,6 +49,7 @@ RenderAttribute::~RenderAttribute()
 
 PhysicsAttribute::PhysicsAttribute()
 {
+	collisionResponse = true;
 	added = false;
 	alive = true;
 	mass = 1.0f;
