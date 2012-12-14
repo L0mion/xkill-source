@@ -60,6 +60,17 @@ void PhysicsObject::preStep(CollisionShapeManager* collisionShapeManager,Physics
 
 	gravity_ = WorldScaling*btVector3(physicsAttribute->gravity.x, physicsAttribute->gravity.y, physicsAttribute->gravity.z);
 
+	/*
+	if(physicsAttribute->collisionResponse)
+	{
+		setCollisionFlags(getCollisionFlags() & ~CF_NO_CONTACT_RESPONSE);
+	}
+	else
+	{
+		setCollisionFlags(getCollisionFlags() | CF_NO_CONTACT_RESPONSE);
+	}
+	*/
+
 	if(physicsAttribute->isProjectile)
 	{
   		m_worldTransform.setRotation(btQuaternion(spatialAttribute->rotation.x, spatialAttribute->rotation.y, spatialAttribute->rotation.z, spatialAttribute->rotation.w));

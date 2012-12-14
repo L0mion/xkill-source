@@ -31,6 +31,7 @@ bool GameComponent::init()
 	GET_ATTRIBUTES(spatialAttribute_, SpatialAttribute, ATTRIBUTE_SPATIAL);
 	GET_ATTRIBUTES(positionAttributes_, PositionAttribute, ATTRIBUTE_POSITION);
 	GET_ATTRIBUTES(projectileAttributes_, ProjectileAttribute, ATTRIBUTE_PROJECTILE);
+	GET_ATTRIBUTES(physicsAttributes_, PhysicsAttribute, ATTRIBUTE_PHYSICS);
 	GET_ATTRIBUTES(spawnPointAttributes_, SpawnPointAttribute, ATTRIBUTE_SPAWNPOINT);
 
 	SEND_EVENT(&Event_CreateSpawnPoint(Float3(-1.5f, 3.0f, 0.0f), 2.0f));
@@ -160,7 +161,7 @@ void GameComponent::onUpdate(float delta)
 		}
 	}
 
-	//Handle updates of projectile attributes (lifetime management)
+	//Handle updates of projectile attributes
 	std::vector<int>* projectileAttributesOwners;		GET_ATTRIBUTE_OWNERS(projectileAttributesOwners, ATTRIBUTE_PROJECTILE);
 	for(unsigned i=0; i<projectileAttributesOwners->size(); i++)
 	{
@@ -168,7 +169,6 @@ void GameComponent::onUpdate(float delta)
 		{
 			ProjectileAttribute* projectile = &projectileAttributes_->at(i);
 			projectile->currentLifeTimeLeft -= delta;
-
 			if(projectile->currentLifeTimeLeft <= 0)
 			{
 				DEBUGPRINT("Projectile entity " << projectileAttributesOwners->at(i) << " has no lifetime left");
@@ -176,6 +176,19 @@ void GameComponent::onUpdate(float delta)
 				//Remove projectile entity
 				Event_RemoveEntity removeEntityEvent(projectileAttributesOwners->at(i));
 				SEND_EVENT(&removeEntityEvent);
+			}
+
+			std::vector<int>* physicsAttributesOwners;		GET_ATTRIBUTE_OWNERS(physicsAttributesOwners, ATTRIBUTE_PHYSICS);
+			for(unsigned i=0; i<physicsAttributesOwners->size(); i++)
+			{
+				if(physicsAttributesOwners->at(i)!=0)
+				{
+					PhysicsAttribute* physicsAttribute = &physicsAttributes_->at(i);
+					if(projectile->currentLifeTimeLeft < 8.0f)
+					{
+						physicsAttribute->collisionResponse = true;
+					}
+				}
 			}
 		}
 	}
@@ -309,9 +322,9 @@ void GameComponent::event_PhysicsAttributesColliding(Event_PhysicsAttributesColl
 			for(unsigned i=0;i<projectileId.size();i++)
 			{
 				ProjectileAttribute* projectileAttribute = &allProjectile->at(projectileId.at(i));
-				if(projectileAttribute->currentLifeTimeLeft > 1.2f)
+				if(projectileAttribute->currentLifeTimeLeft > 0.2f)
 				{
-					projectileAttribute->currentLifeTimeLeft = 1.15f;
+					projectileAttribute->currentLifeTimeLeft = 0.15f;
 				}
 			}
 		}
