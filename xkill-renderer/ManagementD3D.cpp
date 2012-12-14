@@ -1,10 +1,10 @@
 #include <DirectXMath.h>
 
-#include "D3DManagement.h"
+#include "ManagementD3D.h"
 
 #include "renderingUtilities.h"
 
-D3DManagement::D3DManagement(HWND windowHandle, unsigned int screenWidth, unsigned int screenHeight)
+ManagementD3D::ManagementD3D(HWND windowHandle, unsigned int screenWidth, unsigned int screenHeight)
 {
 	windowHandle_	= windowHandle;
 	screenWidth_	= screenWidth;
@@ -21,7 +21,7 @@ D3DManagement::D3DManagement(HWND windowHandle, unsigned int screenWidth, unsign
 	texBackBuffer_	= nullptr;
 	texDepthBuffer_	= nullptr;
 }
-D3DManagement::~D3DManagement()
+ManagementD3D::~ManagementD3D()
 {
 	if(swapChain_)
 		swapChain_->SetFullscreenState(false, nullptr);
@@ -36,7 +36,7 @@ D3DManagement::~D3DManagement()
 	SAFE_RELEASE(texBackBuffer_);
 	SAFE_RELEASE(texDepthBuffer_);
 }
-void D3DManagement::reset()
+void ManagementD3D::reset()
 {
 	SAFE_RELEASE(device_);
 	SAFE_RELEASE(devcon_);
@@ -49,7 +49,7 @@ void D3DManagement::reset()
 	SAFE_RELEASE(texDepthBuffer_);
 }
 
-HRESULT D3DManagement::resize(unsigned int screenWidth, unsigned int screenHeight)
+HRESULT ManagementD3D::resize(unsigned int screenWidth, unsigned int screenHeight)
 {
 	HRESULT hr = S_OK;
 
@@ -76,7 +76,7 @@ HRESULT D3DManagement::resize(unsigned int screenWidth, unsigned int screenHeigh
 	return hr;
 }
 
-HRESULT D3DManagement::init()
+HRESULT ManagementD3D::init()
 {
 	HRESULT hr = S_OK;
 
@@ -91,7 +91,7 @@ HRESULT D3DManagement::init()
 
 	return hr;
 }
-HRESULT D3DManagement::initDeviceAndSwapChain()
+HRESULT ManagementD3D::initDeviceAndSwapChain()
 {
 	HRESULT hr = S_OK;
 
@@ -111,7 +111,7 @@ HRESULT D3DManagement::initDeviceAndSwapChain()
 
 	return hr;
 }
-HRESULT D3DManagement::createDeviceAndSwapChain(const DXGI_SWAP_CHAIN_DESC swapChainDesc)
+HRESULT ManagementD3D::createDeviceAndSwapChain(const DXGI_SWAP_CHAIN_DESC swapChainDesc)
 {
 	HRESULT hr = E_FAIL;
 
@@ -157,7 +157,7 @@ HRESULT D3DManagement::createDeviceAndSwapChain(const DXGI_SWAP_CHAIN_DESC swapC
 
 	return hr;
 }
-HRESULT D3DManagement::initBackBuffer()
+HRESULT ManagementD3D::initBackBuffer()
 {
 	HRESULT hr = S_OK;
 
@@ -172,7 +172,7 @@ HRESULT D3DManagement::initBackBuffer()
 
 	return hr;
 }
-HRESULT D3DManagement::initDepthBuffer()
+HRESULT ManagementD3D::initDepthBuffer()
 {
 	HRESULT hr = S_OK;
 
@@ -204,7 +204,7 @@ HRESULT D3DManagement::initDepthBuffer()
 
 	return hr;
 }
-LPCWSTR D3DManagement::featureLevelToString(D3D_FEATURE_LEVEL featureLevel)
+LPCWSTR ManagementD3D::featureLevelToString(D3D_FEATURE_LEVEL featureLevel)
 {
 	LPCWSTR featureString = L"Default";
 	if(featureLevel == D3D_FEATURE_LEVEL_11_0)
@@ -217,29 +217,29 @@ LPCWSTR D3DManagement::featureLevelToString(D3D_FEATURE_LEVEL featureLevel)
 	return featureString;
 }
 
-void D3DManagement::setUAVBackBufferCS()
+void ManagementD3D::setUAVBackBufferCS()
 {
 	devcon_->CSSetUnorderedAccessViews(0, 1, &uavBackBuffer_, nullptr);
 }
 
-void D3DManagement::present()
+void ManagementD3D::present()
 {
 	swapChain_->Present(0, 0);
 }
-void D3DManagement::clearDepthBuffer()
+void ManagementD3D::clearDepthBuffer()
 {
 	devcon_->ClearDepthStencilView(dsvDepthBuffer_, D3D11_CLEAR_DEPTH, 1.0f, 0);
 }
 
-ID3D11Device*			D3DManagement::getDevice()			const
+ID3D11Device*			ManagementD3D::getDevice()			const
 {
 	return device_;
 }
-ID3D11DeviceContext*	D3DManagement::getDeviceContext()	const
+ID3D11DeviceContext*	ManagementD3D::getDeviceContext()	const
 {
 	return devcon_;
 }
-ID3D11DepthStencilView* D3DManagement::getDepthBuffer()		const
+ID3D11DepthStencilView* ManagementD3D::getDepthBuffer()		const
 {
 	return dsvDepthBuffer_;
 }

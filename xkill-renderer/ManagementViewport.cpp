@@ -1,7 +1,7 @@
-#include "ViewportManagement.h"
+#include "ManagementViewport.h"
 #include "renderingUtilities.h"
 
-ViewportManagement::ViewportManagement(	unsigned int numViewports,
+ManagementViewport::ManagementViewport(	unsigned int numViewports,
 										unsigned int screenWidth,
 										unsigned int screenHeight)
 {
@@ -15,17 +15,17 @@ ViewportManagement::ViewportManagement(	unsigned int numViewports,
 	borderSize_ = 2;
 }
 
-ViewportManagement::~ViewportManagement()
+ManagementViewport::~ManagementViewport()
 {
 	SAFE_DELETE(viewports_);
 }
 
-void ViewportManagement::reset()
+void ManagementViewport::reset()
 {
 	SAFE_DELETE(viewports_);
 }
 
-void ViewportManagement::setViewport(ID3D11DeviceContext* devcon, unsigned int index)
+void ManagementViewport::setViewport(ID3D11DeviceContext* devcon, unsigned int index)
 {
 	devcon->RSSetViewports(1, &viewports_->at(index));
 
@@ -34,7 +34,7 @@ void ViewportManagement::setViewport(ID3D11DeviceContext* devcon, unsigned int i
 	devcon->RSGetViewports(&numDebugs, &debug);
 }
 
-HRESULT ViewportManagement::resize(unsigned int screenWidth, unsigned int screenHeight)
+HRESULT ManagementViewport::resize(unsigned int screenWidth, unsigned int screenHeight)
 {
 	HRESULT hr = S_OK;
 
@@ -48,7 +48,7 @@ HRESULT ViewportManagement::resize(unsigned int screenWidth, unsigned int screen
 	return hr;
 }
 
-HRESULT ViewportManagement::init()
+HRESULT ManagementViewport::init()
 {
 	viewports_ = new std::vector<D3D11_VIEWPORT>();
 
@@ -79,7 +79,7 @@ HRESULT ViewportManagement::init()
 	return hr;
 }
 
-HRESULT ViewportManagement::initViewportSingle()
+HRESULT ManagementViewport::initViewportSingle()
 {
 	HRESULT hr = S_OK;
 	
@@ -103,7 +103,7 @@ HRESULT ViewportManagement::initViewportSingle()
 
 	return hr;
 }
-HRESULT ViewportManagement::initViewportDouble()
+HRESULT ManagementViewport::initViewportDouble()
 {
 	HRESULT hr = S_OK;
 
@@ -132,7 +132,7 @@ HRESULT ViewportManagement::initViewportDouble()
 
 	return hr;
 }
-HRESULT ViewportManagement::initViewportGrid(unsigned int gridSize)
+HRESULT ManagementViewport::initViewportGrid(unsigned int gridSize)
 {
 	HRESULT hr = S_OK;
 
@@ -169,27 +169,27 @@ HRESULT ViewportManagement::initViewportGrid(unsigned int gridSize)
 	return hr;
 }
 
-unsigned int ViewportManagement::getViewportWidth() const
+unsigned int ManagementViewport::getViewportWidth() const
 {
 	return viewportWidth_;
 }
 
-unsigned int ViewportManagement::getViewportHeight() const
+unsigned int ManagementViewport::getViewportHeight() const
 {
 	return viewportHeight_;
 }
 
-unsigned int ViewportManagement::getNumViewportsX() const
+unsigned int ManagementViewport::getNumViewportsX() const
 {
 	return numViewportsX_;
 }
 
-unsigned int ViewportManagement::getNumViewportsY() const
+unsigned int ManagementViewport::getNumViewportsY() const
 {
 	return numViewportsY_;
 }
 
-D3D11_VIEWPORT ViewportManagement::getViewport(unsigned int index) const
+D3D11_VIEWPORT ManagementViewport::getViewport(unsigned int index) const
 {
 	return viewports_->at(index);
 }

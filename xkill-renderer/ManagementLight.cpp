@@ -1,11 +1,11 @@
 
 #include <d3d11.h>
 
-#include "LightManagement.h"
+#include "ManagementLight.h"
 #include "renderingUtilities.h"
 
 
-LightManagement::LightManagement()
+ManagementLight::ManagementLight()
 {
 	maxNumLights_	= 20;
 	numLights_		= 0;
@@ -15,19 +15,19 @@ LightManagement::LightManagement()
 	lightSRV_	= nullptr;
 }
 
-LightManagement::~LightManagement()
+ManagementLight::~ManagementLight()
 {
 	SAFE_RELEASE(lightBuffer_);
 	SAFE_RELEASE(lightSRV_);
 }
 
-void LightManagement::reset()
+void ManagementLight::reset()
 {
 	SAFE_RELEASE(lightBuffer_);
 	SAFE_RELEASE(lightSRV_);
 }
 
-HRESULT LightManagement::init(ID3D11Device* device)
+HRESULT ManagementLight::init(ID3D11Device* device)
 {
 	HRESULT hr = S_OK;
 	createDirectionalLight(device);
@@ -39,7 +39,7 @@ HRESULT LightManagement::init(ID3D11Device* device)
 	return hr;
 }
 
-HRESULT LightManagement::updateBufferData(ID3D11DeviceContext* devcon)
+HRESULT ManagementLight::updateBufferData(ID3D11DeviceContext* devcon)
 {
 	HRESULT hr = S_OK;
 	if(lights_.size() == 0)
@@ -58,12 +58,12 @@ HRESULT LightManagement::updateBufferData(ID3D11DeviceContext* devcon)
 	return hr;
 }
 
-void LightManagement::setLightSRVCS(ID3D11DeviceContext* devcon, unsigned int shaderRegister)
+void ManagementLight::setLightSRVCS(ID3D11DeviceContext* devcon, unsigned int shaderRegister)
 {
 	devcon->CSSetShaderResources(shaderRegister, 1, &lightSRV_);
 }
 
-void LightManagement::addLight(LightDesc light, ID3D11Device* device, ID3D11DeviceContext* devcon)
+void ManagementLight::addLight(LightDesc light, ID3D11Device* device, ID3D11DeviceContext* devcon)
 {
 	if(numLights_ == maxNumLights_)
 		resizeLights(device);
@@ -73,7 +73,7 @@ void LightManagement::addLight(LightDesc light, ID3D11Device* device, ID3D11Devi
 	updateBufferData(devcon);
 }
 
-void LightManagement::createDirectionalLight(ID3D11Device* device)
+void ManagementLight::createDirectionalLight(ID3D11Device* device)
 {
 	if(numLights_ == maxNumLights_)
 		resizeLights( device);
@@ -91,7 +91,7 @@ void LightManagement::createDirectionalLight(ID3D11Device* device)
 	numLights_++;
 }
 
-void LightManagement::resizeLights(ID3D11Device* device)
+void ManagementLight::resizeLights(ID3D11Device* device)
 {
 	maxNumLights_ *= 2;
 	lights_.resize(maxNumLights_);
@@ -103,7 +103,7 @@ void LightManagement::resizeLights(ID3D11Device* device)
 	createLightSRV(device);
 }
 
-HRESULT LightManagement::createLightBuffer(ID3D11Device* device)
+HRESULT ManagementLight::createLightBuffer(ID3D11Device* device)
 {
 	HRESULT hr = E_FAIL;
 	if(lights_.size() > 0)
@@ -133,7 +133,7 @@ HRESULT LightManagement::createLightBuffer(ID3D11Device* device)
 	return hr;
 }
 
-HRESULT LightManagement::createLightSRV(ID3D11Device* device)
+HRESULT ManagementLight::createLightSRV(ID3D11Device* device)
 {
 	HRESULT hr = S_OK;
 
@@ -156,7 +156,7 @@ HRESULT LightManagement::createLightSRV(ID3D11Device* device)
 	return hr;
 }
 
-unsigned int LightManagement::getNumLights() const
+unsigned int ManagementLight::getNumLights() const
 {
 	return numLights_;
 }

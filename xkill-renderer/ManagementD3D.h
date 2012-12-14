@@ -21,7 +21,7 @@ static const unsigned int MULTISAMPLES_DEPTHBUFFER	= 1;
 /*!
 \ingroup xkill-renderer
 */
-class D3DManagement : public D3DInterface
+class ManagementD3D : public D3DInterface
 {
 public:
 	//! Sets D3DManagement to its default state.
@@ -30,9 +30,9 @@ public:
 	\param screenWidth Width of the screen.
 	\param screenHeight Height of the screen.
 	*/
-	D3DManagement(HWND windowHandle, unsigned int screenWidth, unsigned int screenHeight);
+	ManagementD3D(HWND windowHandle, unsigned int screenWidth, unsigned int screenHeight);
 	//!Releases all memory and resets D3DManagement to its default state.
-	virtual ~D3DManagement();
+	virtual ~ManagementD3D();
 	//!Releases all memory and resets D3DManagement to its default state.
 	virtual void reset();
 	

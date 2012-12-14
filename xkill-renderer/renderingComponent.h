@@ -19,15 +19,15 @@
 
 #define TILE_SIZE 16
 
-class D3DManagement;
-class FXManagement;
+class ManagementD3D;
+class ManagementFX;
 class CBManagement;
-class TexManagement;
-class ViewportManagement;
-class SSManagement;
-class RSManagement;
-class LightManagement;
-class ModelManagement;
+class ManagementTex;
+class ManagementViewport;
+class ManagementSS;
+class ManagementRS;
+class ManagementLight;
+class ManagementModel;
 
 class GBuffer;
 class D3DDebug;
@@ -221,17 +221,17 @@ private:
 	unsigned int csDispatchX_;		//!< Number of threads along the x-axis that will be dispatched by the compute shader.
 	unsigned int csDispatchY_;		//!< Number of threads along the y-axis that will be dispatched by the compute shader.
 	
-	D3DManagement*		d3dManagement_;
-	FXManagement*		fxManagement_;						//!< Maintaining shaders and input-layouts.
+	ManagementD3D*		d3dManagement_;
+	ManagementFX*		fxManagement_;						//!< Maintaining shaders and input-layouts.
 	CBManagement*		cbManagement_;						//!< Maintaining constant buffers.
-	LightManagement*	lightManagement_;					//!< Maintaining lights.
-	ViewportManagement* viewportManagement_;				//!< Maintaining viewports.
+	ManagementLight*	lightManagement_;					//!< Maintaining lights.
+	ManagementViewport* viewportManagement_;				//!< Maintaining viewports.
 
-	ModelManagement*	modelManagement_;
-	TexManagement*		texManagement_;
+	ManagementModel*	modelManagement_;
+	ManagementTex*		texManagement_;
 	
-	SSManagement*		ssManagement_;						//!< Maintaining sampler states.
-	RSManagement*		rsManagement_;						//!< Maintaining rasterizer states.
+	ManagementSS*		ssManagement_;						//!< Maintaining sampler states.
+	ManagementRS*		rsManagement_;						//!< Maintaining rasterizer states.
 	
 	D3DDebug*			d3dDebug_;							//!< Used for detecting live COM-objects.
 	GBuffer*			gBuffers_[GBUFFERID_NUM_BUFFERS];	//!< Containing data for deferred rendering.

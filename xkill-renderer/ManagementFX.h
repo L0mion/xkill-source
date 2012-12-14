@@ -6,7 +6,7 @@
 #include <d3dcompiler.h>
 
 #include "d3dInterface.h"
-#include "IEDManagement.h"
+#include "ManagementIED.h"
 #include "shaderVS.h"
 #include "shaderPS.h"
 #include "shaderCS.h"
@@ -15,13 +15,13 @@
 /*!
 \ingroup xkill-renderer
 */
-class FXManagement : public D3DInterface
+class ManagementFX : public D3DInterface
 {
 public:
 	//! Sets FXManagement to default state.
-	FXManagement();
+	ManagementFX();
 	//! Releases all memory and returns FXManagement to defualt state.
-	~FXManagement();
+	~ManagementFX();
 	
 	//! Releases all memory and returns FXManagement to defualt state.
 	void reset();
@@ -119,7 +119,7 @@ private:
 	HRESULT initILDefaultVSPosNormTex(ID3D11Device* device);
 	HRESULT initILPosNormTexTanSkinned(ID3D11Device* device);
 
-	IEDManagement* ilManagement;
+	ManagementIED* managementIED_;
 
 	ShaderVS*	defaultVS_;			//!< Default vertex shader.
 	ShaderPS*	defaultPS_;			//!< Default pixel shader.

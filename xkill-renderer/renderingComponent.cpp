@@ -8,23 +8,22 @@
 #include <xkill-utilities/TexDescTex.h>
 #include <xkill-utilities/TexDesc.h>
 
-#include "D3DManagement.h"
-#include "fxManagement.h"
-#include "ViewportManagement.h"
-#include "SSManagement.h"
-#include "RSManagement.h"
+#include "ManagementD3D.h"
+#include "ManagementFX.h"
+#include "ManagementViewport.h"
+#include "ManagementSS.h"
+#include "ManagementRS.h"
 #include "gBuffer.h"
 #include "renderingUtilities.h"
 #include "d3dDebug.h"
 #include "CBManagement.h"
-#include "LightManagement.h"
-#include "ModelManagement.h"
-#include "TexManagement.h"
+#include "ManagementLight.h"
+#include "ManagementModel.h"
+#include "ManagementTex.h"
 #include "ModelD3D.h"
 #include "VB.h"
 #include "IB.h"
 #include "SubsetD3D.h"
-
 
 #include "M3DLoader.h"
 #include "AnimatedMesh.h"
@@ -448,7 +447,7 @@ DirectX::XMFLOAT4X4 RenderingComponent::calculateFinalMatrix(DirectX::XMFLOAT4X4
 HRESULT RenderingComponent::initD3DManagement()
 {
 	HRESULT hr;
-	d3dManagement_ = new D3DManagement(windowHandle_, screenWidth_, screenHeight_);
+	d3dManagement_ = new ManagementD3D(windowHandle_, screenWidth_, screenHeight_);
 	hr = d3dManagement_->init();
 	return hr;
 }
@@ -456,7 +455,7 @@ HRESULT RenderingComponent::initFXManagement()
 {
 	HRESULT hr = S_OK;
 
-	fxManagement_ = new FXManagement();
+	fxManagement_ = new ManagementFX();
 	hr = fxManagement_->init(d3dManagement_->getDevice());
 
 	return hr;
@@ -474,7 +473,7 @@ HRESULT RenderingComponent::initLightManagement()
 {
 	HRESULT hr = S_OK;
 
-	lightManagement_ = new LightManagement();
+	lightManagement_ = new ManagementLight();
 	hr = lightManagement_->init(d3dManagement_->getDevice());
 
 	return hr;
@@ -483,7 +482,7 @@ HRESULT RenderingComponent::initModelManagement()
 {
 	HRESULT hr = S_OK;
 
-	modelManagement_ = new ModelManagement();
+	modelManagement_ = new ManagementModel();
 	hr = modelManagement_->init();
 
 	return hr;
@@ -492,7 +491,7 @@ HRESULT RenderingComponent::initTexManagement()
 {
 	HRESULT hr = S_OK;
 
-	texManagement_ = new TexManagement();
+	texManagement_ = new ManagementTex();
 	hr = texManagement_->init();
 
 	return hr;
@@ -500,7 +499,7 @@ HRESULT RenderingComponent::initTexManagement()
 HRESULT RenderingComponent::initViewport()
 {
 	HRESULT hr = S_OK;
-	viewportManagement_ = new ViewportManagement(numViewports_,
+	viewportManagement_ = new ManagementViewport(numViewports_,
 												 screenWidth_,
 												 screenHeight_);
 	hr = viewportManagement_->init();
@@ -511,7 +510,7 @@ HRESULT RenderingComponent::initSSManagement()
 {
 	HRESULT hr = S_OK;
 
-	ssManagement_ = new SSManagement();
+	ssManagement_ = new ManagementSS();
 	hr = ssManagement_->init(d3dManagement_->getDevice());
 
 	return hr;
@@ -520,7 +519,7 @@ HRESULT RenderingComponent::initRSManagement()
 {
 	HRESULT hr = S_OK;
 
-	rsManagement_ = new RSManagement();
+	rsManagement_ = new ManagementRS();
 	rsManagement_->init(d3dManagement_->getDevice());
 
 	return hr;

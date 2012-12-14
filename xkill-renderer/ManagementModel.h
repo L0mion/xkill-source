@@ -19,13 +19,13 @@ class SubsetD3D;
 /*!
 \ingroup xkill-renderer
 */
-class ModelManagement
+class ManagementModel
 {
 public:
 	//! Does nothing.
-	ModelManagement();
+	ManagementModel();
 	//! Deletes all models held by ModelManagement. (the rendering-view of these, not the actual mesh-data read from file)
-	~ModelManagement();
+	~ManagementModel();
 
 	//! Does nothing.
 	HRESULT init();

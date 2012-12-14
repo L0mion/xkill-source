@@ -1,9 +1,9 @@
-#include "fxManagement.h"
+#include "ManagementFX.h"
 #include "renderingUtilities.h"
 
-FXManagement::FXManagement()
+ManagementFX::ManagementFX()
 {
-	ilManagement = nullptr;
+	managementIED_ = nullptr;
 
 	defaultVS_				= nullptr;
 	defaultPS_				= nullptr;
@@ -16,9 +16,9 @@ FXManagement::FXManagement()
 	ilPosNormTexTanSkinned_ = nullptr;
 }
 
-FXManagement::~FXManagement()
+ManagementFX::~ManagementFX()
 {
-	SAFE_DELETE(ilManagement);
+	SAFE_DELETE(managementIED_);
 	//delete ilManagement;
 
 	SAFE_DELETE(defaultVS_);
@@ -33,7 +33,7 @@ FXManagement::~FXManagement()
 	SAFE_RELEASE(ilPosNormTexTanSkinned_);
 }
 
-void FXManagement::reset()
+void ManagementFX::reset()
 {
 	defaultVS_->reset();
 	defaultPS_->reset();
@@ -46,7 +46,7 @@ void FXManagement::reset()
 	SAFE_RELEASE(ilDefaultVSPosNormTex_);
 }
 
-HRESULT FXManagement::init(ID3D11Device* device)
+HRESULT ManagementFX::init(ID3D11Device* device)
 {
 	HRESULT hr = S_OK;
 
@@ -57,7 +57,7 @@ HRESULT FXManagement::init(ID3D11Device* device)
 	return hr;
 }
 
-HRESULT FXManagement::initShaders(ID3D11Device* device)
+HRESULT ManagementFX::initShaders(ID3D11Device* device)
 {
 	HRESULT hr = S_OK;
 
@@ -77,7 +77,7 @@ HRESULT FXManagement::initShaders(ID3D11Device* device)
 	
 	return hr;
 }
-HRESULT FXManagement::initDefaultVS(ID3D11Device* device)
+HRESULT ManagementFX::initDefaultVS(ID3D11Device* device)
 {
 	HRESULT hr = S_OK;
 
@@ -86,7 +86,7 @@ HRESULT FXManagement::initDefaultVS(ID3D11Device* device)
 
 	return hr;
 }
-HRESULT FXManagement::initDefaultPS(ID3D11Device* device)
+HRESULT ManagementFX::initDefaultPS(ID3D11Device* device)
 {
 	HRESULT hr = S_OK;
 
@@ -95,7 +95,7 @@ HRESULT FXManagement::initDefaultPS(ID3D11Device* device)
 
 	return hr;
 }
-HRESULT FXManagement::initDefaultDeferredVS(ID3D11Device* device)
+HRESULT ManagementFX::initDefaultDeferredVS(ID3D11Device* device)
 {
 	HRESULT hr = S_OK;
 
@@ -104,7 +104,7 @@ HRESULT FXManagement::initDefaultDeferredVS(ID3D11Device* device)
 
 	return hr;
 }
-HRESULT FXManagement::initDefaultDeferredPS(ID3D11Device* device)
+HRESULT ManagementFX::initDefaultDeferredPS(ID3D11Device* device)
 {
 	HRESULT hr = S_OK;
 
@@ -113,7 +113,7 @@ HRESULT FXManagement::initDefaultDeferredPS(ID3D11Device* device)
 
 	return hr;
 }
-HRESULT FXManagement::initDefaultCS(ID3D11Device* device)
+HRESULT ManagementFX::initDefaultCS(ID3D11Device* device)
 {
 	HRESULT hr = S_OK;
 
@@ -122,7 +122,7 @@ HRESULT FXManagement::initDefaultCS(ID3D11Device* device)
 
 	return hr;
 }
-HRESULT FXManagement::initAnimationVS(ID3D11Device* device)
+HRESULT ManagementFX::initAnimationVS(ID3D11Device* device)
 {
 	HRESULT hr = S_OK;
 
@@ -131,7 +131,7 @@ HRESULT FXManagement::initAnimationVS(ID3D11Device* device)
 
 	return hr;
 }
-HRESULT FXManagement::initAnimationPS(ID3D11Device* device)
+HRESULT ManagementFX::initAnimationPS(ID3D11Device* device)
 {
 	HRESULT hr = S_OK;
 
@@ -141,7 +141,7 @@ HRESULT FXManagement::initAnimationPS(ID3D11Device* device)
 	return hr;
 }
 
-HRESULT FXManagement::initILs(ID3D11Device* device)
+HRESULT ManagementFX::initILs(ID3D11Device* device)
 {
 	HRESULT hr = S_OK;
 
@@ -153,17 +153,17 @@ HRESULT FXManagement::initILs(ID3D11Device* device)
 	
 	return hr;
 }
-void FXManagement::initILManagement()
+void ManagementFX::initILManagement()
 {
-	ilManagement = new IEDManagement();
-	ilManagement->init();
+	managementIED_ = new ManagementIED();
+	managementIED_->init();
 }
-HRESULT FXManagement::initILDefaultVSPosNormTex(ID3D11Device* device)
+HRESULT ManagementFX::initILDefaultVSPosNormTex(ID3D11Device* device)
 {
 	HRESULT hr = S_OK;
 
-	unsigned int iedPosNormTexNumElements	= ilManagement->getIEDPosNormTexNumElements();
-	D3D11_INPUT_ELEMENT_DESC* iedPosNormTex = ilManagement->getIEDPosNormTex();
+	unsigned int iedPosNormTexNumElements	= managementIED_->getIEDPosNormTexNumElements();
+	D3D11_INPUT_ELEMENT_DESC* iedPosNormTex = managementIED_->getIEDPosNormTex();
 
 	int debug = sizeof(D3D11_INPUT_ELEMENT_DESC);
 
@@ -178,7 +178,7 @@ HRESULT FXManagement::initILDefaultVSPosNormTex(ID3D11Device* device)
 
 	return hr;
 }
-HRESULT FXManagement::initILPosNormTexTanSkinned(ID3D11Device* device)
+HRESULT ManagementFX::initILPosNormTexTanSkinned(ID3D11Device* device)
 {
 	HRESULT hr = S_OK;
 
@@ -200,40 +200,40 @@ HRESULT FXManagement::initILPosNormTexTanSkinned(ID3D11Device* device)
 	return hr;
 }
 
-ShaderVS* FXManagement::getDefaultVS() const
+ShaderVS* ManagementFX::getDefaultVS() const
 {
 	return defaultVS_;
 }
-ShaderPS* FXManagement::getDefaultPS() const
+ShaderPS* ManagementFX::getDefaultPS() const
 {
 	return defaultPS_;
 }
-ShaderVS* FXManagement::getDefaultDeferredVS()	const
+ShaderVS* ManagementFX::getDefaultDeferredVS()	const
 {
 	return defaultDeferredVS_;
 }
-ShaderPS* FXManagement::getDefaultDeferredPS() const
+ShaderPS* ManagementFX::getDefaultDeferredPS() const
 {
 	return defaultDeferredPS_;
 }
-ShaderCS* FXManagement::getDefaultCS() const
+ShaderCS* ManagementFX::getDefaultCS() const
 {
 	return defaultCS_;
 }
-ShaderVS* FXManagement::getAnimationVS() const
+ShaderVS* ManagementFX::getAnimationVS() const
 {
 	return animationVS_;
 }
-ShaderPS* FXManagement::getAnimationPS() const
+ShaderPS* ManagementFX::getAnimationPS() const
 {
 	return animationPS_;
 }
 
-ID3D11InputLayout* FXManagement::getILDefaultVSPosNormTex() const
+ID3D11InputLayout* ManagementFX::getILDefaultVSPosNormTex() const
 {
 	return ilDefaultVSPosNormTex_;
 }
-ID3D11InputLayout* FXManagement::getILPosNormTexTanSkinned() const
+ID3D11InputLayout* ManagementFX::getILPosNormTexTanSkinned() const
 {
 	return ilPosNormTexTanSkinned_;
 }

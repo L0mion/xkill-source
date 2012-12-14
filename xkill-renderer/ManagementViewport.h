@@ -10,7 +10,7 @@
 /*!
 \ingroup xkill-renderer
 */
-class ViewportManagement : public D3DInterface
+class ManagementViewport : public D3DInterface
 {
 public:
 	//! Sets ViewportManagement to its default state.
@@ -21,11 +21,11 @@ public:
 	\param screenWidth The width of the screen in which the viewports reside.
 	\param screenHeight The height of the screen in which the viewports reside.
 	*/
-	ViewportManagement(unsigned int numViewports,
+	ManagementViewport(unsigned int numViewports,
 						unsigned int screenWidth,
 						unsigned int screenHeight);
 	//! Releases all memory and returns ViewportManagement to default state.
-	~ViewportManagement();
+	~ManagementViewport();
 	//! Releases all memory and returns ViewportManagement to default state.
 	virtual void reset();
 	//! Set the viewport that the renderer will draw to. 
