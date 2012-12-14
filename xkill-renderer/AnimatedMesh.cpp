@@ -16,6 +16,8 @@ AnimatedMesh::AnimatedMesh()
 
 	vertexBuffer_ = nullptr;
 	indexBuffer_ = nullptr;
+
+	timePosition_ = 0.0f; 
 }
 
 AnimatedMesh::~AnimatedMesh()
@@ -28,6 +30,14 @@ AnimatedMesh::~AnimatedMesh()
 
 	SAFE_RELEASE(vertexBuffer_);
 	SAFE_RELEASE(indexBuffer_);
+}
+
+void AnimatedMesh::update(float delta)
+{
+	timePosition_ += delta;
+
+	if(timePosition_ > skinInfo_->getClipEndTime("Take1"))
+		timePosition_ = 0.0f;
 }
 
 HRESULT AnimatedMesh::init(ID3D11Device* device)
@@ -46,11 +56,11 @@ HRESULT AnimatedMesh::createVertexBuffer(ID3D11Device* device)
 	D3D11_BUFFER_DESC bufferDesc;
 	ZeroMemory(&bufferDesc, sizeof(bufferDesc));
 	
-	bufferDesc.Usage			= D3D11_USAGE_DYNAMIC;
-	bufferDesc.ByteWidth		= vertices_->size() * sizeof(VertexPosNormTexTanSkinned);
-	bufferDesc.BindFlags		= D3D11_BIND_VERTEX_BUFFER;
-	bufferDesc.CPUAccessFlags	= D3D11_CPU_ACCESS_WRITE;
-	bufferDesc.MiscFlags		= 0;
+	bufferDesc.Usage				= D3D11_USAGE_DYNAMIC;
+	bufferDesc.ByteWidth			= vertices_->size() * sizeof(vertices_->at(0));
+	bufferDesc.BindFlags			= D3D11_BIND_VERTEX_BUFFER;
+	bufferDesc.CPUAccessFlags		= D3D11_CPU_ACCESS_WRITE;
+	bufferDesc.MiscFlags			= 0;
 
 	D3D11_SUBRESOURCE_DATA vInitData;
 	vInitData.pSysMem = &vertices_->at(0);
@@ -114,4 +124,9 @@ unsigned int  AnimatedMesh::getNumVertices()	const
 unsigned int  AnimatedMesh::getNumIndices()		const
 {
 	return indices_->size();
+}
+
+float AnimatedMesh::getTimePosition() const
+{
+	return timePosition_;
 }

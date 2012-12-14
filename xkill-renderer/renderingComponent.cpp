@@ -28,6 +28,7 @@
 
 #include "M3DLoader.h"
 #include "AnimatedMesh.h"
+#include "SkinnedData.h"
 
 #include "renderingComponent.h"
 
@@ -166,8 +167,8 @@ HRESULT RenderingComponent::init()
 	if(SUCCEEDED(hr))
 		hr = initGBuffers();
 
-//	if(SUCCEEDED(hr))
-//		initAnimations();
+	if(SUCCEEDED(hr))
+		initAnimations();
 
 	return hr;
 }
@@ -622,16 +623,23 @@ void RenderingComponent::renderAnimatedMesh(DirectX::XMFLOAT4X4 viewMatrix, Dire
 	ID3D11Device*			device = d3dManagement_->getDevice();
 	ID3D11DeviceContext*	devcon = d3dManagement_->getDeviceContext();
 
-	DirectX::XMFLOAT4X4 worldMatrix(0.05f, 0.0f, 0.0f, 0.0f,
-									0.0f, 0.05f, 0.0f, 0.0f,
-									0.0f, 0.0f, 0.05f, 0.0f,
-									4.0f, 2.3f, 1.0f, 1.0f);
+	DirectX::XMFLOAT4X4 worldMatrix(0.01f, 0.0f, 0.0f, 0.0f,
+									0.0f, 0.01f, 0.0f, 0.0f,
+									0.0f, 0.0f, 0.01f, 0.0f,
+									10.0f, 2.3f, 1.0f, 1.0f);
 	DirectX::XMFLOAT4X4 worldMatrixInverse	= worldMatrix;
 	DirectX::XMFLOAT4X4 finalMatrix			= calculateFinalMatrix(worldMatrix, viewMatrix, projectionMatrix);
 	
 	cbManagement_->vsSet(CB_TYPE_OBJECT, CB_REGISTER_OBJECT, devcon);
 	cbManagement_->updateCBObject(devcon, finalMatrix, worldMatrix, worldMatrixInverse);
 	
+	animatedMesh_->update(0.002f);
+	std::vector<DirectX::XMFLOAT4X4> finalTransforms;
+	animatedMesh_->getSkinInfo()->getFinalTransforms("Take1", animatedMesh_->getTimePosition(), &finalTransforms);
+
+	cbManagement_->vsSet(CB_TYPE_BONE, CB_REGISTER_BONE, devcon);
+	cbManagement_->updateCBBone(devcon, finalTransforms);
+
 	fxManagement_->getAnimationVS()->set(devcon);
 	fxManagement_->getAnimationPS()->set(devcon);
 	ssManagement_->setPS(d3dManagement_->getDeviceContext(), SS_ID_DEFAULT, 0);

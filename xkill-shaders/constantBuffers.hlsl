@@ -1,7 +1,7 @@
 #ifndef XKILL_RENDERER_CONSTANTBUFFERS_HLSL
 #define XKILL_RENDERER_CONSTANTBUFFERS_HLSL
 
-#define MAX_NUM_BONES 96
+#define MAX_NUM_BONES 64
 
 cbuffer cbPerInstance : register (b0)
 {
@@ -46,6 +46,6 @@ cbuffer cbPerSubset : register (b4)
 cbuffer cbBones : register (b5)
 {
 	float4x4 boneTransforms[MAX_NUM_BONES];
-}
+};
 
 #endif //XKILL_RENDERER_CONSTANTBUFFERS_HLSL
