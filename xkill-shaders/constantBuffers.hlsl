@@ -39,7 +39,7 @@ cbuffer cbPerObject : register (b3)
 
 cbuffer cbBones : register (b4)
 {
-	/*float4x4*/ matrix boneTransforms[MAX_NUM_BONES];
+	float4x4 boneTransforms[MAX_NUM_BONES];
 };
 
 #endif //XKILL_RENDERER_CONSTANTBUFFERS_HLSL
