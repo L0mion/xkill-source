@@ -67,7 +67,7 @@ HRESULT FXManagement::initShaders(ID3D11Device* device)
 	if(debugShaders_)
 		shaderPath = L"../../xkill-build/bin-Debug/";
 	else
-		shaderPath = L"../../xkill-build/bin-Debug/";
+		shaderPath = L"../../xkill-build/bin-Release/";
 
 	hr = initDefaultVS(device, shaderPath);
 	if(SUCCEEDED(hr))
