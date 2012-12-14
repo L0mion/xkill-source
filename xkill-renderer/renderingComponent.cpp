@@ -457,7 +457,12 @@ HRESULT RenderingComponent::initFXManagement()
 {
 	HRESULT hr = S_OK;
 
-	fxManagement_ = new FXManagement();
+	bool debugShaders = false;
+#if defined (_DEBUG) || defined (DEBUG)
+	debugShaders = true;
+#endif //_DEBUG || DEBUG
+
+	fxManagement_ = new FXManagement(debugShaders);
 	hr = fxManagement_->init(d3dManagement_->getDevice());
 
 	return hr;
