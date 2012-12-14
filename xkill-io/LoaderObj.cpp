@@ -435,11 +435,6 @@ bool LoaderObj::loadIndex(unsigned int index)
 	return sucessfulLoad;
 }
 
-void LoaderObj::getLine(std::string& line)
-{
-	std::getline(ifstream_, line);
-	lineNum_++;
-}
 void LoaderObj::printFail(const std::string curLine)
 {
 	std::string file	= getFilePath() + getFileName();
@@ -447,14 +442,6 @@ void LoaderObj::printFail(const std::string curLine)
 	std::string failed	= " parsing failed at line " + lineNum + ": " + curLine;
 
 	SHOW_MESSAGEBOX(failed);
-}
-bool LoaderObj::isNumeric(const std::string value)
-{
-	std::stringstream conv;
-	double tmp;
-	conv << value;
-	conv >> tmp;
-	return conv.eof();
 }
 ObjGroup LoaderObj::createDefaultGroup()
 {

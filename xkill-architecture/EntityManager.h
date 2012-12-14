@@ -105,7 +105,7 @@ public:
 		{
 			entities[id].deleteAttributes();
 			deleted.push(id);
-			std::cout << "ENTITYMANAGER: Removed Entity " << id << std::endl;
+			DEBUGPRINT("ENTITYMANAGER: Removed Entity " << id);
 		}
 	}
 };
@@ -133,6 +133,7 @@ public:
 		SUBSCRIBE_TO_EVENT(this, EVENT_CREATE_PROJECTILE);
 		SUBSCRIBE_TO_EVENT(this, EVENT_CREATE_MESH);
 		SUBSCRIBE_TO_EVENT(this, EVENT_REMOVE_ENTITY);
+		SUBSCRIBE_TO_EVENT(this, EVENT_CREATE_SPAWNPOINT);
 	}
 
 	/**
@@ -152,6 +153,8 @@ public:
 		case EVENT_CREATE_MESH:
 			event_createmesh(static_cast<Event_CreateMesh*>(e));
 			break;
+		case EVENT_CREATE_SPAWNPOINT:
+			event_CreateSpawnPoint(static_cast<Event_CreateSpawnPoint*>(e));
 		default:
 			break;
 		}
@@ -174,11 +177,11 @@ public:
 		{
 		case PLAYER:
 			entityFactory.createPlayerEntity(entity);
-			std::cout << "ENTITYMANAGER: Created player entity " << entity->getID() << std::endl;
+			DEBUGPRINT("ENTITYMANAGER: Created player entity " << entity->getID());
 			break;
 		case WORLD:
 			entityFactory.createWorldEntity(entity);
-			std::cout << "ENTITYMANAGER: Created World in 7 cycles " << entity->getID() << std::endl;
+			DEBUGPRINT("ENTITYMANAGER: Created World in 7 cycles " << entity->getID());
 			break;
 		}
 	}
@@ -187,6 +190,13 @@ public:
 	{
 		Entity* entity = createEntity();
 		entityFactory.createProjectileEntity(entity, e);
-		std::cout << "ENTITYMANAGER: Created projectile entity " << entity->getID() << std::endl;
+		DEBUGPRINT("ENTITYMANAGER: Created projectile entity " << entity->getID());
+	}
+
+	void event_CreateSpawnPoint(Event_CreateSpawnPoint* e)
+	{
+		Entity* entity = createEntity();
+		entityFactory.createSpawnPointEntity(entity, e);
+		DEBUGPRINT("ENTITYMANAGER: Created spawn point entity " << entity->getID());
 	}
 };

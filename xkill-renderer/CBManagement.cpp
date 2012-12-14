@@ -9,6 +9,7 @@ CBManagement::CBManagement()
 	cbFrame_	= nullptr;
 	cbCamera_	= nullptr;
 	cbObject_	= nullptr;
+	cbBone_		= nullptr;
 }
 CBManagement::~CBManagement()
 {
@@ -16,6 +17,7 @@ CBManagement::~CBManagement()
 	SAFE_RELEASE(cbFrame_);
 	SAFE_RELEASE(cbCamera_);
 	SAFE_RELEASE(cbObject_);
+	SAFE_RELEASE(cbBone_);
 }
 void CBManagement::reset()
 {
@@ -23,6 +25,7 @@ void CBManagement::reset()
 	SAFE_RELEASE(cbFrame_);
 	SAFE_RELEASE(cbCamera_);
 	SAFE_RELEASE(cbObject_);
+	SAFE_RELEASE(cbBone_);
 }
 
 void CBManagement::updateCBInstance(ID3D11DeviceContext*	devcon,
@@ -150,6 +153,8 @@ HRESULT CBManagement::init(ID3D11Device* device)
 		hr = initCBCamera(device);
 	if(SUCCEEDED(hr))
 		hr = initCBObject(device);
+	if(SUCCEEDED(hr))
+		hr = initCBBone(device);
 
 	return hr;
 }
@@ -222,6 +227,24 @@ HRESULT CBManagement::initCBObject(ID3D11Device* device)
 	hr = device->CreateBuffer(&bufferDesc, NULL, &cbObject_);
 	if(FAILED(hr))
 		ERROR_MSG(L"CBManagement::initCBObject | device->CreateBuffer | Failed!");
+
+	return hr;
+}
+HRESULT CBManagement::initCBBone(ID3D11Device* device)
+{
+	HRESULT hr = S_OK;
+
+	D3D11_BUFFER_DESC bufferDesc;
+	ZeroMemory(&bufferDesc, sizeof(bufferDesc));
+	
+	bufferDesc.Usage			= D3D11_USAGE_DEFAULT;
+	bufferDesc.ByteWidth		= CB_BONE_DESC_SIZE;
+	bufferDesc.BindFlags		= D3D11_BIND_CONSTANT_BUFFER;
+	bufferDesc.CPUAccessFlags	= 0;
+
+	hr = device->CreateBuffer(&bufferDesc, NULL, &cbBone_);
+	if(FAILED(hr))
+		ERROR_MSG(L"CBManagement::initCBBone | device->CreateBuffer | Failed!");
 
 	return hr;
 }

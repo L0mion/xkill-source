@@ -8,8 +8,9 @@
 
 #include "CameraComponent.h"
 #include "GameComponent.h"
-//#include "ScoreComponent.h"
+#include "ScoreComponent.h"
 #include "AttributeManager.h"
+
 
 
 /// Is responsible for updating Components in a certain order
@@ -31,11 +32,11 @@ private:
 	IOComponent*			ioComponent_;
 	RenderingComponent*		render_;
 	BulletPhysicsComponent	physics_;
-	SoundComponent		sound_;
+	SoundComponent			sound_;
 	CameraComponent			camera_;
 	InputComponent			input_;
 	GameComponent			game_;
-	//ScoreComponent		score_;
+	ScoreComponent			score_;
 
 public:
 	ComponentManager()
@@ -47,19 +48,18 @@ public:
 	{
 		SAFE_DELETE(render_);
 		SAFE_DELETE(ioComponent_);
-		//SAFE_DELETE(soundComponent);
 	}
 
 	bool init(HWND windowHandle, HWND parentWindowHandle)
 	{
-		bool sucessfulInit = true;
+		render_ = new RenderingComponent(windowHandle);
+		if(render_->init() != S_OK)
+			return false;
 
 		ioComponent_ = new IOComponent();
 		if(!ioComponent_->init())
 			return false;
 		
-		render_ = new RenderingComponent(windowHandle);
-		render_->init();
 		physics_.init();
 		camera_.init();
 
@@ -73,8 +73,8 @@ public:
 		if(!input_.init(parentWindowHandle, AttributeManager::getInstance()->inputAttributes_.getAllAttributes(), configPath))
 			return false;
 
-		//if(!score_.init(AttributeManager::getInstance()->playerAttributes_.getAllAttributes()))
-		//	return false;
+		if(!score_.init(AttributeManager::getInstance()->playerAttributes_.getAllAttributes()))
+			return false;
 
 		// Returns that everything went ok
 		return true;
@@ -84,8 +84,10 @@ public:
 		sound_.onUpdate(delta);
 		physics_.onUpdate(delta);
 		camera_.onUpdate(delta);
+		SEND_EVENT(&Event_DoCulling());
 		render_->onUpdate(delta);
 		input_.onUpdate(delta);
 		game_.onUpdate(delta);
+		SEND_EVENT(&Event(EVENT_UPDATE));
 	}
 };

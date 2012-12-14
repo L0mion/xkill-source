@@ -197,15 +197,10 @@ private:
 	//! Creates resulting MTL-type based on materials read from .mtl.
 	void loadMTL();
 
-	//! Reads a line from file. Also increments a linenumber-counter.
-	void getLine(std::string& line);
 	//! Used to print error if such have occured.
 	void printFail(const std::string curLine);
-	//! Checks if a string is numeric.
-	bool isNumeric(const std::string value);
 
 	/*helper*/
-	unsigned int lineNum_;					//!< Line-number previously read from .mtl.
 	SimpleStringSplitter* sss_;				//!< Helper-object to aid in splitting lines read from .mtl.
 
 	/*intermediate*/

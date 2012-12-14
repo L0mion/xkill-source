@@ -14,25 +14,6 @@ An object that wraps object specific functionality for rigid bodies.
 \ingroup xkill-physics
 */
 
-struct CollisionResult : public btCollisionWorld::ContactResultCallback
-{
-	bool collision;
-
-	CollisionResult()
-	{
-		collision = false;
-	}
-	virtual	btScalar addSingleResult(btManifoldPoint& cp, const btCollisionObjectWrapper* colObj0Wrap,int partId0,int index0,const btCollisionObjectWrapper* colObj1Wrap,int partId1,int index1)
-	{
-		btVector3 ptA = cp.getPositionWorldOnA();
-		btVector3 ptB = cp.getPositionWorldOnB();
-
-		collision = true;
-
-		return 0;
-	}
-};
-
 
 class PhysicsObject : public btRigidBody
 {
@@ -42,6 +23,7 @@ private:
 	btVector3 movement_;
 	btScalar yaw_;
 	unsigned int index_;
+	bool noContactResponse_;
 protected:
 public:
 

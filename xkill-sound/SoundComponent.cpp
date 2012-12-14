@@ -18,6 +18,8 @@ SoundComponent::SoundComponent()
 	converter = NULL;
 
 	SUBSCRIBE_TO_EVENT(this, EVENT_CREATE_PROJECTILE);
+	SUBSCRIBE_TO_EVENT(this, EVENT_PLAYERDEATH);
+	SUBSCRIBE_TO_EVENT(this, EVENT_END_DEATHMATCH);
 }
 
 SoundComponent::~SoundComponent()
@@ -34,7 +36,7 @@ bool SoundComponent::init(std::string configFilePath)
 	FMODEventSystemProgrammerReportParser fmodEventSystemProgrammerReportParser;
 	if(!fmodEventSystemProgrammerReportParser.parseProgrammerReport(mFMODEventSystem))
 	{
-		std::cout << "parsing of FMOD Designer's programmer's report failed." << std::endl;
+		DEBUGPRINT("parsing of FMOD Designer's programmer's report failed.");
 		return false;
 	}
 
