@@ -2,6 +2,18 @@
 
 #include "FileParser.h"
 
+//Used for IsXInputDevice function//
+#include <wbemidl.h>			  //
+#include <oleauto.h>			  //
+#include <stdio.h>				  //
+////////////////////////////////////
+
+#define DIRECTINPUT_VERSION 0x0800 //
+#include <dinput.h>				   //
+/////////////////////////////////////
+
+#include <cmath>
+
 InputManager::InputManager(void)
 {
 }

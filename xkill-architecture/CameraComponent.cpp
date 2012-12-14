@@ -14,7 +14,7 @@ CameraComponent::~CameraComponent()
 {
 }
 
-void CameraComponent::init()
+bool CameraComponent::init()
 {
 	// subscribe to events
 	SUBSCRIBE_TO_EVENT(this, EVENT_WINDOW_RESIZE);
@@ -44,6 +44,8 @@ void CameraComponent::init()
 		cameras_[i].updateProj();
 		cameraAttributes_->at(i).mat_projection.copy((float*)&cameras_[i].getProjection());
 	}
+
+	return true;
 }
 
 void CameraComponent::onEvent(Event* e)

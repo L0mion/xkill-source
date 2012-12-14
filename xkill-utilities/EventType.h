@@ -43,6 +43,8 @@ enum DLL_U EventType
 	EVENT_PLAYERDEATH,
 	EVENT_CREATE_SPAWNPOINT,
 	EVENT_END_DEATHMATCH,
+	EVENT_START_DEATHMATCH,
+	EVENT_CHANGE_GAMESTATE,
 
 	EVENT_UPDATE,
 	EVENT_MOUSE_MOVE,
@@ -322,8 +324,24 @@ public:
 	Event_DoCulling();
 };
 
+
+class DLL_U Event_StartDeathmatch : public Event
+{
+public:
+	Event_StartDeathmatch();
+};
+
 class DLL_U Event_EndDeathmatch : public Event
 {
 public:
 	Event_EndDeathmatch();
+};
+
+enum StateType;
+class DLL_U Event_ChangeGameState : public Event
+{
+public:
+	Event_ChangeGameState(StateType newState);
+
+	StateType newState;
 };

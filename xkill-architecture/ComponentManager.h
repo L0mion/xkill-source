@@ -1,17 +1,33 @@
 #pragma once
 
-#include <xkill-physics/BulletPhysicsComponent.h>
-#include <xkill-sound/SoundComponent.h>
-#include <xkill-renderer/renderingComponent.h>
-#include <xkill-input/InputComponent.h>
-#include <xkill-io/IOComponent.h>
+#include <xkill-utilities/IObserver.h>
 
-#include "CameraComponent.h"
-#include "GameComponent.h"
-#include "ScoreComponent.h"
+class IOComponent;
+class RenderingComponent;
+class BulletPhysicsComponent;
+class SoundComponent;
+class CameraComponent;
+class InputComponent;
+enum StateType;
+
+#include <Windows.h>
+
+//#include <windef.h>
+
+//typedef HWND *HWND;
+
+//struct HWND;
+
+//#include <WinNT.h>
+
+//typedef void* PVOID;
+//typedef PVOID HANDLE;
+//typedef HANDLE HWND;
+
+class GameComponent;
+class ScoreComponent;
+
 #include "AttributeManager.h"
-
-
 
 /// Is responsible for updating Components in a certain order
 /** 
@@ -24,70 +40,25 @@ be the responsibility of the ComponentManager.
 \ingroup ARCHITECTURE
 */
 
-#define SAFE_DELETE(x) if( x ) { delete(x); (x) = NULL; }
-
-class ComponentManager
+class ComponentManager : public IObserver
 {
 private:
 	IOComponent*			ioComponent_;
 	RenderingComponent*		render_;
-	BulletPhysicsComponent	physics_;
-	SoundComponent			sound_;
-	CameraComponent			camera_;
-	InputComponent			input_;
-	GameComponent			game_;
-	ScoreComponent			score_;
+	BulletPhysicsComponent*	physics_;
+	SoundComponent*			sound_;
+	CameraComponent*		camera_;
+	InputComponent*			input_;
+	GameComponent*			game_;
+	ScoreComponent*			score_;
+	//FiniteStateMachine		stateMachine_;
+	StateType				state_TemporaryVariableUsedAsSubstituteForStateMachine;
 
 public:
-	ComponentManager()
-	{
-		render_			= NULL;
-		ioComponent_	= NULL;
-	}
-	~ComponentManager()
-	{
-		SAFE_DELETE(render_);
-		SAFE_DELETE(ioComponent_);
-	}
+	ComponentManager();
+	~ComponentManager();
 
-	bool init(HWND windowHandle, HWND parentWindowHandle)
-	{
-		render_ = new RenderingComponent(windowHandle);
-		if(render_->init() != S_OK)
-			return false;
-
-		ioComponent_ = new IOComponent();
-		if(!ioComponent_->init())
-			return false;
-		
-		physics_.init();
-		camera_.init();
-
-		if(!game_.init())
-			return false;
-
-		std::string configPath = "../../xkill-resources/xkill-configs/";
-
-		if(!sound_.init(configPath))
-			return false;
-		if(!input_.init(parentWindowHandle, AttributeManager::getInstance()->inputAttributes_.getAllAttributes(), configPath))
-			return false;
-
-		if(!score_.init(AttributeManager::getInstance()->playerAttributes_.getAllAttributes()))
-			return false;
-
-		// Returns that everything went ok
-		return true;
-	}
-	void update(float delta)
-	{
-		sound_.onUpdate(delta);
-		physics_.onUpdate(delta);
-		camera_.onUpdate(delta);
-		SEND_EVENT(&Event_DoCulling());
-		render_->onUpdate(delta);
-		input_.onUpdate(delta);
-		game_.onUpdate(delta);
-		SEND_EVENT(&Event(EVENT_UPDATE));
-	}
+	bool init(HWND windowHandle, HWND parentWindowHandle);
+	void onEvent(Event* e);
+	void update(float delta);
 };

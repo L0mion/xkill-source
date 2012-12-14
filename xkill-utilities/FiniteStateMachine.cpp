@@ -1,8 +1,6 @@
 #include "FiniteStateMachine.h"
 #include <iostream>
 
-
-
 bool FiniteStateMachine::AddState( FiniteState* state )
 {
 	auto result = states_.insert(
@@ -61,17 +59,22 @@ void FiniteStateMachine::Update( float dt )
 {
 	//no states to handle, nothing to do
 	if (states_.size() == 0)
-		return; //TODO Print warning about update being called on empty machine
+	{
+		std::cout << "Warning: FiniteStateMachine::Update are being called on an empty machine" << std::endl;
+		return;
+	}
 
-	//if no current state attempt to set it to default
+	//if no current state: attempt to set it to default
 	if (!currentState_ && defaultState_)
 	{
 		currentState_ = defaultState_;
 	}
+
 	//no valid  state could be established, nothing to do
 	if (!currentState_)
 	{
-		return; //TODO Print warning on state being invalid
+		std::cout << "Warning: FiniteStateMachine::Update, current state is invalid" << std::endl;
+		return;
 	}
 
 	//check for transitions
@@ -101,7 +104,6 @@ void FiniteStateMachine::Update( float dt )
 
 StateType FiniteStateMachine::CheckTransitions( bool& outShouldReplaceCurrent ) const
 {
-	
 	return type_; //returning my own StateType means no transition will take place if I am the current state
 }
 
@@ -127,9 +129,7 @@ void FiniteStateMachine::Reset()
 }
 
 FiniteStateMachine::FiniteStateMachine( StateType type, FiniteState* defaultState ):
-	FiniteState(type),
-	defaultState_(0),
-	currentState_(0)
+	FiniteState(type), defaultState_(0), currentState_(0)
 {
 	if (defaultState)
 	{

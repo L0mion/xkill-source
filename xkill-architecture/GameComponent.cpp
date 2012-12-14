@@ -79,10 +79,10 @@ void GameComponent::onUpdate(float delta)
 			PositionAttribute* position	=	&positionAttributes_->at(spatial->positionAttribute.index); //Extract position attribute from the above spatial attribute
 
 			//Deathmatch end logic
-			//if(player->priority >= 2)
-			//{
-			//	SEND_EVENT(&Event_EndDeathmatch());
-			//}
+			if(player->priority >= 4)
+			{
+				SEND_EVENT(&Event_EndDeathmatch());
+			}
 
 
 			//Firing logic
