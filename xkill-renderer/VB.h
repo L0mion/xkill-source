@@ -10,6 +10,9 @@ struct ID3D11Device;
 #include <vector>
 
 //! Describes a vertex buffer.
+/*!
+\ingroup xkill-renderer
+*/
 class VB
 {
 public:

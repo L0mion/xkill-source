@@ -1,8 +1,10 @@
 #include "fxManagement.h"
 #include "renderingUtilities.h"
 
-FXManagement::FXManagement()
+FXManagement::FXManagement(bool debugShaders)
 {
+	debugShaders_ = debugShaders;
+
 	ilManagement = nullptr;
 
 	defaultVS_				= nullptr;
@@ -61,82 +63,88 @@ HRESULT FXManagement::initShaders(ID3D11Device* device)
 {
 	HRESULT hr = S_OK;
 
-	hr = initDefaultVS(device);
+	std::wstring shaderPath;
+	if(debugShaders_)
+		shaderPath = L"../../xkill-build/bin-Debug/";
+	else
+		shaderPath = L"../../xkill-build/bin-Release/";
+
+	hr = initDefaultVS(device, shaderPath);
 	if(SUCCEEDED(hr))
-		hr = initDefaultPS(device);
+		hr = initDefaultPS(device, shaderPath);
 	if(SUCCEEDED(hr))
-		hr = initDefaultDeferredVS(device);
+		hr = initDefaultDeferredVS(device, shaderPath);
 	if(SUCCEEDED(hr))
-		hr = initDefaultDeferredPS(device);
+		hr = initDefaultDeferredPS(device, shaderPath);
 	if(SUCCEEDED(hr))
-		hr = initDefaultCS(device);
+		hr = initDefaultCS(device, shaderPath);
 	if(SUCCEEDED(hr))
-		hr = initAnimationVS(device);
+		hr = initAnimationVS(device, shaderPath);
 	if(SUCCEEDED(hr))
-		hr = initAnimationPS(device);
+		hr = initAnimationPS(device, shaderPath);
 	
 	return hr;
 }
-HRESULT FXManagement::initDefaultVS(ID3D11Device* device)
+HRESULT FXManagement::initDefaultVS(ID3D11Device* device, std::wstring shaderPath)
 {
 	HRESULT hr = S_OK;
-
+	std::wstring completePath = shaderPath + L"defaultVS.cso";
 	defaultVS_ = new ShaderVS();
-	hr = defaultVS_->init(device, L"../../xkill-build/bin-Debug/defaultVS.cso");
+	hr = defaultVS_->init(device, completePath.c_str());
 
 	return hr;
 }
-HRESULT FXManagement::initDefaultPS(ID3D11Device* device)
+HRESULT FXManagement::initDefaultPS(ID3D11Device* device, std::wstring shaderPath)
 {
 	HRESULT hr = S_OK;
-
+	std::wstring completePath = shaderPath + L"defaultPS.cso";
 	defaultPS_ = new ShaderPS();
-	hr = defaultPS_->init(device, L"../../xkill-build/bin-Debug/defaultPS.cso");
+	hr = defaultPS_->init(device, completePath.c_str());
 
 	return hr;
 }
-HRESULT FXManagement::initDefaultDeferredVS(ID3D11Device* device)
+HRESULT FXManagement::initDefaultDeferredVS(ID3D11Device* device, std::wstring shaderPath)
 {
 	HRESULT hr = S_OK;
-
+	std::wstring completePath = shaderPath + L"defaultDeferredVS.cso";
 	defaultDeferredVS_ = new ShaderVS();
-	hr = defaultDeferredVS_->init(device, L"../../xkill-build/bin-Debug/defaultDeferredVS.cso");
+	hr = defaultDeferredVS_->init(device, completePath.c_str());
 
 	return hr;
 }
-HRESULT FXManagement::initDefaultDeferredPS(ID3D11Device* device)
+HRESULT FXManagement::initDefaultDeferredPS(ID3D11Device* device, std::wstring shaderPath)
 {
 	HRESULT hr = S_OK;
-
+	std::wstring completePath = shaderPath + L"defaultDeferredPS.cso";
 	defaultDeferredPS_ = new ShaderPS();
-	hr = defaultDeferredPS_->init(device, L"../../xkill-build/bin-Debug/defaultDeferredPS.cso");
+	hr = defaultDeferredPS_->init(device, completePath.c_str());
 
 	return hr;
 }
-HRESULT FXManagement::initDefaultCS(ID3D11Device* device)
+HRESULT FXManagement::initDefaultCS(ID3D11Device* device, std::wstring shaderPath)
 {
 	HRESULT hr = S_OK;
-
+	std::wstring completePath = shaderPath + L"lightingCS.cso";
 	defaultCS_ = new ShaderCS();
-	hr = defaultCS_->init(device, L"../../xkill-build/bin-Debug/lightingCS.cso");
+	hr = defaultCS_->init(device, completePath.c_str());
 
 	return hr;
 }
-HRESULT FXManagement::initAnimationVS(ID3D11Device* device)
+HRESULT FXManagement::initAnimationVS(ID3D11Device* device, std::wstring shaderPath)
 {
 	HRESULT hr = S_OK;
-
+	std::wstring completePath = shaderPath + L"animationVS.cso";
 	animationVS_ = new ShaderVS();
-	hr = animationVS_->init(device, L"../../xkill-build/bin-Debug/animationVS.cso");
+	hr = animationVS_->init(device, completePath.c_str());
 
 	return hr;
 }
-HRESULT FXManagement::initAnimationPS(ID3D11Device* device)
+HRESULT FXManagement::initAnimationPS(ID3D11Device* device, std::wstring shaderPath)
 {
 	HRESULT hr = S_OK;
-
+	std::wstring completePath = shaderPath + L"animationPS.cso";
 	animationPS_ = new ShaderPS();
-	hr = animationPS_->init(device, L"../../xkill-build/bin-Debug/animationPS.cso");
+	hr = animationPS_->init(device, completePath.c_str());
 
 	return hr;
 }

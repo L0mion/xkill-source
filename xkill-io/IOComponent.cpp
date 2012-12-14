@@ -4,6 +4,7 @@
 
 #include <xkill-utilities/EventManager.h>
 #include <xkill-utilities/MeshModel.h>
+#include <xkill-utilities/AttributeType.h>
 
 #include "MeshMakerObj.h"
 #include "IOComponent.h"
@@ -14,9 +15,13 @@
 
 IOComponent::IOComponent()
 {
+	texNameToTexID = nullptr;
 }
 IOComponent::~IOComponent()
 {
+	if(texNameToTexID)
+		delete texNameToTexID;
+
 	for(unsigned int i = 0; i < meshModels_.size(); i++)
 	{
 		if(meshModels_[i])
@@ -27,15 +32,11 @@ bool IOComponent::init()
 {
 	bool sucessfulInit = true;
 
+	texNameToTexID = new std::map<std::string, unsigned int>();
+
 	sucessfulInit = initTexDescs();
 	if(sucessfulInit)
 		sucessfulInit = initMdlDescs();
-
-	//std::vector<MeshAttribute>*	allMesh; GET_ATTRIBUTES(allMesh, MeshAttribute,	ATTRIBUTE_MESH);
-	//for(unsigned int i = 0; i < allMesh->size(); i++)
-	//{
-	//	MeshAttribute mesh = allMesh->at(i);
-	//}
 
 	return sucessfulInit;
 }
@@ -68,6 +69,17 @@ bool IOComponent::initTexDesc(std::string filename)
 	if(sucessfulLoad)
 	{
 		TexDesc* texDesc = loader->claimTexDesc();
+
+		/*Export me into seperate function without introducing any dependencies include-wize.*/
+		std::vector<TexDescTex> textureDescriptions = texDesc->getTexDescs();
+		for(unsigned int i = 0; i < textureDescriptions.size(); i++)
+		{
+			std::string texFilename	= textureDescriptions[i].fileName_;
+			unsigned int texID		= textureDescriptions[i].id_; 
+
+			std::pair<std::string, unsigned int> newMapping(texFilename, texID);
+			texNameToTexID->insert(newMapping);
+		}
 
 		Event_PostDescTex e(texDesc);
 		SEND_EVENT(&e);
@@ -145,7 +157,8 @@ bool IOComponent::loadModel(
 		modelPath, 
 		modelPath, 
 		modelName, 
-		modelPath);
+		modelPath,
+		texNameToTexID);
 	sucessfulMake = objMaker->init();
 
 	if(sucessfulMake)

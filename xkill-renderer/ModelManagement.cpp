@@ -7,6 +7,7 @@
 
 #include "VB.h"
 #include "IB.h"
+#include "SubsetD3D.h"
 #include "renderingUtilities.h"
 #include "ModelD3D.h"
 #include "ModelManagement.h"
@@ -58,8 +59,8 @@ HRESULT ModelManagement::createModelD3D(
 	{
 		MeshModel* model = meshAt.mesh;
 
-		VB*					vb = new VB();
-		std::vector<IB*>	ibs;
+		VB*						vb = new VB();
+		std::vector<SubsetD3D*>	subsetD3Ds;
 
 		hr = createVertexBuffer(
 			modelID, 
@@ -71,14 +72,14 @@ HRESULT ModelManagement::createModelD3D(
 			hr = createIndexBuffers(
 				modelID, 
 				model->getGeometry(), 
-				ibs, 
+				subsetD3Ds, 
 				device);
 		}
 		if(SUCCEEDED(hr))
 		{
 			pushModelD3D(
-			modelID,
-			new ModelD3D(vb, ibs));
+				modelID,
+				new ModelD3D(vb, subsetD3Ds, model->getMaterials()));
 		}
 	}
 	else
@@ -123,10 +124,10 @@ HRESULT ModelManagement::createVertexBuffer(
 	return hr;
 }
 HRESULT ModelManagement::createIndexBuffers(
-	const unsigned int	modelID, 
-	MeshGeometry&		geometry, 
-	std::vector<IB*>&	ibs,
-	ID3D11Device*		device)
+	const unsigned int			modelID, 
+	MeshGeometry&				geometry, 
+	std::vector<SubsetD3D*>&	subsetD3Ds,
+	ID3D11Device*				device)
 {
 	HRESULT hr = S_OK;
 
@@ -140,7 +141,10 @@ HRESULT ModelManagement::createIndexBuffers(
 			ib,
 			device);
 		if(SUCCEEDED(hr))
-			ibs.push_back(ib);
+		{
+			SubsetD3D* subsetD3D = new SubsetD3D(subsets[i].getMaterialIndex(), ib);
+			subsetD3Ds.push_back(subsetD3D);
+		}
 	}
 
 	return hr;
