@@ -10,7 +10,7 @@ Contains the data from an axis but formatted to a bolean value.
 class InputButtonObject : public InputObject
 {
 public:
-	InputButtonObject(void);
+	InputButtonObject(char key);
 	virtual ~InputButtonObject(void);
 
 	void SetValue(bool value);

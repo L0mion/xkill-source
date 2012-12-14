@@ -341,7 +341,7 @@ void DirectInputDevice::updateState()
 				}
 			}
 
-			axes_[i].SetValue(value);
+			axes_[i]->SetValue(value);
 		}
 		
 		int HatSwitch;
@@ -350,15 +350,15 @@ void DirectInputDevice::updateState()
 		{
 			HatSwitch = joyState.rgdwPOV[i];
 
-			hatSwitches_[i].SetButton(0, (HatSwitch == 0 || HatSwitch == 4500 || HatSwitch == 31500));
-			hatSwitches_[i].SetButton(1, (HatSwitch == 9000 || HatSwitch == 13500 || HatSwitch == 4500));
-			hatSwitches_[i].SetButton(2, (HatSwitch == 18000 || HatSwitch == 22500 || HatSwitch == 13500));
-			hatSwitches_[i].SetButton(3, (HatSwitch == 27000 || HatSwitch == 31500 || HatSwitch == 22500));
+			hatSwitches_[i]->SetButton(0, (HatSwitch == 0 || HatSwitch == 4500 || HatSwitch == 31500));
+			hatSwitches_[i]->SetButton(1, (HatSwitch == 9000 || HatSwitch == 13500 || HatSwitch == 4500));
+			hatSwitches_[i]->SetButton(2, (HatSwitch == 18000 || HatSwitch == 22500 || HatSwitch == 13500));
+			hatSwitches_[i]->SetButton(3, (HatSwitch == 27000 || HatSwitch == 31500 || HatSwitch == 22500));
 		}
 
 		for(int i = 0; i < inputLayout_.nrOfButtons; i++)
 		{
-			buttons_[i].SetValue(joyState.rgbButtons[i]);
+			buttons_[i]->SetValue(joyState.rgbButtons[i]);
 		}
 	}
 }
@@ -383,13 +383,22 @@ void DirectInputDevice::createInputObjectsFromLayout()
 	createAxes();
 
 	for(int i = 0; i < inputLayout_.nrOfButtons; i++)
-		buttons_.push_back(InputButtonObject());
+	{
+		buttons_.push_back(new InputButtonObject(i));
+		inputObjects_.push_back(buttons_[buttons_.size() - 1]);
+	}
 
 	for(int i = 0; i < inputLayout_.nrOfHatSwitches; i++)
-		hatSwitches_.push_back(InputHatSwitchObject());
+	{
+		hatSwitches_.push_back(new InputHatSwitchObject());
+		inputObjects_.push_back(hatSwitches_[hatSwitches_.size() - 1]);
+	}
 
 	for(int i = 0; i < inputLayout_.nrOfTriggers; i++)
-		triggers_.push_back(InputTriggerObject(0, 0xFF));
+	{
+		triggers_.push_back(new InputTriggerObject(0, 0xFF));
+		inputObjects_.push_back(triggers_[triggers_.size() - 1]);
+	}
 }
 
 void DirectInputDevice::createAxes()
@@ -414,11 +423,14 @@ void DirectInputDevice::createAxes()
 	}
 
 	while(axesIndexArray_.size() > axes_.size())
-		axes_.push_back(InputAxisObject(0, 0xFFFF));
+	{
+		axes_.push_back(new InputAxisObject(0, 0xFFFF));
+		inputObjects_.push_back(axes_[axes_.size() - 1]);
+	}
 
 	if(axesIndexArray_.size() >= 2)
 	{
-		axes_[1].SetInverted(true);
+		axes_[1]->setInverted(true);
 	}
 
 	inputLayout_.nrOfAxes = axes_.size();

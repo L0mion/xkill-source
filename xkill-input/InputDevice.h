@@ -4,15 +4,21 @@
 
 #include <InitGuid.h>
 
+#include "KeyMapper.h"
+
 #include "InputButtonObject.h"
 #include "InputAxisObject.h"
 #include "InputHatSwitchObject.h"
 #include "InputTriggerObject.h"
 
+#define SAFE_DELETE(x) {if(x != nullptr) delete x; x = nullptr;}
+
 //! An interface for wrappers of Direct Input and XInput devices
 
 class InputDevice
 {
+	friend class KeyMapper;
+
 public:
 
 	//! A struct containing the states of all the objects
@@ -21,10 +27,10 @@ public:
 	*/
 	struct InputState
 	{
-		std::vector<InputAxisObject> axes;
-		std::vector<InputButtonObject> buttons;
-		std::vector<InputHatSwitchObject> hatSwitches;
-		std::vector<InputTriggerObject> triggers;
+		std::vector<InputAxisObject*> axes;
+		std::vector<InputButtonObject*> buttons;
+		std::vector<InputHatSwitchObject*> hatSwitches;
+		std::vector<InputTriggerObject*> triggers;
 	};
 
 	//! Lists the capabilities of the device
@@ -80,16 +86,20 @@ public:
 	virtual void setPlayerID(int playerID);
 	virtual int getPlayerID();
 
+	virtual float getFloatValue(int mapping);
+	virtual bool getBoolValue(int mapping);
+
 protected:
 	InputDeviceLayout inputLayout_;
 	GUID deviceGUID_;
 	std::string name_;
 	unsigned int playerID_;
 
-	std::vector<InputAxisObject> axes_;				//Should perhaps use an inputstate to store this instead?
-	std::vector<InputButtonObject> buttons_;
-	std::vector<InputHatSwitchObject> hatSwitches_;
-	std::vector<InputTriggerObject> triggers_;
+	std::vector<InputAxisObject*> axes_;				//Should perhaps use an inputstate to store this instead?
+	std::vector<InputButtonObject*> buttons_;
+	std::vector<InputHatSwitchObject*> hatSwitches_;
+	std::vector<InputTriggerObject*> triggers_;
+	std::vector<InputObject*> inputObjects_;
 
 	//! Updates the input object to the latest state
 	virtual void updateState() = 0;
@@ -97,5 +107,7 @@ protected:
 	virtual void createInputLayout() = 0;
 	//! Creates all the input objects using the input layout as guide
 	virtual void createInputObjectsFromLayout() = 0;
+
+	virtual InputButtonObject* getButtonObject(int index);
 };
 

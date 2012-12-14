@@ -57,15 +57,15 @@ void DirectInputMouse::updateState()
 	{
 		result = device_->GetDeviceState(sizeof(mouseState), &mouseState);
 
-		axes_[0].SetValue(mouseState.lX);
-		axes_[1].SetValue(mouseState.lY);
+		axes_[0]->SetValue(mouseState.lX);
+		axes_[1]->SetValue(mouseState.lY);
 
 		if(axes_.size() >= 3)
-			axes_[2].SetValue(mouseState.lZ);
+			axes_[2]->SetValue(mouseState.lZ);
 
 		for(int i = 0; i < inputLayout_.nrOfButtons; i++)
 		{
-			buttons_[i].SetValue(mouseState.rgbButtons[i]);
+			buttons_[i]->SetValue(mouseState.rgbButtons[i]);
 		}
 	}
 }
@@ -73,14 +73,26 @@ void DirectInputMouse::updateState()
 void DirectInputMouse::createInputObjectsFromLayout()
 {
 	for(int i = 0; i < inputLayout_.nrOfAxes; i++)
-		axes_.push_back(InputAxisObject(-0xFF, 0xFF));
+	{
+		axes_.push_back(new InputAxisObject(-0xFF, 0xFF));
+		inputObjects_.push_back(axes_[axes_.size() - 1]);
+	}
 	
 	for(int i = 0; i < inputLayout_.nrOfButtons; i++)
-		buttons_.push_back(InputButtonObject());
+	{
+		buttons_.push_back(new InputButtonObject(i));
+		inputObjects_.push_back(buttons_[buttons_.size() - 1]);
+	}
 
 	for(int i = 0; i < inputLayout_.nrOfHatSwitches; i++)
-		hatSwitches_.push_back(InputHatSwitchObject());
+	{
+		hatSwitches_.push_back(new InputHatSwitchObject());
+		inputObjects_.push_back(hatSwitches_[hatSwitches_.size() - 1]);
+	}
 
 	for(int i = 0; i < inputLayout_.nrOfTriggers; i++)
-		triggers_.push_back(InputTriggerObject(0, 0xFF));
+	{
+		triggers_.push_back(new InputTriggerObject(0, 0xFF));
+		inputObjects_.push_back(triggers_[triggers_.size() - 1]);
+	}
 }

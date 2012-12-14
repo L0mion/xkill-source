@@ -32,7 +32,12 @@ void InputTriggerObject::SetValue(int value)
 
 float InputTriggerObject::GetValue()
 {
-	return value_;
+	float value = value_;
+
+	if(inverted_)
+		value *= -1.0f;
+
+	return value;
 }
 
 bool InputTriggerObject::IsTriggered()
@@ -42,7 +47,7 @@ bool InputTriggerObject::IsTriggered()
 
 float InputTriggerObject::getValueFloat()
 {
-	return value_;
+	return GetValue();
 }
 
 bool InputTriggerObject::getValueBool()
@@ -55,7 +60,7 @@ InputObject::InputObjectType InputTriggerObject::GetType()
 	return TRIGGER_OBJECT;
 }
 
-void InputTriggerObject::SetDeadZone(float deadZone)
+void InputTriggerObject::setDeadZone(float deadZone)
 {
 	if(deadZone > 1.0f)
 		deadZone_ = 1.0f;
@@ -65,7 +70,12 @@ void InputTriggerObject::SetDeadZone(float deadZone)
 		deadZone_ = deadZone;
 }
 
-void InputTriggerObject::SetTriggerValue(float triggerValue)
+float InputTriggerObject::getDeadZone()
+{
+	return deadZone_;
+}
+
+void InputTriggerObject::setTriggerValue(float triggerValue)
 {
 	if(triggerValue > 1.0f)
 		triggerValue_ = 1.0f;
@@ -73,6 +83,11 @@ void InputTriggerObject::SetTriggerValue(float triggerValue)
 		triggerValue_ = 0.0f;
 	else
 		triggerValue_ = triggerValue;
+}
+
+float InputTriggerObject::getTriggerValue()
+{
+	return triggerValue_;
 }
 
 float InputTriggerObject::formatValue(int value)

@@ -6,7 +6,6 @@ InputAxisObject::InputAxisObject(int minValue, int maxValue)
 	maxValue_ = maxValue;
 
 	deadZone_ = 0.25f;
-	inverted_ = false;
 
 	value_ = 0.0f;
 }
@@ -55,7 +54,7 @@ InputObject::InputObjectType InputAxisObject::GetType()
 	return AXIS_OBJECT;
 }
 
-void InputAxisObject::SetDeadZone(float deadZone)
+void InputAxisObject::setDeadZone(float deadZone)
 {
 	if(deadZone > 1.0f)
 		deadZone_ = 1.0f;
@@ -65,9 +64,9 @@ void InputAxisObject::SetDeadZone(float deadZone)
 		deadZone_ = deadZone;
 }
 
-void InputAxisObject::SetInverted(bool inverted)
+float InputAxisObject::getDeadZone()
 {
-	inverted_ = inverted;
+	return deadZone_;
 }
 
 float InputAxisObject::formatValue(int value) //Fix deadzone, is square for the moment

@@ -31,25 +31,30 @@ void QTInputDevices::createInputLayout()
 {
 	inputLayout_.nrOfHatSwitches = 0;
 	inputLayout_.nrOfTriggers = 0;
-	inputLayout_.nrOfButtons = 10;
 	inputLayout_.nrOfAxes = 4;
 }
 
 void QTInputDevices::createInputObjectsFromLayout()
 {
 	for(int i = 0; i < inputLayout_.nrOfAxes; i++)
-		axes_.push_back(InputAxisObject(-0x7FFF, 0x7FFF));
+	{
+		axes_.push_back(new InputAxisObject(-0x7FFF, 0x7FFF));
+		inputObjects_.push_back(axes_[axes_.size() - 1]);
+	}
 	
-	for(int i = 0; i < inputLayout_.nrOfButtons; i++)
-		buttons_.push_back(InputButtonObject());
+	for(int i = 0; i < 5; i++)
+	{
+		buttons_.push_back(new InputButtonObject(i));
+		inputObjects_.push_back(buttons_[buttons_.size() - 1]);
+	}
 
 	if(buttons_.size() >= 5)
 	{
-		buttons_[3].setKey('W');
-		buttons_[4].setKey('A');
-		buttons_[5].setKey('S');
-		buttons_[6].setKey('D');
-		buttons_[0].setKey(0x20); //Space
+		buttons_[0]->setKey('W');
+		buttons_[1]->setKey('A');
+		buttons_[2]->setKey('S');
+		buttons_[3]->setKey('D');
+		buttons_[4]->setKey(0x20); //Space
 	}
 }
 
@@ -57,7 +62,7 @@ void QTInputDevices::setAxis(unsigned int index, float value)
 {
 	if(axes_.size() > index)
 	{
-		axes_[index].AddValue(value);
+		axes_[index]->AddValue(value);
 	}
 }
 
@@ -65,9 +70,9 @@ void QTInputDevices::setButton(char key, bool value)
 {
 	for(unsigned int i = 0; i < buttons_.size(); i++)
 	{
-		if(buttons_[i].getKey() == key)
+		if(buttons_[i]->getKey() == key)
 		{
-			buttons_[i].SetValue(value);
+			buttons_[i]->SetValue(value);
 		}
 	}
 }
@@ -76,14 +81,38 @@ void QTInputDevices::setAxesToZero()
 {
 	for(unsigned int i = 0; i < axes_.size(); i++)
 	{
-		axes_[i].SetValue(0.0f);
+		axes_[i]->SetValue(0.0f);
 	}
 }
 
 void QTInputDevices::updateButtons()
 {
 	for(unsigned int i = 0; i < buttons_.size(); i++)
-		buttons_[i].SetValue(buttons_[i].isDown());
+		buttons_[i]->SetValue(buttons_[i]->isDown());
+}
+
+InputButtonObject* QTInputDevices::getButtonObject(int index)
+{
+	InputButtonObject* button = nullptr;
+
+	for(unsigned int i = 0; i < buttons_.size(); i++)
+	{
+		if(buttons_[i]->getKey() == (char)index)
+		{
+			button = buttons_[i];
+			break;
+		}
+	}
+
+	if(button == nullptr)
+	{
+		button = new InputButtonObject(index);
+		buttons_.push_back(button);
+		inputObjects_.push_back(button);
+		inputLayout_.nrOfButtons++;
+	}
+
+	return button;
 }
   
 void QTInputDevices::RunForceFeedback()

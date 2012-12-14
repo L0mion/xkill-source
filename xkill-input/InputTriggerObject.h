@@ -27,8 +27,10 @@ public:
 
 	virtual InputObjectType GetType();
 
-	void SetDeadZone(float deadZone);
-	void SetTriggerValue(float triggerValue);
+	void setDeadZone(float deadZone);
+	float getDeadZone();
+	void setTriggerValue(float triggerValue);
+	float getTriggerValue();
 
 private:
 	float triggerValue_;

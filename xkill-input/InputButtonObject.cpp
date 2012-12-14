@@ -1,10 +1,10 @@
 #include "InputButtonObject.h"
 
-InputButtonObject::InputButtonObject(void)
+InputButtonObject::InputButtonObject(char key)
 {
 	value_ = false;
 	prevValue_ = false;
-	keyChar_ = 0;
+	keyChar_ = key;
 }
 
 InputButtonObject::~InputButtonObject(void)
@@ -39,7 +39,12 @@ bool InputButtonObject::isReleased()
 
 float InputButtonObject::getValueFloat()
 {
-	return (float)value_;
+	float value = (float)value_;
+
+	if(inverted_)
+		value *= (-1);
+
+	return value;
 }
 
 bool InputButtonObject::getValueBool()

@@ -1,6 +1,6 @@
 #include "InputManager.h"
 
-#include "FileParser.h"
+#include "KeyMapper.h"
 
 InputManager::InputManager(void)
 {
@@ -8,9 +8,13 @@ InputManager::InputManager(void)
 
 InputManager::~InputManager(void)
 {
+	keyMapper_.saveConfig(devices_);
+
 	std::vector<InputDevice*>::iterator it = devices_.begin();
 	for(; it != devices_.end(); it++)
-		delete (*it);
+		SAFE_DELETE(*it);
+
+	devices_.clear();
 }
 
 bool InputManager::InitInput(HWND hWindow, std::string configFilePath)
@@ -49,6 +53,9 @@ bool InputManager::InitInput(HWND hWindow, std::string configFilePath)
 	//device = new DirectInputKeyboard(dInputDevice, GUID_SysKeyboard, "Keyboard"); //Kolla ifall tangentbordet är inkopplad genom att köra en enum med guid:et
 	//device->Init(hWindow);
 	//devices_.push_back(device);
+
+	keyMapper_.init(configFilePath);
+	keyMapper_.loadConfig(devices_);
 
 	return true;
 }
@@ -198,14 +205,14 @@ std::string InputManager::GetInputInformationString()
 
 		for(unsigned int j = 0; j < inputState.axes.size(); j++)
 		{
-			str += "Axis #" + Converter::IntToStr(j) + ": " + Converter::FloatToStr(inputState.axes[j].GetValue()) + "\n";
+			str += "Axis #" + Converter::IntToStr(j) + ": " + Converter::FloatToStr(inputState.axes[j]->GetValue()) + "\n";
 		}
 
 		for(unsigned int j = 0; j < inputState.triggers.size(); j++)
 		{
-			str += "Trigger #" + Converter::IntToStr(j) + ": " + Converter::FloatToStr(inputState.triggers[j].GetValue()) + " ";
+			str += "Trigger #" + Converter::IntToStr(j) + ": " + Converter::FloatToStr(inputState.triggers[j]->GetValue()) + " ";
 
-			if(inputState.triggers[j].IsTriggered())
+			if(inputState.triggers[j]->IsTriggered())
 			{
 				str += "On\n";
 			}
@@ -220,7 +227,7 @@ std::string InputManager::GetInputInformationString()
 			str += "Hat Switch #" + Converter::IntToStr(j) + ": ";
 
 			for(int i = 0; i < 4; i++)
-				str += Converter::IntToStr(inputState.hatSwitches[j].buttonDown(i));
+				str += Converter::IntToStr(inputState.hatSwitches[j]->buttonDown(i));
 
 			str += "\n";
 		}
@@ -229,7 +236,7 @@ std::string InputManager::GetInputInformationString()
 		{
 			str += "Button #" + Converter::IntToStr(j) + ": ";
 
-			if(inputState.buttons[j].isDown())
+			if(inputState.buttons[j]->isDown())
 			{
 				str += "On\n";
 			}

@@ -59,7 +59,7 @@ void DirectInputKeyboard::updateState()
 
 		for(int i = 0; !(i >= 256 || i >= inputLayout_.nrOfButtons); i++)
 		{
-			buttons_[i].SetValue(keyState[i]);
+			buttons_[i]->SetValue(keyState[i]);
 		}
 	}
 }

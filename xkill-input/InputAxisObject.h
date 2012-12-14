@@ -43,12 +43,11 @@ public:
 	*/
 	virtual InputObjectType GetType();
 
-	void SetDeadZone(float deadZone);
-	void SetInverted(bool inverted);
+	void setDeadZone(float deadZone);
+	float getDeadZone();
 
 private:
 	float deadZone_;
-	bool inverted_;
 	int maxValue_, minValue_;
 
 	float value_;

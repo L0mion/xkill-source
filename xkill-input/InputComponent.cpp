@@ -84,52 +84,81 @@ void InputComponent::handleInput(float delta)
 
 		int nrAxes = state.axes.size();
 		if(nrAxes >= 1)
-			inputAttributes_->at(i).position.x = state.axes[0].GetValue();
+			inputAttributes_->at(i).position.x = state.axes[0]->GetValue();
 																		    
 		if(nrAxes >= 2)													    
-			inputAttributes_->at(i).position.y = state.axes[1].GetValue();
+			inputAttributes_->at(i).position.y = state.axes[1]->GetValue();
 																		    
 		if(nrAxes >= 3)													    
-			inputAttributes_->at(i).rotation.x = state.axes[2].GetValue() * delta;
+			inputAttributes_->at(i).rotation.x = state.axes[2]->GetValue() * delta;
 																		    
 		if(nrAxes >= 4)													    
-			inputAttributes_->at(i).rotation.y = state.axes[3].GetValue() * delta;
+			inputAttributes_->at(i).rotation.y = state.axes[3]->GetValue() * delta;
 
-		if(state.buttons.size() > 3)
+		//if(state.buttons.size() > 3)
+		//{
+		//	if(state.buttons[1]->isReleased())
+		//	{
+		//		Event_Rumble* er = new Event_Rumble(i, true, 100.0f, 1.0f, 1.0f);
+		//		EventManager::getInstance()->sendEvent(er);
+		//		delete er;
+		//	}
+
+		//	if(state.buttons[2]->isReleased())
+		//	{
+		//		Event_Rumble* er = new Event_Rumble(i, false, 100.0f, 0.0f, 0.0f);
+		//		EventManager::getInstance()->sendEvent(er);
+		//		delete er;
+		//	}
+
+		//	//Projectile test
+		//	if(state.buttons[0]->isDown())													   
+		//		inputAttributes_->at(i).fire = true;
+
+			//if(state.buttons.size() > 7)
+			//{
+			//	if(state.buttons[3]->isDown())
+			//		inputAttributes_->at(i).position.y = 1.0f;
+			//															    
+			//	if(state.buttons[4]->isDown())
+			//		inputAttributes_->at(i).position.x = -1.0f;
+
+			//	if(state.buttons[5]->isDown())
+			//		inputAttributes_->at(i).position.y = -1.0f;
+
+			//	if(state.buttons[6]->isDown())
+			//		inputAttributes_->at(i).position.x = 1.0f;
+			//}
+		//}
+
+		if(device->getBoolValue(0))
+			inputAttributes_->at(i).fire = true;
+
+		if(device->getBoolValue(1))
 		{
-			if(state.buttons[1].isReleased())
-			{
-				Event_Rumble* er = new Event_Rumble(i, true, 100.0f, 1.0f, 1.0f);
-				EventManager::getInstance()->sendEvent(er);
-				delete er;
-			}
-
-			if(state.buttons[2].isReleased())
-			{
-				Event_Rumble* er = new Event_Rumble(i, false, 100.0f, 0.0f, 0.0f);
-				EventManager::getInstance()->sendEvent(er);
-				delete er;
-			}
-
-			//Projectile test
-			if(state.buttons[0].isDown())													   
-				inputAttributes_->at(i).fire = true;
-
-			if(state.buttons.size() > 7)
-			{
-				if(state.buttons[3].isDown())
-					inputAttributes_->at(i).position.y = 1.0f;
-																		    
-				if(state.buttons[4].isDown())
-					inputAttributes_->at(i).position.x = -1.0f;
-
-				if(state.buttons[5].isDown())
-					inputAttributes_->at(i).position.y = -1.0f;
-
-				if(state.buttons[6].isDown())
-					inputAttributes_->at(i).position.x = 1.0f;
-			}
+			Event_Rumble* er = new Event_Rumble(i, true, 100.0f, 1.0f, 1.0f);
+			EventManager::getInstance()->sendEvent(er);
+			delete er;
 		}
+
+		if(device->getBoolValue(2))
+		{
+			Event_Rumble* er = new Event_Rumble(i, false, 100.0f, 0.0f, 0.0f);
+			EventManager::getInstance()->sendEvent(er);
+			delete er;
+		}
+
+		if(device->getBoolValue(3))
+			inputAttributes_->at(i).position.y = 1.0f;
+															
+		if(device->getBoolValue(4))
+			inputAttributes_->at(i).position.x = -1.0f;
+		
+		if(device->getBoolValue(5))
+			inputAttributes_->at(i).position.y = -1.0f;
+		
+		if(device->getBoolValue(6))
+			inputAttributes_->at(i).position.x = 1.0f;
 		
 		if(device->GetType() == device->QT_INPUT_DEVICE)
 		{

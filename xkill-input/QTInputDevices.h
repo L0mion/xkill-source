@@ -28,4 +28,6 @@ protected:
 	virtual void updateState();
 	virtual void createInputLayout();
 	virtual void createInputObjectsFromLayout();
+
+	virtual InputButtonObject* getButtonObject(int index);
 };

@@ -32,8 +32,9 @@
 ////////////////////////////////////
 
 #define SAFE_RELEASE(x) {if(x != NULL) x->Release(); x = NULL;} //Should probably not be here, needed for isXInputDevice
+#define SAFE_DELETE(x) {if(x != nullptr) delete x; x = nullptr;}
 
-class FileParser;
+class KeyMapper;
 
 //! Detects and manages devices and their input.
 /*!
@@ -124,6 +125,7 @@ private:
 	Shouldn't be able to go above four. Four is the limit that XInput sets on how many gamepads that can be handled.
 	*/
 	int nrOfXInputDevices_;
+	KeyMapper keyMapper_;
 
 	//! Creates and adds a new device
 	/*!
