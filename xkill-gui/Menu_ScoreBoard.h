@@ -19,8 +19,11 @@ public:
 		QWidget::setAttribute(Qt::WA_TranslucentBackground, true);
 		QWidget::setWindowFlags(Qt::SplashScreen);
 		QWidget::setAttribute(Qt::WA_ShowWithoutActivating);
+		setWindowFlags(Qt::WindowStaysOnBottomHint);
 		QWidget::setStyleSheet("QWidget{color: #fff; background-color: #000;}");
+		QWidget::setEnabled(false);
 	}
+
 
 	// Not working! What's wrong with Qt?
 	void mapListToAttributes(int numAttributes)
@@ -50,9 +53,10 @@ public:
 		//}
 	}
 
+
 	void onUpdate(float delta)
 	{
-		// Iternate list and update score
+		// Iterate list and update score
 		if(showMenu)
 		{
 			std::vector<PlayerAttribute>* allPlayers;		GET_ATTRIBUTES(allPlayers, PlayerAttribute, ATTRIBUTE_PLAYER);
@@ -71,9 +75,9 @@ public:
 					// Extract attributes from a playerAttribute
 					PlayerAttribute* player			=	&allPlayers->at(i);
 					HealthAttribute* health			=	&allHealth->at(player->healthAttribute.index);
-					RenderAttribute* render		=	&allRender->at(player->renderAttribute.index);			
+					RenderAttribute* render			=	&allRender->at(player->renderAttribute.index);			
 					SpatialAttribute* spatial		=	&allSpatial->at(render->spatialAttribute.index);
-					PositionAttribute* position	=	&allPositions->at(spatial->positionAttribute.index);
+					PositionAttribute* position		=	&allPositions->at(spatial->positionAttribute.index);
 
 					// Add row
 					QTreeWidgetItem* itm = new QTreeWidgetItem();
@@ -100,6 +104,7 @@ public:
 	void parentMoveEvent()
 	{
 		QPoint pos = parentWidget()->pos();
+		pos = QPoint();
 		int x = pos.x() + parentWidget()->width()/2 - this->width()/2;
 		int y = pos.y() + parentWidget()->height()/2 - this->height()/2;
 		move(x, y);

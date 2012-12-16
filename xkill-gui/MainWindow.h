@@ -7,7 +7,7 @@
 #include <xkill-utilities/IObserver.h>
 #include <xkill-utilities/EventManager.h>
 #include "ui_MainWindow.h"
-
+ #include <QApplication>
 #include "GameWidget.h"
 #include "MenuManager.h"
 
@@ -45,7 +45,7 @@ public:
 		menuManager = new MenuManager(this);
 
 		// setup signals and slots
-		connect(ui.actionFullscreen, SIGNAL(toggled(bool)), this, SLOT(toggleFullScreen(bool)));
+		connect(ui.actionFullscreen, SIGNAL(triggered()), this, SLOT(slot_toggleFullScreen()));
 		connect(ui.actionCap_FPS, SIGNAL(toggled(bool)), gameWidget, SLOT(slot_toggleCapFPS(bool)));
 		ui.actionCap_FPS->setChecked(true);
 		connect(ui.actionQuit, SIGNAL(triggered()), this, SLOT(close()));
@@ -115,6 +115,9 @@ protected:
 	// Behavior on keyboard input
 	void keyPressEvent(QKeyEvent* e)
 	{
+		if((e->key()==Qt::Key_Return) && (e->modifiers()==Qt::AltModifier))
+			slot_toggleFullScreen();
+
 		//switch (e->key()) 
 		//{
 		//case Qt::Key_Escape:
@@ -193,19 +196,19 @@ public slots:
 			MainWindow::setWindowTitle("XKILL  [" + title + "]");
 		};
 
-	void toggleFullScreen(bool isChecked)
-	{
-		if(isChecked)
+		void slot_toggleFullScreen()
 		{
-			ui.mainToolBar->hide();
-			this->showFullScreen();
-		}
-		else
-		{
-			ui.mainToolBar->show();
-			this->showNormal();
-		}
-	};
+			if(this->isFullScreen())
+			{
+				ui.mainToolBar->show();
+				this->showNormal();
+			}
+			else
+			{
+				ui.mainToolBar->hide();
+				this->showFullScreen();
+			}
+		};
 
 private:
 	void toggleMouseLock()

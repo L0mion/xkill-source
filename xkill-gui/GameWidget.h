@@ -53,10 +53,6 @@ public:
 	
 	QPaintEngine* paintEngine() const {return 0;}; // overrides Qt:s own paint engine; prevents flicker
 
-	void onUpdate(float delta)
-	{
-	}
-
 	void onEvent(Event* e)
 	{
 		EventType type = e->getType();
@@ -69,10 +65,6 @@ public:
 			break;
 		}
 	}
-
-	void toggleMenu()
-	{
-	};
 
 public slots:
 	// Runs every time gameTimer times out
