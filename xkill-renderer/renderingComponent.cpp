@@ -1,22 +1,7 @@
-#include <iostream>
-
 #include <xkill-utilities/AttributeType.h>
 #include <xkill-utilities/EventManager.h>
 #include <xkill-utilities/TexDesc.h>
 
-#include "d3dDebug.h"
-#include "CBManagement.h"
-#include "LightManagement.h"
-#include "ModelManagement.h"
-#include "TexManagement.h"
-#include "ModelD3D.h"
-#include "VB.h"
-#include "IB.h"
-#include "SubsetD3D.h"
-
-#include "M3DLoader.h"
-#include "AnimatedMesh.h"
-#include "SkinnedData.h"
 #include "Renderer.h"
 #include "renderingUtilities.h"
 #include "renderingComponent.h"

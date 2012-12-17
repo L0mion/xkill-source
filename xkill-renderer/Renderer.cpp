@@ -28,6 +28,7 @@
 //temp
 #include "AnimatedMesh.h"
 #include "M3DLoader.h"
+#include "SkinnedData.h"
 
 Renderer::Renderer(HWND windowHandle)
 {

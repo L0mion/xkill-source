@@ -90,7 +90,7 @@ void ManagementCB::updateCBSubset(ID3D11DeviceContext* devcon,
 
 	devcon->UpdateSubresource(cbSubset_, 0, 0, &cbDesc, 0, 0);
 }
-void CBManagement::updateCBBone(ID3D11DeviceContext* devcon, std::vector<DirectX::XMFLOAT4X4> boneTransforms)
+void ManagementCB::updateCBBone(ID3D11DeviceContext* devcon, std::vector<DirectX::XMFLOAT4X4> boneTransforms)
 {
 	unsigned int numBones = boneTransforms.size();
 	if(numBones > CB_BONE_DESC_NUM_BONES)
