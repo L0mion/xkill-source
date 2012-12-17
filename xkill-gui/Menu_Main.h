@@ -2,6 +2,8 @@
 
 #include <QMainWindow>
 #include <QKeyEvent>
+#include <xkill-utilities/EventManager.h>
+#include <xkill-utilities/AttributeType.h>
 #include "ToggleHelper.h"
 #include "ui_MainMenu2.h" 
 #include <QtXml>
@@ -32,9 +34,14 @@ public:
 		connect(ui.pushButton_AddLevel, SIGNAL(clicked()), this, SLOT(slot_addLevel()));
 		connect(ui.pushButton_SaveLevel, SIGNAL(clicked()), this, SLOT(slot_saveLevel()));
 		connect(ui.pushButton_RemoveLevel, SIGNAL(clicked()), this, SLOT(slot_removeLevel()));
-
+		connect(ui.pushButton_editorRefresh, SIGNAL(clicked()), this, SLOT(slot_EditorRefresh()));
+		
 		filePath = QString("../../xkill-resources/xkill-scripts/levels.xml");
 		model = new QStandardItemModel(0, 1, this);
+		editorModel = new QStandardItemModel(0, 2, this);
+
+		ui.treeView_EntityBrowser->setModel(editorModel);
+
 		loadXML();
 	}
 
@@ -47,9 +54,14 @@ public:
 		move(x, y);
 	}
 
+	QStandardItemModel* editorModel;
+
+	
+
 protected:
 	QStandardItemModel* model;
 	QString filePath;
+
 
 	void loadXML()
 	{
@@ -104,6 +116,71 @@ public slots:
 			QStandardItem* name = levels->child(levelId,0);
 			QStandardItem* desc = name->child(0,0);
 			ui.textBrowser_LevelInfo->setText(desc->text());
+		}
+	}
+
+	void slot_EditorRefresh()
+	{
+		// Iterate list and update score
+		std::vector<PlayerAttribute>* allPlayers;		GET_ATTRIBUTES(allPlayers, PlayerAttribute, ATTRIBUTE_PLAYER);
+		std::vector<HealthAttribute>* allHealth;		GET_ATTRIBUTES(allHealth, HealthAttribute, ATTRIBUTE_HEALTH);
+		std::vector<RenderAttribute>* allRender;		GET_ATTRIBUTES(allRender, RenderAttribute, ATTRIBUTE_RENDER);
+		std::vector<SpatialAttribute>* allSpatial;		GET_ATTRIBUTES(allSpatial, SpatialAttribute, ATTRIBUTE_SPATIAL);
+		std::vector<PositionAttribute>* allPositions;	GET_ATTRIBUTES(allPositions, PositionAttribute, ATTRIBUTE_POSITION);
+
+		// Update tree widget
+		ui.treeWidget->clear();
+		//editorModel->clear();
+		std::vector<int>* allPlayerOwner;				GET_ATTRIBUTE_OWNERS(allPlayerOwner, ATTRIBUTE_PLAYER);
+		QStandardItem* playersItm = new QStandardItem("Players");
+		editorModel->appendRow(playersItm);
+
+
+		editorModel->setItem(0,1, new QStandardItem("Row"));
+
+		for(unsigned i=0; i<allPlayerOwner->size(); i++)
+		{
+			if(allPlayerOwner->at(i)!=0)
+			{
+				// Extract attributes from a playerAttribute
+				PlayerAttribute* player			=	&allPlayers->at(i);
+				HealthAttribute* health			=	&allHealth->at(player->healthAttribute.index);
+				RenderAttribute* render			=	&allRender->at(player->renderAttribute.index);			
+				SpatialAttribute* spatial		=	&allSpatial->at(render->spatialAttribute.index);
+				PositionAttribute* position		=	&allPositions->at(spatial->positionAttribute.index);
+
+				// Player
+				QStandardItem* playerItm = new QStandardItem(QString::number(i));
+				playersItm->appendRow(playerItm);
+
+				// Position
+				int pos_x = position->position.x;
+				int pos_y = position->position.y;
+				int pos_z = position->position.z;
+				QString str_position = QString::number(pos_x) + ", "  + QString::number(pos_y) + ", "  + QString::number(pos_z);
+				
+				// Render
+				QStandardItem* renderItm = new QStandardItem("Render");
+				playerItm->appendRow(renderItm);
+
+				// MeshID
+				QStandardItem* meshIdItm = new QStandardItem("MeshID");
+				playerItm->appendRow(meshIdItm);
+
+				meshIdItm->appendRow(new QStandardItem(QString::number(render->meshID)));
+
+				// Tex
+				QStandardItem* textureIdItm = new QStandardItem("TextureID");
+				playerItm->appendRow(textureIdItm);
+
+				QList<QStandardItem*> list;
+				list.append(new QStandardItem(QString::number(render->textureID)));
+				textureIdItm->appendColumn(list);
+
+				playerItm->appendRow( new QStandardItem("Position"));
+				playerItm->appendRow( new QStandardItem(str_position));
+				playerItm->appendRow( new QStandardItem("Health"));
+			}
 		}
 	}
 
