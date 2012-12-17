@@ -31,6 +31,7 @@ bool GameComponent::init()
 	GET_ATTRIBUTES(projectileAttributes_, ProjectileAttribute, ATTRIBUTE_PROJECTILE);
 	GET_ATTRIBUTES(physicsAttributes_, PhysicsAttribute, ATTRIBUTE_PHYSICS);
 	GET_ATTRIBUTES(spawnPointAttributes_, SpawnPointAttribute, ATTRIBUTE_SPAWNPOINT);
+	GET_ATTRIBUTES(weaponStatsAttributes_, WeaponStatsAttribute, ATTRIBUTE_WEAPONSTATS);
 
 	SEND_EVENT(&Event_CreateSpawnPoint(Float3(-1.5f, 3.0f, 0.0f), 2.0f));
 	SEND_EVENT(&Event_CreateSpawnPoint(Float3(1.0f, 5.0f, 0.0f), 2.0f));
@@ -62,7 +63,7 @@ void GameComponent::onEvent(Event* e)
 
 void GameComponent::onUpdate(float delta)
 {
-	//Handle updates of player attributes
+	//Handles updates of player attributes
 	std::vector<int>* playerAttributesOwners;		GET_ATTRIBUTE_OWNERS(playerAttributesOwners, ATTRIBUTE_PLAYER);
 	for(unsigned i=0; i<playerAttributesOwners->size(); i++)
 	{
@@ -74,68 +75,92 @@ void GameComponent::onUpdate(float delta)
 			CameraAttribute* camera		=	&cameraAttributes_->at(player->cameraAttribute.index);
 			InputAttribute* input		=	&inputAttributes_->at(player->inputAttribute.index);
 			RenderAttribute* render		=	&renderAttributes_->at(player->renderAttribute.index);
+			WeaponStatsAttribute* weaponStats = &weaponStatsAttributes_->at(player->weaponStatsAttribute.index);
 			SpatialAttribute* spatial	=	&spatialAttribute_->at(render->spatialAttribute.index); //Extract spatial attribute from the render attribute from the above playerAttribute
 			PositionAttribute* position	=	&positionAttributes_->at(spatial->positionAttribute.index); //Extract position attribute from the above spatial attribute
-
+			
 			//Deathmatch end logic
 			if(player->priority >= 4)
 			{
 				//SEND_EVENT(&Event_EndDeathmatch());
 			}
 
+			if(input->changeWeapon)
+			{
+				input->changeWeapon = false;
+				weaponStats->setWeaponStats(WeaponStatsAttribute::SCATTER_SHOT, WeaponStatsAttribute::AUTO);
+			}
 
 			//Firing logic
-			if(input->fire) //Create a projectile
+			if(input->fire)
 			{
 				input->fire = false;
 
-				// Position
-				Float3 pos;
-				pos.x = position->position.x;
-				pos.y = position->position.y;
-				pos.z = position->position.z;
+				if(weaponStats->nrOfShotsLeftInClip > 0 && weaponStats->cooldownLeft <= 0.0f)
+				{
+					weaponStats->cooldownLeft = weaponStats->cooldownBetweenShots;
+					weaponStats->totalNrOfShots--;
+					weaponStats->nrOfShotsLeftInClip--;
 
-				// extract camera orientation to determine velocity
-				DirectX::XMFLOAT3 lookAtFloat3;
-				lookAtFloat3.x = camera->mat_view._13;
-				lookAtFloat3.y = camera->mat_view._23;
-				lookAtFloat3.z = camera->mat_view._33;
-				DirectX::XMVECTOR lookAt = DirectX::XMLoadFloat3(&lookAtFloat3);
-				lookAt = DirectX::XMVector3Normalize(lookAt);
+					// Position
+					Float3 pos;
+					pos.x = position->position.x;
+					pos.y = position->position.y;
+					pos.z = position->position.z;
+					
+					// extract camera orientation to determine velocity
+					DirectX::XMFLOAT3 lookAtFloat3;
+					lookAtFloat3.x = camera->mat_view._13;
+					lookAtFloat3.y = camera->mat_view._23;
+					lookAtFloat3.z = camera->mat_view._33;
+					DirectX::XMVECTOR lookAt = DirectX::XMLoadFloat3(&lookAtFloat3);
+					lookAt = DirectX::XMVector3Normalize(lookAt);
 
-				//Direction and speed
-				float lookAtX = DirectX::XMVectorGetX(lookAt);
-				float lookAtY = DirectX::XMVectorGetY(lookAt);
-				float lookAtZ = DirectX::XMVectorGetZ(lookAt);
-				Float3 velocity(lookAtX, lookAtY, lookAtZ);
-				velocity.x *= 1000.0f;
-				velocity.y *= 1000.0f;
-				velocity.z *= 1000.0f;
-				// add rotation displacement on position 
-				float d = 0.2f;
-				pos.x += lookAtX*d;
-				pos.y += lookAtY*d;
-				pos.z += lookAtZ*d;
-				
-				// Rotation
-				DirectX::XMMATRIX rotationMatrix(	camera->mat_view._11,	camera->mat_view._21,	camera->mat_view._31,	0.0f,
-													camera->mat_view._12,	camera->mat_view._22,	camera->mat_view._32,	0.0f, 
-													camera->mat_view._13,	camera->mat_view._23,	camera->mat_view._33,	0.0f,
-													0.0f,					0.0f,					0.0f,					1.0f);
+					//Direction and speed
+					float lookAtX = DirectX::XMVectorGetX(lookAt);
+					float lookAtY = DirectX::XMVectorGetY(lookAt);
+					float lookAtZ = DirectX::XMVectorGetZ(lookAt);
+					Float3 velocity(lookAtX, lookAtY, lookAtZ);
+					velocity.x *= weaponStats->velocityOfEachProjectile;
+					velocity.y *= weaponStats->velocityOfEachProjectile;
+					velocity.z *= weaponStats->velocityOfEachProjectile;
+					// add rotation displacement on position 
+					float d = 0.5f;
+					pos.x += lookAtX*d;
+					pos.y += lookAtY*d;
+					pos.z += lookAtZ*d;
 
-				DirectX::XMVECTOR orientationQuaternion = DirectX::XMQuaternionRotationMatrix(rotationMatrix);
-				float orientationQuaternionX = DirectX::XMVectorGetX(orientationQuaternion);
-				float orientationQuaternionY = DirectX::XMVectorGetY(orientationQuaternion);
-				float orientationQuaternionZ = DirectX::XMVectorGetZ(orientationQuaternion);
-				float orientationQuaternionW = DirectX::XMVectorGetW(orientationQuaternion);
+					// Rotation
+					DirectX::XMMATRIX rotationMatrix(	camera->mat_view._11,	camera->mat_view._21,	camera->mat_view._31,	0.0f,
+														camera->mat_view._12,	camera->mat_view._22,	camera->mat_view._32,	0.0f, 
+														camera->mat_view._13,	camera->mat_view._23,	camera->mat_view._33,	0.0f,
+														0.0f,					0.0f,					0.0f,					1.0f);
 
-				Float4 rot = Float4(orientationQuaternionX, orientationQuaternionY, orientationQuaternionZ, orientationQuaternionW);
+					DirectX::XMVECTOR orientationQuaternion = DirectX::XMQuaternionRotationMatrix(rotationMatrix);
+					float orientationQuaternionX = DirectX::XMVectorGetX(orientationQuaternion);
+					float orientationQuaternionY = DirectX::XMVectorGetY(orientationQuaternion);
+					float orientationQuaternionZ = DirectX::XMVectorGetZ(orientationQuaternion);
+					float orientationQuaternionW = DirectX::XMVectorGetW(orientationQuaternion);
 
-				Float3 gravity = Float3(0.0f, 0.0f, 0.0f);
+					Float4 rot = Float4(orientationQuaternionX, orientationQuaternionY, orientationQuaternionZ, orientationQuaternionW);
 
-				// Send event
-				SEND_EVENT(&Event_CreateProjectile(pos, velocity, rot, gravity, playerAttributesOwners->at(i)));
-				input->fire = false;
+					Float3 gravity = Float3(0.0f, 0.0f, 0.0f);
+
+					// Send event
+					for(int j=0;j<weaponStats->nrOfProjectilesForEachShot;j++)
+					{
+						SEND_EVENT(&Event_CreateProjectile(pos, velocity, rot, weaponStats->damgeOfEachProjectile, playerAttributesOwners->at(i)));
+					}
+				}
+				else if(weaponStats->nrOfShotsLeftInClip <= 0)
+				{
+					//weaponStats->
+					DEBUGPRINT("Cannot shot: Out of ammo. Try reloading.");
+				}
+				else if(weaponStats->cooldownLeft > 0)
+				{
+					DEBUGPRINT("Cannot shot: weapon cooldown. Be patient.");
+				}
 			}
 
 			//Health and respawn logic for players
@@ -184,14 +209,14 @@ void GameComponent::onUpdate(float delta)
 					PhysicsAttribute* physicsAttribute = &physicsAttributes_->at(i);
 					if(projectile->currentLifeTimeLeft < 8.0f)
 					{
-						physicsAttribute->collisionResponse = true;
+						//physicsAttribute->collisionResponse = true;
 					}
 				}
 			}
 		}
 	}
 
-	//Handle updates of spawn point attributes (update "timeSinceLastSpawn" timer)
+	//Handles updates of spawn point attributes (update "timeSinceLastSpawn" timer)
 	std::vector<int>* spawnPointAttributesOwners;		GET_ATTRIBUTE_OWNERS(spawnPointAttributesOwners, ATTRIBUTE_SPAWNPOINT);
 	for(unsigned i=0; i<spawnPointAttributesOwners->size(); i++)
 	{
@@ -199,6 +224,40 @@ void GameComponent::onUpdate(float delta)
 		{
 			SpawnPointAttribute* spawnPoint = &spawnPointAttributes_->at(i);
 			spawnPoint->timeSinceLastSpawn += delta;
+		}
+	}
+
+	//Handles updates of weapon stats attributes
+	std::vector<int>* weaponStatsAttributesOwners;		GET_ATTRIBUTE_OWNERS(weaponStatsAttributesOwners, ATTRIBUTE_WEAPONSTATS);
+	for(unsigned i=0; i<weaponStatsAttributesOwners->size(); i++)
+	{
+		if(weaponStatsAttributesOwners->at(i)!=0)
+		{
+			WeaponStatsAttribute* weaponStats = &weaponStatsAttributes_->at(i);
+			
+			//Cooldown after each shot
+			weaponStats->cooldownLeft -= delta;
+
+			//Reloading
+			if(weaponStats->totalNrOfShots > 0 && weaponStats->nrOfShotsLeftInClip <= 0)
+			{
+				DEBUGPRINT("Reloading...");
+				weaponStats->reloadTimeLeft -= delta;
+				if(weaponStats->reloadTimeLeft <= 0)
+				{
+					weaponStats->reloadTimeLeft = weaponStats->reloadTime;
+
+					if(weaponStats->clipSize > weaponStats->totalNrOfShots)
+					{
+						weaponStats->nrOfShotsLeftInClip = weaponStats->totalNrOfShots;
+					}
+					else
+					{
+						weaponStats->nrOfShotsLeftInClip = weaponStats->clipSize;
+					}
+					weaponStats->totalNrOfShots -= weaponStats->nrOfShotsLeftInClip;
+				}
+			}
 		}
 	}
 }

@@ -56,9 +56,8 @@ public:
 
 		CREATE_ATTRIBUTE(PhysicsAttribute, physics, entity);
 		CONNECT_ATTRIBUTES(physics, spatial);
-		
 		physics->meshID = render->meshID;
-
+		
 		CREATE_ATTRIBUTE(InputAttribute, input, entity);
 		CONNECT_ATTRIBUTES(input, physics);
 
@@ -66,11 +65,15 @@ public:
 		CONNECT_ATTRIBUTES(camera, spatial);
 
 		CREATE_ATTRIBUTE(HealthAttribute, health, entity);
+
+		CREATE_ATTRIBUTE(WeaponStatsAttribute, weaponStats, entity);
+
 		CREATE_ATTRIBUTE(PlayerAttribute, player, entity);
 		CONNECT_ATTRIBUTES(player, render);
 		CONNECT_ATTRIBUTES(player, input);
 		CONNECT_ATTRIBUTES(player, camera);
 		CONNECT_ATTRIBUTES(player, health);
+		CONNECT_ATTRIBUTES(player, weaponStats);
 		//player->name = "Process Name";
 		static int playerId = 0;
 		player->id = playerId;
@@ -120,14 +123,15 @@ public:
 		physics->isProjectile = true;
 		physics->linearVelocity = e->velocity;
 		physics->mass = 100.0f;
-		physics->gravity = e->gravity;
-		physics->collisionResponse = false;
+		physics->gravity = Float3(0.0f, 0.0f, 0.0f);
+		physics->collisionResponse = true;
 
 		CREATE_ATTRIBUTE(ProjectileAttribute, projectile, entity);
 		CONNECT_ATTRIBUTES(projectile, physics);
 		projectile->entityIdOfCreator = e->entityIdOfCreator;
 
 		CREATE_ATTRIBUTE(DamageAttribute, damage, entity);
+		damage->damage = e->damage;
 		damage->owner_entityID = e->entityIdOfCreator;
 	}
 

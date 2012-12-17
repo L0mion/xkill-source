@@ -62,6 +62,7 @@ enum DLL_U AttributeType
 	ATTRIBUTE_HEALTH,
 	ATTRIBUTE_DAMAGE,
 	ATTRIBUTE_SPAWNPOINT,
+	ATTRIBUTE_WEAPONSTATS,
 
 	// this is needed, don't touch!
 	ATTRIBUTE_LAST
@@ -178,6 +179,7 @@ struct DLL_U InputAttribute : public IAttribute
 	Float2 position;
 	Float2 rotation;
 	bool fire;
+	bool changeWeapon;
 };
 
 /// Stores everything SoundComponent needs to know to play a 3D sound
@@ -277,14 +279,41 @@ struct DLL_U SpawnPointAttribute : public IAttribute
 
 struct DLL_U WeaponStatsAttribute : public IAttribute
 {
+	enum AmmunitionType
+	{
+		BULLET,
+		SCATTER_SHOT,
+		EXPLOSIVE
+	};
+
+	enum FiringMode
+	{
+		SINGLE,
+		SEMI,
+		AUTO
+	};
+
 	WeaponStatsAttribute();
+	void setWeaponStats(AmmunitionType ammunitionType, FiringMode firingMode);
+
 	~WeaponStatsAttribute();
 
-	float damgeOfEachProjectile;
-	int ammo;						//!< Number of shots that can be fired.
+	AmmunitionType ammunitionType;
+	FiringMode firingMode;
+
+	int totalNrOfShots;				//!< Total number of shots that can be fired. A value of 0 denotes unlimited ammunition.
+	int clipSize;					//!< Number of shots that can be fired before reload is needed. A value of 0 denotes that no reload is necessary.
+	int nrOfShotsLeftInClip;
+
+	float reloadTime;				//!< Number of milliseconds it takes to reload.
+	float reloadTimeLeft;			//!< Reload progress, when 0 the weapon is reloaded.
 	float cooldownBetweenShots;		//!< Number of milliseconds that must pass between each shot.
 	float cooldownLeft;				//!< Number of milliseconds until a new shot can be fired.
-	
+
 	float velocityOfEachProjectile;
 	int nrOfProjectilesForEachShot; //!< If > 1 then scattershot else singleshot.
+	float damgeOfEachProjectile;
+
+	bool isExplosive;				//!< Determines if the projectile explodes on impact.
+	float explosionSphereRadius;	//!< Radius of explosion sphere.
 };

@@ -73,12 +73,12 @@ Event_ShowMessageBox::Event_ShowMessageBox(std::string message) : Event(EVENT_SH
 	this->message = message;
 }
 
-Event_CreateProjectile::Event_CreateProjectile(Float3 position, Float3 velocity, Float4 rotation, Float3 gravity, int entityIdOfCreator) : Event(EVENT_CREATE_PROJECTILE)
+Event_CreateProjectile::Event_CreateProjectile(Float3 position, Float3 velocity, Float4 rotation, int damage, int entityIdOfCreator) : Event(EVENT_CREATE_PROJECTILE)
 {
 	this->position = position;
 	this->velocity = velocity;
 	this->rotation = rotation;
-	this->gravity = gravity;
+	this->damage = damage;
 	this->entityIdOfCreator = entityIdOfCreator;
 }
 

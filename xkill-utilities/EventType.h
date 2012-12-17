@@ -218,13 +218,13 @@ public:
 class DLL_U Event_CreateProjectile : public Event
 {
 public:
-	int entityIdOfCreator;
 	Float3 position;
 	Float3 velocity;
-	Float3 gravity;
 	Float4 rotation;
+	int damage;
+	int entityIdOfCreator;
 
-	Event_CreateProjectile(Float3 position, Float3 velocity, Float4 rotation, Float3 gravity, int entityIdOfCreator);
+	Event_CreateProjectile(Float3 position, Float3 velocity, Float4 rotation, int damage, int entityIdOfCreator);
 };
 
 class MeshModel;

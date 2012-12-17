@@ -60,7 +60,6 @@ void PhysicsObject::preStep(CollisionShapeManager* collisionShapeManager,Physics
 
 	gravity_ = WorldScaling*btVector3(physicsAttribute->gravity.x, physicsAttribute->gravity.y, physicsAttribute->gravity.z);
 
-	/*
 	if(physicsAttribute->collisionResponse)
 	{
 		setCollisionFlags(getCollisionFlags() & ~CF_NO_CONTACT_RESPONSE);
@@ -69,7 +68,6 @@ void PhysicsObject::preStep(CollisionShapeManager* collisionShapeManager,Physics
 	{
 		setCollisionFlags(getCollisionFlags() | CF_NO_CONTACT_RESPONSE);
 	}
-	*/
 
 	if(physicsAttribute->isProjectile)
 	{

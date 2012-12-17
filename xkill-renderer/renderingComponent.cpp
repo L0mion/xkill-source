@@ -167,8 +167,9 @@ HRESULT RenderingComponent::init()
 	if(SUCCEEDED(hr))
 		hr = initGBuffers();
 
-	if(SUCCEEDED(hr))
-		initAnimations();
+	//Removed in order to decrease startup time.
+	//if(SUCCEEDED(hr))
+	//	initAnimations();
 
 	return hr;
 }

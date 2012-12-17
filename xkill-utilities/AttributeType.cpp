@@ -104,6 +104,7 @@ CameraAttribute::~CameraAttribute()
 InputAttribute::InputAttribute()
 {
 	fire = false;
+	changeWeapon = false;
 	ZeroMemory(&position,sizeof(position));
 	ZeroMemory(&rotation,sizeof(rotation));
 	DirectX::XMFLOAT3 test;
@@ -172,12 +173,63 @@ SpawnPointAttribute::~SpawnPointAttribute()
 
 WeaponStatsAttribute::WeaponStatsAttribute()
 {
-	ammo = 10;
-	cooldownBetweenShots = 0.0f;
-	cooldownLeft = cooldownBetweenShots;
-	
-	velocityOfEachProjectile = 100.0f;
+	setWeaponStats(BULLET, SINGLE);
+}
+
+void WeaponStatsAttribute::setWeaponStats(AmmunitionType ammunitionType, FiringMode firingMode)
+{
+	this->ammunitionType = ammunitionType;
+	this->firingMode = firingMode;
+
+	totalNrOfShots = 100;
+	clipSize = 10;
+	reloadTime = 2000.0f;
 	nrOfProjectilesForEachShot = 1;
+
+	isExplosive = false;
+	explosionSphereRadius = 1.0f;
+
+	switch(ammunitionType)
+	{
+	case BULLET: //One powerful accurate bullet.
+		velocityOfEachProjectile = 2500.0f;
+		damgeOfEachProjectile = 5;
+		break;
+	case SCATTER_SHOT: //Many weak and less accurate bullets.
+		velocityOfEachProjectile = 1000.0f;
+		nrOfProjectilesForEachShot = 10;
+		damgeOfEachProjectile = 2;
+		break;
+	case EXPLOSIVE: //One powerful accurate exploding bullet.
+		velocityOfEachProjectile = 500.0f;
+		damgeOfEachProjectile = 10;
+		isExplosive = true;
+		break;
+	}
+
+	switch(firingMode)
+	{
+	case SINGLE: //Reload after each shot. Fast reload time.
+		cooldownBetweenShots = 0.0f;
+		reloadTime = 1.0f;
+		clipSize = 1;
+		break;
+	case SEMI: //Reload after a number of shots. Medium load time.
+		cooldownBetweenShots = 0.5f;
+		reloadTime = 2.0f;
+		explosionSphereRadius *= 0.5f;
+		clipSize = 10;
+		break;
+	case AUTO: //Reload after a large number of shots. Long reload time.
+		cooldownBetweenShots = 0.1f;
+		reloadTime = 3.0f;
+		explosionSphereRadius *= 0.15f;
+		clipSize = 50;
+		break;
+	}
+	cooldownLeft = cooldownBetweenShots;
+	reloadTimeLeft = reloadTime;
+	nrOfShotsLeftInClip = clipSize;
 }
 WeaponStatsAttribute::~WeaponStatsAttribute()
 {

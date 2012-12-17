@@ -16,6 +16,7 @@ struct PositionAttribute;
 struct ProjectileAttribute;
 struct PhysicsAttribute;
 struct SpawnPointAttribute;
+struct WeaponStatsAttribute;
 
 class GameComponent :
 	public IObserver
@@ -34,6 +35,7 @@ private:
 	std::vector<ProjectileAttribute>* projectileAttributes_;
 	std::vector<PhysicsAttribute>* physicsAttributes_;
 	std::vector<SpawnPointAttribute>* spawnPointAttributes_;
+	std::vector<WeaponStatsAttribute>* weaponStatsAttributes_;
 
 public:
 	GameComponent(void);
