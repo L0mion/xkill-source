@@ -7,9 +7,9 @@
 #include <xkill-utilities/IObserver.h>
 #include <xkill-utilities/EventManager.h>
 #include "ui_MainWindow.h"
-
+ #include <QApplication>
 #include "GameWidget.h"
-#include "Menu.h"
+#include "MenuManager.h"
 
 #include <Windows.h> //check. Separates this file into .cpp and .h file to remove windows.h inclusion from this file.
 
@@ -20,7 +20,7 @@ class MainWindow : public QMainWindow, public IObserver
 private:
 	Ui::MainWindowClass ui;
 	GameWidget* gameWidget;
-	Menu* menu;
+	MenuManager* menuManager;
 	bool hasMouseLock;
 
 public:
@@ -32,6 +32,7 @@ public:
 
 		// create UI generated from XML file
 		ui.setupUi(this);
+		QApplication::setStyle(new QCleanlooksStyle);
 		MainWindow::setWindowTitle("XKILL");
 		resize(800, 600);
 
@@ -43,20 +44,20 @@ public:
 		this->setCentralWidget(gameWidget);
 		setMouseTracking(true);
 		hasMouseLock = false;
+		menuManager = new MenuManager(this);
 
 		// setup signals and slots
-		connect(ui.actionFullscreen, SIGNAL(toggled(bool)), this, SLOT(toggleFullScreen(bool)));
+		connect(ui.actionFullscreen, SIGNAL(triggered()), this, SLOT(slot_toggleFullScreen()));
 		connect(ui.actionCap_FPS, SIGNAL(toggled(bool)), gameWidget, SLOT(slot_toggleCapFPS(bool)));
 		ui.actionCap_FPS->setChecked(true);
 		connect(ui.actionQuit, SIGNAL(triggered()), this, SLOT(close()));
 		connect(gameWidget, SIGNAL(signal_fpsChanged(QString)), this, SLOT(slot_setTitle(QString)));
-
-		menu = new Menu(this);
 	}
 
 	~MainWindow()
 	{
 		delete gameWidget;
+		delete menuManager;
 	}
 
 	void onUpdate(float delta)
@@ -116,22 +117,28 @@ protected:
 	// Behavior on keyboard input
 	void keyPressEvent(QKeyEvent* e)
 	{
-		switch (e->key()) 
-		{
-		case Qt::Key_Escape:
-			// TRUE: Quit program
-			if(ui.actionFullscreen->isChecked())
-				ui.actionFullscreen->setChecked(false);
-			// ELSE: Quit fullscreen
-			else
-				MainWindow::close();
-			break;
-		case Qt::Key_Tab:
-			menu->toggleMenu();
-			break;
-		default:
-			break;
-		}
+		if((e->key()==Qt::Key_Return) && (e->modifiers()==Qt::AltModifier))
+			slot_toggleFullScreen();
+
+		//switch (e->key()) 
+		//{
+		//case Qt::Key_Escape:
+		//	// TRUE: Quit program
+		//	if(ui.actionFullscreen->isChecked())
+		//		ui.actionFullscreen->setChecked(false);
+		//	// ELSE: Quit fullscreen
+		//	else
+		//		MainWindow::close();
+		//	break;
+		//case Qt::Key_Tab:
+		//	menu->toggleMenu();
+		//	break;
+		//default:
+		//	break;
+		//}
+
+		// Detect keypress in menu
+		menuManager->keyPressEvent(e);
 
 		// Inform about key press
 		SEND_EVENT(&Event_KeyPress(e->key()));
@@ -139,7 +146,7 @@ protected:
 
 	void moveEvent(QMoveEvent *e)
 	{
-		menu->parentMoveEvent();
+		menuManager->moveEvent();
 	}
 
 	void resizeEvent(QResizeEvent* e)
@@ -147,7 +154,7 @@ protected:
 		QWidget::resizeEvent(e);
 
 		// Reposition menu
-		menu->parentMoveEvent();
+		menuManager->moveEvent();
 	};
 
 	void showMenu()
@@ -185,25 +192,25 @@ protected:
 		SEND_EVENT(&Event_KeyRelease(e->key()));
 	};
 
-	public slots:
+public slots:
 		void slot_setTitle(QString title)
 		{
 			MainWindow::setWindowTitle("XKILL  [" + title + "]");
 		};
 
-	void toggleFullScreen(bool isChecked)
-	{
-		if(isChecked)
+		void slot_toggleFullScreen()
 		{
-			ui.mainToolBar->hide();
-			this->showFullScreen();
-		}
-		else
-		{
-			ui.mainToolBar->show();
-			this->showNormal();
-		}
-	};
+			if(this->isFullScreen())
+			{
+				ui.mainToolBar->show();
+				this->showNormal();
+			}
+			else
+			{
+				ui.mainToolBar->hide();
+				this->showFullScreen();
+			}
+		};
 
 private:
 	void toggleMouseLock()

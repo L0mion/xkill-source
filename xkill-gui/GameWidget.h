@@ -12,7 +12,6 @@
 
 #include "ui_MainWindow.h"
 #include "GameTimer.h"
-#include "Menu.h"
 
 
 class GameWidget : public QWidget, public IObserver
@@ -54,10 +53,6 @@ public:
 	
 	QPaintEngine* paintEngine() const {return 0;}; // overrides Qt:s own paint engine; prevents flicker
 
-	void onUpdate(float delta)
-	{
-	}
-
 	void onEvent(Event* e)
 	{
 		EventType type = e->getType();
@@ -70,10 +65,6 @@ public:
 			break;
 		}
 	}
-
-	void toggleMenu()
-	{
-	};
 
 public slots:
 	// Runs every time gameTimer times out
@@ -127,7 +118,7 @@ private:
 			// convert statistics into QString
 			QString stats;
 			stats = "FPS:  %1  Frame Time:  %2 (ms)";
-			stats = stats.arg(fps).arg(msPerFrame);
+			stats = stats.arg(fps).arg((int)msPerFrame);
 
 			// send signal
 			emit signal_fpsChanged(stats);
