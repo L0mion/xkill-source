@@ -13,6 +13,8 @@
 #include "MdlDesc.h"
 #include "MdlDescModel.h"
 
+#include "LoaderFbx.h"
+
 IOComponent::IOComponent()
 {
 	texNameToTexID = nullptr;
@@ -37,6 +39,9 @@ bool IOComponent::init()
 	sucessfulInit = initTexDescs();
 	if(sucessfulInit)
 		sucessfulInit = initMdlDescs();
+
+	fbxLoader_ = new LoaderFbx();
+	fbxLoader_->init("../../xkill-resources/xkill-models/xkill_process_18.fbx");
 
 	return sucessfulInit;
 }
