@@ -1,7 +1,7 @@
 #ifndef LEANWINDOWS_H
 #define LEANWINDOWS_H
 
-//Substittute for <windows.h> when include is needed in .h-files.
+//Substitute for <windows.h> when include is needed in .h-files.
 
 #define WIN32_LEAN_AND_MEAN //Added 2012-12-14 14.21. Background: "window.h" include in .h-files due to failed HWND forward declarations.
 	
