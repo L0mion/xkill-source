@@ -18,22 +18,11 @@
 class ManagementFX : public D3DInterface
 {
 public:
-	//! Sets FXManagement to default state.
-	ManagementFX();
-	//! Releases all memory and returns FXManagement to defualt state.
-	~ManagementFX();
+	ManagementFX();		//!< Sets FXManagement to default state.
+	~ManagementFX();	//!< Releases all memory and returns FXManagement to defualt state.
 	
-	//! Releases all memory and returns FXManagement to defualt state.
-	void reset();
-
-	//! Initializes FXManagement
-	/*!
-	\param device DirectX Device-pointer.
-	\return Any error encountered.
-	\sa initShaders
-	\sa initILs
-	*/
-	HRESULT init(ID3D11Device* device);
+	void reset(); //!< Releases all memory and returns FXManagement to defualt state.
+	HRESULT init(ID3D11Device* device);	//!< Initializes FXManagement
 
 	ShaderVS* getDefaultVS()			const;
 	ShaderPS* getDefaultPS()			const;

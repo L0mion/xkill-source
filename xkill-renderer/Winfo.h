@@ -3,13 +3,11 @@
 
 #define CS_TILE_SIZE 16
 
+typedef struct HWND__* HWND;
+
 static const unsigned int MULTISAMPLES_GBUFFERS		= 1;
 static const unsigned int MULTISAMPLES_BACKBUFFER	= 1;
 static const unsigned int MULTISAMPLES_DEPTHBUFFER	= 1;
-
-typedef void*	PVOID;
-typedef PVOID	HANDLE;
-typedef HANDLE	HWND;
 
 class Winfo
 {

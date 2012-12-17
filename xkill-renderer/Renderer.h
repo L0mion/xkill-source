@@ -2,8 +2,15 @@
 #define XKILL_RENDERER_RENDERER_H
 
 typedef long HRESULT;
+typedef struct HWND__* HWND;
+
+struct RenderAttribute;
+struct CameraAttribute;
+struct SpatialAttribute;
+struct PositionAttribute;
 
 class Winfo;
+class TexDesc;
 
 class ManagementD3D;
 class ManagementFX;
@@ -17,14 +24,17 @@ class ManagementRS;
 class ManagementGBuffer;
 class ManagementDebug;
 
-class RenderAttribute;
-class CameraAttribute;
-class SpatialAttribute;
-class PositionAttribute;
-
-class ManagementDebug;
-
 #include <vector>
+
+//temp?
+namespace DirectX
+{
+	struct XMFLOAT4X4;
+};
+
+//temp
+class M3DLoader;
+class AnimatedMesh;
 
 //! Module responsible for managing data related to rendering and doing the actual rendering of XKILL.
 /*! Rendering module of XKILL utilizing Deferred Rendering with DirectCompute.
@@ -36,10 +46,11 @@ public:
 	Renderer(HWND windowHandle);	//!< Initializes RenderingComponent to default values. init()-method need be called in order for RenderingComponent to get proper values.
 	~Renderer();					//!< Releases all memory and returns to default state.
 	
-	void reset(); //!< Resets RenderingComponent to default state.
-	HRESULT resize(unsigned int screenWidth, unsigned int screenHeight); //!< Resizes all management objects that are affected by a change in screen resolution.
-
-	HRESULT init(); //!< Initializes members and prepares render.
+	void	reset(); //!< Resets RenderingComponent to default state.
+	HRESULT	resize(unsigned int screenWidth, unsigned int screenHeight); //!< Resizes all management objects that are affected by a change in screen resolution.
+	HRESULT	init();	//!< Initializes members and prepares render.
+	void	render(float delta);
+	void	loadTextures(TexDesc* texdesc);
 protected:
 private:
 	void initAttributes();				//!< Retrieves pointers to data vectors which will be used during execution.
@@ -55,6 +66,26 @@ private:
 	HRESULT initManagementRS();			//!< Creates a ManagementRS object that will maintain rasterizer states.
 	HRESULT initManagementGBuffer();	//!< Creates a ManagementGBuffer-type object that will maintain the application's g-buffers.
 	HRESULT initManagementDebug();
+
+	//temp?
+	void renderViewportToGBuffer(
+		DirectX::XMFLOAT4X4 viewMatrix,
+		DirectX::XMFLOAT4X4 projectionMatrix);
+	void renderAnimatedMesh(
+		DirectX::XMFLOAT4X4 viewMatrix, 
+		DirectX::XMFLOAT4X4 projectionMatrix);
+	void renderGBufferClean();
+	void renderViewportToBackBuffer();
+	void renderBackBufferClean();
+
+	DirectX::XMFLOAT4X4 calculateWorldMatrix(
+		SpatialAttribute* spatialAttribute,							 
+		PositionAttribute* positionAttribute);
+	DirectX::XMFLOAT4X4 calculateFinalMatrix(
+		DirectX::XMFLOAT4X4 worldMatrix,
+		DirectX::XMFLOAT4X4 viewMatrix,
+		DirectX::XMFLOAT4X4 projectionMatrix);
+	DirectX::XMFLOAT4X4 calculateMatrixInverse(DirectX::XMFLOAT4X4 matrix);
 	
 	HWND	windowHandle_;	//!< Handle to WinAPI-window.
 	Winfo*	winfo_;			//!< Holds information related to screen dimensions. Object is shared thruought Renderer's members.
@@ -72,10 +103,14 @@ private:
 	ManagementDebug*	managementDebug_;		//!< Used for detecting live COM-objects.
 
 	std::vector<SpatialAttribute>*	attributesSpatial_;
-	std::vector<PositionAttribute>*	attibutesPosition_;
+	std::vector<PositionAttribute>*	attributesPosition_;
 	std::vector<RenderAttribute>*	attributesRender_;
 	std::vector<int>*				attributesRenderOwner_;
 	std::vector<CameraAttribute>*	attributesCamera_;
+
+	//temp
+	M3DLoader*		m3dLoader_;
+	AnimatedMesh*	animatedMesh_;
 };			
 			
 #endif //XKILL_RENDERER_RENDERER_H

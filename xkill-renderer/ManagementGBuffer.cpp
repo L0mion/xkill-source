@@ -42,9 +42,9 @@ HRESULT ManagementGBuffer::init(ID3D11Device* device)
 	HRESULT hr = S_OK;
 
 	hr = initAlbedo(device);
-	if(hr)
+	if(SUCCEEDED(hr))
 		hr = initNormal(device);
-	if(hr)
+	if(SUCCEEDED(hr))
 		hr = initMaterial(device);
 
 	return hr;
@@ -96,4 +96,51 @@ HRESULT ManagementGBuffer::initMaterial(ID3D11Device* device)
 	gBuffers_[GBUFFERID_MATERIAL] = gBuffer;
 
 	return hr;
+}
+
+void ManagementGBuffer::clearGBuffers(ID3D11DeviceContext* devcon)
+{
+	ID3D11RenderTargetView* renderTargets[GBUFFERID_NUM_BUFFERS];
+	for(int i=0; i<GBUFFERID_NUM_BUFFERS; i++)
+		renderTargets[i] = gBuffers_[i]->getRTV();
+	
+	//clear all gbuffers in black
+	devcon->ClearRenderTargetView(renderTargets[GBUFFERID_ALBEDO],		CLEARCOLOR_BLACK);
+	devcon->ClearRenderTargetView(renderTargets[GBUFFERID_NORMAL],		CLEARCOLOR_BLACK);
+	devcon->ClearRenderTargetView(renderTargets[GBUFFERID_MATERIAL],	CLEARCOLOR_BLACK);
+}
+void ManagementGBuffer::setGBuffersAndDepthBufferAsRenderTargets(
+	ID3D11DeviceContext*	devcon, 
+	ID3D11DepthStencilView*	depthBuffer)
+{
+	ID3D11RenderTargetView* renderTargets[GBUFFERID_NUM_BUFFERS];
+	for(int i = 0; i < GBUFFERID_NUM_BUFFERS; i++)
+		renderTargets[i] = gBuffers_[i]->getRTV();
+
+	devcon->OMSetRenderTargets(
+		GBUFFERID_NUM_BUFFERS,
+		renderTargets, 
+		depthBuffer);
+}
+void ManagementGBuffer::unsetGBuffersAndDepthBufferAsRenderTargets(ID3D11DeviceContext* devcon)
+{
+	ID3D11RenderTargetView* renderTargets[GBUFFERID_NUM_BUFFERS];
+	for(int i = 0; i < GBUFFERID_NUM_BUFFERS; i++)
+		renderTargets[i] = gBuffers_[i]->getRTV();
+
+	for(int i = 0; i < GBUFFERID_NUM_BUFFERS; i++)
+		renderTargets[i] = nullptr;
+
+	devcon->OMSetRenderTargets(GBUFFERID_NUM_BUFFERS, renderTargets, nullptr);
+}
+void ManagementGBuffer::setGBuffersAsCSShaderResources(ID3D11DeviceContext* devcon)
+{
+	ID3D11ShaderResourceView* resourceViews[GBUFFERID_NUM_BUFFERS];
+	for(int i=0; i<GBUFFERID_NUM_BUFFERS; i++)
+		resourceViews[i] = gBuffers_[i]->getSRV();
+
+	devcon->CSSetShaderResources(
+		0, 
+		GBUFFERID_NUM_BUFFERS, 
+		resourceViews);
 }

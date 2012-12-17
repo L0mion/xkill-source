@@ -1,6 +1,6 @@
 #include "renderingUtilities.h"
 
-#include "d3dDebug.h"
+#include "ManagementDebug.h"
 
 ManagementDebug::ManagementDebug()
 {
