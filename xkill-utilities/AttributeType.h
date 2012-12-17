@@ -227,6 +227,7 @@ struct DLL_U PlayerAttribute : public IAttribute
 	AttributePointer inputAttribute;
 	AttributePointer cameraAttribute;
 	AttributePointer healthAttribute;
+	AttributePointer weaponStatsAttribute;
 };
 
 
@@ -269,7 +270,21 @@ struct DLL_U SpawnPointAttribute : public IAttribute
 	SpawnPointAttribute();
 	~SpawnPointAttribute();
 
-	float timeSinceLastSpawn;	//!< Is reset when a player spawn at the spawn point.
-	float spawnArea;			//!< Defines a horisontal circle area wherein no player will spawn if another player resides in the area.
+	float timeSinceLastSpawn;	//!< Is reset when a player spawns at the spawn point.
+	float spawnArea;			//!< Defines the spawn point zone, a horizontal circle area.
 	AttributePointer positionAttribute;
+};
+
+struct DLL_U WeaponStatsAttribute : public IAttribute
+{
+	WeaponStatsAttribute();
+	~WeaponStatsAttribute();
+
+	float damgeOfEachProjectile;
+	int ammo;						//!< Number of shots that can be fired.
+	float cooldownBetweenShots;		//!< Number of milliseconds that must pass between each shot.
+	float cooldownLeft;				//!< Number of milliseconds until a new shot can be fired.
+	
+	float velocityOfEachProjectile;
+	int nrOfProjectilesForEachShot; //!< If > 1 then scattershot else singleshot.
 };

@@ -80,7 +80,7 @@ void GameComponent::onUpdate(float delta)
 			//Deathmatch end logic
 			if(player->priority >= 4)
 			{
-				SEND_EVENT(&Event_EndDeathmatch());
+				//SEND_EVENT(&Event_EndDeathmatch());
 			}
 
 

@@ -169,3 +169,16 @@ SpawnPointAttribute::SpawnPointAttribute()
 SpawnPointAttribute::~SpawnPointAttribute()
 {
 }
+
+WeaponStatsAttribute::WeaponStatsAttribute()
+{
+	ammo = 10;
+	cooldownBetweenShots = 0.0f;
+	cooldownLeft = cooldownBetweenShots;
+	
+	velocityOfEachProjectile = 100.0f;
+	nrOfProjectilesForEachShot = 1;
+}
+WeaponStatsAttribute::~WeaponStatsAttribute()
+{
+}

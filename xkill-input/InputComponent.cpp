@@ -1,11 +1,7 @@
 #include "InputComponent.h"
 
 #include <xkill-utilities/EventManager.h>
-
 #include "InputManager.h"
-#include <iostream>
-
-#include <windows.h>
 
 InputComponent::InputComponent()
 {
