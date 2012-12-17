@@ -123,7 +123,6 @@ HRESULT Renderer::init()
 {
 	HRESULT hr = S_OK;
 
-	//call me
 	initAttributes();
 	initWinfo();
 	if(SUCCEEDED(hr))
@@ -338,13 +337,6 @@ void Renderer::render(float delta)
 
 void Renderer::renderViewportToGBuffer(DirectX::XMFLOAT4X4 viewMatrix, DirectX::XMFLOAT4X4 projectionMatrix)									
 {
-	//temp
-	GET_ATTRIBUTES(attributesCamera_,	CameraAttribute,	ATTRIBUTE_CAMERA);
-	GET_ATTRIBUTES(attributesRender_,	RenderAttribute,	ATTRIBUTE_RENDER);
-	GET_ATTRIBUTES(attributesSpatial_,	SpatialAttribute,	ATTRIBUTE_SPATIAL);
-	GET_ATTRIBUTES(attributesPosition_,	PositionAttribute,	ATTRIBUTE_POSITION);
-	GET_ATTRIBUTE_OWNERS(attributesRenderOwner_, ATTRIBUTE_RENDER);
-
 	ID3D11Device*			device = managementD3D_->getDevice();
 	ID3D11DeviceContext*	devcon = managementD3D_->getDeviceContext();
 
@@ -353,8 +345,9 @@ void Renderer::renderViewportToGBuffer(DirectX::XMFLOAT4X4 viewMatrix, DirectX::
 	if(animatedMesh_)
 		renderAnimatedMesh(viewMatrix, projectionMatrix);
 
-	managementFX_->getDefaultVS()->set(devcon);
-	managementFX_->getDefaultPS()->set(devcon);
+	managementFX_->setShader(devcon, SHADERID_VS_DEFAULT);
+	managementFX_->setShader(devcon, SHADERID_PS_DEFAULT);
+
 	managementSS_->setPS(devcon, SS_ID_DEFAULT, 0);
 	managementRS_->setRS(devcon, RS_ID_DEFAULT);
 
@@ -424,7 +417,8 @@ void Renderer::renderViewportToGBuffer(DirectX::XMFLOAT4X4 viewMatrix, DirectX::
 				DXGI_FORMAT_R32_UINT, 
 				offset);
 	
-			devcon->IASetInputLayout(managementFX_->getILDefaultVSPosNormTex());
+			managementFX_->setLayout(devcon, LAYOUTID_POS_NORM_TEX);
+
 			devcon->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 			devcon->DrawIndexed(
 				subsetD3Ds[j]->getIndexBuffer()->getNumIndices(), 
@@ -457,8 +451,9 @@ void Renderer::renderAnimatedMesh(DirectX::XMFLOAT4X4 viewMatrix, DirectX::XMFLO
 	managementCB_->vsSet(CB_TYPE_BONE, CB_REGISTER_BONE, devcon);
 	managementCB_->updateCBBone(devcon, finalTransforms);
 
-	managementFX_->getAnimationVS()->set(devcon);
-	managementFX_->getAnimationPS()->set(devcon);
+	managementFX_->setShader(devcon, SHADERID_VS_ANIMATION);
+	managementFX_->setShader(devcon, SHADERID_PS_ANIMATION);
+
 	managementSS_->setPS(devcon, SS_ID_DEFAULT, 0);
 	managementRS_->setRS(devcon, RS_ID_DEFAULT);
 
@@ -477,7 +472,8 @@ void Renderer::renderAnimatedMesh(DirectX::XMFLOAT4X4 viewMatrix, DirectX::XMFLO
 				&offset);
 	devcon->IASetIndexBuffer(animatedMesh_->getIndexBuffer(), DXGI_FORMAT_R32_UINT, 0);
 	
-	devcon->IASetInputLayout(managementFX_->getILPosNormTexTanSkinned());
+	managementFX_->setLayout(devcon, LAYOUTID_POS_NORM_TEX_TAN_SKINNED);
+
 	devcon->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 	devcon->DrawIndexed(animatedMesh_->getNumIndices(), 0, 0);
 
@@ -500,13 +496,13 @@ void Renderer::renderViewportToBackBuffer()
 	
 	managementSS_->setCS(devcon, SS_ID_DEFAULT, 0);
 
-	managementFX_->getDefaultCS()->set(devcon);
+	managementFX_->setShader(devcon, SHADERID_CS_DEFAULT);
 
 	unsigned int dispatchX = winfo_->getCSDispathX() / managementViewport_->getNumViewportsX();
 	unsigned int dispatchY = winfo_->getCSDispathY() / managementViewport_->getNumViewportsY();
 
 	devcon->Dispatch(dispatchX, dispatchY, 1);
-	managementFX_->getDefaultCS()->unset(devcon);
+	managementFX_->unsetShader(devcon, SHADERID_CS_DEFAULT);
 
 	renderBackBufferClean();
 

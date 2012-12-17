@@ -1,5 +1,9 @@
-#include "ManagementFX.h"
+//#include <d3d11.h>
+//#include <d3d10.h>
+#include <d3dcompiler.h>
+
 #include "renderingUtilities.h"
+#include "ManagementFX.h"
 
 ManagementFX::ManagementFX(bool debugShaders)
 {
@@ -14,10 +18,9 @@ ManagementFX::ManagementFX(bool debugShaders)
 	defaultCS_				= nullptr;
 	animationVS_			= nullptr;
 	animationPS_			= nullptr;
-	ilDefaultVSPosNormTex_	= nullptr;
+	ilPosNormTex_			= nullptr;
 	ilPosNormTexTanSkinned_ = nullptr;
 }
-
 ManagementFX::~ManagementFX()
 {
 	SAFE_DELETE(managementIED_);
@@ -30,7 +33,7 @@ ManagementFX::~ManagementFX()
 	SAFE_DELETE(animationVS_);
 	SAFE_DELETE(animationPS_);
 	
-	SAFE_RELEASE(ilDefaultVSPosNormTex_);
+	SAFE_RELEASE(ilPosNormTex_);
 	SAFE_RELEASE(ilPosNormTexTanSkinned_);
 }
 
@@ -44,7 +47,7 @@ void ManagementFX::reset()
 	animationVS_->reset();
 	animationPS_->reset();
 	
-	SAFE_RELEASE(ilDefaultVSPosNormTex_);
+	SAFE_RELEASE(ilPosNormTex_);
 }
 
 HRESULT ManagementFX::init(ID3D11Device* device)
@@ -56,6 +59,35 @@ HRESULT ManagementFX::init(ID3D11Device* device)
 		hr = initILs(device);
 
 	return hr;
+}
+
+void ManagementFX::setShader(ID3D11DeviceContext* devcon, ShaderID shaderID)
+{
+	Shader* shader = getShaderFromID(shaderID);
+	if(shader)
+		shader->set(devcon);
+}
+void ManagementFX::unsetShader(ID3D11DeviceContext* devcon, ShaderID shaderID)
+{
+	Shader* shader = getShaderFromID(shaderID);
+	if(shader)
+		shader->unset(devcon);
+}
+void ManagementFX::setLayout(ID3D11DeviceContext* devcon,	LayoutID layoutID)
+{
+	ID3D11InputLayout* il = nullptr;
+	switch(layoutID)
+	{
+	case LAYOUTID_POS_NORM_TEX:
+		il = ilPosNormTex_;
+		break;
+	case LAYOUTID_POS_NORM_TEX_TAN_SKINNED:
+		il = ilPosNormTexTanSkinned_;
+		break;
+	};
+
+	if(il)
+		devcon->IASetInputLayout(il);
 }
 
 HRESULT ManagementFX::initShaders(ID3D11Device* device)
@@ -179,7 +211,7 @@ HRESULT ManagementFX::initILDefaultVSPosNormTex(ID3D11Device* device)
 		iedPosNormTexNumElements, 
 		defaultVS_->getBlob()->GetBufferPointer(), 
 		defaultVS_->getBlob()->GetBufferSize(), 
-		&ilDefaultVSPosNormTex_);
+		&ilPosNormTex_);
 	if(FAILED(hr))
 		ERROR_MSG(L"FXManagement::initILDefaultVSPosNormTex CreateInputLayout failed");
 
@@ -207,40 +239,33 @@ HRESULT ManagementFX::initILPosNormTexTanSkinned(ID3D11Device* device)
 	return hr;
 }
 
-ShaderVS* ManagementFX::getDefaultVS() const
+Shader* ManagementFX::getShaderFromID(ShaderID shaderID)
 {
-	return defaultVS_;
-}
-ShaderPS* ManagementFX::getDefaultPS() const
-{
-	return defaultPS_;
-}
-ShaderVS* ManagementFX::getDefaultDeferredVS()	const
-{
-	return defaultDeferredVS_;
-}
-ShaderPS* ManagementFX::getDefaultDeferredPS() const
-{
-	return defaultDeferredPS_;
-}
-ShaderCS* ManagementFX::getDefaultCS() const
-{
-	return defaultCS_;
-}
-ShaderVS* ManagementFX::getAnimationVS() const
-{
-	return animationVS_;
-}
-ShaderPS* ManagementFX::getAnimationPS() const
-{
-	return animationPS_;
-}
+	Shader* shader = nullptr;
+	switch(shaderID)
+	{
+	case SHADERID_VS_DEFAULT:
+		shader = defaultVS_;
+		break;
+	case SHADERID_PS_DEFAULT:
+		shader = defaultPS_;
+		break;
+	case SHADERID_VS_DEFERRED_DEFAULT:
+		shader = defaultDeferredVS_;
+		break;
+	case SHADERID_PS_DEFERRED_DEFAULT:
+		shader = defaultDeferredPS_;
+		break;
+	case SHADERID_CS_DEFAULT:
+		shader = defaultCS_;
+		break;
+	case SHADERID_VS_ANIMATION:
+		shader = animationVS_;
+		break;
+	case SHADERID_PS_ANIMATION:
+		shader = animationPS_;
+		break;
+	}
 
-ID3D11InputLayout* ManagementFX::getILDefaultVSPosNormTex() const
-{
-	return ilDefaultVSPosNormTex_;
-}
-ID3D11InputLayout* ManagementFX::getILPosNormTexTanSkinned() const
-{
-	return ilPosNormTexTanSkinned_;
+	return shader;
 }
