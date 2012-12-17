@@ -4,7 +4,8 @@
 #include <xkill-utilities/EventType.h>
 #include "dllInput.h"
 
-#include <Windows.h>
+#include <xkill-utilities/LeanWindows.h>
+
 #include <vector>
 
 class InputManager;

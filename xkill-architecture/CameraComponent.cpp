@@ -7,6 +7,9 @@
 
 CameraComponent::CameraComponent()
 {
+	// subscribe to events
+	SUBSCRIBE_TO_EVENT(this, EVENT_WINDOW_RESIZE);
+
 	cameraAttributes_	= nullptr;
 }
 
@@ -14,11 +17,8 @@ CameraComponent::~CameraComponent()
 {
 }
 
-void CameraComponent::init()
+bool CameraComponent::init()
 {
-	// subscribe to events
-	SUBSCRIBE_TO_EVENT(this, EVENT_WINDOW_RESIZE);
-
 	// fetch attributes
 	GET_ATTRIBUTES(cameraAttributes_, CameraAttribute, ATTRIBUTE_CAMERA);
 	GET_ATTRIBUTES(inputAttributes_, InputAttribute, ATTRIBUTE_INPUT);
@@ -44,6 +44,8 @@ void CameraComponent::init()
 		cameras_[i].updateProj();
 		cameraAttributes_->at(i).mat_projection.copy((float*)&cameras_[i].getProjection());
 	}
+
+	return true;
 }
 
 void CameraComponent::onEvent(Event* e)

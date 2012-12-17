@@ -14,6 +14,7 @@ struct RenderAttribute;
 struct SpatialAttribute;
 struct PositionAttribute;
 struct ProjectileAttribute;
+struct PhysicsAttribute;
 struct SpawnPointAttribute;
 
 class GameComponent :
@@ -31,6 +32,7 @@ private:
 	std::vector<SpatialAttribute>* spatialAttribute_;		
 	std::vector<PositionAttribute>* positionAttributes_;	
 	std::vector<ProjectileAttribute>* projectileAttributes_;
+	std::vector<PhysicsAttribute>* physicsAttributes_;
 	std::vector<SpawnPointAttribute>* spawnPointAttributes_;
 
 public:

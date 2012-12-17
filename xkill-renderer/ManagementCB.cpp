@@ -90,6 +90,19 @@ void ManagementCB::updateCBSubset(ID3D11DeviceContext* devcon,
 
 	devcon->UpdateSubresource(cbSubset_, 0, 0, &cbDesc, 0, 0);
 }
+void CBManagement::updateCBBone(ID3D11DeviceContext* devcon, std::vector<DirectX::XMFLOAT4X4> boneTransforms)
+{
+	unsigned int numBones = boneTransforms.size();
+	if(numBones > CB_BONE_DESC_NUM_BONES)
+		numBones = CB_BONE_DESC_NUM_BONES;
+
+	CBBoneDesc cbDesc;
+	ZeroMemory(&cbDesc, sizeof(cbDesc));
+	for(unsigned int i=0; i<numBones; i++)
+		cbDesc.boneTransforms[i] = boneTransforms[i];
+
+	devcon->UpdateSubresource(cbBone_, 0, 0, &cbDesc, 0, 0);
+}
 
 void ManagementCB::vsSet(CB_TYPE cbType, unsigned int shaderRegister, ID3D11DeviceContext* devcon)
 {
@@ -109,6 +122,9 @@ void ManagementCB::vsSet(CB_TYPE cbType, unsigned int shaderRegister, ID3D11Devi
 		break;
 	case CB_TYPE_SUBSET:
 		devcon->VSSetConstantBuffers(shaderRegister, 1, &cbSubset_);
+		break;
+	case CB_TYPE_BONE:
+		devcon->VSSetConstantBuffers(shaderRegister, 1, &cbBone_);
 		break;
 	default:
 		ERROR_MSG(L"CBManagement::vsSet | Failed! | Index not recognized!");
@@ -134,6 +150,9 @@ void ManagementCB::psSet(CB_TYPE cbType, unsigned int shaderRegister, ID3D11Devi
 	case CB_TYPE_SUBSET:
 		devcon->PSSetConstantBuffers(shaderRegister, 1, &cbSubset_);
 		break;
+	case CB_TYPE_BONE:
+		devcon->PSSetConstantBuffers(shaderRegister, 1, &cbBone_);
+		break;
 	default:
 		ERROR_MSG(L"CBManagement::vsSet | Failed! | Index not recognized!");
 		break;
@@ -157,6 +176,9 @@ void ManagementCB::csSet(CB_TYPE cbType, unsigned int shaderRegister, ID3D11Devi
 		break;
 	case CB_TYPE_SUBSET:
 		devcon->CSSetConstantBuffers(shaderRegister, 1, &cbSubset_);
+		break;
+	case CB_TYPE_BONE:
+		devcon->CSSetConstantBuffers(shaderRegister, 1, &cbBone_);
 		break;
 	default:
 		ERROR_MSG(L"CBManagement::vsSet | Failed! | Index not recognized!");

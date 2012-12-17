@@ -120,6 +120,17 @@ Event_DoCulling::Event_DoCulling() : Event(EVENT_DO_CULLING)
 {
 }
 
+
+Event_StartDeathmatch::Event_StartDeathmatch() : Event(EVENT_START_DEATHMATCH)
+{
+
+}
+
 Event_EndDeathmatch::Event_EndDeathmatch() : Event(EVENT_END_DEATHMATCH)
 {
+}
+
+Event_ChangeGameState::Event_ChangeGameState(StateType newState) : Event(EVENT_CHANGE_GAMESTATE)
+{
+	this->newState = newState;
 }

@@ -82,7 +82,7 @@ void ManagementLight::createDirectionalLight(ID3D11Device* device)
 	ZeroMemory(&lightDesc, sizeof(lightDesc));
 	
 	lightDesc.direction = DirectX::XMFLOAT3(0.57735f, -0.57735f, 0.57735f);
-	lightDesc.ambient	= DirectX::XMFLOAT4(0.2f, 0.2f, 0.2f, 1.0f);
+	lightDesc.ambient	= DirectX::XMFLOAT4(0.8f, 0.8f, 0.8f, 1.0f);
 	lightDesc.diffuse	= DirectX::XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
 	lightDesc.specular	= DirectX::XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
 	lightDesc.type		= LIGHT_DIRECTIONAL;

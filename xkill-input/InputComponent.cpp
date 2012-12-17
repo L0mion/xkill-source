@@ -5,8 +5,15 @@
 #include "InputManager.h"
 #include <iostream>
 
+#include <windows.h>
+
 InputComponent::InputComponent()
 {
+	SUBSCRIBE_TO_EVENT(this, EVENT_RUMBLE);
+	SUBSCRIBE_TO_EVENT(this, EVENT_MOUSE_MOVE);
+	SUBSCRIBE_TO_EVENT(this, EVENT_KEY_PRESS);
+	SUBSCRIBE_TO_EVENT(this, EVENT_KEY_RELEASE);
+
 	newDeviceSearchTimer_ = 0.0f;
 }
 
@@ -17,11 +24,6 @@ InputComponent::~InputComponent()
 
 bool InputComponent::init(HWND windowHandle, std::vector<InputAttribute>* inputAttributes, std::string configFilePath, float searchTime)
 {
-	SUBSCRIBE_TO_EVENT(this, EVENT_RUMBLE);
-	SUBSCRIBE_TO_EVENT(this, EVENT_MOUSE_MOVE);
-	SUBSCRIBE_TO_EVENT(this, EVENT_KEY_PRESS);
-	SUBSCRIBE_TO_EVENT(this, EVENT_KEY_RELEASE);
-
 	inputAttributes_ = inputAttributes;
 
 	windowHandle_ = windowHandle;

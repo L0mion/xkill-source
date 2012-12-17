@@ -5,7 +5,8 @@
 
 ScoreComponent::ScoreComponent()
 {
-
+	playerAttributes_ = nullptr;
+	SUBSCRIBE_TO_EVENT(this, EVENT_PLAYERDEATH);
 }
 
 ScoreComponent::~ScoreComponent()
@@ -15,8 +16,6 @@ ScoreComponent::~ScoreComponent()
 
 bool ScoreComponent::init(std::vector<PlayerAttribute>* playerAttribute)
 {
-	SUBSCRIBE_TO_EVENT(this, EVENT_PLAYERDEATH);
-
 	playerAttributes_ = playerAttribute;
 
 	for(unsigned int i = 0; i < playerAttributes_->size(); i++)
