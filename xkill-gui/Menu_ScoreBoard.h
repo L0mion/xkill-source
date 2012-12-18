@@ -2,6 +2,7 @@
 
 #include <xkill-utilities/EventManager.h>
 #include <xkill-utilities/EventType.h>
+#include <xkill-utilities/AttributeType.h>
 #include <QDialog>
 #include <QKeyEvent>
 #include "ToggleHelper.h"

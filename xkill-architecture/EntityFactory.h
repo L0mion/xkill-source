@@ -122,6 +122,8 @@ public:
 		physics->mass = 100.0f;
 		physics->gravity = e->gravity;
 		physics->collisionResponse = false;
+		physics->angularVelocity.x = 100.0f;
+		physics->angularVelocity.y = 1.0f;
 
 		CREATE_ATTRIBUTE(ProjectileAttribute, projectile, entity);
 		CONNECT_ATTRIBUTES(projectile, physics);

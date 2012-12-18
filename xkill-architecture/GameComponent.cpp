@@ -169,11 +169,11 @@ void GameComponent::onUpdate(float delta)
 			projectile->currentLifeTimeLeft -= delta;
 			if(projectile->currentLifeTimeLeft <= 0)
 			{
-				DEBUGPRINT("Projectile entity " << projectileAttributesOwners->at(i) << " has no lifetime left");
-				
-				//Remove projectile entity
-				Event_RemoveEntity removeEntityEvent(projectileAttributesOwners->at(i));
-				SEND_EVENT(&removeEntityEvent);
+				//DEBUGPRINT("Projectile entity " << projectileAttributesOwners->at(i) << " has no lifetime left");
+				//
+				////Remove projectile entity
+				//Event_RemoveEntity removeEntityEvent(projectileAttributesOwners->at(i));
+				//SEND_EVENT(&removeEntityEvent);
 			}
 
 			std::vector<int>* physicsAttributesOwners;		GET_ATTRIBUTE_OWNERS(physicsAttributesOwners, ATTRIBUTE_PHYSICS);

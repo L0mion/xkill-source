@@ -4,6 +4,7 @@
 #include <QKeyEvent> // needed to grab mouse input
 #include <xkill-utilities/IObserver.h>
 
+
 #include "Menu_Main.h"
 #include "Menu_ScoreBoard.h"
 
@@ -12,15 +13,10 @@ class MenuManager : public IObserver
 private:
 	Menu_Main* main;
 	Menu_ScoreBoard* scoreBoard;
+	
 
 public:
-	MenuManager(QWidget* parent)
-	{
-		scoreBoard = new Menu_ScoreBoard(parent);
-		main = new Menu_Main(parent);
-
-		SUBSCRIBE_TO_EVENT(this, EVENT_UPDATE);
-	}
+	MenuManager(QWidget* parent);
 
 	void onEvent(Event* e)
 	{
