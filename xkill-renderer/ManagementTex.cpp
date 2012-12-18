@@ -13,13 +13,13 @@
 #include "Tex.h"
 #include "StringConv.h"
 #include "TexLoader.h"
-#include "TexManagement.h"
+#include "ManagementTex.h"
 
-TexManagement::TexManagement()
+ManagementTex::ManagementTex()
 {
 	//Do nothing.
 }
-TexManagement::~TexManagement()
+ManagementTex::~ManagementTex()
 {
 	if(texLoader_)
 		delete texLoader_;
@@ -31,7 +31,7 @@ TexManagement::~TexManagement()
 	}
 }
 
-HRESULT TexManagement::init()
+HRESULT ManagementTex::init()
 {
 	HRESULT hr = S_OK;
 
@@ -40,7 +40,7 @@ HRESULT TexManagement::init()
 	return hr;
 }
 
-HRESULT TexManagement::handleTexDesc(
+HRESULT ManagementTex::handleTexDesc(
 	TexDesc*		texDesc,
 	ID3D11Device*	device)
 {
@@ -65,7 +65,7 @@ HRESULT TexManagement::handleTexDesc(
 
 	return hr;
 }
-HRESULT TexManagement::createTex(
+HRESULT ManagementTex::createTex(
 		unsigned int	texID, 
 		std::string		texPath, 
 		std::string		texFileName,
@@ -86,7 +86,7 @@ HRESULT TexManagement::createTex(
 	
 	return hr;
 }
-void TexManagement::pushTex(
+void ManagementTex::pushTex(
 		unsigned int				texID,
 		ID3D11ShaderResourceView*	srv)
 {
@@ -115,7 +115,7 @@ void TexManagement::pushTex(
 	}
 }
 
-ID3D11ShaderResourceView* TexManagement::getTexSrv(const unsigned int texID) const
+ID3D11ShaderResourceView* ManagementTex::getTexSrv(const unsigned int texID) const
 {
 	ID3D11ShaderResourceView* srv = nullptr;
 
@@ -125,7 +125,7 @@ ID3D11ShaderResourceView* TexManagement::getTexSrv(const unsigned int texID) con
 
 	return srv;
 }
-int TexManagement::getTexsIndex(const unsigned int texID) const
+int ManagementTex::getTexsIndex(const unsigned int texID) const
 {
 	int foundIndex = -1;
 

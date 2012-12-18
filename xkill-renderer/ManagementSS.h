@@ -14,13 +14,13 @@ enum SS_ID
 /*!
 \ingroup xkill-renderer
 */
-class SSManagement : public D3DInterface
+class ManagementSS : public D3DInterface
 {
 public:
 	//! Initializes SSManagement to its default state.
-	SSManagement();
+	ManagementSS();
 	//!Releases all memory and resets SSManagement to its default state.
-	virtual ~SSManagement();
+	virtual ~ManagementSS();
 	//!Releases all memory and resets SSManagement to its default state.
 	virtual void reset();
 

@@ -8,7 +8,7 @@
 \ingroup xkill-renderer
 \sa D3D11_INPUT_ELEMENT_DESC
 */
-class IEDManagement
+class ManagementIED
 {
 public:
 	//! Sets IEDManagement to default state.
@@ -16,10 +16,10 @@ public:
 	Nulls memory of member IEDs.
 	\sa iedPosNormTex_
 	*/
-	IEDManagement();
+	ManagementIED();
 
 	//! Does nothing.
-	virtual ~IEDManagement();
+	virtual ~ManagementIED();
 
 	//! Initializes member IEDs.
 	/*!

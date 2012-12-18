@@ -20,13 +20,13 @@ Warning: these members will be reported as live objects, and may influence other
 \sa DEBUG
 \sa _DEBUG
 */
-class D3DDebug : public D3DInterface
+class ManagementDebug : public D3DInterface
 {
 public:
 	//! Sets object to default state and nulls all members.
-	D3DDebug();
+	ManagementDebug();
 	//! Clears memory and resets to default state.
-	~D3DDebug();
+	~ManagementDebug();
 
 	//! Clears memory and resets to default state.
 	void reset();

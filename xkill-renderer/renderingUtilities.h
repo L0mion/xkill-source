@@ -3,6 +3,7 @@
 
 #define SAFE_RELEASE(com)	if(com != nullptr) { com->Release();	com = nullptr; }
 #define SAFE_DELETE(obj)	if(obj != nullptr) { delete obj;		obj = nullptr; }
+#define SAFE_RESET(obj)		if(obj != nullptr) { obj->reset(); }
 
 #include <Windows.h>
 #include <string>

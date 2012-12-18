@@ -1,10 +1,6 @@
 #ifndef XKILL_RENDERER_D3DMANAGEMENT_H
 #define XKILL_RENDERER_D3DMANAGEMENT_H
 
-#include <d3d11.h>
-
-#include "d3dInterface.h"
-
 namespace DirectX
 {
 	struct XMFLOAT3;
@@ -13,36 +9,35 @@ namespace DirectX
 
 struct VertexPosNormTex;
 
-static const unsigned int MULTISAMPLES_GBUFFERS		= 1;
-static const unsigned int MULTISAMPLES_BACKBUFFER	= 1;
-static const unsigned int MULTISAMPLES_DEPTHBUFFER	= 1;
+class Winfo;
+
+#include <d3d11.h>
+
+#include "d3dInterface.h"
 
 //! Class for maintaining DirectX core objects.
 /*!
 \ingroup xkill-renderer
 */
-class D3DManagement : public D3DInterface
+class ManagementD3D : public D3DInterface
 {
 public:
 	//! Sets D3DManagement to its default state.
 	/*!
-	\param windowHandle A handle to a WIN-API window.
-	\param screenWidth Width of the screen.
-	\param screenHeight Height of the screen.
+	\param windowHandle	A handle to a WIN-API window.
+	\param winfo		Pointer to Renderer's window-info attribute.
 	*/
-	D3DManagement(HWND windowHandle, unsigned int screenWidth, unsigned int screenHeight);
+	ManagementD3D(HWND windowHandle, Winfo* winfo);
 	//!Releases all memory and resets D3DManagement to its default state.
-	virtual ~D3DManagement();
+	virtual ~ManagementD3D();
 	//!Releases all memory and resets D3DManagement to its default state.
 	virtual void reset();
 	
 	//! Resizes textures and back buffers to fit the new screen size.
 	/*!
-	\param screenWidth The new screen width.
-	\param screenHeight the new screen height.
 	\return Any error encountered.
 	*/
-	HRESULT resize(unsigned int screenWidth, unsigned int screenHeight);
+	HRESULT resize();
 
 	//! Set the variable uavBackBuffer to the compute shader stage.
 	void setUAVBackBufferCS();
@@ -100,8 +95,7 @@ private:
 	LPCWSTR featureLevelToString(const D3D_FEATURE_LEVEL featureLevel);
 
 	HWND						windowHandle_;						//!< WINAPI-handle to window.
-	unsigned int				screenWidth_;						//!< Width of screen.
-	unsigned int				screenHeight_;						//!< Height of screen.
+	Winfo*						winfo_;
 
 	ID3D11Device*				device_;							//!< DirectX device pointer.
 	ID3D11DeviceContext*		devcon_;							//!< DirectX device context pointer.
