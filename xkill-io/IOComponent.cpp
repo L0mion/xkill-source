@@ -18,6 +18,7 @@
 IOComponent::IOComponent()
 {
 	texNameToTexID = nullptr;
+	fbxLoader_ = nullptr;
 }
 IOComponent::~IOComponent()
 {
@@ -29,6 +30,8 @@ IOComponent::~IOComponent()
 		if(meshModels_[i])
 			delete meshModels_[i];
 	}
+	if(fbxLoader_)
+		delete fbxLoader_;
 }
 bool IOComponent::init()
 {

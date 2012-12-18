@@ -21,6 +21,7 @@ private:
 	void printAttribute(FbxNodeAttribute* attribute);
 	void printNode(FbxNode* node);
 
+	bool loadVertices(FbxMesh* mesh);
 
 	int numTabs_;
 

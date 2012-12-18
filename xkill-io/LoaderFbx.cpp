@@ -14,10 +14,14 @@ LoaderFbx::LoaderFbx()
 
 LoaderFbx::~LoaderFbx()
 {
-	fbxManager_->Destroy();
-	fbxIOSettings_->Destroy();
-	fbxImporter_->Destroy();
-	fbxScene_->Destroy();
+	if(fbxIOSettings_)
+		fbxIOSettings_->Destroy();
+	if(fbxImporter_)
+		fbxImporter_->Destroy();
+	if(fbxScene_)
+		fbxScene_->Destroy();
+	if(fbxManager_)		//Manages memory and should be delete last.
+		fbxManager_->Destroy();
 }
 
 void LoaderFbx::init(std::string filename)
@@ -40,6 +44,7 @@ void LoaderFbx::init(std::string filename)
 	FbxNode* rootNode = fbxScene_->GetRootNode();
 	if(rootNode)
 	{
+		int childCount = rootNode->GetChildCount();
 		for(unsigned int i=0; i<rootNode->GetChildCount(); i++)
 			printNode(rootNode->GetChild(i));
 	}
@@ -135,7 +140,7 @@ void LoaderFbx::printNode(FbxNode* node)
 {
 	printTabs();
 	const char* nodeName	= node->GetName();
-	fbxDouble3 translation	= node->LclTranslation.Get();
+	fbxDouble3 translation	= fbxDouble3(0.0f, 0.0f, 0.0f);//node->LclTranslation.Get();
 	fbxDouble3 rotation		= node->LclRotation.Get();
 	fbxDouble3 scaling		= node->LclScaling.Get();
 
