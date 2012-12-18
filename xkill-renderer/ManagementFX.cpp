@@ -1,11 +1,15 @@
-#include "fxManagement.h"
-#include "renderingUtilities.h"
+//#include <d3d11.h>
+//#include <d3d10.h>
+#include <d3dcompiler.h>
 
-FXManagement::FXManagement(bool debugShaders)
+#include "renderingUtilities.h"
+#include "ManagementFX.h"
+
+ManagementFX::ManagementFX(bool debugShaders)
 {
 	debugShaders_ = debugShaders;
 
-	ilManagement = nullptr;
+	managementIED_ = nullptr;
 
 	defaultVS_				= nullptr;
 	defaultPS_				= nullptr;
@@ -14,14 +18,12 @@ FXManagement::FXManagement(bool debugShaders)
 	defaultCS_				= nullptr;
 	animationVS_			= nullptr;
 	animationPS_			= nullptr;
-	ilDefaultVSPosNormTex_	= nullptr;
+	ilPosNormTex_			= nullptr;
 	ilPosNormTexTanSkinned_ = nullptr;
 }
-
-FXManagement::~FXManagement()
+ManagementFX::~ManagementFX()
 {
-	SAFE_DELETE(ilManagement);
-	//delete ilManagement;
+	SAFE_DELETE(managementIED_);
 
 	SAFE_DELETE(defaultVS_);
 	SAFE_DELETE(defaultPS_);
@@ -31,11 +33,11 @@ FXManagement::~FXManagement()
 	SAFE_DELETE(animationVS_);
 	SAFE_DELETE(animationPS_);
 	
-	SAFE_RELEASE(ilDefaultVSPosNormTex_);
+	SAFE_RELEASE(ilPosNormTex_);
 	SAFE_RELEASE(ilPosNormTexTanSkinned_);
 }
 
-void FXManagement::reset()
+void ManagementFX::reset()
 {
 	defaultVS_->reset();
 	defaultPS_->reset();
@@ -45,10 +47,10 @@ void FXManagement::reset()
 	animationVS_->reset();
 	animationPS_->reset();
 	
-	SAFE_RELEASE(ilDefaultVSPosNormTex_);
+	SAFE_RELEASE(ilPosNormTex_);
 }
 
-HRESULT FXManagement::init(ID3D11Device* device)
+HRESULT ManagementFX::init(ID3D11Device* device)
 {
 	HRESULT hr = S_OK;
 
@@ -59,7 +61,36 @@ HRESULT FXManagement::init(ID3D11Device* device)
 	return hr;
 }
 
-HRESULT FXManagement::initShaders(ID3D11Device* device)
+void ManagementFX::setShader(ID3D11DeviceContext* devcon, ShaderID shaderID)
+{
+	Shader* shader = getShaderFromID(shaderID);
+	if(shader)
+		shader->set(devcon);
+}
+void ManagementFX::unsetShader(ID3D11DeviceContext* devcon, ShaderID shaderID)
+{
+	Shader* shader = getShaderFromID(shaderID);
+	if(shader)
+		shader->unset(devcon);
+}
+void ManagementFX::setLayout(ID3D11DeviceContext* devcon,	LayoutID layoutID)
+{
+	ID3D11InputLayout* il = nullptr;
+	switch(layoutID)
+	{
+	case LAYOUTID_POS_NORM_TEX:
+		il = ilPosNormTex_;
+		break;
+	case LAYOUTID_POS_NORM_TEX_TAN_SKINNED:
+		il = ilPosNormTexTanSkinned_;
+		break;
+	};
+
+	if(il)
+		devcon->IASetInputLayout(il);
+}
+
+HRESULT ManagementFX::initShaders(ID3D11Device* device)
 {
 	HRESULT hr = S_OK;
 
@@ -85,7 +116,7 @@ HRESULT FXManagement::initShaders(ID3D11Device* device)
 	
 	return hr;
 }
-HRESULT FXManagement::initDefaultVS(ID3D11Device* device, std::wstring shaderPath)
+HRESULT ManagementFX::initDefaultVS(ID3D11Device* device, std::wstring shaderPath)
 {
 	HRESULT hr = S_OK;
 	std::wstring completePath = shaderPath + L"defaultVS.cso";
@@ -94,7 +125,7 @@ HRESULT FXManagement::initDefaultVS(ID3D11Device* device, std::wstring shaderPat
 
 	return hr;
 }
-HRESULT FXManagement::initDefaultPS(ID3D11Device* device, std::wstring shaderPath)
+HRESULT ManagementFX::initDefaultPS(ID3D11Device* device, std::wstring shaderPath)
 {
 	HRESULT hr = S_OK;
 	std::wstring completePath = shaderPath + L"defaultPS.cso";
@@ -103,7 +134,7 @@ HRESULT FXManagement::initDefaultPS(ID3D11Device* device, std::wstring shaderPat
 
 	return hr;
 }
-HRESULT FXManagement::initDefaultDeferredVS(ID3D11Device* device, std::wstring shaderPath)
+HRESULT ManagementFX::initDefaultDeferredVS(ID3D11Device* device, std::wstring shaderPath)
 {
 	HRESULT hr = S_OK;
 	std::wstring completePath = shaderPath + L"defaultDeferredVS.cso";
@@ -112,7 +143,7 @@ HRESULT FXManagement::initDefaultDeferredVS(ID3D11Device* device, std::wstring s
 
 	return hr;
 }
-HRESULT FXManagement::initDefaultDeferredPS(ID3D11Device* device, std::wstring shaderPath)
+HRESULT ManagementFX::initDefaultDeferredPS(ID3D11Device* device, std::wstring shaderPath)
 {
 	HRESULT hr = S_OK;
 	std::wstring completePath = shaderPath + L"defaultDeferredPS.cso";
@@ -121,7 +152,7 @@ HRESULT FXManagement::initDefaultDeferredPS(ID3D11Device* device, std::wstring s
 
 	return hr;
 }
-HRESULT FXManagement::initDefaultCS(ID3D11Device* device, std::wstring shaderPath)
+HRESULT ManagementFX::initDefaultCS(ID3D11Device* device, std::wstring shaderPath)
 {
 	HRESULT hr = S_OK;
 	std::wstring completePath = shaderPath + L"lightingCS.cso";
@@ -130,7 +161,7 @@ HRESULT FXManagement::initDefaultCS(ID3D11Device* device, std::wstring shaderPat
 
 	return hr;
 }
-HRESULT FXManagement::initAnimationVS(ID3D11Device* device, std::wstring shaderPath)
+HRESULT ManagementFX::initAnimationVS(ID3D11Device* device, std::wstring shaderPath)
 {
 	HRESULT hr = S_OK;
 	std::wstring completePath = shaderPath + L"animationVS.cso";
@@ -139,7 +170,7 @@ HRESULT FXManagement::initAnimationVS(ID3D11Device* device, std::wstring shaderP
 
 	return hr;
 }
-HRESULT FXManagement::initAnimationPS(ID3D11Device* device, std::wstring shaderPath)
+HRESULT ManagementFX::initAnimationPS(ID3D11Device* device, std::wstring shaderPath)
 {
 	HRESULT hr = S_OK;
 	std::wstring completePath = shaderPath + L"animationPS.cso";
@@ -149,7 +180,7 @@ HRESULT FXManagement::initAnimationPS(ID3D11Device* device, std::wstring shaderP
 	return hr;
 }
 
-HRESULT FXManagement::initILs(ID3D11Device* device)
+HRESULT ManagementFX::initILs(ID3D11Device* device)
 {
 	HRESULT hr = S_OK;
 
@@ -161,17 +192,17 @@ HRESULT FXManagement::initILs(ID3D11Device* device)
 	
 	return hr;
 }
-void FXManagement::initILManagement()
+void ManagementFX::initILManagement()
 {
-	ilManagement = new IEDManagement();
-	ilManagement->init();
+	managementIED_ = new ManagementIED();
+	managementIED_->init();
 }
-HRESULT FXManagement::initILDefaultVSPosNormTex(ID3D11Device* device)
+HRESULT ManagementFX::initILDefaultVSPosNormTex(ID3D11Device* device)
 {
 	HRESULT hr = S_OK;
 
-	unsigned int iedPosNormTexNumElements	= ilManagement->getIEDPosNormTexNumElements();
-	D3D11_INPUT_ELEMENT_DESC* iedPosNormTex = ilManagement->getIEDPosNormTex();
+	unsigned int iedPosNormTexNumElements	= managementIED_->getIEDPosNormTexNumElements();
+	D3D11_INPUT_ELEMENT_DESC* iedPosNormTex = managementIED_->getIEDPosNormTex();
 
 	int debug = sizeof(D3D11_INPUT_ELEMENT_DESC);
 
@@ -180,13 +211,13 @@ HRESULT FXManagement::initILDefaultVSPosNormTex(ID3D11Device* device)
 		iedPosNormTexNumElements, 
 		defaultVS_->getBlob()->GetBufferPointer(), 
 		defaultVS_->getBlob()->GetBufferSize(), 
-		&ilDefaultVSPosNormTex_);
+		&ilPosNormTex_);
 	if(FAILED(hr))
 		ERROR_MSG(L"FXManagement::initILDefaultVSPosNormTex CreateInputLayout failed");
 
 	return hr;
 }
-HRESULT FXManagement::initILPosNormTexTanSkinned(ID3D11Device* device)
+HRESULT ManagementFX::initILPosNormTexTanSkinned(ID3D11Device* device)
 {
 	HRESULT hr = S_OK;
 
@@ -208,40 +239,33 @@ HRESULT FXManagement::initILPosNormTexTanSkinned(ID3D11Device* device)
 	return hr;
 }
 
-ShaderVS* FXManagement::getDefaultVS() const
+Shader* ManagementFX::getShaderFromID(ShaderID shaderID)
 {
-	return defaultVS_;
-}
-ShaderPS* FXManagement::getDefaultPS() const
-{
-	return defaultPS_;
-}
-ShaderVS* FXManagement::getDefaultDeferredVS()	const
-{
-	return defaultDeferredVS_;
-}
-ShaderPS* FXManagement::getDefaultDeferredPS() const
-{
-	return defaultDeferredPS_;
-}
-ShaderCS* FXManagement::getDefaultCS() const
-{
-	return defaultCS_;
-}
-ShaderVS* FXManagement::getAnimationVS() const
-{
-	return animationVS_;
-}
-ShaderPS* FXManagement::getAnimationPS() const
-{
-	return animationPS_;
-}
+	Shader* shader = nullptr;
+	switch(shaderID)
+	{
+	case SHADERID_VS_DEFAULT:
+		shader = defaultVS_;
+		break;
+	case SHADERID_PS_DEFAULT:
+		shader = defaultPS_;
+		break;
+	case SHADERID_VS_DEFERRED_DEFAULT:
+		shader = defaultDeferredVS_;
+		break;
+	case SHADERID_PS_DEFERRED_DEFAULT:
+		shader = defaultDeferredPS_;
+		break;
+	case SHADERID_CS_DEFAULT:
+		shader = defaultCS_;
+		break;
+	case SHADERID_VS_ANIMATION:
+		shader = animationVS_;
+		break;
+	case SHADERID_PS_ANIMATION:
+		shader = animationPS_;
+		break;
+	}
 
-ID3D11InputLayout* FXManagement::getILDefaultVSPosNormTex() const
-{
-	return ilDefaultVSPosNormTex_;
-}
-ID3D11InputLayout* FXManagement::getILPosNormTexTanSkinned() const
-{
-	return ilPosNormTexTanSkinned_;
+	return shader;
 }

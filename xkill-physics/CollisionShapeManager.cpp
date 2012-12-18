@@ -96,6 +96,7 @@ btCollisionShape* CollisionShapeManager::loadCollisionShape(unsigned int meshID)
 			btVector3 test = hull.getVertexPointer()[i];
 			convexShape->addPoint(hull.getVertexPointer()[i]);
 		}
+
 		collisionShapes_.push_back(convexShape);
 		delete triangleMesh;
 	}

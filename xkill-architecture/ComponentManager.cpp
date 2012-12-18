@@ -1,7 +1,7 @@
 #include "ComponentManager.h"
 
 #include <xkill-io/IOComponent.h>
-#include <xkill-renderer/renderingComponent.h>
+//#include <xkill-renderer/renderingComponent.h>
 #include <xkill-physics/BulletPhysicsComponent.h>
 #include <xkill-sound/SoundComponent.h>
 #include <xkill-input/InputComponent.h>
@@ -15,8 +15,6 @@
 #include "States.h"
 
 #include <iostream>
-
-//#include <windows.h>
 
 #define SAFE_DELETE(x) if( x ) { delete(x); (x) = NULL; }
 
@@ -61,7 +59,7 @@ bool ComponentManager::init(HWND windowHandle, HWND parentWindowHandle)
 	//Substitute statemchine, enum
 	state_TemporaryVariableUsedAsSubstituteForStateMachine = SPECIAL_STATE_NONE;
 
-	render_ = new RenderingComponent(windowHandle);
+	//render_ = new RenderingComponent(windowHandle);
 	physics_ = new BulletPhysicsComponent();
 	camera_ = new CameraComponent();
 	game_ = new GameComponent();
@@ -70,11 +68,11 @@ bool ComponentManager::init(HWND windowHandle, HWND parentWindowHandle)
 	score_ = new ScoreComponent();
 	ioComponent_ = new IOComponent();
 
-	if(render_->init() != S_OK)
+	/*if(render_->init() != S_OK)
 	{
 		std::cout << "RenderingComponent failed to init." << std::endl;
 		return false;
-	}
+	}*/
 
 	if(!physics_->init())
 	{
@@ -146,7 +144,7 @@ void ComponentManager::update(float delta)
 		physics_->onUpdate(delta);
 		camera_->onUpdate(delta);
 		SEND_EVENT(&Event_DoCulling());
-		render_->onUpdate(delta);
+		//render_->onUpdate(delta);
 		input_->onUpdate(delta);
 		game_->onUpdate(delta);
 		SEND_EVENT(&Event(EVENT_UPDATE));

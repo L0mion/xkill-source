@@ -1,4 +1,5 @@
 #include "XInputDevice.h"
+#include <xkill-utilities/LeanWindows.h>
 
 #include <Xinput.h>
 

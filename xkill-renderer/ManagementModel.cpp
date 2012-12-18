@@ -10,13 +10,13 @@
 #include "SubsetD3D.h"
 #include "renderingUtilities.h"
 #include "ModelD3D.h"
-#include "ModelManagement.h"
+#include "ManagementModel.h"
 
-ModelManagement::ModelManagement()
+ManagementModel::ManagementModel()
 {
 	//Do nothing.
 }
-ModelManagement::~ModelManagement()
+ManagementModel::~ManagementModel()
 {
 	for(unsigned int i = 0; i < modelD3Ds_.size(); i++)
 	{
@@ -25,7 +25,7 @@ ModelManagement::~ModelManagement()
 	}
 }
 
-HRESULT ModelManagement::init()
+HRESULT ManagementModel::init()
 {
 	HRESULT hr = S_OK;
 
@@ -34,7 +34,7 @@ HRESULT ModelManagement::init()
 	return hr;
 }
 
-ModelD3D* ModelManagement::getModelD3D(
+ModelD3D* ManagementModel::getModelD3D(
 	const unsigned int	modelID, 
 	ID3D11Device*		device)	
 {
@@ -48,7 +48,7 @@ ModelD3D* ModelManagement::getModelD3D(
 	return modelD3Ds_[meshModelD3DIndex];
 }
 
-HRESULT ModelManagement::createModelD3D(
+HRESULT ManagementModel::createModelD3D(
 	const unsigned int	modelID, 
 	ID3D11Device*		device)
 {
@@ -90,7 +90,7 @@ HRESULT ModelManagement::createModelD3D(
 
 	return hr;
 }
-bool ModelManagement::getMeshAttribute(unsigned int modelID, MeshAttribute& inout)
+bool ManagementModel::getMeshAttribute(unsigned int modelID, MeshAttribute& inout)
 {
 	std::vector<MeshAttribute>*	allMesh; GET_ATTRIBUTES(allMesh, MeshAttribute,	ATTRIBUTE_MESH);
 	
@@ -106,7 +106,7 @@ bool ModelManagement::getMeshAttribute(unsigned int modelID, MeshAttribute& inou
 
 	return foundAt;
 }
-HRESULT ModelManagement::createVertexBuffer(
+HRESULT ManagementModel::createVertexBuffer(
 		const unsigned int	modelID, 
 		MeshGeometry&		geometry,
 		VB*					vb,
@@ -123,7 +123,7 @@ HRESULT ModelManagement::createVertexBuffer(
 
 	return hr;
 }
-HRESULT ModelManagement::createIndexBuffers(
+HRESULT ManagementModel::createIndexBuffers(
 	const unsigned int			modelID, 
 	MeshGeometry&				geometry, 
 	std::vector<SubsetD3D*>&	subsetD3Ds,
@@ -149,7 +149,7 @@ HRESULT ModelManagement::createIndexBuffers(
 
 	return hr;
 }
-HRESULT ModelManagement::createIndexBuffer(
+HRESULT ManagementModel::createIndexBuffer(
 	const unsigned int	modelID,
 	MeshSubset&			subset,
 	IB*					ib,
@@ -167,7 +167,7 @@ HRESULT ModelManagement::createIndexBuffer(
 	return hr;
 }
 
-void ModelManagement::pushModelD3D(
+void ManagementModel::pushModelD3D(
 	const unsigned int	modelID, 
 	ModelD3D*		meshModelD3D)
 {
@@ -177,7 +177,7 @@ void ModelManagement::pushModelD3D(
 	modelIDtoIndex_.insert(std::pair<unsigned int, unsigned int>(modelID, meshModelD3DIndex));
 }
 
-bool ModelManagement::existingModelD3D(const int unsigned modelID)
+bool ManagementModel::existingModelD3D(const int unsigned modelID)
 {
 	bool valExists = false;
 
@@ -188,7 +188,7 @@ bool ModelManagement::existingModelD3D(const int unsigned modelID)
 	return valExists;
 }
 
-unsigned int ModelManagement::getModelD3DIndex(const int unsigned modelID)
+unsigned int ManagementModel::getModelD3DIndex(const int unsigned modelID)
 {
 	std::map<unsigned int, unsigned int>::iterator it = modelIDtoIndex_.find(modelID);
 

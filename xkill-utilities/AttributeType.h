@@ -62,6 +62,7 @@ enum DLL_U AttributeType
 	ATTRIBUTE_HEALTH,
 	ATTRIBUTE_DAMAGE,
 	ATTRIBUTE_SPAWNPOINT,
+	ATTRIBUTE_WEAPONSTATS,
 
 	// this is needed, don't touch!
 	ATTRIBUTE_LAST
@@ -167,6 +168,8 @@ struct DLL_U ProjectileAttribute : public IAttribute
 	AttributePointer physicsAttribute;
 	int entityIdOfCreator;		//!< Entity id of the entity that created the projectile.
 	float currentLifeTimeLeft;	//!< Counter counting down the lifetime of the projectile. Is initialized to totalLifeTime. When equal or less than zero, the projectile attribute shall be destroyed.
+	bool explodeOnImnpact;
+	float explosionSphereRadius;
 };
 
 struct DLL_U InputAttribute : public IAttribute
@@ -178,6 +181,7 @@ struct DLL_U InputAttribute : public IAttribute
 	Float2 position;
 	Float2 rotation;
 	bool fire;
+	bool changeWeapon;
 };
 
 /// Stores everything SoundComponent needs to know to play a 3D sound
@@ -227,6 +231,7 @@ struct DLL_U PlayerAttribute : public IAttribute
 	AttributePointer inputAttribute;
 	AttributePointer cameraAttribute;
 	AttributePointer healthAttribute;
+	AttributePointer weaponStatsAttribute;
 };
 
 
@@ -269,7 +274,53 @@ struct DLL_U SpawnPointAttribute : public IAttribute
 	SpawnPointAttribute();
 	~SpawnPointAttribute();
 
-	float timeSinceLastSpawn;	//!< Is reset when a player spawn at the spawn point.
-	float spawnArea;			//!< Defines a horisontal circle area wherein no player will spawn if another player resides in the area.
+	float timeSinceLastSpawn;	//!< Is reset when a player spawns at the spawn point.
+	float spawnArea;			//!< Defines the spawn point zone, a horizontal circle area.
 	AttributePointer positionAttribute;
+};
+
+struct DLL_U WeaponStatsAttribute : public IAttribute
+{
+	enum AmmunitionType
+	{
+		BULLET,
+		SCATTER,
+		EXPLOSIVE
+	};
+
+	enum FiringMode
+	{
+		SINGLE,
+		SEMI,
+		AUTO
+	};
+
+	WeaponStatsAttribute();
+	void setWeaponStats(AmmunitionType ammunitionType, FiringMode firingMode);
+
+	void setWeaponToDebugMachineGun();
+
+	~WeaponStatsAttribute();
+
+	AmmunitionType ammunitionType;	//!< BULLET, SCATTER, EXPLOSIVE
+	FiringMode firingMode;			//!< SINGLE, SEMI, AUTO
+
+	int totalNrOfShots;				//!< Total number of shots that can be fired. A value of -1 denotes unlimited ammunition.
+	int clipSize;					//!< Number of shots that can be fired before reload is needed. A value of 0 denotes that no reload is necessary.
+	int nrOfShotsLeftInClip;		//!< Current number of shots left in the current clip.
+
+	float reloadTime;				//!< Number of seconds it takes to reload.
+	float reloadTimeLeft;			//!< Reload progress, when lesser or equal to 0 the weapon is reloaded.
+	float cooldownBetweenShots;		//!< Number of seconds that must pass between each shot.
+	float cooldownLeft;				//!< Number of seconds until a new shot can be fired.
+
+	float velocityOfEachProjectile; //!< Velocity of the PhysicsAttribute when creating a projectile.
+	int nrOfProjectilesForEachShot; //!< If > 1 then scattershot else singleshot.
+	float damgeOfEachProjectile;	//!< Damage value of the damage attribute created when creating a projectile from this weapon.
+
+	float displacementSphereRadius;	//!< Randomizes the position of each projectile.
+	float spreadConeRadius;			//!< Randomizes the orientation of each projectile's velocity vector inside this cone. 
+
+	bool isExplosive;				//!< Determines if projectiles created from this weapon will explode on impact.
+	float explosionSphereRadius;	//!< Radius of explosion sphere.
 };

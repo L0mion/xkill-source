@@ -1,7 +1,6 @@
 #pragma once
 
 #include <xkill-utilities/IObserver.h>
-#include <xkill-utilities/LeanWindows.h>
 #include "AttributeManager.h"
 
 class RenderingComponent;
@@ -13,6 +12,11 @@ class GameComponent;
 class ScoreComponent;
 class IOComponent;
 enum StateType;
+
+#ifndef HWND_FORWARD_DECLARATION
+#define HWND_FORWARD_DECLARATION
+typedef struct HWND__* HWND;
+#endif
 
 /// Is responsible for updating Components in a certain order
 /** 

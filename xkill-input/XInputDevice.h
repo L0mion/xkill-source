@@ -1,8 +1,6 @@
 #pragma once
 
 #include "InputDevice.h"
-#include <xkill-utilities/LeanWindows.h>
-#include <guiddef.h>
 
 //! A wrapper for a XInput device
 /*!
@@ -23,7 +21,7 @@ public:
 	virtual bool IsForceFeedbackCapable();
 
 	/*!
-	\return XINPUT_DEVICE 
+	\return XINPUT_DEVICE
 	*/
 	virtual InputDeviceType GetType();
 

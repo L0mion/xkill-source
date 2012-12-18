@@ -134,6 +134,7 @@ public:
 		SUBSCRIBE_TO_EVENT(this, EVENT_CREATE_MESH);
 		SUBSCRIBE_TO_EVENT(this, EVENT_REMOVE_ENTITY);
 		SUBSCRIBE_TO_EVENT(this, EVENT_CREATE_SPAWNPOINT);
+		SUBSCRIBE_TO_EVENT(this, EVENT_CREATE_EXPLOSIONSPHERE);
 	}
 
 	/**
@@ -155,6 +156,10 @@ public:
 			break;
 		case EVENT_CREATE_SPAWNPOINT:
 			event_CreateSpawnPoint(static_cast<Event_CreateSpawnPoint*>(e));
+			break;
+		case EVENT_CREATE_EXPLOSIONSPHERE:
+			event_CreateExplosionSphere(static_cast<Event_CreateExplosionSphere*>(e));
+			break;
 		default:
 			break;
 		}
@@ -198,5 +203,12 @@ public:
 		Entity* entity = createEntity();
 		entityFactory.createSpawnPointEntity(entity, e);
 		DEBUGPRINT("ENTITYMANAGER: Created spawn point entity " << entity->getID());
+	}
+
+	void event_CreateExplosionSphere(Event_CreateExplosionSphere* e)
+	{
+		Entity* entity = createEntity();
+		entityFactory.createExplosionSphere(entity, e);
+		DEBUGPRINT("ENTITYMANAGER: Created explosion sphere entity " << entity->getID());
 	}
 };

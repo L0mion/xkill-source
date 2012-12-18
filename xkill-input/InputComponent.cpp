@@ -1,11 +1,7 @@
 #include "InputComponent.h"
 
 #include <xkill-utilities/EventManager.h>
-
 #include "InputManager.h"
-#include <iostream>
-
-#include <windows.h>
 
 InputComponent::InputComponent()
 {
@@ -114,10 +110,10 @@ void InputComponent::handleInput(float delta)
 			}
 
 			//Projectile test
-			if(state.buttons[0].isReleased())
+			if(state.buttons[0].isDown())
 				inputAttributes_->at(i).fire = true;
-			if(state.buttons[7].isDown())
-				inputAttributes_->at(i).fire = true;
+			if(state.buttons[7].isReleased())
+				inputAttributes_->at(i).changeWeapon = true;
 
 			if(state.buttons.size() > 7)
 			{

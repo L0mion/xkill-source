@@ -1,22 +1,22 @@
 
-#include "SSManagement.h"
+#include "ManagementSS.h"
 #include "renderingUtilities.h"
 
-SSManagement::SSManagement()
+ManagementSS::ManagementSS()
 {
 	ssDefault_ = nullptr;
 }
-SSManagement::~SSManagement()
+ManagementSS::~ManagementSS()
 {
 	SAFE_RELEASE(ssDefault_);
 }
 
-void SSManagement::reset()
+void ManagementSS::reset()
 {
 	SAFE_RELEASE(ssDefault_);
 }
 
-void SSManagement::setVS(ID3D11DeviceContext* devcon, SS_ID ssId, unsigned int shaderRegister)
+void ManagementSS::setVS(ID3D11DeviceContext* devcon, SS_ID ssId, unsigned int shaderRegister)
 {
 	switch(ssId)
 	{
@@ -28,7 +28,7 @@ void SSManagement::setVS(ID3D11DeviceContext* devcon, SS_ID ssId, unsigned int s
 		break;
 	}
 }
-void SSManagement::setPS(ID3D11DeviceContext* devcon, SS_ID ssId, unsigned int shaderRegister)
+void ManagementSS::setPS(ID3D11DeviceContext* devcon, SS_ID ssId, unsigned int shaderRegister)
 {
 	switch(ssId)
 	{
@@ -40,7 +40,7 @@ void SSManagement::setPS(ID3D11DeviceContext* devcon, SS_ID ssId, unsigned int s
 		break;
 	}
 }
-void SSManagement::setCS(ID3D11DeviceContext* devcon, SS_ID ssId, unsigned int shaderRegister)
+void ManagementSS::setCS(ID3D11DeviceContext* devcon, SS_ID ssId, unsigned int shaderRegister)
 {
 	switch(ssId)
 	{
@@ -53,7 +53,7 @@ void SSManagement::setCS(ID3D11DeviceContext* devcon, SS_ID ssId, unsigned int s
 	}
 }
 
-HRESULT SSManagement::init(ID3D11Device* device)
+HRESULT ManagementSS::init(ID3D11Device* device)
 {
 	HRESULT hr = S_OK;
 
@@ -61,7 +61,7 @@ HRESULT SSManagement::init(ID3D11Device* device)
 
 	return hr;
 }
-HRESULT SSManagement::initSSDefault(ID3D11Device* device)
+HRESULT ManagementSS::initSSDefault(ID3D11Device* device)
 {
 	HRESULT hr = S_OK;
 
