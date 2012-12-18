@@ -5,11 +5,12 @@
 #include <xkill-utilities/AttributeType.h>
 #include <xkill-utilities/MeshModel.h>
 
+#include "ModelD3D.h"
+#include "SubsetD3D.h"
+#include "DebugShapeD3D.h"
 #include "VB.h"
 #include "IB.h"
-#include "SubsetD3D.h"
 #include "renderingUtilities.h"
-#include "ModelD3D.h"
 #include "ManagementModel.h"
 
 ManagementModel::ManagementModel()
@@ -44,8 +45,21 @@ ModelD3D* ManagementModel::getModelD3D(
 		hr = createModelD3D(modelID, device);
 	}
 
-	unsigned int meshModelD3DIndex = getModelD3DIndex(modelID);
-	return modelD3Ds_[meshModelD3DIndex];
+	unsigned int modelD3DIndex = getModelD3DIndex(modelID);
+	return modelD3Ds_[modelD3DIndex];
+}
+DebugShapeD3D* ManagementModel::getDebugShapeD3D(
+	const unsigned int	shapeIndex,
+	ID3D11Device*		device)
+{
+	if(!existingDebugShapeD3D(shapeIndex))
+	{
+		HRESULT hr = S_OK;
+		hr = createDebugShapeD3D(shapeIndex, device);
+	}
+
+	unsigned int debugShapeD3DIndex = getModelD3DIndex(shapeIndex);
+	return debugShapeD3Ds_[debugShapeD3DIndex];
 }
 
 HRESULT ManagementModel::createModelD3D(
@@ -177,6 +191,18 @@ void ManagementModel::pushModelD3D(
 	modelIDtoIndex_.insert(std::pair<unsigned int, unsigned int>(modelID, meshModelD3DIndex));
 }
 
+HRESULT ManagementModel::createDebugShapeD3D(unsigned int shapeIndex, ID3D11Device* device)
+{
+	std::vector<DebugShapeAttribute>* attributesDebugShape;
+	GET_ATTRIBUTES(attributesDebugShape, DebugShapeAttribute, ATTRIBUTE_DEBUGSHAPE);
+
+	DebugShapeAttribute debugShapeAt = attributesDebugShape->at(shapeIndex);
+	//debugShapeAt.
+
+
+	return S_OK; //tmep
+}
+
 bool ManagementModel::existingModelD3D(const int unsigned modelID)
 {
 	bool valExists = false;
@@ -187,10 +213,24 @@ bool ManagementModel::existingModelD3D(const int unsigned modelID)
 
 	return valExists;
 }
-
 unsigned int ManagementModel::getModelD3DIndex(const int unsigned modelID)
 {
 	std::map<unsigned int, unsigned int>::iterator it = modelIDtoIndex_.find(modelID);
+	return (*it).second;
+}
 
+bool ManagementModel::existingDebugShapeD3D(const unsigned int shapeIndex)
+{
+	bool valExists = false;
+
+	std::map<unsigned int, unsigned int>::iterator it = shapeIndextoD3DIndex_.find(shapeIndex);
+	if(it != shapeIndextoD3DIndex_.end())
+		valExists = true;
+
+	return valExists;
+}
+unsigned int ManagementModel::getDebugShapeD3DIndex(const int unsigned shapeIndex)
+{
+	std::map<unsigned int, unsigned int>::iterator it = shapeIndextoD3DIndex_.find(shapeIndex);
 	return (*it).second;
 }

@@ -51,6 +51,7 @@ enum DLL_U AttributeType
 	ATTRIBUTE_POSITION,
 	ATTRIBUTE_SPATIAL,
 	ATTRIBUTE_RENDER,
+	ATTRIBUTE_DEBUGSHAPE,
 	ATTRIBUTE_PHYSICS,
 	ATTRIBUTE_CAMERA,
 	ATTRIBUTE_INPUT,
@@ -111,7 +112,7 @@ A good approach for the RenderComponent would be to step through all
 RenderAttribute and construct multiple queues consisting of objects
 that should be transparent or not, tesselated or not, use the same
 meshID and textureID, and the Render each Queue in a orderly fashion 
-throught the use of Instancing.
+through the use of Instancing.
 
 \ingroup ATTRIBUTES
 */
@@ -124,8 +125,10 @@ struct DLL_U RenderAttribute : public IAttribute
 	AttributePointer boundingAttribute;
 	
 	BoolField culling;
+
 	bool transparent;
 	bool tessellation;
+
 	int meshID;
 	int textureID;
 };
@@ -233,17 +236,17 @@ struct DLL_U PlayerAttribute : public IAttribute
 class MeshModel;
 struct DLL_U MeshAttribute : public IAttribute
 {
-	unsigned int	meshID;
-	MeshModel*		mesh;
-	bool			dynamic;
+	unsigned int	meshID;		//!< ID of mesh, read from .mdldesc-file.
+	MeshModel*		mesh;		//!< Type containing all mesh-related data.
+	bool			dynamic;	//!< Whether or not mesh is supposed to be dynamic physics-wize.
 
-	void clean();
-	MeshAttribute();
+	void clean();					//!< Does nothing.
+	MeshAttribute();				//!< Initializes attribute with default values. Dynamic = false.
 	MeshAttribute(
 		unsigned int	id,
 		MeshModel*		mesh,
-		bool			dynamic);
-	~MeshAttribute();
+		bool			dynamic);	//!< Initializes attribute with passed values.
+	~MeshAttribute();				//!< Does nothing.
 };
 
 struct DLL_U HealthAttribute : public IAttribute
@@ -272,4 +275,17 @@ struct DLL_U SpawnPointAttribute : public IAttribute
 	float timeSinceLastSpawn;	//!< Is reset when a player spawn at the spawn point.
 	float spawnArea;			//!< Defines a horisontal circle area wherein no player will spawn if another player resides in the area.
 	AttributePointer positionAttribute;
+};
+
+struct DebugShape;
+struct DLL_U DebugShapeAttribute : public IAttribute
+{
+	DebugShapeAttribute();
+	~DebugShapeAttribute();
+	void clean();
+
+	AttributePointer spatialAttribute;
+
+	DebugShape* shape;
+	bool		render;
 };

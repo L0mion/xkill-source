@@ -10,6 +10,7 @@ namespace DirectX
 };
 
 struct RenderAttribute;
+struct DebugShapeAttribute;
 struct CameraAttribute;
 struct SpatialAttribute;
 struct PositionAttribute;
@@ -84,6 +85,10 @@ private:
 	void renderSubset(
 		IB* ib, 
 		MeshMaterial& material);
+	void renderDebugShape(
+		DebugShapeAttribute*	debugShapeAt, 
+		DirectX::XMFLOAT4X4		viewMatrix, 
+		DirectX::XMFLOAT4X4		projectionMatrix);
 
 	//temp
 	void renderGBufferClean();		//refactor me
@@ -116,11 +121,12 @@ private:
 	ManagementGBuffer*	managementGBuffer_;		//!< Maintains the G-Buffers of application.
 	ManagementDebug*	managementDebug_;		//!< Used for detecting live COM-objects.
 
-	std::vector<SpatialAttribute>*	attributesSpatial_;		//!< Holds spatial data. Is fetched only once.
-	std::vector<PositionAttribute>*	attributesPosition_;	//!< Holds positional data. Is fetched only once.
-	std::vector<RenderAttribute>*	attributesRender_;		//!< Holds objects supposed to be rendered. Is fetched only once.
-	std::vector<int>*				attributesRenderOwner_;
-	std::vector<CameraAttribute>*	attributesCamera_;		//!< Holds cameras being rendered to g-buffers. Is fetched only once.
+	std::vector<SpatialAttribute>*		attributesSpatial_;		//!< Holds spatial data. Is fetched only once.
+	std::vector<PositionAttribute>*		attributesPosition_;	//!< Holds positional data. Is fetched only once.
+	std::vector<RenderAttribute>*		attributesRender_;		//!< Holds objects supposed to be rendered. Is fetched only once.
+	std::vector<DebugShapeAttribute>*	attributesDebugShape_;
+	std::vector<int>*					attributesRenderOwner_;
+	std::vector<CameraAttribute>*		attributesCamera_;		//!< Holds cameras being rendered to g-buffers. Is fetched only once.
 
 	//temp
 	M3DLoader*		m3dLoader_;
