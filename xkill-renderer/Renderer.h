@@ -4,6 +4,11 @@
 typedef long HRESULT;
 typedef struct HWND__* HWND;
 
+namespace DirectX
+{
+	struct XMFLOAT4X4;
+};
+
 struct RenderAttribute;
 struct CameraAttribute;
 struct SpatialAttribute;
@@ -11,7 +16,8 @@ struct PositionAttribute;
 
 class Winfo;
 class TexDesc;
-
+class IB;
+class MeshMaterial;
 class ManagementD3D;
 class ManagementFX;
 class ManagementCB;
@@ -25,12 +31,6 @@ class ManagementGBuffer;
 class ManagementDebug;
 
 #include <vector>
-
-//temp?
-namespace DirectX
-{
-	struct XMFLOAT4X4;
-};
 
 //temp
 class M3DLoader;
@@ -46,11 +46,13 @@ public:
 	Renderer(HWND windowHandle);	//!< Initializes RenderingComponent to default values. init()-method need be called in order for RenderingComponent to get proper values.
 	~Renderer();					//!< Releases all memory and returns to default state.
 	
-	void	reset(); //!< Resets RenderingComponent to default state.
-	HRESULT	resize(unsigned int screenWidth, unsigned int screenHeight); //!< Resizes all management objects that are affected by a change in screen resolution.
-	HRESULT	init();	//!< Initializes members and prepares render.
-	void	render(float delta);
-	void	loadTextures(TexDesc* texdesc);
+	void	reset();				//!< Resets RenderingComponent to default state.
+	HRESULT	resize(
+		unsigned int screenWidth, 
+		unsigned int screenHeight);	//!< Resizes all management objects that are affected by a change in screen resolution.
+	HRESULT	init();					//!< Initializes members and prepares render.
+	void	render(float delta);	//!< Renders a frame.
+	void	loadTextures(TexDesc* texdesc); //!< Forwards information related to what textures Renderer is to load to Renderer-object.
 protected:
 private:
 	void initAttributes();				//!< Retrieves pointers to data vectors which will be used during execution.
@@ -59,24 +61,36 @@ private:
 	HRESULT initManagementFX();			//!< Initializes ManagementFX-object which will maintain shaders and input-layouts throughout application.
 	HRESULT initManagementCB();			//!< Initializes ManagementCB-object which will maintain constant buffers.
 	HRESULT initManagementLight();		//!< Initializes ManagementLight-object which will maintain lights.
-	HRESULT initManagementModel();
-	HRESULT initManagementTex();
+	HRESULT initManagementModel();		//!< Initializes ManegementModel, which maintains the renderer's view of meshes.
+	HRESULT initManagementTex();		//!< Initializes ManagementTex, which maintains loaded textures.
 	HRESULT initManagementViewport();	//!< Creates a ManagementViewport object that in turn will create the specified amount of viewports.
 	HRESULT initManagementSS();			//!< Creates a ManagementSS object that will maintain sampler states.
 	HRESULT initManagementRS();			//!< Creates a ManagementRS object that will maintain rasterizer states.
 	HRESULT initManagementGBuffer();	//!< Creates a ManagementGBuffer-type object that will maintain the application's g-buffers.
-	HRESULT initManagementDebug();
+	HRESULT initManagementDebug();		//!< Initializes ManagementDebug, which holds data allowing advanced detection of COM-leaks in D3D.
 
-	//temp?
+	void renderViewport(
+		CameraAttribute	cameraAt, 
+		unsigned int	viewportTopX,
+		unsigned int	viewportTopY);
 	void renderViewportToGBuffer(
 		DirectX::XMFLOAT4X4 viewMatrix,
 		DirectX::XMFLOAT4X4 projectionMatrix);
+	void renderViewportToBackBuffer();
+	void renderAttribute(
+		RenderAttribute* renderAt, 
+		DirectX::XMFLOAT4X4 viewMatrix, 
+		DirectX::XMFLOAT4X4 projectionMatrix);
+	void renderSubset(
+		IB* ib, 
+		MeshMaterial& material);
+
+	//temp
+	void renderGBufferClean();		//refactor me
+	void renderBackBufferClean();	//refactor me
 	void renderAnimatedMesh(
 		DirectX::XMFLOAT4X4 viewMatrix, 
 		DirectX::XMFLOAT4X4 projectionMatrix);
-	void renderGBufferClean();
-	void renderViewportToBackBuffer();
-	void renderBackBufferClean();
 
 	DirectX::XMFLOAT4X4 calculateWorldMatrix(
 		SpatialAttribute* spatialAttribute,							 
@@ -102,11 +116,11 @@ private:
 	ManagementGBuffer*	managementGBuffer_;		//!< Maintains the G-Buffers of application.
 	ManagementDebug*	managementDebug_;		//!< Used for detecting live COM-objects.
 
-	std::vector<SpatialAttribute>*	attributesSpatial_;
-	std::vector<PositionAttribute>*	attributesPosition_;
-	std::vector<RenderAttribute>*	attributesRender_;
+	std::vector<SpatialAttribute>*	attributesSpatial_;		//!< Holds spatial data. Is fetched only once.
+	std::vector<PositionAttribute>*	attributesPosition_;	//!< Holds positional data. Is fetched only once.
+	std::vector<RenderAttribute>*	attributesRender_;		//!< Holds objects supposed to be rendered. Is fetched only once.
 	std::vector<int>*				attributesRenderOwner_;
-	std::vector<CameraAttribute>*	attributesCamera_;
+	std::vector<CameraAttribute>*	attributesCamera_;		//!< Holds cameras being rendered to g-buffers. Is fetched only once.
 
 	//temp
 	M3DLoader*		m3dLoader_;

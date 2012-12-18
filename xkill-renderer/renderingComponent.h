@@ -38,11 +38,6 @@ private:
 	 
 	void event_WindowResize(Event_WindowResize* e);
 	void event_PostDescTex(Event_PostDescTex* e);
-	
-	//TEMP
-	void initAnimations();
-	
-
 };
 
 #endif //XKILL_RENDERER_RENDERINGCOMPONENT_H

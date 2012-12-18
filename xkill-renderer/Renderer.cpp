@@ -298,49 +298,64 @@ HRESULT Renderer::initManagementDebug()
 
 void Renderer::render(float delta)
 {
+	//Clear g-buffers and depth buffer.
 	managementGBuffer_->clearGBuffers(managementD3D_->getDeviceContext());
+	managementD3D_->clearDepthBuffer();
 
+	//Update per-frame constant buffer.
 	managementCB_->vsSet(CB_TYPE_FRAME, CB_REGISTER_FRAME, managementD3D_->getDeviceContext());
 	managementCB_->updateCBFrame(managementD3D_->getDeviceContext(), managementLight_->getNumLights());
+
+	//Render to each viewport.
 	for(unsigned int i = 0; i < attributesCamera_->size(); i++)
 	{
-		DirectX::XMFLOAT4X4 viewMatrix((float*)&attributesCamera_->at(i).mat_view);
-		DirectX::XMFLOAT4X4 projectionMatrix((float*)&attributesCamera_->at(i).mat_projection);
-
-		DirectX::XMFLOAT4X4 viewMatrixInverse		= calculateMatrixInverse(viewMatrix);
-		DirectX::XMFLOAT4X4 projectionMatrixInverse	= calculateMatrixInverse(projectionMatrix);
-		
-		CameraAttribute* cameraAttribute		= &attributesCamera_->at(i);
-		SpatialAttribute* spatialAttribute		= ATTRIBUTE_CAST(SpatialAttribute, spatialAttribute, cameraAttribute);
-		PositionAttribute* positionAttribute	= ATTRIBUTE_CAST(PositionAttribute, positionAttribute, spatialAttribute);
-
-		DirectX::XMFLOAT3	eyePosition = *(DirectX::XMFLOAT3*)&positionAttribute->position;
-		
-		unsigned int viewportTopX = static_cast<unsigned int>(managementViewport_->getViewport(i).TopLeftX);
-		unsigned int viewportTopY = static_cast<unsigned int>(managementViewport_->getViewport(i).TopLeftY);
-		managementCB_->vsSet(CB_TYPE_CAMERA, CB_REGISTER_CAMERA, managementD3D_->getDeviceContext());
-		managementCB_->updateCBCamera(managementD3D_->getDeviceContext(),
-									  viewMatrix,
-									  viewMatrixInverse,
-									  projectionMatrix,
-									  projectionMatrixInverse,
-									  eyePosition,
-									  viewportTopX,
-									  viewportTopY);
-
+		//Set viewport.
 		managementViewport_->setViewport(managementD3D_->getDeviceContext(), i);
 
-		renderViewportToGBuffer(viewMatrix, projectionMatrix);
-		renderViewportToBackBuffer();
+		//Render viewport.
+		unsigned int viewportTopX = static_cast<unsigned int>(managementViewport_->getViewport(i).TopLeftX);
+		unsigned int viewportTopY = static_cast<unsigned int>(managementViewport_->getViewport(i).TopLeftY);
+		renderViewport(
+			attributesCamera_->at(i), 
+			viewportTopX, 
+			viewportTopY);
 	}
 }
+void Renderer::renderViewport(
+	CameraAttribute		cameraAt, 
+	unsigned int		viewportTopX,
+	unsigned int		viewportTopY)
+{
+	//Get camera's view- and projection matrix, and their inverses.
+	DirectX::XMFLOAT4X4 viewMatrix((float*)&cameraAt.mat_view);
+	DirectX::XMFLOAT4X4 projectionMatrix((float*)&cameraAt.mat_projection);
+	DirectX::XMFLOAT4X4 viewMatrixInverse		= calculateMatrixInverse(viewMatrix);
+	DirectX::XMFLOAT4X4 projectionMatrixInverse	= calculateMatrixInverse(projectionMatrix);
 
+	//Get eye position.
+	CameraAttribute*	cameraAtP = &cameraAt;
+	SpatialAttribute*	spatialAttribute	= ATTRIBUTE_CAST(SpatialAttribute, spatialAttribute, cameraAtP);
+	PositionAttribute*	positionAttribute	= ATTRIBUTE_CAST(PositionAttribute, positionAttribute, spatialAttribute);
+	DirectX::XMFLOAT3	eyePosition			= *(DirectX::XMFLOAT3*)&positionAttribute->position;
+
+	//Update per-viewport constant buffer.
+	managementCB_->vsSet(CB_TYPE_CAMERA, CB_REGISTER_CAMERA, managementD3D_->getDeviceContext());
+	managementCB_->updateCBCamera(managementD3D_->getDeviceContext(),
+		viewMatrix,
+		viewMatrixInverse,
+		projectionMatrix,
+		projectionMatrixInverse,
+		eyePosition,
+		viewportTopX,
+		viewportTopY);
+
+	renderViewportToGBuffer(viewMatrix, projectionMatrix);
+	renderViewportToBackBuffer();
+}
 void Renderer::renderViewportToGBuffer(DirectX::XMFLOAT4X4 viewMatrix, DirectX::XMFLOAT4X4 projectionMatrix)									
 {
 	ID3D11Device*			device = managementD3D_->getDevice();
 	ID3D11DeviceContext*	devcon = managementD3D_->getDeviceContext();
-
-	managementD3D_->clearDepthBuffer();
 
 	if(animatedMesh_)
 		renderAnimatedMesh(viewMatrix, projectionMatrix);
@@ -353,82 +368,143 @@ void Renderer::renderViewportToGBuffer(DirectX::XMFLOAT4X4 viewMatrix, DirectX::
 
 	managementGBuffer_->setGBuffersAndDepthBufferAsRenderTargets(devcon, managementD3D_->getDepthBuffer());
 
-	unsigned int		meshID;
-	ModelD3D*			modelD3D;
-	RenderAttribute*	renderAt;
-	SpatialAttribute*	spatialAt;
-	PositionAttribute*	positionAt;
-	DirectX::XMFLOAT4X4 worldMatrix;  
-	DirectX::XMFLOAT4X4 worldMatrixInverse;
-	DirectX::XMFLOAT4X4 finalMatrix;
+	RenderAttribute* renderAt;
 	for(unsigned int i = 0; i < attributesRender_->size() && attributesRenderOwner_->at(i) != 0; i++)
 	{
-		renderAt	= &attributesRender_->at(i);
-		spatialAt	= &attributesSpatial_->at(renderAt->spatialAttribute.index);
-		positionAt	= &attributesPosition_->at(spatialAt->positionAttribute.index);
-		
-		meshID		= renderAt->meshID;
-		modelD3D	= managementModel_->getModelD3D(meshID, device);
-		std::vector<MeshMaterial> materials = modelD3D->getMaterials();
-
-		worldMatrix			= calculateWorldMatrix(spatialAt, positionAt);
-		worldMatrixInverse	= calculateMatrixInverse(worldMatrix);
-		finalMatrix			= calculateFinalMatrix(worldMatrix, viewMatrix, projectionMatrix);
-		
-		managementCB_->vsSet(CB_TYPE_OBJECT, CB_REGISTER_OBJECT, devcon);
-		managementCB_->updateCBObject(devcon, finalMatrix, worldMatrix, worldMatrixInverse);
-	
-		VB* vb	= modelD3D->getVertexBuffer();
-		std::vector<SubsetD3D*> subsetD3Ds = modelD3D->getSubsetD3Ds();
-
-		UINT stride = sizeof(VertexPosNormTex);
-		UINT offset = 0;
-		
-		ID3D11Buffer* vertexBuffer = vb->getVB();
-		devcon->IASetVertexBuffers(
-			0, 
-			1, 
-			&vertexBuffer, 
-			&stride, 
-			&offset);
-	
-		for(unsigned int j = 0; j < subsetD3Ds.size(); j++)
-		{
-			ID3D11Buffer* indexBuffer = subsetD3Ds[j]->getIndexBuffer()->getIB();
-			unsigned int materialIndex = subsetD3Ds[j]->getMaterialIndex();
-
-			MeshMaterial material = materials[materialIndex];
-
-			ID3D11ShaderResourceView* texAlbedo = managementTex_->getTexSrv(material.getIDAlbedoTex());
-			ID3D11ShaderResourceView* texNormal = managementTex_->getTexSrv(material.getIDNormalTex());
-			devcon->PSSetShaderResources(0, 1, &texAlbedo);
-			devcon->PSSetShaderResources(1, 1, &texNormal);
-
-			managementCB_->psSet(CB_TYPE_SUBSET, CB_REGISTER_SUBSET, devcon);
-
-			DirectX::XMFLOAT3 dxSpec(1.0f, 1.0f, 1.0f); //((float*)&material.getSpecularTerm());
-			managementCB_->updateCBSubset(
-				devcon,
-				dxSpec,
-				material.getSpecularPower());
-
-			devcon->IASetIndexBuffer(
-				indexBuffer, 
-				DXGI_FORMAT_R32_UINT, 
-				offset);
-	
-			managementFX_->setLayout(devcon, LAYOUTID_POS_NORM_TEX);
-
-			devcon->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-			devcon->DrawIndexed(
-				subsetD3Ds[j]->getIndexBuffer()->getNumIndices(), 
-				0, 
-				0);
-		}
+		renderAt = &attributesRender_->at(i);
+		renderAttribute(
+			renderAt, 
+			viewMatrix, 
+			projectionMatrix);
 	}
 
 	renderGBufferClean();
 }
+void Renderer::renderViewportToBackBuffer()
+{
+	ID3D11DeviceContext* devcon = managementD3D_->getDeviceContext();
+
+	//Set backbuffer.
+	managementD3D_->setUAVBackBufferCS();
+
+	//Set shader.
+	managementFX_->setShader(devcon, SHADERID_CS_DEFAULT);
+
+	//Set constant buffers.
+	managementCB_->csSet(CB_TYPE_FRAME,		CB_REGISTER_FRAME,		devcon);
+	managementCB_->csSet(CB_TYPE_INSTANCE,	CB_REGISTER_INSTANCE,	devcon); //remove me
+	managementCB_->csSet(CB_TYPE_CAMERA,	CB_REGISTER_CAMERA,		devcon);
+	managementCB_->updateCBInstance(devcon, winfo_->getScreenWidth(), winfo_->getScreenHeight());
+
+	//Set lights.
+	managementLight_->setLightSRVCS(devcon, 3);
+
+	//Connect g-buffers to shader.
+	managementGBuffer_->setGBuffersAsCSShaderResources(devcon);
+	
+	//Set default samplerstate.
+	managementSS_->setCS(devcon, SS_ID_DEFAULT, 0);
+
+	//Call compute shader kernel.
+	unsigned int dispatchX = winfo_->getCSDispathX() / managementViewport_->getNumViewportsX();
+	unsigned int dispatchY = winfo_->getCSDispathY() / managementViewport_->getNumViewportsY();
+	devcon->Dispatch(dispatchX, dispatchY, 1);
+
+	//Unset and clean.
+	managementFX_->unsetShader(devcon, SHADERID_CS_DEFAULT);
+	renderBackBufferClean();
+
+	managementD3D_->present();
+}
+void Renderer::renderAttribute(
+	RenderAttribute*	renderAt,
+	DirectX::XMFLOAT4X4 viewMatrix,
+	DirectX::XMFLOAT4X4 projectionMatrix)
+{
+	ID3D11Device*			device = managementD3D_->getDevice();
+	ID3D11DeviceContext*	devcon = managementD3D_->getDeviceContext();
+
+	//Get transform matrices.
+	SpatialAttribute*	spatialAt			= &attributesSpatial_->at(renderAt->spatialAttribute.index);
+	PositionAttribute*	positionAt			= &attributesPosition_->at(spatialAt->positionAttribute.index);
+	DirectX::XMFLOAT4X4 worldMatrix			= calculateWorldMatrix(spatialAt, positionAt);
+	DirectX::XMFLOAT4X4 worldMatrixInverse	= calculateMatrixInverse(worldMatrix);
+	DirectX::XMFLOAT4X4 finalMatrix			= calculateFinalMatrix(worldMatrix, viewMatrix, projectionMatrix);
+	
+	//Update per-object constant buffer.
+	managementCB_->vsSet(CB_TYPE_OBJECT, CB_REGISTER_OBJECT, devcon);
+	managementCB_->updateCBObject(
+		devcon, 
+		finalMatrix, 
+		worldMatrix, 
+		worldMatrixInverse);
+
+	//Fetch renderer representation of model.
+	unsigned int meshID	= renderAt->meshID;
+	ModelD3D* modelD3D	= managementModel_->getModelD3D(meshID, device);
+	
+	//Set vertex buffer.
+	ID3D11Buffer* vertexBuffer = modelD3D->getVertexBuffer()->getVB();
+	UINT stride = sizeof(VertexPosNormTex);
+	UINT offset = 0;
+	devcon->IASetVertexBuffers(
+		0, 
+		1, 
+		&vertexBuffer, 
+		&stride, 
+		&offset);
+	
+	std::vector<SubsetD3D*>		subsetD3Ds	= modelD3D->getSubsetD3Ds();
+	std::vector<MeshMaterial>	materials	= modelD3D->getMaterials();
+	for(unsigned int i = 0; i < subsetD3Ds.size(); i++)
+	{
+		IB* ib	= subsetD3Ds[i]->getIndexBuffer();
+		unsigned int materialIndex	= subsetD3Ds[i]->getMaterialIndex();
+
+		renderSubset(
+			ib,
+			materials[materialIndex]);
+	}
+}
+void Renderer::renderSubset(IB* ib, MeshMaterial& material)
+{
+	ID3D11Device*			device = managementD3D_->getDevice();
+	ID3D11DeviceContext*	devcon = managementD3D_->getDeviceContext();
+
+	//Set textures.
+	ID3D11ShaderResourceView* texAlbedo = managementTex_->getTexSrv(material.getIDAlbedoTex());
+	ID3D11ShaderResourceView* texNormal = managementTex_->getTexSrv(material.getIDNormalTex());
+	devcon->PSSetShaderResources(0, 1, &texAlbedo);
+	devcon->PSSetShaderResources(1, 1, &texNormal);
+
+	//Set per-subset constant buffer.
+	managementCB_->psSet(CB_TYPE_SUBSET, CB_REGISTER_SUBSET, devcon);
+	DirectX::XMFLOAT3 dxSpec(1.0f, 1.0f, 1.0f); //((float*)&material.getSpecularTerm());
+	managementCB_->updateCBSubset(
+		devcon,
+		dxSpec,
+		material.getSpecularPower());
+
+	//Set input layout
+	managementFX_->setLayout(devcon, LAYOUTID_POS_NORM_TEX);
+
+	//Set index-buffer.
+	UINT offset = 0;
+	devcon->IASetIndexBuffer(
+		ib->getIB(), 
+		DXGI_FORMAT_R32_UINT, 
+		offset);
+
+	//Set topology. Where to put this?
+	devcon->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	
+	//Draw subset.
+	devcon->DrawIndexed(
+		ib->getNumIndices(), 
+		0, 
+		0);
+}
+
 void Renderer::renderAnimatedMesh(DirectX::XMFLOAT4X4 viewMatrix, DirectX::XMFLOAT4X4 projectionMatrix)
 {
 	ID3D11Device*			device = managementD3D_->getDevice();
@@ -478,35 +554,6 @@ void Renderer::renderAnimatedMesh(DirectX::XMFLOAT4X4 viewMatrix, DirectX::XMFLO
 	devcon->DrawIndexed(animatedMesh_->getNumIndices(), 0, 0);
 
 	renderGBufferClean();
-}
-void Renderer::renderViewportToBackBuffer()
-{
-	ID3D11DeviceContext* devcon = managementD3D_->getDeviceContext();
-
-	managementD3D_->setUAVBackBufferCS();
-
-	managementCB_->csSet(CB_TYPE_FRAME,		CB_REGISTER_FRAME,		devcon);
-	managementCB_->csSet(CB_TYPE_INSTANCE,	CB_REGISTER_INSTANCE,	devcon);
-	managementCB_->csSet(CB_TYPE_CAMERA,	CB_REGISTER_CAMERA,		devcon);
-	managementCB_->updateCBInstance(devcon, winfo_->getScreenWidth(), winfo_->getScreenHeight());
-
-	managementLight_->setLightSRVCS(devcon, 3);
-
-	managementGBuffer_->setGBuffersAsCSShaderResources(devcon);
-	
-	managementSS_->setCS(devcon, SS_ID_DEFAULT, 0);
-
-	managementFX_->setShader(devcon, SHADERID_CS_DEFAULT);
-
-	unsigned int dispatchX = winfo_->getCSDispathX() / managementViewport_->getNumViewportsX();
-	unsigned int dispatchY = winfo_->getCSDispathY() / managementViewport_->getNumViewportsY();
-
-	devcon->Dispatch(dispatchX, dispatchY, 1);
-	managementFX_->unsetShader(devcon, SHADERID_CS_DEFAULT);
-
-	renderBackBufferClean();
-
-	managementD3D_->present();
 }
 void Renderer::renderGBufferClean()
 {
