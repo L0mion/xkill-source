@@ -14,13 +14,13 @@ enum RS_ID
 /*!
 \ingroup xkill-renderer
 */
-class RSManagement : public D3DInterface
+class ManagementRS : public D3DInterface
 {
 public:
 	//! Initializes RSManagement to its default state.
-	RSManagement();
+	ManagementRS();
 	//!Releases all memory and resets RSManagement to its default state.
-	virtual ~RSManagement();
+	virtual ~ManagementRS();
 	//!Releases all memory and resets RSManagement to its default state.
 	virtual void reset();
 

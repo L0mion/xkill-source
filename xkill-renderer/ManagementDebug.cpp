@@ -1,8 +1,8 @@
 #include "renderingUtilities.h"
 
-#include "d3dDebug.h"
+#include "ManagementDebug.h"
 
-D3DDebug::D3DDebug()
+ManagementDebug::ManagementDebug()
 {
 	#if defined(DEBUG) || defined(_DEBUG)
 	dxgiFactory_		= nullptr;
@@ -11,7 +11,7 @@ D3DDebug::D3DDebug()
 	dxgiInfoQueue_	= nullptr;
 	#endif //DEBUG || _DEBUG
 }
-D3DDebug::~D3DDebug()
+ManagementDebug::~ManagementDebug()
 {
 	#if defined(DEBUG) || defined(_DEBUG)
 	SAFE_RELEASE(dxgiFactory_);
@@ -21,7 +21,7 @@ D3DDebug::~D3DDebug()
 	#endif //DEBUG || _DEBUG
 }
 
-void D3DDebug::reset()
+void ManagementDebug::reset()
 {
 	#if defined(DEBUG) || defined(_DEBUG)
 	SAFE_RELEASE(dxgiFactory_);
@@ -30,7 +30,7 @@ void D3DDebug::reset()
 	SAFE_RELEASE(dxgiInfoQueue_);
 	#endif //DEBUG || _DEBUG
 }
-HRESULT D3DDebug::init(ID3D11Device* device)
+HRESULT ManagementDebug::init(ID3D11Device* device)
 {
 	HRESULT hr = S_OK;
 
@@ -53,7 +53,7 @@ HRESULT D3DDebug::init(ID3D11Device* device)
 	return hr;
 }
 
-HRESULT D3DDebug::reportLiveDeviceObjects()
+HRESULT ManagementDebug::reportLiveDeviceObjects()
 {
 	HRESULT hr = S_OK;
 
@@ -63,7 +63,7 @@ HRESULT D3DDebug::reportLiveDeviceObjects()
 
 	return hr;
 }
-HRESULT D3DDebug::reportLiveObjects()
+HRESULT ManagementDebug::reportLiveObjects()
 {
 	HRESULT hr = S_OK;
 

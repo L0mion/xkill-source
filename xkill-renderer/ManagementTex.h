@@ -17,13 +17,13 @@ class TexLoader;
 /*!
 \ingroup xkill-renderer
 */
-class TexManagement
+class ManagementTex
 {
 public:
 	//! Does nothing.
-	TexManagement();
+	ManagementTex();
 	//! Releases memory allocated by TexManagement, including vector of Tex-objects.
-	~TexManagement();
+	~ManagementTex();
 
 	//! Creates TexLoader-object, which will then be used to load textures.
 	HRESULT init();

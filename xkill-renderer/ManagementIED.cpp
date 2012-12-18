@@ -1,6 +1,6 @@
-#include "IEDManagement.h"
+#include "ManagementIED.h"
 
-IEDManagement::IEDManagement() :
+ManagementIED::ManagementIED() :
 	semanticPosition_("POSITION"),
 	semanticNormal_("NORMAL"),
 	semanticTexcoord_ ("TEXCOORD")
@@ -9,24 +9,24 @@ IEDManagement::IEDManagement() :
 		iedPosNormTex_, 
 		sizeof(D3D11_INPUT_ELEMENT_DESC) * iedPosNormTexNumElements_);
 }
-IEDManagement::~IEDManagement()
+ManagementIED::~ManagementIED()
 {
 
 }
 
-void IEDManagement::init()
+void ManagementIED::init()
 {
 	initIEDPosNormTex();
 }
 
-void IEDManagement::initIEDPosNormTex()
+void ManagementIED::initIEDPosNormTex()
 {
 	iedPosNormTex_[0] = createIED(semanticPosition_,	DXGI_FORMAT_R32G32B32_FLOAT);
 	iedPosNormTex_[1] = createIED(semanticNormal_,		DXGI_FORMAT_R32G32B32_FLOAT);
 	iedPosNormTex_[2] = createIED(semanticTexcoord_,	DXGI_FORMAT_R32G32_FLOAT);
 }
 
-D3D11_INPUT_ELEMENT_DESC IEDManagement::createIED(
+D3D11_INPUT_ELEMENT_DESC ManagementIED::createIED(
 	LPCSTR		semanticName,
 	DXGI_FORMAT	format)
 {
@@ -42,7 +42,7 @@ D3D11_INPUT_ELEMENT_DESC IEDManagement::createIED(
 
 	return ied;
 }
-D3D11_INPUT_ELEMENT_DESC IEDManagement::IED(
+D3D11_INPUT_ELEMENT_DESC ManagementIED::IED(
 	LPCSTR						semanticName,
 	unsigned int				semanticIndex,
 	DXGI_FORMAT					format,
@@ -63,11 +63,11 @@ D3D11_INPUT_ELEMENT_DESC IEDManagement::IED(
 	return ied;
 }
 
-unsigned int IEDManagement::getIEDPosNormTexNumElements()
+unsigned int ManagementIED::getIEDPosNormTexNumElements()
 {
 	return iedPosNormTexNumElements_;
 }
-D3D11_INPUT_ELEMENT_DESC* IEDManagement::getIEDPosNormTex()
+D3D11_INPUT_ELEMENT_DESC* ManagementIED::getIEDPosNormTex()
 {
 	return iedPosNormTex_;
 }
