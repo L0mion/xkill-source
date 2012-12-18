@@ -75,6 +75,8 @@ ProjectileAttribute::ProjectileAttribute()
 {
 	entityIdOfCreator = -1;
 	currentLifeTimeLeft = 10.0f;
+	explodeOnImnpact = false;
+	explosionSphereRadius = 1.0f;
 }
 ProjectileAttribute::~ProjectileAttribute()
 {
@@ -183,11 +185,11 @@ void WeaponStatsAttribute::setWeaponStats(AmmunitionType ammunitionType, FiringM
 
 	totalNrOfShots = 100;
 	clipSize = 10;
-	reloadTime = 2000.0f;
+	reloadTime = 0.0f;
 	nrOfProjectilesForEachShot = 1;
-
+	displacementSphereRadius = 0.0f;
+	spreadConeRadius = 0.0f;
 	isExplosive = false;
-	explosionSphereRadius = 1.0f;
 
 	switch(ammunitionType)
 	{
@@ -195,14 +197,17 @@ void WeaponStatsAttribute::setWeaponStats(AmmunitionType ammunitionType, FiringM
 		velocityOfEachProjectile = 2500.0f;
 		damgeOfEachProjectile = 5;
 		break;
-	case SCATTER_SHOT: //Many weak and less accurate bullets.
+	case SCATTER: //Many weak and less accurate bullets.
 		velocityOfEachProjectile = 1000.0f;
 		nrOfProjectilesForEachShot = 10;
 		damgeOfEachProjectile = 2;
+		displacementSphereRadius = 0.02f;
+		spreadConeRadius = 0.2f;
 		break;
 	case EXPLOSIVE: //One powerful accurate exploding bullet.
 		velocityOfEachProjectile = 500.0f;
 		damgeOfEachProjectile = 10;
+		explosionSphereRadius = 1.0f;
 		isExplosive = true;
 		break;
 	}
@@ -227,10 +232,31 @@ void WeaponStatsAttribute::setWeaponStats(AmmunitionType ammunitionType, FiringM
 		clipSize = 50;
 		break;
 	}
+
 	cooldownLeft = cooldownBetweenShots;
 	reloadTimeLeft = reloadTime;
+
 	nrOfShotsLeftInClip = clipSize;
 }
+
+void WeaponStatsAttribute::setWeaponToDebugMachineGun()
+{
+	totalNrOfShots = -1;
+	nrOfShotsLeftInClip = clipSize;
+	clipSize = 0.0f;
+	cooldownLeft = 0.0f;
+	reloadTime = 0.0f;
+
+	nrOfProjectilesForEachShot = 1;
+	displacementSphereRadius = 0.0f;
+	spreadConeRadius = 0.0f;
+
+	velocityOfEachProjectile = 2500.0f;
+	damgeOfEachProjectile = 1;
+	explosionSphereRadius = 0.0f;
+	cooldownBetweenShots = 0.0f;
+}
+
 WeaponStatsAttribute::~WeaponStatsAttribute()
 {
 }

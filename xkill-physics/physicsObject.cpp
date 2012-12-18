@@ -53,7 +53,15 @@ void PhysicsObject::preStep(CollisionShapeManager* collisionShapeManager,Physics
 	PositionAttribute* positionAttribute = ATTRIBUTE_CAST(PositionAttribute,
 														  positionAttribute,
 														  spatialAttribute);
-	setMassProps(physicsAttribute->mass,btVector3(0,0,0));
+
+	//if(physicsAttribute->dyna
+	btVector3 localInertia(0,0,0);
+	btCollisionShape* col = getCollisionShape();
+	if(index_!=0)
+		col->calculateLocalInertia(1.0f, localInertia);
+
+	//setMassProps(physicsAttribute->mass,btVector3(0,0,0));
+	setMassProps(physicsAttribute->mass,localInertia);
 	m_worldTransform.setOrigin(WorldScaling*btVector3(positionAttribute->position.x,
 	 												  positionAttribute->position.y,
 	 												  positionAttribute->position.z));

@@ -129,6 +129,7 @@ public:
 		CREATE_ATTRIBUTE(ProjectileAttribute, projectile, entity);
 		CONNECT_ATTRIBUTES(projectile, physics);
 		projectile->entityIdOfCreator = e->entityIdOfCreator;
+		projectile->explodeOnImnpact = e->explodeOnImpact;
 
 		CREATE_ATTRIBUTE(DamageAttribute, damage, entity);
 		damage->damage = e->damage;
@@ -153,6 +154,18 @@ public:
 		spawnPoint->timeSinceLastSpawn = 0.1f;
 		spawnPoint->spawnArea = e->spawnAreaRadius;
 	}
+
+	void createExplosionSphere(Entity* entity, Event_CreateExplosionSphere* e)
+	{
+		/*
+		CREATE_ATTRIBUTE(PositionAttribute, position, entity);
+		position->position = e->position;
+
+		CREATE_ATTRIBUTE(SpatialAttribute, spatial, entity);
+		CONNECT_ATTRIBUTES(spatial, position);
+		*/
+	}
+
 };
 
 	//

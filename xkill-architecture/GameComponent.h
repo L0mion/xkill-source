@@ -30,7 +30,7 @@ private:
 	std::vector<CameraAttribute>* cameraAttributes_;		
 	std::vector<InputAttribute>* inputAttributes_;			
 	std::vector<RenderAttribute>* renderAttributes_;		
-	std::vector<SpatialAttribute>* spatialAttribute_;		
+	std::vector<SpatialAttribute>* spatialAttributes_;		
 	std::vector<PositionAttribute>* positionAttributes_;	
 	std::vector<ProjectileAttribute>* projectileAttributes_;
 	std::vector<PhysicsAttribute>* physicsAttributes_;
