@@ -116,5 +116,7 @@ public:
 		default:
 			break;
 		}
+
+		int size = sizeof(CameraAttribute);
 	}
 };

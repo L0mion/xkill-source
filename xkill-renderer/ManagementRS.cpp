@@ -1,22 +1,22 @@
-#include "RSManagement.h"
+#include "ManagementRS.h"
 
 #include "renderingUtilities.h"
 
-RSManagement::RSManagement()
+ManagementRS::ManagementRS()
 {
 	rsDefault_ = nullptr;
 }
-RSManagement::~RSManagement()
+ManagementRS::~ManagementRS()
 {
 	SAFE_RELEASE(rsDefault_);
 }
 
-void RSManagement::reset()
+void ManagementRS::reset()
 {
 	SAFE_RELEASE(rsDefault_);
 }
 
-void RSManagement::setRS(ID3D11DeviceContext* devcon, RS_ID rsId)
+void ManagementRS::setRS(ID3D11DeviceContext* devcon, RS_ID rsId)
 {
 	switch(rsId)
 	{
@@ -29,7 +29,7 @@ void RSManagement::setRS(ID3D11DeviceContext* devcon, RS_ID rsId)
 	}
 }
 
-HRESULT RSManagement::init(ID3D11Device* device)
+HRESULT ManagementRS::init(ID3D11Device* device)
 {
 	HRESULT hr = S_OK;
 
@@ -37,7 +37,7 @@ HRESULT RSManagement::init(ID3D11Device* device)
 
 	return hr;
 }
-HRESULT RSManagement::initRSDefault(ID3D11Device* device)
+HRESULT ManagementRS::initRSDefault(ID3D11Device* device)
 {
 	HRESULT hr = S_OK;
 

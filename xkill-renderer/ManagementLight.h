@@ -17,13 +17,13 @@ struct ID3D11DeviceContext;
 /*!
 \ingroup xkill-renderer
 */
-class LightManagement : public D3DInterface
+class ManagementLight : public D3DInterface
 {
 public:
 	//! Sets LightManagement to its default state.
-	LightManagement();
+	ManagementLight();
 	//! Releases all memory and returns LightManagement to its default state.
-	~LightManagement();
+	~ManagementLight();
 	//! Releases all memory and returns LightManagement to its default state.
 	virtual void reset();
 	//! Initializes LightManagement.

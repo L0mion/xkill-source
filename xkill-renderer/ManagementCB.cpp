@@ -1,9 +1,9 @@
 
-#include "CBManagement.h"
+#include "ManagementCB.h"
 #include "CBDesc.h"
 #include "renderingUtilities.h"
 
-CBManagement::CBManagement()
+ManagementCB::ManagementCB()
 {
 	cbInstance_ = nullptr;
 	cbFrame_	= nullptr;
@@ -12,7 +12,7 @@ CBManagement::CBManagement()
 	cbSubset_	= nullptr;
 	cbBone_		= nullptr;
 }
-CBManagement::~CBManagement()
+ManagementCB::~ManagementCB()
 {
 	SAFE_RELEASE(cbInstance_);
 	SAFE_RELEASE(cbFrame_);
@@ -21,7 +21,7 @@ CBManagement::~CBManagement()
 	SAFE_RELEASE(cbSubset_);
 	SAFE_RELEASE(cbBone_);
 }
-void CBManagement::reset()
+void ManagementCB::reset()
 {
 	SAFE_RELEASE(cbInstance_);
 	SAFE_RELEASE(cbFrame_);
@@ -31,7 +31,7 @@ void CBManagement::reset()
 	SAFE_RELEASE(cbBone_);
 }
 
-void CBManagement::updateCBInstance(ID3D11DeviceContext*	devcon,
+void ManagementCB::updateCBInstance(ID3D11DeviceContext*	devcon,
 									const unsigned int		screenWidth,
 									const unsigned int		screenHeight)
 {
@@ -41,14 +41,14 @@ void CBManagement::updateCBInstance(ID3D11DeviceContext*	devcon,
 
 	devcon->UpdateSubresource(cbInstance_, 0, 0, &cbDesc, 0, 0);
 }
-void CBManagement::updateCBFrame(ID3D11DeviceContext* devcon, unsigned int numLights)
+void ManagementCB::updateCBFrame(ID3D11DeviceContext* devcon, unsigned int numLights)
 {
 	CBFrameDesc cbDesc;
 	cbDesc.numLights_ = numLights;
 
 	devcon->UpdateSubresource(cbFrame_, 0, 0, &cbDesc, 0, 0);
 }
-void CBManagement::updateCBCamera(ID3D11DeviceContext*	devcon,
+void ManagementCB::updateCBCamera(ID3D11DeviceContext*	devcon,
 								  DirectX::XMFLOAT4X4	viewMatrix,
 								  DirectX::XMFLOAT4X4	viewMatrixInverse,
 								  DirectX::XMFLOAT4X4	projectionMatrix,
@@ -68,7 +68,7 @@ void CBManagement::updateCBCamera(ID3D11DeviceContext*	devcon,
 
 	devcon->UpdateSubresource(cbCamera_, 0, 0, &cbDesc, 0, 0);
 }
-void CBManagement::updateCBObject(ID3D11DeviceContext* devcon,
+void ManagementCB::updateCBObject(ID3D11DeviceContext* devcon,
 								  DirectX::XMFLOAT4X4 finalMatrix,
 								  DirectX::XMFLOAT4X4 worldMatrix,
 								  DirectX::XMFLOAT4X4 worldMatrixInverse)
@@ -80,7 +80,7 @@ void CBManagement::updateCBObject(ID3D11DeviceContext* devcon,
 
 	devcon->UpdateSubresource(cbObject_, 0, 0, &cbDesc, 0, 0);
 }
-void CBManagement::updateCBSubset(ID3D11DeviceContext* devcon,
+void ManagementCB::updateCBSubset(ID3D11DeviceContext* devcon,
 						DirectX::XMFLOAT3	specularTerm,
 						float				specularPower)
 {
@@ -90,7 +90,7 @@ void CBManagement::updateCBSubset(ID3D11DeviceContext* devcon,
 
 	devcon->UpdateSubresource(cbSubset_, 0, 0, &cbDesc, 0, 0);
 }
-void CBManagement::updateCBBone(ID3D11DeviceContext* devcon, std::vector<DirectX::XMFLOAT4X4> boneTransforms)
+void ManagementCB::updateCBBone(ID3D11DeviceContext* devcon, std::vector<DirectX::XMFLOAT4X4> boneTransforms)
 {
 	unsigned int numBones = boneTransforms.size();
 	if(numBones > CB_BONE_DESC_NUM_BONES)
@@ -104,7 +104,7 @@ void CBManagement::updateCBBone(ID3D11DeviceContext* devcon, std::vector<DirectX
 	devcon->UpdateSubresource(cbBone_, 0, 0, &cbDesc, 0, 0);
 }
 
-void CBManagement::vsSet(CB_TYPE cbType, unsigned int shaderRegister, ID3D11DeviceContext* devcon)
+void ManagementCB::vsSet(CB_TYPE cbType, unsigned int shaderRegister, ID3D11DeviceContext* devcon)
 {
 	switch(cbType)
 	{
@@ -131,7 +131,7 @@ void CBManagement::vsSet(CB_TYPE cbType, unsigned int shaderRegister, ID3D11Devi
 		break;
 	}
 }
-void CBManagement::psSet(CB_TYPE cbType, unsigned int shaderRegister, ID3D11DeviceContext* devcon)
+void ManagementCB::psSet(CB_TYPE cbType, unsigned int shaderRegister, ID3D11DeviceContext* devcon)
 {
 	switch(cbType)
 	{
@@ -158,7 +158,7 @@ void CBManagement::psSet(CB_TYPE cbType, unsigned int shaderRegister, ID3D11Devi
 		break;
 	}
 }
-void CBManagement::csSet(CB_TYPE cbType, unsigned int shaderRegister, ID3D11DeviceContext* devcon)
+void ManagementCB::csSet(CB_TYPE cbType, unsigned int shaderRegister, ID3D11DeviceContext* devcon)
 {
 	switch(cbType)
 	{
@@ -186,7 +186,7 @@ void CBManagement::csSet(CB_TYPE cbType, unsigned int shaderRegister, ID3D11Devi
 	}
 }
 
-HRESULT CBManagement::init(ID3D11Device* device)
+HRESULT ManagementCB::init(ID3D11Device* device)
 {
 	HRESULT hr = S_OK;
 
@@ -204,7 +204,7 @@ HRESULT CBManagement::init(ID3D11Device* device)
 
 	return hr;
 }
-HRESULT CBManagement::initCBInstance(ID3D11Device* device)
+HRESULT ManagementCB::initCBInstance(ID3D11Device* device)
 {
 	HRESULT hr = S_OK;
 
@@ -222,7 +222,7 @@ HRESULT CBManagement::initCBInstance(ID3D11Device* device)
 
 	return hr;
 }
-HRESULT CBManagement::initCBFrame(ID3D11Device* device)
+HRESULT ManagementCB::initCBFrame(ID3D11Device* device)
 {
 	HRESULT hr = S_OK;
 
@@ -240,7 +240,7 @@ HRESULT CBManagement::initCBFrame(ID3D11Device* device)
 
 	return hr;
 }
-HRESULT CBManagement::initCBCamera(ID3D11Device* device)
+HRESULT ManagementCB::initCBCamera(ID3D11Device* device)
 {
 	HRESULT hr = S_OK;
 
@@ -258,7 +258,7 @@ HRESULT CBManagement::initCBCamera(ID3D11Device* device)
 
 	return hr;
 }
-HRESULT CBManagement::initCBObject(ID3D11Device* device)
+HRESULT ManagementCB::initCBObject(ID3D11Device* device)
 {
 	HRESULT hr = S_OK;
 
@@ -276,7 +276,7 @@ HRESULT CBManagement::initCBObject(ID3D11Device* device)
 
 	return hr;
 }
-HRESULT CBManagement::initCBSubset(ID3D11Device* device)
+HRESULT ManagementCB::initCBSubset(ID3D11Device* device)
 {
 	HRESULT hr = S_OK;
 
@@ -294,7 +294,7 @@ HRESULT CBManagement::initCBSubset(ID3D11Device* device)
 		
 	return hr;
 }
-HRESULT CBManagement::initCBBone(ID3D11Device* device)
+HRESULT ManagementCB::initCBBone(ID3D11Device* device)
 {
 	HRESULT hr = S_OK;
 

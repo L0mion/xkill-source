@@ -1,3 +1,5 @@
+#include <d3dcompiler.h> //id3d10blob
+
 #include "renderingUtilities.h"
 
 #include "shader.h"

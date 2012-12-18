@@ -29,13 +29,13 @@ static const unsigned int CB_REGISTER_BONE		= 5;
 /*!
 \ingroup xkill-renderer
 */
-class CBManagement : public D3DInterface
+class ManagementCB : public D3DInterface
 {
 public:
 	//! Initializes CBManagement to its default state.
-	CBManagement();
+	ManagementCB();
 	//!Releases all memory and resets CBManagement to its default state.
-	~CBManagement();
+	~ManagementCB();
 	//!Releases all memory and resets CBManagement to its default state.
 	void reset();
 
