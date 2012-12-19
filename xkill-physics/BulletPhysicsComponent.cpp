@@ -238,7 +238,7 @@ void BulletPhysicsComponent::onEvent(Event* e)
 		
 		dynamicsWorld_->removeRigidBody(frustrumObjects_->at(i));
 	}
-	FLUSH_QUEUED_EVENTS(EVENT_ENTITIES_COLLIDING);
+	FLUSH_QUEUED_EVENTS(EVENT_PHYSICS_ATTRIBUTES_COLLIDING);
 }
 
 void BulletPhysicsComponent::tickCallback(btScalar timeStep)

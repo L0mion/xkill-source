@@ -72,10 +72,12 @@ private:
 	void renderViewport(
 		CameraAttribute	cameraAt, 
 		unsigned int	viewportTopX,
-		unsigned int	viewportTopY);
+		unsigned int	viewportTopY,
+		unsigned int	cameraIndex);
 	void renderViewportToGBuffer(
 		DirectX::XMFLOAT4X4 viewMatrix,
-		DirectX::XMFLOAT4X4 projectionMatrix);
+		DirectX::XMFLOAT4X4 projectionMatrix,
+		unsigned int		cameraIndex);
 	void renderViewportToBackBuffer();
 	void renderAttribute(
 		RenderAttribute* renderAt, 
