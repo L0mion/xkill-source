@@ -157,15 +157,21 @@ public:
 
 	void createExplosionSphere(Entity* entity, Event_CreateExplosionSphere* e)
 	{
-		/*
 		CREATE_ATTRIBUTE(PositionAttribute, position, entity);
 		position->position = e->position;
 
 		CREATE_ATTRIBUTE(SpatialAttribute, spatial, entity);
 		CONNECT_ATTRIBUTES(spatial, position);
-		*/
-	}
 
+		/*
+			Needs some visual representation. Add attribute for it here.
+		*/
+	
+		CREATE_ATTRIBUTE(PhysicsAttribute, physics, entity);
+		CONNECT_ATTRIBUTES(physics, spatial);
+		physics->isExplosionSphere = true;
+		physics->explosionSphereRadius = e->radius;
+	}
 };
 
 	//

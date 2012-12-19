@@ -93,7 +93,19 @@ void PhysicsObject::preStep(CollisionShapeManager* collisionShapeManager,Physics
 	setAngularVelocity(btVector3(physicsAttribute->angularVelocity.x,
 					   physicsAttribute->angularVelocity.y,
 					   physicsAttribute->angularVelocity.z));
-	m_collisionShape = collisionShapeManager->getCollisionShape(physicsAttribute->meshID);
+
+	//if(!physicsAttribute->isExplosionSphere)
+	//{
+		m_collisionShape = collisionShapeManager->getCollisionShape(physicsAttribute->meshID);
+	//}
+	//else
+	//{
+	//	//check
+	//	if(m_collisionShape == NULL)
+	//	{
+	//		m_collisionShape = new btSphereShape(physicsAttribute->explosionSphereRadius);
+	//	}
+	//}
 	setGravity(gravity_+forces_);
 	activate(true);
 

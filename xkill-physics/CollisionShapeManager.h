@@ -17,7 +17,7 @@ class CollisionShapeManager
 {
 private:
 	std::map<unsigned int, unsigned int> collisionShapesIDtoIndex_;
-	btAlignedObjectArray<btCollisionShape*> collisionShapes_; //!< An vector for holding all collision shapes
+	btAlignedObjectArray<btCollisionShape*> collisionShapes_; //!< A vector for holding all collision shapes
 	std::vector<MeshAttribute>* meshAttributes_;
 	std::vector<btTriangleMesh*> triangleMeshes_;
 public:
@@ -31,13 +31,19 @@ public:
 	/*
 	\param index The index of the desired CollisionShape
 	*/
-	btCollisionShape* getCollisionShape(unsigned int index);
+	btCollisionShape* getCollisionShape(unsigned int meshID);
 	//! Create a CollisionShape for a triangle mesh. Deletes unneeded detail vertices
 	/*
 	\param vertices A pointer to a list of 3 float groups
 	\param numVertices The number of vertices sent in
 	*/
 	btCollisionShape* loadCollisionShape(unsigned int meshID);
+
+	//! Adds a collision shape
+	/*
+	\param the btCollisionShape to add
+	*/
+	void addCollisionShape(btCollisionShape* collisionShape);
 };
 
 #endif //XKILL_PHYSICS_COLLISIONSHAPEMANAGER

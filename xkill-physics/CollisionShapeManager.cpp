@@ -26,7 +26,7 @@ btCollisionShape* CollisionShapeManager::getCollisionShape(unsigned int meshID)
 		return collisionShapes_.at(index);
 	}
 	else
-	{ //add collusionshape
+	{ //add collision shape
 		return loadCollisionShape(meshID);
 	}
 
@@ -133,3 +133,8 @@ void CollisionShapeManager::clean()
 		triangleMeshes_.pop_back();
 	}
 };
+
+void CollisionShapeManager::addCollisionShape(btCollisionShape* collisionShape)
+{
+	collisionShapes_.push_back(collisionShape);
+}

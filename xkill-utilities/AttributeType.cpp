@@ -59,6 +59,7 @@ PhysicsAttribute::PhysicsAttribute()
 	gravity = Float3(0.0f, -10.0f, 0.0f);
 	
 	isProjectile = false;
+	isExplosionSphere = false;
 
 	angularVelocity.x = 0; 
 	angularVelocity.y = 0;

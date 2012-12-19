@@ -396,7 +396,6 @@ void GameComponent::event_PhysicsAttributesColliding(Event_PhysicsAttributesColl
 				}
 
 				//Explosion handling. In progress.
-				/*
 				if(projectileAttribute->explodeOnImnpact)
 				{
 					projectileAttribute->currentLifeTimeLeft = 0.0f;
@@ -408,7 +407,6 @@ void GameComponent::event_PhysicsAttributesColliding(Event_PhysicsAttributesColl
 
 					SEND_EVENT(&Event_CreateExplosionSphere(projectilePositionAttribute->position, projectileAttribute->explosionSphereRadius));
 				}
-				*/
 			}
 		}
 	}

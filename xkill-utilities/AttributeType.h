@@ -154,6 +154,9 @@ struct DLL_U PhysicsAttribute : public IAttribute
 	bool added;
 	bool alive;
 	bool isProjectile;
+
+	bool isExplosionSphere;
+	float explosionSphereRadius;
 };
 
 /// Stores everything GameComponent needs to know when handling 
