@@ -18,6 +18,7 @@
 #include "ModelD3D.h"
 #include "gBuffer.h"
 #include "SubsetD3D.h"
+#include "DebugShapeD3D.h"
 #include "VB.h"
 #include "IB.h"
 #include "renderingUtilities.h"
@@ -369,23 +370,30 @@ void Renderer::renderViewportToGBuffer(DirectX::XMFLOAT4X4 viewMatrix, DirectX::
 	managementGBuffer_->setGBuffersAndDepthBufferAsRenderTargets(devcon, managementD3D_->getDepthBuffer());
 
 	RenderAttribute* renderAt;
-	for(unsigned int i = 0; i < attributesRender_->size() && attributesRenderOwner_->at(i) != 0; i++)
+	for(unsigned int i = 0; i < attributesRenderOwner_->size(); i++)
 	{
-		renderAt = &attributesRender_->at(i);
-		renderAttribute(
-			renderAt, 
-			viewMatrix, 
-			projectionMatrix);
+		if(attributesRenderOwner_->at(i) != 0)
+		{
+			renderAt = &attributesRender_->at(i);
+			renderAttribute(
+				renderAt, 
+				viewMatrix, 
+				projectionMatrix);
+		}
 	}
 
 	DebugShapeAttribute* debugShapeAt;
-	for(unsigned int i = 0; i < attributesDebugShape_->size() && attributesDebugShape_->at(i).render; i++)
+	for(unsigned int i = 0; i < attributesDebugShape_->size(); i++)
 	{
-		debugShapeAt = &attributesDebugShape_->at(i);
-		renderDebugShape(
-			debugShapeAt, 
-			viewMatrix, 
-			projectionMatrix);
+		if(attributesDebugShape_->at(i).render)
+		{
+			debugShapeAt = &attributesDebugShape_->at(i);
+			renderDebugShape(
+				debugShapeAt,
+				i,
+				viewMatrix, 
+				projectionMatrix);
+		}
 	}
 
 	renderGBufferClean();
@@ -516,53 +524,55 @@ void Renderer::renderSubset(IB* ib, MeshMaterial& material)
 }
 void Renderer::renderDebugShape(
 	DebugShapeAttribute*	debugShapeAt, 
+	unsigned int			shapeIndex,
 	DirectX::XMFLOAT4X4		viewMatrix, 
 	DirectX::XMFLOAT4X4		projectionMatrix)
 {
-	//ID3D11Device*			device = managementD3D_->getDevice();
-	//ID3D11DeviceContext*	devcon = managementD3D_->getDeviceContext();
-	//
-	////Get transform matrices.
-	//SpatialAttribute*	spatialAt			= &attributesSpatial_->at(debugShapeAt->spatialAttribute.index);
-	//PositionAttribute*	positionAt			= &attributesPosition_->at(spatialAt->positionAttribute.index);
-	//DirectX::XMFLOAT4X4 worldMatrix			= calculateWorldMatrix(spatialAt, positionAt);
-	//DirectX::XMFLOAT4X4 worldMatrixInverse	= calculateMatrixInverse(worldMatrix);
-	//DirectX::XMFLOAT4X4 finalMatrix			= calculateFinalMatrix(worldMatrix, viewMatrix, projectionMatrix);
-	//
-	////Update per-object constant buffer.
-	//managementCB_->vsSet(CB_TYPE_OBJECT, CB_REGISTER_OBJECT, devcon);
-	//managementCB_->updateCBObject(
-	//	devcon, 
-	//	finalMatrix, 
-	//	worldMatrix, 
-	//	worldMatrixInverse);
-	//
-	////Fetch renderer representation of model.
-	////unsigned int meshID	= renderAt->meshID;
-	////ModelD3D* modelD3D	= managementModel_->getModelD3D(meshID, device);
-	//
-	////Set vertex buffer.
-	//ID3D11Buffer* vertexBuffer = modelD3D->getVertexBuffer()->getVB();
-	//UINT stride = sizeof(VertexPosNormTex);
-	//UINT offset = 0;
-	//devcon->IASetVertexBuffers(
-	//	0, 
-	//	1, 
-	//	&vertexBuffer, 
-	//	&stride, 
-	//	&offset);
-	//
-	//std::vector<SubsetD3D*>		subsetD3Ds	= modelD3D->getSubsetD3Ds();
-	//std::vector<MeshMaterial>	materials	= modelD3D->getMaterials();
-	//for(unsigned int i = 0; i < subsetD3Ds.size(); i++)
-	//{
-	//	IB* ib	= subsetD3Ds[i]->getIndexBuffer();
-	//	unsigned int materialIndex	= subsetD3Ds[i]->getMaterialIndex();
-	//
-	//	renderSubset(
-	//		ib,
-	//		materials[materialIndex]);
-	//}
+	ID3D11Device*			device = managementD3D_->getDevice();
+	ID3D11DeviceContext*	devcon = managementD3D_->getDeviceContext();
+	
+	//Get transform matrices.
+	SpatialAttribute*	spatialAt			= &attributesSpatial_->at(debugShapeAt->spatialAttribute.index);
+	PositionAttribute*	positionAt			= &attributesPosition_->at(spatialAt->positionAttribute.index);
+	DirectX::XMFLOAT4X4 worldMatrix			= calculateWorldMatrix(spatialAt, positionAt);
+	DirectX::XMFLOAT4X4 worldMatrixInverse	= calculateMatrixInverse(worldMatrix);
+	DirectX::XMFLOAT4X4 finalMatrix			= calculateFinalMatrix(worldMatrix, viewMatrix, projectionMatrix);
+	
+	managementFX_->setShader(devcon, SHADERID_VS_COLOR);
+	managementFX_->setShader(devcon, SHADERID_PS_COLOR);
+
+	//Update per-object constant buffer.
+	managementCB_->vsSet(CB_TYPE_OBJECT, CB_REGISTER_OBJECT, devcon);
+	managementCB_->updateCBObject(
+		devcon, 
+		finalMatrix, 
+		worldMatrix, 
+		worldMatrixInverse);
+	
+	//Fetch renderer representation of shape.
+	DebugShapeD3D* shapeD3D = managementModel_->getDebugShapeD3D(shapeIndex, device);
+	
+	//Set vertex buffer.
+	ID3D11Buffer* vertexBuffer	= shapeD3D->getVB()->getVB();
+	unsigned int numVertices	= shapeD3D->getVB()->getNumVertices();
+
+	UINT stride = sizeof(VertexPosColor);
+	UINT offset = 0;
+	devcon->IASetVertexBuffers(
+		0, 
+		1, 
+		&vertexBuffer, 
+		&stride, 
+		&offset);
+
+	//Set input layout
+	managementFX_->setLayout(devcon, LAYOUTID_POS_COLOR);
+
+	//Set topology. Where to put this?
+	devcon->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_LINELIST);
+
+	//Draw subset.
+	devcon->Draw(numVertices, 0);
 }
 
 void Renderer::renderAnimatedMesh(DirectX::XMFLOAT4X4 viewMatrix, DirectX::XMFLOAT4X4 projectionMatrix)

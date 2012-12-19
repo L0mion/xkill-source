@@ -73,22 +73,23 @@ private:
 	void renderViewport(
 		CameraAttribute	cameraAt, 
 		unsigned int	viewportTopX,
-		unsigned int	viewportTopY);
+		unsigned int	viewportTopY);			//!< Renders a viewport.
 	void renderViewportToGBuffer(
 		DirectX::XMFLOAT4X4 viewMatrix,
-		DirectX::XMFLOAT4X4 projectionMatrix);
-	void renderViewportToBackBuffer();
+		DirectX::XMFLOAT4X4 projectionMatrix);	//!< Renders to g-buffer.
+	void renderViewportToBackBuffer();			//!< Renders to backbuffer.
 	void renderAttribute(
 		RenderAttribute* renderAt, 
 		DirectX::XMFLOAT4X4 viewMatrix, 
-		DirectX::XMFLOAT4X4 projectionMatrix);
+		DirectX::XMFLOAT4X4 projectionMatrix);	//!< Renders an attribute.
 	void renderSubset(
 		IB* ib, 
-		MeshMaterial& material);
+		MeshMaterial& material);				//!< Renders a subset.
 	void renderDebugShape(
 		DebugShapeAttribute*	debugShapeAt, 
+		unsigned int			shapeIndex,
 		DirectX::XMFLOAT4X4		viewMatrix, 
-		DirectX::XMFLOAT4X4		projectionMatrix);
+		DirectX::XMFLOAT4X4		projectionMatrix); //!< Renders a debug shape, such as a bounding sphere.
 
 	//temp
 	void renderGBufferClean();		//refactor me
@@ -124,8 +125,8 @@ private:
 	std::vector<SpatialAttribute>*		attributesSpatial_;		//!< Holds spatial data. Is fetched only once.
 	std::vector<PositionAttribute>*		attributesPosition_;	//!< Holds positional data. Is fetched only once.
 	std::vector<RenderAttribute>*		attributesRender_;		//!< Holds objects supposed to be rendered. Is fetched only once.
-	std::vector<DebugShapeAttribute>*	attributesDebugShape_;
-	std::vector<int>*					attributesRenderOwner_;
+	std::vector<DebugShapeAttribute>*	attributesDebugShape_;	//!< Holds debug shapes.
+	std::vector<int>*					attributesRenderOwner_;	//!< Holds owners of render-attributes.
 	std::vector<CameraAttribute>*		attributesCamera_;		//!< Holds cameras being rendered to g-buffers. Is fetched only once.
 
 	//temp
