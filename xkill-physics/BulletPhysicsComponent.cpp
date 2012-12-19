@@ -12,6 +12,8 @@
 
 #include <xkill-utilities/EventManager.h>
 
+#include <xkill-utilities/DebugShape.h>
+
 #include <iostream>
 
 #define SAFE_DELETE(obj)	if(obj != nullptr) { delete obj;		obj = nullptr; }
@@ -90,6 +92,7 @@ bool BulletPhysicsComponent::init()
 	GET_ATTRIBUTES(boundingAttributes_, BoundingAttribute, ATTRIBUTE_BOUNDING);
 	GET_ATTRIBUTES(renderAttributes_, RenderAttribute, ATTRIBUTE_RENDER);
 	GET_ATTRIBUTES(cameraAttributes_, CameraAttribute, ATTRIBUTE_CAMERA);
+	GET_ATTRIBUTES(debugShapeAttributes_, DebugShapeAttribute, ATTRIBUTE_DEBUGSHAPE);
 	GET_ATTRIBUTE_OWNERS(physicsOwners_, ATTRIBUTE_PHYSICS);
 	
 	physicsObjects_ = new btAlignedObjectArray<PhysicsObject*>();
@@ -129,7 +132,30 @@ void BulletPhysicsComponent::onUpdate(float delta)
 	{
 		physicsObjects_->push_back(new PhysicsObject(collisionShapeManager_,i,PO_Types::tDEFAULT));
 	}
-	
+
+	for(unsigned int i = 0; i < debugShapeAttributes_->size(); i++)
+	{
+		DebugShapeAttribute *debugShapeAttribute = &debugShapeAttributes_->at(i);
+		if(!debugShapeAttribute->render)
+		{
+			btTransform c;
+			btVector3 a,b,d;
+			float e;
+			collisionShapeManager_->getCollisionShape(debugShapeAttribute->meshID)->getAabb(c,a,b);
+			a = (1.0f/100.0f)*a;
+			b = (1.0f/100.0f)*b;
+			
+			collisionShapeManager_->getCollisionShape(debugShapeAttribute->meshID)->getBoundingSphere(d,e);
+			e = (1.0f/100.0f)*e;
+			//debugShapeAttribute->shape = new DebugShapeBB(Float3(a.x(),a.y(),a.z()),Float3(b.x(),b.y(),b.z()));
+
+			debugShapeAttribute->render = true;
+			debugShapeAttribute->shape = new DebugShapeSphere(e);
+		}
+	}
+
+
+
 	//Synchronize the internal represenation of physics objects with the physics attributes
 	for(unsigned int i = 0; i < static_cast<unsigned int>(physicsObjects_->size()); i++)
 	{

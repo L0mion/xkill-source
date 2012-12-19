@@ -21,6 +21,7 @@ private:
 		positionAttributes_		.init(ATTRIBUTE_POSITION);
 		spatialAttributes_		.init(ATTRIBUTE_SPATIAL);
 		renderAttributes_		.init(ATTRIBUTE_RENDER);
+		debugShapeAttributes_	.init(ATTRIBUTE_DEBUGSHAPE);
 		physicsAttributes_		.init(ATTRIBUTE_PHYSICS);
 		cameraAttributes_		.init(ATTRIBUTE_CAMERA);
 		inputAttributes_		.init(ATTRIBUTE_INPUT);
@@ -39,6 +40,7 @@ public:
 	AttributeStorage<PositionAttribute>			positionAttributes_;
 	AttributeStorage<SpatialAttribute>			spatialAttributes_;
 	AttributeStorage<RenderAttribute>			renderAttributes_;
+	AttributeStorage<DebugShapeAttribute>		debugShapeAttributes_;
 	AttributeStorage<PhysicsAttribute>			physicsAttributes_;
 	AttributeStorage<CameraAttribute>			cameraAttributes_;
 	AttributeStorage<InputAttribute>			inputAttributes_;
@@ -97,6 +99,7 @@ public:
 		case ATTRIBUTE_POSITION:	PUT_ATTRIBUTES_INSIDE_EVENT(positionAttributes_		);
 		case ATTRIBUTE_SPATIAL:		PUT_ATTRIBUTES_INSIDE_EVENT(spatialAttributes_		);
 		case ATTRIBUTE_RENDER:		PUT_ATTRIBUTES_INSIDE_EVENT(renderAttributes_		);
+		case ATTRIBUTE_DEBUGSHAPE:	PUT_ATTRIBUTES_INSIDE_EVENT(debugShapeAttributes_	);
 		case ATTRIBUTE_PHYSICS:		PUT_ATTRIBUTES_INSIDE_EVENT(physicsAttributes_		);
 		case ATTRIBUTE_CAMERA:		PUT_ATTRIBUTES_INSIDE_EVENT(cameraAttributes_		);
 		case ATTRIBUTE_INPUT:		PUT_ATTRIBUTES_INSIDE_EVENT(inputAttributes_		);
@@ -116,7 +119,5 @@ public:
 		default:
 			break;
 		}
-
-		int size = sizeof(CameraAttribute);
 	}
 };

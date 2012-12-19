@@ -17,6 +17,7 @@ struct BoundingAttribute;
 struct InputAttribute;
 struct RenderAttribute;
 struct CameraAttribute;
+struct DebugShapeAttribute;
 
 class btBroadphaseInterface;
 class btDefaultCollisionConfiguration;
@@ -61,6 +62,7 @@ private:
 	std::vector<InputAttribute>*	inputAttributes_; //<! A pointer to the attribute storage containing the input data from the input component
 	std::vector<RenderAttribute>*	renderAttributes_;
 	std::vector<CameraAttribute>*	cameraAttributes_;
+	std::vector<DebugShapeAttribute>* debugShapeAttributes_;
 	std::vector<int>*				physicsOwners_; //! Owners of physicsAttributes
 
 	btAlignedObjectArray<PhysicsObject*>* physicsObjects_; //<! A vector of PhysicsObjects, internal representation of world

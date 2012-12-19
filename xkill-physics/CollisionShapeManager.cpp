@@ -5,9 +5,11 @@
 #include <xkill-utilities/EventManager.h>
 #include <xkill-utilities/MeshModel.h>
 
+
 CollisionShapeManager::CollisionShapeManager()
 {
 	GET_ATTRIBUTES(meshAttributes_, MeshAttribute, ATTRIBUTE_MESH);
+	
 	//if(collisionShapes_.size()==0)
 		//collisionShapes_.push_back(new btSphereShape(50));
 }
@@ -23,11 +25,14 @@ btCollisionShape* CollisionShapeManager::getCollisionShape(unsigned int meshID)
 	if(it != collisionShapesIDtoIndex_.end())
 	{
 		unsigned int index = it->second;
+		//create debug shape
 		return collisionShapes_.at(index);
 	}
 	else
 	{ //add collusionshape
-		return loadCollisionShape(meshID);
+		btCollisionShape* result = loadCollisionShape(meshID);
+
+		return result;
 	}
 
 	//loadCollisionShapes();
@@ -107,6 +112,8 @@ btCollisionShape* CollisionShapeManager::loadCollisionShape(unsigned int meshID)
 		triangleMeshes_.push_back(triangleMesh);
 		
 	}
+
+	
 
 	unsigned int meshID		= meshAttribute->meshID;
 	unsigned int meshIndex	= collisionShapes_.size() - 1;

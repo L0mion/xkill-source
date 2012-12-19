@@ -5,7 +5,7 @@
 #include "ModelD3D.h"
 
 ModelD3D::ModelD3D(
-	VB*									vertexBuffer,
+	VB<VertexPosNormTex>*				vertexBuffer,
 	const std::vector<SubsetD3D*>		subsets,
 	const std::vector<MeshMaterial>		materials)
 {
@@ -25,7 +25,7 @@ ModelD3D::~ModelD3D()
 	}
 }
 
-VB*							ModelD3D::getVertexBuffer()
+VB<VertexPosNormTex>*		ModelD3D::getVertexBuffer()
 {
 	return vertexBuffer_;
 }

@@ -1,5 +1,7 @@
 #pragma once
 
+#include <xkill-utilities/DebugShape.h>
+
 #include "Entity.h"
 #include "EntityManager.h"
 #include "AttributeManager.h"
@@ -53,6 +55,14 @@ public:
 		CREATE_ATTRIBUTE(RenderAttribute, render, entity);
 		CONNECT_ATTRIBUTES(render, spatial);
 		render->meshID = 0;
+
+		CREATE_ATTRIBUTE(DebugShapeAttribute, debugShape, entity);	//create temp debug shape
+		CONNECT_ATTRIBUTES(debugShape, spatial);
+		debugShape->meshID = render->meshID;
+		debugShape->shape	=  nullptr;/*new DebugShapeBB(
+			Float3(-0.5f, -0.5f, -0.5f),
+			Float3(0.5f, 0.5f, 0.5f)); //new DebugShapeSphere(1.0f);*/
+		debugShape->render	= false;
 
 		CREATE_ATTRIBUTE(PhysicsAttribute, physics, entity);
 		CONNECT_ATTRIBUTES(physics, spatial);
@@ -115,8 +125,15 @@ public:
 
 		CREATE_ATTRIBUTE(RenderAttribute, render, entity);
 		CONNECT_ATTRIBUTES(render, spatial);
-		
 		render->meshID = 2;
+
+		CREATE_ATTRIBUTE(DebugShapeAttribute, debugShape, entity);	//create temp debug shape
+		CONNECT_ATTRIBUTES(debugShape, spatial);
+		debugShape->meshID = render->meshID;
+		debugShape->shape	=  nullptr;/*new DebugShapeBB(
+			Float3(-0.5f, -0.5f, -0.5f),
+			Float3(0.5f, 0.5f, 0.5f)); //new DebugShapeSphere(1.0f);*/
+		debugShape->render	= false;
 
 		CREATE_ATTRIBUTE(PhysicsAttribute, physics, entity);
 		CONNECT_ATTRIBUTES(physics, spatial);
