@@ -21,18 +21,6 @@ class InputDevice
 	friend class KeyMapper;
 
 public:
-
-	//! A struct containing the states of all the objects
-	/*!
-	Contains the states of all the axes, buttons, hat switches and triggers that the device have
-	*/
-	struct InputState
-	{
-		std::vector<InputAxisObject*> axes;
-		std::vector<InputButtonObject*> buttons;
-		std::vector<InputTriggerObject*> triggers;
-	};
-
 	//! Lists the capabilities of the device
 	/*!
 	Lists how many of each object the device has and if it has force feedback.
@@ -76,7 +64,6 @@ public:
 	virtual void SetForceFeedback(float leftMotorScale, float rightMotorScale) = 0;
 	virtual bool IsForceFeedbackCapable() = 0;
 
-	virtual InputState GetState();
 	virtual InputDeviceLayout GetLayout();
 
 	virtual InputDeviceType GetType() = 0;

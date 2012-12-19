@@ -48,7 +48,6 @@ void DirectInputKeyboard::updateState()
 {
 	HRESULT result;
 	byte keyState[256];
-	InputDevice::InputState inputState;
 
 	ZeroMemory(&keyState, sizeof(keyState));
 

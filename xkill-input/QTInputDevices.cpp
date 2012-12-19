@@ -67,14 +67,16 @@ void QTInputDevices::createInputObjectsFromLayout()
 {
 	for(int i = 0; i < inputLayout_.nrOfAxes; i++)
 	{
-		axes_.push_back(new InputAxisObject(-0x7FFF, 0x7FFF));
-		inputObjects_.push_back(axes_[axes_.size() - 1]);
+		InputAxisObject* axis = new InputAxisObject(-0x7FFF, 0x7FFF);
+		axes_.push_back(axis);
+		inputObjects_.push_back(axis);
 	}
 	
 	for(int i = 0; i < 6; i++)
 	{
-		buttons_.push_back(new InputButtonObject(i));
-		inputObjects_.push_back(buttons_[buttons_.size() - 1]);
+		InputButtonObject* button = new InputButtonObject(i);
+		buttons_.push_back(button);
+		inputObjects_.push_back(button);
 	}
 
 	if(buttons_.size() >= 6)

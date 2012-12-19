@@ -310,7 +310,6 @@ void DirectInputDevice::updateState()
 {
 	HRESULT result;
 	DIJOYSTATE joyState;
-	InputDevice::InputState inputState;
 
 	ZeroMemory(&joyState, sizeof(joyState));
 
@@ -378,7 +377,7 @@ void DirectInputDevice::updateState()
 			HatSwitch = joyState.rgdwPOV[hatSwitchNumber++];
 
 			buttons_[i]->SetValue(HatSwitch == 0		||	HatSwitch == 4500	||	HatSwitch == 31500);
-			buttons_[i]->SetValue(HatSwitch == 9000		||	HatSwitch == 13500	||	HatSwitch == 4500);
+			buttons_[i]->SetValue(HatSwitch == 9000	||	HatSwitch == 13500	||	HatSwitch == 4500);
 			buttons_[i]->SetValue(HatSwitch == 18000	||	HatSwitch == 22500	||	HatSwitch == 13500);
 			buttons_[i]->SetValue(HatSwitch == 27000	||	HatSwitch == 31500	||	HatSwitch == 22500);
 		}
@@ -406,14 +405,16 @@ void DirectInputDevice::createInputObjectsFromLayout()
 
 	for(int i = 0; i < inputLayout_.nrOfButtons + inputLayout_.nrOfHatSwitches*4; i++)
 	{
-		buttons_.push_back(new InputButtonObject(i));
-		inputObjects_.push_back(buttons_[buttons_.size() - 1]);
+		InputButtonObject* button = new InputButtonObject(i);
+		buttons_.push_back(button);
+		inputObjects_.push_back(button);
 	}
 
 	for(int i = 0; i < inputLayout_.nrOfTriggers; i++)
 	{
-		triggers_.push_back(new InputTriggerObject(0, 0xFF));
-		inputObjects_.push_back(triggers_[triggers_.size() - 1]);
+		InputTriggerObject* trigger = new InputTriggerObject(0, 0xFF);
+		triggers_.push_back(trigger);
+		inputObjects_.push_back(trigger);
 	}
 }
 
@@ -421,7 +422,6 @@ void DirectInputDevice::createAxes()
 {
 	HRESULT result;
 	DIJOYSTATE joyState;
-	InputDevice::InputState inputState;
 
 	ZeroMemory(&joyState, sizeof(joyState));
 
@@ -440,8 +440,9 @@ void DirectInputDevice::createAxes()
 
 	while(axesIndexArray_.size() > axes_.size())
 	{
-		axes_.push_back(new InputAxisObject(0, 0xFFFF));
-		inputObjects_.push_back(axes_[axes_.size() - 1]);
+		InputAxisObject* axis = new InputAxisObject(0, 0xFFFF);
+		axes_.push_back(axis);
+		inputObjects_.push_back(axis);
 	}
 
 	if(axesIndexArray_.size() >= 2)

@@ -48,7 +48,6 @@ void DirectInputMouse::updateState()
 {
 	HRESULT result;
 	DIMOUSESTATE2 mouseState;
-	InputDevice::InputState inputState;
 
 	ZeroMemory(&mouseState, sizeof(mouseState));
 
@@ -74,19 +73,22 @@ void DirectInputMouse::createInputObjectsFromLayout()
 {
 	for(int i = 0; i < inputLayout_.nrOfAxes; i++)
 	{
-		axes_.push_back(new InputAxisObject(-0xFF, 0xFF));
-		inputObjects_.push_back(axes_[axes_.size() - 1]);
+		InputAxisObject* axis = new InputAxisObject(-0xFF, 0xFF);
+		axes_.push_back(axis);
+		inputObjects_.push_back(axis);
 	}
 	
 	for(int i = 0; i < inputLayout_.nrOfButtons; i++)
 	{
-		buttons_.push_back(new InputButtonObject(i));
-		inputObjects_.push_back(buttons_[buttons_.size() - 1]);
+		InputButtonObject* button = new InputButtonObject(i);
+		buttons_.push_back(button);
+		inputObjects_.push_back(button);
 	}
 
 	for(int i = 0; i < inputLayout_.nrOfTriggers; i++)
 	{
-		triggers_.push_back(new InputTriggerObject(0, 0xFF));
-		inputObjects_.push_back(triggers_[triggers_.size() - 1]);
+		InputTriggerObject* trigger = new InputTriggerObject(0, 0xFF);
+		triggers_.push_back(trigger);
+		inputObjects_.push_back(trigger);
 	}
 }

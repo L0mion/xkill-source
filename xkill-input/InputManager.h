@@ -83,13 +83,6 @@ public:
 
 	InputDevice* GetDevice(unsigned int playerID);
 	QTInputDevices* GetMouseAndKeyboard();
-	
-	//! Generates a string with the states of all devices
-	/*!
-	A string with information of the states of all devices.
-	Used when debugging.
-	*/
-	std::string GetInputInformationString();
 
 	//! Callback function for the Direct Input EnumDevices function
 	/*!

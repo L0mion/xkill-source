@@ -85,8 +85,6 @@ void InputComponent::handleInput(float delta)
 		if(device == nullptr)
 			continue;
 
-		InputDevice::InputState state = device->GetState();
-
 		//int nrAxes = state.axes.size();
 		//if(nrAxes >= 1)
 		//	inputAttributes_->at(i).position.x = state.axes[0]->GetValue();

@@ -18,12 +18,6 @@ XInputDevice::XInputDevice(int deviceNr, GUID deviceGUID, std::string name, unsi
 XInputDevice::~XInputDevice(void)
 {
 	StopForceFeedback();
-
-	std::vector<InputTriggerObject*>::iterator it;
-	for(; it != triggers_.end(); it++)
-		delete (*it);
-
-	triggers_.clear();
 }
 
 void XInputDevice::Update(float deltaTime)
@@ -158,8 +152,9 @@ void XInputDevice::createInputObjectsFromLayout()
 {
 	for(int i = 0; i < inputLayout_.nrOfAxes; i++)
 	{
-		axes_.push_back(new InputAxisObject(-0x7FFF, 0x7FFF));
-		inputObjects_.push_back(axes_[axes_.size() - 1]);
+		InputAxisObject* axis = new InputAxisObject(-0x7FFF, 0x7FFF);
+		axes_.push_back(axis);
+		inputObjects_.push_back(axis);
 	}
 
 	if(axes_.size() >= 4)
@@ -167,13 +162,15 @@ void XInputDevice::createInputObjectsFromLayout()
 	
 	for(int i = 0; i < inputLayout_.nrOfButtons + inputLayout_.nrOfHatSwitches*4; i++)
 	{
-		buttons_.push_back(new InputButtonObject(i));
-		inputObjects_.push_back(buttons_[buttons_.size() - 1]);
+		InputButtonObject* button = new InputButtonObject(i);
+		buttons_.push_back(button);
+		inputObjects_.push_back(button);
 	}
 
 	for(int i = 0; i < inputLayout_.nrOfTriggers; i++)
 	{
-		triggers_.push_back(new InputTriggerObject(0, 0xFF));
-		inputObjects_.push_back(triggers_[triggers_.size() - 1]);
+		InputTriggerObject* trigger = new InputTriggerObject(0, 0xFF);
+		triggers_.push_back(trigger);
+		inputObjects_.push_back(trigger);
 	}
 }

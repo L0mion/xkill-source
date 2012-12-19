@@ -430,6 +430,8 @@ void KeyMapper::handleTriggerObjectSettings(InputTriggerObject* trigger, std::st
 			break;
 		};
 	}
+
+	delete settings;
 }
 
 std::vector<std::pair<char, std::string>>* KeyMapper::settingsExtracter(std::string settingsString)

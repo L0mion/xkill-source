@@ -16,17 +16,10 @@ InputDevice::~InputDevice()
 		SAFE_DELETE(*it);
 
 	inputObjects_.clear();
-}
 
-InputDevice::InputState InputDevice::GetState()
-{
-	InputState state;
-
-	state.axes = axes_;
-	state.buttons = buttons_;
-	state.triggers = triggers_;
-
-	return state;
+	axes_.clear();
+	buttons_.clear();
+	triggers_.clear();
 }
 
 InputDevice::InputDeviceLayout InputDevice::GetLayout()

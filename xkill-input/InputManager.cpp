@@ -213,58 +213,6 @@ BOOL CALLBACK InputManager::EnumDevicesCallback(const DIDEVICEINSTANCE* device, 
 	return DIENUM_CONTINUE;
 }
 
-std::string InputManager::GetInputInformationString()
-{
-	InputDevice::InputState inputState;
-	std::string str = "";
-
-	for(unsigned int i = 0; i < devices_.size(); i++)
-	{
-		devices_[i]->Update(0.0f);
-		inputState = devices_[i]->GetState();
-
-		str += "Device #" + Converter::IntToStr(i) + "\n";
-		str += "[ " + devices_[i]->GetName() + " ]\n";
-
-		for(unsigned int j = 0; j < inputState.axes.size(); j++)
-		{
-			str += "Axis #" + Converter::IntToStr(j) + ": " + Converter::FloatToStr(inputState.axes[j]->GetValue()) + "\n";
-		}
-
-		for(unsigned int j = 0; j < inputState.triggers.size(); j++)
-		{
-			str += "Trigger #" + Converter::IntToStr(j) + ": " + Converter::FloatToStr(inputState.triggers[j]->GetValue()) + " ";
-
-			if(inputState.triggers[j]->IsTriggered())
-			{
-				str += "On\n";
-			}
-			else
-			{
-				str += "Off\n";
-			}
-		}
-
-		for(unsigned int j = 0; j < inputState.buttons.size(); j++)
-		{
-			str += "Button #" + Converter::IntToStr(j) + ": ";
-
-			if(inputState.buttons[j]->isDown())
-			{
-				str += "On\n";
-			}
-			else
-			{
-				str += "Off\n";
-			}
-		}
-
-		str += "\n";
-	}
-
-	return str;
-}
-
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
 //Code from msdn: http://msdn.microsoft.com/en-us/library/windows/desktop/ee417014%28v=vs.85%29.aspx 	//
 //-------------------------------------------------------------------------------------------------- //
