@@ -3,6 +3,9 @@
 
 #include "dllUtilities.h"
 
+#define PI		3.141592654
+#define TwoPI	PI * 2
+
 class DLL_U BoolField
 {
 public:

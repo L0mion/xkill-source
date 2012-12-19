@@ -1,5 +1,7 @@
 #pragma once
 
+#include <xkill-utilities/DebugShape.h>
+
 #include "Entity.h"
 #include "EntityManager.h"
 #include "AttributeManager.h"
@@ -49,6 +51,13 @@ public:
 
 		CREATE_ATTRIBUTE(SpatialAttribute, spatial, entity);
 		CONNECT_ATTRIBUTES(spatial, position);
+
+		CREATE_ATTRIBUTE(DebugShapeAttribute, debugShape, entity);	//create temp debug shape
+		CONNECT_ATTRIBUTES(debugShape, spatial);
+		debugShape->shape	= new DebugShapeBB(
+			Float3(-0.5f, -0.5f, -0.5f),
+			Float3(0.5f, 0.5f, 0.5f)); //new DebugShapeSphere(1.0f);
+		debugShape->render	= true;
 
 		CREATE_ATTRIBUTE(RenderAttribute, render, entity);
 		CONNECT_ATTRIBUTES(render, spatial);
@@ -175,6 +184,8 @@ public:
 		physics->isExplosionSphere = true;
 		physics->explosionSphereRadius = e->radius;
 		physics->collisionResponse = false;
+		physics->mass = 0.0f;
+		physics->gravity = Float3(0.0f, 0.0f, 0.0f);
 
 		CREATE_ATTRIBUTE(DamageAttribute, damage, entity);
 		damage->damage = e->damage;

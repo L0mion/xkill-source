@@ -412,7 +412,7 @@ void GameComponent::event_PhysicsAttributesColliding(Event_PhysicsAttributesColl
 						}
 					}
 
-					projectileAttribute->currentLifeTimeLeft = 0.0f;
+ 					projectileAttribute->currentLifeTimeLeft = 0.0f;
 
 					//Extract projectile position.
 					PhysicsAttribute* projectilePhysicsAttribute = &physicsAttributes_->at(projectileAttribute->physicsAttribute.index);
@@ -422,7 +422,7 @@ void GameComponent::event_PhysicsAttributesColliding(Event_PhysicsAttributesColl
 					//Creates an explosion sphere. Init information is taken from the impacting projectile.
 					//int damageMultiplier = 3; //The explosion damage is a multiple of the projectile damage.
 					//SEND_EVENT(&Event_CreateExplosionSphere(projectilePositionAttribute->position, projectileAttribute->explosionSphereRadius, projectileDamageAttribute->damage, entity1->getID()));
-					SEND_EVENT(&Event_CreateExplosionSphere(projectilePositionAttribute->position, 10000.0f, projectileDamageAttribute->damage, entity1->getID()));
+					SEND_EVENT(&Event_CreateExplosionSphere(projectilePositionAttribute->position, 0.01f, projectileDamageAttribute->damage, entity1->getID()));
 				}
 			}
 		}

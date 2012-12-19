@@ -141,12 +141,7 @@ void BulletPhysicsComponent::onUpdate(float delta)
 			// if the object is not in the world, add it
 			if(!physicsObject->isInWorld())
 			{
-				if(physicsAttribute->isExplosionSphere)
-				{
- 					btCollisionShape* collisionSphere = new btSphereShape(physicsAttribute->explosionSphereRadius);
-					collisionShapeManager_->addCollisionShape(collisionSphere);
-					physicsObject->setCollisionShape(collisionSphere);
-				}
+
 				physicsObject->addToWorld(dynamicsWorld_);
 			}
 			// load data from physics attribute

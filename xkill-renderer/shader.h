@@ -22,7 +22,10 @@ enum ShaderID
 	SHADERID_CS_DEFAULT,
 
 	SHADERID_VS_ANIMATION,
-	SHADERID_PS_ANIMATION
+	SHADERID_PS_ANIMATION,
+
+	SHADERID_VS_COLOR,
+	SHADERID_PS_COLOR
 };
 
 /*! \defgroup xkill-renderer-shader xkill-renderer-shader

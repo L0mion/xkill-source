@@ -3,6 +3,7 @@
 #include <windows.h>
 
 #include "MeshModel.h"
+#include "DebugShape.h"
 
 IAttribute::IAttribute()
 {
@@ -38,9 +39,10 @@ SpatialAttribute::~SpatialAttribute()
 
 RenderAttribute::RenderAttribute()
 {
-	transparent		= false;
-	tessellation	= false;
-	meshID		= 0;
+	transparent			= false;
+	tessellation		= false;
+
+	meshID			= 0;
 	textureID		= 0;
 }
 RenderAttribute::~RenderAttribute()
@@ -99,7 +101,6 @@ CameraAttribute::CameraAttribute()
 	zFar = 40.0f;
 	zNear = 0.01f;
 }
-
 CameraAttribute::~CameraAttribute()
 {
 }
@@ -259,4 +260,19 @@ void WeaponStatsAttribute::setWeaponToDebugMachineGun()
 
 WeaponStatsAttribute::~WeaponStatsAttribute()
 {
+}
+
+DebugShapeAttribute::DebugShapeAttribute()
+{
+	shape	= nullptr;
+	render	= false;
+}
+DebugShapeAttribute::~DebugShapeAttribute()
+{
+	//Do nothing.
+}
+void DebugShapeAttribute::clean()
+{
+	if(shape)
+		delete shape;
 }
