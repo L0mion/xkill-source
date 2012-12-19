@@ -1,6 +1,6 @@
 #include "FiniteStateMachine.h"
 #include <iostream>
-
+#include <iterator>
 
 
 bool FiniteStateMachine::AddState( FiniteState* state )
@@ -29,13 +29,13 @@ bool FiniteStateMachine::AddState( FiniteState* state )
 	return result.second;
 }
 
-bool FiniteStateMachine::SetDefaultState( FiniteState* state )
+bool FiniteStateMachine::SetDefaultState( StateType state )
 {
 	bool wasSet = false;
 
-	if(states_.count(state->GetType()) > 0)
+	if(states_.count(state) > 0)
 	{
-		defaultState_ = state;
+		defaultState_ = states_[state];
 		wasSet = true;
 	}
 
@@ -44,13 +44,13 @@ bool FiniteStateMachine::SetDefaultState( FiniteState* state )
 	{
 		std::cout << "[SUCCESS] FiniteStateMachine::SetDefaultState | "
 			<< "Default state successfully set to FiniteState with enum value " 
-			<< state->GetType() << "\n";
+			<< state << "\n";
 	}
 	else
 	{
 		std::cout << "[FAIL] FiniteStateMachine::SetDefaultState | "
 			<< "Attempt to set default state set to FiniteState with enum value " 
-			<< state->GetType() << " was unsuccessful. Did you remember to add it first? \n";
+			<< state << " was unsuccessful. Did you remember to add it first? \n";
 	}
 	#endif
 
@@ -64,55 +64,43 @@ void FiniteStateMachine::Update( float dt )
 		return; //TODO Print warning about update being called on empty machine
 
 	//if no current state attempt to set it to default
-	if (!currentState_ && defaultState_)
+	if (currentState_.empty() && defaultState_)
 	{
-		currentState_ = defaultState_;
+		currentState_.push(defaultState_);
 	}
 	//no valid  state could be established, nothing to do
-	if (!currentState_)
+	if (currentState_.empty())
 	{
 		return; //TODO Print warning on state being invalid
 	}
 
-	//check for transitions
-	bool shouldReplaceCurrentState = true;
-	StateType currentStateType = currentState_->GetType();
-	StateType goalStateType = currentState_->CheckTransitions(shouldReplaceCurrentState);
+	HandleTransitions();
 
-	//switch if there was a transition
-	if (goalStateType != currentStateType)
-	{
-		//TODO: Make changes to this code when adding Stack to FSM
-		if (shouldReplaceCurrentState)
-		{
-			currentState_->Exit();
-			currentState_ = states_[goalStateType];
-			currentState_->Enter();
-		}
-		else
-		{
-			currentState_->Exit();
-			currentState_ = states_[goalStateType];
-			currentState_->Enter();
-		}
-		currentState_->Update(dt);
-	}
+	currentState_.top()->Update(dt);
 }
 
 StateType FiniteStateMachine::CheckTransitions( bool& outShouldReplaceCurrent ) const
 {
-	
 	return type_; //returning my own StateType means no transition will take place if I am the current state
+}
+
+void FiniteStateMachine::Exit()
+{
+	if (currentState_.top())
+	{
+		currentState_.top()->Exit();
+	}
 }
 
 void FiniteStateMachine::Reset()
 {
 	Exit();
-	if (currentState_)
+
+	//empty stack of current states
+	while (!currentState_.empty())
 	{
-		currentState_->Exit();
+		currentState_.pop();
 	}
-	currentState_ = defaultState_;
 
 	//reset all added states
 	for (auto pair : states_)
@@ -122,25 +110,85 @@ void FiniteStateMachine::Reset()
 
 	if (defaultState_)
 	{
-		defaultState_->Enter();
+		currentState_.push(defaultState_);
+		currentState_.top()->Enter();
 	}
 }
 
-FiniteStateMachine::FiniteStateMachine( StateType type, FiniteState* defaultState ):
-	FiniteState(type),
-	defaultState_(0),
-	currentState_(0)
+void FiniteStateMachine::Nuke()
 {
-	if (defaultState)
+	Exit();
+	
+	//empty stack of current states
+	while (!currentState_.empty())
 	{
-		AddState(defaultState);
-		SetDefaultState(defaultState);
-		currentState_ = defaultState; 
+		currentState_.pop();
 	}
+
+	//deallocate all states and clear map
+	for (std::map<StateType, FiniteState*>::iterator it = states_.begin(); 
+		it != states_.end(); 
+		it++)
+	{
+		delete it->second; //what if the state is another state machine?! will result in memory leak!
+		//states_.erase(it); //alternative solution is to call states_clear() after the loop instead
+	}
+	states_.clear();
+
+	defaultState_ = 0; //all states removed, no valid default state exists
 }
 
+FiniteStateMachine::FiniteStateMachine( StateType type, FiniteState* defaultAndCurrentState ):
+	FiniteState(type),
+	defaultState_(0)
+{
+	if (defaultAndCurrentState)
+	{
+		AddState(defaultAndCurrentState);
+		defaultState_ = defaultAndCurrentState;
+		currentState_.push(defaultAndCurrentState); 
+	}
+}
 
 FiniteStateMachine::~FiniteStateMachine()
 {
 	//States are injected and memory deallocation is therefore handled by caller (See Wikipedia RAII)
+	//Deallocation can however be performed by a specific call to the method Nuke()
+}
+
+void FiniteStateMachine::HandleTransitions()
+{
+	//check for transitions
+	bool shouldReplaceCurrentState = true;
+	StateType currentStateType = currentState_.top()->GetType();
+	StateType goalStateType = currentState_.top()->CheckTransitions(shouldReplaceCurrentState);
+
+	//switch if a transition is both possible and neccessary
+	bool stateHasChanged = goalStateType != currentStateType;
+	bool goalStateExists = states_.count(goalStateType) > 0;
+	if (stateHasChanged && goalStateExists)
+	{ 
+		if (shouldReplaceCurrentState)
+		{	//replace stack top
+			currentState_.top()->Exit();
+			currentState_.top() = states_[goalStateType];
+		}
+		else //add to stack
+		{
+			currentState_.push(states_[goalStateType]);
+		}
+		currentState_.top()->Enter();
+	}
+	else if (goalStateType == SPECIAL_STATE_BACK && !currentState_.empty())
+	{ //handle special transition
+		currentState_.pop();
+		if (currentState_.empty())
+		{
+			currentState_.push(defaultState_);
+		}
+	}
+	else //requested transition could not be performed
+	{
+		//TODO: Print warning on trying to transition to non added state
+	}
 }

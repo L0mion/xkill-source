@@ -17,6 +17,7 @@ public:
 	virtual void Update(float dt) = 0;
 	virtual void Exit();
 	virtual void Reset();
+	virtual void Nuke();
 	virtual StateType CheckTransitions(bool& outShouldReplaceCurrent) const = 0;
 	StateType GetType() const;
 

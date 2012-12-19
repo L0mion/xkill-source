@@ -20,6 +20,11 @@ void FiniteState::Reset()
 	//Intentionally left blank
 }
 
+void FiniteState::Nuke()
+{
+	//Intentionally left blank
+}
+
 FiniteState::FiniteState( StateType type ):
 	type_(type)
 {
