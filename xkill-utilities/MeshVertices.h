@@ -5,6 +5,15 @@
 
 #include "dllUtilities.h"
 
+struct DLL_U VertexPosColor
+{
+	Float3 position_;
+	Float3 color_;
+
+	VertexPosColor();
+	VertexPosColor(Float3 position, Float3 color);
+};
+
 //! Basic three-member vertex
 /*!
 \ingroup xkill-mesh*/
