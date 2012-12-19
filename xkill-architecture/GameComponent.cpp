@@ -381,7 +381,7 @@ void GameComponent::event_PhysicsAttributesColliding(Event_PhysicsAttributesColl
 			{
 				PhysicsAttribute* physicsAttribute = &allPhysics->at(physicsId.at(i));
 				physicsAttribute->gravity = Float3(0.0f, -10.0f, 0.0f);
-				physicsAttribute->linearVelocity = Float3(0.0f, 0.0f, 0.0f);
+				//physicsAttribute->linearVelocity = Float3(0.0f, 0.0f, 0.0f);
 			}
 
 			//Shorten lifetime of projectile colliding with physics objects
@@ -390,10 +390,10 @@ void GameComponent::event_PhysicsAttributesColliding(Event_PhysicsAttributesColl
 			for(unsigned i=0;i<projectileId.size();i++)
 			{
 				ProjectileAttribute* projectileAttribute = &allProjectile->at(projectileId.at(i));
-				if(projectileAttribute->currentLifeTimeLeft > 0.2f)
+				/*if(projectileAttribute->currentLifeTimeLeft > 0.2f)
 				{
 					projectileAttribute->currentLifeTimeLeft = 0.15f;
-				}
+				}*/
 
 				//Explosion handling. In progress.
 				if(projectileAttribute->explodeOnImnpact)

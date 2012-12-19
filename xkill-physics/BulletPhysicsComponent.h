@@ -64,7 +64,9 @@ private:
 	std::vector<int>*				physicsOwners_; //! Owners of physicsAttributes
 
 	btAlignedObjectArray<PhysicsObject*>* physicsObjects_; //<! A vector of PhysicsObjects, internal representation of world
+	btAlignedObjectArray<PhysicsObject*>* frustrumObjects_; //<! Frustrum Objects vector
 	PhysicsObject*						  floor_; //<! The absolute floor plane, no object may pass bellow this plane
+	
 	//btAlignedObjectArray<btGhostObject*>* ghostObjects_;
 	//btGhostPairCallback*				  ghostPairCallback_;
 public:

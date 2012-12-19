@@ -320,13 +320,14 @@ void Renderer::render(float delta)
 		renderViewport(
 			attributesCamera_->at(i), 
 			viewportTopX, 
-			viewportTopY);
+			viewportTopY,i);
 	}
 }
 void Renderer::renderViewport(
 	CameraAttribute		cameraAt, 
 	unsigned int		viewportTopX,
-	unsigned int		viewportTopY)
+	unsigned int		viewportTopY,
+	unsigned int		cameraIndex)
 {
 	//Get camera's view- and projection matrix, and their inverses.
 	DirectX::XMFLOAT4X4 viewMatrix((float*)&cameraAt.mat_view);
@@ -351,10 +352,10 @@ void Renderer::renderViewport(
 		viewportTopX,
 		viewportTopY);
 
-	renderViewportToGBuffer(viewMatrix, projectionMatrix);
+	renderViewportToGBuffer(viewMatrix, projectionMatrix, cameraIndex);
 	renderViewportToBackBuffer();
 }
-void Renderer::renderViewportToGBuffer(DirectX::XMFLOAT4X4 viewMatrix, DirectX::XMFLOAT4X4 projectionMatrix)									
+void Renderer::renderViewportToGBuffer(DirectX::XMFLOAT4X4 viewMatrix, DirectX::XMFLOAT4X4 projectionMatrix, unsigned int cameraIndex)									
 {
 	ID3D11Device*			device = managementD3D_->getDevice();
 	ID3D11DeviceContext*	devcon = managementD3D_->getDeviceContext();
@@ -374,10 +375,13 @@ void Renderer::renderViewportToGBuffer(DirectX::XMFLOAT4X4 viewMatrix, DirectX::
 	for(unsigned int i = 0; i < attributesRender_->size() && attributesRenderOwner_->at(i) != 0; i++)
 	{
 		renderAt = &attributesRender_->at(i);
-		renderAttribute(
-			renderAt, 
-			viewMatrix, 
-			projectionMatrix);
+		//if(renderAt->culling.getBool(cameraIndex))
+		{
+			renderAttribute(
+				renderAt, 
+				viewMatrix, 
+				projectionMatrix);
+		}
 	}
 
 	renderGBufferClean();

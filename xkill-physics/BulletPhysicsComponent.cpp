@@ -31,7 +31,7 @@ BulletPhysicsComponent::BulletPhysicsComponent()
 	solver_ = nullptr;
 	dynamicsWorld_ = nullptr;
 	physicsObjects_ = nullptr;
-	//ghostObjects_ = nullptr;
+	frustrumObjects_ = nullptr;
 	collisionShapeManager_ = nullptr;
 	floor_ = nullptr;
 }
@@ -49,18 +49,17 @@ BulletPhysicsComponent::~BulletPhysicsComponent()
 	}
 	SAFE_DELETE(physicsObjects_);
 	
-	//if( ghostObjects_ != nullptr)
-	//{
-	//	while(ghostObjects_->size() > 0)
-	//	{
-	//		dynamicsWorld_->removeCollisionObject(ghostObjects_->at(ghostObjects_->size()-1));
-	//		delete ghostObjects_->at(ghostObjects_->size()-1)->getCollisionShape();
-	//		SAFE_DELETE(ghostObjects_->at(ghostObjects_->size()-1));
-	//		ghostObjects_->pop_back();
-	//	}
-	//}
-	//SAFE_DELETE(ghostObjects_)
-	
+	if(frustrumObjects_ != nullptr)
+	{
+		while(frustrumObjects_->size() > 0)
+		{
+			frustrumObjects_->at(frustrumObjects_->size()-1)->removeFromWorld(dynamicsWorld_);
+			delete frustrumObjects_->at(frustrumObjects_->size()-1)->getCollisionShape();
+			SAFE_DELETE(frustrumObjects_->at(frustrumObjects_->size()-1));
+			frustrumObjects_->pop_back();
+		}
+	}
+	SAFE_DELETE(frustrumObjects_);
 
 	dynamicsWorld_->removeRigidBody(floor_);
 	delete floor_->getCollisionShape();
@@ -94,6 +93,7 @@ bool BulletPhysicsComponent::init()
 	GET_ATTRIBUTE_OWNERS(physicsOwners_, ATTRIBUTE_PHYSICS);
 	
 	physicsObjects_ = new btAlignedObjectArray<PhysicsObject*>();
+	frustrumObjects_ = new btAlignedObjectArray<PhysicsObject*>();
 	broadphase_ = new btDbvtBroadphase();
 	collisionConfiguration_ = new btDefaultCollisionConfiguration();
 	dispatcher_ = new btCollisionDispatcher(collisionConfiguration_);
@@ -105,7 +105,7 @@ bool BulletPhysicsComponent::init()
 	dynamicsWorld_->setInternalTickCallback(wrapTickCallback,static_cast<void*>(this));
 
 
-	floor_ = new PhysicsObject(new btStaticPlaneShape(btVector3(0,1,0),0.0f),1337);
+	floor_ = new PhysicsObject(new btStaticPlaneShape(btVector3(0,1,0),0.0f),1337,tStatic);
 	dynamicsWorld_->addRigidBody(floor_);
 
 	//ghostObjects_ = new btAlignedObjectArray<btGhostObject*>;
@@ -127,7 +127,7 @@ void BulletPhysicsComponent::onUpdate(float delta)
 	//Checks if new physiscs attributes were created since last call to this function
 	for(unsigned int i = physicsObjects_->size(); i < physicsAttributes_->size(); i++)
 	{
-		physicsObjects_->push_back(new PhysicsObject(collisionShapeManager_,i));
+		physicsObjects_->push_back(new PhysicsObject(collisionShapeManager_,i,PO_Types::tDEFAULT));
 	}
 	
 	//Synchronize the internal represenation of physics objects with the physics attributes
@@ -172,76 +172,73 @@ void BulletPhysicsComponent::onUpdate(float delta)
 
 void BulletPhysicsComponent::onEvent(Event* e)
 {
+	for(unsigned int i = 0; i < renderAttributes_->size(); i++)
+	{
+		renderAttributes_->at(i).culling.clear();
+	}
+	for(unsigned int i = frustrumObjects_->size(); i < cameraAttributes_->size(); i++)
+	{
+		//create new frustrum;
+		CameraAttribute* cameraAttribute = &cameraAttributes_->at(i);
+		btConvexHullShape* frustumShape = new btConvexHullShape;
+		float far = cameraAttribute->zFar;
+		float near = cameraAttribute->zNear;
+		float aspect = cameraAttribute->aspect;
+		float fovy = cameraAttribute->fov;
+		float fovx = 2*atan(aspect*tan(fovy/2));
 
-	//dynamicsWorld_->performDiscreteCollisionDetection();
-	//tickCallback(0);
-	//switch(e->getType())
-	//{
-	//case EVENT_DO_CULLING:
-	//	
-	//	break;
+		frustumShape->addPoint(WorldScaling*btVector3(near*tan(fovx/2),near*tan(fovy/2),near));    //y = far/ tan(fov/2)
+		frustumShape->addPoint(WorldScaling*btVector3(-near*tan(fovx/2),near*tan(fovy/2),near));   //fovx = 2atan(aspect*tan(fovy/2))
+		frustumShape->addPoint(WorldScaling*btVector3(near*tan(fovx/2),-near*tan(fovy/2),near));
+		frustumShape->addPoint(WorldScaling*btVector3(-near*tan(fovx/2),-near*tan(fovy/2),near));
 
-	////	while(ghostObjects_->size() < cameraAttributes_->size())
-	////	{
-	////		CameraAttribute* cameraAttribute = &cameraAttributes_->at(ghostObjects_->size());
-	////		btGhostObject *ghost = new btGhostObject;
-	////		btConvexHullShape* frustumShape = new btConvexHullShape;
-	////		float far = cameraAttribute->zFar;
-	////		float near = cameraAttribute->zNear;
-	////		float aspect = cameraAttribute->aspect;
-	////		float fovy = cameraAttribute->fov;
-	////		float fovx = 2*atan(aspect*tan(fovy/2));
-	////		frustumShape->addPoint(WorldScaling*btVector3(near*tan(fovx/2),near*tan(fovy/2),near));    //y = far/ tan(fov/2)
-	////		frustumShape->addPoint(WorldScaling*btVector3(-near*tan(fovx/2),near*tan(fovy/2),near));   //fovx = 2atan(aspect*tan(fovy/2))
-	////		frustumShape->addPoint(WorldScaling*btVector3(near*tan(fovx/2),-near*tan(fovy/2),near));
-	////		frustumShape->addPoint(WorldScaling*btVector3(-near*tan(fovx/2),-near*tan(fovy/2),near));
+		frustumShape->addPoint(WorldScaling*btVector3(far*tan(fovx/2),far*tan(fovy/2),far));
+		frustumShape->addPoint(WorldScaling*btVector3(-far*tan(fovx/2),far*tan(fovy/2),far));
+		frustumShape->addPoint(WorldScaling*btVector3(far*tan(fovx/2),-far*tan(fovy/2),far));
+		frustumShape->addPoint(WorldScaling*btVector3(-far*tan(fovx/2),-far*tan(fovy/2),far));
 
-	////		frustumShape->addPoint(WorldScaling*btVector3(far*tan(fovx/2),far*tan(fovy/2),far));
-	////		frustumShape->addPoint(WorldScaling*btVector3(-far*tan(fovx/2),far*tan(fovy/2),far));
-	////		frustumShape->addPoint(WorldScaling*btVector3(far*tan(fovx/2),-far*tan(fovy/2),far));
-	////		frustumShape->addPoint(WorldScaling*btVector3(-far*tan(fovx/2),-far*tan(fovy/2),far));
+		PhysicsObject *frustrum = new PhysicsObject(frustumShape,i,PO_Types::tFrustrum);
+		delete frustumShape;
 
-	////		ghost->setCollisionShape(frustumShape);
-	////		ghostObjects_->push_back(ghost);
-	////		//dynamicsWorld_->addCollisionObject(ghost);//,btBroadphaseProxy::DefaultFilter,btBroadphaseProxy::AllFilter);
-	////	}
-	////	for(unsigned int i = 0; i < renderAttributes_->size(); i++)
-	////	{
-	////		renderAttributes_->at(i).culling.clear();
-	////	}
-	////	for(unsigned int i = 0; i < ghostObjects_->size(); i++)
-	////	{
-	////		//Sync pos
-	////		dynamicsWorld_->addCollisionObject(ghostObjects_->at(i),btBroadphaseProxy::DefaultFilter,btBroadphaseProxy::AllFilter);
-	////	}
-	////	
-	////	dynamicsWorld_->performDiscreteCollisionDetection();
-
-	////	for(unsigned int i = 0; i < ghostObjects_->size(); i++)
-	////	{
-	////		btGhostObject* ghostObject=  ghostObjects_->at(i);
-	////		unsigned int numObjects = ghostObject->getNumOverlappingObjects();
-	////		for(unsigned int j = 0; j < numObjects; j++)
-	////		{
-	////			PhysicsObject* physicsObject = static_cast<PhysicsObject*>(ghostObject->getOverlappingObject(j));
-	////			
-	////			if(j < BoolField::NUM_INTS*BoolField::NUM_INTS_PER_BOOL)
-	////			{
-	////				//renderAttributes_->at(physicsObject->getIndex()).culling.setBool(j,true);
-	////			}
-	////			else
-	////			{
-	////				SHOW_MESSAGEBOX("There are more cameras than allowed by the frustum culling, ask a developer to increase the value of BoolField::NUM_INTS");
-	////			}
-	////		}
-	////	}
-	////	for(unsigned int i = 0; i < ghostObjects_->size(); i++)
-	////	{
-	////		dynamicsWorld_->removeCollisionObject(ghostObjects_->at(i));
-	////	}
-	//	
-	//	break;
-	//}
+		frustrum->setCollisionShape(new btSphereShape(100));
+		
+		btTransform test;
+		test.setIdentity();
+		frustrum->setWorldTransform(test);
+		
+		frustrumObjects_->push_back(frustrum);
+	}
+	for(unsigned int i = 0; i < frustrumObjects_->size(); i++)
+	{
+		PhysicsObject* frustrum = frustrumObjects_->at(i);
+		CameraAttribute* camera = &cameraAttributes_->at(i);
+		SpatialAttribute* spatial = ATTRIBUTE_CAST(SpatialAttribute,spatialAttribute,camera);
+		PositionAttribute* position = ATTRIBUTE_CAST(PositionAttribute,positionAttribute,spatial);
+		Float3 look (camera->mat_view._13, camera->mat_view._23, camera->mat_view._33);
+		Float3 eye (camera->mat_view._13, camera->mat_view._23, camera->mat_view._33);
+		float yaw = atan(-look.x/look.y);
+		float pitch = atan(sqrt(look.x*look.x+look.y*look.y)/look.z);
+		frustrum->setLinearVelocity(btVector3(0,0,0));
+		frustrum->setAngularVelocity(btVector3(0,0,0));
+		frustrum->setMassProps(1,btVector3(0,0,0));
+		//frustrum->set
+		frustrum->getWorldTransform().setRotation(btQuaternion(yaw,
+															 pitch,
+															 0));
+		frustrum->getWorldTransform().setOrigin(btVector3(position->position.x + look.x*0.1f,
+														  position->position.y + look.y*0.1f,
+														  position->position.z + look.z*0.1f));
+		//frustrum->setCollisionFlags( frustrum->getCollisionFlags() | frustrum->CF_NO_CONTACT_RESPONSE);
+		dynamicsWorld_->addRigidBody(frustrum);
+	}
+	dynamicsWorld_->performDiscreteCollisionDetection();
+	tickCallback(0);
+	for(unsigned int i = 0; i < frustrumObjects_->size(); i++)
+	{
+		
+		dynamicsWorld_->removeRigidBody(frustrumObjects_->at(i));
+	}
+	FLUSH_QUEUED_EVENTS(EVENT_PHYSICS_ATTRIBUTES_COLLIDING);
 }
 
 void BulletPhysicsComponent::tickCallback(btScalar timeStep)
@@ -262,16 +259,38 @@ void BulletPhysicsComponent::tickCallback(btScalar timeStep)
 			{
 				const PhysicsObject* objectA = static_cast<const PhysicsObject*>(persistentManifold->getBody0());
 				const PhysicsObject* objectB = static_cast<const PhysicsObject*>(persistentManifold->getBody1());
-				if( objectA->getIndex() != 1337 && objectB->getIndex() != 1337) //1337 = floor
+				if( objectA->getType() != PO_Types::tStatic && objectB->getType() != PO_Types::tStatic)
 				{
-					unsigned int ownerA = physicsOwners_->at(objectA->getIndex());
-					unsigned int ownerB = physicsOwners_->at(objectB->getIndex());
-					
-					//Two PhysicsObjects colliding
-					if(ownerA != 0 || ownerB != 0) // ignore contacts where one owner is 0
+					if( objectA->getType() == PO_Types::tFrustrum || objectB->getType() == PO_Types::tFrustrum)
 					{
-						QUEUE_EVENT(new Event_PhysicsAttributesColliding(objectA->getIndex(), objectB->getIndex()));
-						QUEUE_EVENT(new Event_PhysicsAttributesColliding(objectB->getIndex(), objectA->getIndex()));
+						if(!(objectA->getType() == PO_Types::tFrustrum && objectB->getType() == PO_Types::tFrustrum))
+						{
+							if(objectA->getType() == PO_Types::tFrustrum)
+							{
+								PhysicsAttribute* physics = &physicsAttributes_->at(objectB->getIndex());
+								RenderAttribute* render; render = ATTRIBUTE_CAST(RenderAttribute, renderAttribute, physics);
+								render->culling.setBool(objectA->getIndex(),true);
+							}
+							else
+							{
+								PhysicsAttribute* physics = &physicsAttributes_->at(objectA->getIndex());
+								RenderAttribute* render; render = ATTRIBUTE_CAST(RenderAttribute, renderAttribute, physics);
+								render->culling.setBool(objectB->getIndex(),true);
+							}
+						}
+					
+					}
+					else
+					{
+						unsigned int ownerA = physicsOwners_->at(objectA->getIndex());
+						unsigned int ownerB = physicsOwners_->at(objectB->getIndex());
+					
+						//Two PhysicsObjects colliding
+						if(ownerA != 0 || ownerB != 0) // ignore contacts where one owner is 0
+						{
+							QUEUE_EVENT(new Event_PhysicsAttributesColliding(objectA->getIndex(), objectB->getIndex()));
+							QUEUE_EVENT(new Event_PhysicsAttributesColliding(objectB->getIndex(), objectA->getIndex()));
+						}
 					}
 				}
 			}
