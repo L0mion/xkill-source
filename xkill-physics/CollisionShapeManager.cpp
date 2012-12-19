@@ -4,6 +4,7 @@
 #include <xkill-utilities/AttributeType.h>
 #include <xkill-utilities/EventManager.h>
 #include <xkill-utilities/MeshModel.h>
+#include "physicsUtilities.h"
 
 CollisionShapeManager::CollisionShapeManager()
 {
@@ -42,6 +43,22 @@ btCollisionShape* CollisionShapeManager::getCollisionShape(unsigned int meshID)
 	
 }
 
+btCollisionShape* CollisionShapeManager::getCollisionShapeAt(unsigned int index)
+{
+	btCollisionShape* collisionShape = NULL;
+
+	if(index < collisionShapes_.size())
+	{
+		return collisionShapes_.at(index);
+	}
+	else
+	{
+		return NULL;
+	}
+
+	return collisionShape;
+}
+
 btCollisionShape* CollisionShapeManager::loadCollisionShape(unsigned int meshID)
 {
 	MeshAttribute* meshAttribute;
@@ -67,17 +84,16 @@ btCollisionShape* CollisionShapeManager::loadCollisionShape(unsigned int meshID)
 		unsigned int numIndices = indices.size();
 		for(unsigned int k = 0; k+2 < numIndices; k+=3)
 		{
-			btScalar scale = 100.0f;
-			btVector3 a = scale*btVector3(vertices[indices[k]].position_.x,
+			btVector3 a = WorldScaling*btVector3(vertices[indices[k]].position_.x,
 												vertices[indices[k]].position_.y,
 												vertices[indices[k]].position_.z);
-			triangleMesh->addTriangle(scale*btVector3(vertices[indices[k]].position_.x,
+			triangleMesh->addTriangle(WorldScaling*btVector3(vertices[indices[k]].position_.x,
 												vertices[indices[k]].position_.y,
 												vertices[indices[k]].position_.z),
-										scale*btVector3(vertices[indices[k+1]].position_.x,
+										WorldScaling*btVector3(vertices[indices[k+1]].position_.x,
 												vertices[indices[k+1]].position_.y,
 												vertices[indices[k+1]].position_.z),
-										scale*btVector3(vertices[indices[k+2]].position_.x,
+										WorldScaling*btVector3(vertices[indices[k+2]].position_.x,
 												vertices[indices[k+2]].position_.y,
 												vertices[indices[k+2]].position_.z));
 		}

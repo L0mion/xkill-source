@@ -239,7 +239,6 @@ void WeaponStatsAttribute::setWeaponStats(AmmunitionType ammunitionType, FiringM
 
 	nrOfShotsLeftInClip = clipSize;
 }
-
 void WeaponStatsAttribute::setWeaponToDebugMachineGun()
 {
 	totalNrOfShots = -1;

@@ -29,9 +29,16 @@ public:
 	void clean();
 	//! Get a pointer to a specific CollisionShape
 	/*
-	\param index The index of the desired CollisionShape
+	\param index The meshID of the desired CollisionShape
 	*/
 	btCollisionShape* getCollisionShape(unsigned int meshID);
+
+	//! Get a pointer to a CollisionShape at index
+	/*
+	\param index The index of the desired CollisionShape
+	*/
+	btCollisionShape* getCollisionShapeAt(unsigned int index);
+
 	//! Create a CollisionShape for a triangle mesh. Deletes unneeded detail vertices
 	/*
 	\param vertices A pointer to a list of 3 float groups

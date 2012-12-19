@@ -96,7 +96,7 @@ void GameComponent::onUpdate(float delta)
 				}
 				else if(weapon == 1)
 				{
-					weaponStats->setWeaponStats(WeaponStatsAttribute::SCATTER, WeaponStatsAttribute::AUTO);
+					weaponStats->setWeaponStats(WeaponStatsAttribute::EXPLOSIVE, WeaponStatsAttribute::AUTO);
 				}
 				weapon++;
 
@@ -384,20 +384,34 @@ void GameComponent::event_PhysicsAttributesColliding(Event_PhysicsAttributesColl
 				//physicsAttribute->linearVelocity = Float3(0.0f, 0.0f, 0.0f);
 			}
 
-			//Shorten lifetime of projectile colliding with physics objects
+			//Handle PhysicsAttribute of a projectile colliding with another PhysicsAttribute
 			std::vector<ProjectileAttribute>* allProjectile; GET_ATTRIBUTES(allProjectile, ProjectileAttribute, ATTRIBUTE_PROJECTILE);
 			std::vector<int> projectileId = entity1->getAttributes(ATTRIBUTE_PROJECTILE);
 			for(unsigned i=0;i<projectileId.size();i++)
 			{
 				ProjectileAttribute* projectileAttribute = &allProjectile->at(projectileId.at(i));
-				/*if(projectileAttribute->currentLifeTimeLeft > 0.2f)
+
+				//Shorten lifetime of projectile colliding with physics objects
+				if(projectileAttribute->currentLifeTimeLeft > 0.2f)
 				{
 					projectileAttribute->currentLifeTimeLeft = 0.15f;
-				}*/
+				}
 
 				//Explosion handling. In progress.
 				if(projectileAttribute->explodeOnImnpact)
 				{
+					//Get damage from projectile.
+ 					std::vector<DamageAttribute>* allDamage; GET_ATTRIBUTES(allDamage, DamageAttribute, ATTRIBUTE_DAMAGE);
+					DamageAttribute* projectileDamageAttribute;
+					if(entity1->hasAttribute(ATTRIBUTE_DAMAGE))
+					{
+						std::vector<int> damageId = entity1->getAttributes(ATTRIBUTE_DAMAGE);
+						for(unsigned i=0;i<damageId.size();i++)
+						{
+							projectileDamageAttribute = &allDamage->at(damageId.at(i));
+						}
+					}
+
 					projectileAttribute->currentLifeTimeLeft = 0.0f;
 
 					//Extract projectile position.
@@ -405,7 +419,10 @@ void GameComponent::event_PhysicsAttributesColliding(Event_PhysicsAttributesColl
 					SpatialAttribute* projectileSpatialAttribute = &spatialAttributes_->at(projectilePhysicsAttribute->spatialAttribute.index);
 					PositionAttribute* projectilePositionAttribute = &positionAttributes_->at(projectileSpatialAttribute->positionAttribute.index);
 
-					SEND_EVENT(&Event_CreateExplosionSphere(projectilePositionAttribute->position, projectileAttribute->explosionSphereRadius));
+					//Creates an explosion sphere. Init information is taken from the impacting projectile.
+					//int damageMultiplier = 3; //The explosion damage is a multiple of the projectile damage.
+					//SEND_EVENT(&Event_CreateExplosionSphere(projectilePositionAttribute->position, projectileAttribute->explosionSphereRadius, projectileDamageAttribute->damage, entity1->getID()));
+					SEND_EVENT(&Event_CreateExplosionSphere(projectilePositionAttribute->position, 10000.0f, projectileDamageAttribute->damage, entity1->getID()));
 				}
 			}
 		}

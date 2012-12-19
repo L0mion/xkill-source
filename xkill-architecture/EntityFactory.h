@@ -169,11 +169,16 @@ public:
 		/*
 			Needs some visual representation. Add attribute for it here.
 		*/
-	
+
 		CREATE_ATTRIBUTE(PhysicsAttribute, physics, entity);
 		CONNECT_ATTRIBUTES(physics, spatial);
 		physics->isExplosionSphere = true;
 		physics->explosionSphereRadius = e->radius;
+		physics->collisionResponse = false;
+
+		CREATE_ATTRIBUTE(DamageAttribute, damage, entity);
+		damage->damage = e->damage;
+		damage->owner_entityID = e->entityIdOfCreator;
 	}
 };
 

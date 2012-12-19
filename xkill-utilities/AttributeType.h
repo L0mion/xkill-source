@@ -283,6 +283,10 @@ struct DLL_U SpawnPointAttribute : public IAttribute
 	AttributePointer positionAttribute;
 };
 
+/// Stores everything needed for the weapon system. The two enums "AmmunitionType" and "FiringMode" is used to preset the weapon settings. These settings are used in GameComponent to simulate the weapon behavior of choice.
+/** 
+\ingroup ATTRIBUTES
+*/
 struct DLL_U WeaponStatsAttribute : public IAttribute
 {
 	enum AmmunitionType
@@ -300,11 +304,10 @@ struct DLL_U WeaponStatsAttribute : public IAttribute
 	};
 
 	WeaponStatsAttribute();
-	void setWeaponStats(AmmunitionType ammunitionType, FiringMode firingMode);
-
-	void setWeaponToDebugMachineGun();
-
 	~WeaponStatsAttribute();
+
+	void setWeaponStats(AmmunitionType ammunitionType, FiringMode firingMode);
+	void setWeaponToDebugMachineGun();
 
 	AmmunitionType ammunitionType;	//!< BULLET, SCATTER, EXPLOSIVE
 	FiringMode firingMode;			//!< SINGLE, SEMI, AUTO
@@ -322,7 +325,7 @@ struct DLL_U WeaponStatsAttribute : public IAttribute
 	int nrOfProjectilesForEachShot; //!< If > 1 then scattershot else singleshot.
 	float damgeOfEachProjectile;	//!< Damage value of the damage attribute created when creating a projectile from this weapon.
 
-	float displacementSphereRadius;	//!< Randomizes the position of each projectile.
+	float displacementSphereRadius;	//!< Randomizes the position of each projectile inside this sphere.
 	float spreadConeRadius;			//!< Randomizes the orientation of each projectile's velocity vector inside this cone. 
 
 	bool isExplosive;				//!< Determines if projectiles created from this weapon will explode on impact.
