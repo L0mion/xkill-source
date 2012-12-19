@@ -167,8 +167,8 @@ HRESULT RenderingComponent::init()
 	if(SUCCEEDED(hr))
 		hr = initGBuffers();
 
-	if(SUCCEEDED(hr))
-		initAnimations();
+	//if(SUCCEEDED(hr))
+	//	initAnimations();
 
 	return hr;
 }

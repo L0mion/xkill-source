@@ -56,6 +56,7 @@ public:
 
 		CREATE_ATTRIBUTE(PhysicsAttribute, physics, entity);
 		CONNECT_ATTRIBUTES(physics, spatial);
+		CONNECT_ATTRIBUTES(physics, render);
 		
 		physics->meshID = render->meshID;
 
@@ -92,6 +93,7 @@ public:
 
 		CREATE_ATTRIBUTE(PhysicsAttribute, physics, entity);
 		CONNECT_ATTRIBUTES(physics, spatial);
+		CONNECT_ATTRIBUTES(physics, render);
 		physics->meshID = render->meshID;
 		
 		physics->mass = 0;
@@ -115,6 +117,7 @@ public:
 
 		CREATE_ATTRIBUTE(PhysicsAttribute, physics, entity);
 		CONNECT_ATTRIBUTES(physics, spatial);
+		CONNECT_ATTRIBUTES(physics, render);
 		physics->meshID = render->meshID;
 		
 		physics->isProjectile = true;

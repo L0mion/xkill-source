@@ -140,6 +140,7 @@ struct DLL_U PhysicsAttribute : public IAttribute
 	~PhysicsAttribute();
 
 	AttributePointer spatialAttribute;
+	AttributePointer renderAttribute;
 	Float3 linearVelocity;
 	Float3 angularVelocity;
 	Float3 gravity;

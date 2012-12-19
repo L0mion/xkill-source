@@ -112,7 +112,7 @@ void GameComponent::onUpdate(float delta)
 				velocity.y *= 1000.0f;
 				velocity.z *= 1000.0f;
 				// add rotation displacement on position 
-				float d = 0.2f;
+				float d = 0.3f;
 				pos.x += lookAtX*d;
 				pos.y += lookAtY*d;
 				pos.z += lookAtZ*d;
@@ -298,10 +298,10 @@ void GameComponent::event_PhysicsAttributesColliding(Event_PhysicsAttributesColl
 			for(unsigned i=0;i<projectileId.size();i++)
 			{
 				ProjectileAttribute* projectileAttribute = &allProjectile->at(projectileId.at(i));
-				if(projectileAttribute->currentLifeTimeLeft > 0.4f)
+				/*if(projectileAttribute->currentLifeTimeLeft > 0.4f)
 				{
 				projectileAttribute->currentLifeTimeLeft = 0.3f;
-				}
+				}*/
 			}
 
 			//Set gravity on projectiles colliding with physics objects
@@ -311,7 +311,7 @@ void GameComponent::event_PhysicsAttributesColliding(Event_PhysicsAttributesColl
 			{
 				PhysicsAttribute* physicsAttribute = &allPhysics->at(physicsId.at(i));
 				physicsAttribute->gravity = Float3(0.0f, -10.0f, 0.0f);
-				physicsAttribute->linearVelocity = Float3(0.0f, 0.0f, 0.0f);
+				//physicsAttribute->linearVelocity = Float3(0.0f, 0.0f, 0.0f);
 			}
 
 			//Shorten lifetime of projectile colliding with physics objects
@@ -320,10 +320,10 @@ void GameComponent::event_PhysicsAttributesColliding(Event_PhysicsAttributesColl
 			for(unsigned i=0;i<projectileId.size();i++)
 			{
 				ProjectileAttribute* projectileAttribute = &allProjectile->at(projectileId.at(i));
-				if(projectileAttribute->currentLifeTimeLeft > 0.2f)
+				/*if(projectileAttribute->currentLifeTimeLeft > 0.2f)
 				{
 					projectileAttribute->currentLifeTimeLeft = 0.15f;
-				}
+				}*/
 			}
 		}
 	}

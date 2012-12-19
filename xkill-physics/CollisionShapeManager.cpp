@@ -93,7 +93,6 @@ btCollisionShape* CollisionShapeManager::loadCollisionShape(unsigned int meshID)
 		btConvexHullShape* convexShape = new btConvexHullShape;
 		for(int i=0; i< hull.numVertices(); i++)
 		{
-			btVector3 test = hull.getVertexPointer()[i];
 			convexShape->addPoint(hull.getVertexPointer()[i]);
 		}
 		collisionShapes_.push_back(convexShape);
