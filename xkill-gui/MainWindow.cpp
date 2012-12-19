@@ -24,7 +24,7 @@ MainWindow::MainWindow( QWidget *parent /*= 0*/, Qt::WFlags flags /*= 0*/ ) : QM
 	menuManager = new MenuManager(this);
 
 	// setup signals and slots
-	//connect(ui.actionFullscreen, SIGNAL(triggered()), this, SLOT(slot_toggleFullScreen()));
+	connect(ui.actionFullscreen, SIGNAL(triggered()), this, SLOT(slot_toggleFullScreen()));
 	connect(ui.actionCap_FPS, SIGNAL(toggled(bool)), gameWidget, SLOT(slot_toggleCapFPS(bool)));
 	ui.actionCap_FPS->setChecked(true);
 	connect(ui.actionQuit, SIGNAL(triggered()), this, SLOT(close()));
@@ -164,6 +164,9 @@ void MainWindow::toggleMouseLock()
 		// move mouse to middle
 		QPoint mouseAnchor = QWidget::mapToGlobal(QPoint(this->width()*0.5f,this->height()*0.5f));
 		QCursor::setPos(mouseAnchor.x(), mouseAnchor.y()); // anchor mouse again
+
+		// set focus to this widget
+		QWidget::setFocus(Qt::MouseFocusReason);
 	}
 	else
 	{

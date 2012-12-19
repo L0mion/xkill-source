@@ -369,13 +369,16 @@ void Renderer::renderViewportToGBuffer(DirectX::XMFLOAT4X4 viewMatrix, DirectX::
 	managementGBuffer_->setGBuffersAndDepthBufferAsRenderTargets(devcon, managementD3D_->getDepthBuffer());
 
 	RenderAttribute* renderAt;
-	for(unsigned int i = 0; i < attributesRender_->size() && attributesRenderOwner_->at(i) != 0; i++)
+	for(unsigned int i = 0; i < attributesRender_->size(); i++)
 	{
-		renderAt = &attributesRender_->at(i);
-		renderAttribute(
-			renderAt, 
-			viewMatrix, 
-			projectionMatrix);
+		if(attributesRenderOwner_->at(i) != 0)
+		{
+			renderAt = &attributesRender_->at(i);
+			renderAttribute(
+				renderAt, 
+				viewMatrix, 
+				projectionMatrix);
+		}
 	}
 
 	renderGBufferClean();

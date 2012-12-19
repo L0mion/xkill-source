@@ -26,6 +26,7 @@ public:
 	void loadXML();
 
 public slots:
+		void slot_startGame();
 		void slot_selectLevel(int levelId);
 		void slot_addLevel();
 		void slot_removeLevel();

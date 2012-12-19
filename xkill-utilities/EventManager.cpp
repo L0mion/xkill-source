@@ -8,6 +8,8 @@
 
 EventManager::EventManager()
 {
+	state_TemporaryVariableUsedAsSubstituteForStateMachine = STATE_DEATHMATCH;
+
 	// Build vectors with all events
 	subscibers = new std::vector<std::vector<IObserver*>>;
 	for(int i=0; i<EVENT_LAST; i++)
@@ -75,7 +77,8 @@ void EventManager::removeObserver(IObserver* observer, EventType type)
 
 void EventManager::sendEvent(Event* e)
 {
-	int index = e->getType();
+	EventType eventTyp = e->getType();
+	int index = eventTyp;
 	//std::cout << "EVENTMANAGER: Sends Event of Enum " << index << std::endl;
 	for(int i=0; i < (int)(*subscibers)[index].size(); i++)
 	{

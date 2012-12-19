@@ -26,6 +26,7 @@ Menu_Main::Menu_Main( QWidget* parent ) : QMainWindow(parent), ToggleHelper(this
 	connect(ui.pushButton_AddLevel, SIGNAL(clicked()), this, SLOT(slot_addLevel()));
 	connect(ui.pushButton_SaveLevel, SIGNAL(clicked()), this, SLOT(slot_saveLevel()));
 	connect(ui.pushButton_RemoveLevel, SIGNAL(clicked()), this, SLOT(slot_removeLevel()));
+	connect(ui.pushButton_startGame, SIGNAL(clicked()), this, SLOT(slot_startGame()));
 
 	filePath = QString("../../xkill-resources/xkill-scripts/levels.xml");
 	model = new QStandardItemModel(0, 1, this);
@@ -159,6 +160,12 @@ void Menu_Main::keyPressEvent( QKeyEvent* e )
 void Menu_Main::mousePressEvent( QMouseEvent* e )
 {
 	e->accept(); // avoids propagating event to parent
+}
+
+void Menu_Main::slot_startGame()
+{
+	int num_players = ui.horizontalSlider_numPlayers->value();
+	SEND_EVENT(&Event_StartDeathmatch(num_players));
 }
 
 
