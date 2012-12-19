@@ -6,9 +6,11 @@
 
 DebugShapes::DebugShapes()
 {
+	//Do nothing.
 }
 DebugShapes::~DebugShapes()
 {
+	//Do nothing.
 }
 
 std::vector<VertexPosColor> DebugShapes::getSphere(float radius)
@@ -56,3 +58,64 @@ std::vector<VertexPosColor> DebugShapes::getSphere(float radius)
 
 	return verticesSphere;
 }
+std::vector<VertexPosColor> DebugShapes::getBB(Float3 bbMin, Float3 bbMax)
+{	
+	Float3 p1 = bbMin;
+	Float3 p2 = Float3(bbMax.x, bbMin.y, bbMin.z);
+	Float3 p3 = Float3(bbMin.x, bbMax.y, bbMin.z);
+	Float3 p4 = Float3(bbMax.x, bbMax.y, bbMin.z);
+
+	Float3 p5 = Float3(bbMin.x, bbMin.y, bbMax.z);
+	Float3 p6 = Float3(bbMax.x, bbMin.y, bbMax.z);
+	Float3 p7 = Float3(bbMin.x, bbMax.y, bbMax.z);
+	Float3 p8 = bbMax;
+		
+	VertexPosColor v;
+	v.color_ = Float3(1.0f, 0.0f, 0.0f);
+
+	//Connect vertices in a line list.
+	std::vector<VertexPosColor> vertices;
+
+	//Connect first quad
+	v.position_ = p1; vertices.push_back(v);
+	v.position_ = p2; vertices.push_back(v);
+	v.position_ = p1; vertices.push_back(v);
+	v.position_ = p3; vertices.push_back(v);
+	v.position_ = p4; vertices.push_back(v);
+	v.position_ = p2; vertices.push_back(v);
+	v.position_ = p4; vertices.push_back(v);
+	v.position_ = p3; vertices.push_back(v);
+
+	//Connect second quad
+	v.position_ = p5; vertices.push_back(v);
+	v.position_ = p6; vertices.push_back(v);
+	v.position_ = p5; vertices.push_back(v);
+	v.position_ = p7; vertices.push_back(v);
+	v.position_ = p8; vertices.push_back(v);
+	v.position_ = p7; vertices.push_back(v);
+	v.position_ = p8; vertices.push_back(v);
+	v.position_ = p6; vertices.push_back(v);
+
+	//Connect quads
+	v.position_ = p1; vertices.push_back(v);
+	v.position_ = p5; vertices.push_back(v);
+	v.position_ = p2; vertices.push_back(v);
+	v.position_ = p6; vertices.push_back(v);
+	v.position_ = p3; vertices.push_back(v);
+	v.position_ = p7; vertices.push_back(v);
+	v.position_ = p4; vertices.push_back(v);
+	v.position_ = p8; vertices.push_back(v);
+
+	return vertices;
+}
+
+/*
+v.position_ = p1; vertices.push_back(v);
+v.position_ = p2; vertices.push_back(v);
+v.position_ = p3; vertices.push_back(v);
+v.position_ = p4; vertices.push_back(v);
+v.position_ = p5; vertices.push_back(v);
+v.position_ = p6; vertices.push_back(v);
+v.position_ = p7; vertices.push_back(v);
+v.position_ = p8; vertices.push_back(v);
+*/

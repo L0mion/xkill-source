@@ -11,10 +11,11 @@ const static unsigned int SPHERE_RES = 100;
 class DebugShapes
 {
 public:
-	DebugShapes();
-	~DebugShapes();
+	DebugShapes();	//!< Does nothing.
+	~DebugShapes();	//!< Does nothing.
 
 	std::vector<VertexPosColor> getSphere(float radius); //! Creates an array of vertices forming a sphere based on passed radius.
+	std::vector<VertexPosColor> getBB(Float3 bbMin, Float3 bbMax);
 protected:
 private:
 };

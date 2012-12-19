@@ -254,7 +254,17 @@ DebugShapeD3D* ManagementModel::createSphere(DebugShapeSphere* sphere, ID3D11Dev
 }
 DebugShapeD3D* ManagementModel::createBB(DebugShapeBB* bb, ID3D11Device* device)
 {
-	return nullptr; //temp
+	DebugShapeD3D* debugBB = nullptr;
+
+	Float3 bbMin = bb->bbMin_;
+	Float3 bbMax = bb->bbMax_;
+	std::vector<VertexPosColor> bbVertices = debugShapes_->getBB(bbMin, bbMax);
+
+	VB<VertexPosColor>* vb = new VB<VertexPosColor>();
+	vb->init(bbVertices, device);
+
+	debugBB = new DebugShapeD3D(vb);
+	return debugBB;
 }
 
 
