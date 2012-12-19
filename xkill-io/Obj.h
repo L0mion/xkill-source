@@ -6,7 +6,6 @@
 	\ingroup xkill-mesh-io
 */
 
-#include <Windows.h>
 #include <vector>
 #include <string>
 

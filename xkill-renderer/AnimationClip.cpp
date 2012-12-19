@@ -36,7 +36,7 @@ float AnimationClip::getClipStartTime() const
 
 float AnimationClip::getClipEndTime() const
 {
-	float endTime = FLT_MIN;
+	float endTime = 0;
 	for(unsigned int i=0; i<boneAnimations_->size(); i++)
 		endTime = DirectX::XMMax<float>(endTime, boneAnimations_->at(i)->getEndTime());
 

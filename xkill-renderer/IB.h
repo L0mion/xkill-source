@@ -9,6 +9,9 @@ struct ID3D11Device;
 #include <vector>
 
 //! Describes an index buffer.
+/*!
+\ingroup xkill-renderer
+*/
 class IB
 {
 public:

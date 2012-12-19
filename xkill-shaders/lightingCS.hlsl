@@ -9,8 +9,9 @@ RWTexture2D<float4> output : register( u0 );
 
 Texture2D gBufferNormal		: register( t0 );
 Texture2D gBufferAlbedo		: register( t1 );
+Texture2D gBufferMaterial	: register( t2 );
 
-StructuredBuffer<Light> lights : register( t2 );
+StructuredBuffer<Light> lights : register( t3 );
 
 SamplerState ss : register(s0);
 
@@ -33,6 +34,7 @@ void lightingCS( uint3 threadID : SV_DispatchThreadID )
 	float2 texCoord = float2((float)(threadID.x + viewportTopX)/(float)screenWidth,(float)(threadID.y + viewportTopY)/(float)screenHeight);
 	float4 albedo	= gBufferAlbedo.SampleLevel(ss, texCoord, 0);
 	float3 normal	= gBufferNormal.SampleLevel(ss, texCoord, 0).xyz;
+	float4 material = gBufferMaterial.SampleLevel(ss, texCoord, 0);
 	float3 position = reconstructViewSpacePosition(texCoord);
 	
 	//Transform position from view space to world space.

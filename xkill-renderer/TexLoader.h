@@ -9,6 +9,9 @@ struct ID3D11ShaderResourceView;
 #include <string>
 
 //! Object used to load textures as shader resource views.
+/*!
+\ingroup xkill-renderer
+*/
 class TexLoader
 {
 public:

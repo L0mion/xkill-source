@@ -1,32 +1,39 @@
 #include "VB.h"
-#include "IB.h"
+#include "SubsetD3D.h"
 #include "renderingUtilities.h"
 
 #include "ModelD3D.h"
 
 ModelD3D::ModelD3D(
-	VB* vb,
-	const std::vector<IB*> ibs)
+	VB<VertexPosNormTex>*				vertexBuffer,
+	const std::vector<SubsetD3D*>		subsets,
+	const std::vector<MeshMaterial>		materials)
 {
-	vb_		= vb;
-	ibs_	= ibs;
+	vertexBuffer_	= vertexBuffer;
+	subsets_		= subsets;
+	materials_		= materials;
 }
 ModelD3D::~ModelD3D()
 {
-	if(vb_)
-		delete vb_;
-	for(unsigned int i = 0; i < ibs_.size(); i++)
+	if(vertexBuffer_)
+		delete vertexBuffer_;
+
+	for(unsigned int i = 0; i < subsets_.size(); i++)
 	{
-		if(ibs_[i])
-			delete ibs_[i];
+		if(subsets_[i])
+			delete subsets_[i];
 	}
 }
 
-VB* ModelD3D::getVB()
+VB<VertexPosNormTex>*		ModelD3D::getVertexBuffer()
 {
-	return vb_;
+	return vertexBuffer_;
 }
-const std::vector<IB*>& ModelD3D::getIBs()
+std::vector<SubsetD3D*>&	ModelD3D::getSubsetD3Ds()
 {
-	return ibs_;
+	return subsets_;
+}
+std::vector<MeshMaterial>&	ModelD3D::getMaterials()
+{
+	return materials_;
 }

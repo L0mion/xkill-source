@@ -16,6 +16,17 @@ struct DefaultVSIn
 	float2 texcoord	: TEXCOORD;
 };
 
+struct ColorVSIn
+{
+	float3 position : POSITION;
+	float3 color	: COLOR;
+};
+struct ColorVSOut
+{
+	float4 position : SV_POSITION;
+	float3 color	: COLOR;
+};
+
 struct AnimationVSIn
 {
 	float3 position		: POSITION;

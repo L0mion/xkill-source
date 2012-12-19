@@ -3,10 +3,17 @@
 
 #include <vector>
 
+#include <xkill-utilities/MeshMaterial.h>
+#include <xkill-utilities/MeshVertices.h>
+
+template <class Vertex>    
 class VB;
-class IB;
+class SubsetD3D;
 
 //! Type representing the rendering-view of a model.
+/*!
+\ingroup xkill-renderer
+*/
 class ModelD3D
 {
 public:
@@ -16,17 +23,20 @@ public:
 	\param ibs	A collection of index buffers.
 	*/
 	ModelD3D(
-		VB* vb,
-		const std::vector<IB*> ibs);
+		VB<VertexPosNormTex>*				vertexBuffer,
+		const std::vector<SubsetD3D*>		subsets,
+		const std::vector<MeshMaterial>		materials);
 	//! Deletes VB-type and vector of IBs.
 	~ModelD3D();
 
-	VB* getVB();
-	const std::vector<IB*>&	getIBs();
+	VB<VertexPosNormTex>*		getVertexBuffer();
+	std::vector<SubsetD3D*>&	getSubsetD3Ds();
+	std::vector<MeshMaterial>&	getMaterials();
 protected:
 private:
-	VB* vb_;				//!< Vertex buffer.
-	std::vector<IB*> ibs_;	//!< Index buffers.
+	VB<VertexPosNormTex>*		vertexBuffer_;	//!< Vertex buffer.
+	std::vector<SubsetD3D*>		subsets_;		//!< Index buffers.
+	std::vector<MeshMaterial>	materials_;		//!< Materials.
 };
 
 /*

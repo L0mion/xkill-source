@@ -2,10 +2,6 @@
 
 #include "InputDevice.h"
 
-#include <windows.h>
-#include <Xinput.h>
-
-
 //! A wrapper for a XInput device
 /*!
 
@@ -25,7 +21,7 @@ public:
 	virtual bool IsForceFeedbackCapable();
 
 	/*!
-	\return XINPUT_DEVICE 
+	\return XINPUT_DEVICE
 	*/
 	virtual InputDeviceType GetType();
 

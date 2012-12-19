@@ -61,17 +61,22 @@ void FiniteStateMachine::Update( float dt )
 {
 	//no states to handle, nothing to do
 	if (states_.size() == 0)
-		return; //TODO Print warning about update being called on empty machine
+	{
+		std::cout << "Warning: FiniteStateMachine::Update are being called on an empty machine" << std::endl;
+		return;
+	}
 
-	//if no current state attempt to set it to default
+	//if no current state: attempt to set it to default
 	if (currentState_.empty() && defaultState_)
 	{
 		currentState_.push(defaultState_);
 	}
+
 	//no valid  state could be established, nothing to do
 	if (currentState_.empty())
 	{
-		return; //TODO Print warning on state being invalid
+		std::cout << "Warning: FiniteStateMachine::Update, current state is invalid" << std::endl;
+		return;
 	}
 
 	HandleTransitions();

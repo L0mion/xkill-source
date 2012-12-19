@@ -7,6 +7,10 @@
 #include "MdlDescHeader.h"
 #include "MdlDescModel.h"
 
+//! Object descibing a loaded .mdldesc-file.
+/*!
+\ingroup xkill-io
+*/
 class MdlDesc
 {
 public:

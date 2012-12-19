@@ -1,12 +1,15 @@
 #include "InputComponent.h"
 
 #include <xkill-utilities/EventManager.h>
-
 #include "InputManager.h"
-#include <iostream>
 
 InputComponent::InputComponent()
 {
+	SUBSCRIBE_TO_EVENT(this, EVENT_RUMBLE);
+	SUBSCRIBE_TO_EVENT(this, EVENT_MOUSE_MOVE);
+	SUBSCRIBE_TO_EVENT(this, EVENT_KEY_PRESS);
+	SUBSCRIBE_TO_EVENT(this, EVENT_KEY_RELEASE);
+
 	newDeviceSearchTimer_ = 0.0f;
 }
 
@@ -17,11 +20,6 @@ InputComponent::~InputComponent()
 
 bool InputComponent::init(HWND windowHandle, std::vector<InputAttribute>* inputAttributes, std::string configFilePath, float searchTime)
 {
-	SUBSCRIBE_TO_EVENT(this, EVENT_RUMBLE);
-	SUBSCRIBE_TO_EVENT(this, EVENT_MOUSE_MOVE);
-	SUBSCRIBE_TO_EVENT(this, EVENT_KEY_PRESS);
-	SUBSCRIBE_TO_EVENT(this, EVENT_KEY_RELEASE);
-
 	inputAttributes_ = inputAttributes;
 
 	windowHandle_ = windowHandle;
@@ -112,10 +110,10 @@ void InputComponent::handleInput(float delta)
 			}
 
 			//Projectile test
-			if(state.buttons[0].isReleased())
+			if(state.buttons[0].isDown())
 				inputAttributes_->at(i).fire = true;
-			if(state.buttons[7].isDown())
-				inputAttributes_->at(i).fire = true;
+			if(state.buttons[7].isReleased())
+				inputAttributes_->at(i).changeWeapon = true;
 
 			if(state.buttons.size() > 7)
 			{

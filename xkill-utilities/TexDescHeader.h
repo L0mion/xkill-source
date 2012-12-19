@@ -6,6 +6,9 @@
 #include "dllUtilities.h"
 
 //! Describes a header read from a .texdesc-file.
+/*!
+\ingroup UTILITIES
+*/
 struct DLL_U TexDescHeader
 {
 	//! Does nothing.

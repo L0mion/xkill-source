@@ -13,25 +13,14 @@
 #include "Converter.h"
 
 #include <Windows.h>
+
 #include <string>
 #include <vector>
-#include <cmath>
-#include <fstream>
+
 
 ///////Needed for Direct Input //////
-#include <InitGuid.h>			   //
+//#include <InitGuid.h>			   //
 								   //
-#define DIRECTINPUT_VERSION 0x0800 //
-#include <dinput.h>				   //
-/////////////////////////////////////
-
-//Used for IsXInputDevice function//
-#include <wbemidl.h>			  //
-#include <oleauto.h>			  //
-#include <stdio.h>				  //
-////////////////////////////////////
-
-#define SAFE_RELEASE(x) {if(x != NULL) x->Release(); x = NULL;} //Should probably not be here, needed for isXInputDevice
 
 class FileParser;
 

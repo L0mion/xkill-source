@@ -19,6 +19,8 @@
 
 BulletPhysicsComponent::BulletPhysicsComponent()
 {
+	SUBSCRIBE_TO_EVENT(this,EVENT_DO_CULLING);
+
 	inputAttributes_ = nullptr;
 	physicsAttributes_ = nullptr;
 	boundingAttributes_ = nullptr;
@@ -91,8 +93,6 @@ bool BulletPhysicsComponent::init()
 	GET_ATTRIBUTES(cameraAttributes_, CameraAttribute, ATTRIBUTE_CAMERA);
 	GET_ATTRIBUTE_OWNERS(physicsOwners_, ATTRIBUTE_PHYSICS);
 	
-	SUBSCRIBE_TO_EVENT(this,EVENT_DO_CULLING);
-
 	physicsObjects_ = new btAlignedObjectArray<PhysicsObject*>();
 	broadphase_ = new btDbvtBroadphase();
 	collisionConfiguration_ = new btDefaultCollisionConfiguration();
@@ -167,7 +167,7 @@ void BulletPhysicsComponent::onUpdate(float delta)
 		}
 	}
 
-	FLUSH_QUEUED_EVENTS(EVENT_ENTITIES_COLLIDING);
+	FLUSH_QUEUED_EVENTS(EVENT_PHYSICS_ATTRIBUTES_COLLIDING);
 }
 
 void BulletPhysicsComponent::onEvent(Event* e)

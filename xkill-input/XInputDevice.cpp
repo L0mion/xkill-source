@@ -1,4 +1,7 @@
 #include "XInputDevice.h"
+#include <xkill-utilities/LeanWindows.h>
+
+#include <Xinput.h>
 
 XInputDevice::XInputDevice(int deviceNr, GUID deviceGUID, std::string name, unsigned int playerID) : 
 	InputDevice(deviceGUID, name, playerID)
@@ -72,7 +75,7 @@ void XInputDevice::updateState()
 	DWORD dwResult;    
 	XINPUT_STATE state;
 	
-	ZeroMemory(&state, sizeof(XINPUT_STATE));
+	memset(&state, 0, sizeof(XINPUT_STATE));
 	dwResult = XInputGetState(deviceNr_, &state);
 
 	axes_[0].SetValue(state.Gamepad.sThumbLX);

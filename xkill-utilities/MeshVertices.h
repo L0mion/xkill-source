@@ -5,6 +5,15 @@
 
 #include "dllUtilities.h"
 
+struct DLL_U VertexPosColor
+{
+	Float3 position_;
+	Float3 color_;
+
+	VertexPosColor();
+	VertexPosColor(Float3 position, Float3 color);
+};
+
 //! Basic three-member vertex
 /*!
 \ingroup xkill-mesh*/
@@ -49,7 +58,7 @@ struct DLL_U VertexPosNormTexTanSkinned
 	//! Default constructor setting all member variables to zero.
 	VertexPosNormTexTanSkinned()
 	{
-		std::memset(this, 0, sizeof(VertexPosNormTexTanSkinned));
+		//std::memset(this, 0, sizeof(VertexPosNormTexTanSkinned));
 	}
 
 	//! Constructor setting members to specific values.

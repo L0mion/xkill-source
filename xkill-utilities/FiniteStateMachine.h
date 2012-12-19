@@ -7,6 +7,11 @@
 #include "dllUtilities.h"
 #include "FiniteState.h"
 
+//! Finite State Machine
+/*!
+
+\ingroup xkill-utilities
+*/
 class DLL_U FiniteStateMachine : public FiniteState
 {
 public:
@@ -21,7 +26,8 @@ public:
 	void Nuke();
 
 	//Constructors and Destructors
-	FiniteStateMachine(
+	FiniteStateMachine
+	(
 		StateType type = MACHINE_STATE_DEFAULT, 
 		FiniteState* defaultAndCurrentState = NULL); //Note: default constructor is generated using default parameters
 	~FiniteStateMachine(); //States are injected and memory deallocation is therefore handled by caller (See Wikipedia RAII)

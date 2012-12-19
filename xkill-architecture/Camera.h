@@ -1,7 +1,6 @@
 #ifndef XKILL_CAMERA_H
 #define XKILL_CAMERA_H
 
-#include <Windows.h>
 #include <DirectXMath.h>
 #include <vector>
 

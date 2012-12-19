@@ -1,5 +1,7 @@
 #pragma once
 
+#include <xkill-utilities/DebugShape.h>
+
 #include "Entity.h"
 #include "EntityManager.h"
 #include "AttributeManager.h"
@@ -50,15 +52,21 @@ public:
 		CREATE_ATTRIBUTE(SpatialAttribute, spatial, entity);
 		CONNECT_ATTRIBUTES(spatial, position);
 
+		CREATE_ATTRIBUTE(DebugShapeAttribute, debugShape, entity);	//create temp debug shape
+		CONNECT_ATTRIBUTES(debugShape, spatial);
+		debugShape->shape	= new DebugShapeBB(
+			Float3(-0.5f, -0.5f, -0.5f),
+			Float3(0.5f, 0.5f, 0.5f)); //new DebugShapeSphere(1.0f);
+		debugShape->render	= true;
+
 		CREATE_ATTRIBUTE(RenderAttribute, render, entity);
 		CONNECT_ATTRIBUTES(render, spatial);
 		render->meshID = 0;
 
 		CREATE_ATTRIBUTE(PhysicsAttribute, physics, entity);
 		CONNECT_ATTRIBUTES(physics, spatial);
-		
 		physics->meshID = render->meshID;
-
+		
 		CREATE_ATTRIBUTE(InputAttribute, input, entity);
 		CONNECT_ATTRIBUTES(input, physics);
 
@@ -66,11 +74,15 @@ public:
 		CONNECT_ATTRIBUTES(camera, spatial);
 
 		CREATE_ATTRIBUTE(HealthAttribute, health, entity);
+
+		CREATE_ATTRIBUTE(WeaponStatsAttribute, weaponStats, entity);
+
 		CREATE_ATTRIBUTE(PlayerAttribute, player, entity);
 		CONNECT_ATTRIBUTES(player, render);
 		CONNECT_ATTRIBUTES(player, input);
 		CONNECT_ATTRIBUTES(player, camera);
 		CONNECT_ATTRIBUTES(player, health);
+		CONNECT_ATTRIBUTES(player, weaponStats);
 		//player->name = "Process Name";
 		static int playerId = 0;
 		player->id = playerId;
@@ -120,13 +132,16 @@ public:
 		physics->isProjectile = true;
 		physics->linearVelocity = e->velocity;
 		physics->mass = 100.0f;
-		physics->gravity = e->gravity;
+		physics->gravity = Float3(0.0f, 0.0f, 0.0f);
+		physics->collisionResponse = true;
 
 		CREATE_ATTRIBUTE(ProjectileAttribute, projectile, entity);
 		CONNECT_ATTRIBUTES(projectile, physics);
 		projectile->entityIdOfCreator = e->entityIdOfCreator;
+		projectile->explodeOnImnpact = e->explodeOnImpact;
 
 		CREATE_ATTRIBUTE(DamageAttribute, damage, entity);
+		damage->damage = e->damage;
 		damage->owner_entityID = e->entityIdOfCreator;
 	}
 
@@ -148,6 +163,18 @@ public:
 		spawnPoint->timeSinceLastSpawn = 0.1f;
 		spawnPoint->spawnArea = e->spawnAreaRadius;
 	}
+
+	void createExplosionSphere(Entity* entity, Event_CreateExplosionSphere* e)
+	{
+		/*
+		CREATE_ATTRIBUTE(PositionAttribute, position, entity);
+		position->position = e->position;
+
+		CREATE_ATTRIBUTE(SpatialAttribute, spatial, entity);
+		CONNECT_ATTRIBUTES(spatial, position);
+		*/
+	}
+
 };
 
 	//

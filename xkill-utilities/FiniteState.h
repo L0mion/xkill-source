@@ -7,6 +7,8 @@ enum DLL_U StateType
 	SPECIAL_STATE_NONE,
 	SPECIAL_STATE_BACK,
 	MACHINE_STATE_DEFAULT,
+	STATE_DEATHMATCH,
+	STATE_MAINMENU
 	//FINITE_STATE_YOURSTATEHERE
 };
 
@@ -29,4 +31,3 @@ protected:
 	StateType type_; //must be unique to every state
 	//bool isActive_; //TODO: Add deactivation mechanism to States & FSM
 };
-
