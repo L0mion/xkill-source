@@ -4,7 +4,11 @@
 #include <xkill-utilities/EventType.h>
 #include "dllInput.h"
 
-#include <Windows.h>
+#ifndef HWND_FORWARD_DECLARATION
+#define HWND_FORWARD_DECLARATION
+typedef struct HWND__* HWND;
+#endif
+
 #include <vector>
 
 class InputManager;

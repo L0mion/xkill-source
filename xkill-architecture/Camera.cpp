@@ -1,6 +1,6 @@
-#include <Windows.h>
-
 #include "Camera.h"
+
+#include <Windows.h>
 
 Camera::Camera(
 		float aspect, 

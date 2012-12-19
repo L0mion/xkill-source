@@ -73,13 +73,14 @@ Event_ShowMessageBox::Event_ShowMessageBox(std::string message) : Event(EVENT_SH
 	this->message = message;
 }
 
-Event_CreateProjectile::Event_CreateProjectile(Float3 position, Float3 velocity, Float4 rotation, Float3 gravity, int entityIdOfCreator) : Event(EVENT_CREATE_PROJECTILE)
+Event_CreateProjectile::Event_CreateProjectile(Float3 position, Float3 velocity, Float4 rotation, int damage, int entityIdOfCreator, bool explodeOnImpact) : Event(EVENT_CREATE_PROJECTILE)
 {
 	this->position = position;
 	this->velocity = velocity;
 	this->rotation = rotation;
-	this->gravity = gravity;
+	this->damage = damage;
 	this->entityIdOfCreator = entityIdOfCreator;
+	this->explodeOnImpact = explodeOnImpact;
 }
 
 Event_CreateMesh::Event_CreateMesh(unsigned int id, MeshModel* mesh, bool dynamic) : Event(EVENT_CREATE_MESH)
@@ -89,7 +90,7 @@ Event_CreateMesh::Event_CreateMesh(unsigned int id, MeshModel* mesh, bool dynami
 	this->dynamic	= dynamic;
 }
 
-Event_PhysicsAttributesColliding::Event_PhysicsAttributesColliding(int attribute1_index, int attribute2_index) : Event(EVENT_ENTITIES_COLLIDING)
+Event_PhysicsAttributesColliding::Event_PhysicsAttributesColliding(int attribute1_index, int attribute2_index) : Event(EVENT_PHYSICS_ATTRIBUTES_COLLIDING)
 {
 	this->attribute1_index = attribute1_index;
 	this->attribute2_index = attribute2_index;
@@ -120,6 +121,23 @@ Event_DoCulling::Event_DoCulling() : Event(EVENT_DO_CULLING)
 {
 }
 
+
+Event_StartDeathmatch::Event_StartDeathmatch() : Event(EVENT_START_DEATHMATCH)
+{
+
+}
+
 Event_EndDeathmatch::Event_EndDeathmatch() : Event(EVENT_END_DEATHMATCH)
 {
+}
+
+Event_ChangeGameState::Event_ChangeGameState(StateType newState) : Event(EVENT_CHANGE_GAMESTATE)
+{
+	this->newState = newState;
+}
+
+Event_CreateExplosionSphere::Event_CreateExplosionSphere(Float3 position, float radius) : Event(EVENT_CREATE_EXPLOSIONSPHERE)
+{
+	this->position = position;
+	this->radius = radius;
 }

@@ -72,11 +72,10 @@ void BoneAnimation::keyframeInterpolate(float time, DirectX::XMFLOAT4X4& matrix)
 
 			DirectX::XMVECTOR scale				 = DirectX::XMVectorLerp(scale0, scale1, lerpPercent);
 			DirectX::XMVECTOR translation		 = DirectX::XMVectorLerp(translation0, translation1, lerpPercent);
-			DirectX::XMVECTOR rotationQuaternion = DirectX::XMVectorLerp(rotationQuaternion0, rotationQuaternion1, lerpPercent);
+			DirectX::XMVECTOR rotationQuaternion = DirectX::XMQuaternionSlerp(rotationQuaternion0, rotationQuaternion1, lerpPercent);
 
 			DirectX::XMVECTOR zero = DirectX::XMVectorSet(0.0f, 0.0f, 0.0f, 1.0f);
 			DirectX::XMStoreFloat4x4(&matrix, DirectX::XMMatrixAffineTransformation(scale, zero, rotationQuaternion, translation));
-
 			done = true;
 		}
 		index++;

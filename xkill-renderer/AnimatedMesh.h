@@ -21,6 +21,8 @@ public:
 	AnimatedMesh();
 	~AnimatedMesh();
 
+	void update(float delta);
+
 	HRESULT init(ID3D11Device* device);
 
 	std::vector<VertexPosNormTexTanSkinned>* getVertices()  const;
@@ -35,6 +37,8 @@ public:
 	unsigned int getNumVertices()	const;
 	unsigned int getNumIndices()	const;
 
+	float getTimePosition() const;
+
 private:
 
 	HRESULT createVertexBuffer(ID3D11Device* device);
@@ -48,6 +52,8 @@ private:
 
 	ID3D11Buffer* vertexBuffer_;
 	ID3D11Buffer* indexBuffer_;
+
+	float timePosition_;
 };
 
 #endif //XKILL_RENDERER_ANIMATEDMESH_H

@@ -21,8 +21,8 @@ public:
 	CameraComponent();
 	//! Releases all allocated memory.
 	virtual ~CameraComponent();
-	//! Initializes CameraCompnent.
-	void init();
+	//! Initializes CameraCompnent. Returns true.
+	bool init();
 	//! Methods that will be called on events. 
 	void onEvent(Event* e);
 	//! Methods that will be called on events. 

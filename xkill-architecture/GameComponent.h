@@ -14,7 +14,9 @@ struct RenderAttribute;
 struct SpatialAttribute;
 struct PositionAttribute;
 struct ProjectileAttribute;
+struct PhysicsAttribute;
 struct SpawnPointAttribute;
+struct WeaponStatsAttribute;
 
 class GameComponent :
 	public IObserver
@@ -28,10 +30,12 @@ private:
 	std::vector<CameraAttribute>* cameraAttributes_;		
 	std::vector<InputAttribute>* inputAttributes_;			
 	std::vector<RenderAttribute>* renderAttributes_;		
-	std::vector<SpatialAttribute>* spatialAttribute_;		
+	std::vector<SpatialAttribute>* spatialAttributes_;		
 	std::vector<PositionAttribute>* positionAttributes_;	
 	std::vector<ProjectileAttribute>* projectileAttributes_;
+	std::vector<PhysicsAttribute>* physicsAttributes_;
 	std::vector<SpawnPointAttribute>* spawnPointAttributes_;
+	std::vector<WeaponStatsAttribute>* weaponStatsAttributes_;
 
 public:
 	GameComponent(void);
