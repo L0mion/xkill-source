@@ -167,7 +167,7 @@ void BulletPhysicsComponent::onUpdate(float delta)
 		}
 	}
 
-	FLUSH_QUEUED_EVENTS(EVENT_ENTITIES_COLLIDING);
+	FLUSH_QUEUED_EVENTS(EVENT_PHYSICS_ATTRIBUTES_COLLIDING);
 }
 
 void BulletPhysicsComponent::onEvent(Event* e)
