@@ -228,11 +228,24 @@ void BulletPhysicsComponent::onEvent(Event* e)
 		frustrum->getWorldTransform().setOrigin(btVector3(position->position.x + look.x*0.1f,
 														  position->position.y + look.y*0.1f,
 														  position->position.z + look.z*0.1f));
+		std::cout << frustrum->getWorldTransform().getOrigin().distance(btVector3(0,0,0)) << " "
+				  << frustrum->getWorldTransform().getRotation().x() << " "
+				  << frustrum->getWorldTransform().getRotation().y() << " "
+				  << frustrum->getWorldTransform().getRotation().z() << " "
+				  << frustrum->getWorldTransform().getRotation().w() << std::endl;
 		//frustrum->setCollisionFlags( frustrum->getCollisionFlags() | frustrum->CF_NO_CONTACT_RESPONSE);
 		dynamicsWorld_->addRigidBody(frustrum);
 	}
+	static bool t = false;
+	if(t)
+	{
 	dynamicsWorld_->performDiscreteCollisionDetection();
 	tickCallback(0);
+	}
+	else
+	{
+		t = true;
+	}
 	for(unsigned int i = 0; i < frustrumObjects_->size(); i++)
 	{
 		
