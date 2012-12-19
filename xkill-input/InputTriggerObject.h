@@ -22,8 +22,9 @@ public:
 	float GetValue();
 	bool IsTriggered();
 
-	float getValueFloat();
-	bool getValueBool();
+	virtual float getValueFloat();
+	virtual bool getValueBool();
+	virtual bool getValueBoolReleased();
 
 	virtual InputObjectType GetType();
 
@@ -38,7 +39,9 @@ private:
 	int maxValue_, minValue_;
 
 	float value_;
+	float prevValue_;
 
 	float formatValue(int value);
+	bool floatToBool(float value);
 };
 

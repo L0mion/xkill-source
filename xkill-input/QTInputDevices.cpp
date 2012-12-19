@@ -1,5 +1,7 @@
 #include "QTInputDevices.h"
 
+#include "InputActions.h"
+
 QTInputDevices::QTInputDevices(GUID deviceGUID, std::string name, unsigned int playerID) : 
 	InputDevice(deviceGUID, name, playerID)
 {
@@ -21,27 +23,28 @@ void QTInputDevices::setStandardMappings()
 {
 	if(axes_.size() >= 2)
 	{
-		axes_[0]->addFloatMapping(2);
+		axes_[0]->addFloatMapping(ACTION_F_LOOK_LR);
 		axes_[0]->setDeadZone(0.0f);
-		axes_[1]->addFloatMapping(3);
+		axes_[1]->addFloatMapping(ACTION_F_LOOK_UD);
 		axes_[1]->setDeadZone(0.0f);
 	}
 
 	if(axes_.size() >= 4)
 	{
-		axes_[2]->addFloatMapping(2);
+		axes_[2]->addFloatMapping(ACTION_F_LOOK_LR);
 		axes_[2]->setDeadZone(0.0f);
-		axes_[3]->addFloatMapping(3);
+		axes_[3]->addFloatMapping(ACTION_F_LOOK_UD);
 		axes_[3]->setDeadZone(0.0f);
 	}
 
-	if(buttons_.size() >= 5)
+	if(buttons_.size() >= 6)
 	{
-		buttons_[0]->addBoolMapping(3);
-		buttons_[1]->addBoolMapping(4);
-		buttons_[2]->addBoolMapping(5);
-		buttons_[3]->addBoolMapping(6);
-		buttons_[4]->addBoolMapping(0);
+		buttons_[0]->addBoolMapping(ACTION_B_WALK_FORWARD);
+		buttons_[1]->addBoolMapping(ACTION_B_WALK_LEFT);
+		buttons_[2]->addBoolMapping(ACTION_B_WALK_BACKWARD);
+		buttons_[3]->addBoolMapping(ACTION_B_WALK_RIGHT);
+		buttons_[4]->addBoolMapping(ACTION_B_FIRE);
+		buttons_[5]->addBoolMapping(ACTION_B_CHANGE_WEAPON);
 	}
 }
 

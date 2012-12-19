@@ -21,8 +21,9 @@ public:
 	*/
 	virtual InputObjectType GetType();
 
-	float getValueFloat();
-	bool getValueBool();
+	virtual float getValueFloat();
+	virtual bool getValueBool();
+	virtual bool getValueBoolReleased();
 
 	//! Returns if the button is down
 	bool isDown();

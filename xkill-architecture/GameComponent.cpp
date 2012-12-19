@@ -218,6 +218,7 @@ void GameComponent::onUpdate(float delta)
 				}
 				
 				health->health = health->startHealth; // restore player health
+				SEND_EVENT(&Event_PlaySound(1));
 			}
 		}
 	}
@@ -355,6 +356,10 @@ void GameComponent::event_PhysicsAttributesColliding(Event_PhysicsAttributesColl
 							}
 
 							SEND_EVENT(&Event_PlayerDeath());
+						}
+						else
+						{
+							SEND_EVENT(&Event_PlaySound(0));
 						}
 						DEBUGPRINT("DAMAGEEVENT Entity " << entity2->getID() << " damage: " <<  damage->damage << " Entity " << entity1->getID() << " health " << health->health);
 					}

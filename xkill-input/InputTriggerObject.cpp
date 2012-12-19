@@ -9,6 +9,7 @@ InputTriggerObject::InputTriggerObject(int minValue, int maxValue)
 	triggerValue_ = 0.75;
 
 	value_ = 0.0f;
+	prevValue_ = 0.0f;
 }
 
 InputTriggerObject::~InputTriggerObject(void)
@@ -17,6 +18,8 @@ InputTriggerObject::~InputTriggerObject(void)
 
 void InputTriggerObject::SetValue(float value)
 {
+	prevValue_ = value_;
+
 	if(value > 1.0f)
 		value_ = 1.0f;
 	else if(value < 0.0f)
@@ -27,6 +30,7 @@ void InputTriggerObject::SetValue(float value)
 
 void InputTriggerObject::SetValue(int value)
 {
+	prevValue_ = value_;
 	value_ = formatValue(value);
 }
 
@@ -53,6 +57,11 @@ float InputTriggerObject::getValueFloat()
 bool InputTriggerObject::getValueBool()
 {
 	return IsTriggered();
+}
+
+bool InputTriggerObject::getValueBoolReleased()
+{
+	return (!floatToBool(value_) && floatToBool(prevValue_));
 }
 
 InputObject::InputObjectType InputTriggerObject::GetType()
@@ -102,4 +111,9 @@ float InputTriggerObject::formatValue(int value)
 		doubleTrigger = 0.0;
 
 	return (float)doubleTrigger;
+}
+
+bool InputTriggerObject::floatToBool(float value)
+{
+	return (std::abs(value) >= triggerValue_);
 }

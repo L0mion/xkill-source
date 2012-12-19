@@ -37,6 +37,7 @@ public:
 
 	virtual float getValueFloat();
 	virtual bool getValueBool();
+	virtual bool getValueBoolReleased();
 
 	/*!
 	\return AXIS_OBJECT
@@ -51,8 +52,10 @@ private:
 	int maxValue_, minValue_;
 
 	float value_;
+	float prevValue_;
 
 	//! Formats the value to the interval (-1.0f, 1.0f)
 	float formatValue(int value);
+	bool floatToBool(float value);
 };
 

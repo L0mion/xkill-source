@@ -2,6 +2,7 @@
 #include <xkill-utilities/LeanWindows.h>
 
 #include <Xinput.h>
+#include "InputActions.h"
 
 XInputDevice::XInputDevice(int deviceNr, GUID deviceGUID, std::string name, unsigned int playerID) : 
 	InputDevice(deviceGUID, name, playerID)
@@ -69,23 +70,25 @@ void XInputDevice::setStandardMappings()
 {
 	if(axes_.size() >= 4)
 	{
-		axes_[0]->addFloatMapping(0);
-		axes_[1]->addFloatMapping(1);
-		axes_[2]->addFloatMapping(2);
-		axes_[3]->addFloatMapping(3);
+		axes_[0]->addFloatMapping(ACTION_F_WALK_LR);
+		axes_[1]->addFloatMapping(ACTION_F_WALK_FB);
+		axes_[2]->addFloatMapping(ACTION_F_LOOK_LR);
+		axes_[3]->addFloatMapping(ACTION_F_LOOK_UD);
 	}
 
 	if(buttons_.size() >= 14)
 	{
-		buttons_[10]->addBoolMapping(3);
-		buttons_[11]->addBoolMapping(6);
-		buttons_[12]->addBoolMapping(5);
-		buttons_[13]->addBoolMapping(4);
+		buttons_[0]->addBoolMapping(ACTION_B_CHANGE_WEAPON);
+		buttons_[1]->addBoolMapping(ACTION_B_TOGGLE_MUTE_SOUND);
+		buttons_[10]->addBoolMapping(ACTION_B_WALK_FORWARD);
+		buttons_[11]->addBoolMapping(ACTION_B_WALK_RIGHT);
+		buttons_[12]->addBoolMapping(ACTION_B_WALK_BACKWARD);
+		buttons_[13]->addBoolMapping(ACTION_B_WALK_RIGHT);
 	}
 
 	if(triggers_.size() >= 2)
 	{
-		triggers_[0]->addBoolMapping(0);
+		triggers_[0]->addBoolMapping(ACTION_B_FIRE);
 	}
 }
 

@@ -55,11 +55,27 @@ void FMODEventSystem::StartSoundEventAt(unsigned int index)
 	{
 		FMOD::Event* soundEvent;
 		FMODErrorCheck(mEventsystem->getEventBySystemID(index, FMOD_EVENT_NONBLOCKING, &soundEvent));
-		mSoundEvents->push_back(soundEvent);
+		//mSoundEvents->push_back(soundEvent);
 		soundEvent->start();
 	}
 	else
 	{
 		//std::cout << "error in \"FMODEventSystem.h\" in function \"void FMODEventSystem::StartSoundEventAt(int index)\"" << std::endl;
+	}
+}
+
+void FMODEventSystem::SetMuteSounds(bool mute)
+{
+	int nrOfEvents;
+	FMOD::Event* soundEvent;
+	if(mEventsystem->getNumEvents(&nrOfEvents) == FMOD_OK)
+	{
+		for(int i = 0; i < nrOfEvents; i++)
+		{
+			if(mEventsystem->getEventBySystemID(i, FMOD_EVENT_NONBLOCKING, &soundEvent) == FMOD_OK)
+			{
+				soundEvent->setMute(mute);
+			}
+		}
 	}
 }

@@ -41,6 +41,8 @@ public:
 	void Update();
 	/** \brief Start a sound event at index in the mSoundEvents vector.*/
 	void StartSoundEventAt(unsigned int index);
+	/** \brief Mutes all sounds.*/
+	void SetMuteSounds(bool mute = true);
 
 private:
 	void FMODErrorCheck(FMOD_RESULT result);

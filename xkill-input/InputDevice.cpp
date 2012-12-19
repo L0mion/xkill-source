@@ -77,6 +77,15 @@ bool InputDevice::getBoolValue(int mapping)
 	return false;
 }
 
+bool InputDevice::getBoolReleased(int mapping)
+{
+	for(unsigned int i = 0; i < boolObjects_[mapping].size(); i++)
+		if(inputObjects_[boolObjects_[mapping][i]]->getValueBoolReleased())
+			return true;
+
+	return false;
+}
+
 InputButtonObject* InputDevice::getButtonObject(unsigned int index)
 {
 	if(index >= buttons_.size())

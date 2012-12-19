@@ -98,10 +98,10 @@ void InputComponent::handleInput(float delta)
 		//if(nrAxes >= 4)													    
 		//	inputAttributes_->at(i).rotation.y = state.axes[3]->GetValue() * delta;
 
-		inputAttributes_->at(i).position.x = device->getFloatValue(0);
-		inputAttributes_->at(i).position.y = device->getFloatValue(1);
-		inputAttributes_->at(i).rotation.x = device->getFloatValue(2) * delta;
-		inputAttributes_->at(i).rotation.y = device->getFloatValue(3) * delta;
+		inputAttributes_->at(i).position.x = device->getFloatValue(ACTION_F_WALK_LR);
+		inputAttributes_->at(i).position.y = device->getFloatValue(ACTION_F_WALK_FB);
+		inputAttributes_->at(i).rotation.x = device->getFloatValue(ACTION_F_LOOK_LR) * delta;
+		inputAttributes_->at(i).rotation.y = device->getFloatValue(ACTION_F_LOOK_UD) * delta;
 
 		////if(state.buttons.size() > 3)
 		////{
@@ -141,35 +141,38 @@ void InputComponent::handleInput(float delta)
 		//	//}
 		////}
 
-		if(device->getBoolValue(0))
+		if(device->getBoolValue(ACTION_B_FIRE))
 			inputAttributes_->at(i).fire = true;
-		//if(state.buttons[7].isReleased())
-		//	inputAttributes_->at(i).changeWeapon = true;
+		if(device->getBoolValue(ACTION_B_CHANGE_WEAPON))
+			inputAttributes_->at(i).changeWeapon = true;
 
-		if(device->getBoolValue(1))
+		if(device->getBoolValue(ACTION_B_TOGGLE_MUTE_SOUND))
+			SEND_EVENT(&Event_PlaySound(-1, true));
+
+		if(device->getBoolValue(ACTION_B_RUMBLE_ON))
 		{
 			Event_Rumble* er = new Event_Rumble(i, true, 100.0f, 1.0f, 1.0f);
 			EventManager::getInstance()->sendEvent(er);
 			delete er;
 		}
 
-		if(device->getBoolValue(2))
+		if(device->getBoolValue(ACTION_B_RUMBLE_OFF))
 		{
 			Event_Rumble* er = new Event_Rumble(i, false, 100.0f, 0.0f, 0.0f);
 			EventManager::getInstance()->sendEvent(er);
 			delete er;
 		}
 
-		if(device->getBoolValue(3))
+		if(device->getBoolValue(ACTION_B_WALK_FORWARD))
 			inputAttributes_->at(i).position.y = 1.0f;
 															
-		if(device->getBoolValue(4))
+		if(device->getBoolValue(ACTION_B_WALK_LEFT))
 			inputAttributes_->at(i).position.x = -1.0f;
 		
-		if(device->getBoolValue(5))
+		if(device->getBoolValue(ACTION_B_WALK_BACKWARD))
 			inputAttributes_->at(i).position.y = -1.0f;
 		
-		if(device->getBoolValue(6))
+		if(device->getBoolValue(ACTION_B_WALK_RIGHT))
 			inputAttributes_->at(i).position.x = 1.0f;
 		
 		if(device->GetType() == device->QT_INPUT_DEVICE)

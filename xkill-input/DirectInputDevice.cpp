@@ -1,5 +1,6 @@
 #include "DirectInputDevice.h"
 
+#include "InputActions.h"
 
 DirectInputDevice::DirectInputDevice(LPDIRECTINPUTDEVICE8 device, GUID deviceGUID, std::string name, unsigned int playerID) : 
 	InputDevice(deviceGUID, name, playerID)
@@ -165,19 +166,21 @@ void DirectInputDevice::setStandardMappings()
 {
 	if(axes_.size() >= 4)
 	{
-		axes_[0]->addFloatMapping(0);
-		axes_[1]->addFloatMapping(1);
-		axes_[2]->addFloatMapping(2);
-		axes_[3]->addFloatMapping(3);
+		axes_[0]->addFloatMapping(ACTION_F_WALK_LR);
+		axes_[1]->addFloatMapping(ACTION_F_WALK_FB);
+		axes_[2]->addFloatMapping(ACTION_F_LOOK_LR);
+		axes_[3]->addFloatMapping(ACTION_F_LOOK_UD);
 	}
 
 	if(buttons_.size() >= 10)
 	{
-		buttons_[9]->addBoolMapping(0);
+		buttons_[0]->addBoolMapping(ACTION_B_CHANGE_WEAPON);
+		buttons_[9]->addBoolMapping(ACTION_B_FIRE);
 	}
-	else if(buttons_.size() >= 1)
+	else if(buttons_.size() >= 2)
 	{
-		buttons_[0]->addBoolMapping(0);
+		buttons_[0]->addBoolMapping(ACTION_B_CHANGE_WEAPON);
+		buttons_[1]->addBoolMapping(ACTION_B_FIRE);
 	}
 }
 

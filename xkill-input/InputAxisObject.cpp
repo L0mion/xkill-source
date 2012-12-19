@@ -21,6 +21,8 @@ void InputAxisObject::AddValue(float value)
 
 void InputAxisObject::SetValue(float value)
 {
+	prevValue_ = value_;
+
 	if(value > 1.0f)
 		value_ = 1.0f;
 	else if(value < -1.0f)
@@ -31,6 +33,7 @@ void InputAxisObject::SetValue(float value)
 
 void InputAxisObject::SetValue(int value)
 {
+	prevValue_ = value;
 	value_ = formatValue(value);
 }
 
@@ -46,7 +49,12 @@ float InputAxisObject::getValueFloat()
 
 bool InputAxisObject::getValueBool()
 {
-	return (std::abs(value_) >= 0.9f);
+	return floatToBool(value_);
+}
+
+bool InputAxisObject::getValueBoolReleased()
+{
+	return ( !floatToBool(value_) && floatToBool(prevValue_));
 }
 
 InputObject::InputObjectType InputAxisObject::GetType()
@@ -90,4 +98,9 @@ float InputAxisObject::formatValue(int value) //Fix deadzone, is square for the 
 		doubleAxis = -doubleAxis;
 
 	return (float)doubleAxis;
+}
+
+bool InputAxisObject::floatToBool(float value)
+{
+	return (std::abs(value) >= 0.9f);
 }

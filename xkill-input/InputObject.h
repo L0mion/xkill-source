@@ -27,6 +27,7 @@ public:
 
 	virtual float getValueFloat() = 0;
 	virtual bool getValueBool() = 0;
+	virtual bool getValueBoolReleased() = 0;
 
 	void setInverted(bool inverted);
 	bool isInverted();

@@ -49,7 +49,12 @@ float InputButtonObject::getValueFloat()
 
 bool InputButtonObject::getValueBool()
 {
-	return value_;
+	return isDown();
+}
+
+bool InputButtonObject::getValueBoolReleased()
+{
+	return isReleased();
 }
 
 char InputButtonObject::getKey()

@@ -77,6 +77,8 @@ public:
 	virtual float getFloatValue(int mapping);
 	//! Returns if any object that is mapped to that number is activated
 	virtual bool getBoolValue(int mapping);
+	//! Returns if any object that is mapped to that number was released
+	virtual bool getBoolReleased(int mapping);
 
 	//! Sets standard mappings
 	/*!
