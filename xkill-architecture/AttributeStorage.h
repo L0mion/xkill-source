@@ -41,6 +41,15 @@ public:
 	{
 	}
 
+	~AttributeStorage()
+	{
+		for(int i=0; i<attributes.size(); i++)
+		{
+			IAttribute* a = (IAttribute*)&attributes[i];
+			a->clean();
+		}
+	}
+
 	void init(AttributeType type)
 	{
 		this->type = type;
