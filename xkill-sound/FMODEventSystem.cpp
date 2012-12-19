@@ -60,8 +60,6 @@ void FMODEventSystem::StartSoundEventAt(unsigned int index)
 	}
 	else
 	{
-#ifdef XKILL_DEBUG
-		std::cout << "No sound event with index: " << index << " In class: FMODEventSystem " << std::endl;
-#endif
+		//std::cout << "error in \"FMODEventSystem.h\" in function \"void FMODEventSystem::StartSoundEventAt(int index)\"" << std::endl;
 	}
 }

@@ -16,6 +16,16 @@ struct DefaultVSIn
 	float2 texcoord	: TEXCOORD;
 };
 
+struct AnimationVSIn
+{
+	float3 position		: POSITION;
+	float3 normal		: NORMAL;
+	float2 texcoord		: TEXCOORD;
+	float4 tangent		: TANGENT;
+	float3 weights		: WEIGHTS;
+	uint4  boneIndices	: BONEINDICES;
+};
+
 struct quad_vertex
 {
 	uint id : SV_VertexID;

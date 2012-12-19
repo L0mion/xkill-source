@@ -1,4 +1,5 @@
 #include <string>
+#include <sstream>
 
 #include "Loader.h"
 
@@ -13,6 +14,20 @@ Loader::~Loader()
 {
 	if(ifstream_.is_open())
 		ifstream_.close();
+}
+
+bool Loader::isNumeric(const std::string value)
+{
+	std::stringstream conv;
+	double tmp;
+	conv << value;
+	conv >> tmp;
+	return conv.eof();
+}
+void Loader::getLine(std::string& line)
+{
+	std::getline(ifstream_, line);
+	lineNum_++;
 }
 
 const std::string Loader::getFilePath()

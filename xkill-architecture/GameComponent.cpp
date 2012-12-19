@@ -3,6 +3,7 @@
 #include <DirectXMath.h>
 
 #include <iostream>
+#include <ctime>
 
 GameComponent::GameComponent(void)
 {
@@ -16,14 +17,30 @@ GameComponent::~GameComponent(void)
 bool GameComponent::init()
 {
 	SUBSCRIBE_TO_EVENT(this, EVENT_ENTITIES_COLLIDING);
+	SUBSCRIBE_TO_EVENT(this, EVENT_END_DEATHMATCH);
 
 	// Fetch list of stuff used in logic
 	GET_ENTITIES(allEntity);
 	GET_ATTRIBUTE_OWNERS(allPhysicsOwner, ATTRIBUTE_PHYSICS);
 
-	//Crate two spawn points
-	SEND_EVENT(&Event_CreateSpawnPoint(Float3(0.0f, 0.0f, -5.0f)));
-	SEND_EVENT(&Event_CreateSpawnPoint(Float3(0.0f, 5.0f, 0.0f)));
+	GET_ATTRIBUTES(playerAttributes_, PlayerAttribute, ATTRIBUTE_PLAYER);
+	GET_ATTRIBUTES(healthAttributes_, HealthAttribute, ATTRIBUTE_HEALTH);
+	GET_ATTRIBUTES(cameraAttributes_, CameraAttribute, ATTRIBUTE_CAMERA);
+	GET_ATTRIBUTES(inputAttributes_, InputAttribute, ATTRIBUTE_INPUT);
+	GET_ATTRIBUTES(renderAttributes_, RenderAttribute, ATTRIBUTE_RENDER);
+	GET_ATTRIBUTES(spatialAttribute_, SpatialAttribute, ATTRIBUTE_SPATIAL);
+	GET_ATTRIBUTES(positionAttributes_, PositionAttribute, ATTRIBUTE_POSITION);
+	GET_ATTRIBUTES(projectileAttributes_, ProjectileAttribute, ATTRIBUTE_PROJECTILE);
+	GET_ATTRIBUTES(spawnPointAttributes_, SpawnPointAttribute, ATTRIBUTE_SPAWNPOINT);
+
+	SEND_EVENT(&Event_CreateSpawnPoint(Float3(-1.5f, 3.0f, 0.0f), 2.0f));
+	SEND_EVENT(&Event_CreateSpawnPoint(Float3(1.0f, 5.0f, 0.0f), 2.0f));
+	SEND_EVENT(&Event_CreateSpawnPoint(Float3(0.0f, 0.0f, -5.0f), 2.0f));
+	SEND_EVENT(&Event_CreateSpawnPoint(Float3(1.0f, 1.0f, 1.0f), 2.0f));
+	SEND_EVENT(&Event_CreateSpawnPoint(Float3(0.0f, 0.0f, -5.0f), 2.0f));
+	SEND_EVENT(&Event_CreateSpawnPoint(Float3(4.0f, 4.0f, 4.0f), 2.0f));
+
+	srand ( time(NULL) );
 
 	return true;
 }
@@ -36,8 +53,142 @@ void GameComponent::onEvent(Event* e)
 	case EVENT_ENTITIES_COLLIDING:
 		event_PhysicsAttributesColliding(static_cast<Event_PhysicsAttributesColliding*>(e));
 		break;
+	case EVENT_END_DEATHMATCH:
+		event_EndDeathmatch(static_cast<Event_EndDeathmatch*>(e));
+		break;
 	default:
 		break;
+	}
+}
+
+void GameComponent::onUpdate(float delta)
+{
+	//Handle updates of player attributes
+	std::vector<int>* playerAttributesOwners;		GET_ATTRIBUTE_OWNERS(playerAttributesOwners, ATTRIBUTE_PLAYER);
+	for(unsigned i=0; i<playerAttributesOwners->size(); i++)
+	{
+		if(playerAttributesOwners->at(i)!=0)
+		{
+			//Extract attributes from a playerAttribute
+			PlayerAttribute* player		=	&playerAttributes_->at(i);
+			HealthAttribute* health		=	&healthAttributes_->at(player->healthAttribute.index);
+			CameraAttribute* camera		=	&cameraAttributes_->at(player->cameraAttribute.index);
+			InputAttribute* input		=	&inputAttributes_->at(player->inputAttribute.index);
+			RenderAttribute* render		=	&renderAttributes_->at(player->renderAttribute.index);
+			SpatialAttribute* spatial	=	&spatialAttribute_->at(render->spatialAttribute.index); //Extract spatial attribute from the render attribute from the above playerAttribute
+			PositionAttribute* position	=	&positionAttributes_->at(spatial->positionAttribute.index); //Extract position attribute from the above spatial attribute
+
+			//Deathmatch end logic
+			//if(player->priority >= 2)
+			//{
+			//	SEND_EVENT(&Event_EndDeathmatch());
+			//}
+
+
+			//Firing logic
+			if(input->fire) //Create a projectile
+			{
+				input->fire = false;
+
+				// Position
+				Float3 pos;
+				pos.x = position->position.x;
+				pos.y = position->position.y;
+				pos.z = position->position.z;
+
+				// extract camera orientation to determine velocity
+				DirectX::XMFLOAT3 lookAtFloat3;
+				lookAtFloat3.x = camera->mat_view._13;
+				lookAtFloat3.y = camera->mat_view._23;
+				lookAtFloat3.z = camera->mat_view._33;
+				DirectX::XMVECTOR lookAt = DirectX::XMLoadFloat3(&lookAtFloat3);
+				lookAt = DirectX::XMVector3Normalize(lookAt);
+
+				//Direction and speed
+				float lookAtX = DirectX::XMVectorGetX(lookAt);
+				float lookAtY = DirectX::XMVectorGetY(lookAt);
+				float lookAtZ = DirectX::XMVectorGetZ(lookAt);
+				Float3 velocity(lookAtX, lookAtY, lookAtZ);
+				velocity.x *= 1000.0f;
+				velocity.y *= 1000.0f;
+				velocity.z *= 1000.0f;
+				// add rotation displacement on position 
+				float d = 0.2f;
+				pos.x += lookAtX*d;
+				pos.y += lookAtY*d;
+				pos.z += lookAtZ*d;
+				
+				// Rotation
+				DirectX::XMMATRIX rotationMatrix(	camera->mat_view._11,	camera->mat_view._21,	camera->mat_view._31,	0.0f,
+													camera->mat_view._12,	camera->mat_view._22,	camera->mat_view._32,	0.0f, 
+													camera->mat_view._13,	camera->mat_view._23,	camera->mat_view._33,	0.0f,
+													0.0f,					0.0f,					0.0f,					1.0f);
+
+				DirectX::XMVECTOR orientationQuaternion = DirectX::XMQuaternionRotationMatrix(rotationMatrix);
+				float orientationQuaternionX = DirectX::XMVectorGetX(orientationQuaternion);
+				float orientationQuaternionY = DirectX::XMVectorGetY(orientationQuaternion);
+				float orientationQuaternionZ = DirectX::XMVectorGetZ(orientationQuaternion);
+				float orientationQuaternionW = DirectX::XMVectorGetW(orientationQuaternion);
+
+				Float4 rot = Float4(orientationQuaternionX, orientationQuaternionY, orientationQuaternionZ, orientationQuaternionW);
+
+				Float3 gravity = Float3(0.0f, 0.0f, 0.0f);
+
+				// Send event
+				SEND_EVENT(&Event_CreateProjectile(pos, velocity, rot, gravity, playerAttributesOwners->at(i)));
+				input->fire = false;
+			}
+
+			//Health and respawn logic for players
+			if(health->health <= 0) //A player is dead
+			{
+				//If an appropriate spawnpoint was found: spawn at it; otherwise: spawn at origo.
+				SpawnPointAttribute* spawnPointAttribute = findUnoccupiedSpawnPoint();
+				if(spawnPointAttribute != nullptr)
+				{
+					PositionAttribute* spawnPointPositionAttribute;
+					spawnPointPositionAttribute = &positionAttributes_->at(spawnPointAttribute->positionAttribute.index);
+					position->position = spawnPointPositionAttribute->position; //Set player position attribute
+				}
+				else
+				{
+					position->position = Float3(0.0f, 0.0f, 0.0f);
+				}
+				
+				health->health = health->startHealth; // restore player health
+			}
+		}
+	}
+
+	//Handle updates of projectile attributes (lifetime management)
+	std::vector<int>* projectileAttributesOwners;		GET_ATTRIBUTE_OWNERS(projectileAttributesOwners, ATTRIBUTE_PROJECTILE);
+	for(unsigned i=0; i<projectileAttributesOwners->size(); i++)
+	{
+		if(projectileAttributesOwners->at(i)!=0)
+		{
+			ProjectileAttribute* projectile = &projectileAttributes_->at(i);
+			projectile->currentLifeTimeLeft -= delta;
+
+			if(projectile->currentLifeTimeLeft <= 0)
+			{
+				DEBUGPRINT("Projectile entity " << projectileAttributesOwners->at(i) << " has no lifetime left");
+				
+				//Remove projectile entity
+				Event_RemoveEntity removeEntityEvent(projectileAttributesOwners->at(i));
+				SEND_EVENT(&removeEntityEvent);
+			}
+		}
+	}
+
+	//Handle updates of spawn point attributes (update "timeSinceLastSpawn" timer)
+	std::vector<int>* spawnPointAttributesOwners;		GET_ATTRIBUTE_OWNERS(spawnPointAttributesOwners, ATTRIBUTE_SPAWNPOINT);
+	for(unsigned i=0; i<spawnPointAttributesOwners->size(); i++)
+	{
+		if(spawnPointAttributesOwners->at(i)!=0)
+		{
+			SpawnPointAttribute* spawnPoint = &spawnPointAttributes_->at(i);
+			spawnPoint->timeSinceLastSpawn += delta;
+		}
 	}
 }
 
@@ -88,29 +239,29 @@ void GameComponent::event_PhysicsAttributesColliding(Event_PhysicsAttributesColl
 						{
 							if(entity2->hasAttribute(ATTRIBUTE_PROJECTILE))
 							{
-								std::vector<ProjectileAttribute>* allProjectiles;	GET_ATTRIBUTES(allProjectiles, ProjectileAttribute, ATTRIBUTE_PROJECTILE);
+								std::vector<ProjectileAttribute>* projectileAttributes_;	GET_ATTRIBUTES(projectileAttributes_, ProjectileAttribute, ATTRIBUTE_PROJECTILE);
 								std::vector<PlayerAttribute>* allPlayers;			GET_ATTRIBUTES(allPlayers, PlayerAttribute, ATTRIBUTE_PLAYER);
 							
 								std::vector<int> projectileId = entity2->getAttributes(ATTRIBUTE_PROJECTILE);
 								
-								for(int i=0;i<projectileId.size();i++)
+								for(unsigned i=0;i<projectileId.size();i++)
 								{
-									int entityIdOfProjectileCreator = allProjectiles->at(projectileId.at(i)).entityIdOfCreator;
+									int entityIdOfProjectileCreator = projectileAttributes_->at(projectileId.at(i)).entityIdOfCreator;
 									Entity* creatorOfProjectilePlayerEntity = &allEntity->at(entityIdOfProjectileCreator);
 									std::vector<int> playerId = creatorOfProjectilePlayerEntity->getAttributes(ATTRIBUTE_PLAYER);
 
-									for(int i=0;i<playerId.size();i++)
+									for(unsigned i=0;i<playerId.size();i++)
 									{
 										PlayerAttribute* player = &allPlayers->at(playerId.at(i));
 										player->priority++;
-										std::cout << "Player with entity id " << entityIdOfProjectileCreator << " killed player with entity id " << entity1->getID() << std::endl;
+										DEBUGPRINT("Player with entity id " << entityIdOfProjectileCreator << " killed player with entity id " << entity1->getID());
 									}
 								}
 							}
 
 							SEND_EVENT(&Event_PlayerDeath());
 						}
-						std::cout << "DAMAGEEVENT Entity " << entity2->getID() << " damage: " <<  damage->damage << " Entity " << entity1->getID() << " health " << health->health << std::endl;
+						DEBUGPRINT("DAMAGEEVENT Entity " << entity2->getID() << " damage: " <<  damage->damage << " Entity " << entity1->getID() << " health " << health->health);
 					}
 
 					// remove damage entity
@@ -119,201 +270,156 @@ void GameComponent::event_PhysicsAttributesColliding(Event_PhysicsAttributesColl
 			}
 		}
 	}
-
 	// projectile
 	else if(entity1->hasAttribute(ATTRIBUTE_PROJECTILE))
 	{
-		if(entity2->hasAttribute(ATTRIBUTE_PHYSICS))
+		//
+		// colliding with...
+		//
+
+		std::vector<ProjectileAttribute>* allProjectile; GET_ATTRIBUTES(allProjectile, ProjectileAttribute, ATTRIBUTE_PROJECTILE);
+		std::vector<int> projectileId = entity1->getAttributes(ATTRIBUTE_PROJECTILE);
+
+		if(entity2->hasAttribute(ATTRIBUTE_PHYSICS) && !entity2->hasAttribute(ATTRIBUTE_PROJECTILE))
 		{
+			//Shorten lifetime of projectile colliding with physics objects
+
+			for(unsigned i=0;i<projectileId.size();i++)
+			{
+				ProjectileAttribute* projectileAttribute = &allProjectile->at(projectileId.at(i));
+				if(projectileAttribute->currentLifeTimeLeft > 0.4f)
+				{
+				projectileAttribute->currentLifeTimeLeft = 0.3f;
+				}
+			}
+
 			//Set gravity on projectiles colliding with physics objects
 			std::vector<PhysicsAttribute>* allPhysics; GET_ATTRIBUTES(allPhysics, PhysicsAttribute, ATTRIBUTE_PHYSICS);
 			std::vector<int> physicsId = entity1->getAttributes(ATTRIBUTE_PHYSICS);
-			for(int i=0;i<physicsId.size();i++)
+			for(unsigned i=0;i<physicsId.size();i++)
 			{
 				PhysicsAttribute* physicsAttribute = &allPhysics->at(physicsId.at(i));
-				physicsAttribute->gravity = Float3(0.0f, -1000.0f, 0.0f);
-				physicsAttribute->linearVelocity = Float3(0.0f, 0.0f, 0.0f); //Does not seem to work
+				physicsAttribute->gravity = Float3(0.0f, -10.0f, 0.0f);
+				physicsAttribute->linearVelocity = Float3(0.0f, 0.0f, 0.0f);
 			}
 
 			//Shorten lifetime of projectile colliding with physics objects
 			std::vector<ProjectileAttribute>* allProjectile; GET_ATTRIBUTES(allProjectile, ProjectileAttribute, ATTRIBUTE_PROJECTILE);
 			std::vector<int> projectileId = entity1->getAttributes(ATTRIBUTE_PROJECTILE);
-			for(int i=0;i<projectileId.size();i++)
+			for(unsigned i=0;i<projectileId.size();i++)
 			{
 				ProjectileAttribute* projectileAttribute = &allProjectile->at(projectileId.at(i));
-				//if(projectileAttribute->currentLifeTimeLeft > 0.2f)
-				//{
-				//	projectileAttribute->currentLifeTimeLeft = 0.15f;
-				//}
+				if(projectileAttribute->currentLifeTimeLeft > 1.2f)
+				{
+					projectileAttribute->currentLifeTimeLeft = 1.15f;
+				}
 			}
 		}
-		//
-		// colliding with...
-		//
-
-	//	// destroy projectile on impact with everything except the owner who created the projectile
-	//	std::vector<ProjectileAttribute>* allProjectile; GET_ATTRIBUTES(allProjectile, ProjectileAttribute, ATTRIBUTE_PROJECTILE);
-	//	std::vector<int> projectileId = e1->getAttributes(ATTRIBUTE_PROJECTILE);
-	//	for(unsigned i=0; i<projectileId.size(); i++)
-	//	{
-	//		ProjectileAttribute* projectile = &allProjectile->at(projectileId[i]);
-
-	//		// ignore collision with owner
-	//		if(projectile->entityIdOfCreator != e2->getID())
-	//		{
-	//			// Destroy the Entity containing the ProjectileAttribute
-	//			std::cout << "COLLISIONEVENT: Projectile " << e1->getID() << " collides with Entity " << e2->getID() << std::endl;
-	//			SEND_EVENT(&Event_RemoveEntity(e1->getID()));
-	//		}
-	//	}
-	//	
 	}
 }
 
-
-void GameComponent::onUpdate(float delta)
+void GameComponent::event_EndDeathmatch(Event_EndDeathmatch* e)
 {
-	// Fetches attributes from AttributeManager through the use of EventManager.
-	// This can be used from everywhere EventManager is known.
-	std::vector<PlayerAttribute>* allPlayers;		GET_ATTRIBUTES(allPlayers, PlayerAttribute, ATTRIBUTE_PLAYER);
-	std::vector<HealthAttribute>* allHealth;		GET_ATTRIBUTES(allHealth, HealthAttribute, ATTRIBUTE_HEALTH);
-	std::vector<CameraAttribute>* allCameras;		GET_ATTRIBUTES(allCameras, CameraAttribute, ATTRIBUTE_CAMERA);
-	std::vector<InputAttribute>* allInput;			GET_ATTRIBUTES(allInput, InputAttribute, ATTRIBUTE_INPUT);
-	std::vector<RenderAttribute>* allRender;		GET_ATTRIBUTES(allRender, RenderAttribute, ATTRIBUTE_RENDER);
-	std::vector<SpatialAttribute>* allSpatial;		GET_ATTRIBUTES(allSpatial, SpatialAttribute, ATTRIBUTE_SPATIAL);
-	std::vector<PositionAttribute>* allPositions;	GET_ATTRIBUTES(allPositions, PositionAttribute, ATTRIBUTE_POSITION);
-	std::vector<ProjectileAttribute>* allProjectiles;	GET_ATTRIBUTES(allProjectiles, ProjectileAttribute, ATTRIBUTE_PROJECTILE);
+	DEBUGPRINT("x--------------x");
+	DEBUGPRINT("-x------------x-");
+	DEBUGPRINT("DEATHMATCH ENDED");
+	DEBUGPRINT("-x------------x-");
+	DEBUGPRINT("x--------------x");
+}
+
+
+
+SpawnPointAttribute* GameComponent::findUnoccupiedSpawnPoint()
+{
+	SpawnPointAttribute* foundSpawnPoint = nullptr;
+	std::vector<int>* spawnPointAttributesOwners;	GET_ATTRIBUTE_OWNERS(spawnPointAttributesOwners, ATTRIBUTE_SPAWNPOINT);
 	
-	std::vector<SpawnPointAttribute>* allSpawnPoints;	GET_ATTRIBUTES(allSpawnPoints, SpawnPointAttribute, ATTRIBUTE_SPAWNPOINT);
-	std::vector<int>* spawnPointAttributesOwners;		GET_ATTRIBUTE_OWNERS(spawnPointAttributesOwners, ATTRIBUTE_SPAWNPOINT);
-
-	//Handle updates of player attributes
-	std::vector<int>* playerAttributesOwners;		GET_ATTRIBUTE_OWNERS(playerAttributesOwners, ATTRIBUTE_PLAYER);
-	for(unsigned i=0; i<playerAttributesOwners->size(); i++)
+	//Special cases: *no spawn point, return nullptr.
+	int nrOfSpawnPoints = spawnPointAttributesOwners->size();
+	if(nrOfSpawnPoints < 1)
 	{
-		if(playerAttributesOwners->at(i)!=0)
-		{
-			//Extract attributes from a playerAttribute
-			PlayerAttribute* player		=	&allPlayers->at(i);
-			HealthAttribute* health		=	&allHealth->at(player->healthAttribute.index);
-			CameraAttribute* camera		=	&allCameras->at(player->cameraAttribute.index);
-			InputAttribute* input		=	&allInput->at(player->inputAttribute.index);
-			RenderAttribute* render		=	&allRender->at(player->renderAttribute.index);
-			SpatialAttribute* spatial	=	&allSpatial->at(render->spatialAttribute.index); //Extract spatial attribute from the render attribute from the above playerAttribute
-			PositionAttribute* position	=	&allPositions->at(spatial->positionAttribute.index); //Extract position attribute from the above spatial attribute
-
-			if(input->fire) //Create a projectile
-			{
-				input->fire = false;
-
-				// Position
-				Float3 pos;
-				pos.x = position->position.x;
-				pos.y = position->position.y;
-				pos.z = position->position.z;
-
-				// extract camera orientation to determine velocity
-				DirectX::XMFLOAT3 lookAtFloat3;
-				lookAtFloat3.x = camera->mat_view._13;
-				lookAtFloat3.y = camera->mat_view._23;
-				lookAtFloat3.z = camera->mat_view._33;
-				DirectX::XMVECTOR lookAt = DirectX::XMLoadFloat3(&lookAtFloat3);
-				lookAt = DirectX::XMVector3Normalize(lookAt);
-
-				//Direction and speed
-				float lookAtX = DirectX::XMVectorGetX(lookAt);
-				float lookAtY = DirectX::XMVectorGetY(lookAt);
-				float lookAtZ = DirectX::XMVectorGetZ(lookAt);
-				Float3 velocity(lookAtX, lookAtY, lookAtZ);
-				velocity.x *= 1000.0f;
-				velocity.y *= 1000.0f;
-				velocity.z *= 1000.0f;
-				// add rotation displacement on position 
-				float d = 1.0f;
-				pos.x += lookAtX*d;
-				pos.y += lookAtY*d;
-				pos.z += lookAtZ*d;
-				
-				// Rotation
-				DirectX::XMMATRIX rotationMatrix(	camera->mat_view._11,	camera->mat_view._21,	camera->mat_view._31,	0.0f,
-													camera->mat_view._12,	camera->mat_view._22,	camera->mat_view._32,	0.0f, 
-													camera->mat_view._13,	camera->mat_view._23,	camera->mat_view._33,	0.0f,
-													0.0f,					0.0f,					0.0f,					1.0f);
-
-				DirectX::XMVECTOR orientationQuaternion = DirectX::XMQuaternionRotationMatrix(rotationMatrix);
-				float orientationQuaternionX = DirectX::XMVectorGetX(orientationQuaternion);
-				float orientationQuaternionY = DirectX::XMVectorGetY(orientationQuaternion);
-				float orientationQuaternionZ = DirectX::XMVectorGetZ(orientationQuaternion);
-				float orientationQuaternionW = DirectX::XMVectorGetW(orientationQuaternion);
-
-				Float4 rot = Float4(orientationQuaternionX, orientationQuaternionY, orientationQuaternionZ, orientationQuaternionW);
-
-				Float3 gravity = Float3(0.0f, 0.0f, 0.0f);
-
-				// Send event
-				SEND_EVENT(&Event_CreateProjectile(pos, velocity, rot, gravity, playerAttributesOwners->at(i)));
-				input->fire = false;
-			}
-
-			//Health and respawn logic for players
-			SpawnPointAttribute* spawnPoint;
-			int longestTimeSinceLastSpawnIndex = -1;
-			float longestTimeSinceLastSpawn = 0.0f;
-			if(health->health <= 0) 
-			{
-				for(unsigned i=0; i<spawnPointAttributesOwners->size(); i++)
-				{
-					if(spawnPointAttributesOwners->at(i)!=0)
-					{
-						spawnPoint = &allSpawnPoints->at(i);
-  						if(spawnPoint->timeSinceLastSpawn > longestTimeSinceLastSpawn)
-						{
-							longestTimeSinceLastSpawn = spawnPoint->timeSinceLastSpawn;
- 							longestTimeSinceLastSpawnIndex = i;
-						}
-					}
- 				}
-
-				//Set player position to the spawn point position and reset the spawn point timer
-				spawnPoint = &allSpawnPoints->at(longestTimeSinceLastSpawnIndex);
-				PositionAttribute* newPosition	= &allPositions->at(spawnPoint->positionAttribute.index);
-				position->position = newPosition->position;
-				spawnPoint->timeSinceLastSpawn = 0.0f;
-
-				// restore health player have health on next life
-				health->health = health->startHealth;
-			}
-		}
+		DEBUGPRINT("GameComponent::findUnoccupiedSpawnPoint - No spawn point found.");
+		return foundSpawnPoint;
 	}
 
-	//Handle updates of projectile attributes (lifetime management)
-	std::vector<int>* projectileAttributesOwners;		GET_ATTRIBUTE_OWNERS(projectileAttributesOwners, ATTRIBUTE_PROJECTILE);
-	for(unsigned i=0; i<projectileAttributesOwners->size(); i++)
-	{
-		if(projectileAttributesOwners->at(i)!=0)
-		{
-			ProjectileAttribute* projectile = &allProjectiles->at(i);
-			projectile->currentLifeTimeLeft -= delta;
-
-			if(projectile->currentLifeTimeLeft <= 0)
-			{
-#ifdef XKILL_DEBUG
-				std::cout << "Projectile entity " << projectileAttributesOwners->at(i) << " has no lifetime left" << std::endl;
-#endif
-				//Remove projectile entity
-				Event_RemoveEntity removeEntityEvent(projectileAttributesOwners->at(i));
-				SEND_EVENT(&removeEntityEvent);
-			}
-		}
-	}
-
-	//Handle updates of spawn point attributes (update "timeSinceLastSpawn" timer)
-	for(unsigned i=0; i<spawnPointAttributesOwners->size(); i++)
+	//Iterate through all spawn points to find all unoccupied spawn points.
+	std::vector<SpawnPointAttribute*> unoccupiedSpawnPointAttributes;
+	for(unsigned int i=0; i<nrOfSpawnPoints; i++)
 	{
 		if(spawnPointAttributesOwners->at(i)!=0)
 		{
-			SpawnPointAttribute* spawnPoint = &allSpawnPoints->at(i);
-			spawnPoint->timeSinceLastSpawn += delta;
+			foundSpawnPoint = &spawnPointAttributes_->at(i);
+			PositionAttribute* spawnPointPositionAttribute;
+			spawnPointPositionAttribute = &positionAttributes_->at(foundSpawnPoint->positionAttribute.index);
+		
+			//Iterate through all living players to find if any of them are inside the current spawn point radius.
+			bool occupiedSpawnPoint = false;
+			std::vector<int>* playerAttributesOwners;		GET_ATTRIBUTE_OWNERS(playerAttributesOwners, ATTRIBUTE_PLAYER);
+			int nrOfPlayers = playerAttributesOwners->size();
+			for(unsigned int j=0; j<nrOfPlayers; j++)
+			{
+				if(playerAttributesOwners->at(j)!=0)
+				{
+					PlayerAttribute* player	= &playerAttributes_->at(j);
+					HealthAttribute* health	= &healthAttributes_->at(player->healthAttribute.index);
+
+					if(health->health > 0) //If the current player is alive.
+					{
+						//Extract player position.
+						RenderAttribute* render = &renderAttributes_->at(player->renderAttribute.index);
+						SpatialAttribute* spatial = &spatialAttribute_->at(render->spatialAttribute.index);
+						PositionAttribute* playerPosition = &positionAttributes_->at(spatial->positionAttribute.index);
+
+						float x1, x2, z1, z2;
+						x1 = spawnPointPositionAttribute->position.x;
+						x2 = playerPosition->position.x;
+						z1 = spawnPointPositionAttribute->position.z;
+						z2 = playerPosition->position.z;
+
+						float distanceBetweenCurrentPlayerAndCurrentSpawnPoint = sqrtf( ((x1-x2)*(x1-x2)) + ((z1-z2)*(z1-z2)) );
+						if(distanceBetweenCurrentPlayerAndCurrentSpawnPoint < foundSpawnPoint->spawnArea) //A player is inside the spawn point radius.
+						{
+							occupiedSpawnPoint = true;
+							break;
+						}
+					}
+				}
+			}
+			if(!occupiedSpawnPoint)
+			{
+				unoccupiedSpawnPointAttributes.push_back(foundSpawnPoint); //This vector will be iterated below.
+			}
 		}
 	}
+
+	//Iterate through all unoccupied spawn points (found in the above loop) to find the spawn point that least recently spawned a player.
+	int nrOfUnoccupiedSpawnPoints = unoccupiedSpawnPointAttributes.size();
+	int longestTimeSinceLastSpawnIndex = -1;
+	float longestTimeSinceLastSpawn = 0.0f;
+	for(unsigned int i=0; i<nrOfUnoccupiedSpawnPoints; i++)
+	{
+		foundSpawnPoint = unoccupiedSpawnPointAttributes.at(i);
+  		if(foundSpawnPoint->timeSinceLastSpawn >= longestTimeSinceLastSpawn)
+		{
+			longestTimeSinceLastSpawn = foundSpawnPoint->timeSinceLastSpawn;
+ 			longestTimeSinceLastSpawnIndex = i;
+		}
+	}
+	if(longestTimeSinceLastSpawnIndex > -1)
+	{
+		foundSpawnPoint = unoccupiedSpawnPointAttributes.at(longestTimeSinceLastSpawnIndex);
+	}
+
+	//If all spawnpoints are occupied, pick one at random.
+	if(nrOfUnoccupiedSpawnPoints < 1)
+	{
+		int pseudoRandomSpawnPointAttributeId = rand()%nrOfSpawnPoints;
+		foundSpawnPoint = &spawnPointAttributes_->at(pseudoRandomSpawnPointAttributeId);
+	}
+
+	//Reset spawn point timer.
+	if(foundSpawnPoint != nullptr)
+		foundSpawnPoint->timeSinceLastSpawn = 0.0f;
+
+	return foundSpawnPoint;
 }

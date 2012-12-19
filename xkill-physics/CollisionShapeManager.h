@@ -3,6 +3,8 @@
 
 #include <btBulletDynamicsCommon.h>
 #include <vector>
+#include <map>
+
 //! CollisionShapeManager
 /*!
 Responsible for creating collision shapes and storing them for
@@ -14,6 +16,7 @@ struct MeshAttribute;
 class CollisionShapeManager
 {
 private:
+	std::map<unsigned int, unsigned int> collisionShapesIDtoIndex_;
 	btAlignedObjectArray<btCollisionShape*> collisionShapes_; //!< An vector for holding all collision shapes
 	std::vector<MeshAttribute>* meshAttributes_;
 	std::vector<btTriangleMesh*> triangleMeshes_;
@@ -34,7 +37,7 @@ public:
 	\param vertices A pointer to a list of 3 float groups
 	\param numVertices The number of vertices sent in
 	*/
-	void loadCollisionShapes();
+	btCollisionShape* loadCollisionShape(unsigned int meshID);
 };
 
 #endif //XKILL_PHYSICS_COLLISIONSHAPEMANAGER

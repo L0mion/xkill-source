@@ -12,6 +12,7 @@
 #include "AttributeManager.h"
 
 
+
 /// Is responsible for updating Components in a certain order
 /** 
 Some \ref COMPONENTS such as RenderComponent and PhysicsComponent need to run 
@@ -28,7 +29,6 @@ be the responsibility of the ComponentManager.
 class ComponentManager
 {
 private:
-	IOComponent*			ioComponent_;
 	RenderingComponent*		render_;
 	BulletPhysicsComponent	physics_;
 	SoundComponent			sound_;
@@ -36,6 +36,7 @@ private:
 	InputComponent			input_;
 	GameComponent			game_;
 	ScoreComponent			score_;
+	IOComponent*			ioComponent_;
 
 public:
 	ComponentManager()
@@ -51,14 +52,10 @@ public:
 
 	bool init(HWND windowHandle, HWND parentWindowHandle)
 	{
-		bool sucessfulInit = true;
-
-		ioComponent_ = new IOComponent();
-		if(!ioComponent_->init())
+		render_ = new RenderingComponent(windowHandle);
+		if(render_->init() != S_OK)
 			return false;
 		
-		render_ = new RenderingComponent(windowHandle);
-		render_->init();
 		physics_.init();
 		camera_.init();
 
@@ -75,6 +72,10 @@ public:
 		if(!score_.init(AttributeManager::getInstance()->playerAttributes_.getAllAttributes()))
 			return false;
 
+		ioComponent_ = new IOComponent();
+		if(!ioComponent_->init())
+			return false;
+
 		// Returns that everything went ok
 		return true;
 	}
@@ -83,8 +84,10 @@ public:
 		sound_.onUpdate(delta);
 		physics_.onUpdate(delta);
 		camera_.onUpdate(delta);
+		SEND_EVENT(&Event_DoCulling());
 		render_->onUpdate(delta);
 		input_.onUpdate(delta);
 		game_.onUpdate(delta);
+		SEND_EVENT(&Event(EVENT_UPDATE));
 	}
 };

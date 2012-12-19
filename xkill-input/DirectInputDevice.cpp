@@ -161,6 +161,26 @@ bool DirectInputDevice::Init(HWND hWindow)
 	return true;
 }
 
+void DirectInputDevice::setStandardMappings()
+{
+	if(axes_.size() >= 4)
+	{
+		axes_[0]->addFloatMapping(0);
+		axes_[1]->addFloatMapping(1);
+		axes_[2]->addFloatMapping(2);
+		axes_[3]->addFloatMapping(3);
+	}
+
+	if(buttons_.size() >= 10)
+	{
+		buttons_[9]->addBoolMapping(0);
+	}
+	else if(buttons_.size() >= 1)
+	{
+		buttons_[0]->addBoolMapping(0);
+	}
+}
+
 InputDevice::InputDeviceType DirectInputDevice::GetType()
 {
 	return InputDevice::InputDeviceType::DIRECT_INPUT_DEVICE;
@@ -343,22 +363,24 @@ void DirectInputDevice::updateState()
 
 			axes_[i]->SetValue(value);
 		}
-		
-		int HatSwitch;
-
-		for(int i = 0; i < inputLayout_.nrOfHatSwitches; i++)
-		{
-			HatSwitch = joyState.rgdwPOV[i];
-
-			hatSwitches_[i]->SetButton(0, (HatSwitch == 0 || HatSwitch == 4500 || HatSwitch == 31500));
-			hatSwitches_[i]->SetButton(1, (HatSwitch == 9000 || HatSwitch == 13500 || HatSwitch == 4500));
-			hatSwitches_[i]->SetButton(2, (HatSwitch == 18000 || HatSwitch == 22500 || HatSwitch == 13500));
-			hatSwitches_[i]->SetButton(3, (HatSwitch == 27000 || HatSwitch == 31500 || HatSwitch == 22500));
-		}
 
 		for(int i = 0; i < inputLayout_.nrOfButtons; i++)
 		{
 			buttons_[i]->SetValue(joyState.rgbButtons[i]);
+		}
+
+		int HatSwitch;
+		int hatSwitchLimit = inputLayout_.nrOfButtons + inputLayout_.nrOfHatSwitches*4;
+		int hatSwitchNumber = 0;
+
+		for(int i = inputLayout_.nrOfButtons; i < inputLayout_.nrOfHatSwitches; i += 4)
+		{
+			HatSwitch = joyState.rgdwPOV[hatSwitchNumber++];
+
+			buttons_[i]->SetValue(HatSwitch == 0		||	HatSwitch == 4500	||	HatSwitch == 31500);
+			buttons_[i]->SetValue(HatSwitch == 9000		||	HatSwitch == 13500	||	HatSwitch == 4500);
+			buttons_[i]->SetValue(HatSwitch == 18000	||	HatSwitch == 22500	||	HatSwitch == 13500);
+			buttons_[i]->SetValue(HatSwitch == 27000	||	HatSwitch == 31500	||	HatSwitch == 22500);
 		}
 	}
 }
@@ -382,16 +404,10 @@ void DirectInputDevice::createInputObjectsFromLayout()
 {
 	createAxes();
 
-	for(int i = 0; i < inputLayout_.nrOfButtons; i++)
+	for(int i = 0; i < inputLayout_.nrOfButtons + inputLayout_.nrOfHatSwitches*4; i++)
 	{
 		buttons_.push_back(new InputButtonObject(i));
 		inputObjects_.push_back(buttons_[buttons_.size() - 1]);
-	}
-
-	for(int i = 0; i < inputLayout_.nrOfHatSwitches; i++)
-	{
-		hatSwitches_.push_back(new InputHatSwitchObject());
-		inputObjects_.push_back(hatSwitches_[hatSwitches_.size() - 1]);
 	}
 
 	for(int i = 0; i < inputLayout_.nrOfTriggers; i++)

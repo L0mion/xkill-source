@@ -125,7 +125,7 @@ private:
 	Shouldn't be able to go above four. Four is the limit that XInput sets on how many gamepads that can be handled.
 	*/
 	int nrOfXInputDevices_;
-	KeyMapper keyMapper_;
+	KeyMapper* keyMapper_;
 
 	//! Creates and adds a new device
 	/*!

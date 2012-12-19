@@ -1,9 +1,12 @@
-#include "renderingComponent.h"
+#include <iostream>
 
 #include <xkill-utilities/AttributeType.h>
 #include <xkill-utilities/EventManager.h>
 #include <xkill-utilities/MeshVertices.h>
 #include <xkill-utilities/MeshModel.h>
+#include <xkill-utilities/TexDescHeader.h>
+#include <xkill-utilities/TexDescTex.h>
+#include <xkill-utilities/TexDesc.h>
 
 #include "D3DManagement.h"
 #include "fxManagement.h"
@@ -15,14 +18,18 @@
 #include "d3dDebug.h"
 #include "CBManagement.h"
 #include "LightManagement.h"
-#include "MeshManagement.h"
-#include "MeshModelD3D.h"
+#include "ModelManagement.h"
+#include "TexManagement.h"
+#include "ModelD3D.h"
 #include "VB.h"
 #include "IB.h"
+#include "SubsetD3D.h"
+
+
+#include "M3DLoader.h"
+#include "AnimatedMesh.h"
 
 #include "renderingComponent.h"
-
-#include <iostream>
 
 RenderingComponent::RenderingComponent(HWND windowHandle)
 {
@@ -42,7 +49,8 @@ RenderingComponent::RenderingComponent(HWND windowHandle)
 	fxManagement_		= nullptr;
 	cbManagement_		= nullptr; 
 	lightManagement_	= nullptr;
-	meshManagement_		= nullptr;
+	modelManagement_	= nullptr;
+	texManagement_		= nullptr;
 	viewportManagement_ = nullptr;
 	ssManagement_		= nullptr;
 	rsManagement_		= nullptr;
@@ -51,6 +59,9 @@ RenderingComponent::RenderingComponent(HWND windowHandle)
 	
 	for(unsigned int i = 0; i < GBUFFERID_NUM_BUFFERS; i++)
 		gBuffers_[i] = nullptr;
+
+	m3dLoader_		= nullptr;
+	animatedMesh_	= nullptr;
 }
 RenderingComponent::~RenderingComponent()
 {
@@ -59,7 +70,8 @@ RenderingComponent::~RenderingComponent()
 
 	SAFE_DELETE(cbManagement_);
 	SAFE_DELETE(lightManagement_);
-	SAFE_DELETE(meshManagement_);
+	SAFE_DELETE(modelManagement_);
+	SAFE_DELETE(texManagement_);
 	SAFE_DELETE(viewportManagement_);
 	SAFE_DELETE(ssManagement_);
 	SAFE_DELETE(rsManagement_);
@@ -69,6 +81,10 @@ RenderingComponent::~RenderingComponent()
 
 	for(unsigned int i = 0; i < GBUFFERID_NUM_BUFFERS; i++)
 		SAFE_DELETE(gBuffers_[i]);
+
+	
+	SAFE_DELETE(m3dLoader_);
+	SAFE_DELETE(animatedMesh_);
 }
 
 void RenderingComponent::reset()
@@ -122,6 +138,7 @@ HRESULT RenderingComponent::init()
 {
 	// subscribe to events
 	SUBSCRIBE_TO_EVENT(this, EVENT_WINDOW_RESIZE);
+	SUBSCRIBE_TO_EVENT(this, EVENT_POST_DESC_TEX);
 
 	// init component
 	//float* f = new float();
@@ -135,7 +152,9 @@ HRESULT RenderingComponent::init()
 	if(SUCCEEDED(hr))
 		hr = initLightManagement();
 	if(SUCCEEDED(hr))
-		hr = initMeshManagement();
+		hr = initModelManagement();
+	if(SUCCEEDED(hr))
+		hr = initTexManagement();
 	if(SUCCEEDED(hr))
 		hr = initViewport();
 	if(SUCCEEDED(hr))
@@ -146,6 +165,9 @@ HRESULT RenderingComponent::init()
 //		hr = initDebug();
 	if(SUCCEEDED(hr))
 		hr = initGBuffers();
+
+//	if(SUCCEEDED(hr))
+//		initAnimations();
 
 	return hr;
 }
@@ -183,7 +205,7 @@ void RenderingComponent::onUpdate(float delta)
 									  viewportTopY);
 
 		setViewport(i);
-		
+
 		renderViewportToGBuffer(viewMatrix, projectionMatrix);
 		renderViewportToBackBuffer();
 	}
@@ -193,17 +215,20 @@ void RenderingComponent::renderViewportToGBuffer(DirectX::XMFLOAT4X4 viewMatrix,
 	ID3D11Device*			device = d3dManagement_->getDevice();
 	ID3D11DeviceContext*	devcon = d3dManagement_->getDeviceContext();
 
+	d3dManagement_->clearDepthBuffer();
+
+	if(animatedMesh_)
+		renderAnimatedMesh(viewMatrix, projectionMatrix);
+
 	fxManagement_->getDefaultVS()->set(d3dManagement_->getDeviceContext());
 	fxManagement_->getDefaultPS()->set(d3dManagement_->getDeviceContext());
 	ssManagement_->setPS(d3dManagement_->getDeviceContext(), SS_ID_DEFAULT, 0);
 	rsManagement_->setRS(d3dManagement_->getDeviceContext(), RS_ID_DEFAULT);
 
 	renderGBufferSetRenderTargets();
-	
-	d3dManagement_->clearDepthBuffer();
 
 	// Fetch attributes
-	std::vector<int>* renderOwners;					GET_ATTRIBUTE_OWNERS(renderOwners, ATTRIBUTE_RENDER);
+	std::vector<int>*				renderOwners;	GET_ATTRIBUTE_OWNERS(renderOwners,	ATTRIBUTE_RENDER);
 	std::vector<RenderAttribute>*	allRender;		GET_ATTRIBUTES(allRender,	RenderAttribute,	ATTRIBUTE_RENDER);
 	std::vector<SpatialAttribute>*	allSpatial;		GET_ATTRIBUTES(allSpatial,	SpatialAttribute,	ATTRIBUTE_SPATIAL);
 	std::vector<PositionAttribute>*	allPosition;	GET_ATTRIBUTES(allPosition,	PositionAttribute,	ATTRIBUTE_POSITION);
@@ -212,22 +237,20 @@ void RenderingComponent::renderViewportToGBuffer(DirectX::XMFLOAT4X4 viewMatrix,
 	DirectX::XMFLOAT4X4 worldMatrixInverse;
 	DirectX::XMFLOAT4X4 finalMatrix;
 	
-	
-	for(unsigned int i=0; i<renderOwners->size(); i++)
+	unsigned int meshID; ModelD3D* modelD3D;
+	RenderAttribute* renderAt; SpatialAttribute* spatialAt; PositionAttribute* positionAt;
+	for(unsigned int i=0; i<allRender->size(); i++)
 	{
 		if(renderOwners->at(i)!=0)
 		{
-			// fetch attributes
-			RenderAttribute* renderAt	= &allRender->at(i);
-			SpatialAttribute* spatialAt	= &allSpatial->at(renderAt->spatialAttribute.index);
-			PositionAttribute* positionAt = &allPosition->at(spatialAt->positionAttribute.index);
+			renderAt	= &allRender->at(i);
+			meshID		= renderAt->meshID;
+			spatialAt	= &allSpatial->at(renderAt->spatialAttribute.index);
+			positionAt	= &allPosition->at(spatialAt->positionAttribute.index);
 			
-			// render from attributes
-			int meshIndex	= renderAt->meshIndex;
-			MeshModelD3D* meshModelD3D = meshManagement_->getMeshModelD3D(meshIndex, d3dManagement_->getDevice());
-			VB*					vb	= meshModelD3D->getVB();
-			std::vector<IB*>	ibs	= meshModelD3D->getIBs();
-	
+			modelD3D = modelManagement_->getModelD3D(meshID, d3dManagement_->getDevice());
+			std::vector<MeshMaterial> materials = modelD3D->getMaterials();
+
 			worldMatrix			= calculateWorldMatrix(spatialAt, positionAt);
 			worldMatrixInverse	= calculateMatrixInverse(worldMatrix);
 			finalMatrix			= calculateFinalMatrix(worldMatrix, viewMatrix, projectionMatrix);
@@ -235,6 +258,9 @@ void RenderingComponent::renderViewportToGBuffer(DirectX::XMFLOAT4X4 viewMatrix,
 			cbManagement_->vsSet(CB_TYPE_OBJECT, CB_REGISTER_OBJECT, devcon);
 			cbManagement_->updateCBObject(devcon, finalMatrix, worldMatrix, worldMatrixInverse);
 	
+			VB* vb	= modelD3D->getVertexBuffer();
+			std::vector<SubsetD3D*> subsetD3Ds = modelD3D->getSubsetD3Ds();
+
 			UINT stride = sizeof(VertexPosNormTex);
 			UINT offset = 0;
 			
@@ -246,13 +272,37 @@ void RenderingComponent::renderViewportToGBuffer(DirectX::XMFLOAT4X4 viewMatrix,
 				&stride, 
 				&offset);
 	
-			for(unsigned int j = 0; j < ibs.size(); j++)
+			for(unsigned int j = 0; j < subsetD3Ds.size(); j++)
 			{
-				devcon->IASetIndexBuffer(ibs[j]->getIB(), DXGI_FORMAT_R32_UINT, offset);
+				ID3D11Buffer* indexBuffer = subsetD3Ds[j]->getIndexBuffer()->getIB();
+				unsigned int materialIndex = subsetD3Ds[j]->getMaterialIndex();
+
+				MeshMaterial material;//materials[materialIndex];
+
+				ID3D11ShaderResourceView* texAlbedo = texManagement_->getTexSrv(material.getIDAlbedoTex());
+				ID3D11ShaderResourceView* texNormal = texManagement_->getTexSrv(material.getIDNormalTex());
+				devcon->PSSetShaderResources(0, 1, &texAlbedo);
+				devcon->PSSetShaderResources(1, 1, &texNormal);
+
+				cbManagement_->psSet(CB_TYPE_SUBSET, CB_REGISTER_SUBSET, devcon);
+
+				DirectX::XMFLOAT3 dxSpec(1.0f, 1.0f, 1.0f); //((float*)&material.getSpecularTerm());
+				cbManagement_->updateCBSubset(
+					devcon,
+					dxSpec,
+					material.getSpecularPower());
+
+				devcon->IASetIndexBuffer(
+					indexBuffer, 
+					DXGI_FORMAT_R32_UINT, 
+					offset);
 	
 				devcon->IASetInputLayout(fxManagement_->getILDefaultVSPosNormTex());
 				devcon->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-				devcon->DrawIndexed(ibs[j]->getNumIndices(), 0, 0);
+				devcon->DrawIndexed(
+					subsetD3Ds[j]->getIndexBuffer()->getNumIndices(), 
+					0, 
+					0);
 			}
 		}
 	}
@@ -268,7 +318,7 @@ void RenderingComponent::renderViewportToBackBuffer()
 	cbManagement_->csSet(CB_TYPE_CAMERA,	CB_REGISTER_CAMERA,		d3dManagement_->getDeviceContext());
 	cbManagement_->updateCBInstance(d3dManagement_->getDeviceContext(), screenWidth_, screenHeight_);
 
-	lightManagement_->setLightSRVCS(d3dManagement_->getDeviceContext(), 2);
+	lightManagement_->setLightSRVCS(d3dManagement_->getDeviceContext(), 3);
 
 	ID3D11ShaderResourceView* resourceViews[GBUFFERID_NUM_BUFFERS];
 	for(int i=0; i<GBUFFERID_NUM_BUFFERS; i++)
@@ -307,6 +357,7 @@ void RenderingComponent::clearGBuffers()
 	
 	d3dManagement_->getDeviceContext()->ClearRenderTargetView(renderTargets[GBUFFERID_ALBEDO], black);
 	d3dManagement_->getDeviceContext()->ClearRenderTargetView(renderTargets[GBUFFERID_NORMAL], black);
+	d3dManagement_->getDeviceContext()->ClearRenderTargetView(renderTargets[GBUFFERID_MATERIAL], black);
 }
 void RenderingComponent::renderGBufferClean()
 {
@@ -428,11 +479,21 @@ HRESULT RenderingComponent::initLightManagement()
 
 	return hr;
 }
-HRESULT RenderingComponent::initMeshManagement()
+HRESULT RenderingComponent::initModelManagement()
 {
 	HRESULT hr = S_OK;
 
-	meshManagement_ = new MeshManagement();
+	modelManagement_ = new ModelManagement();
+	hr = modelManagement_->init();
+
+	return hr;
+}
+HRESULT RenderingComponent::initTexManagement()
+{
+	HRESULT hr = S_OK;
+
+	texManagement_ = new TexManagement();
+	hr = texManagement_->init();
 
 	return hr;
 }
@@ -485,11 +546,19 @@ HRESULT RenderingComponent::initGBuffers()
 	gBuffers_[GBUFFERID_ALBEDO] = gBuffer;
 
 	/*Normals*/
-	if(hr == S_OK)
+	if(SUCCEEDED(hr))
 	{
 		gBuffer = new GBuffer(screenWidth_, screenHeight_, MULTISAMPLES_GBUFFERS, DXGI_FORMAT_R32G32B32A32_FLOAT);
 		hr = gBuffer->init(d3dManagement_->getDevice());
 		gBuffers_[GBUFFERID_NORMAL] = gBuffer;
+	}
+
+	/*Material*/
+	if(SUCCEEDED(hr))
+	{
+		gBuffer = new GBuffer(screenWidth_, screenHeight_, MULTISAMPLES_GBUFFERS, DXGI_FORMAT_R32G32B32A32_FLOAT);
+		hr = gBuffer->init(d3dManagement_->getDevice());
+		gBuffers_[GBUFFERID_MATERIAL] = gBuffer;
 	}
 
 	return hr;
@@ -501,6 +570,9 @@ void RenderingComponent::onEvent( Event* e )
 	{
 	case EVENT_WINDOW_RESIZE:
 		event_WindowResize((Event_WindowResize*)e);
+		break;
+	case EVENT_POST_DESC_TEX:
+		event_PostDescTex((Event_PostDescTex*)e);
 		break;
 	default:
 		break;
@@ -515,4 +587,73 @@ void RenderingComponent::event_WindowResize( Event_WindowResize* e )
 	resize(width, height);
 
 	// TODO: resize render window
+}
+
+void RenderingComponent::event_PostDescTex(Event_PostDescTex* e)
+{
+	TexDesc* texDesc = e->texDesc_;
+
+	texManagement_->handleTexDesc(
+		texDesc,
+		d3dManagement_->getDevice());
+
+	delete texDesc;
+}
+
+void RenderingComponent::initAnimations()
+{
+	m3dLoader_ = new M3DLoader();
+	
+	animatedMesh_ = nullptr;
+	animatedMesh_ = new AnimatedMesh();
+
+	m3dLoader_->loadM3D("../../xkill-resources/xkill-models/soldier.m3d",
+					   animatedMesh_->getVertices(),
+					   animatedMesh_->getIndices(),
+					   animatedMesh_->getSubsets(),
+					   animatedMesh_->getMaterials(),
+					   animatedMesh_->getSkinInfo());
+
+	animatedMesh_->init(d3dManagement_->getDevice());
+}
+
+void RenderingComponent::renderAnimatedMesh(DirectX::XMFLOAT4X4 viewMatrix, DirectX::XMFLOAT4X4 projectionMatrix)
+{
+	ID3D11Device*			device = d3dManagement_->getDevice();
+	ID3D11DeviceContext*	devcon = d3dManagement_->getDeviceContext();
+
+	DirectX::XMFLOAT4X4 worldMatrix(0.05f, 0.0f, 0.0f, 0.0f,
+									0.0f, 0.05f, 0.0f, 0.0f,
+									0.0f, 0.0f, 0.05f, 0.0f,
+									4.0f, 2.3f, 1.0f, 1.0f);
+	DirectX::XMFLOAT4X4 worldMatrixInverse	= worldMatrix;
+	DirectX::XMFLOAT4X4 finalMatrix			= calculateFinalMatrix(worldMatrix, viewMatrix, projectionMatrix);
+	
+	cbManagement_->vsSet(CB_TYPE_OBJECT, CB_REGISTER_OBJECT, devcon);
+	cbManagement_->updateCBObject(devcon, finalMatrix, worldMatrix, worldMatrixInverse);
+	
+	fxManagement_->getAnimationVS()->set(devcon);
+	fxManagement_->getAnimationPS()->set(devcon);
+	ssManagement_->setPS(d3dManagement_->getDeviceContext(), SS_ID_DEFAULT, 0);
+	rsManagement_->setRS(d3dManagement_->getDeviceContext(), RS_ID_DEFAULT);
+
+	renderGBufferSetRenderTargets();
+	d3dManagement_->clearDepthBuffer();
+
+	ID3D11Buffer* vertexBuffer = animatedMesh_->getVertexBuffer();
+	UINT stride = sizeof(VertexPosNormTexTanSkinned);
+	UINT offset = 0;
+	devcon->IASetVertexBuffers(
+				0, 
+				1, 
+				&vertexBuffer, 
+				&stride, 
+				&offset);
+	devcon->IASetIndexBuffer(animatedMesh_->getIndexBuffer(), DXGI_FORMAT_R32_UINT, 0);
+	
+	devcon->IASetInputLayout(fxManagement_->getILPosNormTexTanSkinned());
+	devcon->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	devcon->DrawIndexed(animatedMesh_->getNumIndices(), 0, 0);
+
+	renderGBufferClean();
 }

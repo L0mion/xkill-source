@@ -17,6 +17,34 @@ void QTInputDevices::Update(float deltaTime)
 	updateState();
 }
 
+void QTInputDevices::setStandardMappings()
+{
+	if(axes_.size() >= 2)
+	{
+		axes_[0]->addFloatMapping(2);
+		axes_[0]->setDeadZone(0.0f);
+		axes_[1]->addFloatMapping(3);
+		axes_[1]->setDeadZone(0.0f);
+	}
+
+	if(axes_.size() >= 4)
+	{
+		axes_[2]->addFloatMapping(2);
+		axes_[2]->setDeadZone(0.0f);
+		axes_[3]->addFloatMapping(3);
+		axes_[3]->setDeadZone(0.0f);
+	}
+
+	if(buttons_.size() >= 5)
+	{
+		buttons_[0]->addBoolMapping(3);
+		buttons_[1]->addBoolMapping(4);
+		buttons_[2]->addBoolMapping(5);
+		buttons_[3]->addBoolMapping(6);
+		buttons_[4]->addBoolMapping(0);
+	}
+}
+
 InputDevice::InputDeviceType QTInputDevices::GetType()
 {
 	return QT_INPUT_DEVICE;
@@ -30,6 +58,7 @@ void QTInputDevices::updateState()
 void QTInputDevices::createInputLayout()
 {
 	inputLayout_.nrOfHatSwitches = 0;
+	inputLayout_.nrOfButtons = 6;
 	inputLayout_.nrOfTriggers = 0;
 	inputLayout_.nrOfAxes = 4;
 }
@@ -42,19 +71,20 @@ void QTInputDevices::createInputObjectsFromLayout()
 		inputObjects_.push_back(axes_[axes_.size() - 1]);
 	}
 	
-	for(int i = 0; i < 5; i++)
+	for(int i = 0; i < 6; i++)
 	{
 		buttons_.push_back(new InputButtonObject(i));
 		inputObjects_.push_back(buttons_[buttons_.size() - 1]);
 	}
 
-	if(buttons_.size() >= 5)
+	if(buttons_.size() >= 6)
 	{
 		buttons_[0]->setKey('W');
 		buttons_[1]->setKey('A');
 		buttons_[2]->setKey('S');
 		buttons_[3]->setKey('D');
 		buttons_[4]->setKey(0x20); //Space
+		buttons_[5]->setKey(33); //CTRL
 	}
 }
 
@@ -91,7 +121,7 @@ void QTInputDevices::updateButtons()
 		buttons_[i]->SetValue(buttons_[i]->isDown());
 }
 
-InputButtonObject* QTInputDevices::getButtonObject(int index)
+InputButtonObject* QTInputDevices::getButtonObject(unsigned int index)
 {
 	InputButtonObject* button = nullptr;
 

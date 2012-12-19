@@ -15,6 +15,8 @@ public:
 	virtual void SetForceFeedback(float leftMotorScale, float rightMotorScale);
 	virtual bool IsForceFeedbackCapable();
 
+	virtual void setStandardMappings();
+
 	virtual InputDeviceType GetType();
 
 	void setAxis(unsigned int index, float value);
@@ -29,5 +31,5 @@ protected:
 	virtual void createInputLayout();
 	virtual void createInputObjectsFromLayout();
 
-	virtual InputButtonObject* getButtonObject(int index);
+	virtual InputButtonObject* getButtonObject(unsigned int index);
 };

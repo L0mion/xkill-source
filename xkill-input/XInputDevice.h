@@ -24,6 +24,8 @@ public:
 	void SetForceFeedback(float leftMotorScale, float rightMotorScale);
 	virtual bool IsForceFeedbackCapable();
 
+	virtual void setStandardMappings();
+
 	/*!
 	\return XINPUT_DEVICE 
 	*/

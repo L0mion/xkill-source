@@ -40,7 +40,7 @@ RenderAttribute::RenderAttribute()
 {
 	transparent		= false;
 	tessellation	= false;
-	meshIndex		= 0;
+	meshID		= 0;
 	textureID		= 0;
 }
 RenderAttribute::~RenderAttribute()
@@ -52,8 +52,11 @@ PhysicsAttribute::PhysicsAttribute()
 	added = false;
 	alive = true;
 	mass = 1.0f;
-	collisionShapeIndex = 0;
-	gravity = Float3(0.0f, -1000.0f, 0.0f);
+	
+	meshID = 0;
+
+	gravity = Float3(0.0f, -10.0f, 0.0f);
+	
 	isProjectile = false;
 
 	angularVelocity.x = 0; 
@@ -70,7 +73,7 @@ PhysicsAttribute::~PhysicsAttribute()
 ProjectileAttribute::ProjectileAttribute()
 {
 	entityIdOfCreator = -1;
-	currentLifeTimeLeft = 3.0f;
+	currentLifeTimeLeft = 10.0f;
 }
 ProjectileAttribute::~ProjectileAttribute()
 {
@@ -87,7 +90,12 @@ CameraAttribute::CameraAttribute()
 {
 	ZeroMemory(&mat_projection, sizeof(mat_projection));
 	ZeroMemory(&mat_view, sizeof(mat_view));
+	aspect = 0;
+	fov = 0.785f; 
+	zFar = 40.0f;
+	zNear = 0.01f;
 }
+
 CameraAttribute::~CameraAttribute()
 {
 }
@@ -105,7 +113,6 @@ InputAttribute::~InputAttribute()
 PlayerAttribute::PlayerAttribute()
 {
 	id = -1;
-	name = "Player";
 	priority = 0;
 	cycleSteals = 0;
 	totalExecutionTime = 0;
@@ -116,6 +123,18 @@ PlayerAttribute::~PlayerAttribute()
 
 MeshAttribute::MeshAttribute()
 {
+	this->meshID		= 0;
+	this->mesh			= nullptr;
+	this->dynamic		= false;
+}
+MeshAttribute::MeshAttribute(
+	unsigned int	id,
+	MeshModel*		mesh,
+	bool			dynamic)
+{
+	this->meshID		= id;
+	this->mesh			= mesh;
+	this->dynamic		= dynamic;
 }
 MeshAttribute::~MeshAttribute()
 {
@@ -126,8 +145,8 @@ void MeshAttribute::clean()
 
 HealthAttribute::HealthAttribute()
 {
-	startHealth = 2;
-	health = startHealth;
+	startHealth = 10;
+	health = 0;
 }
 HealthAttribute::~HealthAttribute()
 {
@@ -144,6 +163,7 @@ DamageAttribute::~DamageAttribute()
 SpawnPointAttribute::SpawnPointAttribute()
 {
 	timeSinceLastSpawn = 0.0f;
+	spawnArea = 0.0f;
 }
 SpawnPointAttribute::~SpawnPointAttribute()
 {

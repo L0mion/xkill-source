@@ -15,6 +15,12 @@ XInputDevice::XInputDevice(int deviceNr, GUID deviceGUID, std::string name, unsi
 XInputDevice::~XInputDevice(void)
 {
 	StopForceFeedback();
+
+	std::vector<InputTriggerObject*>::iterator it;
+	for(; it != triggers_.end(); it++)
+		delete (*it);
+
+	triggers_.clear();
 }
 
 void XInputDevice::Update(float deltaTime)
@@ -62,6 +68,30 @@ bool XInputDevice::IsForceFeedbackCapable()
 	return true;
 }
 
+void XInputDevice::setStandardMappings()
+{
+	if(axes_.size() >= 4)
+	{
+		axes_[0]->addFloatMapping(0);
+		axes_[1]->addFloatMapping(1);
+		axes_[2]->addFloatMapping(2);
+		axes_[3]->addFloatMapping(3);
+	}
+
+	if(buttons_.size() >= 14)
+	{
+		buttons_[10]->addBoolMapping(3);
+		buttons_[11]->addBoolMapping(6);
+		buttons_[12]->addBoolMapping(5);
+		buttons_[13]->addBoolMapping(4);
+	}
+
+	if(triggers_.size() >= 2)
+	{
+		triggers_[0]->addBoolMapping(0);
+	}
+}
+
 InputDevice::InputDeviceType XInputDevice::GetType()
 {
 	return InputDevice::InputDeviceType::XINPUT_DEVICE;
@@ -75,29 +105,42 @@ void XInputDevice::updateState()
 	ZeroMemory(&state, sizeof(XINPUT_STATE));
 	dwResult = XInputGetState(deviceNr_, &state);
 
-	axes_[0]->SetValue(state.Gamepad.sThumbLX);
-	axes_[1]->SetValue(state.Gamepad.sThumbLY);
-	axes_[2]->SetValue(state.Gamepad.sThumbRX);
-	axes_[3]->SetValue(state.Gamepad.sThumbRY);
+	if(axes_.size() >= 4)
+	{
+		axes_[0]->SetValue(state.Gamepad.sThumbLX);
+		axes_[1]->SetValue(state.Gamepad.sThumbLY);
+		axes_[2]->SetValue(state.Gamepad.sThumbRX);
+		axes_[3]->SetValue(state.Gamepad.sThumbRY);
+	}
 
-	triggers_[0]->SetValue(state.Gamepad.bRightTrigger);
-	triggers_[1]->SetValue(state.Gamepad.bLeftTrigger);
+	if(triggers_.size() >= 2)
+	{
+		triggers_[0]->SetValue(state.Gamepad.bRightTrigger);
+		triggers_[1]->SetValue(state.Gamepad.bLeftTrigger);
+	}
 
-	hatSwitches_[0]->SetButton(InputHatSwitchObject::HAT_SWITCH_UP, ((state.Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_UP) != 0));
-	hatSwitches_[0]->SetButton(InputHatSwitchObject::HAT_SWITCH_RIGHT, ((state.Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_RIGHT) != 0));
-	hatSwitches_[0]->SetButton(InputHatSwitchObject::HAT_SWITCH_DOWN, ((state.Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_DOWN) != 0));
-	hatSwitches_[0]->SetButton(InputHatSwitchObject::HAT_SWITCH_LEFT, ((state.Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_LEFT) != 0));
-								 
-	buttons_[0]->SetValue((state.Gamepad.wButtons & XINPUT_GAMEPAD_A) != 0);
-	buttons_[1]->SetValue((state.Gamepad.wButtons & XINPUT_GAMEPAD_B) != 0);
-	buttons_[2]->SetValue((state.Gamepad.wButtons & XINPUT_GAMEPAD_X) != 0);
-	buttons_[3]->SetValue((state.Gamepad.wButtons & XINPUT_GAMEPAD_Y) != 0);
-	buttons_[6]->SetValue((state.Gamepad.wButtons & XINPUT_GAMEPAD_START) != 0);
-	buttons_[7]->SetValue((state.Gamepad.wButtons & XINPUT_GAMEPAD_BACK) != 0);
-	buttons_[4]->SetValue((state.Gamepad.wButtons & XINPUT_GAMEPAD_LEFT_SHOULDER) != 0);
-	buttons_[5]->SetValue((state.Gamepad.wButtons & XINPUT_GAMEPAD_RIGHT_SHOULDER) != 0);
-	buttons_[8]->SetValue((state.Gamepad.wButtons & XINPUT_GAMEPAD_LEFT_THUMB) != 0);
-	buttons_[9]->SetValue((state.Gamepad.wButtons & XINPUT_GAMEPAD_RIGHT_THUMB) != 0);
+	if(buttons_.size() >= 10)
+	{
+		buttons_[0]->SetValue((state.Gamepad.wButtons & XINPUT_GAMEPAD_A) != 0);
+		buttons_[1]->SetValue((state.Gamepad.wButtons & XINPUT_GAMEPAD_B) != 0);
+		buttons_[2]->SetValue((state.Gamepad.wButtons & XINPUT_GAMEPAD_X) != 0);
+		buttons_[3]->SetValue((state.Gamepad.wButtons & XINPUT_GAMEPAD_Y) != 0);
+		buttons_[6]->SetValue((state.Gamepad.wButtons & XINPUT_GAMEPAD_START) != 0);
+		buttons_[7]->SetValue((state.Gamepad.wButtons & XINPUT_GAMEPAD_BACK) != 0);
+		buttons_[4]->SetValue((state.Gamepad.wButtons & XINPUT_GAMEPAD_LEFT_SHOULDER) != 0);
+		buttons_[5]->SetValue((state.Gamepad.wButtons & XINPUT_GAMEPAD_RIGHT_SHOULDER) != 0);
+		buttons_[8]->SetValue((state.Gamepad.wButtons & XINPUT_GAMEPAD_LEFT_THUMB) != 0);
+		buttons_[9]->SetValue((state.Gamepad.wButtons & XINPUT_GAMEPAD_RIGHT_THUMB) != 0);
+	}
+
+	//Hatswitch buttons
+	if(buttons_.size() >= 14)
+	{
+		buttons_[10]->SetValue((state.Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_UP) != 0);	
+		buttons_[11]->SetValue((state.Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_RIGHT) != 0);
+		buttons_[12]->SetValue((state.Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_DOWN) != 0);
+		buttons_[13]->SetValue((state.Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_LEFT) != 0);
+	}
 }
 
 void XInputDevice::createInputLayout()
@@ -119,16 +162,10 @@ void XInputDevice::createInputObjectsFromLayout()
 	if(axes_.size() >= 4)
 		axes_[3]->setInverted(true);
 	
-	for(int i = 0; i < inputLayout_.nrOfButtons; i++)
+	for(int i = 0; i < inputLayout_.nrOfButtons + inputLayout_.nrOfHatSwitches*4; i++)
 	{
 		buttons_.push_back(new InputButtonObject(i));
 		inputObjects_.push_back(buttons_[buttons_.size() - 1]);
-	}
-
-	for(int i = 0; i < inputLayout_.nrOfHatSwitches; i++)
-	{
-		hatSwitches_.push_back(new InputHatSwitchObject());
-		inputObjects_.push_back(hatSwitches_[hatSwitches_.size() - 1]);
 	}
 
 	for(int i = 0; i < inputLayout_.nrOfTriggers; i++)

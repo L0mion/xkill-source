@@ -57,9 +57,14 @@ void InputComponent::onEvent(Event* e)
 	}
 }
 
+#include "WindowsTime.h"
+
 void InputComponent::onUpdate(float delta)
 {
-	newDeviceSearchTimer_ += delta;
+	WindowsTime wt;
+	wt.Start();
+
+	newDeviceSearchTimer_ += delta;				//Takes alot of time so should probably not run in main thread or during run-time
 	if(newDeviceSearchTimer_ >= searchTime_)
 	{
 		newDeviceSearchTimer_ = 0.0f;
@@ -69,6 +74,8 @@ void InputComponent::onUpdate(float delta)
 	inputManager_->Update(delta);
 
 	handleInput(delta);
+	wt.Stop();
+	float time = wt.GetDelta();
 }
 
 void InputComponent::handleInput(float delta)
@@ -82,54 +89,61 @@ void InputComponent::handleInput(float delta)
 
 		InputDevice::InputState state = device->GetState();
 
-		int nrAxes = state.axes.size();
-		if(nrAxes >= 1)
-			inputAttributes_->at(i).position.x = state.axes[0]->GetValue();
-																		    
-		if(nrAxes >= 2)													    
-			inputAttributes_->at(i).position.y = state.axes[1]->GetValue();
-																		    
-		if(nrAxes >= 3)													    
-			inputAttributes_->at(i).rotation.x = state.axes[2]->GetValue() * delta;
-																		    
-		if(nrAxes >= 4)													    
-			inputAttributes_->at(i).rotation.y = state.axes[3]->GetValue() * delta;
+		//int nrAxes = state.axes.size();
+		//if(nrAxes >= 1)
+		//	inputAttributes_->at(i).position.x = state.axes[0]->GetValue();
+		//																    
+		//if(nrAxes >= 2)													    
+		//	inputAttributes_->at(i).position.y = state.axes[1]->GetValue();
+		//																    
+		//if(nrAxes >= 3)													    
+		//	inputAttributes_->at(i).rotation.x = state.axes[2]->GetValue() * delta;
+		//																    
+		//if(nrAxes >= 4)													    
+		//	inputAttributes_->at(i).rotation.y = state.axes[3]->GetValue() * delta;
 
-		//if(state.buttons.size() > 3)
-		//{
-		//	if(state.buttons[1]->isReleased())
-		//	{
-		//		Event_Rumble* er = new Event_Rumble(i, true, 100.0f, 1.0f, 1.0f);
-		//		EventManager::getInstance()->sendEvent(er);
-		//		delete er;
-		//	}
+		inputAttributes_->at(i).position.x = device->getFloatValue(0);
+		inputAttributes_->at(i).position.y = device->getFloatValue(1);
+		inputAttributes_->at(i).rotation.x = device->getFloatValue(2) * delta;
+		inputAttributes_->at(i).rotation.y = device->getFloatValue(3) * delta;
 
-		//	if(state.buttons[2]->isReleased())
-		//	{
-		//		Event_Rumble* er = new Event_Rumble(i, false, 100.0f, 0.0f, 0.0f);
-		//		EventManager::getInstance()->sendEvent(er);
-		//		delete er;
-		//	}
-
-		//	//Projectile test
-		//	if(state.buttons[0]->isDown())													   
-		//		inputAttributes_->at(i).fire = true;
-
-			//if(state.buttons.size() > 7)
-			//{
-			//	if(state.buttons[3]->isDown())
-			//		inputAttributes_->at(i).position.y = 1.0f;
-			//															    
-			//	if(state.buttons[4]->isDown())
-			//		inputAttributes_->at(i).position.x = -1.0f;
-
-			//	if(state.buttons[5]->isDown())
-			//		inputAttributes_->at(i).position.y = -1.0f;
-
-			//	if(state.buttons[6]->isDown())
-			//		inputAttributes_->at(i).position.x = 1.0f;
-			//}
-		//}
+		////if(state.buttons.size() > 3)
+		////{
+		////	if(state.buttons[1]->isReleased())
+		////	{
+		////		Event_Rumble* er = new Event_Rumble(i, true, 100.0f, 1.0f, 1.0f);
+		////		EventManager::getInstance()->sendEvent(er);
+		////		delete er;
+		////	}
+		//
+		////	if(state.buttons[2]->isReleased())
+		////	{
+		////		Event_Rumble* er = new Event_Rumble(i, false, 100.0f, 0.0f, 0.0f);
+		////		EventManager::getInstance()->sendEvent(er);
+		////		delete er;
+		////	}
+		//
+		////	//Projectile test
+		////	if(state.buttons[0]->isDown())													   
+		////		inputAttributes_->at(i).fire = true;
+		//	//if(state.buttons[7].isDown())
+		//	//	inputAttributes_->at(i).fire = true;
+		//
+		//	//if(state.buttons.size() > 7)
+		//	//{
+		//	//	if(state.buttons[3]->isDown())
+		//	//		inputAttributes_->at(i).position.y = 1.0f;
+		//	//															    
+		//	//	if(state.buttons[4]->isDown())
+		//	//		inputAttributes_->at(i).position.x = -1.0f;
+		//
+		//	//	if(state.buttons[5]->isDown())
+		//	//		inputAttributes_->at(i).position.y = -1.0f;
+		//
+		//	//	if(state.buttons[6]->isDown())
+		//	//		inputAttributes_->at(i).position.x = 1.0f;
+		//	//}
+		////}
 
 		if(device->getBoolValue(0))
 			inputAttributes_->at(i).fire = true;

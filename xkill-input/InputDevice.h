@@ -8,8 +8,9 @@
 
 #include "InputButtonObject.h"
 #include "InputAxisObject.h"
-#include "InputHatSwitchObject.h"
 #include "InputTriggerObject.h"
+
+#include "InputActions.h"
 
 #define SAFE_DELETE(x) {if(x != nullptr) delete x; x = nullptr;}
 
@@ -29,7 +30,6 @@ public:
 	{
 		std::vector<InputAxisObject*> axes;
 		std::vector<InputButtonObject*> buttons;
-		std::vector<InputHatSwitchObject*> hatSwitches;
 		std::vector<InputTriggerObject*> triggers;
 	};
 
@@ -85,9 +85,21 @@ public:
 
 	virtual void setPlayerID(int playerID);
 	virtual int getPlayerID();
-
+	
+	//! Returns the largest float value of objects that is mapped to that number
 	virtual float getFloatValue(int mapping);
+	//! Returns if any object that is mapped to that number is activated
 	virtual bool getBoolValue(int mapping);
+
+	//! Sets standard mappings
+	/*!
+	Note: Should only be called if the device don't have any previous mappings
+	as it doesn't reset previous mappings. The result could be that multiple 
+	mappings will be present at the same time.
+	*/
+	virtual void setStandardMappings() = 0;
+
+	void createObjectVectors();
 
 protected:
 	InputDeviceLayout inputLayout_;
@@ -97,9 +109,11 @@ protected:
 
 	std::vector<InputAxisObject*> axes_;				//Should perhaps use an inputstate to store this instead?
 	std::vector<InputButtonObject*> buttons_;
-	std::vector<InputHatSwitchObject*> hatSwitches_;
 	std::vector<InputTriggerObject*> triggers_;
 	std::vector<InputObject*> inputObjects_;
+
+	std::vector<std::vector<int>> floatObjects_;
+	std::vector<std::vector<int>> boolObjects_;
 
 	//! Updates the input object to the latest state
 	virtual void updateState() = 0;
@@ -108,6 +122,6 @@ protected:
 	//! Creates all the input objects using the input layout as guide
 	virtual void createInputObjectsFromLayout() = 0;
 
-	virtual InputButtonObject* getButtonObject(int index);
+	virtual InputButtonObject* getButtonObject(unsigned int index);
 };
 

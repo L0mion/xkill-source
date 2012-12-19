@@ -2,7 +2,15 @@
 
 MeshMaterial::MeshMaterial()
 {
-	//Do nothing.
+	ambientTerm_	= Float3(1.0f, 1.0f, 1.0f);
+	diffuseTerm_	= Float3(1.0f, 1.0f, 1.0f);
+	specularTerm_	= Float3(1.0f, 1.0f, 1.0f);
+	specularPower_	= 1.0f;
+	reflectivity_	= Float3(0.5f, 0.5f, 0.5f);
+	transperency_	= false;
+
+	idAlbedoTex_ = 0;
+	idNormalTex_ = 0;
 }
 MeshMaterial::MeshMaterial(
 	const Float3	ambientTerm,
@@ -10,7 +18,10 @@ MeshMaterial::MeshMaterial(
 	const Float3	specularTerm,
 	const float		specularPower,
 	const Float3	reflectivity,
-	const bool		transperency)
+	const bool		transperency,
+	
+	const unsigned int idAlbedoTex,
+	const unsigned int idNormalTex)
 {
 	ambientTerm_	= ambientTerm;
 	diffuseTerm_	= diffuseTerm;
@@ -18,33 +29,45 @@ MeshMaterial::MeshMaterial(
 	specularPower_	= specularPower;
 	reflectivity_	= reflectivity;
 	transperency_	= transperency;
+
+	idAlbedoTex_ = idAlbedoTex;
+	idNormalTex_ = idNormalTex;
 }
 MeshMaterial::~MeshMaterial()
 {
 	//Do nothing.
 }
 
-const Float3 MeshMaterial::getAmbientTerm()
+Float3 MeshMaterial::getAmbientTerm()	const
 {
 	return ambientTerm_;
 }
-const Float3 MeshMaterial::getDiffuseTerm()
+Float3 MeshMaterial::getDiffuseTerm()	const
 {
 	return diffuseTerm_;
 }
-const Float3 MeshMaterial::getSpecularTerm()
+Float3 MeshMaterial::getSpecularTerm()	const
 {
 	return specularTerm_;
 }
-const float MeshMaterial::getSpecularPower()
+float MeshMaterial::getSpecularPower()	const
 {
 	return specularPower_;
 }
-const Float3 MeshMaterial::getReflectivity()
+Float3 MeshMaterial::getReflectivity()	const
 {
 	return reflectivity_;
 }
-const bool MeshMaterial::getTransperency()
+bool MeshMaterial::getTransperency()	const
 {
 	return transperency_;
+}
+
+unsigned int MeshMaterial::getIDAlbedoTex() const
+{
+	return idAlbedoTex_;
+}
+unsigned int MeshMaterial::getIDNormalTex() const
+{
+	return idNormalTex_;
 }

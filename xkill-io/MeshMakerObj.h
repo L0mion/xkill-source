@@ -1,6 +1,7 @@
 #ifndef XKILL_IO_MESHMAKER_H
 #define XKILL_IO_MESHMAKER_H
 
+#include <map>
 #include <string>
 
 #include <xkill-utilities/MeshModel.h>
@@ -11,6 +12,7 @@
 #include "MTL.h"
 #include "ObjGeometry.h"
 #include "Obj.h"
+#include "VarStatus.h"
 
 class LoaderObj;
 class LoaderMTL;
@@ -34,31 +36,32 @@ public:
 		const std::string pathObj,
 		const std::string pathPGY,
 		const std::string fileNameObj,
-		const std::string pathMTL);
+		const std::string pathMTL,
+		std::map<std::string, unsigned int>* texNameToID);
 	//! Deletes loaderObj_ and (OBS!) meshModel_.
 	~MeshMakerObj();
 
 	//! Loads mesh from .pgy-format if such exists. If not; the mesh is loaded from an .obj-file and then written to .pgy-format.
 	bool init();
 
-	MeshModel* getMesh();
+	MeshModel* claimMesh();
 protected:
 private:
 	//! Initializes LoaderObj-object and proceeds to load .obj.
-	bool		loadObj();
+	bool loadObj();
 	//! Initializes LoaderPgy-object and proceeds to load .pgy.
-	MeshModel*	loadPGY();
+	MeshModel* loadPGY();
 
 	//! Checks whether or not a corresponding .pgy-file exists.
 	bool existingPGY(std::string pathPGY, std::string fileNamePGY);
 	
 	//! Converts Obj-format loaded from .obj-file into general Mesh-type format.
-	MeshModel*	makeMesh(Obj obj);
+	MeshModel* makeMesh(Obj obj);
 	//! Writes loaded model into a .pgy-format.
-	bool		makePGY(MeshModel* model);
+	bool makePGY(MeshModel* model);
 	
 	//! Loads .mtl-files based on dependencies loaded from .obj.
-	bool loadMTLs();
+	bool loadMaterials();
 	//! Loads an .mtl-file.
 	bool loadMTL(std::string fileNameMTL);
 	//! Loads resulting materials from .mtl-files into general Mesh-type material format.
@@ -73,6 +76,7 @@ private:
 	//! Searches through materials and converts the string-type identifier of Material into an index.
 	const int			MTLNameToMaterialIndex(std::string mtlName);
 
+	unsigned int getTexIDfromName(std::string texFilename);
 	std::string getFileNamePGY();
 
 	std::string pathObj_;		//!< Path up to .obj-file.
@@ -83,12 +87,14 @@ private:
 	LoaderObj* loaderObj_;		//!< Used to load .obj-files.
 	LoaderMTL* loaderMtl_;		//!< Used to load .mtl-files.
 
+	std::map<std::string, unsigned int>* texNameToID_; //!< Borrowed variable used to translate texture file-names to IDs.
+
 	/*Intermediate*/
 	std::vector<MeshMaterial>	materials_;		//!< Generalized Mesh-type materials read from .mtl.
 	std::vector<std::string>	materialID_;	//!< Used to locate index of material-type
 
 	/*Result*/
-	MeshModel* meshModel_;	//!< Resulting Mesh read from file.
+	VarStatus<MeshModel>* meshModel_;	//!< Resulting Mesh read from file.
 };
 
 #endif //XKILL_IO_MESHMAKER_H

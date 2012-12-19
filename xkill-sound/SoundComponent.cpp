@@ -16,9 +16,11 @@ SoundComponent::SoundComponent()
 {
 	mFMODEventSystem = NULL;
 	converter = NULL;
+	timer = 0.0f;
 
 	SUBSCRIBE_TO_EVENT(this, EVENT_CREATE_PROJECTILE);
 	SUBSCRIBE_TO_EVENT(this, EVENT_PLAYERDEATH);
+	SUBSCRIBE_TO_EVENT(this, EVENT_END_DEATHMATCH);
 }
 
 SoundComponent::~SoundComponent()
@@ -35,7 +37,7 @@ bool SoundComponent::init(std::string configFilePath)
 	//FMODEventSystemProgrammerReportParser fmodEventSystemProgrammerReportParser;
 	//if(!fmodEventSystemProgrammerReportParser.parseProgrammerReport(mFMODEventSystem))
 	//{
-	//	std::cout << "parsing of FMOD Designer's programmer's report failed." << std::endl;
+	//	DEBUGPRINT("parsing of FMOD Designer's programmer's report failed.");
 	//	return false;
 	//}
 
@@ -57,6 +59,15 @@ void SoundComponent::onEvent(Event* e)
 
 void SoundComponent::onUpdate(float delta)
 {
+	timer += delta;
+	if(timer >= 0.5f)
+	{
+		timer = 0.0f;
+		int fmodEventIndex = converter->getFModIndex(0);
+		if(fmodEventIndex >= 0)
+			mFMODEventSystem->StartSoundEventAt(fmodEventIndex);
+	}
+
 	mFMODEventSystem->Update();
 }
 

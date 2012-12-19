@@ -6,109 +6,135 @@
 
 KeyMapper::KeyMapper()
 {
-
+	
 }
 
 KeyMapper::~KeyMapper()
 {
+	writeFileList();
+
 	delete fileParser_;
 }
 
 bool KeyMapper::init(std::string configFilePath)
 {
-	fileParser_ = new FileParser(configMessage());
-	fileParser_->setFilePath(configFilePath);
-	fileParser_->setFileName("keymappings.cfg");
+	fileParser_ = new FileParser("");
+	fileParser_->setFilePath(configFilePath + "Keymappings/");
+
+	parseFileList();
 
 	return true;
 }
 
 void KeyMapper::saveConfig(std::vector<InputDevice*> devices)
 {
-	fileParser_->startWriting();
+	bool existed;
 
-	bool doneWriting = false;
-	InputDevice* device = nullptr;
-	unsigned int index = 0;
-
-	while(!doneWriting)
+	for(unsigned int i = 0; i < devices.size(); i++)
 	{
-		if(device == nullptr)
+		existed = false;
+
+		for(unsigned int j = 0; j < fileList_.size(); j++)
 		{
-			if(index >= devices.size())
+			if(devices[i]->GetGUID() == fileList_[j].first)
 			{
-				doneWriting = true;
-			}
-			else
-			{
-				device = devices[index++];
-				fileParser_->writeRow(getGUIDstring(&device->GetGUID()));
+				fileParser_->setFileName(fileList_[j].second);
+
+				existed = true;
+				break;
 			}
 		}
-		else
+
+		if(!existed)
 		{
-			std::string row = "";
+			GUID guid = devices[i]->GetGUID();
+			std::string fileName = Converter::IntToStr(guid.Data1);
+			fileName += Converter::IntToStr(guid.Data2);
+			fileName += Converter::IntToStr(guid.Data3);
+			fileName += ".kmp";
+			fileParser_->setFileName(fileName);
 
-			row = getAxesString(&device->axes_);
-			if(row != "")
-				fileParser_->writeRow(row);
-
-			row = getButtonString(&device->buttons_);
-			if(row != "")
-				fileParser_->writeRow(row);
-
-			row = getHatSwitchString(&device->hatSwitches_);
-			if(row != "")
-				fileParser_->writeRow(row);
-
-			row = getTriggerString(&device->triggers_);
-			if(row != "")
-				fileParser_->writeRow(row);
-
-			fileParser_->writeRow("");
-
-			device = nullptr;
+			fileList_.push_back(std::pair<GUID, std::string>(guid, fileName));
 		}
+
+		writeToFile(devices[i]);
 	}
-	
-	fileParser_->doneWriting();
 }
 
 void KeyMapper::loadConfig(std::vector<InputDevice*> devices)
 {
-	fileParser_->startReading();
+	for(unsigned int i = 0; i < devices.size(); i++)
+	{
+		getConfigForNewController(devices[i]);
+	}
+}
 
-	GUID guid;
+void KeyMapper::getConfigForNewController(InputDevice* device)
+{
+	bool mappingsFound = false;
+
+	for(unsigned int j = 0; j < fileList_.size(); j++)
+	{
+		if(device->GetGUID() == fileList_[j].first)
+		{
+			fileParser_->setFileName(fileList_[j].second);
+			if(parseFile(device))
+				mappingsFound = true;
+
+			break;
+		}
+	}
+
+	if(!mappingsFound)
+	{
+		device->setStandardMappings();
+	}
+
+	device->createObjectVectors();
+}
+
+void KeyMapper::parseFileList()
+{
 	std::string row;
-	InputDevice* device = nullptr;
+	GUID guid;
+	std::string fileName;
+
+	fileParser_->setFileName("guid_list.gli");
+	fileParser_->startReading();
 
 	while(!fileParser_->isEmpty())
 	{
 		row = fileParser_->getNextRow();
-		row = removeComment(row);
 
-		if(isGUIDRow(row, &guid))
-		{
-			for(unsigned int i = 0; i < devices.size(); i++)
-			{
-				if(devices[i]->GetGUID() == guid)
-				{
-					device = devices[i];
-					break;
-				}
-			}
-		}
-		else if(device != nullptr)
-		{
-			extractSettingsFromRow(row, device);
-		}
+		if(isGUIDRow(row, guid, fileName))
+			fileList_.push_back(std::pair<GUID, std::string>(guid, fileName));
 	}
 }
 
-bool KeyMapper::isGUIDRow(std::string row, GUID* guid)
+void KeyMapper::writeFileList()
+{
+	fileParser_->setFileName("guid_list.gli");
+	std::string row;
+
+	fileParser_->startWriting();
+	
+	for(unsigned int i = 0; i < fileList_.size(); i++)
+	{
+		row = getGUIDstring(&fileList_[i].first);
+		row += " = #" + fileList_[i].second + "#";
+
+		fileParser_->writeRow(row);
+	}
+
+	fileParser_->doneWriting();
+}
+
+bool KeyMapper::isGUIDRow(std::string row, GUID& guid, std::string& fileName)
 {
 	int endIndex = row.find_first_of("guid");
 	int startIndex = 0;
+	std::string guidChars;
+
 	if(endIndex == row.npos)
 		return false;
 
@@ -119,7 +145,7 @@ bool KeyMapper::isGUIDRow(std::string row, GUID* guid)
 	if(!Converter::StrToUInt(row.substr(0, endIndex), value))
 		return false;
 
-	guid->Data1 = value;
+	guid.Data1 = value;
 
 	startIndex = endIndex + 1;
 	row = row.substr(startIndex);
@@ -127,7 +153,7 @@ bool KeyMapper::isGUIDRow(std::string row, GUID* guid)
 	if(!Converter::StrToUInt(row.substr(0, endIndex), value))
 		return false;
 
-	guid->Data2 = value;
+	guid.Data2 = value;
 
 	startIndex = endIndex + 1;
 	row = row.substr(startIndex);
@@ -135,12 +161,50 @@ bool KeyMapper::isGUIDRow(std::string row, GUID* guid)
 	if(!Converter::StrToUInt(row.substr(0, endIndex), value))
 		return false;
 
-	guid->Data3 = value;
+	guid.Data3 = value;
+
+	startIndex = endIndex + 1;
+	row = row.substr(startIndex);
+
+	endIndex = row.find_first_of("=");
+	guidChars = row.substr(0, endIndex);
+
+	for(unsigned int i = 0; i < guidChars.size() && i < 8; i++)
+		guid.Data4[i] = guidChars[i];
 
 	row = row.substr(endIndex + 1);
 
-	for(unsigned int i = 0; i < row.size() && i < 8; i++)
-		guid->Data4[i] = row[i];
+	startIndex = row.find_first_of("#");
+	if(startIndex == row.npos)
+		return false;
+
+	endIndex = row.find_first_of("#", startIndex + 1);
+
+	fileName = row.substr(startIndex + 1, endIndex - 2);
+
+	if(fileName == "")
+		return false;
+
+	return true;
+}
+
+bool KeyMapper::parseFile(InputDevice* device)
+{
+	std::string row;
+
+	if(!fileParser_->startReading())
+		return false;
+
+	if(fileParser_->isEmpty())
+		return false;
+
+	while(!fileParser_->isEmpty())
+	{
+		row = fileParser_->getNextRow();
+		row = removeComment(row);
+
+		extractSettingsFromRow(row, device);
+	}
 
 	return true;
 }
@@ -168,6 +232,27 @@ void KeyMapper::extractSettingsFromRow(std::string row, InputDevice* device)
 			row = row.substr(endIndex);
 		}
 	}
+}
+
+void KeyMapper::writeToFile(InputDevice* device)
+{
+	fileParser_->startWriting();
+
+	std::string row = "";
+
+	row = getAxesString(&device->axes_);
+	if(row != "")
+		fileParser_->writeRow(row);
+
+	row = getButtonString(&device->buttons_);
+	if(row != "")
+		fileParser_->writeRow(row);
+
+	row = getTriggerString(&device->triggers_);
+	if(row != "")
+		fileParser_->writeRow(row);
+
+	fileParser_->doneWriting();
 }
 
 bool KeyMapper::handleInputObjectSettings(std::string configSnippet, InputDevice* device)
@@ -210,13 +295,8 @@ bool KeyMapper::handleInputObjectSettings(std::string configSnippet, InputDevice
 		break;
 	case 'B': //Button object
 		button = device->getButtonObject(objectIndex);
-		handleButtonObjectSettings(button, settingsString);
-		break;
-	case 'H': //Hatswitch object
-		if(objectIndex < device->buttons_.size())
-		{
-			handleHatSwitchObjectSettings(device->hatSwitches_[objectIndex], settingsString);	
-		}
+		if(button != nullptr)
+			handleButtonObjectSettings(button, settingsString);
 		break;
 	case 'T': //Trigger object
 		if(objectIndex < device->triggers_.size())
@@ -233,20 +313,154 @@ bool KeyMapper::handleInputObjectSettings(std::string configSnippet, InputDevice
 
 void KeyMapper::handleAxisObjectSettings(InputAxisObject* axis, std::string settingsString)
 {
+	std::vector<std::pair<char, std::string>>* settings = settingsExtracter(settingsString);
+	std::pair<char, std::string>* settingsPair;
+
+	unsigned int intValue;
+	float floatValue;
+
+	for(unsigned int i = 0; i < settings->size(); i++)
+	{
+		settingsPair = &settings->at(i);
+		switch(settingsPair->first)
+		{
+		case 'F': //Float key mapping
+			if(Converter::StrToUInt(settingsPair->second, intValue))
+				axis->addFloatMapping(intValue);
+			break;
+		case 'B': //Bool key mapping
+			if(Converter::StrToUInt(settingsPair->second, intValue))
+				axis->addBoolMapping(intValue);
+			break;
+		case 'D': //Deadzone
+			floatValue = Converter::StrToFloat(settingsPair->second);
+			if(floatValue >= 0.0f)
+				axis->setDeadZone(floatValue);
+			break;
+		case 'T': //Trigger value
+			//Set trigger value
+			break;
+		case 'I': //Inverted
+			if(Converter::StrToUInt(settingsPair->second, intValue))
+				axis->setInverted(intValue > 0);
+			break;
+		case 'S':
+			//Set sensitivity
+			break;
+		default:
+			break;
+		};
+	}
+
+	delete settings;
+}
+
+void KeyMapper::handleButtonObjectSettings(InputButtonObject* button, std::string settingsString)
+{
+	std::vector<std::pair<char, std::string>>* settings = settingsExtracter(settingsString);
+	std::pair<char, std::string>* settingsPair;
+
+	unsigned int intValue;
+	//float floatValue;
+
+	for(unsigned int i = 0; i < settings->size(); i++)
+	{
+		settingsPair = &settings->at(i);
+		switch(settingsPair->first)
+		{
+		case 'F': //Float key mapping
+			if(Converter::StrToUInt(settingsPair->second, intValue))
+				button->addFloatMapping(intValue);
+			break;
+		case 'B': //Bool key mapping
+			if(Converter::StrToUInt(settingsPair->second, intValue))
+				button->addBoolMapping(intValue);
+			break;
+		case 'I': //Inverted
+			if(Converter::StrToUInt(settingsPair->second, intValue))
+				button->setInverted(intValue > 0);
+			break;
+		default:
+			break;
+		};
+	}
+
+	delete settings;
+}
+
+void KeyMapper::handleTriggerObjectSettings(InputTriggerObject* trigger, std::string settingsString)
+{
+	std::vector<std::pair<char, std::string>>* settings = settingsExtracter(settingsString);
+	std::pair<char, std::string>* settingsPair;
+
+	unsigned int intValue;
+	float floatValue;
+
+	for(unsigned int i = 0; i < settings->size(); i++)
+	{
+		settingsPair = &settings->at(i);
+		switch(settingsPair->first)
+		{
+		case 'F': //Float key mapping
+			if(Converter::StrToUInt(settingsPair->second, intValue))
+				trigger->addFloatMapping(intValue);
+			break;
+		case 'B': //Bool key mapping
+			if(Converter::StrToUInt(settingsPair->second, intValue))
+				trigger->addBoolMapping(intValue);
+			break;
+		case 'D': //Deadzone
+			floatValue = Converter::StrToFloat(settingsPair->second);
+			if(floatValue >= 0.0f)
+				trigger->setDeadZone(floatValue);
+			break;
+		case 'T': //Trigger value
+			floatValue = Converter::StrToFloat(settingsPair->second);
+			if(floatValue >= 0.0f)
+				trigger->setTriggerValue(floatValue);
+			break;
+		case 'I': //Inverted
+			if(Converter::StrToUInt(settingsPair->second, intValue))
+				trigger->setInverted(intValue > 0);
+			break;
+		case 'S': //Sensitivity
+			//Set sensitivity
+			break;
+		default:
+			break;
+		};
+	}
+}
+
+std::vector<std::pair<char, std::string>>* KeyMapper::settingsExtracter(std::string settingsString)
+{
 	std::string setting;
 	char settingChar;
-	int settingValue;
 	int index;
-	float settingFloatValue;
+	std::vector<std::pair<char, std::string>>* settings = new std::vector<std::pair<char, std::string>>();
 
 	while(settingsString != "")
 	{
 		index = settingsString.find_first_of(" ");
+
 		if(index < 0)
-			break;
+		{
+			if(settingsString.size() <= 0)
+			{
+				break;
+			}
+			else
+			{
+				index = settingsString.size();
+			}
+		}
+		else if(index == 0)
+		{
+			index = 1;
+		}
 
 		setting = settingsString.substr(0, index);
-		settingsString = settingsString.substr(index + 1);
+		settingsString = settingsString.substr(index);
 
 		if(setting.size() < 3)
 			continue;
@@ -257,182 +471,11 @@ void KeyMapper::handleAxisObjectSettings(InputAxisObject* axis, std::string sett
 			continue;
 
 		setting = setting.substr(index + 1);
-		settingValue = Converter::StrToInt(setting);
-		if(settingValue < 0)
-			continue;
 
-		switch(settingChar)
-		{
-		case 'F': //Float key mapping
-			axis->addFloatMapping(settingValue);
-			break;
-		case 'B': //Bool key mapping
-			axis->addBoolMapping(settingValue);
-			break;
-		case 'D': //Deadzone
-			settingFloatValue = Converter::StrToFloat(setting);
-			if(settingFloatValue < 0.0f)
-				settingFloatValue = 0.0f;
-			axis->setDeadZone(settingFloatValue);
-			break;
-		case 'T': //Trigger value
-			//Set trigger value
-			break;
-		case 'I': //Inverted
-			axis->setInverted(settingValue > 0);
-			break;
-		case 'S':
-			//Set sensitivity
-			break;
-		default:
-			break;
-		};
+		settings->push_back(std::pair<char, std::string>(settingChar, setting));
 	}
-}
 
-void KeyMapper::handleButtonObjectSettings(InputButtonObject* button, std::string settingsString)
-{
-	std::string setting;
-	char settingChar;
-	int settingValue;
-	int index;
-
-	while(settingsString != "")
-	{
-		index = settingsString.find_first_of(" ");
-		if(index < 0)
-			break;
-
-		setting = settingsString.substr(0, index);
-		settingsString = settingsString.substr(index + 1);
-
-		if(setting.size() < 3)
-			continue;
-
-		settingChar = setting[0];
-		index = setting.find_first_of("=");
-		if(index == setting.npos)
-			continue;
-
-		setting = setting.substr(index + 1);
-		settingValue = Converter::StrToInt(setting);
-		if(settingValue < 0)
-			continue;
-
-		switch(settingChar)
-		{
-		case 'F': //Float key mapping
-			button->addFloatMapping(settingValue);
-			break;
-		case 'B': //Bool key mapping
-			button->addBoolMapping(settingValue);
-			break;
-		case 'I': //Inverted
-			button->setInverted(settingValue > 0);
-			break;
-		default:
-			break;
-		};
-	}
-}
-
-void KeyMapper::handleHatSwitchObjectSettings(InputHatSwitchObject* hatSwitch, std::string settingsString)
-{
-	std::string setting;
-	char settingChar;
-	int settingValue;
-	int index;
-
-	while(settingsString != "")
-	{
-		index = settingsString.find_first_of(" ");
-		if(index < 0)
-			break;
-
-		setting = settingsString.substr(0, index);
-		settingsString = settingsString.substr(index + 1);
-
-		if(setting.size() < 3)
-			continue;
-
-		settingChar = setting[0];
-		index = setting.find_first_of("=");
-		if(index = setting.npos)
-			continue;
-
-		setting = setting.substr(index);
-		settingValue = Converter::StrToInt(setting);
-		if(settingValue < 0)
-			continue;
-
-		switch(settingChar)
-		{
-		//Figure shit out
-		default:
-			break;
-		};
-	}
-}
-
-void KeyMapper::handleTriggerObjectSettings(InputTriggerObject* trigger, std::string settingsString)
-{
-	std::string setting;
-	char settingChar;
-	int settingValue;
-	float settingFloatValue;
-	int index;
-
-	while(settingsString != "")
-	{
-		index = settingsString.find_first_of(" ");
-		if(index < 0)
-			break;
-
-		setting = settingsString.substr(0, index);
-		settingsString = settingsString.substr(index);
-
-		if(setting.size() < 3)
-		{
-			settingsString = settingsString.substr(setting.size() + 1);
-			continue;
-		}
-
-		settingChar = setting[0];
-		index = setting.find_first_of("=");
-		if(index == setting.npos)
-			continue;
-
-		setting = setting.substr(index);
-		settingValue = Converter::StrToInt(setting);
-		if(settingValue < 0)
-			continue;
-
-		switch(settingChar)
-		{
-		case 'F': //Float key mapping
-			trigger->addFloatMapping(settingValue);
-			break;
-		case 'B': //Bool key mapping
-			trigger->addBoolMapping(settingValue);
-			break;
-		case 'D': //Deadzone
-			settingFloatValue = Converter::StrToFloat(setting);
-			trigger->setDeadZone(settingFloatValue);
-			break;
-		case 'T': //Trigger value
-			settingFloatValue = Converter::StrToFloat(setting);
-			trigger->setTriggerValue(settingFloatValue);
-			break;
-		case 'I': //Inverted
-			trigger->setInverted(settingValue > 0);
-			break;
-		case 'S': //Sensitivity
-			//Set sensitivity
-			break;
-		default:
-			break;
-		};
-	}
+	return settings;
 }
 
 std::string KeyMapper::getGUIDstring(GUID* guid)
@@ -465,12 +508,12 @@ std::string KeyMapper::getAxesString(std::vector<InputAxisObject*>* axes)
 		std::vector<int> mappings = axis->getFloatMappings();
 
 		for(unsigned int j = 0; j < mappings.size(); j++)
-			axesString += "F=" + Converter::IntToStr(mappings[i]) + " ";
+			axesString += "F=" + Converter::IntToStr(mappings[j]) + " ";
 
 		mappings = axis->getBoolMappings();
 
 		for(unsigned int j = 0; j < mappings.size(); j++)
-			axesString += "B=" + Converter::IntToStr(mappings[i]) + " ";
+			axesString += "B=" + Converter::IntToStr(mappings[j]) + " ";
 	}
 
 	return axesString;
@@ -493,23 +536,18 @@ std::string KeyMapper::getButtonString(std::vector<InputButtonObject*>* buttons)
 
 		for(unsigned int j = 0; j < mappings.size(); j++)
 		{
-			buttonString += "F=" + Converter::IntToStr(mappings[i]) + " ";
+			buttonString += "F=" + Converter::IntToStr(mappings[j]) + " ";
 		}
 
 		mappings = button->getBoolMappings();
 
 		for(unsigned int j = 0; j < mappings.size(); j++)
 		{
-			buttonString += "B=" + Converter::IntToStr(mappings[i]) + " ";
+			buttonString += "B=" + Converter::IntToStr(mappings[j]) + " ";
 		}
 	}
 
 	return buttonString;
-}
-
-std::string KeyMapper::getHatSwitchString(std::vector<InputHatSwitchObject*>* hatSwitches)
-{
-	return "";
 }
 
 std::string KeyMapper::getTriggerString(std::vector<InputTriggerObject*>* triggers)
@@ -529,12 +567,16 @@ std::string KeyMapper::getTriggerString(std::vector<InputTriggerObject*>* trigge
 		std::vector<int> mappings = trigger->getFloatMappings();
 
 		for(unsigned int j = 0; j < mappings.size(); j++)
-			triggerString += "F=" + Converter::IntToStr(mappings[i]) + " ";
+		{
+			triggerString += "F=" + Converter::IntToStr(mappings[j]) + " ";
+		}
 
 		mappings = trigger->getBoolMappings();
 
 		for(unsigned int j = 0; j < mappings.size(); j++)
-			triggerString += "B=" + Converter::IntToStr(mappings[i]) + " ";
+		{
+			triggerString += "B=" + Converter::IntToStr(mappings[j]) + " ";
+		}
 	}
 
 	return triggerString;
@@ -544,13 +586,4 @@ std::string KeyMapper::removeComment(std::string str)
 {
 	int strIndex = str.find_first_of("//");
 	return str.substr(0, strIndex);
-}
-
-std::string KeyMapper::configMessage()
-{
-	std::string message = "";
-
-	message += "// This file contains key mappings.\n";
-
-	return message;
 }

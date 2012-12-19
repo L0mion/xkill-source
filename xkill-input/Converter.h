@@ -3,10 +3,9 @@
 #include <string>
 #include <sstream>
 
-//! A temporary converter class
+//! A converter class
 /*!
-Should probably not be here and is probably not necessary in input
-outside debugging. Used to convert floats and ints to string in GetInputInformationString
+Should probably not be here. Used to convert floats and ints to string in GetInputInformationString
 in InputManager.
 */
 

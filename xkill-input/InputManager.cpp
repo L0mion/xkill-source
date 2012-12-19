@@ -4,11 +4,14 @@
 
 InputManager::InputManager(void)
 {
+	dInput_ = nullptr;
+	keyMapper_ = nullptr;
 }
 
 InputManager::~InputManager(void)
 {
-	keyMapper_.saveConfig(devices_);
+	keyMapper_->saveConfig(devices_);
+	delete keyMapper_;
 
 	std::vector<InputDevice*>::iterator it = devices_.begin();
 	for(; it != devices_.end(); it++)
@@ -19,6 +22,9 @@ InputManager::~InputManager(void)
 
 bool InputManager::InitInput(HWND hWindow, std::string configFilePath)
 {
+	keyMapper_ = new KeyMapper();
+	keyMapper_->init(configFilePath);
+
 	HRESULT result;
 	nrOfXInputDevices_ = 0;
 
@@ -34,6 +40,7 @@ bool InputManager::InitInput(HWND hWindow, std::string configFilePath)
 	GUID guid;
 	memset(&guid, 0, sizeof(guid));
 	QTInputDevices* mouseAndKeyboard = new QTInputDevices(guid, "Mouse & Keyboard", devices_.size());
+	keyMapper_->getConfigForNewController(mouseAndKeyboard);
 	devices_.push_back(mouseAndKeyboard);
 	mouseAndKeyboard_ = mouseAndKeyboard;
 
@@ -53,9 +60,6 @@ bool InputManager::InitInput(HWND hWindow, std::string configFilePath)
 	//device = new DirectInputKeyboard(dInputDevice, GUID_SysKeyboard, "Keyboard"); //Kolla ifall tangentbordet är inkopplad genom att köra en enum med guid:et
 	//device->Init(hWindow);
 	//devices_.push_back(device);
-
-	keyMapper_.init(configFilePath);
-	keyMapper_.loadConfig(devices_);
 
 	return true;
 }
@@ -116,8 +120,11 @@ int InputManager::UpdateNumberOfGamepads(HWND hWindow)
 
 		if(!deviceAlreadyAdded)
 		{
-			addNewDevice(hWindow, enumDevicesStruct.deviceInstanceGUIDs[i], enumDevicesStruct.deviceProductGUIDs[i], enumDevicesStruct.deviceNames[i]);
-			nrOfGamepadsAdded++;
+			if(addNewDevice(hWindow, enumDevicesStruct.deviceInstanceGUIDs[i], enumDevicesStruct.deviceProductGUIDs[i], enumDevicesStruct.deviceNames[i]))
+			{
+				keyMapper_->getConfigForNewController(devices_[devices_.size() - 1]);
+				nrOfGamepadsAdded++;
+			}
 		}
 	}
 
@@ -220,16 +227,6 @@ std::string InputManager::GetInputInformationString()
 			{
 				str += "Off\n";
 			}
-		}
-
-		for(unsigned int j = 0; j < inputState.hatSwitches.size(); j++)
-		{
-			str += "Hat Switch #" + Converter::IntToStr(j) + ": ";
-
-			for(int i = 0; i < 4; i++)
-				str += Converter::IntToStr(inputState.hatSwitches[j]->buttonDown(i));
-
-			str += "\n";
 		}
 
 		for(unsigned int j = 0; j < inputState.buttons.size(); j++)

@@ -84,12 +84,6 @@ void DirectInputMouse::createInputObjectsFromLayout()
 		inputObjects_.push_back(buttons_[buttons_.size() - 1]);
 	}
 
-	for(int i = 0; i < inputLayout_.nrOfHatSwitches; i++)
-	{
-		hatSwitches_.push_back(new InputHatSwitchObject());
-		inputObjects_.push_back(hatSwitches_[hatSwitches_.size() - 1]);
-	}
-
 	for(int i = 0; i < inputLayout_.nrOfTriggers; i++)
 	{
 		triggers_.push_back(new InputTriggerObject(0, 0xFF));
