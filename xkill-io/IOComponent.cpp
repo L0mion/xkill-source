@@ -44,7 +44,7 @@ bool IOComponent::init()
 		sucessfulInit = initMdlDescs();
 
 	fbxLoader_ = new LoaderFbx();
-	fbxLoader_->load("../../xkill-resources/xkill-models/xkill_weapon_02.fbx");
+	fbxLoader_->load("../../xkill-resources/xkill-models/box.fbx");
 
 	return sucessfulInit;
 }

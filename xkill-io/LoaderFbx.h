@@ -16,36 +16,21 @@ public:
 	~LoaderFbx();
 
 	bool load(std::string filename);
+
 private:
-	void initFbxManager();
-	void initFbxIOSettings();
-	bool initFbxImporter(std::string filename);
-	void initFbxScene();
+	bool createFbxManager();
+	bool createFbxScene();
+	bool loadScene(std::string filename);
 	
-	void	parseNode(FbxNode* node);
-	void	parseMesh(FbxMesh* mesh);
-	void	parsePolyGroups(FbxMesh* mesh, int polygonIndex);
-	int		parseIndex(FbxMesh* mesh, int polygonIndex, int insidePolygonIndex);
-	void	parseVertexColor(FbxMesh* mesh, int controlPointIndex, int vertexId);
-	void	parseTexcoords(FbxMesh* mesh, int polygonIndex, int insidePolygonIndex, int controlPointIndex);
-	void	parseNormals(FbxMesh* mesh, int vertexId);
+	void parseNode(FbxNode* node);
+	void parseMesh(FbxNode* node);
+	void parseVertexPositions(FbxMesh* mesh, int polygonVertexCount);
+	void parseVertexNormals(FbxMesh* mesh, int polygonCount);
 
-
-	FbxString getAttributeTypeName(FbxNodeAttribute::EType type);
-	void printTabs();
-	void printAttribute(FbxNodeAttribute* attribute);
-	void printNode(FbxNode* node);
-
-	int numTabs_;
-	std::vector<unsigned int>	indices_;
-	std::vector<unsigned int>	polygonGroups_;
-	std::vector<FbxColor>		vertexColors_;
-	std::vector<FbxVector2>		texcoords_;
-
+	std::vector<Float3> vertexPositions;
+	std::vector<Float3> vertexNormals;
 
 	FbxManager*		fbxManager_;
-	FbxIOSettings*	fbxIOSettings_;
-	FbxImporter*	fbxImporter_;
 	FbxScene*		fbxScene_;
 };
 
