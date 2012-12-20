@@ -24,7 +24,6 @@ bool GameManager::init(HWND windowHandle, HWND parentWindowHandle)
 	ENTITYTYPE listOfEntitiesToBeCreated[] =
 	{
 		WORLD,
-		WORLD,
 		PLAYER,
 		PLAYER,
 		PLAYER,

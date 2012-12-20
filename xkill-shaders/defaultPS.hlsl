@@ -16,8 +16,11 @@ SamplerState ss : register(s0);
 PSOut defaultPS(VSOut pIn)
 {
 	PSOut output;
+
+	float2 texcoord = float2(pIn.texcoord.x, 1-pIn.texcoord.y);
+
 	output.normal.xyz	= pIn.normalW;
-	output.albedo		= texAlbedo.SampleLevel(ss, pIn.texcoord, 0);
+	output.albedo		= texAlbedo.SampleLevel(ss, texcoord, 0);
 	output.material		= float4(specularTerm, 1.0f);
 
 	return output;
