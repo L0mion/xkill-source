@@ -4,7 +4,9 @@
 #include <vector>
 
 #include <xkill-utilities/MeshMaterial.h>
+#include <xkill-utilities/MeshVertices.h>
 
+template <class Vertex>    
 class VB;
 class SubsetD3D;
 
@@ -21,18 +23,18 @@ public:
 	\param ibs	A collection of index buffers.
 	*/
 	ModelD3D(
-		VB*									vertexBuffer,
+		VB<VertexPosNormTex>*				vertexBuffer,
 		const std::vector<SubsetD3D*>		subsets,
 		const std::vector<MeshMaterial>		materials);
 	//! Deletes VB-type and vector of IBs.
 	~ModelD3D();
 
-	VB*							getVertexBuffer();
+	VB<VertexPosNormTex>*		getVertexBuffer();
 	std::vector<SubsetD3D*>&	getSubsetD3Ds();
 	std::vector<MeshMaterial>&	getMaterials();
 protected:
 private:
-	VB*							vertexBuffer_;	//!< Vertex buffer.
+	VB<VertexPosNormTex>*		vertexBuffer_;	//!< Vertex buffer.
 	std::vector<SubsetD3D*>		subsets_;		//!< Index buffers.
 	std::vector<MeshMaterial>	materials_;		//!< Materials.
 };

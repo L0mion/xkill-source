@@ -38,6 +38,8 @@ public:
 	virtual void SetForceFeedback(float leftMotorScale, float rightMotorScale);
 	virtual bool IsForceFeedbackCapable();
 
+	virtual void setStandardMappings();
+
 	virtual InputDeviceType GetType();
 
 	//! Callback function used when enumerating the device objects

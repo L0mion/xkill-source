@@ -138,7 +138,6 @@ EventManager::getInstance()->state_TemporaryVariableUsedAsSubstituteForStateMach
 #ifndef _DEBUG
 	#define DEBUGPRINT(dataStream)
 #endif
-
 // Defines DEBUGPRINT to a cout function in Debug configuration
 #ifdef _DEBUG
 	#define DEBUGPRINT(dataStream)									\

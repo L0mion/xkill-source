@@ -3,6 +3,7 @@
 #include <windows.h>
 
 #include "MeshModel.h"
+#include "DebugShape.h"
 
 IAttribute::IAttribute()
 {
@@ -38,9 +39,10 @@ SpatialAttribute::~SpatialAttribute()
 
 RenderAttribute::RenderAttribute()
 {
-	transparent		= false;
-	tessellation	= false;
-	meshID		= 0;
+	transparent			= false;
+	tessellation		= false;
+
+	meshID			= 0;
 	textureID		= 0;
 }
 RenderAttribute::~RenderAttribute()
@@ -59,6 +61,7 @@ PhysicsAttribute::PhysicsAttribute()
 	gravity = Float3(0.0f, -10.0f, 0.0f);
 	
 	isProjectile = false;
+	isExplosionSphere = false;
 
 	angularVelocity.x = 0; 
 	angularVelocity.y = 0;
@@ -76,7 +79,7 @@ ProjectileAttribute::ProjectileAttribute()
 	entityIdOfCreator = -1;
 	currentLifeTimeLeft = 10.0f;
 	explodeOnImnpact = false;
-	explosionSphereRadius = 1.0f;
+	explosionSphereRadius = 0.01f;
 }
 ProjectileAttribute::~ProjectileAttribute()
 {
@@ -98,7 +101,6 @@ CameraAttribute::CameraAttribute()
 	zFar = 40.0f;
 	zNear = 0.01f;
 }
-
 CameraAttribute::~CameraAttribute()
 {
 }
@@ -106,7 +108,8 @@ CameraAttribute::~CameraAttribute()
 InputAttribute::InputAttribute()
 {
 	fire = false;
-	changeWeapon = false;
+	changeAmmunitionType = false;
+	changeAmmunitionType = false;
 	ZeroMemory(&position,sizeof(position));
 	ZeroMemory(&rotation,sizeof(rotation));
 	DirectX::XMFLOAT3 test;
@@ -194,7 +197,7 @@ void WeaponStatsAttribute::setWeaponStats(AmmunitionType ammunitionType, FiringM
 	switch(ammunitionType)
 	{
 	case BULLET: //One powerful accurate bullet.
-		velocityOfEachProjectile = 2500.0f;
+		velocityOfEachProjectile = 4000.0f;
 		damgeOfEachProjectile = 5;
 		break;
 	case SCATTER: //Many weak and less accurate bullets.
@@ -238,7 +241,6 @@ void WeaponStatsAttribute::setWeaponStats(AmmunitionType ammunitionType, FiringM
 
 	nrOfShotsLeftInClip = clipSize;
 }
-
 void WeaponStatsAttribute::setWeaponToDebugMachineGun()
 {
 	totalNrOfShots = -1;
@@ -258,5 +260,31 @@ void WeaponStatsAttribute::setWeaponToDebugMachineGun()
 }
 
 WeaponStatsAttribute::~WeaponStatsAttribute()
+{
+}
+
+DebugShapeAttribute::DebugShapeAttribute()
+{
+	shape	= nullptr;
+	render	= false;
+}
+DebugShapeAttribute::~DebugShapeAttribute()
+{
+	//Do nothing.
+}
+void DebugShapeAttribute::clean()
+{
+	if(shape)
+	{
+		delete shape;
+		shape = nullptr;
+	}
+	render = false;
+}
+ExplosionSphereAttribute::ExplosionSphereAttribute()
+{
+	currentLifeTimeLeft = 1.0f;
+}
+ExplosionSphereAttribute::~ExplosionSphereAttribute()
 {
 }

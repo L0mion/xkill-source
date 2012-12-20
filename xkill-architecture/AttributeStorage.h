@@ -41,6 +41,15 @@ public:
 	{
 	}
 
+	~AttributeStorage()
+	{
+		for(int i=0; i<attributes.size(); i++)
+		{
+			IAttribute* a = (IAttribute*)&attributes[i];
+			a->clean();
+		}
+	}
+
 	void init(AttributeType type)
 	{
 		this->type = type;
@@ -85,13 +94,18 @@ public:
 
 		// Save access controller in Entity so it can be deleted later
 		owner->addAttribute(getAttributeController());
-
+		
 		// Get attribute
 		return &attributes[index];
 	}
 
 	void deleteAttribute(int index)
 	{
+		// Clean Attribute before  deletion
+		IAttribute* a = (IAttribute*)&attributes[index];
+		a->clean();
+		
+		// Delete Attribute
 		owners[index] = 0;
 		deleted.push(index);
 	}
