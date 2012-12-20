@@ -4,6 +4,7 @@
 
 #include "dllUtilities.h"
 #include "EventType.h"
+#include "FiniteState.h"
 
 class IObserver;
 enum EventType;
@@ -26,6 +27,9 @@ private:
 
 public:
 	static EventManager* getInstance();
+
+	// HACK: Used to access global game state
+	StateType state_TemporaryVariableUsedAsSubstituteForStateMachine;
 
 	void addObserver(IObserver* o, EventType type);
 
@@ -125,6 +129,10 @@ EventManager::getInstance()->addObserver(Subscriber, EventType);
 	EventManager::getInstance()->sendEvent(&e);						\
 	EntityPointer = e.entities;										\
 }
+
+// Fetches a owners of a specific Attribute from AttributeManager
+#define GET_STATE()													\
+EventManager::getInstance()->state_TemporaryVariableUsedAsSubstituteForStateMachine								
 
 // Defines DEBUGPRINT to an empty function in Release configuration
 #ifndef _DEBUG

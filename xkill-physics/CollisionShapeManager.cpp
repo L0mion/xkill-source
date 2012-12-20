@@ -78,7 +78,6 @@ btCollisionShape* CollisionShapeManager::loadCollisionShape(unsigned int meshID)
 	}
 
 	std::vector<VertexPosNormTex> vertices;
-	
 	btTriangleMesh *triangleMesh = new btTriangleMesh();;
 	vertices = meshAttribute->mesh->getGeometry().getVertices();
 	unsigned int numSubsets = meshAttribute->mesh->getGeometry().getNumSubsets();

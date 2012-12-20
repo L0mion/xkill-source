@@ -39,8 +39,6 @@ private:
 	InputComponent*			input_;
 	GameComponent*			game_;
 	ScoreComponent*			score_;
-	//FiniteStateMachine		stateMachine_;
-	StateType				state_TemporaryVariableUsedAsSubstituteForStateMachine;
 	IOComponent*			ioComponent_;
 
 public:
@@ -49,5 +47,6 @@ public:
 
 	bool init(HWND windowHandle, HWND parentWindowHandle);
 	void onEvent(Event* e);
+	void resetGame();
 	void update(float delta);
 };

@@ -22,6 +22,8 @@
 #include "VB.h"
 #include "IB.h"
 #include "renderingUtilities.h"
+#include "TypeFX.h"
+#include "ManagementMath.h"
 #include "Renderer.h"
 
 //temp
@@ -46,6 +48,7 @@ Renderer::Renderer(HWND windowHandle)
 	managementRS_		= nullptr;
 	managementGBuffer_	= nullptr;
 	managementDebug_	= nullptr;
+	managementMath_		= nullptr;
 
 	attributesSpatial_		= nullptr;
 	attributesPosition_		= nullptr;
@@ -72,6 +75,7 @@ Renderer::~Renderer()
 	SAFE_DELETE(managementSS_);
 	SAFE_DELETE(managementRS_);
 	SAFE_DELETE(managementGBuffer_);
+	SAFE_DELETE(managementMath_);
 
 	//d3dDebug_->reportLiveDeviceObjects();
 	SAFE_DELETE(managementDebug_);
@@ -95,10 +99,20 @@ void Renderer::reset()
 }
 HRESULT Renderer::resize(unsigned int screenWidth, unsigned int screenHeight)
 {
+	// Calculate number of cameras
+	unsigned numCameras = 0;
+	for(unsigned i=0; i<attributesCameraOwner_->size(); i++)
+	{
+		if(attributesCameraOwner_->at(i)!=0)
+		{
+			numCameras++;
+		}
+	}
+	
+	// Stuff
 	HRESULT hr = S_OK;
-
 	unsigned int numViewports, csDispatchX, csDispatchY;
-	numViewports	= winfo_->getNumViewports();
+	numViewports	= numCameras; //winfo_->getNumViewports();
 	csDispatchX		= screenWidth	/ CS_TILE_SIZE;
 	csDispatchY		= screenHeight	/ CS_TILE_SIZE;
 	winfo_->init(
@@ -143,6 +157,7 @@ HRESULT Renderer::init()
 		hr = initManagementRS();
 //	if(SUCCEEDED(hr))
 //		hr = initManagementDebug();
+	initManagementMath();
 	if(SUCCEEDED(hr))
 		hr = initManagementGBuffer();
 
@@ -170,6 +185,7 @@ void Renderer::initAttributes()
 	GET_ATTRIBUTES(attributesSpatial_,		SpatialAttribute,		ATTRIBUTE_SPATIAL);
 	GET_ATTRIBUTES(attributesPosition_,		PositionAttribute,		ATTRIBUTE_POSITION);
 
+	GET_ATTRIBUTE_OWNERS(attributesCameraOwner_, ATTRIBUTE_CAMERA);
 	GET_ATTRIBUTE_OWNERS(attributesRenderOwner_, ATTRIBUTE_RENDER);
 }
 void Renderer::initWinfo()
@@ -296,6 +312,10 @@ HRESULT Renderer::initManagementDebug()
 
 	return hr;
 }
+void Renderer::initManagementMath()
+{
+	managementMath_ = new ManagementMath();
+}
 
 void Renderer::render(float delta)
 {
@@ -304,22 +324,30 @@ void Renderer::render(float delta)
 	managementD3D_->clearDepthBuffer();
 
 	//Update per-frame constant buffer.
-	managementCB_->vsSet(CB_TYPE_FRAME, CB_REGISTER_FRAME, managementD3D_->getDeviceContext());
+	managementCB_->setCB(CB_TYPE_FRAME, TypeFX_VS, CB_REGISTER_FRAME, managementD3D_->getDeviceContext());
 	managementCB_->updateCBFrame(managementD3D_->getDeviceContext(), managementLight_->getNumLights());
 
 	//Render to each viewport.
+	int cameraIndex = 0;
 	for(unsigned int i = 0; i < attributesCamera_->size(); i++)
 	{
-		//Set viewport.
-		managementViewport_->setViewport(managementD3D_->getDeviceContext(), i);
+		if(attributesCameraOwner_->at(i)!=0)
+		{
+			//Set viewport.
+			managementViewport_->setViewport(managementD3D_->getDeviceContext(), cameraIndex);
 
-		//Render viewport.
-		unsigned int viewportTopX = static_cast<unsigned int>(managementViewport_->getViewport(i).TopLeftX);
-		unsigned int viewportTopY = static_cast<unsigned int>(managementViewport_->getViewport(i).TopLeftY);
-		renderViewport(
-			attributesCamera_->at(i), 
-			viewportTopX, 
-			viewportTopY,i);
+			//Render viewport.
+			unsigned int viewportTopX = static_cast<unsigned int>(managementViewport_->getViewport(cameraIndex).TopLeftX);
+			unsigned int viewportTopY = static_cast<unsigned int>(managementViewport_->getViewport(cameraIndex).TopLeftY);
+			renderViewport(
+				attributesCamera_->at(cameraIndex), 
+				viewportTopX, 
+				viewportTopY,
+				cameraIndex);
+
+			// HACK: Increment camera index
+			cameraIndex++;
+		}	
 	}
 }
 void Renderer::renderViewport(
@@ -331,8 +359,8 @@ void Renderer::renderViewport(
 	//Get camera's view- and projection matrix, and their inverses.
 	DirectX::XMFLOAT4X4 viewMatrix((float*)&cameraAt.mat_view);
 	DirectX::XMFLOAT4X4 projectionMatrix((float*)&cameraAt.mat_projection);
-	DirectX::XMFLOAT4X4 viewMatrixInverse		= calculateMatrixInverse(viewMatrix);
-	DirectX::XMFLOAT4X4 projectionMatrixInverse	= calculateMatrixInverse(projectionMatrix);
+	DirectX::XMFLOAT4X4 viewMatrixInverse		= managementMath_->calculateMatrixInverse(viewMatrix);
+	DirectX::XMFLOAT4X4 projectionMatrixInverse	= managementMath_->calculateMatrixInverse(projectionMatrix);
 
 	//Get eye position.
 	CameraAttribute*	cameraAtP = &cameraAt;
@@ -341,7 +369,7 @@ void Renderer::renderViewport(
 	DirectX::XMFLOAT3	eyePosition			= *(DirectX::XMFLOAT3*)&positionAttribute->position;
 
 	//Update per-viewport constant buffer.
-	managementCB_->vsSet(CB_TYPE_CAMERA, CB_REGISTER_CAMERA, managementD3D_->getDeviceContext());
+	managementCB_->setCB(CB_TYPE_CAMERA, TypeFX_VS, CB_REGISTER_CAMERA, managementD3D_->getDeviceContext());
 	managementCB_->updateCBCamera(managementD3D_->getDeviceContext(),
 		viewMatrix,
 		viewMatrixInverse,
@@ -365,7 +393,7 @@ void Renderer::renderViewportToGBuffer(DirectX::XMFLOAT4X4 viewMatrix, DirectX::
 	managementFX_->setShader(devcon, SHADERID_VS_DEFAULT);
 	managementFX_->setShader(devcon, SHADERID_PS_DEFAULT);
 
-	managementSS_->setPS(devcon, SS_ID_DEFAULT, 0);
+	managementSS_->setSS(devcon, TypeFX_PS, 0, SS_ID_DEFAULT);
 	managementRS_->setRS(devcon, RS_ID_DEFAULT);
 
 	managementGBuffer_->setGBuffersAndDepthBufferAsRenderTargets(devcon, managementD3D_->getDepthBuffer());
@@ -401,7 +429,14 @@ void Renderer::renderViewportToGBuffer(DirectX::XMFLOAT4X4 viewMatrix, DirectX::
 		}
 	}
 
-	renderGBufferClean();
+	managementGBuffer_->unsetGBuffersAndDepthBufferAsRenderTargets(devcon);
+
+	managementFX_->unsetAll(devcon);
+	managementFX_->unsetLayout(devcon);
+
+	managementSS_->unsetSS(devcon, TypeFX_PS, 0);
+
+	devcon->RSSetState(nullptr);
 }
 void Renderer::renderViewportToBackBuffer()
 {
@@ -414,9 +449,9 @@ void Renderer::renderViewportToBackBuffer()
 	managementFX_->setShader(devcon, SHADERID_CS_DEFAULT);
 
 	//Set constant buffers.
-	managementCB_->csSet(CB_TYPE_FRAME,		CB_REGISTER_FRAME,		devcon);
-	managementCB_->csSet(CB_TYPE_INSTANCE,	CB_REGISTER_INSTANCE,	devcon); //remove me
-	managementCB_->csSet(CB_TYPE_CAMERA,	CB_REGISTER_CAMERA,		devcon);
+	managementCB_->setCB(CB_TYPE_FRAME,		TypeFX_CS, CB_REGISTER_FRAME,		devcon);
+	managementCB_->setCB(CB_TYPE_INSTANCE,	TypeFX_CS, CB_REGISTER_INSTANCE,	devcon); //remove me
+	managementCB_->setCB(CB_TYPE_CAMERA,	TypeFX_CS, CB_REGISTER_CAMERA,		devcon);
 	managementCB_->updateCBInstance(devcon, winfo_->getScreenWidth(), winfo_->getScreenHeight());
 
 	//Set lights.
@@ -426,7 +461,7 @@ void Renderer::renderViewportToBackBuffer()
 	managementGBuffer_->setGBuffersAsCSShaderResources(devcon);
 	
 	//Set default samplerstate.
-	managementSS_->setCS(devcon, SS_ID_DEFAULT, 0);
+	managementSS_->setSS(devcon, TypeFX_CS, 0, SS_ID_DEFAULT);
 
 	//Call compute shader kernel.
 	unsigned int dispatchX = winfo_->getCSDispathX() / managementViewport_->getNumViewportsX();
@@ -450,12 +485,12 @@ void Renderer::renderAttribute(
 	//Get transform matrices.
 	SpatialAttribute*	spatialAt			= &attributesSpatial_->at(renderAt->spatialAttribute.index);
 	PositionAttribute*	positionAt			= &attributesPosition_->at(spatialAt->positionAttribute.index);
-	DirectX::XMFLOAT4X4 worldMatrix			= calculateWorldMatrix(spatialAt, positionAt);
-	DirectX::XMFLOAT4X4 worldMatrixInverse	= calculateMatrixInverse(worldMatrix);
-	DirectX::XMFLOAT4X4 finalMatrix			= calculateFinalMatrix(worldMatrix, viewMatrix, projectionMatrix);
+	DirectX::XMFLOAT4X4 worldMatrix			= managementMath_->calculateWorldMatrix(spatialAt, positionAt);
+	DirectX::XMFLOAT4X4 worldMatrixInverse	= managementMath_->calculateMatrixInverse(worldMatrix);
+	DirectX::XMFLOAT4X4 finalMatrix			= managementMath_->calculateFinalMatrix(worldMatrix, viewMatrix, projectionMatrix);
 	
 	//Update per-object constant buffer.
-	managementCB_->vsSet(CB_TYPE_OBJECT, CB_REGISTER_OBJECT, devcon);
+	managementCB_->setCB(CB_TYPE_OBJECT, TypeFX_VS, CB_REGISTER_OBJECT, devcon);
 	managementCB_->updateCBObject(
 		devcon, 
 		finalMatrix, 
@@ -501,7 +536,7 @@ void Renderer::renderSubset(IB* ib, MeshMaterial& material)
 	devcon->PSSetShaderResources(1, 1, &texNormal);
 
 	//Set per-subset constant buffer.
-	managementCB_->psSet(CB_TYPE_SUBSET, CB_REGISTER_SUBSET, devcon);
+	managementCB_->setCB(CB_TYPE_SUBSET, TypeFX_PS, CB_REGISTER_SUBSET, devcon);
 	DirectX::XMFLOAT3 dxSpec(1.0f, 1.0f, 1.0f); //((float*)&material.getSpecularTerm());
 	managementCB_->updateCBSubset(
 		devcon,
@@ -539,15 +574,15 @@ void Renderer::renderDebugShape(
 	//Get transform matrices.
 	SpatialAttribute*	spatialAt			= &attributesSpatial_->at(debugShapeAt->spatialAttribute.index);
 	PositionAttribute*	positionAt			= &attributesPosition_->at(spatialAt->positionAttribute.index);
-	DirectX::XMFLOAT4X4 worldMatrix			= calculateWorldMatrix(spatialAt, positionAt);
-	DirectX::XMFLOAT4X4 worldMatrixInverse	= calculateMatrixInverse(worldMatrix);
-	DirectX::XMFLOAT4X4 finalMatrix			= calculateFinalMatrix(worldMatrix, viewMatrix, projectionMatrix);
+	DirectX::XMFLOAT4X4 worldMatrix			= managementMath_->calculateWorldMatrix(spatialAt, positionAt);
+	DirectX::XMFLOAT4X4 worldMatrixInverse	= managementMath_->calculateMatrixInverse(worldMatrix);
+	DirectX::XMFLOAT4X4 finalMatrix			= managementMath_->calculateFinalMatrix(worldMatrix, viewMatrix, projectionMatrix);
 	
 	managementFX_->setShader(devcon, SHADERID_VS_COLOR);
 	managementFX_->setShader(devcon, SHADERID_PS_COLOR);
 
 	//Update per-object constant buffer.
-	managementCB_->vsSet(CB_TYPE_OBJECT, CB_REGISTER_OBJECT, devcon);
+	managementCB_->setCB(CB_TYPE_OBJECT, TypeFX_VS, CB_REGISTER_OBJECT, devcon);
 	managementCB_->updateCBObject(
 		devcon, 
 		finalMatrix, 
@@ -590,22 +625,22 @@ void Renderer::renderAnimatedMesh(DirectX::XMFLOAT4X4 viewMatrix, DirectX::XMFLO
 									0.0f, 0.0f, 0.01f, 0.0f,
 									10.0f, 2.3f, 1.0f, 1.0f);
 	DirectX::XMFLOAT4X4 worldMatrixInverse	= worldMatrix;
-	DirectX::XMFLOAT4X4 finalMatrix			= calculateFinalMatrix(worldMatrix, viewMatrix, projectionMatrix);
+	DirectX::XMFLOAT4X4 finalMatrix			= managementMath_->calculateFinalMatrix(worldMatrix, viewMatrix, projectionMatrix);
 	
-	managementCB_->vsSet(CB_TYPE_OBJECT, CB_REGISTER_OBJECT, devcon);
+	managementCB_->setCB(CB_TYPE_OBJECT, TypeFX_VS, CB_REGISTER_OBJECT, devcon);
 	managementCB_->updateCBObject(devcon, finalMatrix, worldMatrix, worldMatrixInverse);
 	
 	animatedMesh_->update(0.002f);
 	std::vector<DirectX::XMFLOAT4X4> finalTransforms;
 	animatedMesh_->getSkinInfo()->getFinalTransforms("Take1", animatedMesh_->getTimePosition(), &finalTransforms);
 
-	managementCB_->vsSet(CB_TYPE_BONE, CB_REGISTER_BONE, devcon);
+	managementCB_->setCB(CB_TYPE_BONE, TypeFX_VS, CB_REGISTER_BONE, devcon);
 	managementCB_->updateCBBone(devcon, finalTransforms);
 
 	managementFX_->setShader(devcon, SHADERID_VS_ANIMATION);
 	managementFX_->setShader(devcon, SHADERID_PS_ANIMATION);
 
-	managementSS_->setPS(devcon, SS_ID_DEFAULT, 0);
+	managementSS_->setSS(devcon, TypeFX_PS, 0, SS_ID_DEFAULT);
 	managementRS_->setRS(devcon, RS_ID_DEFAULT);
 
 	managementGBuffer_->setGBuffersAndDepthBufferAsRenderTargets(devcon, managementD3D_->getDepthBuffer());
@@ -628,18 +663,9 @@ void Renderer::renderAnimatedMesh(DirectX::XMFLOAT4X4 viewMatrix, DirectX::XMFLO
 	devcon->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 	devcon->DrawIndexed(animatedMesh_->getNumIndices(), 0, 0);
 
-	renderGBufferClean();
-}
-void Renderer::renderGBufferClean()
-{
-	ID3D11DeviceContext* devcon = managementD3D_->getDeviceContext();
-
 	managementGBuffer_->unsetGBuffersAndDepthBufferAsRenderTargets(devcon);
 
-	//put me into managementfx?
-	devcon->VSSetShader(NULL, NULL, 0);
-	devcon->PSSetShader(NULL, NULL, 0);
-	devcon->CSSetShader(NULL, NULL, 0);
+	managementFX_->unsetAll(devcon);
 
 	devcon->PSSetSamplers(0, 0, nullptr);
 	devcon->IASetInputLayout(nullptr);
@@ -657,60 +683,6 @@ void Renderer::renderBackBufferClean()
 		resourceViews[i] = nullptr;
 	devcon->CSSetShaderResources(0, GBUFFERID_NUM_BUFFERS, resourceViews);
 	devcon->CSSetSamplers(0, 0, nullptr);
-}
-
-DirectX::XMFLOAT4X4 Renderer::calculateMatrixInverse(DirectX::XMFLOAT4X4 matrix)
-{
-	DirectX::CXMMATRIX	cxmMatrix		= DirectX::XMLoadFloat4x4(&matrix);
-	DirectX::XMVECTOR	vDeterminant	= DirectX::XMMatrixDeterminant(cxmMatrix);
-	DirectX::XMMATRIX	xmMatrixInverse = DirectX::XMMatrixInverse(&vDeterminant, cxmMatrix);
-	
-	DirectX::XMFLOAT4X4 matrixInverse;
-	DirectX::XMStoreFloat4x4(&matrixInverse, xmMatrixInverse);
-	
-	return matrixInverse;
-}
-DirectX::XMFLOAT4X4 Renderer::calculateWorldMatrix(
-	SpatialAttribute* spatialAttribute, 
-	PositionAttribute* positionAttribute)
-{
-	DirectX::XMMATRIX translation = DirectX::XMMatrixTranslation(positionAttribute->position.x,
-																 positionAttribute->position.y,
-																 positionAttribute->position.z);
-
-	DirectX::XMMATRIX scaling = DirectX::XMMatrixScaling(spatialAttribute->scale.x,
-														 spatialAttribute->scale.y,
-														 spatialAttribute->scale.z);
-
-	DirectX::XMFLOAT4 fRotation = DirectX::XMFLOAT4(spatialAttribute->rotation.x,
-													spatialAttribute->rotation.y,
-													spatialAttribute->rotation.z,
-													spatialAttribute->rotation.w);
-
-	DirectX::XMVECTOR qRotation = DirectX::XMLoadFloat4(&fRotation);
-	DirectX::XMMATRIX rotation = DirectX::XMMatrixRotationQuaternion(qRotation);
-
-	DirectX::XMMATRIX mWorldMatrix = scaling * rotation * translation;
-	DirectX::XMFLOAT4X4 worldMatrix;
-	DirectX::XMStoreFloat4x4(&worldMatrix, mWorldMatrix);
-
-	return worldMatrix;
-}
-DirectX::XMFLOAT4X4 Renderer::calculateFinalMatrix(
-	DirectX::XMFLOAT4X4 worldMatrix, 
-	DirectX::XMFLOAT4X4 viewMatrix, 
-	DirectX::XMFLOAT4X4 projectionMatrix)
-{
-	DirectX::CXMMATRIX mView		= DirectX::XMLoadFloat4x4(&viewMatrix);
-	DirectX::CXMMATRIX mProjection	= DirectX::XMLoadFloat4x4(&projectionMatrix);
-	DirectX::CXMMATRIX mWorld		= DirectX::XMLoadFloat4x4(&worldMatrix);
-
-	DirectX::XMMATRIX mFinalMatrix = mWorld * mView * mProjection;
-	
-	DirectX::XMFLOAT4X4 finalMatrix;
-	DirectX::XMStoreFloat4x4(&finalMatrix, mFinalMatrix);
-
-	return finalMatrix;
 }
 
 void Renderer::loadTextures(TexDesc* texdesc)

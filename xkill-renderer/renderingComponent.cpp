@@ -11,6 +11,7 @@ RenderingComponent::RenderingComponent(HWND windowHandle)
 	//Subscribe to all the events RenderingComponent will need during execution.
 	SUBSCRIBE_TO_EVENT(this, EVENT_WINDOW_RESIZE);
 	SUBSCRIBE_TO_EVENT(this, EVENT_POST_DESC_TEX);
+	SUBSCRIBE_TO_EVENT(this, EVENT_GAMERESET);
 
 	windowHandle_	= windowHandle;
 	renderer_		= nullptr;
@@ -46,6 +47,9 @@ void RenderingComponent::onEvent( Event* e )
 	{
 	case EVENT_WINDOW_RESIZE:
 		event_WindowResize((Event_WindowResize*)e);
+		break;
+	case EVENT_GAMERESET:
+		reset();
 		break;
 	case EVENT_POST_DESC_TEX:
 		event_PostDescTex((Event_PostDescTex*)e);

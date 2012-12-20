@@ -36,6 +36,8 @@ public:
 	\param screenHeight the new screen height.
 	\return Any error encountered.
 	*/
+
+	
 	HRESULT resize();
 	//! Initializes ViewportManagement.
 	HRESULT init();

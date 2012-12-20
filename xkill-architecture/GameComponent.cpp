@@ -8,6 +8,7 @@
 GameComponent::GameComponent(void)
 {
 	SUBSCRIBE_TO_EVENT(this, EVENT_PHYSICS_ATTRIBUTES_COLLIDING);
+	SUBSCRIBE_TO_EVENT(this, EVENT_START_DEATHMATCH);	
 	SUBSCRIBE_TO_EVENT(this, EVENT_END_DEATHMATCH);	
 }
 
@@ -54,6 +55,9 @@ void GameComponent::onEvent(Event* e)
 	{
 	case EVENT_PHYSICS_ATTRIBUTES_COLLIDING:
 		event_PhysicsAttributesColliding(static_cast<Event_PhysicsAttributesColliding*>(e));
+		break;
+	case EVENT_START_DEATHMATCH:
+		event_StartDeathmatch(static_cast<Event_StartDeathmatch*>(e));
 		break;
 	case EVENT_END_DEATHMATCH:
 		event_EndDeathmatch(static_cast<Event_EndDeathmatch*>(e));
@@ -546,4 +550,33 @@ SpawnPointAttribute* GameComponent::findUnoccupiedSpawnPoint()
 		foundSpawnPoint->timeSinceLastSpawn = 0.0f;
 
 	return foundSpawnPoint;
+}
+
+void GameComponent::event_StartDeathmatch( Event_StartDeathmatch* e )
+{ 
+	// Delete players
+	std::vector<int>* playerAttributesOwners;		GET_ATTRIBUTE_OWNERS(playerAttributesOwners, ATTRIBUTE_PLAYER);
+	for(unsigned i=0; i<playerAttributesOwners->size(); i++)
+	{
+		if(playerAttributesOwners->at(i)!=0)
+		{
+			SEND_EVENT(&Event_RemoveEntity(playerAttributesOwners->at(i)));
+		}
+	}
+
+	// Create new players
+	for(unsigned i=0; i<e->num_players; i++)
+	{
+		SEND_EVENT(&Event_CreateEntity(PLAYER));
+	}
+
+	// Get window resolution so we can tell renderer to recalculate and resize split screens
+	Event_GetWindowResolution event_getWindowResolution;
+	SEND_EVENT(&event_getWindowResolution);
+	int width = event_getWindowResolution.width;
+	int height = event_getWindowResolution.height;
+	SEND_EVENT(&Event_WindowResize(width,height));
+
+	// Set state to deathmatch
+	GET_STATE() =  STATE_DEATHMATCH;
 }
