@@ -48,21 +48,21 @@ btCollisionShape* CollisionShapeManager::getCollisionShape(unsigned int meshID)
 	
 }
 
-btCollisionShape* CollisionShapeManager::getCollisionShapeAt(unsigned int index)
-{
-	btCollisionShape* collisionShape = NULL;
-
-	if(index < collisionShapes_.size())
-	{
-		return collisionShapes_.at(index);
-	}
-	else
-	{
-		return NULL;
-	}
-
-	return collisionShape;
-}
+//btCollisionShape* CollisionShapeManager::getCollisionShapeAt(unsigned int index)
+//{
+//	btCollisionShape* collisionShape = NULL;
+//
+//	if(index < collisionShapes_.size())
+//	{
+//		return collisionShapes_.at(index);
+//	}
+//	else
+//	{
+//		return NULL;
+//	}
+//
+//	return collisionShape;
+//}
 
 btCollisionShape* CollisionShapeManager::loadCollisionShape(unsigned int meshID)
 {
