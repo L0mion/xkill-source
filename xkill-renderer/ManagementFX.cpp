@@ -85,6 +85,9 @@ void ManagementFX::setLayout(ID3D11DeviceContext* devcon,	LayoutID layoutID)
 	ID3D11InputLayout* il = nullptr;
 	switch(layoutID)
 	{
+	case LAYOUTID_POS_COLOR:
+		il = ilPosColor_;
+		break;
 	case LAYOUTID_POS_NORM_TEX:
 		il = ilPosNormTex_;
 		break;

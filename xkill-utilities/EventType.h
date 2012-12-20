@@ -354,8 +354,10 @@ public:
 class DLL_U Event_CreateExplosionSphere : public Event
 {
 public:
-	Event_CreateExplosionSphere(Float3 position, float radius);
+	Event_CreateExplosionSphere(Float3 position, float radius, int damage, int entityIdOfCreator);
 
 	Float3 position;
 	float radius;
+	int damage;
+	int entityIdOfCreator;
 };

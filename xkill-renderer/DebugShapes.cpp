@@ -69,53 +69,72 @@ std::vector<VertexPosColor> DebugShapes::getBB(Float3 bbMin, Float3 bbMax)
 	Float3 p6 = Float3(bbMax.x, bbMin.y, bbMax.z);
 	Float3 p7 = Float3(bbMin.x, bbMax.y, bbMax.z);
 	Float3 p8 = bbMax;
-		
-	VertexPosColor v;
-	v.color_ = Float3(1.0f, 0.0f, 0.0f);
 
+	return getBoxLines(
+		p1, 
+		p2,
+		p3,
+		p4,
+		p5,
+		p6,
+		p7,
+		p8,
+		Float3(0.0f, 1.0f, 0.0f)); //BBs are blue color.
+}
+
+std::vector<VertexPosColor> DebugShapes::getFrustum(
+		Float3 p1, Float3 p2,
+		Float3 p3, Float3 p4,
+		Float3 p5, Float3 p6,
+		Float3 p7, Float3 p8)
+{
+	return getBoxLines(
+		p1, 
+		p2,
+		p3,
+		p4,
+		p5,
+		p6,
+		p7,
+		p8,
+		Float3(1.0f, 0.0f, 0.0f)); //Frustum is red color.
+}
+
+std::vector<VertexPosColor> DebugShapes::getBoxLines(
+	Float3 p1, Float3 p2,
+	Float3 p3, Float3 p4,
+	Float3 p5, Float3 p6,
+	Float3 p7, Float3 p8,
+	Float3 color)
+{
 	//Connect vertices in a line list.
 	std::vector<VertexPosColor> vertices;
+	VertexPosColor v;
+	v.color_ = color;
+
+#define CONNECT_LINE(p1, p2)					\
+	v.position_ = p1; vertices.push_back(v);	\
+	v.position_ = p2; vertices.push_back(v);	\
 
 	//Connect first quad
-	v.position_ = p1; vertices.push_back(v);
-	v.position_ = p2; vertices.push_back(v);
-	v.position_ = p1; vertices.push_back(v);
-	v.position_ = p3; vertices.push_back(v);
-	v.position_ = p4; vertices.push_back(v);
-	v.position_ = p2; vertices.push_back(v);
-	v.position_ = p4; vertices.push_back(v);
-	v.position_ = p3; vertices.push_back(v);
+	CONNECT_LINE(p1, p2);
+	CONNECT_LINE(p1, p3);
+	CONNECT_LINE(p4, p2);
+	CONNECT_LINE(p4, p3);
 
 	//Connect second quad
-	v.position_ = p5; vertices.push_back(v);
-	v.position_ = p6; vertices.push_back(v);
-	v.position_ = p5; vertices.push_back(v);
-	v.position_ = p7; vertices.push_back(v);
-	v.position_ = p8; vertices.push_back(v);
-	v.position_ = p7; vertices.push_back(v);
-	v.position_ = p8; vertices.push_back(v);
-	v.position_ = p6; vertices.push_back(v);
+	CONNECT_LINE(p5, p6);
+	CONNECT_LINE(p5, p7);
+	CONNECT_LINE(p8, p7);
+	CONNECT_LINE(p8, p6);
 
 	//Connect quads
-	v.position_ = p1; vertices.push_back(v);
-	v.position_ = p5; vertices.push_back(v);
-	v.position_ = p2; vertices.push_back(v);
-	v.position_ = p6; vertices.push_back(v);
-	v.position_ = p3; vertices.push_back(v);
-	v.position_ = p7; vertices.push_back(v);
-	v.position_ = p4; vertices.push_back(v);
-	v.position_ = p8; vertices.push_back(v);
+	CONNECT_LINE(p1, p5);
+	CONNECT_LINE(p2, p6);
+	CONNECT_LINE(p3, p7);
+	CONNECT_LINE(p4, p8);
+
+#undef CONNECT_LINE
 
 	return vertices;
 }
-
-/*
-v.position_ = p1; vertices.push_back(v);
-v.position_ = p2; vertices.push_back(v);
-v.position_ = p3; vertices.push_back(v);
-v.position_ = p4; vertices.push_back(v);
-v.position_ = p5; vertices.push_back(v);
-v.position_ = p6; vertices.push_back(v);
-v.position_ = p7; vertices.push_back(v);
-v.position_ = p8; vertices.push_back(v);
-*/
