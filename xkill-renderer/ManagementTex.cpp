@@ -3,7 +3,7 @@
 #include <sstream>
 #include <vector>
 #include <d3d11.h>
-#include <DDSTextureLoader.h>
+#include "DDSTextureLoader.h"
 
 #include <xkill-utilities/TexDesc.h>
 #include <xkill-utilities/TexDescHeader.h>

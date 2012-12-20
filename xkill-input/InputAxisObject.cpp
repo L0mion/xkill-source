@@ -6,7 +6,6 @@ InputAxisObject::InputAxisObject(int minValue, int maxValue)
 	maxValue_ = maxValue;
 
 	deadZone_ = 0.25f;
-	inverted_ = false;
 
 	value_ = 0.0f;
 }
@@ -22,6 +21,8 @@ void InputAxisObject::AddValue(float value)
 
 void InputAxisObject::SetValue(float value)
 {
+	prevValue_ = value_;
+
 	if(value > 1.0f)
 		value_ = 1.0f;
 	else if(value < -1.0f)
@@ -32,6 +33,7 @@ void InputAxisObject::SetValue(float value)
 
 void InputAxisObject::SetValue(int value)
 {
+	prevValue_ = value;
 	value_ = formatValue(value);
 }
 
@@ -47,7 +49,12 @@ float InputAxisObject::getValueFloat()
 
 bool InputAxisObject::getValueBool()
 {
-	return (std::abs(value_) >= 0.9f);
+	return floatToBool(value_);
+}
+
+bool InputAxisObject::getValueBoolReleased()
+{
+	return ( !floatToBool(value_) && floatToBool(prevValue_));
 }
 
 InputObject::InputObjectType InputAxisObject::GetType()
@@ -55,7 +62,7 @@ InputObject::InputObjectType InputAxisObject::GetType()
 	return AXIS_OBJECT;
 }
 
-void InputAxisObject::SetDeadZone(float deadZone)
+void InputAxisObject::setDeadZone(float deadZone)
 {
 	if(deadZone > 1.0f)
 		deadZone_ = 1.0f;
@@ -65,9 +72,9 @@ void InputAxisObject::SetDeadZone(float deadZone)
 		deadZone_ = deadZone;
 }
 
-void InputAxisObject::SetInverted(bool inverted)
+float InputAxisObject::getDeadZone()
 {
-	inverted_ = inverted;
+	return deadZone_;
 }
 
 float InputAxisObject::formatValue(int value) //Fix deadzone, is square for the moment
@@ -91,4 +98,9 @@ float InputAxisObject::formatValue(int value) //Fix deadzone, is square for the 
 		doubleAxis = -doubleAxis;
 
 	return (float)doubleAxis;
+}
+
+bool InputAxisObject::floatToBool(float value)
+{
+	return (std::abs(value) >= 0.9f);
 }

@@ -39,9 +39,9 @@ private:
 	InputComponent*			input_;
 	GameComponent*			game_;
 	ScoreComponent*			score_;
-	IOComponent*			ioComponent_;
 	//FiniteStateMachine		stateMachine_;
 	StateType				state_TemporaryVariableUsedAsSubstituteForStateMachine;
+	IOComponent*			ioComponent_;
 
 public:
 	ComponentManager();

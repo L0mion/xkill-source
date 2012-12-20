@@ -22,7 +22,8 @@
 //#include <InitGuid.h>			   //
 								   //
 
-class FileParser;
+
+class KeyMapper;
 
 //! Detects and manages devices and their input.
 /*!
@@ -82,13 +83,6 @@ public:
 
 	InputDevice* GetDevice(unsigned int playerID);
 	QTInputDevices* GetMouseAndKeyboard();
-	
-	//! Generates a string with the states of all devices
-	/*!
-	A string with information of the states of all devices.
-	Used when debugging.
-	*/
-	std::string GetInputInformationString();
 
 	//! Callback function for the Direct Input EnumDevices function
 	/*!
@@ -113,6 +107,7 @@ private:
 	Shouldn't be able to go above four. Four is the limit that XInput sets on how many gamepads that can be handled.
 	*/
 	int nrOfXInputDevices_;
+	KeyMapper* keyMapper_;
 
 	//! Creates and adds a new device
 	/*!
