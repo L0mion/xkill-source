@@ -130,7 +130,6 @@ EventManager::getInstance()->addObserver(Subscriber, EventType);
 #ifndef _DEBUG
 	#define DEBUGPRINT(dataStream)
 #endif
-
 // Defines DEBUGPRINT to a cout function in Debug configuration
 #ifdef _DEBUG
 	#define DEBUGPRINT(dataStream)									\

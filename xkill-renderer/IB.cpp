@@ -27,6 +27,10 @@ HRESULT IB::init(
 	ibd.MiscFlags		= 0;
 
 	D3D11_SUBRESOURCE_DATA vinitData;
+
+	if(indices.size() <= 0)
+		return E_FAIL;
+
 	vinitData.pSysMem = &indices.at(0);
 
 	hr = device->CreateBuffer(&ibd, &vinitData, &ib_);

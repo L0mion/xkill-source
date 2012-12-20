@@ -14,6 +14,8 @@ class LoaderFbx;
 
 #include "dllIO.h"
 
+#include <xkill-utilities/LeanWindows.h>
+
 static const std::string PATH_XKILL_RESOURCES	= "../../xkill-resources/";
 static const LPCTSTR PATH_TEXDESC				= L"../../xkill-resources/*.texdesc";
 static const LPCTSTR PATH_MDLDESC				= L"../../xkill-resources/*.mdldesc";

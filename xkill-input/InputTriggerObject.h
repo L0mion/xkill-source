@@ -22,13 +22,16 @@ public:
 	float GetValue();
 	bool IsTriggered();
 
-	float getValueFloat();
-	bool getValueBool();
+	virtual float getValueFloat();
+	virtual bool getValueBool();
+	virtual bool getValueBoolReleased();
 
 	virtual InputObjectType GetType();
 
-	void SetDeadZone(float deadZone);
-	void SetTriggerValue(float triggerValue);
+	void setDeadZone(float deadZone);
+	float getDeadZone();
+	void setTriggerValue(float triggerValue);
+	float getTriggerValue();
 
 private:
 	float triggerValue_;
@@ -36,7 +39,9 @@ private:
 	int maxValue_, minValue_;
 
 	float value_;
+	float prevValue_;
 
 	float formatValue(int value);
+	bool floatToBool(float value);
 };
 

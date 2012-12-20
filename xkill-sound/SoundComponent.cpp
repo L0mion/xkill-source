@@ -16,7 +16,9 @@ SoundComponent::SoundComponent()
 {
 	mFMODEventSystem = NULL;
 	converter = NULL;
+	timer = 0.0f;
 
+	SUBSCRIBE_TO_EVENT(this, EVENT_PLAYSOUND);
 	SUBSCRIBE_TO_EVENT(this, EVENT_CREATE_PROJECTILE);
 	SUBSCRIBE_TO_EVENT(this, EVENT_PLAYERDEATH);
 	SUBSCRIBE_TO_EVENT(this, EVENT_END_DEATHMATCH);
@@ -31,19 +33,23 @@ SoundComponent::~SoundComponent()
 bool SoundComponent::init(std::string configFilePath)
 {
 	mFMODEventSystem = new FMODEventSystem();
-	mFMODEventSystem->Init("../xkill-dependencies/sound/", "testproject.fev", 64);
+	mFMODEventSystem->Init("../xkill-dependencies/sound/", "xkill.fev", 64);
 
-	FMODEventSystemProgrammerReportParser fmodEventSystemProgrammerReportParser;
-	if(!fmodEventSystemProgrammerReportParser.parseProgrammerReport(mFMODEventSystem))
-	{
-		DEBUGPRINT("parsing of FMOD Designer's programmer's report failed.");
-		return false;
-	}
+	//FMODEventSystemProgrammerReportParser fmodEventSystemProgrammerReportParser;
+	//if(!fmodEventSystemProgrammerReportParser.parseProgrammerReport(mFMODEventSystem))
+	//{
+	//	DEBUGPRINT("parsing of FMOD Designer's programmer's report failed.");
+	//	return false;
+	//}
 
 	converter = new EventToFModConverter();
 	converter->init(configFilePath);
 
 	fillEventsToFModVector(configFilePath);
+
+	int fmodEventIndex = converter->getFModIndex(4);
+	if(fmodEventIndex >= 0)
+		mFMODEventSystem->StartSoundEventAt(fmodEventIndex);
 
 	return true;
 }
@@ -51,11 +57,38 @@ bool SoundComponent::init(std::string configFilePath)
 void SoundComponent::onEvent(Event* e)
 {
 	EventType type = e->getType();
-	mFMODEventSystem->StartSoundEventAt(converter->getFModIndex((int)type));
+	int eventIndex = -1;
+
+	if(type == EventType::EVENT_PLAYSOUND)
+	{
+		Event_PlaySound* eps = static_cast<Event_PlaySound*>(e);
+		
+		if(eps->muteSound)
+			mFMODEventSystem->SetMuteSounds();
+		else
+			eventIndex = eps->soundId;
+	}
+	else
+	{
+		eventIndex = (int)type;
+	}
+
+	int fmodEventIndex = converter->getFModIndex(eventIndex);
+	if(fmodEventIndex >= 0)
+		mFMODEventSystem->StartSoundEventAt(fmodEventIndex);
 }
 
 void SoundComponent::onUpdate(float delta)
 {
+	//timer += delta;
+	//if(timer >= 0.5f)
+	//{
+	//	timer = 0.0f;
+	//	int fmodEventIndex = converter->getFModIndex(3);
+	//	if(fmodEventIndex >= 0)
+	//		mFMODEventSystem->StartSoundEventAt(fmodEventIndex);
+	//}
+
 	mFMODEventSystem->Update();
 }
 

@@ -21,6 +21,7 @@ private:
 		positionAttributes_		.init(ATTRIBUTE_POSITION);
 		spatialAttributes_		.init(ATTRIBUTE_SPATIAL);
 		renderAttributes_		.init(ATTRIBUTE_RENDER);
+		debugShapeAttributes_	.init(ATTRIBUTE_DEBUGSHAPE);
 		physicsAttributes_		.init(ATTRIBUTE_PHYSICS);
 		cameraAttributes_		.init(ATTRIBUTE_CAMERA);
 		inputAttributes_		.init(ATTRIBUTE_INPUT);
@@ -32,12 +33,15 @@ private:
 		healthAttributes_		.init(ATTRIBUTE_HEALTH);
 		damageAttributes_		.init(ATTRIBUTE_DAMAGE);
 		spawnPointAttributes_	.init(ATTRIBUTE_SPAWNPOINT);
+		weaponStatsAttributes_	.init(ATTRIBUTE_WEAPONSTATS);
+		explosionSphereAttributes_.init(ATTRIBUTE_EXPLOSIONSPHERE);
 	}
 
 public:
 	AttributeStorage<PositionAttribute>			positionAttributes_;
 	AttributeStorage<SpatialAttribute>			spatialAttributes_;
 	AttributeStorage<RenderAttribute>			renderAttributes_;
+	AttributeStorage<DebugShapeAttribute>		debugShapeAttributes_;
 	AttributeStorage<PhysicsAttribute>			physicsAttributes_;
 	AttributeStorage<CameraAttribute>			cameraAttributes_;
 	AttributeStorage<InputAttribute>			inputAttributes_;
@@ -48,6 +52,8 @@ public:
 	AttributeStorage<HealthAttribute>			healthAttributes_;
 	AttributeStorage<DamageAttribute>			damageAttributes_;
 	AttributeStorage<SpawnPointAttribute>		spawnPointAttributes_;
+	AttributeStorage<WeaponStatsAttribute>		weaponStatsAttributes_;
+	AttributeStorage<ExplosionSphereAttribute>	explosionSphereAttributes_;
 
 	static AttributeManager* getInstance()
 	{
@@ -84,7 +90,7 @@ public:
 		switch(type) 
 		{
 			// Macro to facilitate adding and refactoring attributes
-#define PUT_ATTRIBUTES_INSIDE_EVENT(AttributeStorage)	\
+#define PUT_ATTRIBUTES_INSIDE_EVENT(AttributeStorage)				\
 			e->hostVector = AttributeStorage.getAllAttributes();	\
 			e->owners = AttributeStorage.getAllOwners();			\
 			break;
@@ -95,6 +101,7 @@ public:
 		case ATTRIBUTE_POSITION:	PUT_ATTRIBUTES_INSIDE_EVENT(positionAttributes_		);
 		case ATTRIBUTE_SPATIAL:		PUT_ATTRIBUTES_INSIDE_EVENT(spatialAttributes_		);
 		case ATTRIBUTE_RENDER:		PUT_ATTRIBUTES_INSIDE_EVENT(renderAttributes_		);
+		case ATTRIBUTE_DEBUGSHAPE:	PUT_ATTRIBUTES_INSIDE_EVENT(debugShapeAttributes_	);
 		case ATTRIBUTE_PHYSICS:		PUT_ATTRIBUTES_INSIDE_EVENT(physicsAttributes_		);
 		case ATTRIBUTE_CAMERA:		PUT_ATTRIBUTES_INSIDE_EVENT(cameraAttributes_		);
 		case ATTRIBUTE_INPUT:		PUT_ATTRIBUTES_INSIDE_EVENT(inputAttributes_		);
@@ -105,6 +112,9 @@ public:
 		case ATTRIBUTE_HEALTH:		PUT_ATTRIBUTES_INSIDE_EVENT(healthAttributes_		);
 		case ATTRIBUTE_DAMAGE:		PUT_ATTRIBUTES_INSIDE_EVENT(damageAttributes_		);
 		case ATTRIBUTE_SPAWNPOINT:	PUT_ATTRIBUTES_INSIDE_EVENT(spawnPointAttributes_	);
+		case ATTRIBUTE_WEAPONSTATS:	PUT_ATTRIBUTES_INSIDE_EVENT(weaponStatsAttributes_	);
+		case ATTRIBUTE_EXPLOSIONSPHERE:	PUT_ATTRIBUTES_INSIDE_EVENT(explosionSphereAttributes_);
+			
 
 			// undefine dirty macro
 #undef PUT_ATTRIBUTES_INSIDE_EVENT
@@ -112,7 +122,5 @@ public:
 		default:
 			break;
 		}
-
-		int size = sizeof(CameraAttribute);
 	}
 };

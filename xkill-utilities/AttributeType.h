@@ -51,6 +51,7 @@ enum DLL_U AttributeType
 	ATTRIBUTE_POSITION,
 	ATTRIBUTE_SPATIAL,
 	ATTRIBUTE_RENDER,
+	ATTRIBUTE_DEBUGSHAPE,
 	ATTRIBUTE_PHYSICS,
 	ATTRIBUTE_CAMERA,
 	ATTRIBUTE_INPUT,
@@ -62,6 +63,8 @@ enum DLL_U AttributeType
 	ATTRIBUTE_HEALTH,
 	ATTRIBUTE_DAMAGE,
 	ATTRIBUTE_SPAWNPOINT,
+	ATTRIBUTE_WEAPONSTATS,
+	ATTRIBUTE_EXPLOSIONSPHERE,
 
 	// this is needed, don't touch!
 	ATTRIBUTE_LAST
@@ -111,7 +114,7 @@ A good approach for the RenderComponent would be to step through all
 RenderAttribute and construct multiple queues consisting of objects
 that should be transparent or not, tesselated or not, use the same
 meshID and textureID, and the Render each Queue in a orderly fashion 
-throught the use of Instancing.
+through the use of Instancing.
 
 \ingroup ATTRIBUTES
 */
@@ -124,8 +127,10 @@ struct DLL_U RenderAttribute : public IAttribute
 	AttributePointer boundingAttribute;
 	
 	BoolField culling;
+
 	bool transparent;
 	bool tessellation;
+
 	int meshID;
 	int textureID;
 };
@@ -140,6 +145,7 @@ struct DLL_U PhysicsAttribute : public IAttribute
 	~PhysicsAttribute();
 
 	AttributePointer spatialAttribute;
+	AttributePointer renderAttribute;
 	Float3 linearVelocity;
 	Float3 angularVelocity;
 	Float3 gravity;
@@ -153,6 +159,9 @@ struct DLL_U PhysicsAttribute : public IAttribute
 	bool added;
 	bool alive;
 	bool isProjectile;
+
+	bool isExplosionSphere;
+	float explosionSphereRadius;
 };
 
 /// Stores everything GameComponent needs to know when handling 
@@ -167,6 +176,8 @@ struct DLL_U ProjectileAttribute : public IAttribute
 	AttributePointer physicsAttribute;
 	int entityIdOfCreator;		//!< Entity id of the entity that created the projectile.
 	float currentLifeTimeLeft;	//!< Counter counting down the lifetime of the projectile. Is initialized to totalLifeTime. When equal or less than zero, the projectile attribute shall be destroyed.
+	bool explodeOnImnpact;
+	float explosionSphereRadius;
 };
 
 struct DLL_U InputAttribute : public IAttribute
@@ -178,6 +189,8 @@ struct DLL_U InputAttribute : public IAttribute
 	Float2 position;
 	Float2 rotation;
 	bool fire;
+	bool changeAmmunitionType;
+	bool changeFiringMode;
 };
 
 /// Stores everything SoundComponent needs to know to play a 3D sound
@@ -227,23 +240,24 @@ struct DLL_U PlayerAttribute : public IAttribute
 	AttributePointer inputAttribute;
 	AttributePointer cameraAttribute;
 	AttributePointer healthAttribute;
+	AttributePointer weaponStatsAttribute;
 };
 
 
 class MeshModel;
 struct DLL_U MeshAttribute : public IAttribute
 {
-	unsigned int	meshID;
-	MeshModel*		mesh;
-	bool			dynamic;
+	unsigned int	meshID;		//!< ID of mesh, read from .mdldesc-file.
+	MeshModel*		mesh;		//!< Type containing all mesh-related data.
+	bool			dynamic;	//!< Whether or not mesh is supposed to be dynamic physics-wize.
 
-	void clean();
-	MeshAttribute();
+	void clean();					//!< Does nothing.
+	MeshAttribute();				//!< Initializes attribute with default values. Dynamic = false.
 	MeshAttribute(
 		unsigned int	id,
 		MeshModel*		mesh,
-		bool			dynamic);
-	~MeshAttribute();
+		bool			dynamic);	//!< Initializes attribute with passed values.
+	~MeshAttribute();				//!< Does nothing.
 };
 
 struct DLL_U HealthAttribute : public IAttribute
@@ -269,7 +283,83 @@ struct DLL_U SpawnPointAttribute : public IAttribute
 	SpawnPointAttribute();
 	~SpawnPointAttribute();
 
-	float timeSinceLastSpawn;	//!< Is reset when a player spawn at the spawn point.
-	float spawnArea;			//!< Defines a horisontal circle area wherein no player will spawn if another player resides in the area.
+	float timeSinceLastSpawn;	//!< Is reset when a player spawns at the spawn point.
+	float spawnArea;			//!< Defines the spawn point zone, a horizontal circle area.
 	AttributePointer positionAttribute;
+};
+
+/// Stores everything needed for the weapon system. The two enums "AmmunitionType" and "FiringMode" is used to preset the weapon settings. These settings are used in GameComponent to simulate the weapon behavior of choice.
+/** 
+\ingroup ATTRIBUTES
+*/
+struct DLL_U WeaponStatsAttribute : public IAttribute
+{
+	enum AmmunitionType
+	{
+		BULLET,
+		SCATTER,
+		EXPLOSIVE,
+
+		NROFAMUNITIONTYPES
+	};
+
+	enum FiringMode
+	{
+		SINGLE,
+		SEMI,
+		AUTO,
+
+		NROFFIRINGMODES
+	};
+
+	WeaponStatsAttribute();
+	~WeaponStatsAttribute();
+
+	void setWeaponStats(AmmunitionType ammunitionType, FiringMode firingMode);
+	void setWeaponToDebugMachineGun();
+
+	AmmunitionType ammunitionType;	//!< BULLET, SCATTER, EXPLOSIVE
+	FiringMode firingMode;			//!< SINGLE, SEMI, AUTO
+
+	int totalNrOfShots;				//!< Total number of shots that can be fired. A value of -1 denotes unlimited ammunition.
+	int clipSize;					//!< Number of shots that can be fired before reload is needed. A value of 0 denotes that no reload is necessary.
+	int nrOfShotsLeftInClip;		//!< Current number of shots left in the current clip.
+
+	float reloadTime;				//!< Number of seconds it takes to reload.
+	float reloadTimeLeft;			//!< Reload progress, when lesser or equal to 0 the weapon is reloaded.
+	float cooldownBetweenShots;		//!< Number of seconds that must pass between each shot.
+	float cooldownLeft;				//!< Number of seconds until a new shot can be fired.
+
+	float velocityOfEachProjectile; //!< Velocity of the PhysicsAttribute when creating a projectile.
+	int nrOfProjectilesForEachShot; //!< If > 1 then scattershot else singleshot.
+	float damgeOfEachProjectile;	//!< Damage value of the damage attribute created when creating a projectile from this weapon.
+
+	float displacementSphereRadius;	//!< Randomizes the position of each projectile inside this sphere.
+	float spreadConeRadius;			//!< Randomizes the orientation of each projectile's velocity vector inside this cone. 
+
+	bool isExplosive;				//!< Determines if projectiles created from this weapon will explode on impact.
+	float explosionSphereRadius;	//!< Radius of explosion sphere.
+};
+
+struct DebugShape;
+struct DLL_U DebugShapeAttribute : public IAttribute
+{
+	DebugShapeAttribute();
+	~DebugShapeAttribute();
+	void clean();
+
+	unsigned int	meshID;		//!< ID of mesh
+	AttributePointer spatialAttribute;
+
+	DebugShape* shape;
+	bool		render;
+};
+
+struct DLL_U ExplosionSphereAttribute : public IAttribute
+{
+	ExplosionSphereAttribute();
+	~ExplosionSphereAttribute();
+
+	AttributePointer physicsAttribute;
+	float currentLifeTimeLeft;
 };

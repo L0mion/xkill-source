@@ -38,13 +38,14 @@ enum DLL_U EventType
 	EVENT_PLAYSOUND,
 	EVENT_RUMBLE,
 	EVENT_CREATE_PROJECTILE,
-	EVENT_ENTITIES_COLLIDING,
+	EVENT_PHYSICS_ATTRIBUTES_COLLIDING,
 	EVENT_REMOVE_ENTITY,
 	EVENT_PLAYERDEATH,
 	EVENT_CREATE_SPAWNPOINT,
 	EVENT_END_DEATHMATCH,
 	EVENT_START_DEATHMATCH,
 	EVENT_CHANGE_GAMESTATE,
+	EVENT_CREATE_EXPLOSIONSPHERE,
 
 	EVENT_UPDATE,
 	EVENT_MOUSE_MOVE,
@@ -104,14 +105,17 @@ public:
 };
 
 /**
+If muteSound is true then all sounds will be muted
+
 \ingroup events
 */
 class DLL_U Event_PlaySound : public Event
 {
 public:
-	Event_PlaySound(int soundId);
+	Event_PlaySound(int soundId, bool muteSound = false);
 
 	int soundId;
+	bool muteSound;
 };
 
 //! Will trigger rumble in devices[deviceNr]
@@ -218,13 +222,14 @@ public:
 class DLL_U Event_CreateProjectile : public Event
 {
 public:
-	int entityIdOfCreator;
 	Float3 position;
 	Float3 velocity;
-	Float3 gravity;
 	Float4 rotation;
+	int damage;
+	int entityIdOfCreator;
+	bool explodeOnImpact;
 
-	Event_CreateProjectile(Float3 position, Float3 velocity, Float4 rotation, Float3 gravity, int entityIdOfCreator);
+	Event_CreateProjectile(Float3 position, Float3 velocity, Float4 rotation, int damage, int entityIdOfCreator, bool explodeOfImpact);
 };
 
 class MeshModel;
@@ -344,4 +349,15 @@ public:
 	Event_ChangeGameState(StateType newState);
 
 	StateType newState;
+};
+
+class DLL_U Event_CreateExplosionSphere : public Event
+{
+public:
+	Event_CreateExplosionSphere(Float3 position, float radius, int damage, int entityIdOfCreator);
+
+	Float3 position;
+	float radius;
+	int damage;
+	int entityIdOfCreator;
 };

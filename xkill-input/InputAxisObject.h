@@ -37,23 +37,25 @@ public:
 
 	virtual float getValueFloat();
 	virtual bool getValueBool();
+	virtual bool getValueBoolReleased();
 
 	/*!
 	\return AXIS_OBJECT
 	*/
 	virtual InputObjectType GetType();
 
-	void SetDeadZone(float deadZone);
-	void SetInverted(bool inverted);
+	void setDeadZone(float deadZone);
+	float getDeadZone();
 
 private:
 	float deadZone_;
-	bool inverted_;
 	int maxValue_, minValue_;
 
 	float value_;
+	float prevValue_;
 
 	//! Formats the value to the interval (-1.0f, 1.0f)
 	float formatValue(int value);
+	bool floatToBool(float value);
 };
 

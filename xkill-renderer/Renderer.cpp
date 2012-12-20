@@ -15,15 +15,14 @@
 #include "ManagementDebug.h"
 
 #include "Winfo.h"
-#include "gBuffer.h"
-#include "renderingUtilities.h"
-#include "Renderer.h"
-
-//temp?
 #include "ModelD3D.h"
+#include "gBuffer.h"
 #include "SubsetD3D.h"
+#include "DebugShapeD3D.h"
 #include "VB.h"
 #include "IB.h"
+#include "renderingUtilities.h"
+#include "Renderer.h"
 
 //temp
 #include "AnimatedMesh.h"
@@ -51,6 +50,7 @@ Renderer::Renderer(HWND windowHandle)
 	attributesSpatial_		= nullptr;
 	attributesPosition_		= nullptr;
 	attributesRender_		= nullptr;
+	attributesDebugShape_	= nullptr;
 	attributesRenderOwner_	= nullptr;
 	attributesCamera_		= nullptr;
 
@@ -89,8 +89,6 @@ void Renderer::reset()
 	SAFE_RESET(managementCB_);
 	SAFE_RESET(managementLight_);
 	SAFE_RESET(managementViewport_);
-	//SAFE_RESET(managementModel_);		//?
-	//SAFE_RESET(managementTex_);		//?
 	SAFE_RESET(managementSS_);
 	SAFE_RESET(managementRS_);
 	SAFE_RESET(managementGBuffer_);
@@ -149,6 +147,7 @@ HRESULT Renderer::init()
 		hr = initManagementGBuffer();
 
 	//temp
+	/*
 	m3dLoader_ = new M3DLoader();
 	animatedMesh_ = nullptr;
 	animatedMesh_ = new AnimatedMesh();
@@ -159,15 +158,17 @@ HRESULT Renderer::init()
 					   animatedMesh_->getMaterials(),
 					   animatedMesh_->getSkinInfo());
 	animatedMesh_->init(managementD3D_->getDevice());
+	*/
 
 	return hr;
 }
 void Renderer::initAttributes()
 {	
-	GET_ATTRIBUTES(attributesCamera_,	CameraAttribute,	ATTRIBUTE_CAMERA);
-	GET_ATTRIBUTES(attributesRender_,	RenderAttribute,	ATTRIBUTE_RENDER);
-	GET_ATTRIBUTES(attributesSpatial_,	SpatialAttribute,	ATTRIBUTE_SPATIAL);
-	GET_ATTRIBUTES(attributesPosition_,	PositionAttribute,	ATTRIBUTE_POSITION);
+	GET_ATTRIBUTES(attributesCamera_,		CameraAttribute,		ATTRIBUTE_CAMERA);
+	GET_ATTRIBUTES(attributesRender_,		RenderAttribute,		ATTRIBUTE_RENDER);
+	GET_ATTRIBUTES(attributesDebugShape_,	DebugShapeAttribute,	ATTRIBUTE_DEBUGSHAPE);
+	GET_ATTRIBUTES(attributesSpatial_,		SpatialAttribute,		ATTRIBUTE_SPATIAL);
+	GET_ATTRIBUTES(attributesPosition_,		PositionAttribute,		ATTRIBUTE_POSITION);
 
 	GET_ATTRIBUTE_OWNERS(attributesRenderOwner_, ATTRIBUTE_RENDER);
 }
@@ -318,13 +319,14 @@ void Renderer::render(float delta)
 		renderViewport(
 			attributesCamera_->at(i), 
 			viewportTopX, 
-			viewportTopY);
+			viewportTopY,i);
 	}
 }
 void Renderer::renderViewport(
 	CameraAttribute		cameraAt, 
 	unsigned int		viewportTopX,
-	unsigned int		viewportTopY)
+	unsigned int		viewportTopY,
+	unsigned int		cameraIndex)
 {
 	//Get camera's view- and projection matrix, and their inverses.
 	DirectX::XMFLOAT4X4 viewMatrix((float*)&cameraAt.mat_view);
@@ -349,10 +351,10 @@ void Renderer::renderViewport(
 		viewportTopX,
 		viewportTopY);
 
-	renderViewportToGBuffer(viewMatrix, projectionMatrix);
+	renderViewportToGBuffer(viewMatrix, projectionMatrix, cameraIndex);
 	renderViewportToBackBuffer();
 }
-void Renderer::renderViewportToGBuffer(DirectX::XMFLOAT4X4 viewMatrix, DirectX::XMFLOAT4X4 projectionMatrix)									
+void Renderer::renderViewportToGBuffer(DirectX::XMFLOAT4X4 viewMatrix, DirectX::XMFLOAT4X4 projectionMatrix, unsigned int cameraIndex)									
 {
 	ID3D11Device*			device = managementD3D_->getDevice();
 	ID3D11DeviceContext*	devcon = managementD3D_->getDeviceContext();
@@ -369,13 +371,34 @@ void Renderer::renderViewportToGBuffer(DirectX::XMFLOAT4X4 viewMatrix, DirectX::
 	managementGBuffer_->setGBuffersAndDepthBufferAsRenderTargets(devcon, managementD3D_->getDepthBuffer());
 
 	RenderAttribute* renderAt;
-	for(unsigned int i = 0; i < attributesRender_->size() && attributesRenderOwner_->at(i) != 0; i++)
+	for(unsigned int i = 0; i < attributesRenderOwner_->size(); i++)
 	{
-		renderAt = &attributesRender_->at(i);
-		renderAttribute(
-			renderAt, 
-			viewMatrix, 
-			projectionMatrix);
+		if(attributesRenderOwner_->at(i) != 0)
+		{
+			//if(renderAt->culling.getBool(cameraIndex))
+			{
+			renderAt = &attributesRender_->at(i);
+			//if(renderAt->culling.getBool(cameraIndex))
+				renderAttribute(
+					renderAt, 
+					viewMatrix, 
+					projectionMatrix);
+			}
+		}
+	}
+
+	DebugShapeAttribute* debugShapeAt;
+	for(unsigned int i = 0; i < attributesDebugShape_->size(); i++)
+	{
+		if(attributesDebugShape_->at(i).render)
+		{
+			debugShapeAt = &attributesDebugShape_->at(i);
+			renderDebugShape(
+				debugShapeAt,
+				i,
+				viewMatrix, 
+				projectionMatrix);
+		}
 	}
 
 	renderGBufferClean();
@@ -497,12 +520,64 @@ void Renderer::renderSubset(IB* ib, MeshMaterial& material)
 
 	//Set topology. Where to put this?
 	devcon->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-	
+
 	//Draw subset.
 	devcon->DrawIndexed(
 		ib->getNumIndices(), 
 		0, 
 		0);
+}
+void Renderer::renderDebugShape(
+	DebugShapeAttribute*	debugShapeAt, 
+	unsigned int			shapeIndex,
+	DirectX::XMFLOAT4X4		viewMatrix, 
+	DirectX::XMFLOAT4X4		projectionMatrix)
+{
+	ID3D11Device*			device = managementD3D_->getDevice();
+	ID3D11DeviceContext*	devcon = managementD3D_->getDeviceContext();
+	
+	//Get transform matrices.
+	SpatialAttribute*	spatialAt			= &attributesSpatial_->at(debugShapeAt->spatialAttribute.index);
+	PositionAttribute*	positionAt			= &attributesPosition_->at(spatialAt->positionAttribute.index);
+	DirectX::XMFLOAT4X4 worldMatrix			= calculateWorldMatrix(spatialAt, positionAt);
+	DirectX::XMFLOAT4X4 worldMatrixInverse	= calculateMatrixInverse(worldMatrix);
+	DirectX::XMFLOAT4X4 finalMatrix			= calculateFinalMatrix(worldMatrix, viewMatrix, projectionMatrix);
+	
+	managementFX_->setShader(devcon, SHADERID_VS_COLOR);
+	managementFX_->setShader(devcon, SHADERID_PS_COLOR);
+
+	//Update per-object constant buffer.
+	managementCB_->vsSet(CB_TYPE_OBJECT, CB_REGISTER_OBJECT, devcon);
+	managementCB_->updateCBObject(
+		devcon, 
+		finalMatrix, 
+		worldMatrix, 
+		worldMatrixInverse);
+	
+	//Fetch renderer representation of shape.
+	DebugShapeD3D* shapeD3D = managementModel_->getDebugShapeD3D(shapeIndex, device);
+	
+	//Set vertex buffer.
+	ID3D11Buffer* vertexBuffer	= shapeD3D->getVB()->getVB();
+	unsigned int numVertices	= shapeD3D->getVB()->getNumVertices();
+
+	UINT stride = sizeof(VertexPosColor);
+	UINT offset = 0;
+	devcon->IASetVertexBuffers(
+		0, 
+		1, 
+		&vertexBuffer, 
+		&stride, 
+		&offset);
+
+	//Set input layout
+	managementFX_->setLayout(devcon, LAYOUTID_POS_COLOR);
+
+	//Set topology. Where to put this?
+	devcon->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_LINELIST);
+
+	//Draw subset.
+	devcon->Draw(numVertices, 0);
 }
 
 void Renderer::renderAnimatedMesh(DirectX::XMFLOAT4X4 viewMatrix, DirectX::XMFLOAT4X4 projectionMatrix)

@@ -13,7 +13,27 @@ class CollisionShapeManager;
 An object that wraps object specific functionality for rigid bodies.
 \ingroup xkill-physics
 */
+enum PO_Types
+{
+	tDEFAULT = 0,
+	tStatic = 1,
+	tWorld = 2,
+	tProjectile = 4,
+	tPlayer = 8,
+	tFrustrum = 16,
+	tExplosion = 32
+};
 
+enum PO_TypesCollideWith
+{
+	cwDEFAULT = 0,
+	cwStatic = 0,
+	cwWorld = 0,
+	cwProjectile = PO_Types::tStatic | PO_Types::tWorld | PO_Types::tPlayer,
+	cwPlayer = PO_Types::tStatic | PO_Types::tWorld | PO_Types::tPlayer,
+	cwFrustrum = PO_Types::tWorld | PO_Types::tPlayer | PO_Types::tProjectile,
+	cwExplosion = PO_Types::tPlayer
+};
 
 class PhysicsObject : public btRigidBody
 {
@@ -23,7 +43,9 @@ private:
 	btVector3 movement_;
 	btScalar yaw_;
 	unsigned int index_;
+	unsigned int type_;
 	bool noContactResponse_;
+	bool inertiad;
 protected:
 public:
 
@@ -31,8 +53,8 @@ public:
 	/*!
 	\param collisionShapeManager A pointer used to access collision shapes
 	*/
-	PhysicsObject(CollisionShapeManager* collisionShapeManager, unsigned int index);
-	PhysicsObject(btCollisionShape* collisionShape, unsigned int index);
+	PhysicsObject(CollisionShapeManager* collisionShapeManager, unsigned int index, unsigned int type);
+	PhysicsObject(btCollisionShape* collisionShape, unsigned int index, unsigned int type);
 	
 	//! Deletes all subobjects of the contained rigidbody and the rigidbody itself
 	~PhysicsObject();
@@ -65,6 +87,11 @@ public:
 	void input(InputAttribute* inputAttribute, float delta);
 	//! return index of physicsobject
 	unsigned int getIndex() const;
+	//! return type of physicsobject
+	unsigned int getType() const;
+
+	//! scales the collisionShape before setting it to the btRigidBody object that this class inherits from.
+	//void setCollisionShapeTo(btCollisionShape* collisionShape);
 };
 
 #endif //XKILL_PHYSICS_PHYSICSOBJECT

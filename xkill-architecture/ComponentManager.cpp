@@ -16,8 +16,6 @@
 
 #include <iostream>
 
-//#include <windows.h>
-
 #define SAFE_DELETE(x) if( x ) { delete(x); (x) = NULL; }
 
 ComponentManager::ComponentManager()
