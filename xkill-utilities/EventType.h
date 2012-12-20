@@ -105,14 +105,17 @@ public:
 };
 
 /**
+If muteSound is true then all sounds will be muted
+
 \ingroup events
 */
 class DLL_U Event_PlaySound : public Event
 {
 public:
-	Event_PlaySound(int soundId);
+	Event_PlaySound(int soundId, bool muteSound = false);
 
 	int soundId;
+	bool muteSound;
 };
 
 //! Will trigger rumble in devices[deviceNr]

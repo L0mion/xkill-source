@@ -1,5 +1,5 @@
 #include <Windows.h>
-#include <DDSTextureLoader.h>
+#include "DDSTextureLoader.h"
 
 #include "StringConv.h"
 #include "TexLoader.h"
