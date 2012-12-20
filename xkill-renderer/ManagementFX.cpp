@@ -99,6 +99,20 @@ void ManagementFX::setLayout(ID3D11DeviceContext* devcon,	LayoutID layoutID)
 	if(il)
 		devcon->IASetInputLayout(il);
 }
+void ManagementFX::unsetLayout(ID3D11DeviceContext* devcon)
+{
+	devcon->IASetInputLayout(nullptr);
+}
+
+void ManagementFX::unsetAll(ID3D11DeviceContext* devcon)
+{
+	devcon->VSSetShader(NULL, NULL, 0);
+	devcon->GSSetShader(NULL, NULL, 0);
+	devcon->HSSetShader(NULL, NULL, 0);
+	devcon->DSSetShader(NULL, NULL, 0);
+	devcon->PSSetShader(NULL, NULL, 0);
+	devcon->CSSetShader(NULL, NULL, 0);
+}
 
 HRESULT ManagementFX::initShaders(ID3D11Device* device)
 {

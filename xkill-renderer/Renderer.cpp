@@ -22,6 +22,7 @@
 #include "VB.h"
 #include "IB.h"
 #include "renderingUtilities.h"
+#include "TypeFX.h"
 #include "Renderer.h"
 
 //temp
@@ -302,7 +303,7 @@ void Renderer::render(float delta)
 	managementD3D_->clearDepthBuffer();
 
 	//Update per-frame constant buffer.
-	managementCB_->vsSet(CB_TYPE_FRAME, CB_REGISTER_FRAME, managementD3D_->getDeviceContext());
+	managementCB_->setCB(CB_TYPE_FRAME, TypeFX_VS, CB_REGISTER_FRAME, managementD3D_->getDeviceContext());
 	managementCB_->updateCBFrame(managementD3D_->getDeviceContext(), managementLight_->getNumLights());
 
 	//Render to each viewport.
@@ -338,7 +339,7 @@ void Renderer::renderViewport(
 	DirectX::XMFLOAT3	eyePosition			= *(DirectX::XMFLOAT3*)&positionAttribute->position;
 
 	//Update per-viewport constant buffer.
-	managementCB_->vsSet(CB_TYPE_CAMERA, CB_REGISTER_CAMERA, managementD3D_->getDeviceContext());
+	managementCB_->setCB(CB_TYPE_CAMERA, TypeFX_VS, CB_REGISTER_CAMERA, managementD3D_->getDeviceContext());
 	managementCB_->updateCBCamera(managementD3D_->getDeviceContext(),
 		viewMatrix,
 		viewMatrixInverse,
@@ -362,7 +363,7 @@ void Renderer::renderViewportToGBuffer(DirectX::XMFLOAT4X4 viewMatrix, DirectX::
 	managementFX_->setShader(devcon, SHADERID_VS_DEFAULT);
 	managementFX_->setShader(devcon, SHADERID_PS_DEFAULT);
 
-	managementSS_->setPS(devcon, SS_ID_DEFAULT, 0);
+	managementSS_->setSS(devcon, TypeFX_PS, 0, SS_ID_DEFAULT);
 	managementRS_->setRS(devcon, RS_ID_DEFAULT);
 
 	managementGBuffer_->setGBuffersAndDepthBufferAsRenderTargets(devcon, managementD3D_->getDepthBuffer());
@@ -394,7 +395,14 @@ void Renderer::renderViewportToGBuffer(DirectX::XMFLOAT4X4 viewMatrix, DirectX::
 		}
 	}
 
-	renderGBufferClean();
+	managementGBuffer_->unsetGBuffersAndDepthBufferAsRenderTargets(devcon);
+
+	managementFX_->unsetAll(devcon);
+	managementFX_->unsetLayout(devcon);
+
+	managementSS_->unsetSS(devcon, TypeFX_PS, 0);
+
+	devcon->RSSetState(nullptr);
 }
 void Renderer::renderViewportToBackBuffer()
 {
@@ -407,9 +415,9 @@ void Renderer::renderViewportToBackBuffer()
 	managementFX_->setShader(devcon, SHADERID_CS_DEFAULT);
 
 	//Set constant buffers.
-	managementCB_->csSet(CB_TYPE_FRAME,		CB_REGISTER_FRAME,		devcon);
-	managementCB_->csSet(CB_TYPE_INSTANCE,	CB_REGISTER_INSTANCE,	devcon); //remove me
-	managementCB_->csSet(CB_TYPE_CAMERA,	CB_REGISTER_CAMERA,		devcon);
+	managementCB_->setCB(CB_TYPE_FRAME,		TypeFX_CS, CB_REGISTER_FRAME,		devcon);
+	managementCB_->setCB(CB_TYPE_INSTANCE,	TypeFX_CS, CB_REGISTER_INSTANCE,	devcon); //remove me
+	managementCB_->setCB(CB_TYPE_CAMERA,	TypeFX_CS, CB_REGISTER_CAMERA,		devcon);
 	managementCB_->updateCBInstance(devcon, winfo_->getScreenWidth(), winfo_->getScreenHeight());
 
 	//Set lights.
@@ -419,7 +427,7 @@ void Renderer::renderViewportToBackBuffer()
 	managementGBuffer_->setGBuffersAsCSShaderResources(devcon);
 	
 	//Set default samplerstate.
-	managementSS_->setCS(devcon, SS_ID_DEFAULT, 0);
+	managementSS_->setSS(devcon, TypeFX_CS, 0, SS_ID_DEFAULT);
 
 	//Call compute shader kernel.
 	unsigned int dispatchX = winfo_->getCSDispathX() / managementViewport_->getNumViewportsX();
@@ -448,7 +456,7 @@ void Renderer::renderAttribute(
 	DirectX::XMFLOAT4X4 finalMatrix			= calculateFinalMatrix(worldMatrix, viewMatrix, projectionMatrix);
 	
 	//Update per-object constant buffer.
-	managementCB_->vsSet(CB_TYPE_OBJECT, CB_REGISTER_OBJECT, devcon);
+	managementCB_->setCB(CB_TYPE_OBJECT, TypeFX_VS, CB_REGISTER_OBJECT, devcon);
 	managementCB_->updateCBObject(
 		devcon, 
 		finalMatrix, 
@@ -494,7 +502,7 @@ void Renderer::renderSubset(IB* ib, MeshMaterial& material)
 	devcon->PSSetShaderResources(1, 1, &texNormal);
 
 	//Set per-subset constant buffer.
-	managementCB_->psSet(CB_TYPE_SUBSET, CB_REGISTER_SUBSET, devcon);
+	managementCB_->setCB(CB_TYPE_SUBSET, TypeFX_PS, CB_REGISTER_SUBSET, devcon);
 	DirectX::XMFLOAT3 dxSpec(1.0f, 1.0f, 1.0f); //((float*)&material.getSpecularTerm());
 	managementCB_->updateCBSubset(
 		devcon,
@@ -540,7 +548,7 @@ void Renderer::renderDebugShape(
 	managementFX_->setShader(devcon, SHADERID_PS_COLOR);
 
 	//Update per-object constant buffer.
-	managementCB_->vsSet(CB_TYPE_OBJECT, CB_REGISTER_OBJECT, devcon);
+	managementCB_->setCB(CB_TYPE_OBJECT, TypeFX_VS, CB_REGISTER_OBJECT, devcon);
 	managementCB_->updateCBObject(
 		devcon, 
 		finalMatrix, 
@@ -585,20 +593,20 @@ void Renderer::renderAnimatedMesh(DirectX::XMFLOAT4X4 viewMatrix, DirectX::XMFLO
 	DirectX::XMFLOAT4X4 worldMatrixInverse	= worldMatrix;
 	DirectX::XMFLOAT4X4 finalMatrix			= calculateFinalMatrix(worldMatrix, viewMatrix, projectionMatrix);
 	
-	managementCB_->vsSet(CB_TYPE_OBJECT, CB_REGISTER_OBJECT, devcon);
+	managementCB_->setCB(CB_TYPE_OBJECT, TypeFX_VS, CB_REGISTER_OBJECT, devcon);
 	managementCB_->updateCBObject(devcon, finalMatrix, worldMatrix, worldMatrixInverse);
 	
 	animatedMesh_->update(0.002f);
 	std::vector<DirectX::XMFLOAT4X4> finalTransforms;
 	animatedMesh_->getSkinInfo()->getFinalTransforms("Take1", animatedMesh_->getTimePosition(), &finalTransforms);
 
-	managementCB_->vsSet(CB_TYPE_BONE, CB_REGISTER_BONE, devcon);
+	managementCB_->setCB(CB_TYPE_BONE, TypeFX_VS, CB_REGISTER_BONE, devcon);
 	managementCB_->updateCBBone(devcon, finalTransforms);
 
 	managementFX_->setShader(devcon, SHADERID_VS_ANIMATION);
 	managementFX_->setShader(devcon, SHADERID_PS_ANIMATION);
 
-	managementSS_->setPS(devcon, SS_ID_DEFAULT, 0);
+	managementSS_->setSS(devcon, TypeFX_PS, 0, SS_ID_DEFAULT);
 	managementRS_->setRS(devcon, RS_ID_DEFAULT);
 
 	managementGBuffer_->setGBuffersAndDepthBufferAsRenderTargets(devcon, managementD3D_->getDepthBuffer());
@@ -621,18 +629,9 @@ void Renderer::renderAnimatedMesh(DirectX::XMFLOAT4X4 viewMatrix, DirectX::XMFLO
 	devcon->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 	devcon->DrawIndexed(animatedMesh_->getNumIndices(), 0, 0);
 
-	renderGBufferClean();
-}
-void Renderer::renderGBufferClean()
-{
-	ID3D11DeviceContext* devcon = managementD3D_->getDeviceContext();
-
 	managementGBuffer_->unsetGBuffersAndDepthBufferAsRenderTargets(devcon);
 
-	//put me into managementfx?
-	devcon->VSSetShader(NULL, NULL, 0);
-	devcon->PSSetShader(NULL, NULL, 0);
-	devcon->CSSetShader(NULL, NULL, 0);
+	managementFX_->unsetAll(devcon);
 
 	devcon->PSSetSamplers(0, 0, nullptr);
 	devcon->IASetInputLayout(nullptr);
