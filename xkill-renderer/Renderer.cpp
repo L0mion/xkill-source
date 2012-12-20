@@ -89,8 +89,6 @@ void Renderer::reset()
 	SAFE_RESET(managementCB_);
 	SAFE_RESET(managementLight_);
 	SAFE_RESET(managementViewport_);
-	//SAFE_RESET(managementModel_);		//?
-	//SAFE_RESET(managementTex_);		//?
 	SAFE_RESET(managementSS_);
 	SAFE_RESET(managementRS_);
 	SAFE_RESET(managementGBuffer_);
