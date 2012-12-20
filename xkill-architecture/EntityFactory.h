@@ -54,9 +54,7 @@ public:
 
 		CREATE_ATTRIBUTE(DebugShapeAttribute, debugShape, entity);	//create temp debug shape
 		CONNECT_ATTRIBUTES(debugShape, spatial);
-		debugShape->shape	= new DebugShapeBB(
-			Float3(-0.5f, -0.5f, -0.5f),
-			Float3(0.5f, 0.5f, 0.5f)); //new DebugShapeSphere(1.0f);
+		debugShape->shape = new DebugShapeSphere(1.0f);
 		debugShape->render	= true;
 
 		CREATE_ATTRIBUTE(RenderAttribute, render, entity);
