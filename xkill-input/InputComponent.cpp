@@ -1,11 +1,7 @@
 #include "InputComponent.h"
 
 #include <xkill-utilities/EventManager.h>
-
 #include "InputManager.h"
-#include <iostream>
-
-#include <windows.h>
 
 InputComponent::InputComponent()
 {
@@ -59,9 +55,14 @@ void InputComponent::onEvent(Event* e)
 	}
 }
 
+#include "WindowsTime.h"
+
 void InputComponent::onUpdate(float delta)
 {
-	newDeviceSearchTimer_ += delta;
+	WindowsTime wt;
+	wt.Start();
+
+	newDeviceSearchTimer_ += delta;				//Takes alot of time so should probably not run in main thread or during run-time
 	if(newDeviceSearchTimer_ >= searchTime_)
 	{
 		newDeviceSearchTimer_ = 0.0f;
@@ -71,6 +72,8 @@ void InputComponent::onUpdate(float delta)
 	inputManager_->Update(delta);
 
 	handleInput(delta);
+	wt.Stop();
+	float time = wt.GetDelta();
 }
 
 void InputComponent::handleInput(float delta)
@@ -82,58 +85,95 @@ void InputComponent::handleInput(float delta)
 		if(device == nullptr)
 			continue;
 
-		InputDevice::InputState state = device->GetState();
+		//int nrAxes = state.axes.size();
+		//if(nrAxes >= 1)
+		//	inputAttributes_->at(i).position.x = state.axes[0]->GetValue();
+		//																    
+		//if(nrAxes >= 2)													    
+		//	inputAttributes_->at(i).position.y = state.axes[1]->GetValue();
+		//																    
+		//if(nrAxes >= 3)													    
+		//	inputAttributes_->at(i).rotation.x = state.axes[2]->GetValue() * delta;
+		//																    
+		//if(nrAxes >= 4)													    
+		//	inputAttributes_->at(i).rotation.y = state.axes[3]->GetValue() * delta;
 
-		int nrAxes = state.axes.size();
-		if(nrAxes >= 1)
-			inputAttributes_->at(i).position.x = state.axes[0].GetValue();
-																		    
-		if(nrAxes >= 2)													    
-			inputAttributes_->at(i).position.y = state.axes[1].GetValue();
-																		    
-		if(nrAxes >= 3)													    
-			inputAttributes_->at(i).rotation.x = state.axes[2].GetValue() * delta;
-																		    
-		if(nrAxes >= 4)													    
-			inputAttributes_->at(i).rotation.y = state.axes[3].GetValue() * delta;
+		inputAttributes_->at(i).position.x = device->getFloatValue(ACTION_F_WALK_LR);
+		inputAttributes_->at(i).position.y = device->getFloatValue(ACTION_F_WALK_FB);
+		inputAttributes_->at(i).rotation.x = device->getFloatValue(ACTION_F_LOOK_LR) * delta;
+		inputAttributes_->at(i).rotation.y = device->getFloatValue(ACTION_F_LOOK_UD) * delta;
 
-		if(state.buttons.size() > 3)
+		////if(state.buttons.size() > 3)
+		////{
+		////	if(state.buttons[1]->isReleased())
+		////	{
+		////		Event_Rumble* er = new Event_Rumble(i, true, 100.0f, 1.0f, 1.0f);
+		////		EventManager::getInstance()->sendEvent(er);
+		////		delete er;
+		////	}
+		//
+		////	if(state.buttons[2]->isReleased())
+		////	{
+		////		Event_Rumble* er = new Event_Rumble(i, false, 100.0f, 0.0f, 0.0f);
+		////		EventManager::getInstance()->sendEvent(er);
+		////		delete er;
+		////	}
+		//
+		////	//Projectile test
+		////	if(state.buttons[0]->isDown())													   
+		////		inputAttributes_->at(i).fire = true;
+		//	//if(state.buttons[7].isDown())
+		//	//	inputAttributes_->at(i).fire = true;
+		//
+		//	//if(state.buttons.size() > 7)
+		//	//{
+		//	//	if(state.buttons[3]->isDown())
+		//	//		inputAttributes_->at(i).position.y = 1.0f;
+		//	//															    
+		//	//	if(state.buttons[4]->isDown())
+		//	//		inputAttributes_->at(i).position.x = -1.0f;
+		//
+		//	//	if(state.buttons[5]->isDown())
+		//	//		inputAttributes_->at(i).position.y = -1.0f;
+		//
+		//	//	if(state.buttons[6]->isDown())
+		//	//		inputAttributes_->at(i).position.x = 1.0f;
+		//	//}
+		////}
+
+		if(device->getBoolValue(ACTION_B_FIRE))
+			inputAttributes_->at(i).fire = true;
+		if(device->getBoolValue(ACTION_B_CHANGE_WEAPON))
+			inputAttributes_->at(i).changeWeapon = true;
+
+		if(device->getBoolValue(ACTION_B_TOGGLE_MUTE_SOUND))
+			SEND_EVENT(&Event_PlaySound(-1, true));
+
+		if(device->getBoolValue(ACTION_B_RUMBLE_ON))
 		{
-			if(state.buttons[1].isReleased())
-			{
-				Event_Rumble* er = new Event_Rumble(i, true, 100.0f, 1.0f, 1.0f);
-				EventManager::getInstance()->sendEvent(er);
-				delete er;
-			}
-
-			if(state.buttons[2].isReleased())
-			{
-				Event_Rumble* er = new Event_Rumble(i, false, 100.0f, 0.0f, 0.0f);
-				EventManager::getInstance()->sendEvent(er);
-				delete er;
-			}
-
-			//Projectile test
-			if(state.buttons[0].isReleased())
-				inputAttributes_->at(i).fire = true;
-			if(state.buttons[7].isDown())
-				inputAttributes_->at(i).fire = true;
-
-			if(state.buttons.size() > 7)
-			{
-				if(state.buttons[3].isDown())
-					inputAttributes_->at(i).position.y = 1.0f;
-
-				if(state.buttons[4].isDown())
-					inputAttributes_->at(i).position.x = -1.0f;
-
-				if(state.buttons[5].isDown())
-					inputAttributes_->at(i).position.y = -1.0f;
-
-				if(state.buttons[6].isDown())
-					inputAttributes_->at(i).position.x = 1.0f;
-			}
+			Event_Rumble* er = new Event_Rumble(i, true, 100.0f, 1.0f, 1.0f);
+			EventManager::getInstance()->sendEvent(er);
+			delete er;
 		}
+
+		if(device->getBoolValue(ACTION_B_RUMBLE_OFF))
+		{
+			Event_Rumble* er = new Event_Rumble(i, false, 100.0f, 0.0f, 0.0f);
+			EventManager::getInstance()->sendEvent(er);
+			delete er;
+		}
+
+		if(device->getBoolValue(ACTION_B_WALK_FORWARD))
+			inputAttributes_->at(i).position.y = 1.0f;
+															
+		if(device->getBoolValue(ACTION_B_WALK_LEFT))
+			inputAttributes_->at(i).position.x = -1.0f;
+		
+		if(device->getBoolValue(ACTION_B_WALK_BACKWARD))
+			inputAttributes_->at(i).position.y = -1.0f;
+		
+		if(device->getBoolValue(ACTION_B_WALK_RIGHT))
+			inputAttributes_->at(i).position.x = 1.0f;
 		
 		if(device->GetType() == device->QT_INPUT_DEVICE)
 		{

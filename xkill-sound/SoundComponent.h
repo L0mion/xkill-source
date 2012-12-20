@@ -23,6 +23,7 @@ class DLL_S SoundComponent : public IObserver
 private:
 	FMODEventSystem* mFMODEventSystem;
 	EventToFModConverter* converter;
+	float timer;
 
 	void fillEventsToFModVector(std::string configFilePath);
 

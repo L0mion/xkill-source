@@ -9,6 +9,7 @@ InputTriggerObject::InputTriggerObject(int minValue, int maxValue)
 	triggerValue_ = 0.75;
 
 	value_ = 0.0f;
+	prevValue_ = 0.0f;
 }
 
 InputTriggerObject::~InputTriggerObject(void)
@@ -17,6 +18,8 @@ InputTriggerObject::~InputTriggerObject(void)
 
 void InputTriggerObject::SetValue(float value)
 {
+	prevValue_ = value_;
+
 	if(value > 1.0f)
 		value_ = 1.0f;
 	else if(value < 0.0f)
@@ -27,12 +30,18 @@ void InputTriggerObject::SetValue(float value)
 
 void InputTriggerObject::SetValue(int value)
 {
+	prevValue_ = value_;
 	value_ = formatValue(value);
 }
 
 float InputTriggerObject::GetValue()
 {
-	return value_;
+	float value = value_;
+
+	if(inverted_)
+		value *= -1.0f;
+
+	return value;
 }
 
 bool InputTriggerObject::IsTriggered()
@@ -42,7 +51,7 @@ bool InputTriggerObject::IsTriggered()
 
 float InputTriggerObject::getValueFloat()
 {
-	return value_;
+	return GetValue();
 }
 
 bool InputTriggerObject::getValueBool()
@@ -50,12 +59,17 @@ bool InputTriggerObject::getValueBool()
 	return IsTriggered();
 }
 
+bool InputTriggerObject::getValueBoolReleased()
+{
+	return (!floatToBool(value_) && floatToBool(prevValue_));
+}
+
 InputObject::InputObjectType InputTriggerObject::GetType()
 {
 	return TRIGGER_OBJECT;
 }
 
-void InputTriggerObject::SetDeadZone(float deadZone)
+void InputTriggerObject::setDeadZone(float deadZone)
 {
 	if(deadZone > 1.0f)
 		deadZone_ = 1.0f;
@@ -65,7 +79,12 @@ void InputTriggerObject::SetDeadZone(float deadZone)
 		deadZone_ = deadZone;
 }
 
-void InputTriggerObject::SetTriggerValue(float triggerValue)
+float InputTriggerObject::getDeadZone()
+{
+	return deadZone_;
+}
+
+void InputTriggerObject::setTriggerValue(float triggerValue)
 {
 	if(triggerValue > 1.0f)
 		triggerValue_ = 1.0f;
@@ -73,6 +92,11 @@ void InputTriggerObject::SetTriggerValue(float triggerValue)
 		triggerValue_ = 0.0f;
 	else
 		triggerValue_ = triggerValue;
+}
+
+float InputTriggerObject::getTriggerValue()
+{
+	return triggerValue_;
 }
 
 float InputTriggerObject::formatValue(int value)
@@ -87,4 +111,9 @@ float InputTriggerObject::formatValue(int value)
 		doubleTrigger = 0.0;
 
 	return (float)doubleTrigger;
+}
+
+bool InputTriggerObject::floatToBool(float value)
+{
+	return (std::abs(value) >= triggerValue_);
 }
