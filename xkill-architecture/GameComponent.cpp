@@ -525,14 +525,14 @@ SpawnPointAttribute* GameComponent::findUnoccupiedSpawnPoint()
 }
 
 void GameComponent::event_StartDeathmatch( Event_StartDeathmatch* e )
-{
+{ 
 	// Delete players
 	std::vector<int>* playerAttributesOwners;		GET_ATTRIBUTE_OWNERS(playerAttributesOwners, ATTRIBUTE_PLAYER);
 	for(unsigned i=0; i<playerAttributesOwners->size(); i++)
 	{
 		if(playerAttributesOwners->at(i)!=0)
 		{
-			//SEND_EVENT(&Event_RemoveEntity(playerAttributesOwners->at(i)));
+			SEND_EVENT(&Event_RemoveEntity(playerAttributesOwners->at(i)));
 		}
 	}
 
@@ -541,7 +541,14 @@ void GameComponent::event_StartDeathmatch( Event_StartDeathmatch* e )
 	{
 		SEND_EVENT(&Event_CreateEntity(PLAYER));
 	}
-	SEND_EVENT(&Event_WindowResize(800,800));
+
+	// Get window resolution so we can tell renderer to recalculate and resize split screens
+	Event_GetWindowResolution event_getWindowResolution;
+	SEND_EVENT(&event_getWindowResolution);
+	int width = event_getWindowResolution.width;
+	int height = event_getWindowResolution.height;
+	SEND_EVENT(&Event_WindowResize(width,height));
+
 	// Set state to deathmatch
 	GET_STATE() =  STATE_DEATHMATCH;
 }

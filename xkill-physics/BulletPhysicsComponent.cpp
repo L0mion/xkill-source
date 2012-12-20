@@ -118,16 +118,16 @@ bool BulletPhysicsComponent::init()
 
 void BulletPhysicsComponent::onUpdate(float delta)
 {
-	for(unsigned int i = 0; i < inputAttributes_->size(); i++)
-	{
-		if(i < static_cast<unsigned int>(physicsObjects_->size()))
-			physicsObjects_->at(inputAttributes_->at(i).physicsAttribute.index)->input(&inputAttributes_->at(i),delta);
-	}
-
 	//Checks if new physiscs attributes were created since last call to this function
 	for(unsigned int i = physicsObjects_->size(); i < physicsAttributes_->size(); i++)
 	{
 		physicsObjects_->push_back(new PhysicsObject(collisionShapeManager_,i));
+	}
+
+	for(unsigned int i = 0; i < inputAttributes_->size(); i++)
+	{
+		if(i < static_cast<unsigned int>(physicsObjects_->size()))
+			physicsObjects_->at(inputAttributes_->at(i).physicsAttribute.index)->input(&inputAttributes_->at(i),delta);
 	}
 	
 	//Synchronize the internal represenation of physics objects with the physics attributes

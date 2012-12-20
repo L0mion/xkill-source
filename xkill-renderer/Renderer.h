@@ -119,6 +119,7 @@ private:
 	std::vector<SpatialAttribute>*	attributesSpatial_;		//!< Holds spatial data. Is fetched only once.
 	std::vector<PositionAttribute>*	attributesPosition_;	//!< Holds positional data. Is fetched only once.
 	std::vector<RenderAttribute>*	attributesRender_;		//!< Holds objects supposed to be rendered. Is fetched only once.
+	std::vector<int>*				attributesCameraOwner_;
 	std::vector<int>*				attributesRenderOwner_;
 	std::vector<CameraAttribute>*	attributesCamera_;		//!< Holds cameras being rendered to g-buffers. Is fetched only once.
 

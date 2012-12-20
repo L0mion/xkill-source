@@ -166,6 +166,8 @@ void Menu_Main::slot_startGame()
 {
 	int num_players = ui.horizontalSlider_numPlayers->value();
 	SEND_EVENT(&Event_StartDeathmatch(num_players));
+
+	ToggleHelper::toggleMenu(false);
 }
 
 

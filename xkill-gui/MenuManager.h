@@ -7,12 +7,14 @@
 
 #include "Menu_Main.h"
 #include "Menu_ScoreBoard.h"
+#include "Menu_InGame.h"
 
 class MenuManager : public IObserver
 {
 private:
-	Menu_Main* main;
+	Menu_Main* mainMenu;
 	Menu_ScoreBoard* scoreBoard;
+	Menu_InGame* inGameMenu;
 	
 
 public:
@@ -34,6 +36,11 @@ public:
 				test = refreshRate;
 			}
 			break;
+		case EVENT_END_DEATHMATCH:
+			scoreBoard->toggleMenu(false);
+			inGameMenu->toggleMenu(false);
+			mainMenu->toggleMenu(true);
+			break;
 		default:
 			break;
 		}
@@ -43,26 +50,15 @@ public:
 	{
 
 	}
-
 	// Behavior on keyboard input
-	void keyPressEvent(QKeyEvent* e)
-	{
-		switch (e->key()) 
-		{
-		case Qt::Key_Escape:
-			main->toggleMenu();
-			break;
-		case Qt::Key_Tab:
-			scoreBoard->toggleMenu();
-			break;
-		default:
-			break;
-		}
-	}
+	void keyPressEvent(QKeyEvent* e);
+
+	void keyReleaseEvent(QKeyEvent* e);
 
 	void moveEvent()
 	{
-		main->parentMoveEvent();
+		mainMenu->parentMoveEvent();
 		scoreBoard->parentMoveEvent();
+		inGameMenu->parentMoveEvent();
 	}
 };

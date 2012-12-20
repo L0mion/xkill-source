@@ -97,10 +97,20 @@ void Renderer::reset()
 }
 HRESULT Renderer::resize(unsigned int screenWidth, unsigned int screenHeight)
 {
+	// Calculate number of cameras
+	unsigned numCameras = 0;
+	for(unsigned i=0; i<attributesCameraOwner_->size(); i++)
+	{
+		if(attributesCameraOwner_->at(i)!=0)
+		{
+			numCameras++;
+		}
+	}
+	
+	// Stuff
 	HRESULT hr = S_OK;
-
 	unsigned int numViewports, csDispatchX, csDispatchY;
-	numViewports	= winfo_->getNumViewports();
+	numViewports	= numCameras; //winfo_->getNumViewports();
 	csDispatchX		= screenWidth	/ CS_TILE_SIZE;
 	csDispatchY		= screenHeight	/ CS_TILE_SIZE;
 	winfo_->init(
@@ -169,6 +179,7 @@ void Renderer::initAttributes()
 	GET_ATTRIBUTES(attributesSpatial_,	SpatialAttribute,	ATTRIBUTE_SPATIAL);
 	GET_ATTRIBUTES(attributesPosition_,	PositionAttribute,	ATTRIBUTE_POSITION);
 
+	GET_ATTRIBUTE_OWNERS(attributesCameraOwner_, ATTRIBUTE_CAMERA);
 	GET_ATTRIBUTE_OWNERS(attributesRenderOwner_, ATTRIBUTE_RENDER);
 }
 void Renderer::initWinfo()
@@ -307,18 +318,25 @@ void Renderer::render(float delta)
 	managementCB_->updateCBFrame(managementD3D_->getDeviceContext(), managementLight_->getNumLights());
 
 	//Render to each viewport.
+	int cameraIndex = 0;
 	for(unsigned int i = 0; i < attributesCamera_->size(); i++)
 	{
-		//Set viewport.
-		managementViewport_->setViewport(managementD3D_->getDeviceContext(), i);
+		if(attributesCameraOwner_->at(i)!=0)
+		{
+			//Set viewport.
+			managementViewport_->setViewport(managementD3D_->getDeviceContext(), cameraIndex);
 
-		//Render viewport.
-		unsigned int viewportTopX = static_cast<unsigned int>(managementViewport_->getViewport(i).TopLeftX);
-		unsigned int viewportTopY = static_cast<unsigned int>(managementViewport_->getViewport(i).TopLeftY);
-		renderViewport(
-			attributesCamera_->at(i), 
-			viewportTopX, 
-			viewportTopY);
+			//Render viewport.
+			unsigned int viewportTopX = static_cast<unsigned int>(managementViewport_->getViewport(cameraIndex).TopLeftX);
+			unsigned int viewportTopY = static_cast<unsigned int>(managementViewport_->getViewport(cameraIndex).TopLeftY);
+			renderViewport(
+				attributesCamera_->at(cameraIndex), 
+				viewportTopX, 
+				viewportTopY);
+
+			// HACK: Increment camera index
+			cameraIndex++;
+		}
 	}
 }
 void Renderer::renderViewport(

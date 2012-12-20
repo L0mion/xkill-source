@@ -24,7 +24,7 @@ bool GameManager::init(HWND windowHandle, HWND parentWindowHandle)
 
 	// Init world
 	SEND_EVENT(&Event_CreateEntity(WORLD));
-	for(int i=0; i<2; i++)
+	for(int i=0; i<1; i++)
 	{
 		SEND_EVENT(&Event_CreateEntity(PLAYER));
 	}

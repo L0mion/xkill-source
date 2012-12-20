@@ -178,6 +178,9 @@ void MainWindow::toggleMouseLock()
 
 void MainWindow::keyReleaseEvent( QKeyEvent* e )
 {
+	// Detect keypress in menu
+	menuManager->keyReleaseEvent(e);
+
 	// Inform about key release
 	SEND_EVENT(&Event_KeyRelease(e->key()));
 }

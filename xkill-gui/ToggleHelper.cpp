@@ -21,3 +21,11 @@ void ToggleHelper::toggleMenu()
 	else
 		owner->hide();
 }
+
+void ToggleHelper::toggleMenu( bool show )
+{
+	if(show != showMenu)
+	{
+		toggleMenu();
+	}
+}

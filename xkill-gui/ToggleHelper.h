@@ -16,6 +16,7 @@ public:
 	ToggleHelper(QWidget* owner);
 
 	void toggleMenu();
+	void toggleMenu(bool show);
 
 	void virtual parentMoveEvent() = 0;
 };
