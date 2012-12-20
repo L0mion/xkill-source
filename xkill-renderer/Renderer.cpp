@@ -23,6 +23,7 @@
 #include "IB.h"
 #include "renderingUtilities.h"
 #include "TypeFX.h"
+#include "ManagementMath.h"
 #include "Renderer.h"
 
 //temp
@@ -47,6 +48,7 @@ Renderer::Renderer(HWND windowHandle)
 	managementRS_		= nullptr;
 	managementGBuffer_	= nullptr;
 	managementDebug_	= nullptr;
+	managementMath_		= nullptr;
 
 	attributesSpatial_		= nullptr;
 	attributesPosition_		= nullptr;
@@ -73,6 +75,7 @@ Renderer::~Renderer()
 	SAFE_DELETE(managementSS_);
 	SAFE_DELETE(managementRS_);
 	SAFE_DELETE(managementGBuffer_);
+	SAFE_DELETE(managementMath_);
 
 	//d3dDebug_->reportLiveDeviceObjects();
 	SAFE_DELETE(managementDebug_);
@@ -144,6 +147,7 @@ HRESULT Renderer::init()
 		hr = initManagementRS();
 //	if(SUCCEEDED(hr))
 //		hr = initManagementDebug();
+	initManagementMath();
 	if(SUCCEEDED(hr))
 		hr = initManagementGBuffer();
 
@@ -295,6 +299,10 @@ HRESULT Renderer::initManagementDebug()
 
 	return hr;
 }
+void Renderer::initManagementMath()
+{
+	managementMath_ = new ManagementMath();
+}
 
 void Renderer::render(float delta)
 {
@@ -329,8 +337,8 @@ void Renderer::renderViewport(
 	//Get camera's view- and projection matrix, and their inverses.
 	DirectX::XMFLOAT4X4 viewMatrix((float*)&cameraAt.mat_view);
 	DirectX::XMFLOAT4X4 projectionMatrix((float*)&cameraAt.mat_projection);
-	DirectX::XMFLOAT4X4 viewMatrixInverse		= calculateMatrixInverse(viewMatrix);
-	DirectX::XMFLOAT4X4 projectionMatrixInverse	= calculateMatrixInverse(projectionMatrix);
+	DirectX::XMFLOAT4X4 viewMatrixInverse		= managementMath_->calculateMatrixInverse(viewMatrix);
+	DirectX::XMFLOAT4X4 projectionMatrixInverse	= managementMath_->calculateMatrixInverse(projectionMatrix);
 
 	//Get eye position.
 	CameraAttribute*	cameraAtP = &cameraAt;
@@ -451,9 +459,9 @@ void Renderer::renderAttribute(
 	//Get transform matrices.
 	SpatialAttribute*	spatialAt			= &attributesSpatial_->at(renderAt->spatialAttribute.index);
 	PositionAttribute*	positionAt			= &attributesPosition_->at(spatialAt->positionAttribute.index);
-	DirectX::XMFLOAT4X4 worldMatrix			= calculateWorldMatrix(spatialAt, positionAt);
-	DirectX::XMFLOAT4X4 worldMatrixInverse	= calculateMatrixInverse(worldMatrix);
-	DirectX::XMFLOAT4X4 finalMatrix			= calculateFinalMatrix(worldMatrix, viewMatrix, projectionMatrix);
+	DirectX::XMFLOAT4X4 worldMatrix			= managementMath_->calculateWorldMatrix(spatialAt, positionAt);
+	DirectX::XMFLOAT4X4 worldMatrixInverse	= managementMath_->calculateMatrixInverse(worldMatrix);
+	DirectX::XMFLOAT4X4 finalMatrix			= managementMath_->calculateFinalMatrix(worldMatrix, viewMatrix, projectionMatrix);
 	
 	//Update per-object constant buffer.
 	managementCB_->setCB(CB_TYPE_OBJECT, TypeFX_VS, CB_REGISTER_OBJECT, devcon);
@@ -540,9 +548,9 @@ void Renderer::renderDebugShape(
 	//Get transform matrices.
 	SpatialAttribute*	spatialAt			= &attributesSpatial_->at(debugShapeAt->spatialAttribute.index);
 	PositionAttribute*	positionAt			= &attributesPosition_->at(spatialAt->positionAttribute.index);
-	DirectX::XMFLOAT4X4 worldMatrix			= calculateWorldMatrix(spatialAt, positionAt);
-	DirectX::XMFLOAT4X4 worldMatrixInverse	= calculateMatrixInverse(worldMatrix);
-	DirectX::XMFLOAT4X4 finalMatrix			= calculateFinalMatrix(worldMatrix, viewMatrix, projectionMatrix);
+	DirectX::XMFLOAT4X4 worldMatrix			= managementMath_->calculateWorldMatrix(spatialAt, positionAt);
+	DirectX::XMFLOAT4X4 worldMatrixInverse	= managementMath_->calculateMatrixInverse(worldMatrix);
+	DirectX::XMFLOAT4X4 finalMatrix			= managementMath_->calculateFinalMatrix(worldMatrix, viewMatrix, projectionMatrix);
 	
 	managementFX_->setShader(devcon, SHADERID_VS_COLOR);
 	managementFX_->setShader(devcon, SHADERID_PS_COLOR);
@@ -591,7 +599,7 @@ void Renderer::renderAnimatedMesh(DirectX::XMFLOAT4X4 viewMatrix, DirectX::XMFLO
 									0.0f, 0.0f, 0.01f, 0.0f,
 									10.0f, 2.3f, 1.0f, 1.0f);
 	DirectX::XMFLOAT4X4 worldMatrixInverse	= worldMatrix;
-	DirectX::XMFLOAT4X4 finalMatrix			= calculateFinalMatrix(worldMatrix, viewMatrix, projectionMatrix);
+	DirectX::XMFLOAT4X4 finalMatrix			= managementMath_->calculateFinalMatrix(worldMatrix, viewMatrix, projectionMatrix);
 	
 	managementCB_->setCB(CB_TYPE_OBJECT, TypeFX_VS, CB_REGISTER_OBJECT, devcon);
 	managementCB_->updateCBObject(devcon, finalMatrix, worldMatrix, worldMatrixInverse);
@@ -649,60 +657,6 @@ void Renderer::renderBackBufferClean()
 		resourceViews[i] = nullptr;
 	devcon->CSSetShaderResources(0, GBUFFERID_NUM_BUFFERS, resourceViews);
 	devcon->CSSetSamplers(0, 0, nullptr);
-}
-
-DirectX::XMFLOAT4X4 Renderer::calculateMatrixInverse(DirectX::XMFLOAT4X4 matrix)
-{
-	DirectX::CXMMATRIX	cxmMatrix		= DirectX::XMLoadFloat4x4(&matrix);
-	DirectX::XMVECTOR	vDeterminant	= DirectX::XMMatrixDeterminant(cxmMatrix);
-	DirectX::XMMATRIX	xmMatrixInverse = DirectX::XMMatrixInverse(&vDeterminant, cxmMatrix);
-	
-	DirectX::XMFLOAT4X4 matrixInverse;
-	DirectX::XMStoreFloat4x4(&matrixInverse, xmMatrixInverse);
-	
-	return matrixInverse;
-}
-DirectX::XMFLOAT4X4 Renderer::calculateWorldMatrix(
-	SpatialAttribute* spatialAttribute, 
-	PositionAttribute* positionAttribute)
-{
-	DirectX::XMMATRIX translation = DirectX::XMMatrixTranslation(positionAttribute->position.x,
-																 positionAttribute->position.y,
-																 positionAttribute->position.z);
-
-	DirectX::XMMATRIX scaling = DirectX::XMMatrixScaling(spatialAttribute->scale.x,
-														 spatialAttribute->scale.y,
-														 spatialAttribute->scale.z);
-
-	DirectX::XMFLOAT4 fRotation = DirectX::XMFLOAT4(spatialAttribute->rotation.x,
-													spatialAttribute->rotation.y,
-													spatialAttribute->rotation.z,
-													spatialAttribute->rotation.w);
-
-	DirectX::XMVECTOR qRotation = DirectX::XMLoadFloat4(&fRotation);
-	DirectX::XMMATRIX rotation = DirectX::XMMatrixRotationQuaternion(qRotation);
-
-	DirectX::XMMATRIX mWorldMatrix = scaling * rotation * translation;
-	DirectX::XMFLOAT4X4 worldMatrix;
-	DirectX::XMStoreFloat4x4(&worldMatrix, mWorldMatrix);
-
-	return worldMatrix;
-}
-DirectX::XMFLOAT4X4 Renderer::calculateFinalMatrix(
-	DirectX::XMFLOAT4X4 worldMatrix, 
-	DirectX::XMFLOAT4X4 viewMatrix, 
-	DirectX::XMFLOAT4X4 projectionMatrix)
-{
-	DirectX::CXMMATRIX mView		= DirectX::XMLoadFloat4x4(&viewMatrix);
-	DirectX::CXMMATRIX mProjection	= DirectX::XMLoadFloat4x4(&projectionMatrix);
-	DirectX::CXMMATRIX mWorld		= DirectX::XMLoadFloat4x4(&worldMatrix);
-
-	DirectX::XMMATRIX mFinalMatrix = mWorld * mView * mProjection;
-	
-	DirectX::XMFLOAT4X4 finalMatrix;
-	DirectX::XMStoreFloat4x4(&finalMatrix, mFinalMatrix);
-
-	return finalMatrix;
 }
 
 void Renderer::loadTextures(TexDesc* texdesc)
