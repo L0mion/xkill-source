@@ -94,7 +94,7 @@ public:
 
 		// Save access controller in Entity so it can be deleted later
 		owner->addAttribute(getAttributeController());
-
+		
 		// Get attribute
 		return &attributes[index];
 	}

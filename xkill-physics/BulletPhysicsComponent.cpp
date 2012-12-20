@@ -198,80 +198,80 @@ void BulletPhysicsComponent::onUpdate(float delta)
 
 void BulletPhysicsComponent::onEvent(Event* e)
 {
-	for(unsigned int i = 0; i < renderAttributes_->size(); i++)
-	{
-		renderAttributes_->at(i).culling.clear();
-	}
-	for(unsigned int i = frustrumObjects_->size(); i < cameraAttributes_->size(); i++)
-	{
-		//create new frustrum;
-		CameraAttribute* cameraAttribute = &cameraAttributes_->at(i);
-		btConvexHullShape* frustumShape = new btConvexHullShape;
-		float far = cameraAttribute->zFar;
-		float near = cameraAttribute->zNear;
-		float aspect = cameraAttribute->aspect;
-		float fovy = cameraAttribute->fov;
-		float fovx = 2*atan(aspect*tan(fovy/2));
+	//for(unsigned int i = 0; i < renderAttributes_->size(); i++)
+	//{
+	//	renderAttributes_->at(i).culling.clear();
+	//}
+	//for(unsigned int i = frustrumObjects_->size(); i < cameraAttributes_->size(); i++)
+	//{
+	//	//create new frustrum;
+	//	CameraAttribute* cameraAttribute = &cameraAttributes_->at(i);
+	//	btConvexHullShape* frustumShape = new btConvexHullShape;
+	//	float far = cameraAttribute->zFar;
+	//	float near = cameraAttribute->zNear;
+	//	float aspect = cameraAttribute->aspect;
+	//	float fovy = cameraAttribute->fov;
+	//	float fovx = 2*atan(aspect*tan(fovy/2));
 
-		frustumShape->addPoint(WorldScaling*btVector3(near*tan(fovx/2),near*tan(fovy/2),near));    //y = far/ tan(fov/2)
-		frustumShape->addPoint(WorldScaling*btVector3(-near*tan(fovx/2),near*tan(fovy/2),near));   //fovx = 2atan(aspect*tan(fovy/2))
-		frustumShape->addPoint(WorldScaling*btVector3(near*tan(fovx/2),-near*tan(fovy/2),near));
-		frustumShape->addPoint(WorldScaling*btVector3(-near*tan(fovx/2),-near*tan(fovy/2),near));
+	//	frustumShape->addPoint(WorldScaling*btVector3(near*tan(fovx/2),near*tan(fovy/2),near));    //y = far/ tan(fov/2)
+	//	frustumShape->addPoint(WorldScaling*btVector3(-near*tan(fovx/2),near*tan(fovy/2),near));   //fovx = 2atan(aspect*tan(fovy/2))
+	//	frustumShape->addPoint(WorldScaling*btVector3(near*tan(fovx/2),-near*tan(fovy/2),near));
+	//	frustumShape->addPoint(WorldScaling*btVector3(-near*tan(fovx/2),-near*tan(fovy/2),near));
 
-		frustumShape->addPoint(WorldScaling*btVector3(far*tan(fovx/2),far*tan(fovy/2),far));
-		frustumShape->addPoint(WorldScaling*btVector3(-far*tan(fovx/2),far*tan(fovy/2),far));
-		frustumShape->addPoint(WorldScaling*btVector3(far*tan(fovx/2),-far*tan(fovy/2),far));
-		frustumShape->addPoint(WorldScaling*btVector3(-far*tan(fovx/2),-far*tan(fovy/2),far));
+	//	frustumShape->addPoint(WorldScaling*btVector3(far*tan(fovx/2),far*tan(fovy/2),far));
+	//	frustumShape->addPoint(WorldScaling*btVector3(-far*tan(fovx/2),far*tan(fovy/2),far));
+	//	frustumShape->addPoint(WorldScaling*btVector3(far*tan(fovx/2),-far*tan(fovy/2),far));
+	//	frustumShape->addPoint(WorldScaling*btVector3(-far*tan(fovx/2),-far*tan(fovy/2),far));
 
-		PhysicsObject *frustrum = new PhysicsObject(frustumShape,i,PO_Types::tFrustrum);
-		delete frustumShape;
+	//	PhysicsObject *frustrum = new PhysicsObject(frustumShape,i,PO_Types::tFrustrum);
+	//	delete frustumShape;
 
-		frustrum->setCollisionShape(new btSphereShape(100));
-		
-		btTransform test;
-		test.setIdentity();
-		frustrum->setWorldTransform(test);
-		frustrum->setLinearVelocity(btVector3(0,0,0));
-		frustrum->setAngularVelocity(btVector3(0,0,0));
-		frustrum->setMassProps(1,btVector3(0,0,0));
-		frustrum->setCollisionFlags(frustrum->getCollisionFlags() | frustrum->CF_NO_CONTACT_RESPONSE);
-		frustrumObjects_->push_back(frustrum);
-	}
-	for(unsigned int i = 0; i < frustrumObjects_->size(); i++)
-	{
-		PhysicsObject* frustrum = frustrumObjects_->at(i);
-		CameraAttribute* camera = &cameraAttributes_->at(i);
-		SpatialAttribute* spatial = ATTRIBUTE_CAST(SpatialAttribute,spatialAttribute,camera);
-		PositionAttribute* position = ATTRIBUTE_CAST(PositionAttribute,positionAttribute,spatial);
-		Float3 look (camera->mat_view._13, camera->mat_view._23, camera->mat_view._33);
-		Float3 eye (camera->mat_view._13, camera->mat_view._23, camera->mat_view._33);
-		
-		
-		/*float yaw = atan(-look.x/look.y);
-		float pitch = atan(sqrt(look.x*look.x+look.y*look.y)/look.z);*/
-		float yaw,pitch,distance;
-		distance = sqrt(look.x*look.x + look.z*look.z);
-		pitch = atan2(look.y,distance);
-		yaw = atan2(look.x, look.z);
-		
-		
-		//frustrum->set
-		frustrum->getWorldTransform().setRotation(btQuaternion(yaw,
-															 pitch,
-															 0));
-		frustrum->getWorldTransform().setOrigin(btVector3(position->position.x, //+ look.x*0.1f,
-														  position->position.y, //+ look.y*0.1f,
-														  position->position.z)); //+ look.z*0.1f));
-		//frustrum->setCollisionFlags( frustrum->getCollisionFlags() | frustrum->CF_NO_CONTACT_RESPONSE);
-		dynamicsWorld_->addRigidBody(frustrum);
-	}
-	dynamicsWorld_->performDiscreteCollisionDetection();
-	tickCallback(0);
-	for(unsigned int i = 0; i < frustrumObjects_->size(); i++)
-	{
-		dynamicsWorld_->removeRigidBody(frustrumObjects_->at(i));
-	}
-	FLUSH_QUEUED_EVENTS(EVENT_PHYSICS_ATTRIBUTES_COLLIDING);
+	//	frustrum->setCollisionShape(new btSphereShape(100));
+	//	
+	//	btTransform test;
+	//	test.setIdentity();
+	//	frustrum->setWorldTransform(test);
+	//	frustrum->setLinearVelocity(btVector3(0,0,0));
+	//	frustrum->setAngularVelocity(btVector3(0,0,0));
+	//	frustrum->setMassProps(1,btVector3(0,0,0));
+	//	frustrum->setCollisionFlags(frustrum->getCollisionFlags() | frustrum->CF_NO_CONTACT_RESPONSE);
+	//	frustrumObjects_->push_back(frustrum);
+	//}
+	//for(unsigned int i = 0; i < frustrumObjects_->size(); i++)
+	//{
+	//	PhysicsObject* frustrum = frustrumObjects_->at(i);
+	//	CameraAttribute* camera = &cameraAttributes_->at(i);
+	//	SpatialAttribute* spatial = ATTRIBUTE_CAST(SpatialAttribute,spatialAttribute,camera);
+	//	PositionAttribute* position = ATTRIBUTE_CAST(PositionAttribute,positionAttribute,spatial);
+	//	Float3 look (camera->mat_view._13, camera->mat_view._23, camera->mat_view._33);
+	//	Float3 eye (camera->mat_view._13, camera->mat_view._23, camera->mat_view._33);
+	//	
+	//	
+	//	/*float yaw = atan(-look.x/look.y);
+	//	float pitch = atan(sqrt(look.x*look.x+look.y*look.y)/look.z);*/
+	//	float yaw,pitch,distance;
+	//	distance = sqrt(look.x*look.x + look.z*look.z);
+	//	pitch = atan2(look.y,distance);
+	//	yaw = atan2(look.x, look.z);
+	//	
+	//	
+	//	//frustrum->set
+	//	frustrum->getWorldTransform().setRotation(btQuaternion(yaw,
+	//														 pitch,
+	//														 0));
+	//	frustrum->getWorldTransform().setOrigin(btVector3(position->position.x, //+ look.x*0.1f,
+	//													  position->position.y, //+ look.y*0.1f,
+	//													  position->position.z)); //+ look.z*0.1f));
+	//	//frustrum->setCollisionFlags( frustrum->getCollisionFlags() | frustrum->CF_NO_CONTACT_RESPONSE);
+	//	dynamicsWorld_->addRigidBody(frustrum);
+	//}
+	//dynamicsWorld_->performDiscreteCollisionDetection();
+	//tickCallback(0);
+	//for(unsigned int i = 0; i < frustrumObjects_->size(); i++)
+	//{
+	//	dynamicsWorld_->removeRigidBody(frustrumObjects_->at(i));
+	//}
+	//FLUSH_QUEUED_EVENTS(EVENT_PHYSICS_ATTRIBUTES_COLLIDING);
 }
 
 void BulletPhysicsComponent::tickCallback(btScalar timeStep)

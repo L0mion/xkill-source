@@ -376,7 +376,7 @@ void Renderer::renderViewportToGBuffer(DirectX::XMFLOAT4X4 viewMatrix, DirectX::
 		if(attributesRenderOwner_->at(i) != 0)
 		{
 			renderAt = &attributesRender_->at(i);
-			if(renderAt->culling.getBool(cameraIndex))
+			//if(renderAt->culling.getBool(cameraIndex))
 				renderAttribute(
 					renderAt, 
 					viewMatrix, 
