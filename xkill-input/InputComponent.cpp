@@ -143,8 +143,10 @@ void InputComponent::handleInput(float delta)
 
 		if(device->getBoolValue(ACTION_B_FIRE))
 			inputAttributes_->at(i).fire = true;
-		if(device->getBoolValue(ACTION_B_CHANGE_WEAPON))
-			inputAttributes_->at(i).changeWeapon = true;
+		if(device->getBoolValue(ACTION_B_CHANGE_AMMUNITIONTYPE))
+			inputAttributes_->at(i).changeAmmunitionType = true;
+		if(device->getBoolValue(ACTION_B_CHANGE_FIRINGMODE))
+			inputAttributes_->at(i).changeFiringMode = true;
 
 		if(device->getBoolValue(ACTION_B_TOGGLE_MUTE_SOUND))
 			SEND_EVENT(&Event_PlaySound(-1, true));

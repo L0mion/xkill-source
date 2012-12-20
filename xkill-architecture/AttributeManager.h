@@ -34,6 +34,7 @@ private:
 		damageAttributes_		.init(ATTRIBUTE_DAMAGE);
 		spawnPointAttributes_	.init(ATTRIBUTE_SPAWNPOINT);
 		weaponStatsAttributes_	.init(ATTRIBUTE_WEAPONSTATS);
+		explosionSphereAttributes_.init(ATTRIBUTE_EXPLOSIONSPHERE);
 	}
 
 public:
@@ -52,6 +53,7 @@ public:
 	AttributeStorage<DamageAttribute>			damageAttributes_;
 	AttributeStorage<SpawnPointAttribute>		spawnPointAttributes_;
 	AttributeStorage<WeaponStatsAttribute>		weaponStatsAttributes_;
+	AttributeStorage<ExplosionSphereAttribute>	explosionSphereAttributes_;
 
 	static AttributeManager* getInstance()
 	{
@@ -111,6 +113,7 @@ public:
 		case ATTRIBUTE_DAMAGE:		PUT_ATTRIBUTES_INSIDE_EVENT(damageAttributes_		);
 		case ATTRIBUTE_SPAWNPOINT:	PUT_ATTRIBUTES_INSIDE_EVENT(spawnPointAttributes_	);
 		case ATTRIBUTE_WEAPONSTATS:	PUT_ATTRIBUTES_INSIDE_EVENT(weaponStatsAttributes_	);
+		case ATTRIBUTE_EXPLOSIONSPHERE:	PUT_ATTRIBUTES_INSIDE_EVENT(explosionSphereAttributes_);
 			
 
 			// undefine dirty macro

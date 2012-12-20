@@ -64,6 +64,7 @@ enum DLL_U AttributeType
 	ATTRIBUTE_DAMAGE,
 	ATTRIBUTE_SPAWNPOINT,
 	ATTRIBUTE_WEAPONSTATS,
+	ATTRIBUTE_EXPLOSIONSPHERE,
 
 	// this is needed, don't touch!
 	ATTRIBUTE_LAST
@@ -188,7 +189,8 @@ struct DLL_U InputAttribute : public IAttribute
 	Float2 position;
 	Float2 rotation;
 	bool fire;
-	bool changeWeapon;
+	bool changeAmmunitionType;
+	bool changeFiringMode;
 };
 
 /// Stores everything SoundComponent needs to know to play a 3D sound
@@ -296,14 +298,18 @@ struct DLL_U WeaponStatsAttribute : public IAttribute
 	{
 		BULLET,
 		SCATTER,
-		EXPLOSIVE
+		EXPLOSIVE,
+
+		NROFAMUNITIONTYPES
 	};
 
 	enum FiringMode
 	{
 		SINGLE,
 		SEMI,
-		AUTO
+		AUTO,
+
+		NROFFIRINGMODES
 	};
 
 	WeaponStatsAttribute();
@@ -346,4 +352,13 @@ struct DLL_U DebugShapeAttribute : public IAttribute
 
 	DebugShape* shape;
 	bool		render;
+};
+
+struct DLL_U ExplosionSphereAttribute : public IAttribute
+{
+	ExplosionSphereAttribute();
+	~ExplosionSphereAttribute();
+
+	AttributePointer physicsAttribute;
+	float currentLifeTimeLeft;
 };

@@ -113,18 +113,15 @@ void PhysicsObject::preStep(CollisionShapeManager* collisionShapeManager,Physics
 					   physicsAttribute->angularVelocity.y,
 					   physicsAttribute->angularVelocity.z));
 
-	//if(!physicsAttribute->isExplosionSphere)
-	//{
+	if(!physicsAttribute->isExplosionSphere)
+	{
 		m_collisionShape = collisionShapeManager->getCollisionShape(physicsAttribute->meshID);
-	//}
-	//else
-	//{
-	//	//check
-	//	if(m_collisionShape == NULL)
-	//	{
-	//		m_collisionShape = new btSphereShape(physicsAttribute->explosionSphereRadius);
-	//	}
-	//}
+	}
+	else
+	{
+		int f = 4;
+	}
+
 	setGravity(gravity_+forces_);
 	activate(true);
 
@@ -165,3 +162,18 @@ unsigned int PhysicsObject::getType() const
 {
 	return type_;
 }
+
+/*
+void PhysicsObject::setCollisionShapeTo(btCollisionShape* collisionShape)
+{
+	Does not work
+	//Scale and set collision shape,
+	btCollisionShape* scaleCollisionShape = new btCollisionShape();
+
+	btVector3 vector = btVector3(WorldScaling, WorldScaling, WorldScaling);
+	collisionShape->se
+	collisionShape->setLocalScaling(vector);
+	setCollisionShape(collisionShape);
+	
+}
+*/
