@@ -133,26 +133,26 @@ void BulletPhysicsComponent::onUpdate(float delta)
 		physicsObjects_->push_back(new PhysicsObject(collisionShapeManager_,i,PO_Types::tDEFAULT));
 	}
 
-	for(unsigned int i = 0; i < debugShapeAttributes_->size(); i++)
-	{
-		DebugShapeAttribute *debugShapeAttribute = &debugShapeAttributes_->at(i);
-		if(!debugShapeAttribute->render)
-		{
-			btTransform c;
-			btVector3 a,b,d;
-			float e;
-			collisionShapeManager_->getCollisionShape(debugShapeAttribute->meshID)->getAabb(c,a,b);
-			a = (1.0f/100.0f)*a;
-			b = (1.0f/100.0f)*b;
-			
-			collisionShapeManager_->getCollisionShape(debugShapeAttribute->meshID)->getBoundingSphere(d,e);
-			e = (1.0f/100.0f)*e;
-			//debugShapeAttribute->shape = new DebugShapeBB(Float3(a.x(),a.y(),a.z()),Float3(b.x(),b.y(),b.z()));
+	//for(unsigned int i = 0; i < debugShapeAttributes_->size(); i++)
+	//{
+	//	DebugShapeAttribute *debugShapeAttribute = &debugShapeAttributes_->at(i);
+	//	if(!debugShapeAttribute->render)
+	//	{
+	//		btTransform c;
+	//		btVector3 a,b,d;
+	//		float e;
+	//		collisionShapeManager_->getCollisionShape(debugShapeAttribute->meshID)->getAabb(c,a,b);
+	//		a = (1.0f/100.0f)*a;
+	//		b = (1.0f/100.0f)*b;
+	//		
+	//		collisionShapeManager_->getCollisionShape(debugShapeAttribute->meshID)->getBoundingSphere(d,e);
+	//		e = (1.0f/100.0f)*e;
+	//		//debugShapeAttribute->shape = new DebugShapeBB(Float3(a.x(),a.y(),a.z()),Float3(b.x(),b.y(),b.z()));
 
-			debugShapeAttribute->render = true;
-			debugShapeAttribute->shape = new DebugShapeSphere(e);
-		}
-	}
+	//		debugShapeAttribute->render = true;
+	//		debugShapeAttribute->shape = new DebugShapeSphere(e);
+	//	}
+	//}
 
 
 
