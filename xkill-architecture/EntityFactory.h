@@ -118,6 +118,11 @@ public:
 		CONNECT_ATTRIBUTES(spatial, position);
 		spatial->rotation = e->rotation;
 
+		CREATE_ATTRIBUTE(DebugShapeAttribute, debugShape, entity);	//create temp debug shape
+		CONNECT_ATTRIBUTES(debugShape, spatial);
+		debugShape->shape	= new DebugShapeSphere(1.0f);
+		debugShape->render	= true;
+
 		CREATE_ATTRIBUTE(RenderAttribute, render, entity);
 		CONNECT_ATTRIBUTES(render, spatial);
 		
