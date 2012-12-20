@@ -35,6 +35,9 @@ public:
 	void setShader(ID3D11DeviceContext*		devcon,	ShaderID shaderID);
 	void unsetShader(ID3D11DeviceContext*	devcon,	ShaderID shaderID);
 	void setLayout(ID3D11DeviceContext*		devcon,	LayoutID layoutID);
+	void unsetLayout(ID3D11DeviceContext*	devcon);
+
+	void unsetAll(ID3D11DeviceContext* devcon);
 
 private:
 	HRESULT initShaders(ID3D11Device*			device);							//!< Initializes all shaders handled by FXManagement.

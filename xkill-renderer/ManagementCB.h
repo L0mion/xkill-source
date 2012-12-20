@@ -4,7 +4,9 @@
 #include <d3d11.h>
 #include <DirectXMath.h>
 #include <vector>
+
 #include "d3dInterface.h"
+#include "TypeFX.h"
 
 enum CB_TYPE 
 {
@@ -71,27 +73,11 @@ public:
 						DirectX::XMFLOAT3	specularTerm,
 						float				specularPower);
 
-	//!Sets a constant buffer the vertex shader stage.
-	/*!
-	\param cbIndex Identifies which constant buffer to use.
-	\param shaderRegister Specifies which register in the shader that will be used.
-	\param devcon Pointer to a DirectX Device Context.
-	*/
-	void vsSet(CB_TYPE cbType, unsigned int shaderRegister, ID3D11DeviceContext* devcon);
-	//!Sets a constant buffer the pixel shader stage.
-	/*!
-	\param cbIndex Identifies which constant buffer to use.
-	\param shaderRegister Specifies which register in the shader that will be used.
-	\param devcon Pointer to a DirectX Device Context.
-	*/
-	void psSet(CB_TYPE cbType, unsigned int shaderRegister, ID3D11DeviceContext* devcon);
-	//!Sets a constant buffer the compute shader stage.
-	/*!
-	\param cbIndex Identifies which constant buffer to use.
-	\param shaderRegister Specifies which register in the shader that will be used.
-	\param devcon Pointer to a DirectX Device Context.
-	*/
-	void csSet(CB_TYPE cbType, unsigned int shaderRegister, ID3D11DeviceContext* devcon);
+	void setCB(
+		CB_TYPE					cbType, 
+		TypeFX					shaderStage, 
+		unsigned int			shaderRegister, 
+		ID3D11DeviceContext*	devcon);
 
 	//! Initializes CBManagement.
 	/*!

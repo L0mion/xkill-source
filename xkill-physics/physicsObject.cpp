@@ -111,6 +111,7 @@ void PhysicsObject::preStep(CollisionShapeManager* collisionShapeManager,Physics
 	}
 
 	setGravity(gravity_+forces_);
+	updateInertiaTensor();
 	activate(true);
 
 }

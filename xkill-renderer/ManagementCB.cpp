@@ -104,84 +104,56 @@ void ManagementCB::updateCBBone(ID3D11DeviceContext* devcon, std::vector<DirectX
 	devcon->UpdateSubresource(cbBone_, 0, 0, &cbDesc, 0, 0);
 }
 
-void ManagementCB::vsSet(CB_TYPE cbType, unsigned int shaderRegister, ID3D11DeviceContext* devcon)
+void ManagementCB::setCB(
+	CB_TYPE					cbType, 
+	TypeFX					shaderStage, 
+	unsigned int			shaderRegister, 
+	ID3D11DeviceContext*	devcon)
 {
+	//Get specified buffer
+	ID3D11Buffer* cb = nullptr;
 	switch(cbType)
 	{
 	case CB_TYPE_INSTANCE:
-		devcon->VSSetConstantBuffers(shaderRegister, 1, &cbInstance_);
+		cb = cbInstance_;
 		break;
 	case CB_TYPE_FRAME:
-		devcon->VSSetConstantBuffers(shaderRegister, 1, &cbFrame_);
+		cb = cbFrame_;
 		break;
 	case CB_TYPE_CAMERA:
-		devcon->VSSetConstantBuffers(shaderRegister, 1, &cbCamera_);
+		cb = cbCamera_;
 		break;
 	case CB_TYPE_OBJECT:
-		devcon->VSSetConstantBuffers(shaderRegister, 1, &cbObject_);
+		cb = cbObject_;
 		break;
 	case CB_TYPE_SUBSET:
-		devcon->VSSetConstantBuffers(shaderRegister, 1, &cbSubset_);
+		cb = cbSubset_;
 		break;
 	case CB_TYPE_BONE:
-		devcon->VSSetConstantBuffers(shaderRegister, 1, &cbBone_);
-		break;
-	default:
-		ERROR_MSG(L"CBManagement::vsSet | Failed! | Index not recognized!");
+		cb = cbBone_;
 		break;
 	}
-}
-void ManagementCB::psSet(CB_TYPE cbType, unsigned int shaderRegister, ID3D11DeviceContext* devcon)
-{
-	switch(cbType)
+
+	//Set to specified shader-stage
+	switch(shaderStage)
 	{
-	case CB_TYPE_INSTANCE:
-		devcon->PSSetConstantBuffers(shaderRegister, 1, &cbInstance_);
+	case TypeFX_VS:
+		devcon->VSSetConstantBuffers(shaderRegister, 1, &cb);
 		break;
-	case CB_TYPE_FRAME:
-		devcon->PSSetConstantBuffers(shaderRegister, 1, &cbFrame_);
+	case TypeFX_GS:
+		devcon->GSSetConstantBuffers(shaderRegister, 1, &cb);
 		break;
-	case CB_TYPE_CAMERA:
-		devcon->PSSetConstantBuffers(shaderRegister, 1, &cbCamera_);
+	case TypeFX_HS:
+		devcon->HSSetConstantBuffers(shaderRegister, 1, &cb);
 		break;
-	case CB_TYPE_OBJECT:
-		devcon->PSSetConstantBuffers(shaderRegister, 1, &cbObject_);
+	case TypeFX_DS:
+		devcon->DSSetConstantBuffers(shaderRegister, 1, &cb);
 		break;
-	case CB_TYPE_SUBSET:
-		devcon->PSSetConstantBuffers(shaderRegister, 1, &cbSubset_);
+	case TypeFX_PS:
+		devcon->PSSetConstantBuffers(shaderRegister, 1, &cb);
 		break;
-	case CB_TYPE_BONE:
-		devcon->PSSetConstantBuffers(shaderRegister, 1, &cbBone_);
-		break;
-	default:
-		ERROR_MSG(L"CBManagement::vsSet | Failed! | Index not recognized!");
-		break;
-	}
-}
-void ManagementCB::csSet(CB_TYPE cbType, unsigned int shaderRegister, ID3D11DeviceContext* devcon)
-{
-	switch(cbType)
-	{
-	case CB_TYPE_INSTANCE:
-		devcon->CSSetConstantBuffers(shaderRegister, 1, &cbInstance_);
-		break;
-	case CB_TYPE_FRAME:
-		devcon->CSSetConstantBuffers(shaderRegister, 1, &cbFrame_);
-		break;
-	case CB_TYPE_CAMERA:
-		devcon->CSSetConstantBuffers(shaderRegister, 1, &cbCamera_);
-		break;
-	case CB_TYPE_OBJECT:
-		devcon->CSSetConstantBuffers(shaderRegister, 1, &cbObject_);
-		break;
-	case CB_TYPE_SUBSET:
-		devcon->CSSetConstantBuffers(shaderRegister, 1, &cbSubset_);
-		break;
-	case CB_TYPE_BONE:
-		devcon->CSSetConstantBuffers(shaderRegister, 1, &cbBone_);
-		break;
-	default:
-		ERROR_MSG(L"CBManagement::vsSet | Failed! | Index not recognized!");
+	case TypeFX_CS:
+		devcon->CSSetConstantBuffers(shaderRegister, 1, &cb);
 		break;
 	}
 }

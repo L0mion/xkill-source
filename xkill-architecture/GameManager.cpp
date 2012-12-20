@@ -21,19 +21,12 @@ bool GameManager::init(HWND windowHandle, HWND parentWindowHandle)
 #endif
 
 	entityManager_ = new EntityManager();
-	ENTITYTYPE listOfEntitiesToBeCreated[] =
+
+	// Init world
+	SEND_EVENT(&Event_CreateEntity(WORLD));
+	for(int i=0; i<1; i++)
 	{
-		WORLD,
-		PLAYER,
-		PLAYER,
-		PLAYER,
-		PLAYER
-	};
-	int nrOfListOfEntitiesToBeCreated = sizeof(listOfEntitiesToBeCreated)/4;
-	//Create all entities as given by of the above enum array
-	for(int i=0;i<nrOfListOfEntitiesToBeCreated;i++)
-	{
-		entityManager_->createSpecificEntity(listOfEntitiesToBeCreated[i]);
+		SEND_EVENT(&Event_CreateEntity(PLAYER));
 	}
 
 	//Initialize components
@@ -46,7 +39,7 @@ bool GameManager::init(HWND windowHandle, HWND parentWindowHandle)
 		return false;
 	}
 
-	SEND_EVENT(&Event_StartDeathmatch());
+	//SEND_EVENT(&Event_StartDeathmatch(5));
 
 	return true;
 }
@@ -54,10 +47,4 @@ bool GameManager::init(HWND windowHandle, HWND parentWindowHandle)
 void GameManager::update(float delta)
 {
 	componentManager_->update(delta);
-
-	//
-	// End game
-	//
-
-	// Clean up behind ourselves like good little programmers
 }

@@ -63,10 +63,59 @@ void CameraComponent::onEvent(Event* e)
 
 void CameraComponent::onUpdate(float delta)
 {
+	// Add extra camera
+	while(cameraAttributes_->size() > cameras_.size())
+	{
+		Event_GetWindowResolution windowResolution;
+		SEND_EVENT(&windowResolution);
+
+		// Calculate split screen attribute
+		float aspectRatio = windowResolution.getAspectRatio();
+		if(cameraAttributes_->size()==2)
+		{
+			aspectRatio *= 2;
+		}
+
+		// push new camera
+		CameraAttribute* cameraAttribute = &cameraAttributes_->at(cameras_.size());
+		cameraAttribute->aspect = aspectRatio;
+		cameras_.push_back(Camera(cameraAttribute->aspect,cameraAttribute->fov,cameraAttribute->zFar,cameraAttribute->zNear));
+	}
+	for(unsigned int i=0; i<cameraAttributes_->size(); i++)
+	{
+		cameras_[i].updateProj();
+		cameraAttributes_->at(i).mat_projection.copy((float*)&cameras_[i].getProjection());
+	}
+
+	// Remove unnecessary camera
+	while(cameraAttributes_->size() < cameras_.size())
+	{
+		cameras_.pop_back();
+		if(cameras_.size()==2)
+		{
+			for(int i=0; i<cameras_.size(); i++)
+			{
+				Event_GetWindowResolution windowResolution;
+				SEND_EVENT(&windowResolution);
+
+				// Calculate split screen attribute
+				float aspectRatio = windowResolution.getAspectRatio();
+				if(cameraAttributes_->size()==2)
+				{
+					aspectRatio *= 2;
+				}
+				cameras_[i].setAspectRatio(aspectRatio);
+				cameraAttributes_->at(i).aspect = aspectRatio;
+			}
+		}
+	}
+
+	// Update cameras
 	unsigned int nrOfCamerasWithInput = cameras_.size();
 	if(nrOfCamerasWithInput > inputAttributes_->size())
 		nrOfCamerasWithInput = inputAttributes_->size();
 
+	
 	for(unsigned int i = 0; i < nrOfCamerasWithInput; i++)
 	{
 		cameras_[i].yaw(inputAttributes_->at(i).rotation.x);
