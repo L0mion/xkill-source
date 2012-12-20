@@ -160,10 +160,28 @@ void LoaderFbx::parseMesh(FbxNode* node)
 	}
 
 	int polygonVertexCount = mesh->GetPolygonVertexCount();
-	int polygonCount = polygonVertexCount / 3;
+	int polygonCount = polygonVertexCount / POLYGON_SIZE;
 	
 	parseVertexPositions(mesh, polygonVertexCount);
-	parseVertexNormals(mesh, polygonCount);
+	parseIndices(mesh, polygonVertexCount);
+	
+	int vertexId = 0;
+
+	for(int polygonIndex=0; polygonIndex<polygonCount; polygonIndex++)
+	{
+		for(int insidePolygonIndex=0; insidePolygonIndex<POLYGON_SIZE; insidePolygonIndex++)
+		{
+			parseVertexNormals(mesh, polygonIndex, insidePolygonIndex, vertexId);
+
+			vertexId++;
+		}
+	}
+}
+void LoaderFbx::parseIndices(FbxMesh* mesh, int polygonVertexCount)
+{
+	int* indices = mesh->GetPolygonVertices();
+	indices_.resize(polygonVertexCount);
+	memcpy(&indices_[0], &indices[0], sizeof(int)*polygonVertexCount);
 }
 void LoaderFbx::parseVertexPositions(FbxMesh* mesh, int polygonVertexCount)
 {
@@ -177,30 +195,91 @@ void LoaderFbx::parseVertexPositions(FbxMesh* mesh, int polygonVertexCount)
 		position.y = controlPoints[indices[i]].mData[1];
 		position.z = controlPoints[indices[i]].mData[2];
 
-		vertexPositions.push_back(position);
+		vertexPositions_.push_back(position);
 	}
 }
-void LoaderFbx::parseVertexNormals(FbxMesh* mesh, int polygonCount)
+void LoaderFbx::parseVertexNormals(FbxMesh* mesh, int polygonIndex, int insidePolygonIndex, int vertexId)
 {
-	bool success = true;
+	FbxVector4 fbxNormal;
+	mesh->GetPolygonVertexNormal(polygonIndex, insidePolygonIndex, fbxNormal);
+	Float3 normal;
+	normal.x = fbxNormal.mData[0];
+	normal.y = fbxNormal.mData[1];
+	normal.z = fbxNormal.mData[2];
 
-	FbxArray<FbxVector4> normals;
-	success = mesh->GetPolygonVertexNormals(normals);
-	if(!success)
-	{
-		std::stringstream message;
-		message << "LoaderFbx::parseVertexNormals | mesh->GetPolygonVertexNormals() failed \n "
-				<< "Error code: " << mesh->GetLastErrorID() << ". Error string: " << mesh->GetLastErrorString();
-		SHOW_MESSAGEBOX(message.str());
-	}
-
-	for(int i=0; i<normals.Size(); i++)
-	{
-		Float3 normal;
-		normal.x = normals[i].mData[0];
-		normal.y = normals[i].mData[1];
-		normal.z = normals[i].mData[2];
-		
-		vertexNormals.push_back(normal);
-	}
+	vertexNormals_.push_back(normal);
 }
+
+
+
+
+
+
+
+
+	//FbxVector4 fbxNormal;
+	//int id;
+	//
+	//for(int i=0; i<mesh->GetElementNormalCount(); i++)
+	//{
+	//	FbxGeometryElementNormal* elementNormal = mesh->GetElementNormal(i);
+	//
+	//	int errorCode = mesh->GetLastErrorID();
+	//	if(errorCode != -1)
+	//	{
+	//		std::stringstream message;
+	//		message << "LoaderFbx::parseMesh | Error code : " << errorCode
+	//				<< " Error message: " << mesh->GetLastErrorString();
+	//		SHOW_MESSAGEBOX(message.str());
+	//	}
+	//
+	//	FbxLayerElementArrayTemplate<FbxVector4> normals(elementNormal->GetDirectArray());
+	//	fbxNormal = elementNormal->GetDirectArray().GetAt(vertexId);
+	//
+	//	if(elementNormal->GetMappingMode() == FbxGeometryElement::eByPolygonVertex)
+	//	{
+	//		switch(elementNormal->GetReferenceMode())
+	//		{
+	//		case FbxGeometryElement::eDirect:
+	//			fbxNormal = elementNormal->GetDirectArray().GetAt(vertexId);
+	//			break;
+	//		case FbxGeometryElement::eIndexToDirect:
+	//			id = elementNormal->GetIndexArray().GetAt(vertexId);
+	//			fbxNormal = elementNormal->GetDirectArray().GetAt(id);
+	//			break;
+	//		default:
+	//			break;
+	//		}
+	//	}
+	//	Float3 normal;
+	//	normal.x = fbxNormal.mData[0];
+	//	normal.y = fbxNormal.mData[1];
+	//	normal.z = fbxNormal.mData[2];
+	//	vertexNormals_.push_back(normal);
+	//}
+
+
+
+
+
+	//bool success = true;
+	//
+	//FbxArray<FbxVector4> normals;
+	//success = mesh->GetPolygonVertexNormals(normals);
+	//if(!success)
+	//{
+	//	std::stringstream message;
+	//	message << "LoaderFbx::parseVertexNormals | mesh->GetPolygonVertexNormals() failed \n "
+	//			<< "Error code: " << mesh->GetLastErrorID() << ". Error string: " << mesh->GetLastErrorString();
+	//	SHOW_MESSAGEBOX(message.str());
+	//}
+	//
+	//for(int i=0; i<normals.Size(); i++)
+	//{
+	//	Float3 normal;
+	//	normal.x = normals[i].mData[0];
+	//	normal.y = normals[i].mData[1];
+	//	normal.z = normals[i].mData[2];
+	//	
+	//	vertexNormals_.push_back(normal);
+	//}

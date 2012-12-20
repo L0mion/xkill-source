@@ -9,6 +9,8 @@
 
 #define FBXSDK_NEW_API
 
+static const unsigned int POLYGON_SIZE = 3;
+
 class LoaderFbx
 {
 public:
@@ -24,11 +26,14 @@ private:
 	
 	void parseNode(FbxNode* node);
 	void parseMesh(FbxNode* node);
+	void parseIndices(FbxMesh* mesh, int polygonVertexCount);
 	void parseVertexPositions(FbxMesh* mesh, int polygonVertexCount);
-	void parseVertexNormals(FbxMesh* mesh, int polygonCount);
+	
+	void parseVertexNormals(FbxMesh* mesh, int polygonIndex, int insidePolygonIndex, int vertexId);
 
-	std::vector<Float3> vertexPositions;
-	std::vector<Float3> vertexNormals;
+	std::vector<int>	indices_;
+	std::vector<Float3> vertexPositions_;
+	std::vector<Float3> vertexNormals_;
 
 	FbxManager*		fbxManager_;
 	FbxScene*		fbxScene_;
