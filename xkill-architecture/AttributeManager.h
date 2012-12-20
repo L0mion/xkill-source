@@ -90,7 +90,7 @@ public:
 		switch(type) 
 		{
 			// Macro to facilitate adding and refactoring attributes
-#define PUT_ATTRIBUTES_INSIDE_EVENT(AttributeStorage)	\
+#define PUT_ATTRIBUTES_INSIDE_EVENT(AttributeStorage)				\
 			e->hostVector = AttributeStorage.getAllAttributes();	\
 			e->owners = AttributeStorage.getAllOwners();			\
 			break;

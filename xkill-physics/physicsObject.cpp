@@ -117,10 +117,6 @@ void PhysicsObject::preStep(CollisionShapeManager* collisionShapeManager,Physics
 	{
 		m_collisionShape = collisionShapeManager->getCollisionShape(physicsAttribute->meshID);
 	}
-	else
-	{
-		int f = 4;
-	}
 
 	setGravity(gravity_+forces_);
 	activate(true);

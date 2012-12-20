@@ -197,7 +197,7 @@ void WeaponStatsAttribute::setWeaponStats(AmmunitionType ammunitionType, FiringM
 	switch(ammunitionType)
 	{
 	case BULLET: //One powerful accurate bullet.
-		velocityOfEachProjectile = 2500.0f;
+		velocityOfEachProjectile = 4000.0f;
 		damgeOfEachProjectile = 5;
 		break;
 	case SCATTER: //Many weak and less accurate bullets.
@@ -275,9 +275,12 @@ DebugShapeAttribute::~DebugShapeAttribute()
 void DebugShapeAttribute::clean()
 {
 	if(shape)
+	{
 		delete shape;
+		shape = nullptr;
+	}
+	render = false;
 }
-
 ExplosionSphereAttribute::ExplosionSphereAttribute()
 {
 	currentLifeTimeLeft = 1.0f;

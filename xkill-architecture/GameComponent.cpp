@@ -372,7 +372,7 @@ void GameComponent::event_PhysicsAttributesColliding(Event_PhysicsAttributesColl
 
 					 if(entity2->hasAttribute(ATTRIBUTE_PROJECTILE))
 					 {
-						 //SEND_EVENT(&Event_RemoveEntity(entity2->getID()));
+						 SEND_EVENT(&Event_RemoveEntity(entity2->getID()));
 					 }
 				}
 			}
@@ -437,7 +437,7 @@ void GameComponent::event_PhysicsAttributesColliding(Event_PhysicsAttributesColl
 					SEND_EVENT(&Event_CreateExplosionSphere(projectilePositionAttribute->position, projectileAttribute->explosionSphereRadius, projectileDamageAttribute->damage, projectileAttribute->entityIdOfCreator));
 				}
 			}
-			SEND_EVENT(&Event_RemoveEntity(entity1->getID()));
+			//SEND_EVENT(&Event_RemoveEntity(entity1->getID())); //Crashes somtimes if removed here
 		}
 	}
 }

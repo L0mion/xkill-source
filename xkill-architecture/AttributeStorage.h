@@ -101,6 +101,11 @@ public:
 
 	void deleteAttribute(int index)
 	{
+		// Clean attribute
+		IAttribute* a = (IAttribute*)&attributes[index];
+		a->clean();
+
+		// Delete attribute
 		owners[index] = 0;
 		deleted.push(index);
 	}
