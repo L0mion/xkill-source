@@ -274,5 +274,9 @@ DebugShapeAttribute::~DebugShapeAttribute()
 void DebugShapeAttribute::clean()
 {
 	if(shape)
+	{
 		delete shape;
+		shape = nullptr;
+		render = false;
+	}
 }

@@ -90,6 +90,7 @@ public:
 		player->id = playerId;
 		playerId++;
 	}
+	
 	void createWorldEntity(Entity* entity)
 	{
 		static int HACKHACK = 1;
@@ -102,7 +103,7 @@ public:
 		CREATE_ATTRIBUTE(RenderAttribute, render, entity);
 		CONNECT_ATTRIBUTES(render, spatial);
 		
-		render->meshID = 1;
+		render->meshID = HACKHACK;
 
 		CREATE_ATTRIBUTE(PhysicsAttribute, physics, entity);
 		CONNECT_ATTRIBUTES(physics, spatial);
@@ -110,8 +111,8 @@ public:
 		physics->meshID = render->meshID;
 		
 		physics->mass = 0;
-
-		HACKHACK++;
+				
+		HACKHACK+=2;
 	}
 
 	void createProjectileEntity(Entity* entity, Event_CreateProjectile* e)

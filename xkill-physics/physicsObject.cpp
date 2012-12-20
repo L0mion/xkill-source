@@ -61,12 +61,15 @@ void PhysicsObject::preStep(CollisionShapeManager* collisionShapeManager,Physics
 	if(getCollisionShape()->getShapeType()==4 && index_ >2)
 		//if(!inertiad)
 		{
+			
 			getCollisionShape()->calculateLocalInertia(physicsAttribute->mass,localInertia);
 			inertiad = true;
 			setRestitution(1.0);
 			setRollingFriction(0.01);
+			
 		}
 	setMassProps(physicsAttribute->mass,localInertia);
+	
 	m_worldTransform.setOrigin(WorldScaling*btVector3(positionAttribute->position.x,
 	 												  positionAttribute->position.y,
 	 												  positionAttribute->position.z));

@@ -109,8 +109,7 @@ btCollisionShape* CollisionShapeManager::loadCollisionShape(unsigned int meshID)
 		btBvhTriangleMeshShape* staticShape = new btBvhTriangleMeshShape(triangleMesh,true);
 		collisionShapes_.push_back(staticShape);
 		int a = staticShape->getShapeType();
-		triangleMeshes_.push_back(triangleMesh);
-		
+		triangleMeshes_.push_back(triangleMesh);	
 	}
 
 	

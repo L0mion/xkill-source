@@ -231,7 +231,10 @@ void BulletPhysicsComponent::onEvent(Event* e)
 		btTransform test;
 		test.setIdentity();
 		frustrum->setWorldTransform(test);
-		
+		frustrum->setLinearVelocity(btVector3(0,0,0));
+		frustrum->setAngularVelocity(btVector3(0,0,0));
+		frustrum->setMassProps(1,btVector3(0,0,0));
+		frustrum->setCollisionFlags(frustrum->getCollisionFlags() | frustrum->CF_NO_CONTACT_RESPONSE);
 		frustrumObjects_->push_back(frustrum);
 	}
 	for(unsigned int i = 0; i < frustrumObjects_->size(); i++)
@@ -242,39 +245,30 @@ void BulletPhysicsComponent::onEvent(Event* e)
 		PositionAttribute* position = ATTRIBUTE_CAST(PositionAttribute,positionAttribute,spatial);
 		Float3 look (camera->mat_view._13, camera->mat_view._23, camera->mat_view._33);
 		Float3 eye (camera->mat_view._13, camera->mat_view._23, camera->mat_view._33);
-		float yaw = atan(-look.x/look.y);
-		float pitch = atan(sqrt(look.x*look.x+look.y*look.y)/look.z);
-		frustrum->setLinearVelocity(btVector3(0,0,0));
-		frustrum->setAngularVelocity(btVector3(0,0,0));
-		frustrum->setMassProps(1,btVector3(0,0,0));
+		
+		
+		/*float yaw = atan(-look.x/look.y);
+		float pitch = atan(sqrt(look.x*look.x+look.y*look.y)/look.z);*/
+		float yaw,pitch,distance;
+		distance = sqrt(look.x*look.x + look.z*look.z);
+		pitch = atan2(look.y,distance);
+		yaw = atan2(look.x, look.z);
+		
+		
 		//frustrum->set
 		frustrum->getWorldTransform().setRotation(btQuaternion(yaw,
 															 pitch,
 															 0));
-		frustrum->getWorldTransform().setOrigin(btVector3(position->position.x + look.x*0.1f,
-														  position->position.y + look.y*0.1f,
-														  position->position.z + look.z*0.1f));
-		std::cout << frustrum->getWorldTransform().getOrigin().distance(btVector3(0,0,0)) << " "
-				  << frustrum->getWorldTransform().getRotation().x() << " "
-				  << frustrum->getWorldTransform().getRotation().y() << " "
-				  << frustrum->getWorldTransform().getRotation().z() << " "
-				  << frustrum->getWorldTransform().getRotation().w() << std::endl;
+		frustrum->getWorldTransform().setOrigin(btVector3(position->position.x, //+ look.x*0.1f,
+														  position->position.y, //+ look.y*0.1f,
+														  position->position.z)); //+ look.z*0.1f));
 		//frustrum->setCollisionFlags( frustrum->getCollisionFlags() | frustrum->CF_NO_CONTACT_RESPONSE);
 		dynamicsWorld_->addRigidBody(frustrum);
 	}
-	static bool t = false;
-	if(t)
-	{
 	dynamicsWorld_->performDiscreteCollisionDetection();
 	tickCallback(0);
-	}
-	else
-	{
-		t = true;
-	}
 	for(unsigned int i = 0; i < frustrumObjects_->size(); i++)
 	{
-		
 		dynamicsWorld_->removeRigidBody(frustrumObjects_->at(i));
 	}
 	FLUSH_QUEUED_EVENTS(EVENT_PHYSICS_ATTRIBUTES_COLLIDING);
