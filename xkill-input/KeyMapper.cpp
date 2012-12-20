@@ -344,8 +344,10 @@ void KeyMapper::handleAxisObjectSettings(InputAxisObject* axis, std::string sett
 			if(Converter::StrToUInt(settingsPair->second, intValue))
 				axis->setInverted(intValue > 0);
 			break;
-		case 'S':
-			//Set sensitivity
+		case 'S': //Sensitivity
+			floatValue = Converter::StrToFloat(settingsPair->second);
+			if(floatValue >= 0.0f)
+				axis->setSensitivity(floatValue);
 			break;
 		default:
 			break;
@@ -361,7 +363,7 @@ void KeyMapper::handleButtonObjectSettings(InputButtonObject* button, std::strin
 	std::pair<char, std::string>* settingsPair;
 
 	unsigned int intValue;
-	//float floatValue;
+	float floatValue;
 
 	for(unsigned int i = 0; i < settings->size(); i++)
 	{
@@ -379,6 +381,11 @@ void KeyMapper::handleButtonObjectSettings(InputButtonObject* button, std::strin
 		case 'I': //Inverted
 			if(Converter::StrToUInt(settingsPair->second, intValue))
 				button->setInverted(intValue > 0);
+			break;
+		case 'S': //Sensitivity
+			floatValue = Converter::StrToFloat(settingsPair->second);
+			if(floatValue >= 0.0f)
+				button->setSensitivity(floatValue);
 			break;
 		default:
 			break;
@@ -424,7 +431,9 @@ void KeyMapper::handleTriggerObjectSettings(InputTriggerObject* trigger, std::st
 				trigger->setInverted(intValue > 0);
 			break;
 		case 'S': //Sensitivity
-			//Set sensitivity
+			floatValue = Converter::StrToFloat(settingsPair->second);
+			if(floatValue >= 0.0f)
+				trigger->setSensitivity(floatValue);
 			break;
 		default:
 			break;
@@ -506,6 +515,7 @@ std::string KeyMapper::getAxesString(std::vector<InputAxisObject*>* axes)
 		
 		axesString += "D=" + Converter::FloatToStr(axis->getDeadZone()) + " ";
 		axesString += "I=" + Converter::IntToStr((int)axis->isInverted()) + " ";
+		axesString += "S=" + Converter::FloatToStr(axis->getSensitivity()) + " ";
 
 		std::vector<int> mappings = axis->getFloatMappings();
 
@@ -533,6 +543,7 @@ std::string KeyMapper::getButtonString(std::vector<InputButtonObject*>* buttons)
 		buttonString += "#B" + Converter::IntToStr(button->getKey()) + ": ";
 		
 		buttonString += "I=" + Converter::IntToStr((int)button->isInverted()) + " ";
+		buttonString += "S=" + Converter::FloatToStr(button->getSensitivity()) + " ";
 
 		std::vector<int> mappings = button->getFloatMappings();
 
@@ -565,6 +576,7 @@ std::string KeyMapper::getTriggerString(std::vector<InputTriggerObject*>* trigge
 		triggerString += "I=" + Converter::IntToStr((int)trigger->isInverted()) + " ";
 		triggerString += "T=" + Converter::FloatToStr(trigger->getTriggerValue()) + " ";
 		triggerString += "D=" + Converter::FloatToStr(trigger->getDeadZone()) + " ";
+		triggerString += "S=" + Converter::FloatToStr(trigger->getSensitivity()) + " ";
 
 		std::vector<int> mappings = trigger->getFloatMappings();
 

@@ -47,29 +47,31 @@ int InputDevice::getPlayerID()
 	return playerID_;
 }
 
-float InputDevice::getFloatValue(int mapping)
+float InputDevice::getFloatValue(int mapping, bool useSesitivity)
 {
 	float maxValue = 0.0f;
-	
-	//for(unsigned int i = 0; i < inputObjects_.size(); i++)
-	//	if(inputObjects_[i]->hasFloatMapping(mapping))
-	//		if(std::abs(inputObjects_[i]->getValueFloat()) > maxValue)
-	//			maxValue = inputObjects_[i]->getValueFloat();
+	int index = 0;
+	float value = 0.0f;
 
 	for(unsigned int i = 0; i < floatObjects_[mapping].size(); i++)
-		if(std::abs(inputObjects_[floatObjects_[mapping][i]]->getValueFloat()) > maxValue)
-			maxValue = inputObjects_[floatObjects_[mapping][i]]->getValueFloat();
+	{
+		index = floatObjects_[mapping][i];
+		value = inputObjects_[index]->getValueFloat();
+
+		if(useSesitivity)
+			value *= inputObjects_[index]->getSensitivity();
+
+		if(std::abs(value) > maxValue)
+		{
+			maxValue = value;
+		}
+	}
 
 	return maxValue;
 }
 
 bool InputDevice::getBoolValue(int mapping)
 {
-	//for(unsigned int i = 0; i < inputObjects_.size(); i++)
-	//	if(inputObjects_[i]->hasBoolMapping(mapping))
-	//		if(inputObjects_[i]->getValueBool())
-	//			return true;
-
 	for(unsigned int i = 0; i < boolObjects_[mapping].size(); i++)
 		if(inputObjects_[boolObjects_[mapping][i]]->getValueBool())
 			return true;

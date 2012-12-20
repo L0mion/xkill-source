@@ -3,6 +3,7 @@
 InputObject::InputObject(void)
 {
 	inverted_ = false;
+	sensitivity_ = 3.0f;
 }
 
 InputObject::~InputObject(void)
@@ -17,6 +18,16 @@ void InputObject::setInverted(bool inverted)
 bool InputObject::isInverted()
 {
 	return inverted_;
+}
+
+void InputObject::setSensitivity(float sensitivity)
+{
+	sensitivity_ = sensitivity;
+}
+
+float InputObject::getSensitivity()
+{
+	return sensitivity_;
 }
 
 void InputObject::addFloatMapping(int mapping)

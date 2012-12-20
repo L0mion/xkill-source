@@ -32,6 +32,9 @@ public:
 	void setInverted(bool inverted);
 	bool isInverted();
 
+	void setSensitivity(float sensitivity);
+	float getSensitivity();
+
 	void addFloatMapping(int mapping);
 	void addBoolMapping(int mapping);
 	void removeFloatMapping(int mapping);
@@ -47,6 +50,7 @@ protected:
 	std::vector<int> boolMappings_;
 
 	bool inverted_;
+	float sensitivity_;
 
 	void removeMapping(std::vector<int>* vector, int mapping);
 	bool hasMapping(std::vector<int>* vector, int mapping);
