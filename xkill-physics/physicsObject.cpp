@@ -60,6 +60,7 @@ void PhysicsObject::preStep(CollisionShapeManager* collisionShapeManager,Physics
 	
 	btVector3 localInertia(0,0,0);
 	if(getCollisionShape()->getShapeType()==4 && index_ >2)
+	{
 		//if(!inertiad)
 		{
 			

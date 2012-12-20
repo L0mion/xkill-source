@@ -55,13 +55,8 @@ void InputComponent::onEvent(Event* e)
 	}
 }
 
-#include "WindowsTime.h"
-
 void InputComponent::onUpdate(float delta)
 {
-	WindowsTime wt;
-	wt.Start();
-
 	newDeviceSearchTimer_ += delta;				//Takes alot of time so should probably not run in main thread or during run-time
 	if(newDeviceSearchTimer_ >= searchTime_)
 	{
@@ -72,8 +67,6 @@ void InputComponent::onUpdate(float delta)
 	inputManager_->Update(delta);
 
 	handleInput(delta);
-	wt.Stop();
-	float time = wt.GetDelta();
 }
 
 void InputComponent::handleInput(float delta)
