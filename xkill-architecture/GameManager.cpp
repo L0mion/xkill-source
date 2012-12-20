@@ -26,6 +26,8 @@ bool GameManager::init(HWND windowHandle, HWND parentWindowHandle)
 		WORLD,
 		WORLD,
 		PLAYER,
+		PLAYER,
+		PLAYER,
 		PLAYER
 	};
 	int nrOfListOfEntitiesToBeCreated = sizeof(listOfEntitiesToBeCreated)/4;

@@ -7,6 +7,7 @@ struct ID3D11Device;
 
 struct DebugShapeSphere;
 struct DebugShapeBB;
+struct DebugShapeFrustum;
 
 class ModelD3D;
 class DebugShapeD3D;
@@ -18,10 +19,10 @@ class VB;
 
 class IB;
 
-#include <map>
-
 #include <xkill-utilities\MeshGeometry.h>
 #include <xkill-utilities\AttributeType.h>
+
+#include <map>
 
 //! Holds rendering-view of models, including vertex- and index-buffers.
 /*!
@@ -67,9 +68,10 @@ private:
 		IB*					ib,
 		ID3D11Device*		device);			//!< Initializes ib.
 
-	HRESULT			createDebugShapeD3D(unsigned int shapeIndex,	ID3D11Device* device);	//!< Creates a debug-shape. Finds the corresponding attribute in the debugshape-attribute vector and cretaes the correct shape.
+	void			createDebugShapeD3D(unsigned int shapeIndex,	ID3D11Device* device);	//!< Creates a debug-shape. Finds the corresponding attribute in the debugshape-attribute vector and cretaes the correct shape.
 	DebugShapeD3D*	createSphere(DebugShapeSphere* sphere,			ID3D11Device* device);	//!< Creates a sphere as a debug-shape.
 	DebugShapeD3D*	createBB(DebugShapeBB* bb,						ID3D11Device* device);	//!< Creates a bounding-box as a debug-shape.
+	DebugShapeD3D*	createFrustum(DebugShapeFrustum* frustum,		ID3D11Device* device);	//!< Creates an irregular box based on passed points in DebugShapeFrustum as a debug-shape.
 
 	void pushModelD3D(
 		const unsigned int modelID, 

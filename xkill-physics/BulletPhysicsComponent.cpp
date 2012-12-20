@@ -167,6 +167,15 @@ void BulletPhysicsComponent::onUpdate(float delta)
 			// if the object is not in the world, add it
 			if(!physicsObject->isInWorld())
 			{
+				if(physicsAttribute->isExplosionSphere)
+				{
+					float scale = 100.0f;
+					btCollisionShape* collisionSphere = new btSphereShape(physicsAttribute->explosionSphereRadius*scale);
+					collisionSphere->setLocalScaling(btVector3(scale,scale,scale));
+					collisionShapeManager_->addCollisionShape(collisionSphere);
+					physicsObject->setCollisionShape(collisionSphere);
+				}
+
 				physicsObject->addToWorld(dynamicsWorld_);
 			}
 			// load data from physics attribute
@@ -272,6 +281,7 @@ void BulletPhysicsComponent::onEvent(Event* e)
 	//	dynamicsWorld_->removeRigidBody(frustrumObjects_->at(i));
 	//}
 	//FLUSH_QUEUED_EVENTS(EVENT_PHYSICS_ATTRIBUTES_COLLIDING);
+	*/
 }
 
 void BulletPhysicsComponent::tickCallback(btScalar timeStep)

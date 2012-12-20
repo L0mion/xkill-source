@@ -4,29 +4,23 @@
 
 #include <InitGuid.h>
 
+#include "KeyMapper.h"
+
 #include "InputButtonObject.h"
 #include "InputAxisObject.h"
-#include "InputHatSwitchObject.h"
 #include "InputTriggerObject.h"
+
+#include "InputActions.h"
+
+#define SAFE_DELETE(x) {if(x != nullptr) delete x; x = nullptr;}
 
 //! An interface for wrappers of Direct Input and XInput devices
 
 class InputDevice
 {
+	friend class KeyMapper;
+
 public:
-
-	//! A struct containing the states of all the objects
-	/*!
-	Contains the states of all the axes, buttons, hat switches and triggers that the device have
-	*/
-	struct InputState
-	{
-		std::vector<InputAxisObject> axes;
-		std::vector<InputButtonObject> buttons;
-		std::vector<InputHatSwitchObject> hatSwitches;
-		std::vector<InputTriggerObject> triggers;
-	};
-
 	//! Lists the capabilities of the device
 	/*!
 	Lists how many of each object the device has and if it has force feedback.
@@ -70,7 +64,6 @@ public:
 	virtual void SetForceFeedback(float leftMotorScale, float rightMotorScale) = 0;
 	virtual bool IsForceFeedbackCapable() = 0;
 
-	virtual InputState GetState();
 	virtual InputDeviceLayout GetLayout();
 
 	virtual InputDeviceType GetType() = 0;
@@ -79,6 +72,23 @@ public:
 
 	virtual void setPlayerID(int playerID);
 	virtual int getPlayerID();
+	
+	//! Returns the largest float value of objects that is mapped to that number
+	virtual float getFloatValue(int mapping);
+	//! Returns if any object that is mapped to that number is activated
+	virtual bool getBoolValue(int mapping);
+	//! Returns if any object that is mapped to that number was released
+	virtual bool getBoolReleased(int mapping);
+
+	//! Sets standard mappings
+	/*!
+	Note: Should only be called if the device don't have any previous mappings
+	as it doesn't reset previous mappings. The result could be that multiple 
+	mappings will be present at the same time.
+	*/
+	virtual void setStandardMappings() = 0;
+
+	void createObjectVectors();
 
 protected:
 	InputDeviceLayout inputLayout_;
@@ -86,10 +96,13 @@ protected:
 	std::string name_;
 	unsigned int playerID_;
 
-	std::vector<InputAxisObject> axes_;				//Should perhaps use an inputstate to store this instead?
-	std::vector<InputButtonObject> buttons_;
-	std::vector<InputHatSwitchObject> hatSwitches_;
-	std::vector<InputTriggerObject> triggers_;
+	std::vector<InputAxisObject*> axes_;				//Should perhaps use an inputstate to store this instead?
+	std::vector<InputButtonObject*> buttons_;
+	std::vector<InputTriggerObject*> triggers_;
+	std::vector<InputObject*> inputObjects_;
+
+	std::vector<std::vector<int>> floatObjects_;
+	std::vector<std::vector<int>> boolObjects_;
 
 	//! Updates the input object to the latest state
 	virtual void updateState() = 0;
@@ -97,5 +110,7 @@ protected:
 	virtual void createInputLayout() = 0;
 	//! Creates all the input objects using the input layout as guide
 	virtual void createInputObjectsFromLayout() = 0;
+
+	virtual InputButtonObject* getButtonObject(unsigned int index);
 };
 

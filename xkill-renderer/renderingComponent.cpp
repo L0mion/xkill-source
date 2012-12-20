@@ -38,6 +38,7 @@ void RenderingComponent::onUpdate(float delta)
 {
 	renderer_->render(delta);
 }
+
 void RenderingComponent::onEvent( Event* e )
 {
 	EventType type = e->getType();

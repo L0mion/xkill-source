@@ -71,6 +71,8 @@ public:
 		
 		CREATE_ATTRIBUTE(InputAttribute, input, entity);
 		CONNECT_ATTRIBUTES(input, physics);
+		input->changeAmmunitionType = false;
+		input->changeFiringMode = false;
 
 		CREATE_ATTRIBUTE(CameraAttribute, camera, entity);
 		CONNECT_ATTRIBUTES(camera, spatial);
@@ -178,15 +180,32 @@ public:
 
 	void createExplosionSphere(Entity* entity, Event_CreateExplosionSphere* e)
 	{
-		/*
 		CREATE_ATTRIBUTE(PositionAttribute, position, entity);
 		position->position = e->position;
 
 		CREATE_ATTRIBUTE(SpatialAttribute, spatial, entity);
 		CONNECT_ATTRIBUTES(spatial, position);
-		*/
-	}
 
+		CREATE_ATTRIBUTE(DebugShapeAttribute, debugShape, entity);	//create temp debug shape
+		CONNECT_ATTRIBUTES(debugShape, spatial);
+		debugShape->shape	= new DebugShapeSphere(e->radius*100.0f);
+		debugShape->render	= true;
+
+		CREATE_ATTRIBUTE(PhysicsAttribute, physics, entity);
+		CONNECT_ATTRIBUTES(physics, spatial);
+		physics->isExplosionSphere = true;
+		physics->explosionSphereRadius = e->radius;
+		physics->collisionResponse = false;
+		physics->mass = 0.0f;
+		physics->gravity = Float3(0.0f, 0.0f, 0.0f);
+
+		CREATE_ATTRIBUTE(ExplosionSphereAttribute, explosionSphere, entity);
+		CONNECT_ATTRIBUTES(explosionSphere, physics);
+
+		CREATE_ATTRIBUTE(DamageAttribute, damage, entity);
+		damage->damage = e->damage;
+		damage->owner_entityID = e->entityIdOfCreator;
+	}
 };
 
 	//

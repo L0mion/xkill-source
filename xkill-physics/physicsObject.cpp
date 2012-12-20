@@ -57,6 +57,7 @@ void PhysicsObject::preStep(CollisionShapeManager* collisionShapeManager,Physics
 	PositionAttribute* positionAttribute = ATTRIBUTE_CAST(PositionAttribute,
 														  positionAttribute,
 														  spatialAttribute);
+	
 	btVector3 localInertia(0,0,0);
 	if(getCollisionShape()->getShapeType()==4 && index_ >2)
 		//if(!inertiad)
@@ -68,6 +69,7 @@ void PhysicsObject::preStep(CollisionShapeManager* collisionShapeManager,Physics
 			setRollingFriction(0.01);
 			
 		}
+	}
 	setMassProps(physicsAttribute->mass,localInertia);
 	
 	m_worldTransform.setOrigin(WorldScaling*btVector3(positionAttribute->position.x,
@@ -101,7 +103,12 @@ void PhysicsObject::preStep(CollisionShapeManager* collisionShapeManager,Physics
 	setAngularVelocity(btVector3(physicsAttribute->angularVelocity.x,
 					   physicsAttribute->angularVelocity.y,
 					   physicsAttribute->angularVelocity.z));
-	m_collisionShape = collisionShapeManager->getCollisionShape(physicsAttribute->meshID);
+
+	if(!physicsAttribute->isExplosionSphere)
+	{
+		m_collisionShape = collisionShapeManager->getCollisionShape(physicsAttribute->meshID);
+	}
+
 	setGravity(gravity_+forces_);
 	activate(true);
 
@@ -142,3 +149,18 @@ unsigned int PhysicsObject::getType() const
 {
 	return type_;
 }
+
+/*
+void PhysicsObject::setCollisionShapeTo(btCollisionShape* collisionShape)
+{
+	Does not work
+	//Scale and set collision shape,
+	btCollisionShape* scaleCollisionShape = new btCollisionShape();
+
+	btVector3 vector = btVector3(WorldScaling, WorldScaling, WorldScaling);
+	collisionShape->se
+	collisionShape->setLocalScaling(vector);
+	setCollisionShape(collisionShape);
+	
+}
+*/

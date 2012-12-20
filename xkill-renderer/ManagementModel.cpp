@@ -66,10 +66,7 @@ DebugShapeD3D* ManagementModel::getDebugShapeD3D(
 	ID3D11Device*		device)
 {
 	if(!existingDebugShapeD3D(shapeIndex))
-	{
-		HRESULT hr = S_OK;
-		hr = createDebugShapeD3D(shapeIndex, device);
-	}
+		createDebugShapeD3D(shapeIndex, device);
 
 	unsigned int debugShapeD3DIndex = getDebugShapeD3DIndex(shapeIndex);
 	return debugShapeD3Ds_[debugShapeD3DIndex];
@@ -213,7 +210,7 @@ void ManagementModel::pushDebugShapeD3D(
 	shapeIndextoD3DIndex_.insert(std::pair<unsigned int, unsigned int>(shapeIndex, debugShapeD3DIndex));
 }
 
-HRESULT ManagementModel::createDebugShapeD3D(unsigned int shapeIndex, ID3D11Device* device)
+void ManagementModel::createDebugShapeD3D(unsigned int shapeIndex, ID3D11Device* device)
 {
 	std::vector<DebugShapeAttribute>* attributesDebugShape;
 	GET_ATTRIBUTES(attributesDebugShape, DebugShapeAttribute, ATTRIBUTE_DEBUGSHAPE);
@@ -229,15 +226,16 @@ HRESULT ManagementModel::createDebugShapeD3D(unsigned int shapeIndex, ID3D11Devi
 	case DEBUG_SHAPE_BB:
 		pushDebugShapeD3D(shapeIndex, createBB((DebugShapeBB*)shape, device));
 		break;
+	case DEBUG_SHAPE_FRUSTUM:
+		pushDebugShapeD3D(shapeIndex, createFrustum((DebugShapeFrustum*)shape, device));
+		break;
 	case DEBUG_SHAPE_NA:
 		//Log warning
 		break;
 	default:
-		//Error
+		SHOW_MESSAGEBOX("ManagementModel::createDebugShapeD3D: Failed to load DebugShapeD3D, no regognized DEBUG_SHAPE-enum.");
 		break;
 	}
-
-	return S_OK; //tmep
 }
 DebugShapeD3D* ManagementModel::createSphere(DebugShapeSphere* sphere, ID3D11Device* device)
 {
@@ -265,6 +263,26 @@ DebugShapeD3D* ManagementModel::createBB(DebugShapeBB* bb, ID3D11Device* device)
 
 	debugBB = new DebugShapeD3D(vb);
 	return debugBB;
+}
+DebugShapeD3D* ManagementModel::createFrustum(DebugShapeFrustum* frustum, ID3D11Device* device)
+{
+	DebugShapeD3D* debugFrustum = nullptr;
+
+	std::vector<VertexPosColor> bbVertices = debugShapes_->getFrustum(
+		frustum->p[0],
+		frustum->p[1],
+		frustum->p[2],
+		frustum->p[3],
+		frustum->p[4],
+		frustum->p[5],
+		frustum->p[6],
+		frustum->p[7]);
+
+	VB<VertexPosColor>* vb = new VB<VertexPosColor>();
+	vb->init(bbVertices, device);
+
+	debugFrustum = new DebugShapeD3D(vb);
+	return debugFrustum;
 }
 
 

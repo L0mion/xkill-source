@@ -16,9 +16,10 @@ Event_MouseMove::Event_MouseMove(int dx, int dy) : Event(EVENT_MOUSE_MOVE)
 	this->dy = dy;
 }
 
-Event_PlaySound::Event_PlaySound(int soundId) : Event(EVENT_PLAYSOUND)
+Event_PlaySound::Event_PlaySound(int soundId, bool muteSound) : Event(EVENT_PLAYSOUND)
 {
 	this->soundId = soundId;
+	this->muteSound = muteSound;
 }
 
 Event_Rumble::Event_Rumble(unsigned int deviceNr,
@@ -136,8 +137,10 @@ Event_ChangeGameState::Event_ChangeGameState(StateType newState) : Event(EVENT_C
 	this->newState = newState;
 }
 
-Event_CreateExplosionSphere::Event_CreateExplosionSphere(Float3 position, float radius) : Event(EVENT_CREATE_EXPLOSIONSPHERE)
+Event_CreateExplosionSphere::Event_CreateExplosionSphere(Float3 position, float radius, int damage, int entityIdOfCreator) : Event(EVENT_CREATE_EXPLOSIONSPHERE)
 {
 	this->position = position;
 	this->radius = radius;
+	this->damage = damage;
+	this->entityIdOfCreator = entityIdOfCreator;
 }

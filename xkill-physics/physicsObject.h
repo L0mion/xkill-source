@@ -89,6 +89,9 @@ public:
 	unsigned int getIndex() const;
 	//! return type of physicsobject
 	unsigned int getType() const;
+
+	//! scales the collisionShape before setting it to the btRigidBody object that this class inherits from.
+	//void setCollisionShapeTo(btCollisionShape* collisionShape);
 };
 
 #endif //XKILL_PHYSICS_PHYSICSOBJECT

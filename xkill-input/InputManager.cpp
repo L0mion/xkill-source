@@ -1,6 +1,6 @@
 #include "InputManager.h"
 
-#include "FileParser.h"
+#include "KeyMapper.h"
 
 #include <Xinput.h>
 
@@ -20,17 +20,27 @@
 
 InputManager::InputManager(void)
 {
+	dInput_ = nullptr;
+	keyMapper_ = nullptr;
 }
 
 InputManager::~InputManager(void)
 {
+	keyMapper_->saveConfig(devices_);
+	delete keyMapper_;
+
 	std::vector<InputDevice*>::iterator it = devices_.begin();
 	for(; it != devices_.end(); it++)
-		delete (*it);
+		SAFE_DELETE(*it);
+
+	devices_.clear();
 }
 
 bool InputManager::InitInput(HWND hWindow, std::string configFilePath)
 {
+	keyMapper_ = new KeyMapper();
+	keyMapper_->init(configFilePath);
+
 	HRESULT result;
 	nrOfXInputDevices_ = 0;
 
@@ -46,6 +56,7 @@ bool InputManager::InitInput(HWND hWindow, std::string configFilePath)
 	GUID guid;
 	memset(&guid, 0, sizeof(guid));
 	QTInputDevices* mouseAndKeyboard = new QTInputDevices(guid, "Mouse & Keyboard", devices_.size());
+	keyMapper_->getConfigForNewController(mouseAndKeyboard);
 	devices_.push_back(mouseAndKeyboard);
 	mouseAndKeyboard_ = mouseAndKeyboard;
 
@@ -125,8 +136,11 @@ int InputManager::UpdateNumberOfGamepads(HWND hWindow)
 
 		if(!deviceAlreadyAdded)
 		{
-			addNewDevice(hWindow, enumDevicesStruct.deviceInstanceGUIDs[i], enumDevicesStruct.deviceProductGUIDs[i], enumDevicesStruct.deviceNames[i]);
-			nrOfGamepadsAdded++;
+			if(addNewDevice(hWindow, enumDevicesStruct.deviceInstanceGUIDs[i], enumDevicesStruct.deviceProductGUIDs[i], enumDevicesStruct.deviceNames[i]))
+			{
+				keyMapper_->getConfigForNewController(devices_[devices_.size() - 1]);
+				nrOfGamepadsAdded++;
+			}
 		}
 	}
 
@@ -197,68 +211,6 @@ BOOL CALLBACK InputManager::EnumDevicesCallback(const DIDEVICEINSTANCE* device, 
 	eds->deviceNames.push_back(device->tszProductName);
 
 	return DIENUM_CONTINUE;
-}
-
-std::string InputManager::GetInputInformationString()
-{
-	InputDevice::InputState inputState;
-	std::string str = "";
-
-	for(unsigned int i = 0; i < devices_.size(); i++)
-	{
-		devices_[i]->Update(0.0f);
-		inputState = devices_[i]->GetState();
-
-		str += "Device #" + Converter::IntToStr(i) + "\n";
-		str += "[ " + devices_[i]->GetName() + " ]\n";
-
-		for(unsigned int j = 0; j < inputState.axes.size(); j++)
-		{
-			str += "Axis #" + Converter::IntToStr(j) + ": " + Converter::FloatToStr(inputState.axes[j].GetValue()) + "\n";
-		}
-
-		for(unsigned int j = 0; j < inputState.triggers.size(); j++)
-		{
-			str += "Trigger #" + Converter::IntToStr(j) + ": " + Converter::FloatToStr(inputState.triggers[j].GetValue()) + " ";
-
-			if(inputState.triggers[j].IsTriggered())
-			{
-				str += "On\n";
-			}
-			else
-			{
-				str += "Off\n";
-			}
-		}
-
-		for(unsigned int j = 0; j < inputState.hatSwitches.size(); j++)
-		{
-			str += "Hat Switch #" + Converter::IntToStr(j) + ": ";
-
-			for(int i = 0; i < 4; i++)
-				str += Converter::IntToStr(inputState.hatSwitches[j].buttonDown(i));
-
-			str += "\n";
-		}
-
-		for(unsigned int j = 0; j < inputState.buttons.size(); j++)
-		{
-			str += "Button #" + Converter::IntToStr(j) + ": ";
-
-			if(inputState.buttons[j].isDown())
-			{
-				str += "On\n";
-			}
-			else
-			{
-				str += "Off\n";
-			}
-		}
-
-		str += "\n";
-	}
-
-	return str;
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////

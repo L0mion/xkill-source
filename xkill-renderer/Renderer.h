@@ -78,7 +78,7 @@ private:
 	void renderViewportToGBuffer(
 		DirectX::XMFLOAT4X4 viewMatrix,
 		DirectX::XMFLOAT4X4 projectionMatrix,
-		unsigned int		cameraInde);	//!< Renders to g-buffer.
+		unsigned int		cameraIndex);	//!< Renders to g-buffer.
 	void renderViewportToBackBuffer();			//!< Renders to backbuffer.
 	void renderAttribute(
 		RenderAttribute* renderAt, 

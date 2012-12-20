@@ -89,8 +89,6 @@ void Renderer::reset()
 	SAFE_RESET(managementCB_);
 	SAFE_RESET(managementLight_);
 	SAFE_RESET(managementViewport_);
-	//SAFE_RESET(managementModel_);		//?
-	//SAFE_RESET(managementTex_);		//?
 	SAFE_RESET(managementSS_);
 	SAFE_RESET(managementRS_);
 	SAFE_RESET(managementGBuffer_);
@@ -149,6 +147,7 @@ HRESULT Renderer::init()
 		hr = initManagementGBuffer();
 
 	//temp
+	/*
 	m3dLoader_ = new M3DLoader();
 	animatedMesh_ = nullptr;
 	animatedMesh_ = new AnimatedMesh();
@@ -159,6 +158,7 @@ HRESULT Renderer::init()
 					   animatedMesh_->getMaterials(),
 					   animatedMesh_->getSkinInfo());
 	animatedMesh_->init(managementD3D_->getDevice());
+	*/
 
 	return hr;
 }
@@ -375,12 +375,15 @@ void Renderer::renderViewportToGBuffer(DirectX::XMFLOAT4X4 viewMatrix, DirectX::
 	{
 		if(attributesRenderOwner_->at(i) != 0)
 		{
+			//if(renderAt->culling.getBool(cameraIndex))
+			{
 			renderAt = &attributesRender_->at(i);
 			//if(renderAt->culling.getBool(cameraIndex))
 				renderAttribute(
 					renderAt, 
 					viewMatrix, 
 					projectionMatrix);
+			}
 		}
 	}
 
