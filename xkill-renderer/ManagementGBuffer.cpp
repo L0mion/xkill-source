@@ -74,7 +74,7 @@ HRESULT ManagementGBuffer::initNormal(ID3D11Device* device)
 		winfo_->getScreenWidth(), 
 		winfo_->getScreenHeight(), 
 		MULTISAMPLES_GBUFFERS, 
-		DXGI_FORMAT_R32G32B32A32_FLOAT);
+		DXGI_FORMAT_R16G16B16A16_FLOAT);
 	hr = gBuffer->init(device);
 
 	gBuffers_[GBUFFERID_NORMAL] = gBuffer;
