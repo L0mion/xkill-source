@@ -16,41 +16,73 @@ void ManagementSS::reset()
 	SAFE_RELEASE(ssDefault_);
 }
 
-void ManagementSS::setVS(ID3D11DeviceContext* devcon, SS_ID ssId, unsigned int shaderRegister)
+void ManagementSS::setSS(
+	ID3D11DeviceContext*	devcon,
+	TypeFX					shaderStage,
+	unsigned int			shaderRegister,
+	SS_ID					ssId)
 {
+	//Get specified ss
+	ID3D11SamplerState* ss = nullptr;
 	switch(ssId)
 	{
 	case SS_ID_DEFAULT:
-		devcon->VSSetSamplers(shaderRegister, 1, &ssDefault_);
+		ss = ssDefault_;
 		break;
 	default:
-		devcon->VSSetSamplers(shaderRegister, 1, &ssDefault_);
+		ss = ssDefault_; // Should we really set a 'default' samplerstate this way?
 		break;
 	}
+
+	//Bind to specified shade-stage
+	switch(shaderStage)
+	{
+	case TypeFX_VS:
+		devcon->VSSetSamplers(shaderRegister, 1, &ss);
+		break;
+	case TypeFX_GS:
+		devcon->GSSetSamplers(shaderRegister, 1, &ss);
+		break;
+	case TypeFX_HS:
+		devcon->HSSetSamplers(shaderRegister, 1, &ss);
+		break;
+	case TypeFX_DS:
+		devcon->DSSetSamplers(shaderRegister, 1, &ss);
+		break;
+	case TypeFX_PS:
+		devcon->PSSetSamplers(shaderRegister, 1, &ss);
+		break;
+	case TypeFX_CS:
+		devcon->CSSetSamplers(shaderRegister, 1, &ss);
+		break;
+	};
 }
-void ManagementSS::setPS(ID3D11DeviceContext* devcon, SS_ID ssId, unsigned int shaderRegister)
+void ManagementSS::unsetSS(
+	ID3D11DeviceContext*	devcon,
+	TypeFX					shaderStage,
+	unsigned int			shaderRegister)
 {
-	switch(ssId)
+	switch(shaderStage)
 	{
-	case SS_ID_DEFAULT:
-		devcon->PSSetSamplers(shaderRegister, 1, &ssDefault_);
+	case TypeFX_VS:
+		devcon->VSSetSamplers(shaderRegister, 0, nullptr);
 		break;
-	default:
-		devcon->PSSetSamplers(shaderRegister, 1, &ssDefault_);
+	case TypeFX_GS:
+		devcon->GSSetSamplers(shaderRegister, 0, nullptr);
 		break;
-	}
-}
-void ManagementSS::setCS(ID3D11DeviceContext* devcon, SS_ID ssId, unsigned int shaderRegister)
-{
-	switch(ssId)
-	{
-	case SS_ID_DEFAULT:
-		devcon->CSSetSamplers(shaderRegister, 1, &ssDefault_);
+	case TypeFX_HS:
+		devcon->HSSetSamplers(shaderRegister, 0, nullptr);
 		break;
-	default:
-		devcon->CSSetSamplers(shaderRegister, 1, &ssDefault_);
+	case TypeFX_DS:
+		devcon->DSSetSamplers(shaderRegister, 0, nullptr);
 		break;
-	}
+	case TypeFX_PS:
+		devcon->PSSetSamplers(shaderRegister, 0, nullptr);
+		break;
+	case TypeFX_CS:
+		devcon->CSSetSamplers(shaderRegister, 0, nullptr);
+		break;
+	};
 }
 
 HRESULT ManagementSS::init(ID3D11Device* device)

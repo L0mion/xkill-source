@@ -30,6 +30,7 @@ class ManagementSS;
 class ManagementRS;
 class ManagementGBuffer;
 class ManagementDebug;
+class ManagementMath;
 
 #include <vector>
 
@@ -69,6 +70,7 @@ private:
 	HRESULT initManagementRS();			//!< Creates a ManagementRS object that will maintain rasterizer states.
 	HRESULT initManagementGBuffer();	//!< Creates a ManagementGBuffer-type object that will maintain the application's g-buffers.
 	HRESULT initManagementDebug();		//!< Initializes ManagementDebug, which holds data allowing advanced detection of COM-leaks in D3D.
+	void	initManagementMath();		//!< Initializes ManagementMath, which manages math-related functions and loading of dx-vectors into generic-type vectors utilizing SIMD.
 
 	void renderViewport(
 		CameraAttribute	cameraAt, 
@@ -94,20 +96,10 @@ private:
 		DirectX::XMFLOAT4X4		projectionMatrix); //!< Renders a debug shape, such as a bounding sphere.
 
 	//temp
-	void renderGBufferClean();		//refactor me
 	void renderBackBufferClean();	//refactor me
 	void renderAnimatedMesh(
 		DirectX::XMFLOAT4X4 viewMatrix, 
 		DirectX::XMFLOAT4X4 projectionMatrix);
-
-	DirectX::XMFLOAT4X4 calculateWorldMatrix(
-		SpatialAttribute* spatialAttribute,							 
-		PositionAttribute* positionAttribute);
-	DirectX::XMFLOAT4X4 calculateFinalMatrix(
-		DirectX::XMFLOAT4X4 worldMatrix,
-		DirectX::XMFLOAT4X4 viewMatrix,
-		DirectX::XMFLOAT4X4 projectionMatrix);
-	DirectX::XMFLOAT4X4 calculateMatrixInverse(DirectX::XMFLOAT4X4 matrix);
 	
 	HWND	windowHandle_;	//!< Handle to WinAPI-window.
 	Winfo*	winfo_;			//!< Holds information related to screen dimensions. Object is shared thruought Renderer's members.
@@ -123,6 +115,7 @@ private:
 	ManagementRS*		managementRS_;			//!< Maintaining rasterizer states.
 	ManagementGBuffer*	managementGBuffer_;		//!< Maintains the G-Buffers of application.
 	ManagementDebug*	managementDebug_;		//!< Used for detecting live COM-objects.
+	ManagementMath*		managementMath_;		//!< Loads dx-math vectors into generic-type vectors and maintains other math-related functions.
 
 	std::vector<SpatialAttribute>*		attributesSpatial_;		//!< Holds spatial data. Is fetched only once.
 	std::vector<PositionAttribute>*		attributesPosition_;	//!< Holds positional data. Is fetched only once.
