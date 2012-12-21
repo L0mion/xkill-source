@@ -7,6 +7,7 @@ MenuManager::MenuManager( QWidget* parent )
 	scoreBoard = new Menu_ScoreBoard(parent);
 	inGameMenu = new Menu_InGame(parent);
 	mainMenu = new Menu_Main(parent);
+	
 	mainMenu->toggleMenu(true);
 
 	SUBSCRIBE_TO_EVENT(this, EVENT_UPDATE);

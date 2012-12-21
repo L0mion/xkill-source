@@ -18,12 +18,18 @@ class Entity
 {
 private:
 	int id;
-	std::vector<AttributeController> attributes;
+	std::vector<AttributeController>* attributes;
 
 public:
 	Entity(int id)
 	{
 		this->id = id;
+		attributes = new std::vector<AttributeController>;
+	}
+
+	void clean()
+	{
+		delete attributes;
 	}
 
 	~Entity()
@@ -32,14 +38,14 @@ public:
 
 	void deleteAttributes()
 	{
-		for(unsigned int i = 0; i < attributes.size(); i++)
-			attributes[i].remove();
-		attributes.clear();
+		for(unsigned int i = 0; i < attributes->size(); i++)
+			attributes->at(i).remove();
+		attributes->clear();
 	}
 
 	void addAttribute(AttributeController attribute)
 	{
-		attributes.push_back(attribute);
+		attributes->push_back(attribute);
 	}
 
 	
@@ -49,9 +55,9 @@ public:
 	*/
 	bool hasAttribute(AttributeType type)
 	{
-		for(unsigned i=0; i<attributes.size(); i++)
+		for(unsigned i=0; i<attributes->size(); i++)
 		{
-			if(type == attributes[i].type)
+			if(type == attributes->at(i).type)
 			{
 				return true;
 			}
@@ -67,11 +73,11 @@ public:
 	std::vector<int> getAttributes(AttributeType type)
 	{
 		std::vector<int> matchingAttributes;
-		for(unsigned i=0; i<attributes.size(); i++)
+		for(unsigned i=0; i<attributes->size(); i++)
 		{
-			if(type == attributes[i].type)
+			if(type == attributes->at(i).type)
 			{
-				matchingAttributes.push_back( attributes[i].index);
+				matchingAttributes.push_back( attributes->at(i).index);
 			}
 		}
 		return matchingAttributes;

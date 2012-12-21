@@ -3,11 +3,12 @@
 #include <vector>
 #include <queue>
 
-#include "IAttributeStorage.h"
-#include "AttributeController.h"
 #include <xkill-utilities/AttributePointer.h>
 #include <xkill-utilities/AttributeType.h>
+
 #include "Entity.h"
+#include "IAttributeStorage.h"
+#include "AttributeController.h"
 
 
 /// Template class for storing and creating \ref ATTRIBUTES in a uniform manner.
@@ -43,7 +44,7 @@ public:
 
 	~AttributeStorage()
 	{
-		for(int i=0; i<attributes.size(); i++)
+		for(unsigned i=0; i<attributes.size(); i++)
 		{
 			IAttribute* a = (IAttribute*)&attributes[i];
 			a->clean();
