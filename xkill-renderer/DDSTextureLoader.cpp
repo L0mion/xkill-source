@@ -18,7 +18,7 @@
 // http://go.microsoft.com/fwlink/?LinkId=248929
 //--------------------------------------------------------------------------------------
 
-#define _WIN32_WINNT 0x0601 
+//#define _WIN32_WINNT 0x0601 
 
 #include <dxgiformat.h>
 #include <assert.h>
