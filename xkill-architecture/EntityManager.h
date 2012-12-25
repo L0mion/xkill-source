@@ -10,13 +10,6 @@
 \ingroup ARCHITECTURE
 */
 
-enum ENTITYTYPE
-{
-	WORLD,
-	PLAYER,
-	PROJECTILE
-};
-
 class EntityStorage : public IObserver
 {
 private:
@@ -34,6 +27,7 @@ public:
 
 		// subscribe to events
 		SUBSCRIBE_TO_EVENT(this, EVENT_GET_ENTITIES);
+		SUBSCRIBE_TO_EVENT(this, EVENT_CREATE_ENTITY);
 	}
 
 	~EntityStorage()
@@ -41,6 +35,7 @@ public:
 		for(unsigned i=0; i<entities.size(); i++)
 		{
 			entities[i].deleteAttributes();
+			entities[i].clean();
 		}
 	}
 
@@ -135,6 +130,7 @@ public:
 		SUBSCRIBE_TO_EVENT(this, EVENT_REMOVE_ENTITY);
 		SUBSCRIBE_TO_EVENT(this, EVENT_CREATE_SPAWNPOINT);
 		SUBSCRIBE_TO_EVENT(this, EVENT_CREATE_EXPLOSIONSPHERE);
+		SUBSCRIBE_TO_EVENT(this, EVENT_CREATE_ENTITY);
 	}
 
 	/**
@@ -147,6 +143,9 @@ public:
 		{
 		case EVENT_CREATE_PROJECTILE:
 			event_CreateProjectile(static_cast<Event_CreateProjectile*>(e));
+			break;
+		case EVENT_CREATE_ENTITY:
+			createSpecificEntity(static_cast<Event_CreateEntity*>(e));
 			break;
 		case EVENT_REMOVE_ENTITY:
 			deleteEntity(static_cast<Event_RemoveEntity*>(e)->entityId);
@@ -175,10 +174,11 @@ public:
 		entityFactory.createMesh(entity, e);
 	}
 
-	void createSpecificEntity(ENTITYTYPE entityType)
+	void createSpecificEntity(Event_CreateEntity* e)
 	{
+		EntityType type = e->entityType;
 		Entity* entity = createEntity();
-		switch(entityType)
+		switch(type)
 		{
 		case PLAYER:
 			entityFactory.createPlayerEntity(entity);

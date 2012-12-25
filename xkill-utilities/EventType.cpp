@@ -123,9 +123,9 @@ Event_DoCulling::Event_DoCulling() : Event(EVENT_DO_CULLING)
 }
 
 
-Event_StartDeathmatch::Event_StartDeathmatch() : Event(EVENT_START_DEATHMATCH)
+Event_StartDeathmatch::Event_StartDeathmatch(int num_players) : Event(EVENT_START_DEATHMATCH)
 {
-
+	this->num_players = num_players;
 }
 
 Event_EndDeathmatch::Event_EndDeathmatch() : Event(EVENT_END_DEATHMATCH)
@@ -137,8 +137,15 @@ Event_ChangeGameState::Event_ChangeGameState(StateType newState) : Event(EVENT_C
 	this->newState = newState;
 }
 
-Event_CreateExplosionSphere::Event_CreateExplosionSphere(Float3 position, float radius) : Event(EVENT_CREATE_EXPLOSIONSPHERE)
+Event_CreateExplosionSphere::Event_CreateExplosionSphere(Float3 position, float radius, int damage, int entityIdOfCreator) : Event(EVENT_CREATE_EXPLOSIONSPHERE)
 {
 	this->position = position;
 	this->radius = radius;
+	this->damage = damage;
+	this->entityIdOfCreator = entityIdOfCreator;
+}
+
+Event_CreateEntity::Event_CreateEntity( EntityType entityType ) : Event(EVENT_CREATE_ENTITY)
+{
+	this->entityType = entityType;
 }

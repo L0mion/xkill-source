@@ -47,6 +47,8 @@ enum DLL_U EventType
 	EVENT_CHANGE_GAMESTATE,
 	EVENT_CREATE_EXPLOSIONSPHERE,
 
+	EVENT_CREATE_ENTITY,
+	EVENT_GAMERESET,
 	EVENT_UPDATE,
 	EVENT_MOUSE_MOVE,
 	EVENT_KEY_PRESS,
@@ -333,7 +335,8 @@ public:
 class DLL_U Event_StartDeathmatch : public Event
 {
 public:
-	Event_StartDeathmatch();
+	Event_StartDeathmatch(int num_players);
+	int num_players;
 };
 
 class DLL_U Event_EndDeathmatch : public Event
@@ -354,8 +357,26 @@ public:
 class DLL_U Event_CreateExplosionSphere : public Event
 {
 public:
-	Event_CreateExplosionSphere(Float3 position, float radius);
+	Event_CreateExplosionSphere(Float3 position, float radius, int damage, int entityIdOfCreator);
 
 	Float3 position;
 	float radius;
+	int damage;
+	int entityIdOfCreator;
 };
+
+enum DLL_U EntityType
+{
+	WORLD,
+	PLAYER,
+	PROJECTILE
+};
+
+class DLL_U Event_CreateEntity : public Event
+{
+public:
+	Event_CreateEntity(EntityType entityType);
+
+	EntityType entityType;
+};
+

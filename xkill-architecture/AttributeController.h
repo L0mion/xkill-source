@@ -1,6 +1,6 @@
 #pragma once
 
-#include "AttributeStorage.h"
+#include "IAttributeStorage.h"
 
 /// A handle used by Entity to modify one of its Attributes
 /** 

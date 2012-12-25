@@ -74,7 +74,7 @@ public:
 	virtual int getPlayerID();
 	
 	//! Returns the largest float value of objects that is mapped to that number
-	virtual float getFloatValue(int mapping);
+	virtual float getFloatValue(int mapping, bool useSensitivity = false);
 	//! Returns if any object that is mapped to that number is activated
 	virtual bool getBoolValue(int mapping);
 	//! Returns if any object that is mapped to that number was released

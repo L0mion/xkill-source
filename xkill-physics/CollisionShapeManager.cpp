@@ -4,10 +4,13 @@
 #include <xkill-utilities/AttributeType.h>
 #include <xkill-utilities/EventManager.h>
 #include <xkill-utilities/MeshModel.h>
+#include "physicsUtilities.h"
+
 
 CollisionShapeManager::CollisionShapeManager()
 {
 	GET_ATTRIBUTES(meshAttributes_, MeshAttribute, ATTRIBUTE_MESH);
+	
 	//if(collisionShapes_.size()==0)
 		//collisionShapes_.push_back(new btSphereShape(50));
 }
@@ -23,11 +26,14 @@ btCollisionShape* CollisionShapeManager::getCollisionShape(unsigned int meshID)
 	if(it != collisionShapesIDtoIndex_.end())
 	{
 		unsigned int index = it->second;
+		//create debug shape
 		return collisionShapes_.at(index);
 	}
 	else
-	{ //add collusionshape
-		return loadCollisionShape(meshID);
+	{ //add collision shape
+		btCollisionShape* result = loadCollisionShape(meshID);
+
+		return result;
 	}
 
 	//loadCollisionShapes();
@@ -41,6 +47,22 @@ btCollisionShape* CollisionShapeManager::getCollisionShape(unsigned int meshID)
 	//}
 	
 }
+
+//btCollisionShape* CollisionShapeManager::getCollisionShapeAt(unsigned int index)
+//{
+//	btCollisionShape* collisionShape = NULL;
+//
+//	if(index < collisionShapes_.size())
+//	{
+//		return collisionShapes_.at(index);
+//	}
+//	else
+//	{
+//		return NULL;
+//	}
+//
+//	return collisionShape;
+//}
 
 btCollisionShape* CollisionShapeManager::loadCollisionShape(unsigned int meshID)
 {
@@ -56,7 +78,6 @@ btCollisionShape* CollisionShapeManager::loadCollisionShape(unsigned int meshID)
 	}
 
 	std::vector<VertexPosNormTex> vertices;
-	
 	btTriangleMesh *triangleMesh = new btTriangleMesh();;
 	vertices = meshAttribute->mesh->getGeometry().getVertices();
 	unsigned int numSubsets = meshAttribute->mesh->getGeometry().getNumSubsets();
@@ -67,17 +88,16 @@ btCollisionShape* CollisionShapeManager::loadCollisionShape(unsigned int meshID)
 		unsigned int numIndices = indices.size();
 		for(unsigned int k = 0; k+2 < numIndices; k+=3)
 		{
-			btScalar scale = 100.0f;
-			btVector3 a = scale*btVector3(vertices[indices[k]].position_.x,
+			btVector3 a = WorldScaling*btVector3(vertices[indices[k]].position_.x,
 												vertices[indices[k]].position_.y,
 												vertices[indices[k]].position_.z);
-			triangleMesh->addTriangle(scale*btVector3(vertices[indices[k]].position_.x,
+			triangleMesh->addTriangle(WorldScaling*btVector3(vertices[indices[k]].position_.x,
 												vertices[indices[k]].position_.y,
 												vertices[indices[k]].position_.z),
-										scale*btVector3(vertices[indices[k+1]].position_.x,
+										WorldScaling*btVector3(vertices[indices[k+1]].position_.x,
 												vertices[indices[k+1]].position_.y,
 												vertices[indices[k+1]].position_.z),
-										scale*btVector3(vertices[indices[k+2]].position_.x,
+										WorldScaling*btVector3(vertices[indices[k+2]].position_.x,
 												vertices[indices[k+2]].position_.y,
 												vertices[indices[k+2]].position_.z));
 		}
@@ -93,7 +113,6 @@ btCollisionShape* CollisionShapeManager::loadCollisionShape(unsigned int meshID)
 		btConvexHullShape* convexShape = new btConvexHullShape;
 		for(int i=0; i< hull.numVertices(); i++)
 		{
-			btVector3 test = hull.getVertexPointer()[i];
 			convexShape->addPoint(hull.getVertexPointer()[i]);
 		}
 
@@ -105,9 +124,10 @@ btCollisionShape* CollisionShapeManager::loadCollisionShape(unsigned int meshID)
 		btBvhTriangleMeshShape* staticShape = new btBvhTriangleMeshShape(triangleMesh,true);
 		collisionShapes_.push_back(staticShape);
 		int a = staticShape->getShapeType();
-		triangleMeshes_.push_back(triangleMesh);
-		
+		triangleMeshes_.push_back(triangleMesh);	
 	}
+
+	
 
 	unsigned int meshID		= meshAttribute->meshID;
 	unsigned int meshIndex	= collisionShapes_.size() - 1;
@@ -133,3 +153,8 @@ void CollisionShapeManager::clean()
 		triangleMeshes_.pop_back();
 	}
 };
+
+void CollisionShapeManager::addCollisionShape(btCollisionShape* collisionShape)
+{
+	collisionShapes_.push_back(collisionShape);
+}

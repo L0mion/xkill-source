@@ -27,6 +27,8 @@ void Winfo::init(
 	numViewports_	= numViewports;
 	csDispathX_		= csDispathX;
 	csDispathY_		= csDispathY;
+
+
 }
 
 unsigned int	Winfo::getScreenWidth()		const

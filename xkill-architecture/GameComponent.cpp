@@ -8,6 +8,7 @@
 GameComponent::GameComponent(void)
 {
 	SUBSCRIBE_TO_EVENT(this, EVENT_PHYSICS_ATTRIBUTES_COLLIDING);
+	SUBSCRIBE_TO_EVENT(this, EVENT_START_DEATHMATCH);	
 	SUBSCRIBE_TO_EVENT(this, EVENT_END_DEATHMATCH);	
 }
 
@@ -32,6 +33,8 @@ bool GameComponent::init()
 	GET_ATTRIBUTES(physicsAttributes_, PhysicsAttribute, ATTRIBUTE_PHYSICS);
 	GET_ATTRIBUTES(spawnPointAttributes_, SpawnPointAttribute, ATTRIBUTE_SPAWNPOINT);
 	GET_ATTRIBUTES(weaponStatsAttributes_, WeaponStatsAttribute, ATTRIBUTE_WEAPONSTATS);
+	GET_ATTRIBUTES(damageAttributes_, DamageAttribute, ATTRIBUTE_DAMAGE);
+	GET_ATTRIBUTES(explosionSphereAttributes_, ExplosionSphereAttribute, ATTRIBUTE_EXPLOSIONSPHERE);
 
 	SEND_EVENT(&Event_CreateSpawnPoint(Float3(-1.5f, 3.0f, 0.0f), 2.0f));
 	SEND_EVENT(&Event_CreateSpawnPoint(Float3(1.0f, 5.0f, 0.0f), 2.0f));
@@ -52,6 +55,9 @@ void GameComponent::onEvent(Event* e)
 	{
 	case EVENT_PHYSICS_ATTRIBUTES_COLLIDING:
 		event_PhysicsAttributesColliding(static_cast<Event_PhysicsAttributesColliding*>(e));
+		break;
+	case EVENT_START_DEATHMATCH:
+		event_StartDeathmatch(static_cast<Event_StartDeathmatch*>(e));
 		break;
 	case EVENT_END_DEATHMATCH:
 		event_EndDeathmatch(static_cast<Event_EndDeathmatch*>(e));
@@ -85,25 +91,16 @@ void GameComponent::onUpdate(float delta)
 				//SEND_EVENT(&Event_EndDeathmatch());
 			}
 
-			if(input->changeWeapon)
+			if(input->changeAmmunitionType)
 			{
-				static int weapon = 0;
-				input->changeWeapon = false;
+				input->changeAmmunitionType = false;
+				weaponStats->setWeaponStats(static_cast<WeaponStatsAttribute::AmmunitionType>((weaponStats->ammunitionType + 1) % WeaponStatsAttribute::NROFAMUNITIONTYPES), weaponStats->firingMode);
+			}
 
-				if(weapon == 0)
-				{
-  					weaponStats->setWeaponToDebugMachineGun();
-				}
-				else if(weapon == 1)
-				{
-					weaponStats->setWeaponStats(WeaponStatsAttribute::SCATTER, WeaponStatsAttribute::AUTO);
-				}
-				weapon++;
-
-				if(weapon == 2)
-				{
-					weapon = 0;
-				}
+			if(input->changeFiringMode)
+			{
+				input->changeFiringMode = false;
+				weaponStats->setWeaponStats(weaponStats->ammunitionType, static_cast<WeaponStatsAttribute::FiringMode>((weaponStats->firingMode + 1) % WeaponStatsAttribute::NROFFIRINGMODES));
 			}
 
 			//Firing logic
@@ -236,8 +233,7 @@ void GameComponent::onUpdate(float delta)
 				DEBUGPRINT("Projectile entity " << projectileAttributesOwners->at(i) << " has no lifetime left");
 				
 				//Remove projectile entity
-				Event_RemoveEntity removeEntityEvent(projectileAttributesOwners->at(i));
-				SEND_EVENT(&removeEntityEvent);
+				SEND_EVENT(&Event_RemoveEntity(projectileAttributesOwners->at(i)));
 			}
 		}
 	}
@@ -286,6 +282,21 @@ void GameComponent::onUpdate(float delta)
 			}
 		}
 	}
+
+	//Handles updates of explosion sphere attributes
+	std::vector<int>* explosionSphereAttributesOwners;		GET_ATTRIBUTE_OWNERS(explosionSphereAttributesOwners, ATTRIBUTE_EXPLOSIONSPHERE);
+	for(unsigned i=0; i<explosionSphereAttributesOwners->size(); i++)
+	{
+		if(explosionSphereAttributesOwners->at(i)!=0)
+		{
+			ExplosionSphereAttribute* explosionSphere = &explosionSphereAttributes_->at(i);
+			explosionSphere->currentLifeTimeLeft -= delta;
+			if(explosionSphere->currentLifeTimeLeft <= 0.0f)
+			{
+				SEND_EVENT(&Event_RemoveEntity(explosionSphereAttributesOwners->at(i)));
+			}
+		}
+	}
 }
 
 void GameComponent::event_PhysicsAttributesColliding(Event_PhysicsAttributesColliding* e)
@@ -322,7 +333,7 @@ void GameComponent::event_PhysicsAttributesColliding(Event_PhysicsAttributesColl
 				DamageAttribute* damage = &allDamage->at(damageId[i]);
 
 				// avoid damage to self
-				if(entity1->getID() != damage->owner_entityID)
+				if(entity1->getID() != damage->owner_entityID || entity2->hasAttribute(ATTRIBUTE_EXPLOSIONSPHERE))
 				{
 					// Apply damage to all Health attributes
 					for(unsigned i=0; i<healthId.size(); i++)
@@ -330,29 +341,28 @@ void GameComponent::event_PhysicsAttributesColliding(Event_PhysicsAttributesColl
 						HealthAttribute* health = &allHealth->at(healthId[i]);
 						health->health -= damage->damage;
 						
-						//If a player was killed by the collision, give priority (score) to the player that created the projectile
+						//If a player was killed by the collision, give priority (score) to the player that created the DamageAttribute
 						if(health->health <= 0)
 						{
-							if(entity2->hasAttribute(ATTRIBUTE_PROJECTILE))
-							{
-								std::vector<ProjectileAttribute>* projectileAttributes_;	GET_ATTRIBUTES(projectileAttributes_, ProjectileAttribute, ATTRIBUTE_PROJECTILE);
-								std::vector<PlayerAttribute>* allPlayers;			GET_ATTRIBUTES(allPlayers, PlayerAttribute, ATTRIBUTE_PLAYER);
-							
-								std::vector<int> projectileId = entity2->getAttributes(ATTRIBUTE_PROJECTILE);
-								
-								for(unsigned i=0;i<projectileId.size();i++)
-								{
-									int entityIdOfProjectileCreator = projectileAttributes_->at(projectileId.at(i)).entityIdOfCreator;
-									Entity* creatorOfProjectilePlayerEntity = &allEntity->at(entityIdOfProjectileCreator);
-									std::vector<int> playerId = creatorOfProjectilePlayerEntity->getAttributes(ATTRIBUTE_PLAYER);
+							std::vector<PlayerAttribute>* allPlayers;			GET_ATTRIBUTES(allPlayers, PlayerAttribute, ATTRIBUTE_PLAYER);
+							Entity* creatorOfProjectilePlayerEntity = &allEntity->at(damage->owner_entityID);
+							std::vector<int> playerId = creatorOfProjectilePlayerEntity->getAttributes(ATTRIBUTE_PLAYER);
 
-									for(unsigned i=0;i<playerId.size();i++)
-									{
-										PlayerAttribute* player = &allPlayers->at(playerId.at(i));
-										player->priority++;
-										DEBUGPRINT("Player with entity id " << entityIdOfProjectileCreator << " killed player with entity id " << entity1->getID());
-									}
+							for(unsigned i=0;i<playerId.size();i++)
+							{
+								PlayerAttribute* player = &allPlayers->at(playerId.at(i));
+								
+								//Award player
+								if(entity1->getID() != damage->owner_entityID)
+								{
+									player->priority++;
 								}
+								else //Punish player for blowing himself up
+								{
+									player->priority--;
+								}
+								
+								DEBUGPRINT("Player with entity id " << damage->owner_entityID << " killed player with entity id " << entity1->getID());
 							}
 
 							SEND_EVENT(&Event_PlayerDeath());
@@ -364,8 +374,10 @@ void GameComponent::event_PhysicsAttributesColliding(Event_PhysicsAttributesColl
 						DEBUGPRINT("DAMAGEEVENT Entity " << entity2->getID() << " damage: " <<  damage->damage << " Entity " << entity1->getID() << " health " << health->health);
 					}
 
-					// remove damage entity
-					SEND_EVENT(&Event_RemoveEntity(entity2->getID()));
+					 if(entity2->hasAttribute(ATTRIBUTE_PROJECTILE))
+					 {
+						 SEND_EVENT(&Event_RemoveEntity(entity2->getID()));
+					 }
 				}
 			}
 		}
@@ -377,7 +389,8 @@ void GameComponent::event_PhysicsAttributesColliding(Event_PhysicsAttributesColl
 		// colliding with...
 		//
 
-		if(entity2->hasAttribute(ATTRIBUTE_PHYSICS) && !entity2->hasAttribute(ATTRIBUTE_PROJECTILE))
+		if(entity2->hasAttribute(ATTRIBUTE_PHYSICS) && !entity2->hasAttribute(ATTRIBUTE_PROJECTILE) && !entity2->hasAttribute(ATTRIBUTE_EXPLOSIONSPHERE))
+		//if(entity2->hasAttribute(ATTRIBUTE_PHYSICS) && !entity2->hasAttribute(ATTRIBUTE_PROJECTILE))
 		{
 			//Set gravity on projectiles colliding with physics objects
 			std::vector<PhysicsAttribute>* allPhysics; GET_ATTRIBUTES(allPhysics, PhysicsAttribute, ATTRIBUTE_PHYSICS);
@@ -389,32 +402,46 @@ void GameComponent::event_PhysicsAttributesColliding(Event_PhysicsAttributesColl
 				physicsAttribute->linearVelocity = Float3(0.0f, 0.0f, 0.0f);
 			}
 
-			//Shorten lifetime of projectile colliding with physics objects
+			//Handle PhysicsAttribute of a projectile colliding with another PhysicsAttribute
 			std::vector<ProjectileAttribute>* allProjectile; GET_ATTRIBUTES(allProjectile, ProjectileAttribute, ATTRIBUTE_PROJECTILE);
 			std::vector<int> projectileId = entity1->getAttributes(ATTRIBUTE_PROJECTILE);
 			for(unsigned i=0;i<projectileId.size();i++)
 			{
 				ProjectileAttribute* projectileAttribute = &allProjectile->at(projectileId.at(i));
+
+				//Shorten lifetime of projectile colliding with physics objects
 				if(projectileAttribute->currentLifeTimeLeft > 0.2f)
 				{
 					projectileAttribute->currentLifeTimeLeft = 0.15f;
 				}
 
 				//Explosion handling. In progress.
-				/*
 				if(projectileAttribute->explodeOnImnpact)
 				{
-					projectileAttribute->currentLifeTimeLeft = 0.0f;
+					//Get damage from projectile.
+ 					std::vector<DamageAttribute>* allDamage; GET_ATTRIBUTES(allDamage, DamageAttribute, ATTRIBUTE_DAMAGE);
+					DamageAttribute* projectileDamageAttribute;
+					if(entity1->hasAttribute(ATTRIBUTE_DAMAGE))
+					{
+						std::vector<int> damageId = entity1->getAttributes(ATTRIBUTE_DAMAGE);
+						for(unsigned i=0;i<damageId.size();i++)
+						{
+							projectileDamageAttribute = &allDamage->at(damageId.at(i));
+						}
+					}
+
+ 					projectileAttribute->currentLifeTimeLeft = 0.0f;
 
 					//Extract projectile position.
 					PhysicsAttribute* projectilePhysicsAttribute = &physicsAttributes_->at(projectileAttribute->physicsAttribute.index);
 					SpatialAttribute* projectileSpatialAttribute = &spatialAttributes_->at(projectilePhysicsAttribute->spatialAttribute.index);
 					PositionAttribute* projectilePositionAttribute = &positionAttributes_->at(projectileSpatialAttribute->positionAttribute.index);
 
-					SEND_EVENT(&Event_CreateExplosionSphere(projectilePositionAttribute->position, projectileAttribute->explosionSphereRadius));
+					//Creates an explosion sphere. Init information is taken from the impacting projectile.
+					SEND_EVENT(&Event_CreateExplosionSphere(projectilePositionAttribute->position, projectileAttribute->explosionSphereRadius, projectileDamageAttribute->damage, projectileAttribute->entityIdOfCreator));
 				}
-				*/
 			}
+			//SEND_EVENT(&Event_RemoveEntity(entity1->getID())); //Crashes somtimes if removed here
 		}
 	}
 }
@@ -523,4 +550,33 @@ SpawnPointAttribute* GameComponent::findUnoccupiedSpawnPoint()
 		foundSpawnPoint->timeSinceLastSpawn = 0.0f;
 
 	return foundSpawnPoint;
+}
+
+void GameComponent::event_StartDeathmatch( Event_StartDeathmatch* e )
+{ 
+	// Delete players
+	std::vector<int>* playerAttributesOwners;		GET_ATTRIBUTE_OWNERS(playerAttributesOwners, ATTRIBUTE_PLAYER);
+	for(unsigned i=0; i<playerAttributesOwners->size(); i++)
+	{
+		if(playerAttributesOwners->at(i)!=0)
+		{
+			SEND_EVENT(&Event_RemoveEntity(playerAttributesOwners->at(i)));
+		}
+	}
+
+	// Create new players
+	for(unsigned i=0; i<e->num_players; i++)
+	{
+		SEND_EVENT(&Event_CreateEntity(PLAYER));
+	}
+
+	// Get window resolution so we can tell renderer to recalculate and resize split screens
+	Event_GetWindowResolution event_getWindowResolution;
+	SEND_EVENT(&event_getWindowResolution);
+	int width = event_getWindowResolution.width;
+	int height = event_getWindowResolution.height;
+	SEND_EVENT(&Event_WindowResize(width,height));
+
+	// Set state to deathmatch
+	GET_STATE() =  STATE_DEATHMATCH;
 }

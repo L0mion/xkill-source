@@ -20,8 +20,7 @@
 
 ComponentManager::ComponentManager()
 {
-	//SUBSCRIBE_TO_EVENT(this, EVENT_END_DEATHMATCH);
-	//SUBSCRIBE_TO_EVENT(this, EVENT_START_DEATHMATCH);
+	SUBSCRIBE_TO_EVENT(this, EVENT_END_DEATHMATCH);
 
 	render_			= NULL;
 	physics_		= NULL;
@@ -34,6 +33,10 @@ ComponentManager::ComponentManager()
 }
 ComponentManager::~ComponentManager()
 {
+	//
+	// Clean up behind ourselves like good little programmers
+	//
+
 	SAFE_DELETE(render_);
 	SAFE_DELETE(physics_);
 	SAFE_DELETE(sound_);
@@ -57,7 +60,7 @@ bool ComponentManager::init(HWND windowHandle, HWND parentWindowHandle)
 //------------------------delete "deathmatchState" and "mainMenuState" somewhere //check-----
 	
 	//Substitute statemchine, enum
-	state_TemporaryVariableUsedAsSubstituteForStateMachine = SPECIAL_STATE_NONE;
+	//state_TemporaryVariableUsedAsSubstituteForStateMachine = SPECIAL_STATE_NONE;
 
 	render_ = new RenderingComponent(windowHandle);
 	physics_ = new BulletPhysicsComponent();
@@ -127,18 +130,23 @@ void ComponentManager::onEvent(Event* e)
 	switch (type) 
 	{
 	case EVENT_END_DEATHMATCH:
-		state_TemporaryVariableUsedAsSubstituteForStateMachine = STATE_MAINMENU;
+		GET_STATE() = STATE_MAINMENU;
 		break;
-	case EVENT_START_DEATHMATCH: //currently sent from GameManager::init()
-		state_TemporaryVariableUsedAsSubstituteForStateMachine = STATE_DEATHMATCH;
 	default:
 		break;
 	}
 }
 
+int a = 0;
+
+int getValue()
+{
+	
+	return a;
+}
 void ComponentManager::update(float delta)
 {
-	if(STATE_DEATHMATCH)
+	if(GET_STATE() == STATE_DEATHMATCH)
 	{
 		sound_->onUpdate(delta);
 		physics_->onUpdate(delta);
@@ -149,11 +157,18 @@ void ComponentManager::update(float delta)
 		game_->onUpdate(delta);
 		SEND_EVENT(&Event(EVENT_UPDATE));
 	}
-	else if(STATE_MAINMENU)
+	else if(GET_STATE() == STATE_MAINMENU)
 	{
-		std::cout << "ComponentManager::update, MAIN MENU" << std::endl;
+		sound_->onUpdate(delta);
+		physics_->onUpdate(delta);
+		camera_->onUpdate(delta);
+		SEND_EVENT(&Event_DoCulling());
+		render_->onUpdate(delta);
+		input_->onUpdate(delta);
+		game_->onUpdate(delta);
+		SEND_EVENT(&Event(EVENT_UPDATE));
 	}
-	else if(SPECIAL_STATE_NONE)
+	else if(GET_STATE() == SPECIAL_STATE_NONE)
 	{
 		std::cout << "ComponentManager::update has no state set" << std::endl;
 	}

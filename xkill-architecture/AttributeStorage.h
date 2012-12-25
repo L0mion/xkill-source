@@ -3,11 +3,12 @@
 #include <vector>
 #include <queue>
 
-#include "IAttributeStorage.h"
-#include "AttributeController.h"
 #include <xkill-utilities/AttributePointer.h>
 #include <xkill-utilities/AttributeType.h>
+
 #include "Entity.h"
+#include "IAttributeStorage.h"
+#include "AttributeController.h"
 
 
 /// Template class for storing and creating \ref ATTRIBUTES in a uniform manner.
@@ -43,7 +44,7 @@ public:
 
 	~AttributeStorage()
 	{
-		for(int i=0; i<attributes.size(); i++)
+		for(unsigned i=0; i<attributes.size(); i++)
 		{
 			IAttribute* a = (IAttribute*)&attributes[i];
 			a->clean();
@@ -94,13 +95,18 @@ public:
 
 		// Save access controller in Entity so it can be deleted later
 		owner->addAttribute(getAttributeController());
-
+		
 		// Get attribute
 		return &attributes[index];
 	}
 
 	void deleteAttribute(int index)
 	{
+		// Clean Attribute before  deletion
+		IAttribute* a = (IAttribute*)&attributes[index];
+		a->clean();
+		
+		// Delete Attribute
 		owners[index] = 0;
 		deleted.push(index);
 	}

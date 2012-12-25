@@ -78,8 +78,8 @@ void XInputDevice::setStandardMappings()
 
 	if(buttons_.size() >= 14)
 	{
-		buttons_[0]->addBoolMapping(ACTION_B_CHANGE_WEAPON);
-		buttons_[1]->addBoolMapping(ACTION_B_TOGGLE_MUTE_SOUND);
+		buttons_[0]->addBoolMapping(ACTION_B_CHANGE_AMMUNITIONTYPE);
+		buttons_[1]->addBoolMapping(ACTION_B_CHANGE_FIRINGMODE);
 		buttons_[10]->addBoolMapping(ACTION_B_WALK_FORWARD);
 		buttons_[11]->addBoolMapping(ACTION_B_WALK_RIGHT);
 		buttons_[12]->addBoolMapping(ACTION_B_WALK_BACKWARD);

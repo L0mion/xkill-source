@@ -3,6 +3,7 @@
 #include <vector>
 
 class Event_PhysicsAttributesColliding;
+class Event_StartDeathmatch;
 class Event_EndDeathmatch;
 class Entity;
 
@@ -17,6 +18,8 @@ struct ProjectileAttribute;
 struct PhysicsAttribute;
 struct SpawnPointAttribute;
 struct WeaponStatsAttribute;
+struct DamageAttribute;
+struct ExplosionSphereAttribute;
 
 class GameComponent :
 	public IObserver
@@ -36,6 +39,8 @@ private:
 	std::vector<PhysicsAttribute>* physicsAttributes_;
 	std::vector<SpawnPointAttribute>* spawnPointAttributes_;
 	std::vector<WeaponStatsAttribute>* weaponStatsAttributes_;
+	std::vector<DamageAttribute>* damageAttributes_;
+	std::vector<ExplosionSphereAttribute>* explosionSphereAttributes_;
 
 public:
 	GameComponent(void);
@@ -57,6 +62,11 @@ public:
 	Handles ending of a deathmatch.
 	*/
 	void event_EndDeathmatch(Event_EndDeathmatch* e);
+
+	/**
+	Handles start of a deathmatch.
+	*/
+	void event_StartDeathmatch(Event_StartDeathmatch* e);
 
 	/**
 	Finds an unoccupied spawn point (no other player inside its radius). Prioritizes spawn points that least recently spawned a player. If no unoccupied spawn point is found, one is selected at random. If there exists no spawn points at all, nullptr is returned.

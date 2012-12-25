@@ -3,6 +3,7 @@
 
 #include <d3d11.h>
 
+#include "TypeFX.h"
 #include "d3dInterface.h"
 
 enum SS_ID
@@ -17,41 +18,23 @@ enum SS_ID
 class ManagementSS : public D3DInterface
 {
 public:
-	//! Initializes SSManagement to its default state.
-	ManagementSS();
-	//!Releases all memory and resets SSManagement to its default state.
-	virtual ~ManagementSS();
-	//!Releases all memory and resets SSManagement to its default state.
-	virtual void reset();
+	ManagementSS();				//!< Initializes SSManagement to its default state.
+	virtual ~ManagementSS();	//!< Releases all memory and resets SSManagement to its default state.
+	virtual void reset();		//!< Releases all memory and resets SSManagement to its default state.
 
-	//! Sets a sampler state the vertex shader stage.
-	/*!
-	\param devcon Pointer to a DirectX Device Context.
-	\param ssId An enum identifying which state to be set.
-	\param shaderRegister An index identifying which register in the shader that will be used. 
-	*/
-	void setVS(ID3D11DeviceContext* devcon, SS_ID ssId, unsigned int shaderRegister);
-	//! Sets a sampler state the pixel shader stage.
-	/*!
-	\param devcon Pointer to a DirectX Device Context.
-	\param ssId An enum identifying which state to be set.
-	\param shaderRegister An index identifying which register in the shader that will be used. 
-	*/
-	void setPS(ID3D11DeviceContext* devcon, SS_ID ssId, unsigned int shaderRegister);
-	//! Sets a sampler state the compute shader stage.
-	/*!
-	\param devcon Pointer to a DirectX Device Context.
-	\param ssId An enum identifying which state to be set.
-	\param shaderRegister An index identifying which register in the shader that will be used. 
-	*/
-	void setCS(ID3D11DeviceContext* devcon, SS_ID ssId, unsigned int shaderRegister);
-	//! Initializes SSManagement's members.
-	/*!
-	\return Return any error encountered.
-	\param device A pointer to a DirectX Device.
-	\sa initSSDefault
-	*/
+	void setSS(
+		ID3D11DeviceContext*	devcon,
+		TypeFX					shaderStage,
+		unsigned int			shaderRegister,
+		SS_ID					ssId); //!< Sets a sampler state based on a samplerstate-identifier, a specified shader-stage and regiser.
+	void ManagementSS::unsetSS(
+		ID3D11DeviceContext*	devcon,
+		TypeFX					shaderStage,
+		unsigned int			shaderRegister);
+
 	HRESULT init(ID3D11Device* device);
+
+	void unsetSS();
 private:
 	//! Initializes the variable ssDefault_.
 	/*!
