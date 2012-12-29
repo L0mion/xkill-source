@@ -35,6 +35,4 @@ private:
 	std::vector<Camera> cameras_;						//!< Holds camera objects.
 	std::vector<CameraAttribute>* cameraAttributes_;	//!< Holds camera attributes.
 	std::vector<InputAttribute>* inputAttributes_;		//!< Holds input attributes.
-
-	float temp;
 };

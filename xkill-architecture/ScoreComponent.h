@@ -17,7 +17,7 @@ public:
 	ScoreComponent();
 	~ScoreComponent();
 
-	virtual bool init(std::vector<PlayerAttribute>* playerAttribute);
+	virtual bool init();
 
 	virtual void onEvent(Event* e);
 	virtual void onUpdate(float delta);

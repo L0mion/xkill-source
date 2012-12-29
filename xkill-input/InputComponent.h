@@ -27,7 +27,7 @@ public:
 	\param windowHandle Handle to current window
 	\param searchTime Time between searches for new input devices. Default: 10s
 	*/
-	virtual bool init(HWND windowHandle, std::vector<InputAttribute>* inputAttributes, std::string configFilePath, float searchTime = 10.0f);
+	virtual bool init(HWND windowHandle, std::string configFilePath, float searchTime = 10.0f);
 
 	virtual void onEvent(Event* e);
 	virtual void onUpdate(float delta);

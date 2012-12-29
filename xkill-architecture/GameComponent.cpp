@@ -1,5 +1,5 @@
 #include "GameComponent.h"
-#include "AttributeManager.h"
+#include <xkill-utilities/AttributeManager.h>
 #include <DirectXMath.h>
 
 #include <iostream>
@@ -10,6 +10,7 @@ GameComponent::GameComponent(void)
 	SUBSCRIBE_TO_EVENT(this, EVENT_PHYSICS_ATTRIBUTES_COLLIDING);
 	SUBSCRIBE_TO_EVENT(this, EVENT_START_DEATHMATCH);	
 	SUBSCRIBE_TO_EVENT(this, EVENT_END_DEATHMATCH);	
+	InstanceTest::getInstance();
 }
 
 GameComponent::~GameComponent(void)
@@ -20,21 +21,21 @@ bool GameComponent::init()
 {
 	// Fetch list of stuff used in logic
 	GET_ENTITIES(allEntity);
-	GET_ATTRIBUTE_OWNERS(allPhysicsOwner, ATTRIBUTE_PHYSICS);
+	allPhysicsOwner				 = GET_ATTRIBUTE_OWNERS(physicsAttributes);
 
-	GET_ATTRIBUTES(playerAttributes_, PlayerAttribute, ATTRIBUTE_PLAYER);
-	GET_ATTRIBUTES(healthAttributes_, HealthAttribute, ATTRIBUTE_HEALTH);
-	GET_ATTRIBUTES(cameraAttributes_, CameraAttribute, ATTRIBUTE_CAMERA);
-	GET_ATTRIBUTES(inputAttributes_, InputAttribute, ATTRIBUTE_INPUT);
-	GET_ATTRIBUTES(renderAttributes_, RenderAttribute, ATTRIBUTE_RENDER);
-	GET_ATTRIBUTES(spatialAttributes_, SpatialAttribute, ATTRIBUTE_SPATIAL);
-	GET_ATTRIBUTES(positionAttributes_, PositionAttribute, ATTRIBUTE_POSITION);
-	GET_ATTRIBUTES(projectileAttributes_, ProjectileAttribute, ATTRIBUTE_PROJECTILE);
-	GET_ATTRIBUTES(physicsAttributes_, PhysicsAttribute, ATTRIBUTE_PHYSICS);
-	GET_ATTRIBUTES(spawnPointAttributes_, SpawnPointAttribute, ATTRIBUTE_SPAWNPOINT);
-	GET_ATTRIBUTES(weaponStatsAttributes_, WeaponStatsAttribute, ATTRIBUTE_WEAPONSTATS);
-	GET_ATTRIBUTES(damageAttributes_, DamageAttribute, ATTRIBUTE_DAMAGE);
-	GET_ATTRIBUTES(explosionSphereAttributes_, ExplosionSphereAttribute, ATTRIBUTE_EXPLOSIONSPHERE);
+	playerAttributes_			= GET_ATTRIBUTES(playerAttributes);
+	healthAttributes_			= GET_ATTRIBUTES(healthAttributes);
+	cameraAttributes_			= GET_ATTRIBUTES(cameraAttributes);
+	inputAttributes_			= GET_ATTRIBUTES(inputAttributes);
+	renderAttributes_			= GET_ATTRIBUTES(renderAttributes);
+	spatialAttributes_			= GET_ATTRIBUTES(spatialAttributes);
+	positionAttributes_			= GET_ATTRIBUTES(positionAttributes);
+	projectileAttributes_		= GET_ATTRIBUTES(projectileAttributes);
+	physicsAttributes_			= GET_ATTRIBUTES(physicsAttributes);
+	spawnPointAttributes_		= GET_ATTRIBUTES(spawnPointAttributes);
+	weaponStatsAttributes_		= GET_ATTRIBUTES(weaponStatsAttributes);
+	damageAttributes_			= GET_ATTRIBUTES(damageAttributes);
+	explosionSphereAttributes_	= GET_ATTRIBUTES(explosionSphereAttributes);
 
 	SEND_EVENT(&Event_CreateSpawnPoint(Float3(-1.5f, 3.0f, 0.0f), 2.0f));
 	SEND_EVENT(&Event_CreateSpawnPoint(Float3(1.0f, 5.0f, 0.0f), 2.0f));
@@ -43,7 +44,7 @@ bool GameComponent::init()
 	SEND_EVENT(&Event_CreateSpawnPoint(Float3(0.0f, 0.0f, -5.0f), 2.0f));
 	SEND_EVENT(&Event_CreateSpawnPoint(Float3(4.0f, 4.0f, 4.0f), 2.0f));
 
-	srand ( time(NULL) );
+	srand ((unsigned)time(NULL) );
 
 	return true;
 }
@@ -70,7 +71,7 @@ void GameComponent::onEvent(Event* e)
 void GameComponent::onUpdate(float delta)
 {
 	//Handles updates of player attributes
-	std::vector<int>* playerAttributesOwners;		GET_ATTRIBUTE_OWNERS(playerAttributesOwners, ATTRIBUTE_PLAYER);
+	std::vector<int>* playerAttributesOwners = GET_ATTRIBUTE_OWNERS(playerAttributes);
 	for(unsigned i=0; i<playerAttributesOwners->size(); i++)
 	{
 		if(playerAttributesOwners->at(i)!=0)
@@ -221,7 +222,7 @@ void GameComponent::onUpdate(float delta)
 	}
 
 	//Handle updates of projectile attributes
-	std::vector<int>* projectileAttributesOwners;		GET_ATTRIBUTE_OWNERS(projectileAttributesOwners, ATTRIBUTE_PROJECTILE);
+	std::vector<int>* projectileAttributesOwners = GET_ATTRIBUTE_OWNERS(projectileAttributes);
 	for(unsigned i=0; i<projectileAttributesOwners->size(); i++)
 	{
 		if(projectileAttributesOwners->at(i)!=0)
@@ -239,7 +240,7 @@ void GameComponent::onUpdate(float delta)
 	}
 
 	//Handles updates of spawn point attributes (update "timeSinceLastSpawn" timer)
-	std::vector<int>* spawnPointAttributesOwners;		GET_ATTRIBUTE_OWNERS(spawnPointAttributesOwners, ATTRIBUTE_SPAWNPOINT);
+	std::vector<int>* spawnPointAttributesOwners = GET_ATTRIBUTE_OWNERS(spawnPointAttributes);
 	for(unsigned i=0; i<spawnPointAttributesOwners->size(); i++)
 	{
 		if(spawnPointAttributesOwners->at(i)!=0)
@@ -250,7 +251,7 @@ void GameComponent::onUpdate(float delta)
 	}
 
 	//Handles updates of weapon stats attributes
-	std::vector<int>* weaponStatsAttributesOwners;		GET_ATTRIBUTE_OWNERS(weaponStatsAttributesOwners, ATTRIBUTE_WEAPONSTATS);
+	std::vector<int>* weaponStatsAttributesOwners = GET_ATTRIBUTE_OWNERS(weaponStatsAttributes);
 	for(unsigned i=0; i<weaponStatsAttributesOwners->size(); i++)
 	{
 		if(weaponStatsAttributesOwners->at(i)!=0)
@@ -284,7 +285,7 @@ void GameComponent::onUpdate(float delta)
 	}
 
 	//Handles updates of explosion sphere attributes
-	std::vector<int>* explosionSphereAttributesOwners;		GET_ATTRIBUTE_OWNERS(explosionSphereAttributesOwners, ATTRIBUTE_EXPLOSIONSPHERE);
+	std::vector<int>* explosionSphereAttributesOwners = GET_ATTRIBUTE_OWNERS(explosionSphereAttributes);
 	for(unsigned i=0; i<explosionSphereAttributesOwners->size(); i++)
 	{
 		if(explosionSphereAttributesOwners->at(i)!=0)
@@ -321,11 +322,11 @@ void GameComponent::event_PhysicsAttributesColliding(Event_PhysicsAttributesColl
 		if(entity2->hasAttribute(ATTRIBUTE_DAMAGE))
 		{
 			// fetch damage from entity 2
-			std::vector<DamageAttribute>* allDamage; GET_ATTRIBUTES(allDamage, DamageAttribute, ATTRIBUTE_DAMAGE);
+			std::vector<DamageAttribute>* allDamage = GET_ATTRIBUTES(damageAttributes);
 			std::vector<int> damageId = entity2->getAttributes(ATTRIBUTE_DAMAGE);
 
 			// fetch health from entity 1
-			std::vector<HealthAttribute>* allHealth; GET_ATTRIBUTES(allHealth, HealthAttribute, ATTRIBUTE_HEALTH);
+			std::vector<HealthAttribute>* allHealth =  GET_ATTRIBUTES(healthAttributes);
 			std::vector<int> healthId = entity1->getAttributes(ATTRIBUTE_HEALTH);
 
 			for(unsigned i=0; i<damageId.size(); i++)
@@ -344,7 +345,7 @@ void GameComponent::event_PhysicsAttributesColliding(Event_PhysicsAttributesColl
 						//If a player was killed by the collision, give priority (score) to the player that created the DamageAttribute
 						if(health->health <= 0)
 						{
-							std::vector<PlayerAttribute>* allPlayers;			GET_ATTRIBUTES(allPlayers, PlayerAttribute, ATTRIBUTE_PLAYER);
+							std::vector<PlayerAttribute>* allPlayers = GET_ATTRIBUTES(playerAttributes);
 							Entity* creatorOfProjectilePlayerEntity = &allEntity->at(damage->owner_entityID);
 							std::vector<int> playerId = creatorOfProjectilePlayerEntity->getAttributes(ATTRIBUTE_PLAYER);
 
@@ -393,7 +394,7 @@ void GameComponent::event_PhysicsAttributesColliding(Event_PhysicsAttributesColl
 		//if(entity2->hasAttribute(ATTRIBUTE_PHYSICS) && !entity2->hasAttribute(ATTRIBUTE_PROJECTILE))
 		{
 			//Set gravity on projectiles colliding with physics objects
-			std::vector<PhysicsAttribute>* allPhysics; GET_ATTRIBUTES(allPhysics, PhysicsAttribute, ATTRIBUTE_PHYSICS);
+			std::vector<PhysicsAttribute>* allPhysics = GET_ATTRIBUTES(physicsAttributes);
 			std::vector<int> physicsId = entity1->getAttributes(ATTRIBUTE_PHYSICS);
 			for(unsigned i=0;i<physicsId.size();i++)
 			{
@@ -403,7 +404,7 @@ void GameComponent::event_PhysicsAttributesColliding(Event_PhysicsAttributesColl
 			}
 
 			//Handle PhysicsAttribute of a projectile colliding with another PhysicsAttribute
-			std::vector<ProjectileAttribute>* allProjectile; GET_ATTRIBUTES(allProjectile, ProjectileAttribute, ATTRIBUTE_PROJECTILE);
+			std::vector<ProjectileAttribute>* allProjectile = GET_ATTRIBUTES(projectileAttributes);
 			std::vector<int> projectileId = entity1->getAttributes(ATTRIBUTE_PROJECTILE);
 			for(unsigned i=0;i<projectileId.size();i++)
 			{
@@ -419,7 +420,7 @@ void GameComponent::event_PhysicsAttributesColliding(Event_PhysicsAttributesColl
 				if(projectileAttribute->explodeOnImnpact)
 				{
 					//Get damage from projectile.
- 					std::vector<DamageAttribute>* allDamage; GET_ATTRIBUTES(allDamage, DamageAttribute, ATTRIBUTE_DAMAGE);
+ 					std::vector<DamageAttribute>* allDamage = GET_ATTRIBUTES(damageAttributes);
 					DamageAttribute* projectileDamageAttribute;
 					if(entity1->hasAttribute(ATTRIBUTE_DAMAGE))
 					{
@@ -460,10 +461,10 @@ void GameComponent::event_EndDeathmatch(Event_EndDeathmatch* e)
 SpawnPointAttribute* GameComponent::findUnoccupiedSpawnPoint()
 {
 	SpawnPointAttribute* foundSpawnPoint = nullptr;
-	std::vector<int>* spawnPointAttributesOwners;	GET_ATTRIBUTE_OWNERS(spawnPointAttributesOwners, ATTRIBUTE_SPAWNPOINT);
+	std::vector<int>* spawnPointAttributesOwners = GET_ATTRIBUTE_OWNERS(spawnPointAttributes);
 	
 	//Special cases: *no spawn point, return nullptr.
-	int nrOfSpawnPoints = spawnPointAttributesOwners->size();
+	int nrOfSpawnPoints = (int)spawnPointAttributesOwners->size();
 	if(nrOfSpawnPoints < 1)
 	{
 		DEBUGPRINT("GameComponent::findUnoccupiedSpawnPoint - No spawn point found.");
@@ -472,7 +473,7 @@ SpawnPointAttribute* GameComponent::findUnoccupiedSpawnPoint()
 
 	//Iterate through all spawn points to find all unoccupied spawn points.
 	std::vector<SpawnPointAttribute*> unoccupiedSpawnPointAttributes;
-	for(unsigned int i=0; i<nrOfSpawnPoints; i++)
+	for(int i=0; i<nrOfSpawnPoints; i++)
 	{
 		if(spawnPointAttributesOwners->at(i)!=0)
 		{
@@ -482,9 +483,9 @@ SpawnPointAttribute* GameComponent::findUnoccupiedSpawnPoint()
 		
 			//Iterate through all living players to find if any of them are inside the current spawn point radius.
 			bool occupiedSpawnPoint = false;
-			std::vector<int>* playerAttributesOwners;		GET_ATTRIBUTE_OWNERS(playerAttributesOwners, ATTRIBUTE_PLAYER);
+			std::vector<int>* playerAttributesOwners = GET_ATTRIBUTE_OWNERS(playerAttributes);
 			int nrOfPlayers = playerAttributesOwners->size();
-			for(unsigned int j=0; j<nrOfPlayers; j++)
+			for(int j=0; j<nrOfPlayers; j++)
 			{
 				if(playerAttributesOwners->at(j)!=0)
 				{
@@ -524,7 +525,7 @@ SpawnPointAttribute* GameComponent::findUnoccupiedSpawnPoint()
 	int nrOfUnoccupiedSpawnPoints = unoccupiedSpawnPointAttributes.size();
 	int longestTimeSinceLastSpawnIndex = -1;
 	float longestTimeSinceLastSpawn = 0.0f;
-	for(unsigned int i=0; i<nrOfUnoccupiedSpawnPoints; i++)
+	for(int i=0; i<nrOfUnoccupiedSpawnPoints; i++)
 	{
 		foundSpawnPoint = unoccupiedSpawnPointAttributes.at(i);
   		if(foundSpawnPoint->timeSinceLastSpawn >= longestTimeSinceLastSpawn)
@@ -555,7 +556,7 @@ SpawnPointAttribute* GameComponent::findUnoccupiedSpawnPoint()
 void GameComponent::event_StartDeathmatch( Event_StartDeathmatch* e )
 { 
 	// Delete players
-	std::vector<int>* playerAttributesOwners;		GET_ATTRIBUTE_OWNERS(playerAttributesOwners, ATTRIBUTE_PLAYER);
+	std::vector<int>* playerAttributesOwners = GET_ATTRIBUTE_OWNERS(playerAttributes);
 	for(unsigned i=0; i<playerAttributesOwners->size(); i++)
 	{
 		if(playerAttributesOwners->at(i)!=0)
@@ -565,7 +566,7 @@ void GameComponent::event_StartDeathmatch( Event_StartDeathmatch* e )
 	}
 
 	// Create new players
-	for(unsigned i=0; i<e->num_players; i++)
+	for(int i=0; i<e->num_players; i++)
 	{
 		SEND_EVENT(&Event_CreateEntity(PLAYER));
 	}

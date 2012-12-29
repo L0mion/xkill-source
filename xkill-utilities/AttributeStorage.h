@@ -3,8 +3,8 @@
 #include <vector>
 #include <queue>
 
-#include <xkill-utilities/AttributePointer.h>
-#include <xkill-utilities/AttributeType.h>
+#include "AttributePointer.h"
+#include "AttributeType.h"
 
 #include "Entity.h"
 #include "IAttributeStorage.h"
@@ -24,20 +24,22 @@ template <class T>
 class AttributeStorage : public IAttributeStorage
 {
 private:
-	std::vector<T> attributes;		//!< Each attribute.
-	std::vector<int> owners;		//!< Owner of each attribute.
+	
 									//!< Owner 0 means no owner, and means the attribute.
 									//!< Is deleted and ready to be reused.
 	std::queue<int> deleted;		//!< Queue to keep track of deleted Indexe e.g. Indexes with "owner 0".
-	int index;
+	int index_lastCreated;			//!< Index of the last created attribute
 	AttributeType type;				//!< The AttributeType contained in AttributeStorage
 
 	AttributeController getAttributeController()
 	{
-		return AttributeController(this, index, type);
+		return AttributeController(this, index_lastCreated, type);
 	}
 
 public:
+	std::vector<T> attributes;		//!< Each attribute.
+	std::vector<int> owners;		//!< Owner of each attribute.
+
 	AttributeStorage()
 	{
 	}
@@ -56,15 +58,7 @@ public:
 		this->type = type;
 	}
 
-	std::vector<T>* getAllAttributes()
-	{
-		return &attributes;
-	}
-
-	std::vector<int>* getAllOwners()
-	{
-		return &owners;
-	}
+	
 
 	/** 
 	Creates space for an attribute and returns a
@@ -78,10 +72,10 @@ public:
 		if(deleted.size() > 0)
 		{
 			// Reuse attribute
-			index = deleted.front();
+			index_lastCreated = deleted.front();
 			deleted.pop();
-			attributes[index] = T();
-			owners[index]=owner->getID();
+			attributes[index_lastCreated] = T();
+			owners[index_lastCreated]=owner->getID();
 			
 		}
 		// FALSE: Create new attribute
@@ -89,7 +83,7 @@ public:
 		{
 			// Create attribute
 			owners.push_back(owner->getID());
-			index = (int)attributes.size();
+			index_lastCreated = (int)attributes.size();
 			attributes.push_back(T());
 		}
 
@@ -97,7 +91,7 @@ public:
 		owner->addAttribute(getAttributeController());
 		
 		// Get attribute
-		return &attributes[index];
+		return &attributes[index_lastCreated];
 	}
 
 	void deleteAttribute(int index)
@@ -114,7 +108,7 @@ public:
 	AttributePointer getLatestAttributeAsAttributePointer()
 	{
 		AttributePointer a;
-		a.init(&attributes, index);
+		a.init(&attributes, index_lastCreated);
 		return a;
 	}
 };

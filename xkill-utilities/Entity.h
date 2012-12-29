@@ -1,6 +1,6 @@
 #pragma once
 
-#include <xkill-utilities/EventManager.h>
+#include "EventManager.h"
 #include "AttributeController.h"
 
 /// Provides a unique id and keeps track of \ref ATTRIBUTES associated with that id.

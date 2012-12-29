@@ -116,7 +116,7 @@ HRESULT ManagementModel::createModelD3D(
 }
 bool ManagementModel::getMeshAttribute(unsigned int modelID, MeshAttribute& inout)
 {
-	std::vector<MeshAttribute>*	allMesh; GET_ATTRIBUTES(allMesh, MeshAttribute,	ATTRIBUTE_MESH);
+	std::vector<MeshAttribute>*	allMesh = GET_ATTRIBUTES(meshAttributes);
 	
 	bool foundAt = false;
 	for(unsigned int i = 0; i < allMesh->size() && !foundAt; i++)
@@ -213,7 +213,7 @@ void ManagementModel::pushDebugShapeD3D(
 void ManagementModel::createDebugShapeD3D(unsigned int shapeIndex, ID3D11Device* device)
 {
 	std::vector<DebugShapeAttribute>* attributesDebugShape;
-	GET_ATTRIBUTES(attributesDebugShape, DebugShapeAttribute, ATTRIBUTE_DEBUGSHAPE);
+	attributesDebugShape = GET_ATTRIBUTES(debugShapeAttributes);
 
 	DebugShapeAttribute debugShapeAt = attributesDebugShape->at(shapeIndex);
 	DebugShape* shape = debugShapeAt.shape;

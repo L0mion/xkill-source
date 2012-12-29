@@ -179,14 +179,14 @@ HRESULT Renderer::init()
 }
 void Renderer::initAttributes()
 {	
-	GET_ATTRIBUTES(attributesCamera_,		CameraAttribute,		ATTRIBUTE_CAMERA);
-	GET_ATTRIBUTES(attributesRender_,		RenderAttribute,		ATTRIBUTE_RENDER);
-	GET_ATTRIBUTES(attributesDebugShape_,	DebugShapeAttribute,	ATTRIBUTE_DEBUGSHAPE);
-	GET_ATTRIBUTES(attributesSpatial_,		SpatialAttribute,		ATTRIBUTE_SPATIAL);
-	GET_ATTRIBUTES(attributesPosition_,		PositionAttribute,		ATTRIBUTE_POSITION);
+	attributesCamera_		= GET_ATTRIBUTES(cameraAttributes);
+	attributesRender_		= GET_ATTRIBUTES(renderAttributes);
+	attributesDebugShape_	= GET_ATTRIBUTES(debugShapeAttributes);
+	attributesSpatial_		= GET_ATTRIBUTES(spatialAttributes);
+	attributesPosition_		= GET_ATTRIBUTES(positionAttributes);
 
-	GET_ATTRIBUTE_OWNERS(attributesCameraOwner_, ATTRIBUTE_CAMERA);
-	GET_ATTRIBUTE_OWNERS(attributesRenderOwner_, ATTRIBUTE_RENDER);
+	attributesCameraOwner_	= GET_ATTRIBUTE_OWNERS(cameraAttributes);
+	attributesRenderOwner_	= GET_ATTRIBUTE_OWNERS(renderAttributes);
 }
 void Renderer::initWinfo()
 {
@@ -322,6 +322,9 @@ void Renderer::render(float delta)
 	//Clear g-buffers and depth buffer.
 	managementGBuffer_->clearGBuffers(managementD3D_->getDeviceContext());
 	managementD3D_->clearDepthBuffer();
+	InstanceTest::getInstance();
+	InstanceTest::getInstance();
+	InstanceTest::getInstance();
 
 	//Update per-frame constant buffer.
 	managementCB_->setCB(CB_TYPE_FRAME, TypeFX_VS, CB_REGISTER_FRAME, managementD3D_->getDeviceContext());

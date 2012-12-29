@@ -20,8 +20,9 @@ CameraComponent::~CameraComponent()
 bool CameraComponent::init()
 {
 	// fetch attributes
-	GET_ATTRIBUTES(cameraAttributes_, CameraAttribute, ATTRIBUTE_CAMERA);
-	GET_ATTRIBUTES(inputAttributes_, InputAttribute, ATTRIBUTE_INPUT);
+	cameraAttributes_ = GET_ATTRIBUTES(cameraAttributes);
+	inputAttributes_ = GET_ATTRIBUTES(inputAttributes);
+
 
 	// fetch aspect ratio
 	Event_GetWindowResolution windowResolution;
@@ -93,7 +94,7 @@ void CameraComponent::onUpdate(float delta)
 		cameras_.pop_back();
 		if(cameras_.size()==2)
 		{
-			for(int i=0; i<cameras_.size(); i++)
+			for(unsigned i=0; i<cameras_.size(); i++)
 			{
 				Event_GetWindowResolution windowResolution;
 				SEND_EVENT(&windowResolution);

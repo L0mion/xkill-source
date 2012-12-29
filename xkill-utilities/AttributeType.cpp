@@ -152,8 +152,8 @@ void MeshAttribute::clean()
 
 HealthAttribute::HealthAttribute()
 {
-	startHealth = 10;
-	health = 0;
+	startHealth = 10.0f;
+	health = 0.0f;
 }
 HealthAttribute::~HealthAttribute()
 {
@@ -161,7 +161,7 @@ HealthAttribute::~HealthAttribute()
 
 DamageAttribute::DamageAttribute()
 {
-	damage = 1;
+	damage = 1.0f;
 }
 DamageAttribute::~DamageAttribute()
 {
@@ -245,7 +245,7 @@ void WeaponStatsAttribute::setWeaponToDebugMachineGun()
 {
 	totalNrOfShots = -1;
 	nrOfShotsLeftInClip = clipSize;
-	clipSize = 0.0f;
+	clipSize = 0;
 	cooldownLeft = 0.0f;
 	reloadTime = 0.0f;
 

@@ -60,15 +60,15 @@ public:
 		// Iterate list and update score
 		if(showMenu)
 		{
-			std::vector<PlayerAttribute>* allPlayers;		GET_ATTRIBUTES(allPlayers, PlayerAttribute, ATTRIBUTE_PLAYER);
-			std::vector<HealthAttribute>* allHealth;		GET_ATTRIBUTES(allHealth, HealthAttribute, ATTRIBUTE_HEALTH);
-			std::vector<RenderAttribute>* allRender;		GET_ATTRIBUTES(allRender, RenderAttribute, ATTRIBUTE_RENDER);
-			std::vector<SpatialAttribute>* allSpatial;		GET_ATTRIBUTES(allSpatial, SpatialAttribute, ATTRIBUTE_SPATIAL);
-			std::vector<PositionAttribute>* allPositions;	GET_ATTRIBUTES(allPositions, PositionAttribute, ATTRIBUTE_POSITION);
+			std::vector<PlayerAttribute>* allPlayers		=	GET_ATTRIBUTES(playerAttributes);
+			std::vector<HealthAttribute>* allHealth			=	GET_ATTRIBUTES(healthAttributes);
+			std::vector<RenderAttribute>* allRender			=	GET_ATTRIBUTES(renderAttributes);
+			std::vector<SpatialAttribute>* allSpatial		=	GET_ATTRIBUTES(spatialAttributes);
+			std::vector<PositionAttribute>* allPositions	=	GET_ATTRIBUTES(positionAttributes);
 
 			// Update tree widget
 			ui.treeWidget->clear();
-			std::vector<int>* allPlayerOwner;				GET_ATTRIBUTE_OWNERS(allPlayerOwner, ATTRIBUTE_PLAYER);
+			std::vector<int>* allPlayerOwner				= GET_ATTRIBUTE_OWNERS(playerAttributes);
 			for(unsigned i=0; i<allPlayerOwner->size(); i++)
 			{
 				if(allPlayerOwner->at(i)!=0)

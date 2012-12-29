@@ -4,7 +4,7 @@
 
 #include <xkill-utilities/EventManager.h>
 #include <xkill-utilities/AttributeType.h>
-#include <xkill-architecture/Entity.h>
+#include <xkill-utilities/Entity.h>
 
 
 Menu_Editor::Menu_Editor( Ui::MainMenu& ui, QWidget* parent ) : QWidget(parent), ui(ui)

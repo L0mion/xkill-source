@@ -41,7 +41,6 @@ struct DLL_U IAttribute
 /*
 Just something that can be used if "casting" of
 \ref ATTRIBTUES is needed.
-
 NOTE: DOXYGEN can not detect Enums combined with DLL
 for some reason
 */
@@ -265,8 +264,8 @@ struct DLL_U HealthAttribute : public IAttribute
 	HealthAttribute();
 	~HealthAttribute();
 
-	int startHealth;
-	int health;
+	float startHealth;
+	float health;
 };
 
 struct DLL_U DamageAttribute : public IAttribute
@@ -274,7 +273,7 @@ struct DLL_U DamageAttribute : public IAttribute
 	DamageAttribute();
 	~DamageAttribute();
 
-	int damage;
+	float damage;
 	int owner_entityID;
 };
 

@@ -87,13 +87,13 @@ void wrapTickCallback(btDynamicsWorld *world, btScalar timeStep)
 bool BulletPhysicsComponent::init()
 {
 	// Fetch attributes
-	GET_ATTRIBUTES(inputAttributes_, InputAttribute, ATTRIBUTE_INPUT);
-	GET_ATTRIBUTES(physicsAttributes_, PhysicsAttribute, ATTRIBUTE_PHYSICS);
-	GET_ATTRIBUTES(boundingAttributes_, BoundingAttribute, ATTRIBUTE_BOUNDING);
-	GET_ATTRIBUTES(renderAttributes_, RenderAttribute, ATTRIBUTE_RENDER);
-	GET_ATTRIBUTES(cameraAttributes_, CameraAttribute, ATTRIBUTE_CAMERA);
-	GET_ATTRIBUTES(debugShapeAttributes_, DebugShapeAttribute, ATTRIBUTE_DEBUGSHAPE);
-	GET_ATTRIBUTE_OWNERS(physicsOwners_, ATTRIBUTE_PHYSICS);
+	inputAttributes_		= GET_ATTRIBUTES(inputAttributes);
+	physicsAttributes_		= GET_ATTRIBUTES(physicsAttributes);
+	boundingAttributes_		= GET_ATTRIBUTES(boundingAttributes);
+	renderAttributes_		= GET_ATTRIBUTES(renderAttributes);
+	cameraAttributes_		= GET_ATTRIBUTES(cameraAttributes);
+	debugShapeAttributes_	= GET_ATTRIBUTES(debugShapeAttributes);
+	physicsOwners_			= GET_ATTRIBUTE_OWNERS(physicsAttributes);
 	
 	physicsObjects_ = new btAlignedObjectArray<PhysicsObject*>();
 	frustrumObjects_ = new btAlignedObjectArray<PhysicsObject*>();
