@@ -9,7 +9,7 @@
 
 CollisionShapeManager::CollisionShapeManager()
 {
-	GET_ATTRIBUTES(meshAttributes);
+	meshAttributes_ = GET_ATTRIBUTES(meshAttributes);
 	
 	//if(collisionShapes_.size()==0)
 		//collisionShapes_.push_back(new btSphereShape(50));
@@ -67,6 +67,7 @@ btCollisionShape* CollisionShapeManager::getCollisionShape(unsigned int meshID)
 btCollisionShape* CollisionShapeManager::loadCollisionShape(unsigned int meshID)
 {
 	MeshAttribute* meshAttribute;
+
 	bool foundMeshAt = false;
 	for(unsigned int i = 0; i < meshAttributes_->size() && !foundMeshAt; i++)
 	{

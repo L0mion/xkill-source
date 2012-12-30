@@ -43,6 +43,11 @@ public:
 	AttributeStorage()
 	{
 	}
+	
+	AttributeStorage(AttributeType type)
+	{
+		this->type = type;
+	}
 
 	~AttributeStorage()
 	{

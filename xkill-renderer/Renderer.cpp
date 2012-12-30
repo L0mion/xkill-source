@@ -322,9 +322,6 @@ void Renderer::render(float delta)
 	//Clear g-buffers and depth buffer.
 	managementGBuffer_->clearGBuffers(managementD3D_->getDeviceContext());
 	managementD3D_->clearDepthBuffer();
-	InstanceTest::getInstance();
-	InstanceTest::getInstance();
-	InstanceTest::getInstance();
 
 	//Update per-frame constant buffer.
 	managementCB_->setCB(CB_TYPE_FRAME, TypeFX_VS, CB_REGISTER_FRAME, managementD3D_->getDeviceContext());

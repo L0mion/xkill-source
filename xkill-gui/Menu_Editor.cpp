@@ -42,53 +42,58 @@ void Menu_Editor::slot_editorRefresh()
 	num_rows = 0;
 
 	// Fill columns
-	std::vector<int>* allPlayerOwner;				GET_ATTRIBUTE_OWNERS(allPlayerOwner, ATTRIBUTE_PLAYER);
+	std::vector<int>* allPlayerOwner = 	GET_ATTRIBUTE_OWNERS(playerAttributes);
 	entityBrowser_add("Players", allPlayerOwner);
-	std::vector<int>* allSpawnOwner;				GET_ATTRIBUTE_OWNERS(allSpawnOwner, ATTRIBUTE_SPAWNPOINT);
+	std::vector<int>* allSpawnOwner = GET_ATTRIBUTE_OWNERS(spawnPointAttributes);
 	entityBrowser_add("Spawn points", allSpawnOwner);
-	std::vector<int>* allMeshOwner;					GET_ATTRIBUTE_OWNERS(allMeshOwner, ATTRIBUTE_MESH);
+	std::vector<int>* allMeshOwner = GET_ATTRIBUTE_OWNERS(meshAttributes);
 	entityBrowser_add("Meshes", allMeshOwner);
-	std::vector<int>* allPhysicsOwner;				GET_ATTRIBUTE_OWNERS(allPhysicsOwner, ATTRIBUTE_PHYSICS);
+	std::vector<int>* allPhysicsOwner = GET_ATTRIBUTE_OWNERS(physicsAttributes);
 	entityBrowser_add("Physics objects", allPhysicsOwner);
-	std::vector<int>* allProjectileOwner;			GET_ATTRIBUTE_OWNERS(allProjectileOwner, ATTRIBUTE_PROJECTILE);
+	std::vector<int>* allProjectileOwner = GET_ATTRIBUTE_OWNERS(projectileAttributes);
 	entityBrowser_add("Projectiles", allProjectileOwner);
 }
 
 void Menu_Editor::entityBrowser_add(QString name, std::vector<int>* owners)
 {
-	// Create / reuse row
-	QStandardItem* item = model_entityBrowser->item(num_rows);
-	// TRUE: Item doesn't exist, create new Item
-	if(item == 0)
-	{
-		item = new QStandardItem();
-		model_entityBrowser->setItem(num_rows, item);
-	}
-	num_rows++;
+	std::vector<PlayerAttribute>* allPlayers		=	GET_ATTRIBUTES(playerAttributes);
 	
-	// Fill row with data
-	int num_entities = 0;
-	for(unsigned i=0; i<owners->size(); i++)
-	{
-		if(owners->at(i)!=0)
-		{
-			// Create data item
-			QStandardItem* data = new QStandardItem();
-			item->setChild(num_entities, 0, data);
-			model_entityBrowser->setData(data->index(), QVariant(owners->at(i)));
 
-			// Increment index
-			num_entities++;
-		}
-	}
+	std::vector<int>* allSpawnOwner = GET_ATTRIBUTE_OWNERS(spawnPointAttributes);
+	allPlayers		=	GET_ATTRIBUTES(playerAttributes);
+	//// Create / reuse row
+	//QStandardItem* item = model_entityBrowser->item(num_rows);
+	//// TRUE: Item doesn't exist, create new Item
+	//if(item == 0)
+	//{
+	//	item = new QStandardItem();
+	//	model_entityBrowser->setItem(num_rows, item);
+	//}
+	//num_rows++;
+	//
+	//// Fill row with data
+	//int num_entities = 0;
+	//for(unsigned i=0; i<owners->size(); i++)
+	//{
+	//	if(owners->at(i)!=0)
+	//	{
+	//		// Create data item
+	//		QStandardItem* data = new QStandardItem();
+	//		item->setChild(num_entities, 0, data);
+	//		model_entityBrowser->setData(data->index(), QVariant(owners->at(i)));
 
-	// Remove unused rows
-	int excessRows = item->rowCount() - num_entities;
-	if(excessRows>0)
-		item->removeRows(num_entities, excessRows);
+	//		// Increment index
+	//		num_entities++;
+	//	}
+	//}
 
-	// Set name
-	item->setText("[" + QString::number(num_entities) + "] " + name);
+	//// Remove unused rows
+	//int excessRows = item->rowCount() - num_entities;
+	//if(excessRows>0)
+	//	item->removeRows(num_entities, excessRows);
+
+	//// Set name
+	//item->setText("[" + QString::number(num_entities) + "] " + name);
 }
 
 void Menu_Editor::slot_clicked_entityBrowser( QModelIndex indexClicked )
@@ -139,5 +144,11 @@ void Menu_Editor::slot_clicked_entityBrowser( QModelIndex indexClicked )
 void Menu_Editor::entityInspector_add(QString name)
 {
 	model_entityInspector->appendRow(new QStandardItem(name));
+}
+
+void Menu_Editor::slot_tab_changed( int index )
+{
+	if(index == 2)
+		slot_editorRefresh();
 }
 

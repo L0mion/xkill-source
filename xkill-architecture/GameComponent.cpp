@@ -10,7 +10,6 @@ GameComponent::GameComponent(void)
 	SUBSCRIBE_TO_EVENT(this, EVENT_PHYSICS_ATTRIBUTES_COLLIDING);
 	SUBSCRIBE_TO_EVENT(this, EVENT_START_DEATHMATCH);	
 	SUBSCRIBE_TO_EVENT(this, EVENT_END_DEATHMATCH);	
-	InstanceTest::getInstance();
 }
 
 GameComponent::~GameComponent(void)
