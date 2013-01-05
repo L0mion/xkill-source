@@ -58,17 +58,18 @@ public:
 	void onUpdate(float delta)
 	{
 		// Iterate list and update score
-		if(showMenu)
+		// showMenu
+		if(false)
 		{
-			std::vector<PlayerAttribute>* allPlayers		=	GET_ATTRIBUTES(playerAttributes);
-			std::vector<HealthAttribute>* allHealth			=	GET_ATTRIBUTES(healthAttributes);
-			std::vector<RenderAttribute>* allRender			=	GET_ATTRIBUTES(renderAttributes);
-			std::vector<SpatialAttribute>* allSpatial		=	GET_ATTRIBUTES(spatialAttributes);
-			std::vector<PositionAttribute>* allPositions	=	GET_ATTRIBUTES(positionAttributes);
+			std::vector<PlayerAttribute>* allPlayers		=	GET_ATTRIBUTES(player);
+			std::vector<HealthAttribute>* allHealth			=	GET_ATTRIBUTES(health);
+			std::vector<RenderAttribute>* allRender			=	GET_ATTRIBUTES(render);
+			std::vector<SpatialAttribute>* allSpatial		=	GET_ATTRIBUTES(spatial);
+			std::vector<PositionAttribute>* allPositions	=	GET_ATTRIBUTES(position);
 
 			// Update tree widget
 			ui.treeWidget->clear();
-			std::vector<int>* allPlayerOwner				= GET_ATTRIBUTE_OWNERS(playerAttributes);
+			std::vector<int>* allPlayerOwner				= GET_ATTRIBUTE_OWNERS(player);
 			for(unsigned i=0; i<allPlayerOwner->size(); i++)
 			{
 				if(allPlayerOwner->at(i)!=0)
@@ -99,7 +100,6 @@ public:
 			// Sort by score
 			ui.treeWidget->sortItems(2, Qt::DescendingOrder);
 		}
-		
 	}
 
 	void parentMoveEvent()

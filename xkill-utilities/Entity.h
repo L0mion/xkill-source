@@ -1,7 +1,10 @@
 #pragma once
 
+#include "dllUtilities.h"
 #include "EventManager.h"
-#include "AttributeController.h"
+#include <vector>
+class AttributeController;
+
 
 /// Provides a unique id and keeps track of \ref ATTRIBUTES associated with that id.
 /** 
@@ -14,77 +17,36 @@ the \ref COMPONENTS working on each attribute.
 \ingroup ARCHITECTURE
 */
 
-class Entity
+class DLL_U Entity
 {
 private:
 	int id;
 	std::vector<AttributeController>* attributes;
 
 public:
-	Entity(int id)
-	{
-		this->id = id;
-		attributes = new std::vector<AttributeController>;
-	}
+	Entity(int id);
 
-	void clean()
-	{
-		delete attributes;
-	}
+	void clean();
 
-	~Entity()
-	{
-	}
+	~Entity();
 
-	void deleteAttributes()
-	{
-		for(unsigned int i = 0; i < attributes->size(); i++)
-			attributes->at(i).remove();
-		attributes->clear();
-	}
+	void deleteAttributes();
 
-	void addAttribute(AttributeController attribute)
-	{
-		attributes->push_back(attribute);
-	}
+	void addAttribute(AttributeController attribute);
 
 	
 	/**
 	Returns true if Entity contains an Attribute
 	matching AttributeType. 
 	*/
-	bool hasAttribute(AttributeType type)
-	{
-		for(unsigned i=0; i<attributes->size(); i++)
-		{
-			if(type == attributes->at(i).type)
-			{
-				return true;
-			}
-		}
-		return false;
-	}
+	bool hasAttribute(AttributeType type);
 
 	/**
 	Returns a std:vector<int> of all the matching index 
 	of Attributes matching AttributeType. If Entity
 	contains no matching Attributes, vector size is 0.
 	*/
-	std::vector<int> getAttributes(AttributeType type)
-	{
-		std::vector<int> matchingAttributes;
-		for(unsigned i=0; i<attributes->size(); i++)
-		{
-			if(type == attributes->at(i).type)
-			{
-				matchingAttributes.push_back( attributes->at(i).index);
-			}
-		}
-		return matchingAttributes;
-	}
+	std::vector<int> getAttributes(AttributeType type);
 
-	int getID()
-	{
-		return id;
-	}
+	int getID();
 };

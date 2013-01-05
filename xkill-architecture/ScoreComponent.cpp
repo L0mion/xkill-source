@@ -16,7 +16,7 @@ ScoreComponent::~ScoreComponent()
 
 bool ScoreComponent::init()
 {
-	playerAttributes_ = GET_ATTRIBUTES(playerAttributes);
+	playerAttributes_ = GET_ATTRIBUTES(player);
 
 	for(unsigned int i = 0; i < playerAttributes_->size(); i++)
 		playerIndices.push_back(i);

@@ -5,6 +5,7 @@
 
 #include "AttributePointer.h"
 #include "AttributeType.h"
+#include "Iterator.h"
 
 #include "Entity.h"
 #include "IAttributeStorage.h"
@@ -42,6 +43,11 @@ public:
 
 	AttributeStorage()
 	{
+	}
+
+	AttributeIterator<T> getIterator()
+	{
+		return AttributeIterator<T>(&attributes, &owners, this);
 	}
 	
 	AttributeStorage(AttributeType type)

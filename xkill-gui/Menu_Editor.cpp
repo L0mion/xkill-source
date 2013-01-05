@@ -42,25 +42,24 @@ void Menu_Editor::slot_editorRefresh()
 	num_rows = 0;
 
 	// Fill columns
-	std::vector<int>* allPlayerOwner = 	GET_ATTRIBUTE_OWNERS(playerAttributes);
+	std::vector<int>* allPlayerOwner = 	GET_ATTRIBUTE_OWNERS(player);
 	entityBrowser_add("Players", allPlayerOwner);
-	std::vector<int>* allSpawnOwner = GET_ATTRIBUTE_OWNERS(spawnPointAttributes);
+	std::vector<int>* allSpawnOwner = GET_ATTRIBUTE_OWNERS(spawnPoint);
 	entityBrowser_add("Spawn points", allSpawnOwner);
-	std::vector<int>* allMeshOwner = GET_ATTRIBUTE_OWNERS(meshAttributes);
+	std::vector<int>* allMeshOwner = GET_ATTRIBUTE_OWNERS(mesh);
 	entityBrowser_add("Meshes", allMeshOwner);
-	std::vector<int>* allPhysicsOwner = GET_ATTRIBUTE_OWNERS(physicsAttributes);
+	std::vector<int>* allPhysicsOwner = GET_ATTRIBUTE_OWNERS(physics);
 	entityBrowser_add("Physics objects", allPhysicsOwner);
-	std::vector<int>* allProjectileOwner = GET_ATTRIBUTE_OWNERS(projectileAttributes);
+	std::vector<int>* allProjectileOwner = GET_ATTRIBUTE_OWNERS(projectile);
 	entityBrowser_add("Projectiles", allProjectileOwner);
 }
 
 void Menu_Editor::entityBrowser_add(QString name, std::vector<int>* owners)
 {
-	std::vector<PlayerAttribute>* allPlayers		=	GET_ATTRIBUTES(playerAttributes);
-	
+	std::vector<PlayerAttribute>* allPlayers		=	GET_ATTRIBUTES(player);
 
-	std::vector<int>* allSpawnOwner = GET_ATTRIBUTE_OWNERS(spawnPointAttributes);
-	allPlayers		=	GET_ATTRIBUTES(playerAttributes);
+	std::vector<int>* allSpawnOwner = GET_ATTRIBUTE_OWNERS(spawnPoint);
+	allPlayers		=	GET_ATTRIBUTES(player);
 	//// Create / reuse row
 	//QStandardItem* item = model_entityBrowser->item(num_rows);
 	//// TRUE: Item doesn't exist, create new Item

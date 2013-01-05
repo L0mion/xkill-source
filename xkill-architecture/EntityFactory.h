@@ -30,14 +30,14 @@ public:
 	// AttributeManager instead of "'positionAttributes_" which will result in error. As long as a shorter naming convention
 	// such as "position" is used, this will not be a problem.
 #define CREATE_ATTRIBUTE(AttributeType, AttributeName, OwnerEntity)						\
-	AttributeType* AttributeName = ((AttributeManager*)AttributeManagerDLLWrapper::getInstance())->AttributeName##Attributes->createAttribute(OwnerEntity)
+	AttributeType* AttributeName = ((AttributeManager*)AttributeManagerDLLWrapper::getInstance())->AttributeName.createAttribute(OwnerEntity)
 	
 	// Connects the AttributePointer by the name PointerName inside AttributeName with latest AttributePointer created inside AttributeManager.
 	// IMPORTANT: The following formula is used to access AttributeManager, "PointerName+Attributes".
 	// PointerName "position" will result in "positionAttributes" which will work.
 	// PointerName "positionAttribute" will result in "positionAttributeAttributes" which will fail.
 #define CONNECT_ATTRIBUTES(AttributeName, PointerName)									\
-	AttributeName->PointerName##Attribute = ((AttributeManager*)AttributeManagerDLLWrapper::getInstance())->PointerName##Attributes->getLatestAttributeAsAttributePointer()
+	AttributeName->PointerName##Attribute = ((AttributeManager*)AttributeManagerDLLWrapper::getInstance())->PointerName.getLatestAttributeAsAttributePointer()
 
 	//! A player entity has the following attributes: position attribute, spatial attribute, render attribute, physics attribute, input attribute, camera attribute and player attribute
 	//! Bindings:
@@ -160,10 +160,11 @@ public:
 
 	void createMesh(Entity* entity, Event_CreateMesh* e)
 	{
-		MeshAttribute* meshAttribute = ATTRIBUTE_MANAGER->meshAttributes->createAttribute(entity);
-		meshAttribute->mesh		= e->mesh;
-		meshAttribute->dynamic	= e->dynamic;
-		meshAttribute->meshID	= e->id;
+		//MeshAttribute* meshAttribute = ATTRIBUTE_MANAGER->mesh.createAttribute(entity);
+		CREATE_ATTRIBUTE(MeshAttribute, mesh, entity);
+		mesh->mesh		= e->mesh;
+		mesh->dynamic	= e->dynamic;
+		mesh->meshID	= e->id;
 	}
 
 	void createSpawnPointEntity(Entity* entity, Event_CreateSpawnPoint* e)

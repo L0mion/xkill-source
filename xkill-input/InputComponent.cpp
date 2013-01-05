@@ -20,7 +20,7 @@ InputComponent::~InputComponent()
 
 bool InputComponent::init(HWND windowHandle, std::string configFilePath, float searchTime)
 {
-	inputAttributes_ = GET_ATTRIBUTES(inputAttributes);
+	inputAttributes_ = GET_ATTRIBUTES(input);
 
 	windowHandle_ = windowHandle;
 	searchTime_ = searchTime;

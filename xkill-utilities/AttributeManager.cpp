@@ -2,42 +2,26 @@
 
 AttributeManager::AttributeManager()
 {
-	positionAttributes			= new AttributeStorage<PositionAttribute>			(ATTRIBUTE_POSITION);
-	spatialAttributes			= new AttributeStorage<SpatialAttribute>			(ATTRIBUTE_SPATIAL);
-	renderAttributes			= new AttributeStorage<RenderAttribute>				(ATTRIBUTE_RENDER);
-	debugShapeAttributes		= new AttributeStorage<DebugShapeAttribute>			(ATTRIBUTE_DEBUGSHAPE);
-	physicsAttributes			= new AttributeStorage<PhysicsAttribute>			(ATTRIBUTE_PHYSICS);
-	cameraAttributes			= new AttributeStorage<CameraAttribute>				(ATTRIBUTE_CAMERA);
-	inputAttributes				= new AttributeStorage<InputAttribute>				(ATTRIBUTE_INPUT);
-	playerAttributes			= new AttributeStorage<PlayerAttribute>				(ATTRIBUTE_PLAYER);
-	boundingAttributes			= new AttributeStorage<BoundingAttribute>			(ATTRIBUTE_BOUNDING);
-	projectileAttributes		= new AttributeStorage<ProjectileAttribute>			(ATTRIBUTE_PROJECTILE);			
-	meshAttributes				= new AttributeStorage<MeshAttribute>				(ATTRIBUTE_MESH);
-	healthAttributes			= new AttributeStorage<HealthAttribute>				(ATTRIBUTE_HEALTH);
-	damageAttributes			= new AttributeStorage<DamageAttribute>				(ATTRIBUTE_DAMAGE);
-	spawnPointAttributes		= new AttributeStorage<SpawnPointAttribute>			(ATTRIBUTE_SPAWNPOINT);
-	weaponStatsAttributes		= new AttributeStorage<WeaponStatsAttribute>		(ATTRIBUTE_WEAPONSTATS);
-	explosionSphereAttributes	= new AttributeStorage<ExplosionSphereAttribute>	(ATTRIBUTE_EXPLOSIONSPHERE);
+	position		.init	(ATTRIBUTE_POSITION);
+	spatial			.init	(ATTRIBUTE_SPATIAL);
+	render			.init	(ATTRIBUTE_RENDER);
+	debugShape		.init	(ATTRIBUTE_DEBUGSHAPE);
+	physics			.init	(ATTRIBUTE_PHYSICS);
+	camera			.init	(ATTRIBUTE_CAMERA);
+	input			.init	(ATTRIBUTE_INPUT);
+	player			.init	(ATTRIBUTE_PLAYER);
+	bounding		.init	(ATTRIBUTE_BOUNDING);
+	projectile		.init	(ATTRIBUTE_PROJECTILE);			
+	mesh			.init	(ATTRIBUTE_MESH);
+	health			.init	(ATTRIBUTE_HEALTH);
+	damage			.init	(ATTRIBUTE_DAMAGE);
+	spawnPoint		.init	(ATTRIBUTE_SPAWNPOINT);
+	weaponStats		.init	(ATTRIBUTE_WEAPONSTATS);
+	explosionSphere	.init	(ATTRIBUTE_EXPLOSIONSPHERE);
 }
 
 AttributeManager::~AttributeManager()
 {
-	positionAttributes			;
-	spatialAttributes			;
-	renderAttributes			;
-	debugShapeAttributes		;
-	physicsAttributes			;
-	cameraAttributes			;
-	inputAttributes				;
-	playerAttributes			;
-	boundingAttributes			;
-	projectileAttributes		;
-	meshAttributes				;
-	healthAttributes			;
-	damageAttributes			;
-	spawnPointAttributes		;
-	weaponStatsAttributes		;
-	explosionSphereAttributes	;
 }
 
 AttributeManager* AttributeManager::getInstance()

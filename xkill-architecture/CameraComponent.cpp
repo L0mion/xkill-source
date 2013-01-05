@@ -20,8 +20,8 @@ CameraComponent::~CameraComponent()
 bool CameraComponent::init()
 {
 	// fetch attributes
-	cameraAttributes_ = GET_ATTRIBUTES(cameraAttributes);
-	inputAttributes_ = GET_ATTRIBUTES(inputAttributes);
+	cameraAttributes_ = GET_ATTRIBUTES(camera);
+	inputAttributes_ = GET_ATTRIBUTES(input);
 
 
 	// fetch aspect ratio

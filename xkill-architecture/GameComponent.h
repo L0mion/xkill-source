@@ -1,5 +1,6 @@
 #pragma once
 #include <xkill-utilities/IObserver.h>
+//#include <xkill-utilities/Iterator.h>
 #include <vector>
 
 class Event_PhysicsAttributesColliding;
@@ -21,6 +22,9 @@ struct WeaponStatsAttribute;
 struct DamageAttribute;
 struct ExplosionSphereAttribute;
 
+template <class T>
+class LinkFrame;
+
 class GameComponent :
 	public IObserver
 {
@@ -28,19 +32,32 @@ private:
 	std::vector<Entity>* allEntity;
 	std::vector<int>* allPhysicsOwner;
 
-	std::vector<PlayerAttribute>* playerAttributes_;		
-	std::vector<HealthAttribute>* healthAttributes_;		
-	std::vector<CameraAttribute>* cameraAttributes_;		
-	std::vector<InputAttribute>* inputAttributes_;			
-	std::vector<RenderAttribute>* renderAttributes_;		
-	std::vector<SpatialAttribute>* spatialAttributes_;		
-	std::vector<PositionAttribute>* positionAttributes_;	
+	std::vector<PlayerAttribute>*		playerAttributes_;		
+	std::vector<HealthAttribute>*		healthAttributes_;		
+	std::vector<CameraAttribute>*		cameraAttributes_;		
+	std::vector<InputAttribute>*		inputAttributes_;			
+	std::vector<RenderAttribute>*		renderAttributes_;		
+	std::vector<SpatialAttribute>*		spatialAttributes_;		
+	std::vector<PositionAttribute>*		positionAttributes_;	
 	std::vector<ProjectileAttribute>* projectileAttributes_;
 	std::vector<PhysicsAttribute>* physicsAttributes_;
 	std::vector<SpawnPointAttribute>* spawnPointAttributes_;
 	std::vector<WeaponStatsAttribute>* weaponStatsAttributes_;
 	std::vector<DamageAttribute>* damageAttributes_;
 	std::vector<ExplosionSphereAttribute>* explosionSphereAttributes_;
+
+	/*AttributeIterator<PlayerAttribute>			*itrPlayer;
+	AttributeIterator<PlayerAttribute>			*itrPlayer			;
+	AttributeIterator<HealthAttribute>			*itrHealth			;
+	AttributeIterator<CameraAttribute>			*itrCamera			;
+	AttributeIterator<InputAttribute>			*itrInput			;
+	AttributeIterator<RenderAttribute>			*itrRender			;
+	AttributeIterator<WeaponStatsAttribute>		*itrWeaponStats		;
+	AttributeIterator<SpatialAttribute>			*itrSpatial			;
+	AttributeIterator<PositionAttribute>		*itrPosition		;
+	AttributeIterator<ProjectileAttribute>		*itrProjectile		;
+	AttributeIterator<SpawnPointAttribute>		*itrSpawnPoint		;*/
+	//AttributeIterator<ExplosionSphereAttribute>	*itrExplosionSphere	;
 
 public:
 	GameComponent(void);

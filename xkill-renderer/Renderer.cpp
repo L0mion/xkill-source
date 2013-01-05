@@ -179,14 +179,14 @@ HRESULT Renderer::init()
 }
 void Renderer::initAttributes()
 {	
-	attributesCamera_		= GET_ATTRIBUTES(cameraAttributes);
-	attributesRender_		= GET_ATTRIBUTES(renderAttributes);
-	attributesDebugShape_	= GET_ATTRIBUTES(debugShapeAttributes);
-	attributesSpatial_		= GET_ATTRIBUTES(spatialAttributes);
-	attributesPosition_		= GET_ATTRIBUTES(positionAttributes);
+	attributesCamera_		= GET_ATTRIBUTES(camera);
+	attributesRender_		= GET_ATTRIBUTES(render);
+	attributesDebugShape_	= GET_ATTRIBUTES(debugShape);
+	attributesSpatial_		= GET_ATTRIBUTES(spatial);
+	attributesPosition_		= GET_ATTRIBUTES(position);
 
-	attributesCameraOwner_	= GET_ATTRIBUTE_OWNERS(cameraAttributes);
-	attributesRenderOwner_	= GET_ATTRIBUTE_OWNERS(renderAttributes);
+	attributesCameraOwner_	= GET_ATTRIBUTE_OWNERS(camera);
+	attributesRenderOwner_	= GET_ATTRIBUTE_OWNERS(render);
 }
 void Renderer::initWinfo()
 {

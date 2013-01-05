@@ -1,6 +1,7 @@
 #pragma once
 
 #include "AttributeStorage.h"
+class Entity;
 
 // Forward declaration of templates
 template <class T> 
@@ -9,7 +10,7 @@ class AttributeStorage;
 class IAttributeIterator
 {
 public:
-    virtual int getCurrentIndex() = 0;
+    virtual int getIndex() = 0;
 };
 
 // An Iterator to facilitate Attribute iteration
@@ -24,6 +25,9 @@ private:
     int nextIndex;
 	
 public:
+	AttributeIterator()
+	{
+	}
     AttributeIterator(std::vector<T>* attributes, std::vector<int>* owners, AttributeStorage<T>* storage)
     {
         this->attributes = attributes;
@@ -37,13 +41,21 @@ public:
     bool hasNext()
     {
         // Step to next Item or until end is reached
-        while(nextIndex < owners->size() && owners->at(nextIndex) == 0)
+        while(nextIndex < (int)owners->size() && owners->at(nextIndex) == 0)
         {
             nextIndex++;
         }
 
         // Returns TRUE if next Item is valid, otherwise end has been reached
-        return nextIndex < owners->size() ? true : false;
+		if(nextIndex < (int)owners->size())
+			return true;
+		else
+		{
+			// reset index
+			resetIndex();
+			return false;
+		}
+       
     }
 
     // Returns an Item and steps to next item
@@ -51,15 +63,22 @@ public:
     {
         // Fetch current item, and step to next item
         nextIndex++;
-        return &attributes->at(getCurrentIndex());
+        return &attributes->at(getIndex());
     }
 
-    // Retuns the Index of the latest
+    // Returns the Index of the latest
     // Item aquired throught getNext()
-    int getCurrentIndex()
+    int getIndex()
     {
         return nextIndex-1;
     }
+
+	// Returns the Owner of the latest
+	// Item aquired throught getNext()
+	int getOwner()
+	{
+		return owners->at(getIndex());
+	}
 
     // Resets the Iterator to the beginning
     void resetIndex()
@@ -77,9 +96,9 @@ public:
     // Returns an item in the vector regardless
     // if it is valid or not, using the Index of
     // the supplied Iterator
-    T* at(IAttributeIterator* iterator)
+    T* at(AttributePointer attrPointer)
     {
-        return at(iterator->getCurrentIndex);
+        return at(attrPointer.index);
     }
 
 	T* createAttribute(Entity* owner)

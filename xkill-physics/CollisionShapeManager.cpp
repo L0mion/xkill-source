@@ -9,7 +9,7 @@
 
 CollisionShapeManager::CollisionShapeManager()
 {
-	meshAttributes_ = GET_ATTRIBUTES(meshAttributes);
+	meshAttributes_ = GET_ATTRIBUTES(mesh);
 	
 	//if(collisionShapes_.size()==0)
 		//collisionShapes_.push_back(new btSphereShape(50));

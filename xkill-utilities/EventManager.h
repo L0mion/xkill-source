@@ -113,12 +113,12 @@ EventManager::getInstance()->addObserver(Subscriber, EventType);
 // Fetches a vector<AttributeType>* of a specific Attribute
 // from AttributeManager.
 #define GET_ATTRIBUTES(AttributePointer)							\
-	&((AttributeManager*)AttributeManagerDLLWrapper::getInstance())->AttributePointer->attributes;
+	&((AttributeManager*)AttributeManagerDLLWrapper::getInstance())->AttributePointer.attributes;
 
 // Fetches a vector<AttributeType>* of a specific Attribute
 // from AttributeManager.
 #define GET_ATTRIBUTE_OWNERS(OwnerPointer)							\
-	&((AttributeManager*)AttributeManagerDLLWrapper::getInstance())->OwnerPointer->owners;
+	&((AttributeManager*)AttributeManagerDLLWrapper::getInstance())->OwnerPointer.owners;
 
 // Fetches a owners of a specific Attribute from AttributeManager
 #define GET_ENTITIES(EntityPointer)									\

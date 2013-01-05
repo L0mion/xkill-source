@@ -16,22 +16,22 @@ private:
 public:
 	~AttributeManager();
 
-	AttributeStorage<PositionAttribute>			*positionAttributes;
-	AttributeStorage<SpatialAttribute>			*spatialAttributes;
-	AttributeStorage<RenderAttribute>			*renderAttributes;
-	AttributeStorage<DebugShapeAttribute>		*debugShapeAttributes;
-	AttributeStorage<PhysicsAttribute>			*physicsAttributes;
-	AttributeStorage<CameraAttribute>			*cameraAttributes;
-	AttributeStorage<InputAttribute>			*inputAttributes;
-	AttributeStorage<PlayerAttribute>			*playerAttributes;
-	AttributeStorage<BoundingAttribute>			*boundingAttributes;
-	AttributeStorage<ProjectileAttribute>		*projectileAttributes;
-	AttributeStorage<MeshAttribute>				*meshAttributes;
-	AttributeStorage<HealthAttribute>			*healthAttributes;
-	AttributeStorage<DamageAttribute>			*damageAttributes;
-	AttributeStorage<SpawnPointAttribute>		*spawnPointAttributes;
-	AttributeStorage<WeaponStatsAttribute>		*weaponStatsAttributes;
-	AttributeStorage<ExplosionSphereAttribute>	*explosionSphereAttributes;
+	AttributeStorage<PositionAttribute>			position;
+	AttributeStorage<SpatialAttribute>			spatial;
+	AttributeStorage<RenderAttribute>			render;
+	AttributeStorage<DebugShapeAttribute>		debugShape;
+	AttributeStorage<PhysicsAttribute>			physics;
+	AttributeStorage<CameraAttribute>			camera;
+	AttributeStorage<InputAttribute>			input;
+	AttributeStorage<PlayerAttribute>			player;
+	AttributeStorage<BoundingAttribute>			bounding;
+	AttributeStorage<ProjectileAttribute>		projectile;
+	AttributeStorage<MeshAttribute>				mesh;
+	AttributeStorage<HealthAttribute>			health;
+	AttributeStorage<DamageAttribute>			damage;
+	AttributeStorage<SpawnPointAttribute>		spawnPoint;
+	AttributeStorage<WeaponStatsAttribute>		weaponStats;
+	AttributeStorage<ExplosionSphereAttribute>	explosionSphere;
 
 	static AttributeManager* getInstance();
 };
