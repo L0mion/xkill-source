@@ -1,6 +1,6 @@
 #include "Menu_Editor.h"
 
-#include <QStandardItemModel>
+#include <QtGui/QStandardItemModel>
 
 #include <xkill-utilities/EventManager.h>
 #include <xkill-utilities/AttributeType.h>
@@ -56,43 +56,43 @@ void Menu_Editor::slot_editorRefresh()
 
 void Menu_Editor::entityBrowser_add(QString name, std::vector<int>* owners)
 {
-	std::vector<PlayerAttribute>* allPlayers		=	GET_ATTRIBUTES(player);
+	std::vector<Attribute_Player>* allPlayers		=	GET_ATTRIBUTES(player);
 
 	std::vector<int>* allSpawnOwner = GET_ATTRIBUTE_OWNERS(spawnPoint);
 	allPlayers		=	GET_ATTRIBUTES(player);
-	//// Create / reuse row
-	//QStandardItem* item = model_entityBrowser->item(num_rows);
-	//// TRUE: Item doesn't exist, create new Item
-	//if(item == 0)
-	//{
-	//	item = new QStandardItem();
-	//	model_entityBrowser->setItem(num_rows, item);
-	//}
-	//num_rows++;
-	//
-	//// Fill row with data
-	//int num_entities = 0;
-	//for(unsigned i=0; i<owners->size(); i++)
-	//{
-	//	if(owners->at(i)!=0)
-	//	{
-	//		// Create data item
-	//		QStandardItem* data = new QStandardItem();
-	//		item->setChild(num_entities, 0, data);
-	//		model_entityBrowser->setData(data->index(), QVariant(owners->at(i)));
+	// Create / reuse row
+	QStandardItem* item = model_entityBrowser->item(num_rows);
+	// TRUE: Item doesn't exist, create new Item
+	if(item == 0)
+	{
+		item = new QStandardItem();
+		model_entityBrowser->setItem(num_rows, item);
+	}
+	num_rows++;
+	
+	// Fill row with data
+	int num_entities = 0;
+	for(unsigned i=0; i<owners->size(); i++)
+	{
+		if(owners->at(i)!=0)
+		{
+			// Create data item
+			QStandardItem* data = new QStandardItem();
+			item->setChild(num_entities, 0, data);
+			model_entityBrowser->setData(data->index(), QVariant(owners->at(i)));
 
-	//		// Increment index
-	//		num_entities++;
-	//	}
-	//}
+			// Increment index
+			num_entities++;
+		}
+	}
 
-	//// Remove unused rows
-	//int excessRows = item->rowCount() - num_entities;
-	//if(excessRows>0)
-	//	item->removeRows(num_entities, excessRows);
+	// Remove unused rows
+	int excessRows = item->rowCount() - num_entities;
+	if(excessRows>0)
+		item->removeRows(num_entities, excessRows);
 
-	//// Set name
-	//item->setText("[" + QString::number(num_entities) + "] " + name);
+	// Set name
+	item->setText("[" + QString::number(num_entities) + "] " + name);
 }
 
 void Menu_Editor::slot_clicked_entityBrowser( QModelIndex indexClicked )

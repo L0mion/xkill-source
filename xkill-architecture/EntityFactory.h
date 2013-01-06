@@ -37,7 +37,7 @@ public:
 	// PointerName "position" will result in "positionAttributes" which will work.
 	// PointerName "positionAttribute" will result in "positionAttributeAttributes" which will fail.
 #define CONNECT_ATTRIBUTES(AttributeName, PointerName)									\
-	AttributeName->PointerName##Attribute = ((AttributeManager*)AttributeManagerDLLWrapper::getInstance())->PointerName.getLatestAttributeAsAttributePointer()
+	AttributeName->ptr_##PointerName = ((AttributeManager*)AttributeManagerDLLWrapper::getInstance())->PointerName.getLatestAttributeAsAttributePointer()
 
 	//! A player entity has the following attributes: position attribute, spatial attribute, render attribute, physics attribute, input attribute, camera attribute and player attribute
 	//! Bindings:
@@ -46,16 +46,16 @@ public:
 	//! Note: the player has the same spatial attribute as the camera.
 	void createPlayerEntity(Entity* entity)
 	{
-		CREATE_ATTRIBUTE(PositionAttribute, position, entity);
+		CREATE_ATTRIBUTE(Attribute_Position, position, entity);
 
-		CREATE_ATTRIBUTE(SpatialAttribute, spatial, entity);
+		CREATE_ATTRIBUTE(Attribute_Spatial, spatial, entity);
 		CONNECT_ATTRIBUTES(spatial, position);
 
-		CREATE_ATTRIBUTE(RenderAttribute, render, entity);
+		CREATE_ATTRIBUTE(Attribute_Render, render, entity);
 		CONNECT_ATTRIBUTES(render, spatial);
 		render->meshID = 0;
 
-		CREATE_ATTRIBUTE(DebugShapeAttribute, debugShape, entity);	//create temp debug shape
+		CREATE_ATTRIBUTE(Attribute_DebugShape, debugShape, entity);	//create temp debug shape
 		CONNECT_ATTRIBUTES(debugShape, spatial);
 		debugShape->meshID = render->meshID;
 		debugShape->shape	=  nullptr;/*new DebugShapeBB(
@@ -63,24 +63,24 @@ public:
 			Float3(0.5f, 0.5f, 0.5f)); //new DebugShapeSphere(1.0f);*/
 		debugShape->render	= false;
 
-		CREATE_ATTRIBUTE(PhysicsAttribute, physics, entity);
+		CREATE_ATTRIBUTE(Attribute_Physics, physics, entity);
 		CONNECT_ATTRIBUTES(physics, spatial);
 		CONNECT_ATTRIBUTES(physics, render);
 		physics->meshID = render->meshID;
 		
-		CREATE_ATTRIBUTE(InputAttribute, input, entity);
+		CREATE_ATTRIBUTE(Attribute_Input, input, entity);
 		CONNECT_ATTRIBUTES(input, physics);
 		input->changeAmmunitionType = false;
 		input->changeFiringMode = false;
 
-		CREATE_ATTRIBUTE(CameraAttribute, camera, entity);
+		CREATE_ATTRIBUTE(Attribute_Camera, camera, entity);
 		CONNECT_ATTRIBUTES(camera, spatial);
 
-		CREATE_ATTRIBUTE(HealthAttribute, health, entity);
+		CREATE_ATTRIBUTE(Attribute_Health, health, entity);
 
-		CREATE_ATTRIBUTE(WeaponStatsAttribute, weaponStats, entity);
+		CREATE_ATTRIBUTE(Attribute_WeaponStats, weaponStats, entity);
 
-		CREATE_ATTRIBUTE(PlayerAttribute, player, entity);
+		CREATE_ATTRIBUTE(Attribute_Player, player, entity);
 		CONNECT_ATTRIBUTES(player, render);
 		CONNECT_ATTRIBUTES(player, input);
 		CONNECT_ATTRIBUTES(player, camera);
@@ -96,17 +96,17 @@ public:
 	{
 		static int HACKHACK = 1;
 
-		CREATE_ATTRIBUTE(PositionAttribute, position, entity);
+		CREATE_ATTRIBUTE(Attribute_Position, position, entity);
 
-		CREATE_ATTRIBUTE(SpatialAttribute, spatial, entity);
+		CREATE_ATTRIBUTE(Attribute_Spatial, spatial, entity);
 		CONNECT_ATTRIBUTES(spatial, position);
 
-		CREATE_ATTRIBUTE(RenderAttribute, render, entity);
+		CREATE_ATTRIBUTE(Attribute_Render, render, entity);
 		CONNECT_ATTRIBUTES(render, spatial);
 		
 		render->meshID = HACKHACK;
 
-		CREATE_ATTRIBUTE(PhysicsAttribute, physics, entity);
+		CREATE_ATTRIBUTE(Attribute_Physics, physics, entity);
 		CONNECT_ATTRIBUTES(physics, spatial);
 		CONNECT_ATTRIBUTES(physics, render);
 		physics->meshID = render->meshID;
@@ -118,18 +118,18 @@ public:
 
 	void createProjectileEntity(Entity* entity, Event_CreateProjectile* e)
 	{
-		CREATE_ATTRIBUTE(PositionAttribute, position, entity);
+		CREATE_ATTRIBUTE(Attribute_Position, position, entity);
 		position->position = e->position;
 
-		CREATE_ATTRIBUTE(SpatialAttribute, spatial, entity);
+		CREATE_ATTRIBUTE(Attribute_Spatial, spatial, entity);
 		CONNECT_ATTRIBUTES(spatial, position);
 		spatial->rotation = e->rotation;
 
-		CREATE_ATTRIBUTE(RenderAttribute, render, entity);
+		CREATE_ATTRIBUTE(Attribute_Render, render, entity);
 		CONNECT_ATTRIBUTES(render, spatial);
 		render->meshID = 2;
 
-		CREATE_ATTRIBUTE(DebugShapeAttribute, debugShape, entity);	//create temp debug shape
+		CREATE_ATTRIBUTE(Attribute_DebugShape, debugShape, entity);	//create temp debug shape
 		CONNECT_ATTRIBUTES(debugShape, spatial);
 		debugShape->meshID = render->meshID;
 		debugShape->shape	=  nullptr;/*new DebugShapeBB(
@@ -137,7 +137,7 @@ public:
 			Float3(0.5f, 0.5f, 0.5f)); //new DebugShapeSphere(1.0f);*/
 		debugShape->render	= false;
 
-		CREATE_ATTRIBUTE(PhysicsAttribute, physics, entity);
+		CREATE_ATTRIBUTE(Attribute_Physics, physics, entity);
 		CONNECT_ATTRIBUTES(physics, spatial);
 		CONNECT_ATTRIBUTES(physics, render);
 		physics->meshID = render->meshID;
@@ -148,12 +148,12 @@ public:
 		physics->gravity = Float3(0.0f, 0.0f, 0.0f);
 		physics->collisionResponse = true;
 
-		CREATE_ATTRIBUTE(ProjectileAttribute, projectile, entity);
+		CREATE_ATTRIBUTE(Attribute_Projectile, projectile, entity);
 		CONNECT_ATTRIBUTES(projectile, physics);
 		projectile->entityIdOfCreator = e->entityIdOfCreator;
 		projectile->explodeOnImnpact = e->explodeOnImpact;
 
-		CREATE_ATTRIBUTE(DamageAttribute, damage, entity);
+		CREATE_ATTRIBUTE(Attribute_Damage, damage, entity);
 		damage->damage = e->damage;
 		damage->owner_entityID = e->entityIdOfCreator;
 	}
@@ -161,7 +161,7 @@ public:
 	void createMesh(Entity* entity, Event_CreateMesh* e)
 	{
 		//MeshAttribute* meshAttribute = ATTRIBUTE_MANAGER->mesh.createAttribute(entity);
-		CREATE_ATTRIBUTE(MeshAttribute, mesh, entity);
+		CREATE_ATTRIBUTE(Attribute_Mesh, mesh, entity);
 		mesh->mesh		= e->mesh;
 		mesh->dynamic	= e->dynamic;
 		mesh->meshID	= e->id;
@@ -169,10 +169,10 @@ public:
 
 	void createSpawnPointEntity(Entity* entity, Event_CreateSpawnPoint* e)
 	{
-		CREATE_ATTRIBUTE(PositionAttribute, position, entity);
+		CREATE_ATTRIBUTE(Attribute_Position, position, entity);
 		position->position = e->spawnPointPosition;
 		
-		CREATE_ATTRIBUTE(SpawnPointAttribute, spawnPoint, entity);
+		CREATE_ATTRIBUTE(Attribute_SpawnPoint, spawnPoint, entity);
 		CONNECT_ATTRIBUTES(spawnPoint, position);
 		spawnPoint->timeSinceLastSpawn = 0.1f;
 		spawnPoint->spawnArea = e->spawnAreaRadius;
@@ -180,18 +180,18 @@ public:
 
 	void createExplosionSphere(Entity* entity, Event_CreateExplosionSphere* e)
 	{
-		CREATE_ATTRIBUTE(PositionAttribute, position, entity);
+		CREATE_ATTRIBUTE(Attribute_Position, position, entity);
 		position->position = e->position;
 
-		CREATE_ATTRIBUTE(SpatialAttribute, spatial, entity);
+		CREATE_ATTRIBUTE(Attribute_Spatial, spatial, entity);
 		CONNECT_ATTRIBUTES(spatial, position);
 
-		CREATE_ATTRIBUTE(DebugShapeAttribute, debugShape, entity);	//create temp debug shape
+		CREATE_ATTRIBUTE(Attribute_DebugShape, debugShape, entity);	//create temp debug shape
 		CONNECT_ATTRIBUTES(debugShape, spatial);
 		debugShape->shape	= new DebugShapeSphere(e->radius*100.0f);
 		debugShape->render	= true;
 
-		CREATE_ATTRIBUTE(PhysicsAttribute, physics, entity);
+		CREATE_ATTRIBUTE(Attribute_Physics, physics, entity);
 		CONNECT_ATTRIBUTES(physics, spatial);
 		physics->isExplosionSphere = true;
 		physics->explosionSphereRadius = e->radius;
@@ -199,10 +199,10 @@ public:
 		physics->mass = 0.0f;
 		physics->gravity = Float3(0.0f, 0.0f, 0.0f);
 
-		CREATE_ATTRIBUTE(ExplosionSphereAttribute, explosionSphere, entity);
+		CREATE_ATTRIBUTE(Attribute_ExplosionSphere, explosionSphere, entity);
 		CONNECT_ATTRIBUTES(explosionSphere, physics);
 
-		CREATE_ATTRIBUTE(DamageAttribute, damage, entity);
+		CREATE_ATTRIBUTE(Attribute_Damage, damage, entity);
 		damage->damage = e->damage;
 		damage->owner_entityID = e->entityIdOfCreator;
 	}

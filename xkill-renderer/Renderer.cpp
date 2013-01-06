@@ -351,7 +351,7 @@ void Renderer::render(float delta)
 	}
 }
 void Renderer::renderViewport(
-	CameraAttribute		cameraAt, 
+	Attribute_Camera		cameraAt, 
 	unsigned int		viewportTopX,
 	unsigned int		viewportTopY,
 	unsigned int		cameraIndex)
@@ -363,9 +363,9 @@ void Renderer::renderViewport(
 	DirectX::XMFLOAT4X4 projectionMatrixInverse	= managementMath_->calculateMatrixInverse(projectionMatrix);
 
 	//Get eye position.
-	CameraAttribute*	cameraAtP = &cameraAt;
-	SpatialAttribute*	spatialAttribute	= ATTRIBUTE_CAST(SpatialAttribute, spatialAttribute, cameraAtP);
-	PositionAttribute*	positionAttribute	= ATTRIBUTE_CAST(PositionAttribute, positionAttribute, spatialAttribute);
+	Attribute_Camera*	cameraAtP = &cameraAt;
+	Attribute_Spatial*	spatialAttribute	= ATTRIBUTE_CAST(Attribute_Spatial, ptr_spatial, cameraAtP);
+	Attribute_Position*	positionAttribute	= ATTRIBUTE_CAST(Attribute_Position, ptr_position, spatialAttribute);
 	DirectX::XMFLOAT3	eyePosition			= *(DirectX::XMFLOAT3*)&positionAttribute->position;
 
 	//Update per-viewport constant buffer.
@@ -398,7 +398,7 @@ void Renderer::renderViewportToGBuffer(DirectX::XMFLOAT4X4 viewMatrix, DirectX::
 
 	managementGBuffer_->setGBuffersAndDepthBufferAsRenderTargets(devcon, managementD3D_->getDepthBuffer());
 
-	RenderAttribute* renderAt;
+	Attribute_Render* renderAt;
 	for(unsigned int i = 0; i < attributesRenderOwner_->size(); i++)
 	{
 		if(attributesRenderOwner_->at(i) != 0)
@@ -415,7 +415,7 @@ void Renderer::renderViewportToGBuffer(DirectX::XMFLOAT4X4 viewMatrix, DirectX::
 		}
 	}
 
-	DebugShapeAttribute* debugShapeAt;
+	Attribute_DebugShape* debugShapeAt;
 	for(unsigned int i = 0; i < attributesDebugShape_->size(); i++)
 	{
 		if(attributesDebugShape_->at(i).render)
@@ -475,7 +475,7 @@ void Renderer::renderViewportToBackBuffer()
 	managementD3D_->present();
 }
 void Renderer::renderAttribute(
-	RenderAttribute*	renderAt,
+	Attribute_Render*	renderAt,
 	DirectX::XMFLOAT4X4 viewMatrix,
 	DirectX::XMFLOAT4X4 projectionMatrix)
 {
@@ -483,8 +483,8 @@ void Renderer::renderAttribute(
 	ID3D11DeviceContext*	devcon = managementD3D_->getDeviceContext();
 
 	//Get transform matrices.
-	SpatialAttribute*	spatialAt			= &attributesSpatial_->at(renderAt->spatialAttribute.index);
-	PositionAttribute*	positionAt			= &attributesPosition_->at(spatialAt->positionAttribute.index);
+	Attribute_Spatial*	spatialAt			= &attributesSpatial_->at(renderAt->ptr_spatial.index);
+	Attribute_Position*	positionAt			= &attributesPosition_->at(spatialAt->ptr_position.index);
 	DirectX::XMFLOAT4X4 worldMatrix			= managementMath_->calculateWorldMatrix(spatialAt, positionAt);
 	DirectX::XMFLOAT4X4 worldMatrixInverse	= managementMath_->calculateMatrixInverse(worldMatrix);
 	DirectX::XMFLOAT4X4 finalMatrix			= managementMath_->calculateFinalMatrix(worldMatrix, viewMatrix, projectionMatrix);
@@ -563,7 +563,7 @@ void Renderer::renderSubset(IB* ib, MeshMaterial& material)
 		0);
 }
 void Renderer::renderDebugShape(
-	DebugShapeAttribute*	debugShapeAt, 
+	Attribute_DebugShape*	debugShapeAt, 
 	unsigned int			shapeIndex,
 	DirectX::XMFLOAT4X4		viewMatrix, 
 	DirectX::XMFLOAT4X4		projectionMatrix)
@@ -572,8 +572,8 @@ void Renderer::renderDebugShape(
 	ID3D11DeviceContext*	devcon = managementD3D_->getDeviceContext();
 	
 	//Get transform matrices.
-	SpatialAttribute*	spatialAt			= &attributesSpatial_->at(debugShapeAt->spatialAttribute.index);
-	PositionAttribute*	positionAt			= &attributesPosition_->at(spatialAt->positionAttribute.index);
+	Attribute_Spatial*	spatialAt			= &attributesSpatial_->at(debugShapeAt->ptr_spatial.index);
+	Attribute_Position*	positionAt			= &attributesPosition_->at(spatialAt->ptr_position.index);
 	DirectX::XMFLOAT4X4 worldMatrix			= managementMath_->calculateWorldMatrix(spatialAt, positionAt);
 	DirectX::XMFLOAT4X4 worldMatrixInverse	= managementMath_->calculateMatrixInverse(worldMatrix);
 	DirectX::XMFLOAT4X4 finalMatrix			= managementMath_->calculateFinalMatrix(worldMatrix, viewMatrix, projectionMatrix);

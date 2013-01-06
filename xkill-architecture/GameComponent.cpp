@@ -5,18 +5,24 @@
 #include <iostream>
 #include <ctime>
 
+// Iterators
+static	AttributeIterator<Attribute_Position>		itrPosition			;
+static	AttributeIterator<Attribute_Spatial>			itrSpatial			;
+static	AttributeIterator<Attribute_Render>			itrRender			;
+static	AttributeIterator<Attribute_DebugShape>		itrDebugShape		;
+static	AttributeIterator<Attribute_Physics>			itrPhysics			;
+static	AttributeIterator<Attribute_Camera>			itrCamera			;
+static	AttributeIterator<Attribute_Input>			itrInput			;
+static	AttributeIterator<Attribute_Player>			itrPlayer			;
+static	AttributeIterator<Attribute_Bounding>		itrBounding			;
+static	AttributeIterator<Attribute_Projectile>		itrProjectile		;
+static	AttributeIterator<Attribute_Mesh>			itrMesh				;
+static	AttributeIterator<Attribute_Health>			itrHealth			;
+static	AttributeIterator<Attribute_Damage>			itrDamage			;
+static	AttributeIterator<Attribute_SpawnPoint>		itrSpawnPoint		;
+static	AttributeIterator<Attribute_WeaponStats>		itrWeaponStats		;
+static	AttributeIterator<Attribute_ExplosionSphere>	itrExplosionSphere	;
 
-static	AttributeIterator<PlayerAttribute>			itrPlayer			;
-static	AttributeIterator<HealthAttribute>			itrHealth			;
-static	AttributeIterator<CameraAttribute>			itrCamera			;
-static	AttributeIterator<InputAttribute>			itrInput			;
-static	AttributeIterator<RenderAttribute>			itrRender			;
-static	AttributeIterator<WeaponStatsAttribute>		itrWeaponStats		;
-static	AttributeIterator<SpatialAttribute>			itrSpatial			;
-static	AttributeIterator<PositionAttribute>		itrPosition			;
-static	AttributeIterator<ProjectileAttribute>		itrProjectile		;
-static	AttributeIterator<SpawnPointAttribute>		itrSpawnPoint		;
-static	AttributeIterator<ExplosionSphereAttribute>	itrExplosionSphere	;
 
 GameComponent::GameComponent(void)
 {
@@ -25,17 +31,21 @@ GameComponent::GameComponent(void)
 	SUBSCRIBE_TO_EVENT(this, EVENT_END_DEATHMATCH);
 
 
-	// Create iterators
-	itrPlayer			= ATTRIBUTE_MANAGER->player				.getIterator();
-	itrHealth			= ATTRIBUTE_MANAGER->health				.getIterator();
+	itrPosition			= ATTRIBUTE_MANAGER->position			.getIterator();
+	itrSpatial			= ATTRIBUTE_MANAGER->spatial			.getIterator();
+	itrRender			= ATTRIBUTE_MANAGER->render				.getIterator();
+	itrDebugShape		= ATTRIBUTE_MANAGER->debugShape			.getIterator();
+	itrPhysics			= ATTRIBUTE_MANAGER->physics			.getIterator();
 	itrCamera			= ATTRIBUTE_MANAGER->camera				.getIterator();
 	itrInput			= ATTRIBUTE_MANAGER->input				.getIterator();
-	itrRender			= ATTRIBUTE_MANAGER->render				.getIterator();
-	itrWeaponStats		= ATTRIBUTE_MANAGER->weaponStats		.getIterator();
-	itrSpatial			= ATTRIBUTE_MANAGER->spatial			.getIterator();
-	itrPosition			= ATTRIBUTE_MANAGER->position			.getIterator();
+	itrPlayer			= ATTRIBUTE_MANAGER->player				.getIterator();
+	itrBounding			= ATTRIBUTE_MANAGER->bounding			.getIterator();
 	itrProjectile		= ATTRIBUTE_MANAGER->projectile			.getIterator();
+	itrMesh				= ATTRIBUTE_MANAGER->mesh				.getIterator();
+	itrHealth			= ATTRIBUTE_MANAGER->health				.getIterator();
+	itrDamage			= ATTRIBUTE_MANAGER->damage				.getIterator();
 	itrSpawnPoint		= ATTRIBUTE_MANAGER->spawnPoint			.getIterator();
+	itrWeaponStats		= ATTRIBUTE_MANAGER->weaponStats		.getIterator();
 	itrExplosionSphere	= ATTRIBUTE_MANAGER->explosionSphere	.getIterator();
 }
 
@@ -47,21 +57,6 @@ bool GameComponent::init()
 {
 	// Fetch list of stuff used in logic
 	GET_ENTITIES(allEntity);
-	allPhysicsOwner				 = GET_ATTRIBUTE_OWNERS(physics);
-
-	playerAttributes_			= GET_ATTRIBUTES(player);
-	healthAttributes_			= GET_ATTRIBUTES(health);
-	cameraAttributes_			= GET_ATTRIBUTES(camera);
-	inputAttributes_			= GET_ATTRIBUTES(input);
-	renderAttributes_			= GET_ATTRIBUTES(render);
-	spatialAttributes_			= GET_ATTRIBUTES(spatial);
-	positionAttributes_			= GET_ATTRIBUTES(position);
-	projectileAttributes_		= GET_ATTRIBUTES(projectile);
-	physicsAttributes_			= GET_ATTRIBUTES(physics);
-	spawnPointAttributes_		= GET_ATTRIBUTES(spawnPoint);
-	weaponStatsAttributes_		= GET_ATTRIBUTES(weaponStats);
-	damageAttributes_			= GET_ATTRIBUTES(damage);
-	explosionSphereAttributes_	= GET_ATTRIBUTES(explosionSphere);
 
 	SEND_EVENT(&Event_CreateSpawnPoint(Float3(-1.5f, 3.0f, 0.0f), 2.0f));
 	SEND_EVENT(&Event_CreateSpawnPoint(Float3(1.0f, 5.0f, 0.0f), 2.0f));
@@ -104,14 +99,14 @@ void GameComponent::onUpdate(float delta)
 	while(itrPlayer.hasNext())
 	{
 		// Fetch attributes through iterators
-		PlayerAttribute*		player		=	itrPlayer		.getNext();
-		HealthAttribute*		health		=	itrHealth		.at(player->healthAttribute);
-		CameraAttribute*		camera		=	itrCamera		.at(player->cameraAttribute);
-		InputAttribute*			input		=	itrInput		.at(player->inputAttribute);
-		RenderAttribute*		render		=	itrRender		.at(player->renderAttribute);
-		WeaponStatsAttribute*	weaponStats	=	itrWeaponStats	.at(player->weaponStatsAttribute);
-		SpatialAttribute*		spatial		=	itrSpatial		.at(render->spatialAttribute);
-		PositionAttribute*		position	=	itrPosition		.at(spatial->positionAttribute);
+		Attribute_Player*		player		=	itrPlayer		.getNext();
+		Attribute_Health*		health		=	itrHealth		.at(player->ptr_health);
+		Attribute_Camera*		camera		=	itrCamera		.at(player->ptr_camera);
+		Attribute_Input*			input		=	itrInput		.at(player->ptr_input);
+		Attribute_Render*		render		=	itrRender		.at(player->ptr_render);
+		Attribute_WeaponStats*	weaponStats	=	itrWeaponStats	.at(player->ptr_weaponStats);
+		Attribute_Spatial*		spatial		=	itrSpatial		.at(render->ptr_spatial);
+		Attribute_Position*		position	=	itrPosition		.at(spatial->ptr_position);
 
 
 		//
@@ -131,13 +126,13 @@ void GameComponent::onUpdate(float delta)
 		if(input->changeAmmunitionType)
 		{
 			input->changeAmmunitionType = false;
-			weaponStats->setWeaponStats(static_cast<WeaponStatsAttribute::AmmunitionType>((weaponStats->ammunitionType + 1) % WeaponStatsAttribute::NROFAMUNITIONTYPES), weaponStats->firingMode);
+			weaponStats->setWeaponStats(static_cast<Attribute_WeaponStats::AmmunitionType>((weaponStats->ammunitionType + 1) % Attribute_WeaponStats::NROFAMUNITIONTYPES), weaponStats->firingMode);
 		}
 
 		if(input->changeFiringMode)
 		{
 			input->changeFiringMode = false;
-			weaponStats->setWeaponStats(weaponStats->ammunitionType, static_cast<WeaponStatsAttribute::FiringMode>((weaponStats->firingMode + 1) % WeaponStatsAttribute::NROFFIRINGMODES));
+			weaponStats->setWeaponStats(weaponStats->ammunitionType, static_cast<Attribute_WeaponStats::FiringMode>((weaponStats->firingMode + 1) % Attribute_WeaponStats::NROFFIRINGMODES));
 		}
 
 
@@ -159,21 +154,19 @@ void GameComponent::onUpdate(float delta)
 				}
 
 				// Position
-				Float3 pos;
-				pos.x = position->position.x;
-				pos.y = position->position.y;
-				pos.z = position->position.z;
+				Float3 pos = position->position;
 
 				// extract camera orientation to determine velocity
-				DirectX::XMFLOAT3 lookAtXMFloat3;
-				lookAtXMFloat3.x = camera->mat_view._13;
-				lookAtXMFloat3.y = camera->mat_view._23;
-				lookAtXMFloat3.z = camera->mat_view._33;
+				DirectX::XMFLOAT3 lookAtXMFloat3((float*)&camera->mat_view.getLookAt());
+
 				DirectX::XMVECTOR lookAt = DirectX::XMLoadFloat3(&lookAtXMFloat3);
 				lookAt = DirectX::XMVector3Normalize(lookAt);
 
 				// Rotation
-				DirectX::XMMATRIX rotationMatrix(	camera->mat_view._11,	camera->mat_view._21,	camera->mat_view._31,	0.0f,
+				camera->mat_view.getRotationOnly();
+				//DirectX::XMMATRIX rotationMatrix((float*)&camera->mat_view);
+				DirectX::XMMATRIX rotationMatrix(
+					camera->mat_view._11,	camera->mat_view._21,	camera->mat_view._31,	0.0f,
 					camera->mat_view._12,	camera->mat_view._22,	camera->mat_view._32,	0.0f, 
 					camera->mat_view._13,	camera->mat_view._23,	camera->mat_view._33,	0.0f,
 					0.0f,					0.0f,					0.0f,					1.0f);
@@ -211,9 +204,7 @@ void GameComponent::onUpdate(float delta)
 					lookAtXMFloat3.z = DirectX::XMVectorGetZ(newLookAt);
 
 					Float3 velocity(lookAtXMFloat3.x, lookAtXMFloat3.y, lookAtXMFloat3.z);
-					velocity.x *= weaponStats->velocityOfEachProjectile;
-					velocity.y *= weaponStats->velocityOfEachProjectile;
-					velocity.z *= weaponStats->velocityOfEachProjectile;
+					velocity = velocity * weaponStats->velocityOfEachProjectile;
 
 					// add displacement on position (this should be based on the collision shape of the player model)
 					float d = 0.5f;
@@ -227,7 +218,7 @@ void GameComponent::onUpdate(float delta)
 					pos.x += randomLO + (float)rand()/((float)RAND_MAX/(randomHI-randomLO));
 					pos.y += randomLO + (float)rand()/((float)RAND_MAX/(randomHI-randomLO));
 					pos.z += randomLO + (float)rand()/((float)RAND_MAX/(randomHI-randomLO));
-					SEND_EVENT(&Event_CreateProjectile(pos, velocity, rotation, weaponStats->damgeOfEachProjectile, itrPlayer.getOwner(), weaponStats->isExplosive));
+					SEND_EVENT(&Event_CreateProjectile(pos, velocity, rotation, weaponStats->damgeOfEachProjectile, itrPlayer.ownerId(), weaponStats->isExplosive));
 				}
 			}
 			else if(weaponStats->nrOfShotsLeftInClip <= 0)
@@ -249,11 +240,10 @@ void GameComponent::onUpdate(float delta)
 		if(health->health <= 0) 
 		{
 			// if an appropriate spawnpoint was found: spawn at it; otherwise: spawn at origo.
-			SpawnPointAttribute* spawnPointAttribute = findUnoccupiedSpawnPoint();
+			Attribute_SpawnPoint* spawnPointAttribute = findUnoccupiedSpawnPoint();
 			if(spawnPointAttribute != nullptr)
 			{
-				PositionAttribute* spawnPointPositionAttribute;
-				spawnPointPositionAttribute = &positionAttributes_->at(spawnPointAttribute->positionAttribute.index);
+				Attribute_Position* spawnPointPositionAttribute = itrPosition.at(spawnPointAttribute->ptr_position);
 				position->position = spawnPointPositionAttribute->position; // set player position attribute
 			}
 			else
@@ -274,7 +264,7 @@ void GameComponent::onUpdate(float delta)
 	while(itrProjectile.hasNext())
 	{
 		// Fetch attributes
-		ProjectileAttribute* projectile = itrProjectile.getNext();
+		Attribute_Projectile* projectile = itrProjectile.getNext();
 
 		//
 		// Update projectile lifetime
@@ -283,10 +273,10 @@ void GameComponent::onUpdate(float delta)
 		projectile->currentLifeTimeLeft -= delta;
 		if(projectile->currentLifeTimeLeft <= 0)
 		{
-			DEBUGPRINT("Projectile entity " << itrProjectile.getOwner() << " has no lifetime left");
+			DEBUGPRINT("Projectile entity " << itrProjectile.ownerId() << " has no lifetime left");
 
 			// remove projectile entity
-			SEND_EVENT(&Event_RemoveEntity(itrProjectile.getOwner()));
+			SEND_EVENT(&Event_RemoveEntity(itrProjectile.ownerId()));
 		}
 	}
 
@@ -298,7 +288,7 @@ void GameComponent::onUpdate(float delta)
 	while(itrSpawnPoint.hasNext())
 	{
 		// spawn delay logic
-		SpawnPointAttribute* spawnPoint	= itrSpawnPoint.getNext();
+		Attribute_SpawnPoint* spawnPoint	= itrSpawnPoint.getNext();
 		spawnPoint->timeSinceLastSpawn += delta;
 	}
 
@@ -310,7 +300,7 @@ void GameComponent::onUpdate(float delta)
 	while(itrWeaponStats.hasNext())
 	{
 		// Fetch attribute
-		WeaponStatsAttribute* weaponStats = itrWeaponStats.getNext();
+		Attribute_WeaponStats* weaponStats = itrWeaponStats.getNext();
 
 		//
 		// Weapon cooldown logic
@@ -353,7 +343,7 @@ void GameComponent::onUpdate(float delta)
 	while(itrExplosionSphere.hasNext())
 	{
 		// Fetch attributes
-		ExplosionSphereAttribute* explosionSphere = itrExplosionSphere.getNext();
+		Attribute_ExplosionSphere* explosionSphere = itrExplosionSphere.getNext();
 
 
 		//
@@ -363,7 +353,7 @@ void GameComponent::onUpdate(float delta)
 		explosionSphere->currentLifeTimeLeft -= delta;
 		if(explosionSphere->currentLifeTimeLeft <= 0.0f)
 		{
-			SEND_EVENT(&Event_RemoveEntity(itrExplosionSphere.getOwner()));
+			SEND_EVENT(&Event_RemoveEntity(itrExplosionSphere.ownerId()));
 		}
 	}
 }
@@ -371,8 +361,8 @@ void GameComponent::onUpdate(float delta)
 void GameComponent::event_PhysicsAttributesColliding(Event_PhysicsAttributesColliding* e)
 {
 	// Fetch Entities so we can inspect their attributes
-	Entity* entity1 = &allEntity->at(allPhysicsOwner->at(e->attribute1_index)); //entityOfCollidingAttribute
-	Entity* entity2 = &allEntity->at(allPhysicsOwner->at(e->attribute2_index));
+	Entity* entity1 = &allEntity->at(itrPhysics.ownerIdAt(e->attribute1_index));
+	Entity* entity2 = &allEntity->at(itrPhysics.ownerIdAt(e->attribute2_index));
 	
 	//
 	// Handle hit reaction on entity 1
@@ -390,16 +380,16 @@ void GameComponent::event_PhysicsAttributesColliding(Event_PhysicsAttributesColl
 		if(entity2->hasAttribute(ATTRIBUTE_DAMAGE))
 		{
 			// fetch damage from entity 2
-			std::vector<DamageAttribute>* allDamage = GET_ATTRIBUTES(damage);
+			std::vector<Attribute_Damage>* allDamage = GET_ATTRIBUTES(damage);
 			std::vector<int> damageId = entity2->getAttributes(ATTRIBUTE_DAMAGE);
 
 			// fetch health from entity 1
-			std::vector<HealthAttribute>* allHealth =  GET_ATTRIBUTES(health);
+			std::vector<Attribute_Health>* allHealth =  GET_ATTRIBUTES(health);
 			std::vector<int> healthId = entity1->getAttributes(ATTRIBUTE_HEALTH);
 
 			for(unsigned i=0; i<damageId.size(); i++)
 			{
-				DamageAttribute* damage = &allDamage->at(damageId[i]);
+				Attribute_Damage* damage = &allDamage->at(damageId[i]);
 
 				// avoid damage to self
 				if(entity1->getID() != damage->owner_entityID || entity2->hasAttribute(ATTRIBUTE_EXPLOSIONSPHERE))
@@ -407,19 +397,19 @@ void GameComponent::event_PhysicsAttributesColliding(Event_PhysicsAttributesColl
 					// Apply damage to all Health attributes
 					for(unsigned i=0; i<healthId.size(); i++)
 					{
-						HealthAttribute* health = &allHealth->at(healthId[i]);
+						Attribute_Health* health = &allHealth->at(healthId[i]);
 						health->health -= damage->damage;
 						
 						// If a player was killed by the collision, give priority (score) to the player that created the DamageAttribute
 						if(health->health <= 0)
 						{
-							std::vector<PlayerAttribute>* allPlayers = GET_ATTRIBUTES(player);
+							std::vector<Attribute_Player>* allPlayers = GET_ATTRIBUTES(player);
 							Entity* creatorOfProjectilePlayerEntity = &allEntity->at(damage->owner_entityID);
 							std::vector<int> playerId = creatorOfProjectilePlayerEntity->getAttributes(ATTRIBUTE_PLAYER);
 
 							for(unsigned i=0;i<playerId.size();i++)
 							{
-								PlayerAttribute* player = &allPlayers->at(playerId.at(i));
+								Attribute_Player* player = &allPlayers->at(playerId.at(i));
 								
 								//Award player
 								if(entity1->getID() != damage->owner_entityID)
@@ -462,21 +452,21 @@ void GameComponent::event_PhysicsAttributesColliding(Event_PhysicsAttributesColl
 		//if(entity2->hasAttribute(ATTRIBUTE_PHYSICS) && !entity2->hasAttribute(ATTRIBUTE_PROJECTILE))
 		{
 			//Set gravity on projectiles colliding with physics objects
-			std::vector<PhysicsAttribute>* allPhysics = GET_ATTRIBUTES(physics);
+			std::vector<Attribute_Physics>* allPhysics = GET_ATTRIBUTES(physics);
 			std::vector<int> physicsId = entity1->getAttributes(ATTRIBUTE_PHYSICS);
 			for(unsigned i=0;i<physicsId.size();i++)
 			{
-				PhysicsAttribute* physicsAttribute = &allPhysics->at(physicsId.at(i));
+				Attribute_Physics* physicsAttribute = &allPhysics->at(physicsId.at(i));
 				physicsAttribute->gravity = Float3(0.0f, -10.0f, 0.0f);
 				physicsAttribute->linearVelocity = Float3(0.0f, 0.0f, 0.0f);
 			}
 
 			//Handle PhysicsAttribute of a projectile colliding with another PhysicsAttribute
-			std::vector<ProjectileAttribute>* allProjectile = GET_ATTRIBUTES(projectile);
+			std::vector<Attribute_Projectile>* allProjectile = GET_ATTRIBUTES(projectile);
 			std::vector<int> projectileId = entity1->getAttributes(ATTRIBUTE_PROJECTILE);
 			for(unsigned i=0;i<projectileId.size();i++)
 			{
-				ProjectileAttribute* projectileAttribute = &allProjectile->at(projectileId.at(i));
+				Attribute_Projectile* projectileAttribute = &allProjectile->at(projectileId.at(i));
 
 				//Shorten lifetime of projectile colliding with physics objects
 				if(projectileAttribute->currentLifeTimeLeft > 0.2f)
@@ -488,8 +478,8 @@ void GameComponent::event_PhysicsAttributesColliding(Event_PhysicsAttributesColl
 				if(projectileAttribute->explodeOnImnpact)
 				{
 					//Get damage from projectile.
- 					std::vector<DamageAttribute>* allDamage = GET_ATTRIBUTES(damage);
-					DamageAttribute* projectileDamageAttribute;
+ 					std::vector<Attribute_Damage>* allDamage = GET_ATTRIBUTES(damage);
+					Attribute_Damage* projectileDamageAttribute;
 					if(entity1->hasAttribute(ATTRIBUTE_DAMAGE))
 					{
 						std::vector<int> damageId = entity1->getAttributes(ATTRIBUTE_DAMAGE);
@@ -502,9 +492,10 @@ void GameComponent::event_PhysicsAttributesColliding(Event_PhysicsAttributesColl
  					projectileAttribute->currentLifeTimeLeft = 0.0f;
 
 					//Extract projectile position.
-					PhysicsAttribute* projectilePhysicsAttribute = &physicsAttributes_->at(projectileAttribute->physicsAttribute.index);
-					SpatialAttribute* projectileSpatialAttribute = &spatialAttributes_->at(projectilePhysicsAttribute->spatialAttribute.index);
-					PositionAttribute* projectilePositionAttribute = &positionAttributes_->at(projectileSpatialAttribute->positionAttribute.index);
+			
+					Attribute_Physics* projectilePhysicsAttribute = itrPhysics.at(projectileAttribute->ptr_physics);
+					Attribute_Spatial* projectileSpatialAttribute = itrSpatial.at(projectilePhysicsAttribute->ptr_spatial);
+					Attribute_Position* projectilePositionAttribute = itrPosition.at(projectileSpatialAttribute->ptr_position);
 
 					//Creates an explosion sphere. Init information is taken from the impacting projectile.
 					SEND_EVENT(&Event_CreateExplosionSphere(projectilePositionAttribute->position, projectileAttribute->explosionSphereRadius, projectileDamageAttribute->damage, projectileAttribute->entityIdOfCreator));
@@ -524,76 +515,76 @@ void GameComponent::event_EndDeathmatch(Event_EndDeathmatch* e)
 	DEBUGPRINT("x--------------x");
 }
 
-SpawnPointAttribute* GameComponent::findUnoccupiedSpawnPoint()
+Attribute_SpawnPoint* GameComponent::findUnoccupiedSpawnPoint()
 {
-	SpawnPointAttribute* foundSpawnPoint = nullptr;
-	std::vector<int>* spawnPointAttributesOwners = GET_ATTRIBUTE_OWNERS(spawnPoint);
+	Attribute_SpawnPoint* foundSpawnPoint = nullptr;
 	
-	//Special cases: *no spawn point, return nullptr.
-	int nrOfSpawnPoints = (int)spawnPointAttributesOwners->size();
-	if(nrOfSpawnPoints < 1)
+	// Special cases: *no spawn point, return nullptr.
+	int numSpawnPoints = itrSpawnPoint.size();
+	if(numSpawnPoints < 1)
 	{
 		DEBUGPRINT("GameComponent::findUnoccupiedSpawnPoint - No spawn point found.");
 		return foundSpawnPoint;
 	}
 
-	//Iterate through all spawn points to find all unoccupied spawn points.
-	std::vector<SpawnPointAttribute*> unoccupiedSpawnPointAttributes;
-	for(int i=0; i<nrOfSpawnPoints; i++)
+
+	//
+	// Find all unoccupied spawn points.
+	//
+
+	std::vector<Attribute_SpawnPoint*> unoccupiedSpawnPoints;
+	while(itrSpawnPoint.hasNext())
 	{
-		if(spawnPointAttributesOwners->at(i)!=0)
-		{
-			foundSpawnPoint = &spawnPointAttributes_->at(i);
-			PositionAttribute* spawnPointPositionAttribute;
-			spawnPointPositionAttribute = &positionAttributes_->at(foundSpawnPoint->positionAttribute.index);
+		// Fetch attributes
+		foundSpawnPoint = itrSpawnPoint.getNext();
+		Attribute_Position* position_spawnPoint = itrPosition.at(foundSpawnPoint->ptr_position);
 		
-			//Iterate through all living players to find if any of them are inside the current spawn point radius.
-			bool occupiedSpawnPoint = false;
-			std::vector<int>* playerAttributesOwners = GET_ATTRIBUTE_OWNERS(player);
-			int nrOfPlayers = playerAttributesOwners->size();
-			for(int j=0; j<nrOfPlayers; j++)
+		// To prevent spawncamping, check if spawnpoint is occupied
+		bool isUnoccupied = true;
+		while(itrPlayer.hasNext())
+		{
+			Attribute_Player* player	= itrPlayer.getNext();
+			Attribute_Health* health	= itrHealth.at(player->ptr_health);
+
+			// If player is alive
+			if(health->health > 0)
 			{
-				if(playerAttributesOwners->at(j)!=0)
+				Attribute_Render*	render	= itrRender.at(player->ptr_render);
+				Attribute_Spatial*	spatial	= itrSpatial.at(render->ptr_spatial);
+				Attribute_Position*	position_player	= itrPosition.at(spatial->ptr_position);
+
+				// calculate distance to spawn point
+				float distanceToSpawnPoint =  position_player->position.distanceTo(position_spawnPoint->position);
+
+				// if a player is within spawn point radius
+				if(distanceToSpawnPoint < foundSpawnPoint->spawnArea)
 				{
-					PlayerAttribute* player	= &playerAttributes_->at(j);
-					HealthAttribute* health	= &healthAttributes_->at(player->healthAttribute.index);
-
-					if(health->health > 0) //If the current player is alive.
-					{
-						//Extract player position.
-						RenderAttribute* render = &renderAttributes_->at(player->renderAttribute.index);
-						SpatialAttribute* spatial = &spatialAttributes_->at(render->spatialAttribute.index);
-						PositionAttribute* playerPosition = &positionAttributes_->at(spatial->positionAttribute.index);
-
-						float x1, x2, z1, z2;
-						x1 = spawnPointPositionAttribute->position.x;
-						x2 = playerPosition->position.x;
-						z1 = spawnPointPositionAttribute->position.z;
-						z2 = playerPosition->position.z;
-
-						float distanceBetweenCurrentPlayerAndCurrentSpawnPoint = sqrtf( ((x1-x2)*(x1-x2)) + ((z1-z2)*(z1-z2)) );
-						if(distanceBetweenCurrentPlayerAndCurrentSpawnPoint < foundSpawnPoint->spawnArea) //A player is inside the spawn point radius.
-						{
-							occupiedSpawnPoint = true;
-							break;
-						}
-					}
+					// spawn point is occupied, abort further testing
+					isUnoccupied = false;
+					break;
 				}
 			}
-			if(!occupiedSpawnPoint)
-			{
-				unoccupiedSpawnPointAttributes.push_back(foundSpawnPoint); //This vector will be iterated below.
-			}
+		}
+		// TRUE: Spawn point is unoccupied, add to vector
+		if(isUnoccupied)
+		{
+			unoccupiedSpawnPoints.push_back(foundSpawnPoint); // this vector will be iterated below.
 		}
 	}
 
-	//Iterate through all unoccupied spawn points (found in the above loop) to find the spawn point that least recently spawned a player.
-	int nrOfUnoccupiedSpawnPoints = unoccupiedSpawnPointAttributes.size();
+
+	// Iterate through all unoccupied spawn points 
+	// (found in the above loop) to find the spawn 
+	// point that least recently spawned a player.
+
+	int nrOfUnoccupiedSpawnPoints = unoccupiedSpawnPoints.size();
+	
+	// Find least recently used spawn point
 	int longestTimeSinceLastSpawnIndex = -1;
 	float longestTimeSinceLastSpawn = 0.0f;
 	for(int i=0; i<nrOfUnoccupiedSpawnPoints; i++)
 	{
-		foundSpawnPoint = unoccupiedSpawnPointAttributes.at(i);
+		foundSpawnPoint = unoccupiedSpawnPoints.at(i);
   		if(foundSpawnPoint->timeSinceLastSpawn >= longestTimeSinceLastSpawn)
 		{
 			longestTimeSinceLastSpawn = foundSpawnPoint->timeSinceLastSpawn;
@@ -602,17 +593,17 @@ SpawnPointAttribute* GameComponent::findUnoccupiedSpawnPoint()
 	}
 	if(longestTimeSinceLastSpawnIndex > -1)
 	{
-		foundSpawnPoint = unoccupiedSpawnPointAttributes.at(longestTimeSinceLastSpawnIndex);
+		foundSpawnPoint = unoccupiedSpawnPoints.at(longestTimeSinceLastSpawnIndex);
 	}
 
-	//If all spawnpoints are occupied, pick one at random.
+	// If all spawn points are occupied, pick one at random.
 	if(nrOfUnoccupiedSpawnPoints < 1)
 	{
-		int pseudoRandomSpawnPointAttributeId = rand()%nrOfSpawnPoints;
-		foundSpawnPoint = &spawnPointAttributes_->at(pseudoRandomSpawnPointAttributeId);
+		int randomSpawnPointId = Math::randomInt(numSpawnPoints);
+		foundSpawnPoint = itrSpawnPoint.at(randomSpawnPointId);
 	}
 
-	//Reset spawn point timer.
+	// Reset spawn point timer.
 	if(foundSpawnPoint != nullptr)
 		foundSpawnPoint->timeSinceLastSpawn = 0.0f;
 

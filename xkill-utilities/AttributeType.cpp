@@ -12,17 +12,17 @@ IAttribute::~IAttribute()
 {
 }
 
-PositionAttribute::PositionAttribute()
+Attribute_Position::Attribute_Position()
 {
 	position.x = 0.0f;
 	position.y = 0.0f;
 	position.z = 0.0f;
 }
-PositionAttribute::~PositionAttribute()
+Attribute_Position::~Attribute_Position()
 {
 }
 
-SpatialAttribute::SpatialAttribute()
+Attribute_Spatial::Attribute_Spatial()
 {
 	rotation.x = 0.0f;
 	rotation.y = 0.0f;
@@ -33,11 +33,11 @@ SpatialAttribute::SpatialAttribute()
 	scale.y = 1.0f;
 	scale.z = 1.0f;
 }
-SpatialAttribute::~SpatialAttribute()
+Attribute_Spatial::~Attribute_Spatial()
 {
 }
 
-RenderAttribute::RenderAttribute()
+Attribute_Render::Attribute_Render()
 {
 	transparent			= false;
 	tessellation		= false;
@@ -45,11 +45,11 @@ RenderAttribute::RenderAttribute()
 	meshID			= 0;
 	textureID		= 0;
 }
-RenderAttribute::~RenderAttribute()
+Attribute_Render::~Attribute_Render()
 {
 }
 
-PhysicsAttribute::PhysicsAttribute()
+Attribute_Physics::Attribute_Physics()
 {
 	collisionResponse = true;
 	added = false;
@@ -70,29 +70,29 @@ PhysicsAttribute::PhysicsAttribute()
 	linearVelocity.y = 0;
 	linearVelocity.z = 0;
 }
-PhysicsAttribute::~PhysicsAttribute()
+Attribute_Physics::~Attribute_Physics()
 {
 }
 
-ProjectileAttribute::ProjectileAttribute()
+Attribute_Projectile::Attribute_Projectile()
 {
 	entityIdOfCreator = -1;
 	currentLifeTimeLeft = 10.0f;
 	explodeOnImnpact = false;
 	explosionSphereRadius = 0.01f;
 }
-ProjectileAttribute::~ProjectileAttribute()
+Attribute_Projectile::~Attribute_Projectile()
 {
 }
 
-SoundAttribute::SoundAttribute()
+Attribute_Sound::Attribute_Sound()
 {
 }
-SoundAttribute::~SoundAttribute()
+Attribute_Sound::~Attribute_Sound()
 {
 }
 
-CameraAttribute::CameraAttribute()
+Attribute_Camera::Attribute_Camera()
 {
 	ZeroMemory(&mat_projection, sizeof(mat_projection));
 	ZeroMemory(&mat_view, sizeof(mat_view));
@@ -101,11 +101,11 @@ CameraAttribute::CameraAttribute()
 	zFar = 40.0f;
 	zNear = 0.01f;
 }
-CameraAttribute::~CameraAttribute()
+Attribute_Camera::~Attribute_Camera()
 {
 }
 
-InputAttribute::InputAttribute()
+Attribute_Input::Attribute_Input()
 {
 	fire = false;
 	changeAmmunitionType = false;
@@ -114,27 +114,27 @@ InputAttribute::InputAttribute()
 	ZeroMemory(&rotation,sizeof(rotation));
 	DirectX::XMFLOAT3 test;
 }
-InputAttribute::~InputAttribute()
+Attribute_Input::~Attribute_Input()
 {
 }
-PlayerAttribute::PlayerAttribute()
+Attribute_Player::Attribute_Player()
 {
 	id = -1;
 	priority = 0;
 	cycleSteals = 0;
 	totalExecutionTime = 0;
 }
-PlayerAttribute::~PlayerAttribute()
+Attribute_Player::~Attribute_Player()
 {
 }
 
-MeshAttribute::MeshAttribute()
+Attribute_Mesh::Attribute_Mesh()
 {
 	this->meshID		= 0;
 	this->mesh			= nullptr;
 	this->dynamic		= false;
 }
-MeshAttribute::MeshAttribute(
+Attribute_Mesh::Attribute_Mesh(
 	unsigned int	id,
 	MeshModel*		mesh,
 	bool			dynamic)
@@ -143,45 +143,45 @@ MeshAttribute::MeshAttribute(
 	this->mesh			= mesh;
 	this->dynamic		= dynamic;
 }
-MeshAttribute::~MeshAttribute()
+Attribute_Mesh::~Attribute_Mesh()
 {
 }
-void MeshAttribute::clean()
+void Attribute_Mesh::clean()
 {
 }
 
-HealthAttribute::HealthAttribute()
+Attribute_Health::Attribute_Health()
 {
 	startHealth = 10.0f;
 	health = 0.0f;
 }
-HealthAttribute::~HealthAttribute()
+Attribute_Health::~Attribute_Health()
 {
 }
 
-DamageAttribute::DamageAttribute()
+Attribute_Damage::Attribute_Damage()
 {
 	damage = 1.0f;
 }
-DamageAttribute::~DamageAttribute()
+Attribute_Damage::~Attribute_Damage()
 {
 }
 
-SpawnPointAttribute::SpawnPointAttribute()
+Attribute_SpawnPoint::Attribute_SpawnPoint()
 {
 	timeSinceLastSpawn = 0.0f;
 	spawnArea = 0.0f;
 }
-SpawnPointAttribute::~SpawnPointAttribute()
+Attribute_SpawnPoint::~Attribute_SpawnPoint()
 {
 }
 
-WeaponStatsAttribute::WeaponStatsAttribute()
+Attribute_WeaponStats::Attribute_WeaponStats()
 {
 	setWeaponStats(BULLET, SINGLE);
 }
 
-void WeaponStatsAttribute::setWeaponStats(AmmunitionType ammunitionType, FiringMode firingMode)
+void Attribute_WeaponStats::setWeaponStats(AmmunitionType ammunitionType, FiringMode firingMode)
 {
 	this->ammunitionType = ammunitionType;
 	this->firingMode = firingMode;
@@ -241,7 +241,7 @@ void WeaponStatsAttribute::setWeaponStats(AmmunitionType ammunitionType, FiringM
 
 	nrOfShotsLeftInClip = clipSize;
 }
-void WeaponStatsAttribute::setWeaponToDebugMachineGun()
+void Attribute_WeaponStats::setWeaponToDebugMachineGun()
 {
 	totalNrOfShots = -1;
 	nrOfShotsLeftInClip = clipSize;
@@ -259,20 +259,20 @@ void WeaponStatsAttribute::setWeaponToDebugMachineGun()
 	cooldownBetweenShots = 0.0f;
 }
 
-WeaponStatsAttribute::~WeaponStatsAttribute()
+Attribute_WeaponStats::~Attribute_WeaponStats()
 {
 }
 
-DebugShapeAttribute::DebugShapeAttribute()
+Attribute_DebugShape::Attribute_DebugShape()
 {
 	shape	= nullptr;
 	render	= false;
 }
-DebugShapeAttribute::~DebugShapeAttribute()
+Attribute_DebugShape::~Attribute_DebugShape()
 {
 	//Do nothing.
 }
-void DebugShapeAttribute::clean()
+void Attribute_DebugShape::clean()
 {
 	if(shape)
 	{
@@ -281,10 +281,10 @@ void DebugShapeAttribute::clean()
 	}
 	render = false;
 }
-ExplosionSphereAttribute::ExplosionSphereAttribute()
+Attribute_ExplosionSphere::Attribute_ExplosionSphere()
 {
 	currentLifeTimeLeft = 1.0f;
 }
-ExplosionSphereAttribute::~ExplosionSphereAttribute()
+Attribute_ExplosionSphere::~Attribute_ExplosionSphere()
 {
 }

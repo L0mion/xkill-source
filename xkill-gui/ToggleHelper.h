@@ -1,6 +1,6 @@
 #pragma once
 
-#include <QWidget>
+#include <QtGui/QWidget>
 #include <xkill-utilities/IObserver.h>
 
 class Event;

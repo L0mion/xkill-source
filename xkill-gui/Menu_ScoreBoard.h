@@ -3,8 +3,8 @@
 #include <xkill-utilities/EventManager.h>
 #include <xkill-utilities/EventType.h>
 #include <xkill-utilities/AttributeType.h>
-#include <QDialog>
-#include <QKeyEvent>
+#include <QtGui/QDialog>
+#include <QtGui/QKeyEvent>
 #include "ToggleHelper.h"
 #include "ui_ScoreMenu.h" 
 
@@ -61,11 +61,11 @@ public:
 		// showMenu
 		if(false)
 		{
-			std::vector<PlayerAttribute>* allPlayers		=	GET_ATTRIBUTES(player);
-			std::vector<HealthAttribute>* allHealth			=	GET_ATTRIBUTES(health);
-			std::vector<RenderAttribute>* allRender			=	GET_ATTRIBUTES(render);
-			std::vector<SpatialAttribute>* allSpatial		=	GET_ATTRIBUTES(spatial);
-			std::vector<PositionAttribute>* allPositions	=	GET_ATTRIBUTES(position);
+			std::vector<Attribute_Player>* allPlayers		=	GET_ATTRIBUTES(player);
+			std::vector<Attribute_Health>* allHealth			=	GET_ATTRIBUTES(health);
+			std::vector<Attribute_Render>* allRender			=	GET_ATTRIBUTES(render);
+			std::vector<Attribute_Spatial>* allSpatial		=	GET_ATTRIBUTES(spatial);
+			std::vector<Attribute_Position>* allPositions	=	GET_ATTRIBUTES(position);
 
 			// Update tree widget
 			ui.treeWidget->clear();
@@ -75,11 +75,11 @@ public:
 				if(allPlayerOwner->at(i)!=0)
 				{
 					// Extract attributes from a playerAttribute
-					PlayerAttribute* player			=	&allPlayers->at(i);
-					HealthAttribute* health			=	&allHealth->at(player->healthAttribute.index);
-					RenderAttribute* render			=	&allRender->at(player->renderAttribute.index);			
-					SpatialAttribute* spatial		=	&allSpatial->at(render->spatialAttribute.index);
-					PositionAttribute* position		=	&allPositions->at(spatial->positionAttribute.index);
+					Attribute_Player* player			=	&allPlayers->at(i);
+					Attribute_Health* health			=	&allHealth->at(player->ptr_health.index);
+					Attribute_Render* render			=	&allRender->at(player->ptr_render.index);			
+					Attribute_Spatial* spatial		=	&allSpatial->at(render->ptr_spatial.index);
+					Attribute_Position* position		=	&allPositions->at(spatial->ptr_position.index);
 
 					// Add row
 					QTreeWidgetItem* itm = new QTreeWidgetItem();

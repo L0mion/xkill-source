@@ -1,6 +1,6 @@
 #pragma once
 
-#include <QMainWindow>
+#include <QtGui/QMainWindow>
 #include "ui_MainMenu.h"
 
 class QStandardItemModel;

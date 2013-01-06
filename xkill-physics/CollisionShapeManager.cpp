@@ -66,7 +66,7 @@ btCollisionShape* CollisionShapeManager::getCollisionShape(unsigned int meshID)
 
 btCollisionShape* CollisionShapeManager::loadCollisionShape(unsigned int meshID)
 {
-	MeshAttribute* meshAttribute;
+	Attribute_Mesh* meshAttribute;
 
 	bool foundMeshAt = false;
 	for(unsigned int i = 0; i < meshAttributes_->size() && !foundMeshAt; i++)

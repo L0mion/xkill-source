@@ -1,9 +1,7 @@
 #pragma once
 
-#include <QtGui>
-#include <QKeyEvent> // needed to grab mouse input
+#include <QtGui/QKeyEvent> // needed to grab mouse input
 #include <xkill-utilities/IObserver.h>
-
 
 #include "Menu_Main.h"
 #include "Menu_ScoreBoard.h"

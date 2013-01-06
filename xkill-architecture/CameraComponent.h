@@ -5,8 +5,8 @@
 #include <xkill-utilities/IObserver.h>
 
 class Camera;
-struct CameraAttribute;
-struct InputAttribute;
+struct Attribute_Camera;
+struct Attribute_Input;
 class Event_MouseMove;
 class Event_WindowResize;
 
@@ -33,6 +33,6 @@ public:
 
 private:
 	std::vector<Camera> cameras_;						//!< Holds camera objects.
-	std::vector<CameraAttribute>* cameraAttributes_;	//!< Holds camera attributes.
-	std::vector<InputAttribute>* inputAttributes_;		//!< Holds input attributes.
+	std::vector<Attribute_Camera>* cameraAttributes_;	//!< Holds camera attributes.
+	std::vector<Attribute_Input>* inputAttributes_;		//!< Holds input attributes.
 };

@@ -45,6 +45,7 @@ NOTE: DOXYGEN can not detect Enums combined with DLL
 for some reason
 */
 
+
 enum DLL_U AttributeType
 {
 	ATTRIBUTE_POSITION,
@@ -73,10 +74,11 @@ enum DLL_U AttributeType
 /** 
 \ingroup ATTRIBUTES
 */
-struct DLL_U PositionAttribute : public IAttribute
+struct DLL_U Attribute_Position : public IAttribute
 {
-	PositionAttribute();
-	~PositionAttribute();
+	Attribute_Position();
+	~Attribute_Position();
+
 	Float3 position;
 };
 
@@ -84,12 +86,12 @@ struct DLL_U PositionAttribute : public IAttribute
 /** 
 \ingroup ATTRIBUTES
 */
-struct DLL_U SpatialAttribute : public IAttribute
+struct DLL_U Attribute_Spatial : public IAttribute
 {
-	SpatialAttribute();
-	~SpatialAttribute();
+	Attribute_Spatial();
+	~Attribute_Spatial();
 
-	AttributePointer positionAttribute;
+	AttributePointer ptr_position;
 
 	Float4 rotation;
 	Float3 scale;
@@ -99,7 +101,7 @@ struct DLL_U SpatialAttribute : public IAttribute
 /** 
 \ingroup ATTRIBUTES
 */
-struct DLL_U BoundingAttribute : public IAttribute
+struct DLL_U Attribute_Bounding : public IAttribute
 {
 	float BoxPoints[8*3];
 	float ConvexPoints[42*3];
@@ -117,13 +119,13 @@ through the use of Instancing.
 
 \ingroup ATTRIBUTES
 */
-struct DLL_U RenderAttribute : public IAttribute
+struct DLL_U Attribute_Render : public IAttribute
 {
-	RenderAttribute();
-	~RenderAttribute();
+	Attribute_Render();
+	~Attribute_Render();
 
-	AttributePointer spatialAttribute;
-	AttributePointer boundingAttribute;
+	AttributePointer ptr_spatial;
+	AttributePointer ptr_bounding;
 	
 	BoolField culling;
 
@@ -138,13 +140,14 @@ struct DLL_U RenderAttribute : public IAttribute
 /** 
 \ingroup ATTRIBUTES
 */
-struct DLL_U PhysicsAttribute : public IAttribute
+struct DLL_U Attribute_Physics : public IAttribute
 {
-	PhysicsAttribute();
-	~PhysicsAttribute();
+	Attribute_Physics();
+	~Attribute_Physics();
 
-	AttributePointer spatialAttribute;
-	AttributePointer renderAttribute;
+	AttributePointer ptr_spatial;
+	AttributePointer ptr_render;
+
 	Float3 linearVelocity;
 	Float3 angularVelocity;
 	Float3 gravity;
@@ -167,24 +170,25 @@ struct DLL_U PhysicsAttribute : public IAttribute
 /** 
 \ingroup ATTRIBUTES
 */
-struct DLL_U ProjectileAttribute : public IAttribute
+struct DLL_U Attribute_Projectile : public IAttribute
 {
-	ProjectileAttribute();
-	~ProjectileAttribute();
+	Attribute_Projectile();
+	~Attribute_Projectile();
 
-	AttributePointer physicsAttribute;
+	AttributePointer ptr_physics;
+
 	int entityIdOfCreator;		//!< Entity id of the entity that created the projectile.
 	float currentLifeTimeLeft;	//!< Counter counting down the lifetime of the projectile. Is initialized to totalLifeTime. When equal or less than zero, the projectile attribute shall be destroyed.
 	bool explodeOnImnpact;
 	float explosionSphereRadius;
 };
 
-struct DLL_U InputAttribute : public IAttribute
+struct DLL_U Attribute_Input : public IAttribute
 {
-	InputAttribute();
-	~InputAttribute();
+	Attribute_Input();
+	~Attribute_Input();
 
-	AttributePointer physicsAttribute;
+	AttributePointer ptr_physics;
 	Float2 position;
 	Float2 rotation;
 	bool fire;
@@ -196,23 +200,25 @@ struct DLL_U InputAttribute : public IAttribute
 /** 
 \ingroup ATTRIBUTES
 */
-struct DLL_U SoundAttribute : public IAttribute
+struct DLL_U Attribute_Sound : public IAttribute
 {
-	SoundAttribute();
-	~SoundAttribute();
+	Attribute_Sound();
+	~Attribute_Sound();
 
-	AttributePointer positionAttribute;
+	AttributePointer ptr_position;
 };
 
 /// Stores everything RenderComponent needs to know to manage multiple Cameras in the world
 /** 
 \ingroup ATTRIBUTES
 */
-struct DLL_U CameraAttribute : public IAttribute
+struct DLL_U Attribute_Camera : public IAttribute
 {
-	CameraAttribute();
-	~CameraAttribute();
-	AttributePointer spatialAttribute;
+	Attribute_Camera();
+	~Attribute_Camera();
+
+	AttributePointer ptr_spatial;
+
 	Float4x4 mat_view;
 	Float4x4 mat_projection;
 	float fov;
@@ -225,73 +231,74 @@ struct DLL_U CameraAttribute : public IAttribute
 /** 
 \ingroup ATTRIBUTES
 */
-struct DLL_U PlayerAttribute : public IAttribute
+struct DLL_U Attribute_Player : public IAttribute
 {
-	PlayerAttribute();
-	~PlayerAttribute();
+	Attribute_Player();
+	~Attribute_Player();
 
 	int id;					//!< The id of the player process. Used to identify a player attribute in GameComponent when firing projectiles.
 	int priority;			//!< Priority of the player process. Higher value means higher priority. The scheduler will choose the process with the highest priority for execution.
 	int cycleSteals;		//!< Total number of cycle steals for the player process. Cycle steals steal priority from other player processes.
 	int totalExecutionTime; //!< Total execution time of the player process, used ased final score in the deathmatch. The game session winner is the player with the most total execution time as awarded by the scheduler.
 
-	AttributePointer renderAttribute;
-	AttributePointer inputAttribute;
-	AttributePointer cameraAttribute;
-	AttributePointer healthAttribute;
-	AttributePointer weaponStatsAttribute;
+	AttributePointer ptr_render;
+	AttributePointer ptr_input;
+	AttributePointer ptr_camera;
+	AttributePointer ptr_health;
+	AttributePointer ptr_weaponStats;
 };
 
 
 class MeshModel;
-struct DLL_U MeshAttribute : public IAttribute
+struct DLL_U Attribute_Mesh : public IAttribute
 {
 	unsigned int	meshID;		//!< ID of mesh, read from .mdldesc-file.
 	MeshModel*		mesh;		//!< Type containing all mesh-related data.
 	bool			dynamic;	//!< Whether or not mesh is supposed to be dynamic physics-wize.
 
 	void clean();					//!< Does nothing.
-	MeshAttribute();				//!< Initializes attribute with default values. Dynamic = false.
-	MeshAttribute(
+	Attribute_Mesh();				//!< Initializes attribute with default values. Dynamic = false.
+	Attribute_Mesh(
 		unsigned int	id,
 		MeshModel*		mesh,
 		bool			dynamic);	//!< Initializes attribute with passed values.
-	~MeshAttribute();				//!< Does nothing.
+	~Attribute_Mesh();				//!< Does nothing.
 };
 
-struct DLL_U HealthAttribute : public IAttribute
+struct DLL_U Attribute_Health : public IAttribute
 {
-	HealthAttribute();
-	~HealthAttribute();
+	Attribute_Health();
+	~Attribute_Health();
 
 	float startHealth;
 	float health;
 };
 
-struct DLL_U DamageAttribute : public IAttribute
+struct DLL_U Attribute_Damage : public IAttribute
 {
-	DamageAttribute();
-	~DamageAttribute();
+	Attribute_Damage();
+	~Attribute_Damage();
 
 	float damage;
 	int owner_entityID;
 };
 
-struct DLL_U SpawnPointAttribute : public IAttribute
+struct DLL_U Attribute_SpawnPoint : public IAttribute
 {
-	SpawnPointAttribute();
-	~SpawnPointAttribute();
+	Attribute_SpawnPoint();
+	~Attribute_SpawnPoint();
 
 	float timeSinceLastSpawn;	//!< Is reset when a player spawns at the spawn point.
 	float spawnArea;			//!< Defines the spawn point zone, a horizontal circle area.
-	AttributePointer positionAttribute;
+
+	AttributePointer ptr_position;
 };
 
 /// Stores everything needed for the weapon system. The two enums "AmmunitionType" and "FiringMode" is used to preset the weapon settings. These settings are used in GameComponent to simulate the weapon behavior of choice.
 /** 
 \ingroup ATTRIBUTES
 */
-struct DLL_U WeaponStatsAttribute : public IAttribute
+struct DLL_U Attribute_WeaponStats : public IAttribute
 {
 	enum AmmunitionType
 	{
@@ -311,8 +318,8 @@ struct DLL_U WeaponStatsAttribute : public IAttribute
 		NROFFIRINGMODES
 	};
 
-	WeaponStatsAttribute();
-	~WeaponStatsAttribute();
+	Attribute_WeaponStats();
+	~Attribute_WeaponStats();
 
 	void setWeaponStats(AmmunitionType ammunitionType, FiringMode firingMode);
 	void setWeaponToDebugMachineGun();
@@ -341,24 +348,24 @@ struct DLL_U WeaponStatsAttribute : public IAttribute
 };
 
 struct DebugShape;
-struct DLL_U DebugShapeAttribute : public IAttribute
+struct DLL_U Attribute_DebugShape : public IAttribute
 {
-	DebugShapeAttribute();
-	~DebugShapeAttribute();
+	Attribute_DebugShape();
+	~Attribute_DebugShape();
 	void clean();
 
 	unsigned int	meshID;		//!< ID of mesh
-	AttributePointer spatialAttribute;
+	AttributePointer ptr_spatial;
 
 	DebugShape* shape;
 	bool		render;
 };
 
-struct DLL_U ExplosionSphereAttribute : public IAttribute
+struct DLL_U Attribute_ExplosionSphere : public IAttribute
 {
-	ExplosionSphereAttribute();
-	~ExplosionSphereAttribute();
+	Attribute_ExplosionSphere();
+	~Attribute_ExplosionSphere();
 
-	AttributePointer physicsAttribute;
+	AttributePointer ptr_physics;
 	float currentLifeTimeLeft;
 };

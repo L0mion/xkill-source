@@ -1,5 +1,5 @@
 #include "Menu_InGame.h"
-#include <QKeyEvent>
+#include <QtGui/QKeyEvent>
 #include <xkill-utilities/EventManager.h>
 #include <xkill-utilities/AttributeType.h>
 

@@ -1,5 +1,7 @@
 #include "Math.h"
-
+#include <math.h>
+#include <stdlib.h>
+#include <stdio.h>
 
 BoolField::BoolField()
 {
@@ -68,6 +70,51 @@ void Float3::copy(const float* float3)
 	x = float3[0];
 	y = float3[1];
 	z = float3[2];
+}
+
+Float3& Float3::normalize()
+{
+	const float length = sqrtf(x * x + y * y + z * z);
+	x /= length;
+	y /= length;
+	z /= length;
+	return *this;
+}
+
+float Float3::dot( Float3 vec )
+{
+	float result = 
+		x * vec.x + 
+		y * vec.y + 
+		z * vec.z;
+	return result;
+}
+
+void Float3::lerp( Float3 *v, float factor )
+{
+	x =  x * (1.0f - factor) + v->x * factor;
+	y =  y * (1.0f - factor) + v->y * factor;
+	z =  z * (1.0f - factor) + v->z * factor;
+}
+
+Float3 Float3::cross( const Float3& vec ) const
+{
+	const float _x = y * vec.z - z * vec.y;
+	const float _y = z * vec.x - x * vec.z;
+	const float _z = x * vec.y - y * vec.x;
+
+	return Float3(_x, _y, _z);
+}
+
+float Float3::length()
+{
+	return sqrt(x * x + y * y + z * z);
+}
+
+float Float3::distanceTo( Float3 v )
+{
+	Float3 v3(x-v.x,y-v.y,v.z-z);
+	return v3.length();
 }
 
 Float4::Float4()
@@ -323,4 +370,39 @@ void Float4x4::setIdentity()
 	m[3][1] = 0.0f;
 	m[3][2] = 0.0f;
 	m[3][3] = 1.0f;
+}
+
+Float4x4 Float4x4::getRotationOnly()
+{
+	Float4x4 ret;
+		
+		ret._11 = _11;	ret._21 = _21;	ret._31 = _31;	ret._41 = 0.0f;
+		ret._12 = _12;	ret._22 = _22;	ret._32 = _32;	ret._42 = 0.0f; 
+		ret._13 = _13;	ret._23 = _23;	ret._33 = _33;	ret._43 = 0.0f;
+		ret._14 = 0.0f;	ret._24 = 0.0f;	ret._34 = 0.0f;	ret._44	= 1.0f;
+
+	return ret;
+}
+
+Float3 Float4x4::getLookAt()
+{
+	return Float3(_13, _23, _33);
+}
+
+int Math::randomInt( int value )
+{
+	return rand() % value;
+}
+
+int Math::randomInt( int min, int max )
+{
+	return rand() % (max-min + 1) + min;
+}
+
+float Math::randomFloat( float min, float max )
+{
+	float random = ((float)rand())/(float)RAND_MAX;
+	float diff = max - min;
+	float r = random * diff;
+	return min + r;
 }

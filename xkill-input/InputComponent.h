@@ -12,7 +12,7 @@ typedef struct HWND__* HWND;
 #include <vector>
 
 class InputManager;
-struct InputAttribute;
+struct Attribute_Input;
 
 //! Handles input devices and their input
 
@@ -35,7 +35,7 @@ public:
 private:
 	InputManager*					inputManager_;
 	HWND							windowHandle_;
-	std::vector<InputAttribute>*	inputAttributes_;
+	std::vector<Attribute_Input>*	inputAttributes_;
 	float							newDeviceSearchTimer_;	//! Timer until next search for new input devices
 	float							searchTime_;			//! How long time there will be between searches for new input devices
 

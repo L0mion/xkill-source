@@ -10,7 +10,7 @@ class AttributeStorage;
 class IAttributeIterator
 {
 public:
-    virtual int getIndex() = 0;
+    virtual int index() = 0;
 };
 
 // An Iterator to facilitate Attribute iteration
@@ -63,21 +63,34 @@ public:
     {
         // Fetch current item, and step to next item
         nextIndex++;
-        return &attributes->at(getIndex());
+        return &attributes->at(index());
     }
 
     // Returns the Index of the latest
     // Item aquired throught getNext()
-    int getIndex()
+    int index()
     {
         return nextIndex-1;
     }
 
+	// Returns how many attributes (including deleted ones) there is 
+	int size()
+	{
+		return (int)owners->size();
+	}
+
 	// Returns the Owner of the latest
 	// Item aquired throught getNext()
-	int getOwner()
+	int ownerId()
 	{
-		return owners->at(getIndex());
+		return owners->at(index());
+	}
+
+	// Returns the id of the owner
+	// of the Attribute at index
+	int ownerIdAt(int index)
+	{
+		return owners->at(index);
 	}
 
     // Resets the Iterator to the beginning
