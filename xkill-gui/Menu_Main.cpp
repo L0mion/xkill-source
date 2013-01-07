@@ -1,12 +1,12 @@
 #include "Menu_Main.h"
-#include <QKeyEvent>
+#include <QtGui/QKeyEvent>
 #include <xkill-utilities/EventManager.h>
 #include <xkill-utilities/AttributeType.h>
 
 
-#include <QtXml>
-#include <QStandardItemModel>
-#include <QMessageBox>
+#include <QtXml/QtXml>
+#include <QtGui/QStandardItemModel>
+#include <QtGui/QMessageBox>
 
 #include "Menu_Editor.h"
 

@@ -25,8 +25,8 @@ DirectX::XMFLOAT4X4 ManagementMath::calculateMatrixInverse(DirectX::XMFLOAT4X4 m
 	return matrixInverse;
 }
 DirectX::XMFLOAT4X4 ManagementMath::calculateWorldMatrix(
-	SpatialAttribute* spatialAttribute, 
-	PositionAttribute* positionAttribute)
+	Attribute_Spatial* spatialAttribute, 
+	Attribute_Position* positionAttribute)
 {
 	DirectX::XMMATRIX translation = DirectX::XMMatrixTranslation(positionAttribute->position.x,
 																 positionAttribute->position.y,

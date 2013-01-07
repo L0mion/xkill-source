@@ -227,11 +227,11 @@ public:
 	Float3 position;
 	Float3 velocity;
 	Float4 rotation;
-	int damage;
+	float damage;
 	int entityIdOfCreator;
 	bool explodeOnImpact;
 
-	Event_CreateProjectile(Float3 position, Float3 velocity, Float4 rotation, int damage, int entityIdOfCreator, bool explodeOfImpact);
+	Event_CreateProjectile(Float3 position, Float3 velocity, Float4 rotation, float damage, int entityIdOfCreator, bool explodeOfImpact);
 };
 
 class MeshModel;
@@ -358,11 +358,11 @@ public:
 class DLL_U Event_CreateExplosionSphere : public Event
 {
 public:
-	Event_CreateExplosionSphere(Float3 position, float radius, int damage, int entityIdOfCreator);
+	Event_CreateExplosionSphere(Float3 position, float radius, float damage, int entityIdOfCreator);
 
 	Float3 position;
 	float radius;
-	int damage;
+	float damage;
 	int entityIdOfCreator;
 };
 

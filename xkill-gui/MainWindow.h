@@ -1,13 +1,12 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
-#include <QtGui>
-#include <QMouseEvent> // needed to grab mouse input
-#include <QMessageBox> // used to display info dialogs
+#include <QtGui/QMouseEvent> // needed to grab mouse input
+#include <QtGui/QMessageBox> // used to display info dialogs
 #include <xkill-utilities/IObserver.h>
 #include <xkill-utilities/EventManager.h>
 #include "ui_MainWindow.h"
- #include <QApplication>
+ #include <QtGui/QApplication>
 #include "GameWidget.h"
 #include "MenuManager.h"
 
