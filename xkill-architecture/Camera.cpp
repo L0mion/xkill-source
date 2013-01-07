@@ -126,42 +126,33 @@ void Camera::walk(const float velocity)
 
 void Camera::pitch(const float angle)
 {
+
 	//Load vectors in to XMVECTORs to utilize SIMD.
 	DirectX::XMVECTOR vLook		= DirectX::XMLoadFloat3(&look_); 
 	DirectX::XMVECTOR vUp		= DirectX::XMLoadFloat3(&up_);
 
-	DirectX::XMVECTOR vLimitUp = DirectX::XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
-	DirectX::XMVECTOR vLimitDown = DirectX::XMVectorSet(0.0f, -1.0f, 0.0f, 0.0f);
-	DirectX::XMVECTOR vResult;
-	DirectX::XMFLOAT3 result;
+	DirectX::XMVECTOR vStraightUp = DirectX::XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
 	
-	//Check that the camera does not tip over. 
-	vResult = DirectX::XMVector3AngleBetweenVectors(vLook, vLimitUp);
-	DirectX::XMStoreFloat3(&result, vResult);
-	float angleUp = result.x;
-	vResult = DirectX::XMVector3AngleBetweenVectors(vLook, vLimitDown);
-	DirectX::XMStoreFloat3(&result, vResult);
-	float angleDown = result.x;
-	bool canRotate = true;
-	if(angleUp < 0.1f && angle < 0)
-		canRotate = false;
-	if(angleDown < 0.1f && angle > 0)
-		canRotate = false;
-	
-	if(canRotate)
+	//Create a Quaternian that describes the rotation.
+	float cosAngle = cos((angle)/2);
+	float sinAngle = sin((angle)/2);
+	DirectX::XMFLOAT4 fQuaternion = DirectX::XMFLOAT4(right_.x*sinAngle, right_.y*sinAngle, right_.z*sinAngle, cosAngle);
+	DirectX::XMVECTOR vQuaternion = DirectX::XMLoadFloat4(&fQuaternion);
+	vQuaternion = DirectX::XMQuaternionNormalize(vQuaternion);
+
+	//Rotate all vectors that are affected by the transform. 
+	vUp		= DirectX::XMVector3Rotate(vUp, vQuaternion);
+	vLook	= DirectX::XMVector3Rotate(vLook, vQuaternion);
+
+	//Check the angle between the camera's up-vector and "straight up".
+	DirectX::XMFLOAT3 fResult;
+	DirectX::XMVECTOR vResult = DirectX::XMVector3AngleBetweenNormals(vUp, vStraightUp);
+	DirectX::XMStoreFloat3(&fResult, vResult);
+
+	//Store the results in member variables if the the angle between the camera's up-vector
+	//and "straight up" is less than pi/2.
+	if(fResult.x < DirectX::XM_PI/2 && fResult.x > -DirectX::XM_PI/2)
 	{
-		//Create a Quaternian that describes the rotation.
-		float cosAngle = cos((angle)/2);
-		float sinAngle = sin((angle)/2);
-		DirectX::XMFLOAT4 fQuaternion = DirectX::XMFLOAT4(right_.x*sinAngle, right_.y*sinAngle, right_.z*sinAngle, cosAngle);
-		DirectX::XMVECTOR vQuaternion = DirectX::XMLoadFloat4(&fQuaternion);
-		vQuaternion = DirectX::XMQuaternionNormalize(vQuaternion);
-
-		//Rotate all vectors that are affected by the transform. 
-		vUp		= DirectX::XMVector3Rotate(vUp, vQuaternion);
-		vLook	= DirectX::XMVector3Rotate(vLook, vQuaternion);
-
-		//Store the results in member variables.
 		DirectX::XMStoreFloat3(&up_, vUp);
 		DirectX::XMStoreFloat3(&look_, vLook);
 	}
