@@ -70,6 +70,7 @@ void Menu_Main::loadXML()
 	// read all levels to ItemModel
 	QStandardItem* root = new QStandardItem("Levels");
 	model->appendRow(root);
+	model->item(0);
 	QDomElement xmlRoot = document.firstChildElement();
 	QDomNodeList allLevel = xmlRoot.elementsByTagName("Level");
 	for(int i=0; i<allLevel.count(); i++)
@@ -91,6 +92,9 @@ void Menu_Main::loadXML()
 		ui.comboBox_LevelSelect->addItem(child->text());
 	}
 	ui.treeView->setModel(model);
+
+	ui.treeView->setExpanded(allLevelItm->index(), true);
+	
 }
 
 void Menu_Main::slot_selectLevel( int levelId )

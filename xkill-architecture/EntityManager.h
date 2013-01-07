@@ -35,6 +35,7 @@ public:
 		for(unsigned i=0; i<entities.size(); i++)
 		{
 			entities[i].deleteAttributes();
+			entities[i].clean();
 		}
 	}
 
