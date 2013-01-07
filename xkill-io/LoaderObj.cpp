@@ -37,7 +37,10 @@ bool LoaderObj::init()
 			ifstream_.close();
 	}
 	else
+	{
 		sucessfulLoad = false;
+		lastError_ = LOADER_ERROR_FILE_NOT_FOUND;
+	}
 
 	if(sucessfulLoad)
 		loadObj();

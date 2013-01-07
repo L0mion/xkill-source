@@ -11,7 +11,7 @@ static const float LOADER_PGY_VERSION = 1.0f;
 
 //! MeshLoader with functionality to load .obj-files.
 /*!
-Loader has minimal or no error handling to ensure a fast loading of binary .pgy-format.
+Loader has minimal error handling to ensure a fast loading of binary .pgy-format.
 \ingroup xkill-mesh-io-pgy
 */
 class LoaderPGY : public Loader

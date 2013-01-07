@@ -23,7 +23,10 @@ bool LoaderPGY::init()
 		std::ios::in | std::ios::binary);
 	
 	if(!ifstream_.is_open())
+	{
 		sucessfulLoad = false;
+		lastError_ = LOADER_ERROR_FILE_NOT_FOUND;
+	}
 	else
 	{
 		PGYHeader header = loadHeader();
@@ -35,7 +38,10 @@ bool LoaderPGY::init()
 				header.numSubsets_);
 		}
 		else
+		{
 			sucessfulLoad = false;
+			lastError_ = LOADER_ERROR_PGY_VERSION_NUMBER_MISMATCH;
+		}
 
 		ifstream_.close();
 	}
