@@ -102,13 +102,13 @@ bool ComponentManager::init(HWND windowHandle, HWND parentWindowHandle)
 		return false;
 	}
 
-	if(!input_->init(parentWindowHandle, AttributeManager::getInstance()->inputAttributes_.getAllAttributes(), configPath))
+	if(!input_->init(parentWindowHandle, configPath))
 	{
 		std::cout << "InputComponent failed to init." << std::endl;
 		return false;
 	}
 		
-	if(!score_->init(AttributeManager::getInstance()->playerAttributes_.getAllAttributes()))
+	if(!score_->init())
 	{
 		std::cout << "ScoreComponent failed to init." << std::endl;
 		return false;

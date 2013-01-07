@@ -12,7 +12,7 @@ typedef struct HWND__* HWND;
 #include <vector>
 
 class InputManager;
-struct InputAttribute;
+struct Attribute_Input;
 
 //! Handles input devices and their input
 
@@ -27,7 +27,7 @@ public:
 	\param windowHandle Handle to current window
 	\param searchTime Time between searches for new input devices. Default: 10s
 	*/
-	virtual bool init(HWND windowHandle, std::vector<InputAttribute>* inputAttributes, std::string configFilePath, float searchTime = 10.0f);
+	virtual bool init(HWND windowHandle, std::string configFilePath, float searchTime = 10.0f);
 
 	virtual void onEvent(Event* e);
 	virtual void onUpdate(float delta);
@@ -35,7 +35,7 @@ public:
 private:
 	InputManager*					inputManager_;
 	HWND							windowHandle_;
-	std::vector<InputAttribute>*	inputAttributes_;
+	std::vector<Attribute_Input>*	inputAttributes_;
 	float							newDeviceSearchTimer_;	//! Timer until next search for new input devices
 	float							searchTime_;			//! How long time there will be between searches for new input devices
 

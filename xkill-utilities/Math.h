@@ -6,6 +6,14 @@
 #define PI		3.141592654
 #define TwoPI	PI * 2
 
+class DLL_U Math
+{
+public:
+	static int randomInt(int value);
+	static int randomInt(int min, int max);
+	static float randomFloat(float min, float max);
+};
+
 class DLL_U BoolField
 {
 public:
@@ -29,6 +37,10 @@ struct DLL_U Float2
 	void copy(const float* float2);
 };
 
+//
+// Float3
+//
+
 struct DLL_U Float3
 {
 	float x;
@@ -38,7 +50,49 @@ struct DLL_U Float3
 	Float3();
 	Float3(float x, float y, float z);
 	void copy(const float* float3);
+
+	Float3&	normalize();
+	Float3	cross(const Float3& vec) const;
+	float dot(Float3 vec);
+	void lerp(Float3 *v, float factor);
+	float length();
+	float distanceTo(Float3 v);
 };
+
+
+// Vector addition
+inline Float3 operator+(const Float3& left, const Float3& right)
+{
+	Float3 ret(
+		left.x + right.x,
+		left.y + right.y,
+		left.z + right.z);
+	return ret;
+}
+
+// Vector subtraction
+inline Float3 operator-(const Float3& left, const Float3& right)
+{
+	Float3 ret(
+		left.x - right.x,
+		left.y - right.y,
+		left.z - right.z);
+	return ret;
+}
+
+// Vector scaling
+inline Float3 operator*(const Float3& left, float scalar)
+{
+	Float3 ret(left.x * scalar,
+		left.y * scalar,
+		left.z * scalar);
+	return ret;
+}
+
+
+//
+// Float4
+//
 
 struct DLL_U Float4
 {
@@ -80,4 +134,8 @@ struct DLL_U Float4x4
 	Float4 multiply(const Float4& vector);
 	Float4x4 multiply(const Float4x4& matrix);
 	void copy(float* float4x4);
+
+	Float3 getLookAt();
+
+	Float4x4 getRotationOnly();
 };

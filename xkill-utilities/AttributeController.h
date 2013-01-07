@@ -1,6 +1,7 @@
 #pragma once
 
 #include "IAttributeStorage.h"
+#include "EventManager.h"
 
 /// A handle used by Entity to modify one of its Attributes
 /** 

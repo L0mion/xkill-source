@@ -49,13 +49,13 @@ void PhysicsObject::removeFromWorld(btDiscreteDynamicsWorld* dynamicsWorld)
 	dynamicsWorld->removeRigidBody(this);
 }
 
-void PhysicsObject::preStep(CollisionShapeManager* collisionShapeManager,PhysicsAttribute* physicsAttribute)
+void PhysicsObject::preStep(CollisionShapeManager* collisionShapeManager,Attribute_Physics* physicsAttribute)
 {
-	SpatialAttribute* spatialAttribute = ATTRIBUTE_CAST(SpatialAttribute,
-														spatialAttribute,
+	Attribute_Spatial* spatialAttribute = ATTRIBUTE_CAST(Attribute_Spatial,
+														ptr_spatial,
 														physicsAttribute);
-	PositionAttribute* positionAttribute = ATTRIBUTE_CAST(PositionAttribute,
-														  positionAttribute,
+	Attribute_Position* positionAttribute = ATTRIBUTE_CAST(Attribute_Position,
+														  ptr_position,
 														  spatialAttribute);
 	
 	btVector3 localInertia(0,0,0);
@@ -116,15 +116,15 @@ void PhysicsObject::preStep(CollisionShapeManager* collisionShapeManager,Physics
 
 }
 
-void PhysicsObject::postStep(PhysicsAttribute* physicsAttribute)
+void PhysicsObject::postStep(Attribute_Physics* physicsAttribute)
 {
 	//std::cout << "\n" << m_worldTransform.getOrigin().x() << " " << m_worldTransform.getOrigin().y() << m_worldTransform.getOrigin().z();
-	SpatialAttribute* spatialAttribute = ATTRIBUTE_CAST(SpatialAttribute,
-														spatialAttribute,
+	Attribute_Spatial* spatialAttribute = ATTRIBUTE_CAST(Attribute_Spatial,
+														ptr_spatial,
 														physicsAttribute);
-	PositionAttribute* positionAttribute = ATTRIBUTE_CAST(PositionAttribute,
-														  positionAttribute,
-														  spatialAttribute);
+	Attribute_Position* positionAttribute = ATTRIBUTE_CAST(Attribute_Position,
+														ptr_position,
+														spatialAttribute);
 	btVector3 position = (1.0f/WorldScaling)*m_worldTransform.getOrigin();
 	positionAttribute->position.copy(position.m_floats);
 	spatialAttribute->rotation.copy(m_worldTransform.getRotation().get128().m128_f32);
@@ -133,7 +133,7 @@ void PhysicsObject::postStep(PhysicsAttribute* physicsAttribute)
 	forces_.setZero();
 }
 
-void PhysicsObject::input(InputAttribute* inputAttribute,float delta)
+void PhysicsObject::input(Attribute_Input* inputAttribute,float delta)
 {
 	yaw_ += inputAttribute->rotation.x;
 	movement_ = 5*WorldScaling*btVector3(inputAttribute->position.x, 0, inputAttribute->position.y);

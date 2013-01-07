@@ -1,6 +1,6 @@
 #pragma once
 
-#include <QMainWindow>
+#include <QtGui/QMainWindow>
 #include "ui_MainMenu.h"
 
 class QStandardItemModel;
@@ -23,9 +23,5 @@ public:
 public slots:
 	void slot_editorRefresh();
 	void slot_clicked_entityBrowser(QModelIndex index);
-	void slot_tab_changed(int index)
-	{
-		if(index == 2)
-			slot_editorRefresh();
-	}
+	void slot_tab_changed(int index);
 };

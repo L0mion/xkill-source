@@ -6,8 +6,8 @@ namespace DirectX
 	struct XMFLOAT4X4;
 };
 
-struct SpatialAttribute;
-struct PositionAttribute;
+struct Attribute_Spatial;
+struct Attribute_Position;
 
 class ManagementMath
 {
@@ -16,8 +16,8 @@ public:
 	~ManagementMath();
 
 	DirectX::XMFLOAT4X4 calculateWorldMatrix(
-		SpatialAttribute*	spatialAttribute,							 
-		PositionAttribute*	positionAttribute);
+		Attribute_Spatial*	spatialAttribute,							 
+		Attribute_Position*	positionAttribute);
 	DirectX::XMFLOAT4X4 calculateFinalMatrix(
 		DirectX::XMFLOAT4X4 worldMatrix,
 		DirectX::XMFLOAT4X4 viewMatrix,

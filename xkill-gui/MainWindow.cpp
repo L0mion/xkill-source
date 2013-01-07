@@ -1,6 +1,11 @@
 #include "MainWindow.h"
 #include <Windows.h> //check. Separates this file into .cpp and .h file to remove windows.h inclusion from this file.
 
+#include <QtGui/QLayout> 
+#include <QtGui/QPushButton>
+#include <QtGui/QCleanlooksStyle> 
+
+
 MainWindow::MainWindow( QWidget *parent /*= 0*/, Qt::WFlags flags /*= 0*/ ) : QMainWindow(parent, flags)
 {
 	// Create console
