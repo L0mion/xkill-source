@@ -65,7 +65,7 @@ enum DLL_U EventType
 
 	// Utilities
 	EVENT_CREATE_MESH,
-	EVENT_POST_DESC_TEX,
+	EVENT_LOAD_TEXTURES,
 	EVENT_SHOW_MESSAGEBOX,
 
 	// this is needed, don't touch!
@@ -246,12 +246,12 @@ public:
 };
 
 class TexDesc;
-class DLL_U Event_PostDescTex : public Event
+class DLL_U Event_LoadTextures : public Event
 {
 public:
 	TexDesc* texDesc_;
 
-	Event_PostDescTex(TexDesc* texDesc) : Event(EVENT_POST_DESC_TEX)
+	Event_LoadTextures(TexDesc* texDesc) : Event(EVENT_LOAD_TEXTURES)
 	{
 		texDesc_ = texDesc;
 	}

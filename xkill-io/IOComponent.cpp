@@ -81,7 +81,7 @@ bool IOComponent::initTexDesc(std::string filename)
 			texNameToTexID->insert(newMapping);
 		}
 
-		Event_PostDescTex e(texDesc);
+		Event_LoadTextures e(texDesc);
 		SEND_EVENT(&e);
 	}
 	else
