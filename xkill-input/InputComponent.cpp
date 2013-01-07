@@ -57,7 +57,7 @@ void InputComponent::onEvent(Event* e)
 
 void InputComponent::onUpdate(float delta)
 {
-	newDeviceSearchTimer_ += delta;				//Takes alot of time so should probably not run in main thread or during run-time
+	newDeviceSearchTimer_ += delta;				//Takes alot of time so should probably not run in main thread or while playing
 	if(newDeviceSearchTimer_ >= searchTime_)
 	{
 		newDeviceSearchTimer_ = 0.0f;
@@ -82,6 +82,18 @@ void InputComponent::handleInput(float delta)
 		inputAttributes_->at(i).position.y = device->getFloatValue(ACTION_F_WALK_FB);
 		inputAttributes_->at(i).rotation.x = device->getFloatValue(ACTION_F_LOOK_LR, true) * delta;
 		inputAttributes_->at(i).rotation.y = device->getFloatValue(ACTION_F_LOOK_UD, true) * delta;
+
+		//float x, y;
+
+		//x = inputAttributes_->at(i).rotation.x;
+		//y = inputAttributes_->at(i).rotation.y;
+		//float length = std::sqrt(x*x + y*y);
+
+		//x = x/length;
+		//y = y/length;
+
+		//inputAttributes_->at(i).rotation.x = x;
+		//inputAttributes_->at(i).rotation.y = y;
 
 		if(device->getBoolValue(ACTION_B_FIRE))
 			inputAttributes_->at(i).fire = true;
