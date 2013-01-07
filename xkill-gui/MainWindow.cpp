@@ -5,12 +5,26 @@
 #include <QtGui/QPushButton>
 #include <QtGui/QCleanlooksStyle> 
 
+// Stuff used to allocate console
+// no idea what most of it does
+#include <stdio.h>
+#include <io.h>
+#include <fcntl.h>
+#include <Windows.h>
 
-MainWindow::MainWindow( QWidget *parent /*= 0*/, Qt::WFlags flags /*= 0*/ ) : QMainWindow(parent, flags)
+MainWindow::MainWindow()
 {
 	// Create console
 	AllocConsole();
-	SetStdHandle(STD_INPUT_HANDLE |STD_OUTPUT_HANDLE, this->winId());
+	SetConsoleTitle(L"Debug console");
+	int hConHandle;
+	long lStdHandle;
+	FILE *fp;   // redirect unbuffered STDOUT to the console
+	lStdHandle = (long)GetStdHandle(STD_OUTPUT_HANDLE);
+	hConHandle = _open_osfhandle(lStdHandle, _O_TEXT);
+	fp = _fdopen( hConHandle, "w" );
+	*stdout = *fp;
+	setvbuf( stdout, NULL, _IONBF, 0 ); 
 
 	// create UI generated from XML file
 	ui.setupUi(this);
