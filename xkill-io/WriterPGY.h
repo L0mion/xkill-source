@@ -7,10 +7,11 @@
 #include "Writer.h"
 #include "SpecsPGY.h"
 
+// !OBS! Be sure to increment WRITER_PGY_VERSION if updating WriterPGY! !OBS!
 static const float WRITER_PGY_VERSION = 1.0f;
 
 //! Writer with functionality to write binary .pgy-files.
-/*!
+/*! !OBS! Be sure to increment WRITER_PGY_VERSION if updating WriterPGY! !OBS!
 \ingroup xkill-mesh-io-pgy
 */
 class WriterPGY : public Writer

@@ -10,7 +10,7 @@
 static const float LOADER_PGY_VERSION = 1.0f;
 
 //! MeshLoader with functionality to load .obj-files.
-/*!
+/*! !OBS! Be sure to increment LOADER_PGY_VERSION if updating LoaderPGY! !OBS!
 Loader has minimal error handling to ensure a fast loading of binary .pgy-format.
 \ingroup xkill-mesh-io-pgy
 */
