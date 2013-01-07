@@ -74,7 +74,7 @@ Event_ShowMessageBox::Event_ShowMessageBox(std::string message) : Event(EVENT_SH
 	this->message = message;
 }
 
-Event_CreateProjectile::Event_CreateProjectile(Float3 position, Float3 velocity, Float4 rotation, int damage, int entityIdOfCreator, bool explodeOnImpact) : Event(EVENT_CREATE_PROJECTILE)
+Event_CreateProjectile::Event_CreateProjectile(Float3 position, Float3 velocity, Float4 rotation, float damage, int entityIdOfCreator, bool explodeOnImpact) : Event(EVENT_CREATE_PROJECTILE)
 {
 	this->position = position;
 	this->velocity = velocity;
@@ -137,7 +137,7 @@ Event_ChangeGameState::Event_ChangeGameState(StateType newState) : Event(EVENT_C
 	this->newState = newState;
 }
 
-Event_CreateExplosionSphere::Event_CreateExplosionSphere(Float3 position, float radius, int damage, int entityIdOfCreator) : Event(EVENT_CREATE_EXPLOSIONSPHERE)
+Event_CreateExplosionSphere::Event_CreateExplosionSphere(Float3 position, float radius, float damage, int entityIdOfCreator) : Event(EVENT_CREATE_EXPLOSIONSPHERE)
 {
 	this->position = position;
 	this->radius = radius;

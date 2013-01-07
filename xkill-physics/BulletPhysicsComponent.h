@@ -12,12 +12,12 @@
 
 class PhysicsObject;
 class Event;
-struct PhysicsAttribute;
-struct BoundingAttribute;
-struct InputAttribute;
-struct RenderAttribute;
-struct CameraAttribute;
-struct DebugShapeAttribute;
+struct Attribute_Physics;
+struct Attribute_Bounding;
+struct Attribute_Input;
+struct Attribute_Render;
+struct Attribute_Camera;
+struct Attribute_DebugShape;
 
 class btBroadphaseInterface;
 class btDefaultCollisionConfiguration;
@@ -57,12 +57,12 @@ private:
 	btDiscreteDynamicsWorld*			 dynamicsWorld_; //<! Used to step simulation
 	CollisionShapeManager*				 collisionShapeManager_;
 
-	std::vector<PhysicsAttribute>*	physicsAttributes_; //<! A pointer to the attribute storage containing PhysicsAttributes, external representation of world
-	std::vector<BoundingAttribute>* boundingAttributes_; //<! A pointer to the attribute storage containing a copy of bounding volumes for the renderer
-	std::vector<InputAttribute>*	inputAttributes_; //<! A pointer to the attribute storage containing the input data from the input component
-	std::vector<RenderAttribute>*	renderAttributes_;
-	std::vector<CameraAttribute>*	cameraAttributes_;
-	std::vector<DebugShapeAttribute>* debugShapeAttributes_;
+	std::vector<Attribute_Physics>*	physicsAttributes_; //<! A pointer to the attribute storage containing PhysicsAttributes, external representation of world
+	std::vector<Attribute_Bounding>* boundingAttributes_; //<! A pointer to the attribute storage containing a copy of bounding volumes for the renderer
+	std::vector<Attribute_Input>*	inputAttributes_; //<! A pointer to the attribute storage containing the input data from the input component
+	std::vector<Attribute_Render>*	renderAttributes_;
+	std::vector<Attribute_Camera>*	cameraAttributes_;
+	std::vector<Attribute_DebugShape>* debugShapeAttributes_;
 	std::vector<int>*				physicsOwners_; //! Owners of physicsAttributes
 
 	btAlignedObjectArray<PhysicsObject*>* physicsObjects_; //<! A vector of PhysicsObjects, internal representation of world

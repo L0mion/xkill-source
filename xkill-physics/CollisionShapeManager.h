@@ -11,14 +11,14 @@ Responsible for creating collision shapes and storing them for
 the physics component.
 \ingroup xkill-physics
 */
-struct MeshAttribute;
+struct Attribute_Mesh;
 
 class CollisionShapeManager
 {
 private:
 	std::map<unsigned int, unsigned int> collisionShapesIDtoIndex_;
 	btAlignedObjectArray<btCollisionShape*> collisionShapes_; //!< A vector for holding all collision shapes
-	std::vector<MeshAttribute>* meshAttributes_;
+	std::vector<Attribute_Mesh>* meshAttributes_;
 	
 	std::vector<btTriangleMesh*> triangleMeshes_;
 public:

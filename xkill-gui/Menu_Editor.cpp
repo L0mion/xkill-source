@@ -1,10 +1,10 @@
 #include "Menu_Editor.h"
 
-#include <QStandardItemModel>
+#include <QtGui/QStandardItemModel>
 
 #include <xkill-utilities/EventManager.h>
 #include <xkill-utilities/AttributeType.h>
-#include <xkill-architecture/Entity.h>
+#include <xkill-utilities/Entity.h>
 
 
 Menu_Editor::Menu_Editor( Ui::MainMenu& ui, QWidget* parent ) : QWidget(parent), ui(ui)
@@ -42,20 +42,24 @@ void Menu_Editor::slot_editorRefresh()
 	num_rows = 0;
 
 	// Fill columns
-	std::vector<int>* allPlayerOwner;				GET_ATTRIBUTE_OWNERS(allPlayerOwner, ATTRIBUTE_PLAYER);
+	std::vector<int>* allPlayerOwner = 	GET_ATTRIBUTE_OWNERS(player);
 	entityBrowser_add("Players", allPlayerOwner);
-	std::vector<int>* allSpawnOwner;				GET_ATTRIBUTE_OWNERS(allSpawnOwner, ATTRIBUTE_SPAWNPOINT);
+	std::vector<int>* allSpawnOwner = GET_ATTRIBUTE_OWNERS(spawnPoint);
 	entityBrowser_add("Spawn points", allSpawnOwner);
-	std::vector<int>* allMeshOwner;					GET_ATTRIBUTE_OWNERS(allMeshOwner, ATTRIBUTE_MESH);
+	std::vector<int>* allMeshOwner = GET_ATTRIBUTE_OWNERS(mesh);
 	entityBrowser_add("Meshes", allMeshOwner);
-	std::vector<int>* allPhysicsOwner;				GET_ATTRIBUTE_OWNERS(allPhysicsOwner, ATTRIBUTE_PHYSICS);
+	std::vector<int>* allPhysicsOwner = GET_ATTRIBUTE_OWNERS(physics);
 	entityBrowser_add("Physics objects", allPhysicsOwner);
-	std::vector<int>* allProjectileOwner;			GET_ATTRIBUTE_OWNERS(allProjectileOwner, ATTRIBUTE_PROJECTILE);
+	std::vector<int>* allProjectileOwner = GET_ATTRIBUTE_OWNERS(projectile);
 	entityBrowser_add("Projectiles", allProjectileOwner);
 }
 
 void Menu_Editor::entityBrowser_add(QString name, std::vector<int>* owners)
 {
+	std::vector<Attribute_Player>* allPlayers		=	GET_ATTRIBUTES(player);
+
+	std::vector<int>* allSpawnOwner = GET_ATTRIBUTE_OWNERS(spawnPoint);
+	allPlayers		=	GET_ATTRIBUTES(player);
 	// Create / reuse row
 	QStandardItem* item = model_entityBrowser->item(num_rows);
 	// TRUE: Item doesn't exist, create new Item
@@ -139,5 +143,11 @@ void Menu_Editor::slot_clicked_entityBrowser( QModelIndex indexClicked )
 void Menu_Editor::entityInspector_add(QString name)
 {
 	model_entityInspector->appendRow(new QStandardItem(name));
+}
+
+void Menu_Editor::slot_tab_changed( int index )
+{
+	if(index == 2)
+		slot_editorRefresh();
 }
 

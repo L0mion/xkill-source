@@ -87,13 +87,13 @@ void wrapTickCallback(btDynamicsWorld *world, btScalar timeStep)
 bool BulletPhysicsComponent::init()
 {
 	// Fetch attributes
-	GET_ATTRIBUTES(inputAttributes_, InputAttribute, ATTRIBUTE_INPUT);
-	GET_ATTRIBUTES(physicsAttributes_, PhysicsAttribute, ATTRIBUTE_PHYSICS);
-	GET_ATTRIBUTES(boundingAttributes_, BoundingAttribute, ATTRIBUTE_BOUNDING);
-	GET_ATTRIBUTES(renderAttributes_, RenderAttribute, ATTRIBUTE_RENDER);
-	GET_ATTRIBUTES(cameraAttributes_, CameraAttribute, ATTRIBUTE_CAMERA);
-	GET_ATTRIBUTES(debugShapeAttributes_, DebugShapeAttribute, ATTRIBUTE_DEBUGSHAPE);
-	GET_ATTRIBUTE_OWNERS(physicsOwners_, ATTRIBUTE_PHYSICS);
+	inputAttributes_		= GET_ATTRIBUTES(input);
+	physicsAttributes_		= GET_ATTRIBUTES(physics);
+	boundingAttributes_		= GET_ATTRIBUTES(bounding);
+	renderAttributes_		= GET_ATTRIBUTES(render);
+	cameraAttributes_		= GET_ATTRIBUTES(camera);
+	debugShapeAttributes_	= GET_ATTRIBUTES(debugShape);
+	physicsOwners_			= GET_ATTRIBUTE_OWNERS(physics);
 	
 	physicsObjects_ = new btAlignedObjectArray<PhysicsObject*>();
 	frustrumObjects_ = new btAlignedObjectArray<PhysicsObject*>();
@@ -130,7 +130,7 @@ void BulletPhysicsComponent::onUpdate(float delta)
 	for(unsigned int i = 0; i < inputAttributes_->size(); i++)
 	{
 		if(i < static_cast<unsigned int>(physicsObjects_->size()))
-			physicsObjects_->at(inputAttributes_->at(i).physicsAttribute.index)->input(&inputAttributes_->at(i),delta);
+			physicsObjects_->at(inputAttributes_->at(i).ptr_physics.index)->input(&inputAttributes_->at(i),delta);
 	}
 	
 	//for(unsigned int i = 0; i < debugShapeAttributes_->size(); i++)
@@ -158,7 +158,7 @@ void BulletPhysicsComponent::onUpdate(float delta)
 	for(unsigned int i = 0; i < static_cast<unsigned int>(physicsObjects_->size()); i++)
 	{
 		PhysicsObject* physicsObject = physicsObjects_->at(i);
-		PhysicsAttribute* physicsAttribute = &physicsAttributes_->at(i);
+		Attribute_Physics* physicsAttribute = &physicsAttributes_->at(i);
 		// if the objects owner is not 0 it should simulate
 		if(physicsOwners_->at(i)!=0)
 		{
@@ -193,7 +193,7 @@ void BulletPhysicsComponent::onUpdate(float delta)
 	for(unsigned int i = 0; i < static_cast<unsigned int>(physicsObjects_->size()); i++)
 	{
 		PhysicsObject* physicsObject = physicsObjects_->at(i);
-		PhysicsAttribute* physicsAttribute = &physicsAttributes_->at(i);
+		Attribute_Physics* physicsAttribute = &physicsAttributes_->at(i);
 		if(physicsOwners_->at(i)!=0 && physicsObject->isInWorld())
 		{
 			physicsObject->postStep(physicsAttribute);
@@ -307,14 +307,14 @@ void BulletPhysicsComponent::tickCallback(btScalar timeStep)
 						{
 							if(objectA->getType() == PO_Types::tFrustrum)
 							{
-								PhysicsAttribute* physics = &physicsAttributes_->at(objectB->getIndex());
-								RenderAttribute* render; render = ATTRIBUTE_CAST(RenderAttribute, renderAttribute, physics);
+								Attribute_Physics* physics = &physicsAttributes_->at(objectB->getIndex());
+								Attribute_Render* render; render = ATTRIBUTE_CAST(Attribute_Render, ptr_render, physics);
 								render->culling.setBool(objectA->getIndex(),true);
 							}
 							else
 							{
-								PhysicsAttribute* physics = &physicsAttributes_->at(objectA->getIndex());
-								RenderAttribute* render; render = ATTRIBUTE_CAST(RenderAttribute, renderAttribute, physics);
+								Attribute_Physics* physics = &physicsAttributes_->at(objectA->getIndex());
+								Attribute_Render* render; render = ATTRIBUTE_CAST(Attribute_Render, ptr_render, physics);
 								render->culling.setBool(objectB->getIndex(),true);
 							}
 						}
