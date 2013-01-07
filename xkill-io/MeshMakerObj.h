@@ -50,7 +50,7 @@ private:
 	//! Initializes LoaderObj-object and proceeds to load .obj.
 	bool loadObj();
 	//! Initializes LoaderPgy-object and proceeds to load .pgy.
-	MeshModel* loadPGY();
+	bool loadPGY();
 
 	//! Checks whether or not a corresponding .pgy-file exists.
 	bool existingPGY(std::string pathPGY, std::string fileNamePGY);

@@ -26,24 +26,35 @@ bool LoaderPGY::init()
 		sucessfulLoad = false;
 	else
 	{
-		meshModel_ = loadPGY();
+		PGYHeader header = loadHeader();
+		if(header.versionNum_ == LOADER_PGY_VERSION)
+		{
+			meshModel_ = loadPGY(
+				header.numMaterials_, 
+				header.numVertices_, 
+				header.numSubsets_);
+		}
+		else
+			sucessfulLoad = false;
+
 		ifstream_.close();
 	}
 
 	return sucessfulLoad;
 }
 
-MeshModel* LoaderPGY::loadPGY()
+MeshModel* LoaderPGY::loadPGY(
+	unsigned int numMaterials,
+	unsigned int numVertices,
+	unsigned int numSubsets)
 {
-	PGYHeader header = loadHeader();
-
 	std::vector<MeshMaterial> materials;
-	materials = loadMaterials(header.numMaterials_);
+	materials = loadMaterials(numMaterials);
 
 	MeshGeometry geometry;
 	geometry = loadGeometry(
-		header.numVertices_,
-		header.numSubsets_);
+		numVertices,
+		numSubsets);
 
 	return new MeshModel(geometry, materials);
 }

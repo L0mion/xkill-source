@@ -61,7 +61,7 @@ bool MeshMakerObj::init()
 		}
 	}
 	else
-		meshModel_->setVar(loadPGY());
+		sucessfulLoad = loadPGY();
 
 	return sucessfulLoad;
 }
@@ -88,7 +88,7 @@ bool MeshMakerObj::loadObj()
 
 	return sucessfulLoad;
 }
-MeshModel* MeshMakerObj::loadPGY()
+bool MeshMakerObj::loadPGY()
 {
 	MeshModel* loadedMesh = nullptr;
 	bool sucessfulLoad = true;
@@ -100,9 +100,9 @@ MeshModel* MeshMakerObj::loadPGY()
 	sucessfulLoad = pgyLoader.init();
 
 	if(sucessfulLoad)
-		loadedMesh = pgyLoader.getMeshModel();
+		meshModel_->setVar(pgyLoader.getMeshModel());
 
-	return loadedMesh; //ugly, fix this
+	return sucessfulLoad;
 }
 
 bool MeshMakerObj::existingPGY(std::string pathPGY, std::string fileNamePGY)
