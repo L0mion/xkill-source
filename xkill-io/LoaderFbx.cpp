@@ -210,10 +210,18 @@ void LoaderFbx::parseVertexNormals(FbxMesh* mesh, int polygonIndex, int insidePo
 	vertexNormals_.push_back(normal);
 }
 
+void LoaderFbx::parseVertexUVs(FbxMesh* fbxMesh)
+{
+	FbxArray<FbxVector2> texcoords;
+	int numLayers = fbxMesh->GetLayerCount();
+	FbxArray<FbxLayerElement::EType> uvChannels;
+
+	if(numLayers >= 0)
+		uvChannels = fbxMesh->GetAllChannelUV(0);
 
 
-
-
+	fbxMesh->GetPolygonVertexUVs(
+}
 
 
 

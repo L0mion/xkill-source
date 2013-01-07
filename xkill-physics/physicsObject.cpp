@@ -62,7 +62,7 @@ void PhysicsObject::preStep(CollisionShapeManager* collisionShapeManager,Physics
 	btVector3 localInertia(0,0,0);
 	std::vector<int>* physicsOwners;
 	GET_ATTRIBUTE_OWNERS(physicsOwners, ATTRIBUTE_PHYSICS);
-	physicsOwners->at(index_)
+	physicsOwners->at(index_);
 	if(getCollisionShape()->getShapeType()==4 && index_ >2)
 	{
 		//if(!inertiad)
