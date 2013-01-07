@@ -246,6 +246,7 @@ public:
 };
 
 class TexDesc;
+//! Event sending information of which textures to load to renderer. Renderer then cleans the memory allocated manually.
 class DLL_U Event_LoadTextures : public Event
 {
 public:
