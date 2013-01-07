@@ -132,8 +132,9 @@ Event_EndDeathmatch::Event_EndDeathmatch() : Event(EVENT_END_DEATHMATCH)
 {
 }
 
-Event_ChangeGameState::Event_ChangeGameState(StateType newState) : Event(EVENT_CHANGE_GAMESTATE)
+Event_StateChanged::Event_StateChanged(StateType newState, FiniteStateMachine* sender) : Event(EVENT_STATE_CHANGED)
 {
+	this->sender = sender;
 	this->newState = newState;
 }
 

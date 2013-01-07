@@ -1,6 +1,7 @@
 #pragma once
 
 #include "dllUtilities.h"
+#include "IObserver.h"
 
 enum DLL_U StateType
 {
@@ -9,10 +10,9 @@ enum DLL_U StateType
 	MACHINE_STATE_DEFAULT,
 	STATE_DEATHMATCH,
 	STATE_MAINMENU
-	//FINITE_STATE_YOURSTATEHERE
 };
 
-class DLL_U FiniteState
+class DLL_U FiniteState: public IObserver
 {
 public:
 	virtual void Enter();
@@ -20,8 +20,11 @@ public:
 	virtual void Exit();
 	virtual void Reset();
 	virtual void Nuke();
-	virtual StateType CheckTransitions(bool& outShouldReplaceCurrent) const = 0;
+	virtual StateType CheckTransitions(bool& out_isReplacementState) const = 0;
 	StateType GetType() const;
+
+	void onEvent(Event* e) = 0;
+	void onUpdate(float delta);
 
 	FiniteState(StateType type = SPECIAL_STATE_NONE); //Note: default constructor is generated using default parameters
 	virtual ~FiniteState();

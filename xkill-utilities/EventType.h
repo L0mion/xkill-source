@@ -44,7 +44,7 @@ enum DLL_U EventType
 	EVENT_CREATE_SPAWNPOINT,
 	EVENT_END_DEATHMATCH,
 	EVENT_START_DEATHMATCH,
-	EVENT_CHANGE_GAMESTATE,
+	EVENT_STATE_CHANGED,
 	EVENT_CREATE_EXPLOSIONSPHERE,
 
 	EVENT_CREATE_ENTITY,
@@ -346,11 +346,13 @@ public:
 };
 
 enum StateType;
-class DLL_U Event_ChangeGameState : public Event
+class FiniteStateMachine;
+class DLL_U Event_StateChanged : public Event
 {
 public:
-	Event_ChangeGameState(StateType newState);
+	Event_StateChanged(StateType newState, FiniteStateMachine* sender);
 
+	FiniteStateMachine* sender;
 	StateType newState;
 };
 

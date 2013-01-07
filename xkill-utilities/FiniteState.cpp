@@ -36,6 +36,11 @@ FiniteState::~FiniteState()
 	//Intentionally left blank
 }
 
+void FiniteState::onUpdate( float delta )
+{
+	Update(delta);
+}
+
 //void FiniteState::Update( float dt )
 //{
 //

@@ -2,29 +2,26 @@
 #include <iostream>
 #include <iterator>
 
-
 bool FiniteStateMachine::AddState( FiniteState* state )
 {
 	auto result = states_.insert(
 		std::pair<StateType, FiniteState*>(state->GetType(), state));
 	
-	#if defined(DEBUG) | defined(_DEBUG)
 	if(result.second)
 	{
-		std::cout << "[SUCCESS] FiniteStateMachine::AddState | "
+		DEBUGPRINT( "[SUCCESS] FiniteStateMachine::AddState, "
 			<< "Adding FiniteState with enum value " 
 			<< state->GetType() 
-			<< " succeded\n";
+			<< " succeded");
 	}
 	else
 	{
-		std::cout << "[FAIL] FiniteStateMachine::AddState | "
+		DEBUGPRINT( "[FAIL] FiniteStateMachine::AddState, "
 			<< "Adding FiniteState with enum value " 
 			<< state->GetType() 
-			<< " was unsuccessful, did you add it twice? " 
-			<< "Note: A particular state may only be added once per state machine\n";
+			<< " was unsuccessful, did you try to add it twice? " 
+			<< "Note: A particular state may only be added once per state machine");
 	}
-	#endif
 
 	return result.second;
 }
@@ -39,20 +36,17 @@ bool FiniteStateMachine::SetDefaultState( StateType state )
 		wasSet = true;
 	}
 
-	#if defined(DEBUG) | defined(_DEBUG)
 	if (wasSet)
 	{
-		std::cout << "[SUCCESS] FiniteStateMachine::SetDefaultState | "
-			<< "Default state successfully set to FiniteState with enum value " 
-			<< state << "\n";
+		DEBUGPRINT( "[SUCCESS] FiniteStateMachine::SetDefaultState, "
+			<< "Default state successfully set to FiniteState with enum value " << state );
 	}
 	else
 	{
-		std::cout << "[FAIL] FiniteStateMachine::SetDefaultState | "
-			<< "Attempt to set default state set to FiniteState with enum value " 
-			<< state << " was unsuccessful. Did you remember to add it first? \n";
+		DEBUGPRINT( "[FAIL] FiniteStateMachine::SetDefaultState, "
+			<< "Attempt to set default state to FiniteState with enum value " 
+			<< state << " was unsuccessful. Did you remember to add it first?" );
 	}
-	#endif
 
 	return wasSet;
 }
@@ -62,7 +56,7 @@ void FiniteStateMachine::Update( float dt )
 	//no states to handle, nothing to do
 	if (states_.size() == 0)
 	{
-		std::cout << "Warning: FiniteStateMachine::Update are being called on an empty machine" << std::endl;
+		DEBUGPRINT( "Warning: FiniteStateMachine::Update is being called on an empty machine" );
 		return;
 	}
 
@@ -75,16 +69,18 @@ void FiniteStateMachine::Update( float dt )
 	//no valid  state could be established, nothing to do
 	if (currentState_.empty())
 	{
-		std::cout << "Warning: FiniteStateMachine::Update, current state is invalid" << std::endl;
+		DEBUGPRINT( "Warning: FiniteStateMachine::Update, current state is invalid" );
 		return;
 	}
 
-	HandleTransitions();
+	bool isReplacementState = true;
+	StateType goalStateType = currentState_.top()->CheckTransitions(isReplacementState);
+	HandleTransition(goalStateType, isReplacementState);
 
 	currentState_.top()->Update(dt);
 }
 
-StateType FiniteStateMachine::CheckTransitions( bool& outShouldReplaceCurrent ) const
+StateType FiniteStateMachine::CheckTransitions( bool& out_isReplacementState ) const
 {
 	return type_; //returning my own StateType means no transition will take place if I am the current state
 }
@@ -161,19 +157,17 @@ FiniteStateMachine::~FiniteStateMachine()
 	//Deallocation can however be performed by a specific call to the method Nuke()
 }
 
-void FiniteStateMachine::HandleTransitions()
+void FiniteStateMachine::HandleTransition( StateType goalStateType, bool isReplacementState )
 {
-	//check for transitions
-	bool shouldReplaceCurrentState = true;
 	StateType currentStateType = currentState_.top()->GetType();
-	StateType goalStateType = currentState_.top()->CheckTransitions(shouldReplaceCurrentState);
-
+	bool stateChanged = false;
+	
 	//switch if a transition is both possible and neccessary
-	bool stateHasChanged = goalStateType != currentStateType;
+	bool stateShouldChange = goalStateType != currentStateType;
 	bool goalStateExists = states_.count(goalStateType) > 0;
-	if (stateHasChanged && goalStateExists)
+	if (stateShouldChange && goalStateExists)
 	{ 
-		if (shouldReplaceCurrentState)
+		if (isReplacementState)
 		{	//replace stack top
 			currentState_.top()->Exit();
 			currentState_.top() = states_[goalStateType];
@@ -183,6 +177,7 @@ void FiniteStateMachine::HandleTransitions()
 			currentState_.push(states_[goalStateType]);
 		}
 		currentState_.top()->Enter();
+		stateChanged = true;
 	}
 	else if (goalStateType == SPECIAL_STATE_BACK && !currentState_.empty())
 	{ //handle special transition
@@ -190,10 +185,50 @@ void FiniteStateMachine::HandleTransitions()
 		if (currentState_.empty())
 		{
 			currentState_.push(defaultState_);
+			stateChanged = true;
 		}
 	}
 	else //requested transition could not be performed
 	{
-		//TODO: Print warning on trying to transition to non added state
+		DEBUGPRINT( "Warning: FiniteStateMachine::Update, The requested transition could not be performed." 
+			<< " From state with enum value " << currentStateType
+			<< " To state with enum value " << goalStateType);
+	}
+
+	if (stateChanged)
+	{
+		SEND_EVENT(&Event_StateChanged(goalStateType, this));
+	}
+}
+
+void FiniteStateMachine::onEvent( Event* e )
+{
+	//Pass the event on if current state is another FiniteStateMachine
+	if (dynamic_cast<FiniteStateMachine*>(currentState_.top())) //true if dynamic type is FiniteStateMachine or a subclass thereof 
+		//Note 1: dynamic_cast returns null if the cast fails and a pointer, i.e positive integer, otherwise
+		//Note 2: The alternative, typeid(currentState_.top()) == typeid(FiniteStateMachine) , is true only if the dynamic type is exactly FiniteStateMachine, derived types would yeild false
+	{
+		currentState_.top()->onEvent(e);
+		return;
+	}
+
+	//Handle revieced event
+	switch (e->getType())
+	{
+	case EVENT_STATE_CHANGED:
+			handleEvent_StateChanged(static_cast<Event_StateChanged*>(e));
+		break;
+	default:
+		break;
+	}
+}
+
+void FiniteStateMachine::handleEvent_StateChanged( Event_StateChanged* e )
+{
+	if (e->sender != this)
+	{
+		DEBUGPRINT("FiniteStateMachine::onEvent(Event*), "
+			<< "Recieved EVENT_STATE_CHANGED event. New state has enum value " 
+			<< e->newState);
 	}
 }
