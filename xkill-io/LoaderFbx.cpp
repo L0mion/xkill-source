@@ -216,11 +216,12 @@ void LoaderFbx::parseVertexUVs(FbxMesh* fbxMesh)
 	int numLayers = fbxMesh->GetLayerCount();
 	FbxArray<FbxLayerElement::EType> uvChannels;
 
+
 	if(numLayers >= 0)
 		uvChannels = fbxMesh->GetAllChannelUV(0);
 
 
-	fbxMesh->GetPolygonVertexUVs(
+	//fbxMesh->GetPolygonVertexUVs(
 }
 
 
