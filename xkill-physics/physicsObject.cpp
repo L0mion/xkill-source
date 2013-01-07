@@ -6,6 +6,7 @@
 
 #include "physicsUtilities.h"
 #include "CollisionShapeManager.h"
+#include <xkill-utilities/EventManager.h>
 
 PhysicsObject::PhysicsObject(CollisionShapeManager* collisionShapeManager, unsigned int index, unsigned int type) : btRigidBody(1,
 																											 new btDefaultMotionState(),
@@ -59,6 +60,9 @@ void PhysicsObject::preStep(CollisionShapeManager* collisionShapeManager,Physics
 														  spatialAttribute);
 	
 	btVector3 localInertia(0,0,0);
+	std::vector<int>* physicsOwners;
+	GET_ATTRIBUTE_OWNERS(physicsOwners, ATTRIBUTE_PHYSICS);
+	physicsOwners->at(index_)
 	if(getCollisionShape()->getShapeType()==4 && index_ >2)
 	{
 		//if(!inertiad)

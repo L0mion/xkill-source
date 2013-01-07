@@ -13,9 +13,12 @@
 #include "MdlDesc.h"
 #include "MdlDescModel.h"
 
+#include "LoaderFbx.h"
+
 IOComponent::IOComponent()
 {
 	texNameToTexID = nullptr;
+	fbxLoader_ = nullptr;
 }
 IOComponent::~IOComponent()
 {
@@ -27,6 +30,8 @@ IOComponent::~IOComponent()
 		if(meshModels_[i])
 			delete meshModels_[i];
 	}
+	if(fbxLoader_)
+		delete fbxLoader_;
 }
 bool IOComponent::init()
 {
@@ -37,6 +42,9 @@ bool IOComponent::init()
 	sucessfulInit = initTexDescs();
 	if(sucessfulInit)
 		sucessfulInit = initMdlDescs();
+
+	fbxLoader_ = new LoaderFbx();
+	fbxLoader_->load("../../xkill-resources/xkill-models/box.fbx");
 
 	return sucessfulInit;
 }
