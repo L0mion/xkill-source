@@ -138,7 +138,7 @@ void Camera::pitch(const float angle)
 	float sinAngle = sin((angle)/2);
 	DirectX::XMFLOAT4 fQuaternion = DirectX::XMFLOAT4(right_.x*sinAngle, right_.y*sinAngle, right_.z*sinAngle, cosAngle);
 	DirectX::XMVECTOR vQuaternion = DirectX::XMLoadFloat4(&fQuaternion);
-	vQuaternion = DirectX::XMQuaternionNormalize(vQuaternion);
+	vQuaternion = DirectX::XMQuaternionNormalize(vQuaternion);  
 
 	//Rotate all vectors that are affected by the transform. 
 	vUp		= DirectX::XMVector3Rotate(vUp, vQuaternion);
