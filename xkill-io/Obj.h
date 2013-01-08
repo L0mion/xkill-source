@@ -11,6 +11,7 @@
 
 #include "ObjGeometry.h"
 #include "ObjDependencies.h"
+#include "WriteTime.h"
 
 struct VertexPosNormTex;
 
@@ -26,17 +27,20 @@ public:
 	//! Initializes Obj with arguments passed.
 	Obj(
 		const std::string		filename,
+		const WriteTimeUTC		writeTimeUTC,
 		const ObjDependencies	objDependencies,
 		const ObjGeometry		objGeometry);
 	//! Does nothing.
 	~Obj();
 
-	const std::string getFileName();
-	const std::vector<std::string> getMTLs();
-	const ObjGeometry getObjGeometry();
+	std::string						getFileName()		const;
+	WriteTimeUTC					getWriteTimeUTC()	const;
+	const std::vector<std::string>	getMTLs();
+	ObjGeometry						getObjGeometry()	const;
 protected:
 private:
 	std::string		fileName_;			//!< Original file-name of .obj.
+	WriteTimeUTC	writeTimeUTC_;		//!< Time last written to .obj.
 	ObjDependencies	objDependencies_;	//!< Dependencies of geometry read from .obj. (this may include references to .mtl-files.)
 	ObjGeometry		objGeometry_;		//!< Geometry of mesh read from .obj.
 };

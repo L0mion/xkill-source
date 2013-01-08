@@ -1,11 +1,17 @@
+#include <iostream>
+
+#include <xkill-utilities/EventManager.h>
+
 #include "WriterPGY.h"
 
 WriterPGY::WriterPGY(
 	const MeshModel		subject,
+	const WriteTimeUTC	writeTimeUTC,
 	const std::string	filePath,
 	const std::string	fileName) : Writer(filePath, fileName)
 {
-	subject_ = subject;
+	writeTimeUTC_	= writeTimeUTC;
+	subject_		= subject;
 }
 WriterPGY::~WriterPGY()
 {
@@ -28,7 +34,7 @@ bool WriterPGY::init()
 		ofstream_.close();
 	}
 
-	return true;
+	return sucessfulWrite;
 }
 
 void WriterPGY::writePGY()
@@ -55,6 +61,7 @@ const PGYHeader WriterPGY::loadHeader()
 	for(unsigned int i = 0; i < 4; i++)
 		header.fileType_[i]	= PGY_SPECS_FILETYPE[i];
 	header.versionNum_		= WRITER_PGY_VERSION;
+	header.writeTime_		= writeTimeUTC_;
 	header.vertexType_		= POS_NORM_TEX;
 	header.numMaterials_	= numMaterials;
 	header.numVertices_		= numVertices;
@@ -67,11 +74,19 @@ void WriterPGY::writeHeader(const PGYHeader header)
 	ofstream_.write(
 		reinterpret_cast<const char*>(&header),
 		PGY_SPECS_SIZE_HEADER);
+
+	std::string log = "Wrote a " + PGY_SPECS_SIZE_HEADER;
+	log += " bytes PGY-header to PGY-file with version number " + std::to_string(header.versionNum_) + ".";
+	std::cout << log;
 }
 void WriterPGY::writeMaterials(const std::vector<MeshMaterial> materials)
 {
 	for(unsigned int i = 0; i < materials.size(); i++)
 		writeMaterial(materials[i]);
+
+	std::string log = "Wrote " + materials.size();
+	log += " materials to PGY-file.";
+	std::cout << log;
 }
 void WriterPGY::writeMaterial(const MeshMaterial material)
 {
@@ -97,6 +112,10 @@ void WriterPGY::writeVertices(
 {
 	for(unsigned int i = 0; i < numVertices; i++)
 		writeVertex(vertices[i]);
+
+	std::string log = "Wrote " + numVertices;
+	log += " vertices to PGY-file.";
+	std::cout << log;
 }
 void WriterPGY::writeVertex(const VertexPosNormTex vertex)
 {
@@ -110,6 +129,10 @@ void WriterPGY::writeSubsets(
 {
 	for(unsigned int i = 0; i < numSubsets; i++)
 		writeSubset(subsets[i]);
+
+	std::string log = "Wrote " + numSubsets;
+	log += " subsets to PGY-file.";
+	std::cout << log;
 }
 void WriterPGY::writeSubset(MeshSubset subset)
 {

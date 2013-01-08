@@ -3,6 +3,7 @@
 
 struct PSOut
 {
+	float4 normal	: SV_TARGET0;
 	float4 albedo	: SV_TARGET1;
 };
 

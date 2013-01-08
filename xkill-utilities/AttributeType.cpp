@@ -148,6 +148,11 @@ Attribute_Mesh::~Attribute_Mesh()
 }
 void Attribute_Mesh::clean()
 {
+	if(mesh)
+	{
+		delete mesh;
+		mesh = nullptr;
+	}
 }
 
 Attribute_Health::Attribute_Health()

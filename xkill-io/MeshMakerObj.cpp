@@ -1,7 +1,9 @@
 #include <fstream>
+#include <windows.h>
 
 #include <xkill-utilities/EventManager.h>
 #include <xkill-utilities/MeshVertices.h>
+#include <xkill-utilities/StringConv.h>
 
 #include "LoaderObj.h"
 #include "LoaderMTL.h"
@@ -47,21 +49,28 @@ bool MeshMakerObj::init()
 {
 	bool sucessfulLoad = true;
 
+	//Get time when original file was last edited.
+	WriteTimeUTC writeTimeUTC;
+	sucessfulLoad = getLastWrittenToFile(pathObj_, fileNameObj_, writeTimeUTC);
+	
 	std::string fileNamePGY = getFileNamePGY();
+	if(existingPGY(pathPGY_, fileNamePGY) && sucessfulLoad) //Attempt to load PGY
+		sucessfulLoad = loadPGY(writeTimeUTC);
+	else
+		sucessfulLoad = false;
 
-	if(!existingPGY(pathPGY_, fileNamePGY))
+	if(!sucessfulLoad)
 	{
 		sucessfulLoad = loadObj();
 		if(sucessfulLoad)
 			sucessfulLoad = loadMaterials();
 		if(sucessfulLoad)
 		{
-			meshModel_->setVar(makeMesh(loaderObj_->getObj()));
-			sucessfulLoad = makePGY(meshModel_->getVar());
+			Obj obj = loaderObj_->getObj();
+			meshModel_->setVar(makeMesh(obj));
+			sucessfulLoad = makePGY(meshModel_->getVar(), obj.getWriteTimeUTC());
 		}
 	}
-	else
-		meshModel_->setVar(loadPGY());
 
 	return sucessfulLoad;
 }
@@ -88,7 +97,7 @@ bool MeshMakerObj::loadObj()
 
 	return sucessfulLoad;
 }
-MeshModel* MeshMakerObj::loadPGY()
+bool MeshMakerObj::loadPGY(WriteTimeUTC writeTimeUTC)
 {
 	MeshModel* loadedMesh = nullptr;
 	bool sucessfulLoad = true;
@@ -100,9 +109,14 @@ MeshModel* MeshMakerObj::loadPGY()
 	sucessfulLoad = pgyLoader.init();
 
 	if(sucessfulLoad)
-		loadedMesh = pgyLoader.getMeshModel();
-
-	return loadedMesh; //ugly, fix this
+	{
+		if(writeTimeUTC == pgyLoader.getWriteTimeUTC())
+			meshModel_->setVar(pgyLoader.claimMeshModel());
+		else
+			sucessfulLoad = false; //Original file has been modified. Not valid.
+	}
+	
+	return sucessfulLoad;
 }
 
 bool MeshMakerObj::existingPGY(std::string pathPGY, std::string fileNamePGY)
@@ -112,6 +126,47 @@ bool MeshMakerObj::existingPGY(std::string pathPGY, std::string fileNamePGY)
 	std::ifstream ifile(fullPathPGY);
 	return ifile.good();
 }
+bool MeshMakerObj::getLastWrittenToFile(std::string path, std::string fileName, WriteTimeUTC& out)
+{
+	WIN32_FIND_DATA findFileData;
+	HANDLE searchHandleWinAPI;
+
+#ifndef _UNICODE
+	searchHandleWinAPI = FindFirstFile(
+		fullPath.c_str(),
+		&findFileData);
+#else
+	wchar_t* lpcwstr = stringToWstr(path + fileName);
+	searchHandleWinAPI = FindFirstFile(
+		lpcwstr,
+		&findFileData);
+	delete lpcwstr;
+#endif //_UNICODE
+
+	bool sucessfulRead = false;
+	if(searchHandleWinAPI != INVALID_HANDLE_VALUE)
+	{
+		sucessfulRead = true;
+
+		FILETIME lastWriteTime = findFileData.ftLastWriteTime;
+
+		//Convert the last-write time to UTC-time.
+		SYSTEMTIME utcTime;
+		FileTimeToSystemTime(&lastWriteTime, &utcTime);
+
+		out.year	= utcTime.wYear;
+		out.month	= utcTime.wMonth;
+		out.day		= utcTime.wDay;
+		out.hour	= utcTime.wHour;
+		out.min		= utcTime.wMinute;
+		out.sec		= utcTime.wSecond;
+
+		FindClose(searchHandleWinAPI);
+	}
+
+	return sucessfulRead;
+}
+
 MeshModel* MeshMakerObj::makeMesh(Obj obj)
 {
 	MeshGeometry meshGeo = objGeoToMeshGeo(obj.getObjGeometry());
@@ -119,11 +174,12 @@ MeshModel* MeshMakerObj::makeMesh(Obj obj)
 	MeshModel* model = new MeshModel(meshGeo, materials_);
 	return model;
 }
-bool MeshMakerObj::makePGY(MeshModel* model)
+bool MeshMakerObj::makePGY(MeshModel* model, WriteTimeUTC writeTimeUTC)
 {
 	std::string fileNamePgy = getFileNamePGY();
 	WriterPGY pgyWriter(
 		*model,
+		writeTimeUTC,
 		pathPGY_,
 		fileNamePgy);
 	bool sucessfulWrite = pgyWriter.init();
