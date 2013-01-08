@@ -1,6 +1,14 @@
 #include "QTInputDevices.h"
 
 #include "InputActions.h"
+#include "Converter.h"
+
+QTInputDevices::QTInputDevices() :
+	InputDevice(GUID(), "")
+{
+	createInputLayout();
+	createInputObjectsFromLayout();
+}
 
 QTInputDevices::QTInputDevices(GUID deviceGUID, std::string name, unsigned int playerID) : 
 	InputDevice(deviceGUID, name, playerID)
@@ -56,6 +64,35 @@ void QTInputDevices::setStandardMappings()
 InputDevice::InputDeviceType QTInputDevices::GetType()
 {
 	return QT_INPUT_DEVICE;
+}
+
+std::string QTInputDevices::getStandardMappingsString()
+{
+	QTInputDevices qtDevice;
+
+	qtDevice.setStandardMappings();
+	std::vector<InputObject*> inputObjects = qtDevice.inputObjects_;
+
+	std::string str = "";
+
+	for(unsigned int i = 0; i < inputObjects.size(); i++)
+	{
+		std::vector<int> mappings = inputObjects[i]->getBoolMappings();
+
+		for(unsigned int j = 0; j < mappings.size(); j++)
+		{
+			str += Converter::IntToStr(mappings[j]);
+		}
+
+		mappings = inputObjects[i]->getFloatMappings();
+
+		for(unsigned int j = 0; j < mappings.size(); j++)
+		{
+			str += Converter::IntToStr(mappings[j]);
+		}
+	}
+
+	return str;
 }
 
 void QTInputDevices::updateState()
