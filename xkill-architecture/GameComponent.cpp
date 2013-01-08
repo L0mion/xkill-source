@@ -30,9 +30,8 @@ bool GameComponent::init()
 
 	SEND_EVENT(&Event_CreateSpawnPoint(Float3(-1.5f, 3.0f, 0.0f), 2.0f));
 	SEND_EVENT(&Event_CreateSpawnPoint(Float3(1.0f, 5.0f, 0.0f), 2.0f));
-	SEND_EVENT(&Event_CreateSpawnPoint(Float3(0.0f, 0.0f, -5.0f), 2.0f));
+	SEND_EVENT(&Event_CreateSpawnPoint(Float3(0.0f, 0.5f, -5.0f), 2.0f));
 	SEND_EVENT(&Event_CreateSpawnPoint(Float3(1.0f, 1.0f, 1.0f), 2.0f));
-	SEND_EVENT(&Event_CreateSpawnPoint(Float3(0.0f, 0.0f, -5.0f), 2.0f));
 	SEND_EVENT(&Event_CreateSpawnPoint(Float3(4.0f, 4.0f, 4.0f), 2.0f));
 
 	srand ((unsigned)time(NULL) );
@@ -61,7 +60,6 @@ void GameComponent::onEvent(Event* e)
 
 void GameComponent::onUpdate(float delta)
 {
-
 	//
 	// Update players
 	//
@@ -97,12 +95,18 @@ void GameComponent::onUpdate(float delta)
 		{
 			input->changeAmmunitionType = false;
 			weaponStats->setWeaponStats(static_cast<Attribute_WeaponStats::AmmunitionType>((weaponStats->ammunitionType + 1) % Attribute_WeaponStats::NROFAMUNITIONTYPES), weaponStats->firingMode);
+			DEBUGPRINT(std::endl);
+			DEBUGPRINT("Ammunition type: " << weaponStats->getAmmunitionTypeAsString());
+			DEBUGPRINT("Firing mode: " << weaponStats->getFiringModeAsString());
 		}
 
 		if(input->changeFiringMode)
 		{
 			input->changeFiringMode = false;
 			weaponStats->setWeaponStats(weaponStats->ammunitionType, static_cast<Attribute_WeaponStats::FiringMode>((weaponStats->firingMode + 1) % Attribute_WeaponStats::NROFFIRINGMODES));
+			DEBUGPRINT(std::endl);
+			DEBUGPRINT("Ammunition type: " << weaponStats->getAmmunitionTypeAsString());
+			DEBUGPRINT("Firing mode: " << weaponStats->getFiringModeAsString());
 		}
 
 
@@ -193,7 +197,14 @@ void GameComponent::onUpdate(float delta)
 			}
 			else if(weaponStats->nrOfShotsLeftInClip <= 0)
 			{
-				DEBUGPRINT("Cannot shoot: Out of ammo. Currently reloading.");
+				if(weaponStats->totalNrOfShots <= 0)
+				{
+					DEBUGPRINT("Cannot shoot: Out of ammo.");
+				}
+				else
+				{
+					DEBUGPRINT("Cannot shoot: Out of ammo in current clip.");
+				}
 			}
 			else if(weaponStats->cooldownLeft > 0)
 			{
@@ -215,6 +226,12 @@ void GameComponent::onUpdate(float delta)
 			{
 				Attribute_Position* spawnPointPositionAttribute = itrPosition.at(spawnPointAttribute->ptr_position);
 				position->position = spawnPointPositionAttribute->position; // set player position attribute
+				
+				DEBUGPRINT("Player spawned at " << position->position.x << " " << position->position.y << " " << position->position.z << std::endl);
+
+				//Entity* spawnPointEntity = &allEntity->at(itrSpawnPoint.ownerIdAt(e->attribute1_index));
+				//spawnPointPositionAttribute->
+				//DEBUGPRINT("
 			}
 			else
 			{
@@ -285,7 +302,6 @@ void GameComponent::onUpdate(float delta)
 
 		if(weaponStats->totalNrOfShots > 0 && weaponStats->nrOfShotsLeftInClip <= 0)
 		{
-			//DEBUGPRINT("Reloading...");
 			weaponStats->reloadTimeLeft -= delta;
 			if(weaponStats->reloadTimeLeft <= 0)
 			{
@@ -299,7 +315,10 @@ void GameComponent::onUpdate(float delta)
 				{
 					weaponStats->nrOfShotsLeftInClip = weaponStats->clipSize;
 				}
-				weaponStats->totalNrOfShots -= weaponStats->nrOfShotsLeftInClip;
+
+				DEBUGPRINT("Weapon was automatically reloaded.");
+				DEBUGPRINT("Ammo in current clip: " << weaponStats->nrOfShotsLeftInClip);
+				DEBUGPRINT("Total number of shots left: " << weaponStats->totalNrOfShots);
 			}
 		}
 
@@ -428,7 +447,8 @@ void GameComponent::event_PhysicsAttributesColliding(Event_PhysicsAttributesColl
 			{
 				Attribute_Physics* physicsAttribute = &allPhysics->at(physicsId.at(i));
 				physicsAttribute->gravity = Float3(0.0f, -10.0f, 0.0f);
-				physicsAttribute->linearVelocity = Float3(0.0f, 0.0f, 0.0f);
+				//TEST
+				//physicsAttribute->linearVelocity = Float3(0.0f, 0.0f, 0.0f);
 			}
 
 			//Handle PhysicsAttribute of a projectile colliding with another PhysicsAttribute
@@ -444,7 +464,7 @@ void GameComponent::event_PhysicsAttributesColliding(Event_PhysicsAttributesColl
 					projectileAttribute->currentLifeTimeLeft = 0.15f;
 				}
 
-				//Explosion handling. In progress.
+				//Explosion handling.
 				if(projectileAttribute->explodeOnImnpact)
 				{
 					//Get damage from projectile.

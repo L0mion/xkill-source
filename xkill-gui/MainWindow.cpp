@@ -1,5 +1,5 @@
 #include "MainWindow.h"
-#include <Windows.h> //check. Separates this file into .cpp and .h file to remove windows.h inclusion from this file.
+#include <Windows.h>
 
 #include <QtGui/QLayout> 
 #include <QtGui/QPushButton>

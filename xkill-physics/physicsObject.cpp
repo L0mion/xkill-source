@@ -58,6 +58,11 @@ void PhysicsObject::preStep(CollisionShapeManager* collisionShapeManager,Attribu
 														  ptr_position,
 														  spatialAttribute);
 	
+	if(!physicsAttribute->isExplosionSphere)
+	{
+		m_collisionShape = collisionShapeManager->getCollisionShape(physicsAttribute->meshID);
+	}
+
 	btVector3 localInertia(0,0,0);
 	if(getCollisionShape()->getShapeType()==4 && index_ >2)
 	{
@@ -71,7 +76,13 @@ void PhysicsObject::preStep(CollisionShapeManager* collisionShapeManager,Attribu
 			
 		}
 	}
-	setMassProps(physicsAttribute->mass,localInertia);
+
+	//PhysicsAttribute 1 is created as a projectile. PhysicsAttribute 1 is synchronized with Bullet as a PhysicsObject. "setMassProps(physicsAttribute->mass,localInertia);" is 
+
+	if(!physicsAttribute->isExplosionSphere)
+	{
+		setMassProps(physicsAttribute->mass,localInertia);
+	}
 	
 	m_worldTransform.setOrigin(WorldScaling*btVector3(positionAttribute->position.x,
 	 												  positionAttribute->position.y,
@@ -105,15 +116,9 @@ void PhysicsObject::preStep(CollisionShapeManager* collisionShapeManager,Attribu
 					   physicsAttribute->angularVelocity.y,
 					   physicsAttribute->angularVelocity.z));
 
-	if(!physicsAttribute->isExplosionSphere)
-	{
-		m_collisionShape = collisionShapeManager->getCollisionShape(physicsAttribute->meshID);
-	}
-
 	setGravity(gravity_+forces_);
 	updateInertiaTensor();
 	activate(true);
-
 }
 
 void PhysicsObject::postStep(Attribute_Physics* physicsAttribute)

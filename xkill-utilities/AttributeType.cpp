@@ -51,6 +51,13 @@ Attribute_Render::~Attribute_Render()
 
 Attribute_Physics::Attribute_Physics()
 {
+	reset();
+}
+Attribute_Physics::~Attribute_Physics()
+{
+}
+void Attribute_Physics::reset()
+{
 	collisionResponse = true;
 	added = false;
 	alive = true;
@@ -70,16 +77,13 @@ Attribute_Physics::Attribute_Physics()
 	linearVelocity.y = 0;
 	linearVelocity.z = 0;
 }
-Attribute_Physics::~Attribute_Physics()
-{
-}
 
 Attribute_Projectile::Attribute_Projectile()
 {
 	entityIdOfCreator = -1;
 	currentLifeTimeLeft = 10.0f;
 	explodeOnImnpact = false;
-	explosionSphereRadius = 0.01f;
+	explosionSphereRadius = 1.0f;
 }
 Attribute_Projectile::~Attribute_Projectile()
 {
@@ -178,7 +182,7 @@ Attribute_SpawnPoint::~Attribute_SpawnPoint()
 
 Attribute_WeaponStats::Attribute_WeaponStats()
 {
-	setWeaponStats(BULLET, SINGLE);
+	setWeaponStats(EXPLOSIVE, AUTO);
 }
 
 void Attribute_WeaponStats::setWeaponStats(AmmunitionType ammunitionType, FiringMode firingMode)
@@ -186,7 +190,7 @@ void Attribute_WeaponStats::setWeaponStats(AmmunitionType ammunitionType, Firing
 	this->ammunitionType = ammunitionType;
 	this->firingMode = firingMode;
 
-	totalNrOfShots = 100;
+	totalNrOfShots = 1000;
 	clipSize = 10;
 	reloadTime = 0.0f;
 	nrOfProjectilesForEachShot = 1;
@@ -257,6 +261,41 @@ void Attribute_WeaponStats::setWeaponToDebugMachineGun()
 	damgeOfEachProjectile = 1;
 	explosionSphereRadius = 0.0f;
 	cooldownBetweenShots = 0.0f;
+}
+
+std::string Attribute_WeaponStats::getAmmunitionTypeAsString()
+{
+	std::string ammunitionTypeAsString = "Error in std::string Attribute_WeaponStats::getAmmunitionTypeAsString()";
+	switch(this->ammunitionType)
+	{
+		case BULLET:
+			ammunitionTypeAsString = "Bullet";
+			break;
+		case SCATTER:
+			ammunitionTypeAsString = "Scatter";
+			break;
+		case EXPLOSIVE:
+			ammunitionTypeAsString = "Explosive";
+			break;
+	}
+	return ammunitionTypeAsString;
+}
+std::string Attribute_WeaponStats::getFiringModeAsString()
+{
+	std::string firingModeAsString = "Error in std::string Attribute_WeaponStats::getFiringModesString()";
+	switch(this->firingMode)
+	{
+		case SINGLE:
+			firingModeAsString = "Single";
+			break;
+		case SEMI:
+			firingModeAsString = "Semi";
+			break;
+		case AUTO:
+			firingModeAsString = "Auto";
+			break;
+	}
+	return firingModeAsString;
 }
 
 Attribute_WeaponStats::~Attribute_WeaponStats()

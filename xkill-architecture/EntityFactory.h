@@ -29,9 +29,17 @@ public:
 	// An AttributeName such as "positionAttribute" will result in accessing "positionAttributeAttributes_" inside
 	// AttributeManager instead of "'positionAttributes_" which will result in error. As long as a shorter naming convention
 	// such as "position" is used, this will not be a problem.
+
 #define CREATE_ATTRIBUTE(AttributeType, AttributeName, OwnerEntity)						\
 	AttributeType* AttributeName = ((AttributeManager*)AttributeManagerDLLWrapper::getInstance())->AttributeName.createAttribute(OwnerEntity)
+
+
+//Test
+//#define CREATE_ATTRIBUTE(AttributeType, AttributeName, OwnerEntity)						\
+//	AttributeType* AttributeName = ((AttributeManager*)AttributeManagerDLLWrapper::getInstance())->AttributeName.createAttribute(OwnerEntity); \
+//	AttributeName->reset();
 	
+
 	// Connects the AttributePointer by the name PointerName inside AttributeName with latest AttributePointer created inside AttributeManager.
 	// IMPORTANT: The following formula is used to access AttributeManager, "PointerName+Attributes".
 	// PointerName "position" will result in "positionAttributes" which will work.
@@ -141,6 +149,7 @@ public:
 		CONNECT_ATTRIBUTES(physics, spatial);
 		CONNECT_ATTRIBUTES(physics, render);
 		physics->meshID = render->meshID;
+		//physics->isExplosionSphere = false; //CHECK
 		
 		physics->isProjectile = true;
 		physics->linearVelocity = e->velocity;
@@ -188,7 +197,7 @@ public:
 
 		CREATE_ATTRIBUTE(Attribute_DebugShape, debugShape, entity);	//create temp debug shape
 		CONNECT_ATTRIBUTES(debugShape, spatial);
-		debugShape->shape	= new DebugShapeSphere(e->radius*100.0f);
+		debugShape->shape	= new DebugShapeSphere(e->radius);
 		debugShape->render	= true;
 
 		CREATE_ATTRIBUTE(Attribute_Physics, physics, entity);
@@ -198,6 +207,7 @@ public:
 		physics->collisionResponse = false;
 		physics->mass = 0.0f;
 		physics->gravity = Float3(0.0f, 0.0f, 0.0f);
+		physics->linearVelocity = Float3(0.0f, 0.0f, 0.0f);
 
 		CREATE_ATTRIBUTE(Attribute_ExplosionSphere, explosionSphere, entity);
 		CONNECT_ATTRIBUTES(explosionSphere, physics);
