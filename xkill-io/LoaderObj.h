@@ -221,6 +221,8 @@ private:
 	/*!	OBS: Also checks if a group has zero indices. If so removes it if OBJ_PARSE_FLAGS_IGNORE_EMPTY_GROUPS is set. (this includes the default group) */
 	void loadObj();
 
+	bool getLastWrittenToFile(std::string fullPath, WriteTimeUTC& out);
+
 	unsigned int flags_;
 
 	SimpleStringSplitter* sss_; //!< Helper class used to split strings when reading these from file.
@@ -235,7 +237,8 @@ private:
 	std::vector<std::string>		mtlLib_;	//!< Filenames referencing to external .mtl-files read from file.
 
 	/*Result*/
-	Obj obj_;	//!< Resulting .obj-file.
+	Obj obj_;					//!< Resulting .obj-file.
+	WriteTimeUTC writeTimeUTC_;	//!< Last time .obj was modified.
 };
 
 #endif //XKILL_IO_LOADEROBJ_H

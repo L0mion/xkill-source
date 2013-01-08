@@ -47,7 +47,7 @@ int InputDevice::getPlayerID()
 	return playerID_;
 }
 
-float InputDevice::getFloatValue(int mapping, bool useSesitivity)
+float InputDevice::getFloatValue(int mapping, bool useSensitivity)
 {
 	float maxValue = 0.0f;
 	int index = 0;
@@ -58,7 +58,7 @@ float InputDevice::getFloatValue(int mapping, bool useSesitivity)
 		index = floatObjects_[mapping][i];
 		value = inputObjects_[index]->getValueFloat();
 
-		if(useSesitivity)
+		if(useSensitivity)
 			value *= inputObjects_[index]->getSensitivity();
 
 		if(std::abs(value) > maxValue)
@@ -86,6 +86,23 @@ bool InputDevice::getBoolReleased(int mapping)
 			return true;
 
 	return false;
+}
+
+/*  //////////////////////////////////////////////////////////////////
+	Hash algorithm djb2 from: http://www.cse.yorku.ca/~oz/hash.html	//
+*/  //////////////////////////////////////////////////////////////////
+unsigned long InputDevice::getHash()
+{
+	std::string str = getStandardMappingsString();
+
+	unsigned long hash = 5381;
+
+	for(unsigned int i = 0; i < str.size(); i++)
+	{
+		hash = ((hash << 5) + hash) + str[i];
+	}
+
+	return hash;
 }
 
 InputButtonObject* InputDevice::getButtonObject(unsigned int index)

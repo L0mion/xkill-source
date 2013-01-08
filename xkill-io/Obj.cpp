@@ -6,28 +6,34 @@ Obj::Obj()
 	//Do nothing.
 }
 Obj::Obj(
-	const std::string		moFilename,
+	const std::string		filename,
+	const WriteTimeUTC		writeTimeUTC,
 	const ObjDependencies	objDependencies,
-	const ObjGeometry		moMeshGeometry)
+	const ObjGeometry		objGeometry)
 {
-	this->fileName_			= moFilename;
+	this->fileName_			= filename;
+	this->writeTimeUTC_		= writeTimeUTC;
 	this->objDependencies_	= objDependencies;
-	this->objGeometry_		= moMeshGeometry;
+	this->objGeometry_		= objGeometry;
 }
 Obj::~Obj()
 {
 	//Do nothing.
 }
 
-const std::string Obj::getFileName()
+std::string Obj::getFileName() const
 {
 	return fileName_;
+}
+WriteTimeUTC Obj::getWriteTimeUTC() const
+{
+	return writeTimeUTC_;
 }
 const std::vector<std::string> Obj::getMTLs()
 {
 	return objDependencies_.getMTLFiles();
 }
-const ObjGeometry Obj::getObjGeometry()
+ObjGeometry Obj::getObjGeometry() const
 {
 	return objGeometry_;
 }

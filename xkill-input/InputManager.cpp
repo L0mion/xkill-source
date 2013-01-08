@@ -10,6 +10,9 @@
 #include <stdio.h>				  //
 ////////////////////////////////////
 
+///////Needed for Direct Input //////
+//#include <InitGuid.h>			   //
+								   //
 #define DIRECTINPUT_VERSION 0x0800 //
 #include <dinput.h>				   //
 /////////////////////////////////////
@@ -59,6 +62,8 @@ bool InputManager::InitInput(HWND hWindow, std::string configFilePath)
 	keyMapper_->getConfigForNewController(mouseAndKeyboard);
 	devices_.push_back(mouseAndKeyboard);
 	mouseAndKeyboard_ = mouseAndKeyboard;
+
+	//unsigned long tmp = mouseAndKeyboard_->getHash();
 
 	//LPDIRECTINPUTDEVICE8 dInputDevice;
 	//result = dInput_->CreateDevice(GUID_SysMouse, &dInputDevice, NULL);

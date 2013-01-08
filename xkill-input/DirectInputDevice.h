@@ -24,6 +24,7 @@ Some code should probably be refactored to a DirectInputGamepad class.
 
 class DirectInputDevice : public InputDevice
 {
+	DirectInputDevice();
 public:
 	DirectInputDevice(LPDIRECTINPUTDEVICE8 device, GUID deviceGUID, std::string name, unsigned int playerID);
 	virtual ~DirectInputDevice(void);
@@ -66,6 +67,8 @@ protected:
 	float leftFFMotorScale_;
 	float rightFFMotorScale_;
 
+	virtual std::string getStandardMappingsString();
+
 	//! Creates a force feedback effect
 	/*!
 	Currently uses a constant power effect.
@@ -97,16 +100,6 @@ protected:
 		}
 
 		int nrOfFFObjects;
-		//int offset;
-		//std::vector<DIOBJECTDATAFORMAT> ObjectDataFormat;
-		//LPDIRECTINPUTDEVICE8 device;
 	};
-
-	//struct InputData
-	//{
-	//	long axes[6];
-	//	long POV;
-	//	byte buttons[20];
-	//};
 };
 

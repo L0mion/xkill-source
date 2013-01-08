@@ -1,7 +1,9 @@
 #include <Windows.h>
+
+#include <xkill-utilities/StringConv.h>
+
 #include "DDSTextureLoader.h"
 
-#include "StringConv.h"
 #include "TexLoader.h"
 
 TexLoader::TexLoader()

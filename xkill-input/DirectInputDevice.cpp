@@ -1,6 +1,15 @@
 #include "DirectInputDevice.h"
 
 #include "InputActions.h"
+#include "Converter.h"
+
+DirectInputDevice::DirectInputDevice() : 
+	InputDevice(GUID(), "")
+{
+	device_ = nullptr;
+	hasFF_ = false;
+	isFFTurnedOn_ = false;
+}
 
 DirectInputDevice::DirectInputDevice(LPDIRECTINPUTDEVICE8 device, GUID deviceGUID, std::string name, unsigned int playerID) : 
 	InputDevice(deviceGUID, name, playerID)
@@ -222,50 +231,34 @@ BOOL CALLBACK DirectInputDevice::EnumObjectsCallback(const DIDEVICEOBJECTINSTANC
 	return DIENUM_CONTINUE;
 }
 
-//DIOBJECTDATAFORMAT DirectInputDevice::CreateDataFormat(const DIDEVICEOBJECTINSTANCE* object, int objectNumber)
-//{
-//	DIOBJECTDATAFORMAT objectDataFormat;
-//
-//	objectDataFormat.pguid = &object->guidType;
-//	objectDataFormat.dwType = object->dwType | DIDFT_ANYINSTANCE | DIDFT_OPTIONAL;
-//	objectDataFormat.dwOfs = object->dwOfs;
-//	objectDataFormat.dwFlags = 0;
-//
-//	return objectDataFormat;
-//}
-//
-//BOOL DirectInputDevice::SetupAxisObject(const DIDEVICEOBJECTINSTANCE* object, LPDIRECTINPUTDEVICE8 device)
-//{
-//	HRESULT result;
-//
-//	DIPROPRANGE propRange;
-//	DIPROPDWORD propWord;
-//
-//	propRange.diph.dwSize = sizeof(DIPROPRANGE);
-//	propRange.diph.dwHeaderSize = sizeof(DIPROPHEADER);
-//	propRange.diph.dwHow = DIPH_BYID;
-//	propRange.diph.dwObj = object->dwType;
-//
-//	propRange.lMin = -1000;
-//	propRange.lMin = +1000;
-//
-//	result = device->SetProperty(DIPROP_RANGE, &propRange.diph);
-//	if(FAILED(result))
-//		return false;
-//
-//	propWord.diph.dwSize = sizeof(DIPROPDWORD);
-//	propWord.diph.dwHeaderSize = sizeof(DIPROPHEADER);
-//	propWord.diph.dwHow = DIPH_BYID;
-//	propWord.diph.dwObj = object->dwType;
-//
-//	propWord.dwData = 4000;
-//
-//	result = device->SetProperty(DIPROP_DEADZONE, &propWord.diph);
-//	if(FAILED(result))
-//		return false;
-//
-//	return true;
-//}
+std::string DirectInputDevice::getStandardMappingsString()
+{
+	DirectInputDevice diDevice;
+
+	diDevice.setStandardMappings();
+	std::vector<InputObject*> inputObjects = diDevice.inputObjects_;
+
+	std::string str = "";
+
+	for(unsigned int i = 0; i < inputObjects.size(); i++)
+	{
+		std::vector<int> mappings = inputObjects[i]->getBoolMappings();
+
+		for(unsigned int j = 0; j < mappings.size(); j++)
+		{
+			str += Converter::IntToStr(mappings[j]);
+		}
+
+		mappings = inputObjects[i]->getFloatMappings();
+
+		for(unsigned int j = 0; j < mappings.size(); j++)
+		{
+			str += Converter::IntToStr(mappings[j]);
+		}
+	}
+
+	return str;
+}
 
 HRESULT DirectInputDevice::createEffect(int nrFFObjects)
 {

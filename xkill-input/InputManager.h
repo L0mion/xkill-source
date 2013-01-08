@@ -17,12 +17,6 @@
 #include <string>
 #include <vector>
 
-
-///////Needed for Direct Input //////
-//#include <InitGuid.h>			   //
-								   //
-
-
 class KeyMapper;
 
 //! Detects and manages devices and their input.

@@ -6,11 +6,12 @@ LoaderPGY::LoaderPGY(
 	const std::string filePath, 
 	const std::string fileName) : Loader(filePath, fileName)
 {
-	meshModel_ = nullptr;
+	meshModel_ = new VarStatus<MeshModel>(true);
 }
 LoaderPGY::~LoaderPGY()
 {
-	//Do nothing.
+	if(meshModel_)
+		delete meshModel_;
 }
 
 bool LoaderPGY::init()
@@ -23,27 +24,52 @@ bool LoaderPGY::init()
 		std::ios::in | std::ios::binary);
 	
 	if(!ifstream_.is_open())
+	{
 		sucessfulLoad = false;
+		lastError_ = LOADER_ERROR_FILE_NOT_FOUND;
+	}
 	else
 	{
-		meshModel_ = loadPGY();
+		PGYHeader header = loadHeader();
+		writeTimeUTC_ = header.writeTime_; //store for later
+		if(header.versionNum_ == LOADER_PGY_VERSION)
+		{
+			meshModel_->setVar(
+				loadPGY(
+					header.numMaterials_, 
+					header.numVertices_, 
+					header.numSubsets_));
+		}
+		else
+		{
+			sucessfulLoad = false;
+			lastError_ = LOADER_ERROR_PGY_VERSION_NUMBER_MISMATCH;
+		}
+
 		ifstream_.close();
 	}
 
 	return sucessfulLoad;
 }
 
-MeshModel* LoaderPGY::loadPGY()
+MeshModel* LoaderPGY::claimMeshModel()
 {
-	PGYHeader header = loadHeader();
+	meshModel_->setStatus(false);
+	return meshModel_->getVar();
+}
 
+MeshModel* LoaderPGY::loadPGY(
+	unsigned int numMaterials,
+	unsigned int numVertices,
+	unsigned int numSubsets)
+{
 	std::vector<MeshMaterial> materials;
-	materials = loadMaterials(header.numMaterials_);
+	materials = loadMaterials(numMaterials);
 
 	MeshGeometry geometry;
 	geometry = loadGeometry(
-		header.numVertices_,
-		header.numSubsets_);
+		numVertices,
+		numSubsets);
 
 	return new MeshModel(geometry, materials);
 }
@@ -136,7 +162,7 @@ const MeshSubset LoaderPGY::loadSubset()
 	return MeshSubset(materialIndex, indices);
 }
 
-MeshModel* LoaderPGY::getMeshModel()
+WriteTimeUTC LoaderPGY::getWriteTimeUTC() const
 {
-	return meshModel_;
+	return writeTimeUTC_;
 }

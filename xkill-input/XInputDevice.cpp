@@ -3,6 +3,19 @@
 
 #include <Xinput.h>
 #include "InputActions.h"
+#include "Converter.h"
+
+XInputDevice::XInputDevice() : 
+	InputDevice(GUID(), "")
+{
+	deviceNr_ = -1;
+	rightFFMotor_ = 0xFFFF;
+	leftFFMotor_ = 0xFFFF;
+	forceFeedbackOn_ = false;
+
+	createInputLayout();
+	createInputObjectsFromLayout();
+}
 
 XInputDevice::XInputDevice(int deviceNr, GUID deviceGUID, std::string name, unsigned int playerID) : 
 	InputDevice(deviceGUID, name, playerID)
@@ -95,6 +108,35 @@ void XInputDevice::setStandardMappings()
 InputDevice::InputDeviceType XInputDevice::GetType()
 {
 	return InputDevice::InputDeviceType::XINPUT_DEVICE;
+}
+
+std::string XInputDevice::getStandardMappingsString()
+{
+	XInputDevice xiDevice;
+
+	xiDevice.setStandardMappings();
+	std::vector<InputObject*> inputObjects = xiDevice.inputObjects_;
+
+	std::string str = "";
+
+	for(unsigned int i = 0; i < inputObjects.size(); i++)
+	{
+		std::vector<int> mappings = inputObjects[i]->getBoolMappings();
+
+		for(unsigned int j = 0; j < mappings.size(); j++)
+		{
+			str += Converter::IntToStr(mappings[j]);
+		}
+
+		mappings = inputObjects[i]->getFloatMappings();
+
+		for(unsigned int j = 0; j < mappings.size(); j++)
+		{
+			str += Converter::IntToStr(mappings[j]);
+		}
+	}
+
+	return str;
 }
 
 void XInputDevice::updateState()

@@ -1,6 +1,7 @@
 #include "FileParser.h"
 
 #include <fstream>
+#include <stdio.h>
 
 FileParser::FileParser(std::string message)
 {
@@ -169,6 +170,11 @@ bool FileParser::doneWriting(bool append)
 	}
 
 	return true;
+}
+
+void FileParser::deleteFile()
+{
+	std::remove(std::string(filepath_ + filename_).c_str());
 }
 
 void FileParser::createFile()

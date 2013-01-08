@@ -11,6 +11,8 @@
 #include <xkill-utilities/MeshMaterial.h>
 #include <xkill-utilities/MeshSubset.h>
 
+#include "WriteTime.h"
+
 /** Types of vertices that one may read from .pgy.
 * Currently supports only one vertex-type.
 */
@@ -27,6 +29,7 @@ struct PGYHeader
 {
 	char			fileType_[4];
 	float			versionNum_;
+	WriteTimeUTC	writeTime_;
 	unsigned int	vertexType_;		//PGY_SPECS_VERTEX
 	unsigned int	numMaterials_;
 	unsigned int	numVertices_;
@@ -46,6 +49,7 @@ static const std::string	PGY_SPECS_SUFFIX				= ".pgy";
 static const char			PGY_SPECS_FILETYPE[4]			= "pgy";
 
 static const unsigned int	PGY_SPECS_SIZE_HEADER			= sizeof(PGYHeader);
+//static const unsigned int	PGY_SPECS_SIZE_WRITETIMEUTC		= sizeof(WriteTimeUTC);
 static const unsigned int	PGY_SPECS_SIZE_HEADER_SUBSET	= sizeof(PGYHeaderSubset);
 static const unsigned int	PGY_SPECS_SIZE_MATERIAL			= sizeof(MeshMaterial);
 static const unsigned int	PGY_SPECS_SIZE_VERTEXPOSNORMTEX	= sizeof(VertexPosNormTex);
