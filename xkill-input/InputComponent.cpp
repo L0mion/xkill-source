@@ -97,22 +97,22 @@ void InputComponent::handleInput(float delta)
 
 		if(device->getBoolValue(ACTION_B_FIRE))
 			inputAttributes_->at(i).fire = true;
-		if(device->getBoolValue(ACTION_B_CHANGE_AMMUNITIONTYPE))
+		if(device->getBoolReleased(ACTION_B_CHANGE_AMMUNITIONTYPE))
 			inputAttributes_->at(i).changeAmmunitionType = true;
-		if(device->getBoolValue(ACTION_B_CHANGE_FIRINGMODE))
+		if(device->getBoolReleased(ACTION_B_CHANGE_FIRINGMODE))
 			inputAttributes_->at(i).changeFiringMode = true;
 
-		if(device->getBoolValue(ACTION_B_TOGGLE_MUTE_SOUND))
+		if(device->getBoolReleased(ACTION_B_TOGGLE_MUTE_SOUND))
 			SEND_EVENT(&Event_PlaySound(-1, true));
 
-		if(device->getBoolValue(ACTION_B_RUMBLE_ON))
+		if(device->getBoolReleased(ACTION_B_RUMBLE_ON))
 		{
 			Event_Rumble* er = new Event_Rumble(i, true, 100.0f, 1.0f, 1.0f);
 			EventManager::getInstance()->sendEvent(er);
 			delete er;
 		}
 
-		if(device->getBoolValue(ACTION_B_RUMBLE_OFF))
+		if(device->getBoolReleased(ACTION_B_RUMBLE_OFF))
 		{
 			Event_Rumble* er = new Event_Rumble(i, false, 100.0f, 0.0f, 0.0f);
 			EventManager::getInstance()->sendEvent(er);
