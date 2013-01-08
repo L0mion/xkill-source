@@ -137,13 +137,6 @@ void ComponentManager::onEvent(Event* e)
 	}
 }
 
-int a = 0;
-
-int getValue()
-{
-	
-	return a;
-}
 void ComponentManager::update(float delta)
 {
 	if(GET_STATE() == STATE_DEATHMATCH)
