@@ -72,15 +72,17 @@ void CameraComponent::onUpdate(float delta)
 
 		// Calculate split screen attribute
 		float aspectRatio = windowResolution.getAspectRatio();
-		if(cameraAttributes_->size()==2)
-		{
-			aspectRatio *= 2;
-		}
 
 		// push new camera
 		Attribute_Camera* cameraAttribute = &cameraAttributes_->at(cameras_.size());
 		cameraAttribute->aspect = aspectRatio;
 		cameras_.push_back(Camera(cameraAttribute->aspect,cameraAttribute->fov,cameraAttribute->zFar,cameraAttribute->zNear));
+		if(cameraAttributes_->size()==2)
+		{
+			aspectRatio *= 2;
+			for(unsigned int i=0; i<cameras_.size(); i++)
+				cameras_[i].setAspectRatio(aspectRatio);
+		}
 	}
 	for(unsigned int i=0; i<cameraAttributes_->size(); i++)
 	{
