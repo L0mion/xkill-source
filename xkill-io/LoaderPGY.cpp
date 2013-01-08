@@ -26,7 +26,21 @@ bool LoaderPGY::init()
 		sucessfulLoad = false;
 	else
 	{
-		meshModel_ = loadPGY();
+		PGYHeader header = loadHeader();
+		writeTimeUTC_ = header.writeTime_; //store for later
+		if(header.versionNum_ == LOADER_PGY_VERSION)
+		{
+			meshModel_ = loadPGY(
+				header.numMaterials_, 
+				header.numVertices_, 
+				header.numSubsets_);
+		}
+		else
+		{
+			sucessfulLoad = false;
+			lastError_ = LOADER_ERROR_PGY_VERSION_NUMBER_MISMATCH;
+		}
+
 		ifstream_.close();
 	}
 
@@ -136,7 +150,11 @@ const MeshSubset LoaderPGY::loadSubset()
 	return MeshSubset(materialIndex, indices);
 }
 
-MeshModel* LoaderPGY::getMeshModel()
+WriteTimeUTC LoaderPGY::getWriteTimeUTC() const
+{
+	return writeTimeUTC_;
+}
+MeshModel* LoaderPGY::getMeshModel() const
 {
 	return meshModel_;
 }

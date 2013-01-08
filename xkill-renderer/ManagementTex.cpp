@@ -9,9 +9,9 @@
 #include <xkill-utilities/TexDescHeader.h>
 #include <xkill-utilities/TexDescTex.h>
 #include <xkill-utilities/EventManager.h>
+#include <xkill-utilities/StringConv.h>
 
 #include "Tex.h"
-#include "StringConv.h"
 #include "TexLoader.h"
 #include "ManagementTex.h"
 

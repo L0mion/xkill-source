@@ -1,4 +1,9 @@
+#include <windows.h>
+//#include <tchar.h>
+//#include <stdio.h>
+
 #include <xkill-utilities/EventManager.h>
+#include <xkill-utilities/StringConv.h>
 
 #include "ObjFace.h"
 #include "LoaderObj.h"
@@ -27,10 +32,13 @@ bool LoaderObj::init()
 	sss_ = new SimpleStringSplitter();
 	groups_.push_back(createDefaultGroup());
 
+	//Get last time written to file using WinAPI.
 	std::string fullPath = getFilePath() + getFileName();
-	ifstream_.open(fullPath);
+	sucessfulLoad = getLastWrittenToFile(fullPath, writeTimeUTC_);
 
-	if(ifstream_.is_open())
+	//Open stream
+	ifstream_.open(fullPath);
+	if(ifstream_.is_open() && sucessfulLoad)
 	{
 		sucessfulLoad = parseObj();
 		if(ifstream_.is_open())
@@ -464,7 +472,46 @@ void LoaderObj::loadObj()
 	ObjDependencies dependencies;
 	for(unsigned int i = 0; i < mtlLib_.size(); i++)
 		dependencies.pushDependencyMTL(mtlLib_[i]);
-	obj_ = Obj(getFileName(), dependencies, mlGeometry);
+	obj_ = Obj(getFileName(), writeTimeUTC_, dependencies, mlGeometry);
+}
+
+bool LoaderObj::getLastWrittenToFile(std::string fullPath, WriteTimeUTC& out)
+{
+	WIN32_FIND_DATA findFileData;
+	HANDLE searchHandleWinAPI;
+
+#ifndef _UNICODE
+	searchHandleWinAPI = FindFirstFile(
+		fullPath.c_str(),
+		&findFileData);
+#else
+	searchHandleWinAPI = FindFirstFile(
+		stringToWstr(fullPath),
+		&findFileData);
+#endif //_UNICODE
+	
+	bool sucessfulRead = false;
+	if(searchHandleWinAPI != INVALID_HANDLE_VALUE)
+	{
+		sucessfulRead = true;
+
+		FILETIME lastWriteTime = findFileData.ftLastWriteTime;
+
+		//Convert the last-write time to UTC-time.
+		SYSTEMTIME utcTime;
+		FileTimeToSystemTime(&lastWriteTime, &utcTime);
+
+		out.year	= utcTime.wYear;
+		out.month	= utcTime.wMonth;
+		out.day		= utcTime.wDay;
+		out.hour	= utcTime.wHour;
+		out.min		= utcTime.wMinute;
+		out.sec		= utcTime.wSecond;
+
+		FindClose(searchHandleWinAPI);
+	}
+
+	return sucessfulRead;
 }
 
 Obj LoaderObj::getObj()

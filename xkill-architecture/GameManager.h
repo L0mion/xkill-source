@@ -45,6 +45,8 @@ the game by sending an Event, creating and deleting an Entity and such.
 
 #define SAFE_DELETE(x) if( x ) { delete(x); (x) = NULL; }
 
+#include <vld.h>
+
 class DLL_A GameManager
 {
 private:

@@ -6,6 +6,12 @@
 #include "Loader.h"
 #include "SpecsPGY.h"
 
+// Must correspond with WRITER_PGY_VERSION in order to read .pgy sucessfully.
+static const float LOADER_PGY_VERSION = 1.1f;
+/*
+* 1.1 - Now reads WriteTimeUTC struct from PGY-header.
+*/
+
 //! MeshLoader with functionality to load .obj-files.
 /*!
 Loader has minimal or no error handling to ensure a fast loading of binary .pgy-format.
@@ -31,7 +37,8 @@ public:
 	*/
 	bool init();
 
-	MeshModel* getMeshModel();
+	WriteTimeUTC	getWriteTimeUTC()	const;
+	MeshModel*		getMeshModel()		const;
 protected:
 private:
 	//! Loads binary .pgy-format.
@@ -91,6 +98,8 @@ private:
 	//! Reads a single subset from .pgy.
 	/*! \return Read subset. */
 	const MeshSubset					loadSubset();
+
+	WriteTimeUTC writeTimeUTC_;
 
 	MeshModel* meshModel_; //!< Resulting model read from .pgy.
 };

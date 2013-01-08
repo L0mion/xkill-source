@@ -6,8 +6,13 @@
 
 #include "Writer.h"
 #include "SpecsPGY.h"
+#include "WriteTime.h"
 
-static const float WRITER_PGY_VERSION = 0.1f;
+// !OBS! Be sure to increment WRITER_PGY_VERSION if updating WriterPGY! !OBS!
+static const float WRITER_PGY_VERSION = 1.1f;
+/*
+* 1.1 - Now writes WriteTimeUTC struct to PGY-header.
+*/
 
 //! Writer with functionality to write binary .pgy-files.
 /*!
@@ -24,6 +29,7 @@ public:
 	*/
 	WriterPGY(
 		const MeshModel		subject,
+		const WriteTimeUTC	writeTimeUTC,
 		const std::string	filePath,
 		const std::string	fileName);
 	//! Does nothing.
@@ -79,7 +85,8 @@ private:
 	//! Writes a single index to .pgy.
 	void writeIndex(unsigned int index);
 
-	MeshModel subject_; //!< Model to be written to .pgy.
+	MeshModel		subject_;		//!< Model to be written to .pgy.
+	WriteTimeUTC	writeTimeUTC_;	//!< Time last written to original file being converted into .pgy. Measured in UTC.
 };
 
 #endif //XKILL_IO_WRITERPGY_H

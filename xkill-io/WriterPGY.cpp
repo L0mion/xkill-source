@@ -2,10 +2,12 @@
 
 WriterPGY::WriterPGY(
 	const MeshModel		subject,
+	const WriteTimeUTC	writeTimeUTC,
 	const std::string	filePath,
 	const std::string	fileName) : Writer(filePath, fileName)
 {
-	subject_ = subject;
+	writeTimeUTC_	= writeTimeUTC;
+	subject_		= subject;
 }
 WriterPGY::~WriterPGY()
 {
@@ -55,6 +57,7 @@ const PGYHeader WriterPGY::loadHeader()
 	for(unsigned int i = 0; i < 4; i++)
 		header.fileType_[i]	= PGY_SPECS_FILETYPE[i];
 	header.versionNum_		= WRITER_PGY_VERSION;
+	header.writeTime_		= writeTimeUTC_;
 	header.vertexType_		= POS_NORM_TEX;
 	header.numMaterials_	= numMaterials;
 	header.numVertices_		= numVertices;
