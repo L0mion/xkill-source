@@ -69,13 +69,19 @@ void GameComponent::onUpdate(float delta)
 	{
 		// Fetch attributes through iterators
 		Attribute_Player*		player		=	itrPlayer		.getNext();
+
 		Attribute_Health*		health		=	itrHealth		.at(player->ptr_health);
 		Attribute_Camera*		camera		=	itrCamera		.at(player->ptr_camera);
-		Attribute_Input*			input		=	itrInput		.at(player->ptr_input);
+		Attribute_Input*		input		=	itrInput		.at(player->ptr_input);
 		Attribute_Render*		render		=	itrRender		.at(player->ptr_render);
 		Attribute_WeaponStats*	weaponStats	=	itrWeaponStats	.at(player->ptr_weaponStats);
 		Attribute_Spatial*		spatial		=	itrSpatial		.at(render->ptr_spatial);
 		Attribute_Position*		position	=	itrPosition		.at(spatial->ptr_position);
+
+
+		Entity* playerEntity = itrPlayer.owner();
+		Attribute_DebugShape* debugShap = itrDebugShape.createAttribute(playerEntity);
+		debugShap->ptr_spatial = itrDebugShape.attributePointer(debugShap);
 
 
 		//

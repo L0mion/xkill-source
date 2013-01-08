@@ -18,6 +18,8 @@ private:
 public:
 	~AttributeManager();
 
+	EntityStorage* entities;
+
 	AttributeStorage<Attribute_Position>		position;
 	AttributeStorage<Attribute_Spatial>			spatial;
 	AttributeStorage<Attribute_Render>			render;
@@ -34,8 +36,6 @@ public:
 	AttributeStorage<Attribute_SpawnPoint>		spawnPoint;
 	AttributeStorage<Attribute_WeaponStats>		weaponStats;
 	AttributeStorage<Attribute_ExplosionSphere>	explosionSphere;
-
-	EntityStorage* entities;
 
 	static AttributeManager* getInstance();
 };
@@ -59,6 +59,7 @@ public:
 
 // Declares all attributes
 #define ATTRIBUTES_DECLARE_ALL														\
+static	EntityStorage										*entityStorage		;	\
 static	AttributeIterator<Attribute_Position>				itrPosition			;	\
 static	AttributeIterator<Attribute_Spatial>				itrSpatial			;	\
 static	AttributeIterator<Attribute_Render>					itrRender			;	\
@@ -80,6 +81,7 @@ static	AttributeIterator<Attribute_ExplosionSphere>		itrExplosionSphere	;	\
 
 // Inits all attributes
 #define ATTRIBUTES_INIT_ALL															\
+entityStorage		= ATTRIBUTE_MANAGER->entities;									\
 itrPosition			= ATTRIBUTE_MANAGER->position			.getIterator();			\
 itrSpatial			= ATTRIBUTE_MANAGER->spatial			.getIterator();			\
 itrRender			= ATTRIBUTE_MANAGER->render				.getIterator();			\

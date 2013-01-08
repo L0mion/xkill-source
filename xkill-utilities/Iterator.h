@@ -22,37 +22,39 @@ class AttributeIterator : public IAttributeIterator
 {
 private:
     std::vector<T>* attributes;        //!< Each attribute.
-    std::vector<int>* owners;
-	AttributeStorage<T>* storage;
-	std::vector<Entity>* entities;
-
+    std::vector<int>* allOwnerId;
+	std::vector<Entity>* allOwner;
     int nextIndex;
-	
+	AttributeStorage<T>* attributeStorage;
 public:
+	
+
 	AttributeIterator()
 	{
-		GET_ENTITIES(entities);
+		
 	}
-    AttributeIterator(std::vector<T>* attributes, std::vector<int>* owners, AttributeStorage<T>* storage)
+    AttributeIterator(std::vector<T>* attributes, std::vector<int>* owners, AttributeStorage<T>* attributeStorage)
     {
         this->attributes = attributes;
-        this->owners = owners;
-		this->storage = storage;
-
+        this->allOwnerId = owners;
+		this->attributeStorage = attributeStorage;
         nextIndex = 0;
+
+		// connect with owners
+		GET_ENTITIES(allOwner);
     }
 
     // Returns true if getNext will return a valid Item
     bool hasNext()
     {
         // Step to next Item or until end is reached
-        while(nextIndex < (int)owners->size() && owners->at(nextIndex) == 0)
+        while(nextIndex < (int)allOwnerId->size() && allOwnerId->at(nextIndex) == 0)
         {
             nextIndex++;
         }
 
         // Returns TRUE if next Item is valid, otherwise end has been reached
-		if(nextIndex < (int)owners->size())
+		if(nextIndex < (int)allOwnerId->size())
 			return true;
 		else
 		{
@@ -81,22 +83,37 @@ public:
 	// Returns how many attributes (including deleted ones) there is 
 	int size()
 	{
-		return (int)owners->size();
+		return (int)allOwnerId->size();
 	}
 
-	// Returns the Owner of the latest
+	// Returns the Owner ID of the latest
 	// Item aquired throught getNext()
 	int ownerId()
 	{
-		return owners->at(index());
+		return allOwnerId->at(index());
 	}
 
 	// Returns the id of the owner
 	// of the Attribute at index
 	int ownerIdAt(int index)
 	{
-		return owners->at(index);
+		return allOwnerId->at(index);
 	}
+
+	// Returns the Owner of the latest
+	// Item aquired throught getNext()
+	Entity* owner()
+	{
+		return &allOwner->at(ownerId());
+	}
+
+	// Returns the Owner of the latest
+	// Item aquired throught getNext()
+	Entity* ownerAt(int index)
+	{
+		return &allOwner->at(ownerIdAt(index));
+	}
+
 
     // Resets the Iterator to the beginning
     void resetIndex()
@@ -119,8 +136,21 @@ public:
         return at(attrPointer.index);
     }
 
-	T* createAttribute(Entity* owner)
-    {
-        return createAttribute(owner);
-    }
+	int index(T* attribute)
+	{ 
+		int index = attribute - &attributes->at(0);
+		return index;
+	}
+
+	AttributePointer attributePointer(T* attribute)
+	{ 
+		AttributePointer pointer;
+		pointer.init(&attributes, index(attribute));
+		return pointer;
+	}
+
+	T* createAttribute(Entity* e)
+	{ 
+		return attributeStorage->createAttribute(e);
+	}
 };

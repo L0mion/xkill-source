@@ -3,6 +3,8 @@
 
 AttributeManager::AttributeManager()
 {
+	entities = new EntityStorage;
+
 	position		.init	(ATTRIBUTE_POSITION);
 	spatial			.init	(ATTRIBUTE_SPATIAL);
 	render			.init	(ATTRIBUTE_RENDER);
@@ -19,8 +21,6 @@ AttributeManager::AttributeManager()
 	spawnPoint		.init	(ATTRIBUTE_SPAWNPOINT);
 	weaponStats		.init	(ATTRIBUTE_WEAPONSTATS);
 	explosionSphere	.init	(ATTRIBUTE_EXPLOSIONSPHERE);
-
-	entities = new EntityStorage;
 }
 
 AttributeManager::~AttributeManager()
