@@ -3,6 +3,13 @@
 #include <queue>
 #include <string>
 
+//! Handles files
+/*!
+Reads from and writes to a file.
+
+Should be removed as the functionality already exists in xkill-io.
+*/
+
 class FileParser
 {
 public:

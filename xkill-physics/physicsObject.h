@@ -4,8 +4,8 @@
 #include <btBulletDynamicsCommon.h>
 #include "physicsObject.h"
 
-struct PhysicsAttribute;
-struct InputAttribute;
+struct Attribute_Physics;
+struct Attribute_Input;
 class CollisionShapeManager;
 
 //! Physics Object
@@ -74,17 +74,17 @@ public:
 	/*! 
 	\param physicsAttribute The physics attribute which contain object data
 	*/
-	void preStep(CollisionShapeManager* collisionShapeManager, PhysicsAttribute* physicsAttribute);
+	void preStep(CollisionShapeManager* collisionShapeManager, Attribute_Physics* physicsAttribute);
 	//! Runs after simulation is stepped to copy data from rigidbody to attribute
 	/*! 
 	\param physicsAttribute The physics attribute which contain object data
 	*/
-	void postStep(PhysicsAttribute* physicsAttribute);
+	void postStep(Attribute_Physics* physicsAttribute);
 	//! Runs after simulation is stepped to copy data from rigidbody to attribute
 	/*! 
 	\param inputAttribute The attribute containing player controller information
 	*/
-	void input(InputAttribute* inputAttribute, float delta);
+	void input(Attribute_Input* inputAttribute, float delta);
 	//! return index of physicsobject
 	unsigned int getIndex() const;
 	//! return type of physicsobject

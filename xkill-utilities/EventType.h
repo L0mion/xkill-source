@@ -55,6 +55,8 @@ enum DLL_U EventType
 	EVENT_KEY_RELEASE,
 	EVENT_WINDOW_RESIZE,
 
+	EVENT_INPUT_DEVICE_SEARCH,
+
 	EVENT_DO_CULLING,
 
 	// Get events
@@ -65,7 +67,7 @@ enum DLL_U EventType
 
 	// Utilities
 	EVENT_CREATE_MESH,
-	EVENT_POST_DESC_TEX,
+	EVENT_LOAD_TEXTURES,
 	EVENT_SHOW_MESSAGEBOX,
 
 	// this is needed, don't touch!
@@ -227,11 +229,11 @@ public:
 	Float3 position;
 	Float3 velocity;
 	Float4 rotation;
-	int damage;
+	float damage;
 	int entityIdOfCreator;
 	bool explodeOnImpact;
 
-	Event_CreateProjectile(Float3 position, Float3 velocity, Float4 rotation, int damage, int entityIdOfCreator, bool explodeOfImpact);
+	Event_CreateProjectile(Float3 position, Float3 velocity, Float4 rotation, float damage, int entityIdOfCreator, bool explodeOfImpact);
 };
 
 class MeshModel;
@@ -246,12 +248,13 @@ public:
 };
 
 class TexDesc;
-class DLL_U Event_PostDescTex : public Event
+//! Event sending information of which textures to load to renderer. Renderer then cleans the memory allocated manually.
+class DLL_U Event_LoadTextures : public Event
 {
 public:
 	TexDesc* texDesc_;
 
-	Event_PostDescTex(TexDesc* texDesc) : Event(EVENT_POST_DESC_TEX)
+	Event_LoadTextures(TexDesc* texDesc) : Event(EVENT_LOAD_TEXTURES)
 	{
 		texDesc_ = texDesc;
 	}
@@ -357,11 +360,11 @@ public:
 class DLL_U Event_CreateExplosionSphere : public Event
 {
 public:
-	Event_CreateExplosionSphere(Float3 position, float radius, int damage, int entityIdOfCreator);
+	Event_CreateExplosionSphere(Float3 position, float radius, float damage, int entityIdOfCreator);
 
 	Float3 position;
 	float radius;
-	int damage;
+	float damage;
 	int entityIdOfCreator;
 };
 

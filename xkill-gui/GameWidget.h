@@ -1,11 +1,11 @@
 #ifndef GAMEWIDGET_H
 #define GAMEWIDGET_H
 
-#include <QWidget.h>
-#include <QResizeEvent>
-#include <QMouseEvent>
-#include <QTime>
-#include <QTimer> // needed to implement frame rate
+#include <QtGui/QWidget.h>
+#include <QtGui/QResizeEvent>
+#include <QtGui/QMouseEvent>
+#include <QtCore/QTime>
+#include <QtCore/QTimer> // needed to implement frame rate
 #include <xkill-architecture/GameManager.h>
 #include <xkill-utilities/IObserver.h>
 #include <xkill-utilities/EventManager.h>
@@ -25,7 +25,7 @@ private:
 	QTimer* updateTimer;
 
 public:
-	GameWidget(QWidget* parent = 0, Qt::WFlags flags = 0) : QWidget(parent, flags)
+	GameWidget(QWidget* parent) : QWidget(parent)
 	{
 		// make widget non-transparent & draw directly onto screen
 		QWidget::setAttribute(Qt::WA_OpaquePaintEvent);

@@ -32,6 +32,7 @@ IOComponent::~IOComponent()
 	}
 	if(fbxLoader_)
 		delete fbxLoader_;
+
 }
 bool IOComponent::init()
 {
@@ -89,7 +90,7 @@ bool IOComponent::initTexDesc(std::string filename)
 			texNameToTexID->insert(newMapping);
 		}
 
-		Event_PostDescTex e(texDesc);
+		Event_LoadTextures e(texDesc);
 		SEND_EVENT(&e);
 	}
 	else
@@ -172,7 +173,6 @@ bool IOComponent::loadModel(
 	if(sucessfulMake)
 	{
 		MeshModel* model = objMaker->claimMesh();
-		meshModels_.push_back(model);
 
 		Event_CreateMesh e(modelDesc->modelID_, model, modelDesc->dynamic_);
 		SEND_EVENT(&e);

@@ -5,6 +5,7 @@
 #include "dllUtilities.h"
 #include "EventType.h"
 #include "FiniteState.h"
+#include "AttributeManager.h"
 
 class IObserver;
 enum EventType;
@@ -105,22 +106,19 @@ EventManager::getInstance()->addObserver(Subscriber, EventType);
 	EventManager::getInstance()->sendEvent(&e);						\
 }
 
+// TODO
+#define ATTRIBUTE_MANAGER							\
+	((AttributeManager*)AttributeManagerDLLWrapper::getInstance())
+
 // Fetches a vector<AttributeType>* of a specific Attribute
 // from AttributeManager.
-#define GET_ATTRIBUTES(AttributePointer, AttributeType, Enum)		\
-{																	\
-	Event_GetAttribute e(Enum);										\
-	EventManager::getInstance()->sendEvent(&e);						\
-	AttributePointer = (std::vector<AttributeType>*)e.hostVector;	\
-}
+#define GET_ATTRIBUTES(AttributePointer)							\
+	&((AttributeManager*)AttributeManagerDLLWrapper::getInstance())->AttributePointer.attributes;
 
-// Fetches the owners of a specific Attribute from AttributeManager
-#define GET_ATTRIBUTE_OWNERS(OwnerPointer, Enum)					\
-{																	\
-	Event_GetAttribute e(Enum);										\
-	EventManager::getInstance()->sendEvent(&e);						\
-	OwnerPointer = e.owners;										\
-}
+// Fetches a vector<AttributeType>* of a specific Attribute
+// from AttributeManager.
+#define GET_ATTRIBUTE_OWNERS(OwnerPointer)							\
+	&((AttributeManager*)AttributeManagerDLLWrapper::getInstance())->OwnerPointer.owners;
 
 // Fetches a owners of a specific Attribute from AttributeManager
 #define GET_ENTITIES(EntityPointer)									\

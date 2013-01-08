@@ -1,6 +1,9 @@
 #ifndef XKILL_RENDERER_RENDERINGCOMPONENT_H
 #define XKILL_RENDERER_RENDERINGCOMPONENT_H
 
+#define WINVER			0x0601
+#define _WIN32_WINNT	0x0601
+
 typedef struct HWND__* HWND;
 
 class Renderer;
@@ -37,7 +40,7 @@ private:
 	Renderer* renderer_;
 	 
 	void event_WindowResize(Event_WindowResize* e);
-	void event_PostDescTex(Event_PostDescTex* e);
+	void event_PostDescTex(Event_LoadTextures* e);
 };
 
 #endif //XKILL_RENDERER_RENDERINGCOMPONENT_H
