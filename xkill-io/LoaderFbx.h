@@ -34,6 +34,7 @@ private:
 	std::vector<int>	indices_;
 	std::vector<Float3> vertexPositions_;
 	std::vector<Float3> vertexNormals_;
+	std::vector<Float2> vertexUVs_;
 
 	FbxManager*		fbxManager_;
 	FbxScene*		fbxScene_;

@@ -172,12 +172,10 @@ void LoaderFbx::parseMesh(FbxNode* node)
 		for(int insidePolygonIndex=0; insidePolygonIndex<POLYGON_SIZE; insidePolygonIndex++)
 		{
 			parseVertexNormals(mesh, polygonIndex, insidePolygonIndex, vertexId);
-			parseVertexUVs(mesh, polygonIndex, insidePolygonIndex);
-			
+			parseVertexUVs(mesh, polygonIndex, insidePolygonIndex);		
 			vertexId++;
 		}
 	}
-	
 }
 void LoaderFbx::parseIndices(FbxMesh* mesh, int polygonVertexCount)
 {
@@ -219,11 +217,14 @@ void LoaderFbx::parseVertexUVs(FbxMesh* mesh, int polygonIndex, int insidePolygo
 	for(int i=0; i<uvSetNameList.GetCount(); i++)
 	{
 		const char* uvSetName = uvSetNameList.GetStringAt(i);
-		const FbxGeometryElement* uvElement = mesh->GetElementUV(uvSetName);
-		uvElement->GetMappingMode();
-	}
 
-	//fbxMesh->GetPolygonVertexUVs(
+		FbxVector2 fbxUV; 
+		mesh->GetPolygonVertexUV(polygonIndex, insidePolygonIndex, uvSetName, fbxUV);
+		Float2 uv;
+		uv.x = fbxUV.mData[0];
+		uv.y = fbxUV.mData[1];
+		vertexUVs_.push_back(uv);
+	}
 }
 
 
