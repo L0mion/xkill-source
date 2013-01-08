@@ -23,7 +23,10 @@ bool LoaderPGY::init()
 		std::ios::in | std::ios::binary);
 	
 	if(!ifstream_.is_open())
+	{
 		sucessfulLoad = false;
+		lastError_ = LOADER_ERROR_FILE_NOT_FOUND;
+	}
 	else
 	{
 		PGYHeader header = loadHeader();
@@ -47,17 +50,18 @@ bool LoaderPGY::init()
 	return sucessfulLoad;
 }
 
-MeshModel* LoaderPGY::loadPGY()
+MeshModel* LoaderPGY::loadPGY(
+	unsigned int numMaterials,
+	unsigned int numVertices,
+	unsigned int numSubsets)
 {
-	PGYHeader header = loadHeader();
-
 	std::vector<MeshMaterial> materials;
-	materials = loadMaterials(header.numMaterials_);
+	materials = loadMaterials(numMaterials);
 
 	MeshGeometry geometry;
 	geometry = loadGeometry(
-		header.numVertices_,
-		header.numSubsets_);
+		numVertices,
+		numSubsets);
 
 	return new MeshModel(geometry, materials);
 }
