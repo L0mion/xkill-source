@@ -1,13 +1,16 @@
 #pragma once
 
 #include "AttributeStorage.h"
+#include "EventManager.h"
+#include "EntityStorage.h"
+
 class Entity;
 
 // Forward declaration of templates
 template <class T> 
 class AttributeStorage;
 
-class IAttributeIterator
+class DLL_U IAttributeIterator
 {
 public:
     virtual int index() = 0;
@@ -21,12 +24,14 @@ private:
     std::vector<T>* attributes;        //!< Each attribute.
     std::vector<int>* owners;
 	AttributeStorage<T>* storage;
+	std::vector<Entity>* entities;
 
     int nextIndex;
 	
 public:
 	AttributeIterator()
 	{
+		GET_ENTITIES(entities);
 	}
     AttributeIterator(std::vector<T>* attributes, std::vector<int>* owners, AttributeStorage<T>* storage)
     {

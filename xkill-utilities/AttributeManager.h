@@ -3,6 +3,8 @@
 #include "AttributeType.h"
 #include "AttributeStorage.h"
 
+class EntityStorage;
+
 /// Singleton responsible for providing access to each Attribute.
 /** 
 \ingroup ARCHITECTURE
@@ -32,6 +34,8 @@ public:
 	AttributeStorage<Attribute_SpawnPoint>		spawnPoint;
 	AttributeStorage<Attribute_WeaponStats>		weaponStats;
 	AttributeStorage<Attribute_ExplosionSphere>	explosionSphere;
+
+	EntityStorage* entities;
 
 	static AttributeManager* getInstance();
 };

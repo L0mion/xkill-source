@@ -14,9 +14,6 @@ GameComponent::GameComponent(void)
 	SUBSCRIBE_TO_EVENT(this, EVENT_PHYSICS_ATTRIBUTES_COLLIDING);
 	SUBSCRIBE_TO_EVENT(this, EVENT_START_DEATHMATCH);	
 	SUBSCRIBE_TO_EVENT(this, EVENT_END_DEATHMATCH);
-
-
-	ATTRIBUTES_INIT_ALL;
 }
 
 GameComponent::~GameComponent(void)
@@ -34,6 +31,8 @@ bool GameComponent::init()
 	SEND_EVENT(&Event_CreateSpawnPoint(Float3(1.0f, 1.0f, 1.0f), 2.0f));
 	SEND_EVENT(&Event_CreateSpawnPoint(Float3(0.0f, 0.0f, -5.0f), 2.0f));
 	SEND_EVENT(&Event_CreateSpawnPoint(Float3(4.0f, 4.0f, 4.0f), 2.0f));
+
+	ATTRIBUTES_INIT_ALL;
 
 	srand ((unsigned)time(NULL) );
 
@@ -334,10 +333,9 @@ void GameComponent::event_PhysicsAttributesColliding(Event_PhysicsAttributesColl
 	Entity* entity1 = &allEntity->at(itrPhysics.ownerIdAt(e->attribute1_index));
 	Entity* entity2 = &allEntity->at(itrPhysics.ownerIdAt(e->attribute2_index));
 	
-	//
+
 	// Handle hit reaction on entity 1
 	// when colliding with entity 2
-	//
 
 	// health
 	if(entity1->hasAttribute(ATTRIBUTE_HEALTH))

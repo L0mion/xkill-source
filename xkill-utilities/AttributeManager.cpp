@@ -1,4 +1,5 @@
 #include "AttributeManager.h"
+#include "EntityStorage.h"
 
 AttributeManager::AttributeManager()
 {
@@ -18,10 +19,13 @@ AttributeManager::AttributeManager()
 	spawnPoint		.init	(ATTRIBUTE_SPAWNPOINT);
 	weaponStats		.init	(ATTRIBUTE_WEAPONSTATS);
 	explosionSphere	.init	(ATTRIBUTE_EXPLOSIONSPHERE);
+
+	entities = new EntityStorage;
 }
 
 AttributeManager::~AttributeManager()
 {
+	delete entities;
 }
 
 AttributeManager* AttributeManager::getInstance()
