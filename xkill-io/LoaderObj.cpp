@@ -488,9 +488,11 @@ bool LoaderObj::getLastWrittenToFile(std::string fullPath, WriteTimeUTC& out)
 		fullPath.c_str(),
 		&findFileData);
 #else
+	wchar_t* lpcwstr = stringToWstr(fullPath);
 	searchHandleWinAPI = FindFirstFile(
-		stringToWstr(fullPath),
+		lpcwstr,
 		&findFileData);
+	delete lpcwstr;
 #endif //_UNICODE
 	
 	bool sucessfulRead = false;

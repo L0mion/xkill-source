@@ -56,6 +56,8 @@ bool MeshMakerObj::init()
 	std::string fileNamePGY = getFileNamePGY();
 	if(existingPGY(pathPGY_, fileNamePGY) && sucessfulLoad) //Attempt to load PGY
 		sucessfulLoad = loadPGY(writeTimeUTC);
+	else
+		sucessfulLoad = false;
 
 	if(!sucessfulLoad)
 	{
@@ -134,9 +136,11 @@ bool MeshMakerObj::getLastWrittenToFile(std::string path, std::string fileName, 
 		fullPath.c_str(),
 		&findFileData);
 #else
+	wchar_t* lpcwstr = stringToWstr(path + fileName);
 	searchHandleWinAPI = FindFirstFile(
-		stringToWstr(path + fileName),
+		lpcwstr,
 		&findFileData);
+	delete lpcwstr;
 #endif //_UNICODE
 
 	bool sucessfulRead = false;
