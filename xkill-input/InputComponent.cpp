@@ -53,17 +53,14 @@ void InputComponent::onEvent(Event* e)
 		Event_KeyRelease* ekr = static_cast<Event_KeyRelease*>(e);
 		handleKeyEvent(ekr->keyEnum, false);
 	}
+	if(type == EVENT_INPUT_DEVICE_SEARCH)
+	{
+		inputManager_->UpdateNumberOfGamepads(windowHandle_);
+	}
 }
 
 void InputComponent::onUpdate(float delta)
 {
-	newDeviceSearchTimer_ += delta;				//Takes alot of time so should probably not run in main thread or while playing
-	if(newDeviceSearchTimer_ >= searchTime_)
-	{
-		newDeviceSearchTimer_ = 0.0f;
-		inputManager_->UpdateNumberOfGamepads(windowHandle_);
-	}
-
 	inputManager_->Update(delta);
 
 	handleInput(delta);

@@ -96,9 +96,10 @@ protected:
 	std::string name_;
 	unsigned int playerID_;
 
-	std::vector<InputAxisObject*> axes_;				//Should perhaps use an inputstate to store this instead?
+	std::vector<InputAxisObject*> axes_;
 	std::vector<InputButtonObject*> buttons_;
 	std::vector<InputTriggerObject*> triggers_;
+
 	std::vector<InputObject*> inputObjects_;
 
 	std::vector<std::vector<int>> floatObjects_;
