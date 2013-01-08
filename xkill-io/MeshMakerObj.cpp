@@ -52,10 +52,10 @@ bool MeshMakerObj::init()
 	//Get time when original file was last edited.
 	WriteTimeUTC writeTimeUTC;
 	sucessfulLoad = getLastWrittenToFile(pathObj_, fileNameObj_, writeTimeUTC);
-
+	
 	std::string fileNamePGY = getFileNamePGY();
 	if(existingPGY(pathPGY_, fileNamePGY) && sucessfulLoad) //Attempt to load PGY
-		sucessfulLoad = loadPGY(writeTimeUTC); //meshModel_->setVar(loadPGY());
+		sucessfulLoad = loadPGY(writeTimeUTC);
 
 	if(!sucessfulLoad)
 	{

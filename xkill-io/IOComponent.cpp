@@ -22,11 +22,11 @@ IOComponent::~IOComponent()
 	if(texNameToTexID)
 		delete texNameToTexID;
 
-	for(unsigned int i = 0; i < meshModels_.size(); i++)
-	{
-		if(meshModels_[i])
-			delete meshModels_[i];
-	}
+	//for(unsigned int i = 0; i < meshModels_.size(); i++)
+	//{
+	//	if(meshModels_[i])
+	//		delete meshModels_[i];
+	//}
 }
 bool IOComponent::init()
 {
@@ -164,7 +164,7 @@ bool IOComponent::loadModel(
 	if(sucessfulMake)
 	{
 		MeshModel* model = objMaker->claimMesh();
-		meshModels_.push_back(model);
+		//meshModels_.push_back(model);
 
 		Event_CreateMesh e(modelDesc->modelID_, model, modelDesc->dynamic_);
 		SEND_EVENT(&e);
