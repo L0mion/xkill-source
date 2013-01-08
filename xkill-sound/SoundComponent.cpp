@@ -32,6 +32,8 @@ SoundComponent::~SoundComponent()
 
 bool SoundComponent::init(std::string configFilePath)
 {
+	int test = sizeof(*ATTRIBUTE_MANAGER);
+
 	mFMODEventSystem = new FMODEventSystem();
 	mFMODEventSystem->Init("../xkill-dependencies/sound/", "Xkill 1.0.fev", 64);
 

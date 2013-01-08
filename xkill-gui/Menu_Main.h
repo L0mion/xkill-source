@@ -1,6 +1,6 @@
 #pragma once
 
-#include <QMainWindow>
+#include <QtGui/QMainWindow>
 #include "ToggleHelper.h"
 #include "ui_MainMenu.h"
 

@@ -18,9 +18,9 @@ InputComponent::~InputComponent()
 	delete inputManager_;
 }
 
-bool InputComponent::init(HWND windowHandle, std::vector<InputAttribute>* inputAttributes, std::string configFilePath, float searchTime)
+bool InputComponent::init(HWND windowHandle, std::string configFilePath, float searchTime)
 {
-	inputAttributes_ = inputAttributes;
+	inputAttributes_ = GET_ATTRIBUTES(input);
 
 	windowHandle_ = windowHandle;
 	searchTime_ = searchTime;

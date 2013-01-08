@@ -9,11 +9,11 @@ namespace DirectX
 	struct XMFLOAT4X4;
 };
 
-struct RenderAttribute;
-struct DebugShapeAttribute;
-struct CameraAttribute;
-struct SpatialAttribute;
-struct PositionAttribute;
+struct Attribute_Render;
+struct Attribute_DebugShape;
+struct Attribute_Camera;
+struct Attribute_Spatial;
+struct Attribute_Position;
 
 class Winfo;
 class TexDesc;
@@ -73,7 +73,7 @@ private:
 	void	initManagementMath();		//!< Initializes ManagementMath, which manages math-related functions and loading of dx-vectors into generic-type vectors utilizing SIMD.
 
 	void renderViewport(
-		CameraAttribute	cameraAt, 
+		Attribute_Camera	cameraAt, 
 		unsigned int	viewportTopX,
 		unsigned int	viewportTopY,
 		unsigned int	cameraIndex); //!< Renders a viewport.
@@ -83,14 +83,14 @@ private:
 		unsigned int		cameraIndex);	//!< Renders to g-buffer.
 	void renderViewportToBackBuffer();			//!< Renders to backbuffer.
 	void renderAttribute(
-		RenderAttribute* renderAt, 
+		Attribute_Render* renderAt, 
 		DirectX::XMFLOAT4X4 viewMatrix, 
 		DirectX::XMFLOAT4X4 projectionMatrix);	//!< Renders an attribute.
 	void renderSubset(
 		IB* ib, 
 		MeshMaterial& material);				//!< Renders a subset.
 	void renderDebugShape(
-		DebugShapeAttribute*	debugShapeAt, 
+		Attribute_DebugShape*	debugShapeAt, 
 		unsigned int			shapeIndex,
 		DirectX::XMFLOAT4X4		viewMatrix, 
 		DirectX::XMFLOAT4X4		projectionMatrix); //!< Renders a debug shape, such as a bounding sphere.
@@ -117,13 +117,13 @@ private:
 	ManagementDebug*	managementDebug_;		//!< Used for detecting live COM-objects.
 	ManagementMath*		managementMath_;		//!< Loads dx-math vectors into generic-type vectors and maintains other math-related functions.
 
-	std::vector<SpatialAttribute>*		attributesSpatial_;		//!< Holds spatial data. Is fetched only once.
-	std::vector<PositionAttribute>*		attributesPosition_;	//!< Holds positional data. Is fetched only once.
-	std::vector<RenderAttribute>*		attributesRender_;		//!< Holds objects supposed to be rendered. Is fetched only once.
-	std::vector<DebugShapeAttribute>*	attributesDebugShape_;	//!< Holds debug shapes.
+	std::vector<Attribute_Spatial>*		attributesSpatial_;		//!< Holds spatial data. Is fetched only once.
+	std::vector<Attribute_Position>*		attributesPosition_;	//!< Holds positional data. Is fetched only once.
+	std::vector<Attribute_Render>*		attributesRender_;		//!< Holds objects supposed to be rendered. Is fetched only once.
+	std::vector<Attribute_DebugShape>*	attributesDebugShape_;	//!< Holds debug shapes.
 	std::vector<int>*					attributesRenderOwner_;	//!< Holds owners of render-attributes.
 	std::vector<int>*					attributesCameraOwner_;
-	std::vector<CameraAttribute>*		attributesCamera_;		//!< Holds cameras being rendered to g-buffers. Is fetched only once.
+	std::vector<Attribute_Camera>*		attributesCamera_;		//!< Holds cameras being rendered to g-buffers. Is fetched only once.
 
 	//temp
 	M3DLoader*		m3dLoader_;

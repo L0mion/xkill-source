@@ -1,6 +1,6 @@
 #include "ScoreComponent.h"
 
-#include <xkill-architecture/AttributeManager.h>
+#include <xkill-utilities/AttributeManager.h>
 #include <xkill-utilities/EventType.h>
 
 ScoreComponent::ScoreComponent()
@@ -14,9 +14,9 @@ ScoreComponent::~ScoreComponent()
 
 }
 
-bool ScoreComponent::init(std::vector<PlayerAttribute>* playerAttribute)
+bool ScoreComponent::init()
 {
-	playerAttributes_ = playerAttribute;
+	playerAttributes_ = GET_ATTRIBUTES(player);
 
 	for(unsigned int i = 0; i < playerAttributes_->size(); i++)
 		playerIndices.push_back(i);

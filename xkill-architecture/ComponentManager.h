@@ -1,7 +1,7 @@
 #pragma once
 
 #include <xkill-utilities/IObserver.h>
-#include "AttributeManager.h"
+#include <xkill-utilities/AttributeManager.h>
 
 class RenderingComponent;
 class BulletPhysicsComponent;

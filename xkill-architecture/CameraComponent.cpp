@@ -20,14 +20,15 @@ CameraComponent::~CameraComponent()
 bool CameraComponent::init()
 {
 	// fetch attributes
-	GET_ATTRIBUTES(cameraAttributes_, CameraAttribute, ATTRIBUTE_CAMERA);
-	GET_ATTRIBUTES(inputAttributes_, InputAttribute, ATTRIBUTE_INPUT);
+	cameraAttributes_ = GET_ATTRIBUTES(camera);
+	inputAttributes_ = GET_ATTRIBUTES(input);
+
 
 	// fetch aspect ratio
 	Event_GetWindowResolution windowResolution;
 	SEND_EVENT(&windowResolution);
 	float aspectRatio = windowResolution.getAspectRatio();
-	CameraAttribute* cameraAttribute;
+	Attribute_Camera* cameraAttribute;
 	if(cameraAttributes_->size()==2)
 	{
 		aspectRatio *= 2;
@@ -77,7 +78,7 @@ void CameraComponent::onUpdate(float delta)
 		}
 
 		// push new camera
-		CameraAttribute* cameraAttribute = &cameraAttributes_->at(cameras_.size());
+		Attribute_Camera* cameraAttribute = &cameraAttributes_->at(cameras_.size());
 		cameraAttribute->aspect = aspectRatio;
 		cameras_.push_back(Camera(cameraAttribute->aspect,cameraAttribute->fov,cameraAttribute->zFar,cameraAttribute->zNear));
 	}
@@ -93,7 +94,7 @@ void CameraComponent::onUpdate(float delta)
 		cameras_.pop_back();
 		if(cameras_.size()==2)
 		{
-			for(int i=0; i<cameras_.size(); i++)
+			for(unsigned i=0; i<cameras_.size(); i++)
 			{
 				Event_GetWindowResolution windowResolution;
 				SEND_EVENT(&windowResolution);
@@ -127,9 +128,9 @@ void CameraComponent::onUpdate(float delta)
 
 	for(unsigned int i=0; i<cameraAttributes_->size(); i++)
 	{
-		CameraAttribute* camera = &cameraAttributes_->at(i);
-		SpatialAttribute* spatial = ATTRIBUTE_CAST(SpatialAttribute, spatialAttribute, camera);
-		PositionAttribute* position = ATTRIBUTE_CAST(PositionAttribute, positionAttribute, spatial);
+		Attribute_Camera* camera = &cameraAttributes_->at(i);
+		Attribute_Spatial* spatial = ATTRIBUTE_CAST(Attribute_Spatial, ptr_spatial, camera);
+		Attribute_Position* position = ATTRIBUTE_CAST(Attribute_Position, ptr_position, spatial);
 		cameras_[i].setPosition((float*)&position->position);
 		cameras_[i].updateView();
 		
