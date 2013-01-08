@@ -22,7 +22,7 @@ private:
 	bool hasMouseLock;
 
 public:
-	MainWindow(QWidget *parent = 0, Qt::WFlags flags = 0);
+	MainWindow();
 	~MainWindow();
 
 	void onUpdate(float delta);

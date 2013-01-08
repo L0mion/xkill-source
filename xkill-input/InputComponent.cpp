@@ -53,17 +53,14 @@ void InputComponent::onEvent(Event* e)
 		Event_KeyRelease* ekr = static_cast<Event_KeyRelease*>(e);
 		handleKeyEvent(ekr->keyEnum, false);
 	}
+	if(type == EVENT_INPUT_DEVICE_SEARCH)
+	{
+		inputManager_->UpdateNumberOfGamepads(windowHandle_);
+	}
 }
 
 void InputComponent::onUpdate(float delta)
 {
-	newDeviceSearchTimer_ += delta;				//Takes alot of time so should probably not run in main thread or during run-time
-	if(newDeviceSearchTimer_ >= searchTime_)
-	{
-		newDeviceSearchTimer_ = 0.0f;
-		inputManager_->UpdateNumberOfGamepads(windowHandle_);
-	}
-
 	inputManager_->Update(delta);
 
 	handleInput(delta);
@@ -83,24 +80,36 @@ void InputComponent::handleInput(float delta)
 		inputAttributes_->at(i).rotation.x = device->getFloatValue(ACTION_F_LOOK_LR, true) * delta;
 		inputAttributes_->at(i).rotation.y = device->getFloatValue(ACTION_F_LOOK_UD, true) * delta;
 
+		//float x, y;
+
+		//x = inputAttributes_->at(i).rotation.x;
+		//y = inputAttributes_->at(i).rotation.y;
+		//float length = std::sqrt(x*x + y*y);
+
+		//x = x/length;
+		//y = y/length;
+
+		//inputAttributes_->at(i).rotation.x = x;
+		//inputAttributes_->at(i).rotation.y = y;
+
 		if(device->getBoolValue(ACTION_B_FIRE))
 			inputAttributes_->at(i).fire = true;
-		if(device->getBoolValue(ACTION_B_CHANGE_AMMUNITIONTYPE))
+		if(device->getBoolReleased(ACTION_B_CHANGE_AMMUNITIONTYPE))
 			inputAttributes_->at(i).changeAmmunitionType = true;
-		if(device->getBoolValue(ACTION_B_CHANGE_FIRINGMODE))
+		if(device->getBoolReleased(ACTION_B_CHANGE_FIRINGMODE))
 			inputAttributes_->at(i).changeFiringMode = true;
 
-		if(device->getBoolValue(ACTION_B_TOGGLE_MUTE_SOUND))
+		if(device->getBoolReleased(ACTION_B_TOGGLE_MUTE_SOUND))
 			SEND_EVENT(&Event_PlaySound(-1, true));
 
-		if(device->getBoolValue(ACTION_B_RUMBLE_ON))
+		if(device->getBoolReleased(ACTION_B_RUMBLE_ON))
 		{
 			Event_Rumble* er = new Event_Rumble(i, true, 100.0f, 1.0f, 1.0f);
 			EventManager::getInstance()->sendEvent(er);
 			delete er;
 		}
 
-		if(device->getBoolValue(ACTION_B_RUMBLE_OFF))
+		if(device->getBoolReleased(ACTION_B_RUMBLE_OFF))
 		{
 			Event_Rumble* er = new Event_Rumble(i, false, 100.0f, 0.0f, 0.0f);
 			EventManager::getInstance()->sendEvent(er);
