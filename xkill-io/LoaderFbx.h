@@ -29,7 +29,7 @@ private:
 	void parseIndices(FbxMesh* mesh, int polygonVertexCount);
 	void parseVertexPositions(FbxMesh* mesh, int polygonVertexCount);
 	void parseVertexNormals(FbxMesh* mesh, int polygonIndex, int insidePolygonIndex, int vertexId);
-	void parseVertexUV(FbxMesh* mesh);
+	void parseVertexUVs(FbxMesh* mesh, int polygonIndex, int insidePolygonIndex);
 
 	std::vector<int>	indices_;
 	std::vector<Float3> vertexPositions_;
