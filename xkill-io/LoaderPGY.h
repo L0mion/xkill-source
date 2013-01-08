@@ -5,6 +5,7 @@
 
 #include "Loader.h"
 #include "SpecsPGY.h"
+#include "VarStatus.h"
 
 // Must correspond with WRITER_PGY_VERSION in order to read .pgy sucessfully.
 static const float LOADER_PGY_VERSION = 1.1f;
@@ -23,12 +24,13 @@ public:
 	LoaderPGY(
 		const std::string filePath, 
 		const std::string fileName); //!< Forwards path to .pgy to parent Loader-class.
-	~LoaderPGY(); //!< Does nothing.
+	~LoaderPGY(); //!< Clears memory allocated by LoaderPGY.
 
 	bool init(); //!< Opens specified file and calls loading of binary .pgy-format if the header version number corresponds with the version num of the LoaderPGY.
 
+	MeshModel* claimMeshModel();
+
 	WriteTimeUTC	getWriteTimeUTC()	const;
-	MeshModel*		getMeshModel()		const;
 protected:
 private:
 	MeshModel* loadPGY(
@@ -48,7 +50,7 @@ private:
 
 	WriteTimeUTC writeTimeUTC_;
 
-	MeshModel* meshModel_; //!< Resulting model read from .pgy.
+	VarStatus<MeshModel>* meshModel_; //!< Resulting model read from .pgy.
 };
 
 #endif //XKILL_IO_LOADERPGY_H

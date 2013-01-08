@@ -6,11 +6,12 @@ LoaderPGY::LoaderPGY(
 	const std::string filePath, 
 	const std::string fileName) : Loader(filePath, fileName)
 {
-	meshModel_ = nullptr;
+	meshModel_ = new VarStatus<MeshModel>(true);
 }
 LoaderPGY::~LoaderPGY()
 {
-	//Do nothing.
+	if(meshModel_)
+		delete meshModel_;
 }
 
 bool LoaderPGY::init()
@@ -33,10 +34,11 @@ bool LoaderPGY::init()
 		writeTimeUTC_ = header.writeTime_; //store for later
 		if(header.versionNum_ == LOADER_PGY_VERSION)
 		{
-			meshModel_ = loadPGY(
-				header.numMaterials_, 
-				header.numVertices_, 
-				header.numSubsets_);
+			meshModel_->setVar(
+				loadPGY(
+					header.numMaterials_, 
+					header.numVertices_, 
+					header.numSubsets_));
 		}
 		else
 		{
@@ -48,6 +50,12 @@ bool LoaderPGY::init()
 	}
 
 	return sucessfulLoad;
+}
+
+MeshModel* LoaderPGY::claimMeshModel()
+{
+	meshModel_->setStatus(false);
+	return meshModel_->getVar();
 }
 
 MeshModel* LoaderPGY::loadPGY(
@@ -157,8 +165,4 @@ const MeshSubset LoaderPGY::loadSubset()
 WriteTimeUTC LoaderPGY::getWriteTimeUTC() const
 {
 	return writeTimeUTC_;
-}
-MeshModel* LoaderPGY::getMeshModel() const
-{
-	return meshModel_;
 }

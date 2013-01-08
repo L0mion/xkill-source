@@ -111,7 +111,7 @@ bool MeshMakerObj::loadPGY(WriteTimeUTC writeTimeUTC)
 	if(sucessfulLoad)
 	{
 		if(writeTimeUTC == pgyLoader.getWriteTimeUTC())
-			meshModel_->setVar(pgyLoader.getMeshModel());
+			meshModel_->setVar(pgyLoader.claimMeshModel());
 		else
 			sucessfulLoad = false; //Original file has been modified. Not valid.
 	}
