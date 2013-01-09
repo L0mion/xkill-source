@@ -41,7 +41,9 @@ public:
         nextIndex = 0;
 
 		// connect with owners
-		GET_ENTITIES(allOwner);
+		Event_GetEntities e;										
+		EventManager::getInstance()->sendEvent(&e);					
+		allOwner = e.entities;								
     }
 
     // Returns true if getNext will return a valid Item
