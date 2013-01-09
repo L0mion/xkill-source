@@ -51,13 +51,6 @@ Attribute_Render::~Attribute_Render()
 
 Attribute_Physics::Attribute_Physics()
 {
-	reset();
-}
-Attribute_Physics::~Attribute_Physics()
-{
-}
-void Attribute_Physics::reset()
-{
 	collisionResponse = true;
 	added = false;
 	alive = true;
@@ -76,6 +69,9 @@ void Attribute_Physics::reset()
 	linearVelocity.x = 0;
 	linearVelocity.y = 0;
 	linearVelocity.z = 0;
+}
+Attribute_Physics::~Attribute_Physics()
+{
 }
 
 Attribute_Projectile::Attribute_Projectile()

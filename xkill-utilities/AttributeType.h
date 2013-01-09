@@ -32,8 +32,6 @@ struct DLL_U IAttribute
 	//! Called when deleting attributes (refer to AttributeStorage::deleteAttribute(int index))
 	virtual void clean(){};
 
-	//! Called when reusing attributes (refer to AttributeStorage::createAttribute(Entity* owner))
-	virtual void reset() = 0;
 	virtual ~IAttribute();
 };
 
@@ -83,7 +81,6 @@ struct DLL_U Attribute_Position : public IAttribute
 {
 	Attribute_Position();
 	~Attribute_Position();
-	void reset(){}
 
 	Float3 position;
 };
@@ -96,7 +93,6 @@ struct DLL_U Attribute_Spatial : public IAttribute
 {
 	Attribute_Spatial();
 	~Attribute_Spatial();
-	void reset(){}
 
 	AttributePointer ptr_position;
 
@@ -110,7 +106,6 @@ struct DLL_U Attribute_Spatial : public IAttribute
 */
 struct DLL_U Attribute_Bounding : public IAttribute
 {
-	void reset(){}
 	float BoxPoints[8*3];
 	float ConvexPoints[42*3];
 };
@@ -131,7 +126,6 @@ struct DLL_U Attribute_Render : public IAttribute
 {
 	Attribute_Render();
 	~Attribute_Render();
-	void reset(){}
 
 	AttributePointer ptr_spatial;
 	AttributePointer ptr_bounding;
@@ -153,7 +147,6 @@ struct DLL_U Attribute_Physics : public IAttribute
 {
 	Attribute_Physics();
 	~Attribute_Physics();
-	void reset();
 
 	AttributePointer ptr_spatial;
 	AttributePointer ptr_render;
@@ -184,7 +177,6 @@ struct DLL_U Attribute_Projectile : public IAttribute
 {
 	Attribute_Projectile();
 	~Attribute_Projectile();
-	void reset(){}
 
 	AttributePointer ptr_physics;
 
@@ -198,7 +190,6 @@ struct DLL_U Attribute_Input : public IAttribute
 {
 	Attribute_Input();
 	~Attribute_Input();
-	void reset(){}
 
 	AttributePointer ptr_physics;
 	Float2 position;
@@ -216,7 +207,6 @@ struct DLL_U Attribute_Sound : public IAttribute
 {
 	Attribute_Sound();
 	~Attribute_Sound();
-	void reset(){}
 
 	AttributePointer ptr_position;
 };
@@ -229,7 +219,6 @@ struct DLL_U Attribute_Camera : public IAttribute
 {
 	Attribute_Camera();
 	~Attribute_Camera();
-	void reset(){}
 
 	AttributePointer ptr_spatial;
 
@@ -249,7 +238,6 @@ struct DLL_U Attribute_Player : public IAttribute
 {
 	Attribute_Player();
 	~Attribute_Player();
-	void reset(){}
 
 	int id;					//!< The id of the player process. Used to identify a player attribute in GameComponent when firing projectiles.
 	int priority;			//!< Priority of the player process. Higher value means higher priority. The scheduler will choose the process with the highest priority for execution.
@@ -278,14 +266,12 @@ struct DLL_U Attribute_Mesh : public IAttribute
 		MeshModel*		mesh,
 		bool			dynamic);	//!< Initializes attribute with passed values.
 	~Attribute_Mesh();				//!< Does nothing.
-	void reset(){}
 };
 
 struct DLL_U Attribute_Health : public IAttribute
 {
 	Attribute_Health();
 	~Attribute_Health();
-	void reset(){}
 
 	float startHealth;
 	float health;
@@ -295,7 +281,6 @@ struct DLL_U Attribute_Damage : public IAttribute
 {
 	Attribute_Damage();
 	~Attribute_Damage();
-	void reset(){}
 
 	float damage;
 	int owner_entityID;
@@ -305,7 +290,6 @@ struct DLL_U Attribute_SpawnPoint : public IAttribute
 {
 	Attribute_SpawnPoint();
 	~Attribute_SpawnPoint();
-	void reset(){}
 
 	float timeSinceLastSpawn;	//!< Is reset when a player spawns at the spawn point.
 	float spawnArea;			//!< Defines the spawn point zone, a horizontal circle area.
@@ -339,7 +323,6 @@ struct DLL_U Attribute_WeaponStats : public IAttribute
 
 	Attribute_WeaponStats();
 	~Attribute_WeaponStats();
-	void reset(){}
 
 	void setWeaponStats(AmmunitionType ammunitionType, FiringMode firingMode);
 	void setWeaponToDebugMachineGun();
@@ -374,7 +357,6 @@ struct DLL_U Attribute_DebugShape : public IAttribute
 {
 	Attribute_DebugShape();
 	~Attribute_DebugShape();
-	void reset(){}
 	void clean();
 
 	unsigned int	meshID;		//!< ID of mesh
@@ -388,7 +370,6 @@ struct DLL_U Attribute_ExplosionSphere : public IAttribute
 {
 	Attribute_ExplosionSphere();
 	~Attribute_ExplosionSphere();
-	void reset(){}
 
 	AttributePointer ptr_physics;
 	float currentLifeTimeLeft;

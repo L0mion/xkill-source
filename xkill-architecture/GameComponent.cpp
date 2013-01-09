@@ -68,6 +68,7 @@ void GameComponent::onUpdate(float delta)
 	{
 		// Fetch attributes through iterators
 		Attribute_Player*		player		=	itrPlayer		.getNext();
+
 		Attribute_Health*		health		=	itrHealth		.at(player->ptr_health);
 		Attribute_Camera*		camera		=	itrCamera		.at(player->ptr_camera);
 		Attribute_Input*			input		=	itrInput		.at(player->ptr_input);
@@ -192,6 +193,7 @@ void GameComponent::onUpdate(float delta)
 					pos.x += randomLO + (float)rand()/((float)RAND_MAX/(randomHI-randomLO));
 					pos.y += randomLO + (float)rand()/((float)RAND_MAX/(randomHI-randomLO));
 					pos.z += randomLO + (float)rand()/((float)RAND_MAX/(randomHI-randomLO));
+
 					SEND_EVENT(&Event_CreateProjectile(pos, velocity, rotation, weaponStats->damgeOfEachProjectile, itrPlayer.ownerId(), weaponStats->isExplosive));
 				}
 			}
@@ -212,7 +214,6 @@ void GameComponent::onUpdate(float delta)
 			}
 		}
 
-
 		//
 		// Health and respawn logic
 		//
@@ -226,12 +227,8 @@ void GameComponent::onUpdate(float delta)
 			{
 				Attribute_Position* spawnPointPositionAttribute = itrPosition.at(spawnPointAttribute->ptr_position);
 				position->position = spawnPointPositionAttribute->position; // set player position attribute
-				
-				DEBUGPRINT("Player spawned at " << position->position.x << " " << position->position.y << " " << position->position.z << std::endl);
 
-				//Entity* spawnPointEntity = &allEntity->at(itrSpawnPoint.ownerIdAt(e->attribute1_index));
-				//spawnPointPositionAttribute->
-				//DEBUGPRINT("
+				DEBUGPRINT("Player entity " << itrPlayer.ownerId() << " spawned at " << position->position.x << " " << position->position.y << " " << position->position.z << std::endl);
 			}
 			else
 			{
@@ -422,10 +419,10 @@ void GameComponent::event_PhysicsAttributesColliding(Event_PhysicsAttributesColl
 						DEBUGPRINT("DAMAGEEVENT Entity " << entity2->getID() << " damage: " <<  damage->damage << " Entity " << entity1->getID() << " health " << health->health);
 					}
 
-					 if(entity2->hasAttribute(ATTRIBUTE_PROJECTILE))
-					 {
-						 SEND_EVENT(&Event_RemoveEntity(entity2->getID()));
-					 }
+					if(entity2->hasAttribute(ATTRIBUTE_PROJECTILE))
+					{
+						SEND_EVENT(&Event_RemoveEntity(entity2->getID()));
+					}
 				}
 			}
 		}
@@ -508,6 +505,7 @@ void GameComponent::event_EndDeathmatch(Event_EndDeathmatch* e)
 Attribute_SpawnPoint* GameComponent::findUnoccupiedSpawnPoint()
 {
 	Attribute_SpawnPoint* foundSpawnPoint = nullptr;
+	std::vector<Attribute_SpawnPoint*> unoccupiedSpawnPoints;
 	
 	// Special cases: *no spawn point, return nullptr.
 	int numSpawnPoints = itrSpawnPoint.size();
@@ -517,12 +515,11 @@ Attribute_SpawnPoint* GameComponent::findUnoccupiedSpawnPoint()
 		return foundSpawnPoint;
 	}
 
-
 	//
 	// Find all unoccupied spawn points.
 	//
 
-	std::vector<Attribute_SpawnPoint*> unoccupiedSpawnPoints;
+	AttributeIterator<Attribute_SpawnPoint> itrSpawnPoint = ATTRIBUTE_MANAGER->spawnPoint.getIterator();
 	while(itrSpawnPoint.hasNext())
 	{
 		// Fetch attributes
@@ -531,6 +528,7 @@ Attribute_SpawnPoint* GameComponent::findUnoccupiedSpawnPoint()
 		
 		// To prevent spawncamping, check if spawnpoint is occupied
 		bool isUnoccupied = true;
+		AttributeIterator<Attribute_Player> itrPlayer = ATTRIBUTE_MANAGER->player.getIterator();
 		while(itrPlayer.hasNext())
 		{
 			Attribute_Player* player	= itrPlayer.getNext();

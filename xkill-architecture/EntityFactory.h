@@ -29,16 +29,8 @@ public:
 	// An AttributeName such as "positionAttribute" will result in accessing "positionAttributeAttributes_" inside
 	// AttributeManager instead of "'positionAttributes_" which will result in error. As long as a shorter naming convention
 	// such as "position" is used, this will not be a problem.
-
 #define CREATE_ATTRIBUTE(AttributeType, AttributeName, OwnerEntity)						\
 	AttributeType* AttributeName = ((AttributeManager*)AttributeManagerDLLWrapper::getInstance())->AttributeName.createAttribute(OwnerEntity)
-
-
-//Test
-//#define CREATE_ATTRIBUTE(AttributeType, AttributeName, OwnerEntity)						\
-//	AttributeType* AttributeName = ((AttributeManager*)AttributeManagerDLLWrapper::getInstance())->AttributeName.createAttribute(OwnerEntity); \
-//	AttributeName->reset();
-	
 
 	// Connects the AttributePointer by the name PointerName inside AttributeName with latest AttributePointer created inside AttributeManager.
 	// IMPORTANT: The following formula is used to access AttributeManager, "PointerName+Attributes".
