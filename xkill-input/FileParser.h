@@ -40,6 +40,8 @@ public:
 
 	void deleteFile();						//! Deletes the file
 
+	void clean();							//! Removes all loaded rows
+
 private:
 	std::queue<std::string> rows_;			//! Stores rows to read or written
 	std::string filename_;					//! The name of the file to be handled
