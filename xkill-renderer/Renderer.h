@@ -7,6 +7,7 @@ typedef struct HWND__* HWND;
 namespace DirectX
 {
 	struct XMFLOAT4X4;
+	struct XMFLOAT3;
 };
 
 struct Attribute_Render;
@@ -14,6 +15,7 @@ struct Attribute_DebugShape;
 struct Attribute_Camera;
 struct Attribute_Spatial;
 struct Attribute_Position;
+struct ViewportData;
 
 class Winfo;
 class TexDesc;
@@ -37,6 +39,8 @@ class ManagementMath;
 //temp
 class M3DLoader;
 class AnimatedMesh;
+
+
 
 //! Module responsible for managing data related to rendering and doing the actual rendering of XKILL.
 /*! Rendering module of XKILL utilizing Deferred Rendering with DirectCompute.
@@ -73,11 +77,6 @@ private:
 	HRESULT initManagementDebug();		//!< Initializes ManagementDebug, which holds data allowing advanced detection of COM-leaks in D3D.
 	void	initManagementMath();		//!< Initializes ManagementMath, which manages math-related functions and loading of dx-vectors into generic-type vectors utilizing SIMD.
 
-	void renderViewport(
-		Attribute_Camera*	cameraAt, 
-		unsigned int		viewportTopX,
-		unsigned int		viewportTopY,
-		unsigned int		cameraIndex); //!< Renders a viewport.
 	void renderViewportToGBuffer(
 		DirectX::XMFLOAT4X4 viewMatrix,
 		DirectX::XMFLOAT4X4 projectionMatrix,

@@ -25,6 +25,7 @@
 #include "TypeFX.h"
 #include "ManagementMath.h"
 #include "Renderer.h"
+#include "ViewportData.h"
 
 //temp
 #include "AnimatedMesh.h"
@@ -361,59 +362,68 @@ void Renderer::render()
 	managementCB_->setCB(CB_TYPE_FRAME, TypeFX_VS, CB_REGISTER_FRAME, managementD3D_->getDeviceContext());
 	managementCB_->updateCBFrame(managementD3D_->getDeviceContext(), managementLight_->getNumLights());
 
-	int cameraIndex = 0;
+	Attribute_Camera*	camAt; 
+	Attribute_Spatial*	spatialAt;
+	Attribute_Position*	posAt;
+
+	ViewportData vpData;
+	std::vector<ViewportData> vpDatas;
+
+	//Render everything to g-buffers.
+	int camIndex = 0;
 	while(itrCamera.hasNext())
 	{
-		Attribute_Camera* camAt = itrCamera.getNext();
+		camAt		= itrCamera.getNext();
+		camIndex	= itrCamera.index();
+		spatialAt	= ATTRIBUTE_CAST(Attribute_Spatial, ptr_spatial, camAt);
+		posAt		= ATTRIBUTE_CAST(Attribute_Position, ptr_position, spatialAt);
 	
 		//Set viewport.
-		managementViewport_->setViewport(managementD3D_->getDeviceContext(), cameraIndex);
-	
-		//Render viewport.
-		unsigned int viewportTopX = static_cast<unsigned int>(managementViewport_->getViewport(cameraIndex).TopLeftX);
-		unsigned int viewportTopY = static_cast<unsigned int>(managementViewport_->getViewport(cameraIndex).TopLeftY);
-		renderViewport(
-			camAt,
-			viewportTopX, 
-			viewportTopY,
-			cameraIndex);
-	
-		// HACK: Increment camera index
-		cameraIndex++;
+		managementViewport_->setViewport(managementD3D_->getDeviceContext(), camIndex);
+
+		//Store all the viewport-specific data for the backbuffer-rendering.
+		vpData.camIndex = camIndex;
+		vpData.view			= DirectX::XMFLOAT4X4(((float*)&camAt->mat_view));
+		vpData.proj			= DirectX::XMFLOAT4X4(((float*)&camAt->mat_projection));
+		vpData.viewInv		= managementMath_->calculateMatrixInverse(vpData.view);
+		vpData.projInv		= managementMath_->calculateMatrixInverse(vpData.proj);
+		vpData.eyePos		= *(DirectX::XMFLOAT3*)&posAt->position;
+		vpData.viewportTopX = static_cast<unsigned int>(managementViewport_->getViewport(camIndex).TopLeftX);
+		vpData.viewportTopY = static_cast<unsigned int>(managementViewport_->getViewport(camIndex).TopLeftY);
+
+		//Update per-viewport constant buffer.
+		managementCB_->setCB(CB_TYPE_CAMERA, TypeFX_VS, CB_REGISTER_CAMERA, managementD3D_->getDeviceContext());
+		managementCB_->updateCBCamera(managementD3D_->getDeviceContext(),
+			vpData.view,
+			vpData.viewInv,
+			vpData.proj,
+			vpData.projInv,
+			vpData.eyePos,
+			vpData.viewportTopX,
+			vpData.viewportTopY);
+		vpDatas.push_back(vpData);
+
+		renderViewportToGBuffer(vpData.view, vpData.proj, camIndex);
+	}
+
+	//Render everything to backbuffer.
+	for(unsigned int i = 0; i < vpDatas.size(); i++)
+	{
+		//Update per-viewport constant buffer.
+		managementCB_->setCB(CB_TYPE_CAMERA, TypeFX_VS, CB_REGISTER_CAMERA, managementD3D_->getDeviceContext());
+		managementCB_->updateCBCamera(managementD3D_->getDeviceContext(),
+			vpDatas[i].view,
+			vpDatas[i].viewInv,
+			vpDatas[i].proj,
+			vpDatas[i].projInv,
+			vpDatas[i].eyePos,
+			vpDatas[i].viewportTopX,
+			vpDatas[i].viewportTopY);
+
+		renderViewportToBackBuffer();
 	}
 
 	managementD3D_->present();
-}
-void Renderer::renderViewport(
-	Attribute_Camera*	cameraAt, 
-	unsigned int		viewportTopX,
-	unsigned int		viewportTopY,
-	unsigned int		cameraIndex)
-{
-	//Get camera's view- and projection matrix, and their inverses.
-	DirectX::XMFLOAT4X4 viewMatrix((float*)&cameraAt->mat_view);
-	DirectX::XMFLOAT4X4 projectionMatrix((float*)&cameraAt->mat_projection);
-	DirectX::XMFLOAT4X4 viewMatrixInverse		= managementMath_->calculateMatrixInverse(viewMatrix);
-	DirectX::XMFLOAT4X4 projectionMatrixInverse	= managementMath_->calculateMatrixInverse(projectionMatrix);
-
-	//Get eye position.
-	Attribute_Spatial*	spatialAttribute	= ATTRIBUTE_CAST(Attribute_Spatial, ptr_spatial, cameraAt);
-	Attribute_Position*	positionAttribute	= ATTRIBUTE_CAST(Attribute_Position, ptr_position, spatialAttribute);
-	DirectX::XMFLOAT3	eyePosition			= *(DirectX::XMFLOAT3*)&positionAttribute->position;
-
-	//Update per-viewport constant buffer.
-	managementCB_->setCB(CB_TYPE_CAMERA, TypeFX_VS, CB_REGISTER_CAMERA, managementD3D_->getDeviceContext());
-	managementCB_->updateCBCamera(managementD3D_->getDeviceContext(),
-		viewMatrix,
-		viewMatrixInverse,
-		projectionMatrix,
-		projectionMatrixInverse,
-		eyePosition,
-		viewportTopX,
-		viewportTopY);
-
-	renderViewportToGBuffer(viewMatrix, projectionMatrix, cameraIndex);
-	renderViewportToBackBuffer();
 }
 void Renderer::renderViewportToGBuffer(DirectX::XMFLOAT4X4 viewMatrix, DirectX::XMFLOAT4X4 projectionMatrix, unsigned int cameraIndex)									
 {
