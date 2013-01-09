@@ -353,6 +353,8 @@ void Renderer::render()
 			cameraIndex++;
 		}	
 	}
+
+	managementD3D_->present();
 }
 void Renderer::renderViewport(
 	Attribute_Camera		cameraAt, 
@@ -475,8 +477,6 @@ void Renderer::renderViewportToBackBuffer()
 	//Unset and clean.
 	managementFX_->unsetShader(devcon, SHADERID_CS_DEFAULT);
 	renderBackBufferClean();
-
-	managementD3D_->present();
 }
 void Renderer::renderAttribute(
 	Attribute_Render*	renderAt,
