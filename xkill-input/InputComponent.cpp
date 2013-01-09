@@ -80,18 +80,6 @@ void InputComponent::handleInput(float delta)
 		inputAttributes_->at(i).rotation.x = device->getFloatValue(ACTION_F_LOOK_LR, true) * delta;
 		inputAttributes_->at(i).rotation.y = device->getFloatValue(ACTION_F_LOOK_UD, true) * delta;
 
-		//float x, y;
-
-		//x = inputAttributes_->at(i).rotation.x;
-		//y = inputAttributes_->at(i).rotation.y;
-		//float length = std::sqrt(x*x + y*y);
-
-		//x = x/length;
-		//y = y/length;
-
-		//inputAttributes_->at(i).rotation.x = x;
-		//inputAttributes_->at(i).rotation.y = y;
-
 		if(device->getBoolValue(ACTION_B_FIRE))
 			inputAttributes_->at(i).fire = true;
 		if(device->getBoolReleased(ACTION_B_CHANGE_AMMUNITIONTYPE))
@@ -128,6 +116,22 @@ void InputComponent::handleInput(float delta)
 		if(device->getBoolValue(ACTION_B_WALK_RIGHT))
 			inputAttributes_->at(i).position.x = 1.0f;
 		
+		float x, y;
+
+		x = inputAttributes_->at(i).position.x;
+		y = inputAttributes_->at(i).position.y;
+
+		float length = std::sqrt(x*x + y*y);
+
+		if(length > 0.0f)
+		{
+			x = x/length;
+			y = y/length;
+
+			inputAttributes_->at(i).position.x = x;
+			inputAttributes_->at(i).position.y = y;
+		}
+
 		if(device->GetType() == device->QT_INPUT_DEVICE)
 		{
 			QTInputDevices* qtDevice = static_cast<QTInputDevices*>(device);
@@ -158,10 +162,10 @@ void InputComponent::handleMouseMoveEvent(Event_MouseMove* e)
 	QTInputDevices* device = inputManager_->GetMouseAndKeyboard();
 
 	// Test camera movement
-	float x = 5.0f*(float)e->dx;
-	float y = 5.0f*(float)e->dy;
+	float x = (float)e->dx;
+	float y = (float)e->dy;
 
-	float mouseSensitivity = 0.1f;
+	float mouseSensitivity = 0.5f;
 
 	if(device != nullptr)
 	{

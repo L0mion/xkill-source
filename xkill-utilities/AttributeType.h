@@ -29,7 +29,10 @@ be modified to suit the need of each Component.
 struct DLL_U IAttribute
 {
 	IAttribute();
+
+	//! Called when deleting attributes (refer to AttributeStorage::deleteAttribute(int index))
 	virtual void clean(){};
+
 	virtual ~IAttribute();
 };
 
@@ -345,6 +348,8 @@ struct DLL_U Attribute_WeaponStats : public IAttribute
 
 	void setWeaponStats(AmmunitionType ammunitionType, FiringMode firingMode);
 	void setWeaponToDebugMachineGun();
+	std::string getAmmunitionTypeAsString();
+	std::string getFiringModeAsString();
 
 	AmmunitionType ammunitionType;	//!< BULLET, SCATTER, EXPLOSIVE
 	FiringMode firingMode;			//!< SINGLE, SEMI, AUTO

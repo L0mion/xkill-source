@@ -1,7 +1,10 @@
 #include "AttributeManager.h"
+#include "EntityStorage.h"
 
 AttributeManager::AttributeManager()
 {
+	entities = new EntityStorage;
+
 	position		.init	(ATTRIBUTE_POSITION);
 	spatial			.init	(ATTRIBUTE_SPATIAL);
 	render			.init	(ATTRIBUTE_RENDER);
@@ -23,6 +26,7 @@ AttributeManager::AttributeManager()
 
 AttributeManager::~AttributeManager()
 {
+	delete entities;
 }
 
 AttributeManager* AttributeManager::getInstance()

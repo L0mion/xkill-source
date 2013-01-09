@@ -99,6 +99,7 @@ bool BulletPhysicsComponent::init()
 	frustrumObjects_ = new btAlignedObjectArray<PhysicsObject*>();
 	broadphase_ = new btDbvtBroadphase();
 	collisionConfiguration_ = new btDefaultCollisionConfiguration();
+	collisionConfiguration_->setConvexConvexMultipointIterations(10, 10);
 	dispatcher_ = new btCollisionDispatcher(collisionConfiguration_);
 	solver_ = new btSequentialImpulseConstraintSolver;
 	dynamicsWorld_ = new btDiscreteDynamicsWorld(dispatcher_,broadphase_,solver_,collisionConfiguration_);
@@ -159,6 +160,7 @@ void BulletPhysicsComponent::onUpdate(float delta)
 	{
 		PhysicsObject* physicsObject = physicsObjects_->at(i);
 		Attribute_Physics* physicsAttribute = &physicsAttributes_->at(i);
+
 		// if the objects owner is not 0 it should simulate
 		if(physicsOwners_->at(i)!=0)
 		{
@@ -169,7 +171,6 @@ void BulletPhysicsComponent::onUpdate(float delta)
 				{
 					float scale = 100.0f;
 					btCollisionShape* collisionSphere = new btSphereShape(physicsAttribute->explosionSphereRadius*scale);
-					collisionSphere->setLocalScaling(btVector3(scale,scale,scale));
 					collisionShapeManager_->addCollisionShape(collisionSphere);
 					physicsObject->setCollisionShape(collisionSphere);
 				}

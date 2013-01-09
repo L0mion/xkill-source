@@ -51,6 +51,7 @@ void PhysicsObject::removeFromWorld(btDiscreteDynamicsWorld* dynamicsWorld)
 
 void PhysicsObject::preStep(CollisionShapeManager* collisionShapeManager,Attribute_Physics* physicsAttribute)
 {
+
 	Attribute_Spatial* spatialAttribute = ATTRIBUTE_CAST(Attribute_Spatial,
 														ptr_spatial,
 														physicsAttribute);
@@ -58,20 +59,25 @@ void PhysicsObject::preStep(CollisionShapeManager* collisionShapeManager,Attribu
 														  ptr_position,
 														  spatialAttribute);
 	
+	if(!physicsAttribute->isExplosionSphere)
+	{
+		m_collisionShape = collisionShapeManager->getCollisionShape(physicsAttribute->meshID);
+	}
+
 	btVector3 localInertia(0,0,0);
 	if(getCollisionShape()->getShapeType()==4 && index_ >2)
 	{
-		//if(!inertiad)
-		{
+		getCollisionShape()->calculateLocalInertia(physicsAttribute->mass,localInertia);
+		inertiad = true;
+		setRestitution(1.0);
+		setRollingFriction(0.01);
 			
-			getCollisionShape()->calculateLocalInertia(physicsAttribute->mass,localInertia);
-			inertiad = true;
-			setRestitution(1.0);
-			setRollingFriction(0.01);
-			
-		}
 	}
-	setMassProps(physicsAttribute->mass,localInertia);
+
+	if(!physicsAttribute->isExplosionSphere)
+	{
+		setMassProps(physicsAttribute->mass,localInertia);
+	}
 	
 	m_worldTransform.setOrigin(WorldScaling*btVector3(positionAttribute->position.x,
 	 												  positionAttribute->position.y,
@@ -105,15 +111,9 @@ void PhysicsObject::preStep(CollisionShapeManager* collisionShapeManager,Attribu
 					   physicsAttribute->angularVelocity.y,
 					   physicsAttribute->angularVelocity.z));
 
-	if(!physicsAttribute->isExplosionSphere)
-	{
-		m_collisionShape = collisionShapeManager->getCollisionShape(physicsAttribute->meshID);
-	}
-
 	setGravity(gravity_+forces_);
 	updateInertiaTensor();
 	activate(true);
-
 }
 
 void PhysicsObject::postStep(Attribute_Physics* physicsAttribute)

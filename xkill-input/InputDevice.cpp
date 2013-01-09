@@ -1,5 +1,7 @@
 #include "InputDevice.h"
 
+#include "Converter.h"
+
 InputDevice::InputDevice(GUID deviceGUID, std::string name, unsigned int playerID)
 {
 	deviceGUID_ = deviceGUID;
@@ -47,7 +49,7 @@ int InputDevice::getPlayerID()
 	return playerID_;
 }
 
-float InputDevice::getFloatValue(int mapping, bool useSesitivity)
+float InputDevice::getFloatValue(int mapping, bool useSensitivity)
 {
 	float maxValue = 0.0f;
 	int index = 0;
@@ -58,7 +60,7 @@ float InputDevice::getFloatValue(int mapping, bool useSesitivity)
 		index = floatObjects_[mapping][i];
 		value = inputObjects_[index]->getValueFloat();
 
-		if(useSesitivity)
+		if(useSensitivity)
 			value *= inputObjects_[index]->getSensitivity();
 
 		if(std::abs(value) > maxValue)
@@ -86,6 +88,26 @@ bool InputDevice::getBoolReleased(int mapping)
 			return true;
 
 	return false;
+}
+
+/*  //////////////////////////////////////////////////////////////////
+	Hash algorithm djb2 from: http://www.cse.yorku.ca/~oz/hash.html	//
+*/  //////////////////////////////////////////////////////////////////
+unsigned long InputDevice::getHash()
+{
+	std::string str = getStandardMappingsString();
+
+	str += Converter::IntToStr(ACTION_B_LAST);
+	str += Converter::IntToStr(ACTION_F_LAST);
+
+	unsigned long hash = 5381;
+
+	for(unsigned int i = 0; i < str.size(); i++)
+	{
+		hash = ((hash << 5) + hash) + str[i];
+	}
+
+	return hash;
 }
 
 InputButtonObject* InputDevice::getButtonObject(unsigned int index)

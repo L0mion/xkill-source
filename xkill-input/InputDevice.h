@@ -88,6 +88,19 @@ public:
 	*/
 	virtual void setStandardMappings() = 0;
 
+	//! Returns a hash value of the standard keymappings
+	/*!
+	Used to determine if a keymappings file is up to date.
+	Hash will change if either standard keymappings is changed or if the 
+	inputactions enums have changed.
+	Changes in both places at the same time might potentially casue the 
+	program to think that the keymappings file is up to date when it isn't.
+	The effect will be that the keymappings might become faulty and that the
+	keymappings file needs to be removed or the device reconfigured in an
+	input settings menu.
+	*/
+	virtual unsigned long getHash();
+
 	void createObjectVectors();
 
 protected:
@@ -113,5 +126,7 @@ protected:
 	virtual void createInputObjectsFromLayout() = 0;
 
 	virtual InputButtonObject* getButtonObject(unsigned int index);
+	//! Returns a string of the standard keymappings
+	virtual std::string getStandardMappingsString() = 0;
 };
 

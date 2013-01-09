@@ -53,6 +53,12 @@ private:
 	// Handle file reading
 	//! Parses a single ".kmp" file
 	bool parseFile(InputDevice* device);
+	//! Checks if file is valid
+	/*!
+	Compares the hash value in the beginning of the file to that of the standard
+	mappings for that input device type
+	*/
+	bool isValid(std::string row, InputDevice* device);
 	//! Extracts all settings from a row and sets corresponding setting in device
 	void extractSettingsFromRow(std::string row, InputDevice* device);
 	//! Handles the settings of an single input object

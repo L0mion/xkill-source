@@ -27,6 +27,13 @@ public:
 		return ss.str();
 	}
 
+	static std::string ULongToStr(unsigned long n)
+	{
+		std::stringstream ss;
+		ss << n;
+		return ss.str();
+	}
+
 	static std::string FloatToStr(float f)
 	{
 		std::stringstream ss;
@@ -48,6 +55,18 @@ public:
 	}
 
 	static bool StrToUInt(std::string str, unsigned int& n)
+	{
+		std::stringstream ss(str);
+		ss >> n;
+		if(ss.fail())
+		{
+			return false;
+		}
+
+		return true;
+	}
+
+	static bool StrToULong(std::string str, unsigned long& n)
 	{
 		std::stringstream ss(str);
 		ss >> n;
