@@ -1,5 +1,7 @@
 #include "InputDevice.h"
 
+#include "Converter.h"
+
 InputDevice::InputDevice(GUID deviceGUID, std::string name, unsigned int playerID)
 {
 	deviceGUID_ = deviceGUID;
@@ -94,6 +96,9 @@ bool InputDevice::getBoolReleased(int mapping)
 unsigned long InputDevice::getHash()
 {
 	std::string str = getStandardMappingsString();
+
+	str += Converter::IntToStr(ACTION_B_LAST);
+	str += Converter::IntToStr(ACTION_F_LAST);
 
 	unsigned long hash = 5381;
 

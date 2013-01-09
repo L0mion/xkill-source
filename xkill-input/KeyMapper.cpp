@@ -213,6 +213,7 @@ bool KeyMapper::parseFile(InputDevice* device)
 	}
 	else
 	{
+		fileParser_->clean();
 		fileParser_->deleteFile();
 		return false;
 	}

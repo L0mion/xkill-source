@@ -190,3 +190,9 @@ void FileParser::createFile()
 		file.close();
 	}
 }
+
+void FileParser::clean()
+{
+	while(!rows_.empty())
+		rows_.pop();
+}
