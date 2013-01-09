@@ -28,13 +28,13 @@ public:
 		QWidget::setWindowFlags(Qt::SplashScreen);
 		show();
 
-		// build menu
-		verticalLayout = new QVBoxLayout(this);
-        verticalLayout->setSpacing(6);
-        verticalLayout->setContentsMargins(11, 11, 11, 11);
-        label_health = new QLabel(this);
-        label_health->setObjectName("label_health");
-		verticalLayout->addWidget(label_health);
+		//// build menu
+		//verticalLayout = new QVBoxLayout(this);
+  //      verticalLayout->setSpacing(6);
+  //      verticalLayout->setContentsMargins(11, 11, 11, 11);
+  //      label_health = new QLabel(this);
+  //      label_health->setObjectName("label_health");
+		//verticalLayout->addWidget(label_health);
 
 		
 		//setWindowFlags(Qt::WindowStaysOnBottomHint);

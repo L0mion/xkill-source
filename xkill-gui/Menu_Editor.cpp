@@ -7,7 +7,7 @@
 #include <xkill-utilities/Entity.h>
 
 
-Menu_Editor::Menu_Editor( Ui::MainMenu& ui, QWidget* parent ) : QWidget(parent), ui(ui)
+Menu_Editor::Menu_Editor( Ui::MainWindowClass& ui, QWidget* parent ) : QWidget(parent), ui(ui)
 {
 	this->hide();
 
@@ -15,7 +15,7 @@ Menu_Editor::Menu_Editor( Ui::MainMenu& ui, QWidget* parent ) : QWidget(parent),
 	model_entityBrowser = new QStandardItemModel(0, 1, this);
 	model_entityBrowser->setHorizontalHeaderItem(0, new QStandardItem("Entity ID"));
 	ui.treeView_entityBrowser->setModel(model_entityBrowser);
-	//ui.treeView_entityBrowser->setEditTriggers(QAbstractItemView::NoEditTriggers);
+	ui.treeView_entityBrowser->setEditTriggers(QAbstractItemView::NoEditTriggers);
 
 	// Init Entity Inspector
 	model_entityInspector = new QStandardItemModel(0, 1, this);
@@ -32,7 +32,7 @@ Menu_Editor::Menu_Editor( Ui::MainMenu& ui, QWidget* parent ) : QWidget(parent),
 
 	connect(ui.pushButton_editorRefresh, SIGNAL(clicked()), this, SLOT(slot_editorRefresh()));
 	connect(ui.treeView_entityBrowser, SIGNAL(clicked(QModelIndex)), this, SLOT(slot_clicked_entityBrowser(QModelIndex)));
-	connect(ui.tabWidget, SIGNAL(currentChanged(int)), this, SLOT(slot_tab_changed(int)));
+	//connect(ui.tabWidget, SIGNAL(currentChanged(int)), this, SLOT(slot_tab_changed(int)));
 	//ui.groupBox_AttributeInspector->hide();
 }
 
@@ -45,11 +45,11 @@ void Menu_Editor::slot_editorRefresh()
 	std::vector<int>* allPlayerOwner = 	GET_ATTRIBUTE_OWNERS(player);
 	entityBrowser_add("Players", allPlayerOwner);
 	std::vector<int>* allSpawnOwner = GET_ATTRIBUTE_OWNERS(spawnPoint);
-	entityBrowser_add("Spawn points", allSpawnOwner);
+	entityBrowser_add("SpawnPoints", allSpawnOwner);
 	std::vector<int>* allMeshOwner = GET_ATTRIBUTE_OWNERS(mesh);
 	entityBrowser_add("Meshes", allMeshOwner);
 	std::vector<int>* allPhysicsOwner = GET_ATTRIBUTE_OWNERS(physics);
-	entityBrowser_add("Physics objects", allPhysicsOwner);
+	entityBrowser_add("PhysicsObjects", allPhysicsOwner);
 	std::vector<int>* allProjectileOwner = GET_ATTRIBUTE_OWNERS(projectile);
 	entityBrowser_add("Projectiles", allProjectileOwner);
 }
@@ -101,6 +101,7 @@ void Menu_Editor::slot_clicked_entityBrowser( QModelIndex indexClicked )
 	if(data.type() == QVariant::Int)
 	{
 		model_entityInspector->clear();
+		model_entityInspector->setHorizontalHeaderItem(0, new QStandardItem("Attributes"));
 		int entityId = data.toInt();
 		std::vector<Entity>* allEntity; GET_ENTITIES(allEntity);
 		Entity* entity = &allEntity->at(entityId);
