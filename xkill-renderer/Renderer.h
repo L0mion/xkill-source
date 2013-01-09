@@ -74,10 +74,10 @@ private:
 	void	initManagementMath();		//!< Initializes ManagementMath, which manages math-related functions and loading of dx-vectors into generic-type vectors utilizing SIMD.
 
 	void renderViewport(
-		Attribute_Camera	cameraAt, 
-		unsigned int	viewportTopX,
-		unsigned int	viewportTopY,
-		unsigned int	cameraIndex); //!< Renders a viewport.
+		Attribute_Camera*	cameraAt, 
+		unsigned int		viewportTopX,
+		unsigned int		viewportTopY,
+		unsigned int		cameraIndex); //!< Renders a viewport.
 	void renderViewportToGBuffer(
 		DirectX::XMFLOAT4X4 viewMatrix,
 		DirectX::XMFLOAT4X4 projectionMatrix,

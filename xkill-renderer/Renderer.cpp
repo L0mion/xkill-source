@@ -31,6 +31,8 @@
 #include "M3DLoader.h"
 #include "SkinnedData.h"
 
+ATTRIBUTES_DECLARE_ALL;
+
 Renderer::Renderer(HWND windowHandle)
 {
 	windowHandle_	= windowHandle;
@@ -56,6 +58,8 @@ Renderer::Renderer(HWND windowHandle)
 	attributesDebugShape_	= nullptr;
 	attributesRenderOwner_	= nullptr;
 	attributesCamera_		= nullptr;
+
+	ATTRIBUTES_INIT_ALL;
 
 	//temp
 	m3dLoader_		= nullptr;
@@ -127,6 +131,18 @@ HRESULT Renderer::resize(unsigned int screenWidth, unsigned int screenHeight)
 		hr = managementGBuffer_->resize(managementD3D_->getDevice());
 	if(SUCCEEDED(hr))
 		hr = managementViewport_->resize();
+
+	//Update per-instance constant-buffer.
+	ID3D11DeviceContext* devcon = managementD3D_->getDeviceContext();
+	managementCB_->setCB(
+		CB_TYPE_INSTANCE,
+		TypeFX_CS, 
+		CB_REGISTER_INSTANCE, 
+		devcon);
+	managementCB_->updateCBInstance(
+		devcon, 
+		winfo_->getScreenWidth(), 
+		winfo_->getScreenHeight());
 
 	return hr;
 }
@@ -236,7 +252,21 @@ HRESULT Renderer::initManagementCB()
 	HRESULT hr = S_OK;
 
 	managementCB_ = new ManagementCB();
-	managementCB_->init(managementD3D_->getDevice());
+	hr = managementCB_->init(managementD3D_->getDevice());
+
+	if(SUCCEEDED(hr))
+	{
+		ID3D11DeviceContext* devcon = managementD3D_->getDeviceContext();
+		managementCB_->setCB(
+			CB_TYPE_INSTANCE,
+			TypeFX_CS, 
+			CB_REGISTER_INSTANCE, 
+			devcon);
+		managementCB_->updateCBInstance(
+			devcon, 
+			winfo_->getScreenWidth(), 
+			winfo_->getScreenHeight());
+	}
 
 	return hr;
 }
@@ -331,46 +361,43 @@ void Renderer::render()
 	managementCB_->setCB(CB_TYPE_FRAME, TypeFX_VS, CB_REGISTER_FRAME, managementD3D_->getDeviceContext());
 	managementCB_->updateCBFrame(managementD3D_->getDeviceContext(), managementLight_->getNumLights());
 
-	//Render to each viewport.
 	int cameraIndex = 0;
-	for(unsigned int i = 0; i < attributesCamera_->size(); i++)
+	while(itrCamera.hasNext())
 	{
-		if(attributesCameraOwner_->at(i)!=0)
-		{
-			//Set viewport.
-			managementViewport_->setViewport(managementD3D_->getDeviceContext(), cameraIndex);
-
-			//Render viewport.
-			unsigned int viewportTopX = static_cast<unsigned int>(managementViewport_->getViewport(cameraIndex).TopLeftX);
-			unsigned int viewportTopY = static_cast<unsigned int>(managementViewport_->getViewport(cameraIndex).TopLeftY);
-			renderViewport(
-				attributesCamera_->at(cameraIndex), 
-				viewportTopX, 
-				viewportTopY,
-				cameraIndex);
-
-			// HACK: Increment camera index
-			cameraIndex++;
-		}	
+		Attribute_Camera* camAt = itrCamera.getNext();
+	
+		//Set viewport.
+		managementViewport_->setViewport(managementD3D_->getDeviceContext(), cameraIndex);
+	
+		//Render viewport.
+		unsigned int viewportTopX = static_cast<unsigned int>(managementViewport_->getViewport(cameraIndex).TopLeftX);
+		unsigned int viewportTopY = static_cast<unsigned int>(managementViewport_->getViewport(cameraIndex).TopLeftY);
+		renderViewport(
+			camAt,
+			viewportTopX, 
+			viewportTopY,
+			cameraIndex);
+	
+		// HACK: Increment camera index
+		cameraIndex++;
 	}
 
 	managementD3D_->present();
 }
 void Renderer::renderViewport(
-	Attribute_Camera		cameraAt, 
+	Attribute_Camera*	cameraAt, 
 	unsigned int		viewportTopX,
 	unsigned int		viewportTopY,
 	unsigned int		cameraIndex)
 {
 	//Get camera's view- and projection matrix, and their inverses.
-	DirectX::XMFLOAT4X4 viewMatrix((float*)&cameraAt.mat_view);
-	DirectX::XMFLOAT4X4 projectionMatrix((float*)&cameraAt.mat_projection);
+	DirectX::XMFLOAT4X4 viewMatrix((float*)&cameraAt->mat_view);
+	DirectX::XMFLOAT4X4 projectionMatrix((float*)&cameraAt->mat_projection);
 	DirectX::XMFLOAT4X4 viewMatrixInverse		= managementMath_->calculateMatrixInverse(viewMatrix);
 	DirectX::XMFLOAT4X4 projectionMatrixInverse	= managementMath_->calculateMatrixInverse(projectionMatrix);
 
 	//Get eye position.
-	Attribute_Camera*	cameraAtP = &cameraAt;
-	Attribute_Spatial*	spatialAttribute	= ATTRIBUTE_CAST(Attribute_Spatial, ptr_spatial, cameraAtP);
+	Attribute_Spatial*	spatialAttribute	= ATTRIBUTE_CAST(Attribute_Spatial, ptr_spatial, cameraAt);
 	Attribute_Position*	positionAttribute	= ATTRIBUTE_CAST(Attribute_Position, ptr_position, spatialAttribute);
 	DirectX::XMFLOAT3	eyePosition			= *(DirectX::XMFLOAT3*)&positionAttribute->position;
 
@@ -404,23 +431,19 @@ void Renderer::renderViewportToGBuffer(DirectX::XMFLOAT4X4 viewMatrix, DirectX::
 
 	managementGBuffer_->setGBuffersAndDepthBufferAsRenderTargets(devcon, managementD3D_->getDepthBuffer());
 
+	//Render renderattributes
 	Attribute_Render* renderAt;
-	for(unsigned int i = 0; i < attributesRenderOwner_->size(); i++)
+	while(itrRender.hasNext())
 	{
-		if(attributesRenderOwner_->at(i) != 0)
-		{
-			//if(renderAt->culling.getBool(cameraIndex))
-			{
-			renderAt = &attributesRender_->at(i);
-			//if(renderAt->culling.getBool(cameraIndex))
-				renderAttribute(
-					renderAt, 
-					viewMatrix, 
-					projectionMatrix);
-			}
-		}
+		renderAt = itrRender.getNext();
+		//if(renderAt->culling.getBool(cameraIndex))
+		renderAttribute(
+			renderAt, 
+			viewMatrix, 
+			projectionMatrix);
 	}
 
+	//MAKE ME USE ITERATORS
 	Attribute_DebugShape* debugShapeAt;
 	for(unsigned int i = 0; i < attributesDebugShape_->size(); i++)
 	{
@@ -456,9 +479,7 @@ void Renderer::renderViewportToBackBuffer()
 
 	//Set constant buffers.
 	managementCB_->setCB(CB_TYPE_FRAME,		TypeFX_CS, CB_REGISTER_FRAME,		devcon);
-	managementCB_->setCB(CB_TYPE_INSTANCE,	TypeFX_CS, CB_REGISTER_INSTANCE,	devcon); //remove me
 	managementCB_->setCB(CB_TYPE_CAMERA,	TypeFX_CS, CB_REGISTER_CAMERA,		devcon);
-	managementCB_->updateCBInstance(devcon, winfo_->getScreenWidth(), winfo_->getScreenHeight());
 
 	//Set lights.
 	managementLight_->setLightSRVCS(devcon, 3);
