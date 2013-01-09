@@ -3,6 +3,11 @@
 
 #include <Xinput.h>
 #include "InputActions.h"
+
+#include "InputButtonObject.h"
+#include "InputAxisObject.h"
+#include "InputTriggerObject.h"
+
 #include "Converter.h"
 
 XInputDevice::XInputDevice() : 

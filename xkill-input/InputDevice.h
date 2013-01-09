@@ -4,17 +4,18 @@
 
 #include <InitGuid.h>
 
-#include "KeyMapper.h"
+class InputObject;
+class InputAxisObject;
+class InputButtonObject;
+class InputTriggerObject;
 
-#include "InputButtonObject.h"
-#include "InputAxisObject.h"
-#include "InputTriggerObject.h"
+class KeyMapper;
 
 #include "InputActions.h"
 
 #define SAFE_DELETE(x) {if(x != nullptr) delete x; x = nullptr;}
 
-//! An interface for wrappers of Direct Input and XInput devices
+//! An interface for wrappers of input devices
 
 class InputDevice
 {

@@ -2,6 +2,11 @@
 
 #include "FileParser.h"
 #include "InputDevice.h"
+
+#include "InputButtonObject.h"
+#include "InputAxisObject.h"
+#include "InputTriggerObject.h"
+
 #include "Converter.h"
 
 KeyMapper::KeyMapper()

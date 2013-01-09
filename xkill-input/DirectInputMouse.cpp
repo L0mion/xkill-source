@@ -1,5 +1,9 @@
 #include "DirectInputMouse.h"
 
+#include "InputButtonObject.h"
+#include "InputAxisObject.h"
+#include "InputTriggerObject.h"
+
 DirectInputMouse::DirectInputMouse(LPDIRECTINPUTDEVICE8 device, GUID deviceGUID, std::string name, unsigned int playerID) : 
 	DirectInputDevice(device, deviceGUID, name, playerID)
 {

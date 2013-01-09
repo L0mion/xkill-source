@@ -1,5 +1,11 @@
 #include "InputDevice.h"
 
+#include "InputButtonObject.h"
+#include "InputAxisObject.h"
+#include "InputTriggerObject.h"
+
+#include "KeyMapper.h"
+
 #include "Converter.h"
 
 InputDevice::InputDevice(GUID deviceGUID, std::string name, unsigned int playerID)

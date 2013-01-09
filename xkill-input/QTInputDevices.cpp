@@ -1,5 +1,9 @@
 #include "QTInputDevices.h"
 
+#include "InputButtonObject.h"
+#include "InputAxisObject.h"
+#include "InputTriggerObject.h"
+
 #include "InputActions.h"
 #include "Converter.h"
 
