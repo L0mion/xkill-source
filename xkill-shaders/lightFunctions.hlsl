@@ -3,9 +3,9 @@
 
 #include "structs.hlsl"
 
-static const uint LIGHT_TYPE_DIRECTIONAL	= 1;
-static const uint LIGHT_TYPE_POINT			= 2;
-static const uint LIGHT_TYPE_SPOT			= 3;
+static const uint LIGHT_TYPE_DIRECTIONAL	= 0;
+static const uint LIGHT_TYPE_POINT			= 1;
+static const uint LIGHT_TYPE_SPOT			= 2;
 
 float3 directionalLight(SurfaceInfo surface, Light light, float3 eyePosition)
 {

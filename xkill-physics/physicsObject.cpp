@@ -51,6 +51,7 @@ void PhysicsObject::removeFromWorld(btDiscreteDynamicsWorld* dynamicsWorld)
 
 void PhysicsObject::preStep(CollisionShapeManager* collisionShapeManager,Attribute_Physics* physicsAttribute)
 {
+
 	Attribute_Spatial* spatialAttribute = ATTRIBUTE_CAST(Attribute_Spatial,
 														ptr_spatial,
 														physicsAttribute);
@@ -66,18 +67,12 @@ void PhysicsObject::preStep(CollisionShapeManager* collisionShapeManager,Attribu
 	btVector3 localInertia(0,0,0);
 	if(getCollisionShape()->getShapeType()==4 && index_ >2)
 	{
-		//if(!inertiad)
-		{
+		getCollisionShape()->calculateLocalInertia(physicsAttribute->mass,localInertia);
+		inertiad = true;
+		setRestitution(1.0);
+		setRollingFriction(0.01);
 			
-			getCollisionShape()->calculateLocalInertia(physicsAttribute->mass,localInertia);
-			inertiad = true;
-			setRestitution(1.0);
-			setRollingFriction(0.01);
-			
-		}
 	}
-
-	//PhysicsAttribute 1 is created as a projectile. PhysicsAttribute 1 is synchronized with Bullet as a PhysicsObject. "setMassProps(physicsAttribute->mass,localInertia);" is 
 
 	if(!physicsAttribute->isExplosionSphere)
 	{

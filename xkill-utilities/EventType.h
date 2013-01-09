@@ -3,6 +3,7 @@
 #include <vector>
 #include "dllUtilities.h"
 #include "Math.h"
+#include "LightStructs.h"
 
 //
 // Events info
@@ -48,6 +49,7 @@ enum DLL_U EventType
 	EVENT_CREATE_EXPLOSIONSPHERE,
 
 	EVENT_CREATE_ENTITY,
+	EVENT_CREATE_LIGHT,
 	EVENT_GAMERESET,
 	EVENT_UPDATE,
 	EVENT_MOUSE_MOVE,
@@ -67,6 +69,7 @@ enum DLL_U EventType
 
 	// Utilities
 	EVENT_CREATE_MESH,
+	EVENT_CREATE_LIGHT_D3D,
 	EVENT_LOAD_TEXTURES,
 	EVENT_SHOW_MESSAGEBOX,
 
@@ -383,3 +386,24 @@ public:
 	EntityType entityType;
 };
 
+class DLL_U Event_CreateLight : public Event
+{
+public:
+	Event_CreateLight(LightType lightType);
+	~Event_CreateLight(); //!< Does nothing.
+
+	Float3 position;	//!< Position of the light source.
+	Float3 direction;	//!< The lights direction.
+	Float3 attenuation;	//!< How fast the light intensity will diminish
+	
+	Float4 ambient;		//!< The ambient color.
+	Float4 diffuse;		//!< The diffuse color.
+	Float4 specular;	//!< The specular color.
+	
+	float range;		//!< How far the light can reach.
+	float spotPower;	//!< Controls the spotlight cone.
+
+	LightType getLightType() const { return lightType; }
+private:
+	LightType lightType; //!< Type of light: Directional, Point or Spot.
+};

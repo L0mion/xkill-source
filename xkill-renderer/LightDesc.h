@@ -20,6 +20,17 @@ struct LightDesc
 		ZeroMemory(this, sizeof(LightDesc));
 	}
 
+	Float3			position;		//!< Position of the light source.
+	float			range;			//!< How far the light can reach.
+	Float3			direction;		//!< The lights direction.
+	float			spotPower;		//!< Controls the spotlight cone.
+	Float4			ambient;		//!< The ambient color.
+	Float4			diffuse;		//!< The diffuse color.
+	Float4			specular;		//!< The specular color.
+	Float3			attenuation;	//!< How fast the light intensity will diminish
+	unsigned int	type;			//!< Type of light i.e. Directional, Point or Spot.
+
+	/*
 	DirectX::XMFLOAT3 position;		//!< Position of the light source.
 	float range;					//!< How far the light can reach.
 	DirectX::XMFLOAT3 direction;	//!< The lights direction.
@@ -29,6 +40,7 @@ struct LightDesc
 	DirectX::XMFLOAT4 specular;		//!< The specular color.
 	DirectX::XMFLOAT3 attenuation;	//!< How fast the light intensity will diminish
 	unsigned int type;				//!< Type of light i.e. Directional, Point or Spot.
+	*/
 };
 
 #endif //XKILL_RENDERER_LIGHTDESC_H
