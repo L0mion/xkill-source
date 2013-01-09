@@ -58,8 +58,7 @@ public:
 	void onUpdate(float delta)
 	{
 		// Iterate list and update score
-		// showMenu
-		if(false)
+		if(showMenu)
 		{
 			std::vector<Attribute_Player>* allPlayers		=	GET_ATTRIBUTES(player);
 			std::vector<Attribute_Health>* allHealth			=	GET_ATTRIBUTES(health);
