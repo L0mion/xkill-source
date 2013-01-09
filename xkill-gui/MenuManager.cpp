@@ -12,6 +12,8 @@ MenuManager::MenuManager( QWidget* parent )
 
 	SUBSCRIBE_TO_EVENT(this, EVENT_UPDATE);
 	SUBSCRIBE_TO_EVENT(this, EVENT_END_DEATHMATCH);
+
+	hudManager = HUDManager(parent);
 }
 
 void MenuManager::keyPressEvent( QKeyEvent* e )
