@@ -114,6 +114,17 @@ public:
 		physics->mass = 0;
 				
 		HACKHACK+=2;
+
+		//temp, create demo light for each projectile
+		CREATE_ATTRIBUTE(Attribute_Light, light, entity);
+		CONNECT_ATTRIBUTES(light, position);
+		light->direction	= Float3(0.57735f, -0.57735f, 0.57735f);
+		light->ambient		= Float4(0.8f, 0.8f, 0.8f, 1.0f);
+		light->diffuse		= Float4(0.2f, 0.2f, 0.2f, 1.0f);
+		light->specular		= Float4(1.0f, 1.0f, 1.0f, 1.0f);
+		light->lightType	= LIGHTTYPE_DIRECTIONAL;
+		light->range		= 1000.0f;
+		light->attenuation	= Float3(0.5f, 0.5f, 0.5f);
 	}
 
 	void createProjectileEntity(Entity* entity, Event_CreateProjectile* e)

@@ -53,7 +53,8 @@ public:
 		unsigned int screenWidth, 
 		unsigned int screenHeight);	//!< Resizes all management objects that are affected by a change in screen resolution.
 	HRESULT	init();					//!< Initializes members and prepares render.
-	void	render(float delta);	//!< Renders a frame.
+	void	update();
+	void	render();	//!< Renders a frame.
 	void	loadTextures(TexDesc* texdesc); //!< Forwards information related to what textures Renderer is to load to Renderer-object.
 protected:
 private:
@@ -118,7 +119,7 @@ private:
 	ManagementMath*		managementMath_;		//!< Loads dx-math vectors into generic-type vectors and maintains other math-related functions.
 
 	std::vector<Attribute_Spatial>*		attributesSpatial_;		//!< Holds spatial data. Is fetched only once.
-	std::vector<Attribute_Position>*		attributesPosition_;	//!< Holds positional data. Is fetched only once.
+	std::vector<Attribute_Position>*	attributesPosition_;	//!< Holds positional data. Is fetched only once.
 	std::vector<Attribute_Render>*		attributesRender_;		//!< Holds objects supposed to be rendered. Is fetched only once.
 	std::vector<Attribute_DebugShape>*	attributesDebugShape_;	//!< Holds debug shapes.
 	std::vector<int>*					attributesRenderOwner_;	//!< Holds owners of render-attributes.

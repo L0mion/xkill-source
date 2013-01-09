@@ -85,6 +85,25 @@ Attribute_Projectile::~Attribute_Projectile()
 {
 }
 
+Attribute_Light::Attribute_Light()
+{
+	lightType = LIGHTTYPE_NA;
+
+	direction	= Float3(0.0f, 0.0f, 0.0f);
+	attenuation	= Float3(0.0f, 0.0f, 0.0f);
+
+	ambient		= Float4(0.0f, 0.0f, 0.0f, 0.0f);
+	diffuse		= Float4(0.0f, 0.0f, 0.0f, 0.0f);
+	specular	= Float4(0.0f, 0.0f, 0.0f, 0.0f);
+
+	range		= 0.0f;
+	spotPower	= 0.0f;
+}
+Attribute_Light::~Attribute_Light()
+{
+	//Do nothing.
+}
+
 Attribute_Sound::Attribute_Sound()
 {
 }

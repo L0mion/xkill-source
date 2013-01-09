@@ -12,6 +12,7 @@ RenderingComponent::RenderingComponent(HWND windowHandle)
 	SUBSCRIBE_TO_EVENT(this, EVENT_WINDOW_RESIZE);
 	SUBSCRIBE_TO_EVENT(this, EVENT_LOAD_TEXTURES);
 	SUBSCRIBE_TO_EVENT(this, EVENT_GAMERESET);
+	SUBSCRIBE_TO_EVENT(this, EVENT_CREATE_LIGHT);
 
 	windowHandle_	= windowHandle;
 	renderer_		= nullptr;
@@ -37,7 +38,8 @@ HRESULT RenderingComponent::init()
 
 void RenderingComponent::onUpdate(float delta)
 {
-	renderer_->render(delta);
+	renderer_->update();
+	renderer_->render();
 }
 
 void RenderingComponent::onEvent( Event* e )
@@ -54,12 +56,15 @@ void RenderingComponent::onEvent( Event* e )
 	case EVENT_LOAD_TEXTURES:
 		event_PostDescTex((Event_LoadTextures*)e);
 		break;
+	case EVENT_CREATE_LIGHT:
+		event_CreateLight((Event_CreateLight*)e);
+		break;
 	default:
 		break;
 	}
 }
 
-void RenderingComponent::event_WindowResize( Event_WindowResize* e )
+void RenderingComponent::event_WindowResize(Event_WindowResize* e)
 {
 	int width = e->width;
 	int height = e->height;
@@ -73,4 +78,8 @@ void RenderingComponent::event_PostDescTex(Event_LoadTextures* e)
 	renderer_->loadTextures(texDesc);
 
 	delete texDesc;
+}
+void RenderingComponent::event_CreateLight(Event_CreateLight* e)
+{
+
 }

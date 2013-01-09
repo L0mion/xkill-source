@@ -317,7 +317,11 @@ void Renderer::initManagementMath()
 	managementMath_ = new ManagementMath();
 }
 
-void Renderer::render(float delta)
+void Renderer::update()
+{
+	managementLight_->update(managementD3D_->getDevice(), managementD3D_->getDeviceContext());
+}
+void Renderer::render()
 {
 	//Clear g-buffers and depth buffer.
 	managementGBuffer_->clearGBuffers(managementD3D_->getDeviceContext());
