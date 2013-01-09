@@ -26,8 +26,11 @@ DirectInputDevice::~DirectInputDevice(void)
 		StopForceFeedback();
 		SAFE_RELEASE(effect_);
 	}
-	device_->Unacquire();
-	SAFE_RELEASE(device_);
+	if(device_ != nullptr)
+	{
+		device_->Unacquire();
+		SAFE_RELEASE(device_);
+	}
 }
 
 void DirectInputDevice::RunForceFeedback()

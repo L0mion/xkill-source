@@ -145,6 +145,17 @@ struct DLL_U Attribute_Render : public IAttribute
 */
 struct DLL_U Attribute_Physics : public IAttribute
 {
+	enum PhysicsAttributeType
+	{
+		DEFAULT_ERROR = 0,
+		WORLD = 1,
+		PLAYER = 2,
+		PROJECTILE = 4,
+		EXPLOSIONSPHERE = 8,
+		EVERYTHING = 0xffff
+	};
+	PhysicsAttributeType collisionFilterGroup;
+
 	Attribute_Physics();
 	~Attribute_Physics();
 
@@ -156,6 +167,7 @@ struct DLL_U Attribute_Physics : public IAttribute
 	Float3 gravity;
 	float mass;
 	unsigned int meshID; //collisionShapeIndex;
+	short int collisionFilterMask;
 	//CollisionShape
 	//friction
 	//restitution
@@ -163,9 +175,7 @@ struct DLL_U Attribute_Physics : public IAttribute
 	bool collisionResponse;
 	bool added;
 	bool alive;
-	bool isProjectile;
 
-	bool isExplosionSphere;
 	float explosionSphereRadius;
 };
 

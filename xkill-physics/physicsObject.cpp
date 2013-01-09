@@ -39,9 +39,9 @@ PhysicsObject::~PhysicsObject()
 	delete getMotionState();
 }
 
-void PhysicsObject::addToWorld(btDiscreteDynamicsWorld* dynamicsWorld)
+void PhysicsObject::addToWorld(btDiscreteDynamicsWorld* dynamicsWorld, short int collisionFilterGroup, short int collisionFilterMask)
 {
-	dynamicsWorld->addRigidBody(this);
+	dynamicsWorld->addRigidBody(this, collisionFilterGroup, collisionFilterMask);
 }
 
 void PhysicsObject::removeFromWorld(btDiscreteDynamicsWorld* dynamicsWorld)
@@ -59,7 +59,7 @@ void PhysicsObject::preStep(CollisionShapeManager* collisionShapeManager,Attribu
 														  ptr_position,
 														  spatialAttribute);
 	
-	if(!physicsAttribute->isExplosionSphere)
+	if(physicsAttribute->collisionFilterGroup != Attribute_Physics::EXPLOSIONSPHERE)
 	{
 		m_collisionShape = collisionShapeManager->getCollisionShape(physicsAttribute->meshID);
 	}
@@ -74,7 +74,7 @@ void PhysicsObject::preStep(CollisionShapeManager* collisionShapeManager,Attribu
 			
 	}
 
-	if(!physicsAttribute->isExplosionSphere)
+	if(physicsAttribute->collisionFilterGroup != Attribute_Physics::EXPLOSIONSPHERE)
 	{
 		setMassProps(physicsAttribute->mass,localInertia);
 	}
@@ -94,7 +94,7 @@ void PhysicsObject::preStep(CollisionShapeManager* collisionShapeManager,Attribu
 		setCollisionFlags(getCollisionFlags() | CF_NO_CONTACT_RESPONSE);
 	}
 
-	if(physicsAttribute->isProjectile)
+	if(physicsAttribute->collisionFilterGroup == Attribute_Physics::PROJECTILE)
 	{
   		m_worldTransform.setRotation(btQuaternion(spatialAttribute->rotation.x, spatialAttribute->rotation.y, spatialAttribute->rotation.z, spatialAttribute->rotation.w));
 		setLinearVelocity(btVector3(physicsAttribute->linearVelocity.x,

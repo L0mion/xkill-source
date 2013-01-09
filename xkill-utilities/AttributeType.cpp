@@ -58,10 +58,10 @@ Attribute_Physics::Attribute_Physics()
 	
 	meshID = 0;
 
+	collisionFilterGroup = Attribute_Physics::DEFAULT_ERROR;
+	collisionFilterMask = 0;
+
 	gravity = Float3(0.0f, -10.0f, 0.0f);
-	
-	isProjectile = false;
-	isExplosionSphere = false;
 
 	angularVelocity.x = 0; 
 	angularVelocity.y = 0;

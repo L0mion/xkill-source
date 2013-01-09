@@ -167,7 +167,7 @@ void BulletPhysicsComponent::onUpdate(float delta)
 			// if the object is not in the world, add it
 			if(!physicsObject->isInWorld())
 			{
-				if(physicsAttribute->isExplosionSphere)
+				if(physicsAttribute->collisionFilterGroup == Attribute_Physics::EXPLOSIONSPHERE)
 				{
 					float scale = 100.0f;
 					btCollisionShape* collisionSphere = new btSphereShape(physicsAttribute->explosionSphereRadius*scale);
@@ -175,7 +175,8 @@ void BulletPhysicsComponent::onUpdate(float delta)
 					physicsObject->setCollisionShape(collisionSphere);
 				}
 
-				physicsObject->addToWorld(dynamicsWorld_);
+				physicsObject->addToWorld(dynamicsWorld_, physicsAttribute->collisionFilterGroup, physicsAttribute->collisionFilterMask);
+
 			}
 			// load data from physics attribute
 			physicsObject->preStep(collisionShapeManager_,physicsAttribute);
@@ -325,7 +326,17 @@ void BulletPhysicsComponent::tickCallback(btScalar timeStep)
 					{
 						unsigned int ownerA = physicsOwners_->at(objectA->getIndex());
 						unsigned int ownerB = physicsOwners_->at(objectB->getIndex());
-					
+
+						if(ownerA != 2)
+						{
+							int g = 5;
+						}
+
+						if(ownerB != 1)
+						{
+							int g = 5;
+						}
+
 						//Two PhysicsObjects colliding
 						if(ownerA != 0 || ownerB != 0) // ignore contacts where one owner is 0
 						{
