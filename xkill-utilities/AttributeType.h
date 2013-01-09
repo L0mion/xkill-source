@@ -3,6 +3,7 @@
 #include "dllUtilities.h"
 #include "AttributePointer.h"
 #include "Math.h"
+#include "LightStructs.h"
 #include <string>
 
 
@@ -62,6 +63,7 @@ enum DLL_U AttributeType
 	ATTRIBUTE_BOUNDING,
 	ATTRIBUTE_MESH,
 	ATTRIBUTE_PROJECTILE,
+	ATTRIBUTE_LIGHT,
 
 	ATTRIBUTE_HEALTH,
 	ATTRIBUTE_DAMAGE,
@@ -194,6 +196,26 @@ struct DLL_U Attribute_Projectile : public IAttribute
 	float currentLifeTimeLeft;	//!< Counter counting down the lifetime of the projectile. Is initialized to totalLifeTime. When equal or less than zero, the projectile attribute shall be destroyed.
 	bool explodeOnImnpact;
 	float explosionSphereRadius;
+};
+
+struct DLL_U Attribute_Light : public IAttribute
+{
+	Attribute_Light();
+	~Attribute_Light(); //!< Does nothing.
+
+	LightType lightType; //!< Type of light: Directional, Point or Spot.
+
+	AttributePointer ptr_position; //!< Position of light.
+
+	Float3 direction;	//!< The lights direction.
+	Float3 attenuation;	//!< How fast the light intensity will diminish
+
+	Float4 ambient;		//!< The ambient color.
+	Float4 diffuse;		//!< The diffuse color.
+	Float4 specular;	//!< The specular color.
+
+	float range;		//!< How far the light can reach.
+	float spotPower;	//!< Controls the spotlight cone.
 };
 
 struct DLL_U Attribute_Input : public IAttribute

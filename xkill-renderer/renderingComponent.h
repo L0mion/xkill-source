@@ -41,6 +41,7 @@ private:
 	 
 	void event_WindowResize(Event_WindowResize* e);
 	void event_PostDescTex(Event_LoadTextures* e);
+	void event_CreateLight(Event_CreateLight* e);
 };
 
 #endif //XKILL_RENDERER_RENDERINGCOMPONENT_H
