@@ -45,7 +45,8 @@ bool IOComponent::init()
 		sucessfulInit = initMdlDescs();
 
 	fbxLoader_ = new LoaderFbx();
-	fbxLoader_->load("../../xkill-resources/xkill-models/box.fbx");
+	fbxLoader_->load("../../xkill-resources/xkill-models/test.fbx");
+	fbxLoader_->createVerteciesPosNormTex();
 
 	return sucessfulInit;
 }
