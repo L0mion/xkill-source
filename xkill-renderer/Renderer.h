@@ -78,10 +78,8 @@ private:
 	void	initManagementMath();		//!< Initializes ManagementMath, which manages math-related functions and loading of dx-vectors into generic-type vectors utilizing SIMD.
 
 	void renderViewportToGBuffer(
-		DirectX::XMFLOAT4X4 viewMatrix,
-		DirectX::XMFLOAT4X4 projectionMatrix,
-		unsigned int		cameraIndex);	//!< Renders to g-buffer.
-	void renderViewportToBackBuffer();			//!< Renders to backbuffer.
+		ViewportData& vpData);	//!< Renders to g-buffer.
+	void renderViewportToBackBuffer(ViewportData& vpData);			//!< Renders to backbuffer.
 	void renderAttribute(
 		Attribute_Render* renderAt, 
 		DirectX::XMFLOAT4X4 viewMatrix, 

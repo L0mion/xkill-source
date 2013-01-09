@@ -382,7 +382,7 @@ void Renderer::render()
 		managementViewport_->setViewport(managementD3D_->getDeviceContext(), camIndex);
 
 		//Store all the viewport-specific data for the backbuffer-rendering.
-		vpData.camIndex = camIndex;
+		vpData.camIndex		= camIndex;
 		vpData.view			= DirectX::XMFLOAT4X4(((float*)&camAt->mat_view));
 		vpData.proj			= DirectX::XMFLOAT4X4(((float*)&camAt->mat_projection));
 		vpData.viewInv		= managementMath_->calculateMatrixInverse(vpData.view);
@@ -390,48 +390,24 @@ void Renderer::render()
 		vpData.eyePos		= *(DirectX::XMFLOAT3*)&posAt->position;
 		vpData.viewportTopX = static_cast<unsigned int>(managementViewport_->getViewport(camIndex).TopLeftX);
 		vpData.viewportTopY = static_cast<unsigned int>(managementViewport_->getViewport(camIndex).TopLeftY);
-
-		//Update per-viewport constant buffer.
-		managementCB_->setCB(CB_TYPE_CAMERA, TypeFX_VS, CB_REGISTER_CAMERA, managementD3D_->getDeviceContext());
-		managementCB_->updateCBCamera(managementD3D_->getDeviceContext(),
-			vpData.view,
-			vpData.viewInv,
-			vpData.proj,
-			vpData.projInv,
-			vpData.eyePos,
-			vpData.viewportTopX,
-			vpData.viewportTopY);
 		vpDatas.push_back(vpData);
 
-		renderViewportToGBuffer(vpData.view, vpData.proj, camIndex);
+		renderViewportToGBuffer(vpData);
 	}
 
 	//Render everything to backbuffer.
 	for(unsigned int i = 0; i < vpDatas.size(); i++)
-	{
-		//Update per-viewport constant buffer.
-		managementCB_->setCB(CB_TYPE_CAMERA, TypeFX_VS, CB_REGISTER_CAMERA, managementD3D_->getDeviceContext());
-		managementCB_->updateCBCamera(managementD3D_->getDeviceContext(),
-			vpDatas[i].view,
-			vpDatas[i].viewInv,
-			vpDatas[i].proj,
-			vpDatas[i].projInv,
-			vpDatas[i].eyePos,
-			vpDatas[i].viewportTopX,
-			vpDatas[i].viewportTopY);
-
-		renderViewportToBackBuffer();
-	}
+		renderViewportToBackBuffer(vpDatas[i]);
 
 	managementD3D_->present();
 }
-void Renderer::renderViewportToGBuffer(DirectX::XMFLOAT4X4 viewMatrix, DirectX::XMFLOAT4X4 projectionMatrix, unsigned int cameraIndex)									
+void Renderer::renderViewportToGBuffer(ViewportData& vpData)									
 {
 	ID3D11Device*			device = managementD3D_->getDevice();
 	ID3D11DeviceContext*	devcon = managementD3D_->getDeviceContext();
 
 	if(animatedMesh_)
-		renderAnimatedMesh(viewMatrix, projectionMatrix);
+		renderAnimatedMesh(vpData.view, vpData.proj);
 
 	managementFX_->setShader(devcon, SHADERID_VS_DEFAULT);
 	managementFX_->setShader(devcon, SHADERID_PS_DEFAULT);
@@ -441,6 +417,17 @@ void Renderer::renderViewportToGBuffer(DirectX::XMFLOAT4X4 viewMatrix, DirectX::
 
 	managementGBuffer_->setGBuffersAndDepthBufferAsRenderTargets(devcon, managementD3D_->getDepthBuffer());
 
+	//Update per-viewport constant buffer.
+	managementCB_->setCB(CB_TYPE_CAMERA, TypeFX_VS, CB_REGISTER_CAMERA, managementD3D_->getDeviceContext());
+	managementCB_->updateCBCamera(managementD3D_->getDeviceContext(),
+		vpData.view,
+		vpData.viewInv,
+		vpData.proj,
+		vpData.projInv,
+		vpData.eyePos,
+		vpData.viewportTopX,
+		vpData.viewportTopY);
+
 	//Render renderattributes
 	Attribute_Render* renderAt;
 	while(itrRender.hasNext())
@@ -449,11 +436,11 @@ void Renderer::renderViewportToGBuffer(DirectX::XMFLOAT4X4 viewMatrix, DirectX::
 		//if(renderAt->culling.getBool(cameraIndex))
 		renderAttribute(
 			renderAt, 
-			viewMatrix, 
-			projectionMatrix);
+			vpData.view, 
+			vpData.proj);
 	}
 
-	//MAKE ME USE ITERATORS
+	//Make me use iterators!
 	Attribute_DebugShape* debugShapeAt;
 	for(unsigned int i = 0; i < attributesDebugShape_->size(); i++)
 	{
@@ -463,8 +450,8 @@ void Renderer::renderViewportToGBuffer(DirectX::XMFLOAT4X4 viewMatrix, DirectX::
 			renderDebugShape(
 				debugShapeAt,
 				i,
-				viewMatrix, 
-				projectionMatrix);
+				vpData.view, 
+				vpData.proj);
 		}
 	}
 
@@ -477,7 +464,7 @@ void Renderer::renderViewportToGBuffer(DirectX::XMFLOAT4X4 viewMatrix, DirectX::
 
 	devcon->RSSetState(nullptr);
 }
-void Renderer::renderViewportToBackBuffer()
+void Renderer::renderViewportToBackBuffer(ViewportData& vpData)
 {
 	ID3D11DeviceContext* devcon = managementD3D_->getDeviceContext();
 
@@ -488,8 +475,17 @@ void Renderer::renderViewportToBackBuffer()
 	managementFX_->setShader(devcon, SHADERID_CS_DEFAULT);
 
 	//Set constant buffers.
-	managementCB_->setCB(CB_TYPE_FRAME,		TypeFX_CS, CB_REGISTER_FRAME,		devcon);
-	managementCB_->setCB(CB_TYPE_CAMERA,	TypeFX_CS, CB_REGISTER_CAMERA,		devcon);
+	managementCB_->setCB(CB_TYPE_FRAME,		TypeFX_CS, CB_REGISTER_FRAME,	devcon);
+	managementCB_->setCB(CB_TYPE_CAMERA,	TypeFX_CS, CB_REGISTER_CAMERA,	devcon);
+	managementCB_->setCB(CB_TYPE_CAMERA,	TypeFX_VS, CB_REGISTER_CAMERA,	devcon);
+	managementCB_->updateCBCamera(managementD3D_->getDeviceContext(),
+		vpData.view,
+		vpData.viewInv,
+		vpData.proj,
+		vpData.projInv,
+		vpData.eyePos,
+		vpData.viewportTopX,
+		vpData.viewportTopY);
 
 	//Set lights.
 	managementLight_->setLightSRVCS(devcon, 3);
