@@ -35,12 +35,11 @@ float3 pointLight(SurfaceInfo surface, Light light, float3 eyePosition)
 	float3 litColor = float3(0.0f, 0.0f, 0.0f);
 
 	float3 lightVector = light.position - surface.position;
-	float distance = length(lightVector);
 
-	if(distance > light.range)
+	if(length(lightVector) > light.range)
 		return litColor;
 
-	lightVector /= distance;
+	lightVector /= length(lightVector);
 
 	litColor += (surface.diffuse * light.ambient).xyz;
 
@@ -56,7 +55,7 @@ float3 pointLight(SurfaceInfo surface, Light light, float3 eyePosition)
 		litColor += (specularFactor * surface.specular * light.specular).xyz;
 	}
 
-	return litColor / dot(light.attenuation, float3(1.0f, distance, distance*distance));
+	return litColor / dot(light.attenuation, float3(1.0f, length(lightVector), length(lightVector) * length(lightVector)));
 }
 
 float3 spotLight(SurfaceInfo surface, Light light, float3 eyePosition)

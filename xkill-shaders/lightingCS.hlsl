@@ -40,9 +40,13 @@ void lightingCS( uint3 threadID : SV_DispatchThreadID )
 	//Transform position from view space to world space.
 	position = mul(float4(position, 1.0f), viewInverse).xyz;
 	
-	float4 diffuse = float4(1.0f, 1.0f, 1.0f, 1.0f);
-	float4 specular = float4(0.1f, 0.1f, 0.1f, 1.0f);
-	SurfaceInfo surface = {position, normal, albedo, specular};
+	SurfaceInfo surface = 
+	{
+		position, 
+		normal, 
+		albedo,							//diffuse
+		float4(0.1f, 0.1f, 0.1f, 1.0f)	//specular
+	};
 	
 	float3 color = float3(0.0f, 0.0f, 0.0f);
 	for(unsigned int i=0; i<numLights; i++)
