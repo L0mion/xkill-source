@@ -1,97 +1,18 @@
 #ifndef XKILL_PHYSICS_PHYSICSOBJECT
 #define XKILL_PHYSICS_PHYSICSOBJECT
 
-#include <btBulletDynamicsCommon.h>
-#include "physicsObject.h"
-
-struct Attribute_Physics;
-struct Attribute_Input;
-class CollisionShapeManager;
-
-//! Physics Object
-/*!
-An object that wraps object specific functionality for rigid bodies.
-\ingroup xkill-physics
-*/
-enum PO_Types
-{
-	tDEFAULT = 0,
-	tStatic = 1,
-	tWorld = 2,
-	tProjectile = 4,
-	tPlayer = 8,
-	tFrustrum = 16,
-	tExplosion = 32
-};
-
-enum PO_TypesCollideWith
-{
-	cwDEFAULT = 0,
-	cwStatic = 0,
-	cwWorld = 0,
-	cwProjectile = PO_Types::tStatic | PO_Types::tWorld | PO_Types::tPlayer,
-	cwPlayer = PO_Types::tStatic | PO_Types::tWorld | PO_Types::tPlayer,
-	cwFrustrum = PO_Types::tWorld | PO_Types::tPlayer | PO_Types::tProjectile,
-	cwExplosion = PO_Types::tPlayer
-};
+#include <BulletDynamics/Dynamics/btRigidBody.h>
 
 class PhysicsObject : public btRigidBody
 {
 private:
-	btVector3 gravity_;
-	btVector3 forces_;
-	btVector3 movement_;
-	btScalar yaw_;
-	unsigned int index_;
-	unsigned int type_;
-	bool noContactResponse_;
-	bool inertiad;
-protected:
+	unsigned int attributeIndex_;
 public:
-
-	//! Creates a Physics Object with a rigidbody pointer set to nullptr
-	/*!
-	\param collisionShapeManager A pointer used to access collision shapes
-	*/
-	PhysicsObject(CollisionShapeManager* collisionShapeManager, unsigned int index, unsigned int type);
-	PhysicsObject(btCollisionShape* collisionShape, unsigned int index, unsigned int type);
-	
-	//! Deletes all subobjects of the contained rigidbody and the rigidbody itself
+	PhysicsObject();
 	~PhysicsObject();
-	//! Initialize rigidbody from physicsAttribute and add object to simulation
-	/*! 
-	\param physicsAttribute The physics attribute which contain object data
-	\param dynamicsWorld The simulation object, used to add the object to the simulation 
-	\sa preStep
-	*/
-	void addToWorld(btDiscreteDynamicsWorld* dynamicsWorld);
-	//! Remove the rigidbody from the simulation but do not delete the rigidbody or the object
-	/*! 
-	\param dynamicsWorld The simulation object, used to the the object from the simulation 
-	*/
-	void removeFromWorld(btDiscreteDynamicsWorld* dynamicsWorld);
-	//! Runs before simulation is stepped to copy data from attribute to rigidbody
-	/*! 
-	\param physicsAttribute The physics attribute which contain object data
-	*/
-	void preStep(CollisionShapeManager* collisionShapeManager, Attribute_Physics* physicsAttribute);
-	//! Runs after simulation is stepped to copy data from rigidbody to attribute
-	/*! 
-	\param physicsAttribute The physics attribute which contain object data
-	*/
-	void postStep(Attribute_Physics* physicsAttribute);
-	//! Runs after simulation is stepped to copy data from rigidbody to attribute
-	/*! 
-	\param inputAttribute The attribute containing player controller information
-	*/
-	void input(Attribute_Input* inputAttribute, float delta);
-	//! return index of physicsobject
-	unsigned int getIndex() const;
-	//! return type of physicsobject
-	unsigned int getType() const;
-
-	//! scales the collisionShape before setting it to the btRigidBody object that this class inherits from.
-	//void setCollisionShapeTo(btCollisionShape* collisionShape);
+	void init(unsigned int attributeIndex);
+	void preStep();
+	void postStep();
 };
 
-#endif //XKILL_PHYSICS_PHYSICSOBJECT
+#endif

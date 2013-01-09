@@ -2,7 +2,7 @@
 
 #include <xkill-io/IOComponent.h>
 #include <xkill-renderer/renderingComponent.h>
-#include <xkill-physics/BulletPhysicsComponent.h>
+#include <xkill-physics/PhysicsComponent.h>
 #include <xkill-sound/SoundComponent.h>
 #include <xkill-input/InputComponent.h>
 
@@ -63,7 +63,7 @@ bool ComponentManager::init(HWND windowHandle, HWND parentWindowHandle)
 	//state_TemporaryVariableUsedAsSubstituteForStateMachine = SPECIAL_STATE_NONE;
 
 	render_ = new RenderingComponent(windowHandle);
-	physics_ = new BulletPhysicsComponent();
+	physics_ = new PhysicsComponent();
 	camera_ = new CameraComponent();
 	game_ = new GameComponent();
 	sound_ = new SoundComponent();
