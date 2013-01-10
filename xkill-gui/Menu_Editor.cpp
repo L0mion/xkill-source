@@ -33,7 +33,8 @@ Menu_Editor::Menu_Editor( Ui::MainWindowClass& ui, QWidget* parent ) : QWidget(p
 	connect(ui.pushButton_editorRefresh, SIGNAL(clicked()), this, SLOT(slot_editorRefresh()));
 	connect(ui.treeView_entityBrowser, SIGNAL(clicked(QModelIndex)), this, SLOT(slot_clicked_entityBrowser(QModelIndex)));
 	//connect(ui.tabWidget, SIGNAL(currentChanged(int)), this, SLOT(slot_tab_changed(int)));
-	//ui.groupBox_AttributeInspector->hide();
+	ui.dockWidget->hide();
+	
 }
 
 void Menu_Editor::slot_editorRefresh()

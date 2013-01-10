@@ -511,7 +511,7 @@ Attribute_SpawnPoint* GameComponent::findUnoccupiedSpawnPoint()
 	std::vector<Attribute_SpawnPoint*> unoccupiedSpawnPoints;
 	
 	// Special cases: *no spawn point, return nullptr.
-	int numSpawnPoints = itrSpawnPoint.size();
+	int numSpawnPoints = itrSpawnPoint.storageSize();
 	if(numSpawnPoints < 1)
 	{
 		DEBUGPRINT("GameComponent::findUnoccupiedSpawnPoint - No spawn point found.");
