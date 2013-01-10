@@ -327,16 +327,6 @@ void BulletPhysicsComponent::tickCallback(btScalar timeStep)
 						unsigned int ownerA = physicsOwners_->at(objectA->getIndex());
 						unsigned int ownerB = physicsOwners_->at(objectB->getIndex());
 
-						if(ownerA != 2)
-						{
-							int g = 5;
-						}
-
-						if(ownerB != 1)
-						{
-							int g = 5;
-						}
-
 						//Two PhysicsObjects colliding
 						if(ownerA != 0 || ownerB != 0) // ignore contacts where one owner is 0
 						{
