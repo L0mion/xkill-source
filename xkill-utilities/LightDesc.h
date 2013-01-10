@@ -16,17 +16,7 @@ enum DLL_U LightDescType
 	LIGHTDESCTYPE_NA	= 3
 };
 
-//struct LightDesc
-//{
-//	LightDesc();
-//	virtual ~LightDesc();
-//
-//	Float4 ambient;
-//	Float4 diffuse;
-//	Float4 specular;
-//};
-
-struct DLL_U LightDescDir// : public LightDesc
+struct DLL_U LightDescDir
 {
 	LightDescDir();
 	~LightDescDir();
@@ -41,7 +31,7 @@ struct DLL_U LightDescDir// : public LightDesc
 	float pad1;
 };
 
-struct DLL_U LightDescPoint //: public LightDesc
+struct DLL_U LightDescPoint
 {
 	LightDescPoint();
 	~LightDescPoint();
@@ -58,7 +48,7 @@ struct DLL_U LightDescPoint //: public LightDesc
 	float pad1;
 };
 
-struct DLL_U LightDescSpot //: public LightDesc
+struct DLL_U LightDescSpot
 {
 	LightDescSpot();
 	~LightDescSpot();
@@ -76,28 +66,5 @@ struct DLL_U LightDescSpot //: public LightDesc
 	//Padding
 	float pad1;
 };
-
-//! Struct describing a single light source.
-/*!
-\ingroup xkill-renderer
-*/
-//struct LightDesc
-//{
-//	//! Initializes LightDesc to its default state.
-//	LightDesc()
-//	{
-//		ZeroMemory(this, sizeof(LightDesc));
-//	}
-//
-//	Float3			position;		//!< Position of the light source.
-//	float			range;			//!< How far the light can reach.
-//	Float3			direction;		//!< The lights direction.
-//	float			spotPower;		//!< Controls the spotlight cone.
-//	Float4			ambient;		//!< The ambient color.
-//	Float4			diffuse;		//!< The diffuse color.
-//	Float4			specular;		//!< The specular color.
-//	Float3			attenuation;	//!< How fast the light intensity will diminish
-//	unsigned int	type;			//!< Type of light i.e. Directional, Point or Spot.
-//};
 
 #endif //XKILL_RENDERER_LIGHTDESC_H
