@@ -12,7 +12,7 @@ RenderingComponent::RenderingComponent(HWND windowHandle)
 	SUBSCRIBE_TO_EVENT(this, EVENT_WINDOW_RESIZE);
 	SUBSCRIBE_TO_EVENT(this, EVENT_LOAD_TEXTURES);
 	SUBSCRIBE_TO_EVENT(this, EVENT_GAMERESET);
-	SUBSCRIBE_TO_EVENT(this, EVENT_CREATE_LIGHT);
+	//SUBSCRIBE_TO_EVENT(this, EVENT_CREATE_LIGHT);
 
 	windowHandle_	= windowHandle;
 	renderer_		= nullptr;
@@ -56,9 +56,9 @@ void RenderingComponent::onEvent( Event* e )
 	case EVENT_LOAD_TEXTURES:
 		event_PostDescTex((Event_LoadTextures*)e);
 		break;
-	case EVENT_CREATE_LIGHT:
-		event_CreateLight((Event_CreateLight*)e);
-		break;
+	//case EVENT_CREATE_LIGHT:
+	//	event_CreateLight((Event_CreateLight*)e);
+	//	break;
 	default:
 		break;
 	}
@@ -79,7 +79,7 @@ void RenderingComponent::event_PostDescTex(Event_LoadTextures* e)
 
 	delete texDesc;
 }
-void RenderingComponent::event_CreateLight(Event_CreateLight* e)
-{
-
-}
+//void RenderingComponent::event_CreateLight(Event_CreateLight* e)
+//{
+//
+//}

@@ -15,7 +15,9 @@ AttributeManager::AttributeManager()
 	player			.init	(ATTRIBUTE_PLAYER);
 	bounding		.init	(ATTRIBUTE_BOUNDING);
 	projectile		.init	(ATTRIBUTE_PROJECTILE);
-	light			.init	(ATTRIBUTE_LIGHT);
+	lightDir		.init	(ATTRIBUTE_LIGHT_DIRECTIONAL);
+	lightPoint		.init	(ATTRIBUTE_LIGHT_POINT);
+	lightSpot		.init	(ATTRIBUTE_LIGHT_SPOT);
 	mesh			.init	(ATTRIBUTE_MESH);
 	health			.init	(ATTRIBUTE_HEALTH);
 	damage			.init	(ATTRIBUTE_DAMAGE);
