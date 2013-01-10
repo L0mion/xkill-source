@@ -16,6 +16,17 @@ static const FLOAT CLEARCOLOR_RED[]		= { 1.0f, 0.0f, 0.0f, 1.0f };
 static const FLOAT CLEARCOLOR_GREEN[]	= { 0.0f, 1.0f, 0.0f, 1.0f };
 static const FLOAT CLEARCOLOR_BLUE[]	= { 0.0f, 0.0f, 1.0f, 1.0f };
 
+enum GBUFFER_FORMAT
+{
+	R8_G8_B8_A8__UNORM,
+	R16_G16_B16_A16__FLOAT,
+	R32_G32_B32_A32__FLOAT
+};
+
+static const GBUFFER_FORMAT GBUFFER_FORMAT_ALBEDO	= R8_G8_B8_A8__UNORM;
+static const GBUFFER_FORMAT GBUFFER_FORMAT_NORMAL	= R16_G16_B16_A16__FLOAT;
+static const GBUFFER_FORMAT GBUFFER_FORMAT_MATERIAL	= R32_G32_B32_A32__FLOAT;
+
 class ManagementGBuffer
 {
 public:

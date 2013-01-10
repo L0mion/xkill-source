@@ -359,8 +359,16 @@ void Renderer::render()
 	managementD3D_->clearDepthBuffer();
 
 	//Update per-frame constant buffer.
-	managementCB_->setCB(CB_TYPE_FRAME, TypeFX_VS, CB_REGISTER_FRAME, managementD3D_->getDeviceContext());
-	managementCB_->updateCBFrame(managementD3D_->getDeviceContext(), managementLight_->getNumLights());
+	managementCB_->setCB(
+		CB_TYPE_FRAME, 
+		TypeFX_VS, 
+		CB_REGISTER_FRAME, 
+		managementD3D_->getDeviceContext());
+	managementCB_->updateCBFrame(
+		managementD3D_->getDeviceContext(),
+		managementLight_->getLightDirCurCount(),
+		managementLight_->getLightPointCurCount(),
+		managementLight_->getLightSpotCurCount());
 
 	Attribute_Camera*	camAt; 
 	Attribute_Spatial*	spatialAt;
@@ -487,11 +495,13 @@ void Renderer::renderViewportToBackBuffer(ViewportData& vpData)
 		vpData.viewportTopX,
 		vpData.viewportTopY);
 
-	//Set lights.
-	managementLight_->setLightSRVCS(devcon, 3);
-
 	//Connect g-buffers to shader.
 	managementGBuffer_->setGBuffersAsCSShaderResources(devcon);
+
+	//Set lights.
+	managementLight_->setLightSRVCS(devcon, LIGHTDESCTYPE_DIR,		3);
+	managementLight_->setLightSRVCS(devcon, LIGHTDESCTYPE_POINT,	4);
+	managementLight_->setLightSRVCS(devcon, LIGHTDESCTYPE_SPOT,		5);
 	
 	//Set default samplerstate.
 	managementSS_->setSS(devcon, TypeFX_CS, 0, SS_ID_DEFAULT);

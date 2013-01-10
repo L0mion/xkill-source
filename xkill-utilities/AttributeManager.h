@@ -30,7 +30,9 @@ public:
 	AttributeStorage<Attribute_Player>			player;
 	AttributeStorage<Attribute_Bounding>		bounding;
 	AttributeStorage<Attribute_Projectile>		projectile;
-	AttributeStorage<Attribute_Light>			light;
+	AttributeStorage<Attribute_Light_Dir>	lightDir;
+	AttributeStorage<Attribute_Light_Point>			lightPoint;
+	AttributeStorage<Attribute_Light_Spot>			lightSpot;
 	AttributeStorage<Attribute_Mesh>			mesh;
 	AttributeStorage<Attribute_Health>			health;
 	AttributeStorage<Attribute_Damage>			damage;
@@ -71,7 +73,9 @@ static	AttributeIterator<Attribute_Input>					itrInput			;	\
 static	AttributeIterator<Attribute_Player>					itrPlayer			;	\
 static	AttributeIterator<Attribute_Bounding>				itrBounding			;	\
 static	AttributeIterator<Attribute_Projectile>				itrProjectile		;	\
-static	AttributeIterator<Attribute_Light>					itrLight			;	\
+static	AttributeIterator<Attribute_Light_Dir>		itrLightDir			;	\
+static	AttributeIterator<Attribute_Light_Point>			itrLightPoint		;	\
+static	AttributeIterator<Attribute_Light_Spot>				itrLightSpot		;	\
 static	AttributeIterator<Attribute_Mesh>					itrMesh				;	\
 static	AttributeIterator<Attribute_Health>					itrHealth			;	\
 static	AttributeIterator<Attribute_Damage>					itrDamage			;	\
@@ -94,7 +98,9 @@ itrInput			= ATTRIBUTE_MANAGER->input				.getIterator();			\
 itrPlayer			= ATTRIBUTE_MANAGER->player				.getIterator();			\
 itrBounding			= ATTRIBUTE_MANAGER->bounding			.getIterator();			\
 itrProjectile		= ATTRIBUTE_MANAGER->projectile			.getIterator();			\
-itrLight			= ATTRIBUTE_MANAGER->light				.getIterator();			\
+itrLightDir			= ATTRIBUTE_MANAGER->lightDir			.getIterator();			\
+itrLightPoint		= ATTRIBUTE_MANAGER->lightPoint			.getIterator();			\
+itrLightSpot		= ATTRIBUTE_MANAGER->lightSpot			.getIterator();			\
 itrMesh				= ATTRIBUTE_MANAGER->mesh				.getIterator();			\
 itrHealth			= ATTRIBUTE_MANAGER->health				.getIterator();			\
 itrDamage			= ATTRIBUTE_MANAGER->damage				.getIterator();			\

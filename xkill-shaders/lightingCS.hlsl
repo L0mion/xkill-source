@@ -1,5 +1,5 @@
 
-#include "structs.hlsl"
+#include "LightDesc.hlsl"
 #include "constantBuffers.hlsl"
 #include "lightFunctions.hlsl"
 
@@ -11,7 +11,9 @@ Texture2D gBufferNormal		: register( t0 );
 Texture2D gBufferAlbedo		: register( t1 );
 Texture2D gBufferMaterial	: register( t2 );
 
-StructuredBuffer<Light> lights : register( t3 );
+StructuredBuffer<LightDir>		lightsDir	: register( t3 );
+StructuredBuffer<LightPoint>	lightsPoint	: register( t4 );
+StructuredBuffer<LightSpot>		lightsSpot	: register( t5 );
 
 SamplerState ss : register(s0);
 
@@ -40,20 +42,21 @@ void lightingCS( uint3 threadID : SV_DispatchThreadID )
 	//Transform position from view space to world space.
 	position = mul(float4(position, 1.0f), viewInverse).xyz;
 	
-	float4 diffuse = float4(1.0f, 1.0f, 1.0f, 1.0f);
-	float4 specular = float4(0.1f, 0.1f, 0.1f, 1.0f);
-	SurfaceInfo surface = {position, normal, albedo, specular};
+	SurfaceInfo surface = 
+	{
+		position, 
+		normal, 
+		albedo,							//diffuse
+		float4(0.1f, 0.1f, 0.1f, 1.0f)	//specular
+	};
 	
 	float3 color = float3(0.0f, 0.0f, 0.0f);
-	for(unsigned int i=0; i<numLights; i++)
-	{
-		if(lights[i].type == LIGHT_TYPE_DIRECTIONAL)
-			color += directionalLight(surface, lights[i], eyePosition);
-		else if(lights[i].type == LIGHT_TYPE_POINT)
-			color += pointLight(surface, lights[i], eyePosition);
-		else if(lights[i].type == LIGHT_TYPE_SPOT)
-			color += spotLight(surface, lights[i], eyePosition);
-	}
+	for(unsigned int i = 0; i < numLightsDir; i++)
+		color += directionalLight(surface, eyePosition, lightsDir[i].ambient, lightsDir[i].diffuse, lightsDir[i].specular, lightsDir[i].direction);
+	for(i = 0; i < numLightsPoint; i++)
+		color += pointLight(surface, eyePosition, lightsPoint[i].ambient, lightsPoint[i].diffuse, lightsPoint[i].specular, lightsPoint[i].pos, lightsPoint[i].range, lightsPoint[i].attenuation);
+	for(i = 0; i < numLightsSpot; i++)
+		color += spotLight(surface, eyePosition, lightsSpot[i].ambient, lightsSpot[i].diffuse, lightsSpot[i].specular, lightsSpot[i].pos, lightsSpot[i].range, lightsSpot[i].direction, lightsSpot[i].spotPow, lightsSpot[i].attenuation);
 
 	output[uint2( threadID.x + viewportTopX, threadID.y + viewportTopY)] = float4(color, 1.0f);
 }

@@ -4,6 +4,26 @@
 
 #include "ManagementGBuffer.h"
 
+DXGI_FORMAT getFormat(GBUFFER_FORMAT format)
+{
+	DXGI_FORMAT dxgiFormat = DXGI_FORMAT::DXGI_FORMAT_UNKNOWN;
+
+	switch(format)
+	{
+	case R8_G8_B8_A8__UNORM:
+		dxgiFormat = DXGI_FORMAT::DXGI_FORMAT_R8G8B8A8_UNORM;
+		break;
+	case R16_G16_B16_A16__FLOAT:
+		dxgiFormat = DXGI_FORMAT::DXGI_FORMAT_R16G16B16A16_FLOAT;
+		break;
+	case R32_G32_B32_A32__FLOAT:
+		dxgiFormat = DXGI_FORMAT::DXGI_FORMAT_R32G32B32A32_FLOAT;
+		break;
+	}
+
+	return dxgiFormat;
+}
+
 ManagementGBuffer::ManagementGBuffer(Winfo* winfo)
 {
 	winfo_ = winfo;
@@ -58,7 +78,7 @@ HRESULT ManagementGBuffer::initAlbedo(ID3D11Device* device)
 		winfo_->getScreenWidth(),
 		winfo_->getScreenHeight(),
 		MULTISAMPLES_GBUFFERS, 
-		DXGI_FORMAT_R32G32B32A32_FLOAT);
+		getFormat(GBUFFER_FORMAT_ALBEDO));
 	hr = gBuffer->init(device);
 
 	gBuffers_[GBUFFERID_ALBEDO] = gBuffer;
@@ -74,7 +94,7 @@ HRESULT ManagementGBuffer::initNormal(ID3D11Device* device)
 		winfo_->getScreenWidth(), 
 		winfo_->getScreenHeight(), 
 		MULTISAMPLES_GBUFFERS, 
-		DXGI_FORMAT_R16G16B16A16_FLOAT);
+		getFormat(GBUFFER_FORMAT_NORMAL));
 	hr = gBuffer->init(device);
 
 	gBuffers_[GBUFFERID_NORMAL] = gBuffer;
@@ -90,7 +110,7 @@ HRESULT ManagementGBuffer::initMaterial(ID3D11Device* device)
 		winfo_->getScreenWidth(), 
 		winfo_->getScreenHeight(), 
 		MULTISAMPLES_GBUFFERS, 
-		DXGI_FORMAT_R32G32B32A32_FLOAT);
+		getFormat(GBUFFER_FORMAT_MATERIAL));
 	hr = gBuffer->init(device);
 	
 	gBuffers_[GBUFFERID_MATERIAL] = gBuffer;

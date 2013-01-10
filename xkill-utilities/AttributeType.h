@@ -3,7 +3,7 @@
 #include "dllUtilities.h"
 #include "AttributePointer.h"
 #include "Math.h"
-#include "LightStructs.h"
+#include "LightDesc.h"
 #include <string>
 
 
@@ -63,7 +63,10 @@ enum DLL_U AttributeType
 	ATTRIBUTE_BOUNDING,
 	ATTRIBUTE_MESH,
 	ATTRIBUTE_PROJECTILE,
-	ATTRIBUTE_LIGHT,
+	
+	ATTRIBUTE_LIGHT_DIRECTIONAL,
+	ATTRIBUTE_LIGHT_POINT,
+	ATTRIBUTE_LIGHT_SPOT,
 
 	ATTRIBUTE_HEALTH,
 	ATTRIBUTE_DAMAGE,
@@ -198,24 +201,50 @@ struct DLL_U Attribute_Projectile : public IAttribute
 	float explosionSphereRadius;
 };
 
-struct DLL_U Attribute_Light : public IAttribute
+//struct DLL_U Attribute_Light : public IAttribute
+//{
+//	Attribute_Light();
+//	~Attribute_Light(); //!< Does nothing.
+//
+//	LightType lightType; //!< Type of light: Directional, Point or Spot.
+//
+//	AttributePointer ptr_position; //!< Position of light.
+//
+//	Float3 direction;	//!< The lights direction.
+//	Float3 attenuation;	//!< How fast the light intensity will diminish
+//	
+//	Float4 ambient;		//!< The ambient color.
+//	Float4 diffuse;		//!< The diffuse color.
+//	Float4 specular;	//!< The specular color.
+//
+//	float range;		//!< How far the light can reach.
+//	float spotPower;	//!< Controls the spotlight cone.
+//};
+
+struct DLL_U Attribute_Light_Dir : public IAttribute
 {
-	Attribute_Light();
-	~Attribute_Light(); //!< Does nothing.
+	Attribute_Light_Dir();
+	~Attribute_Light_Dir();
 
-	LightType lightType; //!< Type of light: Directional, Point or Spot.
+	LightDescDir lightDir;
+};
+struct DLL_U Attribute_Light_Point : public IAttribute
+{
+	Attribute_Light_Point();
+	~Attribute_Light_Point();
 
-	AttributePointer ptr_position; //!< Position of light.
+	AttributePointer ptr_position;
 
-	Float3 direction;	//!< The lights direction.
-	Float3 attenuation;	//!< How fast the light intensity will diminish
+	LightDescPoint lightPoint;
+};
+struct DLL_U Attribute_Light_Spot : public IAttribute
+{
+	Attribute_Light_Spot();
+	~Attribute_Light_Spot();
 
-	Float4 ambient;		//!< The ambient color.
-	Float4 diffuse;		//!< The diffuse color.
-	Float4 specular;	//!< The specular color.
+	AttributePointer ptr_position;
 
-	float range;		//!< How far the light can reach.
-	float spotPower;	//!< Controls the spotlight cone.
+	LightDescSpot lightSpot;
 };
 
 struct DLL_U Attribute_Input : public IAttribute
