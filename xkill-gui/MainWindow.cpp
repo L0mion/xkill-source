@@ -12,6 +12,8 @@
 #include <fcntl.h>
 #include <Windows.h>
 
+#include "ui_MainWindow.h"
+
 MainWindow::MainWindow()
 {
 	// Create console
@@ -31,6 +33,7 @@ MainWindow::MainWindow()
 	QApplication::setStyle(new QCleanlooksStyle);
 	MainWindow::setWindowTitle("XKILL");
 	resize(800, 600);
+	QWidget::setAttribute(Qt::WA_PaintOnScreen);
 
 	// subscribe to events
 	SUBSCRIBE_TO_EVENT(this, EVENT_SHOW_MESSAGEBOX);
@@ -41,6 +44,7 @@ MainWindow::MainWindow()
 	setMouseTracking(true);
 	hasMouseLock = false;
 	menuManager = new MenuManager(this);
+	ui.dockWidget;
 
 	// setup signals and slots
 	connect(ui.actionFullscreen, SIGNAL(triggered()), this, SLOT(slot_toggleFullScreen()));
@@ -48,6 +52,8 @@ MainWindow::MainWindow()
 	ui.actionCap_FPS->setChecked(true);
 	connect(ui.actionQuit, SIGNAL(triggered()), this, SLOT(close()));
 	connect(gameWidget, SIGNAL(signal_fpsChanged(QString)), this, SLOT(slot_setTitle(QString)));
+
+	new Menu_Editor(ui, this);
 }
 
 MainWindow::~MainWindow()
@@ -101,6 +107,9 @@ void MainWindow::keyPressEvent( QKeyEvent* e )
 
 	if((e->key()==Qt::Key_F4) && (e->modifiers()==Qt::AltModifier))
 		MainWindow::close();
+
+	if((e->key()==Qt::Key_F1))
+		ui.dockWidget->toggleViewAction()->activate(QAction::Trigger);
 
 
 	//switch (e->key()) 
