@@ -185,11 +185,16 @@ void BulletPhysicsComponent::onUpdate(float delta)
 		{
 			// if the objects owner is 0 then remove it from simulation world
 			physicsObject->removeFromWorld(dynamicsWorld_);
+			physicsObject->activate();
 		}
 	}
 	
 	//When data have been tranferred from PhysicsAttributes to the internal representation
-	dynamicsWorld_->stepSimulation(delta,10);//Perform Bullet Physics simulation
+	/*
+	btDynamicsWorld::stepSimulation(btScalar timeStep, int maxSubSteps=1, btScalar fixedTimeStep=btScalar(1.)/btScalar(60.));
+	timeStep - time in seconds to step the simulation by
+	*/
+	dynamicsWorld_->stepSimulation(delta);//Perform Bullet Physics simulation
 
 	//Copy the physics simulation result to the physics attributes
 	for(unsigned int i = 0; i < static_cast<unsigned int>(physicsObjects_->size()); i++)
@@ -320,7 +325,6 @@ void BulletPhysicsComponent::tickCallback(btScalar timeStep)
 								render->culling.setBool(objectB->getIndex(),true);
 							}
 						}
-					
 					}
 					else
 					{
