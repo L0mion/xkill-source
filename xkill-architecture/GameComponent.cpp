@@ -458,11 +458,10 @@ void GameComponent::event_PhysicsAttributesColliding(Event_PhysicsAttributesColl
 				Attribute_Projectile* projectileAttribute = &allProjectile->at(projectileId.at(i));
 
 				//Shorten lifetime of projectile colliding with physics objects
-				//if(projectileAttribute->currentLifeTimeLeft > 0.2f)
-				//{
-				//	projectileAttribute->currentLifeTimeLeft = 0.15f;
-				//}
-				//HERE
+				if(projectileAttribute->currentLifeTimeLeft > 0.2f)
+				{
+					projectileAttribute->currentLifeTimeLeft = 0.15f;
+				}
 
 				//Explosion handling.
 				if(projectileAttribute->explodeOnImnpact)
