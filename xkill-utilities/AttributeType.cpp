@@ -136,6 +136,14 @@ Attribute_Input::Attribute_Input()
 Attribute_Input::~Attribute_Input()
 {
 }
+
+Attribute_InputDevice::Attribute_InputDevice()
+{
+}
+Attribute_InputDevice::~Attribute_InputDevice()
+{
+}
+
 Attribute_Player::Attribute_Player()
 {
 	id = -1;

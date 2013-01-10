@@ -12,6 +12,7 @@ AttributeManager::AttributeManager()
 	physics			.init	(ATTRIBUTE_PHYSICS);
 	camera			.init	(ATTRIBUTE_CAMERA);
 	input			.init	(ATTRIBUTE_INPUT);
+	input			.init	(ATTRIBUTE_INPUTDEVICE);
 	player			.init	(ATTRIBUTE_PLAYER);
 	bounding		.init	(ATTRIBUTE_BOUNDING);
 	projectile		.init	(ATTRIBUTE_PROJECTILE);

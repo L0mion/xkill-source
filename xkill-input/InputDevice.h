@@ -1,5 +1,7 @@
 #pragma once
 
+#include <xkill-utilities/AttributeType.h>
+
 #include <vector>
 
 #include <InitGuid.h>
@@ -10,6 +12,7 @@ class InputButtonObject;
 class InputTriggerObject;
 
 class KeyMapper;
+class InputObjectArray;
 
 #include "InputActions.h"
 
@@ -114,7 +117,8 @@ protected:
 	std::vector<InputButtonObject*> buttons_;
 	std::vector<InputTriggerObject*> triggers_;
 
-	std::vector<InputObject*> inputObjects_;
+	//std::vector<InputObject*> inputObjects_;
+	InputObjectArray* inputObjectArray_;
 
 	std::vector<std::vector<int>> floatObjects_;
 	std::vector<std::vector<int>> boolObjects_;

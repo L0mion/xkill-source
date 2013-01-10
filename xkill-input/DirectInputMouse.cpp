@@ -4,6 +4,8 @@
 #include "InputAxisObject.h"
 #include "InputTriggerObject.h"
 
+#include "InputObjectArray.h"
+
 DirectInputMouse::DirectInputMouse(LPDIRECTINPUTDEVICE8 device, GUID deviceGUID, std::string name, unsigned int playerID) : 
 	DirectInputDevice(device, deviceGUID, name, playerID)
 {
@@ -79,20 +81,20 @@ void DirectInputMouse::createInputObjectsFromLayout()
 	{
 		InputAxisObject* axis = new InputAxisObject(-0xFF, 0xFF);
 		axes_.push_back(axis);
-		inputObjects_.push_back(axis);
+		inputObjectArray_->inputObjects.push_back(axis);
 	}
 	
 	for(int i = 0; i < inputLayout_.nrOfButtons; i++)
 	{
 		InputButtonObject* button = new InputButtonObject(i);
 		buttons_.push_back(button);
-		inputObjects_.push_back(button);
+		inputObjectArray_->inputObjects.push_back(button);
 	}
 
 	for(int i = 0; i < inputLayout_.nrOfTriggers; i++)
 	{
 		InputTriggerObject* trigger = new InputTriggerObject(0, 0xFF);
 		triggers_.push_back(trigger);
-		inputObjects_.push_back(trigger);
+		inputObjectArray_->inputObjects.push_back(trigger);
 	}
 }

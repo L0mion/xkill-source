@@ -1,10 +1,14 @@
 #include "InputDevice.h"
 
+#include "InputObjectArray.h"
+
 #include "InputButtonObject.h"
 #include "InputAxisObject.h"
 #include "InputTriggerObject.h"
 
 #include "KeyMapper.h"
+
+#include <xkill-utilities/AttributeManager.h>
 
 #include "Converter.h"
 
@@ -14,16 +18,18 @@ InputDevice::InputDevice(GUID deviceGUID, std::string name, unsigned int playerI
 	name_ = name;
 	playerID_ = playerID;
 
+	inputObjectArray_ = new InputObjectArray();
+
 	createObjectVectors();
 }
 
 InputDevice::~InputDevice()
 {
-	std::vector<InputObject*>::iterator it = inputObjects_.begin();
-	for(; it != inputObjects_.end(); it++)
+	std::vector<InputObject*>::iterator it = inputObjectArray_->inputObjects.begin();
+	for(; it != inputObjectArray_->inputObjects.end(); it++)
 		SAFE_DELETE(*it);
 
-	inputObjects_.clear();
+	inputObjectArray_->inputObjects.clear();
 
 	axes_.clear();
 	buttons_.clear();
@@ -64,10 +70,10 @@ float InputDevice::getFloatValue(int mapping, bool useSensitivity)
 	for(unsigned int i = 0; i < floatObjects_[mapping].size(); i++)
 	{
 		index = floatObjects_[mapping][i];
-		value = inputObjects_[index]->getValueFloat();
+		value = inputObjectArray_->inputObjects[index]->getValueFloat();
 
 		if(useSensitivity)
-			value *= inputObjects_[index]->getSensitivity();
+			value *= inputObjectArray_->inputObjects[index]->getSensitivity();
 
 		if(std::abs(value) > maxValue)
 		{
@@ -81,7 +87,7 @@ float InputDevice::getFloatValue(int mapping, bool useSensitivity)
 bool InputDevice::getBoolValue(int mapping)
 {
 	for(unsigned int i = 0; i < boolObjects_[mapping].size(); i++)
-		if(inputObjects_[boolObjects_[mapping][i]]->getValueBool())
+		if(inputObjectArray_->inputObjects[boolObjects_[mapping][i]]->getValueBool())
 			return true;
 
 	return false;
@@ -90,7 +96,7 @@ bool InputDevice::getBoolValue(int mapping)
 bool InputDevice::getBoolReleased(int mapping)
 {
 	for(unsigned int i = 0; i < boolObjects_[mapping].size(); i++)
-		if(inputObjects_[boolObjects_[mapping][i]]->getValueBoolReleased())
+		if(inputObjectArray_->inputObjects[boolObjects_[mapping][i]]->getValueBoolReleased())
 			return true;
 
 	return false;
@@ -132,9 +138,9 @@ void InputDevice::createObjectVectors()
 	{
 		boolObjects_.push_back(std::vector<int>());
 
-		for(unsigned int j = 0; j < inputObjects_.size(); j++)
+		for(unsigned int j = 0; j < inputObjectArray_->inputObjects.size(); j++)
 		{
-			if(inputObjects_[j]->hasBoolMapping(i))
+			if(inputObjectArray_->inputObjects[j]->hasBoolMapping(i))
 			{
 				boolObjects_[i].push_back(j);
 			}
@@ -147,9 +153,9 @@ void InputDevice::createObjectVectors()
 	{
 		floatObjects_.push_back(std::vector<int>());
 
-		for(unsigned int j = 0; j < inputObjects_.size(); j++)
+		for(unsigned int j = 0; j < inputObjectArray_->inputObjects.size(); j++)
 		{
-			if(inputObjects_[j]->hasFloatMapping(i))
+			if(inputObjectArray_->inputObjects[j]->hasFloatMapping(i))
 			{
 				floatObjects_[i].push_back(j);
 			}
