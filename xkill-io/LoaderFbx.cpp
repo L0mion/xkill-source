@@ -4,7 +4,7 @@
 #include <xkill-utilities/MeshVertices.h>
 
 #include "LoaderFbx.h"
-
+#include "MaterialDescFbx.h"
 
 LoaderFbx::LoaderFbx()
 {
@@ -302,6 +302,8 @@ void LoaderFbx::parseVertexBinormals(FbxMesh* mesh, int vertexId)
 
 void LoaderFbx::parseMaterial(FbxGeometry* geometry)
 {
+	MaterialDescFbx materialDesc;
+
 	int numMaterials = 0;
 	FbxNode* node = NULL;
 	if(geometry)
@@ -313,12 +315,16 @@ void LoaderFbx::parseMaterial(FbxGeometry* geometry)
 	if(numMaterials > 0)
 	{
 		FbxColor					color;
-		FbxPropertyT<FbxDouble3>	KFbxDouble3;
-		FbxPropertyT<FbxDouble>		KFbxDouble;
+		FbxPropertyT<FbxDouble3>	kFbxDouble3;
+		FbxPropertyT<FbxDouble>		kFbxDouble;
 		
 		for(int materialIndex=0; materialIndex<numMaterials; materialIndex++)
 		{
 			FbxSurfaceMaterial* material = node->GetMaterial(materialIndex);
+			
+			FbxString name = material->GetName();
+			printf("Material:  %s \n", name.Buffer());
+			
 			const FbxImplementation* implementation = GetImplementation(material, FBXSDK_IMPLEMENTATION_HLSL);
 			FbxString implementationType = "HLHL";
 			if(!implementation)
@@ -327,40 +333,224 @@ void LoaderFbx::parseMaterial(FbxGeometry* geometry)
 				implementationType = "CGFX";
 			}
 			if(implementation)
+				parseMaterialImplementation(material, implementation, materialIndex, &materialDesc);
+			else if(material->GetClassId().Is(fbxsdk_2013_3::FbxSurfacePhong::ClassId))
+				parseMaterialPhong(material, materialIndex, &materialDesc);
+			else if(material->GetClassId().Is(FbxSurfaceLambert::ClassId))
+				parseMaterialLambert(material, materialIndex, &materialDesc);
+			else
+				parseMaterialUnknown();
+		}
+	}
+}
+void LoaderFbx::parseMaterialImplementation(FbxSurfaceMaterial* material, const FbxImplementation* implementation, int materialIndex, MaterialDescFbx* materialDesc)
+{
+	FbxBindingTable const* rootTable = implementation->GetRootTable();
+	FbxString fileName = rootTable->DescAbsoluteURL.Get();
+	FbxString techniqueName = rootTable->DescTAG.Get();
+
+	FbxBindingTable const* table = implementation->GetRootTable();
+	size_t entryNum = table->GetEntryCount();
+
+	for(int entryIndex=0; entryIndex<(int)entryNum; entryIndex++)
+	{
+		const FbxBindingTableEntry& entry = table->GetEntry(entryIndex);
+		const char* entrySrcType = entry.GetEntryType(true);
+		FbxProperty fbxProperty;
+
+		FbxString test = entry.GetSource();
+		printf("Entry: %s \n", test.Buffer());
+
+		if(strcmp(FbxPropertyEntryView::sEntryType, entrySrcType) == 0)
+		{
+			fbxProperty = material->FindPropertyHierarchical(entry.GetSource());
+			if(!fbxProperty.IsValid())
+					fbxProperty = material->RootProperty.FindHierarchical(entry.GetSource());
+		}
+		else if(strcmp(FbxConstantEntryView::sEntryType, entrySrcType) == 0)
+		{
+			fbxProperty = implementation->GetConstants().FindHierarchical(entry.GetSource());
+		}
+
+		if(fbxProperty.IsValid())
+		{
+			if(fbxProperty.GetSrcObjectCount<FbxTexture>() > 0)
 			{
-				FbxBindingTable const* rootTable = implementation->GetRootTable();
-				FbxString fileName = rootTable->DescAbsoluteURL.Get();
-				FbxString techniqueName = rootTable->DescTAG.Get();
-
-				FbxBindingTable const* table = implementation->GetRootTable();
-				size_t entryNum = table->GetEntryCount();
-
-				for(int i=0; i<(int)entryNum; i++)
-				{
-					const FbxBindingTableEntry& entry = table->GetEntry(i);
-					const char* entrySrcType = entry.GetEntryType(true);
-					FbxProperty fbxProperty;
-
-					FbxString test = entry.GetSource();
-					printf("Entry: %s \n", test.Buffer());
-				}
+				for(int i=0; i<fbxProperty.GetSrcObjectCount<FbxFileTexture>(); i++)
+					materialDesc->addFbxFileTexture(fbxProperty.GetSrcObject<FbxFileTexture>(i));
+				
+				for(int i=0; i<fbxProperty.GetSrcObjectCount<FbxLayeredTexture>(); i++)
+					materialDesc->addFbxLayeredTexture(fbxProperty.GetSrcObject<FbxLayeredTexture>(i));
+				
+				for(int i=0; i<fbxProperty.GetSrcObjectCount<FbxProceduralTexture>(); i++)
+					materialDesc->addFbxProceduralTexture(fbxProperty.GetSrcObject<FbxProceduralTexture>(i));
 			}
-
-
-			//else if(material->GetClassId().Is(fbxsdk_2013_3::FbxSurfacePhong::ClassId))
-			//{
-			//	int debug = 1;
-			//}
-			//else if(material->GetClassId().Is(FbxSurfaceLambert::ClassId))
-			//{
-			//	int debug = 1;
-			//}
 			else
 			{
-				int debug = 1;
+				FbxDataType fbxType = fbxProperty.GetPropertyDataType();
+				
+				/*************************************************************
+				 *In the SDK example they extract various data types from the*
+				 *property object here without saying what they mean and thus*
+				 *I don't know what to do with it							 *
+				 *************************************************************/ 
 			}
 		}
 	}
+}
+void LoaderFbx::parseMaterialPhong(FbxSurfaceMaterial* material, int materialIndex, MaterialDescFbx* materialDesc)
+{
+	extractPhongAmbient(material, materialDesc);
+	extractPhongDiffuse(material, materialDesc);
+	extractPhongSpecular(material, materialDesc);
+	extractPhongEmissive(material, materialDesc);
+	extractPhongOpacity(material, materialDesc);
+	extractPhongShininess(material, materialDesc);
+	extractPhongReflectivity(material, materialDesc);
+}
+void LoaderFbx::parseMaterialLambert(FbxSurfaceMaterial* material, int materialIndex, MaterialDescFbx* materialDesc)
+{
+	extractLambertAmbient(material, materialDesc);
+	extractLambertDiffuse(material, materialDesc);
+	extractLambertEmissive(material, materialDesc);
+	extractLambertOpacity(material, materialDesc);
+}
+void LoaderFbx::parseMaterialUnknown()
+{
+}
+
+void LoaderFbx::extractPhongAmbient(FbxSurfaceMaterial* material, MaterialDescFbx* materialDesc)
+{
+	FbxPropertyT<FbxDouble3> fbxAmbient;
+
+	const char* debug = static_cast<FbxSurfacePhong*>(material)->sAmbient;
+	printf("sAmbient: %s\n", debug); 
+
+	fbxAmbient = static_cast<FbxSurfacePhong*>(material)->Ambient;
+	Float3 ambient;
+	ambient.x = static_cast<float>(fbxAmbient.Get()[0]);
+	ambient.y = static_cast<float>(fbxAmbient.Get()[1]);
+	ambient.z = static_cast<float>(fbxAmbient.Get()[2]);
+
+	materialDesc->setAmbient(ambient);
+}
+void LoaderFbx::extractPhongDiffuse(FbxSurfaceMaterial* material, MaterialDescFbx* materialDesc)
+{
+	FbxPropertyT<FbxDouble3> fbxDiffuse;
+	fbxDiffuse = static_cast<FbxSurfacePhong*>(material)->Diffuse;
+	Float3 diffuse;
+	diffuse.x = static_cast<float>(fbxDiffuse.Get()[0]);
+	diffuse.y = static_cast<float>(fbxDiffuse.Get()[1]);
+	diffuse.z = static_cast<float>(fbxDiffuse.Get()[2]);
+	materialDesc->setDiffuse(diffuse);
+}
+void LoaderFbx::extractPhongSpecular(FbxSurfaceMaterial* material, MaterialDescFbx* materialDesc)
+{
+	FbxPropertyT<FbxDouble3> fbxSpecular;
+	fbxSpecular = static_cast<FbxSurfacePhong*>(material)->Specular;
+	Float3 specular;
+	specular.x = static_cast<float>(fbxSpecular.Get()[0]);
+	specular.y = static_cast<float>(fbxSpecular.Get()[1]);
+	specular.z = static_cast<float>(fbxSpecular.Get()[2]);
+	materialDesc->setSpecular(specular);
+}
+void LoaderFbx::extractPhongEmissive(FbxSurfaceMaterial* material, MaterialDescFbx* materialDesc)
+{
+	FbxPropertyT<FbxDouble3> fbxEmissive;
+	fbxEmissive = static_cast<FbxSurfacePhong*>(material)->Emissive;
+	Float3 emissive;
+	emissive.x = static_cast<float>(fbxEmissive.Get()[0]);
+	emissive.y = static_cast<float>(fbxEmissive.Get()[1]);
+	emissive.z = static_cast<float>(fbxEmissive.Get()[2]);
+	materialDesc->setEmissive(emissive);
+}
+void LoaderFbx::extractPhongOpacity(FbxSurfaceMaterial* material, MaterialDescFbx* materialDesc)
+{
+	FbxPropertyT<FbxDouble> fbxOpacity;
+	fbxOpacity = static_cast<FbxSurfacePhong*>(material)->TransparencyFactor;
+	float opacity = static_cast<float>(fbxOpacity.Get());
+	materialDesc->setOpacity(opacity);
+}
+void LoaderFbx::extractPhongShininess(FbxSurfaceMaterial* material, MaterialDescFbx* materialDesc)
+{
+	FbxPropertyT<FbxDouble> fbxShininess;
+	fbxShininess = static_cast<FbxSurfacePhong*>(material)->Shininess;
+	float shininess = static_cast<float>(fbxShininess.Get());
+	materialDesc->setShininess(shininess);
+}
+void LoaderFbx::extractPhongReflectivity(FbxSurfaceMaterial* material, MaterialDescFbx* materialDesc)
+{
+	FbxPropertyT<FbxDouble> fbxReflectivity;
+	fbxReflectivity = static_cast<FbxSurfacePhong*>(material)->ReflectionFactor;
+	float reflectivity = static_cast<float>(fbxReflectivity.Get());
+	materialDesc->setReflectivity(reflectivity);
+}
+
+void LoaderFbx::extractLambertAmbient(FbxSurfaceMaterial* material, MaterialDescFbx* materialDesc)
+{
+	FbxPropertyT<FbxDouble3> fbxAmbient;
+	fbxAmbient = static_cast<FbxSurfaceLambert*>(material)->Ambient;
+	Float3 ambient;
+	ambient.x = static_cast<float>(fbxAmbient.Get()[0]);
+	ambient.y = static_cast<float>(fbxAmbient.Get()[1]);
+	ambient.z = static_cast<float>(fbxAmbient.Get()[2]);
+	materialDesc->setAmbient(ambient);
+}
+void LoaderFbx::extractLambertDiffuse(FbxSurfaceMaterial* material, MaterialDescFbx* materialDesc)
+{
+	FbxPropertyT<FbxDouble3> fbxDiffuse;
+	fbxDiffuse = static_cast<FbxSurfaceLambert*>(material)->Diffuse;
+	Float3 diffuse;
+	diffuse.x = static_cast<float>(fbxDiffuse.Get()[0]);
+	diffuse.y = static_cast<float>(fbxDiffuse.Get()[1]);
+	diffuse.z = static_cast<float>(fbxDiffuse.Get()[2]);
+	materialDesc->setDiffuse(diffuse);
+}
+void LoaderFbx::extractLambertEmissive(FbxSurfaceMaterial* material, MaterialDescFbx* materialDesc)
+{
+	FbxPropertyT<FbxDouble3> fbxEmissive;
+	fbxEmissive = static_cast<FbxSurfaceLambert*>(material)->Emissive;
+	Float3 emissive;
+	emissive.x = static_cast<float>(fbxEmissive.Get()[0]);
+	emissive.y = static_cast<float>(fbxEmissive.Get()[1]);
+	emissive.z = static_cast<float>(fbxEmissive.Get()[2]);
+	materialDesc->setEmissive(emissive);
+}
+void LoaderFbx::extractLambertOpacity(FbxSurfaceMaterial* material, MaterialDescFbx* materialDesc)
+{
+	FbxPropertyT<FbxDouble> fbxOpacity;
+	fbxOpacity = static_cast<FbxSurfaceLambert*>(material)->TransparencyFactor;
+	float opacity = static_cast<float>(fbxOpacity.Get());
+	materialDesc->setOpacity(opacity);
+}
+
+void LoaderFbx::parseAnimation(FbxScene* scene)
+{
+	for(int i=0; i<scene->GetSrcObjectCount<FbxAnimStack>(); i++)
+	{
+		FbxAnimStack* animStack = scene->GetSrcObject<FbxAnimStack>(i);
+	
+		parseAnimationStack(animStack, scene->GetRootNode(), true);
+		parseAnimationStack(animStack, scene->GetRootNode(), false);
+	}
+}
+void LoaderFbx::parseAnimationStack(FbxAnimStack* animStack, FbxNode* node, bool isSwitcher)
+{
+	int numAnimationLayers = animStack->GetMemberCount<FbxAnimLayer>();
+	
+	for(int i=0; i<numAnimationLayers; i++)
+	{
+		FbxAnimLayer* animLayer = animStack->GetMember<FbxAnimLayer>(i);
+		parseAnimationLayer(animLayer, node, isSwitcher);
+	}
+}
+void LoaderFbx::parseAnimationLayer(FbxAnimLayer* animLayer, FbxNode* node, bool isSwitcher)
+{
+
+}
+void LoaderFbx::parseAnimationChannels(FbxNode* node, FbxAnimLayer* animLayer, bool isSwitcher)
+{
+
 }
 
 void LoaderFbx::clearPreviousGeometryData()
@@ -450,6 +640,8 @@ std::vector<VertexPosNormTex> LoaderFbx::getVerticesPosNormTex()
 {
 	return verticesPosNormTex_;
 }
+
+
 
 //FbxVector4 fbxNormal;
 //int id;

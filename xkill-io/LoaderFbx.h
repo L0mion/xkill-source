@@ -7,10 +7,9 @@
 #include <fbxsdk.h>
 #include <fbxsdk/fbxsdk_compatibility.h>
 
-#define FBXSDK_NEW_API
-
 static const unsigned int POLYGON_SIZE = 3;
 
+class MaterialDescFbx;
 struct VertexPosNormTex;
 
 class LoaderFbx
@@ -41,6 +40,28 @@ private:
 	void parseVertexBinormals(FbxMesh* mesh, int vertexId);
 
 	void parseMaterial(FbxGeometry* geometry);
+	void parseMaterialImplementation(FbxSurfaceMaterial* material, const FbxImplementation* implementation, int materialIndex, MaterialDescFbx* materialDesc);
+	void parseMaterialPhong(FbxSurfaceMaterial* material, int materialIndex, MaterialDescFbx* materialDesc);
+	void parseMaterialLambert(FbxSurfaceMaterial* material, int materialIndex, MaterialDescFbx* materialDesc);
+	void parseMaterialUnknown();
+
+	void extractPhongAmbient(FbxSurfaceMaterial* material, MaterialDescFbx* materialDesc);
+	void extractPhongDiffuse(FbxSurfaceMaterial* material, MaterialDescFbx* materialDesc);
+	void extractPhongSpecular(FbxSurfaceMaterial* material, MaterialDescFbx* materialDesc);
+	void extractPhongEmissive(FbxSurfaceMaterial* material, MaterialDescFbx* materialDesc);
+	void extractPhongOpacity(FbxSurfaceMaterial* material, MaterialDescFbx* materialDesc);
+	void extractPhongShininess(FbxSurfaceMaterial* material, MaterialDescFbx* materialDesc);
+	void extractPhongReflectivity(FbxSurfaceMaterial* material, MaterialDescFbx* materialDesc);
+
+	void extractLambertAmbient(FbxSurfaceMaterial* material, MaterialDescFbx* materialDesc);
+	void extractLambertDiffuse(FbxSurfaceMaterial* material, MaterialDescFbx* materialDesc);
+	void extractLambertEmissive(FbxSurfaceMaterial* material, MaterialDescFbx* materialDesc);
+	void extractLambertOpacity(FbxSurfaceMaterial* material, MaterialDescFbx* materialDesc);
+
+	void parseAnimation(FbxScene* scene);
+	void parseAnimationStack(FbxAnimStack* animStack, FbxNode* node, bool isSwitcher);
+	void parseAnimationLayer(FbxAnimLayer* animLayer, FbxNode* node, bool isSwitcher);
+	void parseAnimationChannels(FbxNode* node, FbxAnimLayer* animLayer, bool isSwitcher);
 
 	void clearPreviousGeometryData();
 
