@@ -9,7 +9,7 @@ ATTRIBUTES_DECLARE_ALL;
 
 ManagementLight::ManagementLight()
 {
-	maxNumLights_	= 1;
+	maxNumLights_	= 5;
 	curNumLights_	= 0;
 
 	//numLights_		= 0;

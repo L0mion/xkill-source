@@ -36,7 +36,6 @@ class btAlignedObjectArray;
 
 class CollisionShapeManager;
 
-
 //! Physics Component of XKILL.
 /*!
 The physics component of XKILL, implements BulletPhysics to simulate the world.

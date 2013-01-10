@@ -61,10 +61,12 @@ public:
 	//! Initialize rigidbody from physicsAttribute and add object to simulation
 	/*! 
 	\param physicsAttribute The physics attribute which contain object data
-	\param dynamicsWorld The simulation object, used to add the object to the simulation 
+	\param dynamicsWorld The simulation object, used to add the object to the simulation
+	\param collisionFilterGroup The collision group this btRigidBody belongs to
+	\param collisionFilterMask The collision accepted by this btRigidBody
 	\sa preStep
 	*/
-	void addToWorld(btDiscreteDynamicsWorld* dynamicsWorld);
+	void addToWorld(btDiscreteDynamicsWorld* dynamicsWorld, short int collisionFilterGroup, short int collisionFilterMask);
 	//! Remove the rigidbody from the simulation but do not delete the rigidbody or the object
 	/*! 
 	\param dynamicsWorld The simulation object, used to the the object from the simulation 

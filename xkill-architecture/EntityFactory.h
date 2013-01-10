@@ -67,6 +67,8 @@ public:
 		CONNECT_ATTRIBUTES(physics, spatial);
 		CONNECT_ATTRIBUTES(physics, render);
 		physics->meshID = render->meshID;
+		physics->collisionFilterGroup = Attribute_Physics::PLAYER;
+		physics->collisionFilterMask = Attribute_Physics::EVERYTHING;
 		
 		CREATE_ATTRIBUTE(Attribute_Input, input, entity);
 		CONNECT_ATTRIBUTES(input, physics);
@@ -110,7 +112,8 @@ public:
 		CONNECT_ATTRIBUTES(physics, spatial);
 		CONNECT_ATTRIBUTES(physics, render);
 		physics->meshID = render->meshID;
-		
+		physics->collisionFilterGroup = Attribute_Physics::WORLD;
+		physics->collisionFilterMask = Attribute_Physics::PLAYER | Attribute_Physics::PROJECTILE;
 		physics->mass = 0;
 				
 		HACKHACK+=2;
@@ -149,12 +152,12 @@ public:
 		debugShape->render	= false;
 
 		CREATE_ATTRIBUTE(Attribute_Physics, physics, entity);
+		physics->collisionFilterGroup = Attribute_Physics::PROJECTILE;
+		physics->collisionFilterMask = Attribute_Physics::WORLD | Attribute_Physics::PLAYER;
 		CONNECT_ATTRIBUTES(physics, spatial);
 		CONNECT_ATTRIBUTES(physics, render);
 		physics->meshID = render->meshID;
-		//physics->isExplosionSphere = false; //CHECK
 		
-		physics->isProjectile = true;
 		physics->linearVelocity = e->velocity;
 		physics->mass = 100.0f;
 		physics->gravity = Float3(0.0f, 0.0f, 0.0f);
@@ -204,8 +207,9 @@ public:
 		debugShape->render	= true;
 
 		CREATE_ATTRIBUTE(Attribute_Physics, physics, entity);
+		physics->collisionFilterGroup = Attribute_Physics::EXPLOSIONSPHERE;
+		physics->collisionFilterMask = Attribute_Physics::PLAYER;
 		CONNECT_ATTRIBUTES(physics, spatial);
-		physics->isExplosionSphere = true;
 		physics->explosionSphereRadius = e->radius;
 		physics->collisionResponse = false;
 		physics->mass = 0.0f;

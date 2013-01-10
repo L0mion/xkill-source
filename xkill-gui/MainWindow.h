@@ -6,7 +6,7 @@
 #include <xkill-utilities/IObserver.h>
 #include <xkill-utilities/EventManager.h>
 #include "ui_MainWindow.h"
- #include <QtGui/QApplication>
+#include <QtGui/QApplication>
 #include "GameWidget.h"
 #include "MenuManager.h"
 
