@@ -258,8 +258,8 @@ HRESULT ManagementLight::initLightSpotSRV(ID3D11Device* device)
 void ManagementLight::update(ID3D11Device* device, ID3D11DeviceContext* devcon)
 {
 	updateLightDir(device, devcon);
-	//updateLightPoint(device, devcon);
-	//updateLightSpot(device, devcon);
+	updateLightPoint(device, devcon);
+	updateLightSpot(device, devcon);
 }
 
 void ManagementLight::setLightSRVCS(
