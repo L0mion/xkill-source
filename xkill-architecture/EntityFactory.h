@@ -78,6 +78,9 @@ public:
 		CREATE_ATTRIBUTE(Attribute_Camera, camera, entity);
 		CONNECT_ATTRIBUTES(camera, spatial);
 
+		CREATE_ATTRIBUTE(Attribute_SplitScreen, splitScreen, entity);
+		CONNECT_ATTRIBUTES(splitScreen, camera);
+
 		CREATE_ATTRIBUTE(Attribute_Health, health, entity);
 
 		CREATE_ATTRIBUTE(Attribute_WeaponStats, weaponStats, entity);

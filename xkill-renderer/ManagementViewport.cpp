@@ -1,6 +1,11 @@
+#include <xkill-utilities/EventManager.h>
+#include <xkill-utilities/AttributeType.h>
+
 #include "Winfo.h"
 #include "ManagementViewport.h"
 #include "renderingUtilities.h"
+
+ATTRIBUTES_DECLARE_ALL;
 
 ManagementViewport::ManagementViewport(Winfo* winfo)
 {
@@ -10,31 +15,35 @@ ManagementViewport::ManagementViewport(Winfo* winfo)
 	viewportHeight_ = 0;
 
 	borderSize_ = 2;
+
+	splitScreenViewports_ = nullptr;
+
+	ATTRIBUTES_INIT_ALL;
 }
 ManagementViewport::~ManagementViewport()
 {
-	SAFE_DELETE(viewports_);
+	SAFE_DELETE(splitScreenViewports_);
 }
 
 void ManagementViewport::reset()
 {
-	SAFE_DELETE(viewports_);
+	SAFE_DELETE(splitScreenViewports_);
 }
 
-void ManagementViewport::setViewport(ID3D11DeviceContext* devcon, unsigned int index)
+void ManagementViewport::setViewport(ID3D11DeviceContext* devcon, unsigned int splitScreenViewportIndex)
 {
-	devcon->RSSetViewports(1, &viewports_->at(index));
+	devcon->RSSetViewports(1, &splitScreenViewports_->at(splitScreenViewportIndex).viewport);
 
-	D3D11_VIEWPORT debug;
-	UINT numDebugs = 1;
-	devcon->RSGetViewports(&numDebugs, &debug);
+	//D3D11_VIEWPORT debug;
+	//UINT numDebugs = 1;
+	//devcon->RSGetViewports(&numDebugs, &debug);
 }
 
 HRESULT ManagementViewport::resize()
 {
 	HRESULT hr = S_OK;
 
-	SAFE_DELETE(viewports_);
+	SAFE_DELETE(splitScreenViewports_);
 	hr = init();
 
 	return hr;
@@ -42,12 +51,13 @@ HRESULT ManagementViewport::resize()
 
 HRESULT ManagementViewport::init()
 {
-	viewports_ = new std::vector<D3D11_VIEWPORT>();
+	splitScreenViewports_ = new std::vector<SplitScreenViewport>();
 
 	unsigned int gridSizes[] = {1, 2, 4, 9, 16, 25, 36, 49, 64, 81, 100 };
 	unsigned int gridSize = 0;
 	unsigned int index = 0;
 	HRESULT hr = E_FAIL;
+
 	while(FAILED(hr) && index<11)
 	{
 		if(winfo_->getNumViewports() <= gridSizes[index])
@@ -74,53 +84,92 @@ HRESULT ManagementViewport::init()
 HRESULT ManagementViewport::initViewportSingle()
 {
 	HRESULT hr = S_OK;
-	
-	viewportWidth_	= winfo_->getScreenWidth();
-	viewportHeight_ = winfo_->getScreenHeight();
 
-	D3D11_VIEWPORT viewport;
-	ZeroMemory(&viewport, sizeof(D3D11_VIEWPORT));
-	
-	viewport.TopLeftX	= 0;
-	viewport.TopLeftY	= 0;
-	viewport.Width		= static_cast<FLOAT>(viewportWidth_);
-	viewport.Height		= static_cast<FLOAT>(viewportHeight_);
-	viewport.MinDepth	= 0;
-	viewport.MaxDepth	= 1;
+	if(itrSplitScreen.hasNext())
+	{
+		SplitScreenViewport ssViewport;
+		ssViewport.ssAt = itrSplitScreen.getNext(); 
 
-	viewports_->push_back(viewport);
+		viewportWidth_	= winfo_->getScreenWidth();
+		viewportHeight_ = winfo_->getScreenHeight();
 
-	numViewportsX_ = 1;
-	numViewportsY_ = 1;
+		D3D11_VIEWPORT viewport;
+		ZeroMemory(&viewport, sizeof(D3D11_VIEWPORT));
+		viewport.TopLeftX	= 0;
+		viewport.TopLeftY	= 0;
+		viewport.Width		= static_cast<FLOAT>(viewportWidth_);
+		viewport.Height		= static_cast<FLOAT>(viewportHeight_);
+		viewport.MinDepth	= 0;
+		viewport.MaxDepth	= 1;
+		ssViewport.viewport = viewport;
+
+		splitScreenViewports_->push_back(ssViewport);
+
+		numViewportsX_ = 1;
+		numViewportsY_ = 1;
+
+		//Init Split-screen attribute
+		ssViewport.ssAt->ssWidth	= viewportWidth_;
+		ssViewport.ssAt->ssHeight	= viewportHeight_;
+
+		ssViewport.ssAt->ssTopLeftX = 0;
+		ssViewport.ssAt->ssTopLeftY = 0;
+	}
+	itrSplitScreen.resetIndex();
 
 	return hr;
 }
 HRESULT ManagementViewport::initViewportDouble()
 {
-	HRESULT hr = S_OK;
+	HRESULT hr = S_FALSE;
 
 	viewportWidth_	= winfo_->getScreenWidth();
 	viewportHeight_ = winfo_->getScreenHeight() / 2;
 
-	D3D11_VIEWPORT viewport;
-	ZeroMemory(&viewport, sizeof(D3D11_VIEWPORT));
-	
-	viewport.TopLeftX	= 0;
-	viewport.TopLeftY	= 0;
-	viewport.Width		= static_cast<FLOAT>(viewportWidth_);
-	viewport.Height		= static_cast<FLOAT>(viewportHeight_)-borderSize_;
-	viewport.MinDepth	= 0;
-	viewport.MaxDepth	= 1;
+	unsigned int ssCount = 0;
+	while(itrSplitScreen.hasNext() && ssCount < 2)
+	{
+		SplitScreenViewport ssViewport;
+		ssViewport.ssAt = itrSplitScreen.getNext();
 
-	viewports_->push_back(viewport);
+		D3D11_VIEWPORT viewport;
+		ZeroMemory(&viewport, sizeof(D3D11_VIEWPORT));
+		viewport.Width		= static_cast<FLOAT>(viewportWidth_);
+		viewport.Height		= static_cast<FLOAT>(viewportHeight_)-borderSize_;
+		viewport.MinDepth	= 0;
+		viewport.MaxDepth	= 1;
 
-	viewport.TopLeftX	= 0;
-	viewport.TopLeftY	= static_cast<FLOAT>(viewportHeight_)+borderSize_;
+		switch (ssCount)
+		{
+		case 0:
+			viewport.TopLeftX	= 0;
+			viewport.TopLeftY	= 0;
+			break;
+		case 1:
+			viewport.TopLeftX	= 0;
+			viewport.TopLeftY	= static_cast<FLOAT>(viewportHeight_)+borderSize_;
+			break;
+		}
+		ssViewport.viewport = viewport;
+		splitScreenViewports_->push_back(ssViewport);
 
-	viewports_->push_back(viewport);
+		//Init split-screen attribute
+		ssViewport.ssAt->ssWidth	= static_cast<unsigned>(viewport.Width);
+		ssViewport.ssAt->ssHeight	= static_cast<unsigned>(viewport.Height);
+		ssViewport.ssAt->ssTopLeftX = static_cast<unsigned>(viewport.TopLeftX);
+		ssViewport.ssAt->ssTopLeftY = static_cast<unsigned>(viewport.TopLeftY);
 
-	numViewportsX_ = 1;
-	numViewportsY_ = 2;
+		ssCount++;
+	}
+	itrSplitScreen.resetIndex();
+
+	if(ssCount == 1)
+	{
+		numViewportsX_ = 1;
+		numViewportsY_ = 2;
+
+		hr = S_OK;
+	}
 
 	return hr;
 }
@@ -144,16 +193,33 @@ HRESULT ManagementViewport::initViewportGrid(unsigned int gridSize)
 	viewport.MinDepth	= 0;
 	viewport.MaxDepth	= 1;
 
-	for(unsigned int row = 0; row < numGridColumns; row++)
+	bool noMoreAttributes = false;
+	for(unsigned int row = 0; row < numGridColumns && !noMoreAttributes; row++)
 	{
-		for(unsigned int column = 0; column < numGridColumns; column++)
+		for(unsigned int column = 0; column < numGridColumns && !noMoreAttributes; column++)
 		{
-			viewport.TopLeftX = static_cast<FLOAT>(column * (viewportWidth_ + borderSize_));
-			viewport.TopLeftY = static_cast<FLOAT>(row * (viewportHeight_ + borderSize_));
+			if(itrSplitScreen.hasNext())
+			{
+				SplitScreenViewport ssViewport;
+				ssViewport.ssAt = itrSplitScreen.getNext();
 
-			viewports_->push_back(viewport);
+				viewport.TopLeftX = static_cast<FLOAT>(column * (viewportWidth_ + borderSize_));
+				viewport.TopLeftY = static_cast<FLOAT>(row * (viewportHeight_ + borderSize_));
+
+				ssViewport.viewport = viewport;
+				splitScreenViewports_->push_back(ssViewport);
+
+				//Init split-screen attribute
+				ssViewport.ssAt->ssWidth	= static_cast<unsigned>(viewport.Width);
+				ssViewport.ssAt->ssHeight	= static_cast<unsigned>(viewport.Height);
+				ssViewport.ssAt->ssTopLeftX = static_cast<unsigned>(viewport.TopLeftX);
+				ssViewport.ssAt->ssTopLeftY = static_cast<unsigned>(viewport.TopLeftY);
+			}
+			else
+				noMoreAttributes = true;
 		}
 	}
+	itrSplitScreen.resetIndex();
 
 	numViewportsX_ = numGridColumns;
 	numViewportsY_ = numGridColumns;
@@ -165,23 +231,35 @@ unsigned int ManagementViewport::getViewportWidth() const
 {
 	return viewportWidth_;
 }
-
 unsigned int ManagementViewport::getViewportHeight() const
 {
 	return viewportHeight_;
 }
-
 unsigned int ManagementViewport::getNumViewportsX() const
 {
 	return numViewportsX_;
 }
-
 unsigned int ManagementViewport::getNumViewportsY() const
 {
 	return numViewportsY_;
 }
-
-D3D11_VIEWPORT ManagementViewport::getViewport(unsigned int index) const
+std::vector<SplitScreenViewport>* ManagementViewport::getSplitScreenViewports()
 {
-	return viewports_->at(index);
+	return splitScreenViewports_;
 }
+
+//D3D11_VIEWPORT ManagementViewport::getViewport(Attribute_SplitScreen* ssAt) const
+//{
+//	D3D11_VIEWPORT viewport;
+//	bool foundViewPort = false;
+//	for(unsigned int i = 0; i < viewports_->size() && !foundViewPort; i++)
+//	{
+//		if(viewports_->at(i).ssAt == ssAt)
+//		{
+//			viewport = viewports_->at(i).viewport;
+//			foundViewPort = true;
+//		}
+//	}
+//
+//	return viewport;
+//}

@@ -1,12 +1,20 @@
 #ifndef XKILL_RENDERER_VIEWPORTMANAGEMENT_H
 #define XKILL_RENDERER_VIEWPORTMANAGEMENT_H
 
+struct Attribute_SplitScreen;
+
 class Winfo;
 
 #include <vector>
 #include <d3d11.h>
 
 #include "d3dInterface.h"
+
+struct SplitScreenViewport
+{
+	Attribute_SplitScreen* ssAt;
+	D3D11_VIEWPORT viewport;
+};
 
 //! Class for maintaining viewports.
 /*!
@@ -29,15 +37,13 @@ public:
 	//! Releases all memory and returns ViewportManagement to default state.
 	virtual void reset();
 	//! Set the viewport that the renderer will draw to. 
-	void setViewport(ID3D11DeviceContext* devcon, unsigned int index);
+	void setViewport(ID3D11DeviceContext* devcon, unsigned int splitScreenViewportIndex);
 	//! Resizes the viewports to fit the new screen size.
 	/*!
 	\param screenWidth The new screen width.
 	\param screenHeight the new screen height.
 	\return Any error encountered.
 	*/
-
-	
 	HRESULT resize();
 	//! Initializes ViewportManagement.
 	HRESULT init();
@@ -47,8 +53,8 @@ public:
 	unsigned int getNumViewportsX() const;
 	unsigned int getNumViewportsY() const;
 
-	D3D11_VIEWPORT getViewport(unsigned int index) const;
-
+	//D3D11_VIEWPORT getViewport(Attribute_SplitScreen* ssAt) const;
+	std::vector<SplitScreenViewport>* getSplitScreenViewports();
 private:
 	//! Creates a single viewport that covers the entire window.
 	HRESULT initViewportSingle();
@@ -69,7 +75,8 @@ private:
 	
 	unsigned int borderSize_;	//<! Adds space between viewports.
 
-	std::vector<D3D11_VIEWPORT>* viewports_;	//!< Vector containing all the viewport objects.
+	std::vector<SplitScreenViewport>* splitScreenViewports_;
+	//std::vector<D3D11_VIEWPORT>* viewports_;	//!< Vector containing all the viewport objects.
 };
 
 #endif //XKILL_RENDERER_VIEWPORTMANAGEMENT_H

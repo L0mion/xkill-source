@@ -11,6 +11,7 @@ AttributeManager::AttributeManager()
 	debugShape		.init	(ATTRIBUTE_DEBUGSHAPE);
 	physics			.init	(ATTRIBUTE_PHYSICS);
 	camera			.init	(ATTRIBUTE_CAMERA);
+	splitScreen		.init	(ATTRIBUTE_SPLITSCREEN);
 	input			.init	(ATTRIBUTE_INPUT);
 	player			.init	(ATTRIBUTE_PLAYER);
 	bounding		.init	(ATTRIBUTE_BOUNDING);

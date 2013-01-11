@@ -209,7 +209,7 @@ struct DLL_U Attribute_Projectile : public IAttribute
 struct DLL_U Attribute_Light_Dir : public IAttribute
 {
 	Attribute_Light_Dir();
-	~Attribute_Light_Dir();
+	~Attribute_Light_Dir(); //!< Does nothing.
 
 	LightDescDir lightDir;
 };
@@ -221,7 +221,7 @@ OBS! The pos-attribute in LightDescPoint must be updated with the corresponding 
 struct DLL_U Attribute_Light_Point : public IAttribute
 {
 	Attribute_Light_Point();
-	~Attribute_Light_Point();
+	~Attribute_Light_Point(); //!< Does nothing.
 
 	AttributePointer ptr_position; //!< The correct position of point-light.
 
@@ -235,7 +235,7 @@ OBS! The pos-attribute in LightDescSpot must be updated with the corresponding v
 struct DLL_U Attribute_Light_Spot : public IAttribute
 {
 	Attribute_Light_Spot();
-	~Attribute_Light_Spot();
+	~Attribute_Light_Spot(); //!< Does nothing.
 
 	AttributePointer ptr_position; //!< The correct position of spotlight.
 
@@ -284,6 +284,20 @@ struct DLL_U Attribute_Camera : public IAttribute
 	float aspect;
 	float zNear;
 	float zFar;
+};
+
+struct DLL_U Attribute_SplitScreen : public IAttribute
+{
+	Attribute_SplitScreen();
+	~Attribute_SplitScreen();
+
+	AttributePointer ptr_camera;
+
+	unsigned int ssTopLeftX;
+	unsigned int ssTopLeftY;
+
+	unsigned int ssWidth;
+	unsigned int ssHeight;
 };
 
 /// Stores everything GameComponent needs to know about a player (also refer to createPlayerEntity)

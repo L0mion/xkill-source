@@ -26,13 +26,14 @@ public:
 	AttributeStorage<Attribute_DebugShape>		debugShape;
 	AttributeStorage<Attribute_Physics>			physics;
 	AttributeStorage<Attribute_Camera>			camera;
+	AttributeStorage<Attribute_SplitScreen>		splitScreen;
 	AttributeStorage<Attribute_Input>			input;
 	AttributeStorage<Attribute_Player>			player;
 	AttributeStorage<Attribute_Bounding>		bounding;
 	AttributeStorage<Attribute_Projectile>		projectile;
-	AttributeStorage<Attribute_Light_Dir>	lightDir;
-	AttributeStorage<Attribute_Light_Point>			lightPoint;
-	AttributeStorage<Attribute_Light_Spot>			lightSpot;
+	AttributeStorage<Attribute_Light_Dir>		lightDir;
+	AttributeStorage<Attribute_Light_Point>		lightPoint;
+	AttributeStorage<Attribute_Light_Spot>		lightSpot;
 	AttributeStorage<Attribute_Mesh>			mesh;
 	AttributeStorage<Attribute_Health>			health;
 	AttributeStorage<Attribute_Damage>			damage;
@@ -69,11 +70,12 @@ static	AttributeIterator<Attribute_Render>					itrRender			;	\
 static	AttributeIterator<Attribute_DebugShape>				itrDebugShape		;	\
 static	AttributeIterator<Attribute_Physics>				itrPhysics			;	\
 static	AttributeIterator<Attribute_Camera>					itrCamera			;	\
+static	AttributeIterator<Attribute_SplitScreen>			itrSplitScreen		;	\
 static	AttributeIterator<Attribute_Input>					itrInput			;	\
 static	AttributeIterator<Attribute_Player>					itrPlayer			;	\
 static	AttributeIterator<Attribute_Bounding>				itrBounding			;	\
 static	AttributeIterator<Attribute_Projectile>				itrProjectile		;	\
-static	AttributeIterator<Attribute_Light_Dir>		itrLightDir			;	\
+static	AttributeIterator<Attribute_Light_Dir>				itrLightDir			;	\
 static	AttributeIterator<Attribute_Light_Point>			itrLightPoint		;	\
 static	AttributeIterator<Attribute_Light_Spot>				itrLightSpot		;	\
 static	AttributeIterator<Attribute_Mesh>					itrMesh				;	\
@@ -94,6 +96,7 @@ itrRender			= ATTRIBUTE_MANAGER->render				.getIterator();			\
 itrDebugShape		= ATTRIBUTE_MANAGER->debugShape			.getIterator();			\
 itrPhysics			= ATTRIBUTE_MANAGER->physics			.getIterator();			\
 itrCamera			= ATTRIBUTE_MANAGER->camera				.getIterator();			\
+itrSplitScreen		= ATTRIBUTE_MANAGER->splitScreen		.getIterator();			\
 itrInput			= ATTRIBUTE_MANAGER->input				.getIterator();			\
 itrPlayer			= ATTRIBUTE_MANAGER->player				.getIterator();			\
 itrBounding			= ATTRIBUTE_MANAGER->bounding			.getIterator();			\

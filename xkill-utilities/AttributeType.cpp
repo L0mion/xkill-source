@@ -149,6 +149,19 @@ Attribute_Camera::~Attribute_Camera()
 {
 }
 
+Attribute_SplitScreen::Attribute_SplitScreen()
+{
+	ssTopLeftX = 0;
+	ssTopLeftY = 0;
+
+	ssWidth		= 0;
+	ssHeight	= 0;
+}
+Attribute_SplitScreen::~Attribute_SplitScreen()
+{
+	//Do nothing.
+}
+
 Attribute_Input::Attribute_Input()
 {
 	fire = false;
