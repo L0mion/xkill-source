@@ -59,7 +59,7 @@ enum DLL_U AttributeType
 	ATTRIBUTE_PHYSICS,
 	ATTRIBUTE_CAMERA,
 	ATTRIBUTE_INPUT,
-	ATTRIBUTE_INPUTDEVICESETTINGS,
+	//ATTRIBUTE_INPUTDEVICESETTINGS,
 	ATTRIBUTE_PLAYER,
 	ATTRIBUTE_BOUNDING,
 	ATTRIBUTE_MESH,
@@ -268,13 +268,13 @@ class InputObjectArray;
 \ingroup ATTRIBUTES
 */
 
-struct DLL_U Attribute_InputDeviceSettings : public IAttribute
-{
-	Attribute_InputDeviceSettings();
-	~Attribute_InputDeviceSettings();
-
-	InputObjectArray* inputObjectArray;
-};
+//struct DLL_U Attribute_InputDeviceSettings : public IAttribute
+//{
+//	Attribute_InputDeviceSettings();
+//	~Attribute_InputDeviceSettings();
+//
+//	InputObjectArray* inputObjectArray;
+//};
 
 /// Stores everything SoundComponent needs to know to play a 3D sound
 /** 

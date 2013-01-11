@@ -77,8 +77,8 @@ void GameComponent::onUpdate(float delta)
 
 
 		Entity* playerEntity = itrPlayer.owner();
-		Attribute_DebugShape* debugShap = itrDebugShape.createAttribute(playerEntity);
-		debugShap->ptr_spatial = itrDebugShape.attributePointer(debugShap);
+		Attribute_DebugShape* debugShape = itrDebugShape.createAttribute(playerEntity);
+		debugShape->ptr_spatial = itrDebugShape.attributePointer(debugShape);
 
 
 		//

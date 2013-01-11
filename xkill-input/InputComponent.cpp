@@ -10,12 +10,13 @@ InputComponent::InputComponent()
 	SUBSCRIBE_TO_EVENT(this, EVENT_KEY_PRESS);
 	SUBSCRIBE_TO_EVENT(this, EVENT_KEY_RELEASE);
 
+	inputManager_ = nullptr;
 	newDeviceSearchTimer_ = 0.0f;
 }
 
 InputComponent::~InputComponent()
 {
-	delete inputManager_;
+	SAFE_DELETE(inputManager_);
 }
 
 bool InputComponent::init(HWND windowHandle, std::string configFilePath, float searchTime)

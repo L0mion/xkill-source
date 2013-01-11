@@ -4,7 +4,7 @@
 AttributeManager::AttributeManager()
 {
 	entities = new EntityStorage;
-	settings_entity = entities->createEntity();
+	//settings_entity = entities->createEntity();
 
 	position			.init	(ATTRIBUTE_POSITION);
 	spatial				.init	(ATTRIBUTE_SPATIAL);
@@ -13,7 +13,7 @@ AttributeManager::AttributeManager()
 	physics				.init	(ATTRIBUTE_PHYSICS);
 	camera				.init	(ATTRIBUTE_CAMERA);
 	input				.init	(ATTRIBUTE_INPUT);
-	inputDeviceSettings	.init	(ATTRIBUTE_INPUTDEVICESETTINGS);
+	//inputDeviceSettings	.init	(ATTRIBUTE_INPUTDEVICESETTINGS);
 	player				.init	(ATTRIBUTE_PLAYER);
 	bounding			.init	(ATTRIBUTE_BOUNDING);
 	projectile			.init	(ATTRIBUTE_PROJECTILE);

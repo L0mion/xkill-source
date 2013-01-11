@@ -38,6 +38,7 @@ InputDevice::~InputDevice()
 		SAFE_DELETE(*it);
 
 	inputObjectArray_->inputObjects.clear();
+	delete inputObjectArray_;
 
 	axes_.clear();
 	buttons_.clear();
