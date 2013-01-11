@@ -2,6 +2,11 @@
 
 #include "InputDevice.h"
 
+class InputObject;
+class InputAxisObject;
+class InputButtonObject;
+class InputTriggerObject;
+
 //! A wrapper for a XInput device
 /*!
 
@@ -17,7 +22,7 @@ public:
 	virtual void Update(float deltaTime);
 
 	virtual void RunForceFeedback();
-	virtual void StopForceFeedback();
+	virtual bool StopForceFeedback();
 	void SetForceFeedback(float leftMotorScale, float rightMotorScale);
 	virtual bool IsForceFeedbackCapable();
 

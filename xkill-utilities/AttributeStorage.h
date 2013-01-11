@@ -69,8 +69,6 @@ public:
 		this->type = type;
 	}
 
-	
-
 	/** 
 	Creates space for an attribute and returns a
 	pointer to that space.

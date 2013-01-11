@@ -77,8 +77,8 @@ void GameComponent::onUpdate(float delta)
 
 
 		Entity* playerEntity = itrPlayer.owner();
-		Attribute_DebugShape* debugShap = itrDebugShape.createAttribute(playerEntity);
-		debugShap->ptr_spatial = itrDebugShape.attributePointer(debugShap);
+		Attribute_DebugShape* debugShape = itrDebugShape.createAttribute(playerEntity);
+		debugShape->ptr_spatial = itrDebugShape.attributePointer(debugShape);
 
 
 		//
@@ -417,6 +417,19 @@ void GameComponent::event_PhysicsAttributesColliding(Event_PhysicsAttributesColl
 						else
 						{
 							SEND_EVENT(&Event_PlaySound(0));
+
+							int playerID = -1;
+
+							while(itrPlayer.hasNext())
+							{
+								Attribute_Player* player = itrPlayer.getNext();
+								if(itrPlayer.ownerId() == entity1->getID())
+								{
+									playerID = player->id;
+								}
+							}
+
+							SEND_EVENT(&Event_Rumble(playerID, true, 0.5f, 1.0f, 1.0f));
 						}
 						DEBUGPRINT("DAMAGEEVENT Entity " << entity2->getID() << " damage: " <<  damage->damage << " Entity " << entity1->getID() << " health " << health->health);
 					}

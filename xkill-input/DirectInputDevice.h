@@ -13,7 +13,12 @@
 #define DIDFT_OPTIONAL 0x80000000
 #endif
 
-#define SAFE_RELEASE(x) {if(x != NULL) x->Release(); x = NULL;} //Should probably not be here, needed for isXInputDevice
+#define SAFE_RELEASE(x) {if(x != NULL) x->Release(); x = NULL;} //Should probably not be here
+
+class InputObject;
+class InputAxisObject;
+class InputButtonObject;
+class InputTriggerObject;
 
 //! A wrapper of a Direct Input device
 /*!
@@ -35,7 +40,7 @@ public:
 	virtual void Update(float deltaTime);
 
 	virtual void RunForceFeedback();
-	virtual void StopForceFeedback();
+	virtual bool StopForceFeedback();
 	virtual void SetForceFeedback(float leftMotorScale, float rightMotorScale);
 	virtual bool IsForceFeedbackCapable();
 

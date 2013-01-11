@@ -3,6 +3,7 @@
 #include <xkill-utilities/EventManager.h>
 #include "InputManager.h"
 
+
 InputComponent::InputComponent()
 {
 	SUBSCRIBE_TO_EVENT(this, EVENT_RUMBLE);
@@ -10,12 +11,13 @@ InputComponent::InputComponent()
 	SUBSCRIBE_TO_EVENT(this, EVENT_KEY_PRESS);
 	SUBSCRIBE_TO_EVENT(this, EVENT_KEY_RELEASE);
 
+	inputManager_ = nullptr;
 	newDeviceSearchTimer_ = 0.0f;
 }
 
 InputComponent::~InputComponent()
 {
-	delete inputManager_;
+	SAFE_DELETE(inputManager_);
 }
 
 bool InputComponent::init(HWND windowHandle, std::string configFilePath, float searchTime)
@@ -70,15 +72,15 @@ void InputComponent::handleInput(float delta)
 {
 	for(unsigned int i = 0; i < inputAttributes_->size(); i++)
 	{
-		InputDevice* device = inputManager_->GetDevice(i);
+		InputDevice* device = inputManager_->GetDevice(i + 1);
 
 		if(device == nullptr)
 			continue;
 
 		inputAttributes_->at(i).position.x = device->getFloatValue(ACTION_F_WALK_LR);
 		inputAttributes_->at(i).position.y = device->getFloatValue(ACTION_F_WALK_FB);
-		inputAttributes_->at(i).rotation.x = device->getFloatValue(ACTION_F_LOOK_LR, true) * delta;
-		inputAttributes_->at(i).rotation.y = device->getFloatValue(ACTION_F_LOOK_UD, true) * delta;
+		inputAttributes_->at(i).rotation.x = device->getFloatValue(ACTION_F_LOOK_LR, true) * 0.01f;
+		inputAttributes_->at(i).rotation.y = device->getFloatValue(ACTION_F_LOOK_UD, true) * 0.01f;
 
 		if(device->getBoolValue(ACTION_B_FIRE))
 			inputAttributes_->at(i).fire = true;
@@ -144,12 +146,12 @@ void InputComponent::handleInput(float delta)
 
 void InputComponent::handleRumbleEvent(Event_Rumble* e)
 {
-	InputDevice* device = inputManager_->GetDevice(e->deviceNr);
+ 	InputDevice* device = inputManager_->GetDevice(e->deviceNr);
 
 	if(device != nullptr)
 	{
 		if(e->runRumble)
-			device->RunForceFeedback();
+			device->RunForceFeedback(e->duration);
 		else
 			device->StopForceFeedback();
 

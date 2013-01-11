@@ -3,6 +3,13 @@
 
 #include <Xinput.h>
 #include "InputActions.h"
+
+#include "InputButtonObject.h"
+#include "InputAxisObject.h"
+#include "InputTriggerObject.h"
+
+#include "InputObjectArray.h"
+
 #include "Converter.h"
 
 XInputDevice::XInputDevice() : 
@@ -36,6 +43,7 @@ XInputDevice::~XInputDevice(void)
 
 void XInputDevice::Update(float deltaTime)
 {
+	InputDevice::Update(deltaTime);
 	updateState();
 }
 
@@ -51,7 +59,7 @@ void XInputDevice::RunForceFeedback()
 	forceFeedbackOn_ = true;
 }
 
-void XInputDevice::StopForceFeedback()
+bool XInputDevice::StopForceFeedback()
 {
 	XINPUT_VIBRATION vibration;
 
@@ -61,6 +69,8 @@ void XInputDevice::StopForceFeedback()
 	XInputSetState(deviceNr_, &vibration);
 
 	forceFeedbackOn_ = false;
+
+	return forceFeedbackOn_;
 }
 
 void  XInputDevice::SetForceFeedback(float leftMotorScale, float rightMotorScale)
@@ -115,24 +125,24 @@ std::string XInputDevice::getStandardMappingsString()
 	XInputDevice xiDevice;
 
 	xiDevice.setStandardMappings();
-	std::vector<InputObject*> inputObjects = xiDevice.inputObjects_;
+	std::vector<InputObject*> inputObjects = xiDevice.inputObjectArray_->inputObjects;
 
 	std::string str = "";
 
 	for(unsigned int i = 0; i < inputObjects.size(); i++)
 	{
-		std::vector<int> mappings = inputObjects[i]->getBoolMappings();
+		std::vector<int>* mappings = inputObjects.at(i)->getBoolMappings();
 
-		for(unsigned int j = 0; j < mappings.size(); j++)
+		for(unsigned int j = 0; j < mappings->size(); j++)
 		{
-			str += Converter::IntToStr(mappings[j]);
+			str += Converter::IntToStr(mappings->at(j));
 		}
 
-		mappings = inputObjects[i]->getFloatMappings();
+		mappings = inputObjects.at(i)->getFloatMappings();
 
-		for(unsigned int j = 0; j < mappings.size(); j++)
+		for(unsigned int j = 0; j < mappings->size(); j++)
 		{
-			str += Converter::IntToStr(mappings[j]);
+			str += Converter::IntToStr(mappings->at(j));
 		}
 	}
 
@@ -199,7 +209,7 @@ void XInputDevice::createInputObjectsFromLayout()
 	{
 		InputAxisObject* axis = new InputAxisObject(-0x7FFF, 0x7FFF);
 		axes_.push_back(axis);
-		inputObjects_.push_back(axis);
+		inputObjectArray_->inputObjects.push_back(axis);
 	}
 
 	if(axes_.size() >= 4)
@@ -209,13 +219,13 @@ void XInputDevice::createInputObjectsFromLayout()
 	{
 		InputButtonObject* button = new InputButtonObject(i);
 		buttons_.push_back(button);
-		inputObjects_.push_back(button);
+		inputObjectArray_->inputObjects.push_back(button);
 	}
 
 	for(int i = 0; i < inputLayout_.nrOfTriggers; i++)
 	{
 		InputTriggerObject* trigger = new InputTriggerObject(0, 0xFF);
 		triggers_.push_back(trigger);
-		inputObjects_.push_back(trigger);
+		inputObjectArray_->inputObjects.push_back(trigger);
 	}
 }
