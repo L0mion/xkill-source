@@ -60,16 +60,14 @@ bool InputObject::hasBoolMapping(int mapping)
 	return hasMapping(&boolMappings_, mapping);
 }
 
-std::vector<int> InputObject::getFloatMappings()
+std::vector<int>* InputObject::getFloatMappings()
 {
-	//std::vector<int> vector(floatMappings_);
-	return floatMappings_;
+	return &floatMappings_;
 }
 
-std::vector<int> InputObject::getBoolMappings()
+std::vector<int>* InputObject::getBoolMappings()
 {
-	//std::vector<int> vector(boolMappings_);
-	return boolMappings_;
+	return &boolMappings_;
 }
 
 void InputObject::removeMapping(std::vector<int>* vector, int mapping)

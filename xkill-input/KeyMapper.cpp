@@ -2,6 +2,11 @@
 
 #include "FileParser.h"
 #include "InputDevice.h"
+
+#include "InputButtonObject.h"
+#include "InputAxisObject.h"
+#include "InputTriggerObject.h"
+
 #include "Converter.h"
 
 KeyMapper::KeyMapper()
@@ -539,15 +544,15 @@ std::string KeyMapper::getAxesString(std::vector<InputAxisObject*>* axes)
 		axesString += "I=" + Converter::IntToStr((int)axis->isInverted()) + " ";
 		axesString += "S=" + Converter::FloatToStr(axis->getSensitivity()) + " ";
 
-		std::vector<int> mappings = axis->getFloatMappings();
+		std::vector<int>* mappings = axis->getFloatMappings();
 
-		for(unsigned int j = 0; j < mappings.size(); j++)
-			axesString += "F=" + Converter::IntToStr(mappings[j]) + " ";
+		for(unsigned int j = 0; j < mappings->size(); j++)
+			axesString += "F=" + Converter::IntToStr(mappings->at(j)) + " ";
 
 		mappings = axis->getBoolMappings();
 
-		for(unsigned int j = 0; j < mappings.size(); j++)
-			axesString += "B=" + Converter::IntToStr(mappings[j]) + " ";
+		for(unsigned int j = 0; j < mappings->size(); j++)
+			axesString += "B=" + Converter::IntToStr(mappings->at(j)) + " ";
 	}
 
 	return axesString;
@@ -567,18 +572,18 @@ std::string KeyMapper::getButtonString(std::vector<InputButtonObject*>* buttons)
 		buttonString += "I=" + Converter::IntToStr((int)button->isInverted()) + " ";
 		buttonString += "S=" + Converter::FloatToStr(button->getSensitivity()) + " ";
 
-		std::vector<int> mappings = button->getFloatMappings();
+		std::vector<int>* mappings = button->getFloatMappings();
 
-		for(unsigned int j = 0; j < mappings.size(); j++)
+		for(unsigned int j = 0; j < mappings->size(); j++)
 		{
-			buttonString += "F=" + Converter::IntToStr(mappings[j]) + " ";
+			buttonString += "F=" + Converter::IntToStr(mappings->at(j)) + " ";
 		}
 
 		mappings = button->getBoolMappings();
 
-		for(unsigned int j = 0; j < mappings.size(); j++)
+		for(unsigned int j = 0; j < mappings->size(); j++)
 		{
-			buttonString += "B=" + Converter::IntToStr(mappings[j]) + " ";
+			buttonString += "B=" + Converter::IntToStr(mappings->at(j)) + " ";
 		}
 	}
 
@@ -600,18 +605,18 @@ std::string KeyMapper::getTriggerString(std::vector<InputTriggerObject*>* trigge
 		triggerString += "D=" + Converter::FloatToStr(trigger->getDeadZone()) + " ";
 		triggerString += "S=" + Converter::FloatToStr(trigger->getSensitivity()) + " ";
 
-		std::vector<int> mappings = trigger->getFloatMappings();
+		std::vector<int>* mappings = trigger->getFloatMappings();
 
-		for(unsigned int j = 0; j < mappings.size(); j++)
+		for(unsigned int j = 0; j < mappings->size(); j++)
 		{
-			triggerString += "F=" + Converter::IntToStr(mappings[j]) + " ";
+			triggerString += "F=" + Converter::IntToStr(mappings->at(j)) + " ";
 		}
 
 		mappings = trigger->getBoolMappings();
 
-		for(unsigned int j = 0; j < mappings.size(); j++)
+		for(unsigned int j = 0; j < mappings->size(); j++)
 		{
-			triggerString += "B=" + Converter::IntToStr(mappings[j]) + " ";
+			triggerString += "B=" + Converter::IntToStr(mappings->at(j)) + " ";
 		}
 	}
 

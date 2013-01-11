@@ -2,6 +2,11 @@
 
 #include "InputDevice.h"
 
+class InputObject;
+class InputAxisObject;
+class InputButtonObject;
+class InputTriggerObject;
+
 class QTInputDevices : public InputDevice
 {
 	

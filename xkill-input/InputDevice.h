@@ -1,20 +1,24 @@
 #pragma once
 
+#include <xkill-utilities/AttributeType.h>
+
 #include <vector>
 
 #include <InitGuid.h>
 
-#include "KeyMapper.h"
+class InputObject;
+class InputAxisObject;
+class InputButtonObject;
+class InputTriggerObject;
 
-#include "InputButtonObject.h"
-#include "InputAxisObject.h"
-#include "InputTriggerObject.h"
+class KeyMapper;
+class InputObjectArray;
 
 #include "InputActions.h"
 
 #define SAFE_DELETE(x) {if(x != nullptr) delete x; x = nullptr;}
 
-//! An interface for wrappers of Direct Input and XInput devices
+//! An interface for wrappers of input devices
 
 class InputDevice
 {
@@ -113,7 +117,8 @@ protected:
 	std::vector<InputButtonObject*> buttons_;
 	std::vector<InputTriggerObject*> triggers_;
 
-	std::vector<InputObject*> inputObjects_;
+	//std::vector<InputObject*> inputObjects_;
+	InputObjectArray* inputObjectArray_;
 
 	std::vector<std::vector<int>> floatObjects_;
 	std::vector<std::vector<int>> boolObjects_;

@@ -1,5 +1,11 @@
 #include "QTInputDevices.h"
 
+#include "InputButtonObject.h"
+#include "InputAxisObject.h"
+#include "InputTriggerObject.h"
+
+#include "InputObjectArray.h"
+
 #include "InputActions.h"
 #include "Converter.h"
 
@@ -33,23 +39,23 @@ void QTInputDevices::setStandardMappings()
 	{
 		axes_[0]->addFloatMapping(ACTION_F_LOOK_LR);
 		axes_[0]->setDeadZone(0.0f);
-		axes_[0]->setSensitivity(1.0f);
+		axes_[0]->setSensitivity(0.01f);
 		axes_[1]->addFloatMapping(ACTION_F_LOOK_UD);
 		axes_[1]->setDeadZone(0.0f);
-		axes_[1]->setSensitivity(1.0f);
+		axes_[1]->setSensitivity(0.01f);
 	}
 
 	if(axes_.size() >= 4)
 	{
 		axes_[2]->addFloatMapping(ACTION_F_LOOK_LR);
 		axes_[2]->setDeadZone(0.0f);
-		axes_[2]->setSensitivity(1.0f);
+		axes_[2]->setSensitivity(0.01f);
 		axes_[3]->addFloatMapping(ACTION_F_LOOK_UD);
 		axes_[3]->setDeadZone(0.0f);
-		axes_[3]->setSensitivity(1.0f);
+		axes_[3]->setSensitivity(0.01f);
 	}
 
-	if(buttons_.size() >= inputLayout_.nrOfButtons)
+	if(buttons_.size() >= (unsigned int)inputLayout_.nrOfButtons)
 	{
 		buttons_[0]->addBoolMapping(ACTION_B_WALK_FORWARD);
 		buttons_[1]->addBoolMapping(ACTION_B_WALK_LEFT);
@@ -71,25 +77,28 @@ std::string QTInputDevices::getStandardMappingsString()
 	QTInputDevices qtDevice;
 
 	qtDevice.setStandardMappings();
-	std::vector<InputObject*> inputObjects = qtDevice.inputObjects_;
+	std::vector<InputObject*> inputObjects = qtDevice.inputObjectArray_->inputObjects;
 
 	std::string str = "";
 
 	for(unsigned int i = 0; i < inputObjects.size(); i++)
 	{
-		std::vector<int> mappings = inputObjects[i]->getBoolMappings();
+		std::vector<int>* mappings = inputObjects.at(i)->getBoolMappings();
 
-		for(unsigned int j = 0; j < mappings.size(); j++)
+		for(unsigned int j = 0; j < mappings->size(); j++)
 		{
-			str += Converter::IntToStr(mappings[j]);
+			str += Converter::IntToStr(mappings->at(j));
 		}
 
 		mappings = inputObjects[i]->getFloatMappings();
 
-		for(unsigned int j = 0; j < mappings.size(); j++)
+		for(unsigned int j = 0; j < mappings->size(); j++)
 		{
-			str += Converter::IntToStr(mappings[j]);
+			str += Converter::IntToStr(mappings->at(j));
 		}
+
+		str += Converter::FloatToStr(inputObjects[i]->getSensitivity());
+		str += Converter::IntToStr(static_cast<int>(inputObjects[i]->isInverted()));
 	}
 
 	return str;
@@ -114,17 +123,17 @@ void QTInputDevices::createInputObjectsFromLayout()
 	{
 		InputAxisObject* axis = new InputAxisObject(-0x7FFF, 0x7FFF);
 		axes_.push_back(axis);
-		inputObjects_.push_back(axis);
+		inputObjectArray_->inputObjects.push_back(axis);
 	}
 	
 	for(int i = 0; i < inputLayout_.nrOfButtons; i++)
 	{
 		InputButtonObject* button = new InputButtonObject(i);
 		buttons_.push_back(button);
-		inputObjects_.push_back(button);
+		inputObjectArray_->inputObjects.push_back(button);
 	}
 
-	if(buttons_.size() >= inputLayout_.nrOfButtons)
+	if(buttons_.size() >= (unsigned int)inputLayout_.nrOfButtons)
 	{
 		buttons_[0]->setKey('W');
 		buttons_[1]->setKey('A');
@@ -186,7 +195,7 @@ InputButtonObject* QTInputDevices::getButtonObject(unsigned int index)
 	{
 		button = new InputButtonObject(index);
 		buttons_.push_back(button);
-		inputObjects_.push_back(button);
+		inputObjectArray_->inputObjects.push_back(button);
 		inputLayout_.nrOfButtons++;
 	}
 
