@@ -2,10 +2,18 @@
 
 #include <btBulletDynamicsCommon.h>
 
+#include <xkill-utilities/EventManager.h>
+
 #include "Serialize/BulletWorldImporter/btBulletWorldImporter.h"
 #include "physicsObject.h"
+#include "collisionShapes.h"
 
-ATTRIBUTES_DECLARE_ALL;
+
+
+
+
+
+AttributeIterator<Attribute_Physics> itrPhysics;
 
 PhysicsComponent::PhysicsComponent() : broadphase_(nullptr),
 									   collisionConfiguration_(nullptr),
@@ -16,7 +24,7 @@ PhysicsComponent::PhysicsComponent() : broadphase_(nullptr),
 									   physicsObjects_(nullptr)
 {
 	SUBSCRIBE_TO_EVENT(this,EVENT_DO_CULLING);
-	ATTRIBUTES_INIT_ALL;
+	itrPhysics = ATTRIBUTE_MANAGER->physics.getIterator();
 }
 
 PhysicsComponent::~PhysicsComponent()
@@ -66,6 +74,7 @@ PhysicsComponent::~PhysicsComponent()
 	{
 		delete bulletImporter_;
 	}
+	delete CollisionShapes::Instance();
 }
 
 bool PhysicsComponent::init()
@@ -82,13 +91,19 @@ bool PhysicsComponent::init()
 
 	dynamicsWorld_->setGravity(btVector3(0,0,0));
 
+	
+
 	return true;
 }
 
 void PhysicsComponent::onUpdate(float delta)
 {
 	syncronizeWithAttributes();
-	dynamicsWorld_->stepSimulation(delta);
+	for(unsigned int i = 0; i < physicsObjects_->size(); i++)
+	{
+		physicsObjects_->at(i)->onUpdate(delta);
+	}
+	dynamicsWorld_->stepSimulation(delta,10);
 }
 
 void PhysicsComponent::onEvent(Event* e)
@@ -105,11 +120,12 @@ void PhysicsComponent::onEvent(Event* e)
 
 void PhysicsComponent::syncronizeWithAttributes()
 {
+	itrPhysics = ATTRIBUTE_MANAGER->physics.getIterator();
 	while(itrPhysics.hasNext())
 	{
 		Attribute_Physics* physicsAttribute = itrPhysics.getNext();
 		unsigned int index = itrPhysics.index();
-		if(index > physicsObjects_->size())
+		if(index >= physicsObjects_->size())
 		{
 			physicsObjects_->push_back(nullptr);
 		}
@@ -117,6 +133,7 @@ void PhysicsComponent::syncronizeWithAttributes()
 		{
 			if(physicsObjects_->at(index) != nullptr)
 			{
+				dynamicsWorld_->removeRigidBody(physicsObjects_->at(index));
 				delete physicsObjects_->at(index);
 				physicsObjects_->at(index) = nullptr;
 			}
@@ -125,17 +142,20 @@ void PhysicsComponent::syncronizeWithAttributes()
 		{
 			if(physicsObjects_->at(index) != nullptr)
 			{
+				dynamicsWorld_->removeRigidBody(physicsObjects_->at(index));
 				delete physicsObjects_->at(index);
 			}
 			// Add object based on type
 			/*switch(physicsAttribute->collisionFilterGroup())
 			{
-				DEFAULT_ERROR:
+				DEFAULT_ERROR:*/
 				physicsObjects_->at(index) = new PhysicsObject();
-				break;
+				/*break;
 			}*/
+			dynamicsWorld_->addRigidBody(physicsObjects_->at(index));
 			physicsObjects_->at(index)->init(index);
 			physicsAttribute->hasChanged = false;
+			
 		}
 	}
 }

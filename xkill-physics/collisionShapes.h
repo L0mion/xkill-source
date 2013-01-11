@@ -14,17 +14,18 @@ class CollisionShapes
 {
 private:
 	CollisionShapes();
-	~CollisionShapes();
 	btAlignedObjectArray<btCollisionShape*>* collisionShapes_;
 	btCollisionShape* defaultShape_;
 	btBulletWorldImporter* importer_;
 	std::map<unsigned int, unsigned int> collisionShapesIdToIndex_;
 	std::string levelName_;
 public:
+	~CollisionShapes();
 	btCollisionShape* getCollisionShape(unsigned int meshId);
 	void loadWorldCollisionShapes(std::string world);
 	void loadCollisionShapes();
 	static CollisionShapes* Instance();
+	static CollisionShapes* instance;
 };
 
 #endif //XKILL_PHYSICS_PHYSICSUTILITIES

@@ -88,12 +88,14 @@ void CollisionShapes::loadCollisionShapes()
 	}
 }
 
+CollisionShapes* CollisionShapes::instance = nullptr;
+
 CollisionShapes* CollisionShapes::Instance()
 {
-	static CollisionShapes* instance = nullptr;
 	if(instance == nullptr)
 	{
 		instance = new CollisionShapes();
 	}
 	return instance;
 }
+

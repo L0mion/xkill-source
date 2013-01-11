@@ -65,27 +65,27 @@ public:
 
 // Declares all attributes
 #define ATTRIBUTES_DECLARE_ALL															\
-static	EntityStorage										*entityStorage			;	\
-static	AttributeIterator<Attribute_Position>				itrPosition				;	\
-static	AttributeIterator<Attribute_Spatial>				itrSpatial				;	\
-static	AttributeIterator<Attribute_Render>					itrRender				;	\
-static	AttributeIterator<Attribute_DebugShape>				itrDebugShape			;	\
-static	AttributeIterator<Attribute_Physics>				itrPhysics				;	\
-static	AttributeIterator<Attribute_Camera>					itrCamera				;	\
-static	AttributeIterator<Attribute_Input>					itrInput				;	\
+static EntityStorage										*entityStorage			;	\
+static AttributeIterator<Attribute_Position>				itrPosition				;	\
+static AttributeIterator<Attribute_Spatial>				itrSpatial				;	\
+static AttributeIterator<Attribute_Render>					itrRender				;	\
+static AttributeIterator<Attribute_DebugShape>				itrDebugShape			;	\
+static AttributeIterator<Attribute_Physics>				itrPhysics				;	\
+static AttributeIterator<Attribute_Camera>					itrCamera				;	\
+static AttributeIterator<Attribute_Input>					itrInput				;	\
 /*static	AttributeIterator<Attribute_InputDeviceSettings>	itrInputDeviceSettings	;	*/\
-static	AttributeIterator<Attribute_Player>					itrPlayer				;	\
-static	AttributeIterator<Attribute_Bounding>				itrBounding				;	\
-static	AttributeIterator<Attribute_Projectile>				itrProjectile			;	\
-static	AttributeIterator<Attribute_Light_Dir>				itrLightDir				;	\
-static	AttributeIterator<Attribute_Light_Point>			itrLightPoint			;	\
-static	AttributeIterator<Attribute_Light_Spot>				itrLightSpot			;	\
-static	AttributeIterator<Attribute_Mesh>					itrMesh					;	\
-static	AttributeIterator<Attribute_Health>					itrHealth				;	\
-static	AttributeIterator<Attribute_Damage>					itrDamage				;	\
-static	AttributeIterator<Attribute_SpawnPoint>				itrSpawnPoint			;	\
-static	AttributeIterator<Attribute_WeaponStats>			itrWeaponStats			;	\
-static	AttributeIterator<Attribute_ExplosionSphere>		itrExplosionSphere		;	\
+static AttributeIterator<Attribute_Player>					itrPlayer				;	\
+static AttributeIterator<Attribute_Bounding>				itrBounding				;	\
+static AttributeIterator<Attribute_Projectile>				itrProjectile			;	\
+static AttributeIterator<Attribute_Light_Dir>				itrLightDir				;	\
+static AttributeIterator<Attribute_Light_Point>			itrLightPoint			;	\
+static AttributeIterator<Attribute_Light_Spot>				itrLightSpot			;	\
+static AttributeIterator<Attribute_Mesh>					itrMesh					;	\
+static AttributeIterator<Attribute_Health>					itrHealth				;	\
+static AttributeIterator<Attribute_Damage>					itrDamage				;	\
+static AttributeIterator<Attribute_SpawnPoint>				itrSpawnPoint			;	\
+static AttributeIterator<Attribute_WeaponStats>			itrWeaponStats			;	\
+static AttributeIterator<Attribute_ExplosionSphere>		itrExplosionSphere		;	\
 																						\
 // ADD MORE ABOVE ^
 

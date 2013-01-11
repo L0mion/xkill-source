@@ -2,7 +2,6 @@
 #define XKILL_PHYSICS_PHYSICSCOMPONENT2_H
 
 #include <xkill-utilities/IObserver.h>
-#include <xkill-utilities/EventManager.h>
 #include "dllPhysics.h"
 template<class T>
 class btAlignedObjectArray;

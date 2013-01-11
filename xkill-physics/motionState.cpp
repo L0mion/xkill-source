@@ -34,7 +34,7 @@ void MotionState::getWorldTransform(btTransform &worldTrans) const
 {
 	Attribute_Spatial* spatialAttribute = itrSpatial.at(itrPhysics.at(attributeIndex_)->ptr_spatial);
 	Attribute_Position* positionAttribute = itrPosition.at(spatialAttribute->ptr_position);
-	worldTrans.setOrigin(convert(positionAttribute->position));
+ 	worldTrans.setOrigin(convert(positionAttribute->position));
 	worldTrans.setRotation(convert(spatialAttribute->rotation));
 }
 

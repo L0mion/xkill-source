@@ -14,6 +14,7 @@ public:
 	PhysicsObject();
 	~PhysicsObject();
 	void init(unsigned int attributeIndex);
+	virtual void onUpdate(float delta);
 	virtual void reload();
 };
 
