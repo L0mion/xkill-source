@@ -30,6 +30,7 @@ QTInputDevices::~QTInputDevices()
 
 void QTInputDevices::Update(float deltaTime)
 {
+	InputDevice::Update(deltaTime);
 	updateState();
 }
 
@@ -39,20 +40,20 @@ void QTInputDevices::setStandardMappings()
 	{
 		axes_[0]->addFloatMapping(ACTION_F_LOOK_LR);
 		axes_[0]->setDeadZone(0.0f);
-		axes_[0]->setSensitivity(0.01f);
+		axes_[0]->setSensitivity(1.0f);
 		axes_[1]->addFloatMapping(ACTION_F_LOOK_UD);
 		axes_[1]->setDeadZone(0.0f);
-		axes_[1]->setSensitivity(0.01f);
+		axes_[1]->setSensitivity(1.0f);
 	}
 
 	if(axes_.size() >= 4)
 	{
 		axes_[2]->addFloatMapping(ACTION_F_LOOK_LR);
 		axes_[2]->setDeadZone(0.0f);
-		axes_[2]->setSensitivity(0.01f);
+		axes_[2]->setSensitivity(1.0f);
 		axes_[3]->addFloatMapping(ACTION_F_LOOK_UD);
 		axes_[3]->setDeadZone(0.0f);
-		axes_[3]->setSensitivity(0.01f);
+		axes_[3]->setSensitivity(1.0f);
 	}
 
 	if(buttons_.size() >= (unsigned int)inputLayout_.nrOfButtons)
@@ -206,9 +207,9 @@ void QTInputDevices::RunForceFeedback()
 {
 
 }
-void QTInputDevices::StopForceFeedback()
+bool QTInputDevices::StopForceFeedback()
 {
-
+	return true;
 }
 void QTInputDevices::SetForceFeedback(float leftMotorScale, float rightMotorScale)
 {

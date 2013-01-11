@@ -22,7 +22,7 @@ public:
 	virtual void Update(float deltaTime);
 
 	virtual void RunForceFeedback();
-	virtual void StopForceFeedback();
+	virtual bool StopForceFeedback();
 	void SetForceFeedback(float leftMotorScale, float rightMotorScale);
 	virtual bool IsForceFeedbackCapable();
 

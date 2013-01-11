@@ -55,10 +55,13 @@ public:
 	/*!
 	\param deltaTime Time since last call
 	*/
-	virtual void Update(float deltaTime) = 0;
+	virtual void Update(float deltaTime);
 
+protected:
 	virtual void RunForceFeedback() = 0;
-	virtual void StopForceFeedback() = 0;
+public:
+	virtual void RunForceFeedback(float timer);
+	virtual bool StopForceFeedback() = 0;
 	//! Sets the intensity of each motor
 	/*!
 	Handles up to two force feedback motors. If only one motor is available then it'll take an average of both values;
@@ -112,6 +115,9 @@ protected:
 	GUID deviceGUID_;
 	std::string name_;
 	unsigned int playerID_;
+
+	float rumbleTimer_;
+	bool rumbleActive_;
 
 	std::vector<InputAxisObject*> axes_;
 	std::vector<InputButtonObject*> buttons_;

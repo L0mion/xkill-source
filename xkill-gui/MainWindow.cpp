@@ -44,7 +44,6 @@ MainWindow::MainWindow()
 	setMouseTracking(true);
 	hasMouseLock = false;
 	menuManager = new MenuManager(this);
-	ui.dockWidget;
 
 	// setup signals and slots
 	connect(ui.actionFullscreen, SIGNAL(triggered()), this, SLOT(slot_toggleFullScreen()));

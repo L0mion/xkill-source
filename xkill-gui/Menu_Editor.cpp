@@ -6,9 +6,12 @@
 #include <xkill-utilities/AttributeType.h>
 #include <xkill-utilities/Entity.h>
 
+ATTRIBUTES_DECLARE_ALL;
+
 
 Menu_Editor::Menu_Editor( Ui::MainWindowClass& ui, QWidget* parent ) : QWidget(parent), ui(ui)
 {
+	ATTRIBUTES_INIT_ALL;
 	this->hide();
 
 	// Init Entity Browser
@@ -32,7 +35,8 @@ Menu_Editor::Menu_Editor( Ui::MainWindowClass& ui, QWidget* parent ) : QWidget(p
 
 	connect(ui.pushButton_editorRefresh, SIGNAL(clicked()), this, SLOT(slot_editorRefresh()));
 	connect(ui.treeView_entityBrowser, SIGNAL(clicked(QModelIndex)), this, SLOT(slot_clicked_entityBrowser(QModelIndex)));
-	//connect(ui.tabWidget, SIGNAL(currentChanged(int)), this, SLOT(slot_tab_changed(int)));
+	connect(ui.treeView_entityBrowser, SIGNAL(clicked(QModelIndex)), this, SLOT(slot_clicked_entityBrowser(QModelIndex)));
+	connect(ui.horizontalSlider_simulationSpeed, SIGNAL(valueChanged(int)), this, SLOT(slot_changed_simulationSpeed(int)));
 	ui.dockWidget->hide();
 	
 }
@@ -149,9 +153,12 @@ void Menu_Editor::entityInspector_add(QString name)
 	model_entityInspector->appendRow(new QStandardItem(name));
 }
 
-void Menu_Editor::slot_tab_changed( int index )
+void Menu_Editor::slot_changed_simulationSpeed(int speed)
 {
-	if(index == 2)
-		slot_editorRefresh();
+	// Set simulation speed and update label
+	float simulationSpeed = (float)speed/100;
+	ui.label_simulationSpeed->setText(QString::number(simulationSpeed));
+	settings->timeScale = simulationSpeed;
 }
+
 
