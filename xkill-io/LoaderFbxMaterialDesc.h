@@ -1,32 +1,34 @@
-#ifndef XKILL_IO_MATERIALDESCFBX_H
-#define XKILL_IO_MATERIALDESCFBX_H
+#ifndef XKILL_IO_LOADERFBXMATERIALDESC_H
+#define XKILL_IO_LOADERFBXMATERIALDESC_H
 
 #include <vector>
 #include <fbxsdk.h>
 
 #include <xkill-utilities/Math.h>
 
-class MaterialDescFbx
+class LoaderFbxMaterialDesc
 {
 public:
-	MaterialDescFbx();
-	MaterialDescFbx(Float3	ambient,
-					Float3	diffuse,
-					Float3	specular,
-					Float3	emissive,
-					float	opacity,
-					float	shininess,
-					float	reflectivity);
-	MaterialDescFbx(Float3	ambient,
-					Float3	diffuse,
-					Float3	specular,
-					Float3	emissive,
-					float	opacity,
-					float	shininess,
-					float	reflectivity,
-					std::vector<FbxFileTexture*> fbxFileTextures,
-					std::vector<FbxLayeredTexture*>	fbxLayeredTextures,
-					std::vector<FbxProceduralTexture*> fbxProceduralTextures);
+	LoaderFbxMaterialDesc();
+	LoaderFbxMaterialDesc(Float3 ambient,
+		Float3	diffuse,
+		Float3	specular,
+		Float3	emissive,
+		float	opacity,
+		float	shininess,
+		float	reflectivity);
+	LoaderFbxMaterialDesc(Float3 ambient,
+		Float3	diffuse,
+		Float3	specular,
+		Float3	emissive,
+		float	opacity,
+		float	shininess,
+		float	reflectivity,
+		std::vector<FbxFileTexture*> fbxFileTextures,
+		std::vector<FbxLayeredTexture*>	fbxLayeredTextures,
+		std::vector<FbxProceduralTexture*> fbxProceduralTextures);
+
+	void reset();
 
 	void addFbxFileTexture(FbxFileTexture* fileTexture);
 	void addFbxLayeredTexture(FbxLayeredTexture* layeredTexture);
@@ -63,10 +65,10 @@ private:
 	float	opacity_;
 	float	shininess_;
 	float	reflectivity_;
-	
+
 	std::vector<FbxFileTexture*>		fbxFileTextures_;
 	std::vector<FbxLayeredTexture*>		fbxLayeredTextures_;
 	std::vector<FbxProceduralTexture*>	fbxProceduralTextures_;
 };
 
-#endif //XKILL_IO_MATERIALDESCFBX_H
+#endif //XKILL_IO_LOADERFBXMATERIALDESC_H
