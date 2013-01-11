@@ -1,5 +1,9 @@
 #include "DirectInputKeyboard.h"
 
+#include "InputButtonObject.h"
+#include "InputAxisObject.h"
+#include "InputTriggerObject.h"
+
 DirectInputKeyboard::DirectInputKeyboard(LPDIRECTINPUTDEVICE8 device, GUID deviceGUID, std::string name, unsigned int playerID) : 
 	DirectInputDevice(device, deviceGUID, name, playerID)
 {

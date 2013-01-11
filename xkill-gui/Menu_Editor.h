@@ -1,7 +1,7 @@
 #pragma once
 
 #include <QtGui/QMainWindow>
-#include "ui_MainMenu.h"
+#include "ui_MainWindow.h"
 
 class QStandardItemModel;
 
@@ -11,13 +11,13 @@ class Menu_Editor : public QWidget
 
 private:
 	int num_rows;
-	Ui::MainMenu& ui;
+	Ui::MainWindowClass& ui;
 	QStandardItemModel* model_entityBrowser;
 	QStandardItemModel* model_entityInspector;
 	QStandardItemModel* model_attributeInspector;
 
 public:
-	Menu_Editor(Ui::MainMenu& ui, QWidget* parent);
+	Menu_Editor(Ui::MainWindowClass& ui, QWidget* parent);
 	void entityBrowser_add(QString name, std::vector<int>* owners);
 	void entityInspector_add(QString name);
 public slots:

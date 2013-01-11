@@ -83,9 +83,26 @@ public:
     }
 
 	// Returns how many attributes (including deleted ones) there is 
-	int size()
+	int storageSize()
 	{
 		return (int)allOwnerId->size();
+	}
+
+	// HACK: Returns nr of non-deleted attributes. Non optimized! 
+	int size()
+	{
+		int tmp_nextIndex = nextIndex;
+		
+		int count = 0;
+		resetIndex();
+		while(hasNext())
+		{
+			getNext();
+			count++;
+		}
+
+		nextIndex = nextIndex;
+		return count;
 	}
 
 	// Returns the Owner ID of the latest

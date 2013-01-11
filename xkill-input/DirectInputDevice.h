@@ -13,7 +13,12 @@
 #define DIDFT_OPTIONAL 0x80000000
 #endif
 
-#define SAFE_RELEASE(x) {if(x != NULL) x->Release(); x = NULL;} //Should probably not be here, needed for isXInputDevice
+#define SAFE_RELEASE(x) {if(x != NULL) x->Release(); x = NULL;} //Should probably not be here
+
+class InputObject;
+class InputAxisObject;
+class InputButtonObject;
+class InputTriggerObject;
 
 //! A wrapper of a Direct Input device
 /*!

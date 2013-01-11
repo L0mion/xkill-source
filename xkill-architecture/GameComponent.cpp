@@ -27,7 +27,6 @@ bool GameComponent::init()
 
 	SEND_EVENT(&Event_CreateSpawnPoint(Float3(-1.5f, 3.0f, 0.0f), 2.0f));
 	SEND_EVENT(&Event_CreateSpawnPoint(Float3(1.0f, 5.0f, 0.0f), 2.0f));
-	SEND_EVENT(&Event_CreateSpawnPoint(Float3(0.0f, 0.5f, -5.0f), 2.0f));
 	SEND_EVENT(&Event_CreateSpawnPoint(Float3(1.0f, 1.0f, 1.0f), 2.0f));
 	SEND_EVENT(&Event_CreateSpawnPoint(Float3(4.0f, 4.0f, 4.0f), 2.0f));
 
@@ -78,8 +77,8 @@ void GameComponent::onUpdate(float delta)
 
 
 		Entity* playerEntity = itrPlayer.owner();
-		Attribute_DebugShape* debugShap = itrDebugShape.createAttribute(playerEntity);
-		debugShap->ptr_spatial = itrDebugShape.attributePointer(debugShap);
+		Attribute_DebugShape* debugShape = itrDebugShape.createAttribute(playerEntity);
+		debugShape->ptr_spatial = itrDebugShape.attributePointer(debugShape);
 
 
 		//
@@ -191,7 +190,7 @@ void GameComponent::onUpdate(float delta)
 					pos.y += lookAtXMFloat3.y*d;
 					pos.z += lookAtXMFloat3.z*d;
 
-					// randomize displacement of each projectile preventing all projectiles spawning from
+					// randomize displacement of each projectile preventing them from spawning at the same position
 					randomLO = -weaponStats->displacementSphereRadius*0.5f;
 					randomHI = weaponStats->displacementSphereRadius*0.5f;
 					pos.x += randomLO + (float)rand()/((float)RAND_MAX/(randomHI-randomLO));
@@ -511,7 +510,7 @@ Attribute_SpawnPoint* GameComponent::findUnoccupiedSpawnPoint()
 	std::vector<Attribute_SpawnPoint*> unoccupiedSpawnPoints;
 	
 	// Special cases: *no spawn point, return nullptr.
-	int numSpawnPoints = itrSpawnPoint.size();
+	int numSpawnPoints = itrSpawnPoint.storageSize();
 	if(numSpawnPoints < 1)
 	{
 		DEBUGPRINT("GameComponent::findUnoccupiedSpawnPoint - No spawn point found.");

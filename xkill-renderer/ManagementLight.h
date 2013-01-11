@@ -3,15 +3,20 @@
 
 #include <vector>
 
+#include <xkill-utilities/LightDesc.h>
+
 #include "d3dInterface.h"
-#include "LightDesc.h"
+
+typedef long HRESULT;
 
 struct ID3D11UnorderedAccesView;
 struct ID3D11Buffer;
 struct ID3D11Device;
 struct ID3D11DeviceContext;
-//typedef HRESULT;
 
+static const unsigned int LIGHT_START_MAX_COUNT_DIR		= 5; //Can't be zero as one may not create a naught-sized vector.
+static const unsigned int LIGHT_START_MAX_COUNT_POINT	= 5; //Can't be zero as one may not create a naught-sized vector.
+static const unsigned int LIGHT_START_MAX_COUNT_SPOT	= 5; //Can't be zero as one may not create a naught-sized vector.
 
 //! Class for maintaining lights.
 /*!
@@ -25,32 +30,55 @@ public:
 
 	virtual void reset(); //!< Releases all memory and returns LightManagement to its default state.
 	HRESULT init(ID3D11Device* device); //!< Initializes LightManagement.
+	void update(ID3D11Device* device, ID3D11DeviceContext* devcon); //!< Updates all light-buffers with data from Attribute_Lights.
+	
+	void setLightSRVCS(
+		ID3D11DeviceContext*	devcon, 
+		LightDescType			lightType, 
+		unsigned int			shaderRegister); //!< Set the compute shader to use specified SRV.
 
-	void update(ID3D11Device* device, ID3D11DeviceContext* devcon);
-	
-	HRESULT updateBufferData(ID3D11DeviceContext* devcon); //!< Updates data in the light buffer.
-	
-	void setLightSRVCS(ID3D11DeviceContext* devcon, unsigned int shaderRegister); //!< Set the compute shader to use lightSRV_
-	
-	void addLight(LightDesc light, ID3D11Device* device, ID3D11DeviceContext* devcon); //!< Adds a light to LightManagement
-
-	unsigned int getNumLights() const;
+	unsigned int getLightDirCurCount()		const;
+	unsigned int getLightPointCurCount()	const;
+	unsigned int getLightSpotCurCount()		const;
 private:
-	//void createDirectionalLight(ID3D11Device* device);	//!< Fills a LightDesc with data necessary for a directionalLight
-	void resizeLights(ID3D11Device* device);		//!< Resizes the vector lights_ and also modifies lightBuffer_ and lightSRV_ accordingly.
-	HRESULT initLightBuffer(ID3D11Device* device);	//!< Creates a buffer containg all the lights.
-	HRESULT createLightSRV(ID3D11Device* device);	//! Creates a Shader Resource View that is bound to lightBuffer_.
+	HRESULT initLightDir(ID3D11Device* device);			//!< Initializes directional light-buffer and srv, if lightDirCurCount > 0
+	HRESULT initLightDirBuffer(ID3D11Device* device);	//!< Initializes directional light-buffer.
+	HRESULT initLightDirSRV(ID3D11Device* device);		//!< Initializes directional srv.
+
+	HRESULT initLightPoint(ID3D11Device* device);		//!< Initializes pointlight light-buffer and srv, if lightPointCurCount > 0
+	HRESULT initLightPointBuffer(ID3D11Device* device);	//!< Initializes pointlight light-buffer.
+	HRESULT initLightPointSRV(ID3D11Device* device);	//!< Initializes pointlight srv.
+
+	HRESULT initLightSpot(ID3D11Device* device);		//!< Initializes spotlight light-buffer and srv, if lightSpotCurCount > 0
+	HRESULT initLightSpotBuffer(ID3D11Device* device);	//!< Initializes spotlight light-buffer.
+	HRESULT initLightSpotSRV(ID3D11Device* device);		//!< Initializes spotlight srv.
+
+	void updateLightDir(ID3D11Device* device, ID3D11DeviceContext* devcon);		//!< Updated directional light-buffer with data from Attributes_LightDir.
+	void updateLightPoint(ID3D11Device* device, ID3D11DeviceContext* devcon);	//!< Updated pointlight light-buffer with data from Attributes_LightPoint.
+	void updateLightSpot(ID3D11Device* device, ID3D11DeviceContext* devcon);	//!< Updated spotlight light-buffer with data from Attributes_LightSpot.
+
+	HRESULT increaseLightCapacity(ID3D11Device* device, LightDescType lightType);		//!< Grows specified light-buffer capacity, allowing for more lights of that type to be sent to shader.
+	HRESULT updateLightBuffers(ID3D11DeviceContext* devcon, LightDescType lightType);	//!< Maps new data to specified light-buffer.
+
+	unsigned int lightDirMaxCount_;					//!< Number of directional light slots being bound to shader. 
+	unsigned int lightDirCurCount_;					//!< Number of currently valid directional lights being sent to shader.
+	std::vector<LightDescDir>	lightDirs_;			//!< Light-descriptions copied from Attributes_LightDir. These are then bound to buffer.
+	ID3D11Buffer*				lightDirBuffer_;	//!< Buffer containing directional lights.
+	ID3D11ShaderResourceView*	lightDirSRV_;		//!< SRV bound to directional lights.
 	
-	unsigned int maxNumLights_;	//!< Size of the vector lights_. Doubles every time the vector becomes full.
-	unsigned int curNumLights_;
-	std::vector<LightDesc> lights_;
+	unsigned int lightPointMaxCount_;				//!< Number of pointlight slots being bound to shader.
+	unsigned int lightPointCurCount_;				//!< Number of currently valid pointlights being sent to shader.
+	std::vector<LightDescPoint> lightPoints_;		//!< Light-descriptions copied from Attributes_LightPoint. These are then bound to buffer.
+	ID3D11Buffer*				lightPointBuffer_;	//!< Buffer containing pointlights.
+	ID3D11ShaderResourceView*	lightPointSRV_;		//!< SRV bound to pointlights.
+
+	unsigned int lightSpotMaxCount_;				//!< Number of spotlight slots being bound to shader.
+	unsigned int lightSpotCurCount_;				//!< Number of currently valid spotlights being sent to shader.
+	std::vector<LightDescSpot>	lightSpots_;		//!< Light-descriptions copied from Attributes_LightSpot. These are then bound to buffer.
+	ID3D11Buffer*				lightSpotBuffer_;	//!< Buffer containing spotlights.
+	ID3D11ShaderResourceView*	lightSpotSRV_;		//!< SRV bound to spotlights.
 
 	std::vector<Attribute_Position>* attributesPosition_; //!< Holds positional data. Is fetched only once.
-
-	//unsigned int				numLights_;		//!< Current number of lights.
-	//std::vector<LightDesc>		lights_;		//!< A vector containing all lights.
-	ID3D11Buffer*				lightBuffer_;	//!< A D3D11Buffer object.
-	ID3D11ShaderResourceView*	lightSRV_;		//!< A D3D11ShaderResourceView that will be bound to lightBuffer_.
 };
 
 

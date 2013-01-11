@@ -58,10 +58,10 @@ Attribute_Physics::Attribute_Physics()
 	
 	meshID = 0;
 
+	collisionFilterGroup = Attribute_Physics::DEFAULT_ERROR;
+	collisionFilterMask = 0;
+
 	gravity = Float3(0.0f, -10.0f, 0.0f);
-	
-	isProjectile = false;
-	isExplosionSphere = false;
 
 	angularVelocity.x = 0; 
 	angularVelocity.y = 0;
@@ -85,21 +85,46 @@ Attribute_Projectile::~Attribute_Projectile()
 {
 }
 
-Attribute_Light::Attribute_Light()
+//Attribute_Light::Attribute_Light()
+//{
+//	lightType = LIGHTTYPE_NA;
+//
+//	direction	= Float3(0.0f, 0.0f, 0.0f);
+//	attenuation	= Float3(0.0f, 0.0f, 0.0f);
+//
+//	ambient		= Float4(0.0f, 0.0f, 0.0f, 0.0f);
+//	diffuse		= Float4(0.0f, 0.0f, 0.0f, 0.0f);
+//	specular	= Float4(0.0f, 0.0f, 0.0f, 0.0f);
+//
+//	range		= 0.0f;
+//	spotPower	= 0.0f;
+//}
+//Attribute_Light::~Attribute_Light()
+//{
+//	//Do nothing.
+//}
+
+Attribute_Light_Dir::Attribute_Light_Dir()
 {
-	lightType = LIGHTTYPE_NA;
 
-	direction	= Float3(0.0f, 0.0f, 0.0f);
-	attenuation	= Float3(0.0f, 0.0f, 0.0f);
-
-	ambient		= Float4(0.0f, 0.0f, 0.0f, 0.0f);
-	diffuse		= Float4(0.0f, 0.0f, 0.0f, 0.0f);
-	specular	= Float4(0.0f, 0.0f, 0.0f, 0.0f);
-
-	range		= 0.0f;
-	spotPower	= 0.0f;
 }
-Attribute_Light::~Attribute_Light()
+Attribute_Light_Dir::~Attribute_Light_Dir()
+{
+	//Do nothing.
+}
+Attribute_Light_Point::Attribute_Light_Point()
+{
+
+}
+Attribute_Light_Point::~Attribute_Light_Point()
+{
+	//Do nothing.
+}
+Attribute_Light_Spot::Attribute_Light_Spot()
+{
+
+}
+Attribute_Light_Spot::~Attribute_Light_Spot()
 {
 	//Do nothing.
 }
@@ -136,6 +161,14 @@ Attribute_Input::Attribute_Input()
 Attribute_Input::~Attribute_Input()
 {
 }
+
+//Attribute_InputDeviceSettings::Attribute_InputDeviceSettings()
+//{
+//}
+//Attribute_InputDeviceSettings::~Attribute_InputDeviceSettings()
+//{
+//}
+
 Attribute_Player::Attribute_Player()
 {
 	id = -1;
