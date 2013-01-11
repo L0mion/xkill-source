@@ -23,6 +23,9 @@ InputDevice::InputDevice(GUID deviceGUID, std::string name, unsigned int playerI
 	name_ = name;
 	playerID_ = playerID;
 
+	rumbleTimer_ = 0.0f;
+	rumbleActive_ = false;
+
 	inputObjectArray_ = new InputObjectArray();
 
 	//Needs to create a inputDeviceSettings attribute
@@ -43,6 +46,27 @@ InputDevice::~InputDevice()
 	axes_.clear();
 	buttons_.clear();
 	triggers_.clear();
+}
+
+void InputDevice::Update(float deltaTime)
+{
+	if(IsForceFeedbackCapable() && rumbleActive_)
+	{
+		rumbleTimer_ -= deltaTime;
+
+		if(rumbleTimer_ <= 0.0f)
+		{
+			rumbleActive_ = StopForceFeedback();
+		}
+	}
+}
+
+void InputDevice::RunForceFeedback(float timer)
+{
+	rumbleActive_ = true;
+	rumbleTimer_ = timer;
+
+	RunForceFeedback();
 }
 
 InputDevice::InputDeviceLayout InputDevice::GetLayout()
