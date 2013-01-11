@@ -401,7 +401,6 @@ void Renderer::render()
 		vpDatas.push_back(vpData);
 
 		renderViewportToGBuffer(vpData);
-
 	}
 
 	//Render everything to backbuffer.

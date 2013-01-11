@@ -23,60 +23,36 @@ struct SplitScreenViewport
 class ManagementViewport : public D3DInterface
 {
 public:
-	//! Sets ViewportManagement to its default state.
-	/*!
-	\param numViewports The number of viewports that will be used.
-	\param viewportWidth The width of each viewport.
-	\param viewportHeight The height of each viewport.
-	\param screenWidth The width of the screen in which the viewports reside.
-	\param screenHeight The height of the screen in which the viewports reside.
-	*/
-	ManagementViewport(Winfo* winfo);
-	//! Releases all memory and returns ViewportManagement to default state.
-	~ManagementViewport();
-	//! Releases all memory and returns ViewportManagement to default state.
-	virtual void reset();
-	//! Set the viewport that the renderer will draw to. 
-	void setViewport(ID3D11DeviceContext* devcon, unsigned int splitScreenViewportIndex);
-	//! Resizes the viewports to fit the new screen size.
-	/*!
-	\param screenWidth The new screen width.
-	\param screenHeight the new screen height.
-	\return Any error encountered.
-	*/
-	HRESULT resize();
-	//! Initializes ViewportManagement.
-	HRESULT init();
+	ManagementViewport(Winfo* winfo); //!< Sets ViewportManagement to its default state.
+	
+	~ManagementViewport(); //!< Releases all memory and returns ViewportManagement to default state.
+	virtual void reset(); //!< Releases all memory and returns ViewportManagement to default state.
+	void setViewport(ID3D11DeviceContext* devcon, unsigned int splitScreenViewportIndex); //!< Set the viewport that the renderer will draw to. 
+	
+	HRESULT resize();	//!< Resizes the viewports to fit the new screen size.
+	HRESULT init();		//!< Initializes ViewportManagement
 
-	unsigned int getViewportWidth() const;
-	unsigned int getViewportHeight() const;
-	unsigned int getNumViewportsX() const;
+	unsigned int getViewportWidth() const;	
+	unsigned int getViewportHeight() const;	
+	unsigned int getNumViewportsX() const;	
 	unsigned int getNumViewportsY() const;
 
-	//D3D11_VIEWPORT getViewport(Attribute_SplitScreen* ssAt) const;
 	std::vector<SplitScreenViewport>* getSplitScreenViewports();
 private:
-	//! Creates a single viewport that covers the entire window.
-	HRESULT initViewportSingle();
-	//! Creates two viewports that splits the window horizontally
-	HRESULT initViewportDouble();
-	//! Creates a specified amount of viewports in a grid pattern.
-	/*!
-	\param gridSize Total number of viewports in the grid. Must be a perfect square!
-	*/
-	HRESULT initViewportGrid(unsigned int gridSize);
+	HRESULT initViewportSingle(); //!< Creates a single viewport that covers the entire window.
+	HRESULT initViewportDouble(); //!< Creates two viewports that splits the window horizontally
+	HRESULT initViewportGrid(unsigned int gridSize); //!< Creates a specified amount of viewports in a grid pattern.
 
-	Winfo* winfo_;
+	Winfo* winfo_; //!< Shared struct containing data related to screen dimensions.
 
-	unsigned int numViewportsX_;
-	unsigned int numViewportsY_;
+	unsigned int numViewportsX_;	//!< Number of viewports horisontally.
+	unsigned int numViewportsY_;	//!< Number of viewports vertically.
 	unsigned int viewportWidth_;	//!< Width of each viewport.
 	unsigned int viewportHeight_;	//!< Height of each viewport.
 	
 	unsigned int borderSize_;	//<! Adds space between viewports.
 
-	std::vector<SplitScreenViewport>* splitScreenViewports_;
-	//std::vector<D3D11_VIEWPORT>* viewports_;	//!< Vector containing all the viewport objects.
+	std::vector<SplitScreenViewport>* splitScreenViewports_; //!< Current viewports.
 };
 
 #endif //XKILL_RENDERER_VIEWPORTMANAGEMENT_H

@@ -247,19 +247,3 @@ std::vector<SplitScreenViewport>* ManagementViewport::getSplitScreenViewports()
 {
 	return splitScreenViewports_;
 }
-
-//D3D11_VIEWPORT ManagementViewport::getViewport(Attribute_SplitScreen* ssAt) const
-//{
-//	D3D11_VIEWPORT viewport;
-//	bool foundViewPort = false;
-//	for(unsigned int i = 0; i < viewports_->size() && !foundViewPort; i++)
-//	{
-//		if(viewports_->at(i).ssAt == ssAt)
-//		{
-//			viewport = viewports_->at(i).viewport;
-//			foundViewPort = true;
-//		}
-//	}
-//
-//	return viewport;
-//}
