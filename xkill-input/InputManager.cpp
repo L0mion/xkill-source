@@ -10,6 +10,9 @@
 #include <stdio.h>				  //
 ////////////////////////////////////
 
+///////Needed for Direct Input //////
+//#include <InitGuid.h>			   //
+								   //
 #define DIRECTINPUT_VERSION 0x0800 //
 #include <dinput.h>				   //
 /////////////////////////////////////
@@ -22,6 +25,7 @@ InputManager::InputManager(void)
 {
 	dInput_ = nullptr;
 	keyMapper_ = nullptr;
+	mouseAndKeyboard_ = nullptr;
 }
 
 InputManager::~InputManager(void)
@@ -60,23 +64,6 @@ bool InputManager::InitInput(HWND hWindow, std::string configFilePath)
 	devices_.push_back(mouseAndKeyboard);
 	mouseAndKeyboard_ = mouseAndKeyboard;
 
-	//LPDIRECTINPUTDEVICE8 dInputDevice;
-	//result = dInput_->CreateDevice(GUID_SysMouse, &dInputDevice, NULL);
-	//if(FAILED(result))
-	//	return false;
-
-	//DirectInputDevice* device = new DirectInputMouse(dInputDevice, GUID_SysMouse, "Mouse", 0); //Kolla ifall musen är inkopplad genom att köra en enum med guid:et
-	//device->Init(hWindow);
-	//devices_.push_back(device);
-
-	//result = dInput_->CreateDevice(GUID_SysKeyboard, &dInputDevice, NULL);
-	//if(FAILED(result))
-	//	return false;
-
-	//device = new DirectInputKeyboard(dInputDevice, GUID_SysKeyboard, "Keyboard"); //Kolla ifall tangentbordet är inkopplad genom att köra en enum med guid:et
-	//device->Init(hWindow);
-	//devices_.push_back(device);
-
 	return true;
 }
 
@@ -84,8 +71,6 @@ void InputManager::Update(float deltaTime)
 {
 	for(unsigned int i = 0; i < devices_.size(); i++)
 		devices_[i]->Update(deltaTime);
-
-	//handleInput();
 }
 
 InputDevice* InputManager::GetDevice(unsigned int playerID)

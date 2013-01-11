@@ -2,8 +2,15 @@
 
 #include "InputDevice.h"
 
+class InputObject;
+class InputAxisObject;
+class InputButtonObject;
+class InputTriggerObject;
+
 class QTInputDevices : public InputDevice
 {
+	
+	QTInputDevices();
 public:
 	QTInputDevices(GUID deviceGUID, std::string name, unsigned int playerID = -1);
 	~QTInputDevices();
@@ -30,6 +37,8 @@ protected:
 	virtual void updateState();
 	virtual void createInputLayout();
 	virtual void createInputObjectsFromLayout();
+
+	virtual std::string getStandardMappingsString();
 
 	virtual InputButtonObject* getButtonObject(unsigned int index);
 };

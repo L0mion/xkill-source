@@ -37,7 +37,8 @@ HRESULT RenderingComponent::init()
 
 void RenderingComponent::onUpdate(float delta)
 {
-	renderer_->render(delta);
+	renderer_->update();
+	renderer_->render();
 }
 
 void RenderingComponent::onEvent( Event* e )
@@ -59,7 +60,7 @@ void RenderingComponent::onEvent( Event* e )
 	}
 }
 
-void RenderingComponent::event_WindowResize( Event_WindowResize* e )
+void RenderingComponent::event_WindowResize(Event_WindowResize* e)
 {
 	int width = e->width;
 	int height = e->height;

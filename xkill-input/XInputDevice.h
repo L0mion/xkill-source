@@ -2,6 +2,11 @@
 
 #include "InputDevice.h"
 
+class InputObject;
+class InputAxisObject;
+class InputButtonObject;
+class InputTriggerObject;
+
 //! A wrapper for a XInput device
 /*!
 
@@ -9,6 +14,7 @@
 
 class XInputDevice : public InputDevice
 {
+	XInputDevice();
 public:
 	XInputDevice(int deviceNr, GUID deviceGUID, std::string name, unsigned int playerID);
 	virtual ~XInputDevice(void);
@@ -31,6 +37,8 @@ private:
 	int deviceNr_;
 	int rightFFMotor_, leftFFMotor_;
 	bool forceFeedbackOn_;
+
+	virtual std::string getStandardMappingsString();
 
 	virtual void updateState();
 	virtual void createInputLayout();

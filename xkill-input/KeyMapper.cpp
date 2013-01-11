@@ -2,6 +2,11 @@
 
 #include "FileParser.h"
 #include "InputDevice.h"
+
+#include "InputButtonObject.h"
+#include "InputAxisObject.h"
+#include "InputTriggerObject.h"
+
 #include "Converter.h"
 
 KeyMapper::KeyMapper()
@@ -198,15 +203,35 @@ bool KeyMapper::parseFile(InputDevice* device)
 	if(fileParser_->isEmpty())
 		return false;
 
-	while(!fileParser_->isEmpty())
-	{
-		row = fileParser_->getNextRow();
-		row = removeComment(row);
+	row = fileParser_->getNextRow();
+	row = removeComment(row);
 
-		extractSettingsFromRow(row, device);
+	if(isValid(row, device))
+	{
+		while(!fileParser_->isEmpty())
+		{
+			row = fileParser_->getNextRow();
+			row = removeComment(row);
+
+			extractSettingsFromRow(row, device);
+		}
+	}
+	else
+	{
+		fileParser_->clean();
+		fileParser_->deleteFile();
+		return false;
 	}
 
 	return true;
+}
+
+bool KeyMapper::isValid(std::string row, InputDevice* device)
+{
+	unsigned long hash = 0;
+	Converter::StrToULong(row, hash);
+
+	return hash == device->getHash();
 }
 
 void KeyMapper::extractSettingsFromRow(std::string row, InputDevice* device)
@@ -239,6 +264,8 @@ void KeyMapper::writeToFile(InputDevice* device)
 	fileParser_->startWriting();
 
 	std::string row = "";
+
+	fileParser_->writeRow(Converter::ULongToStr(device->getHash()));
 
 	row = getAxesString(&device->axes_);
 	if(row != "")
@@ -517,15 +544,15 @@ std::string KeyMapper::getAxesString(std::vector<InputAxisObject*>* axes)
 		axesString += "I=" + Converter::IntToStr((int)axis->isInverted()) + " ";
 		axesString += "S=" + Converter::FloatToStr(axis->getSensitivity()) + " ";
 
-		std::vector<int> mappings = axis->getFloatMappings();
+		std::vector<int>* mappings = axis->getFloatMappings();
 
-		for(unsigned int j = 0; j < mappings.size(); j++)
-			axesString += "F=" + Converter::IntToStr(mappings[j]) + " ";
+		for(unsigned int j = 0; j < mappings->size(); j++)
+			axesString += "F=" + Converter::IntToStr(mappings->at(j)) + " ";
 
 		mappings = axis->getBoolMappings();
 
-		for(unsigned int j = 0; j < mappings.size(); j++)
-			axesString += "B=" + Converter::IntToStr(mappings[j]) + " ";
+		for(unsigned int j = 0; j < mappings->size(); j++)
+			axesString += "B=" + Converter::IntToStr(mappings->at(j)) + " ";
 	}
 
 	return axesString;
@@ -545,18 +572,18 @@ std::string KeyMapper::getButtonString(std::vector<InputButtonObject*>* buttons)
 		buttonString += "I=" + Converter::IntToStr((int)button->isInverted()) + " ";
 		buttonString += "S=" + Converter::FloatToStr(button->getSensitivity()) + " ";
 
-		std::vector<int> mappings = button->getFloatMappings();
+		std::vector<int>* mappings = button->getFloatMappings();
 
-		for(unsigned int j = 0; j < mappings.size(); j++)
+		for(unsigned int j = 0; j < mappings->size(); j++)
 		{
-			buttonString += "F=" + Converter::IntToStr(mappings[j]) + " ";
+			buttonString += "F=" + Converter::IntToStr(mappings->at(j)) + " ";
 		}
 
 		mappings = button->getBoolMappings();
 
-		for(unsigned int j = 0; j < mappings.size(); j++)
+		for(unsigned int j = 0; j < mappings->size(); j++)
 		{
-			buttonString += "B=" + Converter::IntToStr(mappings[j]) + " ";
+			buttonString += "B=" + Converter::IntToStr(mappings->at(j)) + " ";
 		}
 	}
 
@@ -578,18 +605,18 @@ std::string KeyMapper::getTriggerString(std::vector<InputTriggerObject*>* trigge
 		triggerString += "D=" + Converter::FloatToStr(trigger->getDeadZone()) + " ";
 		triggerString += "S=" + Converter::FloatToStr(trigger->getSensitivity()) + " ";
 
-		std::vector<int> mappings = trigger->getFloatMappings();
+		std::vector<int>* mappings = trigger->getFloatMappings();
 
-		for(unsigned int j = 0; j < mappings.size(); j++)
+		for(unsigned int j = 0; j < mappings->size(); j++)
 		{
-			triggerString += "F=" + Converter::IntToStr(mappings[j]) + " ";
+			triggerString += "F=" + Converter::IntToStr(mappings->at(j)) + " ";
 		}
 
 		mappings = trigger->getBoolMappings();
 
-		for(unsigned int j = 0; j < mappings.size(); j++)
+		for(unsigned int j = 0; j < mappings->size(); j++)
 		{
-			triggerString += "B=" + Converter::IntToStr(mappings[j]) + " ";
+			triggerString += "B=" + Converter::IntToStr(mappings->at(j)) + " ";
 		}
 	}
 

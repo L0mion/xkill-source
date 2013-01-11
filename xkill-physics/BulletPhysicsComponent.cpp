@@ -99,6 +99,7 @@ bool BulletPhysicsComponent::init()
 	frustrumObjects_ = new btAlignedObjectArray<PhysicsObject*>();
 	broadphase_ = new btDbvtBroadphase();
 	collisionConfiguration_ = new btDefaultCollisionConfiguration();
+	collisionConfiguration_->setConvexConvexMultipointIterations(10, 10);
 	dispatcher_ = new btCollisionDispatcher(collisionConfiguration_);
 	solver_ = new btSequentialImpulseConstraintSolver;
 	dynamicsWorld_ = new btDiscreteDynamicsWorld(dispatcher_,broadphase_,solver_,collisionConfiguration_);
@@ -159,22 +160,23 @@ void BulletPhysicsComponent::onUpdate(float delta)
 	{
 		PhysicsObject* physicsObject = physicsObjects_->at(i);
 		Attribute_Physics* physicsAttribute = &physicsAttributes_->at(i);
+
 		// if the objects owner is not 0 it should simulate
 		if(physicsOwners_->at(i)!=0)
 		{
 			// if the object is not in the world, add it
 			if(!physicsObject->isInWorld())
 			{
-				if(physicsAttribute->isExplosionSphere)
+				if(physicsAttribute->collisionFilterGroup == Attribute_Physics::EXPLOSIONSPHERE)
 				{
 					float scale = 100.0f;
 					btCollisionShape* collisionSphere = new btSphereShape(physicsAttribute->explosionSphereRadius*scale);
-					collisionSphere->setLocalScaling(btVector3(scale,scale,scale));
 					collisionShapeManager_->addCollisionShape(collisionSphere);
 					physicsObject->setCollisionShape(collisionSphere);
 				}
 
-				physicsObject->addToWorld(dynamicsWorld_);
+				physicsObject->addToWorld(dynamicsWorld_, physicsAttribute->collisionFilterGroup, physicsAttribute->collisionFilterMask);
+
 			}
 			// load data from physics attribute
 			physicsObject->preStep(collisionShapeManager_,physicsAttribute);
@@ -324,7 +326,7 @@ void BulletPhysicsComponent::tickCallback(btScalar timeStep)
 					{
 						unsigned int ownerA = physicsOwners_->at(objectA->getIndex());
 						unsigned int ownerB = physicsOwners_->at(objectB->getIndex());
-					
+
 						//Two PhysicsObjects colliding
 						if(ownerA != 0 || ownerB != 0) // ignore contacts where one owner is 0
 						{

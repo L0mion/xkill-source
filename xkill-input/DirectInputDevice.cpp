@@ -1,6 +1,21 @@
 #include "DirectInputDevice.h"
 
+#include "InputButtonObject.h"
+#include "InputAxisObject.h"
+#include "InputTriggerObject.h"
+
+#include "InputObjectArray.h"
+
 #include "InputActions.h"
+#include "Converter.h"
+
+DirectInputDevice::DirectInputDevice() : 
+	InputDevice(GUID(), "")
+{
+	device_ = nullptr;
+	hasFF_ = false;
+	isFFTurnedOn_ = false;
+}
 
 DirectInputDevice::DirectInputDevice(LPDIRECTINPUTDEVICE8 device, GUID deviceGUID, std::string name, unsigned int playerID) : 
 	InputDevice(deviceGUID, name, playerID)
@@ -17,8 +32,11 @@ DirectInputDevice::~DirectInputDevice(void)
 		StopForceFeedback();
 		SAFE_RELEASE(effect_);
 	}
-	device_->Unacquire();
-	SAFE_RELEASE(device_);
+	if(device_ != nullptr)
+	{
+		device_->Unacquire();
+		SAFE_RELEASE(device_);
+	}
 }
 
 void DirectInputDevice::RunForceFeedback()
@@ -222,50 +240,34 @@ BOOL CALLBACK DirectInputDevice::EnumObjectsCallback(const DIDEVICEOBJECTINSTANC
 	return DIENUM_CONTINUE;
 }
 
-//DIOBJECTDATAFORMAT DirectInputDevice::CreateDataFormat(const DIDEVICEOBJECTINSTANCE* object, int objectNumber)
-//{
-//	DIOBJECTDATAFORMAT objectDataFormat;
-//
-//	objectDataFormat.pguid = &object->guidType;
-//	objectDataFormat.dwType = object->dwType | DIDFT_ANYINSTANCE | DIDFT_OPTIONAL;
-//	objectDataFormat.dwOfs = object->dwOfs;
-//	objectDataFormat.dwFlags = 0;
-//
-//	return objectDataFormat;
-//}
-//
-//BOOL DirectInputDevice::SetupAxisObject(const DIDEVICEOBJECTINSTANCE* object, LPDIRECTINPUTDEVICE8 device)
-//{
-//	HRESULT result;
-//
-//	DIPROPRANGE propRange;
-//	DIPROPDWORD propWord;
-//
-//	propRange.diph.dwSize = sizeof(DIPROPRANGE);
-//	propRange.diph.dwHeaderSize = sizeof(DIPROPHEADER);
-//	propRange.diph.dwHow = DIPH_BYID;
-//	propRange.diph.dwObj = object->dwType;
-//
-//	propRange.lMin = -1000;
-//	propRange.lMin = +1000;
-//
-//	result = device->SetProperty(DIPROP_RANGE, &propRange.diph);
-//	if(FAILED(result))
-//		return false;
-//
-//	propWord.diph.dwSize = sizeof(DIPROPDWORD);
-//	propWord.diph.dwHeaderSize = sizeof(DIPROPHEADER);
-//	propWord.diph.dwHow = DIPH_BYID;
-//	propWord.diph.dwObj = object->dwType;
-//
-//	propWord.dwData = 4000;
-//
-//	result = device->SetProperty(DIPROP_DEADZONE, &propWord.diph);
-//	if(FAILED(result))
-//		return false;
-//
-//	return true;
-//}
+std::string DirectInputDevice::getStandardMappingsString()
+{
+	DirectInputDevice diDevice;
+
+	diDevice.setStandardMappings();
+	std::vector<InputObject*> inputObjects = diDevice.inputObjectArray_->inputObjects;
+
+	std::string str = "";
+
+	for(unsigned int i = 0; i < inputObjects.size(); i++)
+	{
+		std::vector<int>* mappings = inputObjects[i]->getBoolMappings();
+
+		for(unsigned int j = 0; j < mappings->size(); j++)
+		{
+			str += Converter::IntToStr(mappings->at(j));
+		}
+
+		mappings = inputObjects[i]->getFloatMappings();
+
+		for(unsigned int j = 0; j < mappings->size(); j++)
+		{
+			str += Converter::IntToStr(mappings->at(j));
+		}
+	}
+
+	return str;
+}
 
 HRESULT DirectInputDevice::createEffect(int nrFFObjects)
 {
@@ -412,14 +414,14 @@ void DirectInputDevice::createInputObjectsFromLayout()
 	{
 		InputButtonObject* button = new InputButtonObject(i);
 		buttons_.push_back(button);
-		inputObjects_.push_back(button);
+		inputObjectArray_->inputObjects.push_back(button);
 	}
 
 	for(int i = 0; i < inputLayout_.nrOfTriggers; i++)
 	{
 		InputTriggerObject* trigger = new InputTriggerObject(0, 0xFF);
 		triggers_.push_back(trigger);
-		inputObjects_.push_back(trigger);
+		inputObjectArray_->inputObjects.push_back(trigger);
 	}
 }
 
@@ -447,7 +449,7 @@ void DirectInputDevice::createAxes()
 	{
 		InputAxisObject* axis = new InputAxisObject(0, 0xFFFF);
 		axes_.push_back(axis);
-		inputObjects_.push_back(axis);
+		inputObjectArray_->inputObjects.push_back(axis);
 	}
 
 	if(axesIndexArray_.size() >= 2)

@@ -3,6 +3,7 @@
 #include <vector>
 #include "dllUtilities.h"
 #include "Math.h"
+#include "LightDesc.h"
 
 //
 // Events info
@@ -67,6 +68,7 @@ enum DLL_U EventType
 
 	// Utilities
 	EVENT_CREATE_MESH,
+	EVENT_CREATE_LIGHT_D3D,
 	EVENT_LOAD_TEXTURES,
 	EVENT_SHOW_MESSAGEBOX,
 
@@ -382,4 +384,3 @@ public:
 
 	EntityType entityType;
 };
-

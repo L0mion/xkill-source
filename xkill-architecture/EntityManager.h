@@ -1,124 +1,25 @@
 #pragma once
 
+#include <xkill-utilities/EntityStorage.h>
 #include "EntityFactory.h"
 
 #include <vector>
 #include <iostream>
 
-/// Manages multiple Entities in a uniform way.
-/** 
-\ingroup ARCHITECTURE
-*/
-
-class EntityStorage : public IObserver
-{
-private:
-	std::vector<Entity> entities;
-	std::queue<int> deleted;
-	int index;
-
-public:
-	EntityStorage()
-	{
-		// Creates Entity 0.
-		// IMPORTANT: Entity 0 is used to mark deleted
-		// Attributes and shouldn't be used in the game.
-		createEntity();
-
-		// subscribe to events
-		SUBSCRIBE_TO_EVENT(this, EVENT_GET_ENTITIES);
-		SUBSCRIBE_TO_EVENT(this, EVENT_CREATE_ENTITY);
-	}
-
-	~EntityStorage()
-	{
-		for(unsigned i=0; i<entities.size(); i++)
-		{
-			entities[i].deleteAttributes();
-			entities[i].clean();
-		}
-	}
-
-	/**
-	Gives access to Entities through a Event_GetEntities.
-	*/
-	void event_GetEntities(Event_GetEntities* e)
-	{
-		e->entities = &entities;
-	}
-
-	/**
-	Handles Events for EntityStorage.
-	*/
-	void onEvent(Event* e)
-	{
-		EventType type = e->getType();
-		switch (type) 
-		{
-		case EVENT_GET_ENTITIES:
-			event_GetEntities(static_cast<Event_GetEntities*>(e));
-			break;
-		default:
-			break;
-		}
-	}
-
-	/**
-	Creates an Entity with a unique ID.
-	*/
-	Entity* createEntity()
-	{
-		// TRUE: Reuse Entity
-		if(deleted.size() > 0)
-		{
-			index = deleted.front();
-			deleted.pop();
-		}
-		// ELSE: Create new Entity
-		else
-		{
-			index = (int)entities.size();
-			entities.push_back(Entity(index));
-		}
-
-		return &entities[index];
-	}
-
-	/**
-	Deletes an Entity based on its unique ID.
-	*/
-	void deleteEntity(int id)
-	{
-		// TRUE: Make sure no one is trying to delete "Entity 0"
-		if(id == 0)
-		{
-			std::string message = "Trying to delete 'Entity 0'. Entity 0 is used to mark deleted Attributes and is not allowed to be deleted.";
-			SHOW_MESSAGEBOX(message);
-		}
-		// ELSE: Delete Entity
-		else
-		{
-			entities[id].deleteAttributes();
-			deleted.push(id);
-			DEBUGPRINT("ENTITYMANAGER: Removed Entity " << id);
-		}
-	}
-};
-
 class EntityManager: public IObserver
 {
 private:
-	EntityStorage entities;
+	EntityStorage* entities;
 	EntityFactory entityFactory;
 
 	Entity* createEntity()
 	{
-		return entities.createEntity();
+		return entities->createEntity();
 	}
 
 	void deleteEntity(int id)
 	{
-		entities.deleteEntity(id);
+		entities->deleteEntity(id);
 	}
 
 public:
@@ -131,6 +32,8 @@ public:
 		SUBSCRIBE_TO_EVENT(this, EVENT_CREATE_SPAWNPOINT);
 		SUBSCRIBE_TO_EVENT(this, EVENT_CREATE_EXPLOSIONSPHERE);
 		SUBSCRIBE_TO_EVENT(this, EVENT_CREATE_ENTITY);
+
+		entities = ATTRIBUTE_MANAGER->entities;
 	}
 
 	/**
