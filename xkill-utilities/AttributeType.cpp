@@ -52,7 +52,7 @@ Attribute_Render::~Attribute_Render()
 Attribute_Physics::Attribute_Physics()
 {
 	collisionResponse = true;
-	added = false;
+	hasChanged = false;
 	alive = true;
 	mass = 1.0f;
 	

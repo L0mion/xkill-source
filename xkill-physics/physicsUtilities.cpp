@@ -3,7 +3,12 @@
 #include <xkill-utilities/Math.h>
 #include <btBulletDynamicsCommon.h>
 
-btVector3 convert(Float4 float4)	
+btQuaternion convert(Float4 float4)	
 {
-	return btVector3(float4.x, float4.y, float4.z);
+	return btQuaternion(float4.x, float4.y, float4.z);
+}
+
+btVector3 convert(Float3 float3)	
+{
+	return btVector3(float3.x, float3.y, float3.z);
 }

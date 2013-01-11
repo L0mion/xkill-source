@@ -163,7 +163,7 @@ struct DLL_U Attribute_Physics : public IAttribute
 	//restitution
 
 	bool collisionResponse;
-	bool added;
+	bool hasChanged;
 	bool alive;
 	bool isProjectile;
 

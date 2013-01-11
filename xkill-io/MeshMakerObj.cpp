@@ -170,8 +170,8 @@ bool MeshMakerObj::getLastWrittenToFile(std::string path, std::string fileName, 
 MeshModel* MeshMakerObj::makeMesh(Obj obj)
 {
 	MeshGeometry meshGeo = objGeoToMeshGeo(obj.getObjGeometry());
-	
-	MeshModel* model = new MeshModel(meshGeo, materials_);
+	MeshOrigins meshOri = OriginsToMeshOrigins();
+	MeshModel* model = new MeshModel(meshGeo, materials_,meshOri);
 	return model;
 }
 bool MeshMakerObj::makePGY(MeshModel* model, WriteTimeUTC writeTimeUTC)
@@ -232,6 +232,10 @@ void MeshMakerObj::loadMTLMaterials(MTL mtl)
 	}
 }
 
+const MeshOrigins MeshMakerObj::OriginsToMeshOrigins()
+{
+	return MeshOrigins(fileNameObj_);
+}
 const MeshMaterial MeshMakerObj::MTLToMeshMaterial(MTLMaterial mtl)
 {
 	Float3 ambientColor		= mtl.getAmbientColor();
@@ -272,16 +276,21 @@ const MeshSubset MeshMakerObj::objGroupToMeshSubset(ObjGroup objGroup)
 {
 	std::vector<unsigned int> indices	= objGroup.getIndices();
 	int materialIndex = MTLNameToMaterialIndex(objGroup.getMaterial());
-
 	return MeshSubset(materialIndex, indices);
 }
 const int MeshMakerObj::MTLNameToMaterialIndex(std::string mtlName)
 {
 	int materialIndex = 0;
 
-	for(unsigned int i = 0; i < materialID_.size(); i++)
+	bool foundMat = false;
+	for(unsigned int i = 0; i < materialID_.size() && !foundMat; i++)
+	{
 		if(materialID_[i] == mtlName)
+		{
 			materialIndex = i;
+			foundMat = true;
+		}
+	}
 
 	return materialIndex;
 }

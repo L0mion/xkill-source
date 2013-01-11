@@ -8,6 +8,7 @@
 #include <xkill-utilities/MeshGeometry.h>
 #include <xkill-utilities/MeshSubset.h>
 #include <xkill-utilities/MeshMaterial.h>
+#include <xkill-utilities/MeshOrigins.h>
 
 #include "MTL.h"
 #include "ObjGeometry.h"
@@ -68,6 +69,9 @@ private:
 	//! Loads resulting materials from .mtl-files into general Mesh-type material format.
 	void loadMTLMaterials(MTL mtl);
 	
+
+	//! Converts an .obj-type MTL-material into a general Mesh-type material format.
+	const MeshOrigins	OriginsToMeshOrigins();
 	//! Converts an .obj-type MTL-material into a general Mesh-type material format.
 	const MeshMaterial	MTLToMeshMaterial(MTLMaterial mtl);
 	//! Converts an .obj-type Geometry into a general Mesh-type Geometry format.

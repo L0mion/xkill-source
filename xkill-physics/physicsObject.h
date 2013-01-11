@@ -3,6 +3,9 @@
 
 #include <BulletDynamics/Dynamics/btRigidBody.h>
 
+class btManifoldPoint;
+class btCollisionObject;
+
 class PhysicsObject : public btRigidBody
 {
 private:
@@ -11,8 +14,7 @@ public:
 	PhysicsObject();
 	~PhysicsObject();
 	void init(unsigned int attributeIndex);
-	void preStep();
-	void postStep();
+	virtual void reload();
 };
 
 #endif

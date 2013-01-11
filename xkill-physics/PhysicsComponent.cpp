@@ -5,17 +5,18 @@
 #include "Serialize/BulletWorldImporter/btBulletWorldImporter.h"
 #include "physicsObject.h"
 
+ATTRIBUTES_DECLARE_ALL;
+
 PhysicsComponent::PhysicsComponent() : broadphase_(nullptr),
 									   collisionConfiguration_(nullptr),
 									   dispatcher_(nullptr),
 									   solver_(nullptr),
 									   dynamicsWorld_(nullptr),
 									   bulletImporter_(nullptr),
-									   collisionObjects_(nullptr),
-									   physicsObjects_(nullptr),
-									   collisionShapes_(nullptr)
+									   physicsObjects_(nullptr)
 {
 	SUBSCRIBE_TO_EVENT(this,EVENT_DO_CULLING);
+	ATTRIBUTES_INIT_ALL;
 }
 
 PhysicsComponent::~PhysicsComponent()
@@ -34,35 +35,6 @@ PhysicsComponent::~PhysicsComponent()
 			physicsObjects_->pop_back();
 		}
 		delete physicsObjects_;
-	}
-	// Remove all CollisionObjects
-	if(collisionObjects_ != nullptr)
-	{
-		while(collisionObjects_->size() > 0)
-		{
-			unsigned int last = collisionObjects_->size()-1;
-			if(collisionObjects_->at(last) != nullptr)
-			{
-				//dynamicsWorld_->removeCollisionObject(collisionObjects_->at(last)); // ADD WHEN COLLISIONOBJECTS IS DONE
-				delete collisionObjects_->at(last);
-			}
-			collisionObjects_->pop_back();
-		}
-		delete collisionObjects_;
-	}
-	// Remove all btCollisionShapes
-	if(collisionShapes_ != nullptr)
-	{
-		while(collisionShapes_->size() > 0)
-		{
-			unsigned int last = collisionShapes_->size()-1;
-			if(collisionShapes_->at(last) != nullptr)
-			{
-				delete collisionShapes_->at(last);
-			}
-			collisionShapes_->pop_back();
-		}
-		delete collisionShapes_;
 	}
 	// Remove the btCollisionDispatcher
 	if(dispatcher_ != nullptr)
@@ -99,9 +71,6 @@ PhysicsComponent::~PhysicsComponent()
 bool PhysicsComponent::init()
 {
 	physicsObjects_ =	new btAlignedObjectArray<PhysicsObject*>();
-	collisionObjects_ = new btAlignedObjectArray<CollisionObject*>();
-	collisionShapes_ =	new btAlignedObjectArray<btCollisionShape*>();
-
 	
 	collisionConfiguration_ = new btDefaultCollisionConfiguration();
 	solver_ =				  new btSequentialImpulseConstraintSolver();
@@ -119,9 +88,7 @@ bool PhysicsComponent::init()
 void PhysicsComponent::onUpdate(float delta)
 {
 	syncronizeWithAttributes();
-	preStep();
 	dynamicsWorld_->stepSimulation(delta);
-	postStep();
 }
 
 void PhysicsComponent::onEvent(Event* e)
@@ -136,27 +103,49 @@ void PhysicsComponent::onEvent(Event* e)
 	}
 }
 
-void loadObjects()
-{
-
-}
-
 void PhysicsComponent::syncronizeWithAttributes()
 {
-}
-
-void PhysicsComponent::preStep()
-{
-}
-
-void PhysicsComponent::postStep()
-{
+	while(itrPhysics.hasNext())
+	{
+		Attribute_Physics* physicsAttribute = itrPhysics.getNext();
+		unsigned int index = itrPhysics.index();
+		if(index > physicsObjects_->size())
+		{
+			physicsObjects_->push_back(nullptr);
+		}
+		if(itrPhysics.ownerId() == 0)
+		{
+			if(physicsObjects_->at(index) != nullptr)
+			{
+				delete physicsObjects_->at(index);
+				physicsObjects_->at(index) = nullptr;
+			}
+		}
+		if(physicsAttribute->hasChanged)
+		{
+			if(physicsObjects_->at(index) != nullptr)
+			{
+				delete physicsObjects_->at(index);
+			}
+			// Add object based on type
+			/*switch(physicsAttribute->collisionFilterGroup())
+			{
+				DEFAULT_ERROR:
+				physicsObjects_->at(index) = new PhysicsObject();
+				break;
+			}*/
+			physicsObjects_->at(index)->init(index);
+			physicsAttribute->hasChanged = false;
+		}
+	}
 }
 
 void PhysicsComponent::collisionDetection()
 {
+	//Weehaa!
 }
 
 void PhysicsComponent::doCulling()
 {
+	//YippiKayey
 }

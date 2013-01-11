@@ -27,14 +27,9 @@ private:
 	btDiscreteDynamicsWorld*					dynamicsWorld_;
 	btBulletWorldImporter*						bulletImporter_;
 
-	btAlignedObjectArray<CollisionObject*>*		collisionObjects_;
 	btAlignedObjectArray<PhysicsObject*>*		physicsObjects_;
-	btAlignedObjectArray<btCollisionShape*>*	collisionShapes_;
 
-	void loadObjects();
 	void syncronizeWithAttributes();
-	void preStep();
-	void postStep();
 	void collisionDetection();
 	void doCulling();
 public:

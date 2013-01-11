@@ -11,6 +11,7 @@
 #include "MeshGeometry.h"
 #include "MeshMaterial.h"
 #include "MeshVertices.h"
+#include "MeshOrigins.h"
 
 //! Generalized Model describing mesh of renderable objects.
 /*!
@@ -25,17 +26,20 @@ public:
 	//! Initializes Model to default state.
 	MeshModel(
 		const MeshGeometry				geometry,
-		const std::vector<MeshMaterial>	materials);
+		const std::vector<MeshMaterial>	materials,
+		const MeshOrigins				origins);
 	//! Does nothing.
 	~MeshModel();
 
 	MeshGeometry				getGeometry();
 	unsigned int				getNumMaterials();
 	std::vector<MeshMaterial>	getMaterials();
+	MeshOrigins					getOrigins();
 protected:
 private:
 	MeshGeometry				geometry_;	//!< Vertex and index data of mesh.
 	std::vector<MeshMaterial>	materials_;	//!< Materials describing rendering properties of subsets.
+	MeshOrigins					origins_; //!< File properties such as filename
 };
 
 #endif //XKILL_RENDERER_MESHMODEL_H
