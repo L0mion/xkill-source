@@ -58,6 +58,7 @@ enum DLL_U AttributeType
 	ATTRIBUTE_DEBUGSHAPE,
 	ATTRIBUTE_PHYSICS,
 	ATTRIBUTE_CAMERA,
+	ATTRIBUTE_SPLITSCREEN,
 	ATTRIBUTE_INPUT,
 	ATTRIBUTE_PLAYER,
 	ATTRIBUTE_BOUNDING,
@@ -201,26 +202,10 @@ struct DLL_U Attribute_Projectile : public IAttribute
 	float explosionSphereRadius;
 };
 
-//struct DLL_U Attribute_Light : public IAttribute
-//{
-//	Attribute_Light();
-//	~Attribute_Light(); //!< Does nothing.
-//
-//	LightType lightType; //!< Type of light: Directional, Point or Spot.
-//
-//	AttributePointer ptr_position; //!< Position of light.
-//
-//	Float3 direction;	//!< The lights direction.
-//	Float3 attenuation;	//!< How fast the light intensity will diminish
-//	
-//	Float4 ambient;		//!< The ambient color.
-//	Float4 diffuse;		//!< The diffuse color.
-//	Float4 specular;	//!< The specular color.
-//
-//	float range;		//!< How far the light can reach.
-//	float spotPower;	//!< Controls the spotlight cone.
-//};
-
+/// Represents a directional light. The LightDescDir-struct is directly mapped to GPU.
+/** 
+\ingroup ATTRIBUTES
+*/
 struct DLL_U Attribute_Light_Dir : public IAttribute
 {
 	Attribute_Light_Dir();
@@ -228,23 +213,33 @@ struct DLL_U Attribute_Light_Dir : public IAttribute
 
 	LightDescDir lightDir;
 };
+/// Represents a point-light. The LightDescPoint-struct is directly mapped to GPU.
+/** 
+OBS! The pos-attribute in LightDescPoint must be updated with the corresponding value in AttributePointer ptr_position-type in order to have the correct position! OBS!
+\ingroup ATTRIBUTES
+*/
 struct DLL_U Attribute_Light_Point : public IAttribute
 {
 	Attribute_Light_Point();
 	~Attribute_Light_Point();
 
-	AttributePointer ptr_position;
+	AttributePointer ptr_position; //!< The correct position of point-light.
 
-	LightDescPoint lightPoint;
+	LightDescPoint lightPoint; //!< Describing struct being directly mapped to GPU. Be sure to update my positional value beforehand.
 };
+/// Represents a spot-light. The LightDescSpot-struct is directly mapped to GPU.
+/** 
+OBS! The pos-attribute in LightDescSpot must be updated with the corresponding value in AttributePointer ptr_position-type in order to have the correct position! OBS!
+\ingroup ATTRIBUTES
+*/
 struct DLL_U Attribute_Light_Spot : public IAttribute
 {
 	Attribute_Light_Spot();
 	~Attribute_Light_Spot();
 
-	AttributePointer ptr_position;
+	AttributePointer ptr_position; //!< The correct position of spotlight.
 
-	LightDescSpot lightSpot;
+	LightDescSpot lightSpot; //!< Describing struct being directly mapped to GPU. Be sure to update my positional value beforehand.
 };
 
 struct DLL_U Attribute_Input : public IAttribute
