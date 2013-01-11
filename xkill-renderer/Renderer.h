@@ -40,8 +40,6 @@ class ManagementMath;
 class M3DLoader;
 class AnimatedMesh;
 
-
-
 //! Module responsible for managing data related to rendering and doing the actual rendering of XKILL.
 /*! Rendering module of XKILL utilizing Deferred Rendering with DirectCompute.
 \ingroup xkill-renderer

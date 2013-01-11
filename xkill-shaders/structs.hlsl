@@ -44,25 +44,4 @@ struct quad_vertex
 	float2 texcoord : TEXCOORD;
 };
 
-struct Light
-{
-	float3	position;
-	float	range;
-	float3	direction;
-	float	spotPower;
-	float4	ambient;
-	float4	diffuse;
-	float4	specular;
-	float3	attenuation;
-	uint	type;
-};
-
-struct SurfaceInfo
-{
-	float3 position;
-	float3 normal;
-	float4 diffuse;
-	float4 specular;
-};
-
-#endif //XKILL_RENDERERE_STRUCTS_HLSL
+#endif //XKILL_RENDERER_STRUCTS_HLSL

@@ -119,15 +119,12 @@ public:
 		HACKHACK+=2;
 
 		//temp, create demo light for each projectile
-		CREATE_ATTRIBUTE(Attribute_Light, light, entity);
-		CONNECT_ATTRIBUTES(light, position);
-		light->direction	= Float3(0.57735f, -0.57735f, 0.57735f);
-		light->ambient		= Float4(0.8f, 0.8f, 0.8f, 1.0f);
-		light->diffuse		= Float4(0.2f, 0.2f, 0.2f, 1.0f);
-		light->specular		= Float4(1.0f, 1.0f, 1.0f, 1.0f);
-		light->lightType	= LIGHTTYPE_DIRECTIONAL;
-		light->range		= 1000.0f;
-		light->attenuation	= Float3(0.5f, 0.5f, 0.5f);
+		CREATE_ATTRIBUTE(Attribute_Light_Dir, lightDir, entity);
+		//CONNECT_ATTRIBUTES(lightDir, position);
+		lightDir->lightDir.direction = Float3(0.57735f, -0.57735f, 0.57735f);
+		lightDir->lightDir.ambient = Float4(0.8f, 0.8f, 0.8f, 1.0f);
+		lightDir->lightDir.diffuse = Float4(0.2f, 0.2f, 0.2f, 1.0f);
+		lightDir->lightDir.specular = Float4(1.0f, 1.0f, 1.0f, 1.0f);
 	}
 
 	void createProjectileEntity(Entity* entity, Event_CreateProjectile* e)
@@ -171,6 +168,15 @@ public:
 		CREATE_ATTRIBUTE(Attribute_Damage, damage, entity);
 		damage->damage = e->damage;
 		damage->owner_entityID = e->entityIdOfCreator;
+
+		//temp, create demo light for each projectile
+		CREATE_ATTRIBUTE(Attribute_Light_Point, lightPoint, entity);
+		CONNECT_ATTRIBUTES(lightPoint, position);
+		lightPoint->lightPoint.ambient		= Float4(0.0f, 0.0f, 0.0f, 1.0f);
+		lightPoint->lightPoint.diffuse		= Float4(0.8f, 0.8f, 0.8f, 1.0f);
+		lightPoint->lightPoint.specular		= Float4(0.1f, 0.1f, 0.1f, 1.0f);
+		lightPoint->lightPoint.range		= 100.0f;
+		lightPoint->lightPoint.attenuation	= Float3(1.5f, 1.2f, 0.0f);
 	}
 
 	void createMesh(Entity* entity, Event_CreateMesh* e)

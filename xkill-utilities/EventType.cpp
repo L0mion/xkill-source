@@ -149,23 +149,3 @@ Event_CreateEntity::Event_CreateEntity( EntityType entityType ) : Event(EVENT_CR
 {
 	this->entityType = entityType;
 }
-
-Event_CreateLight::Event_CreateLight(LightType lightType) : Event(EVENT_CREATE_LIGHT)
-{
-	lightType = lightType;
-
-	position	= Float3(0.0f, 0.0f, 0.0f);
-	direction	= Float3(0.0f, 0.0f, 0.0f); 
-	attenuation	= Float3(0.0f, 0.0f, 0.0f);
-
-	ambient		= Float4(0.0f, 0.0f, 0.0f, 0.0f);
-	diffuse		= Float4(0.0f, 0.0f, 0.0f, 0.0f);
-	specular	= Float4(0.0f, 0.0f, 0.0f, 0.0f);
-
-	range		= 0.0f;
-	spotPower	= 0.0f;
-}
-Event_CreateLight::~Event_CreateLight()
-{
-	//Does nothing.
-}
