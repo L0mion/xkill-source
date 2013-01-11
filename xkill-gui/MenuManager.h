@@ -8,7 +8,6 @@
 #include "Menu_InGame.h"
 #include <vector>
 
-
 class Attribute_Player;
 
 class HUDWindow : public QMainWindow
