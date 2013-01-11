@@ -119,8 +119,8 @@ void Menu_Editor::slot_clicked_entityBrowser( QModelIndex indexClicked )
 			entityInspector_add("Camera");
 		if(entity->hasAttribute(ATTRIBUTE_INPUT))
 			entityInspector_add("Input");
-		if(entity->hasAttribute(ATTRIBUTE_INPUTDEVICE))
-			entityInspector_add("Input Device");
+		if(entity->hasAttribute(ATTRIBUTE_INPUTDEVICESETTINGS))
+			entityInspector_add("Input Device Settings");
 		if(entity->hasAttribute(ATTRIBUTE_PLAYER))
 			entityInspector_add("Player");
 		if(entity->hasAttribute(ATTRIBUTE_BOUNDING))

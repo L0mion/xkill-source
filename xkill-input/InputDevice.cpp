@@ -9,16 +9,24 @@
 #include "KeyMapper.h"
 
 #include <xkill-utilities/AttributeManager.h>
+#include <xkill-utilities/EntityStorage.h>
 
 #include "Converter.h"
 
+ATTRIBUTES_DECLARE_ALL;
+
 InputDevice::InputDevice(GUID deviceGUID, std::string name, unsigned int playerID)
 {
+	ATTRIBUTES_INIT_ALL;
+
 	deviceGUID_ = deviceGUID;
 	name_ = name;
 	playerID_ = playerID;
 
 	inputObjectArray_ = new InputObjectArray();
+
+	//Needs to create a inputDeviceSettings attribute
+	//itrInputDevice.createAttribute(settings_entity)->inputObjectArray = inputObjectArray_;
 
 	createObjectVectors();
 }

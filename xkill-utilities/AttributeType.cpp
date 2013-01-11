@@ -137,10 +137,10 @@ Attribute_Input::~Attribute_Input()
 {
 }
 
-Attribute_InputDevice::Attribute_InputDevice()
+Attribute_InputDeviceSettings::Attribute_InputDeviceSettings()
 {
 }
-Attribute_InputDevice::~Attribute_InputDevice()
+Attribute_InputDeviceSettings::~Attribute_InputDeviceSettings()
 {
 }
 

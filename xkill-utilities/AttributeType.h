@@ -59,7 +59,7 @@ enum DLL_U AttributeType
 	ATTRIBUTE_PHYSICS,
 	ATTRIBUTE_CAMERA,
 	ATTRIBUTE_INPUT,
-	ATTRIBUTE_INPUTDEVICE,
+	ATTRIBUTE_INPUTDEVICESETTINGS,
 	ATTRIBUTE_PLAYER,
 	ATTRIBUTE_BOUNDING,
 	ATTRIBUTE_MESH,
@@ -239,10 +239,10 @@ class InputObjectArray;
 \ingroup ATTRIBUTES
 */
 
-struct DLL_U Attribute_InputDevice : public IAttribute
+struct DLL_U Attribute_InputDeviceSettings : public IAttribute
 {
-	Attribute_InputDevice();
-	~Attribute_InputDevice();
+	Attribute_InputDeviceSettings();
+	~Attribute_InputDeviceSettings();
 
 	InputObjectArray* inputObjectArray;
 };
