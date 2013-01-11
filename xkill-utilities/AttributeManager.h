@@ -5,6 +5,20 @@
 
 class EntityStorage;
 
+// Settings class
+class DLL_U Settings
+{
+public:
+	float timeScale;
+
+	Settings()
+	{
+		timeScale = 1.0f;
+	}
+};
+
+
+
 /// Singleton responsible for providing access to each Attribute.
 /** 
 \ingroup ARCHITECTURE
@@ -13,11 +27,41 @@ class EntityStorage;
 class AttributeManager
 {
 private:
-	AttributeManager();
+	AttributeManager()
+	{
+		createEntityStorage();
+		settings = new Settings;
+
+		position		.init	(ATTRIBUTE_POSITION);
+		spatial			.init	(ATTRIBUTE_SPATIAL);
+		render			.init	(ATTRIBUTE_RENDER);
+		debugShape		.init	(ATTRIBUTE_DEBUGSHAPE);
+		physics			.init	(ATTRIBUTE_PHYSICS);
+		camera			.init	(ATTRIBUTE_CAMERA);
+		input			.init	(ATTRIBUTE_INPUT);
+		player			.init	(ATTRIBUTE_PLAYER);
+		bounding		.init	(ATTRIBUTE_BOUNDING);
+		projectile		.init	(ATTRIBUTE_PROJECTILE);
+		lightDir		.init	(ATTRIBUTE_LIGHT_DIRECTIONAL);
+		lightPoint		.init	(ATTRIBUTE_LIGHT_POINT);
+		lightSpot		.init	(ATTRIBUTE_LIGHT_SPOT);
+		mesh			.init	(ATTRIBUTE_MESH);
+		health			.init	(ATTRIBUTE_HEALTH);
+		damage			.init	(ATTRIBUTE_DAMAGE);
+		spawnPoint		.init	(ATTRIBUTE_SPAWNPOINT);
+		weaponStats		.init	(ATTRIBUTE_WEAPONSTATS);
+		explosionSphere	.init	(ATTRIBUTE_EXPLOSIONSPHERE);
+
+		// ADD MORE ABOVE ^
+
+	}
+
+	void createEntityStorage();
 
 public:
 	~AttributeManager();
 
+	Settings* settings;
 	EntityStorage* entities;
 
 	AttributeStorage<Attribute_Position>		position;
@@ -30,15 +74,18 @@ public:
 	AttributeStorage<Attribute_Player>			player;
 	AttributeStorage<Attribute_Bounding>		bounding;
 	AttributeStorage<Attribute_Projectile>		projectile;
-	AttributeStorage<Attribute_Light_Dir>	lightDir;
-	AttributeStorage<Attribute_Light_Point>			lightPoint;
-	AttributeStorage<Attribute_Light_Spot>			lightSpot;
+	AttributeStorage<Attribute_Light_Dir>		lightDir;
+	AttributeStorage<Attribute_Light_Point>		lightPoint;
+	AttributeStorage<Attribute_Light_Spot>		lightSpot;
 	AttributeStorage<Attribute_Mesh>			mesh;
 	AttributeStorage<Attribute_Health>			health;
 	AttributeStorage<Attribute_Damage>			damage;
 	AttributeStorage<Attribute_SpawnPoint>		spawnPoint;
 	AttributeStorage<Attribute_WeaponStats>		weaponStats;
 	AttributeStorage<Attribute_ExplosionSphere>	explosionSphere;
+
+	// ADD MORE ABOVE ^
+
 
 	static AttributeManager* getInstance();
 };
@@ -57,11 +104,13 @@ public:
 		}
 		return instance;
 	}
+	static Settings settingsx;
 };
 
 
 // Declares all attributes
 #define ATTRIBUTES_DECLARE_ALL														\
+static	Settings											*settings			;	\
 static	EntityStorage										*entityStorage		;	\
 static	AttributeIterator<Attribute_Position>				itrPosition			;	\
 static	AttributeIterator<Attribute_Spatial>				itrSpatial			;	\
@@ -73,7 +122,7 @@ static	AttributeIterator<Attribute_Input>					itrInput			;	\
 static	AttributeIterator<Attribute_Player>					itrPlayer			;	\
 static	AttributeIterator<Attribute_Bounding>				itrBounding			;	\
 static	AttributeIterator<Attribute_Projectile>				itrProjectile		;	\
-static	AttributeIterator<Attribute_Light_Dir>		itrLightDir			;	\
+static	AttributeIterator<Attribute_Light_Dir>				itrLightDir			;	\
 static	AttributeIterator<Attribute_Light_Point>			itrLightPoint		;	\
 static	AttributeIterator<Attribute_Light_Spot>				itrLightSpot		;	\
 static	AttributeIterator<Attribute_Mesh>					itrMesh				;	\
@@ -87,6 +136,7 @@ static	AttributeIterator<Attribute_ExplosionSphere>		itrExplosionSphere	;	\
 
 // Inits all attributes
 #define ATTRIBUTES_INIT_ALL															\
+settings			= ATTRIBUTE_MANAGER->settings;									\
 entityStorage		= ATTRIBUTE_MANAGER->entities;									\
 itrPosition			= ATTRIBUTE_MANAGER->position			.getIterator();			\
 itrSpatial			= ATTRIBUTE_MANAGER->spatial			.getIterator();			\
