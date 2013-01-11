@@ -13,7 +13,6 @@ class Menu_Main : public QMainWindow, public ToggleHelper
 
 private:
 	Ui::MainMenu ui;
-	Menu_Editor* editor;
 
 public:
 	Menu_Main(QWidget* parent);
