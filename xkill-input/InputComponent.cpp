@@ -78,8 +78,8 @@ void InputComponent::handleInput(float delta)
 
 		inputAttributes_->at(i).position.x = device->getFloatValue(ACTION_F_WALK_LR);
 		inputAttributes_->at(i).position.y = device->getFloatValue(ACTION_F_WALK_FB);
-		inputAttributes_->at(i).rotation.x = device->getFloatValue(ACTION_F_LOOK_LR, true) * delta;
-		inputAttributes_->at(i).rotation.y = device->getFloatValue(ACTION_F_LOOK_UD, true) * delta;
+		inputAttributes_->at(i).rotation.x = device->getFloatValue(ACTION_F_LOOK_LR, true);
+		inputAttributes_->at(i).rotation.y = device->getFloatValue(ACTION_F_LOOK_UD, true);
 
 		if(device->getBoolValue(ACTION_B_FIRE))
 			inputAttributes_->at(i).fire = true;
