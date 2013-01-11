@@ -44,8 +44,8 @@ void lightingCS( uint3 threadID : SV_DispatchThreadID )
 	
 	SurfaceInfo surface = 
 	{
-		position, 
-		normal, 
+		position,
+		normal,
 		albedo,							//diffuse
 		float4(0.1f, 0.1f, 0.1f, 1.0f)	//specular
 	};

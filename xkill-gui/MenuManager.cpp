@@ -22,12 +22,10 @@ HUDWindow::HUDWindow(QWidget* parent, int id) : QMainWindow(parent)
 
 	// health
 	label_health = new QLabel(this);
-	label_health->setText("<html><head/><body><p><span style=\" font-size:6pt; font-weight:600;\">Health 50</span></p></body></html>");
 	horizontalLayout->addWidget(label_health);
 
 	// ammo
 	label_ammo = new QLabel(this);
-	label_ammo->setText("<html><head/><body><p><span style=\" font-size:6pt; font-weight:600;\">Ammo 50</span></p></body></html>");
 	horizontalLayout->addWidget(label_ammo);
 
 	// ammo type
@@ -64,11 +62,20 @@ void HUDWindow::update(Attribute_Player* player)
 	Attribute_Health*		health		=	itrHealth		.at(player->ptr_health);
 	Attribute_WeaponStats*	weaponStats	=	itrWeaponStats	.at(player->ptr_weaponStats);
 
+	float sizeScale = (float) this->parentWidget()->height() / 1000;
+	int textSize = (int)(20 * sizeScale);
+	if(textSize<1)
+		textSize = 1;
+	QString str_textSize = QString::number(textSize);
+	QSize iconSize((int)32*sizeScale, (int)32*sizeScale);
+	label_weaponType->setMaximumSize(iconSize);
+	label_ammoType->setMaximumSize(iconSize);
+
 	// health & ammo bars
 	QString str_health = QString::number(health->health);
-	label_health->setText("<html><head/><body><p><span style=\" font-size:6pt; font-weight:600;\">Health "+str_health+"</span></p></body></html>");
+	label_health->setText("<html><head/><body><p><span style=\" font-size:"+str_textSize+"pt; font-weight:600;\">Health "+str_health+"&nbsp;</span></p></body></html>");
 	QString str_ammo = QString::number(weaponStats->nrOfShotsLeftInClip);
-	label_ammo->setText("<html><head/><body><p><span style=\" font-size:6pt; font-weight:600;\">Ammo "+str_ammo+"</span></p></body></html>");
+	label_ammo->setText("<html><head/><body><p><span style=\" font-size:"+str_textSize+"pt; font-weight:600;\">Ammo "+str_ammo+"&nbsp;</span></p></body></html>");
 
 	// ammo icon
 	if(ammo != weaponStats->ammunitionType)
@@ -107,6 +114,7 @@ void HUDWindow::update(Attribute_Player* player)
 			label_weaponType->setPixmap(QPixmap(QString::fromUtf8(":/xkill/images/w_auto.png")));
 		}
 	}
+	resize(horizontalLayout->minimumSize());
 }
 
 void HUDManager::update()
