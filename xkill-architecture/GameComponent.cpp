@@ -614,7 +614,7 @@ Attribute_SpawnPoint* GameComponent::findUnoccupiedSpawnPoint()
 }
 
 void GameComponent::event_StartDeathmatch( Event_StartDeathmatch* e )
-{ 
+{
 	// Delete players
 	std::vector<int>* playerAttributesOwners = GET_ATTRIBUTE_OWNERS(player);
 	for(unsigned i=0; i<playerAttributesOwners->size(); i++)
