@@ -5,7 +5,7 @@
 
 btQuaternion convert(Float4 float4)	
 {
-	return btQuaternion(float4.x, float4.y, float4.z);
+	return btQuaternion(float4.x, float4.y, float4.z, float4.w);
 }
 
 btVector3 convert(Float3 float3)	

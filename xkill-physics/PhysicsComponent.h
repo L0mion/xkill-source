@@ -31,6 +31,7 @@ private:
 	void syncronizeWithAttributes();
 	void collisionDetection();
 	void doCulling();
+	void handleInput();
 public:
 	PhysicsComponent();
 	~PhysicsComponent();

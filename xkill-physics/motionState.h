@@ -11,7 +11,8 @@ public:
 	MotionState(unsigned int attributeIndex);
 	~MotionState();
 	void setAttributeIndex(unsigned int attributeIndex);
-	virtual void sgetWorldTransform(btTransform &worldTrans) const;
+	unsigned int getAttributeIndex();
+	virtual void getWorldTransform(btTransform &worldTrans) const;
 	virtual void setWorldTransform(const btTransform &worldTrans);
 };
 

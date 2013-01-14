@@ -254,18 +254,18 @@ void Attribute_WeaponStats::setWeaponStats(AmmunitionType ammunitionType, Firing
 	switch(ammunitionType)
 	{
 	case BULLET: //One powerful accurate bullet.
-		velocityOfEachProjectile = 4000.0f;
+		velocityOfEachProjectile = 40.0f;
 		damgeOfEachProjectile = 5;
 		break;
 	case SCATTER: //Many weak and less accurate bullets.
-		velocityOfEachProjectile = 1000.0f;
+		velocityOfEachProjectile = 10.0f;
 		nrOfProjectilesForEachShot = 10;
 		damgeOfEachProjectile = 2;
 		displacementSphereRadius = 0.02f;
 		spreadConeRadius = 0.2f;
 		break;
 	case EXPLOSIVE: //One powerful accurate exploding bullet.
-		velocityOfEachProjectile = 500.0f;
+		velocityOfEachProjectile = 5.0f;
 		damgeOfEachProjectile = 10;
 		explosionSphereRadius = 1.0f;
 		isExplosive = true;

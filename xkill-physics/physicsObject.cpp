@@ -7,15 +7,17 @@
 #include "collisionShapes.h"
 #include "motionState.h"
 
+#include "physicsUtilities.h"
+
 
 ATTRIBUTES_DECLARE_ALL;
 static bool isFirst = true;
 
 
 
-PhysicsObject::PhysicsObject() : btRigidBody(0, new MotionState(0), nullptr)
+PhysicsObject::PhysicsObject(unsigned int attributeIndex) : btRigidBody(0, new MotionState(attributeIndex), nullptr)
 {
-	
+	yaw_ = 0;
 }
 
 PhysicsObject::~PhysicsObject()
@@ -30,21 +32,19 @@ void PhysicsObject::init(unsigned int attributeIndex)
 		isFirst = false;
 	}
 
-	attributeIndex_ = attributeIndex;
 	static_cast<MotionState*>(getMotionState())->setAttributeIndex(attributeIndex);
 	reload();
 }
 
 void PhysicsObject::onUpdate(float delta)
 {
-	btVector3 t = getLinearVelocity();
-	int a =1;
 }
 
 void PhysicsObject::reload()
 {
 	static float worldScale = 100.0f;
-	Attribute_Physics* physicsAttribute = itrPhysics.at(attributeIndex_);
+	Attribute_Physics* physicsAttribute = itrPhysics.at(static_cast<MotionState*>(getMotionState())->getAttributeIndex());
+	
 	setAngularVelocity(btVector3(physicsAttribute->angularVelocity.x,
 								 physicsAttribute->angularVelocity.y,
 								 physicsAttribute->angularVelocity.z));
@@ -58,4 +58,17 @@ void PhysicsObject::reload()
 	setMassProps(physicsAttribute->mass,
 				 btVector3(0,0,0));
 	activate(true);
+}
+
+void PhysicsObject::handleInput(Attribute_Input* inputAttribute)
+{
+	yaw_ += inputAttribute->rotation.x;
+	btVector3 move = btVector3(inputAttribute->position.x, 0, inputAttribute->position.y);
+	move = move.rotate(btVector3(0,1,0),yaw_);
+	move = btVector3(move.x(), getLinearVelocity().y(), move.z());
+	setLinearVelocity(move);
+	btTransform world;
+	getMotionState()->getWorldTransform(world);
+	world.setRotation(btQuaternion(yaw_,0,0));
+	getMotionState()->setWorldTransform(world);
 }

@@ -74,6 +74,7 @@ void GameComponent::onUpdate(float delta)
 		Attribute_WeaponStats*	weaponStats	=	itrWeaponStats	.at(player->ptr_weaponStats);
 		Attribute_Spatial*		spatial		=	itrSpatial		.at(render->ptr_spatial);
 		Attribute_Position*		position	=	itrPosition		.at(spatial->ptr_position);
+		Attribute_Physics*		physics		=	itrPhysics		.at(input->ptr_physics);
 
 
 		Entity* playerEntity = itrPlayer.owner();
@@ -230,14 +231,14 @@ void GameComponent::onUpdate(float delta)
 			{
 				Attribute_Position* spawnPointPositionAttribute = itrPosition.at(spawnPointAttribute->ptr_position);
 				position->position = spawnPointPositionAttribute->position; // set player position attribute
-
+				
 				DEBUGPRINT("Player entity " << itrPlayer.ownerId() << " spawned at " << position->position.x << " " << position->position.y << " " << position->position.z << std::endl);
 			}
 			else
 			{
 				position->position = Float3(0.0f, 0.0f, 0.0f);
 			}
-
+			physics->hasChanged = true;
 			health->health = health->startHealth; // restore player health
 			SEND_EVENT(&Event_PlaySound(1));
 		}

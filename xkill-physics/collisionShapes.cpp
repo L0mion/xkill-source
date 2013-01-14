@@ -8,11 +8,11 @@
 #include <xkill-utilities/AttributeManager.h>
 #include <xkill-utilities/MeshModel.h>
 
-ATTRIBUTES_DECLARE_ALL;
+AttributeIterator<Attribute_Mesh> itrMesh;
 
 CollisionShapes::CollisionShapes()
 {
-	ATTRIBUTES_INIT_ALL;
+	itrMesh	 = ATTRIBUTE_MANAGER->mesh.getIterator();
 	collisionShapes_ = new btAlignedObjectArray<btCollisionShape*>();
 	defaultShape_ = new btSphereShape(1);
 	importer_ = new btBulletWorldImporter();
@@ -21,13 +21,9 @@ CollisionShapes::CollisionShapes()
 
 CollisionShapes::~CollisionShapes()
 {
-	while(collisionShapes_->size() > 0)
-	{
-		delete collisionShapes_->at(collisionShapes_->size() - 1);
-		collisionShapes_->pop_back();
-	}
 	delete collisionShapes_;
 	delete defaultShape_;
+	importer_->deleteAllData();
 	delete importer_;
 }
 
@@ -46,6 +42,7 @@ btCollisionShape* CollisionShapes::getCollisionShape(unsigned int meshId)
 
 void CollisionShapes::loadCollisionShapes()
 {
+	
 	while(itrMesh.hasNext())
 	{
 		Attribute_Mesh* meshAttribute = itrMesh.getNext();
@@ -76,7 +73,8 @@ void CollisionShapes::loadCollisionShapes()
 				filename = filename.append(name);
 				filename = filename.append(".bullet");
 				importer_->loadFile(filename.c_str());
-				collisionShape = importer_->getCollisionShapeByName(name.c_str());
+				if(importer_->getNumCollisionShapes())
+					collisionShape = importer_->getCollisionShapeByIndex(importer_->getNumCollisionShapes()-1);//name.c_str());
 				if(collisionShape != nullptr)
 				{
 					std::pair<unsigned int, unsigned int>  idToIndex(meshAttribute->meshID,collisionShapes_->size());

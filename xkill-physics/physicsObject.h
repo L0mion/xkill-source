@@ -5,17 +5,19 @@
 
 class btManifoldPoint;
 class btCollisionObject;
+struct Attribute_Input;
 
 class PhysicsObject : public btRigidBody
 {
 private:
-	unsigned int attributeIndex_;
+	float yaw_;
 public:
-	PhysicsObject();
+	PhysicsObject(unsigned int attributeIndex);
 	~PhysicsObject();
 	void init(unsigned int attributeIndex);
 	virtual void onUpdate(float delta);
 	virtual void reload();
+	virtual void handleInput(Attribute_Input* inputAttribute);
 };
 
 #endif

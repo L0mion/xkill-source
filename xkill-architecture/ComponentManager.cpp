@@ -77,12 +77,6 @@ bool ComponentManager::init(HWND windowHandle, HWND parentWindowHandle)
 		return false;
 	}
 
-	if(!physics_->init())
-	{
-		std::cout << "BulletPhysicsComponent failed to init." << std::endl;
-		return false;
-	}
-
 	if(!camera_->init())
 	{
 		std::cout << "CameraComponent failed to init." << std::endl;
@@ -117,6 +111,12 @@ bool ComponentManager::init(HWND windowHandle, HWND parentWindowHandle)
 	if(!ioComponent_->init())
 	{
 		std::cout << "IOComponent failed to init." << std::endl;
+		return false;
+	}
+
+	if(!physics_->init())
+	{
+		std::cout << "BulletPhysicsComponent failed to init." << std::endl;
 		return false;
 	}
 

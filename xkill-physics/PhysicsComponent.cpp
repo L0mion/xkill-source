@@ -14,6 +14,7 @@
 
 
 AttributeIterator<Attribute_Physics> itrPhysics;
+AttributeIterator<Attribute_Input> itrInput;
 
 PhysicsComponent::PhysicsComponent() : broadphase_(nullptr),
 									   collisionConfiguration_(nullptr),
@@ -25,6 +26,7 @@ PhysicsComponent::PhysicsComponent() : broadphase_(nullptr),
 {
 	SUBSCRIBE_TO_EVENT(this,EVENT_DO_CULLING);
 	itrPhysics = ATTRIBUTE_MANAGER->physics.getIterator();
+	itrInput = ATTRIBUTE_MANAGER->input.getIterator();
 }
 
 PhysicsComponent::~PhysicsComponent()
@@ -89,11 +91,20 @@ bool PhysicsComponent::init()
 	dynamicsWorld_ =  new btDiscreteDynamicsWorld(dispatcher_,broadphase_,solver_,collisionConfiguration_);
 	bulletImporter_ = new btBulletWorldImporter(dynamicsWorld_);
 
-	dynamicsWorld_->setGravity(btVector3(0,0,0));
-
+	dynamicsWorld_->setGravity(btVector3(0,-10,0));
+	CollisionShapes::Instance()->loadCollisionShapes();
 	
 
 	return true;
+}
+
+void PhysicsComponent::handleInput()
+{
+	while(itrInput.hasNext())
+	{
+		Attribute_Input* inputAttribute = itrInput.getNext();
+		physicsObjects_->at(inputAttribute->ptr_physics.index)->handleInput(inputAttribute);
+	}
 }
 
 void PhysicsComponent::onUpdate(float delta)
@@ -103,6 +114,7 @@ void PhysicsComponent::onUpdate(float delta)
 	{
 		physicsObjects_->at(i)->onUpdate(delta);
 	}
+	handleInput();
 	dynamicsWorld_->stepSimulation(delta,10);
 }
 
@@ -149,11 +161,11 @@ void PhysicsComponent::syncronizeWithAttributes()
 			/*switch(physicsAttribute->collisionFilterGroup())
 			{
 				DEFAULT_ERROR:*/
-				physicsObjects_->at(index) = new PhysicsObject();
+				physicsObjects_->at(index) = new PhysicsObject(index);
 				/*break;
 			}*/
-			dynamicsWorld_->addRigidBody(physicsObjects_->at(index));
 			physicsObjects_->at(index)->init(index);
+			dynamicsWorld_->addRigidBody(physicsObjects_->at(index));			
 			physicsAttribute->hasChanged = false;
 			
 		}
