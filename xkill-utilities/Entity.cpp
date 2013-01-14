@@ -26,6 +26,16 @@ void Entity::deleteAttributes()
 	attributes->clear();
 }
 
+std::vector<int>  Entity::getAttributesAsEnums()
+{
+	std::vector<int> enums;
+	for(int i=0; i<(int)attributes->size(); i++)
+	{
+		enums.push_back(attributes->at(i).type);
+	}
+	return enums;
+}
+
 void Entity::addAttribute( AttributeController attribute )
 {
 	attributes->push_back(attribute);
@@ -59,4 +69,10 @@ std::vector<int> Entity::getAttributes( AttributeType type )
 int Entity::getID()
 {
 	return id;
+}
+
+
+DataItemList* Entity::getDataListFromAttribute(int index)
+{
+	return attributes->at(index).getDataList();
 }

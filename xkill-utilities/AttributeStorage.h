@@ -45,6 +45,12 @@ public:
 	{
 	}
 
+	DataItemList* getDataList(int index)
+	{
+		IAttribute* a = (IAttribute*)&attributes[index];
+		return a->getDataList();
+	}
+
 	AttributeIterator<T> getIterator()
 	{
 		return AttributeIterator<T>(&attributes, &owners, this);

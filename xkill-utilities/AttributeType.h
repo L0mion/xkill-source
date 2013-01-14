@@ -6,6 +6,8 @@
 #include "LightDesc.h"
 #include <string>
 
+#include "DataItem.h"
+
 
 /// Used inside \ref COMPONENTS for data processing.
 /** 
@@ -32,6 +34,12 @@ struct DLL_U IAttribute
 
 	//! Called when deleting attributes (refer to AttributeStorage::deleteAttribute(int index))
 	virtual void clean(){};
+
+	virtual DataItemList* getDataList()
+	{
+		DataItemList* list = new DataItemList();
+		return list;
+	};
 
 	virtual ~IAttribute();
 };
@@ -89,6 +97,13 @@ struct DLL_U Attribute_Position : public IAttribute
 	~Attribute_Position();
 
 	Float3 position;
+
+	DataItemList* getDataList()
+	{
+		DataItemList* list = new DataItemList();
+		list->add(position, "Position");
+		return list;
+	}
 };
 
 /// Stores detailed Spatial informaiton about an Entity 
@@ -104,6 +119,14 @@ struct DLL_U Attribute_Spatial : public IAttribute
 
 	Float4 rotation;
 	Float3 scale;
+
+	DataItemList* getDataList()
+	{
+		DataItemList* list = new DataItemList();
+		list->add(rotation, "Rotation");
+		list->add(scale,	"Scale");
+		return list;
+	}
 };
 
 /// Stores the points for both a bounding box and a convex mesh
