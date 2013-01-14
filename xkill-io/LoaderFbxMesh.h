@@ -20,11 +20,28 @@ public:
 	std::vector<VertexPosNormTex> getVerticesPosNormTex();
 
 private:
-	void parseVertexPositions(FbxMesh* mesh, int polygonVertexCount);
-	void parseVertexNormals(FbxMesh* mesh, int polygonIndex, int insidePolygonIndex, int vertexId);
-	void parseVertexUVs(FbxMesh* mesh, int polygonIndex, int insidePolygonIndex);
-	void parseVertexTangents(FbxMesh* mesh, int vertexId);
-	void parseVertexBinormals(FbxMesh* mesh, int vertexId);
+	void parsePolygonGroup(FbxMesh* mesh, int polygonIndex);
+	void parseVertexPositions(FbxMesh* mesh, FbxVector4* controlPoints, int controlPointIndex);
+	
+	void parseVertexColors(FbxMesh* mesh, int controlPointIndex, int vertexId);
+	FbxColor parseVertexColorsByControlPoint(FbxGeometryElementVertexColor* vertexColorElement, int controlPointIndex);
+	FbxColor parseVertexColorsByPolygonVertex(FbxGeometryElementVertexColor* vertexColorElement, int vertexId);
+	
+	void parseVertexNormals(FbxMesh* mesh, int controlPointIndex, int vertexId);
+	FbxVector4 parseVertexNormalsByControlPoint(FbxGeometryElementNormal* normalElement, int controlPointIndex);
+	FbxVector4 parseVertexNormalsByPolygonVertex(FbxGeometryElementNormal* normalElement, int vertexId);
+	
+	void parseVertexUVs(FbxMesh* mesh, int polygonIndex, int insidePolygonIndex, int controlPointIndex);
+	FbxVector2 parseVertexUVsByControlPoint(FbxGeometryElementUV* uvElement, int controlPointIndex);
+	FbxVector2 parseVertexUVsByPolygonVertex(FbxMesh* mesh, FbxGeometryElementUV* uvElement, int polygonIndex, int insidePolygonIndex);
+	
+	void parseVertexTangents(FbxMesh* mesh, int controlPointIndex, int vertexId);
+	FbxVector4 parseVertexTangentsByControlPoint(FbxGeometryElementTangent* tangentElement, int controlPointIndex);
+	FbxVector4 parseVertexTangentsByPolygonVertex(FbxGeometryElementTangent* tangentElement, int vertexId);
+
+	void parseVertexBinormals(FbxMesh* mesh, int controlPointIndex, int vertexId);
+	FbxVector4 parseVertexBinormalsByControlPoint(FbxGeometryElementBinormal* binormalElement, int controlPointIndex);
+	FbxVector4 parseVertexBinormalsByPolygonVertex(FbxGeometryElementBinormal* binormalElement, int vertexId);
 
 	bool float2Equal(Float2 f1, Float2 f2);
 	bool float3Equal(Float3 f1, Float3 f2);
@@ -36,7 +53,9 @@ private:
 	std::vector<unsigned int>	indices_;
 	std::vector<VertexPosNormTex> verticesPosNormTex_;
 
+	std::vector<int>	polygonGroupIds_;
 	std::vector<Float3> vertexPositions_;
+	std::vector<Float4> vertexColors_;
 	std::vector<Float3> vertexNormals_;
 	std::vector<Float2> vertexUVs_;
 	std::vector<Float4> vertexTangents_;

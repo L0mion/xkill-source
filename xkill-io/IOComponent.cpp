@@ -46,7 +46,7 @@ bool IOComponent::init()
 
 	fbxLoader_ = new LoaderFbx();
 	fbxLoader_->init();
-	fbxLoader_->load("../../xkill-resources/xkill-models/Sadface.fbx");
+	fbxLoader_->load("../../xkill-resources/xkill-models/box.fbx");
 
 	return sucessfulInit;
 }
