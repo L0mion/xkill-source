@@ -35,7 +35,7 @@ bool SoundComponent::init(std::string configFilePath)
 	int test = sizeof(*ATTRIBUTE_MANAGER);
 
 	mFMODEventSystem = new FMODEventSystem();
-	mFMODEventSystem->Init("../xkill-dependencies/sound/", "Xkill 1.0.fev", 64);
+	mFMODEventSystem->Init("../../xkill-resources/xkill-sounds/", "Xkill 1.0.fev", 64);
 
 	//FMODEventSystemProgrammerReportParser fmodEventSystemProgrammerReportParser;
 	//if(!fmodEventSystemProgrammerReportParser.parseProgrammerReport(mFMODEventSystem))
@@ -82,14 +82,14 @@ void SoundComponent::onEvent(Event* e)
 
 void SoundComponent::onUpdate(float delta)
 {
-	//timer += delta;
-	//if(timer >= 0.5f)
-	//{
-	//	timer = 0.0f;
-	//	int fmodEventIndex = converter->getFModIndex(3);
-	//	if(fmodEventIndex >= 0)
-	//		mFMODEventSystem->StartSoundEventAt(fmodEventIndex);
-	//}
+	timer += delta;
+	if(timer >= 0.5f)
+	{
+		timer = 0.0f;
+		int fmodEventIndex = converter->getFModIndex(3);
+		if(fmodEventIndex >= 0)
+			mFMODEventSystem->StartSoundEventAt(fmodEventIndex);
+	}
 
 	mFMODEventSystem->Update();
 }

@@ -1,5 +1,11 @@
 #include "DirectInputDevice.h"
 
+#include "InputButtonObject.h"
+#include "InputAxisObject.h"
+#include "InputTriggerObject.h"
+
+#include "InputObjectArray.h"
+
 #include "InputActions.h"
 #include "Converter.h"
 
@@ -47,7 +53,7 @@ void DirectInputDevice::RunForceFeedback()
 	}
 }
 
-void DirectInputDevice::StopForceFeedback()
+bool DirectInputDevice::StopForceFeedback()
 {
 	if(hasFF_)
 	{
@@ -57,6 +63,8 @@ void DirectInputDevice::StopForceFeedback()
 				isFFTurnedOn_ = false;
 		}
 	}
+
+	return isFFTurnedOn_;
 }
 
 void DirectInputDevice::SetForceFeedback(float leftMotorScale, float rightMotorScale)
@@ -114,6 +122,7 @@ bool DirectInputDevice::IsForceFeedbackCapable()
 
 void DirectInputDevice::Update(float deltaTime)
 {
+	InputDevice::Update(deltaTime);
 	updateState();
 }
 
@@ -239,24 +248,24 @@ std::string DirectInputDevice::getStandardMappingsString()
 	DirectInputDevice diDevice;
 
 	diDevice.setStandardMappings();
-	std::vector<InputObject*> inputObjects = diDevice.inputObjects_;
+	std::vector<InputObject*> inputObjects = diDevice.inputObjectArray_->inputObjects;
 
 	std::string str = "";
 
 	for(unsigned int i = 0; i < inputObjects.size(); i++)
 	{
-		std::vector<int> mappings = inputObjects[i]->getBoolMappings();
+		std::vector<int>* mappings = inputObjects[i]->getBoolMappings();
 
-		for(unsigned int j = 0; j < mappings.size(); j++)
+		for(unsigned int j = 0; j < mappings->size(); j++)
 		{
-			str += Converter::IntToStr(mappings[j]);
+			str += Converter::IntToStr(mappings->at(j));
 		}
 
 		mappings = inputObjects[i]->getFloatMappings();
 
-		for(unsigned int j = 0; j < mappings.size(); j++)
+		for(unsigned int j = 0; j < mappings->size(); j++)
 		{
-			str += Converter::IntToStr(mappings[j]);
+			str += Converter::IntToStr(mappings->at(j));
 		}
 	}
 
@@ -408,14 +417,14 @@ void DirectInputDevice::createInputObjectsFromLayout()
 	{
 		InputButtonObject* button = new InputButtonObject(i);
 		buttons_.push_back(button);
-		inputObjects_.push_back(button);
+		inputObjectArray_->inputObjects.push_back(button);
 	}
 
 	for(int i = 0; i < inputLayout_.nrOfTriggers; i++)
 	{
 		InputTriggerObject* trigger = new InputTriggerObject(0, 0xFF);
 		triggers_.push_back(trigger);
-		inputObjects_.push_back(trigger);
+		inputObjectArray_->inputObjects.push_back(trigger);
 	}
 }
 
@@ -443,7 +452,7 @@ void DirectInputDevice::createAxes()
 	{
 		InputAxisObject* axis = new InputAxisObject(0, 0xFFFF);
 		axes_.push_back(axis);
-		inputObjects_.push_back(axis);
+		inputObjectArray_->inputObjects.push_back(axis);
 	}
 
 	if(axesIndexArray_.size() >= 2)

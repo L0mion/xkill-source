@@ -2,6 +2,11 @@
 
 #include "InputDevice.h"
 
+class InputObject;
+class InputAxisObject;
+class InputButtonObject;
+class InputTriggerObject;
+
 class QTInputDevices : public InputDevice
 {
 	
@@ -13,7 +18,7 @@ public:
 	virtual void Update(float deltaTime);
 
 	virtual void RunForceFeedback();
-	virtual void StopForceFeedback();
+	virtual bool StopForceFeedback();
 	virtual void SetForceFeedback(float leftMotorScale, float rightMotorScale);
 	virtual bool IsForceFeedbackCapable();
 

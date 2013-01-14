@@ -25,7 +25,6 @@ template <class T>
 class AttributeStorage : public IAttributeStorage
 {
 private:
-	//static EntityStorage* entities;
 									//!< Owner 0 means no owner, and means the attribute.
 									//!< Is deleted and ready to be reused.
 	std::queue<int> deleted;		//!< Queue to keep track of deleted Indexe e.g. Indexes with "owner 0".
@@ -69,8 +68,6 @@ public:
 	{
 		this->type = type;
 	}
-
-	
 
 	/** 
 	Creates space for an attribute and returns a

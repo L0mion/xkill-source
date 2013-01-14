@@ -161,6 +161,14 @@ Attribute_Input::Attribute_Input()
 Attribute_Input::~Attribute_Input()
 {
 }
+
+//Attribute_InputDeviceSettings::Attribute_InputDeviceSettings()
+//{
+//}
+//Attribute_InputDeviceSettings::~Attribute_InputDeviceSettings()
+//{
+//}
+
 Attribute_Player::Attribute_Player()
 {
 	id = -1;
