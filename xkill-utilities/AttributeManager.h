@@ -114,7 +114,7 @@ public:
 
 // Declares all attributes
 #define ATTRIBUTES_DECLARE_ALL														\
-static	Settings											*settings			;	\
+static	Settings											*settings				;	\
 static	EntityStorage										*entityStorage			;	\
 static	AttributeIterator<Attribute_Position>				itrPosition				;	\
 static	AttributeIterator<Attribute_Spatial>				itrSpatial				;	\
@@ -141,6 +141,7 @@ static	AttributeIterator<Attribute_ExplosionSphere>		itrExplosionSphere		;	\
 
 // Inits all attributes
 #define ATTRIBUTES_INIT_ALL																\
+settings				= ATTRIBUTE_MANAGER->settings;									\
 entityStorage			= ATTRIBUTE_MANAGER->entities;									\
 itrPosition				= ATTRIBUTE_MANAGER->position				.getIterator();		\
 itrSpatial				= ATTRIBUTE_MANAGER->spatial				.getIterator();		\
