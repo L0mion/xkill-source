@@ -7,6 +7,7 @@ typedef struct HWND__* HWND;
 namespace DirectX
 {
 	struct XMFLOAT4X4;
+	struct XMFLOAT3;
 };
 
 struct Attribute_Render;
@@ -14,6 +15,7 @@ struct Attribute_DebugShape;
 struct Attribute_Camera;
 struct Attribute_Spatial;
 struct Attribute_Position;
+struct ViewportData;
 
 class Winfo;
 class TexDesc;
@@ -53,7 +55,8 @@ public:
 		unsigned int screenWidth, 
 		unsigned int screenHeight);	//!< Resizes all management objects that are affected by a change in screen resolution.
 	HRESULT	init();					//!< Initializes members and prepares render.
-	void	render(float delta);	//!< Renders a frame.
+	void	update();
+	void	render();	//!< Renders a frame.
 	void	loadTextures(TexDesc* texdesc); //!< Forwards information related to what textures Renderer is to load to Renderer-object.
 protected:
 private:
@@ -72,16 +75,9 @@ private:
 	HRESULT initManagementDebug();		//!< Initializes ManagementDebug, which holds data allowing advanced detection of COM-leaks in D3D.
 	void	initManagementMath();		//!< Initializes ManagementMath, which manages math-related functions and loading of dx-vectors into generic-type vectors utilizing SIMD.
 
-	void renderViewport(
-		Attribute_Camera	cameraAt, 
-		unsigned int	viewportTopX,
-		unsigned int	viewportTopY,
-		unsigned int	cameraIndex); //!< Renders a viewport.
 	void renderViewportToGBuffer(
-		DirectX::XMFLOAT4X4 viewMatrix,
-		DirectX::XMFLOAT4X4 projectionMatrix,
-		unsigned int		cameraIndex);	//!< Renders to g-buffer.
-	void renderViewportToBackBuffer();			//!< Renders to backbuffer.
+		ViewportData& vpData);	//!< Renders to g-buffer.
+	void renderViewportToBackBuffer(ViewportData& vpData);			//!< Renders to backbuffer.
 	void renderAttribute(
 		Attribute_Render* renderAt, 
 		DirectX::XMFLOAT4X4 viewMatrix, 
@@ -118,7 +114,7 @@ private:
 	ManagementMath*		managementMath_;		//!< Loads dx-math vectors into generic-type vectors and maintains other math-related functions.
 
 	std::vector<Attribute_Spatial>*		attributesSpatial_;		//!< Holds spatial data. Is fetched only once.
-	std::vector<Attribute_Position>*		attributesPosition_;	//!< Holds positional data. Is fetched only once.
+	std::vector<Attribute_Position>*	attributesPosition_;	//!< Holds positional data. Is fetched only once.
 	std::vector<Attribute_Render>*		attributesRender_;		//!< Holds objects supposed to be rendered. Is fetched only once.
 	std::vector<Attribute_DebugShape>*	attributesDebugShape_;	//!< Holds debug shapes.
 	std::vector<int>*					attributesRenderOwner_;	//!< Holds owners of render-attributes.

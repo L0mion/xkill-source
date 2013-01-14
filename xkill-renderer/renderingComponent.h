@@ -40,7 +40,7 @@ private:
 	Renderer* renderer_;
 	 
 	void event_WindowResize(Event_WindowResize* e);
-	void event_PostDescTex(Event_PostDescTex* e);
+	void event_PostDescTex(Event_LoadTextures* e);
 };
 
 #endif //XKILL_RENDERER_RENDERINGCOMPONENT_H

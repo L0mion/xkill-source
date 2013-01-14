@@ -1,20 +1,24 @@
 #pragma once
 
+#include <xkill-utilities/AttributeType.h>
+
 #include <vector>
 
 #include <InitGuid.h>
 
-#include "KeyMapper.h"
+class InputObject;
+class InputAxisObject;
+class InputButtonObject;
+class InputTriggerObject;
 
-#include "InputButtonObject.h"
-#include "InputAxisObject.h"
-#include "InputTriggerObject.h"
+class KeyMapper;
+class InputObjectArray;
 
 #include "InputActions.h"
 
 #define SAFE_DELETE(x) {if(x != nullptr) delete x; x = nullptr;}
 
-//! An interface for wrappers of Direct Input and XInput devices
+//! An interface for wrappers of input devices
 
 class InputDevice
 {
@@ -51,10 +55,13 @@ public:
 	/*!
 	\param deltaTime Time since last call
 	*/
-	virtual void Update(float deltaTime) = 0;
+	virtual void Update(float deltaTime);
 
+protected:
 	virtual void RunForceFeedback() = 0;
-	virtual void StopForceFeedback() = 0;
+public:
+	virtual void RunForceFeedback(float timer);
+	virtual bool StopForceFeedback() = 0;
 	//! Sets the intensity of each motor
 	/*!
 	Handles up to two force feedback motors. If only one motor is available then it'll take an average of both values;
@@ -88,6 +95,19 @@ public:
 	*/
 	virtual void setStandardMappings() = 0;
 
+	//! Returns a hash value of the standard keymappings
+	/*!
+	Used to determine if a keymappings file is up to date.
+	Hash will change if either standard keymappings is changed or if the 
+	inputactions enums have changed.
+	Changes in both places at the same time might potentially casue the 
+	program to think that the keymappings file is up to date when it isn't.
+	The effect will be that the keymappings might become faulty and that the
+	keymappings file needs to be removed or the device reconfigured in an
+	input settings menu.
+	*/
+	virtual unsigned long getHash();
+
 	void createObjectVectors();
 
 protected:
@@ -96,10 +116,15 @@ protected:
 	std::string name_;
 	unsigned int playerID_;
 
-	std::vector<InputAxisObject*> axes_;				//Should perhaps use an inputstate to store this instead?
+	float rumbleTimer_;
+	bool rumbleActive_;
+
+	std::vector<InputAxisObject*> axes_;
 	std::vector<InputButtonObject*> buttons_;
 	std::vector<InputTriggerObject*> triggers_;
-	std::vector<InputObject*> inputObjects_;
+
+	//std::vector<InputObject*> inputObjects_;
+	InputObjectArray* inputObjectArray_;
 
 	std::vector<std::vector<int>> floatObjects_;
 	std::vector<std::vector<int>> boolObjects_;
@@ -112,5 +137,7 @@ protected:
 	virtual void createInputObjectsFromLayout() = 0;
 
 	virtual InputButtonObject* getButtonObject(unsigned int index);
+	//! Returns a string of the standard keymappings
+	virtual std::string getStandardMappingsString() = 0;
 };
 

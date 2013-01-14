@@ -25,11 +25,14 @@
 #include "TypeFX.h"
 #include "ManagementMath.h"
 #include "Renderer.h"
+#include "ViewportData.h"
 
 //temp
 #include "AnimatedMesh.h"
 #include "M3DLoader.h"
 #include "SkinnedData.h"
+
+ATTRIBUTES_DECLARE_ALL;
 
 Renderer::Renderer(HWND windowHandle)
 {
@@ -56,6 +59,8 @@ Renderer::Renderer(HWND windowHandle)
 	attributesDebugShape_	= nullptr;
 	attributesRenderOwner_	= nullptr;
 	attributesCamera_		= nullptr;
+
+	ATTRIBUTES_INIT_ALL;
 
 	//temp
 	m3dLoader_		= nullptr;
@@ -127,6 +132,18 @@ HRESULT Renderer::resize(unsigned int screenWidth, unsigned int screenHeight)
 		hr = managementGBuffer_->resize(managementD3D_->getDevice());
 	if(SUCCEEDED(hr))
 		hr = managementViewport_->resize();
+
+	//Update per-instance constant-buffer.
+	ID3D11DeviceContext* devcon = managementD3D_->getDeviceContext();
+	managementCB_->setCB(
+		CB_TYPE_INSTANCE,
+		TypeFX_CS, 
+		CB_REGISTER_INSTANCE, 
+		devcon);
+	managementCB_->updateCBInstance(
+		devcon, 
+		winfo_->getScreenWidth(), 
+		winfo_->getScreenHeight());
 
 	return hr;
 }
@@ -236,7 +253,21 @@ HRESULT Renderer::initManagementCB()
 	HRESULT hr = S_OK;
 
 	managementCB_ = new ManagementCB();
-	managementCB_->init(managementD3D_->getDevice());
+	hr = managementCB_->init(managementD3D_->getDevice());
+
+	if(SUCCEEDED(hr))
+	{
+		ID3D11DeviceContext* devcon = managementD3D_->getDeviceContext();
+		managementCB_->setCB(
+			CB_TYPE_INSTANCE,
+			TypeFX_CS, 
+			CB_REGISTER_INSTANCE, 
+			devcon);
+		managementCB_->updateCBInstance(
+			devcon, 
+			winfo_->getScreenWidth(), 
+			winfo_->getScreenHeight());
+	}
 
 	return hr;
 }
@@ -317,78 +348,74 @@ void Renderer::initManagementMath()
 	managementMath_ = new ManagementMath();
 }
 
-void Renderer::render(float delta)
+void Renderer::update()
+{
+	managementLight_->update(managementD3D_->getDevice(), managementD3D_->getDeviceContext());
+}
+void Renderer::render()
 {
 	//Clear g-buffers and depth buffer.
 	managementGBuffer_->clearGBuffers(managementD3D_->getDeviceContext());
 	managementD3D_->clearDepthBuffer();
 
 	//Update per-frame constant buffer.
-	managementCB_->setCB(CB_TYPE_FRAME, TypeFX_VS, CB_REGISTER_FRAME, managementD3D_->getDeviceContext());
-	managementCB_->updateCBFrame(managementD3D_->getDeviceContext(), managementLight_->getNumLights());
+	managementCB_->setCB(
+		CB_TYPE_FRAME, 
+		TypeFX_VS, 
+		CB_REGISTER_FRAME, 
+		managementD3D_->getDeviceContext());
+	managementCB_->updateCBFrame(
+		managementD3D_->getDeviceContext(),
+		managementLight_->getLightDirCurCount(),
+		managementLight_->getLightPointCurCount(),
+		managementLight_->getLightSpotCurCount());
 
-	//Render to each viewport.
-	int cameraIndex = 0;
-	for(unsigned int i = 0; i < attributesCamera_->size(); i++)
+	Attribute_Camera*	camAt; 
+	Attribute_Spatial*	spatialAt;
+	Attribute_Position*	posAt;
+
+	ViewportData vpData;
+	std::vector<ViewportData> vpDatas;
+
+	//Render everything to g-buffers.
+	int camIndex = 0;
+	while(itrCamera.hasNext())
 	{
-		if(attributesCameraOwner_->at(i)!=0)
-		{
-			//Set viewport.
-			managementViewport_->setViewport(managementD3D_->getDeviceContext(), cameraIndex);
+		camAt		= itrCamera.getNext();
+		camIndex	= itrCamera.index();
+		spatialAt	= ATTRIBUTE_CAST(Attribute_Spatial, ptr_spatial, camAt);
+		posAt		= ATTRIBUTE_CAST(Attribute_Position, ptr_position, spatialAt);
+	
+		//Set viewport.
+		managementViewport_->setViewport(managementD3D_->getDeviceContext(), camIndex);
 
-			//Render viewport.
-			unsigned int viewportTopX = static_cast<unsigned int>(managementViewport_->getViewport(cameraIndex).TopLeftX);
-			unsigned int viewportTopY = static_cast<unsigned int>(managementViewport_->getViewport(cameraIndex).TopLeftY);
-			renderViewport(
-				attributesCamera_->at(cameraIndex), 
-				viewportTopX, 
-				viewportTopY,
-				cameraIndex);
+		//Store all the viewport-specific data for the backbuffer-rendering.
+		vpData.camIndex		= camIndex;
+		vpData.view			= DirectX::XMFLOAT4X4(((float*)&camAt->mat_view));
+		vpData.proj			= DirectX::XMFLOAT4X4(((float*)&camAt->mat_projection));
+		vpData.viewInv		= managementMath_->calculateMatrixInverse(vpData.view);
+		vpData.projInv		= managementMath_->calculateMatrixInverse(vpData.proj);
+		vpData.eyePos		= *(DirectX::XMFLOAT3*)&posAt->position;
+		vpData.viewportTopX = static_cast<unsigned int>(managementViewport_->getViewport(camIndex).TopLeftX);
+		vpData.viewportTopY = static_cast<unsigned int>(managementViewport_->getViewport(camIndex).TopLeftY);
+		vpDatas.push_back(vpData);
 
-			// HACK: Increment camera index
-			cameraIndex++;
-		}	
+		renderViewportToGBuffer(vpData);
 	}
+
+	//Render everything to backbuffer.
+	for(unsigned int i = 0; i < vpDatas.size(); i++)
+		renderViewportToBackBuffer(vpDatas[i]);
+
+	managementD3D_->present();
 }
-void Renderer::renderViewport(
-	Attribute_Camera		cameraAt, 
-	unsigned int		viewportTopX,
-	unsigned int		viewportTopY,
-	unsigned int		cameraIndex)
-{
-	//Get camera's view- and projection matrix, and their inverses.
-	DirectX::XMFLOAT4X4 viewMatrix((float*)&cameraAt.mat_view);
-	DirectX::XMFLOAT4X4 projectionMatrix((float*)&cameraAt.mat_projection);
-	DirectX::XMFLOAT4X4 viewMatrixInverse		= managementMath_->calculateMatrixInverse(viewMatrix);
-	DirectX::XMFLOAT4X4 projectionMatrixInverse	= managementMath_->calculateMatrixInverse(projectionMatrix);
-
-	//Get eye position.
-	Attribute_Camera*	cameraAtP = &cameraAt;
-	Attribute_Spatial*	spatialAttribute	= ATTRIBUTE_CAST(Attribute_Spatial, ptr_spatial, cameraAtP);
-	Attribute_Position*	positionAttribute	= ATTRIBUTE_CAST(Attribute_Position, ptr_position, spatialAttribute);
-	DirectX::XMFLOAT3	eyePosition			= *(DirectX::XMFLOAT3*)&positionAttribute->position;
-
-	//Update per-viewport constant buffer.
-	managementCB_->setCB(CB_TYPE_CAMERA, TypeFX_VS, CB_REGISTER_CAMERA, managementD3D_->getDeviceContext());
-	managementCB_->updateCBCamera(managementD3D_->getDeviceContext(),
-		viewMatrix,
-		viewMatrixInverse,
-		projectionMatrix,
-		projectionMatrixInverse,
-		eyePosition,
-		viewportTopX,
-		viewportTopY);
-
-	renderViewportToGBuffer(viewMatrix, projectionMatrix, cameraIndex);
-	renderViewportToBackBuffer();
-}
-void Renderer::renderViewportToGBuffer(DirectX::XMFLOAT4X4 viewMatrix, DirectX::XMFLOAT4X4 projectionMatrix, unsigned int cameraIndex)									
+void Renderer::renderViewportToGBuffer(ViewportData& vpData)									
 {
 	ID3D11Device*			device = managementD3D_->getDevice();
 	ID3D11DeviceContext*	devcon = managementD3D_->getDeviceContext();
 
 	if(animatedMesh_)
-		renderAnimatedMesh(viewMatrix, projectionMatrix);
+		renderAnimatedMesh(vpData.view, vpData.proj);
 
 	managementFX_->setShader(devcon, SHADERID_VS_DEFAULT);
 	managementFX_->setShader(devcon, SHADERID_PS_DEFAULT);
@@ -398,23 +425,30 @@ void Renderer::renderViewportToGBuffer(DirectX::XMFLOAT4X4 viewMatrix, DirectX::
 
 	managementGBuffer_->setGBuffersAndDepthBufferAsRenderTargets(devcon, managementD3D_->getDepthBuffer());
 
+	//Update per-viewport constant buffer.
+	managementCB_->setCB(CB_TYPE_CAMERA, TypeFX_VS, CB_REGISTER_CAMERA, managementD3D_->getDeviceContext());
+	managementCB_->updateCBCamera(managementD3D_->getDeviceContext(),
+		vpData.view,
+		vpData.viewInv,
+		vpData.proj,
+		vpData.projInv,
+		vpData.eyePos,
+		vpData.viewportTopX,
+		vpData.viewportTopY);
+
+	//Render renderattributes
 	Attribute_Render* renderAt;
-	for(unsigned int i = 0; i < attributesRenderOwner_->size(); i++)
+	while(itrRender.hasNext())
 	{
-		if(attributesRenderOwner_->at(i) != 0)
-		{
-			//if(renderAt->culling.getBool(cameraIndex))
-			{
-			renderAt = &attributesRender_->at(i);
-			//if(renderAt->culling.getBool(cameraIndex))
-				renderAttribute(
-					renderAt, 
-					viewMatrix, 
-					projectionMatrix);
-			}
-		}
+		renderAt = itrRender.getNext();
+		//if(renderAt->culling.getBool(cameraIndex))
+		renderAttribute(
+			renderAt, 
+			vpData.view, 
+			vpData.proj);
 	}
 
+	//Make me use iterators!
 	Attribute_DebugShape* debugShapeAt;
 	for(unsigned int i = 0; i < attributesDebugShape_->size(); i++)
 	{
@@ -424,8 +458,8 @@ void Renderer::renderViewportToGBuffer(DirectX::XMFLOAT4X4 viewMatrix, DirectX::
 			renderDebugShape(
 				debugShapeAt,
 				i,
-				viewMatrix, 
-				projectionMatrix);
+				vpData.view, 
+				vpData.proj);
 		}
 	}
 
@@ -438,7 +472,7 @@ void Renderer::renderViewportToGBuffer(DirectX::XMFLOAT4X4 viewMatrix, DirectX::
 
 	devcon->RSSetState(nullptr);
 }
-void Renderer::renderViewportToBackBuffer()
+void Renderer::renderViewportToBackBuffer(ViewportData& vpData)
 {
 	ID3D11DeviceContext* devcon = managementD3D_->getDeviceContext();
 
@@ -449,16 +483,25 @@ void Renderer::renderViewportToBackBuffer()
 	managementFX_->setShader(devcon, SHADERID_CS_DEFAULT);
 
 	//Set constant buffers.
-	managementCB_->setCB(CB_TYPE_FRAME,		TypeFX_CS, CB_REGISTER_FRAME,		devcon);
-	managementCB_->setCB(CB_TYPE_INSTANCE,	TypeFX_CS, CB_REGISTER_INSTANCE,	devcon); //remove me
-	managementCB_->setCB(CB_TYPE_CAMERA,	TypeFX_CS, CB_REGISTER_CAMERA,		devcon);
-	managementCB_->updateCBInstance(devcon, winfo_->getScreenWidth(), winfo_->getScreenHeight());
-
-	//Set lights.
-	managementLight_->setLightSRVCS(devcon, 3);
+	managementCB_->setCB(CB_TYPE_FRAME,		TypeFX_CS, CB_REGISTER_FRAME,	devcon);
+	managementCB_->setCB(CB_TYPE_CAMERA,	TypeFX_CS, CB_REGISTER_CAMERA,	devcon);
+	managementCB_->setCB(CB_TYPE_CAMERA,	TypeFX_VS, CB_REGISTER_CAMERA,	devcon);
+	managementCB_->updateCBCamera(managementD3D_->getDeviceContext(),
+		vpData.view,
+		vpData.viewInv,
+		vpData.proj,
+		vpData.projInv,
+		vpData.eyePos,
+		vpData.viewportTopX,
+		vpData.viewportTopY);
 
 	//Connect g-buffers to shader.
 	managementGBuffer_->setGBuffersAsCSShaderResources(devcon);
+
+	//Set lights.
+	managementLight_->setLightSRVCS(devcon, LIGHTDESCTYPE_DIR,		3);
+	managementLight_->setLightSRVCS(devcon, LIGHTDESCTYPE_POINT,	4);
+	managementLight_->setLightSRVCS(devcon, LIGHTDESCTYPE_SPOT,		5);
 	
 	//Set default samplerstate.
 	managementSS_->setSS(devcon, TypeFX_CS, 0, SS_ID_DEFAULT);
@@ -471,8 +514,6 @@ void Renderer::renderViewportToBackBuffer()
 	//Unset and clean.
 	managementFX_->unsetShader(devcon, SHADERID_CS_DEFAULT);
 	renderBackBufferClean();
-
-	managementD3D_->present();
 }
 void Renderer::renderAttribute(
 	Attribute_Render*	renderAt,

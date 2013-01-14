@@ -25,7 +25,7 @@ private:
 	QTimer* updateTimer;
 
 public:
-	GameWidget(QWidget* parent = 0, Qt::WFlags flags = 0) : QWidget(parent, flags)
+	GameWidget(QWidget* parent) : QWidget(parent)
 	{
 		// make widget non-transparent & draw directly onto screen
 		QWidget::setAttribute(Qt::WA_OpaquePaintEvent);
@@ -72,6 +72,8 @@ public slots:
 	{
 		gameTimer.tick();
 		float delta = gameTimer.getDeltaTime();
+		// add time manipultion
+		delta *= ATTRIBUTE_MANAGER->settings->timeScale;
 		computeFPS();
 		gameManager.update(delta);
 	};

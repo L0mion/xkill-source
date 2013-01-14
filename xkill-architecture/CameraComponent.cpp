@@ -5,6 +5,8 @@
 #include <xkill-utilities/EventManager.h>
 #include "Camera.h"
 
+ATTRIBUTES_DECLARE_ALL;
+
 CameraComponent::CameraComponent()
 {
 	// subscribe to events
@@ -23,6 +25,7 @@ bool CameraComponent::init()
 	cameraAttributes_ = GET_ATTRIBUTES(camera);
 	inputAttributes_ = GET_ATTRIBUTES(input);
 
+	ATTRIBUTES_INIT_ALL;
 
 	// fetch aspect ratio
 	Event_GetWindowResolution windowResolution;
@@ -64,32 +67,41 @@ void CameraComponent::onEvent(Event* e)
 
 void CameraComponent::onUpdate(float delta)
 {
+	unsigned int numCameras = 0;
+	while(itrCamera.hasNext())
+	{
+		numCameras++;
+		itrCamera.getNext();
+	}
+
 	// Add extra camera
-	while(cameraAttributes_->size() > cameras_.size())
+	while(numCameras > cameras_.size())
 	{
 		Event_GetWindowResolution windowResolution;
 		SEND_EVENT(&windowResolution);
 
 		// Calculate split screen attribute
 		float aspectRatio = windowResolution.getAspectRatio();
-		if(cameraAttributes_->size()==2)
-		{
-			aspectRatio *= 2;
-		}
 
 		// push new camera
 		Attribute_Camera* cameraAttribute = &cameraAttributes_->at(cameras_.size());
 		cameraAttribute->aspect = aspectRatio;
 		cameras_.push_back(Camera(cameraAttribute->aspect,cameraAttribute->fov,cameraAttribute->zFar,cameraAttribute->zNear));
+		if(numCameras==2)
+		{
+			aspectRatio *= 2;
+			for(unsigned int i=0; i<cameras_.size(); i++)
+				cameras_[i].setAspectRatio(aspectRatio);
+		}
 	}
-	for(unsigned int i=0; i<cameraAttributes_->size(); i++)
+	for(unsigned int i=0; i<numCameras; i++)
 	{
 		cameras_[i].updateProj();
 		cameraAttributes_->at(i).mat_projection.copy((float*)&cameras_[i].getProjection());
 	}
 
 	// Remove unnecessary camera
-	while(cameraAttributes_->size() < cameras_.size())
+	while(numCameras < cameras_.size())
 	{
 		cameras_.pop_back();
 		if(cameras_.size()==2)
@@ -101,7 +113,7 @@ void CameraComponent::onUpdate(float delta)
 
 				// Calculate split screen attribute
 				float aspectRatio = windowResolution.getAspectRatio();
-				if(cameraAttributes_->size()==2)
+				if(numCameras==2)
 				{
 					aspectRatio *= 2;
 				}
@@ -126,15 +138,16 @@ void CameraComponent::onUpdate(float delta)
 		inputAttributes_->at(i).rotation.y = 0.0f;
 	}
 
-	for(unsigned int i=0; i<cameraAttributes_->size(); i++)
+	for(unsigned int i=0; i<numCameras; i++)
 	{
 		Attribute_Camera* camera = &cameraAttributes_->at(i);
 		Attribute_Spatial* spatial = ATTRIBUTE_CAST(Attribute_Spatial, ptr_spatial, camera);
 		Attribute_Position* position = ATTRIBUTE_CAST(Attribute_Position, ptr_position, spatial);
+		
 		cameras_[i].setPosition((float*)&position->position);
 		cameras_[i].updateView();
-		
-		cameraAttributes_->at(i).mat_view.copy((float*)&cameras_[i].getView());
+
+		camera->mat_view.copy((float*)&cameras_[i].getView());
 	}
 }
 

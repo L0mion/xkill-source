@@ -58,10 +58,10 @@ Attribute_Physics::Attribute_Physics()
 	
 	meshID = 0;
 
+	collisionFilterGroup = Attribute_Physics::DEFAULT_ERROR;
+	collisionFilterMask = 0;
+
 	gravity = Float3(0.0f, -10.0f, 0.0f);
-	
-	isProjectile = false;
-	isExplosionSphere = false;
 
 	angularVelocity.x = 0; 
 	angularVelocity.y = 0;
@@ -79,10 +79,54 @@ Attribute_Projectile::Attribute_Projectile()
 	entityIdOfCreator = -1;
 	currentLifeTimeLeft = 10.0f;
 	explodeOnImnpact = false;
-	explosionSphereRadius = 0.01f;
+	explosionSphereRadius = 1.0f;
 }
 Attribute_Projectile::~Attribute_Projectile()
 {
+}
+
+//Attribute_Light::Attribute_Light()
+//{
+//	lightType = LIGHTTYPE_NA;
+//
+//	direction	= Float3(0.0f, 0.0f, 0.0f);
+//	attenuation	= Float3(0.0f, 0.0f, 0.0f);
+//
+//	ambient		= Float4(0.0f, 0.0f, 0.0f, 0.0f);
+//	diffuse		= Float4(0.0f, 0.0f, 0.0f, 0.0f);
+//	specular	= Float4(0.0f, 0.0f, 0.0f, 0.0f);
+//
+//	range		= 0.0f;
+//	spotPower	= 0.0f;
+//}
+//Attribute_Light::~Attribute_Light()
+//{
+//	//Do nothing.
+//}
+
+Attribute_Light_Dir::Attribute_Light_Dir()
+{
+
+}
+Attribute_Light_Dir::~Attribute_Light_Dir()
+{
+	//Do nothing.
+}
+Attribute_Light_Point::Attribute_Light_Point()
+{
+
+}
+Attribute_Light_Point::~Attribute_Light_Point()
+{
+	//Do nothing.
+}
+Attribute_Light_Spot::Attribute_Light_Spot()
+{
+
+}
+Attribute_Light_Spot::~Attribute_Light_Spot()
+{
+	//Do nothing.
 }
 
 Attribute_Sound::Attribute_Sound()
@@ -117,6 +161,14 @@ Attribute_Input::Attribute_Input()
 Attribute_Input::~Attribute_Input()
 {
 }
+
+//Attribute_InputDeviceSettings::Attribute_InputDeviceSettings()
+//{
+//}
+//Attribute_InputDeviceSettings::~Attribute_InputDeviceSettings()
+//{
+//}
+
 Attribute_Player::Attribute_Player()
 {
 	id = -1;
@@ -148,6 +200,11 @@ Attribute_Mesh::~Attribute_Mesh()
 }
 void Attribute_Mesh::clean()
 {
+	if(mesh)
+	{
+		delete mesh;
+		mesh = nullptr;
+	}
 }
 
 Attribute_Health::Attribute_Health()
@@ -178,7 +235,7 @@ Attribute_SpawnPoint::~Attribute_SpawnPoint()
 
 Attribute_WeaponStats::Attribute_WeaponStats()
 {
-	setWeaponStats(BULLET, SINGLE);
+	setWeaponStats(EXPLOSIVE, AUTO);
 }
 
 void Attribute_WeaponStats::setWeaponStats(AmmunitionType ammunitionType, FiringMode firingMode)
@@ -186,7 +243,7 @@ void Attribute_WeaponStats::setWeaponStats(AmmunitionType ammunitionType, Firing
 	this->ammunitionType = ammunitionType;
 	this->firingMode = firingMode;
 
-	totalNrOfShots = 100;
+	totalNrOfShots = 1000;
 	clipSize = 10;
 	reloadTime = 0.0f;
 	nrOfProjectilesForEachShot = 1;
@@ -257,6 +314,41 @@ void Attribute_WeaponStats::setWeaponToDebugMachineGun()
 	damgeOfEachProjectile = 1;
 	explosionSphereRadius = 0.0f;
 	cooldownBetweenShots = 0.0f;
+}
+
+std::string Attribute_WeaponStats::getAmmunitionTypeAsString()
+{
+	std::string ammunitionTypeAsString = "Error in std::string Attribute_WeaponStats::getAmmunitionTypeAsString()";
+	switch(this->ammunitionType)
+	{
+		case BULLET:
+			ammunitionTypeAsString = "Bullet";
+			break;
+		case SCATTER:
+			ammunitionTypeAsString = "Scatter";
+			break;
+		case EXPLOSIVE:
+			ammunitionTypeAsString = "Explosive";
+			break;
+	}
+	return ammunitionTypeAsString;
+}
+std::string Attribute_WeaponStats::getFiringModeAsString()
+{
+	std::string firingModeAsString = "Error in std::string Attribute_WeaponStats::getFiringModesString()";
+	switch(this->firingMode)
+	{
+		case SINGLE:
+			firingModeAsString = "Single";
+			break;
+		case SEMI:
+			firingModeAsString = "Semi";
+			break;
+		case AUTO:
+			firingModeAsString = "Auto";
+			break;
+	}
+	return firingModeAsString;
 }
 
 Attribute_WeaponStats::~Attribute_WeaponStats()

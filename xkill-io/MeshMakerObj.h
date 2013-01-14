@@ -50,15 +50,16 @@ private:
 	//! Initializes LoaderObj-object and proceeds to load .obj.
 	bool loadObj();
 	//! Initializes LoaderPgy-object and proceeds to load .pgy.
-	MeshModel* loadPGY();
+	bool loadPGY(WriteTimeUTC writeTimeUTC);
 
 	//! Checks whether or not a corresponding .pgy-file exists.
 	bool existingPGY(std::string pathPGY, std::string fileNamePGY);
+	bool getLastWrittenToFile(std::string pathPGY, std::string fileNamePGY, WriteTimeUTC& out);
 	
 	//! Converts Obj-format loaded from .obj-file into general Mesh-type format.
 	MeshModel* makeMesh(Obj obj);
 	//! Writes loaded model into a .pgy-format.
-	bool makePGY(MeshModel* model);
+	bool makePGY(MeshModel* model, WriteTimeUTC writeTimeUTC);
 	
 	//! Loads .mtl-files based on dependencies loaded from .obj.
 	bool loadMaterials();

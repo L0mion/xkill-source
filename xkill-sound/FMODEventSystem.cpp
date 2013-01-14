@@ -51,7 +51,7 @@ void FMODEventSystem::Update()
 
 void FMODEventSystem::StartSoundEventAt(unsigned int index)
 {
-	if(index < nrOfEvents_)
+	if(index < (unsigned int)nrOfEvents_)
 	{
 		FMOD::Event* soundEvent;
 		FMODErrorCheck(mEventsystem->getEventBySystemID(index, FMOD_EVENT_NONBLOCKING, &soundEvent));

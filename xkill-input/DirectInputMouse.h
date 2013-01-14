@@ -2,10 +2,17 @@
 
 #include "DirectInputDevice.h"
 
+class InputObject;
+class InputAxisObject;
+class InputButtonObject;
+class InputTriggerObject;
+
 //! A wrapper for a Direct Input mouse device
 /*!
 The big difference from DirectInputDevice is that this class uses a MouseState struct
 as input from Direct Input instead of a JoyState struct.
+
+#NOTE: This class is not updated to comply with latest interface changes.
 */
 
 class DirectInputMouse : public DirectInputDevice

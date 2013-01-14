@@ -99,6 +99,7 @@ bool BulletPhysicsComponent::init()
 	frustrumObjects_ = new btAlignedObjectArray<PhysicsObject*>();
 	broadphase_ = new btDbvtBroadphase();
 	collisionConfiguration_ = new btDefaultCollisionConfiguration();
+	collisionConfiguration_->setConvexConvexMultipointIterations(10, 10);
 	dispatcher_ = new btCollisionDispatcher(collisionConfiguration_);
 	solver_ = new btSequentialImpulseConstraintSolver;
 	dynamicsWorld_ = new btDiscreteDynamicsWorld(dispatcher_,broadphase_,solver_,collisionConfiguration_);
@@ -159,22 +160,23 @@ void BulletPhysicsComponent::onUpdate(float delta)
 	{
 		PhysicsObject* physicsObject = physicsObjects_->at(i);
 		Attribute_Physics* physicsAttribute = &physicsAttributes_->at(i);
+
 		// if the objects owner is not 0 it should simulate
 		if(physicsOwners_->at(i)!=0)
 		{
 			// if the object is not in the world, add it
 			if(!physicsObject->isInWorld())
 			{
-				if(physicsAttribute->isExplosionSphere)
+				if(physicsAttribute->collisionFilterGroup == Attribute_Physics::EXPLOSIONSPHERE)
 				{
 					float scale = 100.0f;
 					btCollisionShape* collisionSphere = new btSphereShape(physicsAttribute->explosionSphereRadius*scale);
-					collisionSphere->setLocalScaling(btVector3(scale,scale,scale));
 					collisionShapeManager_->addCollisionShape(collisionSphere);
 					physicsObject->setCollisionShape(collisionSphere);
 				}
 
-				physicsObject->addToWorld(dynamicsWorld_);
+				physicsObject->addToWorld(dynamicsWorld_, physicsAttribute->collisionFilterGroup, physicsAttribute->collisionFilterMask);
+
 			}
 			// load data from physics attribute
 			physicsObject->preStep(collisionShapeManager_,physicsAttribute);
@@ -183,11 +185,16 @@ void BulletPhysicsComponent::onUpdate(float delta)
 		{
 			// if the objects owner is 0 then remove it from simulation world
 			physicsObject->removeFromWorld(dynamicsWorld_);
+			physicsObject->activate();
 		}
 	}
 	
 	//When data have been tranferred from PhysicsAttributes to the internal representation
-	dynamicsWorld_->stepSimulation(delta,10);//Perform Bullet Physics simulation
+	/*
+	btDynamicsWorld::stepSimulation(btScalar timeStep, int maxSubSteps=1, btScalar fixedTimeStep=btScalar(1.)/btScalar(60.));
+	timeStep - time in seconds to step the simulation by
+	*/
+	dynamicsWorld_->stepSimulation(delta);//Perform Bullet Physics simulation
 
 	//Copy the physics simulation result to the physics attributes
 	for(unsigned int i = 0; i < static_cast<unsigned int>(physicsObjects_->size()); i++)
@@ -318,13 +325,12 @@ void BulletPhysicsComponent::tickCallback(btScalar timeStep)
 								render->culling.setBool(objectB->getIndex(),true);
 							}
 						}
-					
 					}
 					else
 					{
 						unsigned int ownerA = physicsOwners_->at(objectA->getIndex());
 						unsigned int ownerB = physicsOwners_->at(objectB->getIndex());
-					
+
 						//Two PhysicsObjects colliding
 						if(ownerA != 0 || ownerB != 0) // ignore contacts where one owner is 0
 						{

@@ -1,22 +1,39 @@
 #include "MainWindow.h"
-#include <Windows.h> //check. Separates this file into .cpp and .h file to remove windows.h inclusion from this file.
+#include <Windows.h>
 
 #include <QtGui/QLayout> 
 #include <QtGui/QPushButton>
 #include <QtGui/QCleanlooksStyle> 
 
+// Stuff used to allocate console
+// no idea what most of it does
+#include <stdio.h>
+#include <io.h>
+#include <fcntl.h>
+#include <Windows.h>
 
-MainWindow::MainWindow( QWidget *parent /*= 0*/, Qt::WFlags flags /*= 0*/ ) : QMainWindow(parent, flags)
+#include "ui_MainWindow.h"
+
+MainWindow::MainWindow()
 {
 	// Create console
 	AllocConsole();
-	SetStdHandle(STD_INPUT_HANDLE |STD_OUTPUT_HANDLE, this->winId());
+	SetConsoleTitle(L"Debug console");
+	int hConHandle;
+	long lStdHandle;
+	FILE *fp;   // redirect unbuffered STDOUT to the console
+	lStdHandle = (long)GetStdHandle(STD_OUTPUT_HANDLE);
+	hConHandle = _open_osfhandle(lStdHandle, _O_TEXT);
+	fp = _fdopen( hConHandle, "w" );
+	*stdout = *fp;
+	setvbuf( stdout, NULL, _IONBF, 0 ); 
 
 	// create UI generated from XML file
 	ui.setupUi(this);
 	QApplication::setStyle(new QCleanlooksStyle);
 	MainWindow::setWindowTitle("XKILL");
 	resize(800, 600);
+	QWidget::setAttribute(Qt::WA_PaintOnScreen);
 
 	// subscribe to events
 	SUBSCRIBE_TO_EVENT(this, EVENT_SHOW_MESSAGEBOX);
@@ -34,6 +51,8 @@ MainWindow::MainWindow( QWidget *parent /*= 0*/, Qt::WFlags flags /*= 0*/ ) : QM
 	ui.actionCap_FPS->setChecked(true);
 	connect(ui.actionQuit, SIGNAL(triggered()), this, SLOT(close()));
 	connect(gameWidget, SIGNAL(signal_fpsChanged(QString)), this, SLOT(slot_setTitle(QString)));
+
+	new Menu_Editor(ui, this);
 }
 
 MainWindow::~MainWindow()
@@ -87,6 +106,9 @@ void MainWindow::keyPressEvent( QKeyEvent* e )
 
 	if((e->key()==Qt::Key_F4) && (e->modifiers()==Qt::AltModifier))
 		MainWindow::close();
+
+	if((e->key()==Qt::Key_F1))
+		ui.dockWidget->toggleViewAction()->activate(QAction::Trigger);
 
 
 	//switch (e->key()) 

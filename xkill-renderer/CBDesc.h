@@ -22,10 +22,10 @@ static const unsigned int CB_INSTANCE_DESC_SIZE = 16;
 */
 struct CBFrameDesc
 {
-	unsigned int numLights_;
-	unsigned int pad1_;
-	unsigned int pad2_;
-	unsigned int pad3_;
+	unsigned int numLightsDir;
+	unsigned int numLightsPoint;
+	unsigned int numLightsSpot;
+	unsigned int pad1;
 };
 static const unsigned int CB_FRAME_DESC_SIZE = 16;
 

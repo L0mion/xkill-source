@@ -13,7 +13,12 @@
 #define DIDFT_OPTIONAL 0x80000000
 #endif
 
-#define SAFE_RELEASE(x) {if(x != NULL) x->Release(); x = NULL;} //Should probably not be here, needed for isXInputDevice
+#define SAFE_RELEASE(x) {if(x != NULL) x->Release(); x = NULL;} //Should probably not be here
+
+class InputObject;
+class InputAxisObject;
+class InputButtonObject;
+class InputTriggerObject;
 
 //! A wrapper of a Direct Input device
 /*!
@@ -24,6 +29,7 @@ Some code should probably be refactored to a DirectInputGamepad class.
 
 class DirectInputDevice : public InputDevice
 {
+	DirectInputDevice();
 public:
 	DirectInputDevice(LPDIRECTINPUTDEVICE8 device, GUID deviceGUID, std::string name, unsigned int playerID);
 	virtual ~DirectInputDevice(void);
@@ -34,7 +40,7 @@ public:
 	virtual void Update(float deltaTime);
 
 	virtual void RunForceFeedback();
-	virtual void StopForceFeedback();
+	virtual bool StopForceFeedback();
 	virtual void SetForceFeedback(float leftMotorScale, float rightMotorScale);
 	virtual bool IsForceFeedbackCapable();
 
@@ -65,6 +71,8 @@ protected:
 	int nrOfFFMotors_;
 	float leftFFMotorScale_;
 	float rightFFMotorScale_;
+
+	virtual std::string getStandardMappingsString();
 
 	//! Creates a force feedback effect
 	/*!
@@ -97,16 +105,6 @@ protected:
 		}
 
 		int nrOfFFObjects;
-		//int offset;
-		//std::vector<DIOBJECTDATAFORMAT> ObjectDataFormat;
-		//LPDIRECTINPUTDEVICE8 device;
 	};
-
-	//struct InputData
-	//{
-	//	long axes[6];
-	//	long POV;
-	//	byte buttons[20];
-	//};
 };
 

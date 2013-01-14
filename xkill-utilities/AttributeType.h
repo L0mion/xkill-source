@@ -3,6 +3,7 @@
 #include "dllUtilities.h"
 #include "AttributePointer.h"
 #include "Math.h"
+#include "LightDesc.h"
 #include <string>
 
 
@@ -28,7 +29,10 @@ be modified to suit the need of each Component.
 struct DLL_U IAttribute
 {
 	IAttribute();
+
+	//! Called when deleting attributes (refer to AttributeStorage::deleteAttribute(int index))
 	virtual void clean(){};
+
 	virtual ~IAttribute();
 };
 
@@ -55,10 +59,15 @@ enum DLL_U AttributeType
 	ATTRIBUTE_PHYSICS,
 	ATTRIBUTE_CAMERA,
 	ATTRIBUTE_INPUT,
+	//ATTRIBUTE_INPUTDEVICESETTINGS,
 	ATTRIBUTE_PLAYER,
 	ATTRIBUTE_BOUNDING,
 	ATTRIBUTE_MESH,
 	ATTRIBUTE_PROJECTILE,
+	
+	ATTRIBUTE_LIGHT_DIRECTIONAL,
+	ATTRIBUTE_LIGHT_POINT,
+	ATTRIBUTE_LIGHT_SPOT,
 
 	ATTRIBUTE_HEALTH,
 	ATTRIBUTE_DAMAGE,
@@ -142,6 +151,17 @@ struct DLL_U Attribute_Render : public IAttribute
 */
 struct DLL_U Attribute_Physics : public IAttribute
 {
+	enum PhysicsAttributeType
+	{
+		DEFAULT_ERROR = 0,
+		WORLD = 1,
+		PLAYER = 2,
+		PROJECTILE = 4,
+		EXPLOSIONSPHERE = 8,
+		EVERYTHING = 0xffff
+	};
+	PhysicsAttributeType collisionFilterGroup;
+
 	Attribute_Physics();
 	~Attribute_Physics();
 
@@ -153,6 +173,7 @@ struct DLL_U Attribute_Physics : public IAttribute
 	Float3 gravity;
 	float mass;
 	unsigned int meshID; //collisionShapeIndex;
+	short int collisionFilterMask;
 	//CollisionShape
 	//friction
 	//restitution
@@ -160,9 +181,7 @@ struct DLL_U Attribute_Physics : public IAttribute
 	bool collisionResponse;
 	bool added;
 	bool alive;
-	bool isProjectile;
 
-	bool isExplosionSphere;
 	float explosionSphereRadius;
 };
 
@@ -183,6 +202,52 @@ struct DLL_U Attribute_Projectile : public IAttribute
 	float explosionSphereRadius;
 };
 
+//struct DLL_U Attribute_Light : public IAttribute
+//{
+//	Attribute_Light();
+//	~Attribute_Light(); //!< Does nothing.
+//
+//	LightType lightType; //!< Type of light: Directional, Point or Spot.
+//
+//	AttributePointer ptr_position; //!< Position of light.
+//
+//	Float3 direction;	//!< The lights direction.
+//	Float3 attenuation;	//!< How fast the light intensity will diminish
+//	
+//	Float4 ambient;		//!< The ambient color.
+//	Float4 diffuse;		//!< The diffuse color.
+//	Float4 specular;	//!< The specular color.
+//
+//	float range;		//!< How far the light can reach.
+//	float spotPower;	//!< Controls the spotlight cone.
+//};
+
+struct DLL_U Attribute_Light_Dir : public IAttribute
+{
+	Attribute_Light_Dir();
+	~Attribute_Light_Dir();
+
+	LightDescDir lightDir;
+};
+struct DLL_U Attribute_Light_Point : public IAttribute
+{
+	Attribute_Light_Point();
+	~Attribute_Light_Point();
+
+	AttributePointer ptr_position;
+
+	LightDescPoint lightPoint;
+};
+struct DLL_U Attribute_Light_Spot : public IAttribute
+{
+	Attribute_Light_Spot();
+	~Attribute_Light_Spot();
+
+	AttributePointer ptr_position;
+
+	LightDescSpot lightSpot;
+};
+
 struct DLL_U Attribute_Input : public IAttribute
 {
 	Attribute_Input();
@@ -195,6 +260,21 @@ struct DLL_U Attribute_Input : public IAttribute
 	bool changeAmmunitionType;
 	bool changeFiringMode;
 };
+
+class InputObjectArray;
+
+/// Stores the input objects of a input device
+/**
+\ingroup ATTRIBUTES
+*/
+
+//struct DLL_U Attribute_InputDeviceSettings : public IAttribute
+//{
+//	Attribute_InputDeviceSettings();
+//	~Attribute_InputDeviceSettings();
+//
+//	InputObjectArray* inputObjectArray;
+//};
 
 /// Stores everything SoundComponent needs to know to play a 3D sound
 /** 
@@ -323,6 +403,8 @@ struct DLL_U Attribute_WeaponStats : public IAttribute
 
 	void setWeaponStats(AmmunitionType ammunitionType, FiringMode firingMode);
 	void setWeaponToDebugMachineGun();
+	std::string getAmmunitionTypeAsString();
+	std::string getFiringModeAsString();
 
 	AmmunitionType ammunitionType;	//!< BULLET, SCATTER, EXPLOSIVE
 	FiringMode firingMode;			//!< SINGLE, SEMI, AUTO

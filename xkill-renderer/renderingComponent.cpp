@@ -10,7 +10,7 @@ RenderingComponent::RenderingComponent(HWND windowHandle)
 {
 	//Subscribe to all the events RenderingComponent will need during execution.
 	SUBSCRIBE_TO_EVENT(this, EVENT_WINDOW_RESIZE);
-	SUBSCRIBE_TO_EVENT(this, EVENT_POST_DESC_TEX);
+	SUBSCRIBE_TO_EVENT(this, EVENT_LOAD_TEXTURES);
 	SUBSCRIBE_TO_EVENT(this, EVENT_GAMERESET);
 
 	windowHandle_	= windowHandle;
@@ -37,7 +37,8 @@ HRESULT RenderingComponent::init()
 
 void RenderingComponent::onUpdate(float delta)
 {
-	renderer_->render(delta);
+	renderer_->update();
+	renderer_->render();
 }
 
 void RenderingComponent::onEvent( Event* e )
@@ -51,22 +52,22 @@ void RenderingComponent::onEvent( Event* e )
 	case EVENT_GAMERESET:
 		reset();
 		break;
-	case EVENT_POST_DESC_TEX:
-		event_PostDescTex((Event_PostDescTex*)e);
+	case EVENT_LOAD_TEXTURES:
+		event_PostDescTex((Event_LoadTextures*)e);
 		break;
 	default:
 		break;
 	}
 }
 
-void RenderingComponent::event_WindowResize( Event_WindowResize* e )
+void RenderingComponent::event_WindowResize(Event_WindowResize* e)
 {
 	int width = e->width;
 	int height = e->height;
 
 	renderer_->resize(width, height);
 }
-void RenderingComponent::event_PostDescTex(Event_PostDescTex* e)
+void RenderingComponent::event_PostDescTex(Event_LoadTextures* e)
 {
 	TexDesc* texDesc = e->texDesc_;
 

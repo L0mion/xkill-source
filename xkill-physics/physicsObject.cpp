@@ -39,9 +39,9 @@ PhysicsObject::~PhysicsObject()
 	delete getMotionState();
 }
 
-void PhysicsObject::addToWorld(btDiscreteDynamicsWorld* dynamicsWorld)
+void PhysicsObject::addToWorld(btDiscreteDynamicsWorld* dynamicsWorld, short int collisionFilterGroup, short int collisionFilterMask)
 {
-	dynamicsWorld->addRigidBody(this);
+	dynamicsWorld->addRigidBody(this, collisionFilterGroup, collisionFilterMask);
 }
 
 void PhysicsObject::removeFromWorld(btDiscreteDynamicsWorld* dynamicsWorld)
@@ -51,6 +51,7 @@ void PhysicsObject::removeFromWorld(btDiscreteDynamicsWorld* dynamicsWorld)
 
 void PhysicsObject::preStep(CollisionShapeManager* collisionShapeManager,Attribute_Physics* physicsAttribute)
 {
+
 	Attribute_Spatial* spatialAttribute = ATTRIBUTE_CAST(Attribute_Spatial,
 														ptr_spatial,
 														physicsAttribute);
@@ -58,20 +59,25 @@ void PhysicsObject::preStep(CollisionShapeManager* collisionShapeManager,Attribu
 														  ptr_position,
 														  spatialAttribute);
 	
+	if(physicsAttribute->collisionFilterGroup != Attribute_Physics::EXPLOSIONSPHERE)
+	{
+		m_collisionShape = collisionShapeManager->getCollisionShape(physicsAttribute->meshID);
+	}
+
 	btVector3 localInertia(0,0,0);
 	if(getCollisionShape()->getShapeType()==4 && index_ >2)
 	{
-		//if(!inertiad)
-		{
+		getCollisionShape()->calculateLocalInertia(physicsAttribute->mass,localInertia); //Refactor: only needs to be called once
+		inertiad = true;
+		setRestitution(1.0);
+		setRollingFriction(0.01);
 			
-			getCollisionShape()->calculateLocalInertia(physicsAttribute->mass,localInertia);
-			inertiad = true;
-			setRestitution(1.0);
-			setRollingFriction(0.01);
-			
-		}
 	}
-	setMassProps(physicsAttribute->mass,localInertia);
+
+	if(physicsAttribute->collisionFilterGroup != Attribute_Physics::EXPLOSIONSPHERE)
+	{
+		setMassProps(physicsAttribute->mass,localInertia); //Refactor: only needs to be called once, and is called indirectly from the btRigidBody constructor.
+	}
 	
 	m_worldTransform.setOrigin(WorldScaling*btVector3(positionAttribute->position.x,
 	 												  positionAttribute->position.y,
@@ -88,7 +94,7 @@ void PhysicsObject::preStep(CollisionShapeManager* collisionShapeManager,Attribu
 		setCollisionFlags(getCollisionFlags() | CF_NO_CONTACT_RESPONSE);
 	}
 
-	if(physicsAttribute->isProjectile)
+	if(physicsAttribute->collisionFilterGroup == Attribute_Physics::PROJECTILE)
 	{
   		m_worldTransform.setRotation(btQuaternion(spatialAttribute->rotation.x, spatialAttribute->rotation.y, spatialAttribute->rotation.z, spatialAttribute->rotation.w));
 		setLinearVelocity(btVector3(physicsAttribute->linearVelocity.x,
@@ -105,15 +111,18 @@ void PhysicsObject::preStep(CollisionShapeManager* collisionShapeManager,Attribu
 					   physicsAttribute->angularVelocity.y,
 					   physicsAttribute->angularVelocity.z));
 
-	if(!physicsAttribute->isExplosionSphere)
+	setGravity(gravity_+forces_);
+	updateInertiaTensor(); //Refactor: only needs to be called once, and is called indirectly from the btRigidBody constructor.
+
+	if(physicsAttribute->collisionFilterGroup != Attribute_Physics::EXPLOSIONSPHERE)
 	{
-		m_collisionShape = collisionShapeManager->getCollisionShape(physicsAttribute->meshID);
+		//activate(true);
 	}
 
-	setGravity(gravity_+forces_);
-	updateInertiaTensor();
-	activate(true);
-
+	if(physicsAttribute->collisionFilterGroup == Attribute_Physics::PLAYER)
+	{
+		setActivationState(DISABLE_DEACTIVATION); //Refactor: only needs to be set once
+	}
 }
 
 void PhysicsObject::postStep(Attribute_Physics* physicsAttribute)

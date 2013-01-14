@@ -31,7 +31,7 @@ public:
 	// such as "position" is used, this will not be a problem.
 #define CREATE_ATTRIBUTE(AttributeType, AttributeName, OwnerEntity)						\
 	AttributeType* AttributeName = ((AttributeManager*)AttributeManagerDLLWrapper::getInstance())->AttributeName.createAttribute(OwnerEntity)
-	
+
 	// Connects the AttributePointer by the name PointerName inside AttributeName with latest AttributePointer created inside AttributeManager.
 	// IMPORTANT: The following formula is used to access AttributeManager, "PointerName+Attributes".
 	// PointerName "position" will result in "positionAttributes" which will work.
@@ -55,18 +55,20 @@ public:
 		CONNECT_ATTRIBUTES(render, spatial);
 		render->meshID = 0;
 
-		CREATE_ATTRIBUTE(Attribute_DebugShape, debugShape, entity);	//create temp debug shape
-		CONNECT_ATTRIBUTES(debugShape, spatial);
-		debugShape->meshID = render->meshID;
-		debugShape->shape	=  nullptr;/*new DebugShapeBB(
-			Float3(-0.5f, -0.5f, -0.5f),
-			Float3(0.5f, 0.5f, 0.5f)); //new DebugShapeSphere(1.0f);*/
-		debugShape->render	= false;
+		//CREATE_ATTRIBUTE(Attribute_DebugShape, debugShape, entity);	//create temp debug shape
+		//CONNECT_ATTRIBUTES(debugShape, spatial);
+		//debugShape->meshID = render->meshID;
+		//debugShape->shape	=  nullptr;/*new DebugShapeBB(
+		//	Float3(-0.5f, -0.5f, -0.5f),
+		//	Float3(0.5f, 0.5f, 0.5f)); //new DebugShapeSphere(1.0f);*/
+		//debugShape->render	= false;
 
 		CREATE_ATTRIBUTE(Attribute_Physics, physics, entity);
 		CONNECT_ATTRIBUTES(physics, spatial);
 		CONNECT_ATTRIBUTES(physics, render);
 		physics->meshID = render->meshID;
+		physics->collisionFilterGroup = Attribute_Physics::PLAYER;
+		physics->collisionFilterMask = Attribute_Physics::EVERYTHING;
 		
 		CREATE_ATTRIBUTE(Attribute_Input, input, entity);
 		CONNECT_ATTRIBUTES(input, physics);
@@ -110,10 +112,19 @@ public:
 		CONNECT_ATTRIBUTES(physics, spatial);
 		CONNECT_ATTRIBUTES(physics, render);
 		physics->meshID = render->meshID;
-		
+		physics->collisionFilterGroup = Attribute_Physics::WORLD;
+		physics->collisionFilterMask = Attribute_Physics::PLAYER | Attribute_Physics::PROJECTILE;
 		physics->mass = 0;
 				
 		HACKHACK+=2;
+
+		//temp, create demo light for each projectile
+		CREATE_ATTRIBUTE(Attribute_Light_Dir, lightDir, entity);
+		//CONNECT_ATTRIBUTES(lightDir, position);
+		lightDir->lightDir.direction = Float3(0.57735f, -0.57735f, 0.57735f);
+		lightDir->lightDir.ambient = Float4(0.8f, 0.8f, 0.8f, 1.0f);
+		lightDir->lightDir.diffuse = Float4(0.2f, 0.2f, 0.2f, 1.0f);
+		lightDir->lightDir.specular = Float4(1.0f, 1.0f, 1.0f, 1.0f);
 	}
 
 	void createProjectileEntity(Entity* entity, Event_CreateProjectile* e)
@@ -129,20 +140,21 @@ public:
 		CONNECT_ATTRIBUTES(render, spatial);
 		render->meshID = 2;
 
-		CREATE_ATTRIBUTE(Attribute_DebugShape, debugShape, entity);	//create temp debug shape
-		CONNECT_ATTRIBUTES(debugShape, spatial);
-		debugShape->meshID = render->meshID;
-		debugShape->shape	=  nullptr;/*new DebugShapeBB(
-			Float3(-0.5f, -0.5f, -0.5f),
-			Float3(0.5f, 0.5f, 0.5f)); //new DebugShapeSphere(1.0f);*/
-		debugShape->render	= false;
+		//CREATE_ATTRIBUTE(Attribute_DebugShape, debugShape, entity);	//create temp debug shape
+		//CONNECT_ATTRIBUTES(debugShape, spatial);
+		//debugShape->meshID = render->meshID;
+		//debugShape->shape	=  nullptr;/*new DebugShapeBB(
+		//	Float3(-0.5f, -0.5f, -0.5f),
+		//	Float3(0.5f, 0.5f, 0.5f)); //new DebugShapeSphere(1.0f);*/
+		//debugShape->render	= false;
 
 		CREATE_ATTRIBUTE(Attribute_Physics, physics, entity);
+		physics->collisionFilterGroup = Attribute_Physics::PROJECTILE;
+		physics->collisionFilterMask = Attribute_Physics::WORLD | Attribute_Physics::PLAYER;
 		CONNECT_ATTRIBUTES(physics, spatial);
 		CONNECT_ATTRIBUTES(physics, render);
 		physics->meshID = render->meshID;
 		
-		physics->isProjectile = true;
 		physics->linearVelocity = e->velocity;
 		physics->mass = 100.0f;
 		physics->gravity = Float3(0.0f, 0.0f, 0.0f);
@@ -156,6 +168,15 @@ public:
 		CREATE_ATTRIBUTE(Attribute_Damage, damage, entity);
 		damage->damage = e->damage;
 		damage->owner_entityID = e->entityIdOfCreator;
+
+		//temp, create demo light for each projectile
+		CREATE_ATTRIBUTE(Attribute_Light_Point, lightPoint, entity);
+		CONNECT_ATTRIBUTES(lightPoint, position);
+		lightPoint->lightPoint.ambient		= Float4(0.0f, 0.0f, 0.0f, 1.0f);
+		lightPoint->lightPoint.diffuse		= Float4(0.8f, 0.8f, 0.8f, 1.0f);
+		lightPoint->lightPoint.specular		= Float4(0.1f, 0.1f, 0.1f, 1.0f);
+		lightPoint->lightPoint.range		= 100.0f;
+		lightPoint->lightPoint.attenuation	= Float3(1.5f, 1.2f, 0.0f);
 	}
 
 	void createMesh(Entity* entity, Event_CreateMesh* e)
@@ -188,16 +209,18 @@ public:
 
 		CREATE_ATTRIBUTE(Attribute_DebugShape, debugShape, entity);	//create temp debug shape
 		CONNECT_ATTRIBUTES(debugShape, spatial);
-		debugShape->shape	= new DebugShapeSphere(e->radius*100.0f);
+		debugShape->shape	= new DebugShapeSphere(e->radius);
 		debugShape->render	= true;
 
 		CREATE_ATTRIBUTE(Attribute_Physics, physics, entity);
+		physics->collisionFilterGroup = Attribute_Physics::EXPLOSIONSPHERE;
+		physics->collisionFilterMask = Attribute_Physics::PLAYER;
 		CONNECT_ATTRIBUTES(physics, spatial);
-		physics->isExplosionSphere = true;
 		physics->explosionSphereRadius = e->radius;
 		physics->collisionResponse = false;
 		physics->mass = 0.0f;
 		physics->gravity = Float3(0.0f, 0.0f, 0.0f);
+		physics->linearVelocity = Float3(0.0f, 0.0f, 0.0f);
 
 		CREATE_ATTRIBUTE(Attribute_ExplosionSphere, explosionSphere, entity);
 		CONNECT_ATTRIBUTES(explosionSphere, physics);

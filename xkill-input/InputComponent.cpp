@@ -3,6 +3,7 @@
 #include <xkill-utilities/EventManager.h>
 #include "InputManager.h"
 
+
 InputComponent::InputComponent()
 {
 	SUBSCRIBE_TO_EVENT(this, EVENT_RUMBLE);
@@ -10,12 +11,13 @@ InputComponent::InputComponent()
 	SUBSCRIBE_TO_EVENT(this, EVENT_KEY_PRESS);
 	SUBSCRIBE_TO_EVENT(this, EVENT_KEY_RELEASE);
 
+	inputManager_ = nullptr;
 	newDeviceSearchTimer_ = 0.0f;
 }
 
 InputComponent::~InputComponent()
 {
-	delete inputManager_;
+	SAFE_DELETE(inputManager_);
 }
 
 bool InputComponent::init(HWND windowHandle, std::string configFilePath, float searchTime)
@@ -53,17 +55,14 @@ void InputComponent::onEvent(Event* e)
 		Event_KeyRelease* ekr = static_cast<Event_KeyRelease*>(e);
 		handleKeyEvent(ekr->keyEnum, false);
 	}
+	if(type == EVENT_INPUT_DEVICE_SEARCH)
+	{
+		inputManager_->UpdateNumberOfGamepads(windowHandle_);
+	}
 }
 
 void InputComponent::onUpdate(float delta)
 {
-	newDeviceSearchTimer_ += delta;				//Takes alot of time so should probably not run in main thread or during run-time
-	if(newDeviceSearchTimer_ >= searchTime_)
-	{
-		newDeviceSearchTimer_ = 0.0f;
-		inputManager_->UpdateNumberOfGamepads(windowHandle_);
-	}
-
 	inputManager_->Update(delta);
 
 	handleInput(delta);
@@ -73,34 +72,34 @@ void InputComponent::handleInput(float delta)
 {
 	for(unsigned int i = 0; i < inputAttributes_->size(); i++)
 	{
-		InputDevice* device = inputManager_->GetDevice(i);
+		InputDevice* device = inputManager_->GetDevice(i + 1);
 
 		if(device == nullptr)
 			continue;
 
 		inputAttributes_->at(i).position.x = device->getFloatValue(ACTION_F_WALK_LR);
 		inputAttributes_->at(i).position.y = device->getFloatValue(ACTION_F_WALK_FB);
-		inputAttributes_->at(i).rotation.x = device->getFloatValue(ACTION_F_LOOK_LR, true) * delta;
-		inputAttributes_->at(i).rotation.y = device->getFloatValue(ACTION_F_LOOK_UD, true) * delta;
+		inputAttributes_->at(i).rotation.x = device->getFloatValue(ACTION_F_LOOK_LR, true) * 0.01f;
+		inputAttributes_->at(i).rotation.y = device->getFloatValue(ACTION_F_LOOK_UD, true) * 0.01f;
 
 		if(device->getBoolValue(ACTION_B_FIRE))
 			inputAttributes_->at(i).fire = true;
-		if(device->getBoolValue(ACTION_B_CHANGE_AMMUNITIONTYPE))
+		if(device->getBoolReleased(ACTION_B_CHANGE_AMMUNITIONTYPE))
 			inputAttributes_->at(i).changeAmmunitionType = true;
-		if(device->getBoolValue(ACTION_B_CHANGE_FIRINGMODE))
+		if(device->getBoolReleased(ACTION_B_CHANGE_FIRINGMODE))
 			inputAttributes_->at(i).changeFiringMode = true;
 
-		if(device->getBoolValue(ACTION_B_TOGGLE_MUTE_SOUND))
+		if(device->getBoolReleased(ACTION_B_TOGGLE_MUTE_SOUND))
 			SEND_EVENT(&Event_PlaySound(-1, true));
 
-		if(device->getBoolValue(ACTION_B_RUMBLE_ON))
+		if(device->getBoolReleased(ACTION_B_RUMBLE_ON))
 		{
 			Event_Rumble* er = new Event_Rumble(i, true, 100.0f, 1.0f, 1.0f);
 			EventManager::getInstance()->sendEvent(er);
 			delete er;
 		}
 
-		if(device->getBoolValue(ACTION_B_RUMBLE_OFF))
+		if(device->getBoolReleased(ACTION_B_RUMBLE_OFF))
 		{
 			Event_Rumble* er = new Event_Rumble(i, false, 100.0f, 0.0f, 0.0f);
 			EventManager::getInstance()->sendEvent(er);
@@ -119,6 +118,22 @@ void InputComponent::handleInput(float delta)
 		if(device->getBoolValue(ACTION_B_WALK_RIGHT))
 			inputAttributes_->at(i).position.x = 1.0f;
 		
+		float x, y;
+
+		x = inputAttributes_->at(i).position.x;
+		y = inputAttributes_->at(i).position.y;
+
+		float length = std::sqrt(x*x + y*y);
+
+		if(length > 0.0f)
+		{
+			x = x/length;
+			y = y/length;
+
+			inputAttributes_->at(i).position.x = x;
+			inputAttributes_->at(i).position.y = y;
+		}
+
 		if(device->GetType() == device->QT_INPUT_DEVICE)
 		{
 			QTInputDevices* qtDevice = static_cast<QTInputDevices*>(device);
@@ -131,12 +146,12 @@ void InputComponent::handleInput(float delta)
 
 void InputComponent::handleRumbleEvent(Event_Rumble* e)
 {
-	InputDevice* device = inputManager_->GetDevice(e->deviceNr);
+ 	InputDevice* device = inputManager_->GetDevice(e->deviceNr);
 
 	if(device != nullptr)
 	{
 		if(e->runRumble)
-			device->RunForceFeedback();
+			device->RunForceFeedback(e->duration);
 		else
 			device->StopForceFeedback();
 
@@ -149,10 +164,10 @@ void InputComponent::handleMouseMoveEvent(Event_MouseMove* e)
 	QTInputDevices* device = inputManager_->GetMouseAndKeyboard();
 
 	// Test camera movement
-	float x = 5.0f*(float)e->dx;
-	float y = 5.0f*(float)e->dy;
+	float x = (float)e->dx;
+	float y = (float)e->dy;
 
-	float mouseSensitivity = 0.1f;
+	float mouseSensitivity = 0.5f;
 
 	if(device != nullptr)
 	{
