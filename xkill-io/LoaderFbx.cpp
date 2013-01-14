@@ -153,14 +153,14 @@ bool LoaderFbx::loadScene(std::string filename)
 
 void LoaderFbx::parseNode(FbxNode* node)
 {
-	int errorCode = node->GetLastErrorID();
-	if(errorCode != -1)
-	{
-		std::stringstream message;
-		message << "LoaderFbx::parseNode | Error code : " << errorCode
-				<< " Error message: " << node->GetLastErrorString();
-		SHOW_MESSAGEBOX(message.str());
-	}
+	//int errorCode = node->GetLastErrorID();
+	//if(errorCode != -1)
+	//{
+	//	std::stringstream message;
+	//	message << "LoaderFbx::parseNode | Error code : " << errorCode
+	//			<< " Error message: " << node->GetLastErrorString();
+	//	SHOW_MESSAGEBOX(message.str());
+	//}
 
 	FbxNodeAttribute::EType attributeType;
 

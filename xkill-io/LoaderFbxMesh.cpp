@@ -26,15 +26,17 @@ void LoaderFbxMesh::reset()
 
 void LoaderFbxMesh::parseMesh(FbxMesh* mesh)
 {
-	int errorCode = mesh->GetLastErrorID();
-	if(errorCode != -1)
-	{
-		std::stringstream message;
-		message << "LoaderFbx::parseMesh | Error code : " << errorCode
-				<< " Error message: " << mesh->GetLastErrorString();
-		SHOW_MESSAGEBOX(message.str());
-	}
+//	int errorCode = mesh->GetLastErrorID();
+//	if(errorCode != -1)
+//	{
+//		std::stringstream message;
+//		message << "LoaderFbx::parseMesh | Error code : " << errorCode
+//				<< " Error message: " << mesh->GetLastErrorString();
+//		SHOW_MESSAGEBOX(message.str());
+//	}
 
+	int polyCount = mesh->GetPolygonCount();
+	int polySize = mesh->GetPolygonSize(0);
 	int polygonVertexCount = mesh->GetPolygonVertexCount();
 	int polygonCount = polygonVertexCount / POLYGON_SIZE;
 	
