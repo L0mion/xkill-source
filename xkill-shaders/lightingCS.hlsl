@@ -17,6 +17,10 @@ StructuredBuffer<LightSpot>		lightsSpot	: register( t5 );
 
 SamplerState ss : register(s0);
 
+//Shared memory
+groupshared uint tileMinDepthInt;
+groupshared uint tileMaxDepthInt;
+
 float3 reconstructViewSpacePosition(float2 texCoord)
 {
 	float4 position = float4(0.0f, 0.0f, 0.0f, 1.0f);
@@ -33,23 +37,32 @@ float3 reconstructViewSpacePosition(float2 texCoord)
 [numthreads(TILE_SIZE, TILE_SIZE, 1)]
 void lightingCS( uint3 threadID : SV_DispatchThreadID )
 {
+	//Sample G-Buffers. Data prefetching?
 	float2 texCoord = float2((float)(threadID.x + viewportTopX)/(float)screenWidth,(float)(threadID.y + viewportTopY)/(float)screenHeight);
 	float4 albedo	= gBufferAlbedo.SampleLevel(ss, texCoord, 0);
-	float3 normal	= gBufferNormal.SampleLevel(ss, texCoord, 0).xyz;
+	float4 normal	= gBufferNormal.SampleLevel(ss, texCoord, 0);
 	float4 material = gBufferMaterial.SampleLevel(ss, texCoord, 0);
 	float3 position = reconstructViewSpacePosition(texCoord);
-	
-	//Transform position from view space to world space.
-	position = mul(float4(position, 1.0f), viewInverse).xyz;
+
+	//Get minimum/maximum depth of tile.
+	uint pixelDepthInt = asuint(normal.w); //Depth currently stored in alpha channel of normal g-buffer.
+	tileMinDepthInt = 0xFFFFFFFF;
+	tileMaxDepthInt = 0;
+	GroupMemoryBarrierWithGroupSync();
+	InterlockedMin(tileMinDepthInt, pixelDepthInt);
+	InterlockedMax(tileMaxDepthInt, pixelDepthInt);
+	GroupMemoryBarrierWithGroupSync();
+	float tileMinDepthF = asfloat(tileMinDepthInt);
+	float tileMaxDepthF = asfloat(tileMaxDepthInt);
 	
 	SurfaceInfo surface = 
 	{
-		position,
-		normal,
+		mul(float4(position, 1.0f), viewInverse).xyz, //Transform position from view space to world space.
+		normal.xyz,
 		albedo,							//diffuse
 		float4(0.1f, 0.1f, 0.1f, 1.0f)	//specular
 	};
-	
+
 	float3 color = float3(0.0f, 0.0f, 0.0f);
 	for(unsigned int i = 0; i < numLightsDir; i++)
 		color += directionalLight(surface, eyePosition, lightsDir[i].ambient, lightsDir[i].diffuse, lightsDir[i].specular, lightsDir[i].direction);
@@ -58,7 +71,7 @@ void lightingCS( uint3 threadID : SV_DispatchThreadID )
 	for(i = 0; i < numLightsSpot; i++)
 		color += spotLight(surface, eyePosition, lightsSpot[i].ambient, lightsSpot[i].diffuse, lightsSpot[i].specular, lightsSpot[i].pos, lightsSpot[i].range, lightsSpot[i].direction, lightsSpot[i].spotPow, lightsSpot[i].attenuation);
 
-	output[uint2( threadID.x + viewportTopX, threadID.y + viewportTopY)] = float4(color, 1.0f);
+	output[uint2(threadID.x + viewportTopX, threadID.y + viewportTopY)] = float4(color, 1.0f);
 }
 
 // Transform coordinates from screen space to view space.
