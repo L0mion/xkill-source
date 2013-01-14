@@ -211,7 +211,7 @@ void Menu_Editor::slot_clicked_entityInspector( QModelIndex indexClicked )
 		
 		// set label
 		item_property->setText(data.label.c_str());
-		item_property->setFlags(Qt::ItemIsEditable);
+		item_property->setFlags(Qt::ItemIsSelectable | Qt::ItemIsUserCheckable | Qt::ItemIsEnabled | Qt::ItemIsEditable);
 		// set data
 		DataItem::DataType type = data.type;
 		if(type == DataItem::_BOOL)
@@ -233,12 +233,11 @@ void Menu_Editor::slot_clicked_entityInspector( QModelIndex indexClicked )
 		if(type == DataItem::_FLOAT3)
 		{
 			Float3 value = *data.value._float3;
-			double x = (double)value.x;
-
-			QStandardItem* item_value	 = model_attributeInspector->item(num_items, 1);
-			QStandardItem* child = new QStandardItem();
-			item_value->setChild(0, child);
-			model_attributeInspector->setData(item_value->index(), QVariant(x));
+			float x = value.x;
+		
+			QStandardItem* child = new QStandardItem("bUU");
+			item_value->appendRow(child);
+			//child->setData(QVariant(x));
 		}
 
 		if(type == DataItem::_FLOAT4)
