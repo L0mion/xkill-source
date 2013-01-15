@@ -23,5 +23,5 @@ public:
 public slots:
 	void slot_editorRefresh();
 	void slot_clicked_entityBrowser(QModelIndex index);
-	void slot_tab_changed(int index);
+	void slot_changed_simulationSpeed(int speed);
 };

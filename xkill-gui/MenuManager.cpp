@@ -18,31 +18,31 @@ HUDWindow::HUDWindow(QWidget* parent, int id) : QMainWindow(parent)
 	// build menu
 	//
 
-	horizontalLayout = new QHBoxLayout(this);
+	horizontalLayout = new QHBoxLayout();
 
 	// health
-	label_health = new QLabel(this);
+	label_health = new QLabel();
 	horizontalLayout->addWidget(label_health);
 
 	// ammo
-	label_ammo = new QLabel(this);
+	label_ammo = new QLabel();
 	horizontalLayout->addWidget(label_ammo);
 
 	// ammo type
-	label_ammoType = new QLabel(this);
+	label_ammoType = new QLabel();
 	label_ammoType->setPixmap(QPixmap(QString::fromUtf8(":/xkill/images/a_explosive2.png")));
 	label_ammoType->setMaximumSize(QSize(15, 15));
 	label_ammoType->setScaledContents(true);
 	horizontalLayout->addWidget(label_ammoType);
-
+	
 	// weapon type
-	label_weaponType = new QLabel(this);
+	label_weaponType = new QLabel();
 	label_weaponType->setPixmap(QPixmap(QString::fromUtf8(":/xkill/images/w_auto.png")));
 	label_weaponType->setMaximumSize(QSize(15, 15));
 	label_weaponType->setScaledContents(true);
 	horizontalLayout->addWidget(label_weaponType);
 
-	QWidget* mainWidget = new QWidget(this);
+	QWidget* mainWidget = new QWidget();
 	mainWidget->setLayout(horizontalLayout);
 	setCentralWidget(mainWidget);
 
@@ -148,7 +148,6 @@ HUDManager::HUDManager(QWidget* parent)
 	ATTRIBUTES_INIT_ALL;
 
 	this->parent = parent;
-	createHUD();
 }
 
 
