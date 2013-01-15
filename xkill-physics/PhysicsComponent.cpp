@@ -110,7 +110,7 @@ void PhysicsComponent::handleInput()
 void PhysicsComponent::onUpdate(float delta)
 {
 	syncronizeWithAttributes();
-	for(unsigned int i = 0; i < physicsObjects_->size(); i++)
+	for(unsigned int i = 0; i < static_cast<unsigned int>(physicsObjects_->size()); i++)
 	{
 		physicsObjects_->at(i)->onUpdate(delta);
 	}
@@ -139,7 +139,7 @@ void PhysicsComponent::syncronizeWithAttributes()
 		unsigned int index = itrPhysics.index();
 		
 		//Checks if new physiscs attributes were created since last call to this function
-		if(index >= physicsObjects_->size())
+		if(index >= static_cast<unsigned int>(physicsObjects_->size()))
 		{
 			physicsObjects_->push_back(nullptr);
 		}
