@@ -42,7 +42,7 @@ void PhysicsObject::onUpdate(float delta)
 
 void PhysicsObject::reload()
 {
-	static float worldScale = 100.0f;
+	//static float worldScale = 100.0f;
 	Attribute_Physics* physicsAttribute = itrPhysics.at(static_cast<MotionState*>(getMotionState())->getAttributeIndex());
 	
 	setAngularVelocity(btVector3(physicsAttribute->angularVelocity.x,

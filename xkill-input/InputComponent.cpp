@@ -78,8 +78,8 @@ void InputComponent::handleInput(float delta)
 
 		inputAttributes_->at(i).position.x = device->getFloatValue(ACTION_F_WALK_LR);
 		inputAttributes_->at(i).position.y = device->getFloatValue(ACTION_F_WALK_FB);
-		inputAttributes_->at(i).rotation.x = device->getFloatValue(ACTION_F_LOOK_LR, true)*0.01f;
-		inputAttributes_->at(i).rotation.y = device->getFloatValue(ACTION_F_LOOK_UD, true)*0.01f;
+		inputAttributes_->at(i).rotation.x = device->getFloatValue(ACTION_F_LOOK_LR, true)*0.25f;
+		inputAttributes_->at(i).rotation.y = device->getFloatValue(ACTION_F_LOOK_UD, true)*0.25f;
 
 		if(device->getBoolValue(ACTION_B_FIRE))
 			inputAttributes_->at(i).fire = true;
@@ -166,12 +166,10 @@ void InputComponent::handleMouseMoveEvent(Event_MouseMove* e)
 	float x = (float)e->dx;
 	float y = (float)e->dy;
 
-	float mouseSensitivity = 0.5f;
-
 	if(device != nullptr)
 	{
-		device->setAxis(2, x * mouseSensitivity);
-		device->setAxis(3, y * mouseSensitivity);
+		device->setAxis(2, x);
+		device->setAxis(3, y);
 	}
 }
 
