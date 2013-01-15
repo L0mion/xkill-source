@@ -10,7 +10,7 @@ ATTRIBUTES_DECLARE_ALL;
 static bool isFirst = true;
 
 
-MotionState::MotionState(unsigned int attributeIndex)
+MotionState::MotionState()
 {
 	if(isFirst)
 	{
@@ -18,7 +18,7 @@ MotionState::MotionState(unsigned int attributeIndex)
 		isFirst = false;
 	}
 
-	attributeIndex_ = attributeIndex;
+	attributeIndex_ = -1;
 }
 
 MotionState::~MotionState()

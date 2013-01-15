@@ -1,4 +1,4 @@
-#include "mathBasic.h"
+#include "MathBasic.h"
 
 VecF3	VecF3::cross(const VecF3& vec) const
 {

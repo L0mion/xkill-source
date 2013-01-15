@@ -1,20 +1,19 @@
 #include "PhysicsComponent.h"
 
 #include <btBulletDynamicsCommon.h>
+#include "Serialize/BulletWorldImporter/btBulletWorldImporter.h"
 
 #include <xkill-utilities/EventManager.h>
 
-#include "Serialize/BulletWorldImporter/btBulletWorldImporter.h"
-#include "physicsObject.h"
-#include "collisionShapes.h"
+#include "PhysicsObject.h"
+#include "PlayerPhysicsObject.h"
+#include "ProjectilePhysicsObject.h"
 
+#include "CollisionShapes.h"
 
-
-
-
+#include <iostream>
 
 AttributeIterator<Attribute_Physics> itrPhysics;
-AttributeIterator<Attribute_Input> itrInput;
 
 PhysicsComponent::PhysicsComponent() : broadphase_(nullptr),
 									   collisionConfiguration_(nullptr),
@@ -26,7 +25,6 @@ PhysicsComponent::PhysicsComponent() : broadphase_(nullptr),
 {
 	SUBSCRIBE_TO_EVENT(this,EVENT_DO_CULLING);
 	itrPhysics = ATTRIBUTE_MANAGER->physics.getIterator();
-	itrInput = ATTRIBUTE_MANAGER->input.getIterator();
 }
 
 PhysicsComponent::~PhysicsComponent()
@@ -98,15 +96,6 @@ bool PhysicsComponent::init()
 	return true;
 }
 
-void PhysicsComponent::handleInput()
-{
-	while(itrInput.hasNext())
-	{
-		Attribute_Input* inputAttribute = itrInput.getNext();
-		physicsObjects_->at(inputAttribute->ptr_physics.index)->handleInput(inputAttribute);
-	}
-}
-
 void PhysicsComponent::onUpdate(float delta)
 {
 	syncronizeWithAttributes();
@@ -114,7 +103,6 @@ void PhysicsComponent::onUpdate(float delta)
 	{
 		physicsObjects_->at(i)->onUpdate(delta);
 	}
-	handleInput();
 	dynamicsWorld_->stepSimulation(delta,10);
 }
 
@@ -143,6 +131,7 @@ void PhysicsComponent::syncronizeWithAttributes()
 		{
 			physicsObjects_->push_back(nullptr);
 		}
+		//If a physiscs attribute has been removed, remove its PhysicsObject representation
 		if(itrPhysics.ownerId() == 0)
 		{
 			if(physicsObjects_->at(index) != nullptr)
@@ -152,24 +141,47 @@ void PhysicsComponent::syncronizeWithAttributes()
 				physicsObjects_->at(index) = nullptr;
 			}
 		}
+		//Synchronize physiscs attributes with internal PhysicsObjects
 		if(physicsAttribute->hasChanged)
 		{
+			//If the PhysicsObjects already exists, it needs to be removed to safely reset all of its internal Bullet Physics values
 			if(physicsObjects_->at(index) != nullptr)
 			{
 				dynamicsWorld_->removeRigidBody(physicsObjects_->at(index));
 				delete physicsObjects_->at(index);
 			}
-			// Add object based on type
-			/*switch(physicsAttribute->collisionFilterGroup())
+			// Determine type of PhysicsObject to create and add to the Bullet Physics world
+			switch(physicsAttribute->collisionFilterGroup)
 			{
-				DEFAULT_ERROR:*/
-				physicsObjects_->at(index) = new PhysicsObject(index);
-				/*break;
-			}*/
-			physicsObjects_->at(index)->init(index);
-			dynamicsWorld_->addRigidBody(physicsObjects_->at(index));			
-			physicsAttribute->hasChanged = false;
-			
+			case Attribute_Physics::DEFAULT_ERROR:
+				std::cout << "Error: Attribute_Physics should not have be DEFAULT_ERROR as collisionFilterGroup. Do not forget to set collisionFilterGroup when creating Attribute_Physics." << std::endl;
+				break;
+			case Attribute_Physics::WORLD:
+				physicsObjects_->at(index) = new PhysicsObject();
+				break;
+			case Attribute_Physics::PLAYER:
+				physicsObjects_->at(index) = new PlayerPhysicsObject();
+				break;
+			case Attribute_Physics::PROJECTILE:
+				physicsObjects_->at(index) = new ProjectilePhysicsObject(); //In progress (2013-01-15 17.25)
+				break;
+			case Attribute_Physics::EXPLOSIONSPHERE:
+				//physicsObjects_->at(index) = new PhysicsObject();
+				break;
+			case Attribute_Physics::EVERYTHING:
+				std::cout << "Error: Attribute_Physics should not have EVERYTHING as collisionFilterGroup" << std::endl;
+				break;
+			}
+
+			if(physicsObjects_->at(index)->init(index) == true)
+			{
+				dynamicsWorld_->addRigidBody(physicsObjects_->at(index));			
+				physicsAttribute->hasChanged = false;
+			}
+			else
+			{
+				std::cout << "-->Error initializing PhysicsObject" << std::endl;
+			}
 		}
 	}
 }

@@ -3,21 +3,23 @@
 
 #include <BulletDynamics/Dynamics/btRigidBody.h>
 
-class btManifoldPoint;
-class btCollisionObject;
-struct Attribute_Input;
-
-class PhysicsObject : public btRigidBody
+class PhysicsObject
+	: public btRigidBody
 {
 private:
-	float yaw_;
+	virtual bool subClassSpecificInitHook();	//! Can be overridden by subclasses. Is called from init.
+protected:
+		float yaw_;
 public:
-	PhysicsObject(unsigned int attributeIndex);
+	PhysicsObject();
 	~PhysicsObject();
-	void init(unsigned int attributeIndex);
+	//! Init PhysicsObject and call subClassSpecificInitHook()
+	/*!
+	\param attributeIndex The physics attribute index. Refer to MotionState.
+	*/
+	bool init(unsigned int attributeIndex);
+	
 	virtual void onUpdate(float delta);
-	virtual void reload();
-	virtual void handleInput(Attribute_Input* inputAttribute);
 };
 
 #endif

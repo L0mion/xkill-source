@@ -16,6 +16,14 @@ class btSequentialImpulseConstraintSolver;
 class PhysicsObject;
 class CollisionObject;
 
+/*! \defgroup xkill-physics xkill-physics
+	Physics Component of XKILL. */
+
+//! Physics Component of XKILL. Uses Bullet Physics. Synchronizes physics attributes with PhysicsObjects.
+/*!
+\ingroup xkill-physics
+*/
+
 class DLL_P PhysicsComponent : public IObserver
 {
 private:
@@ -31,7 +39,6 @@ private:
 	void syncronizeWithAttributes();
 	void collisionDetection();
 	void doCulling();
-	void handleInput();
 public:
 	PhysicsComponent();
 	~PhysicsComponent();

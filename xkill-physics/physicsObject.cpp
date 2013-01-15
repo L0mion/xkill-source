@@ -1,74 +1,88 @@
-#include "physicsObject.h"
+#include "PhysicsObject.h"
 
 #include <btBulletDynamicsCommon.h>
 
 #include <xkill-utilities/AttributeManager.h>
 
-#include "collisionShapes.h"
-#include "motionState.h"
+#include "CollisionShapes.h"
+#include "MotionState.h"
 
-#include "physicsUtilities.h"
+#include "PhysicsUtilities.h"
 
-
-ATTRIBUTES_DECLARE_ALL;
 static bool isFirst = true;
+AttributeIterator<Attribute_Physics> itrPhysics_2; //if "itrPhysics", compile error: itrPhysics already defined in PhysicsComponent.obj
 
-
-
-PhysicsObject::PhysicsObject(unsigned int attributeIndex) : btRigidBody(0, new MotionState(attributeIndex), nullptr)
+PhysicsObject::PhysicsObject()
+	: btRigidBody(-1, nullptr, nullptr)
 {
 	yaw_ = 0;
+	itrPhysics_2 = ATTRIBUTE_MANAGER->physics.getIterator();
 }
 
 PhysicsObject::~PhysicsObject()
 {
 	delete getMotionState();
 }
-void PhysicsObject::init(unsigned int attributeIndex)
+
+bool PhysicsObject::subClassSpecificInitHook()
 {
-	if(isFirst)
+	return true;
+}
+
+bool PhysicsObject::init(unsigned int attributeIndex)
+{
+	if(attributeIndex < 0)
 	{
-		ATTRIBUTES_INIT_ALL;
-		isFirst = false;
+		return false;
 	}
 
-	static_cast<MotionState*>(getMotionState())->setAttributeIndex(attributeIndex);
-	reload();
+	//Get the init data from a physics attribute
+	Attribute_Physics* physicsAttribute = itrPhysics_2.at(attributeIndex);
+
+	//Resolve mass, local inertia of the collision shape, and also the collision shape itself.
+	float mass = static_cast<float>(physicsAttribute->mass);
+	btVector3 localInertia;
+	localInertia.setZero();
+	btCollisionShape* collisionShape = CollisionShapes::Instance()->getCollisionShape(physicsAttribute->meshID);
+	if(mass == 0.0f) //calling "setMassProps()" below will set the CF_STATIC_OBJECT flag to true for the btRigidBody if the mass is zero
+	{
+		collisionShape->calculateLocalInertia(mass, localInertia);
+	}
+	setMassProps(mass, localInertia); //Set inverse mass and inverse local inertia
+	setCollisionShape(collisionShape);
+
+	//CHECK motion state on static objects
+
+	//Bind a motion state to this object. Also set an attribute index to the bound motion state.
+	MotionState* customMotionState = new MotionState();
+	customMotionState->setAttributeIndex(attributeIndex);
+	setMotionState(customMotionState);
+
+	if(!(getCollisionFlags() & btCollisionObject::CF_STATIC_OBJECT))
+	{
+		setAngularVelocity(btVector3(physicsAttribute->angularVelocity.x,
+									 physicsAttribute->angularVelocity.y,
+									 physicsAttribute->angularVelocity.z));
+		setLinearVelocity(btVector3(physicsAttribute->linearVelocity.x,
+									 physicsAttribute->linearVelocity.y,
+									 physicsAttribute->linearVelocity.z));
+		setGravity(btVector3(physicsAttribute->gravity.x,
+								physicsAttribute->gravity.y,
+								physicsAttribute->gravity.z));
+	}
+
+	if(physicsAttribute->collisionResponse)
+	{
+		setCollisionFlags(getCollisionFlags() & ~CF_NO_CONTACT_RESPONSE); //Activate collision response
+	}
+	else
+	{
+		setCollisionFlags(getCollisionFlags() | CF_NO_CONTACT_RESPONSE); //Deactivate collision response
+	}
+	
+	return subClassSpecificInitHook();
 }
 
 void PhysicsObject::onUpdate(float delta)
 {
-}
-
-void PhysicsObject::reload()
-{
-	//static float worldScale = 100.0f;
-	Attribute_Physics* physicsAttribute = itrPhysics.at(static_cast<MotionState*>(getMotionState())->getAttributeIndex());
-	
-	setAngularVelocity(btVector3(physicsAttribute->angularVelocity.x,
-								 physicsAttribute->angularVelocity.y,
-								 physicsAttribute->angularVelocity.z));
-	setLinearVelocity(btVector3(physicsAttribute->linearVelocity.x,
-								 physicsAttribute->linearVelocity.y,
-								 physicsAttribute->linearVelocity.z));
-	setGravity(btVector3(physicsAttribute->gravity.x,
-							physicsAttribute->gravity.y,
-							physicsAttribute->gravity.z));
-	setCollisionShape(CollisionShapes::Instance()->getCollisionShape(physicsAttribute->meshID));
-	setMassProps(physicsAttribute->mass,
-				 btVector3(0,0,0));
-	activate(true);
-}
-
-void PhysicsObject::handleInput(Attribute_Input* inputAttribute)
-{
-	yaw_ += inputAttribute->rotation.x;
-	btVector3 move = btVector3(inputAttribute->position.x, 0, inputAttribute->position.y);
-	move = move.rotate(btVector3(0,1,0),yaw_);
-	move = btVector3(move.x(), getLinearVelocity().y(), move.z());
-	setLinearVelocity(move);
-	btTransform world;
-	getMotionState()->getWorldTransform(world);
-	world.setRotation(btQuaternion(yaw_,0,0));
-	getMotionState()->setWorldTransform(world);
 }
