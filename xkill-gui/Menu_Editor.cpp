@@ -57,6 +57,8 @@ void Menu_Editor::slot_editorRefresh()
 	entityBrowser_add("PhysicsObjects", allPhysicsOwner);
 	std::vector<int>* allProjectileOwner = GET_ATTRIBUTE_OWNERS(projectile);
 	entityBrowser_add("Projectiles", allProjectileOwner);
+	std::vector<int>* allInputDeviceOwner = GET_ATTRIBUTE_OWNERS(inputDevice);
+	entityBrowser_add("InputDevices", allInputDeviceOwner);
 }
 
 void Menu_Editor::entityBrowser_add(QString name, std::vector<int>* owners)
