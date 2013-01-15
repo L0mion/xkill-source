@@ -162,22 +162,35 @@ Attribute_Input::~Attribute_Input()
 {
 }
 
-//Attribute_InputDeviceSettings::Attribute_InputDeviceSettings()
-//{
-//}
-//Attribute_InputDeviceSettings::~Attribute_InputDeviceSettings()
-//{
-//}
+Attribute_InputDevice::Attribute_InputDevice()
+{
+	device = nullptr;
+}
+Attribute_InputDevice::~Attribute_InputDevice()
+{
+}
 
+Attribute_InputDeviceSettings::Attribute_InputDeviceSettings()
+{
+}
+Attribute_InputDeviceSettings::~Attribute_InputDeviceSettings()
+{
+}
+
+int Attribute_Player::nextId = 0;
 Attribute_Player::Attribute_Player()
 {
-	id = -1;
+	id = nextId++;
 	priority = 0;
 	cycleSteals = 0;
 	totalExecutionTime = 0;
 }
 Attribute_Player::~Attribute_Player()
 {
+}
+void Attribute_Player::clean()
+{
+	nextId = 0;
 }
 
 Attribute_Mesh::Attribute_Mesh()

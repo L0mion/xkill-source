@@ -29,7 +29,8 @@ public:
 	AttributeStorage<Attribute_Physics>					physics;
 	AttributeStorage<Attribute_Camera>					camera;
 	AttributeStorage<Attribute_Input>					input;
-	//AttributeStorage<Attribute_InputDeviceSettings>		inputDeviceSettings;
+	AttributeStorage<Attribute_InputDevice>				inputDevice;
+	AttributeStorage<Attribute_InputDeviceSettings>		inputDeviceSettings;
 	AttributeStorage<Attribute_Player>					player;
 	AttributeStorage<Attribute_Bounding>				bounding;
 	AttributeStorage<Attribute_Projectile>				projectile;
@@ -73,7 +74,8 @@ static	AttributeIterator<Attribute_DebugShape>				itrDebugShape			;	\
 static	AttributeIterator<Attribute_Physics>				itrPhysics				;	\
 static	AttributeIterator<Attribute_Camera>					itrCamera				;	\
 static	AttributeIterator<Attribute_Input>					itrInput				;	\
-/*static	AttributeIterator<Attribute_InputDeviceSettings>	itrInputDeviceSettings	;	*/\
+static	AttributeIterator<Attribute_InputDevice>			itrInputDevice			;	\
+static	AttributeIterator<Attribute_InputDeviceSettings>	itrInputDeviceSettings	;	\
 static	AttributeIterator<Attribute_Player>					itrPlayer				;	\
 static	AttributeIterator<Attribute_Bounding>				itrBounding				;	\
 static	AttributeIterator<Attribute_Projectile>				itrProjectile			;	\
@@ -99,7 +101,8 @@ itrDebugShape			= ATTRIBUTE_MANAGER->debugShape				.getIterator();		\
 itrPhysics				= ATTRIBUTE_MANAGER->physics				.getIterator();		\
 itrCamera				= ATTRIBUTE_MANAGER->camera					.getIterator();		\
 itrInput				= ATTRIBUTE_MANAGER->input					.getIterator();		\
-/*itrInputDeviceSettings	= ATTRIBUTE_MANAGER->inputDeviceSettings	.getIterator();		*/\
+itrInputDevice			= ATTRIBUTE_MANAGER->inputDevice			.getIterator();		\
+itrInputDeviceSettings	= ATTRIBUTE_MANAGER->inputDeviceSettings	.getIterator();		\
 itrPlayer				= ATTRIBUTE_MANAGER->player					.getIterator();		\
 itrBounding				= ATTRIBUTE_MANAGER->bounding				.getIterator();		\
 itrProjectile			= ATTRIBUTE_MANAGER->projectile				.getIterator();		\

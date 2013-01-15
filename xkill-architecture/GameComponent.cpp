@@ -417,20 +417,10 @@ void GameComponent::event_PhysicsAttributesColliding(Event_PhysicsAttributesColl
 						else
 						{
 							SEND_EVENT(&Event_PlaySound(0));
-
-							int playerID = -1;
-
-							while(itrPlayer.hasNext())
-							{
-								Attribute_Player* player = itrPlayer.getNext();
-								if(itrPlayer.ownerId() == entity1->getID())
-								{
-									playerID = player->id;
-								}
-							}
-
-							SEND_EVENT(&Event_Rumble(playerID, true, 0.5f, 1.0f, 1.0f));
 						}
+
+						SEND_EVENT(&Event_Rumble(entity1->getID(), true, 0.2f, 1.0f, 1.0f));
+
 						DEBUGPRINT("DAMAGEEVENT Entity " << entity2->getID() << " damage: " <<  damage->damage << " Entity " << entity1->getID() << " health " << health->health);
 					}
 

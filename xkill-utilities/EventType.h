@@ -47,6 +47,7 @@ enum DLL_U EventType
 	EVENT_START_DEATHMATCH,
 	EVENT_CHANGE_GAMESTATE,
 	EVENT_CREATE_EXPLOSIONSPHERE,
+	EVENT_CREATE_INPUTDEVICE,
 
 	EVENT_CREATE_ENTITY,
 	EVENT_GAMERESET,
@@ -374,7 +375,8 @@ enum DLL_U EntityType
 {
 	WORLD,
 	PLAYER,
-	PROJECTILE
+	PROJECTILE,
+	INPUTDEVICES
 };
 
 class DLL_U Event_CreateEntity : public Event
@@ -383,4 +385,15 @@ public:
 	Event_CreateEntity(EntityType entityType);
 
 	EntityType entityType;
+};
+
+class InputObjectArray;
+class InputDevice;
+class DLL_U Event_CreateInputDevice : public Event
+{
+public:
+	Event_CreateInputDevice(InputDevice* inputDevice, InputObjectArray* inputObjectArray);
+
+	InputDevice* device;
+	InputObjectArray* objectArray;
 };

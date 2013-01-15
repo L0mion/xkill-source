@@ -59,6 +59,7 @@ enum DLL_U AttributeType
 	ATTRIBUTE_PHYSICS,
 	ATTRIBUTE_CAMERA,
 	ATTRIBUTE_INPUT,
+	ATTRIBUTE_INPUTDEVICE,
 	//ATTRIBUTE_INPUTDEVICESETTINGS,
 	ATTRIBUTE_PLAYER,
 	ATTRIBUTE_BOUNDING,
@@ -261,6 +262,23 @@ struct DLL_U Attribute_Input : public IAttribute
 	bool changeFiringMode;
 };
 
+class InputDevice;
+
+/// Represent an input device
+/**
+\ingroup ATTRIBUTES
+*/
+
+struct DLL_U Attribute_InputDevice : public IAttribute
+{
+	Attribute_InputDevice();
+	~Attribute_InputDevice();
+
+	InputDevice* device;
+
+	AttributePointer ptr_inputDeviceSettings;
+};
+
 class InputObjectArray;
 
 /// Stores the input objects of a input device
@@ -268,13 +286,13 @@ class InputObjectArray;
 \ingroup ATTRIBUTES
 */
 
-//struct DLL_U Attribute_InputDeviceSettings : public IAttribute
-//{
-//	Attribute_InputDeviceSettings();
-//	~Attribute_InputDeviceSettings();
-//
-//	InputObjectArray* inputObjectArray;
-//};
+struct DLL_U Attribute_InputDeviceSettings : public IAttribute
+{
+	Attribute_InputDeviceSettings();
+	~Attribute_InputDeviceSettings();
+
+	InputObjectArray* inputObjectArray;
+};
 
 /// Stores everything SoundComponent needs to know to play a 3D sound
 /** 
@@ -316,6 +334,10 @@ struct DLL_U Attribute_Player : public IAttribute
 	Attribute_Player();
 	~Attribute_Player();
 
+	void clean();
+
+	static int nextId;
+
 	int id;					//!< The id of the player process. Used to identify a player attribute in GameComponent when firing projectiles.
 	int priority;			//!< Priority of the player process. Higher value means higher priority. The scheduler will choose the process with the highest priority for execution.
 	int cycleSteals;		//!< Total number of cycle steals for the player process. Cycle steals steal priority from other player processes.
@@ -323,6 +345,7 @@ struct DLL_U Attribute_Player : public IAttribute
 
 	AttributePointer ptr_render;
 	AttributePointer ptr_input;
+	AttributePointer ptr_inputDevice;
 	AttributePointer ptr_camera;
 	AttributePointer ptr_health;
 	AttributePointer ptr_weaponStats;

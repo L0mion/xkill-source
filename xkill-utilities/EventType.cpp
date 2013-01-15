@@ -149,3 +149,9 @@ Event_CreateEntity::Event_CreateEntity( EntityType entityType ) : Event(EVENT_CR
 {
 	this->entityType = entityType;
 }
+
+Event_CreateInputDevice::Event_CreateInputDevice(InputDevice* inputDevice, InputObjectArray* inputObjectArray) : Event(EVENT_CREATE_INPUTDEVICE)
+{
+	device = inputDevice;
+	objectArray = inputObjectArray;
+}
