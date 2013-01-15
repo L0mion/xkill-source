@@ -53,7 +53,7 @@ void DirectInputDevice::RunForceFeedback()
 	}
 }
 
-void DirectInputDevice::StopForceFeedback()
+bool DirectInputDevice::StopForceFeedback()
 {
 	if(hasFF_)
 	{
@@ -63,6 +63,8 @@ void DirectInputDevice::StopForceFeedback()
 				isFFTurnedOn_ = false;
 		}
 	}
+
+	return isFFTurnedOn_;
 }
 
 void DirectInputDevice::SetForceFeedback(float leftMotorScale, float rightMotorScale)
@@ -120,6 +122,7 @@ bool DirectInputDevice::IsForceFeedbackCapable()
 
 void DirectInputDevice::Update(float deltaTime)
 {
+	InputDevice::Update(deltaTime);
 	updateState();
 }
 

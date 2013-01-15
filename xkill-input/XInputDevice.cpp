@@ -43,6 +43,7 @@ XInputDevice::~XInputDevice(void)
 
 void XInputDevice::Update(float deltaTime)
 {
+	InputDevice::Update(deltaTime);
 	updateState();
 }
 
@@ -58,7 +59,7 @@ void XInputDevice::RunForceFeedback()
 	forceFeedbackOn_ = true;
 }
 
-void XInputDevice::StopForceFeedback()
+bool XInputDevice::StopForceFeedback()
 {
 	XINPUT_VIBRATION vibration;
 
@@ -68,6 +69,8 @@ void XInputDevice::StopForceFeedback()
 	XInputSetState(deviceNr_, &vibration);
 
 	forceFeedbackOn_ = false;
+
+	return forceFeedbackOn_;
 }
 
 void  XInputDevice::SetForceFeedback(float leftMotorScale, float rightMotorScale)

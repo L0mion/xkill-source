@@ -22,7 +22,6 @@ Menu_Main::Menu_Main( QWidget* parent ) : QMainWindow(parent), ToggleHelper(this
 	connect(ui.pushButton_exit, SIGNAL(clicked()), parentWidget(), SLOT(close()));
 	connect(ui.pushButton_exit_2, SIGNAL(clicked()), parentWidget(), SLOT(close()));
 	connect(ui.comboBox_LevelSelect, SIGNAL(currentIndexChanged(int)), this, SLOT(slot_selectLevel(int)));
-	connect(ui.textBrowser_LevelInfo, SIGNAL(currentIndexChanged(int)), this, SLOT(slot_selectLevel(int)));
 	connect(ui.pushButton_AddLevel, SIGNAL(clicked()), this, SLOT(slot_addLevel()));
 	connect(ui.pushButton_SaveLevel, SIGNAL(clicked()), this, SLOT(slot_saveLevel()));
 	connect(ui.pushButton_RemoveLevel, SIGNAL(clicked()), this, SLOT(slot_removeLevel()));

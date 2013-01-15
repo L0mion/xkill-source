@@ -418,6 +418,19 @@ void GameComponent::event_PhysicsAttributesColliding(Event_PhysicsAttributesColl
 						else
 						{
 							SEND_EVENT(&Event_PlaySound(0));
+
+							int playerID = -1;
+
+							while(itrPlayer.hasNext())
+							{
+								Attribute_Player* player = itrPlayer.getNext();
+								if(itrPlayer.ownerId() == entity1->getID())
+								{
+									playerID = player->id;
+								}
+							}
+
+							SEND_EVENT(&Event_Rumble(playerID, true, 0.5f, 1.0f, 1.0f));
 						}
 						DEBUGPRINT("DAMAGEEVENT Entity " << entity2->getID() << " damage: " <<  damage->damage << " Entity " << entity1->getID() << " health " << health->health);
 					}
@@ -602,7 +615,7 @@ Attribute_SpawnPoint* GameComponent::findUnoccupiedSpawnPoint()
 }
 
 void GameComponent::event_StartDeathmatch( Event_StartDeathmatch* e )
-{ 
+{
 	// Delete players
 	std::vector<int>* playerAttributesOwners = GET_ATTRIBUTE_OWNERS(player);
 	for(unsigned i=0; i<playerAttributesOwners->size(); i++)

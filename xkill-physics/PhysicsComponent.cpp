@@ -137,6 +137,8 @@ void PhysicsComponent::syncronizeWithAttributes()
 	{
 		Attribute_Physics* physicsAttribute = itrPhysics.getNext();
 		unsigned int index = itrPhysics.index();
+		
+		//Checks if new physiscs attributes were created since last call to this function
 		if(index >= physicsObjects_->size())
 		{
 			physicsObjects_->push_back(nullptr);

@@ -76,6 +76,7 @@ void InputManager::Update(float deltaTime)
 InputDevice* InputManager::GetDevice(unsigned int playerID)
 {
 	unsigned int index = 1;
+	playerID--;
 
 	for(; index <= devices_.size(); index++)
 	{
