@@ -38,6 +38,7 @@ struct DLL_U IAttribute
 	virtual DataItemList* getDataList()
 	{
 		DataItemList* list = new DataItemList();
+		list->addNotSupported();
 		return list;
 	};
 
@@ -123,6 +124,7 @@ struct DLL_U Attribute_Spatial : public IAttribute
 	DataItemList* getDataList()
 	{
 		DataItemList* list = new DataItemList();
+		list->add(ptr_position.index, "ptr_Position");
 		list->add(rotation, "Rotation");
 		list->add(scale,	"Scale");
 		return list;
@@ -166,6 +168,15 @@ struct DLL_U Attribute_Render : public IAttribute
 
 	int meshID;
 	int textureID;
+
+	DataItemList* getDataList()
+	{
+		DataItemList* list = new DataItemList();
+		list->add(ptr_spatial.index,	"ptr_Spatial");
+		list->add(meshID,		"MeshID");
+		list->add(textureID,	"TextureID");
+		return list;
+	}
 };
 
 /// Stores everything PhysicsComponent needs to know about an entity

@@ -53,7 +53,7 @@ enum DLL_U EventType
 	EVENT_UPDATE,
 	EVENT_MOUSE_MOVE,
 	EVENT_KEY_PRESS,
-	EVENT_KEY_RELEASE,
+	EVENT_MOUSE_PRESS,
 	EVENT_WINDOW_RESIZE,
 
 	EVENT_INPUT_DEVICE_SEARCH,
@@ -296,20 +296,22 @@ class DLL_U Event_KeyPress : public Event
 {
 public:
 	int keyEnum;
+	bool isPressed;
 
-	Event_KeyPress(int keyEnum);
+	Event_KeyPress(int keyEnum, bool isPressed);
 };
 
-/// Alerts InputComponent about key release
+/// Alerts InputComponent about mouse press
 /**
 \ingroup events
 */
-class DLL_U Event_KeyRelease : public Event
+class DLL_U Event_MousePress : public Event
 {
 public:
 	int keyEnum;
+	bool isPressed;
 
-	Event_KeyRelease(int keyEnum);
+	Event_MousePress(int keyEnum, bool isPressed);
 };
 
 class DLL_U Event_PlayerDeath : public Event

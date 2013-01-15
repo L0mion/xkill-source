@@ -19,7 +19,7 @@ private:
 public:
 	Menu_Editor(Ui::MainWindowClass& ui, QWidget* parent);
 	void entityBrowser_add(QString name, std::vector<int>* owners);
-	void entityInspector_add(QString name);
+	void entityInspector_add(int index, QString name);
 public slots:
 	void slot_editorRefresh();
 	void slot_clicked_entityBrowser(QModelIndex index);

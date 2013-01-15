@@ -19,7 +19,7 @@ private:
 	Ui::MainWindowClass ui;
 	MenuManager* menuManager;
 	GameWidget* gameWidget;
-	bool hasMouseLock;
+	
 
 public:
 	MainWindow();
@@ -30,10 +30,6 @@ public:
 	void event_showMessageBox(Event_ShowMessageBox* e);
 
 protected:
-	// Sends mouse movement as an event.
-	void mouseMoveEvent(QMouseEvent* e);
-	// Behavior on mouse press
-	void mousePressEvent(QMouseEvent *e);
 	// Behavior on keyboard input
 	void keyPressEvent(QKeyEvent* e);
 	void moveEvent(QMoveEvent *e);
@@ -44,9 +40,6 @@ protected:
 public slots:
 		void slot_setTitle(QString title);
 		void slot_toggleFullScreen();
-
-private:
-	void toggleMouseLock();
 };
 
 #endif // MAINWINDOW_H

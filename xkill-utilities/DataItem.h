@@ -88,6 +88,13 @@ public:
 		index = 0;
 	}
 
+	void addNotSupported()
+	{
+		DataItem d;
+		d.label = "UNKOWN";
+		content.push_back(d);
+	}
+
 	void add(bool x, std::string label)
 	{
 		DataItem d;

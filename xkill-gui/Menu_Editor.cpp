@@ -40,8 +40,9 @@ Menu_Editor::Menu_Editor( Ui::MainWindowClass& ui, QWidget* parent ) : QWidget(p
 	ui.treeView_entityBrowser->setEditTriggers(QAbstractItemView::NoEditTriggers);
 
 	// Init Entity Inspector
-	model_entityInspector = new QStandardItemModel(0, 1, this);
+	model_entityInspector = new QStandardItemModel(0, 2, this);
 	model_entityInspector->setHorizontalHeaderItem(0, new QStandardItem("Attributes"));
+	model_entityInspector->setHorizontalHeaderItem(1, new QStandardItem("ID"));
 	ui.treeView_entityInspector->setModel(model_entityInspector);
 	ui.treeView_entityInspector->setEditTriggers(QAbstractItemView::NoEditTriggers);
 
@@ -50,31 +51,39 @@ Menu_Editor::Menu_Editor( Ui::MainWindowClass& ui, QWidget* parent ) : QWidget(p
 	model_attributeInspector->setHorizontalHeaderItem(0, new QStandardItem("Property"));
 	model_attributeInspector->setHorizontalHeaderItem(1, new QStandardItem("Value"));
 	ui.treeView_attributeInspector->setModel(model_attributeInspector);
+
+
 	//ui.treeView_attributeInspector->setEditTriggers(QAbstractItemView::NoEditTriggers);
 
 	connect(ui.pushButton_editorRefresh, SIGNAL(clicked()), this, SLOT(slot_editorRefresh()));
 	connect(ui.treeView_entityBrowser, SIGNAL(clicked(QModelIndex)), this, SLOT(slot_clicked_entityBrowser(QModelIndex)));
 	connect(ui.treeView_entityInspector, SIGNAL(clicked(QModelIndex)), this, SLOT(slot_clicked_entityInspector(QModelIndex)));
 	connect(ui.horizontalSlider_simulationSpeed, SIGNAL(valueChanged(int)), this, SLOT(slot_changed_simulationSpeed(int)));
+	connect(ui.horizontalSlider_simulationSpeed, SIGNAL(valueChanged(int)), this, SLOT(slot_changed_simulationSpeed(int)));
+	connect(ui.dockWidget, SIGNAL(visibilityChanged(bool)), this, SLOT(slot_editorRefresh()));
+	 
 	ui.dockWidget->hide();
 }
 
 void Menu_Editor::slot_editorRefresh()
 {
-	// Reset column counting
-	num_rows = 0;
+	if(ui.dockWidget->isVisible())
+	{
+		// Reset column counting
+		num_rows = 0;
 
-	// Fill columns
-	std::vector<int>* allPlayerOwner = 	GET_ATTRIBUTE_OWNERS(player);
-	entityBrowser_add("Players", allPlayerOwner);
-	std::vector<int>* allSpawnOwner = GET_ATTRIBUTE_OWNERS(spawnPoint);
-	entityBrowser_add("SpawnPoints", allSpawnOwner);
-	std::vector<int>* allMeshOwner = GET_ATTRIBUTE_OWNERS(mesh);
-	entityBrowser_add("Meshes", allMeshOwner);
-	std::vector<int>* allPhysicsOwner = GET_ATTRIBUTE_OWNERS(physics);
-	entityBrowser_add("PhysicsObjects", allPhysicsOwner);
-	std::vector<int>* allProjectileOwner = GET_ATTRIBUTE_OWNERS(projectile);
-	entityBrowser_add("Projectiles", allProjectileOwner);
+		// Fill columns
+		std::vector<int>* allPlayerOwner = 	GET_ATTRIBUTE_OWNERS(player);
+		entityBrowser_add("Players", allPlayerOwner);
+		std::vector<int>* allSpawnOwner = GET_ATTRIBUTE_OWNERS(spawnPoint);
+		entityBrowser_add("SpawnPoints", allSpawnOwner);
+		std::vector<int>* allMeshOwner = GET_ATTRIBUTE_OWNERS(mesh);
+		entityBrowser_add("Meshes", allMeshOwner);
+		std::vector<int>* allPhysicsOwner = GET_ATTRIBUTE_OWNERS(physics);
+		entityBrowser_add("PhysicsObjects", allPhysicsOwner);
+		std::vector<int>* allProjectileOwner = GET_ATTRIBUTE_OWNERS(projectile);
+		entityBrowser_add("Projectiles", allProjectileOwner);
+	}
 }
 
 void Menu_Editor::entityBrowser_add(QString name, std::vector<int>* owners)
@@ -118,56 +127,93 @@ void Menu_Editor::entityBrowser_add(QString name, std::vector<int>* owners)
 	item->setText("[" + QString::number(num_entities) + "] " + name);
 }
 
+void Menu_Editor::entityInspector_add(int index, QString name)
+{
+	model_entityInspector->setItem(index, new QStandardItem(name));
+}
+
 void Menu_Editor::slot_clicked_entityBrowser( QModelIndex indexClicked )
 {
 	QVariant data = model_entityBrowser->data(indexClicked);
 	if(data.type() == QVariant::Int)
 	{
-		model_entityInspector->clear();
-		model_entityInspector->setHorizontalHeaderItem(0, new QStandardItem("Attributes"));
+		//model_entityInspector->setHorizontalHeaderItem(1, new QStandardItem("ID"));
 		int entityId = data.toInt();
 		std::vector<Entity>* allEntity; GET_ENTITIES(allEntity);
 		Entity* entity = &allEntity->at(entityId);
 		selected_attribute.entityId = entityId;
 
 		// Get all attributes as enums and build menu from it
-		std::vector<int> enums = entity->getAttributesAsEnums();
-		for(std::vector<int>::iterator it = enums.begin(); it != enums.end(); ++it)
+		std::vector<AttributeController>* attributes = entity->getAttributeControllers();
+		int num_items = 0;
+		for(int i=0; i<attributes->size(); i++)
 		{
-			int e = *it;
-			if(e == ATTRIBUTE_POSITION)
-				entityInspector_add("Position");
-			if(e == ATTRIBUTE_SPATIAL)
-				entityInspector_add("Spatial");
-			if(e == ATTRIBUTE_RENDER)
-				entityInspector_add("Render");
-			if(e == ATTRIBUTE_DEBUGSHAPE)
-				entityInspector_add("Debug Shape");
-			if(e == ATTRIBUTE_PHYSICS)
-				entityInspector_add("Physics");
-			if(e == ATTRIBUTE_CAMERA)
-				entityInspector_add("Camera");
-			if(e == ATTRIBUTE_INPUT)
-				entityInspector_add("Input");
-			if(e == ATTRIBUTE_PLAYER)
-				entityInspector_add("Player");
-			if(e == ATTRIBUTE_BOUNDING)
-				entityInspector_add("Bounding Shape");
-			if(e == ATTRIBUTE_MESH)
-				entityInspector_add("Mesh");
-			if(e == ATTRIBUTE_PROJECTILE)
-				entityInspector_add("Projectile");
-			if(e == ATTRIBUTE_HEALTH)
-				entityInspector_add("Health");
-			if(e == ATTRIBUTE_DAMAGE)
-				entityInspector_add("Damage");
-			if(e == ATTRIBUTE_SPAWNPOINT)
-				entityInspector_add("Spawn Point");
-			if(e == ATTRIBUTE_WEAPONSTATS)
-				entityInspector_add("Weapon Stats");
-			if(e == ATTRIBUTE_EXPLOSIONSPHERE)
-				entityInspector_add("Explosion Sphere");
+			int attributeType = attributes->at(i).type;
+			switch (attributeType) 
+			{
+			case ATTRIBUTE_POSITION:
+				entityInspector_add(num_items, "Position");
+				break;
+			case ATTRIBUTE_SPATIAL:
+				entityInspector_add(num_items, "Spatial");
+				break;
+			case ATTRIBUTE_RENDER:
+				entityInspector_add(num_items, "Render");
+				break;
+			case ATTRIBUTE_DEBUGSHAPE:
+				entityInspector_add(num_items, "DebugShape");
+				break;
+			case ATTRIBUTE_PHYSICS:
+				entityInspector_add(num_items, "Physics");
+				break;
+			default:
+				entityInspector_add(num_items, "UNKOWN");
+				break;
+			}
+			QStandardItem* item_id = new QStandardItem();
+			model_entityInspector->setItem(num_items, 1, item_id);
+			model_entityInspector->setData(item_id->index(), QVariant(attributes->at(i).index));
+			num_items++;
+
+			//ATTRIBUTE_POSITION
+			//	entityInspector_add("Position");
+			//ATTRIBUTE_SPATIAL
+			//	entityInspector_add("Spatial");
+			//if(e == ATTRIBUTE_RENDER)
+			//	entityInspector_add("Render");
+			//if(e == ATTRIBUTE_DEBUGSHAPE)
+			//	entityInspector_add("Debug Shape");
+			//if(e == ATTRIBUTE_PHYSICS)
+			//	entityInspector_add("Physics");
+			//if(e == ATTRIBUTE_CAMERA)
+			//	entityInspector_add("Camera");
+			//if(e == ATTRIBUTE_INPUT)
+			//	entityInspector_add("Input");
+			//if(e == ATTRIBUTE_PLAYER)
+			//	entityInspector_add("Player");
+			//if(e == ATTRIBUTE_BOUNDING)
+			//	entityInspector_add("Bounding Shape");
+			//if(e == ATTRIBUTE_MESH)
+			//	entityInspector_add("Mesh");
+			//if(e == ATTRIBUTE_PROJECTILE)
+			//	entityInspector_add("Projectile");
+			//if(e == ATTRIBUTE_HEALTH)
+			//	entityInspector_add("Health");
+			//if(e == ATTRIBUTE_DAMAGE)
+			//	entityInspector_add("Damage");
+			//if(e == ATTRIBUTE_SPAWNPOINT)
+			//	entityInspector_add("Spawn Point");
+			//if(e == ATTRIBUTE_WEAPONSTATS)
+			//	entityInspector_add("Weapon Stats");
+			//if(e == ATTRIBUTE_EXPLOSIONSPHERE)
+			//	entityInspector_add("Explosion Sphere");
 		}
+		//model_entityInspector->setItem(1, new QStandardItem("Blaj"));
+
+			// Remove unused rows
+		int excessRows = model_entityInspector->rowCount() - num_items;
+		if(excessRows>0)
+			model_entityInspector->removeRows(num_items, excessRows);
 	}
 }
 
@@ -199,6 +245,14 @@ void Menu_Editor::slot_clicked_entityInspector( QModelIndex indexClicked )
 			item_value	  = new QStandardItem();
 			model_attributeInspector->setItem(num_items, 0, item_property);
 			model_attributeInspector->setItem(num_items, 1, item_value);
+		}
+		else
+		{
+			// Clean reused attribute
+			if(item_property->hasChildren())
+			{
+				item_property->removeRows(0, item_property->rowCount());
+			}
 		}
 		num_items++;
 
@@ -234,10 +288,27 @@ void Menu_Editor::slot_clicked_entityInspector( QModelIndex indexClicked )
 		{
 			Float3 value = *data.value._float3;
 			float x = value.x;
-		
-			QStandardItem* child = new QStandardItem("bUU");
-			item_value->appendRow(child);
-			//child->setData(QVariant(x));
+			{
+				item_property->setChild(0, 0, new QStandardItem("X"));
+				QStandardItem* child = new QStandardItem();
+				item_property->setChild(0, 1, child);
+				model_attributeInspector->setData(child->index(), QVariant(x));
+				//model_attributeInspector->setData(model_attributeInspector->index(0), Qt::blue, Qt::BackgroundRole);
+			}
+			float y = value.y;
+			{
+				item_property->setChild(1, 0, new QStandardItem("Y"));
+				QStandardItem* child = new QStandardItem();
+				item_property->setChild(1, 1,child);
+				model_attributeInspector->setData(child->index(), QVariant(y));
+			}
+			float z = value.z;
+			{
+				item_property->setChild(2, 0, new QStandardItem("Z"));
+				QStandardItem* child = new QStandardItem();
+				item_property->setChild(2, 1, child);
+				model_attributeInspector->setData(child->index(), QVariant(z));
+			}
 		}
 
 		if(type == DataItem::_FLOAT4)
@@ -246,17 +317,17 @@ void Menu_Editor::slot_clicked_entityInspector( QModelIndex indexClicked )
 			double x = (double)value.x;
 			model_attributeInspector->setData(item_value->index(), QVariant(x));
 		}
+
+		if(type == DataItem::_INVALID)
+		{
+			model_attributeInspector->setData(item_value->index(), QVariant(""));
+		}
 	}
 
 	// Remove unused rows
 	int excessRows = model_attributeInspector->rowCount() - num_items;
 	if(excessRows>0)
 		model_attributeInspector->removeRows(num_items, excessRows);
-}
-
-void Menu_Editor::entityInspector_add(QString name)
-{
-	model_entityInspector->appendRow(new QStandardItem(name));
 }
 
 void Menu_Editor::slot_changed_simulationSpeed(int speed)

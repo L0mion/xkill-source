@@ -102,14 +102,16 @@ Event_RemoveEntity::Event_RemoveEntity(int entityId) : Event(EVENT_REMOVE_ENTITY
 	this->entityId = entityId;
 }
 
-Event_KeyPress::Event_KeyPress(int keyEnum) : Event(EVENT_KEY_PRESS)
+Event_KeyPress::Event_KeyPress(int keyEnum, bool isPressed) : Event(EVENT_KEY_PRESS)
 {
 	this->keyEnum = keyEnum;
+	this->isPressed = isPressed;
 }
 
-Event_KeyRelease::Event_KeyRelease(int keyEnum) : Event(EVENT_KEY_RELEASE)
+Event_MousePress::Event_MousePress(int keyEnum, bool isPressed) : Event(EVENT_MOUSE_PRESS)
 {
 	this->keyEnum = keyEnum;
+	this->isPressed = isPressed;
 }
 
 Event_CreateSpawnPoint::Event_CreateSpawnPoint(Float3 spawnPointPosition, float spawnAreaRadius) : Event(EVENT_CREATE_SPAWNPOINT)
