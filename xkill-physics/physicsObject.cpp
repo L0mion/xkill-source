@@ -10,12 +10,16 @@
 #include "PhysicsUtilities.h"
 
 AttributeIterator<Attribute_Physics> itrPhysics_;
+AttributeIterator<Attribute_Position> itrPosition_PhysicsObject;
+AttributeIterator<Attribute_Spatial> itrSpatial_PhysicsObject;
 
 PhysicsObject::PhysicsObject()
 	: btRigidBody(-1, nullptr, nullptr)
 {
 	yaw_ = 0;
 	itrPhysics_ = ATTRIBUTE_MANAGER->physics.getIterator();
+	itrSpatial_PhysicsObject = ATTRIBUTE_MANAGER->spatial.getIterator();
+	itrPosition_PhysicsObject = ATTRIBUTE_MANAGER->position.getIterator();
 }
 
 PhysicsObject::~PhysicsObject()
@@ -51,17 +55,19 @@ bool PhysicsObject::init(unsigned int attributeIndex)
 	setMassProps(mass, localInertia); //Set inverse mass and inverse local inertia
 	setCollisionShape(collisionShape);
 
-	//CHECK motion state on static objects
-
 	if((getCollisionFlags() & btCollisionObject::CF_STATIC_OBJECT))
 	{
-		//Handle static objects. Set world transform, once.
 		btTransform world;
-		//setWorldTransform(
+
+		Attribute_Spatial* spatialAttribute = itrSpatial_PhysicsObject.at(itrPhysics_.at(attributeIndex_)->ptr_spatial);
+ 		Attribute_Position* positionAttribute = itrPosition_PhysicsObject.at(spatialAttribute->ptr_position);
+ 		world.setOrigin(convert(positionAttribute->position));
+		world.setRotation(convert(spatialAttribute->rotation));
+		setWorldTransform(world);  //Static physics objects: transform once
 	}
 	else
 	{
-		//Bind a motion state to this object. Also set an attribute index to the bound motion state.
+		//Non-static physics objects: let a derived btMotionState handle transforms.
 		MotionState* customMotionState = new MotionState(attributeIndex);
 		setMotionState(customMotionState);
 
