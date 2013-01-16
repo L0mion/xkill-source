@@ -3,7 +3,7 @@
 
 #include <LinearMath/btMotionState.h>
 
-//! Each PhysicsObject has a MotionState. It handles world transforms and binding between physics attributes and PhysicsObjects.
+//! Each PhysicsObject has a MotionState. It handles world transforms.
 class MotionState : public btMotionState
 {
 private:
