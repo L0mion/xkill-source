@@ -38,7 +38,7 @@ struct DLL_U IAttribute
 	virtual DataItemList* getDataList()
 	{
 		DataItemList* list = new DataItemList();
-		list->addNotSupported();
+		list->add_NotSupported("NOT_IMPLEMENTED");
 		return list;
 	};
 
@@ -124,9 +124,9 @@ struct DLL_U Attribute_Spatial : public IAttribute
 	DataItemList* getDataList()
 	{
 		DataItemList* list = new DataItemList();
-		list->add(ptr_position.index, "ptr_Position");
-		list->add(rotation, "Rotation");
-		list->add(scale,	"Scale");
+		list->add_AttributePointer(ptr_position.index,	"ptr_Position");
+		list->add(rotation,								"Rotation");
+		list->add(scale,								"Scale");
 		return list;
 	}
 };
@@ -139,6 +139,13 @@ struct DLL_U Attribute_Bounding : public IAttribute
 {
 	float BoxPoints[8*3];
 	float ConvexPoints[42*3];
+	DataItemList* getDataList()
+	{
+		DataItemList* list = new DataItemList();
+		list->add_NotSupported("BoxPoints");
+		list->add_NotSupported("ConvexPoints");
+		return list;
+	}
 };
 
 
@@ -161,20 +168,25 @@ struct DLL_U Attribute_Render : public IAttribute
 	AttributePointer ptr_spatial;
 	AttributePointer ptr_bounding;
 	
-	BoolField culling;
+	int meshID;
+	int textureID;
 
 	bool transparent;
 	bool tessellation;
 
-	int meshID;
-	int textureID;
+	
+
+	BoolField culling;
 
 	DataItemList* getDataList()
 	{
 		DataItemList* list = new DataItemList();
-		list->add(ptr_spatial.index,	"ptr_Spatial");
-		list->add(meshID,		"MeshID");
-		list->add(textureID,	"TextureID");
+		list->add_AttributePointer(ptr_spatial.index,	"ptr_Spatial");
+		list->add_AttributePointer(ptr_bounding.index,	"ptr_Bounding");
+		list->add(meshID,								"MeshID");
+		list->add(textureID,							"TextureID");
+		list->add(transparent,							"Transparent");
+		list->add(tessellation,							"Tessellation");
 		return list;
 	}
 };
@@ -217,6 +229,24 @@ struct DLL_U Attribute_Physics : public IAttribute
 	bool alive;
 
 	float explosionSphereRadius;
+
+	DataItemList* getDataList()
+	{
+		DataItemList* list = new DataItemList();
+		list->add_AttributePointer(ptr_spatial.index,	"ptr_Spatial");
+		list->add_AttributePointer(ptr_render.index,	"ptr_Render");
+		list->add(linearVelocity,						"LinearVelocity");
+		list->add(angularVelocity,						"AngularVelocity");
+		list->add(gravity,								"Gravity");
+		list->add(mass,									"Mass");
+		list->add((int)meshID,							"TextureID");
+		list->add((int)collisionFilterMask,				"CollisionFilterMask");
+		list->add(collisionResponse,					"CollisionResponse");
+		list->add(added,								"isAdded");
+		list->add(alive,								"isAlive");
+		
+		return list;
+	}
 };
 
 /// Stores everything GameComponent needs to know when handling 
@@ -234,6 +264,18 @@ struct DLL_U Attribute_Projectile : public IAttribute
 	float currentLifeTimeLeft;	//!< Counter counting down the lifetime of the projectile. Is initialized to totalLifeTime. When equal or less than zero, the projectile attribute shall be destroyed.
 	bool explodeOnImnpact;
 	float explosionSphereRadius;
+
+	DataItemList* getDataList()
+	{
+		DataItemList* list = new DataItemList();
+		list->add_AttributePointer(ptr_physics.index,	"ptr_Physics");
+		list->add(entityIdOfCreator,					"EntityIdOfCreator");
+		list->add(currentLifeTimeLeft,					"CurrentLifeTimeLeft");
+		list->add(explodeOnImnpact,						"ExplodeOnInpact");
+		list->add(explosionSphereRadius,				"ExplosionSphereRadius");
+
+		return list;
+	}
 };
 
 //struct DLL_U Attribute_Light : public IAttribute
@@ -262,6 +304,17 @@ struct DLL_U Attribute_Light_Dir : public IAttribute
 	~Attribute_Light_Dir();
 
 	LightDescDir lightDir;
+	DataItemList* getDataList()
+	{
+		DataItemList* list = new DataItemList();
+		
+		list->add(lightDir.ambient,		"Ambient");
+		list->add(lightDir.diffuse,		"Diffuse");
+		list->add(lightDir.specular,	"Specular");
+		list->add(lightDir.direction,	"Direction");
+
+		return list;
+	}
 };
 struct DLL_U Attribute_Light_Point : public IAttribute
 {
@@ -271,6 +324,23 @@ struct DLL_U Attribute_Light_Point : public IAttribute
 	AttributePointer ptr_position;
 
 	LightDescPoint lightPoint;
+
+	DataItemList* getDataList()
+	{
+		DataItemList* list = new DataItemList();
+		
+		list->add_AttributePointer	(ptr_position.index, "ptr_Position");
+
+		list->add(lightPoint.ambient,		"Ambient");
+		list->add(lightPoint.diffuse,		"Diffuse");
+		list->add(lightPoint.specular,		"Specular");
+
+		list->add(lightPoint.pos,			"Pos");
+		list->add(lightPoint.range,			"Range");
+		list->add(lightPoint.attenuation,	"Attenuation");
+
+		return list;
+	}
 };
 struct DLL_U Attribute_Light_Spot : public IAttribute
 {
@@ -280,6 +350,25 @@ struct DLL_U Attribute_Light_Spot : public IAttribute
 	AttributePointer ptr_position;
 
 	LightDescSpot lightSpot;
+
+	DataItemList* getDataList()
+	{
+		DataItemList* list = new DataItemList();
+		
+		list->add_AttributePointer	(ptr_position.index, "ptr_Position");
+
+		list->add(lightSpot.ambient,		"Ambient");
+		list->add(lightSpot.diffuse,		"Diffuse");
+		list->add(lightSpot.specular,		"Specular");
+
+		list->add(lightSpot.pos,			"Pos");
+		list->add(lightSpot.range,			"Range");
+		list->add(lightSpot.direction,		"Attenuation");
+		list->add(lightSpot.spotPow,		"spotPow");
+		list->add(lightSpot.attenuation,	"Attenuation");
+
+		return list;
+	}
 };
 
 struct DLL_U Attribute_Input : public IAttribute
@@ -293,6 +382,21 @@ struct DLL_U Attribute_Input : public IAttribute
 	bool fire;
 	bool changeAmmunitionType;
 	bool changeFiringMode;
+
+	DataItemList* getDataList()
+	{
+		DataItemList* list = new DataItemList();
+		
+		list->add_AttributePointer(ptr_physics.index, "ptr_Physics");
+
+		list->add(position,					"Position");
+		list->add(rotation,					"Rotation");
+		list->add(fire,						"Fire");
+		list->add(changeAmmunitionType,		"ChangeAmmunitionType");
+		list->add(changeFiringMode,			"ChangeFiringMode");
+
+		return list;
+	}
 };
 
 class InputObjectArray;
@@ -320,6 +424,15 @@ struct DLL_U Attribute_Sound : public IAttribute
 	~Attribute_Sound();
 
 	AttributePointer ptr_position;
+
+	DataItemList* getDataList()
+	{
+		DataItemList* list = new DataItemList();
+		
+		list->add_AttributePointer(ptr_position.index, "ptr_Position");
+
+		return list;
+	}
 };
 
 /// Stores everything RenderComponent needs to know to manage multiple Cameras in the world
@@ -339,6 +452,22 @@ struct DLL_U Attribute_Camera : public IAttribute
 	float aspect;
 	float zNear;
 	float zFar;
+
+	DataItemList* getDataList()
+	{
+		DataItemList* list = new DataItemList();
+		
+		list->add_AttributePointer(ptr_spatial.index, "ptr_spatial");
+
+		list->add(mat_view,			"Mat_view");
+		list->add(mat_projection,	"Mat_projection");
+		list->add(fov,				"Fov");
+		list->add(aspect,			"Aspect");
+		list->add(zNear,			"ZNear");
+		list->add(zFar,				"ZFar");
+
+		return list;
+	}
 };
 
 /// Stores everything GameComponent needs to know about a player (also refer to createPlayerEntity)
@@ -350,16 +479,36 @@ struct DLL_U Attribute_Player : public IAttribute
 	Attribute_Player();
 	~Attribute_Player();
 
-	int id;					//!< The id of the player process. Used to identify a player attribute in GameComponent when firing projectiles.
-	int priority;			//!< Priority of the player process. Higher value means higher priority. The scheduler will choose the process with the highest priority for execution.
-	int cycleSteals;		//!< Total number of cycle steals for the player process. Cycle steals steal priority from other player processes.
-	int totalExecutionTime; //!< Total execution time of the player process, used ased final score in the deathmatch. The game session winner is the player with the most total execution time as awarded by the scheduler.
-
 	AttributePointer ptr_render;
 	AttributePointer ptr_input;
 	AttributePointer ptr_camera;
 	AttributePointer ptr_health;
 	AttributePointer ptr_weaponStats;
+
+	int id;					//!< The id of the player process. Used to identify a player attribute in GameComponent when firing projectiles.
+	int priority;			//!< Priority of the player process. Higher value means higher priority. The scheduler will choose the process with the highest priority for execution.
+	int cycleSteals;		//!< Total number of cycle steals for the player process. Cycle steals steal priority from other player processes.
+	int totalExecutionTime; //!< Total execution time of the player process, used ased final score in the deathmatch. The game session winner is the player with the most total execution time as awarded by the scheduler.
+
+	
+
+	DataItemList* getDataList()
+	{
+		DataItemList* list = new DataItemList();
+		
+		list->add_AttributePointer(ptr_render.index,		"ptr_Render");
+		list->add_AttributePointer(ptr_input.index,			"ptr_Input");
+		list->add_AttributePointer(ptr_camera.index,		"ptr_Camera");
+		list->add_AttributePointer(ptr_health.index,		"ptr_Health");
+		list->add_AttributePointer(ptr_weaponStats.index,	"ptr_WeaponStats");
+
+		list->add(id,					"Id");
+		list->add(priority,				"Priority");
+		list->add(cycleSteals,			"CycleSteals");
+		list->add(totalExecutionTime,	"TotalExecutionTime");
+
+		return list;
+	}
 };
 
 
@@ -377,6 +526,17 @@ struct DLL_U Attribute_Mesh : public IAttribute
 		MeshModel*		mesh,
 		bool			dynamic);	//!< Initializes attribute with passed values.
 	~Attribute_Mesh();				//!< Does nothing.
+
+	DataItemList* getDataList()
+	{
+		DataItemList* list = new DataItemList();
+	
+		list->add((int)meshID,	"MeshID");
+		list->add_NotSupported(	"Mesh");
+		list->add(dynamic,		"Dynamic");
+
+		return list;
+	}
 };
 
 struct DLL_U Attribute_Health : public IAttribute
@@ -386,6 +546,14 @@ struct DLL_U Attribute_Health : public IAttribute
 
 	float startHealth;
 	float health;
+
+	DataItemList* getDataList()
+	{
+		DataItemList* list = new DataItemList();
+		list->add(startHealth,	"StartHealth");
+		list->add(health,		"Health");
+		return list;
+	}
 };
 
 struct DLL_U Attribute_Damage : public IAttribute
@@ -395,6 +563,14 @@ struct DLL_U Attribute_Damage : public IAttribute
 
 	float damage;
 	int owner_entityID;
+
+	DataItemList* getDataList()
+	{
+		DataItemList* list = new DataItemList();
+		list->add(damage,			"Damage");
+		list->add(owner_entityID,	"Owner_entityID");
+		return list;
+	}
 };
 
 struct DLL_U Attribute_SpawnPoint : public IAttribute
@@ -402,10 +578,19 @@ struct DLL_U Attribute_SpawnPoint : public IAttribute
 	Attribute_SpawnPoint();
 	~Attribute_SpawnPoint();
 
+	AttributePointer ptr_position;
+
 	float timeSinceLastSpawn;	//!< Is reset when a player spawns at the spawn point.
 	float spawnArea;			//!< Defines the spawn point zone, a horizontal circle area.
 
-	AttributePointer ptr_position;
+	DataItemList* getDataList()
+	{
+		DataItemList* list = new DataItemList();
+		list->add_AttributePointer(ptr_position.index, "ptr_Position");
+		list->add(timeSinceLastSpawn,	"TimeSinceLastSpawn");
+		list->add(spawnArea,			"SpawnArea");
+		return list;
+	}
 };
 
 /// Stores everything needed for the weapon system. The two enums "AmmunitionType" and "FiringMode" is used to preset the weapon settings. These settings are used in GameComponent to simulate the weapon behavior of choice.
@@ -461,6 +646,33 @@ struct DLL_U Attribute_WeaponStats : public IAttribute
 
 	bool isExplosive;				//!< Determines if projectiles created from this weapon will explode on impact.
 	float explosionSphereRadius;	//!< Radius of explosion sphere.
+
+	DataItemList* getDataList()
+	{
+		DataItemList* list = new DataItemList();
+		list->add_NotSupported("ammunitionType");
+		list->add_NotSupported("firingMode");
+
+		list->add(totalNrOfShots,				"TotalNrOfShots");
+		list->add(clipSize,						"ClipSize");
+		list->add(nrOfShotsLeftInClip,			"NrOfShotsLeftInClip");
+
+		list->add(reloadTime,					"ReloadTime");
+		list->add(reloadTimeLeft,				"ReloadTimeLeft");
+		list->add(cooldownBetweenShots,			"CooldownBetweenShots");
+		list->add(cooldownLeft,					"CooldownLeft");
+
+		list->add(velocityOfEachProjectile,		"VelocityOfEachProjectile");
+		list->add(nrOfProjectilesForEachShot,	"NrOfProjectilesForEachShot");
+		list->add(damgeOfEachProjectile,		"DamgeOfEachProjectile");
+
+		list->add(displacementSphereRadius,		"DisplacementSphereRadius");
+		list->add(spreadConeRadius,				"SpreadConeRadius");
+
+		list->add(isExplosive,					"IsExplosive");
+		list->add(explosionSphereRadius,		"ExplosionSphereRadius");
+		return list;
+	}
 };
 
 struct DebugShape;
@@ -470,11 +682,14 @@ struct DLL_U Attribute_DebugShape : public IAttribute
 	~Attribute_DebugShape();
 	void clean();
 
-	unsigned int	meshID;		//!< ID of mesh
+	
 	AttributePointer ptr_spatial;
 
-	DebugShape* shape;
-	bool		render;
+	unsigned int	meshID;		//!< ID of mesh
+	DebugShape*		shape;
+	bool			render;
+
+	DataItemList* getDataList();
 };
 
 struct DLL_U Attribute_ExplosionSphere : public IAttribute
@@ -484,4 +699,12 @@ struct DLL_U Attribute_ExplosionSphere : public IAttribute
 
 	AttributePointer ptr_physics;
 	float currentLifeTimeLeft;
+
+	DataItemList* getDataList()
+	{
+		DataItemList* list = new DataItemList();
+		list->add_AttributePointer(ptr_physics.index, "ptr_Physics");;
+		list->add(currentLifeTimeLeft,	"CurrentLifeTimeLeft");
+		return list;
+	}
 };

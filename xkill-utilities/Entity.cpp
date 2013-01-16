@@ -74,5 +74,8 @@ int Entity::getID()
 
 DataItemList* Entity::getDataListFromAttribute(int index)
 {
-	return attributes->at(index).getDataList();
+	DataItemList* list = NULL;
+	if(index<(int)attributes->size())
+		list = attributes->at(index).getDataList();
+	return list;
 }

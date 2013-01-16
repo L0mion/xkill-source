@@ -61,8 +61,8 @@ public:
 		if(showMenu)
 		{
 			std::vector<Attribute_Player>* allPlayers		=	GET_ATTRIBUTES(player);
-			std::vector<Attribute_Health>* allHealth			=	GET_ATTRIBUTES(health);
-			std::vector<Attribute_Render>* allRender			=	GET_ATTRIBUTES(render);
+			std::vector<Attribute_Health>* allHealth		=	GET_ATTRIBUTES(health);
+			std::vector<Attribute_Render>* allRender		=	GET_ATTRIBUTES(render);
 			std::vector<Attribute_Spatial>* allSpatial		=	GET_ATTRIBUTES(spatial);
 			std::vector<Attribute_Position>* allPositions	=	GET_ATTRIBUTES(position);
 
