@@ -10,6 +10,8 @@ AttributeIterator<Attribute_Spatial> itrSpatial;
 PlayerPhysicsObject::PlayerPhysicsObject()
 	: PhysicsObject()
 {
+	yaw_ = 0;
+
 	itrInput = ATTRIBUTE_MANAGER->input.getIterator();
 	itrPhysics_3 = ATTRIBUTE_MANAGER->physics.getIterator();
 	itrSpatial = ATTRIBUTE_MANAGER->spatial.getIterator();
