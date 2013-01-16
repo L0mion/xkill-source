@@ -242,7 +242,7 @@ void Menu_Editor::slot_clicked_entityBrowser( QModelIndex indexClicked )
 				entityInspector_add(num_items, "ExplosionSphere");
 				break;
 			case ATTRIBUTE_INPUTDEVICE:
-				entityInspector_add(num_items, "ExplosionSphere");
+				entityInspector_add(num_items, "InputDevice");
 				break;
 			default:
 				entityInspector_add(num_items, "UNKOWN");
