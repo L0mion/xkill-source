@@ -1,15 +1,20 @@
 #include "InputComponent.h"
 
 #include <xkill-utilities/EventManager.h>
+#include <xkill-utilities/EventManager.h>
 #include "InputManager.h"
 
+ATTRIBUTES_DECLARE_ALL;
 
 InputComponent::InputComponent()
 {
+	ATTRIBUTES_INIT_ALL;
+
+	SUBSCRIBE_TO_EVENT(this, EVENT_START_DEATHMATCH);
 	SUBSCRIBE_TO_EVENT(this, EVENT_RUMBLE);
 	SUBSCRIBE_TO_EVENT(this, EVENT_MOUSE_MOVE);
 	SUBSCRIBE_TO_EVENT(this, EVENT_KEY_PRESS);
-	SUBSCRIBE_TO_EVENT(this, EVENT_KEY_RELEASE);
+	SUBSCRIBE_TO_EVENT(this, EVENT_MOUSE_PRESS);
 
 	inputManager_ = nullptr;
 	newDeviceSearchTimer_ = 0.0f;
@@ -31,6 +36,8 @@ bool InputComponent::init(HWND windowHandle, std::string configFilePath, float s
 	if(!inputManager_->InitInput(windowHandle, configFilePath))
 		return false;
 
+	setupPlayerControllerConnection();
+
 	return true;
 }
 
@@ -48,16 +55,28 @@ void InputComponent::onEvent(Event* e)
 	if(type == EVENT_KEY_PRESS)
 	{
 		Event_KeyPress* ekp = static_cast<Event_KeyPress*>(e);
-		handleKeyEvent(ekp->keyEnum, true);
+		int keyEnum	= ekp->keyEnum;
+		bool isPressed = ekp->isPressed;
+
+		handleKeyEvent(keyEnum, isPressed);
 	}
-	if(type == EVENT_KEY_RELEASE)
+	if(type == EVENT_MOUSE_PRESS)
 	{
-		Event_KeyRelease* ekr = static_cast<Event_KeyRelease*>(e);
-		handleKeyEvent(ekr->keyEnum, false);
+		Event_MousePress* emp = static_cast<Event_MousePress*>(e);
+		int keyEnum	= emp->keyEnum;
+		bool isPressed = emp->isPressed;
+
+		//
+		// TODO: Handle mousepress
+		//
 	}
 	if(type == EVENT_INPUT_DEVICE_SEARCH)
 	{
 		inputManager_->UpdateNumberOfGamepads(windowHandle_);
+	}
+	if(type == EVENT_START_DEATHMATCH)
+	{
+		setupPlayerControllerConnection();
 	}
 }
 
@@ -70,71 +89,79 @@ void InputComponent::onUpdate(float delta)
 
 void InputComponent::handleInput(float delta)
 {
-	for(unsigned int i = 0; i < inputAttributes_->size(); i++)
+	while(itrPlayer.hasNext())
 	{
-		InputDevice* device = inputManager_->GetDevice(i + 1);
+		Attribute_Player* player = itrPlayer.getNext();
+
+		AttributePointer ptr = player->ptr_inputDevice;
+
+		if(ptr.host == nullptr)
+			continue;
+
+		InputDevice* device = itrInputDevice.at(ptr)->device;
+		Attribute_Input* input = itrInput.at(player->ptr_input);
 
 		if(device == nullptr)
 			continue;
 
-		inputAttributes_->at(i).position.x = device->getFloatValue(ACTION_F_WALK_LR);
-		inputAttributes_->at(i).position.y = device->getFloatValue(ACTION_F_WALK_FB);
-		inputAttributes_->at(i).rotation.x = device->getFloatValue(ACTION_F_LOOK_LR, true) * 0.01f;
-		inputAttributes_->at(i).rotation.y = device->getFloatValue(ACTION_F_LOOK_UD, true) * 0.01f;
+		input->position.x = device->getFloatValue(ACTION_F_WALK_LR);
+		input->position.y = device->getFloatValue(ACTION_F_WALK_FB);
+		input->rotation.x = device->getFloatValue(ACTION_F_LOOK_LR, true) * 0.01f; // Scale input to a reasonable range
+		input->rotation.y = device->getFloatValue(ACTION_F_LOOK_UD, true) * 0.01f;	// Scale input to a reasonable range
 
 		if(device->getBoolValue(ACTION_B_FIRE))
-			inputAttributes_->at(i).fire = true;
+			input->fire = true;
 		if(device->getBoolReleased(ACTION_B_CHANGE_AMMUNITIONTYPE))
-			inputAttributes_->at(i).changeAmmunitionType = true;
+			input->changeAmmunitionType = true;
 		if(device->getBoolReleased(ACTION_B_CHANGE_FIRINGMODE))
-			inputAttributes_->at(i).changeFiringMode = true;
+			input->changeFiringMode = true;
 
 		if(device->getBoolReleased(ACTION_B_TOGGLE_MUTE_SOUND))
 			SEND_EVENT(&Event_PlaySound(-1, true));
 
 		if(device->getBoolReleased(ACTION_B_RUMBLE_ON))
 		{
-			Event_Rumble* er = new Event_Rumble(i, true, 100.0f, 1.0f, 1.0f);
+			Event_Rumble* er = new Event_Rumble(itrPlayer.ownerId(), true, 100.0f, 1.0f, 1.0f);
 			EventManager::getInstance()->sendEvent(er);
 			delete er;
 		}
 
 		if(device->getBoolReleased(ACTION_B_RUMBLE_OFF))
 		{
-			Event_Rumble* er = new Event_Rumble(i, false, 100.0f, 0.0f, 0.0f);
+			Event_Rumble* er = new Event_Rumble(itrPlayer.ownerId(), false, 100.0f, 0.0f, 0.0f);
 			EventManager::getInstance()->sendEvent(er);
 			delete er;
 		}
 
 		if(device->getBoolValue(ACTION_B_WALK_FORWARD))
-			inputAttributes_->at(i).position.y = 1.0f;
+			input->position.y = 1.0f;
 															
 		if(device->getBoolValue(ACTION_B_WALK_LEFT))
-			inputAttributes_->at(i).position.x = -1.0f;
+			input->position.x = -1.0f;
 		
 		if(device->getBoolValue(ACTION_B_WALK_BACKWARD))
-			inputAttributes_->at(i).position.y = -1.0f;
+			input->position.y = -1.0f;
 		
 		if(device->getBoolValue(ACTION_B_WALK_RIGHT))
-			inputAttributes_->at(i).position.x = 1.0f;
+			input->position.x = 1.0f;
 		
 		float x, y;
 
-		x = inputAttributes_->at(i).position.x;
-		y = inputAttributes_->at(i).position.y;
+		x = input->position.x;
+		y = input->position.y;
 
 		float length = std::sqrt(x*x + y*y);
 
-		if(length > 0.0f)
+		if(length > 1.0f) // The character shouldn't move faster than it's set speed
 		{
 			x = x/length;
 			y = y/length;
 
-			inputAttributes_->at(i).position.x = x;
-			inputAttributes_->at(i).position.y = y;
+			input->position.x = x;
+			input->position.y = y;
 		}
 
-		if(device->GetType() == device->QT_INPUT_DEVICE)
+		if(device->GetType() == device->QT_INPUT_DEVICE) // Need to update QT devices since they're event based
 		{
 			QTInputDevices* qtDevice = static_cast<QTInputDevices*>(device);
 
@@ -142,6 +169,26 @@ void InputComponent::handleInput(float delta)
 			qtDevice->updateButtons();
 		}
 	}
+}
+
+void InputComponent::setupPlayerControllerConnection()
+{
+	while(itrPlayer.hasNext())
+	{
+		Attribute_Player* player = itrPlayer.getNext();
+
+		if(itrInputDevice.hasNext())
+		{
+			player->ptr_inputDevice = itrInputDevice.attributePointer(itrInputDevice.getNext());
+		}
+		else
+		{
+			break;
+		}
+	}
+
+	itrInputDevice.resetIndex();
+	itrPlayer.resetIndex();
 }
 
 void InputComponent::handleRumbleEvent(Event_Rumble* e)

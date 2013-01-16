@@ -162,22 +162,28 @@ Attribute_Input::~Attribute_Input()
 {
 }
 
-//Attribute_InputDeviceSettings::Attribute_InputDeviceSettings()
-//{
-//}
-//Attribute_InputDeviceSettings::~Attribute_InputDeviceSettings()
-//{
-//}
+Attribute_InputDevice::Attribute_InputDevice()
+{
+	device = nullptr;
+}
+Attribute_InputDevice::~Attribute_InputDevice()
+{
+}
 
+int Attribute_Player::nextId = 0;
 Attribute_Player::Attribute_Player()
 {
-	id = -1;
+	id = nextId++;
 	priority = 0;
 	cycleSteals = 0;
 	totalExecutionTime = 0;
 }
 Attribute_Player::~Attribute_Player()
 {
+}
+void Attribute_Player::clean()
+{
+	nextId = 0;
 }
 
 Attribute_Mesh::Attribute_Mesh()
@@ -373,6 +379,17 @@ void Attribute_DebugShape::clean()
 	}
 	render = false;
 }
+
+DataItemList* Attribute_DebugShape::getDataList()
+	{
+		DataItemList* list = new DataItemList();
+		list->add_AttributePointer(ptr_spatial.index, "ptr_Spatial");;
+		list->add((int)meshID,			"MeshID");
+		list->add(shape->shapeType_,	"Shape->ShapeType");
+		list->add(render,				"Render");
+		return list;
+	}
+
 Attribute_ExplosionSphere::Attribute_ExplosionSphere()
 {
 	currentLifeTimeLeft = 1.0f;

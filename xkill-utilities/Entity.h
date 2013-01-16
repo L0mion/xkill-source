@@ -32,6 +32,13 @@ public:
 
 	void deleteAttributes();
 
+	std::vector<AttributeController>*  getAttributeControllers()
+	{
+		return attributes;
+	}
+
+	std::vector<int>  getAttributesAsEnums();
+
 	void addAttribute(AttributeController attribute);
 
 	
@@ -47,6 +54,11 @@ public:
 	contains no matching Attributes, vector size is 0.
 	*/
 	std::vector<int> getAttributes(AttributeType type);
+
+	/**
+	TODO
+	*/
+	DataItemList* getDataListFromAttribute(int index);
 
 	int getID();
 };

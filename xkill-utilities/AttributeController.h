@@ -26,6 +26,11 @@ public:
 		this->type = type;
 	}
 
+	DataItemList* getDataList()
+	{
+		return host->getDataList(index);
+	}
+
 	void remove()
 	{
 		host->deleteAttribute(index);

@@ -23,10 +23,14 @@ private:
 	GameManager gameManager;
 	GameTimer gameTimer;
 	QTimer* updateTimer;
+	bool hasMouseLock;
 
 public:
 	GameWidget(QWidget* parent) : QWidget(parent)
 	{
+		setMouseTracking(true);
+		hasMouseLock = false;
+
 		// make widget non-transparent & draw directly onto screen
 		QWidget::setAttribute(Qt::WA_OpaquePaintEvent);
 		QWidget::setAttribute(Qt::WA_PaintOnScreen);
@@ -101,7 +105,69 @@ protected:
 		int height = size().height();
 		Event_WindowResize event_windowResize(width, height);
 		SEND_EVENT(&event_windowResize);
-	};
+	}
+	// Behavior on mouse press
+	void mousePressEvent(QMouseEvent *e)
+	{
+		// lock / release mouse
+		if(e->button() == Qt::LeftButton)
+			toggleMouseLock();
+
+		// Inform about key press
+		int keyEnum = e->button();
+		SEND_EVENT(&Event_MousePress(keyEnum, true));
+	}
+	void mouseReleaseEvent(QMouseEvent *e)
+	{
+		// Inform about key release
+		int keyEnum = e->button();
+		SEND_EVENT(&Event_MousePress(keyEnum, false));
+	}
+	void toggleMouseLock()
+	{
+		// locking / releasing mouse cursor to widget
+		this->
+		hasMouseLock = !hasMouseLock;
+		if(hasMouseLock)
+		{
+			// hide cursor and set new anchor point
+			QWidget::setCursor(Qt::BlankCursor);
+			QWidget::grabMouse();
+
+			// move mouse to middle
+			QPoint mouseAnchor = QWidget::mapToGlobal(QPoint(this->width()*0.5f,this->height()*0.5f));
+			QCursor::setPos(mouseAnchor.x(), mouseAnchor.y()); // anchor mouse again
+
+			// set focus to this widget
+			QWidget::setFocus(Qt::MouseFocusReason);
+		}
+		else
+		{
+			// show cursor again and release mouse cursor
+			QWidget::setCursor(Qt::ArrowCursor);	
+			QWidget::releaseMouse();
+		}
+	}
+	// Sends mouse movement as an event.
+	void mouseMoveEvent( QMouseEvent* e )
+	{
+		if(hasMouseLock)
+		{
+			// calculate change (delta) in mouse position
+			QPoint mouseAnchor = QWidget::mapToGlobal(QPoint(this->width()*0.5f,this->height()*0.5f));
+			QCursor::setPos(mouseAnchor.x(), mouseAnchor.y()); // anchor mouse again
+			int dx = e->globalX() - mouseAnchor.x();
+			int dy = e->globalY() - mouseAnchor.y();
+
+			// send mouse move event to relevant observers
+			Event_MouseMove e(dx, dy);
+			EventManager::getInstance()->sendEvent(&e);
+		}
+		else 
+		{
+			// TODO: Handle menu and other stuff
+		}
+	}
 
 private:
 	void computeFPS()

@@ -41,7 +41,7 @@ private:
 		physics			.init	(ATTRIBUTE_PHYSICS);
 		camera			.init	(ATTRIBUTE_CAMERA);
 		input			.init	(ATTRIBUTE_INPUT);
-		//inputDeviceSettings	.init	(ATTRIBUTE_INPUTDEVICESETTINGS);
+		inputDevice		.init	(ATTRIBUTE_INPUTDEVICE);
 		player			.init	(ATTRIBUTE_PLAYER);
 		bounding		.init	(ATTRIBUTE_BOUNDING);
 		projectile		.init	(ATTRIBUTE_PROJECTILE);
@@ -74,7 +74,7 @@ public:
 	AttributeStorage<Attribute_Physics>					physics;
 	AttributeStorage<Attribute_Camera>					camera;
 	AttributeStorage<Attribute_Input>					input;
-	//AttributeStorage<Attribute_InputDeviceSettings>		inputDeviceSettings;
+	AttributeStorage<Attribute_InputDevice>				inputDevice;
 	AttributeStorage<Attribute_Player>					player;
 	AttributeStorage<Attribute_Bounding>				bounding;
 	AttributeStorage<Attribute_Projectile>				projectile;
@@ -115,7 +115,7 @@ public:
 // Declares all attributes
 #define ATTRIBUTES_DECLARE_ALL														\
 static	Settings											*settings				;	\
-static	EntityStorage										*entityStorage			;	\
+static	EntityStorage										*itr_entity				;	\
 static	AttributeIterator<Attribute_Position>				itrPosition				;	\
 static	AttributeIterator<Attribute_Spatial>				itrSpatial				;	\
 static	AttributeIterator<Attribute_Render>					itrRender				;	\
@@ -123,7 +123,7 @@ static	AttributeIterator<Attribute_DebugShape>				itrDebugShape			;	\
 static	AttributeIterator<Attribute_Physics>				itrPhysics				;	\
 static	AttributeIterator<Attribute_Camera>					itrCamera				;	\
 static	AttributeIterator<Attribute_Input>					itrInput				;	\
-/*static	AttributeIterator<Attribute_InputDeviceSettings>	itrInputDeviceSettings	;	*/\
+static	AttributeIterator<Attribute_InputDevice>			itrInputDevice			;	\
 static	AttributeIterator<Attribute_Player>					itrPlayer				;	\
 static	AttributeIterator<Attribute_Bounding>				itrBounding				;	\
 static	AttributeIterator<Attribute_Projectile>				itrProjectile			;	\
@@ -142,7 +142,7 @@ static	AttributeIterator<Attribute_ExplosionSphere>		itrExplosionSphere		;	\
 // Inits all attributes
 #define ATTRIBUTES_INIT_ALL																\
 settings				= ATTRIBUTE_MANAGER->settings;									\
-entityStorage			= ATTRIBUTE_MANAGER->entities;									\
+itr_entity				= ATTRIBUTE_MANAGER->entities;									\
 itrPosition				= ATTRIBUTE_MANAGER->position				.getIterator();		\
 itrSpatial				= ATTRIBUTE_MANAGER->spatial				.getIterator();		\
 itrRender				= ATTRIBUTE_MANAGER->render					.getIterator();		\
@@ -150,7 +150,7 @@ itrDebugShape			= ATTRIBUTE_MANAGER->debugShape				.getIterator();		\
 itrPhysics				= ATTRIBUTE_MANAGER->physics				.getIterator();		\
 itrCamera				= ATTRIBUTE_MANAGER->camera					.getIterator();		\
 itrInput				= ATTRIBUTE_MANAGER->input					.getIterator();		\
-/*itrInputDeviceSettings	= ATTRIBUTE_MANAGER->inputDeviceSettings	.getIterator();		*/\
+itrInputDevice			= ATTRIBUTE_MANAGER->inputDevice			.getIterator();		\
 itrPlayer				= ATTRIBUTE_MANAGER->player					.getIterator();		\
 itrBounding				= ATTRIBUTE_MANAGER->bounding				.getIterator();		\
 itrProjectile			= ATTRIBUTE_MANAGER->projectile				.getIterator();		\

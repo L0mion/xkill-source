@@ -47,13 +47,14 @@ enum DLL_U EventType
 	EVENT_START_DEATHMATCH,
 	EVENT_STATE_CHANGED,
 	EVENT_CREATE_EXPLOSIONSPHERE,
+	EVENT_CREATE_INPUTDEVICE,
 
 	EVENT_CREATE_ENTITY,
 	EVENT_GAMERESET,
 	EVENT_UPDATE,
 	EVENT_MOUSE_MOVE,
 	EVENT_KEY_PRESS,
-	EVENT_KEY_RELEASE,
+	EVENT_MOUSE_PRESS,
 	EVENT_WINDOW_RESIZE,
 
 	EVENT_INPUT_DEVICE_SEARCH,
@@ -296,20 +297,22 @@ class DLL_U Event_KeyPress : public Event
 {
 public:
 	int keyEnum;
+	bool isPressed;
 
-	Event_KeyPress(int keyEnum);
+	Event_KeyPress(int keyEnum, bool isPressed);
 };
 
-/// Alerts InputComponent about key release
+/// Alerts InputComponent about mouse press
 /**
 \ingroup events
 */
-class DLL_U Event_KeyRelease : public Event
+class DLL_U Event_MousePress : public Event
 {
 public:
 	int keyEnum;
+	bool isPressed;
 
-	Event_KeyRelease(int keyEnum);
+	Event_MousePress(int keyEnum, bool isPressed);
 };
 
 class DLL_U Event_PlayerDeath : public Event
@@ -383,7 +386,8 @@ enum DLL_U EntityType
 {
 	WORLD,
 	PLAYER,
-	PROJECTILE
+	PROJECTILE,
+	INPUTDEVICES
 };
 
 class DLL_U Event_CreateEntity : public Event
@@ -392,4 +396,15 @@ public:
 	Event_CreateEntity(EntityType entityType);
 
 	EntityType entityType;
+};
+
+class InputObjectArray;
+class InputDevice;
+class DLL_U Event_CreateInputDevice : public Event
+{
+public:
+	Event_CreateInputDevice(InputDevice* inputDevice, InputObjectArray* inputObjectArray);
+
+	InputDevice* device;
+	InputObjectArray* objectArray;
 };

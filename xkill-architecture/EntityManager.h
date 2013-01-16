@@ -32,6 +32,7 @@ public:
 		SUBSCRIBE_TO_EVENT(this, EVENT_CREATE_SPAWNPOINT);
 		SUBSCRIBE_TO_EVENT(this, EVENT_CREATE_EXPLOSIONSPHERE);
 		SUBSCRIBE_TO_EVENT(this, EVENT_CREATE_ENTITY);
+		SUBSCRIBE_TO_EVENT(this, EVENT_CREATE_INPUTDEVICE);
 
 		entities = ATTRIBUTE_MANAGER->entities;
 	}
@@ -62,6 +63,8 @@ public:
 		case EVENT_CREATE_EXPLOSIONSPHERE:
 			event_CreateExplosionSphere(static_cast<Event_CreateExplosionSphere*>(e));
 			break;
+		case EVENT_CREATE_INPUTDEVICE:
+			event_CreateInputDevice(static_cast<Event_CreateInputDevice*>(e));
 		default:
 			break;
 		}
@@ -113,5 +116,12 @@ public:
 		Entity* entity = createEntity();
 		entityFactory.createExplosionSphere(entity, e);
 		DEBUGPRINT("ENTITYMANAGER: Created explosion sphere entity " << entity->getID());
+	}
+
+	void event_CreateInputDevice(Event_CreateInputDevice* e)
+	{
+		Entity* entity = createEntity();
+		entityFactory.createInputDevice(entity, e);
+		DEBUGPRINT("ENTITYMANAGER: Created input device entity " << entity->getID());
 	}
 };

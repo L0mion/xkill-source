@@ -39,9 +39,11 @@ private:
 	float							newDeviceSearchTimer_;	//! Timer until next search for new input devices
 	float							searchTime_;			//! How long time there will be between searches for new input devices
 
-	virtual void handleInput(float delta);
+	void handleInput(float delta);
 
-	virtual void handleRumbleEvent(Event_Rumble* e);
-	virtual void handleMouseMoveEvent(Event_MouseMove* e);
-	virtual void handleKeyEvent(char key, bool pressed);
+	void setupPlayerControllerConnection();
+
+	void handleRumbleEvent(Event_Rumble* e);
+	void handleMouseMoveEvent(Event_MouseMove* e);
+	void handleKeyEvent(char key, bool pressed);
 };

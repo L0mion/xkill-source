@@ -8,6 +8,8 @@
 #include <vector>
 #include <iostream>
 
+// Iterators
+ATTRIBUTES_DECLARE_ALL;
 
 /// A factory for creating Entities and assigning multiple \ref ATTRIBUTES in a flexible way.
 /** 
@@ -39,6 +41,11 @@ public:
 #define CONNECT_ATTRIBUTES(AttributeName, PointerName)									\
 	AttributeName->ptr_##PointerName = ((AttributeManager*)AttributeManagerDLLWrapper::getInstance())->PointerName.getLatestAttributeAsAttributePointer()
 
+	EntityFactory()
+	{
+		ATTRIBUTES_INIT_ALL;
+	}
+
 	//! A player entity has the following attributes: position attribute, spatial attribute, render attribute, physics attribute, input attribute, camera attribute and player attribute
 	//! Bindings:
 	//! camera attribute --> spatial attribute --> position attribute
@@ -46,6 +53,8 @@ public:
 	//! Note: the player has the same spatial attribute as the camera.
 	void createPlayerEntity(Entity* entity)
 	{
+		ATTRIBUTES_INIT_ALL;
+
 		CREATE_ATTRIBUTE(Attribute_Position, position, entity);
 
 		CREATE_ATTRIBUTE(Attribute_Spatial, spatial, entity);
@@ -89,9 +98,10 @@ public:
 		CONNECT_ATTRIBUTES(player, health);
 		CONNECT_ATTRIBUTES(player, weaponStats);
 		//player->name = "Process Name";
-		static int playerId = 0;
-		player->id = playerId;
-		playerId++;
+
+		//static int playerId = 0;
+		//player->id = playerId;
+		//playerId++;
 	}
 	
 	void createWorldEntity(Entity* entity)
@@ -228,6 +238,14 @@ public:
 		CREATE_ATTRIBUTE(Attribute_Damage, damage, entity);
 		damage->damage = e->damage;
 		damage->owner_entityID = e->entityIdOfCreator;
+	}
+
+	void createInputDevice(Entity* entity, Event_CreateInputDevice* e)
+	{
+		Attribute_InputDevice* inputDevice = itrInputDevice.createAttribute(entity);
+		
+
+		inputDevice->device = e->device;
 	}
 };
 

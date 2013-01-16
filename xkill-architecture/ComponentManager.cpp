@@ -163,6 +163,6 @@ void ComponentManager::update(float delta)
 	}
 	else if(GET_STATE() == SPECIAL_STATE_NONE)
 	{
-		std::cout << "ComponentManager::update has no state set" << std::endl;
+		DEBUGPRINT("ComponentManager::update has no state set");
 	}
 }
