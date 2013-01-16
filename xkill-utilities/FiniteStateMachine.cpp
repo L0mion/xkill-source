@@ -71,6 +71,7 @@ void FiniteStateMachine::Update( float dt )
 	if (currentState_.empty() && defaultState_)
 	{
 		currentState_.push(defaultState_);
+		defaultState_->Enter();
 		SEND_EVENT(&Event_StateChanged(defaultState_->GetType(), this));
 	}
 
@@ -93,24 +94,44 @@ void FiniteStateMachine::Update( float dt )
 
 StateType FiniteStateMachine::CheckTransitions( bool& out_isReplacementState ) const
 {
-	return type_; //returning my own StateType means no transition will take place if I am the current state
+	return type_; //returning my own StateType means no transition will take place if I am the current state.
+}
+
+void FiniteStateMachine::Enter()
+{
+	if(currentState_.empty() && defaultState_) //no current state exists, see if we have a default state we can use
+	{
+		currentState_.push(defaultState_);
+	}
+
+	if(!currentState_.empty()) //if we have a usable current state
+	{
+		currentState_.top()->Enter();
+	}
 }
 
 void FiniteStateMachine::Exit()
 {
-	if (currentState_.top())
+	if (!currentState_.empty())
 	{
 		currentState_.top()->Exit();
+		currentState_.pop();
+	}
+	
+	if (defaultState_)
+	{
+		// Prepare for next use by resetting to default state. 
+		currentState_.push(defaultState_);
+		// Enter should be called later using FiniteStateMachine::Enter()
 	}
 }
 
 void FiniteStateMachine::Reset()
 {
-	Exit();
-
 	//empty stack of current states
 	while (!currentState_.empty())
 	{
+		currentState_.top()->Exit();
 		currentState_.pop();
 	}
 
@@ -129,11 +150,10 @@ void FiniteStateMachine::Reset()
 
 void FiniteStateMachine::Nuke()
 {
-	Exit();
-	
 	//empty stack of current states
 	while (!currentState_.empty())
 	{
+		currentState_.top()->Exit();
 		currentState_.pop();
 	}
 
