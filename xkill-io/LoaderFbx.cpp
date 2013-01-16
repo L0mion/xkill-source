@@ -135,7 +135,54 @@ bool LoaderFbx::loadScene(std::string filename)
 			SHOW_MESSAGEBOX(message.str());
 		}
 	}
-	else
+	if(fbxImporter->IsFBX())
+	{
+		FBXSDK_printf("FBX file format version for file '%s' is %d.%d.%d\n\n", filename, fileMajor, fileMinor, fileRevision);
+
+        // From this point, it is possible to access animation stack information without
+        // the expense of loading the entire file.
+
+        FBXSDK_printf("Animation Stack Information\n");
+
+        int animStackCount = fbxImporter->GetAnimStackCount();
+
+        FBXSDK_printf("    Number of Animation Stacks: %d\n", animStackCount);
+        FBXSDK_printf("    Current Animation Stack: \"%s\"\n", fbxImporter->GetActiveAnimStackName().Buffer());
+        FBXSDK_printf("\n");
+
+        for(int i = 0; i < animStackCount; i++)
+        {
+            FbxTakeInfo* takeInfo = fbxImporter->GetTakeInfo(i);;
+
+            FBXSDK_printf("    Animation Stack %d\n", i);
+            FBXSDK_printf("         Name: \"%s\"\n", takeInfo->mName.Buffer());
+			const char* debug = takeInfo->mDescription.Buffer();
+	//		FBXSDK_printf("         Description: \"%s\"\n", takeInfo->mDescription.Buffer());
+            
+			// Change the value of the import name if the animation stack should be imported 
+            // under a different name.
+            FBXSDK_printf("         Import Name: \"%s\"\n", takeInfo->mImportName.Buffer());
+
+            // Set the value of the import state to false if the animation stack should be not
+            // be imported. 
+            FBXSDK_printf("         Import State: %s\n", takeInfo->mSelect ? "true" : "false");
+            FBXSDK_printf("\n");
+
+			
+        }
+
+        // Set the import states. By default, the import states are always set to 
+        // true. The code below shows how to change these states.
+        fbxManager_->GetIOSettings()->SetBoolProp(IMP_FBX_MATERIAL,        true);
+        fbxManager_->GetIOSettings()->SetBoolProp(IMP_FBX_TEXTURE,         true);
+        fbxManager_->GetIOSettings()->SetBoolProp(IMP_FBX_LINK,            true);
+        fbxManager_->GetIOSettings()->SetBoolProp(IMP_FBX_SHAPE,           true);
+        fbxManager_->GetIOSettings()->SetBoolProp(IMP_FBX_GOBO,            true);
+        fbxManager_->GetIOSettings()->SetBoolProp(IMP_FBX_ANIMATION,       true);
+        fbxManager_->GetIOSettings()->SetBoolProp(IMP_FBX_GLOBAL_SETTINGS, true);
+	}
+	
+	if(success)
 	{
 		success = fbxImporter->Import(fbxScene_);
 	}
