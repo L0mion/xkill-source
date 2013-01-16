@@ -37,6 +37,11 @@ public:
 	Entity* createEntity();
 
 	/**
+	Returns the Entity at index.
+	*/
+	Entity* at(int index);
+
+	/**
 	Deletes an Entity based on its unique ID.
 	*/
 	void deleteEntity(int id);

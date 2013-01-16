@@ -3,7 +3,7 @@
 
 #include <QtGui/QLayout> 
 #include <QtGui/QPushButton>
-#include <QtGui/QCleanlooksStyle> 
+#include <QtGui/qplastiquestyle.h> 
 
 // Stuff used to allocate console
 // no idea what most of it does
@@ -30,7 +30,7 @@ MainWindow::MainWindow()
 
 	// create UI generated from XML file
 	ui.setupUi(this);
-	QApplication::setStyle(new QCleanlooksStyle);
+	QApplication::setStyle(new QPlastiqueStyle);
 	MainWindow::setWindowTitle("XKILL");
 	resize(800, 600);
 	QWidget::setAttribute(Qt::WA_PaintOnScreen);
@@ -41,8 +41,7 @@ MainWindow::MainWindow()
 	// init game
 	gameWidget = new GameWidget(this);
 	this->setCentralWidget(gameWidget);
-	setMouseTracking(true);
-	hasMouseLock = false;
+	
 	menuManager = new MenuManager(this);
 
 	// setup signals and slots
@@ -79,26 +78,6 @@ void MainWindow::onEvent( Event* e )
 	}
 }
 
-void MainWindow::mouseMoveEvent( QMouseEvent* e )
-{
-	if(hasMouseLock)
-	{
-		// calculate change (delta) in mouse position
-		QPoint mouseAnchor = QWidget::mapToGlobal(QPoint(this->width()*0.5f,this->height()*0.5f));
-		QCursor::setPos(mouseAnchor.x(), mouseAnchor.y()); // anchor mouse again
-		int dx = e->globalX() - mouseAnchor.x();
-		int dy = e->globalY() - mouseAnchor.y();
-
-		// send mouse move event to relevant observers
-		Event_MouseMove e(dx, dy);
-		EventManager::getInstance()->sendEvent(&e);
-	}
-	else 
-	{
-		// TODO: Handle menu and other stuff
-	}
-}
-
 void MainWindow::keyPressEvent( QKeyEvent* e )
 {
 	if((e->key()==Qt::Key_Return) && (e->modifiers()==Qt::AltModifier))
@@ -132,7 +111,7 @@ void MainWindow::keyPressEvent( QKeyEvent* e )
 	menuManager->keyPressEvent(e);
 
 	// Inform about key press
-	SEND_EVENT(&Event_KeyPress(e->key()));
+	SEND_EVENT(&Event_KeyPress(e->key(), true));
 }
 
 void MainWindow::showMenu()
@@ -178,30 +157,7 @@ void MainWindow::slot_toggleFullScreen()
 	}
 }
 
-void MainWindow::toggleMouseLock()
-{
-	// locking / releasing mouse cursor to widget
-	hasMouseLock = !hasMouseLock;
-	if(hasMouseLock)
-	{
-		// hide cursor and set new anchor point
-		QWidget::setCursor(Qt::BlankCursor);
-		QWidget::grabMouse();
 
-		// move mouse to middle
-		QPoint mouseAnchor = QWidget::mapToGlobal(QPoint(this->width()*0.5f,this->height()*0.5f));
-		QCursor::setPos(mouseAnchor.x(), mouseAnchor.y()); // anchor mouse again
-
-		// set focus to this widget
-		QWidget::setFocus(Qt::MouseFocusReason);
-	}
-	else
-	{
-		// show cursor again and release mouse cursor
-		QWidget::setCursor(Qt::ArrowCursor);	
-		QWidget::releaseMouse();
-	}
-}
 
 void MainWindow::keyReleaseEvent( QKeyEvent* e )
 {
@@ -209,7 +165,7 @@ void MainWindow::keyReleaseEvent( QKeyEvent* e )
 	menuManager->keyReleaseEvent(e);
 
 	// Inform about key release
-	SEND_EVENT(&Event_KeyRelease(e->key()));
+	SEND_EVENT(&Event_KeyPress(e->key(), false));
 }
 
 void MainWindow::slot_setTitle( QString title )
@@ -228,13 +184,6 @@ void MainWindow::resizeEvent( QResizeEvent* e )
 void MainWindow::moveEvent( QMoveEvent *e )
 {
 	menuManager->moveEvent();
-}
-
-void MainWindow::mousePressEvent( QMouseEvent *e )
-{
-	// lock / release mouse
-	if(e->button() == Qt::LeftButton)
-		toggleMouseLock();
 }
 
 void MainWindow::event_showMessageBox( Event_ShowMessageBox* e )

@@ -14,7 +14,7 @@ InputComponent::InputComponent()
 	SUBSCRIBE_TO_EVENT(this, EVENT_RUMBLE);
 	SUBSCRIBE_TO_EVENT(this, EVENT_MOUSE_MOVE);
 	SUBSCRIBE_TO_EVENT(this, EVENT_KEY_PRESS);
-	SUBSCRIBE_TO_EVENT(this, EVENT_KEY_RELEASE);
+	SUBSCRIBE_TO_EVENT(this, EVENT_MOUSE_PRESS);
 
 	inputManager_ = nullptr;
 	newDeviceSearchTimer_ = 0.0f;
@@ -55,12 +55,20 @@ void InputComponent::onEvent(Event* e)
 	if(type == EVENT_KEY_PRESS)
 	{
 		Event_KeyPress* ekp = static_cast<Event_KeyPress*>(e);
-		handleKeyEvent(ekp->keyEnum, true);
+		int keyEnum	= ekp->keyEnum;
+		bool isPressed = ekp->isPressed;
+
+		handleKeyEvent(keyEnum, isPressed);
 	}
-	if(type == EVENT_KEY_RELEASE)
+	if(type == EVENT_MOUSE_PRESS)
 	{
-		Event_KeyRelease* ekr = static_cast<Event_KeyRelease*>(e);
-		handleKeyEvent(ekr->keyEnum, false);
+		Event_MousePress* emp = static_cast<Event_MousePress*>(e);
+		int keyEnum	= emp->keyEnum;
+		bool isPressed = emp->isPressed;
+
+		//
+		// TODO: Handle mousepress
+		//
 	}
 	if(type == EVENT_INPUT_DEVICE_SEARCH)
 	{

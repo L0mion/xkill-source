@@ -60,6 +60,11 @@ Entity* EntityStorage::createEntity()
 	return &entities[index];
 }
 
+Entity* EntityStorage::at(int index)
+{
+	return &entities[index];
+}
+
 void EntityStorage::deleteEntity( int id )
 {
 	// TRUE: Make sure no one is trying to delete "Entity 0"

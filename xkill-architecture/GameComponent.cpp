@@ -76,11 +76,6 @@ void GameComponent::onUpdate(float delta)
 		Attribute_Position*		position	=	itrPosition		.at(spatial->ptr_position);
 
 
-		Entity* playerEntity = itrPlayer.owner();
-		Attribute_DebugShape* debugShape = itrDebugShape.createAttribute(playerEntity);
-		debugShape->ptr_spatial = itrDebugShape.attributePointer(debugShape);
-
-
 		//
 		// End of deathmatch logic
 		//

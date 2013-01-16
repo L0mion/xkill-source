@@ -170,13 +170,6 @@ Attribute_InputDevice::~Attribute_InputDevice()
 {
 }
 
-Attribute_InputDeviceSettings::Attribute_InputDeviceSettings()
-{
-}
-Attribute_InputDeviceSettings::~Attribute_InputDeviceSettings()
-{
-}
-
 int Attribute_Player::nextId = 0;
 Attribute_Player::Attribute_Player()
 {
@@ -386,6 +379,17 @@ void Attribute_DebugShape::clean()
 	}
 	render = false;
 }
+
+DataItemList* Attribute_DebugShape::getDataList()
+	{
+		DataItemList* list = new DataItemList();
+		list->add_AttributePointer(ptr_spatial.index, "ptr_Spatial");;
+		list->add((int)meshID,			"MeshID");
+		list->add(shape->shapeType_,	"Shape->ShapeType");
+		list->add(render,				"Render");
+		return list;
+	}
+
 Attribute_ExplosionSphere::Attribute_ExplosionSphere()
 {
 	currentLifeTimeLeft = 1.0f;
