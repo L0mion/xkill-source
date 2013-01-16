@@ -3,12 +3,13 @@
 
 #include "PhysicsObject.h"
 
-class ProjectilePhysicsObject : public PhysicsObject
+class ProjectilePhysicsObject
+	: public PhysicsObject
 {
 public:
 	ProjectilePhysicsObject();
 	~ProjectilePhysicsObject();
-	virtual bool subClassSpecificInitHook();
+	//virtual bool subClassSpecificInitHook();
 };
 
 #endif

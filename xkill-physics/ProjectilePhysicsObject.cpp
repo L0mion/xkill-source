@@ -8,8 +8,9 @@ ProjectilePhysicsObject::ProjectilePhysicsObject()
 ProjectilePhysicsObject::~ProjectilePhysicsObject()
 {
 }
-
+/*
 bool ProjectilePhysicsObject::subClassSpecificInitHook()
 {
 	return true;
 }
+*/

@@ -90,9 +90,10 @@ bool PhysicsComponent::init()
 	bulletImporter_ = new btBulletWorldImporter(dynamicsWorld_);
 
 	dynamicsWorld_->setGravity(btVector3(0,-10,0));
+	dynamicsWorld_->setInternalTickCallback(wrapTickCallback,static_cast<void*>(this));
+
 	CollisionShapes::Instance()->loadCollisionShapes();
 	
-
 	return true;
 }
 
@@ -104,6 +105,7 @@ void PhysicsComponent::onUpdate(float delta)
 		physicsObjects_->at(i)->onUpdate(delta);
 	}
 	dynamicsWorld_->stepSimulation(delta,10);
+	FLUSH_QUEUED_EVENTS(EVENT_PHYSICS_ATTRIBUTES_COLLIDING);
 }
 
 void PhysicsComponent::onEvent(Event* e)
@@ -142,7 +144,7 @@ void PhysicsComponent::syncronizeWithAttributes()
 			}
 		}
 		//Synchronize physiscs attributes with internal PhysicsObjects
-		if(physicsAttribute->hasChanged)
+		if(physicsAttribute->reloadDataIntoBulletPhysics) //If something has changed in the physics attribute
 		{
 			//If the PhysicsObjects already exists, it needs to be removed to safely reset all of its internal Bullet Physics values
 			if(physicsObjects_->at(index) != nullptr)
@@ -163,32 +165,82 @@ void PhysicsComponent::syncronizeWithAttributes()
 				physicsObjects_->at(index) = new PlayerPhysicsObject();
 				break;
 			case Attribute_Physics::PROJECTILE:
-				physicsObjects_->at(index) = new ProjectilePhysicsObject(); //In progress (2013-01-15 17.25)
+				physicsObjects_->at(index) = new ProjectilePhysicsObject();
 				break;
 			case Attribute_Physics::EXPLOSIONSPHERE:
-				//physicsObjects_->at(index) = new PhysicsObject();
+				physicsObjects_->at(index) = new PhysicsObject();
 				break;
 			case Attribute_Physics::EVERYTHING:
 				std::cout << "Error: Attribute_Physics should not have EVERYTHING as collisionFilterGroup" << std::endl;
 				break;
 			}
 
-			if(physicsObjects_->at(index)->init(index) == true)
+			if(physicsObjects_ != nullptr)
 			{
-				dynamicsWorld_->addRigidBody(physicsObjects_->at(index));			
-				physicsAttribute->hasChanged = false;
-			}
-			else
-			{
-				std::cout << "-->Error initializing PhysicsObject" << std::endl;
+				if(physicsObjects_->at(index)->init(index) == true)
+				{
+					dynamicsWorld_->addRigidBody(physicsObjects_->at(index), physicsAttribute->collisionFilterGroup, physicsAttribute->collisionFilterMask);
+					//Per object gravity must be set after "addRigidBody"
+					if(!physicsObjects_->at(index)->isStaticOrKinematicObject())
+					{
+						physicsObjects_->at(index)->setGravity(btVector3(physicsAttribute->gravity.x,physicsAttribute->gravity.y, physicsAttribute->gravity.z));
+					}
+
+					physicsAttribute->reloadDataIntoBulletPhysics = false;
+				}
+				else
+				{
+					std::cout << "-->Error initializing PhysicsObject" << std::endl;
+				}
 			}
 		}
 	}
 }
 
-void PhysicsComponent::collisionDetection()
+void wrapTickCallback(btDynamicsWorld *world, btScalar timeStep)
 {
-	//Weehaa!
+    PhysicsComponent *component = static_cast<PhysicsComponent *>(world->getWorldUserInfo());
+	component->detectedCollisionsDuringStepSimulation(timeStep);
+}
+
+void PhysicsComponent::detectedCollisionsDuringStepSimulation(btScalar timeStep)
+{
+	btPersistentManifold* persistentManifold;
+	btDispatcher* dispatcher = dynamicsWorld_->getDispatcher();
+	unsigned int numManifolds = dynamicsWorld_->getDispatcher()->getNumManifolds();
+	
+	// loop through all manifolds from last timestep
+	for(unsigned int i = 0; i < numManifolds; i++)
+	{
+		persistentManifold = dispatcher_->getManifoldByIndexInternal(i);
+		unsigned int numContacts = persistentManifold->getNumContacts();
+		
+		// loop through all contact points of manifold
+		for(unsigned int j = 0; j < numContacts; j++)
+		{
+			// ignore contacts where distance is larger than 0
+			if(persistentManifold->getContactPoint(j).getDistance()<0.0f)
+			{
+				const PhysicsObject* objectA = static_cast<const PhysicsObject*>(persistentManifold->getBody0());
+				const PhysicsObject* objectB = static_cast<const PhysicsObject*>(persistentManifold->getBody1());
+				
+				
+				//unsigned int ownerA = physicsOwners_->at(objectA->getIndex());
+				//unsigned int ownerB = physicsOwners_->at(objectB->getIndex());
+
+				unsigned int ownerA = itrPhysics.ownerIdAt(objectA->getAttributeIndex());
+				unsigned int ownerB = itrPhysics.ownerIdAt(objectB->getAttributeIndex());
+
+				//Two PhysicsObjects colliding
+				if(ownerA != 0 && ownerB != 0) // ignore contacts where one owner is 0
+				{
+					//std::cout << "\nCollision between " << ownerA << " & " << ownerB;
+					QUEUE_EVENT(new Event_PhysicsAttributesColliding(objectA->getAttributeIndex(), objectB->getAttributeIndex()));
+					QUEUE_EVENT(new Event_PhysicsAttributesColliding(objectB->getAttributeIndex(), objectA->getAttributeIndex()));
+				}
+			}
+		}
+	}
 }
 
 void PhysicsComponent::doCulling()

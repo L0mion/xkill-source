@@ -11,6 +11,7 @@ CameraComponent::CameraComponent()
 {
 	// subscribe to events
 	SUBSCRIBE_TO_EVENT(this, EVENT_WINDOW_RESIZE);
+	SUBSCRIBE_TO_EVENT(this, EVENT_START_DEATHMATCH);
 
 	cameraAttributes_	= nullptr;
 }
@@ -60,6 +61,9 @@ void CameraComponent::onEvent(Event* e)
 	case EVENT_WINDOW_RESIZE:
 		event_WindowResize((Event_WindowResize*)e);
 		break;
+	case EVENT_START_DEATHMATCH:
+		cameras_.clear();
+		init();
 	default:
 		break;
 	}

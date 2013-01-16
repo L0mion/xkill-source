@@ -179,7 +179,7 @@ struct DLL_U Attribute_Physics : public IAttribute
 	//restitution
 
 	bool collisionResponse;
-	bool hasChanged;
+	bool reloadDataIntoBulletPhysics;
 	bool alive;
 
 	float explosionSphereRadius;

@@ -11,7 +11,9 @@ class btCollisionDispatcher;
 class btCollisionShape;
 class btDefaultCollisionConfiguration;
 class btDiscreteDynamicsWorld;
+class btDynamicsWorld;
 class btSequentialImpulseConstraintSolver;
+typedef float btScalar;
 
 class PhysicsObject;
 class CollisionObject;
@@ -23,6 +25,8 @@ class CollisionObject;
 /*!
 \ingroup xkill-physics
 */
+
+static void wrapTickCallback(btDynamicsWorld *world, btScalar timeStep);
 
 class DLL_P PhysicsComponent : public IObserver
 {
@@ -37,7 +41,6 @@ private:
 	btAlignedObjectArray<PhysicsObject*>*		physicsObjects_;
 
 	void syncronizeWithAttributes();
-	void collisionDetection();
 	void doCulling();
 public:
 	PhysicsComponent();
@@ -45,6 +48,8 @@ public:
 	bool init();
 	void onUpdate(float delta);
 	void onEvent(Event* e);
+
+	void detectedCollisionsDuringStepSimulation(btScalar timeStep);
 };
 
 #endif

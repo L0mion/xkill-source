@@ -10,10 +10,8 @@ private:
 	unsigned int attributeIndex_; //!< Specifies which PhysicsObject is synchronized with which physics attribute.
 	
 public:
-	MotionState();
+	MotionState(unsigned int attributeIndex);
 	~MotionState();
-	void setAttributeIndex(unsigned int attributeIndex);
-	unsigned int getAttributeIndex();
 	virtual void getWorldTransform(btTransform &worldTrans) const;
 	virtual void setWorldTransform(const btTransform &worldTrans);
 };

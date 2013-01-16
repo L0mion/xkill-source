@@ -6,10 +6,10 @@
 class PhysicsObject
 	: public btRigidBody
 {
-private:
 	virtual bool subClassSpecificInitHook();	//! Can be overridden by subclasses. Is called from init.
 protected:
 		float yaw_;
+		unsigned int attributeIndex_; //!< Specifies which PhysicsObject is synchronized with which physics attribute.
 public:
 	PhysicsObject();
 	~PhysicsObject();
@@ -18,6 +18,7 @@ public:
 	\param attributeIndex The physics attribute index. Refer to MotionState.
 	*/
 	bool init(unsigned int attributeIndex);
+	unsigned int getAttributeIndex() const;
 	
 	virtual void onUpdate(float delta);
 };
