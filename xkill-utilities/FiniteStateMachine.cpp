@@ -4,6 +4,13 @@
 
 bool FiniteStateMachine::AddState( FiniteState* state )
 {
+	if (state == 0)
+	{
+		DEBUGPRINT( "[FAIL] FiniteStateMachine::AddState, "
+			<< "Parameter 'state' can not be null");
+		return false;
+	}
+
 	auto result = states_.insert(
 		std::pair<StateType, FiniteState*>(state->GetType(), state));
 	
@@ -64,12 +71,13 @@ void FiniteStateMachine::Update( float dt )
 	if (currentState_.empty() && defaultState_)
 	{
 		currentState_.push(defaultState_);
+		SEND_EVENT(&Event_StateChanged(defaultState_->GetType(), this));
 	}
 
 	//no valid  state could be established, nothing to do
 	if (currentState_.empty())
 	{
-		DEBUGPRINT( "Warning: FiniteStateMachine::Update, current state is invalid" );
+		DEBUGPRINT( "Warning: FiniteStateMachine::Update, current state is invalid. Provide a default state to fix this issue" );
 		return;
 	}
 
@@ -77,7 +85,10 @@ void FiniteStateMachine::Update( float dt )
 	StateType goalStateType = currentState_.top()->CheckTransitions(isReplacementState);
 	HandleTransition(goalStateType, isReplacementState);
 
-	currentState_.top()->Update(dt);
+	if (!currentState_.empty())
+	{
+		currentState_.top()->Update(dt);
+	}
 }
 
 StateType FiniteStateMachine::CheckTransitions( bool& out_isReplacementState ) const
@@ -131,8 +142,8 @@ void FiniteStateMachine::Nuke()
 		it != states_.end(); 
 		it++)
 	{
-		delete it->second; //what if the state is another state machine?! will result in memory leak!
-		//states_.erase(it); //alternative solution is to call states_clear() after the loop instead
+		it->second->Nuke(); // Nested FSMs are possible: recursively nuke nested states.
+		delete it->second;
 	}
 	states_.clear();
 
@@ -162,7 +173,7 @@ void FiniteStateMachine::HandleTransition( StateType goalStateType, bool isRepla
 	StateType currentStateType = currentState_.top()->GetType();
 	bool stateChanged = false;
 	
-	//switch if a transition is both possible and neccessary
+	//switch if a transition is both possible and necessary
 	bool stateShouldChange = goalStateType != currentStateType;
 	bool goalStateExists = states_.count(goalStateType) > 0;
 	if (stateShouldChange && goalStateExists)
@@ -179,13 +190,27 @@ void FiniteStateMachine::HandleTransition( StateType goalStateType, bool isRepla
 		currentState_.top()->Enter();
 		stateChanged = true;
 	}
-	else if (goalStateType == SPECIAL_STATE_BACK && !currentState_.empty())
+	else if (goalStateType == SPECIAL_STATE_BACK)
 	{ //handle special transition
+		currentState_.top()->Exit();
 		currentState_.pop();
-		if (currentState_.empty())
+
+		if (!currentState_.empty())
+		{
+			goalStateType = currentState_.top()->GetType();
+			stateChanged = true;
+		}
+		else if (currentState_.empty() && defaultState_)
 		{
 			currentState_.push(defaultState_);
+			goalStateType = defaultState_->GetType();
 			stateChanged = true;
+		}
+		else
+		{
+			DEBUGPRINT("Warning: FiniteStateMachine::HandleTransition, "
+				<< "SPECIAL_STATE_BACK resulted in invalid current state as no default fallback state has been set. "
+				<< "Provide a default state to fix this issue. No event message will be dispathed.");
 		}
 	}
 	else //requested transition could not be performed
@@ -204,15 +229,16 @@ void FiniteStateMachine::HandleTransition( StateType goalStateType, bool isRepla
 void FiniteStateMachine::onEvent( Event* e )
 {
 	//Pass the event on if current state is another FiniteStateMachine
-	if (dynamic_cast<FiniteStateMachine*>(currentState_.top())) //true if dynamic type is FiniteStateMachine or a subclass thereof 
-		//Note 1: dynamic_cast returns null if the cast fails and a pointer, i.e positive integer, otherwise
-		//Note 2: The alternative, typeid(currentState_.top()) == typeid(FiniteStateMachine) , is true only if the dynamic type is exactly FiniteStateMachine, derived types would yeild false
+	if (dynamic_cast<FiniteStateMachine*>(currentState_.top())) //true if dynamic type is FiniteStateMachine or subclass 
+		//Note 1: dynamic_cast returns null if the cast fails and a pointer, i.e positive integer, otherwise. Thus the expression evaluates to true if successful.
+		//Note 2: The alternative, typeid(currentState_.top()) == typeid(FiniteStateMachine) , is true only if the dynamic type is exactly FiniteStateMachine, derived types would yeild false.
 	{
 		currentState_.top()->onEvent(e);
+		DEBUGPRINT("FiniteStateMachine::onEvent(Event*), Current state is another StateMachine - Passed event on to that Machine.");
 		return;
 	}
 
-	//Handle revieced event
+	//Event intended for us, handle received event
 	switch (e->getType())
 	{
 	case EVENT_STATE_CHANGED:

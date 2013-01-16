@@ -350,8 +350,15 @@ public:
 	Event_EndDeathmatch();
 };
 
+
 enum StateType;
 class FiniteStateMachine;
+/// Informs the engine about a state change
+/**
+Only for informative purposes, no intended to be used for changing state.
+\sa SyncStateCommand
+\ingroup events
+*/
 class DLL_U Event_StateChanged : public Event
 {
 public:
