@@ -156,7 +156,7 @@ public:
 		physics->meshID = render->meshID;
 		
 		float scale = 100.0f;
-		physics->linearVelocity = Float3(e->velocity.x / scale,  e->velocity.y / scale, e->velocity.z / scale);;
+		physics->linearVelocity = e->velocity; //Float3(e->velocity.x / scale,  e->velocity.y / scale, e->velocity.z / scale);
 		physics->mass = 100.0f;
 		physics->gravity = Float3(0.0f, 0.0f, 0.0f);
 		physics->collisionResponse = true;
@@ -176,7 +176,7 @@ public:
 		lightPoint->lightPoint.ambient		= Float4(0.0f, 0.0f, 0.0f, 1.0f);
 		lightPoint->lightPoint.diffuse		= Float4(0.8f, 0.8f, 0.8f, 1.0f);
 		lightPoint->lightPoint.specular		= Float4(0.1f, 0.1f, 0.1f, 1.0f);
-		lightPoint->lightPoint.range		= 0.5f;
+		lightPoint->lightPoint.range		= 1.0f;
 		lightPoint->lightPoint.attenuation	= Float3(0.0f, 1.0f, 0.0f);
 	}
 

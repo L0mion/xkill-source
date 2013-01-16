@@ -499,9 +499,11 @@ void Renderer::renderViewportToBackBuffer(ViewportData& vpData)
 	managementGBuffer_->setGBuffersAsCSShaderResources(devcon);
 
 	//Set lights.
-	managementLight_->setLightSRVCS(devcon, LIGHTDESCTYPE_DIR,		3);
-	managementLight_->setLightSRVCS(devcon, LIGHTDESCTYPE_POINT,	4);
-	managementLight_->setLightSRVCS(devcon, LIGHTDESCTYPE_SPOT,		5);
+	managementLight_->setLightViewSpacePoss(devcon, vpData.view);
+	managementLight_->setLightSRVCS(devcon, LIGHTBUFFERTYPE_DIR,		3);
+	managementLight_->setLightSRVCS(devcon, LIGHTBUFFERTYPE_POINT,		4);
+	managementLight_->setLightSRVCS(devcon, LIGHTBUFFERTYPE_SPOT,		5);
+	managementLight_->setLightSRVCS(devcon, LIGHTBUFFERTYPE_POS_VIEW,	6);
 	
 	//Set default samplerstate.
 	managementSS_->setSS(devcon, TypeFX_CS, 0, SS_ID_DEFAULT);
