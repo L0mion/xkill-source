@@ -8,10 +8,9 @@
 
 RWTexture2D<float4> output : register( u0 );
 
-Texture2D gBufferNormal		: register( t0 );
-Texture2D gBufferAlbedo		: register( t1 );
-Texture2D gBufferMaterial	: register( t2 );
-
+Texture2D gBufferNormal						: register( t0 );
+Texture2D gBufferAlbedo						: register( t1 );
+Texture2D gBufferMaterial					: register( t2 );
 StructuredBuffer<LightDir>		lightsDir	: register( t3 );
 StructuredBuffer<LightPoint>	lightsPoint	: register( t4 );
 StructuredBuffer<LightSpot>		lightsSpot	: register( t5 );
@@ -40,10 +39,19 @@ float3 reconstructViewSpacePosition(float2 texCoord)
 
 [numthreads(TILE_DIM, TILE_DIM, 1)]
 void lightingCS(
-	uint3 blockID			: SV_GroupID,
-	uint3 threadIDDispatch	: SV_DispatchThreadID,
-	uint3 threadIDBlock		: SV_GroupThreadID)
+	uint3	blockID				: SV_GroupID,
+	uint	blockIndex			: SV_GroupIndex, //SV_GroupIndex = SV_GroupThreadID.z*dimx*dimy + SV_GroupThreadID.y*dimx + SV_GroupThreadID.x
+	uint3	threadIDDispatch	: SV_DispatchThreadID,
+	uint3	threadIDBlock		: SV_GroupThreadID)
 {
+	//Initialize kernel
+	[branch] if(blockIndex == 0)
+	{
+		tileMinDepthInt = 0xFFFFFFFF;
+		tileMaxDepthInt = 0.0f;
+		tileLightNum	= 0.0f;
+	}
+
 	//Sample G-Buffers. Data prefetching?
 	float2 texCoord = float2((float)(threadIDDispatch.x + viewportTopX)/(float)screenWidth,(float)(threadIDDispatch.y + viewportTopY)/(float)screenHeight);
 	float4 albedo	= gBufferAlbedo.SampleLevel(ss, texCoord, 0);
@@ -51,12 +59,10 @@ void lightingCS(
 	float4 material = gBufferMaterial.SampleLevel(ss, texCoord, 0);
 	float3 position = reconstructViewSpacePosition(texCoord);
 
+	GroupMemoryBarrierWithGroupSync();
+
 	//Get minimum/maximum depth of tile.
 	uint pixelDepthInt = asuint(position.z); //Depth currently stored in alpha channel of normal g-buffer.
-	tileMinDepthInt = 0xFFFFFFFF;	//These are initializing shared values in a potentially dangerous way. See if there might be a better way of doing this.
-	tileMaxDepthInt = 0.0f;			//These are initializing shared values in a potentially dangerous way. See if there might be a better way of doing this.
-	tileLightNum	= 0.0f;			//These are initializing shared values in a potentially dangerous way. See if there might be a better way of doing this.
-	GroupMemoryBarrierWithGroupSync();
 	InterlockedMin(tileMinDepthInt, pixelDepthInt);
 	InterlockedMax(tileMaxDepthInt, pixelDepthInt);
 	GroupMemoryBarrierWithGroupSync();
@@ -66,11 +72,9 @@ void lightingCS(
 	//Extract Frustum Planes
 	float2 tileScale	= float2(float(screenWidth), float(screenHeight)) * rcp(float(2 * TILE_DIM));
 	float2 tileBias		= tileScale - float2(blockID.xy);
-	
 	float4 c1 = float4(projection._11 * tileScale.x, 0.0f, tileBias.x, 0.0f);
 	float4 c2 = float4(0.0f, -projection._22 * tileScale.y, tileBias.y, 0.0f);
 	float4 c4 = float4(0.0f, 0.0f, 1.0f, 0.0f);
-	
 	float4 frustum[6];
 	frustum[0] = c4 - c1; //Sides
 	frustum[1] = c4 + c1;
@@ -78,8 +82,7 @@ void lightingCS(
 	frustum[3] = c4 + c2;
 	frustum[4] = float4(0.0f, 0.0f, 1.0f, tileMinDepthF); //Near/Far
 	frustum[5] = float4(0.0f, 0.0f, -1.0f, -tileMaxDepthF);
-	
-	for(uint i = 0; i < 4; i++) //Normalize frustum sides
+	[unroll] for(uint i = 0; i < 4; i++) //Normalize frustum sides
 	{
 		frustum[i] *= rcp(length(frustum[i].xyz));
 	}
@@ -87,13 +90,13 @@ void lightingCS(
 	for(i = 0; i < numLightsPoint; i++)
 	{
 		bool inFrustum = true;
-		for(uint j = 0; j < 6; j++)
+		[unroll] for(uint j = 0; j < 6; j++)
 		{
 			float d = dot(frustum[j], float4(lightsPos[i], 1.0f));
 			inFrustum = inFrustum && (d >= -lightsPoint[i].range);
 		}
 	
-		if(inFrustum)
+		[branch] if(inFrustum && tileLightNum < TILE_MAX_LIGHTS)
 		{
 			uint index;
 			InterlockedAdd(tileLightNum, 1, index);
@@ -111,30 +114,49 @@ void lightingCS(
 	};
 
 	float3 color = float3(0.0f, 0.0f, 0.0f);
-	for(i = 0; i < numLightsDir; i++)
+	for(i = 0; i < numLightsDir; i++) //Always apply directional lights.
 	{
+		LightDir lightDir = lightsDir[i];
 		color += directionalLight(
 			surface, 
 			eyePosition, 
-			lightsDir[i].ambient, 
-			lightsDir[i].diffuse, 
-			lightsDir[i].specular, 
-			lightsDir[i].direction);
+			lightDir.ambient, 
+			lightDir.diffuse, 
+			lightDir.specular, 
+			lightDir.direction);
 	}
-	//for(i = 0; i < tileLightNum; i++)
-	//{
-	//	//color += pointLight(
-	//	//	surface, 
-	//	//	eyePosition, 
-	//	//	lightsPoint[tileLightIndices[i]].ambient, 
-	//	//	lightsPoint[tileLightIndices[i]].diffuse, 
-	//	//	lightsPoint[tileLightIndices[i]].specular, 
-	//	//	(float3)lightsPos[tileLightIndices[i]],			//lightsPoint[i].pos
-	//	//	lightsPoint[tileLightIndices[i]].range, 
-	//	//	lightsPoint[tileLightIndices[i]].attenuation); 
-	//	//color = float4(1.0f, 1.0f, 1.0f, 1.0f); //color.g = 1.0f;
-	//}
-	//for(i = 0; i < numLightsSpot; i++)
+	for(i = 0; i < tileLightNum; i++) //Apply culled pointlights.
+	{
+		LightPoint lightPoint = lightsPoint[tileLightIndices[i]];
+		color += pointLight(
+			surface, 
+			float3(0.0f, 0.0f, 0.0f), 
+			lightPoint.ambient, 
+			lightPoint.diffuse, 
+			lightPoint.specular, 
+			(float3)lightsPos[tileLightIndices[i]],
+			lightPoint.range, 
+			lightPoint.attenuation); 
+	}
+
+	//output[uint2(threadIDDispatch.x + viewportTopX, threadIDDispatch.y + viewportTopY)] = float4(color, 1.0f);
+
+	if(tileLightNum > 0)
+	{
+		output[uint2(threadIDDispatch.x + viewportTopX, threadIDDispatch.y + viewportTopY)] = float4(0.0f, 1.0f, 0.0f, 1.0f);
+	}
+	else
+	{
+		output[uint2(threadIDDispatch.x + viewportTopX, threadIDDispatch.y + viewportTopY)] = float4(color, 1.0f);
+	}
+}
+
+// Transform coordinates from screen space to view space.
+//float viewX = (((2.0f*screenX)/screenWidth)-1.0f)/projection._11;
+//float viewY = (((-2.0f*screenY)/screenHeight)+1.0f)/projection._22;
+//float viewZ = 1.0f;
+
+//for(i = 0; i < numLightsSpot; i++)
 	//{
 	//	LightSpot lightSpot = lightsSpot[i];
 	//	color += spotLight(
@@ -149,20 +171,3 @@ void lightingCS(
 	//		lightSpot.spotPow, 
 	//		lightSpot.attenuation);
 	//}
-
-	output[uint2(threadIDDispatch.x + viewportTopX, threadIDDispatch.y + viewportTopY)] = float4(color, 1.0f);
-
-	//if(tileLightNum > 0)
-	//{
-	//	output[uint2(threadIDDispatch.x + viewportTopX, threadIDDispatch.y + viewportTopY)] = float4(color, 1.0f);
-	//}
-	//else
-	//{
-	//	output[uint2(threadIDDispatch.x + viewportTopX, threadIDDispatch.y + viewportTopY)] = float4(1.0f, 0.0f, 0.0f, 1.0f);
-	//}
-}
-
-// Transform coordinates from screen space to view space.
-//float viewX = (((2.0f*screenX)/screenWidth)-1.0f)/projection._11;
-//float viewY = (((-2.0f*screenY)/screenHeight)+1.0f)/projection._22;
-//float viewZ = 1.0f;
