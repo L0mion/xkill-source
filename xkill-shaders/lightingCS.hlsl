@@ -40,12 +40,12 @@ float3 reconstructViewSpacePosition(float2 texCoord)
 [numthreads(TILE_DIM, TILE_DIM, 1)]
 void lightingCS(
 	uint3	blockID				: SV_GroupID,
-	uint	blockIndex			: SV_GroupIndex, //SV_GroupIndex = SV_GroupThreadID.z*dimx*dimy + SV_GroupThreadID.y*dimx + SV_GroupThreadID.x
+	uint	threadIDBlockIndex	: SV_GroupIndex, //SV_GroupIndex = SV_GroupThreadID.z*dimx*dimy + SV_GroupThreadID.y*dimx + SV_GroupThreadID.x
 	uint3	threadIDDispatch	: SV_DispatchThreadID,
 	uint3	threadIDBlock		: SV_GroupThreadID)
 {
 	//Initialize kernel
-	[branch] if(blockIndex == 0)
+	[branch] if(threadIDBlockIndex == 0) //This is being called once per tile, which is not correct.
 	{
 		tileMinDepthInt = 0xFFFFFFFF;
 		tileMaxDepthInt = 0.0f;
@@ -87,22 +87,29 @@ void lightingCS(
 		frustum[i] *= rcp(length(frustum[i].xyz));
 	}
 	
-	for(i = 0; i < numLightsPoint; i++)
+	//Cull lights
+	uint numTileThreads	= TILE_DIM * TILE_DIM;
+	uint numPasses		= (numLightsPoint + numTileThreads - 1) / numTileThreads; //Passes required by tile threads to cover all lights.
+	for(i = 0; i < numPasses; ++i)
 	{
+		uint lightIndex = i * numTileThreads + threadIDBlockIndex;
+		lightIndex = min(lightIndex, numLightsPoint);
+
 		bool inFrustum = true;
 		[unroll] for(uint j = 0; j < 6; j++)
 		{
-			float d = dot(frustum[j], float4(lightsPos[i], 1.0f));
-			inFrustum = inFrustum && (d >= -lightsPoint[i].range);
+			float d = dot(frustum[j], float4(lightsPos[lightIndex], 1.0f));
+			inFrustum = inFrustum && (d >= -lightsPoint[lightIndex].range);
 		}
-	
-		[branch] if(inFrustum && tileLightNum < TILE_MAX_LIGHTS)
+
+		[branch] if(inFrustum)
 		{
 			uint index;
 			InterlockedAdd(tileLightNum, 1, index);
-			tileLightIndices[index] = i;
+			tileLightIndices[index] = lightIndex;
 		}
 	}
+	GroupMemoryBarrierWithGroupSync();
 	
 	//Apply lighting
 	SurfaceInfo surface = 
@@ -150,11 +157,6 @@ void lightingCS(
 		output[uint2(threadIDDispatch.x + viewportTopX, threadIDDispatch.y + viewportTopY)] = float4(color, 1.0f);
 	}
 }
-
-// Transform coordinates from screen space to view space.
-//float viewX = (((2.0f*screenX)/screenWidth)-1.0f)/projection._11;
-//float viewY = (((-2.0f*screenY)/screenHeight)+1.0f)/projection._22;
-//float viewZ = 1.0f;
 
 //for(i = 0; i < numLightsSpot; i++)
 	//{
