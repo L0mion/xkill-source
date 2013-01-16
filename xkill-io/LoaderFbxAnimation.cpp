@@ -339,15 +339,32 @@ void LoaderFbxAnimation::parseAnimationChannelsPropertyEnum(FbxAnimCurveNode* cu
 
 void LoaderFbxAnimation::parseAnimationCurve(FbxAnimCurve* animCurve)
 {
+	FbxAnimCurveDef::EInterpolationType interpolationType;
+	FbxAnimCurveDef::EConstantMode		constantMode;
+	FbxAnimCurveDef::ETangentMode		tangentMode;
+	FbxAnimCurveDef::EWeightedMode		weightedMode;
+	FbxAnimCurveDef::EVelocityMode		velocityMode;
+
 	FbxTime keyTime;
 	float	keyValue;
-
-	//int hour, minute, second, frame, field, residual;
 
 	for(int i=0; i<animCurve->KeyGetCount(); i++)
 	{
 		keyValue = static_cast<float>(animCurve->KeyGetValue(i));
 		keyTime	 = animCurve->KeyGetTime(i);
+
+		interpolationType = animCurve->KeyGetInterpolation(i);
+		
+		if((animCurve->KeyGetInterpolation(i)&FbxAnimCurveDef::eInterpolationConstant) == FbxAnimCurveDef::eInterpolationConstant)
+		{
+			constantMode = animCurve->KeyGetConstantMode(i);
+		}
+		else if((animCurve->KeyGetInterpolation(i)&FbxAnimCurveDef::eInterpolationCubic) == FbxAnimCurveDef::eInterpolationCubic)
+		{
+			tangentMode		= animCurve->KeyGetTangentMode(i);
+			weightedMode	= animCurve->KeyGet(i).GetTangentWeightMode();
+			velocityMode	= animCurve->KeyGet(i).GetTangentVelocityMode();
+		}
 
 		FbxString outStr;
 		char timeString[256];
