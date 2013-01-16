@@ -241,16 +241,17 @@ void GameComponent::onUpdate(float delta)
 				Attribute_Position* spawnPointPositionAttribute = itrPosition.at(spawnPointAttribute->ptr_position);
 				position->position = spawnPointPositionAttribute->position; // set player position attribute
 				DEBUGPRINT("Player entity " << itrPlayer.ownerId() << " spawned at " << position->position.x << " " << position->position.y << " " << position->position.z << std::endl);
-
-				//Reset player rotation.
-				spatial->rotation = Float4(0.0f, 0.0f, 0.0f, 1.0f);
 			}
 			else
 			{
 				position->position = Float3(0.0f, 0.0f, 0.0f);
 				DEBUGPRINT("No spawn point was found. Player entity " << itrPlayer.ownerId() << " spawned at origo" << std::endl);
 			}
+
+			spatial->rotation = Float4(0.0f, 0.0f, 0.0f, 1.0f);
+			camera->reset = true; //Reset player rotation.
 			physics->reloadDataIntoBulletPhysics = true;
+
 			health->health = health->startHealth; // restores player health
 			SEND_EVENT(&Event_PlaySound(1));
 		}
@@ -472,8 +473,7 @@ void GameComponent::event_PhysicsAttributesColliding(Event_PhysicsAttributesColl
 			{
 				Attribute_Physics* physicsAttribute = &allPhysics->at(physicsId.at(i));
 				physicsAttribute->gravity = Float3(0.0f, -10.0f, 0.0f);
-				//TEST
-				//physicsAttribute->linearVelocity = Float3(0.0f, 0.0f, 0.0f);
+				physicsAttribute->linearVelocity = Float3(0.0f, 0.0f, 0.0f);
 			}
 
 			//Handle PhysicsAttribute of a projectile colliding with another PhysicsAttribute

@@ -9,7 +9,7 @@ class ProjectilePhysicsObject
 public:
 	ProjectilePhysicsObject();
 	~ProjectilePhysicsObject();
-	//virtual bool subClassSpecificInitHook();
+	virtual bool subClassSpecificInitHook();
 };
 
 #endif

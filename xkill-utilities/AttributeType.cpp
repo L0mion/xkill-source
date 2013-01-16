@@ -144,6 +144,7 @@ Attribute_Camera::Attribute_Camera()
 	fov = 0.785f; 
 	zFar = 40.0f;
 	zNear = 0.01f;
+	reset = false;
 }
 Attribute_Camera::~Attribute_Camera()
 {

@@ -305,6 +305,8 @@ struct DLL_U Attribute_Camera : public IAttribute
 	float aspect;
 	float zNear;
 	float zFar;
+
+	bool reset;
 };
 
 /// Stores everything GameComponent needs to know about a player (also refer to createPlayerEntity)

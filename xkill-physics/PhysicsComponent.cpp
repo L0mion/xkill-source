@@ -8,6 +8,7 @@
 #include "PhysicsObject.h"
 #include "PlayerPhysicsObject.h"
 #include "ProjectilePhysicsObject.h"
+#include "ExplosionSpherePhysicsObject.h"
 
 #include "CollisionShapes.h"
 
@@ -180,7 +181,7 @@ void PhysicsComponent::synchronizeWithAttributes()
 				physicsObjects_->at(index) = new ProjectilePhysicsObject();
 				break;
 			case Attribute_Physics::EXPLOSIONSPHERE:
-				physicsObjects_->at(index) = new PhysicsObject();
+				physicsObjects_->at(index) = new ExplosionSpherePhysicsObject();
 				break;
 			case Attribute_Physics::EVERYTHING:
 				std::cout << "Error: Attribute_Physics should not have EVERYTHING as collisionFilterGroup" << std::endl;
