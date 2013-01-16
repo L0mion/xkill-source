@@ -19,7 +19,7 @@ void BoolField::clear()
 }
 bool BoolField::getBool(int index)
 {
-	return values[index/NUM_INTS_PER_BOOL] & (1 << (index%NUM_INTS_PER_BOOL));
+	return 0 < (values[index/NUM_INTS_PER_BOOL] & (1 << (index%NUM_INTS_PER_BOOL)));
 }
 void BoolField::setBool(int index, bool value)
 {

@@ -15,9 +15,10 @@ class MeshModel;
 
 #include <xkill-utilities/LeanWindows.h>
 
-static const std::string PATH_XKILL_RESOURCES	= "../../xkill-resources/";
-static const LPCTSTR PATH_TEXDESC				= L"../../xkill-resources/*.texdesc";
-static const LPCTSTR PATH_MDLDESC				= L"../../xkill-resources/*.mdldesc";
+static const std::string PATH_XKILL_RESOURCES		 = "../../xkill-resources/";
+static const std::string PATH_XKILL_RESOURCES_LEVELS = "../../xkill-resources/xkill-level/";
+static const LPCTSTR PATH_TEXDESC					 = L"../../xkill-resources/*.texdesc";
+static const LPCTSTR PATH_MDLDESC					 = L"../../xkill-resources/*.mdldesc";
 
 //! Component loading and writing from/to file.
 /*!
@@ -39,6 +40,7 @@ private:
 	bool initTexDesc(std::string filename);
 	bool initMdlDescs();
 	bool initMdlDesc(std::string filename);
+	bool initLvlMdlDesc(std::string filename);
 
 	bool loadModel(
 		std::string		modelName,

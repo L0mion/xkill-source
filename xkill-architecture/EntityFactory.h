@@ -94,30 +94,27 @@ public:
 		playerId++;
 	}
 	
-	void createWorldEntity(Entity* entity)
+	void createWorldEntity(Entity* entity, Event_CreateWorld* e)
 	{
-		static int HACKHACK = 1;
-
 		CREATE_ATTRIBUTE(Attribute_Position, position, entity);
+		position->position = e->position;
 
 		CREATE_ATTRIBUTE(Attribute_Spatial, spatial, entity);
 		CONNECT_ATTRIBUTES(spatial, position);
+		spatial->rotation = e->rotation;
 
 		CREATE_ATTRIBUTE(Attribute_Render, render, entity);
 		CONNECT_ATTRIBUTES(render, spatial);
-		
-		render->meshID = HACKHACK;
+		render->meshID = e->meshID;
 
 		CREATE_ATTRIBUTE(Attribute_Physics, physics, entity);
 		CONNECT_ATTRIBUTES(physics, spatial);
 		CONNECT_ATTRIBUTES(physics, render);
-		physics->meshID = render->meshID;
+		physics->meshID = e->meshID;
 		physics->collisionFilterGroup = Attribute_Physics::WORLD;
 		physics->collisionFilterMask = Attribute_Physics::PLAYER | Attribute_Physics::PROJECTILE;
 		physics->mass = 0;
 				
-		HACKHACK+=2;
-
 		//temp, create demo light for each projectile
 		CREATE_ATTRIBUTE(Attribute_Light_Dir, lightDir, entity);
 		//CONNECT_ATTRIBUTES(lightDir, position);

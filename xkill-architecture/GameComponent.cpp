@@ -14,10 +14,16 @@ GameComponent::GameComponent(void)
 	SUBSCRIBE_TO_EVENT(this, EVENT_PHYSICS_ATTRIBUTES_COLLIDING);
 	SUBSCRIBE_TO_EVENT(this, EVENT_START_DEATHMATCH);	
 	SUBSCRIBE_TO_EVENT(this, EVENT_END_DEATHMATCH);
+	SUBSCRIBE_TO_EVENT(this, EVENT_TRANSFEREVENTSTOGAME);
 }
 
 GameComponent::~GameComponent(void)
 {
+	for(int i = 0; i < levelEvents_.size(); i++)
+	{
+		delete levelEvents_.at(i);
+	}
+	levelEvents_.clear();
 }
 
 bool GameComponent::init()
@@ -50,6 +56,9 @@ void GameComponent::onEvent(Event* e)
 		break;
 	case EVENT_END_DEATHMATCH:
 		event_EndDeathmatch(static_cast<Event_EndDeathmatch*>(e));
+		break;
+	case EVENT_TRANSFEREVENTSTOGAME:
+		event_TransferEventsToGame(static_cast<Event_TransferEventsToGame*>(e));
 		break;
 	default:
 		break;
@@ -626,6 +635,12 @@ void GameComponent::event_StartDeathmatch( Event_StartDeathmatch* e )
 		}
 	}
 
+	// Create level entities
+	for(unsigned int i = 0; i < levelEvents_.size(); i++)
+	{
+		SEND_EVENT(levelEvents_.at(i));
+	}
+
 	// Create new players
 	for(int i=0; i<e->num_players; i++)
 	{
@@ -641,4 +656,9 @@ void GameComponent::event_StartDeathmatch( Event_StartDeathmatch* e )
 
 	// Set state to deathmatch
 	GET_STATE() =  STATE_DEATHMATCH;
+}
+
+void GameComponent::event_TransferEventsToGame(Event_TransferEventsToGame* e)
+{
+	levelEvents_ = e->events;
 }

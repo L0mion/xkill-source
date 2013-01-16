@@ -11,9 +11,11 @@ class DLL_U Settings
 {
 public:
 	float timeScale;
+	std::string currentLevel;
 
 	Settings()
 	{
+		currentLevel = "TestArena";
 		timeScale = 1.0f;
 	}
 };

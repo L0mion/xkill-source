@@ -16,7 +16,6 @@ CollisionShapes::CollisionShapes()
 	collisionShapes_ = new btAlignedObjectArray<btCollisionShape*>();
 	defaultShape_ = new btSphereShape(1);
 	importer_ = new btBulletWorldImporter();
-	levelName_ = "";
 }
 
 CollisionShapes::~CollisionShapes()
@@ -52,14 +51,17 @@ void CollisionShapes::loadCollisionShapes()
 			name = name.substr(0,name.find("Mesh"));
 			name = name.append("RigidBody");
 			//Edit world variable to reflect true path
-			std::string filename = levelName_;
-			filename = std::string("../../xkill-resources/xkill-levels/");
-			filename = filename.append(levelName_);
+			Settings* settings = ATTRIBUTE_MANAGER->settings;	
+			std::string filename = std::string("../../xkill-resources/xkill-level/");
+			filename = filename.append(settings->currentLevel);
 			filename = filename.append("/");
-			filename = filename.append(levelName_);
+			filename = filename.append(name);
 			filename = filename.append(".bullet");
-			importer_->loadFile(filename.c_str());
-			btCollisionShape* collisionShape = importer_->getCollisionShapeByName(name.c_str());
+			btCollisionShape* collisionShape = nullptr;
+			if(importer_->loadFile(filename.c_str()))
+			{
+				collisionShape = importer_->getCollisionShapeByIndex(importer_->getNumCollisionShapes()-1);
+			}
 			if(collisionShape != nullptr)
 			{
 				std::pair<unsigned int, unsigned int>  idToIndex(meshAttribute->meshID,collisionShapes_->size());
@@ -72,8 +74,8 @@ void CollisionShapes::loadCollisionShapes()
 				filename = std::string("../../xkill-resources/xkill-models/");
 				filename = filename.append(name);
 				filename = filename.append(".bullet");
-				importer_->loadFile(filename.c_str());
-				if(importer_->getNumCollisionShapes())
+				
+				if(importer_->loadFile(filename.c_str()))
 					collisionShape = importer_->getCollisionShapeByIndex(importer_->getNumCollisionShapes()-1);//name.c_str());
 				if(collisionShape != nullptr)
 				{

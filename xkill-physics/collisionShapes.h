@@ -18,7 +18,6 @@ private:
 	btCollisionShape* defaultShape_;
 	btBulletWorldImporter* importer_;
 	std::map<unsigned int, unsigned int> collisionShapesIdToIndex_;
-	std::string levelName_;
 public:
 	~CollisionShapes();
 	btCollisionShape* getCollisionShape(unsigned int meshId);

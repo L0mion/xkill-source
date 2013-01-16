@@ -33,6 +33,13 @@ public:
 		SUBSCRIBE_TO_EVENT(this, EVENT_CREATE_EXPLOSIONSPHERE);
 		SUBSCRIBE_TO_EVENT(this, EVENT_CREATE_ENTITY);
 
+		SUBSCRIBE_TO_EVENT(this, EVENT_CREATE_WORLD);
+		SUBSCRIBE_TO_EVENT(this, EVENT_CREATE_AMMO);
+		SUBSCRIBE_TO_EVENT(this, EVENT_CREATE_HACK);
+		SUBSCRIBE_TO_EVENT(this, EVENT_CREATE_LIGHT);
+
+
+
 		entities = ATTRIBUTE_MANAGER->entities;
 	}
 
@@ -44,9 +51,6 @@ public:
 		EventType type = e->getType();
 		switch (type) 
 		{
-		case EVENT_CREATE_PROJECTILE:
-			event_CreateProjectile(static_cast<Event_CreateProjectile*>(e));
-			break;
 		case EVENT_CREATE_ENTITY:
 			createSpecificEntity(static_cast<Event_CreateEntity*>(e));
 			break;
@@ -61,6 +65,21 @@ public:
 			break;
 		case EVENT_CREATE_EXPLOSIONSPHERE:
 			event_CreateExplosionSphere(static_cast<Event_CreateExplosionSphere*>(e));
+			break;
+		case EVENT_CREATE_PROJECTILE:
+			event_CreateProjectile(static_cast<Event_CreateProjectile*>(e));
+			break;
+		case EVENT_CREATE_WORLD:
+			event_CreateWorld(static_cast<Event_CreateWorld*>(e));
+			break;
+		case EVENT_CREATE_AMMO:
+			event_CreateAmmo(static_cast<Event_CreateAmmo*>(e));
+			break;
+		case EVENT_CREATE_HACK:
+			event_CreateHack(static_cast<Event_CreateHack*>(e));
+			break;
+		case EVENT_CREATE_LIGHT:
+			event_CreateLight(static_cast<Event_CreateLight*>(e));
 			break;
 		default:
 			break;
@@ -88,8 +107,8 @@ public:
 			DEBUGPRINT("ENTITYMANAGER: Created player entity " << entity->getID());
 			break;
 		case WORLD:
-			entityFactory.createWorldEntity(entity);
-			DEBUGPRINT("ENTITYMANAGER: Created World in 7 cycles " << entity->getID());
+			entityFactory.createWorldEntity(entity, &Event_CreateWorld(Float3(0,0,0),Float4(0,0,0,1),1));
+			DEBUGPRINT("ENTITYMANAGER: Created World in 7 cycles,, Satan took over and this function won't work anymore " << entity->getID());
 			break;
 		}
 	}
@@ -113,5 +132,36 @@ public:
 		Entity* entity = createEntity();
 		entityFactory.createExplosionSphere(entity, e);
 		DEBUGPRINT("ENTITYMANAGER: Created explosion sphere entity " << entity->getID());
+	}
+
+	void event_CreateWorld(Event_CreateWorld* e)
+	{
+		Entity* entity = createEntity();
+		entityFactory.createWorldEntity(entity, e);
+		DEBUGPRINT("ENTITYMANAGER: Created world entity " << entity->getID());
+	}
+
+	void event_CreateAmmo (Event_CreateAmmo* e)
+	{
+		//Entity* entity = createEntity();
+		//entityFactory.createAmmoEntity(entity, e);
+		//DEBUGPRINT("ENTITYMANAGER: Created ammo entity " << entity->getID());
+		DEBUGPRINT("ENTITYMANAGER: Didn't create ammo entity, please implement or remove!");
+	}
+
+	void event_CreateHack (Event_CreateHack* e)
+	{
+		//Entity* entity = createEntity();
+		//entityFactory.createHackEntity(entity, e);
+		//DEBUGPRINT("ENTITYMANAGER: Created hack entity " << entity->getID());
+		DEBUGPRINT("ENTITYMANAGER: Didn't create hack entity, please implement or remove!");
+	}
+
+	void event_CreateLight(Event_CreateLight* e)
+	{
+		//Entity* entity = createEntity();
+		//entityFactory.createLightEntity(entity, e);
+		//DEBUGPRINT("ENTITYMANAGER: Created light entity " << entity->getID());
+		DEBUGPRINT("ENTITYMANAGER: Didn't create light entity, please implement or remove!");
 	}
 };

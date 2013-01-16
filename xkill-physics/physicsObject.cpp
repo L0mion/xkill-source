@@ -63,7 +63,7 @@ void PhysicsObject::reload()
 void PhysicsObject::handleInput(Attribute_Input* inputAttribute)
 {
 	yaw_ += inputAttribute->rotation.x;
-	btVector3 move = btVector3(inputAttribute->position.x, 0, inputAttribute->position.y);
+	btVector3 move = 5*btVector3(inputAttribute->position.x, 0, inputAttribute->position.y);
 	move = move.rotate(btVector3(0,1,0),yaw_);
 	move = btVector3(move.x(), getLinearVelocity().y(), move.z());
 	setLinearVelocity(move);

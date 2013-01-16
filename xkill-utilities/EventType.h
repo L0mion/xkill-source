@@ -36,29 +36,34 @@ for some reason
 enum DLL_U EventType
 {
 	// Inform events
-	EVENT_PLAYSOUND,
-	EVENT_RUMBLE,
-	EVENT_CREATE_PROJECTILE,
-	EVENT_PHYSICS_ATTRIBUTES_COLLIDING,
-	EVENT_REMOVE_ENTITY,
 	EVENT_PLAYERDEATH,
-	EVENT_CREATE_SPAWNPOINT,
 	EVENT_END_DEATHMATCH,
 	EVENT_START_DEATHMATCH,
-	EVENT_CHANGE_GAMESTATE,
+	
+	EVENT_CREATE_PROJECTILE,
+	EVENT_CREATE_SPAWNPOINT,
 	EVENT_CREATE_EXPLOSIONSPHERE,
-
+	EVENT_CREATE_WORLD,
+	EVENT_CREATE_AMMO,
+	EVENT_CREATE_HACK,
+	EVENT_CREATE_LIGHT,
 	EVENT_CREATE_ENTITY,
+	EVENT_REMOVE_ENTITY,
+
+	EVENT_TRANSFEREVENTSTOGAME,
+
+	EVENT_CHANGE_GAMESTATE,
 	EVENT_GAMERESET,
 	EVENT_UPDATE,
 	EVENT_MOUSE_MOVE,
 	EVENT_KEY_PRESS,
 	EVENT_KEY_RELEASE,
 	EVENT_WINDOW_RESIZE,
-
 	EVENT_INPUT_DEVICE_SEARCH,
-
+	EVENT_PLAYSOUND,
+	EVENT_RUMBLE,
 	EVENT_DO_CULLING,
+	EVENT_PHYSICS_ATTRIBUTES_COLLIDING,
 
 	// Get events
 	EVENT_GET_ATTRIBUTE,
@@ -368,6 +373,58 @@ public:
 	float radius;
 	float damage;
 	int entityIdOfCreator;
+};
+
+class DLL_U Event_CreateWorld : public Event
+{
+public:
+	Event_CreateWorld(Float3 position, Float4 rotation, unsigned int meshID);
+
+	Float3 position;
+	Float4 rotation;
+	unsigned int meshID;
+};
+
+class DLL_U Event_CreateAmmo : public Event
+{
+public:
+	Event_CreateAmmo(Float3 position, unsigned int type);
+
+	Float3 position;
+	unsigned int type;
+};
+
+class DLL_U Event_CreateHack : public Event
+{
+public:
+	Event_CreateHack(Float3 position, unsigned int type);
+
+	Float3 position;
+	unsigned int type;
+};
+
+class DLL_U Event_CreateLight : public Event
+{
+public:
+	Event_CreateLight(Float3 position, Float3 direction, Float3 ambient, Float3 diffuse, Float3 specular,
+					  Float3 attenuation, float range, float spotPow, unsigned int type);
+
+	Float3 position;
+	Float3 direction;
+	Float3 ambient;
+	Float3 diffuse;
+	Float3 specular;
+	Float3 attenuation;
+	float range;
+	float spotPow;
+	unsigned int type;
+};
+
+class DLL_U Event_TransferEventsToGame : public Event
+{
+public:
+	Event_TransferEventsToGame(std::vector<Event*> events);
+	std::vector<Event*> events;
 };
 
 enum DLL_U EntityType
