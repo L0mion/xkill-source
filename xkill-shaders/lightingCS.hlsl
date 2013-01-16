@@ -1,4 +1,3 @@
-
 #include "LightDesc.hlsl"
 #include "constantBuffers.hlsl"
 #include "lightFunctions.hlsl"
@@ -40,12 +39,12 @@ float3 reconstructViewSpacePosition(float2 texCoord)
 [numthreads(TILE_DIM, TILE_DIM, 1)]
 void lightingCS(
 	uint3	blockID				: SV_GroupID,
-	uint	threadIDBlockIndex	: SV_GroupIndex, //SV_GroupIndex = SV_GroupThreadID.z*dimx*dimy + SV_GroupThreadID.y*dimx + SV_GroupThreadID.x
+	uint	threadIDBlockIndex	: SV_GroupIndex,
 	uint3	threadIDDispatch	: SV_DispatchThreadID,
 	uint3	threadIDBlock		: SV_GroupThreadID)
 {
 	//Initialize kernel
-	[branch] if(threadIDBlockIndex == 0) //This is being called once per tile, which is not correct.
+	if(threadIDBlockIndex == 0) //This is being called once per tile atm. Make sure this is only called once per dispatch.
 	{
 		tileMinDepthInt = 0xFFFFFFFF;
 		tileMaxDepthInt = 0.0f;
@@ -87,7 +86,7 @@ void lightingCS(
 		frustum[i] *= rcp(length(frustum[i].xyz));
 	}
 	
-	//Cull lights
+	//Cull lights with tile
 	uint numTileThreads	= TILE_DIM * TILE_DIM;
 	uint numPasses		= (numLightsPoint + numTileThreads - 1) / numTileThreads; //Passes required by tile threads to cover all lights.
 	for(i = 0; i < numPasses; ++i)
@@ -110,66 +109,115 @@ void lightingCS(
 		}
 	}
 	GroupMemoryBarrierWithGroupSync();
-	
+
 	//Apply lighting
-	SurfaceInfo surface = 
+	Material surfaceMaterial = 
 	{
-		position,
-		normal.xyz,
-		albedo,							//diffuse
-		float4(0.1f, 0.1f, 0.1f, 1.0f)	//specular
+		/*Ambient*/		albedo,
+		/*Diffuse*/		albedo,
+		/*Specular*/	float4(0.1f, 0.1f, 0.1f, 1.0f)
 	};
 
-	float3 color = float3(0.0f, 0.0f, 0.0f);
-	for(i = 0; i < numLightsDir; i++) //Always apply directional lights.
+	float4 sumAmbient	= float4(0.0f, 0.0f, 0.0f, 0.0f);
+	float4 sumDiffuse	= float4(0.0f, 0.0f, 0.0f, 0.0f);
+	float4 sumSpecular	= float4(0.0f, 0.0f, 0.0f, 0.0f);
+	float4 ambient, diffuse, specular;
+	
+	float3 toEye = normalize(float3(0.0f, 0.0f, 0.0f) - position);
+	for(i = 0; i < numLightsDir; i++) //Always apply directional lights regardless of culling.
 	{
-		LightDir lightDir = lightsDir[i];
-		color += directionalLight(
-			surface, 
-			eyePosition, 
-			lightDir.ambient, 
-			lightDir.diffuse, 
-			lightDir.specular, 
-			lightDir.direction);
+		lightDir(
+			surfaceMaterial,
+			lightsDir[i],
+			normal.xyz,
+			toEye,
+			ambient, diffuse, specular);
+
+		sumAmbient	+= ambient;
+		sumDiffuse	+= diffuse;
+		sumSpecular	+= specular;
 	}
-	for(i = 0; i < tileLightNum; i++) //Apply culled pointlights.
+	for(i = 0; i < tileLightNum; i++) //Apply culled point-lights.
 	{
-		LightPoint lightPoint = lightsPoint[tileLightIndices[i]];
-		color += pointLight(
-			surface, 
-			float3(0.0f, 0.0f, 0.0f), 
-			lightPoint.ambient, 
-			lightPoint.diffuse, 
-			lightPoint.specular, 
-			(float3)lightsPos[tileLightIndices[i]],
-			lightPoint.range, 
-			lightPoint.attenuation); 
+		uint pointLightIndex = tileLightIndices[i];
+		lightPoint(
+			surfaceMaterial,
+			lightsPoint[pointLightIndex],
+			(float3)lightsPos[pointLightIndex],
+			position,
+			normal.xyz,
+			toEye,
+			ambient, diffuse, specular);
+
+		sumAmbient	+= ambient;
+		sumDiffuse	+= diffuse;
+		sumSpecular	+= specular;
 	}
 
-	//output[uint2(threadIDDispatch.x + viewportTopX, threadIDDispatch.y + viewportTopY)] = float4(color, 1.0f);
 
-	if(tileLightNum > 0)
-	{
-		output[uint2(threadIDDispatch.x + viewportTopX, threadIDDispatch.y + viewportTopY)] = float4(0.0f, 1.0f, 0.0f, 1.0f);
-	}
-	else
-	{
-		output[uint2(threadIDDispatch.x + viewportTopX, threadIDDispatch.y + viewportTopY)] = float4(color, 1.0f);
-	}
+	//for(i = 0; i < tileLightNum; i++) //Apply culled pointlights.
+	//{
+	//	uint lightPointIndex = tileLightIndices[i];
+	//	LightPoint lightPoint = lightsPoint[lightPointIndex];
+	//	color += pointLight(
+	//		surface, 
+	//		float3(0.0f, 0.0f, 0.0f), 
+	//		lightPoint.ambient, 
+	//		lightPoint.diffuse, 
+	//		lightPoint.specular, 
+	//		(float3)lightsPos[lightPointIndex],
+	//		lightPoint.range, 
+	//		lightPoint.attenuation); 
+	//}
+
+	float4 litSum = sumAmbient + sumDiffuse + sumSpecular;
+	output[uint2(threadIDDispatch.x + viewportTopX, threadIDDispatch.y + viewportTopY)] = litSum;
+
+	//if(tileLightNum > 0)
+	//{
+	//	output[uint2(threadIDDispatch.x + viewportTopX, threadIDDispatch.y + viewportTopY)] = float4(0.0f, 1.0f, 0.0f, 1.0f);
+	//}
+	//else
+	//{
+	//	output[uint2(threadIDDispatch.x + viewportTopX, threadIDDispatch.y + viewportTopY)] = float4(color, 1.0f);
+	//}
 }
 
+//Insert me back into the code plz? :(
 //for(i = 0; i < numLightsSpot; i++)
+//{
+//	LightSpot lightSpot = lightsSpot[i];
+//	color += spotLight(
+//		surface, 
+//		eyePosition, 
+//		lightSpot.ambient, 
+//		lightSpot.diffuse, 
+//		lightSpot.specular, 
+//		(float3)lightsPos[numLightsPoint + i], //offset by pointlights
+//		lightSpot.range, 
+//		lightSpot.direction, 
+//		lightSpot.spotPow, 
+//		lightSpot.attenuation);
+//}
+
+//Old code below:
+	//for(i = 0; i < numLightsDir; i++) //Always apply directional lights.
 	//{
-	//	LightSpot lightSpot = lightsSpot[i];
-	//	color += spotLight(
+	//	LightDir lightDir = lightsDir[i];
+	//	color += directionalLight(
 	//		surface, 
 	//		eyePosition, 
-	//		lightSpot.ambient, 
-	//		lightSpot.diffuse, 
-	//		lightSpot.specular, 
-	//		(float3)lightsPos[numLightsPoint + i], //offset by pointlights
-	//		lightSpot.range, 
-	//		lightSpot.direction, 
-	//		lightSpot.spotPow, 
-	//		lightSpot.attenuation);
+	//		lightDir.ambient, 
+	//		lightDir.diffuse, 
+	//		lightDir.specular, 
+	//		lightDir.direction);
 	//}
+
+//Apply lighting
+	//SurfaceInfo surface = 
+	//{
+	//	position,
+	//	normal.xyz,
+	//	albedo,							//diffuse
+	//	float4(0.1f, 0.1f, 0.1f, 1.0f)	//specular
+	//};
