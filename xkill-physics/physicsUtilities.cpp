@@ -1,4 +1,4 @@
-#include "physicsUtilities.h"
+#include "PhysicsUtilities.h"
 
 #include <xkill-utilities/Math.h>
 #include <btBulletDynamicsCommon.h>

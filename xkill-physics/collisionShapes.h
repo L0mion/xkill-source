@@ -3,8 +3,6 @@
 
 #include <map>
 
-
-
 template<class T>
 class btAlignedObjectArray;
 class btBulletWorldImporter;

@@ -247,7 +247,7 @@ void GameComponent::onUpdate(float delta)
 			{
 				position->position = Float3(0.0f, 0.0f, 0.0f);
 			}
-			physics->hasChanged = true;
+			//physics->reloadDataIntoBulletPhysics = true;
 			health->health = health->startHealth; // restore player health
 			SEND_EVENT(&Event_PlaySound(1));
 		}

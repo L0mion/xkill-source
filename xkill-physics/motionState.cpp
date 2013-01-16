@@ -6,47 +6,34 @@
 
 #include "physicsUtilities.h"
 
-ATTRIBUTES_DECLARE_ALL;
-static bool isFirst = true;
-
+AttributeIterator<Attribute_Position> itrPosition_MotionState;
+AttributeIterator<Attribute_Spatial> itrSpatial_MotionState;
+AttributeIterator<Attribute_Physics> itrPhysics_MotionState;
 
 MotionState::MotionState(unsigned int attributeIndex)
 {
-	if(isFirst)
-	{
-		ATTRIBUTES_INIT_ALL;
-		isFirst = false;
-	}
-
 	attributeIndex_ = attributeIndex;
+	itrSpatial_MotionState = ATTRIBUTE_MANAGER->spatial.getIterator();
+	itrPosition_MotionState = ATTRIBUTE_MANAGER->position.getIterator();
+	itrPhysics_MotionState = ATTRIBUTE_MANAGER->physics.getIterator();
 }
 
 MotionState::~MotionState()
 {
 }
 
-void MotionState::setAttributeIndex(unsigned int attributeIndex)
-{
-	attributeIndex_ = attributeIndex;
-}
-
-unsigned int MotionState::getAttributeIndex()
-{
-	return attributeIndex_;
-}
-
 void MotionState::getWorldTransform(btTransform &worldTrans) const
 {
-	Attribute_Spatial* spatialAttribute = itrSpatial.at(itrPhysics.at(attributeIndex_)->ptr_spatial);
-	Attribute_Position* positionAttribute = itrPosition.at(spatialAttribute->ptr_position);
+	Attribute_Spatial* spatialAttribute = itrSpatial_MotionState.at(itrPhysics_MotionState.at(attributeIndex_)->ptr_spatial);
+	Attribute_Position* positionAttribute = itrPosition_MotionState.at(spatialAttribute->ptr_position);
  	worldTrans.setOrigin(convert(positionAttribute->position));
 	worldTrans.setRotation(convert(spatialAttribute->rotation));
 }
 
 void MotionState::setWorldTransform(const btTransform &worldTrans)
 {
-	Attribute_Spatial* spatialAttribute = itrSpatial.at(itrPhysics.at(attributeIndex_)->ptr_spatial);
- 	Attribute_Position* positionAttribute = itrPosition.at(spatialAttribute->ptr_position);
+	Attribute_Spatial* spatialAttribute = itrSpatial_MotionState.at(itrPhysics_MotionState.at(attributeIndex_)->ptr_spatial);
+ 	Attribute_Position* positionAttribute = itrPosition_MotionState.at(spatialAttribute->ptr_position);
 	btVector3 position = worldTrans.getOrigin();
 	btQuaternion rotation = worldTrans.getRotation();
 	positionAttribute->position = Float3(position.x(),position.y(),position.z());
