@@ -187,3 +187,8 @@ Event_CreateEntity::Event_CreateEntity( EntityType entityType ) : Event(EVENT_CR
 {
 	this->entityType = entityType;
 }
+
+Event_RemoveBulletPhysicsObject::Event_RemoveBulletPhysicsObject(unsigned int attributeIndex) : Event(EVENT_REMOVE_BULLET_PHYSICS_OBJECT)
+{
+	this->attributeIndex = attributeIndex;
+}

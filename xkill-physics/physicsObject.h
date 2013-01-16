@@ -8,11 +8,10 @@ class PhysicsObject
 {
 	virtual bool subClassSpecificInitHook();	//! Can be overridden by subclasses. Is called from init.
 protected:
-		float yaw_;
 		unsigned int attributeIndex_; //!< Specifies which PhysicsObject is synchronized with which physics attribute.
 public:
 	PhysicsObject();
-	~PhysicsObject();
+	virtual ~PhysicsObject();
 	//! Init PhysicsObject and call subClassSpecificInitHook()
 	/*!
 	\param attributeIndex The physics attribute index. Refer to MotionState.

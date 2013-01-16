@@ -16,7 +16,6 @@ AttributeIterator<Attribute_Spatial> itrSpatial_PhysicsObject;
 PhysicsObject::PhysicsObject()
 	: btRigidBody(-1, nullptr, nullptr)
 {
-	yaw_ = 0;
 	itrPhysics_ = ATTRIBUTE_MANAGER->physics.getIterator();
 	itrSpatial_PhysicsObject = ATTRIBUTE_MANAGER->spatial.getIterator();
 	itrPosition_PhysicsObject = ATTRIBUTE_MANAGER->position.getIterator();

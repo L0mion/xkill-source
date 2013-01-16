@@ -6,6 +6,8 @@
 class PlayerPhysicsObject
 	: public PhysicsObject
 {
+private:
+	float yaw_;
 public:
 	PlayerPhysicsObject();
 	~PlayerPhysicsObject();

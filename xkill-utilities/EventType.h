@@ -64,6 +64,7 @@ enum DLL_U EventType
 	EVENT_RUMBLE,
 	EVENT_DO_CULLING,
 	EVENT_PHYSICS_ATTRIBUTES_COLLIDING,
+	EVENT_REMOVE_BULLET_PHYSICS_OBJECT,
 
 	// Get events
 	EVENT_GET_ATTRIBUTE,
@@ -440,4 +441,12 @@ public:
 	Event_CreateEntity(EntityType entityType);
 
 	EntityType entityType;
+};
+
+class DLL_U Event_RemoveBulletPhysicsObject : public Event
+{
+public:
+	Event_RemoveBulletPhysicsObject(unsigned int attributeIndex);
+	
+	unsigned int attributeIndex;
 };

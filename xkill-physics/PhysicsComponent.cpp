@@ -24,6 +24,7 @@ PhysicsComponent::PhysicsComponent() : broadphase_(nullptr),
 									   physicsObjects_(nullptr)
 {
 	SUBSCRIBE_TO_EVENT(this,EVENT_DO_CULLING);
+	SUBSCRIBE_TO_EVENT(this,EVENT_REMOVE_BULLET_PHYSICS_OBJECT);
 	itrPhysics = ATTRIBUTE_MANAGER->physics.getIterator();
 }
 
@@ -99,10 +100,13 @@ bool PhysicsComponent::init()
 
 void PhysicsComponent::onUpdate(float delta)
 {
-	syncronizeWithAttributes();
+	synchronizeWithAttributes();
 	for(unsigned int i = 0; i < static_cast<unsigned int>(physicsObjects_->size()); i++)
 	{
-		physicsObjects_->at(i)->onUpdate(delta);
+		if(physicsObjects_->at(i) != nullptr)
+		{
+			physicsObjects_->at(i)->onUpdate(delta);
+		}
 	}
 	dynamicsWorld_->stepSimulation(delta,10);
 	FLUSH_QUEUED_EVENTS(EVENT_PHYSICS_ATTRIBUTES_COLLIDING);
@@ -110,18 +114,36 @@ void PhysicsComponent::onUpdate(float delta)
 
 void PhysicsComponent::onEvent(Event* e)
 {
-	switch(e->getType())
+	EventType type = e->getType();
+	switch(type)
 	{
 	case EVENT_DO_CULLING:
 		doCulling();
+		break;
+	case EVENT_REMOVE_BULLET_PHYSICS_OBJECT: //Replace
+		Event_RemoveBulletPhysicsObject* removeBulletPhysicsObject = static_cast<Event_RemoveBulletPhysicsObject*>(e);
+		int attributeIndex = removeBulletPhysicsObject->attributeIndex;
+		
+		dynamicsWorld_->removeRigidBody(physicsObjects_->at(attributeIndex));
+		delete physicsObjects_->at(attributeIndex);
+		physicsObjects_->at(attributeIndex) = nullptr;
 		break;
 	//case EVENT_LOAD_LEVEL:
 	//	break;
 	}
 }
 
-void PhysicsComponent::syncronizeWithAttributes()
+void PhysicsComponent::synchronizeWithAttributes()
 {
+	for(int i = 0; i < itrPhysics.storageSize(); i++)
+	{
+		if( itrPhysics.ownerIdAt(i) == 0 && physicsObjects_->at(i) != nullptr)
+		{
+			dynamicsWorld_->removeRigidBody(physicsObjects_->at(i));
+			delete physicsObjects_->at(i);
+			physicsObjects_->at(i) = nullptr;
+		}
+	}
 	itrPhysics = ATTRIBUTE_MANAGER->physics.getIterator();
 	while(itrPhysics.hasNext())
 	{
@@ -132,16 +154,6 @@ void PhysicsComponent::syncronizeWithAttributes()
 		if(index >= static_cast<unsigned int>(physicsObjects_->size()))
 		{
 			physicsObjects_->push_back(nullptr);
-		}
-		//If a physiscs attribute has been removed, remove its PhysicsObject representation
-		if(itrPhysics.ownerId() == 0)
-		{
-			if(physicsObjects_->at(index) != nullptr)
-			{
-				dynamicsWorld_->removeRigidBody(physicsObjects_->at(index));
-				delete physicsObjects_->at(index);
-				physicsObjects_->at(index) = nullptr;
-			}
 		}
 		//Synchronize physiscs attributes with internal PhysicsObjects
 		if(physicsAttribute->reloadDataIntoBulletPhysics) //If something has changed in the physics attribute
