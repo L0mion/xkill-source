@@ -27,12 +27,10 @@ private:
     int nextIndex;
 	AttributeStorage<T>* attributeStorage;
 public:
-	
-
 	AttributeIterator()
 	{
-		
 	}
+
     AttributeIterator(std::vector<T>* attributes, std::vector<int>* owners, AttributeStorage<T>* attributeStorage)
     {
         this->attributes = attributes;
@@ -103,6 +101,13 @@ public:
 
 		nextIndex = nextIndex;
 		return count;
+	}
+
+	// Returns if the attribute at
+	// index is deleted or not
+	bool isDeleted(int index)
+	{
+		return allOwnerId->at(index() == 0);
 	}
 
 	// Returns the Owner ID of the latest

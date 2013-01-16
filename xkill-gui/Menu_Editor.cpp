@@ -15,6 +15,7 @@ public:
 	{
 		data = NULL;
 		entityId = -1;
+		ignoreRefresh = false;
 	}
 	~SelectedAttribute()
 	{
@@ -24,6 +25,7 @@ public:
 	DataItemList*	data;
 	int				index;
 	int				entityId;
+	bool			ignoreRefresh; // Used to prevent wastefull uptating
 };
 
 static SelectedAttribute selected_attribute;
@@ -64,6 +66,7 @@ Menu_Editor::Menu_Editor( Ui::MainWindowClass& ui, QWidget* parent ) : QWidget(p
 	connect(ui.horizontalSlider_simulationSpeed, SIGNAL(valueChanged(int)), this, SLOT(slot_changed_simulationSpeed(int)));
 	connect(ui.checkBox_autoRefresh, SIGNAL(clicked()),		this,	SLOT(slot_attributeInspector_refresh()));
 	connect(ui.dockWidget, SIGNAL(visibilityChanged(bool)), this,	SLOT(slot_editorRefresh()));
+	connect(model_attributeInspector, SIGNAL(itemChanged(QStandardItem*)),		this,	SLOT(slot_attributeInspector_itemChanged()));
 	 
 	ui.dockWidget->hide();
 }
@@ -283,6 +286,7 @@ void Menu_Editor::slot_changed_simulationSpeed(int speed)
 
 void Menu_Editor::slot_attributeInspector_refresh()
 {
+	selected_attribute.ignoreRefresh = true;
 
 	if(ui.checkBox_autoRefresh->isChecked())
 	{
@@ -498,6 +502,20 @@ void Menu_Editor::slot_attributeInspector_refresh()
 	if(excessRows>0)
 		model_attributeInspector->removeRows(num_items, excessRows);
 	ui.treeView_attributeInspector->expandAll();
+
+	// Enable itemChanged trigger again
+	selected_attribute.ignoreRefresh = false;
+}
+
+void Menu_Editor::slot_attributeInspector_itemChanged()
+{
+	// Only activate if update is caused by "player"
+	// not by update is caused by code
+	if(!selected_attribute.ignoreRefresh)
+	{
+		int test = 0;
+	}
+	int test = 0;
 }
 
 

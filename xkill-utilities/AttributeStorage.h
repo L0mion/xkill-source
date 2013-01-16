@@ -117,6 +117,11 @@ public:
 		
 		// Delete Attribute
 		owners[index] = 0;
+
+		// Inform about deletion
+		EventManager::getInstance()->sendEvent(&Event_AttributeUpdated(index, type));
+
+		// Allow Attribute to be reused
 		deleted.push(index);
 	}
 

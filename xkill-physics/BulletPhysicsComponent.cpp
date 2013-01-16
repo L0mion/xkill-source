@@ -21,7 +21,8 @@
 
 BulletPhysicsComponent::BulletPhysicsComponent()
 {
-	SUBSCRIBE_TO_EVENT(this,EVENT_DO_CULLING);
+	SUBSCRIBE_TO_EVENT(this, EVENT_DO_CULLING);
+	SUBSCRIBE_TO_EVENT(this, EVENT_ATTRIBUTE_UPDATED);
 
 	inputAttributes_ = nullptr;
 	physicsAttributes_ = nullptr;

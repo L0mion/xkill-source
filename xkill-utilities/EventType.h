@@ -61,6 +61,8 @@ enum DLL_U EventType
 
 	EVENT_DO_CULLING,
 
+	EVENT_ATTRIBUTE_UPDATED,
+
 	// Get events
 	EVENT_GET_ATTRIBUTE,
 	EVENT_GET_ENTITIES,
@@ -163,6 +165,22 @@ public:
 								//!< Requires manual casting.
 	std::vector<int>* owners;	//!< A std::vector<int> of owners corresponding to each
 								//!< attribute.
+};
+
+/// Returns access to \ref ATTRIBUTES.
+/**
+\ingroup events
+*/
+class DLL_U Event_AttributeUpdated : public Event
+{
+public:
+	Event_AttributeUpdated(int index, int attributeEnum) : Event(EVENT_ATTRIBUTE_UPDATED)
+	{
+		this->attributeEnum = attributeEnum;
+	}
+
+	int attributeEnum;
+	int index;
 };
 
 /// Returns access to a vector of Entity from EntityManager.
