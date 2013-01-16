@@ -20,6 +20,13 @@ CollisionShapes::CollisionShapes()
 
 CollisionShapes::~CollisionShapes()
 {
+	for(int i = 0; i < collisionShapes_->size(); i++)
+	{
+		if(collisionShapes_->at(i)->getShapeType() == COMPOUND_SHAPE_PROXYTYPE)
+		{
+			delete collisionShapes_->at(i);
+		}
+	}
 	delete collisionShapes_;
 	delete defaultShape_;
 	importer_->deleteAllData();
@@ -41,7 +48,16 @@ btCollisionShape* CollisionShapes::getCollisionShape(unsigned int meshId)
 
 void CollisionShapes::loadCollisionShapes()
 {
-	
+	Settings* settings = ATTRIBUTE_MANAGER->settings;	
+	std::string filename = std::string("../../xkill-resources/xkill-level/");
+	filename = filename.append(settings->currentLevel);
+	filename = filename.append("/");
+	filename = filename.append(settings->currentLevel);
+	filename = filename.append(".bullet");
+	if(!importer_->loadFile(filename.c_str()))
+	{
+		DEBUGPRINT("Level .bullet-file could not be loaded");
+	}
 	while(itrMesh.hasNext())
 	{
 		Attribute_Mesh* meshAttribute = itrMesh.getNext();
@@ -49,29 +65,24 @@ void CollisionShapes::loadCollisionShapes()
 		{
 			std::string name = meshAttribute->mesh->getOrigins().getName();
 			name = name.substr(0,name.find("Mesh"));
-			name = name.append("RigidBody");
-			//Edit world variable to reflect true path
-			Settings* settings = ATTRIBUTE_MANAGER->settings;	
-			std::string filename = std::string("../../xkill-resources/xkill-level/");
-			filename = filename.append(settings->currentLevel);
-			filename = filename.append("/");
-			filename = filename.append(name);
-			filename = filename.append(".bullet");
-			btCollisionShape* collisionShape = nullptr;
-			if(importer_->loadFile(filename.c_str()))
-			{
-				collisionShape = importer_->getCollisionShapeByIndex(importer_->getNumCollisionShapes()-1);
-			}
+			name = name.append("RigidBodyShape");
+			btCollisionShape* collisionShape;
+			collisionShape = importer_->getCollisionShapeByName(name.c_str());
 			if(collisionShape != nullptr)
 			{
 				std::pair<unsigned int, unsigned int>  idToIndex(meshAttribute->meshID,collisionShapes_->size());
 				collisionShapesIdToIndex_.insert(idToIndex);
-				collisionShapes_->push_back(collisionShape);
+				btCompoundShape* compoundShape = new btCompoundShape();
+				compoundShape->addChildShape(importer_->getRigidBodyByName(name.c_str())->getWorldTransform(),collisionShape);
+				collisionShapes_->push_back(compoundShape);
 			}
 			else
 			{
 				//Load from model file
 				filename = std::string("../../xkill-resources/xkill-models/");
+				name = meshAttribute->mesh->getOrigins().getName();
+				name = name.substr(0,name.find("Mesh"));
+				name = name.append("RigidBody");
 				filename = filename.append(name);
 				filename = filename.append(".bullet");
 				

@@ -38,7 +38,7 @@ void PlayerPhysicsObject::handleInput()
 
 	if(inputAttributes.size() > 1)
 	{
-		std::cout << "More than one controller for one player. Not tested." << std::endl;
+		//std::cout << "More than one controller for one player. Not tested." << std::endl;
 	}
 
 	for(int i=0;i<inputAttributes.size();i++)
