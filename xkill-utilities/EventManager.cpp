@@ -59,14 +59,14 @@ void EventManager::removeObserver(IObserver* observer)
 void EventManager::removeObserver(IObserver* observer, EventType type)
 {
 	int index = type;
-	for(int i=0; i<(int)subscibers[index].size(); i++)
+	for(int i=0; i<(int)subscibers->at(index).size(); i++)
 	{
 		// TRUE: Element matches index; erase at index
 		if((*subscibers)[index][i] == observer)
 		{
 			// remove using "swap trick"
-			subscibers[index][i] = subscibers[index].back();
-			subscibers[index].pop_back();
+			(*subscibers)[index][i] = (*subscibers)[index].back();
+			(*subscibers)[index].pop_back();
 
 			// avoids unnecessary testing
 			break;

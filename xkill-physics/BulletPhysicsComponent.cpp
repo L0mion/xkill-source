@@ -41,6 +41,10 @@ BulletPhysicsComponent::BulletPhysicsComponent()
 
 BulletPhysicsComponent::~BulletPhysicsComponent()
 {
+	// Prevents BulletPhysicsComponent from receiving events,
+	// when BulletPhysicsComponent is deleted
+	UNSUBSCRIBE_TO_EVENTS(this);
+
 	if(physicsObjects_ != nullptr)
 	{
 		while(physicsObjects_->size() > 0)
