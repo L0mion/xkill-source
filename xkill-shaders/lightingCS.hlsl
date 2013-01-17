@@ -1,6 +1,7 @@
 #include "LightDesc.hlsl"
 #include "constantBuffers.hlsl"
 #include "lightFunctions.hlsl"
+#include "utilities.hlsl"
 
 #define TILE_DIM		16
 #define TILE_MAX_LIGHTS	10
@@ -23,12 +24,12 @@ groupshared uint tileMaxDepthInt;
 groupshared uint tileLightNum;						//Number of lights intersecting tile.
 groupshared uint tileLightIndices[TILE_MAX_LIGHTS];	//Indices to lights intersecting tile.
 
-float3 reconstructViewSpacePosition(float2 texCoord)
+float3 reconstructViewSpacePosition(float2 texCoord, float z)
 {
 	float4 position = float4(0.0f, 0.0f, 0.0f, 1.0f);
 	position.x = 2.0f * texCoord.x - 1.0f;
 	position.y = -2.0f * texCoord.y +1.0f;
-	position.z = -gBufferNormal.SampleLevel(ss, texCoord, 0).w;
+	position.z = -z;
 
 	position = mul(position, projectionInverse);
 	position.xyz = position.xyz / position.w;
@@ -53,15 +54,15 @@ void lightingCS(
 
 	//Sample G-Buffers. Data prefetching?
 	float2 texCoord		= float2((float)(threadIDDispatch.x + viewportTopX)/(float)screenWidth,(float)(threadIDDispatch.y + viewportTopY)/(float)screenHeight);
-	float3 positionV	= reconstructViewSpacePosition(texCoord);
-	float4 albedo		= gBufferAlbedo.SampleLevel(ss,		texCoord, 0);
-	float4 normal		= gBufferNormal.SampleLevel(ss,		texCoord, 0);
-	float4 material		= gBufferMaterial.SampleLevel(ss,	texCoord, 0);
+	float4 gAlbedo		= gBufferAlbedo.SampleLevel(ss,		texCoord, 0);
+	float4 gNormal		= gBufferNormal.SampleLevel(ss,		texCoord, 0);
+	float4 gMaterial	= gBufferMaterial.SampleLevel(ss,	texCoord, 0);
+	float3 positionV	= reconstructViewSpacePosition(texCoord, gNormal.w);
 
 	GroupMemoryBarrierWithGroupSync();
 
 	//Get minimum/maximum depth of tile.
-	uint pixelDepthInt = asuint(positionV.z); //Depth currently stored in alpha channel of normal g-buffer.
+	uint pixelDepthInt = asuint(positionV.z);
 	InterlockedMin(tileMinDepthInt, pixelDepthInt);
 	InterlockedMax(tileMaxDepthInt, pixelDepthInt);
 	GroupMemoryBarrierWithGroupSync();
@@ -113,8 +114,8 @@ void lightingCS(
 	//Apply lighting
 	Material surfaceMaterial = 
 	{
-		/*Ambient*/		albedo,
-		/*Diffuse*/		albedo,
+		/*Ambient*/		gAlbedo,
+		/*Diffuse*/		gAlbedo,
 		/*Specular*/	float4(0.1f, 0.1f, 0.1f, 1.0f)
 	};
 
@@ -122,6 +123,8 @@ void lightingCS(
 	float4 sumDiffuse	= float4(0.0f, 0.0f, 0.0f, 0.0f);
 	float4 sumSpecular	= float4(0.0f, 0.0f, 0.0f, 0.0f);
 	float4 ambient, diffuse, specular;
+
+	float3 normal = decodeSphereMap(gNormal.xy);
 	
 	float3 eyePosV	= float3(0.0f, 0.0f, 0.0f);
 	float3 toEye	= normalize(eyePosition - positionV);
@@ -174,14 +177,14 @@ void lightingCS(
 	float4 litSum = sumAmbient + sumDiffuse + sumSpecular;
 	output[uint2(threadIDDispatch.x + viewportTopX, threadIDDispatch.y + viewportTopY)] = litSum;
 
-	//if(tileLightNum > 0)
-	//{
-	//	output[uint2(threadIDDispatch.x + viewportTopX, threadIDDispatch.y + viewportTopY)] = float4(0.0f, 1.0f, 0.0f, 1.0f);
-	//}
-	//else
-	//{
-	//	output[uint2(threadIDDispatch.x + viewportTopX, threadIDDispatch.y + viewportTopY)] = litSum;
-	//}
+	if(tileLightNum > 0)
+	{
+		output[uint2(threadIDDispatch.x + viewportTopX, threadIDDispatch.y + viewportTopY)] = float4(0.0f, 1.0f, 0.0f, 1.0f);
+	}
+	else
+	{
+		output[uint2(threadIDDispatch.x + viewportTopX, threadIDDispatch.y + viewportTopY)] = litSum;
+	}
 }
 
 //Insert me back into the code plz? :(

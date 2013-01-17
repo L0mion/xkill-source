@@ -51,14 +51,16 @@ public:
 					   unsigned int numLightsPoint,
 					   unsigned int numLightsSpot);
 
-	void updateCBCamera(ID3D11DeviceContext* devcon,
-						DirectX::XMFLOAT4X4	 viewMatrix,
-						DirectX::XMFLOAT4X4	 viewMatrixInverse,
-						DirectX::XMFLOAT4X4	 projectionMatrix,
-						DirectX::XMFLOAT4X4	 projectionMatrixInverse,
-						DirectX::XMFLOAT3	 eyePosition,
-						unsigned int		 viewportTopX,
-						unsigned int		 viewportTopY);
+	void updateCBCamera(ID3D11DeviceContext*	devcon,
+						DirectX::XMFLOAT4X4		viewMatrix,
+						DirectX::XMFLOAT4X4		viewMatrixInverse,
+						DirectX::XMFLOAT4X4		projectionMatrix,
+						DirectX::XMFLOAT4X4		projectionMatrixInverse,
+						DirectX::XMFLOAT3		eyePosition,
+						unsigned int			viewportTopX,
+						unsigned int			viewportTopY,
+						unsigned int			zNear,
+						unsigned int			zFar);
 
 	//! Updates the constant buffer cbObject.
 	void updateCBObject(ID3D11DeviceContext* devcon,

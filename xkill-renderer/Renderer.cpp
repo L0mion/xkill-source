@@ -398,6 +398,8 @@ void Renderer::render()
 		vpData.eyePos		= *(DirectX::XMFLOAT3*)&posAt->position;
 		vpData.viewportTopX = static_cast<unsigned int>(managementViewport_->getViewport(camIndex).TopLeftX);
 		vpData.viewportTopY = static_cast<unsigned int>(managementViewport_->getViewport(camIndex).TopLeftY);
+		vpData.zNear		= camAt->zNear;
+		vpData.zFar			= camAt->zFar;
 		vpDatas.push_back(vpData);
 
 		renderViewportToGBuffer(vpData);
@@ -434,7 +436,9 @@ void Renderer::renderViewportToGBuffer(ViewportData& vpData)
 		vpData.projInv,
 		vpData.eyePos,
 		vpData.viewportTopX,
-		vpData.viewportTopY);
+		vpData.viewportTopY,
+		vpData.zNear,
+		vpData.zFar);
 
 	//Render renderattributes
 	Attribute_Render* renderAt;
@@ -493,17 +497,19 @@ void Renderer::renderViewportToBackBuffer(ViewportData& vpData)
 		vpData.projInv,
 		vpData.eyePos,
 		vpData.viewportTopX,
-		vpData.viewportTopY);
+		vpData.viewportTopY,
+		vpData.zNear,
+		vpData.zFar);
 
 	//Connect g-buffers to shader.
 	managementGBuffer_->setGBuffersAsCSShaderResources(devcon);
 
 	//Set lights.
 	managementLight_->setLightViewSpacePoss(devcon, vpData.view);
-	managementLight_->setLightSRVCS(devcon, LIGHTBUFFERTYPE_DIR,		3);
-	managementLight_->setLightSRVCS(devcon, LIGHTBUFFERTYPE_POINT,		4);
-	managementLight_->setLightSRVCS(devcon, LIGHTBUFFERTYPE_SPOT,		5);
-	managementLight_->setLightSRVCS(devcon, LIGHTBUFFERTYPE_POS_VIEW,	6);
+	managementLight_->setLightSRVCS(devcon, LIGHTBUFFERTYPE_DIR,		LIGHT_SRV_REGISTER_DIR);
+	managementLight_->setLightSRVCS(devcon, LIGHTBUFFERTYPE_POINT,		LIGHT_SRV_REGISTER_POINT);
+	managementLight_->setLightSRVCS(devcon, LIGHTBUFFERTYPE_SPOT,		LIGHT_SRV_REGISTER_SPOT);
+	managementLight_->setLightSRVCS(devcon, LIGHTBUFFERTYPE_POS_VIEW,	LIGHT_SRV_REGISTER_POS);
 	
 	//Set default samplerstate.
 	managementSS_->setSS(devcon, TypeFX_CS, 0, SS_ID_DEFAULT);

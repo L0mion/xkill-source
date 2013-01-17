@@ -156,7 +156,7 @@ public:
 		physics->meshID = render->meshID;
 		
 		float scale = 100.0f;
-		physics->linearVelocity = Float3(e->velocity.x / scale,  e->velocity.y / scale, e->velocity.z / scale);
+		physics->linearVelocity = e->velocity; //Float3(e->velocity.x / scale,  e->velocity.y / scale, e->velocity.z / scale);
 		physics->mass = 100.0f;
 		physics->gravity = Float3(0.0f, 0.0f, 0.0f);
 		physics->collisionResponse = true;

@@ -60,7 +60,9 @@ void ManagementCB::updateCBCamera(ID3D11DeviceContext*	devcon,
 								  DirectX::XMFLOAT4X4	projectionMatrixInverse,
 								  DirectX::XMFLOAT3		eyePosition,
 								  unsigned int			viewportTopX,
-								  unsigned int			viewportTopY)
+								  unsigned int			viewportTopY,
+								  unsigned int			zNear,
+								  unsigned int			zFar)
 {
 	CBCameraDesc cbDesc;
 	cbDesc.viewMatrix_				= viewMatrix;
@@ -70,6 +72,8 @@ void ManagementCB::updateCBCamera(ID3D11DeviceContext*	devcon,
 	cbDesc.eyePosition_				= eyePosition;
 	cbDesc.viewportTopX_			= viewportTopX;
 	cbDesc.viewportTopY_			= viewportTopY;
+	cbDesc.zNear					= zNear;
+	cbDesc.zFar						= zFar;
 
 	devcon->UpdateSubresource(cbCamera_, 0, 0, &cbDesc, 0, 0);
 }

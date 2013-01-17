@@ -37,7 +37,10 @@ struct CBCameraDesc
 	DirectX::XMFLOAT4X4 projectionMatrixInverse_;
 	DirectX::XMFLOAT3	eyePosition_;
 	unsigned int		viewportTopX_;
+
 	unsigned int		viewportTopY_;
+	unsigned int		zNear;
+	unsigned int		zFar;
 };
 static const unsigned int CB_CAMERA_DESC_SIZE = 288;
 
