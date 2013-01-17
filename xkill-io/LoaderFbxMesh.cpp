@@ -1,5 +1,7 @@
 #include <sstream>
 
+#include <fbxsdk.h>
+
 #include <xkill-utilities/EventManager.h>
 #include <xkill-utilities/MeshVertices.h>
 
@@ -61,7 +63,7 @@ void LoaderFbxMesh::parseMesh(FbxMesh* mesh)
 		}
 	}
 
-	createVerticesPosNormTex();
+//	createVerticesPosNormTex();
 }
 
 void LoaderFbxMesh::parsePolygonGroup(FbxMesh* mesh, int polygonIndex)
@@ -413,7 +415,6 @@ FbxVector4 LoaderFbxMesh::parseVertexBinormalsByPolygonVertex(FbxGeometryElement
 
 	return fbxBinormal;
 }
-
 
 bool LoaderFbxMesh::float2Equal(Float2 f1, Float2 f2)
 {

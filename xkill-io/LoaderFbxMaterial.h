@@ -1,7 +1,14 @@
 #ifndef XKILL_IO_LOADERFBXMATERIAL_H
 #define XKILL_IO_LOADERFBXMATERIAL_H
 
-#include <fbxsdk.h>
+
+
+namespace fbxsdk_2014_0_beta2
+{
+	class FbxGeometry;
+	class FbxSurfaceMaterial;
+	class FbxImplementation;
+}
 
 class LoaderFbxMaterialDesc;
 

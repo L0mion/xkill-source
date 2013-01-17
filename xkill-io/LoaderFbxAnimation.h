@@ -1,7 +1,19 @@
 #ifndef XKILL_IO_LOADERFBXANIMATION_H
 #define XKILL_IO_LOADERFBXANIMATION_H
 
-#include <fbxsdk.h>
+
+
+namespace fbxsdk_2014_0_beta2
+{
+	class FbxScene;
+	class FbxNode;
+	class FbxNodeAttribute;
+	class FbxAnimStack;
+	class FbxAnimLayer;
+	class FbxAnimCurve;
+	class FbxAnimCurveNode;
+	class FbxProperty;
+}
 
 class LoaderFbxAnimation
 {

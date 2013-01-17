@@ -1,3 +1,5 @@
+#include <fbxsdk.h>
+
 #include "LoaderFbxAnimation.h"
 
 

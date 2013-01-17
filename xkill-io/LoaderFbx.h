@@ -4,11 +4,19 @@
 #include <string>
 #include <vector>
 
-#include <fbxsdk.h>
+
+
+namespace fbxsdk_2014_0_beta2
+{
+	class FbxManager;
+	class FbxScene;
+	class FbxNode;
+}
 
 class LoaderFbxMesh;
 class LoaderFbxMaterial;
 class LoaderFbxMaterialDesc;
+class LoaderFbxTexture;
 class LoaderFbxAnimation;
 struct VertexPosNormTex;
 
@@ -26,18 +34,19 @@ private:
 	bool createFbxScene();
 	bool loadScene(std::string filename);
 	
-	void parseNode(FbxNode* node);
-	void parseMesh(FbxNode* node);
-	void parseAnimation(FbxScene* scene);
+	void parseNode(fbxsdk_2014_0_beta2::FbxNode* node);
+	void parseMesh(fbxsdk_2014_0_beta2::FbxNode* node);
+	void parseAnimation(fbxsdk_2014_0_beta2::FbxScene* scene);
 	
 
-	LoaderFbxMesh* meshLoader_;
-	LoaderFbxMaterial* materialLoader_;
-	LoaderFbxMaterialDesc* materialDesc_;
-	LoaderFbxAnimation* animationLoader_;
+	LoaderFbxMesh*			meshLoader_;
+	LoaderFbxMaterial*		materialLoader_;
+	LoaderFbxMaterialDesc*	materialDesc_;
+	LoaderFbxTexture*		textureLoader_;
+	LoaderFbxAnimation*		animationLoader_;
 
-	FbxManager*		fbxManager_;
-	FbxScene*		fbxScene_;
+	fbxsdk_2014_0_beta2::FbxManager*		fbxManager_;
+	fbxsdk_2014_0_beta2::FbxScene*		fbxScene_;
 };
 
 #endif

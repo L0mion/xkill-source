@@ -2,10 +2,28 @@
 #define XKILL_IO_LOADERFBXMESH_H
 
 #include <vector>
-#include <fbxsdk.h>
+
 #include <xkill-utilities/Math.h>
 
-static const unsigned int POLYGON_SIZE = 3;
+namespace fbxsdk_2014_0_beta2
+{
+	class FbxNode;
+	class FbxMesh;
+	class FbxVector2;
+	class FbxVector4;
+
+	class FbxLayerElementVertexColor;
+	class FbxLayerElementNormal;
+	class FbxLayerElementUV;
+	class FbxLayerElementTangent;
+	class FbxlayerElementBinormal;
+
+	typedef FbxLayerElementVertexColor	FbxGeometryElementVertexColor;
+	typedef FbxLayerElementNormal		FbxGeometryElementNormal;
+	typedef FbxLayerElementUV			FbxGeometryElementUV;
+	typedef FbxLayerElementTangent		FbxGeometryElementTangent;
+	typedef FbxLayerElementBinormal		FbxGeometryElementBinormal;
+}
 
 class LoaderFbxMesh
 {
@@ -18,6 +36,8 @@ public:
 	void createVerticesPosNormTex();
 	std::vector<unsigned int> getIndices();
 	std::vector<VertexPosNormTex> getVerticesPosNormTex();
+
+	
 
 private:
 	void parsePolygonGroup(FbxMesh* mesh, int polygonIndex);

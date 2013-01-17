@@ -1,3 +1,5 @@
+#include <fbxsdk.h>
+
 #include <xkill-utilities/EventManager.h>
 #include <xkill-utilities/MeshVertices.h>
 

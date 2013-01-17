@@ -1,18 +1,24 @@
 #include <sstream>
 
+#include <fbxsdk.h>
+
 #include <xkill-utilities/EventManager.h>
 #include <xkill-utilities/MeshVertices.h>
 
 #include "LoaderFbx.h"
 #include "LoaderFbxMesh.h"
 #include "LoaderFbxMaterial.h"
+#include "LoaderFbxTexture.h"
 #include "LoaderFbxAnimation.h"
 #include "LoaderFbxMaterialDesc.h"
 
 LoaderFbx::LoaderFbx()
 {
-	meshLoader_		= nullptr;
-	materialLoader_ = nullptr;
+	meshLoader_			= nullptr;
+	materialLoader_		= nullptr;
+	materialDesc_		= nullptr;
+	textureLoader_		= nullptr;
+	animationLoader_	= nullptr;
 
 	fbxManager_ = nullptr;
 	fbxScene_	= nullptr;
@@ -23,6 +29,12 @@ LoaderFbx::~LoaderFbx()
 		delete meshLoader_;
 	if(materialLoader_)
 		delete materialLoader_;
+	if(materialDesc_)
+		delete materialDesc_;
+	if(textureLoader_)
+		delete textureLoader_;
+	if(animationLoader_)
+		delete animationLoader_;
 
 	fbxManager_->Destroy();
 }
@@ -31,7 +43,8 @@ bool LoaderFbx::init()
 	meshLoader_		 = new LoaderFbxMesh();
 	materialLoader_  = new LoaderFbxMaterial();
 	materialDesc_	 = new LoaderFbxMaterialDesc();
-	animationLoader_ = new LoaderFbxAnimation();
+	textureLoader_	 = new LoaderFbxTexture();
+ 	animationLoader_ = new LoaderFbxAnimation();
 
 	bool success = true;
 	success = createFbxManager();
@@ -44,6 +57,7 @@ bool LoaderFbx::load(std::string filename)
 	meshLoader_->reset();
 	materialLoader_->reset();
 	materialDesc_->reset();
+	textureLoader_->reset();
 	animationLoader_->reset();
 
 	bool success = true;
@@ -66,7 +80,7 @@ bool LoaderFbx::load(std::string filename)
 			parseNode(node->GetChild(i));
 	}
 
-	animationLoader_->parseAnimation(fbxScene_);
+//	animationLoader_->parseAnimation(fbxScene_);
 
 	return success;
 }
@@ -234,6 +248,7 @@ void LoaderFbx::parseMesh(FbxNode* node)
 	FbxMesh* mesh = (FbxMesh*)node->GetNodeAttribute();
 	meshLoader_->parseMesh(mesh);
 	materialLoader_->parseMaterial(mesh);
+	textureLoader_->parseTexture(mesh);
 }
 void LoaderFbx::parseAnimation(FbxScene* scene)
 {

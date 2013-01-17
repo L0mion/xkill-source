@@ -46,7 +46,7 @@ bool IOComponent::init()
 
 	fbxLoader_ = new LoaderFbx();
 	fbxLoader_->init();
-	fbxLoader_->load("../../xkill-resources/xkill-models/test.fbx");
+	fbxLoader_->load("../../xkill-resources/xkill-models/Soldier_2k_poly.fbx");
 
 	return sucessfulInit;
 }
