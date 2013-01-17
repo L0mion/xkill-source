@@ -31,6 +31,7 @@ PhysicsComponent::PhysicsComponent() : broadphase_(nullptr),
 
 PhysicsComponent::~PhysicsComponent()
 {
+	UNSUBSCRIBE_TO_EVENTS(this);
 	// Remove all PhysicsObjects
 	if(physicsObjects_ != nullptr)
 	{
@@ -121,8 +122,7 @@ void PhysicsComponent::onEvent(Event* e)
 	case EVENT_DO_CULLING:
 		doCulling();
 		break;
-
-	case EVENT_ATTRIBUTE_UPDATED:
+	case EVENT_ATTRIBUTE_UPDATED: //Removes physics objects when the corresponding physics attribute is removed
 		Event_AttributeUpdated* attributeUpdated = static_cast<Event_AttributeUpdated*>(e);
 		int attributeIndex = attributeUpdated->index;
 		if(attributeUpdated->attributeEnum == ATTRIBUTE_PHYSICS)
@@ -142,6 +142,10 @@ void PhysicsComponent::onEvent(Event* e)
 
 void PhysicsComponent::synchronizeWithAttributes()
 {
+	//Also refer to PhysicsComponent::onEvent, handling of EVENT_ATTRIBUTE_UPDATED
+	
+	//Old physics attribute <--> physics object remove synchronization
+	/*
 	for(int i = 0; i < itrPhysics.storageSize(); i++)
 	{
 		if( itrPhysics.ownerIdAt(i) == 0 && physicsObjects_->at(i) != nullptr)
@@ -151,6 +155,7 @@ void PhysicsComponent::synchronizeWithAttributes()
 			physicsObjects_->at(i) = nullptr;
 		}
 	}
+	*/
 	itrPhysics = ATTRIBUTE_MANAGER->physics.getIterator();
 	while(itrPhysics.hasNext())
 	{
