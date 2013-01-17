@@ -11,10 +11,11 @@ RWTexture2D<float4> output : register( u0 );
 Texture2D gBufferNormal						: register( t0 );
 Texture2D gBufferAlbedo						: register( t1 );
 Texture2D gBufferMaterial					: register( t2 );
-StructuredBuffer<LightDir>		lightsDir	: register( t3 );
-StructuredBuffer<LightPoint>	lightsPoint	: register( t4 );
-StructuredBuffer<LightSpot>		lightsSpot	: register( t5 );
-StructuredBuffer<float3>		lightsPos	: register( t6 );
+Texture2D gBufferDepth						: register( t3 );
+StructuredBuffer<LightDir>		lightsDir	: register( t4 );
+StructuredBuffer<LightPoint>	lightsPoint	: register( t5 );
+StructuredBuffer<LightSpot>		lightsSpot	: register( t6 );
+StructuredBuffer<float3>		lightsPos	: register( t7 );
 
 SamplerState ss : register(s0);
 
@@ -54,10 +55,10 @@ void lightingCS(
 
 	//Sample G-Buffers. Data prefetching?
 	float2 texCoord		= float2((float)(threadIDDispatch.x + viewportTopX)/(float)screenWidth,(float)(threadIDDispatch.y + viewportTopY)/(float)screenHeight);
-	float4 gAlbedo		= gBufferAlbedo.SampleLevel(ss,		texCoord, 0);
-	float4 gNormal		= gBufferNormal.SampleLevel(ss,		texCoord, 0);
-	float4 gMaterial	= gBufferMaterial.SampleLevel(ss,	texCoord, 0);
-	float3 positionV	= reconstructViewSpacePosition(texCoord, gNormal.w);
+	float4 gAlbedo		= gBufferAlbedo.SampleLevel(ss, texCoord, 0);
+	float4 gNormal		= gBufferNormal.SampleLevel(ss, texCoord, 0);
+	float4 gMaterial	= gBufferMaterial.SampleLevel(ss, texCoord, 0);
+	float3 positionV	= reconstructViewSpacePosition(texCoord, gBufferDepth.SampleLevel(ss, texCoord, 0).x);
 
 	GroupMemoryBarrierWithGroupSync();
 
@@ -175,7 +176,7 @@ void lightingCS(
 	}
 
 	float4 litSum = sumAmbient + sumDiffuse + sumSpecular;
-	output[uint2(threadIDDispatch.x + viewportTopX, threadIDDispatch.y + viewportTopY)] = litSum;
+	output[uint2(threadIDDispatch.x + viewportTopX, threadIDDispatch.y + viewportTopY)] = litSum; //
 
 	if(tileLightNum > 0)
 	{

@@ -16,6 +16,7 @@ ManagementD3D::ManagementD3D(HWND windowHandle, Winfo* winfo)
 	rtvBackBuffer_	= nullptr;
 	uavBackBuffer_	= nullptr;
 	dsvDepthBuffer_	= nullptr;
+	srvDepthBuffer_	= nullptr;
 	
 	texBackBuffer_	= nullptr;
 	texDepthBuffer_	= nullptr;
@@ -31,6 +32,7 @@ ManagementD3D::~ManagementD3D()
 	SAFE_RELEASE(rtvBackBuffer_);
 	SAFE_RELEASE(uavBackBuffer_);
 	SAFE_RELEASE(dsvDepthBuffer_);
+	SAFE_RELEASE(srvDepthBuffer_);
 
 	SAFE_RELEASE(texBackBuffer_);
 	SAFE_RELEASE(texDepthBuffer_);
@@ -43,6 +45,7 @@ void ManagementD3D::reset()
 	SAFE_RELEASE(rtvBackBuffer_);
 	SAFE_RELEASE(uavBackBuffer_);
 	SAFE_RELEASE(dsvDepthBuffer_);
+	SAFE_RELEASE(srvDepthBuffer_);
 
 	SAFE_RELEASE(texBackBuffer_);
 	SAFE_RELEASE(texDepthBuffer_);
@@ -55,6 +58,7 @@ HRESULT ManagementD3D::resize()
 	SAFE_RELEASE(rtvBackBuffer_);
 	SAFE_RELEASE(uavBackBuffer_);
 	SAFE_RELEASE(dsvDepthBuffer_);
+	SAFE_RELEASE(srvDepthBuffer_);
 	SAFE_RELEASE(texBackBuffer_);
 	SAFE_RELEASE(texDepthBuffer_);
 
@@ -177,19 +181,19 @@ HRESULT ManagementD3D::initDepthBuffer()
 
 	D3D11_TEXTURE2D_DESC texd;
 	ZeroMemory(&texd, sizeof(texd));
-	texd.Width		= winfo_->getScreenWidth();
-	texd.Height		= winfo_->getScreenHeight();
-	texd.ArraySize	= 1;
-	texd.MipLevels	= 1;
-	texd.SampleDesc.Count = MULTISAMPLES_DEPTHBUFFER;
-	texd.Format		= DXGI_FORMAT_D32_FLOAT;
-	texd.BindFlags	= D3D11_BIND_DEPTH_STENCIL;
+	texd.Width				= winfo_->getScreenWidth();
+	texd.Height				= winfo_->getScreenHeight();
+	texd.ArraySize			= 1;
+	texd.MipLevels			= 1;
+	texd.SampleDesc.Count	= MULTISAMPLES_DEPTHBUFFER;
+	texd.Format				= DXGI_FORMAT_R32_TYPELESS; //DXGI_FORMAT_D32_FLOAT;
+	texd.BindFlags			= D3D11_BIND_DEPTH_STENCIL | D3D11_BIND_SHADER_RESOURCE;
 
 	hr = device_->CreateTexture2D(&texd, NULL, &texDepthBuffer_);
 	if(FAILED(hr))
 		ERROR_MSG(L"RenderingComponent::initDepthBuffer CreateTexture2D failed");
 
-	if(hr == S_OK)
+	if(SUCCEEDED(hr))
 	{
 		D3D11_DEPTH_STENCIL_VIEW_DESC dsvd;
 		ZeroMemory(&dsvd, sizeof(dsvd));
@@ -198,7 +202,18 @@ HRESULT ManagementD3D::initDepthBuffer()
 
 		hr = device_->CreateDepthStencilView(texDepthBuffer_, &dsvd, &dsvDepthBuffer_);
 		if(FAILED(hr))
-		ERROR_MSG(L"RenderingComponent::initDepthBuffer CreateDepthStencilView failed");
+			ERROR_MSG(L"RenderingComponent::initDepthBuffer CreateDepthStencilView failed");
+		else
+		{			HRESULT hr = S_OK;
+
+			D3D11_SHADER_RESOURCE_VIEW_DESC shaderResourceDesc;
+			shaderResourceDesc.Format						= DXGI_FORMAT_R32_FLOAT;
+			shaderResourceDesc.ViewDimension				= D3D11_SRV_DIMENSION_TEXTURE2D;
+			shaderResourceDesc.Texture2D.MostDetailedMip	= 0;
+			shaderResourceDesc.Texture2D.MipLevels			= 1;
+
+			hr = device_->CreateShaderResourceView(texDepthBuffer_, &shaderResourceDesc, &srvDepthBuffer_);
+		}
 	}
 
 	return hr;
@@ -220,6 +235,13 @@ void ManagementD3D::setUAVBackBufferCS()
 {
 	devcon_->CSSetUnorderedAccessViews(0, 1, &uavBackBuffer_, nullptr);
 }
+void ManagementD3D::setDepthBufferSRV(unsigned int shaderRegister)
+{
+	devcon_->CSSetShaderResources(
+		shaderRegister, 
+		1, 
+		&srvDepthBuffer_);
+}
 
 void ManagementD3D::present()
 {
@@ -230,15 +252,23 @@ void ManagementD3D::clearDepthBuffer()
 	devcon_->ClearDepthStencilView(dsvDepthBuffer_, D3D11_CLEAR_DEPTH, 1.0f, 0);
 }
 
-ID3D11Device*			ManagementD3D::getDevice()			const
+ID3D11Device*				ManagementD3D::getDevice()			const
 {
 	return device_;
 }
-ID3D11DeviceContext*	ManagementD3D::getDeviceContext()	const
+ID3D11DeviceContext*		ManagementD3D::getDeviceContext()	const
 {
 	return devcon_;
 }
-ID3D11DepthStencilView* ManagementD3D::getDepthBuffer()		const
+ID3D11DepthStencilView*		ManagementD3D::getDepthBuffer()		const
 {
 	return dsvDepthBuffer_;
+}
+ID3D11Texture2D*			ManagementD3D::getDepthBufferTexture() const
+{
+	return texDepthBuffer_;
+}
+ID3D11ShaderResourceView*	ManagementD3D::getDepthBufferSRV()		const
+{
+	return srvDepthBuffer_;
 }

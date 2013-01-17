@@ -425,7 +425,7 @@ void Renderer::renderViewportToGBuffer(ViewportData& vpData)
 	managementSS_->setSS(devcon, TypeFX_PS, 0, SS_ID_DEFAULT);
 	managementRS_->setRS(devcon, RS_ID_DEFAULT);
 
-	managementGBuffer_->setGBuffersAndDepthBufferAsRenderTargets(devcon, managementD3D_->getDepthBuffer());
+	managementGBuffer_->setGBuffersAndDepthBuffer(devcon, managementD3D_->getDepthBuffer());
 
 	//Update per-viewport constant buffer.
 	managementCB_->setCB(CB_TYPE_CAMERA, TypeFX_VS, CB_REGISTER_CAMERA, managementD3D_->getDeviceContext());
@@ -481,6 +481,7 @@ void Renderer::renderViewportToBackBuffer(ViewportData& vpData)
 	ID3D11DeviceContext* devcon = managementD3D_->getDeviceContext();
 
 	//Set backbuffer.
+	managementD3D_->setDepthBufferSRV(GBUFFER_SHADER_REGISTER_DEPTH);
 	managementD3D_->setUAVBackBufferCS();
 
 	//Set shader.
@@ -692,7 +693,7 @@ void Renderer::renderAnimatedMesh(DirectX::XMFLOAT4X4 viewMatrix, DirectX::XMFLO
 	managementSS_->setSS(devcon, TypeFX_PS, 0, SS_ID_DEFAULT);
 	managementRS_->setRS(devcon, RS_ID_DEFAULT);
 
-	managementGBuffer_->setGBuffersAndDepthBufferAsRenderTargets(devcon, managementD3D_->getDepthBuffer());
+	managementGBuffer_->setGBuffersAndDepthBuffer(devcon, managementD3D_->getDepthBuffer());
 
 	managementD3D_->clearDepthBuffer();
 

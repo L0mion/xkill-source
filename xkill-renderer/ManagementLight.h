@@ -26,10 +26,10 @@ static const unsigned int LIGHT_START_MAX_COUNT_SPOT	= 5; //Can't be zero as one
 
 static const unsigned int POS_START_MAX_COUNT = LIGHT_START_MAX_COUNT_POINT + LIGHT_START_MAX_COUNT_SPOT;
 
-static const unsigned int LIGHT_SRV_REGISTER_DIR	= 3;
-static const unsigned int LIGHT_SRV_REGISTER_POINT	= 4;
-static const unsigned int LIGHT_SRV_REGISTER_SPOT	= 5;
-static const unsigned int LIGHT_SRV_REGISTER_POS	= 6;
+static const unsigned int LIGHT_SRV_REGISTER_DIR	= 4;
+static const unsigned int LIGHT_SRV_REGISTER_POINT	= 5;
+static const unsigned int LIGHT_SRV_REGISTER_SPOT	= 6;
+static const unsigned int LIGHT_SRV_REGISTER_POS	= 7;
 
 enum DLL_U LightBufferType
 { 

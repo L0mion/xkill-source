@@ -38,9 +38,7 @@ public:
 	HRESULT init(ID3D11Device* device);
 
 	void clearGBuffers(ID3D11DeviceContext* devcon);
-	void setGBuffersAndDepthBufferAsRenderTargets(
-		ID3D11DeviceContext*	devcon, 
-		ID3D11DepthStencilView*	depthBuffer);
+	void setGBuffersAndDepthBuffer(ID3D11DeviceContext*	devcon, ID3D11DepthStencilView*	depthBuffer);
 	void unsetGBuffersAndDepthBufferAsRenderTargets(ID3D11DeviceContext* devcon);
 	void setGBuffersAsCSShaderResources(ID3D11DeviceContext* devcon);
 protected:
