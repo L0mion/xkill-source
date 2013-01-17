@@ -50,6 +50,8 @@ struct DLL_U Float3
 	Float3();
 	Float3(float x, float y, float z);
 	void copy(const float* float3);
+	
+	float* asFloat();
 
 	Float3&	normalize();
 	Float3	cross(const Float3& vec) const;

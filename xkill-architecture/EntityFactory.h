@@ -81,8 +81,6 @@ public:
 		
 		CREATE_ATTRIBUTE(Attribute_Input, input, entity);
 		CONNECT_ATTRIBUTES(input, physics);
-		input->changeAmmunitionType = false;
-		input->changeFiringMode = false;
 
 		CREATE_ATTRIBUTE(Attribute_Camera, camera, entity);
 		CONNECT_ATTRIBUTES(camera, spatial);

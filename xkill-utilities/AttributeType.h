@@ -456,28 +456,16 @@ struct DLL_U Attribute_Camera : public IAttribute
 
 	AttributePointer ptr_spatial;
 
-	Float4x4 mat_view;
-	Float4x4 mat_projection;
+	Float4x4 mat_view;			//!< The view matrix. Used to transform objects to view space.
+	Float4x4 mat_projection;	//!< The projection matrix. Defines the camera's frustum.
 	float fov;
 	float aspect;
 	float zNear;
 	float zFar;
 
-	DataItemList* getDataList()
-	{
-		DataItemList* list = new DataItemList();
-		
-		list->add_AttributePointer(ptr_spatial.index, "ptr_spatial");
-
-		list->add(mat_view,			"Mat_view");
-		list->add(mat_projection,	"Mat_projection");
-		list->add(fov,				"Fov");
-		list->add(aspect,			"Aspect");
-		list->add(zNear,			"ZNear");
-		list->add(zFar,				"ZFar");
-
-		return list;
-	}
+	Float3 right;		//!< Always aims to the right of the camera, perpendicular to look.
+	Float3 up;			//!< Always aims up from the camera, perpendicular to look.
+	Float3 look;		//!< The direction in which the camera is aimed. 
 };
 
 /// Stores everything GameComponent needs to know about a player (also refer to createPlayerEntity)

@@ -117,6 +117,12 @@ float Float3::distanceTo( Float3 v )
 	return v3.length();
 }
 
+float* Float3::asFloat()
+{
+	float* asFloat = (float*)this;
+	return asFloat;
+}
+
 Float4::Float4()
 {
 	x = 0.0f;

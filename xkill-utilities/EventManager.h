@@ -153,4 +153,14 @@ EventManager::getInstance()->state_TemporaryVariableUsedAsSubstituteForStateMach
 	std::cout << dataStream << std::endl;			
 #endif
 
+//
+// Math macros
+//
+
+#define XMFLOAT_TO_FLOAT(XMFloatPointer )									\
+(Float3*)XMFloatPointer;
+
+#define XMFLOAT_TO_FLOAT(XMFloatPointer )									\
+(Float3*)XMFloatPointer;
+
 // END OF EVIL

@@ -14,7 +14,6 @@ Camera::Camera(
 	this->zNear_	= zNear;
 
 	velocity_			= 0.01f;
-
 	position_	= DirectX::XMFLOAT3(0.0f, 0.0f, -50.0f);
 	right_		= DirectX::XMFLOAT3(1.0f, 0.0f, 0.0f);
 	up_			= DirectX::XMFLOAT3(0.0f, 1.0f, 0.0f);

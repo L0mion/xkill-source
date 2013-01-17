@@ -32,7 +32,7 @@ public:
 		float zFar = 10.0f, 
 		float zNear = 0.01f);
 	//! Does nothing since the camera does not alocate any memory.
-	virtual ~Camera();
+	~Camera();
 
 	//! Moves the camera depending on input from the mouse.
 	/*!
@@ -41,35 +41,35 @@ public:
 	\sa yaw
 	\sa pitch
 	*/
-	virtual void mouse(const float dX, const float dY);
+	void mouse(const float dX, const float dY);
 	//! Moves the camera depending on input from the keyboard.
 	/*!
 	\param keys Vector where each index maps to a key on the keyboard.
 	\sa walk
 	\sa strafe
 	*/
-	virtual void keyboard(std::vector<bool>* keys);
+	void keyboard(std::vector<bool>* keys);
 
 	//! Rebuilds the view matrix.
-	virtual void updateView();
+	void updateView();
 	//! Rebuilds the projection matrix.
-	virtual void updateProj();
+	void updateProj();
 
 	//! Moves the camera along the right-vector.
 	/*!
 	\param velocity How fast the camera should move.
 	*/
-	virtual void strafe(const float velocity);
+	void strafe(const float velocity);
 	//! Moves the camera along the look-vector.
 	/*!
 	\param velocity How fast the camera should move.
 	*/
-	virtual void walk(const float velocity);
+	void walk(const float velocity);
 	//! Rotates the camera around the right-vector.
 	/*!
 	\param angle How far the camera should rotate.
 	*/
-	virtual void pitch(const float angle);
+	void pitch(const float angle);
 	//! Rotates the camera around the up-vector.
 	/*!
 	\param angle How far the camera should rotate.
@@ -83,6 +83,7 @@ public:
 	DirectX::XMFLOAT4X4 getView();
 	DirectX::XMFLOAT4X4 getProjection();
 private:
+
 	float fov_;					//!< The cameras field of view.
 	float aspect_;				//!< Aspect ratio of the window.
 	float zNear_;				//!< The far viewing plane.
