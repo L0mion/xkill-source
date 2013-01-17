@@ -105,6 +105,11 @@ public:
 		// Save access controller in Entity so it can be deleted later
 		owner->addAttribute(getAttributeController());
 		
+		// Inform about creation
+		Event_AttributeUpdated e(index, type);
+		e.isCreated = true;
+		EventManager::getInstance()->sendEvent(&e);
+
 		// Get attribute
 		return &attributes[index_lastCreated];
 	}
@@ -119,7 +124,9 @@ public:
 		owners[index] = 0;
 
 		// Inform about deletion
-		EventManager::getInstance()->sendEvent(&Event_AttributeUpdated(index, type));
+		Event_AttributeUpdated e(index, type);
+		e.isDeleted = true;
+		EventManager::getInstance()->sendEvent(&e);
 
 		// Allow Attribute to be reused
 		deleted.push(index);

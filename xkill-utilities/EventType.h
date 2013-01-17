@@ -176,11 +176,16 @@ class DLL_U Event_AttributeUpdated : public Event
 public:
 	Event_AttributeUpdated(int index, int attributeEnum) : Event(EVENT_ATTRIBUTE_UPDATED)
 	{
+		this->index = index;
 		this->attributeEnum = attributeEnum;
+		isCreated = false;
+		isDeleted = false;
 	}
 
 	int attributeEnum;
 	int index;
+	bool isCreated;
+	bool isDeleted;
 };
 
 /// Returns access to a vector of Entity from EntityManager.
