@@ -6,6 +6,7 @@
 #include <xkill-utilities/MeshVertices.h>
 
 #include "LoaderFbxMesh.h"
+#include "LoaderFbxMeshDesc.h"
 
 LoaderFbxMesh::LoaderFbxMesh()
 {
@@ -26,17 +27,8 @@ void LoaderFbxMesh::reset()
 	vertexBinormals_.clear();
 }
 
-void LoaderFbxMesh::parseMesh(FbxMesh* mesh)
+void LoaderFbxMesh::parseMesh(FbxMesh* mesh, LoaderFbxMeshDesc* meshDesc)
 {
-//	int errorCode = mesh->GetLastErrorID();
-//	if(errorCode != -1)
-//	{
-//		std::stringstream message;
-//		message << "LoaderFbx::parseMesh | Error code : " << errorCode
-//				<< " Error message: " << mesh->GetLastErrorString();
-//		SHOW_MESSAGEBOX(message.str());
-//	}
-
 	int polygonVertexCount = mesh->GetPolygonVertexCount();
 	int polygonCount = mesh->GetPolygonCount();
 	FbxVector4* controlPoints = mesh->GetControlPoints();
@@ -63,7 +55,12 @@ void LoaderFbxMesh::parseMesh(FbxMesh* mesh)
 		}
 	}
 
-//	createVerticesPosNormTex();
+	meshDesc->setPolygonGroupIds(polygonGroupIds_);
+	meshDesc->setVertexPositions(vertexPositions_);
+	meshDesc->setVertexNormals(vertexNormals_);
+	meshDesc->setVertexUVs(vertexUVs_);
+	meshDesc->setVertexTangents(vertexTangents_);
+	meshDesc->setVertexBinormals(vertexBinormals_);
 }
 
 void LoaderFbxMesh::parsePolygonGroup(FbxMesh* mesh, int polygonIndex)

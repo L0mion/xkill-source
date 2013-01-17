@@ -16,10 +16,8 @@ void LoaderFbxMaterial::reset()
 {
 }
 
-void LoaderFbxMaterial::parseMaterial(FbxGeometry* geometry)
+void LoaderFbxMaterial::parseMaterial(FbxGeometry* geometry, LoaderFbxMaterialDesc* materialDesc)
 {
-	LoaderFbxMaterialDesc materialDesc;
-
 	int numMaterials = 0;
 	FbxNode* node = NULL;
 	if(geometry)
@@ -49,11 +47,11 @@ void LoaderFbxMaterial::parseMaterial(FbxGeometry* geometry)
 				implementationType = "CGFX";
 			}
 			if(implementation)
-				parseMaterialImplementation(material, implementation, materialIndex, &materialDesc);
+				parseMaterialImplementation(material, implementation, materialIndex, materialDesc);
 			else if(material->GetClassId().Is(FbxSurfacePhong::ClassId))
-				parseMaterialPhong(material, materialIndex, &materialDesc);
+				parseMaterialPhong(material, materialIndex, materialDesc);
 			else if(material->GetClassId().Is(FbxSurfaceLambert::ClassId))
-				parseMaterialLambert(material, materialIndex, &materialDesc);
+				parseMaterialLambert(material, materialIndex, materialDesc);
 			else
 				parseMaterialUnknown();
 		}

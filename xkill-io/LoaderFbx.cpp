@@ -7,8 +7,10 @@
 
 #include "LoaderFbx.h"
 #include "LoaderFbxMesh.h"
+#include "LoaderFbxMeshDesc.h"
 #include "LoaderFbxMaterial.h"
 #include "LoaderFbxTexture.h"
+#include "LoaderFbxTextureDesc.h"
 #include "LoaderFbxAnimation.h"
 #include "LoaderFbxMaterialDesc.h"
 
@@ -16,7 +18,6 @@ LoaderFbx::LoaderFbx()
 {
 	meshLoader_			= nullptr;
 	materialLoader_		= nullptr;
-	materialDesc_		= nullptr;
 	textureLoader_		= nullptr;
 	animationLoader_	= nullptr;
 
@@ -29,8 +30,6 @@ LoaderFbx::~LoaderFbx()
 		delete meshLoader_;
 	if(materialLoader_)
 		delete materialLoader_;
-	if(materialDesc_)
-		delete materialDesc_;
 	if(textureLoader_)
 		delete textureLoader_;
 	if(animationLoader_)
@@ -42,7 +41,6 @@ bool LoaderFbx::init()
 {
 	meshLoader_		 = new LoaderFbxMesh();
 	materialLoader_  = new LoaderFbxMaterial();
-	materialDesc_	 = new LoaderFbxMaterialDesc();
 	textureLoader_	 = new LoaderFbxTexture();
  	animationLoader_ = new LoaderFbxAnimation();
 
@@ -56,7 +54,6 @@ bool LoaderFbx::load(std::string filename)
 {
 	meshLoader_->reset();
 	materialLoader_->reset();
-	materialDesc_->reset();
 	textureLoader_->reset();
 	animationLoader_->reset();
 
@@ -213,15 +210,6 @@ bool LoaderFbx::loadScene(std::string filename)
 
 void LoaderFbx::parseNode(FbxNode* node)
 {
-	//int errorCode = node->GetLastErrorID();
-	//if(errorCode != -1)
-	//{
-	//	std::stringstream message;
-	//	message << "LoaderFbx::parseNode | Error code : " << errorCode
-	//			<< " Error message: " << node->GetLastErrorString();
-	//	SHOW_MESSAGEBOX(message.str());
-	//}
-
 	FbxNodeAttribute::EType attributeType;
 
 	if(node->GetNodeAttribute() == NULL)
@@ -245,10 +233,14 @@ void LoaderFbx::parseNode(FbxNode* node)
 }
 void LoaderFbx::parseMesh(FbxNode* node)
 {
+	LoaderFbxMeshDesc meshDesc;
+	LoaderFbxMaterialDesc materialDesc;
+	LoaderFbxTextureDesc textureDesc;
+
 	FbxMesh* mesh = (FbxMesh*)node->GetNodeAttribute();
-	meshLoader_->parseMesh(mesh);
-	materialLoader_->parseMaterial(mesh);
-	textureLoader_->parseTexture(mesh);
+	meshLoader_->parseMesh(mesh, &meshDesc);
+	materialLoader_->parseMaterial(mesh, &materialDesc);
+	textureLoader_->parseTexture(mesh, &textureDesc);
 }
 void LoaderFbx::parseAnimation(FbxScene* scene)
 {

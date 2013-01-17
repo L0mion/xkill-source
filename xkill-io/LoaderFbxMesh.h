@@ -25,6 +25,8 @@ namespace fbxsdk_2014_0_beta2
 	typedef FbxLayerElementBinormal		FbxGeometryElementBinormal;
 }
 
+class LoaderFbxMeshDesc;
+
 class LoaderFbxMesh
 {
 public:
@@ -32,7 +34,7 @@ public:
 	~LoaderFbxMesh();
 	void reset();
 
-	void parseMesh(FbxMesh* mesh);
+	void parseMesh(FbxMesh* mesh, LoaderFbxMeshDesc* meshDesc);
 	void createVerticesPosNormTex();
 	std::vector<unsigned int> getIndices();
 	std::vector<VertexPosNormTex> getVerticesPosNormTex();

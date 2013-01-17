@@ -19,7 +19,7 @@ public:
 	~LoaderFbxMaterial();
 	void reset();
 
-	void parseMaterial(FbxGeometry* geometry);
+	void parseMaterial(FbxGeometry* geometry, LoaderFbxMaterialDesc* materialDesc);
 
 private:
 	void parseMaterialImplementation(FbxSurfaceMaterial* material, const FbxImplementation* implementation, int materialIndex, LoaderFbxMaterialDesc* materialDesc);

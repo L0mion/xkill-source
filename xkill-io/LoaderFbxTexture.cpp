@@ -3,6 +3,7 @@
 #include <xkill-utilities/Math.h>
 
 #include "LoaderFbxTexture.h"
+#include "LoaderFbxTextureDesc.h"
 
 LoaderFbxTexture::LoaderFbxTexture()
 {
@@ -14,7 +15,7 @@ void LoaderFbxTexture::reset()
 {
 }
 
-void LoaderFbxTexture::parseTexture(FbxGeometry* geometry)
+void LoaderFbxTexture::parseTexture(FbxGeometry* geometry, LoaderFbxTextureDesc* textureDesc)
 {
 	FbxProperty fbxProperty;
 	if(geometry->GetNode() == NULL)
@@ -33,13 +34,13 @@ void LoaderFbxTexture::parseTexture(FbxGeometry* geometry)
 			FBXSDK_FOR_EACH_TEXTURE(textureIndex)
 			{
 				fbxProperty = surfaceMaterial->FindProperty(FbxLayerElement::sTextureChannelNames[textureIndex]);
-				parseTextureByProperty(&fbxProperty, parseHeader, materialIndex);
+				parseTextureByProperty(&fbxProperty, parseHeader, materialIndex, textureDesc);
 			}
 		}
 	}
 
 }
-void LoaderFbxTexture::parseTextureByProperty(FbxProperty* fbxProperty, bool& parseHeader, int materialIndex)
+void LoaderFbxTexture::parseTextureByProperty(FbxProperty* fbxProperty, bool& parseHeader, int materialIndex, LoaderFbxTextureDesc* textureDesc)
 {
 	if(fbxProperty->IsValid())
 	{
@@ -49,16 +50,16 @@ void LoaderFbxTexture::parseTextureByProperty(FbxProperty* fbxProperty, bool& pa
 			FbxLayeredTexture* layeredTexture = fbxProperty->GetSrcObject<FbxLayeredTexture>(textureIndex);
 			if(layeredTexture)
 			{
-				parseTextureByPropertyLayered(fbxProperty, textureIndex);
+				parseTextureByPropertyLayered(fbxProperty, textureIndex, textureDesc);
 			}
 			else
 			{
-				parseTextureByPropertyNotLayered(fbxProperty, textureIndex);
+				parseTextureByPropertyNotLayered(fbxProperty, textureIndex, textureDesc);
 			}
 		}
 	}
 }
-void LoaderFbxTexture::parseTextureByPropertyLayered(FbxProperty* fbxProperty, int textureIndex)
+void LoaderFbxTexture::parseTextureByPropertyLayered(FbxProperty* fbxProperty, int textureIndex, LoaderFbxTextureDesc* textureDesc)
 {
 	FbxLayeredTexture* layeredTexture = fbxProperty->GetSrcObject<FbxLayeredTexture>(textureIndex);
 	int numTextures = layeredTexture->GetSrcObjectCount<FbxTexture>();
@@ -69,73 +70,53 @@ void LoaderFbxTexture::parseTextureByPropertyLayered(FbxProperty* fbxProperty, i
 		{
 			FbxLayeredTexture::EBlendMode blendMode;
 			layeredTexture->GetTextureBlendMode(i, blendMode);
-			parseTextureInfo(texture, blendMode);
+			parseTextureInfo(texture, blendMode, textureDesc);
 		}
 	}
 }
-void LoaderFbxTexture::parseTextureByPropertyNotLayered(FbxProperty* fbxProperty, int textureIndex)
+void LoaderFbxTexture::parseTextureByPropertyNotLayered(FbxProperty* fbxProperty, int textureIndex, LoaderFbxTextureDesc* textureDesc)
 {
 	FbxTexture* texture = fbxProperty->GetSrcObject<FbxTexture>(textureIndex);
 	if(texture)
 	{
-		parseTextureInfo(texture, -1);
+		parseTextureInfo(texture, -1, textureDesc);
 	}
 }
 
-void LoaderFbxTexture::parseTextureInfo(FbxTexture* texture, int blendMode)
+void LoaderFbxTexture::parseTextureInfo(FbxTexture* texture, int blendMode, LoaderFbxTextureDesc* textureDesc)
 {
 	FbxFileTexture* fileTexture = FbxCast<FbxFileTexture>(texture);
 	FbxProceduralTexture* proceduralTexture = FbxCast<FbxProceduralTexture>(texture);
-
-	const char* textureName;
-	const char* fileName;
 	
-	Float2	scale				= Float2(0.0f, 0.0f);
-	Float2	translation			= Float2(0.0f, 0.0f);
-	Float3	rotation			= Float3(0.0f, 0.0f, 0.0f);
-	bool	swap				= false;;
-	int		alphaSource			= 0;
-	int		croppingLeft		= 0;
-	int		croppingTop			= 0;
-	int		croppingRight		= 0;
-	int		croppingBottom		= 0;
-	int		mappingType			= 0;
-	int		planarMappingNormal	= 0;
-	float	defaultAlpha		= 0;
-	int		materialUse			= 0;
-	int		textureUse			= 0;
-
-	textureName = texture->GetName();
+	textureDesc->setTextureName(texture->GetName());
 
 	if(fileTexture)
-		fileName = fileTexture->GetFileName();
+		textureDesc->setFileName(fileTexture->GetFileName());
 	else if(proceduralTexture)
-		fileName = "Procedural Texture";
+		textureDesc->setFileName("Unknown/Procedural Texture");
 
-	scale.x			= static_cast<float>(texture->GetScaleU());
-	scale.y			= static_cast<float>(texture->GetScaleV());
-	translation.x	= static_cast<float>(texture->GetTranslationU());
-	translation.y	= static_cast<float>(texture->GetTranslationV());
-	rotation.x		= static_cast<float>(texture->GetRotationU());
-	rotation.y		= static_cast<float>(texture->GetRotationV());
-	rotation.z		= static_cast<float>(texture->GetRotationW());
-	swap			= texture->GetSwapUV();
-	alphaSource		= texture->GetAlphaSource();
-	croppingLeft	= texture->GetCroppingLeft();
-	croppingTop		= texture->GetCroppingTop();
-	croppingRight	= texture->GetCroppingRight();
-	croppingBottom	= texture->GetCroppingBottom();
-	mappingType		= texture->GetMappingType();
+	textureDesc->setScale(Float2(static_cast<float>(texture->GetScaleU()), static_cast<float>(texture->GetScaleV())));
+	textureDesc->setTranslation(Float2(static_cast<float>(texture->GetTranslationU()), static_cast<float>(texture->GetTranslationV())));
+	textureDesc->setRotation(Float3(static_cast<float>(texture->GetRotationU()),
+									static_cast<float>(texture->GetRotationV()),
+									static_cast<float>(texture->GetRotationW())));
+	textureDesc->setSwap(texture->GetSwapUV());
+	textureDesc->setAlphaSource(texture->GetAlphaSource());
 
-	if(mappingType == FbxTexture::ePlanar)
-		planarMappingNormal = texture->GetPlanarMappingNormal();
+	textureDesc->setCroppingLeft(texture->GetCroppingLeft());
+	textureDesc->setCroppingTop(texture->GetCroppingTop());
+	textureDesc->setCroppingRight(texture->GetCroppingRight());
+	textureDesc->setCroppingBottom(texture->GetCroppingBottom());
+	textureDesc->setMappingType(texture->GetMappingType());
 
-	//Rember BlendMode!
+	if(textureDesc->getMappingType() == FbxTexture::ePlanar)
+		textureDesc->setPlanarMappingNormal(texture->GetPlanarMappingNormal());
 
-	defaultAlpha = static_cast<float>(texture->GetDefaultAlpha());
+	textureDesc->setBlendMode(blendMode);
+	textureDesc->setDefaultAlpha(static_cast<float>(texture->GetDefaultAlpha()));
 
 	if(fileTexture)
-		materialUse = fileTexture->GetMaterialUse();
+		textureDesc->setMaterialUse(fileTexture->GetMaterialUse());
 	
-	textureUse = texture->GetTextureUse();
+	textureDesc->setTextureUse(texture->GetTextureUse());
 }
