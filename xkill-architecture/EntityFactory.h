@@ -114,14 +114,6 @@ public:
 		physics->collisionFilterGroup = Attribute_Physics::WORLD;
 		physics->collisionFilterMask = Attribute_Physics::PLAYER | Attribute_Physics::PROJECTILE;
 		physics->mass = 0;
-				
-		//temp, create demo light for each projectile
-		CREATE_ATTRIBUTE(Attribute_Light_Dir, lightDir, entity);
-		//CONNECT_ATTRIBUTES(lightDir, position);
-		lightDir->lightDir.direction = Float3(0.57735f, -0.57735f, 0.57735f);
-		lightDir->lightDir.ambient = Float4(0.8f, 0.8f, 0.8f, 1.0f);
-		lightDir->lightDir.diffuse = Float4(0.2f, 0.2f, 0.2f, 1.0f);
-		lightDir->lightDir.specular = Float4(1.0f, 1.0f, 1.0f, 1.0f);
 	}
 
 	void createProjectileEntity(Entity* entity, Event_CreateProjectile* e)
@@ -226,6 +218,47 @@ public:
 		damage->damage = e->damage;
 		damage->owner_entityID = e->entityIdOfCreator;
 	}
+
+	void createLightEntity(Entity* entity, Event_CreateLight* e)
+	{
+		//temp, create demo light for each projectile
+		if(e->type == 1)
+		{
+			CREATE_ATTRIBUTE(Attribute_Position, position, entity);
+			position->position = e->position;
+			CREATE_ATTRIBUTE(Attribute_Light_Point, lightPoint, entity);
+			CONNECT_ATTRIBUTES(lightPoint, position);
+			lightPoint->lightPoint.ambient = Float4(e->ambient,1);
+			lightPoint->lightPoint.diffuse = Float4(e->diffuse,1);
+			lightPoint->lightPoint.specular = Float4(e->specular,1);
+			lightPoint->lightPoint.attenuation = e->attenuation;
+			lightPoint->lightPoint.range = e->range;
+		}
+		else if(e->type == 2)
+		{
+			CREATE_ATTRIBUTE(Attribute_Light_Dir, lightDir, entity);
+			lightDir->lightDir.ambient = Float4(e->ambient,1);
+			lightDir->lightDir.diffuse = Float4(e->diffuse,1);
+			lightDir->lightDir.specular = Float4(e->specular,1);
+			lightDir->lightDir.direction = e->direction.normalize();
+		}
+		else if(e->type == 3)
+		{
+			CREATE_ATTRIBUTE(Attribute_Position, position, entity);
+			position->position = e->position;
+			CREATE_ATTRIBUTE(Attribute_Light_Spot, lightSpot, entity);
+			CONNECT_ATTRIBUTES(lightSpot, position);
+			lightSpot->lightSpot.ambient = Float4(e->ambient,1);
+			lightSpot->lightSpot.diffuse = Float4(e->diffuse,1);
+			lightSpot->lightSpot.specular = Float4(e->specular,1);
+			lightSpot->lightSpot.attenuation = e->attenuation;
+			lightSpot->lightSpot.direction = e->direction;
+			lightSpot->lightSpot.range = e->range;
+			lightSpot->lightSpot.spotPow = e->spotPow;
+		}
+	}
+
+
 };
 
 	//

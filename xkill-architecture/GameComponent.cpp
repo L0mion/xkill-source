@@ -638,6 +638,7 @@ void GameComponent::event_StartDeathmatch( Event_StartDeathmatch* e )
 		}
 	}
 
+
 	// Create level entities
 	for(unsigned int i = 0; i < levelEvents_.size(); i++)
 	{
