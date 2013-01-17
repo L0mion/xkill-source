@@ -122,11 +122,10 @@ bool LoaderFbx::loadScene(std::string filename)
 	{
 		message.str("");
 		message << "LoaderFbx::loadScene | Call to FbxImporter::Initialize() failed! \n Error returned: " 
-				<< fbxImporter->GetLastErrorString();
+				<< fbxImporter->GetStatus().GetErrorString();
 		SHOW_MESSAGEBOX(message.str());
 
-		if(fbxImporter->GetLastErrorID() == FbxIOBase::eFileVersionNotSupportedYet ||
-		   fbxImporter->GetLastErrorID() == FbxIOBase::eFileVersionNotSupportedAnymore)
+		if(fbxImporter->GetStatus().GetCode() == FbxStatus::eInvalidFileVersion)
 		{
 			std::stringstream message;
 			message.str("");
@@ -191,7 +190,7 @@ bool LoaderFbx::loadScene(std::string filename)
 	{
 		message.str("");
 		message << "LoaderFbx::loadScene | Call to FbxImporter::Import() failed! \n Error returned: "
-				<< fbxImporter->GetLastErrorString();
+				<< fbxImporter->GetStatus().GetErrorString();
 		SHOW_MESSAGEBOX(message.str());
 	}
 

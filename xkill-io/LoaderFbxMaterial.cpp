@@ -48,7 +48,7 @@ void LoaderFbxMaterial::parseMaterial(FbxGeometry* geometry)
 			}
 			if(implementation)
 				parseMaterialImplementation(material, implementation, materialIndex, &materialDesc);
-			else if(material->GetClassId().Is(fbxsdk_2013_3::FbxSurfacePhong::ClassId))
+			else if(material->GetClassId().Is(FbxSurfacePhong::ClassId))
 				parseMaterialPhong(material, materialIndex, &materialDesc);
 			else if(material->GetClassId().Is(FbxSurfaceLambert::ClassId))
 				parseMaterialLambert(material, materialIndex, &materialDesc);

@@ -5,8 +5,6 @@
 #include <vector>
 
 #include <fbxsdk.h>
-#include <fbxsdk/fbxsdk_compatibility.h>
-
 
 class LoaderFbxMesh;
 class LoaderFbxMaterial;
