@@ -34,11 +34,10 @@ bool GameComponent::init()
 	SEND_EVENT(&Event_CreateSpawnPoint(Float3(-1.5f, 3.0f, 0.0f), 2.0f));
 	SEND_EVENT(&Event_CreateSpawnPoint(Float3(1.0f, 5.0f, 0.0f), 2.0f));
 	SEND_EVENT(&Event_CreateSpawnPoint(Float3(1.0f, 1.0f, 1.0f), 2.0f));
-	SEND_EVENT(&Event_CreateSpawnPoint(Float3(4.0f, 4.0f, 4.0f), 2.0f));
 
 	ATTRIBUTES_INIT_ALL;
 
-	srand ((unsigned)time(NULL) );
+	srand((unsigned)time(NULL));
 
 	return true;
 }
@@ -84,11 +83,6 @@ void GameComponent::onUpdate(float delta)
 		Attribute_Spatial*		spatial		=	itrSpatial		.at(render->ptr_spatial);
 		Attribute_Position*		position	=	itrPosition		.at(spatial->ptr_position);
 		Attribute_Physics*		physics		=	itrPhysics		.at(input->ptr_physics);
-
-
-		Entity* playerEntity = itrPlayer.owner();
-		Attribute_DebugShape* debugShape = itrDebugShape.createAttribute(playerEntity);
-		debugShape->ptr_spatial = itrDebugShape.attributePointer(debugShape);
 
 
 		//
@@ -174,6 +168,7 @@ void GameComponent::onUpdate(float delta)
 				// Send "Event_CreateProjectile" for each projectile in a shot. Scatter has more than one projectile per shot.
 				for(int j=0;j<weaponStats->nrOfProjectilesForEachShot;j++)
 				{
+					Float3 scatterPos = pos;
 					randomLO = -weaponStats->spreadConeRadius*0.5f;
 					randomHI = weaponStats->spreadConeRadius*0.5f;
 
@@ -196,18 +191,22 @@ void GameComponent::onUpdate(float delta)
 
 					// add displacement on position (this should be based on the collision shape of the player model)
 					float d = 0.5f;
-					pos.x += lookAtXMFloat3.x*d;
-					pos.y += lookAtXMFloat3.y*d;
-					pos.z += lookAtXMFloat3.z*d;
+					scatterPos.x += lookAtXMFloat3.x*d;
+					scatterPos.y += lookAtXMFloat3.y*d;
+					scatterPos.z += lookAtXMFloat3.z*d;
+
+					scatterPos.x += randomLO + (float)rand()/((float)RAND_MAX/(randomHI-randomLO));
+					scatterPos.y += randomLO + (float)rand()/((float)RAND_MAX/(randomHI-randomLO));
+					scatterPos.z += randomLO + (float)rand()/((float)RAND_MAX/(randomHI-randomLO));
 
 					// randomize displacement of each projectile preventing them from spawning at the same position
-					randomLO = -weaponStats->displacementSphereRadius*0.5f;
-					randomHI = weaponStats->displacementSphereRadius*0.5f;
-					pos.x += randomLO + (float)rand()/((float)RAND_MAX/(randomHI-randomLO));
-					pos.y += randomLO + (float)rand()/((float)RAND_MAX/(randomHI-randomLO));
-					pos.z += randomLO + (float)rand()/((float)RAND_MAX/(randomHI-randomLO));
+					//randomLO = -weaponStats->displacementSphereRadius*0.5f;
+					//randomHI = weaponStats->displacementSphereRadius*0.5f;
+					//pos.x += randomLO + (float)rand()/((float)RAND_MAX/(randomHI-randomLO));
+					//pos.y += randomLO + (float)rand()/((float)RAND_MAX/(randomHI-randomLO));
+					//pos.z += randomLO + (float)rand()/((float)RAND_MAX/(randomHI-randomLO));
 
-					SEND_EVENT(&Event_CreateProjectile(pos, velocity, rotation, weaponStats->damgeOfEachProjectile, itrPlayer.ownerId(), weaponStats->isExplosive));
+					SEND_EVENT(&Event_CreateProjectile(scatterPos, velocity, rotation, weaponStats->damgeOfEachProjectile, itrPlayer.ownerId(), weaponStats->isExplosive));
 				}
 			}
 			else if(weaponStats->nrOfShotsLeftInClip <= 0)
@@ -226,13 +225,33 @@ void GameComponent::onUpdate(float delta)
 				DEBUGPRINT("Cannot shoot: weapon cooldown. Be patient.");
 			}
 		}
+		if(input->killPlayer)
+		{
+			health->health = 0.0f;
+			input->killPlayer = false;
+		}
+		if(input->jump)
+		{
+
+			input->jump = false;
+		}
+
+		if(input->sprint)
+		{
+			player->currentSpeed = player->sprintSpeed;
+			input->sprint = false;
+		}
+		else
+		{
+			player->currentSpeed = player->walkSpeed;
+		}
 
 		//
 		// Health and respawn logic
 		//
 
 		// TRUE: Player is dead
-		if(health->health <= 0) 
+		if(health->health <= 0.0f) 
 		{
 			// If an appropriate spawnpoint was found: spawn at it; otherwise: spawn at origo.
 			Attribute_SpawnPoint* spawnPointAttribute = findUnoccupiedSpawnPoint();
@@ -241,16 +260,17 @@ void GameComponent::onUpdate(float delta)
 				Attribute_Position* spawnPointPositionAttribute = itrPosition.at(spawnPointAttribute->ptr_position);
 				position->position = spawnPointPositionAttribute->position; // set player position attribute
 				DEBUGPRINT("Player entity " << itrPlayer.ownerId() << " spawned at " << position->position.x << " " << position->position.y << " " << position->position.z << std::endl);
-
-				//Reset player rotation.
-				spatial->rotation = Float4(0.0f, 0.0f, 0.0f, 1.0f);
 			}
 			else
 			{
 				position->position = Float3(0.0f, 0.0f, 0.0f);
 				DEBUGPRINT("No spawn point was found. Player entity " << itrPlayer.ownerId() << " spawned at origo" << std::endl);
 			}
+
+			spatial->rotation = Float4(0.0f, 0.0f, 0.0f, 1.0f);
+			camera->reset = true; //Reset player rotation.
 			physics->reloadDataIntoBulletPhysics = true;
+
 			health->health = health->startHealth; // restores player health
 			SEND_EVENT(&Event_PlaySound(1));
 		}
@@ -430,20 +450,10 @@ void GameComponent::event_PhysicsAttributesColliding(Event_PhysicsAttributesColl
 						else
 						{
 							SEND_EVENT(&Event_PlaySound(0));
-
-							int playerID = -1;
-
-							while(itrPlayer.hasNext())
-							{
-								Attribute_Player* player = itrPlayer.getNext();
-								if(itrPlayer.ownerId() == entity1->getID())
-								{
-									playerID = player->id;
-								}
-							}
-
-							SEND_EVENT(&Event_Rumble(playerID, true, 0.5f, 1.0f, 1.0f));
 						}
+
+						SEND_EVENT(&Event_Rumble(entity1->getID(), true, 0.2f, 1.0f, 1.0f));
+
 						DEBUGPRINT("DAMAGEEVENT Entity " << entity2->getID() << " damage: " <<  damage->damage << " Entity " << entity1->getID() << " health " << health->health);
 					}
 
@@ -472,8 +482,8 @@ void GameComponent::event_PhysicsAttributesColliding(Event_PhysicsAttributesColl
 			{
 				Attribute_Physics* physicsAttribute = &allPhysics->at(physicsId.at(i));
 				physicsAttribute->gravity = Float3(0.0f, -10.0f, 0.0f);
-				//TEST
-				//physicsAttribute->linearVelocity = Float3(0.0f, 0.0f, 0.0f);
+				physicsAttribute->linearVelocity = Float3(0.0f, 0.0f, 0.0f);
+				physicsAttribute->reloadDataIntoBulletPhysics = true;
 			}
 
 			//Handle PhysicsAttribute of a projectile colliding with another PhysicsAttribute

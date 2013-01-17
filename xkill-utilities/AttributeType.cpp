@@ -77,7 +77,7 @@ Attribute_Physics::~Attribute_Physics()
 Attribute_Projectile::Attribute_Projectile()
 {
 	entityIdOfCreator = -1;
-	currentLifeTimeLeft = 3.0f;
+	currentLifeTimeLeft = 10.0f;
 	explodeOnImnpact = false;
 	explosionSphereRadius = 1.0f;
 }
@@ -144,6 +144,7 @@ Attribute_Camera::Attribute_Camera()
 	fov = 0.785f; 
 	zFar = 40.0f;
 	zNear = 0.01f;
+	reset = false;
 }
 Attribute_Camera::~Attribute_Camera()
 {
@@ -151,6 +152,9 @@ Attribute_Camera::~Attribute_Camera()
 
 Attribute_Input::Attribute_Input()
 {
+	jump = false;
+	sprint = false;
+	killPlayer = false;
 	fire = false;
 	changeAmmunitionType = false;
 	changeAmmunitionType = false;
@@ -162,22 +166,32 @@ Attribute_Input::~Attribute_Input()
 {
 }
 
-//Attribute_InputDeviceSettings::Attribute_InputDeviceSettings()
-//{
-//}
-//Attribute_InputDeviceSettings::~Attribute_InputDeviceSettings()
-//{
-//}
+Attribute_InputDevice::Attribute_InputDevice()
+{
+	device = nullptr;
+}
+Attribute_InputDevice::~Attribute_InputDevice()
+{
+}
 
+int Attribute_Player::nextId = 0;
 Attribute_Player::Attribute_Player()
 {
-	id = -1;
+	id = nextId++;
 	priority = 0;
 	cycleSteals = 0;
 	totalExecutionTime = 0;
+	
+	walkSpeed = 5.0f;
+	sprintSpeed = walkSpeed*2;
+	currentSpeed = walkSpeed;
 }
 Attribute_Player::~Attribute_Player()
 {
+}
+void Attribute_Player::clean()
+{
+	nextId = 0;
 }
 
 Attribute_Mesh::Attribute_Mesh()
@@ -373,6 +387,17 @@ void Attribute_DebugShape::clean()
 	}
 	render = false;
 }
+
+DataItemList* Attribute_DebugShape::getDataList()
+	{
+		DataItemList* list = new DataItemList();
+		list->add_AttributePointer(ptr_spatial.index, "ptr_Spatial");;
+		list->add((int)meshID,			"MeshID");
+		list->add(shape->shapeType_,	"Shape->ShapeType");
+		list->add(render,				"Render");
+		return list;
+	}
+
 Attribute_ExplosionSphere::Attribute_ExplosionSphere()
 {
 	currentLifeTimeLeft = 1.0f;

@@ -102,14 +102,16 @@ Event_RemoveEntity::Event_RemoveEntity(int entityId) : Event(EVENT_REMOVE_ENTITY
 	this->entityId = entityId;
 }
 
-Event_KeyPress::Event_KeyPress(int keyEnum) : Event(EVENT_KEY_PRESS)
+Event_KeyPress::Event_KeyPress(int keyEnum, bool isPressed) : Event(EVENT_KEY_PRESS)
 {
 	this->keyEnum = keyEnum;
+	this->isPressed = isPressed;
 }
 
-Event_KeyRelease::Event_KeyRelease(int keyEnum) : Event(EVENT_KEY_RELEASE)
+Event_MousePress::Event_MousePress(int keyEnum, bool isPressed) : Event(EVENT_MOUSE_PRESS)
 {
 	this->keyEnum = keyEnum;
+	this->isPressed = isPressed;
 }
 
 Event_CreateSpawnPoint::Event_CreateSpawnPoint(Float3 spawnPointPosition, float spawnAreaRadius) : Event(EVENT_CREATE_SPAWNPOINT)
@@ -132,8 +134,9 @@ Event_EndDeathmatch::Event_EndDeathmatch() : Event(EVENT_END_DEATHMATCH)
 {
 }
 
-Event_ChangeGameState::Event_ChangeGameState(StateType newState) : Event(EVENT_CHANGE_GAMESTATE)
+Event_StateChanged::Event_StateChanged(StateType newState, FiniteStateMachine* sender) : Event(EVENT_STATE_CHANGED)
 {
+	this->sender = sender;
 	this->newState = newState;
 }
 
@@ -188,7 +191,8 @@ Event_CreateEntity::Event_CreateEntity( EntityType entityType ) : Event(EVENT_CR
 	this->entityType = entityType;
 }
 
-Event_RemoveBulletPhysicsObject::Event_RemoveBulletPhysicsObject(unsigned int attributeIndex) : Event(EVENT_REMOVE_BULLET_PHYSICS_OBJECT)
+Event_CreateInputDevice::Event_CreateInputDevice(InputDevice* inputDevice, InputObjectArray* inputObjectArray) : Event(EVENT_CREATE_INPUTDEVICE)
 {
-	this->attributeIndex = attributeIndex;
+	device = inputDevice;
+	objectArray = inputObjectArray;
 }

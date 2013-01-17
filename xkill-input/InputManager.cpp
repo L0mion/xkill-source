@@ -1,5 +1,7 @@
 #include "InputManager.h"
 
+#include <xkill-utilities/AttributeManager.h>
+
 #include "KeyMapper.h"
 
 #include <Xinput.h>
@@ -20,9 +22,12 @@
 #include <cmath>
 
 #define SAFE_RELEASE(x) {if(x != NULL) x->Release(); x = NULL;} //Should probably not be here, needed for isXInputDevice
+ATTRIBUTES_DECLARE_ALL;
 
 InputManager::InputManager(void)
 {
+	ATTRIBUTES_INIT_ALL;
+
 	dInput_ = nullptr;
 	keyMapper_ = nullptr;
 	mouseAndKeyboard_ = nullptr;
@@ -64,6 +69,9 @@ bool InputManager::InitInput(HWND hWindow, std::string configFilePath)
 	devices_.push_back(mouseAndKeyboard);
 	mouseAndKeyboard_ = mouseAndKeyboard;
 
+	SEND_EVENT(&Event_CreateInputDevice(mouseAndKeyboard, mouseAndKeyboard->getInputObjectArray()));
+
+
 	return true;
 }
 
@@ -75,22 +83,25 @@ void InputManager::Update(float deltaTime)
 
 InputDevice* InputManager::GetDevice(unsigned int playerID)
 {
-	unsigned int index = 1;
-	playerID--;
+	InputDevice* device = nullptr;
 
-	for(; index <= devices_.size(); index++)
+	while(itrPlayer.hasNext())
 	{
-		if(playerID == devices_[index-1]->getPlayerID())
+		Attribute_Player* attribute_player = itrPlayer.getNext();
+
+		if(itrPlayer.ownerId() == playerID)
 		{
-			index--;
-			break;
+			if(attribute_player->ptr_inputDevice.host != nullptr)
+			{
+				device = itrInputDevice.at(attribute_player->ptr_inputDevice)->device;
+				break;
+			}
 		}
 	}
 
-	if(index < 0 || index >= devices_.size())
-		return nullptr;
+	itrPlayer.resetIndex();
 
-	return devices_[index];
+	return device;
 }
 
 QTInputDevices* InputManager::GetMouseAndKeyboard()
@@ -139,6 +150,8 @@ bool InputManager::addNewDevice(HWND hWindow, GUID instanceGUID, GUID productGUI
 {
 	bool deviceAdded = false;
 
+	InputDevice* device;
+
 	if(nrOfXInputDevices_ >= XUSER_MAX_COUNT || !isXInputDevice(&productGUID))
 	{
 		LPDIRECTINPUTDEVICE8 dInputDevice;
@@ -146,18 +159,27 @@ bool InputManager::addNewDevice(HWND hWindow, GUID instanceGUID, GUID productGUI
 		if(FAILED(result))
 			return false;
 
-		DirectInputDevice* device = new DirectInputDevice(dInputDevice, instanceGUID, name, devices_.size());
-		if(device->Init(hWindow))
-			devices_.push_back(device);
+		DirectInputDevice* diDevice = new DirectInputDevice(dInputDevice, instanceGUID, name, devices_.size());
+		if(diDevice->Init(hWindow))
+		{
+			devices_.push_back(diDevice);
 
-		deviceAdded = true;
+			device = diDevice;
+
+			deviceAdded = true;
+		}
 	}
 	else
 	{
-		InputDevice* device = new XInputDevice(nrOfXInputDevices_++, instanceGUID, name, devices_.size());
+		device = new XInputDevice(nrOfXInputDevices_++, instanceGUID, name, devices_.size());
 		devices_.push_back(device);
 
 		deviceAdded = true;
+	}
+
+	if(deviceAdded)
+	{
+		SEND_EVENT(&Event_CreateInputDevice(device, device->getInputObjectArray()));
 	}
 
 	return deviceAdded;
@@ -182,6 +204,8 @@ int InputManager::checkForNewXInputDevices()
 			InputDevice* device = new XInputDevice(nrOfXInputDevices_++, guid, "Xbox Controller (non DI)", devices_.size());
 			nrOfControllersAdded++;
 			devices_.push_back(device);
+
+			SEND_EVENT(&Event_CreateInputDevice(device, device->getInputObjectArray()));
 		}
 	}
 

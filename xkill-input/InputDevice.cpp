@@ -74,6 +74,11 @@ InputDevice::InputDeviceLayout InputDevice::GetLayout()
 	return inputLayout_;
 }
 
+InputObjectArray* InputDevice::getInputObjectArray()
+{
+	return inputObjectArray_;
+}
+
 GUID InputDevice::GetGUID()
 {
 	return deviceGUID_;

@@ -39,7 +39,6 @@ enum DLL_U EventType
 	EVENT_PLAYERDEATH,
 	EVENT_END_DEATHMATCH,
 	EVENT_START_DEATHMATCH,
-	
 	EVENT_CREATE_PROJECTILE,
 	EVENT_CREATE_SPAWNPOINT,
 	EVENT_CREATE_EXPLOSIONSPHERE,
@@ -49,6 +48,8 @@ enum DLL_U EventType
 	EVENT_CREATE_LIGHT,
 	EVENT_CREATE_ENTITY,
 	EVENT_REMOVE_ENTITY,
+	EVENT_STATE_CHANGED,
+	EVENT_CREATE_INPUTDEVICE,
 
 	EVENT_TRANSFEREVENTSTOGAME,
 
@@ -57,14 +58,15 @@ enum DLL_U EventType
 	EVENT_UPDATE,
 	EVENT_MOUSE_MOVE,
 	EVENT_KEY_PRESS,
-	EVENT_KEY_RELEASE,
+	EVENT_MOUSE_PRESS,
 	EVENT_WINDOW_RESIZE,
 	EVENT_INPUT_DEVICE_SEARCH,
 	EVENT_PLAYSOUND,
 	EVENT_RUMBLE,
 	EVENT_DO_CULLING,
 	EVENT_PHYSICS_ATTRIBUTES_COLLIDING,
-	EVENT_REMOVE_BULLET_PHYSICS_OBJECT,
+
+	EVENT_ATTRIBUTE_UPDATED,
 
 	// Get events
 	EVENT_GET_ATTRIBUTE,
@@ -168,6 +170,27 @@ public:
 								//!< Requires manual casting.
 	std::vector<int>* owners;	//!< A std::vector<int> of owners corresponding to each
 								//!< attribute.
+};
+
+/// Returns access to \ref ATTRIBUTES.
+/**
+\ingroup events
+*/
+class DLL_U Event_AttributeUpdated : public Event
+{
+public:
+	Event_AttributeUpdated(int index, int attributeEnum) : Event(EVENT_ATTRIBUTE_UPDATED)
+	{
+		this->index = index;
+		this->attributeEnum = attributeEnum;
+		isCreated = false;
+		isDeleted = false;
+	}
+
+	int attributeEnum;
+	int index;
+	bool isCreated;
+	bool isDeleted;
 };
 
 /// Returns access to a vector of Entity from EntityManager.
@@ -302,20 +325,22 @@ class DLL_U Event_KeyPress : public Event
 {
 public:
 	int keyEnum;
+	bool isPressed;
 
-	Event_KeyPress(int keyEnum);
+	Event_KeyPress(int keyEnum, bool isPressed);
 };
 
-/// Alerts InputComponent about key release
+/// Alerts InputComponent about mouse press
 /**
 \ingroup events
 */
-class DLL_U Event_KeyRelease : public Event
+class DLL_U Event_MousePress : public Event
 {
 public:
 	int keyEnum;
+	bool isPressed;
 
-	Event_KeyRelease(int keyEnum);
+	Event_MousePress(int keyEnum, bool isPressed);
 };
 
 class DLL_U Event_PlayerDeath : public Event
@@ -356,12 +381,21 @@ public:
 	Event_EndDeathmatch();
 };
 
+
 enum StateType;
-class DLL_U Event_ChangeGameState : public Event
+class FiniteStateMachine;
+/// Informs the engine about a state change
+/**
+Only for informative purposes, no intended to be used for changing state.
+\sa SyncStateCommand
+\ingroup events
+*/
+class DLL_U Event_StateChanged : public Event
 {
 public:
-	Event_ChangeGameState(StateType newState);
+	Event_StateChanged(StateType newState, FiniteStateMachine* sender);
 
+	FiniteStateMachine* sender;
 	StateType newState;
 };
 
@@ -432,7 +466,8 @@ enum DLL_U EntityType
 {
 	WORLD,
 	PLAYER,
-	PROJECTILE
+	PROJECTILE,
+	INPUTDEVICES
 };
 
 class DLL_U Event_CreateEntity : public Event
@@ -443,10 +478,13 @@ public:
 	EntityType entityType;
 };
 
-class DLL_U Event_RemoveBulletPhysicsObject : public Event
+class InputObjectArray;
+class InputDevice;
+class DLL_U Event_CreateInputDevice : public Event
 {
 public:
-	Event_RemoveBulletPhysicsObject(unsigned int attributeIndex);
-	
-	unsigned int attributeIndex;
+	Event_CreateInputDevice(InputDevice* inputDevice, InputObjectArray* inputObjectArray);
+
+	InputDevice* device;
+	InputObjectArray* objectArray;
 };

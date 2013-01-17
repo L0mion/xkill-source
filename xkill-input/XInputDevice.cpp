@@ -103,6 +103,8 @@ void XInputDevice::setStandardMappings()
 	{
 		buttons_[0]->addBoolMapping(ACTION_B_CHANGE_AMMUNITIONTYPE);
 		buttons_[1]->addBoolMapping(ACTION_B_CHANGE_FIRINGMODE);
+		buttons_[2]->addBoolMapping(ACTION_B_KILL_PLAYER);
+		buttons_[4]->addBoolMapping(ACTION_B_SPRINT);
 		buttons_[10]->addBoolMapping(ACTION_B_WALK_FORWARD);
 		buttons_[11]->addBoolMapping(ACTION_B_WALK_RIGHT);
 		buttons_[12]->addBoolMapping(ACTION_B_WALK_BACKWARD);

@@ -6,6 +6,7 @@
 AttributeIterator<Attribute_Input> itrInput;
 AttributeIterator<Attribute_Physics> itrPhysics_3;
 AttributeIterator<Attribute_Spatial> itrSpatial;
+AttributeIterator<Attribute_Player> itrPlayer;
 
 PlayerPhysicsObject::PlayerPhysicsObject()
 	: PhysicsObject()
@@ -15,6 +16,7 @@ PlayerPhysicsObject::PlayerPhysicsObject()
 	itrInput = ATTRIBUTE_MANAGER->input.getIterator();
 	itrPhysics_3 = ATTRIBUTE_MANAGER->physics.getIterator();
 	itrSpatial = ATTRIBUTE_MANAGER->spatial.getIterator();
+	itrPlayer = ATTRIBUTE_MANAGER->player.getIterator();
 }
 
 PlayerPhysicsObject::~PlayerPhysicsObject()
@@ -34,22 +36,24 @@ void PlayerPhysicsObject::onUpdate(float delta)
 
 void PlayerPhysicsObject::handleInput()
 {
-	std::vector<int> inputAttributes = itrPhysics_3.ownerAt(attributeIndex_)->getAttributes(ATTRIBUTE_INPUT);
+	std::vector<int> playerAttributes = itrPhysics_3.ownerAt(attributeIndex_)->getAttributes(ATTRIBUTE_PLAYER);
 	
 	Attribute_Input* inputAttribute;
+	Attribute_Player* playerAttribute;
 
-	if(inputAttributes.size() > 1)
+	if(playerAttributes.size() > 1)
 	{
 		//std::cout << "More than one controller for one player. Not tested." << std::endl;
 	}
 
-	for(int i=0;i<inputAttributes.size();i++)
+	for(int i=0;i<playerAttributes.size();i++)
 	{
-		inputAttribute = itrInput.at(inputAttributes.at(i));
+		playerAttribute = itrPlayer.at(playerAttributes.at(i));
+		inputAttribute = itrInput.at(playerAttribute->ptr_input);
 	}
 
 	yaw_ += inputAttribute->rotation.x;
-	btVector3 move = 5*btVector3(inputAttribute->position.x, 0, inputAttribute->position.y);
+	btVector3 move = playerAttribute->currentSpeed*btVector3(inputAttribute->position.x, 0, inputAttribute->position.y);
 	move = move.rotate(btVector3(0,1,0),yaw_);
 	move = btVector3(move.x(), getLinearVelocity().y(), move.z());
 	setLinearVelocity(move);

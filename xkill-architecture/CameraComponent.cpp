@@ -148,6 +148,12 @@ void CameraComponent::onUpdate(float delta)
 		Attribute_Spatial* spatial = ATTRIBUTE_CAST(Attribute_Spatial, ptr_spatial, camera);
 		Attribute_Position* position = ATTRIBUTE_CAST(Attribute_Position, ptr_position, spatial);
 		
+		if(camera->reset)
+		{
+			cameras_[i].setRotationToZero();
+			camera->reset = false;
+		}
+
 		cameras_[i].setPosition((float*)&position->position);
 		cameras_[i].updateView();
 

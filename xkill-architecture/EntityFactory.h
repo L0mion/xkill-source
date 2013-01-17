@@ -8,6 +8,8 @@
 #include <vector>
 #include <iostream>
 
+// Iterators
+ATTRIBUTES_DECLARE_ALL;
 
 /// A factory for creating Entities and assigning multiple \ref ATTRIBUTES in a flexible way.
 /** 
@@ -39,6 +41,11 @@ public:
 #define CONNECT_ATTRIBUTES(AttributeName, PointerName)									\
 	AttributeName->ptr_##PointerName = ((AttributeManager*)AttributeManagerDLLWrapper::getInstance())->PointerName.getLatestAttributeAsAttributePointer()
 
+	EntityFactory()
+	{
+		ATTRIBUTES_INIT_ALL;
+	}
+
 	//! A player entity has the following attributes: position attribute, spatial attribute, render attribute, physics attribute, input attribute, camera attribute and player attribute
 	//! Bindings:
 	//! camera attribute --> spatial attribute --> position attribute
@@ -46,6 +53,8 @@ public:
 	//! Note: the player has the same spatial attribute as the camera.
 	void createPlayerEntity(Entity* entity)
 	{
+		ATTRIBUTES_INIT_ALL;
+
 		CREATE_ATTRIBUTE(Attribute_Position, position, entity);
 
 		CREATE_ATTRIBUTE(Attribute_Spatial, spatial, entity);
@@ -58,10 +67,10 @@ public:
 		//CREATE_ATTRIBUTE(Attribute_DebugShape, debugShape, entity);	//create temp debug shape
 		//CONNECT_ATTRIBUTES(debugShape, spatial);
 		//debugShape->meshID = render->meshID;
-		//debugShape->shape	=  nullptr;/*new DebugShapeBB(
+		//debugShape->shape	=  new DebugShapeSphere(1.0f);/*new DebugShapeBB(
 		//	Float3(-0.5f, -0.5f, -0.5f),
 		//	Float3(0.5f, 0.5f, 0.5f)); //new DebugShapeSphere(1.0f);*/
-		//debugShape->render	= false;
+		//debugShape->render	= true;
 
 		CREATE_ATTRIBUTE(Attribute_Physics, physics, entity);
 		CONNECT_ATTRIBUTES(physics, spatial);
@@ -89,9 +98,10 @@ public:
 		CONNECT_ATTRIBUTES(player, health);
 		CONNECT_ATTRIBUTES(player, weaponStats);
 		//player->name = "Process Name";
-		static int playerId = 0;
-		player->id = playerId;
-		playerId++;
+
+		//static int playerId = 0;
+		//player->id = playerId;
+		//playerId++;
 	}
 	
 	void createWorldEntity(Entity* entity, Event_CreateWorld* e)
@@ -158,14 +168,14 @@ public:
 		damage->damage = e->damage;
 		damage->owner_entityID = e->entityIdOfCreator;
 
-		//temp, create demo light for each projectile
-		CREATE_ATTRIBUTE(Attribute_Light_Point, lightPoint, entity);
-		CONNECT_ATTRIBUTES(lightPoint, position);
-		lightPoint->lightPoint.ambient		= Float4(0.0f, 0.0f, 0.0f, 1.0f);
-		lightPoint->lightPoint.diffuse		= Float4(0.8f, 0.8f, 0.8f, 1.0f);
-		lightPoint->lightPoint.specular		= Float4(0.1f, 0.1f, 0.1f, 1.0f);
-		lightPoint->lightPoint.range		= 100.0f;
-		lightPoint->lightPoint.attenuation	= Float3(1.5f, 1.2f, 0.0f);
+		////temp, create demo light for each projectile
+		//CREATE_ATTRIBUTE(Attribute_Light_Point, lightPoint, entity);
+		//CONNECT_ATTRIBUTES(lightPoint, position);
+		//lightPoint->lightPoint.ambient		= Float4(0.0f, 0.0f, 0.0f, 1.0f);
+		//lightPoint->lightPoint.diffuse		= Float4(0.8f, 0.8f, 0.8f, 1.0f);
+		//lightPoint->lightPoint.specular		= Float4(0.1f, 0.1f, 0.1f, 1.0f);
+		//lightPoint->lightPoint.range		= 100.0f;
+		//lightPoint->lightPoint.attenuation	= Float3(1.5f, 1.2f, 0.0f);
 	}
 
 	void createMesh(Entity* entity, Event_CreateMesh* e)
@@ -219,6 +229,7 @@ public:
 		damage->owner_entityID = e->entityIdOfCreator;
 	}
 
+
 	void createLightEntity(Entity* entity, Event_CreateLight* e)
 	{
 		//temp, create demo light for each projectile
@@ -259,6 +270,13 @@ public:
 	}
 
 
+	void createInputDevice(Entity* entity, Event_CreateInputDevice* e)
+	{
+		Attribute_InputDevice* inputDevice = itrInputDevice.createAttribute(entity);
+		
+
+		inputDevice->device = e->device;
+	}
 };
 
 	//

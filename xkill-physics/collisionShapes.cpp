@@ -76,6 +76,7 @@ void CollisionShapes::loadCollisionShapes()
 				btCompoundShape* compoundShape = new btCompoundShape();
 				compoundShape->addChildShape(importer_->getRigidBodyByName(name.c_str())->getWorldTransform(),collisionShape);
 				collisionShapes_->push_back(compoundShape);
+				//collisionShapes_->push_back(collisionShape);
 			}
 			else
 			{
@@ -106,6 +107,7 @@ void CollisionShapes::loadCollisionShapes()
 					cs->addChildShape(importer_->getRigidBodyByName(name.c_str())->getWorldTransform(),collisionShape);
 					std::pair<unsigned int, unsigned int>  idToIndex(meshAttribute->meshID,collisionShapes_->size());
 					collisionShapesIdToIndex_.insert(idToIndex);
+					//collisionShapes_->push_back(collisionShape);
 					collisionShapes_->push_back(cs);;
 					
 				}
