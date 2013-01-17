@@ -41,12 +41,12 @@ struct Material
 	float4 specular; //w = specpow
 };
 
-struct LightPos
-{
-	float x;
-    float y;
-    float z;
-};
+//struct LightPos
+//{
+//	float x;
+//    float y;
+//    float z;
+//};
 
 #endif //XKILL_RENDERER_LIGHTDESC_HLSL
 

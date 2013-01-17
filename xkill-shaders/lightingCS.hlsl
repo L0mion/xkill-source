@@ -13,7 +13,7 @@ Texture2D gBufferMaterial					: register( t2 );
 StructuredBuffer<LightDir>		lightsDir	: register( t3 );
 StructuredBuffer<LightPoint>	lightsPoint	: register( t4 );
 StructuredBuffer<LightSpot>		lightsSpot	: register( t5 );
-StructuredBuffer<LightPos>		lightsPos	: register( t6 );
+StructuredBuffer<float3>		lightsPos	: register( t6 );
 
 SamplerState ss : register(s0);
 
@@ -43,8 +43,8 @@ void lightingCS(
 	uint3	threadIDDispatch	: SV_DispatchThreadID,
 	uint3	threadIDBlock		: SV_GroupThreadID)
 {
-	//Initialize kernel
-	if(threadIDBlockIndex == 0) //This is being called once per tile atm. Make sure this is only called once per dispatch.
+	//Initialize kernel once per tile
+	if(threadIDBlockIndex == 0)
 	{
 		tileMinDepthInt = 0xFFFFFFFF;
 		tileMaxDepthInt = 0.0f;
@@ -52,16 +52,16 @@ void lightingCS(
 	}
 
 	//Sample G-Buffers. Data prefetching?
-	float2 texCoord = float2((float)(threadIDDispatch.x + viewportTopX)/(float)screenWidth,(float)(threadIDDispatch.y + viewportTopY)/(float)screenHeight);
-	float4 albedo	= gBufferAlbedo.SampleLevel(ss, texCoord, 0);
-	float4 normal	= gBufferNormal.SampleLevel(ss, texCoord, 0);
-	float4 material = gBufferMaterial.SampleLevel(ss, texCoord, 0);
-	float3 position = reconstructViewSpacePosition(texCoord);
+	float2 texCoord		= float2((float)(threadIDDispatch.x + viewportTopX)/(float)screenWidth,(float)(threadIDDispatch.y + viewportTopY)/(float)screenHeight);
+	float3 positionV	= reconstructViewSpacePosition(texCoord);
+	float4 albedo		= gBufferAlbedo.SampleLevel(ss,		texCoord, 0);
+	float4 normal		= gBufferNormal.SampleLevel(ss,		texCoord, 0);
+	float4 material		= gBufferMaterial.SampleLevel(ss,	texCoord, 0);
 
 	GroupMemoryBarrierWithGroupSync();
 
 	//Get minimum/maximum depth of tile.
-	uint pixelDepthInt = asuint(position.z); //Depth currently stored in alpha channel of normal g-buffer.
+	uint pixelDepthInt = asuint(positionV.z); //Depth currently stored in alpha channel of normal g-buffer.
 	InterlockedMin(tileMinDepthInt, pixelDepthInt);
 	InterlockedMax(tileMaxDepthInt, pixelDepthInt);
 	GroupMemoryBarrierWithGroupSync();
@@ -101,7 +101,7 @@ void lightingCS(
 			inFrustum = inFrustum && (d >= -lightsPoint[lightIndex].range);
 		}
 
-		[branch] if(inFrustum)
+		if(inFrustum && tileLightNum < TILE_MAX_LIGHTS)
 		{
 			uint index;
 			InterlockedAdd(tileLightNum, 1, index);
@@ -123,7 +123,8 @@ void lightingCS(
 	float4 sumSpecular	= float4(0.0f, 0.0f, 0.0f, 0.0f);
 	float4 ambient, diffuse, specular;
 	
-	float3 toEye = normalize(float3(0.0f, 0.0f, 0.0f) - position);
+	float3 eyePosV	= float3(0.0f, 0.0f, 0.0f);
+	float3 toEye	= normalize(eyePosition - positionV);
 	for(i = 0; i < numLightsDir; i++) //Always apply directional lights regardless of culling.
 	{
 		lightDir(
@@ -137,38 +138,38 @@ void lightingCS(
 		sumDiffuse	+= diffuse;
 		sumSpecular	+= specular;
 	}
-	for(i = 0; i < tileLightNum; i++) //Apply culled point-lights.
+	//for(i = 0; i < tileLightNum; i++) //Apply culled point-lights.
+	//{
+	//	uint pointLightIndex = tileLightIndices[i];
+	//	lightPoint(
+	//		surfaceMaterial,
+	//		lightsPoint[pointLightIndex],
+	//		lightsPos[pointLightIndex],
+	//		positionV,
+	//		normal.xyz,
+	//		toEye,
+	//		ambient, diffuse, specular);
+	//
+	//	sumAmbient	+= ambient;
+	//	sumDiffuse	+= diffuse;
+	//	sumSpecular	+= specular;
+	//}
+
+	for(i = 0; i < numLightsPoint; i++)
 	{
-		uint pointLightIndex = tileLightIndices[i];
 		lightPoint(
 			surfaceMaterial,
-			lightsPoint[pointLightIndex],
-			(float3)lightsPos[pointLightIndex],
-			position,
-			normal.xyz,
+			lightsPoint[i],
+			lightsPos[i],
+			positionV,
+			mul(float4(normal.xyz, 0.0f), view),
 			toEye,
 			ambient, diffuse, specular);
-
+	
 		sumAmbient	+= ambient;
 		sumDiffuse	+= diffuse;
 		sumSpecular	+= specular;
 	}
-
-
-	//for(i = 0; i < tileLightNum; i++) //Apply culled pointlights.
-	//{
-	//	uint lightPointIndex = tileLightIndices[i];
-	//	LightPoint lightPoint = lightsPoint[lightPointIndex];
-	//	color += pointLight(
-	//		surface, 
-	//		float3(0.0f, 0.0f, 0.0f), 
-	//		lightPoint.ambient, 
-	//		lightPoint.diffuse, 
-	//		lightPoint.specular, 
-	//		(float3)lightsPos[lightPointIndex],
-	//		lightPoint.range, 
-	//		lightPoint.attenuation); 
-	//}
 
 	float4 litSum = sumAmbient + sumDiffuse + sumSpecular;
 	output[uint2(threadIDDispatch.x + viewportTopX, threadIDDispatch.y + viewportTopY)] = litSum;
@@ -179,7 +180,7 @@ void lightingCS(
 	//}
 	//else
 	//{
-	//	output[uint2(threadIDDispatch.x + viewportTopX, threadIDDispatch.y + viewportTopY)] = float4(color, 1.0f);
+	//	output[uint2(threadIDDispatch.x + viewportTopX, threadIDDispatch.y + viewportTopY)] = litSum;
 	//}
 }
 
