@@ -25,7 +25,7 @@ PhysicsComponent::PhysicsComponent() : broadphase_(nullptr),
 									   physicsObjects_(nullptr)
 {
 	SUBSCRIBE_TO_EVENT(this,EVENT_DO_CULLING);
-	SUBSCRIBE_TO_EVENT(this,EVENT_REMOVE_BULLET_PHYSICS_OBJECT);
+	SUBSCRIBE_TO_EVENT(this,EVENT_ATTRIBUTE_UPDATED);
 	itrPhysics = ATTRIBUTE_MANAGER->physics.getIterator();
 }
 
@@ -121,13 +121,19 @@ void PhysicsComponent::onEvent(Event* e)
 	case EVENT_DO_CULLING:
 		doCulling();
 		break;
-	case EVENT_REMOVE_BULLET_PHYSICS_OBJECT: //Replace
-		Event_RemoveBulletPhysicsObject* removeBulletPhysicsObject = static_cast<Event_RemoveBulletPhysicsObject*>(e);
-		int attributeIndex = removeBulletPhysicsObject->attributeIndex;
-		
-		dynamicsWorld_->removeRigidBody(physicsObjects_->at(attributeIndex));
-		delete physicsObjects_->at(attributeIndex);
-		physicsObjects_->at(attributeIndex) = nullptr;
+
+	case EVENT_ATTRIBUTE_UPDATED:
+		Event_AttributeUpdated* attributeUpdated = static_cast<Event_AttributeUpdated*>(e);
+		int attributeIndex = attributeUpdated->index;
+		if(attributeUpdated->attributeEnum == ATTRIBUTE_PHYSICS)
+		{
+			if(attributeUpdated->isDeleted)
+			{
+  				dynamicsWorld_->removeRigidBody(physicsObjects_->at(attributeIndex));
+				delete physicsObjects_->at(attributeIndex);
+				physicsObjects_->at(attributeIndex) = nullptr;
+			}
+		}
 		break;
 	//case EVENT_LOAD_LEVEL:
 	//	break;
@@ -237,19 +243,16 @@ void PhysicsComponent::detectedCollisionsDuringStepSimulation(btScalar timeStep)
 				const PhysicsObject* objectA = static_cast<const PhysicsObject*>(persistentManifold->getBody0());
 				const PhysicsObject* objectB = static_cast<const PhysicsObject*>(persistentManifold->getBody1());
 				
-				
-				//unsigned int ownerA = physicsOwners_->at(objectA->getIndex());
-				//unsigned int ownerB = physicsOwners_->at(objectB->getIndex());
-
 				unsigned int ownerA = itrPhysics.ownerIdAt(objectA->getAttributeIndex());
 				unsigned int ownerB = itrPhysics.ownerIdAt(objectB->getAttributeIndex());
 
 				//Two PhysicsObjects colliding
-				if(ownerA != 0 && ownerB != 0) // ignore contacts where one owner is 0
+				//if(ownerA != 0 && ownerB != 0) // ignore contacts where one owner is 0
 				{
 					//std::cout << "\nCollision between " << ownerA << " & " << ownerB;
 					QUEUE_EVENT(new Event_PhysicsAttributesColliding(objectA->getAttributeIndex(), objectB->getAttributeIndex()));
 					QUEUE_EVENT(new Event_PhysicsAttributesColliding(objectB->getAttributeIndex(), objectA->getAttributeIndex()));
+					break;
 				}
 			}
 		}

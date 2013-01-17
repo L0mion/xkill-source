@@ -39,7 +39,6 @@ enum DLL_U EventType
 	EVENT_PLAYERDEATH,
 	EVENT_END_DEATHMATCH,
 	EVENT_START_DEATHMATCH,
-	
 	EVENT_CREATE_PROJECTILE,
 	EVENT_CREATE_SPAWNPOINT,
 	EVENT_CREATE_EXPLOSIONSPHERE,
@@ -66,7 +65,6 @@ enum DLL_U EventType
 	EVENT_RUMBLE,
 	EVENT_DO_CULLING,
 	EVENT_PHYSICS_ATTRIBUTES_COLLIDING,
-	EVENT_REMOVE_BULLET_PHYSICS_OBJECT,
 
 	EVENT_ATTRIBUTE_UPDATED,
 
@@ -478,14 +476,6 @@ public:
 	Event_CreateEntity(EntityType entityType);
 
 	EntityType entityType;
-};
-
-class DLL_U Event_RemoveBulletPhysicsObject : public Event
-{
-public:
-	Event_RemoveBulletPhysicsObject(unsigned int attributeIndex);
-	
-	unsigned int attributeIndex;
 };
 
 class InputObjectArray;

@@ -152,6 +152,9 @@ Attribute_Camera::~Attribute_Camera()
 
 Attribute_Input::Attribute_Input()
 {
+	jump = false;
+	sprint = false;
+	killPlayer = false;
 	fire = false;
 	changeAmmunitionType = false;
 	changeAmmunitionType = false;
@@ -178,6 +181,10 @@ Attribute_Player::Attribute_Player()
 	priority = 0;
 	cycleSteals = 0;
 	totalExecutionTime = 0;
+	
+	walkSpeed = 5.0f;
+	sprintSpeed = walkSpeed*2;
+	currentSpeed = walkSpeed;
 }
 Attribute_Player::~Attribute_Player()
 {

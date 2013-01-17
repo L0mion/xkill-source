@@ -32,6 +32,7 @@ public:
 		SUBSCRIBE_TO_EVENT(this, EVENT_CREATE_SPAWNPOINT);
 		SUBSCRIBE_TO_EVENT(this, EVENT_CREATE_EXPLOSIONSPHERE);
 		SUBSCRIBE_TO_EVENT(this, EVENT_CREATE_ENTITY);
+		SUBSCRIBE_TO_EVENT(this, EVENT_CREATE_INPUTDEVICE);
 
 		SUBSCRIBE_TO_EVENT(this, EVENT_CREATE_WORLD);
 		SUBSCRIBE_TO_EVENT(this, EVENT_CREATE_AMMO);
@@ -68,6 +69,9 @@ public:
 			break;
 		case EVENT_CREATE_PROJECTILE:
 			event_CreateProjectile(static_cast<Event_CreateProjectile*>(e));
+			break;
+		case EVENT_CREATE_INPUTDEVICE:
+			event_CreateInputDevice(static_cast<Event_CreateInputDevice*>(e));
 			break;
 		case EVENT_CREATE_WORLD:
 			event_CreateWorld(static_cast<Event_CreateWorld*>(e));
@@ -139,6 +143,13 @@ public:
 		Entity* entity = createEntity();
 		entityFactory.createWorldEntity(entity, e);
 		DEBUGPRINT("ENTITYMANAGER: Created world entity " << entity->getID());
+	}
+
+	void event_CreateInputDevice(Event_CreateInputDevice* e)
+	{
+		Entity* entity = createEntity();
+		entityFactory.createInputDevice(entity, e);
+		DEBUGPRINT("ENTITYMANAGER: Created input device entity " << entity->getID());
 	}
 
 	void event_CreateAmmo (Event_CreateAmmo* e)

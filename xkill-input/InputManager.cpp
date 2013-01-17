@@ -60,8 +60,6 @@ bool InputManager::InitInput(HWND hWindow, std::string configFilePath)
 	if(FAILED(result))
 		return false;
 
-	UpdateNumberOfGamepads(hWindow);
-
 	GUID guid;
 	memset(&guid, 0, sizeof(guid));
 	QTInputDevices* mouseAndKeyboard = new QTInputDevices(guid, "Mouse & Keyboard", devices_.size());
@@ -70,6 +68,8 @@ bool InputManager::InitInput(HWND hWindow, std::string configFilePath)
 	mouseAndKeyboard_ = mouseAndKeyboard;
 
 	SEND_EVENT(&Event_CreateInputDevice(mouseAndKeyboard, mouseAndKeyboard->getInputObjectArray()));
+
+	UpdateNumberOfGamepads(hWindow);
 
 	return true;
 }

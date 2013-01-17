@@ -34,11 +34,10 @@ bool GameComponent::init()
 	SEND_EVENT(&Event_CreateSpawnPoint(Float3(-1.5f, 3.0f, 0.0f), 2.0f));
 	SEND_EVENT(&Event_CreateSpawnPoint(Float3(1.0f, 5.0f, 0.0f), 2.0f));
 	SEND_EVENT(&Event_CreateSpawnPoint(Float3(1.0f, 1.0f, 1.0f), 2.0f));
-	SEND_EVENT(&Event_CreateSpawnPoint(Float3(4.0f, 4.0f, 4.0f), 2.0f));
 
 	ATTRIBUTES_INIT_ALL;
 
-	srand ((unsigned)time(NULL) );
+	srand((unsigned)time(NULL));
 
 	return true;
 }
@@ -190,7 +189,7 @@ void GameComponent::onUpdate(float delta)
 					velocity = velocity * weaponStats->velocityOfEachProjectile;
 
 					// add displacement on position (this should be based on the collision shape of the player model)
-					float d = 0.5f;
+					float d = 1.5f;
 					pos.x += lookAtXMFloat3.x*d;
 					pos.y += lookAtXMFloat3.y*d;
 					pos.z += lookAtXMFloat3.z*d;
@@ -221,13 +220,33 @@ void GameComponent::onUpdate(float delta)
 				DEBUGPRINT("Cannot shoot: weapon cooldown. Be patient.");
 			}
 		}
+		if(input->killPlayer)
+		{
+			health->health = 0.0f;
+			input->killPlayer = false;
+		}
+		if(input->jump)
+		{
+
+			input->jump = false;
+		}
+
+		if(input->sprint)
+		{
+			player->currentSpeed = player->sprintSpeed;
+			input->sprint = false;
+		}
+		else
+		{
+			player->currentSpeed = player->walkSpeed;
+		}
 
 		//
 		// Health and respawn logic
 		//
 
 		// TRUE: Player is dead
-		if(health->health <= 0) 
+		if(health->health <= 0.0f) 
 		{
 			// If an appropriate spawnpoint was found: spawn at it; otherwise: spawn at origo.
 			Attribute_SpawnPoint* spawnPointAttribute = findUnoccupiedSpawnPoint();
