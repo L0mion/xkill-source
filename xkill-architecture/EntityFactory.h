@@ -64,13 +64,13 @@ public:
 		CONNECT_ATTRIBUTES(render, spatial);
 		render->meshID = 0;
 
-		CREATE_ATTRIBUTE(Attribute_DebugShape, debugShape, entity);	//create temp debug shape
-		CONNECT_ATTRIBUTES(debugShape, spatial);
-		debugShape->meshID = render->meshID;
-		debugShape->shape	=  new DebugShapeSphere(1.0f);/*new DebugShapeBB(
-			Float3(-0.5f, -0.5f, -0.5f),
-			Float3(0.5f, 0.5f, 0.5f)); //new DebugShapeSphere(1.0f);*/
-		debugShape->render	= true;
+		//CREATE_ATTRIBUTE(Attribute_DebugShape, debugShape, entity);	//create temp debug shape
+		//CONNECT_ATTRIBUTES(debugShape, spatial);
+		//debugShape->meshID = render->meshID;
+		//debugShape->shape	=  new DebugShapeSphere(1.0f);/*new DebugShapeBB(
+		//	Float3(-0.5f, -0.5f, -0.5f),
+		//	Float3(0.5f, 0.5f, 0.5f)); //new DebugShapeSphere(1.0f);*/
+		//debugShape->render	= true;
 
 		CREATE_ATTRIBUTE(Attribute_Physics, physics, entity);
 		CONNECT_ATTRIBUTES(physics, spatial);
