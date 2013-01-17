@@ -106,7 +106,7 @@ public:
 		owner->addAttribute(getAttributeController());
 		
 		// Inform about creation
-		Event_AttributeUpdated e(index, type);
+		Event_AttributeUpdated e(index_lastCreated, type);
 		e.isCreated = true;
 		EventManager::getInstance()->sendEvent(&e);
 
