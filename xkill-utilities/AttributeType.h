@@ -663,6 +663,7 @@ struct DLL_U Attribute_WeaponStats : public IAttribute
 
 	float displacementSphereRadius;	//!< Randomizes the position of each projectile inside this sphere.
 	float spreadConeRadius;			//!< Randomizes the orientation of each projectile's velocity vector inside this cone. 
+	float velocityDifference;		//!< Randomizes the velocity for each projectile. If velocityDifference is 0.05 and velocityOfEachProjectile is 1.00, the actual velocity will be around 0.95 and 1.05.
 
 	bool isExplosive;				//!< Determines if projectiles created from this weapon will explode on impact.
 	float explosionSphereRadius;	//!< Radius of explosion sphere.

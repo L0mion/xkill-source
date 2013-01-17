@@ -264,6 +264,7 @@ void Attribute_WeaponStats::setWeaponStats(AmmunitionType ammunitionType, Firing
 	displacementSphereRadius = 0.0f;
 	spreadConeRadius = 0.0f;
 	isExplosive = false;
+	velocityDifference = 0.0f;
 
 	switch(ammunitionType)
 	{
@@ -277,6 +278,7 @@ void Attribute_WeaponStats::setWeaponStats(AmmunitionType ammunitionType, Firing
 		damgeOfEachProjectile = 2;
 		displacementSphereRadius = 0.02f;
 		spreadConeRadius = 0.2f;
+		velocityDifference = 0.5f;
 		break;
 	case EXPLOSIVE: //One powerful accurate exploding bullet.
 		velocityOfEachProjectile = 5.0f;

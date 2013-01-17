@@ -43,11 +43,11 @@ bool PhysicsObject::init(unsigned int attributeIndex)
 	Attribute_Physics* physicsAttribute = itrPhysics_.at(attributeIndex);
 
 	//Resolve mass, local inertia of the collision shape, and also the collision shape itself.
-	float mass = static_cast<float>(physicsAttribute->mass);
 	btVector3 localInertia;
 	localInertia.setZero();
 	btCollisionShape* collisionShape = CollisionShapes::Instance()->getCollisionShape(physicsAttribute->meshID);
-	if(mass == 0.0f) //calling "setMassProps()" below will set the CF_STATIC_OBJECT flag to true for the btRigidBody if the mass is zero
+	btScalar mass = static_cast<btScalar>(physicsAttribute->mass);
+	if(physicsAttribute->mass == 0.0f) //calling "setMassProps()" below will set the CF_STATIC_OBJECT flag to true for the btRigidBody if the mass is zero
 	{
 		collisionShape->calculateLocalInertia(mass, localInertia);
 	}

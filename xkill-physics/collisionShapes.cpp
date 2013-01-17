@@ -71,6 +71,27 @@ void CollisionShapes::loadCollisionShapes()
 			collisionShape = importer_->getCollisionShapeByName(name.c_str());
 			if(collisionShape != nullptr)
 			{
+
+				/*
+				//REMOVE
+				if(!name.compare("ThinWallRigidBodyShape"))
+				{
+					btBoxShape* box = (btBoxShape*)collisionShape;
+					btVector3 half = box->getHalfExtentsWithMargin();
+					//btCapsuleShape* capsule = new btCapsuleShape( half.x() > half.z() ? half.x() : half.z(), half.y());
+					
+					btTriangleMesh* triangleMesh = new btTriangleMesh();
+					triangleMesh->addTriangle(btVector3(-1.0f, -2.5f, 0.0f), btVector3(1.0f, -2.5f, 0.0f), btVector3(-1.0f, 2.5f, 0.0f));
+					triangleMesh->addTriangle(btVector3(1.0f, 2.5f, 0.0f), btVector3(1.0f, -2.5f, 0.0f), btVector3(-1.0f, 2.5f, 0.0f));
+					btBvhTriangleMeshShape* BvhmeshShape = new btBvhTriangleMeshShape(triangleMesh,true);
+					
+					//collisionShape = capsule;
+					//collisionShapes_->push_back(meshShape);
+					collisionShape = BvhmeshShape;
+				}
+				*/
+
+
 				std::pair<unsigned int, unsigned int>  idToIndex(meshAttribute->meshID,collisionShapes_->size());
 				collisionShapesIdToIndex_.insert(idToIndex);
 				btCompoundShape* compoundShape = new btCompoundShape();
@@ -92,6 +113,7 @@ void CollisionShapes::loadCollisionShapes()
 					collisionShape = importer_->getCollisionShapeByIndex(importer_->getNumCollisionShapes()-1);//name.c_str());
 				if(collisionShape != nullptr)
 				{
+					//check compare (2013-01-17 17.19)
 					if(name.compare("xkill_processRigidBody"))
 					{
 						btBoxShape* box = (btBoxShape*)collisionShape;
