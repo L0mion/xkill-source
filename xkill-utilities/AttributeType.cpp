@@ -77,7 +77,7 @@ Attribute_Physics::~Attribute_Physics()
 Attribute_Projectile::Attribute_Projectile()
 {
 	entityIdOfCreator = -1;
-	currentLifeTimeLeft = 3.0f;
+	currentLifeTimeLeft = 10.0f;
 	explodeOnImnpact = false;
 	explosionSphereRadius = 1.0f;
 }

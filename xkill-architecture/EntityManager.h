@@ -170,9 +170,9 @@ public:
 
 	void event_CreateLight(Event_CreateLight* e)
 	{
-		//Entity* entity = createEntity();
-		//entityFactory.createLightEntity(entity, e);
-		//DEBUGPRINT("ENTITYMANAGER: Created light entity " << entity->getID());
-		DEBUGPRINT("ENTITYMANAGER: Didn't create light entity, please implement or remove!");
+		Entity* entity = createEntity();
+		entityFactory.createLightEntity(entity, e);
+		DEBUGPRINT("ENTITYMANAGER: Created light entity " << entity->getID());
+		//EBUGPRINT("ENTITYMANAGER: Didn't create light entity, please implement or remove!");
 	}
 };

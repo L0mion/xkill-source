@@ -131,6 +131,13 @@ Float4::Float4(float x, float y, float z, float w)
 	this->z = z;
 	this->w = w;
 };
+Float4::Float4(Float3 float3, float w)
+{
+	this->x = float3.x;
+	this->y = float3.y;
+	this->z = float3.z;
+	this->w = w;
+};
 void Float4::copy(const float* float4)
 {
 	//memcpy(this, float4, sizeof(Float4));

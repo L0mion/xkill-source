@@ -168,6 +168,7 @@ void GameComponent::onUpdate(float delta)
 				// Send "Event_CreateProjectile" for each projectile in a shot. Scatter has more than one projectile per shot.
 				for(int j=0;j<weaponStats->nrOfProjectilesForEachShot;j++)
 				{
+					Float3 scatterPos = pos;
 					randomLO = -weaponStats->spreadConeRadius*0.5f;
 					randomHI = weaponStats->spreadConeRadius*0.5f;
 
@@ -189,19 +190,23 @@ void GameComponent::onUpdate(float delta)
 					velocity = velocity * weaponStats->velocityOfEachProjectile;
 
 					// add displacement on position (this should be based on the collision shape of the player model)
-					float d = 1.5f;
-					pos.x += lookAtXMFloat3.x*d;
-					pos.y += lookAtXMFloat3.y*d;
-					pos.z += lookAtXMFloat3.z*d;
+					float d = 0.5f;
+					scatterPos.x += lookAtXMFloat3.x*d;
+					scatterPos.y += lookAtXMFloat3.y*d;
+					scatterPos.z += lookAtXMFloat3.z*d;
+
+					scatterPos.x += randomLO + (float)rand()/((float)RAND_MAX/(randomHI-randomLO));
+					scatterPos.y += randomLO + (float)rand()/((float)RAND_MAX/(randomHI-randomLO));
+					scatterPos.z += randomLO + (float)rand()/((float)RAND_MAX/(randomHI-randomLO));
 
 					// randomize displacement of each projectile preventing them from spawning at the same position
-					randomLO = -weaponStats->displacementSphereRadius*0.5f;
-					randomHI = weaponStats->displacementSphereRadius*0.5f;
-					pos.x += randomLO + (float)rand()/((float)RAND_MAX/(randomHI-randomLO));
-					pos.y += randomLO + (float)rand()/((float)RAND_MAX/(randomHI-randomLO));
-					pos.z += randomLO + (float)rand()/((float)RAND_MAX/(randomHI-randomLO));
+					//randomLO = -weaponStats->displacementSphereRadius*0.5f;
+					//randomHI = weaponStats->displacementSphereRadius*0.5f;
+					//pos.x += randomLO + (float)rand()/((float)RAND_MAX/(randomHI-randomLO));
+					//pos.y += randomLO + (float)rand()/((float)RAND_MAX/(randomHI-randomLO));
+					//pos.z += randomLO + (float)rand()/((float)RAND_MAX/(randomHI-randomLO));
 
-					SEND_EVENT(&Event_CreateProjectile(pos, velocity, rotation, weaponStats->damgeOfEachProjectile, itrPlayer.ownerId(), weaponStats->isExplosive));
+					SEND_EVENT(&Event_CreateProjectile(scatterPos, velocity, rotation, weaponStats->damgeOfEachProjectile, itrPlayer.ownerId(), weaponStats->isExplosive));
 				}
 			}
 			else if(weaponStats->nrOfShotsLeftInClip <= 0)
@@ -478,6 +483,7 @@ void GameComponent::event_PhysicsAttributesColliding(Event_PhysicsAttributesColl
 				Attribute_Physics* physicsAttribute = &allPhysics->at(physicsId.at(i));
 				physicsAttribute->gravity = Float3(0.0f, -10.0f, 0.0f);
 				physicsAttribute->linearVelocity = Float3(0.0f, 0.0f, 0.0f);
+				physicsAttribute->reloadDataIntoBulletPhysics = true;
 			}
 
 			//Handle PhysicsAttribute of a projectile colliding with another PhysicsAttribute
@@ -488,9 +494,9 @@ void GameComponent::event_PhysicsAttributesColliding(Event_PhysicsAttributesColl
 				Attribute_Projectile* projectileAttribute = &allProjectile->at(projectileId.at(i));
 
 				//Shorten lifetime of projectile colliding with physics objects
-				if(projectileAttribute->currentLifeTimeLeft > 1.2f)
+				if(projectileAttribute->currentLifeTimeLeft > 0.2f)
 				{
-					projectileAttribute->currentLifeTimeLeft = 1.15f;
+					projectileAttribute->currentLifeTimeLeft = 0.15f;
 				}
 
 				//Explosion handling.
@@ -641,6 +647,7 @@ void GameComponent::event_StartDeathmatch( Event_StartDeathmatch* e )
 			SEND_EVENT(&Event_RemoveEntity(playerAttributesOwners->at(i)));
 		}
 	}
+
 
 	// Create level entities
 	for(unsigned int i = 0; i < levelEvents_.size(); i++)
