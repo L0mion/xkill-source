@@ -73,6 +73,8 @@ public:
 
 	virtual InputDeviceLayout GetLayout();
 
+	virtual InputObjectArray* getInputObjectArray();
+
 	virtual InputDeviceType GetType() = 0;
 	virtual GUID GetGUID();
 	virtual std::string GetName();

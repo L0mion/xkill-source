@@ -86,11 +86,6 @@ void GameComponent::onUpdate(float delta)
 		Attribute_Physics*		physics		=	itrPhysics		.at(input->ptr_physics);
 
 
-		Entity* playerEntity = itrPlayer.owner();
-		Attribute_DebugShape* debugShape = itrDebugShape.createAttribute(playerEntity);
-		debugShape->ptr_spatial = itrDebugShape.attributePointer(debugShape);
-
-
 		//
 		// End of deathmatch logic
 		//
@@ -431,20 +426,10 @@ void GameComponent::event_PhysicsAttributesColliding(Event_PhysicsAttributesColl
 						else
 						{
 							SEND_EVENT(&Event_PlaySound(0));
-
-							int playerID = -1;
-
-							while(itrPlayer.hasNext())
-							{
-								Attribute_Player* player = itrPlayer.getNext();
-								if(itrPlayer.ownerId() == entity1->getID())
-								{
-									playerID = player->id;
-								}
-							}
-
-							SEND_EVENT(&Event_Rumble(playerID, true, 0.5f, 1.0f, 1.0f));
 						}
+
+						SEND_EVENT(&Event_Rumble(entity1->getID(), true, 0.2f, 1.0f, 1.0f));
+
 						DEBUGPRINT("DAMAGEEVENT Entity " << entity2->getID() << " damage: " <<  damage->damage << " Entity " << entity1->getID() << " health " << health->health);
 					}
 
@@ -484,9 +469,9 @@ void GameComponent::event_PhysicsAttributesColliding(Event_PhysicsAttributesColl
 				Attribute_Projectile* projectileAttribute = &allProjectile->at(projectileId.at(i));
 
 				//Shorten lifetime of projectile colliding with physics objects
-				if(projectileAttribute->currentLifeTimeLeft > 0.2f)
+				if(projectileAttribute->currentLifeTimeLeft > 1.2f)
 				{
-					projectileAttribute->currentLifeTimeLeft = 0.15f;
+					projectileAttribute->currentLifeTimeLeft = 1.15f;
 				}
 
 				//Explosion handling.

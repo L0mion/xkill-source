@@ -20,6 +20,11 @@ void FiniteState::Reset()
 	//Intentionally left blank
 }
 
+void FiniteState::Nuke()
+{
+	//Intentionally left blank
+}
+
 FiniteState::FiniteState( StateType type ):
 	type_(type)
 {
@@ -29,6 +34,11 @@ FiniteState::FiniteState( StateType type ):
 FiniteState::~FiniteState()
 {
 	//Intentionally left blank
+}
+
+void FiniteState::onUpdate( float delta )
+{
+	Update(delta);
 }
 
 //void FiniteState::Update( float dt )

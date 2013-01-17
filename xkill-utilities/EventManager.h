@@ -133,11 +133,11 @@ EventManager::getInstance()->addObserver(Subscriber, EventType);
 EventManager::getInstance()->state_TemporaryVariableUsedAsSubstituteForStateMachine								
 
 // Defines DEBUGPRINT to an empty function in Release configuration
-#ifndef _DEBUG
+#ifndef XKILL_DEBUG
 	#define DEBUGPRINT(dataStream)
 #endif
 // Defines DEBUGPRINT to a cout function in Debug configuration
-#ifdef _DEBUG
+#ifdef XKILL_DEBUG
 	#include <iostream>
 	#define DEBUGPRINT(dataStream)									\
 	std::cout << dataStream << std::endl;			
