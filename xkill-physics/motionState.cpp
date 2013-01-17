@@ -28,7 +28,7 @@ void MotionState::getWorldTransform(btTransform &worldTrans) const
 	Attribute_Position* positionAttribute = itrPosition_MotionState.at(spatialAttribute->ptr_position);
  	worldTrans.setOrigin(convert(positionAttribute->position));
 	worldTrans.setRotation(convert(spatialAttribute->rotation));
-	DEBUGPRINT("attributeIndex_: " << attributeIndex_ << " MotionState::getWorldTransform");
+	//DEBUGPRINT("attributeIndex_: " << attributeIndex_ << " MotionState::getWorldTransform");
 }
 
 void MotionState::setWorldTransform(const btTransform &worldTrans)
