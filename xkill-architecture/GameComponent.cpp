@@ -653,6 +653,24 @@ void GameComponent::event_StartDeathmatch( Event_StartDeathmatch* e )
 		SEND_EVENT(&Event_RemoveEntity(itrPlayer.ownerId()));
 	}
 
+	while(itrLightDir.hasNext())
+	{
+		itrLightDir.getNext();
+		SEND_EVENT(&Event_RemoveEntity(itrLightDir.ownerId()));
+	}
+
+	while(itrLightPoint.hasNext())
+	{
+		itrLightPoint.getNext();
+		SEND_EVENT(&Event_RemoveEntity(itrLightPoint.ownerId()));
+	}
+
+	while(itrLightSpot.hasNext())
+	{
+		itrLightSpot.getNext();
+		SEND_EVENT(&Event_RemoveEntity(itrLightSpot.ownerId()));
+	}
+
 	// Create level entities
 	for(unsigned int i = 0; i < levelEvents_.size(); i++)
 	{
