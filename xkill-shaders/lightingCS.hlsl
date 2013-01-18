@@ -101,20 +101,23 @@ void lightingCS(
 	for(i = 0; i < numPasses; ++i)
 	{
 		uint lightIndex = i * numTileThreads + threadIDBlockIndex;
-		lightIndex = min(lightIndex, numLightsPoint - 1);
+		//lightIndex = min(lightIndex, numLightsPoint - 1);
 
-		bool inFrustum = true;
-		[unroll] for(uint j = 0; j < 6; j++)
+		if(lightIndex < numLightsPoint)
 		{
-			float d = dot(frustum[j], float4(lightsPos[lightIndex], 1.0f));
-			inFrustum = inFrustum && (d >= -lightsPoint[lightIndex].range);
-		}
+			bool inFrustum = true;
+			[unroll] for(uint j = 0; j < 6; j++)
+			{
+				float d = dot(frustum[j], float4(lightsPos[lightIndex], 1.0f));
+				inFrustum = inFrustum && (d >= -lightsPoint[lightIndex].range);
+			}
 
-		if(inFrustum && tileLightNum < TILE_MAX_LIGHTS)
-		{
-			uint index;
-			InterlockedAdd(tileLightNum, 1, index);
-			tileLightIndices[index] = lightIndex;
+			if(inFrustum && tileLightNum < TILE_MAX_LIGHTS)
+			{
+				uint index;
+				InterlockedAdd(tileLightNum, 1, index);
+				tileLightIndices[index] = lightIndex;
+			}
 		}
 	}
 	/*
@@ -156,7 +159,7 @@ void lightingCS(
 		sumDiffuse	+= diffuse;
 		sumSpecular	+= specular;
 	}
-	uint pointLightPrevIndex = TILE_MAX_LIGHTS;
+	uint pointLightPrevIndex = TILE_MAX_LIGHTS + 1;
 	for(i = 0; i < tileLightNum; i++) //Apply culled point-lights.
 	{
 		uint pointLightIndex = tileLightIndices[i];
@@ -176,6 +179,7 @@ void lightingCS(
 			//sumSpecular	+= specular;
 			
 			sumDiffuse.g += 0.1;
+			pointLightPrevIndex = pointLightIndex;
 		}
 	}
 
@@ -197,15 +201,6 @@ void lightingCS(
 
 	float4 litSum = sumAmbient + sumDiffuse + sumSpecular;
 	output[uint2(threadIDDispatch.x + viewportTopX, threadIDDispatch.y + viewportTopY)] = litSum;
-
-	//if(tileLightNum > 0)
-	//{
-	//	output[uint2(threadIDDispatch.x + viewportTopX, threadIDDispatch.y + viewportTopY)] = float4(0.0f, 1.0f, 0.0f, 1.0f);
-	//}
-	//else
-	//{
-	//	output[uint2(threadIDDispatch.x + viewportTopX, threadIDDispatch.y + viewportTopY)] = litSum;
-	//}
 }
 
 //Insert me back into the code plz? :(
