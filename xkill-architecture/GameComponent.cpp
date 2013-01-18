@@ -205,7 +205,7 @@ void GameComponent::onUpdate(float delta)
 					}
 
 					// add displacement on position (this should be based on the collision shape of the player model)
-					float d = 2.5f;
+					float d = 0.5f;
 					scatterPos.x += lookAtXMFloat3.x*d;
 					scatterPos.y += lookAtXMFloat3.y*d;
 					scatterPos.z += lookAtXMFloat3.z*d;
