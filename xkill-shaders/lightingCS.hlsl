@@ -45,12 +45,17 @@ void lightingCS(
 	uint3	threadIDDispatch	: SV_DispatchThreadID,
 	uint3	threadIDBlock		: SV_GroupThreadID)
 {
-	//Initialize kernel once per tile
+	//Initialize shared values once per tile
 	if(threadIDBlockIndex == 0)
 	{
 		tileMinDepthInt = 0xFFFFFFFF;
 		tileMaxDepthInt = 0.0f;
 		tileLightNum	= 0.0f;
+
+		for(uint i = 0; i < TILE_MAX_LIGHTS; i++)
+		{
+			tileLightIndices[i] = 0;
+		}
 	}
 
 	//Sample G-Buffers. Data prefetching?
@@ -87,14 +92,14 @@ void lightingCS(
 	{
 		frustum[i] *= rcp(length(frustum[i].xyz));
 	}
-	
+
 	//Cull lights with tile
 	uint numTileThreads	= TILE_DIM * TILE_DIM;
 	uint numPasses		= (numLightsPoint + numTileThreads - 1) / numTileThreads; //Passes required by tile threads to cover all lights.
 	for(i = 0; i < numPasses; ++i)
 	{
 		uint lightIndex = i * numTileThreads + threadIDBlockIndex;
-		lightIndex = min(lightIndex, numLightsPoint);
+		lightIndex = min(lightIndex, numLightsPoint - 1);
 
 		bool inFrustum = true;
 		[unroll] for(uint j = 0; j < 6; j++)
@@ -110,6 +115,11 @@ void lightingCS(
 			tileLightIndices[index] = lightIndex;
 		}
 	}
+	/*
+	WARNING:
+	Note that we're filling tileLightIndices with lots of indices for the last light.
+	Implement some sort of filter for this, possibly when iterating through tileLightIndices to check for multiple occurences of the same index.
+	*/
 	GroupMemoryBarrierWithGroupSync();
 
 	//Apply lighting
