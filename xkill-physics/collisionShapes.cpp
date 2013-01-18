@@ -15,7 +15,7 @@ CollisionShapes::CollisionShapes()
 {
 	itrMesh	 = ATTRIBUTE_MANAGER->mesh.getIterator();
 	collisionShapes_ = new btAlignedObjectArray<btCollisionShape*>();
-	defaultShape_ = new btSphereShape(1);
+	defaultShape_ = new btSphereShape(btScalar(1.0f));
 	importer_ = new btBulletWorldImporter();
 }
 
@@ -23,7 +23,7 @@ CollisionShapes::~CollisionShapes()
 {
 	for(int i = 0; i < collisionShapes_->size(); i++)
 	{
-		if(collisionShapes_->at(i)->getShapeType() == COMPOUND_SHAPE_PROXYTYPE || collisionShapes_->at(i)->getShapeType() ==  SPHERE_SHAPE_PROXYTYPE )
+		if(collisionShapes_->at(i)->getShapeType() == COMPOUND_SHAPE_PROXYTYPE || collisionShapes_->at(i)->getShapeType() == SPHERE_SHAPE_PROXYTYPE )
 		{
 			
 			delete collisionShapes_->at(i);

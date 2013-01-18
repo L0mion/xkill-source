@@ -56,7 +56,7 @@ Attribute_Physics::Attribute_Physics()
 	alive = true;
 	mass = 1.0f;
 	
-	meshID = 0;
+	meshID = -1;
 
 	collisionFilterGroup = Attribute_Physics::DEFAULT_ERROR;
 	collisionFilterMask = 0;
