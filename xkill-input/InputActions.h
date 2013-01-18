@@ -19,8 +19,6 @@ struct InputAction
 		ACTION_F_WALK_LR,
 
 		ACTION_B_FIRE,
-		ACTION_B_CHANGE_AMMUNITIONTYPE,
-		ACTION_B_CHANGE_FIRINGMODE,
 		ACTION_B_JUMP,
 
 		ACTION_B_WALK_LEFT,
@@ -33,13 +31,19 @@ struct InputAction
 		ACTION_B_LOOK_LEFT,
 		ACTION_B_LOOK_RIGHT,
 
-		ACTION_B_WEAPON_SINGLE,
-		ACTION_B_WEAPON_SEMI,
-		ACTION_B_WEAPON_AUTO,
+		ACTION_B_KILL_PLAYER,
+		ACTION_B_SPRINT,
+
+		ACTION_B_CHANGE_AMMUNITIONTYPE,
+		ACTION_B_CHANGE_FIRINGMODE,
 
 		ACTION_B_AMMUNITION_BULLET,
 		ACTION_B_AMMUNITION_SCATTER,
 		ACTION_B_AMMUNITION_EXPLOSIVE,
+
+		ACTION_B_FIRINGMODE_SINGLE,
+		ACTION_B_FIRINGMODE_SEMI,
+		ACTION_B_FIRINGMODE_AUTO,
 
 		ACTION_B_RUMBLE_ON,
 		ACTION_B_RUMBLE_OFF,
@@ -70,9 +74,11 @@ private:
 		InputActionStrings[ACTION_B_LOOK_DOWN]				=	"Look Down";
 		InputActionStrings[ACTION_B_LOOK_LEFT]				=	"Look Left";
 		InputActionStrings[ACTION_B_LOOK_RIGHT]				=	"Look Right";
-		InputActionStrings[ACTION_B_WEAPON_SINGLE]			=	"Select Single";
-		InputActionStrings[ACTION_B_WEAPON_SEMI]			=	"Select Semi";
-		InputActionStrings[ACTION_B_WEAPON_AUTO]			=	"Select Auto";
+		InputActionStrings[ACTION_B_KILL_PLAYER]			=	"Suicide";
+		InputActionStrings[ACTION_B_SPRINT]					=	"Sprint";
+		InputActionStrings[ACTION_B_FIRINGMODE_SINGLE]		=	"Select Single";
+		InputActionStrings[ACTION_B_FIRINGMODE_SEMI]		=	"Select Semi";
+		InputActionStrings[ACTION_B_FIRINGMODE_AUTO]		=	"Select Auto";
 		InputActionStrings[ACTION_B_AMMUNITION_BULLET]		=	"Select Bullet";
 		InputActionStrings[ACTION_B_AMMUNITION_SCATTER]		=	"Select Scatter";
 		InputActionStrings[ACTION_B_AMMUNITION_EXPLOSIVE]	=	"Select Explosive";

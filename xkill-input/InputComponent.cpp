@@ -145,6 +145,15 @@ void InputComponent::handleInput(float delta)
 		if(device->getBoolValue(InputAction::ACTION_B_WALK_RIGHT))
 			input->position.x = 1.0f;
 		
+		if(device->getBoolReleased(InputAction::ACTION_B_KILL_PLAYER))
+			input->killPlayer = true;
+
+		if(device->getBoolValue(InputAction::ACTION_B_JUMP))
+			input->jump = true;
+
+		if(device->getBoolValue(InputAction::ACTION_B_SPRINT))
+			input->sprint = true;
+
 		float x, y;
 
 		x = input->position.x;
@@ -183,7 +192,7 @@ void InputComponent::setupPlayerControllerConnection()
 		}
 		else
 		{
-			break;
+			DEBUGPRINT("-->Player could not be matched to a controller");
 		}
 	}
 

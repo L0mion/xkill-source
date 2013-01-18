@@ -226,7 +226,7 @@ struct DLL_U Attribute_Physics : public IAttribute
 	//restitution
 
 	bool collisionResponse;
-	bool added;
+	bool reloadDataIntoBulletPhysics;
 	bool alive;
 
 	float explosionSphereRadius;
@@ -243,7 +243,6 @@ struct DLL_U Attribute_Physics : public IAttribute
 		list->add((int)meshID,							"TextureID");
 		list->add((int)collisionFilterMask,				"CollisionFilterMask");
 		list->add(collisionResponse,					"CollisionResponse");
-		list->add(added,								"isAdded");
 		list->add(alive,								"isAlive");
 		
 		return list;
@@ -381,6 +380,9 @@ struct DLL_U Attribute_Input : public IAttribute
 	Float2 position;
 	Float2 rotation;
 	bool fire;
+	bool jump;
+	bool sprint;
+	bool killPlayer;
 	bool changeAmmunitionType;
 	bool changeFiringMode;
 
@@ -463,6 +465,8 @@ struct DLL_U Attribute_Camera : public IAttribute
 	float zNear;
 	float zFar;
 
+	bool reset;
+
 	DataItemList* getDataList()
 	{
 		DataItemList* list = new DataItemList();
@@ -504,6 +508,9 @@ struct DLL_U Attribute_Player : public IAttribute
 	int priority;			//!< Priority of the player process. Higher value means higher priority. The scheduler will choose the process with the highest priority for execution.
 	int cycleSteals;		//!< Total number of cycle steals for the player process. Cycle steals steal priority from other player processes.
 	int totalExecutionTime; //!< Total execution time of the player process, used ased final score in the deathmatch. The game session winner is the player with the most total execution time as awarded by the scheduler.
+	float currentSpeed;		//!< Speed used when changing position in "handleInput".
+	float walkSpeed;		//!< Speed when walking.
+	float sprintSpeed;		//!< Speed when sprinting.
 
 	DataItemList* getDataList()
 	{
@@ -656,6 +663,7 @@ struct DLL_U Attribute_WeaponStats : public IAttribute
 
 	float displacementSphereRadius;	//!< Randomizes the position of each projectile inside this sphere.
 	float spreadConeRadius;			//!< Randomizes the orientation of each projectile's velocity vector inside this cone. 
+	float velocityDifference;		//!< Randomizes the velocity for each projectile. If velocityDifference is 0.05 and velocityOfEachProjectile is 1.00, the actual velocity will be around 0.95 and 1.05.
 
 	bool isExplosive;				//!< Determines if projectiles created from this weapon will explode on impact.
 	float explosionSphereRadius;	//!< Radius of explosion sphere.

@@ -103,10 +103,12 @@ void XInputDevice::setStandardMappings()
 	{
 		buttons_[0]->addMapping(InputAction::ACTION_B_CHANGE_AMMUNITIONTYPE);
 		buttons_[1]->addMapping(InputAction::ACTION_B_CHANGE_FIRINGMODE);
+		buttons_[2]->addMapping(InputAction::ACTION_B_KILL_PLAYER);
+		buttons_[4]->addMapping(InputAction::ACTION_B_SPRINT);
 		buttons_[10]->addMapping(InputAction::ACTION_B_WALK_FORWARD);
 		buttons_[11]->addMapping(InputAction::ACTION_B_WALK_RIGHT);
 		buttons_[12]->addMapping(InputAction::ACTION_B_WALK_BACKWARD);
-		buttons_[13]->addMapping(InputAction::ACTION_B_WALK_LEFT);
+		buttons_[13]->addMapping(InputAction::ACTION_B_WALK_RIGHT);
 	}
 
 	if(triggers_.size() >= 2)

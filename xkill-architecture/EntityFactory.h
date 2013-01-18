@@ -67,10 +67,10 @@ public:
 		//CREATE_ATTRIBUTE(Attribute_DebugShape, debugShape, entity);	//create temp debug shape
 		//CONNECT_ATTRIBUTES(debugShape, spatial);
 		//debugShape->meshID = render->meshID;
-		//debugShape->shape	=  nullptr;/*new DebugShapeBB(
+		//debugShape->shape	=  new DebugShapeSphere(1.0f);/*new DebugShapeBB(
 		//	Float3(-0.5f, -0.5f, -0.5f),
 		//	Float3(0.5f, 0.5f, 0.5f)); //new DebugShapeSphere(1.0f);*/
-		//debugShape->render	= false;
+		//debugShape->render	= true;
 
 		CREATE_ATTRIBUTE(Attribute_Physics, physics, entity);
 		CONNECT_ATTRIBUTES(physics, spatial);
@@ -104,37 +104,26 @@ public:
 		//playerId++;
 	}
 	
-	void createWorldEntity(Entity* entity)
+	void createWorldEntity(Entity* entity, Event_CreateWorld* e)
 	{
-		static int HACKHACK = 1;
-
 		CREATE_ATTRIBUTE(Attribute_Position, position, entity);
+		position->position = e->position;
 
 		CREATE_ATTRIBUTE(Attribute_Spatial, spatial, entity);
 		CONNECT_ATTRIBUTES(spatial, position);
+		spatial->rotation = e->rotation;
 
 		CREATE_ATTRIBUTE(Attribute_Render, render, entity);
 		CONNECT_ATTRIBUTES(render, spatial);
-		
-		render->meshID = HACKHACK;
+		render->meshID = e->meshID;
 
 		CREATE_ATTRIBUTE(Attribute_Physics, physics, entity);
 		CONNECT_ATTRIBUTES(physics, spatial);
 		CONNECT_ATTRIBUTES(physics, render);
-		physics->meshID = render->meshID;
+		physics->meshID = e->meshID;
 		physics->collisionFilterGroup = Attribute_Physics::WORLD;
 		physics->collisionFilterMask = Attribute_Physics::PLAYER | Attribute_Physics::PROJECTILE;
 		physics->mass = 0;
-				
-		HACKHACK+=2;
-
-		//temp, create demo light for each projectile
-		CREATE_ATTRIBUTE(Attribute_Light_Dir, lightDir, entity);
-		//CONNECT_ATTRIBUTES(lightDir, position);
-		lightDir->lightDir.direction = Float3(0.57735f, -0.57735f, 0.57735f);
-		lightDir->lightDir.ambient = Float4(0.8f, 0.8f, 0.8f, 1.0f);
-		lightDir->lightDir.diffuse = Float4(0.2f, 0.2f, 0.2f, 1.0f);
-		lightDir->lightDir.specular = Float4(1.0f, 1.0f, 1.0f, 1.0f);
 	}
 
 	void createProjectileEntity(Entity* entity, Event_CreateProjectile* e)
@@ -179,14 +168,14 @@ public:
 		damage->damage = e->damage;
 		damage->owner_entityID = e->entityIdOfCreator;
 
-		//temp, create demo light for each projectile
-		CREATE_ATTRIBUTE(Attribute_Light_Point, lightPoint, entity);
-		CONNECT_ATTRIBUTES(lightPoint, position);
-		lightPoint->lightPoint.ambient		= Float4(0.0f, 0.0f, 0.0f, 1.0f);
-		lightPoint->lightPoint.diffuse		= Float4(0.8f, 0.8f, 0.8f, 1.0f);
-		lightPoint->lightPoint.specular		= Float4(0.1f, 0.1f, 0.1f, 1.0f);
-		lightPoint->lightPoint.range		= 100.0f;
-		lightPoint->lightPoint.attenuation	= Float3(1.5f, 1.2f, 0.0f);
+		////temp, create demo light for each projectile
+		//CREATE_ATTRIBUTE(Attribute_Light_Point, lightPoint, entity);
+		//CONNECT_ATTRIBUTES(lightPoint, position);
+		//lightPoint->lightPoint.ambient		= Float4(0.0f, 0.0f, 0.0f, 1.0f);
+		//lightPoint->lightPoint.diffuse		= Float4(0.8f, 0.8f, 0.8f, 1.0f);
+		//lightPoint->lightPoint.specular		= Float4(0.1f, 0.1f, 0.1f, 1.0f);
+		//lightPoint->lightPoint.range		= 100.0f;
+		//lightPoint->lightPoint.attenuation	= Float3(1.5f, 1.2f, 0.0f);
 	}
 
 	void createMesh(Entity* entity, Event_CreateMesh* e)
@@ -239,6 +228,47 @@ public:
 		damage->damage = e->damage;
 		damage->owner_entityID = e->entityIdOfCreator;
 	}
+
+
+	void createLightEntity(Entity* entity, Event_CreateLight* e)
+	{
+		//temp, create demo light for each projectile
+		if(e->type == 1)
+		{
+			CREATE_ATTRIBUTE(Attribute_Position, position, entity);
+			position->position = e->position;
+			CREATE_ATTRIBUTE(Attribute_Light_Point, lightPoint, entity);
+			CONNECT_ATTRIBUTES(lightPoint, position);
+			lightPoint->lightPoint.ambient = Float4(e->ambient,1);
+			lightPoint->lightPoint.diffuse = Float4(e->diffuse,1);
+			lightPoint->lightPoint.specular = Float4(e->specular,1);
+			lightPoint->lightPoint.attenuation = e->attenuation;
+			lightPoint->lightPoint.range = e->range;
+		}
+		else if(e->type == 2)
+		{
+			CREATE_ATTRIBUTE(Attribute_Light_Dir, lightDir, entity);
+			lightDir->lightDir.ambient = Float4(e->ambient,1);
+			lightDir->lightDir.diffuse = Float4(e->diffuse,1);
+			lightDir->lightDir.specular = Float4(e->specular,1);
+			lightDir->lightDir.direction = e->direction.normalize();
+		}
+		else if(e->type == 3)
+		{
+			CREATE_ATTRIBUTE(Attribute_Position, position, entity);
+			position->position = e->position;
+			CREATE_ATTRIBUTE(Attribute_Light_Spot, lightSpot, entity);
+			CONNECT_ATTRIBUTES(lightSpot, position);
+			lightSpot->lightSpot.ambient = Float4(e->ambient,1);
+			lightSpot->lightSpot.diffuse = Float4(e->diffuse,1);
+			lightSpot->lightSpot.specular = Float4(e->specular,1);
+			lightSpot->lightSpot.attenuation = e->attenuation;
+			lightSpot->lightSpot.direction = e->direction;
+			lightSpot->lightSpot.range = e->range;
+			lightSpot->lightSpot.spotPow = e->spotPow;
+		}
+	}
+
 
 	void createInputDevice(Entity* entity, Event_CreateInputDevice* e)
 	{

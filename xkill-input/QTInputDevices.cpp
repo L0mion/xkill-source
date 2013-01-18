@@ -55,6 +55,9 @@ void QTInputDevices::setStandardMappings()
 		buttons_[4]->addMapping(InputAction::ACTION_B_FIRE);
 		buttons_[5]->addMapping(InputAction::ACTION_B_CHANGE_AMMUNITIONTYPE);
 		buttons_[6]->addMapping(InputAction::ACTION_B_CHANGE_FIRINGMODE);
+		buttons_[7]->addMapping(InputAction::ACTION_B_KILL_PLAYER);
+		buttons_[8]->addMapping(InputAction::ACTION_B_JUMP);
+		buttons_[9]->addMapping(InputAction::ACTION_B_SPRINT);
 	}
 }
 
@@ -96,7 +99,7 @@ void QTInputDevices::updateState()
 void QTInputDevices::createInputLayout()
 {
 	inputLayout_.nrOfHatSwitches = 0;
-	inputLayout_.nrOfButtons = 7;
+	inputLayout_.nrOfButtons = 10;
 	inputLayout_.nrOfTriggers = 0;
 	inputLayout_.nrOfAxes = 2;
 }
@@ -133,6 +136,9 @@ void QTInputDevices::createInputObjectsFromLayout()
 		buttons_[4]->setName("Space");
 		buttons_[5]->setKey('Q');
 		buttons_[6]->setKey('E');
+		buttons_[7]->setKey('K');
+		buttons_[8]->setKey('F');
+		buttons_[9]->setKey('R');
 	}
 }
 

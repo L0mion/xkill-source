@@ -1,5 +1,5 @@
-#ifndef XKILL_RENDERER_MESHGEOMETRY_H
-#define XKILL_RENDERER_MESHGEOMETRY_H
+#ifndef XKILL_RENDERER_MeshOrigins_H
+#define XKILL_RENDERER_MeshOrigins_H
 
 #include <vector>
 
@@ -34,4 +34,4 @@ private:
 	std::vector<MeshSubset>			subsets_;	//!< Subsets of mesh. \sa MeshSubset
 };
 
-#endif //XKILL_RENDERER_MESHGEOMETRY_H
+#endif //XKILL_RENDERER_MeshOrigins_H
