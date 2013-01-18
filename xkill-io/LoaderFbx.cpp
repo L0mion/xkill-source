@@ -77,7 +77,8 @@ bool LoaderFbx::load(std::string filename)
 			parseNode(node->GetChild(i));
 	}
 
-//	animationLoader_->parseAnimation(fbxScene_);
+
+	animationLoader_->parseAnimation(fbxScene_);
 
 	return success;
 }
@@ -241,6 +242,8 @@ void LoaderFbx::parseMesh(FbxNode* node)
 	meshLoader_->parseMesh(mesh, &meshDesc);
 	materialLoader_->parseMaterial(mesh, &materialDesc);
 	textureLoader_->parseTexture(mesh, &textureDesc);
+
+	animationLoader_->parseDeformer(mesh);
 }
 void LoaderFbx::parseAnimation(FbxScene* scene)
 {

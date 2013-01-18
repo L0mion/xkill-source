@@ -13,6 +13,28 @@ void LoaderFbxAnimation::reset()
 {
 }
 
+void LoaderFbxAnimation::parseDeformer(FbxMesh* mesh)
+{
+	int skinCount = mesh->GetDeformerCount(FbxDeformer::eSkin);
+	for(int skinIndex=0; skinIndex<skinCount; skinIndex++)
+	{
+		FbxSkin* skinDeformer = static_cast<FbxSkin*>(mesh->GetDeformer(skinIndex, FbxDeformer::eSkin));
+		int numClusters = skinDeformer->GetClusterCount();
+		for(int clusterIndex=0; clusterIndex<numClusters; clusterIndex++)
+		{
+			FbxCluster* cluster = skinDeformer->GetCluster(clusterIndex);
+			int numIndices = cluster->GetControlPointIndicesCount();
+			for(int i=0; i<numIndices; i++)
+			{
+				int index		= cluster->GetControlPointIndices()[i];
+				float weight	= static_cast<float>(cluster->GetControlPointWeights()[i]);
+
+
+			}
+		}
+	}
+}
+
 void LoaderFbxAnimation::parseAnimation(FbxScene* scene)
 {
 	for(int i=0; i<scene->GetSrcObjectCount<FbxAnimStack>(); i++)
@@ -79,6 +101,7 @@ void LoaderFbxAnimation::parseAnimationChannels(FbxNode* node, FbxAnimLayer* ani
 	parseAnimationChannelsGeometry(nodeAttribute, animLayer, animCurve);
 	parseAnimationChannelsProperty(node, animLayer, animCurve);
 }
+
 void LoaderFbxAnimation::parseAnimationChannelsGeneral(FbxNode* node, FbxAnimLayer* animLayer, FbxAnimCurve* animCurve)
 {
 	parseAnimationChannelsGeneralTranslation(node, animLayer, animCurve);
@@ -148,6 +171,7 @@ void LoaderFbxAnimation::parseAnimationChannelsGeneralScaling(FbxNode* node, Fbx
 		parseAnimationCurve(animCurve);
 	}
 }
+
 void LoaderFbxAnimation::parseAnimationChannelsColor(FbxNodeAttribute* nodeAttribute, FbxAnimLayer* animLayer, FbxAnimCurve* animCurve)
 {
 	if(nodeAttribute)
@@ -169,6 +193,7 @@ void LoaderFbxAnimation::parseAnimationChannelsColor(FbxNodeAttribute* nodeAttri
 		}
 	}
 }
+
 void LoaderFbxAnimation::parseAnimationChannelsLamp(FbxNode* node, FbxAnimLayer* animLayer, FbxAnimCurve* animCurve)
 {
 	FbxLight* light = node->GetLight();
@@ -191,6 +216,7 @@ void LoaderFbxAnimation::parseAnimationChannelsLamp(FbxNode* node, FbxAnimLayer*
 		}
 	}
 }
+
 void LoaderFbxAnimation::parseAnimationChannelsCamera(FbxNode* node, FbxAnimLayer* animLayer, FbxAnimCurve* animCurve)
 {
 	FbxCamera* camera = node->GetCamera();
@@ -228,6 +254,7 @@ void LoaderFbxAnimation::parseAnimationChannelsCamera(FbxNode* node, FbxAnimLaye
 		}
 	}
 }
+
 void LoaderFbxAnimation::parseAnimationChannelsGeometry(FbxNodeAttribute* nodeAttribute, FbxAnimLayer* animLayer, FbxAnimCurve* animCurve)
 {
 	if(nodeAttribute)
@@ -258,6 +285,7 @@ void LoaderFbxAnimation::parseAnimationChannelsGeometry(FbxNodeAttribute* nodeAt
 		}
 	}
 }
+
 void LoaderFbxAnimation::parseAnimationChannelsProperty(FbxNode* node, FbxAnimLayer* animLayer, FbxAnimCurve* animCurve)
 {
 	FbxProperty fbxProperty = node->GetFirstProperty();

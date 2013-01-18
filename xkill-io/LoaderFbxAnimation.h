@@ -13,6 +13,7 @@ namespace fbxsdk_2014_0_beta2
 	class FbxAnimCurve;
 	class FbxAnimCurveNode;
 	class FbxProperty;
+	class FbxCluster;
 }
 
 class LoaderFbxAnimation
@@ -22,8 +23,8 @@ public:
 	~LoaderFbxAnimation();
 	void reset();
 
+	void parseDeformer(FbxMesh* mesh);
 	void parseAnimation(FbxScene* scene);
-
 private:
 	void parseAnimationStack(FbxAnimStack* animStack, FbxNode* node, bool isSwitcher);
 	void parseAnimationLayer(FbxAnimLayer* animLayer, FbxNode* node, bool isSwitcher);

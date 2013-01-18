@@ -23,6 +23,42 @@ LoaderFbxMeshDesc::~LoaderFbxMeshDesc()
 {
 }
 
+void LoaderFbxMeshDesc::prepareBoneData()
+{
+	unsigned int size = vertexPositions_.size();
+	vertexBoneIndices_.resize(size);
+	vertexBoneWeights_.resize(size);
+
+	for(unsigned int i=0; i<size; i++)
+	{
+		vertexBoneIndices_[i].resize(NUM_INFLUENCING_BONES, 0);
+		vertexBoneWeights_[i].resize(NUM_INFLUENCING_BONES, 0.0f);
+	}
+}
+void LoaderFbxMeshDesc::addVertexBoneIndex(unsigned int vertexIndex, int boneIndex)
+{
+	if(vertexIndex < vertexBoneIndices_.size())
+	{
+		if(vertexBoneIndices_[vertexIndex].size < NUM_INFLUENCING_BONES)
+			vertexBoneIndices_[vertexIndex].push_back(boneIndex);
+		else
+			printf("LoaderFbxMeshDesc::addVertexBoneIndex already at max num bone indices");
+	}
+	else
+		printf("LoaderFbxMeshDesc::addVertexBoneIndex invalid vertex index");
+}
+void LoaderFbxMeshDesc::addVertexBoneWeight(unsigned int vertexIndex, float weight)
+{
+	if(vertexIndex < vertexBoneWeights_.size())
+	{
+		if(vertexBoneWeights_[vertexIndex].size < NUM_INFLUENCING_BONES)
+			vertexBoneWeights_[vertexIndex].push_back(weight);
+		else
+			printf("LoaderFbxMeshDesc::addVertexBoneWeight already at max num bone weights");
+	}
+	else
+		printf("LoaderFbxMeshDesc::addVertexBoneWeight invalid vertex index");
+}
 
 void LoaderFbxMeshDesc::setPolygonGroupIds(std::vector<int> polygonGroupIds)
 {
@@ -52,6 +88,14 @@ void LoaderFbxMeshDesc::setVertexBinormals(std::vector<Float4> vertexBinormals)
 {
 	vertexBinormals_ = vertexBinormals;
 }
+void LoaderFbxMeshDesc::setVertexBoneIndices(std::vector<std::vector<int>> vertexBoneIndices)
+{
+	vertexBoneIndices_ = vertexBoneIndices;
+}
+void LoaderFbxMeshDesc::setVertexBoneWeights(std::vector<std::vector<float>> vertexBoneWeights)
+{
+	vertexBoneWeights_ = vertexBoneWeights;
+}
 
 std::vector<int>	LoaderFbxMeshDesc::getPolygonGroupIds()
 {
@@ -80,4 +124,13 @@ std::vector<Float4>	LoaderFbxMeshDesc::getVertexTangents()
 std::vector<Float4>	LoaderFbxMeshDesc::getVertexBinormals()
 {
 	return vertexBinormals_;
+}
+
+std::vector<std::vector<int>> LoaderFbxMeshDesc::getVertexBoneIndices()
+{
+	return vertexBoneIndices_;
+}
+std::vector<std::vector<float>> LoaderFbxMeshDesc::getVertexBoneWeights()
+{
+	return vertexBoneWeights_;
 }
