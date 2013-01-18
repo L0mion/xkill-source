@@ -181,7 +181,7 @@ Attribute_Player::Attribute_Player()
 	priority = 0;
 	cycleSteals = 0;
 	totalExecutionTime = 0;
-	
+
 	walkSpeed = 5.0f;
 	sprintSpeed = walkSpeed*2;
 	currentSpeed = walkSpeed;
@@ -223,7 +223,7 @@ void Attribute_Mesh::clean()
 
 Attribute_Health::Attribute_Health()
 {
-	startHealth = 10.0f;
+	startHealth = 1.0f;
 	health = 0.0f;
 }
 Attribute_Health::~Attribute_Health()
