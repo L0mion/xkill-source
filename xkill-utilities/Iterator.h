@@ -154,10 +154,10 @@ public:
 
 	// Returns an item in the vector regardless
     // if it is valid or not
-    std::vector<T*> getMultiple(std::vector indexVector)
+    std::vector<T*> getMultiple(std::vector<int> indexVector)
     {
-		std::vector<T> attributeVector;
-		for(int i=0; i<indexVector->size(); i++)
+		std::vector<T*> attributeVector;
+		for(int i=0; i<(int)indexVector.size(); i++)
 			attributeVector.push_back(at(indexVector.at(i)));
 
         return attributeVector;

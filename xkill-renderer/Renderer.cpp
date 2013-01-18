@@ -105,14 +105,7 @@ void Renderer::reset()
 HRESULT Renderer::resize(unsigned int screenWidth, unsigned int screenHeight)
 {
 	// Calculate number of cameras
-	unsigned numCameras = 0;
-	for(unsigned i=0; i<attributesCameraOwner_->size(); i++)
-	{
-		if(attributesCameraOwner_->at(i)!=0)
-		{
-			numCameras++;
-		}
-	}
+	unsigned numCameras = itrCamera.size();
 	
 	// Stuff
 	HRESULT hr = S_OK;

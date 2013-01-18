@@ -25,14 +25,7 @@ public:
 	bool init();
 	//! Methods that will be called on events. 
 	void onEvent(Event* e);
-	//! Methods that will be called on events. 
-	void event_WindowResize(Event_WindowResize* e);
 	
 	//! Update method that will be called every frame.
 	void onUpdate(float delta);
-
-private:
-	std::vector<Camera> cameras_;						//!< Holds camera objects.
-	std::vector<Attribute_Camera>* cameraAttributes_;	//!< Holds camera attributes.
-	std::vector<Attribute_Input>* inputAttributes_;		//!< Holds input attributes.
 };
