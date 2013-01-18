@@ -41,6 +41,7 @@ public:
 	void setGBuffersAndDepthBuffer(ID3D11DeviceContext*	devcon, ID3D11DepthStencilView*	depthBuffer);
 	void unsetGBuffersAndDepthBufferAsRenderTargets(ID3D11DeviceContext* devcon);
 	void setGBuffersAsCSShaderResources(ID3D11DeviceContext* devcon);
+	void unsetGBuffersAsCSShaderResources(ID3D11DeviceContext* devcon);
 protected:
 private:
 	HRESULT initAlbedo(ID3D11Device* device);

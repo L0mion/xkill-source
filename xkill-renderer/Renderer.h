@@ -92,7 +92,6 @@ private:
 		DirectX::XMFLOAT4X4		projectionMatrix); //!< Renders a debug shape, such as a bounding sphere.
 
 	//temp
-	void renderBackBufferClean();	//refactor me
 	void renderAnimatedMesh(
 		DirectX::XMFLOAT4X4 viewMatrix, 
 		DirectX::XMFLOAT4X4 projectionMatrix);

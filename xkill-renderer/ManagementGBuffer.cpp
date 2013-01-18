@@ -167,3 +167,11 @@ void ManagementGBuffer::setGBuffersAsCSShaderResources(ID3D11DeviceContext* devc
 		GBUFFERID_NUM_BUFFERS, 
 		resourceViews);
 }
+void ManagementGBuffer::unsetGBuffersAsCSShaderResources(ID3D11DeviceContext* devcon)
+{
+	ID3D11ShaderResourceView* resourceViews[GBUFFERID_NUM_BUFFERS];
+	for(int i = 0; i < GBUFFERID_NUM_BUFFERS; i++)
+		resourceViews[i] = nullptr;
+
+	devcon->CSSetShaderResources(0, GBUFFERID_NUM_BUFFERS, resourceViews);
+}

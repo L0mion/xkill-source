@@ -6,6 +6,7 @@
 #define TILE_DIM		16
 #define TILE_MAX_LIGHTS	10
 
+//Global memory
 RWTexture2D<float4> output : register( u0 );
 
 Texture2D gBufferNormal						: register( t0 );
@@ -57,17 +58,18 @@ void lightingCS(
 			tileLightIndices[i] = 0;
 		}
 	}
-
-	//Sample G-Buffers. Data prefetching?
-	float2 texCoord		= float2((float)(threadIDDispatch.x + viewportTopX)/(float)screenWidth,(float)(threadIDDispatch.y + viewportTopY)/(float)screenHeight);
-	float4 gAlbedo		= gBufferAlbedo.SampleLevel(ss, texCoord, 0);
-	float4 gNormal		= gBufferNormal.SampleLevel(ss, texCoord, 0);
-	float4 gMaterial	= gBufferMaterial.SampleLevel(ss, texCoord, 0);
-	float3 positionV	= reconstructViewSpacePosition(texCoord, gBufferDepth.SampleLevel(ss, texCoord, 0).x);
-
 	GroupMemoryBarrierWithGroupSync();
 
+	//Sample G-Buffers. Data prefetching?
+	float2	texCoord	= float2((float)(threadIDDispatch.x + viewportTopX)/(float)screenWidth,(float)(threadIDDispatch.y + viewportTopY)/(float)screenHeight);
+	float4	gAlbedo		= gBufferAlbedo		.SampleLevel(ss, texCoord, 0);
+	float4	gNormal		= gBufferNormal		.SampleLevel(ss, texCoord, 0);
+	float4	gMaterial	= gBufferMaterial	.SampleLevel(ss, texCoord, 0);
+	float	gDepth		= gBufferDepth		.SampleLevel(ss, texCoord, 0).x;
+
 	//Get minimum/maximum depth of tile.
+	float3 positionV = reconstructViewSpacePosition(texCoord, gDepth);
+	float3 positionW = mul(float4(positionV, 1.0f), viewInverse).xyz;
 	uint pixelDepthInt = asuint(positionV.z);
 	InterlockedMin(tileMinDepthInt, pixelDepthInt);
 	InterlockedMax(tileMaxDepthInt, pixelDepthInt);
@@ -138,30 +140,54 @@ void lightingCS(
 	float3 normal = decodeSphereMap(gNormal.xy);
 	
 	float3 eyePosV	= float3(0.0f, 0.0f, 0.0f);
-	float3 toEye	= normalize(eyePosition - positionV);
+	float3 eyePosW	= eyePosition;
+	float3 toEyeW	= normalize(eyePosW - positionW);
+	float3 toEyeV	= normalize(eyePosV - positionV);
 	for(i = 0; i < numLightsDir; i++) //Always apply directional lights regardless of culling.
 	{
 		lightDir(
 			surfaceMaterial,
 			lightsDir[i],
 			normal.xyz,
-			toEye,
+			toEyeW,
 			ambient, diffuse, specular);
 
 		sumAmbient	+= ambient;
 		sumDiffuse	+= diffuse;
 		sumSpecular	+= specular;
 	}
-	//for(i = 0; i < tileLightNum; i++) //Apply culled point-lights.
+	uint pointLightPrevIndex = TILE_MAX_LIGHTS;
+	for(i = 0; i < tileLightNum; i++) //Apply culled point-lights.
+	{
+		uint pointLightIndex = tileLightIndices[i];
+		if(pointLightIndex != pointLightPrevIndex)
+		{
+			//lightPoint(
+			//surfaceMaterial,
+			//lightsPoint[pointLightIndex],
+			//lightsPos[pointLightIndex],
+			//positionV,
+			//normal.xyz,
+			//toEyeV,
+			//ambient, diffuse, specular);
+			//
+			//sumAmbient	+= ambient;
+			//sumDiffuse	+= diffuse;
+			//sumSpecular	+= specular;
+			
+			sumDiffuse.g += 0.1;
+		}
+	}
+
+	//for(i = 0; i < numLightsPoint; i++)
 	//{
-	//	uint pointLightIndex = tileLightIndices[i];
 	//	lightPoint(
 	//		surfaceMaterial,
-	//		lightsPoint[pointLightIndex],
-	//		lightsPos[pointLightIndex],
+	//		lightsPoint[i],
+	//		lightsPos[i], //mul(float4(lightsPos[i], 1.0f), viewInverse).xyz
 	//		positionV,
-	//		normal.xyz,
-	//		toEye,
+	//		mul(float4(normal.xyz, 0.0f), view).xyz, //normal.xyz
+	//		toEyeW,
 	//		ambient, diffuse, specular);
 	//
 	//	sumAmbient	+= ambient;
@@ -169,33 +195,17 @@ void lightingCS(
 	//	sumSpecular	+= specular;
 	//}
 
-	for(i = 0; i < numLightsPoint; i++)
-	{
-		lightPoint(
-			surfaceMaterial,
-			lightsPoint[i],
-			lightsPos[i],
-			positionV,
-			mul(float4(normal.xyz, 0.0f), view),
-			toEye,
-			ambient, diffuse, specular);
-	
-		sumAmbient	+= ambient;
-		sumDiffuse	+= diffuse;
-		sumSpecular	+= specular;
-	}
-
 	float4 litSum = sumAmbient + sumDiffuse + sumSpecular;
-	output[uint2(threadIDDispatch.x + viewportTopX, threadIDDispatch.y + viewportTopY)] = litSum; //
+	output[uint2(threadIDDispatch.x + viewportTopX, threadIDDispatch.y + viewportTopY)] = litSum;
 
-	if(tileLightNum > 0)
-	{
-		output[uint2(threadIDDispatch.x + viewportTopX, threadIDDispatch.y + viewportTopY)] = float4(0.0f, 1.0f, 0.0f, 1.0f);
-	}
-	else
-	{
-		output[uint2(threadIDDispatch.x + viewportTopX, threadIDDispatch.y + viewportTopY)] = litSum;
-	}
+	//if(tileLightNum > 0)
+	//{
+	//	output[uint2(threadIDDispatch.x + viewportTopX, threadIDDispatch.y + viewportTopY)] = float4(0.0f, 1.0f, 0.0f, 1.0f);
+	//}
+	//else
+	//{
+	//	output[uint2(threadIDDispatch.x + viewportTopX, threadIDDispatch.y + viewportTopY)] = litSum;
+	//}
 }
 
 //Insert me back into the code plz? :(

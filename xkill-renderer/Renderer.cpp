@@ -522,7 +522,13 @@ void Renderer::renderViewportToBackBuffer(ViewportData& vpData)
 
 	//Unset and clean.
 	managementFX_->unsetShader(devcon, SHADERID_CS_DEFAULT);
-	renderBackBufferClean();
+
+	managementD3D_->unsetUAVBackBufferCS();
+	managementD3D_->unsetDepthBufferSRV(GBUFFER_SHADER_REGISTER_DEPTH);
+
+	managementGBuffer_->unsetGBuffersAsCSShaderResources(devcon);
+
+	devcon->CSSetSamplers(0, 0, nullptr); //make me nice...
 }
 void Renderer::renderAttribute(
 	Attribute_Render*	renderAt,
@@ -720,19 +726,6 @@ void Renderer::renderAnimatedMesh(DirectX::XMFLOAT4X4 viewMatrix, DirectX::XMFLO
 	devcon->PSSetSamplers(0, 0, nullptr);
 	devcon->IASetInputLayout(nullptr);
 	devcon->RSSetState(nullptr);
-}
-void Renderer::renderBackBufferClean()
-{
-	ID3D11DeviceContext* devcon = managementD3D_->getDeviceContext();
-
-	ID3D11UnorderedAccessView* uav2[] = { nullptr };
-	devcon->CSSetUnorderedAccessViews(0, 1, uav2, NULL);
-
-	ID3D11ShaderResourceView* resourceViews[GBUFFERID_NUM_BUFFERS];
-	for(int i=0; i<GBUFFERID_NUM_BUFFERS; i++)
-		resourceViews[i] = nullptr;
-	devcon->CSSetShaderResources(0, GBUFFERID_NUM_BUFFERS, resourceViews);
-	devcon->CSSetSamplers(0, 0, nullptr);
 }
 
 void Renderer::loadTextures(TexDesc* texdesc)

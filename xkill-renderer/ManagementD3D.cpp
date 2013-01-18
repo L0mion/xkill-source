@@ -233,7 +233,20 @@ LPCWSTR ManagementD3D::featureLevelToString(D3D_FEATURE_LEVEL featureLevel)
 
 void ManagementD3D::setUAVBackBufferCS()
 {
-	devcon_->CSSetUnorderedAccessViews(0, 1, &uavBackBuffer_, nullptr);
+	devcon_->CSSetUnorderedAccessViews(
+		0, 
+		1, 
+		&uavBackBuffer_, 
+		nullptr);
+}
+void ManagementD3D::unsetUAVBackBufferCS()
+{
+	ID3D11UnorderedAccessView* uav[] = { nullptr };
+	devcon_->CSSetUnorderedAccessViews(
+		0, 
+		1, 
+		uav, 
+		nullptr);
 }
 void ManagementD3D::setDepthBufferSRV(unsigned int shaderRegister)
 {
@@ -241,6 +254,13 @@ void ManagementD3D::setDepthBufferSRV(unsigned int shaderRegister)
 		shaderRegister, 
 		1, 
 		&srvDepthBuffer_);
+}
+void ManagementD3D::unsetDepthBufferSRV(unsigned int shaderRegister)
+{
+	devcon_->CSSetShaderResources(
+		shaderRegister,
+		0,
+		NULL);
 }
 
 void ManagementD3D::present()
