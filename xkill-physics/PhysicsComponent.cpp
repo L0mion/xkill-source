@@ -110,7 +110,7 @@ void PhysicsComponent::onUpdate(float delta)
 			physicsObjects_->at(i)->onUpdate(delta);
 		}
 	}
-	dynamicsWorld_->stepSimulation(delta,10);
+	dynamicsWorld_->stepSimulation(delta,0);
 	FLUSH_QUEUED_EVENTS(EVENT_PHYSICS_ATTRIBUTES_COLLIDING);
 }
 

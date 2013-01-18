@@ -4,6 +4,7 @@
 
 #include <btBulletDynamicsCommon.h>
 #include <Serialize/BulletWorldImporter/btBulletWorldImporter.h>
+#include <BulletCollision/CollisionShapes/btShapeHull.h>
 
 #include <xkill-utilities/AttributeManager.h>
 #include <xkill-utilities/MeshModel.h>
@@ -14,7 +15,7 @@ CollisionShapes::CollisionShapes()
 {
 	itrMesh	 = ATTRIBUTE_MANAGER->mesh.getIterator();
 	collisionShapes_ = new btAlignedObjectArray<btCollisionShape*>();
-	defaultShape_ = new btSphereShape(1);
+	defaultShape_ = new btSphereShape(btScalar(1.0f));
 	importer_ = new btBulletWorldImporter();
 }
 
@@ -22,7 +23,7 @@ CollisionShapes::~CollisionShapes()
 {
 	for(int i = 0; i < collisionShapes_->size(); i++)
 	{
-		if(collisionShapes_->at(i)->getShapeType() == COMPOUND_SHAPE_PROXYTYPE || collisionShapes_->at(i)->getShapeType() ==  SPHERE_SHAPE_PROXYTYPE )
+		if(collisionShapes_->at(i)->getShapeType() == COMPOUND_SHAPE_PROXYTYPE || collisionShapes_->at(i)->getShapeType() == SPHERE_SHAPE_PROXYTYPE )
 		{
 			
 			delete collisionShapes_->at(i);
@@ -49,7 +50,81 @@ btCollisionShape* CollisionShapes::getCollisionShape(unsigned int meshId)
 
 void CollisionShapes::loadCollisionShapes()
 {
-	Settings* settings = ATTRIBUTE_MANAGER->settings;	
+	//btTriangleMesh file load (memory leak, otherwise functioning)
+	/*
+	Attribute_Mesh* meshAttribute;
+	while(itrMesh.hasNext())
+	{
+		meshAttribute = itrMesh.getNext();
+		std::vector<VertexPosNormTex> vertices;
+
+
+
+		//----------------------------------
+		//-->check MEMORY LEAK
+		btTriangleMesh *triangleMesh = new btTriangleMesh(); 
+		//<--
+		//----------------------------------
+
+
+
+		vertices = meshAttribute->mesh->getGeometry().getVertices();
+		unsigned int numSubsets = meshAttribute->mesh->getGeometry().getNumSubsets();
+		std::vector<unsigned int> indices;
+		for(unsigned int j = 0; j < numSubsets; j++)
+		{
+			indices = meshAttribute->mesh->getGeometry().getSubsets().at(j).getIndices();
+			unsigned int numIndices = indices.size();
+			for(unsigned int k = 0; k+2 < numIndices; k+=3)
+			{
+				btVector3 a = btVector3(vertices[indices[k]].position_.x,
+													vertices[indices[k]].position_.y,
+													vertices[indices[k]].position_.z);
+				triangleMesh->addTriangle(btVector3(vertices[indices[k]].position_.x,
+													vertices[indices[k]].position_.y,
+													vertices[indices[k]].position_.z),
+											btVector3(vertices[indices[k+1]].position_.x,
+													vertices[indices[k+1]].position_.y,
+													vertices[indices[k+1]].position_.z),
+											btVector3(vertices[indices[k+2]].position_.x,
+													vertices[indices[k+2]].position_.y,
+													vertices[indices[k+2]].position_.z));
+			}
+		}
+
+		if(meshAttribute->dynamic)
+		{
+			btConvexTriangleMeshShape tcs(triangleMesh);
+		
+			btShapeHull hull(&tcs);
+			hull.buildHull(0);
+			tcs.setUserPointer(&hull);
+			btConvexHullShape* convexShape = new btConvexHullShape;
+			for(int i=0; i< hull.numVertices(); i++)
+			{
+				convexShape->addPoint(hull.getVertexPointer()[i]);
+			}
+
+			collisionShapes_->push_back(convexShape);
+			delete triangleMesh;
+		}
+		else
+		{
+			btBvhTriangleMeshShape* staticShape = new btBvhTriangleMeshShape(triangleMesh,true);
+			collisionShapes_->push_back(staticShape);
+			int a = staticShape->getShapeType();
+			//triangleMeshes_push_back(triangleMesh);
+		}
+
+		unsigned int meshID		= meshAttribute->meshID;
+		unsigned int meshIndex	= collisionShapes_->size() - 1;
+		std::pair<unsigned int, unsigned int> idtoindex(meshID, meshIndex);
+		collisionShapesIdToIndex_.insert(idtoindex);
+	}
+	*/
+
+	//.bullet file loading
+	Settings* settings = ATTRIBUTE_MANAGER->settings;
 	std::string filename = std::string("../../xkill-resources/xkill-level/");
 	filename = filename.append(settings->currentLevel);
 	filename = filename.append("/");
@@ -71,25 +146,25 @@ void CollisionShapes::loadCollisionShapes()
 			collisionShape = importer_->getCollisionShapeByName(name.c_str());
 			if(collisionShape != nullptr)
 			{
-
-				/*
 				//REMOVE
-				if(!name.compare("ThinWallRigidBodyShape"))
-				{
-					btBoxShape* box = (btBoxShape*)collisionShape;
-					btVector3 half = box->getHalfExtentsWithMargin();
-					//btCapsuleShape* capsule = new btCapsuleShape( half.x() > half.z() ? half.x() : half.z(), half.y());
-					
-					btTriangleMesh* triangleMesh = new btTriangleMesh();
-					triangleMesh->addTriangle(btVector3(-1.0f, -2.5f, 0.0f), btVector3(1.0f, -2.5f, 0.0f), btVector3(-1.0f, 2.5f, 0.0f));
-					triangleMesh->addTriangle(btVector3(1.0f, 2.5f, 0.0f), btVector3(1.0f, -2.5f, 0.0f), btVector3(-1.0f, 2.5f, 0.0f));
-					btBvhTriangleMeshShape* BvhmeshShape = new btBvhTriangleMeshShape(triangleMesh,true);
-					
-					//collisionShape = capsule;
-					//collisionShapes_->push_back(meshShape);
-					collisionShape = BvhmeshShape;
-				}
-				*/
+				
+				//if(!name.compare("ThinWallRigidBodyShape"))
+				//{
+				//	btBoxShape* box = (btBoxShape*)collisionShape;
+				//	btVector3 half = box->getHalfExtentsWithMargin();
+				//	//btCapsuleShape* capsule = new btCapsuleShape( half.x() > half.z() ? half.x() : half.z(), half.y());
+				//	
+				//	btTriangleMesh* triangleMesh = new btTriangleMesh();
+				//	triangleMesh->addTriangle(btVector3(0.0f, -2.5f, -1.0f), btVector3(0.0f, -2.5f, 1.0f), btVector3(0.0f, 2.5f, -1.0f));
+				//	triangleMesh->addTriangle(btVector3(0.0f, 2.5f, 1.0f), btVector3(0.0f,  2.5f, -1.0f), btVector3(0.0f, -2.5f, 1.0f));
+				//	btBvhTriangleMeshShape* BvhmeshShape = new btBvhTriangleMeshShape(triangleMesh,true);
+				//	
+				//	//collisionShape = capsule;
+				//	//collisionShapes_->push_back(meshShape);
+				//	collisionShape = BvhmeshShape;
+				//}
+				
+				
 
 
 				std::pair<unsigned int, unsigned int>  idToIndex(meshAttribute->meshID,collisionShapes_->size());
@@ -114,16 +189,16 @@ void CollisionShapes::loadCollisionShapes()
 				if(collisionShape != nullptr)
 				{
 					//check compare (2013-01-17 17.19)
-					if(name.compare("xkill_processRigidBody"))
-					{
-						btBoxShape* box = (btBoxShape*)collisionShape;
-						btVector3 half = box->getHalfExtentsWithMargin();
-						//btCapsuleShape* capsule = new btCapsuleShape( half.x() > half.z() ? half.x() : half.z(), half.y());
-						btSphereShape* sphere = new btSphereShape(0.2);
-						//collisionShape = capsule;
-						collisionShapes_->push_back(sphere);
-						collisionShape = sphere;
-					}
+					//if(name.compare("xkill_processRigidBody"))
+					//{
+					//	btBoxShape* box = (btBoxShape*)collisionShape;
+					//	btVector3 half = box->getHalfExtentsWithMargin();
+					//	//btCapsuleShape* capsule = new btCapsuleShape( half.x() > half.z() ? half.x() : half.z(), half.y());
+					//	btSphereShape* sphere = new btSphereShape(0.2);
+					//	//collisionShape = capsule;
+					//	collisionShapes_->push_back(sphere);
+					//	collisionShape = sphere;
+					//}
 					name = name.append("Shape");
 					btCompoundShape* cs = new btCompoundShape();
 					cs->addChildShape(importer_->getRigidBodyByName(name.c_str())->getWorldTransform(),collisionShape);

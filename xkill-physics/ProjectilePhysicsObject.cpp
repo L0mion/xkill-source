@@ -23,7 +23,6 @@ bool ProjectilePhysicsObject::subClassSpecificInitHook()
 
 	//Box shape: 0.1, 0.1, 0.494
 	//Projectile speed: 5
-	//Wall thickness: 0.01
 	//dynamicsWorld_->stepSimulation(delta,10);
 	//Working settings:
 	setCcdMotionThreshold(1.0f);
