@@ -257,10 +257,12 @@ void ManagementD3D::setDepthBufferSRV(unsigned int shaderRegister)
 }
 void ManagementD3D::unsetDepthBufferSRV(unsigned int shaderRegister)
 {
+	ID3D11ShaderResourceView* nullViews[1] = { nullptr };
+
 	devcon_->CSSetShaderResources(
 		shaderRegister,
-		0,
-		NULL);
+		1,
+		nullViews);
 }
 
 void ManagementD3D::present()

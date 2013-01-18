@@ -18,7 +18,7 @@ PSOut defaultPS(VSOut pIn)
 {
 	PSOut output;
 
-	output.normal		= float4(encodeSphereMap(pIn.normalW), 0.0f, pIn.position.z);
+	output.normal		= float4(encodeSphereMap(pIn.normalW), 0.0f, 0.0f);
 	output.albedo		= texAlbedo.SampleLevel(ss, pIn.texcoord, 0);
 	
 	output.material		= float4(specularTerm, 1.0f);

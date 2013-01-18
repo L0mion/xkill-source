@@ -525,10 +525,9 @@ void Renderer::renderViewportToBackBuffer(ViewportData& vpData)
 
 	managementD3D_->unsetUAVBackBufferCS();
 	managementD3D_->unsetDepthBufferSRV(GBUFFER_SHADER_REGISTER_DEPTH);
-
 	managementGBuffer_->unsetGBuffersAsCSShaderResources(devcon);
 
-	devcon->CSSetSamplers(0, 0, nullptr); //make me nice...
+	devcon->CSSetSamplers(0, 0, nullptr); //move me into managementSS
 }
 void Renderer::renderAttribute(
 	Attribute_Render*	renderAt,

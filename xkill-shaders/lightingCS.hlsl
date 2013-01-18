@@ -28,10 +28,11 @@ groupshared uint tileLightIndices[TILE_MAX_LIGHTS];	//Indices to lights intersec
 
 float3 reconstructViewSpacePosition(float2 texCoord, float z)
 {
-	float4 position = float4(0.0f, 0.0f, 0.0f, 1.0f);
-	position.x = 2.0f * texCoord.x - 1.0f;
-	position.y = -2.0f * texCoord.y +1.0f;
-	position.z = -z;
+	float4 position = float4(
+		2.0f	* texCoord.x - 1.0f, 
+		-2.0f	* texCoord.y + 1.0f, 
+		-z, 
+		1.0f);
 
 	position = mul(position, projectionInverse);
 	position.xyz = position.xyz / position.w;
@@ -101,7 +102,6 @@ void lightingCS(
 	for(i = 0; i < numPasses; ++i)
 	{
 		uint lightIndex = i * numTileThreads + threadIDBlockIndex;
-		//lightIndex = min(lightIndex, numLightsPoint - 1);
 
 		if(lightIndex < numLightsPoint)
 		{
@@ -120,11 +120,6 @@ void lightingCS(
 			}
 		}
 	}
-	/*
-	WARNING:
-	Note that we're filling tileLightIndices with lots of indices for the last light.
-	Implement some sort of filter for this, possibly when iterating through tileLightIndices to check for multiple occurences of the same index.
-	*/
 	GroupMemoryBarrierWithGroupSync();
 
 	//Apply lighting
@@ -159,49 +154,45 @@ void lightingCS(
 		sumDiffuse	+= diffuse;
 		sumSpecular	+= specular;
 	}
-	uint pointLightPrevIndex = TILE_MAX_LIGHTS + 1;
-	for(i = 0; i < tileLightNum; i++) //Apply culled point-lights.
-	{
-		uint pointLightIndex = tileLightIndices[i];
-		if(pointLightIndex != pointLightPrevIndex)
-		{
-			//lightPoint(
-			//surfaceMaterial,
-			//lightsPoint[pointLightIndex],
-			//lightsPos[pointLightIndex],
-			//positionV,
-			//normal.xyz,
-			//toEyeV,
-			//ambient, diffuse, specular);
-			//
-			//sumAmbient	+= ambient;
-			//sumDiffuse	+= diffuse;
-			//sumSpecular	+= specular;
-			
-			sumDiffuse.g += 0.1;
-			pointLightPrevIndex = pointLightIndex;
-		}
-	}
 
-	//for(i = 0; i < numLightsPoint; i++)
-	//{
-	//	lightPoint(
-	//		surfaceMaterial,
-	//		lightsPoint[i],
-	//		lightsPos[i], //mul(float4(lightsPos[i], 1.0f), viewInverse).xyz
-	//		positionV,
-	//		mul(float4(normal.xyz, 0.0f), view).xyz, //normal.xyz
-	//		toEyeW,
-	//		ambient, diffuse, specular);
-	//
-	//	sumAmbient	+= ambient;
-	//	sumDiffuse	+= diffuse;
-	//	sumSpecular	+= specular;
-	//}
+	for(i = 0; i < numLightsPoint; i++)
+	{
+		lightPoint(
+			surfaceMaterial,
+			lightsPoint[i],
+			lightsPos[i], //mul(float4(lightsPos[i], 1.0f), viewInverse).xyz
+			positionV,
+			mul(float4(normal.xyz, 0.0f), view).xyz, //normal.xyz
+			toEyeV,
+			ambient, diffuse, specular);
+	
+		sumAmbient	+= ambient;
+		sumDiffuse	+= diffuse;
+		sumSpecular	+= specular;
+	}
 
 	float4 litSum = sumAmbient + sumDiffuse + sumSpecular;
 	output[uint2(threadIDDispatch.x + viewportTopX, threadIDDispatch.y + viewportTopY)] = litSum;
 }
+
+//Insert me back into the code when lighting works!
+//for(i = 0; i < tileLightNum; i++) //Apply culled point-lights.
+//{
+//	lightPoint(
+//		surfaceMaterial,
+//		lightsPoint[pointLightIndex],
+//		lightsPos[pointLightIndex],
+//		positionV,
+//		normal.xyz,
+//		toEyeV,
+//		ambient, diffuse, specular);
+//	
+//	sumAmbient	+= ambient;
+//	sumDiffuse	+= diffuse;
+//	sumSpecular	+= specular;
+//	
+//	//sumDiffuse.g += 0.1;
+//}
 
 //Insert me back into the code plz? :(
 //for(i = 0; i < numLightsSpot; i++)
