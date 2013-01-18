@@ -48,6 +48,16 @@ public:
 	{
 		CREATE_ATTRIBUTE(Attribute_Position, position, entity);
 
+		//temp, create demo light for each projectile
+		//CREATE_ATTRIBUTE(Attribute_Light_Point, lightPoint, entity);
+		//CONNECT_ATTRIBUTES(lightPoint, position);
+		//lightPoint->lightPoint.ambient		= Float4(0.8f, 0.8f, 0.8f, 1.0f);
+		//lightPoint->lightPoint.diffuse		= Float4(0.8f, 0.8f, 0.8f, 1.0f);
+		//lightPoint->lightPoint.specular		= Float4(0.8f, 0.8f, 0.8f, 1.0f);
+		//lightPoint->lightPoint.range		= 3.0f;
+		//lightPoint->lightPoint.attenuation	= Float3(0.0f, 0.1f, 0.0f);
+		/////
+
 		CREATE_ATTRIBUTE(Attribute_Spatial, spatial, entity);
 		CONNECT_ATTRIBUTES(spatial, position);
 
@@ -117,6 +127,17 @@ public:
 		physics->mass = 0;
 				
 		HACKHACK+=2;
+
+		position = ((AttributeManager*)AttributeManagerDLLWrapper::getInstance())->position.createAttribute(entity);
+		position->position = Float3(0.0f, 0.5f, 0.0f);
+		//temp, create demo light for each projectile
+		CREATE_ATTRIBUTE(Attribute_Light_Point, lightPoint, entity);
+		CONNECT_ATTRIBUTES(lightPoint, position);
+		lightPoint->lightPoint.ambient		= Float4(0.8f, 0.8f, 0.8f, 1.0f);
+		lightPoint->lightPoint.diffuse		= Float4(0.8f, 0.8f, 0.8f, 1.0f);
+		lightPoint->lightPoint.specular		= Float4(0.8f, 0.8f, 0.8f, 1.0f);
+		lightPoint->lightPoint.range		= 3.0f;
+		lightPoint->lightPoint.attenuation	= Float3(0.0f, 0.1f, 0.0f);
 
 		//temp, create demo light for each projectile
 		CREATE_ATTRIBUTE(Attribute_Light_Dir, lightDir, entity);

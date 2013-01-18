@@ -29,15 +29,13 @@ groupshared uint tileLightIndices[TILE_MAX_LIGHTS];	//Indices to lights intersec
 float3 reconstructViewSpacePosition(float2 texCoord, float z)
 {
 	float4 position = float4(
-		2.0f	* texCoord.x - 1.0f, 
-		-2.0f	* texCoord.y + 1.0f, 
-		-z, 
-		1.0f);
+	/*x = */ 2.0f	* texCoord.x - 1.0f, 
+	/*y = */ -2.0f	* texCoord.y + 1.0f, 
+	/*z = */ -z, 
+	1.0f);
 
 	position = mul(position, projectionInverse);
-	position.xyz = position.xyz / position.w;
-
-	return position.xyz;
+	return position.xyz / position.w;
 }
 
 [numthreads(TILE_DIM, TILE_DIM, 1)]
@@ -68,10 +66,11 @@ void lightingCS(
 	float4	gMaterial	= gBufferMaterial	.SampleLevel(ss, texCoord, 0);
 	float	gDepth		= gBufferDepth		.SampleLevel(ss, texCoord, 0).x;
 
+	float3 surfacePosV = reconstructViewSpacePosition(texCoord, gDepth);
+	float3 surfacePosW = mul(float4(surfacePosV, 1.0f), viewInverse).xyz;
+
 	//Get minimum/maximum depth of tile.
-	float3 positionV = reconstructViewSpacePosition(texCoord, gDepth);
-	float3 positionW = mul(float4(positionV, 1.0f), viewInverse).xyz;
-	uint pixelDepthInt = asuint(positionV.z);
+	uint pixelDepthInt = asuint(surfacePosV.z);
 	InterlockedMin(tileMinDepthInt, pixelDepthInt);
 	InterlockedMax(tileMaxDepthInt, pixelDepthInt);
 	GroupMemoryBarrierWithGroupSync();
@@ -89,8 +88,8 @@ void lightingCS(
 	frustum[1] = c4 + c1;
 	frustum[2] = c4 - c2;
 	frustum[3] = c4 + c2;
-	frustum[4] = float4(0.0f, 0.0f, 1.0f, tileMinDepthF); //Near/Far
-	frustum[5] = float4(0.0f, 0.0f, -1.0f, -tileMaxDepthF);
+	frustum[4] = float4(0.0f, 0.0f, 1.0f,	tileMinDepthF); //Near/Far
+	frustum[5] = float4(0.0f, 0.0f, -1.0f,	-tileMaxDepthF);
 	[unroll] for(uint i = 0; i < 4; i++) //Normalize frustum sides
 	{
 		frustum[i] *= rcp(length(frustum[i].xyz));
@@ -139,8 +138,8 @@ void lightingCS(
 	
 	float3 eyePosV	= float3(0.0f, 0.0f, 0.0f);
 	float3 eyePosW	= eyePosition;
-	float3 toEyeW	= normalize(eyePosW - positionW);
-	float3 toEyeV	= normalize(eyePosV - positionV);
+	float3 toEyeW	= normalize(eyePosW - surfacePosW);
+	float3 toEyeV	= normalize(eyePosV - surfacePosV);
 	for(i = 0; i < numLightsDir; i++) //Always apply directional lights regardless of culling.
 	{
 		lightDir(
@@ -160,16 +159,23 @@ void lightingCS(
 		lightPoint(
 			surfaceMaterial,
 			lightsPoint[i],
-			lightsPos[i], //mul(float4(lightsPos[i], 1.0f), viewInverse).xyz
-			positionV,
-			mul(float4(normal.xyz, 0.0f), view).xyz, //normal.xyz
-			toEyeV,
+			mul(float4(lightsPos[i], 1.0f), viewInverse).xyz, //lightsPos[i], //
+			surfacePosW,
+			normal.xyz,//mul(float4(normal.xyz, 0.0f), view).xyz, // 
+			toEyeW,
 			ambient, diffuse, specular);
 	
 		sumAmbient	+= ambient;
 		sumDiffuse	+= diffuse;
 		sumSpecular	+= specular;
 	}
+
+	//TILING DEMO:
+	//for(i = 0; i < tileLightNum; i++) //Apply culled point-lights.
+	//{
+	//	
+	//	sumDiffuse.g += 0.1;
+	//}
 
 	float4 litSum = sumAmbient + sumDiffuse + sumSpecular;
 	output[uint2(threadIDDispatch.x + viewportTopX, threadIDDispatch.y + viewportTopY)] = litSum;
