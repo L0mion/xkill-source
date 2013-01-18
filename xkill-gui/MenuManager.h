@@ -6,6 +6,7 @@
 #include "Menu_Main.h"
 #include "Menu_ScoreBoard.h"
 #include "Menu_InGame.h"
+#include "InputTable.h"
 #include <vector>
 
 class Attribute_Player;
@@ -67,6 +68,7 @@ private:
 	Menu_Main* mainMenu;
 	Menu_ScoreBoard* scoreBoard;
 	Menu_InGame* inGameMenu;
+	InputTable*	inputTable;
 	HUDManager hudManager;
 
 public:

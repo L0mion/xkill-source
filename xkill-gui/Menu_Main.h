@@ -6,6 +6,8 @@
 
 class Menu_Editor;
 class QStandardItemModel;
+class QStandardItemModel;
+class InputObject;
 
 class Menu_Main : public QMainWindow, public ToggleHelper
 {
@@ -19,7 +21,10 @@ public:
 
 	void parentMoveEvent();
 
-	QStandardItemModel* model;
+	QStandardItemModel* levelListModel;
+	QStandardItemModel* inputListModel;
+	QStandardItemModel* deviceListModel;
+	InputObject* currentObject;
 	QString filePath;
 
 	void loadXML();
@@ -30,8 +35,16 @@ public slots:
 		void slot_addLevel();
 		void slot_removeLevel();
 		void slot_saveLevel();
+		void slot_loadInputList(int deviceId);
+		void slot_loadInputSettings(QModelIndex index);
+		void slot_inputSettingsChanged();
+		void slot_setInputObject(QModelIndex index);
 
 protected:
 	void keyPressEvent(QKeyEvent* e);
 	void mousePressEvent(QMouseEvent* e);
+
+	void loadDeviceList();
+	void loadInputList(int deviceId);
+	void loadInputSettings(int objectId);
 };

@@ -93,25 +93,25 @@ void XInputDevice::setStandardMappings()
 {
 	if(axes_.size() >= 4)
 	{
-		axes_[0]->addFloatMapping(ACTION_F_WALK_LR);
-		axes_[1]->addFloatMapping(ACTION_F_WALK_FB);
-		axes_[2]->addFloatMapping(ACTION_F_LOOK_LR);
-		axes_[3]->addFloatMapping(ACTION_F_LOOK_UD);
+		axes_[0]->addMapping(InputAction::ACTION_F_WALK_LR);
+		axes_[1]->addMapping(InputAction::ACTION_F_WALK_FB);
+		axes_[2]->addMapping(InputAction::ACTION_F_LOOK_LR);
+		axes_[3]->addMapping(InputAction::ACTION_F_LOOK_UD);
 	}
 
 	if(buttons_.size() >= 14)
 	{
-		buttons_[0]->addBoolMapping(ACTION_B_CHANGE_AMMUNITIONTYPE);
-		buttons_[1]->addBoolMapping(ACTION_B_CHANGE_FIRINGMODE);
-		buttons_[10]->addBoolMapping(ACTION_B_WALK_FORWARD);
-		buttons_[11]->addBoolMapping(ACTION_B_WALK_RIGHT);
-		buttons_[12]->addBoolMapping(ACTION_B_WALK_BACKWARD);
-		buttons_[13]->addBoolMapping(ACTION_B_WALK_RIGHT);
+		buttons_[0]->addMapping(InputAction::ACTION_B_CHANGE_AMMUNITIONTYPE);
+		buttons_[1]->addMapping(InputAction::ACTION_B_CHANGE_FIRINGMODE);
+		buttons_[10]->addMapping(InputAction::ACTION_B_WALK_FORWARD);
+		buttons_[11]->addMapping(InputAction::ACTION_B_WALK_RIGHT);
+		buttons_[12]->addMapping(InputAction::ACTION_B_WALK_BACKWARD);
+		buttons_[13]->addMapping(InputAction::ACTION_B_WALK_LEFT);
 	}
 
 	if(triggers_.size() >= 2)
 	{
-		triggers_[0]->addBoolMapping(ACTION_B_FIRE);
+		triggers_[0]->addMapping(InputAction::ACTION_B_FIRE);
 	}
 }
 
@@ -131,14 +131,7 @@ std::string XInputDevice::getStandardMappingsString()
 
 	for(unsigned int i = 0; i < inputObjects.size(); i++)
 	{
-		std::vector<int>* mappings = inputObjects.at(i)->getBoolMappings();
-
-		for(unsigned int j = 0; j < mappings->size(); j++)
-		{
-			str += Converter::IntToStr(mappings->at(j));
-		}
-
-		mappings = inputObjects.at(i)->getFloatMappings();
+		std::vector<int>* mappings = inputObjects.at(i)->getMappings();
 
 		for(unsigned int j = 0; j < mappings->size(); j++)
 		{
@@ -213,7 +206,14 @@ void XInputDevice::createInputObjectsFromLayout()
 	}
 
 	if(axes_.size() >= 4)
+	{
 		axes_[3]->setInverted(true);
+
+		axes_[0]->setName("Left Stick X");
+		axes_[1]->setName("Left Stick Y");
+		axes_[2]->setName("Right Stick X");
+		axes_[3]->setName("Right Stick Y");
+	}
 	
 	for(int i = 0; i < inputLayout_.nrOfButtons + inputLayout_.nrOfHatSwitches*4; i++)
 	{
@@ -222,10 +222,34 @@ void XInputDevice::createInputObjectsFromLayout()
 		inputObjectArray_->inputObjects.push_back(button);
 	}
 
+	if(buttons_.size() >= 14)
+	{
+		buttons_[0]->setName("A");
+		buttons_[1]->setName("B");
+		buttons_[2]->setName("Y");
+		buttons_[3]->setName("X");
+		buttons_[4]->setName("Start");
+		buttons_[5]->setName("Select");
+		buttons_[6]->setName("Left Shoulder");
+		buttons_[7]->setName("Right Shoulder");
+		buttons_[8]->setName("Left Stick Button");
+		buttons_[9]->setName("Right Stick Button");
+		buttons_[10]->setName("DPad Up");
+		buttons_[11]->setName("DPad Right");
+		buttons_[12]->setName("DPad Down");
+		buttons_[13]->setName("DPad Left");
+	}
+
 	for(int i = 0; i < inputLayout_.nrOfTriggers; i++)
 	{
 		InputTriggerObject* trigger = new InputTriggerObject(0, 0xFF);
 		triggers_.push_back(trigger);
 		inputObjectArray_->inputObjects.push_back(trigger);
+	}
+
+	if(triggers_.size() >= 2)
+	{
+		triggers_[0]->setName("Right Trigger");
+		triggers_[1]->setName("Left Trigger");
 	}
 }

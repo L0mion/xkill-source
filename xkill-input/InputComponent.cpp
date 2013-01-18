@@ -96,45 +96,45 @@ void InputComponent::handleInput(float delta)
 		if(device == nullptr)
 			continue;
 
-		input->position.x = device->getFloatValue(ACTION_F_WALK_LR);
-		input->position.y = device->getFloatValue(ACTION_F_WALK_FB);
-		input->rotation.x = device->getFloatValue(ACTION_F_LOOK_LR, true) * 0.01f; // Scale input to a reasonable range
-		input->rotation.y = device->getFloatValue(ACTION_F_LOOK_UD, true) * 0.01f;	// Scale input to a reasonable range
+		input->position.x = device->getFloatValue(InputAction::ACTION_F_WALK_LR);
+		input->position.y = device->getFloatValue(InputAction::ACTION_F_WALK_FB);
+		input->rotation.x = device->getFloatValue(InputAction::ACTION_F_LOOK_LR, true) * 0.01f; // Scale input to a reasonable range
+		input->rotation.y = device->getFloatValue(InputAction::ACTION_F_LOOK_UD, true) * 0.01f;	// Scale input to a reasonable range
 
-		if(device->getBoolValue(ACTION_B_FIRE))
+		if(device->getBoolValue(InputAction::ACTION_B_FIRE))
 			input->fire = true;
-		if(device->getBoolReleased(ACTION_B_CHANGE_AMMUNITIONTYPE))
+		if(device->getBoolReleased(InputAction::ACTION_B_CHANGE_AMMUNITIONTYPE))
 			input->changeAmmunitionType = true;
-		if(device->getBoolReleased(ACTION_B_CHANGE_FIRINGMODE))
+		if(device->getBoolReleased(InputAction::ACTION_B_CHANGE_FIRINGMODE))
 			input->changeFiringMode = true;
 
-		if(device->getBoolReleased(ACTION_B_TOGGLE_MUTE_SOUND))
+		if(device->getBoolReleased(InputAction::ACTION_B_TOGGLE_MUTE_SOUND))
 			SEND_EVENT(&Event_PlaySound(-1, true));
 
-		if(device->getBoolReleased(ACTION_B_RUMBLE_ON))
+		if(device->getBoolReleased(InputAction::ACTION_B_RUMBLE_ON))
 		{
 			Event_Rumble* er = new Event_Rumble(itrPlayer.ownerId(), true, 100.0f, 1.0f, 1.0f);
 			EventManager::getInstance()->sendEvent(er);
 			delete er;
 		}
 
-		if(device->getBoolReleased(ACTION_B_RUMBLE_OFF))
+		if(device->getBoolReleased(InputAction::ACTION_B_RUMBLE_OFF))
 		{
 			Event_Rumble* er = new Event_Rumble(itrPlayer.ownerId(), false, 100.0f, 0.0f, 0.0f);
 			EventManager::getInstance()->sendEvent(er);
 			delete er;
 		}
 
-		if(device->getBoolValue(ACTION_B_WALK_FORWARD))
+		if(device->getBoolValue(InputAction::ACTION_B_WALK_FORWARD))
 			input->position.y = 1.0f;
 															
-		if(device->getBoolValue(ACTION_B_WALK_LEFT))
+		if(device->getBoolValue(InputAction::ACTION_B_WALK_LEFT))
 			input->position.x = -1.0f;
 		
-		if(device->getBoolValue(ACTION_B_WALK_BACKWARD))
+		if(device->getBoolValue(InputAction::ACTION_B_WALK_BACKWARD))
 			input->position.y = -1.0f;
 		
-		if(device->getBoolValue(ACTION_B_WALK_RIGHT))
+		if(device->getBoolValue(InputAction::ACTION_B_WALK_RIGHT))
 			input->position.x = 1.0f;
 		
 		float x, y;
@@ -202,16 +202,10 @@ void InputComponent::handleMouseMoveEvent(Event_MouseMove* e)
 {
 	QTInputDevices* device = inputManager_->GetMouseAndKeyboard();
 
-	// Test camera movement
-	float x = (float)e->dx;
-	float y = (float)e->dy;
-
-	float mouseSensitivity = 0.5f;
-
 	if(device != nullptr)
 	{
-		device->setAxis(2, x * mouseSensitivity);
-		device->setAxis(3, y * mouseSensitivity);
+		device->setAxis(0, (float)e->dx);
+		device->setAxis(1, (float)e->dy);
 	}
 }
 

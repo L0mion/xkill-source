@@ -29,6 +29,22 @@ Some code should probably be refactored to a DirectInputGamepad class.
 
 class DirectInputDevice : public InputDevice
 {
+protected:
+	//! Used for passing data from callback function
+	struct EnumObjectsStruct
+	{
+		EnumObjectsStruct()
+		{
+			nrOfFFObjects = 0;
+		}
+
+		int nrOfFFObjects;
+		std::vector<std::string> buttonNames;
+		std::vector<std::string> axisNames;
+		std::vector<std::string> hatSwitchNames;
+	};
+
+private:
 	DirectInputDevice();
 public:
 	DirectInputDevice(LPDIRECTINPUTDEVICE8 device, GUID deviceGUID, std::string name, unsigned int playerID);
@@ -84,6 +100,7 @@ protected:
 	virtual void updateState();
 	virtual void createInputLayout();
 	virtual void createInputObjectsFromLayout();
+	virtual void createInputObjectsFromLayout(EnumObjectsStruct* eos);
 	//! Creates the axes objects 
 	/*!
 	Fills the axesIndexArray that is used to map internal representation of axes
@@ -93,18 +110,6 @@ protected:
 	Could potentially fail to list axes on the controller if they are at a certain
 	position at start up. Unable to replicate this however so maybe not a problem.
 	*/
-	virtual void createAxes();
-
-	//! Used for passing data from callback function
-	struct EnumObjectsStruct
-	{
-		EnumObjectsStruct()
-		{
-			nrOfFFObjects = 0;
-			//offset = 0;
-		}
-
-		int nrOfFFObjects;
-	};
+	virtual void createAxes(EnumObjectsStruct* eos);
 };
 
