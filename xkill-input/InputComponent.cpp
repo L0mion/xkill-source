@@ -1,7 +1,6 @@
 #include "InputComponent.h"
 
 #include <xkill-utilities/EventManager.h>
-#include <xkill-utilities/EventManager.h>
 #include "InputManager.h"
 
 ATTRIBUTES_DECLARE_ALL;
@@ -27,8 +26,6 @@ InputComponent::~InputComponent()
 
 bool InputComponent::init(HWND windowHandle, std::string configFilePath, float searchTime)
 {
-	inputAttributes_ = GET_ATTRIBUTES(input);
-
 	windowHandle_ = windowHandle;
 	searchTime_ = searchTime;
 

@@ -3,9 +3,12 @@
 #include <xkill-utilities/AttributeManager.h>
 #include <xkill-utilities/EventType.h>
 
+ATTRIBUTES_DECLARE_ALL
+
 ScoreComponent::ScoreComponent()
 {
-	playerAttributes_ = nullptr;
+	ATTRIBUTES_INIT_ALL
+
 	SUBSCRIBE_TO_EVENT(this, EVENT_PLAYERDEATH);
 }
 
@@ -16,10 +19,11 @@ ScoreComponent::~ScoreComponent()
 
 bool ScoreComponent::init()
 {
-	playerAttributes_ = GET_ATTRIBUTES(player);
-
-	for(unsigned int i = 0; i < playerAttributes_->size(); i++)
+	for(unsigned int i = 0; itrPlayer.hasNext(); i++)
+	{
 		playerIndices.push_back(i);
+		itrPlayer.getNext();
+	}
 
 	sort(playerIndices);
 
@@ -53,7 +57,7 @@ void ScoreComponent::sort(std::vector<int>& elements)
 
 		for(unsigned int j = 0; j < (elements.size() - 1); j++)
 		{
-			if(playerAttributes_->at(elements[j]).priority > playerAttributes_->at(elements[j + 1]).priority )
+			if(itrPlayer.at(elements[j])->priority > itrPlayer.at(elements[j + 1])->priority )
 			{
 				swap(elements, j, j + 1);
 				alreadySorted = false;

@@ -19,7 +19,7 @@ GameComponent::GameComponent(void)
 
 GameComponent::~GameComponent(void)
 {
-	for(int i = 0; i < levelEvents_.size(); i++)
+	for(unsigned int i = 0; i < levelEvents_.size(); i++)
 	{
 		delete levelEvents_.at(i);
 	}
@@ -28,7 +28,7 @@ GameComponent::~GameComponent(void)
 
 bool GameComponent::init()
 {
-	// Fetch list of stuff used in logic
+	//Fetch list of stuff used in logic
 	GET_ENTITIES(allEntity);
 
 	SEND_EVENT(&Event_CreateSpawnPoint(Float3(-1.5f, 3.0f, 0.0f), 2.0f));
@@ -415,16 +415,14 @@ void GameComponent::event_PhysicsAttributesColliding(Event_PhysicsAttributesColl
 		if(entity2->hasAttribute(ATTRIBUTE_DAMAGE))
 		{
 			// fetch damage from entity 2
-			std::vector<Attribute_Damage>* allDamage = GET_ATTRIBUTES(damage);
 			std::vector<int> damageId = entity2->getAttributes(ATTRIBUTE_DAMAGE);
 
 			// fetch health from entity 1
-			std::vector<Attribute_Health>* allHealth =  GET_ATTRIBUTES(health);
 			std::vector<int> healthId = entity1->getAttributes(ATTRIBUTE_HEALTH);
 
 			for(unsigned i=0; i<damageId.size(); i++)
 			{
-				Attribute_Damage* damage = &allDamage->at(damageId[i]);
+				Attribute_Damage* damage = itrDamage.at(damageId[i]);
 
 				// avoid damage to self
 				if(entity1->getID() != damage->owner_entityID || entity2->hasAttribute(ATTRIBUTE_EXPLOSIONSPHERE))
@@ -432,19 +430,18 @@ void GameComponent::event_PhysicsAttributesColliding(Event_PhysicsAttributesColl
 					// Apply damage to all Health attributes
 					for(unsigned i=0; i<healthId.size(); i++)
 					{
-						Attribute_Health* health = &allHealth->at(healthId[i]);
+						Attribute_Health* health = itrHealth.at(healthId[i]);
 						health->health -= damage->damage;
 						
 						// If a player was killed by the collision, give priority (score) to the player that created the DamageAttribute
 						if(health->health <= 0)
 						{
-							std::vector<Attribute_Player>* allPlayers = GET_ATTRIBUTES(player);
 							Entity* creatorOfProjectilePlayerEntity = &allEntity->at(damage->owner_entityID);
 							std::vector<int> playerId = creatorOfProjectilePlayerEntity->getAttributes(ATTRIBUTE_PLAYER);
 
 							for(unsigned i=0;i<playerId.size();i++)
 							{
-								Attribute_Player* player = &allPlayers->at(playerId.at(i));
+								Attribute_Player* player = itrPlayer.at(playerId.at(i));
 								
 								//Award player
 								if(entity1->getID() != damage->owner_entityID)
@@ -490,22 +487,20 @@ void GameComponent::event_PhysicsAttributesColliding(Event_PhysicsAttributesColl
 		//if(entity2->hasAttribute(ATTRIBUTE_PHYSICS) && !entity2->hasAttribute(ATTRIBUTE_PROJECTILE))
 		{
 			//Set gravity on projectiles colliding with physics objects
-			std::vector<Attribute_Physics>* allPhysics = GET_ATTRIBUTES(physics);
 			std::vector<int> physicsId = entity1->getAttributes(ATTRIBUTE_PHYSICS);
 			for(unsigned i=0;i<physicsId.size();i++)
 			{
-				Attribute_Physics* physicsAttribute = &allPhysics->at(physicsId.at(i));
+				Attribute_Physics* physicsAttribute = itrPhysics.at(physicsId.at(i));
 				physicsAttribute->gravity = Float3(0.0f, -10.0f, 0.0f);
 				physicsAttribute->linearVelocity = Float3(0.0f, 0.0f, 0.0f);
 				physicsAttribute->reloadDataIntoBulletPhysics = true;
 			}
 
 			//Handle PhysicsAttribute of a projectile colliding with another PhysicsAttribute
-			std::vector<Attribute_Projectile>* allProjectile = GET_ATTRIBUTES(projectile);
 			std::vector<int> projectileId = entity1->getAttributes(ATTRIBUTE_PROJECTILE);
 			for(unsigned i=0;i<projectileId.size();i++)
 			{
-				Attribute_Projectile* projectileAttribute = &allProjectile->at(projectileId.at(i));
+				Attribute_Projectile* projectileAttribute = itrProjectile.at(projectileId.at(i));
 
 				//Shorten lifetime of projectile colliding with physics objects
 				if(projectileAttribute->currentLifeTimeLeft > 0.2f)
@@ -517,14 +512,13 @@ void GameComponent::event_PhysicsAttributesColliding(Event_PhysicsAttributesColl
 				if(projectileAttribute->explodeOnImnpact)
 				{
 					//Get damage from projectile.
- 					std::vector<Attribute_Damage>* allDamage = GET_ATTRIBUTES(damage);
 					Attribute_Damage* projectileDamageAttribute;
 					if(entity1->hasAttribute(ATTRIBUTE_DAMAGE))
 					{
 						std::vector<int> damageId = entity1->getAttributes(ATTRIBUTE_DAMAGE);
 						for(unsigned i=0;i<damageId.size();i++)
 						{
-							projectileDamageAttribute = &allDamage->at(damageId.at(i));
+							projectileDamageAttribute = itrDamage.at(damageId.at(i));
 						}
 					}
 
@@ -653,15 +647,11 @@ Attribute_SpawnPoint* GameComponent::findUnoccupiedSpawnPoint()
 void GameComponent::event_StartDeathmatch( Event_StartDeathmatch* e )
 {
 	// Delete players
-	std::vector<int>* playerAttributesOwners = GET_ATTRIBUTE_OWNERS(player);
-	for(unsigned i=0; i<playerAttributesOwners->size(); i++)
+	while(itrPlayer.hasNext())
 	{
-		if(playerAttributesOwners->at(i)!=0)
-		{
-			SEND_EVENT(&Event_RemoveEntity(playerAttributesOwners->at(i)));
-		}
+		itrPlayer.getNext();
+		SEND_EVENT(&Event_RemoveEntity(itrPlayer.ownerId()));
 	}
-
 
 	// Create level entities
 	for(unsigned int i = 0; i < levelEvents_.size(); i++)

@@ -177,4 +177,9 @@ public:
 	{ 
 		return attributeStorage->createAttribute(e);
 	}
+
+	std::vector<int> getAllOwnerId()
+	{
+		return std::vector<int>(*allOwnerId);
+	}
 };

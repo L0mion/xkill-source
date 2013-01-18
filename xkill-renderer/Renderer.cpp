@@ -53,12 +53,7 @@ Renderer::Renderer(HWND windowHandle)
 	managementDebug_	= nullptr;
 	managementMath_		= nullptr;
 
-	attributesSpatial_		= nullptr;
-	attributesPosition_		= nullptr;
-	attributesRender_		= nullptr;
-	attributesDebugShape_	= nullptr;
 	attributesRenderOwner_	= nullptr;
-	attributesCamera_		= nullptr;
 
 	ATTRIBUTES_INIT_ALL;
 
@@ -106,9 +101,11 @@ HRESULT Renderer::resize(unsigned int screenWidth, unsigned int screenHeight)
 {
 	// Calculate number of cameras
 	unsigned numCameras = 0;
-	for(unsigned i=0; i<attributesCameraOwner_->size(); i++)
+
+	std::vector<int> attributesCameraOwner_ = itrCamera.getAllOwnerId();
+	for(unsigned i=0; i < attributesCameraOwner_.size(); i++)
 	{
-		if(attributesCameraOwner_->at(i)!=0)
+		if(attributesCameraOwner_.at(i) != 0)
 		{
 			numCameras++;
 		}
@@ -152,7 +149,6 @@ HRESULT Renderer::init()
 {
 	HRESULT hr = S_OK;
 
-	initAttributes();
 	initWinfo();
 	if(SUCCEEDED(hr))
 		hr = initManagementD3D();
@@ -194,17 +190,6 @@ HRESULT Renderer::init()
 
 	return hr;
 }
-void Renderer::initAttributes()
-{	
-	attributesCamera_		= GET_ATTRIBUTES(camera);
-	attributesRender_		= GET_ATTRIBUTES(render);
-	attributesDebugShape_	= GET_ATTRIBUTES(debugShape);
-	attributesSpatial_		= GET_ATTRIBUTES(spatial);
-	attributesPosition_		= GET_ATTRIBUTES(position);
-
-	attributesCameraOwner_	= GET_ATTRIBUTE_OWNERS(camera);
-	attributesRenderOwner_	= GET_ATTRIBUTE_OWNERS(render);
-}
 void Renderer::initWinfo()
 {
 	Event_GetWindowResolution windowResolution;
@@ -213,7 +198,7 @@ void Renderer::initWinfo()
 	unsigned int screenWidth, screenHeight, numViewports, csDispatchX, csDispatchY;
 	screenWidth		= windowResolution.width;
 	screenHeight	= windowResolution.height;
-	numViewports	= attributesCamera_->size();
+	numViewports	= itrCamera.size();
 	csDispatchX		= screenWidth	/ CS_TILE_SIZE;
 	csDispatchY		= screenHeight	/ CS_TILE_SIZE;
 
@@ -450,14 +435,14 @@ void Renderer::renderViewportToGBuffer(ViewportData& vpData)
 
 	//Make me use iterators!
 	Attribute_DebugShape* debugShapeAt;
-	for(unsigned int i = 0; i < attributesDebugShape_->size(); i++)
+	while(itrDebugShape.hasNext())
 	{
-		if(attributesDebugShape_->at(i).render)
+		debugShapeAt = itrDebugShape.getNext();
+		if(debugShapeAt->render)
 		{
-			debugShapeAt = &attributesDebugShape_->at(i);
 			renderDebugShape(
 				debugShapeAt,
-				i,
+				itrDebugShape.index(),
 				vpData.view, 
 				vpData.proj);
 		}
@@ -524,8 +509,8 @@ void Renderer::renderAttribute(
 	ID3D11DeviceContext*	devcon = managementD3D_->getDeviceContext();
 
 	//Get transform matrices.
-	Attribute_Spatial*	spatialAt			= &attributesSpatial_->at(renderAt->ptr_spatial.index);
-	Attribute_Position*	positionAt			= &attributesPosition_->at(spatialAt->ptr_position.index);
+	Attribute_Spatial*	spatialAt			= itrSpatial.at(renderAt->ptr_spatial.index);
+	Attribute_Position*	positionAt			= itrPosition.at(spatialAt->ptr_position.index);
 	DirectX::XMFLOAT4X4 worldMatrix			= managementMath_->calculateWorldMatrix(spatialAt, positionAt);
 	DirectX::XMFLOAT4X4 worldMatrixInverse	= managementMath_->calculateMatrixInverse(worldMatrix);
 	DirectX::XMFLOAT4X4 finalMatrix			= managementMath_->calculateFinalMatrix(worldMatrix, viewMatrix, projectionMatrix);
@@ -613,8 +598,8 @@ void Renderer::renderDebugShape(
 	ID3D11DeviceContext*	devcon = managementD3D_->getDeviceContext();
 	
 	//Get transform matrices.
-	Attribute_Spatial*	spatialAt			= &attributesSpatial_->at(debugShapeAt->ptr_spatial.index);
-	Attribute_Position*	positionAt			= &attributesPosition_->at(spatialAt->ptr_position.index);
+	Attribute_Spatial*	spatialAt			= itrSpatial.at(debugShapeAt->ptr_spatial.index);
+	Attribute_Position*	positionAt			= itrPosition.at(spatialAt->ptr_position.index);
 	DirectX::XMFLOAT4X4 worldMatrix			= managementMath_->calculateWorldMatrix(spatialAt, positionAt);
 	DirectX::XMFLOAT4X4 worldMatrixInverse	= managementMath_->calculateMatrixInverse(worldMatrix);
 	DirectX::XMFLOAT4X4 finalMatrix			= managementMath_->calculateFinalMatrix(worldMatrix, viewMatrix, projectionMatrix);

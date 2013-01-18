@@ -31,8 +31,6 @@ ManagementLight::ManagementLight()
 	lightSpotBuffer_	= nullptr;
 	lightSpotSRV_		= nullptr;
 
-	attributesPosition_ = nullptr;
-
 	ATTRIBUTES_INIT_ALL;
 }
 ManagementLight::~ManagementLight()
@@ -57,8 +55,6 @@ void ManagementLight::reset()
 HRESULT ManagementLight::init(ID3D11Device* device)
 {
 	HRESULT hr = S_OK;
-
-	attributesPosition_	= GET_ATTRIBUTES(position);
 
 	hr = initLightDir(device);
 	if(SUCCEEDED(hr))
@@ -321,7 +317,7 @@ void ManagementLight::updateLightPoint(ID3D11Device* device, ID3D11DeviceContext
 	while(itrLightPoint.hasNext())
 	{
 		lightPointAt = itrLightPoint.getNext();
-		posAt = &attributesPosition_->at(lightPointAt->ptr_position.index);
+		posAt = itrPosition.at(lightPointAt->ptr_position);
 		lightPointAt->lightPoint.pos = posAt->position;
 
 		if(lightPointCurCount_ < lightPoints_.size())
@@ -355,7 +351,7 @@ void ManagementLight::updateLightSpot(ID3D11Device* device, ID3D11DeviceContext*
 	while(itrLightSpot.hasNext())
 	{
 		lightSpotAt = itrLightSpot.getNext();
-		posAt = &attributesPosition_->at(lightSpotAt->ptr_position.index);
+		posAt = itrPosition.at(lightSpotAt->ptr_position);
 		lightSpotAt->lightSpot.pos = posAt->position;
 
 		if(lightSpotCurCount_ < lightSpots_.size())

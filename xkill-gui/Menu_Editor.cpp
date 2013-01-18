@@ -79,32 +79,20 @@ void Menu_Editor::slot_editorRefresh()
 		num_rows = 0;
 
 		// Fill columns
-		std::vector<int>* allPlayerOwner = 	GET_ATTRIBUTE_OWNERS(player);
-		entityBrowser_add("Players", allPlayerOwner);
-		std::vector<int>* allPositionOwner = GET_ATTRIBUTE_OWNERS(position);
-		entityBrowser_add("Positions", allPositionOwner);
-		std::vector<int>* allSpawnOwner = GET_ATTRIBUTE_OWNERS(spawnPoint);
-		entityBrowser_add("SpawnPoints", allSpawnOwner);
-		std::vector<int>* allRenderOwner = GET_ATTRIBUTE_OWNERS(render);
-		entityBrowser_add("Render", allRenderOwner);
-		std::vector<int>* allMeshOwner = GET_ATTRIBUTE_OWNERS(mesh);
-		entityBrowser_add("Meshes", allMeshOwner);
-		std::vector<int>* allPhysicsOwner = GET_ATTRIBUTE_OWNERS(physics);
-		entityBrowser_add("PhysicsObjects", allPhysicsOwner);
-		std::vector<int>* allInputDeviceOwner = GET_ATTRIBUTE_OWNERS(inputDevice);
-		entityBrowser_add("InputDevices", allInputDeviceOwner);
-		std::vector<int>* allProjectileOwner = GET_ATTRIBUTE_OWNERS(projectile);
-		entityBrowser_add("Projectiles", allProjectileOwner);
+		entityBrowser_add("Players", &itrPlayer.getAllOwnerId());
+		entityBrowser_add("Positions", &itrPosition.getAllOwnerId());
+		entityBrowser_add("SpawnPoints", &itrSpawnPoint.getAllOwnerId());
+		entityBrowser_add("Render", &itrRender.getAllOwnerId());
+		entityBrowser_add("Meshes", &itrMesh.getAllOwnerId());
+		entityBrowser_add("PhysicsObjects", &itrPhysics.getAllOwnerId());
+		entityBrowser_add("InputDevices", &itrInputDevice.getAllOwnerId());
+		entityBrowser_add("Projectiles", &itrProjectile.getAllOwnerId());
 		
 	}
 }
 
 void Menu_Editor::entityBrowser_add(QString name, std::vector<int>* owners)
 {
-	std::vector<Attribute_Player>* allPlayers		=	GET_ATTRIBUTES(player);
-
-	std::vector<int>* allSpawnOwner = GET_ATTRIBUTE_OWNERS(spawnPoint);
-	allPlayers						= GET_ATTRIBUTES(player);
 	// Create / reuse row
 	QStandardItem* item = model_entityBrowser->item(num_rows);
 	// TRUE: Item doesn't exist, create new Item
