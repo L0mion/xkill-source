@@ -242,13 +242,10 @@ public:
 
 	void createInputDevice(Entity* entity, Event_CreateInputDevice* e)
 	{
-		Attribute_InputDeviceSettings* deviceSettings = itrInputDeviceSettings.createAttribute(entity);
 		Attribute_InputDevice* inputDevice = itrInputDevice.createAttribute(entity);
 		
-		deviceSettings->inputObjectArray = e->objectArray;
 
 		inputDevice->device = e->device;
-		inputDevice->ptr_inputDeviceSettings = itrInputDeviceSettings.attributePointer(deviceSettings);
 	}
 };
 

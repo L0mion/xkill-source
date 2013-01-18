@@ -99,6 +99,17 @@ EventManager::getInstance()->flushQueuedEvents(EventType);
 #define SUBSCRIBE_TO_EVENT(Subscriber,EventType)					\
 EventManager::getInstance()->addObserver(Subscriber, EventType);
 
+// Unsubscribes a IObserver to events of EventType.
+#define UNSUBSCRIBE_TO_EVENT(Subscriber, EventType)					\
+EventManager::getInstance()->removeObserver(Subscriber, EventType);
+
+// Unsubscribes a IObserver to all events.
+#define UNSUBSCRIBE_TO_EVENTS(Subscriber)							\
+EventManager::getInstance()->removeObserver(Subscriber);
+
+#define SUBSCRIBE_TO_EVENT(Subscriber,EventType)					\
+EventManager::getInstance()->addObserver(Subscriber, EventType);
+
 // Fetches a owners of a specific Attribute from AttributeManager
 #define SHOW_MESSAGEBOX(Message)									\
 {																	\
@@ -133,11 +144,11 @@ EventManager::getInstance()->addObserver(Subscriber, EventType);
 EventManager::getInstance()->state_TemporaryVariableUsedAsSubstituteForStateMachine								
 
 // Defines DEBUGPRINT to an empty function in Release configuration
-#ifndef _DEBUG
+#ifndef XKILL_DEBUG
 	#define DEBUGPRINT(dataStream)
 #endif
 // Defines DEBUGPRINT to a cout function in Debug configuration
-#ifdef _DEBUG
+#ifdef XKILL_DEBUG
 	#define DEBUGPRINT(dataStream)									\
 	std::cout << dataStream << std::endl;			
 #endif

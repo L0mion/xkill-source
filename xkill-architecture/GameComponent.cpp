@@ -76,11 +76,6 @@ void GameComponent::onUpdate(float delta)
 		Attribute_Position*		position	=	itrPosition		.at(spatial->ptr_position);
 
 
-		Entity* playerEntity = itrPlayer.owner();
-		Attribute_DebugShape* debugShape = itrDebugShape.createAttribute(playerEntity);
-		debugShape->ptr_spatial = itrDebugShape.attributePointer(debugShape);
-
-
 		//
 		// End of deathmatch logic
 		//
@@ -461,9 +456,9 @@ void GameComponent::event_PhysicsAttributesColliding(Event_PhysicsAttributesColl
 				Attribute_Projectile* projectileAttribute = &allProjectile->at(projectileId.at(i));
 
 				//Shorten lifetime of projectile colliding with physics objects
-				if(projectileAttribute->currentLifeTimeLeft > 0.2f)
+				if(projectileAttribute->currentLifeTimeLeft > 1.2f)
 				{
-					projectileAttribute->currentLifeTimeLeft = 0.15f;
+					projectileAttribute->currentLifeTimeLeft = 1.15f;
 				}
 
 				//Explosion handling.
