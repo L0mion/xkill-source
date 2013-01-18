@@ -12,16 +12,23 @@ ATTRIBUTES_DECLARE_ALL;
 void updateView(Attribute_Camera* camera)
 {
 	// Fetch attributes from camera
-	Float3& position			= itrPosition.at(itrSpatial.at(camera->ptr_spatial)->ptr_position)->position;
-
-	DirectX::XMFLOAT4X4& view	= *(DirectX::XMFLOAT4X4*)&camera->mat_view; 
+	Float3& playerPosition		= itrPosition.at(itrSpatial.at(camera->ptr_spatial)->ptr_position)->position;
+	
+	DirectX::XMFLOAT4X4& view	= *(DirectX::XMFLOAT4X4*)&camera->mat_view;
 	DirectX::XMFLOAT3& look		= *(DirectX::XMFLOAT3*)&camera->look; 
+	
 	DirectX::XMFLOAT3& up		= *(DirectX::XMFLOAT3*)&camera->up;
 	DirectX::XMFLOAT3& right	= *(DirectX::XMFLOAT3*)&camera->right;
 
 	DirectX::XMVECTOR& vLook	= DirectX::XMLoadFloat3((DirectX::XMFLOAT3*)&camera->look); 
 	DirectX::XMVECTOR& vUp		= DirectX::XMLoadFloat3((DirectX::XMFLOAT3*)&camera->up);
 	DirectX::XMVECTOR& vRight	= DirectX::XMLoadFloat3((DirectX::XMFLOAT3*)&camera->right);
+
+	// Add offset to camera position
+	Float3 position = playerPosition;
+	position.x += look.x*0.1f;
+	position.y += look.y*0.1f;
+	position.z += look.z*0.1f;
 
 	float& zFar			= camera->zFar;
 	float& zNear		= camera->zNear;
