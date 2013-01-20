@@ -52,11 +52,11 @@ Attribute_Render::~Attribute_Render()
 Attribute_Physics::Attribute_Physics()
 {
 	collisionResponse = true;
-	added = false;
+	reloadDataIntoBulletPhysics = true;
 	alive = true;
 	mass = 1.0f;
 	
-	meshID = 0;
+	meshID = -1;
 
 	collisionFilterGroup = Attribute_Physics::DEFAULT_ERROR;
 	collisionFilterMask = 0;
@@ -156,6 +156,9 @@ Attribute_Camera::~Attribute_Camera()
 
 Attribute_Input::Attribute_Input()
 {
+	jump = false;
+	sprint = false;
+	killPlayer = false;
 	fire = false;
 	changeAmmunitionType = false;
 	changeFiringMode = false;
@@ -182,6 +185,10 @@ Attribute_Player::Attribute_Player()
 	priority = 0;
 	cycleSteals = 0;
 	totalExecutionTime = 0;
+
+	walkSpeed = 5.0f;
+	sprintSpeed = walkSpeed*2;
+	currentSpeed = walkSpeed;
 }
 Attribute_Player::~Attribute_Player()
 {
@@ -220,7 +227,7 @@ void Attribute_Mesh::clean()
 
 Attribute_Health::Attribute_Health()
 {
-	startHealth = 10.0f;
+	startHealth = 1.0f;
 	health = 0.0f;
 }
 Attribute_Health::~Attribute_Health()
@@ -261,22 +268,24 @@ void Attribute_WeaponStats::setWeaponStats(AmmunitionType ammunitionType, Firing
 	displacementSphereRadius = 0.0f;
 	spreadConeRadius = 0.0f;
 	isExplosive = false;
+	velocityDifference = 0.0f;
 
 	switch(ammunitionType)
 	{
 	case BULLET: //One powerful accurate bullet.
-		velocityOfEachProjectile = 4000.0f;
+		velocityOfEachProjectile = 40.0f;
 		damgeOfEachProjectile = 5;
 		break;
 	case SCATTER: //Many weak and less accurate bullets.
-		velocityOfEachProjectile = 1000.0f;
+		velocityOfEachProjectile = 10.0f;
 		nrOfProjectilesForEachShot = 10;
 		damgeOfEachProjectile = 2;
 		displacementSphereRadius = 0.02f;
 		spreadConeRadius = 0.2f;
+		velocityDifference = 0.5f;
 		break;
 	case EXPLOSIVE: //One powerful accurate exploding bullet.
-		velocityOfEachProjectile = 500.0f;
+		velocityOfEachProjectile = 5.0f;
 		damgeOfEachProjectile = 10;
 		explosionSphereRadius = 1.0f;
 		isExplosive = true;

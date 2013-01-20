@@ -11,9 +11,11 @@ class DLL_U Settings
 {
 public:
 	float timeScale;
+	std::string currentLevel;
 
 	Settings()
 	{
+		currentLevel = "TestArena";
 		timeScale = 1.0f;
 	}
 };
@@ -33,30 +35,6 @@ private:
 	{
 		createEntityStorage();
 		settings = new Settings;
-
-		position		.init	(ATTRIBUTE_POSITION);
-		spatial			.init	(ATTRIBUTE_SPATIAL);
-		render			.init	(ATTRIBUTE_RENDER);
-		debugShape		.init	(ATTRIBUTE_DEBUGSHAPE);
-		physics			.init	(ATTRIBUTE_PHYSICS);
-		camera			.init	(ATTRIBUTE_CAMERA);
-		input			.init	(ATTRIBUTE_INPUT);
-		inputDevice		.init	(ATTRIBUTE_INPUTDEVICE);
-		player			.init	(ATTRIBUTE_PLAYER);
-		bounding		.init	(ATTRIBUTE_BOUNDING);
-		projectile		.init	(ATTRIBUTE_PROJECTILE);
-		lightDir		.init	(ATTRIBUTE_LIGHT_DIRECTIONAL);
-		lightPoint		.init	(ATTRIBUTE_LIGHT_POINT);
-		lightSpot		.init	(ATTRIBUTE_LIGHT_SPOT);
-		mesh			.init	(ATTRIBUTE_MESH);
-		health			.init	(ATTRIBUTE_HEALTH);
-		damage			.init	(ATTRIBUTE_DAMAGE);
-		spawnPoint		.init	(ATTRIBUTE_SPAWNPOINT);
-		weaponStats		.init	(ATTRIBUTE_WEAPONSTATS);
-		explosionSphere	.init	(ATTRIBUTE_EXPLOSIONSPHERE);
-
-		// ADD MORE ABOVE ^
-
 	}
 
 	void createEntityStorage();
@@ -114,29 +92,29 @@ public:
 
 // Declares all attributes
 #define ATTRIBUTES_DECLARE_ALL														\
-static	Settings											*settings				;	\
-static	EntityStorage										*itr_entity				;	\
-static	AttributeIterator<Attribute_Position>				itrPosition				;	\
-static	AttributeIterator<Attribute_Spatial>				itrSpatial				;	\
-static	AttributeIterator<Attribute_Render>					itrRender				;	\
-static	AttributeIterator<Attribute_DebugShape>				itrDebugShape			;	\
-static	AttributeIterator<Attribute_Physics>				itrPhysics				;	\
-static	AttributeIterator<Attribute_Camera>					itrCamera				;	\
-static	AttributeIterator<Attribute_Input>					itrInput				;	\
-static	AttributeIterator<Attribute_InputDevice>			itrInputDevice			;	\
-static	AttributeIterator<Attribute_Player>					itrPlayer				;	\
-static	AttributeIterator<Attribute_Bounding>				itrBounding				;	\
-static	AttributeIterator<Attribute_Projectile>				itrProjectile			;	\
-static	AttributeIterator<Attribute_Light_Dir>				itrLightDir				;	\
-static	AttributeIterator<Attribute_Light_Point>			itrLightPoint			;	\
-static	AttributeIterator<Attribute_Light_Spot>				itrLightSpot			;	\
-static	AttributeIterator<Attribute_Mesh>					itrMesh					;	\
-static	AttributeIterator<Attribute_Health>					itrHealth				;	\
-static	AttributeIterator<Attribute_Damage>					itrDamage				;	\
-static	AttributeIterator<Attribute_SpawnPoint>				itrSpawnPoint			;	\
-static	AttributeIterator<Attribute_WeaponStats>			itrWeaponStats			;	\
-static	AttributeIterator<Attribute_ExplosionSphere>		itrExplosionSphere		;	\
-																						\
+static Settings											*settings				;	\
+static EntityStorage									*itr_entity				;	\
+static AttributeIterator<Attribute_Position>			itrPosition				;	\
+static AttributeIterator<Attribute_Spatial>				itrSpatial				;	\
+static AttributeIterator<Attribute_Render>				itrRender				;	\
+static AttributeIterator<Attribute_DebugShape>			itrDebugShape			;	\
+static AttributeIterator<Attribute_Physics>				itrPhysics				;	\
+static AttributeIterator<Attribute_Camera>				itrCamera				;	\
+static AttributeIterator<Attribute_Input>				itrInput				;	\
+static AttributeIterator<Attribute_InputDevice>			itrInputDevice			;	\
+static AttributeIterator<Attribute_Player>				itrPlayer				;	\
+static AttributeIterator<Attribute_Bounding>			itrBounding				;	\
+static AttributeIterator<Attribute_Projectile>			itrProjectile			;	\
+static AttributeIterator<Attribute_Light_Dir>			itrLightDir				;	\
+static AttributeIterator<Attribute_Light_Point>			itrLightPoint			;	\
+static AttributeIterator<Attribute_Light_Spot>			itrLightSpot			;	\
+static AttributeIterator<Attribute_Mesh>				itrMesh					;	\
+static AttributeIterator<Attribute_Health>				itrHealth				;	\
+static AttributeIterator<Attribute_Damage>				itrDamage				;	\
+static AttributeIterator<Attribute_SpawnPoint>			itrSpawnPoint			;	\
+static AttributeIterator<Attribute_WeaponStats>			itrWeaponStats			;	\
+static AttributeIterator<Attribute_ExplosionSphere>		itrExplosionSphere		;	\
+																					\
 // ADD MORE ABOVE ^
 
 // Inits all attributes

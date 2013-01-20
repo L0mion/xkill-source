@@ -26,16 +26,6 @@ void Entity::deleteAttributes()
 	attributes->clear();
 }
 
-std::vector<int>  Entity::getAttributesAsEnums()
-{
-	std::vector<int> enums;
-	for(int i=0; i<(int)attributes->size(); i++)
-	{
-		enums.push_back(attributes->at(i).type);
-	}
-	return enums;
-}
-
 void Entity::addAttribute( AttributeController attribute )
 {
 	attributes->push_back(attribute);
@@ -45,7 +35,7 @@ bool Entity::hasAttribute( AttributeType type )
 {
 	for(unsigned i=0; i<attributes->size(); i++)
 	{
-		if(type == attributes->at(i).type)
+		if(type == attributes->at(i).getType())
 		{
 			return true;
 		}
@@ -58,9 +48,9 @@ std::vector<int> Entity::getAttributes( AttributeType type )
 	std::vector<int> matchingAttributes;
 	for(unsigned i=0; i<attributes->size(); i++)
 	{
-		if(type == attributes->at(i).type)
+		if(type == attributes->at(i).getType())
 		{
-			matchingAttributes.push_back( attributes->at(i).index);
+			matchingAttributes.push_back( attributes->at(i).getIndex());
 		}
 	}
 	return matchingAttributes;
@@ -72,10 +62,10 @@ int Entity::getID()
 }
 
 
-DataItemList* Entity::getDataListFromAttribute(int index)
+IAttribute* Entity::getAttributeInterface(int index)
 {
-	DataItemList* list = NULL;
+	IAttribute* attribute = NULL;
 	if(index<(int)attributes->size())
-		list = attributes->at(index).getDataList();
-	return list;
+		attribute = attributes->at(index).getAttribute();
+	return attribute;
 }

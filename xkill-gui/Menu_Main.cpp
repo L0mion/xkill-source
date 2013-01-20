@@ -2,7 +2,11 @@
 #include <QtGui/QKeyEvent>
 #include <xkill-utilities/EventManager.h>
 #include <xkill-utilities/AttributeType.h>
+#include <xkill-utilities/AttributeManager.h>
 
+#include <xkill-input/InputDevice.h>
+#include <xkill-input/InputObjectArray.h>
+#include <xkill-input/InputObject.h>
 
 #include <QtXml/QtXml>
 #include <QtGui/QStandardItemModel>
@@ -10,8 +14,12 @@
 
 #include "Menu_Editor.h"
 
+ATTRIBUTES_DECLARE_ALL
+
 Menu_Main::Menu_Main( QWidget* parent ) : QMainWindow(parent), ToggleHelper(this)
 {
+	ATTRIBUTES_INIT_ALL
+
 	ui.setupUi(this);
 	QWidget::setAttribute(Qt::WA_TranslucentBackground, true);
 	QWidget::setWindowFlags(Qt::SplashScreen);
@@ -27,9 +35,25 @@ Menu_Main::Menu_Main( QWidget* parent ) : QMainWindow(parent), ToggleHelper(this
 	connect(ui.pushButton_RemoveLevel, SIGNAL(clicked()), this, SLOT(slot_removeLevel()));
 	connect(ui.pushButton_startGame, SIGNAL(clicked()), this, SLOT(slot_startGame()));
 
+	connect(ui.comboBox_Input, SIGNAL(currentIndexChanged(int)), this, SLOT(slot_loadInputList(int)));
+	connect(ui.tableView_Input, SIGNAL(clicked(QModelIndex)), this, SLOT(slot_loadInputSettings(QModelIndex)));
+	connect(ui.tableView_Input, SIGNAL(clicked(QModelIndex)), this, SLOT(slot_setInputObject(QModelIndex)));
+
+	connect(ui.horizontalSlider_Input, SIGNAL(sliderMoved(int)), this, SLOT(slot_inputSettingsChanged()));
+	connect(ui.checkBox_Input, SIGNAL(clicked()), this, SLOT(slot_inputSettingsChanged()));
+	connect(ui.pushButton_Input, SIGNAL(clicked()), this, SLOT(slot_inputSettingsChanged()));
+
+
 	filePath = QString("../../xkill-resources/xkill-scripts/levels.xml");
-	model = new QStandardItemModel(0, 1, this);
-	
+	levelListModel = new QStandardItemModel(0, 1, this);
+	inputListModel = new QStandardItemModel(0, 2, this);
+	deviceListModel = new QStandardItemModel(0, 1, this);
+
+	currentObject = nullptr;
+
+	loadDeviceList();
+	loadInputList(0);
+
 	//editorModel->setHorizontalHeaderItem(1, new QStandardItem("ID"));
 
 	QStringList columnNames;
@@ -48,7 +72,7 @@ void Menu_Main::parentMoveEvent()
 
 void Menu_Main::loadXML()
 {
-	model->clear();
+	levelListModel->clear();
 
 	// load XML file
 	QDomDocument document;
@@ -66,8 +90,8 @@ void Menu_Main::loadXML()
 
 	// read all levels to ItemModel
 	QStandardItem* root = new QStandardItem("Levels");
-	model->appendRow(root);
-	model->item(0);
+	levelListModel->appendRow(root);
+	levelListModel->item(0);
 	QDomElement xmlRoot = document.firstChildElement();
 	QDomNodeList allLevel = xmlRoot.elementsByTagName("Level");
 	for(int i=0; i<allLevel.count(); i++)
@@ -82,13 +106,13 @@ void Menu_Main::loadXML()
 
 	// parse model and build stuff from it
 	ui.comboBox_LevelSelect->clear();
-	QStandardItem* allLevelItm = model->item(0,0);
+	QStandardItem* allLevelItm = levelListModel->item(0,0);
 	for(int i=0; i<allLevelItm->rowCount(); i++)
 	{
 		QStandardItem* child = allLevelItm->child(i,0);
 		ui.comboBox_LevelSelect->addItem(child->text());
 	}
-	ui.treeView->setModel(model);
+	ui.treeView->setModel(levelListModel);
 
 	ui.treeView->setExpanded(allLevelItm->index(), true);
 	
@@ -96,7 +120,7 @@ void Menu_Main::loadXML()
 
 void Menu_Main::slot_selectLevel( int levelId )
 {
-	QStandardItem* levels = model->item(0,0);
+	QStandardItem* levels = levelListModel->item(0,0);
 	if(levels->rowCount()>levelId && levelId>=0)
 	{
 		QStandardItem* name = levels->child(levelId,0);
@@ -110,13 +134,13 @@ void Menu_Main::slot_addLevel()
 	QStandardItem* desc = new QStandardItem("Description");
 	QStandardItem* name = new QStandardItem("Name");
 	name->appendRow(desc);
-	QStandardItem* levels = model->item(0,0);
+	QStandardItem* levels = levelListModel->item(0,0);
 	levels->appendRow(name);
 }
 
 void Menu_Main::slot_removeLevel()
 {
-	QStandardItem* levels = model->item(0,0);
+	QStandardItem* levels = levelListModel->item(0,0);
 	QModelIndex index = ui.treeView->currentIndex();
 	levels->removeRow(index.row());
 }
@@ -129,7 +153,7 @@ void Menu_Main::slot_saveLevel()
 	document.appendChild(xmlroot);
 
 	// parse model into level xml
-	QStandardItem* levels = model->item(0,0);
+	QStandardItem* levels = levelListModel->item(0,0);
 	for(int i=0; i<levels->rowCount(); i++)
 	{
 		QDomElement xmlbook = document.createElement("Level");
@@ -171,4 +195,133 @@ void Menu_Main::slot_startGame()
 	ToggleHelper::toggleMenu(false);
 }
 
+void Menu_Main::slot_loadInputList(int deviceId)
+{
+	loadInputList(deviceId);
+}
 
+void Menu_Main::slot_loadInputSettings(QModelIndex index)
+{
+	loadInputSettings(index.row());
+}
+
+void Menu_Main::slot_inputSettingsChanged()
+{
+	if(currentObject != nullptr)
+	{
+		currentObject->setInverted(ui.checkBox_Input->isChecked());
+		currentObject->setSensitivity(ui.horizontalSlider_Input->value()/100.0f);
+	}
+}
+
+void Menu_Main::slot_setInputObject(QModelIndex index)
+{
+	Attribute_InputDevice* attr_device = itrInputDevice.at(ui.comboBox_Input->currentIndex());
+	InputDevice* device = attr_device->device;
+
+	std::vector<int> objectIndex = device->getMappedArray(index.row());
+	if(objectIndex.size() > 0)
+	{
+		currentObject = device->getInputObjectArray()->inputObjects[objectIndex[0]];
+		loadInputSettings(0);
+	}
+	else
+	{
+		currentObject = nullptr;
+	}
+}
+
+void Menu_Main::loadDeviceList()
+{
+	deviceListModel->clear();
+
+	InputDevice* device;
+	Attribute_InputDevice* attr_inputDevice;
+
+	QStandardItem* item;
+
+	while(itrInputDevice.hasNext())
+	{
+		attr_inputDevice = itrInputDevice.getNext();
+		device = attr_inputDevice->device;
+
+		item = new QStandardItem(device->GetName().c_str());
+
+		deviceListModel->appendRow(item);	
+	}
+
+	ui.comboBox_Input->setModel(deviceListModel);
+}
+
+void Menu_Main::loadInputList(int deviceId)
+{
+	inputListModel->clear();
+
+	QStringList qStringList;
+
+	qStringList.push_back("Action");
+	qStringList.push_back("Key");
+
+	inputListModel->setHorizontalHeaderLabels(qStringList);
+
+	if(deviceId >= itrInputDevice.size())
+		return;
+
+	Attribute_InputDevice* attr_device = itrInputDevice.at(deviceId);
+	InputDevice* device = attr_device->device;
+
+	InputAction inputAction;
+
+	ui.tableView_Input->setSortingEnabled(false);
+
+	for(int i = 0; i < InputAction::ACTION_LAST; i++)
+	{
+		QList<QStandardItem*> rowList;
+		QString qStr = inputAction.InputActionStrings[i].c_str();
+		QStandardItem* actionItem = new QStandardItem(qStr);
+		actionItem->setEditable(false);
+		rowList.push_back(actionItem);
+
+		std::vector<int> objectIndex = device->getMappedArray(i);
+		InputObjectArray* inputObjectsArray = device->getInputObjectArray();
+
+		QStandardItem* keyItem;
+
+		qStr = "";
+
+		std::string str = "";
+
+		for(unsigned int j = 0; j < objectIndex.size(); j++)
+		{
+			if(i == 0 && j == 0)
+			{
+				currentObject = inputObjectsArray->inputObjects[objectIndex[j]];
+				loadInputSettings(objectIndex[j]);
+			}
+
+			str += inputObjectsArray->inputObjects[objectIndex[j]]->getName();
+
+			if(j != (objectIndex.size()-1))
+				str += ", ";
+		}
+
+		qStr = str.c_str();
+
+		keyItem = new QStandardItem(qStr);
+		keyItem->setEditable(false);
+		rowList.push_back(keyItem);
+
+		inputListModel->appendRow(rowList);
+	}
+
+	ui.tableView_Input->setModel(inputListModel);
+}
+
+void Menu_Main::loadInputSettings(int objectId)
+{
+	if(currentObject != nullptr)
+	{
+		ui.horizontalSlider_Input->setValue(currentObject->getSensitivity()*100);
+		ui.checkBox_Input->setChecked(currentObject->isInverted());
+	}
+}

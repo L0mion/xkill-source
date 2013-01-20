@@ -16,6 +16,9 @@ InputAxisObject::~InputAxisObject(void)
 
 void InputAxisObject::AddValue(float value)
 {
+	if(inverted_)
+		value = -value;
+
 	value_ += value;
 }
 

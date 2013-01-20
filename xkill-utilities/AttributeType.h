@@ -24,27 +24,6 @@ be modified to suit the need of each Component.
 \ingroup UTILITIES
 */
 
-/// Attribute interface to facilitate grouping of attributes.
-/** 
-\ingroup ATTRIBUTES
-*/
-struct DLL_U IAttribute
-{
-	IAttribute();
-
-	//! Called when deleting attributes (refer to AttributeStorage::deleteAttribute(int index))
-	virtual void clean(){};
-
-	virtual DataItemList* getDataList()
-	{
-		DataItemList* list = new DataItemList();
-		list->add_NotSupported("NOT_IMPLEMENTED");
-		return list;
-	};
-
-	virtual ~IAttribute();
-};
-
 
 ///////////////////////////////////////////
 // Attributes
@@ -69,6 +48,7 @@ enum DLL_U AttributeType
 	ATTRIBUTE_CAMERA,
 	ATTRIBUTE_INPUT,
 	ATTRIBUTE_INPUTDEVICE,
+	ATTRIBUTE_SOUND,
 
 	ATTRIBUTE_PLAYER,
 	ATTRIBUTE_BOUNDING,
@@ -85,9 +65,34 @@ enum DLL_U AttributeType
 	ATTRIBUTE_WEAPONSTATS,
 	ATTRIBUTE_EXPLOSIONSPHERE,
 
+	ATTRIBUTE_UNKOWN,
+
 	// this is needed, don't touch!
 	ATTRIBUTE_LAST
 };
+
+/// Attribute interface to facilitate grouping of attributes.
+/** 
+\ingroup ATTRIBUTES
+*/
+struct DLL_U IAttribute
+{
+	IAttribute();
+
+	//! Called when deleting attributes (refer to AttributeStorage::deleteAttribute(int index))
+	virtual void clean(){};
+	virtual ~IAttribute();
+
+	virtual DataItemList* getDataList()
+	{
+		DataItemList* list = new DataItemList();
+		list->add_NotSupported("NOT_IMPLEMENTED");
+		return list;
+	};
+	virtual AttributeType getType(){return ATTRIBUTE_UNKOWN;}
+	virtual std::string getName(){return "UNKOWN";}
+};
+
 
 /// Stores the position of an Entity 
 /** 
@@ -106,6 +111,8 @@ struct DLL_U Attribute_Position : public IAttribute
 		list->add(position, "Position");
 		return list;
 	}
+	AttributeType getType(){return ATTRIBUTE_POSITION;}
+	std::string getName(){return "Position";}
 };
 
 /// Stores detailed Spatial informaiton about an Entity 
@@ -130,6 +137,8 @@ struct DLL_U Attribute_Spatial : public IAttribute
 		list->add(scale,								"Scale");
 		return list;
 	}
+	AttributeType getType(){return ATTRIBUTE_SPATIAL;}
+	std::string getName(){return "Spatial";}
 };
 
 /// Stores the points for both a bounding box and a convex mesh
@@ -147,6 +156,8 @@ struct DLL_U Attribute_Bounding : public IAttribute
 		list->add_NotSupported("ConvexPoints");
 		return list;
 	}
+	AttributeType getType(){return ATTRIBUTE_BOUNDING;}
+	std::string getName(){return "Bounding";}
 };
 
 
@@ -190,6 +201,8 @@ struct DLL_U Attribute_Render : public IAttribute
 		list->add(tessellation,							"Tessellation");
 		return list;
 	}
+	AttributeType getType(){return ATTRIBUTE_RENDER;}
+	std::string getName(){return "Render";}
 };
 
 /// Stores everything PhysicsComponent needs to know about an entity
@@ -226,7 +239,7 @@ struct DLL_U Attribute_Physics : public IAttribute
 	//restitution
 
 	bool collisionResponse;
-	bool added;
+	bool reloadDataIntoBulletPhysics;
 	bool alive;
 
 	float explosionSphereRadius;
@@ -243,11 +256,12 @@ struct DLL_U Attribute_Physics : public IAttribute
 		list->add((int)meshID,							"TextureID");
 		list->add((int)collisionFilterMask,				"CollisionFilterMask");
 		list->add(collisionResponse,					"CollisionResponse");
-		list->add(added,								"isAdded");
 		list->add(alive,								"isAlive");
 		
 		return list;
 	}
+	AttributeType getType(){return ATTRIBUTE_PHYSICS;}
+	std::string getName(){return "Physics";}
 };
 
 /// Stores everything GameComponent needs to know when handling 
@@ -277,6 +291,8 @@ struct DLL_U Attribute_Projectile : public IAttribute
 
 		return list;
 	}
+	AttributeType getType(){return ATTRIBUTE_PROJECTILE;}
+	std::string getName(){return "Projectile";}
 };
 
 //struct DLL_U Attribute_Light : public IAttribute
@@ -316,6 +332,8 @@ struct DLL_U Attribute_Light_Dir : public IAttribute
 
 		return list;
 	}
+	AttributeType getType(){return ATTRIBUTE_LIGHT_DIRECTIONAL;}
+	std::string getName(){return "LightDir";}
 };
 struct DLL_U Attribute_Light_Point : public IAttribute
 {
@@ -342,6 +360,8 @@ struct DLL_U Attribute_Light_Point : public IAttribute
 
 		return list;
 	}
+	AttributeType getType(){return ATTRIBUTE_LIGHT_POINT;}
+	std::string getName(){return "LightPoint";}
 };
 struct DLL_U Attribute_Light_Spot : public IAttribute
 {
@@ -370,6 +390,8 @@ struct DLL_U Attribute_Light_Spot : public IAttribute
 
 		return list;
 	}
+	AttributeType getType(){return ATTRIBUTE_LIGHT_SPOT;}
+	std::string getName(){return "LightSpot";}
 };
 
 struct DLL_U Attribute_Input : public IAttribute
@@ -381,6 +403,9 @@ struct DLL_U Attribute_Input : public IAttribute
 	Float2 position;
 	Float2 rotation;
 	bool fire;
+	bool jump;
+	bool sprint;
+	bool killPlayer;
 	bool changeAmmunitionType;
 	bool changeFiringMode;
 
@@ -398,6 +423,8 @@ struct DLL_U Attribute_Input : public IAttribute
 
 		return list;
 	}
+	AttributeType getType(){return ATTRIBUTE_INPUT;}
+	std::string getName(){return "Input";}
 };
 
 class InputDevice;
@@ -422,6 +449,8 @@ struct DLL_U Attribute_InputDevice : public IAttribute
 
 		return list;
 	}
+	AttributeType getType(){return ATTRIBUTE_INPUTDEVICE;}
+	std::string getName(){return "InputDevice";}
 };
 
 /// Stores everything SoundComponent needs to know to play a 3D sound
@@ -443,6 +472,8 @@ struct DLL_U Attribute_Sound : public IAttribute
 
 		return list;
 	}
+	AttributeType getType(){return ATTRIBUTE_SOUND;}
+	std::string getName(){return "Sound";}
 };
 
 /// Stores everything RenderComponent needs to know to manage multiple Cameras in the world
@@ -451,6 +482,8 @@ struct DLL_U Attribute_Sound : public IAttribute
 */
 struct DLL_U Attribute_Camera : public IAttribute
 {
+	const static int attributeType = ATTRIBUTE_POSITION;
+
 	Attribute_Camera();
 	~Attribute_Camera();
 
@@ -465,7 +498,10 @@ struct DLL_U Attribute_Camera : public IAttribute
 
 	Float3 up;			//!< Always aims up from the camera, perpendicular to look.
 	Float3 right;		//!< Always aims to the right of the camera, perpendicular to look.
-	Float3 look;		//!< The direction in which the camera is aimed. 
+	Float3 look;		//!< The direction in which the camera is aimed.
+
+	AttributeType getType(){return ATTRIBUTE_CAMERA;}
+	std::string getName(){return "Camera";}
 };
 
 /// Stores everything GameComponent needs to know about a player (also refer to createPlayerEntity)
@@ -492,6 +528,9 @@ struct DLL_U Attribute_Player : public IAttribute
 	int priority;			//!< Priority of the player process. Higher value means higher priority. The scheduler will choose the process with the highest priority for execution.
 	int cycleSteals;		//!< Total number of cycle steals for the player process. Cycle steals steal priority from other player processes.
 	int totalExecutionTime; //!< Total execution time of the player process, used ased final score in the deathmatch. The game session winner is the player with the most total execution time as awarded by the scheduler.
+	float currentSpeed;		//!< Speed used when changing position in "handleInput".
+	float walkSpeed;		//!< Speed when walking.
+	float sprintSpeed;		//!< Speed when sprinting.
 
 	DataItemList* getDataList()
 	{
@@ -510,6 +549,8 @@ struct DLL_U Attribute_Player : public IAttribute
 
 		return list;
 	}
+	AttributeType getType(){return ATTRIBUTE_PLAYER;}
+	std::string getName(){return "Player";}
 };
 
 
@@ -538,6 +579,8 @@ struct DLL_U Attribute_Mesh : public IAttribute
 
 		return list;
 	}
+	AttributeType getType(){return ATTRIBUTE_MESH;}
+	std::string getName(){return "Mesh";}
 };
 
 struct DLL_U Attribute_Health : public IAttribute
@@ -555,6 +598,8 @@ struct DLL_U Attribute_Health : public IAttribute
 		list->add(health,		"Health");
 		return list;
 	}
+	AttributeType getType(){return ATTRIBUTE_HEALTH;}
+	std::string getName(){return "Health";}
 };
 
 struct DLL_U Attribute_Damage : public IAttribute
@@ -572,6 +617,8 @@ struct DLL_U Attribute_Damage : public IAttribute
 		list->add(owner_entityID,	"Owner_entityID");
 		return list;
 	}
+	AttributeType getType(){return ATTRIBUTE_DAMAGE;}
+	std::string getName(){return "Damage";}
 };
 
 struct DLL_U Attribute_SpawnPoint : public IAttribute
@@ -592,6 +639,8 @@ struct DLL_U Attribute_SpawnPoint : public IAttribute
 		list->add(spawnArea,			"SpawnArea");
 		return list;
 	}
+	AttributeType getType(){return ATTRIBUTE_SPAWNPOINT;}
+	std::string getName(){return "SpawnPoint";}
 };
 
 /// Stores everything needed for the weapon system. The two enums "AmmunitionType" and "FiringMode" is used to preset the weapon settings. These settings are used in GameComponent to simulate the weapon behavior of choice.
@@ -644,6 +693,7 @@ struct DLL_U Attribute_WeaponStats : public IAttribute
 
 	float displacementSphereRadius;	//!< Randomizes the position of each projectile inside this sphere.
 	float spreadConeRadius;			//!< Randomizes the orientation of each projectile's velocity vector inside this cone. 
+	float velocityDifference;		//!< Randomizes the velocity for each projectile. If velocityDifference is 0.05 and velocityOfEachProjectile is 1.00, the actual velocity will be around 0.95 and 1.05.
 
 	bool isExplosive;				//!< Determines if projectiles created from this weapon will explode on impact.
 	float explosionSphereRadius;	//!< Radius of explosion sphere.
@@ -674,6 +724,8 @@ struct DLL_U Attribute_WeaponStats : public IAttribute
 		list->add(explosionSphereRadius,		"ExplosionSphereRadius");
 		return list;
 	}
+	AttributeType getType(){return ATTRIBUTE_WEAPONSTATS;}
+	std::string getName(){return "WeaponStats";}
 };
 
 struct DebugShape;
@@ -691,6 +743,8 @@ struct DLL_U Attribute_DebugShape : public IAttribute
 	bool			render;
 
 	DataItemList* getDataList();
+	AttributeType getType(){return ATTRIBUTE_WEAPONSTATS;}
+	std::string getName(){return "WeaponStats";}
 };
 
 struct DLL_U Attribute_ExplosionSphere : public IAttribute
@@ -708,4 +762,6 @@ struct DLL_U Attribute_ExplosionSphere : public IAttribute
 		list->add(currentLifeTimeLeft,	"CurrentLifeTimeLeft");
 		return list;
 	}
+	AttributeType getType(){return ATTRIBUTE_EXPLOSIONSPHERE;}
+	std::string getName(){return "ExplosionSphere";}
 };

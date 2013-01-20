@@ -1,6 +1,9 @@
 #include "MdlDesc.h"
 #include "SimpleStringSplitter.h"
 
+#include <xkill-utilities/EventType.h>
+#include <xkill-utilities/EventManager.h>
+
 #include "LoaderMdlDesc.h"
 
 LoaderMdlDesc::LoaderMdlDesc(
@@ -52,6 +55,13 @@ MdlDesc* LoaderMdlDesc::claimMdlDesc()
 	mdlDesc_->setStatus(false);
 	return mdlDesc_->getVar();
 }
+
+void LoaderMdlDesc::transferEventsToGame()
+{
+	Event_TransferEventsToGame e(events_);
+	SEND_EVENT(&e);
+}
+
 bool LoaderMdlDesc::parseMdlDesc()
 {
 	bool sucessfulLoad = true;
@@ -82,12 +92,22 @@ MdlDescSymbol LoaderMdlDesc::parseSymbol(const std::vector<std::string>& params)
 	if(params.size() > 0)
 	{
 		char indicator = params.front().front();
-		if(params.size() > 0)
+		switch(indicator)
 		{
-			if(indicator == MDLDESC_INDICATOR_HEADER)
-				symbol = MDLDESC_SYMBOL_HEADER;
-			if(indicator == MDLDESC_INDICATOR_MODEL)
-				symbol = MDLDESC_SYMBOL_MODEL;
+		case MDLDESC_INDICATOR_HEADER:
+			return MDLDESC_SYMBOL_HEADER;
+		case MDLDESC_INDICATOR_MODEL:
+			return MDLDESC_SYMBOL_MODEL;
+		case MDLDESC_INDICATOR_WORLD:
+			return MDLDESC_SYMBOL_WORLD;
+		case MDLDESC_INDICATOR_SPAWN:
+			return MDLDESC_SYMBOL_SPAWN;
+		case MDLDESC_INDICATOR_HACK:
+			return MDLDESC_SYMBOL_HACK;
+		case MDLDESC_INDICATOR_AMMO:
+			return MDLDESC_SYMBOL_AMMO;
+		case MDLDESC_INDICATOR_LIGHT:
+			return MDLDESC_SYMBOL_LIGHT;
 		}
 	}
 	
@@ -108,6 +128,21 @@ bool LoaderMdlDesc::parseParams(
 		break;
 	case MDLDESC_SYMBOL_MODEL:
 		numExpectedParams = MDLDESC_PARAM_NUM_MODEL;
+		break;
+	case MDLDESC_SYMBOL_WORLD:
+		numExpectedParams = MDLDESC_PARAM_NUM_WORLD;
+		break;
+	case MDLDESC_SYMBOL_SPAWN:
+		numExpectedParams = MDLDESC_PARAM_NUM_SPAWN;
+		break;
+	case MDLDESC_SYMBOL_HACK:
+		numExpectedParams = MDLDESC_PARAM_NUM_HACK;
+		break;
+	case MDLDESC_SYMBOL_AMMO:
+		numExpectedParams = MDLDESC_PARAM_NUM_AMMO;
+		break;
+	case MDLDESC_SYMBOL_LIGHT:
+		numExpectedParams = MDLDESC_PARAM_NUM_LIGHT;
 		break;
 	case MDLDESC_SYMBOL_IGNORE:
 		//Do nothing.
@@ -133,6 +168,21 @@ bool LoaderMdlDesc::loadSymbol(
 		break;
 	case MDLDESC_SYMBOL_MODEL:
 		loadModel(params);
+		break;
+	case MDLDESC_SYMBOL_WORLD:
+		loadWorld(params);
+		break;
+	case MDLDESC_SYMBOL_SPAWN:
+		loadSpawn(params);
+		break;
+	case MDLDESC_SYMBOL_HACK:
+		loadHack(params);
+		break;
+	case MDLDESC_SYMBOL_AMMO:
+		loadAmmo(params);
+		break;
+	case MDLDESC_SYMBOL_LIGHT:
+		loadLight(params);
 		break;
 	}
 
@@ -164,6 +214,96 @@ void LoaderMdlDesc::loadModel(const std::vector<std::string>& params)
 		modelName, 
 		modelDynamic != "0"));
 }
+void LoaderMdlDesc::loadWorld(const std::vector<std::string>& params)
+{
+	Float3 position;
+	Float4 rotation;
+	unsigned int meshID;
+
+	position = Float3(static_cast<float>(atof(params[MDLDESC_PARAM_INDEX_WORLD_POSX].c_str())),
+					  static_cast<float>(atof(params[MDLDESC_PARAM_INDEX_WORLD_POSY].c_str())),
+					  static_cast<float>(atof(params[MDLDESC_PARAM_INDEX_WORLD_POSZ].c_str())));
+	rotation = Float4(static_cast<float>(atof(params[MDLDESC_PARAM_INDEX_WORLD_ROTX].c_str())),
+					  static_cast<float>(atof(params[MDLDESC_PARAM_INDEX_WORLD_ROTY].c_str())),
+					  static_cast<float>(atof(params[MDLDESC_PARAM_INDEX_WORLD_ROTZ].c_str())),
+					  static_cast<float>(atof(params[MDLDESC_PARAM_INDEX_WORLD_ROTW].c_str())));
+	meshID = atoi(params[MDLDESC_PARAM_INDEX_WORLD_ID].c_str());
+
+	events_.push_back( new Event_CreateWorld(position,rotation,meshID));
+}
+void LoaderMdlDesc::loadSpawn(const std::vector<std::string>& params)
+{
+	Float3 position;
+	float radius;
+
+	position = Float3(static_cast<float>(atof(params[MDLDESC_PARAM_INDEX_SPAWN_POSX].c_str())),
+					  static_cast<float>(atof(params[MDLDESC_PARAM_INDEX_SPAWN_POSY].c_str())),
+					  static_cast<float>(atof(params[MDLDESC_PARAM_INDEX_SPAWN_POSZ].c_str())));
+	radius =  static_cast<float>(atof(params[MDLDESC_PARAM_INDEX_SPAWN_RADIUS].c_str()));
+
+	events_.push_back( new Event_CreateSpawnPoint(position,radius));
+}
+void LoaderMdlDesc::loadHack(const std::vector<std::string>& params)
+{
+	Float3 position;
+	unsigned int type;
+
+	position = Float3(static_cast<float>(atof(params[MDLDESC_PARAM_INDEX_HACK_POSX].c_str())),
+					  static_cast<float>(atof(params[MDLDESC_PARAM_INDEX_HACK_POSY].c_str())),
+					  static_cast<float>(atof(params[MDLDESC_PARAM_INDEX_HACK_POSZ].c_str())));
+	type = atoi(params[MDLDESC_PARAM_INDEX_HACK_TYPE].c_str());
+
+	events_.push_back( new Event_CreateHack(position,type));
+}
+void LoaderMdlDesc::loadAmmo(const std::vector<std::string>& params)
+{
+	Float3 position;
+	unsigned int type;
+
+	position = Float3( static_cast<float>(atof(params[MDLDESC_PARAM_INDEX_AMMO_POSX].c_str())),
+					   static_cast<float>(atof(params[MDLDESC_PARAM_INDEX_AMMO_POSY].c_str())),
+					   static_cast<float>(atof(params[MDLDESC_PARAM_INDEX_AMMO_POSZ].c_str())));
+	type = atoi(params[MDLDESC_PARAM_INDEX_AMMO_TYPE].c_str());
+
+	events_.push_back( new Event_CreateAmmo(position,type));
+}
+void LoaderMdlDesc::loadLight(const std::vector<std::string>& params)
+{
+	Float3 position;
+	Float3 direction;
+	Float3 ambient;
+	Float3 diffuse;
+	Float3 specular;
+	Float3 attenuation;
+	float range;
+	float spotPow;
+	unsigned int type;
+	
+	position = Float3(	 static_cast<float>(atof(params[MDLDESC_PARAM_INDEX_LIGHT_POSX].c_str())),
+						 static_cast<float>(atof(params[MDLDESC_PARAM_INDEX_LIGHT_POSY].c_str())),
+						 static_cast<float>(atof(params[MDLDESC_PARAM_INDEX_LIGHT_POSZ].c_str())));
+	direction = Float3(	 static_cast<float>(atof(params[MDLDESC_PARAM_INDEX_LIGHT_DIRX].c_str())),
+						 static_cast<float>(atof(params[MDLDESC_PARAM_INDEX_LIGHT_DIRY].c_str())),
+						 static_cast<float>(atof(params[MDLDESC_PARAM_INDEX_LIGHT_DIRZ].c_str())));
+	ambient = Float3(	 static_cast<float>(atof(params[MDLDESC_PARAM_INDEX_LIGHT_AMBR].c_str())),
+						 static_cast<float>(atof(params[MDLDESC_PARAM_INDEX_LIGHT_AMBG].c_str())),
+						 static_cast<float>(atof(params[MDLDESC_PARAM_INDEX_LIGHT_AMBB].c_str())));
+	diffuse = Float3(	 static_cast<float>(atof(params[MDLDESC_PARAM_INDEX_LIGHT_DIFR].c_str())),
+						 static_cast<float>(atof(params[MDLDESC_PARAM_INDEX_LIGHT_DIFG].c_str())),
+						 static_cast<float>(atof(params[MDLDESC_PARAM_INDEX_LIGHT_DIFB].c_str())));
+	specular = Float3(	 static_cast<float>(atof(params[MDLDESC_PARAM_INDEX_LIGHT_SPER].c_str())),
+						 static_cast<float>(atof(params[MDLDESC_PARAM_INDEX_LIGHT_SPEG].c_str())),
+						 static_cast<float>(atof(params[MDLDESC_PARAM_INDEX_LIGHT_SPEB].c_str())));
+	attenuation = Float3(static_cast<float>(atof(params[MDLDESC_PARAM_INDEX_LIGHT_ATTX].c_str())),
+						 static_cast<float>(atof(params[MDLDESC_PARAM_INDEX_LIGHT_ATTY].c_str())),
+						 static_cast<float>(atof(params[MDLDESC_PARAM_INDEX_LIGHT_ATTZ].c_str())));
+	range =	  static_cast<float>(atof(params[MDLDESC_PARAM_INDEX_LIGHT_RANGE].c_str()));
+	spotPow = static_cast<float>(atof(params[MDLDESC_PARAM_INDEX_LIGHT_SPOTPOW].c_str()));
+	type = atoi(params[MDLDESC_PARAM_INDEX_LIGHT_TYPE].c_str());
+
+	events_.push_back( new Event_CreateLight(position,direction,ambient,diffuse,specular,attenuation,range,spotPow,type));
+}
+
 
 void LoaderMdlDesc::loadMdlDesc()
 {

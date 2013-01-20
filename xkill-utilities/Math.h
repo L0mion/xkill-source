@@ -112,6 +112,7 @@ struct DLL_U Float4
 
 	Float4();
 	Float4(float x, float y, float z, float w);
+	Float4(Float3 float3, float w);
 	void copy(const float* float4);
 };
 

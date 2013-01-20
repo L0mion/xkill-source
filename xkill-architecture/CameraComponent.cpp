@@ -107,21 +107,6 @@ void updateProj(Attribute_Camera* camera)
 	projection(3, 2) = (-zNear * zFar)/(zFar - zNear);
 }
 
-void updateAspectRatio(float aspectRatio)
-{
-	// Recalculate view and 
-	// resize aspect ratios of all cameras 
-	while(itrCamera.hasNext())
-	{
-		Attribute_Camera* camera = itrCamera.getNext();
-		Attribute_Spatial* spatial = itrSpatial.at(camera->ptr_spatial);
-		Attribute_Position* position = itrPosition.at(spatial->ptr_position);
-
-		camera->aspectRatio=aspectRatio;
-		updateProj(camera);
-	}
-}
-
 void yaw(const float angle, Attribute_Camera* camera)
 {
 	//Load vectors in to XMVECTORs to utilize SIMD.
@@ -188,10 +173,27 @@ void mouse(const float dX, const float dY, Attribute_Camera* camera)
 	pitch(dY, camera);
 }
 
+void updateAspectRatio(float aspectRatio)
+{
+	// Recalculate view and 
+	// resize aspect ratios of all cameras 
+	while(itrCamera.hasNext())
+	{
+		Attribute_Camera* camera = itrCamera.getNext();
+		Attribute_Spatial* spatial = itrSpatial.at(camera->ptr_spatial);
+		Attribute_Position* position = itrPosition.at(spatial->ptr_position);
+
+		camera->aspectRatio=aspectRatio;
+		updateProj(camera);
+		updateView(camera);
+	}
+}
+
 CameraComponent::CameraComponent()
 {
 	// subscribe to events
 	SUBSCRIBE_TO_EVENT(this, EVENT_WINDOW_RESIZE);
+	SUBSCRIBE_TO_EVENT(this, EVENT_START_DEATHMATCH);
 }
 
 CameraComponent::~CameraComponent()
@@ -201,12 +203,6 @@ CameraComponent::~CameraComponent()
 bool CameraComponent::init()
 {
 	ATTRIBUTES_INIT_ALL;
-
-	//if(cameraAttributes_->size()==2)
-	//{
-	//	aspectRatio *= 2;
-	//}
-
 
 	// Update aspect ratio
 	Event_GetWindowResolution windowResolution;
@@ -224,6 +220,8 @@ void CameraComponent::onEvent(Event* e)
 	case EVENT_WINDOW_RESIZE:
 		updateAspectRatio(((Event_WindowResize*)e)->getAspectRatio());
 		break;
+	case EVENT_START_DEATHMATCH:
+		init();
 	default:
 		break;
 	}
@@ -262,6 +260,5 @@ void CameraComponent::onUpdate(float delta)
 	{
 		Attribute_Camera* camera = itrCamera.getNext();
 		updateView(camera);
-		int a = 0;;
 	}
 }

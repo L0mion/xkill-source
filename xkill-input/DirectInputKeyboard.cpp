@@ -33,7 +33,7 @@ bool DirectInputKeyboard::Init(HWND hWindow)
 		return false;
 
 	createInputLayout();
-	createInputObjectsFromLayout();
+	createInputObjectsFromLayout(&enumObjectsStruct);
 
 	return true;
 }

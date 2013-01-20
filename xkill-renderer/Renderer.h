@@ -10,11 +10,6 @@ namespace DirectX
 	struct XMFLOAT3;
 };
 
-struct Attribute_Render;
-struct Attribute_DebugShape;
-struct Attribute_Camera;
-struct Attribute_Spatial;
-struct Attribute_Position;
 struct ViewportData;
 
 class Winfo;
@@ -60,7 +55,6 @@ public:
 	void	loadTextures(TexDesc* texdesc); //!< Forwards information related to what textures Renderer is to load to Renderer-object.
 protected:
 private:
-	void initAttributes();				//!< Retrieves pointers to data vectors which will be used during execution.
 	void initWinfo();					//!< Sends resolution event to find out current resolution, and stores this info in a Winfo-type object. This object is then shared as a pointer amongst Renderer's members.
 	HRESULT initManagementD3D();		//!< Initializes ManagementD3D-object which will maintain core DirectX objects, e.g. device and device context.
 	HRESULT initManagementFX();			//!< Initializes ManagementFX-object which will maintain shaders and input-layouts throughout application.
@@ -113,13 +107,8 @@ private:
 	ManagementDebug*	managementDebug_;		//!< Used for detecting live COM-objects.
 	ManagementMath*		managementMath_;		//!< Loads dx-math vectors into generic-type vectors and maintains other math-related functions.
 
-	std::vector<Attribute_Spatial>*		attributesSpatial_;		//!< Holds spatial data. Is fetched only once.
-	std::vector<Attribute_Position>*	attributesPosition_;	//!< Holds positional data. Is fetched only once.
-	std::vector<Attribute_Render>*		attributesRender_;		//!< Holds objects supposed to be rendered. Is fetched only once.
-	std::vector<Attribute_DebugShape>*	attributesDebugShape_;	//!< Holds debug shapes.
 	std::vector<int>*					attributesRenderOwner_;	//!< Holds owners of render-attributes.
 	std::vector<int>*					attributesCameraOwner_;
-	std::vector<Attribute_Camera>*		attributesCamera_;		//!< Holds cameras being rendered to g-buffers. Is fetched only once.
 
 	//temp
 	M3DLoader*		m3dLoader_;

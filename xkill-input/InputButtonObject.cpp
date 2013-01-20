@@ -65,4 +65,5 @@ char InputButtonObject::getKey()
 void InputButtonObject::setKey(char key)
 {
 	keyChar_ = key;
+	name_ = key;
 }

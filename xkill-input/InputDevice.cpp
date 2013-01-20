@@ -13,11 +13,11 @@
 
 #include "Converter.h"
 
-ATTRIBUTES_DECLARE_ALL;
+ATTRIBUTES_DECLARE_ALL
 
 InputDevice::InputDevice(GUID deviceGUID, std::string name, unsigned int playerID)
 {
-	ATTRIBUTES_INIT_ALL;
+	ATTRIBUTES_INIT_ALL
 
 	deviceGUID_ = deviceGUID;
 	name_ = name;
@@ -99,15 +99,29 @@ int InputDevice::getPlayerID()
 	return playerID_;
 }
 
+std::vector<std::string> InputDevice::getNamesOfMappedObjects(int mapping)
+{
+	std::vector<std::string> names;
+	int index;
+
+	for(unsigned int i = 0; i < mappedObjects_[mapping].size(); i++)
+	{
+		index = mappedObjects_[mapping][i];
+		names.push_back(inputObjectArray_->inputObjects[index]->getName());
+	}
+
+	return names;
+}
+
 float InputDevice::getFloatValue(int mapping, bool useSensitivity)
 {
 	float maxValue = 0.0f;
 	int index = 0;
 	float value = 0.0f;
 
-	for(unsigned int i = 0; i < floatObjects_[mapping].size(); i++)
+	for(unsigned int i = 0; i < mappedObjects_[mapping].size(); i++)
 	{
-		index = floatObjects_[mapping][i];
+		index = mappedObjects_[mapping][i];
 		value = inputObjectArray_->inputObjects[index]->getValueFloat();
 
 		if(useSensitivity)
@@ -124,8 +138,8 @@ float InputDevice::getFloatValue(int mapping, bool useSensitivity)
 
 bool InputDevice::getBoolValue(int mapping)
 {
-	for(unsigned int i = 0; i < boolObjects_[mapping].size(); i++)
-		if(inputObjectArray_->inputObjects[boolObjects_[mapping][i]]->getValueBool())
+	for(unsigned int i = 0; i < mappedObjects_[mapping].size(); i++)
+		if(inputObjectArray_->inputObjects[mappedObjects_[mapping][i]]->getValueBool())
 			return true;
 
 	return false;
@@ -133,11 +147,16 @@ bool InputDevice::getBoolValue(int mapping)
 
 bool InputDevice::getBoolReleased(int mapping)
 {
-	for(unsigned int i = 0; i < boolObjects_[mapping].size(); i++)
-		if(inputObjectArray_->inputObjects[boolObjects_[mapping][i]]->getValueBoolReleased())
+	for(unsigned int i = 0; i < mappedObjects_[mapping].size(); i++)
+		if(inputObjectArray_->inputObjects[mappedObjects_[mapping][i]]->getValueBoolReleased())
 			return true;
 
 	return false;
+}
+
+std::vector<int> InputDevice::getMappedArray(int mapping)	//Switch to unsigned
+{
+	return mappedObjects_[mapping];
 }
 
 /*  //////////////////////////////////////////////////////////////////
@@ -147,8 +166,7 @@ unsigned long InputDevice::getHash()
 {
 	std::string str = getStandardMappingsString();
 
-	str += Converter::IntToStr(ACTION_B_LAST);
-	str += Converter::IntToStr(ACTION_F_LAST);
+	str += Converter::IntToStr(InputAction::ACTION_LAST);
 
 	unsigned long hash = 5381;
 
@@ -170,32 +188,17 @@ InputButtonObject* InputDevice::getButtonObject(unsigned int index)
 
 void InputDevice::createObjectVectors()
 {
-	boolObjects_.clear();
+	mappedObjects_.clear();
 
-	for(int i = 0; i < InputBoolAction::ACTION_B_LAST; i++)
+	for(int i = 0; i < InputAction::ACTION_LAST; i++)
 	{
-		boolObjects_.push_back(std::vector<int>());
+		mappedObjects_.push_back(std::vector<int>());
 
 		for(unsigned int j = 0; j < inputObjectArray_->inputObjects.size(); j++)
 		{
-			if(inputObjectArray_->inputObjects[j]->hasBoolMapping(i))
+			if(inputObjectArray_->inputObjects[j]->hasMapping(i))
 			{
-				boolObjects_[i].push_back(j);
-			}
-		}
-	}
-
-	floatObjects_.clear();
-
-	for(int i = 0; i < InputFloatAction::ACTION_F_LAST; i++)
-	{
-		floatObjects_.push_back(std::vector<int>());
-
-		for(unsigned int j = 0; j < inputObjectArray_->inputObjects.size(); j++)
-		{
-			if(inputObjectArray_->inputObjects[j]->hasFloatMapping(i))
-			{
-				floatObjects_[i].push_back(j);
+				mappedObjects_[i].push_back(j);
 			}
 		}
 	}

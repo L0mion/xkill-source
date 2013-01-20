@@ -5,6 +5,7 @@
 class Event_PhysicsAttributesColliding;
 class Event_StartDeathmatch;
 class Event_EndDeathmatch;
+class Event_TransferEventsToGame;
 class Entity;
 
 struct Attribute_SpawnPoint;
@@ -17,6 +18,7 @@ class GameComponent :
 {
 private:
 	std::vector<Entity>* allEntity;
+	std::vector<Event*> levelEvents_;
 
 public:
 	GameComponent(void);
@@ -43,6 +45,11 @@ public:
 	Handles start of a deathmatch.
 	*/
 	void event_StartDeathmatch(Event_StartDeathmatch* e);
+
+	/**
+	Handles the transfer of the loaded leveldata
+	*/
+	void event_TransferEventsToGame(Event_TransferEventsToGame* e);
 
 	/**
 	Finds an unoccupied spawn point (no other player inside its radius). 

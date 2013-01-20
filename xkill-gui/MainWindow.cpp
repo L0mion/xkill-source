@@ -14,6 +14,17 @@
 
 #include "ui_MainWindow.h"
 
+
+struct Test
+{
+	//const static int attributeType = ATTRIBUTE_POSITION;
+
+
+	Float3 up;			//!< Always aims up from the camera, perpendicular to look.
+	Float3 right;		//!< Always aims to the right of the camera, perpendicular to look.
+	Float3 look;		//!< The direction in which the camera is aimed. 
+};
+
 MainWindow::MainWindow()
 {
 	// Create console

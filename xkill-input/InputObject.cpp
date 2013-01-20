@@ -4,6 +4,7 @@ InputObject::InputObject(void)
 {
 	inverted_ = false;
 	sensitivity_ = 3.0f;
+	name_ = "<NO_NAME>";
 }
 
 InputObject::~InputObject(void)
@@ -30,44 +31,24 @@ float InputObject::getSensitivity()
 	return sensitivity_;
 }
 
-void InputObject::addFloatMapping(int mapping)
+void InputObject::addMapping(int mapping)
 {
-	floatMappings_.push_back(mapping);
+	mappings_.push_back(mapping);
 }
 
-void InputObject::addBoolMapping(int mapping)
+void InputObject::removeMapping(int mapping)
 {
-	boolMappings_.push_back(mapping);
+	removeMapping(&mappings_, mapping);
 }
 
-void InputObject::removeFloatMapping(int mapping)
+bool InputObject::hasMapping(int mapping)
 {
-	removeMapping(&floatMappings_, mapping);
+	return hasMapping(&mappings_, mapping);
 }
 
-void InputObject::removeBoolMapping(int mapping)
+std::vector<int>* InputObject::getMappings()
 {
-	removeMapping(&boolMappings_, mapping);
-}
-
-bool InputObject::hasFloatMapping(int mapping)
-{
-	return hasMapping(&floatMappings_, mapping);
-}
-
-bool InputObject::hasBoolMapping(int mapping)
-{
-	return hasMapping(&boolMappings_, mapping);
-}
-
-std::vector<int>* InputObject::getFloatMappings()
-{
-	return &floatMappings_;
-}
-
-std::vector<int>* InputObject::getBoolMappings()
-{
-	return &boolMappings_;
+	return &mappings_;
 }
 
 void InputObject::removeMapping(std::vector<int>* vector, int mapping)
@@ -97,4 +78,14 @@ void InputObject::swap(std::vector<int>* vector, int firstIndex, int secondIndex
 	int temp = vector->at(firstIndex);
 	vector->at(firstIndex) = vector->at(secondIndex);
 	vector->at(secondIndex) = temp;
+}
+
+void InputObject::setName(std::string name)
+{
+	name_ = name;
+}
+
+std::string InputObject::getName()
+{
+	return name_;
 }

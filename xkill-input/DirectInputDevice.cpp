@@ -178,7 +178,7 @@ bool DirectInputDevice::Init(HWND hWindow)
 	}
 
 	createInputLayout();
-	createInputObjectsFromLayout();
+	createInputObjectsFromLayout(&enumObjectsStruct);
 
 	return true;
 }
@@ -187,23 +187,23 @@ void DirectInputDevice::setStandardMappings()
 {
 	if(axes_.size() >= 4)
 	{
-		axes_[0]->addFloatMapping(ACTION_F_WALK_LR);
-		axes_[1]->addFloatMapping(ACTION_F_WALK_FB);
-		axes_[2]->addFloatMapping(ACTION_F_LOOK_LR);
-		axes_[3]->addFloatMapping(ACTION_F_LOOK_UD);
+		axes_[0]->addMapping(InputAction::ACTION_F_WALK_LR);
+		axes_[1]->addMapping(InputAction::ACTION_F_WALK_FB);
+		axes_[2]->addMapping(InputAction::ACTION_F_LOOK_LR);
+		axes_[3]->addMapping(InputAction::ACTION_F_LOOK_UD);
 	}
 
 	if(buttons_.size() >= 10)
 	{
-		buttons_[0]->addBoolMapping(ACTION_B_CHANGE_AMMUNITIONTYPE);
-		buttons_[1]->addBoolMapping(ACTION_B_CHANGE_FIRINGMODE);
-		buttons_[9]->addBoolMapping(ACTION_B_FIRE);
+		buttons_[0]->addMapping(InputAction::ACTION_B_CHANGE_AMMUNITIONTYPE);
+		buttons_[1]->addMapping(InputAction::ACTION_B_CHANGE_FIRINGMODE);
+		buttons_[9]->addMapping(InputAction::ACTION_B_FIRE);
 	}
 	else if(buttons_.size() >= 2)
 	{
-		buttons_[0]->addBoolMapping(ACTION_B_CHANGE_AMMUNITIONTYPE);
-		buttons_[1]->addBoolMapping(ACTION_B_CHANGE_FIRINGMODE);
-		buttons_[2]->addBoolMapping(ACTION_B_FIRE);
+		buttons_[0]->addMapping(InputAction::ACTION_B_CHANGE_AMMUNITIONTYPE);
+		buttons_[1]->addMapping(InputAction::ACTION_B_CHANGE_FIRINGMODE);
+		buttons_[2]->addMapping(InputAction::ACTION_B_FIRE);
 	}
 }
 
@@ -222,23 +222,26 @@ BOOL CALLBACK DirectInputDevice::EnumObjectsCallback(const DIDEVICEOBJECTINSTANC
 
 		eos->nrOfFFObjects++;
 	}
-	//else if((object->dwType & DIDFT_AXIS) != 0)
-	//{
-	//	//SetupAxisObject(object, eos->device);
-	//	eos->offset += sizeof(long);
-	//	eos->ObjectDataFormat.push_back(CreateDataFormat(object, eos->ObjectDataFormat.size()));
-	//}
-	//else if((object->dwType & DIDFT_BUTTON) != 0)
-	//{
-	//	//Setup button object
-	//	eos->offset += sizeof(byte);
-	//	eos->ObjectDataFormat.push_back(CreateDataFormat(object, eos->ObjectDataFormat.size()));
-	//}
-	//else if((object->dwType & DIDFT_POV) != 0)
-	//{
-	//	eos->offset += sizeof(long);
-	//	eos->ObjectDataFormat.push_back(CreateDataFormat(object, eos->ObjectDataFormat.size()));
-	//}
+	if((object->dwType & DIDFT_AXIS) != 0)
+	{
+		//SetupAxisObject(object, eos->device);
+		//eos->offset += sizeof(long);
+		//eos->ObjectDataFormat.push_back(CreateDataFormat(object, eos->ObjectDataFormat.size()));
+		eos->axisNames.push_back(object->tszName);
+	}
+	else if((object->dwType & DIDFT_BUTTON) != 0)
+	{
+		//Setup button object
+		//eos->offset += sizeof(byte);
+		//eos->ObjectDataFormat.push_back(CreateDataFormat(object, eos->ObjectDataFormat.size()));
+		eos->buttonNames.push_back(object->tszName);
+	}
+	else if((object->dwType & DIDFT_POV) != 0)
+	{
+		//eos->offset += sizeof(long);
+		//eos->ObjectDataFormat.push_back(CreateDataFormat(object, eos->ObjectDataFormat.size()));
+		eos->hatSwitchNames.push_back(object->tszName);
+	}
 
 	return DIENUM_CONTINUE;
 }
@@ -254,14 +257,7 @@ std::string DirectInputDevice::getStandardMappingsString()
 
 	for(unsigned int i = 0; i < inputObjects.size(); i++)
 	{
-		std::vector<int>* mappings = inputObjects[i]->getBoolMappings();
-
-		for(unsigned int j = 0; j < mappings->size(); j++)
-		{
-			str += Converter::IntToStr(mappings->at(j));
-		}
-
-		mappings = inputObjects[i]->getFloatMappings();
+		std::vector<int>* mappings = inputObjects[i]->getMappings();
 
 		for(unsigned int j = 0; j < mappings->size(); j++)
 		{
@@ -387,7 +383,7 @@ void DirectInputDevice::updateState()
 			HatSwitch = joyState.rgdwPOV[hatSwitchNumber++];
 
 			buttons_[i]->SetValue(HatSwitch == 0		||	HatSwitch == 4500	||	HatSwitch == 31500);
-			buttons_[i]->SetValue(HatSwitch == 9000	||	HatSwitch == 13500	||	HatSwitch == 4500);
+			buttons_[i]->SetValue(HatSwitch == 9000		||	HatSwitch == 13500	||	HatSwitch == 4500);
 			buttons_[i]->SetValue(HatSwitch == 18000	||	HatSwitch == 22500	||	HatSwitch == 13500);
 			buttons_[i]->SetValue(HatSwitch == 27000	||	HatSwitch == 31500	||	HatSwitch == 22500);
 		}
@@ -411,13 +407,42 @@ void DirectInputDevice::createInputLayout()
 
 void DirectInputDevice::createInputObjectsFromLayout()
 {
-	createAxes();
+	createInputObjectsFromLayout(nullptr);
+}
 
-	for(int i = 0; i < inputLayout_.nrOfButtons + inputLayout_.nrOfHatSwitches*4; i++)
+void DirectInputDevice::createInputObjectsFromLayout(EnumObjectsStruct* eos)
+{
+	createAxes(eos);
+
+	for(int i = 0; i < inputLayout_.nrOfButtons; i++)
 	{
 		InputButtonObject* button = new InputButtonObject(i);
 		buttons_.push_back(button);
 		inputObjectArray_->inputObjects.push_back(button);
+		if(eos != nullptr && static_cast<unsigned int>(i) < eos->buttonNames.size())
+		{
+			button->setName(eos->buttonNames[i]);
+		}
+	}
+
+	for(int i = 0; i < inputLayout_.nrOfHatSwitches*4; i++)
+	{
+		InputButtonObject* buttons[4];
+
+		for(int j = 0; j < 4; j++)
+		{
+			InputButtonObject* button = new InputButtonObject(inputLayout_.nrOfButtons + i + j);
+			buttons_.push_back(button);
+			inputObjectArray_->inputObjects.push_back(button);
+			buttons[j] = button;
+		}
+		if(eos != nullptr && static_cast<unsigned int>(i) < eos->hatSwitchNames.size())
+		{
+			buttons[0]->setName(eos->buttonNames[i] + " Up");
+			buttons[1]->setName(eos->buttonNames[i] + " Right");
+			buttons[2]->setName(eos->buttonNames[i] + " Down");
+			buttons[3]->setName(eos->buttonNames[i] + " Left");
+		}
 	}
 
 	for(int i = 0; i < inputLayout_.nrOfTriggers; i++)
@@ -428,7 +453,7 @@ void DirectInputDevice::createInputObjectsFromLayout()
 	}
 }
 
-void DirectInputDevice::createAxes()
+void DirectInputDevice::createAxes(EnumObjectsStruct* eos)
 {
 	HRESULT result;
 	DIJOYSTATE joyState;
@@ -448,7 +473,8 @@ void DirectInputDevice::createAxes()
 		if(joyState.lRz != 0) axesIndexArray_.push_back(5);
 	}
 
-	while(axesIndexArray_.size() > axes_.size())
+	//while(axesIndexArray_.size() > axes_.size())
+	for(unsigned int i = 0; i < axesIndexArray_.size(); i++)
 	{
 		InputAxisObject* axis = new InputAxisObject(0, 0xFFFF);
 		axes_.push_back(axis);
@@ -461,4 +487,15 @@ void DirectInputDevice::createAxes()
 	}
 
 	inputLayout_.nrOfAxes = axes_.size();
+
+	if(eos != nullptr)
+	{
+		for(unsigned int i = 0; i < axes_.size(); i++)
+		{
+			if(i < eos->axisNames.size())
+			{
+				axes_[i]->setName(eos->axisNames[i]);
+			}
+		}
+	}
 }

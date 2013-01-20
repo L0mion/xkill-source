@@ -4,12 +4,6 @@
 
 #include <xkill-utilities/IObserver.h>
 
-class Camera;
-struct Attribute_Camera;
-struct Attribute_Input;
-class Event_MouseMove;
-class Event_WindowResize;
-
 //! Component to process Cameras
 /** 
 \ingroup components

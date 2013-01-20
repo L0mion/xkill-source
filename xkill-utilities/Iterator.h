@@ -13,7 +13,7 @@ class AttributeStorage;
 class DLL_U IAttributeIterator
 {
 public:
-    virtual int index() = 0;
+    virtual int storageIndex() = 0;
 };
 
 // An Iterator to facilitate Attribute iteration
@@ -21,11 +21,12 @@ template <class T>
 class AttributeIterator : public IAttributeIterator
 {
 private:
-    std::vector<T>* attributes;        //!< Each attribute.
-    std::vector<int>* allOwnerId;
-	std::vector<Entity>* allOwner;
-    int nextIndex;
-	AttributeStorage<T>* attributeStorage;
+    std::vector<T>* _attributes;			//!< Each attribute.
+    std::vector<int>* _allOwnerId;
+	std::vector<Entity>* _allOwner;
+    int _nextIndex;
+	int _orderIndex;						//!< The order the Attribute occured, not counting empty attributes
+	AttributeStorage<T>* _attributeStorage;
 public:
 	AttributeIterator()
 	{
@@ -33,28 +34,29 @@ public:
 
     AttributeIterator(std::vector<T>* attributes, std::vector<int>* owners, AttributeStorage<T>* attributeStorage)
     {
-        this->attributes = attributes;
-        this->allOwnerId = owners;
-		this->attributeStorage = attributeStorage;
-        nextIndex = 0;
+		_attributes = attributes;
+		_allOwnerId = owners;
+		_attributeStorage = attributeStorage;
+        resetIndex();
 
 		// connect with owners
 		Event_GetEntities e;										
 		EventManager::getInstance()->sendEvent(&e);					
-		allOwner = e.entities;								
+		_allOwner = e.entities;								
     }
+
 
     // Returns true if getNext will return a valid Item
     bool hasNext()
     {
         // Step to next Item or until end is reached
-        while(nextIndex < (int)allOwnerId->size() && allOwnerId->at(nextIndex) == 0)
+        while(_nextIndex < (int)_allOwnerId->size() && _allOwnerId->at(_nextIndex) == 0)
         {
-            nextIndex++;
+            _nextIndex++;
         }
 
         // Returns TRUE if next Item is valid, otherwise end has been reached
-		if(nextIndex < (int)allOwnerId->size())
+		if(_nextIndex < (int)_allOwnerId->size())
 			return true;
 		else
 		{
@@ -69,87 +71,99 @@ public:
     T* getNext()
     {
         // Fetch current item, and step to next item
-        nextIndex++;
-        return &attributes->at(index());
+        _nextIndex++;
+		_orderIndex++;
+        return &_attributes->at(storageIndex());
     }
 
-    // Returns the Index of the latest
-    // Item aquired throught getNext()
-    int index()
-    {
-        return nextIndex-1;
-    }
+	int storageIndex(T* attribute)
+	{ 
+		int index = attribute - &_attributes->at(0);
+		return index;
+	}
+
+	// Returns the Index of the latest
+	// Item aquired throught getNext()
+	int storageIndex()
+	{
+		return _nextIndex-1;
+	}
+
+
+	void resetAllAttributes()
+	{
+		_attributeStorage->reset();
+	}
+
+	// Returns the order in which the current Attribute occurred
+	// not counting empty attributes
+	int orderIndex()
+	{
+		return _orderIndex;
+	}
 
 	// Returns how many attributes (including deleted ones) there is 
 	int storageSize()
 	{
-		return (int)allOwnerId->size();
+		return (int)_allOwnerId->size();
 	}
 
-	// HACK: Returns nr of non-deleted attributes. Non optimized! 
+	
+
+	// Returns nr of non-deleted attributes. Non optimized! 
 	int size()
 	{
-		int tmp_nextIndex = nextIndex;
-		
-		int count = 0;
-		resetIndex();
-		while(hasNext())
-		{
-			getNext();
-			count++;
-		}
-
-		nextIndex = nextIndex;
-		return count;
+		return _attributeStorage->size();
 	}
 
 	// Returns if the attribute at
 	// index is deleted or not
 	bool isDeleted(int index)
 	{
-		return allOwnerId->at(index() == 0);
+		return _allOwnerId->at(index() == 0);
 	}
 
 	// Returns the Owner ID of the latest
 	// Item aquired throught getNext()
 	int ownerId()
 	{
-		return allOwnerId->at(index());
+		return _allOwnerId->at(storageIndex());
 	}
 
 	// Returns the id of the owner
 	// of the Attribute at index
 	int ownerIdAt(int index)
 	{
-		return allOwnerId->at(index);
+		return _allOwnerId->at(index);
 	}
 
 	// Returns the Owner of the latest
 	// Item aquired throught getNext()
 	Entity* owner()
 	{
-		return &allOwner->at(ownerId());
+		return &_allOwner->at(ownerId());
 	}
 
 	// Returns the Owner of the latest
 	// Item aquired throught getNext()
 	Entity* ownerAt(int index)
 	{
-		return &allOwner->at(ownerIdAt(index));
+		return &_allOwner->at(ownerIdAt(index));
 	}
 
 
     // Resets the Iterator to the beginning
     void resetIndex()
     {
-        nextIndex = 0;
+        _nextIndex = 0;
+		_orderIndex = -1;
     }
 
     // Returns an item in the vector regardless
     // if it is valid or not
     T* at(int index)
     {
-        return &attributes->at(index);
+        return &_attributes->at(index);
     }
 
 	// Returns an item in the vector regardless
@@ -171,21 +185,20 @@ public:
         return at(attrPointer.index);
     }
 
-	int index(T* attribute)
-	{ 
-		int index = attribute - &attributes->at(0);
-		return index;
-	}
-
 	AttributePointer attributePointer(T* attribute)
 	{ 
 		AttributePointer pointer;
-		pointer.init(&attributes, index(attribute));
+		pointer.init(&_attributes, storageIndex(attribute));
 		return pointer;
 	}
 
 	T* createAttribute(Entity* e)
 	{ 
-		return attributeStorage->createAttribute(e);
+		return _attributeStorage->createAttribute(e);
+	}
+
+	std::vector<int> getAllOwnerId()
+	{
+		return std::vector<int>(*_allOwnerId);
 	}
 };

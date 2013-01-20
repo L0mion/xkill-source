@@ -128,8 +128,8 @@ EventManager::getInstance()->addObserver(Subscriber, EventType);
 
 // Fetches a vector<AttributeType>* of a specific Attribute
 // from AttributeManager.
-#define GET_ATTRIBUTE_OWNERS(OwnerPointer)							\
-	&((AttributeManager*)AttributeManagerDLLWrapper::getInstance())->OwnerPointer.owners;
+//#define GET_ATTRIBUTE_OWNERS(OwnerPointer)							\
+//	&((AttributeManager*)AttributeManagerDLLWrapper::getInstance())->OwnerPointer.owners;
 
 // Fetches a owners of a specific Attribute from AttributeManager
 #define GET_ENTITIES(EntityPointer)									\
@@ -149,6 +149,7 @@ EventManager::getInstance()->state_TemporaryVariableUsedAsSubstituteForStateMach
 #endif
 // Defines DEBUGPRINT to a cout function in Debug configuration
 #ifdef XKILL_DEBUG
+	#include <iostream>
 	#define DEBUGPRINT(dataStream)									\
 	std::cout << dataStream << std::endl;			
 #endif

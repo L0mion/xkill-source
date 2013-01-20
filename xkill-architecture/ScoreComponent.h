@@ -23,7 +23,6 @@ public:
 	virtual void onUpdate(float delta);
 
 private:
-	std::vector<Attribute_Player>* playerAttributes_;	//! A pointer to the playerAttributes
 	std::vector<int> playerIndices;						//! Used as a sorted list of playerAttributes according to 'priority'
 
 	//! Sorts the vector using bubble sort

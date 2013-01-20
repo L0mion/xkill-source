@@ -19,7 +19,7 @@ void BoolField::clear()
 }
 bool BoolField::getBool(int index)
 {
-	return values[index/NUM_INTS_PER_BOOL] & (1 << (index%NUM_INTS_PER_BOOL));
+	return 0 < (values[index/NUM_INTS_PER_BOOL] & (1 << (index%NUM_INTS_PER_BOOL)));
 }
 void BoolField::setBool(int index, bool value)
 {
@@ -135,6 +135,13 @@ Float4::Float4(float x, float y, float z, float w)
 	this->x = x;
 	this->y = y;
 	this->z = z;
+	this->w = w;
+};
+Float4::Float4(Float3 float3, float w)
+{
+	this->x = float3.x;
+	this->y = float3.y;
+	this->z = float3.z;
 	this->w = w;
 };
 void Float4::copy(const float* float4)

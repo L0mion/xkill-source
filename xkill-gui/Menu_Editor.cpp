@@ -79,32 +79,20 @@ void Menu_Editor::slot_editorRefresh()
 		num_rows = 0;
 
 		// Fill columns
-		std::vector<int>* allPlayerOwner = 	GET_ATTRIBUTE_OWNERS(player);
-		entityBrowser_add("Players", allPlayerOwner);
-		std::vector<int>* allPositionOwner = GET_ATTRIBUTE_OWNERS(position);
-		entityBrowser_add("Positions", allPositionOwner);
-		std::vector<int>* allSpawnOwner = GET_ATTRIBUTE_OWNERS(spawnPoint);
-		entityBrowser_add("SpawnPoints", allSpawnOwner);
-		std::vector<int>* allRenderOwner = GET_ATTRIBUTE_OWNERS(render);
-		entityBrowser_add("Render", allRenderOwner);
-		std::vector<int>* allMeshOwner = GET_ATTRIBUTE_OWNERS(mesh);
-		entityBrowser_add("Meshes", allMeshOwner);
-		std::vector<int>* allPhysicsOwner = GET_ATTRIBUTE_OWNERS(physics);
-		entityBrowser_add("PhysicsObjects", allPhysicsOwner);
-		std::vector<int>* allInputDeviceOwner = GET_ATTRIBUTE_OWNERS(inputDevice);
-		entityBrowser_add("InputDevices", allInputDeviceOwner);
-		std::vector<int>* allProjectileOwner = GET_ATTRIBUTE_OWNERS(projectile);
-		entityBrowser_add("Projectiles", allProjectileOwner);
+		entityBrowser_add("Players", &itrPlayer.getAllOwnerId());
+		entityBrowser_add("Positions", &itrPosition.getAllOwnerId());
+		entityBrowser_add("SpawnPoints", &itrSpawnPoint.getAllOwnerId());
+		entityBrowser_add("Render", &itrRender.getAllOwnerId());
+		entityBrowser_add("Meshes", &itrMesh.getAllOwnerId());
+		entityBrowser_add("PhysicsObjects", &itrPhysics.getAllOwnerId());
+		entityBrowser_add("InputDevices", &itrInputDevice.getAllOwnerId());
+		entityBrowser_add("Projectiles", &itrProjectile.getAllOwnerId());
 		
 	}
 }
 
 void Menu_Editor::entityBrowser_add(QString name, std::vector<int>* owners)
 {
-	std::vector<Attribute_Player>* allPlayers		=	GET_ATTRIBUTES(player);
-
-	std::vector<int>* allSpawnOwner = GET_ATTRIBUTE_OWNERS(spawnPoint);
-	allPlayers						= GET_ATTRIBUTES(player);
 	// Create / reuse row
 	QStandardItem* item = model_entityBrowser->item(num_rows);
 	// TRUE: Item doesn't exist, create new Item
@@ -184,84 +172,19 @@ void Menu_Editor::slot_clicked_entityBrowser( QModelIndex indexClicked )
 		int num_items = 0;
 		for(int i=0; i<attributes->size(); i++)
 		{
-			int attributeType = attributes->at(i).type;
-			switch (attributeType) 
-			{
-			case ATTRIBUTE_POSITION:
-				entityInspector_add(num_items, "Position");                                   
-				break;
-			case ATTRIBUTE_SPATIAL:
-				entityInspector_add(num_items, "Spatial");
-				break;
-			case ATTRIBUTE_RENDER:
-				entityInspector_add(num_items, "Render");
-				break;
-			case ATTRIBUTE_DEBUGSHAPE:
-				entityInspector_add(num_items, "DebugShape");
-				break;
-			case ATTRIBUTE_PHYSICS:
-				entityInspector_add(num_items, "Physics");
-				break;
-			case ATTRIBUTE_CAMERA:
-				entityInspector_add(num_items, "Camera");
-				break;
-			case ATTRIBUTE_INPUT:
-				entityInspector_add(num_items, "Input");
-				break;
-			case ATTRIBUTE_PLAYER:
-				entityInspector_add(num_items, "Player");
-				break;
-			case ATTRIBUTE_BOUNDING:
-				entityInspector_add(num_items, "Bounding");
-				break;
-			case ATTRIBUTE_PROJECTILE:
-				entityInspector_add(num_items, "Projectile");
-				break;
-			case ATTRIBUTE_LIGHT_DIRECTIONAL:
-				entityInspector_add(num_items, "LightDir");
-				break;
-			case ATTRIBUTE_LIGHT_POINT:
-				entityInspector_add(num_items, "LightPoint");
-				break;
-			case ATTRIBUTE_LIGHT_SPOT:
-				entityInspector_add(num_items, "LightSpot");
-				break;
-			case ATTRIBUTE_MESH:
-				entityInspector_add(num_items, "Mesh");
-				break;
-			case ATTRIBUTE_HEALTH:
-				entityInspector_add(num_items, "Health");
-				break;
-			case ATTRIBUTE_DAMAGE:
-				entityInspector_add(num_items, "Damage");
-				break;
-			case ATTRIBUTE_SPAWNPOINT:
-				entityInspector_add(num_items, "SpawnPoint");
-				break;
-			case ATTRIBUTE_WEAPONSTATS:
-				entityInspector_add(num_items, "WeaponStats");
-				break;
-			case ATTRIBUTE_EXPLOSIONSPHERE:
-				entityInspector_add(num_items, "ExplosionSphere");
-				break;
-			case ATTRIBUTE_INPUTDEVICE:
-				entityInspector_add(num_items, "InputDevice");
-				break;
-			default:
-				entityInspector_add(num_items, "UNKOWN");
-				break;
-			}
+			// Name
+			std::string attributeName = attributes->at(i).getAttribute()->getName();
+			entityInspector_add(num_items, attributeName.c_str());                                   
+		
+			// ID
 			QStandardItem* item_id = new QStandardItem();
 			model_entityInspector->setItem(num_items, 1, item_id);
-			model_entityInspector->setData(item_id->index(), QVariant(attributes->at(i).index));
+			model_entityInspector->setData(item_id->index(), QVariant(attributes->at(i).getIndex()));
+			
 			num_items++;
-
-			
-			
 		}
-		//model_entityInspector->setItem(1, new QStandardItem("Blaj"));
 
-			// Remove unused rows
+		// Remove unused rows
 		int excessRows = model_entityInspector->rowCount() - num_items;
 		if(excessRows>0)
 			model_entityInspector->removeRows(num_items, excessRows);
@@ -286,28 +209,24 @@ void Menu_Editor::slot_changed_simulationSpeed(int speed)
 
 void Menu_Editor::slot_attributeInspector_refresh()
 {
+	// Disable attributes from refreshing
+	// which prevents unnecessary updating
+	// attributes while creating menu
+
 	selected_attribute.ignoreRefresh = true;
 
 	if(ui.checkBox_autoRefresh->isChecked())
 	{
-		ui.treeView_attributeInspector->setEditTriggers(QAbstractItemView::NoEditTriggers);
-		ui.treeView_attributeInspector->setSelectionMode(QAbstractItemView::NoSelection);
-	}
-	else
-	{
-		ui.treeView_attributeInspector->setEditTriggers(QAbstractItemView::DoubleClicked);
-		ui.treeView_attributeInspector->setSelectionMode(QAbstractItemView::SingleSelection);
-	}
-
-	/*if(ui.checkBox_autoRefresh->isChecked())
-	{
+		/*ui.treeView_attributeInspector->setEditTriggers(QAbstractItemView::NoEditTriggers);
+		ui.treeView_attributeInspector->setSelectionMode(QAbstractItemView::NoSelection);*/
 		ui.treeView_attributeInspector->setEnabled(false);
 	}
 	else
 	{
+		/*ui.treeView_attributeInspector->setEditTriggers(QAbstractItemView::DoubleClicked);
+		ui.treeView_attributeInspector->setSelectionMode(QAbstractItemView::SingleSelection);*/
 		ui.treeView_attributeInspector->setEnabled(true);
 	}
-*/
 
 	//
 	// Fetch entity we will inspect attributes from
@@ -319,13 +238,17 @@ void Menu_Editor::slot_attributeInspector_refresh()
 
 	Entity* entity = itr_entity->at(selected_attribute.entityId);
 
-	// fetch DataList from the selected Entity
+	// fetch DataList from the selected  attribute 
+	// of the selected Entity
+
 	int index = selected_attribute.index;
-	DataItemList* list = entity->getDataListFromAttribute(index);
+	IAttribute* attribute = entity->getAttributeInterface(index);
 
 	// abort if attribute does not exist
-	if(list == NULL)
+	if(attribute == NULL)
 		return;
+
+	DataItemList* list = attribute->getDataList();
 
 	// save data (we need it to save data into attributes later on)
 	delete selected_attribute.data; // delete previous data
@@ -333,7 +256,7 @@ void Menu_Editor::slot_attributeInspector_refresh()
 
 
 
-	//
+	//////////////////////////////////////////////////////////////////////////
 	// Build menu from DataList
 	//
 
@@ -362,7 +285,7 @@ void Menu_Editor::slot_attributeInspector_refresh()
 		num_items++;
 
 
-		//
+		//////////////////////////////////////////////////////////////////////////
 		// Fill item with data
 		//
 
@@ -373,6 +296,11 @@ void Menu_Editor::slot_attributeInspector_refresh()
 		item_property->setFlags(Qt::ItemIsSelectable | Qt::ItemIsUserCheckable | Qt::ItemIsEnabled | Qt::ItemIsEditable);
 		// set data
 		DataItem::DataType type = data.type;
+
+		//
+		// create menu for the "specific" type
+		//
+
 		if(type == DataItem::_BOOL)
 		{
 			bool value = *data.value._bool;
@@ -497,13 +425,19 @@ void Menu_Editor::slot_attributeInspector_refresh()
 		}
 	}
 
+
+	//////////////////////////////////////////////////////////////////////////
+	// Clean up
+	//
+
 	// Remove unused rows
 	int excessRows = model_attributeInspector->rowCount() - num_items;
 	if(excessRows>0)
 		model_attributeInspector->removeRows(num_items, excessRows);
 	ui.treeView_attributeInspector->expandAll();
 
-	// Enable itemChanged trigger again
+	// Enable itemChanged to trigger again
+	// see above
 	selected_attribute.ignoreRefresh = false;
 }
 
