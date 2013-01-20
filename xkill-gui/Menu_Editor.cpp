@@ -25,7 +25,7 @@ public:
 	DataItemList*	data;
 	int				index;
 	int				entityId;
-	bool			ignoreRefresh; // Used to prevent wastefull uptating
+	bool			ignoreRefresh; // Used to prevent wasteful updating
 };
 
 static SelectedAttribute selected_attribute;
@@ -151,6 +151,7 @@ void Menu_Editor::onEvent(Event* e)
 				slot_attributeInspector_refresh();
 			}
 		}
+		break;
 	default:
 		break;
 	}
@@ -289,139 +290,149 @@ void Menu_Editor::slot_attributeInspector_refresh()
 		// Fill item with data
 		//
 
-		DataItem data = list->getNext();
+		DataItem* data = list->getNext();
 
 		// set label
-		item_property->setText(data.label.c_str());
+		item_property->setText(data->label.c_str());
 		item_property->setFlags(Qt::ItemIsSelectable | Qt::ItemIsUserCheckable | Qt::ItemIsEnabled | Qt::ItemIsEditable);
-		// set data
-		DataItem::DataType type = data.type;
+		
 
 		//
 		// create menu for the "specific" type
 		//
 
-		if(type == DataItem::_BOOL)
+		DataItem::DataType type = data->type;
+		switch(type) 
 		{
-			bool value = *data.value._bool;
-			model_attributeInspector->setData(item_value->index(), QVariant(value));
-		}
-		if(type == DataItem::_INT)
-		{
-			int value = *data.value._int;
-			model_attributeInspector->setData(item_value->index(), QVariant(value));
-		}
-		if(type == DataItem::_FLOAT)
-		{
-			double value = (double)*data.value._float;
-			model_attributeInspector->setData(item_value->index(), QVariant(value));
-		}
+		case DataItem::_BOOL:
+			{
+				bool value = *data->value._bool;
+				model_attributeInspector->setData(item_value->index(), QVariant(value));
+			}
+			break;
+		case DataItem::_INT:
+			{
+				int value = *data->value._int;
+				model_attributeInspector->setData(item_value->index(), QVariant(value));
+			}
+			break;
+		case DataItem::_FLOAT:
+			{
+				double value = (double)*data->value._float;
+				model_attributeInspector->setData(item_value->index(), QVariant(value));
+			}
+			break;
+		case DataItem::_FLOAT2:
+			{
+				Float2 value = *data->value._float2;
+				double x = value.x;
+				{
+					item_property->setChild(0, 0, new QStandardItem("X"));
+					QStandardItem* child = new QStandardItem();
+					item_property->setChild(0, 1, child);
+					model_attributeInspector->setData(child->index(), QVariant(x));
+					//model_attributeInspector->setData(model_attributeInspector->index(0), Qt::blue, Qt::BackgroundRole);
+				}
+				double y = value.y;
+				{
+					item_property->setChild(1, 0, new QStandardItem("Y"));
+					QStandardItem* child = new QStandardItem();
+					item_property->setChild(1, 1,child);
+					model_attributeInspector->setData(child->index(), QVariant(y));
+				}
+			}
+			break;
+		case DataItem::_FLOAT3:
+			{
+				Float3 value = *data->value._float3;
+				double x = value.x;
+				{
+					item_property->setChild(0, 0, new QStandardItem("X"));
+					QStandardItem* child = new QStandardItem();
+					item_property->setChild(0, 1, child);
+					model_attributeInspector->setData(child->index(), QVariant(x));
+					//model_attributeInspector->setData(model_attributeInspector->index(0), Qt::blue, Qt::BackgroundRole);
+				}
+				double y = value.y;
+				{
+					item_property->setChild(1, 0, new QStandardItem("Y"));
+					QStandardItem* child = new QStandardItem();
+					item_property->setChild(1, 1,child);
+					model_attributeInspector->setData(child->index(), QVariant(y));
+				}
+				double z = value.z;
+				{
+					item_property->setChild(2, 0, new QStandardItem("Z"));
+					QStandardItem* child = new QStandardItem();
+					item_property->setChild(2, 1, child);
+					model_attributeInspector->setData(child->index(), QVariant(z));
+				}
+			}
+			break;
+		case DataItem::_FLOAT4:
+			{
+				Float4 value = *data->value._float4;
+				double x = value.x;
+				{
+					item_property->setChild(0, 0, new QStandardItem("X"));
+					QStandardItem* child = new QStandardItem();
+					item_property->setChild(0, 1, child);
+					model_attributeInspector->setData(child->index(), QVariant(x));
+					//model_attributeInspector->setData(model_attributeInspector->index(0), Qt::blue, Qt::BackgroundRole);
+				}
+				double y = value.y;
+				{
+					item_property->setChild(1, 0, new QStandardItem("Y"));
+					QStandardItem* child = new QStandardItem();
+					item_property->setChild(1, 1,child);
+					model_attributeInspector->setData(child->index(), QVariant(y));
+				}
+				double z = value.z;
+				{
+					item_property->setChild(2, 0, new QStandardItem("Z"));
+					QStandardItem* child = new QStandardItem();
+					item_property->setChild(2, 1, child);
+					model_attributeInspector->setData(child->index(), QVariant(z));
+				}
+				double w = value.w;
+				{
+					item_property->setChild(3, 0, new QStandardItem("W"));
+					QStandardItem* child = new QStandardItem();
+					item_property->setChild(3, 1, child);
+					model_attributeInspector->setData(child->index(), QVariant(w));
+				}
+			}
+			break;
+		case DataItem::_FLOAT4X4:
+			{
+				Float4x4 value = *data->value._float4x4;
+				{
+					item_property->setChild(0, 0, new QStandardItem("MATRIX"));
+				}
+			}
+			break;
+		case DataItem::_STRING:
+			{
+				std::string value = *data->value._string;
+				model_attributeInspector->setData(item_value->index(), QVariant(value.c_str()));
+			}
+			break;
+		case DataItem::_ATTRIBUTE_POINTER:
+			{
+				int value = *data->value._int;
+				model_attributeInspector->setData(item_value->index(), QVariant(value));
+			}
+			break;
+		case DataItem::_INVALID:
+			{
+				model_attributeInspector->setData(item_value->index(), QVariant(""));
+			}
+			break;
+		default:
+			{
 
-		if(type == DataItem::_FLOAT2)
-		{
-			Float2 value = *data.value._float2;
-			double x = value.x;
-			{
-				item_property->setChild(0, 0, new QStandardItem("X"));
-				QStandardItem* child = new QStandardItem();
-				item_property->setChild(0, 1, child);
-				model_attributeInspector->setData(child->index(), QVariant(x));
-				//model_attributeInspector->setData(model_attributeInspector->index(0), Qt::blue, Qt::BackgroundRole);
 			}
-			double y = value.y;
-			{
-				item_property->setChild(1, 0, new QStandardItem("Y"));
-				QStandardItem* child = new QStandardItem();
-				item_property->setChild(1, 1,child);
-				model_attributeInspector->setData(child->index(), QVariant(y));
-			}
-		}
-
-		if(type == DataItem::_FLOAT3)
-		{
-			Float3 value = *data.value._float3;
-			double x = value.x;
-			{
-				item_property->setChild(0, 0, new QStandardItem("X"));
-				QStandardItem* child = new QStandardItem();
-				item_property->setChild(0, 1, child);
-				model_attributeInspector->setData(child->index(), QVariant(x));
-				//model_attributeInspector->setData(model_attributeInspector->index(0), Qt::blue, Qt::BackgroundRole);
-			}
-			double y = value.y;
-			{
-				item_property->setChild(1, 0, new QStandardItem("Y"));
-				QStandardItem* child = new QStandardItem();
-				item_property->setChild(1, 1,child);
-				model_attributeInspector->setData(child->index(), QVariant(y));
-			}
-			double z = value.z;
-			{
-				item_property->setChild(2, 0, new QStandardItem("Z"));
-				QStandardItem* child = new QStandardItem();
-				item_property->setChild(2, 1, child);
-				model_attributeInspector->setData(child->index(), QVariant(z));
-			}
-		}
-
-		if(type == DataItem::_FLOAT4)
-		{
-			Float4 value = *data.value._float4;
-			double x = value.x;
-			{
-				item_property->setChild(0, 0, new QStandardItem("X"));
-				QStandardItem* child = new QStandardItem();
-				item_property->setChild(0, 1, child);
-				model_attributeInspector->setData(child->index(), QVariant(x));
-				//model_attributeInspector->setData(model_attributeInspector->index(0), Qt::blue, Qt::BackgroundRole);
-			}
-			double y = value.y;
-			{
-				item_property->setChild(1, 0, new QStandardItem("Y"));
-				QStandardItem* child = new QStandardItem();
-				item_property->setChild(1, 1,child);
-				model_attributeInspector->setData(child->index(), QVariant(y));
-			}
-			double z = value.z;
-			{
-				item_property->setChild(2, 0, new QStandardItem("Z"));
-				QStandardItem* child = new QStandardItem();
-				item_property->setChild(2, 1, child);
-				model_attributeInspector->setData(child->index(), QVariant(z));
-			}
-			double w = value.w;
-			{
-				item_property->setChild(3, 0, new QStandardItem("W"));
-				QStandardItem* child = new QStandardItem();
-				item_property->setChild(3, 1, child);
-				model_attributeInspector->setData(child->index(), QVariant(w));
-			}
-		}
-
-		if(type == DataItem::_FLOAT4X4)
-		{
-			Float4x4 value = *data.value._float4x4;
-			{
-				item_property->setChild(0, 0, new QStandardItem("MATRIX"));
-			}
-		}
-
-		if(type == DataItem::_STRING)
-		{
-			std::string value = *data.value._string;
-			model_attributeInspector->setData(item_value->index(), QVariant(value.c_str()));
-		}
-
-
-		if(type == DataItem::_ATTRIBUTE_POINTER)
-		{
-			int value = *data.value._int;
-			model_attributeInspector->setData(item_value->index(), QVariant(value));
-		}
-
-		if(type == DataItem::_INVALID)
-		{
-			model_attributeInspector->setData(item_value->index(), QVariant(""));
+			break;
 		}
 	}
 
@@ -447,9 +458,58 @@ void Menu_Editor::slot_attributeInspector_itemChanged()
 	// not by update is caused by code
 	if(!selected_attribute.ignoreRefresh)
 	{
-		int test = 0;
+		// abort if Entity do not exists
+		if(selected_attribute.entityId == -1)
+			return;
+
+		// abort if data do not exist
+		DataItemList* list = selected_attribute.data;
+		if(list = NULL)
+			return;
+
+
+		// parse menu and save changes into our DataList
+		list->reset();
+		int num_items = 0;
+		while(list->hasNext())
+		{
+			// Fetch data
+			DataItem* data = list->getNext();
+
+			// Fetch item
+			QStandardItem* item = model_attributeInspector->item(num_items);
+			num_items++;
+
+			// Determine type
+			QVariant type = item->type();
+
+			if(type == QVariant::Int)
+			{
+				type.toInt();
+			}
+			
+			
+			/*DataItem::DataType type = data.type;
+
+
+			switch(type) 
+			{
+			QVariant data = model_attributeInspector->item(indexClicked);
+
+			{
+			double value = (double)*data.value._float;
+			model_attributeInspector->setData(item_value->index(), QVariant(value));
+			}
+			break;
+			}*/
+
+			// TRUE: Item doesn't exist, create new Item
+			QStandardItem* item_property = model_attributeInspector->item(num_items, 0);
+			QStandardItem* item_value	 = model_attributeInspector->item(num_items, 1);
+
+			
+		}
 	}
-	int test = 0;
 }
 
 

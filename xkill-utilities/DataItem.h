@@ -187,10 +187,13 @@ public:
 		if( index < (int)content.size())
 			return true;
 		else
+		{
+			reset();
 			return false;
+		}
 	}
 
-	DataItem getNext()
+	DataItem* getNext()
 	{
 		// make sure we're not accessing an empty vector
 		if(!hasNext())
@@ -202,7 +205,7 @@ public:
 		}
 
 		// access data normaly
-		DataItem nextItem = content.at(index);
+		DataItem* nextItem = &content.at(index);
 		index++;
 		return nextItem;
 	}

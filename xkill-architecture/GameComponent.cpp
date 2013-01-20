@@ -281,7 +281,7 @@ void GameComponent::onUpdate(float delta)
 				DEBUGPRINT("No spawn point was found. Player entity " << itrPlayer.ownerId() << " spawned at origo" << std::endl);
 			}
 
-			spatial->rotation = Float4(0.0f, 0.0f, 0.0f, 1.0f);
+			//spatial->rotation = Float4(0.0f, 0.0f, 0.0f, 1.0f);
 			physics->reloadDataIntoBulletPhysics = true;
 
 			health->health = health->startHealth; // restores player health
