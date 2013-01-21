@@ -14,11 +14,14 @@ private:
 	CollisionShapes();
 	btAlignedObjectArray<btCollisionShape*>* collisionShapes_;
 	btCollisionShape* defaultShape_;
+	btCollisionShape* frustrumShape_;
 	btBulletWorldImporter* importer_;
 	std::map<unsigned int, unsigned int> collisionShapesIdToIndex_;
 public:
 	~CollisionShapes();
 	btCollisionShape* getCollisionShape(unsigned int meshId);
+	btCollisionShape* getFrustrumShape();
+	void updateFrustrumShape();
 	void loadWorldCollisionShapes(std::string world);
 	void loadCollisionShapes();
 	static CollisionShapes* Instance();

@@ -419,3 +419,44 @@ float Math::randomFloat( float min, float max )
 	float r = random * diff;
 	return min + r;
 }
+
+float PlaneDotCoord(Float4 plane, Float3 coord)
+{
+	return plane.x*coord.x + plane.y*coord.y + plane.z*coord.z + plane.w*1;
+}
+
+float  Determinant(float _11, float _21, float _12, float _22)
+{
+	return _11*_22 - _21*_22;
+}
+
+Float3 PlaneIntersectPlane(Float4 plane1, Float4 plane2, Float4 plane3)
+{
+	//DO NOT USE IF NOT SURE PLANES DO INTERSECT, EG. NO PARALLEL PLANES
+	float a = Determinant(plane1.y,plane1.z,plane2.y,plane2.z);
+	float b = Determinant(plane1.z,plane1.x,plane2.z,plane2.x);
+	float c = Determinant(plane1.x,plane1.y,plane2.x,plane2.y);
+	float a2b2c2 = a*a+b*b+c*c;
+
+	float x1 = b*Determinant(plane1.w,plane1.z,plane2.w,plane2.z);
+		  x1 = x1 - c*Determinant(plane1.w,plane1.y,plane2.w,plane2.y);
+		  x1 = x1 / a2b2c2;
+	float y1 = c*Determinant(plane1.w,plane1.x,plane2.w,plane2.x);
+		  y1 = y1 - a*Determinant(plane1.w,plane1.z,plane2.w,plane2.z);
+		  y1 = y1 / a2b2c2;
+	float z1 = a*Determinant(plane1.w,plane1.y,plane2.w,plane2.y);
+		  z1 = z1 - b*Determinant(plane1.w,plane1.x,plane2.w,plane2.x);
+		  z1 = z1 / a2b2c2;
+
+	Float3 d(a,b,c);
+	Float3 o(x1,y1,z1);
+
+	float t = -PlaneDotCoord(plane3,o)/(d.x*plane3.x + d.y*plane3.y + d.z*plane3.z);
+	return o+d*t;
+}
+
+Float4 PlaneNormalize(Float4 plane)
+{
+	float length = sqrt(plane.x*plane.x + plane.y*plane.y + plane.z*plane.z);
+	return Float4(plane.x / length, plane.y / length, plane.z / length, plane.w * length);
+}

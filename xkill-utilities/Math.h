@@ -142,3 +142,11 @@ struct DLL_U Float4x4
 
 	Float4x4 getRotationOnly();
 };
+
+float DLL_U PlaneDotCoord(Float4 plane, Float3 coord);
+
+float  DLL_U Determinant(float _11, float _21, float _12, float _22);
+
+Float3 DLL_U PlaneIntersectPlane(Float4 plane1, Float4 plane2, Float4 plane3);
+
+Float4 DLL_U PlaneNormalize(Float4 plane);

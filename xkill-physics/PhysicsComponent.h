@@ -41,7 +41,7 @@ private:
 	btAlignedObjectArray<PhysicsObject*>*		physicsObjects_;
 
 	void synchronizeWithAttributes();
-	void doCulling();
+	void updateCulling();
 public:
 	PhysicsComponent();
 	~PhysicsComponent();
