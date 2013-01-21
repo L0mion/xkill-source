@@ -1,17 +1,21 @@
 #include "ManagementIED.h"
 
 ManagementIED::ManagementIED() :
-	semanticPosition_	("POSITION"),
-	semanticNormal_		("NORMAL"),
-	semanticTexcoord_	("TEXCOORD"),
-	semanticColor_		("COLOR"),
-	semanticTangent_	("TANGENT"),
-	semanticWeights_	("WEIGHTS"),
-	semanticBoneIndices_("BONEINDICES")
+	semanticPosition_		("POSITION"),
+	semanticNormal_			("NORMAL"),
+	semanticTexcoord_		("TEXCOORD"),
+	semanticColor_			("COLOR"),
+	semanticTangent_		("TANGENT"),
+	semanticWeights_		("WEIGHTS"),
+	semanticBoneIndices_	("BONEINDICES"),
+	semanticWorldTransform_	("WORLD")
 {
 	ZeroMemory(
 		iedPosNormTex_, 
 		sizeof(D3D11_INPUT_ELEMENT_DESC) * iedPosNormTexNumElements_);
+	ZeroMemory(
+		iedPosNormTexInstanced_,
+		sizeof(D3D11_INPUT_ELEMENT_DESC) * iedPosNormTexInstancedNumElements_);
 	ZeroMemory(
 		iedPosColor_,
 		sizeof(D3D11_INPUT_ELEMENT_DESC) * iedPosColorNumElements_);
@@ -27,6 +31,7 @@ ManagementIED::~ManagementIED()
 void ManagementIED::init()
 {
 	initIEDPosNormTex();
+	initIEDPosNormTexInstanced();
 	initIEDPosColor();
 	initIEDPosNormTexTanSkinned();
 }
@@ -38,6 +43,17 @@ void ManagementIED::initIEDPosNormTex()
 	iedPosNormTex_[0] = createIED(semanticPosition_,	DXGI_FORMAT_R32G32B32_FLOAT,	semanticIndex, D3D11_INPUT_PER_VERTEX_DATA, dataStepRate);
 	iedPosNormTex_[1] = createIED(semanticNormal_,		DXGI_FORMAT_R32G32B32_FLOAT,	semanticIndex, D3D11_INPUT_PER_VERTEX_DATA, dataStepRate);
 	iedPosNormTex_[2] = createIED(semanticTexcoord_,	DXGI_FORMAT_R32G32_FLOAT,		semanticIndex, D3D11_INPUT_PER_VERTEX_DATA, dataStepRate);
+}
+void ManagementIED::initIEDPosNormTexInstanced()
+{
+	iedPosNormTexInstanced_[0] = createIED(semanticPosition_,		DXGI_FORMAT_R32G32B32_FLOAT,	0, D3D11_INPUT_PER_VERTEX_DATA,		0);
+	iedPosNormTexInstanced_[1] = createIED(semanticNormal_,			DXGI_FORMAT_R32G32B32_FLOAT,	0, D3D11_INPUT_PER_VERTEX_DATA,		0);
+	iedPosNormTexInstanced_[2] = createIED(semanticTexcoord_,		DXGI_FORMAT_R32G32_FLOAT,		0, D3D11_INPUT_PER_VERTEX_DATA,		0);
+
+	iedPosNormTexInstanced_[3] = createIED(semanticWorldTransform_,	DXGI_FORMAT_R32G32B32A32_FLOAT, 0, D3D11_INPUT_PER_INSTANCE_DATA,	1);
+	iedPosNormTexInstanced_[4] = createIED(semanticWorldTransform_,	DXGI_FORMAT_R32G32B32A32_FLOAT, 1, D3D11_INPUT_PER_INSTANCE_DATA,	1);
+	iedPosNormTexInstanced_[5] = createIED(semanticWorldTransform_,	DXGI_FORMAT_R32G32B32A32_FLOAT, 2, D3D11_INPUT_PER_INSTANCE_DATA,	1);
+	iedPosNormTexInstanced_[6] = createIED(semanticWorldTransform_,	DXGI_FORMAT_R32G32B32A32_FLOAT, 3, D3D11_INPUT_PER_INSTANCE_DATA,	1);
 }
 void ManagementIED::initIEDPosColor()
 {
@@ -68,6 +84,9 @@ unsigned int ManagementIED::getIEDNumElements(IED_TYPE iedType)
 	case IED_TYPE__POS_NORM_TEX:
 		iedNumElements = iedPosNormTexNumElements_;
 		break;
+	case IED_TYPE__POS_NORM_TEX_INSTANCED:
+		iedNumElements = iedPosNormTexInstancedNumElements_;
+		break;
 	case IED_TYPE__POS_COLOR:
 		iedNumElements = iedPosColorNumElements_;
 		break;
@@ -85,6 +104,9 @@ D3D11_INPUT_ELEMENT_DESC* ManagementIED::getIED(IED_TYPE iedType)
 	{
 	case IED_TYPE__POS_NORM_TEX:
 		ied = iedPosNormTex_;
+		break;
+	case IED_TYPE__POS_NORM_TEX_INSTANCED:
+		ied = iedPosNormTexInstanced_;
 		break;
 	case IED_TYPE__POS_COLOR:
 		ied = iedPosColor_;
