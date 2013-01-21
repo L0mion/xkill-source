@@ -511,6 +511,13 @@ struct DLL_U Attribute_SplitScreen : public IAttribute
 
 	unsigned int ssWidth;
 	unsigned int ssHeight;
+
+	float getAspectRatio()
+	{
+		return (float)ssWidth/(float)ssHeight;
+	}
+	AttributeType getType(){return ATTRIBUTE_SPLITSCREEN;}
+	std::string getName(){return "SplitScreen";}
 };
 
 /// Stores everything GameComponent needs to know about a player (also refer to createPlayerEntity)

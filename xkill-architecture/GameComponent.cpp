@@ -653,6 +653,17 @@ void GameComponent::event_StartDeathmatch( Event_StartDeathmatch* e )
 	}
 	itrPlayer.resetAllAttributes();
 
+	while(itrPhysics.hasNext())
+	{
+		itrPhysics.getNext();
+		SEND_EVENT(&Event_RemoveEntity(itrPhysics.ownerId()));
+	}
+	while(itrSpawnPoint.hasNext())
+	{
+		itrSpawnPoint.getNext();
+		SEND_EVENT(&Event_RemoveEntity(itrSpawnPoint.ownerId()));
+	}
+
 	while(itrLightDir.hasNext())
 	{
 		itrLightDir.getNext();

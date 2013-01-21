@@ -99,17 +99,8 @@ void Renderer::reset()
 }
 HRESULT Renderer::resize(unsigned int screenWidth, unsigned int screenHeight)
 {
-//<<<<<<< HEAD
-//	// Calculate number of cameras
-//	unsigned numCameras = itrCamera.size();
-//=======
 	//Get number of split-screens
-	unsigned int numSS = 0;
-	while(itrSplitScreen.hasNext())
-	{
-		itrSplitScreen.getNext();
-		numSS++;
-	}
+	unsigned int numSS = itrSplitScreen.size();
 	
 	//Initialize new windo-type object.
 	HRESULT hr = S_OK;
