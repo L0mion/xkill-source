@@ -4,17 +4,23 @@
 
 #include <btBulletDynamicsCommon.h>
 #include <Serialize/BulletWorldImporter/btBulletWorldImporter.h>
+#include <BulletCollision/CollisionShapes/btShapeHull.h>
 
 #include <xkill-utilities/AttributeManager.h>
 #include <xkill-utilities/MeshModel.h>
 
+#include "physicsUtilities.h"
+
 AttributeIterator<Attribute_Mesh> itrMesh;
+AttributeIterator<Attribute_Camera> itrCamera;
 
 CollisionShapes::CollisionShapes()
 {
-	itrMesh	 = ATTRIBUTE_MANAGER->mesh.getIterator();
+	itrMesh = ATTRIBUTE_MANAGER->mesh.getIterator();
+	itrCamera = ATTRIBUTE_MANAGER->camera.getIterator();
 	collisionShapes_ = new btAlignedObjectArray<btCollisionShape*>();
 	defaultShape_ = new btSphereShape(1);
+	frustrumShape_ = nullptr;
 	importer_ = new btBulletWorldImporter();
 }
 
@@ -92,12 +98,12 @@ void CollisionShapes::loadCollisionShapes()
 					collisionShape = importer_->getCollisionShapeByIndex(importer_->getNumCollisionShapes()-1);//name.c_str());
 				if(collisionShape != nullptr)
 				{
-					if(name.compare("xkill_processRigidBody"))
+					if(!name.compare("xkill_processRigidBody"))
 					{
 						btBoxShape* box = (btBoxShape*)collisionShape;
 						btVector3 half = box->getHalfExtentsWithMargin();
 						//btCapsuleShape* capsule = new btCapsuleShape( half.x() > half.z() ? half.x() : half.z(), half.y());
-						btSphereShape* sphere = new btSphereShape(0.2);
+						btSphereShape* sphere = new btSphereShape(0.2f);
 						//collisionShape = capsule;
 						collisionShapes_->push_back(sphere);
 						collisionShape = sphere;
@@ -127,3 +133,50 @@ CollisionShapes* CollisionShapes::Instance()
 	return instance;
 }
 
+
+
+void CollisionShapes::updateFrustrumShape()
+{
+	if(frustrumShape_)
+		delete frustrumShape_;
+	if(!itrCamera.size())
+	{
+		DEBUGPRINT("COLLISIONSHAPES: No cameras to use for frustum creation");
+		return;
+	}
+	Attribute_Camera* cA = itrCamera.at(0);
+	float fovX = cA->aspect*cA->fov;
+
+
+	btVector3 points[8];
+	points[0] = btVector3(-tan(fovX)*cA->zNear,-tan(cA->fov)*cA->zNear, cA->zNear);
+	points[1] = btVector3( tan(fovX)*cA->zNear, -tan(cA->fov)*cA->zNear, cA->zNear);
+	points[2] = btVector3(-tan(fovX)*cA->zNear, tan(cA->fov)*cA->zNear, cA->zNear);
+	points[3] = btVector3( tan(fovX)*cA->zNear,  tan(cA->fov)*cA->zNear, cA->zNear);
+	points[4] = btVector3(-tan(fovX)*cA->zFar, -tan(cA->fov)*cA->zFar,  cA->zFar);
+	points[5] = btVector3( tan(fovX)*cA->zFar,  -tan(cA->fov)*cA->zFar,  cA->zFar);
+	points[6] = btVector3(-tan(fovX)*cA->zFar,  tan(cA->fov)*cA->zFar,  cA->zFar);
+	points[7] = btVector3( tan(fovX)*cA->zFar,   tan(cA->fov)*cA->zFar,  cA->zFar);
+
+	btTriangleMesh triangleMesh;
+	triangleMesh.addTriangle(points[0],points[3],points[6]);
+	triangleMesh.addTriangle(points[1],points[4],points[7]);
+	triangleMesh.addTriangle(points[2],points[5],points[0]);
+	btConvexTriangleMeshShape tcs(&triangleMesh);
+	btShapeHull hull(&tcs);
+	hull.buildHull(0);
+	tcs.setUserPointer(&hull);
+	btConvexHullShape* convexShape = new btConvexHullShape();
+	for(unsigned int i = 0; i < hull.numTriangles(); i++)
+	{
+		convexShape->addPoint(hull.getVertexPointer()[i]);
+		btVector3 a = hull.getVertexPointer()[i];
+		int b = 2;
+	}
+	frustrumShape_ = convexShape;
+}
+
+btCollisionShape* CollisionShapes::getFrustrumShape()
+{
+	return frustrumShape_;
+}

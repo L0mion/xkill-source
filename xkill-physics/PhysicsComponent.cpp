@@ -110,6 +110,7 @@ void PhysicsComponent::onUpdate(float delta)
 			physicsObjects_->at(i)->onUpdate(delta);
 		}
 	}
+	updateCulling();
 	dynamicsWorld_->stepSimulation(delta,10);
 	FLUSH_QUEUED_EVENTS(EVENT_PHYSICS_ATTRIBUTES_COLLIDING);
 }
@@ -120,7 +121,7 @@ void PhysicsComponent::onEvent(Event* e)
 	switch(type)
 	{
 	case EVENT_DO_CULLING:
-		doCulling();
+		updateCulling();
 		break;
 	case EVENT_ATTRIBUTE_UPDATED: //Removes physics objects when the corresponding physics attribute is removed
 		Event_AttributeUpdated* attributeUpdated = static_cast<Event_AttributeUpdated*>(e);
@@ -264,7 +265,7 @@ void PhysicsComponent::detectedCollisionsDuringStepSimulation(btScalar timeStep)
 	}
 }
 
-void PhysicsComponent::doCulling()
+void PhysicsComponent::updateCulling()
 {
-	//YippiKayey
+	CollisionShapes::Instance()->updateFrustrumShape();
 }
