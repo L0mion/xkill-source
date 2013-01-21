@@ -158,7 +158,7 @@ void InputComponent::handleInput(float delta)
 
 		float length = std::sqrt(x*x + y*y);
 
-		if(length > 1.0f) // The character shouldn't move faster than it's set speed
+		if(length > 1.0f) // The character shouldn't move faster than set speed
 		{
 			x = x/length;
 			y = y/length;
@@ -190,6 +190,7 @@ void InputComponent::setupPlayerControllerConnection()
 		else
 		{
 			DEBUGPRINT("-->Player could not be matched to a controller");
+			break;
 		}
 	}
 
