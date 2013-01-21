@@ -46,7 +46,7 @@ void PlayerPhysicsObject::handleInput()
 		//std::cout << "More than one controller for one player. Not tested." << std::endl;
 	}
 
-	for(int i=0;i<playerAttributes.size();i++)
+	for(unsigned int i=0;i<playerAttributes.size();i++)
 	{
 		playerAttribute = itrPlayer.at(playerAttributes.at(i));
 		inputAttribute = itrInput.at(playerAttribute->ptr_input);
