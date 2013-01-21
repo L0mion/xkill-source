@@ -86,7 +86,7 @@ void SoundComponent::onUpdate(float delta)
 	if(timer >= 0.5f)
 	{
 		timer = 0.0f;
-		int fmodEventIndex = converter->getFModIndex(3);
+		int fmodEventIndex = converter->getFModIndex(2);
 		if(fmodEventIndex >= 0)
 			mFMODEventSystem->StartSoundEventAt(fmodEventIndex);
 	}
