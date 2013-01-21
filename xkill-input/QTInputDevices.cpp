@@ -40,10 +40,10 @@ void QTInputDevices::setStandardMappings()
 	{
 		axes_[0]->addMapping(InputAction::ACTION_F_LOOK_LR);
 		axes_[0]->setDeadZone(0.0f);
-		axes_[0]->setSensitivity(0.5f);
+		axes_[0]->setSensitivity(0.01f);
 		axes_[1]->addMapping(InputAction::ACTION_F_LOOK_UD);
 		axes_[1]->setDeadZone(0.0f);
-		axes_[1]->setSensitivity(0.5f);
+		axes_[1]->setSensitivity(0.01f);
 	}
 
 	if(buttons_.size() >= (unsigned int)inputLayout_.nrOfButtons)
@@ -108,7 +108,7 @@ void QTInputDevices::createInputObjectsFromLayout()
 {
 	for(int i = 0; i < inputLayout_.nrOfAxes; i++)
 	{
-		InputAxisObject* axis = new InputAxisObject(-0x7FFF, 0x7FFF);
+		InputAxisObject* axis = new InputAxisObject(-0x7FFF, 0x7FFF, true);
 		axes_.push_back(axis);
 		inputObjectArray_->inputObjects.push_back(axis);
 	}

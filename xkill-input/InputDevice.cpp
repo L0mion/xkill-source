@@ -113,7 +113,7 @@ std::vector<std::string> InputDevice::getNamesOfMappedObjects(int mapping)
 	return names;
 }
 
-float InputDevice::getFloatValue(int mapping, bool useSensitivity)
+float InputDevice::getFloatValue(int mapping, float delta, bool useSensitivity)
 {
 	float maxValue = 0.0f;
 	int index = 0;
@@ -125,9 +125,13 @@ float InputDevice::getFloatValue(int mapping, bool useSensitivity)
 		value = inputObjectArray_->inputObjects[index]->getValueFloat();
 
 		if(useSensitivity)
+		{
 			value *= inputObjectArray_->inputObjects[index]->getSensitivity();
+			if(inputObjectArray_->inputObjects[index]->needsDelta())
+				value *= delta;
+		}
 
-		if(std::abs(value) > maxValue)
+		if(std::abs(value) > std::abs(maxValue))
 		{
 			maxValue = value;
 		}

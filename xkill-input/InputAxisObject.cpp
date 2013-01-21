@@ -1,9 +1,11 @@
 #include "InputAxisObject.h"
 
-InputAxisObject::InputAxisObject(int minValue, int maxValue)
+InputAxisObject::InputAxisObject(int minValue, int maxValue, bool relativeAxis)
 {
 	minValue_ = minValue;
 	maxValue_ = maxValue;
+
+	relativeAxis_ = relativeAxis;
 
 	deadZone_ = 0.25f;
 
@@ -78,6 +80,11 @@ void InputAxisObject::setDeadZone(float deadZone)
 float InputAxisObject::getDeadZone()
 {
 	return deadZone_;
+}
+
+bool InputAxisObject::needsDelta()
+{
+	return !relativeAxis_;
 }
 
 float InputAxisObject::formatValue(int value) //Fix deadzone, is square for the moment

@@ -210,7 +210,7 @@ void Menu_Main::slot_inputSettingsChanged()
 	if(currentObject != nullptr)
 	{
 		currentObject->setInverted(ui.checkBox_Input->isChecked());
-		currentObject->setSensitivity(ui.horizontalSlider_Input->value()/100.0f);
+		currentObject->setSensitivity(static_cast<float>(ui.horizontalSlider_Input->value())/5000.0f);
 	}
 }
 
@@ -321,7 +321,7 @@ void Menu_Main::loadInputSettings(int objectId)
 {
 	if(currentObject != nullptr)
 	{
-		ui.horizontalSlider_Input->setValue(currentObject->getSensitivity()*100);
+		ui.horizontalSlider_Input->setValue(static_cast<int>(currentObject->getSensitivity()*5000.0f + 0.5f)); //Must fix better translation
 		ui.checkBox_Input->setChecked(currentObject->isInverted());
 	}
 }
