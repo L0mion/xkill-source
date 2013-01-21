@@ -14,29 +14,6 @@ void LoaderFbxAnimation::reset()
 {
 }
 
-void LoaderFbxAnimation::parseDeformer(FbxMesh* mesh, LoaderFbxMeshDesc* meshDesc)
-{
-	int skinCount = mesh->GetDeformerCount(FbxDeformer::eSkin);
-	for(int skinIndex=0; skinIndex<skinCount; skinIndex++)
-	{
-		FbxSkin* skinDeformer = static_cast<FbxSkin*>(mesh->GetDeformer(skinIndex, FbxDeformer::eSkin));
-		int numClusters = skinDeformer->GetClusterCount();
-		for(int clusterIndex=0; clusterIndex<numClusters; clusterIndex++)
-		{
-			FbxCluster* cluster = skinDeformer->GetCluster(clusterIndex);
-			int numIndices = cluster->GetControlPointIndicesCount();
-			for(int i=0; i<numIndices; i++)
-			{
-				int vertexIndex		= cluster->GetControlPointIndices()[i];
-				float vertexWeight	= static_cast<float>(cluster->GetControlPointWeights()[i]);
-
-				meshDesc->addVertexBoneIndex(vertexIndex, clusterIndex);
-				meshDesc->addVertexBoneWeight(vertexIndex, vertexWeight); 
-			}
-		}
-	}
-}
-
 void LoaderFbxAnimation::parseAnimation(FbxScene* scene)
 {
 	for(int i=0; i<scene->GetSrcObjectCount<FbxAnimStack>(); i++)

@@ -16,8 +16,6 @@ namespace fbxsdk_2014_0_beta2
 	class FbxCluster;
 }
 
-class LoaderFbxMeshDesc;
-
 class LoaderFbxAnimation
 {
 public:
@@ -25,7 +23,6 @@ public:
 	~LoaderFbxAnimation();
 	void reset();
 
-	void parseDeformer(FbxMesh* mesh, LoaderFbxMeshDesc* meshDesc);
 	void parseAnimation(FbxScene* scene);
 private:
 	void parseAnimationStack(FbxAnimStack* animStack, FbxNode* node, bool isSwitcher);

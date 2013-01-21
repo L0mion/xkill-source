@@ -20,7 +20,7 @@ public:
 		std::vector<Float4> vertexBinormals);
 	~LoaderFbxMeshDesc();
 
-	void prepareBoneData();
+	void prepareBoneData(int numControlPoints);
 	void addVertexBoneIndex(unsigned int vertexIndex, int boneIndex);
 	void addVertexBoneWeight(unsigned int vertexIndex, float weight);
 

@@ -31,6 +31,7 @@ void LoaderFbxMesh::parseMesh(FbxMesh* mesh, LoaderFbxMeshDesc* meshDesc)
 {
 	int polygonVertexCount = mesh->GetPolygonVertexCount();
 	int polygonCount = mesh->GetPolygonCount();
+	int numControlPonts = mesh->GetControlPointsCount();
 	FbxVector4* controlPoints = mesh->GetControlPoints();
 	
 	int vertexId = 0;
@@ -61,6 +62,8 @@ void LoaderFbxMesh::parseMesh(FbxMesh* mesh, LoaderFbxMeshDesc* meshDesc)
 	meshDesc->setVertexUVs(vertexUVs_);
 	meshDesc->setVertexTangents(vertexTangents_);
 	meshDesc->setVertexBinormals(vertexBinormals_);
+
+	parseVertexLinkData(mesh, meshDesc);
 }
 
 void LoaderFbxMesh::parsePolygonGroup(FbxMesh* mesh, int polygonIndex)
@@ -413,6 +416,49 @@ FbxVector4 LoaderFbxMesh::parseVertexBinormalsByPolygonVertex(FbxGeometryElement
 	return fbxBinormal;
 }
 
+void LoaderFbxMesh::parseVertexLinkData(FbxMesh* mesh, LoaderFbxMeshDesc* meshDesc)
+{
+	meshDesc->prepareBoneData(mesh->GetControlPointsCount());
+
+	//Cluster seems to be the same as bone.
+
+	FbxCluster* cluster = nullptr;
+	
+	int	numDeformers = mesh->GetDeformerCount(FbxDeformer::eSkin);
+	int	numClusters	 = 0;
+	int linkMode	 = 0;
+
+	const char* clusterName;
+
+	for(int deformerIndex=0; deformerIndex<numDeformers; deformerIndex++)
+	{
+		numClusters = static_cast<FbxSkin*>(mesh->GetDeformer(deformerIndex, FbxDeformer::eSkin))->GetClusterCount();
+		for(int clusterIndex=0; clusterIndex<numClusters; clusterIndex++)
+		{
+			printf("  Cluster: %d\n", clusterIndex);
+			cluster = static_cast<FbxSkin*>(mesh->GetDeformer(deformerIndex, FbxDeformer::eSkin))->GetCluster(clusterIndex);
+
+			if(cluster->GetLink() != NULL)
+			{
+				clusterName = cluster->GetLink()->GetName();
+				printf("    Name: %s\n", clusterName);
+			}
+
+			int numIndices = cluster->GetControlPointIndicesCount();
+
+			int* indices = cluster->GetControlPointIndices();
+			double* weights = cluster->GetControlPointWeights();
+
+			for(int i =0; i<numIndices; i++)
+			{
+				meshDesc->addVertexBoneIndex(indices[i], clusterIndex);
+				meshDesc->addVertexBoneWeight(indices[i], static_cast<float>(weights[i]));
+			}
+		}
+	}
+}
+
+
 bool LoaderFbxMesh::float2Equal(Float2 f1, Float2 f2)
 {
 	bool equal = false;
@@ -446,7 +492,7 @@ std::vector<VertexPosNormTex> LoaderFbxMesh::assemblePosNormTex()
 		VertexPosNormTex vertex;
 		vertex.position_	= vertexPositions_[i];
 		vertex.normal_		= vertexNormals_[i];
-		vertex.texcoord_	= vertexUVs_[i];
+		//vertex.texcoord_	= vertexUVs_[i];
 
 		vertices.push_back(vertex);
 	}

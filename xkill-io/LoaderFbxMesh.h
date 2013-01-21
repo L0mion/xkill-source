@@ -65,6 +65,8 @@ private:
 	FbxVector4 parseVertexBinormalsByControlPoint(FbxGeometryElementBinormal* binormalElement, int controlPointIndex);
 	FbxVector4 parseVertexBinormalsByPolygonVertex(FbxGeometryElementBinormal* binormalElement, int vertexId);
 
+	void parseVertexLinkData(FbxMesh* mesh, LoaderFbxMeshDesc* meshDesc);
+
 	bool float2Equal(Float2 f1, Float2 f2);
 	bool float3Equal(Float3 f1, Float3 f2);
 	bool float4Equal(Float4 f1, Float4 f2);

@@ -23,17 +23,10 @@ LoaderFbxMeshDesc::~LoaderFbxMeshDesc()
 {
 }
 
-void LoaderFbxMeshDesc::prepareBoneData()
+void LoaderFbxMeshDesc::prepareBoneData(int numControlPoints)
 {
-	unsigned int size = vertexPositions_.size();
-	vertexBoneIndices_.resize(size);
-	vertexBoneWeights_.resize(size);
-
-	for(unsigned int i=0; i<size; i++)
-	{
-		vertexBoneIndices_[i].resize(NUM_INFLUENCING_BONES, 0);
-		vertexBoneWeights_[i].resize(NUM_INFLUENCING_BONES, 0.0f);
-	}
+	vertexBoneIndices_.resize(numControlPoints);
+	vertexBoneWeights_.resize(numControlPoints);
 }
 void LoaderFbxMeshDesc::addVertexBoneIndex(unsigned int vertexIndex, int boneIndex)
 {
@@ -42,10 +35,10 @@ void LoaderFbxMeshDesc::addVertexBoneIndex(unsigned int vertexIndex, int boneInd
 		if(vertexBoneIndices_[vertexIndex].size() < NUM_INFLUENCING_BONES)
 			vertexBoneIndices_[vertexIndex].push_back(boneIndex);
 		else
-			printf("LoaderFbxMeshDesc::addVertexBoneIndex already at max num bone indices");
+			printf("LoaderFbxMeshDesc::addVertexBoneIndex already at max num bone indices \n");
 	}
 	else
-		printf("LoaderFbxMeshDesc::addVertexBoneIndex invalid vertex index");
+		printf("LoaderFbxMeshDesc::addVertexBoneIndex invalid vertex index \n");
 }
 void LoaderFbxMeshDesc::addVertexBoneWeight(unsigned int vertexIndex, float weight)
 {
@@ -54,10 +47,10 @@ void LoaderFbxMeshDesc::addVertexBoneWeight(unsigned int vertexIndex, float weig
 		if(vertexBoneWeights_[vertexIndex].size() < NUM_INFLUENCING_BONES)
 			vertexBoneWeights_[vertexIndex].push_back(weight);
 		else
-			printf("LoaderFbxMeshDesc::addVertexBoneWeight already at max num bone weights");
+			printf("LoaderFbxMeshDesc::addVertexBoneWeight already at max num bone weights \n");
 	}
 	else
-		printf("LoaderFbxMeshDesc::addVertexBoneWeight invalid vertex index");
+		printf("LoaderFbxMeshDesc::addVertexBoneWeight invalid vertex index \n");
 }
 
 void LoaderFbxMeshDesc::setPolygonGroupIds(std::vector<int> polygonGroupIds)
