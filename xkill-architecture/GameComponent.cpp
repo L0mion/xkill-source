@@ -278,7 +278,7 @@ void GameComponent::onUpdate(float delta)
 			}
 
 			spatial->rotation = Float4(0.0f, 0.0f, 0.0f, 1.0f);
-			camera->reset = true; //Reset player rotation.
+			//camera->reset = true; //Reset player rotation.
 			physics->reloadDataIntoBulletPhysics = true;
 
 			health->health = health->startHealth; // restores player health
