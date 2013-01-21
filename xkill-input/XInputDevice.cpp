@@ -97,6 +97,7 @@ void XInputDevice::setStandardMappings()
 		axes_[1]->addMapping(InputAction::ACTION_F_WALK_FB);
 		axes_[2]->addMapping(InputAction::ACTION_F_LOOK_LR);
 		axes_[3]->addMapping(InputAction::ACTION_F_LOOK_UD);
+		axes_[3]->setInverted(true);
 	}
 
 	if(buttons_.size() >= 14)
@@ -209,8 +210,6 @@ void XInputDevice::createInputObjectsFromLayout()
 
 	if(axes_.size() >= 4)
 	{
-		axes_[3]->setInverted(true);
-
 		axes_[0]->setName("Left Stick X");
 		axes_[1]->setName("Left Stick Y");
 		axes_[2]->setName("Right Stick X");

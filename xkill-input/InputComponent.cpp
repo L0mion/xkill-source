@@ -101,10 +101,10 @@ void InputComponent::handleInput(float delta)
 		if(device == nullptr)
 			continue;
 
-		input->position.x = device->getFloatValue(InputAction::ACTION_F_WALK_LR);
-		input->position.y = device->getFloatValue(InputAction::ACTION_F_WALK_FB);
-		input->rotation.x = device->getFloatValue(InputAction::ACTION_F_LOOK_LR, true) * 0.01f; // Scale input to a reasonable range
-		input->rotation.y = device->getFloatValue(InputAction::ACTION_F_LOOK_UD, true) * 0.01f;	// Scale input to a reasonable range
+		input->position.x = device->getFloatValue(InputAction::ACTION_F_WALK_LR, delta);
+		input->position.y = device->getFloatValue(InputAction::ACTION_F_WALK_FB, delta);
+		input->rotation.x = device->getFloatValue(InputAction::ACTION_F_LOOK_LR, delta, true);
+		input->rotation.y = device->getFloatValue(InputAction::ACTION_F_LOOK_UD, delta, true);
 
 		if(device->getBoolValue(InputAction::ACTION_B_FIRE))
 			input->fire = true;
@@ -141,6 +141,18 @@ void InputComponent::handleInput(float delta)
 		
 		if(device->getBoolValue(InputAction::ACTION_B_WALK_RIGHT))
 			input->position.x = 1.0f;
+
+		if(device->getBoolValue(InputAction::ACTION_B_LOOK_UP))
+			input->rotation.y = -1.0f * delta;
+															
+		if(device->getBoolValue(InputAction::ACTION_B_LOOK_LEFT))
+			input->rotation.x = -1.0f * delta;
+		
+		if(device->getBoolValue(InputAction::ACTION_B_LOOK_DOWN))
+			input->rotation.y = 1.0f * delta;
+		
+		if(device->getBoolValue(InputAction::ACTION_B_LOOK_RIGHT))
+			input->rotation.x = 1.0f * delta;
 		
 		if(device->getBoolReleased(InputAction::ACTION_B_KILL_PLAYER))
 			input->killPlayer = true;
