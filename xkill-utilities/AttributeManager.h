@@ -65,9 +65,9 @@ public:
 	AttributeStorage<Attribute_SpawnPoint>				spawnPoint;
 	AttributeStorage<Attribute_WeaponStats>				weaponStats;
 	AttributeStorage<Attribute_ExplosionSphere>			explosionSphere;
+	AttributeStorage<Attribute_SplitScreen>				splitScreen;
 
 	// ADD MORE ABOVE ^
-
 
 	static AttributeManager* getInstance();
 };
@@ -114,6 +114,7 @@ static AttributeIterator<Attribute_Damage>				itrDamage				;	\
 static AttributeIterator<Attribute_SpawnPoint>			itrSpawnPoint			;	\
 static AttributeIterator<Attribute_WeaponStats>			itrWeaponStats			;	\
 static AttributeIterator<Attribute_ExplosionSphere>		itrExplosionSphere		;	\
+static AttributeIterator<Attribute_SplitScreen>			itrSplitScreen			;	\
 																					\
 // ADD MORE ABOVE ^
 
@@ -141,5 +142,6 @@ itrDamage				= ATTRIBUTE_MANAGER->damage					.getIterator();		\
 itrSpawnPoint			= ATTRIBUTE_MANAGER->spawnPoint				.getIterator();		\
 itrWeaponStats			= ATTRIBUTE_MANAGER->weaponStats			.getIterator();		\
 itrExplosionSphere		= ATTRIBUTE_MANAGER->explosionSphere		.getIterator();		\
+itrSplitScreen			= ATTRIBUTE_MANAGER->splitScreen			.getIterator();		\
 																						\
 // ADD MORE ABOVE ^

@@ -5,7 +5,7 @@
 
 struct ViewportData
 {
-	unsigned int camIndex; 
+	//unsigned int camIndex; 
 
 	DirectX::XMFLOAT4X4 view;
 	DirectX::XMFLOAT4X4 viewInv;
