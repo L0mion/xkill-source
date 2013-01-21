@@ -16,10 +16,6 @@ LoaderFbxMesh::~LoaderFbxMesh()
 }
 void LoaderFbxMesh::reset()
 {
-	indices_.clear();
-
-	verticesPosNormTex_.clear();
-
 	vertexPositions_.clear();
 	vertexNormals_.clear();
 	vertexUVs_.clear();
@@ -482,64 +478,4 @@ bool LoaderFbxMesh::float4Equal(Float4 f1, Float4 f2)
 		equal = true;
 
 	return equal;
-}
-
-std::vector<VertexPosNormTex> LoaderFbxMesh::assemblePosNormTex()
-{
-	std::vector<VertexPosNormTex> vertices;
-	for(unsigned int i=0; i<vertexPositions_.size(); i++)
-	{
-		VertexPosNormTex vertex;
-		vertex.position_	= vertexPositions_[i];
-		vertex.normal_		= vertexNormals_[i];
-		//vertex.texcoord_	= vertexUVs_[i];
-
-		vertices.push_back(vertex);
-	}
-	return vertices;
-}
-
-void LoaderFbxMesh::indexPosNormTex(std::vector<VertexPosNormTex> posNormTex)
-{
-	indices_.clear();
-	verticesPosNormTex_.clear();
-
-	for(unsigned int i=0; i<posNormTex.size(); i++)
-	{
-		bool equal			= false;
-		unsigned int index	= 0;
-		while(index<verticesPosNormTex_.size() && !equal)
-		{
-			equal = float3Equal(posNormTex[i].position_, verticesPosNormTex_[index].position_);
-			if(equal)
-				equal = float3Equal(posNormTex[i].normal_, verticesPosNormTex_[index].normal_);
-			if(equal)
-				equal = float2Equal(posNormTex[i].texcoord_, verticesPosNormTex_[index].texcoord_);
-			if(!equal)
-				index++;
-		}
-		if(equal)
-			indices_.push_back(index);
-		else
-		{
-			verticesPosNormTex_.push_back(posNormTex[i]);
-			indices_.push_back(verticesPosNormTex_.size()-1);
-		}
-	}
-}
-
-void LoaderFbxMesh::createVerticesPosNormTex()
-{
-	std::vector<VertexPosNormTex> vertices;
-	vertices = assemblePosNormTex();
-	indexPosNormTex(vertices);
-}
-
-std::vector<unsigned int> LoaderFbxMesh::getIndices()
-{
-	return indices_;
-}
-std::vector<VertexPosNormTex> LoaderFbxMesh::getVerticesPosNormTex()
-{
-	return verticesPosNormTex_;
 }

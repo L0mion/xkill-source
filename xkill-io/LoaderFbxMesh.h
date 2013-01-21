@@ -35,12 +35,6 @@ public:
 	void reset();
 
 	void parseMesh(FbxMesh* mesh, LoaderFbxMeshDesc* meshDesc);
-	void createVerticesPosNormTex();
-	std::vector<unsigned int> getIndices();
-	std::vector<VertexPosNormTex> getVerticesPosNormTex();
-
-	
-
 private:
 	void parsePolygonGroup(FbxMesh* mesh, int polygonIndex);
 	void parseVertexPositions(FbxMesh* mesh, FbxVector4* controlPoints, int controlPointIndex);
@@ -70,12 +64,6 @@ private:
 	bool float2Equal(Float2 f1, Float2 f2);
 	bool float3Equal(Float3 f1, Float3 f2);
 	bool float4Equal(Float4 f1, Float4 f2);
-
-	std::vector<VertexPosNormTex> assemblePosNormTex();
-	void indexPosNormTex(std::vector<VertexPosNormTex> posNormTex);
-	
-	std::vector<unsigned int>	indices_;
-	std::vector<VertexPosNormTex> verticesPosNormTex_;
 
 	std::vector<int>	polygonGroupIds_;
 	std::vector<Float3> vertexPositions_;

@@ -78,7 +78,7 @@ bool LoaderFbx::load(std::string filename)
 	}
 
 
-	animationLoader_->parseAnimation(fbxScene_);
+//	animationLoader_->parseAnimation(fbxScene_);
 
 	return success;
 }
@@ -242,6 +242,9 @@ void LoaderFbx::parseMesh(FbxNode* node)
 	meshLoader_->parseMesh(mesh, &meshDesc);
 	materialLoader_->parseMaterial(mesh, &materialDesc);
 	textureLoader_->parseTexture(mesh, &textureDesc);
+
+	std::vector<VertexPosNormSkinned> vertices = meshDesc.createVerticesPosNormSkinned();
+	std::vector<unsigned int> indices = meshDesc.getIndices();
 }
 void LoaderFbx::parseAnimation(FbxScene* scene)
 {
