@@ -243,7 +243,7 @@ void LoaderFbx::parseMesh(FbxNode* node)
 	materialLoader_->parseMaterial(mesh, &materialDesc);
 	textureLoader_->parseTexture(mesh, &textureDesc);
 
-	animationLoader_->parseDeformer(mesh);
+	animationLoader_->parseDeformer(mesh, &meshDesc);
 }
 void LoaderFbx::parseAnimation(FbxScene* scene)
 {

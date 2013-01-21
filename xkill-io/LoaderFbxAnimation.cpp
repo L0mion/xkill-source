@@ -1,6 +1,7 @@
 #include <fbxsdk.h>
 
 #include "LoaderFbxAnimation.h"
+#include "LoaderFbxMeshDesc.h"
 
 
 LoaderFbxAnimation::LoaderFbxAnimation()
@@ -13,7 +14,7 @@ void LoaderFbxAnimation::reset()
 {
 }
 
-void LoaderFbxAnimation::parseDeformer(FbxMesh* mesh)
+void LoaderFbxAnimation::parseDeformer(FbxMesh* mesh, LoaderFbxMeshDesc* meshDesc)
 {
 	int skinCount = mesh->GetDeformerCount(FbxDeformer::eSkin);
 	for(int skinIndex=0; skinIndex<skinCount; skinIndex++)
@@ -26,10 +27,11 @@ void LoaderFbxAnimation::parseDeformer(FbxMesh* mesh)
 			int numIndices = cluster->GetControlPointIndicesCount();
 			for(int i=0; i<numIndices; i++)
 			{
-				int index		= cluster->GetControlPointIndices()[i];
-				float weight	= static_cast<float>(cluster->GetControlPointWeights()[i]);
+				int vertexIndex		= cluster->GetControlPointIndices()[i];
+				float vertexWeight	= static_cast<float>(cluster->GetControlPointWeights()[i]);
 
-
+				meshDesc->addVertexBoneIndex(vertexIndex, clusterIndex);
+				meshDesc->addVertexBoneWeight(vertexIndex, vertexWeight); 
 			}
 		}
 	}

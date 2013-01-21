@@ -39,7 +39,7 @@ void LoaderFbxMeshDesc::addVertexBoneIndex(unsigned int vertexIndex, int boneInd
 {
 	if(vertexIndex < vertexBoneIndices_.size())
 	{
-		if(vertexBoneIndices_[vertexIndex].size < NUM_INFLUENCING_BONES)
+		if(vertexBoneIndices_[vertexIndex].size() < NUM_INFLUENCING_BONES)
 			vertexBoneIndices_[vertexIndex].push_back(boneIndex);
 		else
 			printf("LoaderFbxMeshDesc::addVertexBoneIndex already at max num bone indices");
@@ -51,7 +51,7 @@ void LoaderFbxMeshDesc::addVertexBoneWeight(unsigned int vertexIndex, float weig
 {
 	if(vertexIndex < vertexBoneWeights_.size())
 	{
-		if(vertexBoneWeights_[vertexIndex].size < NUM_INFLUENCING_BONES)
+		if(vertexBoneWeights_[vertexIndex].size() < NUM_INFLUENCING_BONES)
 			vertexBoneWeights_[vertexIndex].push_back(weight);
 		else
 			printf("LoaderFbxMeshDesc::addVertexBoneWeight already at max num bone weights");
