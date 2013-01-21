@@ -189,7 +189,7 @@ void InputComponent::setupPlayerControllerConnection()
 		}
 		else
 		{
-			DEBUGPRINT("-->Player could not be matched to a controller");
+			DEBUGPRINT("Player(s) could not be matched to a controller");
 			break;
 		}
 	}
