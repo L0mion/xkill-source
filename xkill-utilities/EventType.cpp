@@ -196,3 +196,9 @@ Event_CreateInputDevice::Event_CreateInputDevice(InputDevice* inputDevice, Input
 	device = inputDevice;
 	objectArray = inputObjectArray;
 }
+
+Event_DrawDebugVertexBuffer::Event_DrawDebugVertexBuffer(Float3* float3Array, int float3ArraySize) : Event (EVENT_DRAW_DEBUG_VERTEX_BUFFER)
+{
+	this->float3Array = float3Array;
+	this->float3ArraySize = float3ArraySize;
+};

@@ -65,6 +65,7 @@ enum DLL_U EventType
 	EVENT_RUMBLE,
 	EVENT_DO_CULLING,
 	EVENT_PHYSICS_ATTRIBUTES_COLLIDING,
+	EVENT_DRAW_DEBUG_VERTEX_BUFFER,
 
 	EVENT_ATTRIBUTE_UPDATED,
 
@@ -487,4 +488,13 @@ public:
 
 	InputDevice* device;
 	InputObjectArray* objectArray;
+};
+
+class DLL_U Event_DrawDebugVertexBuffer : public Event
+{
+public:
+	Event_DrawDebugVertexBuffer(Float3* float3Array, int float3ArraySize);
+
+	Float3* float3Array;
+	int float3ArraySize;
 };
