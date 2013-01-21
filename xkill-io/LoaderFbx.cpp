@@ -1,25 +1,71 @@
 #include <sstream>
 
+#include <fbxsdk.h>
+
 #include <xkill-utilities/EventManager.h>
+#include <xkill-utilities/MeshVertices.h>
 
 #include "LoaderFbx.h"
+#include "LoaderFbxMesh.h"
+#include "LoaderFbxMeshDesc.h"
+#include "LoaderFbxMaterial.h"
+#include "LoaderFbxTexture.h"
+#include "LoaderFbxTextureDesc.h"
+#include "LoaderFbxAnimation.h"
+#include "LoaderFbxMaterialDesc.h"
 
 LoaderFbx::LoaderFbx()
 {
+	meshLoader_			= nullptr;
+	materialLoader_		= nullptr;
+	textureLoader_		= nullptr;
+	animationLoader_	= nullptr;
+
 	fbxManager_ = nullptr;
 	fbxScene_	= nullptr;
 }
 LoaderFbx::~LoaderFbx()
 {
+	if(meshLoader_)
+		delete meshLoader_;
+	if(materialLoader_)
+		delete materialLoader_;
+	if(textureLoader_)
+		delete textureLoader_;
+	if(animationLoader_)
+		delete animationLoader_;
+
 	fbxManager_->Destroy();
+}
+bool LoaderFbx::init()
+{
+	meshLoader_		 = new LoaderFbxMesh();
+	materialLoader_  = new LoaderFbxMaterial();
+	textureLoader_	 = new LoaderFbxTexture();
+ 	animationLoader_ = new LoaderFbxAnimation();
+
+	bool success = true;
+	success = createFbxManager();
+	
+	return success;
 }
 
 bool LoaderFbx::load(std::string filename)
 {
+	meshLoader_->reset();
+	materialLoader_->reset();
+	textureLoader_->reset();
+	animationLoader_->reset();
+
 	bool success = true;
 
-	success = createFbxManager();
-	if(success)
+	if(fbxScene_)
+	{
+		fbxScene_->Destroy();
+		fbxScene_ = nullptr;
+		success = createFbxScene();
+	}
+	else
 		success = createFbxScene();
 	if(success)
 		success = loadScene(filename);
@@ -30,6 +76,9 @@ bool LoaderFbx::load(std::string filename)
 		for(int i=0; i<node->GetChildCount(); i++)
 			parseNode(node->GetChild(i));
 	}
+
+
+	animationLoader_->parseAnimation(fbxScene_);
 
 	return success;
 }
@@ -85,11 +134,10 @@ bool LoaderFbx::loadScene(std::string filename)
 	{
 		message.str("");
 		message << "LoaderFbx::loadScene | Call to FbxImporter::Initialize() failed! \n Error returned: " 
-				<< fbxImporter->GetLastErrorString();
+				<< fbxImporter->GetStatus().GetErrorString();
 		SHOW_MESSAGEBOX(message.str());
 
-		if(fbxImporter->GetLastErrorID() == FbxIOBase::eFileVersionNotSupportedYet ||
-		   fbxImporter->GetLastErrorID() == FbxIOBase::eFileVersionNotSupportedAnymore)
+		if(fbxImporter->GetStatus().GetCode() == FbxStatus::eInvalidFileVersion)
 		{
 			std::stringstream message;
 			message.str("");
@@ -98,7 +146,54 @@ bool LoaderFbx::loadScene(std::string filename)
 			SHOW_MESSAGEBOX(message.str());
 		}
 	}
-	else
+	if(fbxImporter->IsFBX())
+	{
+		FBXSDK_printf("FBX file format version for file '%s' is %d.%d.%d\n\n", filename, fileMajor, fileMinor, fileRevision);
+
+        // From this point, it is possible to access animation stack information without
+        // the expense of loading the entire file.
+
+        FBXSDK_printf("Animation Stack Information\n");
+
+        int animStackCount = fbxImporter->GetAnimStackCount();
+
+        FBXSDK_printf("    Number of Animation Stacks: %d\n", animStackCount);
+        FBXSDK_printf("    Current Animation Stack: \"%s\"\n", fbxImporter->GetActiveAnimStackName().Buffer());
+        FBXSDK_printf("\n");
+
+        for(int i = 0; i < animStackCount; i++)
+        {
+            FbxTakeInfo* takeInfo = fbxImporter->GetTakeInfo(i);;
+
+            FBXSDK_printf("    Animation Stack %d\n", i);
+            FBXSDK_printf("         Name: \"%s\"\n", takeInfo->mName.Buffer());
+			const char* debug = takeInfo->mDescription.Buffer();
+	//		FBXSDK_printf("         Description: \"%s\"\n", takeInfo->mDescription.Buffer());
+            
+			// Change the value of the import name if the animation stack should be imported 
+            // under a different name.
+            FBXSDK_printf("         Import Name: \"%s\"\n", takeInfo->mImportName.Buffer());
+
+            // Set the value of the import state to false if the animation stack should be not
+            // be imported. 
+            FBXSDK_printf("         Import State: %s\n", takeInfo->mSelect ? "true" : "false");
+            FBXSDK_printf("\n");
+
+			
+        }
+
+        // Set the import states. By default, the import states are always set to 
+        // true. The code below shows how to change these states.
+        fbxManager_->GetIOSettings()->SetBoolProp(IMP_FBX_MATERIAL,        true);
+        fbxManager_->GetIOSettings()->SetBoolProp(IMP_FBX_TEXTURE,         true);
+        fbxManager_->GetIOSettings()->SetBoolProp(IMP_FBX_LINK,            true);
+        fbxManager_->GetIOSettings()->SetBoolProp(IMP_FBX_SHAPE,           true);
+        fbxManager_->GetIOSettings()->SetBoolProp(IMP_FBX_GOBO,            true);
+        fbxManager_->GetIOSettings()->SetBoolProp(IMP_FBX_ANIMATION,       true);
+        fbxManager_->GetIOSettings()->SetBoolProp(IMP_FBX_GLOBAL_SETTINGS, true);
+	}
+	
+	if(success)
 	{
 		success = fbxImporter->Import(fbxScene_);
 	}
@@ -107,7 +202,7 @@ bool LoaderFbx::loadScene(std::string filename)
 	{
 		message.str("");
 		message << "LoaderFbx::loadScene | Call to FbxImporter::Import() failed! \n Error returned: "
-				<< fbxImporter->GetLastErrorString();
+				<< fbxImporter->GetStatus().GetErrorString();
 		SHOW_MESSAGEBOX(message.str());
 	}
 
@@ -116,15 +211,6 @@ bool LoaderFbx::loadScene(std::string filename)
 
 void LoaderFbx::parseNode(FbxNode* node)
 {
-	int errorCode = node->GetLastErrorID();
-	if(errorCode != -1)
-	{
-		std::stringstream message;
-		message << "LoaderFbx::parseNode | Error code : " << errorCode
-				<< " Error message: " << node->GetLastErrorString();
-		SHOW_MESSAGEBOX(message.str());
-	}
-
 	FbxNodeAttribute::EType attributeType;
 
 	if(node->GetNodeAttribute() == NULL)
@@ -148,138 +234,24 @@ void LoaderFbx::parseNode(FbxNode* node)
 }
 void LoaderFbx::parseMesh(FbxNode* node)
 {
+	LoaderFbxMeshDesc meshDesc;
+	LoaderFbxMaterialDesc materialDesc;
+	LoaderFbxTextureDesc textureDesc;
+
 	FbxMesh* mesh = (FbxMesh*)node->GetNodeAttribute();
+	meshLoader_->parseMesh(mesh, &meshDesc);
+	materialLoader_->parseMaterial(mesh, &materialDesc);
+	textureLoader_->parseTexture(mesh, &textureDesc);
 
-	int errorCode = mesh->GetLastErrorID();
-	if(errorCode != -1)
-	{
-		std::stringstream message;
-		message << "LoaderFbx::parseMesh | Error code : " << errorCode
-				<< " Error message: " << mesh->GetLastErrorString();
-		SHOW_MESSAGEBOX(message.str());
-	}
-
-	int polygonVertexCount = mesh->GetPolygonVertexCount();
-	int polygonCount = polygonVertexCount / POLYGON_SIZE;
-	
-	parseVertexPositions(mesh, polygonVertexCount);
-	parseIndices(mesh, polygonVertexCount);
-	
-	int vertexId = 0;
-
-	for(int polygonIndex=0; polygonIndex<polygonCount; polygonIndex++)
-	{
-		for(int insidePolygonIndex=0; insidePolygonIndex<POLYGON_SIZE; insidePolygonIndex++)
-		{
-			parseVertexNormals(mesh, polygonIndex, insidePolygonIndex, vertexId);
-
-			vertexId++;
-		}
-	}
+	animationLoader_->parseDeformer(mesh);
 }
-void LoaderFbx::parseIndices(FbxMesh* mesh, int polygonVertexCount)
+void LoaderFbx::parseAnimation(FbxScene* scene)
 {
-	int* indices = mesh->GetPolygonVertices();
-	indices_.resize(polygonVertexCount);
-	memcpy(&indices_[0], &indices[0], sizeof(int)*polygonVertexCount);
-}
-void LoaderFbx::parseVertexPositions(FbxMesh* mesh, int polygonVertexCount)
-{
-	FbxVector4* controlPoints = mesh->GetControlPoints();
-
-	int* indices = mesh->GetPolygonVertices();
-	for(int i=0; i<polygonVertexCount; i++)
-	{
-		Float3 position;
-		position.x = controlPoints[indices[i]].mData[0];
-		position.y = controlPoints[indices[i]].mData[1];
-		position.z = controlPoints[indices[i]].mData[2];
-
-		vertexPositions_.push_back(position);
-	}
-}
-void LoaderFbx::parseVertexNormals(FbxMesh* mesh, int polygonIndex, int insidePolygonIndex, int vertexId)
-{
-	FbxVector4 fbxNormal;
-	mesh->GetPolygonVertexNormal(polygonIndex, insidePolygonIndex, fbxNormal);
-	Float3 normal;
-	normal.x = fbxNormal.mData[0];
-	normal.y = fbxNormal.mData[1];
-	normal.z = fbxNormal.mData[2];
-
-	vertexNormals_.push_back(normal);
-}
-
-
-
-
-
-
-
-
-	//FbxVector4 fbxNormal;
-	//int id;
-	//
-	//for(int i=0; i<mesh->GetElementNormalCount(); i++)
+	//for(int i=0; i<scene->GetSrcObjectCount<FbxAnimStack>(); i++)
 	//{
-	//	FbxGeometryElementNormal* elementNormal = mesh->GetElementNormal(i);
+	//	FbxAnimStack* animStack = scene->GetSrcObject<FbxAnimStack>(i);
 	//
-	//	int errorCode = mesh->GetLastErrorID();
-	//	if(errorCode != -1)
-	//	{
-	//		std::stringstream message;
-	//		message << "LoaderFbx::parseMesh | Error code : " << errorCode
-	//				<< " Error message: " << mesh->GetLastErrorString();
-	//		SHOW_MESSAGEBOX(message.str());
-	//	}
-	//
-	//	FbxLayerElementArrayTemplate<FbxVector4> normals(elementNormal->GetDirectArray());
-	//	fbxNormal = elementNormal->GetDirectArray().GetAt(vertexId);
-	//
-	//	if(elementNormal->GetMappingMode() == FbxGeometryElement::eByPolygonVertex)
-	//	{
-	//		switch(elementNormal->GetReferenceMode())
-	//		{
-	//		case FbxGeometryElement::eDirect:
-	//			fbxNormal = elementNormal->GetDirectArray().GetAt(vertexId);
-	//			break;
-	//		case FbxGeometryElement::eIndexToDirect:
-	//			id = elementNormal->GetIndexArray().GetAt(vertexId);
-	//			fbxNormal = elementNormal->GetDirectArray().GetAt(id);
-	//			break;
-	//		default:
-	//			break;
-	//		}
-	//	}
-	//	Float3 normal;
-	//	normal.x = fbxNormal.mData[0];
-	//	normal.y = fbxNormal.mData[1];
-	//	normal.z = fbxNormal.mData[2];
-	//	vertexNormals_.push_back(normal);
+	//	parseAnimationStack(animStack, scene->GetRootNode(), true);
+	//	parseAnimationStack(animStack, scene->GetRootNode(), false);
 	//}
-
-
-
-
-
-	//bool success = true;
-	//
-	//FbxArray<FbxVector4> normals;
-	//success = mesh->GetPolygonVertexNormals(normals);
-	//if(!success)
-	//{
-	//	std::stringstream message;
-	//	message << "LoaderFbx::parseVertexNormals | mesh->GetPolygonVertexNormals() failed \n "
-	//			<< "Error code: " << mesh->GetLastErrorID() << ". Error string: " << mesh->GetLastErrorString();
-	//	SHOW_MESSAGEBOX(message.str());
-	//}
-	//
-	//for(int i=0; i<normals.Size(); i++)
-	//{
-	//	Float3 normal;
-	//	normal.x = normals[i].mData[0];
-	//	normal.y = normals[i].mData[1];
-	//	normal.z = normals[i].mData[2];
-	//	
-	//	vertexNormals_.push_back(normal);
-	//}
+}

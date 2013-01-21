@@ -2,7 +2,13 @@
 
 #include <btBulletDynamicsCommon.h>
 
+
 #include <xkill-utilities/AttributeManager.h>
+
+#include "physicsUtilities.h"
+#include "CollisionShapeManager.h"
+#include <xkill-utilities/EventManager.h>
+
 
 #include "CollisionShapes.h"
 #include "MotionState.h"
@@ -39,8 +45,23 @@ bool PhysicsObject::init(unsigned int attributeIndex)
 	}
 	attributeIndex_ = attributeIndex;
 
+<<<<<<< HEAD
 	//Get the init data from a physics attribute
 	Attribute_Physics* physicsAttribute = itrPhysics_.at(attributeIndex);
+=======
+	btVector3 localInertia(0,0,0);
+	//std::vector<int>* physicsOwners;
+	//GET_ATTRIBUTE_OWNERS(physicsOwners, ATTRIBUTE_PHYSICS);
+	//physicsOwners->at(index_);
+	if(getCollisionShape()->getShapeType()==4 && index_ >2)
+	{
+		getCollisionShape()->calculateLocalInertia(physicsAttribute->mass,localInertia);
+		inertiad = true;
+		setRestitution(1.0);
+		setRollingFriction(0.01);
+			
+	}
+>>>>>>> Sprint3-FBX-FBXLoader
 
 	//Resolve mass, local inertia of the collision shape, and also the collision shape itself.
 	btVector3 localInertia;
