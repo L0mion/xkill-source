@@ -17,8 +17,9 @@ public:
 	/*!
 	\param minValue The smallest value that unformatted input can have
 	\param maxValue The largest value that unformatted input can have
+	\param set if axis is a relative axis
 	*/
-	InputAxisObject(int minValue, int maxValue);
+	InputAxisObject(int minValue, int maxValue, bool relativeAxis = false);
 	virtual ~InputAxisObject(void);
 
 	void AddValue(float value);
@@ -47,9 +48,12 @@ public:
 	void setDeadZone(float deadZone);
 	float getDeadZone();
 
+	virtual bool needsDelta();
+
 private:
 	float deadZone_;
 	int maxValue_, minValue_;
+	bool relativeAxis_;
 
 	float value_;
 	float prevValue_;

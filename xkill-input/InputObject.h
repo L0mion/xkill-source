@@ -38,6 +38,8 @@ public:
 	virtual void setName(std::string name);
 	virtual std::string getName();
 
+	virtual bool needsDelta();
+
 	//! Adds a mapping
 	void addMapping(int mapping);
 	//! Removes a mapping
