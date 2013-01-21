@@ -3,6 +3,13 @@
 
 #include <d3d11.h>
 
+enum IED_TYPE
+{
+	IED_TYPE__POS_NORM_TEX,
+	IED_TYPE__POS_COLOR,
+	IED_TYPE__POS_NORM_TEX_TAN_SKINNED
+};
+
 //! Stores predefined types of Input Element descriptions required to initialize Input Layouts.
 /*!
 \ingroup xkill-renderer
@@ -14,12 +21,14 @@ public:
 	virtual ~ManagementIED();	//!< Does nothing.
 	
 	void init(); //!< Initializes member IEDs.
-	
-	unsigned int				getIEDPosNormTexNumElements();
-	D3D11_INPUT_ELEMENT_DESC*	getIEDPosNormTex();
+
+	unsigned int getIEDNumElements(IED_TYPE iedType);
+	D3D11_INPUT_ELEMENT_DESC* getIED(IED_TYPE iedType);
 protected:
 private:
-	void initIEDPosNormTex(); //!< Initializes IED consisting of Position-, Normal- and TexCoord-attributes.
+	void initIEDPosNormTex();			//!< Initializes IED consisting of Position-, Normal- and TexCoord-attributes.
+	void initIEDPosColor();				//!< Initializes IED consisting of Position- and Color-attributes.
+	void initIEDPosNormTexTanSkinned();	//!< Initializes IED consisting of Position-, Normal-, TexCoord-, Tangent-, Weights- and BoneIndices-attributes.
 
 	D3D11_INPUT_ELEMENT_DESC createIED(
 		LPCSTR		semanticName,
@@ -40,12 +49,22 @@ private:
 	static const unsigned int				defaultInstanceDataStepRate_	= 0;							//!< The number of instances to draw using the same per-instance data before advancing in the buffer by one element. This value must be 0 for an element that contains per-vertex data (the slot class is set to D3D11_INPUT_PER_VERTEX_DATA).
 
 	/*Semantic descriptors*/
-	const LPCSTR semanticPosition_;	//!< Defined semantic of POSITION in D3D.
-	const LPCSTR semanticNormal_;	//!< Defined semantic of NORMAL in D3D.
-	const LPCSTR semanticTexcoord_;	//!< Defined semantic of TEXCOORD in D3D.
+	const LPCSTR semanticPosition_;		//!< Defined semantic of POSITION in D3D.
+	const LPCSTR semanticNormal_;		//!< Defined semantic of NORMAL in D3D.
+	const LPCSTR semanticTexcoord_;		//!< Defined semantic of TEXCOORD in D3D.
+	const LPCSTR semanticColor_;		//!< Defined semantic of COLOR in D3D.
+	const LPCSTR semanticTangent_;		//!< Defined semantic of TANGENT in D3D.
+	const LPCSTR semanticWeights_;		//!< Defined semantic of WEIGHTS in D3D.
+	const LPCSTR semanticBoneIndices_;	//!< Defined semantic of BONEINDICES in D3D.
 
 	static const unsigned int iedPosNormTexNumElements_ = 3;			//!< Number of elements in PosNormTex-IED.
 	D3D11_INPUT_ELEMENT_DESC iedPosNormTex_[iedPosNormTexNumElements_];	//!< IED describing PosNormTex-Input-Layout.
+
+	static const unsigned int iedPosColorNumElements_ = 2;				//!< Number of elements in PosColor-IED.
+	D3D11_INPUT_ELEMENT_DESC iedPosColor_[iedPosColorNumElements_];		//!< IED describing PosColor-Input-Layout.
+
+	static const unsigned int iedPosNormTexTanSkinnedNumElements_ = 6;
+	D3D11_INPUT_ELEMENT_DESC iedPosNormTexTanSkinned_[iedPosNormTexTanSkinnedNumElements_];
 };
 
 #endif //XKILL_RENDERER_ILMANAGEMENT_H
