@@ -163,7 +163,7 @@ HRESULT ManagementViewport::initViewportDouble()
 	}
 	itrSplitScreen.resetIndex();
 
-	if(ssCount == 1)
+	if(ssCount == 2)
 	{
 		numViewportsX_ = 1;
 		numViewportsY_ = 2;
