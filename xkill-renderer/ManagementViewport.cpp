@@ -135,7 +135,7 @@ HRESULT ManagementViewport::initViewportDouble()
 		D3D11_VIEWPORT viewport;
 		ZeroMemory(&viewport, sizeof(D3D11_VIEWPORT));
 		viewport.Width		= static_cast<FLOAT>(viewportWidth_);
-		viewport.Height		= static_cast<FLOAT>(viewportHeight_)-borderSize_;
+		viewport.Height		= static_cast<FLOAT>(viewportHeight_) - borderSize_;
 		viewport.MinDepth	= 0;
 		viewport.MaxDepth	= 1;
 
@@ -147,7 +147,7 @@ HRESULT ManagementViewport::initViewportDouble()
 			break;
 		case 1:
 			viewport.TopLeftX	= 0;
-			viewport.TopLeftY	= static_cast<FLOAT>(viewportHeight_)+borderSize_;
+			viewport.TopLeftY	= static_cast<FLOAT>(viewportHeight_) + borderSize_;
 			break;
 		}
 		ssViewport.viewport = viewport;
@@ -163,7 +163,7 @@ HRESULT ManagementViewport::initViewportDouble()
 	}
 	itrSplitScreen.resetIndex();
 
-	if(ssCount == 1)
+	if(ssCount == 2)
 	{
 		numViewportsX_ = 1;
 		numViewportsY_ = 2;
