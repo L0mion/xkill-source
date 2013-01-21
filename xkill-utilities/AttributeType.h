@@ -505,6 +505,7 @@ struct DLL_U Attribute_SplitScreen : public IAttribute
 	~Attribute_SplitScreen();
 
 	AttributePointer ptr_camera;
+	AttributePointer ptr_player;
 
 	unsigned int ssTopLeftX;
 	unsigned int ssTopLeftY;

@@ -30,6 +30,7 @@ public:
 	void loadXML();
 
 public slots:
+		void slot_quitToDesktop();
 		void slot_startGame();
 		void slot_selectLevel(int levelId);
 		void slot_addLevel();

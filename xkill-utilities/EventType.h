@@ -36,6 +36,8 @@ for some reason
 enum DLL_U EventType
 {
 	// Inform events
+	EVENT_QUIT_TO_DESKTOP,
+
 	EVENT_PLAYERDEATH,
 	EVENT_END_DEATHMATCH,
 	EVENT_START_DEATHMATCH,
