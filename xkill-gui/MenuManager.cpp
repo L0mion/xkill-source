@@ -49,20 +49,24 @@ HUDWindow::HUDWindow(QWidget* parent, int id) : QMainWindow(parent)
 	resize(horizontalLayout->minimumSize());
 }
 
-void HUDWindow::parentMoveEvent()
+void HUDWindow::parentMoveEvent(Attribute_SplitScreen* splitScreen)
 {
-	QWidget* parent = this->parentWidget();
-	int x = 20 + id*(width()+10);
-	int y = parent->height() - this->height() - 20;
+	float sizeScale = (float) splitScreen->ssHeight / 1000;
+	sizeScale = 0.75f*sizeScale + 0.25f;
+
+	int x = 20*sizeScale + splitScreen->ssTopLeftX;
+	int y = splitScreen->ssTopLeftY + splitScreen->ssHeight - this->height() - 20*sizeScale;
 	move(x, y);
 }
 
-void HUDWindow::update(Attribute_Player* player)
+void HUDWindow::update(Attribute_SplitScreen* splitScreen)
 {
+	Attribute_Player*		player		=	itrPlayer		.at(splitScreen->ptr_player);
 	Attribute_Health*		health		=	itrHealth		.at(player->ptr_health);
 	Attribute_WeaponStats*	weaponStats	=	itrWeaponStats	.at(player->ptr_weaponStats);
 
-	float sizeScale = (float) this->parentWidget()->height() / 1000;
+	float sizeScale = (float) splitScreen->ssHeight / 1000;
+	sizeScale = 0.75f*sizeScale + 0.25f;
 	int textSize = (int)(20 * sizeScale);
 	if(textSize<1)
 		textSize = 1;
@@ -120,25 +124,24 @@ void HUDWindow::update(Attribute_Player* player)
 void HUDManager::update()
 {
 	// Balance attributes / vs huds
-	int numPlayers = itrPlayer.size();
-	while(numPlayers>huds.size())
+	int num_splitScreen = itrSplitScreen.size();
+	while(num_splitScreen>huds.size())
 	{
 		huds.push_back(new HUDWindow(parent, huds.size()));
 	}
-	while(numPlayers<huds.size())
+	while(num_splitScreen<huds.size())
 	{
-	
 		delete huds.back();
 		huds.pop_back();
 	}
-	parentMoveEvent();
 
 	// Update huds
 	int index = 0;
-	while(itrPlayer.hasNext())
+	while(itrSplitScreen.hasNext())
 	{
-		Attribute_Player* player = itrPlayer.getNext();
-		huds[index]->update(player);
+		Attribute_SplitScreen* splitScreen = itrSplitScreen.getNext();
+		huds[index]->update(splitScreen);
+		huds[index]->parentMoveEvent(splitScreen);
 		index++;
 	}
 }

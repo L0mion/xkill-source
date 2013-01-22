@@ -27,6 +27,10 @@ struct Test
 
 MainWindow::MainWindow()
 {
+	// subscribe to events
+	SUBSCRIBE_TO_EVENT(this, EVENT_SHOW_MESSAGEBOX);
+	SUBSCRIBE_TO_EVENT(this, EVENT_QUIT_TO_DESKTOP);
+
 	// Create console
 	AllocConsole();
 	SetConsoleTitle(L"Debug console");
@@ -46,14 +50,11 @@ MainWindow::MainWindow()
 	resize(800, 600);
 	QWidget::setAttribute(Qt::WA_PaintOnScreen);
 
-	// subscribe to events
-	SUBSCRIBE_TO_EVENT(this, EVENT_SHOW_MESSAGEBOX);
-
 	// init game
 	gameWidget = new GameWidget(this);
 	this->setCentralWidget(gameWidget);
 	
-	menuManager = new MenuManager(this);
+	menuManager = new MenuManager(gameWidget);
 
 	// setup signals and slots
 	connect(ui.actionFullscreen, SIGNAL(triggered()), this, SLOT(slot_toggleFullScreen()));
@@ -82,6 +83,9 @@ void MainWindow::onEvent( Event* e )
 	EventType type = e->getType();
 	switch (type) 
 	{
+	case EVENT_QUIT_TO_DESKTOP:
+		QWidget::close();
+		break;
 	case EVENT_SHOW_MESSAGEBOX:
 		event_showMessageBox((Event_ShowMessageBox*)e);
 		break;

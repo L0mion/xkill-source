@@ -40,10 +40,10 @@ void QTInputDevices::setStandardMappings()
 	{
 		axes_[0]->addMapping(InputAction::ACTION_F_LOOK_LR);
 		axes_[0]->setDeadZone(0.0f);
-		axes_[0]->setSensitivity(0.5f);
+		axes_[0]->setSensitivity(0.01f);
 		axes_[1]->addMapping(InputAction::ACTION_F_LOOK_UD);
 		axes_[1]->setDeadZone(0.0f);
-		axes_[1]->setSensitivity(0.5f);
+		axes_[1]->setSensitivity(0.01f);
 	}
 
 	if(buttons_.size() >= (unsigned int)inputLayout_.nrOfButtons)
@@ -58,6 +58,10 @@ void QTInputDevices::setStandardMappings()
 		buttons_[7]->addMapping(InputAction::ACTION_B_KILL_PLAYER);
 		buttons_[8]->addMapping(InputAction::ACTION_B_JUMP);
 		buttons_[9]->addMapping(InputAction::ACTION_B_SPRINT);
+
+		buttons_[10]->addMapping(InputAction::ACTION_B_FIRE);
+		buttons_[13]->addMapping(InputAction::ACTION_B_CHANGE_FIRINGMODE);
+		buttons_[14]->addMapping(InputAction::ACTION_B_CHANGE_AMMUNITIONTYPE);
 	}
 }
 
@@ -99,7 +103,7 @@ void QTInputDevices::updateState()
 void QTInputDevices::createInputLayout()
 {
 	inputLayout_.nrOfHatSwitches = 0;
-	inputLayout_.nrOfButtons = 10;
+	inputLayout_.nrOfButtons = 10 + 5; //5 = mouseButtons_
 	inputLayout_.nrOfTriggers = 0;
 	inputLayout_.nrOfAxes = 2;
 }
@@ -108,7 +112,7 @@ void QTInputDevices::createInputObjectsFromLayout()
 {
 	for(int i = 0; i < inputLayout_.nrOfAxes; i++)
 	{
-		InputAxisObject* axis = new InputAxisObject(-0x7FFF, 0x7FFF);
+		InputAxisObject* axis = new InputAxisObject(-0x7FFF, 0x7FFF, true);
 		axes_.push_back(axis);
 		inputObjectArray_->inputObjects.push_back(axis);
 	}
@@ -139,6 +143,27 @@ void QTInputDevices::createInputObjectsFromLayout()
 		buttons_[7]->setKey('K');
 		buttons_[8]->setKey('F');
 		buttons_[9]->setKey('R');
+
+		//Mouse buttons
+		buttons_[10]->setKey(1);
+		buttons_[10]->setName("Left mouse button");
+		mouseButtons_.push_back(buttons_[10]);
+
+		buttons_[11]->setKey(2);
+		buttons_[11]->setName("Right mouse button");
+		mouseButtons_.push_back(buttons_[11]);
+
+		buttons_[12]->setKey(4);
+		buttons_[12]->setName("Middle mouse button");
+		mouseButtons_.push_back(buttons_[12]);
+
+		buttons_[13]->setKey(8);
+		buttons_[13]->setName("Mouse button 4");
+		mouseButtons_.push_back(buttons_[13]);
+
+		buttons_[14]->setKey(16);
+		buttons_[14]->setName("Mouse button 5");
+		mouseButtons_.push_back(buttons_[14]);
 	}
 }
 
@@ -158,6 +183,14 @@ void QTInputDevices::setButton(char key, bool value)
 		{
 			buttons_[i]->SetValue(value);
 		}
+	}
+}
+
+void QTInputDevices::setMouseButton(unsigned int nr, bool value)
+{
+	if(nr < mouseButtons_.size())
+	{
+		mouseButtons_[nr]->SetValue(value);
 	}
 }
 

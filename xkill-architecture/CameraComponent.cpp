@@ -173,17 +173,18 @@ void mouse(const float dX, const float dY, Attribute_Camera* camera)
 	pitch(dY, camera);
 }
 
-void updateAspectRatio(float aspectRatio)
+void updateAspectRatio()
 {
 	// Recalculate view and 
 	// resize aspect ratios of all cameras 
-	while(itrCamera.hasNext())
+	while(itrSplitScreen.hasNext())
 	{
-		Attribute_Camera* camera = itrCamera.getNext();
+		Attribute_SplitScreen* splitScreen = itrSplitScreen.getNext();
+		Attribute_Camera* camera = itrCamera.at(splitScreen->ptr_camera);
 		Attribute_Spatial* spatial = itrSpatial.at(camera->ptr_spatial);
 		Attribute_Position* position = itrPosition.at(spatial->ptr_position);
 
-		camera->aspectRatio=aspectRatio;
+		camera->aspectRatio=splitScreen->getAspectRatio();
 		updateProj(camera);
 		updateView(camera);
 	}
@@ -192,8 +193,9 @@ void updateAspectRatio(float aspectRatio)
 CameraComponent::CameraComponent()
 {
 	// subscribe to events
-	SUBSCRIBE_TO_EVENT(this, EVENT_WINDOW_RESIZE);
+	SUBSCRIBE_TO_EVENT(this, EVENT_SPLITSCREEN_CHANGED);
 	SUBSCRIBE_TO_EVENT(this, EVENT_START_DEATHMATCH);
+	ATTRIBUTES_INIT_ALL;
 }
 
 CameraComponent::~CameraComponent()
@@ -202,13 +204,6 @@ CameraComponent::~CameraComponent()
 
 bool CameraComponent::init()
 {
-	ATTRIBUTES_INIT_ALL;
-
-	// Update aspect ratio
-	Event_GetWindowResolution windowResolution;
-	SEND_EVENT(&windowResolution);
-	updateAspectRatio(windowResolution.getAspectRatio());
-
 	return true;
 }
 
@@ -217,8 +212,8 @@ void CameraComponent::onEvent(Event* e)
 	EventType type = e->getType();
 	switch (type) 
 	{
-	case EVENT_WINDOW_RESIZE:
-		updateAspectRatio(((Event_WindowResize*)e)->getAspectRatio());
+	case EVENT_SPLITSCREEN_CHANGED:
+		updateAspectRatio();
 		break;
 	case EVENT_START_DEATHMATCH:
 		init();
