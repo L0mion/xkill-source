@@ -16,6 +16,7 @@ class btSequentialImpulseConstraintSolver;
 typedef float btScalar;
 
 class PhysicsObject;
+class FrustumPhysicsObject;
 class CollisionObject;
 
 /*! \defgroup xkill-physics xkill-physics
@@ -39,9 +40,11 @@ private:
 	btBulletWorldImporter*						bulletImporter_;
 
 	btAlignedObjectArray<PhysicsObject*>*		physicsObjects_;
+	btAlignedObjectArray<FrustumPhysicsObject*>* frustumPhysicsObjects_;
 
 	void synchronizeWithAttributes();
 	void updateCulling();
+	void doCulling(unsigned int frustumAttributeIndex, unsigned int objectAttributeIndex);
 public:
 	PhysicsComponent();
 	~PhysicsComponent();
@@ -49,6 +52,7 @@ public:
 	void onUpdate(float delta);
 	void onEvent(Event* e);
 
+	
 	void detectedCollisionsDuringStepSimulation(btScalar timeStep);
 };
 

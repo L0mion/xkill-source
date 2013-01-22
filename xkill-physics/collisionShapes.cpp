@@ -275,7 +275,7 @@ void CollisionShapes::updateFrustrumShape()
 	frustrumShape_ = convexShape;
 }
 
-btCollisionShape* CollisionShapes::getFrustrumShape()
+btCollisionShape* CollisionShapes::getFrustrumShape(unsigned int cameraIndex)
 {
 	return frustrumShape_;
 }

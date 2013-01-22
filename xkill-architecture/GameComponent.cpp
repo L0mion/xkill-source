@@ -278,6 +278,9 @@ void GameComponent::onUpdate(float delta)
 			}
 
 			spatial->rotation = Float4(0.0f, 0.0f, 0.0f, 1.0f);
+			camera->up = Float3(0.0f, 1.0f, 0.0f);
+			camera->right = Float3(1.0f, 0.0f, 0.0f);
+			camera->look = Float3(0.0f, 0.0f, 1.0f);
 			//camera->reset = true; //Reset player rotation.
 			physics->reloadDataIntoBulletPhysics = true;
 

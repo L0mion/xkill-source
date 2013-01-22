@@ -17,7 +17,8 @@
 #include <iostream>
 
 AttributeIterator<Attribute_Physics> itrPhysics;
-
+AttributeIterator<Attribute_Render> itrRender;
+AttributeIterator<Attribute_Camera> itrCamera_2;
 PhysicsComponent::PhysicsComponent() : broadphase_(nullptr),
 									   collisionConfiguration_(nullptr),
 									   dispatcher_(nullptr),
@@ -29,12 +30,27 @@ PhysicsComponent::PhysicsComponent() : broadphase_(nullptr),
 	SUBSCRIBE_TO_EVENT(this,EVENT_DO_CULLING);
 	SUBSCRIBE_TO_EVENT(this,EVENT_ATTRIBUTE_UPDATED);
 	itrPhysics = ATTRIBUTE_MANAGER->physics.getIterator();
+	itrRender = ATTRIBUTE_MANAGER->render.getIterator();
+	itrCamera_2 = ATTRIBUTE_MANAGER->camera.getIterator();
 }
 
 PhysicsComponent::~PhysicsComponent()
 {
 	UNSUBSCRIBE_TO_EVENTS(this);
 	// Remove all PhysicsObjects
+	if(frustumPhysicsObjects_ != nullptr)
+	{
+		while(frustumPhysicsObjects_->size() > 0)
+		{
+			if(frustumPhysicsObjects_->at(frustumPhysicsObjects_->size() - 1) != nullptr)
+			{
+				dynamicsWorld_->removeRigidBody(frustumPhysicsObjects_->at(frustumPhysicsObjects_->size() - 1));
+				delete frustumPhysicsObjects_->at(frustumPhysicsObjects_->size() - 1);
+			}
+			frustumPhysicsObjects_->pop_back();
+		}
+		delete frustumPhysicsObjects_;
+	}
 	if(physicsObjects_ != nullptr)
 	{
 		while(physicsObjects_->size() > 0)
@@ -85,6 +101,7 @@ PhysicsComponent::~PhysicsComponent()
 bool PhysicsComponent::init()
 {
 	physicsObjects_ =	new btAlignedObjectArray<PhysicsObject*>();
+	frustumPhysicsObjects_ = new btAlignedObjectArray<FrustumPhysicsObject*>();
 	
 	collisionConfiguration_ = new btDefaultCollisionConfiguration();
 	solver_ =				  new btSequentialImpulseConstraintSolver();
@@ -135,6 +152,15 @@ void PhysicsComponent::onEvent(Event* e)
   				dynamicsWorld_->removeRigidBody(physicsObjects_->at(attributeIndex));
 				delete physicsObjects_->at(attributeIndex);
 				physicsObjects_->at(attributeIndex) = nullptr;
+			}
+		}
+		else if(attributeUpdated->attributeEnum == ATTRIBUTE_CAMERA)
+		{
+			if(attributeUpdated->isDeleted)
+			{
+  				dynamicsWorld_->removeRigidBody(frustumPhysicsObjects_->at(attributeIndex));
+				delete frustumPhysicsObjects_->at(attributeIndex);
+				frustumPhysicsObjects_->at(attributeIndex) = nullptr;
 			}
 		}
 		break;
@@ -197,9 +223,6 @@ void PhysicsComponent::synchronizeWithAttributes()
 			case Attribute_Physics::EXPLOSIONSPHERE:
 				physicsObjects_->at(index) = new ExplosionSpherePhysicsObject();
 				break;
-			case Attribute_Physics::FRUSTUM:
-				physicsObjects_->at(index) = new FrustumPhysicsObject();
-				break;
 			case Attribute_Physics::EVERYTHING:
 				std::cout << "Error: Attribute_Physics should not have EVERYTHING as collisionFilterGroup" << std::endl;
 				break;
@@ -207,7 +230,7 @@ void PhysicsComponent::synchronizeWithAttributes()
 
 			if(physicsObjects_ != nullptr)
 			{
-				if(physicsObjects_->at(index)->init(index) == true)
+				if(physicsObjects_->at(index)->init(index,physicsAttribute->collisionFilterGroup) == true)
 				{
 					dynamicsWorld_->addRigidBody(physicsObjects_->at(index), physicsAttribute->collisionFilterGroup, physicsAttribute->collisionFilterMask);
 					//Per object gravity must be set after "addRigidBody"
@@ -256,9 +279,23 @@ void PhysicsComponent::detectedCollisionsDuringStepSimulation(btScalar timeStep)
 				
 				unsigned int ownerA = itrPhysics.ownerIdAt(objectA->getAttributeIndex());
 				unsigned int ownerB = itrPhysics.ownerIdAt(objectB->getAttributeIndex());
-
-				//Two PhysicsObjects colliding
-				//if(ownerA != 0 && ownerB != 0) // ignore contacts where one owner is 0
+				
+				//////check physicsobjecttype;
+				if(objectA->getCollisionFilterGroup() == Attribute_Physics::FRUSTUM ||
+					objectB->getCollisionFilterGroup() == Attribute_Physics::FRUSTUM)
+				{
+					if(objectA->getCollisionFilterGroup() == Attribute_Physics::FRUSTUM &&
+					   objectB->getCollisionFilterGroup() != Attribute_Physics::FRUSTUM)
+					{
+						doCulling(objectA->getAttributeIndex(),objectB->getAttributeIndex());
+					}
+					else if(objectA->getCollisionFilterGroup() != Attribute_Physics::FRUSTUM &&
+					   objectB->getCollisionFilterGroup() == Attribute_Physics::FRUSTUM)
+					{
+						doCulling(objectB->getAttributeIndex(),objectA->getAttributeIndex());
+					}					
+				}
+				else
 				{
 					//std::cout << "\nCollision between " << ownerA << " & " << ownerB;
 					QUEUE_EVENT(new Event_PhysicsAttributesColliding(objectA->getAttributeIndex(), objectB->getAttributeIndex()));
@@ -270,8 +307,37 @@ void PhysicsComponent::detectedCollisionsDuringStepSimulation(btScalar timeStep)
 	}
 }
 
+void PhysicsComponent::doCulling(unsigned int frustumAttributeIndex, unsigned int objectAttributeIndex)
+{
+	itrRender.at(itrPhysics.at(objectAttributeIndex)->ptr_render)->culling.setBool(frustumAttributeIndex,true);
+}
 
 void PhysicsComponent::updateCulling()
 {
 	CollisionShapes::Instance()->updateFrustrumShape();
+
+	itrCamera_2 = ATTRIBUTE_MANAGER->camera.getIterator();
+	while(itrCamera_2.hasNext())
+	{
+		Attribute_Camera* cameraAttribute = itrCamera_2.getNext();
+		unsigned int index = itrCamera_2.storageIndex();
+		
+		//Checks if new physiscs attributes were created since last call to this function
+		if(index >= static_cast<unsigned int>(frustumPhysicsObjects_->size()))
+		{
+			frustumPhysicsObjects_->push_back(nullptr);
+		}
+		if(frustumPhysicsObjects_->at(index) == nullptr)
+		{
+			frustumPhysicsObjects_->at(index) = new FrustumPhysicsObject();
+			frustumPhysicsObjects_->at(index)->init(index,Attribute_Physics::FRUSTUM);
+			int a = dynamicsWorld_->getNumCollisionObjects();
+			dynamicsWorld_->addRigidBody(frustumPhysicsObjects_->at(index),Attribute_Physics::FRUSTUM,Attribute_Physics::EVERYTHING);
+			int b = dynamicsWorld_->getNumCollisionObjects();
+		}
+		else
+		{
+			frustumPhysicsObjects_->at(index)->onUpdate(0);
+		}
+	}
 }

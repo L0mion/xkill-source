@@ -419,6 +419,7 @@ void Renderer::renderViewportToGBuffer(ViewportData& vpData)
 	while(itrRender.hasNext())
 	{
 		renderAt = itrRender.getNext();
+		if(renderAt->culling.getBool(Ö))
 		renderAttribute(
 			renderAt, 
 			vpData.view, 

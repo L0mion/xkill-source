@@ -9,6 +9,7 @@ class PhysicsObject
 	virtual bool subClassSpecificInitHook();	//! Can be overridden by subclasses. Is called from init.
 protected:
 		unsigned int attributeIndex_; //!< Specifies which PhysicsObject is synchronized with which physics attribute.
+		unsigned int collisionFilterGroup_;
 public:
 	PhysicsObject();
 	virtual ~PhysicsObject();
@@ -16,8 +17,9 @@ public:
 	/*!
 	\param attributeIndex The physics attribute index. Refer to MotionState.
 	*/
-	bool init(unsigned int attributeIndex);
+	bool init(unsigned int attributeIndex,unsigned int collisionFilterGroup);
 	unsigned int getAttributeIndex() const;
+	unsigned int getCollisionFilterGroup() const;
 	
 	virtual void onUpdate(float delta);
 };

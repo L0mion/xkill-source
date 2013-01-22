@@ -20,7 +20,7 @@ private:
 public:
 	~CollisionShapes();
 	btCollisionShape* getCollisionShape(unsigned int meshId);
-	btCollisionShape* getFrustrumShape();
+	btCollisionShape* getFrustrumShape(unsigned int cameraIndex);
 	void updateFrustrumShape();
 	void loadWorldCollisionShapes(std::string world);
 	void loadCollisionShapes();

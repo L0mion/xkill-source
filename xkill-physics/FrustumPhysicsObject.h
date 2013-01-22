@@ -9,7 +9,8 @@ class FrustumPhysicsObject
 public:
 	FrustumPhysicsObject();
 	~FrustumPhysicsObject();
-	virtual bool subClassSpecificInitHook();
+	virtual void onUpdate(float delta);
+	bool frustumInit(unsigned int attributeIndex,unsigned int collisionFilterGroup);
 };
 
 #endif

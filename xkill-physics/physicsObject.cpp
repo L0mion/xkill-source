@@ -31,13 +31,14 @@ bool PhysicsObject::subClassSpecificInitHook()
 	return true;
 }
 
-bool PhysicsObject::init(unsigned int attributeIndex)
+bool PhysicsObject::init(unsigned int attributeIndex,unsigned int collisionFilterGroup)
 {
 	if(attributeIndex < 0)
 	{
 		return false;
 	}
 	attributeIndex_ = attributeIndex;
+	collisionFilterGroup_ = collisionFilterGroup;
 
 	//Get the init data from a physics attribute
 	Attribute_Physics* physicsAttribute = itrPhysics_.at(attributeIndex);
@@ -94,6 +95,11 @@ bool PhysicsObject::init(unsigned int attributeIndex)
 unsigned int PhysicsObject::getAttributeIndex() const
 {
 	return attributeIndex_;
+}
+
+unsigned int PhysicsObject::getCollisionFilterGroup() const
+{
+	return collisionFilterGroup_;
 }
 
 void PhysicsObject::onUpdate(float delta)
