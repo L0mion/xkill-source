@@ -13,6 +13,8 @@
 #include "ManagementRS.h"
 #include "ManagementGBuffer.h"
 #include "ManagementDebug.h"
+#include "ManagementMath.h"
+#include "ManagementInstance.h"
 
 #include "Winfo.h"
 #include "ModelD3D.h"
@@ -23,7 +25,6 @@
 #include "IB.h"
 #include "renderingUtilities.h"
 #include "TypeFX.h"
-#include "ManagementMath.h"
 #include "Renderer.h"
 #include "ViewportData.h"
 
@@ -52,6 +53,7 @@ Renderer::Renderer(HWND windowHandle)
 	managementGBuffer_	= nullptr;
 	managementDebug_	= nullptr;
 	managementMath_		= nullptr;
+	managementInstance_ = nullptr;
 
 	attributesRenderOwner_	= nullptr;
 
@@ -76,6 +78,7 @@ Renderer::~Renderer()
 	SAFE_DELETE(managementRS_);
 	SAFE_DELETE(managementGBuffer_);
 	SAFE_DELETE(managementMath_);
+	SAFE_DELETE(managementInstance_);
 
 	//d3dDebug_->reportLiveDeviceObjects();
 	SAFE_DELETE(managementDebug_);
@@ -164,6 +167,7 @@ HRESULT Renderer::init()
 	initManagementMath();
 	if(SUCCEEDED(hr))
 		hr = initManagementGBuffer();
+	initManagementInstance();
 
 	//temp
 	/*
@@ -323,10 +327,21 @@ void Renderer::initManagementMath()
 {
 	managementMath_ = new ManagementMath();
 }
+void Renderer::initManagementInstance()
+{
+	managementInstance_ = new ManagementInstance();
+}
 
 void Renderer::update()
 {
-	managementLight_->update(managementD3D_->getDevice(), managementD3D_->getDeviceContext());
+	ID3D11Device*			device = managementD3D_->getDevice();
+	ID3D11DeviceContext*	devcon = managementD3D_->getDeviceContext();
+
+	//Update lights.
+	managementLight_->update(device, devcon);
+
+	//Update instances.
+	managementInstance_->update(device, devcon);
 }
 void Renderer::render()
 {
@@ -414,16 +429,22 @@ void Renderer::renderViewportToGBuffer(ViewportData& vpData)
 		vpData.viewportTopX,
 		vpData.viewportTopY);
 
-	//Render renderattributes
-	Attribute_Render* renderAt;
-	while(itrRender.hasNext())
+	std::map<unsigned int, InstancedData*> instancesMap = managementInstance_->getInstancesMap();
+	for(std::map<unsigned int, InstancedData*>::iterator i = instancesMap.begin(); i != instancesMap.end(); i++)
 	{
-		renderAt = itrRender.getNext();
-		renderAttribute(
-			renderAt, 
-			vpData.view, 
-			vpData.proj);
+		renderInstance(i->first, i->second);
 	}
+
+	//Render renderattributes
+	//Attribute_Render* renderAt;
+	//while(itrRender.hasNext())
+	//{
+	//	renderAt = itrRender.getNext();
+	//	renderAttribute(
+	//		renderAt, 
+	//		vpData.view, 
+	//		vpData.proj);
+	//}
 
 	//Make me use iterators!
 	Attribute_DebugShape* debugShapeAt;
@@ -581,43 +602,24 @@ void Renderer::renderViewportToBackBuffer(ViewportData& vpData)
 	managementFX_->unsetShader(devcon, SHADERID_CS_DEFAULT);
 	renderBackBufferClean();
 }
-void Renderer::renderAttribute(
-	Attribute_Render*	renderAt,
-	DirectX::XMFLOAT4X4 viewMatrix,
-	DirectX::XMFLOAT4X4 projectionMatrix)
+
+void Renderer::renderInstance(unsigned int meshID, InstancedData* instance)
 {
 	ID3D11Device*			device = managementD3D_->getDevice();
 	ID3D11DeviceContext*	devcon = managementD3D_->getDeviceContext();
 
-	//Get transform matrices.
-	Attribute_Spatial*	spatialAt			= itrSpatial.at(renderAt->ptr_spatial.index);
-	Attribute_Position*	positionAt			= itrPosition.at(spatialAt->ptr_position.index);
-	DirectX::XMFLOAT4X4 worldMatrix			= managementMath_->calculateWorldMatrix(spatialAt, positionAt);
-	DirectX::XMFLOAT4X4 worldMatrixInverse	= managementMath_->calculateMatrixInverse(worldMatrix);
-	DirectX::XMFLOAT4X4 finalMatrix			= managementMath_->calculateFinalMatrix(worldMatrix, viewMatrix, projectionMatrix);
-
-	//Update per-object constant buffer.
-	managementCB_->setCB(CB_TYPE_OBJECT, TypeFX_VS, CB_REGISTER_OBJECT, devcon);
-	managementCB_->updateCBObject(
-		devcon, 
-		finalMatrix, 
-		worldMatrix, 
-		worldMatrixInverse);
-
 	//Fetch renderer representation of model.
-	unsigned int meshID	= renderAt->meshID;
 	ModelD3D* modelD3D	= managementModel_->getModelD3D(meshID, device);
-	
+
 	//Set vertex buffer.
-	ID3D11Buffer* vertexBuffer = modelD3D->getVertexBuffer()->getVB();
-	UINT stride = sizeof(VertexPosNormTex);
-	UINT offset = 0;
-	devcon->IASetVertexBuffers(
-		0, 
-		1, 
-		&vertexBuffer, 
-		&stride, 
-		&offset);
+	UINT stride[2] = { sizeof(VertexPosNormTex), sizeof(VertexPosNormTexInstanced) };
+	UINT offset[2] = { 0, 0 };
+	ID3D11Buffer* vbs[2] = 
+	{ 
+		modelD3D->getVertexBuffer()->getVB(), 
+		instance->getInstanceBuffer()
+	};
+	devcon->IASetVertexBuffers(0, 2, vbs, stride, offset);
 	
 	std::vector<SubsetD3D*>		subsetD3Ds	= modelD3D->getSubsetD3Ds();
 	std::vector<MeshMaterial>	materials	= modelD3D->getMaterials();
@@ -628,10 +630,14 @@ void Renderer::renderAttribute(
 
 		renderSubset(
 			ib,
-			materials[materialIndex]);
+			materials[materialIndex],
+			instance->getInstanceCount());
 	}
 }
-void Renderer::renderSubset(IB* ib, MeshMaterial& material)
+void Renderer::renderSubset(
+	IB* ib, 
+	MeshMaterial& material, 
+	unsigned int numInstances)
 {
 	ID3D11Device*			device = managementD3D_->getDevice();
 	ID3D11DeviceContext*	devcon = managementD3D_->getDeviceContext();
@@ -651,7 +657,7 @@ void Renderer::renderSubset(IB* ib, MeshMaterial& material)
 		material.getSpecularPower());
 
 	//Set input layout
-	managementFX_->setLayout(devcon, LAYOUTID_POS_NORM_TEX);
+	managementFX_->setLayout(devcon, LAYOUTID_POS_NORM_TEX_INSTANCED);
 
 	//Set index-buffer.
 	UINT offset = 0;
@@ -664,10 +670,10 @@ void Renderer::renderSubset(IB* ib, MeshMaterial& material)
 	devcon->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
 	//Draw subset.
-	devcon->DrawIndexed(
-		ib->getNumIndices(), 
-		0, 
-		0);
+	devcon->DrawIndexedInstanced(
+		ib->getNumIndices(),
+		numInstances,
+		0, 0, 0);
 }
 void Renderer::renderDebugShape(
 	Attribute_DebugShape*	debugShapeAt, 
