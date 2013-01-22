@@ -22,9 +22,9 @@ public:
 	~LoaderFbxMeshDesc();
 
 	void prepareBoneData(int numControlPoints);
+	void fillBoneData();
 	void addVertexBoneIndex(unsigned int vertexIndex, int boneIndex);
 	void addVertexBoneWeight(unsigned int vertexIndex, float weight);
-
 	
 	std::vector<VertexPosColor>				createVerticesPosColor();
 	std::vector<VertexPosNormTex>			createVerticesPosNormTex();

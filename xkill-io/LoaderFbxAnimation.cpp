@@ -14,10 +14,13 @@ void LoaderFbxAnimation::reset()
 {
 }
 
-void LoaderFbxAnimation::parseAnimation(FbxScene* scene)
+void LoaderFbxAnimation::parseAnimation(FbxScene* scene, std::vector<LoaderFbxAnimationDesc>* animationDescs)
 {
+	animationDescs->clear();
+
 	for(int i=0; i<scene->GetSrcObjectCount<FbxAnimStack>(); i++)
 	{
+		animationBones_.clear();
 		FbxAnimStack* animStack = scene->GetSrcObject<FbxAnimStack>(i);
 	
 		FbxString str = "Animation Stack Name: ";
@@ -25,8 +28,12 @@ void LoaderFbxAnimation::parseAnimation(FbxScene* scene)
 		str += "\n";
 		printf("%s", str.Buffer());
 
-		parseAnimationStack(animStack, scene->GetRootNode(), true);
+		animationDescs->push_back(LoaderFbxAnimationDesc(animStack->GetName()));
+
+	//	parseAnimationStack(animStack, scene->GetRootNode(), true);
 		parseAnimationStack(animStack, scene->GetRootNode(), false);
+
+		animationDescs->back().setBones(animationBones_);
 	}
 }
 void LoaderFbxAnimation::parseAnimationStack(FbxAnimStack* animStack, FbxNode* node, bool isSwitcher)
@@ -59,6 +66,8 @@ void LoaderFbxAnimation::parseAnimationLayer(FbxAnimLayer* animLayer, FbxNode* n
 	str += "\n";
 	printf(str.Buffer());
 
+	animationBones_.push_back(LoaderFbxAnimationBone(node->GetName()));
+
 	parseAnimationChannels(node, animLayer, isSwitcher);
 
 	for(int i=0; i< node->GetChildCount(); i++)
@@ -80,7 +89,6 @@ void LoaderFbxAnimation::parseAnimationChannels(FbxNode* node, FbxAnimLayer* ani
 	parseAnimationChannelsGeometry(nodeAttribute, animLayer, animCurve);
 	parseAnimationChannelsProperty(node, animLayer, animCurve);
 }
-
 void LoaderFbxAnimation::parseAnimationChannelsGeneral(FbxNode* node, FbxAnimLayer* animLayer, FbxAnimCurve* animCurve)
 {
 	parseAnimationChannelsGeneralTranslation(node, animLayer, animCurve);
@@ -92,20 +100,20 @@ void LoaderFbxAnimation::parseAnimationChannelsGeneralTranslation(FbxNode* node,
 	animCurve = node->LclTranslation.GetCurve(animLayer, FBXSDK_CURVENODE_COMPONENT_X);
 	if(animCurve)
 	{
-		printf("    TX:\n");
-		parseAnimationCurve(animCurve);
+		//printf("    TX:\n");
+		parseAnimationCurve(animCurve, animationBones_.back().getTranslationX());
 	}
 	animCurve = node->LclTranslation.GetCurve(animLayer, FBXSDK_CURVENODE_COMPONENT_Y);
 	if(animCurve)
 	{
-		printf("    TY:\n");
-		parseAnimationCurve(animCurve);
+		//printf("    TY:\n");
+		parseAnimationCurve(animCurve, animationBones_.back().getTranslationY());
 	}
 	animCurve = node->LclTranslation.GetCurve(animLayer, FBXSDK_CURVENODE_COMPONENT_Z);
 	if(animCurve)
 	{
-		printf("    TZ:\n");
-		parseAnimationCurve(animCurve);
+		//printf("    TZ:\n");
+		parseAnimationCurve(animCurve, animationBones_.back().getTranslationZ());
 	}
 }
 void LoaderFbxAnimation::parseAnimationChannelsGeneralRotation(FbxNode* node, FbxAnimLayer* animLayer, FbxAnimCurve* animCurve)
@@ -113,20 +121,20 @@ void LoaderFbxAnimation::parseAnimationChannelsGeneralRotation(FbxNode* node, Fb
 	animCurve = node->LclRotation.GetCurve(animLayer, FBXSDK_CURVENODE_COMPONENT_X);
 	if(animCurve)
 	{
-		printf("    RX:\n");
-		parseAnimationCurve(animCurve);
+		//printf("    RX:\n");
+		parseAnimationCurve(animCurve, animationBones_.back().getRotationX());
 	}
 	animCurve = node->LclRotation.GetCurve(animLayer, FBXSDK_CURVENODE_COMPONENT_Y);
 	if(animCurve)
 	{
-		printf("    RY:\n");
-		parseAnimationCurve(animCurve);
+		//printf("    RY:\n");
+		parseAnimationCurve(animCurve, animationBones_.back().getRotationY());
 	}
 	animCurve = node->LclRotation.GetCurve(animLayer, FBXSDK_CURVENODE_COMPONENT_Z);
 	if(animCurve)
 	{
-		printf("    RZ:\n");
-		parseAnimationCurve(animCurve);
+		//printf("    RZ:\n");
+		parseAnimationCurve(animCurve, animationBones_.back().getRotationZ());
 	}
 }
 void LoaderFbxAnimation::parseAnimationChannelsGeneralScaling(FbxNode* node, FbxAnimLayer* animLayer, FbxAnimCurve* animCurve)
@@ -134,23 +142,22 @@ void LoaderFbxAnimation::parseAnimationChannelsGeneralScaling(FbxNode* node, Fbx
 	animCurve = node->LclScaling.GetCurve(animLayer, FBXSDK_CURVENODE_COMPONENT_X);
 	if(animCurve)
 	{
-		printf("    SX:\n");
-		parseAnimationCurve(animCurve);
+		//printf("    SX:\n");
+		parseAnimationCurve(animCurve, animationBones_.back().getScalingX());
 	}
 	animCurve = node->LclScaling.GetCurve(animLayer, FBXSDK_CURVENODE_COMPONENT_Y);
 	if(animCurve)
 	{
-		printf("    SY:\n");
-		parseAnimationCurve(animCurve);
+		//printf("    SY:\n");
+		parseAnimationCurve(animCurve, animationBones_.back().getScalingY());
 	}
 	animCurve = node->LclScaling.GetCurve(animLayer, FBXSDK_CURVENODE_COMPONENT_Z);
 	if(animCurve)
 	{
-		printf("    SZ:\n");
-		parseAnimationCurve(animCurve);
+		//printf("    SZ:\n");
+		parseAnimationCurve(animCurve, animationBones_.back().getScalingZ());
 	}
 }
-
 void LoaderFbxAnimation::parseAnimationChannelsColor(FbxNodeAttribute* nodeAttribute, FbxAnimLayer* animLayer, FbxAnimCurve* animCurve)
 {
 	if(nodeAttribute)
@@ -158,21 +165,20 @@ void LoaderFbxAnimation::parseAnimationChannelsColor(FbxNodeAttribute* nodeAttri
 		animCurve = nodeAttribute->Color.GetCurve(animLayer, FBXSDK_CURVENODE_COLOR_RED);
 		if(animCurve)
 		{
-			parseAnimationCurve(animCurve);
+			parseAnimationCurve(animCurve, animationBones_.back().getColorRed());
 		}
 		animCurve = nodeAttribute->Color.GetCurve(animLayer, FBXSDK_CURVENODE_COLOR_GREEN);
 		if(animCurve)
 		{
-			parseAnimationCurve(animCurve);
+			parseAnimationCurve(animCurve, animationBones_.back().getColorGreen());
 		}
 		animCurve = nodeAttribute->Color.GetCurve(animLayer, FBXSDK_CURVENODE_COLOR_BLUE);
 		if(animCurve)
 		{
-			parseAnimationCurve(animCurve);
+			parseAnimationCurve(animCurve, animationBones_.back().getColorBlue());
 		}
 	}
 }
-
 void LoaderFbxAnimation::parseAnimationChannelsLamp(FbxNode* node, FbxAnimLayer* animLayer, FbxAnimCurve* animCurve)
 {
 	FbxLight* light = node->GetLight();
@@ -181,21 +187,20 @@ void LoaderFbxAnimation::parseAnimationChannelsLamp(FbxNode* node, FbxAnimLayer*
 		animCurve = light->Intensity.GetCurve(animLayer);
 		if(animCurve)
 		{
-			parseAnimationCurve(animCurve);
+			parseAnimationCurve(animCurve, animationBones_.back().getLightIntensity());
 		}
 		animCurve = light->OuterAngle.GetCurve(animLayer);
 		if(animCurve)
 		{
-			parseAnimationCurve(animCurve);
+			parseAnimationCurve(animCurve, animationBones_.back().getLightOuterAngle());
 		}
 		animCurve = light->Fog.GetCurve(animLayer);
 		if(animCurve)
 		{
-			parseAnimationCurve(animCurve);
+			parseAnimationCurve(animCurve, animationBones_.back().getLightFog());
 		}
 	}
 }
-
 void LoaderFbxAnimation::parseAnimationChannelsCamera(FbxNode* node, FbxAnimLayer* animLayer, FbxAnimCurve* animCurve)
 {
 	FbxCamera* camera = node->GetCamera();
@@ -204,36 +209,35 @@ void LoaderFbxAnimation::parseAnimationChannelsCamera(FbxNode* node, FbxAnimLaye
 		animCurve = camera->FieldOfView.GetCurve(animLayer);
 		if(animCurve)
 		{
-			parseAnimationCurve(animCurve);
+			parseAnimationCurve(animCurve, animationBones_.back().getCameraFieldOfView());
 		}
 		animCurve = camera->FieldOfViewX.GetCurve(animLayer);
 		if(animCurve)
 		{
-			parseAnimationCurve(animCurve);
+			parseAnimationCurve(animCurve, animationBones_.back().getCameraFieldOfViewX());
 		}
 		animCurve = camera->FieldOfViewY.GetCurve(animLayer);
 		if(animCurve)
 		{
-			parseAnimationCurve(animCurve);
+			parseAnimationCurve(animCurve, animationBones_.back().getCameraFieldOfViewY());
 		}
 		animCurve = camera->OpticalCenterX.GetCurve(animLayer);
 		if(animCurve)
 		{
-			parseAnimationCurve(animCurve);
+			parseAnimationCurve(animCurve, animationBones_.back().getCameraOpticalCenterX());
 		}
 		animCurve = camera->OpticalCenterY.GetCurve(animLayer);
 		if(animCurve)
 		{
-			parseAnimationCurve(animCurve);
+			parseAnimationCurve(animCurve, animationBones_.back().getCameraOpticalCenterY());
 		}
 		animCurve = camera->Roll.GetCurve(animLayer);
 		if(animCurve)
 		{
-			parseAnimationCurve(animCurve);
+			parseAnimationCurve(animCurve, animationBones_.back().getCameraRoll());
 		}
 	}
 }
-
 void LoaderFbxAnimation::parseAnimationChannelsGeometry(FbxNodeAttribute* nodeAttribute, FbxAnimLayer* animLayer, FbxAnimCurve* animCurve)
 {
 	if(nodeAttribute)
@@ -257,14 +261,13 @@ void LoaderFbxAnimation::parseAnimationChannelsGeometry(FbxNodeAttribute* nodeAt
 					animCurve = geometry->GetShapeChannel(blendShapeIndex, channelIndex, animLayer, true);
 					if(animCurve)
 					{
-						parseAnimationCurve(animCurve);
+						parseAnimationCurve(animCurve, animationBones_.back().getGeometryShapeChannel());
 					}
 				}
 			}
 		}
 	}
 }
-
 void LoaderFbxAnimation::parseAnimationChannelsProperty(FbxNode* node, FbxAnimLayer* animLayer, FbxAnimCurve* animCurve)
 {
 	FbxProperty fbxProperty = node->GetFirstProperty();
@@ -310,7 +313,7 @@ void LoaderFbxAnimation::parseAnimationChannelsPropertyPrimitive(FbxAnimCurveNod
 	{
 		animCurve = curveNode->GetCurve(0U, i);
 		if(animCurve)
-			parseAnimationCurve(animCurve);
+			parseAnimationCurve(animCurve, animationBones_.back().getPropertyPrimitive());
 	}
 }
 void LoaderFbxAnimation::parseAnimationChannelsPropertyVector(FbxAnimCurveNode* curveNode, FbxAnimCurve* animCurve)
@@ -319,19 +322,19 @@ void LoaderFbxAnimation::parseAnimationChannelsPropertyVector(FbxAnimCurveNode* 
 	{
 		animCurve = curveNode->GetCurve(0U, i);
 		if(animCurve)
-			parseAnimationCurve(animCurve);
+			parseAnimationCurve(animCurve, animationBones_.back().getPropertyVector());
 	}
 	for(int i=0; i<curveNode->GetCurveCount(1U); i++)
 	{
 		animCurve = curveNode->GetCurve(1U, i);
 		if(animCurve)
-			parseAnimationCurve(animCurve);
+			parseAnimationCurve(animCurve, animationBones_.back().getPropertyVector());
 	}
 	for(int i=0; i<curveNode->GetCurveCount(2U); i++)
 	{
 		animCurve = curveNode->GetCurve(2U, i);
 		if(animCurve)
-			parseAnimationCurve(animCurve);
+			parseAnimationCurve(animCurve, animationBones_.back().getPropertyVector());
 	}
 }
 void LoaderFbxAnimation::parseAnimationChannelsPropertyEnum(FbxAnimCurveNode* curveNode, FbxAnimCurve* animCurve, FbxProperty* fbxProperty)
@@ -341,71 +344,64 @@ void LoaderFbxAnimation::parseAnimationChannelsPropertyEnum(FbxAnimCurveNode* cu
 	 	 animCurve = curveNode->GetCurve(0U, i);
 	 	 if(animCurve)
 	 	 {
-	 		 parseAnimationListCurve(animCurve, fbxProperty);
+			 parseAnimationListCurve(animCurve, fbxProperty, animationBones_.back().getPropertyEnum());
 	 	 }
 	 }
 }
-
-void LoaderFbxAnimation::parseAnimationCurve(FbxAnimCurve* animCurve)
+void LoaderFbxAnimation::parseAnimationCurve(FbxAnimCurve* animCurve, std::vector<LoaderFbxAnimationKeyFrame>* keyFrames)
 {
-	FbxAnimCurveDef::EInterpolationType interpolationType;
-	FbxAnimCurveDef::EConstantMode		constantMode;
-	FbxAnimCurveDef::ETangentMode		tangentMode;
-	FbxAnimCurveDef::EWeightedMode		weightedMode;
-	FbxAnimCurveDef::EVelocityMode		velocityMode;
-
 	FbxTime keyTime;
-	float	keyValue;
+
+	int numKeys = animCurve->KeyGetCount();
 
 	for(int i=0; i<animCurve->KeyGetCount(); i++)
 	{
-		keyValue = static_cast<float>(animCurve->KeyGetValue(i));
-		keyTime	 = animCurve->KeyGetTime(i);
+		LoaderFbxAnimationKeyFrame keyFrame;
 
-		interpolationType = animCurve->KeyGetInterpolation(i);
+		keyTime			= animCurve->KeyGetTime(i);
+		keyFrame.value_ = static_cast<float>(animCurve->KeyGetValue(i));
+		keyFrame.time_	= static_cast<float>(keyTime.GetSecondDouble());
+
+		keyFrame.interpolationType_ = animCurve->KeyGetInterpolation(i);
 		
 		if((animCurve->KeyGetInterpolation(i)&FbxAnimCurveDef::eInterpolationConstant) == FbxAnimCurveDef::eInterpolationConstant)
 		{
-			constantMode = animCurve->KeyGetConstantMode(i);
+			keyFrame.constantMode_ = animCurve->KeyGetConstantMode(i);
 		}
 		else if((animCurve->KeyGetInterpolation(i)&FbxAnimCurveDef::eInterpolationCubic) == FbxAnimCurveDef::eInterpolationCubic)
 		{
-			tangentMode		= animCurve->KeyGetTangentMode(i);
-			weightedMode	= animCurve->KeyGet(i).GetTangentWeightMode();
-			velocityMode	= animCurve->KeyGet(i).GetTangentVelocityMode();
+			keyFrame.tangentMode_	= animCurve->KeyGetTangentMode(i);
+			keyFrame.weightedMode_	= animCurve->KeyGet(i).GetTangentWeightMode();
+			keyFrame.velocityMode_	= animCurve->KeyGet(i).GetTangentVelocityMode();
 		}
 
-		FbxString outStr;
-		char timeString[256];
-		outStr = "            Key Time: ";
-        outStr += keyTime.GetTimeString(timeString, FbxUShort(256));
-        outStr += ".... Key Value: ";
-        outStr += keyValue;
-
-		printf("AnimationCurve:  %s \n", outStr.Buffer());
+		keyFrames->push_back(keyFrame);
 	}
 }
-void LoaderFbxAnimation::parseAnimationListCurve(FbxAnimCurve* animCurve, FbxProperty* fbxProperty)
+void LoaderFbxAnimation::parseAnimationListCurve(FbxAnimCurve* animCurve, FbxProperty* fbxProperty, std::vector<LoaderFbxAnimationKeyFrame>* keyFrames)
 {
 	FbxTime keyTime;
-	int keyValue;
-	char timeString[256];
-	FbxString outputString;
-
 	for(int i=0; i<animCurve->KeyGetCount(); i++)
 	{
-		keyValue = static_cast<int>(animCurve->KeyGetValue(i));
-		keyTime = animCurve->KeyGetTime(i);
+		LoaderFbxAnimationKeyFrame keyFrame;
 
-		outputString = "            Key Time: ";
-        outputString += keyTime.GetTimeString(timeString, FbxUShort(256));
-        outputString += ".... Key Value: ";
-        outputString += keyValue;
-        outputString += " (";
-        outputString += fbxProperty->GetEnumValue(keyValue);
-        outputString += ")";
+		keyFrame.value_ = static_cast<int>(animCurve->KeyGetValue(i));
+		keyTime			= animCurve->KeyGetTime(i);
+		keyFrame.time_	= static_cast<float>(keyTime.GetSecondDouble());
 
-        outputString += "\n";
-        FBXSDK_printf (outputString);
+		keyFrames->push_back(keyFrame);
+
+		//FbxString outputString;
+		//char timeString[256];
+		//outputString = "            Key Time: ";
+        //outputString += keyTime.GetTimeString(timeString, FbxUShort(256));
+        //outputString += ".... Key Value: ";
+        //outputString += keyValue;
+        //outputString += " (";
+        //outputString += fbxProperty->GetEnumValue(keyValue);
+        //outputString += ")";
+		//
+        //outputString += "\n";
+        //FBXSDK_printf (outputString);
 	}
 }

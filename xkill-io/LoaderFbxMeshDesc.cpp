@@ -30,6 +30,16 @@ void LoaderFbxMeshDesc::prepareBoneData(int numControlPoints)
 	vertexBoneIndices_.resize(numControlPoints);
 	vertexBoneWeights_.resize(numControlPoints);
 }
+void LoaderFbxMeshDesc::fillBoneData()
+{
+	for(unsigned int i=0; i<vertexBoneIndices_.size(); i++)
+	{
+		while(vertexBoneIndices_[i].size() < NUM_BONES_PER_VERTEX)
+			vertexBoneIndices_[i].push_back(0);
+		while(vertexBoneWeights_[i].size() < NUM_BONES_PER_VERTEX)
+			vertexBoneWeights_[i].push_back(0.0f);
+	}
+}
 void LoaderFbxMeshDesc::addVertexBoneIndex(unsigned int vertexIndex, int boneIndex)
 {
 	if(vertexIndex < vertexBoneIndices_.size())
@@ -79,11 +89,6 @@ std::vector<VertexPosNormSkinned>		LoaderFbxMeshDesc::createVerticesPosNormSkinn
 
 	for(unsigned int i=0; i<vertices.size(); i++)
 	{
-		while(vertexBoneWeights_.size() < NUM_BONES_PER_VERTEX)
-			vertexBoneWeights_[i].push_back(0.0f);
-		while(vertexBoneIndices_.size() < NUM_BONES_PER_VERTEX)
-			vertexBoneIndices_[i].push_back(0);
-
 		vertices[i].weights_.x = vertexBoneWeights_[i][0];
 		vertices[i].weights_.y = vertexBoneWeights_[i][1];
 		vertices[i].weights_.z = vertexBoneWeights_[i][2];
@@ -103,11 +108,6 @@ std::vector<VertexPosNormTexSkinned>	LoaderFbxMeshDesc::createVerticesPosNormTex
 
 	for(unsigned int i=0; i<vertices.size(); i++)
 	{
-		while(vertexBoneWeights_.size() < NUM_BONES_PER_VERTEX)
-			vertexBoneWeights_[i].push_back(0.0f);
-		while(vertexBoneIndices_.size() < NUM_BONES_PER_VERTEX)
-			vertexBoneIndices_[i].push_back(0.0f);
-
 		vertices[i].weights_.x = vertexBoneWeights_[i][0];
 		vertices[i].weights_.y = vertexBoneWeights_[i][1];
 		vertices[i].weights_.z = vertexBoneWeights_[i][2];
@@ -127,11 +127,6 @@ std::vector<VertexPosNormTexTanSkinned> LoaderFbxMeshDesc::createVerticesPosNorm
 
 	for(unsigned int i=0; i<vertices.size(); i++)
 	{
-		while(vertexBoneWeights_.size() < NUM_BONES_PER_VERTEX)
-			vertexBoneWeights_[i].push_back(0.0f);
-		while(vertexBoneIndices_.size() < NUM_BONES_PER_VERTEX)
-			vertexBoneIndices_[i].push_back(0.0f);
-
 		vertices[i].weights_.x = vertexBoneWeights_[i][0];
 		vertices[i].weights_.y = vertexBoneWeights_[i][1];
 		vertices[i].weights_.z = vertexBoneWeights_[i][2];

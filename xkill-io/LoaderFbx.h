@@ -36,12 +36,9 @@ private:
 	
 	void parseNode(fbxsdk_2014_0_beta2::FbxNode* node);
 	void parseMesh(fbxsdk_2014_0_beta2::FbxNode* node);
-	void parseAnimation(fbxsdk_2014_0_beta2::FbxScene* scene);
 	
-
 	LoaderFbxMesh*			meshLoader_;
 	LoaderFbxMaterial*		materialLoader_;
-	LoaderFbxMaterialDesc*	materialDesc_;
 	LoaderFbxTexture*		textureLoader_;
 	LoaderFbxAnimation*		animationLoader_;
 

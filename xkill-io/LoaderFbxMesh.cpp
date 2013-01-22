@@ -60,6 +60,7 @@ void LoaderFbxMesh::parseMesh(FbxMesh* mesh, LoaderFbxMeshDesc* meshDesc)
 	meshDesc->setVertexBinormals(vertexBinormals_);
 
 	parseVertexLinkData(mesh, meshDesc);
+	meshDesc->fillBoneData();
 }
 
 void LoaderFbxMesh::parsePolygonGroup(FbxMesh* mesh, int polygonIndex)

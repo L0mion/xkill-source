@@ -1,7 +1,10 @@
 #ifndef XKILL_IO_LOADERFBXANIMATION_H
 #define XKILL_IO_LOADERFBXANIMATION_H
 
+#include <vector>
 
+#include "LoaderFbxAnimationDesc.h"
+#include "LoaderFbxAnimationKeyFrame.h"
 
 namespace fbxsdk_2014_0_beta2
 {
@@ -23,7 +26,7 @@ public:
 	~LoaderFbxAnimation();
 	void reset();
 
-	void parseAnimation(FbxScene* scene);
+	void parseAnimation(FbxScene* scene, std::vector<LoaderFbxAnimationDesc>* animationDescs);
 private:
 	void parseAnimationStack(FbxAnimStack* animStack, FbxNode* node, bool isSwitcher);
 	void parseAnimationLayer(FbxAnimLayer* animLayer, FbxNode* node, bool isSwitcher);
@@ -43,8 +46,10 @@ private:
 	void parseAnimationChannelsPropertyVector(FbxAnimCurveNode* curveNode, FbxAnimCurve* animCurve);
 	void parseAnimationChannelsPropertyEnum(FbxAnimCurveNode* curveNode, FbxAnimCurve* animCurve, FbxProperty* fbxProperty);
 
-	void parseAnimationCurve(FbxAnimCurve* animCurve);
-	void parseAnimationListCurve(FbxAnimCurve* animCurve, FbxProperty* fbxProperty);
+	void parseAnimationCurve(FbxAnimCurve* animCurve, std::vector<LoaderFbxAnimationKeyFrame>* keyFrames);
+	void parseAnimationListCurve(FbxAnimCurve* animCurve, FbxProperty* fbxProperty, std::vector<LoaderFbxAnimationKeyFrame>* keyFrames);
+
+	std::vector<LoaderFbxAnimationBone> animationBones_;
 };
 
 #endif //XKILL_IO_LOADERFBXANIMATION_H

@@ -13,6 +13,7 @@
 #include "LoaderFbxTextureDesc.h"
 #include "LoaderFbxAnimation.h"
 #include "LoaderFbxMaterialDesc.h"
+#include "LoaderFbxAnimationDesc.h"
 
 LoaderFbx::LoaderFbx()
 {
@@ -77,8 +78,8 @@ bool LoaderFbx::load(std::string filename)
 			parseNode(node->GetChild(i));
 	}
 
-
-//	animationLoader_->parseAnimation(fbxScene_);
+	std::vector<LoaderFbxAnimationDesc>	animationDescs;
+	animationLoader_->parseAnimation(fbxScene_, &animationDescs);
 
 	return success;
 }
@@ -234,9 +235,9 @@ void LoaderFbx::parseNode(FbxNode* node)
 }
 void LoaderFbx::parseMesh(FbxNode* node)
 {
-	LoaderFbxMeshDesc meshDesc;
-	LoaderFbxMaterialDesc materialDesc;
-	LoaderFbxTextureDesc textureDesc;
+	LoaderFbxMeshDesc		meshDesc;
+	LoaderFbxMaterialDesc	materialDesc;
+	LoaderFbxTextureDesc	textureDesc;
 
 	FbxMesh* mesh = (FbxMesh*)node->GetNodeAttribute();
 	meshLoader_->parseMesh(mesh, &meshDesc);
@@ -245,14 +246,4 @@ void LoaderFbx::parseMesh(FbxNode* node)
 
 	std::vector<VertexPosNormSkinned> vertices = meshDesc.createVerticesPosNormSkinned();
 	std::vector<unsigned int> indices = meshDesc.getIndices();
-}
-void LoaderFbx::parseAnimation(FbxScene* scene)
-{
-	//for(int i=0; i<scene->GetSrcObjectCount<FbxAnimStack>(); i++)
-	//{
-	//	FbxAnimStack* animStack = scene->GetSrcObject<FbxAnimStack>(i);
-	//
-	//	parseAnimationStack(animStack, scene->GetRootNode(), true);
-	//	parseAnimationStack(animStack, scene->GetRootNode(), false);
-	//}
 }
