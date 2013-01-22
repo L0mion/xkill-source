@@ -55,6 +55,8 @@ Menu_Editor::Menu_Editor( Ui::MainWindowClass& ui, QWidget* parent ) : QWidget(p
 	model_attributeInspector->setHorizontalHeaderItem(0, new QStandardItem("Property"));
 	model_attributeInspector->setHorizontalHeaderItem(1, new QStandardItem("Value"));
 	ui.treeView_attributeInspector->setModel(model_attributeInspector);
+	ui.treeView_attributeInspector->setColumnWidth(0,180);
+	
 
 
 	//ui.treeView_attributeInspector->setEditTriggers(QAbstractItemView::NoEditTriggers);

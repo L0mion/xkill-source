@@ -27,22 +27,22 @@ Menu_Main::Menu_Main( QWidget* parent ) : QMainWindow(parent), ToggleHelper(this
 	//setAttribute(Qt::WA_TranslucentBackground);
 	setWindowFlags(Qt::WindowStaysOnBottomHint);
 
-	connect(ui.pushButton_exit, SIGNAL(clicked()), this, SLOT(slot_quitToDesktop()));
-	connect(ui.pushButton_exit_2, SIGNAL(clicked()), this, SLOT(slot_quitToDesktop()));
-	connect(ui.comboBox_LevelSelect, SIGNAL(currentIndexChanged(int)), this, SLOT(slot_selectLevel(int)));
-	connect(ui.pushButton_AddLevel, SIGNAL(clicked()), this, SLOT(slot_addLevel()));
-	connect(ui.pushButton_SaveLevel, SIGNAL(clicked()), this, SLOT(slot_saveLevel()));
-	connect(ui.pushButton_RemoveLevel, SIGNAL(clicked()), this, SLOT(slot_removeLevel()));
-	connect(ui.pushButton_startGame, SIGNAL(clicked()), this, SLOT(slot_startGame()));
-
-	connect(ui.comboBox_Input, SIGNAL(currentIndexChanged(int)), this, SLOT(slot_loadInputList(int)));
-	connect(ui.tableView_Input, SIGNAL(clicked(QModelIndex)), this, SLOT(slot_loadInputSettings(QModelIndex)));
-	connect(ui.tableView_Input, SIGNAL(clicked(QModelIndex)), this, SLOT(slot_setInputObject(QModelIndex)));
-
-	connect(ui.horizontalSlider_Input, SIGNAL(sliderMoved(int)), this, SLOT(slot_inputSettingsChanged()));
-	connect(ui.checkBox_Input, SIGNAL(clicked()), this, SLOT(slot_inputSettingsChanged()));
-	connect(ui.pushButton_Input, SIGNAL(clicked()), this, SLOT(slot_inputSettingsChanged()));
-
+	connect(ui.pushButton_exit,			SIGNAL(clicked()),					this,	SLOT(slot_quitToDesktop()));
+	connect(ui.pushButton_exit_2,		SIGNAL(clicked()),					this,	SLOT(slot_quitToDesktop()));
+	connect(ui.comboBox_LevelSelect,	SIGNAL(currentIndexChanged(int)),	this,	SLOT(slot_selectLevel(int)));
+	connect(ui.pushButton_AddLevel,		SIGNAL(clicked()),					this,	SLOT(slot_addLevel()));
+	connect(ui.pushButton_SaveLevel,	SIGNAL(clicked()),					this,	SLOT(slot_saveLevel()));
+	connect(ui.pushButton_RemoveLevel,	SIGNAL(clicked()),					this,	SLOT(slot_removeLevel()));
+	connect(ui.pushButton_startGame,	SIGNAL(clicked()),					this,	SLOT(slot_startGame()));
+	connect(ui.comboBox_Input,			SIGNAL(currentIndexChanged(int)),	this,	SLOT(slot_loadInputList(int)));
+	connect(ui.tableView_Input,			SIGNAL(clicked(QModelIndex)),		this,	SLOT(slot_loadInputSettings(QModelIndex)));
+	connect(ui.tableView_Input,			SIGNAL(clicked(QModelIndex)),		this,	SLOT(slot_setInputObject(QModelIndex)));
+	connect(ui.horizontalSlider_Input,	SIGNAL(sliderMoved(int)),			this,	SLOT(slot_inputSettingsChanged()));
+	connect(ui.checkBox_Input,			SIGNAL(clicked()),					this,	SLOT(slot_inputSettingsChanged()));
+	connect(ui.pushButton_Input,		SIGNAL(clicked()),					this,	SLOT(slot_inputSettingsChanged()));
+	
+	// Set num players to 2
+	ui.horizontalSlider_numPlayers->setValue(2);
 
 	filePath = QString("../../xkill-resources/xkill-scripts/levels.xml");
 	levelListModel = new QStandardItemModel(0, 1, this);
@@ -315,6 +315,8 @@ void Menu_Main::loadInputList(int deviceId)
 	}
 
 	ui.tableView_Input->setModel(inputListModel);
+	ui.tableView_Input->setColumnWidth(0,180);
+	ui.tableView_Input->setColumnWidth(1,180);
 }
 
 void Menu_Main::loadInputSettings(int objectId)
