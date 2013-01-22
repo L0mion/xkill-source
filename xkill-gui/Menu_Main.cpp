@@ -40,7 +40,9 @@ Menu_Main::Menu_Main( QWidget* parent ) : QMainWindow(parent), ToggleHelper(this
 	connect(ui.horizontalSlider_Input,	SIGNAL(sliderMoved(int)),			this,	SLOT(slot_inputSettingsChanged()));
 	connect(ui.checkBox_Input,			SIGNAL(clicked()),					this,	SLOT(slot_inputSettingsChanged()));
 	connect(ui.pushButton_Input,		SIGNAL(clicked()),					this,	SLOT(slot_inputSettingsChanged()));
-
+	
+	// Set num players to 2
+	ui.horizontalSlider_numPlayers->setValue(2);
 
 	filePath = QString("../../xkill-resources/xkill-scripts/levels.xml");
 	levelListModel = new QStandardItemModel(0, 1, this);
