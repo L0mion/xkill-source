@@ -99,13 +99,13 @@ void Renderer::reset()
 }
 HRESULT Renderer::resize(unsigned int screenWidth, unsigned int screenHeight)
 {
-	// Calculate number of cameras
-	unsigned numCameras = itrCamera.size();
+	//Get number of split-screens
+	unsigned int numSS = itrSplitScreen.size();
 	
-	// Stuff
+	//Initialize new windo-type object.
 	HRESULT hr = S_OK;
 	unsigned int numViewports, csDispatchX, csDispatchY;
-	numViewports	= numCameras; //winfo_->getNumViewports();
+	numViewports	= numSS;
 	csDispatchX		= screenWidth	/ CS_TILE_SIZE;
 	csDispatchY		= screenHeight	/ CS_TILE_SIZE;
 	winfo_->init(
@@ -330,8 +330,10 @@ void Renderer::update()
 }
 void Renderer::render()
 {
+	ID3D11DeviceContext* devcon = managementD3D_->getDeviceContext();
+
 	//Clear g-buffers and depth buffer.
-	managementGBuffer_->clearGBuffers(managementD3D_->getDeviceContext());
+	managementGBuffer_->clearGBuffers(devcon);
 	managementD3D_->clearDepthBuffer();
 
 	//Update per-frame constant buffer.
@@ -339,41 +341,41 @@ void Renderer::render()
 		CB_TYPE_FRAME, 
 		TypeFX_VS, 
 		CB_REGISTER_FRAME, 
-		managementD3D_->getDeviceContext());
+		devcon);
 	managementCB_->updateCBFrame(
-		managementD3D_->getDeviceContext(),
+		devcon,
 		managementLight_->getLightDirCurCount(),
 		managementLight_->getLightPointCurCount(),
 		managementLight_->getLightSpotCurCount());
 
-	Attribute_Camera*	camAt; 
-	Attribute_Spatial*	spatialAt;
-	Attribute_Position*	posAt;
+	Attribute_Camera*		camAt; 
+	Attribute_Spatial*		spatialAt;
+	Attribute_Position*		posAt;
+	Attribute_SplitScreen*	ssAt;
 
 	ViewportData vpData;
 	std::vector<ViewportData> vpDatas;
 
-	//Render everything to g-buffers.
-	int camIndex = 0;
-	while(itrCamera.hasNext())
+	//Render each split-screen seperately
+	std::vector<SplitScreenViewport>* ssViewports = managementViewport_->getSplitScreenViewports();
+	for(unsigned int i = 0; i < ssViewports->size(); i++)
 	{
-		camAt		= itrCamera.getNext();
-		camIndex	= itrCamera.orderIndex();
+		ssAt		= ssViewports->at(i).ssAt;
+		camAt		= itrCamera.at(ssAt->ptr_camera);
+
 		spatialAt	= ATTRIBUTE_CAST(Attribute_Spatial, ptr_spatial, camAt);
 		posAt		= ATTRIBUTE_CAST(Attribute_Position, ptr_position, spatialAt);
-	
-		//Set viewport.
-		managementViewport_->setViewport(managementD3D_->getDeviceContext(), camIndex);
+
+		managementViewport_->setViewport(devcon, i);
 
 		//Store all the viewport-specific data for the backbuffer-rendering.
-		vpData.camIndex		= camIndex;
 		vpData.view			= DirectX::XMFLOAT4X4(((float*)&camAt->mat_view));
 		vpData.proj			= DirectX::XMFLOAT4X4(((float*)&camAt->mat_projection));
 		vpData.viewInv		= managementMath_->calculateMatrixInverse(vpData.view);
 		vpData.projInv		= managementMath_->calculateMatrixInverse(vpData.proj);
 		vpData.eyePos		= *(DirectX::XMFLOAT3*)&posAt->position;
-		vpData.viewportTopX = static_cast<unsigned int>(managementViewport_->getViewport(camIndex).TopLeftX);
-		vpData.viewportTopY = static_cast<unsigned int>(managementViewport_->getViewport(camIndex).TopLeftY);
+		vpData.viewportTopX = static_cast<unsigned int>(ssAt->ssTopLeftX);
+		vpData.viewportTopY = static_cast<unsigned int>(ssAt->ssTopLeftY);
 		vpDatas.push_back(vpData);
 
 		renderViewportToGBuffer(vpData);
@@ -417,7 +419,6 @@ void Renderer::renderViewportToGBuffer(ViewportData& vpData)
 	while(itrRender.hasNext())
 	{
 		renderAt = itrRender.getNext();
-		//if(renderAt->culling.getBool(cameraIndex))
 		renderAttribute(
 			renderAt, 
 			vpData.view, 

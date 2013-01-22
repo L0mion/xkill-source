@@ -308,6 +308,11 @@ void Menu_Editor::slot_attributeInspector_refresh()
 			{
 				bool value = *data->value._bool;
 				model_attributeInspector->setData(item_value->index(), QVariant(value));
+
+				// Fetch new value from menu
+				QVariant test = model_attributeInspector->data(item_value->index());
+				QVariant::Type test2 = test.type();
+				test2 = test.type();
 			}
 			break;
 		case DataItem::_INT:
@@ -458,15 +463,18 @@ void Menu_Editor::slot_attributeInspector_itemChanged()
 	// not by update is caused by code
 	if(!selected_attribute.ignoreRefresh)
 	{
+		// abort if data do not exist
+		DataItemList* list = selected_attribute.data;
+		if(!list)
+			return;
 		// abort if Entity do not exists
 		if(selected_attribute.entityId == -1)
 			return;
-
-		// abort if data do not exist
-		DataItemList* list = selected_attribute.data;
-		if(list = NULL)
+		Entity* entity = itr_entity->at(selected_attribute.entityId);
+		// abort if attribute does not exist
+		IAttribute* attribute = entity->getAttributeInterface(selected_attribute.index);
+		if(!attribute)
 			return;
-
 
 		// parse menu and save changes into our DataList
 		list->reset();
@@ -476,39 +484,42 @@ void Menu_Editor::slot_attributeInspector_itemChanged()
 			// Fetch data
 			DataItem* data = list->getNext();
 
-			// Fetch item
-			QStandardItem* item = model_attributeInspector->item(num_items);
-			num_items++;
-
 			// Determine type
-			QVariant type = item->type();
-
-			if(type == QVariant::Int)
-			{
-				type.toInt();
-			}
-			
-			
-			/*DataItem::DataType type = data.type;
-
-
+			DataItem::DataType type = data->type;
 			switch(type) 
 			{
-			QVariant data = model_attributeInspector->item(indexClicked);
+			case DataItem::_BOOL:
+				{
+					// Access value
+					bool* value = data->value._bool;
+					
+					// Fetch new value from menu
+					*value = model_attributeInspector->data(model_attributeInspector->item(num_items, 1)->index()).toBool();
+				}
+				break;
+			case DataItem::_FLOAT3:
+				{
+					// Access value
+					Float3* value = data->value._float3;
 
-			{
-			double value = (double)*data.value._float;
-			model_attributeInspector->setData(item_value->index(), QVariant(value));
+					// Fetch new value from menu
+					QStandardItem* item_property = model_attributeInspector->item(num_items, 0);
+					
+					value->x = (float)model_attributeInspector->data(item_property->child(0, 1)->index()).toDouble();
+					value->y = (float)model_attributeInspector->data(item_property->child(1, 1)->index()).toDouble();
+					value->z = (float)model_attributeInspector->data(item_property->child(2, 1)->index()).toDouble();
+				}
+				break;
 			}
-			break;
-			}*/
 
-			// TRUE: Item doesn't exist, create new Item
-			QStandardItem* item_property = model_attributeInspector->item(num_items, 0);
-			QStandardItem* item_value	 = model_attributeInspector->item(num_items, 1);
-
-			
+			// Switch to next row
+			num_items++;
 		}
+
+		// Save to attribute
+		attribute->saveTo(list);
+
+		
 	}
 }
 

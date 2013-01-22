@@ -40,12 +40,15 @@ for some reason
 
 enum DLL_U AttributeType
 {
+	ATTRIBUTE_UNKOWN,
+
 	ATTRIBUTE_POSITION,
 	ATTRIBUTE_SPATIAL,
 	ATTRIBUTE_RENDER,
 	ATTRIBUTE_DEBUGSHAPE,
 	ATTRIBUTE_PHYSICS,
 	ATTRIBUTE_CAMERA,
+	ATTRIBUTE_SPLITSCREEN,
 	ATTRIBUTE_INPUT,
 	ATTRIBUTE_INPUTDEVICE,
 	ATTRIBUTE_SOUND,
@@ -64,8 +67,6 @@ enum DLL_U AttributeType
 	ATTRIBUTE_SPAWNPOINT,
 	ATTRIBUTE_WEAPONSTATS,
 	ATTRIBUTE_EXPLOSIONSPHERE,
-
-	ATTRIBUTE_UNKOWN,
 
 	// this is needed, don't touch!
 	ATTRIBUTE_LAST
@@ -89,6 +90,9 @@ struct DLL_U IAttribute
 		list->add_NotSupported("NOT_IMPLEMENTED");
 		return list;
 	};
+	virtual void saveTo(DataItemList* list)
+	{
+	};
 	virtual AttributeType getType(){return ATTRIBUTE_UNKOWN;}
 	virtual std::string getName(){return "UNKOWN";}
 };
@@ -111,6 +115,10 @@ struct DLL_U Attribute_Position : public IAttribute
 		list->add(position, "Position");
 		return list;
 	}
+	void saveTo(DataItemList* list)
+	{
+		position = *list->getNext()->value._float3;
+	};
 	AttributeType getType(){return ATTRIBUTE_POSITION;}
 	std::string getName(){return "Position";}
 };
@@ -295,30 +303,14 @@ struct DLL_U Attribute_Projectile : public IAttribute
 	std::string getName(){return "Projectile";}
 };
 
-//struct DLL_U Attribute_Light : public IAttribute
-//{
-//	Attribute_Light();
-//	~Attribute_Light(); //!< Does nothing.
-//
-//	LightType lightType; //!< Type of light: Directional, Point or Spot.
-//
-//	AttributePointer ptr_position; //!< Position of light.
-//
-//	Float3 direction;	//!< The lights direction.
-//	Float3 attenuation;	//!< How fast the light intensity will diminish
-//	
-//	Float4 ambient;		//!< The ambient color.
-//	Float4 diffuse;		//!< The diffuse color.
-//	Float4 specular;	//!< The specular color.
-//
-//	float range;		//!< How far the light can reach.
-//	float spotPower;	//!< Controls the spotlight cone.
-//};
-
+/// Represents a directional light. The LightDescDir-struct is directly mapped to GPU.
+/** 
+\ingroup ATTRIBUTES
+*/
 struct DLL_U Attribute_Light_Dir : public IAttribute
 {
 	Attribute_Light_Dir();
-	~Attribute_Light_Dir();
+	~Attribute_Light_Dir(); //!< Does nothing.
 
 	LightDescDir lightDir;
 	DataItemList* getDataList()
@@ -335,12 +327,17 @@ struct DLL_U Attribute_Light_Dir : public IAttribute
 	AttributeType getType(){return ATTRIBUTE_LIGHT_DIRECTIONAL;}
 	std::string getName(){return "LightDir";}
 };
+/// Represents a point-light. The LightDescPoint-struct is directly mapped to GPU.
+/** 
+OBS! The pos-attribute in LightDescPoint must be updated with the corresponding value in AttributePointer ptr_position-type in order to have the correct position! OBS!
+\ingroup ATTRIBUTES
+*/
 struct DLL_U Attribute_Light_Point : public IAttribute
 {
 	Attribute_Light_Point();
-	~Attribute_Light_Point();
+	~Attribute_Light_Point(); //!< Does nothing.
 
-	AttributePointer ptr_position;
+	AttributePointer ptr_position; //!< The correct position of point-light.
 
 	LightDescPoint lightPoint;
 
@@ -363,12 +360,17 @@ struct DLL_U Attribute_Light_Point : public IAttribute
 	AttributeType getType(){return ATTRIBUTE_LIGHT_POINT;}
 	std::string getName(){return "LightPoint";}
 };
+/// Represents a spot-light. The LightDescSpot-struct is directly mapped to GPU.
+/** 
+OBS! The pos-attribute in LightDescSpot must be updated with the corresponding value in AttributePointer ptr_position-type in order to have the correct position! OBS!
+\ingroup ATTRIBUTES
+*/
 struct DLL_U Attribute_Light_Spot : public IAttribute
 {
 	Attribute_Light_Spot();
-	~Attribute_Light_Spot();
+	~Attribute_Light_Spot(); //!< Does nothing.
 
-	AttributePointer ptr_position;
+	AttributePointer ptr_position; //!< The correct position of spotlight.
 
 	LightDescSpot lightSpot;
 
@@ -502,6 +504,28 @@ struct DLL_U Attribute_Camera : public IAttribute
 
 	AttributeType getType(){return ATTRIBUTE_CAMERA;}
 	std::string getName(){return "Camera";}
+};
+
+struct DLL_U Attribute_SplitScreen : public IAttribute
+{
+	Attribute_SplitScreen();
+	~Attribute_SplitScreen();
+
+	AttributePointer ptr_camera;
+	AttributePointer ptr_player;
+
+	unsigned int ssTopLeftX;
+	unsigned int ssTopLeftY;
+
+	unsigned int ssWidth;
+	unsigned int ssHeight;
+
+	float getAspectRatio()
+	{
+		return (float)ssWidth/(float)ssHeight;
+	}
+	AttributeType getType(){return ATTRIBUTE_SPLITSCREEN;}
+	std::string getName(){return "SplitScreen";}
 };
 
 /// Stores everything GameComponent needs to know about a player (also refer to createPlayerEntity)

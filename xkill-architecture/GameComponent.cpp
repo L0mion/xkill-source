@@ -31,10 +31,6 @@ bool GameComponent::init()
 	//Fetch list of stuff used in logic
 	GET_ENTITIES(allEntity);
 
-	SEND_EVENT(&Event_CreateSpawnPoint(Float3(-1.5f, 3.0f, 0.0f), 2.0f));
-	SEND_EVENT(&Event_CreateSpawnPoint(Float3(1.0f, 5.0f, 0.0f), 2.0f));
-	SEND_EVENT(&Event_CreateSpawnPoint(Float3(1.0f, 1.0f, 1.0f), 2.0f));
-
 	ATTRIBUTES_INIT_ALL;
 
 	srand((unsigned)time(NULL));
@@ -281,7 +277,8 @@ void GameComponent::onUpdate(float delta)
 				DEBUGPRINT("No spawn point was found. Player entity " << itrPlayer.ownerId() << " spawned at origo" << std::endl);
 			}
 
-			//spatial->rotation = Float4(0.0f, 0.0f, 0.0f, 1.0f);
+			spatial->rotation = Float4(0.0f, 0.0f, 0.0f, 1.0f);
+			//camera->reset = true; //Reset player rotation.
 			physics->reloadDataIntoBulletPhysics = true;
 
 			health->health = health->startHealth; // restores player health
@@ -336,7 +333,7 @@ void GameComponent::onUpdate(float delta)
 		Attribute_WeaponStats* weaponStats = itrWeaponStats.getNext();
 
 		//
-		// Weapon cool down logic
+		// Weapon cooldown logic
 		//
 
 		weaponStats->cooldownLeft -= delta;
@@ -651,7 +648,17 @@ void GameComponent::event_StartDeathmatch( Event_StartDeathmatch* e )
 		itrPlayer.getNext();
 		SEND_EVENT(&Event_RemoveEntity(itrPlayer.ownerId()));
 	}
-	itrPlayer.resetAllAttributes();
+
+	while(itrPhysics.hasNext())
+	{
+		itrPhysics.getNext();
+		SEND_EVENT(&Event_RemoveEntity(itrPhysics.ownerId()));
+	}
+	while(itrSpawnPoint.hasNext())
+	{
+		itrSpawnPoint.getNext();
+		SEND_EVENT(&Event_RemoveEntity(itrSpawnPoint.ownerId()));
+	}
 
 	while(itrLightDir.hasNext())
 	{
