@@ -11,7 +11,7 @@ class debugDrawDispatcher
 {
 private:
 	int m_debugMode;
-
+	
 	std::vector<VertexPosColor>* debugLineVertices;
 
 public:

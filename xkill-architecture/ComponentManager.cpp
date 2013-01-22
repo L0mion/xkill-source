@@ -146,10 +146,6 @@ void ComponentManager::update(float delta)
 		camera_->onUpdate(delta);
 		SEND_EVENT(&Event_DoCulling());
 		render_->onUpdate(delta);
-
-		//Not tested
-		physics_->queueDebugDrawEvent();
-
 		input_->onUpdate(delta);
 		game_->onUpdate(delta);
 		SEND_EVENT(&Event(EVENT_UPDATE));

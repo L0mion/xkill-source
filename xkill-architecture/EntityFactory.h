@@ -85,8 +85,6 @@ public:
 		CREATE_ATTRIBUTE(Attribute_Camera, camera, entity);
 		CONNECT_ATTRIBUTES(camera, spatial);
 
-		CREATE_ATTRIBUTE(Attribute_SplitScreen, splitScreen, entity);
-		CONNECT_ATTRIBUTES(splitScreen, camera);
 
 		CREATE_ATTRIBUTE(Attribute_Health, health, entity);
 
@@ -98,11 +96,10 @@ public:
 		CONNECT_ATTRIBUTES(player, camera);
 		CONNECT_ATTRIBUTES(player, health);
 		CONNECT_ATTRIBUTES(player, weaponStats);
-		//player->name = "Process Name";
 
-		//static int playerId = 0;
-		//player->id = playerId;
-		//playerId++;
+		CREATE_ATTRIBUTE(Attribute_SplitScreen, splitScreen, entity);
+		CONNECT_ATTRIBUTES(splitScreen, camera);
+		CONNECT_ATTRIBUTES(splitScreen, player);
 	}
 	
 	void createWorldEntity(Entity* entity, Event_CreateWorld* e)

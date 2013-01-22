@@ -17,7 +17,7 @@
 
 AttributeIterator<Attribute_Physics> itrPhysics;
 
-static debugDrawDispatcher gDebugDraw;
+//static debugDrawDispatcher gDebugDraw;
 
 PhysicsComponent::PhysicsComponent() : broadphase_(nullptr),
 									   collisionConfiguration_(nullptr),
@@ -98,8 +98,8 @@ bool PhysicsComponent::init()
 	dynamicsWorld_->setGravity(btVector3(0,-10,0));
 	dynamicsWorld_->setInternalTickCallback(wrapTickCallback,static_cast<void*>(this));
 
-	gDebugDraw.setDebugMode(btIDebugDraw::DBG_DrawWireframe);
-	dynamicsWorld_->setDebugDrawer(&gDebugDraw);
+	//gDebugDraw.setDebugMode(btIDebugDraw::DBG_DrawWireframe);
+	//dynamicsWorld_->setDebugDrawer(&gDebugDraw);
 
 	CollisionShapes::Instance()->loadCollisionShapes();
 	
@@ -118,8 +118,9 @@ void PhysicsComponent::onUpdate(float delta)
 	}
 	dynamicsWorld_->stepSimulation(delta,0);
 
-	gDebugDraw.clearDebugVerticesVector();
-	dynamicsWorld_->debugDrawWorld();
+	//gDebugDraw.clearDebugVerticesVector();
+	//dynamicsWorld_->debugDrawWorld();
+	//queueDebugDrawEvent();
 
 	FLUSH_QUEUED_EVENTS(EVENT_PHYSICS_ATTRIBUTES_COLLIDING);
 }
@@ -152,7 +153,7 @@ void PhysicsComponent::onEvent(Event* e)
 
 void PhysicsComponent::queueDebugDrawEvent()
 {
-	gDebugDraw.queueDebugDrawEvent();
+	//gDebugDraw.queueDebugDrawEvent();
 }
 
 void PhysicsComponent::synchronizeWithAttributes()

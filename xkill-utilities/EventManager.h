@@ -71,6 +71,12 @@ public:
 	void flushQueuedEvents(EventType type);
 
 	/** 
+	Get pointer to the internal vector holding the queued Events
+	Must be Flushed afterwards to make sure events are deleted.
+	*/
+	std::vector<Event*>* getPointerToQueuedEvents(EventType type);
+
+	/** 
 	Removes all queued messages without sending them,
 	prevents memory leaks if not all messages is sent.
 	*/
@@ -94,6 +100,10 @@ EventManager::getInstance()->queueEvent(EventPointer);
 // Sends all queued events to relevant listeners.
 #define FLUSH_QUEUED_EVENTS(EventType)								\
 EventManager::getInstance()->flushQueuedEvents(EventType);
+
+// Gets the internal pointer holding the queued events.
+#define GET_POINTER_TO_QUEUED_EVENTS(EventType)						\
+EventManager::getInstance()->getPointerToQueuedEvents(EventType);
 
 // Subscribes a IObserver to events of EventType.
 #define SUBSCRIBE_TO_EVENT(Subscriber,EventType)					\

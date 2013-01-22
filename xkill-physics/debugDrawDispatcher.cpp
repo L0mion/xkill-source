@@ -57,6 +57,6 @@ void debugDrawDispatcher::queueDebugDrawEvent()
 {
 	if(debugLineVertices->size() > 0)
 	{
-		//QUEUE_EVENT(new Event_DrawBulletPhysicsDebugLines(debugLineVertices));
+		QUEUE_EVENT(new Event_DrawBulletPhysicsDebugLines(debugLineVertices));
 	}
 }
