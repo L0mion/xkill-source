@@ -9,6 +9,12 @@
 
 typedef long HRESULT;
 
+namespace DirectX
+{
+	struct XMFLOAT4X4;
+	struct XMFLOAT3;
+};
+
 struct ID3D11UnorderedAccesView;
 struct ID3D11Buffer;
 struct ID3D11Device;
@@ -17,6 +23,22 @@ struct ID3D11DeviceContext;
 static const unsigned int LIGHT_START_MAX_COUNT_DIR		= 5; //Can't be zero as one may not create a naught-sized vector.
 static const unsigned int LIGHT_START_MAX_COUNT_POINT	= 5; //Can't be zero as one may not create a naught-sized vector.
 static const unsigned int LIGHT_START_MAX_COUNT_SPOT	= 5; //Can't be zero as one may not create a naught-sized vector.
+
+static const unsigned int POS_START_MAX_COUNT = LIGHT_START_MAX_COUNT_POINT + LIGHT_START_MAX_COUNT_SPOT;
+
+static const unsigned int LIGHT_SRV_REGISTER_DIR	= 4;
+static const unsigned int LIGHT_SRV_REGISTER_POINT	= 5;
+static const unsigned int LIGHT_SRV_REGISTER_SPOT	= 6;
+static const unsigned int LIGHT_SRV_REGISTER_POS	= 7;
+
+enum DLL_U LightBufferType
+{ 
+	LIGHTBUFFERTYPE_DIR			= 0, 
+	LIGHTBUFFERTYPE_POINT		= 1, 
+	LIGHTBUFFERTYPE_SPOT		= 2, 
+	LIGHTBUFFERTYPE_POS_VIEW	= 3,
+	LIGHTDESCTYPE_NA			= 4
+};
 
 //! Class for maintaining lights.
 /*!
@@ -34,8 +56,13 @@ public:
 	
 	void setLightSRVCS(
 		ID3D11DeviceContext*	devcon, 
-		LightDescType			lightType, 
+		LightBufferType			bufferType, 
 		unsigned int			shaderRegister); //!< Set the compute shader to use specified SRV.
+
+	void setLightViewSpacePoss(ID3D11DeviceContext* devcon, DirectX::XMFLOAT4X4 view);
+
+	//void transformPointPossToViewSpace(DirectX::XMFLOAT4X4 view);
+	//void transformSpotPossToViewSpace(DirectX::XMFLOAT4X4 view);
 
 	unsigned int getLightDirCurCount()		const;
 	unsigned int getLightPointCurCount()	const;
@@ -53,12 +80,17 @@ private:
 	HRESULT initLightSpotBuffer(ID3D11Device* device);	//!< Initializes spotlight light-buffer.
 	HRESULT initLightSpotSRV(ID3D11Device* device);		//!< Initializes spotlight srv.
 
+	HRESULT initLightPos(ID3D11Device* device);
+	HRESULT initLightPosBuffer(ID3D11Device* device);
+	HRESULT initLightPosSRV(ID3D11Device* device);
+
 	void updateLightDir(ID3D11Device* device, ID3D11DeviceContext* devcon);		//!< Updated directional light-buffer with data from Attributes_LightDir.
 	void updateLightPoint(ID3D11Device* device, ID3D11DeviceContext* devcon);	//!< Updated pointlight light-buffer with data from Attributes_LightPoint.
 	void updateLightSpot(ID3D11Device* device, ID3D11DeviceContext* devcon);	//!< Updated spotlight light-buffer with data from Attributes_LightSpot.
+	void updateLightPos(ID3D11Device* device);
 
-	HRESULT increaseLightCapacity(ID3D11Device* device, LightDescType lightType);		//!< Grows specified light-buffer capacity, allowing for more lights of that type to be sent to shader.
-	HRESULT updateLightBuffers(ID3D11DeviceContext* devcon, LightDescType lightType);	//!< Maps new data to specified light-buffer.
+	HRESULT increaseBufferCapacity(ID3D11Device* device, LightBufferType bufferType);		//!< Grows specified light-buffer capacity, allowing for more lights of that type to be sent to shader.
+	HRESULT updateLightBuffers(ID3D11DeviceContext* devcon, LightBufferType bufferType);	//!< Maps new data to specified light-buffer.
 
 	unsigned int lightDirMaxCount_;					//!< Number of directional light slots being bound to shader. 
 	unsigned int lightDirCurCount_;					//!< Number of currently valid directional lights being sent to shader.
@@ -77,6 +109,15 @@ private:
 	std::vector<LightDescSpot>	lightSpots_;		//!< Light-descriptions copied from Attributes_LightSpot. These are then bound to buffer.
 	ID3D11Buffer*				lightSpotBuffer_;	//!< Buffer containing spotlights.
 	ID3D11ShaderResourceView*	lightSpotSRV_;		//!< SRV bound to spotlights.
+	
+	unsigned int lightPosMaxCount_;
+	unsigned int lightPosCurCount_;
+	std::vector<Float3>			lightPossView_;
+	std::vector<Float3>			lightPoss_;
+	ID3D11Buffer*				lightPosViewBuffer_;
+	ID3D11ShaderResourceView*	lightPosViewSRV_;
+
+	std::vector<Attribute_Position>* attributesPosition_; //!< Holds positional data. Is fetched only once.
 };
 
 

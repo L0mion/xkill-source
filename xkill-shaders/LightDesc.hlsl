@@ -18,12 +18,8 @@ struct LightPoint
 	float4 diffuse;
 	float4 specular;
 
-	float3	pos;
-	float	range;
 	float3	attenuation;
-
-	//Padding
-	float pad1;
+	float	range;
 };
 struct LightSpot
 {
@@ -31,16 +27,30 @@ struct LightSpot
 	float4 diffuse;
 	float4 specular;
 
-	float3	pos;
-	float	range;
 	float3	direction;
-	float	spotPow;
+	float	range;
 	float3	attenuation;
-
-	//Padding
-	float pad1;
+	float	spotPow;
 };
 
+//Describes how the various components affect the surface.
+struct Material
+{
+	float4 ambient;
+	float4 diffuse;
+	float4 specular; //w = specpow
+};
+
+//struct LightPos
+//{
+//	float x;
+//    float y;
+//    float z;
+//};
+
+#endif //XKILL_RENDERER_LIGHTDESC_HLSL
+
+/*
 struct SurfaceInfo
 {
 	float3 position;
@@ -48,5 +58,4 @@ struct SurfaceInfo
 	float4 diffuse;
 	float4 specular;
 };
-
-#endif //XKILL_RENDERER_LIGHTDESC_HLSL
+*/

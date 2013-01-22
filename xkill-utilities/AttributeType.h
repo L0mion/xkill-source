@@ -395,7 +395,7 @@ struct DLL_U Attribute_Light_Point : public IAttribute
 		list->add(lightPoint.ambient,		"ambient");
 		list->add(lightPoint.diffuse,		"diffuse");
 		list->add(lightPoint.specular,		"specular");
-		list->add(lightPoint.pos,			"pos");
+		//list->add(lightPoint.pos,			"pos");
 		list->add(lightPoint.range,			"range");
 		list->add(lightPoint.attenuation,	"attenuation");
 
@@ -407,7 +407,7 @@ struct DLL_U Attribute_Light_Point : public IAttribute
 		list->get(&lightPoint.ambient);
 		list->get(&lightPoint.diffuse);
 		list->get(&lightPoint.specular);
-		list->get(&lightPoint.pos);
+		//list->get(&lightPoint.pos);
 		list->get(&lightPoint.range);
 		list->get(&lightPoint.attenuation);
 	};
@@ -436,7 +436,7 @@ struct DLL_U Attribute_Light_Spot : public IAttribute
 		list->add(lightSpot.ambient,		"ambient");
 		list->add(lightSpot.diffuse,		"diffuse");
 		list->add(lightSpot.specular,		"specular");
-		list->add(lightSpot.pos,			"pos");
+		//list->add(lightSpot.pos,			"pos");
 		list->add(lightSpot.range,			"range");
 		list->add(lightSpot.direction,		"direction");
 		list->add(lightSpot.spotPow,		"spotPow");
@@ -450,7 +450,7 @@ struct DLL_U Attribute_Light_Spot : public IAttribute
 		list->get(&lightSpot.ambient);
 		list->get(&lightSpot.diffuse);
 		list->get(&lightSpot.specular);
-		list->get(&lightSpot.pos);
+		//list->get(&lightSpot.pos);
 		list->get(&lightSpot.range);
 		list->get(&lightSpot.direction);
 		list->get(&lightSpot.spotPow);

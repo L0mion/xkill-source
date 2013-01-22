@@ -129,7 +129,7 @@ void ManagementGBuffer::clearGBuffers(ID3D11DeviceContext* devcon)
 	devcon->ClearRenderTargetView(renderTargets[GBUFFERID_NORMAL],		CLEARCOLOR_BLACK);
 	devcon->ClearRenderTargetView(renderTargets[GBUFFERID_MATERIAL],	CLEARCOLOR_BLACK);
 }
-void ManagementGBuffer::setGBuffersAndDepthBufferAsRenderTargets(
+void ManagementGBuffer::setGBuffersAndDepthBuffer(
 	ID3D11DeviceContext*	devcon, 
 	ID3D11DepthStencilView*	depthBuffer)
 {
@@ -151,7 +151,10 @@ void ManagementGBuffer::unsetGBuffersAndDepthBufferAsRenderTargets(ID3D11DeviceC
 	for(int i = 0; i < GBUFFERID_NUM_BUFFERS; i++)
 		renderTargets[i] = nullptr;
 
-	devcon->OMSetRenderTargets(GBUFFERID_NUM_BUFFERS, renderTargets, nullptr);
+	devcon->OMSetRenderTargets(
+		GBUFFERID_NUM_BUFFERS, 
+		renderTargets, 
+		NULL);
 }
 void ManagementGBuffer::setGBuffersAsCSShaderResources(ID3D11DeviceContext* devcon)
 {
@@ -163,4 +166,12 @@ void ManagementGBuffer::setGBuffersAsCSShaderResources(ID3D11DeviceContext* devc
 		0, 
 		GBUFFERID_NUM_BUFFERS, 
 		resourceViews);
+}
+void ManagementGBuffer::unsetGBuffersAsCSShaderResources(ID3D11DeviceContext* devcon)
+{
+	ID3D11ShaderResourceView* resourceViews[GBUFFERID_NUM_BUFFERS];
+	for(int i = 0; i < GBUFFERID_NUM_BUFFERS; i++)
+		resourceViews[i] = nullptr;
+
+	devcon->CSSetShaderResources(0, GBUFFERID_NUM_BUFFERS, resourceViews);
 }

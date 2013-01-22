@@ -1,5 +1,6 @@
 #include "constantBuffers.hlsl"
 #include "structs.hlsl"
+#include "utilities.hlsl"
 
 struct PSOut
 {
@@ -16,8 +17,10 @@ SamplerState ss : register(s0);
 PSOut defaultPS(DefaultVSOut pIn)
 {
 	PSOut output;
-	output.normal		= float4(pIn.normalW, pIn.position.z);
+
+	output.normal		= float4(encodeSphereMap(pIn.normalW), 0.0f, 0.0f);
 	output.albedo		= texAlbedo.SampleLevel(ss, pIn.texcoord, 0);
+	
 	output.material		= float4(specularTerm, 1.0f);
 
 	return output;
