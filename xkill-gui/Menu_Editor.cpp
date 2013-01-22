@@ -497,6 +497,36 @@ void Menu_Editor::slot_attributeInspector_itemChanged()
 					*value = model_attributeInspector->data(model_attributeInspector->item(num_items, 1)->index()).toBool();
 				}
 				break;
+			case DataItem::_INT:
+				{
+					// Access value
+					int* value = data->value._int;
+
+					// Fetch new value from menu
+					*value = model_attributeInspector->data(model_attributeInspector->item(num_items, 1)->index()).toInt();
+				}
+				break;
+			case DataItem::_FLOAT:
+				{
+					// Access value
+					float* value = data->value._float;
+
+					// Fetch new value from menu
+					*value = model_attributeInspector->data(model_attributeInspector->item(num_items, 1)->index()).toFloat();
+				}
+				break;
+			case DataItem::_FLOAT2:
+				{
+					// Access value
+					Float2* value = data->value._float2;
+
+					// Fetch new value from menu
+					QStandardItem* item_property = model_attributeInspector->item(num_items, 0);
+
+					value->x = (float)model_attributeInspector->data(item_property->child(0, 1)->index()).toDouble();
+					value->y = (float)model_attributeInspector->data(item_property->child(1, 1)->index()).toDouble();
+				}
+				break;
 			case DataItem::_FLOAT3:
 				{
 					// Access value
@@ -510,6 +540,38 @@ void Menu_Editor::slot_attributeInspector_itemChanged()
 					value->z = (float)model_attributeInspector->data(item_property->child(2, 1)->index()).toDouble();
 				}
 				break;
+			case DataItem::_FLOAT4:
+				{
+					// Access value
+					Float4* value = data->value._float4;
+
+					// Fetch new value from menu
+					QStandardItem* item_property = model_attributeInspector->item(num_items, 0);
+
+					value->x = (float)model_attributeInspector->data(item_property->child(0, 1)->index()).toDouble();
+					value->y = (float)model_attributeInspector->data(item_property->child(1, 1)->index()).toDouble();
+					value->z = (float)model_attributeInspector->data(item_property->child(2, 1)->index()).toDouble();
+					value->w = (float)model_attributeInspector->data(item_property->child(3, 1)->index()).toDouble();
+				}
+				break;
+			case DataItem::_STRING:
+				{
+					// Access value
+					std::string* value = data->value._string;
+
+					// Fetch new value from menu
+					*value = model_attributeInspector->data(model_attributeInspector->item(num_items, 1)->index()).toString().toStdString();
+				}
+				break;
+			case DataItem::_ATTRIBUTE_POINTER:
+				{
+					// Access value
+					int* value = data->value._int;
+
+					// Fetch new value from menu
+					*value = model_attributeInspector->data(model_attributeInspector->item(num_items, 1)->index()).toInt();
+				}
+				break;
 			}
 
 			// Switch to next row
@@ -518,8 +580,6 @@ void Menu_Editor::slot_attributeInspector_itemChanged()
 
 		// Save to attribute
 		attribute->saveTo(list);
-
-		
 	}
 }
 
