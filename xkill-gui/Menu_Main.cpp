@@ -27,8 +27,8 @@ Menu_Main::Menu_Main( QWidget* parent ) : QMainWindow(parent), ToggleHelper(this
 	//setAttribute(Qt::WA_TranslucentBackground);
 	setWindowFlags(Qt::WindowStaysOnBottomHint);
 
-	connect(ui.pushButton_exit, SIGNAL(clicked()), parentWidget(), SLOT(close()));
-	connect(ui.pushButton_exit_2, SIGNAL(clicked()), parentWidget(), SLOT(close()));
+	connect(ui.pushButton_exit, SIGNAL(clicked()), this, SLOT(slot_quitToDesktop()));
+	connect(ui.pushButton_exit_2, SIGNAL(clicked()), this, SLOT(slot_quitToDesktop()));
 	connect(ui.comboBox_LevelSelect, SIGNAL(currentIndexChanged(int)), this, SLOT(slot_selectLevel(int)));
 	connect(ui.pushButton_AddLevel, SIGNAL(clicked()), this, SLOT(slot_addLevel()));
 	connect(ui.pushButton_SaveLevel, SIGNAL(clicked()), this, SLOT(slot_saveLevel()));
@@ -324,4 +324,9 @@ void Menu_Main::loadInputSettings(int objectId)
 		ui.horizontalSlider_Input->setValue(static_cast<int>(currentObject->getSensitivity()*5000.0f + 0.5f)); //Must fix better translation
 		ui.checkBox_Input->setChecked(currentObject->isInverted());
 	}
+}
+
+void Menu_Main::slot_quitToDesktop()
+{
+	SEND_EVENT(&Event(EVENT_QUIT_TO_DESKTOP));
 }

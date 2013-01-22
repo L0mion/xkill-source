@@ -78,6 +78,8 @@ HRESULT ManagementViewport::init()
 			hr = initViewportGrid(gridSize);
 	}
 
+	// Inform about change in splitscreen
+	SEND_EVENT(&Event(EVENT_SPLITSCREEN_CHANGED));
 	return hr;
 }
 

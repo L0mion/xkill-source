@@ -14,7 +14,7 @@ Menu_InGame::Menu_InGame( QWidget* parent ) : QMainWindow(parent), ToggleHelper(
 
 	connect(ui.pushButton_return, SIGNAL(clicked()), this, SLOT(slot_return()));
 	connect(ui.pushButton_quitToMenu, SIGNAL(clicked()), this, SLOT(slot_quitToMenu()));
-	connect(ui.pushButton_quitToDesktop, SIGNAL(clicked()), parentWidget(), SLOT(close()));
+	connect(ui.pushButton_quitToDesktop, SIGNAL(clicked()), this, SLOT(slot_quitToDesktop()));
 }
 
 void Menu_InGame::parentMoveEvent()
@@ -40,5 +40,5 @@ void Menu_InGame::slot_quitToMenu()
 
 void Menu_InGame::slot_quitToDesktop()
 {
-
+	SEND_EVENT(&Event(EVENT_QUIT_TO_DESKTOP));
 }

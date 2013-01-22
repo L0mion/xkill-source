@@ -8,7 +8,7 @@
 #include "Menu_InGame.h"
 #include <vector>
 
-class Attribute_Player;
+class Attribute_SplitScreen;
 
 class HUDWindow : public QMainWindow
 {
@@ -26,8 +26,8 @@ private:
 public:
 	HUDWindow(QWidget* parent, int id);
 
-	void parentMoveEvent();
-	void update(Attribute_Player* player);
+	void parentMoveEvent(Attribute_SplitScreen* splitScreen);
+	void update(Attribute_SplitScreen* player);
 };
 
 class HUDManager
@@ -53,10 +53,7 @@ public:
 
 	void parentMoveEvent()
 	{
-		for(int i=0; i<(int)huds.size(); i++)
-		{
-			huds[i]->parentMoveEvent();
-		}
+		update();
 	}
 };
 
