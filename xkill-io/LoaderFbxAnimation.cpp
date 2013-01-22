@@ -23,10 +23,10 @@ void LoaderFbxAnimation::parseAnimation(FbxScene* scene, std::vector<LoaderFbxAn
 		animationBones_.clear();
 		FbxAnimStack* animStack = scene->GetSrcObject<FbxAnimStack>(i);
 	
-		FbxString str = "Animation Stack Name: ";
-		str += animStack->GetName();
-		str += "\n";
-		printf("%s", str.Buffer());
+	//	FbxString str = "Animation Stack Name: ";
+	//	str += animStack->GetName();
+	//	str += "\n";
+	//	printf("%s", str.Buffer());
 
 		animationDescs->push_back(LoaderFbxAnimationDesc(animStack->GetName()));
 
@@ -40,31 +40,31 @@ void LoaderFbxAnimation::parseAnimationStack(FbxAnimStack* animStack, FbxNode* n
 {
 	int numAnimationLayers = animStack->GetMemberCount<FbxAnimLayer>();
 	
-	FbxString str = "Animation stack contains ";
-	str += numAnimationLayers;
-	str += " Animation Layer(s)\n";
-	printf(str.Buffer());
+	//FbxString str = "Animation stack contains ";
+	//str += numAnimationLayers;
+	//str += " Animation Layer(s)\n";
+	//printf(str.Buffer());
 
 	for(int i=0; i<numAnimationLayers; i++)
 	{
 		FbxAnimLayer* animLayer = animStack->GetMember<FbxAnimLayer>(i);
 
-		str = "AnimLayer ";
-		str += i;
-		str += ": ";
-		str += animLayer->GetName();
-		str += "\n";
-		printf(str.Buffer());
+	//	str = "AnimLayer ";
+	//	str += i;
+	//	str += ": ";
+	//	str += animLayer->GetName();
+	//	str += "\n";
+	//	printf(str.Buffer());
 
 		parseAnimationLayer(animLayer, node, isSwitcher);
 	}
 }
 void LoaderFbxAnimation::parseAnimationLayer(FbxAnimLayer* animLayer, FbxNode* node, bool isSwitcher)
 {
-	FbxString str = "Node name: ";
-	str += node->GetName();
-	str += "\n";
-	printf(str.Buffer());
+//	FbxString str = "Node name: ";
+//	str += node->GetName();
+//	str += "\n";
+//	printf(str.Buffer());
 
 	animationBones_.push_back(LoaderFbxAnimationBone(node->GetName()));
 
