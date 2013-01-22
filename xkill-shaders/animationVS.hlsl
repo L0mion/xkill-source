@@ -2,9 +2,9 @@
 #include "constantBuffers.hlsl"
 #include "structs.hlsl"
 
-VSOut animationVS(AnimationVSIn vsIn)
+DefaultVSOut animationVS(AnimationVSIn vsIn)
 {
-	VSOut output;
+	DefaultVSOut output;
 
 	float weights[4] = {0.0f, 0.0f, 0.0f, 0.0f};
 	weights[0] = vsIn.weights.x;

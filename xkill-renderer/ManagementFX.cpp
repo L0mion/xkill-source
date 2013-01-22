@@ -23,6 +23,7 @@ ManagementFX::ManagementFX(bool debugShaders)
 
 	ilPosColor_				= nullptr;
 	ilPosNormTex_			= nullptr;
+	ilPosNormTexInstanced_	= nullptr;
 	ilPosNormTexTanSkinned_ = nullptr;
 }
 ManagementFX::~ManagementFX()
@@ -41,6 +42,7 @@ ManagementFX::~ManagementFX()
 
 	SAFE_RELEASE(ilPosColor_);
 	SAFE_RELEASE(ilPosNormTex_);
+	SAFE_RELEASE(ilPosNormTexInstanced_);
 	SAFE_RELEASE(ilPosNormTexTanSkinned_);
 }
 
@@ -90,6 +92,9 @@ void ManagementFX::setLayout(ID3D11DeviceContext* devcon,	LayoutID layoutID)
 		break;
 	case LAYOUTID_POS_NORM_TEX:
 		il = ilPosNormTex_;
+		break;
+	case LAYOUTID_POS_NORM_TEX_INSTANCED:
+		il = ilPosNormTexInstanced_;
 		break;
 	case LAYOUTID_POS_NORM_TEX_TAN_SKINNED:
 		il = ilPosNormTexTanSkinned_;
@@ -236,6 +241,8 @@ HRESULT ManagementFX::initILs(ID3D11Device* device)
 	if(SUCCEEDED(hr))
 		hr = initILDefaultVSPosNormTex(device);
 	if(SUCCEEDED(hr))
+		hr = initILDefaultVSPosNormTexInstanced(device);
+	if(SUCCEEDED(hr))
 		hr = initILPosNormTexTanSkinned(device);
 	
 	return hr;
@@ -262,14 +269,29 @@ HRESULT ManagementFX::initILDefaultVSPosNormTex(ID3D11Device* device)
 {
 	HRESULT hr = S_OK;
 
+	//hr = device->CreateInputLayout(
+	//	managementIED_->getIED(IED_TYPE__POS_NORM_TEX), 
+	//	managementIED_->getIEDNumElements(IED_TYPE__POS_NORM_TEX), 
+	//	defaultVS_->getBlob()->GetBufferPointer(), 
+	//	defaultVS_->getBlob()->GetBufferSize(), 
+	//	&ilPosNormTex_);
+	//if(FAILED(hr))
+	//	ERROR_MSG(L"FXManagement::initILDefaultVSPosNormTex CreateInputLayout failed");
+
+	return hr;
+}
+HRESULT ManagementFX::initILDefaultVSPosNormTexInstanced(ID3D11Device* device)
+{
+	HRESULT hr = S_OK;
+
 	hr = device->CreateInputLayout(
-		managementIED_->getIED(IED_TYPE__POS_NORM_TEX), 
-		managementIED_->getIEDNumElements(IED_TYPE__POS_NORM_TEX), 
+		managementIED_->getIED(IED_TYPE__POS_NORM_TEX_INSTANCED), 
+		managementIED_->getIEDNumElements(IED_TYPE__POS_NORM_TEX_INSTANCED), 
 		defaultVS_->getBlob()->GetBufferPointer(), 
 		defaultVS_->getBlob()->GetBufferSize(), 
-		&ilPosNormTex_);
+		&ilPosNormTexInstanced_);
 	if(FAILED(hr))
-		ERROR_MSG(L"FXManagement::initILDefaultVSPosNormTex CreateInputLayout failed");
+		ERROR_MSG(L"FXManagement::initILDefaultVSPosNormTexInstanced CreateInputLayout failed");
 
 	return hr;
 }

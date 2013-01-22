@@ -16,6 +16,7 @@ enum LayoutID
 {
 	LAYOUTID_POS_COLOR,
 	LAYOUTID_POS_NORM_TEX,
+	LAYOUTID_POS_NORM_TEX_INSTANCED,
 	LAYOUTID_POS_NORM_TEX_TAN_SKINNED
 };
 
@@ -55,6 +56,7 @@ private:
 	void initILManagement();									//!< Initializes helper-class IEDManagement.
 	HRESULT initILPosColor(ID3D11Device* device);				//!< Initializes input layout of MeshVertex VertexPosColor.
 	HRESULT initILDefaultVSPosNormTex(ID3D11Device* device);	//!< Initializes input layout of MeshVertex VertexPosNormTex.
+	HRESULT initILDefaultVSPosNormTexInstanced(ID3D11Device* device);
 	HRESULT initILPosNormTexTanSkinned(ID3D11Device* device);	//!< Initializes input layout of MeshVertex VertexPosNormTexTanSkinned.
 
 	Shader* getShaderFromID(ShaderID shaderID);
@@ -74,6 +76,7 @@ private:
 	
 	ID3D11InputLayout* ilPosColor_;				//!< Input layout specifying position and color.
 	ID3D11InputLayout* ilPosNormTex_;			//!< Standard input layout used in default vertex shader.
+	ID3D11InputLayout* ilPosNormTexInstanced_;
 	ID3D11InputLayout* ilPosNormTexTanSkinned_;	//!< Input layout for the vertex type VertexPosNormTexTanSkinned.
 };
 

@@ -12,10 +12,6 @@ namespace DirectX
 
 struct ViewportData;
 
-class Winfo;
-class TexDesc;
-class IB;
-class MeshMaterial;
 class ManagementD3D;
 class ManagementFX;
 class ManagementCB;
@@ -29,6 +25,12 @@ class ManagementGBuffer;
 class ManagementDebug;
 class ManagementMath;
 class ManagementInstance;
+
+class Winfo;
+class TexDesc;
+class IB;
+class MeshMaterial;
+class InstancedData;
 
 #include <vector>
 
@@ -74,13 +76,15 @@ private:
 	void renderViewportToGBuffer(
 		ViewportData& vpData);	//!< Renders to g-buffer.
 	void renderViewportToBackBuffer(ViewportData& vpData);			//!< Renders to backbuffer.
-	void renderAttribute(
-		Attribute_Render* renderAt, 
-		DirectX::XMFLOAT4X4 viewMatrix, 
-		DirectX::XMFLOAT4X4 projectionMatrix);	//!< Renders an attribute.
+	//void renderAttribute(
+	//	Attribute_Render* renderAt, 
+	//	DirectX::XMFLOAT4X4 viewMatrix, 
+	//	DirectX::XMFLOAT4X4 projectionMatrix);	//!< Renders an attribute.
+	void renderInstance(unsigned int meshID, InstancedData* instance);
 	void renderSubset(
 		IB* ib, 
-		MeshMaterial& material);				//!< Renders a subset.
+		MeshMaterial& material,
+		unsigned int numInstances);				//!< Renders a subset.
 	void renderDebugShape(
 		Attribute_DebugShape*	debugShapeAt, 
 		unsigned int			shapeIndex,
@@ -110,8 +114,8 @@ private:
 	ManagementMath*		managementMath_;		//!< Loads dx-math vectors into generic-type vectors and maintains other math-related functions.
 	ManagementInstance*	managementInstance_;
 
-	std::vector<int>*					attributesRenderOwner_;	//!< Holds owners of render-attributes.
-	std::vector<int>*					attributesCameraOwner_;
+	std::vector<int>* attributesRenderOwner_;	//!< Holds owners of render-attributes.
+	std::vector<int>* attributesCameraOwner_;
 
 	//temp
 	M3DLoader*		m3dLoader_;
