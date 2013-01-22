@@ -240,7 +240,7 @@ void InputComponent::handleMousePressedEvent(int nr, bool pressed)
 
 	if(device != nullptr)
 	{
-		device->setButton(nr, pressed);
+		device->setMouseButton(nr, pressed);
 	}
 }
 

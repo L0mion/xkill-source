@@ -119,7 +119,7 @@ protected:
 	// Behavior on mouse press
 	void mousePressEvent(QMouseEvent *e)
 	{
-		// lock / release mouse
+		// lock / release mouse5
 		if(!hasMouseLock && e->button() == Qt::LeftButton)
 			setMouseLock(true);
 
