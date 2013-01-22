@@ -1,4 +1,4 @@
-#include "InstancedDataDesc.h"
+#include "MeshVerticesInstanced.h"
 
 VertexPosNormTexInstanced::VertexPosNormTexInstanced()
 {
