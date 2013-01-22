@@ -9,7 +9,8 @@
 /** 
 */
 
-int main(int argc, char *argv[])
+//int main(int argc, char *argv[])
+int main(int argc,char** argv) //debug draw test main
 {
 	// Detect memory leaks
 #if defined(DEBUG) | defined(_DEBUG)

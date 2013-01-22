@@ -6,9 +6,11 @@
 class PhysicsObject
 	: public btRigidBody
 {
-	virtual bool subClassSpecificInitHook();	//! Can be overridden by subclasses. Is called from init.
+private:
+	virtual btVector3 subClassCalculateLocalInertia(btScalar mass);	//! Can be overridden by subclasses. Is called from init.
+	virtual bool subClassSpecificInitHook();						//! Can be overridden by subclasses. Is called from the end of init.
 protected:
-		unsigned int attributeIndex_; //!< Specifies which PhysicsObject is synchronized with which physics attribute.
+		unsigned int attributeIndex_;								//!< Specifies which PhysicsObject is synchronized with which physics attribute.
 public:
 	PhysicsObject();
 	virtual ~PhysicsObject();

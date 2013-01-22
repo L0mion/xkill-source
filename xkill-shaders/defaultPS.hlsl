@@ -13,7 +13,7 @@ Texture2D texNormal		: register(t1);
 
 SamplerState ss : register(s0);
 
-PSOut defaultPS(VSOut pIn)
+PSOut defaultPS(DefaultVSOut pIn)
 {
 	PSOut output;
 	output.normal		= float4(pIn.normalW, pIn.position.z);

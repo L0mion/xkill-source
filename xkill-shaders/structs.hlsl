@@ -1,7 +1,7 @@
 #ifndef XKILL_RENDERER_STRUCTS_HLSL
 #define XKILL_RENDERER_STRUCTS_HLSL
 
-struct VSOut
+struct DefaultVSOut
 {
 	float2 texcoord		: TEXCOORD;
 	float4 position		: SV_POSITION;
@@ -9,11 +9,12 @@ struct VSOut
 	float3 normalW		: NORMAL;
 };
 
-struct DefaultVSIn
+struct DefaultVSInInstanced
 {
-	float3 position : POSITION;
-	float3 normal	: NORMAL;
-	float2 texcoord	: TEXCOORD;
+	float3		position	: POSITION;
+	float3		normal		: NORMAL;
+	float2		texcoord	: TEXCOORD;
+	float4x4	world		: WORLD;
 };
 
 struct ColorVSIn

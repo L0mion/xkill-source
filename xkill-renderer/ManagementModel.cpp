@@ -112,8 +112,8 @@ HRESULT ManagementModel::createModelD3D(
 	}
 	else
 	{
-		//Could not find mesh loaded, error or warning?
-		//hr = S_FALSE;
+		ERROR_MSG(L"ManagementModel::createModelD3D Could not find model!");
+		hr = S_FALSE;
 	}
 
 	return hr;
@@ -289,7 +289,6 @@ DebugShapeD3D* ManagementModel::createFrustum(DebugShapeFrustum* frustum, ID3D11
 	debugFrustum = new DebugShapeD3D(vb);
 	return debugFrustum;
 }
-
 
 bool ManagementModel::existingModelD3D(const int unsigned modelID)
 {

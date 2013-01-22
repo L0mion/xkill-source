@@ -1,5 +1,7 @@
 #include "ProjectilePhysicsObject.h"
 
+#include <BulletCollision/CollisionShapes/btCollisionShape.h>
+
 //#include <xkill-utilities/AttributeManager.h>
 //AttributeIterator<Attribute_Physics> itrPhysics_ProjectilePhysicsObject;
 
@@ -33,4 +35,13 @@ bool ProjectilePhysicsObject::subClassSpecificInitHook()
 	//setCcdMotionThreshold(0.001f);
 	//setCcdSweptSphereRadius(0.001f);
 	return true;
+}
+
+btVector3 ProjectilePhysicsObject::subClassCalculateLocalInertia(btScalar mass)
+{
+	btCollisionShape* collisionShape = getCollisionShape();
+	btVector3 localInertia;
+	collisionShape->calculateLocalInertia(mass, localInertia);
+	
+	return localInertia;
 }
