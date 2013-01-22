@@ -71,20 +71,16 @@ private:
 	HRESULT initManagementGBuffer();	//!< Creates a ManagementGBuffer-type object that will maintain the application's g-buffers.
 	HRESULT initManagementDebug();		//!< Initializes ManagementDebug, which holds data allowing advanced detection of COM-leaks in D3D.
 	void	initManagementMath();		//!< Initializes ManagementMath, which manages math-related functions and loading of dx-vectors into generic-type vectors utilizing SIMD.
-	void	initManagementInstance();
+	void	initManagementInstance();	//!< Initializes ManagementInstance, which manages all the instances of the various models.
 
 	void renderViewportToGBuffer(
-		ViewportData& vpData);	//!< Renders to g-buffer.
-	void renderViewportToBackBuffer(ViewportData& vpData);			//!< Renders to backbuffer.
-	//void renderAttribute(
-	//	Attribute_Render* renderAt, 
-	//	DirectX::XMFLOAT4X4 viewMatrix, 
-	//	DirectX::XMFLOAT4X4 projectionMatrix);	//!< Renders an attribute.
-	void renderInstance(unsigned int meshID, InstancedData* instance);
+		ViewportData& vpData);											//!< Renders to g-buffer.
+	void renderViewportToBackBuffer(ViewportData& vpData);				//!< Renders to backbuffer.
+	void renderInstance(unsigned int meshID, InstancedData* instance);	//!< Renders an instanced model.
 	void renderSubset(
 		IB* ib, 
 		MeshMaterial& material,
-		unsigned int numInstances);				//!< Renders a subset.
+		unsigned int numInstances);										//!< Renders a subset.
 	void renderDebugShape(
 		Attribute_DebugShape*	debugShapeAt, 
 		unsigned int			shapeIndex,
@@ -112,7 +108,7 @@ private:
 	ManagementGBuffer*	managementGBuffer_;		//!< Maintains the G-Buffers of application.
 	ManagementDebug*	managementDebug_;		//!< Used for detecting live COM-objects.
 	ManagementMath*		managementMath_;		//!< Loads dx-math vectors into generic-type vectors and maintains other math-related functions.
-	ManagementInstance*	managementInstance_;
+	ManagementInstance*	managementInstance_;	//!< Maintains all instances of respective model in the game.
 
 	std::vector<int>* attributesRenderOwner_;	//!< Holds owners of render-attributes.
 	std::vector<int>* attributesCameraOwner_;

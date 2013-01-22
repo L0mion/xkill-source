@@ -22,7 +22,6 @@ ManagementFX::ManagementFX(bool debugShaders)
 	colorPS_				= nullptr;
 
 	ilPosColor_				= nullptr;
-	ilPosNormTex_			= nullptr;
 	ilPosNormTexInstanced_	= nullptr;
 	ilPosNormTexTanSkinned_ = nullptr;
 }
@@ -41,7 +40,6 @@ ManagementFX::~ManagementFX()
 	SAFE_DELETE(colorPS_);
 
 	SAFE_RELEASE(ilPosColor_);
-	SAFE_RELEASE(ilPosNormTex_);
 	SAFE_RELEASE(ilPosNormTexInstanced_);
 	SAFE_RELEASE(ilPosNormTexTanSkinned_);
 }
@@ -55,8 +53,6 @@ void ManagementFX::reset()
 	defaultCS_->reset();
 	animationVS_->reset();
 	animationPS_->reset();
-	
-	SAFE_RELEASE(ilPosNormTex_);
 }
 
 HRESULT ManagementFX::init(ID3D11Device* device)
@@ -89,9 +85,6 @@ void ManagementFX::setLayout(ID3D11DeviceContext* devcon,	LayoutID layoutID)
 	{
 	case LAYOUTID_POS_COLOR:
 		il = ilPosColor_;
-		break;
-	case LAYOUTID_POS_NORM_TEX:
-		il = ilPosNormTex_;
 		break;
 	case LAYOUTID_POS_NORM_TEX_INSTANCED:
 		il = ilPosNormTexInstanced_;
@@ -239,8 +232,6 @@ HRESULT ManagementFX::initILs(ID3D11Device* device)
 
 	hr = initILPosColor(device);
 	if(SUCCEEDED(hr))
-		hr = initILDefaultVSPosNormTex(device);
-	if(SUCCEEDED(hr))
 		hr = initILDefaultVSPosNormTexInstanced(device);
 	if(SUCCEEDED(hr))
 		hr = initILPosNormTexTanSkinned(device);
@@ -262,21 +253,6 @@ HRESULT ManagementFX::initILPosColor(ID3D11Device* device)
 		colorVS_->getBlob()->GetBufferPointer(),
 		colorVS_->getBlob()->GetBufferSize(),
 		&ilPosColor_);
-
-	return hr;
-}
-HRESULT ManagementFX::initILDefaultVSPosNormTex(ID3D11Device* device)
-{
-	HRESULT hr = S_OK;
-
-	//hr = device->CreateInputLayout(
-	//	managementIED_->getIED(IED_TYPE__POS_NORM_TEX), 
-	//	managementIED_->getIEDNumElements(IED_TYPE__POS_NORM_TEX), 
-	//	defaultVS_->getBlob()->GetBufferPointer(), 
-	//	defaultVS_->getBlob()->GetBufferSize(), 
-	//	&ilPosNormTex_);
-	//if(FAILED(hr))
-	//	ERROR_MSG(L"FXManagement::initILDefaultVSPosNormTex CreateInputLayout failed");
 
 	return hr;
 }

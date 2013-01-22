@@ -339,7 +339,6 @@ void Renderer::initManagementMath()
 void Renderer::initManagementInstance()
 {
 	managementInstance_ = new ManagementInstance();
-	managementInstance_->init();
 }
 
 void Renderer::update()

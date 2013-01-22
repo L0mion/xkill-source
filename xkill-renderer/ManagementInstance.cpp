@@ -18,10 +18,6 @@ ManagementInstance::~ManagementInstance()
 	}
 }
 
-void ManagementInstance::init()
-{
-
-}
 void ManagementInstance::update(ID3D11Device* device, ID3D11DeviceContext* devcon)
 {
 	//Clear all existing instance-lists.

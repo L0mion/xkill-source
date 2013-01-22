@@ -15,7 +15,6 @@ struct ID3D11DeviceContext;
 enum LayoutID
 {
 	LAYOUTID_POS_COLOR,
-	LAYOUTID_POS_NORM_TEX,
 	LAYOUTID_POS_NORM_TEX_INSTANCED,
 	LAYOUTID_POS_NORM_TEX_TAN_SKINNED
 };
@@ -52,12 +51,11 @@ private:
 	HRESULT initColorVS(ID3D11Device*			device,	std::wstring shaderPath);	//!< Initializes color-shaders.
 	HRESULT initColorPS(ID3D11Device*			device,	std::wstring shaderPath);	//!< Initializes color-shaders.
 
-	HRESULT initILs(ID3D11Device* device);						//!< Initializes input-layouts.
-	void initILManagement();									//!< Initializes helper-class IEDManagement.
-	HRESULT initILPosColor(ID3D11Device* device);				//!< Initializes input layout of MeshVertex VertexPosColor.
-	HRESULT initILDefaultVSPosNormTex(ID3D11Device* device);	//!< Initializes input layout of MeshVertex VertexPosNormTex.
-	HRESULT initILDefaultVSPosNormTexInstanced(ID3D11Device* device);
-	HRESULT initILPosNormTexTanSkinned(ID3D11Device* device);	//!< Initializes input layout of MeshVertex VertexPosNormTexTanSkinned.
+	HRESULT initILs(ID3D11Device* device);								//!< Initializes input-layouts.
+	void initILManagement();											//!< Initializes helper-class IEDManagement.
+	HRESULT initILPosColor(ID3D11Device* device);						//!< Initializes input layout of MeshVertex VertexPosColor.
+	HRESULT initILDefaultVSPosNormTexInstanced(ID3D11Device* device);	//!< Initializes input layout of a standard three-component instanced vertex.
+	HRESULT initILPosNormTexTanSkinned(ID3D11Device* device);			//!< Initializes input layout of MeshVertex VertexPosNormTexTanSkinned.
 
 	Shader* getShaderFromID(ShaderID shaderID);
 
@@ -75,8 +73,7 @@ private:
 	ShaderPS*	colorPS_;
 	
 	ID3D11InputLayout* ilPosColor_;				//!< Input layout specifying position and color.
-	ID3D11InputLayout* ilPosNormTex_;			//!< Standard input layout used in default vertex shader.
-	ID3D11InputLayout* ilPosNormTexInstanced_;
+	ID3D11InputLayout* ilPosNormTexInstanced_;	//!< Standard instanced input layout used in default vertex shader.
 	ID3D11InputLayout* ilPosNormTexTanSkinned_;	//!< Input layout for the vertex type VertexPosNormTexTanSkinned.
 };
 
