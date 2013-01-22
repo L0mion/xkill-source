@@ -172,14 +172,7 @@ unsigned long InputDevice::getHash()
 
 	str += Converter::IntToStr(InputAction::ACTION_LAST);
 
-	unsigned long hash = 5381;
-
-	for(unsigned int i = 0; i < str.size(); i++)
-	{
-		hash = ((hash << 5) + hash) + str[i];
-	}
-
-	return hash;
+	return Converter::HashString(str);
 }
 
 InputButtonObject* InputDevice::getButtonObject(unsigned int index)

@@ -90,6 +90,7 @@ std::string QTInputDevices::getStandardMappingsString()
 			str += Converter::IntToStr(mappings->at(j));
 		}
 
+		str += inputObjects[i]->getName();
 		str += Converter::FloatToStr(inputObjects[i]->getSensitivity());
 		str += Converter::IntToStr(static_cast<int>(inputObjects[i]->isInverted()));
 	}
@@ -146,23 +147,23 @@ void QTInputDevices::createInputObjectsFromLayout()
 		buttons_[8]->setKey('F');
 		buttons_[9]->setKey('R');
 
-		buttons_[10]->setKey(-1);
+		buttons_[10]->setKey('Ü');	//Fix
 		buttons_[10]->setName("Left mouse button");
 		mouseButtons_.push_back(buttons_[10]);
 
-		buttons_[11]->setKey(-1);
+		buttons_[11]->setKey('Û');
 		buttons_[11]->setName("Right mouse button");
 		mouseButtons_.push_back(buttons_[11]);
 
-		buttons_[12]->setKey(-1);
+		buttons_[12]->setKey('ÿ');
 		buttons_[12]->setName("Middle mouse button");
 		mouseButtons_.push_back(buttons_[12]);
 
-		buttons_[13]->setKey(-1);
+		buttons_[13]->setKey('ï');
 		buttons_[13]->setName("Mouse button 4");
 		mouseButtons_.push_back(buttons_[13]);
 
-		buttons_[14]->setKey(-1);
+		buttons_[14]->setKey('î');
 		buttons_[14]->setName("Mouse button 5");
 		mouseButtons_.push_back(buttons_[14]);
 	}
