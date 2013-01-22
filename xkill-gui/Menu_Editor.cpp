@@ -59,14 +59,14 @@ Menu_Editor::Menu_Editor( Ui::MainWindowClass& ui, QWidget* parent ) : QWidget(p
 
 	//ui.treeView_attributeInspector->setEditTriggers(QAbstractItemView::NoEditTriggers);
 
-	connect(ui.pushButton_editorRefresh, SIGNAL(clicked()), this, SLOT(slot_editorRefresh()));
-	connect(ui.treeView_entityBrowser, SIGNAL(clicked(QModelIndex)), this, SLOT(slot_clicked_entityBrowser(QModelIndex)));
-	connect(ui.treeView_entityInspector, SIGNAL(clicked(QModelIndex)), this, SLOT(slot_clicked_entityInspector(QModelIndex)));
-	connect(ui.horizontalSlider_simulationSpeed, SIGNAL(valueChanged(int)), this, SLOT(slot_changed_simulationSpeed(int)));
-	connect(ui.horizontalSlider_simulationSpeed, SIGNAL(valueChanged(int)), this, SLOT(slot_changed_simulationSpeed(int)));
-	connect(ui.checkBox_autoRefresh, SIGNAL(clicked()),		this,	SLOT(slot_attributeInspector_refresh()));
-	connect(ui.dockWidget, SIGNAL(visibilityChanged(bool)), this,	SLOT(slot_editorRefresh()));
-	connect(model_attributeInspector, SIGNAL(itemChanged(QStandardItem*)),		this,	SLOT(slot_attributeInspector_itemChanged()));
+	connect(ui.pushButton_editorRefresh,			SIGNAL(clicked()),						this,	SLOT(slot_editorRefresh()));
+	connect(ui.treeView_entityBrowser,				SIGNAL(clicked(QModelIndex)),			this,	SLOT(slot_clicked_entityBrowser(QModelIndex)));
+	connect(ui.treeView_entityInspector,			SIGNAL(clicked(QModelIndex)),			this,	SLOT(slot_clicked_entityInspector(QModelIndex)));
+	connect(ui.horizontalSlider_simulationSpeed,	SIGNAL(valueChanged(int)),				this,	SLOT(slot_changed_simulationSpeed(int)));
+	connect(ui.horizontalSlider_simulationSpeed,	SIGNAL(valueChanged(int)),				this,	SLOT(slot_changed_simulationSpeed(int)));
+	connect(ui.checkBox_autoRefresh,				SIGNAL(clicked()),						this,	SLOT(slot_attributeInspector_refresh()));
+	connect(ui.dockWidget,							SIGNAL(visibilityChanged(bool)),		this,	SLOT(slot_editorRefresh()));
+	connect(model_attributeInspector,				SIGNAL(itemChanged(QStandardItem*)),	this,	SLOT(slot_attributeInspector_itemChanged()));
 	 
 	ui.dockWidget->hide();
 }
@@ -79,14 +79,14 @@ void Menu_Editor::slot_editorRefresh()
 		num_rows = 0;
 
 		// Fill columns
-		entityBrowser_add("Players", &itrPlayer.getAllOwnerId());
-		entityBrowser_add("Positions", &itrPosition.getAllOwnerId());
-		entityBrowser_add("SpawnPoints", &itrSpawnPoint.getAllOwnerId());
-		entityBrowser_add("Render", &itrRender.getAllOwnerId());
-		entityBrowser_add("Meshes", &itrMesh.getAllOwnerId());
+		entityBrowser_add("Players",		&itrPlayer.getAllOwnerId());
+		entityBrowser_add("Positions",		&itrPosition.getAllOwnerId());
+		entityBrowser_add("SpawnPoints",	&itrSpawnPoint.getAllOwnerId());
+		entityBrowser_add("Render",			&itrRender.getAllOwnerId());
+		entityBrowser_add("Meshes",			&itrMesh.getAllOwnerId());
 		entityBrowser_add("PhysicsObjects", &itrPhysics.getAllOwnerId());
-		entityBrowser_add("InputDevices", &itrInputDevice.getAllOwnerId());
-		entityBrowser_add("Projectiles", &itrProjectile.getAllOwnerId());
+		entityBrowser_add("InputDevices",	&itrInputDevice.getAllOwnerId());
+		entityBrowser_add("Projectiles",	&itrProjectile.getAllOwnerId());
 		
 	}
 }
@@ -580,6 +580,21 @@ void Menu_Editor::slot_attributeInspector_itemChanged()
 
 		// Save to attribute
 		attribute->saveTo(list);
+
+		// Refresh all attributes connected to entity
+		// this is to ensure attributes with pointers 
+		// (such as physics) gets updated as well as 
+		// the attribute they are pointing to
+
+		std::vector<AttributeController>* attributes = entity->getAttributeControllers();
+		for(int i=0; i<attributes->size(); i++)
+		{
+			int attributeEnum = attributes->at(i).getAttribute()->getType();
+			int index = attributes->at(i).getIndex();
+
+			// Send event
+			EventManager::getInstance()->sendEvent(&Event_AttributeUpdated(index, attributeEnum));
+		}
 	}
 }
 

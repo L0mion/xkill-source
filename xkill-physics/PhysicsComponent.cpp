@@ -144,6 +144,13 @@ void PhysicsComponent::onEvent(Event* e)
 				delete physicsObjects_->at(attributeIndex);
 				physicsObjects_->at(attributeIndex) = nullptr;
 			}
+			else if(attributeUpdated->isCreated)
+			{
+			}
+			else
+			{
+				itrPhysics.at(attributeIndex)->reloadDataIntoBulletPhysics = true;
+			}
 		}
 		break;
 	//case EVENT_LOAD_LEVEL:
