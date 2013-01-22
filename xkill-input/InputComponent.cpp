@@ -63,9 +63,7 @@ void InputComponent::onEvent(Event* e)
 		int keyEnum	= emp->keyEnum;
 		bool isPressed = emp->isPressed;
 
-		//
-		// TODO: Handle mousepress
-		//
+		handleMousePressedEvent(keyEnum, isPressed);
 	}
 	if(type == EVENT_INPUT_DEVICE_SEARCH)
 	{
@@ -233,6 +231,16 @@ void InputComponent::handleMouseMoveEvent(Event_MouseMove* e)
 	{
 		device->setAxis(0, (float)e->dx);
 		device->setAxis(1, (float)e->dy);
+	}
+}
+
+void InputComponent::handleMousePressedEvent(int nr, bool pressed)
+{
+	QTInputDevices* device = inputManager_->GetMouseAndKeyboard();
+
+	if(device != nullptr)
+	{
+		device->setButton(nr, pressed);
 	}
 }
 

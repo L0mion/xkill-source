@@ -28,11 +28,13 @@ public:
 
 	void setAxis(unsigned int index, float value);
 	void setButton(char key, bool value);
+	void setMouseButton(unsigned int nr, bool value);
 
 	void setAxesToZero();
 	void updateButtons();
 
 protected:
+	std::vector<InputButtonObject*> mouseButtons_;
 
 	virtual void updateState();
 	virtual void createInputLayout();
