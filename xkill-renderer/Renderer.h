@@ -28,6 +28,7 @@ class ManagementRS;
 class ManagementGBuffer;
 class ManagementDebug;
 class ManagementMath;
+class ManagementInstance;
 
 #include <vector>
 
@@ -68,6 +69,7 @@ private:
 	HRESULT initManagementGBuffer();	//!< Creates a ManagementGBuffer-type object that will maintain the application's g-buffers.
 	HRESULT initManagementDebug();		//!< Initializes ManagementDebug, which holds data allowing advanced detection of COM-leaks in D3D.
 	void	initManagementMath();		//!< Initializes ManagementMath, which manages math-related functions and loading of dx-vectors into generic-type vectors utilizing SIMD.
+	void	initManagementInstance();
 
 	void renderViewportToGBuffer(
 		ViewportData& vpData);	//!< Renders to g-buffer.
@@ -106,6 +108,7 @@ private:
 	ManagementGBuffer*	managementGBuffer_;		//!< Maintains the G-Buffers of application.
 	ManagementDebug*	managementDebug_;		//!< Used for detecting live COM-objects.
 	ManagementMath*		managementMath_;		//!< Loads dx-math vectors into generic-type vectors and maintains other math-related functions.
+	ManagementInstance*	managementInstance_;
 
 	std::vector<int>*					attributesRenderOwner_;	//!< Holds owners of render-attributes.
 	std::vector<int>*					attributesCameraOwner_;

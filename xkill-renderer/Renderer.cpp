@@ -13,6 +13,8 @@
 #include "ManagementRS.h"
 #include "ManagementGBuffer.h"
 #include "ManagementDebug.h"
+#include "ManagementMath.h"
+#include "ManagementInstance.h"
 
 #include "Winfo.h"
 #include "ModelD3D.h"
@@ -23,7 +25,6 @@
 #include "IB.h"
 #include "renderingUtilities.h"
 #include "TypeFX.h"
-#include "ManagementMath.h"
 #include "Renderer.h"
 #include "ViewportData.h"
 
@@ -52,6 +53,7 @@ Renderer::Renderer(HWND windowHandle)
 	managementGBuffer_	= nullptr;
 	managementDebug_	= nullptr;
 	managementMath_		= nullptr;
+	managementInstance_ = nullptr;
 
 	attributesRenderOwner_	= nullptr;
 
@@ -76,6 +78,7 @@ Renderer::~Renderer()
 	SAFE_DELETE(managementRS_);
 	SAFE_DELETE(managementGBuffer_);
 	SAFE_DELETE(managementMath_);
+	SAFE_DELETE(managementInstance_);
 
 	//d3dDebug_->reportLiveDeviceObjects();
 	SAFE_DELETE(managementDebug_);
@@ -173,6 +176,7 @@ HRESULT Renderer::init()
 	initManagementMath();
 	if(SUCCEEDED(hr))
 		hr = initManagementGBuffer();
+	initManagementInstance();
 
 	//temp
 	/*
@@ -332,10 +336,19 @@ void Renderer::initManagementMath()
 {
 	managementMath_ = new ManagementMath();
 }
+void Renderer::initManagementInstance()
+{
+	managementInstance_ = new ManagementInstance();
+	managementInstance_->init();
+}
 
 void Renderer::update()
 {
+	//Update lights.
 	managementLight_->update(managementD3D_->getDevice(), managementD3D_->getDeviceContext());
+
+	//Update instances.
+	managementInstance_->update();
 }
 void Renderer::render()
 {
