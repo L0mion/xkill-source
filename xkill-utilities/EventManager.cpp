@@ -88,6 +88,8 @@ void EventManager::sendEvent(Event* e)
 
 EventManager::~EventManager()
 {
+	cleanAllQueues();
+
 	delete subscibers;
 	delete queues;
 }
@@ -115,9 +117,19 @@ void EventManager::flushQueuedEvents( EventType type )
 	(*queues)[index].clear();
 }
 
+std::vector<Event*>* EventManager::getPointerToQueuedEvents( EventType type )
+{
+	int index = type;
+	return &queues->at(index);
+}
+
 void EventManager::cleanAllQueues()
 {
-	// NOT IMPLEMENTED YET
+	// Sends all remaining queued messages to prevent memory leak
+	for(unsigned i=0; i<queues->size(); i++)
+	{
+		flushQueuedEvents((EventType)i);
+	}
 }
 
 
