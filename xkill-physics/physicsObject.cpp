@@ -47,7 +47,7 @@ bool PhysicsObject::init(unsigned int attributeIndex)
 	localInertia.setZero();
 	btCollisionShape* collisionShape = CollisionShapes::Instance()->getCollisionShape(physicsAttribute->meshID);
 	btScalar mass = static_cast<btScalar>(physicsAttribute->mass);
-	if(physicsAttribute->mass == 0.0f) //calling "setMassProps()" below will set the CF_STATIC_OBJECT flag to true for the btRigidBody if the mass is zero
+	if(physicsAttribute->mass != 0.0f) //calling "setMassProps()" below will set the CF_STATIC_OBJECT flag to true for the btRigidBody if the mass is zero
 	{
 		collisionShape->calculateLocalInertia(mass, localInertia);
 	}

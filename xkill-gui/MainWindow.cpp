@@ -62,7 +62,9 @@ MainWindow::MainWindow()
 	connect(ui.actionQuit, SIGNAL(triggered()), this, SLOT(close()));
 	connect(gameWidget, SIGNAL(signal_fpsChanged(QString)), this, SLOT(slot_setTitle(QString)));
 
+	
 	new Menu_Editor(ui, this);
+	
 }
 
 MainWindow::~MainWindow()
@@ -73,7 +75,6 @@ MainWindow::~MainWindow()
 
 void MainWindow::onUpdate( float delta )
 {
-
 }
 
 void MainWindow::onEvent( Event* e )

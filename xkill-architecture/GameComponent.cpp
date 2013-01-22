@@ -278,7 +278,7 @@ void GameComponent::onUpdate(float delta)
 			}
 
 			spatial->rotation = Float4(0.0f, 0.0f, 0.0f, 1.0f);
-			camera->reset = true; //Reset player rotation.
+			//camera->reset = true; //Reset player rotation.
 			physics->reloadDataIntoBulletPhysics = true;
 
 			health->health = health->startHealth; // restores player health
@@ -499,10 +499,10 @@ void GameComponent::event_PhysicsAttributesColliding(Event_PhysicsAttributesColl
 				Attribute_Projectile* projectileAttribute = itrProjectile.at(projectileId.at(i));
 
 				//Shorten lifetime of projectile colliding with physics objects
-				if(projectileAttribute->currentLifeTimeLeft > 0.2f)
+				/*if(projectileAttribute->currentLifeTimeLeft > 0.2f)
 				{
 					projectileAttribute->currentLifeTimeLeft = 0.15f;
-				}
+				}*/ //ÄÄÄÄ
 
 				//Explosion handling.
 				if(projectileAttribute->explodeOnImnpact)

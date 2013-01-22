@@ -9,6 +9,8 @@
 #include "PlayerPhysicsObject.h"
 #include "ProjectilePhysicsObject.h"
 #include "ExplosionSpherePhysicsObject.h"
+#include "FrustumPhysicsObject.h"
+#include "physicsUtilities.h"
 
 #include "CollisionShapes.h"
 
@@ -195,6 +197,9 @@ void PhysicsComponent::synchronizeWithAttributes()
 			case Attribute_Physics::EXPLOSIONSPHERE:
 				physicsObjects_->at(index) = new ExplosionSpherePhysicsObject();
 				break;
+			case Attribute_Physics::FRUSTUM:
+				physicsObjects_->at(index) = new FrustumPhysicsObject();
+				break;
 			case Attribute_Physics::EVERYTHING:
 				std::cout << "Error: Attribute_Physics should not have EVERYTHING as collisionFilterGroup" << std::endl;
 				break;
@@ -264,6 +269,7 @@ void PhysicsComponent::detectedCollisionsDuringStepSimulation(btScalar timeStep)
 		}
 	}
 }
+
 
 void PhysicsComponent::updateCulling()
 {

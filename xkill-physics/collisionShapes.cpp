@@ -231,9 +231,13 @@ CollisionShapes* CollisionShapes::Instance()
 
 
 void CollisionShapes::updateFrustrumShape()
-{
-	if(frustrumShape_)
+{	
+	return;
+	if(frustrumShape_ == nullptr)
+	{
 		delete frustrumShape_;
+		frustrumShape_ = nullptr;
+	}
 	if(!itrCamera.size())
 	{
 		DEBUGPRINT("COLLISIONSHAPES: No cameras to use for frustum creation");

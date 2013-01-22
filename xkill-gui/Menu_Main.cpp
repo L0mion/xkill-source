@@ -59,6 +59,7 @@ Menu_Main::Menu_Main( QWidget* parent ) : QMainWindow(parent), ToggleHelper(this
 	QStringList columnNames;
 
 	loadXML();
+	
 }
 
 void Menu_Main::parentMoveEvent()

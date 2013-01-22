@@ -247,7 +247,21 @@ void CameraComponent::onUpdate(float delta)
 				Attribute_Camera* camera = cameras.at(i);
 				yaw(input->rotation.x, camera);
 				pitch(input->rotation.y, camera);
+				
+				
 
+				// Authorative camera
+				DirectX::XMVECTOR rotation;
+				DirectX::XMVECTOR attribute;
+				attribute = DirectX::XMLoadFloat4((DirectX::XMFLOAT4*)&itrSpatial.at(camera->ptr_spatial)->rotation);
+				rotation = DirectX::XMQuaternionRotationRollPitchYaw(input->rotation.x,0,0);
+				rotation = DirectX::XMQuaternionNormalize(rotation);
+				attribute = DirectX::XMQuaternionMultiply(rotation,attribute);
+				attribute = DirectX::XMQuaternionNormalize(attribute);
+				//XMVector3Rotate
+				DirectX::XMStoreFloat4((DirectX::XMFLOAT4*)&itrSpatial.at(camera->ptr_spatial)->rotation, attribute);
+
+				
 				// reset for next input
 				input->rotation.x = 0.0f;
 				input->rotation.y = 0.0f;

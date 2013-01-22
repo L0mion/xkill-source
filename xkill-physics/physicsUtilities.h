@@ -11,5 +11,6 @@ struct Float3;
 
 btQuaternion convert(Float4 float4);
 btVector3 convert(Float3 float3);
+float yawFromQuaternion(const btQuaternion& q);
 
 #endif //XKILL_PHYSICS_PHYSICSUTILITIES

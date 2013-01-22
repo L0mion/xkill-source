@@ -219,6 +219,7 @@ struct DLL_U Attribute_Physics : public IAttribute
 		PLAYER = 2,
 		PROJECTILE = 4,
 		EXPLOSIONSPHERE = 8,
+		FRUSTUM = 16,
 		EVERYTHING = 0xffff
 	};
 	PhysicsAttributeType collisionFilterGroup;
