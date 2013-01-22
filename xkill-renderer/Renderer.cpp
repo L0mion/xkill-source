@@ -449,6 +449,10 @@ void Renderer::renderViewportToGBuffer(ViewportData& vpData)
 		}
 	}
 
+	/*
+		Get debug draw line render event here
+	*/
+	
 	managementGBuffer_->unsetGBuffersAndDepthBufferAsRenderTargets(devcon);
 
 	managementFX_->unsetAll(devcon);

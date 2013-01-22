@@ -197,8 +197,7 @@ Event_CreateInputDevice::Event_CreateInputDevice(InputDevice* inputDevice, Input
 	objectArray = inputObjectArray;
 }
 
-Event_DrawDebugVertexBuffer::Event_DrawDebugVertexBuffer(Float3* float3Array, int float3ArraySize) : Event (EVENT_DRAW_DEBUG_VERTEX_BUFFER)
+Event_DrawBulletPhysicsDebugLines::Event_DrawBulletPhysicsDebugLines(std::vector<VertexPosColor>* debugLineVertices) : Event (EVENT_DRAW_BULLET_PHYSICS_DEBUG_LINES)
 {
-	this->float3Array = float3Array;
-	this->float3ArraySize = float3ArraySize;
-};
+	this->debugLineVertices = debugLineVertices;
+}

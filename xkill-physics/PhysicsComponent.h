@@ -49,6 +49,8 @@ public:
 	void onUpdate(float delta);
 	void onEvent(Event* e);
 
+	void queueDebugDrawEvent();
+	
 	void detectedCollisionsDuringStepSimulation(btScalar timeStep);
 };
 
