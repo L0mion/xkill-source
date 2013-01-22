@@ -1,6 +1,6 @@
 #include "FrustumPhysicsObject.h"
 
-//#include <BulletCollision/CollisionShapes/btCollisionShape.h>
+#include <BulletCollision/CollisionShapes/btCollisionShape.h>
 //#include <BulletCollision/CollisionShapes/btSphereShape.h>
 
 //#include "collisionShapes.h"
@@ -36,6 +36,7 @@ void FrustumPhysicsObject::onUpdate(float delta)
 	world.setRotation(q);
 	world.setOrigin(pos);
 	setWorldTransform(world);
+	setGravity(btVector3(0,0,0));
 }
 
 bool FrustumPhysicsObject::frustumInit(unsigned int attributeIndex,unsigned int collisionFilterGroup)
@@ -54,11 +55,11 @@ bool FrustumPhysicsObject::frustumInit(unsigned int attributeIndex,unsigned int 
 	btVector3 localInertia;
 	localInertia.setZero();
 	btCollisionShape* collisionShape = CollisionShapes::Instance()->getFrustrumShape(attributeIndex_);
-	btScalar mass = static_cast<btScalar>(0);
-	//if(physicsAttribute->mass != 0.0f) //calling "setMassProps()" below will set the CF_STATIC_OBJECT flag to true for the btRigidBody if the mass is zero
-	//{
-	//	collisionShape->calculateLocalInertia(mass, localInertia);
-	//}
+	btScalar mass = static_cast<btScalar>(1);
+	if(mass != 0.0f) //calling "setMassProps()" below will set the CF_STATIC_OBJECT flag to true for the btRigidBody if the mass is zero
+	{
+		collisionShape->calculateLocalInertia(mass, localInertia);
+	}
 	setMassProps(mass, localInertia); //Set inverse mass and inverse local inertia
 	setCollisionShape(collisionShape);
 

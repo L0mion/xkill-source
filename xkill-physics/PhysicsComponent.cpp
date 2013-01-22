@@ -284,6 +284,11 @@ void PhysicsComponent::detectedCollisionsDuringStepSimulation(btScalar timeStep)
 				if(objectA->getCollisionFilterGroup() == Attribute_Physics::FRUSTUM ||
 					objectB->getCollisionFilterGroup() == Attribute_Physics::FRUSTUM)
 				{
+					if(objectA->getCollisionFilterGroup() == Attribute_Physics::WORLD ||
+					objectB->getCollisionFilterGroup() == Attribute_Physics::WORLD)
+					{
+						int a = 2;
+					}
 					if(objectA->getCollisionFilterGroup() == Attribute_Physics::FRUSTUM &&
 					   objectB->getCollisionFilterGroup() != Attribute_Physics::FRUSTUM)
 					{
