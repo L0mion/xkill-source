@@ -11,10 +11,13 @@
 #include "ExplosionSpherePhysicsObject.h"
 
 #include "CollisionShapes.h"
+#include "debugDrawDispatcher.h"
 
 #include <iostream>
 
 AttributeIterator<Attribute_Physics> itrPhysics;
+
+//static debugDrawDispatcher gDebugDraw;
 
 PhysicsComponent::PhysicsComponent() : broadphase_(nullptr),
 									   collisionConfiguration_(nullptr),
@@ -95,6 +98,9 @@ bool PhysicsComponent::init()
 	dynamicsWorld_->setGravity(btVector3(0,-10,0));
 	dynamicsWorld_->setInternalTickCallback(wrapTickCallback,static_cast<void*>(this));
 
+	//gDebugDraw.setDebugMode(btIDebugDraw::DBG_DrawWireframe);
+	//dynamicsWorld_->setDebugDrawer(&gDebugDraw);
+
 	CollisionShapes::Instance()->loadCollisionShapes();
 	
 	return true;
@@ -111,6 +117,11 @@ void PhysicsComponent::onUpdate(float delta)
 		}
 	}
 	dynamicsWorld_->stepSimulation(delta,0);
+
+	//gDebugDraw.clearDebugVerticesVector();
+	//dynamicsWorld_->debugDrawWorld();
+	//queueDebugDrawEvent();
+
 	FLUSH_QUEUED_EVENTS(EVENT_PHYSICS_ATTRIBUTES_COLLIDING);
 }
 
@@ -133,11 +144,23 @@ void PhysicsComponent::onEvent(Event* e)
 				delete physicsObjects_->at(attributeIndex);
 				physicsObjects_->at(attributeIndex) = nullptr;
 			}
+			else if(attributeUpdated->isCreated)
+			{
+			}
+			else
+			{
+				itrPhysics.at(attributeIndex)->reloadDataIntoBulletPhysics = true;
+			}
 		}
 		break;
 	//case EVENT_LOAD_LEVEL:
 	//	break;
 	}
+}
+
+void PhysicsComponent::queueDebugDrawEvent()
+{
+	//gDebugDraw.queueDebugDrawEvent();
 }
 
 void PhysicsComponent::synchronizeWithAttributes()
@@ -247,7 +270,7 @@ void PhysicsComponent::detectedCollisionsDuringStepSimulation(btScalar timeStep)
 			{
 				const PhysicsObject* objectA = static_cast<const PhysicsObject*>(persistentManifold->getBody0());
 				const PhysicsObject* objectB = static_cast<const PhysicsObject*>(persistentManifold->getBody1());
-				
+
 				unsigned int ownerA = itrPhysics.ownerIdAt(objectA->getAttributeIndex());
 				unsigned int ownerB = itrPhysics.ownerIdAt(objectB->getAttributeIndex());
 

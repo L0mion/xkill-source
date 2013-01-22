@@ -196,3 +196,8 @@ Event_CreateInputDevice::Event_CreateInputDevice(InputDevice* inputDevice, Input
 	device = inputDevice;
 	objectArray = inputObjectArray;
 }
+
+Event_DrawBulletPhysicsDebugLines::Event_DrawBulletPhysicsDebugLines(std::vector<VertexPosColor>* debugLineVertices) : Event (EVENT_DRAW_BULLET_PHYSICS_DEBUG_LINES)
+{
+	this->debugLineVertices = debugLineVertices;
+}

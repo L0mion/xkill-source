@@ -440,6 +440,95 @@ void Renderer::renderViewportToGBuffer(ViewportData& vpData)
 		}
 	}
 
+	//Bullet Physics debug lines are stored as a pointer to an std::vector containing "VertexPosColor" in an event (refer to debugDrawDispatcher::drawLine).
+	//The event is fetched and handled from here. Afterwards the event queue is flushed using FLUSH_QUEUED_EVENTS.
+	/*
+	std::vector<Event*>* debugDrawEvents = GET_POINTER_TO_QUEUED_EVENTS(EVENT_DRAW_BULLET_PHYSICS_DEBUG_LINES);
+	if(debugDrawEvents != nullptr)
+	{
+		for(int i=0;i<debugDrawEvents->size();i++)
+		{
+			Event* e = debugDrawEvents->at(i);
+			EventType type = e->getType();
+			if(type == EVENT_DRAW_BULLET_PHYSICS_DEBUG_LINES)
+			{
+				Event_DrawBulletPhysicsDebugLines* debugDraw = static_cast<Event_DrawBulletPhysicsDebugLines*>(e);
+				unsigned int nrOfDebugLines = debugDraw->debugLineVertices->size();
+				for(int j=0;j<nrOfDebugLines-1;j++)
+				{
+					std::vector<VertexPosColor>* debugLines = debugDraw->debugLineVertices;
+					DirectX::XMFLOAT4X4 identityMatrix
+					(
+						1.0f,	0.0f,	0.0f,	0.0f,
+						0.0f,	1.0f,	0.0f,	0.0f, 
+						0.0f,	0.0f,	1.0f,	0.0f,
+						0.0f,	0.0f,	0.0f,	1.0f
+					);
+
+					DirectX::XMFLOAT4X4 worldMatrix			= identityMatrix;
+					DirectX::XMFLOAT4X4 worldMatrixInverse	= identityMatrix;
+					DirectX::XMFLOAT4X4 finalMatrix			= managementMath_->calculateFinalMatrix(worldMatrix, vpData.view, vpData.proj);
+					
+					managementFX_->setShader(devcon, SHADERID_VS_COLOR);
+					managementFX_->setShader(devcon, SHADERID_PS_COLOR);
+
+					//Update per-object constant buffer.
+					managementCB_->setCB(CB_TYPE_OBJECT, TypeFX_VS, CB_REGISTER_OBJECT, devcon);
+					managementCB_->updateCBObject(
+						devcon, 
+						finalMatrix, 
+						worldMatrix, 
+						worldMatrixInverse);
+
+					ID3D11Buffer* debugLinesVertexBuffer;
+					D3D11_BUFFER_DESC vbd;
+					vbd.Usage			= D3D11_USAGE_DYNAMIC;
+					vbd.ByteWidth		= sizeof(VertexPosColor) * nrOfDebugLines; //check this line
+					vbd.BindFlags		= D3D11_BIND_VERTEX_BUFFER;
+					vbd.CPUAccessFlags	= D3D11_CPU_ACCESS_WRITE;
+					vbd.MiscFlags		= 0;
+
+					D3D11_SUBRESOURCE_DATA vinitData;
+					//vinitData.pSysMem = &debugLines.at(0); //check this line
+					vinitData.pSysMem = debugLines->data();
+
+					HRESULT hr;
+					hr = device->CreateBuffer(&vbd, &vinitData, &debugLinesVertexBuffer);
+
+					if(hr != S_OK)
+					{
+						int g=5;
+					}
+
+
+
+					//Create vertex buffer
+
+					//unsigned int numVertices	= shapeD3D->getVB()->getNumVertices();
+					//nrOfDebugLines
+
+					UINT stride = sizeof(VertexPosColor);
+					UINT offset = 0;
+					devcon->IASetVertexBuffers(
+						0, 
+						1, 
+						&debugLinesVertexBuffer, 
+						&stride, 
+						&offset);
+
+					managementFX_->setLayout(devcon, LAYOUTID_POS_COLOR);
+
+					devcon->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_LINELIST);
+					devcon->Draw(nrOfDebugLines, 0);
+
+					SAFE_RELEASE(debugLinesVertexBuffer);
+				}
+			}
+		}
+	}
+	FLUSH_QUEUED_EVENTS(EVENT_DRAW_BULLET_PHYSICS_DEBUG_LINES);
+	*/
+	
 	managementGBuffer_->unsetGBuffersAndDepthBufferAsRenderTargets(devcon);
 
 	managementFX_->unsetAll(devcon);
@@ -506,7 +595,7 @@ void Renderer::renderAttribute(
 	DirectX::XMFLOAT4X4 worldMatrix			= managementMath_->calculateWorldMatrix(spatialAt, positionAt);
 	DirectX::XMFLOAT4X4 worldMatrixInverse	= managementMath_->calculateMatrixInverse(worldMatrix);
 	DirectX::XMFLOAT4X4 finalMatrix			= managementMath_->calculateFinalMatrix(worldMatrix, viewMatrix, projectionMatrix);
-	
+
 	//Update per-object constant buffer.
 	managementCB_->setCB(CB_TYPE_OBJECT, TypeFX_VS, CB_REGISTER_OBJECT, devcon);
 	managementCB_->updateCBObject(

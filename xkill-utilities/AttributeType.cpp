@@ -410,12 +410,22 @@ void Attribute_DebugShape::clean()
 DataItemList* Attribute_DebugShape::getDataList()
 	{
 		DataItemList* list = new DataItemList();
-		list->add_AttributePointer(ptr_spatial.index, "ptr_Spatial");;
-		list->add((int)meshID,			"MeshID");
-		list->add(shape->shapeType_,	"Shape->ShapeType");
-		list->add(render,				"Render");
+
+		list->add_AttributePointer(ptr_spatial.index, "ptr_spatial");;
+		list->add(meshID,					"meshID");
+		list->add_Enum(shape->shapeType_,	"shape->shapeType");
+		list->add(render,					"render");
+
 		return list;
 	}
+
+void Attribute_DebugShape::saveTo( DataItemList* list )
+{
+	list->get_AttributePointer(&ptr_spatial.index);
+	list->get(&meshID);
+	shape->shapeType_ = (DebugShapeType)list->get_Enum();
+	list->get(&render);
+}
 
 Attribute_ExplosionSphere::Attribute_ExplosionSphere()
 {

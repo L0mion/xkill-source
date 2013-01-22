@@ -112,6 +112,22 @@ public:
 		d.type = DataItem::_INT;
 		content.push_back(d);
 	}
+	void add(unsigned x, std::string label)
+	{
+		DataItem d;
+		d.label = label;
+		d.value._int =  new int((int)x);
+		d.type = DataItem::_INT;
+		content.push_back(d);
+	}
+	void add(short x, std::string label)
+	{
+		DataItem d;
+		d.label = label;
+		d.value._int =  new int((int)x);
+		d.type = DataItem::_INT;
+		content.push_back(d);
+	}
 	void add(float x, std::string label)
 	{
 		DataItem d;
@@ -164,6 +180,14 @@ public:
 		d.type = DataItem::_STRING;
 		content.push_back(d);
 	}
+	void add_Enum(int x, std::string label)
+	{
+		DataItem d;
+		d.label = label;
+		d.value._int =  new int(x);
+		d.type = DataItem::_INT;
+		content.push_back(d);
+	}
 	void add_AttributePointer(int x, std::string label)
 	{
 		DataItem d;
@@ -182,15 +206,76 @@ public:
 		content.push_back(d);
 	}
 
+	void get(bool* x)
+	{
+		*x = *getNext()->value._bool;
+	}
+	void get(int* x)
+	{
+		*x = *getNext()->value._int;
+	}
+	void get(unsigned* x)
+	{
+		*x = (unsigned)(*getNext()->value._int);
+	}
+	void get(short* x)
+	{
+		*x = (short)(*getNext()->value._int);
+	}
+	void get(float* x)
+	{
+		*x = *getNext()->value._float;
+	}
+	void get(Float2* x)
+	{
+		*x = *getNext()->value._float2;
+	}
+
+	void get(Float3* x)
+	{
+		*x = *getNext()->value._float3;
+	}
+
+	void get(Float4* x)
+	{
+		*x = *getNext()->value._float4;
+	}
+
+	void get(Float4x4* x)
+	{
+		*x = *getNext()->value._float4x4;
+	}
+	void get(std::string* x)
+	{
+		*x = *getNext()->value._string;
+	}
+	int get_Enum()
+	{
+		int x = *getNext()->value._int;
+		return x;
+	}
+	void get_AttributePointer(int* x)
+	{
+		*x = *getNext()->value._int;
+	}
+	void get_NotSupported()
+	{
+		// SKIP TO NEXT
+		getNext();
+	}
+
 	bool hasNext()
 	{
 		if( index < (int)content.size())
 			return true;
 		else
+		{
+			reset();
 			return false;
+		}
 	}
 
-	DataItem getNext()
+	DataItem* getNext()
 	{
 		// make sure we're not accessing an empty vector
 		if(!hasNext())
@@ -202,7 +287,7 @@ public:
 		}
 
 		// access data normaly
-		DataItem nextItem = content.at(index);
+		DataItem* nextItem = &content.at(index);
 		index++;
 		return nextItem;
 	}
