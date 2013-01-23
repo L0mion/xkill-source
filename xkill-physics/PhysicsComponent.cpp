@@ -13,12 +13,15 @@
 #include "physicsUtilities.h"
 
 #include "CollisionShapes.h"
+#include "debugDrawDispatcher.h"
 
 #include <iostream>
 
 AttributeIterator<Attribute_Physics> itrPhysics;
 AttributeIterator<Attribute_Render> itrRender;
 AttributeIterator<Attribute_Camera> itrCamera_2;
+static debugDrawDispatcher gDebugDraw;
+
 PhysicsComponent::PhysicsComponent() : broadphase_(nullptr),
 									   collisionConfiguration_(nullptr),
 									   dispatcher_(nullptr),
@@ -27,7 +30,6 @@ PhysicsComponent::PhysicsComponent() : broadphase_(nullptr),
 									   bulletImporter_(nullptr),
 									   physicsObjects_(nullptr)
 {
-	SUBSCRIBE_TO_EVENT(this,EVENT_DO_CULLING);
 	SUBSCRIBE_TO_EVENT(this,EVENT_ATTRIBUTE_UPDATED);
 	itrPhysics = ATTRIBUTE_MANAGER->physics.getIterator();
 	itrRender = ATTRIBUTE_MANAGER->render.getIterator();
@@ -114,6 +116,9 @@ bool PhysicsComponent::init()
 	dynamicsWorld_->setGravity(btVector3(0,-10,0));
 	dynamicsWorld_->setInternalTickCallback(wrapTickCallback,static_cast<void*>(this));
 
+	gDebugDraw.setDebugMode(btIDebugDraw::DBG_DrawWireframe);
+	dynamicsWorld_->setDebugDrawer(&gDebugDraw);
+
 	CollisionShapes::Instance()->loadCollisionShapes();
 	
 	return true;
@@ -131,6 +136,11 @@ void PhysicsComponent::onUpdate(float delta)
 	}
 	updateCulling();
 	dynamicsWorld_->stepSimulation(delta,0);
+
+	//gDebugDraw.clearDebugVerticesVector();
+	//dynamicsWorld_->debugDrawWorld();
+	//queueDebugDrawEvent();
+
 	FLUSH_QUEUED_EVENTS(EVENT_PHYSICS_ATTRIBUTES_COLLIDING);
 }
 
@@ -139,9 +149,6 @@ void PhysicsComponent::onEvent(Event* e)
 	EventType type = e->getType();
 	switch(type)
 	{
-	case EVENT_DO_CULLING:
-		updateCulling();
-		break;
 	case EVENT_ATTRIBUTE_UPDATED: //Removes physics objects when the corresponding physics attribute is removed
 		Event_AttributeUpdated* attributeUpdated = static_cast<Event_AttributeUpdated*>(e);
 		int attributeIndex = attributeUpdated->index;
@@ -152,6 +159,13 @@ void PhysicsComponent::onEvent(Event* e)
   				dynamicsWorld_->removeRigidBody(physicsObjects_->at(attributeIndex));
 				delete physicsObjects_->at(attributeIndex);
 				physicsObjects_->at(attributeIndex) = nullptr;
+			}
+			else if(attributeUpdated->isCreated)
+			{
+			}
+			else
+			{
+				itrPhysics.at(attributeIndex)->reloadDataIntoBulletPhysics = true;
 			}
 		}
 		else if(attributeUpdated->attributeEnum == ATTRIBUTE_CAMERA)
@@ -167,6 +181,11 @@ void PhysicsComponent::onEvent(Event* e)
 	//case EVENT_LOAD_LEVEL:
 	//	break;
 	}
+}
+
+void PhysicsComponent::queueDebugDrawEvent()
+{
+	gDebugDraw.queueDebugDrawEvent();
 }
 
 void PhysicsComponent::synchronizeWithAttributes()
@@ -237,6 +256,7 @@ void PhysicsComponent::synchronizeWithAttributes()
 					if(!physicsObjects_->at(index)->isStaticOrKinematicObject())
 					{
 						physicsObjects_->at(index)->setGravity(btVector3(physicsAttribute->gravity.x,physicsAttribute->gravity.y, physicsAttribute->gravity.z));
+						//physicsObjects_->at(index)->setGravity(btVector3(0,0,0));
 					}
 
 					physicsAttribute->reloadDataIntoBulletPhysics = false;
@@ -276,7 +296,7 @@ void PhysicsComponent::detectedCollisionsDuringStepSimulation(btScalar timeStep)
 			{
 				const PhysicsObject* objectA = static_cast<const PhysicsObject*>(persistentManifold->getBody0());
 				const PhysicsObject* objectB = static_cast<const PhysicsObject*>(persistentManifold->getBody1());
-				
+
 				unsigned int ownerA = itrPhysics.ownerIdAt(objectA->getAttributeIndex());
 				unsigned int ownerB = itrPhysics.ownerIdAt(objectB->getAttributeIndex());
 				
@@ -288,7 +308,12 @@ void PhysicsComponent::detectedCollisionsDuringStepSimulation(btScalar timeStep)
 					objectB->getCollisionFilterGroup() == Attribute_Physics::WORLD)
 					{
 						int a = 2;
+						if(objectA->isStaticObject())
+							int b = 2;
+						if(objectB->isStaticObject())
+							int b = 2;
 					}
+
 					if(objectA->getCollisionFilterGroup() == Attribute_Physics::FRUSTUM &&
 					   objectB->getCollisionFilterGroup() != Attribute_Physics::FRUSTUM)
 					{
@@ -298,7 +323,12 @@ void PhysicsComponent::detectedCollisionsDuringStepSimulation(btScalar timeStep)
 					   objectB->getCollisionFilterGroup() == Attribute_Physics::FRUSTUM)
 					{
 						doCulling(objectB->getAttributeIndex(),objectA->getAttributeIndex());
-					}					
+					}
+					else
+					{
+						//Both are frustums.
+						int b = 2;
+					}
 				}
 				else
 				{
@@ -314,11 +344,40 @@ void PhysicsComponent::detectedCollisionsDuringStepSimulation(btScalar timeStep)
 
 void PhysicsComponent::doCulling(unsigned int frustumAttributeIndex, unsigned int objectAttributeIndex)
 {
+	static int testvar = 0;
+	if(testvar < 1)
+	{
+		testvar++;
+		return;
+	}
 	itrRender.at(itrPhysics.at(objectAttributeIndex)->ptr_render)->culling.setBool(frustumAttributeIndex,true);
+	//BoolField a = itrRender.at(itrPhysics.at(objectAttributeIndex)->ptr_render)->culling;
+
+
+	BoolField a;
+	a.clear();
+	a.setBool(0,true);
+	a.setBool(1,true);
+	a.setBool(0,false);
+	a.setBool(1,true);
+	int b = 2;
 }
 
 void PhysicsComponent::updateCulling()
 {
+	static int testvar = 0;
+	if(testvar < 1)
+	{
+		testvar++;
+		return;
+	}
+	while(itrRender.hasNext())
+	{
+		Attribute_Render * ra = itrRender.getNext();
+		ra->culling.clear();
+		ra->culling;
+		int a =0;
+	}
 	CollisionShapes::Instance()->updateFrustrumShape();
 
 	itrCamera_2 = ATTRIBUTE_MANAGER->camera.getIterator();
@@ -327,7 +386,6 @@ void PhysicsComponent::updateCulling()
 		Attribute_Camera* cameraAttribute = itrCamera_2.getNext();
 		unsigned int index = itrCamera_2.storageIndex();
 		
-		//Checks if new physiscs attributes were created since last call to this function
 		if(index >= static_cast<unsigned int>(frustumPhysicsObjects_->size()))
 		{
 			frustumPhysicsObjects_->push_back(nullptr);
@@ -335,10 +393,15 @@ void PhysicsComponent::updateCulling()
 		if(frustumPhysicsObjects_->at(index) == nullptr)
 		{
 			frustumPhysicsObjects_->at(index) = new FrustumPhysicsObject();
-			frustumPhysicsObjects_->at(index)->init(index,Attribute_Physics::FRUSTUM);
+			frustumPhysicsObjects_->at(index)->frustumInit(index,Attribute_Physics::FRUSTUM);
 			int a = dynamicsWorld_->getNumCollisionObjects();
 			dynamicsWorld_->addRigidBody(frustumPhysicsObjects_->at(index),Attribute_Physics::FRUSTUM,Attribute_Physics::EVERYTHING);
+			frustumPhysicsObjects_->at(index)->setGravity(btVector3(0,0,0));
 			int b = dynamicsWorld_->getNumCollisionObjects();
+			if(a==b)
+			{
+				int bad = 2;
+			}
 		}
 		else
 		{

@@ -490,9 +490,9 @@ void GameComponent::event_PhysicsAttributesColliding(Event_PhysicsAttributesColl
 			for(unsigned i=0;i<physicsId.size();i++)
 			{
 				Attribute_Physics* physicsAttribute = itrPhysics.at(physicsId.at(i));
-				physicsAttribute->gravity = Float3(0.0f, -10.0f, 0.0f);
-				physicsAttribute->linearVelocity = Float3(0.0f, 0.0f, 0.0f);
-				physicsAttribute->reloadDataIntoBulletPhysics = true;
+				//physicsAttribute->gravity = Float3(0.0f, -10.0f, 0.0f);
+				//physicsAttribute->linearVelocity = Float3(0.0f, 0.0f, 0.0f);
+				//physicsAttribute->reloadDataIntoBulletPhysics = true;
 			}
 
 			//Handle PhysicsAttribute of a projectile colliding with another PhysicsAttribute

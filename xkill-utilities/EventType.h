@@ -65,8 +65,8 @@ enum DLL_U EventType
 	EVENT_INPUT_DEVICE_SEARCH,
 	EVENT_PLAYSOUND,
 	EVENT_RUMBLE,
-	EVENT_DO_CULLING,
 	EVENT_PHYSICS_ATTRIBUTES_COLLIDING,
+	EVENT_DRAW_BULLET_PHYSICS_DEBUG_LINES,
 	EVENT_SPLITSCREEN_CHANGED,
 
 	EVENT_ATTRIBUTE_UPDATED,
@@ -363,14 +363,6 @@ public:
 	float spawnAreaRadius;
 };
 
-
-class DLL_U Event_DoCulling : public Event
-{
-public:
-	Event_DoCulling();
-};
-
-
 class DLL_U Event_StartDeathmatch : public Event
 {
 public:
@@ -490,4 +482,25 @@ public:
 
 	InputDevice* device;
 	InputObjectArray* objectArray;
+};
+
+/*
+class DLL_U Event_DrawDebugLine : public Event
+{
+public:
+	Event_DrawDebugLine(Float3 vertex1, Float3 vertex2);
+
+	Float3 vertex1;
+	Float3 vertex2;
+};
+*/
+
+//struct VertexPosColor;
+#include "MeshVertices.h"
+class DLL_U Event_DrawBulletPhysicsDebugLines : public Event
+{
+public:
+	Event_DrawBulletPhysicsDebugLines(std::vector<VertexPosColor>* debugLineVertices);
+
+	std::vector<VertexPosColor>* debugLineVertices;
 };

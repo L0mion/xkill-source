@@ -57,11 +57,11 @@ MainWindow::MainWindow()
 	menuManager = new MenuManager(gameWidget);
 
 	// setup signals and slots
-	connect(ui.actionFullscreen, SIGNAL(triggered()), this, SLOT(slot_toggleFullScreen()));
-	connect(ui.actionCap_FPS, SIGNAL(toggled(bool)), gameWidget, SLOT(slot_toggleCapFPS(bool)));
+	connect(ui.actionFullscreen,			SIGNAL(triggered()),					this,			SLOT(slot_toggleFullScreen()));
+	connect(ui.actionCap_FPS,				SIGNAL(toggled(bool)),					gameWidget,		SLOT(slot_toggleCapFPS(bool)));
 	ui.actionCap_FPS->setChecked(true);
-	connect(ui.actionQuit, SIGNAL(triggered()), this, SLOT(close()));
-	connect(gameWidget, SIGNAL(signal_fpsChanged(QString)), this, SLOT(slot_setTitle(QString)));
+	connect(ui.actionQuit,					SIGNAL(triggered()),					this,			SLOT(close()));
+	connect(gameWidget,						SIGNAL(signal_fpsChanged(QString)),		this,			SLOT(slot_setTitle(QString)));
 
 	
 	new Menu_Editor(ui, this);

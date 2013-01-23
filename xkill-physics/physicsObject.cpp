@@ -26,6 +26,13 @@ PhysicsObject::~PhysicsObject()
 	delete getMotionState();
 }
 
+btVector3 PhysicsObject::subClassCalculateLocalInertia(btScalar mass)
+{
+	btVector3 localInertia;
+	localInertia.setZero();
+	return localInertia;
+}
+
 bool PhysicsObject::subClassSpecificInitHook()
 {
 	return true;
@@ -42,19 +49,16 @@ bool PhysicsObject::init(unsigned int attributeIndex,unsigned int collisionFilte
 
 	//Get the init data from a physics attribute
 	Attribute_Physics* physicsAttribute = itrPhysics_.at(attributeIndex);
+	btScalar mass = static_cast<btScalar>(physicsAttribute->mass);
 
 	//Resolve mass, local inertia of the collision shape, and also the collision shape itself.
-	btVector3 localInertia;
-	localInertia.setZero();
 	btCollisionShape* collisionShape = CollisionShapes::Instance()->getCollisionShape(physicsAttribute->meshID);
-	btScalar mass = static_cast<btScalar>(physicsAttribute->mass);
-	if(physicsAttribute->mass != 0.0f) //calling "setMassProps()" below will set the CF_STATIC_OBJECT flag to true for the btRigidBody if the mass is zero
-	{
-		collisionShape->calculateLocalInertia(mass, localInertia);
-	}
-	setMassProps(mass, localInertia); //Set inverse mass and inverse local inertia
 	setCollisionShape(collisionShape);
-
+	
+		
+		
+	btVector3 localInertia = subClassCalculateLocalInertia(mass);
+	setMassProps(mass, localInertia); //Set inverse mass and inverse local inertia
 	if((getCollisionFlags() & btCollisionObject::CF_STATIC_OBJECT))
 	{
 		btTransform world;
@@ -64,6 +68,7 @@ bool PhysicsObject::init(unsigned int attributeIndex,unsigned int collisionFilte
  		world.setOrigin(convert(positionAttribute->position));
 		world.setRotation(convert(spatialAttribute->rotation));
 		setWorldTransform(world);  //Static physics objects: transform once
+
 	}
 	else
 	{
@@ -104,4 +109,5 @@ unsigned int PhysicsObject::getCollisionFilterGroup() const
 
 void PhysicsObject::onUpdate(float delta)
 {
+	setGravity(btVector3(0,0,0));
 }

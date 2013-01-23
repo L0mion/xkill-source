@@ -23,8 +23,9 @@ public:
 	void clear();
 	bool getBool(int index);
 	void setBool(int index, bool value);
-private:
+
 	int values[NUM_INTS];
+	private:
 };
 
 struct DLL_U Float2

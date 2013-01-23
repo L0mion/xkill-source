@@ -211,7 +211,7 @@ public:
 
 		CREATE_ATTRIBUTE(Attribute_Physics, physics, entity);
 		physics->collisionFilterGroup = Attribute_Physics::EXPLOSIONSPHERE;
-		physics->collisionFilterMask = Attribute_Physics::PLAYER | Attribute_Physics::FRUSTUM;
+		physics->collisionFilterMask = Attribute_Physics::PLAYER;
 		CONNECT_ATTRIBUTES(physics, spatial);
 		physics->explosionSphereRadius = e->radius;
 		physics->collisionResponse = false;

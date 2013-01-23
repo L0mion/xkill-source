@@ -10,6 +10,7 @@ public:
 	ProjectilePhysicsObject();
 	~ProjectilePhysicsObject();
 	virtual bool subClassSpecificInitHook();
+	virtual btVector3 subClassCalculateLocalInertia(btScalar mass);
 };
 
 #endif

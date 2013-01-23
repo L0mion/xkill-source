@@ -142,9 +142,9 @@ void ComponentManager::update(float delta)
 	if(GET_STATE() == STATE_DEATHMATCH)
 	{
 		sound_->onUpdate(delta);
-		camera_->onUpdate(delta);
+		//camera_->onUpdate(delta);
 		physics_->onUpdate(delta);
-		SEND_EVENT(&Event_DoCulling());
+		camera_->onUpdate(delta);
 		render_->onUpdate(delta);
 		input_->onUpdate(delta);
 		game_->onUpdate(delta);
@@ -153,9 +153,9 @@ void ComponentManager::update(float delta)
 	else if(GET_STATE() == STATE_MAINMENU)
 	{
 		sound_->onUpdate(delta);
-		camera_->onUpdate(delta);
+		//camera_->onUpdate(delta);
 		physics_->onUpdate(delta);
-		SEND_EVENT(&Event_DoCulling());
+		camera_->onUpdate(delta);
 		render_->onUpdate(delta);
 		input_->onUpdate(delta);
 		game_->onUpdate(delta);

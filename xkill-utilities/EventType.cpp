@@ -120,11 +120,6 @@ Event_CreateSpawnPoint::Event_CreateSpawnPoint(Float3 spawnPointPosition, float 
 	this->spawnAreaRadius = spawnAreaRadius;
 }
 
-Event_DoCulling::Event_DoCulling() : Event(EVENT_DO_CULLING)
-{
-}
-
-
 Event_StartDeathmatch::Event_StartDeathmatch(int num_players) : Event(EVENT_START_DEATHMATCH)
 {
 	this->num_players = num_players;
@@ -195,4 +190,9 @@ Event_CreateInputDevice::Event_CreateInputDevice(InputDevice* inputDevice, Input
 {
 	device = inputDevice;
 	objectArray = inputObjectArray;
+}
+
+Event_DrawBulletPhysicsDebugLines::Event_DrawBulletPhysicsDebugLines(std::vector<VertexPosColor>* debugLineVertices) : Event (EVENT_DRAW_BULLET_PHYSICS_DEBUG_LINES)
+{
+	this->debugLineVertices = debugLineVertices;
 }
