@@ -108,8 +108,13 @@ protected:
 	}
 	void keyPressEvent(QKeyEvent *e)
 	{
-		if(hasMouseLock && e->key() == Qt::Key_Escape)
-			setMouseLock(false);
+		if(hasMouseLock)
+		{
+			if(e->key() == Qt::Key_Escape)
+			{
+				setMouseLock(false);
+			}
+		}
 
 		int keyEnum = e->key();
 		SEND_EVENT(&Event_KeyPress(keyEnum, true));
@@ -120,12 +125,19 @@ protected:
 	void mousePressEvent(QMouseEvent *e)
 	{
 		// lock / release mouse5
-		if(!hasMouseLock && e->button() == Qt::LeftButton)
-			setMouseLock(true);
+		if(hasMouseLock && e->button() == Qt::RightButton)
+			setMouseLock(false);
 
-		// Inform about key press
-		int keyEnum = e->button();
-		SEND_EVENT(&Event_MousePress(keyEnum, true));
+		if(!hasMouseLock && e->button() == Qt::LeftButton)
+		{
+			setMouseLock(true);
+		}
+		else
+		{
+			// Inform about key press
+			int keyEnum = e->button();
+			SEND_EVENT(&Event_MousePress(keyEnum, true));
+		}
 	}
 	void mouseReleaseEvent(QMouseEvent *e)
 	{
