@@ -25,7 +25,8 @@ public:
 	void fillBoneData();
 	void addVertexBoneIndex(unsigned int vertexIndex, int boneIndex);
 	void addVertexBoneWeight(unsigned int vertexIndex, float weight);
-	
+	void addOffsetMatrix(Float4x4 offsetMatrix);
+
 	std::vector<VertexPosColor>				createVerticesPosColor();
 	std::vector<VertexPosNormTex>			createVerticesPosNormTex();
 	std::vector<VertexPosNormSkinned>		createVerticesPosNormSkinned();
@@ -44,6 +45,7 @@ public:
 
 	std::vector<std::vector<int>> getVertexBoneIndices();
 	std::vector<std::vector<float>> getVertexBoneWeights();
+	std::vector<Float4x4> getOffsetMatrices();
 
 	void setPolygonGroupIds(std::vector<int> polygonGroupIds);
 	void setVertexPositions(std::vector<Float3> vertexPositions);
@@ -54,6 +56,7 @@ public:
 	void setVertexBinormals(std::vector<Float4> vertexBinormals);
 	void setVertexBoneIndices(std::vector<std::vector<int>> vertexBoneIndices);
 	void setVertexBoneWeights(std::vector<std::vector<float>> vertexBoneWeights);
+	void setOffsetMatrices(std::vector<Float4x4> offsetMatrices);
 
 private:
 
@@ -85,6 +88,8 @@ private:
 
 	std::vector<std::vector<int>> vertexBoneIndices_;
 	std::vector<std::vector<float>> vertexBoneWeights_;
+
+	std::vector<Float4x4> offsetMatrices_;
 };
 
 #endif //XKILL_IO_LOADERFBXMESHDESC_H

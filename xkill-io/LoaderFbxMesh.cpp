@@ -430,31 +430,96 @@ void LoaderFbxMesh::parseVertexLinkData(FbxMesh* mesh, LoaderFbxMeshDesc* meshDe
 	for(int deformerIndex=0; deformerIndex<numDeformers; deformerIndex++)
 	{
 		numClusters = static_cast<FbxSkin*>(mesh->GetDeformer(deformerIndex, FbxDeformer::eSkin))->GetClusterCount();
-		for(int clusterIndex=0; clusterIndex<numClusters; clusterIndex++)
+		if(numClusters > 0)
 		{
-			printf("  Cluster: %d\n", clusterIndex);
-			cluster = static_cast<FbxSkin*>(mesh->GetDeformer(deformerIndex, FbxDeformer::eSkin))->GetCluster(clusterIndex);
+			cluster = static_cast<FbxSkin*>(mesh->GetDeformer(0, FbxDeformer::eSkin))->GetCluster(0);
+		}
+		if(cluster)
+		{
+			FbxNode* node = cluster->GetLink();
+			printf("%s\n", node->GetName());
+			
+			node = findRoot(node);
+			std::vector<FbxNode*> nodes;
+			std::vector<int> parentIndices;
+			parseLinkHierarchy(node, &nodes, &parentIndices);
 
-			if(cluster->GetLink() != NULL)
+			for(int clusterIndex=0; clusterIndex<numClusters; clusterIndex++)
 			{
-				clusterName = cluster->GetLink()->GetName();
-				printf("    Name: %s\n", clusterName);
-			}
+				cluster = static_cast<FbxSkin*>(mesh->GetDeformer(0, FbxDeformer::eSkin))->GetCluster(clusterIndex);
+				unsigned int nodeIndex=0; 
+				bool equal = false;
+				while(!equal && nodeIndex<nodes.size())
+				{
+					if(nodes[nodeIndex]->GetUniqueID() == cluster->GetLink()->GetUniqueID())
+						equal = true;
+					else
+						nodeIndex++;
+				}
 
-			int numIndices = cluster->GetControlPointIndicesCount();
-
-			int* indices = cluster->GetControlPointIndices();
-			double* weights = cluster->GetControlPointWeights();
-
-			for(int i =0; i<numIndices; i++)
-			{
-				meshDesc->addVertexBoneIndex(indices[i], clusterIndex);
-				meshDesc->addVertexBoneWeight(indices[i], static_cast<float>(weights[i]));
+				int numIndices = cluster->GetControlPointIndicesCount();
+				
+				int* indices = cluster->GetControlPointIndices();
+				double* weights = cluster->GetControlPointWeights();
+				
+				for(int i =0; i<numIndices; i++)
+				{
+					meshDesc->addVertexBoneIndex(indices[i], nodeIndex);
+					meshDesc->addVertexBoneWeight(indices[i], static_cast<float>(weights[i]));
+				}
 			}
 		}
 	}
 }
 
+void LoaderFbxMesh::parseLinkHierarchy(FbxNode* rootNode, std::vector<FbxNode*>* nodes, std::vector<int>* parentIndices)
+{
+	nodes->push_back(rootNode);
+	parentIndices->push_back(-1);
+	for(int nodeIndex=0; nodeIndex<nodes->size(); nodeIndex++)
+	{
+		for(int childIndex=0; childIndex<nodes->at(nodeIndex)->GetChildCount(); childIndex++)
+		{
+			nodes->push_back(nodes->at(nodeIndex)->GetChild(childIndex));
+			parentIndices->push_back(nodeIndex);
+		}
+	}
+}
+
+FbxNode* LoaderFbxMesh::findRoot(FbxNode* node)
+{
+	bool done = false;
+	while(!done)
+	{
+		if(node->GetParent()->GetNodeAttribute()->GetAttributeType() == FbxNodeAttribute::eSkeleton)
+		{
+			node = node->GetParent();
+			printf("%s\n", node->GetName());
+		}
+		else
+			done = true;
+	}
+	return node;
+}
+void LoaderFbxMesh::displayNodeChildren(FbxNode* node, int parentIndex)
+{
+	std::vector<FbxNode*> nodes;
+	std::vector<int> parentIndices;
+	nodes.push_back(node);
+	parentIndices.push_back(-1);
+	for(int nodeIndex=0; nodeIndex<nodes.size(); nodeIndex++)
+	{
+		for(int childIndex=0; childIndex<nodes[nodeIndex]->GetChildCount(); childIndex++)
+		{
+			nodes.push_back(nodes[nodeIndex]->GetChild(childIndex));
+			parentIndices.push_back(nodeIndex);
+		}
+	}
+
+	for(int i=0; i<nodes.size(); i++)
+		printf("Node name: %s   ParentIndex: %d\n", nodes[i]->GetName(), parentIndices[i]);
+	
+}
 
 bool LoaderFbxMesh::float2Equal(Float2 f1, Float2 f2)
 {
@@ -480,3 +545,42 @@ bool LoaderFbxMesh::float4Equal(Float4 f1, Float4 f2)
 
 	return equal;
 }
+
+
+
+
+
+		//numClusters = static_cast<FbxSkin*>(mesh->GetDeformer(deformerIndex, FbxDeformer::eSkin))->GetClusterCount();
+		//for(int clusterIndex=0; clusterIndex<numClusters; clusterIndex++)
+		//{
+		//	//printf("  Cluster: %d\n", clusterIndex);
+		//	cluster = static_cast<FbxSkin*>(mesh->GetDeformer(deformerIndex, FbxDeformer::eSkin))->GetCluster(clusterIndex);
+
+		//	if(cluster->GetLink() != NULL)
+		//	{
+		//		clusterName = cluster->GetLink()->GetName();
+		//		//printf("    Name: %s\n", clusterName);
+		//	}
+
+		//	int numIndices = cluster->GetControlPointIndicesCount();
+
+		//	int* indices = cluster->GetControlPointIndices();
+		//	double* weights = cluster->GetControlPointWeights();
+
+		//	for(int i =0; i<numIndices; i++)
+		//	{
+		//		meshDesc->addVertexBoneIndex(indices[i], clusterIndex);
+		//		meshDesc->addVertexBoneWeight(indices[i], static_cast<float>(weights[i]));
+		//	}
+
+		//	FbxAMatrix fbxMatrix;
+		//	cluster->GetTransformLinkMatrix(fbxMatrix);
+		//	Float4x4 offsetMatrix;
+		//	
+		//	for(int x=0; x<4; x++)
+		//	{
+		//		for(int y=0; y<4; y++)
+		//			offsetMatrix.m[x][y] = static_cast<float>(fbxMatrix.mData[x][y]);
+		//	}
+		//	meshDesc->addOffsetMatrix(offsetMatrix);
+		//}

@@ -34,7 +34,7 @@ void LoaderFbxAnimation::parseAnimation(FbxScene* scene, std::vector<LoaderFbxAn
 	//	parseAnimationStack(animStack, scene->GetRootNode(), true);
 		parseAnimationStack(animStack, scene->GetRootNode(), false);
 
-		removeNonAffectingBones();
+	//	removeNonAffectingBones();
 		animationDescs->back().setBones(animationBones_);
 	}
 }
@@ -85,11 +85,11 @@ void LoaderFbxAnimation::parseAnimationChannels(FbxNode* node, FbxAnimLayer* ani
 		
 	FbxNodeAttribute* nodeAttribute = node->GetNodeAttribute();
 	
-//	parseAnimationChannelsColor(nodeAttribute, animLayer, animCurve);
-//	parseAnimationChannelsLamp(node, animLayer, animCurve);
-//	parseAnimationChannelsCamera(node, animLayer, animCurve);
-//	parseAnimationChannelsGeometry(nodeAttribute, animLayer, animCurve);
-//	parseAnimationChannelsProperty(node, animLayer, animCurve);
+	parseAnimationChannelsColor(nodeAttribute, animLayer, animCurve);
+	parseAnimationChannelsLamp(node, animLayer, animCurve);
+	parseAnimationChannelsCamera(node, animLayer, animCurve);
+	parseAnimationChannelsGeometry(nodeAttribute, animLayer, animCurve);
+	parseAnimationChannelsProperty(node, animLayer, animCurve);
 }
 void LoaderFbxAnimation::parseAnimationChannelsGeneral(FbxNode* node, FbxAnimLayer* animLayer, FbxAnimCurve* animCurve)
 {

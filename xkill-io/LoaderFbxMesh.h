@@ -60,6 +60,10 @@ private:
 	FbxVector4 parseVertexBinormalsByPolygonVertex(FbxGeometryElementBinormal* binormalElement, int vertexId);
 
 	void parseVertexLinkData(FbxMesh* mesh, LoaderFbxMeshDesc* meshDesc);
+	void parseLinkHierarchy(FbxNode* rootNode, std::vector<FbxNode*>* nodes, std::vector<int>* parentIndices);
+	
+	FbxNode* findRoot(FbxNode* node);
+	void displayNodeChildren(FbxNode* node, int parentIndex);
 
 	bool float2Equal(Float2 f1, Float2 f2);
 	bool float3Equal(Float3 f1, Float3 f2);

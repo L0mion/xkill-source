@@ -64,6 +64,11 @@ void LoaderFbxMeshDesc::addVertexBoneWeight(unsigned int vertexIndex, float weig
 	else
 		printf("LoaderFbxMeshDesc::addVertexBoneWeight invalid vertex index \n");
 }
+void LoaderFbxMeshDesc::addOffsetMatrix(Float4x4 offsetMatrix)
+{
+	offsetMatrices_.push_back(offsetMatrix);
+}
+
 
 std::vector<VertexPosColor>				LoaderFbxMeshDesc::createVerticesPosColor()
 {
@@ -435,6 +440,10 @@ std::vector<std::vector<float>> LoaderFbxMeshDesc::getVertexBoneWeights()
 {
 	return vertexBoneWeights_;
 }
+std::vector<Float4x4> LoaderFbxMeshDesc::getOffsetMatrices()
+{
+	return offsetMatrices_;
+}
 
 void LoaderFbxMeshDesc::setPolygonGroupIds(std::vector<int> polygonGroupIds)
 {
@@ -471,4 +480,8 @@ void LoaderFbxMeshDesc::setVertexBoneIndices(std::vector<std::vector<int>> verte
 void LoaderFbxMeshDesc::setVertexBoneWeights(std::vector<std::vector<float>> vertexBoneWeights)
 {
 	vertexBoneWeights_ = vertexBoneWeights;
+}
+void LoaderFbxMeshDesc::setOffsetMatrices(std::vector<Float4x4> offsetMatrices)
+{
+	offsetMatrices_ = offsetMatrices;
 }
