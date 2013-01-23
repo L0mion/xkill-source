@@ -42,13 +42,11 @@ public:
 		ID3D11DeviceContext*	devcon,
 		 const unsigned int		screenWidth,
 		 const unsigned int		screenHeight);		//!< Updates the constant buffer cbInstance.
-	
 	void updateCBFrame(
 		ID3D11DeviceContext*	devcon,
 		unsigned int			numLightsDir,
 		unsigned int			numLightsPoint,
 		unsigned int			numLightsSpot);		//!< Updates the constant buffer cbFrame.
-
 	void updateCBCamera(
 		ID3D11DeviceContext* devcon,
 		DirectX::XMFLOAT4X4	 viewMatrix,
@@ -58,22 +56,18 @@ public:
 		DirectX::XMFLOAT3	 eyePosition,
 		unsigned int		 viewportTopX,
 		unsigned int		 viewportTopY);	 //!< Updates the constant buffer cbCamera.
-
 	void updateCBObject(
 		ID3D11DeviceContext* devcon,
 		DirectX::XMFLOAT4X4 finalMatrix,
 		DirectX::XMFLOAT4X4 worldMatrix,
 		DirectX::XMFLOAT4X4 worldMatrixInverse); //!< Updates the constant buffer cbObject.
-	
 	void updateCBBone(
 		ID3D11DeviceContext* devcon,
 		std::vector<DirectX::XMFLOAT4X4> boneTransforms); //!< Updates the constant buffer cbBone.
-
 	void updateCBSubset(
 		ID3D11DeviceContext* devcon,
 		DirectX::XMFLOAT3	specularTerm,
 		float				specularPower); //!< Updates the constant buffer cbSubset.
-
 	void setCB(
 		CB_TYPE					cbType, 
 		TypeFX					shaderStage, 
