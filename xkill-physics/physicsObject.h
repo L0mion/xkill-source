@@ -16,7 +16,7 @@ public:
 	virtual ~PhysicsObject();
 	//! Init PhysicsObject and call subClassSpecificInitHook()
 	/*!
-	\param attributeIndex The physics attribute index. Refer to MotionState.
+	\param attributeIndex The physics attribute index.
 	*/
 	bool init(unsigned int attributeIndex);
 	unsigned int getAttributeIndex() const;
