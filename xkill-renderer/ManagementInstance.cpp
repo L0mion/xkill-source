@@ -79,10 +79,11 @@ DirectX::XMFLOAT4X4 ManagementInstance::calculateWorldMatrix(
 	Attribute_Spatial*	spaAt, 
 	Attribute_Position* posAt)
 {
+	Float3 position = posAt->position();
 	DirectX::XMMATRIX translation = DirectX::XMMatrixTranslation(
-		posAt->position.x,
-		posAt->position.y,
-		posAt->position.z);
+		position.x,
+		position.y,
+		position.z);
 
 	DirectX::XMMATRIX scaling = DirectX::XMMatrixScaling(
 		spaAt->scale.x,

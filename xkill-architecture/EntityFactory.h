@@ -105,7 +105,7 @@ public:
 	void createWorldEntity(Entity* entity, Event_CreateWorld* e)
 	{
 		CREATE_ATTRIBUTE(Attribute_Position, position, entity);
-		position->position = e->position;
+		position->setPosition(e->position);
 
 		CREATE_ATTRIBUTE(Attribute_Spatial, spatial, entity);
 		CONNECT_ATTRIBUTES(spatial, position);
@@ -127,7 +127,7 @@ public:
 	void createProjectileEntity(Entity* entity, Event_CreateProjectile* e)
 	{
 		CREATE_ATTRIBUTE(Attribute_Position, position, entity);
-		position->position = e->position;
+		position->setPosition( e->position );
 
 		CREATE_ATTRIBUTE(Attribute_Spatial, spatial, entity);
 		CONNECT_ATTRIBUTES(spatial, position);
@@ -188,7 +188,7 @@ public:
 	void createSpawnPointEntity(Entity* entity, Event_CreateSpawnPoint* e)
 	{
 		CREATE_ATTRIBUTE(Attribute_Position, position, entity);
-		position->position = e->spawnPointPosition;
+		position->setPosition( e->spawnPointPosition );
 		
 		CREATE_ATTRIBUTE(Attribute_SpawnPoint, spawnPoint, entity);
 		CONNECT_ATTRIBUTES(spawnPoint, position);
@@ -199,7 +199,7 @@ public:
 	void createExplosionSphere(Entity* entity, Event_CreateExplosionSphere* e)
 	{
 		CREATE_ATTRIBUTE(Attribute_Position, position, entity);
-		position->position = e->position;
+		position->setPosition( e->position);
 
 		CREATE_ATTRIBUTE(Attribute_Spatial, spatial, entity);
 		CONNECT_ATTRIBUTES(spatial, position);
@@ -234,7 +234,7 @@ public:
 		if(e->type == 1)
 		{
 			CREATE_ATTRIBUTE(Attribute_Position, position, entity);
-			position->position = e->position;
+			position->setPosition(e->position);
 			CREATE_ATTRIBUTE(Attribute_Light_Point, lightPoint, entity);
 			CONNECT_ATTRIBUTES(lightPoint, position);
 			lightPoint->lightPoint.ambient = Float4(e->ambient,1);
@@ -254,7 +254,7 @@ public:
 		else if(e->type == 3)
 		{
 			CREATE_ATTRIBUTE(Attribute_Position, position, entity);
-			position->position = e->position;
+			position->setPosition( e->position );
 			CREATE_ATTRIBUTE(Attribute_Light_Spot, lightSpot, entity);
 			CONNECT_ATTRIBUTES(lightSpot, position);
 			lightSpot->lightSpot.ambient = Float4(e->ambient,1);

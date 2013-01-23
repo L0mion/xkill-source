@@ -188,7 +188,7 @@ public:
 	AttributePointer attributePointer(T* attribute)
 	{ 
 		AttributePointer pointer;
-		pointer.init(&_attributes, storageIndex(attribute));
+		pointer.init(_attributes, storageIndex(attribute));
 		return pointer;
 	}
 

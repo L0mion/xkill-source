@@ -14,12 +14,26 @@ IAttribute::~IAttribute()
 
 Attribute_Position::Attribute_Position()
 {
-	position.x = 0.0f;
-	position.y = 0.0f;
-	position.z = 0.0f;
+	_position.x = 0.0f;
+	_position.y = 0.0f;
+	_position.z = 0.0f;
 }
 Attribute_Position::~Attribute_Position()
 {
+}
+
+Float3 Attribute_Position::position()
+{
+	if(ptr_position_offset.index != -1)
+	{
+		int index = ptr_position_offset.index;
+		Attribute_Position*	attr = &((std::vector<Attribute_Position>*)ptr_position_offset.host)->at(index);
+		Float3 offset = attr->position();
+
+		return offset + _position;
+	}
+
+	return _position;
 }
 
 Attribute_Spatial::Attribute_Spatial()

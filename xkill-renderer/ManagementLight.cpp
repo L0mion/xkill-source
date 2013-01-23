@@ -318,7 +318,7 @@ void ManagementLight::updateLightPoint(ID3D11Device* device, ID3D11DeviceContext
 	{
 		lightPointAt = itrLightPoint.getNext();
 		posAt = itrPosition.at(lightPointAt->ptr_position);
-		lightPointAt->lightPoint.pos = posAt->position;
+		lightPointAt->lightPoint.pos = posAt->position();
 
 		if(lightPointCurCount_ < lightPoints_.size())
 			lightPoints_[lightPointCurCount_] = lightPointAt->lightPoint;
@@ -352,7 +352,7 @@ void ManagementLight::updateLightSpot(ID3D11Device* device, ID3D11DeviceContext*
 	{
 		lightSpotAt = itrLightSpot.getNext();
 		posAt = itrPosition.at(lightSpotAt->ptr_position);
-		lightSpotAt->lightSpot.pos = posAt->position;
+		lightSpotAt->lightSpot.pos = posAt->position();
 
 		if(lightSpotCurCount_ < lightSpots_.size())
 			lightSpots_[lightSpotCurCount_] = lightSpotAt->lightSpot;

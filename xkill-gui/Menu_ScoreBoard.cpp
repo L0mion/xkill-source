@@ -71,9 +71,9 @@ void Menu_ScoreBoard::onUpdate(float delta)
 			itm->setText(2, QString::number(player->priority));
 			itm->setText(3, QString::number(player->cycleSteals));
 			itm->setText(4, QString::number(health->health));
-			int pos_x = position->position.x;
-			int pos_y = position->position.y;
-			int pos_z = position->position.z;
+			int pos_x = position->position().x;
+			int pos_y = position->position().y;
+			int pos_z = position->position().z;
 			QString str_position = QString::number(pos_x) + ", "  + QString::number(pos_y) + ", "  + QString::number(pos_z);
 			itm->setText(5, str_position);
 			ui.treeWidget->addTopLevelItem(itm);

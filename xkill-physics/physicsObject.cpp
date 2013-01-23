@@ -63,7 +63,7 @@ bool PhysicsObject::init(unsigned int attributeIndex)
 
 		Attribute_Spatial* spatialAttribute = itrSpatial_PhysicsObject.at(itrPhysics_.at(attributeIndex_)->ptr_spatial);
  		Attribute_Position* positionAttribute = itrPosition_PhysicsObject.at(spatialAttribute->ptr_position);
- 		world.setOrigin(convert(positionAttribute->position));
+ 		world.setOrigin(convert(positionAttribute->position()));
 		world.setRotation(convert(spatialAttribute->rotation));
 		setWorldTransform(world);  //Static physics objects: transform once
 	}

@@ -388,7 +388,7 @@ void Renderer::render()
 		vpData.proj			= DirectX::XMFLOAT4X4(((float*)&camAt->mat_projection));
 		vpData.viewInv		= managementMath_->calculateMatrixInverse(vpData.view);
 		vpData.projInv		= managementMath_->calculateMatrixInverse(vpData.proj);
-		vpData.eyePos		= *(DirectX::XMFLOAT3*)&posAt->position;
+		vpData.eyePos		= *(DirectX::XMFLOAT3*)&posAt->position();
 		vpData.viewportTopX = static_cast<unsigned int>(ssAt->ssTopLeftX);
 		vpData.viewportTopY = static_cast<unsigned int>(ssAt->ssTopLeftY);
 		vpDatas.push_back(vpData);

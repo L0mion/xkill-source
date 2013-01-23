@@ -76,9 +76,9 @@ void GameComponent::onUpdate(float delta)
 		Attribute_Input*		input		=	itrInput		.at(player->ptr_input);
 		Attribute_Render*		render		=	itrRender		.at(player->ptr_render);
 		Attribute_WeaponStats*	weaponStats	=	itrWeaponStats	.at(player->ptr_weaponStats);
+		Attribute_Physics*		physics		=	itrPhysics		.at(input->ptr_physics);
 		Attribute_Spatial*		spatial		=	itrSpatial		.at(render->ptr_spatial);
 		Attribute_Position*		position	=	itrPosition		.at(spatial->ptr_position);
-		Attribute_Physics*		physics		=	itrPhysics		.at(input->ptr_physics);
 
 
 		//
@@ -132,7 +132,7 @@ void GameComponent::onUpdate(float delta)
 				}
 
 				// Position
-				Float3 pos = position->position;
+				Float3 pos = position->position();
 
 				// extract camera orientation to determine velocity
 				DirectX::XMFLOAT3 lookAtXMFloat3((float*)&camera->mat_view.getLookAt());
@@ -268,12 +268,13 @@ void GameComponent::onUpdate(float delta)
 			if(spawnPointAttribute != nullptr)
 			{
 				Attribute_Position* spawnPointPositionAttribute = itrPosition.at(spawnPointAttribute->ptr_position);
-				position->position = spawnPointPositionAttribute->position; // set player position attribute
-				DEBUGPRINT("Player entity " << itrPlayer.ownerId() << " spawned at " << position->position.x << " " << position->position.y << " " << position->position.z << std::endl);
+				Float3 newPosition = spawnPointPositionAttribute->position(); // set player position attribute
+				position->setPosition(newPosition);
+				DEBUGPRINT("Player entity " << itrPlayer.ownerId() << " spawned at " << newPosition.x << " " << newPosition.y << " " << newPosition.z << std::endl);
 			}
 			else
 			{
-				position->position = Float3(0.0f, 0.0f, 0.0f);
+				position->setPosition(Float3(0.0f, 0.0f, 0.0f));
 				DEBUGPRINT("No spawn point was found. Player entity " << itrPlayer.ownerId() << " spawned at origo" << std::endl);
 			}
 
@@ -527,7 +528,7 @@ void GameComponent::event_PhysicsAttributesColliding(Event_PhysicsAttributesColl
 					Attribute_Position* projectilePositionAttribute = itrPosition.at(projectileSpatialAttribute->ptr_position);
 
 					//Creates an explosion sphere. Init information is taken from the impacting projectile.
-					SEND_EVENT(&Event_CreateExplosionSphere(projectilePositionAttribute->position, projectileAttribute->explosionSphereRadius, projectileDamageAttribute->damage, projectileAttribute->entityIdOfCreator));
+					SEND_EVENT(&Event_CreateExplosionSphere(projectilePositionAttribute->position(), projectileAttribute->explosionSphereRadius, projectileDamageAttribute->damage, projectileAttribute->entityIdOfCreator));
 				}
 			}
 			//SEND_EVENT(&Event_RemoveEntity(entity1->getID())); //Crashes somtimes if removed here
@@ -584,7 +585,7 @@ Attribute_SpawnPoint* GameComponent::findUnoccupiedSpawnPoint()
 				Attribute_Position*	position_player	= itrPosition.at(spatial->ptr_position);
 
 				// calculate distance to spawn point
-				float distanceToSpawnPoint =  position_player->position.distanceTo(position_spawnPoint->position);
+				float distanceToSpawnPoint =  position_player->position().distanceTo(position_spawnPoint->position());
 
 				// if a player is within spawn point radius
 				if(distanceToSpawnPoint < foundSpawnPoint->spawnArea)

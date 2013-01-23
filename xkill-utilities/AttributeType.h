@@ -98,27 +98,37 @@ struct DLL_U IAttribute
 	virtual std::string getName(){return "UNKOWN";}
 };
 
-
 /// Stores the position of an Entity 
 /** 
 \ingroup ATTRIBUTES
 */
 struct DLL_U Attribute_Position : public IAttribute
 {
+private:
+	Float3 _position;
+
+public:
 	Attribute_Position();
 	~Attribute_Position();
 
-	Float3 position;
+	
+	Float3 position();
+	void setPosition(Float3 position)
+	{
+		_position = position;
+	};
+
+	AttributePointer ptr_position_offset;
 
 	DataItemList* getDataList()
 	{
 		DataItemList* list = new DataItemList();
-		list->add(position, "position");
+		list->add(_position, "position");
 		return list;
 	}
 	void saveTo(DataItemList* list)
 	{
-		list->get(&position);
+		list->get(&_position);
 	};
 	AttributeType getType(){return ATTRIBUTE_POSITION;}
 	std::string getName(){return "Position";}
