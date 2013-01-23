@@ -344,23 +344,9 @@ void PhysicsComponent::detectedCollisionsDuringStepSimulation(btScalar timeStep)
 
 void PhysicsComponent::doCulling(unsigned int frustumAttributeIndex, unsigned int objectAttributeIndex)
 {
-	static int testvar = 0;
-	if(testvar < 1)
-	{
-		testvar++;
-		return;
-	}
-	itrRender.at(itrPhysics.at(objectAttributeIndex)->ptr_render)->culling.setBool(frustumAttributeIndex,true);
-	//BoolField a = itrRender.at(itrPhysics.at(objectAttributeIndex)->ptr_render)->culling;
 
-
-	BoolField a;
-	a.clear();
-	a.setBool(0,true);
-	a.setBool(1,true);
-	a.setBool(0,false);
-	a.setBool(1,true);
-	int b = 2;
+	//itrRender.at(itrPhysics.at(objectAttributeIndex)->ptr_render)->culling.setBool(frustumAttributeIndex,true);
+	itrRender.at(itrPhysics.at(objectAttributeIndex)->ptr_render)->cull = true;
 }
 
 void PhysicsComponent::updateCulling()
@@ -374,8 +360,8 @@ void PhysicsComponent::updateCulling()
 	while(itrRender.hasNext())
 	{
 		Attribute_Render * ra = itrRender.getNext();
-		ra->culling.clear();
-		ra->culling;
+		//ra->culling.clear();
+		ra->cull = false;
 		int a =0;
 	}
 	CollisionShapes::Instance()->updateFrustrumShape();

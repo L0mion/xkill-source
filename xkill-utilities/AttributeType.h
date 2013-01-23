@@ -204,6 +204,7 @@ struct DLL_U Attribute_Render : public IAttribute
 	
 
 	BoolField culling;
+	bool cull;
 
 	DataItemList* getDataList()
 	{

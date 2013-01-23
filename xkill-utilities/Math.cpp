@@ -21,6 +21,15 @@ bool BoolField::getBool(int index)
 {
 	return 0 < (values[index/NUM_INTS_PER_BOOL] & (1 << (index%NUM_INTS_PER_BOOL)));
 }
+bool BoolField::getAnySet()
+{
+	long value=0;
+	for(int i=0;i<NUM_INTS;i++)
+	{
+		value += values[i];
+	}
+	return (value > 0);
+}
 void BoolField::setBool(int index, bool value)
 {
 	int a = index/NUM_INTS_PER_BOOL;

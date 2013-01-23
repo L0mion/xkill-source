@@ -22,6 +22,7 @@ public:
 	BoolField();
 	void clear();
 	bool getBool(int index);
+	bool getAnySet();
 	void setBool(int index, bool value);
 
 	int values[NUM_INTS];
