@@ -49,6 +49,7 @@ private:
 	void parseAnimationCurve(FbxAnimCurve* animCurve, std::vector<LoaderFbxAnimationKeyFrame>* keyFrames);
 	void parseAnimationListCurve(FbxAnimCurve* animCurve, FbxProperty* fbxProperty, std::vector<LoaderFbxAnimationKeyFrame>* keyFrames);
 
+	void removeNonAffectingBones();
 	std::vector<LoaderFbxAnimationBone> animationBones_;
 };
 

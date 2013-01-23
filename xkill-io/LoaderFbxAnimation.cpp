@@ -12,6 +12,7 @@ LoaderFbxAnimation::~LoaderFbxAnimation()
 }
 void LoaderFbxAnimation::reset()
 {
+	animationBones_.clear();
 }
 
 void LoaderFbxAnimation::parseAnimation(FbxScene* scene, std::vector<LoaderFbxAnimationDesc>* animationDescs)
@@ -33,6 +34,7 @@ void LoaderFbxAnimation::parseAnimation(FbxScene* scene, std::vector<LoaderFbxAn
 	//	parseAnimationStack(animStack, scene->GetRootNode(), true);
 		parseAnimationStack(animStack, scene->GetRootNode(), false);
 
+		removeNonAffectingBones();
 		animationDescs->back().setBones(animationBones_);
 	}
 }
@@ -83,11 +85,11 @@ void LoaderFbxAnimation::parseAnimationChannels(FbxNode* node, FbxAnimLayer* ani
 		
 	FbxNodeAttribute* nodeAttribute = node->GetNodeAttribute();
 	
-	parseAnimationChannelsColor(nodeAttribute, animLayer, animCurve);
-	parseAnimationChannelsLamp(node, animLayer, animCurve);
-	parseAnimationChannelsCamera(node, animLayer, animCurve);
-	parseAnimationChannelsGeometry(nodeAttribute, animLayer, animCurve);
-	parseAnimationChannelsProperty(node, animLayer, animCurve);
+//	parseAnimationChannelsColor(nodeAttribute, animLayer, animCurve);
+//	parseAnimationChannelsLamp(node, animLayer, animCurve);
+//	parseAnimationChannelsCamera(node, animLayer, animCurve);
+//	parseAnimationChannelsGeometry(nodeAttribute, animLayer, animCurve);
+//	parseAnimationChannelsProperty(node, animLayer, animCurve);
 }
 void LoaderFbxAnimation::parseAnimationChannelsGeneral(FbxNode* node, FbxAnimLayer* animLayer, FbxAnimCurve* animCurve)
 {
@@ -403,5 +405,37 @@ void LoaderFbxAnimation::parseAnimationListCurve(FbxAnimCurve* animCurve, FbxPro
 		//
         //outputString += "\n";
         //FBXSDK_printf (outputString);
+	}
+}
+
+void LoaderFbxAnimation::removeNonAffectingBones()
+{
+	for(int i=0; i<animationBones_.size(); i++)
+	{
+		bool remove = true;
+		if(animationBones_[i].getTranslationX()->size() > 0)
+			remove = false;
+		else if(animationBones_[i].getTranslationY()->size() > 0)
+			remove = false;
+		else if(animationBones_[i].getTranslationZ()->size() > 0)
+			remove = false;
+		else if(animationBones_[i].getRotationX()->size() > 0)
+			remove = false;
+		else if(animationBones_[i].getRotationY()->size() > 0)
+			remove = false;
+		else if(animationBones_[i].getRotationZ()->size() > 0)
+			remove = false;
+		else if(animationBones_[i].getScalingX()->size() > 0)
+			remove = false;
+		else if(animationBones_[i].getScalingY()->size() > 0)
+			remove = false;
+		else if(animationBones_[i].getScalingZ()->size() > 0)
+			remove = false;
+
+		if(remove)
+		{
+			animationBones_.erase(animationBones_.begin()+i);
+			i=-1;
+		}
 	}
 }
