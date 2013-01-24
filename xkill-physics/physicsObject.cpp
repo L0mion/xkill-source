@@ -38,13 +38,14 @@ bool PhysicsObject::subClassSpecificInitHook()
 	return true;
 }
 
-bool PhysicsObject::init(unsigned int attributeIndex)
+bool PhysicsObject::init(unsigned int attributeIndex,unsigned int collisionFilterGroup)
 {
 	if(attributeIndex < 0)
 	{
 		return false;
 	}
 	attributeIndex_ = attributeIndex;
+	collisionFilterGroup_ = collisionFilterGroup;
 
 	//Get the init data from a physics attribute
 	Attribute_Physics* physicsAttribute = itrPhysics_.at(attributeIndex);
@@ -53,10 +54,11 @@ bool PhysicsObject::init(unsigned int attributeIndex)
 	//Resolve mass, local inertia of the collision shape, and also the collision shape itself.
 	btCollisionShape* collisionShape = CollisionShapes::Instance()->getCollisionShape(physicsAttribute->meshID);
 	setCollisionShape(collisionShape);
-
+	
+		
+		
 	btVector3 localInertia = subClassCalculateLocalInertia(mass);
 	setMassProps(mass, localInertia); //Set inverse mass and inverse local inertia
-	
 	if((getCollisionFlags() & btCollisionObject::CF_STATIC_OBJECT))
 	{
 		btTransform world;
@@ -66,6 +68,7 @@ bool PhysicsObject::init(unsigned int attributeIndex)
  		world.setOrigin(convert(positionAttribute->position));
 		world.setRotation(convert(spatialAttribute->rotation));
 		setWorldTransform(world);  //Static physics objects: transform once
+
 	}
 	else
 	{
@@ -99,6 +102,12 @@ unsigned int PhysicsObject::getAttributeIndex() const
 	return attributeIndex_;
 }
 
+unsigned int PhysicsObject::getCollisionFilterGroup() const
+{
+	return collisionFilterGroup_;
+}
+
 void PhysicsObject::onUpdate(float delta)
 {
+	setGravity(btVector3(0,0,0));
 }

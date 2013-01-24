@@ -1,5 +1,6 @@
 #include "PlayerPhysicsObject.h"
 #include <xkill-utilities/AttributeManager.h>
+#include "physicsUtilities.h"
 
 #include "MotionState.h"
 
@@ -36,6 +37,22 @@ void PlayerPhysicsObject::onUpdate(float delta)
 
 void PlayerPhysicsObject::handleInput()
 {
+	//btTransform world2;
+	//world2 = getWorldTransform();
+	//world2.setRotation(btQuaternion(itrSpatial.at(itrPhysics_3.at(attributeIndex_)->ptr_spatial)->rotation.x,
+	//							   itrSpatial.at(itrPhysics_3.at(attributeIndex_)->ptr_spatial)->rotation.y,
+	//							   itrSpatial.at(itrPhysics_3.at(attributeIndex_)->ptr_spatial)->rotation.z,
+	//							   itrSpatial.at(itrPhysics_3.at(attributeIndex_)->ptr_spatial)->rotation.w));
+	//setWorldTransform(world2);
+	//return;
+	/*float yaw = yawFromQuaternion(btQuaternion(itrSpatial.at(itrPhysics_3.at(attributeIndex_)->ptr_spatial)->rotation.x,
+											   itrSpatial.at(itrPhysics_3.at(attributeIndex_)->ptr_spatial)->rotation.y,
+											   itrSpatial.at(itrPhysics_3.at(attributeIndex_)->ptr_spatial)->rotation.z,
+											   itrSpatial.at(itrPhysics_3.at(attributeIndex_)->ptr_spatial)->rotation.w));*/
+
+	// New code above
+
+
 	std::vector<int> playerAttributes = itrPhysics_3.ownerAt(attributeIndex_)->getAttributes(ATTRIBUTE_PLAYER);
 	
 	Attribute_Input* inputAttribute;
@@ -46,12 +63,11 @@ void PlayerPhysicsObject::handleInput()
 		//std::cout << "More than one controller for one player. Not tested." << std::endl;
 	}
 
-	for(int i=0;i<playerAttributes.size();i++)
+	for(unsigned int i=0;i<playerAttributes.size();i++)
 	{
 		playerAttribute = itrPlayer.at(playerAttributes.at(i));
 		inputAttribute = itrInput.at(playerAttribute->ptr_input);
 	}
-
 	yaw_ += inputAttribute->rotation.x;
 	btVector3 move = playerAttribute->currentSpeed*btVector3(inputAttribute->position.x, 0, inputAttribute->position.y);
 	move = move.rotate(btVector3(0,1,0),yaw_);

@@ -388,6 +388,7 @@ void Renderer::render()
 		managementViewport_->setViewport(devcon, i);
 
 		//Store all the viewport-specific data for the backbuffer-rendering.
+		vpData.camIndex		= ssAt->ptr_camera.index;
 		vpData.view			= DirectX::XMFLOAT4X4(((float*)&camAt->mat_view));
 		vpData.proj			= DirectX::XMFLOAT4X4(((float*)&camAt->mat_projection));
 		vpData.viewInv		= managementMath_->calculateMatrixInverse(vpData.view);
@@ -470,6 +471,7 @@ void Renderer::renderViewportToGBuffer(ViewportData& vpData)
 		drawBulletPhysicsDebugLines(vpData.view, vpData.proj);
 	}
 
+	
 	managementGBuffer_->unsetGBuffersAndDepthBufferAsRenderTargets(devcon);
 
 	managementFX_->unsetAll(devcon);

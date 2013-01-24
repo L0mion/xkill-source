@@ -120,11 +120,6 @@ Event_CreateSpawnPoint::Event_CreateSpawnPoint(Float3 spawnPointPosition, float 
 	this->spawnAreaRadius = spawnAreaRadius;
 }
 
-Event_DoCulling::Event_DoCulling() : Event(EVENT_DO_CULLING)
-{
-}
-
-
 Event_StartDeathmatch::Event_StartDeathmatch(int num_players) : Event(EVENT_START_DEATHMATCH)
 {
 	this->num_players = num_players;

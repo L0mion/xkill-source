@@ -65,7 +65,6 @@ enum DLL_U EventType
 	EVENT_INPUT_DEVICE_SEARCH,
 	EVENT_PLAYSOUND,
 	EVENT_RUMBLE,
-	EVENT_DO_CULLING,
 	EVENT_PHYSICS_ATTRIBUTES_COLLIDING,
 	EVENT_DRAW_BULLET_PHYSICS_DEBUG_LINES,
 	EVENT_SPLITSCREEN_CHANGED,
@@ -363,14 +362,6 @@ public:
 	Float3 spawnPointPosition;
 	float spawnAreaRadius;
 };
-
-
-class DLL_U Event_DoCulling : public Event
-{
-public:
-	Event_DoCulling();
-};
-
 
 class DLL_U Event_StartDeathmatch : public Event
 {

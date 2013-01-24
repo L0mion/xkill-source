@@ -11,6 +11,7 @@ private:
 	virtual bool subClassSpecificInitHook();						//! Can be overridden by subclasses. Is called from the end of init.
 protected:
 		unsigned int attributeIndex_;								//!< Specifies which PhysicsObject is synchronized with which physics attribute.
+		unsigned int collisionFilterGroup_;							 //<! The filter group the object belongs to, ex: Attribute_Physics::WORLD
 public:
 	PhysicsObject();
 	virtual ~PhysicsObject();
@@ -18,8 +19,9 @@ public:
 	/*!
 	\param attributeIndex The physics attribute index.
 	*/
-	bool init(unsigned int attributeIndex);
-	unsigned int getAttributeIndex() const;
+	bool init(unsigned int attributeIndex,unsigned int collisionFilterGroup);
+	unsigned int getAttributeIndex() const;  //<! Returns the attribute index that the physicsobject maps to
+	unsigned int getCollisionFilterGroup() const;  //<! Returns the filter group the object belongs to, ex: Attribute_Physics::WORLD
 	
 	virtual void onUpdate(float delta);
 };
