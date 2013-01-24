@@ -499,7 +499,6 @@ void Renderer::renderViewportToBackBuffer(ViewportData& vpData)
 	//Set constant buffers.
 	managementCB_->setCB(CB_TYPE_FRAME,		TypeFX_CS, CB_REGISTER_FRAME,	devcon);
 	managementCB_->setCB(CB_TYPE_CAMERA,	TypeFX_CS, CB_REGISTER_CAMERA,	devcon);
-	managementCB_->setCB(CB_TYPE_CAMERA,	TypeFX_VS, CB_REGISTER_CAMERA,	devcon);
 	managementCB_->updateCBCamera(managementD3D_->getDeviceContext(),
 		vpData.view,
 		vpData.viewInv,
