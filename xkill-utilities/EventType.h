@@ -36,30 +36,40 @@ for some reason
 enum DLL_U EventType
 {
 	// Inform events
-	EVENT_PLAYSOUND,
-	EVENT_RUMBLE,
-	EVENT_CREATE_PROJECTILE,
-	EVENT_PHYSICS_ATTRIBUTES_COLLIDING,
-	EVENT_REMOVE_ENTITY,
+	EVENT_QUIT_TO_DESKTOP,
+
 	EVENT_PLAYERDEATH,
-	EVENT_CREATE_SPAWNPOINT,
 	EVENT_END_DEATHMATCH,
 	EVENT_START_DEATHMATCH,
-	EVENT_STATE_CHANGED,
+	EVENT_CREATE_PROJECTILE,
+	EVENT_CREATE_SPAWNPOINT,
 	EVENT_CREATE_EXPLOSIONSPHERE,
+	EVENT_CREATE_WORLD,
+	EVENT_CREATE_AMMO,
+	EVENT_CREATE_HACK,
+	EVENT_CREATE_LIGHT,
+	EVENT_CREATE_ENTITY,
+	EVENT_REMOVE_ENTITY,
+	EVENT_STATE_CHANGED,
 	EVENT_CREATE_INPUTDEVICE,
 
-	EVENT_CREATE_ENTITY,
+	EVENT_TRANSFEREVENTSTOGAME,
+
+	EVENT_CHANGE_GAMESTATE,
 	EVENT_GAMERESET,
 	EVENT_UPDATE,
 	EVENT_MOUSE_MOVE,
 	EVENT_KEY_PRESS,
 	EVENT_MOUSE_PRESS,
 	EVENT_WINDOW_RESIZE,
-
 	EVENT_INPUT_DEVICE_SEARCH,
+	EVENT_PLAYSOUND,
+	EVENT_RUMBLE,
+	EVENT_PHYSICS_ATTRIBUTES_COLLIDING,
+	EVENT_DRAW_BULLET_PHYSICS_DEBUG_LINES,
+	EVENT_SPLITSCREEN_CHANGED,
 
-	EVENT_DO_CULLING,
+	EVENT_ATTRIBUTE_UPDATED,
 	EVENT_SYNCSTATECOMMAND,
 
 	// Get events
@@ -164,6 +174,27 @@ public:
 								//!< Requires manual casting.
 	std::vector<int>* owners;	//!< A std::vector<int> of owners corresponding to each
 								//!< attribute.
+};
+
+/// Returns access to \ref ATTRIBUTES.
+/**
+\ingroup events
+*/
+class DLL_U Event_AttributeUpdated : public Event
+{
+public:
+	Event_AttributeUpdated(int index, int attributeEnum) : Event(EVENT_ATTRIBUTE_UPDATED)
+	{
+		this->index = index;
+		this->attributeEnum = attributeEnum;
+		isCreated = false;
+		isDeleted = false;
+	}
+
+	int attributeEnum;
+	int index;
+	bool isCreated;
+	bool isDeleted;
 };
 
 /// Returns access to a vector of Entity from EntityManager.
@@ -333,14 +364,6 @@ public:
 	float spawnAreaRadius;
 };
 
-
-class DLL_U Event_DoCulling : public Event
-{
-public:
-	Event_DoCulling();
-};
-
-
 class DLL_U Event_StartDeathmatch : public Event
 {
 public:
@@ -404,6 +427,58 @@ public:
 	int entityIdOfCreator;
 };
 
+class DLL_U Event_CreateWorld : public Event
+{
+public:
+	Event_CreateWorld(Float3 position, Float4 rotation, unsigned int meshID);
+
+	Float3 position;
+	Float4 rotation;
+	unsigned int meshID;
+};
+
+class DLL_U Event_CreateAmmo : public Event
+{
+public:
+	Event_CreateAmmo(Float3 position, unsigned int type);
+
+	Float3 position;
+	unsigned int type;
+};
+
+class DLL_U Event_CreateHack : public Event
+{
+public:
+	Event_CreateHack(Float3 position, unsigned int type);
+
+	Float3 position;
+	unsigned int type;
+};
+
+class DLL_U Event_CreateLight : public Event
+{
+public:
+	Event_CreateLight(Float3 position, Float3 direction, Float3 ambient, Float3 diffuse, Float3 specular,
+					  Float3 attenuation, float range, float spotPow, unsigned int type);
+
+	Float3 position;
+	Float3 direction;
+	Float3 ambient;
+	Float3 diffuse;
+	Float3 specular;
+	Float3 attenuation;
+	float range;
+	float spotPow;
+	unsigned int type;
+};
+
+class DLL_U Event_TransferEventsToGame : public Event
+{
+public:
+	Event_TransferEventsToGame(std::vector<Event*> events);
+	std::vector<Event*> events;
+};
+
 enum DLL_U EntityType
 {
 	WORLD,
@@ -429,4 +504,25 @@ public:
 
 	InputDevice* device;
 	InputObjectArray* objectArray;
+};
+
+/*
+class DLL_U Event_DrawDebugLine : public Event
+{
+public:
+	Event_DrawDebugLine(Float3 vertex1, Float3 vertex2);
+
+	Float3 vertex1;
+	Float3 vertex2;
+};
+*/
+
+//struct VertexPosColor;
+#include "MeshVertices.h"
+class DLL_U Event_DrawBulletPhysicsDebugLines : public Event
+{
+public:
+	Event_DrawBulletPhysicsDebugLines(std::vector<VertexPosColor>* debugLineVertices);
+
+	std::vector<VertexPosColor>* debugLineVertices;
 };

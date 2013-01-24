@@ -15,24 +15,32 @@ class AttributeController
 {
 private:
 	IAttributeStorage* host;
-public:
 	int index;
 	AttributeType type;
-
-	AttributeController(IAttributeStorage* host, int index, AttributeType type)
+public:
+	AttributeController(IAttributeStorage* host, int index)
 	{
 		this->host = host;
 		this->index = index;
-		this->type = type;
+		this->type = getAttribute()->getType();
 	}
 
-	DataItemList* getDataList()
+	IAttribute* getAttribute()
 	{
-		return host->getDataList(index);
+		return host->getAttribute(index);
 	}
 
 	void remove()
 	{
 		host->deleteAttribute(index);
+	}
+
+	AttributeType getType()
+	{
+		return type;
+	}
+	int getIndex()
+	{
+		return index;
 	}
 };

@@ -22,7 +22,7 @@ ManagementFX::ManagementFX(bool debugShaders)
 	colorPS_				= nullptr;
 
 	ilPosColor_				= nullptr;
-	ilPosNormTex_			= nullptr;
+	ilPosNormTexInstanced_	= nullptr;
 	ilPosNormTexTanSkinned_ = nullptr;
 }
 ManagementFX::~ManagementFX()
@@ -40,7 +40,7 @@ ManagementFX::~ManagementFX()
 	SAFE_DELETE(colorPS_);
 
 	SAFE_RELEASE(ilPosColor_);
-	SAFE_RELEASE(ilPosNormTex_);
+	SAFE_RELEASE(ilPosNormTexInstanced_);
 	SAFE_RELEASE(ilPosNormTexTanSkinned_);
 }
 
@@ -53,8 +53,6 @@ void ManagementFX::reset()
 	defaultCS_->reset();
 	animationVS_->reset();
 	animationPS_->reset();
-	
-	SAFE_RELEASE(ilPosNormTex_);
 }
 
 HRESULT ManagementFX::init(ID3D11Device* device)
@@ -88,8 +86,8 @@ void ManagementFX::setLayout(ID3D11DeviceContext* devcon,	LayoutID layoutID)
 	case LAYOUTID_POS_COLOR:
 		il = ilPosColor_;
 		break;
-	case LAYOUTID_POS_NORM_TEX:
-		il = ilPosNormTex_;
+	case LAYOUTID_POS_NORM_TEX_INSTANCED:
+		il = ilPosNormTexInstanced_;
 		break;
 	case LAYOUTID_POS_NORM_TEX_TAN_SKINNED:
 		il = ilPosNormTexTanSkinned_;
@@ -234,7 +232,7 @@ HRESULT ManagementFX::initILs(ID3D11Device* device)
 
 	hr = initILPosColor(device);
 	if(SUCCEEDED(hr))
-		hr = initILDefaultVSPosNormTex(device);
+		hr = initILDefaultVSPosNormTexInstanced(device);
 	if(SUCCEEDED(hr))
 		hr = initILPosNormTexTanSkinned(device);
 	
@@ -249,36 +247,27 @@ HRESULT ManagementFX::initILPosColor(ID3D11Device* device)
 {
 	HRESULT hr = S_OK;
 
-	D3D11_INPUT_ELEMENT_DESC ied[6] = 
-	{
-		{"POSITION",	0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0,  D3D11_INPUT_PER_VERTEX_DATA, 0},
-		{"COLOR",		0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0}
-	};
+	device->CreateInputLayout(
+		managementIED_->getIED(IED_TYPE__POS_COLOR),
+		managementIED_->getIEDNumElements(IED_TYPE__POS_COLOR),
+		colorVS_->getBlob()->GetBufferPointer(),
+		colorVS_->getBlob()->GetBufferSize(),
+		&ilPosColor_);
 
-	device->CreateInputLayout(ied,
-							  2,
-							  colorVS_->getBlob()->GetBufferPointer(),
-							  colorVS_->getBlob()->GetBufferSize(),
-							  &ilPosColor_);
 	return hr;
 }
-HRESULT ManagementFX::initILDefaultVSPosNormTex(ID3D11Device* device)
+HRESULT ManagementFX::initILDefaultVSPosNormTexInstanced(ID3D11Device* device)
 {
 	HRESULT hr = S_OK;
 
-	unsigned int iedPosNormTexNumElements	= managementIED_->getIEDPosNormTexNumElements();
-	D3D11_INPUT_ELEMENT_DESC* iedPosNormTex = managementIED_->getIEDPosNormTex();
-
-	int debug = sizeof(D3D11_INPUT_ELEMENT_DESC);
-
 	hr = device->CreateInputLayout(
-		iedPosNormTex, 
-		iedPosNormTexNumElements, 
+		managementIED_->getIED(IED_TYPE__POS_NORM_TEX_INSTANCED), 
+		managementIED_->getIEDNumElements(IED_TYPE__POS_NORM_TEX_INSTANCED), 
 		defaultVS_->getBlob()->GetBufferPointer(), 
 		defaultVS_->getBlob()->GetBufferSize(), 
-		&ilPosNormTex_);
+		&ilPosNormTexInstanced_);
 	if(FAILED(hr))
-		ERROR_MSG(L"FXManagement::initILDefaultVSPosNormTex CreateInputLayout failed");
+		ERROR_MSG(L"FXManagement::initILDefaultVSPosNormTexInstanced CreateInputLayout failed");
 
 	return hr;
 }
@@ -286,21 +275,24 @@ HRESULT ManagementFX::initILPosNormTexTanSkinned(ID3D11Device* device)
 {
 	HRESULT hr = S_OK;
 
-	D3D11_INPUT_ELEMENT_DESC ied[6] = 
-	{
-		{"POSITION",     0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0,  D3D11_INPUT_PER_VERTEX_DATA, 0},
-		{"NORMAL",       0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0},
-		{"TEXCOORD",     0, DXGI_FORMAT_R32G32_FLOAT,    0, 24, D3D11_INPUT_PER_VERTEX_DATA, 0},
-		{"TANGENT",      0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 32, D3D11_INPUT_PER_VERTEX_DATA, 0},
-		{"WEIGHTS",      0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 48, D3D11_INPUT_PER_VERTEX_DATA, 0},
-		{"BONEINDICES",  0, DXGI_FORMAT_R8G8B8A8_UINT,   0, 60, D3D11_INPUT_PER_VERTEX_DATA, 0}
-	};
+	//D3D11_INPUT_ELEMENT_DESC ied[6] = 
+	//{
+	//	{"POSITION",     0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0,  D3D11_INPUT_PER_VERTEX_DATA, 0},
+	//	{"NORMAL",       0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0},
+	//	{"TEXCOORD",     0, DXGI_FORMAT_R32G32_FLOAT,    0, 24, D3D11_INPUT_PER_VERTEX_DATA, 0},
+	//	{"TANGENT",      0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 32, D3D11_INPUT_PER_VERTEX_DATA, 0},
+	//	{"WEIGHTS",      0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 48, D3D11_INPUT_PER_VERTEX_DATA, 0},
+	//	{"BONEINDICES",  0, DXGI_FORMAT_R8G8B8A8_UINT,   0, 60, D3D11_INPUT_PER_VERTEX_DATA, 0}
+	//};
 
-	device->CreateInputLayout(ied,
-							  6,
+	hr = device->CreateInputLayout(managementIED_->getIED(IED_TYPE__POS_NORM_TEX_TAN_SKINNED),
+							  managementIED_->getIEDNumElements(IED_TYPE__POS_NORM_TEX_TAN_SKINNED),
 							  animationVS_->getBlob()->GetBufferPointer(),
 							  animationVS_->getBlob()->GetBufferSize(),
 							  &ilPosNormTexTanSkinned_);
+	if(FAILED(hr))
+		ERROR_MSG(L"FXManagement::initILPosNormTexTanSkinned CreateInputLayout failed");
+
 	return hr;
 }
 

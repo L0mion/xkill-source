@@ -15,8 +15,12 @@
 #include "renderingUtilities.h"
 #include "ManagementModel.h"
 
+ATTRIBUTES_DECLARE_ALL
+
 ManagementModel::ManagementModel()
 {
+	ATTRIBUTES_INIT_ALL
+
 	debugShapes_ = nullptr;
 }
 ManagementModel::~ManagementModel()
@@ -108,25 +112,29 @@ HRESULT ManagementModel::createModelD3D(
 	}
 	else
 	{
-		//Could not find mesh loaded, error or warning?
-		//hr = S_FALSE;
+		ERROR_MSG(L"ManagementModel::createModelD3D Could not find model!");
+		hr = S_FALSE;
 	}
 
 	return hr;
 }
 bool ManagementModel::getMeshAttribute(unsigned int modelID, Attribute_Mesh& inout)
 {
-	std::vector<Attribute_Mesh>*	allMesh = GET_ATTRIBUTES(mesh);
-	
 	bool foundAt = false;
-	for(unsigned int i = 0; i < allMesh->size() && !foundAt; i++)
+	Attribute_Mesh* attr_mesh;
+
+	while(!foundAt && itrMesh.hasNext())
 	{
-		if(allMesh->at(i).meshID == modelID)
+		attr_mesh = itrMesh.getNext();
+
+		if(attr_mesh->meshID == modelID)
 		{
-			inout	= allMesh->at(i);
-			foundAt	= true;
+			inout = *attr_mesh;
+			foundAt = true;
 		}
 	}
+
+	itrMesh.resetIndex();
 
 	return foundAt;
 }
@@ -212,11 +220,8 @@ void ManagementModel::pushDebugShapeD3D(
 
 void ManagementModel::createDebugShapeD3D(unsigned int shapeIndex, ID3D11Device* device)
 {
-	std::vector<Attribute_DebugShape>* attributesDebugShape;
-	attributesDebugShape = GET_ATTRIBUTES(debugShape);
-
-	Attribute_DebugShape debugShapeAt = attributesDebugShape->at(shapeIndex);
-	DebugShape* shape = debugShapeAt.shape;
+	Attribute_DebugShape* debugShapeAt = itrDebugShape.at(shapeIndex);
+	DebugShape* shape = debugShapeAt->shape;
 
 	switch(shape->shapeType_)
 	{
@@ -284,7 +289,6 @@ DebugShapeD3D* ManagementModel::createFrustum(DebugShapeFrustum* frustum, ID3D11
 	debugFrustum = new DebugShapeD3D(vb);
 	return debugFrustum;
 }
-
 
 bool ManagementModel::existingModelD3D(const int unsigned modelID)
 {

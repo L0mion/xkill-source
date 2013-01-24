@@ -4,12 +4,6 @@
 
 #include <xkill-utilities/IObserver.h>
 
-class Camera;
-struct Attribute_Camera;
-struct Attribute_Input;
-class Event_MouseMove;
-class Event_WindowResize;
-
 //! Component to process Cameras
 /** 
 \ingroup components
@@ -25,14 +19,7 @@ public:
 	bool init();
 	//! Methods that will be called on events. 
 	void onEvent(Event* e);
-	//! Methods that will be called on events. 
-	void event_WindowResize(Event_WindowResize* e);
 	
 	//! Update method that will be called every frame.
 	void onUpdate(float delta);
-
-private:
-	std::vector<Camera> cameras_;						//!< Holds camera objects.
-	std::vector<Attribute_Camera>* cameraAttributes_;	//!< Holds camera attributes.
-	std::vector<Attribute_Input>* inputAttributes_;		//!< Holds input attributes.
 };

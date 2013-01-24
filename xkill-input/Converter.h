@@ -90,4 +90,16 @@ public:
 		
 		return n;
 	}
+
+	static unsigned long HashString(std::string str)
+	{
+		unsigned long hash = 5381;
+
+		for(unsigned int i = 0; i < str.size(); i++)
+		{
+			hash = ((hash << 5) + hash) + str[i];
+		}
+
+		return hash;
+	}
 };

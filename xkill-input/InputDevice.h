@@ -74,6 +74,7 @@ public:
 	virtual InputDeviceLayout GetLayout();
 
 	virtual InputObjectArray* getInputObjectArray();
+	virtual std::vector<std::string> getNamesOfMappedObjects(int mapping);
 
 	virtual InputDeviceType GetType() = 0;
 	virtual GUID GetGUID();
@@ -81,13 +82,15 @@ public:
 
 	virtual void setPlayerID(int playerID);
 	virtual int getPlayerID();
-	
+
 	//! Returns the largest float value of objects that is mapped to that number
-	virtual float getFloatValue(int mapping, bool useSensitivity = false);
+	virtual float getFloatValue(int mapping, float delta, bool useSensitivity = false);
 	//! Returns if any object that is mapped to that number is activated
 	virtual bool getBoolValue(int mapping);
 	//! Returns if any object that is mapped to that number was released
 	virtual bool getBoolReleased(int mapping);
+
+	virtual std::vector<int> getMappedArray(int mapping);
 
 	//! Sets standard mappings
 	/*!
@@ -128,8 +131,7 @@ protected:
 	//std::vector<InputObject*> inputObjects_;
 	InputObjectArray* inputObjectArray_;
 
-	std::vector<std::vector<int>> floatObjects_;
-	std::vector<std::vector<int>> boolObjects_;
+	std::vector<std::vector<int>> mappedObjects_;
 
 	//! Updates the input object to the latest state
 	virtual void updateState() = 0;

@@ -35,7 +35,6 @@ public:
 private:
 	InputManager*					inputManager_;
 	HWND							windowHandle_;
-	std::vector<Attribute_Input>*	inputAttributes_;
 	float							newDeviceSearchTimer_;	//! Timer until next search for new input devices
 	float							searchTime_;			//! How long time there will be between searches for new input devices
 
@@ -45,5 +44,6 @@ private:
 
 	void handleRumbleEvent(Event_Rumble* e);
 	void handleMouseMoveEvent(Event_MouseMove* e);
+	void handleMousePressedEvent(int nr, bool pressed);
 	void handleKeyEvent(char key, bool pressed);
 };

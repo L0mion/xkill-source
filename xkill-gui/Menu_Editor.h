@@ -28,4 +28,5 @@ public slots:
 	void slot_clicked_entityInspector(QModelIndex index);
 	void slot_changed_simulationSpeed(int speed);
 	void slot_attributeInspector_refresh();
+	void slot_attributeInspector_itemChanged();
 };

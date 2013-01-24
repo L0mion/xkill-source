@@ -77,8 +77,6 @@ private:
 	std::vector<LightDescSpot>	lightSpots_;		//!< Light-descriptions copied from Attributes_LightSpot. These are then bound to buffer.
 	ID3D11Buffer*				lightSpotBuffer_;	//!< Buffer containing spotlights.
 	ID3D11ShaderResourceView*	lightSpotSRV_;		//!< SRV bound to spotlights.
-
-	std::vector<Attribute_Position>* attributesPosition_; //!< Holds positional data. Is fetched only once.
 };
 
 

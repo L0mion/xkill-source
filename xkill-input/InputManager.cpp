@@ -71,6 +71,7 @@ bool InputManager::InitInput(HWND hWindow, std::string configFilePath)
 
 	SEND_EVENT(&Event_CreateInputDevice(mouseAndKeyboard, mouseAndKeyboard->getInputObjectArray()));
 
+
 	return true;
 }
 

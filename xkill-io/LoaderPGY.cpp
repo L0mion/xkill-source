@@ -71,7 +71,9 @@ MeshModel* LoaderPGY::loadPGY(
 		numVertices,
 		numSubsets);
 
-	return new MeshModel(geometry, materials);
+	MeshOrigins origins(getFileName());
+
+	return new MeshModel(geometry, materials, origins);
 }
 const PGYHeader LoaderPGY::loadHeader()
 {

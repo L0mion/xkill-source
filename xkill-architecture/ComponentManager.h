@@ -4,7 +4,7 @@
 #include <xkill-utilities/AttributeManager.h>
 
 class RenderingComponent;
-class BulletPhysicsComponent;
+class PhysicsComponent;
 class SoundComponent;
 class CameraComponent;
 class InputComponent;
@@ -33,7 +33,7 @@ class ComponentManager : public IObserver
 {
 private:
 	RenderingComponent*		render_;
-	BulletPhysicsComponent*	physics_;
+	PhysicsComponent*		physics_;
 	SoundComponent*			sound_;
 	CameraComponent*		camera_;
 	InputComponent*			input_;
@@ -41,6 +41,7 @@ private:
 	ScoreComponent*			score_;
 	IOComponent*			ioComponent_;
 
+	float					initialSpawnDelay;
 public:
 	ComponentManager();
 	~ComponentManager();

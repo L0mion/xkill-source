@@ -2,7 +2,7 @@
 
 #include <xkill-io/IOComponent.h>
 #include <xkill-renderer/renderingComponent.h>
-#include <xkill-physics/BulletPhysicsComponent.h>
+#include <xkill-physics/PhysicsComponent.h>
 #include <xkill-sound/SoundComponent.h>
 #include <xkill-input/InputComponent.h>
 
@@ -21,6 +21,7 @@
 ComponentManager::ComponentManager()
 {
 	SUBSCRIBE_TO_EVENT(this, EVENT_END_DEATHMATCH);
+	SUBSCRIBE_TO_EVENT(this, EVENT_START_DEATHMATCH);
 
 	render_			= NULL;
 	physics_		= NULL;
@@ -63,23 +64,18 @@ bool ComponentManager::init(HWND windowHandle, HWND parentWindowHandle)
 	//state_TemporaryVariableUsedAsSubstituteForStateMachine = SPECIAL_STATE_NONE;
 
 	render_ = new RenderingComponent(windowHandle);
-	physics_ = new BulletPhysicsComponent();
+	physics_ = new PhysicsComponent();
 	camera_ = new CameraComponent();
 	game_ = new GameComponent();
 	sound_ = new SoundComponent();
 	input_ = new InputComponent();
 	score_ = new ScoreComponent();
 	ioComponent_ = new IOComponent();
+	initialSpawnDelay = 0;
 
 	if(render_->init() != S_OK)
 	{
 		std::cout << "RenderingComponent failed to init." << std::endl;
-		return false;
-	}
-
-	if(!physics_->init())
-	{
-		std::cout << "BulletPhysicsComponent failed to init." << std::endl;
 		return false;
 	}
 
@@ -120,6 +116,12 @@ bool ComponentManager::init(HWND windowHandle, HWND parentWindowHandle)
 		return false;
 	}
 
+	if(!physics_->init())
+	{
+		std::cout << "BulletPhysicsComponent failed to init." << std::endl;
+		return false;
+	}
+
 	// Returns that everything went ok
 	return true;
 }
@@ -132,6 +134,8 @@ void ComponentManager::onEvent(Event* e)
 	case EVENT_END_DEATHMATCH:
 		GET_STATE() = STATE_MAINMENU;
 		break;
+	case EVENT_START_DEATHMATCH:
+		initialSpawnDelay = 0.2;
 	default:
 		break;
 	}
@@ -139,26 +143,36 @@ void ComponentManager::onEvent(Event* e)
 
 void ComponentManager::update(float delta)
 {
+	//// PUT SOMETHING 
+	/// DONT SPAWN PLAYERS FIRST FRAMES
+	/// PUT SOMETHING
 	if(GET_STATE() == STATE_DEATHMATCH)
 	{
 		sound_->onUpdate(delta);
+		//camera_->onUpdate(delta);
 		physics_->onUpdate(delta);
 		camera_->onUpdate(delta);
-		SEND_EVENT(&Event_DoCulling());
 		render_->onUpdate(delta);
 		input_->onUpdate(delta);
-		game_->onUpdate(delta);
+		if(initialSpawnDelay > 0)
+		{
+			initialSpawnDelay -= delta;
+		}
+		else
+		{
+			game_->onUpdate(delta);	
+		}
 		SEND_EVENT(&Event(EVENT_UPDATE));
 	}
 	else if(GET_STATE() == STATE_MAINMENU)
 	{
 		sound_->onUpdate(delta);
-		physics_->onUpdate(delta);
-		camera_->onUpdate(delta);
-		SEND_EVENT(&Event_DoCulling());
-		render_->onUpdate(delta);
+		//camera_->onUpdate(delta);
+		//physics_->onUpdate(delta);
+		//camera_->onUpdate(delta);
+		//render_->onUpdate(delta);
 		input_->onUpdate(delta);
-		game_->onUpdate(delta);
+		//game_->onUpdate(delta);
 		SEND_EVENT(&Event(EVENT_UPDATE));
 	}
 	else if(GET_STATE() == SPECIAL_STATE_NONE)

@@ -4,7 +4,6 @@
 #include <queue>
 
 #include "AttributePointer.h"
-#include "AttributeType.h"
 #include "Iterator.h"
 
 #include "Entity.h"
@@ -30,10 +29,11 @@ private:
 	std::queue<int> deleted;		//!< Queue to keep track of deleted Indexe e.g. Indexes with "owner 0".
 	int index_lastCreated;			//!< Index of the last created attribute
 	AttributeType type;				//!< The AttributeType contained in AttributeStorage
+	int num_attributes;
 
 	AttributeController getAttributeController()
 	{
-		return AttributeController(this, index_lastCreated, type);
+		return AttributeController(this, index_lastCreated);
 	}
 
 public:
@@ -43,12 +43,36 @@ public:
 
 	AttributeStorage()
 	{
+		reset();
+
+		// Init type
+		T attribute;
+		type = ((IAttribute*)&attribute)->getType();
 	}
 
-	DataItemList* getDataList(int index)
+	int size()
+	{
+		return num_attributes;
+	}
+
+	void reset()
+	{
+		for(unsigned i=0; i<attributes.size(); i++)
+		{
+			IAttribute* a = (IAttribute*)&attributes[i];
+			a->clean();
+		}
+
+		num_attributes = 0;
+		attributes.clear();
+		owners.clear();
+		deleted = std::queue<int>();
+	}
+
+	IAttribute* getAttribute(int index)
 	{
 		IAttribute* a = (IAttribute*)&attributes[index];
-		return a->getDataList();
+		return a;
 	}
 
 	AttributeIterator<T> getIterator()
@@ -68,11 +92,6 @@ public:
 			IAttribute* a = (IAttribute*)&attributes[i];
 			a->clean();
 		}
-	}
-
-	void init(AttributeType type)
-	{
-		this->type = type;
 	}
 
 	/** 
@@ -101,10 +120,16 @@ public:
 			index_lastCreated = (int)attributes.size();
 			attributes.push_back(T());
 		}
+		num_attributes++;
 
 		// Save access controller in Entity so it can be deleted later
 		owner->addAttribute(getAttributeController());
 		
+		// Inform about creation
+		Event_AttributeUpdated e(index_lastCreated, type);
+		e.isCreated = true;
+		EventManager::getInstance()->sendEvent(&e);
+
 		// Get attribute
 		return &attributes[index_lastCreated];
 	}
@@ -117,6 +142,14 @@ public:
 		
 		// Delete Attribute
 		owners[index] = 0;
+		num_attributes--;
+
+		// Inform about deletion
+		Event_AttributeUpdated e(index, type);
+		e.isDeleted = true;
+		EventManager::getInstance()->sendEvent(&e);
+
+		// Allow Attribute to be reused
 		deleted.push(index);
 	}
 

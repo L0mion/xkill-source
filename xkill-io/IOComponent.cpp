@@ -103,7 +103,11 @@ bool IOComponent::initMdlDescs()
 			sucessfulLoad = initMdlDesc(mdlDescFiles.at(i));
 	}
 	else
+	{
 		SHOW_MESSAGEBOX("Couldn't locate any .mdldesc-files in xkill-resources/.");
+	}
+	Settings* settings = ATTRIBUTE_MANAGER->settings;
+	sucessfulLoad = initLvlMdlDesc(settings->currentLevel);
 
 	return sucessfulLoad;
 }
@@ -118,6 +122,45 @@ bool IOComponent::initMdlDesc(std::string filename)
 	{
 		MdlDesc* mdlDesc = loader->claimMdlDesc();
 		std::vector<MdlDescModel*> models = mdlDesc->getModels();
+		//loader->transferEventsToGame();
+
+		std::string path = mdlDesc->getPath() + mdlDesc->getHeader().path_;
+		for(unsigned int i = 0; i < models.size() && sucessfulLoad; i++)
+		{
+			std::string name = models[i]->modelFileName_;
+			sucessfulLoad = loadModel(name, path, models[i]);
+		}
+
+		delete mdlDesc; //clear when finished
+	}
+	else
+	{
+		std::string errorMsg = "Failed to load .mdldesc-file: " + filename;
+		SHOW_MESSAGEBOX(errorMsg);
+	}
+	
+	//Clear memory allocated
+	delete loader;
+
+	return sucessfulLoad;
+}
+
+bool IOComponent::initLvlMdlDesc(std::string filename)
+{
+	bool sucessfulLoad = true;
+
+	std::string path = PATH_XKILL_RESOURCES_LEVELS;
+	path.append(filename);
+	path.append("/");
+	filename.append(".mdldesc");
+	LoaderMdlDesc* loader = new LoaderMdlDesc(filename, path);
+	sucessfulLoad = loader->init();
+	
+	if(sucessfulLoad)
+	{
+		MdlDesc* mdlDesc = loader->claimMdlDesc();
+		std::vector<MdlDescModel*> models = mdlDesc->getModels();
+		loader->transferEventsToGame();
 
 		std::string path = mdlDesc->getPath() + mdlDesc->getHeader().path_;
 		for(unsigned int i = 0; i < models.size() && sucessfulLoad; i++)

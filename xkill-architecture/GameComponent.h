@@ -5,6 +5,7 @@
 class Event_PhysicsAttributesColliding;
 class Event_StartDeathmatch;
 class Event_EndDeathmatch;
+class Event_TransferEventsToGame;
 class Entity;
 
 struct Attribute_SpawnPoint;
@@ -17,6 +18,7 @@ class GameComponent :
 {
 private:
 	std::vector<Entity>* allEntity;
+	std::vector<Event*> levelEvents_;
 
 public:
 	GameComponent(void);
@@ -45,7 +47,15 @@ public:
 	void event_StartDeathmatch(Event_StartDeathmatch* e);
 
 	/**
-	Finds an unoccupied spawn point (no other player inside its radius). Prioritizes spawn points that least recently spawned a player. If no unoccupied spawn point is found, one is selected at random. If there exists no spawn points at all, nullptr is returned.
+	Handles the transfer of the loaded leveldata
+	*/
+	void event_TransferEventsToGame(Event_TransferEventsToGame* e);
+
+	/**
+	Finds an unoccupied spawn point (no other player inside its radius). 
+	Prioritizes spawn points that least recently spawned a player. 
+	If no unoccupied spawn point is found, one is selected at random. 
+	If there exists no spawn points at all, nullptr is returned.
 	*/
 	Attribute_SpawnPoint* findUnoccupiedSpawnPoint();
 };

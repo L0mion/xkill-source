@@ -37,8 +37,6 @@ public:
 		return attributes;
 	}
 
-	std::vector<int>  getAttributesAsEnums();
-
 	void addAttribute(AttributeController attribute);
 
 	
@@ -58,7 +56,7 @@ public:
 	/**
 	TODO
 	*/
-	DataItemList* getDataListFromAttribute(int index);
+	IAttribute* getAttributeInterface(int index);
 
 	int getID();
 };

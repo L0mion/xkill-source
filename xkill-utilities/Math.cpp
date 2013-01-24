@@ -19,7 +19,16 @@ void BoolField::clear()
 }
 bool BoolField::getBool(int index)
 {
-	return values[index/NUM_INTS_PER_BOOL] & (1 << (index%NUM_INTS_PER_BOOL));
+	return 0 < (values[index/NUM_INTS_PER_BOOL] & (1 << (index%NUM_INTS_PER_BOOL)));
+}
+bool BoolField::getAnySet()
+{
+	long value=0;
+	for(int i=0;i<NUM_INTS;i++)
+	{
+		value += values[i];
+	}
+	return (value > 0);
 }
 void BoolField::setBool(int index, bool value)
 {
@@ -117,6 +126,12 @@ float Float3::distanceTo( Float3 v )
 	return v3.length();
 }
 
+float* Float3::asFloat()
+{
+	float* asFloat = (float*)this;
+	return asFloat;
+}
+
 Float4::Float4()
 {
 	x = 0.0f;
@@ -129,6 +144,13 @@ Float4::Float4(float x, float y, float z, float w)
 	this->x = x;
 	this->y = y;
 	this->z = z;
+	this->w = w;
+};
+Float4::Float4(Float3 float3, float w)
+{
+	this->x = float3.x;
+	this->y = float3.y;
+	this->z = float3.z;
 	this->w = w;
 };
 void Float4::copy(const float* float4)
@@ -405,4 +427,45 @@ float Math::randomFloat( float min, float max )
 	float diff = max - min;
 	float r = random * diff;
 	return min + r;
+}
+
+float PlaneDotCoord(Float4 plane, Float3 coord)
+{
+	return plane.x*coord.x + plane.y*coord.y + plane.z*coord.z + plane.w*1;
+}
+
+float  Determinant(float _11, float _21, float _12, float _22)
+{
+	return _11*_22 - _21*_22;
+}
+
+Float3 PlaneIntersectPlane(Float4 plane1, Float4 plane2, Float4 plane3)
+{
+	//DO NOT USE IF NOT SURE PLANES DO INTERSECT, EG. NO PARALLEL PLANES
+	float a = Determinant(plane1.y,plane1.z,plane2.y,plane2.z);
+	float b = Determinant(plane1.z,plane1.x,plane2.z,plane2.x);
+	float c = Determinant(plane1.x,plane1.y,plane2.x,plane2.y);
+	float a2b2c2 = a*a+b*b+c*c;
+
+	float x1 = b*Determinant(plane1.w,plane1.z,plane2.w,plane2.z);
+		  x1 = x1 - c*Determinant(plane1.w,plane1.y,plane2.w,plane2.y);
+		  x1 = x1 / a2b2c2;
+	float y1 = c*Determinant(plane1.w,plane1.x,plane2.w,plane2.x);
+		  y1 = y1 - a*Determinant(plane1.w,plane1.z,plane2.w,plane2.z);
+		  y1 = y1 / a2b2c2;
+	float z1 = a*Determinant(plane1.w,plane1.y,plane2.w,plane2.y);
+		  z1 = z1 - b*Determinant(plane1.w,plane1.x,plane2.w,plane2.x);
+		  z1 = z1 / a2b2c2;
+
+	Float3 d(a,b,c);
+	Float3 o(x1,y1,z1);
+
+	float t = -PlaneDotCoord(plane3,o)/(d.x*plane3.x + d.y*plane3.y + d.z*plane3.z);
+	return o+d*t;
+}
+
+Float4 PlaneNormalize(Float4 plane)
+{
+	float length = sqrt(plane.x*plane.x + plane.y*plane.y + plane.z*plane.z);
+	return Float4(plane.x / length, plane.y / length, plane.z / length, plane.w * length);
 }

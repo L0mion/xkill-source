@@ -71,6 +71,12 @@ public:
 	void flushQueuedEvents(EventType type);
 
 	/** 
+	Get pointer to the internal vector holding the queued Events
+	Must be Flushed afterwards to make sure events are deleted.
+	*/
+	std::vector<Event*>* getPointerToQueuedEvents(EventType type);
+
+	/** 
 	Removes all queued messages without sending them,
 	prevents memory leaks if not all messages is sent.
 	*/
@@ -95,7 +101,22 @@ EventManager::getInstance()->queueEvent(EventPointer);
 #define FLUSH_QUEUED_EVENTS(EventType)								\
 EventManager::getInstance()->flushQueuedEvents(EventType);
 
+// Gets the internal pointer holding the queued events.
+#define GET_POINTER_TO_QUEUED_EVENTS(EventType)						\
+EventManager::getInstance()->getPointerToQueuedEvents(EventType);
+
 // Subscribes a IObserver to events of EventType.
+#define SUBSCRIBE_TO_EVENT(Subscriber,EventType)					\
+EventManager::getInstance()->addObserver(Subscriber, EventType);
+
+// Unsubscribes a IObserver to events of EventType.
+#define UNSUBSCRIBE_TO_EVENT(Subscriber, EventType)					\
+EventManager::getInstance()->removeObserver(Subscriber, EventType);
+
+// Unsubscribes a IObserver to all events.
+#define UNSUBSCRIBE_TO_EVENTS(Subscriber)							\
+EventManager::getInstance()->removeObserver(Subscriber);
+
 #define SUBSCRIBE_TO_EVENT(Subscriber,EventType)					\
 EventManager::getInstance()->addObserver(Subscriber, EventType);
 
@@ -117,8 +138,8 @@ EventManager::getInstance()->addObserver(Subscriber, EventType);
 
 // Fetches a vector<AttributeType>* of a specific Attribute
 // from AttributeManager.
-#define GET_ATTRIBUTE_OWNERS(OwnerPointer)							\
-	&((AttributeManager*)AttributeManagerDLLWrapper::getInstance())->OwnerPointer.owners;
+//#define GET_ATTRIBUTE_OWNERS(OwnerPointer)							\
+//	&((AttributeManager*)AttributeManagerDLLWrapper::getInstance())->OwnerPointer.owners;
 
 // Fetches a owners of a specific Attribute from AttributeManager
 #define GET_ENTITIES(EntityPointer)									\
@@ -134,12 +155,27 @@ EventManager::getInstance()->state_TemporaryVariableUsedAsSubstituteForStateMach
 
 // Defines DEBUGPRINT to an empty function in Release configuration
 #ifndef XKILL_DEBUG
+	#define BULLETPHYSICSDEBUGDRAW false //render Bullet Physics debug lines true/false
 	#define DEBUGPRINT(dataStream)
 #endif
 // Defines DEBUGPRINT to a cout function in Debug configuration
 #ifdef XKILL_DEBUG
+	#define BULLETPHYSICSDEBUGDRAW true //render Bullet Physics debug lines true/false
+	#include <iostream>
 	#define DEBUGPRINT(dataStream)									\
 	std::cout << dataStream << std::endl;			
 #endif
+
+
+
+//
+// Math macros
+//
+
+#define XMFLOAT_TO_FLOAT(XMFloatPointer )									\
+(Float3*)XMFloatPointer;
+
+#define XMFLOAT_TO_FLOAT(XMFloatPointer )									\
+(Float3*)XMFloatPointer;
 
 // END OF EVIL

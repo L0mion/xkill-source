@@ -15,6 +15,7 @@ public:
 	{
 		data = NULL;
 		entityId = -1;
+		ignoreRefresh = false;
 	}
 	~SelectedAttribute()
 	{
@@ -24,6 +25,7 @@ public:
 	DataItemList*	data;
 	int				index;
 	int				entityId;
+	bool			ignoreRefresh; // Used to prevent wasteful updating
 };
 
 static SelectedAttribute selected_attribute;
@@ -53,17 +55,20 @@ Menu_Editor::Menu_Editor( Ui::MainWindowClass& ui, QWidget* parent ) : QWidget(p
 	model_attributeInspector->setHorizontalHeaderItem(0, new QStandardItem("Property"));
 	model_attributeInspector->setHorizontalHeaderItem(1, new QStandardItem("Value"));
 	ui.treeView_attributeInspector->setModel(model_attributeInspector);
+	ui.treeView_attributeInspector->setColumnWidth(0,180);
+	
 
 
 	//ui.treeView_attributeInspector->setEditTriggers(QAbstractItemView::NoEditTriggers);
 
-	connect(ui.pushButton_editorRefresh, SIGNAL(clicked()), this, SLOT(slot_editorRefresh()));
-	connect(ui.treeView_entityBrowser, SIGNAL(clicked(QModelIndex)), this, SLOT(slot_clicked_entityBrowser(QModelIndex)));
-	connect(ui.treeView_entityInspector, SIGNAL(clicked(QModelIndex)), this, SLOT(slot_clicked_entityInspector(QModelIndex)));
-	connect(ui.horizontalSlider_simulationSpeed, SIGNAL(valueChanged(int)), this, SLOT(slot_changed_simulationSpeed(int)));
-	connect(ui.horizontalSlider_simulationSpeed, SIGNAL(valueChanged(int)), this, SLOT(slot_changed_simulationSpeed(int)));
-	connect(ui.checkBox_autoRefresh, SIGNAL(clicked()),		this,	SLOT(slot_attributeInspector_refresh()));
-	connect(ui.dockWidget, SIGNAL(visibilityChanged(bool)), this,	SLOT(slot_editorRefresh()));
+	connect(ui.pushButton_editorRefresh,			SIGNAL(clicked()),						this,	SLOT(slot_editorRefresh()));
+	connect(ui.treeView_entityBrowser,				SIGNAL(clicked(QModelIndex)),			this,	SLOT(slot_clicked_entityBrowser(QModelIndex)));
+	connect(ui.treeView_entityInspector,			SIGNAL(clicked(QModelIndex)),			this,	SLOT(slot_clicked_entityInspector(QModelIndex)));
+	connect(ui.horizontalSlider_simulationSpeed,	SIGNAL(valueChanged(int)),				this,	SLOT(slot_changed_simulationSpeed(int)));
+	connect(ui.horizontalSlider_simulationSpeed,	SIGNAL(valueChanged(int)),				this,	SLOT(slot_changed_simulationSpeed(int)));
+	connect(ui.checkBox_autoRefresh,				SIGNAL(clicked()),						this,	SLOT(slot_attributeInspector_refresh()));
+	connect(ui.dockWidget,							SIGNAL(visibilityChanged(bool)),		this,	SLOT(slot_editorRefresh()));
+	connect(model_attributeInspector,				SIGNAL(itemChanged(QStandardItem*)),	this,	SLOT(slot_attributeInspector_itemChanged()));
 	 
 	ui.dockWidget->hide();
 }
@@ -76,32 +81,20 @@ void Menu_Editor::slot_editorRefresh()
 		num_rows = 0;
 
 		// Fill columns
-		std::vector<int>* allPlayerOwner = 	GET_ATTRIBUTE_OWNERS(player);
-		entityBrowser_add("Players", allPlayerOwner);
-		std::vector<int>* allPositionOwner = GET_ATTRIBUTE_OWNERS(position);
-		entityBrowser_add("Positions", allPositionOwner);
-		std::vector<int>* allSpawnOwner = GET_ATTRIBUTE_OWNERS(spawnPoint);
-		entityBrowser_add("SpawnPoints", allSpawnOwner);
-		std::vector<int>* allRenderOwner = GET_ATTRIBUTE_OWNERS(render);
-		entityBrowser_add("Render", allRenderOwner);
-		std::vector<int>* allMeshOwner = GET_ATTRIBUTE_OWNERS(mesh);
-		entityBrowser_add("Meshes", allMeshOwner);
-		std::vector<int>* allPhysicsOwner = GET_ATTRIBUTE_OWNERS(physics);
-		entityBrowser_add("PhysicsObjects", allPhysicsOwner);
-		std::vector<int>* allInputDeviceOwner = GET_ATTRIBUTE_OWNERS(inputDevice);
-		entityBrowser_add("InputDevices", allInputDeviceOwner);
-		std::vector<int>* allProjectileOwner = GET_ATTRIBUTE_OWNERS(projectile);
-		entityBrowser_add("Projectiles", allProjectileOwner);
+		entityBrowser_add("Players",		&itrPlayer.getAllOwnerId());
+		entityBrowser_add("Positions",		&itrPosition.getAllOwnerId());
+		entityBrowser_add("SpawnPoints",	&itrSpawnPoint.getAllOwnerId());
+		entityBrowser_add("Render",			&itrRender.getAllOwnerId());
+		entityBrowser_add("Meshes",			&itrMesh.getAllOwnerId());
+		entityBrowser_add("PhysicsObjects", &itrPhysics.getAllOwnerId());
+		entityBrowser_add("InputDevices",	&itrInputDevice.getAllOwnerId());
+		entityBrowser_add("Projectiles",	&itrProjectile.getAllOwnerId());
 		
 	}
 }
 
 void Menu_Editor::entityBrowser_add(QString name, std::vector<int>* owners)
 {
-	std::vector<Attribute_Player>* allPlayers		=	GET_ATTRIBUTES(player);
-
-	std::vector<int>* allSpawnOwner = GET_ATTRIBUTE_OWNERS(spawnPoint);
-	allPlayers						= GET_ATTRIBUTES(player);
 	// Create / reuse row
 	QStandardItem* item = model_entityBrowser->item(num_rows);
 	// TRUE: Item doesn't exist, create new Item
@@ -160,6 +153,7 @@ void Menu_Editor::onEvent(Event* e)
 				slot_attributeInspector_refresh();
 			}
 		}
+		break;
 	default:
 		break;
 	}
@@ -181,84 +175,19 @@ void Menu_Editor::slot_clicked_entityBrowser( QModelIndex indexClicked )
 		int num_items = 0;
 		for(int i=0; i<attributes->size(); i++)
 		{
-			int attributeType = attributes->at(i).type;
-			switch (attributeType) 
-			{
-			case ATTRIBUTE_POSITION:
-				entityInspector_add(num_items, "Position");                                   
-				break;
-			case ATTRIBUTE_SPATIAL:
-				entityInspector_add(num_items, "Spatial");
-				break;
-			case ATTRIBUTE_RENDER:
-				entityInspector_add(num_items, "Render");
-				break;
-			case ATTRIBUTE_DEBUGSHAPE:
-				entityInspector_add(num_items, "DebugShape");
-				break;
-			case ATTRIBUTE_PHYSICS:
-				entityInspector_add(num_items, "Physics");
-				break;
-			case ATTRIBUTE_CAMERA:
-				entityInspector_add(num_items, "Camera");
-				break;
-			case ATTRIBUTE_INPUT:
-				entityInspector_add(num_items, "Input");
-				break;
-			case ATTRIBUTE_PLAYER:
-				entityInspector_add(num_items, "Player");
-				break;
-			case ATTRIBUTE_BOUNDING:
-				entityInspector_add(num_items, "Bounding");
-				break;
-			case ATTRIBUTE_PROJECTILE:
-				entityInspector_add(num_items, "Projectile");
-				break;
-			case ATTRIBUTE_LIGHT_DIRECTIONAL:
-				entityInspector_add(num_items, "LightDir");
-				break;
-			case ATTRIBUTE_LIGHT_POINT:
-				entityInspector_add(num_items, "LightPoint");
-				break;
-			case ATTRIBUTE_LIGHT_SPOT:
-				entityInspector_add(num_items, "LightSpot");
-				break;
-			case ATTRIBUTE_MESH:
-				entityInspector_add(num_items, "Mesh");
-				break;
-			case ATTRIBUTE_HEALTH:
-				entityInspector_add(num_items, "Health");
-				break;
-			case ATTRIBUTE_DAMAGE:
-				entityInspector_add(num_items, "Damage");
-				break;
-			case ATTRIBUTE_SPAWNPOINT:
-				entityInspector_add(num_items, "SpawnPoint");
-				break;
-			case ATTRIBUTE_WEAPONSTATS:
-				entityInspector_add(num_items, "WeaponStats");
-				break;
-			case ATTRIBUTE_EXPLOSIONSPHERE:
-				entityInspector_add(num_items, "ExplosionSphere");
-				break;
-			case ATTRIBUTE_INPUTDEVICE:
-				entityInspector_add(num_items, "InputDevice");
-				break;
-			default:
-				entityInspector_add(num_items, "UNKOWN");
-				break;
-			}
+			// Name
+			std::string attributeName = attributes->at(i).getAttribute()->getName();
+			entityInspector_add(num_items, attributeName.c_str());                                   
+		
+			// ID
 			QStandardItem* item_id = new QStandardItem();
 			model_entityInspector->setItem(num_items, 1, item_id);
-			model_entityInspector->setData(item_id->index(), QVariant(attributes->at(i).index));
+			model_entityInspector->setData(item_id->index(), QVariant(attributes->at(i).getIndex()));
+			
 			num_items++;
-
-			
-			
 		}
-		//model_entityInspector->setItem(1, new QStandardItem("Blaj"));
 
-			// Remove unused rows
+		// Remove unused rows
 		int excessRows = model_entityInspector->rowCount() - num_items;
 		if(excessRows>0)
 			model_entityInspector->removeRows(num_items, excessRows);
@@ -283,27 +212,24 @@ void Menu_Editor::slot_changed_simulationSpeed(int speed)
 
 void Menu_Editor::slot_attributeInspector_refresh()
 {
+	// Disable attributes from refreshing
+	// which prevents unnecessary updating
+	// attributes while creating menu
+
+	selected_attribute.ignoreRefresh = true;
 
 	if(ui.checkBox_autoRefresh->isChecked())
 	{
-		ui.treeView_attributeInspector->setEditTriggers(QAbstractItemView::NoEditTriggers);
-		ui.treeView_attributeInspector->setSelectionMode(QAbstractItemView::NoSelection);
-	}
-	else
-	{
-		ui.treeView_attributeInspector->setEditTriggers(QAbstractItemView::DoubleClicked);
-		ui.treeView_attributeInspector->setSelectionMode(QAbstractItemView::SingleSelection);
-	}
-
-	/*if(ui.checkBox_autoRefresh->isChecked())
-	{
+		/*ui.treeView_attributeInspector->setEditTriggers(QAbstractItemView::NoEditTriggers);
+		ui.treeView_attributeInspector->setSelectionMode(QAbstractItemView::NoSelection);*/
 		ui.treeView_attributeInspector->setEnabled(false);
 	}
 	else
 	{
+		/*ui.treeView_attributeInspector->setEditTriggers(QAbstractItemView::DoubleClicked);
+		ui.treeView_attributeInspector->setSelectionMode(QAbstractItemView::SingleSelection);*/
 		ui.treeView_attributeInspector->setEnabled(true);
 	}
-*/
 
 	//
 	// Fetch entity we will inspect attributes from
@@ -315,13 +241,17 @@ void Menu_Editor::slot_attributeInspector_refresh()
 
 	Entity* entity = itr_entity->at(selected_attribute.entityId);
 
-	// fetch DataList from the selected Entity
+	// fetch DataList from the selected  attribute 
+	// of the selected Entity
+
 	int index = selected_attribute.index;
-	DataItemList* list = entity->getDataListFromAttribute(index);
+	IAttribute* attribute = entity->getAttributeInterface(index);
 
 	// abort if attribute does not exist
-	if(list == NULL)
+	if(attribute == NULL)
 		return;
+
+	DataItemList* list = attribute->getDataList();
 
 	// save data (we need it to save data into attributes later on)
 	delete selected_attribute.data; // delete previous data
@@ -329,7 +259,7 @@ void Menu_Editor::slot_attributeInspector_refresh()
 
 
 
-	//
+	//////////////////////////////////////////////////////////////////////////
 	// Build menu from DataList
 	//
 
@@ -358,146 +288,316 @@ void Menu_Editor::slot_attributeInspector_refresh()
 		num_items++;
 
 
-		//
+		//////////////////////////////////////////////////////////////////////////
 		// Fill item with data
 		//
 
-		DataItem data = list->getNext();
+		DataItem* data = list->getNext();
 
 		// set label
-		item_property->setText(data.label.c_str());
+		item_property->setText(data->label.c_str());
 		item_property->setFlags(Qt::ItemIsSelectable | Qt::ItemIsUserCheckable | Qt::ItemIsEnabled | Qt::ItemIsEditable);
-		// set data
-		DataItem::DataType type = data.type;
-		if(type == DataItem::_BOOL)
-		{
-			bool value = *data.value._bool;
-			model_attributeInspector->setData(item_value->index(), QVariant(value));
-		}
-		if(type == DataItem::_INT)
-		{
-			int value = *data.value._int;
-			model_attributeInspector->setData(item_value->index(), QVariant(value));
-		}
-		if(type == DataItem::_FLOAT)
-		{
-			double value = (double)*data.value._float;
-			model_attributeInspector->setData(item_value->index(), QVariant(value));
-		}
+		
 
-		if(type == DataItem::_FLOAT2)
-		{
-			Float2 value = *data.value._float2;
-			double x = value.x;
-			{
-				item_property->setChild(0, 0, new QStandardItem("X"));
-				QStandardItem* child = new QStandardItem();
-				item_property->setChild(0, 1, child);
-				model_attributeInspector->setData(child->index(), QVariant(x));
-				//model_attributeInspector->setData(model_attributeInspector->index(0), Qt::blue, Qt::BackgroundRole);
-			}
-			double y = value.y;
-			{
-				item_property->setChild(1, 0, new QStandardItem("Y"));
-				QStandardItem* child = new QStandardItem();
-				item_property->setChild(1, 1,child);
-				model_attributeInspector->setData(child->index(), QVariant(y));
-			}
-		}
+		//
+		// create menu for the "specific" type
+		//
 
-		if(type == DataItem::_FLOAT3)
+		DataItem::DataType type = data->type;
+		switch(type) 
 		{
-			Float3 value = *data.value._float3;
-			double x = value.x;
+		case DataItem::_BOOL:
 			{
-				item_property->setChild(0, 0, new QStandardItem("X"));
-				QStandardItem* child = new QStandardItem();
-				item_property->setChild(0, 1, child);
-				model_attributeInspector->setData(child->index(), QVariant(x));
-				//model_attributeInspector->setData(model_attributeInspector->index(0), Qt::blue, Qt::BackgroundRole);
-			}
-			double y = value.y;
-			{
-				item_property->setChild(1, 0, new QStandardItem("Y"));
-				QStandardItem* child = new QStandardItem();
-				item_property->setChild(1, 1,child);
-				model_attributeInspector->setData(child->index(), QVariant(y));
-			}
-			double z = value.z;
-			{
-				item_property->setChild(2, 0, new QStandardItem("Z"));
-				QStandardItem* child = new QStandardItem();
-				item_property->setChild(2, 1, child);
-				model_attributeInspector->setData(child->index(), QVariant(z));
-			}
-		}
+				bool value = *data->value._bool;
+				model_attributeInspector->setData(item_value->index(), QVariant(value));
 
-		if(type == DataItem::_FLOAT4)
-		{
-			Float4 value = *data.value._float4;
-			double x = value.x;
-			{
-				item_property->setChild(0, 0, new QStandardItem("X"));
-				QStandardItem* child = new QStandardItem();
-				item_property->setChild(0, 1, child);
-				model_attributeInspector->setData(child->index(), QVariant(x));
-				//model_attributeInspector->setData(model_attributeInspector->index(0), Qt::blue, Qt::BackgroundRole);
+				// Fetch new value from menu
+				QVariant test = model_attributeInspector->data(item_value->index());
+				QVariant::Type test2 = test.type();
+				test2 = test.type();
 			}
-			double y = value.y;
+			break;
+		case DataItem::_INT:
 			{
-				item_property->setChild(1, 0, new QStandardItem("Y"));
-				QStandardItem* child = new QStandardItem();
-				item_property->setChild(1, 1,child);
-				model_attributeInspector->setData(child->index(), QVariant(y));
+				int value = *data->value._int;
+				model_attributeInspector->setData(item_value->index(), QVariant(value));
 			}
-			double z = value.z;
+			break;
+		case DataItem::_FLOAT:
 			{
-				item_property->setChild(2, 0, new QStandardItem("Z"));
-				QStandardItem* child = new QStandardItem();
-				item_property->setChild(2, 1, child);
-				model_attributeInspector->setData(child->index(), QVariant(z));
+				double value = (double)*data->value._float;
+				model_attributeInspector->setData(item_value->index(), QVariant(value));
 			}
-			double w = value.w;
+			break;
+		case DataItem::_FLOAT2:
 			{
-				item_property->setChild(3, 0, new QStandardItem("W"));
-				QStandardItem* child = new QStandardItem();
-				item_property->setChild(3, 1, child);
-				model_attributeInspector->setData(child->index(), QVariant(w));
+				Float2 value = *data->value._float2;
+				double x = value.x;
+				{
+					item_property->setChild(0, 0, new QStandardItem("X"));
+					QStandardItem* child = new QStandardItem();
+					item_property->setChild(0, 1, child);
+					model_attributeInspector->setData(child->index(), QVariant(x));
+					//model_attributeInspector->setData(model_attributeInspector->index(0), Qt::blue, Qt::BackgroundRole);
+				}
+				double y = value.y;
+				{
+					item_property->setChild(1, 0, new QStandardItem("Y"));
+					QStandardItem* child = new QStandardItem();
+					item_property->setChild(1, 1,child);
+					model_attributeInspector->setData(child->index(), QVariant(y));
+				}
 			}
-		}
-
-		if(type == DataItem::_FLOAT4X4)
-		{
-			Float4x4 value = *data.value._float4x4;
+			break;
+		case DataItem::_FLOAT3:
 			{
-				item_property->setChild(0, 0, new QStandardItem("MATRIX"));
+				Float3 value = *data->value._float3;
+				double x = value.x;
+				{
+					item_property->setChild(0, 0, new QStandardItem("X"));
+					QStandardItem* child = new QStandardItem();
+					item_property->setChild(0, 1, child);
+					model_attributeInspector->setData(child->index(), QVariant(x));
+					//model_attributeInspector->setData(model_attributeInspector->index(0), Qt::blue, Qt::BackgroundRole);
+				}
+				double y = value.y;
+				{
+					item_property->setChild(1, 0, new QStandardItem("Y"));
+					QStandardItem* child = new QStandardItem();
+					item_property->setChild(1, 1,child);
+					model_attributeInspector->setData(child->index(), QVariant(y));
+				}
+				double z = value.z;
+				{
+					item_property->setChild(2, 0, new QStandardItem("Z"));
+					QStandardItem* child = new QStandardItem();
+					item_property->setChild(2, 1, child);
+					model_attributeInspector->setData(child->index(), QVariant(z));
+				}
 			}
-		}
+			break;
+		case DataItem::_FLOAT4:
+			{
+				Float4 value = *data->value._float4;
+				double x = value.x;
+				{
+					item_property->setChild(0, 0, new QStandardItem("X"));
+					QStandardItem* child = new QStandardItem();
+					item_property->setChild(0, 1, child);
+					model_attributeInspector->setData(child->index(), QVariant(x));
+					//model_attributeInspector->setData(model_attributeInspector->index(0), Qt::blue, Qt::BackgroundRole);
+				}
+				double y = value.y;
+				{
+					item_property->setChild(1, 0, new QStandardItem("Y"));
+					QStandardItem* child = new QStandardItem();
+					item_property->setChild(1, 1,child);
+					model_attributeInspector->setData(child->index(), QVariant(y));
+				}
+				double z = value.z;
+				{
+					item_property->setChild(2, 0, new QStandardItem("Z"));
+					QStandardItem* child = new QStandardItem();
+					item_property->setChild(2, 1, child);
+					model_attributeInspector->setData(child->index(), QVariant(z));
+				}
+				double w = value.w;
+				{
+					item_property->setChild(3, 0, new QStandardItem("W"));
+					QStandardItem* child = new QStandardItem();
+					item_property->setChild(3, 1, child);
+					model_attributeInspector->setData(child->index(), QVariant(w));
+				}
+			}
+			break;
+		case DataItem::_FLOAT4X4:
+			{
+				Float4x4 value = *data->value._float4x4;
+				{
+					item_property->setChild(0, 0, new QStandardItem("MATRIX"));
+				}
+			}
+			break;
+		case DataItem::_STRING:
+			{
+				std::string value = *data->value._string;
+				model_attributeInspector->setData(item_value->index(), QVariant(value.c_str()));
+			}
+			break;
+		case DataItem::_ATTRIBUTE_POINTER:
+			{
+				int value = *data->value._int;
+				model_attributeInspector->setData(item_value->index(), QVariant(value));
+			}
+			break;
+		case DataItem::_INVALID:
+			{
+				model_attributeInspector->setData(item_value->index(), QVariant(""));
+			}
+			break;
+		default:
+			{
 
-		if(type == DataItem::_STRING)
-		{
-			std::string value = *data.value._string;
-			model_attributeInspector->setData(item_value->index(), QVariant(value.c_str()));
-		}
-
-
-		if(type == DataItem::_ATTRIBUTE_POINTER)
-		{
-			int value = *data.value._int;
-			model_attributeInspector->setData(item_value->index(), QVariant(value));
-		}
-
-		if(type == DataItem::_INVALID)
-		{
-			model_attributeInspector->setData(item_value->index(), QVariant(""));
+			}
+			break;
 		}
 	}
+
+
+	//////////////////////////////////////////////////////////////////////////
+	// Clean up
+	//
 
 	// Remove unused rows
 	int excessRows = model_attributeInspector->rowCount() - num_items;
 	if(excessRows>0)
 		model_attributeInspector->removeRows(num_items, excessRows);
 	ui.treeView_attributeInspector->expandAll();
+
+	// Enable itemChanged to trigger again
+	// see above
+	selected_attribute.ignoreRefresh = false;
+}
+
+void Menu_Editor::slot_attributeInspector_itemChanged()
+{
+	// Only activate if update is caused by "player"
+	// not by update is caused by code
+	if(!selected_attribute.ignoreRefresh)
+	{
+		// abort if data do not exist
+		DataItemList* list = selected_attribute.data;
+		if(!list)
+			return;
+		// abort if Entity do not exists
+		if(selected_attribute.entityId == -1)
+			return;
+		Entity* entity = itr_entity->at(selected_attribute.entityId);
+		// abort if attribute does not exist
+		IAttribute* attribute = entity->getAttributeInterface(selected_attribute.index);
+		if(!attribute)
+			return;
+
+		// parse menu and save changes into our DataList
+		list->reset();
+		int num_items = 0;
+		while(list->hasNext())
+		{
+			// Fetch data
+			DataItem* data = list->getNext();
+
+			// Determine type
+			DataItem::DataType type = data->type;
+			switch(type) 
+			{
+			case DataItem::_BOOL:
+				{
+					// Access value
+					bool* value = data->value._bool;
+					
+					// Fetch new value from menu
+					*value = model_attributeInspector->data(model_attributeInspector->item(num_items, 1)->index()).toBool();
+				}
+				break;
+			case DataItem::_INT:
+				{
+					// Access value
+					int* value = data->value._int;
+
+					// Fetch new value from menu
+					*value = model_attributeInspector->data(model_attributeInspector->item(num_items, 1)->index()).toInt();
+				}
+				break;
+			case DataItem::_FLOAT:
+				{
+					// Access value
+					float* value = data->value._float;
+
+					// Fetch new value from menu
+					*value = model_attributeInspector->data(model_attributeInspector->item(num_items, 1)->index()).toFloat();
+				}
+				break;
+			case DataItem::_FLOAT2:
+				{
+					// Access value
+					Float2* value = data->value._float2;
+
+					// Fetch new value from menu
+					QStandardItem* item_property = model_attributeInspector->item(num_items, 0);
+
+					value->x = (float)model_attributeInspector->data(item_property->child(0, 1)->index()).toDouble();
+					value->y = (float)model_attributeInspector->data(item_property->child(1, 1)->index()).toDouble();
+				}
+				break;
+			case DataItem::_FLOAT3:
+				{
+					// Access value
+					Float3* value = data->value._float3;
+
+					// Fetch new value from menu
+					QStandardItem* item_property = model_attributeInspector->item(num_items, 0);
+					
+					value->x = (float)model_attributeInspector->data(item_property->child(0, 1)->index()).toDouble();
+					value->y = (float)model_attributeInspector->data(item_property->child(1, 1)->index()).toDouble();
+					value->z = (float)model_attributeInspector->data(item_property->child(2, 1)->index()).toDouble();
+				}
+				break;
+			case DataItem::_FLOAT4:
+				{
+					// Access value
+					Float4* value = data->value._float4;
+
+					// Fetch new value from menu
+					QStandardItem* item_property = model_attributeInspector->item(num_items, 0);
+
+					value->x = (float)model_attributeInspector->data(item_property->child(0, 1)->index()).toDouble();
+					value->y = (float)model_attributeInspector->data(item_property->child(1, 1)->index()).toDouble();
+					value->z = (float)model_attributeInspector->data(item_property->child(2, 1)->index()).toDouble();
+					value->w = (float)model_attributeInspector->data(item_property->child(3, 1)->index()).toDouble();
+				}
+				break;
+			case DataItem::_STRING:
+				{
+					// Access value
+					std::string* value = data->value._string;
+
+					// Fetch new value from menu
+					*value = model_attributeInspector->data(model_attributeInspector->item(num_items, 1)->index()).toString().toStdString();
+				}
+				break;
+			case DataItem::_ATTRIBUTE_POINTER:
+				{
+					// Access value
+					int* value = data->value._int;
+
+					// Fetch new value from menu
+					*value = model_attributeInspector->data(model_attributeInspector->item(num_items, 1)->index()).toInt();
+				}
+				break;
+			}
+
+			// Switch to next row
+			num_items++;
+		}
+
+		// Save to attribute
+		attribute->saveTo(list);
+
+		// Refresh all attributes connected to entity
+		// this is to ensure attributes with pointers 
+		// (such as physics) gets updated as well as 
+		// the attribute they are pointing to
+
+		std::vector<AttributeController>* attributes = entity->getAttributeControllers();
+		for(int i=0; i<attributes->size(); i++)
+		{
+			int attributeEnum = attributes->at(i).getAttribute()->getType();
+			int index = attributes->at(i).getIndex();
+
+			// Send event
+			EventManager::getInstance()->sendEvent(&Event_AttributeUpdated(index, attributeEnum));
+		}
+	}
 }
 
 

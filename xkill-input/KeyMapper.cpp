@@ -351,13 +351,9 @@ void KeyMapper::handleAxisObjectSettings(InputAxisObject* axis, std::string sett
 		settingsPair = &settings->at(i);
 		switch(settingsPair->first)
 		{
-		case 'F': //Float key mapping
+		case 'M': //Key mapping
 			if(Converter::StrToUInt(settingsPair->second, intValue))
-				axis->addFloatMapping(intValue);
-			break;
-		case 'B': //Bool key mapping
-			if(Converter::StrToUInt(settingsPair->second, intValue))
-				axis->addBoolMapping(intValue);
+				axis->addMapping(intValue);
 			break;
 		case 'D': //Deadzone
 			floatValue = Converter::StrToFloat(settingsPair->second);
@@ -397,13 +393,9 @@ void KeyMapper::handleButtonObjectSettings(InputButtonObject* button, std::strin
 		settingsPair = &settings->at(i);
 		switch(settingsPair->first)
 		{
-		case 'F': //Float key mapping
+		case 'M': //Key mapping
 			if(Converter::StrToUInt(settingsPair->second, intValue))
-				button->addFloatMapping(intValue);
-			break;
-		case 'B': //Bool key mapping
-			if(Converter::StrToUInt(settingsPair->second, intValue))
-				button->addBoolMapping(intValue);
+				button->addMapping(intValue);
 			break;
 		case 'I': //Inverted
 			if(Converter::StrToUInt(settingsPair->second, intValue))
@@ -435,13 +427,9 @@ void KeyMapper::handleTriggerObjectSettings(InputTriggerObject* trigger, std::st
 		settingsPair = &settings->at(i);
 		switch(settingsPair->first)
 		{
-		case 'F': //Float key mapping
+		case 'M': //Key mapping
 			if(Converter::StrToUInt(settingsPair->second, intValue))
-				trigger->addFloatMapping(intValue);
-			break;
-		case 'B': //Bool key mapping
-			if(Converter::StrToUInt(settingsPair->second, intValue))
-				trigger->addBoolMapping(intValue);
+				trigger->addMapping(intValue);
 			break;
 		case 'D': //Deadzone
 			floatValue = Converter::StrToFloat(settingsPair->second);
@@ -544,15 +532,10 @@ std::string KeyMapper::getAxesString(std::vector<InputAxisObject*>* axes)
 		axesString += "I=" + Converter::IntToStr((int)axis->isInverted()) + " ";
 		axesString += "S=" + Converter::FloatToStr(axis->getSensitivity()) + " ";
 
-		std::vector<int>* mappings = axis->getFloatMappings();
+		std::vector<int>* mappings = axis->getMappings();
 
 		for(unsigned int j = 0; j < mappings->size(); j++)
-			axesString += "F=" + Converter::IntToStr(mappings->at(j)) + " ";
-
-		mappings = axis->getBoolMappings();
-
-		for(unsigned int j = 0; j < mappings->size(); j++)
-			axesString += "B=" + Converter::IntToStr(mappings->at(j)) + " ";
+			axesString += "M=" + Converter::IntToStr(mappings->at(j)) + " ";
 	}
 
 	return axesString;
@@ -572,18 +555,11 @@ std::string KeyMapper::getButtonString(std::vector<InputButtonObject*>* buttons)
 		buttonString += "I=" + Converter::IntToStr((int)button->isInverted()) + " ";
 		buttonString += "S=" + Converter::FloatToStr(button->getSensitivity()) + " ";
 
-		std::vector<int>* mappings = button->getFloatMappings();
+		std::vector<int>* mappings = button->getMappings();
 
 		for(unsigned int j = 0; j < mappings->size(); j++)
 		{
-			buttonString += "F=" + Converter::IntToStr(mappings->at(j)) + " ";
-		}
-
-		mappings = button->getBoolMappings();
-
-		for(unsigned int j = 0; j < mappings->size(); j++)
-		{
-			buttonString += "B=" + Converter::IntToStr(mappings->at(j)) + " ";
+			buttonString += "M=" + Converter::IntToStr(mappings->at(j)) + " ";
 		}
 	}
 
@@ -605,18 +581,11 @@ std::string KeyMapper::getTriggerString(std::vector<InputTriggerObject*>* trigge
 		triggerString += "D=" + Converter::FloatToStr(trigger->getDeadZone()) + " ";
 		triggerString += "S=" + Converter::FloatToStr(trigger->getSensitivity()) + " ";
 
-		std::vector<int>* mappings = trigger->getFloatMappings();
+		std::vector<int>* mappings = trigger->getMappings();
 
 		for(unsigned int j = 0; j < mappings->size(); j++)
 		{
-			triggerString += "F=" + Converter::IntToStr(mappings->at(j)) + " ";
-		}
-
-		mappings = trigger->getBoolMappings();
-
-		for(unsigned int j = 0; j < mappings->size(); j++)
-		{
-			triggerString += "B=" + Converter::IntToStr(mappings->at(j)) + " ";
+			triggerString += "M=" + Converter::IntToStr(mappings->at(j)) + " ";
 		}
 	}
 

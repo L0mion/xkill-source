@@ -3,16 +3,199 @@
 #include <xkill-utilities/AttributeType.h>
 #include <xkill-utilities/EventType.h>
 #include <xkill-utilities/EventManager.h>
-#include "Camera.h"
+
+#include <DirectXMath.h>
+#include <windows.h>
 
 ATTRIBUTES_DECLARE_ALL;
+
+void updateView(Attribute_Camera* camera)
+{
+	// Fetch attributes from camera
+	Float3& playerPosition		= itrPosition.at(itrSpatial.at(camera->ptr_spatial)->ptr_position)->position;
+	
+	DirectX::XMFLOAT4X4& view	= *(DirectX::XMFLOAT4X4*)&camera->mat_view;
+	DirectX::XMFLOAT3& look		= *(DirectX::XMFLOAT3*)&camera->look; 
+	
+	DirectX::XMFLOAT3& up		= *(DirectX::XMFLOAT3*)&camera->up;
+	DirectX::XMFLOAT3& right	= *(DirectX::XMFLOAT3*)&camera->right;
+
+	DirectX::XMVECTOR& vLook	= DirectX::XMLoadFloat3((DirectX::XMFLOAT3*)&camera->look); 
+	DirectX::XMVECTOR& vUp		= DirectX::XMLoadFloat3((DirectX::XMFLOAT3*)&camera->up);
+	DirectX::XMVECTOR& vRight	= DirectX::XMLoadFloat3((DirectX::XMFLOAT3*)&camera->right);
+
+	// Add offset to camera position
+	Float3 position = playerPosition;
+	position.x += look.x*0.1f;
+	position.y += look.y*0.1f;
+	position.z += look.z*0.1f;
+
+	float& zFar			= camera->zFar;
+	float& zNear		= camera->zNear;
+	float& aspectRatio	= camera->aspectRatio;
+	float& fieldOfView	= camera->fieldOfView;
+
+
+	//
+	// Do calculation as normal
+	//
+
+	vLook = DirectX::XMVector3Normalize(vLook);
+
+	vUp = DirectX::XMVector3Cross(vLook, vRight);
+	vUp = DirectX::XMVector3Normalize(vUp);
+
+	vRight = DirectX::XMVector3Cross(vUp, vLook);
+	vRight = DirectX::XMVector3Normalize(vRight);
+
+	DirectX::XMVECTOR vPosition = DirectX::XMVectorSet( position.x*-1.0f,
+		position.y*-1.0f,
+		position.z*-1.0f,
+		1.0f);
+
+	DirectX::XMVECTOR vResult;
+	DirectX::XMFLOAT3 fResult;
+	vResult = DirectX::XMVector3Dot(vPosition, vRight);
+	DirectX::XMStoreFloat3(&fResult, vResult);
+	float x = fResult.x;
+	vResult = DirectX::XMVector3Dot(vPosition, vUp);
+	DirectX::XMStoreFloat3(&fResult, vResult);
+	float y = fResult.y;
+	vResult = DirectX::XMVector3Dot(vPosition, vLook);
+	DirectX::XMStoreFloat3(&fResult, vResult);
+	float z = fResult.z;
+
+	DirectX::XMStoreFloat3(&right, vRight);
+	DirectX::XMStoreFloat3(&up, vUp);
+	DirectX::XMStoreFloat3(&look, vLook);
+
+	view(0, 0) = right.x;
+	view(1, 0) = right.y;
+	view(2, 0) = right.z;
+	view(3, 0) = x;
+
+	view(0, 1) = up.x;
+	view(1, 1) = up.y;
+	view(2, 1) = up.z;
+	view(3, 1) = y;
+
+	view(0, 2) = look.x;
+	view(1, 2) = look.y;
+	view(2, 2) = look.z;
+	view(3, 2) = z;
+
+	view(0, 3) = 0.0f;
+	view(1, 3) = 0.0f;
+	view(2, 3) = 0.0f;
+	view(3, 3) = 1.0f;
+}
+
+void updateProj(Attribute_Camera* camera)
+{
+	DirectX::XMFLOAT4X4& projection = *(DirectX::XMFLOAT4X4*)&camera->mat_projection;
+	float& zFar		= camera->zFar;
+	float& zNear	= camera->zNear;
+	float& aspectRatio	= camera->aspectRatio;
+	float& fieldOfView		= camera->fieldOfView;
+
+	ZeroMemory(&projection, sizeof(projection));
+
+	projection(0, 0) = 1/(aspectRatio*(tan(fieldOfView/2)));
+	projection(1, 1) = 1/(tan(fieldOfView/2));
+	projection(2, 2) = zFar/(zFar - zNear);
+	projection(2, 3) = 1.0f;
+	projection(3, 2) = (-zNear * zFar)/(zFar - zNear);
+}
+
+void yaw(const float angle, Attribute_Camera* camera)
+{
+	//Load vectors in to XMVECTORs to utilize SIMD.
+	DirectX::XMVECTOR vLook		= DirectX::XMLoadFloat3((DirectX::XMFLOAT3*)&camera->look); 
+	DirectX::XMVECTOR vUp		= DirectX::XMLoadFloat3((DirectX::XMFLOAT3*)&camera->up);
+	DirectX::XMVECTOR vRight	= DirectX::XMLoadFloat3((DirectX::XMFLOAT3*)&camera->right);
+
+	float cosAngle = cos((angle)/2);
+	float sinAngle = sin((angle)/2);
+
+	//Create a Quaternion that describes the rotation.
+	DirectX::XMFLOAT4 fQuaternion = DirectX::XMFLOAT4(0.0f*sinAngle, 1.0f*sinAngle, 0.0f*sinAngle, cosAngle);
+	DirectX::XMVECTOR vQuaternion = DirectX::XMLoadFloat4(&fQuaternion);
+	vQuaternion = DirectX::XMQuaternionNormalize(vQuaternion);
+
+	//Rotate all vectors that are affected by the transform. 
+	vRight	= DirectX::XMVector3Rotate(vRight, vQuaternion);
+	vUp		= DirectX::XMVector3Rotate(vUp, vQuaternion);
+	vLook	= DirectX::XMVector3Rotate(vLook, vQuaternion);
+
+	//Store the results in member variables.
+	DirectX::XMStoreFloat3((DirectX::XMFLOAT3*)&camera->right,	vRight);
+	DirectX::XMStoreFloat3((DirectX::XMFLOAT3*)&camera->up,		vUp);
+	DirectX::XMStoreFloat3((DirectX::XMFLOAT3*)&camera->look,	vLook);
+}
+
+
+void pitch(const float angle, Attribute_Camera* camera)
+{
+	//Load vectors in to XMVECTORs to utilize SIMD.
+	DirectX::XMVECTOR vUp			= DirectX::XMLoadFloat3((DirectX::XMFLOAT3*)&camera->up);
+	DirectX::XMVECTOR vLook			= DirectX::XMLoadFloat3((DirectX::XMFLOAT3*)&camera->look); 
+	DirectX::XMVECTOR vStraightUp	= DirectX::XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
+	Float3& right					= camera->right;
+
+	//Create a Quaternion that describes the rotation.
+	float cosAngle = cos((angle)/2);
+	float sinAngle = sin((angle)/2);
+	DirectX::XMFLOAT4 fQuaternion = DirectX::XMFLOAT4(right.x*sinAngle, right.y*sinAngle, right.z*sinAngle, cosAngle);
+	DirectX::XMVECTOR vQuaternion = DirectX::XMLoadFloat4(&fQuaternion);
+	vQuaternion = DirectX::XMQuaternionNormalize(vQuaternion);  
+
+	//Rotate all vectors that are affected by the transform. 
+	vUp		= DirectX::XMVector3Rotate(vUp, vQuaternion);
+	vLook	= DirectX::XMVector3Rotate(vLook, vQuaternion);
+
+	//Check the angle between the camera's up-vector and "straight up".
+	DirectX::XMFLOAT3 fResult;
+	DirectX::XMVECTOR vResult = DirectX::XMVector3AngleBetweenNormals(vUp, vStraightUp);
+	DirectX::XMStoreFloat3(&fResult, vResult);
+
+	//Store the results in member variables if the the angle between the camera's up-vector
+	//and "straight up" is less than pi/2.
+	if(fResult.x < DirectX::XM_PI/2 && fResult.x > -DirectX::XM_PI/2)
+	{
+		DirectX::XMStoreFloat3((DirectX::XMFLOAT3*)&camera->up, vUp);
+		DirectX::XMStoreFloat3((DirectX::XMFLOAT3*)&camera->look, vLook);
+	}
+}
+
+void mouse(const float dX, const float dY, Attribute_Camera* camera)
+{
+	yaw(dY, camera);
+	pitch(dY, camera);
+}
+
+void updateAspectRatio()
+{
+	// Recalculate view and 
+	// resize aspect ratios of all cameras 
+	while(itrSplitScreen.hasNext())
+	{
+		Attribute_SplitScreen* splitScreen = itrSplitScreen.getNext();
+		Attribute_Camera* camera = itrCamera.at(splitScreen->ptr_camera);
+		Attribute_Spatial* spatial = itrSpatial.at(camera->ptr_spatial);
+		Attribute_Position* position = itrPosition.at(spatial->ptr_position);
+
+		camera->aspectRatio=splitScreen->getAspectRatio();
+		updateProj(camera);
+		updateView(camera);
+	}
+}
 
 CameraComponent::CameraComponent()
 {
 	// subscribe to events
-	SUBSCRIBE_TO_EVENT(this, EVENT_WINDOW_RESIZE);
-
-	cameraAttributes_	= nullptr;
+	SUBSCRIBE_TO_EVENT(this, EVENT_SPLITSCREEN_CHANGED);
+	SUBSCRIBE_TO_EVENT(this, EVENT_START_DEATHMATCH);
+	ATTRIBUTES_INIT_ALL;
 }
 
 CameraComponent::~CameraComponent()
@@ -21,34 +204,6 @@ CameraComponent::~CameraComponent()
 
 bool CameraComponent::init()
 {
-	// fetch attributes
-	cameraAttributes_ = GET_ATTRIBUTES(camera);
-	inputAttributes_ = GET_ATTRIBUTES(input);
-
-	ATTRIBUTES_INIT_ALL;
-
-	// fetch aspect ratio
-	Event_GetWindowResolution windowResolution;
-	SEND_EVENT(&windowResolution);
-	float aspectRatio = windowResolution.getAspectRatio();
-	Attribute_Camera* cameraAttribute;
-	if(cameraAttributes_->size()==2)
-	{
-		aspectRatio *= 2;
-	}
-	for(unsigned int i = 0; i < cameraAttributes_->size(); i++)
-	{	
-		cameraAttribute = &cameraAttributes_->at(i);
-		cameraAttribute->aspect = aspectRatio;
-		cameras_.push_back(Camera(cameraAttribute->aspect,cameraAttribute->fov,cameraAttribute->zFar,cameraAttribute->zNear));
-	}
-
-	for(unsigned int i=0; i<cameraAttributes_->size(); i++)
-	{
-		cameras_[i].updateProj();
-		cameraAttributes_->at(i).mat_projection.copy((float*)&cameras_[i].getProjection());
-	}
-
 	return true;
 }
 
@@ -57,9 +212,11 @@ void CameraComponent::onEvent(Event* e)
 	EventType type = e->getType();
 	switch (type) 
 	{
-	case EVENT_WINDOW_RESIZE:
-		event_WindowResize((Event_WindowResize*)e);
+	case EVENT_SPLITSCREEN_CHANGED:
+		updateAspectRatio();
 		break;
+	case EVENT_START_DEATHMATCH:
+		init();
 	default:
 		break;
 	}
@@ -67,98 +224,32 @@ void CameraComponent::onEvent(Event* e)
 
 void CameraComponent::onUpdate(float delta)
 {
-	unsigned int numCameras = 0;
-	while(itrCamera.hasNext())
+	//Event_GetWindowResolution windowResolution;
+	//SEND_EVENT(&windowResolution);
+	//// Calculate split screen attribute
+	//float aspectRatio = windowResolution.getAspectRatio();
+
+	// Update rotation
+	while(itrInput.hasNext())
 	{
-		numCameras++;
-		itrCamera.getNext();
-	}
-
-	// Add extra camera
-	while(numCameras > cameras_.size())
-	{
-		Event_GetWindowResolution windowResolution;
-		SEND_EVENT(&windowResolution);
-
-		// Calculate split screen attribute
-		float aspectRatio = windowResolution.getAspectRatio();
-
-		// push new camera
-		Attribute_Camera* cameraAttribute = &cameraAttributes_->at(cameras_.size());
-		cameraAttribute->aspect = aspectRatio;
-		cameras_.push_back(Camera(cameraAttribute->aspect,cameraAttribute->fov,cameraAttribute->zFar,cameraAttribute->zNear));
-		if(numCameras==2)
+		Attribute_Input* input = itrInput.getNext();
+		Entity* entity = itrInput.owner();
+		if(entity->hasAttribute(ATTRIBUTE_CAMERA))
 		{
-			aspectRatio *= 2;
-			for(unsigned int i=0; i<cameras_.size(); i++)
-				cameras_[i].setAspectRatio(aspectRatio);
-		}
-	}
-	for(unsigned int i=0; i<numCameras; i++)
-	{
-		cameras_[i].updateProj();
-		cameraAttributes_->at(i).mat_projection.copy((float*)&cameras_[i].getProjection());
-	}
-
-	// Remove unnecessary camera
-	while(numCameras < cameras_.size())
-	{
-		cameras_.pop_back();
-		if(cameras_.size()==2)
-		{
-			for(unsigned i=0; i<cameras_.size(); i++)
+			std::vector<Attribute_Camera*> cameras = itrCamera.getMultiple(entity->getAttributes(ATTRIBUTE_CAMERA));
+			for(int i=0; i<(int)cameras.size(); i++)
 			{
-				Event_GetWindowResolution windowResolution;
-				SEND_EVENT(&windowResolution);
-
-				// Calculate split screen attribute
-				float aspectRatio = windowResolution.getAspectRatio();
-				if(numCameras==2)
-				{
-					aspectRatio *= 2;
-				}
-				cameras_[i].setAspectRatio(aspectRatio);
-				cameraAttributes_->at(i).aspect = aspectRatio;
+				Attribute_Camera* camera = cameras.at(i);
+				yaw(input->rotation.x, camera);
+				pitch(input->rotation.y, camera);
 			}
 		}
 	}
 
-	// Update cameras
-	unsigned int nrOfCamerasWithInput = cameras_.size();
-	if(nrOfCamerasWithInput > inputAttributes_->size())
-		nrOfCamerasWithInput = inputAttributes_->size();
-
-	
-	for(unsigned int i = 0; i < nrOfCamerasWithInput; i++)
+	// Recalculate view
+	while(itrCamera.hasNext())
 	{
-		cameras_[i].yaw(inputAttributes_->at(i).rotation.x);
-		cameras_[i].pitch(inputAttributes_->at(i).rotation.y);
-
-		inputAttributes_->at(i).rotation.x = 0.0f;
-		inputAttributes_->at(i).rotation.y = 0.0f;
+		Attribute_Camera* camera = itrCamera.getNext();
+		updateView(camera);
 	}
-
-	for(unsigned int i=0; i<numCameras; i++)
-	{
-		Attribute_Camera* camera = &cameraAttributes_->at(i);
-		Attribute_Spatial* spatial = ATTRIBUTE_CAST(Attribute_Spatial, ptr_spatial, camera);
-		Attribute_Position* position = ATTRIBUTE_CAST(Attribute_Position, ptr_position, spatial);
-		
-		cameras_[i].setPosition((float*)&position->position);
-		cameras_[i].updateView();
-
-		camera->mat_view.copy((float*)&cameras_[i].getView());
-	}
-}
-
-void CameraComponent::event_WindowResize(Event_WindowResize* e)
-{
-	float aspectRatio = e->getAspectRatio();
-
-	for(unsigned int i=0; i<cameras_.size(); i++)
-	{
-		cameras_[i].setAspectRatio(aspectRatio);
-		cameras_[i].updateProj();
-	}
-	// TODO: resize aspect ratios of all cameras 
 }

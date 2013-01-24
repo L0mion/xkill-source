@@ -120,11 +120,6 @@ Event_CreateSpawnPoint::Event_CreateSpawnPoint(Float3 spawnPointPosition, float 
 	this->spawnAreaRadius = spawnAreaRadius;
 }
 
-Event_DoCulling::Event_DoCulling() : Event(EVENT_DO_CULLING)
-{
-}
-
-
 Event_StartDeathmatch::Event_StartDeathmatch(int num_players) : Event(EVENT_START_DEATHMATCH)
 {
 	this->num_players = num_players;
@@ -161,6 +156,44 @@ Event_CreateExplosionSphere::Event_CreateExplosionSphere(Float3 position, float 
 	this->entityIdOfCreator = entityIdOfCreator;
 }
 
+Event_CreateWorld::Event_CreateWorld(Float3 position, Float4 rotation, unsigned int meshID) : Event(EVENT_CREATE_WORLD)
+{
+	this->position = position;
+	this->rotation = rotation;
+	this->meshID = meshID;
+}
+
+Event_CreateAmmo::Event_CreateAmmo(Float3 position, unsigned int type) : Event(EVENT_CREATE_AMMO)
+{
+	this->position = position;
+	this->position = position;
+}
+
+Event_CreateHack::Event_CreateHack(Float3 position, unsigned int type) : Event(EVENT_CREATE_HACK)
+{
+	this->type = type;
+	this->type = type;
+}
+
+Event_CreateLight::Event_CreateLight(Float3 position, Float3 direction, Float3 ambient, Float3 diffuse, Float3 specular,
+				  Float3 attenuation, float range, float spotPow, unsigned int type) : Event(EVENT_CREATE_LIGHT)
+{
+	this->position = position;
+	this->direction = direction;
+	this->ambient = ambient;
+	this->diffuse = diffuse;
+	this->specular = specular;
+	this->attenuation = attenuation;
+	this->range = range;
+	this->spotPow = spotPow;
+	this->type = type;
+}
+
+Event_TransferEventsToGame::Event_TransferEventsToGame(std::vector<Event*> events) : Event(EVENT_TRANSFEREVENTSTOGAME)
+{
+	this->events = events;
+}
+
 Event_CreateEntity::Event_CreateEntity( EntityType entityType ) : Event(EVENT_CREATE_ENTITY)
 {
 	this->entityType = entityType;
@@ -170,4 +203,9 @@ Event_CreateInputDevice::Event_CreateInputDevice(InputDevice* inputDevice, Input
 {
 	device = inputDevice;
 	objectArray = inputObjectArray;
+}
+
+Event_DrawBulletPhysicsDebugLines::Event_DrawBulletPhysicsDebugLines(std::vector<VertexPosColor>* debugLineVertices) : Event (EVENT_DRAW_BULLET_PHYSICS_DEBUG_LINES)
+{
+	this->debugLineVertices = debugLineVertices;
 }

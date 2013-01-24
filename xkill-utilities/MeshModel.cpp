@@ -10,10 +10,12 @@ MeshModel::MeshModel()
 }
 MeshModel::MeshModel(
 	const MeshGeometry				geometry,
-	const std::vector<MeshMaterial>	materials)
+	const std::vector<MeshMaterial>	materials,
+	const MeshOrigins				origins)
 {
 	geometry_	= geometry;
 	materials_	= materials;
+	origins_	= origins;
 }
 MeshModel::~MeshModel()
 {
@@ -30,4 +32,8 @@ unsigned int MeshModel::getNumMaterials()
 std::vector<MeshMaterial> MeshModel::getMaterials()
 {
 	return materials_;
+}
+MeshOrigins	MeshModel::getOrigins()
+{
+	return origins_;
 }

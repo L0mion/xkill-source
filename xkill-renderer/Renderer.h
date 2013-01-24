@@ -10,17 +10,8 @@ namespace DirectX
 	struct XMFLOAT3;
 };
 
-struct Attribute_Render;
-struct Attribute_DebugShape;
-struct Attribute_Camera;
-struct Attribute_Spatial;
-struct Attribute_Position;
 struct ViewportData;
 
-class Winfo;
-class TexDesc;
-class IB;
-class MeshMaterial;
 class ManagementD3D;
 class ManagementFX;
 class ManagementCB;
@@ -33,8 +24,17 @@ class ManagementRS;
 class ManagementGBuffer;
 class ManagementDebug;
 class ManagementMath;
+class ManagementInstance;
+
+class Winfo;
+class TexDesc;
+class IB;
+class MeshMaterial;
+class InstancedData;
 
 #include <vector>
+
+struct ID3D11Buffer; //Bullet Physics lines
 
 //temp
 class M3DLoader;
@@ -60,7 +60,6 @@ public:
 	void	loadTextures(TexDesc* texdesc); //!< Forwards information related to what textures Renderer is to load to Renderer-object.
 protected:
 private:
-	void initAttributes();				//!< Retrieves pointers to data vectors which will be used during execution.
 	void initWinfo();					//!< Sends resolution event to find out current resolution, and stores this info in a Winfo-type object. This object is then shared as a pointer amongst Renderer's members.
 	HRESULT initManagementD3D();		//!< Initializes ManagementD3D-object which will maintain core DirectX objects, e.g. device and device context.
 	HRESULT initManagementFX();			//!< Initializes ManagementFX-object which will maintain shaders and input-layouts throughout application.
@@ -74,22 +73,25 @@ private:
 	HRESULT initManagementGBuffer();	//!< Creates a ManagementGBuffer-type object that will maintain the application's g-buffers.
 	HRESULT initManagementDebug();		//!< Initializes ManagementDebug, which holds data allowing advanced detection of COM-leaks in D3D.
 	void	initManagementMath();		//!< Initializes ManagementMath, which manages math-related functions and loading of dx-vectors into generic-type vectors utilizing SIMD.
+	void	initManagementInstance();	//!< Initializes ManagementInstance, which manages all the instances of the various models.
 
 	void renderViewportToGBuffer(
-		ViewportData& vpData);	//!< Renders to g-buffer.
-	void renderViewportToBackBuffer(ViewportData& vpData);			//!< Renders to backbuffer.
-	void renderAttribute(
-		Attribute_Render* renderAt, 
-		DirectX::XMFLOAT4X4 viewMatrix, 
-		DirectX::XMFLOAT4X4 projectionMatrix);	//!< Renders an attribute.
+		ViewportData& vpData);											//!< Renders to g-buffer.
+	void renderViewportToBackBuffer(ViewportData& vpData);				//!< Renders to backbuffer.
+	void renderInstance(unsigned int meshID, InstancedData* instance);	//!< Renders an instanced model.
 	void renderSubset(
 		IB* ib, 
-		MeshMaterial& material);				//!< Renders a subset.
+		MeshMaterial& material,
+		unsigned int numInstances);										//!< Renders a subset.
 	void renderDebugShape(
 		Attribute_DebugShape*	debugShapeAt, 
 		unsigned int			shapeIndex,
 		DirectX::XMFLOAT4X4		viewMatrix, 
 		DirectX::XMFLOAT4X4		projectionMatrix); //!< Renders a debug shape, such as a bounding sphere.
+
+	void drawBulletPhysicsDebugLines(
+		DirectX::XMFLOAT4X4		viewMatrix, 
+		DirectX::XMFLOAT4X4		projectionMatrix); //!<A vertex buffer is recreated when a EVENT_DRAW_BULLET_PHYSICS_DEBUG_LINES event is present in the event queue.
 
 	//temp
 	void renderBackBufferClean();	//refactor me
@@ -112,14 +114,12 @@ private:
 	ManagementGBuffer*	managementGBuffer_;		//!< Maintains the G-Buffers of application.
 	ManagementDebug*	managementDebug_;		//!< Used for detecting live COM-objects.
 	ManagementMath*		managementMath_;		//!< Loads dx-math vectors into generic-type vectors and maintains other math-related functions.
+	ManagementInstance*	managementInstance_;	//!< Maintains all instances of respective model in the game.
 
-	std::vector<Attribute_Spatial>*		attributesSpatial_;		//!< Holds spatial data. Is fetched only once.
-	std::vector<Attribute_Position>*	attributesPosition_;	//!< Holds positional data. Is fetched only once.
-	std::vector<Attribute_Render>*		attributesRender_;		//!< Holds objects supposed to be rendered. Is fetched only once.
-	std::vector<Attribute_DebugShape>*	attributesDebugShape_;	//!< Holds debug shapes.
-	std::vector<int>*					attributesRenderOwner_;	//!< Holds owners of render-attributes.
-	std::vector<int>*					attributesCameraOwner_;
-	std::vector<Attribute_Camera>*		attributesCamera_;		//!< Holds cameras being rendered to g-buffers. Is fetched only once.
+	ID3D11Buffer* debugLinesVertexBuffer_;		//!< Might want to move this into some manager of some sort.
+
+	std::vector<int>* attributesRenderOwner_;	//!< Holds owners of render-attributes.
+	std::vector<int>* attributesCameraOwner_;
 
 	//temp
 	M3DLoader*		m3dLoader_;

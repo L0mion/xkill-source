@@ -50,6 +50,7 @@ public:
 		updateTimer->setInterval(0);
 		connect(updateTimer, SIGNAL(timeout()), this, SLOT(slot_onUpdate()));
 		updateTimer->start();
+		
 	};
 	~GameWidget()
 	{
@@ -106,16 +107,38 @@ protected:
 		Event_WindowResize event_windowResize(width, height);
 		SEND_EVENT(&event_windowResize);
 	}
+	void keyPressEvent(QKeyEvent *e)
+	{
+		if(hasMouseLock)
+		{
+			if(e->key() == Qt::Key_Escape)
+			{
+				setMouseLock(false);
+			}
+		}
+
+		int keyEnum = e->key();
+		SEND_EVENT(&Event_KeyPress(keyEnum, true));
+
+		QCoreApplication::sendEvent(parentWidget(), e);
+	}
 	// Behavior on mouse press
 	void mousePressEvent(QMouseEvent *e)
 	{
-		// lock / release mouse
-		if(e->button() == Qt::LeftButton)
-			toggleMouseLock();
+		// lock / release mouse5
+		if(hasMouseLock && e->button() == Qt::RightButton)
+			setMouseLock(false);
 
-		// Inform about key press
-		int keyEnum = e->button();
-		SEND_EVENT(&Event_MousePress(keyEnum, true));
+		if(!hasMouseLock && e->button() == Qt::LeftButton)
+		{
+			setMouseLock(true);
+		}
+		else
+		{
+			// Inform about key press
+			int keyEnum = e->button();
+			SEND_EVENT(&Event_MousePress(keyEnum, true));
+		}
 	}
 	void mouseReleaseEvent(QMouseEvent *e)
 	{
@@ -123,11 +146,11 @@ protected:
 		int keyEnum = e->button();
 		SEND_EVENT(&Event_MousePress(keyEnum, false));
 	}
-	void toggleMouseLock()
+	void setMouseLock(bool mouseLook)
 	{
 		// locking / releasing mouse cursor to widget
 		this->
-		hasMouseLock = !hasMouseLock;
+		hasMouseLock = mouseLook;
 		if(hasMouseLock)
 		{
 			// hide cursor and set new anchor point

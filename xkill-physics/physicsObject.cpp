@@ -1,37 +1,24 @@
-#include "physicsObject.h"
+#include "PhysicsObject.h"
 
-#include <xkill-utilities/AttributeType.h>
-#include <vector>
-#include <iostream>
+#include <btBulletDynamicsCommon.h>
 
-#include "physicsUtilities.h"
-#include "CollisionShapeManager.h"
+#include <xkill-utilities/AttributeManager.h>
 
-PhysicsObject::PhysicsObject(CollisionShapeManager* collisionShapeManager, unsigned int index, unsigned int type) : btRigidBody(1,
-																											 new btDefaultMotionState(),
-																											 collisionShapeManager->getCollisionShape(0),
-																											 btVector3(0,0,0))
+#include "CollisionShapes.h"
+#include "MotionState.h"
+
+#include "PhysicsUtilities.h"
+
+AttributeIterator<Attribute_Physics> itrPhysics_;
+AttributeIterator<Attribute_Position> itrPosition_PhysicsObject;
+AttributeIterator<Attribute_Spatial> itrSpatial_PhysicsObject;
+
+PhysicsObject::PhysicsObject()
+	: btRigidBody(-1, nullptr, nullptr)
 {
-	index_ = index;
-	gravity_.setZero();
-	forces_.setZero();
-	movement_.setZero();
-	yaw_ = 0.0f;
-	inertiad = false;
-	type_ = type;
-}
-PhysicsObject::PhysicsObject(btCollisionShape* collisionShape, unsigned int index, unsigned int type) : btRigidBody(0,
-																											 new btDefaultMotionState(),
-																											 collisionShape,
-																											 btVector3(0,0,0))
-{
-	index_ = index;
-	gravity_ = btVector3(0,-10*WorldScaling,0);
-	forces_.setZero();
-	movement_.setZero();
-	yaw_ = 0.0f;
-	inertiad = false;
-	type_ = type;
+	itrPhysics_ = ATTRIBUTE_MANAGER->physics.getIterator();
+	itrSpatial_PhysicsObject = ATTRIBUTE_MANAGER->spatial.getIterator();
+	itrPosition_PhysicsObject = ATTRIBUTE_MANAGER->position.getIterator();
 }
 
 PhysicsObject::~PhysicsObject()
@@ -39,139 +26,88 @@ PhysicsObject::~PhysicsObject()
 	delete getMotionState();
 }
 
-void PhysicsObject::addToWorld(btDiscreteDynamicsWorld* dynamicsWorld, short int collisionFilterGroup, short int collisionFilterMask)
+btVector3 PhysicsObject::subClassCalculateLocalInertia(btScalar mass)
 {
-	dynamicsWorld->addRigidBody(this, collisionFilterGroup, collisionFilterMask);
+	btVector3 localInertia;
+	localInertia.setZero();
+	return localInertia;
 }
 
-void PhysicsObject::removeFromWorld(btDiscreteDynamicsWorld* dynamicsWorld)
+bool PhysicsObject::subClassSpecificInitHook()
 {
-	dynamicsWorld->removeRigidBody(this);
+	return true;
 }
 
-void PhysicsObject::preStep(CollisionShapeManager* collisionShapeManager,Attribute_Physics* physicsAttribute)
+bool PhysicsObject::init(unsigned int attributeIndex,unsigned int collisionFilterGroup)
 {
+	if(attributeIndex < 0)
+	{
+		return false;
+	}
+	attributeIndex_ = attributeIndex;
+	collisionFilterGroup_ = collisionFilterGroup;
 
-	Attribute_Spatial* spatialAttribute = ATTRIBUTE_CAST(Attribute_Spatial,
-														ptr_spatial,
-														physicsAttribute);
-	Attribute_Position* positionAttribute = ATTRIBUTE_CAST(Attribute_Position,
-														  ptr_position,
-														  spatialAttribute);
+	//Get the init data from a physics attribute
+	Attribute_Physics* physicsAttribute = itrPhysics_.at(attributeIndex);
+	btScalar mass = static_cast<btScalar>(physicsAttribute->mass);
+
+	//Resolve mass, local inertia of the collision shape, and also the collision shape itself.
+	btCollisionShape* collisionShape = CollisionShapes::Instance()->getCollisionShape(physicsAttribute->meshID);
+	setCollisionShape(collisionShape);
 	
-	if(physicsAttribute->collisionFilterGroup != Attribute_Physics::EXPLOSIONSPHERE)
+		
+		
+	btVector3 localInertia = subClassCalculateLocalInertia(mass);
+	setMassProps(mass, localInertia); //Set inverse mass and inverse local inertia
+	if((getCollisionFlags() & btCollisionObject::CF_STATIC_OBJECT))
 	{
-		m_collisionShape = collisionShapeManager->getCollisionShape(physicsAttribute->meshID);
-	}
+		btTransform world;
 
-	btVector3 localInertia(0,0,0);
-	if(getCollisionShape()->getShapeType()==4 && index_ >2)
+		Attribute_Spatial* spatialAttribute = itrSpatial_PhysicsObject.at(itrPhysics_.at(attributeIndex_)->ptr_spatial);
+ 		Attribute_Position* positionAttribute = itrPosition_PhysicsObject.at(spatialAttribute->ptr_position);
+ 		world.setOrigin(convert(positionAttribute->position));
+		world.setRotation(convert(spatialAttribute->rotation));
+		setWorldTransform(world);  //Static physics objects: transform once
+
+	}
+	else
 	{
-		getCollisionShape()->calculateLocalInertia(physicsAttribute->mass,localInertia); //Refactor: only needs to be called once
-		inertiad = true;
-		setRestitution(1.0);
-		setRollingFriction(0.01);
-			
-	}
+		//Non-static physics objects: let a derived btMotionState handle transforms.
+		MotionState* customMotionState = new MotionState(attributeIndex);
+		setMotionState(customMotionState);
 
-	if(physicsAttribute->collisionFilterGroup != Attribute_Physics::EXPLOSIONSPHERE)
-	{
-		setMassProps(physicsAttribute->mass,localInertia); //Refactor: only needs to be called once, and is called indirectly from the btRigidBody constructor.
+		setAngularVelocity(btVector3(physicsAttribute->angularVelocity.x,
+										physicsAttribute->angularVelocity.y,
+										physicsAttribute->angularVelocity.z));
+		setLinearVelocity(btVector3(physicsAttribute->linearVelocity.x,
+										physicsAttribute->linearVelocity.y,
+										physicsAttribute->linearVelocity.z));
+		//Gravity is set after "addRigidBody" for non-static physics objects
 	}
-	
-	m_worldTransform.setOrigin(WorldScaling*btVector3(positionAttribute->position.x,
-	 												  positionAttribute->position.y,
-	 												  positionAttribute->position.z));
-
-	gravity_ = WorldScaling*btVector3(physicsAttribute->gravity.x, physicsAttribute->gravity.y, physicsAttribute->gravity.z);
 
 	if(physicsAttribute->collisionResponse)
 	{
-		setCollisionFlags(getCollisionFlags() & ~CF_NO_CONTACT_RESPONSE);
+		setCollisionFlags(getCollisionFlags() & ~CF_NO_CONTACT_RESPONSE); //Activate collision response
 	}
 	else
 	{
-		setCollisionFlags(getCollisionFlags() | CF_NO_CONTACT_RESPONSE);
+		setCollisionFlags(getCollisionFlags() | CF_NO_CONTACT_RESPONSE); //Deactivate collision response
 	}
-
-	if(physicsAttribute->collisionFilterGroup == Attribute_Physics::PROJECTILE)
-	{
-  		m_worldTransform.setRotation(btQuaternion(spatialAttribute->rotation.x, spatialAttribute->rotation.y, spatialAttribute->rotation.z, spatialAttribute->rotation.w));
-		setLinearVelocity(btVector3(physicsAttribute->linearVelocity.x,
-									physicsAttribute->linearVelocity.y,
-									physicsAttribute->linearVelocity.z));
-	}
-	else
-	{
-		m_worldTransform.setRotation(btQuaternion(yaw_,0,0));
-		movement_.setY(physicsAttribute->linearVelocity.y);
-		setLinearVelocity(movement_);
-	}
-	setAngularVelocity(btVector3(physicsAttribute->angularVelocity.x,
-					   physicsAttribute->angularVelocity.y,
-					   physicsAttribute->angularVelocity.z));
-
-	setGravity(gravity_+forces_);
-	updateInertiaTensor(); //Refactor: only needs to be called once, and is called indirectly from the btRigidBody constructor.
-
-	if(physicsAttribute->collisionFilterGroup != Attribute_Physics::EXPLOSIONSPHERE)
-	{
-		//activate(true);
-	}
-
-	if(physicsAttribute->collisionFilterGroup == Attribute_Physics::PLAYER)
-	{
-		setActivationState(DISABLE_DEACTIVATION); //Refactor: only needs to be set once
-	}
-}
-
-void PhysicsObject::postStep(Attribute_Physics* physicsAttribute)
-{
-	//std::cout << "\n" << m_worldTransform.getOrigin().x() << " " << m_worldTransform.getOrigin().y() << m_worldTransform.getOrigin().z();
-	Attribute_Spatial* spatialAttribute = ATTRIBUTE_CAST(Attribute_Spatial,
-														ptr_spatial,
-														physicsAttribute);
-	Attribute_Position* positionAttribute = ATTRIBUTE_CAST(Attribute_Position,
-														ptr_position,
-														spatialAttribute);
-	btVector3 position = (1.0f/WorldScaling)*m_worldTransform.getOrigin();
-	positionAttribute->position.copy(position.m_floats);
-	spatialAttribute->rotation.copy(m_worldTransform.getRotation().get128().m128_f32);
-	physicsAttribute->linearVelocity.copy(getLinearVelocity().m_floats);
-	physicsAttribute->angularVelocity.copy(getAngularVelocity().m_floats);
-	forces_.setZero();
-}
-
-void PhysicsObject::input(Attribute_Input* inputAttribute,float delta)
-{
-	yaw_ += inputAttribute->rotation.x;
-	movement_ = 5*WorldScaling*btVector3(inputAttribute->position.x, 0, inputAttribute->position.y);
-	movement_ = movement_.rotate(btVector3(0,1,0),yaw_);
-
-	inputAttribute->position.x = inputAttribute->position.y = 0;
-}
-
-unsigned int PhysicsObject::getIndex() const
-{
-	return index_;
-}
-
-unsigned int PhysicsObject::getType() const
-{
-	return type_;
-}
-
-/*
-void PhysicsObject::setCollisionShapeTo(btCollisionShape* collisionShape)
-{
-	Does not work
-	//Scale and set collision shape,
-	btCollisionShape* scaleCollisionShape = new btCollisionShape();
-
-	btVector3 vector = btVector3(WorldScaling, WorldScaling, WorldScaling);
-	collisionShape->se
-	collisionShape->setLocalScaling(vector);
-	setCollisionShape(collisionShape);
 	
+	return subClassSpecificInitHook();
 }
-*/
+
+unsigned int PhysicsObject::getAttributeIndex() const
+{
+	return attributeIndex_;
+}
+
+unsigned int PhysicsObject::getCollisionFilterGroup() const
+{
+	return collisionFilterGroup_;
+}
+
+void PhysicsObject::onUpdate(float delta)
+{
+	setGravity(btVector3(0,0,0));
+}

@@ -29,36 +29,29 @@ public:
 	virtual bool getValueBool() = 0;
 	virtual bool getValueBoolReleased() = 0;
 
-	void setInverted(bool inverted);
-	bool isInverted();
+	virtual void setInverted(bool inverted);
+	virtual bool isInverted();
 
-	void setSensitivity(float sensitivity);
-	float getSensitivity();
+	virtual void setSensitivity(float sensitivity);
+	virtual float getSensitivity();
 
-	void setName(std::string name);
-	std::string getName();
+	virtual void setName(std::string name);
+	virtual std::string getName();
 
-	//! Adds a mapping that needs a float value
-	void addFloatMapping(int mapping);
-	//! Adds a mapping that needs a bool value
-	void addBoolMapping(int mapping);
-	//! Removes a mapping from the floatMappings_ list
-	void removeFloatMapping(int mapping);
-	//! Removes a mapping from the boolMappings_ list
-	void removeBoolMapping(int mapping);
+	virtual bool needsDelta();
 
-	//! Returns true if that mapping exists in the floatMappings_ list
-	bool hasFloatMapping(int mapping);
-	//! Returns true if that mapping exists in the boolMappings_ list
-	bool hasBoolMapping(int mapping);
+	//! Adds a mapping
+	void addMapping(int mapping);
+	//! Removes a mapping
+	void removeMapping(int mapping);
+
+	//! Returns true if that mapping exists
+	bool hasMapping(int mapping);
 	//! Returns the floatMappings list
-	std::vector<int>* getFloatMappings();
-	//! Returns the boolMappings list
-	std::vector<int>* getBoolMappings();
+	std::vector<int>* getMappings();
 
 protected:
-	std::vector<int> floatMappings_;
-	std::vector<int> boolMappings_;
+	std::vector<int> mappings_;
 	std::string name_;
 
 	bool inverted_;

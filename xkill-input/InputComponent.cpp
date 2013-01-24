@@ -1,7 +1,6 @@
 #include "InputComponent.h"
 
 #include <xkill-utilities/EventManager.h>
-#include <xkill-utilities/EventManager.h>
 #include "InputManager.h"
 
 ATTRIBUTES_DECLARE_ALL;
@@ -27,8 +26,6 @@ InputComponent::~InputComponent()
 
 bool InputComponent::init(HWND windowHandle, std::string configFilePath, float searchTime)
 {
-	inputAttributes_ = GET_ATTRIBUTES(input);
-
 	windowHandle_ = windowHandle;
 	searchTime_ = searchTime;
 
@@ -66,9 +63,7 @@ void InputComponent::onEvent(Event* e)
 		int keyEnum	= emp->keyEnum;
 		bool isPressed = emp->isPressed;
 
-		//
-		// TODO: Handle mousepress
-		//
+		handleMousePressedEvent(keyEnum, isPressed);
 	}
 	if(type == EVENT_INPUT_DEVICE_SEARCH)
 	{
@@ -104,47 +99,68 @@ void InputComponent::handleInput(float delta)
 		if(device == nullptr)
 			continue;
 
-		input->position.x = device->getFloatValue(ACTION_F_WALK_LR);
-		input->position.y = device->getFloatValue(ACTION_F_WALK_FB);
-		input->rotation.x = device->getFloatValue(ACTION_F_LOOK_LR, true) * 0.01f; // Scale input to a reasonable range
-		input->rotation.y = device->getFloatValue(ACTION_F_LOOK_UD, true) * 0.01f;	// Scale input to a reasonable range
+		input->position.x = device->getFloatValue(InputAction::ACTION_F_WALK_LR, delta);
+		input->position.y = device->getFloatValue(InputAction::ACTION_F_WALK_FB, delta);
+		input->rotation.x = device->getFloatValue(InputAction::ACTION_F_LOOK_LR, delta, true);
+		input->rotation.y = device->getFloatValue(InputAction::ACTION_F_LOOK_UD, delta, true);
 
-		if(device->getBoolValue(ACTION_B_FIRE))
+		if(device->getBoolValue(InputAction::ACTION_B_FIRE))
 			input->fire = true;
-		if(device->getBoolReleased(ACTION_B_CHANGE_AMMUNITIONTYPE))
+		if(device->getBoolReleased(InputAction::ACTION_B_CHANGE_AMMUNITIONTYPE))
 			input->changeAmmunitionType = true;
-		if(device->getBoolReleased(ACTION_B_CHANGE_FIRINGMODE))
+		if(device->getBoolReleased(InputAction::ACTION_B_CHANGE_FIRINGMODE))
 			input->changeFiringMode = true;
 
-		if(device->getBoolReleased(ACTION_B_TOGGLE_MUTE_SOUND))
+		if(device->getBoolReleased(InputAction::ACTION_B_TOGGLE_MUTE_SOUND))
 			SEND_EVENT(&Event_PlaySound(-1, true));
 
-		if(device->getBoolReleased(ACTION_B_RUMBLE_ON))
+		if(device->getBoolReleased(InputAction::ACTION_B_RUMBLE_ON))
 		{
 			Event_Rumble* er = new Event_Rumble(itrPlayer.ownerId(), true, 100.0f, 1.0f, 1.0f);
 			EventManager::getInstance()->sendEvent(er);
 			delete er;
 		}
 
-		if(device->getBoolReleased(ACTION_B_RUMBLE_OFF))
+		if(device->getBoolReleased(InputAction::ACTION_B_RUMBLE_OFF))
 		{
 			Event_Rumble* er = new Event_Rumble(itrPlayer.ownerId(), false, 100.0f, 0.0f, 0.0f);
 			EventManager::getInstance()->sendEvent(er);
 			delete er;
 		}
 
-		if(device->getBoolValue(ACTION_B_WALK_FORWARD))
+		if(device->getBoolValue(InputAction::ACTION_B_WALK_FORWARD))
 			input->position.y = 1.0f;
 															
-		if(device->getBoolValue(ACTION_B_WALK_LEFT))
+		if(device->getBoolValue(InputAction::ACTION_B_WALK_LEFT))
 			input->position.x = -1.0f;
 		
-		if(device->getBoolValue(ACTION_B_WALK_BACKWARD))
+		if(device->getBoolValue(InputAction::ACTION_B_WALK_BACKWARD))
 			input->position.y = -1.0f;
 		
-		if(device->getBoolValue(ACTION_B_WALK_RIGHT))
+		if(device->getBoolValue(InputAction::ACTION_B_WALK_RIGHT))
 			input->position.x = 1.0f;
+
+		if(device->getBoolValue(InputAction::ACTION_B_LOOK_UP))
+			input->rotation.y = -1.0f * delta;
+															
+		if(device->getBoolValue(InputAction::ACTION_B_LOOK_LEFT))
+			input->rotation.x = -1.0f * delta;
 		
+		if(device->getBoolValue(InputAction::ACTION_B_LOOK_DOWN))
+			input->rotation.y = 1.0f * delta;
+		
+		if(device->getBoolValue(InputAction::ACTION_B_LOOK_RIGHT))
+			input->rotation.x = 1.0f * delta;
+		
+		if(device->getBoolReleased(InputAction::ACTION_B_KILL_PLAYER))
+			input->killPlayer = true;
+
+		if(device->getBoolValue(InputAction::ACTION_B_JUMP))
+			input->jump = true;
+
+		if(device->getBoolValue(InputAction::ACTION_B_SPRINT))
+			input->sprint = true;
+
 		float x, y;
 
 		x = input->position.x;
@@ -152,7 +168,7 @@ void InputComponent::handleInput(float delta)
 
 		float length = std::sqrt(x*x + y*y);
 
-		if(length > 1.0f) // The character shouldn't move faster than it's set speed
+		if(length > 1.0f) // The character shouldn't move faster than set speed
 		{
 			x = x/length;
 			y = y/length;
@@ -183,6 +199,7 @@ void InputComponent::setupPlayerControllerConnection()
 		}
 		else
 		{
+			DEBUGPRINT("Player(s) could not be matched to a controller");
 			break;
 		}
 	}
@@ -210,16 +227,20 @@ void InputComponent::handleMouseMoveEvent(Event_MouseMove* e)
 {
 	QTInputDevices* device = inputManager_->GetMouseAndKeyboard();
 
-	// Test camera movement
-	float x = (float)e->dx;
-	float y = (float)e->dy;
+	if(device != nullptr)
+	{
+		device->setAxis(0, (float)e->dx);
+		device->setAxis(1, (float)e->dy);
+	}
+}
 
-	float mouseSensitivity = 0.5f;
+void InputComponent::handleMousePressedEvent(int nr, bool pressed)
+{
+	QTInputDevices* device = inputManager_->GetMouseAndKeyboard();
 
 	if(device != nullptr)
 	{
-		device->setAxis(2, x * mouseSensitivity);
-		device->setAxis(3, y * mouseSensitivity);
+		device->setMouseButton(nr, pressed);
 	}
 }
 
