@@ -8,6 +8,11 @@
 
 static const unsigned int NUM_INFLUENCING_BONES = 4;
 
+namespace fbxsdk_2014_0_beta2
+{
+	class FbxNode;
+}
+
 class LoaderFbxMeshDesc
 {
 public:
@@ -45,7 +50,10 @@ public:
 
 	std::vector<std::vector<int>> getVertexBoneIndices();
 	std::vector<std::vector<float>> getVertexBoneWeights();
+	
 	std::vector<Float4x4> getOffsetMatrices();
+	std::vector<int> getBoneParentIndices();
+	std::vector<FbxNode*> getBoneNodes();
 
 	void setPolygonGroupIds(std::vector<int> polygonGroupIds);
 	void setVertexPositions(std::vector<Float3> vertexPositions);
@@ -56,7 +64,10 @@ public:
 	void setVertexBinormals(std::vector<Float4> vertexBinormals);
 	void setVertexBoneIndices(std::vector<std::vector<int>> vertexBoneIndices);
 	void setVertexBoneWeights(std::vector<std::vector<float>> vertexBoneWeights);
+	
 	void setOffsetMatrices(std::vector<Float4x4> offsetMatrices);
+	void setBoneParentIndices(std::vector<int> boneParentIndices);
+	void setBoneNodes(std::vector<FbxNode*> boneNodes);
 
 private:
 
@@ -90,6 +101,8 @@ private:
 	std::vector<std::vector<float>> vertexBoneWeights_;
 
 	std::vector<Float4x4> offsetMatrices_;
+	std::vector<int> boneParentIndices_;
+	std::vector<FbxNode*> boneNodes_;
 };
 
 #endif //XKILL_IO_LOADERFBXMESHDESC_H

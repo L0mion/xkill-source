@@ -61,6 +61,8 @@ private:
 
 	void parseVertexLinkData(FbxMesh* mesh, LoaderFbxMeshDesc* meshDesc);
 	void parseLinkHierarchy(FbxNode* rootNode, std::vector<FbxNode*>* nodes, std::vector<int>* parentIndices);
+	void parseIndicesAndWeights(FbxCluster* cluster, LoaderFbxMeshDesc* meshDesc, int nodeIndex);
+	void parseTransformMatrix(FbxCluster* cluster, LoaderFbxMeshDesc* meshDesc);
 	
 	FbxNode* findRoot(FbxNode* node);
 	void displayNodeChildren(FbxNode* node, int parentIndex);

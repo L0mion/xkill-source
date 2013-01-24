@@ -416,9 +416,6 @@ FbxVector4 LoaderFbxMesh::parseVertexBinormalsByPolygonVertex(FbxGeometryElement
 void LoaderFbxMesh::parseVertexLinkData(FbxMesh* mesh, LoaderFbxMeshDesc* meshDesc)
 {
 	meshDesc->prepareBoneData(mesh->GetControlPointsCount());
-
-	//Cluster seems to be the same as bone.
-
 	FbxCluster* cluster = nullptr;
 	
 	int	numDeformers = mesh->GetDeformerCount(FbxDeformer::eSkin);
@@ -444,6 +441,9 @@ void LoaderFbxMesh::parseVertexLinkData(FbxMesh* mesh, LoaderFbxMeshDesc* meshDe
 			std::vector<int> parentIndices;
 			parseLinkHierarchy(node, &nodes, &parentIndices);
 
+			meshDesc->setBoneNodes(nodes);
+			meshDesc->setBoneParentIndices(parentIndices);
+
 			for(int clusterIndex=0; clusterIndex<numClusters; clusterIndex++)
 			{
 				cluster = static_cast<FbxSkin*>(mesh->GetDeformer(0, FbxDeformer::eSkin))->GetCluster(clusterIndex);
@@ -456,22 +456,13 @@ void LoaderFbxMesh::parseVertexLinkData(FbxMesh* mesh, LoaderFbxMeshDesc* meshDe
 					else
 						nodeIndex++;
 				}
-
-				int numIndices = cluster->GetControlPointIndicesCount();
 				
-				int* indices = cluster->GetControlPointIndices();
-				double* weights = cluster->GetControlPointWeights();
-				
-				for(int i =0; i<numIndices; i++)
-				{
-					meshDesc->addVertexBoneIndex(indices[i], nodeIndex);
-					meshDesc->addVertexBoneWeight(indices[i], static_cast<float>(weights[i]));
-				}
+				parseIndicesAndWeights(cluster, meshDesc, nodeIndex);
+				parseTransformMatrix(cluster, meshDesc);
 			}
 		}
 	}
 }
-
 void LoaderFbxMesh::parseLinkHierarchy(FbxNode* rootNode, std::vector<FbxNode*>* nodes, std::vector<int>* parentIndices)
 {
 	nodes->push_back(rootNode);
@@ -484,6 +475,32 @@ void LoaderFbxMesh::parseLinkHierarchy(FbxNode* rootNode, std::vector<FbxNode*>*
 			parentIndices->push_back(nodeIndex);
 		}
 	}
+}
+void LoaderFbxMesh::parseIndicesAndWeights(FbxCluster* cluster, LoaderFbxMeshDesc* meshDesc, int nodeIndex)
+{
+	int numIndices = cluster->GetControlPointIndicesCount();
+				
+	int* indices = cluster->GetControlPointIndices();
+	double* weights = cluster->GetControlPointWeights();
+	
+	for(int i =0; i<numIndices; i++)
+	{
+		meshDesc->addVertexBoneIndex(indices[i], nodeIndex);
+		meshDesc->addVertexBoneWeight(indices[i], static_cast<float>(weights[i]));
+	}
+}
+void LoaderFbxMesh::parseTransformMatrix(FbxCluster* cluster, LoaderFbxMeshDesc* meshDesc)
+{
+	FbxAMatrix fbxMatrix;
+	cluster->GetTransformLinkMatrix(fbxMatrix);
+	Float4x4 offsetMatrix;
+	
+	for(int x=0; x<4; x++)
+	{
+		for(int y=0; y<4; y++)
+			offsetMatrix.m[x][y] = static_cast<float>(fbxMatrix.mData[x][y]);
+	}
+	meshDesc->addOffsetMatrix(offsetMatrix);
 }
 
 FbxNode* LoaderFbxMesh::findRoot(FbxNode* node)

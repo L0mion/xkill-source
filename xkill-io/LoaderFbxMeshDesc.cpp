@@ -1,3 +1,5 @@
+#include <fbxsdk.h>
+
 #include <xkill-utilities/MeshVertices.h>
 
 #include "LoaderFbxMeshDesc.h"
@@ -440,9 +442,18 @@ std::vector<std::vector<float>> LoaderFbxMeshDesc::getVertexBoneWeights()
 {
 	return vertexBoneWeights_;
 }
+
 std::vector<Float4x4> LoaderFbxMeshDesc::getOffsetMatrices()
 {
 	return offsetMatrices_;
+}
+std::vector<int> LoaderFbxMeshDesc::getBoneParentIndices()
+{
+	return boneParentIndices_;
+}
+std::vector<FbxNode*> LoaderFbxMeshDesc::getBoneNodes()
+{
+	return boneNodes_;
 }
 
 void LoaderFbxMeshDesc::setPolygonGroupIds(std::vector<int> polygonGroupIds)
@@ -481,7 +492,16 @@ void LoaderFbxMeshDesc::setVertexBoneWeights(std::vector<std::vector<float>> ver
 {
 	vertexBoneWeights_ = vertexBoneWeights;
 }
+
 void LoaderFbxMeshDesc::setOffsetMatrices(std::vector<Float4x4> offsetMatrices)
 {
 	offsetMatrices_ = offsetMatrices;
+}
+void LoaderFbxMeshDesc::setBoneParentIndices(std::vector<int> boneParentIndices)
+{
+	boneParentIndices_ = boneParentIndices;
+}
+void LoaderFbxMeshDesc::setBoneNodes(std::vector<FbxNode*> boneNodes)
+{
+	boneNodes_ = boneNodes;
 }
