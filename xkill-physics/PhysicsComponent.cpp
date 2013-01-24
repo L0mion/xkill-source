@@ -20,7 +20,6 @@
 AttributeIterator<Attribute_Physics> itrPhysics;
 AttributeIterator<Attribute_Render> itrRender;
 AttributeIterator<Attribute_Camera> itrCamera_2;
-static debugDrawDispatcher gDebugDraw;
 
 static debugDrawDispatcher gDebugDraw;
 
@@ -146,7 +145,7 @@ void PhysicsComponent::onUpdate(float delta)
 		{
 			gDebugDraw.clearDebugVerticesVector();
 			dynamicsWorld_->debugDrawWorld();
-			queueDebugDrawEvent();
+			gDebugDraw.queueDebugDrawEvent();
 			//timer = 0.0f;
 		}
 		//timer += delta;
@@ -167,9 +166,12 @@ void PhysicsComponent::onEvent(Event* e)
 		{
 			if(attributeUpdated->isDeleted)
 			{
-  				dynamicsWorld_->removeRigidBody(physicsObjects_->at(attributeIndex));
-				delete physicsObjects_->at(attributeIndex);
-				physicsObjects_->at(attributeIndex) = nullptr;
+				if(physicsObjects_->at(attributeIndex) != nullptr)
+				{
+  					dynamicsWorld_->removeRigidBody(physicsObjects_->at(attributeIndex));
+					delete physicsObjects_->at(attributeIndex);
+					physicsObjects_->at(attributeIndex) = nullptr;
+				}
 			}
 			else if(attributeUpdated->isCreated)
 			{
@@ -192,11 +194,6 @@ void PhysicsComponent::onEvent(Event* e)
 	//case EVENT_LOAD_LEVEL:
 	//	break;
 	}
-}
-
-void PhysicsComponent::queueDebugDrawEvent()
-{
-	gDebugDraw.queueDebugDrawEvent();
 }
 
 void PhysicsComponent::synchronizeWithAttributes()
