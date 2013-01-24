@@ -34,6 +34,8 @@ class InstancedData;
 
 #include <vector>
 
+struct ID3D11Buffer; //Bullet Physics lines
+
 //temp
 class M3DLoader;
 class AnimatedMesh;
@@ -87,6 +89,10 @@ private:
 		DirectX::XMFLOAT4X4		viewMatrix, 
 		DirectX::XMFLOAT4X4		projectionMatrix); //!< Renders a debug shape, such as a bounding sphere.
 
+	void drawBulletPhysicsDebugLines(
+		DirectX::XMFLOAT4X4		viewMatrix, 
+		DirectX::XMFLOAT4X4		projectionMatrix); //!<A vertex buffer is recreated when a EVENT_DRAW_BULLET_PHYSICS_DEBUG_LINES event is present in the event queue.
+
 	//temp
 	void renderAnimatedMesh(
 		DirectX::XMFLOAT4X4 viewMatrix, 
@@ -108,6 +114,8 @@ private:
 	ManagementDebug*	managementDebug_;		//!< Used for detecting live COM-objects.
 	ManagementMath*		managementMath_;		//!< Loads dx-math vectors into generic-type vectors and maintains other math-related functions.
 	ManagementInstance*	managementInstance_;	//!< Maintains all instances of respective model in the game.
+
+	ID3D11Buffer* debugLinesVertexBuffer_;		//!< Might want to move this into some manager of some sort.
 
 	std::vector<int>* attributesRenderOwner_;	//!< Holds owners of render-attributes.
 	std::vector<int>* attributesCameraOwner_;

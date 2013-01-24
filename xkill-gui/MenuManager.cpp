@@ -65,6 +65,9 @@ void HUDWindow::update(Attribute_SplitScreen* splitScreen)
 	Attribute_Health*		health		=	itrHealth		.at(player->ptr_health);
 	Attribute_WeaponStats*	weaponStats	=	itrWeaponStats	.at(player->ptr_weaponStats);
 
+	Ammunition* ammunition = &weaponStats->ammunition[weaponStats->currentAmmunitionType];
+	FiringMode* firingMode = &weaponStats->firingMode[weaponStats->currentFiringModeType];
+
 	float sizeScale = (float) splitScreen->ssHeight / 1000;
 	sizeScale = 0.75f*sizeScale + 0.25f;
 	int textSize = (int)(20 * sizeScale);
@@ -78,42 +81,42 @@ void HUDWindow::update(Attribute_SplitScreen* splitScreen)
 	// health & ammo bars
 	QString str_health = QString::number(health->health);
 	label_health->setText("<html><head/><body><p><span style=\" font-size:"+str_textSize+"pt; font-weight:600;\">Health "+str_health+"&nbsp;</span></p></body></html>");
-	QString str_ammo = QString::number(weaponStats->nrOfShotsLeftInClip);
+	QString str_ammo = QString::number(firingMode->nrOfShotsLeftInClip);
 	label_ammo->setText("<html><head/><body><p><span style=\" font-size:"+str_textSize+"pt; font-weight:600;\">Ammo "+str_ammo+"&nbsp;</span></p></body></html>");
 
 	// ammo icon
-	if(ammo != weaponStats->ammunitionType)
+	if(ammo != weaponStats->currentAmmunitionType)
 	{
-		ammo = weaponStats->ammunitionType;
+		ammo = weaponStats->currentAmmunitionType;
 
-		if(ammo == Attribute_WeaponStats::BULLET)
+		if(ammo == Ammunition::AmmunitionType::BULLET)
 		{
 			label_ammoType->setPixmap(QPixmap(QString::fromUtf8(":/xkill/images/a_bullet.png")));
 		}
-		if(ammo == Attribute_WeaponStats::SCATTER)
+		if(ammo == Ammunition::AmmunitionType::SCATTER)
 		{
 			label_ammoType->setPixmap(QPixmap(QString::fromUtf8(":/xkill/images/a_scatter.png")));
 		}
-		if(ammo == Attribute_WeaponStats::EXPLOSIVE)
+		if(ammo == Ammunition::AmmunitionType::EXPLOSIVE)
 		{
 			label_ammoType->setPixmap(QPixmap(QString::fromUtf8(":/xkill/images/a_explosive.png")));
 		}
 	}
 
 	// weapon icon
-	if(weapon != weaponStats->firingMode)
+	if(weapon != weaponStats->currentFiringModeType)
 	{
-		weapon = weaponStats->firingMode;
+		weapon = weaponStats->currentFiringModeType;
 
-		if(weapon == Attribute_WeaponStats::SINGLE)
+		if(weapon == FiringMode::FiringModeType::SINGLE)
 		{
 			label_weaponType->setPixmap(QPixmap(QString::fromUtf8(":/xkill/images/w_single.png")));
 		}
-		if(weapon == Attribute_WeaponStats::SEMI)
+		if(weapon == FiringMode::FiringModeType::SEMI)
 		{
 			label_weaponType->setPixmap(QPixmap(QString::fromUtf8(":/xkill/images/w_semi.png")));
 		}
-		if(weapon == Attribute_WeaponStats::AUTO)
+		if(weapon == FiringMode::FiringModeType::AUTO)
 		{
 			label_weaponType->setPixmap(QPixmap(QString::fromUtf8(":/xkill/images/w_auto.png")));
 		}
