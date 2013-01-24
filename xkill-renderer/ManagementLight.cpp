@@ -365,30 +365,49 @@ void ManagementLight::setLightSRVCS(
 
 void ManagementLight::setLightViewSpacePoss(ID3D11DeviceContext* devcon, DirectX::XMFLOAT4X4 view)
 {
-	DirectX::XMFLOAT3 pos;
+	DirectX::XMFLOAT4 pos;
 	DirectX::XMVECTOR posXM;
 	DirectX::XMMATRIX viewXM;
 	for(unsigned int i = 0; i < lightPosCurCount_; i++)
 	{
+		Float3 lightPos = lightPoss_[i];
 		//Convert general-type vars into XM-type vars.
-		pos		= *((DirectX::XMFLOAT3*)(&(lightPoss_[i])));
-		posXM	= DirectX::XMLoadFloat3(&pos);
+		pos		= DirectX::XMFLOAT4(lightPos.x, lightPos.y, lightPos.z, 1.0f);
+		posXM	= DirectX::XMLoadFloat4(&pos);
 		viewXM	= DirectX::XMLoadFloat4x4(&view);
 
 		//Convert light position to view-space.
-		posXM = DirectX::XMVector3Transform(posXM, viewXM);
+		posXM = DirectX::XMVector4Transform(posXM, viewXM);
 
 		//Writeback result to light-attribute.
-		DirectX::XMStoreFloat3(&pos, posXM);
+		DirectX::XMStoreFloat4(&pos, posXM);
 
 		if(i < lightPossView_.size())
-			lightPossView_[i] = *((Float3*)(&pos));
+			lightPossView_[i] = Float3(pos.x, pos.y, pos.z);
 		else
-			lightPossView_.push_back(*((Float3*)(&pos)));
+			lightPossView_.push_back(Float3(pos.x, pos.y, pos.z));
 	}
 
 	if(lightPosCurCount_ > 0)
 		updateLightBuffers(devcon, LIGHTBUFFERTYPE_POS_VIEW);
+
+	/*
+	//Convert general-type vars into XM-type vars.
+	pos		= *((DirectX::XMFLOAT3*)(&(lightPoss_[i])));
+	posXM	= DirectX::XMLoadFloat3(&pos);
+	viewXM	= DirectX::XMLoadFloat4x4(&view);
+
+	//Convert light position to view-space.
+	posXM = DirectX::XMVector3Transform(posXM, viewXM);
+
+	//Writeback result to light-attribute.
+	DirectX::XMStoreFloat3(&pos, posXM);
+
+	if(i < lightPossView_.size())
+	lightPossView_[i] = *((Float3*)(&pos));
+	else
+	lightPossView_.push_back(*((Float3*)(&pos)));
+	*/
 }
 
 void ManagementLight::updateLightDir(ID3D11Device* device, ID3D11DeviceContext* devcon)
