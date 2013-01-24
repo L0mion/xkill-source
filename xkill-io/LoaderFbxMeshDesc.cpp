@@ -434,7 +434,7 @@ std::vector<Float4>		  LoaderFbxMeshDesc::getVertexBinormals()
 	return vertexBinormals_;
 }
 
-std::vector<std::vector<int>> LoaderFbxMeshDesc::getVertexBoneIndices()
+std::vector<std::vector<int>>	LoaderFbxMeshDesc::getVertexBoneIndices()
 {
 	return vertexBoneIndices_;
 }
@@ -447,7 +447,7 @@ std::vector<Float4x4> LoaderFbxMeshDesc::getOffsetMatrices()
 {
 	return offsetMatrices_;
 }
-std::vector<int> LoaderFbxMeshDesc::getBoneParentIndices()
+std::vector<int>	  LoaderFbxMeshDesc::getBoneParentIndices()
 {
 	return boneParentIndices_;
 }

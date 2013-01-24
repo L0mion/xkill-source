@@ -15,7 +15,7 @@ void LoaderFbxAnimation::reset()
 	animationBones_.clear();
 }
 
-void LoaderFbxAnimation::parseAnimation(FbxScene* scene, std::vector<LoaderFbxAnimationDesc>* animationDescs)
+void LoaderFbxAnimation::parseAnimation(FbxScene* scene, std::vector<LoaderFbxAnimationDesc>* animationDescs, std::vector<FbxNode*> boneNodes)
 {
 	animationDescs->clear();
 
@@ -32,13 +32,12 @@ void LoaderFbxAnimation::parseAnimation(FbxScene* scene, std::vector<LoaderFbxAn
 		animationDescs->push_back(LoaderFbxAnimationDesc(animStack->GetName()));
 
 	//	parseAnimationStack(animStack, scene->GetRootNode(), true);
-		parseAnimationStack(animStack, scene->GetRootNode(), false);
+		parseAnimationStack(animStack, boneNodes, false);
 
-	//	removeNonAffectingBones();
 		animationDescs->back().setBones(animationBones_);
 	}
 }
-void LoaderFbxAnimation::parseAnimationStack(FbxAnimStack* animStack, FbxNode* node, bool isSwitcher)
+void LoaderFbxAnimation::parseAnimationStack(FbxAnimStack* animStack, std::vector<FbxNode*> boneNodes, bool isSwitcher)
 {
 	int numAnimationLayers = animStack->GetMemberCount<FbxAnimLayer>();
 	
@@ -58,22 +57,21 @@ void LoaderFbxAnimation::parseAnimationStack(FbxAnimStack* animStack, FbxNode* n
 	//	str += "\n";
 	//	printf(str.Buffer());
 
-		parseAnimationLayer(animLayer, node, isSwitcher);
+		parseAnimationLayer(animLayer, boneNodes, isSwitcher);
 	}
 }
-void LoaderFbxAnimation::parseAnimationLayer(FbxAnimLayer* animLayer, FbxNode* node, bool isSwitcher)
+void LoaderFbxAnimation::parseAnimationLayer(FbxAnimLayer* animLayer, std::vector<FbxNode*> boneNodes, bool isSwitcher)
 {
 //	FbxString str = "Node name: ";
 //	str += node->GetName();
 //	str += "\n";
 //	printf(str.Buffer());
 
-	animationBones_.push_back(LoaderFbxAnimationBone(node->GetName()));
-
-	parseAnimationChannels(node, animLayer, isSwitcher);
-
-	for(int i=0; i< node->GetChildCount(); i++)
-		parseAnimationLayer(animLayer, node->GetChild(i), isSwitcher);
+	for(unsigned int i=0; i<boneNodes.size(); i++)
+	{
+		animationBones_.push_back(LoaderFbxAnimationBone(boneNodes[i]->GetName()));
+		parseAnimationChannels(boneNodes[i], animLayer, isSwitcher);
+	}
 }
 
 void LoaderFbxAnimation::parseAnimationChannels(FbxNode* node, FbxAnimLayer* animLayer, bool isSwitcher)
@@ -405,37 +403,5 @@ void LoaderFbxAnimation::parseAnimationListCurve(FbxAnimCurve* animCurve, FbxPro
 		//
         //outputString += "\n";
         //FBXSDK_printf (outputString);
-	}
-}
-
-void LoaderFbxAnimation::removeNonAffectingBones()
-{
-	for(int i=0; i<animationBones_.size(); i++)
-	{
-		bool remove = true;
-		if(animationBones_[i].getTranslationX()->size() > 0)
-			remove = false;
-		else if(animationBones_[i].getTranslationY()->size() > 0)
-			remove = false;
-		else if(animationBones_[i].getTranslationZ()->size() > 0)
-			remove = false;
-		else if(animationBones_[i].getRotationX()->size() > 0)
-			remove = false;
-		else if(animationBones_[i].getRotationY()->size() > 0)
-			remove = false;
-		else if(animationBones_[i].getRotationZ()->size() > 0)
-			remove = false;
-		else if(animationBones_[i].getScalingX()->size() > 0)
-			remove = false;
-		else if(animationBones_[i].getScalingY()->size() > 0)
-			remove = false;
-		else if(animationBones_[i].getScalingZ()->size() > 0)
-			remove = false;
-
-		if(remove)
-		{
-			animationBones_.erase(animationBones_.begin()+i);
-			i=-1;
-		}
 	}
 }

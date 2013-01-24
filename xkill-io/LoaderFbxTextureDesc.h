@@ -3,10 +3,16 @@
 
 #include <xkill-utilities/Math.h>
 
+//! Class for storing texture data.
+/*!
+\ingroup xkill-io-fbx
+*/
 class LoaderFbxTextureDesc
 {
 public:
+	//! Initializes LoaderFbxTextureDesc to its default state.
 	LoaderFbxTextureDesc();
+	//! Currently unused.
 	~LoaderFbxTextureDesc();
 
 	void setTextureName(const char* textureName);
@@ -46,24 +52,24 @@ public:
 	int			getTextureUse();
 private:
 	
-	const char* textureName_;
-	const char* fileName_;
-	
-	Float2	scale_;
-	Float2	translation_;
-	Float3	rotation_;
-	bool	swap_;
-	int		alphaSource_;
-	int		croppingLeft_;
-	int		croppingTop_;
-	int		croppingRight_;
-	int		croppingBottom_;
-	int		mappingType_;
-	int		planarMappingNormal_;
-	int		blendMode_;
-	float	defaultAlpha_;
-	int		materialUse_;
-	int		textureUse_;
+	const char* textureName_;		//<! Name of the texture
+	const char* fileName_;			//<! The textures file name.
+									
+	Float2	scale_;					//<! Texture scale.
+	Float2	translation_;			//<! Texture translation.
+	Float3	rotation_;				//<! Texture rotation.
+	bool	swap_;					//<! Swap flag.
+	int		alphaSource_;			//<! Source of alpha
+	int		croppingLeft_;			//<! Left cropping.
+	int		croppingTop_;			//<! Top cropping.
+	int		croppingRight_;			//<! Right cropping.
+	int		croppingBottom_;		//<! Bottom cropping.
+	int		mappingType_;			//<! Type of mapping.
+	int		planarMappingNormal_;	//<! Normal mapping planar.
+	int		blendMode_;				//<! Blend mode.
+	float	defaultAlpha_;			//<! Default alpha value.
+	int		materialUse_;			//<! How materials are used.
+	int		textureUse_;			//<! How texture is used.
 };
 
 #endif //XKILL_IO_LOADERFBXTEXTUREDESC_H

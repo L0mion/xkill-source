@@ -9,7 +9,9 @@
 class LoaderFbxMaterialDesc
 {
 public:
+	//! Initializes LoaderFbxMaterialDesc to its default values.
 	LoaderFbxMaterialDesc();
+	//! Initializes LoaderFbxMaterialDesc with specific values.
 	LoaderFbxMaterialDesc(Float3 ambient,
 		Float3	diffuse,
 		Float3	specular,
@@ -17,6 +19,7 @@ public:
 		float	opacity,
 		float	shininess,
 		float	reflectivity);
+	//! Initializes LoaderFbxMaterialDesc with specific values.
 	LoaderFbxMaterialDesc(Float3 ambient,
 		Float3	diffuse,
 		Float3	specular,
@@ -27,11 +30,23 @@ public:
 		std::vector<FbxFileTexture*> fbxFileTextures,
 		std::vector<FbxLayeredTexture*>	fbxLayeredTextures,
 		std::vector<FbxProceduralTexture*> fbxProceduralTextures);
-
+	//! Resets LoaderFbxMaterialDesc to its default state.
 	void reset();
 
+	//! Adds a file texture to the material.
+	/*!
+	\param fileTexture The texture to be added.
+	*/
 	void addFbxFileTexture(FbxFileTexture* fileTexture);
+	//! Adds a layered texture to the material.
+	/*!
+	\param layeredTexture The texture to be added.
+	*/
 	void addFbxLayeredTexture(FbxLayeredTexture* layeredTexture);
+	//! Adds a procedural texture to the material.
+	/*!
+	\param proceduralTexture The texture to be added.
+	*/
 	void addFbxProceduralTexture(FbxProceduralTexture* proceduralTexture);
 
 	void setAmbient(Float3 ambient);
@@ -58,17 +73,17 @@ public:
 	std::vector<FbxProceduralTexture*>	getFbxProceduralTextures()	const;
 
 private:
-	Float3	ambient_;
-	Float3	diffuse_;
-	Float3	specular_;
-	Float3	emissive_;
-	float	opacity_;
-	float	shininess_;
-	float	reflectivity_;
+	Float3	ambient_;		//<! Ambient component of the material.
+	Float3	diffuse_;		//<! Diffuse component of the material.
+	Float3	specular_;		//<! Specular component of the material.
+	Float3	emissive_;		//<! Emissive component of the material.
+	float	opacity_;		//<! Opacity component of the material.
+	float	shininess_;		//<! Shininess component of the material.
+	float	reflectivity_;	//<! Reflectivity component of the material.
 
-	std::vector<FbxFileTexture*>		fbxFileTextures_;
-	std::vector<FbxLayeredTexture*>		fbxLayeredTextures_;
-	std::vector<FbxProceduralTexture*>	fbxProceduralTextures_;
+	std::vector<FbxFileTexture*>		fbxFileTextures_;		//<! Contains file textures.
+	std::vector<FbxLayeredTexture*>		fbxLayeredTextures_;	//<! Contains layered textures.
+	std::vector<FbxProceduralTexture*>	fbxProceduralTextures_;	//<! Contains procedural textures.
 };
 
 #endif //XKILL_IO_LOADERFBXMATERIALDESC_H

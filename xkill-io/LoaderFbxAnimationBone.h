@@ -7,11 +7,18 @@
 
 #include "LoaderFbxAnimationKeyFrame.h"
 
+//! Class for describing a bone and its keyframes.
+/*!
+\ingroup xkill-io-fbx
+*/
 class LoaderFbxAnimationBone
 {
 public:
+	//! Initializes LoaderFbxAnimationBone to its default state.
 	LoaderFbxAnimationBone();
+	//! Initializes LoaderFbxAnimationBone with specific values.
 	LoaderFbxAnimationBone(const char* name);
+	//! Currently unused.
 	~LoaderFbxAnimationBone();
 
 	const char* getName();
@@ -68,33 +75,33 @@ public:
 	void setPropertyVector(std::vector<LoaderFbxAnimationKeyFrame> propertyVector);
 	void setPropertyEnum(std::vector<LoaderFbxAnimationKeyFrame> propertyEnum);
 private:
-	const char*			name_;
+	const char*	name_; //<! Name of the bone.
 
-	std::vector<LoaderFbxAnimationKeyFrame> translationX_;
-	std::vector<LoaderFbxAnimationKeyFrame> translationY_;
-	std::vector<LoaderFbxAnimationKeyFrame> translationZ_;
-	std::vector<LoaderFbxAnimationKeyFrame> rotationX_;
-	std::vector<LoaderFbxAnimationKeyFrame> rotationY_;
-	std::vector<LoaderFbxAnimationKeyFrame> rotationZ_;
-	std::vector<LoaderFbxAnimationKeyFrame> scalingX_;
-	std::vector<LoaderFbxAnimationKeyFrame> scalingY_;
-	std::vector<LoaderFbxAnimationKeyFrame> scalingZ_;
-	std::vector<LoaderFbxAnimationKeyFrame> colorRed_;
-	std::vector<LoaderFbxAnimationKeyFrame> colorGreen_;
-	std::vector<LoaderFbxAnimationKeyFrame> colorBlue_;
-	std::vector<LoaderFbxAnimationKeyFrame> lightIntensity_;
-	std::vector<LoaderFbxAnimationKeyFrame> lightOuterAngle_;
-	std::vector<LoaderFbxAnimationKeyFrame> lightFog_;
-	std::vector<LoaderFbxAnimationKeyFrame> cameraFieldOfView_;
-	std::vector<LoaderFbxAnimationKeyFrame> cameraFieldOfViewX_;
-	std::vector<LoaderFbxAnimationKeyFrame> cameraFieldOfViewY_;
-	std::vector<LoaderFbxAnimationKeyFrame> cameraOpticalCenterX_;
-	std::vector<LoaderFbxAnimationKeyFrame> cameraOpticalCenterY_;
-	std::vector<LoaderFbxAnimationKeyFrame> cameraRoll_;
-	std::vector<LoaderFbxAnimationKeyFrame> geometryShapeChannel_;
-	std::vector<LoaderFbxAnimationKeyFrame> propertyPrimitive_;
-	std::vector<LoaderFbxAnimationKeyFrame> propertyVector_;
-	std::vector<LoaderFbxAnimationKeyFrame> propertyEnum_;
+	std::vector<LoaderFbxAnimationKeyFrame> translationX_;			//<! Contains translation along the X-axis.		
+	std::vector<LoaderFbxAnimationKeyFrame> translationY_;			//<! Contains translation along the Y-axis.		
+	std::vector<LoaderFbxAnimationKeyFrame> translationZ_;			//<! Contains translation along the Z-axis.		
+	std::vector<LoaderFbxAnimationKeyFrame> rotationX_;				//<! Contains rotation along the X-axis.			
+	std::vector<LoaderFbxAnimationKeyFrame> rotationY_;				//<! Contains rotation along the Y-axis.			
+	std::vector<LoaderFbxAnimationKeyFrame> rotationZ_;				//<! Contains rotation along the Z-axis.			
+	std::vector<LoaderFbxAnimationKeyFrame> scalingX_;				//<! Contains scaling along the X-axis.			
+	std::vector<LoaderFbxAnimationKeyFrame> scalingY_;				//<! Contains scaling along the Y-axis.			
+	std::vector<LoaderFbxAnimationKeyFrame> scalingZ_;				//<! Contains scaling along the Z-axis.			
+	std::vector<LoaderFbxAnimationKeyFrame> colorRed_;				//<! Contains color red.			
+	std::vector<LoaderFbxAnimationKeyFrame> colorGreen_;			//<! Contains color green.	
+	std::vector<LoaderFbxAnimationKeyFrame> colorBlue_;				//<! Contains color blue.		
+	std::vector<LoaderFbxAnimationKeyFrame> lightIntensity_;		//<! Contains light intensity.	
+	std::vector<LoaderFbxAnimationKeyFrame> lightOuterAngle_;		//<! Contains light outer angle.	
+	std::vector<LoaderFbxAnimationKeyFrame> lightFog_;				//<! Contains light fog.			
+	std::vector<LoaderFbxAnimationKeyFrame> cameraFieldOfView_;		//<! Contains camera field of view.	
+	std::vector<LoaderFbxAnimationKeyFrame> cameraFieldOfViewX_;	//<! Contains camera field of view along the X-axis.
+	std::vector<LoaderFbxAnimationKeyFrame> cameraFieldOfViewY_;	//<! Contains camera field of view along the Y-axis.
+	std::vector<LoaderFbxAnimationKeyFrame> cameraOpticalCenterX_;	//<! Contains camera optical center X.
+	std::vector<LoaderFbxAnimationKeyFrame> cameraOpticalCenterY_;	//<! Contains camera optical center Y.
+	std::vector<LoaderFbxAnimationKeyFrame> cameraRoll_;			//<! Contains camera roll.		
+	std::vector<LoaderFbxAnimationKeyFrame> geometryShapeChannel_; 	//<! Contains geometry shape channel.
+	std::vector<LoaderFbxAnimationKeyFrame> propertyPrimitive_;		//<! Contains property primitives.	
+	std::vector<LoaderFbxAnimationKeyFrame> propertyVector_;		//<! Contains property vectors.
+	std::vector<LoaderFbxAnimationKeyFrame> propertyEnum_;			//<! Contains property enums.		
 
 };
 
