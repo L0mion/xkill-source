@@ -112,6 +112,15 @@ public:
 		CREATE_ATTRIBUTE(Attribute_SplitScreen, splitScreen, entity);
 		CONNECT_ATTRIBUTES(splitScreen, camera);
 		CONNECT_ATTRIBUTES(splitScreen, player);
+
+		//temp, create demo light for each projectile
+		CREATE_ATTRIBUTE(Attribute_Light_Point, lightPoint, entity);
+		CONNECT_ATTRIBUTES(lightPoint, position);
+		lightPoint->lightPoint.ambient		= Float4(0.8f, 0.8f, 0.8f, 1.0f);
+		lightPoint->lightPoint.diffuse		= Float4(0.8f, 0.8f, 0.8f, 1.0f);
+		lightPoint->lightPoint.specular		= Float4(0.8f, 0.8f, 0.8f, 1.0f);
+		lightPoint->lightPoint.range		= 1.0f;
+		lightPoint->lightPoint.attenuation	= Float3(0.0f, 0.1f, 0.0f);
 	}
 	
 	void createWorldEntity(Entity* entity, Event_CreateWorld* e)
