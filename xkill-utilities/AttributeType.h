@@ -204,6 +204,7 @@ struct DLL_U Attribute_Render : public IAttribute
 	
 
 	BoolField culling;
+	bool cull;
 
 	DataItemList* getDataList()
 	{
@@ -214,6 +215,8 @@ struct DLL_U Attribute_Render : public IAttribute
 		list->add(textureID,							"textureID");
 		list->add(transparent,							"transparent");
 		list->add(tessellation,							"tessellation");
+		list->add(culling.values[0],					"culling1");
+		list->add(culling.values[1],					"culling2");
 		return list;
 	}
 	void saveTo(DataItemList* list)
@@ -224,6 +227,8 @@ struct DLL_U Attribute_Render : public IAttribute
 		list->get(&textureID);
 		list->get(&transparent);
 		list->get(&tessellation);
+		list->get(&culling.values[0]);
+		list->get(&culling.values[1]);
 	};
 	AttributeType getType(){return ATTRIBUTE_RENDER;}
 	std::string getName(){return "Render";}
@@ -242,7 +247,8 @@ struct DLL_U Attribute_Physics : public IAttribute
 		PLAYER = 2,
 		PROJECTILE = 4,
 		EXPLOSIONSPHERE = 8,
-		EVERYTHING = 0xffff
+		FRUSTUM = 16,
+		EVERYTHING = -1
 	};
 	PhysicsAttributeType collisionFilterGroup;
 

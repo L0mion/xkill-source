@@ -122,7 +122,7 @@ public:
 		CONNECT_ATTRIBUTES(physics, render);
 		physics->meshID = e->meshID;
 		physics->collisionFilterGroup = Attribute_Physics::WORLD;
-		physics->collisionFilterMask = Attribute_Physics::PLAYER | Attribute_Physics::PROJECTILE;
+		physics->collisionFilterMask = Attribute_Physics::PLAYER | Attribute_Physics::PROJECTILE | Attribute_Physics::FRUSTUM;
 		physics->mass = 0;
 	}
 
@@ -149,7 +149,7 @@ public:
 
 		CREATE_ATTRIBUTE(Attribute_Physics, physics, entity);
 		physics->collisionFilterGroup = Attribute_Physics::PROJECTILE;
-		physics->collisionFilterMask = Attribute_Physics::WORLD | Attribute_Physics::PLAYER;
+		physics->collisionFilterMask = Attribute_Physics::WORLD | Attribute_Physics::PLAYER | Attribute_Physics::FRUSTUM;
 		CONNECT_ATTRIBUTES(physics, spatial);
 		CONNECT_ATTRIBUTES(physics, render);
 		physics->meshID = render->meshID;
