@@ -53,7 +53,6 @@ Attribute_Physics::Attribute_Physics()
 {
 	collisionResponse = true;
 	reloadDataIntoBulletPhysics = true;
-	alive = true;
 	mass = 1.0f;
 	
 	meshID = -1;
@@ -255,12 +254,21 @@ Attribute_Damage::~Attribute_Damage()
 {
 }
 
-Attribute_SpawnPoint::Attribute_SpawnPoint()
+Attribute_PlayerSpawnPoint::Attribute_PlayerSpawnPoint()
 {
 	timeSinceLastSpawn = 0.0f;
 	spawnArea = 0.0f;
 }
-Attribute_SpawnPoint::~Attribute_SpawnPoint()
+Attribute_PlayerSpawnPoint::~Attribute_PlayerSpawnPoint()
+{
+}
+
+Attribute_PickupablesSpawnPoint::Attribute_PickupablesSpawnPoint()
+{
+	amount = 0;
+	timeSinceLastSpawn = 0.0f;
+}
+Attribute_PickupablesSpawnPoint::~Attribute_PickupablesSpawnPoint()
 {
 }
 

@@ -62,7 +62,7 @@ public:
 	AttributeStorage<Attribute_Mesh>					mesh;
 	AttributeStorage<Attribute_Health>					health;
 	AttributeStorage<Attribute_Damage>					damage;
-	AttributeStorage<Attribute_SpawnPoint>				spawnPoint;
+	AttributeStorage<Attribute_PlayerSpawnPoint>				spawnPoint;
 	AttributeStorage<Attribute_WeaponStats>				weaponStats;
 	AttributeStorage<Attribute_ExplosionSphere>			explosionSphere;
 	AttributeStorage<Attribute_SplitScreen>				splitScreen;
@@ -111,7 +111,7 @@ static AttributeIterator<Attribute_Light_Spot>			itrLightSpot			;	\
 static AttributeIterator<Attribute_Mesh>				itrMesh					;	\
 static AttributeIterator<Attribute_Health>				itrHealth				;	\
 static AttributeIterator<Attribute_Damage>				itrDamage				;	\
-static AttributeIterator<Attribute_SpawnPoint>			itrSpawnPoint			;	\
+static AttributeIterator<Attribute_PlayerSpawnPoint>			itrSpawnPoint			;	\
 static AttributeIterator<Attribute_WeaponStats>			itrWeaponStats			;	\
 static AttributeIterator<Attribute_ExplosionSphere>		itrExplosionSphere		;	\
 static AttributeIterator<Attribute_SplitScreen>			itrSplitScreen			;	\

@@ -64,7 +64,8 @@ enum DLL_U AttributeType
 
 	ATTRIBUTE_HEALTH,
 	ATTRIBUTE_DAMAGE,
-	ATTRIBUTE_SPAWNPOINT,
+	ATTRIBUTE_PLAYERSPAWNPOINT,
+	ATTRIBUTE_PICKUPABLESSPAWNPOINT,
 	ATTRIBUTE_WEAPONSTATS,
 	ATTRIBUTE_EXPLOSIONSPHERE,
 
@@ -270,7 +271,6 @@ struct DLL_U Attribute_Physics : public IAttribute
 
 	bool collisionResponse;
 	bool reloadDataIntoBulletPhysics;
-	bool alive;
 
 	float explosionSphereRadius;
 
@@ -287,7 +287,6 @@ struct DLL_U Attribute_Physics : public IAttribute
 		list->add(collisionFilterMask,					"collisionFilterMask");
 		list->add(collisionResponse,					"collisionResponse");
 		list->add(reloadDataIntoBulletPhysics,			"reloadDataIntoBulletPhysics");
-		list->add(alive,								"isAlive");
 		
 		return list;
 	}
@@ -303,7 +302,6 @@ struct DLL_U Attribute_Physics : public IAttribute
 		list->get(&collisionFilterMask);
 		list->get(&collisionResponse);
 		list->get(&reloadDataIntoBulletPhysics);
-		list->get(&alive);
 	};
 	AttributeType getType(){return ATTRIBUTE_PHYSICS;}
 	std::string getName(){return "Physics";}
@@ -820,10 +818,10 @@ struct DLL_U Attribute_Damage : public IAttribute
 	std::string getName(){return "Damage";}
 };
 
-struct DLL_U Attribute_SpawnPoint : public IAttribute
+struct DLL_U Attribute_PlayerSpawnPoint : public IAttribute
 {
-	Attribute_SpawnPoint();
-	~Attribute_SpawnPoint();
+	Attribute_PlayerSpawnPoint();
+	~Attribute_PlayerSpawnPoint();
 
 	AttributePointer ptr_position;
 
@@ -846,8 +844,40 @@ struct DLL_U Attribute_SpawnPoint : public IAttribute
 		list->get(&timeSinceLastSpawn);
 		list->get(&spawnArea);
 	};
-	AttributeType getType(){return ATTRIBUTE_SPAWNPOINT;}
-	std::string getName(){return "SpawnPoint";}
+	AttributeType getType(){return ATTRIBUTE_PLAYERSPAWNPOINT;}
+	std::string getName(){return "PlayerSpawnPoint";}
+};
+
+struct DLL_U Attribute_PickupablesSpawnPoint : public IAttribute
+{
+	Attribute_PickupablesSpawnPoint();
+	~Attribute_PickupablesSpawnPoint();
+
+	AttributePointer ptr_position;
+
+	int amount;
+	float timeSinceLastSpawn;
+
+	/*
+	DataItemList* getDataList()
+	{
+		DataItemList* list = new DataItemList();
+
+		list->add_AttributePointer(ptr_position.index, "ptr_position");
+		list->add(timeSinceLastSpawn,	"timeSinceLastSpawn");
+		list->add(spawnArea,			"spawnArea");
+
+		return list;
+	}
+	void saveTo(DataItemList* list)
+	{
+		list->get_AttributePointer(&ptr_position.index);
+		list->get(&timeSinceLastSpawn);
+		list->get(&spawnArea);
+	};
+	*/
+	AttributeType getType(){return ATTRIBUTE_PICKUPABLESSPAWNPOINT;}
+	std::string getName(){return "PickupablesSpawnPoint";}
 };
 
 /// Stores everything needed for the weapon system. The two enums "AmmunitionType" and "FiringMode" is used to preset the weapon settings. These settings are used in GameComponent to simulate the weapon behavior of choice.

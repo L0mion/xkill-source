@@ -190,7 +190,7 @@ public:
 		CREATE_ATTRIBUTE(Attribute_Position, position, entity);
 		position->position = e->spawnPointPosition;
 		
-		CREATE_ATTRIBUTE(Attribute_SpawnPoint, spawnPoint, entity);
+		CREATE_ATTRIBUTE(Attribute_PlayerSpawnPoint, spawnPoint, entity);
 		CONNECT_ATTRIBUTES(spawnPoint, position);
 		spawnPoint->timeSinceLastSpawn = 0.1f;
 		spawnPoint->spawnArea = e->spawnAreaRadius;

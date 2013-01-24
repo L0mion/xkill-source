@@ -8,7 +8,7 @@ class Event_EndDeathmatch;
 class Event_TransferEventsToGame;
 class Entity;
 
-struct Attribute_SpawnPoint;
+struct Attribute_PlayerSpawnPoint;
 
 template <class T>
 class LinkFrame;
@@ -57,5 +57,5 @@ public:
 	If no unoccupied spawn point is found, one is selected at random. 
 	If there exists no spawn points at all, nullptr is returned.
 	*/
-	Attribute_SpawnPoint* findUnoccupiedSpawnPoint();
+	Attribute_PlayerSpawnPoint* findUnoccupiedSpawnPoint();
 };

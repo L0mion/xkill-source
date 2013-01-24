@@ -264,7 +264,7 @@ void GameComponent::onUpdate(float delta)
 		if(health->health <= 0.0f) 
 		{
 			// If an appropriate spawnpoint was found: spawn at it; otherwise: spawn at origo.
-			Attribute_SpawnPoint* spawnPointAttribute = findUnoccupiedSpawnPoint();
+			Attribute_PlayerSpawnPoint* spawnPointAttribute = findUnoccupiedSpawnPoint();
 			if(spawnPointAttribute != nullptr)
 			{
 				Attribute_Position* spawnPointPositionAttribute = itrPosition.at(spawnPointAttribute->ptr_position);
@@ -321,7 +321,7 @@ void GameComponent::onUpdate(float delta)
 	while(itrSpawnPoint.hasNext())
 	{
 		// spawn delay logic
-		Attribute_SpawnPoint* spawnPoint	= itrSpawnPoint.getNext();
+		Attribute_PlayerSpawnPoint* spawnPoint	= itrSpawnPoint.getNext();
 		spawnPoint->timeSinceLastSpawn += delta;
 	}
 
@@ -547,10 +547,10 @@ void GameComponent::event_EndDeathmatch(Event_EndDeathmatch* e)
 	DEBUGPRINT("x--------------x");
 }
 
-Attribute_SpawnPoint* GameComponent::findUnoccupiedSpawnPoint()
+Attribute_PlayerSpawnPoint* GameComponent::findUnoccupiedSpawnPoint()
 {
-	Attribute_SpawnPoint* foundSpawnPoint = nullptr;
-	std::vector<Attribute_SpawnPoint*> unoccupiedSpawnPoints;
+	Attribute_PlayerSpawnPoint* foundSpawnPoint = nullptr;
+	std::vector<Attribute_PlayerSpawnPoint*> unoccupiedSpawnPoints;
 	
 	// Special cases: *no spawn point, return nullptr.
 	int numSpawnPoints = itrSpawnPoint.storageSize();
@@ -564,7 +564,7 @@ Attribute_SpawnPoint* GameComponent::findUnoccupiedSpawnPoint()
 	// Find all unoccupied spawn points.
 	//
 
-	AttributeIterator<Attribute_SpawnPoint> itrSpawnPoint = ATTRIBUTE_MANAGER->spawnPoint.getIterator();
+	AttributeIterator<Attribute_PlayerSpawnPoint> itrSpawnPoint = ATTRIBUTE_MANAGER->spawnPoint.getIterator();
 	while(itrSpawnPoint.hasNext())
 	{
 		// Fetch attributes
