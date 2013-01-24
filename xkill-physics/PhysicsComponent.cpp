@@ -134,9 +134,9 @@ void PhysicsComponent::onUpdate(float delta)
 			physicsObjects_->at(i)->onUpdate(delta);
 		}
 	}
+
 	updateCulling();
 	dynamicsWorld_->stepSimulation(delta,0);
-
 	//gDebugDraw.clearDebugVerticesVector();
 	//dynamicsWorld_->debugDrawWorld();
 	//queueDebugDrawEvent();
