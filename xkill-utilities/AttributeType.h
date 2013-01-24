@@ -880,113 +880,30 @@ struct DLL_U Attribute_PickupablesSpawnPoint : public IAttribute
 	std::string getName(){return "PickupablesSpawnPoint";}
 };
 
+class MutatorSettings;
+#include "WeaponStructs.h"
 /// Stores everything needed for the weapon system. The two enums "AmmunitionType" and "FiringMode" is used to preset the weapon settings. These settings are used in GameComponent to simulate the weapon behavior of choice.
 /** 
 \ingroup ATTRIBUTES
 */
 struct DLL_U Attribute_WeaponStats : public IAttribute
 {
-	enum AmmunitionType
-	{
-		BULLET,
-		SCATTER,
-		EXPLOSIVE,
-
-		NROFAMUNITIONTYPES
-	};
-
-	enum FiringMode
-	{
-		SINGLE,
-		SEMI,
-		AUTO,
-
-		NROFFIRINGMODES
-	};
-
 	Attribute_WeaponStats();
 	~Attribute_WeaponStats();
 
-	void setWeaponStats(AmmunitionType ammunitionType, FiringMode firingMode);
-	void setWeaponToDebugMachineGun();
+	Ammunition ammunition[Ammunition::NROFAMUNITIONTYPES];
+	FiringMode firingMode[FiringMode::NROFFIRINGMODETYPES];
+
+	Ammunition::AmmunitionType currentAmmunitionType;
+	FiringMode::FiringModeType currentFiringModeType;
+
+	void setWeaponStats(Ammunition::AmmunitionType ammunitionType, FiringMode::FiringModeType firingModeType);
+
 	std::string getAmmunitionTypeAsString();
 	std::string getFiringModeAsString();
 
-	AmmunitionType ammunitionType;	//!< BULLET, SCATTER, EXPLOSIVE
-	FiringMode firingMode;			//!< SINGLE, SEMI, AUTO
-
-	int totalNrOfShots;				//!< Total number of shots that can be fired. A value of -1 denotes unlimited ammunition.
-	int clipSize;					//!< Number of shots that can be fired before reload is needed. A value of 0 denotes that no reload is necessary.
-	int nrOfShotsLeftInClip;		//!< Current number of shots left in the current clip.
-
-	float reloadTime;				//!< Number of seconds it takes to reload.
-	float reloadTimeLeft;			//!< Reload progress, when lesser or equal to 0 the weapon is reloaded.
-	float cooldownBetweenShots;		//!< Number of seconds that must pass between each shot.
-	float cooldownLeft;				//!< Number of seconds until a new shot can be fired.
-
-	float velocityOfEachProjectile; //!< Velocity of the PhysicsAttribute when creating a projectile.
-	int nrOfProjectilesForEachShot; //!< If > 1 then scattershot else singleshot.
-	float damgeOfEachProjectile;	//!< Damage value of the damage attribute created when creating a projectile from this weapon.
-
-	float displacementSphereRadius;	//!< Randomizes the position of each projectile inside this sphere.
-	float spreadConeRadius;			//!< Randomizes the orientation of each projectile's velocity vector inside this cone. 
-	float velocityDifference;		//!< Randomizes the velocity for each projectile. If velocityDifference is 0.05 and velocityOfEachProjectile is 1.00, the actual velocity will be around 0.95 and 1.05.
-
-	bool isExplosive;				//!< Determines if projectiles created from this weapon will explode on impact.
-	float explosionSphereRadius;	//!< Radius of explosion sphere.
-
-	DataItemList* getDataList()
-	{
-		DataItemList* list = new DataItemList();
-
-		list->add_Enum(ammunitionType,			"ammunitionType");
-		list->add_Enum(firingMode,				"firingMode");
-
-		list->add(totalNrOfShots,				"totalNrOfShots");
-		list->add(clipSize,						"clipSize");
-		list->add(nrOfShotsLeftInClip,			"nrOfShotsLeftInClip");
-
-		list->add(reloadTime,					"reloadTime");
-		list->add(reloadTimeLeft,				"reloadTimeLeft");
-		list->add(cooldownBetweenShots,			"cooldownBetweenShots");
-		list->add(cooldownLeft,					"cooldownLeft");
-
-		list->add(velocityOfEachProjectile,		"velocityOfEachProjectile");
-		list->add(nrOfProjectilesForEachShot,	"nrOfProjectilesForEachShot");
-		list->add(damgeOfEachProjectile,		"damgeOfEachProjectile");
-
-		list->add(displacementSphereRadius,		"displacementSphereRadius");
-		list->add(spreadConeRadius,				"spreadConeRadius");
-
-		list->add(isExplosive,					"isExplosive");
-		list->add(explosionSphereRadius,		"explosionSphereRadius");
-
-		return list;
-	}
-	void saveTo(DataItemList* list)
-	{
-		ammunitionType	= (AmmunitionType)	list->get_Enum();
-		firingMode		= (FiringMode)		list->get_Enum();
-
-		list->get(&totalNrOfShots);
-		list->get(&clipSize);
-		list->get(&nrOfShotsLeftInClip);
-
-		list->get(&reloadTime);
-		list->get(&reloadTimeLeft);
-		list->get(&cooldownBetweenShots);
-		list->get(&cooldownLeft);
-	
-		list->get(&velocityOfEachProjectile);
-		list->get(&nrOfProjectilesForEachShot);
-		list->get(&damgeOfEachProjectile);
-	
-		list->get(&displacementSphereRadius);
-		list->get(&spreadConeRadius);
-		
-		list->get(&isExplosive);
-		list->get(&explosionSphereRadius);
-	};
+	DataItemList* getDataList();
+	void saveTo(DataItemList* list);
 	AttributeType getType(){return ATTRIBUTE_WEAPONSTATS;}
 	std::string getName(){return "WeaponStats";}
 };

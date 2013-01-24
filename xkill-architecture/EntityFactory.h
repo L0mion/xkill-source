@@ -89,6 +89,8 @@ public:
 		CREATE_ATTRIBUTE(Attribute_Health, health, entity);
 
 		CREATE_ATTRIBUTE(Attribute_WeaponStats, weaponStats, entity);
+		weaponStats->currentAmmunitionType = Ammunition::SCATTER;
+		weaponStats->currentFiringModeType = FiringMode::AUTO;
 
 		CREATE_ATTRIBUTE(Attribute_Player, player, entity);
 		CONNECT_ATTRIBUTES(player, render);
