@@ -434,8 +434,7 @@ void LoaderFbxMesh::parseVertexLinkData(FbxMesh* mesh, LoaderFbxMeshDesc* meshDe
 		if(cluster)
 		{
 			FbxNode* node = cluster->GetLink();
-			printf("%s\n", node->GetName());
-			
+
 			node = findRoot(node);
 			std::vector<FbxNode*> nodes;
 			std::vector<int> parentIndices;
@@ -511,7 +510,7 @@ FbxNode* LoaderFbxMesh::findRoot(FbxNode* node)
 		if(node->GetParent()->GetNodeAttribute()->GetAttributeType() == FbxNodeAttribute::eSkeleton)
 		{
 			node = node->GetParent();
-			printf("%s\n", node->GetName());
+//			printf("%s\n", node->GetName());
 		}
 		else
 			done = true;

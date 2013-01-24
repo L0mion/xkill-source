@@ -37,7 +37,7 @@ void LoaderFbxMaterial::parseMaterial(FbxGeometry* geometry, LoaderFbxMaterialDe
 			FbxSurfaceMaterial* material = node->GetMaterial(materialIndex);
 			
 			FbxString name = material->GetName();
-			printf("Material:  %s \n", name.Buffer());
+//			printf("Material:  %s \n", name.Buffer());
 			
 			const FbxImplementation* implementation = GetImplementation(material, FBXSDK_IMPLEMENTATION_HLSL);
 			FbxString implementationType = "HLSL";
@@ -73,7 +73,7 @@ void LoaderFbxMaterial::parseMaterialImplementation(FbxSurfaceMaterial* material
 		FbxProperty fbxProperty;
 
 		FbxString test = entry.GetSource();
-		printf("Entry: %s \n", test.Buffer());
+//		printf("Entry: %s \n", test.Buffer());
 
 		if(strcmp(FbxPropertyEntryView::sEntryType, entrySrcType) == 0)
 		{
