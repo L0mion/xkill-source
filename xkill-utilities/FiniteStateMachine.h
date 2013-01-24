@@ -84,14 +84,15 @@ public:
 	~FiniteStateMachine(); ///< @note States are injected and their memory deallocation is therefore handled by caller (See Wikipedia RAII) @see Nuke(), AddState(FiniteState*)
 
 protected:
-	void HandleTransition(StateType goalStateType, bool replaceCurrentState); ///< Contains the necessary logic for performing a state transition.  
+	bool HandleTransition(StateType goalStateType, bool replaceCurrentState); ///< Contains the necessary logic for performing a state transition.  
 	/**< 
 	Prints debug messages to the console should any problem arise
 	@pre currentState stack must not be empty */
 
 	virtual void handleEvent_StateChanged( Event_StateChanged* e);
+	void handleEvent_SyncStateCommand( Event_SyncStateCommand* e );
 
 	std::map<StateType, FiniteState*> states_; ///< All states currently associated with the State Machine.
-	std::stack<FiniteState*> currentState_; ///< A stack of states with the current (most recent) on top.
+	std::stack<FiniteState*> currentState_; ///< A stack containing the history of current states with the most recent on top.
 	FiniteState* defaultState_; ///< Default fallback state
 };
