@@ -55,8 +55,6 @@ bool PhysicsObject::init(unsigned int attributeIndex,unsigned int collisionFilte
 	btCollisionShape* collisionShape = CollisionShapes::Instance()->getCollisionShape(physicsAttribute->meshID);
 	setCollisionShape(collisionShape);
 	
-		
-		
 	btVector3 localInertia = subClassCalculateLocalInertia(mass);
 	setMassProps(mass, localInertia); //Set inverse mass and inverse local inertia
 	if((getCollisionFlags() & btCollisionObject::CF_STATIC_OBJECT))
@@ -109,5 +107,4 @@ unsigned int PhysicsObject::getCollisionFilterGroup() const
 
 void PhysicsObject::onUpdate(float delta)
 {
-	setGravity(btVector3(0,0,0));
 }

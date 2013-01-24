@@ -187,18 +187,55 @@ public:
 		mesh->meshID	= e->id;
 	}
 
-	void createSpawnPointEntity(Entity* entity, Event_CreateSpawnPoint* e)
+	void createPlayerSpawnPointEntity(Entity* entity, Event_CreatePlayerSpawnPoint* e)
 	{
 		CREATE_ATTRIBUTE(Attribute_Position, position, entity);
 		position->position = e->spawnPointPosition;
 		
-		CREATE_ATTRIBUTE(Attribute_PlayerSpawnPoint, spawnPoint, entity);
-		CONNECT_ATTRIBUTES(spawnPoint, position);
-		spawnPoint->timeSinceLastSpawn = 0.1f;
-		spawnPoint->spawnArea = e->spawnAreaRadius;
+		CREATE_ATTRIBUTE(Attribute_PlayerSpawnPoint, playerSpawnPoint, entity);
+		CONNECT_ATTRIBUTES(playerSpawnPoint, position);
+		playerSpawnPoint->secondsSinceLastSpawn = 0.1f;
+		playerSpawnPoint->spawnArea = e->spawnAreaRadius;
 	}
 
-	void createExplosionSphere(Entity* entity, Event_CreateExplosionSphere* e)
+	void createPickupablesSpawnPointEntity(Entity* entity, Event_CreatePickupablesSpawnPoint* e)
+	{
+		CREATE_ATTRIBUTE(Attribute_Position, position, entity);
+		position->position = e->spawnPointPosition;
+
+		CREATE_ATTRIBUTE(Attribute_PickupablesSpawnPoint, pickupablesSpawnPoint, entity);
+		CONNECT_ATTRIBUTES(pickupablesSpawnPoint, position);
+	}
+
+	void createPickupableEntity(Entity* entity, Event_CreatePickupable* e)
+	{
+		CREATE_ATTRIBUTE(Attribute_Position, position, entity);
+		position->position = e->position;
+
+		CREATE_ATTRIBUTE(Attribute_Spatial, spatial, entity);
+		CONNECT_ATTRIBUTES(spatial, position);
+
+		CREATE_ATTRIBUTE(Attribute_Render, render, entity);
+		CONNECT_ATTRIBUTES(render, spatial);
+		render->meshID = 2;
+
+		CREATE_ATTRIBUTE(Attribute_Physics, physics, entity);
+		CONNECT_ATTRIBUTES(physics, spatial);
+		CONNECT_ATTRIBUTES(physics, render);
+		physics->collisionFilterGroup = Attribute_Physics::PICKUPABLE;
+		physics->collisionFilterMask = Attribute_Physics::PLAYER | Attribute_Physics::FRUSTUM;
+		physics->collisionResponse = false;
+		physics->mass = 0.0f;
+		physics->gravity = Float3(0.0f, 0.0f, 0.0f);
+		physics->meshID = render->meshID;
+
+		CREATE_ATTRIBUTE(Attribute_Pickupable, pickupable, entity);
+		pickupable->amount = e->amount;
+		CONNECT_ATTRIBUTES(pickupable, position);
+		CONNECT_ATTRIBUTES(pickupable, physics);
+	}
+
+	void createExplosionSphereEntity(Entity* entity, Event_CreateExplosionSphere* e)
 	{
 		CREATE_ATTRIBUTE(Attribute_Position, position, entity);
 		position->position = e->position;

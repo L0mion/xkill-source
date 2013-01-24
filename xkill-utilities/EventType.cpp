@@ -114,10 +114,22 @@ Event_MousePress::Event_MousePress(int keyEnum, bool isPressed) : Event(EVENT_MO
 	this->isPressed = isPressed;
 }
 
-Event_CreateSpawnPoint::Event_CreateSpawnPoint(Float3 spawnPointPosition, float spawnAreaRadius) : Event(EVENT_CREATE_SPAWNPOINT)
+Event_CreatePlayerSpawnPoint::Event_CreatePlayerSpawnPoint(Float3 spawnPointPosition, float spawnAreaRadius) : Event(EVENT_CREATE_PLAYERSPAWNPOINT)
 {
 	this->spawnPointPosition = spawnPointPosition;
 	this->spawnAreaRadius = spawnAreaRadius;
+}
+
+Event_CreatePickupablesSpawnPoint::Event_CreatePickupablesSpawnPoint(Float3 spawnPointPosition)  : Event(EVENT_CREATE_PICKUPABLESSPAWNPOINT)
+{
+	this->spawnPointPosition = spawnPointPosition;
+}
+
+Event_CreatePickupable::Event_CreatePickupable(Float3 position, int pickupableType, int amount)  : Event(EVENT_CREATE_PICKUPABLE)
+{
+	this->position = position;
+	this->pickupableType = pickupableType;
+	this->amount = amount;
 }
 
 Event_StartDeathmatch::Event_StartDeathmatch(int num_players) : Event(EVENT_START_DEATHMATCH)
@@ -150,6 +162,7 @@ Event_CreateWorld::Event_CreateWorld(Float3 position, Float4 rotation, unsigned 
 	this->meshID = meshID;
 }
 
+/*
 Event_CreateAmmo::Event_CreateAmmo(Float3 position, unsigned int type) : Event(EVENT_CREATE_AMMO)
 {
 	this->position = position;
@@ -161,6 +174,7 @@ Event_CreateHack::Event_CreateHack(Float3 position, unsigned int type) : Event(E
 	this->type = type;
 	this->type = type;
 }
+*/
 
 Event_CreateLight::Event_CreateLight(Float3 position, Float3 direction, Float3 ambient, Float3 diffuse, Float3 specular,
 				  Float3 attenuation, float range, float spotPow, unsigned int type) : Event(EVENT_CREATE_LIGHT)

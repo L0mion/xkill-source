@@ -66,6 +66,7 @@ enum DLL_U AttributeType
 	ATTRIBUTE_DAMAGE,
 	ATTRIBUTE_PLAYERSPAWNPOINT,
 	ATTRIBUTE_PICKUPABLESSPAWNPOINT,
+	ATTRIBUTE_PICKUPABLE,
 	ATTRIBUTE_WEAPONSTATS,
 	ATTRIBUTE_EXPLOSIONSPHERE,
 
@@ -249,6 +250,7 @@ struct DLL_U Attribute_Physics : public IAttribute
 		PROJECTILE = 4,
 		EXPLOSIONSPHERE = 8,
 		FRUSTUM = 16,
+		PICKUPABLE = 32,
 		EVERYTHING = -1
 	};
 	PhysicsAttributeType collisionFilterGroup;
@@ -825,7 +827,7 @@ struct DLL_U Attribute_PlayerSpawnPoint : public IAttribute
 
 	AttributePointer ptr_position;
 
-	float timeSinceLastSpawn;	//!< Is reset when a player spawns at the spawn point.
+	float secondsSinceLastSpawn;	//!< Is reset when a player spawns at the spawn point.
 	float spawnArea;			//!< Defines the spawn point zone, a horizontal circle area.
 
 	DataItemList* getDataList()
@@ -833,7 +835,7 @@ struct DLL_U Attribute_PlayerSpawnPoint : public IAttribute
 		DataItemList* list = new DataItemList();
 
 		list->add_AttributePointer(ptr_position.index, "ptr_position");
-		list->add(timeSinceLastSpawn,	"timeSinceLastSpawn");
+		list->add(secondsSinceLastSpawn,	"secondsSinceLastSpawn");
 		list->add(spawnArea,			"spawnArea");
 
 		return list;
@@ -841,7 +843,7 @@ struct DLL_U Attribute_PlayerSpawnPoint : public IAttribute
 	void saveTo(DataItemList* list)
 	{
 		list->get_AttributePointer(&ptr_position.index);
-		list->get(&timeSinceLastSpawn);
+		list->get(&secondsSinceLastSpawn);
 		list->get(&spawnArea);
 	};
 	AttributeType getType(){return ATTRIBUTE_PLAYERSPAWNPOINT;}
@@ -855,29 +857,68 @@ struct DLL_U Attribute_PickupablesSpawnPoint : public IAttribute
 
 	AttributePointer ptr_position;
 
-	int amount;
-	float timeSinceLastSpawn;
+	float spawnDelayInSeconds;		//!< Delay until a pickupable may spawn
+	float secondsSinceLastSpawn;	//!< Incrementing timer
 
-	/*
 	DataItemList* getDataList()
 	{
 		DataItemList* list = new DataItemList();
 
 		list->add_AttributePointer(ptr_position.index, "ptr_position");
-		list->add(timeSinceLastSpawn,	"timeSinceLastSpawn");
-		list->add(spawnArea,			"spawnArea");
+		list->add(spawnDelayInSeconds, "spawnDelayInSeconds");
+		list->add(secondsSinceLastSpawn, "secondsSinceLastSpawn");
 
 		return list;
 	}
 	void saveTo(DataItemList* list)
 	{
 		list->get_AttributePointer(&ptr_position.index);
-		list->get(&timeSinceLastSpawn);
-		list->get(&spawnArea);
+		list->get(&spawnDelayInSeconds);
+		list->get(&spawnDelayInSeconds);
 	};
-	*/
+
 	AttributeType getType(){return ATTRIBUTE_PICKUPABLESSPAWNPOINT;}
 	std::string getName(){return "PickupablesSpawnPoint";}
+};
+
+struct DLL_U Attribute_Pickupable : public IAttribute
+{
+	Attribute_Pickupable();
+	~Attribute_Pickupable();
+
+	AttributePointer ptr_position;
+	AttributePointer ptr_physics;
+
+	enum PickupableType
+	{
+		MEDKIT,
+		AMMUNITION_BULLET,
+		AMMUNITION_SCATTER,
+		AMMUNITION_EXPLOSIVE
+	};
+
+	PickupableType pickupableType;	//! MEDKIT, AMMUNITION_BULLET, AMMUNITION_SCATTER, AMMUNITION_EXPLOSIVE, etc
+	int amount;						//! Data of pickupable (health, ammo, etc)
+
+	DataItemList* getDataList()
+	{
+		DataItemList* list = new DataItemList();
+
+		list->add_AttributePointer(ptr_position.index, "ptr_position");
+		list->add_AttributePointer(ptr_physics.index, "ptr_physics");
+		list->add(amount, "amount");
+
+		return list;
+	}
+	void saveTo(DataItemList* list)
+	{
+		list->get_AttributePointer(&ptr_position.index);
+		list->get_AttributePointer(&ptr_physics.index);
+		list->get(&amount);
+	};
+
+	AttributeType getType(){return ATTRIBUTE_PICKUPABLE;}
+	std::string getName(){return "Pickupable";}
 };
 
 class MutatorSettings;

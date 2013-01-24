@@ -62,10 +62,12 @@ public:
 	AttributeStorage<Attribute_Mesh>					mesh;
 	AttributeStorage<Attribute_Health>					health;
 	AttributeStorage<Attribute_Damage>					damage;
-	AttributeStorage<Attribute_PlayerSpawnPoint>				spawnPoint;
+	AttributeStorage<Attribute_PlayerSpawnPoint>		playerSpawnPoint;
 	AttributeStorage<Attribute_WeaponStats>				weaponStats;
 	AttributeStorage<Attribute_ExplosionSphere>			explosionSphere;
 	AttributeStorage<Attribute_SplitScreen>				splitScreen;
+	AttributeStorage<Attribute_PickupablesSpawnPoint>	pickupablesSpawnPoint;
+	AttributeStorage<Attribute_Pickupable>				pickupable;
 
 	// ADD MORE ABOVE ^
 
@@ -91,57 +93,61 @@ public:
 
 
 // Declares all attributes
-#define ATTRIBUTES_DECLARE_ALL														\
-static Settings											*settings				;	\
-static EntityStorage									*itr_entity				;	\
-static AttributeIterator<Attribute_Position>			itrPosition				;	\
-static AttributeIterator<Attribute_Spatial>				itrSpatial				;	\
-static AttributeIterator<Attribute_Render>				itrRender				;	\
-static AttributeIterator<Attribute_DebugShape>			itrDebugShape			;	\
-static AttributeIterator<Attribute_Physics>				itrPhysics				;	\
-static AttributeIterator<Attribute_Camera>				itrCamera				;	\
-static AttributeIterator<Attribute_Input>				itrInput				;	\
-static AttributeIterator<Attribute_InputDevice>			itrInputDevice			;	\
-static AttributeIterator<Attribute_Player>				itrPlayer				;	\
-static AttributeIterator<Attribute_Bounding>			itrBounding				;	\
-static AttributeIterator<Attribute_Projectile>			itrProjectile			;	\
-static AttributeIterator<Attribute_Light_Dir>			itrLightDir				;	\
-static AttributeIterator<Attribute_Light_Point>			itrLightPoint			;	\
-static AttributeIterator<Attribute_Light_Spot>			itrLightSpot			;	\
-static AttributeIterator<Attribute_Mesh>				itrMesh					;	\
-static AttributeIterator<Attribute_Health>				itrHealth				;	\
-static AttributeIterator<Attribute_Damage>				itrDamage				;	\
-static AttributeIterator<Attribute_PlayerSpawnPoint>			itrSpawnPoint			;	\
-static AttributeIterator<Attribute_WeaponStats>			itrWeaponStats			;	\
-static AttributeIterator<Attribute_ExplosionSphere>		itrExplosionSphere		;	\
-static AttributeIterator<Attribute_SplitScreen>			itrSplitScreen			;	\
-																					\
+#define ATTRIBUTES_DECLARE_ALL															\
+static Settings												*settings				;	\
+static EntityStorage										*itr_entity				;	\
+static AttributeIterator<Attribute_Position>				itrPosition				;	\
+static AttributeIterator<Attribute_Spatial>					itrSpatial				;	\
+static AttributeIterator<Attribute_Render>					itrRender				;	\
+static AttributeIterator<Attribute_DebugShape>				itrDebugShape			;	\
+static AttributeIterator<Attribute_Physics>					itrPhysics				;	\
+static AttributeIterator<Attribute_Camera>					itrCamera				;	\
+static AttributeIterator<Attribute_Input>					itrInput				;	\
+static AttributeIterator<Attribute_InputDevice>				itrInputDevice			;	\
+static AttributeIterator<Attribute_Player>					itrPlayer				;	\
+static AttributeIterator<Attribute_Bounding>				itrBounding				;	\
+static AttributeIterator<Attribute_Projectile>				itrProjectile			;	\
+static AttributeIterator<Attribute_Light_Dir>				itrLightDir				;	\
+static AttributeIterator<Attribute_Light_Point>				itrLightPoint			;	\
+static AttributeIterator<Attribute_Light_Spot>				itrLightSpot			;	\
+static AttributeIterator<Attribute_Mesh>					itrMesh					;	\
+static AttributeIterator<Attribute_Health>					itrHealth				;	\
+static AttributeIterator<Attribute_Damage>					itrDamage				;	\
+static AttributeIterator<Attribute_PlayerSpawnPoint>		itrPlayerSpawnPoint		;	\
+static AttributeIterator<Attribute_WeaponStats>				itrWeaponStats			;	\
+static AttributeIterator<Attribute_ExplosionSphere>			itrExplosionSphere		;	\
+static AttributeIterator<Attribute_SplitScreen>				itrSplitScreen			;	\
+static AttributeIterator<Attribute_PickupablesSpawnPoint>	itrPickupablesSpawnPoint;	\
+static AttributeIterator<Attribute_Pickupable>				itrPickupable;				\
+																						\
 // ADD MORE ABOVE ^
 
 // Inits all attributes
-#define ATTRIBUTES_INIT_ALL																\
-settings				= ATTRIBUTE_MANAGER->settings;									\
-itr_entity				= ATTRIBUTE_MANAGER->entities;									\
-itrPosition				= ATTRIBUTE_MANAGER->position				.getIterator();		\
-itrSpatial				= ATTRIBUTE_MANAGER->spatial				.getIterator();		\
-itrRender				= ATTRIBUTE_MANAGER->render					.getIterator();		\
-itrDebugShape			= ATTRIBUTE_MANAGER->debugShape				.getIterator();		\
-itrPhysics				= ATTRIBUTE_MANAGER->physics				.getIterator();		\
-itrCamera				= ATTRIBUTE_MANAGER->camera					.getIterator();		\
-itrInput				= ATTRIBUTE_MANAGER->input					.getIterator();		\
-itrInputDevice			= ATTRIBUTE_MANAGER->inputDevice			.getIterator();		\
-itrPlayer				= ATTRIBUTE_MANAGER->player					.getIterator();		\
-itrBounding				= ATTRIBUTE_MANAGER->bounding				.getIterator();		\
-itrProjectile			= ATTRIBUTE_MANAGER->projectile				.getIterator();		\
-itrLightDir				= ATTRIBUTE_MANAGER->lightDir				.getIterator();		\
-itrLightPoint			= ATTRIBUTE_MANAGER->lightPoint				.getIterator();		\
-itrLightSpot			= ATTRIBUTE_MANAGER->lightSpot				.getIterator();		\
-itrMesh					= ATTRIBUTE_MANAGER->mesh					.getIterator();		\
-itrHealth				= ATTRIBUTE_MANAGER->health					.getIterator();		\
-itrDamage				= ATTRIBUTE_MANAGER->damage					.getIterator();		\
-itrSpawnPoint			= ATTRIBUTE_MANAGER->spawnPoint				.getIterator();		\
-itrWeaponStats			= ATTRIBUTE_MANAGER->weaponStats			.getIterator();		\
-itrExplosionSphere		= ATTRIBUTE_MANAGER->explosionSphere		.getIterator();		\
-itrSplitScreen			= ATTRIBUTE_MANAGER->splitScreen			.getIterator();		\
-																						\
+#define ATTRIBUTES_INIT_ALL																	\
+settings				= ATTRIBUTE_MANAGER->settings;										\
+itr_entity				= ATTRIBUTE_MANAGER->entities;										\
+itrPosition				= ATTRIBUTE_MANAGER->position					.getIterator();		\
+itrSpatial				= ATTRIBUTE_MANAGER->spatial					.getIterator();		\
+itrRender				= ATTRIBUTE_MANAGER->render						.getIterator();		\
+itrDebugShape			= ATTRIBUTE_MANAGER->debugShape					.getIterator();		\
+itrPhysics				= ATTRIBUTE_MANAGER->physics					.getIterator();		\
+itrCamera				= ATTRIBUTE_MANAGER->camera						.getIterator();		\
+itrInput				= ATTRIBUTE_MANAGER->input						.getIterator();		\
+itrInputDevice			= ATTRIBUTE_MANAGER->inputDevice				.getIterator();		\
+itrPlayer				= ATTRIBUTE_MANAGER->player						.getIterator();		\
+itrBounding				= ATTRIBUTE_MANAGER->bounding					.getIterator();		\
+itrProjectile			= ATTRIBUTE_MANAGER->projectile					.getIterator();		\
+itrLightDir				= ATTRIBUTE_MANAGER->lightDir					.getIterator();		\
+itrLightPoint			= ATTRIBUTE_MANAGER->lightPoint					.getIterator();		\
+itrLightSpot			= ATTRIBUTE_MANAGER->lightSpot					.getIterator();		\
+itrMesh					= ATTRIBUTE_MANAGER->mesh						.getIterator();		\
+itrHealth				= ATTRIBUTE_MANAGER->health						.getIterator();		\
+itrDamage				= ATTRIBUTE_MANAGER->damage						.getIterator();		\
+itrPlayerSpawnPoint		= ATTRIBUTE_MANAGER->playerSpawnPoint			.getIterator();		\
+itrWeaponStats			= ATTRIBUTE_MANAGER->weaponStats				.getIterator();		\
+itrExplosionSphere		= ATTRIBUTE_MANAGER->explosionSphere			.getIterator();		\
+itrSplitScreen			= ATTRIBUTE_MANAGER->splitScreen				.getIterator();		\
+itrPickupablesSpawnPoint= ATTRIBUTE_MANAGER->pickupablesSpawnPoint		.getIterator();		\
+itrPickupable			= ATTRIBUTE_MANAGER->pickupable					.getIterator();		\
+																							\
 // ADD MORE ABOVE ^

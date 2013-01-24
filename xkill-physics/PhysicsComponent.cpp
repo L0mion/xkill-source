@@ -235,8 +235,8 @@ void PhysicsComponent::synchronizeWithAttributes()
 			// Determine type of PhysicsObject to create and add to the Bullet Physics world
 			switch(physicsAttribute->collisionFilterGroup)
 			{
-			case Attribute_Physics::DEFAULT_ERROR:
-				std::cout << "Error: Attribute_Physics should not have be DEFAULT_ERROR as collisionFilterGroup. Do not forget to set collisionFilterGroup when creating Attribute_Physics." << std::endl;
+			default:
+				physicsObjects_->at(index) = new PhysicsObject();
 				break;
 			case Attribute_Physics::WORLD:
 				physicsObjects_->at(index) = new PhysicsObject();
@@ -252,6 +252,9 @@ void PhysicsComponent::synchronizeWithAttributes()
 				break;
 			case Attribute_Physics::EVERYTHING:
 				std::cout << "Error: Attribute_Physics should not have EVERYTHING as collisionFilterGroup" << std::endl;
+				break;
+			case Attribute_Physics::DEFAULT_ERROR:
+				std::cout << "Error: Attribute_Physics should not have be DEFAULT_ERROR as collisionFilterGroup. Do not forget to set collisionFilterGroup when creating Attribute_Physics." << std::endl;
 				break;
 			}
 
@@ -312,16 +315,6 @@ void PhysicsComponent::detectedCollisionsDuringStepSimulation(btScalar timeStep)
 				if(objectA->getCollisionFilterGroup() == Attribute_Physics::FRUSTUM ||
 					objectB->getCollisionFilterGroup() == Attribute_Physics::FRUSTUM)
 				{
-					if(objectA->getCollisionFilterGroup() == Attribute_Physics::WORLD ||
-					objectB->getCollisionFilterGroup() == Attribute_Physics::WORLD)
-					{
-						int a = 2;
-						if(objectA->isStaticObject())
-							int b = 2;
-						if(objectB->isStaticObject())
-							int b = 2;
-					}
-
 					if(objectA->getCollisionFilterGroup() == Attribute_Physics::FRUSTUM &&
 					   objectB->getCollisionFilterGroup() != Attribute_Physics::FRUSTUM)
 					{
@@ -331,11 +324,6 @@ void PhysicsComponent::detectedCollisionsDuringStepSimulation(btScalar timeStep)
 					   objectB->getCollisionFilterGroup() == Attribute_Physics::FRUSTUM)
 					{
 						doCulling(objectB->getAttributeIndex(),objectA->getAttributeIndex());
-					}
-					else
-					{
-						//Both are frustums.
-						int b = 2;
 					}
 				}
 				else

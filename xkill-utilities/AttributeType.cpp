@@ -256,7 +256,7 @@ Attribute_Damage::~Attribute_Damage()
 
 Attribute_PlayerSpawnPoint::Attribute_PlayerSpawnPoint()
 {
-	timeSinceLastSpawn = 0.0f;
+	secondsSinceLastSpawn = 0.0f;
 	spawnArea = 0.0f;
 }
 Attribute_PlayerSpawnPoint::~Attribute_PlayerSpawnPoint()
@@ -265,10 +265,18 @@ Attribute_PlayerSpawnPoint::~Attribute_PlayerSpawnPoint()
 
 Attribute_PickupablesSpawnPoint::Attribute_PickupablesSpawnPoint()
 {
-	amount = 0;
-	timeSinceLastSpawn = 0.0f;
+	spawnDelayInSeconds = 0.0f;
+	secondsSinceLastSpawn = 0.0f;
 }
 Attribute_PickupablesSpawnPoint::~Attribute_PickupablesSpawnPoint()
+{
+}
+
+Attribute_Pickupable::Attribute_Pickupable()
+{
+	pickupableType = PickupableType::MEDKIT;
+}
+Attribute_Pickupable::~Attribute_Pickupable()
 {
 }
 
