@@ -1,4 +1,3 @@
-
 #include "constantBuffers.hlsl"
 #include "structs.hlsl"
 
