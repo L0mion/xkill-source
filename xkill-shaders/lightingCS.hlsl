@@ -160,10 +160,10 @@ void lightingCS(
 		lightPoint(
 			surfaceMaterial,
 			lightsPoint[i],
-			mul(float4(lightsPos[i], 1.0f), viewInverse).xyz, //lightsPos[i], //
-			surfacePosW,
-			normal.xyz,//mul(float4(normal.xyz, 0.0f), view).xyz, // 
-			toEyeW,
+			lightsPos[i], //mul(float4(lightsPos[i], 1.0f), viewInverse).xyz,
+			surfacePosV,
+			mul(float4(normal.xyz, 0.0f), view).xyz, // normal.xyz,//
+			toEyeV, //toEyeW
 			ambient, diffuse, specular);
 	
 		sumAmbient	+= ambient;
@@ -172,11 +172,11 @@ void lightingCS(
 	}
 
 	//TILING DEMO:
-	for(i = 0; i < tileLightNum; i++) //Apply culled point-lights.
-	{
-		
-		sumDiffuse.g += 0.1;
-	}
+	//for(i = 0; i < tileLightNum; i++) //Apply culled point-lights.
+	//{
+	//	
+	//	sumDiffuse.g += 0.1;
+	//}
 
 	float4 litSum = sumAmbient + sumDiffuse + sumSpecular;
 	output[uint2(threadIDDispatch.x + viewportTopX, threadIDDispatch.y + viewportTopY)] = litSum;
