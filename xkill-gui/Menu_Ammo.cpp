@@ -16,12 +16,12 @@ void Menu_Ammo::setSettingsMenu()	// TODO: Set good values for the sliders and m
 {
 	Ammunition* ammo = getAmmoSettings();
 
-	ui->horizontalSlider_Ammo_Damage->setValue(ammo->damage);
-	ui->horizontalSlider_Ammo_ExplosionSphere->setValue(ammo->explosionSphere);
+	ui->horizontalSlider_Ammo_Damage->setValue(static_cast<int>(ammo->damage));
+	ui->horizontalSlider_Ammo_ExplosionSphere->setValue(static_cast<int>(ammo->explosionSphere * 100.0f));
 	ui->horizontalSlider_Ammo_NrOfProjectiles->setValue(ammo->nrOfProjectiles);
-	ui->horizontalSlider_Ammo_Speed->setValue(ammo->speed);
-	ui->horizontalSlider_Ammo_Spread->setValue(ammo->spread);
-	ui->horizontalSlider_Ammo_VelocitVariation->setValue(ammo->velocityVariation);
+	ui->horizontalSlider_Ammo_Speed->setValue(static_cast<int>(ammo->speed));
+	ui->horizontalSlider_Ammo_Spread->setValue(static_cast<int>(ammo->spread * 126.6f));
+	ui->horizontalSlider_Ammo_VelocitVariation->setValue(static_cast<int>(ammo->velocityVariation * 100.0f));
 	ui->groupBox_Ammo_Explosive->setChecked(ammo->explosive);
 }
 
@@ -29,13 +29,13 @@ void Menu_Ammo::settingsMenuUpdated()
 {
 	Ammunition* ammo = getAmmoSettings();
 
-	ammo->damage = ui->horizontalSlider_Ammo_Damage->value();
-	ammo->explosionSphere = ui->horizontalSlider_Ammo_ExplosionSphere->value();
+	ammo->damage = static_cast<float>(ui->horizontalSlider_Ammo_Damage->value());
+	ammo->explosionSphere = static_cast<float>(ui->horizontalSlider_Ammo_ExplosionSphere->value()) * 0.01f;
 	ammo->explosive = ui->groupBox_Ammo_Explosive->isChecked();
 	ammo->nrOfProjectiles = ui->horizontalSlider_Ammo_NrOfProjectiles->value();
-	ammo->speed = ui->horizontalSlider_Ammo_Speed->value();
-	ammo->spread = ui->horizontalSlider_Ammo_Spread->value();
-	ammo->velocityVariation = ui->horizontalSlider_Ammo_VelocitVariation->value();
+	ammo->speed = static_cast<float>(ui->horizontalSlider_Ammo_Speed->value());
+	ammo->spread = static_cast<float>(ui->horizontalSlider_Ammo_Spread->value()) * 0.0079f;
+	ammo->velocityVariation = static_cast<float>(ui->horizontalSlider_Ammo_VelocitVariation->value()) * 0.01f;
 }
 
 Ammunition* Menu_Ammo::getAmmoSettings()

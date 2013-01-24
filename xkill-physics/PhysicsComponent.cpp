@@ -166,11 +166,15 @@ void PhysicsComponent::onEvent(Event* e)
 		{
 			if(attributeUpdated->isDeleted)
 			{
-				if(physicsObjects_->at(attributeIndex) != nullptr)
+				if(attributeIndex < physicsObjects_->size() && physicsObjects_->at(attributeIndex) != nullptr)
 				{
   					dynamicsWorld_->removeRigidBody(physicsObjects_->at(attributeIndex));
 					delete physicsObjects_->at(attributeIndex);
 					physicsObjects_->at(attributeIndex) = nullptr;
+				}
+				else
+				{
+					DEBUGPRINT("Mismatch when synchronizing deletion of physics objects with physics attributes");
 				}
 			}
 			else if(attributeUpdated->isCreated)
