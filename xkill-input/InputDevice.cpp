@@ -113,7 +113,7 @@ std::vector<std::string> InputDevice::getNamesOfMappedObjects(int mapping)
 	return names;
 }
 
-float InputDevice::getFloatValue(int mapping, bool useSensitivity)
+float InputDevice::getFloatValue(int mapping, float delta, bool useSensitivity)
 {
 	float maxValue = 0.0f;
 	int index = 0;
@@ -125,9 +125,13 @@ float InputDevice::getFloatValue(int mapping, bool useSensitivity)
 		value = inputObjectArray_->inputObjects[index]->getValueFloat();
 
 		if(useSensitivity)
+		{
 			value *= inputObjectArray_->inputObjects[index]->getSensitivity();
+			if(inputObjectArray_->inputObjects[index]->needsDelta())
+				value *= delta;
+		}
 
-		if(std::abs(value) > maxValue)
+		if(std::abs(value) > std::abs(maxValue))
 		{
 			maxValue = value;
 		}
@@ -168,14 +172,7 @@ unsigned long InputDevice::getHash()
 
 	str += Converter::IntToStr(InputAction::ACTION_LAST);
 
-	unsigned long hash = 5381;
-
-	for(unsigned int i = 0; i < str.size(); i++)
-	{
-		hash = ((hash << 5) + hash) + str[i];
-	}
-
-	return hash;
+	return Converter::HashString(str);
 }
 
 InputButtonObject* InputDevice::getButtonObject(unsigned int index)

@@ -36,6 +36,8 @@ for some reason
 enum DLL_U EventType
 {
 	// Inform events
+	EVENT_QUIT_TO_DESKTOP,
+
 	EVENT_PLAYERDEATH,
 	EVENT_END_DEATHMATCH,
 	EVENT_START_DEATHMATCH,
@@ -63,10 +65,12 @@ enum DLL_U EventType
 	EVENT_INPUT_DEVICE_SEARCH,
 	EVENT_PLAYSOUND,
 	EVENT_RUMBLE,
-	EVENT_DO_CULLING,
 	EVENT_PHYSICS_ATTRIBUTES_COLLIDING,
+	EVENT_DRAW_BULLET_PHYSICS_DEBUG_LINES,
+	EVENT_SPLITSCREEN_CHANGED,
 
 	EVENT_ATTRIBUTE_UPDATED,
+	EVENT_SYNCSTATECOMMAND,
 
 	// Get events
 	EVENT_GET_ATTRIBUTE,
@@ -360,14 +364,6 @@ public:
 	float spawnAreaRadius;
 };
 
-
-class DLL_U Event_DoCulling : public Event
-{
-public:
-	Event_DoCulling();
-};
-
-
 class DLL_U Event_StartDeathmatch : public Event
 {
 public:
@@ -398,6 +394,27 @@ public:
 	FiniteStateMachine* sender;
 	StateType newState;
 };
+
+/**
+Event used for syncing state to state machines that have the same type
+and current state as the sender but are different instances.
+\ingroup events
+*/
+class DLL_U Event_SyncStateCommand : public Event
+{
+public:
+	Event_SyncStateCommand(
+		FiniteStateMachine* sender, 
+		StateType fromState, 
+		StateType toState, 
+		bool isReplacementState);
+
+	FiniteStateMachine* sender; 
+	StateType fromState;
+	StateType toState;
+	bool isReplacementState;
+};
+
 
 class DLL_U Event_CreateExplosionSphere : public Event
 {
@@ -487,4 +504,25 @@ public:
 
 	InputDevice* device;
 	InputObjectArray* objectArray;
+};
+
+/*
+class DLL_U Event_DrawDebugLine : public Event
+{
+public:
+	Event_DrawDebugLine(Float3 vertex1, Float3 vertex2);
+
+	Float3 vertex1;
+	Float3 vertex2;
+};
+*/
+
+//struct VertexPosColor;
+#include "MeshVertices.h"
+class DLL_U Event_DrawBulletPhysicsDebugLines : public Event
+{
+public:
+	Event_DrawBulletPhysicsDebugLines(std::vector<VertexPosColor>* debugLineVertices);
+
+	std::vector<VertexPosColor>* debugLineVertices;
 };

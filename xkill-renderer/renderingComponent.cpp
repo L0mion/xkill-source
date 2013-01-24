@@ -47,7 +47,17 @@ void RenderingComponent::onEvent( Event* e )
 	switch (type) 
 	{
 	case EVENT_WINDOW_RESIZE:
-		event_WindowResize((Event_WindowResize*)e);
+		event_WindowResize();
+		break;
+	case EVENT_ATTRIBUTE_UPDATED:
+		{
+			// Reset if camera has been changed
+			Event_AttributeUpdated* attributeUpdated = static_cast<Event_AttributeUpdated*>(e);
+			if(attributeUpdated->attributeEnum == ATTRIBUTE_CAMERA)
+			{
+				event_WindowResize();
+			}
+		}
 		break;
 	case EVENT_GAMERESET:
 		reset();
@@ -60,11 +70,15 @@ void RenderingComponent::onEvent( Event* e )
 	}
 }
 
-void RenderingComponent::event_WindowResize(Event_WindowResize* e)
+void RenderingComponent::event_WindowResize()
 {
-	int width = e->width;
-	int height = e->height;
+	// Get new window size
+	Event_GetWindowResolution windowResolution;
+	SEND_EVENT(&windowResolution);
+	int width = windowResolution.width;
+	int height = windowResolution.height;
 
+	// Resize renderer
 	renderer_->resize(width, height);
 }
 void RenderingComponent::event_PostDescTex(Event_LoadTextures* e)

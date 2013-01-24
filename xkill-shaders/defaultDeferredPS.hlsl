@@ -12,7 +12,7 @@ Texture2D gBufferAlbedo : register( t1 );
 
 SamplerState ss : register(s0);
 
-float4 defaultDeferredPS(VSOut pIn) : SV_TARGET
+float4 defaultDeferredPS(DefaultVSOut pIn) : SV_TARGET
 {
 	float4 color = gBufferAlbedo.Sample(ss, pIn.texcoord);
 

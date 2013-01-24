@@ -2,13 +2,14 @@
 
 #include <QtGui/QKeyEvent> // needed to grab mouse input
 #include <xkill-utilities/IObserver.h>
+#include <xkill-utilities/WeaponStructs.h>
 
 #include "Menu_Main.h"
 #include "Menu_ScoreBoard.h"
 #include "Menu_InGame.h"
 #include <vector>
 
-class Attribute_Player;
+class Attribute_SplitScreen;
 
 class HUDWindow : public QMainWindow
 {
@@ -18,16 +19,16 @@ private:
     QLabel *label_ammo;
 	QLabel *label_weaponType;
     QLabel *label_ammoType;
-	Attribute_WeaponStats::AmmunitionType ammo;
-	Attribute_WeaponStats::FiringMode weapon;
+	Ammunition::AmmunitionType ammo;
+	FiringMode::FiringModeType weapon;
 	
 	QHBoxLayout *horizontalLayout;
 
 public:
 	HUDWindow(QWidget* parent, int id);
 
-	void parentMoveEvent();
-	void update(Attribute_Player* player);
+	void parentMoveEvent(Attribute_SplitScreen* splitScreen);
+	void update(Attribute_SplitScreen* player);
 };
 
 class HUDManager
@@ -53,10 +54,7 @@ public:
 
 	void parentMoveEvent()
 	{
-		for(int i=0; i<(int)huds.size(); i++)
-		{
-			huds[i]->parentMoveEvent();
-		}
+		update();
 	}
 };
 

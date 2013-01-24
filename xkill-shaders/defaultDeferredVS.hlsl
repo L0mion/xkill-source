@@ -1,8 +1,8 @@
 #include "structs.hlsl"
 
-VSOut defaultDeferredVS(quad_vertex vertex)
+DefaultVSOut defaultDeferredVS(quad_vertex vertex)
 {
-	VSOut output;
+	DefaultVSOut output;
 
 	if(vertex.id == 0)
 	{

@@ -49,20 +49,27 @@ HUDWindow::HUDWindow(QWidget* parent, int id) : QMainWindow(parent)
 	resize(horizontalLayout->minimumSize());
 }
 
-void HUDWindow::parentMoveEvent()
+void HUDWindow::parentMoveEvent(Attribute_SplitScreen* splitScreen)
 {
-	QWidget* parent = this->parentWidget();
-	int x = 20 + id*(width()+10);
-	int y = parent->height() - this->height() - 20;
+	float sizeScale = (float) splitScreen->ssHeight / 1000;
+	sizeScale = 0.75f*sizeScale + 0.25f;
+
+	int x = 20*sizeScale + splitScreen->ssTopLeftX;
+	int y = splitScreen->ssTopLeftY + splitScreen->ssHeight - this->height() - 20*sizeScale;
 	move(x, y);
 }
 
-void HUDWindow::update(Attribute_Player* player)
+void HUDWindow::update(Attribute_SplitScreen* splitScreen)
 {
+	Attribute_Player*		player		=	itrPlayer		.at(splitScreen->ptr_player);
 	Attribute_Health*		health		=	itrHealth		.at(player->ptr_health);
 	Attribute_WeaponStats*	weaponStats	=	itrWeaponStats	.at(player->ptr_weaponStats);
 
-	float sizeScale = (float) this->parentWidget()->height() / 1000;
+	Ammunition* ammunition = &weaponStats->ammunition[weaponStats->currentAmmunitionType];
+	FiringMode* firingMode = &weaponStats->firingMode[weaponStats->currentFiringModeType];
+
+	float sizeScale = (float) splitScreen->ssHeight / 1000;
+	sizeScale = 0.75f*sizeScale + 0.25f;
 	int textSize = (int)(20 * sizeScale);
 	if(textSize<1)
 		textSize = 1;
@@ -74,42 +81,42 @@ void HUDWindow::update(Attribute_Player* player)
 	// health & ammo bars
 	QString str_health = QString::number(health->health);
 	label_health->setText("<html><head/><body><p><span style=\" font-size:"+str_textSize+"pt; font-weight:600;\">Health "+str_health+"&nbsp;</span></p></body></html>");
-	QString str_ammo = QString::number(weaponStats->nrOfShotsLeftInClip);
+	QString str_ammo = QString::number(firingMode->nrOfShotsLeftInClip);
 	label_ammo->setText("<html><head/><body><p><span style=\" font-size:"+str_textSize+"pt; font-weight:600;\">Ammo "+str_ammo+"&nbsp;</span></p></body></html>");
 
 	// ammo icon
-	if(ammo != weaponStats->ammunitionType)
+	if(ammo != weaponStats->currentAmmunitionType)
 	{
-		ammo = weaponStats->ammunitionType;
+		ammo = weaponStats->currentAmmunitionType;
 
-		if(ammo == Attribute_WeaponStats::BULLET)
+		if(ammo == Ammunition::AmmunitionType::BULLET)
 		{
 			label_ammoType->setPixmap(QPixmap(QString::fromUtf8(":/xkill/images/a_bullet.png")));
 		}
-		if(ammo == Attribute_WeaponStats::SCATTER)
+		if(ammo == Ammunition::AmmunitionType::SCATTER)
 		{
 			label_ammoType->setPixmap(QPixmap(QString::fromUtf8(":/xkill/images/a_scatter.png")));
 		}
-		if(ammo == Attribute_WeaponStats::EXPLOSIVE)
+		if(ammo == Ammunition::AmmunitionType::EXPLOSIVE)
 		{
 			label_ammoType->setPixmap(QPixmap(QString::fromUtf8(":/xkill/images/a_explosive.png")));
 		}
 	}
 
 	// weapon icon
-	if(weapon != weaponStats->firingMode)
+	if(weapon != weaponStats->currentFiringModeType)
 	{
-		weapon = weaponStats->firingMode;
+		weapon = weaponStats->currentFiringModeType;
 
-		if(weapon == Attribute_WeaponStats::SINGLE)
+		if(weapon == FiringMode::FiringModeType::SINGLE)
 		{
 			label_weaponType->setPixmap(QPixmap(QString::fromUtf8(":/xkill/images/w_single.png")));
 		}
-		if(weapon == Attribute_WeaponStats::SEMI)
+		if(weapon == FiringMode::FiringModeType::SEMI)
 		{
 			label_weaponType->setPixmap(QPixmap(QString::fromUtf8(":/xkill/images/w_semi.png")));
 		}
-		if(weapon == Attribute_WeaponStats::AUTO)
+		if(weapon == FiringMode::FiringModeType::AUTO)
 		{
 			label_weaponType->setPixmap(QPixmap(QString::fromUtf8(":/xkill/images/w_auto.png")));
 		}
@@ -120,25 +127,24 @@ void HUDWindow::update(Attribute_Player* player)
 void HUDManager::update()
 {
 	// Balance attributes / vs huds
-	int numPlayers = itrPlayer.size();
-	while(numPlayers>huds.size())
+	int num_splitScreen = itrSplitScreen.size();
+	while(num_splitScreen>huds.size())
 	{
 		huds.push_back(new HUDWindow(parent, huds.size()));
 	}
-	while(numPlayers<huds.size())
+	while(num_splitScreen<huds.size())
 	{
-	
 		delete huds.back();
 		huds.pop_back();
 	}
-	parentMoveEvent();
 
 	// Update huds
 	int index = 0;
-	while(itrPlayer.hasNext())
+	while(itrSplitScreen.hasNext())
 	{
-		Attribute_Player* player = itrPlayer.getNext();
-		huds[index]->update(player);
+		Attribute_SplitScreen* splitScreen = itrSplitScreen.getNext();
+		huds[index]->update(splitScreen);
+		huds[index]->parentMoveEvent(splitScreen);
 		index++;
 	}
 }

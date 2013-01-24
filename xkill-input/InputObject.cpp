@@ -31,6 +31,11 @@ float InputObject::getSensitivity()
 	return sensitivity_;
 }
 
+bool InputObject::needsDelta()
+{
+	return false;
+}
+
 void InputObject::addMapping(int mapping)
 {
 	mappings_.push_back(mapping);

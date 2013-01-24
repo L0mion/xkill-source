@@ -13,6 +13,8 @@
 #include "ManagementRS.h"
 #include "ManagementGBuffer.h"
 #include "ManagementDebug.h"
+#include "ManagementMath.h"
+#include "ManagementInstance.h"
 
 #include "Winfo.h"
 #include "ModelD3D.h"
@@ -23,7 +25,6 @@
 #include "IB.h"
 #include "renderingUtilities.h"
 #include "TypeFX.h"
-#include "ManagementMath.h"
 #include "Renderer.h"
 #include "ViewportData.h"
 
@@ -52,10 +53,13 @@ Renderer::Renderer(HWND windowHandle)
 	managementGBuffer_	= nullptr;
 	managementDebug_	= nullptr;
 	managementMath_		= nullptr;
+	managementInstance_ = nullptr;
 
 	attributesRenderOwner_	= nullptr;
 
 	ATTRIBUTES_INIT_ALL;
+
+	debugLinesVertexBuffer_ = nullptr;
 
 	//temp
 	m3dLoader_		= nullptr;
@@ -76,9 +80,12 @@ Renderer::~Renderer()
 	SAFE_DELETE(managementRS_);
 	SAFE_DELETE(managementGBuffer_);
 	SAFE_DELETE(managementMath_);
+	SAFE_DELETE(managementInstance_);
 
 	//d3dDebug_->reportLiveDeviceObjects();
 	SAFE_DELETE(managementDebug_);
+
+	SAFE_RELEASE(debugLinesVertexBuffer_);
 
 	//temp
 	SAFE_DELETE(m3dLoader_);
@@ -99,13 +106,13 @@ void Renderer::reset()
 }
 HRESULT Renderer::resize(unsigned int screenWidth, unsigned int screenHeight)
 {
-	// Calculate number of cameras
-	unsigned numCameras = itrCamera.size();
+	//Get number of split-screens
+	unsigned int numSS = itrSplitScreen.size();
 	
-	// Stuff
+	//Initialize new windo-type object.
 	HRESULT hr = S_OK;
 	unsigned int numViewports, csDispatchX, csDispatchY;
-	numViewports	= numCameras; //winfo_->getNumViewports();
+	numViewports	= numSS;
 	csDispatchX		= screenWidth	/ CS_TILE_SIZE;
 	csDispatchY		= screenHeight	/ CS_TILE_SIZE;
 	winfo_->init(
@@ -164,6 +171,7 @@ HRESULT Renderer::init()
 	initManagementMath();
 	if(SUCCEEDED(hr))
 		hr = initManagementGBuffer();
+	initManagementInstance();
 
 	//temp
 	/*
@@ -323,15 +331,28 @@ void Renderer::initManagementMath()
 {
 	managementMath_ = new ManagementMath();
 }
+void Renderer::initManagementInstance()
+{
+	managementInstance_ = new ManagementInstance();
+}
 
 void Renderer::update()
 {
-	managementLight_->update(managementD3D_->getDevice(), managementD3D_->getDeviceContext());
+	ID3D11Device*			device = managementD3D_->getDevice();
+	ID3D11DeviceContext*	devcon = managementD3D_->getDeviceContext();
+
+	//Update lights.
+	managementLight_->update(device, devcon);
+
+	//Update instances.
+	managementInstance_->update(device, devcon);
 }
 void Renderer::render()
 {
+	ID3D11DeviceContext* devcon = managementD3D_->getDeviceContext();
+
 	//Clear g-buffers and depth buffer.
-	managementGBuffer_->clearGBuffers(managementD3D_->getDeviceContext());
+	managementGBuffer_->clearGBuffers(devcon);
 	managementD3D_->clearDepthBuffer();
 
 	//Update per-frame constant buffer.
@@ -339,41 +360,42 @@ void Renderer::render()
 		CB_TYPE_FRAME, 
 		TypeFX_VS, 
 		CB_REGISTER_FRAME, 
-		managementD3D_->getDeviceContext());
+		devcon);
 	managementCB_->updateCBFrame(
-		managementD3D_->getDeviceContext(),
+		devcon,
 		managementLight_->getLightDirCurCount(),
 		managementLight_->getLightPointCurCount(),
 		managementLight_->getLightSpotCurCount());
 
-	Attribute_Camera*	camAt; 
-	Attribute_Spatial*	spatialAt;
-	Attribute_Position*	posAt;
+	Attribute_Camera*		camAt; 
+	Attribute_Spatial*		spatialAt;
+	Attribute_Position*		posAt;
+	Attribute_SplitScreen*	ssAt;
 
 	ViewportData vpData;
 	std::vector<ViewportData> vpDatas;
 
-	//Render everything to g-buffers.
-	int camIndex = 0;
-	while(itrCamera.hasNext())
+	//Render each split-screen seperately
+	std::vector<SplitScreenViewport>* ssViewports = managementViewport_->getSplitScreenViewports();
+	for(unsigned int i = 0; i < ssViewports->size(); i++)
 	{
-		camAt		= itrCamera.getNext();
-		camIndex	= itrCamera.orderIndex();
+		ssAt		= ssViewports->at(i).ssAt;
+		camAt		= itrCamera.at(ssAt->ptr_camera);
+
 		spatialAt	= ATTRIBUTE_CAST(Attribute_Spatial, ptr_spatial, camAt);
 		posAt		= ATTRIBUTE_CAST(Attribute_Position, ptr_position, spatialAt);
-	
-		//Set viewport.
-		managementViewport_->setViewport(managementD3D_->getDeviceContext(), camIndex);
+
+		managementViewport_->setViewport(devcon, i);
 
 		//Store all the viewport-specific data for the backbuffer-rendering.
-		vpData.camIndex		= camIndex;
+		vpData.camIndex		= ssAt->ptr_camera.index;
 		vpData.view			= DirectX::XMFLOAT4X4(((float*)&camAt->mat_view));
 		vpData.proj			= DirectX::XMFLOAT4X4(((float*)&camAt->mat_projection));
 		vpData.viewInv		= managementMath_->calculateMatrixInverse(vpData.view);
 		vpData.projInv		= managementMath_->calculateMatrixInverse(vpData.proj);
 		vpData.eyePos		= *(DirectX::XMFLOAT3*)&posAt->position;
-		vpData.viewportTopX = static_cast<unsigned int>(managementViewport_->getViewport(camIndex).TopLeftX);
-		vpData.viewportTopY = static_cast<unsigned int>(managementViewport_->getViewport(camIndex).TopLeftY);
+		vpData.viewportTopX = static_cast<unsigned int>(ssAt->ssTopLeftX);
+		vpData.viewportTopY = static_cast<unsigned int>(ssAt->ssTopLeftY);
 		vpDatas.push_back(vpData);
 
 		renderViewportToGBuffer(vpData);
@@ -412,17 +434,22 @@ void Renderer::renderViewportToGBuffer(ViewportData& vpData)
 		vpData.viewportTopX,
 		vpData.viewportTopY);
 
-	//Render renderattributes
-	Attribute_Render* renderAt;
-	while(itrRender.hasNext())
+	std::map<unsigned int, InstancedData*> instancesMap = managementInstance_->getInstancesMap();
+	for(std::map<unsigned int, InstancedData*>::iterator i = instancesMap.begin(); i != instancesMap.end(); i++)
 	{
-		renderAt = itrRender.getNext();
-		//if(renderAt->culling.getBool(cameraIndex))
-		renderAttribute(
-			renderAt, 
-			vpData.view, 
-			vpData.proj);
+		renderInstance(i->first, i->second);
 	}
+
+	//Render renderattributes
+	//Attribute_Render* renderAt;
+	//while(itrRender.hasNext())
+	//{
+	//	renderAt = itrRender.getNext();
+	//	renderAttribute(
+	//		renderAt, 
+	//		vpData.view, 
+	//		vpData.proj);
+	//}
 
 	//Make me use iterators!
 	Attribute_DebugShape* debugShapeAt;
@@ -439,6 +466,12 @@ void Renderer::renderViewportToGBuffer(ViewportData& vpData)
 		}
 	}
 
+	if(BULLETPHYSICSDEBUGDRAW)
+	{
+		drawBulletPhysicsDebugLines(vpData.view, vpData.proj);
+	}
+
+	
 	managementGBuffer_->unsetGBuffersAndDepthBufferAsRenderTargets(devcon);
 
 	managementFX_->unsetAll(devcon);
@@ -491,43 +524,24 @@ void Renderer::renderViewportToBackBuffer(ViewportData& vpData)
 	managementFX_->unsetShader(devcon, SHADERID_CS_DEFAULT);
 	renderBackBufferClean();
 }
-void Renderer::renderAttribute(
-	Attribute_Render*	renderAt,
-	DirectX::XMFLOAT4X4 viewMatrix,
-	DirectX::XMFLOAT4X4 projectionMatrix)
+
+void Renderer::renderInstance(unsigned int meshID, InstancedData* instance)
 {
 	ID3D11Device*			device = managementD3D_->getDevice();
 	ID3D11DeviceContext*	devcon = managementD3D_->getDeviceContext();
 
-	//Get transform matrices.
-	Attribute_Spatial*	spatialAt			= itrSpatial.at(renderAt->ptr_spatial.index);
-	Attribute_Position*	positionAt			= itrPosition.at(spatialAt->ptr_position.index);
-	DirectX::XMFLOAT4X4 worldMatrix			= managementMath_->calculateWorldMatrix(spatialAt, positionAt);
-	DirectX::XMFLOAT4X4 worldMatrixInverse	= managementMath_->calculateMatrixInverse(worldMatrix);
-	DirectX::XMFLOAT4X4 finalMatrix			= managementMath_->calculateFinalMatrix(worldMatrix, viewMatrix, projectionMatrix);
-	
-	//Update per-object constant buffer.
-	managementCB_->setCB(CB_TYPE_OBJECT, TypeFX_VS, CB_REGISTER_OBJECT, devcon);
-	managementCB_->updateCBObject(
-		devcon, 
-		finalMatrix, 
-		worldMatrix, 
-		worldMatrixInverse);
-
 	//Fetch renderer representation of model.
-	unsigned int meshID	= renderAt->meshID;
 	ModelD3D* modelD3D	= managementModel_->getModelD3D(meshID, device);
-	
+
 	//Set vertex buffer.
-	ID3D11Buffer* vertexBuffer = modelD3D->getVertexBuffer()->getVB();
-	UINT stride = sizeof(VertexPosNormTex);
-	UINT offset = 0;
-	devcon->IASetVertexBuffers(
-		0, 
-		1, 
-		&vertexBuffer, 
-		&stride, 
-		&offset);
+	UINT stride[2] = { sizeof(VertexPosNormTex), sizeof(VertexPosNormTexInstanced) };
+	UINT offset[2] = { 0, 0 };
+	ID3D11Buffer* vbs[2] = 
+	{ 
+		modelD3D->getVertexBuffer()->getVB(), 
+		instance->getInstanceBuffer()
+	};
+	devcon->IASetVertexBuffers(0, 2, vbs, stride, offset);
 	
 	std::vector<SubsetD3D*>		subsetD3Ds	= modelD3D->getSubsetD3Ds();
 	std::vector<MeshMaterial>	materials	= modelD3D->getMaterials();
@@ -538,10 +552,14 @@ void Renderer::renderAttribute(
 
 		renderSubset(
 			ib,
-			materials[materialIndex]);
+			materials[materialIndex],
+			instance->getInstanceCount());
 	}
 }
-void Renderer::renderSubset(IB* ib, MeshMaterial& material)
+void Renderer::renderSubset(
+	IB* ib, 
+	MeshMaterial& material, 
+	unsigned int numInstances)
 {
 	ID3D11Device*			device = managementD3D_->getDevice();
 	ID3D11DeviceContext*	devcon = managementD3D_->getDeviceContext();
@@ -561,7 +579,7 @@ void Renderer::renderSubset(IB* ib, MeshMaterial& material)
 		material.getSpecularPower());
 
 	//Set input layout
-	managementFX_->setLayout(devcon, LAYOUTID_POS_NORM_TEX);
+	managementFX_->setLayout(devcon, LAYOUTID_POS_NORM_TEX_INSTANCED);
 
 	//Set index-buffer.
 	UINT offset = 0;
@@ -574,10 +592,10 @@ void Renderer::renderSubset(IB* ib, MeshMaterial& material)
 	devcon->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
 	//Draw subset.
-	devcon->DrawIndexed(
-		ib->getNumIndices(), 
-		0, 
-		0);
+	devcon->DrawIndexedInstanced(
+		ib->getNumIndices(),
+		numInstances,
+		0, 0, 0);
 }
 void Renderer::renderDebugShape(
 	Attribute_DebugShape*	debugShapeAt, 
@@ -630,6 +648,91 @@ void Renderer::renderDebugShape(
 
 	//Draw subset.
 	devcon->Draw(numVertices, 0);
+}
+
+void Renderer::drawBulletPhysicsDebugLines(
+	DirectX::XMFLOAT4X4		viewMatrix, 
+	DirectX::XMFLOAT4X4		projectionMatrix)
+{
+	//Bullet Physics debug lines are stored as a pointer to an std::vector containing "VertexPosColor" in an event (refer to debugDrawDispatcher::drawLine).
+	//The event is fetched and handled from here. Afterwards the event queue is flushed using FLUSH_QUEUED_EVENTS.
+	static unsigned int nrOfDebugLines = 0;
+
+	ID3D11Device*			device = managementD3D_->getDevice();
+	ID3D11DeviceContext*	devcon = managementD3D_->getDeviceContext();
+
+	//Update (recreate) vertex buffer
+	std::vector<Event*>* debugDrawEvents = GET_POINTER_TO_QUEUED_EVENTS(EVENT_DRAW_BULLET_PHYSICS_DEBUG_LINES);
+	if(debugDrawEvents->size() > 0)
+	{
+		SAFE_RELEASE(debugLinesVertexBuffer_);
+		
+		//Assume that debugDrawEvents contains one event, i.e. handle only one event. All events, including this one, should be flushed correctly below using FLUSH_QUEUED_EVENTS.
+		Event* e = debugDrawEvents->at(0);
+		EventType type = e->getType();
+		if(type == EVENT_DRAW_BULLET_PHYSICS_DEBUG_LINES)
+		{
+			Event_DrawBulletPhysicsDebugLines* debugDraw = static_cast<Event_DrawBulletPhysicsDebugLines*>(e);
+			std::vector<VertexPosColor>* debugLines = debugDraw->debugLineVertices; //Vertex vector extracted from event
+			nrOfDebugLines = debugDraw->debugLineVertices->size(); //Vertex vector extracted from event
+
+			D3D11_BUFFER_DESC vbd;
+			vbd.Usage			= D3D11_USAGE_DYNAMIC;
+			vbd.ByteWidth		= sizeof(VertexPosColor) * nrOfDebugLines;
+			vbd.BindFlags		= D3D11_BIND_VERTEX_BUFFER;
+			vbd.CPUAccessFlags	= D3D11_CPU_ACCESS_WRITE;
+			vbd.MiscFlags		= 0;
+
+			D3D11_SUBRESOURCE_DATA vinitData;
+			vinitData.pSysMem = debugLines->data();
+
+			//Create vertex buffer
+			HRESULT hr;
+			hr = device->CreateBuffer(&vbd, &vinitData, &debugLinesVertexBuffer_);
+		}
+	}
+	FLUSH_QUEUED_EVENTS(EVENT_DRAW_BULLET_PHYSICS_DEBUG_LINES);
+
+	//Draw Bullet Physics debug lines
+	if(debugLinesVertexBuffer_)
+	{
+		DirectX::XMFLOAT4X4 identityMatrix
+		(
+			1.0f,	0.0f,	0.0f,	0.0f,
+			0.0f,	1.0f,	0.0f,	0.0f,
+			0.0f,	0.0f,	1.0f,	0.0f,
+			0.0f,	0.0f,	0.0f,	1.0f
+		);
+
+		DirectX::XMFLOAT4X4 worldMatrix			= identityMatrix;
+		DirectX::XMFLOAT4X4 worldMatrixInverse	= identityMatrix;
+		DirectX::XMFLOAT4X4 finalMatrix			= managementMath_->calculateFinalMatrix(worldMatrix, viewMatrix, projectionMatrix);
+					
+		managementFX_->setShader(devcon, SHADERID_VS_COLOR);
+		managementFX_->setShader(devcon, SHADERID_PS_COLOR);
+
+		//Update per-object constant buffer.
+		managementCB_->setCB(CB_TYPE_OBJECT, TypeFX_VS, CB_REGISTER_OBJECT, devcon);
+		managementCB_->updateCBObject(
+			devcon, 
+			finalMatrix, 
+			worldMatrix, 
+			worldMatrixInverse);
+
+		UINT stride = sizeof(VertexPosColor);
+		UINT offset = 0;
+		devcon->IASetVertexBuffers(
+			0, 
+			1, 
+			&debugLinesVertexBuffer_, 
+			&stride, 
+			&offset);
+
+		managementFX_->setLayout(devcon, LAYOUTID_POS_COLOR);
+
+		devcon->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_LINELIST);
+		devcon->Draw(nrOfDebugLines, 0);
+	}
 }
 
 void Renderer::renderAnimatedMesh(DirectX::XMFLOAT4X4 viewMatrix, DirectX::XMFLOAT4X4 projectionMatrix)
