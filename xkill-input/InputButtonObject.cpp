@@ -52,6 +52,11 @@ bool InputButtonObject::getValueBool()
 	return isDown();
 }
 
+bool InputButtonObject::getValueBoolPressed()
+{
+	return (value_ && !prevValue_);
+}
+
 bool InputButtonObject::getValueBoolReleased()
 {
 	return isReleased();

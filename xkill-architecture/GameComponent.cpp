@@ -126,12 +126,13 @@ void GameComponent::onUpdate(float delta)
 		//
 		// Firing logic
 		//
-
-		if(input->fire)
+		if((input->fire && firingMode->type == FiringMode::AUTO) || 
+			input->firePressed && (firingMode->type == FiringMode::SINGLE || firingMode->type == FiringMode::SEMI))
 		{
 			input->fire = false;
+			input->firePressed = false;
 
-			if(firingMode->cooldownBetweenShots > 0 && firingMode->cooldownLeft <= 0.0f
+			if(firingMode->cooldownBetweenShots >= 0 && firingMode->cooldownLeft <= 0.0f
 				&& firingMode->nrOfShotsLeftInClip > 0)
 			{
 				if(ammo->totalNrOfShots != -1) // special case: debug machine gun. Unlimited number of shots.
@@ -164,11 +165,11 @@ void GameComponent::onUpdate(float delta)
 			health->health = 0.0f;
 			input->killPlayer = false;
 		}
-		if(input->jump)
-		{
-			//To be implemented... (2013-01-17 16.17)
-			input->jump = false;
-		}
+		//if(input->jump)
+		//{
+		//	//To be implemented... (2013-01-17 16.17)
+		//	input->jump = false;
+		//}
 
 		if(input->sprint)
 		{
@@ -202,6 +203,9 @@ void GameComponent::onUpdate(float delta)
 			}
 
 			spatial->rotation = Float4(0.0f, 0.0f, 0.0f, 1.0f);
+			camera->up = Float3(0.0f, 1.0f, 0.0f);
+			camera->right = Float3(1.0f, 0.0f, 0.0f);
+			camera->look = Float3(0.0f, 0.0f, 1.0f);
 			//camera->reset = true; //Reset player rotation.
 			physics->reloadDataIntoBulletPhysics = true;
 
@@ -687,6 +691,7 @@ void GameComponent::shootProjectile(Attribute_Position* position, Attribute_Came
 {
 	
 	Ammunition* ammo = &weaponStats->ammunition[weaponStats->currentAmmunitionType];
+	FiringMode* firingMode = &weaponStats->firingMode[weaponStats->currentFiringModeType];
 
 	// Position
 	Float3 pos = position->position;
@@ -773,6 +778,7 @@ void GameComponent::shootProjectile(Attribute_Position* position, Attribute_Came
 			scatterPos.z += randomLO + (float)rand()/((float)RAND_MAX/(randomHI-randomLO));
 		}
 
-		SEND_EVENT(&Event_CreateProjectile(scatterPos, velocity, rotation, ammo->damage, itrPlayer.ownerId(), ammo->explosive));
+		SEND_EVENT(&Event_CreateProjectile(scatterPos, velocity, rotation, ammo->damage * firingMode->damageModifier, 
+					itrPlayer.ownerId(), ammo->explosive, ammo->explosionSphere * firingMode->explosionSphereModifier));
 	}
 }

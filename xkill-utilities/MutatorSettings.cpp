@@ -51,6 +51,7 @@ void MutatorSettings::initStandardAmmunition()
 
 	ammo = &standardAmmunitions[Ammunition::BULLET];
 
+	ammo->type				= Ammunition::BULLET;
 	ammo->damage			= 5.0f;
 	ammo->explosionSphere	= 1.0f;
 	ammo->explosive			= false;
@@ -63,6 +64,7 @@ void MutatorSettings::initStandardAmmunition()
 
 	ammo = &standardAmmunitions[Ammunition::SCATTER];
 
+	ammo->type				= Ammunition::SCATTER;
 	ammo->damage			= 2.0f;
 	ammo->explosionSphere	= 1.0f;
 	ammo->explosive			= false;
@@ -75,6 +77,7 @@ void MutatorSettings::initStandardAmmunition()
 
 	ammo = &standardAmmunitions[Ammunition::EXPLOSIVE];
 
+	ammo->type				= Ammunition::EXPLOSIVE;
 	ammo->damage			= 10.0f;
 	ammo->explosionSphere	= 1.0f;
 	ammo->explosive			= true;
@@ -92,6 +95,7 @@ void MutatorSettings::initStandardFiringModes()
 
 	firingMode = &standardFiringModes[FiringMode::SINGLE];
 
+	firingMode->type					= FiringMode::SINGLE;
 	firingMode->canShootBullet			= true;
 	firingMode->canShootExplosive		= true;
 	firingMode->canShootScatter			= true;
@@ -106,6 +110,7 @@ void MutatorSettings::initStandardFiringModes()
 
 	firingMode = &standardFiringModes[FiringMode::SEMI];
 
+	firingMode->type					= FiringMode::SEMI;
 	firingMode->canShootBullet			= true;
 	firingMode->canShootExplosive		= true;
 	firingMode->canShootScatter			= true;
@@ -120,6 +125,7 @@ void MutatorSettings::initStandardFiringModes()
 
 	firingMode = &standardFiringModes[FiringMode::AUTO];
 
+	firingMode->type					= FiringMode::AUTO;
 	firingMode->canShootBullet			= true;
 	firingMode->canShootExplosive		= true;
 	firingMode->canShootScatter			= true;

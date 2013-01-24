@@ -265,10 +265,11 @@ public:
 	Float3 velocity;
 	Float4 rotation;
 	float damage;
+	float explosionSphereRadius;
 	int entityIdOfCreator;
 	bool explodeOnImpact;
 
-	Event_CreateProjectile(Float3 position, Float3 velocity, Float4 rotation, float damage, int entityIdOfCreator, bool explodeOfImpact);
+	Event_CreateProjectile(Float3 position, Float3 velocity, Float4 rotation, float damage, int entityIdOfCreator, bool explodeOfImpact, float explosionSphereRadius);
 };
 
 class MeshModel;

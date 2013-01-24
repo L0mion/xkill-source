@@ -24,6 +24,8 @@ struct DLL_U Ammunition
 	float spawnVariation;
 	bool explosive;
 	float explosionSphere;
+
+	AmmunitionType type;
 };
 
 struct DLL_U FiringMode
@@ -50,4 +52,6 @@ struct DLL_U FiringMode
 	unsigned int nrOfShotsLeftInClip;
 	float reloadTimeLeft;
 	float cooldownLeft;
+
+	FiringModeType type;
 };
