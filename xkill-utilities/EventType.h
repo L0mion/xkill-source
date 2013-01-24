@@ -397,7 +397,7 @@ public:
 
 /**
 Event used for syncing state to state machines that have the same type
-and current state as the sender but are a different instances.
+and current state as the sender but are different instances.
 \ingroup events
 */
 class DLL_U Event_SyncStateCommand : public Event
