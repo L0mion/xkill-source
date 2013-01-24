@@ -64,14 +64,14 @@ void lightingCS(
 	float4	gNormal		= gBufferNormal		.SampleLevel(ss, texCoord, 0);
 	float4	gMaterial	= gBufferMaterial	.SampleLevel(ss, texCoord, 0);
 	float	gDepth		= gBufferDepth		.SampleLevel(ss, texCoord, 0).x;
-
+	
 	float3 surfacePosV = reconstructViewSpacePosition(texCoord, gDepth);
 	float3 surfacePosW = mul(float4(surfacePosV, 1.0f), viewInverse).xyz;
 
 	//Get minimum/maximum depth of tile.
-	uint pixelDepthInt = asuint(surfacePosV.z);
+	uint pixelDepthInt = asuint(surfacePosV.z); //Interlocked-functions can only be applied onto ints.
 
-	GroupMemoryBarrierWithGroupSync();
+	GroupMemoryBarrierWithGroupSync(); //Needs to be here in order for initialization of shared values to be guaranteed. 
 	InterlockedMin(tileMinDepthInt, pixelDepthInt);
 	InterlockedMax(tileMaxDepthInt, pixelDepthInt);
 	GroupMemoryBarrierWithGroupSync();
@@ -154,16 +154,37 @@ void lightingCS(
 		sumDiffuse	+= diffuse;
 		sumSpecular	+= specular;
 	}
+
+	//TOTALLY ENOURMOUSLY SOLID LIGHT
+	LightPoint ptlight;
+	ptlight.ambient		= float4(0.0f, 1.0f, 1.0f, 1.0f);
+	ptlight.diffuse		= float4(0.0f, 1.0f, 1.0f, 1.0f);
+	ptlight.specular	= float4(0.0f, 1.0f, 1.0f, 1.0f);
+	ptlight.range		= 3.0f;
+	ptlight.attenuation	= float3(0.0f, 0.1f, 0.0f);
+	lightPoint(
+		surfaceMaterial,
+		ptlight,
+		float3(-3.0f, 0.0f, 0.0f), //mul(float4(3.0f, 0.0f, 0.0f, 1.0f), view).xyz,
+		surfacePosV,
+		normal.xyz, // mul(float4(normal.xyz, 0.0f), view).xyz, //
+		toEyeW, //toEyeV, //
+		ambient, diffuse, specular);
 	
+	sumAmbient	+= ambient;
+	sumDiffuse	+= diffuse;
+	sumSpecular	+= specular;
+	//TMEP
+
 	for(i = 0; i < numLightsPoint; i++)
 	{
 		lightPoint(
 			surfaceMaterial,
 			lightsPoint[i],
-			lightsPos[i], //mul(float4(lightsPos[i], 1.0f), viewInverse).xyz,
-			surfacePosV,
-			mul(float4(normal.xyz, 0.0f), view).xyz, // normal.xyz,//
-			toEyeV, //toEyeW
+			lightsPos[i], //mul(float4(lightsPos[i], 1.0f), viewInverse).xyz, //
+			surfacePosV, //surfacePosW
+			mul(float4(normal.xyz, 0.0f), view).xyz, // normal.xyz, //
+			toEyeV, //toEyeW, //
 			ambient, diffuse, specular);
 	
 		sumAmbient	+= ambient;

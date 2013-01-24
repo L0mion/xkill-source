@@ -375,10 +375,10 @@ void ManagementLight::transformLightViewSpacePoss(ID3D11DeviceContext* devcon, D
 		pos		= DirectX::XMFLOAT4(lightPos.x, lightPos.y, lightPos.z, 1.0f);
 		posXM	= DirectX::XMLoadFloat4(&pos);
 		viewXM	= DirectX::XMLoadFloat4x4(&view);
-
+		
 		//Convert light position to view-space.
 		posXM = DirectX::XMVector4Transform(posXM, viewXM);
-
+		
 		//Writeback result to light-attribute.
 		DirectX::XMStoreFloat4(&pos, posXM);
 

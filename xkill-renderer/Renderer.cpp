@@ -373,10 +373,10 @@ void Renderer::render()
 	Attribute_SplitScreen*	ssAt;
 
 	ViewportData vpData;
-	std::vector<ViewportData> vpDatas;
 
 	//Render each split-screen seperately
 	std::vector<SplitScreenViewport>* ssViewports = managementViewport_->getSplitScreenViewports();
+	std::vector<ViewportData> vpDatas(ssViewports->size());
 	for(unsigned int i = 0; i < ssViewports->size(); i++)
 	{
 		ssAt		= ssViewports->at(i).ssAt;
@@ -398,7 +398,7 @@ void Renderer::render()
 		vpData.viewportTopY = static_cast<unsigned int>(ssAt->ssTopLeftY);
 		vpData.zNear		= camAt->zNear;
 		vpData.zFar			= camAt->zFar;
-		vpDatas.push_back(vpData);
+		vpDatas[i]			= vpData;
 
 		renderViewportToGBuffer(vpData);
 	}
