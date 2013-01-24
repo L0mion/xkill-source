@@ -8,6 +8,8 @@ class Menu_Editor;
 class QStandardItemModel;
 class QStandardItemModel;
 class InputObject;
+class Menu_Ammo;
+class Menu_FiringMode;
 
 class Menu_Main : public QMainWindow, public ToggleHelper
 {
@@ -18,6 +20,7 @@ private:
 
 public:
 	Menu_Main(QWidget* parent);
+	~Menu_Main();
 
 	void parentMoveEvent();
 
@@ -26,6 +29,9 @@ public:
 	QStandardItemModel* deviceListModel;
 	InputObject* currentObject;
 	QString filePath;
+
+	Menu_Ammo* ammo_Menu;
+	Menu_FiringMode* firingMode_Menu;
 
 	void loadXML();
 
@@ -40,6 +46,10 @@ public slots:
 		void slot_loadInputSettings(QModelIndex index);
 		void slot_inputSettingsChanged();
 		void slot_setInputObject(QModelIndex index);
+		void slot_updateAmmoMenu();
+		void slot_ammoMenuUpdated();
+		void slot_updateFiringModeMenu();
+		void slot_firingModeUpdated();
 
 protected:
 	void keyPressEvent(QKeyEvent* e);
