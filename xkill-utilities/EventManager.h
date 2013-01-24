@@ -155,14 +155,18 @@ EventManager::getInstance()->state_TemporaryVariableUsedAsSubstituteForStateMach
 
 // Defines DEBUGPRINT to an empty function in Release configuration
 #ifndef XKILL_DEBUG
+	#define BULLETPHYSICSDEBUGDRAW false //render Bullet Physics debug lines true/false
 	#define DEBUGPRINT(dataStream)
 #endif
 // Defines DEBUGPRINT to a cout function in Debug configuration
 #ifdef XKILL_DEBUG
+	#define BULLETPHYSICSDEBUGDRAW true //render Bullet Physics debug lines true/false
 	#include <iostream>
 	#define DEBUGPRINT(dataStream)									\
 	std::cout << dataStream << std::endl;			
 #endif
+
+
 
 //
 // Math macros

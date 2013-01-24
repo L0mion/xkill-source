@@ -2,6 +2,7 @@
 
 #include <QtGui/QKeyEvent> // needed to grab mouse input
 #include <xkill-utilities/IObserver.h>
+#include <xkill-utilities/WeaponStructs.h>
 
 #include "Menu_Main.h"
 #include "Menu_ScoreBoard.h"
@@ -18,8 +19,8 @@ private:
     QLabel *label_ammo;
 	QLabel *label_weaponType;
     QLabel *label_ammoType;
-	Attribute_WeaponStats::AmmunitionType ammo;
-	Attribute_WeaponStats::FiringMode weapon;
+	Ammunition::AmmunitionType ammo;
+	FiringMode::FiringModeType weapon;
 	
 	QHBoxLayout *horizontalLayout;
 

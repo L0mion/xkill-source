@@ -22,9 +22,11 @@ public:
 	BoolField();
 	void clear();
 	bool getBool(int index);
+	bool getAnySet();
 	void setBool(int index, bool value);
-private:
+
 	int values[NUM_INTS];
+	private:
 };
 
 struct DLL_U Float2
@@ -142,3 +144,11 @@ struct DLL_U Float4x4
 
 	Float4x4 getRotationOnly();
 };
+
+float DLL_U PlaneDotCoord(Float4 plane, Float3 coord);
+
+float  DLL_U Determinant(float _11, float _21, float _12, float _22);
+
+Float3 DLL_U PlaneIntersectPlane(Float4 plane1, Float4 plane2, Float4 plane3);
+
+Float4 DLL_U PlaneNormalize(Float4 plane);

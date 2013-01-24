@@ -80,6 +80,9 @@ void GameComponent::onUpdate(float delta)
 		Attribute_Position*		position	=	itrPosition		.at(spatial->ptr_position);
 		Attribute_Physics*		physics		=	itrPhysics		.at(input->ptr_physics);
 
+		Ammunition* ammo = &weaponStats->ammunition[weaponStats->currentAmmunitionType];
+		FiringMode* firingMode = &weaponStats->firingMode[weaponStats->currentFiringModeType];
+
 
 		//
 		// End of deathmatch logic
@@ -98,7 +101,8 @@ void GameComponent::onUpdate(float delta)
 		if(input->changeAmmunitionType)
 		{
 			input->changeAmmunitionType = false;
-			weaponStats->setWeaponStats(static_cast<Attribute_WeaponStats::AmmunitionType>((weaponStats->ammunitionType + 1) % Attribute_WeaponStats::NROFAMUNITIONTYPES), weaponStats->firingMode);
+			weaponStats->currentAmmunitionType = static_cast<Ammunition::AmmunitionType>((weaponStats->currentAmmunitionType + 1) % Ammunition::AmmunitionType::NROFAMUNITIONTYPES);
+			ammo = &weaponStats->ammunition[weaponStats->currentAmmunitionType];
 			DEBUGPRINT(std::endl);
 			DEBUGPRINT("Ammunition type: " << weaponStats->getAmmunitionTypeAsString());
 			DEBUGPRINT("Firing mode: " << weaponStats->getFiringModeAsString());
@@ -107,7 +111,8 @@ void GameComponent::onUpdate(float delta)
 		if(input->changeFiringMode)
 		{
 			input->changeFiringMode = false;
-			weaponStats->setWeaponStats(weaponStats->ammunitionType, static_cast<Attribute_WeaponStats::FiringMode>((weaponStats->firingMode + 1) % Attribute_WeaponStats::NROFFIRINGMODES));
+			weaponStats->currentFiringModeType = static_cast<FiringMode::FiringModeType>((weaponStats->currentFiringModeType + 1) % Ammunition::AmmunitionType::NROFAMUNITIONTYPES);
+			firingMode = &weaponStats->firingMode[weaponStats->currentFiringModeType];
 			DEBUGPRINT(std::endl);
 			DEBUGPRINT("Ammunition type: " << weaponStats->getAmmunitionTypeAsString());
 			DEBUGPRINT("Firing mode: " << weaponStats->getFiringModeAsString());
@@ -122,13 +127,14 @@ void GameComponent::onUpdate(float delta)
 		{
 			input->fire = false;
 
-			if(weaponStats->nrOfShotsLeftInClip > 0 && weaponStats->cooldownLeft <= 0.0f)
+			if(firingMode->cooldownBetweenShots > 0 && firingMode->cooldownLeft <= 0.0f
+				&& firingMode->nrOfShotsLeftInClip > 0)
 			{
-				if(weaponStats->totalNrOfShots != -1) // special case: debug machine gun. Unlimited number of shots.
+				if(ammo->totalNrOfShots != -1) // special case: debug machine gun. Unlimited number of shots.
 				{
-					weaponStats->cooldownLeft = weaponStats->cooldownBetweenShots;
-					weaponStats->totalNrOfShots--;
-					weaponStats->nrOfShotsLeftInClip--;
+					firingMode->cooldownLeft = firingMode->cooldownBetweenShots;
+					ammo->totalNrOfShots--;
+					firingMode->nrOfShotsLeftInClip--;
 				}
 
 				// Position
@@ -162,7 +168,7 @@ void GameComponent::onUpdate(float delta)
 				float randomHI;
 
 				// Send "Event_CreateProjectile" for each projectile in a shot. Scatter has more than one projectile per shot.
-				for(int j=0;j<weaponStats->nrOfProjectilesForEachShot;j++)
+				for(unsigned int j=0;j<ammo->nrOfProjectiles;j++)
 				{
 					Float3 scatterPos = pos;
 
@@ -171,10 +177,10 @@ void GameComponent::onUpdate(float delta)
 					lookAtXMFloat3.z = DirectX::XMVectorGetZ(lookAt);
 
 					// randomize spread cone values (direction of velocity)
-					if(weaponStats->spreadConeRadius != 0.0f)
+					if(ammo->spread != 0.0f)
 					{
-						randomLO = -weaponStats->spreadConeRadius*0.5f;
-						randomHI = weaponStats->spreadConeRadius*0.5f;
+						randomLO = -ammo->spread*0.5f;
+						randomHI = ammo->spread*0.5f;
 						lookAtXMFloat3.x += randomLO + (float)rand()/((float)RAND_MAX/(randomHI-randomLO));
 						lookAtXMFloat3.y += randomLO + (float)rand()/((float)RAND_MAX/(randomHI-randomLO));
 						lookAtXMFloat3.z += randomLO + (float)rand()/((float)RAND_MAX/(randomHI-randomLO));
@@ -187,13 +193,13 @@ void GameComponent::onUpdate(float delta)
 					lookAtXMFloat3.z = DirectX::XMVectorGetZ(newLookAt);
 
 					Float3 velocity(lookAtXMFloat3.x, lookAtXMFloat3.y, lookAtXMFloat3.z);
-					velocity = velocity * weaponStats->velocityOfEachProjectile;
+					velocity = velocity * ammo->speed;
 					
 					//Randomize velocity for each consecutive projectile
-					if(weaponStats->velocityDifference != 0.0f)
+					if(ammo->velocityVariation != 0.0f)
 					{
-						randomLO = 1 - weaponStats->velocityDifference*0.5f;
-						randomHI = 1 + weaponStats->velocityDifference*0.5f;
+						randomLO = 1 - ammo->velocityVariation*0.5f;
+						randomHI = 1 + ammo->velocityVariation*0.5f;
 						float randomVelocityDifference = randomLO + (float)rand()/((float)RAND_MAX/(randomHI-randomLO));
 						velocity.x *= randomVelocityDifference;
  						velocity.y *= randomVelocityDifference;
@@ -207,21 +213,21 @@ void GameComponent::onUpdate(float delta)
 					scatterPos.z += lookAtXMFloat3.z*d;
 
 					// randomize displacement of each projectile preventing them from spawning at the same position
-					if(weaponStats->displacementSphereRadius != 0.0f)
+					if(ammo->spawnVariation != 0.0f)
 					{
-						randomLO = -weaponStats->displacementSphereRadius*0.5f;
-						randomHI = weaponStats->displacementSphereRadius*0.5f;
+						randomLO = -ammo->spawnVariation *0.5f;
+						randomHI = ammo->spawnVariation *0.5f;
 						scatterPos.x += randomLO + (float)rand()/((float)RAND_MAX/(randomHI-randomLO));
 						scatterPos.y += randomLO + (float)rand()/((float)RAND_MAX/(randomHI-randomLO));
 						scatterPos.z += randomLO + (float)rand()/((float)RAND_MAX/(randomHI-randomLO));
 					}
 
-					SEND_EVENT(&Event_CreateProjectile(scatterPos, velocity, rotation, weaponStats->damgeOfEachProjectile, itrPlayer.ownerId(), weaponStats->isExplosive));
+					SEND_EVENT(&Event_CreateProjectile(scatterPos, velocity, rotation, ammo->damage, itrPlayer.ownerId(), ammo->explosive));
 				}
 			}
-			else if(weaponStats->nrOfShotsLeftInClip <= 0)
+			else if(firingMode->nrOfShotsLeftInClip <= 0)
 			{
-				if(weaponStats->totalNrOfShots <= 0)
+				if(ammo->totalNrOfShots <= 0)
 				{
 					DEBUGPRINT("Cannot shoot: Out of ammo.");
 				}
@@ -230,7 +236,7 @@ void GameComponent::onUpdate(float delta)
 					DEBUGPRINT("Cannot shoot: Out of ammo in current clip.");
 				}
 			}
-			else if(weaponStats->cooldownLeft > 0)
+			else if(firingMode->cooldownLeft > 0)
 			{
 				DEBUGPRINT("Cannot shoot: weapon cooldown. Be patient.");
 			}
@@ -278,6 +284,9 @@ void GameComponent::onUpdate(float delta)
 			}
 
 			spatial->rotation = Float4(0.0f, 0.0f, 0.0f, 1.0f);
+			camera->up = Float3(0.0f, 1.0f, 0.0f);
+			camera->right = Float3(1.0f, 0.0f, 0.0f);
+			camera->look = Float3(0.0f, 0.0f, 1.0f);
 			//camera->reset = true; //Reset player rotation.
 			physics->reloadDataIntoBulletPhysics = true;
 
@@ -332,36 +341,39 @@ void GameComponent::onUpdate(float delta)
 		// Fetch attribute
 		Attribute_WeaponStats* weaponStats = itrWeaponStats.getNext();
 
+		Ammunition* ammo = &weaponStats->ammunition[weaponStats->currentAmmunitionType];
+		FiringMode* firingMode = &weaponStats->firingMode[weaponStats->currentFiringModeType];
+
 		//
 		// Weapon cooldown logic
 		//
 
-		weaponStats->cooldownLeft -= delta;
+		firingMode->cooldownLeft -= delta;
 
 
 		//
 		// Weapon reload logic
 		//
 
-		if(weaponStats->totalNrOfShots > 0 && weaponStats->nrOfShotsLeftInClip <= 0)
+		if(ammo->totalNrOfShots > 0 && firingMode->nrOfShotsLeftInClip <= 0)
 		{
-			weaponStats->reloadTimeLeft -= delta;
-			if(weaponStats->reloadTimeLeft <= 0)
+			firingMode->reloadTimeLeft -= delta;
+			if(firingMode->reloadTimeLeft <= 0)
 			{
-				weaponStats->reloadTimeLeft = weaponStats->reloadTime;
+				firingMode->reloadTimeLeft = firingMode->reloadTime;
 
-				if(weaponStats->clipSize > weaponStats->totalNrOfShots)
+				if(firingMode->clipSize > ammo->totalNrOfShots)
 				{
-					weaponStats->nrOfShotsLeftInClip = weaponStats->totalNrOfShots;
+					firingMode->nrOfShotsLeftInClip = ammo->totalNrOfShots;
 				}
 				else
 				{
-					weaponStats->nrOfShotsLeftInClip = weaponStats->clipSize;
+					firingMode->nrOfShotsLeftInClip = firingMode->clipSize;
 				}
 
 				DEBUGPRINT("Weapon was automatically reloaded.");
-				DEBUGPRINT("Ammo in current clip: " << weaponStats->nrOfShotsLeftInClip);
-				DEBUGPRINT("Total number of shots left: " << weaponStats->totalNrOfShots);
+				DEBUGPRINT("Ammo in current clip: " << firingMode->nrOfShotsLeftInClip);
+				DEBUGPRINT("Total number of shots left: " << ammo->totalNrOfShots);
 			}
 		}
 
@@ -499,10 +511,10 @@ void GameComponent::event_PhysicsAttributesColliding(Event_PhysicsAttributesColl
 				Attribute_Projectile* projectileAttribute = itrProjectile.at(projectileId.at(i));
 
 				//Shorten lifetime of projectile colliding with physics objects
-				if(projectileAttribute->currentLifeTimeLeft > 0.2f)
+				/*if(projectileAttribute->currentLifeTimeLeft > 0.2f)
 				{
 					projectileAttribute->currentLifeTimeLeft = 0.15f;
-				}
+				}*/ //ÄÄÄÄ
 
 				//Explosion handling.
 				if(projectileAttribute->explodeOnImnpact)

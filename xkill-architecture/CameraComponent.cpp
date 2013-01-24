@@ -242,10 +242,6 @@ void CameraComponent::onUpdate(float delta)
 				Attribute_Camera* camera = cameras.at(i);
 				yaw(input->rotation.x, camera);
 				pitch(input->rotation.y, camera);
-
-				// reset for next input
-				input->rotation.x = 0.0f;
-				input->rotation.y = 0.0f;
 			}
 		}
 	}

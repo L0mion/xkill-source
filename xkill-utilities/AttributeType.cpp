@@ -264,103 +264,101 @@ Attribute_SpawnPoint::~Attribute_SpawnPoint()
 {
 }
 
+#include "WeaponStructs.h"
+#include "MutatorSettings.h"
 Attribute_WeaponStats::Attribute_WeaponStats()
 {
-	setWeaponStats(EXPLOSIVE, AUTO);
-}
+	MutatorSettings ms;
 
-void Attribute_WeaponStats::setWeaponStats(AmmunitionType ammunitionType, FiringMode firingMode)
-{
-	this->ammunitionType = ammunitionType;
-	this->firingMode = firingMode;
-
-	totalNrOfShots = 1000;
-	clipSize = 10;
-	reloadTime = 0.0f;
-	nrOfProjectilesForEachShot = 1;
-	displacementSphereRadius = 0.0f;
-	spreadConeRadius = 0.0f;
-	isExplosive = false;
-	velocityDifference = 0.0f;
-
-	switch(ammunitionType)
+	for(int i = 0; i < Ammunition::NROFAMUNITIONTYPES; i++)
 	{
-	case BULLET: //One powerful accurate bullet.
-		velocityOfEachProjectile = 40.0f;
-		damgeOfEachProjectile = 5;
-		break;
-	case SCATTER: //Many weak and less accurate bullets.
-		velocityOfEachProjectile = 10.0f;
-		nrOfProjectilesForEachShot = 10;
-		damgeOfEachProjectile = 2;
-		displacementSphereRadius = 0.02f;
-		spreadConeRadius = 0.2f;
-		velocityDifference = 0.5f;
-		break;
-	case EXPLOSIVE: //One powerful accurate exploding bullet.
-		velocityOfEachProjectile = 5.0f;
-		damgeOfEachProjectile = 10;
-		explosionSphereRadius = 1.0f;
-		isExplosive = true;
-		break;
+		for(int j = 0; j < FiringMode::NROFFIRINGMODETYPES; j++)
+		{
+			ms.setupAttribute(this, static_cast<Ammunition::AmmunitionType>(i), static_cast<FiringMode::FiringModeType>(j));
+		}
 	}
-
-	switch(firingMode)
-	{
-	case SINGLE: //Reload after each shot. Fast reload time.
-		cooldownBetweenShots = 0.0f;
-		reloadTime = 1.0f;
-		clipSize = 1;
-		break;
-	case SEMI: //Reload after a number of shots. Medium load time.
-		cooldownBetweenShots = 0.5f;
-		reloadTime = 2.0f;
-		explosionSphereRadius *= 0.5f;
-		clipSize = 10;
-		break;
-	case AUTO: //Reload after a large number of shots. Long reload time.
-		cooldownBetweenShots = 0.1f;
-		reloadTime = 3.0f;
-		explosionSphereRadius *= 0.15f;
-		clipSize = 50;
-		break;
-	}
-
-	cooldownLeft = cooldownBetweenShots;
-	reloadTimeLeft = reloadTime;
-
-	nrOfShotsLeftInClip = clipSize;
 }
-void Attribute_WeaponStats::setWeaponToDebugMachineGun()
+Attribute_WeaponStats::~Attribute_WeaponStats()
 {
-	totalNrOfShots = -1;
-	nrOfShotsLeftInClip = clipSize;
-	clipSize = 0;
-	cooldownLeft = 0.0f;
-	reloadTime = 0.0f;
 
-	nrOfProjectilesForEachShot = 1;
-	displacementSphereRadius = 0.0f;
-	spreadConeRadius = 0.0f;
-
-	velocityOfEachProjectile = 2500.0f;
-	damgeOfEachProjectile = 1;
-	explosionSphereRadius = 0.0f;
-	cooldownBetweenShots = 0.0f;
 }
+void Attribute_WeaponStats::setWeaponStats(Ammunition::AmmunitionType ammunitionType, FiringMode::FiringModeType firingModeType)
+{
+	currentAmmunitionType = ammunitionType;
+	currentFiringModeType = firingModeType;
 
+	MutatorSettings ms;
+	ms.setupAttribute(this);
+
+	//totalNrOfShots = 1000;
+	//clipSize = 10;
+	//reloadTime = 0.0f;
+	//nrOfProjectilesForEachShot = 1;
+	//displacementSphereRadius = 0.0f;
+	//spreadConeRadius = 0.0f;
+	//isExplosive = false;
+	//velocityDifference = 0.0f;
+	//
+	//switch(ammunitionType)
+	//{
+	//case BULLET: //One powerful accurate bullet.
+	//	velocityOfEachProjectile = 40.0f;
+	//	damgeOfEachProjectile = 5;
+	//	break;
+	//case SCATTER: //Many weak and less accurate bullets.
+	//	velocityOfEachProjectile = 10.0f;
+	//	nrOfProjectilesForEachShot = 10;
+	//	damgeOfEachProjectile = 2;
+	//	displacementSphereRadius = 0.02f;
+	//	spreadConeRadius = 0.2f;
+	//	velocityDifference = 0.5f;
+	//	break;
+	//case EXPLOSIVE: //One powerful accurate exploding bullet.
+	//	velocityOfEachProjectile = 5.0f;
+	//	damgeOfEachProjectile = 10;
+	//	explosionSphereRadius = 1.0f;
+	//	isExplosive = true;
+	//	break;
+	//}
+	//
+	//switch(firingMode)
+	//{
+	//case SINGLE: //Reload after each shot. Fast reload time.
+	//	cooldownBetweenShots = 0.0f;
+	//	reloadTime = 1.0f;
+	//	clipSize = 1;
+	//	break;
+	//case SEMI: //Reload after a number of shots. Medium load time.
+	//	cooldownBetweenShots = 0.5f;
+	//	reloadTime = 2.0f;
+	//	explosionSphereRadius *= 0.5f;
+	//	clipSize = 10;
+	//	break;
+	//case AUTO: //Reload after a large number of shots. Long reload time.
+	//	cooldownBetweenShots = 0.1f;
+	//	reloadTime = 3.0f;
+	//	explosionSphereRadius *= 0.15f;
+	//	clipSize = 50;
+	//	break;
+	//}
+	//
+	//cooldownLeft = cooldownBetweenShots;
+	//reloadTimeLeft = reloadTime;
+	//
+	//nrOfShotsLeftInClip = clipSize;
+}
 std::string Attribute_WeaponStats::getAmmunitionTypeAsString()
 {
 	std::string ammunitionTypeAsString = "Error in std::string Attribute_WeaponStats::getAmmunitionTypeAsString()";
-	switch(this->ammunitionType)
+	switch(currentAmmunitionType)
 	{
-		case BULLET:
+		case Ammunition::BULLET:
 			ammunitionTypeAsString = "Bullet";
 			break;
-		case SCATTER:
+		case Ammunition::SCATTER:
 			ammunitionTypeAsString = "Scatter";
 			break;
-		case EXPLOSIVE:
+		case Ammunition::EXPLOSIVE:
 			ammunitionTypeAsString = "Explosive";
 			break;
 	}
@@ -369,23 +367,71 @@ std::string Attribute_WeaponStats::getAmmunitionTypeAsString()
 std::string Attribute_WeaponStats::getFiringModeAsString()
 {
 	std::string firingModeAsString = "Error in std::string Attribute_WeaponStats::getFiringModesString()";
-	switch(this->firingMode)
+	switch(currentFiringModeType)
 	{
-		case SINGLE:
+		case FiringMode::SINGLE:
 			firingModeAsString = "Single";
 			break;
-		case SEMI:
+		case FiringMode::SEMI:
 			firingModeAsString = "Semi";
 			break;
-		case AUTO:
+		case FiringMode::AUTO:
 			firingModeAsString = "Auto";
 			break;
 	}
 	return firingModeAsString;
 }
-
-Attribute_WeaponStats::~Attribute_WeaponStats()
+DataItemList* Attribute_WeaponStats::getDataList()
 {
+	DataItemList* list = new DataItemList();
+
+	list->add_Enum(currentAmmunitionType,								"ammunitionType");
+	list->add_Enum(currentFiringModeType,								"firingMode");
+
+	list->add(ammunition[currentAmmunitionType].totalNrOfShots,			"totalNrOfShots");
+	list->add(firingMode[currentFiringModeType].clipSize,				"clipSize");
+	list->add(firingMode[currentFiringModeType].nrOfShotsLeftInClip,	"nrOfShotsLeftInClip");
+
+	list->add(firingMode[currentFiringModeType].reloadTime,				"reloadTime");
+	list->add(firingMode[currentFiringModeType].reloadTimeLeft,			"reloadTimeLeft");
+	list->add(firingMode[currentFiringModeType].cooldownBetweenShots,	"cooldownBetweenShots");
+	list->add(firingMode[currentFiringModeType].cooldownLeft,			"cooldownLeft");
+
+	list->add(ammunition[currentAmmunitionType].speed,					"velocityOfEachProjectile");
+	list->add(ammunition[currentAmmunitionType].nrOfProjectiles,		"nrOfProjectilesForEachShot");
+	list->add(ammunition[currentAmmunitionType].damage,					"damageOfEachProjectile");
+
+	list->add(ammunition[currentAmmunitionType].spawnVariation,			"displacementSphereRadius");
+	list->add(ammunition[currentAmmunitionType].spread,					"spreadConeRadius");
+
+	list->add(ammunition[currentAmmunitionType].explosive,				"isExplosive");
+	list->add(ammunition[currentAmmunitionType].explosionSphere,		"explosionSphereRadius");
+
+	return list;
+}
+void Attribute_WeaponStats::saveTo(DataItemList* list)
+{
+	currentAmmunitionType	= (Ammunition::AmmunitionType)	list->get_Enum();
+	currentFiringModeType	= (FiringMode::FiringModeType)	list->get_Enum();
+
+	list->get(&ammunition[currentAmmunitionType].totalNrOfShots);
+	list->get(&firingMode[currentFiringModeType].clipSize);
+	list->get(&firingMode[currentFiringModeType].nrOfShotsLeftInClip);
+
+	list->get(&firingMode[currentFiringModeType].reloadTime);
+	list->get(&firingMode[currentFiringModeType].reloadTimeLeft);
+	list->get(&firingMode[currentFiringModeType].cooldownBetweenShots);
+	list->get(&firingMode[currentFiringModeType].cooldownLeft);
+	
+	list->get(&ammunition[currentAmmunitionType].speed);
+	list->get(&ammunition[currentAmmunitionType].nrOfProjectiles);
+	list->get(&ammunition[currentAmmunitionType].damage);
+	
+	list->get(&ammunition[currentAmmunitionType].spawnVariation);
+	list->get(&ammunition[currentAmmunitionType].spread);
+		
+	list->get(&ammunition[currentAmmunitionType].explosive);
+	list->get(&ammunition[currentAmmunitionType].explosionSphere);
 }
 
 Attribute_DebugShape::Attribute_DebugShape()

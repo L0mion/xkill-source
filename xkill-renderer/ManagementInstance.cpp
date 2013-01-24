@@ -29,7 +29,11 @@ void ManagementInstance::update(ID3D11Device* device, ID3D11DeviceContext* devco
 	//Fill instance-lists with updated data.
 	while(itrRender.hasNext())
 	{
-		addRenderAtInstance(itrRender.getNext());
+		Attribute_Render* renderAttribute = itrRender.getNext();
+		if(renderAttribute->cull)
+		{
+			addRenderAtInstance(renderAttribute);
+		}
 	}
 
 	//Update each instance-list. (fill buffers with data)
