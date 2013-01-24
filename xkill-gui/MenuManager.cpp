@@ -161,7 +161,7 @@ MenuManager::MenuManager( QWidget* parent )
 	mainMenu = new Menu_Main(parent);
 	hudManager = HUDManager(parent);
 	
-	mainMenu->toggleMenu(true);
+	//mainMenu->toggleMenu(true);
 
 	SUBSCRIBE_TO_EVENT(this, EVENT_UPDATE);
 	SUBSCRIBE_TO_EVENT(this, EVENT_END_DEATHMATCH);

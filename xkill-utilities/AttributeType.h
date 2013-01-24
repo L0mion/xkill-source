@@ -106,19 +106,22 @@ struct DLL_U Attribute_Position : public IAttribute
 {
 private:
 	Float3 _position;
+	AttributePointer _parent;
 
 public:
 	Attribute_Position();
 	~Attribute_Position();
 
-	
+	void setParent(AttributePointer parent)
+	{
+		_parent = parent;
+	}
+
 	Float3 position();
 	void setPosition(Float3 position)
 	{
 		_position = position;
 	};
-
-	AttributePointer ptr_position_offset;
 
 	DataItemList* getDataList()
 	{
@@ -140,26 +143,39 @@ public:
 */
 struct DLL_U Attribute_Spatial : public IAttribute
 {
+private:
+	AttributePointer ptr_position;
+public:
 	Attribute_Spatial();
 	~Attribute_Spatial();
 
-	AttributePointer ptr_position;
+	Float3 position();
+	void setPosition(Float3 position);
 
-	Float4 rotation;
+	Float4 rotation()
+	{
+		return _rotation;
+	}
+	void setRotation(Float4 rotation)
+	{
+		_rotation = rotation;
+	}
+
+	Float4 _rotation;
 	Float3 scale;
 
 	DataItemList* getDataList()
 	{
 		DataItemList* list = new DataItemList();
 		list->add_AttributePointer(ptr_position.index,	"ptr_position");
-		list->add(rotation,								"rotation");
+		list->add(_rotation,								"rotation");
 		list->add(scale,								"scale");
 		return list;
 	}
 	void saveTo(DataItemList* list)
 	{
 		list->get_AttributePointer(&ptr_position.index);
-		list->get(&rotation);
+		list->get(&_rotation);
 		list->get(&scale);
 	};
 	AttributeType getType(){return ATTRIBUTE_SPATIAL;}
@@ -684,7 +700,7 @@ struct DLL_U Attribute_Player : public IAttribute
 	AttributePointer ptr_render;
 	AttributePointer ptr_input;
 	AttributePointer ptr_inputDevice;
-	AttributePointer ptr_camera;
+	AttributePointer ptr_spatial;
 	AttributePointer ptr_health;
 	AttributePointer ptr_weaponStats;
 
@@ -704,7 +720,7 @@ struct DLL_U Attribute_Player : public IAttribute
 		
 		list->add_AttributePointer(ptr_render.index,		"ptr_render");
 		list->add_AttributePointer(ptr_input.index,			"ptr_input");
-		list->add_AttributePointer(ptr_camera.index,		"ptr_camera");
+		list->add_AttributePointer(ptr_spatial.index,		"ptr_spatial");
 		list->add_AttributePointer(ptr_health.index,		"ptr_health");
 		list->add_AttributePointer(ptr_weaponStats.index,	"ptr_weaponStats");
 		list->add(id,					"id");
@@ -721,7 +737,7 @@ struct DLL_U Attribute_Player : public IAttribute
 	{
 		list->get_AttributePointer(&ptr_render.index);
 		list->get_AttributePointer(&ptr_input.index);
-		list->get_AttributePointer(&ptr_camera.index);
+		list->get_AttributePointer(&ptr_spatial.index);
 		list->get_AttributePointer(&ptr_health.index);
 		list->get_AttributePointer(&ptr_weaponStats.index);
 		list->get(&id);

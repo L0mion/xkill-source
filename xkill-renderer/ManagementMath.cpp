@@ -26,22 +26,22 @@ DirectX::XMFLOAT4X4 ManagementMath::calculateMatrixInverse(DirectX::XMFLOAT4X4 m
 	return matrixInverse;
 }
 DirectX::XMFLOAT4X4 ManagementMath::calculateWorldMatrix(
-	Attribute_Spatial* spatialAttribute, 
-	Attribute_Position* positionAttribute)
+	Attribute_Spatial* spatialAttribute)
 {
-	Float3 position = positionAttribute->position();
-	DirectX::XMMATRIX translation = DirectX::XMMatrixTranslation(position.x,
-		position.y,
-		position.z);
+	Float3 position = spatialAttribute->position();
+	Float4 at_rotation = spatialAttribute->rotation();
+	DirectX::XMMATRIX translation = DirectX::XMMatrixTranslation(at_rotation.x,
+		at_rotation.y,
+		at_rotation.z);
 
 	DirectX::XMMATRIX scaling = DirectX::XMMatrixScaling(spatialAttribute->scale.x,
 														 spatialAttribute->scale.y,
 														 spatialAttribute->scale.z);
 
-	DirectX::XMFLOAT4 fRotation = DirectX::XMFLOAT4(spatialAttribute->rotation.x,
-													spatialAttribute->rotation.y,
-													spatialAttribute->rotation.z,
-													spatialAttribute->rotation.w);
+	DirectX::XMFLOAT4 fRotation = DirectX::XMFLOAT4(rotation.x,
+													rotation.y,
+													rotation.z,
+													rotation.w);
 
 	DirectX::XMVECTOR qRotation = DirectX::XMLoadFloat4(&fRotation);
 	DirectX::XMMATRIX rotation = DirectX::XMMatrixRotationQuaternion(qRotation);

@@ -53,53 +53,69 @@ public:
 	//! Note: the player has the same spatial attribute as the camera.
 	void createPlayerEntity(Entity* entity)
 	{
-		ATTRIBUTES_INIT_ALL;
+		Attribute_Position* position = itrPosition.createAttribute(entity);
+		AttributePointer ptr_position = itrPosition.attributePointer(position);
 
-		CREATE_ATTRIBUTE(Attribute_Position, position, entity);
+		Attribute_Spatial* spatial = itrSpatial.createAttribute(entity);
+		AttributePointer ptr_spatial = itrSpatial.attributePointer(spatial);
+		spatial->ptr_position =	ptr_position;
 
-		CREATE_ATTRIBUTE(Attribute_Spatial, spatial, entity);
-		CONNECT_ATTRIBUTES(spatial, position);
-
-		CREATE_ATTRIBUTE(Attribute_Render, render, entity);
-		CONNECT_ATTRIBUTES(render, spatial);
+		Attribute_Render* render = itrRender.createAttribute(entity);
+		render->ptr_spatial = ptr_spatial;
 		render->meshID = 0;
 
-		//CREATE_ATTRIBUTE(Attribute_DebugShape, debugShape, entity);	//create temp debug shape
-		//CONNECT_ATTRIBUTES(debugShape, spatial);
-		//debugShape->meshID = render->meshID;
-		//debugShape->shape	=  new DebugShapeSphere(1.0f);/*new DebugShapeBB(
-		//	Float3(-0.5f, -0.5f, -0.5f),
-		//	Float3(0.5f, 0.5f, 0.5f)); //new DebugShapeSphere(1.0f);*/
-		//debugShape->render	= true;
-
-		CREATE_ATTRIBUTE(Attribute_Physics, physics, entity);
-		CONNECT_ATTRIBUTES(physics, spatial);
-		CONNECT_ATTRIBUTES(physics, render);
+		Attribute_Physics* physics = itrPhysics.createAttribute(entity);
+		physics->ptr_spatial = itrSpatial.attributePointer(spatial);
+		physics->ptr_render = itrRender.attributePointer(render);
 		physics->meshID = render->meshID;
 		physics->collisionFilterGroup = Attribute_Physics::PLAYER;
 		physics->collisionFilterMask = Attribute_Physics::EVERYTHING;
 		
-		CREATE_ATTRIBUTE(Attribute_Input, input, entity);
-		CONNECT_ATTRIBUTES(input, physics);
+		Attribute_Input* input = itrInput.createAttribute(entity);
+		input->ptr_physics = itrPhysics.attributePointer(physics);
 
-		CREATE_ATTRIBUTE(Attribute_Camera, camera, entity);
-		CONNECT_ATTRIBUTES(camera, spatial);
+		Attribute_Health* health = itrHealth.createAttribute(entity);
 
+		Attribute_WeaponStats* weaponStats = itrWeaponStats.createAttribute(entity);
 
-		CREATE_ATTRIBUTE(Attribute_Health, health, entity);
+		Attribute_Player* player = itrPlayer.createAttribute(entity);
+		player->ptr_render		=	itrRender.attributePointer(render);
+		player->ptr_input		=	itrInput.attributePointer(input);
+		player->ptr_spatial		=	itrSpatial.attributePointer(spatial);
+		player->ptr_health		=	itrHealth.attributePointer(health);
+		player->ptr_weaponStats =	itrWeaponStats.attributePointer(weaponStats);
 
-		CREATE_ATTRIBUTE(Attribute_WeaponStats, weaponStats, entity);
+		// Weapon
+		{
+			Attribute_Position* positionWeapon = itrPosition.createAttribute(entity);
+			positionWeapon->setPosition(Float3(0.0f, 1.0f, 2.0));
+			positionWeapon->setParent(itrSpatial.attributePointer(spatial));
 
-		CREATE_ATTRIBUTE(Attribute_Player, player, entity);
-		CONNECT_ATTRIBUTES(player, render);
-		CONNECT_ATTRIBUTES(player, input);
-		CONNECT_ATTRIBUTES(player, camera);
-		CONNECT_ATTRIBUTES(player, health);
-		CONNECT_ATTRIBUTES(player, weaponStats);
+			Attribute_Spatial* spatial = itrSpatial.createAttribute(entity);
+			spatial->ptr_position =	itrPosition.attributePointer(positionWeapon);
 
-		CREATE_ATTRIBUTE(Attribute_SplitScreen, splitScreen, entity);
-		CONNECT_ATTRIBUTES(splitScreen, camera);
-		CONNECT_ATTRIBUTES(splitScreen, player);
+			Attribute_Render* render = itrRender.createAttribute(entity);
+			render->ptr_spatial = itrSpatial.attributePointer(spatial);
+			render->meshID = 0;
+		}
+
+		// Camera
+		Attribute_Camera* camera = itrCamera.createAttribute(entity);
+		{
+			// Create camera with offset
+			Attribute_Position* position = itrPosition.createAttribute(entity);
+			position->setPosition(Float3(0.0f, 2.0f, -3.0));
+			position->parent_ptr = ptr_spatial;
+			
+			Attribute_Spatial* spatial = itrSpatial.createAttribute(entity);
+			spatial->ptr_position =	itrPosition.attributePointer(position);
+
+			camera->ptr_spatial = itrSpatial.attributePointer(spatial);
+		}
+
+		Attribute_SplitScreen* splitScreen = itrSplitScreen.createAttribute(entity);
+		splitScreen->ptr_camera		=	itrCamera.attributePointer(camera);
+		splitScreen->ptr_player		=	itrPlayer.attributePointer(player);
 	}
 	
 	void createWorldEntity(Entity* entity, Event_CreateWorld* e)

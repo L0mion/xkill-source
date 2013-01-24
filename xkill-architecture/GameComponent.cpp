@@ -72,13 +72,11 @@ void GameComponent::onUpdate(float delta)
 		Attribute_Player*		player		=	itrPlayer		.getNext();
 
 		Attribute_Health*		health		=	itrHealth		.at(player->ptr_health);
-		Attribute_Camera*		camera		=	itrCamera		.at(player->ptr_camera);
 		Attribute_Input*		input		=	itrInput		.at(player->ptr_input);
 		Attribute_Render*		render		=	itrRender		.at(player->ptr_render);
 		Attribute_WeaponStats*	weaponStats	=	itrWeaponStats	.at(player->ptr_weaponStats);
+		Attribute_Spatial*		spatial		=	itrSpatial		.at(player->ptr_spatial);
 		Attribute_Physics*		physics		=	itrPhysics		.at(input->ptr_physics);
-		Attribute_Spatial*		spatial		=	itrSpatial		.at(render->ptr_spatial);
-		Attribute_Position*		position	=	itrPosition		.at(spatial->ptr_position);
 
 
 		//
@@ -118,123 +116,123 @@ void GameComponent::onUpdate(float delta)
 		// Firing logic
 		//
 
-		if(input->fire)
-		{
-			input->fire = false;
+		//if(input->fire)
+		//{
+		//	input->fire = false;
 
-			if(weaponStats->nrOfShotsLeftInClip > 0 && weaponStats->cooldownLeft <= 0.0f)
-			{
-				if(weaponStats->totalNrOfShots != -1) // special case: debug machine gun. Unlimited number of shots.
-				{
-					weaponStats->cooldownLeft = weaponStats->cooldownBetweenShots;
-					weaponStats->totalNrOfShots--;
-					weaponStats->nrOfShotsLeftInClip--;
-				}
+		//	if(weaponStats->nrOfShotsLeftInClip > 0 && weaponStats->cooldownLeft <= 0.0f)
+		//	{
+		//		if(weaponStats->totalNrOfShots != -1) // special case: debug machine gun. Unlimited number of shots.
+		//		{
+		//			weaponStats->cooldownLeft = weaponStats->cooldownBetweenShots;
+		//			weaponStats->totalNrOfShots--;
+		//			weaponStats->nrOfShotsLeftInClip--;
+		//		}
 
-				// Position
-				Float3 pos = position->position();
+		//		// Position
+		//		Float3 pos = position->position();
 
-				// extract camera orientation to determine velocity
-				DirectX::XMFLOAT3 lookAtXMFloat3((float*)&camera->mat_view.getLookAt());
+		//		// extract camera orientation to determine velocity
+		//		DirectX::XMFLOAT3 lookAtXMFloat3((float*)&camera->mat_view.getLookAt());
 
-				DirectX::XMVECTOR lookAt = DirectX::XMLoadFloat3(&lookAtXMFloat3);
-				lookAt = DirectX::XMVector3Normalize(lookAt);
+		//		DirectX::XMVECTOR lookAt = DirectX::XMLoadFloat3(&lookAtXMFloat3);
+		//		lookAt = DirectX::XMVector3Normalize(lookAt);
 
-				// Rotation
-				camera->mat_view.getRotationOnly();
-				//DirectX::XMMATRIX rotationMatrix((float*)&camera->mat_view);
-				DirectX::XMMATRIX rotationMatrix(
-					camera->mat_view._11,	camera->mat_view._21,	camera->mat_view._31,	0.0f,
-					camera->mat_view._12,	camera->mat_view._22,	camera->mat_view._32,	0.0f, 
-					camera->mat_view._13,	camera->mat_view._23,	camera->mat_view._33,	0.0f,
-					0.0f,					0.0f,					0.0f,					1.0f);
+		//		// Rotation
+		//		camera->mat_view.getRotationOnly();
+		//		//DirectX::XMMATRIX rotationMatrix((float*)&camera->mat_view);
+		//		DirectX::XMMATRIX rotationMatrix(
+		//			camera->mat_view._11,	camera->mat_view._21,	camera->mat_view._31,	0.0f,
+		//			camera->mat_view._12,	camera->mat_view._22,	camera->mat_view._32,	0.0f, 
+		//			camera->mat_view._13,	camera->mat_view._23,	camera->mat_view._33,	0.0f,
+		//			0.0f,					0.0f,					0.0f,					1.0f);
 
-				DirectX::XMVECTOR orientationQuaternion = DirectX::XMQuaternionRotationMatrix(rotationMatrix);
-				float orientationQuaternionX = DirectX::XMVectorGetX(orientationQuaternion);
-				float orientationQuaternionY = DirectX::XMVectorGetY(orientationQuaternion);
-				float orientationQuaternionZ = DirectX::XMVectorGetZ(orientationQuaternion);
-				float orientationQuaternionW = DirectX::XMVectorGetW(orientationQuaternion);
+		//		DirectX::XMVECTOR orientationQuaternion = DirectX::XMQuaternionRotationMatrix(rotationMatrix);
+		//		float orientationQuaternionX = DirectX::XMVectorGetX(orientationQuaternion);
+		//		float orientationQuaternionY = DirectX::XMVectorGetY(orientationQuaternion);
+		//		float orientationQuaternionZ = DirectX::XMVectorGetZ(orientationQuaternion);
+		//		float orientationQuaternionW = DirectX::XMVectorGetW(orientationQuaternion);
 
-				Float4 rotation = Float4(orientationQuaternionX, orientationQuaternionY, orientationQuaternionZ, orientationQuaternionW);
+		//		Float4 rotation = Float4(orientationQuaternionX, orientationQuaternionY, orientationQuaternionZ, orientationQuaternionW);
 
-				DirectX::XMVECTOR newLookAt;
-				float randomLO;
-				float randomHI;
+		//		DirectX::XMVECTOR newLookAt;
+		//		float randomLO;
+		//		float randomHI;
 
-				// Send "Event_CreateProjectile" for each projectile in a shot. Scatter has more than one projectile per shot.
-				for(int j=0;j<weaponStats->nrOfProjectilesForEachShot;j++)
-				{
-					Float3 scatterPos = pos;
+		//		// Send "Event_CreateProjectile" for each projectile in a shot. Scatter has more than one projectile per shot.
+		//		for(int j=0;j<weaponStats->nrOfProjectilesForEachShot;j++)
+		//		{
+		//			Float3 scatterPos = pos;
 
-					lookAtXMFloat3.x = DirectX::XMVectorGetX(lookAt);
-					lookAtXMFloat3.y = DirectX::XMVectorGetY(lookAt);
-					lookAtXMFloat3.z = DirectX::XMVectorGetZ(lookAt);
+		//			lookAtXMFloat3.x = DirectX::XMVectorGetX(lookAt);
+		//			lookAtXMFloat3.y = DirectX::XMVectorGetY(lookAt);
+		//			lookAtXMFloat3.z = DirectX::XMVectorGetZ(lookAt);
 
-					// randomize spread cone values (direction of velocity)
-					if(weaponStats->spreadConeRadius != 0.0f)
-					{
-						randomLO = -weaponStats->spreadConeRadius*0.5f;
-						randomHI = weaponStats->spreadConeRadius*0.5f;
-						lookAtXMFloat3.x += randomLO + (float)rand()/((float)RAND_MAX/(randomHI-randomLO));
-						lookAtXMFloat3.y += randomLO + (float)rand()/((float)RAND_MAX/(randomHI-randomLO));
-						lookAtXMFloat3.z += randomLO + (float)rand()/((float)RAND_MAX/(randomHI-randomLO));
-					}
+		//			// randomize spread cone values (direction of velocity)
+		//			if(weaponStats->spreadConeRadius != 0.0f)
+		//			{
+		//				randomLO = -weaponStats->spreadConeRadius*0.5f;
+		//				randomHI = weaponStats->spreadConeRadius*0.5f;
+		//				lookAtXMFloat3.x += randomLO + (float)rand()/((float)RAND_MAX/(randomHI-randomLO));
+		//				lookAtXMFloat3.y += randomLO + (float)rand()/((float)RAND_MAX/(randomHI-randomLO));
+		//				lookAtXMFloat3.z += randomLO + (float)rand()/((float)RAND_MAX/(randomHI-randomLO));
+		//			}
 
-					newLookAt = DirectX::XMLoadFloat3(&lookAtXMFloat3);
-					newLookAt = DirectX::XMVector3Normalize(newLookAt);
-					lookAtXMFloat3.x = DirectX::XMVectorGetX(newLookAt);
-					lookAtXMFloat3.y = DirectX::XMVectorGetY(newLookAt);
-					lookAtXMFloat3.z = DirectX::XMVectorGetZ(newLookAt);
+		//			newLookAt = DirectX::XMLoadFloat3(&lookAtXMFloat3);
+		//			newLookAt = DirectX::XMVector3Normalize(newLookAt);
+		//			lookAtXMFloat3.x = DirectX::XMVectorGetX(newLookAt);
+		//			lookAtXMFloat3.y = DirectX::XMVectorGetY(newLookAt);
+		//			lookAtXMFloat3.z = DirectX::XMVectorGetZ(newLookAt);
 
-					Float3 velocity(lookAtXMFloat3.x, lookAtXMFloat3.y, lookAtXMFloat3.z);
-					velocity = velocity * weaponStats->velocityOfEachProjectile;
-					
-					//Randomize velocity for each consecutive projectile
-					if(weaponStats->velocityDifference != 0.0f)
-					{
-						randomLO = 1 - weaponStats->velocityDifference*0.5f;
-						randomHI = 1 + weaponStats->velocityDifference*0.5f;
-						float randomVelocityDifference = randomLO + (float)rand()/((float)RAND_MAX/(randomHI-randomLO));
-						velocity.x *= randomVelocityDifference;
- 						velocity.y *= randomVelocityDifference;
-						velocity.z *= randomVelocityDifference;
-					}
+		//			Float3 velocity(lookAtXMFloat3.x, lookAtXMFloat3.y, lookAtXMFloat3.z);
+		//			velocity = velocity * weaponStats->velocityOfEachProjectile;
+		//			
+		//			//Randomize velocity for each consecutive projectile
+		//			if(weaponStats->velocityDifference != 0.0f)
+		//			{
+		//				randomLO = 1 - weaponStats->velocityDifference*0.5f;
+		//				randomHI = 1 + weaponStats->velocityDifference*0.5f;
+		//				float randomVelocityDifference = randomLO + (float)rand()/((float)RAND_MAX/(randomHI-randomLO));
+		//				velocity.x *= randomVelocityDifference;
+ 	//					velocity.y *= randomVelocityDifference;
+		//				velocity.z *= randomVelocityDifference;
+		//			}
 
-					// add displacement on position (this should be based on the collision shape of the player model)
-					float d = 0.5f;
-					scatterPos.x += lookAtXMFloat3.x*d;
-					scatterPos.y += lookAtXMFloat3.y*d;
-					scatterPos.z += lookAtXMFloat3.z*d;
+		//			// add displacement on position (this should be based on the collision shape of the player model)
+		//			float d = 0.5f;
+		//			scatterPos.x += lookAtXMFloat3.x*d;
+		//			scatterPos.y += lookAtXMFloat3.y*d;
+		//			scatterPos.z += lookAtXMFloat3.z*d;
 
-					// randomize displacement of each projectile preventing them from spawning at the same position
-					if(weaponStats->displacementSphereRadius != 0.0f)
-					{
-						randomLO = -weaponStats->displacementSphereRadius*0.5f;
-						randomHI = weaponStats->displacementSphereRadius*0.5f;
-						scatterPos.x += randomLO + (float)rand()/((float)RAND_MAX/(randomHI-randomLO));
-						scatterPos.y += randomLO + (float)rand()/((float)RAND_MAX/(randomHI-randomLO));
-						scatterPos.z += randomLO + (float)rand()/((float)RAND_MAX/(randomHI-randomLO));
-					}
+		//			// randomize displacement of each projectile preventing them from spawning at the same position
+		//			if(weaponStats->displacementSphereRadius != 0.0f)
+		//			{
+		//				randomLO = -weaponStats->displacementSphereRadius*0.5f;
+		//				randomHI = weaponStats->displacementSphereRadius*0.5f;
+		//				scatterPos.x += randomLO + (float)rand()/((float)RAND_MAX/(randomHI-randomLO));
+		//				scatterPos.y += randomLO + (float)rand()/((float)RAND_MAX/(randomHI-randomLO));
+		//				scatterPos.z += randomLO + (float)rand()/((float)RAND_MAX/(randomHI-randomLO));
+		//			}
 
-					SEND_EVENT(&Event_CreateProjectile(scatterPos, velocity, rotation, weaponStats->damgeOfEachProjectile, itrPlayer.ownerId(), weaponStats->isExplosive));
-				}
-			}
-			else if(weaponStats->nrOfShotsLeftInClip <= 0)
-			{
-				if(weaponStats->totalNrOfShots <= 0)
-				{
-					DEBUGPRINT("Cannot shoot: Out of ammo.");
-				}
-				else
-				{
-					DEBUGPRINT("Cannot shoot: Out of ammo in current clip.");
-				}
-			}
-			else if(weaponStats->cooldownLeft > 0)
-			{
-				DEBUGPRINT("Cannot shoot: weapon cooldown. Be patient.");
-			}
-		}
+		//			SEND_EVENT(&Event_CreateProjectile(scatterPos, velocity, rotation, weaponStats->damgeOfEachProjectile, itrPlayer.ownerId(), weaponStats->isExplosive));
+		//		}
+		//	}
+		//	else if(weaponStats->nrOfShotsLeftInClip <= 0)
+		//	{
+		//		if(weaponStats->totalNrOfShots <= 0)
+		//		{
+		//			DEBUGPRINT("Cannot shoot: Out of ammo.");
+		//		}
+		//		else
+		//		{
+		//			DEBUGPRINT("Cannot shoot: Out of ammo in current clip.");
+		//		}
+		//	}
+		//	else if(weaponStats->cooldownLeft > 0)
+		//	{
+		//		DEBUGPRINT("Cannot shoot: weapon cooldown. Be patient.");
+		//	}
+		//}
 		if(input->killPlayer)
 		{
 			health->health = 0.0f;

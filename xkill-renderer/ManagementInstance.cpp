@@ -42,10 +42,9 @@ void ManagementInstance::update(ID3D11Device* device, ID3D11DeviceContext* devco
 void ManagementInstance::addRenderAtInstance(Attribute_Render* renderAt)
 {
 	Attribute_Spatial*	spaAt = itrSpatial.at(renderAt->ptr_spatial.index);
-	Attribute_Position*	posAt = itrPosition.at(spaAt->ptr_position.index);
 
 	VertexPosNormTexInstanced newInstance;
-	newInstance.world_ = calculateWorldMatrix(spaAt, posAt);
+	newInstance.world_ = calculateWorldMatrix(spaAt);
 
 	InstancedData* instancedData = getInstancesFromMeshID(renderAt->meshID);
 	if(instancedData != nullptr)
@@ -76,10 +75,11 @@ InstancedData* ManagementInstance::getInstancesFromMeshID(unsigned int meshID)
 }
 
 DirectX::XMFLOAT4X4 ManagementInstance::calculateWorldMatrix(
-	Attribute_Spatial*	spaAt, 
-	Attribute_Position* posAt)
+	Attribute_Spatial*	spaAt)
 {
-	Float3 position = posAt->position();
+	Float3 position = spaAt->position();
+	Float4 rotation = spaAt->rotation();
+
 	DirectX::XMMATRIX translation = DirectX::XMMatrixTranslation(
 		position.x,
 		position.y,
@@ -91,10 +91,10 @@ DirectX::XMFLOAT4X4 ManagementInstance::calculateWorldMatrix(
 		spaAt->scale.z);
 
 	DirectX::XMFLOAT4 fRotation = DirectX::XMFLOAT4(
-		spaAt->rotation.x,
-		spaAt->rotation.y,
-		spaAt->rotation.z,
-		spaAt->rotation.w);
+		rotation.x,
+		rotation.y,
+		rotation.z,
+		rotation.w);
 
 	DirectX::XMVECTOR qRotation = DirectX::XMLoadFloat4(&fRotation);
 	DirectX::XMMATRIX rotation = DirectX::XMMatrixRotationQuaternion(qRotation);

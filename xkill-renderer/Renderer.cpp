@@ -379,7 +379,6 @@ void Renderer::render()
 		camAt		= itrCamera.at(ssAt->ptr_camera);
 
 		spatialAt	= ATTRIBUTE_CAST(Attribute_Spatial, ptr_spatial, camAt);
-		posAt		= ATTRIBUTE_CAST(Attribute_Position, ptr_position, spatialAt);
 
 		managementViewport_->setViewport(devcon, i);
 
@@ -388,7 +387,7 @@ void Renderer::render()
 		vpData.proj			= DirectX::XMFLOAT4X4(((float*)&camAt->mat_projection));
 		vpData.viewInv		= managementMath_->calculateMatrixInverse(vpData.view);
 		vpData.projInv		= managementMath_->calculateMatrixInverse(vpData.proj);
-		vpData.eyePos		= *(DirectX::XMFLOAT3*)&posAt->position();
+		vpData.eyePos		= *(DirectX::XMFLOAT3*)&spatialAt->position();
 		vpData.viewportTopX = static_cast<unsigned int>(ssAt->ssTopLeftX);
 		vpData.viewportTopY = static_cast<unsigned int>(ssAt->ssTopLeftY);
 		vpDatas.push_back(vpData);
@@ -686,8 +685,7 @@ void Renderer::renderDebugShape(
 	
 	//Get transform matrices.
 	Attribute_Spatial*	spatialAt			= itrSpatial.at(debugShapeAt->ptr_spatial.index);
-	Attribute_Position*	positionAt			= itrPosition.at(spatialAt->ptr_position.index);
-	DirectX::XMFLOAT4X4 worldMatrix			= managementMath_->calculateWorldMatrix(spatialAt, positionAt);
+	DirectX::XMFLOAT4X4 worldMatrix			= managementMath_->calculateWorldMatrix(spatialAt);
 	DirectX::XMFLOAT4X4 worldMatrixInverse	= managementMath_->calculateMatrixInverse(worldMatrix);
 	DirectX::XMFLOAT4X4 finalMatrix			= managementMath_->calculateFinalMatrix(worldMatrix, viewMatrix, projectionMatrix);
 	

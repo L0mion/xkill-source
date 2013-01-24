@@ -24,24 +24,50 @@ Attribute_Position::~Attribute_Position()
 
 Float3 Attribute_Position::position()
 {
-	if(ptr_position_offset.index != -1)
-	{
-		int index = ptr_position_offset.index;
-		Attribute_Position*	attr = &((std::vector<Attribute_Position>*)ptr_position_offset.host)->at(index);
-		Float3 offset = attr->position();
+	// Fetch position 
+	Float3 pos = _position;
 
-		return offset + _position;
+	// Check if parent translation applies
+	if(_parent.index != -1)
+	{
+		// Fetch from parent
+		Attribute_Spatial*	parent = &((std::vector<Attribute_Spatial>*)_parent.host)->at(_parent.index);
+		Float4 parent_rot = parent->rotation();
+		Float3 parent_pos = parent->position();
+
+
+		//
+		// Add rotation translation relative to parent
+		//
+
+		// fetch
+		DirectX::XMVECTOR xv_pos = DirectX::XMLoadFloat3((DirectX::XMFLOAT3*)&pos);
+		DirectX::XMVECTOR parent_xv_rot = DirectX::XMLoadFloat4((DirectX::XMFLOAT4*)&parent_rot);
+
+		// rotate
+		DirectX::XMVECTOR xv_pos_offset = DirectX::XMVector3Rotate(xv_pos, parent_xv_rot);
+
+		Float3 pos_offset; DirectX::XMStoreFloat3((DirectX::XMFLOAT3*)&pos_offset, xv_pos_offset);
+
+
+		//
+		// Add position translation relative to parent
+		//
+
+		pos_offset = parent_pos + pos_offset;
+
+		return pos_offset;
 	}
 
-	return _position;
+	return pos;
 }
 
 Attribute_Spatial::Attribute_Spatial()
 {
-	rotation.x = 0.0f;
-	rotation.y = 0.0f;
-	rotation.z = 0.0f;
-	rotation.w = 1.0f;
+	_rotation.x = 0.0f;
+	_rotation.y = 0.0f;
+	_rotation.z = 0.0f;
+	_rotation.w = 1.0f;
 
 	scale.x = 1.0f;
 	scale.y = 1.0f;
@@ -49,6 +75,19 @@ Attribute_Spatial::Attribute_Spatial()
 }
 Attribute_Spatial::~Attribute_Spatial()
 {
+}
+
+Float3 Attribute_Spatial::position()
+{
+	// Fetch position 
+	Float3 pos = (&((std::vector<Attribute_Position>*)ptr_position.host)->at(ptr_position.index))->position();
+
+	return pos;
+}
+
+void Attribute_Spatial::setPosition( Float3 position )
+{
+	(&((std::vector<Attribute_Position>*)ptr_position.host)->at(ptr_position.index))->setPosition(position);
 }
 
 Attribute_Render::Attribute_Render()
