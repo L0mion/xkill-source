@@ -57,7 +57,6 @@ void lightingCS(
 			tileLightIndices[i] = 0;
 		}
 	}
-	GroupMemoryBarrierWithGroupSync();
 
 	//Sample G-Buffers. Data prefetching?
 	float2	texCoord	= float2((float)(threadIDDispatch.x + viewportTopX)/(float)screenWidth,(float)(threadIDDispatch.y + viewportTopY)/(float)screenHeight);
@@ -71,6 +70,8 @@ void lightingCS(
 
 	//Get minimum/maximum depth of tile.
 	uint pixelDepthInt = asuint(surfacePosV.z);
+
+	GroupMemoryBarrierWithGroupSync();
 	InterlockedMin(tileMinDepthInt, pixelDepthInt);
 	InterlockedMax(tileMaxDepthInt, pixelDepthInt);
 	GroupMemoryBarrierWithGroupSync();
@@ -171,11 +172,11 @@ void lightingCS(
 	}
 
 	//TILING DEMO:
-	//for(i = 0; i < tileLightNum; i++) //Apply culled point-lights.
-	//{
-	//	
-	//	sumDiffuse.g += 0.1;
-	//}
+	for(i = 0; i < tileLightNum; i++) //Apply culled point-lights.
+	{
+		
+		sumDiffuse.g += 0.1;
+	}
 
 	float4 litSum = sumAmbient + sumDiffuse + sumSpecular;
 	output[uint2(threadIDDispatch.x + viewportTopX, threadIDDispatch.y + viewportTopY)] = litSum;

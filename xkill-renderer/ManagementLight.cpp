@@ -363,7 +363,7 @@ void ManagementLight::setLightSRVCS(
 	}
 }
 
-void ManagementLight::setLightViewSpacePoss(ID3D11DeviceContext* devcon, DirectX::XMFLOAT4X4 view)
+void ManagementLight::transformLightViewSpacePoss(ID3D11DeviceContext* devcon, DirectX::XMFLOAT4X4 view)
 {
 	DirectX::XMFLOAT4 pos;
 	DirectX::XMVECTOR posXM;
@@ -533,7 +533,6 @@ void ManagementLight::updateLightPos(ID3D11Device* device)
 		{ //simply map to buffer
 			if(!lightPosViewBuffer_)
 				increaseBufferCapacity(device, LIGHTBUFFERTYPE_POS_VIEW);
-			//updateLightBuffers(devcon, LIGHTBUFFERTYPE_POS);
 		}
 	}
 }

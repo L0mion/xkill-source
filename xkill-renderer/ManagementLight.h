@@ -59,10 +59,7 @@ public:
 		LightBufferType			bufferType, 
 		unsigned int			shaderRegister); //!< Set the compute shader to use specified SRV.
 
-	void setLightViewSpacePoss(ID3D11DeviceContext* devcon, DirectX::XMFLOAT4X4 view);
-
-	//void transformPointPossToViewSpace(DirectX::XMFLOAT4X4 view);
-	//void transformSpotPossToViewSpace(DirectX::XMFLOAT4X4 view);
+	void transformLightViewSpacePoss(ID3D11DeviceContext* devcon, DirectX::XMFLOAT4X4 view);
 
 	unsigned int getLightDirCurCount()		const;
 	unsigned int getLightPointCurCount()	const;

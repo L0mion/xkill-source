@@ -514,7 +514,7 @@ void Renderer::renderViewportToBackBuffer(ViewportData& vpData)
 	managementGBuffer_->setGBuffersAsCSShaderResources(devcon);
 
 	//Set lights.
-	managementLight_->setLightViewSpacePoss(devcon, vpData.view);
+	managementLight_->transformLightViewSpacePoss(devcon, vpData.view);
 	managementLight_->setLightSRVCS(devcon, LIGHTBUFFERTYPE_DIR,		LIGHT_SRV_REGISTER_DIR);
 	managementLight_->setLightSRVCS(devcon, LIGHTBUFFERTYPE_POINT,		LIGHT_SRV_REGISTER_POINT);
 	managementLight_->setLightSRVCS(devcon, LIGHTBUFFERTYPE_SPOT,		LIGHT_SRV_REGISTER_SPOT);
