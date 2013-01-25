@@ -74,7 +74,7 @@ Event_ShowMessageBox::Event_ShowMessageBox(std::string message) : Event(EVENT_SH
 	this->message = message;
 }
 
-Event_CreateProjectile::Event_CreateProjectile(Float3 position, Float3 velocity, Float4 rotation, float damage, int entityIdOfCreator, bool explodeOnImpact) : Event(EVENT_CREATE_PROJECTILE)
+Event_CreateProjectile::Event_CreateProjectile(Float3 position, Float3 velocity, Float4 rotation, float damage, int entityIdOfCreator, bool explodeOnImpact, float explosionSphereRadius) : Event(EVENT_CREATE_PROJECTILE)
 {
 	this->position = position;
 	this->velocity = velocity;
@@ -82,6 +82,7 @@ Event_CreateProjectile::Event_CreateProjectile(Float3 position, Float3 velocity,
 	this->damage = damage;
 	this->entityIdOfCreator = entityIdOfCreator;
 	this->explodeOnImpact = explodeOnImpact;
+	this->explosionSphereRadius = explosionSphereRadius;
 }
 
 Event_CreateMesh::Event_CreateMesh(unsigned int id, MeshModel* mesh, bool dynamic) : Event(EVENT_CREATE_MESH)

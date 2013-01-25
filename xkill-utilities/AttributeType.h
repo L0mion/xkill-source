@@ -274,8 +274,6 @@ struct DLL_U Attribute_Physics : public IAttribute
 	bool collisionResponse;
 	bool reloadDataIntoBulletPhysics;
 
-	float explosionSphereRadius;
-
 	DataItemList* getDataList()
 	{
 		DataItemList* list = new DataItemList();
@@ -475,6 +473,7 @@ struct DLL_U Attribute_Input : public IAttribute
 	Float2 position;
 	Float2 rotation;
 	bool fire;
+	bool firePressed;
 	bool jump;
 	bool sprint;
 	bool killPlayer;
@@ -861,7 +860,7 @@ struct DLL_U Attribute_PickupablesSpawnPoint : public IAttribute
 	PickupableType spawnPickupableType;			//!< Type of pickupable spawned by this pickupables spawn point
 	float spawnDelayInSeconds;					//!< Delay until a pickupable may spawn
 	float secondsSinceLastSpawn;				//!< Incrementing timer
-	int maxNrOfExistingSpawns;					//!< Is checked against "currentNrOfExistingSpawnedPickupables"
+	int maxNrOfExistingSpawnedPickupables;		//!< Is checked against "currentNrOfExistingSpawnedPickupables"
 	int currentNrOfExistingSpawnedPickupables;	//!< Incremented when a pickubalbe is spawned from this pickupables spawn point. Decremented when a pickupable is picked up
 
 	DataItemList* getDataList()
@@ -872,7 +871,7 @@ struct DLL_U Attribute_PickupablesSpawnPoint : public IAttribute
 		//list->add(spawnPickupableType, "spawnPickupableType");
 		list->add(spawnDelayInSeconds, "spawnDelayInSeconds");
 		list->add(secondsSinceLastSpawn, "secondsSinceLastSpawn");
-		list->add(maxNrOfExistingSpawns, "maxNrOfExistingSpawns");
+		list->add(maxNrOfExistingSpawnedPickupables, "maxNrOfExistingSpawnedPickupables");
 		list->add(currentNrOfExistingSpawnedPickupables, "currentNrOfExistingSpawnedPickupables");
 
 		return list;
@@ -883,7 +882,7 @@ struct DLL_U Attribute_PickupablesSpawnPoint : public IAttribute
 		//list->get(&spawnPickupableType);
 		list->get(&spawnDelayInSeconds);
 		list->get(&secondsSinceLastSpawn);
-		list->get(&maxNrOfExistingSpawns);
+		list->get(&maxNrOfExistingSpawnedPickupables);
 		list->get(&currentNrOfExistingSpawnedPickupables);
 	};
 
@@ -983,18 +982,21 @@ struct DLL_U Attribute_ExplosionSphere : public IAttribute
 
 	AttributePointer ptr_physics;
 	float currentLifeTimeLeft;
+	float radius;
 
 	DataItemList* getDataList()
 	{
 		DataItemList* list = new DataItemList();
 		list->add_AttributePointer(ptr_physics.index, "ptr_physics");;
 		list->add(currentLifeTimeLeft,	"currentLifeTimeLeft");
+		list->add(radius, "radius");
 		return list;
 	}
 	void saveTo(DataItemList* list)
 	{
 		list->get_AttributePointer(&ptr_physics.index);
 		list->get(&currentLifeTimeLeft);
+		list->get(&radius);
 	};
 	AttributeType getType(){return ATTRIBUTE_EXPLOSIONSPHERE;}
 	std::string getName(){return "ExplosionSphere";}

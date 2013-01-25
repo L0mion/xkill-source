@@ -20,6 +20,7 @@
 
 ComponentManager::ComponentManager()
 {
+	SUBSCRIBE_TO_EVENT(this, EVENT_GAME_OVER);
 	SUBSCRIBE_TO_EVENT(this, EVENT_END_DEATHMATCH);
 	SUBSCRIBE_TO_EVENT(this, EVENT_START_DEATHMATCH);
 
@@ -132,10 +133,14 @@ void ComponentManager::onEvent(Event* e)
 	switch (type) 
 	{
 	case EVENT_END_DEATHMATCH:
-		GET_STATE() = STATE_MAINMENU;
+		GET_STATE() = STATE_GAMEOVER;
 		break;
 	case EVENT_START_DEATHMATCH:
 		initialSpawnDelay = 0.2f;
+	case EVENT_GAME_OVER:
+		gameOverDelay = 10.0f;
+		GET_STATE() = STATE_GAMEOVER;
+		break;
 	default:
 		break;
 	}
@@ -163,6 +168,21 @@ void ComponentManager::update(float delta)
 			game_->onUpdate(delta);	
 		}
 		SEND_EVENT(&Event(EVENT_UPDATE));
+	}
+	else if(GET_STATE() == STATE_GAMEOVER)
+	{
+		sound_->onUpdate(delta);
+		input_->onUpdate(delta);
+		render_->onUpdate(delta);
+
+		if(gameOverDelay > 0.0f)
+		{
+			gameOverDelay -= delta;
+		}
+		else
+		{
+			SEND_EVENT(&Event_EndDeathmatch());
+		}
 	}
 	else if(GET_STATE() == STATE_MAINMENU)
 	{

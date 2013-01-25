@@ -89,6 +89,8 @@ public:
 	virtual bool getBoolValue(int mapping);
 	//! Returns if any object that is mapped to that number was released
 	virtual bool getBoolReleased(int mapping);
+	//! Returns if any object that is mapped to that number was pressed
+	virtual bool getBoolPressed(int mapping);
 
 	virtual std::vector<int> getMappedArray(int mapping);
 

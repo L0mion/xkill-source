@@ -163,6 +163,7 @@ public:
 		CONNECT_ATTRIBUTES(projectile, physics);
 		projectile->entityIdOfCreator = e->entityIdOfCreator;
 		projectile->explodeOnImnpact = e->explodeOnImpact;
+		projectile->explosionSphereRadius = e->explosionSphereRadius;
 
 		CREATE_ATTRIBUTE(Attribute_Damage, damage, entity);
 		damage->damage = e->damage;
@@ -207,7 +208,7 @@ public:
 		CONNECT_ATTRIBUTES(pickupablesSpawnPoint, position);
 		pickupablesSpawnPoint->spawnPickupableType = e->pickupableType;
 		pickupablesSpawnPoint->spawnDelayInSeconds = 5.0f;
-		pickupablesSpawnPoint->maxNrOfExistingSpawns = 10;
+		pickupablesSpawnPoint->maxNrOfExistingSpawnedPickupables = 1;
 	}
 
 	void createPickupableEntity(Entity* entity, Event_CreatePickupable* e)
@@ -260,7 +261,6 @@ public:
 		physics->collisionFilterGroup = Attribute_Physics::EXPLOSIONSPHERE;
 		physics->collisionFilterMask = Attribute_Physics::PLAYER;
 		CONNECT_ATTRIBUTES(physics, spatial);
-		physics->explosionSphereRadius = e->radius;
 		physics->collisionResponse = false;
 		physics->mass = 0.0f;
 		physics->gravity = Float3(0.0f, 0.0f, 0.0f);
@@ -268,6 +268,7 @@ public:
 
 		CREATE_ATTRIBUTE(Attribute_ExplosionSphere, explosionSphere, entity);
 		CONNECT_ATTRIBUTES(explosionSphere, physics);
+		explosionSphere->radius = e->radius;
 
 		CREATE_ATTRIBUTE(Attribute_Damage, damage, entity);
 		damage->damage = e->damage;

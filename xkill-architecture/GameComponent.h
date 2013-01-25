@@ -9,6 +9,9 @@ class Event_TransferEventsToGame;
 class Entity;
 
 struct Attribute_PlayerSpawnPoint;
+struct Attribute_WeaponStats;
+struct Attribute_Position;
+struct Attribute_Camera;
 
 template <class T>
 class LinkFrame;
@@ -58,4 +61,9 @@ public:
 	If there exists no player spawn points at all, nullptr is returned.
 	*/
 	Attribute_PlayerSpawnPoint* findUnoccupiedSpawnPoint();
+
+	bool switchAmmunition(Attribute_WeaponStats* weaponStats);
+	bool switchFiringMode(Attribute_WeaponStats* weaponStats);
+
+	void shootProjectile(Attribute_Position* position, Attribute_Camera* camera, Attribute_WeaponStats* weaponStats);
 };

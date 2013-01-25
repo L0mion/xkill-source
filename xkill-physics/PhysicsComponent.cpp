@@ -23,7 +23,7 @@ AttributeIterator<Attribute_Render> itrRender;
 AttributeIterator<Attribute_Camera> itrCamera_2;
 
 static debugDrawDispatcher gDebugDraw;
-static float removePhysicsObjectIfLowerYCoordinateThanThis;
+static float removePhysicsObjectIfItHasLowerYCoordinateThanThis;
 
 PhysicsComponent::PhysicsComponent() : broadphase_(nullptr),
 									   collisionConfiguration_(nullptr),
@@ -37,7 +37,7 @@ PhysicsComponent::PhysicsComponent() : broadphase_(nullptr),
 	itrPhysics = ATTRIBUTE_MANAGER->physics.getIterator();
 	itrRender = ATTRIBUTE_MANAGER->render.getIterator();
 	itrCamera_2 = ATTRIBUTE_MANAGER->camera.getIterator();
-	removePhysicsObjectIfLowerYCoordinateThanThis = -5.0f;
+	removePhysicsObjectIfItHasLowerYCoordinateThanThis = -5.0f;
 }
 
 PhysicsComponent::~PhysicsComponent()
@@ -140,8 +140,9 @@ void PhysicsComponent::onUpdate(float delta)
 		synchronizeWithAttributes(physicsAttribute, index);
 		physicsObjects_->at(index)->onUpdate(delta);
 
-		if(physicsObjects_->at(index)->getWorldTransform().getOrigin().y() < removePhysicsObjectIfLowerYCoordinateThanThis)
+		if(physicsObjects_->at(index)->getWorldTransform().getOrigin().y() < removePhysicsObjectIfItHasLowerYCoordinateThanThis)
 		{
+			//Not tested (2013-01-25 17.27)
 			//SEND_EVENT(&Event_RemoveEntity(itrPhysics.ownerId()));
 		}
 	}
@@ -183,6 +184,10 @@ void PhysicsComponent::onEvent(Event* e)
   					dynamicsWorld_->removeRigidBody(physicsObjects_->at(attributeIndex));
 					delete physicsObjects_->at(attributeIndex);
 					physicsObjects_->at(attributeIndex) = nullptr;
+				}
+				else
+				{
+					DEBUGPRINT("Mismatch when synchronizing deletion of physics objects with physics attributes");
 				}
 			}
 			else if(attributeUpdated->isCreated)

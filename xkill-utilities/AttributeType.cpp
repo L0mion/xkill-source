@@ -173,6 +173,7 @@ Attribute_Input::Attribute_Input()
 	sprint = false;
 	killPlayer = false;
 	fire = false;
+	firePressed = false;
 	changeAmmunitionType = false;
 	changeFiringMode = false;
 	ZeroMemory(&position,sizeof(position));
@@ -269,7 +270,7 @@ Attribute_PickupablesSpawnPoint::Attribute_PickupablesSpawnPoint()
 	spawnPickupableType = PickupableType::MEDKIT;
 	spawnDelayInSeconds = 0.0f;
 	secondsSinceLastSpawn = 0.0f;
-	maxNrOfExistingSpawns = 1;
+	maxNrOfExistingSpawnedPickupables = 1;
 	currentNrOfExistingSpawnedPickupables = 0;
 }
 Attribute_PickupablesSpawnPoint::~Attribute_PickupablesSpawnPoint()

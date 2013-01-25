@@ -23,6 +23,7 @@ public:
 
 	virtual float getValueFloat();
 	virtual bool getValueBool();
+	virtual bool getValueBoolPressed();
 	virtual bool getValueBoolReleased();
 
 	//! Returns if the button is down

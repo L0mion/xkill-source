@@ -28,6 +28,19 @@ struct ColorVSOut
 	float3 color	: COLOR;
 };
 
+struct SpriteVSIn
+{
+	float3 position : POSITION;
+	float3 normal	: NORMAL;
+	float2 texcoord : TEXCOORD;
+};
+struct SpriteVSOut
+{
+	float4 position : SV_POSITION;
+	float3 normal	: NORMAL;
+	float2 texcoord	: TEXCOORD;
+};
+
 struct AnimationVSIn
 {
 	float3 position		: POSITION;

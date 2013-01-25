@@ -89,9 +89,9 @@ void GameComponent::onUpdate(float delta)
 		// End of deathmatch logic
 		//
 
-		if(player->priority >= 4)
+		if(player->priority >= 20)
 		{
-			//SEND_EVENT(&Event_EndDeathmatch());
+			SEND_EVENT(&Event(EVENT_GAME_OVER));
 		}
 
 
@@ -103,7 +103,9 @@ void GameComponent::onUpdate(float delta)
 		{
 			input->changeAmmunitionType = false;
 			weaponStats->currentAmmunitionType = static_cast<Ammunition::AmmunitionType>((weaponStats->currentAmmunitionType + 1) % Ammunition::AmmunitionType::NROFAMMUNITIONTYPES);
+			switchAmmunition(weaponStats);
 			ammo = &weaponStats->ammunition[weaponStats->currentAmmunitionType];
+			
 			DEBUGPRINT(std::endl);
 			DEBUGPRINT("Ammunition type: " << weaponStats->getAmmunitionTypeAsString());
 			DEBUGPRINT("Firing mode: " << weaponStats->getFiringModeAsString());
@@ -113,7 +115,9 @@ void GameComponent::onUpdate(float delta)
 		{
 			input->changeFiringMode = false;
 			weaponStats->currentFiringModeType = static_cast<FiringMode::FiringModeType>((weaponStats->currentFiringModeType + 1) % Ammunition::AmmunitionType::NROFAMMUNITIONTYPES);
+			switchFiringMode(weaponStats);
 			firingMode = &weaponStats->firingMode[weaponStats->currentFiringModeType];
+
 			DEBUGPRINT(std::endl);
 			DEBUGPRINT("Ammunition type: " << weaponStats->getAmmunitionTypeAsString());
 			DEBUGPRINT("Firing mode: " << weaponStats->getFiringModeAsString());
@@ -123,12 +127,13 @@ void GameComponent::onUpdate(float delta)
 		//
 		// Firing logic
 		//
-
-		if(input->fire)
+		if((input->fire && firingMode->type == FiringMode::AUTO) || 
+			input->firePressed && (firingMode->type == FiringMode::SINGLE || firingMode->type == FiringMode::SEMI))
 		{
 			input->fire = false;
+			input->firePressed = false;
 
-			if(firingMode->cooldownBetweenShots > 0 && firingMode->cooldownLeft <= 0.0f
+			if(firingMode->cooldownBetweenShots >= 0 && firingMode->cooldownLeft <= 0.0f
 				&& firingMode->nrOfShotsLeftInClip > 0)
 			{
 				if(ammo->totalNrOfShots != -1) // special case: debug machine gun. Unlimited number of shots.
@@ -138,93 +143,7 @@ void GameComponent::onUpdate(float delta)
 					firingMode->nrOfShotsLeftInClip--;
 				}
 
-				// Position
-				Float3 pos = position->position;
-
-				// extract camera orientation to determine velocity
-				DirectX::XMFLOAT3 lookAtXMFloat3((float*)&camera->mat_view.getLookAt());
-
-				DirectX::XMVECTOR lookAt = DirectX::XMLoadFloat3(&lookAtXMFloat3);
-				lookAt = DirectX::XMVector3Normalize(lookAt);
-
-				// Rotation
-				camera->mat_view.getRotationOnly();
-				//DirectX::XMMATRIX rotationMatrix((float*)&camera->mat_view);
-				DirectX::XMMATRIX rotationMatrix(
-					camera->mat_view._11,	camera->mat_view._21,	camera->mat_view._31,	0.0f,
-					camera->mat_view._12,	camera->mat_view._22,	camera->mat_view._32,	0.0f, 
-					camera->mat_view._13,	camera->mat_view._23,	camera->mat_view._33,	0.0f,
-					0.0f,					0.0f,					0.0f,					1.0f);
-
-				DirectX::XMVECTOR orientationQuaternion = DirectX::XMQuaternionRotationMatrix(rotationMatrix);
-				float orientationQuaternionX = DirectX::XMVectorGetX(orientationQuaternion);
-				float orientationQuaternionY = DirectX::XMVectorGetY(orientationQuaternion);
-				float orientationQuaternionZ = DirectX::XMVectorGetZ(orientationQuaternion);
-				float orientationQuaternionW = DirectX::XMVectorGetW(orientationQuaternion);
-
-				Float4 rotation = Float4(orientationQuaternionX, orientationQuaternionY, orientationQuaternionZ, orientationQuaternionW);
-
-				DirectX::XMVECTOR newLookAt;
-				float randomLO;
-				float randomHI;
-
-				// Send "Event_CreateProjectile" for each projectile in a shot. Scatter has more than one projectile per shot.
-				for(unsigned int j=0;j<ammo->nrOfProjectiles;j++)
-				{
-					Float3 scatterPos = pos;
-
-					lookAtXMFloat3.x = DirectX::XMVectorGetX(lookAt);
-					lookAtXMFloat3.y = DirectX::XMVectorGetY(lookAt);
-					lookAtXMFloat3.z = DirectX::XMVectorGetZ(lookAt);
-
-					// randomize spread cone values (direction of velocity)
-					if(ammo->spread != 0.0f)
-					{
-						randomLO = -ammo->spread*0.5f;
-						randomHI = ammo->spread*0.5f;
-						lookAtXMFloat3.x += randomLO + (float)rand()/((float)RAND_MAX/(randomHI-randomLO));
-						lookAtXMFloat3.y += randomLO + (float)rand()/((float)RAND_MAX/(randomHI-randomLO));
-						lookAtXMFloat3.z += randomLO + (float)rand()/((float)RAND_MAX/(randomHI-randomLO));
-					}
-
-					newLookAt = DirectX::XMLoadFloat3(&lookAtXMFloat3);
-					newLookAt = DirectX::XMVector3Normalize(newLookAt);
-					lookAtXMFloat3.x = DirectX::XMVectorGetX(newLookAt);
-					lookAtXMFloat3.y = DirectX::XMVectorGetY(newLookAt);
-					lookAtXMFloat3.z = DirectX::XMVectorGetZ(newLookAt);
-
-					Float3 velocity(lookAtXMFloat3.x, lookAtXMFloat3.y, lookAtXMFloat3.z);
-					velocity = velocity * ammo->speed;
-					
-					//Randomize velocity for each consecutive projectile
-					if(ammo->velocityVariation != 0.0f)
-					{
-						randomLO = 1 - ammo->velocityVariation*0.5f;
-						randomHI = 1 + ammo->velocityVariation*0.5f;
-						float randomVelocityDifference = randomLO + (float)rand()/((float)RAND_MAX/(randomHI-randomLO));
-						velocity.x *= randomVelocityDifference;
- 						velocity.y *= randomVelocityDifference;
-						velocity.z *= randomVelocityDifference;
-					}
-
-					// add displacement on position (this should be based on the collision shape of the player model)
-					float d = 0.5f;
-					scatterPos.x += lookAtXMFloat3.x*d;
-					scatterPos.y += lookAtXMFloat3.y*d;
-					scatterPos.z += lookAtXMFloat3.z*d;
-
-					// randomize displacement of each projectile preventing them from spawning at the same position
-					if(ammo->spawnVariation != 0.0f)
-					{
-						randomLO = -ammo->spawnVariation *0.5f;
-						randomHI = ammo->spawnVariation *0.5f;
-						scatterPos.x += randomLO + (float)rand()/((float)RAND_MAX/(randomHI-randomLO));
-						scatterPos.y += randomLO + (float)rand()/((float)RAND_MAX/(randomHI-randomLO));
-						scatterPos.z += randomLO + (float)rand()/((float)RAND_MAX/(randomHI-randomLO));
-					}
-
-					SEND_EVENT(&Event_CreateProjectile(scatterPos, velocity, rotation, ammo->damage, itrPlayer.ownerId(), ammo->explosive));
-				}
+				shootProjectile(position, camera, weaponStats);
 			}
 			else if(firingMode->nrOfShotsLeftInClip <= 0)
 			{
@@ -247,11 +166,11 @@ void GameComponent::onUpdate(float delta)
 			health->health = 0.0f;
 			input->killPlayer = false;
 		}
-		if(input->jump)
-		{
-			//To be implemented... (2013-01-17 16.17)
-			input->jump = false;
-		}
+		//if(input->jump)
+		//{
+		//	//To be implemented... (2013-01-17 16.17)
+		//	input->jump = false;
+		//}
 
 		if(input->sprint)
 		{
@@ -318,7 +237,6 @@ void GameComponent::onUpdate(float delta)
 			SEND_EVENT(&Event_RemoveEntity(itrProjectile.ownerId()));
 		}
 	}
-	std::cout << "Test" << std::endl;
 
 	//
 	// Update player spawn points
@@ -341,7 +259,7 @@ void GameComponent::onUpdate(float delta)
 		pickupablesSpawnPoint->secondsSinceLastSpawn += delta;
 		if(pickupablesSpawnPoint->secondsSinceLastSpawn > pickupablesSpawnPoint->spawnDelayInSeconds)
 		{
-			if(pickupablesSpawnPoint->currentNrOfExistingSpawnedPickupables < pickupablesSpawnPoint->maxNrOfExistingSpawns)
+			if(pickupablesSpawnPoint->currentNrOfExistingSpawnedPickupables < pickupablesSpawnPoint->maxNrOfExistingSpawnedPickupables)
 			{
 				Attribute_Position* pickupablesSpawnPointPosition = itrPosition.at(pickupablesSpawnPoint->ptr_position);
 
@@ -646,6 +564,42 @@ void GameComponent::event_PhysicsAttributesColliding(Event_PhysicsAttributesColl
 
 void GameComponent::event_EndDeathmatch(Event_EndDeathmatch* e)
 {
+	// Delete players
+	while(itrPlayer.hasNext())
+	{
+		itrPlayer.getNext();
+		SEND_EVENT(&Event_RemoveEntity(itrPlayer.ownerId()));
+	}
+
+	while(itrPhysics.hasNext())
+	{
+		itrPhysics.getNext();
+		SEND_EVENT(&Event_RemoveEntity(itrPhysics.ownerId()));
+	}
+	while(itrPlayerSpawnPoint.hasNext())
+	{
+		itrPlayerSpawnPoint.getNext();
+		SEND_EVENT(&Event_RemoveEntity(itrPlayerSpawnPoint.ownerId()));
+	}
+
+	while(itrLightDir.hasNext())
+	{
+		itrLightDir.getNext();
+		SEND_EVENT(&Event_RemoveEntity(itrLightDir.ownerId()));
+	}
+
+	while(itrLightPoint.hasNext())
+	{
+		itrLightPoint.getNext();
+		SEND_EVENT(&Event_RemoveEntity(itrLightPoint.ownerId()));
+	}
+
+	while(itrLightSpot.hasNext())
+	{
+		itrLightSpot.getNext();
+		SEND_EVENT(&Event_RemoveEntity(itrLightSpot.ownerId()));
+	}
+
 	DEBUGPRINT("x--------------x");
 	DEBUGPRINT("-x------------x-");
 	DEBUGPRINT("DEATHMATCH ENDED");
@@ -751,53 +705,6 @@ Attribute_PlayerSpawnPoint* GameComponent::findUnoccupiedSpawnPoint()
 
 void GameComponent::event_StartDeathmatch( Event_StartDeathmatch* e )
 {
-
-	//
-	// Delete players
-	//
-	
-	while(itrPlayer.hasNext())
-	{
-		itrPlayer.getNext();
-		SEND_EVENT(&Event_RemoveEntity(itrPlayer.ownerId()));
-	}
-
-
-	while(itrPlayer.hasNext())
-	{
-		itrPlayer.getNext();
-		SEND_EVENT(&Event_RemoveEntity(itrPlayer.ownerId()));
-	}
-
-	while(itrPhysics.hasNext())
-	{
-		itrPhysics.getNext();
-		SEND_EVENT(&Event_RemoveEntity(itrPhysics.ownerId()));
-	}
-	while(itrPlayerSpawnPoint.hasNext())
-	{
-		itrPlayerSpawnPoint.getNext();
-		SEND_EVENT(&Event_RemoveEntity(itrPlayerSpawnPoint.ownerId()));
-	}
-
-	while(itrLightDir.hasNext())
-	{
-		itrLightDir.getNext();
-		SEND_EVENT(&Event_RemoveEntity(itrLightDir.ownerId()));
-	}
-
-	while(itrLightPoint.hasNext())
-	{
-		itrLightPoint.getNext();
-		SEND_EVENT(&Event_RemoveEntity(itrLightPoint.ownerId()));
-	}
-
-	while(itrLightSpot.hasNext())
-	{
-		itrLightSpot.getNext();
-		SEND_EVENT(&Event_RemoveEntity(itrLightSpot.ownerId()));
-	}
-
 	//while(itrPickupablesSpawnPoint.hasNext())
 	//{
 	//	itrPickupablesSpawnPoint.getNext();
@@ -838,7 +745,7 @@ void GameComponent::event_StartDeathmatch( Event_StartDeathmatch* e )
 	//Continue
 	for(int i=0;i<10;i++)
 	{
-		SEND_EVENT(&Event_CreatePickupablesSpawnPoint(Float3(2, 40, i-6), PickupableType::AMMUNITION_BULLET));
+		SEND_EVENT(&Event_CreatePickupablesSpawnPoint(Float3(2, 40, i-6), PickupableType::MEDKIT));
 	}
 
 	//SEND_EVENT(&Event_CreatePickupable(Float3(2.0f, 2.0f, 0.0f), Attribute_Pickupable::MEDKIT, 5));
@@ -850,4 +757,150 @@ void GameComponent::event_StartDeathmatch( Event_StartDeathmatch* e )
 void GameComponent::event_TransferEventsToGame(Event_TransferEventsToGame* e)
 {
 	levelEvents_ = e->events;
+}
+
+bool GameComponent::switchAmmunition(Attribute_WeaponStats* weaponStats)
+{
+	bool switchedAmmunition = false;
+	FiringMode* firingMode = &weaponStats->firingMode[weaponStats->currentFiringModeType];
+
+	for(int i = 0; i < Ammunition::NROFAMMUNITIONTYPES; i++)
+	{
+		weaponStats->currentAmmunitionType = static_cast<Ammunition::AmmunitionType>((weaponStats->currentAmmunitionType + 1) % Ammunition::NROFAMMUNITIONTYPES);
+
+		if(weaponStats->currentAmmunitionType == Ammunition::BULLET && firingMode->canShootBullet || 
+			weaponStats->currentAmmunitionType == Ammunition::SCATTER && firingMode->canShootScatter || 
+			weaponStats->currentAmmunitionType == Ammunition::EXPLOSIVE && firingMode->canShootExplosive)
+		{
+			switchedAmmunition = true;
+			break;
+		}
+	}
+
+	return switchedAmmunition;
+}
+
+bool GameComponent::switchFiringMode(Attribute_WeaponStats* weaponStats)
+{
+	bool switchedFiringMode = false;
+
+	FiringMode* firingMode;
+
+	for(int i = 0; i < FiringMode::NROFFIRINGMODETYPES; i++)
+	{
+		weaponStats->currentFiringModeType = static_cast<FiringMode::FiringModeType>((weaponStats->currentFiringModeType + 1) % FiringMode::NROFFIRINGMODETYPES);
+
+		firingMode = &weaponStats->firingMode[weaponStats->currentFiringModeType];
+
+		if((weaponStats->currentAmmunitionType == Ammunition::BULLET && firingMode->canShootBullet) ||
+			(weaponStats->currentAmmunitionType == Ammunition::SCATTER && firingMode->canShootScatter) ||
+			(weaponStats->currentAmmunitionType == Ammunition::EXPLOSIVE && firingMode->canShootExplosive))
+		{
+			switchedFiringMode = true;
+			break;
+		}
+		else if(switchAmmunition(weaponStats))
+		{
+			switchedFiringMode = true;
+			break;
+		}
+	}
+
+	return switchedFiringMode;
+}
+
+void GameComponent::shootProjectile(Attribute_Position* position, Attribute_Camera* camera, Attribute_WeaponStats* weaponStats)
+{
+	
+	Ammunition* ammo = &weaponStats->ammunition[weaponStats->currentAmmunitionType];
+	FiringMode* firingMode = &weaponStats->firingMode[weaponStats->currentFiringModeType];
+
+	// Position
+	Float3 pos = position->position;
+
+	// extract camera orientation to determine velocity
+	DirectX::XMFLOAT3 lookAtXMFloat3((float*)&camera->mat_view.getLookAt());
+
+	DirectX::XMVECTOR lookAt = DirectX::XMLoadFloat3(&lookAtXMFloat3);
+	lookAt = DirectX::XMVector3Normalize(lookAt);
+
+	// Rotation
+	camera->mat_view.getRotationOnly();
+	//DirectX::XMMATRIX rotationMatrix((float*)&camera->mat_view);
+	DirectX::XMMATRIX rotationMatrix(
+		camera->mat_view._11,	camera->mat_view._21,	camera->mat_view._31,	0.0f,
+		camera->mat_view._12,	camera->mat_view._22,	camera->mat_view._32,	0.0f, 
+		camera->mat_view._13,	camera->mat_view._23,	camera->mat_view._33,	0.0f,
+		0.0f,					0.0f,					0.0f,					1.0f);
+
+	DirectX::XMVECTOR orientationQuaternion = DirectX::XMQuaternionRotationMatrix(rotationMatrix);
+	float orientationQuaternionX = DirectX::XMVectorGetX(orientationQuaternion);
+	float orientationQuaternionY = DirectX::XMVectorGetY(orientationQuaternion);
+	float orientationQuaternionZ = DirectX::XMVectorGetZ(orientationQuaternion);
+	float orientationQuaternionW = DirectX::XMVectorGetW(orientationQuaternion);
+
+	Float4 rotation = Float4(orientationQuaternionX, orientationQuaternionY, orientationQuaternionZ, orientationQuaternionW);
+
+	DirectX::XMVECTOR newLookAt;
+	float randomLO;
+	float randomHI;
+
+	// Send "Event_CreateProjectile" for each projectile in a shot. Scatter has more than one projectile per shot.
+	for(unsigned int j = 0; j < ammo->nrOfProjectiles; j++)
+	{
+		Float3 scatterPos = pos;
+
+		lookAtXMFloat3.x = DirectX::XMVectorGetX(lookAt);
+		lookAtXMFloat3.y = DirectX::XMVectorGetY(lookAt);
+		lookAtXMFloat3.z = DirectX::XMVectorGetZ(lookAt);
+
+		// randomize spread cone values (direction of velocity)
+		if(ammo->spread != 0.0f)
+		{
+			randomLO = -ammo->spread*0.5f;
+			randomHI = ammo->spread*0.5f;
+			lookAtXMFloat3.x += randomLO + (float)rand()/((float)RAND_MAX/(randomHI-randomLO));
+			lookAtXMFloat3.y += randomLO + (float)rand()/((float)RAND_MAX/(randomHI-randomLO));
+			lookAtXMFloat3.z += randomLO + (float)rand()/((float)RAND_MAX/(randomHI-randomLO));
+		}
+
+		newLookAt = DirectX::XMLoadFloat3(&lookAtXMFloat3);
+		newLookAt = DirectX::XMVector3Normalize(newLookAt);
+		lookAtXMFloat3.x = DirectX::XMVectorGetX(newLookAt);
+		lookAtXMFloat3.y = DirectX::XMVectorGetY(newLookAt);
+		lookAtXMFloat3.z = DirectX::XMVectorGetZ(newLookAt);
+
+		Float3 velocity(lookAtXMFloat3.x, lookAtXMFloat3.y, lookAtXMFloat3.z);
+		velocity = velocity * ammo->speed;
+					
+		//Randomize velocity for each consecutive projectile
+		if(ammo->velocityVariation != 0.0f)
+		{
+			randomLO = 1 - ammo->velocityVariation*0.5f;
+			randomHI = 1 + ammo->velocityVariation*0.5f;
+			float randomVelocityDifference = randomLO + (float)rand()/((float)RAND_MAX/(randomHI-randomLO));
+			velocity.x *= randomVelocityDifference;
+ 			velocity.y *= randomVelocityDifference;
+			velocity.z *= randomVelocityDifference;
+		}
+
+		// add displacement on position (this should be based on the collision shape of the player model)
+		float d = 0.5f;
+		scatterPos.x += lookAtXMFloat3.x*d;
+		scatterPos.y += lookAtXMFloat3.y*d;
+		scatterPos.z += lookAtXMFloat3.z*d;
+
+		// randomize displacement of each projectile preventing them from spawning at the same position
+		if(ammo->spawnVariation != 0.0f)
+		{
+			randomLO = -ammo->spawnVariation *0.5f;
+			randomHI = ammo->spawnVariation *0.5f;
+			scatterPos.x += randomLO + (float)rand()/((float)RAND_MAX/(randomHI-randomLO));
+			scatterPos.y += randomLO + (float)rand()/((float)RAND_MAX/(randomHI-randomLO));
+			scatterPos.z += randomLO + (float)rand()/((float)RAND_MAX/(randomHI-randomLO));
+		}
+
+		SEND_EVENT(&Event_CreateProjectile(scatterPos, velocity, rotation, ammo->damage * firingMode->damageModifier, 
+					itrPlayer.ownerId(), ammo->explosive, ammo->explosionSphere * firingMode->explosionSphereModifier));
+	}
 }

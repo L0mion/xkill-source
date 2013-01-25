@@ -8,7 +8,8 @@
 
 enum SS_ID
 {
-	SS_ID_DEFAULT
+	SS_ID_DEFAULT,
+	SS_ID_SPRITE
 };
 
 //! Class for maintaining sampler states.
@@ -43,8 +44,16 @@ private:
 	\sa ssDefault_
 	*/
 	HRESULT initSSDefault(ID3D11Device* device);
+	//! Initializes the variable ssCrossHair_.
+	/*!
+	\return Return any error encountered.
+	\param device A pointer to a DirectX Device.
+	\sa ssCrossHair_
+	*/
+	HRESULT initSSSprite(ID3D11Device* device);
 
 	ID3D11SamplerState* ssDefault_; //!< A sampler state object.
+	ID3D11SamplerState* ssSprite_; //!< Sampler state used for the cross hair sprite.
 };
 
 #endif //XKILL_RENDERER_SSMANAGEMENT_H
