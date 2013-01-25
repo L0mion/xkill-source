@@ -175,10 +175,11 @@ void MenuManager::keyPressEvent( QKeyEvent* e )
 {
 	if(GET_STATE() == STATE_DEATHMATCH)
 	{
+		//JON: Part of STATE_DEATHMATCH in synced FSM. I.e DeathmatchMenuState::onEvent should listen to keyPressEvents
 		switch (e->key()) 
 		{
 		case Qt::Key_Escape:
-			inGameMenu->toggleMenu();
+			inGameMenu->toggleMenu(); //JON: Set flag in for triggering state transition on update?
 			inGameMenu->setWindowFlags(Qt::WindowStaysOnTopHint);
 			break;
 		case Qt::Key_Tab:
