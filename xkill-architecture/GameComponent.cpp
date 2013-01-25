@@ -88,7 +88,7 @@ void GameComponent::onUpdate(float delta)
 		// End of deathmatch logic
 		//
 
-		if(player->priority >= 4)
+		if(player->priority >= 20)
 		{
 			SEND_EVENT(&Event(EVENT_GAME_OVER));
 		}
