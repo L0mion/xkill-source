@@ -328,11 +328,24 @@ MStatus exportLevel::doIt( const MArgList& args)
 	}
 	command = "file -force -options \"v=0;\" -type \"Bullet Physics export\" -pr -ea \"C:/Users/Nils/Desktop/testexport/TestArena.bullet\";";
 	MGlobal::executeCommand(command,output,false);
+	output = rigidbodies.length();
+	output = output + " to be reset";
+	MGlobal::displayInfo(output);
+
 	for(unsigned int i = 0; i < rigidbodies.length(); i++)
 	{
 		rigidbodies.getDependNode(i,obj);
 		MFnTransform fn(obj);
-		
+		MVector a = fn.getTranslation(MSpace::kTransform);
+		output = "trans: ";
+		/*output = output + a.x;
+		output = output + " ";
+		output = output + a.y;
+		output = output + " ";
+		output = output + a.z;*/
+		MGlobal::displayInfo("ÄRTHJÄRNA");
+
+
 		// Set rigidbody to "rigidbody" transform
 		fn.setTranslation(rbTranslation[i],MSpace::kTransform);
 		fn.setRotation(rbRotation[i],order);
@@ -575,28 +588,32 @@ MStatus exportLevel::doIt( const MArgList& args)
 		MString filename = path + fn.name();
 		MString file = "";
 		filename = filename + ".obj";
-		infile.open(path.asChar());
-		while(!infile.eof())
+		infile.open(filename.asChar(),std::ios::in);
+		if(infile.is_open())
 		{
-			std::string row_;
-			MString row;
-			std::getline(infile,row_);
-			row = row_.c_str();
-			if(row.substring(0,1) == "g ")
+			while(!infile.eof())
 			{
-				unsigned int limit = row_.find(" ",2);
-				row = row.substring(0,limit);
+				
+				std::string row_;
+				MString row;
+				std::getline(infile,row_);
+				row = row_.c_str();
+				if(row.substring(0,1) == "g ")
+				{
+					unsigned int limit = row_.find(" ",2);
+					row = row.substring(0,limit-1);
+				}
+				file = file + row;
+				file = file + "\n";
 			}
-			file = file + row;
-			file = file + "\n";
-		}
-		infile.close();
-		FILE* outfile;
-		outfile = fopen(filename.asChar(),"w");
-		if(outfile != nullptr)
-		{
-			fputs( file.asChar(), outfile);
-			fclose(outfile);
+			infile.close();
+			FILE* outfile;
+			outfile = fopen(filename.asChar(),"w");
+			if(outfile != nullptr)
+			{
+				fputs( file.asChar(), outfile);
+				fclose(outfile);
+			}
 		}
 	}
 	

@@ -135,11 +135,11 @@ void PhysicsComponent::onUpdate(float delta)
 		}
 	}
 
-	updateCulling();
+	/*updateCulling();
 	dynamicsWorld_->stepSimulation(delta,0);
-	//gDebugDraw.clearDebugVerticesVector();
-	//dynamicsWorld_->debugDrawWorld();
-	//queueDebugDrawEvent();
+	gDebugDraw.clearDebugVerticesVector();*/
+	dynamicsWorld_->debugDrawWorld();
+	queueDebugDrawEvent();
 
 	FLUSH_QUEUED_EVENTS(EVENT_PHYSICS_ATTRIBUTES_COLLIDING);
 }
