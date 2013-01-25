@@ -1,7 +1,10 @@
 #include "LightDescSpot.hlsl"
 
+#include "LightPos.hlsl"
 #include "LightDir.hlsl"
 #include "LightPoint.hlsl"
+
+#include "TilingFrustum.hlsl"
 
 #include "UtilSphereMapTransform.hlsl"
 #include "UtilReconstructPosition.hlsl"
@@ -61,10 +64,9 @@ void lightingCS(
 	//Get surface position.
 	/*At the moment, world space position is stored in Material-buffer.*/
 	float3 surfacePosW = gMaterial.xyz;
-	float3 surfacePosV = mul(float4(gMaterial.xyz, 1.0f), view).xyz; //UtilReconstructPositionViewSpace(texCoord, gDepth, projectionInverse)
+	float3 surfacePosV = mul(float4(surfacePosW, 1.0f), view).xyz;
 
-	//Get minimum/maximum depth of tile.
-	uint pixelDepthInt = asuint(UtilReconstructPositionViewSpace(texCoord, gDepth, projectionInverse).z); //surfacePosV.z //Interlocked-functions can only be applied onto ints.
+	uint pixelDepthInt = asuint(gDepth); //Interlocked functions can only be applied onto ints.
 	GroupMemoryBarrierWithGroupSync(); //Needs to be here in order for initialization of shared values to be guaranteed.
 	InterlockedMin(tileMinDepthInt, pixelDepthInt);
 	InterlockedMax(tileMaxDepthInt, pixelDepthInt);
@@ -72,28 +74,19 @@ void lightingCS(
 	float tileMinDepthF = asfloat(tileMinDepthInt);
 	float tileMaxDepthF = asfloat(tileMaxDepthInt);
 
-	//Extract Frustum Planes
-	float2 tileScale = float2(float(screenWidth), float(screenHeight)) * rcp(float(2 * TILE_DIM));
-	float2 tileBias = tileScale - float2(blockID.xy);
-	float4 c1 = float4(projection._11 * tileScale.x, 0.0f, tileBias.x, 0.0f);
-	float4 c2 = float4(0.0f, -projection._22 * tileScale.y, tileBias.y, 0.0f);
-	float4 c4 = float4(0.0f, 0.0f, 1.0f, 0.0f);
-	float4 frustum[6];
-	frustum[0] = c4 - c1; //Sides
-	frustum[1] = c4 + c1;
-	frustum[2] = c4 - c2;
-	frustum[3] = c4 + c2;
-	frustum[4] = float4(0.0f, 0.0f, 1.0f, tileMinDepthF); //Near/Far
-	frustum[5] = float4(0.0f, 0.0f, -1.0f, -tileMaxDepthF);
-	[unroll] for(uint i = 0; i < 4; i++) //Normalize frustum sides
-	{
-		frustum[i] *= rcp(length(frustum[i].xyz));
-	}
+	Frustum frustum = ExtractFrustumPlanes(
+		screenWidth, 
+		screenHeight, 
+		TILE_DIM, 
+		blockID.xy, 
+		projection, 
+		tileMinDepthF, 
+		tileMaxDepthF);
 
 	//Cull lights with tile
 	uint numTileThreads = TILE_DIM * TILE_DIM;
 	uint numPasses = (numLightsPoint + numTileThreads - 1) / numTileThreads; //Passes required by tile threads to cover all lights.
-	for(i = 0; i < numPasses; ++i)
+	for(uint i = 0; i < numPasses; ++i)
 	{
 		uint lightIndex = i * numTileThreads + threadIDBlockIndex;
 		
@@ -102,7 +95,7 @@ void lightingCS(
 			bool inFrustum = true;
 			[unroll] for(uint j = 0; j < 6; j++)
 			{
-				float d = dot(frustum[j], float4(lightsPos[lightIndex], 1.0f));
+				float d = dot(frustum._[j], mul(float4(lightsPos[lightIndex], 1.0f), view)); //mul(float4(lightsPos[lightIndex], 1.0f)
 				inFrustum = inFrustum && (d >= -lightsPoint[lightIndex].range);
 			}
 			
@@ -149,33 +142,17 @@ void lightingCS(
 		Diffuse	+= diffuse; 
 		Specular += specular;
 	}
-	//Insert me back into the code when lighting works!
-	//for(i = 0; i < tileLightNum; i++) //Apply culled point-lights.
-	//{
-	//	uint pointLightIndex = tileLightIndices[i]; 
-	//	LightPoint(
-	//		toEyeV,
-	//		lightsPoint[pointLightIndex],
-	//		mul(float4(lightsPos[pointLightIndex], 1.0f), view),
-	//		surfaceMaterial,
-	//		surfaceNormalV,
-	//		surfacePosV,
-	//		ambient, diffuse, specular);	
-	//	Ambient		+= ambient;
-	//	Diffuse		+= diffuse;
-	//	Specular	+= specular;
-	//}
 
 	for(i = 0; i < numLightsPoint; i++)
 	{
 		LightDescPoint descPoint = lightsPoint[i];
 		LightPoint(
-			toEyeW,
+			toEyeV,
 			descPoint,
-			mul(viewInverse, float4(lightsPos[i], 1.0f)).xyz, //lightsPos[i],//
+			mul(float4(lightsPos[i], 1.0f), view).xyz, //
 			surfaceMaterial,
-			surfaceNormalW,
-			surfacePosW,
+			surfaceNormalV,
+			surfacePosV,
 			ambient, diffuse, specular);	
 		Ambient		+= ambient;
 		Diffuse		+= diffuse;
@@ -183,10 +160,10 @@ void lightingCS(
 	}
 
 	//TILING DEMO:
-	for(i = 0; i < tileLightNum; i++) //Apply culled point-lights.
-	{
-		Diffuse.g += 0.1;
-	}
+	//for(i = 0; i < tileLightNum; i++) //Apply culled point-lights.
+	//{
+	//	Diffuse.g += 0.1;
+	//}
 
-	output[uint2(threadIDDispatch.x + viewportTopX, threadIDDispatch.y + viewportTopY)] = Ambient + Diffuse + Specular;
+	output[uint2(threadIDDispatch.x + viewportTopX, threadIDDispatch.y + viewportTopY)] = Ambient + Diffuse + Specular; //float4(tileMinDepthF, tileMinDepthF, tileMinDepthF, 1.0f); //
 }

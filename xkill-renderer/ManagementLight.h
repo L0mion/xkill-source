@@ -6,6 +6,7 @@
 #include <xkill-utilities/LightDesc.h>
 
 #include "d3dInterface.h"
+#include "LightPos.h"
 
 typedef long HRESULT;
 
