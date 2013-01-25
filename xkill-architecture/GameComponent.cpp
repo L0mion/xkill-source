@@ -1,5 +1,6 @@
 #include "GameComponent.h"
 #include <xkill-utilities/AttributeManager.h>
+#include <xkill-utilities/Enums.h>
 #include <DirectXMath.h>
 
 #include <iostream>
@@ -101,7 +102,7 @@ void GameComponent::onUpdate(float delta)
 		if(input->changeAmmunitionType)
 		{
 			input->changeAmmunitionType = false;
-			weaponStats->currentAmmunitionType = static_cast<Ammunition::AmmunitionType>((weaponStats->currentAmmunitionType + 1) % Ammunition::AmmunitionType::NROFAMUNITIONTYPES);
+			weaponStats->currentAmmunitionType = static_cast<Ammunition::AmmunitionType>((weaponStats->currentAmmunitionType + 1) % Ammunition::AmmunitionType::NROFAMMUNITIONTYPES);
 			ammo = &weaponStats->ammunition[weaponStats->currentAmmunitionType];
 			DEBUGPRINT(std::endl);
 			DEBUGPRINT("Ammunition type: " << weaponStats->getAmmunitionTypeAsString());
@@ -111,7 +112,7 @@ void GameComponent::onUpdate(float delta)
 		if(input->changeFiringMode)
 		{
 			input->changeFiringMode = false;
-			weaponStats->currentFiringModeType = static_cast<FiringMode::FiringModeType>((weaponStats->currentFiringModeType + 1) % Ammunition::AmmunitionType::NROFAMUNITIONTYPES);
+			weaponStats->currentFiringModeType = static_cast<FiringMode::FiringModeType>((weaponStats->currentFiringModeType + 1) % Ammunition::AmmunitionType::NROFAMMUNITIONTYPES);
 			firingMode = &weaponStats->firingMode[weaponStats->currentFiringModeType];
 			DEBUGPRINT(std::endl);
 			DEBUGPRINT("Ammunition type: " << weaponStats->getAmmunitionTypeAsString());
@@ -340,20 +341,41 @@ void GameComponent::onUpdate(float delta)
 		pickupablesSpawnPoint->secondsSinceLastSpawn += delta;
 		if(pickupablesSpawnPoint->secondsSinceLastSpawn > pickupablesSpawnPoint->spawnDelayInSeconds)
 		{
-			Attribute_Position* pickupablesSpawnPointPosition = itrPosition.at(pickupablesSpawnPoint->ptr_position);
-			SEND_EVENT(&Event_CreatePickupable(pickupablesSpawnPointPosition->position, Attribute_Pickupable::MEDKIT, 5));
-			pickupablesSpawnPoint->secondsSinceLastSpawn = 0.0f;
+			if(pickupablesSpawnPoint->currentNrOfExistingSpawnedPickupables < pickupablesSpawnPoint->maxNrOfExistingSpawns)
+			{
+				Attribute_Position* pickupablesSpawnPointPosition = itrPosition.at(pickupablesSpawnPoint->ptr_position);
+
+				int amount;
+				switch(pickupablesSpawnPoint->spawnPickupableType)
+				{
+				case PickupableType::MEDKIT:
+					amount = 20;
+						break;
+				case PickupableType::AMMUNITION_BULLET:
+					amount = 100;
+						break;
+				case PickupableType::AMMUNITION_SCATTER:
+					amount = 50;
+						break;
+				case PickupableType::AMMUNITION_EXPLOSIVE:
+					amount = 10;
+					break;
+				}
+
+				AttributePointer creatorPickupablesSpawnPoint = itrPickupablesSpawnPoint.attributePointer(pickupablesSpawnPoint);
+
+				SEND_EVENT(&Event_CreatePickupable(pickupablesSpawnPointPosition->position, pickupablesSpawnPoint->spawnPickupableType, creatorPickupablesSpawnPoint, amount));
+				pickupablesSpawnPoint->secondsSinceLastSpawn = 0.0f;
+			}
 		}
 	}
 
 	//check
-	/*
-	while(itrPickupable.hasNext())
-	{
-		Attribute_Pickupable* pickupable = itrPickupable.getNext();
-		pickupable;
-	}
-	*/
+	//while(itrPickupable.hasNext())
+	//{
+	//	Attribute_Pickupable* pickupable = itrPickupable.getNext();
+	//	pickupable;
+	//}
 
 	//
 	// Update weapons stats
@@ -571,6 +593,7 @@ void GameComponent::event_PhysicsAttributesColliding(Event_PhysicsAttributesColl
 	//Pickupables
 	else if(entity1->hasAttribute(ATTRIBUTE_PICKUPABLE))
 	{
+		Attribute_Pickupable* pickupableAttribute;
 		if(entity2->hasAttribute(ATTRIBUTE_PLAYER))
 		{
 			//Retrieve player attribute
@@ -583,28 +606,28 @@ void GameComponent::event_PhysicsAttributesColliding(Event_PhysicsAttributesColl
 				std::vector<int> pickupablesId = entity1->getAttributes(ATTRIBUTE_PICKUPABLE);
 				for(unsigned i=0;i<pickupablesId.size();i++)
 				{
-					Attribute_Pickupable* pickupableAttribute = itrPickupable.at(pickupablesId.at(i));
+					pickupableAttribute = itrPickupable.at(pickupablesId.at(i));
 					switch(pickupableAttribute->pickupableType)
 					{
-						case Attribute_Pickupable::MEDKIT:
+						case PickupableType::MEDKIT:
 						{
 								Attribute_Health* health = itrHealth.at(playerAttribute->ptr_health);
 								health->health += pickupableAttribute->amount;
 								break;
 						}
-						case Attribute_Pickupable::AMMUNITION_BULLET:
+						case PickupableType::AMMUNITION_BULLET:
 						{
 								Attribute_WeaponStats* weaponStatsAttribute = itrWeaponStats.at(playerAttribute->ptr_weaponStats);
 								weaponStatsAttribute->ammunition[Ammunition::BULLET].totalNrOfShots += pickupableAttribute->amount;
 								break;
 						}
-						case Attribute_Pickupable::AMMUNITION_EXPLOSIVE:
+						case PickupableType::AMMUNITION_EXPLOSIVE:
 						{
 								Attribute_WeaponStats* weaponStatsAttribute = itrWeaponStats.at(playerAttribute->ptr_weaponStats);
 								weaponStatsAttribute->ammunition[Ammunition::EXPLOSIVE].totalNrOfShots += pickupableAttribute->amount;
 								break;
 						}
-						case Attribute_Pickupable::AMMUNITION_SCATTER:
+						case PickupableType::AMMUNITION_SCATTER:
 						{
 								Attribute_WeaponStats* weaponStatsAttribute = itrWeaponStats.at(playerAttribute->ptr_weaponStats);
 								weaponStatsAttribute->ammunition[Ammunition::SCATTER].totalNrOfShots += pickupableAttribute->amount;
@@ -613,8 +636,11 @@ void GameComponent::event_PhysicsAttributesColliding(Event_PhysicsAttributesColl
 					}
 				}
 			}
+			//Decrement number of spawned pickupables for the spawnpoint that spanwed the pickupable that the player picked up. Also remove it.
+			Attribute_PickupablesSpawnPoint* pickupablesSpawnPointAttribute = itrPickupablesSpawnPoint.at(pickupableAttribute->ptr_creatorPickupablesSpawnPoint);
+			pickupablesSpawnPointAttribute->currentNrOfExistingSpawnedPickupables--;
+			SEND_EVENT(&Event_RemoveEntity(entity1->getID()));
 		}
-		SEND_EVENT(&Event_RemoveEntity(entity1->getID()));
 	}
 }
 
@@ -729,6 +755,13 @@ void GameComponent::event_StartDeathmatch( Event_StartDeathmatch* e )
 	//
 	// Delete players
 	//
+	
+	while(itrPlayer.hasNext())
+	{
+		itrPlayer.getNext();
+		SEND_EVENT(&Event_RemoveEntity(itrPlayer.ownerId()));
+	}
+
 
 	while(itrPlayer.hasNext())
 	{
@@ -765,13 +798,13 @@ void GameComponent::event_StartDeathmatch( Event_StartDeathmatch* e )
 		SEND_EVENT(&Event_RemoveEntity(itrLightSpot.ownerId()));
 	}
 
-	/*
-	while(itrPickupablesSpawnPoint.hasNext())
-	{
-		itrPickupablesSpawnPoint.getNext();
-		SEND_EVENT(&Event_RemoveEntity(itrPickupablesSpawnPoint.ownerId()));
-	}
+	//while(itrPickupablesSpawnPoint.hasNext())
+	//{
+	//	itrPickupablesSpawnPoint.getNext();
+	//	SEND_EVENT(&Event_RemoveEntity(itrPickupablesSpawnPoint.ownerId()));
+	//}
 
+	/*
 	while(itrPickupable.hasNext())
 	{
 		itrPickupable.getNext();
@@ -803,7 +836,11 @@ void GameComponent::event_StartDeathmatch( Event_StartDeathmatch* e )
 	SEND_EVENT(&Event_WindowResize(width,height));
 
 	//Continue
-	//SEND_EVENT(&Event_CreatePickupablesSpawnPoint(Float3(2.0f, 2.0f, 0.0f)));
+	for(int i=0;i<10;i++)
+	{
+		SEND_EVENT(&Event_CreatePickupablesSpawnPoint(Float3(2, 40, i-6), PickupableType::AMMUNITION_BULLET));
+	}
+
 	//SEND_EVENT(&Event_CreatePickupable(Float3(2.0f, 2.0f, 0.0f), Attribute_Pickupable::MEDKIT, 5));
 
 	// Set state to deathmatch

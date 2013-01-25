@@ -4,7 +4,7 @@
 
 #define SAFE_DELETE(x) {if(x != nullptr) delete x; x = nullptr;}
 
-Ammunition	MutatorSettings::standardAmmunitions[Ammunition::NROFAMUNITIONTYPES];
+Ammunition	MutatorSettings::standardAmmunitions[Ammunition::NROFAMMUNITIONTYPES];
 FiringMode	MutatorSettings::standardFiringModes[FiringMode::NROFFIRINGMODETYPES];
 bool		MutatorSettings::hasInitialized = false;
 

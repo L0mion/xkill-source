@@ -4,6 +4,7 @@
 
 #include "MeshModel.h"
 #include "DebugShape.h"
+#include "Enums.h"
 
 IAttribute::IAttribute()
 {
@@ -265,8 +266,11 @@ Attribute_PlayerSpawnPoint::~Attribute_PlayerSpawnPoint()
 
 Attribute_PickupablesSpawnPoint::Attribute_PickupablesSpawnPoint()
 {
+	spawnPickupableType = PickupableType::MEDKIT;
 	spawnDelayInSeconds = 0.0f;
 	secondsSinceLastSpawn = 0.0f;
+	maxNrOfExistingSpawns = 1;
+	currentNrOfExistingSpawnedPickupables = 0;
 }
 Attribute_PickupablesSpawnPoint::~Attribute_PickupablesSpawnPoint()
 {
@@ -286,7 +290,7 @@ Attribute_WeaponStats::Attribute_WeaponStats()
 {
 	MutatorSettings ms;
 
-	for(int i = 0; i < Ammunition::NROFAMUNITIONTYPES; i++)
+	for(int i = 0; i < Ammunition::NROFAMMUNITIONTYPES; i++)
 	{
 		for(int j = 0; j < FiringMode::NROFFIRINGMODETYPES; j++)
 		{

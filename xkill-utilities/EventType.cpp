@@ -1,6 +1,6 @@
 #include "EventType.h"
 
-Event::Event(EventType type) 
+Event::Event(EventType type)
 { 
 	this->type = type; 
 }
@@ -120,15 +120,17 @@ Event_CreatePlayerSpawnPoint::Event_CreatePlayerSpawnPoint(Float3 spawnPointPosi
 	this->spawnAreaRadius = spawnAreaRadius;
 }
 
-Event_CreatePickupablesSpawnPoint::Event_CreatePickupablesSpawnPoint(Float3 spawnPointPosition)  : Event(EVENT_CREATE_PICKUPABLESSPAWNPOINT)
+Event_CreatePickupablesSpawnPoint::Event_CreatePickupablesSpawnPoint(Float3 spawnPointPosition, PickupableType pickupableType)  : Event(EVENT_CREATE_PICKUPABLESSPAWNPOINT)
 {
 	this->spawnPointPosition = spawnPointPosition;
+	this->pickupableType = pickupableType;
 }
 
-Event_CreatePickupable::Event_CreatePickupable(Float3 position, int pickupableType, int amount)  : Event(EVENT_CREATE_PICKUPABLE)
+Event_CreatePickupable::Event_CreatePickupable(Float3 position, PickupableType pickupableType, AttributePointer creatorPickupablesSpawnPoint, int amount)  : Event(EVENT_CREATE_PICKUPABLE)
 {
 	this->position = position;
 	this->pickupableType = pickupableType;
+	this->creatorPickupablesSpawnPoint = creatorPickupablesSpawnPoint;
 	this->amount = amount;
 }
 
@@ -174,20 +176,6 @@ Event_CreateWorld::Event_CreateWorld(Float3 position, Float4 rotation, unsigned 
 	this->rotation = rotation;
 	this->meshID = meshID;
 }
-
-/*
-Event_CreateAmmo::Event_CreateAmmo(Float3 position, unsigned int type) : Event(EVENT_CREATE_AMMO)
-{
-	this->position = position;
-	this->position = position;
-}
-
-Event_CreateHack::Event_CreateHack(Float3 position, unsigned int type) : Event(EVENT_CREATE_HACK)
-{
-	this->type = type;
-	this->type = type;
-}
-*/
 
 Event_CreateLight::Event_CreateLight(Float3 position, Float3 direction, Float3 ambient, Float3 diffuse, Float3 specular,
 				  Float3 attenuation, float range, float spotPow, unsigned int type) : Event(EVENT_CREATE_LIGHT)

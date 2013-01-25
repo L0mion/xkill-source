@@ -4,6 +4,8 @@
 #include "dllUtilities.h"
 #include "Math.h"
 #include "LightDesc.h"
+#include "Enums.h"
+#include "AttributePointer.h"
 
 //
 // Events info
@@ -364,21 +366,24 @@ public:
 	float spawnAreaRadius;
 };
 
+enum PickupableType;
 class DLL_U Event_CreatePickupablesSpawnPoint : public Event
 {
 public:
-	Event_CreatePickupablesSpawnPoint(Float3 spawnPointPosition);
+	Event_CreatePickupablesSpawnPoint(Float3 spawnPointPosition, PickupableType pickupableType);
 
 	Float3 spawnPointPosition;
+	PickupableType pickupableType;
 };
 
 class DLL_U Event_CreatePickupable : public Event
 {
 public:
-	Event_CreatePickupable(Float3 position, int pickupableType, int amount);
+	Event_CreatePickupable(Float3 position, PickupableType pickupableType, AttributePointer creatorPickupablesSpawnPoint, int amount);
 
 	Float3 position;
-	int pickupableType;
+	PickupableType pickupableType;
+	AttributePointer creatorPickupablesSpawnPoint;
 	int amount;
 };
 
@@ -454,26 +459,6 @@ public:
 	Float4 rotation;
 	unsigned int meshID;
 };
-
-/*
-class DLL_U Event_CreateAmmo : public Event
-{
-public:
-	Event_CreateAmmo(Float3 position, unsigned int type);
-
-	Float3 position;
-	unsigned int type;
-};
-
-class DLL_U Event_CreateHack : public Event
-{
-public:
-	Event_CreateHack(Float3 position, unsigned int type);
-
-	Float3 position;
-	unsigned int type;
-};
-*/
 
 class DLL_U Event_CreateLight : public Event
 {

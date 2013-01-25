@@ -253,19 +253,38 @@ void LoaderMdlDesc::loadHack(const std::vector<std::string>& params)
 					  static_cast<float>(atof(params[MDLDESC_PARAM_INDEX_HACK_POSZ].c_str())));
 	type = atoi(params[MDLDESC_PARAM_INDEX_HACK_TYPE].c_str());
 
-	//events_.push_back( new Event_CreateHack(position,type));
+	//int amount = 5; //Check, load
+	//events_.push_back( new Event_CreatePickupable(position, PickupableType::MEDKIT, amount));
 }
 void LoaderMdlDesc::loadAmmo(const std::vector<std::string>& params)
 {
 	Float3 position;
-	unsigned int type;
+	unsigned int type; //could be replaced by string
 
 	position = Float3( static_cast<float>(atof(params[MDLDESC_PARAM_INDEX_AMMO_POSX].c_str())),
 					   static_cast<float>(atof(params[MDLDESC_PARAM_INDEX_AMMO_POSY].c_str())),
 					   static_cast<float>(atof(params[MDLDESC_PARAM_INDEX_AMMO_POSZ].c_str())));
 	type = atoi(params[MDLDESC_PARAM_INDEX_AMMO_TYPE].c_str());
 
-	//events_.push_back( new Event_CreateAmmo(position,type));
+	/*
+	int amount = 50; //Check, load
+
+	switch(type) //String?
+	{
+	default:
+		DEBUGPRINT("Trying to create unknown ammo type.");
+		break;
+		case PickupableType::AMMUNITION_BULLET:
+			events_.push_back( new Event_CreatePickupable(position, PickupableType::AMMUNITION_BULLET, amount));
+			break;
+		case PickupableType::AMMUNITION_SCATTER:
+			events_.push_back( new Event_CreatePickupable(position, PickupableType::AMMUNITION_SCATTER, amount));
+			break;
+		case PickupableType::AMMUNITION_EXPLOSIVE:
+			events_.push_back( new Event_CreatePickupable(position, PickupableType::AMMUNITION_EXPLOSIVE, amount));
+			break;
+	}
+	*/
 }
 void LoaderMdlDesc::loadLight(const std::vector<std::string>& params)
 {

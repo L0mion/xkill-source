@@ -90,8 +90,6 @@ Menu_Main::Menu_Main( QWidget* parent ) : QMainWindow(parent), ToggleHelper(this
 
 	ammo_Menu = new Menu_Ammo(&ui);
 	firingMode_Menu = new Menu_FiringMode(&ui);
-
-	slot_startGame();
 }
 
 Menu_Main::~Menu_Main()

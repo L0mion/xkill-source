@@ -18,7 +18,7 @@ public:
 	FiringMode& getStandardFiringMode(FiringMode::FiringModeType type);
 
 private:
-	static Ammunition standardAmmunitions[Ammunition::NROFAMUNITIONTYPES];
+	static Ammunition standardAmmunitions[Ammunition::NROFAMMUNITIONTYPES];
 	static FiringMode standardFiringModes[FiringMode::NROFFIRINGMODETYPES];
 
 	static bool hasInitialized; //Should only initialize once, dirty workaround

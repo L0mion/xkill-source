@@ -10,6 +10,7 @@
 #include "ProjectilePhysicsObject.h"
 #include "ExplosionSpherePhysicsObject.h"
 #include "FrustumPhysicsObject.h"
+#include "PickupablePhysicsObject.h"
 #include "physicsUtilities.h"
 
 #include "CollisionShapes.h"
@@ -22,6 +23,7 @@ AttributeIterator<Attribute_Render> itrRender;
 AttributeIterator<Attribute_Camera> itrCamera_2;
 
 static debugDrawDispatcher gDebugDraw;
+static float removePhysicsObjectIfLowerYCoordinateThanThis;
 
 PhysicsComponent::PhysicsComponent() : broadphase_(nullptr),
 									   collisionConfiguration_(nullptr),
@@ -35,6 +37,7 @@ PhysicsComponent::PhysicsComponent() : broadphase_(nullptr),
 	itrPhysics = ATTRIBUTE_MANAGER->physics.getIterator();
 	itrRender = ATTRIBUTE_MANAGER->render.getIterator();
 	itrCamera_2 = ATTRIBUTE_MANAGER->camera.getIterator();
+	removePhysicsObjectIfLowerYCoordinateThanThis = -5.0f;
 }
 
 PhysicsComponent::~PhysicsComponent()
@@ -127,17 +130,26 @@ bool PhysicsComponent::init()
 
 void PhysicsComponent::onUpdate(float delta)
 {
-	synchronizeWithAttributes();
-	for(unsigned int i = 0; i < static_cast<unsigned int>(physicsObjects_->size()); i++)
+	//Update physics objects, which are synchronized with physics attributes
+	itrPhysics = ATTRIBUTE_MANAGER->physics.getIterator();
+	while(itrPhysics.hasNext())
 	{
-		if(physicsObjects_->at(i) != nullptr)
+		Attribute_Physics* physicsAttribute = itrPhysics.getNext();
+		unsigned int index = itrPhysics.storageIndex();
+
+		synchronizeWithAttributes(physicsAttribute, index);
+		physicsObjects_->at(index)->onUpdate(delta);
+
+		if(physicsObjects_->at(index)->getWorldTransform().getOrigin().y() < removePhysicsObjectIfLowerYCoordinateThanThis)
 		{
-			physicsObjects_->at(i)->onUpdate(delta);
+			//SEND_EVENT(&Event_RemoveEntity(itrPhysics.ownerId()));
 		}
 	}
 
 	updateCulling();
-	dynamicsWorld_->stepSimulation(delta,0);
+
+	dynamicsWorld_->stepSimulation(delta,0); //Bullet Physics physics simulation
+
 	if(BULLETPHYSICSDEBUGDRAW)
 	{
 		//static float timer = 0.0f;
@@ -166,7 +178,7 @@ void PhysicsComponent::onEvent(Event* e)
 		{
 			if(attributeUpdated->isDeleted)
 			{
-				if(physicsObjects_->at(attributeIndex) != nullptr)
+				if(attributeIndex < physicsObjects_->size() && physicsObjects_->at(attributeIndex) != nullptr)
 				{
   					dynamicsWorld_->removeRigidBody(physicsObjects_->at(attributeIndex));
 					delete physicsObjects_->at(attributeIndex);
@@ -196,7 +208,7 @@ void PhysicsComponent::onEvent(Event* e)
 	}
 }
 
-void PhysicsComponent::synchronizeWithAttributes()
+void PhysicsComponent::synchronizeWithAttributes(Attribute_Physics* physicsAttribute, int physicsAttributeIndex)
 {
 	//Also refer to PhysicsComponent::onEvent, handling of EVENT_ATTRIBUTE_UPDATED
 	
@@ -212,14 +224,15 @@ void PhysicsComponent::synchronizeWithAttributes()
 		}
 	}
 	*/
-	itrPhysics = ATTRIBUTE_MANAGER->physics.getIterator();
-	while(itrPhysics.hasNext())
-	{
-		Attribute_Physics* physicsAttribute = itrPhysics.getNext();
-		unsigned int index = itrPhysics.storageIndex();
+	
+	//itrPhysics = ATTRIBUTE_MANAGER->physics.getIterator();
+	//while(itrPhysics.hasNext())
+	//{
+	//	Attribute_Physics* physicsAttribute = itrPhysics.getNext();
+	//	unsigned int index = itrPhysics.storageIndex();
 		
 		//Checks if new physiscs attributes were created since last call to this function
-		if(index >= static_cast<unsigned int>(physicsObjects_->size()))
+		if(physicsAttributeIndex >= static_cast<unsigned int>(physicsObjects_->size()))
 		{
 			physicsObjects_->push_back(nullptr);
 		}
@@ -227,28 +240,31 @@ void PhysicsComponent::synchronizeWithAttributes()
 		if(physicsAttribute->reloadDataIntoBulletPhysics) //If something has changed in the physics attribute
 		{
 			//If the PhysicsObjects already exists, it needs to be removed to safely reset all of its internal Bullet Physics values
-			if(physicsObjects_->at(index) != nullptr)
+			if(physicsObjects_->at(physicsAttributeIndex) != nullptr)
 			{
-				dynamicsWorld_->removeRigidBody(physicsObjects_->at(index));
-				delete physicsObjects_->at(index);
+				dynamicsWorld_->removeRigidBody(physicsObjects_->at(physicsAttributeIndex));
+				delete physicsObjects_->at(physicsAttributeIndex);
 			}
 			// Determine type of PhysicsObject to create and add to the Bullet Physics world
 			switch(physicsAttribute->collisionFilterGroup)
 			{
 			default:
-				physicsObjects_->at(index) = new PhysicsObject();
+				physicsObjects_->at(physicsAttributeIndex) = new PhysicsObject();
 				break;
 			case Attribute_Physics::WORLD:
-				physicsObjects_->at(index) = new PhysicsObject();
+				physicsObjects_->at(physicsAttributeIndex) = new PhysicsObject();
 				break;
 			case Attribute_Physics::PLAYER:
-				physicsObjects_->at(index) = new PlayerPhysicsObject();
+				physicsObjects_->at(physicsAttributeIndex) = new PlayerPhysicsObject();
 				break;
 			case Attribute_Physics::PROJECTILE:
-				physicsObjects_->at(index) = new ProjectilePhysicsObject();
+				physicsObjects_->at(physicsAttributeIndex) = new ProjectilePhysicsObject();
 				break;
 			case Attribute_Physics::EXPLOSIONSPHERE:
-				physicsObjects_->at(index) = new ExplosionSpherePhysicsObject();
+				physicsObjects_->at(physicsAttributeIndex) = new ExplosionSpherePhysicsObject();
+				break;
+			case Attribute_Physics::PICKUPABLE:
+				physicsObjects_->at(physicsAttributeIndex) = new PickupablePhysicsObject();
 				break;
 			case Attribute_Physics::EVERYTHING:
 				std::cout << "Error: Attribute_Physics should not have EVERYTHING as collisionFilterGroup" << std::endl;
@@ -260,14 +276,14 @@ void PhysicsComponent::synchronizeWithAttributes()
 
 			if(physicsObjects_ != nullptr)
 			{
-				if(physicsObjects_->at(index)->init(index,physicsAttribute->collisionFilterGroup) == true)
+				if(physicsObjects_->at(physicsAttributeIndex)->init(physicsAttributeIndex,physicsAttribute->collisionFilterGroup) == true)
 				{
-					dynamicsWorld_->addRigidBody(physicsObjects_->at(index), physicsAttribute->collisionFilterGroup, physicsAttribute->collisionFilterMask);
+					dynamicsWorld_->addRigidBody(physicsObjects_->at(physicsAttributeIndex), physicsAttribute->collisionFilterGroup, physicsAttribute->collisionFilterMask);
 					//Per object gravity must be set after "addRigidBody"
-					if(!physicsObjects_->at(index)->isStaticOrKinematicObject())
+					if(!physicsObjects_->at(physicsAttributeIndex)->isStaticOrKinematicObject())
 					{
-						physicsObjects_->at(index)->setGravity(btVector3(physicsAttribute->gravity.x,physicsAttribute->gravity.y, physicsAttribute->gravity.z));
-						//physicsObjects_->at(index)->setGravity(btVector3(0,0,0));
+						physicsObjects_->at(physicsAttributeIndex)->setGravity(btVector3(physicsAttribute->gravity.x,physicsAttribute->gravity.y, physicsAttribute->gravity.z));
+						//physicsObjects_->at(physicsAttributeIndex)->setGravity(btVector3(0,0,0));
 					}
 
 					physicsAttribute->reloadDataIntoBulletPhysics = false;
@@ -278,7 +294,7 @@ void PhysicsComponent::synchronizeWithAttributes()
 				}
 			}
 		}
-	}
+	//}
 }
 
 void wrapTickCallback(btDynamicsWorld *world, btScalar timeStep)
@@ -311,6 +327,17 @@ void PhysicsComponent::detectedCollisionsDuringStepSimulation(btScalar timeStep)
 				unsigned int ownerA = itrPhysics.ownerIdAt(objectA->getAttributeIndex());
 				unsigned int ownerB = itrPhysics.ownerIdAt(objectB->getAttributeIndex());
 				
+				if(objectA->getCollisionFilterGroup() == Attribute_Physics::PICKUPABLE &&
+					objectB->getCollisionFilterGroup() == Attribute_Physics::WORLD)
+				{
+					int f=1;
+				}
+				if(objectB->getCollisionFilterGroup() == Attribute_Physics::PICKUPABLE &&
+					objectA->getCollisionFilterGroup() == Attribute_Physics::WORLD)
+				{
+					int f=1;
+				}
+
 				//////check physicsobjecttype;
 				if(objectA->getCollisionFilterGroup() == Attribute_Physics::FRUSTUM ||
 					objectB->getCollisionFilterGroup() == Attribute_Physics::FRUSTUM)

@@ -12,7 +12,7 @@ struct DLL_U Ammunition
 		SCATTER,
 		EXPLOSIVE,
 
-		NROFAMUNITIONTYPES
+		NROFAMMUNITIONTYPES
 	};
 
 	unsigned int totalNrOfShots; 

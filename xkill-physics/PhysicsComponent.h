@@ -29,6 +29,7 @@ class CollisionObject;
 
 static void wrapTickCallback(btDynamicsWorld *world, btScalar timeStep);  //!< wrapper for tickCallback to solve being unable to bind member-function as function pointer issues
 
+struct Attribute_Physics;
 class DLL_P PhysicsComponent : public IObserver
 {
 private:
@@ -42,14 +43,14 @@ private:
 	btAlignedObjectArray<PhysicsObject*>*		physicsObjects_;  //!< List of objects mapping to physics attributes on wich simulation is run
 	btAlignedObjectArray<FrustumPhysicsObject*>* frustumPhysicsObjects_;  //!< List of frustums mapping to cameras wich is used to cull physicsobjects
 
-	void synchronizeWithAttributes();  //!< Synronize newly added physicsattributes with physicsobjects
+	void synchronizeWithAttributes(Attribute_Physics* physicsAttribute, int physicsAttributeIndex);  //!< Synronize newly added physicsattributes with physicsobjects
 	void updateCulling();  //!< Update frustums, clear culling data, sync frustums with cameras
 	void doCulling(unsigned int frustumAttributeIndex, unsigned int objectAttributeIndex);  //!< Set culling data based on a collision between frustum and physicsobject
 public:
 	PhysicsComponent();
 	~PhysicsComponent();
 	bool init();
-	void onUpdate(float delta);  //!< synchronizeWithAttributes, update physicsobjects, update culling and step simulation
+	void onUpdate(float delta);  //!< loop through all physics objects, synchronizeWithAttributes, update physicsobjects, update culling and step simulation
 	void onEvent(Event* e);  //!< handle events for the physicscomponent, mostly deletion/change events of physicsobjects
 
 	void detectedCollisionsDuringStepSimulation(btScalar timeStep);  //!< Recieve and filter out collisions in simulation and translate accordingly

@@ -7,11 +7,14 @@ class PhysicsObject
 	: public btRigidBody
 {
 private:
-	virtual btVector3 subClassCalculateLocalInertia(btScalar mass);	//! Can be overridden by subclasses. Is called from init.
-	virtual bool subClassSpecificInitHook();						//! Can be overridden by subclasses. Is called from the end of init.
+	virtual btVector3 subClassCalculateLocalInertiaHook(btScalar mass);		//! May be overridden by subclasses. Is called from init.
+	virtual bool subClassSpecificInitHook();								//! May be overridden by subclasses. Is called from the end of init.
 protected:
-		unsigned int attributeIndex_;								//!< Specifies which PhysicsObject is synchronized with which physics attribute.
-		unsigned int collisionFilterGroup_;							 //!< The filter group the object belongs to, ex: Attribute_Physics::WORLD
+		unsigned int attributeIndex_;										//!< Specifies which PhysicsObject is synchronized with which physics attribute.
+		unsigned int collisionFilterGroup_;									//!< The filter group the object belongs to, ex: Attribute_Physics::WORLD.
+
+		btVector3 localInertiaBasedOnCollisionShapeAndMass(btScalar mass);	//!< Called from "subClassCalculateLocalInertiaHook" by subclasses.
+		btVector3 zeroLocalInertia();										//!< Called from "subClassCalculateLocalInertiaHook" by subclasses.
 public:
 	PhysicsObject();
 	virtual ~PhysicsObject();

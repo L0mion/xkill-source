@@ -122,7 +122,7 @@ public:
 		CONNECT_ATTRIBUTES(physics, render);
 		physics->meshID = e->meshID;
 		physics->collisionFilterGroup = Attribute_Physics::WORLD;
-		physics->collisionFilterMask = Attribute_Physics::PLAYER | Attribute_Physics::PROJECTILE | Attribute_Physics::FRUSTUM;
+		physics->collisionFilterMask = Attribute_Physics::PLAYER | Attribute_Physics::PROJECTILE | Attribute_Physics::FRUSTUM | Attribute_Physics::PICKUPABLE;
 		physics->mass = 0;
 	}
 
@@ -149,7 +149,7 @@ public:
 
 		CREATE_ATTRIBUTE(Attribute_Physics, physics, entity);
 		physics->collisionFilterGroup = Attribute_Physics::PROJECTILE;
-		physics->collisionFilterMask = Attribute_Physics::WORLD | Attribute_Physics::PLAYER | Attribute_Physics::FRUSTUM;
+		physics->collisionFilterMask = Attribute_Physics::WORLD | Attribute_Physics::PLAYER | Attribute_Physics::FRUSTUM | Attribute_Physics::PICKUPABLE;
 		CONNECT_ATTRIBUTES(physics, spatial);
 		CONNECT_ATTRIBUTES(physics, render);
 		physics->meshID = render->meshID;
@@ -205,6 +205,9 @@ public:
 
 		CREATE_ATTRIBUTE(Attribute_PickupablesSpawnPoint, pickupablesSpawnPoint, entity);
 		CONNECT_ATTRIBUTES(pickupablesSpawnPoint, position);
+		pickupablesSpawnPoint->spawnPickupableType = e->pickupableType;
+		pickupablesSpawnPoint->spawnDelayInSeconds = 5.0f;
+		pickupablesSpawnPoint->maxNrOfExistingSpawns = 10;
 	}
 
 	void createPickupableEntity(Entity* entity, Event_CreatePickupable* e)
@@ -223,16 +226,21 @@ public:
 		CONNECT_ATTRIBUTES(physics, spatial);
 		CONNECT_ATTRIBUTES(physics, render);
 		physics->collisionFilterGroup = Attribute_Physics::PICKUPABLE;
-		physics->collisionFilterMask = Attribute_Physics::PLAYER | Attribute_Physics::FRUSTUM;
-		physics->collisionResponse = false;
-		physics->mass = 0.0f;
-		physics->gravity = Float3(0.0f, 0.0f, 0.0f);
+		physics->collisionFilterMask = Attribute_Physics::PLAYER | Attribute_Physics::FRUSTUM | Attribute_Physics::WORLD | Attribute_Physics::PICKUPABLE | Attribute_Physics::PROJECTILE;
+		physics->collisionResponse = true;
+		physics->mass = 10.0f;
+		physics->gravity = Float3(0.0f, -10.0f, 0.0f);
 		physics->meshID = render->meshID;
 
 		CREATE_ATTRIBUTE(Attribute_Pickupable, pickupable, entity);
 		pickupable->amount = e->amount;
+		pickupable->pickupableType = e->pickupableType;
+		pickupable->ptr_creatorPickupablesSpawnPoint = e->creatorPickupablesSpawnPoint;
 		CONNECT_ATTRIBUTES(pickupable, position);
 		CONNECT_ATTRIBUTES(pickupable, physics);
+
+		Attribute_PickupablesSpawnPoint* pickupablesSpawnPoint = itrPickupablesSpawnPoint.at(e->creatorPickupablesSpawnPoint);
+		pickupablesSpawnPoint->currentNrOfExistingSpawnedPickupables++;
 	}
 
 	void createExplosionSphereEntity(Entity* entity, Event_CreateExplosionSphere* e)
