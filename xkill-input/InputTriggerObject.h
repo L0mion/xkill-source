@@ -24,6 +24,7 @@ public:
 
 	virtual float getValueFloat();
 	virtual bool getValueBool();
+	virtual bool getValueBoolPressed();
 	virtual bool getValueBoolReleased();
 
 	virtual InputObjectType GetType();

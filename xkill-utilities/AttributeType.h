@@ -272,8 +272,6 @@ struct DLL_U Attribute_Physics : public IAttribute
 	bool reloadDataIntoBulletPhysics;
 	bool alive;
 
-	float explosionSphereRadius;
-
 	DataItemList* getDataList()
 	{
 		DataItemList* list = new DataItemList();
@@ -475,6 +473,7 @@ struct DLL_U Attribute_Input : public IAttribute
 	Float2 position;
 	Float2 rotation;
 	bool fire;
+	bool firePressed;
 	bool jump;
 	bool sprint;
 	bool killPlayer;
@@ -905,18 +904,21 @@ struct DLL_U Attribute_ExplosionSphere : public IAttribute
 
 	AttributePointer ptr_physics;
 	float currentLifeTimeLeft;
+	float radius;
 
 	DataItemList* getDataList()
 	{
 		DataItemList* list = new DataItemList();
 		list->add_AttributePointer(ptr_physics.index, "ptr_physics");;
 		list->add(currentLifeTimeLeft,	"currentLifeTimeLeft");
+		list->add(radius, "radius");
 		return list;
 	}
 	void saveTo(DataItemList* list)
 	{
 		list->get_AttributePointer(&ptr_physics.index);
 		list->get(&currentLifeTimeLeft);
+		list->get(&radius);
 	};
 	AttributeType getType(){return ATTRIBUTE_EXPLOSIONSPHERE;}
 	std::string getName(){return "ExplosionSphere";}

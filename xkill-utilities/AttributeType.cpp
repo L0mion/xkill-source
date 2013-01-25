@@ -173,6 +173,7 @@ Attribute_Input::Attribute_Input()
 	sprint = false;
 	killPlayer = false;
 	fire = false;
+	firePressed = false;
 	changeAmmunitionType = false;
 	changeFiringMode = false;
 	ZeroMemory(&position,sizeof(position));

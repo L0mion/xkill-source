@@ -78,4 +78,10 @@ void PlayerPhysicsObject::handleInput()
 	world = getWorldTransform();
 	world.setRotation(btQuaternion(yaw_,0,0));
 	setWorldTransform(world);
+
+	if(inputAttribute->jump)
+	{
+		applyCentralImpulse(btVector3(0.0f, 1.0f, 0.0f));
+		inputAttribute->jump = false;
+	}
 }

@@ -158,6 +158,15 @@ bool InputDevice::getBoolReleased(int mapping)
 	return false;
 }
 
+bool InputDevice::getBoolPressed(int mapping)
+{
+	for(unsigned int i = 0; i < mappedObjects_[mapping].size(); i++)
+		if(inputObjectArray_->inputObjects[mappedObjects_[mapping][i]]->getValueBoolPressed())
+			return true;
+
+	return false;
+}
+
 std::vector<int> InputDevice::getMappedArray(int mapping)	//Switch to unsigned
 {
 	return mappedObjects_[mapping];

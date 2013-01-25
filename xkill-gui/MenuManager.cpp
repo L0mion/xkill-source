@@ -124,6 +124,18 @@ void HUDWindow::update(Attribute_SplitScreen* splitScreen)
 	resize(horizontalLayout->minimumSize());
 }
 
+HUDManager::HUDManager()
+{
+	//Intentionally left blank
+}
+
+HUDManager::HUDManager(QWidget* parent)
+{
+	ATTRIBUTES_INIT_ALL;
+
+	this->parent = parent;
+}
+
 void HUDManager::update()
 {
 	// Balance attributes / vs huds
@@ -149,11 +161,17 @@ void HUDManager::update()
 	}
 }
 
-HUDManager::HUDManager(QWidget* parent)
+void HUDManager::createHUD()
 {
-	ATTRIBUTES_INIT_ALL;
+	for(int i=0; i<5; i++)
+	{
+		huds.push_back(new HUDWindow(parent, i));
+	}
+}
 
-	this->parent = parent;
+void HUDManager::parentMoveEvent()
+{
+	update();
 }
 
 
@@ -168,19 +186,37 @@ MenuManager::MenuManager( QWidget* parent )
 
 	SUBSCRIBE_TO_EVENT(this, EVENT_UPDATE);
 	SUBSCRIBE_TO_EVENT(this, EVENT_END_DEATHMATCH);
+	SUBSCRIBE_TO_EVENT(this, EVENT_GAME_OVER);
 }
 
 void MenuManager::keyPressEvent( QKeyEvent* e )
 {
 	if(GET_STATE() == STATE_DEATHMATCH)
 	{
+		//JON: Part of STATE_DEATHMATCH in synced FSM. I.e DeathmatchMenuState::onEvent should listen to keyPressEvents
 		switch (e->key()) 
 		{
 		case Qt::Key_Escape:
-			inGameMenu->toggleMenu();
+			inGameMenu->toggleMenu(); //JON: Set flag in for triggering state transition on update?
+			inGameMenu->setWindowFlags(Qt::WindowStaysOnTopHint);
 			break;
 		case Qt::Key_Tab:
 			scoreBoard->toggleMenu(true);
+			break;
+		default:
+			break;
+		}
+	}
+	if(GET_STATE() == STATE_GAMEOVER)
+	{
+		switch (e->key())
+		{
+		case Qt::Key_Escape:
+			//SEND_EVENT(&Event(EVENT_END_DEATHMATCH));
+
+			GET_STATE() = STATE_MAINMENU;
+			SEND_EVENT(&Event_EndDeathmatch());
+			SEND_EVENT(&Event_StartDeathmatch(0));	//To get a black background, for now run the game with zero players
 			break;
 		default:
 			break;
@@ -199,5 +235,50 @@ void MenuManager::keyReleaseEvent( QKeyEvent* e )
 	default:
 		break;
 	}
+}
+
+void MenuManager::onEvent( Event* e )
+{
+	EventType type = e->getType();
+	static int refreshRate = 2;
+	static int test = refreshRate;
+	switch(type) 
+	{
+	case EVENT_UPDATE:
+		// HACK: Makes the menu update every 20 frame
+		test--;
+		if(test<0)
+		{
+			hudManager.update();
+			scoreBoard->onUpdate(1.0f);
+			test = refreshRate;
+		}
+		break;
+	case EVENT_END_DEATHMATCH:
+		scoreBoard->toggleMenu(false);
+		inGameMenu->toggleMenu(false);
+		mainMenu->toggleMenu(true);
+		break;
+	case EVENT_GAME_OVER:
+		scoreBoard->toggleMenu(true);
+		scoreBoard->onUpdate(0.01f);
+		inGameMenu->toggleMenu(false);
+		mainMenu->toggleMenu(false);
+	default:
+		break;
+	}
+}
+
+void MenuManager::onUpdate( float delta )
+{
+	//Intentionally left blank
+}
+
+void MenuManager::moveEvent()
+{
+	mainMenu->parentMoveEvent();
+	scoreBoard->parentMoveEvent();
+	inGameMenu->parentMoveEvent();
+	hudManager.parentMoveEvent();
 }
 
