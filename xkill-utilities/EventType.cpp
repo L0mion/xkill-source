@@ -147,6 +147,19 @@ Event_StateChanged::Event_StateChanged(StateType newState, FiniteStateMachine* s
 	this->newState = newState;
 }
 
+Event_SyncStateCommand::Event_SyncStateCommand( 
+	FiniteStateMachine* sender, 
+	StateType fromState, 
+	StateType toState, 
+	bool isReplacementState )
+	: Event(EVENT_SYNCSTATECOMMAND)
+{
+	this->sender = sender;
+	this->fromState = fromState;
+	this->toState = toState;
+	this->isReplacementState = isReplacementState;
+}
+
 Event_CreateExplosionSphere::Event_CreateExplosionSphere(Float3 position, float radius, float damage, int entityIdOfCreator) : Event(EVENT_CREATE_EXPLOSIONSPHERE)
 {
 	this->position = position;

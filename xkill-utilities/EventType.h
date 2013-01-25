@@ -70,6 +70,7 @@ enum DLL_U EventType
 	EVENT_SPLITSCREEN_CHANGED,
 
 	EVENT_ATTRIBUTE_UPDATED,
+	EVENT_SYNCSTATECOMMAND,
 
 	// Get events
 	EVENT_GET_ATTRIBUTE,
@@ -411,6 +412,27 @@ public:
 	FiniteStateMachine* sender;
 	StateType newState;
 };
+
+/**
+Event used for syncing state to state machines that have the same type
+and current state as the sender but are different instances.
+\ingroup events
+*/
+class DLL_U Event_SyncStateCommand : public Event
+{
+public:
+	Event_SyncStateCommand(
+		FiniteStateMachine* sender, 
+		StateType fromState, 
+		StateType toState, 
+		bool isReplacementState);
+
+	FiniteStateMachine* sender; 
+	StateType fromState;
+	StateType toState;
+	bool isReplacementState;
+};
+
 
 class DLL_U Event_CreateExplosionSphere : public Event
 {
