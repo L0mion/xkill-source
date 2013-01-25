@@ -92,6 +92,11 @@ public:
 			inGameMenu->toggleMenu(false);
 			mainMenu->toggleMenu(true);
 			break;
+		case EVENT_GAME_OVER:
+			scoreBoard->toggleMenu(true);
+			scoreBoard->onUpdate(0.01f);
+			inGameMenu->toggleMenu(false);
+			mainMenu->toggleMenu(false);
 		default:
 			break;
 		}

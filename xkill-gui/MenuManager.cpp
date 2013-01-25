@@ -168,6 +168,7 @@ MenuManager::MenuManager( QWidget* parent )
 
 	SUBSCRIBE_TO_EVENT(this, EVENT_UPDATE);
 	SUBSCRIBE_TO_EVENT(this, EVENT_END_DEATHMATCH);
+	SUBSCRIBE_TO_EVENT(this, EVENT_GAME_OVER);
 }
 
 void MenuManager::keyPressEvent( QKeyEvent* e )
@@ -178,9 +179,25 @@ void MenuManager::keyPressEvent( QKeyEvent* e )
 		{
 		case Qt::Key_Escape:
 			inGameMenu->toggleMenu();
+			inGameMenu->setWindowFlags(Qt::WindowStaysOnTopHint);
 			break;
 		case Qt::Key_Tab:
 			scoreBoard->toggleMenu(true);
+			break;
+		default:
+			break;
+		}
+	}
+	if(GET_STATE() == STATE_GAMEOVER)
+	{
+		switch (e->key())
+		{
+		case Qt::Key_Escape:
+			//SEND_EVENT(&Event(EVENT_END_DEATHMATCH));
+
+			GET_STATE() = STATE_MAINMENU;
+			SEND_EVENT(&Event_EndDeathmatch());
+			SEND_EVENT(&Event_StartDeathmatch(0));	//To get a black background, for now run the game with zero players
 			break;
 		default:
 			break;

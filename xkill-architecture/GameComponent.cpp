@@ -90,7 +90,7 @@ void GameComponent::onUpdate(float delta)
 
 		if(player->priority >= 4)
 		{
-			//SEND_EVENT(&Event_EndDeathmatch());
+			SEND_EVENT(&Event(EVENT_GAME_OVER));
 		}
 
 
@@ -468,6 +468,42 @@ void GameComponent::event_PhysicsAttributesColliding(Event_PhysicsAttributesColl
 
 void GameComponent::event_EndDeathmatch(Event_EndDeathmatch* e)
 {
+	// Delete players
+	while(itrPlayer.hasNext())
+	{
+		itrPlayer.getNext();
+		SEND_EVENT(&Event_RemoveEntity(itrPlayer.ownerId()));
+	}
+
+	while(itrPhysics.hasNext())
+	{
+		itrPhysics.getNext();
+		SEND_EVENT(&Event_RemoveEntity(itrPhysics.ownerId()));
+	}
+	while(itrSpawnPoint.hasNext())
+	{
+		itrSpawnPoint.getNext();
+		SEND_EVENT(&Event_RemoveEntity(itrSpawnPoint.ownerId()));
+	}
+
+	while(itrLightDir.hasNext())
+	{
+		itrLightDir.getNext();
+		SEND_EVENT(&Event_RemoveEntity(itrLightDir.ownerId()));
+	}
+
+	while(itrLightPoint.hasNext())
+	{
+		itrLightPoint.getNext();
+		SEND_EVENT(&Event_RemoveEntity(itrLightPoint.ownerId()));
+	}
+
+	while(itrLightSpot.hasNext())
+	{
+		itrLightSpot.getNext();
+		SEND_EVENT(&Event_RemoveEntity(itrLightSpot.ownerId()));
+	}
+
 	DEBUGPRINT("x--------------x");
 	DEBUGPRINT("-x------------x-");
 	DEBUGPRINT("DEATHMATCH ENDED");
@@ -573,42 +609,6 @@ Attribute_SpawnPoint* GameComponent::findUnoccupiedSpawnPoint()
 
 void GameComponent::event_StartDeathmatch( Event_StartDeathmatch* e )
 {
-	// Delete players
-	while(itrPlayer.hasNext())
-	{
-		itrPlayer.getNext();
-		SEND_EVENT(&Event_RemoveEntity(itrPlayer.ownerId()));
-	}
-
-	while(itrPhysics.hasNext())
-	{
-		itrPhysics.getNext();
-		SEND_EVENT(&Event_RemoveEntity(itrPhysics.ownerId()));
-	}
-	while(itrSpawnPoint.hasNext())
-	{
-		itrSpawnPoint.getNext();
-		SEND_EVENT(&Event_RemoveEntity(itrSpawnPoint.ownerId()));
-	}
-
-	while(itrLightDir.hasNext())
-	{
-		itrLightDir.getNext();
-		SEND_EVENT(&Event_RemoveEntity(itrLightDir.ownerId()));
-	}
-
-	while(itrLightPoint.hasNext())
-	{
-		itrLightPoint.getNext();
-		SEND_EVENT(&Event_RemoveEntity(itrLightPoint.ownerId()));
-	}
-
-	while(itrLightSpot.hasNext())
-	{
-		itrLightSpot.getNext();
-		SEND_EVENT(&Event_RemoveEntity(itrLightSpot.ownerId()));
-	}
-
 	// Create level entities
 	for(unsigned int i = 0; i < levelEvents_.size(); i++)
 	{
