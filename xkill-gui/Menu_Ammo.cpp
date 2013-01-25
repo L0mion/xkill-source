@@ -23,6 +23,10 @@ void Menu_Ammo::setSettingsMenu()	// TODO: Set good values for the sliders and m
 	ui->horizontalSlider_Ammo_Spread->setValue(static_cast<int>(ammo->spread * 126.6f));
 	ui->horizontalSlider_Ammo_VelocitVariation->setValue(static_cast<int>(ammo->velocityVariation * 100.0f));
 	ui->groupBox_Ammo_Explosive->setChecked(ammo->explosive);
+
+	ui->doubleSpinBox_Ammo_Spread->setValue(ammo->spread);
+	ui->doubleSpinBox_Ammo_VelocityVariation->setValue(ammo->velocityVariation);
+	ui->doubleSpinBox_Ammo_ExplosionSphere->setValue(ammo->explosionSphere);
 }
 
 void Menu_Ammo::settingsMenuUpdated()
@@ -36,6 +40,10 @@ void Menu_Ammo::settingsMenuUpdated()
 	ammo->speed = static_cast<float>(ui->horizontalSlider_Ammo_Speed->value());
 	ammo->spread = static_cast<float>(ui->horizontalSlider_Ammo_Spread->value()) * 0.0079f;
 	ammo->velocityVariation = static_cast<float>(ui->horizontalSlider_Ammo_VelocitVariation->value()) * 0.01f;
+
+	ui->doubleSpinBox_Ammo_Spread->setValue(ammo->spread);
+	ui->doubleSpinBox_Ammo_VelocityVariation->setValue(ammo->velocityVariation);
+	ui->doubleSpinBox_Ammo_ExplosionSphere->setValue(ammo->explosionSphere);
 }
 
 Ammunition* Menu_Ammo::getAmmoSettings()

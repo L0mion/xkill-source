@@ -4,6 +4,7 @@
 
 struct Attribute_WeaponStats;
 
+//! Stores all data related to ammunition
 struct DLL_U Ammunition
 {
 	enum AmmunitionType
@@ -28,6 +29,7 @@ struct DLL_U Ammunition
 	AmmunitionType type;
 };
 
+//! Stores all data related to firing mode
 struct DLL_U FiringMode
 {
 	enum FiringModeType
