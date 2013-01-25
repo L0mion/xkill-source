@@ -124,6 +124,18 @@ void HUDWindow::update(Attribute_SplitScreen* splitScreen)
 	resize(horizontalLayout->minimumSize());
 }
 
+HUDManager::HUDManager()
+{
+	//Intentionally left blank
+}
+
+HUDManager::HUDManager(QWidget* parent)
+{
+	ATTRIBUTES_INIT_ALL;
+
+	this->parent = parent;
+}
+
 void HUDManager::update()
 {
 	// Balance attributes / vs huds
@@ -149,11 +161,17 @@ void HUDManager::update()
 	}
 }
 
-HUDManager::HUDManager(QWidget* parent)
+void HUDManager::createHUD()
 {
-	ATTRIBUTES_INIT_ALL;
+	for(int i=0; i<5; i++)
+	{
+		huds.push_back(new HUDWindow(parent, i));
+	}
+}
 
-	this->parent = parent;
+void HUDManager::parentMoveEvent()
+{
+	update();
 }
 
 
@@ -217,5 +235,50 @@ void MenuManager::keyReleaseEvent( QKeyEvent* e )
 	default:
 		break;
 	}
+}
+
+void MenuManager::onEvent( Event* e )
+{
+	EventType type = e->getType();
+	static int refreshRate = 2;
+	static int test = refreshRate;
+	switch(type) 
+	{
+	case EVENT_UPDATE:
+		// HACK: Makes the menu update every 20 frame
+		test--;
+		if(test<0)
+		{
+			hudManager.update();
+			scoreBoard->onUpdate(1.0f);
+			test = refreshRate;
+		}
+		break;
+	case EVENT_END_DEATHMATCH:
+		scoreBoard->toggleMenu(false);
+		inGameMenu->toggleMenu(false);
+		mainMenu->toggleMenu(true);
+		break;
+	case EVENT_GAME_OVER:
+		scoreBoard->toggleMenu(true);
+		scoreBoard->onUpdate(0.01f);
+		inGameMenu->toggleMenu(false);
+		mainMenu->toggleMenu(false);
+	default:
+		break;
+	}
+}
+
+void MenuManager::onUpdate( float delta )
+{
+	//Intentionally left blank
+}
+
+void MenuManager::moveEvent()
+{
+	mainMenu->parentMoveEvent();
+	scoreBoard->parentMoveEvent();
+	inGameMenu->parentMoveEvent();
+	hudManager.parentMoveEvent();
 }
 
