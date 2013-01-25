@@ -220,6 +220,14 @@ void ManagementD3D::setUAVBackBufferCS()
 {
 	devcon_->CSSetUnorderedAccessViews(0, 1, &uavBackBuffer_, nullptr);
 }
+void ManagementD3D::setRenderTargetViewBackBuffer()
+{
+	devcon_->OMSetRenderTargets(1, &rtvBackBuffer_, dsvDepthBuffer_);
+}
+void ManagementD3D::unsetRenderTargetViewBackBufer()
+{
+//	devcon_->OMSetRenderTargets(1, nullptr, nullptr);
+}
 
 void ManagementD3D::present()
 {
