@@ -57,16 +57,6 @@ public:
 
 		CREATE_ATTRIBUTE(Attribute_Position, position, entity);
 
-		//temp, create demo light for each projectile
-		//CREATE_ATTRIBUTE(Attribute_Light_Point, lightPoint, entity);
-		//CONNECT_ATTRIBUTES(lightPoint, position);
-		//lightPoint->lightPoint.ambient		= Float4(0.8f, 0.8f, 0.8f, 1.0f);
-		//lightPoint->lightPoint.diffuse		= Float4(0.8f, 0.8f, 0.8f, 1.0f);
-		//lightPoint->lightPoint.specular		= Float4(0.8f, 0.8f, 0.8f, 1.0f);
-		//lightPoint->lightPoint.range		= 3.0f;
-		//lightPoint->lightPoint.attenuation	= Float3(0.0f, 0.1f, 0.0f);
-		/////
-
 		CREATE_ATTRIBUTE(Attribute_Spatial, spatial, entity);
 		CONNECT_ATTRIBUTES(spatial, position);
 
@@ -112,15 +102,6 @@ public:
 		CREATE_ATTRIBUTE(Attribute_SplitScreen, splitScreen, entity);
 		CONNECT_ATTRIBUTES(splitScreen, camera);
 		CONNECT_ATTRIBUTES(splitScreen, player);
-
-		//temp, create demo light for each projectile
-		CREATE_ATTRIBUTE(Attribute_Light_Point, lightPoint, entity);
-		CONNECT_ATTRIBUTES(lightPoint, position);
-		lightPoint->lightPoint.ambient		= Float4(0.8f, 0.0f, 0.0f, 1.0f);
-		lightPoint->lightPoint.diffuse		= Float4(0.8f, 0.0f, 0.0f, 1.0f);
-		lightPoint->lightPoint.specular		= Float4(0.8f, 0.0f, 0.0f, 1.0f);
-		lightPoint->lightPoint.range		= 2.0f;
-		lightPoint->lightPoint.attenuation	= Float3(0.0f, 0.1f, 0.0f);
 	}
 	
 	void createWorldEntity(Entity* entity, Event_CreateWorld* e)
@@ -147,22 +128,11 @@ public:
 		position = ((AttributeManager*)AttributeManagerDLLWrapper::getInstance())->position.createAttribute(entity);
 		position->position = Float3(0.0f, 0.5f, 0.0f);
 		
-		//temp, create demo light for each projectile
-		//CREATE_ATTRIBUTE(Attribute_Light_Point, lightPoint, entity);
-		//CONNECT_ATTRIBUTES(lightPoint, position);
-		//lightPoint->lightPoint.ambient		= Float4(0.8f, 0.8f, 0.8f, 1.0f);
-		//lightPoint->lightPoint.diffuse		= Float4(0.8f, 0.8f, 0.8f, 1.0f);
-		//lightPoint->lightPoint.specular		= Float4(0.8f, 0.8f, 0.8f, 1.0f);
-		//lightPoint->lightPoint.range		= 3.0f;
-		//lightPoint->lightPoint.attenuation	= Float3(0.0f, 0.1f, 0.0f);
-
-		//temp, create demo light for each projectile
 		//CREATE_ATTRIBUTE(Attribute_Light_Dir, lightDir, entity);
-		////CONNECT_ATTRIBUTES(lightDir, position);
-		//lightDir->lightDir.direction = Float3(0.57735f, -0.57735f, 0.57735f);
-		//lightDir->lightDir.ambient = Float4(0.8f, 0.8f, 0.8f, 1.0f);
-		//lightDir->lightDir.diffuse = Float4(0.2f, 0.2f, 0.2f, 1.0f);
-		//lightDir->lightDir.specular = Float4(1.0f, 1.0f, 1.0f, 1.0f);
+		//lightDir->lightDir.direction	= Float3(0.57735f, -0.57735f, 0.57735f);
+		//lightDir->lightDir.ambient		= Float4(0.2f, 0.2f, 0.2f, 1.0f);
+		//lightDir->lightDir.diffuse		= Float4(0.2f, 0.2f, 0.2f, 1.0f);
+		//lightDir->lightDir.specular		= Float4(0.2f, 0.2f, 0.2f, 1.0f);
 	}
 
 	void createProjectileEntity(Entity* entity, Event_CreateProjectile* e)
@@ -211,9 +181,9 @@ public:
 		//temp, create demo light for each projectile
 		CREATE_ATTRIBUTE(Attribute_Light_Point, lightPoint, entity);
 		CONNECT_ATTRIBUTES(lightPoint, position);
-		lightPoint->lightPoint.ambient		= Float4(0.8f, 0.8f, 0.8f, 1.0f);
-		lightPoint->lightPoint.diffuse		= Float4(0.8f, 0.8f, 0.8f, 1.0f);
-		lightPoint->lightPoint.specular		= Float4(0.8f, 0.8f, 0.8f, 1.0f);
+		lightPoint->lightPoint.ambient		= Float4(0.8f, 0.0f, 0.0f, 1.0f);
+		lightPoint->lightPoint.diffuse		= Float4(0.8f, 0.0f, 0.0f, 1.0f);
+		lightPoint->lightPoint.specular		= Float4(0.8f, 0.0f, 0.0f, 1.0f);
 		lightPoint->lightPoint.range		= 1.0f;
 		lightPoint->lightPoint.attenuation	= Float3(0.0f, 0.1f, 0.0f);
 	}
