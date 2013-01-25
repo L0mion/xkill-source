@@ -158,6 +158,15 @@ bool InputDevice::getBoolReleased(int mapping)
 	return false;
 }
 
+bool InputDevice::getBoolPressed(int mapping)
+{
+	for(unsigned int i = 0; i < mappedObjects_[mapping].size(); i++)
+		if(inputObjectArray_->inputObjects[mappedObjects_[mapping][i]]->getValueBoolPressed())
+			return true;
+
+	return false;
+}
+
 std::vector<int> InputDevice::getMappedArray(int mapping)	//Switch to unsigned
 {
 	return mappedObjects_[mapping];
@@ -172,14 +181,7 @@ unsigned long InputDevice::getHash()
 
 	str += Converter::IntToStr(InputAction::ACTION_LAST);
 
-	unsigned long hash = 5381;
-
-	for(unsigned int i = 0; i < str.size(); i++)
-	{
-		hash = ((hash << 5) + hash) + str[i];
-	}
-
-	return hash;
+	return Converter::HashString(str);
 }
 
 InputButtonObject* InputDevice::getButtonObject(unsigned int index)

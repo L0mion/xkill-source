@@ -16,6 +16,7 @@
 #include <maya/MFnTransform.h>
 #include <maya/MQuaternion.h>
 
+
 class exportLevel : public MPxCommand
 {
     public:
@@ -25,7 +26,26 @@ class exportLevel : public MPxCommand
         MStatus redoIt();
         MStatus undoIt();
         bool isUndoable() const;
+		
         static void* creator();
+
+		bool verbose;
+		bool clearhist;
+
+		void selectStuff(bool verboseSelect);
+		void commandpart1();
+		void commandpart2();
+		void commandpart3();
+		void commandpart4();
+		void commandpart5();
+
+		MSelectionList rigidbodies;
+		MSelectionList meshes;
+		MSelectionList instances;
+		MSelectionList spawns;
+		MSelectionList lights;
+		MSelectionList ammos;
+		MSelectionList hacks;
 };
 exportLevel::exportLevel()
 {
@@ -34,38 +54,16 @@ exportLevel::~exportLevel()
 {
 }
 
-MStatus exportLevel::doIt( const MArgList& args)
+void exportLevel::selectStuff(bool verboseSelect)
 {
-	bool verbose = false;
-	for( unsigned int i=0; i < args.length();++i )
-	{
-		if( args.asString(i) == "-v" || args.asString(i) == "-verbose" )
-		{
-			verbose = true;
-		}
-	}
-
 	MString output;
 	MString command;
 	MObject obj;
 
-	////////////////////////////////////////////////////////////////////////////////////////////////
-	// INDEXING BEGINS HERE ////////////////////////////////////////////////////////////////////////
-	////////////////////////////////////////////////////////////////////////////////////////////////
-
-
-	///////////////////////
-	// SAVE USER SELECTIONS
-	///////////////////////
-	MSelectionList userSelection;
-	MGlobal::getActiveSelectionList(userSelection); // Save the users selections for later restoring
-	MGlobal::clearSelectionList();
-
-
 	/////////////////////
 	// SELECT RIGIDBODIES
 	/////////////////////
-	MSelectionList rigidbodies;
+	
 	MGlobal::selectByName( "*RigidBody*"); // Select all nodes with RigidBody in their name
 	MGlobal::getActiveSelectionList(rigidbodies);
 	for( unsigned int i = 0; i < rigidbodies.length(); i++)
@@ -87,14 +85,15 @@ MStatus exportLevel::doIt( const MArgList& args)
 	}
 	output = "Number of rigidbodies in scene: ";
 	output = output + rigidbodies.length();
-	MGlobal::displayInfo(output);  // Print number of rigidbodies found
+	if(verboseSelect)
+		MGlobal::displayInfo(output);  // Print number of rigidbodies found
 	MGlobal::clearSelectionList();
 	
 
 	///////////////////////////////
 	// SELECT MESHES BY RIGIDBODIES
 	///////////////////////////////
-	MSelectionList meshes;
+	
 	for( unsigned int i = 0; i < rigidbodies.length(); i++)
 	{
 		rigidbodies.getDependNode(i,obj);
@@ -106,14 +105,14 @@ MStatus exportLevel::doIt( const MArgList& args)
 	MGlobal::getActiveSelectionList(meshes);
 	output = "Number of meshes in scene: ";
 	output = output + meshes.length();
-	MGlobal::displayInfo(output);  // Print number of meshes found
+	if(verboseSelect)
+		MGlobal::displayInfo(output);  // Print number of meshes found
 	MGlobal::clearSelectionList();
 
 
 	//////////////////////////////////
 	// SELECT INSTANCES BY RIGIDBODIES
 	//////////////////////////////////
-	MSelectionList instances;
 	for( unsigned int i = 0; i < rigidbodies.length(); i++)
 	{
 		rigidbodies.getDependNode(i,obj);
@@ -123,12 +122,6 @@ MStatus exportLevel::doIt( const MArgList& args)
 		MGlobal::selectByName( output ); // Select the objects which correspont to a RigidBody
 	}
 	MGlobal::getActiveSelectionList(instances);
-	output = "Number instances found by RigidBodies: ";
-	output = output + instances.length();
-	if(verbose)
-	{
-		MGlobal::displayInfo(output);  // Print number of instances found
-	}
 	for( unsigned int i = 0; i < instances.length(); i++)
 	{
 		instances.getDependNode(i,obj);
@@ -152,17 +145,15 @@ MStatus exportLevel::doIt( const MArgList& args)
 	}
 	output = "Number of instances in scene: ";
 	output = output + instances.length();
-	MGlobal::displayInfo(output);  // Print number of meshes found
+	if(verboseSelect)
+		MGlobal::displayInfo(output);  // Print number of meshes found
 	MGlobal::clearSelectionList();
 
 
 	///////////////////////
 	// SELECT GAME ENTITIES
 	///////////////////////
-	MSelectionList spawns;
-	MSelectionList lights;
-	MSelectionList ammos;
-	MSelectionList hacks;
+	
 
 	MGlobal::selectByName( "ammo*"); // Select all nodes with ammo in their name
 	MGlobal::getActiveSelectionList(ammos);
@@ -193,7 +184,8 @@ MStatus exportLevel::doIt( const MArgList& args)
 	}
 	output = "Number of ammo in scene: ";
 	output = output + ammos.length();
-	MGlobal::displayInfo(output);  // Print number of ammo found
+	if(verboseSelect)
+		MGlobal::displayInfo(output);  // Print number of ammo found
 
 	MGlobal::selectByName( "hack*"); // Select all nodes with hack in their name
 	MGlobal::getActiveSelectionList(hacks);
@@ -222,7 +214,8 @@ MStatus exportLevel::doIt( const MArgList& args)
 	}
 	output = "Number of hacks in scene: ";
 	output = output + hacks.length();
-	MGlobal::displayInfo(output);  // Print number of hacks found
+	if(verboseSelect)
+		MGlobal::displayInfo(output);  // Print number of hacks found
 
 	MGlobal::selectByName( "light*"); // Select all nodes with light in their name
 	MGlobal::getActiveSelectionList(lights);
@@ -254,7 +247,8 @@ MStatus exportLevel::doIt( const MArgList& args)
 	}
 	output = "Number of lights in scene: ";
 	output = output + lights.length();
-	MGlobal::displayInfo(output);  // Print number of lights found
+	if(verboseSelect)
+		MGlobal::displayInfo(output);  // Print number of lights found
 
 	MGlobal::selectByName( "spawn*"); // Select all nodes with spawn in their name
 	MGlobal::getActiveSelectionList(spawns);
@@ -283,108 +277,241 @@ MStatus exportLevel::doIt( const MArgList& args)
 	}
 	output = "Number of spawns in scene: ";
 	output = output + spawns.length();
-	MGlobal::displayInfo(output);  // Print number of spawns found
-	
+	if(verboseSelect)
+		MGlobal::displayInfo(output);  // Print number of spawns found
+}
 
-	////////////////////////////////////////////////////////////////////////////////////////////////
-	// EXPORTING BEGINS HERE ///////////////////////////////////////////////////////////////////////
-	////////////////////////////////////////////////////////////////////////////////////////////////
-
-
-	////////////////////////////////
-	// EXPORT RIGIDBODIES TO .bullet
-	////////////////////////////////
-	MTransformationMatrix::RotationOrder order;
-	MVector* rbTranslation = new MVector[rigidbodies.length()];
-	double** rbRotation = new double*[rigidbodies.length()];
-	for(unsigned int i = 0; i < rigidbodies.length(); i++)
-	{
-		rigidbodies.getDependNode(i,obj);
-		MFnTransform fn(obj);
-		MObject obj2;
-		MFnTransform fn2(obj2);
-
-		// Get transform for rigidbody
-		rbTranslation[i] = fn.getTranslation(MSpace::kTransform);
-		rbRotation[i] = new double[3];
-		fn.getRotation(rbRotation[i],order);
-
-		// Get transform for mesh
-		MVector	mTranslation = fn2.getTranslation(MSpace::kTransform);
-		double mRotation[3];
-		fn2.getRotation(mRotation,order);
-
-		// Get "origo" tranform
-		MVector oTranslation = rbTranslation[i] - mTranslation;
-		double* oRotation = new double[3];
-		oRotation[0] = rbRotation[i][0] - mRotation[0];
-		oRotation[1] = rbRotation[i][1] - mRotation[1];
-		oRotation[2] = rbRotation[i][2] - mRotation[2];
-
-		// Set rigidbody to "origo" transform
-		fn.setTranslation(oTranslation,MSpace::kTransform);
-		fn.setRotation(oRotation,order);
-
-	}
-	command = "file -force -options \"v=0;\" -type \"Bullet Physics export\" -pr -ea \"C:/Users/Nils/Desktop/testexport/TestArena.bullet\";";
-	MGlobal::executeCommand(command,output,false);
-	output = rigidbodies.length();
-	output = output + " to be reset";
-	MGlobal::displayInfo(output);
-
-	for(unsigned int i = 0; i < rigidbodies.length(); i++)
-	{
-		rigidbodies.getDependNode(i,obj);
-		MFnTransform fn(obj);
-		MVector a = fn.getTranslation(MSpace::kTransform);
-		output = "trans: ";
-		/*output = output + a.x;
-		output = output + " ";
-		output = output + a.y;
-		output = output + " ";
-		output = output + a.z;*/
-		MGlobal::displayInfo("ÄRTHJÄRNA");
-
-
-		// Set rigidbody to "rigidbody" transform
-		fn.setTranslation(rbTranslation[i],MSpace::kTransform);
-		fn.setRotation(rbRotation[i],order);
-	}
+void exportLevel::commandpart1()
+{
+	MString output;
 	if(verbose)
 	{
-		output = "Rigidbodies exported to: " + output;
+		MGlobal::displayInfo("Command part 1 - Displace rigidbodies for export ");
+	}
+	MTransformationMatrix::RotationOrder order;
+	MObject rigidbody;
+	MObject mesh;
+	
+	MVector rigidbodyTranslation, meshTranslation, resultTranslation;
+	double rigidbodyRotation[3], meshRotation[3], resultRotation[3];
+	for(unsigned int i = 0; i < rigidbodies.length(); i++)
+	{
+		// Get rigidbody and mesh
+		rigidbodies.getDependNode(i,rigidbody);
+		meshes.getDependNode(i,mesh);
+		MFnTransform fnRigidBody(rigidbody);
+		MFnTransform fnMesh(mesh);
+		// Print their name
+		if(verbose)
+		{
+			MGlobal::displayInfo(fnRigidBody.name());
+			MGlobal::displayInfo(fnMesh.name());
+		}
+
+		// Get transform for rigidbody
+		rigidbodyTranslation = fnRigidBody.getTranslation(MSpace::kTransform);
+		fnRigidBody.getRotation(rigidbodyRotation,order);
+		if(verbose)
+		{
+			output = "RigidBody transformation ";
+			output = output + rigidbodyTranslation.x;
+			output = output + " ";
+			output = output + rigidbodyTranslation.y;
+			output = output + " ";
+			output = output + rigidbodyTranslation.z;
+			output = output + " ";
+			output = output + rigidbodyRotation[0];
+			output = output + " ";
+			output = output + rigidbodyRotation[1];
+			output = output + " ";
+			output = output + rigidbodyRotation[2];
+			MGlobal::displayInfo(output);
+		}
+		// Get transform for mesh
+		meshTranslation = fnMesh.getTranslation(MSpace::kTransform);
+		fnMesh.getRotation(meshRotation,order);
+		if(verbose)
+		{
+			output = "Mesh transformation ";
+			output = output + meshTranslation.x;
+			output = output + " ";
+			output = output + meshTranslation.y;
+			output = output + " ";
+			output = output + meshTranslation.z;
+			output = output + " ";
+			output = output + meshRotation[0];
+			output = output + " ";
+			output = output + meshRotation[1];
+			output = output + " ";
+			output = output + meshRotation[2];
+			MGlobal::displayInfo(output);
+		}
+		// Get resulting transform and set to rigidbody
+		resultTranslation = rigidbodyTranslation - meshTranslation;
+		resultRotation[0] = rigidbodyRotation[0] - meshRotation[0];
+		resultRotation[1] = rigidbodyRotation[1] - meshRotation[1];
+		resultRotation[2] = rigidbodyRotation[2] - meshRotation[2];
+		if(verbose)
+		{
+			output = "Result transformation ";
+			output = output + meshTranslation.x;
+			output = output + " ";
+			output = output + meshTranslation.y;
+			output = output + " ";
+			output = output + meshTranslation.z;
+			output = output + " ";
+			output = output + meshRotation[0];
+			output = output + " ";
+			output = output + meshRotation[1];
+			output = output + " ";
+			output = output + meshRotation[2];
+			MGlobal::displayInfo(output);
+		}
+		
+		fnRigidBody.setTranslation(resultTranslation,MSpace::kTransform);
+		fnRigidBody.setRotation(resultRotation,order);
+	}
+}
+void exportLevel::commandpart2()
+{
+	if(verbose)
+	{
+		MGlobal::displayInfo("Command part 2 - Export .bullet");
+	}
+	MString output;
+	MString command;
+	command = "file -force -options \"v=0;\" -type \"Bullet Physics export\" -pr -ea \"C:/Users/Nils/Desktop/testexport/TestArena.bullet\";";
+	MGlobal::executeCommand(command,output,false);
+	if(verbose)
+	{
+		output = "Rigidbodies exported to " + output;
 		MGlobal::displayInfo(output);
 	}
-	output = rigidbodies.length();
-	output = output + " rigidbodies have been exported to .bullet";
-	MGlobal::displayInfo(output);
+}
+void exportLevel::commandpart3()
+{
+	MString output;
+	if(verbose)
+	{
+		MGlobal::displayInfo("Command part 3 - Restore displacements");
+	}
+	MTransformationMatrix::RotationOrder order;
+	MObject rigidbody;
+	MObject mesh;
+	
+	MVector rigidbodyTranslation, meshTranslation, resultTranslation;
+	double rigidbodyRotation[3], meshRotation[3], resultRotation[3];
+	for(unsigned int i = 0; i < rigidbodies.length(); i++)
+	{
+		// Get rigidbody and mesh
+		rigidbodies.getDependNode(i,rigidbody);
+		meshes.getDependNode(i,mesh);
+		MFnTransform fnRigidBody(rigidbody);
+		MFnTransform fnMesh(mesh);
+		// Print their name
+		if(verbose)
+		{
+			MGlobal::displayInfo(fnRigidBody.name());
+			MGlobal::displayInfo(fnMesh.name());
+		}
 
-
-	////////////////////////
-	// EXPORT MESHES TO .obj
-	////////////////////////
+		// Get transform for rigidbody
+		rigidbodyTranslation = fnRigidBody.getTranslation(MSpace::kTransform);
+		fnRigidBody.getRotation(rigidbodyRotation,order);
+		if(verbose)
+		{
+			output = "RigidBody transformation ";
+			output = output + rigidbodyTranslation.x;
+			output = output + " ";
+			output = output + rigidbodyTranslation.y;
+			output = output + " ";
+			output = output + rigidbodyTranslation.z;
+			output = output + " ";
+			output = output + rigidbodyRotation[0];
+			output = output + " ";
+			output = output + rigidbodyRotation[1];
+			output = output + " ";
+			output = output + rigidbodyRotation[2];
+			MGlobal::displayInfo(output);
+		}
+		// Get transform for mesh
+		meshTranslation = fnMesh.getTranslation(MSpace::kTransform);
+		fnMesh.getRotation(meshRotation,order);
+		if(verbose)
+		{
+			output = "Mesh transformation ";
+			output = output + meshTranslation.x;
+			output = output + " ";
+			output = output + meshTranslation.y;
+			output = output + " ";
+			output = output + meshTranslation.z;
+			output = output + " ";
+			output = output + meshRotation[0];
+			output = output + " ";
+			output = output + meshRotation[1];
+			output = output + " ";
+			output = output + meshRotation[2];
+			MGlobal::displayInfo(output);
+		}
+		// Get resulting transform and set to rigidbody
+		resultTranslation = rigidbodyTranslation + meshTranslation;
+		resultRotation[0] = rigidbodyRotation[0] + meshRotation[0];
+		resultRotation[1] = rigidbodyRotation[1] + meshRotation[1];
+		resultRotation[2] = rigidbodyRotation[2] + meshRotation[2];
+		if(verbose)
+		{
+			output = "Result transformation ";
+			output = output + meshTranslation.x;
+			output = output + " ";
+			output = output + meshTranslation.y;
+			output = output + " ";
+			output = output + meshTranslation.z;
+			output = output + " ";
+			output = output + meshRotation[0];
+			output = output + " ";
+			output = output + meshRotation[1];
+			output = output + " ";
+			output = output + meshRotation[2];
+			MGlobal::displayInfo(output);
+		}
+		
+		fnRigidBody.setTranslation(resultTranslation,MSpace::kTransform);
+		fnRigidBody.setRotation(resultRotation,order);
+	}
+}
+void exportLevel::commandpart4()
+{
+	MString output;
+	MString command;
+	if(verbose)
+	{
+		MGlobal::displayInfo("Command part 4 - Export .obj's");
+	}
 	MGlobal::clearSelectionList();
+	MObject mesh;
+
 	for( unsigned int i = 0; i < meshes.length(); i++)
 	{
-		meshes.getDependNode(i,obj);
-		MFnTransform fn(obj);
+		MTransformationMatrix::RotationOrder order;
+		meshes.getDependNode(i,mesh);
+		MFnTransform fnMesh(mesh);
 
 		// Get transform for mesh
-		MVector	mTranslation = fn.getTranslation(MSpace::kTransform);
+		MVector	mTranslation = fnMesh.getTranslation(MSpace::kTransform);
 		double mRotation[3];
-		fn.getRotation(mRotation,order);
+		fnMesh.getRotation(mRotation,order);
 		MVector noTrans;
 		double noRot[3] = {0.0,0.0,0.0};
-		fn.setTranslation(noTrans,MSpace::kTransform);
-		fn.setRotation(noRot,order);
+		fnMesh.setTranslation(noTrans,MSpace::kTransform);
+		fnMesh.setRotation(noRot,order);
 
 		//
 		MGlobal::clearSelectionList();
 		command = "select -r ";
-		command = command + fn.name();
+		command = command + fnMesh.name();
 		MGlobal::executeCommand(command,false);
 		command = "file -force -options \"groups=1;ptgroups=0;materials=1;smoothing=0;normals=1\" -typ \"OBJexport\" -pr -es \"C:/Users/Nils/Desktop/testexport/";
-		command = command + fn.name().asChar();
+		command = command + fnMesh.name().asChar();
 		command = command + ".obj\";";
 		MGlobal::executeCommand(command,output,false);
 		output = "Mesh exported to: " + output;
@@ -392,18 +519,18 @@ MStatus exportLevel::doIt( const MArgList& args)
 		{
 			MGlobal::displayInfo(output);
 		}
-		fn.setTranslation(mTranslation,MSpace::kTransform);
-		fn.setRotation(mRotation,order);
+		fnMesh.setTranslation(mTranslation,MSpace::kTransform);
+		fnMesh.setRotation(mRotation,order);
 	}
 	output = meshes.length();
 	output = output + " meshes have been exported to .obj's";
 	MGlobal::displayInfo(output);
 	MGlobal::clearSelectionList();
-
-	//////////////////////////////
-	// EXPORT ENTITIES TO .mdldesc
-	//////////////////////////////
-	
+}
+void exportLevel::commandpart5()
+{
+	MObject obj;
+	MString output;
 	MString rows;
 	rows = "";
 	rows = rows +  "# Use .mdldesc to specify what files are to be loaded and interpreted as level world parts\n";
@@ -634,13 +761,79 @@ MStatus exportLevel::doIt( const MArgList& args)
 		row = row + " 1\n";
 		rows = rows +  row;
 	}*/
-
-	//////////////////////////
-	// RESTORE USER SELECTIONS
-	//////////////////////////
-	MGlobal::clearSelectionList();
-	MGlobal::setActiveSelectionList(userSelection); // Restore the users selections
-    return MS::kSuccess;
+}
+MStatus exportLevel::doIt( const MArgList& args)
+{
+	MString command;
+	verbose = false;
+	clearhist = false;
+	int part = -1;
+	// Read parameters
+	for( unsigned int i=0; i < args.length();++i )
+	{
+		if( args.asString(i) == "-v" || args.asString(i) == "-verbose" )
+		{
+			verbose = true;
+		}
+		if( args.asString(i) == "-c" || args.asString(i) == "-clear" )
+		{
+			clearhist = true;
+		}
+		if( args.asString(i) == "-p" || args.asString(i) == "-part" )
+		{
+			part = args.asInt(++i);
+		}
+	}
+	if(part == -1)
+	{
+		// Save the users selections for later restoring
+		MSelectionList userSelection;
+		MGlobal::getActiveSelectionList(userSelection); 
+		MGlobal::clearSelectionList();
+		// Clear history in script editor
+		if(clearhist)
+		{
+			command = "scriptEditorInfo -clearHistory;";
+			MGlobal::executeCommand(command);
+		}
+		// Run subparts of the script
+		command = "exportLevel ";
+		selectStuff(true);
+		command = command + "-v ";
+		MGlobal::executeCommand(command + "-p 1",true);
+		MGlobal::executeCommand(command + "-p 2",true);
+		MGlobal::executeCommand(command + "-p 3",true);
+		MGlobal::executeCommand(command + "-p 4",true);
+		MGlobal::executeCommand(command + "-p 5",true);
+		// RESTORE USER SELECTIONS
+		MGlobal::clearSelectionList();
+		MGlobal::setActiveSelectionList(userSelection);
+	}
+	else
+	{
+		// Run selection of things
+		selectStuff(true);
+		// Run the correct part
+		switch(part)
+		{
+		case 1:
+			commandpart1();
+			break;
+		case 2:
+			commandpart2();
+			break;
+		case 3:
+			commandpart3();
+			break;
+		case 4:
+			commandpart4();
+			break;
+		case 5:
+			commandpart5();
+			break;
+		}
+	}
+	return MS::kSuccess;
 }
 MStatus exportLevel::redoIt()
 {

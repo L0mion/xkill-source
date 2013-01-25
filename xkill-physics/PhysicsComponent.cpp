@@ -20,6 +20,7 @@
 AttributeIterator<Attribute_Physics> itrPhysics;
 AttributeIterator<Attribute_Render> itrRender;
 AttributeIterator<Attribute_Camera> itrCamera_2;
+
 static debugDrawDispatcher gDebugDraw;
 
 PhysicsComponent::PhysicsComponent() : broadphase_(nullptr),
@@ -135,11 +136,20 @@ void PhysicsComponent::onUpdate(float delta)
 		}
 	}
 
-	/*updateCulling();
+	updateCulling();
 	dynamicsWorld_->stepSimulation(delta,0);
-	gDebugDraw.clearDebugVerticesVector();*/
-	dynamicsWorld_->debugDrawWorld();
-	queueDebugDrawEvent();
+	if(BULLETPHYSICSDEBUGDRAW)
+	{
+		//static float timer = 0.0f;
+		//if(timer > 0.1f)
+		{
+			gDebugDraw.clearDebugVerticesVector();
+			dynamicsWorld_->debugDrawWorld();
+			gDebugDraw.queueDebugDrawEvent();
+			//timer = 0.0f;
+		}
+		//timer += delta;
+	}
 
 	FLUSH_QUEUED_EVENTS(EVENT_PHYSICS_ATTRIBUTES_COLLIDING);
 }
@@ -156,9 +166,16 @@ void PhysicsComponent::onEvent(Event* e)
 		{
 			if(attributeUpdated->isDeleted)
 			{
-  				dynamicsWorld_->removeRigidBody(physicsObjects_->at(attributeIndex));
-				delete physicsObjects_->at(attributeIndex);
-				physicsObjects_->at(attributeIndex) = nullptr;
+				if(attributeIndex < physicsObjects_->size() && physicsObjects_->at(attributeIndex) != nullptr)
+				{
+  					dynamicsWorld_->removeRigidBody(physicsObjects_->at(attributeIndex));
+					delete physicsObjects_->at(attributeIndex);
+					physicsObjects_->at(attributeIndex) = nullptr;
+				}
+				else
+				{
+					DEBUGPRINT("Mismatch when synchronizing deletion of physics objects with physics attributes");
+				}
 			}
 			else if(attributeUpdated->isCreated)
 			{
@@ -181,11 +198,6 @@ void PhysicsComponent::onEvent(Event* e)
 	//case EVENT_LOAD_LEVEL:
 	//	break;
 	}
-}
-
-void PhysicsComponent::queueDebugDrawEvent()
-{
-	gDebugDraw.queueDebugDrawEvent();
 }
 
 void PhysicsComponent::synchronizeWithAttributes()

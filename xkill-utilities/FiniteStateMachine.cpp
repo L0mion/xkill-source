@@ -83,8 +83,13 @@ void FiniteStateMachine::Update( float dt )
 	}
 
 	bool isReplacementState = true;
+	StateType oldStateType = currentState_.top()->GetType();
 	StateType goalStateType = currentState_.top()->CheckTransitions(isReplacementState);
-	HandleTransition(goalStateType, isReplacementState);
+	if (HandleTransition(goalStateType, isReplacementState))
+	{
+		SEND_EVENT(&Event_StateChanged(goalStateType, this));
+		SEND_EVENT(&Event_SyncStateCommand(this, oldStateType, currentState_.top()->GetType(), isReplacementState));
+	}
 
 	if (!currentState_.empty())
 	{
@@ -188,17 +193,17 @@ FiniteStateMachine::~FiniteStateMachine()
 	//Deallocation can however be performed by a specific call to the method Nuke()
 }
 
-void FiniteStateMachine::HandleTransition( StateType goalStateType, bool isReplacementState )
+bool FiniteStateMachine::HandleTransition( StateType goalStateType, bool replaceCurrentState )
 {
-	StateType currentStateType = currentState_.top()->GetType();
 	bool stateChanged = false;
+	StateType currentStateType = currentState_.top()->GetType();
 	
 	//switch if a transition is both possible and necessary
 	bool stateShouldChange = goalStateType != currentStateType;
 	bool goalStateExists = states_.count(goalStateType) > 0;
 	if (stateShouldChange && goalStateExists)
 	{ 
-		if (isReplacementState)
+		if (replaceCurrentState)
 		{	//replace stack top
 			currentState_.top()->Exit();
 			currentState_.top() = states_[goalStateType];
@@ -225,6 +230,10 @@ void FiniteStateMachine::HandleTransition( StateType goalStateType, bool isRepla
 			currentState_.push(defaultState_);
 			goalStateType = defaultState_->GetType();
 			stateChanged = true;
+
+			DEBUGPRINT("FiniteStateMachine::HandleTransition, "
+				<< "SPECIAL_STATE_BACK resulted in a fallback to the default state. "
+				<< "Was this your intention?");
 		}
 		else
 		{
@@ -240,10 +249,7 @@ void FiniteStateMachine::HandleTransition( StateType goalStateType, bool isRepla
 			<< " To state with enum value " << goalStateType);
 	}
 
-	if (stateChanged)
-	{
-		SEND_EVENT(&Event_StateChanged(goalStateType, this));
-	}
+	return stateChanged;
 }
 
 void FiniteStateMachine::onEvent( Event* e )
@@ -264,6 +270,9 @@ void FiniteStateMachine::onEvent( Event* e )
 	case EVENT_STATE_CHANGED:
 			handleEvent_StateChanged(static_cast<Event_StateChanged*>(e));
 		break;
+	case EVENT_SYNCSTATECOMMAND:
+			handleEvent_SyncStateCommand(static_cast<Event_SyncStateCommand*>(e));
+		break;
 	default:
 		break;
 	}
@@ -276,5 +285,18 @@ void FiniteStateMachine::handleEvent_StateChanged( Event_StateChanged* e )
 		DEBUGPRINT("FiniteStateMachine::onEvent(Event*), "
 			<< "Recieved EVENT_STATE_CHANGED event. New state has enum value " 
 			<< e->newState);
+	}
+}
+
+void FiniteStateMachine::handleEvent_SyncStateCommand( Event_SyncStateCommand* e )
+{
+	
+	if (e->sender != this 
+		&& e->sender->GetType() == this->type_
+		&& e->fromState == currentState_.top()->GetType())
+		//If I'm different instance of the same FiniteStateMachine and in the correct (matching) state
+	{
+		HandleTransition(e->toState, e->isReplacementState);
+		// Send StateChanged event?
 	}
 }

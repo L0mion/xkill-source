@@ -70,6 +70,7 @@ enum DLL_U EventType
 	EVENT_SPLITSCREEN_CHANGED,
 
 	EVENT_ATTRIBUTE_UPDATED,
+	EVENT_SYNCSTATECOMMAND,
 
 	// Get events
 	EVENT_GET_ATTRIBUTE,
@@ -264,10 +265,11 @@ public:
 	Float3 velocity;
 	Float4 rotation;
 	float damage;
+	float explosionSphereRadius;
 	int entityIdOfCreator;
 	bool explodeOnImpact;
 
-	Event_CreateProjectile(Float3 position, Float3 velocity, Float4 rotation, float damage, int entityIdOfCreator, bool explodeOfImpact);
+	Event_CreateProjectile(Float3 position, Float3 velocity, Float4 rotation, float damage, int entityIdOfCreator, bool explodeOfImpact, float explosionSphereRadius);
 };
 
 class MeshModel;
@@ -393,6 +395,27 @@ public:
 	FiniteStateMachine* sender;
 	StateType newState;
 };
+
+/**
+Event used for syncing state to state machines that have the same type
+and current state as the sender but are different instances.
+\ingroup events
+*/
+class DLL_U Event_SyncStateCommand : public Event
+{
+public:
+	Event_SyncStateCommand(
+		FiniteStateMachine* sender, 
+		StateType fromState, 
+		StateType toState, 
+		bool isReplacementState);
+
+	FiniteStateMachine* sender; 
+	StateType fromState;
+	StateType toState;
+	bool isReplacementState;
+};
+
 
 class DLL_U Event_CreateExplosionSphere : public Event
 {

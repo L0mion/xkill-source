@@ -1,5 +1,7 @@
 #include "QTInputDevices.h"
 
+#include <math.h>
+
 #include "InputButtonObject.h"
 #include "InputAxisObject.h"
 #include "InputTriggerObject.h"
@@ -59,9 +61,9 @@ void QTInputDevices::setStandardMappings()
 		buttons_[8]->addMapping(InputAction::ACTION_B_JUMP);
 		buttons_[9]->addMapping(InputAction::ACTION_B_SPRINT);
 
-		buttons_[10]->addMapping(InputAction::ACTION_B_FIRE);
-		buttons_[13]->addMapping(InputAction::ACTION_B_CHANGE_FIRINGMODE);
-		buttons_[14]->addMapping(InputAction::ACTION_B_CHANGE_AMMUNITIONTYPE);
+		mouseButtons_[0]->addMapping(InputAction::ACTION_B_FIRE);
+		mouseButtons_[3]->addMapping(InputAction::ACTION_B_CHANGE_FIRINGMODE);
+		mouseButtons_[4]->addMapping(InputAction::ACTION_B_CHANGE_AMMUNITIONTYPE);
 	}
 }
 
@@ -88,6 +90,7 @@ std::string QTInputDevices::getStandardMappingsString()
 			str += Converter::IntToStr(mappings->at(j));
 		}
 
+		str += inputObjects[i]->getName();
 		str += Converter::FloatToStr(inputObjects[i]->getSensitivity());
 		str += Converter::IntToStr(static_cast<int>(inputObjects[i]->isInverted()));
 	}
@@ -103,7 +106,7 @@ void QTInputDevices::updateState()
 void QTInputDevices::createInputLayout()
 {
 	inputLayout_.nrOfHatSwitches = 0;
-	inputLayout_.nrOfButtons = 10 + 5; //5 = mouseButtons_
+	inputLayout_.nrOfButtons = 10 + 5; // 5 = Mouse buttons
 	inputLayout_.nrOfTriggers = 0;
 	inputLayout_.nrOfAxes = 2;
 }
@@ -144,24 +147,23 @@ void QTInputDevices::createInputObjectsFromLayout()
 		buttons_[8]->setKey('F');
 		buttons_[9]->setKey('R');
 
-		//Mouse buttons
-		buttons_[10]->setKey(1);
+		buttons_[10]->setKey('Ü');	//Fix
 		buttons_[10]->setName("Left mouse button");
 		mouseButtons_.push_back(buttons_[10]);
 
-		buttons_[11]->setKey(2);
+		buttons_[11]->setKey('Û');
 		buttons_[11]->setName("Right mouse button");
 		mouseButtons_.push_back(buttons_[11]);
 
-		buttons_[12]->setKey(4);
+		buttons_[12]->setKey('ÿ');
 		buttons_[12]->setName("Middle mouse button");
 		mouseButtons_.push_back(buttons_[12]);
 
-		buttons_[13]->setKey(8);
+		buttons_[13]->setKey('ï');
 		buttons_[13]->setName("Mouse button 4");
 		mouseButtons_.push_back(buttons_[13]);
 
-		buttons_[14]->setKey(16);
+		buttons_[14]->setKey('î');
 		buttons_[14]->setName("Mouse button 5");
 		mouseButtons_.push_back(buttons_[14]);
 	}
@@ -188,9 +190,12 @@ void QTInputDevices::setButton(char key, bool value)
 
 void QTInputDevices::setMouseButton(unsigned int nr, bool value)
 {
-	if(nr < mouseButtons_.size())
+	for(int i = 0; i < 5; i++)
 	{
-		mouseButtons_[nr]->SetValue(value);
+		if(static_cast<int>(std::pow(2, i)) & nr)
+		{
+			mouseButtons_[i]->SetValue(value);
+		}
 	}
 }
 

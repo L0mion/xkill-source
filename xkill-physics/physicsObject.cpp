@@ -2,7 +2,12 @@
 
 #include <btBulletDynamicsCommon.h>
 
+
 #include <xkill-utilities/AttributeManager.h>
+
+#include "physicsUtilities.h"
+#include <xkill-utilities/EventManager.h>
+
 
 #include "CollisionShapes.h"
 #include "MotionState.h"
@@ -47,9 +52,11 @@ bool PhysicsObject::init(unsigned int attributeIndex,unsigned int collisionFilte
 	attributeIndex_ = attributeIndex;
 	collisionFilterGroup_ = collisionFilterGroup;
 
+
 	//Get the init data from a physics attribute
 	Attribute_Physics* physicsAttribute = itrPhysics_.at(attributeIndex);
 	btScalar mass = static_cast<btScalar>(physicsAttribute->mass);
+
 
 	//Resolve mass, local inertia of the collision shape, and also the collision shape itself.
 	btCollisionShape* collisionShape = CollisionShapes::Instance()->getCollisionShape(physicsAttribute->meshID);
@@ -109,5 +116,5 @@ unsigned int PhysicsObject::getCollisionFilterGroup() const
 
 void PhysicsObject::onUpdate(float delta)
 {
-	setGravity(btVector3(0,0,0));
 }
+

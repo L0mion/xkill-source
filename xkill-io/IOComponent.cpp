@@ -13,14 +13,26 @@
 #include "MdlDesc.h"
 #include "MdlDescModel.h"
 
+#include "LoaderFbx.h"
+
 IOComponent::IOComponent()
 {
 	texNameToTexID = nullptr;
+	fbxLoader_ = nullptr;
 }
 IOComponent::~IOComponent()
 {
 	if(texNameToTexID)
 		delete texNameToTexID;
+
+	for(unsigned int i = 0; i < meshModels_.size(); i++)
+	{
+		if(meshModels_[i])
+			delete meshModels_[i];
+	}
+	if(fbxLoader_)
+		delete fbxLoader_;
+
 }
 bool IOComponent::init()
 {
@@ -31,6 +43,10 @@ bool IOComponent::init()
 	sucessfulInit = initTexDescs();
 	if(sucessfulInit)
 		sucessfulInit = initMdlDescs();
+
+	/*fbxLoader_ = new LoaderFbx();
+	fbxLoader_->init();
+	fbxLoader_->load("../../xkill-resources/xkill-models/humanoid.fbx");*/
 
 	return sucessfulInit;
 }

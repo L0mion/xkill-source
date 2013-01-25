@@ -146,7 +146,7 @@ void CollisionShapes::loadCollisionShapes()
 		if(collisionShapesIdToIndex_.find(meshAttribute->meshID) == collisionShapesIdToIndex_.end())
 		{
 			std::string name = meshAttribute->mesh->getOrigins().getName();
-			name = name.substr(0,name.find("Mesh"));
+			name = name.substr(0,name.find(".obj"));
 			name = name.append("RigidBodyShape");
 			btCollisionShape* collisionShape;
 			collisionShape = importer_->getCollisionShapeByName(name.c_str());
@@ -170,13 +170,15 @@ void CollisionShapes::loadCollisionShapes()
 				//	collisionShape = BvhmeshShape;
 				//}
 				
-				
+				//name = name.substr(0,name.find("Shape"));
 
 
 				std::pair<unsigned int, unsigned int>  idToIndex(meshAttribute->meshID,collisionShapes_->size());
 				collisionShapesIdToIndex_.insert(idToIndex);
 				btCompoundShape* compoundShape = new btCompoundShape();
+				collisionShape->setMargin(0);
 				compoundShape->addChildShape(importer_->getRigidBodyByName(name.c_str())->getWorldTransform(),collisionShape);
+				compoundShape->setMargin(0);
 				collisionShapes_->push_back(compoundShape);
 				//collisionShapes_->push_back(collisionShape);
 			}
@@ -211,6 +213,7 @@ void CollisionShapes::loadCollisionShapes()
 					std::pair<unsigned int, unsigned int>  idToIndex(meshAttribute->meshID,collisionShapes_->size());
 					collisionShapesIdToIndex_.insert(idToIndex);
 					//collisionShapes_->push_back(collisionShape);
+					cs->setMargin(0);
 					collisionShapes_->push_back(cs);;
 					
 				}

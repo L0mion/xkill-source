@@ -106,6 +106,8 @@ void InputComponent::handleInput(float delta)
 
 		if(device->getBoolValue(InputAction::ACTION_B_FIRE))
 			input->fire = true;
+		if(device->getBoolPressed(InputAction::ACTION_B_FIRE))
+			input->firePressed = true;
 		if(device->getBoolReleased(InputAction::ACTION_B_CHANGE_AMMUNITIONTYPE))
 			input->changeAmmunitionType = true;
 		if(device->getBoolReleased(InputAction::ACTION_B_CHANGE_FIRINGMODE))
@@ -240,7 +242,7 @@ void InputComponent::handleMousePressedEvent(int nr, bool pressed)
 
 	if(device != nullptr)
 	{
-		device->setButton(nr, pressed);
+		device->setMouseButton(nr, pressed);
 	}
 }
 

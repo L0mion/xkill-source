@@ -52,8 +52,6 @@ public:
 	void onUpdate(float delta);  //<! synchronizeWithAttributes, update physicsobjects, update culling and step simulation
 	void onEvent(Event* e);  //<! handle events for the physicscomponent, mostly deletion/change events of physicsobjects
 
-	void queueDebugDrawEvent();  //<! Put a linelist in a message and queue it for debuging collisionshapes
-	
 	void detectedCollisionsDuringStepSimulation(btScalar timeStep);  //<! Recieve and filter out collisions in simulation and translate accordingly
 };
 

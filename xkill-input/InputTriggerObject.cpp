@@ -59,6 +59,11 @@ bool InputTriggerObject::getValueBool()
 	return IsTriggered();
 }
 
+bool InputTriggerObject::getValueBoolPressed()
+{
+	return (floatToBool(value_) && !floatToBool(prevValue_));
+}
+
 bool InputTriggerObject::getValueBoolReleased()
 {
 	return (!floatToBool(value_) && floatToBool(prevValue_));

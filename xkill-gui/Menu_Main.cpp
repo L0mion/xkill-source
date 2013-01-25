@@ -12,6 +12,9 @@
 #include <QtGui/QStandardItemModel>
 #include <QtGui/QMessageBox>
 
+#include "Menu_Ammo.h"
+#include "Menu_FiringMode.h"
+
 #include "Menu_Editor.h"
 
 ATTRIBUTES_DECLARE_ALL
@@ -27,19 +30,47 @@ Menu_Main::Menu_Main( QWidget* parent ) : QMainWindow(parent), ToggleHelper(this
 	//setAttribute(Qt::WA_TranslucentBackground);
 	setWindowFlags(Qt::WindowStaysOnBottomHint);
 
-	connect(ui.pushButton_exit,			SIGNAL(clicked()),					this,	SLOT(slot_quitToDesktop()));
-	connect(ui.pushButton_exit_2,		SIGNAL(clicked()),					this,	SLOT(slot_quitToDesktop()));
-	connect(ui.comboBox_LevelSelect,	SIGNAL(currentIndexChanged(int)),	this,	SLOT(slot_selectLevel(int)));
-	connect(ui.pushButton_AddLevel,		SIGNAL(clicked()),					this,	SLOT(slot_addLevel()));
-	connect(ui.pushButton_SaveLevel,	SIGNAL(clicked()),					this,	SLOT(slot_saveLevel()));
-	connect(ui.pushButton_RemoveLevel,	SIGNAL(clicked()),					this,	SLOT(slot_removeLevel()));
-	connect(ui.pushButton_startGame,	SIGNAL(clicked()),					this,	SLOT(slot_startGame()));
-	connect(ui.comboBox_Input,			SIGNAL(currentIndexChanged(int)),	this,	SLOT(slot_loadInputList(int)));
-	connect(ui.tableView_Input,			SIGNAL(clicked(QModelIndex)),		this,	SLOT(slot_loadInputSettings(QModelIndex)));
-	connect(ui.tableView_Input,			SIGNAL(clicked(QModelIndex)),		this,	SLOT(slot_setInputObject(QModelIndex)));
-	connect(ui.horizontalSlider_Input,	SIGNAL(sliderMoved(int)),			this,	SLOT(slot_inputSettingsChanged()));
-	connect(ui.checkBox_Input,			SIGNAL(clicked()),					this,	SLOT(slot_inputSettingsChanged()));
-	connect(ui.pushButton_Input,		SIGNAL(clicked()),					this,	SLOT(slot_inputSettingsChanged()));
+	connect(ui.pushButton_exit,									SIGNAL(clicked()),					this,	SLOT(slot_quitToDesktop()));
+	connect(ui.pushButton_exit_2,								SIGNAL(clicked()),					this,	SLOT(slot_quitToDesktop()));
+	connect(ui.comboBox_LevelSelect,							SIGNAL(currentIndexChanged(int)),	this,	SLOT(slot_selectLevel(int)));
+	connect(ui.pushButton_AddLevel,								SIGNAL(clicked()),					this,	SLOT(slot_addLevel()));
+	connect(ui.pushButton_SaveLevel,							SIGNAL(clicked()),					this,	SLOT(slot_saveLevel()));
+	connect(ui.pushButton_RemoveLevel,							SIGNAL(clicked()),					this,	SLOT(slot_removeLevel()));
+	connect(ui.pushButton_startGame,							SIGNAL(clicked()),					this,	SLOT(slot_startGame()));
+	connect(ui.comboBox_Input,									SIGNAL(currentIndexChanged(int)),	this,	SLOT(slot_loadInputList(int)));
+	connect(ui.tableView_Input,									SIGNAL(clicked(QModelIndex)),		this,	SLOT(slot_loadInputSettings(QModelIndex)));
+	connect(ui.tableView_Input,									SIGNAL(clicked(QModelIndex)),		this,	SLOT(slot_setInputObject(QModelIndex)));
+	connect(ui.horizontalSlider_Input,							SIGNAL(sliderMoved(int)),			this,	SLOT(slot_inputSettingsChanged()));
+	connect(ui.checkBox_Input,									SIGNAL(clicked()),					this,	SLOT(slot_inputSettingsChanged()));
+	connect(ui.pushButton_Input,								SIGNAL(clicked()),					this,	SLOT(slot_inputSettingsChanged()));
+
+	connect(ui.radioButton_Ammo_Bullet,							SIGNAL(clicked()),					this,	SLOT(slot_updateAmmoMenu()));
+	connect(ui.radioButton_Ammo_Scatter,						SIGNAL(clicked()),					this,	SLOT(slot_updateAmmoMenu()));
+	connect(ui.radioButton_Ammo_Explosive,						SIGNAL(clicked()),					this,	SLOT(slot_updateAmmoMenu()));
+
+	connect(ui.horizontalSlider_Ammo_Damage,					SIGNAL(sliderMoved(int)),			this,	SLOT(slot_ammoMenuUpdated()));
+	connect(ui.horizontalSlider_Ammo_ExplosionSphere,			SIGNAL(sliderMoved(int)),			this,	SLOT(slot_ammoMenuUpdated()));
+	connect(ui.horizontalSlider_Ammo_NrOfProjectiles,			SIGNAL(sliderMoved(int)),			this,	SLOT(slot_ammoMenuUpdated()));
+	connect(ui.horizontalSlider_Ammo_Speed,						SIGNAL(sliderMoved(int)),			this,	SLOT(slot_ammoMenuUpdated()));
+	connect(ui.horizontalSlider_Ammo_Spread,					SIGNAL(sliderMoved(int)),			this,	SLOT(slot_ammoMenuUpdated()));
+	connect(ui.horizontalSlider_Ammo_VelocitVariation,			SIGNAL(sliderMoved(int)),			this,	SLOT(slot_ammoMenuUpdated()));
+	connect(ui.groupBox_Ammo_Explosive,							SIGNAL(clicked()),					this,	SLOT(slot_ammoMenuUpdated()));
+
+	connect(ui.radioButton_Weapon_Single,						SIGNAL(clicked()),					this,	SLOT(slot_updateFiringModeMenu()));
+	connect(ui.radioButton_Weapon_Semi,							SIGNAL(clicked()),					this,	SLOT(slot_updateFiringModeMenu()));
+	connect(ui.radioButton_Weapon_Auto,							SIGNAL(clicked()),					this,	SLOT(slot_updateFiringModeMenu()));
+
+	connect(ui.checkBox_Weapon_Bullet,							SIGNAL(clicked()),					this,	SLOT(slot_firingModeUpdated()));
+	connect(ui.checkBox_Weapon_Scatter,							SIGNAL(clicked()),					this,	SLOT(slot_firingModeUpdated()));
+	connect(ui.checkBox_Weapon_Explosive,						SIGNAL(clicked()),					this,	SLOT(slot_firingModeUpdated()));
+	connect(ui.horizontalSlider_Weapon_ClipSize,				SIGNAL(sliderMoved(int)),			this,	SLOT(slot_firingModeUpdated()));
+	connect(ui.horizontalSlider_Weapon_DamageModifier,			SIGNAL(sliderMoved(int)),			this,	SLOT(slot_firingModeUpdated()));
+	connect(ui.horizontalSlider_Weapon_ExplosionSphereModifier,	SIGNAL(sliderMoved(int)),			this,	SLOT(slot_firingModeUpdated()));
+	connect(ui.horizontalSlider_Weapon_RateOfFire,				SIGNAL(sliderMoved(int)),			this,	SLOT(slot_firingModeUpdated()));
+	connect(ui.horizontalSlider_Weapon_ReloadTime,				SIGNAL(sliderMoved(int)),			this,	SLOT(slot_firingModeUpdated()));
+
+	connect(ui.tabWidget_2,										SIGNAL(currentChanged(int)),		this,	SLOT(slot_updateAmmoMenu()));
+	connect(ui.tabWidget_2,										SIGNAL(currentChanged(int)),		this,	SLOT(slot_updateFiringModeMenu()));
 	
 	// Set num players to 2
 	ui.horizontalSlider_numPlayers->setValue(2);
@@ -59,7 +90,15 @@ Menu_Main::Menu_Main( QWidget* parent ) : QMainWindow(parent), ToggleHelper(this
 	QStringList columnNames;
 
 	loadXML();
-	
+
+	ammo_Menu = new Menu_Ammo(&ui);
+	firingMode_Menu = new Menu_FiringMode(&ui);
+}
+
+Menu_Main::~Menu_Main()
+{
+	delete ammo_Menu;
+	delete firingMode_Menu;
 }
 
 void Menu_Main::parentMoveEvent()
@@ -230,6 +269,26 @@ void Menu_Main::slot_setInputObject(QModelIndex index)
 	{
 		currentObject = nullptr;
 	}
+}
+
+void Menu_Main::slot_updateAmmoMenu()
+{
+	ammo_Menu->setSettingsMenu();
+}
+
+void Menu_Main::slot_ammoMenuUpdated()
+{
+	ammo_Menu->settingsMenuUpdated();
+}
+
+void Menu_Main::slot_updateFiringModeMenu()
+{
+	firingMode_Menu->setSettingsMenu();
+}
+
+void Menu_Main::slot_firingModeUpdated()
+{
+	firingMode_Menu->settingsMenuUpdated();
 }
 
 void Menu_Main::loadDeviceList()
