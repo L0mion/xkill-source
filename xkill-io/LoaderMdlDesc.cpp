@@ -246,45 +246,41 @@ void LoaderMdlDesc::loadSpawn(const std::vector<std::string>& params)
 void LoaderMdlDesc::loadHack(const std::vector<std::string>& params)
 {
 	Float3 position;
-	unsigned int type;
+	std::string type;
 
 	position = Float3(static_cast<float>(atof(params[MDLDESC_PARAM_INDEX_HACK_POSX].c_str())),
 					  static_cast<float>(atof(params[MDLDESC_PARAM_INDEX_HACK_POSY].c_str())),
 					  static_cast<float>(atof(params[MDLDESC_PARAM_INDEX_HACK_POSZ].c_str())));
-	type = atoi(params[MDLDESC_PARAM_INDEX_HACK_TYPE].c_str());
-
-	//int amount = 5; //Check, load
-	//events_.push_back( new Event_CreatePickupable(position, PickupableType::MEDKIT, amount));
+	type = params[MDLDESC_PARAM_INDEX_HACK_TYPE].c_str();
+	
+	if( type == "HEL")
+	{
+		events_.push_back( new Event_CreatePickupablesSpawnPoint(position,PickupableType::MEDKIT));
+	}
+	else if( type == "EXP")
+	{
+		events_.push_back( new Event_CreatePickupablesSpawnPoint(position,PickupableType::AMMUNITION_EXPLOSIVE));
+	}
+	else if( type == "SHA")
+	{
+		events_.push_back( new Event_CreatePickupablesSpawnPoint(position,PickupableType::AMMUNITION_SCATTER));
+	}
+	else if( type == "SIN")
+	{
+		events_.push_back( new Event_CreatePickupablesSpawnPoint(position,PickupableType::AMMUNITION_BULLET));
+	}
 }
 void LoaderMdlDesc::loadAmmo(const std::vector<std::string>& params)
 {
 	Float3 position;
-	unsigned int type; //could be replaced by string
+	std::string type;
 
 	position = Float3( static_cast<float>(atof(params[MDLDESC_PARAM_INDEX_AMMO_POSX].c_str())),
 					   static_cast<float>(atof(params[MDLDESC_PARAM_INDEX_AMMO_POSY].c_str())),
 					   static_cast<float>(atof(params[MDLDESC_PARAM_INDEX_AMMO_POSZ].c_str())));
-	type = atoi(params[MDLDESC_PARAM_INDEX_AMMO_TYPE].c_str());
+	type = params[MDLDESC_PARAM_INDEX_AMMO_TYPE].c_str();
 
-	/*
-	int amount = 50; //Check, load
-
-	switch(type) //String?
-	{
-	default:
-		DEBUGPRINT("Trying to create unknown ammo type.");
-		break;
-		case PickupableType::AMMUNITION_BULLET:
-			events_.push_back( new Event_CreatePickupable(position, PickupableType::AMMUNITION_BULLET, amount));
-			break;
-		case PickupableType::AMMUNITION_SCATTER:
-			events_.push_back( new Event_CreatePickupable(position, PickupableType::AMMUNITION_SCATTER, amount));
-			break;
-		case PickupableType::AMMUNITION_EXPLOSIVE:
-			events_.push_back( new Event_CreatePickupable(position, PickupableType::AMMUNITION_EXPLOSIVE, amount));
-			break;
-	}
-	*/
+	
 }
 void LoaderMdlDesc::loadLight(const std::vector<std::string>& params)
 {

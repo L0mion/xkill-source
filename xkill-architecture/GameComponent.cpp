@@ -766,7 +766,7 @@ void GameComponent::event_StartDeathmatch( Event_StartDeathmatch* e )
 	//Continue
 	for(int i=0;i<10;i++)
 	{
-		SEND_EVENT(&Event_CreatePickupablesSpawnPoint(Float3(2, 40, i-6), PickupableType::MEDKIT));
+		SEND_EVENT(&Event_CreatePickupablesSpawnPoint(Float3(2, 5, i-6), PickupableType::MEDKIT));
 	}
 
 	//SEND_EVENT(&Event_CreatePickupable(Float3(2.0f, 2.0f, 0.0f), Attribute_Pickupable::MEDKIT, 5));
