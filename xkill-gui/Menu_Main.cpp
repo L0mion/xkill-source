@@ -28,7 +28,7 @@ Menu_Main::Menu_Main( QWidget* parent ) : QMainWindow(parent), ToggleHelper(this
 	QWidget::setWindowFlags(Qt::SplashScreen);
 	//setAttribute(Qt::WA_TransparentForMouseEvents);
 	//setAttribute(Qt::WA_TranslucentBackground);
-	setWindowFlags(Qt::WindowStaysOnBottomHint);
+	setWindowFlags(Qt::WindowStaysOnTopHint);
 
 	connect(ui.pushButton_exit,									SIGNAL(clicked()),					this,	SLOT(slot_quitToDesktop()));
 	connect(ui.pushButton_exit_2,								SIGNAL(clicked()),					this,	SLOT(slot_quitToDesktop()));
@@ -229,6 +229,7 @@ void Menu_Main::mousePressEvent( QMouseEvent* e )
 
 void Menu_Main::slot_startGame()
 {
+	SEND_EVENT(&Event_EndDeathmatch());	//Temporary to remove the "empty" game that is used to paint the menu background black.
 	int num_players = ui.horizontalSlider_numPlayers->value();
 	SEND_EVENT(&Event_StartDeathmatch(num_players));
 

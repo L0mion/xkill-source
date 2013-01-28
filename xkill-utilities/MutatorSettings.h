@@ -25,7 +25,7 @@ public:
 
 private:
 	//! Stores a version of each standard ammunition
-	static Ammunition standardAmmunitions[Ammunition::NROFAMUNITIONTYPES];
+	static Ammunition standardAmmunitions[Ammunition::NROFAMMUNITIONTYPES];
 	//! Stores a version of each standard firing mode
 	static FiringMode standardFiringModes[FiringMode::NROFFIRINGMODETYPES];
 

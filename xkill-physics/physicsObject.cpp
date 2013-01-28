@@ -31,16 +31,30 @@ PhysicsObject::~PhysicsObject()
 	delete getMotionState();
 }
 
-btVector3 PhysicsObject::subClassCalculateLocalInertia(btScalar mass)
+btVector3 PhysicsObject::subClassCalculateLocalInertiaHook(btScalar mass)
 {
-	btVector3 localInertia;
-	localInertia.setZero();
-	return localInertia;
+	return zeroLocalInertia();
 }
 
 bool PhysicsObject::subClassSpecificInitHook()
 {
 	return true;
+}
+
+btVector3 PhysicsObject::localInertiaBasedOnCollisionShapeAndMass(btScalar mass)
+{
+	btCollisionShape* collisionShape = getCollisionShape();
+	btVector3 localInertia;
+	collisionShape->calculateLocalInertia(mass, localInertia);
+	
+	return localInertia;
+}
+
+btVector3 PhysicsObject::zeroLocalInertia()
+{
+	btVector3 localInertia;
+	localInertia.setZero();
+	return localInertia;
 }
 
 bool PhysicsObject::init(unsigned int attributeIndex,unsigned int collisionFilterGroup)
@@ -62,9 +76,7 @@ bool PhysicsObject::init(unsigned int attributeIndex,unsigned int collisionFilte
 	btCollisionShape* collisionShape = CollisionShapes::Instance()->getCollisionShape(physicsAttribute->meshID);
 	setCollisionShape(collisionShape);
 	
-		
-		
-	btVector3 localInertia = subClassCalculateLocalInertia(mass);
+	btVector3 localInertia = subClassCalculateLocalInertiaHook(mass);
 	setMassProps(mass, localInertia); //Set inverse mass and inverse local inertia
 	if((getCollisionFlags() & btCollisionObject::CF_STATIC_OBJECT))
 	{
@@ -117,4 +129,3 @@ unsigned int PhysicsObject::getCollisionFilterGroup() const
 void PhysicsObject::onUpdate(float delta)
 {
 }
-

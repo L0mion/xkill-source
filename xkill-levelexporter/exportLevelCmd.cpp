@@ -20,32 +20,32 @@
 class exportLevel : public MPxCommand
 {
     public:
-        exportLevel();
-        virtual ~exportLevel();
-        MStatus doIt( const MArgList& );
-        MStatus redoIt();
-        MStatus undoIt();
-        bool isUndoable() const;
+        exportLevel(); 
+        virtual ~exportLevel(); 
+        MStatus doIt( const MArgList& ); //!< Handle the call to the command and execute
+        MStatus redoIt(); //!< Redoes the last doIT
+        MStatus undoIt(); //!< Undoes the last doIt
+        bool isUndoable() const; //!< Tells maya wheter or not the command is undoable
 		
-        static void* creator();
+        static void* creator();  //!< Allocates an instance of the command
 
-		bool verbose;
-		bool clearhist;
+		bool verbose;  //!< tells the command to print full information
+		bool clearhist;  //!< tells the command to clear the history in the script editor and only show this commands output
 
-		void selectStuff(bool verboseSelect);
-		void commandpart1();
-		void commandpart2();
-		void commandpart3();
-		void commandpart4();
-		void commandpart5();
+		void selectStuff(bool verboseSelect);  //!< Select the objets from the scene
+		void commandpart1();  //!< Displace rigidbodies before export
+		void commandpart2();  //!< export rigidbodies
+		void commandpart3();  //!< restore displaced rigidbodies
+		void commandpart4(); //!< export objs
+		void commandpart5(); //!< export .mdldesc
 
-		MSelectionList rigidbodies;
-		MSelectionList meshes;
-		MSelectionList instances;
-		MSelectionList spawns;
-		MSelectionList lights;
-		MSelectionList ammos;
-		MSelectionList hacks;
+		MSelectionList rigidbodies;  //!< holds selected rigidbodies in scene
+		MSelectionList meshes;  //!< holds selected meshes in scene
+		MSelectionList instances;  //!< holds selected instances in scene
+		MSelectionList spawns;  //!< holds selected spawns in scene
+		MSelectionList lights;  //!< holds selected lights in scene
+		MSelectionList ammos;  //!< holds selected ammos in scene
+		MSelectionList hacks;  //!< holds selected hacks in scene
 };
 exportLevel::exportLevel()
 {
@@ -643,7 +643,7 @@ void exportLevel::commandpart5()
 		MFnTransform fn(obj);
 		MVector	mTranslation = fn.getTranslation(MSpace::kTransform);
 		MString row = "c ";
-		row = row + fn.name().substring(4,fn.name().length());
+		row = row + fn.name().substring(4,6);
 		row = row + " ";
 		row = row + mTranslation.x;
 		row = row + " ";
@@ -666,7 +666,7 @@ void exportLevel::commandpart5()
 		MFnTransform fn(obj);
 		MVector	mTranslation = fn.getTranslation(MSpace::kTransform);
 		MString row = "c ";
-		row = row + fn.name().substring(4,fn.name().length());
+		row = row + fn.name().substring(4,6);
 		row = row + " ";
 		row = row + mTranslation.x;
 		row = row + " ";
@@ -851,13 +851,13 @@ void* exportLevel::creator()
 {
     return new exportLevel();
 }
-MStatus initializePlugin( MObject obj )
+MStatus initializePlugin( MObject obj ) //!< Registers the plugin command data
 {
     MFnPlugin plugin( obj, "XKill-team", "0.1", "Any" );
     plugin.registerCommand( "exportLevel", exportLevel::creator );
     return MS::kSuccess;
-}
-MStatus uninitializePlugin( MObject obj )
+} 
+MStatus uninitializePlugin( MObject obj ) //!< Unregister the plugin command data
 {
     MFnPlugin plugin( obj );
     plugin.deregisterCommand( "exportLevel" );

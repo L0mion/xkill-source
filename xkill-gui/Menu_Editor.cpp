@@ -81,15 +81,16 @@ void Menu_Editor::slot_editorRefresh()
 		num_rows = 0;
 
 		// Fill columns
-		entityBrowser_add("Players",		&itrPlayer.getAllOwnerId());
-		entityBrowser_add("Positions",		&itrPosition.getAllOwnerId());
-		entityBrowser_add("SpawnPoints",	&itrSpawnPoint.getAllOwnerId());
-		entityBrowser_add("Render",			&itrRender.getAllOwnerId());
-		entityBrowser_add("Meshes",			&itrMesh.getAllOwnerId());
-		entityBrowser_add("PhysicsObjects", &itrPhysics.getAllOwnerId());
-		entityBrowser_add("InputDevices",	&itrInputDevice.getAllOwnerId());
-		entityBrowser_add("Projectiles",	&itrProjectile.getAllOwnerId());
-		
+		entityBrowser_add("Players",				&itrPlayer.getAllOwnerId());
+		entityBrowser_add("Positions",				&itrPosition.getAllOwnerId());
+		entityBrowser_add("PlayerSpawnPoints",		&itrPlayerSpawnPoint.getAllOwnerId());
+		entityBrowser_add("Render",					&itrRender.getAllOwnerId());
+		entityBrowser_add("Meshes",					&itrMesh.getAllOwnerId());
+		entityBrowser_add("PhysicsObjects",			&itrPhysics.getAllOwnerId());
+		entityBrowser_add("InputDevices",			&itrInputDevice.getAllOwnerId());
+		entityBrowser_add("Projectiles",			&itrProjectile.getAllOwnerId());
+		entityBrowser_add("Pickupables",			&itrPickupable.getAllOwnerId());
+		entityBrowser_add("PickupablesSpawnPoints",	&itrPickupablesSpawnPoint.getAllOwnerId());
 	}
 }
 

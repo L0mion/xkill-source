@@ -44,9 +44,12 @@ bool IOComponent::init()
 	if(sucessfulInit)
 		sucessfulInit = initMdlDescs();
 
-	/*fbxLoader_ = new LoaderFbx();
+	/*
+	//Check
+	fbxLoader_ = new LoaderFbx();
 	fbxLoader_->init();
-	fbxLoader_->load("../../xkill-resources/xkill-models/humanoid.fbx");*/
+//	fbxLoader_->load("../../xkill-resources/xkill-models/humanoid.fbx");
+	*/
 
 	return sucessfulInit;
 }

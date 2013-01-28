@@ -76,4 +76,15 @@ struct CBBoneDesc
 };
 static const unsigned int CB_BONE_DESC_SIZE = 4096;
 
+
+//! Struct describing a constant buffer.
+/*!
+\ingroup xkill-renderer
+*/
+struct CBSpriteDesc
+{
+	DirectX::XMFLOAT4X4 spriteMatrix_;
+};
+static const unsigned int CB_SPRITE_DESC_SIZE = 64;
+
 #endif //XKILL_RENDERER_CBDESC_H

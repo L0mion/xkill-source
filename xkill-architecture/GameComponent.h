@@ -8,7 +8,7 @@ class Event_EndDeathmatch;
 class Event_TransferEventsToGame;
 class Entity;
 
-struct Attribute_SpawnPoint;
+struct Attribute_PlayerSpawnPoint;
 struct Attribute_WeaponStats;
 struct Attribute_Position;
 struct Attribute_Camera;
@@ -55,12 +55,12 @@ public:
 	void event_TransferEventsToGame(Event_TransferEventsToGame* e);
 
 	/**
-	Finds an unoccupied spawn point (no other player inside its radius). 
-	Prioritizes spawn points that least recently spawned a player. 
-	If no unoccupied spawn point is found, one is selected at random. 
-	If there exists no spawn points at all, nullptr is returned.
+	Finds an unoccupied player spawn point (no other player inside its radius). 
+	Prioritizes player spawn points that least recently spawned a player. 
+	If no unoccupied player spawn point is found, one is selected at random. 
+	If there exists no player spawn points at all, nullptr is returned.
 	*/
-	Attribute_SpawnPoint* findUnoccupiedSpawnPoint();
+	Attribute_PlayerSpawnPoint* findUnoccupiedSpawnPoint();
 
 	bool switchAmmunition(Attribute_WeaponStats* weaponStats);
 	bool switchFiringMode(Attribute_WeaponStats* weaponStats);
