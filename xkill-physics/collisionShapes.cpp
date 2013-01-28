@@ -154,6 +154,12 @@ void CollisionShapes::loadCollisionShapes()
 			{
 				//REMOVE
 				
+				btVector3 scaling = collisionShape->getLocalScaling();
+
+				collisionShape = new btBoxShape(scaling/2);
+				collisionShape->setMargin(0.0f);
+				collisionShape->setLocalScaling(btVector3(1,1,1));
+
 				//if(!name.compare("ThinWallRigidBodyShape"))
 				//{
 				//	btBoxShape* box = (btBoxShape*)collisionShape;
@@ -176,9 +182,10 @@ void CollisionShapes::loadCollisionShapes()
 				std::pair<unsigned int, unsigned int>  idToIndex(meshAttribute->meshID,collisionShapes_->size());
 				collisionShapesIdToIndex_.insert(idToIndex);
 				btCompoundShape* compoundShape = new btCompoundShape();
-				collisionShape->setMargin(0);
+				collisionShape->setMargin(0.0);
+				
 				compoundShape->addChildShape(importer_->getRigidBodyByName(name.c_str())->getWorldTransform(),collisionShape);
-				compoundShape->setMargin(0);
+				compoundShape->setMargin(0.0);
 				collisionShapes_->push_back(compoundShape);
 				//collisionShapes_->push_back(collisionShape);
 			}
@@ -213,7 +220,7 @@ void CollisionShapes::loadCollisionShapes()
 					std::pair<unsigned int, unsigned int>  idToIndex(meshAttribute->meshID,collisionShapes_->size());
 					collisionShapesIdToIndex_.insert(idToIndex);
 					//collisionShapes_->push_back(collisionShape);
-					cs->setMargin(0);
+					cs->setMargin(0.00);
 					collisionShapes_->push_back(cs);;
 					
 				}
