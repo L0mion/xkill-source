@@ -2,6 +2,7 @@
 
 #include <xkill-utilities/EventManager.h>
 
+
 ATTRIBUTES_DECLARE_ALL;
 
 HUDWindow::HUDWindow(QWidget* parent, int id) : QMainWindow(parent)
@@ -14,31 +15,69 @@ HUDWindow::HUDWindow(QWidget* parent, int id) : QMainWindow(parent)
 	QWidget::setStyleSheet("QWidget{color: #fff; background-color: #000;}");
 	show();
 
+
+
 	//
 	// build menu
 	//
 
 	horizontalLayout = new QHBoxLayout();
+	horizontalLayout->setSpacing(0);
+	horizontalLayout->setMargin(0);
+	verticalLayout	= new QVBoxLayout();
+	verticalLayout->setSpacing(0);
+	horizontalLayout->setMargin(0);
+	horizontalLayout->addLayout(verticalLayout);
 
 	// health
-	label_health = new QLabel();
-	horizontalLayout->addWidget(label_health);
+	progressBar_health = new QProgressBar();
+	verticalLayout->addWidget(progressBar_health);
+	progressBar_health->setValue(50);
+	progressBar_health->setMaximumSize(QSize(50, 10));
+	progressBar_health->setTextVisible(false);
+	progressBar_health->setStyleSheet(QString::fromUtf8("QProgressBar::chunk \n"
+"{\n"
+"	background-color: rgb(0, 170, 0);\n"
+"	border: 1px solid black;\n"
+"}\n"
+"\n"
+"QProgressBar\n"
+"{\n"
+"	border: 0px solid black;\n"
+"	background: rgb(0, 0, 0);\n"
+"}"));
+	
 
 	// ammo
-	label_ammo = new QLabel();
-	horizontalLayout->addWidget(label_ammo);
+	progressBar_ammo = new QProgressBar();
+	verticalLayout->addWidget(progressBar_ammo);
+	progressBar_ammo->setValue(50);
+    progressBar_ammo->setMaximumSize(QSize(50, 10));
+	progressBar_ammo->setTextVisible(false);
+    progressBar_ammo->setStyleSheet(QString::fromUtf8("QProgressBar::chunk \n"
+"{\n"
+"	background-color: rgb(200, 170, 0);\n"
+"	border: 1px solid black;\n"
+"}\n"
+"\n"
+"QProgressBar\n"
+"{\n"
+"	border: 0px solid black;\n"
+"	background: rgb(0, 0, 0);\n"
+"}"));
+	
 
 	// ammo type
 	label_ammoType = new QLabel();
 	label_ammoType->setPixmap(QPixmap(QString::fromUtf8(":/xkill/images/a_explosive2.png")));
-	label_ammoType->setMaximumSize(QSize(15, 15));
+	
 	label_ammoType->setScaledContents(true);
 	horizontalLayout->addWidget(label_ammoType);
 	
 	// weapon type
 	label_weaponType = new QLabel();
 	label_weaponType->setPixmap(QPixmap(QString::fromUtf8(":/xkill/images/w_auto.png")));
-	label_weaponType->setMaximumSize(QSize(15, 15));
+	
 	label_weaponType->setScaledContents(true);
 	horizontalLayout->addWidget(label_weaponType);
 
@@ -69,20 +108,22 @@ void HUDWindow::update(Attribute_SplitScreen* splitScreen)
 	FiringMode* firingMode = &weaponStats->firingMode[weaponStats->currentFiringModeType];
 
 	float sizeScale = (float) splitScreen->ssHeight / 1000;
-	sizeScale = 0.75f*sizeScale + 0.25f;
-	int textSize = (int)(20 * sizeScale);
-	if(textSize<1)
-		textSize = 1;
-	QString str_textSize = QString::number(textSize);
+	sizeScale = 0.50f*sizeScale + 0.50f;
 	QSize iconSize((int)32*sizeScale, (int)32*sizeScale);
 	label_weaponType->setMaximumSize(iconSize);
 	label_ammoType->setMaximumSize(iconSize);
+	progressBar_health->setMaximumSize(QSize(200*sizeScale, 16*sizeScale));
+	progressBar_ammo->setMaximumSize(QSize(200*sizeScale, 16*sizeScale));
+	progressBar_health->setMinimumSize(QSize(200*sizeScale, 16*sizeScale));
+	progressBar_ammo->setMinimumSize(QSize(200*sizeScale, 16*sizeScale));
 
 	// health & ammo bars
-	QString str_health = QString::number(health->health);
-	label_health->setText("<html><head/><body><p><span style=\" font-size:"+str_textSize+"pt; font-weight:600;\">Health "+str_health+"&nbsp;</span></p></body></html>");
-	QString str_ammo = QString::number(firingMode->nrOfShotsLeftInClip);
-	label_ammo->setText("<html><head/><body><p><span style=\" font-size:"+str_textSize+"pt; font-weight:600;\">Ammo "+str_ammo+"&nbsp;</span></p></body></html>");
+	int healthRatio = (int)((health->health / health->startHealth) * 100);
+	int ammoRatio = (int)(((float)firingMode->nrOfShotsLeftInClip / firingMode->clipSize) * 100);
+	progressBar_health->setValue(healthRatio);
+	progressBar_ammo->setValue(ammoRatio);
+	progressBar_health->update();
+	progressBar_ammo->update();
 
 	// ammo icon
 	if(ammo != weaponStats->currentAmmunitionType)

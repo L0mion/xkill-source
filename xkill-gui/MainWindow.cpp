@@ -45,7 +45,7 @@ MainWindow::MainWindow()
 
 	// create UI generated from XML file
 	ui.setupUi(this);
-	QApplication::setStyle(new QPlastiqueStyle);
+//	QApplication::setStyle(new QPlastiqueStyle);
 	MainWindow::setWindowTitle("XKILL");
 	resize(800, 600);
 	QWidget::setAttribute(Qt::WA_PaintOnScreen);
