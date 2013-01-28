@@ -9,6 +9,7 @@ DefaultVSOut defaultVS(DefaultVSInInstanced vsIn)
 	pos = mul(vsIn.world, pos);
 	output.positionW = pos; //output.positionW	= mul(vsIn.world, float4(vsIn.position, 1.0f)).xyz;
 	pos = mul(view, pos);
+	output.positionW = pos;
 	//output.positionW = pos;
 	pos = mul(projection, pos);
 	output.position	= pos;

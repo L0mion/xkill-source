@@ -65,7 +65,7 @@ void lightingCS(
 	//Get surface position.
 	/*At the moment, world space position is stored in Material-buffer.*/
 	float3 surfacePosW = gMaterial.xyz;
-	float3 surfacePosV = mul(view, float4(surfacePosW, 1.0f)).xyz;
+	float3 surfacePosV = surfacePosW;//mul(float4(surfacePosW, 1.0f), view).xyz;
 
 	uint pixelDepthInt = asuint(surfacePosV); //Interlocked functions can only be applied onto ints.
 	
@@ -169,7 +169,7 @@ void lightingCS(
 
 	output[uint2(threadIDDispatch.x + viewportTopX, threadIDDispatch.y + viewportTopY)] = Ambient + Diffuse + Specular; //float4(tileMinDepthF, tileMinDepthF, tileMinDepthF, 1.0f); //
 
-	if(view._14 > 4.9f && view._14 < 5.1f)
+	if(surfacePosV.z > 0.0f)
 	{
 		output[uint2(threadIDDispatch.x + viewportTopX, threadIDDispatch.y + viewportTopY)] = float4(0.0f, 1.0f, 0.0f, 1.0f);
 	}
