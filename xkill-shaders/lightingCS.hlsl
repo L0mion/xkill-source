@@ -54,19 +54,19 @@ void lightingCS(
 		}
 	}
 	GroupMemoryBarrierWithGroupSync();
-
+	
 	//Sample G-Buffers. Data prefetching?
 	float2	texCoord	= float2((float)(threadIDDispatch.x + viewportTopX)/(float)screenWidth,(float)(threadIDDispatch.y + viewportTopY)/(float)screenHeight);
 	float4	gAlbedo		= gBufferAlbedo		.SampleLevel(ss, texCoord, 0);
 	float4	gNormal		= gBufferNormal		.SampleLevel(ss, texCoord, 0);
 	float4	gMaterial	= gBufferMaterial	.SampleLevel(ss, texCoord, 0); //At the moment, world space position is stored in Material-buffer.
 	float	gDepth		= gBufferDepth		.SampleLevel(ss, texCoord, 0).x;
-
+	
 	//Get surface position.
 	/*At the moment, world space position is stored in Material-buffer.*/
 	float3 surfacePosW = gMaterial.xyz;
-	float3 surfacePosV = surfacePosW;//mul(float4(surfacePosW, 1.0f), view).xyz;
-
+	float3 surfacePosV = mul(float4(surfacePosW, 1.0f), view).xyz;
+	
 	uint pixelDepthInt = asuint(surfacePosV); //Interlocked functions can only be applied onto ints.
 	
 	InterlockedMin(tileMinDepthInt, pixelDepthInt);
@@ -74,7 +74,7 @@ void lightingCS(
 	GroupMemoryBarrierWithGroupSync();
 	float tileMinDepthF = asfloat(tileMinDepthInt);
 	float tileMaxDepthF = asfloat(tileMaxDepthInt);
-
+	
 	Frustum frustum = ExtractFrustumPlanes(
 		screenWidth, 
 		screenHeight, 
@@ -84,7 +84,7 @@ void lightingCS(
 		projection._22,
 		tileMinDepthF, 
 		tileMaxDepthF);
-
+	
 	//Cull lights with tile
 	uint numTileThreads = TILE_DIM * TILE_DIM;
 	uint numPasses = (numLightsPoint + numTileThreads - 1) / numTileThreads; //Passes required by tile threads to cover all lights.
@@ -97,7 +97,7 @@ void lightingCS(
 			bool inFrustum = true;
 			[unroll] for(uint j = 0; j < 6; j++)
 			{
-				float d = dot(frustum._[j], mul(view, float4(lightsPos[lightIndex], 1.0f))); //mul(float4(lightsPos[lightIndex], 1.0f)
+				float d = dot(frustum._[j], mul(float4(lightsPos[lightIndex], 1.0f), view)); //mul(float4(lightsPos[lightIndex], 1.0f)
 				inFrustum = inFrustum && (d >= -lightsPoint[lightIndex].range);
 			}
 			
@@ -110,13 +110,13 @@ void lightingCS(
 		}
 	}
 	GroupMemoryBarrierWithGroupSync();
-
-	float3 normal = UtilDecodeSphereMap(gNormal.xy);
-	float3 surfaceNormalW = normalize(normal);
-	float3 surfaceNormalV = normalize(mul(view, float4(normal, 0.0f)).xyz);
-	float3 toEyeW	= normalize(eyePosition - surfacePosW);
-	float3 toEyeV	= normalize(float3(0.0f, 0.0f, 0.0f) - surfacePosV);
-
+	
+	float3 normal			= UtilDecodeSphereMap(gNormal.xy);
+	float3 surfaceNormalW	= normalize(normal);
+	float3 surfaceNormalV	= normalize(mul(float4(normal, 0.0f), view).xyz);
+	float3 toEyeW			= normalize(eyePosition - surfacePosW);
+	float3 toEyeV			= normalize(float3(0.0f, 0.0f, 0.0f) - surfacePosV);
+	
 	//Specify surface material.
 	LightSurfaceMaterial surfaceMaterial =
 	{
@@ -124,13 +124,13 @@ void lightingCS(
 		/*Diffuse*/		gAlbedo,
 		/*Specular*/	float4(0.3f, 0.3f, 0.3f, 1.0f)
 	};
-
+	
 	//Initialize our resulting and inout-components.
 	float4 Ambient	= float4(0.0f, 0.0f, 0.0f, 0.0f);
 	float4 Diffuse	= float4(0.0f, 0.0f, 0.0f, 0.0f);
 	float4 Specular	= float4(0.0f, 0.0f, 0.0f, 0.0f);
 	float4 ambient, diffuse, specular;
-
+	
 	for(i = 0; i < numLightsDir; i++)
 	{
 		LightDescDir descDir = lightsDir[i];
@@ -144,14 +144,14 @@ void lightingCS(
 		Diffuse	+= diffuse; 
 		Specular += specular;
 	}
-
+	
 	for(i = 0; i < numLightsPoint; i++)
 	{
 		LightDescPoint descPoint = lightsPoint[i];
 		LightPoint(
 			toEyeV,
 			descPoint,
-			mul(view, float4(lightsPos[i], 1.0f)).xyz, //
+			mul(float4(lightsPos[i], 1.0f), view).xyz, //
 			surfaceMaterial,
 			surfaceNormalV,
 			surfacePosV,
@@ -160,21 +160,21 @@ void lightingCS(
 		Diffuse		+= diffuse;
 		Specular	+= specular;
 	}
-
+	
 	//TILING DEMO:
-	//for(i = 0; i < tileLightNum; i++) //Apply culled point-lights.
-	//{
-	//	Diffuse.g += 0.1;
-	//}
-
+	for(i = 0; i < tileLightNum; i++) //Apply culled point-lights.
+	{
+		Diffuse.g += 0.1;
+	}
+	
 	output[uint2(threadIDDispatch.x + viewportTopX, threadIDDispatch.y + viewportTopY)] = Ambient + Diffuse + Specular; //float4(tileMinDepthF, tileMinDepthF, tileMinDepthF, 1.0f); //
-
-	if(surfacePosV.z > 0.0f)
-	{
-		output[uint2(threadIDDispatch.x + viewportTopX, threadIDDispatch.y + viewportTopY)] = float4(0.0f, 1.0f, 0.0f, 1.0f);
-	}
-	else
-	{
-		output[uint2(threadIDDispatch.x + viewportTopX, threadIDDispatch.y + viewportTopY)] = float4(1.0f, 0.0f, 0.0f, 1.0f);
-	}
+	
+	//if(surfacePosV.z > 0.0f)
+	//{
+	//	output[uint2(threadIDDispatch.x + viewportTopX, threadIDDispatch.y + viewportTopY)] = float4(0.0f, 1.0f, 0.0f, 1.0f);
+	//}
+	//else
+	//{
+	//	output[uint2(threadIDDispatch.x + viewportTopX, threadIDDispatch.y + viewportTopY)] = float4(1.0f, 0.0f, 0.0f, 1.0f);
+	//}
 }

@@ -6,15 +6,13 @@ DefaultVSOut defaultVS(DefaultVSInInstanced vsIn)
 	DefaultVSOut output;
 
 	float4 pos = float4(vsIn.position, 1.0f);
-	pos = mul(vsIn.world, pos);
-	output.positionW = pos; //output.positionW	= mul(vsIn.world, float4(vsIn.position, 1.0f)).xyz;
-	pos = mul(view, pos);
+	pos = mul(pos, vsIn.world);
 	output.positionW = pos;
-	//output.positionW = pos;
-	pos = mul(projection, pos);
+	pos = mul(pos, view);
+	pos = mul(pos, projection);
 	output.position	= pos;
 
-	output.normalW	= mul(vsIn.world, float4(vsIn.normal, 0.0f)).xyz;
+	output.normalW	= mul(float4(vsIn.normal, 0.0f), vsIn.world).xyz;
 	output.texcoord	= vsIn.texcoord;
 
 	return output;

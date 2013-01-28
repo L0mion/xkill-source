@@ -1,6 +1,8 @@
 #ifndef XKILL_RENDERER_CONSTANTBUFFERS_HLSL
 #define XKILL_RENDERER_CONSTANTBUFFERS_HLSL
 
+#pragma pack_matrix(row_major)
+
 #define MAX_NUM_BONES 64
 
 cbuffer cbPerInstance : register (b0)
@@ -21,10 +23,10 @@ cbuffer cbPerFrame : register (b1)
 
 cbuffer cbPerCamera : register (b2)
 {
-	float4x4	view;
-	float4x4	viewInverse;
-	float4x4	projection;
-	float4x4	projectionInverse;
+	row_major float4x4	view;
+	row_major float4x4	viewInverse;
+	row_major float4x4	projection;
+	row_major float4x4	projectionInverse;
 	float3		eyePosition;
 	uint		viewportTopX;
 
@@ -36,9 +38,9 @@ cbuffer cbPerCamera : register (b2)
 
 cbuffer cbPerObject : register (b3)
 {
-	float4x4 finalMatrix;
-	float4x4 worldMatrix;
-	float4x4 worldMatrixInverse;
+	row_major float4x4 finalMatrix;
+	row_major float4x4 worldMatrix;
+	row_major float4x4 worldMatrixInverse;
 };
 
 cbuffer cbPerSubset : register (b4)
