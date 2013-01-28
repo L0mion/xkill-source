@@ -79,7 +79,8 @@ void lightingCS(
 		screenHeight, 
 		TILE_DIM, 
 		blockID.xy, 
-		projection, 
+		projection._11,
+		projection._22,
 		tileMinDepthF, 
 		tileMaxDepthF);
 
