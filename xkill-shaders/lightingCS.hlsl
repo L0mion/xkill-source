@@ -44,15 +44,16 @@ void lightingCS(
 	//Initialize shared values once per tile
 	if(threadIDBlockIndex == 0)
 	{
-		tileMinDepthInt = 0xFFFFFFFF;
+		tileMinDepthInt = 0x7F7FFFFF; //0xFFFFFFFF;
 		tileMaxDepthInt = 0.0f;
-		tileLightNum = 0.0f;
+		tileLightNum	= 0.0f;
 		
 		for(uint i = 0; i < TILE_MAX_LIGHTS; i++)
 		{
 			tileLightIndices[i] = 0;
 		}
 	}
+	GroupMemoryBarrierWithGroupSync();
 
 	//Sample G-Buffers. Data prefetching?
 	float2	texCoord	= float2((float)(threadIDDispatch.x + viewportTopX)/(float)screenWidth,(float)(threadIDDispatch.y + viewportTopY)/(float)screenHeight);
@@ -64,10 +65,10 @@ void lightingCS(
 	//Get surface position.
 	/*At the moment, world space position is stored in Material-buffer.*/
 	float3 surfacePosW = gMaterial.xyz;
-	float3 surfacePosV = mul(float4(surfacePosW, 1.0f), view).xyz;
+	float3 surfacePosV = mul(view, float4(surfacePosW, 1.0f)).xyz;
 
-	uint pixelDepthInt = asuint(gDepth); //Interlocked functions can only be applied onto ints.
-	GroupMemoryBarrierWithGroupSync(); //Needs to be here in order for initialization of shared values to be guaranteed.
+	uint pixelDepthInt = asuint(surfacePosV); //Interlocked functions can only be applied onto ints.
+	
 	InterlockedMin(tileMinDepthInt, pixelDepthInt);
 	InterlockedMax(tileMaxDepthInt, pixelDepthInt);
 	GroupMemoryBarrierWithGroupSync();
@@ -96,7 +97,7 @@ void lightingCS(
 			bool inFrustum = true;
 			[unroll] for(uint j = 0; j < 6; j++)
 			{
-				float d = dot(frustum._[j], mul(float4(lightsPos[lightIndex], 1.0f), view)); //mul(float4(lightsPos[lightIndex], 1.0f)
+				float d = dot(frustum._[j], mul(view, float4(lightsPos[lightIndex], 1.0f))); //mul(float4(lightsPos[lightIndex], 1.0f)
 				inFrustum = inFrustum && (d >= -lightsPoint[lightIndex].range);
 			}
 			
@@ -112,7 +113,7 @@ void lightingCS(
 
 	float3 normal = UtilDecodeSphereMap(gNormal.xy);
 	float3 surfaceNormalW = normalize(normal);
-	float3 surfaceNormalV = normalize(mul(float4(normal, 0.0f), view).xyz);
+	float3 surfaceNormalV = normalize(mul(view, float4(normal, 0.0f)).xyz);
 	float3 toEyeW	= normalize(eyePosition - surfacePosW);
 	float3 toEyeV	= normalize(float3(0.0f, 0.0f, 0.0f) - surfacePosV);
 
@@ -150,7 +151,7 @@ void lightingCS(
 		LightPoint(
 			toEyeV,
 			descPoint,
-			mul(float4(lightsPos[i], 1.0f), view).xyz, //
+			mul(view, float4(lightsPos[i], 1.0f)).xyz, //
 			surfaceMaterial,
 			surfaceNormalV,
 			surfacePosV,
@@ -167,4 +168,13 @@ void lightingCS(
 	//}
 
 	output[uint2(threadIDDispatch.x + viewportTopX, threadIDDispatch.y + viewportTopY)] = Ambient + Diffuse + Specular; //float4(tileMinDepthF, tileMinDepthF, tileMinDepthF, 1.0f); //
+
+	if(view._14 > 4.9f && view._14 < 5.1f)
+	{
+		output[uint2(threadIDDispatch.x + viewportTopX, threadIDDispatch.y + viewportTopY)] = float4(0.0f, 1.0f, 0.0f, 1.0f);
+	}
+	else
+	{
+		output[uint2(threadIDDispatch.x + viewportTopX, threadIDDispatch.y + viewportTopY)] = float4(1.0f, 0.0f, 0.0f, 1.0f);
+	}
 }
