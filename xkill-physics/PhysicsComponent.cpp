@@ -17,14 +17,7 @@
 #include "debugDrawDispatcher.h"
 
 #include <iostream>
-
-AttributeIterator<Attribute_Physics> itrPhysics;
-AttributeIterator<Attribute_Render> itrRender;
-AttributeIterator<Attribute_Camera> itrCamera_2;
-//std::vector<Entity>* allEntity;
-//AttributeIterator<Attribute_Spatial> itrSpatial_PhysicsComponent;
-//AttributeIterator<Attribute_Position> itrPosition_PhysicsComponent;
-AttributeIterator<Attribute_Player> itrPlayer_PhysicsComponent;
+ATTRIBUTES_DECLARE_ALL;
 
 static debugDrawDispatcher gDebugDraw;
 static float removePhysicsObjectIfItHasLowerYCoordinateThanThis;
@@ -37,15 +30,9 @@ PhysicsComponent::PhysicsComponent() : broadphase_(nullptr),
 									   bulletImporter_(nullptr),
 									   physicsObjects_(nullptr)
 {
+	ATTRIBUTES_INIT_ALL;
 	SUBSCRIBE_TO_EVENT(this,EVENT_ATTRIBUTE_UPDATED);
 	SUBSCRIBE_TO_EVENT(this, EVENT_MODIFY_PHYSICS_OBJECT);
-	itrPhysics = ATTRIBUTE_MANAGER->physics.getIterator();
-	itrRender = ATTRIBUTE_MANAGER->render.getIterator();
-	itrCamera_2 = ATTRIBUTE_MANAGER->camera.getIterator();
-	itrPlayer_PhysicsComponent = ATTRIBUTE_MANAGER->player.getIterator();
-	//itrSpatial_PhysicsComponent = ATTRIBUTE_MANAGER->spatial.getIterator();
-	//itrPosition_PhysicsComponent = ATTRIBUTE_MANAGER->position.getIterator();
-	//GET_ENTITIES(allEntity);
 	removePhysicsObjectIfItHasLowerYCoordinateThanThis = -5.0f;
 }
 
@@ -152,16 +139,23 @@ void PhysicsComponent::onUpdate(float delta)
 		//Physics object out of bounds
 		if(physicsObjects_->at(index)->getWorldTransform().getOrigin().y() < removePhysicsObjectIfItHasLowerYCoordinateThanThis)
 		{
+			//Player out of bounds
 			if(physicsAttribute->collisionFilterGroup == Attribute_Physics::PLAYER)
 			{
-				//Handle player out of bounds
-				physicsObjects_->at(index)->setGravity(btVector3(0.0f, 0.0f, 0.0f));
-				physicsObjects_->at(index)->setLinearVelocity(btVector3(0.0f, 0.0f, 0.0f));
-
 				int playerEntityIndex = itrPhysics.ownerIdAt(index);
-				DEBUGPRINT("Player entity " << playerEntityIndex << " was out of bounds");
-				//check
-				//SEND_EVENT(&Event_PlayerDeath());
+				Entity* playerEntity = itrPhysics.ownerAt(index);
+				
+				std::vector<int> playerAttributeIndices = playerEntity->getAttributes(ATTRIBUTE_PLAYER);
+				for(unsigned int i = 0; i < playerAttributeIndices.size(); i++)
+				{
+					Attribute_Player* playerAttribute = itrPlayer.at(i);
+					Attribute_Health* playerHealthAttribute = itrHealth.at(playerAttribute->ptr_health);
+					if(playerHealthAttribute->health > 0.0f)
+					{
+						DEBUGPRINT("Player entity " << playerEntityIndex << " was out of bounds");
+						SEND_EVENT(&Event_PlayerDeath(playerAttributeIndices[i]));
+					}
+				}
 			}
 			else
 			{
@@ -320,9 +314,6 @@ void PhysicsComponent::synchronizeWithAttributes(Attribute_Physics* physicsAttri
 		case Attribute_Physics::EVERYTHING:
 			std::cout << "Error: Attribute_Physics should not have EVERYTHING as collisionFilterGroup" << std::endl;
 			break;
-		case Attribute_Physics::DEFAULT_ERROR:
-			std::cout << "Error: Attribute_Physics should not have be DEFAULT_ERROR as collisionFilterGroup. Do not forget to set collisionFilterGroup when creating Attribute_Physics." << std::endl;
-			break;
 		}
 
 		if(physicsObjects_ != nullptr)
@@ -428,11 +419,10 @@ void PhysicsComponent::updateCulling()
 	}
 	CollisionShapes::Instance()->updateFrustrumShape();
 
-	itrCamera_2 = ATTRIBUTE_MANAGER->camera.getIterator();
-	while(itrCamera_2.hasNext())
+	while(itrCamera.hasNext())
 	{
-		Attribute_Camera* cameraAttribute = itrCamera_2.getNext();
-		unsigned int index = itrCamera_2.storageIndex();
+		Attribute_Camera* cameraAttribute = itrCamera.getNext();
+		unsigned int index = itrCamera.storageIndex();
 		
 		if(index >= static_cast<unsigned int>(frustumPhysicsObjects_->size()))
 		{

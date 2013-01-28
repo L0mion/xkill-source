@@ -58,7 +58,7 @@ Attribute_Physics::Attribute_Physics()
 	
 	meshID = -1;
 
-	collisionFilterGroup = Attribute_Physics::DEFAULT_ERROR;
+	collisionFilterGroup = Attribute_Physics::NOTHING;
 	collisionFilterMask = 0;
 
 	gravity = Float3(0.0f, -10.0f, 0.0f);
@@ -199,6 +199,8 @@ Attribute_Player::Attribute_Player()
 	priority = 0;
 	cycleSteals = 0;
 	totalExecutionTime = 0;
+	respawnDelay = 5.0f;
+	currentRespawnDelay = 0.0f;
 
 	walkSpeed = 5.0f;
 	sprintSpeed = walkSpeed*2;
