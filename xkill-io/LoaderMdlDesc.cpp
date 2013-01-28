@@ -269,9 +269,6 @@ void LoaderMdlDesc::loadHack(const std::vector<std::string>& params)
 	{
 		events_.push_back( new Event_CreatePickupablesSpawnPoint(position,PickupableType::AMMUNITION_BULLET));
 	}
-
-	//int amount = 5; //Check, load
-	//events_.push_back( new Event_CreatePickupable(position, PickupableType::MEDKIT, amount));
 }
 void LoaderMdlDesc::loadAmmo(const std::vector<std::string>& params)
 {
