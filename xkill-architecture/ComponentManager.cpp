@@ -153,11 +153,6 @@ void ComponentManager::update(float delta)
 	/// PUT SOMETHING
 	if(GET_STATE() == STATE_DEATHMATCH)
 	{
-		sound_->onUpdate(delta);
-		//camera_->onUpdate(delta);
-		physics_->onUpdate(delta);
-		camera_->onUpdate(delta);
-		render_->onUpdate(delta);
 		input_->onUpdate(delta);
 		if(initialSpawnDelay > 0)
 		{
@@ -167,6 +162,11 @@ void ComponentManager::update(float delta)
 		{
 			game_->onUpdate(delta);	
 		}
+		physics_->onUpdate(delta);
+		camera_->onUpdate(delta);
+		sound_->onUpdate(delta);
+		render_->onUpdate(delta);
+	
 		SEND_EVENT(&Event(EVENT_UPDATE));
 	}
 	else if(GET_STATE() == STATE_GAMEOVER)

@@ -32,6 +32,8 @@ Menu_Main::Menu_Main( QWidget* parent ) : QMainWindow(parent), ToggleHelper(this
 
 	ui.verticalLayout_2->setSpacing(0);
 	ui.verticalLayout_2->setMargin(0);
+	ui.verticalLayout->setSpacing(0);
+	ui.verticalLayout->setMargin(0);
 
 	connect(ui.pushButton_exit,									SIGNAL(clicked()),					this,	SLOT(slot_quitToDesktop()));
 	connect(ui.pushButton_exit_2,								SIGNAL(clicked()),					this,	SLOT(slot_quitToDesktop()));
