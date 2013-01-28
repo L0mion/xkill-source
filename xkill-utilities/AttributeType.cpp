@@ -199,6 +199,8 @@ Attribute_Player::Attribute_Player()
 	priority = 0;
 	cycleSteals = 0;
 	totalExecutionTime = 0;
+	respawnDelay = 5.0f;
+	currentRespawnDelay = 0.0f;
 
 	walkSpeed = 5.0f;
 	sprintSpeed = walkSpeed*2;
@@ -270,7 +272,7 @@ Attribute_PickupablesSpawnPoint::Attribute_PickupablesSpawnPoint()
 	spawnPickupableType = PickupableType::MEDKIT;
 	spawnDelayInSeconds = 0.0f;
 	secondsSinceLastSpawn = 0.0f;
-	maxNrOfExistingSpawnedPickupables = 1;
+	maxNrOfExistingSpawnedPickupables = 100;
 	currentNrOfExistingSpawnedPickupables = 0;
 }
 Attribute_PickupablesSpawnPoint::~Attribute_PickupablesSpawnPoint()
