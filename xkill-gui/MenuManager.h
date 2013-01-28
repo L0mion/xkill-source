@@ -37,25 +37,14 @@ private:
 	std::vector<HUDWindow*> huds;
 	QWidget* parent;
 public:
-	HUDManager()
-	{
-	}
-	void update();
-
+	HUDManager();
 	HUDManager(QWidget* parent);
 
-	void createHUD()
-	{
-		for(int i=0; i<5; i++)
-		{
-			huds.push_back(new HUDWindow(parent, i));
-		}
-	}
+	void update();
 
-	void parentMoveEvent()
-	{
-		update();
-	}
+	void createHUD();
+
+	void parentMoveEvent();
 };
 
 
@@ -70,52 +59,14 @@ private:
 public:
 	MenuManager(QWidget* parent);
 
-	void onEvent(Event* e)
-	{
-		EventType type = e->getType();
-		static int refreshRate = 2;
-		static int test = refreshRate;
-		switch(type) 
-		{
-		case EVENT_UPDATE:
-			// HACK: Makes the menu update every 20 frame
-			test--;
-			if(test<0)
-			{
-				hudManager.update();
-				scoreBoard->onUpdate(1.0f);
-				test = refreshRate;
-			}
-			break;
-		case EVENT_END_DEATHMATCH:
-			scoreBoard->toggleMenu(false);
-			inGameMenu->toggleMenu(false);
-			mainMenu->toggleMenu(true);
-			break;
-		case EVENT_GAME_OVER:
-			scoreBoard->toggleMenu(true);
-			scoreBoard->onUpdate(0.01f);
-			inGameMenu->toggleMenu(false);
-			mainMenu->toggleMenu(false);
-		default:
-			break;
-		}
-	}
+	void onEvent(Event* e);
 
-	void onUpdate(float delta)
-	{
+	void onUpdate(float delta);
 
-	}
 	// Behavior on keyboard input
 	void keyPressEvent(QKeyEvent* e);
 
 	void keyReleaseEvent(QKeyEvent* e);
 
-	void moveEvent()
-	{
-		mainMenu->parentMoveEvent();
-		scoreBoard->parentMoveEvent();
-		inGameMenu->parentMoveEvent();
-		hudManager.parentMoveEvent();
-	}
+	void moveEvent();
 };

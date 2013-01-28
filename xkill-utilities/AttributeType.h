@@ -64,7 +64,9 @@ enum DLL_U AttributeType
 
 	ATTRIBUTE_HEALTH,
 	ATTRIBUTE_DAMAGE,
-	ATTRIBUTE_SPAWNPOINT,
+	ATTRIBUTE_PLAYERSPAWNPOINT,
+	ATTRIBUTE_PICKUPABLESSPAWNPOINT,
+	ATTRIBUTE_PICKUPABLE,
 	ATTRIBUTE_WEAPONSTATS,
 	ATTRIBUTE_EXPLOSIONSPHERE,
 
@@ -248,6 +250,7 @@ struct DLL_U Attribute_Physics : public IAttribute
 		PROJECTILE = 4,
 		EXPLOSIONSPHERE = 8,
 		FRUSTUM = 16,
+		PICKUPABLE = 32,
 		EVERYTHING = -1
 	};
 	PhysicsAttributeType collisionFilterGroup;
@@ -270,7 +273,6 @@ struct DLL_U Attribute_Physics : public IAttribute
 
 	bool collisionResponse;
 	bool reloadDataIntoBulletPhysics;
-	bool alive;
 
 	DataItemList* getDataList()
 	{
@@ -285,7 +287,6 @@ struct DLL_U Attribute_Physics : public IAttribute
 		list->add(collisionFilterMask,					"collisionFilterMask");
 		list->add(collisionResponse,					"collisionResponse");
 		list->add(reloadDataIntoBulletPhysics,			"reloadDataIntoBulletPhysics");
-		list->add(alive,								"isAlive");
 		
 		return list;
 	}
@@ -301,7 +302,6 @@ struct DLL_U Attribute_Physics : public IAttribute
 		list->get(&collisionFilterMask);
 		list->get(&collisionResponse);
 		list->get(&reloadDataIntoBulletPhysics);
-		list->get(&alive);
 	};
 	AttributeType getType(){return ATTRIBUTE_PHYSICS;}
 	std::string getName(){return "Physics";}
@@ -821,22 +821,22 @@ struct DLL_U Attribute_Damage : public IAttribute
 	std::string getName(){return "Damage";}
 };
 
-struct DLL_U Attribute_SpawnPoint : public IAttribute
+struct DLL_U Attribute_PlayerSpawnPoint : public IAttribute
 {
-	Attribute_SpawnPoint();
-	~Attribute_SpawnPoint();
+	Attribute_PlayerSpawnPoint();
+	~Attribute_PlayerSpawnPoint();
 
 	AttributePointer ptr_position;
 
-	float timeSinceLastSpawn;	//!< Is reset when a player spawns at the spawn point.
-	float spawnArea;			//!< Defines the spawn point zone, a horizontal circle area.
+	float secondsSinceLastSpawn;	//!< Is reset when a player spawns at the spawn point.
+	float spawnArea;				//!< Defines the spawn point zone, a horizontal circle area.
 
 	DataItemList* getDataList()
 	{
 		DataItemList* list = new DataItemList();
 
 		list->add_AttributePointer(ptr_position.index, "ptr_position");
-		list->add(timeSinceLastSpawn,	"timeSinceLastSpawn");
+		list->add(secondsSinceLastSpawn,	"secondsSinceLastSpawn");
 		list->add(spawnArea,			"spawnArea");
 
 		return list;
@@ -844,11 +844,89 @@ struct DLL_U Attribute_SpawnPoint : public IAttribute
 	void saveTo(DataItemList* list)
 	{
 		list->get_AttributePointer(&ptr_position.index);
-		list->get(&timeSinceLastSpawn);
+		list->get(&secondsSinceLastSpawn);
 		list->get(&spawnArea);
 	};
-	AttributeType getType(){return ATTRIBUTE_SPAWNPOINT;}
-	std::string getName(){return "SpawnPoint";}
+	AttributeType getType(){return ATTRIBUTE_PLAYERSPAWNPOINT;}
+	std::string getName(){return "PlayerSpawnPoint";}
+};
+
+enum PickupableType;
+struct DLL_U Attribute_PickupablesSpawnPoint : public IAttribute
+{
+	Attribute_PickupablesSpawnPoint();
+	~Attribute_PickupablesSpawnPoint();
+
+	AttributePointer ptr_position;
+
+	PickupableType spawnPickupableType;			//!< Type of pickupable spawned by this pickupables spawn point
+	float spawnDelayInSeconds;					//!< Delay until a pickupable may spawn
+	float secondsSinceLastSpawn;				//!< Incrementing timer
+	int maxNrOfExistingSpawnedPickupables;		//!< Is checked against "currentNrOfExistingSpawnedPickupables"
+	int currentNrOfExistingSpawnedPickupables;	//!< Incremented when a pickubalbe is spawned from this pickupables spawn point. Decremented when a pickupable is picked up
+
+	DataItemList* getDataList()
+	{
+		DataItemList* list = new DataItemList();
+
+		list->add_AttributePointer(ptr_position.index, "ptr_position");
+		//list->add(spawnPickupableType, "spawnPickupableType");
+		list->add(spawnDelayInSeconds, "spawnDelayInSeconds");
+		list->add(secondsSinceLastSpawn, "secondsSinceLastSpawn");
+		list->add(maxNrOfExistingSpawnedPickupables, "maxNrOfExistingSpawnedPickupables");
+		list->add(currentNrOfExistingSpawnedPickupables, "currentNrOfExistingSpawnedPickupables");
+
+		return list;
+	}
+	void saveTo(DataItemList* list)
+	{
+		list->get_AttributePointer(&ptr_position.index);
+		//list->get(&spawnPickupableType);
+		list->get(&spawnDelayInSeconds);
+		list->get(&secondsSinceLastSpawn);
+		list->get(&maxNrOfExistingSpawnedPickupables);
+		list->get(&currentNrOfExistingSpawnedPickupables);
+	};
+
+	AttributeType getType(){return ATTRIBUTE_PICKUPABLESSPAWNPOINT;}
+	std::string getName(){return "PickupablesSpawnPoint";}
+};
+
+struct DLL_U Attribute_Pickupable : public IAttribute
+{
+	Attribute_Pickupable();
+	~Attribute_Pickupable();
+
+	AttributePointer ptr_position;
+	AttributePointer ptr_physics;
+	AttributePointer ptr_creatorPickupablesSpawnPoint;	//! The pickupable spawnpoint that spawned this pickupable
+
+	PickupableType pickupableType;						//! MEDKIT, AMMUNITION_BULLET, AMMUNITION_SCATTER, AMMUNITION_EXPLOSIVE, etc
+	int amount;											//! Data of pickupable (health, ammo, etc)
+
+	DataItemList* getDataList()
+	{
+		DataItemList* list = new DataItemList();
+
+		list->add_AttributePointer(ptr_position.index, "ptr_position");
+		list->add_AttributePointer(ptr_physics.index, "ptr_physics");
+		list->add_AttributePointer(ptr_creatorPickupablesSpawnPoint.index, "ptr_creatorPickupablesSpawnPoint");
+		//list->add_AttributePointer(pickupableType, "pickupableType");
+		list->add(amount, "amount");
+
+		return list;
+	}
+	void saveTo(DataItemList* list)
+	{
+		list->get_AttributePointer(&ptr_position.index);
+		list->get_AttributePointer(&ptr_physics.index);
+		list->get_AttributePointer(&ptr_creatorPickupablesSpawnPoint.index);
+		//list->get_AttributePointer(&pickupableType);
+		list->get(&amount);
+	};
+
+	AttributeType getType(){return ATTRIBUTE_PICKUPABLE;}
+	std::string getName(){return "Pickupable";}
 };
 
 class MutatorSettings;
@@ -862,7 +940,7 @@ struct DLL_U Attribute_WeaponStats : public IAttribute
 	Attribute_WeaponStats();
 	~Attribute_WeaponStats();
 
-	Ammunition ammunition[Ammunition::NROFAMUNITIONTYPES];
+	Ammunition ammunition[Ammunition::NROFAMMUNITIONTYPES];
 	FiringMode firingMode[FiringMode::NROFFIRINGMODETYPES];
 
 	Ammunition::AmmunitionType currentAmmunitionType;

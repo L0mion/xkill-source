@@ -136,7 +136,7 @@ void ComponentManager::onEvent(Event* e)
 		GET_STATE() = STATE_GAMEOVER;
 		break;
 	case EVENT_START_DEATHMATCH:
-		initialSpawnDelay = 0.2;
+		initialSpawnDelay = 0.2f;
 	case EVENT_GAME_OVER:
 		gameOverDelay = 10.0f;
 		GET_STATE() = STATE_GAMEOVER;

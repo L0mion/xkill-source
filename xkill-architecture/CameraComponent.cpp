@@ -235,19 +235,29 @@ void CameraComponent::onUpdate(float delta)
 		Attribute_Player* player = itrPlayer.getNext();
 
 		Attribute_Health* health = itrHealth.at(player->ptr_health);
-		if(health->health <= 0)
-			continue;
-
 		Attribute_Input* input = itrInput.at(player->ptr_input);
+		Attribute_Camera* camera = itrCamera.at(player->ptr_camera);
+		if(health->health <= 0)
+		{
+			//camera->aspectRatio += delta*100;
+
+			//updateProj(camera);
+		}
+		else
+		{
+			yaw(input->rotation.x, camera);
+			pitch(input->rotation.y, camera);
+		}
+		
 		//Entity* entity = itrInput.owner();
 		//if(entity->hasAttribute(ATTRIBUTE_CAMERA))
 		//{
 			//std::vector<Attribute_Camera*> cameras = itrCamera.getMultiple(entity->getAttributes(ATTRIBUTE_CAMERA));
 			//for(int i=0; i<(int)cameras.size(); i++)
 			//{
-				Attribute_Camera* camera = itrCamera.at(player->ptr_camera);//cameras.at(i);
-				yaw(input->rotation.x, camera);
-				pitch(input->rotation.y, camera);
+				//Attribute_Camera* camera = itrCamera.at(player->ptr_camera);//cameras.at(i);
+				//yaw(input->rotation.x, camera);
+				//pitch(input->rotation.y, camera);
 			//}
 		//}
 	}

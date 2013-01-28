@@ -1,5 +1,6 @@
 #include "GameComponent.h"
 #include <xkill-utilities/AttributeManager.h>
+#include <xkill-utilities/Enums.h>
 #include <DirectXMath.h>
 
 #include <iostream>
@@ -33,7 +34,7 @@ bool GameComponent::init()
 	GET_ENTITIES(allEntity);
 
 	ATTRIBUTES_INIT_ALL;
-
+	
 	srand((unsigned)time(NULL));
 
 	return true;
@@ -104,7 +105,7 @@ void GameComponent::onUpdate(float delta)
 		if(input->changeAmmunitionType)
 		{
 			input->changeAmmunitionType = false;
-
+			weaponStats->currentAmmunitionType = static_cast<Ammunition::AmmunitionType>((weaponStats->currentAmmunitionType + 1) % Ammunition::AmmunitionType::NROFAMMUNITIONTYPES);
 			switchAmmunition(weaponStats);
 			ammo = &weaponStats->ammunition[weaponStats->currentAmmunitionType];
 			
@@ -116,7 +117,7 @@ void GameComponent::onUpdate(float delta)
 		if(input->changeFiringMode)
 		{
 			input->changeFiringMode = false;
-
+			weaponStats->currentFiringModeType = static_cast<FiringMode::FiringModeType>((weaponStats->currentFiringModeType + 1) % Ammunition::AmmunitionType::NROFAMMUNITIONTYPES);
 			switchFiringMode(weaponStats);
 			firingMode = &weaponStats->firingMode[weaponStats->currentFiringModeType];
 
@@ -198,7 +199,7 @@ void GameComponent::onUpdate(float delta)
 			else
 			{
 				// If an appropriate spawnpoint was found: spawn at it; otherwise: spawn at origo.
-				Attribute_SpawnPoint* spawnPointAttribute = findUnoccupiedSpawnPoint();
+				Attribute_PlayerSpawnPoint* spawnPointAttribute = findUnoccupiedSpawnPoint();
 				if(spawnPointAttribute != nullptr)
 				{
 					Attribute_Position* spawnPointPositionAttribute = itrPosition.at(spawnPointAttribute->ptr_position);
@@ -211,7 +212,6 @@ void GameComponent::onUpdate(float delta)
 					DEBUGPRINT("No spawn point was found. Player entity " << itrPlayer.ownerId() << " spawned at origo" << std::endl);
 				}
 
-				physics->alive = true;
 				physics->gravity = Float3(0.0f, -10.0f, 0.0f);
 				physics->collisionFilterMask = physics->EVERYTHING;
 				physics->collisionResponse = true;
@@ -253,18 +253,62 @@ void GameComponent::onUpdate(float delta)
 		}
 	}
 
-
 	//
-	// Update spawn points
+	// Update player spawn points
 	//
 
-	while(itrSpawnPoint.hasNext())
+	
+	while(itrPlayerSpawnPoint.hasNext())
 	{
-		// spawn delay logic
-		Attribute_SpawnPoint* spawnPoint	= itrSpawnPoint.getNext();
-		spawnPoint->timeSinceLastSpawn += delta;
+		Attribute_PlayerSpawnPoint* spawnPoint	= itrPlayerSpawnPoint.getNext();
+		spawnPoint->secondsSinceLastSpawn += delta;
 	}
 
+	//
+	// Update pickupables spawn points
+	//
+
+	while(itrPickupablesSpawnPoint.hasNext())
+	{
+		Attribute_PickupablesSpawnPoint* pickupablesSpawnPoint = itrPickupablesSpawnPoint.getNext();
+		pickupablesSpawnPoint->secondsSinceLastSpawn += delta;
+		if(pickupablesSpawnPoint->secondsSinceLastSpawn > pickupablesSpawnPoint->spawnDelayInSeconds)
+		{
+			if(pickupablesSpawnPoint->currentNrOfExistingSpawnedPickupables < pickupablesSpawnPoint->maxNrOfExistingSpawnedPickupables)
+			{
+				Attribute_Position* pickupablesSpawnPointPosition = itrPosition.at(pickupablesSpawnPoint->ptr_position);
+
+				int amount;
+				switch(pickupablesSpawnPoint->spawnPickupableType)
+				{
+				case PickupableType::MEDKIT:
+					amount = 20;
+						break;
+				case PickupableType::AMMUNITION_BULLET:
+					amount = 100;
+						break;
+				case PickupableType::AMMUNITION_SCATTER:
+					amount = 50;
+						break;
+				case PickupableType::AMMUNITION_EXPLOSIVE:
+					amount = 10;
+					break;
+				}
+
+				AttributePointer creatorPickupablesSpawnPoint = itrPickupablesSpawnPoint.attributePointer(pickupablesSpawnPoint);
+
+				SEND_EVENT(&Event_CreatePickupable(pickupablesSpawnPointPosition->position, pickupablesSpawnPoint->spawnPickupableType, creatorPickupablesSpawnPoint, amount));
+				pickupablesSpawnPoint->secondsSinceLastSpawn = 0.0f;
+			}
+		}
+	}
+
+	//check
+	//while(itrPickupable.hasNext())
+	//{
+	//	Attribute_Pickupable* pickupable = itrPickupable.getNext();
+	//	pickupable;
+	//}
 
 	//
 	// Update weapons stats
@@ -451,7 +495,7 @@ void GameComponent::event_PhysicsAttributesColliding(Event_PhysicsAttributesColl
 				Attribute_Projectile* projectileAttribute = itrProjectile.at(projectileId.at(i));
 
 				//Shorten lifetime of projectile colliding with physics objects
-				if(projectileAttribute->currentLifeTimeLeft > 0.2f)
+				if(projectileAttribute->currentLifeTimeLeft > 0.15f)
 				{
 					projectileAttribute->currentLifeTimeLeft = 0.15f;
 				}
@@ -482,7 +526,59 @@ void GameComponent::event_PhysicsAttributesColliding(Event_PhysicsAttributesColl
 					SEND_EVENT(&Event_CreateExplosionSphere(projectilePositionAttribute->position, projectileAttribute->explosionSphereRadius, projectileDamageAttribute->damage, projectileAttribute->entityIdOfCreator));
 				}
 			}
-			//SEND_EVENT(&Event_RemoveEntity(entity1->getID())); //Crashes somtimes if removed here
+			//SEND_EVENT(&Event_RemoveEntity(entity1->getID())); //Crashes sometimes if removed here
+		}
+	}
+	//Pickupables
+	else if(entity1->hasAttribute(ATTRIBUTE_PICKUPABLE))
+	{
+		Attribute_Pickupable* pickupableAttribute;
+		if(entity2->hasAttribute(ATTRIBUTE_PLAYER))
+		{
+			//Retrieve player attribute
+			std::vector<int> playerId = entity2->getAttributes(ATTRIBUTE_PLAYER);
+			for(unsigned i=0;i<playerId.size();i++)
+			{
+				Attribute_Player* playerAttribute = itrPlayer.at(playerId.at(i));
+
+				//Retrieve pickupable attribute
+				std::vector<int> pickupablesId = entity1->getAttributes(ATTRIBUTE_PICKUPABLE);
+				for(unsigned i=0;i<pickupablesId.size();i++)
+				{
+					pickupableAttribute = itrPickupable.at(pickupablesId.at(i));
+					switch(pickupableAttribute->pickupableType)
+					{
+						case PickupableType::MEDKIT:
+						{
+								Attribute_Health* health = itrHealth.at(playerAttribute->ptr_health);
+								health->health += pickupableAttribute->amount;
+								break;
+						}
+						case PickupableType::AMMUNITION_BULLET:
+						{
+								Attribute_WeaponStats* weaponStatsAttribute = itrWeaponStats.at(playerAttribute->ptr_weaponStats);
+								weaponStatsAttribute->ammunition[Ammunition::BULLET].totalNrOfShots += pickupableAttribute->amount;
+								break;
+						}
+						case PickupableType::AMMUNITION_EXPLOSIVE:
+						{
+								Attribute_WeaponStats* weaponStatsAttribute = itrWeaponStats.at(playerAttribute->ptr_weaponStats);
+								weaponStatsAttribute->ammunition[Ammunition::EXPLOSIVE].totalNrOfShots += pickupableAttribute->amount;
+								break;
+						}
+						case PickupableType::AMMUNITION_SCATTER:
+						{
+								Attribute_WeaponStats* weaponStatsAttribute = itrWeaponStats.at(playerAttribute->ptr_weaponStats);
+								weaponStatsAttribute->ammunition[Ammunition::SCATTER].totalNrOfShots += pickupableAttribute->amount;
+								break;
+						}
+					}
+				}
+			}
+			//Decrement number of spawned pickupables for the spawnpoint that spanwed the pickupable that the player picked up. Also remove it.
+			Attribute_PickupablesSpawnPoint* pickupablesSpawnPointAttribute = itrPickupablesSpawnPoint.at(pickupableAttribute->ptr_creatorPickupablesSpawnPoint);
+			pickupablesSpawnPointAttribute->currentNrOfExistingSpawnedPickupables--;
+			SEND_EVENT(&Event_RemoveEntity(entity1->getID()));
 		}
 	}
 }
@@ -501,10 +597,10 @@ void GameComponent::event_EndDeathmatch(Event_EndDeathmatch* e)
 		itrPhysics.getNext();
 		SEND_EVENT(&Event_RemoveEntity(itrPhysics.ownerId()));
 	}
-	while(itrSpawnPoint.hasNext())
+	while(itrPlayerSpawnPoint.hasNext())
 	{
-		itrSpawnPoint.getNext();
-		SEND_EVENT(&Event_RemoveEntity(itrSpawnPoint.ownerId()));
+		itrPlayerSpawnPoint.getNext();
+		SEND_EVENT(&Event_RemoveEntity(itrPlayerSpawnPoint.ownerId()));
 	}
 
 	while(itrLightDir.hasNext())
@@ -532,13 +628,13 @@ void GameComponent::event_EndDeathmatch(Event_EndDeathmatch* e)
 	DEBUGPRINT("x--------------x");
 }
 
-Attribute_SpawnPoint* GameComponent::findUnoccupiedSpawnPoint()
+Attribute_PlayerSpawnPoint* GameComponent::findUnoccupiedSpawnPoint()
 {
-	Attribute_SpawnPoint* foundSpawnPoint = nullptr;
-	std::vector<Attribute_SpawnPoint*> unoccupiedSpawnPoints;
+	Attribute_PlayerSpawnPoint* foundSpawnPoint = nullptr;
+	std::vector<Attribute_PlayerSpawnPoint*> unoccupiedSpawnPoints;
 	
-	// Special cases: *no spawn point, return nullptr.
-	int numSpawnPoints = itrSpawnPoint.storageSize();
+	// Special cases: *no player spawn point, return nullptr.
+	int numSpawnPoints = itrPlayerSpawnPoint.storageSize();
 	if(numSpawnPoints < 1)
 	{
 		DEBUGPRINT("GameComponent::findUnoccupiedSpawnPoint - No spawn point found.");
@@ -546,17 +642,17 @@ Attribute_SpawnPoint* GameComponent::findUnoccupiedSpawnPoint()
 	}
 
 	//
-	// Find all unoccupied spawn points.
+	// Find all unoccupied player spawn points.
 	//
 
-	AttributeIterator<Attribute_SpawnPoint> itrSpawnPoint = ATTRIBUTE_MANAGER->spawnPoint.getIterator();
-	while(itrSpawnPoint.hasNext())
+	AttributeIterator<Attribute_PlayerSpawnPoint> itrPlayerSpawnPoint = ATTRIBUTE_MANAGER->playerSpawnPoint.getIterator();
+	while(itrPlayerSpawnPoint.hasNext())
 	{
 		// Fetch attributes
-		foundSpawnPoint = itrSpawnPoint.getNext();
+		foundSpawnPoint = itrPlayerSpawnPoint.getNext();
 		Attribute_Position* position_spawnPoint = itrPosition.at(foundSpawnPoint->ptr_position);
 		
-		// To prevent spawncamping, check if spawnpoint is occupied
+		// To prevent spawncamping, check if player spawnpoint is occupied
 		bool isUnoccupied = true;
 		AttributeIterator<Attribute_Player> itrPlayer = ATTRIBUTE_MANAGER->player.getIterator();
 		while(itrPlayer.hasNext())
@@ -571,10 +667,10 @@ Attribute_SpawnPoint* GameComponent::findUnoccupiedSpawnPoint()
 				Attribute_Spatial*	spatial	= itrSpatial.at(render->ptr_spatial);
 				Attribute_Position*	position_player	= itrPosition.at(spatial->ptr_position);
 
-				// calculate distance to spawn point
+				// calculate distance to player spawn point
 				float distanceToSpawnPoint =  position_player->position.distanceTo(position_spawnPoint->position);
 
-				// if a player is within spawn point radius
+				// if a player is within player spawn point radius
 				if(distanceToSpawnPoint < foundSpawnPoint->spawnArea)
 				{
 					// spawn point is occupied, abort further testing
@@ -583,7 +679,7 @@ Attribute_SpawnPoint* GameComponent::findUnoccupiedSpawnPoint()
 				}
 			}
 		}
-		// TRUE: Spawn point is unoccupied, add to vector
+		// TRUE: Player spawn point is unoccupied, add to vector
 		if(isUnoccupied)
 		{
 			unoccupiedSpawnPoints.push_back(foundSpawnPoint); // this vector will be iterated below.
@@ -591,21 +687,21 @@ Attribute_SpawnPoint* GameComponent::findUnoccupiedSpawnPoint()
 	}
 
 
-	// Iterate through all unoccupied spawn points 
-	// (found in the above loop) to find the spawn 
+	// Iterate through all unoccupied player spawn points 
+	// (found in the above loop) to find the player spawn 
 	// point that least recently spawned a player.
 
 	int nrOfUnoccupiedSpawnPoints = unoccupiedSpawnPoints.size();
 	
-	// Find least recently used spawn point
+	// Find least recently used player spawn point
 	int longestTimeSinceLastSpawnIndex = -1;
 	float longestTimeSinceLastSpawn = 0.0f;
 	for(int i=0; i<nrOfUnoccupiedSpawnPoints; i++)
 	{
 		foundSpawnPoint = unoccupiedSpawnPoints.at(i);
-  		if(foundSpawnPoint->timeSinceLastSpawn >= longestTimeSinceLastSpawn)
+  		if(foundSpawnPoint->secondsSinceLastSpawn >= longestTimeSinceLastSpawn)
 		{
-			longestTimeSinceLastSpawn = foundSpawnPoint->timeSinceLastSpawn;
+			longestTimeSinceLastSpawn = foundSpawnPoint->secondsSinceLastSpawn;
  			longestTimeSinceLastSpawnIndex = i;
 		}
 	}
@@ -614,23 +710,41 @@ Attribute_SpawnPoint* GameComponent::findUnoccupiedSpawnPoint()
 		foundSpawnPoint = unoccupiedSpawnPoints.at(longestTimeSinceLastSpawnIndex);
 	}
 
-	// If all spawn points are occupied, pick one at random.
+	// If all player spawn points are occupied, pick one at random.
 	if(nrOfUnoccupiedSpawnPoints < 1)
 	{
 		int randomSpawnPointId = Math::randomInt(numSpawnPoints);
-		foundSpawnPoint = itrSpawnPoint.at(randomSpawnPointId);
+		foundSpawnPoint = itrPlayerSpawnPoint.at(randomSpawnPointId);
 	}
 
-	// Reset spawn point timer.
+	// Reset player spawn point timer.
 	if(foundSpawnPoint != nullptr)
-		foundSpawnPoint->timeSinceLastSpawn = 0.0f;
+		foundSpawnPoint->secondsSinceLastSpawn = 0.0f;
 
 	return foundSpawnPoint;
 }
 
 void GameComponent::event_StartDeathmatch( Event_StartDeathmatch* e )
 {
+	//while(itrPickupablesSpawnPoint.hasNext())
+	//{
+	//	itrPickupablesSpawnPoint.getNext();
+	//	SEND_EVENT(&Event_RemoveEntity(itrPickupablesSpawnPoint.ownerId()));
+	//}
+
+	/*
+	while(itrPickupable.hasNext())
+	{
+		itrPickupable.getNext();
+		SEND_EVENT(&Event_RemoveEntity(itrPickupable.ownerId()));
+	}
+	*/
+
+
+	//
 	// Create level entities
+	//
+
 	for(unsigned int i = 0; i < levelEvents_.size(); i++)
 	{
 		SEND_EVENT(levelEvents_.at(i));
@@ -649,6 +763,14 @@ void GameComponent::event_StartDeathmatch( Event_StartDeathmatch* e )
 	int height = event_getWindowResolution.height;
 	SEND_EVENT(&Event_WindowResize(width,height));
 
+	//Continue
+	for(int i=0;i<10;i++)
+	{
+		SEND_EVENT(&Event_CreatePickupablesSpawnPoint(Float3(2, 40, i-6), PickupableType::MEDKIT));
+	}
+
+	//SEND_EVENT(&Event_CreatePickupable(Float3(2.0f, 2.0f, 0.0f), Attribute_Pickupable::MEDKIT, 5));
+
 	// Set state to deathmatch
 	GET_STATE() =  STATE_DEATHMATCH;
 }
@@ -663,7 +785,6 @@ void GameComponent::event_PlayerDeath(Event_PlayerDeath* e)
 	Attribute_Player* player = itrPlayer.at(e->playerIndex);
 	Attribute_Physics* physics = itrPhysics.at(itrInput.at(player->ptr_input)->ptr_physics);
 
-	physics->alive = false;
 	physics->angularVelocity = Float3(0.0f, 0.0f, 0.0f);
 	physics->linearVelocity = Float3(0.0f, 0.0f, 0.0f);
 	physics->gravity = Float3(0.0f, 0.0f, 0.0f);
@@ -679,9 +800,9 @@ bool GameComponent::switchAmmunition(Attribute_WeaponStats* weaponStats)
 	bool switchedAmmunition = false;
 	FiringMode* firingMode = &weaponStats->firingMode[weaponStats->currentFiringModeType];
 
-	for(int i = 0; i < Ammunition::NROFAMUNITIONTYPES; i++)
+	for(int i = 0; i < Ammunition::NROFAMMUNITIONTYPES; i++)
 	{
-		weaponStats->currentAmmunitionType = static_cast<Ammunition::AmmunitionType>((weaponStats->currentAmmunitionType + 1) % Ammunition::NROFAMUNITIONTYPES);
+		weaponStats->currentAmmunitionType = static_cast<Ammunition::AmmunitionType>((weaponStats->currentAmmunitionType + 1) % Ammunition::NROFAMMUNITIONTYPES);
 
 		if(weaponStats->currentAmmunitionType == Ammunition::BULLET && firingMode->canShootBullet || 
 			weaponStats->currentAmmunitionType == Ammunition::SCATTER && firingMode->canShootScatter || 

@@ -50,7 +50,7 @@ private:
 	unsigned int viewportWidth_;	//!< Width of each viewport.
 	unsigned int viewportHeight_;	//!< Height of each viewport.
 	
-	unsigned int borderSize_;	//<! Adds space between viewports.
+	unsigned int borderSize_;	//!< Adds space between viewports.
 
 	std::vector<SplitScreenViewport>* splitScreenViewports_; //!< Current viewports.
 };

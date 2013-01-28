@@ -29,17 +29,15 @@ public:
 		SUBSCRIBE_TO_EVENT(this, EVENT_CREATE_PROJECTILE);
 		SUBSCRIBE_TO_EVENT(this, EVENT_CREATE_MESH);
 		SUBSCRIBE_TO_EVENT(this, EVENT_REMOVE_ENTITY);
-		SUBSCRIBE_TO_EVENT(this, EVENT_CREATE_SPAWNPOINT);
+		SUBSCRIBE_TO_EVENT(this, EVENT_CREATE_PLAYERSPAWNPOINT);
+		SUBSCRIBE_TO_EVENT(this, EVENT_CREATE_PICKUPABLESSPAWNPOINT);
+		SUBSCRIBE_TO_EVENT(this, EVENT_CREATE_PICKUPABLE);
 		SUBSCRIBE_TO_EVENT(this, EVENT_CREATE_EXPLOSIONSPHERE);
 		SUBSCRIBE_TO_EVENT(this, EVENT_CREATE_ENTITY);
 		SUBSCRIBE_TO_EVENT(this, EVENT_CREATE_INPUTDEVICE);
 
 		SUBSCRIBE_TO_EVENT(this, EVENT_CREATE_WORLD);
-		SUBSCRIBE_TO_EVENT(this, EVENT_CREATE_AMMO);
-		SUBSCRIBE_TO_EVENT(this, EVENT_CREATE_HACK);
 		SUBSCRIBE_TO_EVENT(this, EVENT_CREATE_LIGHT);
-
-
 
 		entities = ATTRIBUTE_MANAGER->entities;
 	}
@@ -61,8 +59,14 @@ public:
 		case EVENT_CREATE_MESH:
 			event_createmesh(static_cast<Event_CreateMesh*>(e));
 			break;
-		case EVENT_CREATE_SPAWNPOINT:
-			event_CreateSpawnPoint(static_cast<Event_CreateSpawnPoint*>(e));
+		case EVENT_CREATE_PLAYERSPAWNPOINT:
+			event_CreatePlayerSpawnPoint(static_cast<Event_CreatePlayerSpawnPoint*>(e));
+			break;
+		case EVENT_CREATE_PICKUPABLESSPAWNPOINT:
+			event_CreatePickupablesSpawnPoint(static_cast<Event_CreatePickupablesSpawnPoint*>(e));
+			break;
+		case EVENT_CREATE_PICKUPABLE:
+			event_CreatePickupable(static_cast<Event_CreatePickupable*>(e));
 			break;
 		case EVENT_CREATE_EXPLOSIONSPHERE:
 			event_CreateExplosionSphere(static_cast<Event_CreateExplosionSphere*>(e));
@@ -75,12 +79,6 @@ public:
 			break;
 		case EVENT_CREATE_WORLD:
 			event_CreateWorld(static_cast<Event_CreateWorld*>(e));
-			break;
-		case EVENT_CREATE_AMMO:
-			event_CreateAmmo(static_cast<Event_CreateAmmo*>(e));
-			break;
-		case EVENT_CREATE_HACK:
-			event_CreateHack(static_cast<Event_CreateHack*>(e));
 			break;
 		case EVENT_CREATE_LIGHT:
 			event_CreateLight(static_cast<Event_CreateLight*>(e));
@@ -124,17 +122,30 @@ public:
 		DEBUGPRINT("ENTITYMANAGER: Created projectile entity " << entity->getID());
 	}
 
-	void event_CreateSpawnPoint(Event_CreateSpawnPoint* e)
+	void event_CreatePlayerSpawnPoint(Event_CreatePlayerSpawnPoint* e)
 	{
 		Entity* entity = createEntity();
-		entityFactory.createSpawnPointEntity(entity, e);
-		DEBUGPRINT("ENTITYMANAGER: Created spawn point entity " << entity->getID());
+		entityFactory.createPlayerSpawnPointEntity(entity, e);
+		DEBUGPRINT("ENTITYMANAGER: Created player spawn point entity " << entity->getID());
+	}
+
+	void event_CreatePickupablesSpawnPoint(Event_CreatePickupablesSpawnPoint* e)
+	{
+		Entity* entity = createEntity();
+		entityFactory.createPickupablesSpawnPointEntity(entity, e);
+		DEBUGPRINT("ENTITYMANAGER: Created pickupables spawn point entity " << entity->getID());
+	}
+	void event_CreatePickupable(Event_CreatePickupable* e)
+	{
+		Entity* entity = createEntity();
+		entityFactory.createPickupableEntity(entity, e);
+		DEBUGPRINT("ENTITYMANAGER: Created pickupable entity " << entity->getID());
 	}
 
 	void event_CreateExplosionSphere(Event_CreateExplosionSphere* e)
 	{
 		Entity* entity = createEntity();
-		entityFactory.createExplosionSphere(entity, e);
+		entityFactory.createExplosionSphereEntity(entity, e);
 		DEBUGPRINT("ENTITYMANAGER: Created explosion sphere entity " << entity->getID());
 	}
 
@@ -150,22 +161,6 @@ public:
 		Entity* entity = createEntity();
 		entityFactory.createInputDevice(entity, e);
 		DEBUGPRINT("ENTITYMANAGER: Created input device entity " << entity->getID());
-	}
-
-	void event_CreateAmmo (Event_CreateAmmo* e)
-	{
-		//Entity* entity = createEntity();
-		//entityFactory.createAmmoEntity(entity, e);
-		//DEBUGPRINT("ENTITYMANAGER: Created ammo entity " << entity->getID());
-		DEBUGPRINT("ENTITYMANAGER: Didn't create ammo entity, please implement or remove!");
-	}
-
-	void event_CreateHack (Event_CreateHack* e)
-	{
-		//Entity* entity = createEntity();
-		//entityFactory.createHackEntity(entity, e);
-		//DEBUGPRINT("ENTITYMANAGER: Created hack entity " << entity->getID());
-		DEBUGPRINT("ENTITYMANAGER: Didn't create hack entity, please implement or remove!");
 	}
 
 	void event_CreateLight(Event_CreateLight* e)
