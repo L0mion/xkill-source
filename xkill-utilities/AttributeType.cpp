@@ -199,6 +199,8 @@ Attribute_Player::Attribute_Player()
 	priority = 0;
 	cycleSteals = 0;
 	totalExecutionTime = 0;
+	respawnDelay = 5.0f;
+	currentRespawnDelay = 0.0f;
 
 	walkSpeed = 5.0f;
 	sprintSpeed = walkSpeed*2;

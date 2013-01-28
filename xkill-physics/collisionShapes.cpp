@@ -245,7 +245,7 @@ void CollisionShapes::updateFrustrumShape()
 		return;
 	}
 	Attribute_Camera* cA = itrCamera.at(0);
-	float fovX = cA->aspectRatio*cA->fieldOfView;
+	float fovX = atan(cA->aspectRatio*tan(cA->fieldOfView));
 	//cA->zFar =1;
 	btVector3 points[8];
 	points[0] = btVector3(-tan(fovX)*cA->zNear,-tan(cA->fieldOfView)*cA->zNear, cA->zNear);

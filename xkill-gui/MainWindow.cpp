@@ -5,6 +5,8 @@
 #include <QtGui/QPushButton>
 #include <QtGui/qplastiquestyle.h> 
 
+#include <xkill-utilities/AttributeManager.h>
+
 // Stuff used to allocate console
 // no idea what most of it does
 #include <stdio.h>
@@ -14,6 +16,7 @@
 
 #include "ui_MainWindow.h"
 
+ATTRIBUTES_DECLARE_ALL
 
 struct Test
 {
@@ -27,6 +30,8 @@ struct Test
 
 MainWindow::MainWindow()
 {
+	ATTRIBUTES_INIT_ALL
+
 	// subscribe to events
 	SUBSCRIBE_TO_EVENT(this, EVENT_SHOW_MESSAGEBOX);
 	SUBSCRIBE_TO_EVENT(this, EVENT_QUIT_TO_DESKTOP);
@@ -173,8 +178,6 @@ void MainWindow::slot_toggleFullScreen()
 	}
 }
 
-
-
 void MainWindow::keyReleaseEvent( QKeyEvent* e )
 {
 	// Detect keypress in menu
@@ -195,6 +198,18 @@ void MainWindow::resizeEvent( QResizeEvent* e )
 
 	// Reposition menu
 	menuManager->moveEvent();
+
+	QSize size = e->size();
+
+
+	while(itrSplitScreen.hasNext())
+	{
+		Attribute_SplitScreen* splitScreen = itrSplitScreen.getNext();
+
+		//splitScreen->
+	}
+
+	SEND_EVENT(&Event(EVENT_SPLITSCREEN_CHANGED));
 }
 
 void MainWindow::moveEvent( QMoveEvent *e )

@@ -6,6 +6,7 @@ class Event_PhysicsAttributesColliding;
 class Event_StartDeathmatch;
 class Event_EndDeathmatch;
 class Event_TransferEventsToGame;
+class Event_PlayerDeath;
 class Entity;
 
 struct Attribute_SpawnPoint;
@@ -53,6 +54,11 @@ public:
 	Handles the transfer of the loaded leveldata
 	*/
 	void event_TransferEventsToGame(Event_TransferEventsToGame* e);
+
+	/**
+	Handles a players death
+	*/
+	void event_PlayerDeath(Event_PlayerDeath* e);
 
 	/**
 	Finds an unoccupied spawn point (no other player inside its radius). 
