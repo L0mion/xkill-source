@@ -8,6 +8,7 @@
 
 #include "UtilSphereMapTransform.hlsl"
 #include "UtilReconstructPosition.hlsl"
+#include "UtilDebug.hlsl"
 
 #include "constantBuffers.hlsl"
 
@@ -65,9 +66,9 @@ void lightingCS(
 	//Get surface position.
 	/*At the moment, world space position is stored in Material-buffer.*/
 	float3 surfacePosW = gMaterial.xyz;
-	float3 surfacePosV = mul(float4(surfacePosW, 1.0f), view).xyz;
+	float3 surfacePosV = mul(float4(surfacePosW, 1.0f), view).xyz; //AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
 	
-	uint pixelDepthInt = asuint(surfacePosV); //Interlocked functions can only be applied onto ints.
+	uint pixelDepthInt = asuint(surfacePosV.z); //Interlocked functions can only be applied onto ints.
 	
 	InterlockedMin(tileMinDepthInt, pixelDepthInt);
 	InterlockedMax(tileMaxDepthInt, pixelDepthInt);
@@ -162,19 +163,19 @@ void lightingCS(
 	}
 	
 	//TILING DEMO:
-	for(i = 0; i < tileLightNum; i++) //Apply culled point-lights.
+	//for(i = 0; i < tileLightNum; i++) //Apply culled point-lights.
+	//{
+	//	Diffuse.g += 0.1;
+	//}
+	
+	output[uint2(threadIDDispatch.x + viewportTopX, threadIDDispatch.y + viewportTopY)] = Ambient + Diffuse + Specular; //float4(tileMinDepthF / zFar, tileMinDepthF / zFar, tileMinDepthF / zFar, 1.0f); //
+	
+	if(surfacePosV.z > 0.0f)
 	{
-		Diffuse.g += 0.1;
+		output[uint2(threadIDDispatch.x + viewportTopX, threadIDDispatch.y + viewportTopY)] = float4(0.0f, 1.0f, 0.0f, 1.0f);
 	}
-	
-	output[uint2(threadIDDispatch.x + viewportTopX, threadIDDispatch.y + viewportTopY)] = Ambient + Diffuse + Specular; //float4(tileMinDepthF, tileMinDepthF, tileMinDepthF, 1.0f); //
-	
-	//if(surfacePosV.z > 0.0f)
-	//{
-	//	output[uint2(threadIDDispatch.x + viewportTopX, threadIDDispatch.y + viewportTopY)] = float4(0.0f, 1.0f, 0.0f, 1.0f);
-	//}
-	//else
-	//{
-	//	output[uint2(threadIDDispatch.x + viewportTopX, threadIDDispatch.y + viewportTopY)] = float4(1.0f, 0.0f, 0.0f, 1.0f);
-	//}
+	else
+	{
+		output[uint2(threadIDDispatch.x + viewportTopX, threadIDDispatch.y + viewportTopY)] = float4(1.0f, 0.0f, 0.0f, 1.0f);
+	}
 }
