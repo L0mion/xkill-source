@@ -8,7 +8,7 @@
 
 EventManager::EventManager()
 {
-	state_TemporaryVariableUsedAsSubstituteForStateMachine = STATE_DEATHMATCH;
+	state_TemporaryVariableUsedAsSubstituteForStateMachine = STATE_MAINMENU;
 
 	// Build vectors with all events
 	subscibers = new std::vector<std::vector<IObserver*>>;

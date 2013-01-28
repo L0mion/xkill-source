@@ -21,6 +21,10 @@
 AttributeIterator<Attribute_Physics> itrPhysics;
 AttributeIterator<Attribute_Render> itrRender;
 AttributeIterator<Attribute_Camera> itrCamera_2;
+//std::vector<Entity>* allEntity;
+//AttributeIterator<Attribute_Spatial> itrSpatial_PhysicsComponent;
+//AttributeIterator<Attribute_Position> itrPosition_PhysicsComponent;
+AttributeIterator<Attribute_Player> itrPlayer_PhysicsComponent;
 
 static debugDrawDispatcher gDebugDraw;
 static float removePhysicsObjectIfItHasLowerYCoordinateThanThis;
@@ -34,9 +38,14 @@ PhysicsComponent::PhysicsComponent() : broadphase_(nullptr),
 									   physicsObjects_(nullptr)
 {
 	SUBSCRIBE_TO_EVENT(this,EVENT_ATTRIBUTE_UPDATED);
+	SUBSCRIBE_TO_EVENT(this, EVENT_MODIFY_PHYSICS_OBJECT);
 	itrPhysics = ATTRIBUTE_MANAGER->physics.getIterator();
 	itrRender = ATTRIBUTE_MANAGER->render.getIterator();
 	itrCamera_2 = ATTRIBUTE_MANAGER->camera.getIterator();
+	itrPlayer_PhysicsComponent = ATTRIBUTE_MANAGER->player.getIterator();
+	//itrSpatial_PhysicsComponent = ATTRIBUTE_MANAGER->spatial.getIterator();
+	//itrPosition_PhysicsComponent = ATTRIBUTE_MANAGER->position.getIterator();
+	//GET_ENTITIES(allEntity);
 	removePhysicsObjectIfItHasLowerYCoordinateThanThis = -5.0f;
 }
 
@@ -140,10 +149,31 @@ void PhysicsComponent::onUpdate(float delta)
 		synchronizeWithAttributes(physicsAttribute, index);
 		physicsObjects_->at(index)->onUpdate(delta);
 
+		//Physics object out of bounds
 		if(physicsObjects_->at(index)->getWorldTransform().getOrigin().y() < removePhysicsObjectIfItHasLowerYCoordinateThanThis)
 		{
-			//Not tested (2013-01-25 17.27)
-			//SEND_EVENT(&Event_RemoveEntity(itrPhysics.ownerId()));
+			if(physicsAttribute->collisionFilterGroup == Attribute_Physics::PLAYER)
+			{
+				//Handle player out of bounds
+				physicsObjects_->at(index)->setGravity(btVector3(0.0f, 0.0f, 0.0f));
+				physicsObjects_->at(index)->setLinearVelocity(btVector3(0.0f, 0.0f, 0.0f));
+
+				int playerEntityIndex = itrPhysics.ownerIdAt(index);
+				DEBUGPRINT("Player entity " << playerEntityIndex << " was out of bounds");
+				//check
+				//SEND_EVENT(&Event_PlayerDeath());
+			}
+			else
+			{
+				btTransform transform;
+				btVector3 newPosition = btVector3(0.0f, 10.0f, 0.0f);
+
+				transform = physicsObjects_->at(index)->getWorldTransform();
+				transform.setOrigin(newPosition);
+				physicsObjects_->at(index)->setWorldTransform(transform);
+
+				DEBUGPRINT("Something that was out of bounds was moved to " << newPosition.x() << " " << newPosition.y() << " " << newPosition.z());
+			}
 		}
 	}
 
@@ -173,6 +203,7 @@ void PhysicsComponent::onEvent(Event* e)
 	switch(type)
 	{
 	case EVENT_ATTRIBUTE_UPDATED: //Removes physics objects when the corresponding physics attribute is removed
+	{
 		Event_AttributeUpdated* attributeUpdated = static_cast<Event_AttributeUpdated*>(e);
 		int attributeIndex = attributeUpdated->index;
 		if(attributeUpdated->attributeEnum == ATTRIBUTE_PHYSICS)
@@ -208,6 +239,28 @@ void PhysicsComponent::onEvent(Event* e)
 			}
 		}
 		break;
+	}
+	case EVENT_MODIFY_PHYSICS_OBJECT:
+	{
+		Event_ModifyPhysicsObject* modifyPhysicsObject = static_cast<Event_ModifyPhysicsObject*>(e);
+
+		int physicsAttributeIndex = modifyPhysicsObject->physicsAttributeIndex;
+		if(physicsAttributeIndex < physicsObjects_->size())
+		{
+			switch(modifyPhysicsObject->modifyWhatDataInPhysicsObjectData)
+			{
+			case GRAVITY:
+				Float3* gravity = static_cast<Float3*>(modifyPhysicsObject->data);
+				physicsObjects_->at(physicsAttributeIndex)->setGravity(btVector3(gravity->x, gravity->y, gravity->z));
+				break;
+			}
+		}
+		else
+		{
+			DEBUGPRINT("Invalid physics attribute id when handling event of type EVENT_MODIFY_PHYSICS_OBJECT");
+		}
+		break;
+	}
 	//case EVENT_LOAD_LEVEL:
 	//	break;
 	}
@@ -229,77 +282,69 @@ void PhysicsComponent::synchronizeWithAttributes(Attribute_Physics* physicsAttri
 		}
 	}
 	*/
-	
-	//itrPhysics = ATTRIBUTE_MANAGER->physics.getIterator();
-	//while(itrPhysics.hasNext())
-	//{
-	//	Attribute_Physics* physicsAttribute = itrPhysics.getNext();
-	//	unsigned int index = itrPhysics.storageIndex();
-		
-		//Checks if new physiscs attributes were created since last call to this function
-		if(physicsAttributeIndex >= static_cast<unsigned int>(physicsObjects_->size()))
+	//Checks if new physiscs attributes were created since last call to this function
+	if(physicsAttributeIndex >= static_cast<unsigned int>(physicsObjects_->size()))
+	{
+		physicsObjects_->push_back(nullptr);
+	}
+	//Synchronize physiscs attributes with internal PhysicsObjects
+	if(physicsAttribute->reloadDataIntoBulletPhysics) //If something has changed in the physics attribute
+	{
+		//If the PhysicsObjects already exists, it needs to be removed to safely reset all of its internal Bullet Physics values
+		if(physicsObjects_->at(physicsAttributeIndex) != nullptr)
 		{
-			physicsObjects_->push_back(nullptr);
+			dynamicsWorld_->removeRigidBody(physicsObjects_->at(physicsAttributeIndex));
+			delete physicsObjects_->at(physicsAttributeIndex);
 		}
-		//Synchronize physiscs attributes with internal PhysicsObjects
-		if(physicsAttribute->reloadDataIntoBulletPhysics) //If something has changed in the physics attribute
+		// Determine type of PhysicsObject to create and add to the Bullet Physics world
+		switch(physicsAttribute->collisionFilterGroup)
 		{
-			//If the PhysicsObjects already exists, it needs to be removed to safely reset all of its internal Bullet Physics values
-			if(physicsObjects_->at(physicsAttributeIndex) != nullptr)
-			{
-				dynamicsWorld_->removeRigidBody(physicsObjects_->at(physicsAttributeIndex));
-				delete physicsObjects_->at(physicsAttributeIndex);
-			}
-			// Determine type of PhysicsObject to create and add to the Bullet Physics world
-			switch(physicsAttribute->collisionFilterGroup)
-			{
-			default:
-				physicsObjects_->at(physicsAttributeIndex) = new PhysicsObject();
-				break;
-			case Attribute_Physics::WORLD:
-				physicsObjects_->at(physicsAttributeIndex) = new PhysicsObject();
-				break;
-			case Attribute_Physics::PLAYER:
-				physicsObjects_->at(physicsAttributeIndex) = new PlayerPhysicsObject();
-				break;
-			case Attribute_Physics::PROJECTILE:
-				physicsObjects_->at(physicsAttributeIndex) = new ProjectilePhysicsObject();
-				break;
-			case Attribute_Physics::EXPLOSIONSPHERE:
-				physicsObjects_->at(physicsAttributeIndex) = new ExplosionSpherePhysicsObject();
-				break;
-			case Attribute_Physics::PICKUPABLE:
-				physicsObjects_->at(physicsAttributeIndex) = new PickupablePhysicsObject();
-				break;
-			case Attribute_Physics::EVERYTHING:
-				std::cout << "Error: Attribute_Physics should not have EVERYTHING as collisionFilterGroup" << std::endl;
-				break;
-			case Attribute_Physics::DEFAULT_ERROR:
-				std::cout << "Error: Attribute_Physics should not have be DEFAULT_ERROR as collisionFilterGroup. Do not forget to set collisionFilterGroup when creating Attribute_Physics." << std::endl;
-				break;
-			}
+		default:
+			physicsObjects_->at(physicsAttributeIndex) = new PhysicsObject();
+			break;
+		case Attribute_Physics::WORLD:
+			physicsObjects_->at(physicsAttributeIndex) = new PhysicsObject();
+			break;
+		case Attribute_Physics::PLAYER:
+			physicsObjects_->at(physicsAttributeIndex) = new PlayerPhysicsObject();
+			break;
+		case Attribute_Physics::PROJECTILE:
+			physicsObjects_->at(physicsAttributeIndex) = new ProjectilePhysicsObject();
+			break;
+		case Attribute_Physics::EXPLOSIONSPHERE:
+			physicsObjects_->at(physicsAttributeIndex) = new ExplosionSpherePhysicsObject();
+			break;
+		case Attribute_Physics::PICKUPABLE:
+			physicsObjects_->at(physicsAttributeIndex) = new PickupablePhysicsObject();
+			break;
+		case Attribute_Physics::EVERYTHING:
+			std::cout << "Error: Attribute_Physics should not have EVERYTHING as collisionFilterGroup" << std::endl;
+			break;
+		case Attribute_Physics::DEFAULT_ERROR:
+			std::cout << "Error: Attribute_Physics should not have be DEFAULT_ERROR as collisionFilterGroup. Do not forget to set collisionFilterGroup when creating Attribute_Physics." << std::endl;
+			break;
+		}
 
-			if(physicsObjects_ != nullptr)
+		if(physicsObjects_ != nullptr)
+		{
+			if(physicsObjects_->at(physicsAttributeIndex)->init(physicsAttributeIndex,physicsAttribute->collisionFilterGroup) == true)
 			{
-				if(physicsObjects_->at(physicsAttributeIndex)->init(physicsAttributeIndex,physicsAttribute->collisionFilterGroup) == true)
+				dynamicsWorld_->addRigidBody(physicsObjects_->at(physicsAttributeIndex), physicsAttribute->collisionFilterGroup, physicsAttribute->collisionFilterMask);
+				//Per object gravity must be set after "addRigidBody"
+				if(!physicsObjects_->at(physicsAttributeIndex)->isStaticOrKinematicObject())
 				{
-					dynamicsWorld_->addRigidBody(physicsObjects_->at(physicsAttributeIndex), physicsAttribute->collisionFilterGroup, physicsAttribute->collisionFilterMask);
-					//Per object gravity must be set after "addRigidBody"
-					if(!physicsObjects_->at(physicsAttributeIndex)->isStaticOrKinematicObject())
-					{
-						physicsObjects_->at(physicsAttributeIndex)->setGravity(btVector3(physicsAttribute->gravity.x,physicsAttribute->gravity.y, physicsAttribute->gravity.z));
-						//physicsObjects_->at(physicsAttributeIndex)->setGravity(btVector3(0,0,0));
-					}
+					physicsObjects_->at(physicsAttributeIndex)->setGravity(btVector3(physicsAttribute->gravity.x,physicsAttribute->gravity.y, physicsAttribute->gravity.z));
+					//physicsObjects_->at(physicsAttributeIndex)->setGravity(btVector3(0,0,0));
+				}
 
-					physicsAttribute->reloadDataIntoBulletPhysics = false;
-				}
-				else
-				{
-					std::cout << "-->Error initializing PhysicsObject" << std::endl;
-				}
+				physicsAttribute->reloadDataIntoBulletPhysics = false;
+			}
+			else
+			{
+				std::cout << "-->Error initializing PhysicsObject" << std::endl;
 			}
 		}
-	//}
+	}
 }
 
 void wrapTickCallback(btDynamicsWorld *world, btScalar timeStep)
@@ -331,19 +376,8 @@ void PhysicsComponent::detectedCollisionsDuringStepSimulation(btScalar timeStep)
 
 				unsigned int ownerA = itrPhysics.ownerIdAt(objectA->getAttributeIndex());
 				unsigned int ownerB = itrPhysics.ownerIdAt(objectB->getAttributeIndex());
-				
-				if(objectA->getCollisionFilterGroup() == Attribute_Physics::PICKUPABLE &&
-					objectB->getCollisionFilterGroup() == Attribute_Physics::WORLD)
-				{
-					int f=1;
-				}
-				if(objectB->getCollisionFilterGroup() == Attribute_Physics::PICKUPABLE &&
-					objectA->getCollisionFilterGroup() == Attribute_Physics::WORLD)
-				{
-					int f=1;
-				}
 
-				//////check physicsobjecttype;
+				//check physicsobjecttype;
 				if(objectA->getCollisionFilterGroup() == Attribute_Physics::FRUSTUM ||
 					objectB->getCollisionFilterGroup() == Attribute_Physics::FRUSTUM)
 				{

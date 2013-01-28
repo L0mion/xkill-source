@@ -71,6 +71,7 @@ enum DLL_U EventType
 	EVENT_PHYSICS_ATTRIBUTES_COLLIDING,
 	EVENT_DRAW_BULLET_PHYSICS_DEBUG_LINES,
 	EVENT_SPLITSCREEN_CHANGED,
+	EVENT_MODIFY_PHYSICS_OBJECT,
 
 	EVENT_ATTRIBUTE_UPDATED,
 	EVENT_SYNCSTATECOMMAND,
@@ -524,7 +525,6 @@ public:
 };
 */
 
-//struct VertexPosColor;
 #include "MeshVertices.h"
 class DLL_U Event_DrawBulletPhysicsDebugLines : public Event
 {
@@ -532,4 +532,14 @@ public:
 	Event_DrawBulletPhysicsDebugLines(std::vector<VertexPosColor>* debugLineVertices);
 
 	std::vector<VertexPosColor>* debugLineVertices;
+};
+
+class DLL_U Event_ModifyPhysicsObject : public Event
+{
+public:
+	Event_ModifyPhysicsObject(ModifyPhysicsObjectData modifyWhatDataInPhysicsObjectData, void* data, int physicsAttributeIndex);
+
+	ModifyPhysicsObjectData modifyWhatDataInPhysicsObjectData;
+	void* data;
+	int physicsAttributeIndex;
 };

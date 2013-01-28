@@ -270,6 +270,7 @@ Attribute_PickupablesSpawnPoint::Attribute_PickupablesSpawnPoint()
 	spawnPickupableType = PickupableType::MEDKIT;
 	spawnDelayInSeconds = 0.0f;
 	secondsSinceLastSpawn = 0.0f;
+	secondsSinceLastPickup = 0.0f;
 	maxNrOfExistingSpawnedPickupables = 1;
 	currentNrOfExistingSpawnedPickupables = 0;
 }
