@@ -6,6 +6,7 @@ class Event_PhysicsAttributesColliding;
 class Event_StartDeathmatch;
 class Event_EndDeathmatch;
 class Event_TransferEventsToGame;
+class Event_PlayerDeath;
 class Entity;
 
 struct Attribute_PlayerSpawnPoint;
@@ -55,6 +56,15 @@ public:
 	void event_TransferEventsToGame(Event_TransferEventsToGame* e);
 
 	/**
+	Handles a players death
+	*/
+	void event_PlayerDeath(Event_PlayerDeath* e);
+
+	/**
+	Finds an unoccupied spawn point (no other player inside its radius). 
+	Prioritizes spawn points that least recently spawned a player. 
+	If no unoccupied spawn point is found, one is selected at random. 
+	If there exists no spawn points at all, nullptr is returned.
 	Finds an unoccupied player spawn point (no other player inside its radius). 
 	Prioritizes player spawn points that least recently spawned a player. 
 	If no unoccupied player spawn point is found, one is selected at random. 

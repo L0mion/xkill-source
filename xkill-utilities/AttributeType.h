@@ -685,13 +685,15 @@ struct DLL_U Attribute_Player : public IAttribute
 
 	static int nextId;
 
-	int id;					//!< The id of the player process. Used to identify a player attribute in GameComponent when firing projectiles.
-	int priority;			//!< Priority of the player process. Higher value means higher priority. The scheduler will choose the process with the highest priority for execution.
-	int cycleSteals;		//!< Total number of cycle steals for the player process. Cycle steals steal priority from other player processes.
-	int totalExecutionTime; //!< Total execution time of the player process, used ased final score in the deathmatch. The game session winner is the player with the most total execution time as awarded by the scheduler.
-	float currentSpeed;		//!< Speed used when changing position in "handleInput".
-	float walkSpeed;		//!< Speed when walking.
-	float sprintSpeed;		//!< Speed when sprinting.
+	int id;						//!< The id of the player process. Used to identify a player attribute in GameComponent when firing projectiles.
+	int priority;				//!< Priority of the player process. Higher value means higher priority. The scheduler will choose the process with the highest priority for execution.
+	int cycleSteals;			//!< Total number of cycle steals for the player process. Cycle steals steal priority from other player processes.
+	int totalExecutionTime;		//!< Total execution time of the player process, used ased final score in the deathmatch. The game session winner is the player with the most total execution time as awarded by the scheduler.
+	float currentSpeed;			//!< Speed used when changing position in "handleInput".
+	float walkSpeed;			//!< Speed when walking.
+	float sprintSpeed;			//!< Speed when sprinting.
+	float respawnDelay;			//!< Time between death and respawn
+	float currentRespawnDelay;	//!< Time until respawn
 
 	DataItemList* getDataList()
 	{

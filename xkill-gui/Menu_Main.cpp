@@ -30,6 +30,9 @@ Menu_Main::Menu_Main( QWidget* parent ) : QMainWindow(parent), ToggleHelper(this
 	//setAttribute(Qt::WA_TranslucentBackground);
 	setWindowFlags(Qt::WindowStaysOnTopHint);
 
+	ui.verticalLayout_2->setSpacing(0);
+	ui.verticalLayout_2->setMargin(0);
+
 	connect(ui.pushButton_exit,									SIGNAL(clicked()),					this,	SLOT(slot_quitToDesktop()));
 	connect(ui.pushButton_exit_2,								SIGNAL(clicked()),					this,	SLOT(slot_quitToDesktop()));
 	connect(ui.comboBox_LevelSelect,							SIGNAL(currentIndexChanged(int)),	this,	SLOT(slot_selectLevel(int)));

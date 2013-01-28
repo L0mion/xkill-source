@@ -14,8 +14,10 @@ Menu_ScoreBoard::Menu_ScoreBoard(QWidget* parent, Qt::WFlags flags) : QMainWindo
 	QWidget::setWindowFlags(Qt::SplashScreen);
 	QWidget::setAttribute(Qt::WA_ShowWithoutActivating);
 	setWindowFlags(Qt::WindowStaysOnBottomHint);
-	QWidget::setStyleSheet("QWidget{color: #fff; background-color: #000;}");
+	//QWidget::setStyleSheet("QWidget{color: #fff; background-color: #000;}");
 	QWidget::setEnabled(false);
+
+	ui.horizontalLayout->setMargin(0);
 }
 
 

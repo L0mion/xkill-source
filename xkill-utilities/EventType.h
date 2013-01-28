@@ -354,8 +354,11 @@ public:
 class DLL_U Event_PlayerDeath : public Event
 {
 public:
-	Event_PlayerDeath() : Event(EVENT_PLAYERDEATH)
+	int playerIndex; //Index of the player that died
+
+	Event_PlayerDeath(int playerIndex) : Event(EVENT_PLAYERDEATH)
 	{
+		this->playerIndex = playerIndex;
 	}
 };
 
