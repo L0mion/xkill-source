@@ -16,7 +16,7 @@ namespace DirectX
 	struct XMFLOAT3;
 };
 
-struct ID3D11UnorderedAccesView;
+struct ID3D11ShaderResourceView;
 struct ID3D11Buffer;
 struct ID3D11Device;
 struct ID3D11DeviceContext;
@@ -110,7 +110,7 @@ private:
 	
 	unsigned int lightPosMaxCount_;
 	unsigned int lightPosCurCount_;
-	std::vector<Float3>			lightPossView_;
+	std::vector<LightPos>		lightPossView_;
 	std::vector<Float3>			lightPoss_;
 	ID3D11Buffer*				lightPosViewBuffer_;
 	ID3D11ShaderResourceView*	lightPosViewSRV_;

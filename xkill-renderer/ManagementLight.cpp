@@ -26,7 +26,7 @@ ManagementLight::ManagementLight()
 	lightPoints_	= std::vector<LightDescPoint>(lightPointMaxCount_);
 	lightSpots_		= std::vector<LightDescSpot>(lightSpotMaxCount_);
 	lightPoss_		= std::vector<Float3>(lightPosMaxCount_);
-	lightPossView_	= std::vector<Float3>(lightPosMaxCount_);
+	lightPossView_	= std::vector<LightPos>(lightPosMaxCount_);
 
 	lightDirBuffer_		= nullptr;
 	lightDirSRV_		= nullptr;
@@ -286,11 +286,11 @@ HRESULT ManagementLight::initLightPosBuffer(ID3D11Device* device)
 		ZeroMemory(&bufferDesc, sizeof(bufferDesc));
 
 		bufferDesc.BindFlags			= D3D11_BIND_SHADER_RESOURCE;
-		bufferDesc.ByteWidth			= sizeof(Float3) * lightPosMaxCount_;
+		bufferDesc.ByteWidth			= sizeof(LightPos) * lightPosMaxCount_;
 		bufferDesc.MiscFlags			= D3D11_RESOURCE_MISC_BUFFER_STRUCTURED;
 		bufferDesc.CPUAccessFlags		= D3D11_CPU_ACCESS_WRITE;
 		bufferDesc.Usage				= D3D11_USAGE_DYNAMIC;
-		bufferDesc.StructureByteStride	= sizeof(Float3);
+		bufferDesc.StructureByteStride	= sizeof(LightPos);
 
 		D3D11_SUBRESOURCE_DATA initialData;
 		initialData.pSysMem = &lightPossView_.at(0);
@@ -383,9 +383,9 @@ void ManagementLight::transformLightViewSpacePoss(ID3D11DeviceContext* devcon, D
 		//DirectX::XMStoreFloat4(&pos, posXM);
 		
 		if(i < lightPossView_.size())
-			lightPossView_[i] = Float3(pos.x, pos.y, pos.z);
+			lightPossView_[i] = LightPos(Float3(pos.x, pos.y, pos.z));
 		else
-			lightPossView_.push_back(Float3(pos.x, pos.y, pos.z));
+			lightPossView_.push_back(LightPos(Float3(pos.x, pos.y, pos.z)));
 	}
 
 	if(lightPosCurCount_ > 0)
@@ -619,7 +619,7 @@ HRESULT ManagementLight::updateLightBuffers(ID3D11DeviceContext* devcon, LightBu
 			memcpy(map.pData, &lightSpots_[0], lightSpotCurCount_ * sizeof(LightDescSpot));
 			break;
 		case LIGHTBUFFERTYPE_POS_VIEW:
-			memcpy(map.pData, &lightPossView_[0], lightPosCurCount_ * sizeof(Float3));
+			memcpy(map.pData, &lightPossView_[0], lightPosCurCount_ * sizeof(LightPos));
 			break;
 		default:
 			break;

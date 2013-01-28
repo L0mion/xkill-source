@@ -25,7 +25,7 @@ Texture2D gBufferDepth						: register( t3 );
 StructuredBuffer<LightDescDir>		lightsDir	: register( t4 );
 StructuredBuffer<LightDescPoint>	lightsPoint	: register( t5 );
 StructuredBuffer<LightDescSpot>		lightsSpot	: register( t6 );
-StructuredBuffer<float3>			lightsPos	: register( t7 );
+StructuredBuffer<LightPos>			lightsPos	: register( t7 );
 
 SamplerState ss : register(s0);
 
@@ -98,7 +98,7 @@ void lightingCS(
 			bool inFrustum = true;
 			[unroll] for(uint j = 0; j < 6; j++)
 			{
-				float d = dot(frustum._[j], mul(float4(lightsPos[lightIndex], 1.0f), view)); //mul(float4(lightsPos[lightIndex], 1.0f)
+				float d = dot(frustum._[j], mul(float4(lightsPos[lightIndex].pos, 1.0f), view)); //mul(float4(lightsPos[lightIndex], 1.0f)
 				inFrustum = inFrustum && (d >= -lightsPoint[lightIndex].range);
 			}
 			
@@ -152,7 +152,7 @@ void lightingCS(
 		LightPoint(
 			toEyeV,
 			descPoint,
-			mul(float4(lightsPos[i], 1.0f), view).xyz, //
+			mul(float4(lightsPos[i].pos, 1.0f), view).xyz, //
 			surfaceMaterial,
 			surfaceNormalV,
 			surfacePosV,
@@ -170,12 +170,12 @@ void lightingCS(
 	
 	output[uint2(threadIDDispatch.x + viewportTopX, threadIDDispatch.y + viewportTopY)] = Ambient + Diffuse + Specular; //float4(tileMinDepthF / zFar, tileMinDepthF / zFar, tileMinDepthF / zFar, 1.0f); //
 	
-	if(surfacePosV.z > 0.0f)
-	{
-		output[uint2(threadIDDispatch.x + viewportTopX, threadIDDispatch.y + viewportTopY)] = float4(0.0f, 1.0f, 0.0f, 1.0f);
-	}
-	else
-	{
-		output[uint2(threadIDDispatch.x + viewportTopX, threadIDDispatch.y + viewportTopY)] = float4(1.0f, 0.0f, 0.0f, 1.0f);
-	}
+	//if(surfacePosV.z > 0.0f)
+	//{
+	//	output[uint2(threadIDDispatch.x + viewportTopX, threadIDDispatch.y + viewportTopY)] = float4(0.0f, 1.0f, 0.0f, 1.0f);
+	//}
+	//else
+	//{
+	//	output[uint2(threadIDDispatch.x + viewportTopX, threadIDDispatch.y + viewportTopY)] = float4(1.0f, 0.0f, 0.0f, 1.0f);
+	//}
 }
