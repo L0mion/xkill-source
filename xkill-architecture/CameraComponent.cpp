@@ -230,20 +230,26 @@ void CameraComponent::onUpdate(float delta)
 	//float aspectRatio = windowResolution.getAspectRatio();
 
 	// Update rotation
-	while(itrInput.hasNext())
+	while(itrPlayer.hasNext())
 	{
-		Attribute_Input* input = itrInput.getNext();
-		Entity* entity = itrInput.owner();
-		if(entity->hasAttribute(ATTRIBUTE_CAMERA))
-		{
-			std::vector<Attribute_Camera*> cameras = itrCamera.getMultiple(entity->getAttributes(ATTRIBUTE_CAMERA));
-			for(int i=0; i<(int)cameras.size(); i++)
-			{
-				Attribute_Camera* camera = cameras.at(i);
+		Attribute_Player* player = itrPlayer.getNext();
+
+		Attribute_Health* health = itrHealth.at(player->ptr_health);
+		if(health->health <= 0)
+			continue;
+
+		Attribute_Input* input = itrInput.at(player->ptr_input);
+		//Entity* entity = itrInput.owner();
+		//if(entity->hasAttribute(ATTRIBUTE_CAMERA))
+		//{
+			//std::vector<Attribute_Camera*> cameras = itrCamera.getMultiple(entity->getAttributes(ATTRIBUTE_CAMERA));
+			//for(int i=0; i<(int)cameras.size(); i++)
+			//{
+				Attribute_Camera* camera = itrCamera.at(player->ptr_camera);//cameras.at(i);
 				yaw(input->rotation.x, camera);
 				pitch(input->rotation.y, camera);
-			}
-		}
+			//}
+		//}
 	}
 
 	// Recalculate view
