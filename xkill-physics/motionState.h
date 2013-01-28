@@ -12,8 +12,8 @@ private:
 public:
 	MotionState(unsigned int attributeIndex); 
 	~MotionState();
-	virtual void getWorldTransform(btTransform &worldTrans) const;  //<! Gives bullet the position and spatial of an entity
-	virtual void setWorldTransform(const btTransform &worldTrans);  //<! Bullet sets the position and spatial of an entity
+	virtual void getWorldTransform(btTransform &worldTrans) const;  //!< Gives bullet the position and spatial of an entity
+	virtual void setWorldTransform(const btTransform &worldTrans);  //!< Bullet sets the position and spatial of an entity
 };
 
 #endif

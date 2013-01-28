@@ -66,7 +66,7 @@ void Menu_ScoreBoard::onUpdate(float delta)
 
 			// Add row
 			QTreeWidgetItem* itm = new QTreeWidgetItem();
-			itm->setText(0, "Process "+QString::number(itrPlayer.storageIndex()));
+			itm->setText(0, "Process " + QString::number(itrPlayer.storageIndex()));
 			itm->setText(1, QString::number((int)player->totalExecutionTime));
 			itm->setText(2, QString::number(player->priority));
 			itm->setText(3, QString::number(player->cycleSteals));

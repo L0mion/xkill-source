@@ -15,6 +15,7 @@
 #include "ManagementDebug.h"
 #include "ManagementMath.h"
 #include "ManagementInstance.h"
+#include "ManagementSprites.h"
 
 #include "Winfo.h"
 #include "ModelD3D.h"
@@ -54,6 +55,7 @@ Renderer::Renderer(HWND windowHandle)
 	managementDebug_	= nullptr;
 	managementMath_		= nullptr;
 	managementInstance_ = nullptr;
+	managementSprites_  = nullptr;
 
 	attributesRenderOwner_	= nullptr;
 
@@ -81,6 +83,7 @@ Renderer::~Renderer()
 	SAFE_DELETE(managementGBuffer_);
 	SAFE_DELETE(managementMath_);
 	SAFE_DELETE(managementInstance_);
+	SAFE_DELETE(managementSprites_);
 
 	//d3dDebug_->reportLiveDeviceObjects();
 	SAFE_DELETE(managementDebug_);
@@ -103,6 +106,7 @@ void Renderer::reset()
 	SAFE_RESET(managementSS_);
 	SAFE_RESET(managementRS_);
 	SAFE_RESET(managementGBuffer_);
+	SAFE_RESET(managementSprites_);
 }
 HRESULT Renderer::resize(unsigned int screenWidth, unsigned int screenHeight)
 {
@@ -171,6 +175,8 @@ HRESULT Renderer::init()
 	initManagementMath();
 	if(SUCCEEDED(hr))
 		hr = initManagementGBuffer();
+	if(SUCCEEDED(hr))
+		hr = initManagementSprites();
 	initManagementInstance();
 
 	//temp
@@ -335,6 +341,13 @@ void Renderer::initManagementInstance()
 {
 	managementInstance_ = new ManagementInstance();
 }
+HRESULT Renderer::initManagementSprites()
+{
+	HRESULT hr = S_OK;
+	managementSprites_ = new ManagementSprites();
+	hr = managementSprites_->init(managementD3D_->getDevice());
+	return hr;
+}
 
 void Renderer::update()
 {
@@ -404,6 +417,9 @@ void Renderer::render()
 	//Render everything to backbuffer.
 	for(unsigned int i = 0; i < vpDatas.size(); i++)
 		renderViewportToBackBuffer(vpDatas[i]);
+
+	for(unsigned int i=0; i< vpDatas.size(); i++)
+		renderHudElements(i);
 
 	managementD3D_->present();
 }
@@ -733,6 +749,76 @@ void Renderer::drawBulletPhysicsDebugLines(
 		devcon->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_LINELIST);
 		devcon->Draw(nrOfDebugLines, 0);
 	}
+}
+
+void Renderer::renderHudElements(int viewportIndex)
+{
+	//Since drawn directly in screen space hud elements are not affected by the camera's aspect ratio,
+	//Therefor when there are two viewports the hud elements needs to be scaled by 0.5 along the x-axis
+	//to keep thier proportions.
+	float scaleModifierX = 1.0f;
+	int numViewports = managementViewport_->getNumViewportsX() * managementViewport_->getNumViewportsY();
+	if(numViewports == 2)
+		scaleModifierX = 0.5f;
+
+	renderHudElementCrossHair(viewportIndex, scaleModifierX);
+}
+void Renderer::renderHudElementCrossHair(int viewportIndex, float scaleModifierX)
+{
+	DirectX::XMMATRIX rotationX = DirectX::XMMatrixRotationX(0.0f);
+	DirectX::XMMATRIX rotationY = DirectX::XMMatrixRotationY(0.0f);
+	DirectX::XMMATRIX rotationZ = DirectX::XMMatrixRotationZ(0.0f);
+	DirectX::XMMATRIX translation = DirectX::XMMatrixTranslation(0.0f, 0.0f, 0.0f);
+	DirectX::XMMATRIX scaling = DirectX::XMMatrixScaling(0.2f * scaleModifierX, 0.2f, 1.0f);
+
+	DirectX::XMMATRIX spriteMatrix = rotationX * rotationY * rotationZ * scaling * translation;
+	DirectX::XMFLOAT4X4 transformationMatrix;
+	DirectX::XMStoreFloat4x4(&transformationMatrix, spriteMatrix);
+
+	drawHudElement(viewportIndex, TEXTURE_ID_CROSS_HAIR, transformationMatrix);
+}
+void Renderer::drawHudElement(int viewportIndex, unsigned int textureId, DirectX::XMFLOAT4X4 transformationMatrix)
+{
+	ID3D11Device*		 device = managementD3D_->getDevice();
+	ID3D11DeviceContext* devcon = managementD3D_->getDeviceContext();
+
+	managementCB_->updateCBSprite(devcon, transformationMatrix);
+	managementCB_->setCB(CB_TYPE_SPRITE, TypeFX_VS, CB_REGISTER_SPRITE, devcon);
+
+	managementViewport_->setViewport(devcon, viewportIndex);
+
+	managementFX_->setShader(devcon, SHADERID_VS_SPRITE);
+	managementFX_->setShader(devcon, SHADERID_PS_SPRITE);
+	
+	managementSS_->setSS(devcon, TypeFX_PS, 0, SS_ID_SPRITE);
+	managementRS_->setRS(devcon, RS_ID_DEFAULT);
+
+	ID3D11ShaderResourceView* tex = managementTex_->getTexSrv(textureId);
+	devcon->PSSetShaderResources(0, 1, &tex);
+
+	managementD3D_->setRenderTargetViewBackBuffer();
+
+	managementFX_->setLayout(devcon, LAYOUTID_POS_NORM_TEX);
+	
+	ID3D11Buffer* vertexBuffer = managementSprites_->getVertexBuffer();
+	UINT stride = sizeof(VertexPosNormTex);
+	UINT offset = 0;
+	devcon->IASetVertexBuffers(
+				0, 
+				1, 
+				&vertexBuffer, 
+				&stride, 
+				&offset);
+	devcon->IASetIndexBuffer(managementSprites_->getIndexBuffer(), DXGI_FORMAT_R32_UINT, 0);
+
+	devcon->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	devcon->DrawIndexed(NUM_SPRITE_INDICES, 0, 0);
+
+	managementD3D_->unsetRenderTargetViewBackBufer();
+	managementFX_->unsetAll(devcon);
+	devcon->PSSetSamplers(0, 0, nullptr);
+	devcon->IASetInputLayout(nullptr);
+	devcon->RSSetState(nullptr);
 }
 
 void Renderer::renderAnimatedMesh(DirectX::XMFLOAT4X4 viewMatrix, DirectX::XMFLOAT4X4 projectionMatrix)

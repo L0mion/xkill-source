@@ -4,6 +4,7 @@
 
 #include "MeshModel.h"
 #include "DebugShape.h"
+#include "Enums.h"
 
 IAttribute::IAttribute()
 {
@@ -53,7 +54,6 @@ Attribute_Physics::Attribute_Physics()
 {
 	collisionResponse = true;
 	reloadDataIntoBulletPhysics = true;
-	alive = true;
 	mass = 1.0f;
 	
 	meshID = -1;
@@ -173,6 +173,7 @@ Attribute_Input::Attribute_Input()
 	sprint = false;
 	killPlayer = false;
 	fire = false;
+	firePressed = false;
 	changeAmmunitionType = false;
 	changeFiringMode = false;
 	ZeroMemory(&position,sizeof(position));
@@ -255,12 +256,32 @@ Attribute_Damage::~Attribute_Damage()
 {
 }
 
-Attribute_SpawnPoint::Attribute_SpawnPoint()
+Attribute_PlayerSpawnPoint::Attribute_PlayerSpawnPoint()
 {
-	timeSinceLastSpawn = 0.0f;
+	secondsSinceLastSpawn = 0.0f;
 	spawnArea = 0.0f;
 }
-Attribute_SpawnPoint::~Attribute_SpawnPoint()
+Attribute_PlayerSpawnPoint::~Attribute_PlayerSpawnPoint()
+{
+}
+
+Attribute_PickupablesSpawnPoint::Attribute_PickupablesSpawnPoint()
+{
+	spawnPickupableType = PickupableType::MEDKIT;
+	spawnDelayInSeconds = 0.0f;
+	secondsSinceLastSpawn = 0.0f;
+	maxNrOfExistingSpawnedPickupables = 1;
+	currentNrOfExistingSpawnedPickupables = 0;
+}
+Attribute_PickupablesSpawnPoint::~Attribute_PickupablesSpawnPoint()
+{
+}
+
+Attribute_Pickupable::Attribute_Pickupable()
+{
+	pickupableType = PickupableType::MEDKIT;
+}
+Attribute_Pickupable::~Attribute_Pickupable()
 {
 }
 
@@ -270,7 +291,7 @@ Attribute_WeaponStats::Attribute_WeaponStats()
 {
 	MutatorSettings ms;
 
-	for(int i = 0; i < Ammunition::NROFAMUNITIONTYPES; i++)
+	for(int i = 0; i < Ammunition::NROFAMMUNITIONTYPES; i++)
 	{
 		for(int j = 0; j < FiringMode::NROFFIRINGMODETYPES; j++)
 		{

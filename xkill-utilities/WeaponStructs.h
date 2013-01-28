@@ -4,6 +4,7 @@
 
 struct Attribute_WeaponStats;
 
+//! Stores all data related to ammunition
 struct DLL_U Ammunition
 {
 	enum AmmunitionType
@@ -12,7 +13,7 @@ struct DLL_U Ammunition
 		SCATTER,
 		EXPLOSIVE,
 
-		NROFAMUNITIONTYPES
+		NROFAMMUNITIONTYPES
 	};
 
 	unsigned int totalNrOfShots; 
@@ -24,8 +25,11 @@ struct DLL_U Ammunition
 	float spawnVariation;
 	bool explosive;
 	float explosionSphere;
+
+	AmmunitionType type;
 };
 
+//! Stores all data related to firing mode
 struct DLL_U FiringMode
 {
 	enum FiringModeType
@@ -50,4 +54,6 @@ struct DLL_U FiringMode
 	unsigned int nrOfShotsLeftInClip;
 	float reloadTimeLeft;
 	float cooldownLeft;
+
+	FiringModeType type;
 };

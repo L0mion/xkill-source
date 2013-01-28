@@ -13,6 +13,8 @@ class TexLoader;
 #include <map>
 #include <vector>
 
+static const int TEXTURE_ID_CROSS_HAIR = 101;
+
 //! Holds textures which are used in shaders. Recieves TexDesc-objects loaded from file, which specifies what textures to load and what their indices are.
 /*!
 \ingroup xkill-renderer

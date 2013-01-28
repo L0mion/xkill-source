@@ -20,10 +20,14 @@ void Menu_FiringMode::setSettingsMenu()	// TODO: Set good values for the sliders
 	ui->checkBox_Weapon_Scatter->setChecked(firingMode->canShootScatter);
 	ui->checkBox_Weapon_Explosive->setChecked(firingMode->canShootExplosive);
 	ui->horizontalSlider_Weapon_ClipSize->setValue(firingMode->clipSize);
-	ui->horizontalSlider_Weapon_DamageModifier->setValue(firingMode->damageModifier);
-	ui->horizontalSlider_Weapon_ExplosionSphereModifier->setValue(firingMode->explosionSphereModifier);
-	ui->horizontalSlider_Weapon_RateOfFire->setValue(firingMode->cooldownBetweenShots);
-	ui->horizontalSlider_Weapon_ReloadTime->setValue(firingMode->reloadTime);
+	ui->horizontalSlider_Weapon_DamageModifier->setValue(static_cast<int>(firingMode->damageModifier * 100.0f));
+	ui->horizontalSlider_Weapon_ExplosionSphereModifier->setValue(static_cast<int>(firingMode->explosionSphereModifier * 100.0f));
+	ui->horizontalSlider_Weapon_RateOfFire->setValue(static_cast<int>(1.0f / firingMode->cooldownBetweenShots));
+	ui->horizontalSlider_Weapon_ReloadTime->setValue(static_cast<int>(firingMode->reloadTime * 100.0f));
+
+	ui->doubleSpinBox_FiringMode_ReloadTime->setValue(firingMode->reloadTime);
+	ui->doubleSpinBox_FiringMode_DamageModifier->setValue(firingMode->damageModifier);
+	ui->doubleSpinBox_FiringMode_ExplosionSphereModifier->setValue(firingMode->explosionSphereModifier);
 }
 
 void Menu_FiringMode::settingsMenuUpdated()
@@ -34,10 +38,14 @@ void Menu_FiringMode::settingsMenuUpdated()
 	firingMode->canShootScatter = ui->checkBox_Weapon_Scatter->isChecked();
 	firingMode->canShootExplosive = ui->checkBox_Weapon_Explosive->isChecked();
 	firingMode->clipSize = ui->horizontalSlider_Weapon_ClipSize->value();
-	firingMode->cooldownBetweenShots = ui->horizontalSlider_Weapon_RateOfFire->value();
-	firingMode->damageModifier = ui->horizontalSlider_Weapon_DamageModifier->value();
-	firingMode->explosionSphereModifier = ui->horizontalSlider_Weapon_ExplosionSphereModifier->value();
-	firingMode->reloadTime = ui->horizontalSlider_Weapon_ReloadTime->value();
+	firingMode->cooldownBetweenShots = 1.0f / static_cast<float>(ui->horizontalSlider_Weapon_RateOfFire->value());
+	firingMode->damageModifier = static_cast<float>(ui->horizontalSlider_Weapon_DamageModifier->value()) * 0.01f;
+	firingMode->explosionSphereModifier = static_cast<float>(ui->horizontalSlider_Weapon_ExplosionSphereModifier->value()) * 0.01f;
+	firingMode->reloadTime = static_cast<float>(ui->horizontalSlider_Weapon_ReloadTime->value()) * 0.01f;
+
+	ui->doubleSpinBox_FiringMode_ReloadTime->setValue(firingMode->reloadTime);
+	ui->doubleSpinBox_FiringMode_DamageModifier->setValue(firingMode->damageModifier);
+	ui->doubleSpinBox_FiringMode_ExplosionSphereModifier->setValue(firingMode->explosionSphereModifier);
 }
 
 FiringMode* Menu_FiringMode::getFiringModeSettings()

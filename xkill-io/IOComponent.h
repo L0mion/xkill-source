@@ -5,6 +5,7 @@ struct MdlDescModel;
 
 class MeshMakerObj;
 class MeshModel;
+class LoaderFbx;
 
 #include <vector>
 #include <map>
@@ -50,6 +51,10 @@ private:
 	std::vector<std::string> getFileNames(LPCTSTR filename);
 
 	std::map<std::string, unsigned int>* texNameToTexID;
+
+	std::vector<MeshModel*> meshModels_; //temporarily store models until these may be deleted in attribute
+
+	LoaderFbx* fbxLoader_;
 };
 
 #endif //XKILL_IO_IOCOMPONENT_H

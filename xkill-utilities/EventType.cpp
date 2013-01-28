@@ -1,6 +1,6 @@
 #include "EventType.h"
 
-Event::Event(EventType type) 
+Event::Event(EventType type)
 { 
 	this->type = type; 
 }
@@ -74,7 +74,7 @@ Event_ShowMessageBox::Event_ShowMessageBox(std::string message) : Event(EVENT_SH
 	this->message = message;
 }
 
-Event_CreateProjectile::Event_CreateProjectile(Float3 position, Float3 velocity, Float4 rotation, float damage, int entityIdOfCreator, bool explodeOnImpact) : Event(EVENT_CREATE_PROJECTILE)
+Event_CreateProjectile::Event_CreateProjectile(Float3 position, Float3 velocity, Float4 rotation, float damage, int entityIdOfCreator, bool explodeOnImpact, float explosionSphereRadius) : Event(EVENT_CREATE_PROJECTILE)
 {
 	this->position = position;
 	this->velocity = velocity;
@@ -82,6 +82,7 @@ Event_CreateProjectile::Event_CreateProjectile(Float3 position, Float3 velocity,
 	this->damage = damage;
 	this->entityIdOfCreator = entityIdOfCreator;
 	this->explodeOnImpact = explodeOnImpact;
+	this->explosionSphereRadius = explosionSphereRadius;
 }
 
 Event_CreateMesh::Event_CreateMesh(unsigned int id, MeshModel* mesh, bool dynamic) : Event(EVENT_CREATE_MESH)
@@ -114,10 +115,24 @@ Event_MousePress::Event_MousePress(int keyEnum, bool isPressed) : Event(EVENT_MO
 	this->isPressed = isPressed;
 }
 
-Event_CreateSpawnPoint::Event_CreateSpawnPoint(Float3 spawnPointPosition, float spawnAreaRadius) : Event(EVENT_CREATE_SPAWNPOINT)
+Event_CreatePlayerSpawnPoint::Event_CreatePlayerSpawnPoint(Float3 spawnPointPosition, float spawnAreaRadius) : Event(EVENT_CREATE_PLAYERSPAWNPOINT)
 {
 	this->spawnPointPosition = spawnPointPosition;
 	this->spawnAreaRadius = spawnAreaRadius;
+}
+
+Event_CreatePickupablesSpawnPoint::Event_CreatePickupablesSpawnPoint(Float3 spawnPointPosition, PickupableType pickupableType)  : Event(EVENT_CREATE_PICKUPABLESSPAWNPOINT)
+{
+	this->spawnPointPosition = spawnPointPosition;
+	this->pickupableType = pickupableType;
+}
+
+Event_CreatePickupable::Event_CreatePickupable(Float3 position, PickupableType pickupableType, AttributePointer creatorPickupablesSpawnPoint, int amount)  : Event(EVENT_CREATE_PICKUPABLE)
+{
+	this->position = position;
+	this->pickupableType = pickupableType;
+	this->creatorPickupablesSpawnPoint = creatorPickupablesSpawnPoint;
+	this->amount = amount;
 }
 
 Event_StartDeathmatch::Event_StartDeathmatch(int num_players) : Event(EVENT_START_DEATHMATCH)
@@ -161,18 +176,6 @@ Event_CreateWorld::Event_CreateWorld(Float3 position, Float4 rotation, unsigned 
 	this->position = position;
 	this->rotation = rotation;
 	this->meshID = meshID;
-}
-
-Event_CreateAmmo::Event_CreateAmmo(Float3 position, unsigned int type) : Event(EVENT_CREATE_AMMO)
-{
-	this->position = position;
-	this->position = position;
-}
-
-Event_CreateHack::Event_CreateHack(Float3 position, unsigned int type) : Event(EVENT_CREATE_HACK)
-{
-	this->type = type;
-	this->type = type;
 }
 
 Event_CreateLight::Event_CreateLight(Float3 position, Float3 direction, Float3 ambient, Float3 diffuse, Float3 specular,

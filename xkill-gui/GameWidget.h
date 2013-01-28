@@ -66,6 +66,9 @@ public:
 		case EVENT_GET_WINDOW_RESOLUTION:
 			event_getWindowResolution((Event_GetWindowResolution*)e);
 			break;
+		case EVENT_GAME_OVER:
+			setMouseLock(false);
+			break;
 		default:
 			break;
 		}

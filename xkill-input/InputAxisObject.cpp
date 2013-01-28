@@ -57,6 +57,11 @@ bool InputAxisObject::getValueBool()
 	return floatToBool(value_);
 }
 
+bool InputAxisObject::getValueBoolPressed()
+{
+	return (floatToBool(value_) && !floatToBool(prevValue_));
+}
+
 bool InputAxisObject::getValueBoolReleased()
 {
 	return ( !floatToBool(value_) && floatToBool(prevValue_));
