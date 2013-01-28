@@ -3,6 +3,7 @@
 #include <QtGui/QKeyEvent> // needed to grab mouse input
 #include <xkill-utilities/IObserver.h>
 #include <xkill-utilities/WeaponStructs.h>
+#include <QtGui/QProgressBar>
 
 #include "Menu_Main.h"
 #include "Menu_ScoreBoard.h"
@@ -15,14 +16,15 @@ class HUDWindow : public QMainWindow
 {
 private:
 	int id;
-	QLabel *label_health;
-    QLabel *label_ammo;
+	QProgressBar *progressBar_health;
+    QProgressBar *progressBar_ammo;
 	QLabel *label_weaponType;
     QLabel *label_ammoType;
 	Ammunition::AmmunitionType ammo;
 	FiringMode::FiringModeType weapon;
 	
 	QHBoxLayout *horizontalLayout;
+	 QVBoxLayout *verticalLayout;
 
 public:
 	HUDWindow(QWidget* parent, int id);
