@@ -21,6 +21,13 @@ static const std::string PATH_XKILL_RESOURCES_LEVELS = "../../xkill-resources/xk
 static const LPCTSTR PATH_TEXDESC					 = L"../../xkill-resources/*.texdesc";
 static const LPCTSTR PATH_MDLDESC					 = L"../../xkill-resources/*.mdldesc";
 
+enum FileExtension
+{
+	FILE_EXTENSION_UNKNOWN,
+	FILE_EXTENSION_OBJ,
+	FILE_EXTENSION_FBX
+};
+
 //! Component loading and writing from/to file.
 /*!
 \ingroup xkill-io
@@ -47,6 +54,11 @@ private:
 		std::string		modelName,
 		std::string		modelPath,
 		MdlDescModel*	modelDesc);
+
+	bool loadObj(std::string modelName, std::string modelPath, MdlDescModel* modelDesc);
+	bool loadFbx(std::string modelName, std::string modelPath, MdlDescModel* modelDesc);
+
+	FileExtension findFileType(std::string modelName);
 
 	std::vector<std::string> getFileNames(LPCTSTR filename);
 

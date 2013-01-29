@@ -14,6 +14,7 @@
 #include "MdlDescModel.h"
 
 #include "LoaderFbx.h"
+#include "LoaderFbxModelDesc.h"
 
 IOComponent::IOComponent()
 {
@@ -38,18 +39,14 @@ bool IOComponent::init()
 {
 	bool sucessfulInit = true;
 
+	fbxLoader_ = new LoaderFbx();
+	fbxLoader_->init();
+
 	texNameToTexID = new std::map<std::string, unsigned int>();
 
 	sucessfulInit = initTexDescs();
 	if(sucessfulInit)
-		sucessfulInit = initMdlDescs();
-
-	/*
-	//Check
-	fbxLoader_ = new LoaderFbx();
-	fbxLoader_->init();
-//	fbxLoader_->load("../../xkill-resources/xkill-models/humanoid.fbx");
-	*/
+		sucessfulInit = initMdlDescs();	
 
 	return sucessfulInit;
 }
@@ -173,6 +170,7 @@ bool IOComponent::initLvlMdlDesc(std::string filename)
 	path.append("/");
 	filename.append(".mdldesc");
 	LoaderMdlDesc* loader = new LoaderMdlDesc(filename, path);
+
 	sucessfulLoad = loader->init();
 	
 	if(sucessfulLoad)
@@ -207,6 +205,23 @@ bool IOComponent::loadModel(
 	std::string		modelPath,
 	MdlDescModel*	modelDesc)
 {
+	bool successfulLoad = true;
+
+	FileExtension fileType = findFileType(modelName);
+	switch(fileType)
+	{
+	case FILE_EXTENSION_FBX:
+		successfulLoad = loadFbx(modelName, modelPath, modelDesc);
+		break;
+	case FILE_EXTENSION_OBJ:
+		successfulLoad = loadObj(modelName, modelPath, modelDesc);
+		break;
+	}
+
+	return successfulLoad;
+}
+bool IOComponent::loadObj(std::string modelName, std::string modelPath, MdlDescModel* modelDesc)
+{
 	bool sucessfulMake = true;
 
 	MeshMakerObj* objMaker = new MeshMakerObj(
@@ -216,6 +231,7 @@ bool IOComponent::loadModel(
 		modelPath,
 		texNameToTexID);
 	sucessfulMake = objMaker->init();
+
 
 	if(sucessfulMake)
 	{
@@ -232,6 +248,45 @@ bool IOComponent::loadModel(
 
 	delete objMaker;
 	return sucessfulMake;
+}
+bool IOComponent::loadFbx(std::string modelName, std::string modelPath, MdlDescModel* modelDesc)
+{
+	bool successfulLoad = true;
+
+	std::vector<LoaderFbxModelDesc> fbxModels = fbxLoader_->load(modelPath+"Soldier_2k_poly.fbx");
+
+	return successfulLoad;
+}
+FileExtension IOComponent::findFileType(std::string modelName)
+{
+	bool atExtension = false;
+	std::string extension;
+	for(unsigned int i=0; i<modelName.size(); i++)
+	{
+		if(atExtension)
+			extension.push_back(modelName.at(i));
+		if(modelName.at(i) == '.')
+			atExtension = true;
+	}
+
+	FileExtension type;
+	bool typeObj = true;
+	bool typeFbx = true;
+
+	std::string extensionFbx = "fbx";
+	std::string extensionFBX = "FBX";
+	std::string extensionObj = "obj";
+
+	if(strcmp(extension.c_str(), extensionFbx.c_str()) == 0)
+		type = FILE_EXTENSION_FBX;
+	else if(strcmp(extension.c_str(), extensionFBX.c_str()) == 0)
+		type = FILE_EXTENSION_FBX;
+	else if(strcmp(extension.c_str(), extensionObj.c_str()) == 0)
+		type = FILE_EXTENSION_OBJ;
+	else
+		type = FILE_EXTENSION_UNKNOWN;
+
+	return type;
 }
 
 std::vector<std::string> IOComponent::getFileNames(const LPCTSTR filename)
