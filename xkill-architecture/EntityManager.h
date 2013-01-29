@@ -168,6 +168,5 @@ public:
 		Entity* entity = createEntity();
 		entityFactory.createLightEntity(entity, e);
 		DEBUGPRINT("ENTITYMANAGER: Created light entity " << entity->getID());
-		//EBUGPRINT("ENTITYMANAGER: Didn't create light entity, please implement or remove!");
 	}
 };

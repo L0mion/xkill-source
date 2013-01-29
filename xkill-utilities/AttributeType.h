@@ -244,7 +244,7 @@ struct DLL_U Attribute_Physics : public IAttribute
 {
 	enum PhysicsAttributeType
 	{
-		DEFAULT_ERROR = 0,
+		NOTHING = 0,
 		WORLD = 1,
 		PLAYER = 2,
 		PROJECTILE = 4,
@@ -685,13 +685,15 @@ struct DLL_U Attribute_Player : public IAttribute
 
 	static int nextId;
 
-	int id;					//!< The id of the player process. Used to identify a player attribute in GameComponent when firing projectiles.
-	int priority;			//!< Priority of the player process. Higher value means higher priority. The scheduler will choose the process with the highest priority for execution.
-	int cycleSteals;		//!< Total number of cycle steals for the player process. Cycle steals steal priority from other player processes.
-	int totalExecutionTime; //!< Total execution time of the player process, used ased final score in the deathmatch. The game session winner is the player with the most total execution time as awarded by the scheduler.
-	float currentSpeed;		//!< Speed used when changing position in "handleInput".
-	float walkSpeed;		//!< Speed when walking.
-	float sprintSpeed;		//!< Speed when sprinting.
+	int id;						//!< The id of the player process. Used to identify a player attribute in GameComponent when firing projectiles.
+	int priority;				//!< Priority of the player process. Higher value means higher priority. The scheduler will choose the process with the highest priority for execution.
+	int cycleSteals;			//!< Total number of cycle steals for the player process. Cycle steals steal priority from other player processes.
+	int totalExecutionTime;		//!< Total execution time of the player process, used ased final score in the deathmatch. The game session winner is the player with the most total execution time as awarded by the scheduler.
+	float currentSpeed;			//!< Speed used when changing position in "handleInput".
+	float walkSpeed;			//!< Speed when walking.
+	float sprintSpeed;			//!< Speed when sprinting.
+	float respawnDelay;			//!< Time between death and respawn
+	float currentRespawnDelay;	//!< Time until respawn
 
 	DataItemList* getDataList()
 	{
@@ -859,7 +861,8 @@ struct DLL_U Attribute_PickupablesSpawnPoint : public IAttribute
 
 	PickupableType spawnPickupableType;			//!< Type of pickupable spawned by this pickupables spawn point
 	float spawnDelayInSeconds;					//!< Delay until a pickupable may spawn
-	float secondsSinceLastSpawn;				//!< Incrementing timer
+	float secondsSinceLastSpawn;				//!< Incrementing timer, reset when spawned.
+	float secondsSinceLastPickup;				//!< Incrementing timer, reset when picked up.
 	int maxNrOfExistingSpawnedPickupables;		//!< Is checked against "currentNrOfExistingSpawnedPickupables"
 	int currentNrOfExistingSpawnedPickupables;	//!< Incremented when a pickubalbe is spawned from this pickupables spawn point. Decremented when a pickupable is picked up
 
@@ -871,6 +874,7 @@ struct DLL_U Attribute_PickupablesSpawnPoint : public IAttribute
 		//list->add(spawnPickupableType, "spawnPickupableType");
 		list->add(spawnDelayInSeconds, "spawnDelayInSeconds");
 		list->add(secondsSinceLastSpawn, "secondsSinceLastSpawn");
+		list->add(secondsSinceLastPickup, "secondsSinceLastPickup");
 		list->add(maxNrOfExistingSpawnedPickupables, "maxNrOfExistingSpawnedPickupables");
 		list->add(currentNrOfExistingSpawnedPickupables, "currentNrOfExistingSpawnedPickupables");
 
@@ -882,6 +886,7 @@ struct DLL_U Attribute_PickupablesSpawnPoint : public IAttribute
 		//list->get(&spawnPickupableType);
 		list->get(&spawnDelayInSeconds);
 		list->get(&secondsSinceLastSpawn);
+		list->get(&secondsSinceLastPickup);
 		list->get(&maxNrOfExistingSpawnedPickupables);
 		list->get(&currentNrOfExistingSpawnedPickupables);
 	};

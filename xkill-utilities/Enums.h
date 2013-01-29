@@ -12,3 +12,8 @@ enum DLL_U PickupableType
 	
 	NROFPICKUPABLETYPES
 };
+
+enum DLL_U ModifyPhysicsObjectData
+{
+	GRAVITY
+};
