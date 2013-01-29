@@ -213,6 +213,7 @@ void GameComponent::onUpdate(float delta)
 				physics->gravity = Float3(0.0f, -10.0f, 0.0f);
 				physics->collisionFilterMask = physics->EVERYTHING;
 				physics->collisionResponse = true;
+				physics->meshID = 0;
 
 				spatial->rotation = Float4(0.0f, 0.0f, 0.0f, 1.0f);
 				camera->up = Float3(0.0f, 1.0f, 0.0f);
@@ -795,9 +796,10 @@ void GameComponent::event_PlayerDeath(Event_PlayerDeath* e)
 
 	physics->angularVelocity = Float3(0.0f, 0.0f, 0.0f);
 	physics->linearVelocity = Float3(0.0f, 0.0f, 0.0f);
-	physics->gravity = Float3(0.0f, 0.0f, 0.0f);
-	physics->collisionFilterMask = physics->NOTHING;
-	physics->collisionResponse = false;
+	physics->gravity = Float3(0.0f, -1.0f, 0.0f);
+	physics->collisionFilterMask = physics->WORLD;
+	physics->collisionResponse = true;
+	physics->meshID = 1;
 	physics->reloadDataIntoBulletPhysics = true;
 
 	player->currentRespawnDelay = player->respawnDelay;
