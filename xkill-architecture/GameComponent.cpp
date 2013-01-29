@@ -219,7 +219,7 @@ void GameComponent::onUpdate(float delta)
 				physics->reloadDataIntoBulletPhysics = true;
 
 				health->health = health->startHealth; // restores player health
-				SEND_EVENT(&Event_PlaySound(1));
+				SEND_EVENT(&Event_PlaySound(3));
 			}
 		}
 	}

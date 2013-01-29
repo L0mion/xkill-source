@@ -201,13 +201,18 @@ void CollisionShapes::loadCollisionShapes()
 					name = name.append("Shape");
 					if(loadedShape->getShapeType() == BOX_SHAPE_PROXYTYPE)
 					{
-						collisionShape = new btBoxShape(*static_cast<btBoxShape*>(loadedShape));
+						btVector3 scaling = loadedShape->getLocalScaling();
+						collisionShape = new btBoxShape(scaling/2);
+						collisionShape->setMargin(0.0f);
+						collisionShape->setLocalScaling(btVector3(1,1,1));
+						//collisionShape = new btBoxShape(*static_cast<btBoxShape*>(loadedShape));
 					}
 					else if(loadedShape->getShapeType() == CAPSULE_SHAPE_PROXYTYPE)
 					{
 						collisionShape = new btCapsuleShape(*static_cast<btCapsuleShape*>(loadedShape));
 					}
 					btCompoundShape* cs = new btCompoundShape();
+
 					cs->addChildShape(importer_->getRigidBodyByName(name.c_str())->getWorldTransform(),collisionShape);
 					std::pair<unsigned int, unsigned int>  idToIndex(meshAttribute->meshID,collisionShapes_->size());
 					collisionShapesIdToIndex_.insert(idToIndex);

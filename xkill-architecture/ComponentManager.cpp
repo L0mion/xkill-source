@@ -123,6 +123,8 @@ bool ComponentManager::init(HWND windowHandle, HWND parentWindowHandle)
 		return false;
 	}
 
+	SEND_EVENT(&Event_PlaySound(4));
+
 	// Returns that everything went ok
 	return true;
 }
@@ -136,7 +138,7 @@ void ComponentManager::onEvent(Event* e)
 		GET_STATE() = STATE_MAINMENU;
 		break;
 	case EVENT_START_DEATHMATCH:
-		initialSpawnDelay = 0.2f;
+		initialSpawnDelay = 1.0f;
 	case EVENT_GAME_OVER:
 		gameOverDelay = 10.0f;
 		GET_STATE() = STATE_GAMEOVER;
