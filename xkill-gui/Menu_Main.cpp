@@ -28,7 +28,12 @@ Menu_Main::Menu_Main( QWidget* parent ) : QMainWindow(parent), ToggleHelper(this
 	QWidget::setWindowFlags(Qt::SplashScreen);
 	//setAttribute(Qt::WA_TransparentForMouseEvents);
 	//setAttribute(Qt::WA_TranslucentBackground);
-	setWindowFlags(Qt::WindowStaysOnBottomHint);
+	setWindowFlags(Qt::WindowStaysOnTopHint);
+
+	ui.verticalLayout_2->setSpacing(0);
+	ui.verticalLayout_2->setMargin(0);
+	ui.verticalLayout->setSpacing(0);
+	ui.verticalLayout->setMargin(0);
 
 	connect(ui.pushButton_exit,									SIGNAL(clicked()),					this,	SLOT(slot_quitToDesktop()));
 	connect(ui.pushButton_exit_2,								SIGNAL(clicked()),					this,	SLOT(slot_quitToDesktop()));
@@ -68,6 +73,9 @@ Menu_Main::Menu_Main( QWidget* parent ) : QMainWindow(parent), ToggleHelper(this
 	connect(ui.horizontalSlider_Weapon_ExplosionSphereModifier,	SIGNAL(sliderMoved(int)),			this,	SLOT(slot_firingModeUpdated()));
 	connect(ui.horizontalSlider_Weapon_RateOfFire,				SIGNAL(sliderMoved(int)),			this,	SLOT(slot_firingModeUpdated()));
 	connect(ui.horizontalSlider_Weapon_ReloadTime,				SIGNAL(sliderMoved(int)),			this,	SLOT(slot_firingModeUpdated()));
+
+	connect(ui.tabWidget_2,										SIGNAL(currentChanged(int)),		this,	SLOT(slot_updateAmmoMenu()));
+	connect(ui.tabWidget_2,										SIGNAL(currentChanged(int)),		this,	SLOT(slot_updateFiringModeMenu()));
 	
 	// Set num players to 2
 	ui.horizontalSlider_numPlayers->setValue(2);
@@ -226,6 +234,7 @@ void Menu_Main::mousePressEvent( QMouseEvent* e )
 
 void Menu_Main::slot_startGame()
 {
+	SEND_EVENT(&Event_EndDeathmatch());	//Temporary to remove the "empty" game that is used to paint the menu background black.
 	int num_players = ui.horizontalSlider_numPlayers->value();
 	SEND_EVENT(&Event_StartDeathmatch(num_players));
 

@@ -43,10 +43,16 @@ public:
 
 	//! Set the variable uavBackBuffer to the compute shader stage.
 	void setUAVBackBufferCS();
+	
 	void unsetUAVBackBufferCS();
 
 	void setDepthBufferSRV(unsigned int shaderRegister);
 	void unsetDepthBufferSRV(unsigned int shaderRegister);
+
+	//! Sets the variable rtvBackBuffer as a render target.
+	void setRenderTargetViewBackBuffer();
+	//! Removes rtvBackBuffer as render target.
+	void unsetRenderTargetViewBackBufer();
 
 	//! Presents the back buffer.
 	void present();

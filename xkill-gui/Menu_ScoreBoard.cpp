@@ -14,8 +14,10 @@ Menu_ScoreBoard::Menu_ScoreBoard(QWidget* parent, Qt::WFlags flags) : QMainWindo
 	QWidget::setWindowFlags(Qt::SplashScreen);
 	QWidget::setAttribute(Qt::WA_ShowWithoutActivating);
 	setWindowFlags(Qt::WindowStaysOnBottomHint);
-	QWidget::setStyleSheet("QWidget{color: #fff; background-color: #000;}");
+	//QWidget::setStyleSheet("QWidget{color: #fff; background-color: #000;}");
 	QWidget::setEnabled(false);
+
+	ui.horizontalLayout->setMargin(0);
 }
 
 
@@ -66,7 +68,7 @@ void Menu_ScoreBoard::onUpdate(float delta)
 
 			// Add row
 			QTreeWidgetItem* itm = new QTreeWidgetItem();
-			itm->setText(0, "Process "+QString::number(itrPlayer.storageIndex()));
+			itm->setText(0, "Process " + QString::number(itrPlayer.storageIndex()));
 			itm->setText(1, QString::number((int)player->totalExecutionTime));
 			itm->setText(2, QString::number(player->priority));
 			itm->setText(3, QString::number(player->cycleSteals));

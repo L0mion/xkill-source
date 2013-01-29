@@ -25,6 +25,7 @@ class ManagementGBuffer;
 class ManagementDebug;
 class ManagementMath;
 class ManagementInstance;
+class ManagementSprites;
 
 class Winfo;
 class TexDesc;
@@ -74,6 +75,7 @@ private:
 	HRESULT initManagementDebug();		//!< Initializes ManagementDebug, which holds data allowing advanced detection of COM-leaks in D3D.
 	void	initManagementMath();		//!< Initializes ManagementMath, which manages math-related functions and loading of dx-vectors into generic-type vectors utilizing SIMD.
 	void	initManagementInstance();	//!< Initializes ManagementInstance, which manages all the instances of the various models.
+	HRESULT initManagementSprites();	//!< Initializes ManagementSprites, which manages all sprites.
 
 	void renderViewportToGBuffer(
 		ViewportData& vpData);											//!< Renders to g-buffer.
@@ -92,6 +94,10 @@ private:
 	void drawBulletPhysicsDebugLines(
 		DirectX::XMFLOAT4X4		viewMatrix, 
 		DirectX::XMFLOAT4X4		projectionMatrix); //!<A vertex buffer is recreated when a EVENT_DRAW_BULLET_PHYSICS_DEBUG_LINES event is present in the event queue.
+
+	void renderHudElements(int viewportIndex); //!< Reders hud elements such as the cross hair.
+	void renderHudElementCrossHair(int viewportIndex, float scaleModifierX); //<! Renders a cross hair in the middle óf each viewport.
+	void drawHudElement(int viewportIndex, unsigned int textureId, DirectX::XMFLOAT4X4 transformationMatrix); //!< Draws a single hud element.
 
 	//temp
 	void renderAnimatedMesh(
@@ -114,6 +120,7 @@ private:
 	ManagementDebug*	managementDebug_;		//!< Used for detecting live COM-objects.
 	ManagementMath*		managementMath_;		//!< Loads dx-math vectors into generic-type vectors and maintains other math-related functions.
 	ManagementInstance*	managementInstance_;	//!< Maintains all instances of respective model in the game.
+	ManagementSprites*  managementSprites_;		//!< Maintaining sprites.
 
 	ID3D11Buffer* debugLinesVertexBuffer_;		//!< Might want to move this into some manager of some sort.
 

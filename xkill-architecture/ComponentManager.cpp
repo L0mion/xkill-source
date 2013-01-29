@@ -20,6 +20,7 @@
 
 ComponentManager::ComponentManager()
 {
+	SUBSCRIBE_TO_EVENT(this, EVENT_GAME_OVER);
 	SUBSCRIBE_TO_EVENT(this, EVENT_END_DEATHMATCH);
 	SUBSCRIBE_TO_EVENT(this, EVENT_START_DEATHMATCH);
 
@@ -135,7 +136,11 @@ void ComponentManager::onEvent(Event* e)
 		GET_STATE() = STATE_MAINMENU;
 		break;
 	case EVENT_START_DEATHMATCH:
-		initialSpawnDelay = 0.2;
+		initialSpawnDelay = 0.2f;
+	case EVENT_GAME_OVER:
+		gameOverDelay = 10.0f;
+		GET_STATE() = STATE_GAMEOVER;
+		break;
 	default:
 		break;
 	}
@@ -148,11 +153,6 @@ void ComponentManager::update(float delta)
 	/// PUT SOMETHING
 	if(GET_STATE() == STATE_DEATHMATCH)
 	{
-		sound_->onUpdate(delta);
-		//camera_->onUpdate(delta);
-		physics_->onUpdate(delta);
-		camera_->onUpdate(delta);
-		render_->onUpdate(delta);
 		input_->onUpdate(delta);
 		if(initialSpawnDelay > 0)
 		{
@@ -162,7 +162,27 @@ void ComponentManager::update(float delta)
 		{
 			game_->onUpdate(delta);	
 		}
+		physics_->onUpdate(delta);
+		camera_->onUpdate(delta);
+		sound_->onUpdate(delta);
+		render_->onUpdate(delta);
+	
 		SEND_EVENT(&Event(EVENT_UPDATE));
+	}
+	else if(GET_STATE() == STATE_GAMEOVER)
+	{
+		sound_->onUpdate(delta);
+		input_->onUpdate(delta);
+		render_->onUpdate(delta);
+
+		if(gameOverDelay > 0.0f)
+		{
+			gameOverDelay -= delta;
+		}
+		else
+		{
+			SEND_EVENT(&Event_EndDeathmatch());
+		}
 	}
 	else if(GET_STATE() == STATE_MAINMENU)
 	{
@@ -170,7 +190,7 @@ void ComponentManager::update(float delta)
 		//camera_->onUpdate(delta);
 		//physics_->onUpdate(delta);
 		//camera_->onUpdate(delta);
-		//render_->onUpdate(delta);
+		render_->onUpdate(delta);
 		input_->onUpdate(delta);
 		//game_->onUpdate(delta);
 		SEND_EVENT(&Event(EVENT_UPDATE));

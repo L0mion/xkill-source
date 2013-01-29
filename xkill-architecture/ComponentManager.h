@@ -42,6 +42,7 @@ private:
 	IOComponent*			ioComponent_;
 
 	float					initialSpawnDelay;
+	float					gameOverDelay;
 public:
 	ComponentManager();
 	~ComponentManager();

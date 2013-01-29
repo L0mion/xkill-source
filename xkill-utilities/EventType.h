@@ -4,6 +4,8 @@
 #include "dllUtilities.h"
 #include "Math.h"
 #include "LightDesc.h"
+#include "Enums.h"
+#include "AttributePointer.h"
 
 //
 // Events info
@@ -40,13 +42,14 @@ enum DLL_U EventType
 
 	EVENT_PLAYERDEATH,
 	EVENT_END_DEATHMATCH,
+	EVENT_GAME_OVER,
 	EVENT_START_DEATHMATCH,
 	EVENT_CREATE_PROJECTILE,
-	EVENT_CREATE_SPAWNPOINT,
+	EVENT_CREATE_PLAYERSPAWNPOINT,
+	EVENT_CREATE_PICKUPABLESSPAWNPOINT,
+	EVENT_CREATE_PICKUPABLE,
 	EVENT_CREATE_EXPLOSIONSPHERE,
 	EVENT_CREATE_WORLD,
-	EVENT_CREATE_AMMO,
-	EVENT_CREATE_HACK,
 	EVENT_CREATE_LIGHT,
 	EVENT_CREATE_ENTITY,
 	EVENT_REMOVE_ENTITY,
@@ -68,6 +71,7 @@ enum DLL_U EventType
 	EVENT_PHYSICS_ATTRIBUTES_COLLIDING,
 	EVENT_DRAW_BULLET_PHYSICS_DEBUG_LINES,
 	EVENT_SPLITSCREEN_CHANGED,
+	EVENT_MODIFY_PHYSICS_OBJECT,
 
 	EVENT_ATTRIBUTE_UPDATED,
 	EVENT_SYNCSTATECOMMAND,
@@ -265,10 +269,11 @@ public:
 	Float3 velocity;
 	Float4 rotation;
 	float damage;
+	float explosionSphereRadius;
 	int entityIdOfCreator;
 	bool explodeOnImpact;
 
-	Event_CreateProjectile(Float3 position, Float3 velocity, Float4 rotation, float damage, int entityIdOfCreator, bool explodeOfImpact);
+	Event_CreateProjectile(Float3 position, Float3 velocity, Float4 rotation, float damage, int entityIdOfCreator, bool explodeOfImpact, float explosionSphereRadius);
 };
 
 class MeshModel;
@@ -350,18 +355,42 @@ public:
 class DLL_U Event_PlayerDeath : public Event
 {
 public:
-	Event_PlayerDeath() : Event(EVENT_PLAYERDEATH)
+	int playerIndex; //Index of the player that died
+
+	Event_PlayerDeath(int playerIndex) : Event(EVENT_PLAYERDEATH)
 	{
+		this->playerIndex = playerIndex;
 	}
 };
 
-class DLL_U Event_CreateSpawnPoint : public Event
+class DLL_U Event_CreatePlayerSpawnPoint : public Event
 {
 public:
-	Event_CreateSpawnPoint(Float3 spawnPointPosition, float spawnAreaRadius);
+	Event_CreatePlayerSpawnPoint(Float3 spawnPointPosition, float spawnAreaRadius);
 
 	Float3 spawnPointPosition;
 	float spawnAreaRadius;
+};
+
+enum PickupableType;
+class DLL_U Event_CreatePickupablesSpawnPoint : public Event
+{
+public:
+	Event_CreatePickupablesSpawnPoint(Float3 spawnPointPosition, PickupableType pickupableType);
+
+	Float3 spawnPointPosition;
+	PickupableType pickupableType;
+};
+
+class DLL_U Event_CreatePickupable : public Event
+{
+public:
+	Event_CreatePickupable(Float3 position, PickupableType pickupableType, AttributePointer creatorPickupablesSpawnPoint, int amount);
+
+	Float3 position;
+	PickupableType pickupableType;
+	AttributePointer creatorPickupablesSpawnPoint;
+	int amount;
 };
 
 class DLL_U Event_StartDeathmatch : public Event
@@ -437,24 +466,6 @@ public:
 	unsigned int meshID;
 };
 
-class DLL_U Event_CreateAmmo : public Event
-{
-public:
-	Event_CreateAmmo(Float3 position, unsigned int type);
-
-	Float3 position;
-	unsigned int type;
-};
-
-class DLL_U Event_CreateHack : public Event
-{
-public:
-	Event_CreateHack(Float3 position, unsigned int type);
-
-	Float3 position;
-	unsigned int type;
-};
-
 class DLL_U Event_CreateLight : public Event
 {
 public:
@@ -517,7 +528,6 @@ public:
 };
 */
 
-//struct VertexPosColor;
 #include "MeshVertices.h"
 class DLL_U Event_DrawBulletPhysicsDebugLines : public Event
 {
@@ -525,4 +535,14 @@ public:
 	Event_DrawBulletPhysicsDebugLines(std::vector<VertexPosColor>* debugLineVertices);
 
 	std::vector<VertexPosColor>* debugLineVertices;
+};
+
+class DLL_U Event_ModifyPhysicsObject : public Event
+{
+public:
+	Event_ModifyPhysicsObject(ModifyPhysicsObjectData modifyWhatDataInPhysicsObjectData, void* data, int physicsAttributeIndex);
+
+	ModifyPhysicsObjectData modifyWhatDataInPhysicsObjectData;
+	void* data;
+	int physicsAttributeIndex;
 };

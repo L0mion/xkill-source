@@ -20,7 +20,7 @@ class Event;
 class DLL_U EventManager
 {
 private:
-	std::vector<std::vector<IObserver*>>* subscibers;	
+	std::vector<std::vector<IObserver*>>* subscribers;	
 	std::vector<std::vector<Event*>>* queues;		//! Used to queue Events if queue feature is used
 
 	EventManager();
@@ -161,9 +161,13 @@ EventManager::getInstance()->state_TemporaryVariableUsedAsSubstituteForStateMach
 // Defines DEBUGPRINT to a cout function in Debug configuration
 #ifdef XKILL_DEBUG
 	#define BULLETPHYSICSDEBUGDRAW true //render Bullet Physics debug lines true/false
-	#include <iostream>
+	#include <sstream>
 	#define DEBUGPRINT(dataStream)									\
-	std::cout << dataStream << std::endl;			
+	{                                                               \
+		std::ostringstream oss;										\
+		oss << dataStream << std::endl;								\
+		printf(oss.str().c_str());									\
+	}
 #endif
 
 

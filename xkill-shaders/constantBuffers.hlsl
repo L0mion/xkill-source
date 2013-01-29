@@ -54,4 +54,9 @@ cbuffer cbBones : register (b5)
 	float4x4 boneTransforms[MAX_NUM_BONES];
 };
 
+cbuffer cbSprite : register (b6)
+{
+	float4x4 spriteMatrix;
+}
+
 #endif //XKILL_RENDERER_CONSTANTBUFFERS_HLSL

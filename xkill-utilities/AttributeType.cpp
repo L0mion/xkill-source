@@ -4,6 +4,7 @@
 
 #include "MeshModel.h"
 #include "DebugShape.h"
+#include "Enums.h"
 
 IAttribute::IAttribute()
 {
@@ -53,12 +54,11 @@ Attribute_Physics::Attribute_Physics()
 {
 	collisionResponse = true;
 	reloadDataIntoBulletPhysics = true;
-	alive = true;
 	mass = 1.0f;
 	
 	meshID = -1;
 
-	collisionFilterGroup = Attribute_Physics::DEFAULT_ERROR;
+	collisionFilterGroup = Attribute_Physics::NOTHING;
 	collisionFilterMask = 0;
 
 	gravity = Float3(0.0f, -10.0f, 0.0f);
@@ -154,6 +154,7 @@ Attribute_Input::Attribute_Input()
 	sprint = false;
 	killPlayer = false;
 	fire = false;
+	firePressed = false;
 	changeAmmunitionType = false;
 	changeFiringMode = false;
 	ZeroMemory(&position,sizeof(position));
@@ -179,6 +180,8 @@ Attribute_Player::Attribute_Player()
 	priority = 0;
 	cycleSteals = 0;
 	totalExecutionTime = 0;
+	respawnDelay = 5.0f;
+	currentRespawnDelay = 0.0f;
 
 	walkSpeed = 5.0f;
 	sprintSpeed = walkSpeed*2;
@@ -236,12 +239,33 @@ Attribute_Damage::~Attribute_Damage()
 {
 }
 
-Attribute_SpawnPoint::Attribute_SpawnPoint()
+Attribute_PlayerSpawnPoint::Attribute_PlayerSpawnPoint()
 {
-	timeSinceLastSpawn = 0.0f;
+	secondsSinceLastSpawn = 0.0f;
 	spawnArea = 0.0f;
 }
-Attribute_SpawnPoint::~Attribute_SpawnPoint()
+Attribute_PlayerSpawnPoint::~Attribute_PlayerSpawnPoint()
+{
+}
+
+Attribute_PickupablesSpawnPoint::Attribute_PickupablesSpawnPoint()
+{
+	spawnPickupableType = PickupableType::MEDKIT;
+	spawnDelayInSeconds = 0.0f;
+	secondsSinceLastSpawn = 0.0f;
+	secondsSinceLastPickup = 0.0f;
+	maxNrOfExistingSpawnedPickupables = 1;
+	currentNrOfExistingSpawnedPickupables = 0;
+}
+Attribute_PickupablesSpawnPoint::~Attribute_PickupablesSpawnPoint()
+{
+}
+
+Attribute_Pickupable::Attribute_Pickupable()
+{
+	pickupableType = PickupableType::MEDKIT;
+}
+Attribute_Pickupable::~Attribute_Pickupable()
 {
 }
 
@@ -251,7 +275,7 @@ Attribute_WeaponStats::Attribute_WeaponStats()
 {
 	MutatorSettings ms;
 
-	for(int i = 0; i < Ammunition::NROFAMUNITIONTYPES; i++)
+	for(int i = 0; i < Ammunition::NROFAMMUNITIONTYPES; i++)
 	{
 		for(int j = 0; j < FiringMode::NROFFIRINGMODETYPES; j++)
 		{

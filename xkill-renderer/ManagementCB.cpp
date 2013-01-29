@@ -11,6 +11,7 @@ ManagementCB::ManagementCB()
 	cbObject_	= nullptr;
 	cbSubset_	= nullptr;
 	cbBone_		= nullptr;
+	cbSprite_	= nullptr;
 }
 ManagementCB::~ManagementCB()
 {
@@ -20,6 +21,7 @@ ManagementCB::~ManagementCB()
 	SAFE_RELEASE(cbObject_);
 	SAFE_RELEASE(cbSubset_);
 	SAFE_RELEASE(cbBone_);
+	SAFE_RELEASE(cbSprite_);
 }
 void ManagementCB::reset()
 {
@@ -29,6 +31,7 @@ void ManagementCB::reset()
 	SAFE_RELEASE(cbObject_);
 	SAFE_RELEASE(cbSubset_);
 	SAFE_RELEASE(cbBone_);
+	SAFE_RELEASE(cbSprite_);
 }
 
 void ManagementCB::updateCBInstance(ID3D11DeviceContext*	devcon,
@@ -112,6 +115,14 @@ void ManagementCB::updateCBBone(ID3D11DeviceContext* devcon, std::vector<DirectX
 
 	devcon->UpdateSubresource(cbBone_, 0, 0, &cbDesc, 0, 0);
 }
+void ManagementCB::updateCBSprite(ID3D11DeviceContext* devcon, DirectX::XMFLOAT4X4 transformMatrix)
+{
+	CBSpriteDesc cbDesc;
+	cbDesc.spriteMatrix_ = transformMatrix;
+
+	devcon->UpdateSubresource(cbSprite_, 0, 0, &cbDesc, 0, 0);
+}
+
 
 void ManagementCB::setCB(
 	CB_TYPE					cbType, 
@@ -140,6 +151,9 @@ void ManagementCB::setCB(
 		break;
 	case CB_TYPE_BONE:
 		cb = cbBone_;
+		break;
+	case CB_TYPE_SPRITE:
+		cb = cbSprite_;
 		break;
 	}
 
@@ -182,6 +196,8 @@ HRESULT ManagementCB::init(ID3D11Device* device)
 		hr = initCBSubset(device);
 	if(SUCCEEDED(hr))
 		hr = initCBBone(device);
+	if(SUCCEEDED(hr))
+		hr = initCBSprite(device);
 
 	return hr;
 }
@@ -290,6 +306,24 @@ HRESULT ManagementCB::initCBBone(ID3D11Device* device)
 	hr = device->CreateBuffer(&bufferDesc, NULL, &cbBone_);
 	if(FAILED(hr))
 		ERROR_MSG(L"CBManagement::initCBBone | device->CreateBuffer | Failed!");
+
+	return hr;
+}
+HRESULT ManagementCB::initCBSprite(ID3D11Device* device)
+{
+	HRESULT hr = S_OK;
+
+	D3D11_BUFFER_DESC bufferDesc;
+	ZeroMemory(&bufferDesc, sizeof(bufferDesc));
+	
+	bufferDesc.Usage			= D3D11_USAGE_DEFAULT;
+	bufferDesc.ByteWidth		= CB_SPRITE_DESC_SIZE;
+	bufferDesc.BindFlags		= D3D11_BIND_CONSTANT_BUFFER;
+	bufferDesc.CPUAccessFlags	= 0;
+
+	hr = device->CreateBuffer(&bufferDesc, NULL, &cbSprite_);
+	if(FAILED(hr))
+		ERROR_MSG(L"CBManagement::initCBSprite | device->CreateBuffer | Failed!");
 
 	return hr;
 }

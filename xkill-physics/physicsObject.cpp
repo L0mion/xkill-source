@@ -2,7 +2,12 @@
 
 #include <btBulletDynamicsCommon.h>
 
+
 #include <xkill-utilities/AttributeManager.h>
+
+#include "physicsUtilities.h"
+#include <xkill-utilities/EventManager.h>
+
 
 #include "CollisionShapes.h"
 #include "MotionState.h"
@@ -26,16 +31,30 @@ PhysicsObject::~PhysicsObject()
 	delete getMotionState();
 }
 
-btVector3 PhysicsObject::subClassCalculateLocalInertia(btScalar mass)
+btVector3 PhysicsObject::subClassCalculateLocalInertiaHook(btScalar mass)
 {
-	btVector3 localInertia;
-	localInertia.setZero();
-	return localInertia;
+	return zeroLocalInertia();
 }
 
 bool PhysicsObject::subClassSpecificInitHook()
 {
 	return true;
+}
+
+btVector3 PhysicsObject::localInertiaBasedOnCollisionShapeAndMass(btScalar mass)
+{
+	btCollisionShape* collisionShape = getCollisionShape();
+	btVector3 localInertia;
+	collisionShape->calculateLocalInertia(mass, localInertia);
+	
+	return localInertia;
+}
+
+btVector3 PhysicsObject::zeroLocalInertia()
+{
+	btVector3 localInertia;
+	localInertia.setZero();
+	return localInertia;
 }
 
 bool PhysicsObject::init(unsigned int attributeIndex,unsigned int collisionFilterGroup)
@@ -47,18 +66,19 @@ bool PhysicsObject::init(unsigned int attributeIndex,unsigned int collisionFilte
 	attributeIndex_ = attributeIndex;
 	collisionFilterGroup_ = collisionFilterGroup;
 
+
 	//Get the init data from a physics attribute
 	Attribute_Physics* physicsAttribute = itrPhysics_.at(attributeIndex);
 	btScalar mass = static_cast<btScalar>(physicsAttribute->mass);
+
 
 	//Resolve mass, local inertia of the collision shape, and also the collision shape itself.
 	btCollisionShape* collisionShape = CollisionShapes::Instance()->getCollisionShape(physicsAttribute->meshID);
 	setCollisionShape(collisionShape);
 	
-		
-		
-	btVector3 localInertia = subClassCalculateLocalInertia(mass);
+	btVector3 localInertia = subClassCalculateLocalInertiaHook(mass);
 	setMassProps(mass, localInertia); //Set inverse mass and inverse local inertia
+	updateInertiaTensor(); //check
 	if((getCollisionFlags() & btCollisionObject::CF_STATIC_OBJECT))
 	{
 		btTransform world;
@@ -109,5 +129,4 @@ unsigned int PhysicsObject::getCollisionFilterGroup() const
 
 void PhysicsObject::onUpdate(float delta)
 {
-	setGravity(btVector3(0,0,0));
 }

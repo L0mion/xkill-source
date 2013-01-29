@@ -8,6 +8,7 @@ AttributeIterator<Attribute_Input> itrInput;
 AttributeIterator<Attribute_Physics> itrPhysics_3;
 AttributeIterator<Attribute_Spatial> itrSpatial;
 AttributeIterator<Attribute_Player> itrPlayer;
+AttributeIterator<Attribute_Health> itrHealth;
 
 PlayerPhysicsObject::PlayerPhysicsObject()
 	: PhysicsObject()
@@ -18,6 +19,7 @@ PlayerPhysicsObject::PlayerPhysicsObject()
 	itrPhysics_3 = ATTRIBUTE_MANAGER->physics.getIterator();
 	itrSpatial = ATTRIBUTE_MANAGER->spatial.getIterator();
 	itrPlayer = ATTRIBUTE_MANAGER->player.getIterator();
+	itrHealth = ATTRIBUTE_MANAGER->health.getIterator();
 }
 
 PlayerPhysicsObject::~PlayerPhysicsObject()
@@ -66,16 +68,28 @@ void PlayerPhysicsObject::handleInput()
 	for(unsigned int i=0;i<playerAttributes.size();i++)
 	{
 		playerAttribute = itrPlayer.at(playerAttributes.at(i));
-		inputAttribute = itrInput.at(playerAttribute->ptr_input);
-	}
-	yaw_ += inputAttribute->rotation.x;
-	btVector3 move = playerAttribute->currentSpeed*btVector3(inputAttribute->position.x, 0, inputAttribute->position.y);
-	move = move.rotate(btVector3(0,1,0),yaw_);
-	move = btVector3(move.x(), getLinearVelocity().y(), move.z());
-	setLinearVelocity(move);
 
-	btTransform world;
-	world = getWorldTransform();
-	world.setRotation(btQuaternion(yaw_,0,0));
-	setWorldTransform(world);
+		Attribute_Health* health = itrHealth.at(playerAttribute->ptr_health);
+		if(health->health <= 0)
+			continue;
+
+		inputAttribute = itrInput.at(playerAttribute->ptr_input);
+
+		yaw_ += inputAttribute->rotation.x;
+		btVector3 move = playerAttribute->currentSpeed*btVector3(inputAttribute->position.x, 0, inputAttribute->position.y);
+		move = move.rotate(btVector3(0,1,0),yaw_);
+		move = btVector3(move.x(), getLinearVelocity().y(), move.z());
+		setLinearVelocity(move);
+
+		btTransform world;
+		world = getWorldTransform();
+		world.setRotation(btQuaternion(yaw_,0,0));
+		setWorldTransform(world);
+
+		if(inputAttribute->jump)
+		{
+			applyCentralImpulse(btVector3(0.0f, 1.0f, 0.0f));
+			inputAttribute->jump = false;
+		}
+	}
 }

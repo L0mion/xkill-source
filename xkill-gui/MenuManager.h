@@ -3,6 +3,7 @@
 #include <QtGui/QKeyEvent> // needed to grab mouse input
 #include <xkill-utilities/IObserver.h>
 #include <xkill-utilities/WeaponStructs.h>
+#include <QtGui/QProgressBar>
 
 #include "Menu_Main.h"
 #include "Menu_ScoreBoard.h"
@@ -15,14 +16,15 @@ class HUDWindow : public QMainWindow
 {
 private:
 	int id;
-	QLabel *label_health;
-    QLabel *label_ammo;
+	QProgressBar *progressBar_health;
+    QProgressBar *progressBar_ammo;
 	QLabel *label_weaponType;
     QLabel *label_ammoType;
 	Ammunition::AmmunitionType ammo;
 	FiringMode::FiringModeType weapon;
 	
 	QHBoxLayout *horizontalLayout;
+	 QVBoxLayout *verticalLayout;
 
 public:
 	HUDWindow(QWidget* parent, int id);
@@ -37,25 +39,14 @@ private:
 	std::vector<HUDWindow*> huds;
 	QWidget* parent;
 public:
-	HUDManager()
-	{
-	}
-	void update();
-
+	HUDManager();
 	HUDManager(QWidget* parent);
 
-	void createHUD()
-	{
-		for(int i=0; i<5; i++)
-		{
-			huds.push_back(new HUDWindow(parent, i));
-		}
-	}
+	void update();
 
-	void parentMoveEvent()
-	{
-		update();
-	}
+	void createHUD();
+
+	void parentMoveEvent();
 };
 
 
@@ -70,47 +61,14 @@ private:
 public:
 	MenuManager(QWidget* parent);
 
-	void onEvent(Event* e)
-	{
-		EventType type = e->getType();
-		static int refreshRate = 2;
-		static int test = refreshRate;
-		switch(type) 
-		{
-		case EVENT_UPDATE:
-			// HACK: Makes the menu update every 20 frame
-			test--;
-			if(test<0)
-			{
-				hudManager.update();
-				scoreBoard->onUpdate(1.0f);
-				test = refreshRate;
-			}
-			break;
-		case EVENT_END_DEATHMATCH:
-			scoreBoard->toggleMenu(false);
-			inGameMenu->toggleMenu(false);
-			mainMenu->toggleMenu(true);
-			break;
-		default:
-			break;
-		}
-	}
+	void onEvent(Event* e);
 
-	void onUpdate(float delta)
-	{
+	void onUpdate(float delta);
 
-	}
 	// Behavior on keyboard input
 	void keyPressEvent(QKeyEvent* e);
 
 	void keyReleaseEvent(QKeyEvent* e);
 
-	void moveEvent()
-	{
-		mainMenu->parentMoveEvent();
-		scoreBoard->parentMoveEvent();
-		inGameMenu->parentMoveEvent();
-		hudManager.parentMoveEvent();
-	}
+	void moveEvent();
 };
