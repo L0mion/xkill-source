@@ -217,8 +217,8 @@ public:
 		CREATE_ATTRIBUTE(Attribute_PickupablesSpawnPoint, pickupablesSpawnPoint, entity);
 		CONNECT_ATTRIBUTES(pickupablesSpawnPoint, position);
 		pickupablesSpawnPoint->spawnPickupableType = e->pickupableType;
-		pickupablesSpawnPoint->spawnDelayInSeconds = 5.0f;
-		pickupablesSpawnPoint->maxNrOfExistingSpawnedPickupables = 1;
+		pickupablesSpawnPoint->spawnDelayInSeconds = 0.01f;
+		pickupablesSpawnPoint->maxNrOfExistingSpawnedPickupables = 50;
 	}
 
 	void createPickupableEntity(Entity* entity, Event_CreatePickupable* e)
