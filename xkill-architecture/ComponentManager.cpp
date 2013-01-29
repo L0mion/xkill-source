@@ -136,14 +136,12 @@ void ComponentManager::onEvent(Event* e)
 		GET_STATE() = STATE_MAINMENU;
 		break;
 	case EVENT_START_DEATHMATCH:
-		if(XKILL_DEBUG)
+		initialSpawnDelay = 0.0f;
+		#ifdef XKILL_DEBUG
 		{
 			initialSpawnDelay = 1.0f; //Prevent debug lag making physics not registering collision during the first seconds of the game.
 		}
-		else
-		{
-			initialSpawnDelay = 0.0f;
-		}
+		#endif
 	case EVENT_GAME_OVER:
 		gameOverDelay = 10.0f;
 		GET_STATE() = STATE_GAMEOVER;
