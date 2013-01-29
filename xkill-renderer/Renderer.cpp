@@ -367,6 +367,7 @@ void Renderer::render()
 	//Clear g-buffers and depth buffer.
 	managementGBuffer_->clearGBuffers(devcon);
 	managementD3D_->clearDepthBuffer();
+	managementD3D_->clearBackBuffer();
 
 	//Update per-frame constant buffer.
 	managementCB_->setCB(

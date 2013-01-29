@@ -57,125 +57,137 @@ void lightingCS(
 	GroupMemoryBarrierWithGroupSync();
 	
 	//Sample G-Buffers. Data prefetching?
-	float2	texCoord	= float2((float)(threadIDDispatch.x + viewportTopX)/(float)screenWidth,(float)(threadIDDispatch.y + viewportTopY)/(float)screenHeight);
+	float2 texCoord = float2((float)(threadIDDispatch.x + viewportTopX)/(float)screenWidth,(float)(threadIDDispatch.y + viewportTopY)/(float)screenHeight);
 	float4	gAlbedo		= gBufferAlbedo		.SampleLevel(ss, texCoord, 0);
 	float4	gNormal		= gBufferNormal		.SampleLevel(ss, texCoord, 0);
 	float4	gMaterial	= gBufferMaterial	.SampleLevel(ss, texCoord, 0); //At the moment, world space position is stored in Material-buffer.
-	float	gDepth		= gBufferDepth		.SampleLevel(ss, texCoord, 0).x;
-	
+	float	gDepth		= gBufferDepth.SampleLevel(ss, texCoord, 0).x; 
 	//Get surface position.
 	/*At the moment, world space position is stored in Material-buffer.*/
-	float3 surfacePosW = gMaterial.xyz;
-	float3 surfacePosV = surfacePosW;//mul(float4(surfacePosW, 1.0f), view).xyz; //AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
 	
-	//output[uint2(threadIDDispatch.x + viewportTopX, threadIDDispatch.y + viewportTopY)] = Ambient + Diffuse + Specular; //float4(tileMinDepthF / zFar, tileMinDepthF / zFar, tileMinDepthF / zFar, 1.0f); //
-	
-	if(surfacePosV.z > 0.0f)
-	{
-		output[uint2(threadIDDispatch.x + viewportTopX, threadIDDispatch.y + viewportTopY)] = float4(0.0f, 1.0f, 0.0f, 1.0f);
-	}
-	else
-	{
-		output[uint2(threadIDDispatch.x + viewportTopX, threadIDDispatch.y + viewportTopY)] = float4(1.0f, 0.0f, 0.0f, 1.0f);
-	}
-}
+	float3 surfacePosV = UtilReconstructPositionViewSpace(texCoord, gDepth, projectionInverse); //mul(float4(surfacePosW, 1.0f), view).xyz;
+	float3 surfacePosW = mul(float4(surfacePosV, 1.0f), viewInverse);//gMaterial.xyz;
 
-//uint pixelDepthInt = asuint(surfacePosV.z); //Interlocked functions can only be applied onto ints.
-//	
-//	InterlockedMin(tileMinDepthInt, pixelDepthInt);
-//	InterlockedMax(tileMaxDepthInt, pixelDepthInt);
-//	GroupMemoryBarrierWithGroupSync();
-//	float tileMinDepthF = asfloat(tileMinDepthInt);
-//	float tileMaxDepthF = asfloat(tileMaxDepthInt);
-//	
-//	Frustum frustum = ExtractFrustumPlanes(
-//		screenWidth, 
-//		screenHeight, 
-//		TILE_DIM, 
-//		blockID.xy, 
-//		projection._11,
-//		projection._22,
-//		tileMinDepthF, 
-//		tileMaxDepthF);
-//	
-//	//Cull lights with tile
-//	uint numTileThreads = TILE_DIM * TILE_DIM;
-//	uint numPasses = (numLightsPoint + numTileThreads - 1) / numTileThreads; //Passes required by tile threads to cover all lights.
-//	for(uint i = 0; i < numPasses; ++i)
-//	{
-//		uint lightIndex = i * numTileThreads + threadIDBlockIndex;
-//		
-//		if(lightIndex < numLightsPoint)
-//		{
-//			bool inFrustum = true;
-//			[unroll] for(uint j = 0; j < 6; j++)
-//			{
-//				float d = dot(frustum._[j], mul(float4(lightsPos[lightIndex], 1.0f), view)); //mul(float4(lightsPos[lightIndex], 1.0f)
-//				inFrustum = inFrustum && (d >= -lightsPoint[lightIndex].range);
-//			}
-//			
-//			if(inFrustum && tileLightNum < TILE_MAX_LIGHTS)
-//			{
-//				uint index;
-//				InterlockedAdd(tileLightNum, 1, index);
-//				tileLightIndices[index] = lightIndex;
-//			}
-//		}
-//	}
-//	GroupMemoryBarrierWithGroupSync();
-//	
-//	float3 normal			= UtilDecodeSphereMap(gNormal.xy);
-//	float3 surfaceNormalW	= normalize(normal);
-//	float3 surfaceNormalV	= normalize(mul(float4(normal, 0.0f), view).xyz);
-//	float3 toEyeW			= normalize(eyePosition - surfacePosW);
-//	float3 toEyeV			= normalize(float3(0.0f, 0.0f, 0.0f) - surfacePosV);
-//	
-//	//Specify surface material.
-//	LightSurfaceMaterial surfaceMaterial =
-//	{
-//		/*Ambient*/		gAlbedo,
-//		/*Diffuse*/		gAlbedo,
-//		/*Specular*/	float4(0.3f, 0.3f, 0.3f, 1.0f)
-//	};
-//	
-//	//Initialize our resulting and inout-components.
-//	float4 Ambient	= float4(0.0f, 0.0f, 0.0f, 0.0f);
-//	float4 Diffuse	= float4(0.0f, 0.0f, 0.0f, 0.0f);
-//	float4 Specular	= float4(0.0f, 0.0f, 0.0f, 0.0f);
-//	float4 ambient, diffuse, specular;
-//	
-//	for(i = 0; i < numLightsDir; i++)
-//	{
-//		LightDescDir descDir = lightsDir[i];
-//		LightDir(
-//			toEyeV,
-//			descDir,
-//			surfaceMaterial,
-//			surfaceNormalV,
-//			ambient, diffuse, specular);
-//		Ambient	+= ambient;	
-//		Diffuse	+= diffuse; 
-//		Specular += specular;
-//	}
-//	
-//	for(i = 0; i < numLightsPoint; i++)
-//	{
-//		LightDescPoint descPoint = lightsPoint[i];
-//		LightPoint(
-//			toEyeV,
-//			descPoint,
-//			mul(float4(lightsPos[i], 1.0f), view).xyz, //
-//			surfaceMaterial,
-//			surfaceNormalV,
-//			surfacePosV,
-//			ambient, diffuse, specular);	
-//		Ambient		+= ambient;
-//		Diffuse		+= diffuse;
-//		Specular	+= specular;
-//	}
-//	
-//	//TILING DEMO:
-//	//for(i = 0; i < tileLightNum; i++) //Apply culled point-lights.
-//	//{
-//	//	Diffuse.g += 0.1;
-//	//}
+	uint pixelDepthInt = asuint(surfacePosV.z); //Interlocked functions can only be applied onto ints.
+	
+	InterlockedMin(tileMinDepthInt, pixelDepthInt);
+	InterlockedMax(tileMaxDepthInt, pixelDepthInt);
+	GroupMemoryBarrierWithGroupSync();
+	float tileMinDepthF = asfloat(tileMinDepthInt);
+	float tileMaxDepthF = asfloat(tileMaxDepthInt);
+	
+	Frustum frustum = ExtractFrustumPlanes(
+		screenWidth, 
+		screenHeight, 
+		TILE_DIM, 
+		blockID.xy, 
+		projection._11,
+		projection._22,
+		tileMinDepthF, 
+		tileMaxDepthF);
+	
+	//Cull lights with tile
+	uint numTileThreads = TILE_DIM * TILE_DIM;
+	uint numPasses = (numLightsPoint + numTileThreads - 1) / numTileThreads; //Passes required by tile threads to cover all lights.
+	for(uint i = 0; i < numPasses; ++i)
+	{
+		uint lightIndex = i * numTileThreads + threadIDBlockIndex;
+		
+		if(lightIndex < numLightsPoint)
+		{
+			bool inFrustum = true;
+			[unroll] for(uint j = 0; j < 6; j++)
+			{
+				float d = dot(frustum._[j], mul(float4(lightsPos[lightIndex].pos, 1.0f), view)); //mul(float4(lightsPos[lightIndex], 1.0f)
+				inFrustum = inFrustum && (d >= -lightsPoint[lightIndex].range);
+			}
+			
+			if(inFrustum && tileLightNum < TILE_MAX_LIGHTS)
+			{
+				uint index;
+				InterlockedAdd(tileLightNum, 1, index);
+				tileLightIndices[index] = lightIndex;
+			}
+		}
+	}
+	GroupMemoryBarrierWithGroupSync();
+
+	//Sample depth as quickly as possible to ensure that we do not evualuate irrelevant pixels.
+	if(gDepth == 1.0f)
+		return;
+	
+	float3 normal			= UtilDecodeSphereMap(gNormal.xy);
+	float3 surfaceNormalW	= normalize(normal);
+	float3 surfaceNormalV	= normalize(mul(float4(normal, 0.0f), view).xyz);
+	float3 toEyeW			= normalize(eyePosition - surfacePosW);
+	float3 toEyeV			= normalize(float3(0.0f, 0.0f, 0.0f) - surfacePosV);
+	
+	//Specify surface material.
+	LightSurfaceMaterial surfaceMaterial =
+	{
+		/*Ambient*/		gAlbedo,
+		/*Diffuse*/		gAlbedo,
+		/*Specular*/	float4(0.3f, 0.3f, 0.3f, 1.0f)
+	};
+	
+	//Initialize our resulting and inout-components.
+	float4 Ambient	= float4(0.0f, 0.0f, 0.0f, 0.0f);
+	float4 Diffuse	= float4(0.0f, 0.0f, 0.0f, 0.0f);
+	float4 Specular	= float4(0.0f, 0.0f, 0.0f, 0.0f);
+	float4 ambient, diffuse, specular;
+	
+	for(i = 0; i < numLightsDir; i++)
+	{
+		LightDescDir descDir = lightsDir[i];
+		LightDir(
+			toEyeV,
+			descDir,
+			surfaceMaterial,
+			surfaceNormalV,
+			ambient, diffuse, specular);
+		Ambient	+= ambient;	
+		Diffuse	+= diffuse; 
+		Specular += specular;
+	}
+	
+	//for(i = 0; i < numLightsPoint; i++)
+	//{
+	//	LightDescPoint descPoint = lightsPoint[i];
+	//	LightPoint(
+	//		toEyeV,
+	//		descPoint,
+	//		mul(float4(lightsPos[i].pos, 1.0f), view).xyz, //
+	//		surfaceMaterial,
+	//		surfaceNormalV,
+	//		surfacePosV,
+	//		ambient, diffuse, specular);	
+	//	Ambient		+= ambient;
+	//	Diffuse		+= diffuse;
+	//	Specular	+= specular;
+	//}
+
+	uint tileLightNumLocal = tileLightNum;
+	for(i = 0; i < tileLightNumLocal; i++)
+	{
+		LightDescPoint descPoint = lightsPoint[tileLightIndices[i]];
+		LightPoint(
+			toEyeV,
+			descPoint,
+			mul(float4(lightsPos[tileLightIndices[i]].pos, 1.0f), view).xyz, //
+			surfaceMaterial,
+			surfaceNormalV,
+			surfacePosV,
+			ambient, diffuse, specular);	
+		Ambient		+= ambient;
+		Diffuse		+= diffuse;
+		Specular	+= specular;
+	}
+	
+	//TILING DEMO:
+	//for(i = 0; i < tileLightNum; i++) //Apply culled point-lights.
+	//{
+	//	Diffuse.g += 0.1;
+	//}
+	
+	output[uint2(threadIDDispatch.x + viewportTopX, threadIDDispatch.y + viewportTopY)] = Ambient + Diffuse + Specular;
+}

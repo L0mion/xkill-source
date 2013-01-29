@@ -13,5 +13,14 @@ bool isBetween(float betweener, float min, float max)
 	
 	return false;
 }
+bool is(float iser, float condition)
+{
+	if(iser == condition)
+	{
+		return true;
+	}
+	
+	return false;
+}
 
 #endif //XKILL_RENDERER_XKILLDEBUG_HLSL

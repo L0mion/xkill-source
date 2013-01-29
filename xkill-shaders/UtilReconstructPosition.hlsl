@@ -2,17 +2,17 @@
 #define XKILL_RENDERER_UTILRECONSTRUCTPOSITION_HLSL
 
 //Be weary of me, I don't necessarily work as intended. :S
-//float3 UtilReconstructPositionViewSpace(float2 texCoord, float z, float4x4 projInverse)
-//{
-//	float4 position = float4(
-//		/*x = */	2.0f	* texCoord.x - 1.0f,
-//		/*y = */	-2.0f	* texCoord.y + 1.0f,
-//		/*z = */	-z,
-//					1.0f);
-//	position = mul(position, projInverse);
-//
-//	return position.xyz / position.w;
-//}
+float3 UtilReconstructPositionViewSpace(float2 texCoord, float z, float4x4 projInverse)
+{
+	float4 position = float4(
+		/*x = */	2.0f	* texCoord.x - 1.0f,
+		/*y = */	-2.0f	* texCoord.y + 1.0f,
+		/*z = */	z,
+					1.0f);
+	position = mul(position, projInverse);
+
+	return position.xyz / position.w;
+}
 
 //float3 ComputePositionViewFromZ(float2 positionScreen, float viewSpaceZ, float4x4 proj)
 //{

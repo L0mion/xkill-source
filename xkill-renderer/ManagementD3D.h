@@ -17,6 +17,8 @@ class Winfo;
 
 static const unsigned int GBUFFER_SHADER_REGISTER_DEPTH = 3;
 
+static const FLOAT CLEAR_COLOR_BACKBUFFER[4] = { 0.0f, 0.0f, 0.0f, 1.0f };
+
 //! Class for maintaining DirectX core objects.
 /*!
 \ingroup xkill-renderer
@@ -58,6 +60,9 @@ public:
 	void present();
 	//! Clears the depth buffer in preparation for rendering. 
 	void clearDepthBuffer();
+
+	void clearBackBuffer();
+
 	//! Initializes D3DManagement's members.
 	/*!	\return First encountered error.
 		\sa initDeviceAndSwapChain

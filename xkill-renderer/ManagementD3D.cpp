@@ -281,6 +281,10 @@ void ManagementD3D::clearDepthBuffer()
 {
 	devcon_->ClearDepthStencilView(dsvDepthBuffer_, D3D11_CLEAR_DEPTH, 1.0f, 0);
 }
+void ManagementD3D::clearBackBuffer()
+{
+	devcon_->ClearUnorderedAccessViewFloat(uavBackBuffer_, CLEAR_COLOR_BACKBUFFER);
+}
 
 ID3D11Device*				ManagementD3D::getDevice()			const
 {
