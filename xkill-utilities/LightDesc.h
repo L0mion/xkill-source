@@ -8,14 +8,6 @@ static const unsigned int LIGHT_DIRECTIONAL = 1;
 static const unsigned int LIGHT_POINT		= 2;
 static const unsigned int LIGHT_SPOT		= 3;
 
-enum DLL_U LightDescType
-{ 
-	LIGHTDESCTYPE_DIR	= 0, 
-	LIGHTDESCTYPE_POINT	= 1, 
-	LIGHTDESCTYPE_SPOT	= 2, 
-	LIGHTDESCTYPE_NA	= 3
-};
-
 struct DLL_U LightDescDir
 {
 	LightDescDir();
@@ -28,7 +20,7 @@ struct DLL_U LightDescDir
 	Float3 direction;
 
 	//Padding
-	float pad1;
+	float pad1; //remove me?
 };
 
 struct DLL_U LightDescPoint
@@ -40,12 +32,8 @@ struct DLL_U LightDescPoint
 	Float4 diffuse;
 	Float4 specular;
 
-	Float3	pos;
-	float	range;
 	Float3	attenuation;
-
-	//Padding
-	float pad1;
+	float	range;
 };
 
 struct DLL_U LightDescSpot
@@ -56,15 +44,11 @@ struct DLL_U LightDescSpot
 	Float4 ambient;
 	Float4 diffuse;
 	Float4 specular;
-
-	Float3	pos;
-	float	range;
+	
 	Float3	direction;
-	float	spotPow;
+	float	range;
 	Float3	attenuation;
-
-	//Padding
-	float pad1;
+	float	spotPow;
 };
 
 #endif //XKILL_RENDERER_LIGHTDESC_H

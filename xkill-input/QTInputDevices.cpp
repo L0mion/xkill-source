@@ -61,6 +61,9 @@ void QTInputDevices::setStandardMappings()
 		buttons_[8]->addMapping(InputAction::ACTION_B_FIRE);
 		buttons_[9]->addMapping(InputAction::ACTION_B_SPRINT);
 
+		buttons_[15]->addMapping(InputAction::ACTION_B_TIME_SPEED_UP);
+		buttons_[16]->addMapping(InputAction::ACTION_B_TIME_SPEED_DOWN);
+
 		mouseButtons_[0]->addMapping(InputAction::ACTION_B_FIRE);
 		mouseButtons_[3]->addMapping(InputAction::ACTION_B_CHANGE_FIRINGMODE);
 		mouseButtons_[4]->addMapping(InputAction::ACTION_B_CHANGE_AMMUNITIONTYPE);
@@ -106,7 +109,7 @@ void QTInputDevices::updateState()
 void QTInputDevices::createInputLayout()
 {
 	inputLayout_.nrOfHatSwitches = 0;
-	inputLayout_.nrOfButtons = 10 + 5; // 5 = Mouse buttons
+	inputLayout_.nrOfButtons = 12 + 5; // 5 = Mouse buttons
 	inputLayout_.nrOfTriggers = 0;
 	inputLayout_.nrOfAxes = 2;
 }
@@ -146,6 +149,8 @@ void QTInputDevices::createInputObjectsFromLayout()
 		buttons_[7]->setKey('K');
 		buttons_[8]->setKey('F');
 		buttons_[9]->setKey('R');
+		buttons_[15]->setKey(43);
+		buttons_[16]->setKey(45);
 
 		buttons_[10]->setKey('Ü');	//Fix
 		buttons_[10]->setName("Left mouse button");

@@ -29,4 +29,5 @@ public slots:
 	void slot_changed_simulationSpeed(int speed);
 	void slot_attributeInspector_refresh();
 	void slot_attributeInspector_itemChanged();
+	void slot_showDebugPhysics();
 };
