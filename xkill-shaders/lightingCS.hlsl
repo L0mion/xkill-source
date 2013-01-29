@@ -18,14 +18,14 @@
 //Global memory
 RWTexture2D<float4> output : register( u0 );
 
-Texture2D gBufferNormal						: register( t0 );
-Texture2D gBufferAlbedo						: register( t1 );
-Texture2D gBufferMaterial					: register( t2 );
-Texture2D gBufferDepth						: register( t3 );
+Texture2D gBufferNormal		: register( t0 );
+Texture2D gBufferAlbedo		: register( t1 );
+Texture2D gBufferMaterial	: register( t2 );
+Texture2D gBufferDepth		: register( t3 );
 StructuredBuffer<LightDescDir>		lightsDir	: register( t4 );
 StructuredBuffer<LightDescPoint>	lightsPoint	: register( t5 );
 StructuredBuffer<LightDescSpot>		lightsSpot	: register( t6 );
-StructuredBuffer<float3>			lightsPos	: register( t7 );
+StructuredBuffer<LightPos>			lightsPos	: register( t7 );
 
 SamplerState ss : register(s0);
 
@@ -66,7 +66,7 @@ void lightingCS(
 	//Get surface position.
 	/*At the moment, world space position is stored in Material-buffer.*/
 	float3 surfacePosW = gMaterial.xyz;
-	float3 surfacePosV = mul(float4(surfacePosW, 1.0f), view).xyz; //AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+	float3 surfacePosV = surfacePosW;//mul(float4(surfacePosW, 1.0f), view).xyz; //AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
 	
 	//output[uint2(threadIDDispatch.x + viewportTopX, threadIDDispatch.y + viewportTopY)] = Ambient + Diffuse + Specular; //float4(tileMinDepthF / zFar, tileMinDepthF / zFar, tileMinDepthF / zFar, 1.0f); //
 	
