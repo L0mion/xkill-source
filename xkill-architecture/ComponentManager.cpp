@@ -156,7 +156,7 @@ void ComponentManager::update(float delta)
 	if(GET_STATE() == STATE_DEATHMATCH)
 	{
 		input_->onUpdate(delta);
-		if(initialSpawnDelay > 0)
+		if(initialSpawnDelay > 0.0f)
 		{
 			initialSpawnDelay -= delta;
 		}

@@ -13,7 +13,7 @@ ATTRIBUTES_DECLARE_ALL;
 GameComponent::GameComponent(void)
 {
 	SUBSCRIBE_TO_EVENT(this, EVENT_PHYSICS_ATTRIBUTES_COLLIDING);
-	SUBSCRIBE_TO_EVENT(this, EVENT_START_DEATHMATCH);	
+	SUBSCRIBE_TO_EVENT(this, EVENT_START_DEATHMATCH);
 	SUBSCRIBE_TO_EVENT(this, EVENT_END_DEATHMATCH);
 	SUBSCRIBE_TO_EVENT(this, EVENT_TRANSFEREVENTSTOGAME);
 	SUBSCRIBE_TO_EVENT(this, EVENT_PLAYERDEATH);
@@ -130,44 +130,49 @@ void GameComponent::onUpdate(float delta)
 		//
 		// Firing logic
 		//
-		if((input->fire && firingMode->type == FiringMode::AUTO) || 
-			input->firePressed && (firingMode->type == FiringMode::SINGLE || firingMode->type == FiringMode::SEMI))
+		if(health->health > 0.0f)
 		{
-			input->fire = false;
-			input->firePressed = false;
+			if((input->fire && firingMode->type == FiringMode::AUTO) || 
+				input->firePressed && (firingMode->type == FiringMode::SINGLE || firingMode->type == FiringMode::SEMI))
+			{
+				input->fire = false;
+				input->firePressed = false;
 
-			if(firingMode->cooldownBetweenShots >= 0 && firingMode->cooldownLeft <= 0.0f
-				&& firingMode->nrOfShotsLeftInClip > 0)
-			{
-				if(ammo->totalNrOfShots != -1) // special case: debug machine gun. Unlimited number of shots.
+				if(firingMode->cooldownBetweenShots >= 0 && firingMode->cooldownLeft <= 0.0f
+					&& firingMode->nrOfShotsLeftInClip > 0)
 				{
-					firingMode->cooldownLeft = firingMode->cooldownBetweenShots;
-					ammo->totalNrOfShots--;
-					firingMode->nrOfShotsLeftInClip--;
-				}
+					if(ammo->totalNrOfShots != -1) // special case: debug machine gun. Unlimited number of shots.
+					{
+						firingMode->cooldownLeft = firingMode->cooldownBetweenShots;
+						ammo->totalNrOfShots--;
+						firingMode->nrOfShotsLeftInClip--;
+					}
 
-				shootProjectile(position, camera, weaponStats);
-			}
-			else if(firingMode->nrOfShotsLeftInClip <= 0)
-			{
-				if(ammo->totalNrOfShots <= 0)
-				{
-					DEBUGPRINT("Cannot shoot: Out of ammo.");
+					shootProjectile(position, camera, weaponStats);
 				}
-				else
+				else if(firingMode->nrOfShotsLeftInClip <= 0)
 				{
-					DEBUGPRINT("Cannot shoot: Out of ammo in current clip.");
+					if(ammo->totalNrOfShots <= 0)
+					{
+						DEBUGPRINT("Cannot shoot: Out of ammo.");
+					}
+					else
+					{
+						DEBUGPRINT("Cannot shoot: Out of ammo in current clip.");
+					}
 				}
-			}
-			else if(firingMode->cooldownLeft > 0)
-			{
-				DEBUGPRINT("Cannot shoot: weapon cooldown. Be patient.");
+				else if(firingMode->cooldownLeft > 0)
+				{
+					DEBUGPRINT("Cannot shoot: weapon cooldown. Be patient.");
+				}
 			}
 		}
 		if(input->killPlayer)
 		{
 			health->health = 0.0f;
 			input->killPlayer = false;
+			
+			SEND_EVENT(&Event_PlayerDeath(itrPlayer.storageIndex()));
 		}
 
 		if(input->sprint)
@@ -210,6 +215,7 @@ void GameComponent::onUpdate(float delta)
 				physics->gravity = Float3(0.0f, -10.0f, 0.0f);
 				physics->collisionFilterMask = physics->EVERYTHING;
 				physics->collisionResponse = true;
+				physics->meshID = 0;
 
 				spatial->rotation = Float4(0.0f, 0.0f, 0.0f, 1.0f);
 				camera->up = Float3(0.0f, 1.0f, 0.0f);
@@ -792,9 +798,10 @@ void GameComponent::event_PlayerDeath(Event_PlayerDeath* e)
 
 	physics->angularVelocity = Float3(0.0f, 0.0f, 0.0f);
 	physics->linearVelocity = Float3(0.0f, 0.0f, 0.0f);
-	physics->gravity = Float3(0.0f, 0.0f, 0.0f);
-	physics->collisionFilterMask = physics->NOTHING;
-	physics->collisionResponse = false;
+	physics->gravity = Float3(0.0f, -1.0f, 0.0f);
+	physics->collisionFilterMask = physics->WORLD;
+	physics->collisionResponse = true;
+	physics->meshID = 1;
 	physics->reloadDataIntoBulletPhysics = true;
 
 	player->currentRespawnDelay = player->respawnDelay;

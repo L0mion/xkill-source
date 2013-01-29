@@ -79,3 +79,8 @@ void FMODEventSystem::SetMuteSounds(bool mute)
 		}
 	}
 }
+
+std::vector<std::string> FMODEventSystem::GetFMODEventNames()
+{
+	FMOD::Event e;
+}
