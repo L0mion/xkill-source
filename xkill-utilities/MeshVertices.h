@@ -5,6 +5,15 @@
 
 #include "dllUtilities.h"
 
+enum VertexType
+{
+	VERTEX_TYPE_POS_COLOR,
+	VERTEX_TYPE_POS_NORM_TEX,
+	VERTEX_TYPE_POS_NORM_SKINNED,
+	VERTEX_TYPE_POS_NORM_TEX_SKINNED,
+	VERTEX_TYPE_POS_NORM_TEX_TAN_SKINNED
+};
+
 struct DLL_U VertexPosColor
 {
 	Float3 position_;
