@@ -61,7 +61,7 @@ HRESULT InstancedData::initBuffer(ID3D11Device* device)
 
 		hr = device->CreateBuffer(&bufferDesc, &initialData, &instanceBuffer_);
 		if(FAILED(hr))
-			ERROR_MSG(L"InstancedData::init device->CreateBuffer failed!");
+			SHOW_MESSAGEBOX("InstancedData::init device->CreateBuffer failed!");
 	}
 
 	return hr;
@@ -114,7 +114,7 @@ HRESULT InstancedData::updateBuffer(ID3D11DeviceContext* devcon)
 	}
 	else
 	{
-		ERROR_MSG(L"InstancedData::updateBuffer devcon->Map failed!");
+		SHOW_MESSAGEBOX("InstancedData::updateBuffer devcon->Map failed!");
 	}
 
 	return hr;
