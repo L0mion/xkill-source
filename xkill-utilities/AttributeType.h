@@ -244,7 +244,7 @@ struct DLL_U Attribute_Physics : public IAttribute
 {
 	enum PhysicsAttributeType
 	{
-		DEFAULT_ERROR = 0,
+		NOTHING = 0,
 		WORLD = 1,
 		PLAYER = 2,
 		PROJECTILE = 4,
@@ -861,7 +861,8 @@ struct DLL_U Attribute_PickupablesSpawnPoint : public IAttribute
 
 	PickupableType spawnPickupableType;			//!< Type of pickupable spawned by this pickupables spawn point
 	float spawnDelayInSeconds;					//!< Delay until a pickupable may spawn
-	float secondsSinceLastSpawn;				//!< Incrementing timer
+	float secondsSinceLastSpawn;				//!< Incrementing timer, reset when spawned.
+	float secondsSinceLastPickup;				//!< Incrementing timer, reset when picked up.
 	int maxNrOfExistingSpawnedPickupables;		//!< Is checked against "currentNrOfExistingSpawnedPickupables"
 	int currentNrOfExistingSpawnedPickupables;	//!< Incremented when a pickubalbe is spawned from this pickupables spawn point. Decremented when a pickupable is picked up
 
@@ -873,6 +874,7 @@ struct DLL_U Attribute_PickupablesSpawnPoint : public IAttribute
 		//list->add(spawnPickupableType, "spawnPickupableType");
 		list->add(spawnDelayInSeconds, "spawnDelayInSeconds");
 		list->add(secondsSinceLastSpawn, "secondsSinceLastSpawn");
+		list->add(secondsSinceLastPickup, "secondsSinceLastPickup");
 		list->add(maxNrOfExistingSpawnedPickupables, "maxNrOfExistingSpawnedPickupables");
 		list->add(currentNrOfExistingSpawnedPickupables, "currentNrOfExistingSpawnedPickupables");
 
@@ -884,6 +886,7 @@ struct DLL_U Attribute_PickupablesSpawnPoint : public IAttribute
 		//list->get(&spawnPickupableType);
 		list->get(&spawnDelayInSeconds);
 		list->get(&secondsSinceLastSpawn);
+		list->get(&secondsSinceLastPickup);
 		list->get(&maxNrOfExistingSpawnedPickupables);
 		list->get(&currentNrOfExistingSpawnedPickupables);
 	};

@@ -117,7 +117,7 @@ void MutatorSettings::initStandardFiringModes()
 	firingMode->clipSize				= 10;
 	firingMode->damageModifier			= 1.0f;
 	firingMode->explosionSphereModifier	= 0.5f;
-	firingMode->cooldownBetweenShots	= 0.5f;
+	firingMode->cooldownBetweenShots	= 0.0f;
 	firingMode->reloadTime				= 2.0f;
 	firingMode->nrOfShotsLeftInClip		= firingMode->clipSize;
 	firingMode->cooldownLeft			= firingMode->cooldownBetweenShots;

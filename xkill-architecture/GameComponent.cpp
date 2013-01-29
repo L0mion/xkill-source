@@ -169,11 +169,6 @@ void GameComponent::onUpdate(float delta)
 			health->health = 0.0f;
 			input->killPlayer = false;
 		}
-		//if(input->jump)
-		//{
-		//	//To be implemented... (2013-01-17 16.17)
-		//	input->jump = false;
-		//}
 
 		if(input->sprint)
 		{
@@ -271,8 +266,13 @@ void GameComponent::onUpdate(float delta)
 	while(itrPickupablesSpawnPoint.hasNext())
 	{
 		Attribute_PickupablesSpawnPoint* pickupablesSpawnPoint = itrPickupablesSpawnPoint.getNext();
+		
+		//Timer incrementation
+		pickupablesSpawnPoint->secondsSinceLastPickup += delta;
 		pickupablesSpawnPoint->secondsSinceLastSpawn += delta;
-		if(pickupablesSpawnPoint->secondsSinceLastSpawn > pickupablesSpawnPoint->spawnDelayInSeconds)
+
+		//Spawn new pickupable, if secondsSinceLastSpawn and secondsSinceLastPickup are enough incremented
+		if(pickupablesSpawnPoint->secondsSinceLastSpawn > pickupablesSpawnPoint->spawnDelayInSeconds && pickupablesSpawnPoint->secondsSinceLastPickup > pickupablesSpawnPoint->spawnDelayInSeconds)
 		{
 			if(pickupablesSpawnPoint->currentNrOfExistingSpawnedPickupables < pickupablesSpawnPoint->maxNrOfExistingSpawnedPickupables)
 			{
@@ -282,7 +282,7 @@ void GameComponent::onUpdate(float delta)
 				switch(pickupablesSpawnPoint->spawnPickupableType)
 				{
 				case PickupableType::MEDKIT:
-					amount = 20;
+					amount = 1;
 						break;
 				case PickupableType::AMMUNITION_BULLET:
 					amount = 100;
@@ -295,8 +295,8 @@ void GameComponent::onUpdate(float delta)
 					break;
 				}
 
+				//Each pickupable knows it pickupablesSpawnPoint creator
 				AttributePointer creatorPickupablesSpawnPoint = itrPickupablesSpawnPoint.attributePointer(pickupablesSpawnPoint);
-
 				SEND_EVENT(&Event_CreatePickupable(pickupablesSpawnPointPosition->position, pickupablesSpawnPoint->spawnPickupableType, creatorPickupablesSpawnPoint, amount));
 				pickupablesSpawnPoint->secondsSinceLastSpawn = 0.0f;
 			}
@@ -483,6 +483,7 @@ void GameComponent::event_PhysicsAttributesColliding(Event_PhysicsAttributesColl
 			for(unsigned i=0;i<physicsId.size();i++)
 			{
 				Attribute_Physics* physicsAttribute = itrPhysics.at(physicsId.at(i));
+				SEND_EVENT(&Event_ModifyPhysicsObject(ModifyPhysicsObjectData::GRAVITY, static_cast<void*>(&Float3(0.0f, -10.0f, 0.0f)), physicsId.at(i)));
 				//physicsAttribute->gravity = Float3(0.0f, -10.0f, 0.0f);
 				//physicsAttribute->linearVelocity = Float3(0.0f, 0.0f, 0.0f);
 				//physicsAttribute->reloadDataIntoBulletPhysics = true;
@@ -495,9 +496,9 @@ void GameComponent::event_PhysicsAttributesColliding(Event_PhysicsAttributesColl
 				Attribute_Projectile* projectileAttribute = itrProjectile.at(projectileId.at(i));
 
 				//Shorten lifetime of projectile colliding with physics objects
-				if(projectileAttribute->currentLifeTimeLeft > 0.15f)
+				if(projectileAttribute->currentLifeTimeLeft > 1.00f)
 				{
-					projectileAttribute->currentLifeTimeLeft = 0.15f;
+					projectileAttribute->currentLifeTimeLeft = 1.00f;
 				}
 
 				//Explosion handling.
@@ -578,6 +579,8 @@ void GameComponent::event_PhysicsAttributesColliding(Event_PhysicsAttributesColl
 			//Decrement number of spawned pickupables for the spawnpoint that spanwed the pickupable that the player picked up. Also remove it.
 			Attribute_PickupablesSpawnPoint* pickupablesSpawnPointAttribute = itrPickupablesSpawnPoint.at(pickupableAttribute->ptr_creatorPickupablesSpawnPoint);
 			pickupablesSpawnPointAttribute->currentNrOfExistingSpawnedPickupables--;
+			pickupablesSpawnPointAttribute->secondsSinceLastPickup = 0;
+			
 			SEND_EVENT(&Event_RemoveEntity(entity1->getID()));
 		}
 	}
@@ -766,7 +769,7 @@ void GameComponent::event_StartDeathmatch( Event_StartDeathmatch* e )
 	//Continue
 	for(int i=0;i<10;i++)
 	{
-		SEND_EVENT(&Event_CreatePickupablesSpawnPoint(Float3(2, 40, i-6), PickupableType::MEDKIT));
+		SEND_EVENT(&Event_CreatePickupablesSpawnPoint(Float3(2.0f, 5.0f, i-6.0f), PickupableType::MEDKIT));
 	}
 
 	//SEND_EVENT(&Event_CreatePickupable(Float3(2.0f, 2.0f, 0.0f), Attribute_Pickupable::MEDKIT, 5));
@@ -784,11 +787,13 @@ void GameComponent::event_PlayerDeath(Event_PlayerDeath* e)
 {
 	Attribute_Player* player = itrPlayer.at(e->playerIndex);
 	Attribute_Physics* physics = itrPhysics.at(itrInput.at(player->ptr_input)->ptr_physics);
+	Attribute_Health* health = itrHealth.at(player->ptr_health);
+	health->health = 0;
 
 	physics->angularVelocity = Float3(0.0f, 0.0f, 0.0f);
 	physics->linearVelocity = Float3(0.0f, 0.0f, 0.0f);
 	physics->gravity = Float3(0.0f, 0.0f, 0.0f);
-	physics->collisionFilterMask = physics->DEFAULT_ERROR;
+	physics->collisionFilterMask = physics->NOTHING;
 	physics->collisionResponse = false;
 	physics->reloadDataIntoBulletPhysics = true;
 
