@@ -1,6 +1,10 @@
 #ifndef XKILL_RENDERER_D3DMANAGEMENT_H
 #define XKILL_RENDERER_D3DMANAGEMENT_H
 
+#include <d3d11.h>
+
+#include "d3dInterface.h"
+
 namespace DirectX
 {
 	struct XMFLOAT3;
@@ -11,9 +15,9 @@ struct VertexPosNormTex;
 
 class Winfo;
 
-#include <d3d11.h>
+static const unsigned int GBUFFER_SHADER_REGISTER_DEPTH = 3;
 
-#include "d3dInterface.h"
+static const FLOAT CLEAR_COLOR_BACKBUFFER[4] = { 0.0f, 0.0f, 0.0f, 1.0f };
 
 //! Class for maintaining DirectX core objects.
 /*!
@@ -41,14 +45,24 @@ public:
 
 	//! Set the variable uavBackBuffer to the compute shader stage.
 	void setUAVBackBufferCS();
+	
+	void unsetUAVBackBufferCS();
+
+	void setDepthBufferSRV(unsigned int shaderRegister);
+	void unsetDepthBufferSRV(unsigned int shaderRegister);
+
 	//! Sets the variable rtvBackBuffer as a render target.
 	void setRenderTargetViewBackBuffer();
 	//! Removes rtvBackBuffer as render target.
 	void unsetRenderTargetViewBackBufer();
+
 	//! Presents the back buffer.
 	void present();
 	//! Clears the depth buffer in preparation for rendering. 
 	void clearDepthBuffer();
+
+	void clearBackBuffer();
+
 	//! Initializes D3DManagement's members.
 	/*!	\return First encountered error.
 		\sa initDeviceAndSwapChain
@@ -65,9 +79,11 @@ public:
 	*/
 	HRESULT init();
 
-	ID3D11Device*			getDevice()			const;
-	ID3D11DeviceContext*	getDeviceContext()	const;
-	ID3D11DepthStencilView* getDepthBuffer()	const;
+	ID3D11Device*				getDevice()				const;
+	ID3D11DeviceContext*		getDeviceContext()		const;
+	ID3D11DepthStencilView*		getDepthBuffer()		const;
+	ID3D11Texture2D*			getDepthBufferTexture() const;
+	ID3D11ShaderResourceView*	getDepthBufferSRV()		const;
 private:
 	//! Initializes struct describing swapchain using values passed in constructor.
 	/*!
@@ -107,7 +123,8 @@ private:
 	ID3D11RenderTargetView*		rtvBackBuffer_;						//!< Used to render to texBackBuffer.
 	ID3D11UnorderedAccessView*	uavBackBuffer_;						//!< Used to render to texBackBuffer using DirectCompute.
 	ID3D11DepthStencilView*		dsvDepthBuffer_;					//!< Used to render to texDepthBuffer.
-	
+	ID3D11ShaderResourceView*	srvDepthBuffer_;
+
 	ID3D11Texture2D*			texBackBuffer_;						//!< Contains the final image.
 	ID3D11Texture2D*			texDepthBuffer_;					//!< Saves the depth of each rendered pixel.
 };

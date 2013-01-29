@@ -57,7 +57,9 @@ public:
 		DirectX::XMFLOAT4X4	 projectionMatrixInverse,
 		DirectX::XMFLOAT3	 eyePosition,
 		unsigned int		 viewportTopX,
-		unsigned int		 viewportTopY);	 //!< Updates the constant buffer cbCamera.
+		unsigned int		 viewportTopY,
+		unsigned int		zNear,
+		unsigned int		zFar);	 //!< Updates the constant buffer cbCamera.
 	void updateCBObject(
 		ID3D11DeviceContext* devcon,
 		DirectX::XMFLOAT4X4 finalMatrix,

@@ -367,6 +367,7 @@ void Renderer::render()
 	//Clear g-buffers and depth buffer.
 	managementGBuffer_->clearGBuffers(devcon);
 	managementD3D_->clearDepthBuffer();
+	managementD3D_->clearBackBuffer();
 
 	//Update per-frame constant buffer.
 	managementCB_->setCB(
@@ -386,10 +387,10 @@ void Renderer::render()
 	Attribute_SplitScreen*	ssAt;
 
 	ViewportData vpData;
-	std::vector<ViewportData> vpDatas;
 
 	//Render each split-screen seperately
 	std::vector<SplitScreenViewport>* ssViewports = managementViewport_->getSplitScreenViewports();
+	std::vector<ViewportData> vpDatas(ssViewports->size());
 	for(unsigned int i = 0; i < ssViewports->size(); i++)
 	{
 		ssAt		= ssViewports->at(i).ssAt;
@@ -409,7 +410,9 @@ void Renderer::render()
 		vpData.eyePos		= *(DirectX::XMFLOAT3*)&posAt->position;
 		vpData.viewportTopX = static_cast<unsigned int>(ssAt->ssTopLeftX);
 		vpData.viewportTopY = static_cast<unsigned int>(ssAt->ssTopLeftY);
-		vpDatas.push_back(vpData);
+		vpData.zNear		= camAt->zNear;
+		vpData.zFar			= camAt->zFar;
+		vpDatas[i]			= vpData;
 
 		renderViewportToGBuffer(vpData);
 	}
@@ -437,7 +440,7 @@ void Renderer::renderViewportToGBuffer(ViewportData& vpData)
 	managementSS_->setSS(devcon, TypeFX_PS, 0, SS_ID_DEFAULT);
 	managementRS_->setRS(devcon, RS_ID_DEFAULT);
 
-	managementGBuffer_->setGBuffersAndDepthBufferAsRenderTargets(devcon, managementD3D_->getDepthBuffer());
+	managementGBuffer_->setGBuffersAndDepthBuffer(devcon, managementD3D_->getDepthBuffer());
 
 	//Update per-viewport constant buffer.
 	managementCB_->setCB(CB_TYPE_CAMERA, TypeFX_VS, CB_REGISTER_CAMERA, managementD3D_->getDeviceContext());
@@ -448,7 +451,9 @@ void Renderer::renderViewportToGBuffer(ViewportData& vpData)
 		vpData.projInv,
 		vpData.eyePos,
 		vpData.viewportTopX,
-		vpData.viewportTopY);
+		vpData.viewportTopY,
+		vpData.zNear,
+		vpData.zFar);
 
 	std::map<unsigned int, InstancedData*> instancesMap = managementInstance_->getInstancesMap();
 	for(std::map<unsigned int, InstancedData*>::iterator i = instancesMap.begin(); i != instancesMap.end(); i++)
@@ -486,7 +491,6 @@ void Renderer::renderViewportToGBuffer(ViewportData& vpData)
 	{
 		drawBulletPhysicsDebugLines(vpData.view, vpData.proj);
 	}
-
 	
 	managementGBuffer_->unsetGBuffersAndDepthBufferAsRenderTargets(devcon);
 
@@ -502,6 +506,7 @@ void Renderer::renderViewportToBackBuffer(ViewportData& vpData)
 	ID3D11DeviceContext* devcon = managementD3D_->getDeviceContext();
 
 	//Set backbuffer.
+	managementD3D_->setDepthBufferSRV(GBUFFER_SHADER_REGISTER_DEPTH);
 	managementD3D_->setUAVBackBufferCS();
 
 	//Set shader.
@@ -510,7 +515,6 @@ void Renderer::renderViewportToBackBuffer(ViewportData& vpData)
 	//Set constant buffers.
 	managementCB_->setCB(CB_TYPE_FRAME,		TypeFX_CS, CB_REGISTER_FRAME,	devcon);
 	managementCB_->setCB(CB_TYPE_CAMERA,	TypeFX_CS, CB_REGISTER_CAMERA,	devcon);
-	managementCB_->setCB(CB_TYPE_CAMERA,	TypeFX_VS, CB_REGISTER_CAMERA,	devcon);
 	managementCB_->updateCBCamera(managementD3D_->getDeviceContext(),
 		vpData.view,
 		vpData.viewInv,
@@ -518,15 +522,19 @@ void Renderer::renderViewportToBackBuffer(ViewportData& vpData)
 		vpData.projInv,
 		vpData.eyePos,
 		vpData.viewportTopX,
-		vpData.viewportTopY);
+		vpData.viewportTopY,
+		vpData.zNear,
+		vpData.zFar);
 
 	//Connect g-buffers to shader.
 	managementGBuffer_->setGBuffersAsCSShaderResources(devcon);
 
 	//Set lights.
-	managementLight_->setLightSRVCS(devcon, LIGHTDESCTYPE_DIR,		3);
-	managementLight_->setLightSRVCS(devcon, LIGHTDESCTYPE_POINT,	4);
-	managementLight_->setLightSRVCS(devcon, LIGHTDESCTYPE_SPOT,		5);
+	managementLight_->transformLightViewSpacePoss(devcon, vpData.view);
+	managementLight_->setLightSRVCS(devcon, LIGHTBUFFERTYPE_DIR,		LIGHT_SRV_REGISTER_DIR);
+	managementLight_->setLightSRVCS(devcon, LIGHTBUFFERTYPE_POINT,		LIGHT_SRV_REGISTER_POINT);
+	managementLight_->setLightSRVCS(devcon, LIGHTBUFFERTYPE_SPOT,		LIGHT_SRV_REGISTER_SPOT);
+	managementLight_->setLightSRVCS(devcon, LIGHTBUFFERTYPE_POS_VIEW,	LIGHT_SRV_REGISTER_POS);
 	
 	//Set default samplerstate.
 	managementSS_->setSS(devcon, TypeFX_CS, 0, SS_ID_DEFAULT);
@@ -538,7 +546,12 @@ void Renderer::renderViewportToBackBuffer(ViewportData& vpData)
 
 	//Unset and clean.
 	managementFX_->unsetShader(devcon, SHADERID_CS_DEFAULT);
-	renderBackBufferClean();
+
+	managementD3D_->unsetUAVBackBufferCS();
+	managementD3D_->unsetDepthBufferSRV(GBUFFER_SHADER_REGISTER_DEPTH);
+	managementGBuffer_->unsetGBuffersAsCSShaderResources(devcon);
+
+	devcon->CSSetSamplers(0, 0, nullptr); //move me into managementSS
 }
 
 void Renderer::renderInstance(unsigned int meshID, InstancedData* instance)
@@ -797,6 +810,7 @@ void Renderer::drawHudElement(int viewportIndex, unsigned int textureId, DirectX
 	devcon->PSSetShaderResources(0, 1, &tex);
 
 	managementD3D_->setRenderTargetViewBackBuffer();
+	//6managementD3D_->setUAVBackBufferCS();
 
 	managementFX_->setLayout(devcon, LAYOUTID_POS_NORM_TEX);
 	
@@ -815,6 +829,8 @@ void Renderer::drawHudElement(int viewportIndex, unsigned int textureId, DirectX
 	devcon->DrawIndexed(NUM_SPRITE_INDICES, 0, 0);
 
 	managementD3D_->unsetRenderTargetViewBackBufer();
+	//managementD3D_->unsetUAVBackBufferCS();
+
 	managementFX_->unsetAll(devcon);
 	devcon->PSSetSamplers(0, 0, nullptr);
 	devcon->IASetInputLayout(nullptr);
@@ -849,7 +865,7 @@ void Renderer::renderAnimatedMesh(DirectX::XMFLOAT4X4 viewMatrix, DirectX::XMFLO
 	managementSS_->setSS(devcon, TypeFX_PS, 0, SS_ID_DEFAULT);
 	managementRS_->setRS(devcon, RS_ID_DEFAULT);
 
-	managementGBuffer_->setGBuffersAndDepthBufferAsRenderTargets(devcon, managementD3D_->getDepthBuffer());
+	managementGBuffer_->setGBuffersAndDepthBuffer(devcon, managementD3D_->getDepthBuffer());
 
 	managementD3D_->clearDepthBuffer();
 
@@ -876,19 +892,6 @@ void Renderer::renderAnimatedMesh(DirectX::XMFLOAT4X4 viewMatrix, DirectX::XMFLO
 	devcon->PSSetSamplers(0, 0, nullptr);
 	devcon->IASetInputLayout(nullptr);
 	devcon->RSSetState(nullptr);
-}
-void Renderer::renderBackBufferClean()
-{
-	ID3D11DeviceContext* devcon = managementD3D_->getDeviceContext();
-
-	ID3D11UnorderedAccessView* uav2[] = { nullptr };
-	devcon->CSSetUnorderedAccessViews(0, 1, uav2, NULL);
-
-	ID3D11ShaderResourceView* resourceViews[GBUFFERID_NUM_BUFFERS];
-	for(int i=0; i<GBUFFERID_NUM_BUFFERS; i++)
-		resourceViews[i] = nullptr;
-	devcon->CSSetShaderResources(0, GBUFFERID_NUM_BUFFERS, resourceViews);
-	devcon->CSSetSamplers(0, 0, nullptr);
 }
 
 void Renderer::loadTextures(TexDesc* texdesc)
