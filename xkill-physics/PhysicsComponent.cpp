@@ -142,6 +142,9 @@ void PhysicsComponent::onUpdate(float delta)
 			//Player out of bounds
 			if(physicsAttribute->collisionFilterGroup == Attribute_Physics::PLAYER)
 			{
+				physicsObjects_->at(index)->setGravity(btVector3(0.0f, 0.0f, 0.0f));
+				physicsObjects_->at(index)->setLinearVelocity(btVector3(0.0f, 0.0f, 0.0f));
+
 				int playerEntityIndex = itrPhysics.ownerIdAt(index);
 				Entity* playerEntity = itrPhysics.ownerAt(index);
 				
@@ -175,7 +178,8 @@ void PhysicsComponent::onUpdate(float delta)
 
 	dynamicsWorld_->stepSimulation(delta,0); //Bullet Physics physics simulation
 
-	if(BULLETPHYSICSDEBUGDRAW)
+	bool showDebug =  ATTRIBUTE_MANAGER->settings->showDebugPhysics;
+	if(showDebug)
 	{
 		//static float timer = 0.0f;
 		//if(timer > 0.1f)
