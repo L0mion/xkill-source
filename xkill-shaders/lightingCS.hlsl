@@ -62,16 +62,16 @@ void lightingCS(
 	float4	gNormal		= gBufferNormal		.SampleLevel(ss, texCoord, 0);
 	float4	gMaterial	= gBufferMaterial	.SampleLevel(ss, texCoord, 0); //At the moment, world space position is stored in Material-buffer.
 	float	gDepth		= gBufferDepth.SampleLevel(ss, texCoord, 0).x; 
+	
 	//Get surface position.
-	/*At the moment, world space position is stored in Material-buffer.*/
+	float3 surfacePosV = UtilReconstructPositionViewSpace(texCoord, gDepth, projectionInverse);
 	
-	float3 surfacePosV = UtilReconstructPositionViewSpace(texCoord, gDepth, projectionInverse); //mul(float4(surfacePosW, 1.0f), view).xyz;
-	float3 surfacePosW = mul(float4(surfacePosV, 1.0f), viewInverse);//gMaterial.xyz;
-
 	uint pixelDepthInt = asuint(surfacePosV.z); //Interlocked functions can only be applied onto ints.
-	
-	InterlockedMin(tileMinDepthInt, pixelDepthInt);
-	InterlockedMax(tileMaxDepthInt, pixelDepthInt);
+	if(gDepth != 1.0f)
+	{
+		InterlockedMin(tileMinDepthInt, pixelDepthInt);
+		InterlockedMax(tileMaxDepthInt, pixelDepthInt);
+	}
 	GroupMemoryBarrierWithGroupSync();
 	float tileMinDepthF = asfloat(tileMinDepthInt);
 	float tileMaxDepthF = asfloat(tileMaxDepthInt);
@@ -98,7 +98,7 @@ void lightingCS(
 			bool inFrustum = true;
 			[unroll] for(uint j = 0; j < 6; j++)
 			{
-				float d = dot(frustum._[j], mul(float4(lightsPos[lightIndex].pos, 1.0f), view)); //mul(float4(lightsPos[lightIndex], 1.0f)
+				float d = dot(frustum._[j], mul(float4(lightsPos[lightIndex].pos, 1.0f), view)); //lightsPos[lightIndex].pos
 				inFrustum = inFrustum && (d >= -lightsPoint[lightIndex].range);
 			}
 			
@@ -117,9 +117,7 @@ void lightingCS(
 		return;
 	
 	float3 normal			= UtilDecodeSphereMap(gNormal.xy);
-	float3 surfaceNormalW	= normalize(normal);
 	float3 surfaceNormalV	= normalize(mul(float4(normal, 0.0f), view).xyz);
-	float3 toEyeW			= normalize(eyePosition - surfacePosW);
 	float3 toEyeV			= normalize(float3(0.0f, 0.0f, 0.0f) - surfacePosV);
 	
 	//Specify surface material.
@@ -130,12 +128,11 @@ void lightingCS(
 		/*Specular*/	float4(0.3f, 0.3f, 0.3f, 1.0f)
 	};
 	
-	//Initialize our resulting and inout-components.
+	//Do lighting
 	float4 Ambient	= float4(0.0f, 0.0f, 0.0f, 0.0f);
 	float4 Diffuse	= float4(0.0f, 0.0f, 0.0f, 0.0f);
 	float4 Specular	= float4(0.0f, 0.0f, 0.0f, 0.0f);
 	float4 ambient, diffuse, specular;
-	
 	for(i = 0; i < numLightsDir; i++)
 	{
 		LightDescDir descDir = lightsDir[i];
@@ -149,23 +146,6 @@ void lightingCS(
 		Diffuse	+= diffuse; 
 		Specular += specular;
 	}
-	
-	//for(i = 0; i < numLightsPoint; i++)
-	//{
-	//	LightDescPoint descPoint = lightsPoint[i];
-	//	LightPoint(
-	//		toEyeV,
-	//		descPoint,
-	//		mul(float4(lightsPos[i].pos, 1.0f), view).xyz, //
-	//		surfaceMaterial,
-	//		surfaceNormalV,
-	//		surfacePosV,
-	//		ambient, diffuse, specular);	
-	//	Ambient		+= ambient;
-	//	Diffuse		+= diffuse;
-	//	Specular	+= specular;
-	//}
-
 	uint tileLightNumLocal = tileLightNum;
 	for(i = 0; i < tileLightNumLocal; i++)
 	{
@@ -173,7 +153,7 @@ void lightingCS(
 		LightPoint(
 			toEyeV,
 			descPoint,
-			mul(float4(lightsPos[tileLightIndices[i]].pos, 1.0f), view).xyz, //
+			mul(float4(lightsPos[tileLightIndices[i]].pos, 1.0f), view), //lightsPos[tileLightIndices[i]].pos
 			surfaceMaterial,
 			surfaceNormalV,
 			surfacePosV,
@@ -184,10 +164,27 @@ void lightingCS(
 	}
 	
 	//TILING DEMO:
-	//for(i = 0; i < tileLightNum; i++) //Apply culled point-lights.
-	//{
-	//	Diffuse.g += 0.1;
-	//}
+	for(i = 0; i < tileLightNum; i++) //Apply culled point-lights.
+	{
+		Diffuse.g += 0.1;
+	}
 	
 	output[uint2(threadIDDispatch.x + viewportTopX, threadIDDispatch.y + viewportTopY)] = Ambient + Diffuse + Specular;
 }
+
+//Draw all point-lights:
+//for(i = 0; i < numLightsPoint; i++)
+//{
+//	LightDescPoint descPoint = lightsPoint[i];
+//	LightPoint(
+//		toEyeV,
+//		descPoint,
+//		mul(float4(lightsPos[i].pos, 1.0f), view).xyz, //
+//		surfaceMaterial,
+//		surfaceNormalV,
+//		surfacePosV,
+//		ambient, diffuse, specular);	
+//	Ambient		+= ambient;
+//	Diffuse		+= diffuse;
+//	Specular	+= specular;
+//}
