@@ -11,12 +11,14 @@ class DLL_U Settings
 {
 public:
 	float timeScale;
+	bool showDebugPhysics;
 	std::string currentLevel;
 
 	Settings()
 	{
 		currentLevel = "TestArena";
 		timeScale = 1.0f;
+		showDebugPhysics = false;
 	}
 };
 
