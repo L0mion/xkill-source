@@ -482,7 +482,7 @@ void Renderer::renderViewportToGBuffer(ViewportData& vpData)
 		}
 	}
 
-	if(BULLETPHYSICSDEBUGDRAW)
+	if(settings->showDebugPhysics)
 	{
 		drawBulletPhysicsDebugLines(vpData.view, vpData.proj);
 	}

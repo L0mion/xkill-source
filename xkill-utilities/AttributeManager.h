@@ -13,9 +13,11 @@ public:
 	float timeScale;
 	bool showDebugPhysics;
 	std::string currentLevel;
+	float trueDeltaTime;
 
 	Settings()
 	{
+		trueDeltaTime = 0.0f;
 		currentLevel = "TestArena";
 		timeScale = 1.0f;
 		showDebugPhysics = false;
