@@ -81,7 +81,7 @@ void MutatorSettings::initStandardAmmunition()
 	ammo->damage			= 10.0f;
 	ammo->explosionSphere	= 1.0f;
 	ammo->explosive			= true;
-	ammo->nrOfProjectiles	= 10;
+	ammo->nrOfProjectiles	= 1;
 	ammo->spawnVariation	= 0.0f;
 	ammo->speed				= 5.0f;
 	ammo->spread			= 0.0f;
@@ -117,7 +117,7 @@ void MutatorSettings::initStandardFiringModes()
 	firingMode->clipSize				= 10;
 	firingMode->damageModifier			= 1.0f;
 	firingMode->explosionSphereModifier	= 0.5f;
-	firingMode->cooldownBetweenShots	= 0.5f;
+	firingMode->cooldownBetweenShots	= 0.0f;
 	firingMode->reloadTime				= 2.0f;
 	firingMode->nrOfShotsLeftInClip		= firingMode->clipSize;
 	firingMode->cooldownLeft			= firingMode->cooldownBetweenShots;

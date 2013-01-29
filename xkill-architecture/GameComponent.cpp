@@ -16,6 +16,7 @@ GameComponent::GameComponent(void)
 	SUBSCRIBE_TO_EVENT(this, EVENT_START_DEATHMATCH);	
 	SUBSCRIBE_TO_EVENT(this, EVENT_END_DEATHMATCH);
 	SUBSCRIBE_TO_EVENT(this, EVENT_TRANSFEREVENTSTOGAME);
+	SUBSCRIBE_TO_EVENT(this, EVENT_PLAYERDEATH);
 }
 
 GameComponent::~GameComponent(void)
@@ -56,6 +57,8 @@ void GameComponent::onEvent(Event* e)
 	case EVENT_TRANSFEREVENTSTOGAME:
 		event_TransferEventsToGame(static_cast<Event_TransferEventsToGame*>(e));
 		break;
+	case EVENT_PLAYERDEATH:
+		event_PlayerDeath(static_cast<Event_PlayerDeath*>(e));
 	default:
 		break;
 	}
@@ -166,11 +169,6 @@ void GameComponent::onUpdate(float delta)
 			health->health = 0.0f;
 			input->killPlayer = false;
 		}
-		//if(input->jump)
-		//{
-		//	//To be implemented... (2013-01-17 16.17)
-		//	input->jump = false;
-		//}
 
 		if(input->sprint)
 		{
@@ -189,28 +187,40 @@ void GameComponent::onUpdate(float delta)
 		// TRUE: Player is dead
 		if(health->health <= 0.0f) 
 		{
-			// If an appropriate spawnpoint was found: spawn at it; otherwise: spawn at origo.
-			Attribute_PlayerSpawnPoint* spawnPointAttribute = findUnoccupiedSpawnPoint();
-			if(spawnPointAttribute != nullptr)
+			if(player->currentRespawnDelay > 0.0f)
 			{
-				Attribute_Position* spawnPointPositionAttribute = itrPosition.at(spawnPointAttribute->ptr_position);
-				position->position = spawnPointPositionAttribute->position; // set player position attribute
-				DEBUGPRINT("Player entity " << itrPlayer.ownerId() << " spawned at " << position->position.x << " " << position->position.y << " " << position->position.z << std::endl);
+				player->currentRespawnDelay -= delta;
 			}
 			else
 			{
-				position->position = Float3(0.0f, 0.0f, 0.0f);
-				DEBUGPRINT("No spawn point was found. Player entity " << itrPlayer.ownerId() << " spawned at origo" << std::endl);
+				// If an appropriate spawnpoint was found: spawn at it; otherwise: spawn at origo.
+				Attribute_PlayerSpawnPoint* spawnPointAttribute = findUnoccupiedSpawnPoint();
+				if(spawnPointAttribute != nullptr)
+				{
+					Attribute_Position* spawnPointPositionAttribute = itrPosition.at(spawnPointAttribute->ptr_position);
+					position->position = spawnPointPositionAttribute->position; // set player position attribute
+					DEBUGPRINT("Player entity " << itrPlayer.ownerId() << " spawned at " << position->position.x << " " << position->position.y << " " << position->position.z << std::endl);
+				}
+				else
+				{
+					position->position = Float3(0.0f, 0.0f, 0.0f);
+					DEBUGPRINT("No spawn point was found. Player entity " << itrPlayer.ownerId() << " spawned at origo" << std::endl);
+				}
+
+				physics->gravity = Float3(0.0f, -10.0f, 0.0f);
+				physics->collisionFilterMask = physics->EVERYTHING;
+				physics->collisionResponse = true;
+
+				spatial->rotation = Float4(0.0f, 0.0f, 0.0f, 1.0f);
+				camera->up = Float3(0.0f, 1.0f, 0.0f);
+				camera->right = Float3(1.0f, 0.0f, 0.0f);
+				camera->look = Float3(0.0f, 0.0f, 1.0f);
+				//camera->reset = true; //Reset player rotation.
+				physics->reloadDataIntoBulletPhysics = true;
+
+				health->health = health->startHealth; // restores player health
+				SEND_EVENT(&Event_PlaySound(1));
 			}
-
-			spatial->rotation = Float4(0.0f, 0.0f, 0.0f, 1.0f);
-			camera->up = Float3(0.0f, 1.0f, 0.0f);
-			camera->right = Float3(1.0f, 0.0f, 0.0f);
-			camera->look = Float3(0.0f, 0.0f, 1.0f);
-			physics->reloadDataIntoBulletPhysics = true;
-
-			health->health = health->startHealth; // restores player health
-			SEND_EVENT(&Event_PlaySound(1));
 		}
 	}
 
@@ -256,8 +266,13 @@ void GameComponent::onUpdate(float delta)
 	while(itrPickupablesSpawnPoint.hasNext())
 	{
 		Attribute_PickupablesSpawnPoint* pickupablesSpawnPoint = itrPickupablesSpawnPoint.getNext();
+		
+		//Timer incrementation
+		pickupablesSpawnPoint->secondsSinceLastPickup += delta;
 		pickupablesSpawnPoint->secondsSinceLastSpawn += delta;
-		if(pickupablesSpawnPoint->secondsSinceLastSpawn > pickupablesSpawnPoint->spawnDelayInSeconds)
+
+		//Spawn new pickupable, if secondsSinceLastSpawn and secondsSinceLastPickup are enough incremented
+		if(pickupablesSpawnPoint->secondsSinceLastSpawn > pickupablesSpawnPoint->spawnDelayInSeconds && pickupablesSpawnPoint->secondsSinceLastPickup > pickupablesSpawnPoint->spawnDelayInSeconds)
 		{
 			if(pickupablesSpawnPoint->currentNrOfExistingSpawnedPickupables < pickupablesSpawnPoint->maxNrOfExistingSpawnedPickupables)
 			{
@@ -267,7 +282,7 @@ void GameComponent::onUpdate(float delta)
 				switch(pickupablesSpawnPoint->spawnPickupableType)
 				{
 				case PickupableType::MEDKIT:
-					amount = 20;
+					amount = 1;
 						break;
 				case PickupableType::AMMUNITION_BULLET:
 					amount = 100;
@@ -280,8 +295,8 @@ void GameComponent::onUpdate(float delta)
 					break;
 				}
 
+				//Each pickupable knows it pickupablesSpawnPoint creator
 				AttributePointer creatorPickupablesSpawnPoint = itrPickupablesSpawnPoint.attributePointer(pickupablesSpawnPoint);
-
 				SEND_EVENT(&Event_CreatePickupable(pickupablesSpawnPointPosition->position, pickupablesSpawnPoint->spawnPickupableType, creatorPickupablesSpawnPoint, amount));
 				pickupablesSpawnPoint->secondsSinceLastSpawn = 0.0f;
 			}
@@ -399,9 +414,9 @@ void GameComponent::event_PhysicsAttributesColliding(Event_PhysicsAttributesColl
 				if(entity1->getID() != damage->owner_entityID || entity2->hasAttribute(ATTRIBUTE_EXPLOSIONSPHERE))
 				{
 					// Apply damage to all Health attributes
-					for(unsigned i=0; i<healthId.size(); i++)
+					for(unsigned j=0; j<healthId.size(); j++)
 					{
-						Attribute_Health* health = itrHealth.at(healthId[i]);
+						Attribute_Health* health = itrHealth.at(healthId[j]);
 						health->health -= damage->damage;
 						
 						// If a player was killed by the collision, give priority (score) to the player that created the DamageAttribute
@@ -410,9 +425,9 @@ void GameComponent::event_PhysicsAttributesColliding(Event_PhysicsAttributesColl
 							Entity* creatorOfProjectilePlayerEntity = &allEntity->at(damage->owner_entityID);
 							std::vector<int> playerId = creatorOfProjectilePlayerEntity->getAttributes(ATTRIBUTE_PLAYER);
 
-							for(unsigned i=0;i<playerId.size();i++)
+							for(unsigned k=0;k<playerId.size();k++)
 							{
-								Attribute_Player* player = itrPlayer.at(playerId.at(i));
+								Attribute_Player* player = itrPlayer.at(playerId.at(k));
 								
 								//Award player
 								if(entity1->getID() != damage->owner_entityID)
@@ -427,7 +442,13 @@ void GameComponent::event_PhysicsAttributesColliding(Event_PhysicsAttributesColl
 								DEBUGPRINT("Player with entity id " << damage->owner_entityID << " killed player with entity id " << entity1->getID());
 							}
 
-							SEND_EVENT(&Event_PlayerDeath());
+							Entity* playerThatDied = &allEntity->at(itrHealth.ownerIdAt(healthId[j]));
+							playerId = playerThatDied->getAttributes(ATTRIBUTE_PLAYER);
+
+							for(unsigned int k = 0; k < playerId.size(); k++)
+							{
+								SEND_EVENT(&Event_PlayerDeath(playerId[k]));
+							}
 						}
 						else
 						{
@@ -462,6 +483,7 @@ void GameComponent::event_PhysicsAttributesColliding(Event_PhysicsAttributesColl
 			for(unsigned i=0;i<physicsId.size();i++)
 			{
 				Attribute_Physics* physicsAttribute = itrPhysics.at(physicsId.at(i));
+				SEND_EVENT(&Event_ModifyPhysicsObject(ModifyPhysicsObjectData::GRAVITY, static_cast<void*>(&Float3(0.0f, -10.0f, 0.0f)), physicsId.at(i)));
 				//physicsAttribute->gravity = Float3(0.0f, -10.0f, 0.0f);
 				//physicsAttribute->linearVelocity = Float3(0.0f, 0.0f, 0.0f);
 				//physicsAttribute->reloadDataIntoBulletPhysics = true;
@@ -474,9 +496,9 @@ void GameComponent::event_PhysicsAttributesColliding(Event_PhysicsAttributesColl
 				Attribute_Projectile* projectileAttribute = itrProjectile.at(projectileId.at(i));
 
 				//Shorten lifetime of projectile colliding with physics objects
-				if(projectileAttribute->currentLifeTimeLeft > 0.15f)
+				if(projectileAttribute->currentLifeTimeLeft > 1.00f)
 				{
-					projectileAttribute->currentLifeTimeLeft = 0.15f;
+					projectileAttribute->currentLifeTimeLeft = 1.00f;
 				}
 
 				//Explosion handling.
@@ -557,6 +579,8 @@ void GameComponent::event_PhysicsAttributesColliding(Event_PhysicsAttributesColl
 			//Decrement number of spawned pickupables for the spawnpoint that spanwed the pickupable that the player picked up. Also remove it.
 			Attribute_PickupablesSpawnPoint* pickupablesSpawnPointAttribute = itrPickupablesSpawnPoint.at(pickupableAttribute->ptr_creatorPickupablesSpawnPoint);
 			pickupablesSpawnPointAttribute->currentNrOfExistingSpawnedPickupables--;
+			pickupablesSpawnPointAttribute->secondsSinceLastPickup = 0;
+			
 			SEND_EVENT(&Event_RemoveEntity(entity1->getID()));
 		}
 	}
@@ -745,7 +769,7 @@ void GameComponent::event_StartDeathmatch( Event_StartDeathmatch* e )
 	//Continue
 	for(int i=0;i<10;i++)
 	{
-		SEND_EVENT(&Event_CreatePickupablesSpawnPoint(Float3(2, 40, i-6), PickupableType::MEDKIT));
+		SEND_EVENT(&Event_CreatePickupablesSpawnPoint(Float3(2.0f, 5.0f, i-6.0f), PickupableType::MEDKIT));
 	}
 
 	//SEND_EVENT(&Event_CreatePickupable(Float3(2.0f, 2.0f, 0.0f), Attribute_Pickupable::MEDKIT, 5));
@@ -757,6 +781,23 @@ void GameComponent::event_StartDeathmatch( Event_StartDeathmatch* e )
 void GameComponent::event_TransferEventsToGame(Event_TransferEventsToGame* e)
 {
 	levelEvents_ = e->events;
+}
+
+void GameComponent::event_PlayerDeath(Event_PlayerDeath* e)
+{
+	Attribute_Player* player = itrPlayer.at(e->playerIndex);
+	Attribute_Physics* physics = itrPhysics.at(itrInput.at(player->ptr_input)->ptr_physics);
+	Attribute_Health* health = itrHealth.at(player->ptr_health);
+	health->health = 0;
+
+	physics->angularVelocity = Float3(0.0f, 0.0f, 0.0f);
+	physics->linearVelocity = Float3(0.0f, 0.0f, 0.0f);
+	physics->gravity = Float3(0.0f, 0.0f, 0.0f);
+	physics->collisionFilterMask = physics->NOTHING;
+	physics->collisionResponse = false;
+	physics->reloadDataIntoBulletPhysics = true;
+
+	player->currentRespawnDelay = player->respawnDelay;
 }
 
 bool GameComponent::switchAmmunition(Attribute_WeaponStats* weaponStats)
