@@ -18,6 +18,7 @@ PSOut defaultPS(DefaultVSOut pIn)
 	PSOut output;
 
 	output.normal		= float4(pIn.normalW, pIn.position.z);
+	pIn.texcoord.y = 1-pIn.texcoord.y;
 	output.albedo		= texAlbedo.SampleLevel(ss, pIn.texcoord, 0);
 
 	output.material		= float4(specularTerm, 1.0f);
