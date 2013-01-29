@@ -694,6 +694,7 @@ struct DLL_U Attribute_Player : public IAttribute
 	float sprintSpeed;			//!< Speed when sprinting.
 	float respawnDelay;			//!< Time between death and respawn
 	float currentRespawnDelay;	//!< Time until respawn
+	float timeSinceLastJump;	//!< Incrementing timer
 
 	DataItemList* getDataList()
 	{

@@ -157,7 +157,7 @@ void InputComponent::handleInput(float delta)
 		if(device->getBoolReleased(InputAction::ACTION_B_KILL_PLAYER))
 			input->killPlayer = true;
 
-		if(device->getBoolValue(InputAction::ACTION_B_JUMP))
+		if(device->getBoolPressed(InputAction::ACTION_B_JUMP))
 			input->jump = true;
 
 		if(device->getBoolValue(InputAction::ACTION_B_SPRINT))

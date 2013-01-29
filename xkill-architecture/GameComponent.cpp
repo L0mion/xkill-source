@@ -228,6 +228,8 @@ void GameComponent::onUpdate(float delta)
 				SEND_EVENT(&Event_PlaySound(3));
 			}
 		}
+
+		player->timeSinceLastJump += delta;
 	}
 
 
