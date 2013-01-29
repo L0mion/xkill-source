@@ -86,7 +86,7 @@ public:
 		CONNECT_ATTRIBUTES(camera, spatial);
 
 		CREATE_ATTRIBUTE(Attribute_Health, health, entity);
-		health->startHealth = 10;
+		health->startHealth = 100;
 
 		CREATE_ATTRIBUTE(Attribute_WeaponStats, weaponStats, entity);
 		weaponStats->currentAmmunitionType = Ammunition::SCATTER;
