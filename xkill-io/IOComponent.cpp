@@ -255,8 +255,15 @@ bool IOComponent::loadFbx(std::string modelName, std::string modelPath, MdlDescM
 
 	std::vector<LoaderFbxModelDesc> fbxModels = fbxLoader_->load(modelPath+modelName);
 
+	std::vector<VertexDesc> vertices;
+	std::vector<unsigned int> indices;
+	MaterialDesc materialDesc;
+
 	for(unsigned int i=0; i<fbxModels.size(); i++)
 	{
+		vertices		= fbxModels[i].getMeshDesc().createVertices();
+		indices			= fbxModels[i].getMeshDesc().getIndices();
+		materialDesc	= fbxModels[i].getMaterialDesc().getMaterialDesc();
 	}
 	return successfulLoad;
 }

@@ -16,15 +16,19 @@ LoaderFbxMesh::~LoaderFbxMesh()
 }
 void LoaderFbxMesh::reset()
 {
+	polygonGroupIds_.clear();
 	vertexPositions_.clear();
-	vertexNormals_.clear();
-	vertexUVs_.clear();
-	vertexTangents_.clear();
+	vertexColors_.clear();	 
+	vertexNormals_.clear();	 
+	vertexUVs_.clear();		 
+	vertexTangents_.clear(); 
 	vertexBinormals_.clear();
 }
 
 void LoaderFbxMesh::parseMesh(FbxMesh* mesh, LoaderFbxMeshDesc* meshDesc)
 {
+	reset();
+
 	int polygonVertexCount = mesh->GetPolygonVertexCount();
 	int polygonCount = mesh->GetPolygonCount();
 	int numControlPonts = mesh->GetControlPointsCount();
@@ -416,6 +420,7 @@ FbxVector4 LoaderFbxMesh::parseVertexBinormalsByPolygonVertex(FbxGeometryElement
 
 void LoaderFbxMesh::parseVertexLinkData(FbxMesh* mesh, LoaderFbxMeshDesc* meshDesc)
 {
+	int debug = mesh->GetControlPointsCount();
 	meshDesc->prepareBoneData(mesh->GetControlPointsCount());
 	FbxCluster* cluster = nullptr;
 	
