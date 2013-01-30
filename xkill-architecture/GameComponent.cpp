@@ -87,7 +87,6 @@ void GameComponent::onUpdate(float delta)
 		Ammunition* ammo = &weaponStats->ammunition[weaponStats->currentAmmunitionType];
 		FiringMode* firingMode = &weaponStats->firingMode[weaponStats->currentFiringModeType];
 
-
 		//
 		// End of deathmatch logic
 		//
@@ -171,8 +170,6 @@ void GameComponent::onUpdate(float delta)
 		{
 			health->health = 0.0f;
 			input->killPlayer = false;
-			
-			SEND_EVENT(&Event_PlayerDeath(itrPlayer.storageIndex()));
 		}
 
 		if(input->sprint)
@@ -189,8 +186,14 @@ void GameComponent::onUpdate(float delta)
 		// Health and respawn logic
 		//
 
-		// TRUE: Player is dead
-		if(health->health <= 0.0f) 
+		// Detect player death
+		if(health->health <= 0.0f && !player->detectedAsDead) 
+		{
+			SEND_EVENT(&Event_PlayerDeath(itrPlayer.storageIndex()));
+		}
+
+		//Handle dead players
+		if(player->detectedAsDead)
 		{
 			if(player->currentRespawnDelay > 0.0f)
 			{
@@ -209,8 +212,10 @@ void GameComponent::onUpdate(float delta)
 				else
 				{
 					position->position = Float3(0.0f, 0.0f, 0.0f);
-					DEBUGPRINT("No spawn point was found. Player entity " << itrPlayer.ownerId() << " spawned at origo" << std::endl);
+					DEBUGPRINT("No spawn point was found. Player entity " << itrPlayer.ownerId() << " spawned at " << position->position.x << " " << position->position.y << " " << position->position.z << std::endl);
 				}
+
+				player->currentRespawnDelay = player->respawnDelay;
 
 				physics->gravity = Float3(0.0f, -10.0f, 0.0f);
 				physics->collisionFilterMask = physics->EVERYTHING;
@@ -223,6 +228,8 @@ void GameComponent::onUpdate(float delta)
 				camera->look = Float3(0.0f, 0.0f, 1.0f);
 				//camera->reset = true; //Reset player rotation.
 				physics->reloadDataIntoBulletPhysics = true;
+
+				player->detectedAsDead = false;
 
 				health->health = health->startHealth; // restores player health
 				SEND_EVENT(&Event_PlaySound(3));
@@ -584,12 +591,26 @@ void GameComponent::event_PhysicsAttributesColliding(Event_PhysicsAttributesColl
 					}
 				}
 			}
-			//Decrement number of spawned pickupables for the spawnpoint that spanwed the pickupable that the player picked up. Also remove it.
+
+			// Decrement number of spawned pickupables for the spawnpoint that spawned the pickupable that the player picked up. Also remove it.
 			Attribute_PickupablesSpawnPoint* pickupablesSpawnPointAttribute = itrPickupablesSpawnPoint.at(pickupableAttribute->ptr_pickupablesSpawnPoint_creator);
 			pickupablesSpawnPointAttribute->currentNrOfExistingSpawnedPickupables--;
 			pickupablesSpawnPointAttribute->secondsSinceLastPickup = 0;
 			
 			SEND_EVENT(&Event_RemoveEntity(entity1->getID()));
+		}
+	}
+	else if(entity1->hasAttribute(ATTRIBUTE_PHYSICS))
+	{
+		//Player colliding with world
+		if(entity2->hasAttribute(ATTRIBUTE_PLAYER))
+		{
+			std::vector<int> playerId = entity2->getAttributes(ATTRIBUTE_PLAYER);
+			for(int i=0;i<playerId.size();i++)
+			{
+				Attribute_Player* playerAttribute = itrPlayer.at(playerId.at(i));
+				playerAttribute->collidingWithWorld = true;
+			}
 		}
 	}
 }
@@ -671,7 +692,7 @@ Attribute_PlayerSpawnPoint* GameComponent::findUnoccupiedSpawnPoint()
 			Attribute_Player* player	= itrPlayer.getNext();
 			Attribute_Health* health	= itrHealth.at(player->ptr_health);
 
-			// If player is alive
+			// If player is detectedAsDead
 			if(health->health > 0)
 			{
 				Attribute_Render*	render	= itrRender.at(player->ptr_render);
@@ -807,6 +828,7 @@ void GameComponent::event_PlayerDeath(Event_PlayerDeath* e)
 	physics->reloadDataIntoBulletPhysics = true;
 
 	player->currentRespawnDelay = player->respawnDelay;
+	player->detectedAsDead = true;
 }
 
 bool GameComponent::switchAmmunition(Attribute_WeaponStats* weaponStats)

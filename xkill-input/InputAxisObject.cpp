@@ -7,7 +7,7 @@ InputAxisObject::InputAxisObject(int minValue, int maxValue, bool relativeAxis)
 
 	relativeAxis_ = relativeAxis;
 
-	deadZone_ = 0.25f;
+	deadZone_ = 0.1f;
 
 	value_ = 0.0f;
 }
@@ -111,6 +111,8 @@ float InputAxisObject::formatValue(int value) //Fix deadzone, is square for the 
 
 	if(inverted_)
 		doubleAxis = -doubleAxis;
+
+	 doubleAxis = (pow(doubleAxis, 5));
 
 	return (float)doubleAxis;
 }

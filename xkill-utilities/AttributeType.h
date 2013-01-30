@@ -480,6 +480,7 @@ struct DLL_U Attribute_Input : public IAttribute
 	bool killPlayer;
 	bool changeAmmunitionType;
 	bool changeFiringMode;
+	bool lowSensitivity;
 
 	DataItemList* getDataList()
 	{
@@ -699,6 +700,10 @@ struct DLL_U Attribute_Player : public IAttribute
 	float respawnDelay;			//!< Time between death and respawn
 	float currentRespawnDelay;	//!< Time until respawn
 	float timeSinceLastJump;	//!< Incrementing timer
+	float delayInSecondsBetweenEachJump;
+	bool collidingWithWorld;	//!< Set y-velocity to zero when not colliding with world and not jumping
+	float jetpackTimer;			//!< Incremented when using jetpack
+	bool detectedAsDead;
 
 	DataItemList* getDataList()
 	{

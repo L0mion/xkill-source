@@ -141,7 +141,7 @@ void ComponentManager::onEvent(Event* e)
 		initialSpawnDelay = 0.0f;
 		#ifdef XKILL_DEBUG
 		{
-			initialSpawnDelay = 1.0f; //Prevent debug lag making physics not registering collision during the initial seconds of the game.
+			initialSpawnDelay = 2.0f; //Prevent debug lag making physics not registering collision during the initial seconds of the game.
 		}
 		#endif
 	case EVENT_GAME_OVER:

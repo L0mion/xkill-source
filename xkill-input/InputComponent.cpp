@@ -172,13 +172,14 @@ void InputComponent::handleInput(float delta)
 		if(device->getBoolValue(InputAction::ACTION_B_SPRINT))
 			input->sprint = true;
 
+		device->setSensitivityModifier(device->getFloatValue(InputAction::ACTION_B_LOW_SENSITIVITY, delta));
+
 		float x, y;
 
 		x = input->position.x;
 		y = input->position.y;
 
 		float length = std::sqrt(x*x + y*y);
-
 		if(length > 1.0f) // The character shouldn't move faster than set speed
 		{
 			x = x/length;

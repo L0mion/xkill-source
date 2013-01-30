@@ -136,6 +136,22 @@ void PhysicsComponent::onUpdate(float delta)
 		synchronizeWithAttributes(physicsAttribute, index);
 		physicsObjects_->at(index)->onUpdate(delta);
 
+		//Handle players taking off when going up ramps
+		if(physicsAttribute->collisionFilterGroup == Attribute_Physics::PLAYER)
+		{
+			Entity* playerEntity = itrPhysics.ownerAt(index);
+			std::vector<int> playerAttributeIndices = playerEntity->getAttributes(ATTRIBUTE_PLAYER);
+			for(unsigned int i = 0; i < playerAttributeIndices.size(); i++)
+			{
+				Attribute_Player* playerAttribute = itrPlayer.at(playerAttributeIndices.at(i));
+				if(!playerAttribute->collidingWithWorld && playerAttribute->timeSinceLastJump > playerAttribute->delayInSecondsBetweenEachJump && physicsObjects_->at(index)->getLinearVelocity().y() > 0.0f)
+				{
+					physicsObjects_->at(index)->setLinearVelocity(btVector3(physicsObjects_->at(index)->getLinearVelocity().x(), 0.0f, physicsObjects_->at(index)->getLinearVelocity().z()));
+				}
+				playerAttribute->collidingWithWorld = false;
+			}
+		}
+
 		//Physics object out of bounds
 		if(physicsObjects_->at(index)->getWorldTransform().getOrigin().y() < removePhysicsObjectIfItHasLowerYCoordinateThanThis)
 		{
@@ -151,9 +167,9 @@ void PhysicsComponent::onUpdate(float delta)
 				std::vector<int> playerAttributeIndices = playerEntity->getAttributes(ATTRIBUTE_PLAYER);
 				for(unsigned int i = 0; i < playerAttributeIndices.size(); i++)
 				{
-					Attribute_Player* playerAttribute = itrPlayer.at(i);
+					Attribute_Player* playerAttribute = itrPlayer.at(playerAttributeIndices.at(i));
 					Attribute_Health* playerHealthAttribute = itrHealth.at(playerAttribute->ptr_health);
-					if(playerHealthAttribute->health > 0.0f)
+					if(!playerAttribute->detectedAsDead)
 					{
 						DEBUGPRINT("Player entity " << playerEntityIndex << " was out of bounds");
 						SEND_EVENT(&Event_PlayerDeath(playerAttributeIndices[i]));
@@ -178,7 +194,7 @@ void PhysicsComponent::onUpdate(float delta)
 
 	dynamicsWorld_->stepSimulation(delta,0); //Bullet Physics physics simulation
 
-	bool showDebug =  ATTRIBUTE_MANAGER->settings->showDebugPhysics;
+	bool showDebug = ATTRIBUTE_MANAGER->settings->showDebugPhysics;
 	if(showDebug)
 	{
 		//static float timer = 0.0f;
