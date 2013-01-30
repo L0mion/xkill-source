@@ -78,6 +78,7 @@ public:
 		physics->meshID = render->meshID;
 		physics->collisionFilterGroup = Attribute_Physics::PLAYER;
 		physics->collisionFilterMask = Attribute_Physics::EVERYTHING;
+		physics->gravity = Float3(0.0f, -0.0f, 0.0f);
 		
 		CREATE_ATTRIBUTE(Attribute_Input, input, entity);
 		CONNECT_ATTRIBUTES(input, physics);

@@ -158,6 +158,7 @@ Attribute_Input::Attribute_Input()
 	firePressed = false;
 	changeAmmunitionType = false;
 	changeFiringMode = false;
+	lowSensitivity = false;
 	ZeroMemory(&position,sizeof(position));
 	ZeroMemory(&rotation,sizeof(rotation));
 	DirectX::XMFLOAT3 test;

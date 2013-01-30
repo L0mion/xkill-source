@@ -117,6 +117,8 @@ public:
 
 	void createObjectVectors();
 
+	void setSensitivityModifier(float value);
+
 protected:
 	InputDeviceLayout inputLayout_;
 	GUID deviceGUID_;
@@ -125,6 +127,7 @@ protected:
 
 	float rumbleTimer_;
 	bool rumbleActive_;
+	float sensitivityModifier_;
 
 	std::vector<InputAxisObject*> axes_;
 	std::vector<InputButtonObject*> buttons_;

@@ -25,6 +25,7 @@ InputDevice::InputDevice(GUID deviceGUID, std::string name, unsigned int playerI
 
 	rumbleTimer_ = 0.0f;
 	rumbleActive_ = false;
+	sensitivityModifier_ = 1.0f;
 
 	inputObjectArray_ = new InputObjectArray();
 
@@ -126,7 +127,10 @@ float InputDevice::getFloatValue(int mapping, float delta, bool useSensitivity)
 
 		if(useSensitivity)
 		{
-			value *= inputObjectArray_->inputObjects[index]->getSensitivity();
+			float sensitivity;
+			sensitivity = inputObjectArray_->inputObjects[index]->getSensitivity()*sensitivityModifier_;
+			value *= sensitivity;
+
 			if(inputObjectArray_->inputObjects[index]->needsDelta())
 				value *= delta;
 		}
@@ -208,4 +212,9 @@ void InputDevice::createObjectVectors()
 			}
 		}
 	}
+}
+
+void InputDevice::setSensitivityModifier(float value)
+{
+	sensitivityModifier_ = 0.1f+(1 - value)*0.9;
 }

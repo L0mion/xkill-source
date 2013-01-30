@@ -480,6 +480,7 @@ struct DLL_U Attribute_Input : public IAttribute
 	bool killPlayer;
 	bool changeAmmunitionType;
 	bool changeFiringMode;
+	bool lowSensitivity;
 
 	DataItemList* getDataList()
 	{

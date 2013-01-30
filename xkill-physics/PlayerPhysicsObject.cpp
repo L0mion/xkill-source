@@ -103,17 +103,26 @@ void PlayerPhysicsObject::handleInput(float delta)
 			playerAttribute->jetpackTimer+=delta;
 			if(playerAttribute->jetpackTimer > 0.1f)
 			{
+				playerAttribute->jetpackTimer = 0.0f;
 				health->health--;
 			}
 		}
 
+		Attribute_Physics* playerPhysicsAttribute = itrPhysics_3.at(attributeIndex_);
+
+		//Prevent player from sliding down slopes
+		if(inputAttribute->position.x == 0.0f && inputAttribute->position.y == 0.0f && playerAttribute->collidingWithWorld && !inputAttribute->jetpack && !inputAttribute->jump)
+		{
+			setFriction(btScalar(100.0f)); //Friction when player are standing still
+			setGravity(btVector3(0.0f, 0.0f, 0.0f));
+		}
+		else //restore friction and gravity
+		{
+			setFriction(btScalar(0.0f));
+			setGravity(btVector3(playerPhysicsAttribute->gravity.x, playerPhysicsAttribute->gravity.y, playerPhysicsAttribute->gravity.z));
+		}
+
 		inputAttribute->jump = false;
 		inputAttribute->jetpack = false;
-
-		float epsilon = 0.0001f;
-		if(move.x() == 0.0f && move.y() == 0.0f && move.z() == 0.0f && playerAttribute->collidingWithWorld)
-		{
-			setLinearVelocity(btVector3(0.0f, 0.0f, 0.0f));
-		}
 	}
 }

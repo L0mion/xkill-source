@@ -212,7 +212,7 @@ void GameComponent::onUpdate(float delta)
 				else
 				{
 					position->position = Float3(0.0f, 0.0f, 0.0f);
-					DEBUGPRINT("No spawn point was found. Player entity " << itrPlayer.ownerId() << " spawned at origo" << std::endl);
+					DEBUGPRINT("No spawn point was found. Player entity " << itrPlayer.ownerId() << " spawned at " << position->position.x << " " << position->position.y << " " << position->position.z << std::endl);
 				}
 
 				player->currentRespawnDelay = player->respawnDelay;
