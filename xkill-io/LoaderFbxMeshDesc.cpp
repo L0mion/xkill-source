@@ -71,30 +71,85 @@ void LoaderFbxMeshDesc::addOffsetMatrix(Float4x4 offsetMatrix)
 	offsetMatrices_.push_back(offsetMatrix);
 }
 
-
-std::vector<VertexPosColor>				LoaderFbxMeshDesc::createVerticesPosColor()
+std::vector<VertexDesc> LoaderFbxMeshDesc::createVertices()
 {
-	std::vector<VertexPosColor> vertices;
-	vertices = assembleVertexPosColor();
-	vertices = indexVerticesPosColor(vertices);
+	std::vector<VertexDesc> vertices;
+	vertices = assembleVertexDesc();
+	vertices = indexVertexDesc(vertices);
+
+	if(vertexBoneIndices_.size() > 0 && vertexBoneWeights_.size() > 0)
+	{
+		std::vector<unsigned int> indices;
+		indices = calculateBoneMappingIndices(vertices);
+		mapBoneData(&vertices, indices);
+	}
 
 	return vertices;
 }
-std::vector<VertexPosNormTex>			LoaderFbxMeshDesc::createVerticesPosNormTex()
+std::vector<VertexDesc> LoaderFbxMeshDesc::assembleVertexDesc()
 {
-	std::vector<VertexPosNormTex> vertices;
-	vertices = assembleVertexPosNormTex();
-	vertices = indexVerticesPosNormTex(vertices);
+	std::vector<VertexDesc> vertices;
 
+	for(unsigned int i=0; i<vertexPositions_.size(); i++)
+	{
+		VertexDesc vertex;
+		
+		vertex.position_ = vertexPositions_[i];
+		if(i<vertexNormals_.size())
+			vertex.normal_ = vertexNormals_[i];
+		if(i<vertexUVs_.size())
+			vertex.textureCoordinates_ = vertexUVs_[i];
+		if(i<vertexTangents_.size())
+			vertex.tangent_ = vertexTangents_[i];
+
+		vertices.push_back(vertex);
+	}
 	return vertices;
 }
-std::vector<VertexPosNormSkinned>		LoaderFbxMeshDesc::createVerticesPosNormSkinned()
+std::vector<VertexDesc> LoaderFbxMeshDesc::indexVertexDesc(std::vector<VertexDesc> vertices)
 {
-	std::vector<VertexPosNormSkinned> vertices;
-	vertices = assembleVertexPosNormSkinned();
-	vertices = indexVerticesPosNormSkinned(vertices);
+	indices_.clear();
+	std::vector<VertexDesc> indexedVertices;
 
-	std::vector<VertexPosNormSkinned> indexedVertices;
+	for(unsigned int i=0; i<vertices.size(); i++)
+	{
+		bool equal			= false;
+		unsigned int index	= 0;
+		while(index<indexedVertices.size() && !equal)
+		{
+			if(vertexPositions_.size() > 0)
+				equal = float3Equal(vertices[i].position_, indexedVertices[index].position_);
+			if(vertexNormals_.size() > 0)
+			{
+				if(equal)
+					equal = float3Equal(vertices[i].normal_, indexedVertices[index].normal_);
+			}
+			if(vertexUVs_.size() > 0)
+			{
+				if(equal)
+					equal = float2Equal(vertices[i].textureCoordinates_, indexedVertices[index].textureCoordinates_);
+			}
+			if(vertexTangents_.size() > 0)
+			{
+				if(equal)
+					equal = float4Equal(vertices[i].tangent_, indexedVertices[index].tangent_);
+			}
+			if(!equal)
+				index++;
+		}
+		if(equal)
+			indices_.push_back(index);
+		else
+		{
+			indexedVertices.push_back(vertices[i]);
+			indices_.push_back(indexedVertices.size()-1);
+		}
+	}
+	return indexedVertices;
+}
+std::vector<unsigned int> LoaderFbxMeshDesc::calculateBoneMappingIndices(std::vector<VertexDesc> vertices)
+{
+	std::vector<VertexDesc> indexedVertices;
 	std::vector<unsigned int> indices;
 	for(unsigned int i=0; i<vertices.size(); i++)
 	{
@@ -114,331 +169,21 @@ std::vector<VertexPosNormSkinned>		LoaderFbxMeshDesc::createVerticesPosNormSkinn
 			indices.push_back(indexedVertices.size()-1);
 		}
 	}
-
-	for(unsigned int i=0; i<vertices.size(); i++)
-	{
-		vertices[i].weights_.x = vertexBoneWeights_[indices[i]][0];
-		vertices[i].weights_.y = vertexBoneWeights_[indices[i]][1];
-		vertices[i].weights_.z = vertexBoneWeights_[indices[i]][2];
-		for(int boneIndex=0; boneIndex<NUM_BONES_PER_VERTEX; boneIndex++)
-		{
-			vertices[i].boneIndices_[boneIndex] = vertexBoneIndices_[i][boneIndex];
-		}
-	}
-
-	return vertices;
+	return indices;
 }
-std::vector<VertexPosNormTexSkinned>	LoaderFbxMeshDesc::createVerticesPosNormTexSkinned()
+void LoaderFbxMeshDesc::mapBoneData(std::vector<VertexDesc>* vertices, std::vector<unsigned int> indices)
 {
-	std::vector<VertexPosNormTexSkinned> vertices;
-	vertices = assembleVertexPosNormTexSkinned();
-	vertices = indexVerticesPosNormTexSkinned(vertices);
-
-	std::vector<VertexPosNormTexSkinned> indexedVertices;
-	std::vector<unsigned int> indices;
-	for(unsigned int i=0; i<vertices.size(); i++)
+	for(unsigned int i=0; i<vertices->size(); i++)
 	{
-		bool equal = false;
-		unsigned int index = 0;
-		while(index < indexedVertices.size() && !equal)
-		{
-			equal = float3Equal(vertices[i].position_, indexedVertices[index].position_);
-			if(!equal)
-				index++;
-		}
-		if(equal)
-			indices.push_back(index);
-		else
-		{
-			indexedVertices.push_back(vertices[i]);
-			indices.push_back(indexedVertices.size()-1);
-		}
-	}
-
-	for(unsigned int i=0; i<vertices.size(); i++)
-	{
-		vertices[i].weights_.x = vertexBoneWeights_[indices[i]][0];
-		vertices[i].weights_.y = vertexBoneWeights_[indices[i]][1];
-		vertices[i].weights_.z = vertexBoneWeights_[indices[i]][2];
-		for(int boneIndex=0; i<NUM_BONES_PER_VERTEX; i++)
-		{		
-			vertices[i].boneIndices_[boneIndex] = vertexBoneIndices_[i][boneIndex];
-		}
-	}
-
-	return vertices;
-}
-std::vector<VertexPosNormTexTanSkinned> LoaderFbxMeshDesc::createVerticesPosNormTexTanSkinned()
-{
-	std::vector<VertexPosNormTexTanSkinned> vertices;
-	vertices = assembleVertexPosNormTexTanSkinned();
-	vertices = indexVerticesPosNormTexTanSkinned(vertices);
-
-	std::vector<VertexPosNormTexTanSkinned> indexedVertices;
-	std::vector<unsigned int> indices;
-	for(unsigned int i=0; i<vertices.size(); i++)
-	{
-		bool equal = false;
-		unsigned int index = 0;
-		while(index < indexedVertices.size() && !equal)
-		{
-			equal = float3Equal(vertices[i].position_, indexedVertices[index].position_);
-			if(!equal)
-				index++;
-		}
-		if(equal)
-			indices.push_back(index);
-		else
-		{
-			indexedVertices.push_back(vertices[i]);
-			indices.push_back(indexedVertices.size()-1);
-		}
-	}
-
-	for(unsigned int i=0; i<vertices.size(); i++)
-	{
-		vertices[i].weights_.x = vertexBoneWeights_[indices[i]][0];
-		vertices[i].weights_.y = vertexBoneWeights_[indices[i]][1];
-		vertices[i].weights_.z = vertexBoneWeights_[indices[i]][2];
+		vertices->at(i).weights_.x = vertexBoneWeights_[indices[i]][0];
+		vertices->at(i).weights_.y = vertexBoneWeights_[indices[i]][1];
+		vertices->at(i).weights_.z = vertexBoneWeights_[indices[i]][2];
 		for(int boneIndex=0; i<NUM_BONES_PER_VERTEX; i++)
 		{
-			vertices[i].boneIndices_[boneIndex] = vertexBoneIndices_[i][boneIndex];
+			vertices->at(i).boneIndices_[boneIndex] = vertexBoneIndices_[indices[i]][boneIndex];
 		}
 	}
-
-	return vertices;
 }
-
-std::vector<VertexPosColor>				LoaderFbxMeshDesc::assembleVertexPosColor()
-{
-	std::vector<VertexPosColor> vertices;
-	for(unsigned int i=0; i<vertexPositions_.size(); i++)
-	{
-		VertexPosColor vertex;
-		vertex.position_ = vertexPositions_[i];
-		vertex.color_.x	 = vertexColors_[i].x;
-		vertex.color_.y	 = vertexColors_[i].y;
-		vertex.color_.z	 = vertexColors_[i].z;
-
-		vertices.push_back(vertex);
-	}
-	return vertices;
-}
-std::vector<VertexPosNormTex>			LoaderFbxMeshDesc::assembleVertexPosNormTex()
-{
-	std::vector<VertexPosNormTex> vertices;
-	for(unsigned int i=0; i<vertexPositions_.size(); i++)
-	{
-		VertexPosNormTex vertex;
-		vertex.position_ = vertexPositions_[i];
-		vertex.normal_	 = vertexNormals_[i];
-		vertex.texcoord_ = vertexUVs_[i];
-
-		vertices.push_back(vertex);
-	}
-	return vertices;
-}
-std::vector<VertexPosNormSkinned>		LoaderFbxMeshDesc::assembleVertexPosNormSkinned()
-{
-	std::vector<VertexPosNormSkinned> vertices;
-	for(unsigned int i=0; i<vertexPositions_.size(); i++)
-	{
-		VertexPosNormSkinned vertex;
-		vertex.position_ = vertexPositions_[i];
-		vertex.normal_	 = vertexNormals_[i];
-
-		//Bone indices and weights are already in an indexed format and
-		//will therefor not be assembled into the complete vertex here.
-
-		vertices.push_back(vertex);
-	}
-	return vertices;
-}
-std::vector<VertexPosNormTexSkinned>	LoaderFbxMeshDesc::assembleVertexPosNormTexSkinned()
-{
-	std::vector<VertexPosNormTexSkinned> vertices;
-	for(unsigned int i=0; i<vertexPositions_.size(); i++)
-	{
-		VertexPosNormTexSkinned vertex;
-		vertex.position_ = vertexPositions_[i];
-		vertex.normal_	 = vertexNormals_[i];
-		vertex.texcoord_ = vertexUVs_[i];
-
-		//Bone indices and weights are already in an indexed format and
-		//will therefor not be assembled into the complete vertex here.
-
-		vertices.push_back(vertex);
-	}
-	return vertices;
-}
-std::vector<VertexPosNormTexTanSkinned> LoaderFbxMeshDesc::assembleVertexPosNormTexTanSkinned()
-{
-	std::vector<VertexPosNormTexTanSkinned> vertices;
-	for(unsigned int i=0; i<vertexPositions_.size(); i++)
-	{
-		VertexPosNormTexTanSkinned vertex;
-		vertex.position_ = vertexPositions_[i];
-		vertex.normal_	 = vertexNormals_[i];
-		vertex.texcoord_ = vertexUVs_[i];
-		vertex.tangent_  = vertexTangents_[i];
-
-		//Bone indices and weights are already in an indexed format and
-		//will therefor not be assembled into the complete vertex here.
-
-		vertices.push_back(vertex);
-	}
-	return vertices;
-}
-
-std::vector<VertexPosColor>				LoaderFbxMeshDesc::indexVerticesPosColor(std::vector<VertexPosColor> vertices)
-{
-	indices_.clear();
-	std::vector<VertexPosColor> indexedVertices;
-
-	for(unsigned int i=0; i<vertices.size(); i++)
-	{
-		bool equal			= false;
-		unsigned int index	= 0;
-		while(index<indexedVertices.size() && !equal)
-		{
-			equal = float3Equal(vertices[i].position_, indexedVertices[index].position_);
-			if(equal)
-				equal = float3Equal(vertices[i].color_, indexedVertices[index].color_);
-			if(!equal)
-				index++;
-		}
-		if(equal)
-			indices_.push_back(index);
-		else
-		{
-			indexedVertices.push_back(vertices[i]);
-			indices_.push_back(indexedVertices.size()-1);
-		}
-	}
-
-	return indexedVertices;
-}
-std::vector<VertexPosNormTex>			LoaderFbxMeshDesc::indexVerticesPosNormTex(std::vector<VertexPosNormTex> vertices)
-{
-	indices_.clear();
-	std::vector<VertexPosNormTex> indexedVertices;
-
-	for(unsigned int i=0; i<vertices.size(); i++)
-	{
-		bool equal			= false;
-		unsigned int index	= 0;
-		while(index<indexedVertices.size() && !equal)
-		{
-			equal = float3Equal(vertices[i].position_, indexedVertices[index].position_);
-			if(equal)
-				equal = float3Equal(vertices[i].normal_, indexedVertices[index].normal_);
-			if(equal)
-				equal = float2Equal(vertices[i].texcoord_, indexedVertices[index].texcoord_);
-			if(!equal)
-				index++;
-		}
-		if(equal)
-			indices_.push_back(index);
-		else
-		{
-			indexedVertices.push_back(vertices[i]);
-			indices_.push_back(indexedVertices.size()-1);
-		}
-	}
-
-	return indexedVertices;
-}
-std::vector<VertexPosNormSkinned>		LoaderFbxMeshDesc::indexVerticesPosNormSkinned(std::vector<VertexPosNormSkinned> vertices)
-{
-	indices_.clear();
-	std::vector<VertexPosNormSkinned> indexedVertices;
-
-	for(unsigned int i=0; i<vertices.size(); i++)
-	{
-		bool equal			= false;
-		unsigned int index	= 0;
-		while(index<indexedVertices.size() && !equal)
-		{
-			equal = float3Equal(vertices[i].position_, indexedVertices[index].position_);
-			if(equal)
-				equal = float3Equal(vertices[i].normal_, indexedVertices[index].normal_);
-			if(!equal)
-				index++;
-		}
-		if(equal)
-			indices_.push_back(index);
-		else
-		{
-			indexedVertices.push_back(vertices[i]);
-			indices_.push_back(indexedVertices.size()-1);
-		}
-	}
-
-	return indexedVertices;
-}
-std::vector<VertexPosNormTexSkinned>	LoaderFbxMeshDesc::indexVerticesPosNormTexSkinned(std::vector<VertexPosNormTexSkinned> vertices)
-{
-	indices_.clear();
-	std::vector<VertexPosNormTexSkinned> indexedVertices;
-
-	for(unsigned int i=0; i<vertices.size(); i++)
-	{
-		bool equal			= false;
-		unsigned int index	= 0;
-		while(index<indexedVertices.size() && !equal)
-		{
-			equal = float3Equal(vertices[i].position_, indexedVertices[index].position_);
-			if(equal)
-				equal = float3Equal(vertices[i].normal_, indexedVertices[index].normal_);
-			if(equal)
-				equal = float2Equal(vertices[i].texcoord_, indexedVertices[index].texcoord_);
-			if(!equal)
-				index++;
-		}
-		if(equal)
-			indices_.push_back(index);
-		else
-		{
-			indexedVertices.push_back(vertices[i]);
-			indices_.push_back(indexedVertices.size()-1);
-		}
-	}
-
-	return indexedVertices;
-}
-std::vector<VertexPosNormTexTanSkinned> LoaderFbxMeshDesc::indexVerticesPosNormTexTanSkinned(std::vector<VertexPosNormTexTanSkinned> vertices)
-{
-	indices_.clear();
-	std::vector<VertexPosNormTexTanSkinned> indexedVertices;
-
-	for(unsigned int i=0; i<vertices.size(); i++)
-	{
-		bool equal			= false;
-		unsigned int index	= 0;
-		while(index<indexedVertices.size() && !equal)
-		{
-			equal = float3Equal(vertices[i].position_, indexedVertices[index].position_);
-			if(equal)
-				equal = float3Equal(vertices[i].normal_, indexedVertices[index].normal_);
-			if(equal)
-				equal = float2Equal(vertices[i].texcoord_, indexedVertices[index].texcoord_);
-			if(equal)
-				equal = float4Equal(vertices[i].tangent_, indexedVertices[index].tangent_);
-			if(!equal)
-				index++;
-		}
-		if(equal)
-			indices_.push_back(index);
-		else
-		{
-			indexedVertices.push_back(vertices[i]);
-			indices_.push_back(indexedVertices.size()-1);
-		}
-	}
-
-	return indexedVertices;
-}
-
 
 bool LoaderFbxMeshDesc::float2Equal(Float2 f1, Float2 f2)
 {
