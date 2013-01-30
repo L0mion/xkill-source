@@ -1,5 +1,5 @@
-#ifndef XKILL_RENDERER_DATASTREAMSHADER_H
-#define XKILL_RENDERER_DATASTREAMSHADER_H
+#ifndef XKILL_RENDERER_DATASTREAMBUFFER_H
+#define XKILL_RENDERER_DATASTREAMBUFFER_H
 
 #include <d3d11.h>
 #include <vector>
@@ -9,21 +9,22 @@
 #include "renderingUtilities.h"
 
 template <class Data>
-class DataStreamShader
+class DataStreamBuffer
 {
 public:
-	DataStreamShader()
+	DataStreamBuffer(unsigned int bindFlag, unsigned int miscFlag)
 	{
+		bindFlag_ = bindFlag;
+		miscFlag_ = miscFlag;
+
 		dataCountMax_ = 0;
 		dataCountCur_ = 0;
 
 		dataStreamBuffer_	= nullptr;
-		dataStreamSRV_		= nullptr;
 	}
-	~DataStreamShader()
+	virtual ~DataStreamBuffer()
 	{
 		SAFE_RELEASE(dataStreamBuffer_);
-		SAFE_RELEASE(dataStreamSRV_);
 	}
 
 	void resetStream()
@@ -57,19 +58,27 @@ public:
 		return hr;
 	}
 
-	void setStreamSRV(ID3D11DeviceContext* devcon, unsigned int shaderRegister)
-	{
-		devcon->CSSetShaderResources(
-			shaderRegister, 
-			1, 
-			&dataStreamSRV_);
-	}
-
 	//std::vector<Data>& getData() { return data_; }
 	unsigned int getDataCountCur() { return dataCountCur_; }
 	unsigned int getDataCountMax() { return dataCountMax_; }
+	ID3D11Buffer* getDataBuffer()	{ return dataStreamBuffer_; }
 protected:
-private:
+	unsigned int getNewMaxCount(unsigned int maxCount, unsigned int targetMaxCount)
+	{
+		unsigned int newMaxCount = 1;
+		if(maxCount > 0)
+		{
+			newMaxCount = maxCount;
+		}
+
+		while(newMaxCount < targetMaxCount)
+		{
+			newMaxCount *= 2;
+		}
+
+		return newMaxCount;
+	}
+
 	HRESULT streamData(ID3D11Device* device, ID3D11DeviceContext* devcon)
 	{
 		HRESULT hr = S_OK;
@@ -78,7 +87,7 @@ private:
 		{
 			hr = increaseStreamCapacity(device); //Will be guaranteed to run the first time data is streamed.
 		}
-		
+
 		if(SUCCEEDED(hr))
 		{
 			hr = mapBuffer(devcon);
@@ -93,10 +102,8 @@ private:
 
 		dataCountMax_ = getNewMaxCount(dataCountMax_, dataCountCur_);
 
-		SAFE_RELEASE(dataStreamBuffer_);
-		SAFE_RELEASE(dataStreamSRV_);
 		hr = createStream(device);
-		
+
 		return hr;
 	}
 	HRESULT mapBuffer(ID3D11DeviceContext* devcon)
@@ -123,13 +130,12 @@ private:
 		return hr;
 	}
 
-	HRESULT createStream(ID3D11Device* device)
+	virtual HRESULT createStream(ID3D11Device* device)
 	{
 		HRESULT hr = S_OK;
 
+		SAFE_RELEASE(dataStreamBuffer_);
 		hr = createBuffer(device);
-		if(SUCCEEDED(hr))
-			hr = createSRV(device);
 
 		return hr;
 	}
@@ -140,9 +146,9 @@ private:
 		D3D11_BUFFER_DESC bufferDesc;
 		ZeroMemory(&bufferDesc, sizeof(bufferDesc));
 
-		bufferDesc.BindFlags			= D3D11_BIND_SHADER_RESOURCE;
+		bufferDesc.BindFlags			= bindFlag_; 
 		bufferDesc.ByteWidth			= sizeof(Data) * dataCountMax_;
-		bufferDesc.MiscFlags			= D3D11_RESOURCE_MISC_BUFFER_STRUCTURED;
+		bufferDesc.MiscFlags			= miscFlag_;
 		bufferDesc.CPUAccessFlags		= D3D11_CPU_ACCESS_WRITE;
 		bufferDesc.Usage				= D3D11_USAGE_DYNAMIC;
 		bufferDesc.StructureByteStride	= sizeof(Data);
@@ -152,54 +158,20 @@ private:
 
 		hr = device->CreateBuffer(&bufferDesc, &initialData, &dataStreamBuffer_);
 		if(FAILED(hr))
-			SHOW_MESSAGEBOX("DataStreamShader::createBuffer device->CreateBuffer failed!");
+			SHOW_MESSAGEBOX("DataStreambuffer::createBuffer device->CreateBuffer failed!");
 
 		return hr;
-	}
-	HRESULT createSRV(ID3D11Device* device)
-	{
-		HRESULT hr = S_OK;
-
-		D3D11_BUFFER_DESC bufferDesc;
-		ZeroMemory(&bufferDesc, sizeof(bufferDesc));
-		dataStreamBuffer_->GetDesc(&bufferDesc);
-
-		D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc;
-		ZeroMemory(&srvDesc, sizeof(srvDesc));
-
-		srvDesc.ViewDimension			= D3D11_SRV_DIMENSION_BUFFEREX;
-		srvDesc.BufferEx.FirstElement	= 0;
-		srvDesc.Format					= DXGI_FORMAT_UNKNOWN;
-		srvDesc.BufferEx.NumElements	= bufferDesc.ByteWidth / bufferDesc.StructureByteStride;
-
-		hr = device->CreateShaderResourceView(dataStreamBuffer_, &srvDesc, &dataStreamSRV_);
-		if(FAILED(hr))
-			SHOW_MESSAGEBOX("DataStreamShader::createSRV device->CreateShaderResourceView failed!");
-
-		return hr;
-	}
-
-	unsigned int getNewMaxCount(unsigned int maxCount, unsigned int targetMaxCount)
-	{
-		unsigned int newMaxCount = 1;
-		if(maxCount > 0)
-		{
-			newMaxCount = maxCount;
-		}
-
-		while(newMaxCount < targetMaxCount)
-		{
-			newMaxCount *= 2;
-		}
-
-		return newMaxCount;
 	}
 
 	unsigned int dataCountCur_;
 	unsigned int dataCountMax_;
 	std::vector<Data>			data_;
 	ID3D11Buffer*				dataStreamBuffer_;
-	ID3D11ShaderResourceView*	dataStreamSRV_;
+
+	//Desc
+	unsigned int bindFlag_;
+	unsigned int miscFlag_;
+private:
 };
 
-#endif //XKILL_RENDERER_DATASTREAMSHADER_H
+#endif //XKILL_RENDERER_DATASTREAMBUFFER_H

@@ -7,7 +7,7 @@
 
 #include "d3dInterface.h"
 #include "LightPos.h"
-#include "DataStreamShader.h"
+#include "DataStreamSRV.h"
 
 typedef long HRESULT;
 
@@ -46,6 +46,8 @@ public:
 	ManagementLight();	//!< Sets LightManagement to its default state.
 	~ManagementLight();	//!< Releases all memory and returns LightManagement to its default state.
 
+	void init();
+
 	virtual void reset(); //!< Releases all memory and returns LightManagement to its default state.
 	void update(ID3D11Device* device, ID3D11DeviceContext* devcon); //!< Updates all light-buffers with data from Attribute_Lights.
 	
@@ -65,10 +67,10 @@ private:
 	void updateStreamSpotLight();
 	//void updateStreamPosLight();
 
-	DataStreamShader<LightDescDir>		streamDirLight_;
-	DataStreamShader<LightDescPoint>	streamPointLight_;
-	DataStreamShader<LightDescSpot>		streamSpotLight_;
-	DataStreamShader<Float3>			streamPosLight_;
+	DataStreamSRV<LightDescDir>*		streamDirLight_;
+	DataStreamSRV<LightDescPoint>*	streamPointLight_;
+	DataStreamSRV<LightDescSpot>*	streamSpotLight_;
+	DataStreamSRV<Float3>*			streamPosLight_;
 };
 
 
