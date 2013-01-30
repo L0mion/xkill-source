@@ -85,25 +85,6 @@ Attribute_Projectile::~Attribute_Projectile()
 {
 }
 
-//Attribute_Light::Attribute_Light()
-//{
-//	lightType = LIGHTTYPE_NA;
-//
-//	direction	= Float3(0.0f, 0.0f, 0.0f);
-//	attenuation	= Float3(0.0f, 0.0f, 0.0f);
-//
-//	ambient		= Float4(0.0f, 0.0f, 0.0f, 0.0f);
-//	diffuse		= Float4(0.0f, 0.0f, 0.0f, 0.0f);
-//	specular	= Float4(0.0f, 0.0f, 0.0f, 0.0f);
-//
-//	range		= 0.0f;
-//	spotPower	= 0.0f;
-//}
-//Attribute_Light::~Attribute_Light()
-//{
-//	//Do nothing.
-//}
-
 Attribute_Light_Dir::Attribute_Light_Dir()
 {
 
@@ -143,8 +124,8 @@ Attribute_Camera::Attribute_Camera()
 
 	aspectRatio = 0.785f;
 	fieldOfView = 0.785f; 
-	zFar = 60.0f;
-	zNear = 0.01f;
+	zFar = 40.0f;
+	zNear = 1.0f;
 
 	up		= Float3(0.0f, 1.0f, 0.0f);
 	right	= Float3(1.0f, 0.0f, 0.0f);
@@ -170,6 +151,7 @@ Attribute_SplitScreen::~Attribute_SplitScreen()
 Attribute_Input::Attribute_Input()
 {
 	jump = false;
+	jetpack = false;
 	sprint = false;
 	killPlayer = false;
 	fire = false;

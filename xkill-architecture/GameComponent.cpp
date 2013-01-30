@@ -170,6 +170,8 @@ void GameComponent::onUpdate(float delta)
 		{
 			health->health = 0.0f;
 			input->killPlayer = false;
+			
+			SEND_EVENT(&Event_PlayerDeath(itrPlayer.storageIndex()));
 		}
 
 		if(input->sprint)
@@ -222,7 +224,7 @@ void GameComponent::onUpdate(float delta)
 				physics->reloadDataIntoBulletPhysics = true;
 
 				health->health = health->startHealth; // restores player health
-				SEND_EVENT(&Event_PlaySound(1));
+				SEND_EVENT(&Event_PlaySound(3));
 			}
 		}
 

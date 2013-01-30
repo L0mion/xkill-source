@@ -84,6 +84,8 @@ void InputComponent::onUpdate(float delta)
 
 void InputComponent::handleInput(float delta)
 {
+	delta = settings->trueDeltaTime;
+
 	while(itrPlayer.hasNext())
 	{
 		Attribute_Player* player = itrPlayer.getNext();
@@ -112,6 +114,12 @@ void InputComponent::handleInput(float delta)
 			input->changeAmmunitionType = true;
 		if(device->getBoolReleased(InputAction::ACTION_B_CHANGE_FIRINGMODE))
 			input->changeFiringMode = true;
+
+		if(device->getBoolValue(InputAction::ACTION_B_TIME_SPEED_UP))
+			settings->timeScale += delta;
+		if(device->getBoolValue(InputAction::ACTION_B_TIME_SPEED_DOWN))
+			settings->timeScale -= delta;
+
 
 		if(device->getBoolReleased(InputAction::ACTION_B_TOGGLE_MUTE_SOUND))
 			SEND_EVENT(&Event_PlaySound(-1, true));
@@ -159,6 +167,9 @@ void InputComponent::handleInput(float delta)
 
 		if(device->getBoolPressed(InputAction::ACTION_B_JUMP))
 			input->jump = true;
+
+		if(device->getBoolValue(InputAction::ACTION_B_JETPACK))
+			input->jetpack = true;
 
 		if(device->getBoolValue(InputAction::ACTION_B_SPRINT))
 			input->sprint = true;

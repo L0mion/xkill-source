@@ -193,7 +193,8 @@ void PhysicsComponent::onUpdate(float delta)
 
 	dynamicsWorld_->stepSimulation(delta,0); //Bullet Physics physics simulation
 
-	if(BULLETPHYSICSDEBUGDRAW)
+	bool showDebug =  ATTRIBUTE_MANAGER->settings->showDebugPhysics;
+	if(showDebug)
 	{
 		//static float timer = 0.0f;
 		//if(timer > 0.1f)

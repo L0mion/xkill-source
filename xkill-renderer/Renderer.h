@@ -100,7 +100,6 @@ private:
 	void drawHudElement(int viewportIndex, unsigned int textureId, DirectX::XMFLOAT4X4 transformationMatrix); //!< Draws a single hud element.
 
 	//temp
-	void renderBackBufferClean();	//refactor me
 	void renderAnimatedMesh(
 		DirectX::XMFLOAT4X4 viewMatrix, 
 		DirectX::XMFLOAT4X4 projectionMatrix);
