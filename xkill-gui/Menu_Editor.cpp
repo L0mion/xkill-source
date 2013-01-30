@@ -65,14 +65,14 @@ Menu_Editor::Menu_Editor( Ui::MainWindowClass& ui, QWidget* parent ) : QWidget(p
 	connect(ui.treeView_entityBrowser,				SIGNAL(clicked(QModelIndex)),			this,	SLOT(slot_clicked_entityBrowser(QModelIndex)));
 	connect(ui.treeView_entityInspector,			SIGNAL(clicked(QModelIndex)),			this,	SLOT(slot_clicked_entityInspector(QModelIndex)));
 	connect(ui.horizontalSlider_simulationSpeed,	SIGNAL(valueChanged(int)),				this,	SLOT(slot_changed_simulationSpeed(int)));
-	connect(ui.checkBox_showDebugPhysics,			SIGNAL(stateChanged(int)),						this,	SLOT(slot_showDebugPhysics()));
-	connect(ui.checkBox_autoRefresh,				SIGNAL(stateChanged(int)),						this,	SLOT(slot_attributeInspector_refresh()));
+	connect(ui.checkBox_showDebugPhysics,			SIGNAL(stateChanged(int)),				this,	SLOT(slot_showDebugPhysics()));
+	connect(ui.checkBox_autoRefresh,				SIGNAL(stateChanged(int)),				this,	SLOT(slot_attributeInspector_refresh()));
 	connect(ui.dockWidget,							SIGNAL(visibilityChanged(bool)),		this,	SLOT(slot_editorRefresh()));
 	connect(model_attributeInspector,				SIGNAL(itemChanged(QStandardItem*)),	this,	SLOT(slot_attributeInspector_itemChanged()));
 	 
 	ui.dockWidget->hide();
 
-	// Show debugshapes in debug
+	// Show debuglines in debug
 	#ifdef XKILL_DEBUG
 	{
 		ui.checkBox_showDebugPhysics->setChecked(true);

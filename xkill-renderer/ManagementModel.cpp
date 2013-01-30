@@ -15,6 +15,8 @@
 #include "renderingUtilities.h"
 #include "ManagementModel.h"
 
+#include <sstream>
+
 ATTRIBUTES_DECLARE_ALL
 
 ManagementModel::ManagementModel()
@@ -112,7 +114,14 @@ HRESULT ManagementModel::createModelD3D(
 	}
 	else
 	{
-		ERROR_MSG(L"ManagementModel::createModelD3D Could not find model!");
+		std::stringstream ss;
+		ss << "ManagementModel::createModelD3D Could not find model with id ";
+		ss << modelID;
+
+		std::string str;
+		str = ss.str();
+		
+		ERROR_MSG(str);
 		hr = S_FALSE;
 	}
 

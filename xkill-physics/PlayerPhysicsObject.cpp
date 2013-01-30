@@ -30,6 +30,7 @@ bool PlayerPhysicsObject::subClassSpecificInitHook()
 {
 	forceActivationState(DISABLE_DEACTIVATION); //Prevent the player from getting stuck when standing still
 	//setCollisionFlags(getCollisionFlags() | btCollisionObject::CF_KINEMATIC_OBJECT);
+
 	return true;
 }
 
@@ -76,6 +77,7 @@ void PlayerPhysicsObject::handleInput(float delta)
 
 		inputAttribute = itrInput.at(playerAttribute->ptr_input);
 
+		//look and move
 		yaw_ += inputAttribute->rotation.x;
 		btVector3 move = playerAttribute->currentSpeed*btVector3(inputAttribute->position.x, 0, inputAttribute->position.y);
 		move = move.rotate(btVector3(0,1,0),yaw_);
@@ -87,12 +89,14 @@ void PlayerPhysicsObject::handleInput(float delta)
 		world.setRotation(btQuaternion(yaw_,0,0));
 		setWorldTransform(world);
 
-		if(inputAttribute->jump && playerAttribute->timeSinceLastJump > playerAttribute->delayInSecondsBetweenEachJump)
+		//Jump
+		if(inputAttribute->jump && playerAttribute->timeSinceLastJump > playerAttribute->delayInSecondsBetweenEachJump && playerAttribute->collidingWithWorld)
 		{
 			applyCentralImpulse(btVector3(0.0f, 5.0f, 0.0f));
 			playerAttribute->timeSinceLastJump = 0.0f;
 		}
 
+		//Jetpack
 		if(inputAttribute->jetpack)
 		{
 			applyCentralImpulse(btVector3(0.0f, 50.0f*delta, 0.0f));
@@ -106,5 +110,10 @@ void PlayerPhysicsObject::handleInput(float delta)
 		inputAttribute->jump = false;
 		inputAttribute->jetpack = false;
 
+		float epsilon = 0.0001f;
+		if(move.x() == 0.0f && move.y() == 0.0f && move.z() == 0.0f && playerAttribute->collidingWithWorld)
+		{
+			setLinearVelocity(btVector3(0.0f, 0.0f, 0.0f));
+		}
 	}
 }

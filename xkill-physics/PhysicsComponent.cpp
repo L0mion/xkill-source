@@ -136,6 +136,7 @@ void PhysicsComponent::onUpdate(float delta)
 		synchronizeWithAttributes(physicsAttribute, index);
 		physicsObjects_->at(index)->onUpdate(delta);
 
+		//Handle players taking off when going up ramps
 		if(physicsAttribute->collisionFilterGroup == Attribute_Physics::PLAYER)
 		{
 			Entity* playerEntity = itrPhysics.ownerAt(index);
@@ -168,7 +169,7 @@ void PhysicsComponent::onUpdate(float delta)
 				{
 					Attribute_Player* playerAttribute = itrPlayer.at(playerAttributeIndices.at(i));
 					Attribute_Health* playerHealthAttribute = itrHealth.at(playerAttribute->ptr_health);
-					if(playerHealthAttribute->health > 0.0f)
+					if(!playerAttribute->detectedAsDead)
 					{
 						DEBUGPRINT("Player entity " << playerEntityIndex << " was out of bounds");
 						SEND_EVENT(&Event_PlayerDeath(playerAttributeIndices[i]));
@@ -193,7 +194,7 @@ void PhysicsComponent::onUpdate(float delta)
 
 	dynamicsWorld_->stepSimulation(delta,0); //Bullet Physics physics simulation
 
-	bool showDebug =  ATTRIBUTE_MANAGER->settings->showDebugPhysics;
+	bool showDebug = ATTRIBUTE_MANAGER->settings->showDebugPhysics;
 	if(showDebug)
 	{
 		//static float timer = 0.0f;
