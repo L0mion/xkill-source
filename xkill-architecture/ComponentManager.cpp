@@ -123,6 +123,8 @@ bool ComponentManager::init(HWND windowHandle, HWND parentWindowHandle)
 		return false;
 	}
 
+	SEND_EVENT(&Event_PlaySound(4));
+
 	// Returns that everything went ok
 	return true;
 }

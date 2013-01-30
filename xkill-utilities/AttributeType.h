@@ -475,6 +475,7 @@ struct DLL_U Attribute_Input : public IAttribute
 	bool fire;
 	bool firePressed;
 	bool jump;
+	bool jetpack;
 	bool sprint;
 	bool killPlayer;
 	bool changeAmmunitionType;

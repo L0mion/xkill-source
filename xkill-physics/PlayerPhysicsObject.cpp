@@ -86,11 +86,14 @@ void PlayerPhysicsObject::handleInput()
 		world.setRotation(btQuaternion(yaw_,0,0));
 		setWorldTransform(world);
 
-		if(inputAttribute->jump && playerAttribute->timeSinceLastJump > 1.0f)
+		if(inputAttribute->jump && playerAttribute->timeSinceLastJump > 1.0f || inputAttribute->jetpack)
 		{
 			applyCentralImpulse(btVector3(0.0f, 5.0f, 0.0f));
-			inputAttribute->jump = false;
 			playerAttribute->timeSinceLastJump = 0.0f;
 		}
+
+		inputAttribute->jump = false;
+		inputAttribute->jetpack = false;
+
 	}
 }

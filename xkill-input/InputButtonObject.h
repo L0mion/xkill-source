@@ -13,7 +13,7 @@ public:
 	InputButtonObject(char key);
 	virtual ~InputButtonObject(void);
 
-	void SetValue(bool value);
+	void SetValue(bool value, bool updatePrevValue = true);
 	void SetValue(int value);
 
 	/*!
