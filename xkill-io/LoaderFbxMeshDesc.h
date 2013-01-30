@@ -66,6 +66,8 @@ public:
 	//! Creates a vector with vertics of type VertexPosNormTexTanSkinned.
 	std::vector<VertexPosNormTexTanSkinned> createVerticesPosNormTexTanSkinned();
 
+	void indexData();
+
 	std::vector<unsigned int> getIndices();
 	
 	std::vector<int>	getPolygonGroupIds();	

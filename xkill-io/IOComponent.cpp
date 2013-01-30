@@ -257,46 +257,8 @@ bool IOComponent::loadFbx(std::string modelName, std::string modelPath, MdlDescM
 
 	for(unsigned int i=0; i<fbxModels.size(); i++)
 	{
-		switch(modelDesc->vertexType_)
-		{
-		case VERTEX_TYPE_POS_COLOR:
-			loadFbxCreatePosColor(modelDesc, &fbxModels[i]);
-			break;
-		case VERTEX_TYPE_POS_NORM_TEX:
-			loadFbxCreatePosNormTex(modelDesc, &fbxModels[i]);
-			break;
-		case VERTEX_TYPE_POS_NORM_SKINNED:
-			loadFbxCreatePosNormSkinned(modelDesc, &fbxModels[i]);
-			break;
-		case VERTEX_TYPE_POS_NORM_TEX_SKINNED:
-			loadFbxCreatePosNormTexSkinned(modelDesc, &fbxModels[i]);
-			break;
-		case VERTEX_TYPE_POS_NORM_TEX_TAN_SKINNED:
-			loadFbxCreatePosNormTexTanSkinned(modelDesc, &fbxModels[i]);
-			break;
-		}
 	}
 	return successfulLoad;
-}
-void IOComponent::loadFbxCreatePosColor(MdlDescModel* modelDesc, LoaderFbxModelDesc* fbxModel)
-{
-	
-}
-void IOComponent::loadFbxCreatePosNormTex(MdlDescModel* modelDesc, LoaderFbxModelDesc* fbxModel)
-{
-	
-}
-void IOComponent::loadFbxCreatePosNormSkinned(MdlDescModel* modelDesc, LoaderFbxModelDesc* fbxModel)
-{
-	
-}
-void IOComponent::loadFbxCreatePosNormTexSkinned(MdlDescModel* modelDesc, LoaderFbxModelDesc* fbxModel)
-{
-
-}
-void IOComponent::loadFbxCreatePosNormTexTanSkinned(MdlDescModel* modelDesc, LoaderFbxModelDesc* fbxModel)
-{
-
 }
 
 FileExtension IOComponent::findFileType(std::string modelName)

@@ -58,11 +58,6 @@ private:
 
 	bool loadObj(std::string modelName, std::string modelPath, MdlDescModel* modelDesc);
 	bool loadFbx(std::string modelName, std::string modelPath, MdlDescModel* modelDesc);
-	void loadFbxCreatePosColor(MdlDescModel* modelDesc, LoaderFbxModelDesc* fbxModel);
-	void loadFbxCreatePosNormTex(MdlDescModel* modelDesc, LoaderFbxModelDesc* fbxModel);
-	void loadFbxCreatePosNormSkinned(MdlDescModel* modelDesc, LoaderFbxModelDesc* fbxModel);
-	void loadFbxCreatePosNormTexSkinned(MdlDescModel* modelDesc, LoaderFbxModelDesc* fbxModel);
-	void loadFbxCreatePosNormTexTanSkinned(MdlDescModel* modelDesc, LoaderFbxModelDesc* fbxModel);
 
 	FileExtension findFileType(std::string modelName);
 
