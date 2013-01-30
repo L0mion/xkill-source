@@ -85,8 +85,8 @@ public:
 		CREATE_ATTRIBUTE(Attribute_Camera, camera, entity);
 		CONNECT_ATTRIBUTES(camera, spatial);
 
-
 		CREATE_ATTRIBUTE(Attribute_Health, health, entity);
+		health->startHealth = 100;
 
 		CREATE_ATTRIBUTE(Attribute_WeaponStats, weaponStats, entity);
 		weaponStats->currentAmmunitionType = Ammunition::SCATTER;
@@ -124,6 +124,15 @@ public:
 		physics->collisionFilterGroup = Attribute_Physics::WORLD;
 		physics->collisionFilterMask = Attribute_Physics::PLAYER | Attribute_Physics::PROJECTILE | Attribute_Physics::FRUSTUM | Attribute_Physics::PICKUPABLE;
 		physics->mass = 0;
+
+		position = ((AttributeManager*)AttributeManagerDLLWrapper::getInstance())->position.createAttribute(entity);
+		position->position = Float3(0.0f, 0.5f, 0.0f);
+		
+		//CREATE_ATTRIBUTE(Attribute_Light_Dir, lightDir, entity);
+		//lightDir->lightDir.direction	= Float3(0.57735f, -0.57735f, 0.57735f);
+		//lightDir->lightDir.ambient		= Float4(0.2f, 0.2f, 0.2f, 1.0f);
+		//lightDir->lightDir.diffuse		= Float4(0.2f, 0.2f, 0.2f, 1.0f);
+		//lightDir->lightDir.specular		= Float4(0.2f, 0.2f, 0.2f, 1.0f);
 	}
 
 	void createProjectileEntity(Entity* entity, Event_CreateProjectile* e)
@@ -154,7 +163,8 @@ public:
 		CONNECT_ATTRIBUTES(physics, render);
 		physics->meshID = render->meshID;
 		
-		physics->linearVelocity = e->velocity;
+		float scale = 100.0f;
+		physics->linearVelocity = e->velocity; //Float3(e->velocity.x / scale,  e->velocity.y / scale, e->velocity.z / scale);
 		physics->mass = 100.0f;
 		physics->gravity = Float3(0.0f, 0.0f, 0.0f);
 		physics->collisionResponse = true;
@@ -169,14 +179,14 @@ public:
 		damage->damage = e->damage;
 		damage->owner_entityID = e->entityIdOfCreator;
 
-		////temp, create demo light for each projectile
-		//CREATE_ATTRIBUTE(Attribute_Light_Point, lightPoint, entity);
-		//CONNECT_ATTRIBUTES(lightPoint, position);
-		//lightPoint->lightPoint.ambient		= Float4(0.0f, 0.0f, 0.0f, 1.0f);
-		//lightPoint->lightPoint.diffuse		= Float4(0.8f, 0.8f, 0.8f, 1.0f);
-		//lightPoint->lightPoint.specular		= Float4(0.1f, 0.1f, 0.1f, 1.0f);
-		//lightPoint->lightPoint.range		= 100.0f;
-		//lightPoint->lightPoint.attenuation	= Float3(1.5f, 1.2f, 0.0f);
+		//temp, create demo light for each projectile
+		CREATE_ATTRIBUTE(Attribute_Light_Point, lightPoint, entity);
+		CONNECT_ATTRIBUTES(lightPoint, position);
+		lightPoint->lightPoint.ambient		= Float4(0.8f, 0.0f, 0.0f, 1.0f);
+		lightPoint->lightPoint.diffuse		= Float4(0.8f, 0.0f, 0.0f, 1.0f);
+		lightPoint->lightPoint.specular		= Float4(0.8f, 0.0f, 0.0f, 1.0f);
+		lightPoint->lightPoint.range		= 1.0f;
+		lightPoint->lightPoint.attenuation	= Float3(0.0f, 0.1f, 0.0f);
 	}
 
 	void createMesh(Entity* entity, Event_CreateMesh* e)

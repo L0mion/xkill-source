@@ -1,5 +1,6 @@
 #include "constantBuffers.hlsl"
 #include "structs.hlsl"
+#include "UtilSphereMapTransform.hlsl"
 
 struct PSOut
 {
@@ -17,11 +18,11 @@ PSOut defaultPS(DefaultVSOut pIn)
 {
 	PSOut output;
 
-	output.normal		= float4(pIn.normalW, pIn.position.z);
+	output.normal		= float4(UtilEncodeSphereMap(pIn.normalW), 0.0f, 0.0f);
 	pIn.texcoord.y = 1-pIn.texcoord.y;
 	output.albedo		= texAlbedo.SampleLevel(ss, pIn.texcoord, 0);
-
-	output.material		= float4(specularTerm, 1.0f);
+	
+	output.material		= float4(pIn.positionW, 0.0f);//float4(specularTerm, pIn.positionV.z); //
 
 	return output;
 }

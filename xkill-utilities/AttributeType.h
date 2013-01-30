@@ -244,7 +244,7 @@ struct DLL_U Attribute_Physics : public IAttribute
 {
 	enum PhysicsAttributeType
 	{
-		DEFAULT_ERROR = 0,
+		NOTHING = 0,
 		WORLD = 1,
 		PLAYER = 2,
 		PROJECTILE = 4,
@@ -399,7 +399,7 @@ struct DLL_U Attribute_Light_Point : public IAttribute
 		list->add(lightPoint.ambient,		"ambient");
 		list->add(lightPoint.diffuse,		"diffuse");
 		list->add(lightPoint.specular,		"specular");
-		list->add(lightPoint.pos,			"pos");
+		//list->add(lightPoint.pos,			"pos");
 		list->add(lightPoint.range,			"range");
 		list->add(lightPoint.attenuation,	"attenuation");
 
@@ -411,7 +411,7 @@ struct DLL_U Attribute_Light_Point : public IAttribute
 		list->get(&lightPoint.ambient);
 		list->get(&lightPoint.diffuse);
 		list->get(&lightPoint.specular);
-		list->get(&lightPoint.pos);
+		//list->get(&lightPoint.pos);
 		list->get(&lightPoint.range);
 		list->get(&lightPoint.attenuation);
 	};
@@ -440,7 +440,7 @@ struct DLL_U Attribute_Light_Spot : public IAttribute
 		list->add(lightSpot.ambient,		"ambient");
 		list->add(lightSpot.diffuse,		"diffuse");
 		list->add(lightSpot.specular,		"specular");
-		list->add(lightSpot.pos,			"pos");
+		//list->add(lightSpot.pos,			"pos");
 		list->add(lightSpot.range,			"range");
 		list->add(lightSpot.direction,		"direction");
 		list->add(lightSpot.spotPow,		"spotPow");
@@ -454,7 +454,7 @@ struct DLL_U Attribute_Light_Spot : public IAttribute
 		list->get(&lightSpot.ambient);
 		list->get(&lightSpot.diffuse);
 		list->get(&lightSpot.specular);
-		list->get(&lightSpot.pos);
+		//list->get(&lightSpot.pos);
 		list->get(&lightSpot.range);
 		list->get(&lightSpot.direction);
 		list->get(&lightSpot.spotPow);
@@ -694,6 +694,7 @@ struct DLL_U Attribute_Player : public IAttribute
 	float sprintSpeed;			//!< Speed when sprinting.
 	float respawnDelay;			//!< Time between death and respawn
 	float currentRespawnDelay;	//!< Time until respawn
+	float timeSinceLastJump;	//!< Incrementing timer
 
 	DataItemList* getDataList()
 	{
@@ -861,7 +862,8 @@ struct DLL_U Attribute_PickupablesSpawnPoint : public IAttribute
 
 	PickupableType spawnPickupableType;			//!< Type of pickupable spawned by this pickupables spawn point
 	float spawnDelayInSeconds;					//!< Delay until a pickupable may spawn
-	float secondsSinceLastSpawn;				//!< Incrementing timer
+	float secondsSinceLastSpawn;				//!< Incrementing timer, reset when spawned.
+	float secondsSinceLastPickup;				//!< Incrementing timer, reset when picked up.
 	int maxNrOfExistingSpawnedPickupables;		//!< Is checked against "currentNrOfExistingSpawnedPickupables"
 	int currentNrOfExistingSpawnedPickupables;	//!< Incremented when a pickubalbe is spawned from this pickupables spawn point. Decremented when a pickupable is picked up
 
@@ -873,6 +875,7 @@ struct DLL_U Attribute_PickupablesSpawnPoint : public IAttribute
 		//list->add(spawnPickupableType, "spawnPickupableType");
 		list->add(spawnDelayInSeconds, "spawnDelayInSeconds");
 		list->add(secondsSinceLastSpawn, "secondsSinceLastSpawn");
+		list->add(secondsSinceLastPickup, "secondsSinceLastPickup");
 		list->add(maxNrOfExistingSpawnedPickupables, "maxNrOfExistingSpawnedPickupables");
 		list->add(currentNrOfExistingSpawnedPickupables, "currentNrOfExistingSpawnedPickupables");
 
@@ -884,6 +887,7 @@ struct DLL_U Attribute_PickupablesSpawnPoint : public IAttribute
 		//list->get(&spawnPickupableType);
 		list->get(&spawnDelayInSeconds);
 		list->get(&secondsSinceLastSpawn);
+		list->get(&secondsSinceLastPickup);
 		list->get(&maxNrOfExistingSpawnedPickupables);
 		list->get(&currentNrOfExistingSpawnedPickupables);
 	};

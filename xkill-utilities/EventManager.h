@@ -20,7 +20,7 @@ class Event;
 class DLL_U EventManager
 {
 private:
-	std::vector<std::vector<IObserver*>>* subscibers;	
+	std::vector<std::vector<IObserver*>>* subscribers;	
 	std::vector<std::vector<Event*>>* queues;		//! Used to queue Events if queue feature is used
 
 	EventManager();

@@ -78,6 +78,7 @@ bool PhysicsObject::init(unsigned int attributeIndex,unsigned int collisionFilte
 	
 	btVector3 localInertia = subClassCalculateLocalInertiaHook(mass);
 	setMassProps(mass, localInertia); //Set inverse mass and inverse local inertia
+	updateInertiaTensor(); //check
 	if((getCollisionFlags() & btCollisionObject::CF_STATIC_OBJECT))
 	{
 		btTransform world;

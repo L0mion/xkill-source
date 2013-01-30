@@ -111,6 +111,9 @@ void MainWindow::keyPressEvent( QKeyEvent* e )
 		ui.dockWidget->toggleViewAction()->activate(QAction::Trigger);
 
 
+	Qt::Key_Plus;
+	Qt::Key_Minus;
+
 	//switch (e->key()) 
 	//{
 	//case Qt::Key_Escape:

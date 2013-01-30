@@ -65,7 +65,7 @@ Menu_Editor::Menu_Editor( Ui::MainWindowClass& ui, QWidget* parent ) : QWidget(p
 	connect(ui.treeView_entityBrowser,				SIGNAL(clicked(QModelIndex)),			this,	SLOT(slot_clicked_entityBrowser(QModelIndex)));
 	connect(ui.treeView_entityInspector,			SIGNAL(clicked(QModelIndex)),			this,	SLOT(slot_clicked_entityInspector(QModelIndex)));
 	connect(ui.horizontalSlider_simulationSpeed,	SIGNAL(valueChanged(int)),				this,	SLOT(slot_changed_simulationSpeed(int)));
-	connect(ui.horizontalSlider_simulationSpeed,	SIGNAL(valueChanged(int)),				this,	SLOT(slot_changed_simulationSpeed(int)));
+	connect(ui.checkBox_showDebugPhysics,			SIGNAL(clicked()),						this,	SLOT(slot_showDebugPhysics()));
 	connect(ui.checkBox_autoRefresh,				SIGNAL(clicked()),						this,	SLOT(slot_attributeInspector_refresh()));
 	connect(ui.dockWidget,							SIGNAL(visibilityChanged(bool)),		this,	SLOT(slot_editorRefresh()));
 	connect(model_attributeInspector,				SIGNAL(itemChanged(QStandardItem*)),	this,	SLOT(slot_attributeInspector_itemChanged()));
@@ -599,6 +599,11 @@ void Menu_Editor::slot_attributeInspector_itemChanged()
 			EventManager::getInstance()->sendEvent(&Event_AttributeUpdated(index, attributeEnum));
 		}
 	}
+}
+
+void Menu_Editor::slot_showDebugPhysics()
+{
+	settings->showDebugPhysics = ui.checkBox_showDebugPhysics->isChecked();
 }
 
 

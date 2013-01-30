@@ -13,7 +13,7 @@ ATTRIBUTES_DECLARE_ALL;
 GameComponent::GameComponent(void)
 {
 	SUBSCRIBE_TO_EVENT(this, EVENT_PHYSICS_ATTRIBUTES_COLLIDING);
-	SUBSCRIBE_TO_EVENT(this, EVENT_START_DEATHMATCH);	
+	SUBSCRIBE_TO_EVENT(this, EVENT_START_DEATHMATCH);
 	SUBSCRIBE_TO_EVENT(this, EVENT_END_DEATHMATCH);
 	SUBSCRIBE_TO_EVENT(this, EVENT_TRANSFEREVENTSTOGAME);
 	SUBSCRIBE_TO_EVENT(this, EVENT_PLAYERDEATH);
@@ -130,38 +130,41 @@ void GameComponent::onUpdate(float delta)
 		//
 		// Firing logic
 		//
-		if((input->fire && firingMode->type == FiringMode::AUTO) || 
-			input->firePressed && (firingMode->type == FiringMode::SINGLE || firingMode->type == FiringMode::SEMI))
+		if(health->health > 0.0f)
 		{
-			input->fire = false;
-			input->firePressed = false;
+			if((input->fire && firingMode->type == FiringMode::AUTO) || 
+				input->firePressed && (firingMode->type == FiringMode::SINGLE || firingMode->type == FiringMode::SEMI))
+			{
+				input->fire = false;
+				input->firePressed = false;
 
-			if(firingMode->cooldownBetweenShots >= 0 && firingMode->cooldownLeft <= 0.0f
-				&& firingMode->nrOfShotsLeftInClip > 0)
-			{
-				if(ammo->totalNrOfShots != -1) // special case: debug machine gun. Unlimited number of shots.
+				if(firingMode->cooldownBetweenShots >= 0 && firingMode->cooldownLeft <= 0.0f
+					&& firingMode->nrOfShotsLeftInClip > 0)
 				{
-					firingMode->cooldownLeft = firingMode->cooldownBetweenShots;
-					ammo->totalNrOfShots--;
-					firingMode->nrOfShotsLeftInClip--;
-				}
+					if(ammo->totalNrOfShots != -1) // special case: debug machine gun. Unlimited number of shots.
+					{
+						firingMode->cooldownLeft = firingMode->cooldownBetweenShots;
+						ammo->totalNrOfShots--;
+						firingMode->nrOfShotsLeftInClip--;
+					}
 
-				shootProjectile(position, camera, weaponStats);
-			}
-			else if(firingMode->nrOfShotsLeftInClip <= 0)
-			{
-				if(ammo->totalNrOfShots <= 0)
-				{
-					DEBUGPRINT("Cannot shoot: Out of ammo.");
+					shootProjectile(position, camera, weaponStats);
 				}
-				else
+				else if(firingMode->nrOfShotsLeftInClip <= 0)
 				{
-					DEBUGPRINT("Cannot shoot: Out of ammo in current clip.");
+					if(ammo->totalNrOfShots <= 0)
+					{
+						DEBUGPRINT("Cannot shoot: Out of ammo.");
+					}
+					else
+					{
+						DEBUGPRINT("Cannot shoot: Out of ammo in current clip.");
+					}
 				}
-			}
-			else if(firingMode->cooldownLeft > 0)
-			{
-				DEBUGPRINT("Cannot shoot: weapon cooldown. Be patient.");
+				else if(firingMode->cooldownLeft > 0)
+				{
+					DEBUGPRINT("Cannot shoot: weapon cooldown. Be patient.");
+				}
 			}
 		}
 		if(input->killPlayer)
@@ -169,11 +172,6 @@ void GameComponent::onUpdate(float delta)
 			health->health = 0.0f;
 			input->killPlayer = false;
 		}
-		//if(input->jump)
-		//{
-		//	//To be implemented... (2013-01-17 16.17)
-		//	input->jump = false;
-		//}
 
 		if(input->sprint)
 		{
@@ -215,6 +213,7 @@ void GameComponent::onUpdate(float delta)
 				physics->gravity = Float3(0.0f, -10.0f, 0.0f);
 				physics->collisionFilterMask = physics->EVERYTHING;
 				physics->collisionResponse = true;
+				physics->meshID = 0;
 
 				spatial->rotation = Float4(0.0f, 0.0f, 0.0f, 1.0f);
 				camera->up = Float3(0.0f, 1.0f, 0.0f);
@@ -227,6 +226,8 @@ void GameComponent::onUpdate(float delta)
 				SEND_EVENT(&Event_PlaySound(1));
 			}
 		}
+
+		player->timeSinceLastJump += delta;
 	}
 
 
@@ -271,8 +272,13 @@ void GameComponent::onUpdate(float delta)
 	while(itrPickupablesSpawnPoint.hasNext())
 	{
 		Attribute_PickupablesSpawnPoint* pickupablesSpawnPoint = itrPickupablesSpawnPoint.getNext();
+		
+		//Timer incrementation
+		pickupablesSpawnPoint->secondsSinceLastPickup += delta;
 		pickupablesSpawnPoint->secondsSinceLastSpawn += delta;
-		if(pickupablesSpawnPoint->secondsSinceLastSpawn > pickupablesSpawnPoint->spawnDelayInSeconds)
+
+		//Spawn new pickupable, if secondsSinceLastSpawn and secondsSinceLastPickup are enough incremented
+		if(pickupablesSpawnPoint->secondsSinceLastSpawn > pickupablesSpawnPoint->spawnDelayInSeconds && pickupablesSpawnPoint->secondsSinceLastPickup > pickupablesSpawnPoint->spawnDelayInSeconds)
 		{
 			if(pickupablesSpawnPoint->currentNrOfExistingSpawnedPickupables < pickupablesSpawnPoint->maxNrOfExistingSpawnedPickupables)
 			{
@@ -282,7 +288,7 @@ void GameComponent::onUpdate(float delta)
 				switch(pickupablesSpawnPoint->spawnPickupableType)
 				{
 				case PickupableType::MEDKIT:
-					amount = 20;
+					amount = 1;
 						break;
 				case PickupableType::AMMUNITION_BULLET:
 					amount = 100;
@@ -295,8 +301,8 @@ void GameComponent::onUpdate(float delta)
 					break;
 				}
 
+				//Each pickupable knows it pickupablesSpawnPoint creator
 				AttributePointer creatorPickupablesSpawnPoint = itrPickupablesSpawnPoint.attributePointer(pickupablesSpawnPoint);
-
 				SEND_EVENT(&Event_CreatePickupable(pickupablesSpawnPointPosition->position, pickupablesSpawnPoint->spawnPickupableType, creatorPickupablesSpawnPoint, amount));
 				pickupablesSpawnPoint->secondsSinceLastSpawn = 0.0f;
 			}
@@ -483,6 +489,7 @@ void GameComponent::event_PhysicsAttributesColliding(Event_PhysicsAttributesColl
 			for(unsigned i=0;i<physicsId.size();i++)
 			{
 				Attribute_Physics* physicsAttribute = itrPhysics.at(physicsId.at(i));
+				SEND_EVENT(&Event_ModifyPhysicsObject(ModifyPhysicsObjectData::GRAVITY, static_cast<void*>(&Float3(0.0f, -10.0f, 0.0f)), physicsId.at(i)));
 				//physicsAttribute->gravity = Float3(0.0f, -10.0f, 0.0f);
 				//physicsAttribute->linearVelocity = Float3(0.0f, 0.0f, 0.0f);
 				//physicsAttribute->reloadDataIntoBulletPhysics = true;
@@ -495,9 +502,9 @@ void GameComponent::event_PhysicsAttributesColliding(Event_PhysicsAttributesColl
 				Attribute_Projectile* projectileAttribute = itrProjectile.at(projectileId.at(i));
 
 				//Shorten lifetime of projectile colliding with physics objects
-				if(projectileAttribute->currentLifeTimeLeft > 0.15f)
+				if(projectileAttribute->currentLifeTimeLeft > 1.00f)
 				{
-					projectileAttribute->currentLifeTimeLeft = 0.15f;
+					projectileAttribute->currentLifeTimeLeft = 1.00f;
 				}
 
 				//Explosion handling.
@@ -578,6 +585,8 @@ void GameComponent::event_PhysicsAttributesColliding(Event_PhysicsAttributesColl
 			//Decrement number of spawned pickupables for the spawnpoint that spanwed the pickupable that the player picked up. Also remove it.
 			Attribute_PickupablesSpawnPoint* pickupablesSpawnPointAttribute = itrPickupablesSpawnPoint.at(pickupableAttribute->ptr_creatorPickupablesSpawnPoint);
 			pickupablesSpawnPointAttribute->currentNrOfExistingSpawnedPickupables--;
+			pickupablesSpawnPointAttribute->secondsSinceLastPickup = 0;
+			
 			SEND_EVENT(&Event_RemoveEntity(entity1->getID()));
 		}
 	}
@@ -766,7 +775,7 @@ void GameComponent::event_StartDeathmatch( Event_StartDeathmatch* e )
 	//Continue
 	for(int i=0;i<10;i++)
 	{
-		SEND_EVENT(&Event_CreatePickupablesSpawnPoint(Float3(2, 5, i-6), PickupableType::MEDKIT));
+		SEND_EVENT(&Event_CreatePickupablesSpawnPoint(Float3(2.0f, 5.0f, i-6.0f), PickupableType::MEDKIT));
 	}
 
 	//SEND_EVENT(&Event_CreatePickupable(Float3(2.0f, 2.0f, 0.0f), Attribute_Pickupable::MEDKIT, 5));
@@ -784,12 +793,15 @@ void GameComponent::event_PlayerDeath(Event_PlayerDeath* e)
 {
 	Attribute_Player* player = itrPlayer.at(e->playerIndex);
 	Attribute_Physics* physics = itrPhysics.at(itrInput.at(player->ptr_input)->ptr_physics);
+	Attribute_Health* health = itrHealth.at(player->ptr_health);
+	health->health = 0;
 
 	physics->angularVelocity = Float3(0.0f, 0.0f, 0.0f);
 	physics->linearVelocity = Float3(0.0f, 0.0f, 0.0f);
-	physics->gravity = Float3(0.0f, 0.0f, 0.0f);
-	physics->collisionFilterMask = physics->DEFAULT_ERROR;
-	physics->collisionResponse = false;
+	physics->gravity = Float3(0.0f, -1.0f, 0.0f);
+	physics->collisionFilterMask = physics->WORLD;
+	physics->collisionResponse = true;
+	physics->meshID = 1;
 	physics->reloadDataIntoBulletPhysics = true;
 
 	player->currentRespawnDelay = player->respawnDelay;

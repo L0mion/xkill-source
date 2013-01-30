@@ -81,6 +81,7 @@ public slots:
 		gameTimer.tick();
 		float delta = gameTimer.getDeltaTime();
 		// add time manipultion
+		ATTRIBUTE_MANAGER->settings->trueDeltaTime = delta;
 		delta *= ATTRIBUTE_MANAGER->settings->timeScale;
 		computeFPS();
 		gameManager.update(delta);

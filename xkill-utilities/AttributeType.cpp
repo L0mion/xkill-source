@@ -58,7 +58,7 @@ Attribute_Physics::Attribute_Physics()
 	
 	meshID = -1;
 
-	collisionFilterGroup = Attribute_Physics::DEFAULT_ERROR;
+	collisionFilterGroup = Attribute_Physics::NOTHING;
 	collisionFilterMask = 0;
 
 	gravity = Float3(0.0f, -10.0f, 0.0f);
@@ -84,25 +84,6 @@ Attribute_Projectile::Attribute_Projectile()
 Attribute_Projectile::~Attribute_Projectile()
 {
 }
-
-//Attribute_Light::Attribute_Light()
-//{
-//	lightType = LIGHTTYPE_NA;
-//
-//	direction	= Float3(0.0f, 0.0f, 0.0f);
-//	attenuation	= Float3(0.0f, 0.0f, 0.0f);
-//
-//	ambient		= Float4(0.0f, 0.0f, 0.0f, 0.0f);
-//	diffuse		= Float4(0.0f, 0.0f, 0.0f, 0.0f);
-//	specular	= Float4(0.0f, 0.0f, 0.0f, 0.0f);
-//
-//	range		= 0.0f;
-//	spotPower	= 0.0f;
-//}
-//Attribute_Light::~Attribute_Light()
-//{
-//	//Do nothing.
-//}
 
 Attribute_Light_Dir::Attribute_Light_Dir()
 {
@@ -143,8 +124,8 @@ Attribute_Camera::Attribute_Camera()
 
 	aspectRatio = 0.785f;
 	fieldOfView = 0.785f; 
-	zFar = 60.0f;
-	zNear = 0.01f;
+	zFar = 40.0f;
+	zNear = 1.0f;
 
 	up		= Float3(0.0f, 1.0f, 0.0f);
 	right	= Float3(1.0f, 0.0f, 0.0f);
@@ -201,6 +182,7 @@ Attribute_Player::Attribute_Player()
 	totalExecutionTime = 0;
 	respawnDelay = 5.0f;
 	currentRespawnDelay = 0.0f;
+	timeSinceLastJump = 0.0f;
 
 	walkSpeed = 5.0f;
 	sprintSpeed = walkSpeed*2;
@@ -272,7 +254,8 @@ Attribute_PickupablesSpawnPoint::Attribute_PickupablesSpawnPoint()
 	spawnPickupableType = PickupableType::MEDKIT;
 	spawnDelayInSeconds = 0.0f;
 	secondsSinceLastSpawn = 0.0f;
-	maxNrOfExistingSpawnedPickupables = 100;
+	secondsSinceLastPickup = 0.0f;
+	maxNrOfExistingSpawnedPickupables = 1;
 	currentNrOfExistingSpawnedPickupables = 0;
 }
 Attribute_PickupablesSpawnPoint::~Attribute_PickupablesSpawnPoint()

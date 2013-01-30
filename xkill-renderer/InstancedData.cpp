@@ -112,6 +112,10 @@ HRESULT InstancedData::updateBuffer(ID3D11DeviceContext* devcon)
 		memcpy(map.pData, &instanceVec_[0], instanceCount_ * sizeof(VertexPosNormTexInstanced));
 		devcon->Unmap(instanceBuffer_, NULL);
 	}
+	else
+	{
+		ERROR_MSG(L"InstancedData::updateBuffer devcon->Map failed!");
+	}
 
 	return hr;
 }

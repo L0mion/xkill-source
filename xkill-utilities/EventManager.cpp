@@ -8,14 +8,14 @@
 
 EventManager::EventManager()
 {
-	state_TemporaryVariableUsedAsSubstituteForStateMachine = STATE_DEATHMATCH;
+	state_TemporaryVariableUsedAsSubstituteForStateMachine = STATE_MAINMENU;
 
 	// Build vectors with all events
-	subscibers = new std::vector<std::vector<IObserver*>>;
+	subscribers = new std::vector<std::vector<IObserver*>>;
 	for(int i=0; i<EVENT_LAST; i++)
 	{
 		std::vector<IObserver*> v;
-		subscibers->push_back(v);
+		subscribers->push_back(v);
 	}
 
 	// Build vectors with all events
@@ -36,37 +36,37 @@ EventManager* EventManager::getInstance()
 void EventManager::addObserver(IObserver* o, EventType type)
 {
 	int index = type;
-	(*subscibers)[index].push_back(o);
+	(*subscribers)[index].push_back(o);
 
 	DEBUGPRINT("EVENTMANAGER: New subscriber on Events of Enum " << index);
 }
 
 void EventManager::addObserverToAll(IObserver* o)
 {
-	for(int i=0; i<(int)subscibers->size(); i++)
+	for(int i=0; i<(int)subscribers->size(); i++)
 	{
-		(*subscibers)[i].push_back(o);
+		(*subscribers)[i].push_back(o);
 	}
 	DEBUGPRINT("EVENTMANAGER: New subscriber on Events of All Enum ");
 }
 
 void EventManager::removeObserver(IObserver* observer)
 {
-	for(int i=0; i<(int)subscibers->size(); i++)
+	for(int i=0; i<(int)subscribers->size(); i++)
 		removeObserver(observer, (EventType)i);
 }
 
 void EventManager::removeObserver(IObserver* observer, EventType type)
 {
 	int index = type;
-	for(int i=0; i<(int)subscibers->at(index).size(); i++)
+	for(int i=0; i<(int)subscribers->at(index).size(); i++)
 	{
 		// TRUE: Element matches index; erase at index
-		if((*subscibers)[index][i] == observer)
+		if((*subscribers)[index][i] == observer)
 		{
 			// remove using "swap trick"
-			(*subscibers)[index][i] = (*subscibers)[index].back();
-			(*subscibers)[index].pop_back();
+			(*subscribers)[index][i] = (*subscribers)[index].back();
+			(*subscribers)[index].pop_back();
 
 			// avoids unnecessary testing
 			break;
@@ -80,9 +80,9 @@ void EventManager::sendEvent(Event* e)
 	EventType eventTyp = e->getType();
 	int index = eventTyp;
 	//std::cout << "EVENTMANAGER: Sends Event of Enum " << index << std::endl;
-	for(int i=0; i < (int)(*subscibers)[index].size(); i++)
+	for(int i=0; i < (int)(*subscribers)[index].size(); i++)
 	{
-		(*subscibers)[index][i]->onEvent(e);
+		(*subscribers)[index][i]->onEvent(e);
 	}
 }
 
@@ -90,7 +90,7 @@ EventManager::~EventManager()
 {
 	cleanAllQueues();
 
-	delete subscibers;
+	delete subscribers;
 	delete queues;
 }
 
