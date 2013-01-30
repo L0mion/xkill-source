@@ -250,7 +250,6 @@ public:
 		}
 		*/
 		render->meshID = 1;
-		
 
 		CREATE_ATTRIBUTE(Attribute_Physics, physics, entity);
 		CONNECT_ATTRIBUTES(physics, spatial);

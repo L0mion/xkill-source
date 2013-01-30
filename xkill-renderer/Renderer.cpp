@@ -266,6 +266,7 @@ HRESULT Renderer::initManagementLight()
 	HRESULT hr = S_OK;
 
 	managementLight_ = new ManagementLight();
+	managementLight_->init();
 
 	return hr;
 }
@@ -567,7 +568,7 @@ void Renderer::renderInstance(unsigned int meshID, InstancedData* instance)
 	ID3D11Buffer* vbs[2] = 
 	{ 
 		modelD3D->getVertexBuffer()->getVB(), 
-		instance->getInstanceBuffer()
+		instance->getDataBuffer()
 	};
 	devcon->IASetVertexBuffers(0, 2, vbs, stride, offset);
 	
@@ -581,7 +582,7 @@ void Renderer::renderInstance(unsigned int meshID, InstancedData* instance)
 		renderSubset(
 			ib,
 			materials[materialIndex],
-			instance->getInstanceCount());
+			instance->getDataCountCur());
 	}
 }
 void Renderer::renderSubset(
