@@ -87,7 +87,6 @@ void GameComponent::onUpdate(float delta)
 		Ammunition* ammo = &weaponStats->ammunition[weaponStats->currentAmmunitionType];
 		FiringMode* firingMode = &weaponStats->firingMode[weaponStats->currentFiringModeType];
 
-
 		//
 		// End of deathmatch logic
 		//
@@ -582,12 +581,25 @@ void GameComponent::event_PhysicsAttributesColliding(Event_PhysicsAttributesColl
 					}
 				}
 			}
-			//Decrement number of spawned pickupables for the spawnpoint that spanwed the pickupable that the player picked up. Also remove it.
+			//Decrement number of spawned pickupables for the spawnpoint that spawned the pickupable that the player picked up. Also remove it.
 			Attribute_PickupablesSpawnPoint* pickupablesSpawnPointAttribute = itrPickupablesSpawnPoint.at(pickupableAttribute->ptr_creatorPickupablesSpawnPoint);
 			pickupablesSpawnPointAttribute->currentNrOfExistingSpawnedPickupables--;
 			pickupablesSpawnPointAttribute->secondsSinceLastPickup = 0;
 			
 			SEND_EVENT(&Event_RemoveEntity(entity1->getID()));
+		}
+	}
+	else if(entity1->hasAttribute(ATTRIBUTE_PHYSICS))
+	{
+		//Player colliding with world
+		if(entity2->hasAttribute(ATTRIBUTE_PLAYER))
+		{
+			std::vector<int> playerId = entity2->getAttributes(ATTRIBUTE_PLAYER);
+			for(int i=0;i<playerId.size();i++)
+			{
+				Attribute_Player* playerAttribute = itrPlayer.at(playerId.at(i));
+				playerAttribute->collidingWithWorld = true;
+			}
 		}
 	}
 }

@@ -136,6 +136,21 @@ void PhysicsComponent::onUpdate(float delta)
 		synchronizeWithAttributes(physicsAttribute, index);
 		physicsObjects_->at(index)->onUpdate(delta);
 
+		if(physicsAttribute->collisionFilterGroup == Attribute_Physics::PLAYER)
+		{
+			Entity* playerEntity = itrPhysics.ownerAt(index);
+			std::vector<int> playerAttributeIndices = playerEntity->getAttributes(ATTRIBUTE_PLAYER);
+			for(unsigned int i = 0; i < playerAttributeIndices.size(); i++)
+			{
+				Attribute_Player* playerAttribute = itrPlayer.at(playerAttributeIndices.at(i));
+				if(!playerAttribute->collidingWithWorld && playerAttribute->timeSinceLastJump > playerAttribute->delayInSecondsBetweenEachJump && physicsObjects_->at(index)->getLinearVelocity().y() > 0.0f)
+				{
+					physicsObjects_->at(index)->setLinearVelocity(btVector3(physicsObjects_->at(index)->getLinearVelocity().x(), 0.0f, physicsObjects_->at(index)->getLinearVelocity().z()));
+				}
+				playerAttribute->collidingWithWorld = false;
+			}
+		}
+
 		//Physics object out of bounds
 		if(physicsObjects_->at(index)->getWorldTransform().getOrigin().y() < removePhysicsObjectIfItHasLowerYCoordinateThanThis)
 		{

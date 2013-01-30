@@ -695,6 +695,8 @@ struct DLL_U Attribute_Player : public IAttribute
 	float respawnDelay;			//!< Time between death and respawn
 	float currentRespawnDelay;	//!< Time until respawn
 	float timeSinceLastJump;	//!< Incrementing timer
+	float delayInSecondsBetweenEachJump;
+	bool collidingWithWorld;	//!< Set y-velocity to zero when not colliding with world and not jumping
 
 	DataItemList* getDataList()
 	{

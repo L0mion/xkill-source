@@ -201,7 +201,9 @@ Attribute_Player::Attribute_Player()
 	totalExecutionTime = 0;
 	respawnDelay = 5.0f;
 	currentRespawnDelay = 0.0f;
+	delayInSecondsBetweenEachJump = 1.0f;
 	timeSinceLastJump = 0.0f;
+	collidingWithWorld = false;
 
 	walkSpeed = 5.0f;
 	sprintSpeed = walkSpeed*2;

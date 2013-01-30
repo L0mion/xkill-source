@@ -29,6 +29,7 @@ PlayerPhysicsObject::~PlayerPhysicsObject()
 bool PlayerPhysicsObject::subClassSpecificInitHook()
 {
 	forceActivationState(DISABLE_DEACTIVATION); //Prevent the player from getting stuck when standing still
+	//setCollisionFlags(getCollisionFlags() | btCollisionObject::CF_KINEMATIC_OBJECT);
 	return true;
 }
 
@@ -86,7 +87,7 @@ void PlayerPhysicsObject::handleInput()
 		world.setRotation(btQuaternion(yaw_,0,0));
 		setWorldTransform(world);
 
-		if(inputAttribute->jump && playerAttribute->timeSinceLastJump > 1.0f)
+		if(inputAttribute->jump && playerAttribute->timeSinceLastJump > playerAttribute->delayInSecondsBetweenEachJump)
 		{
 			applyCentralImpulse(btVector3(0.0f, 5.0f, 0.0f));
 			inputAttribute->jump = false;
