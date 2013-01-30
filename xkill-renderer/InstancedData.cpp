@@ -37,7 +37,7 @@ void InstancedData::addInstance(VertexPosNormTexInstanced instance)
 void InstancedData::reset()
 {
 	instanceCount_ = 0;
-	instanceVec_.clear();
+	//instanceVec_.clear();
 }
 
 HRESULT InstancedData::initBuffer(ID3D11Device* device)

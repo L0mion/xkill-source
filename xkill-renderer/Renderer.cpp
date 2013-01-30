@@ -266,6 +266,7 @@ HRESULT Renderer::initManagementLight()
 	HRESULT hr = S_OK;
 
 	managementLight_ = new ManagementLight();
+	managementLight_->init();
 
 	return hr;
 }
