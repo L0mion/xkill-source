@@ -4,16 +4,11 @@
 #include <map>
 #include <string>
 
-#include <xkill-utilities/MeshModel.h>
-#include <xkill-utilities/MeshGeometry.h>
-#include <xkill-utilities/MeshSubset.h>
-#include <xkill-utilities/MeshMaterial.h>
-#include <xkill-utilities/MeshOrigins.h>
-
 #include "MTL.h"
 #include "ObjGeometry.h"
 #include "Obj.h"
 #include "VarStatus.h"
+#include "MeshDesc.h"
 
 class LoaderObj;
 class LoaderMTL;
@@ -45,7 +40,7 @@ public:
 	//! Loads mesh from .pgy-format if such exists. If not; the mesh is loaded from an .obj-file and then written to .pgy-format.
 	bool init();
 
-	MeshModel* claimMesh();
+	MeshDesc* claimMesh();
 protected:
 private:
 	//! Initializes LoaderObj-object and proceeds to load .obj.
@@ -58,7 +53,7 @@ private:
 	bool getLastWrittenToFile(std::string pathPGY, std::string fileNamePGY, WriteTimeUTC& out);
 	
 	//! Converts Obj-format loaded from .obj-file into general Mesh-type format.
-	MeshModel* makeMesh(Obj obj);
+	MeshDesc makeMesh(Obj obj);
 	//! Writes loaded model into a .pgy-format.
 	bool makePGY(MeshModel* model, WriteTimeUTC writeTimeUTC);
 	
@@ -69,17 +64,13 @@ private:
 	//! Loads resulting materials from .mtl-files into general Mesh-type material format.
 	void loadMTLMaterials(MTL mtl);
 	
-
 	//! Converts an .obj-type MTL-material into a general Mesh-type material format.
-	const MeshOrigins	OriginsToMeshOrigins();
-	//! Converts an .obj-type MTL-material into a general Mesh-type material format.
-	const MeshMaterial	MTLToMeshMaterial(MTLMaterial mtl);
-	//! Converts an .obj-type Geometry into a general Mesh-type Geometry format.
-	const MeshGeometry	objGeoToMeshGeo(ObjGeometry objGeo);
-	//! Convers an .obj-type group into a general Mesh-type Subset-format.
-	const MeshSubset	objGroupToMeshSubset(ObjGroup objGroup);
+	const MaterialDesc MTLToMeshMaterial(MTLMaterial mtl);
 	//! Searches through materials and converts the string-type identifier of Material into an index.
-	const int			MTLNameToMaterialIndex(std::string mtlName);
+	const int MTLNameToMaterialIndex(std::string mtlName);
+
+	std::vector<VertexDesc> getVertexDescs(std::vector<VertexPosNormTex> objVertices);
+	std::vector<SubsetDesc> getSubsetDescs(std::vector<ObjGroup> objSubsets);
 
 	unsigned int getTexIDfromName(std::string texFilename);
 	std::string getFileNamePGY();
@@ -95,11 +86,11 @@ private:
 	std::map<std::string, unsigned int>* texNameToID_; //!< Borrowed variable used to translate texture file-names to IDs.
 
 	/*Intermediate*/
-	std::vector<MeshMaterial>	materials_;		//!< Generalized Mesh-type materials read from .mtl.
+	std::vector<MaterialDesc>	materials_;		//!< Generalized Mesh-type materials read from .mtl.
 	std::vector<std::string>	materialID_;	//!< Used to locate index of material-type
 
 	/*Result*/
-	VarStatus<MeshModel>* meshModel_;	//!< Resulting Mesh read from file.
+	MeshDesc meshModel_;	//!< Resulting Mesh read from file.
 };
 
 #endif //XKILL_IO_MESHMAKER_H

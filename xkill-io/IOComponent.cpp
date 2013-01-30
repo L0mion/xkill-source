@@ -144,7 +144,16 @@ bool IOComponent::initMdlDesc(std::string filename)
 		for(unsigned int i = 0; i < models.size() && sucessfulLoad; i++)
 		{
 			std::string name = models[i]->modelFileName_;
-			sucessfulLoad = loadModel(name, path, models[i]);
+
+			if(pollFile(path, name + ".pgy"))
+			{
+				//Load pgy
+			}
+			
+			if(/*problem while loading pgy*/)
+			{
+				sucessfulLoad = loadModel(name, path, models[i]);
+			} //then write to pgy
 		}
 
 		delete mdlDesc; //clear when finished
@@ -235,7 +244,7 @@ bool IOComponent::loadObj(std::string modelName, std::string modelPath, MdlDescM
 
 	if(sucessfulMake)
 	{
-		MeshModel* model = objMaker->claimMesh();
+		MeshDesc* model = objMaker->claimMesh();
 
 		Event_CreateMesh e(modelDesc->modelID_, model, modelDesc->dynamic_);
 		SEND_EVENT(&e);
@@ -329,6 +338,14 @@ FileExtension IOComponent::findFileType(std::string modelName)
 		type = FILE_EXTENSION_UNKNOWN;
 
 	return type;
+}
+
+bool IOComponent::pollFile(std::string path, std::string fileName)
+{
+	std::string fullPathPGY = path + fileName; 
+
+	std::ifstream ifile(fullPathPGY);
+	return ifile.good();
 }
 
 std::vector<std::string> IOComponent::getFileNames(const LPCTSTR filename)

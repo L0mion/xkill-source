@@ -32,7 +32,7 @@ MeshMakerObj::MeshMakerObj(
 
 	texNameToID_ = texNameToID;
 
-	meshModel_ = new VarStatus<MeshModel>(true);
+	meshModel_ = new VarStatus<MeshDesc>(true);
 }
 MeshMakerObj::~MeshMakerObj()
 {
@@ -67,15 +67,15 @@ bool MeshMakerObj::init()
 		if(sucessfulLoad)
 		{
 			Obj obj = loaderObj_->getObj();
-			meshModel_->setVar(makeMesh(obj));
-			sucessfulLoad = makePGY(meshModel_->getVar(), obj.getWriteTimeUTC());
+			meshModel_ = makeMesh(obj);
+			sucessfulLoad = makePGY(meshModel_, obj.getWriteTimeUTC());
 		}
 	}
 
 	return sucessfulLoad;
 }
 
-MeshModel* MeshMakerObj::claimMesh()
+MeshDesc* MeshMakerObj::claimMesh()
 {
 	meshModel_->setStatus(false);
 	return meshModel_->getVar();
@@ -167,13 +167,47 @@ bool MeshMakerObj::getLastWrittenToFile(std::string path, std::string fileName, 
 	return sucessfulRead;
 }
 
-MeshModel* MeshMakerObj::makeMesh(Obj obj)
+MeshDesc MeshMakerObj::makeMesh(Obj obj)
 {
-	MeshGeometry meshGeo = objGeoToMeshGeo(obj.getObjGeometry());
-	MeshOrigins meshOri = OriginsToMeshOrigins();
-	MeshModel* model = new MeshModel(meshGeo, materials_,meshOri);
-	return model;
+	MeshDesc meshDesc;
+	meshDesc.vertices_	= getVertexDescs(obj.getObjGeometry().getVertices());
+	meshDesc.subsets_	= getSubsetDescs(obj.getObjGeometry().getObjGroups());
+	meshDesc.materials_ = materials_;
+
+	return meshDesc;
 }
+std::vector<VertexDesc> MeshMakerObj::getVertexDescs(std::vector<VertexPosNormTex> objVertices)
+{
+	std::vector<VertexDesc> vertexDescs(objVertices.size());
+	for(unsigned int i = 0; i < objVertices.size(); i++)
+	{
+		VertexPosNormTex vertexObj = objVertices[i];
+	
+		VertexDesc vertexDesc;
+		vertexDesc.position_			= vertexObj.position_;
+		vertexDesc.normal_				= vertexObj.normal_;
+		vertexDesc.textureCoordinates_	= vertexObj.texcoord_;
+
+		vertexDescs[i] = vertexDesc;
+	}
+
+	return vertexDescs;
+}
+std::vector<SubsetDesc> MeshMakerObj::getSubsetDescs(std::vector<ObjGroup> objGroups)
+{
+	std::vector<SubsetDesc> subsetDescs(objGroups.size());
+	for(unsigned int i = 0; i < objGroups.size(); i++)
+	{
+		ObjGroup objSubset = objGroups[i];
+
+		SubsetDesc subsetDesc;
+		subsetDesc.materialIndex_	= MTLNameToMaterialIndex(objSubset.getMaterial());
+		subsetDesc.indices_			= objSubset.getIndices();
+
+		subsetDescs[i] = subsetDesc;
+	}
+}
+
 bool MeshMakerObj::makePGY(MeshModel* model, WriteTimeUTC writeTimeUTC)
 {
 	std::string fileNamePgy = getFileNamePGY();
@@ -199,7 +233,7 @@ bool MeshMakerObj::loadMaterials()
 	}
 	else
 	{ //load default material
-		MeshMaterial default;
+		MaterialDesc default;
 		materials_.push_back(default);
 		materialID_.push_back("default");
 	}
@@ -232,11 +266,7 @@ void MeshMakerObj::loadMTLMaterials(MTL mtl)
 	}
 }
 
-const MeshOrigins MeshMakerObj::OriginsToMeshOrigins()
-{
-	return MeshOrigins(fileNameObj_);
-}
-const MeshMaterial MeshMakerObj::MTLToMeshMaterial(MTLMaterial mtl)
+const MaterialDesc MeshMakerObj::MTLToMeshMaterial(MTLMaterial mtl)
 {
 	Float3 ambientColor		= mtl.getAmbientColor();
 	Float3 diffuseColor		= mtl.getDiffuseColor();
@@ -248,36 +278,19 @@ const MeshMaterial MeshMakerObj::MTLToMeshMaterial(MTLMaterial mtl)
 	std::string texAlbedoName = mtl.getTexDiffuse();
 	std::string texNormalName = mtl.getTexBump();
 	
-	MeshMaterial meshMaterial(
-		ambientColor,
-		diffuseColor,
-		specularColor,
-		specPow,
-		reflectivity,
-		alpha != 0,
-		
-		getTexIDfromName(texAlbedoName),
-		getTexIDfromName(texNormalName));
+	MaterialDesc materialDesc;
+	materialDesc.ambientTerm_	= ambientColor;
+	materialDesc.diffuseTerm_	= diffuseColor;
+	materialDesc.specularTerm_	= specularColor;
+	materialDesc.reflectivity_	= reflectivity;
+	materialDesc.specularPower_	= specPow;
+	materialDesc.transperency_	= alpha != 0;
+	materialDesc.idAlbedoTex_	= getTexIDfromName(texAlbedoName);
+	materialDesc.idNormalTex_	= getTexIDfromName(texNormalName);
 
-	return meshMaterial;
+	return materialDesc;
 }
-const MeshGeometry MeshMakerObj::objGeoToMeshGeo(ObjGeometry objGeo)
-{
-	std::vector<ObjGroup>			objGroups	= objGeo.getObjGroups();
-	std::vector<VertexPosNormTex>	objVertices = objGeo.getVertices();
 
-	std::vector<MeshSubset> meshSubsets;
-	for(unsigned int i = 0; i < objGroups.size(); i++)
-		meshSubsets.push_back(objGroupToMeshSubset(objGroups[i]));
-
-	return MeshGeometry(objVertices, meshSubsets); //format of vertices the same
-}
-const MeshSubset MeshMakerObj::objGroupToMeshSubset(ObjGroup objGroup)
-{
-	std::vector<unsigned int> indices	= objGroup.getIndices();
-	int materialIndex = MTLNameToMaterialIndex(objGroup.getMaterial());
-	return MeshSubset(materialIndex, indices);
-}
 const int MeshMakerObj::MTLNameToMaterialIndex(std::string mtlName)
 {
 	int materialIndex = 0;

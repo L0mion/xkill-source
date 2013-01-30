@@ -66,6 +66,8 @@ private:
 
 	FileExtension findFileType(std::string modelName);
 
+	bool pollFile(std::string path, std::string fileName);
+
 	std::vector<std::string> getFileNames(LPCTSTR filename);
 
 	std::map<std::string, unsigned int>* texNameToTexID;
