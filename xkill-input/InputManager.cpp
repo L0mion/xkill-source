@@ -91,7 +91,7 @@ InputDevice* InputManager::GetDevice(unsigned int playerID)
 
 		if(itrPlayer.ownerId() == playerID)
 		{
-			if(attribute_player->ptr_inputDevice.isEmpty())
+			if(!attribute_player->ptr_inputDevice.isEmpty())
 			{
 				device = itrInputDevice.at(attribute_player->ptr_inputDevice)->device;
 				break;
