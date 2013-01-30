@@ -3,6 +3,10 @@
 
 #include <vector>
 
+#include "VertexDesc.h"
+#include "MaterialDesc.h"
+#include "SubsetDesc.h"
+
 class MeshDesc
 {
 public:
@@ -10,7 +14,9 @@ public:
 	~MeshDesc();
 protected:
 public:
-	std::vector<
+	std::vector<VertexDesc> vertices_;
+	std::vector<SubsetDesc> subsets_;
+	std::vector<MaterialDesc> materials_;
 };
 
 #endif //XKILL_IO_MESHDESC_H
