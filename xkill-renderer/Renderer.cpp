@@ -266,7 +266,7 @@ HRESULT Renderer::initManagementLight()
 	HRESULT hr = S_OK;
 
 	managementLight_ = new ManagementLight();
-	hr = managementLight_->init(managementD3D_->getDevice());
+	managementLight_->init();
 
 	return hr;
 }
@@ -530,7 +530,7 @@ void Renderer::renderViewportToBackBuffer(ViewportData& vpData)
 	managementGBuffer_->setGBuffersAsCSShaderResources(devcon);
 
 	//Set lights.
-	managementLight_->transformLightViewSpacePoss(devcon, vpData.view);
+	//managementLight_->transformLightViewSpacePoss(devcon, vpData.view);
 	managementLight_->setLightSRVCS(devcon, LIGHTBUFFERTYPE_DIR,		LIGHT_SRV_REGISTER_DIR);
 	managementLight_->setLightSRVCS(devcon, LIGHTBUFFERTYPE_POINT,		LIGHT_SRV_REGISTER_POINT);
 	managementLight_->setLightSRVCS(devcon, LIGHTBUFFERTYPE_SPOT,		LIGHT_SRV_REGISTER_SPOT);
@@ -568,7 +568,7 @@ void Renderer::renderInstance(unsigned int meshID, InstancedData* instance)
 	ID3D11Buffer* vbs[2] = 
 	{ 
 		modelD3D->getVertexBuffer()->getVB(), 
-		instance->getInstanceBuffer()
+		instance->getDataBuffer()
 	};
 	devcon->IASetVertexBuffers(0, 2, vbs, stride, offset);
 	
@@ -582,7 +582,7 @@ void Renderer::renderInstance(unsigned int meshID, InstancedData* instance)
 		renderSubset(
 			ib,
 			materials[materialIndex],
-			instance->getInstanceCount());
+			instance->getDataCountCur());
 	}
 }
 void Renderer::renderSubset(

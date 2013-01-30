@@ -25,7 +25,7 @@ Texture2D gBufferDepth		: register( t3 );
 StructuredBuffer<LightDescDir>		lightsDir	: register( t4 );
 StructuredBuffer<LightDescPoint>	lightsPoint	: register( t5 );
 StructuredBuffer<LightDescSpot>		lightsSpot	: register( t6 );
-StructuredBuffer<LightPos>			lightsPos	: register( t7 );
+StructuredBuffer<float3>			lightsPos	: register( t7 );
 
 SamplerState ss : register(s0);
 
@@ -98,7 +98,7 @@ void lightingCS(
 			bool inFrustum = true;
 			[unroll] for(uint j = 0; j < 6; j++)
 			{
-				float d = dot(frustum._[j], mul(float4(lightsPos[lightIndex].pos, 1.0f), view)); //lightsPos[lightIndex].pos
+				float d = dot(frustum._[j], mul(float4(lightsPos[lightIndex], 1.0f), view)); //lightsPos[lightIndex].pos
 				inFrustum = inFrustum && (d >= -lightsPoint[lightIndex].range);
 			}
 			
@@ -153,7 +153,7 @@ void lightingCS(
 		LightPoint(
 			toEyeV,
 			descPoint,
-			mul(float4(lightsPos[tileLightIndices[i]].pos, 1.0f), view), //lightsPos[tileLightIndices[i]].pos
+			mul(float4(lightsPos[tileLightIndices[i]], 1.0f), view), //lightsPos[tileLightIndices[i]].pos
 			surfaceMaterial,
 			surfaceNormalV,
 			surfacePosV,

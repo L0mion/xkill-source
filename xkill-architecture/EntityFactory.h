@@ -236,6 +236,22 @@ public:
 
 		CREATE_ATTRIBUTE(Attribute_Render, render, entity);
 		CONNECT_ATTRIBUTES(render, spatial);
+		//switch (e->pickupableType)
+		//{
+		//case PickupableType::AMMUNITION_BULLET:
+		//	render->meshID = 4;
+		//	break;
+		//case PickupableType::AMMUNITION_SCATTER:
+		//	render->meshID = 5;
+		//	break;
+		//case PickupableType::AMMUNITION_EXPLOSIVE:
+		//	render->meshID = 6;
+		//	break;
+		//case PickupableType::MEDKIT:
+		//	render->meshID = 3;
+		//default:
+		//	break;
+		//}
 		render->meshID = 1;
 
 		CREATE_ATTRIBUTE(Attribute_Physics, physics, entity);
