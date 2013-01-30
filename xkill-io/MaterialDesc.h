@@ -6,16 +6,6 @@
 struct MaterialDesc
 {
 	MaterialDesc();
-	MaterialDesc(
-		const Float3	ambientTerm,
-		const Float3	diffuseTerm,
-		const Float3	specularTerm,
-		const float		specularPower,
-		const Float3	reflectivity,
-		const bool		transperency,
-
-		const unsigned int idAlbedoTex,
-		const unsigned int idNormalTex);
 	//! Does nothing.
 	~MaterialDesc();
 

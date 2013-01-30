@@ -9,6 +9,9 @@ MaterialDesc::MaterialDesc()
 	reflectivity_	= Float3(0.5f, 0.5f, 0.5f);
 	transperency_	= false;
 
+	emissive_	= Float3(0.0f, 0.0f, 0.0f);
+	shinyness_	= 0.0f;
+
 	idAlbedoTex_ = 0;
 	idNormalTex_ = 0;
 }
