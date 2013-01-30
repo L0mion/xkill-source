@@ -253,9 +253,6 @@ void LoaderFbx::parseMesh(FbxNode* node)
 	materialLoader_->parseMaterial(mesh, &materialDesc);
 	textureLoader_->parseTexture(mesh, &textureDesc);
 
-	std::vector<VertexPosNormSkinned> vertices = meshDesc.createVerticesPosNormSkinned();
-	std::vector<unsigned int> indices = meshDesc.getIndices();
-
 	modelDescs_.back().setMeshDesc(meshDesc);
 	modelDescs_.back().setMaterialDesc(materialDesc);
 	modelDescs_.back().setTextureDesc(textureDesc);

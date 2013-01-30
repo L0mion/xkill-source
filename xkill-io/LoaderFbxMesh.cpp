@@ -28,6 +28,7 @@ void LoaderFbxMesh::parseMesh(FbxMesh* mesh, LoaderFbxMeshDesc* meshDesc)
 	int polygonVertexCount = mesh->GetPolygonVertexCount();
 	int polygonCount = mesh->GetPolygonCount();
 	int numControlPonts = mesh->GetControlPointsCount();
+
 	FbxVector4* controlPoints = mesh->GetControlPoints();
 	
 	int vertexId = 0;
@@ -507,14 +508,15 @@ FbxNode* LoaderFbxMesh::findRoot(FbxNode* node)
 	bool done = false;
 	while(!done)
 	{
-		FbxNode* debug = node;
-		FbxNode* debugParent = node->GetParent();
-		FbxNodeAttribute* debugAttribute = debugParent->GetNodeAttribute();
-		FbxNodeAttribute::EType debugAttributeType = debugAttribute->GetAttributeType();
-		if(node->GetParent()->GetNodeAttribute()->GetAttributeType() == FbxNodeAttribute::eSkeleton)
+		if(node->GetParent()->GetNodeAttribute())
 		{
-			node = node->GetParent();
-			printf("%s\n", node->GetName());
+			if(node->GetParent()->GetNodeAttribute()->GetAttributeType() == FbxNodeAttribute::eSkeleton)
+			{
+				node = node->GetParent();
+				printf("%s\n", node->GetName());
+			}
+			else
+				done = true;
 		}
 		else
 			done = true;

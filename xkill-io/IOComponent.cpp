@@ -253,7 +253,7 @@ bool IOComponent::loadFbx(std::string modelName, std::string modelPath, MdlDescM
 {
 	bool successfulLoad = true;
 
-	std::vector<LoaderFbxModelDesc> fbxModels = fbxLoader_->load(modelPath+"Soldier_2k_poly.fbx");
+	std::vector<LoaderFbxModelDesc> fbxModels = fbxLoader_->load(modelPath+"humanoid.fbx");
 
 	return successfulLoad;
 }
