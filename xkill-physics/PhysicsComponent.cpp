@@ -166,7 +166,7 @@ void PhysicsComponent::onUpdate(float delta)
 				std::vector<int> playerAttributeIndices = playerEntity->getAttributes(ATTRIBUTE_PLAYER);
 				for(unsigned int i = 0; i < playerAttributeIndices.size(); i++)
 				{
-					Attribute_Player* playerAttribute = itrPlayer.at(i);
+					Attribute_Player* playerAttribute = itrPlayer.at(playerAttributeIndices.at(i));
 					Attribute_Health* playerHealthAttribute = itrHealth.at(playerAttribute->ptr_health);
 					if(playerHealthAttribute->health > 0.0f)
 					{

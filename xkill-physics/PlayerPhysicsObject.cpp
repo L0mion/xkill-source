@@ -35,10 +35,10 @@ bool PlayerPhysicsObject::subClassSpecificInitHook()
 
 void PlayerPhysicsObject::onUpdate(float delta)
 {
-	handleInput();
+	handleInput(delta);
 }
 
-void PlayerPhysicsObject::handleInput()
+void PlayerPhysicsObject::handleInput(float delta)
 {
 	//btTransform world2;
 	//world2 = getWorldTransform();
@@ -87,10 +87,20 @@ void PlayerPhysicsObject::handleInput()
 		world.setRotation(btQuaternion(yaw_,0,0));
 		setWorldTransform(world);
 
-		if(inputAttribute->jump && playerAttribute->timeSinceLastJump > playerAttribute->delayInSecondsBetweenEachJump || inputAttribute->jetpack)
+		if(inputAttribute->jump && playerAttribute->timeSinceLastJump > playerAttribute->delayInSecondsBetweenEachJump)
 		{
 			applyCentralImpulse(btVector3(0.0f, 5.0f, 0.0f));
 			playerAttribute->timeSinceLastJump = 0.0f;
+		}
+
+		if(inputAttribute->jetpack)
+		{
+			applyCentralImpulse(btVector3(0.0f, 50.0f*delta, 0.0f));
+			playerAttribute->jetpackTimer+=delta;
+			if(playerAttribute->jetpackTimer > 0.1f)
+			{
+				health->health--;
+			}
 		}
 
 		inputAttribute->jump = false;

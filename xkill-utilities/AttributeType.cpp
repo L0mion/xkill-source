@@ -125,7 +125,7 @@ Attribute_Camera::Attribute_Camera()
 	aspectRatio = 0.785f;
 	fieldOfView = 0.785f; 
 	zFar = 40.0f;
-	zNear = 1.0f;
+	zNear = 0.1f;
 
 	up		= Float3(0.0f, 1.0f, 0.0f);
 	right	= Float3(1.0f, 0.0f, 0.0f);
@@ -186,6 +186,8 @@ Attribute_Player::Attribute_Player()
 	delayInSecondsBetweenEachJump = 1.0f;
 	timeSinceLastJump = 0.0f;
 	collidingWithWorld = false;
+	jetpackTimer = 0.0f;
+	detectedAsDead = true;
 
 	walkSpeed = 5.0f;
 	sprintSpeed = walkSpeed*2;
