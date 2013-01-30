@@ -12,7 +12,7 @@ template <class Data>
 class DataStreamBuffer
 {
 public:
-	DataStreamBuffer(D3D11_BIND_FLAG bindFlag, D3D11_RESOURCE_MISC_FLAG miscFlag)
+	DataStreamBuffer(unsigned int bindFlag, unsigned int miscFlag)
 	{
 		bindFlag_ = bindFlag;
 		miscFlag_ = miscFlag;
@@ -61,6 +61,7 @@ public:
 	//std::vector<Data>& getData() { return data_; }
 	unsigned int getDataCountCur() { return dataCountCur_; }
 	unsigned int getDataCountMax() { return dataCountMax_; }
+	ID3D11Buffer* getDataBuffer()	{ return dataStreamBuffer_; }
 protected:
 	unsigned int getNewMaxCount(unsigned int maxCount, unsigned int targetMaxCount)
 	{
@@ -168,8 +169,8 @@ protected:
 	ID3D11Buffer*				dataStreamBuffer_;
 
 	//Desc
-	D3D11_BIND_FLAG				bindFlag_;
-	D3D11_RESOURCE_MISC_FLAG	miscFlag_;
+	unsigned int bindFlag_;
+	unsigned int miscFlag_;
 private:
 };
 

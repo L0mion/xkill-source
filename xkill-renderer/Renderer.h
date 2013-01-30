@@ -4,6 +4,11 @@
 typedef long HRESULT;
 typedef struct HWND__* HWND;
 
+template<typename T>
+class DataStreamBuffer;
+struct VertexPosNormTexInstanced;
+typedef DataStreamBuffer<VertexPosNormTexInstanced> InstancedData;
+
 namespace DirectX
 {
 	struct XMFLOAT4X4;
@@ -31,15 +36,13 @@ class Winfo;
 class TexDesc;
 class IB;
 class MeshMaterial;
-class InstancedData;
 
 #include <vector>
-
-struct ID3D11Buffer; //Bullet Physics lines
 
 //temp
 class M3DLoader;
 class AnimatedMesh;
+struct ID3D11Buffer; //Bullet Physics lines
 
 //! Module responsible for managing data related to rendering and doing the actual rendering of XKILL.
 /*! Rendering module of XKILL utilizing Deferred Rendering with DirectCompute.

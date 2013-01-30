@@ -14,16 +14,16 @@ ManagementInstance::~ManagementInstance()
 {
 	for(std::map<unsigned int, InstancedData*>::iterator i = instancesMap_.begin(); i != instancesMap_.end(); i++)
 	{
-		delete i->second;
+		SAFE_DELETE(i->second);
 	}
 }
 
 void ManagementInstance::update(ID3D11Device* device, ID3D11DeviceContext* devcon)
 {
-	//Clear all existing instance-lists.
+	//Reset all buffers.
 	for(std::map<unsigned int, InstancedData*>::iterator i = instancesMap_.begin(); i != instancesMap_.end(); i++)
 	{
-		i->second->reset();
+		i->second->resetStream();
 	}
 
 	//Fill instance-lists with updated data.
@@ -36,10 +36,10 @@ void ManagementInstance::update(ID3D11Device* device, ID3D11DeviceContext* devco
 		}
 	}
 
-	//Update each instance-list. (fill buffers with data)
+	//Update buffers with new data
 	for(std::map<unsigned int, InstancedData*>::iterator i = instancesMap_.begin(); i != instancesMap_.end(); i++)
 	{
-		i->second->update(device, devcon);
+		i->second->updateDataStream(device, devcon);
 	}
 }
 
@@ -54,15 +54,14 @@ void ManagementInstance::addRenderAtInstance(Attribute_Render* renderAt)
 	InstancedData* instancedData = getInstancesFromMeshID(renderAt->meshID);
 	if(instancedData != nullptr)
 	{ //add new instance to corresponding instance vector.
-		instancedData->addInstance(newInstance);
+		instancedData->pushData(newInstance);
 	}
 	else
 	{ //no existing instanced data of mesh id, create new one.
-		instancedData = new InstancedData();
-		instancedData->addInstance(newInstance);
+		instancedData = new InstancedData(D3D11_BIND_VERTEX_BUFFER, 0);
+		instancedData->pushData(newInstance);
 
 		instancesMap_.insert(std::pair<unsigned int, InstancedData*>(renderAt->meshID, instancedData));
-		//instancesMap_[renderAt->meshID] = instancedData;
 	}
 }
 
