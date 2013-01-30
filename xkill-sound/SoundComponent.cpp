@@ -1,7 +1,7 @@
 #include "SoundComponent.h"
 
 #include <xkill-utilities/IObserver.h>
-#include <xkill-utilities/EventManager.h>
+#include <xkill-utilities/Util.h>
 #include <xkill-sound/FMODEventSystem.h> //check architecture project depending on sound
 #include <xkill-sound/FMODEventSystemProgrammerReportParser.h> //check architecture project depending on sound
 

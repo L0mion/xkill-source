@@ -3,7 +3,7 @@
 #include <btBulletDynamicsCommon.h>
 #include "Serialize/BulletWorldImporter/btBulletWorldImporter.h"
 
-#include <xkill-utilities/EventManager.h>
+#include <xkill-utilities/Util.h>
 
 #include "PhysicsObject.h"
 #include "PlayerPhysicsObject.h"

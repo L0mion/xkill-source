@@ -1,8 +1,7 @@
 #include <d3d11.h>
 #include <Windows.h>
 
-#include <xkill-utilities/EventManager.h>
-#include <xkill-utilities/AttributeType.h>
+#include <xkill-utilities/Util.h>
 #include <xkill-utilities/MeshModel.h>
 #include <xkill-utilities/DebugShape.h>
 

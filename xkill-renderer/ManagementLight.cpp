@@ -1,7 +1,7 @@
 #include <d3d11.h>
 #include <DirectXMath.h>
 
-#include <xkill-utilities/EventManager.h>
+#include <xkill-utilities/Util.h>
 
 #include "ManagementLight.h"
 #include "renderingUtilities.h"

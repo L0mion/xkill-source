@@ -1,5 +1,4 @@
-#include <xkill-utilities/EventManager.h>
-#include <xkill-utilities/AttributeType.h>
+#include <xkill-utilities/Util.h>
 #include <xkill-utilities/MeshMaterial.h>
 
 #include "ManagementD3D.h"

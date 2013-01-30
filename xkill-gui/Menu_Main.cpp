@@ -1,6 +1,6 @@
 #include "Menu_Main.h"
 #include <QtGui/QKeyEvent>
-#include <xkill-utilities/EventManager.h>
+#include <xkill-utilities/Util.h>
 #include <xkill-utilities/AttributeType.h>
 #include <xkill-utilities/AttributeManager.h>
 

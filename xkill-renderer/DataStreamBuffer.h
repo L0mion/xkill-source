@@ -4,7 +4,7 @@
 #include <d3d11.h>
 #include <vector>
 
-#include <xkill-utilities/EventManager.h>
+#include <xkill-utilities/Util.h>
 
 #include "renderingUtilities.h"
 

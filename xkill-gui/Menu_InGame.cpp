@@ -1,7 +1,7 @@
 #include "Menu_InGame.h"
 #include <QtGui/QKeyEvent>
-#include <xkill-utilities/EventManager.h>
-#include <xkill-utilities/AttributeType.h>
+
+#include <xkill-utilities/Util.h>
 
 Menu_InGame::Menu_InGame( QWidget* parent ) : QMainWindow(parent), ToggleHelper(this)
 {

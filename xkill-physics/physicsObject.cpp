@@ -6,7 +6,7 @@
 #include <xkill-utilities/AttributeManager.h>
 
 #include "physicsUtilities.h"
-#include <xkill-utilities/EventManager.h>
+#include <xkill-utilities/Util.h>
 
 
 #include "CollisionShapes.h"

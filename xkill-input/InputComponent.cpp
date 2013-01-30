@@ -1,6 +1,6 @@
 #include "InputComponent.h"
 
-#include <xkill-utilities/EventManager.h>
+#include <xkill-utilities/Util.h>
 #include "InputManager.h"
 
 ATTRIBUTES_DECLARE_ALL;

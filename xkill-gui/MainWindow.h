@@ -4,7 +4,7 @@
 #include <QtGui/QMouseEvent> // needed to grab mouse input
 #include <QtGui/QMessageBox> // used to display info dialogs
 #include <xkill-utilities/IObserver.h>
-#include <xkill-utilities/EventManager.h>
+#include <xkill-utilities/Util.h>
  #include <QtGui/QApplication>
 #include "GameWidget.h"
 #include "MenuManager.h"

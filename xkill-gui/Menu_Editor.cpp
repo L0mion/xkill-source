@@ -2,9 +2,7 @@
 
 #include <QtGui/QStandardItemModel>
 
-#include <xkill-utilities/EventManager.h>
-#include <xkill-utilities/AttributeType.h>
-#include <xkill-utilities/Entity.h>
+#include <xkill-utilities/Util.h>
 
 ATTRIBUTES_DECLARE_ALL;
 

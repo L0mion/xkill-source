@@ -1,6 +1,6 @@
 #include "MenuManager.h"
 
-#include <xkill-utilities/EventManager.h>
+#include <xkill-utilities/Util.h>
 
 
 ATTRIBUTES_DECLARE_ALL;
