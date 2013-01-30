@@ -58,7 +58,7 @@ void QTInputDevices::setStandardMappings()
 		buttons_[5]->addMapping(InputAction::ACTION_B_CHANGE_AMMUNITIONTYPE);
 		buttons_[6]->addMapping(InputAction::ACTION_B_CHANGE_FIRINGMODE);
 		buttons_[7]->addMapping(InputAction::ACTION_B_KILL_PLAYER);
-		buttons_[8]->addMapping(InputAction::ACTION_B_FIRE);
+		buttons_[8]->addMapping(InputAction::ACTION_B_JETPACK);
 		buttons_[9]->addMapping(InputAction::ACTION_B_SPRINT);
 
 		buttons_[15]->addMapping(InputAction::ACTION_B_TIME_SPEED_UP);
@@ -188,7 +188,7 @@ void QTInputDevices::setButton(char key, bool value)
 	{
 		if(buttons_[i]->getKey() == key)
 		{
-			buttons_[i]->SetValue(value);
+			buttons_[i]->SetValue(value, false);
 		}
 	}
 }

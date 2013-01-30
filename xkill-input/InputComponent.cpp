@@ -168,6 +168,9 @@ void InputComponent::handleInput(float delta)
 		if(device->getBoolPressed(InputAction::ACTION_B_JUMP))
 			input->jump = true;
 
+		if(device->getBoolValue(InputAction::ACTION_B_JETPACK))
+			input->jetpack = true;
+
 		if(device->getBoolValue(InputAction::ACTION_B_SPRINT))
 			input->sprint = true;
 

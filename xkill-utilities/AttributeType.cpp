@@ -151,6 +151,7 @@ Attribute_SplitScreen::~Attribute_SplitScreen()
 Attribute_Input::Attribute_Input()
 {
 	jump = false;
+	jetpack = false;
 	sprint = false;
 	killPlayer = false;
 	fire = false;
