@@ -129,12 +129,12 @@ EventManager::getInstance()->addObserver(Subscriber, EventType);
 
 // TODO
 #define ATTRIBUTE_MANAGER							\
-	((AttributeManager*)AttributeManagerDLLWrapper::getInstance())
+	AttributeManager::instance()
 
 // Fetches a vector<AttributeType>* of a specific Attribute
 // from AttributeManager.
 #define GET_ATTRIBUTES(AttributePointer)							\
-	&((AttributeManager*)AttributeManagerDLLWrapper::getInstance())->AttributePointer.attributes;
+	&(AttributeManager::instance())->AttributePointer.attributes;
 
 // Fetches a vector<AttributeType>* of a specific Attribute
 // from AttributeManager.

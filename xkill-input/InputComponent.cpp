@@ -90,12 +90,10 @@ void InputComponent::handleInput(float delta)
 	{
 		Attribute_Player* player = itrPlayer.getNext();
 
-		AttributePointer ptr = player->ptr_inputDevice;
-
-		if(ptr.host == nullptr)
+		if(player->ptr_inputDevice.isEmpty())
 			continue;
 
-		InputDevice* device = itrInputDevice.at(ptr)->device;
+		InputDevice* device = player->ptr_inputDevice.getAttribute()->device;
 		Attribute_Input* input = itrInput.at(player->ptr_input);
 
 		if(device == nullptr)

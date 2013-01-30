@@ -14,7 +14,7 @@ AttributeManager::~AttributeManager()
 	delete settings;
 }
 
-AttributeManager* AttributeManager::getInstance()
+AttributeManager* AttributeManager::instance()
 {
 	static AttributeManager instance;
 	static bool test = true;

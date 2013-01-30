@@ -6,6 +6,7 @@
 #include "LightDesc.h"
 #include "Enums.h"
 #include "AttributePointer.h"
+#include "AttributeType.h"
 
 //
 // Events info
@@ -385,11 +386,11 @@ public:
 class DLL_U Event_CreatePickupable : public Event
 {
 public:
-	Event_CreatePickupable(Float3 position, PickupableType pickupableType, AttributePointer creatorPickupablesSpawnPoint, int amount);
+	Event_CreatePickupable(Float3 position, PickupableType pickupableType, AttributePtr<Attribute_PickupablesSpawnPoint> creatorPickupablesSpawnPoint, int amount);
 
 	Float3 position;
 	PickupableType pickupableType;
-	AttributePointer creatorPickupablesSpawnPoint;
+	AttributePtr<Attribute_PickupablesSpawnPoint>  creatorPickupablesSpawnPoint;
 	int amount;
 };
 

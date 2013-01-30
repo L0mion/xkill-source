@@ -388,7 +388,7 @@ void Renderer::render()
 
 	ViewportData vpData;
 
-	//Render each split-screen seperately
+	//Render each split-screen separately
 	std::vector<SplitScreenViewport>* ssViewports = managementViewport_->getSplitScreenViewports();
 	std::vector<ViewportData> vpDatas(ssViewports->size());
 	for(unsigned int i = 0; i < ssViewports->size(); i++)
@@ -396,8 +396,8 @@ void Renderer::render()
 		ssAt		= ssViewports->at(i).ssAt;
 		camAt		= itrCamera.at(ssAt->ptr_camera);
 
-		spatialAt	= ATTRIBUTE_CAST(Attribute_Spatial, ptr_spatial, camAt);
-		posAt		= ATTRIBUTE_CAST(Attribute_Position, ptr_position, spatialAt);
+		spatialAt	= camAt->ptr_spatial.getAttribute();
+		posAt		= spatialAt->ptr_position.getAttribute();
 
 		managementViewport_->setViewport(devcon, i);
 

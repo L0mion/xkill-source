@@ -31,6 +31,7 @@ private:
 	AttributeType type;				//!< The AttributeType contained in AttributeStorage
 	int num_attributes;
 
+
 	AttributeController getAttributeController()
 	{
 		return AttributeController(this, index_lastCreated);
@@ -48,6 +49,9 @@ public:
 		// Init type
 		T attribute;
 		type = ((IAttribute*)&attribute)->getType();
+
+		// Init pointers
+		AttributePtr<T>::initClass(&attributes);
 	}
 
 	int size()
@@ -153,13 +157,11 @@ public:
 		deleted.push(index);
 	}
 
-	AttributePointer getLatestAttributeAsAttributePointer()
+	AttributePtr<T> getLatestAttributeAsAttributePointer()
 	{
-		AttributePointer a;
+		AttributePtr<T> a;
 		a.init(&attributes, index_lastCreated);
 		return a;
 	}
-
-	
 };
 

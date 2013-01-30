@@ -75,14 +75,14 @@ void GameComponent::onUpdate(float delta)
 		// Fetch attributes through iterators
 		Attribute_Player*		player		=	itrPlayer		.getNext();
 
-		Attribute_Health*		health		=	itrHealth		.at(player->ptr_health);
-		Attribute_Camera*		camera		=	itrCamera		.at(player->ptr_camera);
-		Attribute_Input*		input		=	itrInput		.at(player->ptr_input);
-		Attribute_Render*		render		=	itrRender		.at(player->ptr_render);
-		Attribute_WeaponStats*	weaponStats	=	itrWeaponStats	.at(player->ptr_weaponStats);
-		Attribute_Spatial*		spatial		=	itrSpatial		.at(render->ptr_spatial);
-		Attribute_Position*		position	=	itrPosition		.at(spatial->ptr_position);
-		Attribute_Physics*		physics		=	itrPhysics		.at(input->ptr_physics);
+		Attribute_Health*		health		=	player	->	ptr_health		.	getAttribute();
+		Attribute_Camera*		camera		=	player	->	ptr_camera		.	getAttribute();
+		Attribute_Input*		input		=	player	->	ptr_input		.	getAttribute();
+		Attribute_Render*		render		=	player	->	ptr_render		.	getAttribute();
+		Attribute_WeaponStats*	weaponStats	=	player	->	ptr_weaponStats	.	getAttribute();
+		Attribute_Spatial*		spatial		=	render	->	ptr_spatial		.	getAttribute();
+		Attribute_Position*		position	=	spatial	->	ptr_position	.	getAttribute();
+		Attribute_Physics*		physics		=	input	->	ptr_physics		.	getAttribute();
 
 		Ammunition* ammo = &weaponStats->ammunition[weaponStats->currentAmmunitionType];
 		FiringMode* firingMode = &weaponStats->firingMode[weaponStats->currentFiringModeType];
@@ -304,7 +304,7 @@ void GameComponent::onUpdate(float delta)
 				}
 
 				//Each pickupable knows it pickupablesSpawnPoint creator
-				AttributePointer creatorPickupablesSpawnPoint = itrPickupablesSpawnPoint.attributePointer(pickupablesSpawnPoint);
+				AttributePtr<Attribute_PickupablesSpawnPoint> creatorPickupablesSpawnPoint = itrPickupablesSpawnPoint.attributePointer(pickupablesSpawnPoint);
 				SEND_EVENT(&Event_CreatePickupable(pickupablesSpawnPointPosition->position, pickupablesSpawnPoint->spawnPickupableType, creatorPickupablesSpawnPoint, amount));
 				pickupablesSpawnPoint->secondsSinceLastSpawn = 0.0f;
 			}
@@ -585,7 +585,7 @@ void GameComponent::event_PhysicsAttributesColliding(Event_PhysicsAttributesColl
 				}
 			}
 			//Decrement number of spawned pickupables for the spawnpoint that spanwed the pickupable that the player picked up. Also remove it.
-			Attribute_PickupablesSpawnPoint* pickupablesSpawnPointAttribute = itrPickupablesSpawnPoint.at(pickupableAttribute->ptr_creatorPickupablesSpawnPoint);
+			Attribute_PickupablesSpawnPoint* pickupablesSpawnPointAttribute = itrPickupablesSpawnPoint.at(pickupableAttribute->ptr_pickupablesSpawnPoint_creator);
 			pickupablesSpawnPointAttribute->currentNrOfExistingSpawnedPickupables--;
 			pickupablesSpawnPointAttribute->secondsSinceLastPickup = 0;
 			
