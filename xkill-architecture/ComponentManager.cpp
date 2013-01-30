@@ -123,6 +123,8 @@ bool ComponentManager::init(HWND windowHandle, HWND parentWindowHandle)
 		return false;
 	}
 
+	SEND_EVENT(&Event_PlaySound(4));
+
 	// Returns that everything went ok
 	return true;
 }
@@ -139,7 +141,7 @@ void ComponentManager::onEvent(Event* e)
 		initialSpawnDelay = 0.0f;
 		#ifdef XKILL_DEBUG
 		{
-			initialSpawnDelay = 1.0f; //Prevent debug lag making physics not registering collision during the first seconds of the game.
+			initialSpawnDelay = 1.0f; //Prevent debug lag making physics not registering collision during the initial seconds of the game.
 		}
 		#endif
 	case EVENT_GAME_OVER:
@@ -192,12 +194,8 @@ void ComponentManager::update(float delta)
 	else if(GET_STATE() == STATE_MAINMENU)
 	{
 		sound_->onUpdate(delta);
-		//camera_->onUpdate(delta);
-		//physics_->onUpdate(delta);
-		//camera_->onUpdate(delta);
-		render_->onUpdate(delta);
 		input_->onUpdate(delta);
-		//game_->onUpdate(delta);
+		render_->onUpdate(delta);
 		SEND_EVENT(&Event(EVENT_UPDATE));
 	}
 	else if(GET_STATE() == SPECIAL_STATE_NONE)

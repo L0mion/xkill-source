@@ -61,7 +61,7 @@ HRESULT InstancedData::initBuffer(ID3D11Device* device)
 
 		hr = device->CreateBuffer(&bufferDesc, &initialData, &instanceBuffer_);
 		if(FAILED(hr))
-			ERROR_MSG(L"InstancedData::init device->CreateBuffer failed!");
+			SHOW_MESSAGEBOX("InstancedData::init device->CreateBuffer failed!");
 	}
 
 	return hr;
@@ -111,6 +111,10 @@ HRESULT InstancedData::updateBuffer(ID3D11DeviceContext* devcon)
 	{
 		memcpy(map.pData, &instanceVec_[0], instanceCount_ * sizeof(VertexPosNormTexInstanced));
 		devcon->Unmap(instanceBuffer_, NULL);
+	}
+	else
+	{
+		SHOW_MESSAGEBOX("InstancedData::updateBuffer devcon->Map failed!");
 	}
 
 	return hr;

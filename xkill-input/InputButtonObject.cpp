@@ -11,9 +11,13 @@ InputButtonObject::~InputButtonObject(void)
 {
 }
 
-void InputButtonObject::SetValue(bool value)
+void InputButtonObject::SetValue(bool value, bool updatePrevValue)
 {
-	prevValue_ = value_;
+	if(updatePrevValue)
+	{
+		prevValue_ = value_;
+	}
+
 	value_ = value;
 }
 

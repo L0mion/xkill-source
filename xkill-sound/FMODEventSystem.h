@@ -44,6 +44,8 @@ public:
 	/** \brief Mutes all sounds.*/
 	void SetMuteSounds(bool mute = true);
 
+	std::vector<std::string> GetFMODEventNames();
+
 private:
 	void FMODErrorCheck(FMOD_RESULT result);
 

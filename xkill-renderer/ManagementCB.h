@@ -36,104 +36,60 @@ static const unsigned int CB_REGISTER_SPRITE	= 6;
 class ManagementCB : public D3DInterface
 {
 public:
-	//! Initializes CBManagement to its default state.
-	ManagementCB();
-	//!Releases all memory and resets CBManagement to its default state.
-	~ManagementCB();
-	//!Releases all memory and resets CBManagement to its default state.
-	void reset();
+	ManagementCB();		//!< Initializes CBManagement to its default state.
+	~ManagementCB();	//!< Releases all memory and resets CBManagement to its default state.
+	void reset();		//!< Releases all memory and resets CBManagement to its default state.
 
-	//! Updates the constant buffer cbInstance.
-	void updateCBInstance(ID3D11DeviceContext*	devcon,
-						  const unsigned int	screenWidth,
-						  const unsigned int	screenHeight);
-	//! Updates the constant buffer cbFrame.
-	void updateCBFrame(ID3D11DeviceContext* devcon,
-					   unsigned int numLightsDir,
-					   unsigned int numLightsPoint,
-					   unsigned int numLightsSpot);
-
-	void updateCBCamera(ID3D11DeviceContext* devcon,
-						DirectX::XMFLOAT4X4	 viewMatrix,
-						DirectX::XMFLOAT4X4	 viewMatrixInverse,
-						DirectX::XMFLOAT4X4	 projectionMatrix,
-						DirectX::XMFLOAT4X4	 projectionMatrixInverse,
-						DirectX::XMFLOAT3	 eyePosition,
-						unsigned int		 viewportTopX,
-						unsigned int		 viewportTopY);
-
-	//! Updates the constant buffer cbObject.
-	void updateCBObject(ID3D11DeviceContext* devcon,
-						DirectX::XMFLOAT4X4 finalMatrix,
-						DirectX::XMFLOAT4X4 worldMatrix,
-						DirectX::XMFLOAT4X4 worldMatrixInverse);
-	
-	//! Updates the constant buffer cbBone.
-	void updateCBBone(ID3D11DeviceContext* devcon,
-					  std::vector<DirectX::XMFLOAT4X4> boneTransforms);
-
-	//! Updates the constant buffer cbSubset.
-	void updateCBSubset(ID3D11DeviceContext* devcon,
-						DirectX::XMFLOAT3	specularTerm,
-						float				specularPower);
-
-	//! Updates the constant buffer cbSprite.
-	void updateCBSprite(ID3D11DeviceContext* devcon,
-						DirectX::XMFLOAT4X4 transformMatrix);
-
+	void updateCBInstance(
+		ID3D11DeviceContext*	devcon,
+		 const unsigned int		screenWidth,
+		 const unsigned int		screenHeight);		//!< Updates the constant buffer cbInstance.
+	void updateCBFrame(
+		ID3D11DeviceContext*	devcon,
+		unsigned int			numLightsDir,
+		unsigned int			numLightsPoint,
+		unsigned int			numLightsSpot);		//!< Updates the constant buffer cbFrame.
+	void updateCBCamera(
+		ID3D11DeviceContext* devcon,
+		DirectX::XMFLOAT4X4	 viewMatrix,
+		DirectX::XMFLOAT4X4	 viewMatrixInverse,
+		DirectX::XMFLOAT4X4	 projectionMatrix,
+		DirectX::XMFLOAT4X4	 projectionMatrixInverse,
+		DirectX::XMFLOAT3	 eyePosition,
+		unsigned int		 viewportTopX,
+		unsigned int		 viewportTopY,
+		unsigned int		zNear,
+		unsigned int		zFar);	 //!< Updates the constant buffer cbCamera.
+	void updateCBObject(
+		ID3D11DeviceContext* devcon,
+		DirectX::XMFLOAT4X4 finalMatrix,
+		DirectX::XMFLOAT4X4 worldMatrix,
+		DirectX::XMFLOAT4X4 worldMatrixInverse); //!< Updates the constant buffer cbObject.
+	void updateCBBone(
+		ID3D11DeviceContext* devcon,
+		std::vector<DirectX::XMFLOAT4X4> boneTransforms); //!< Updates the constant buffer cbBone.
+	void updateCBSubset(
+		ID3D11DeviceContext* devcon,
+		DirectX::XMFLOAT3	specularTerm,
+		float				specularPower); //!< Updates the constant buffer cbSubset.
+	void updateCBSprite(
+		ID3D11DeviceContext* devcon,
+		DirectX::XMFLOAT4X4 transformMatrix); //!< Updates the constant buffer cbSprite.
+		
 	void setCB(
 		CB_TYPE					cbType, 
 		TypeFX					shaderStage, 
 		unsigned int			shaderRegister, 
-		ID3D11DeviceContext*	devcon);
+		ID3D11DeviceContext*	devcon); //!< Sets specified constant buffer.
 
-	//! Initializes CBManagement.
-	/*!
-	\return Any error encountered.
-	\param device Pointer to DirectX Device
-	\sa initCBFrame
-	\sa initCBInstance
-	*/
-	HRESULT init(ID3D11Device* device);
+	HRESULT init(ID3D11Device* device); //! Initializes CBManagement.
 private:
-	//! Initializes a the buffer cbInstance_.
-	/*!
-	\return Any error encountered.
-	\param device Pointer to DirectX Device.
-	\sa cbInstance_
-	*/
-	HRESULT initCBInstance(ID3D11Device* device);
-	//! Initializes a the buffer cbFrame_.
-	/*!
-	\return Any error encountered.
-	\param device Pointer to DirectX Device.
-	\sa cbFrame_
-	*/
-	HRESULT initCBFrame(ID3D11Device* device);
-
-	//! Initializes a the buffer cbCamera_.
-	/*!
-	\return Any error encountered.
-	\param device Pointer to DirectX Device.
-	\sa cbCamera_
-	*/
-	HRESULT initCBCamera(ID3D11Device* device);
-	//! Initializes a the buffer cbObject_.
-	/*!
-	\return Any error encountered.
-	\param device Pointer to DirectX Device.
-	\sa cbObject_
-	*/
-	HRESULT initCBObject(ID3D11Device* device);
-	//! Initializes a the buffer cbBone_.
-	/*!
-	\return Any error encountered.
-	\param device Pointer to DirectX Device.
-	\sa cbBone_
-	*/
-	HRESULT initCBBone(ID3D11Device* device);
-
-	HRESULT initCBSubset(ID3D11Device* device);
+	HRESULT initCBInstance(ID3D11Device* device);	//!< Initializes the buffer cbInstance_.
+	HRESULT initCBFrame(ID3D11Device* device);		//!< Initializes the buffer cbFrame_.
+	HRESULT initCBCamera(ID3D11Device* device);		//!< Initializes the buffer cbCamera_.
+	HRESULT initCBObject(ID3D11Device* device);		//!< Initializes the buffer cbObject_.
+	HRESULT initCBBone(ID3D11Device* device);		//!< Initializes the buffer cbBone_.
+	HRESULT initCBSubset(ID3D11Device* device);		//!< Initializes the buffer cbSubset_.
 
 	//! Initializes a the buffer cbSprite_.
 	/*!
