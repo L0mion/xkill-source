@@ -67,7 +67,7 @@ void lightingCS(
 	
 	//Reconstruct view-space position from depth. Observe the normalized coordinates sent to method.
 	float3 surfacePosV = UtilReconstructPositionViewSpace(float2(threadIDDispatch.x / viewportWidth, threadIDDispatch.y / viewportHeight), gDepth, projectionInverse); 
-
+	
 	uint pixelDepthInt = asuint(surfacePosV.z); //Interlocked functions can only be applied onto ints.
 	if(gDepth != 1.0f)
 	{
@@ -79,8 +79,8 @@ void lightingCS(
 	float tileMaxDepthF = asfloat(tileMaxDepthInt);
 	
 	Frustum frustum = ExtractFrustumPlanes(
-		screenWidth, 
-		screenHeight, 
+		viewportWidth,
+		viewportHeight, 
 		viewportTopX,
 		viewportTopY,
 		TILE_DIM, 
@@ -151,30 +151,13 @@ void lightingCS(
 		Specular += specular;
 	}
 	uint tileLightNumLocal = tileLightNum;
-	//for(i = 0; i < tileLightNumLocal; i++)
-	//{
-	//	LightDescPoint descPoint = lightsPoint[tileLightIndices[i]];
-	//	LightPoint(
-	//		toEyeV,
-	//		descPoint,
-	//		mul(float4(lightsPos[tileLightIndices[i]], 1.0f), view), //lightsPos[tileLightIndices[i]].pos
-	//		surfaceMaterial,
-	//		surfaceNormalV,
-	//		surfacePosV,
-	//		ambient, diffuse, specular);	
-	//	Ambient		+= ambient;
-	//	Diffuse		+= diffuse;
-	//	Specular	+= specular;
-	//}
-
-	//Draw all point-lights:
-	for(i = 0; i < numLightsPoint; i++)
+	for(i = 0; i < tileLightNumLocal; i++)
 	{
-		LightDescPoint descPoint = lightsPoint[i];
+		LightDescPoint descPoint = lightsPoint[tileLightIndices[i]];
 		LightPoint(
 			toEyeV,
 			descPoint,
-			mul(float4(lightsPos[i], 1.0f), view).xyz, //
+			mul(float4(lightsPos[tileLightIndices[i]], 1.0f), view), //lightsPos[tileLightIndices[i]].pos
 			surfaceMaterial,
 			surfaceNormalV,
 			surfacePosV,
@@ -185,27 +168,10 @@ void lightingCS(
 	}
 
 	//TILING DEMO:
-	for(i = 0; i < tileLightNum; i++) //Apply culled point-lights.
-	{
-		Diffuse.g += 0.1;
-	}
+	//for(i = 0; i < tileLightNum; i++) //Apply culled point-lights.
+	//{
+	//	Diffuse.g += 0.1;
+	//}
 	
 	output[uint2(threadIDDispatch.x + viewportTopX, threadIDDispatch.y + viewportTopY)] = Ambient + Diffuse + Specular;
 }
-
-//Draw all point-lights:
-//for(i = 0; i < numLightsPoint; i++)
-//{
-//	LightDescPoint descPoint = lightsPoint[i];
-//	LightPoint(
-//		toEyeV,
-//		descPoint,
-//		mul(float4(lightsPos[i], 1.0f), view).xyz, //
-//		surfaceMaterial,
-//		surfaceNormalV,
-//		surfacePosV,
-//		ambient, diffuse, specular);	
-//	Ambient		+= ambient;
-//	Diffuse		+= diffuse;
-//	Specular	+= specular;
-//}

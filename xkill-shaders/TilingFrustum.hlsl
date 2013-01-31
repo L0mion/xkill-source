@@ -18,7 +18,7 @@ Frustum ExtractFrustumPlanes(
 	float minZ,
 	float maxZ)
 {
-    float2 tileScale = float2(float(screenWidth), float(screenHeight) / 2.0f) * rcp(float(2 * tileDim));
+    float2 tileScale = float2(float(screenWidth), float(screenHeight)) * rcp(float(2 * tileDim));
     float2 tileBias = tileScale - float2(blockID.xy);
 
     float4 c1 = float4(proj11 * tileScale.x,	0.0f,					tileBias.x, 0.0f);
