@@ -6,6 +6,8 @@
 #include "LightDesc.h"
 #include "Enums.h"
 #include "AttributePointer.h"
+#include "MeshDesc.h"
+#include "MeshVertices.h"
 
 //
 // Events info
@@ -276,15 +278,21 @@ public:
 	Event_CreateProjectile(Float3 position, Float3 velocity, Float4 rotation, float damage, int entityIdOfCreator, bool explodeOfImpact, float explosionSphereRadius);
 };
 
-class MeshModel;
 class DLL_U Event_CreateMesh : public Event
 {
 public:
 	unsigned int	id;
-	MeshModel*		mesh;
+	MeshDesc		mesh;
 	bool			dynamic;
+	std::string		fileName;
+	VertexType		vertexType;
 
-	Event_CreateMesh(unsigned int id, MeshModel* mesh, bool dynamic);
+	Event_CreateMesh(
+		unsigned int	id, 
+		MeshDesc		mesh, 
+		bool			dynamic, 
+		std::string		fileName, 
+		VertexType		vertexType);
 };
 
 class TexDesc;

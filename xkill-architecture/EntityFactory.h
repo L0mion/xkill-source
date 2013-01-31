@@ -196,6 +196,8 @@ public:
 		mesh->mesh		= e->mesh;
 		mesh->dynamic	= e->dynamic;
 		mesh->meshID	= e->id;
+		mesh->fileName	= e->fileName;
+		mesh->vertexType = e->vertexType;
 	}
 
 	void createPlayerSpawnPointEntity(Entity* entity, Event_CreatePlayerSpawnPoint* e)

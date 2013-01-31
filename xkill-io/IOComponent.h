@@ -56,8 +56,10 @@ private:
 		std::string		modelPath,
 		MdlDescModel*	modelDesc);
 
-	bool loadObj(std::string modelName, std::string modelPath, MdlDescModel* modelDesc);
-	bool loadFbx(std::string modelName, std::string modelPath, MdlDescModel* modelDesc);
+	bool loadObj(std::string modelName, std::string modelPath, MdlDescModel* modelDesc, MeshDesc& meshDesc);
+	bool loadFbx(std::string modelName, std::string modelPath, MdlDescModel* modelDesc, MeshDesc& meshDesc);
+	bool loadPGY(std::string modelName, std::string modelPath, MdlDescModel* modelDesc, MeshDesc& meshDesc);
+	bool writePGY(std::string modelName, std::string modelPath, MeshDesc meshDesc, VertexType vertexType);
 
 	FileExtension findFileType(std::string modelName);
 
@@ -66,8 +68,6 @@ private:
 	std::vector<std::string> getFileNames(LPCTSTR filename);
 
 	std::map<std::string, unsigned int>* texNameToTexID;
-
-	std::vector<MeshModel*> meshModels_; //temporarily store models until these may be deleted in attribute
 
 	LoaderFbx* fbxLoader_;
 };

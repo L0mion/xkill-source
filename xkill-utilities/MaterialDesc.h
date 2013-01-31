@@ -1,9 +1,9 @@
 #ifndef XKILL_IO_MATERIALDESC_H
 #define XKILL_IO_MATERIALDESC_H
 
-#include <xkill-utilities/Math.h>
+#include "Math.h"
 
-struct MaterialDesc
+struct DLL_U MaterialDesc
 {
 	MaterialDesc();
 	//! Does nothing.

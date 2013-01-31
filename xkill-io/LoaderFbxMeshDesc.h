@@ -6,12 +6,9 @@
 
 #include <xkill-utilities/Math.h>
 #include <xkill-utilities/MeshVertices.h>
-
-#include "VertexDesc.h"
-
+#include <xkill-utilities/VertexDesc.h>
 
 static const unsigned int NUM_INFLUENCING_BONES = 4;
-
 
 //! Class for describing a loaded mesh
 /*!

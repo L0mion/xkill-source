@@ -12,6 +12,8 @@ VertexDesc::VertexDesc()
 		boneIndices_[i] = 0;
 	}
 	weights_ = Float3(0.0f, 0.0f, 0.0f);
+
+	color_ = Float3(1.0f, 0.0f, 0.0f);
 }
 VertexDesc::~VertexDesc()
 {

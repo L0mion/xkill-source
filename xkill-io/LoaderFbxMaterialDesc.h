@@ -6,7 +6,7 @@
 
 #include <xkill-utilities/Math.h>
 
-#include "MaterialDesc.h"
+#include <xkill-utilities/MaterialDesc.h>
 
 class LoaderFbxMaterialDesc
 {

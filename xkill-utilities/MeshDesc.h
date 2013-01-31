@@ -7,7 +7,7 @@
 #include "MaterialDesc.h"
 #include "SubsetDesc.h"
 
-class MeshDesc
+class DLL_U MeshDesc
 {
 public:
 	MeshDesc();

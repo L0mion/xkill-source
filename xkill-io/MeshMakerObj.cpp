@@ -31,16 +31,11 @@ MeshMakerObj::MeshMakerObj(
 	loaderMtl_ = nullptr;
 
 	texNameToID_ = texNameToID;
-
-	meshModel_ = new VarStatus<MeshDesc>(true);
 }
 MeshMakerObj::~MeshMakerObj()
 {
 	if(loaderObj_)
 		delete loaderObj_;
-
-	if(meshModel_)
-		delete meshModel_;
 
 	//loaderMTL_ not deleted here, as it is managed in loadMTL.
 }
@@ -50,35 +45,30 @@ bool MeshMakerObj::init()
 	bool sucessfulLoad = true;
 
 	//Get time when original file was last edited.
-	WriteTimeUTC writeTimeUTC;
-	sucessfulLoad = getLastWrittenToFile(pathObj_, fileNameObj_, writeTimeUTC);
-	
-	std::string fileNamePGY = getFileNamePGY();
-	if(existingPGY(pathPGY_, fileNamePGY) && sucessfulLoad) //Attempt to load PGY
-		sucessfulLoad = loadPGY(writeTimeUTC);
-	else
-		sucessfulLoad = false;
+	//WriteTimeUTC writeTimeUTC;
+	//sucessfulLoad = getLastWrittenToFile(pathObj_, fileNameObj_, writeTimeUTC);
+	//
+	//std::string fileNamePGY = getFileNamePGY();
+	//if(existingPGY(pathPGY_, fileNamePGY) && sucessfulLoad) //Attempt to load PGY
+	//	sucessfulLoad = loadPGY(writeTimeUTC);
+	//else
+	//	sucessfulLoad = false;
 
-	if(!sucessfulLoad)
+	sucessfulLoad = loadObj();
+	if(sucessfulLoad)
+		sucessfulLoad = loadMaterials();
+	if(sucessfulLoad)
 	{
-		sucessfulLoad = loadObj();
-		if(sucessfulLoad)
-			sucessfulLoad = loadMaterials();
-		if(sucessfulLoad)
-		{
-			Obj obj = loaderObj_->getObj();
-			meshModel_ = makeMesh(obj);
-			sucessfulLoad = makePGY(meshModel_, obj.getWriteTimeUTC());
-		}
+		Obj obj = loaderObj_->getObj();
+		meshDesc_ = makeMesh(obj);
+		//sucessfulLoad = makePGY(meshModel_, obj.getWriteTimeUTC());
 	}
-
 	return sucessfulLoad;
 }
 
-MeshDesc* MeshMakerObj::claimMesh()
+MeshDesc MeshMakerObj::getMesh()
 {
-	meshModel_->setStatus(false);
-	return meshModel_->getVar();
+	return meshDesc_;
 }
 
 bool MeshMakerObj::loadObj()
@@ -97,35 +87,35 @@ bool MeshMakerObj::loadObj()
 
 	return sucessfulLoad;
 }
-bool MeshMakerObj::loadPGY(WriteTimeUTC writeTimeUTC)
-{
-	MeshModel* loadedMesh = nullptr;
-	bool sucessfulLoad = true;
-	
-	std::string fileNamePgy = getFileNamePGY();
-	LoaderPGY pgyLoader(
-		pathPGY_,
-		fileNamePgy);
-	sucessfulLoad = pgyLoader.init();
+//bool MeshMakerObj::loadPGY(WriteTimeUTC writeTimeUTC)
+//{
+//	MeshModel* loadedMesh = nullptr;
+//	bool sucessfulLoad = true;
+//	
+//	std::string fileNamePgy = getFileNamePGY();
+//	LoaderPGY pgyLoader(
+//		pathPGY_,
+//		fileNamePgy);
+//	sucessfulLoad = pgyLoader.init();
+//
+//	if(sucessfulLoad)
+//	{
+//		if(writeTimeUTC == pgyLoader.getWriteTimeUTC())
+//			meshDesc_->setVar(pgyLoader.getMeshModel());
+//		else
+//			sucessfulLoad = false; //Original file has been modified. Not valid.
+//	}
+//	
+//	return sucessfulLoad;
+//}
 
-	if(sucessfulLoad)
-	{
-		if(writeTimeUTC == pgyLoader.getWriteTimeUTC())
-			meshModel_->setVar(pgyLoader.claimMeshModel());
-		else
-			sucessfulLoad = false; //Original file has been modified. Not valid.
-	}
-	
-	return sucessfulLoad;
-}
-
-bool MeshMakerObj::existingPGY(std::string pathPGY, std::string fileNamePGY)
-{
-	std::string fullPathPGY = pathPGY + fileNamePGY; 
-
-	std::ifstream ifile(fullPathPGY);
-	return ifile.good();
-}
+//bool MeshMakerObj::existingPGY(std::string pathPGY, std::string fileNamePGY)
+//{
+//	std::string fullPathPGY = pathPGY + fileNamePGY; 
+//
+//	std::ifstream ifile(fullPathPGY);
+//	return ifile.good();
+//}
 bool MeshMakerObj::getLastWrittenToFile(std::string path, std::string fileName, WriteTimeUTC& out)
 {
 	WIN32_FIND_DATA findFileData;
@@ -206,20 +196,22 @@ std::vector<SubsetDesc> MeshMakerObj::getSubsetDescs(std::vector<ObjGroup> objGr
 
 		subsetDescs[i] = subsetDesc;
 	}
+
+	return subsetDescs;
 }
 
-bool MeshMakerObj::makePGY(MeshModel* model, WriteTimeUTC writeTimeUTC)
-{
-	std::string fileNamePgy = getFileNamePGY();
-	WriterPGY pgyWriter(
-		*model,
-		writeTimeUTC,
-		pathPGY_,
-		fileNamePgy);
-	bool sucessfulWrite = pgyWriter.init();
-
-	return sucessfulWrite;
-}
+//bool MeshMakerObj::makePGY(MeshModel* model, WriteTimeUTC writeTimeUTC)
+//{
+//	std::string fileNamePgy = getFileNamePGY();
+//	WriterPGY pgyWriter(
+//		*model,
+//		writeTimeUTC,
+//		pathPGY_,
+//		fileNamePgy);
+//	bool sucessfulWrite = pgyWriter.init();
+//
+//	return sucessfulWrite;
+//}
 
 bool MeshMakerObj::loadMaterials()
 {
@@ -319,7 +311,7 @@ unsigned int MeshMakerObj::getTexIDfromName(std::string texFilename)
 
 	return texID;
 }
-std::string MeshMakerObj::getFileNamePGY()
-{
-	return fileNameObj_ + PGY_SPECS_SUFFIX;
-}
+//std::string MeshMakerObj::getFileNamePGY()
+//{
+//	return fileNameObj_ + PGY_SPECS_SUFFIX;
+//}

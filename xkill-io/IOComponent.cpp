@@ -3,7 +3,6 @@
 #include <stdio.h>
 
 #include <xkill-utilities/EventManager.h>
-#include <xkill-utilities/MeshModel.h>
 #include <xkill-utilities/AttributeType.h>
 
 #include "MeshMakerObj.h"
@@ -15,6 +14,8 @@
 
 #include "LoaderFbx.h"
 #include "LoaderFbxModelDesc.h"
+#include "LoaderPGY.h"
+#include "WriterPGY.h"
 
 IOComponent::IOComponent()
 {
@@ -26,11 +27,6 @@ IOComponent::~IOComponent()
 	if(texNameToTexID)
 		delete texNameToTexID;
 
-	for(unsigned int i = 0; i < meshModels_.size(); i++)
-	{
-		if(meshModels_[i])
-			delete meshModels_[i];
-	}
 	if(fbxLoader_)
 		delete fbxLoader_;
 
@@ -145,15 +141,7 @@ bool IOComponent::initMdlDesc(std::string filename)
 		{
 			std::string name = models[i]->modelFileName_;
 
-			if(pollFile(path, name + ".pgy"))
-			{
-				//Load pgy
-			}
-			
-			if(/*problem while loading pgy*/)
-			{
-				sucessfulLoad = loadModel(name, path, models[i]);
-			} //then write to pgy
+			sucessfulLoad = loadModel(name, path, models[i]);
 		}
 
 		delete mdlDesc; //clear when finished
@@ -216,20 +204,50 @@ bool IOComponent::loadModel(
 {
 	bool successfulLoad = true;
 
-	FileExtension fileType = findFileType(modelName);
-	switch(fileType)
+	MeshDesc meshDesc;
+	if(pollFile(modelPath, modelName + ".pgy"))
 	{
-	case FILE_EXTENSION_FBX:
-		successfulLoad = loadFbx(modelName, modelPath, modelDesc);
-		break;
-	case FILE_EXTENSION_OBJ:
-		successfulLoad = loadObj(modelName, modelPath, modelDesc);
-		break;
+		successfulLoad = loadPGY(modelName + ".pgy", modelPath, modelDesc, meshDesc);
+	}
+	else
+	{
+		FileExtension fileType = findFileType(modelName);
+		switch(fileType)
+		{
+		case FILE_EXTENSION_FBX:
+			successfulLoad = loadFbx(modelName, modelPath, modelDesc, meshDesc);
+			break;
+		case FILE_EXTENSION_OBJ:
+			successfulLoad = loadObj(modelName, modelPath, modelDesc, meshDesc);
+			break;
+		}
+
+		writePGY(modelName + ".pgy", modelPath, meshDesc, (VertexType)modelDesc->vertexType_);
+	}
+
+	if(successfulLoad)
+	{
+		Event_CreateMesh e(
+			modelDesc->modelID_, 
+			meshDesc, 
+			modelDesc->dynamic_, 
+			modelName, 
+			(VertexType)modelDesc->vertexType_);
+		SEND_EVENT(&e);
+	}
+	else
+	{
+		std::string errorMsg = "Could not load model: " + modelPath + modelName;
+		SHOW_MESSAGEBOX(errorMsg);
 	}
 
 	return successfulLoad;
 }
-bool IOComponent::loadObj(std::string modelName, std::string modelPath, MdlDescModel* modelDesc)
+bool IOComponent::loadObj(
+	std::string modelName, 
+	std::string modelPath, 
+	MdlDescModel* modelDesc, 
+	MeshDesc& meshDesc)
 {
 	bool sucessfulMake = true;
 
@@ -241,24 +259,32 @@ bool IOComponent::loadObj(std::string modelName, std::string modelPath, MdlDescM
 		texNameToTexID);
 	sucessfulMake = objMaker->init();
 
-
 	if(sucessfulMake)
 	{
-		MeshDesc* model = objMaker->claimMesh();
-
-		Event_CreateMesh e(modelDesc->modelID_, model, modelDesc->dynamic_);
-		SEND_EVENT(&e);
+		meshDesc = objMaker->getMesh();
 	}
 	else
 	{
-		std::string errorMsg = "Could not load model: " + modelPath + modelName;
-		SHOW_MESSAGEBOX(errorMsg);
+		sucessfulMake = false;
 	}
+
+	//if(sucessfulMake)
+	//{
+	//	model = objMaker->getMesh();
+	//
+	//	Event_CreateMesh e(modelDesc->modelID_, model, modelDesc->dynamic_);
+	//	SEND_EVENT(&e);
+	//}
+	//else
+	//{
+	//	std::string errorMsg = "Could not load model: " + modelPath + modelName;
+	//	SHOW_MESSAGEBOX(errorMsg);
+	//}
 
 	delete objMaker;
 	return sucessfulMake;
 }
-bool IOComponent::loadFbx(std::string modelName, std::string modelPath, MdlDescModel* modelDesc)
+bool IOComponent::loadFbx(std::string modelName, std::string modelPath, MdlDescModel* modelDesc, MeshDesc& meshDesc)
 {
 	bool successfulLoad = true;
 
@@ -268,13 +294,59 @@ bool IOComponent::loadFbx(std::string modelName, std::string modelPath, MdlDescM
 	std::vector<unsigned int> indices;
 	MaterialDesc materialDesc;
 
-	for(unsigned int i=0; i<fbxModels.size(); i++)
+	if(fbxModels.size() > 0)
 	{
-		vertices		= fbxModels[i].getMeshDesc().createVertices();
-		indices			= fbxModels[i].getMeshDesc().getIndices();
-		materialDesc	= fbxModels[i].getMaterialDesc().getMaterialDesc();
+		vertices		= fbxModels[0].getMeshDesc().createVertices();
+		indices			= fbxModels[0].getMeshDesc().getIndices();
+		materialDesc	= fbxModels[0].getMaterialDesc().getMaterialDesc();
+
+		std::vector<MaterialDesc> materials;
+		materials.push_back(materialDesc);
+
+		std::vector<SubsetDesc> subsets;
+		SubsetDesc subset;
+		subset.indices_ = indices;
+		subset.materialIndex_ = 0;
+		subsets.push_back(subset);
+
+		meshDesc.vertices_ = vertices;
+		meshDesc.materials_ = materials;
+		meshDesc.subsets_ = subsets;
 	}
+	else
+		successfulLoad = false;
+
 	return successfulLoad;
+}
+bool IOComponent::loadPGY(std::string modelName, std::string modelPath, MdlDescModel* modelDesc, MeshDesc& meshDesc)
+{
+	bool sucessfulLoad = true;
+
+	LoaderPGY pgyLoader(
+		modelPath,
+		modelName);
+	sucessfulLoad = pgyLoader.init();
+
+	if(sucessfulLoad)
+	{
+		meshDesc = pgyLoader.getMeshModel();
+		//if(writeTimeUTC == pgyLoader.getWriteTimeUTC())
+	}
+
+	return sucessfulLoad;
+}
+
+bool IOComponent::writePGY(std::string modelName, std::string modelPath, MeshDesc meshDesc, VertexType vertexType)
+{
+	WriterPGY pgyWriter(
+		meshDesc,
+		//writeTimeUTC, //fix this
+		modelPath,
+		modelName,
+		vertexType);
+	bool sucessfulWrite = pgyWriter.init();
+
+	return sucessfulWrite;
 }
 
 FileExtension IOComponent::findFileType(std::string modelName)

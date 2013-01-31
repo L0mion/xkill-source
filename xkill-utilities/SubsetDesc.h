@@ -3,7 +3,9 @@
 
 #include <vector>
 
-struct SubsetDesc
+#include "dllUtilities.h"
+
+struct DLL_U SubsetDesc
 {
 	SubsetDesc();
 	~SubsetDesc();

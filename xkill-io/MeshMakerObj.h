@@ -4,11 +4,11 @@
 #include <map>
 #include <string>
 
+#include <xkill-utilities/MeshDesc.h>
+
 #include "MTL.h"
 #include "ObjGeometry.h"
 #include "Obj.h"
-#include "VarStatus.h"
-#include "MeshDesc.h"
 
 class LoaderObj;
 class LoaderMTL;
@@ -34,28 +34,28 @@ public:
 		const std::string fileNameObj,
 		const std::string pathMTL,
 		std::map<std::string, unsigned int>* texNameToID);
-	//! Deletes loaderObj_ and (OBS!) meshModel_.
+	//! Deletes loaderObj_ and (OBS!) meshDesc_.
 	~MeshMakerObj();
 
 	//! Loads mesh from .pgy-format if such exists. If not; the mesh is loaded from an .obj-file and then written to .pgy-format.
 	bool init();
 
-	MeshDesc* claimMesh();
+	MeshDesc getMesh();
 protected:
 private:
 	//! Initializes LoaderObj-object and proceeds to load .obj.
 	bool loadObj();
 	//! Initializes LoaderPgy-object and proceeds to load .pgy.
-	bool loadPGY(WriteTimeUTC writeTimeUTC);
+	//bool loadPGY(WriteTimeUTC writeTimeUTC);
 
 	//! Checks whether or not a corresponding .pgy-file exists.
-	bool existingPGY(std::string pathPGY, std::string fileNamePGY);
+	//bool existingPGY(std::string pathPGY, std::string fileNamePGY);
 	bool getLastWrittenToFile(std::string pathPGY, std::string fileNamePGY, WriteTimeUTC& out);
 	
 	//! Converts Obj-format loaded from .obj-file into general Mesh-type format.
 	MeshDesc makeMesh(Obj obj);
 	//! Writes loaded model into a .pgy-format.
-	bool makePGY(MeshModel* model, WriteTimeUTC writeTimeUTC);
+	//bool makePGY(MeshModel* model, WriteTimeUTC writeTimeUTC);
 	
 	//! Loads .mtl-files based on dependencies loaded from .obj.
 	bool loadMaterials();
@@ -73,7 +73,7 @@ private:
 	std::vector<SubsetDesc> getSubsetDescs(std::vector<ObjGroup> objSubsets);
 
 	unsigned int getTexIDfromName(std::string texFilename);
-	std::string getFileNamePGY();
+	//std::string getFileNamePGY();
 
 	std::string pathObj_;		//!< Path up to .obj-file.
 	std::string pathMTL_;		//!< Path up to .mtl-files.
@@ -90,7 +90,7 @@ private:
 	std::vector<std::string>	materialID_;	//!< Used to locate index of material-type
 
 	/*Result*/
-	MeshDesc meshModel_;	//!< Resulting Mesh read from file.
+	MeshDesc meshDesc_;	//!< Resulting Mesh read from file.
 };
 
 #endif //XKILL_IO_MESHMAKER_H
