@@ -1,11 +1,13 @@
 #include "EventToFModConverter.h"
 
+#include <xkill-utilities/EventType.h>
+
 #include "FileParser.h"
 #include <sstream>
 
-EventToFModConverter::EventToFModConverter()
+EventToFModConverter::EventToFModConverter(std::vector<std::string> fmodEventNames)
 {
-
+	fmodEventNames_ = fmodEventNames;
 }
 
 EventToFModConverter::~EventToFModConverter()
@@ -28,12 +30,12 @@ void EventToFModConverter::fillNameConversionArray(std::string filepath)
 	fp.startReading();
 
 	int number;
-	std::string name, row;
+	std::string numberStr, name, row;
 
 	while(!fp.isEmpty())
 	{
 		row = fp.getNextRow();
-		if(splitRowIntoValues(row, number, name))
+		if(splitRowIntoValues(row, numberStr, name) && (number = stringToInt(numberStr)) >= 0)
 		{
 			eventNameToNumberEvent_.push_back(std::pair<std::string, int>(name, number));
 		}
@@ -58,10 +60,25 @@ int EventToFModConverter::getFModIndex(int eventIndex)
 void EventToFModConverter::addConversion(std::string conversionRow)	
 {
 	std::string name;
+	std::string numberStr;
 	int number;
 
-	if(splitRowIntoValues(conversionRow, number, name))
+	if(splitRowIntoValues(conversionRow, numberStr, name))
 	{
+		if((number = stringToInt(numberStr)) < 0)	// If true: numberstr wasn't a number, check if it's a fmod event name
+		{
+			for(unsigned int i = 0; i < fmodEventNames_.size(); i++)
+			{
+				if(fmodEventNames_[i] == numberStr)
+				{
+					number = i;
+				}
+			}
+		}
+
+		if(number < -1)
+			return;
+
 		int eventIndex = stringToInt(name);
 		if(eventIndex < 0)	//If true then it wasn't a number
 		{
@@ -78,14 +95,14 @@ void EventToFModConverter::addConversion(std::string conversionRow)
 			}
 
 			if(!matchFound)
-				return;		//Should later check if it was a eventname
+				return;
 		}
 
 		eventToFModArray_.push_back(std::pair<int, int>(eventIndex, number));
 	}
 }
 
-bool EventToFModConverter::splitRowIntoValues(std::string row, int& number, std::string& name)
+bool EventToFModConverter::splitRowIntoValues(std::string row, std::string& firstStr, std::string& secondStr)
 {
 	int strIndex;
 
@@ -95,12 +112,12 @@ bool EventToFModConverter::splitRowIntoValues(std::string row, int& number, std:
 	strIndex = row.find_first_of('=');
 	if(strIndex == row.npos) return false;	//Not a correctly formatted row
 
-	number = stringToInt(row.substr(0, strIndex - 1));
-	if(number < 0) return false;			//If true then it wasn't a number
+	firstStr = row.substr(0, strIndex - 1);
+	firstStr = removeWhiteSpaceAtBeginningAndEnd(firstStr);
 
 	row = row.substr(strIndex + 1);			//Get string after '='
 
-	name = removeWhiteSpaceAtBeginningAndEnd(row);
+	secondStr = removeWhiteSpaceAtBeginningAndEnd(row);
 	return true;
 }
 
@@ -138,8 +155,24 @@ int EventToFModConverter::stringToInt(std::string str)
 	return n;
 }
 
+std::string EventToFModConverter::intToString(int n)
+{
+	std::string str;
+	std::stringstream ss;
+	ss << n;
+	str = ss.str();
+
+	if(ss.fail())
+	{
+		return "";
+	}
+
+	return str;
+}
+
 std::string EventToFModConverter::configMessage()
 {
+	int offset = Event_PlaySound::SOUND_LAST;
 	std::string message;
 
 	message += "// This file is a conversion table between in-game event numbers and names.\n";
@@ -148,7 +181,19 @@ std::string EventToFModConverter::configMessage()
 	message += "// The names are allowed to contain spaces.\n";
 	message += "// The names are not allowed to begin with a number as this will be treated as\n";
 	message += "// a event number. \n";
-	message += "// This file will be used to convert fmod events to in-game events.\n";
+	message += "// This file will be used to convert fmod events to in-game events.\n\n";
+
+	message += intToString(Event_PlaySound::SOUND_DEATH)			+ " = Player Death\n";
+	message += intToString(Event_PlaySound::SOUND_FIRE)				+ " = Fire Gun\n";
+	message += intToString(Event_PlaySound::SOUND_HIT)				+ " = Player Hit\n";
+	message += intToString(Event_PlaySound::SOUND_MUSIC)			+ " = Play Music\n";
+	message += intToString(Event_PlaySound::SOUND_RESPAWN)			+ " = Player Respawn\n";
+	message += intToString(Event_PlaySound::SOUND_WALK)				+ " = Player Walk\n";
+	message += intToString(EVENT_CREATE_EXPLOSIONSPHERE + offset)	+ " = Explosion\n";
+	message += intToString(EVENT_CREATE_PROJECTILE + offset)		+ " = Fire Gun\n";
+	message += intToString(EVENT_PLAYERDEATH + offset)				+ " = Player Death\n";
+	message += intToString(EVENT_CREATE_PICKUPABLE + offset)		+ " = Spawn Pickupable\n";
+	message += intToString(EVENT_CREATE_EXPLOSIONSPHERE + offset)	+ " = Explosion\n";
 
 	return message;
 }

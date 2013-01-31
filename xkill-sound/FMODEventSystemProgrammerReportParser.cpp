@@ -44,7 +44,7 @@ bool FMODEventSystemProgrammerReportParser::parseProgrammerReport(FMODEventSyste
 			pieceOfLine = lineFromTextFile.substr(indexOfCharacter, std::string::npos);
 
 			FMODEventSystemWrapperClass->FMODErrorCheck(FMODEventSystemWrapperClass->mEventsystem->getEvent( (soundEventPath+pieceOfLine).c_str(), FMOD_EVENT_DEFAULT, &soundEvent));
-			FMODEventSystemWrapperClass->mSoundEvents->push_back(soundEvent);
+			//FMODEventSystemWrapperClass->mSoundEvents->push_back(soundEvent);
 		}
 		else if(lineFromTextFile == "# Groups") //This implementation does not handle event groups
 		{

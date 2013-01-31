@@ -7,14 +7,12 @@
 FMODEventSystem::FMODEventSystem(void)
 {
 	mEventsystem = NULL;
-	mSoundEvents = NULL;
 	mSoundEventFileNameWithoutExtension = "";
 }
 
 FMODEventSystem::~FMODEventSystem(void)
 {
 	SAFE_RELEASE(mEventsystem);
-	SAFE_DELETE(mSoundEvents); //All FMOD::Event* are deallocated by FMOD through FMOD::EventSystem
 }
 
 void FMODEventSystem::FMODErrorCheck(FMOD_RESULT result)
@@ -24,7 +22,6 @@ void FMODEventSystem::FMODErrorCheck(FMOD_RESULT result)
 	{
 		printf("FMOD error! (%d) %s\n", result, FMOD_ErrorString(result));
 		error = true;
-
 	}
 }
 
@@ -40,8 +37,6 @@ void FMODEventSystem::Init(std::string mediaPath, std::string soundEventFileName
 	mMediaPath = mediaPath;
 
 	FMODErrorCheck(mEventsystem->getNumEvents(&nrOfEvents_));
-
-	mSoundEvents = new std::vector<FMOD::Event*>();
 }
 
 void FMODEventSystem::Update()
@@ -55,7 +50,6 @@ void FMODEventSystem::StartSoundEventAt(unsigned int index)
 	{
 		FMOD::Event* soundEvent;
 		FMODErrorCheck(mEventsystem->getEventBySystemID(index, FMOD_EVENT_NONBLOCKING, &soundEvent));
-		//mSoundEvents->push_back(soundEvent);
 		soundEvent->start();
 	}
 	else
@@ -82,8 +76,24 @@ void FMODEventSystem::SetMuteSounds(bool mute)
 
 std::vector<std::string> FMODEventSystem::GetFMODEventNames()
 {
-	FMOD::Event e;
-	//mEventsystem->
+	FMOD::Event* e;
+	std::vector<std::string> names;
 
-	return std::vector<std::string>();
+	int nrOfEvents;
+	FMODErrorCheck(mEventsystem->getNumEvents(&nrOfEvents));
+
+	for(int i = 0; i < nrOfEvents; i++)
+	{
+		FMODErrorCheck(mEventsystem->getEventBySystemID(i, FMOD_EVENT_INFOONLY, &e));
+
+		int nr;
+		FMOD_EVENT_INFO info;
+		char* name;
+
+		FMODErrorCheck(e->getInfo(&nr, &name, &info));
+
+		names.push_back(std::string(name));
+	}
+
+	return names;
 }

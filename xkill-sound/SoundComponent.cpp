@@ -2,10 +2,7 @@
 
 #include <xkill-utilities/IObserver.h>
 #include <xkill-utilities/EventManager.h>
-#include <xkill-sound/FMODEventSystem.h> //check architecture project depending on sound
-#include <xkill-sound/FMODEventSystemProgrammerReportParser.h> //check architecture project depending on sound
-
-#include <iostream>
+#include "FMODEventSystem.h"
 
 #include "FileParser.h"
 #include "EventToFModConverter.h"
@@ -32,8 +29,6 @@ SoundComponent::~SoundComponent()
 
 bool SoundComponent::init(std::string configFilePath)
 {
-	int test = sizeof(*ATTRIBUTE_MANAGER);
-
 	mFMODEventSystem = new FMODEventSystem();
 	mFMODEventSystem->Init("../../xkill-resources/xkill-sounds/", "Xkill_Sound.fev", 64);
 
@@ -44,7 +39,7 @@ bool SoundComponent::init(std::string configFilePath)
 	//	return false;
 	//}
 
-	converter = new EventToFModConverter();
+	converter = new EventToFModConverter(mFMODEventSystem->GetFMODEventNames());
 	converter->init(configFilePath);
 
 	fillEventsToFModVector(configFilePath);
@@ -114,8 +109,7 @@ std::string SoundComponent::configMessage()
 	std::string message = "";
 
 	message += "// Define a binding between events by using this format\n";
-	message += "// <Fmod event number> = <game event number>\n";
-	message += "// <Fmod event number> = <game event name>\n";
+	message += "// <Fmod event name/number> = <game event name/number>\n";
 	message += "// Example:\n";
 	message += "// 0 = 4";
 	message += "// This will bind fmod event '0' to game event '4'\n";

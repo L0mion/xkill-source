@@ -50,7 +50,6 @@ private:
 	void FMODErrorCheck(FMOD_RESULT result);
 
 	FMOD::EventSystem* mEventsystem;
-	std::vector<FMOD::Event*>* mSoundEvents;
 	std::string mSoundEventFileNameWithoutExtension;
 	std::string mMediaPath;
 	int nrOfEvents_;

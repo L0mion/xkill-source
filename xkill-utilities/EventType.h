@@ -138,6 +138,18 @@ public:
 
 	int soundId;
 	bool muteSound;
+
+	enum sounds
+	{
+		SOUND_WALK,
+		SOUND_HIT,
+		SOUND_RESPAWN,
+		SOUND_FIRE,
+		SOUND_DEATH,
+		SOUND_MUSIC,
+
+		SOUND_LAST
+	};
 };
 
 //! Will trigger rumble in devices[deviceNr]

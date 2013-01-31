@@ -82,6 +82,14 @@ void InputComponent::onUpdate(float delta)
 	handleInput(delta);
 }
 
+
+#define DEBUGPRINT(dataStream)									\
+{                                                               \
+	std::ostringstream oss;										\
+	oss << dataStream << std::endl;								\
+	printf(oss.str().c_str());									\
+}
+
 void InputComponent::handleInput(float delta)
 {
 	delta = settings->trueDeltaTime;
@@ -180,6 +188,8 @@ void InputComponent::handleInput(float delta)
 		y = input->position.y;
 
 		float length = std::sqrt(x*x + y*y);
+
+		DEBUGPRINT("Length: " << length);
 
 		if(length > 1.0f) // The character shouldn't move faster than set speed
 		{
