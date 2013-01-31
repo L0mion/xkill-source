@@ -79,8 +79,8 @@ void lightingCS(
 	float tileMaxDepthF = asfloat(tileMaxDepthInt);
 	
 	Frustum frustum = ExtractFrustumPlanes(
-		screenWidth, 
-		screenHeight, 
+		viewportWidth,
+		viewportHeight,
 		TILE_DIM, 
 		blockID.xy, 
 		projection._11,
@@ -148,31 +148,14 @@ void lightingCS(
 		Diffuse	+= diffuse; 
 		Specular += specular;
 	}
-	//uint tileLightNumLocal = tileLightNum;
-	//for(i = 0; i < tileLightNumLocal; i++)
-	//{
-	//	LightDescPoint descPoint = lightsPoint[tileLightIndices[i]];
-	//	LightPoint(
-	//		toEyeV,
-	//		descPoint,
-	//		mul(float4(lightsPos[tileLightIndices[i]], 1.0f), view), //lightsPos[tileLightIndices[i]].pos
-	//		surfaceMaterial,
-	//		surfaceNormalV,
-	//		surfacePosV,
-	//		ambient, diffuse, specular);	
-	//	Ambient		+= ambient;
-	//	Diffuse		+= diffuse;
-	//	Specular	+= specular;
-	//}
-	
-	//Draw all point-lights:
-	for(i = 0; i < numLightsPoint; i++)
+	uint tileLightNumLocal = tileLightNum;
+	for(i = 0; i < tileLightNumLocal; i++)
 	{
-		LightDescPoint descPoint = lightsPoint[i];
+		LightDescPoint descPoint = lightsPoint[tileLightIndices[i]];
 		LightPoint(
 			toEyeV,
 			descPoint,
-			mul(float4(lightsPos[i], 1.0f), view).xyz, //
+			mul(float4(lightsPos[tileLightIndices[i]], 1.0f), view),
 			surfaceMaterial,
 			surfaceNormalV,
 			surfacePosV,
