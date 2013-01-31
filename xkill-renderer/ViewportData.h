@@ -14,8 +14,10 @@ struct ViewportData
 	DirectX::XMFLOAT3	eyePos;
 	unsigned int		viewportTopX;
 	unsigned int		viewportTopY;
-	unsigned int		zNear;
-	unsigned int		zFar;
+	float		zNear;
+	float		zFar;
+	float		viewportWidth;
+	float		viewportHeight;
 };
 
 #endif //XKILL_RENDERER_VIEWPORTDATA_H

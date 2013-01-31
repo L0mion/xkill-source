@@ -85,11 +85,18 @@ Event_CreateProjectile::Event_CreateProjectile(Float3 position, Float3 velocity,
 	this->damage = damage;
 }
 
-Event_CreateMesh::Event_CreateMesh(unsigned int id, MeshModel* mesh, bool dynamic) : Event(EVENT_CREATE_MESH)
+Event_CreateMesh::Event_CreateMesh(
+	unsigned int	id, 
+	MeshDesc		mesh, 
+	bool			dynamic, 
+	std::string		fileName,
+	VertexType		vertexType) : Event(EVENT_CREATE_MESH)
 {
 	this->id		= id;
 	this->mesh		= mesh;
 	this->dynamic	= dynamic;
+	this->fileName	= fileName;
+	this->vertexType = vertexType;
 }
 
 Event_PhysicsAttributesColliding::Event_PhysicsAttributesColliding(int attribute1_index, int attribute2_index) : Event(EVENT_PHYSICS_ATTRIBUTES_COLLIDING)

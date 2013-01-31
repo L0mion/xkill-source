@@ -16,10 +16,9 @@ class DebugShapes;
 
 template <class Vertex>    
 class VB;
-
 class IB;
 
-#include <xkill-utilities\MeshGeometry.h>
+#include <xkill-utilities\MeshDesc.h>
 #include <xkill-utilities\AttributeType.h>
 
 #include <map>
@@ -54,18 +53,19 @@ private:
 	bool getMeshAttribute(unsigned int modelID, Attribute_Mesh& inout);			//!< Retrieves a MeshAttribute corresponding to modelID, if such exists. Returns whether or not such an attribute was found.
 	HRESULT createVertexBuffer(
 		const unsigned int		modelID, 
-		MeshGeometry&			geometry,
-		VB<VertexPosNormTex>*	vb,
+		std::vector<VertexDesc>	vertices,
+		ID3D11Buffer**			vb,
+		VertexType				vertexType,
 		ID3D11Device*			device);		//!< Initializes vb.
 	HRESULT createIndexBuffers(
 		const unsigned int			modelID, 
-		MeshGeometry&				geometry, 
+		std::vector<SubsetDesc>		subsets, 
 		std::vector<SubsetD3D*>&	subsetD3Ds,
 		ID3D11Device*				device);	//!< Initializes ibs.
 	HRESULT createIndexBuffer(
 		const unsigned int	modelID,
-		MeshSubset&			subset,
-		IB*					ib,
+		SubsetDesc			subset,
+		ID3D11Buffer**		indexBuffer,
 		ID3D11Device*		device);			//!< Initializes ib.
 
 	void			createDebugShapeD3D(unsigned int shapeIndex,	ID3D11Device* device);	//!< Creates a debug-shape. Finds the corresponding attribute in the debugshape-attribute vector and cretaes the correct shape.
@@ -79,6 +79,13 @@ private:
 	void pushDebugShapeD3D(
 		const unsigned int shapeIndex, 
 		DebugShapeD3D* shapeD3D);	//!< Adds a loaded DebugShapeD3D to ModelManagement, where it will be stored for future use.
+
+	std::vector<VertexPosColor> convertVertexPosColor(std::vector<VertexDesc>& vertices);
+	std::vector<VertexPosNormTex> convertVertexPosNormTex(std::vector<VertexDesc>& vertices);
+	std::vector<VertexPosNormTexSkinned> convertVertexPosNormTexSkinned(std::vector<VertexDesc>& vertices);
+	std::vector<VertexPosNormSkinned> convertVertexPosNormSkinned(std::vector<VertexDesc>& vertices);
+	std::vector<VertexPosNormTexTanSkinned> convertVertexPosNormTexTanSkinned(std::vector<VertexDesc>& vertices);
+
 
 	bool			existingModelD3D(const int unsigned modelID);			//!< Checks whether or a model corresponding to passed ID exists or not.
 	unsigned int	getModelD3DIndex(const int unsigned modelID);			//!< Gets index in vector containing ModelD3Ds based on model ID.

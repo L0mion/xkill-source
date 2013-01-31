@@ -203,15 +203,18 @@ void LoaderMdlDesc::loadModel(const std::vector<std::string>& params)
 	unsigned int	modelID;
 	std::string		modelName;
 	std::string		modelDynamic;
+	unsigned int	modelVertexType;
 
 	modelID 		= static_cast<unsigned int>(::atof(params[MDLDESC_PARAM_INDEX_MODEL_ID].c_str()));
 	modelName		= params[MDLDESC_PARAM_INDEX_MODEL_FILENAME].c_str();
 	modelDynamic	= params[MDLDESC_PARAM_INDEX_MODEL_DYNAMIC].c_str();
+	modelVertexType = static_cast<unsigned int>(::atof(params[MDLDESC_PARAM_INDEX_MODEL_VERTEX_TYPE].c_str()));
 
 	models_.push_back(new MdlDescModel(
 		modelID, 
 		modelName, 
-		modelDynamic != "0"));
+		modelDynamic != "0",
+		modelVertexType));
 }
 void LoaderMdlDesc::loadWorld(const std::vector<std::string>& params)
 {
