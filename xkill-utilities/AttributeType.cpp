@@ -185,7 +185,7 @@ Attribute_Player::Attribute_Player()
 	respawnDelay = 5.0f;
 	currentRespawnDelay = 0.0f;
 	delayInSecondsBetweenEachJump = 1.0f;
-	timeSinceLastJump = 0.0f;
+	timeSinceLastJump = delayInSecondsBetweenEachJump+1.0f;
 	collidingWithWorld = false;
 	jetpackTimer = 0.0f;
 	detectedAsDead = true;

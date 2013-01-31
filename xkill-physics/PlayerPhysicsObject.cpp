@@ -3,6 +3,7 @@
 #include "physicsUtilities.h"
 
 #include "MotionState.h"
+#include <iostream>
 
 AttributeIterator<Attribute_Input> itrInput;
 AttributeIterator<Attribute_Physics> itrPhysics_3;
@@ -80,6 +81,13 @@ void PlayerPhysicsObject::handleInput(float delta)
 		//look and move
 		yaw_ += inputAttribute->rotation.x;
 		btVector3 move = playerAttribute->currentSpeed*btVector3(inputAttribute->position.x, 0, inputAttribute->position.y);
+
+		//Airwalk handling
+		if(!playerAttribute->collidingWithWorld)
+		{
+			move *= 0.75f;
+		}
+		
 		move = move.rotate(btVector3(0,1,0),yaw_);
 		move = btVector3(move.x(), getLinearVelocity().y(), move.z());
 		setLinearVelocity(move);
@@ -90,16 +98,17 @@ void PlayerPhysicsObject::handleInput(float delta)
 		setWorldTransform(world);
 
 		//Jump
+		float jumpPower = 10.0f;
 		if(inputAttribute->jump && playerAttribute->timeSinceLastJump > playerAttribute->delayInSecondsBetweenEachJump && playerAttribute->collidingWithWorld)
 		{
-			applyCentralImpulse(btVector3(0.0f, 5.0f, 0.0f));
+			applyCentralImpulse(btVector3(0.0f, jumpPower, 0.0f));
 			playerAttribute->timeSinceLastJump = 0.0f;
 		}
 
 		//Jetpack
 		if(inputAttribute->jetpack)
 		{
-			applyCentralImpulse(btVector3(0.0f, 50.0f*delta, 0.0f));
+			applyCentralImpulse(btVector3(0.0f, jumpPower*10.0f*delta, 0.0f));
 			playerAttribute->jetpackTimer+=delta;
 			if(playerAttribute->jetpackTimer > 0.1f)
 			{
@@ -109,17 +118,31 @@ void PlayerPhysicsObject::handleInput(float delta)
 		}
 
 		Attribute_Physics* playerPhysicsAttribute = itrPhysics_3.at(attributeIndex_);
+		btVector3 currentplayerGravity = getGravity();
 
-		//Prevent player from sliding down slopes
+		//When a player is stading still on the ground, prevent it from sliding down slopes by modifying friction and gravity
 		if(inputAttribute->position.x == 0.0f && inputAttribute->position.y == 0.0f && playerAttribute->collidingWithWorld && !inputAttribute->jetpack && !inputAttribute->jump)
 		{
-			setFriction(btScalar(100.0f)); //Friction when player are standing still
-			setGravity(btVector3(0.0f, 0.0f, 0.0f));
+			if(currentplayerGravity.y() != 0.0f)
+			{
+				setFriction(btScalar(100.0f));
+				setGravity(btVector3(0.0f, 0.0f, 0.0f));
+			}
 		}
-		else //restore friction and gravity
+		//When moving, restore friction and gravity
+		else if( (inputAttribute->position.x != 0.0f || inputAttribute->position.y != 0.0f) )
 		{
-			setFriction(btScalar(0.0f));
-			setGravity(btVector3(playerPhysicsAttribute->gravity.x, playerPhysicsAttribute->gravity.y, playerPhysicsAttribute->gravity.z));
+			if(currentplayerGravity.y() != playerPhysicsAttribute->gravity.y)
+			{
+				setFriction(btScalar(0.0f));
+				setGravity(btVector3(playerPhysicsAttribute->gravity.x, playerPhysicsAttribute->gravity.y, playerPhysicsAttribute->gravity.z));
+			}
+		}
+
+		//Prevent player being able to hang-glide after jumping
+		if(playerAttribute->timeSinceLastJump < playerAttribute->delayInSecondsBetweenEachJump)
+		{
+			setGravity(btVector3(0.0f, playerPhysicsAttribute->gravity.y*5.0f, 0.0f));
 		}
 
 		inputAttribute->jump = false;
