@@ -19,8 +19,8 @@ bool ProjectilePhysicsObject::subClassSpecificInitHook()
 {
 	//Attribute_Physics* physicsAttribute = itrPhysics_ProjectilePhysicsObject.at(attributeIndex_);
 
-	btVector3 velocity = getLinearVelocity();
-	float speed = velocity.length();
+	//btVector3 velocity = getLinearVelocity();
+	//float speed = velocity.length();
 
 	//Anti-tunneling
 	setCcdMotionThreshold(0.1f);

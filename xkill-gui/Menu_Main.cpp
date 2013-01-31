@@ -54,7 +54,7 @@ Menu_Main::Menu_Main( QWidget* parent ) : QMainWindow(parent), ToggleHelper(this
 	connect(ui.radioButton_Ammo_Explosive,						SIGNAL(clicked()),					this,	SLOT(slot_updateAmmoMenu()));
 
 	connect(ui.horizontalSlider_Ammo_Damage,					SIGNAL(sliderMoved(int)),			this,	SLOT(slot_ammoMenuUpdated()));
-	connect(ui.horizontalSlider_Ammo_ExplosionSphere,			SIGNAL(sliderMoved(int)),			this,	SLOT(slot_ammoMenuUpdated()));
+	connect(ui.horizontalSlider_Ammo_ExplosionInitialRadius,			SIGNAL(sliderMoved(int)),			this,	SLOT(slot_ammoMenuUpdated()));
 	connect(ui.horizontalSlider_Ammo_NrOfProjectiles,			SIGNAL(sliderMoved(int)),			this,	SLOT(slot_ammoMenuUpdated()));
 	connect(ui.horizontalSlider_Ammo_Speed,						SIGNAL(sliderMoved(int)),			this,	SLOT(slot_ammoMenuUpdated()));
 	connect(ui.horizontalSlider_Ammo_Spread,					SIGNAL(sliderMoved(int)),			this,	SLOT(slot_ammoMenuUpdated()));

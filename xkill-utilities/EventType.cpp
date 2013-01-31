@@ -74,15 +74,15 @@ Event_ShowMessageBox::Event_ShowMessageBox(std::string message) : Event(EVENT_SH
 	this->message = message;
 }
 
-Event_CreateProjectile::Event_CreateProjectile(Float3 position, Float3 velocity, Float4 rotation, float damage, int entityIdOfCreator, bool explodeOnImpact, float explosionSphereRadius) : Event(EVENT_CREATE_PROJECTILE)
+Event_CreateProjectile::Event_CreateProjectile(Float3 position, Float3 velocity, Float4 rotation, int entityIdOfCreator, XKILL_Enums::AmmunitionType ammunitionType, XKILL_Enums::FiringModeType firingMode, int damage) : Event(EVENT_CREATE_PROJECTILE)
 {
 	this->position = position;
 	this->velocity = velocity;
 	this->rotation = rotation;
-	this->damage = damage;
 	this->entityIdOfCreator = entityIdOfCreator;
-	this->explodeOnImpact = explodeOnImpact;
-	this->explosionSphereRadius = explosionSphereRadius;
+	this->ammunitionType = ammunitionType;
+	this->firingMode = firingMode;
+	this->damage = damage;
 }
 
 Event_CreateMesh::Event_CreateMesh(unsigned int id, MeshModel* mesh, bool dynamic) : Event(EVENT_CREATE_MESH)
@@ -121,13 +121,13 @@ Event_CreatePlayerSpawnPoint::Event_CreatePlayerSpawnPoint(Float3 spawnPointPosi
 	this->spawnAreaRadius = spawnAreaRadius;
 }
 
-Event_CreatePickupablesSpawnPoint::Event_CreatePickupablesSpawnPoint(Float3 spawnPointPosition, PickupableType pickupableType)  : Event(EVENT_CREATE_PICKUPABLESSPAWNPOINT)
+Event_CreatePickupablesSpawnPoint::Event_CreatePickupablesSpawnPoint(Float3 spawnPointPosition, XKILL_Enums::PickupableType pickupableType)  : Event(EVENT_CREATE_PICKUPABLESSPAWNPOINT)
 {
 	this->spawnPointPosition = spawnPointPosition;
 	this->pickupableType = pickupableType;
 }
 
-Event_CreatePickupable::Event_CreatePickupable(Float3 position, PickupableType pickupableType, AttributePtr<Attribute_PickupablesSpawnPoint>  creatorPickupablesSpawnPoint, int amount)  : Event(EVENT_CREATE_PICKUPABLE)
+Event_CreatePickupable::Event_CreatePickupable(Float3 position, XKILL_Enums::PickupableType pickupableType, AttributePtr<Attribute_PickupablesSpawnPoint>  creatorPickupablesSpawnPoint, int amount)  : Event(EVENT_CREATE_PICKUPABLE)
 {
 	this->position = position;
 	this->pickupableType = pickupableType;
@@ -213,7 +213,7 @@ Event_DrawBulletPhysicsDebugLines::Event_DrawBulletPhysicsDebugLines(std::vector
 	this->debugLineVertices = debugLineVertices;
 }
 
-Event_ModifyPhysicsObject::Event_ModifyPhysicsObject(ModifyPhysicsObjectData modifyWhatDataInPhysicsObjectData, void* data, int physicsAttributeIndex) : Event(EVENT_MODIFY_PHYSICS_OBJECT)
+Event_ModifyPhysicsObject::Event_ModifyPhysicsObject(XKILL_Enums::ModifyPhysicsObjectData modifyWhatDataInPhysicsObjectData, void* data, int physicsAttributeIndex) : Event(EVENT_MODIFY_PHYSICS_OBJECT)
 {
 	this->modifyWhatDataInPhysicsObjectData = modifyWhatDataInPhysicsObjectData;
 	this->data = data;

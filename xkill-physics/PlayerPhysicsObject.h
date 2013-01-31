@@ -12,8 +12,9 @@ public:
 	PlayerPhysicsObject();
 	~PlayerPhysicsObject();
 	bool subClassSpecificInitHook();
-	virtual void handleInput(float delta);
 	virtual void onUpdate(float delta);
+	virtual void handleOutOfBounds();
+	virtual void handleInput(float delta);
 };
 
 #endif

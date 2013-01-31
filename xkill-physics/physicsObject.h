@@ -27,6 +27,7 @@ public:
 	unsigned int getCollisionFilterGroup() const;  //!< Returns the filter group the object belongs to, ex: Attribute_Physics::WORLD
 	
 	virtual void onUpdate(float delta);
+	virtual void handleOutOfBounds(); //!< Standard out of bounds handling: move object to a new position
 };
 
 #endif

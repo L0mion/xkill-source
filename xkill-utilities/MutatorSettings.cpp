@@ -4,8 +4,8 @@
 
 #define SAFE_DELETE(x) {if(x != nullptr) delete x; x = nullptr;}
 
-Ammunition	MutatorSettings::standardAmmunitions[Ammunition::NROFAMMUNITIONTYPES];
-FiringMode	MutatorSettings::standardFiringModes[FiringMode::NROFFIRINGMODETYPES];
+Ammunition	MutatorSettings::standardAmmunitions[XKILL_Enums::AmmunitionType::NROFAMMUNITIONTYPES];
+FiringMode	MutatorSettings::standardFiringModes[XKILL_Enums::FiringModeType::NROFFIRINGMODETYPES];
 bool		MutatorSettings::hasInitialized = false;
 
 MutatorSettings::MutatorSettings()
@@ -29,18 +29,18 @@ void MutatorSettings::setupAttribute(Attribute_WeaponStats* attribute)
 	setupAttribute(attribute, attribute->currentAmmunitionType, attribute->currentFiringModeType);
 }
 
-void MutatorSettings::setupAttribute(Attribute_WeaponStats* attribute, Ammunition::AmmunitionType ammo, FiringMode::FiringModeType firingMode)
+void MutatorSettings::setupAttribute(Attribute_WeaponStats* attribute, XKILL_Enums::AmmunitionType ammo, XKILL_Enums::FiringModeType firingMode)
 {
 	attribute->ammunition[ammo] = Ammunition(standardAmmunitions[ammo]);
 	attribute->firingMode[firingMode] = FiringMode(standardFiringModes[firingMode]);
 }
 
-Ammunition& MutatorSettings::getStandardAmmunition(Ammunition::AmmunitionType type)
+Ammunition& MutatorSettings::getStandardAmmunition(XKILL_Enums::AmmunitionType type)
 {
 	return standardAmmunitions[type];
 }
 
-FiringMode& MutatorSettings::getStandardFiringMode(FiringMode::FiringModeType type)
+FiringMode& MutatorSettings::getStandardFiringMode(XKILL_Enums::FiringModeType type)
 {
 	return standardFiringModes[type];
 }
@@ -49,11 +49,13 @@ void MutatorSettings::initStandardAmmunition()
 {
 	Ammunition* ammo;
 
-	ammo = &standardAmmunitions[Ammunition::BULLET];
+	ammo = &standardAmmunitions[XKILL_Enums::AmmunitionType::BULLET];
 
-	ammo->type				= Ammunition::BULLET;
+	ammo->type				= XKILL_Enums::AmmunitionType::BULLET;
 	ammo->damage			= 20.0f;
-	ammo->explosionSphere	= 1.0f;
+	ammo->explosionSphereInitialRadius = 0.0f;
+	ammo->explosionSphereFinalRadius = 0.0f;
+	ammo->explosionSphereExplosionDuration = 0.0f;
 	ammo->explosive			= false;
 	ammo->nrOfProjectiles	= 1;
 	ammo->spawnVariation	= 0.0f;
@@ -62,11 +64,13 @@ void MutatorSettings::initStandardAmmunition()
 	ammo->totalNrOfShots	= 1000;
 	ammo->velocityVariation	= 0.0f;
 
-	ammo = &standardAmmunitions[Ammunition::SCATTER];
+	ammo = &standardAmmunitions[XKILL_Enums::AmmunitionType::SCATTER];
 
-	ammo->type				= Ammunition::SCATTER;
+	ammo->type				= XKILL_Enums::AmmunitionType::SCATTER;
 	ammo->damage			= 3.0f;
-	ammo->explosionSphere	= 1.0f;
+	ammo->explosionSphereInitialRadius = 0.0f;
+	ammo->explosionSphereFinalRadius = 0.0f;
+	ammo->explosionSphereExplosionDuration = 0.0f;
 	ammo->explosive			= false;
 	ammo->nrOfProjectiles	= 10;
 	ammo->spawnVariation	= 0.02f;
@@ -75,11 +79,13 @@ void MutatorSettings::initStandardAmmunition()
 	ammo->totalNrOfShots	= 1000;
 	ammo->velocityVariation	= 0.5f;
 
-	ammo = &standardAmmunitions[Ammunition::EXPLOSIVE];
+	ammo = &standardAmmunitions[XKILL_Enums::AmmunitionType::EXPLOSIVE];
 
-	ammo->type				= Ammunition::EXPLOSIVE;
+	ammo->type				= XKILL_Enums::AmmunitionType::EXPLOSIVE;
 	ammo->damage			= 50.0f;
-	ammo->explosionSphere	= 1.0f;
+	ammo->explosionSphereInitialRadius = 1.0f;
+	ammo->explosionSphereFinalRadius = 10.0f;
+	ammo->explosionSphereExplosionDuration = 3.0f;
 	ammo->explosive			= true;
 	ammo->nrOfProjectiles	= 1;
 	ammo->spawnVariation	= 0.0f;
@@ -93,9 +99,9 @@ void MutatorSettings::initStandardFiringModes()
 {
 	FiringMode* firingMode;
 
-	firingMode = &standardFiringModes[FiringMode::SINGLE];
+	firingMode = &standardFiringModes[XKILL_Enums::FiringModeType::SINGLE];
 
-	firingMode->type					= FiringMode::SINGLE;
+	firingMode->type					= XKILL_Enums::FiringModeType::SINGLE;
 	firingMode->canShootBullet			= true;
 	firingMode->canShootExplosive		= true;
 	firingMode->canShootScatter			= true;
@@ -108,9 +114,9 @@ void MutatorSettings::initStandardFiringModes()
 	firingMode->cooldownLeft			= firingMode->cooldownBetweenShots;
 	firingMode->reloadTimeLeft			= firingMode->reloadTime;
 
-	firingMode = &standardFiringModes[FiringMode::SEMI];
+	firingMode = &standardFiringModes[XKILL_Enums::FiringModeType::SEMI];
 
-	firingMode->type					= FiringMode::SEMI;
+	firingMode->type					= XKILL_Enums::FiringModeType::SEMI;
 	firingMode->canShootBullet			= true;
 	firingMode->canShootExplosive		= true;
 	firingMode->canShootScatter			= true;
@@ -123,9 +129,9 @@ void MutatorSettings::initStandardFiringModes()
 	firingMode->cooldownLeft			= firingMode->cooldownBetweenShots;
 	firingMode->reloadTimeLeft			= firingMode->reloadTime;
 
-	firingMode = &standardFiringModes[FiringMode::AUTO];
+	firingMode = &standardFiringModes[XKILL_Enums::FiringModeType::AUTO];
 
-	firingMode->type					= FiringMode::AUTO;
+	firingMode->type					= XKILL_Enums::FiringModeType::AUTO;
 	firingMode->canShootBullet			= true;
 	firingMode->canShootExplosive		= true;
 	firingMode->canShootScatter			= true;
