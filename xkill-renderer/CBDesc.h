@@ -35,15 +35,22 @@ struct CBCameraDesc
 	DirectX::XMFLOAT4X4 viewMatrixInverse_;
 	DirectX::XMFLOAT4X4 projectionMatrix_;
 	DirectX::XMFLOAT4X4 projectionMatrixInverse_;
+	
 	DirectX::XMFLOAT3	eyePosition_;
 	unsigned int		viewportTopX_;
 
-	unsigned int		viewportTopY_;
-	float				zNear;
-	float				zFar;
-	unsigned int		pad2;
+	unsigned int	viewportTopY_;
+	float			zNear;
+	float			zFar;
+	float			viewportWidth;
+
+	float viewportHeight;
+	float pad2;
+	float pad3;
+	float pad4;
+
 };
-static const unsigned int CB_CAMERA_DESC_SIZE = 288;
+static const unsigned int CB_CAMERA_DESC_SIZE = 304;
 
 //! Struct describing a constant buffer.
 /*!

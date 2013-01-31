@@ -33,7 +33,12 @@ cbuffer cbPerCamera : register (b2)
 	uint		viewportTopY;
 	float		zNear;
 	float		zFar;
+	float		viewportWidth;
+
+	float		viewportHeight;
 	uint		pad4;
+	uint		pad5;
+	uint		pad6;
 };
 
 cbuffer cbPerObject : register (b3)

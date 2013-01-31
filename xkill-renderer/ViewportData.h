@@ -16,6 +16,8 @@ struct ViewportData
 	unsigned int		viewportTopY;
 	float		zNear;
 	float		zFar;
+	float		viewportWidth;
+	float		viewportHeight;
 };
 
 #endif //XKILL_RENDERER_VIEWPORTDATA_H
