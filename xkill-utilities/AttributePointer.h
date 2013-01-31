@@ -29,13 +29,25 @@ Manual casting is necessary since DLLs does not support Templates.
 
 #include <vector>
 
+class IAttributePtr
+{
+public:
+	virtual int index() = 0;
+	virtual void setIndex(int index) = 0;
+};
+
 template <class T>
-class AttributePtr
+class A_Ptr : public IAttributePtr
 {
 private:
 	std::vector<T>* _hostArray;
+	int _index;
 public:
-	int index;
+	T* operator->()
+	{
+		std::vector<T>* v = _hostArray;
+		return &v->at(_index);
+	}
 
 	static void initClass(std::vector<T>* hostArray)
 	{
@@ -43,10 +55,20 @@ public:
 		_hostArray;*/
 	}
 
-	AttributePtr()
+	A_Ptr()
 	{
 		_hostArray = nullptr;
-		index = -1;
+		_index = -1;
+	}
+
+	int index()
+	{
+		return _index;
+	}
+
+	void setIndex(int index)
+	{
+		_index = index;
 	}
 
 	bool isEmpty()
@@ -54,16 +76,15 @@ public:
 		return _hostArray == nullptr;
 	}
 
+	bool isNotEmpty()
+	{
+		return _hostArray != nullptr;
+	}
+
 	void init(std::vector<T>* hostArray, int index)
 	{
 		_hostArray = hostArray;
-		this->index = index;
-	}
-
-	T* getAttribute()
-	{
-		std::vector<T>* v = _hostArray;
-		return &v->at(index);
+		_index = index;
 	}
 };
 

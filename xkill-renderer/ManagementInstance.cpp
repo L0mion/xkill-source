@@ -43,15 +43,15 @@ void ManagementInstance::update(ID3D11Device* device, ID3D11DeviceContext* devco
 	}
 }
 
-void ManagementInstance::addRenderAtInstance(Attribute_Render* renderAt)
+void ManagementInstance::addRenderAtInstance(Attribute_Render* ptr_render)
 {
-	Attribute_Spatial*	spaAt = itrSpatial.at(renderAt->ptr_spatial.index);
-	Attribute_Position*	posAt = itrPosition.at(spaAt->ptr_position.index);
+	A_Ptr<Attribute_Spatial>	ptr_spatial = ptr_render->ptr_spatial;
+	A_Ptr<Attribute_Position> ptr_position = ptr_spatial->ptr_position;
 
 	VertexPosNormTexInstanced newInstance;
-	newInstance.world_ = calculateWorldMatrix(spaAt, posAt);
+	newInstance.world_ = calculateWorldMatrix(ptr_spatial, ptr_position);
 
-	InstancedData* instancedData = getInstancesFromMeshID(renderAt->meshID);
+	InstancedData* instancedData = getInstancesFromMeshID(ptr_render->meshID);
 	if(instancedData != nullptr)
 	{ //add new instance to corresponding instance vector.
 		instancedData->pushData(newInstance);
@@ -61,7 +61,7 @@ void ManagementInstance::addRenderAtInstance(Attribute_Render* renderAt)
 		instancedData = new InstancedData(D3D11_BIND_VERTEX_BUFFER, 0);
 		instancedData->pushData(newInstance);
 
-		instancesMap_.insert(std::pair<unsigned int, InstancedData*>(renderAt->meshID, instancedData));
+		instancesMap_.insert(std::pair<unsigned int, InstancedData*>(ptr_render->meshID, instancedData));
 	}
 }
 
@@ -79,24 +79,24 @@ InstancedData* ManagementInstance::getInstancesFromMeshID(unsigned int meshID)
 }
 
 DirectX::XMFLOAT4X4 ManagementInstance::calculateWorldMatrix(
-	Attribute_Spatial*	spaAt, 
-	Attribute_Position* posAt)
+	A_Ptr<Attribute_Spatial>	ptr_spatial, 
+	A_Ptr<Attribute_Position> ptr_position)
 {
 	DirectX::XMMATRIX translation = DirectX::XMMatrixTranslation(
-		posAt->position.x,
-		posAt->position.y,
-		posAt->position.z);
+		ptr_position->position.x,
+		ptr_position->position.y,
+		ptr_position->position.z);
 
 	DirectX::XMMATRIX scaling = DirectX::XMMatrixScaling(
-		spaAt->scale.x,
-		spaAt->scale.y,
-		spaAt->scale.z);
+		ptr_spatial->scale.x,
+		ptr_spatial->scale.y,
+		ptr_spatial->scale.z);
 
 	DirectX::XMFLOAT4 fRotation = DirectX::XMFLOAT4(
-		spaAt->rotation.x,
-		spaAt->rotation.y,
-		spaAt->rotation.z,
-		spaAt->rotation.w);
+		ptr_spatial->rotation.x,
+		ptr_spatial->rotation.y,
+		ptr_spatial->rotation.z,
+		ptr_spatial->rotation.w);
 
 	DirectX::XMVECTOR qRotation = DirectX::XMLoadFloat4(&fRotation);
 	DirectX::XMMATRIX rotation = DirectX::XMMatrixRotationQuaternion(qRotation);

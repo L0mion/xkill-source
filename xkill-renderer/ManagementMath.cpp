@@ -26,21 +26,21 @@ DirectX::XMFLOAT4X4 ManagementMath::calculateMatrixInverse(DirectX::XMFLOAT4X4 m
 	return matrixInverse;
 }
 DirectX::XMFLOAT4X4 ManagementMath::calculateWorldMatrix(
-	Attribute_Spatial* spatialAttribute, 
-	Attribute_Position* positionAttribute)
+	A_Ptr<Attribute_Spatial> ptr_spatial, 
+	A_Ptr<Attribute_Position> ptr_position)
 {
-	DirectX::XMMATRIX translation = DirectX::XMMatrixTranslation(positionAttribute->position.x,
-																 positionAttribute->position.y,
-																 positionAttribute->position.z);
+	DirectX::XMMATRIX translation = DirectX::XMMatrixTranslation(ptr_position->position.x,
+																 ptr_position->position.y,
+																 ptr_position->position.z);
 
-	DirectX::XMMATRIX scaling = DirectX::XMMatrixScaling(spatialAttribute->scale.x,
-														 spatialAttribute->scale.y,
-														 spatialAttribute->scale.z);
+	DirectX::XMMATRIX scaling = DirectX::XMMatrixScaling(ptr_spatial->scale.x,
+														 ptr_spatial->scale.y,
+														 ptr_spatial->scale.z);
 
-	DirectX::XMFLOAT4 fRotation = DirectX::XMFLOAT4(spatialAttribute->rotation.x,
-													spatialAttribute->rotation.y,
-													spatialAttribute->rotation.z,
-													spatialAttribute->rotation.w);
+	DirectX::XMFLOAT4 fRotation = DirectX::XMFLOAT4(ptr_spatial->rotation.x,
+													ptr_spatial->rotation.y,
+													ptr_spatial->rotation.z,
+													ptr_spatial->rotation.w);
 
 	DirectX::XMVECTOR qRotation = DirectX::XMLoadFloat4(&fRotation);
 	DirectX::XMMATRIX rotation = DirectX::XMMatrixRotationQuaternion(qRotation);

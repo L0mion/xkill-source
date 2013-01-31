@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Math.h"
+#include "AttributePointer.h"
 
 #include <vector>
 #include <string>
@@ -188,11 +189,11 @@ public:
 		d.type = DataItem::_INT;
 		content.push_back(d);
 	}
-	void add_AttributePointer(int x, std::string label)
+	void add(IAttributePtr* x, std::string label)
 	{
 		DataItem d;
 		d.label = label;
-		d.value._int =  new int(x);
+		d.value._int =  new int(x->index());
 		d.type = DataItem::_ATTRIBUTE_POINTER;
 		content.push_back(d);
 	}
@@ -249,15 +250,16 @@ public:
 	{
 		*x = *getNext()->value._string;
 	}
+	void get(IAttributePtr* x)
+	{
+		x->setIndex(*getNext()->value._int);
+	}
 	int get_Enum()
 	{
 		int x = *getNext()->value._int;
 		return x;
 	}
-	void get_AttributePointer(int* x)
-	{
-		*x = *getNext()->value._int;
-	}
+	
 	void get_NotSupported()
 	{
 		// SKIP TO NEXT

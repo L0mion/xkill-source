@@ -167,9 +167,9 @@ void PhysicsComponent::onUpdate(float delta)
 				std::vector<int> playerAttributeIndices = playerEntity->getAttributes(ATTRIBUTE_PLAYER);
 				for(unsigned int i = 0; i < playerAttributeIndices.size(); i++)
 				{
-					Attribute_Player* playerAttribute = itrPlayer.at(playerAttributeIndices.at(i));
-					Attribute_Health* playerHealthAttribute = itrHealth.at(playerAttribute->ptr_health);
-					if(!playerAttribute->detectedAsDead)
+					Attribute_Player* ptr_player = itrPlayer.at(playerAttributeIndices.at(i));
+					A_Ptr<Attribute_Health> ptr_health = ptr_player->ptr_health;
+					if(!ptr_player->detectedAsDead)
 					{
 						DEBUGPRINT("Player entity " << playerEntityIndex << " was out of bounds");
 						SEND_EVENT(&Event_PlayerDeath(playerAttributeIndices[i]));
@@ -297,7 +297,7 @@ void PhysicsComponent::synchronizeWithAttributes(Attribute_Physics* physicsAttri
 	}
 	*/
 	//Checks if new physiscs attributes were created since last call to this function
-	if(physicsAttributeIndex >= static_cast<unsigned int>(physicsObjects_->size()))
+	if(physicsAttributeIndex >= static_cast<int>(physicsObjects_->size()))
 	{
 		physicsObjects_->push_back(nullptr);
 	}
@@ -417,9 +417,7 @@ void PhysicsComponent::detectedCollisionsDuringStepSimulation(btScalar timeStep)
 
 void PhysicsComponent::doCulling(unsigned int frustumAttributeIndex, unsigned int objectAttributeIndex)
 {
-
-	//itrRender.at(itrPhysics.at(objectAttributeIndex)->ptr_render)->culling.setBool(frustumAttributeIndex,true);
-	itrRender.at(itrPhysics.at(objectAttributeIndex)->ptr_render)->cull = true;
+	itrPhysics.at(objectAttributeIndex)->ptr_render->cull = true;
 }
 
 void PhysicsComponent::updateCulling()

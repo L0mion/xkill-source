@@ -127,7 +127,7 @@ Event_CreatePickupablesSpawnPoint::Event_CreatePickupablesSpawnPoint(Float3 spaw
 	this->pickupableType = pickupableType;
 }
 
-Event_CreatePickupable::Event_CreatePickupable(Float3 position, PickupableType pickupableType, AttributePtr<Attribute_PickupablesSpawnPoint>  creatorPickupablesSpawnPoint, int amount)  : Event(EVENT_CREATE_PICKUPABLE)
+Event_CreatePickupable::Event_CreatePickupable(Float3 position, PickupableType pickupableType, A_Ptr<Attribute_PickupablesSpawnPoint>  creatorPickupablesSpawnPoint, int amount)  : Event(EVENT_CREATE_PICKUPABLE)
 {
 	this->position = position;
 	this->pickupableType = pickupableType;

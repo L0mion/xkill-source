@@ -35,11 +35,11 @@ public:
 		InstancedData*>& getInstancesMap();	//!< Returns map holding meshIDs and corresponding InstancedData-objects.
 protected:
 private:
-	void addRenderAtInstance(Attribute_Render* renderAt);		//!< Adds a RenderAttribute to the correct InstancedData. If such an object does not exist, it is created.
+	void addRenderAtInstance(Attribute_Render* ptr_render);		//!< Adds a RenderAttribute to the correct InstancedData. If such an object does not exist, it is created.
 	InstancedData* getInstancesFromMeshID(unsigned int meshID);	//!< Checks map for existing InstancedData-object corresponding to meshID. Returns nullptr if such an object is not found.
 	DirectX::XMFLOAT4X4 calculateWorldMatrix(
-		Attribute_Spatial*	spaAt, 
-		Attribute_Position*	posAt);	//!< Calculates the world-matrix of an instance.
+		A_Ptr<Attribute_Spatial>	ptr_spatial, 
+		A_Ptr<Attribute_Position> ptr_position);	//!< Calculates the world-matrix of an instance.
 
 	std::map<
 		unsigned int, 

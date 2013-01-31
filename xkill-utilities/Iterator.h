@@ -177,22 +177,14 @@ public:
         return attributeVector;
     }
 
-    // Returns an item in the vector regardless
-    // if it is valid or not, using the Index of
-    // the supplied Iterator
-    T* at(AttributePtr<T> attrPointer)
-    {
-        return at(attrPointer.index);
-    }
-
-	AttributePtr<T> attributePointer(T* attribute)
+	A_Ptr<T> attributePointer(T* attribute)
 	{ 
-		AttributePtr<T> pointer;
+		A_Ptr<T> pointer;
 		pointer.init(_attributes, storageIndex(attribute));
 		return pointer;
 	}
 
-	T* createAttribute(Entity* e)
+	A_Ptr<T> createAttribute(Entity* e)
 	{ 
 		return _attributeStorage->createAttribute(e);
 	}

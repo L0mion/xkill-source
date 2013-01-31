@@ -67,6 +67,16 @@ void GameComponent::onEvent(Event* e)
 void GameComponent::onUpdate(float delta)
 {
 	//
+	// Update offset
+	//
+
+	while(itrOffset.hasNext())
+	{
+		Behavior_Offset* offset	= itrOffset.getNext();
+		offset->updateOffset();
+	}
+
+	//
 	// Update players
 	//
 
@@ -75,14 +85,14 @@ void GameComponent::onUpdate(float delta)
 		// Fetch attributes through iterators
 		Attribute_Player*		player		=	itrPlayer		.getNext();
 
-		Attribute_Health*		health		=	player	->	ptr_health		.	getAttribute();
-		Attribute_Camera*		camera		=	player	->	ptr_camera		.	getAttribute();
-		Attribute_Input*		input		=	player	->	ptr_input		.	getAttribute();
-		Attribute_Render*		render		=	player	->	ptr_render		.	getAttribute();
-		Attribute_WeaponStats*	weaponStats	=	player	->	ptr_weaponStats	.	getAttribute();
-		Attribute_Spatial*		spatial		=	render	->	ptr_spatial		.	getAttribute();
-		Attribute_Position*		position	=	spatial	->	ptr_position	.	getAttribute();
-		Attribute_Physics*		physics		=	input	->	ptr_physics		.	getAttribute();
+		A_Ptr<Attribute_Health>			health		=	player	->	ptr_health		;
+		A_Ptr<Attribute_Camera>			camera		=	player	->	ptr_camera		;
+		A_Ptr<Attribute_Input>			input		=	player	->	ptr_input		;
+		A_Ptr<Attribute_Render>			render		=	player	->	ptr_render		;
+		A_Ptr<Attribute_WeaponStats>		weaponStats	=	player	->	ptr_weaponStats	;
+		A_Ptr<Attribute_Spatial>			spatial		=	render	->	ptr_spatial		;
+		A_Ptr<Attribute_Position>		position	=	spatial	->	ptr_position	;
+		A_Ptr<Attribute_Physics>			physics		=	input	->	ptr_physics		;
 
 		Ammunition* ammo = &weaponStats->ammunition[weaponStats->currentAmmunitionType];
 		FiringMode* firingMode = &weaponStats->firingMode[weaponStats->currentFiringModeType];
@@ -205,7 +215,7 @@ void GameComponent::onUpdate(float delta)
 				Attribute_PlayerSpawnPoint* spawnPointAttribute = findUnoccupiedSpawnPoint();
 				if(spawnPointAttribute != nullptr)
 				{
-					Attribute_Position* spawnPointPositionAttribute = itrPosition.at(spawnPointAttribute->ptr_position);
+					A_Ptr<Attribute_Position> spawnPointPositionAttribute = spawnPointAttribute->ptr_position;
 					position->position = spawnPointPositionAttribute->position; // set player position attribute
 					DEBUGPRINT("Player entity " << itrPlayer.ownerId() << " spawned at " << position->position.x << " " << position->position.y << " " << position->position.z << std::endl);
 				}
@@ -291,7 +301,7 @@ void GameComponent::onUpdate(float delta)
 		{
 			if(pickupablesSpawnPoint->currentNrOfExistingSpawnedPickupables < pickupablesSpawnPoint->maxNrOfExistingSpawnedPickupables)
 			{
-				Attribute_Position* pickupablesSpawnPointPosition = itrPosition.at(pickupablesSpawnPoint->ptr_position);
+				A_Ptr<Attribute_Position> pickupablesSpawnPointPosition = pickupablesSpawnPoint->ptr_position;
 
 				int amount;
 				switch(pickupablesSpawnPoint->spawnPickupableType)
@@ -311,7 +321,7 @@ void GameComponent::onUpdate(float delta)
 				}
 
 				//Each pickupable knows it pickupablesSpawnPoint creator
-				AttributePtr<Attribute_PickupablesSpawnPoint> creatorPickupablesSpawnPoint = itrPickupablesSpawnPoint.attributePointer(pickupablesSpawnPoint);
+				A_Ptr<Attribute_PickupablesSpawnPoint> creatorPickupablesSpawnPoint = itrPickupablesSpawnPoint.attributePointer(pickupablesSpawnPoint);
 				SEND_EVENT(&Event_CreatePickupable(pickupablesSpawnPointPosition->position, pickupablesSpawnPoint->spawnPickupableType, creatorPickupablesSpawnPoint, amount));
 				pickupablesSpawnPoint->secondsSinceLastSpawn = 0.0f;
 			}
@@ -534,9 +544,9 @@ void GameComponent::event_PhysicsAttributesColliding(Event_PhysicsAttributesColl
 
 					//Extract projectile position.
 			
-					Attribute_Physics* projectilePhysicsAttribute = itrPhysics.at(projectileAttribute->ptr_physics);
-					Attribute_Spatial* projectileSpatialAttribute = itrSpatial.at(projectilePhysicsAttribute->ptr_spatial);
-					Attribute_Position* projectilePositionAttribute = itrPosition.at(projectileSpatialAttribute->ptr_position);
+					A_Ptr<Attribute_Physics> projectilePhysicsAttribute = projectileAttribute->ptr_physics;
+					A_Ptr<Attribute_Spatial> projectileSpatialAttribute = projectilePhysicsAttribute->ptr_spatial;
+					A_Ptr<Attribute_Position> projectilePositionAttribute = projectileSpatialAttribute->ptr_position;
 
 					//Creates an explosion sphere. Init information is taken from the impacting projectile.
 					SEND_EVENT(&Event_CreateExplosionSphere(projectilePositionAttribute->position, projectileAttribute->explosionSphereRadius, projectileDamageAttribute->damage, projectileAttribute->entityIdOfCreator));
@@ -814,24 +824,22 @@ void GameComponent::event_TransferEventsToGame(Event_TransferEventsToGame* e)
 
 void GameComponent::event_PlayerDeath(Event_PlayerDeath* e)
 {
-	Attribute_Player* player = itrPlayer.at(e->playerIndex);
-	Attribute_Physics* physics = itrPhysics.at(itrInput.at(player->ptr_input)->ptr_physics);
-	Attribute_Health* health = itrHealth.at(player->ptr_health);
-	health->health = 0;
-
-	physics->angularVelocity = Float3(0.0f, 0.0f, 0.0f);
-	physics->linearVelocity = Float3(0.0f, 0.0f, 0.0f);
-	physics->gravity = Float3(0.0f, -1.0f, 0.0f);
-	physics->collisionFilterMask = physics->WORLD;
-	physics->collisionResponse = true;
-	physics->meshID = 1;
-	physics->reloadDataIntoBulletPhysics = true;
-
-	player->currentRespawnDelay = player->respawnDelay;
-	player->detectedAsDead = true;
+	Attribute_Player* ptr_player = itrPlayer.at(e->playerIndex);
+	AttributePtr<Attribute_Physics> ptr_physics = ptr_player->ptr_input->ptr_physics;
+	AttributePtr<Attribute_Health> ptr_health = ptr_player->ptr_health;
+	ptr_health->health = 0;
+	ptr_physics->angularVelocity = Float3(0.0f, 0.0f, 0.0f);
+	ptr_physics->linearVelocity = Float3(0.0f, 0.0f, 0.0f);
+	ptr_physics->gravity = Float3(0.0f, -1.0f, 0.0f);
+	ptr_physics->collisionFilterMask = Attribute_Physics::WORLD;
+	ptr_physics->collisionResponse = true;
+	ptr_physics->meshID = 1;
+	ptr_physics->reloadDataIntoBulletPhysics = true;
+	ptr_player->currentRespawnDelay = ptr_player->respawnDelay;
+	ptr_player->detectedAsDead = true;
 }
 
-bool GameComponent::switchAmmunition(Attribute_WeaponStats* weaponStats)
+bool GameComponent::switchAmmunition(AttributePtr<Attribute_WeaponStats> weaponStats)
 {
 	bool switchedAmmunition = false;
 	FiringMode* firingMode = &weaponStats->firingMode[weaponStats->currentFiringModeType];
@@ -881,28 +889,28 @@ bool GameComponent::switchFiringMode(Attribute_WeaponStats* weaponStats)
 	return switchedFiringMode;
 }
 
-void GameComponent::shootProjectile(Attribute_Position* position, Attribute_Camera* camera, Attribute_WeaponStats* weaponStats)
+void GameComponent::shootProjectile(A_Ptr<Attribute_Position> ptr_position, A_Ptr<Attribute_Camera> ptr_camera, A_Ptr<Attribute_WeaponStats> ptr_weaponStats)
 {
 	
-	Ammunition* ammo = &weaponStats->ammunition[weaponStats->currentAmmunitionType];
+	Ammunition* ammo = &ptr_weaponStats->ammunition[weaponStats->currentAmmunitionType];
 	FiringMode* firingMode = &weaponStats->firingMode[weaponStats->currentFiringModeType];
 
 	// Position
-	Float3 pos = position->position;
+	Float3 pos = ptr_position->position;
 
 	// extract camera orientation to determine velocity
-	DirectX::XMFLOAT3 lookAtXMFloat3((float*)&camera->mat_view.getLookAt());
+	DirectX::XMFLOAT3 lookAtXMFloat3((float*)&ptr_camera->mat_view.getLookAt());
 
 	DirectX::XMVECTOR lookAt = DirectX::XMLoadFloat3(&lookAtXMFloat3);
 	lookAt = DirectX::XMVector3Normalize(lookAt);
 
 	// Rotation
-	camera->mat_view.getRotationOnly();
+	ptr_camera->mat_view.getRotationOnly();
 	//DirectX::XMMATRIX rotationMatrix((float*)&camera->mat_view);
 	DirectX::XMMATRIX rotationMatrix(
-		camera->mat_view._11,	camera->mat_view._21,	camera->mat_view._31,	0.0f,
-		camera->mat_view._12,	camera->mat_view._22,	camera->mat_view._32,	0.0f, 
-		camera->mat_view._13,	camera->mat_view._23,	camera->mat_view._33,	0.0f,
+		ptr_camera->mat_view._11,	ptr_camera->mat_view._21,	ptr_camera->mat_view._31,	0.0f,
+		ptr_camera->mat_view._12,	ptr_camera->mat_view._22,	ptr_camera->mat_view._32,	0.0f, 
+		ptr_camera->mat_view._13,	ptr_camera->mat_view._23,	ptr_camera->mat_view._33,	0.0f,
 		0.0f,					0.0f,					0.0f,					1.0f);
 
 	DirectX::XMVECTOR orientationQuaternion = DirectX::XMQuaternionRotationMatrix(rotationMatrix);

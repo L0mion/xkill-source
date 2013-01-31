@@ -83,10 +83,10 @@ bool PhysicsObject::init(unsigned int attributeIndex,unsigned int collisionFilte
 	{
 		btTransform world;
 
-		Attribute_Spatial* spatialAttribute = itrSpatial_PhysicsObject.at(itrPhysics_.at(attributeIndex_)->ptr_spatial);
- 		Attribute_Position* positionAttribute = itrPosition_PhysicsObject.at(spatialAttribute->ptr_position);
- 		world.setOrigin(convert(positionAttribute->position));
-		world.setRotation(convert(spatialAttribute->rotation));
+		A_Ptr<Attribute_Spatial> ptr_spatial = itrPhysics_.at(attributeIndex_)->ptr_spatial;
+ 		A_Ptr<Attribute_Position> ptr_position = ptr_spatial->ptr_position;
+ 		world.setOrigin(convert(ptr_position->position));
+		world.setRotation(convert(ptr_spatial->rotation));
 		setWorldTransform(world);  //Static physics objects: transform once
 
 	}

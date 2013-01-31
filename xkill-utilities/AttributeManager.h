@@ -73,6 +73,8 @@ public:
 	AttributeStorage<Attribute_PickupablesSpawnPoint>	pickupablesSpawnPoint;
 	AttributeStorage<Attribute_Pickupable>				pickupable;
 
+	AttributeStorage<Behavior_Offset>					offset;
+
 	// ADD MORE ABOVE ^
 
 	static AttributeManager* instance();
@@ -104,7 +106,10 @@ public:
 	static AttributeIterator<Attribute_ExplosionSphere>			itrExplosionSphere		;	\
 	static AttributeIterator<Attribute_SplitScreen>				itrSplitScreen			;	\
 	static AttributeIterator<Attribute_PickupablesSpawnPoint>	itrPickupablesSpawnPoint;	\
-	static AttributeIterator<Attribute_Pickupable>				itrPickupable;				\
+	static AttributeIterator<Attribute_Pickupable>				itrPickupable;			;	\
+	\
+	static AttributeIterator<Behavior_Offset>					itrOffset				;	\
+
 	\
 	// ADD MORE ABOVE ^
 
@@ -135,5 +140,7 @@ public:
 	itrSplitScreen			= AttributeManager::instance()->splitScreen					.getIterator();		\
 	itrPickupablesSpawnPoint= AttributeManager::instance()->pickupablesSpawnPoint		.getIterator();		\
 	itrPickupable			= AttributeManager::instance()->pickupable					.getIterator();		\
+	\
+	itrOffset				= AttributeManager::instance()->offset						.getIterator();		\
 	\
 	// ADD MORE ABOVE ^

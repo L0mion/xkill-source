@@ -27,7 +27,7 @@ FrustumPhysicsObject::~FrustumPhysicsObject()
 void FrustumPhysicsObject::onUpdate(float delta)
 {
 	btMatrix3x3 view = convert(itrCamera_3.at(attributeIndex_)->mat_view);
-	btVector3 pos = convert(itrPosition_3.at(itrSpatial_3.at(itrCamera_3.at(attributeIndex_)->ptr_spatial)->ptr_position)->position);
+	btVector3 pos =  convert(itrCamera_3.at(attributeIndex_)->ptr_spatial->ptr_position->position);
 	btQuaternion q;
 	view.getRotation(q);
 	btTransform world = getWorldTransform();
@@ -54,10 +54,11 @@ bool FrustumPhysicsObject::frustumInit(unsigned int attributeIndex,unsigned int 
 	setMassProps(mass, localInertia);
 	setCollisionShape(collisionShape);
 	btTransform world;
-	Attribute_Spatial* spatialAttribute = itrSpatial_3.at(itrCamera_3.at(attributeIndex_)->ptr_spatial);
- 	Attribute_Position* positionAttribute = itrPosition_3.at(spatialAttribute->ptr_position);
- 	world.setOrigin(convert(positionAttribute->position));
-	world.setRotation(convert(spatialAttribute->rotation));
+	
+	A_Ptr<Attribute_Spatial> ptr_spatial = itrCamera_3.at(attributeIndex_)->ptr_spatial;
+ 	A_Ptr<Attribute_Position> ptr_position = ptr_spatial->ptr_position;
+ 	world.setOrigin(convert(ptr_position->position));
+	world.setRotation(convert(ptr_spatial->rotation));
 	setWorldTransform(world);
 	setCollisionFlags(getCollisionFlags() | CF_NO_CONTACT_RESPONSE); 
 	forceActivationState(DISABLE_DEACTIVATION);

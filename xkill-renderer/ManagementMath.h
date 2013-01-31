@@ -16,8 +16,8 @@ public:
 	~ManagementMath();
 
 	DirectX::XMFLOAT4X4 calculateWorldMatrix(
-		Attribute_Spatial*	spatialAttribute,							 
-		Attribute_Position*	positionAttribute);
+		A_Ptr<Attribute_Spatial> ptr_spatial, 
+		A_Ptr<Attribute_Position> ptr_position);
 	DirectX::XMFLOAT4X4 calculateFinalMatrix(
 		DirectX::XMFLOAT4X4 worldMatrix,
 		DirectX::XMFLOAT4X4 viewMatrix,
