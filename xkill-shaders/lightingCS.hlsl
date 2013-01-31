@@ -57,14 +57,16 @@ void lightingCS(
 	GroupMemoryBarrierWithGroupSync();
 	
 	//Sample G-Buffers. Data prefetching?
-	float2 texCoord = float2((float)(threadIDDispatch.x + viewportTopX)/(float)screenWidth,(float)(threadIDDispatch.y + viewportTopY)/(float)screenHeight);
+	float2 texCoord = float2(
+		(float)(threadIDDispatch.x + viewportTopX) / (float)screenWidth,
+		(float)(threadIDDispatch.y + viewportTopY) / (float)screenHeight);
 	float4	gAlbedo		= gBufferAlbedo		.SampleLevel(ss, texCoord, 0);
 	float4	gNormal		= gBufferNormal		.SampleLevel(ss, texCoord, 0);
 	float4	gMaterial	= gBufferMaterial	.SampleLevel(ss, texCoord, 0); //At the moment, world space position is stored in Material-buffer.
 	float	gDepth		= gBufferDepth.SampleLevel(ss, texCoord, 0).x; 
 	
-	//Get surface position.
-	float3 surfacePosV = UtilReconstructPositionViewSpace(texCoord, gDepth, projectionInverse);
+	//Reconstruct view-space position from depth. Observe the normalized coordinates sent to method.
+	float3 surfacePosV = UtilReconstructPositionViewSpace(float2(threadIDDispatch.x / viewportWidth, threadIDDispatch.y / viewportHeight), gDepth, projectionInverse);
 	
 	uint pixelDepthInt = asuint(surfacePosV.z); //Interlocked functions can only be applied onto ints.
 	if(gDepth != 1.0f)
@@ -146,14 +148,31 @@ void lightingCS(
 		Diffuse	+= diffuse; 
 		Specular += specular;
 	}
-	uint tileLightNumLocal = tileLightNum;
-	for(i = 0; i < tileLightNumLocal; i++)
+	//uint tileLightNumLocal = tileLightNum;
+	//for(i = 0; i < tileLightNumLocal; i++)
+	//{
+	//	LightDescPoint descPoint = lightsPoint[tileLightIndices[i]];
+	//	LightPoint(
+	//		toEyeV,
+	//		descPoint,
+	//		mul(float4(lightsPos[tileLightIndices[i]], 1.0f), view), //lightsPos[tileLightIndices[i]].pos
+	//		surfaceMaterial,
+	//		surfaceNormalV,
+	//		surfacePosV,
+	//		ambient, diffuse, specular);	
+	//	Ambient		+= ambient;
+	//	Diffuse		+= diffuse;
+	//	Specular	+= specular;
+	//}
+	
+	//Draw all point-lights:
+	for(i = 0; i < numLightsPoint; i++)
 	{
-		LightDescPoint descPoint = lightsPoint[tileLightIndices[i]];
+		LightDescPoint descPoint = lightsPoint[i];
 		LightPoint(
 			toEyeV,
 			descPoint,
-			mul(float4(lightsPos[tileLightIndices[i]], 1.0f), view), //lightsPos[tileLightIndices[i]].pos
+			mul(float4(lightsPos[i], 1.0f), view).xyz, //
 			surfaceMaterial,
 			surfaceNormalV,
 			surfacePosV,
@@ -162,7 +181,7 @@ void lightingCS(
 		Diffuse		+= diffuse;
 		Specular	+= specular;
 	}
-	
+
 	//TILING DEMO:
 	for(i = 0; i < tileLightNum; i++) //Apply culled point-lights.
 	{

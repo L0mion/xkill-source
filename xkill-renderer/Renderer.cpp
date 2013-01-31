@@ -410,6 +410,8 @@ void Renderer::render()
 		vpData.viewportTopY = static_cast<unsigned int>(ssAt->ssTopLeftY);
 		vpData.zNear		= camAt->zNear;
 		vpData.zFar			= camAt->zFar;
+		vpData.viewportWidth	= ssAt->ssWidth;
+		vpData.viewportHeight	= ssAt->ssHeight;
 		vpDatas[i]			= vpData;
 
 		renderViewportToGBuffer(vpData);
@@ -451,7 +453,9 @@ void Renderer::renderViewportToGBuffer(ViewportData& vpData)
 		vpData.viewportTopX,
 		vpData.viewportTopY,
 		vpData.zNear,
-		vpData.zFar);
+		vpData.zFar,
+		vpData.viewportWidth,
+		vpData.viewportHeight);
 
 	std::map<unsigned int, InstancedData*> instancesMap = managementInstance_->getInstancesMap();
 	for(std::map<unsigned int, InstancedData*>::iterator i = instancesMap.begin(); i != instancesMap.end(); i++)
@@ -522,7 +526,9 @@ void Renderer::renderViewportToBackBuffer(ViewportData& vpData)
 		vpData.viewportTopX,
 		vpData.viewportTopY,
 		vpData.zNear,
-		vpData.zFar);
+		vpData.zFar,
+		vpData.viewportWidth,
+		vpData.viewportHeight);
 
 	//Connect g-buffers to shader.
 	managementGBuffer_->setGBuffersAsCSShaderResources(devcon);

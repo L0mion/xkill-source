@@ -27,13 +27,19 @@ cbuffer cbPerCamera : register (b2)
 	row_major float4x4	viewInverse;
 	row_major float4x4	projection;
 	row_major float4x4	projectionInverse;
+
 	float3		eyePosition;
 	uint		viewportTopX;
 
 	uint		viewportTopY;
 	float		zNear;
 	float		zFar;
+	float		viewportWidth;
+
+	float		viewportHeight;
 	uint		pad4;
+	uint		pad5;
+	uint		pad6;
 };
 
 cbuffer cbPerObject : register (b3)
