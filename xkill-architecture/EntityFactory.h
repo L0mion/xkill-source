@@ -32,7 +32,7 @@ public:
 	// AttributeManager instead of "'positionAttributes_" which will result in error. As long as a shorter naming convention
 	// such as "position" is used, this will not be a problem.
 #define CREATE_ATTRIBUTE(POINTER_NAME, ATTRIBUTE_NAME, STORAGE_NAME, OWNER_ENTITY)						\
-	A_Ptr<ATTRIBUTE_NAME> POINTER_NAME = AttributeManager::instance()->STORAGE_NAME.createAttribute(OWNER_ENTITY);
+	AttributePtr<ATTRIBUTE_NAME> POINTER_NAME = AttributeManager::instance()->STORAGE_NAME.createAttribute(OWNER_ENTITY);
 
 	// Connects the AttributePointer by the name PointerName inside AttributeName with latest AttributePointer created inside AttributeManager.
 	// IMPORTANT: The following formula is used to access AttributeManager, "PointerName+Attributes".
@@ -74,7 +74,7 @@ public:
 		ptr_weaponStats->currentAmmunitionType = Ammunition::SCATTER;
 		ptr_weaponStats->currentFiringModeType = FiringMode::AUTO;
 		// Create camera
-		A_Ptr<Attribute_Camera> ptr_camera = createCamera(entity); 
+		AttributePtr<Attribute_Camera> ptr_camera = createCamera(entity); 
 		CREATE_ATTRIBUTE(ptr_player, Attribute_Player, player, entity);
 		ptr_player->ptr_render = ptr_render;
 		ptr_player->ptr_input = ptr_input;
@@ -86,7 +86,7 @@ public:
 		ptr_splitScreen->ptr_player = ptr_player;
 	}
 
-	A_Ptr<Attribute_Camera> createCamera(Entity* entity)
+	AttributePtr<Attribute_Camera> createCamera(Entity* entity)
 	{
 		CREATE_ATTRIBUTE(ptr_position, Attribute_Position, position, entity);
 		CREATE_ATTRIBUTE(ptr_spatial, Attribute_Spatial, spatial, entity);
@@ -165,6 +165,8 @@ public:
 		ptr_mesh->mesh		= e->mesh;
 		ptr_mesh->dynamic	= e->dynamic;
 		ptr_mesh->meshID	= e->id;
+		ptr_mesh->fileName	= e->fileName;
+		ptr_mesh->vertexType = e->vertexType;
 	}
 
 	void createPlayerSpawnPointEntity(Entity* entity, Event_CreatePlayerSpawnPoint* e)
@@ -225,14 +227,14 @@ public:
 		ptr_physics->gravity = Float3(0.0f, -10.0f, 0.0f);
 		ptr_physics->meshID = ptr_render->meshID;
 		CREATE_ATTRIBUTE(ptr_pickupable, Attribute_Pickupable, pickupable, entity);
-		ptr_pickupable->ptr_position = ptr_position);
+		ptr_pickupable->ptr_position = ptr_position;
 		ptr_pickupable->ptr_physics = ptr_physics;
 		ptr_pickupable->ptr_pickupablesSpawnPoint_creator = e->creatorPickupablesSpawnPoint;
 		ptr_pickupable->amount = e->amount;
 		ptr_pickupable->pickupableType = e->pickupableType;
 
 		// Increment parent
-		Attribute_PickupablesSpawnPoint* pickupablesSpawnPoint = itrPickupablesSpawnPoint.at(e->creatorPickupablesSpawnPoint);
+		AttributePtr<Attribute_PickupablesSpawnPoint> pickupablesSpawnPoint = e->creatorPickupablesSpawnPoint;
 		pickupablesSpawnPoint->currentNrOfExistingSpawnedPickupables++;
 	}
 

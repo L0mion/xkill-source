@@ -24,8 +24,8 @@ MotionState::~MotionState()
 
 void MotionState::getWorldTransform(btTransform &worldTrans) const
 {
-	A_Ptr<Attribute_Spatial> ptr_spatial = itrPhysics_MotionState.at(attributeIndex_)->ptr_spatial;
-	A_Ptr<Attribute_Position> ptr_position = ptr_spatial->ptr_position;
+	AttributePtr<Attribute_Spatial> ptr_spatial = itrPhysics_MotionState.at(attributeIndex_)->ptr_spatial;
+	AttributePtr<Attribute_Position> ptr_position = ptr_spatial->ptr_position;
  	worldTrans.setOrigin(convert(ptr_position->position));
 	worldTrans.setRotation(convert(ptr_spatial->rotation));
 	//DEBUGPRINT("attributeIndex_: " << attributeIndex_ << " MotionState::getWorldTransform");
@@ -33,8 +33,8 @@ void MotionState::getWorldTransform(btTransform &worldTrans) const
 
 void MotionState::setWorldTransform(const btTransform &worldTrans)
 {
-	A_Ptr<Attribute_Spatial> ptr_spatial = itrPhysics_MotionState.at(attributeIndex_)->ptr_spatial;
- 	A_Ptr<Attribute_Position> ptr_position = ptr_spatial->ptr_position;
+	AttributePtr<Attribute_Spatial> ptr_spatial = itrPhysics_MotionState.at(attributeIndex_)->ptr_spatial;
+ 	AttributePtr<Attribute_Position> ptr_position = ptr_spatial->ptr_position;
 	btVector3 position = worldTrans.getOrigin();
 	btQuaternion rotation = worldTrans.getRotation();
 	ptr_position->position = Float3(position.x(),position.y(),position.z());

@@ -9,6 +9,7 @@ InputComponent::InputComponent()
 {
 	ATTRIBUTES_INIT_ALL;
 
+	SUBSCRIBE_TO_EVENT(this, EVENT_INPUT_DEVICE_SEARCH);
 	SUBSCRIBE_TO_EVENT(this, EVENT_START_DEATHMATCH);
 	SUBSCRIBE_TO_EVENT(this, EVENT_RUMBLE);
 	SUBSCRIBE_TO_EVENT(this, EVENT_MOUSE_MOVE);
@@ -94,7 +95,7 @@ void InputComponent::handleInput(float delta)
 			continue;
 
 		InputDevice* device = player->ptr_inputDevice->device;
-		A_Ptr<Attribute_Input> input = player->ptr_input;
+		AttributePtr<Attribute_Input> input = player->ptr_input;
 
 		if(device == nullptr)
 			continue;

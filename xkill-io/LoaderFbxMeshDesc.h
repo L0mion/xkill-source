@@ -2,14 +2,13 @@
 #define XKILL_IO_LOADERFBXMESHDESC_H
 
 #include <vector>
+#include <fbxsdk.h>
 
 #include <xkill-utilities/Math.h>
 #include <xkill-utilities/MeshVertices.h>
-
-#include <fbxsdk.h>
+#include <xkill-utilities/VertexDesc.h>
 
 static const unsigned int NUM_INFLUENCING_BONES = 4;
-
 
 //! Class for describing a loaded mesh
 /*!
@@ -55,16 +54,8 @@ public:
 	*/
 	void addOffsetMatrix(Float4x4 offsetMatrix);
 
-	//! Creates a vector with vertics of type VertexPosColor.
-	std::vector<VertexPosColor>				createVerticesPosColor();
-	//! Creates a vector with vertics of type VertexPosNormTex. 
-	std::vector<VertexPosNormTex>			createVerticesPosNormTex();
-	//! Creates a vector with vertics of type VertexPosNormSkinned.
-	std::vector<VertexPosNormSkinned>		createVerticesPosNormSkinned();
-	//! Creates a vector with vertics of type VertexPosNormTexSkinned.
-	std::vector<VertexPosNormTexSkinned>	createVerticesPosNormTexSkinned();
-	//! Creates a vector with vertics of type VertexPosNormTexTanSkinned.
-	std::vector<VertexPosNormTexTanSkinned> createVerticesPosNormTexTanSkinned();
+
+	std::vector<VertexDesc> createVertices();
 
 	std::vector<unsigned int> getIndices();
 	
@@ -98,43 +89,10 @@ public:
 	void setBoneNodes(std::vector<FbxNode*> boneNodes);
 
 private:
-
-	//! Assembles vertices of type VertexPosColor.
-	std::vector<VertexPosColor>				assembleVertexPosColor();
-	//! Assembles vertices of type VertexPosNormTex.
-	std::vector<VertexPosNormTex>			assembleVertexPosNormTex();
-	//! Assembles vertices of type VertexPosNormSkinned.
-	std::vector<VertexPosNormSkinned>		assembleVertexPosNormSkinned();
-	//! Assembles vertices of type VertexPosNormTexSkinned.
-	std::vector<VertexPosNormTexSkinned>	assembleVertexPosNormTexSkinned();
-	//! Assembles vertices of type VertexPosNormTexTanSkinned.
-	std::vector<VertexPosNormTexTanSkinned> assembleVertexPosNormTexTanSkinned();
-
-	//! Index vertices of type VertexPosColor, removes doubles and fills the vector indices_ with indices.
-	/*!
-	\param vertices Vertices to be indexed.
-	*/
-	std::vector<VertexPosColor>				indexVerticesPosColor(std::vector<VertexPosColor> vertices);
-	//! Index vertices of type VertexPosNormTex, removes doubles and fills the vector indices_ with indices.
-	/*!
-	\param vertices Vertices to be indexed.
-	*/
-	std::vector<VertexPosNormTex>			indexVerticesPosNormTex(std::vector<VertexPosNormTex> vertices);
-	//! Index vertices of type VertexPosNormSkinned, removes doubles and fills the vector indices_ with indices.
-	/*!
-	\param vertices Vertices to be indexed.
-	*/
-	std::vector<VertexPosNormSkinned>		indexVerticesPosNormSkinned(std::vector<VertexPosNormSkinned> vertices);
-	//! Index vertices of type VertexPosNormTexSkinned, removes doubles and fills the vector indices_ with indices.
-	/*!
-	\param vertices Vertices to be indexed.
-	*/
-	std::vector<VertexPosNormTexSkinned>	indexVerticesPosNormTexSkinned(std::vector<VertexPosNormTexSkinned> vertices);
-	//! Index vertices of type VertexPosNormTexTanSkinned, removes doubles and fills the vector indices_ with indices.
-	/*!
-	\param vertices Vertices to be indexed.
-	*/
-	std::vector<VertexPosNormTexTanSkinned> indexVerticesPosNormTexTanSkinned(std::vector<VertexPosNormTexTanSkinned> vertices);
+	std::vector<VertexDesc> assembleVertexDesc();
+	std::vector<VertexDesc> indexVertexDesc(std::vector<VertexDesc> vertices);
+	std::vector<unsigned int> calculateBoneMappingIndices(std::vector<VertexDesc> vertices);
+	void mapBoneData(std::vector<VertexDesc>* vertices, std::vector<unsigned int> indices);
 
 	//!Checks if two Float2 are equal.
 	/*!

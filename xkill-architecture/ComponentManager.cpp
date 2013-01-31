@@ -193,6 +193,8 @@ void ComponentManager::update(float delta)
 	}
 	else if(GET_STATE() == STATE_MAINMENU)
 	{
+		SEND_EVENT(&Event(EVENT_INPUT_DEVICE_SEARCH));
+
 		sound_->onUpdate(delta);
 		input_->onUpdate(delta);
 		render_->onUpdate(delta);

@@ -45,8 +45,8 @@ void ManagementInstance::update(ID3D11Device* device, ID3D11DeviceContext* devco
 
 void ManagementInstance::addRenderAtInstance(Attribute_Render* ptr_render)
 {
-	A_Ptr<Attribute_Spatial>	ptr_spatial = ptr_render->ptr_spatial;
-	A_Ptr<Attribute_Position> ptr_position = ptr_spatial->ptr_position;
+	AttributePtr<Attribute_Spatial>	ptr_spatial = ptr_render->ptr_spatial;
+	AttributePtr<Attribute_Position> ptr_position = ptr_spatial->ptr_position;
 
 	VertexPosNormTexInstanced newInstance;
 	newInstance.world_ = calculateWorldMatrix(ptr_spatial, ptr_position);
@@ -79,8 +79,8 @@ InstancedData* ManagementInstance::getInstancesFromMeshID(unsigned int meshID)
 }
 
 DirectX::XMFLOAT4X4 ManagementInstance::calculateWorldMatrix(
-	A_Ptr<Attribute_Spatial>	ptr_spatial, 
-	A_Ptr<Attribute_Position> ptr_position)
+	AttributePtr<Attribute_Spatial>	ptr_spatial, 
+	AttributePtr<Attribute_Position> ptr_position)
 {
 	DirectX::XMMATRIX translation = DirectX::XMMatrixTranslation(
 		ptr_position->position.x,

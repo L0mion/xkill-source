@@ -37,7 +37,7 @@ public:
 };
 
 template <class T>
-class A_Ptr : public IAttributePtr
+class AttributePtr : public IAttributePtr
 {
 private:
 	std::vector<T>* _hostArray;
@@ -55,7 +55,7 @@ public:
 		_hostArray;*/
 	}
 
-	A_Ptr()
+	AttributePtr()
 	{
 		_hostArray = nullptr;
 		_index = -1;

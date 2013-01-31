@@ -66,11 +66,9 @@ bool PhysicsObject::init(unsigned int attributeIndex,unsigned int collisionFilte
 	attributeIndex_ = attributeIndex;
 	collisionFilterGroup_ = collisionFilterGroup;
 
-
 	//Get the init data from a physics attribute
 	Attribute_Physics* physicsAttribute = itrPhysics_.at(attributeIndex);
 	btScalar mass = static_cast<btScalar>(physicsAttribute->mass);
-
 
 	//Resolve mass, local inertia of the collision shape, and also the collision shape itself.
 	btCollisionShape* collisionShape = CollisionShapes::Instance()->getCollisionShape(physicsAttribute->meshID);
@@ -83,8 +81,8 @@ bool PhysicsObject::init(unsigned int attributeIndex,unsigned int collisionFilte
 	{
 		btTransform world;
 
-		A_Ptr<Attribute_Spatial> ptr_spatial = itrPhysics_.at(attributeIndex_)->ptr_spatial;
- 		A_Ptr<Attribute_Position> ptr_position = ptr_spatial->ptr_position;
+		AttributePtr<Attribute_Spatial> ptr_spatial = itrPhysics_.at(attributeIndex_)->ptr_spatial;
+ 		AttributePtr<Attribute_Position> ptr_position = ptr_spatial->ptr_position;
  		world.setOrigin(convert(ptr_position->position));
 		world.setRotation(convert(ptr_spatial->rotation));
 		setWorldTransform(world);  //Static physics objects: transform once

@@ -177,14 +177,14 @@ public:
         return attributeVector;
     }
 
-	A_Ptr<T> attributePointer(T* attribute)
+	AttributePtr<T> attributePointer(T* attribute)
 	{ 
-		A_Ptr<T> pointer;
+		AttributePtr<T> pointer;
 		pointer.init(_attributes, storageIndex(attribute));
 		return pointer;
 	}
 
-	A_Ptr<T> createAttribute(Entity* e)
+	AttributePtr<T> createAttribute(Entity* e)
 	{ 
 		return _attributeStorage->createAttribute(e);
 	}

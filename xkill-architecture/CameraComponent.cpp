@@ -7,7 +7,7 @@
 
 ATTRIBUTES_DECLARE_ALL;
 
-void updateView(A_Ptr<Attribute_Camera> camera)
+void updateView(AttributePtr<Attribute_Camera> camera)
 {
 	// Fetch attributes from camera
 	Float3& playerPosition		= camera->ptr_spatial->ptr_position->position;
@@ -88,7 +88,7 @@ void updateView(A_Ptr<Attribute_Camera> camera)
 	view(3, 3) = 1.0f;
 }
 
-void updateProj(A_Ptr<Attribute_Camera> camera)
+void updateProj(AttributePtr<Attribute_Camera> camera)
 {
 	DirectX::XMFLOAT4X4& projection = *(DirectX::XMFLOAT4X4*)&camera->mat_projection;
 	float& zFar		= camera->zFar;
@@ -105,7 +105,7 @@ void updateProj(A_Ptr<Attribute_Camera> camera)
 	projection(3, 2) = (-zNear * zFar)/(zFar - zNear);
 }
 
-void yaw(const float angle, A_Ptr<Attribute_Camera> camera)
+void yaw(const float angle, AttributePtr<Attribute_Camera> camera)
 {
 	//Load vectors in to XMVECTORs to utilize SIMD.
 	DirectX::XMVECTOR vLook		= DirectX::XMLoadFloat3((DirectX::XMFLOAT3*)&camera->look); 
@@ -132,7 +132,7 @@ void yaw(const float angle, A_Ptr<Attribute_Camera> camera)
 }
 
 
-void pitch(const float angle, A_Ptr<Attribute_Camera> camera)
+void pitch(const float angle, AttributePtr<Attribute_Camera> camera)
 {
 	//Load vectors in to XMVECTORs to utilize SIMD.
 	DirectX::XMVECTOR vUp			= DirectX::XMLoadFloat3((DirectX::XMFLOAT3*)&camera->up);
@@ -165,7 +165,7 @@ void pitch(const float angle, A_Ptr<Attribute_Camera> camera)
 	}
 }
 
-void mouse(const float dX, const float dY, A_Ptr<Attribute_Camera> camera)
+void mouse(const float dX, const float dY, AttributePtr<Attribute_Camera> camera)
 {
 	yaw(dY, camera);
 	pitch(dY, camera);
@@ -178,9 +178,9 @@ void updateAspectRatio()
 	while(itrSplitScreen.hasNext())
 	{
 		Attribute_SplitScreen* ptr_splitScreen = itrSplitScreen.getNext();
-		A_Ptr<Attribute_Camera> ptr_camera = ptr_splitScreen->ptr_camera;
-		A_Ptr<Attribute_Spatial> ptr_spatial = ptr_camera->ptr_spatial;
-		A_Ptr<Attribute_Position> ptr_position = ptr_spatial->ptr_position;
+		AttributePtr<Attribute_Camera> ptr_camera = ptr_splitScreen->ptr_camera;
+		AttributePtr<Attribute_Spatial> ptr_spatial = ptr_camera->ptr_spatial;
+		AttributePtr<Attribute_Position> ptr_position = ptr_spatial->ptr_position;
 
 		ptr_camera->aspectRatio = ptr_splitScreen->getAspectRatio();
 		updateProj(ptr_camera);
@@ -232,9 +232,9 @@ void CameraComponent::onUpdate(float delta)
 	{
 		Attribute_Player* ptr_player = itrPlayer.getNext();
 
-		A_Ptr<Attribute_Health> ptr_health = ptr_player->ptr_health;
-		A_Ptr<Attribute_Input> ptr_input = ptr_player->ptr_input;
-		A_Ptr<Attribute_Camera> ptr_camera = ptr_player->ptr_camera;
+		AttributePtr<Attribute_Health> ptr_health = ptr_player->ptr_health;
+		AttributePtr<Attribute_Input> ptr_input = ptr_player->ptr_input;
+		AttributePtr<Attribute_Camera> ptr_camera = ptr_player->ptr_camera;
 		if(ptr_health->health <= 0)
 		{
 			//camera->aspectRatio += delta*100;
@@ -263,7 +263,7 @@ void CameraComponent::onUpdate(float delta)
 	// Recalculate view
 	while(itrCamera.hasNext())
 	{
-		A_Ptr<Attribute_Camera> camera = itrCamera.attributePointer(itrCamera.getNext());
+		AttributePtr<Attribute_Camera> camera = itrCamera.attributePointer(itrCamera.getNext());
 		updateView(camera);
 	}
 }

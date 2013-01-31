@@ -17,7 +17,7 @@ void LoaderFbxAnimation::reset()
 
 void LoaderFbxAnimation::parseAnimation(FbxScene* scene, std::vector<LoaderFbxAnimationDesc>* animationDescs, std::vector<FbxNode*> boneNodes)
 {
-	animationDescs->clear();
+	reset();
 
 	for(int i=0; i<scene->GetSrcObjectCount<FbxAnimStack>(); i++)
 	{

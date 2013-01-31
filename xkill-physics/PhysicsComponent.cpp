@@ -168,7 +168,7 @@ void PhysicsComponent::onUpdate(float delta)
 				for(unsigned int i = 0; i < playerAttributeIndices.size(); i++)
 				{
 					Attribute_Player* ptr_player = itrPlayer.at(playerAttributeIndices.at(i));
-					A_Ptr<Attribute_Health> ptr_health = ptr_player->ptr_health;
+					AttributePtr<Attribute_Health> ptr_health = ptr_player->ptr_health;
 					if(!ptr_player->detectedAsDead)
 					{
 						DEBUGPRINT("Player entity " << playerEntityIndex << " was out of bounds");

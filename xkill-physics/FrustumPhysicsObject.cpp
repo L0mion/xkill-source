@@ -55,8 +55,8 @@ bool FrustumPhysicsObject::frustumInit(unsigned int attributeIndex,unsigned int 
 	setCollisionShape(collisionShape);
 	btTransform world;
 	
-	A_Ptr<Attribute_Spatial> ptr_spatial = itrCamera_3.at(attributeIndex_)->ptr_spatial;
- 	A_Ptr<Attribute_Position> ptr_position = ptr_spatial->ptr_position;
+	AttributePtr<Attribute_Spatial> ptr_spatial = itrCamera_3.at(attributeIndex_)->ptr_spatial;
+ 	AttributePtr<Attribute_Position> ptr_position = ptr_spatial->ptr_position;
  	world.setOrigin(convert(ptr_position->position));
 	world.setRotation(convert(ptr_spatial->rotation));
 	setWorldTransform(world);

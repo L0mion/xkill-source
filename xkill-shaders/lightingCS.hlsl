@@ -57,14 +57,16 @@ void lightingCS(
 	GroupMemoryBarrierWithGroupSync();
 	
 	//Sample G-Buffers. Data prefetching?
-	float2 texCoord = float2((float)(threadIDDispatch.x + viewportTopX)/(float)screenWidth,(float)(threadIDDispatch.y + viewportTopY)/(float)screenHeight);
+	float2 texCoord = float2(
+		(float)(threadIDDispatch.x + viewportTopX) / (float)screenWidth,
+		(float)(threadIDDispatch.y + viewportTopY) / (float)screenHeight);
 	float4	gAlbedo		= gBufferAlbedo		.SampleLevel(ss, texCoord, 0);
 	float4	gNormal		= gBufferNormal		.SampleLevel(ss, texCoord, 0);
 	float4	gMaterial	= gBufferMaterial	.SampleLevel(ss, texCoord, 0); //At the moment, world space position is stored in Material-buffer.
 	float	gDepth		= gBufferDepth.SampleLevel(ss, texCoord, 0).x; 
 	
-	//Get surface position.
-	float3 surfacePosV = UtilReconstructPositionViewSpace(texCoord, gDepth, projectionInverse);
+	//Reconstruct view-space position from depth. Observe the normalized coordinates sent to method.
+	float3 surfacePosV = UtilReconstructPositionViewSpace(float2(threadIDDispatch.x / viewportWidth, threadIDDispatch.y / viewportHeight), gDepth, projectionInverse); 
 	
 	uint pixelDepthInt = asuint(surfacePosV.z); //Interlocked functions can only be applied onto ints.
 	if(gDepth != 1.0f)
@@ -77,8 +79,10 @@ void lightingCS(
 	float tileMaxDepthF = asfloat(tileMaxDepthInt);
 	
 	Frustum frustum = ExtractFrustumPlanes(
-		screenWidth, 
-		screenHeight, 
+		viewportWidth,
+		viewportHeight, 
+		viewportTopX,
+		viewportTopY,
 		TILE_DIM, 
 		blockID.xy, 
 		projection._11,
@@ -162,29 +166,12 @@ void lightingCS(
 		Diffuse		+= diffuse;
 		Specular	+= specular;
 	}
-	
+
 	//TILING DEMO:
-	for(i = 0; i < tileLightNum; i++) //Apply culled point-lights.
-	{
-		Diffuse.g += 0.1;
-	}
+	//for(i = 0; i < tileLightNum; i++) //Apply culled point-lights.
+	//{
+	//	Diffuse.g += 0.1;
+	//}
 	
 	output[uint2(threadIDDispatch.x + viewportTopX, threadIDDispatch.y + viewportTopY)] = Ambient + Diffuse + Specular;
 }
-
-//Draw all point-lights:
-//for(i = 0; i < numLightsPoint; i++)
-//{
-//	LightDescPoint descPoint = lightsPoint[i];
-//	LightPoint(
-//		toEyeV,
-//		descPoint,
-//		mul(float4(lightsPos[i].pos, 1.0f), view).xyz, //
-//		surfaceMaterial,
-//		surfaceNormalV,
-//		surfacePosV,
-//		ambient, diffuse, specular);	
-//	Ambient		+= ambient;
-//	Diffuse		+= diffuse;
-//	Specular	+= specular;
-//}

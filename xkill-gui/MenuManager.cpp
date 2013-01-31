@@ -100,9 +100,9 @@ void HUDWindow::parentMoveEvent(Attribute_SplitScreen* splitScreen)
 
 void HUDWindow::update(Attribute_SplitScreen* splitScreen)
 {
-	Attribute_Player*		player		=	itrPlayer		.at(splitScreen->ptr_player);
-	Attribute_Health*		health		=	itrHealth		.at(player->ptr_health);
-	Attribute_WeaponStats*	weaponStats	=	itrWeaponStats	.at(player->ptr_weaponStats);
+	AttributePtr<Attribute_Player>		player		=	splitScreen->ptr_player;
+	AttributePtr<Attribute_Health>		health		=	player->ptr_health;
+	AttributePtr<Attribute_WeaponStats>	weaponStats	=	player->ptr_weaponStats;
 
 	Ammunition* ammunition = &weaponStats->ammunition[weaponStats->currentAmmunitionType];
 	FiringMode* firingMode = &weaponStats->firingMode[weaponStats->currentFiringModeType];

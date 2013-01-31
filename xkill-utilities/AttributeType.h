@@ -1,12 +1,14 @@
 #pragma once
 
+#include <string>
+
 #include "dllUtilities.h"
 #include "AttributePointer.h"
 #include "Math.h"
 #include "LightDesc.h"
-#include <string>
-
+#include "MeshDesc.h"
 #include "DataItem.h"
+#include "MeshVertices.h"
 
 
 /// Used inside \ref COMPONENTS for data processing.
@@ -140,7 +142,7 @@ struct DLL_U Attribute_Spatial : public IAttribute
 	Attribute_Spatial();
 	~Attribute_Spatial();
 
-	A_Ptr<Attribute_Position> ptr_position;
+	AttributePtr<Attribute_Position> ptr_position;
 
 	Float4 rotation;
 	Float3 scale;
@@ -169,8 +171,8 @@ private:
 	
 
 public:
-	A_Ptr<Attribute_Spatial> ptr_parent_spatial;
-	A_Ptr<Attribute_Spatial> ptr_spatial;
+	AttributePtr<Attribute_Spatial> ptr_parent_spatial;
+	AttributePtr<Attribute_Spatial> ptr_spatial;
 
 	Float3 offset_position;
 	Float4 offset_rotation;
@@ -217,8 +219,8 @@ struct DLL_U Attribute_Render : public IAttribute
 	Attribute_Render();
 	~Attribute_Render();
 
-	A_Ptr<Attribute_Spatial> ptr_spatial;
-	A_Ptr<Attribute_Bounding> ptr_bounding;
+	AttributePtr<Attribute_Spatial> ptr_spatial;
+	AttributePtr<Attribute_Bounding> ptr_bounding;
 	
 	int meshID;
 	int textureID;
@@ -281,8 +283,8 @@ struct DLL_U Attribute_Physics : public IAttribute
 	Attribute_Physics();
 	~Attribute_Physics();
 
-	A_Ptr<Attribute_Spatial> ptr_spatial;
-	A_Ptr<Attribute_Render> ptr_render;
+	AttributePtr<Attribute_Spatial> ptr_spatial;
+	AttributePtr<Attribute_Render> ptr_render;
 
 	Float3 linearVelocity;
 	Float3 angularVelocity;
@@ -339,7 +341,7 @@ struct DLL_U Attribute_Projectile : public IAttribute
 	Attribute_Projectile();
 	~Attribute_Projectile();
 
-	A_Ptr<Attribute_Physics> ptr_physics;
+	AttributePtr<Attribute_Physics> ptr_physics;
 
 	int entityIdOfCreator;		//!< Entity id of the entity that created the projectile.
 	float currentLifeTimeLeft;	//!< Counter counting down the lifetime of the projectile. Is initialized to totalLifeTime. When equal or less than zero, the projectile attribute shall be destroyed.
@@ -410,7 +412,7 @@ struct DLL_U Attribute_Light_Point : public IAttribute
 	Attribute_Light_Point();
 	~Attribute_Light_Point(); //!< Does nothing.
 
-	A_Ptr<Attribute_Position> ptr_position; //!< The correct position of point-light.
+	AttributePtr<Attribute_Position> ptr_position; //!< The correct position of point-light.
 
 	LightDescPoint lightPoint;
 
@@ -451,7 +453,7 @@ struct DLL_U Attribute_Light_Spot : public IAttribute
 	Attribute_Light_Spot();
 	~Attribute_Light_Spot(); //!< Does nothing.
 
-	A_Ptr<Attribute_Position> ptr_position; //!< The correct position of spotlight.
+	AttributePtr<Attribute_Position> ptr_position; //!< The correct position of spotlight.
 
 	LightDescSpot lightSpot;
 
@@ -492,7 +494,7 @@ struct DLL_U Attribute_Input : public IAttribute
 	Attribute_Input();
 	~Attribute_Input();
 
-	A_Ptr<Attribute_Physics> ptr_physics;
+	AttributePtr<Attribute_Physics> ptr_physics;
 	Float2 position;
 	Float2 rotation;
 	bool fire;
@@ -570,7 +572,7 @@ struct DLL_U Attribute_Sound : public IAttribute
 	Attribute_Sound();
 	~Attribute_Sound();
 
-	A_Ptr<Attribute_Position> ptr_position;
+	AttributePtr<Attribute_Position> ptr_position;
 
 	DataItemList* getDataList()
 	{
@@ -599,7 +601,7 @@ struct DLL_U Attribute_Camera : public IAttribute
 	Attribute_Camera();
 	~Attribute_Camera();
 
-	A_Ptr<Attribute_Spatial> ptr_spatial;
+	AttributePtr<Attribute_Spatial> ptr_spatial;
 
 	Float4x4 mat_view;			//!< The view matrix. Used to transform objects to view space.
 	Float4x4 mat_projection;	//!< The projection matrix. Defines the camera's frustum.
@@ -652,8 +654,8 @@ struct DLL_U Attribute_SplitScreen : public IAttribute
 	Attribute_SplitScreen();
 	~Attribute_SplitScreen();
 
-	A_Ptr<Attribute_Camera> ptr_camera;
-	A_Ptr<Attribute_Player> ptr_player;
+	AttributePtr<Attribute_Camera> ptr_camera;
+	AttributePtr<Attribute_Player> ptr_player;
 
 	unsigned int ssTopLeftX;
 	unsigned int ssTopLeftY;
@@ -704,12 +706,12 @@ struct DLL_U Attribute_Player : public IAttribute
 
 	void clean();
 
-	A_Ptr<Attribute_Render> ptr_render;
-	A_Ptr<Attribute_Input> ptr_input;
-	A_Ptr<Attribute_InputDevice> ptr_inputDevice;
-	A_Ptr<Attribute_Camera> ptr_camera;
-	A_Ptr<Attribute_Health> ptr_health;
-	A_Ptr<Attribute_WeaponStats> ptr_weaponStats;
+	AttributePtr<Attribute_Render> ptr_render;
+	AttributePtr<Attribute_Input> ptr_input;
+	AttributePtr<Attribute_InputDevice> ptr_inputDevice;
+	AttributePtr<Attribute_Camera> ptr_camera;
+	AttributePtr<Attribute_Health> ptr_health;
+	AttributePtr<Attribute_WeaponStats> ptr_weaponStats;
 
 	static int nextId;
 
@@ -767,19 +769,22 @@ struct DLL_U Attribute_Player : public IAttribute
 };
 
 
-class MeshModel;
 struct DLL_U Attribute_Mesh : public IAttribute
 {
 	unsigned int	meshID;		//!< ID of mesh, read from .mdldesc-file.
-	MeshModel*		mesh;		//!< Type containing all mesh-related data.
+	MeshDesc		mesh;		//!< Type containing all mesh-related data.
 	bool			dynamic;	//!< Whether or not mesh is supposed to be dynamic physics-wize.
+	std::string		fileName;	//!< Filename of loaded model.
+	VertexType		vertexType;
 
 	void clean();					//!< Does nothing.
 	Attribute_Mesh();				//!< Initializes attribute with default values. Dynamic = false.
 	Attribute_Mesh(
 		unsigned int	id,
-		MeshModel*		mesh,
-		bool			dynamic);	//!< Initializes attribute with passed values.
+		MeshDesc		mesh,
+		bool			dynamic,
+		std::string		fileName,
+		VertexType		vertexType);	//!< Initializes attribute with passed values.
 	~Attribute_Mesh();				//!< Does nothing.
 
 	DataItemList* getDataList()
@@ -859,7 +864,7 @@ struct DLL_U Attribute_PlayerSpawnPoint : public IAttribute
 	Attribute_PlayerSpawnPoint();
 	~Attribute_PlayerSpawnPoint();
 
-	A_Ptr<Attribute_Position> ptr_position;
+	AttributePtr<Attribute_Position> ptr_position;
 
 	float secondsSinceLastSpawn;	//!< Is reset when a player spawns at the spawn point.
 	float spawnArea;				//!< Defines the spawn point zone, a horizontal circle area.
@@ -890,7 +895,7 @@ struct DLL_U Attribute_PickupablesSpawnPoint : public IAttribute
 	Attribute_PickupablesSpawnPoint();
 	~Attribute_PickupablesSpawnPoint();
 
-	A_Ptr<Attribute_Position> ptr_position;
+	AttributePtr<Attribute_Position> ptr_position;
 
 	PickupableType spawnPickupableType;			//!< Type of pickupable spawned by this pickupables spawn point
 	float spawnDelayInSeconds;					//!< Delay until a pickupable may spawn
@@ -933,9 +938,9 @@ struct DLL_U Attribute_Pickupable : public IAttribute
 	Attribute_Pickupable();
 	~Attribute_Pickupable();
 
-	A_Ptr<Attribute_Position> ptr_position;
-	A_Ptr<Attribute_Physics> ptr_physics;
-	A_Ptr<Attribute_PickupablesSpawnPoint> ptr_pickupablesSpawnPoint_creator;	//! The pickupable spawnpoint that spawned this pickupable
+	AttributePtr<Attribute_Position> ptr_position;
+	AttributePtr<Attribute_Physics> ptr_physics;
+	AttributePtr<Attribute_PickupablesSpawnPoint> ptr_pickupablesSpawnPoint_creator;	//! The pickupable spawnpoint that spawned this pickupable
 
 	PickupableType pickupableType;						//! MEDKIT, AMMUNITION_BULLET, AMMUNITION_SCATTER, AMMUNITION_EXPLOSIVE, etc
 	int amount;											//! Data of pickupable (health, ammo, etc)
@@ -1001,7 +1006,7 @@ struct DLL_U Attribute_DebugShape : public IAttribute
 	void clean();
 
 	
-	A_Ptr<Attribute_Spatial> ptr_spatial;
+	AttributePtr<Attribute_Spatial> ptr_spatial;
 
 	unsigned int	meshID;		//!< ID of mesh
 	DebugShape*		shape;
@@ -1018,7 +1023,7 @@ struct DLL_U Attribute_ExplosionSphere : public IAttribute
 	Attribute_ExplosionSphere();
 	~Attribute_ExplosionSphere();
 
-	A_Ptr<Attribute_Physics> ptr_physics;
+	AttributePtr<Attribute_Physics> ptr_physics;
 	float currentLifeTimeLeft;
 	float radius;
 

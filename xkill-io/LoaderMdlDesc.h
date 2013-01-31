@@ -27,7 +27,7 @@ static const char MDLDESC_INDICATOR_AMMO	= 'a';
 static const char MDLDESC_INDICATOR_LIGHT	= 'l';
 
 static const unsigned int MDLDESC_PARAM_NUM_HEADER	= 3;
-static const unsigned int MDLDESC_PARAM_NUM_MODEL	= 4;
+static const unsigned int MDLDESC_PARAM_NUM_MODEL	= 5;
 static const unsigned int MDLDESC_PARAM_NUM_WORLD = 9;
 static const unsigned int MDLDESC_PARAM_NUM_SPAWN = 5;
 static const unsigned int MDLDESC_PARAM_NUM_HACK = 5;
@@ -41,6 +41,7 @@ static const unsigned int MDLDESC_PARAM_INDEX_HEADER_PATH = 2;
 static const unsigned int MDLDESC_PARAM_INDEX_MODEL_ID			= 1;
 static const unsigned int MDLDESC_PARAM_INDEX_MODEL_FILENAME	= 2;
 static const unsigned int MDLDESC_PARAM_INDEX_MODEL_DYNAMIC		= 3;
+static const unsigned int MDLDESC_PARAM_INDEX_MODEL_VERTEX_TYPE = 4;
 
 static const unsigned int MDLDESC_PARAM_INDEX_WORLD_ID = 1;
 static const unsigned int MDLDESC_PARAM_INDEX_WORLD_POSX = 2;

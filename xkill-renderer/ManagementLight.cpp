@@ -109,7 +109,7 @@ void ManagementLight::updateStreamDirLight()
 void ManagementLight::updateStreamPointLight()
 {
 	Attribute_Light_Point*	ptr_lightPoint;
-	A_Ptr<Attribute_Position>	ptr_position;
+	AttributePtr<Attribute_Position>	ptr_position;
 	while(itrLightPoint.hasNext())
 	{
 		ptr_lightPoint = itrLightPoint.getNext();
@@ -122,7 +122,7 @@ void ManagementLight::updateStreamPointLight()
 void ManagementLight::updateStreamSpotLight()
 {
 	Attribute_Light_Spot*	lightSpotAt;
-	A_Ptr<Attribute_Position>		posAt;
+	AttributePtr<Attribute_Position>		posAt;
 	while(itrLightSpot.hasNext())
 	{
 		lightSpotAt = itrLightSpot.getNext();

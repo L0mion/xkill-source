@@ -51,7 +51,7 @@ public:
 		type = ((IAttribute*)&attribute)->getType();
 
 		// Init pointers
-		A_Ptr<T>::initClass(&attributes);
+		AttributePtr<T>::initClass(&attributes);
 	}
 
 	int size()
@@ -89,10 +89,16 @@ public:
 		this->type = type;
 	}
 
-	A_Ptr<T> attributePointer(T* attribute)
+	int storageIndex(T* attribute)
 	{ 
-		A_Ptr<T> pointer;
-		pointer.init(_attributes, storageIndex(attribute));
+		int index = attribute - &attributes[0];
+		return index;
+	}
+
+	AttributePtr<T> attributePointer(T* attribute)
+	{ 
+		AttributePtr<T> pointer;
+		pointer.init(&attributes, storageIndex(attribute));
 		return pointer;
 	}
 
@@ -111,7 +117,7 @@ public:
 	The caller is responsible for filling
 	out the attribute.
 	*/
-	A_Ptr<T> createAttribute(Entity* owner)
+	AttributePtr<T> createAttribute(Entity* owner)
 	{
 		// TRUE: Reuse attribute
 		if(deleted.size() > 0)
@@ -164,9 +170,9 @@ public:
 		deleted.push(index);
 	}
 
-	A_Ptr<T> getLatestAttributeAsAttributePointer()
+	AttributePtr<T> getLatestAttributeAsAttributePointer()
 	{
-		A_Ptr<T> a;
+		AttributePtr<T> a;
 		a.init(&attributes, index_lastCreated);
 		return a;
 	}

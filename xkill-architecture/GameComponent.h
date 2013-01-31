@@ -73,8 +73,8 @@ public:
 	*/
 	Attribute_PlayerSpawnPoint* findUnoccupiedSpawnPoint();
 
-	bool switchAmmunition(A_Ptr<Attribute_WeaponStats> ptr_weaponStats);
-	bool switchFiringMode(A_Ptr<Attribute_WeaponStats> ptr_weaponStats);
+	bool switchAmmunition(AttributePtr<Attribute_WeaponStats> ptr_weaponStats);
+	bool switchFiringMode(AttributePtr<Attribute_WeaponStats> ptr_weaponStats);
 
-	void shootProjectile(A_Ptr<Attribute_Position> position, A_Ptr<Attribute_Camera> camera, A_Ptr<Attribute_WeaponStats> weaponStats);
+	void shootProjectile(AttributePtr<Attribute_Position> position, AttributePtr<Attribute_Camera> camera, AttributePtr<Attribute_WeaponStats> weaponStats);
 };

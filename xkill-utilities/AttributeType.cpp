@@ -2,7 +2,6 @@
 #include <DirectXMath.h>
 #include <windows.h>
 
-#include "MeshModel.h"
 #include "DebugShape.h"
 #include "Enums.h"
 
@@ -185,7 +184,7 @@ Attribute_Player::Attribute_Player()
 	respawnDelay = 5.0f;
 	currentRespawnDelay = 0.0f;
 	delayInSecondsBetweenEachJump = 1.0f;
-	timeSinceLastJump = 0.0f;
+	timeSinceLastJump = delayInSecondsBetweenEachJump+1.0f;
 	collidingWithWorld = false;
 	jetpackTimer = 0.0f;
 	detectedAsDead = true;
@@ -205,28 +204,33 @@ void Attribute_Player::clean()
 Attribute_Mesh::Attribute_Mesh()
 {
 	this->meshID		= 0;
-	this->mesh			= nullptr;
 	this->dynamic		= false;
+	this->fileName		= "unknown";
+	this->vertexType	= VERTEX_INVALID;
 }
 Attribute_Mesh::Attribute_Mesh(
 	unsigned int	id,
-	MeshModel*		mesh,
-	bool			dynamic)
+	MeshDesc		mesh,
+	bool			dynamic,
+	std::string		fileName,
+	VertexType		vertexType)
 {
 	this->meshID		= id;
 	this->mesh			= mesh;
 	this->dynamic		= dynamic;
+	this->fileName		= fileName;
+	this->vertexType	= vertexType;
 }
 Attribute_Mesh::~Attribute_Mesh()
 {
 }
 void Attribute_Mesh::clean()
 {
-	if(mesh)
-	{
-		delete mesh;
-		mesh = nullptr;
-	}
+	//if(mesh)
+	//{
+	//	delete mesh;
+	//	mesh = nullptr;
+	//}
 }
 
 Attribute_Health::Attribute_Health()

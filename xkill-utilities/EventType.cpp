@@ -85,11 +85,18 @@ Event_CreateProjectile::Event_CreateProjectile(Float3 position, Float3 velocity,
 	this->explosionSphereRadius = explosionSphereRadius;
 }
 
-Event_CreateMesh::Event_CreateMesh(unsigned int id, MeshModel* mesh, bool dynamic) : Event(EVENT_CREATE_MESH)
+Event_CreateMesh::Event_CreateMesh(
+	unsigned int	id, 
+	MeshDesc		mesh, 
+	bool			dynamic, 
+	std::string		fileName,
+	VertexType		vertexType) : Event(EVENT_CREATE_MESH)
 {
 	this->id		= id;
 	this->mesh		= mesh;
 	this->dynamic	= dynamic;
+	this->fileName	= fileName;
+	this->vertexType = vertexType;
 }
 
 Event_PhysicsAttributesColliding::Event_PhysicsAttributesColliding(int attribute1_index, int attribute2_index) : Event(EVENT_PHYSICS_ATTRIBUTES_COLLIDING)
@@ -127,7 +134,7 @@ Event_CreatePickupablesSpawnPoint::Event_CreatePickupablesSpawnPoint(Float3 spaw
 	this->pickupableType = pickupableType;
 }
 
-Event_CreatePickupable::Event_CreatePickupable(Float3 position, PickupableType pickupableType, A_Ptr<Attribute_PickupablesSpawnPoint>  creatorPickupablesSpawnPoint, int amount)  : Event(EVENT_CREATE_PICKUPABLE)
+Event_CreatePickupable::Event_CreatePickupable(Float3 position, PickupableType pickupableType, AttributePtr<Attribute_PickupablesSpawnPoint>  creatorPickupablesSpawnPoint, int amount)  : Event(EVENT_CREATE_PICKUPABLE)
 {
 	this->position = position;
 	this->pickupableType = pickupableType;

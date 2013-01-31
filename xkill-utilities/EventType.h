@@ -7,6 +7,8 @@
 #include "Enums.h"
 #include "AttributePointer.h"
 #include "AttributeType.h"
+#include "MeshDesc.h"
+#include "MeshVertices.h"
 
 //
 // Events info
@@ -277,15 +279,21 @@ public:
 	Event_CreateProjectile(Float3 position, Float3 velocity, Float4 rotation, float damage, int entityIdOfCreator, bool explodeOfImpact, float explosionSphereRadius);
 };
 
-class MeshModel;
 class DLL_U Event_CreateMesh : public Event
 {
 public:
 	unsigned int	id;
-	MeshModel*		mesh;
+	MeshDesc		mesh;
 	bool			dynamic;
+	std::string		fileName;
+	VertexType		vertexType;
 
-	Event_CreateMesh(unsigned int id, MeshModel* mesh, bool dynamic);
+	Event_CreateMesh(
+		unsigned int	id, 
+		MeshDesc		mesh, 
+		bool			dynamic, 
+		std::string		fileName, 
+		VertexType		vertexType);
 };
 
 class TexDesc;
@@ -386,11 +394,11 @@ public:
 class DLL_U Event_CreatePickupable : public Event
 {
 public:
-	Event_CreatePickupable(Float3 position, PickupableType pickupableType, A_Ptr<Attribute_PickupablesSpawnPoint> creatorPickupablesSpawnPoint, int amount);
+	Event_CreatePickupable(Float3 position, PickupableType pickupableType, AttributePtr<Attribute_PickupablesSpawnPoint> creatorPickupablesSpawnPoint, int amount);
 
 	Float3 position;
 	PickupableType pickupableType;
-	A_Ptr<Attribute_PickupablesSpawnPoint>  creatorPickupablesSpawnPoint;
+	AttributePtr<Attribute_PickupablesSpawnPoint>  creatorPickupablesSpawnPoint;
 	int amount;
 };
 
