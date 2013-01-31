@@ -12,6 +12,7 @@ struct MdlDescModel
 	unsigned int	modelID_;		//!< ID of model.
 	std::string		modelFileName_;	//!< Filename of model.
 	bool			dynamic_;		//!< Specifies whether or not object is to be interpreted as dynamic by physics-component.
+	unsigned int	vertexType_;	//!< Specifies the type of vertex the models uses. 
 
 	//! Does nothing.
 	MdlDescModel() {}
@@ -19,11 +20,13 @@ struct MdlDescModel
 	MdlDescModel(
 		unsigned int	modelID,
 		std::string		modelFileName,
-		bool			dynamic)
+		bool			dynamic,
+		unsigned int	vertexType)
 	{
 		modelID_		= modelID;
 		modelFileName_	= modelFileName;
 		dynamic_		= dynamic;
+		vertexType_		= vertexType;
 	}
 	//! Does nothing.
 	~MdlDescModel() {}

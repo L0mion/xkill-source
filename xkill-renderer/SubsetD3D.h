@@ -4,8 +4,7 @@
 typedef long HRESULT;
 
 struct ID3D11Device;
-
-class IB;
+struct ID3D11Buffer;
 
 #include <vector>
 
@@ -19,16 +18,19 @@ public:
 	//! Initializes SubsetD3D with previously initialized data.
 	SubsetD3D(
 		const unsigned int	materialIndex,
-		IB*					indexBuffer);
+		const unsigned int	numIndices,
+		ID3D11Buffer*		indexBuffer);
 	//! Deletes IB.
 	~SubsetD3D();
 
 	unsigned int	getMaterialIndex()	const;
-	IB*				getIndexBuffer()	const;
+	unsigned int	getNumIndices()		const;
+	ID3D11Buffer*	getIndexBuffer()	const;
 protected:
 private:
 	unsigned int	materialIndex_;	//!< Index of material used by subset.
-	IB*				indexBuffer_;	//!< Object wrapping a D3D-indexbuffer.
+	unsigned int	numIndices_;
+	ID3D11Buffer*	indexBuffer_;
 };
 
 #endif //XKILL_RENDERER_SUBSETD3D_H

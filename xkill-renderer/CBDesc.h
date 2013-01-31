@@ -39,8 +39,8 @@ struct CBCameraDesc
 	unsigned int		viewportTopX_;
 
 	unsigned int		viewportTopY_;
-	unsigned int		zNear;
-	unsigned int		zFar;
+	float				zNear;
+	float				zFar;
 	unsigned int		pad2;
 };
 static const unsigned int CB_CAMERA_DESC_SIZE = 288;

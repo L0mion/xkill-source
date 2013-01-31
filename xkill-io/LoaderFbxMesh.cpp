@@ -16,18 +16,23 @@ LoaderFbxMesh::~LoaderFbxMesh()
 }
 void LoaderFbxMesh::reset()
 {
+	polygonGroupIds_.clear();
 	vertexPositions_.clear();
-	vertexNormals_.clear();
-	vertexUVs_.clear();
-	vertexTangents_.clear();
+	vertexColors_.clear();	 
+	vertexNormals_.clear();	 
+	vertexUVs_.clear();		 
+	vertexTangents_.clear(); 
 	vertexBinormals_.clear();
 }
 
 void LoaderFbxMesh::parseMesh(FbxMesh* mesh, LoaderFbxMeshDesc* meshDesc)
 {
+	reset();
+
 	int polygonVertexCount = mesh->GetPolygonVertexCount();
 	int polygonCount = mesh->GetPolygonCount();
 	int numControlPonts = mesh->GetControlPointsCount();
+
 	FbxVector4* controlPoints = mesh->GetControlPoints();
 	
 	int vertexId = 0;
@@ -415,6 +420,7 @@ FbxVector4 LoaderFbxMesh::parseVertexBinormalsByPolygonVertex(FbxGeometryElement
 
 void LoaderFbxMesh::parseVertexLinkData(FbxMesh* mesh, LoaderFbxMeshDesc* meshDesc)
 {
+	int debug = mesh->GetControlPointsCount();
 	meshDesc->prepareBoneData(mesh->GetControlPointsCount());
 	FbxCluster* cluster = nullptr;
 	
@@ -507,13 +513,19 @@ FbxNode* LoaderFbxMesh::findRoot(FbxNode* node)
 	bool done = false;
 	while(!done)
 	{
-		if(node->GetParent()->GetNodeAttribute()->GetAttributeType() == FbxNodeAttribute::eSkeleton)
+		if(node->GetParent()->GetNodeAttribute())
 		{
-			node = node->GetParent();
-//			printf("%s\n", node->GetName());
+			if(node->GetParent()->GetNodeAttribute()->GetAttributeType() == FbxNodeAttribute::eSkeleton)
+			{
+				node = node->GetParent();
+				printf("%s\n", node->GetName());
+			}
+			else
+				done = true;
 		}
 		else
 			done = true;
 	}
+	
 	return node;
 }

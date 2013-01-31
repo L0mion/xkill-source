@@ -58,8 +58,8 @@ public:
 		DirectX::XMFLOAT3	 eyePosition,
 		unsigned int		 viewportTopX,
 		unsigned int		 viewportTopY,
-		unsigned int		zNear,
-		unsigned int		zFar);	 //!< Updates the constant buffer cbCamera.
+		float				zNear,
+		float				zFar);	 //!< Updates the constant buffer cbCamera.
 	void updateCBObject(
 		ID3D11DeviceContext* devcon,
 		DirectX::XMFLOAT4X4 finalMatrix,

@@ -64,8 +64,8 @@ void ManagementCB::updateCBCamera(ID3D11DeviceContext*	devcon,
 								  DirectX::XMFLOAT3		eyePosition,
 								  unsigned int			viewportTopX,
 								  unsigned int			viewportTopY,
-								  unsigned int			zNear,
-								  unsigned int			zFar)
+								  float					zNear,
+								  float					zFar)
 {
 	CBCameraDesc cbDesc;
 	cbDesc.viewMatrix_				= viewMatrix;

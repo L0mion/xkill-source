@@ -1,12 +1,14 @@
 #pragma once
 
+#include <string>
+
 #include "dllUtilities.h"
 #include "AttributePointer.h"
 #include "Math.h"
 #include "LightDesc.h"
-#include <string>
-
+#include "MeshDesc.h"
 #include "DataItem.h"
+#include "MeshVertices.h"
 
 
 /// Used inside \ref COMPONENTS for data processing.
@@ -744,19 +746,22 @@ struct DLL_U Attribute_Player : public IAttribute
 };
 
 
-class MeshModel;
 struct DLL_U Attribute_Mesh : public IAttribute
 {
 	unsigned int	meshID;		//!< ID of mesh, read from .mdldesc-file.
-	MeshModel*		mesh;		//!< Type containing all mesh-related data.
+	MeshDesc		mesh;		//!< Type containing all mesh-related data.
 	bool			dynamic;	//!< Whether or not mesh is supposed to be dynamic physics-wize.
+	std::string		fileName;	//!< Filename of loaded model.
+	VertexType		vertexType;
 
 	void clean();					//!< Does nothing.
 	Attribute_Mesh();				//!< Initializes attribute with default values. Dynamic = false.
 	Attribute_Mesh(
 		unsigned int	id,
-		MeshModel*		mesh,
-		bool			dynamic);	//!< Initializes attribute with passed values.
+		MeshDesc		mesh,
+		bool			dynamic,
+		std::string		fileName,
+		VertexType		vertexType);	//!< Initializes attribute with passed values.
 	~Attribute_Mesh();				//!< Does nothing.
 
 	DataItemList* getDataList()

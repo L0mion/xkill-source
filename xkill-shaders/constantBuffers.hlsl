@@ -31,8 +31,8 @@ cbuffer cbPerCamera : register (b2)
 	uint		viewportTopX;
 
 	uint		viewportTopY;
-	uint		zNear;
-	uint		zFar;
+	float		zNear;
+	float		zFar;
 	uint		pad4;
 };
 
