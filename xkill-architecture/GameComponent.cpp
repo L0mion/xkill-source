@@ -402,7 +402,6 @@ void GameComponent::event_PhysicsAttributesColliding(Event_PhysicsAttributesColl
 	Entity* entity1 = &allEntity->at(itrPhysics.ownerIdAt(e->attribute1_index));
 	Entity* entity2 = &allEntity->at(itrPhysics.ownerIdAt(e->attribute2_index));
 	
-
 	// Handle hit reaction on entity 1
 	// when colliding with entity 2
 
