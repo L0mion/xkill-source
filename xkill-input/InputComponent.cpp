@@ -105,10 +105,8 @@ void InputComponent::handleInput(float delta)
 		input->rotation.x = device->getFloatValue(InputAction::ACTION_F_LOOK_LR, delta, true);
 		input->rotation.y = device->getFloatValue(InputAction::ACTION_F_LOOK_UD, delta, true);
 
-		if(device->getBoolValue(InputAction::ACTION_B_FIRE))
-			input->fire = true;
-		if(device->getBoolPressed(InputAction::ACTION_B_FIRE))
-			input->firePressed = true;
+		input->fire = device->getBoolValue(InputAction::ACTION_B_FIRE);
+		input->firePressed = device->getBoolPressed(InputAction::ACTION_B_FIRE);
 		if(device->getBoolReleased(InputAction::ACTION_B_CHANGE_AMMUNITIONTYPE))
 			input->changeAmmunitionType = true;
 		if(device->getBoolReleased(InputAction::ACTION_B_CHANGE_FIRINGMODE))
