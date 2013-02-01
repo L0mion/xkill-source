@@ -116,6 +116,15 @@ Attribute_Sound::~Attribute_Sound()
 {
 }
 
+Attribute_SoundSettings::Attribute_SoundSettings()
+{
+	this->soundMuted = false;
+	this->soundVolume = 1.0f;
+}
+Attribute_SoundSettings::~Attribute_SoundSettings()
+{
+}
+
 Attribute_Camera::Attribute_Camera()
 {
 	ZeroMemory(&mat_projection, sizeof(mat_projection));
@@ -124,7 +133,7 @@ Attribute_Camera::Attribute_Camera()
 	aspectRatio = 0.785f;
 	fieldOfView = 0.785f; 
 	zFar = 40.0f;
-	zNear = 0.1f;
+	zNear = 0.01f;
 
 	up		= Float3(0.0f, 1.0f, 0.0f);
 	right	= Float3(1.0f, 0.0f, 0.0f);
@@ -188,8 +197,8 @@ Attribute_Player::Attribute_Player()
 	collidingWithWorld = false;
 	jetpackTimer = 0.0f;
 	detectedAsDead = true;
-	meshIDWhenAlive = 0;
-	meshIDWhenDead = 1;
+	meshIDWhenAlive = 7;
+	meshIDWhenDead = 9;
 
 	walkSpeed = 5.0f;
 	sprintSpeed = walkSpeed*2;
@@ -498,6 +507,9 @@ void Attribute_DebugShape::saveTo( DataItemList* list )
 Attribute_ExplosionSphere::Attribute_ExplosionSphere()
 {
 	currentLifeTimeLeft = 1.0f;
+	currentRadius = 0.0f;
+	ammunitionType = XKILL_Enums::AmmunitionType::EXPLOSIVE;
+	firingModeType = XKILL_Enums::FiringModeType::SINGLE;
 }
 Attribute_ExplosionSphere::~Attribute_ExplosionSphere()
 {

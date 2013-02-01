@@ -1,13 +1,13 @@
 #include "KeyMapper.h"
 
-#include "FileParser.h"
 #include "InputDevice.h"
 
 #include "InputButtonObject.h"
 #include "InputAxisObject.h"
 #include "InputTriggerObject.h"
 
-#include "Converter.h"
+#include "FileParser.h"
+#include <xkill-utilities/Converter.h>
 
 KeyMapper::KeyMapper()
 {

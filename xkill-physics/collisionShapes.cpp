@@ -148,7 +148,7 @@ void CollisionShapes::loadCollisionShapes()
 		if(collisionShapesIdToIndex_.find(meshAttribute->meshID) == collisionShapesIdToIndex_.end())
 		{
 			std::string name = meshAttribute->fileName;
-			name = name.substr(0,name.find(".obj"));
+			name = name.substr(0,name.find("."));
 			name = name.append("RigidBodyShape");
 			btCollisionShape* collisionShape;
 			btCollisionShape* loadedShape;
@@ -177,26 +177,26 @@ void CollisionShapes::loadCollisionShapes()
 				//Load from model file
 				filename = std::string("../../xkill-resources/xkill-models/");
 				name = meshAttribute->fileName;
-				name = name.substr(0,name.find("Mesh"));
-				name = name.append("RigidBody");
+				name = name.substr(0,name.find("."));
 				filename = filename.append(name);
 				filename = filename.append(".bullet");
-				
+				name = name.append("RigidBody");
+
 				if(importer_->loadFile(filename.c_str()))
 					loadedShape = importer_->getCollisionShapeByIndex(importer_->getNumCollisionShapes()-1);//name.c_str());
 				if(loadedShape != nullptr)
 				{
-					if(!name.compare("xkill_processRigidBody"))
-					{
-						btBoxShape* box = static_cast<btBoxShape*>(loadedShape);
-						btVector3 half = box->getHalfExtentsWithMargin();
-						//btCapsuleShape* capsule = new btCapsuleShape( half.x() > half.z() ? half.x() : half.z(), half.y());
-						//btSphereShape* sphere = new btSphereShape(0.2f);
-						//collisionShape = capsule;
-						//collisionShapes_->push_back(sphere);
-						//collisionShapes_->push_back(capsule);
-						//collisionShape = sphere;
-					}
+					//if(!name.compare("xkill_processRigidBody"))
+					//{
+					//	btBoxShape* box = static_cast<btBoxShape*>(loadedShape);
+					//	btVector3 half = box->getHalfExtentsWithMargin();
+					//	//btCapsuleShape* capsule = new btCapsuleShape( half.x() > half.z() ? half.x() : half.z(), half.y());
+					//	//btSphereShape* sphere = new btSphereShape(0.2f);
+					//	//collisionShape = capsule;
+					//	//collisionShapes_->push_back(sphere);
+					//	//collisionShapes_->push_back(capsule);
+					//	//collisionShape = sphere;
+					//}
 					name = name.append("Shape");
 					if(loadedShape->getShapeType() == BOX_SHAPE_PROXYTYPE)
 					{
@@ -212,7 +212,17 @@ void CollisionShapes::loadCollisionShapes()
 					}
 					btCompoundShape* cs = new btCompoundShape();
 
-					cs->addChildShape(importer_->getRigidBodyByName(name.c_str())->getWorldTransform(),collisionShape);
+					btRigidBody* rb =importer_->getRigidBodyByName(name.c_str());
+					btTransform transform;
+					if(rb!=nullptr)
+					{
+						transform = rb->getWorldTransform();
+					}
+					else
+					{
+						transform.setIdentity();
+					}
+					cs->addChildShape(transform,collisionShape);
 					std::pair<unsigned int, unsigned int>  idToIndex(meshAttribute->meshID,collisionShapes_->size());
 					collisionShapesIdToIndex_.insert(idToIndex);
 					collisionShapes_->push_back(collisionShape);

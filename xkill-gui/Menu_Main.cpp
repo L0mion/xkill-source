@@ -12,8 +12,10 @@
 #include <QtGui/QStandardItemModel>
 #include <QtGui/QMessageBox>
 
+#include "Menu_Input.h"
 #include "Menu_Ammo.h"
 #include "Menu_FiringMode.h"
+#include "Menu_Sound.h"
 
 #include "Menu_Editor.h"
 
@@ -35,20 +37,16 @@ Menu_Main::Menu_Main( QWidget* parent ) : QMainWindow(parent), ToggleHelper(this
 	ui.verticalLayout->setSpacing(0);
 	ui.verticalLayout->setMargin(0);
 
-	connect(ui.pushButton_exit,									SIGNAL(clicked()),					this,	SLOT(slot_quitToDesktop()));
-	connect(ui.pushButton_exit_2,								SIGNAL(clicked()),					this,	SLOT(slot_quitToDesktop()));
-	connect(ui.comboBox_LevelSelect,							SIGNAL(currentIndexChanged(int)),	this,	SLOT(slot_selectLevel(int)));
-	connect(ui.pushButton_AddLevel,								SIGNAL(clicked()),					this,	SLOT(slot_addLevel()));
-	connect(ui.pushButton_SaveLevel,							SIGNAL(clicked()),					this,	SLOT(slot_saveLevel()));
-	connect(ui.pushButton_RemoveLevel,							SIGNAL(clicked()),					this,	SLOT(slot_removeLevel()));
-	connect(ui.pushButton_startGame,							SIGNAL(clicked()),					this,	SLOT(slot_startGame()));
-	connect(ui.comboBox_Input,									SIGNAL(currentIndexChanged(int)),	this,	SLOT(slot_loadInputList(int)));
-	connect(ui.tableView_Input,									SIGNAL(clicked(QModelIndex)),		this,	SLOT(slot_loadInputSettings(QModelIndex)));
-	connect(ui.tableView_Input,									SIGNAL(clicked(QModelIndex)),		this,	SLOT(slot_setInputObject(QModelIndex)));
-	connect(ui.horizontalSlider_Input,							SIGNAL(sliderMoved(int)),			this,	SLOT(slot_inputSettingsChanged()));
-	connect(ui.checkBox_Input,									SIGNAL(clicked()),					this,	SLOT(slot_inputSettingsChanged()));
-	connect(ui.pushButton_Input,								SIGNAL(clicked()),					this,	SLOT(slot_inputSettingsChanged()));
+	connect(ui.pushButton_exit,			SIGNAL(clicked()),					this,	SLOT(slot_quitToDesktop()));
+	connect(ui.pushButton_exit_2,		SIGNAL(clicked()),					this,	SLOT(slot_quitToDesktop()));
+	connect(ui.comboBox_LevelSelect,	SIGNAL(currentIndexChanged(int)),	this,	SLOT(slot_selectLevel(int)));
+	connect(ui.pushButton_AddLevel,		SIGNAL(clicked()),					this,	SLOT(slot_addLevel()));
+	connect(ui.pushButton_SaveLevel,	SIGNAL(clicked()),					this,	SLOT(slot_saveLevel()));
+	connect(ui.pushButton_RemoveLevel,	SIGNAL(clicked()),					this,	SLOT(slot_removeLevel()));
+	connect(ui.pushButton_startGame,	SIGNAL(clicked()),					this,	SLOT(slot_startGame()));
 
+	/*
+	
 	connect(ui.radioButton_Ammo_Bullet,							SIGNAL(clicked()),					this,	SLOT(slot_updateAmmoMenu()));
 	connect(ui.radioButton_Ammo_Scatter,						SIGNAL(clicked()),					this,	SLOT(slot_updateAmmoMenu()));
 	connect(ui.radioButton_Ammo_Explosive,						SIGNAL(clicked()),					this,	SLOT(slot_updateAmmoMenu()));
@@ -77,18 +75,14 @@ Menu_Main::Menu_Main( QWidget* parent ) : QMainWindow(parent), ToggleHelper(this
 	connect(ui.tabWidget_2,										SIGNAL(currentChanged(int)),		this,	SLOT(slot_updateAmmoMenu()));
 	connect(ui.tabWidget_2,										SIGNAL(currentChanged(int)),		this,	SLOT(slot_updateFiringModeMenu()));
 	
+	
+	*/
+	
 	// Set num players to 2
 	ui.horizontalSlider_numPlayers->setValue(2);
 
 	filePath = QString("../../xkill-resources/xkill-scripts/levels.xml");
 	levelListModel = new QStandardItemModel(0, 1, this);
-	inputListModel = new QStandardItemModel(0, 2, this);
-	deviceListModel = new QStandardItemModel(0, 1, this);
-
-	currentObject = nullptr;
-
-	loadDeviceList();
-	loadInputList(0);
 
 	//editorModel->setHorizontalHeaderItem(1, new QStandardItem("ID"));
 
@@ -96,14 +90,19 @@ Menu_Main::Menu_Main( QWidget* parent ) : QMainWindow(parent), ToggleHelper(this
 
 	loadXML();
 
-	ammo_Menu = new Menu_Ammo(&ui);
-	firingMode_Menu = new Menu_FiringMode(&ui);
+	input_Menu = new Menu_Input(&ui, this);
+	input_Menu->Init(new QStandardItemModel(0, 2, this), new QStandardItemModel(0, 1, this));
+	ammo_Menu = new Menu_Ammo(&ui, this);
+	firingMode_Menu = new Menu_FiringMode(&ui, this);
+	sound_Menu = new Menu_Sound(&ui, this);
 }
 
 Menu_Main::~Menu_Main()
 {
+	delete input_Menu;
 	delete ammo_Menu;
 	delete firingMode_Menu;
+	delete sound_Menu;
 }
 
 void Menu_Main::parentMoveEvent()
@@ -243,38 +242,22 @@ void Menu_Main::slot_startGame()
 
 void Menu_Main::slot_loadInputList(int deviceId)
 {
-	loadInputList(deviceId);
+	input_Menu->loadInputList(deviceId);
 }
 
 void Menu_Main::slot_loadInputSettings(QModelIndex index)
 {
-	loadInputSettings(index.row());
+	input_Menu->loadInputSettings(index.row());
 }
 
 void Menu_Main::slot_inputSettingsChanged()
 {
-	if(currentObject != nullptr)
-	{
-		currentObject->setInverted(ui.checkBox_Input->isChecked());
-		currentObject->setSensitivity(static_cast<float>(ui.horizontalSlider_Input->value())/5000.0f);
-	}
+	input_Menu->updateMenu();
 }
 
 void Menu_Main::slot_setInputObject(QModelIndex index)
 {
-	Attribute_InputDevice* attr_device = itrInputDevice.at(ui.comboBox_Input->currentIndex());
-	InputDevice* device = attr_device->device;
-
-	std::vector<int> objectIndex = device->getMappedArray(index.row());
-	if(objectIndex.size() > 0)
-	{
-		currentObject = device->getInputObjectArray()->inputObjects[objectIndex[0]];
-		loadInputSettings(0);
-	}
-	else
-	{
-		currentObject = nullptr;
-	}
+	input_Menu->setInputObject(index);
 }
 
 void Menu_Main::slot_updateAmmoMenu()
@@ -297,101 +280,9 @@ void Menu_Main::slot_firingModeUpdated()
 	firingMode_Menu->settingsMenuUpdated();
 }
 
-void Menu_Main::loadDeviceList()
+void Menu_Main::slot_soundMenuUpdated()
 {
-	deviceListModel->clear();
-
-	InputDevice* device;
-	Attribute_InputDevice* attr_inputDevice;
-
-	QStandardItem* item;
-
-	while(itrInputDevice.hasNext())
-	{
-		attr_inputDevice = itrInputDevice.getNext();
-		device = attr_inputDevice->device;
-
-		item = new QStandardItem(device->GetName().c_str());
-
-		deviceListModel->appendRow(item);	
-	}
-
-	ui.comboBox_Input->setModel(deviceListModel);
-}
-
-void Menu_Main::loadInputList(int deviceId)
-{
-	inputListModel->clear();
-
-	QStringList qStringList;
-
-	qStringList.push_back("Action");
-	qStringList.push_back("Key");
-
-	inputListModel->setHorizontalHeaderLabels(qStringList);
-
-	if(deviceId >= itrInputDevice.size())
-		return;
-
-	Attribute_InputDevice* attr_device = itrInputDevice.at(deviceId);
-	InputDevice* device = attr_device->device;
-
-	InputAction inputAction;
-
-	ui.tableView_Input->setSortingEnabled(false);
-
-	for(int i = 0; i < InputAction::ACTION_LAST; i++)
-	{
-		QList<QStandardItem*> rowList;
-		QString qStr = inputAction.InputActionStrings[i].c_str();
-		QStandardItem* actionItem = new QStandardItem(qStr);
-		actionItem->setEditable(false);
-		rowList.push_back(actionItem);
-
-		std::vector<int> objectIndex = device->getMappedArray(i);
-		InputObjectArray* inputObjectsArray = device->getInputObjectArray();
-
-		QStandardItem* keyItem;
-
-		qStr = "";
-
-		std::string str = "";
-
-		for(unsigned int j = 0; j < objectIndex.size(); j++)
-		{
-			if(i == 0 && j == 0)
-			{
-				currentObject = inputObjectsArray->inputObjects[objectIndex[j]];
-				loadInputSettings(objectIndex[j]);
-			}
-
-			str += inputObjectsArray->inputObjects[objectIndex[j]]->getName();
-
-			if(j != (objectIndex.size()-1))
-				str += ", ";
-		}
-
-		qStr = str.c_str();
-
-		keyItem = new QStandardItem(qStr);
-		keyItem->setEditable(false);
-		rowList.push_back(keyItem);
-
-		inputListModel->appendRow(rowList);
-	}
-
-	ui.tableView_Input->setModel(inputListModel);
-	ui.tableView_Input->setColumnWidth(0,180);
-	ui.tableView_Input->setColumnWidth(1,180);
-}
-
-void Menu_Main::loadInputSettings(int objectId)
-{
-	if(currentObject != nullptr)
-	{
-		ui.horizontalSlider_Input->setValue(static_cast<int>(currentObject->getSensitivity()*5000.0f + 0.5f)); //Must fix better translation
-		ui.checkBox_Input->setChecked(currentObject->isInverted());
-	}
+	sound_Menu->updateMenu();
 }
 
 void Menu_Main::slot_quitToDesktop()

@@ -42,7 +42,7 @@ HRESULT ManagementRS::initRSDefault(ID3D11Device* device)
 	HRESULT hr = S_OK;
 
 	D3D11_RASTERIZER_DESC rsd;
-	rsd.CullMode				= D3D11_CULL_NONE;
+	rsd.CullMode				= D3D11_CULL_BACK;
 	rsd.FillMode				= D3D11_FILL_SOLID;
 	rsd.FrontCounterClockwise	= false;
 	rsd.DepthBias				= false;

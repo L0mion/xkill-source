@@ -201,9 +201,17 @@ void GameComponent::onUpdate(float delta)
 			if(player->currentRespawnDelay > 0.0f)
 			{
 				player->currentRespawnDelay -= delta;
+
+
+				float alive = 3.14/4.0f;
+				float dead = 3.14/3;
+				float slerp = (1 - player->currentRespawnDelay/player->respawnDelay);
+				float fov = slerp*dead + (1-slerp)*alive;
+				player->ptr_camera->fieldOfView = fov;
 			}
 			else
 			{
+				player->ptr_camera->fieldOfView =3.14f/4.0f;
 				// If an appropriate spawnpoint was found: spawn at it; otherwise: spawn at origo.
 				Attribute_PlayerSpawnPoint* spawnPointAttribute = findUnoccupiedSpawnPoint();
 				if(spawnPointAttribute != nullptr)
@@ -235,7 +243,7 @@ void GameComponent::onUpdate(float delta)
 				player->detectedAsDead = false;
 
 				health->health = health->startHealth; // restores player health
-				SEND_EVENT(&Event_PlaySound(3));
+				SEND_EVENT(&Event_PlaySound(Event_PlaySound::SOUND_RESPAWN));
 			}
 		}
 
@@ -480,7 +488,7 @@ void GameComponent::event_PhysicsAttributesColliding(Event_PhysicsAttributesColl
 						}
 						else
 						{
-							SEND_EVENT(&Event_PlaySound(0));
+							SEND_EVENT(&Event_PlaySound(Event_PlaySound::SOUND_HIT));
 						}
 
 						SEND_EVENT(&Event_Rumble(entity1->getID(), true, 0.2f, 1.0f, 1.0f));
@@ -524,19 +532,10 @@ void GameComponent::event_PhysicsAttributesColliding(Event_PhysicsAttributesColl
 				Attribute_Projectile* projectileAttribute = itrProjectile.at(projectileId.at(i));
 
 				//Shorten lifetime of projectile colliding with physics objects
-				if(projectileAttribute->currentLifeTimeLeft > 1.00f)
+			/*	if(projectileAttribute->currentLifeTimeLeft > 1.00f)
 				{
 					projectileAttribute->currentLifeTimeLeft = 1.00f;
-				}
-
-
-				//continue
-				//MutatorSettings ms;
-				//Ammunition ammo = ms.getStandardAmmunition(projectileAttribute->ammunitionType);
-				//FiringMode firingMode = ms.getStandardFiringMode(projectileAttribute->firingModeType);
-
-				//float explosionSphereRadius = ammo.explosionSphereFinalRadius;
-				float explosionSphereRadius = 1.0f;
+				}*/
 
 				//Explosion handling.
 				if(projectileAttribute->ammunitionType == XKILL_Enums::AmmunitionType::EXPLOSIVE)
@@ -552,16 +551,16 @@ void GameComponent::event_PhysicsAttributesColliding(Event_PhysicsAttributesColl
 						}
 					}
 
+					//Kill the projectile that caused the explosion
  					projectileAttribute->currentLifeTimeLeft = 0.0f;
 
 					//Extract projectile position.
-			
 					AttributePtr<Attribute_Physics> projectilePhysicsAttribute = projectileAttribute->ptr_physics;
 					AttributePtr<Attribute_Spatial> projectileSpatialAttribute = projectilePhysicsAttribute->ptr_spatial;
 					AttributePtr<Attribute_Position> projectilePositionAttribute = projectileSpatialAttribute->ptr_position;
 
 					//Creates an explosion sphere. Init information is taken from the impacting projectile.
-					SEND_EVENT(&Event_CreateExplosionSphere(projectilePositionAttribute->position, explosionSphereRadius, projectileDamageAttribute->damage, projectileAttribute->entityIdOfCreator));
+					SEND_EVENT(&Event_CreateExplosionSphere(projectilePositionAttribute->position, projectileDamageAttribute->damage, projectileAttribute->entityIdOfCreator, projectileAttribute->ammunitionType, projectileAttribute->firingModeType));
 				}
 			}
 			//SEND_EVENT(&Event_RemoveEntity(entity1->getID())); //Crashes sometimes if removed here

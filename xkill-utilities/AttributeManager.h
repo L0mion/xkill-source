@@ -14,6 +14,8 @@ public:
 	bool showDebugPhysics;
 	std::string currentLevel;
 	float trueDeltaTime;
+	bool soundMuted;
+	float soundVolume;
 
 	Settings()
 	{
@@ -21,6 +23,8 @@ public:
 		currentLevel = "TestArena";
 		timeScale = 1.0f;
 		showDebugPhysics = false;
+
+		
 	}
 };
 
@@ -72,6 +76,7 @@ public:
 	AttributeStorage<Attribute_SplitScreen>				splitScreen;
 	AttributeStorage<Attribute_PickupablesSpawnPoint>	pickupablesSpawnPoint;
 	AttributeStorage<Attribute_Pickupable>				pickupable;
+	AttributeStorage<Attribute_SoundSettings>			soundSettings;
 
 	AttributeStorage<Behavior_Offset>					offset;
 
@@ -107,16 +112,17 @@ public:
 	static AttributeIterator<Attribute_SplitScreen>				itrSplitScreen			;	\
 	static AttributeIterator<Attribute_PickupablesSpawnPoint>	itrPickupablesSpawnPoint;	\
 	static AttributeIterator<Attribute_Pickupable>				itrPickupable;			;	\
+	static AttributeIterator<Attribute_SoundSettings>			itrSoundSettings		;	\
 	\
 	static AttributeIterator<Behavior_Offset>					itrOffset				;	\
-
 	\
 	// ADD MORE ABOVE ^
 
 // Inits all attributes
-#define ATTRIBUTES_INIT_ALL																				\
+#define ATTRIBUTES_INIT_ALL																					\
 	settings				= AttributeManager::instance()->settings;										\
 	itr_entity				= AttributeManager::instance()->entities;										\
+	\
 	itrPosition				= AttributeManager::instance()->position					.getIterator();		\
 	itrSpatial				= AttributeManager::instance()->spatial						.getIterator();		\
 	itrRender				= AttributeManager::instance()->render						.getIterator();		\
@@ -140,6 +146,7 @@ public:
 	itrSplitScreen			= AttributeManager::instance()->splitScreen					.getIterator();		\
 	itrPickupablesSpawnPoint= AttributeManager::instance()->pickupablesSpawnPoint		.getIterator();		\
 	itrPickupable			= AttributeManager::instance()->pickupable					.getIterator();		\
+	itrSoundSettings		= AttributeManager::instance()->soundSettings				.getIterator();		\
 	\
 	itrOffset				= AttributeManager::instance()->offset						.getIterator();		\
 	\

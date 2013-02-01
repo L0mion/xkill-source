@@ -1,5 +1,5 @@
 #include "WorldPhysicsObject.h"
-#include <xkill-utilities\Util.h> //DEBUGPRINT
+#include <xkill-utilities/Util.h> //DEBUGPRINT
 
 WorldPhysicsObject::WorldPhysicsObject()
 	: PhysicsObject()

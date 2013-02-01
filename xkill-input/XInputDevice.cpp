@@ -10,7 +10,7 @@
 
 #include "InputObjectArray.h"
 
-#include "Converter.h"
+#include <xkill-utilities/Converter.h>
 
 XInputDevice::XInputDevice() : 
 	InputDevice(GUID(), "")

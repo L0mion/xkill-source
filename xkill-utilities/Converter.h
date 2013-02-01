@@ -4,10 +4,6 @@
 #include <sstream>
 
 //! A converter class
-/*!
-Should probably not be here. Used to convert floats and ints to string in GetInputInformationString
-in InputManager.
-*/
 
 class Converter
 {
@@ -90,6 +86,10 @@ public:
 		
 		return n;
 	}
+
+/*  //////////////////////////////////////////////////////////////////
+Hash algorithm djb2 from: http://www.cse.yorku.ca/~oz/hash.html		//
+*/  //////////////////////////////////////////////////////////////////
 
 	static unsigned long HashString(std::string str)
 	{

@@ -11,7 +11,7 @@
 #include <xkill-utilities/AttributeManager.h>
 #include <xkill-utilities/EntityStorage.h>
 
-#include "Converter.h"
+#include <xkill-utilities/Converter.h>
 
 ATTRIBUTES_DECLARE_ALL
 
@@ -25,6 +25,7 @@ InputDevice::InputDevice(GUID deviceGUID, std::string name, unsigned int playerI
 
 	rumbleTimer_ = 0.0f;
 	rumbleActive_ = false;
+	rumbleEnabled_ = true;
 	sensitivityModifier_ = 1.0f;
 
 	inputObjectArray_ = new InputObjectArray();
@@ -64,10 +65,29 @@ void InputDevice::Update(float deltaTime)
 
 void InputDevice::RunForceFeedback(float timer)
 {
-	rumbleActive_ = true;
-	rumbleTimer_ = timer;
+	if(rumbleEnabled_)
+	{
+		rumbleActive_ = true;
+		rumbleTimer_ = timer;
 
-	RunForceFeedback();
+		RunForceFeedback();
+	}
+}
+
+void InputDevice::setForceFeedbackEnabled(bool enabled)
+{
+	rumbleEnabled_ = enabled;
+
+	if(!enabled)
+	{
+		rumbleActive_ = StopForceFeedback();
+		rumbleTimer_ = 0.0f;
+	}
+}
+
+bool InputDevice::isForceFeedbackEnabled()
+{
+	return rumbleEnabled_;
 }
 
 InputDevice::InputDeviceLayout InputDevice::GetLayout()
@@ -176,9 +196,6 @@ std::vector<int> InputDevice::getMappedArray(int mapping)	//Switch to unsigned
 	return mappedObjects_[mapping];
 }
 
-/*  //////////////////////////////////////////////////////////////////
-	Hash algorithm djb2 from: http://www.cse.yorku.ca/~oz/hash.html	//
-*/  //////////////////////////////////////////////////////////////////
 unsigned long InputDevice::getHash()
 {
 	std::string str = getStandardMappingsString();

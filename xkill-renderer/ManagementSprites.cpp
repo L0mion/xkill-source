@@ -45,8 +45,8 @@ void ManagementSprites::initIndices()
 	indices_[0] = 0;
 	indices_[1] = 1;
 	indices_[2] = 2;
-	indices_[3] = 2;
-	indices_[4] = 3;
+	indices_[3] = 3;
+	indices_[4] = 2;
 	indices_[5] = 1;
 }
 HRESULT ManagementSprites::initVertexBuffer(ID3D11Device* device)

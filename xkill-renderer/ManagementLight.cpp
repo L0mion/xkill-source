@@ -96,6 +96,27 @@ void ManagementLight::setLightSRVCS(
 		break;
 	}
 }
+void ManagementLight::unsetLightSRVCS(
+	ID3D11DeviceContext*	devcon, 
+	LightBufferType			bufferType, 
+	unsigned int			shaderRegister)
+{
+	switch (bufferType)
+	{
+	case LIGHTBUFFERTYPE_DIR:
+		streamDirLight_->unsetStreamSRV(devcon, shaderRegister);
+		break;
+	case LIGHTBUFFERTYPE_POINT:
+		streamPointLight_->unsetStreamSRV(devcon, shaderRegister);
+		break;
+	case LIGHTBUFFERTYPE_SPOT:
+		streamSpotLight_->unsetStreamSRV(devcon, shaderRegister);
+		break;
+	case LIGHTBUFFERTYPE_POS_VIEW:
+		streamPosLight_->unsetStreamSRV(devcon, shaderRegister);
+		break;
+	}
+}
 
 void ManagementLight::updateStreamDirLight()
 {

@@ -91,10 +91,10 @@ void updateView(AttributePtr<Attribute_Camera> camera)
 void updateProj(AttributePtr<Attribute_Camera> camera)
 {
 	DirectX::XMFLOAT4X4& projection = *(DirectX::XMFLOAT4X4*)&camera->mat_projection;
-	float& zFar		= camera->zFar;
-	float& zNear	= camera->zNear;
+	float& zFar			= camera->zFar;
+	float& zNear		= camera->zNear;
 	float& aspectRatio	= camera->aspectRatio;
-	float& fieldOfView		= camera->fieldOfView;
+	float& fieldOfView	= camera->fieldOfView;
 
 	ZeroMemory(&projection, sizeof(projection));
 
@@ -265,5 +265,6 @@ void CameraComponent::onUpdate(float delta)
 	{
 		AttributePtr<Attribute_Camera> camera = itrCamera.attributePointer(itrCamera.getNext());
 		updateView(camera);
+		updateProj(camera);
 	}
 }

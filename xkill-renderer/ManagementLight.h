@@ -55,6 +55,10 @@ public:
 		ID3D11DeviceContext*	devcon, 
 		LightBufferType			bufferType, 
 		unsigned int			shaderRegister); //!< Set the compute shader to use specified SRV.
+	void unsetLightSRVCS(
+		ID3D11DeviceContext*	devcon, 
+		LightBufferType			bufferType, 
+		unsigned int			shaderRegister);
 
 	//void transformLightViewSpacePoss(ID3D11DeviceContext* devcon, DirectX::XMFLOAT4X4 view);
 

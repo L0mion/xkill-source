@@ -70,6 +70,7 @@ enum DLL_U EventType
 	EVENT_WINDOW_RESIZE,
 	EVENT_INPUT_DEVICE_SEARCH,
 	EVENT_PLAYSOUND,
+	EVENT_UPDATESOUNDSETTINGS,
 	EVENT_RUMBLE,
 	EVENT_PHYSICS_ATTRIBUTES_COLLIDING,
 	EVENT_DRAW_BULLET_PHYSICS_DEBUG_LINES,
@@ -141,6 +142,18 @@ public:
 
 	int soundId;
 	bool muteSound;
+
+	enum sounds
+	{
+		SOUND_WALK,
+		SOUND_HIT,
+		SOUND_RESPAWN,
+		SOUND_FIRE,
+		SOUND_DEATH,
+		SOUND_MUSIC,
+
+		SOUND_LAST
+	};
 };
 
 //! Will trigger rumble in devices[deviceNr]
@@ -456,12 +469,13 @@ public:
 class DLL_U Event_CreateExplosionSphere : public Event
 {
 public:
-	Event_CreateExplosionSphere(Float3 position, float radius, float damage, int entityIdOfCreator);
+	Event_CreateExplosionSphere(Float3 position, float damage, int entityIdOfCreator, XKILL_Enums::AmmunitionType ammunitionType, XKILL_Enums::FiringModeType firingModeType);
 
 	Float3 position;
-	float radius;
 	float damage;
 	int entityIdOfCreator;
+	XKILL_Enums::AmmunitionType ammunitionType;
+	XKILL_Enums::FiringModeType firingModeType;
 };
 
 class DLL_U Event_CreateWorld : public Event

@@ -2,18 +2,19 @@
 
 #include <xkill-utilities/IObserver.h>
 #include <xkill-utilities/Util.h>
-#include <xkill-sound/FMODEventSystem.h> //check architecture project depending on sound
-#include <xkill-sound/FMODEventSystemProgrammerReportParser.h> //check architecture project depending on sound
-
-#include <iostream>
+#include "FMODEventSystem.h"
 
 #include "FileParser.h"
 #include "EventToFModConverter.h"
 
 #define SAFE_DELETE(x) if( x ) { delete(x); (x) = NULL; }
 
+ATTRIBUTES_DECLARE_ALL
+
 SoundComponent::SoundComponent()
 {
+	ATTRIBUTES_INIT_ALL
+
 	mFMODEventSystem = NULL;
 	converter = NULL;
 	timer = 0.0f;
@@ -22,6 +23,7 @@ SoundComponent::SoundComponent()
 	SUBSCRIBE_TO_EVENT(this, EVENT_CREATE_PROJECTILE);
 	SUBSCRIBE_TO_EVENT(this, EVENT_PLAYERDEATH);
 	SUBSCRIBE_TO_EVENT(this, EVENT_END_DEATHMATCH);
+	SUBSCRIBE_TO_EVENT(this, EVENT_UPDATESOUNDSETTINGS);
 }
 
 SoundComponent::~SoundComponent()
@@ -32,8 +34,6 @@ SoundComponent::~SoundComponent()
 
 bool SoundComponent::init(std::string configFilePath)
 {
-	int test = sizeof(*ATTRIBUTE_MANAGER);
-
 	mFMODEventSystem = new FMODEventSystem();
 	mFMODEventSystem->Init("../../xkill-resources/xkill-sounds/", "Xkill_Sound.fev", 64);
 
@@ -44,7 +44,7 @@ bool SoundComponent::init(std::string configFilePath)
 	//	return false;
 	//}
 
-	converter = new EventToFModConverter();
+	converter = new EventToFModConverter(mFMODEventSystem->GetFMODEventNames());
 	converter->init(configFilePath);
 
 	fillEventsToFModVector(configFilePath);
@@ -65,14 +65,42 @@ void SoundComponent::onEvent(Event* e)
 	{
 		Event_PlaySound* eps = static_cast<Event_PlaySound*>(e);
 		
-		if(eps->muteSound)
-			mFMODEventSystem->SetMuteSounds();
+		if(eps->soundId < 0)
+		{
+			mFMODEventSystem->SetMuteSounds(eps->muteSound);
+
+			//Attribute_SoundSettings* soundSettings;
+			//while(itrSoundSettings.hasNext())
+			//{
+			//	soundSettings = itrSoundSettings.getNext();
+
+			//	soundSettings->soundMuted = eps->muteSound;
+			//}
+
+			settings->soundMuted = eps->muteSound;
+		}
 		else
+		{
 			eventIndex = eps->soundId;
+		}
+	}
+	else if(type == EventType::EVENT_UPDATESOUNDSETTINGS)
+	{
+		//Attribute_SoundSettings* soundSettings;
+		//while(itrSoundSettings.hasNext())
+		//{
+		//	soundSettings = itrSoundSettings.getNext();
+
+		//	mFMODEventSystem->SetMuteSounds(soundSettings->soundMuted);
+		//	mFMODEventSystem->SetVolume(soundSettings->soundVolume);
+		//}
+
+		mFMODEventSystem->SetMuteSounds(settings->soundMuted);
+		mFMODEventSystem->SetVolume(settings->soundVolume);
 	}
 	else
 	{
-		eventIndex = (int)type;
+		eventIndex = (int)type + Event_PlaySound::SOUND_LAST;
 	}
 
 	int fmodEventIndex = converter->getFModIndex(eventIndex);
@@ -86,7 +114,7 @@ void SoundComponent::onUpdate(float delta)
 	if(timer >= 0.5f)
 	{
 		timer = 0.0f;
-		int fmodEventIndex = converter->getFModIndex(2);
+		int fmodEventIndex = converter->getFModIndex(Event_PlaySound::SOUND_WALK);
 		if(fmodEventIndex >= 0)
 			mFMODEventSystem->StartSoundEventAt(fmodEventIndex);
 	}
@@ -114,8 +142,7 @@ std::string SoundComponent::configMessage()
 	std::string message = "";
 
 	message += "// Define a binding between events by using this format\n";
-	message += "// <Fmod event number> = <game event number>\n";
-	message += "// <Fmod event number> = <game event name>\n";
+	message += "// <Fmod event name/number> = <game event name/number>\n";
 	message += "// Example:\n";
 	message += "// 0 = 4";
 	message += "// This will bind fmod event '0' to game event '4'\n";

@@ -9,7 +9,8 @@
 #include "InputObjectArray.h"
 
 #include "InputActions.h"
-#include "Converter.h"
+
+#include <xkill-utilities/Converter.h>
 
 QTInputDevices::QTInputDevices() :
 	InputDevice(GUID(), "")

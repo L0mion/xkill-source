@@ -165,7 +165,7 @@ void PlayerPhysicsObject::handleInput(float delta)
 			}
 		}
 		//When moving, restore friction and gravity
-		else if( (ptr_input->position.x != 0.0f || ptr_input->position.y != 0.0f) )
+		else if( (ptr_input->position.x != 0.0f || ptr_input->position.y != 0.0f))
 		{
 			if(currentplayerGravity.y() != playerPhysicsAttribute->gravity.y)
 			{

@@ -148,6 +148,20 @@ public:
 		CREATE_ATTRIBUTE(ptr_render, Attribute_Render, render, entity);
 		ptr_render->ptr_spatial = ptr_spatial;
 		ptr_render->meshID = 2;
+		switch (e->ammunitionType)
+		{
+		case XKILL_Enums::AmmunitionType::BULLET:
+			ptr_render->meshID = 10;
+			break;
+		case XKILL_Enums::AmmunitionType::EXPLOSIVE:
+			ptr_render->meshID = 8;
+			break;
+		case XKILL_Enums::AmmunitionType::SCATTER:
+			ptr_render->meshID = 9;
+			break;
+		default:
+			break;
+		}
 
 		CREATE_ATTRIBUTE(ptr_physics, Attribute_Physics, physics, entity);
 		ptr_physics->ptr_spatial = ptr_spatial;
@@ -173,11 +187,28 @@ public:
 		//temp, create demo light for each projectile
 		CREATE_ATTRIBUTE(ptr_lightPoint, Attribute_Light_Point, lightPoint, entity);
 		ptr_lightPoint->ptr_position			= ptr_position;
-		ptr_lightPoint->lightPoint.ambient		= Float4(0.8f, 0.0f, 0.0f, 1.0f);
-		ptr_lightPoint->lightPoint.diffuse		= Float4(0.8f, 0.0f, 0.0f, 1.0f);
-		ptr_lightPoint->lightPoint.specular		= Float4(0.8f, 0.0f, 0.0f, 1.0f);
+
+		Float4 color;
+		switch (e->ammunitionType)
+		{
+		case XKILL_Enums::AmmunitionType::BULLET:
+			color = Float4(1.0f, 1.0f, 0.0f, 1.0f);
+			break;
+		case XKILL_Enums::AmmunitionType::SCATTER:
+			color = Float4(0.0f, 1.0f, 0.0f, 1.0f);
+			break;
+		case XKILL_Enums::AmmunitionType::EXPLOSIVE:
+			color = Float4(1.0f, 0.0f, 0.0f, 1.0f);
+			break;
+		default:
+			break;
+		}
+
+		ptr_lightPoint->lightPoint.ambient		= Float4(0.0f, 0.0f, 0.0f, 1.0f);
+		ptr_lightPoint->lightPoint.diffuse		= color;
+		ptr_lightPoint->lightPoint.specular		= color;
 		ptr_lightPoint->lightPoint.range		= 1.0f;
-		ptr_lightPoint->lightPoint.attenuation	= Float3(0.0f, 0.1f, 0.0f);
+		ptr_lightPoint->lightPoint.attenuation	= Float3(0.0f, 30.0f, 0.0f);
 	}
 
 	void createMesh(Entity* entity, Event_CreateMesh* e)
@@ -215,29 +246,29 @@ public:
 	{
 		CREATE_ATTRIBUTE(ptr_position, Attribute_Position, position, entity);
 		ptr_position->position = e->position;
+		
 		CREATE_ATTRIBUTE(ptr_spatial, Attribute_Spatial, spatial, entity);
 		ptr_spatial->ptr_position = ptr_position;
+		
 		CREATE_ATTRIBUTE(ptr_render, Attribute_Render, render, entity);
 		ptr_render->ptr_spatial = ptr_spatial;
-		/*
 		switch (e->pickupableType)
 		{
 		case XKILL_Enums::PickupableType::AMMUNITION_BULLET:
-			render->meshID = 4;
+			ptr_render->meshID = 4;
 			break;
 		case XKILL_Enums::PickupableType::AMMUNITION_SCATTER:
-			render->meshID = 5;
+			ptr_render->meshID = 5;
 			break;
 		case XKILL_Enums::PickupableType::AMMUNITION_EXPLOSIVE:
-			render->meshID = 6;
+			ptr_render->meshID = 6;
 			break;
 		case XKILL_Enums::PickupableType::MEDKIT:
-			render->meshID = 3;
+			ptr_render->meshID = 3;
 		default:
 			break;
 		}
-		*/
-		ptr_render->meshID = 1;
+
 		CREATE_ATTRIBUTE(ptr_physics, Attribute_Physics, physics, entity);
 		ptr_physics->ptr_spatial = ptr_spatial;
 		ptr_physics->ptr_render = ptr_render;
@@ -247,6 +278,7 @@ public:
 		ptr_physics->mass = 10.0f;
 		ptr_physics->gravity = Float3(0.0f, -10.0f, 0.0f);
 		ptr_physics->meshID = ptr_render->meshID;
+
 		CREATE_ATTRIBUTE(ptr_pickupable, Attribute_Pickupable, pickupable, entity);
 		ptr_pickupable->ptr_position = ptr_position;
 		ptr_pickupable->ptr_physics = ptr_physics;
@@ -254,8 +286,8 @@ public:
 		ptr_pickupable->amount = e->amount;
 		ptr_pickupable->pickupableType = e->pickupableType;
 
-		// Increment parent
 		AttributePtr<Attribute_PickupablesSpawnPoint> pickupablesSpawnPoint = e->creatorPickupablesSpawnPoint;
+
 		pickupablesSpawnPoint->currentNrOfExistingSpawnedPickupables++;
 	}
 
@@ -266,10 +298,14 @@ public:
 
 		CREATE_ATTRIBUTE(ptr_spatial, Attribute_Spatial, spatial, entity);
 		ptr_spatial->ptr_position = ptr_position;
+
+		/*
 		CREATE_ATTRIBUTE(ptr_debugShape, Attribute_DebugShape, debugShape, entity);
 		ptr_debugShape->ptr_spatial = ptr_spatial;
 		ptr_debugShape->shape	= new DebugShapeSphere(e->radius);
 		ptr_debugShape->render	= true;
+		*/
+
 		CREATE_ATTRIBUTE(ptr_physics, Attribute_Physics, physics, entity);
 		ptr_physics->ptr_spatial = ptr_spatial;
 		ptr_physics->collisionFilterGroup = Attribute_Physics::EXPLOSIONSPHERE;
@@ -278,9 +314,12 @@ public:
 		ptr_physics->mass = 0.0f;
 		ptr_physics->gravity = Float3(0.0f, 0.0f, 0.0f);
 		ptr_physics->linearVelocity = Float3(0.0f, 0.0f, 0.0f);
+
 		CREATE_ATTRIBUTE(ptr_explosionSphere, Attribute_ExplosionSphere, explosionSphere, entity);
 		ptr_explosionSphere->ptr_physics = ptr_physics;
-		ptr_explosionSphere->radius = e->radius;
+		ptr_explosionSphere->ammunitionType = e->ammunitionType;
+		ptr_explosionSphere->firingModeType = e->firingModeType;
+
 		CREATE_ATTRIBUTE(ptr_damage, Attribute_Damage, damage, entity);
 		ptr_damage->damage = e->damage;
 		ptr_damage->owner_entityID = e->entityIdOfCreator;

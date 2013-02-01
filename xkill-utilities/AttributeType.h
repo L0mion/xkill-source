@@ -32,7 +32,7 @@ be modified to suit the need of each Component.
 // Attributes
 ///////////////////////////////////////////
 
-// XKILL_Enums over each Attribute Type
+// Enums over each Attribute Type
 /*
 Just something that can be used if "casting" of
 \ref ATTRIBTUES is needed.
@@ -55,6 +55,7 @@ enum DLL_U AttributeType
 	ATTRIBUTE_INPUT,
 	ATTRIBUTE_INPUTDEVICE,
 	ATTRIBUTE_SOUND,
+	ATTRIBUTE_SOUNDSETTINGS,
 
 	ATTRIBUTE_PLAYER,
 	ATTRIBUTE_BOUNDING,
@@ -600,6 +601,37 @@ struct DLL_U Attribute_Sound : public IAttribute
 	std::string getName(){return "Sound";}
 };
 
+//class EventToFModConverter;
+
+struct DLL_U Attribute_SoundSettings : public IAttribute
+{
+	Attribute_SoundSettings();
+	~Attribute_SoundSettings();
+
+	bool soundMuted;
+	float soundVolume;
+
+	//EventToFModConverter* converter;
+	
+	DataItemList* getDataList()
+	{
+		DataItemList* list = new DataItemList();
+		
+		list->add(soundMuted, "Sound Muted");
+		list->add(soundVolume, "Sound Volume");
+
+		return list;
+	}
+	void saveTo(DataItemList* list)
+	{
+		list->get(&soundMuted);
+		list->get(&soundVolume);
+	};
+
+	AttributeType getType(){return ATTRIBUTE_SOUNDSETTINGS;}
+	std::string getName(){return "SoundSettings";}
+};
+
 /// Stores everything RenderComponent needs to know to manage multiple Cameras in the world
 /** 
 \ingroup ATTRIBUTES
@@ -928,6 +960,7 @@ struct DLL_U Attribute_PickupablesSpawnPoint : public IAttribute
 		list->add(maxNrOfExistingSpawnedPickupables, "maxNrOfExistingSpawnedPickupables");
 		list->add(currentNrOfExistingSpawnedPickupables, "currentNrOfExistingSpawnedPickupables");
 
+
 		return list;
 	}
 	void saveTo(DataItemList* list)
@@ -1036,22 +1069,22 @@ struct DLL_U Attribute_ExplosionSphere : public IAttribute
 	~Attribute_ExplosionSphere();
 
 	AttributePtr<Attribute_Physics> ptr_physics;
-	float currentLifeTimeLeft;
-	float radius;
+	float currentLifeTimeLeft;						//!< Updated by Bullet each frame
+	float currentRadius;							//!< Updated by Bullet each frame
+	XKILL_Enums::AmmunitionType ammunitionType;
+	XKILL_Enums::FiringModeType firingModeType;
 
 	DataItemList* getDataList()
 	{
 		DataItemList* list = new DataItemList();
 		list->add(&ptr_physics, "ptr_physics");;
 		list->add(currentLifeTimeLeft,	"currentLifeTimeLeft");
-		list->add(radius, "radius");
 		return list;
 	}
 	void saveTo(DataItemList* list)
 	{
 		list->get(&ptr_physics);
 		list->get(&currentLifeTimeLeft);
-		list->get(&radius);
 	};
 	AttributeType getType(){return ATTRIBUTE_EXPLOSIONSPHERE;}
 	std::string getName(){return "ExplosionSphere";}
