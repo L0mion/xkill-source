@@ -13,7 +13,7 @@
 #include "constantBuffers.hlsl"
 
 #define TILE_DIM		16
-#define TILE_MAX_LIGHTS	10
+#define TILE_MAX_LIGHTS	40
 
 //Global memory
 RWTexture2D<float4> output : register( u0 );
@@ -103,8 +103,8 @@ void lightingCS(
 			bool inFrustum = true;
 			[unroll] for(uint j = 0; j < 6; j++)
 			{
-				float d = dot(frustum._[j], mul(float4(lightsPos[lightIndex], 1.0f), view)) + lightsPoint[lightIndex].range;
-				inFrustum = inFrustum && !(d < 0);
+				float d = dot(frustum._[j], mul(float4(lightsPos[lightIndex], 1.0f), view)); //lightsPos[lightIndex].pos
+				inFrustum = inFrustum && (d >= -lightsPoint[lightIndex].range);
 			}
 			
 			if(inFrustum && tileLightNum < TILE_MAX_LIGHTS)
