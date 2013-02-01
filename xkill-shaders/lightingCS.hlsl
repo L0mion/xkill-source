@@ -169,10 +169,10 @@ void lightingCS(
 	}
 
 	//TILING DEMO:
-	for(i = 0; i < tileLightNum; i++) //Apply culled point-lights.
-	{
-		Diffuse.g += 0.1;
-	}
+	//for(i = 0; i < tileLightNum; i++) //Apply culled point-lights.
+	//{
+	//	Diffuse.g += 0.1;
+	//}
 	
 	output[uint2(threadIDDispatch.x + viewportTopX, threadIDDispatch.y + viewportTopY)] = Ambient + Diffuse + Specular;
 }
