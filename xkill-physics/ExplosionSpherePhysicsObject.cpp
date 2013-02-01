@@ -4,6 +4,7 @@
 #include <BulletCollision/CollisionShapes/btSphereShape.h>
 
 #include <xkill-utilities/AttributeManager.h>
+#include <xkill-utilities/MutatorSettings.h>
 
 #include "collisionShapes.h"
 
@@ -12,49 +13,67 @@ ATTRIBUTES_DECLARE_ALL
 ExplosionSpherePhysicsObject::ExplosionSpherePhysicsObject()
 	: PhysicsObject()
 {
-	localCopyOfCollisionShape_ = nullptr;
-	radius = 0.0f;
+	localCollisionShape_ = nullptr;
+	explosionSphereExpansionRate_ = 0.0f;
 	ATTRIBUTES_INIT_ALL
 }
 
 ExplosionSpherePhysicsObject::~ExplosionSpherePhysicsObject()
 {
-	if(localCopyOfCollisionShape_ != nullptr)
+	if(localCollisionShape_ != nullptr)
 	{
-		delete localCopyOfCollisionShape_;
+		delete localCollisionShape_;
 	}
 }
 
 bool ExplosionSpherePhysicsObject::subClassSpecificInitHook()
 {
-	//setCollisionShape(CollisionShapes::Instance()->getCollisionShape(143250));
-	
-	std::vector<int> indices = itrPhysics.ownerAt(attributeIndex_)->getAttributes(ATTRIBUTE_EXPLOSIONSPHERE);
-
-	for(unsigned int i = 0; i < indices.size(); i++)
+	//Get information from Attribute_ExplosionSphere and MutatorSettings and store in class variables accessible from "onUpdate()"
+	MutatorSettings mutatorSettings;
+	Ammunition ammunition;
+	Attribute_ExplosionSphere* explosionSphereAttribute;
+	std::vector<int> explosionSphereEntityId = itrPhysics.ownerAt(attributeIndex_)->getAttributes(ATTRIBUTE_EXPLOSIONSPHERE);
+	for(unsigned int i = 0; i < explosionSphereEntityId.size(); i++)
 	{
-		Attribute_ExplosionSphere* explosionSphere = itrExplosionSphere.at(i);
+		explosionSphereAttribute = itrExplosionSphere.at(explosionSphereEntityId.at(i)); 
 
-		if(explosionSphere->radius > radius)
-			radius = explosionSphere->radius;
+		ammunition = mutatorSettings.getStandardAmmunition(explosionSphereAttribute->ammunitionType);
+		FiringMode firingMode = mutatorSettings.getStandardFiringMode(explosionSphereAttribute->firingModeType);
+		
+		float initialRadius = ammunition.explosionSphereInitialRadius * firingMode.explosionSphereModifier;
+		float finalRadius = ammunition.explosionSphereFinalRadius * firingMode.explosionSphereModifier;
+		if(initialRadius > explosionSphereAttribute->currentRadius)
+		{
+			explosionSphereAttribute->currentRadius = initialRadius;
+		}
+
+		if(finalRadius > explosionSphereFinalRadius_)
+		{
+			explosionSphereFinalRadius_ = finalRadius;
+		}
+
+		explosionSphereExpansionRate_ = (finalRadius-initialRadius)/ammunition.explosionSphereExplosionDuration;
 	}
 
-	//Retrieve the collision shape
-	btCollisionShape* collisionShape = getCollisionShape();
-	btSphereShape* sphere = static_cast<btSphereShape*>(collisionShape);
-	
-	//Create local copy of the collision shape
-	localCopyOfCollisionShape_ = new btSphereShape(*sphere);
-	setCollisionShape(localCopyOfCollisionShape_);
+	//Create local collision shape
+	localCollisionShape_ = new btSphereShape(explosionSphereAttribute->currentRadius);
+	setCollisionShape(localCollisionShape_);
 
-	//Scale the local copy of the collosion shape
-	localCopyOfCollisionShape_->setLocalScaling(btVector3(radius, radius, radius));
-	
 	return true;
 }
 
 void ExplosionSpherePhysicsObject::onUpdate(float delta)
 {
-	radius += delta;
-	localCopyOfCollisionShape_->setLocalScaling(btVector3(radius, radius, radius));
+	//Expand explosion sphere according to mutator settings retrieved in "subClassSpecificInitHook()"
+	std::vector<int> explosionSphereEntityId = itrPhysics.ownerAt(attributeIndex_)->getAttributes(ATTRIBUTE_EXPLOSIONSPHERE);
+	for(unsigned int i = 0; i < explosionSphereEntityId.size(); i++)
+	{
+		Attribute_ExplosionSphere* explosionSphereAttribute = itrExplosionSphere.at(explosionSphereEntityId.at(i));
+		explosionSphereAttribute->currentRadius += explosionSphereExpansionRate_*delta;
+		if(explosionSphereAttribute->currentRadius >= explosionSphereFinalRadius_)
+		{
+			explosionSphereAttribute->currentRadius = explosionSphereFinalRadius_;
+		}
+		localCollisionShape_->setLocalScaling(btVector3(explosionSphereAttribute->currentRadius, explosionSphereAttribute->currentRadius, explosionSphereAttribute->currentRadius));
+	}
 }
