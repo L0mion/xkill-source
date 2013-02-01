@@ -5,13 +5,15 @@
 #include "WriterPGY.h"
 
 WriterPGY::WriterPGY(
-	const MeshModel		subject,
-	const WriteTimeUTC	writeTimeUTC,
+	const MeshDesc		subject,
+	//const WriteTimeUTC	writeTimeUTC,
 	const std::string	filePath,
-	const std::string	fileName) : Writer(filePath, fileName)
+	const std::string	fileName,
+	const VertexType	vertexType) : Writer(filePath, fileName)
 {
-	writeTimeUTC_	= writeTimeUTC;
+	//writeTimeUTC_	= writeTimeUTC;
 	subject_		= subject;
+	subjectVertexType_ = vertexType;
 }
 WriterPGY::~WriterPGY()
 {
@@ -39,30 +41,29 @@ bool WriterPGY::init()
 
 void WriterPGY::writePGY()
 {
+	unsigned int numMaterials = subject_.materials_.size();
+	unsigned int numVertices = subject_.vertices_.size();
+	unsigned int numSubsets	= subject_.subsets_.size();
+
 	/*Write PGY header*/
-	PGYHeader header = loadHeader();
+	PGYHeader header = loadHeader(numMaterials, numVertices, numSubsets);
 	writeHeader(header);
 	
 	/*Write materials*/
-	writeMaterials(subject_.getMaterials());
-	writeGeometry(subject_.getGeometry());
+	writeMaterials(subject_.materials_);
+	writeGeometry(subject_.vertices_, subject_.subsets_);
 }
-const PGYHeader WriterPGY::loadHeader()
+const PGYHeader WriterPGY::loadHeader(
+	unsigned int numMaterials,
+	unsigned int numVertices, 
+	unsigned int numSubsets)
 {
-	MeshGeometry geometry = subject_.getGeometry();
-	std::vector<MeshSubset> subsets = geometry.getSubsets();
-
-	unsigned int numMaterials	= subject_.getNumMaterials();
-
-	unsigned int numVertices	= geometry.getNumVertices();
-	unsigned int numSubsets		= geometry.getNumSubsets();
-	
 	PGYHeader header;
 	for(unsigned int i = 0; i < 4; i++)
 		header.fileType_[i]	= PGY_SPECS_FILETYPE[i];
 	header.versionNum_		= WRITER_PGY_VERSION;
 	header.writeTime_		= writeTimeUTC_;
-	header.vertexType_		= POS_NORM_TEX;
+	header.vertexType_		= subjectVertexType_;
 	header.numMaterials_	= numMaterials;
 	header.numVertices_		= numVertices;
 	header.numSubsets_		= numSubsets;
@@ -73,85 +74,86 @@ void WriterPGY::writeHeader(const PGYHeader header)
 {
 	ofstream_.write(
 		reinterpret_cast<const char*>(&header),
-		PGY_SPECS_SIZE_HEADER);
+		sizeof(PGYHeader));
 
-	std::string log = "Wrote a " + PGY_SPECS_SIZE_HEADER;
-	log += " bytes PGY-header to PGY-file with version number " + std::to_string(header.versionNum_) + ".";
-	std::cout << log;
+	std::string log = "Wrote a " + sizeof(PGYHeader);
+	log += " bytes PGY-header to PGY-file with version number " + std::to_string(header.versionNum_) + ". \n";
+	DEBUGPRINT(log);
 }
-void WriterPGY::writeMaterials(const std::vector<MeshMaterial> materials)
+void WriterPGY::writeMaterials(const std::vector<MaterialDesc> materials)
 {
 	for(unsigned int i = 0; i < materials.size(); i++)
 		writeMaterial(materials[i]);
 
 	std::string log = "Wrote " + materials.size();
-	log += " materials to PGY-file.";
-	std::cout << log;
+	log += " materials to PGY-file. \n";
+	DEBUGPRINT(log);
 }
-void WriterPGY::writeMaterial(const MeshMaterial material)
+void WriterPGY::writeMaterial(const MaterialDesc material)
 {
-	ofstream_.write(reinterpret_cast<const char*>(&material), PGY_SPECS_SIZE_MATERIAL);
+	ofstream_.write(
+		reinterpret_cast<const char*>(&material), 
+		sizeof(MaterialDesc));
 }
-void WriterPGY::writeGeometry(MeshGeometry geometry)
+void WriterPGY::writeGeometry(std::vector<VertexDesc> vertices, 
+							  std::vector<SubsetDesc> subsets)
 {
-	unsigned int numVertices = geometry.getNumVertices();
-	std::vector<VertexPosNormTex> vertices = geometry.getVertices();
+	unsigned int numVertices = vertices.size();
 	writeVertices(
 		numVertices,
 		vertices);
 
-	unsigned int numSubsets = geometry.getNumSubsets();
-	std::vector<MeshSubset> subsets = geometry.getSubsets();
+	unsigned int numSubsets = subsets.size();
 	writeSubsets(
 		numSubsets,
 		subsets);
 }
 void WriterPGY::writeVertices(
-		const unsigned int numVertices, 
-		const std::vector<VertexPosNormTex> vertices)
+	const unsigned int numVertices, 
+	const std::vector<VertexDesc>	vertices)
 {
 	for(unsigned int i = 0; i < numVertices; i++)
 		writeVertex(vertices[i]);
 
 	std::string log = "Wrote " + numVertices;
 	log += " vertices to PGY-file.";
-	std::cout << log;
+	DEBUGPRINT(log);
 }
-void WriterPGY::writeVertex(const VertexPosNormTex vertex)
+void WriterPGY::writeVertex(const VertexDesc vertex)
 {
 	ofstream_.write(
 		reinterpret_cast<const char*>(&vertex), 
-		PGY_SPECS_SIZE_VERTEXPOSNORMTEX);
+		sizeof(VertexDesc));
 }
 void WriterPGY::writeSubsets(
 		const unsigned int				numSubsets, 
-		const std::vector<MeshSubset>	subsets)
+		const std::vector<SubsetDesc>	subsets)
 {
 	for(unsigned int i = 0; i < numSubsets; i++)
 		writeSubset(subsets[i]);
 
 	std::string log = "Wrote " + numSubsets;
-	log += " subsets to PGY-file.";
-	std::cout << log;
+	log += " subsets to PGY-file. \n";
+	DEBUGPRINT(log);
 }
-void WriterPGY::writeSubset(MeshSubset subset)
+void WriterPGY::writeSubset(SubsetDesc subset)
 {
 	/*Write PGY Subset header*/
 	PGYHeaderSubset ssHeader;
-	ssHeader.numIndices_ = subset.getNumIndices();
+	ssHeader.numIndices_ = subset.indices_.size();
 	ofstream_.write(
 		reinterpret_cast<const char*>(&ssHeader), 
-		PGY_SPECS_SIZE_HEADER_SUBSET);
+		sizeof(PGYHeaderSubset));
 
 	/*Write material index to PGY*/
-	unsigned int materialIndex = subset.getMaterialIndex();
+	unsigned int materialIndex = subset.materialIndex_;
 	ofstream_.write(
 		reinterpret_cast<const char*>(&materialIndex), 
 		sizeof(materialIndex));
 
 	/*Write indices to PGY*/
-	unsigned int numIndices = subset.getNumIndices();
-	std::vector<unsigned int> indices = subset.getIndices();
+	unsigned int numIndices = subset.indices_.size();
+	std::vector<unsigned int> indices = subset.indices_;
 	for(unsigned int i = 0; i < numIndices; i++)
 		writeIndex(indices[i]);
 }

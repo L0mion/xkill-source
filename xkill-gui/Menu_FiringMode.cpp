@@ -65,19 +65,19 @@ void Menu_FiringMode::settingsMenuUpdated()
 
 FiringMode* Menu_FiringMode::getFiringModeSettings()
 {
-	FiringMode::FiringModeType firingMode = FiringMode::SINGLE;
+	XKILL_Enums::FiringModeType firingMode = XKILL_Enums::FiringModeType::SINGLE;
 
 	if(ui->radioButton_Weapon_Single->isChecked())
 	{
-		firingMode = FiringMode::SINGLE;
+		firingMode = XKILL_Enums::FiringModeType::SINGLE;
 	}
 	else if(ui->radioButton_Weapon_Semi->isChecked())
 	{
-		firingMode = FiringMode::SEMI;
+		firingMode = XKILL_Enums::FiringModeType::SEMI;
 	}
 	else if(ui->radioButton_Weapon_Auto->isChecked())
 	{
-		firingMode = FiringMode::AUTO;
+		firingMode = XKILL_Enums::FiringModeType::AUTO;
 	}
 
 	return &mutatorSettings_->getStandardFiringMode(firingMode);

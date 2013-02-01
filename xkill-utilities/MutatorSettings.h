@@ -1,5 +1,5 @@
 #pragma once
-
+#include "XKILL_Enums.h"
 #include "dllUtilities.h"
 
 struct Attribute_WeaponStats;
@@ -17,17 +17,17 @@ public:
 	//! Initializes the current ammunition and firing mode of the attribute
 	void setupAttribute(Attribute_WeaponStats* attribute);
 	//! Initializes the specified ammunition and firing mode of the attribute
-	void setupAttribute(Attribute_WeaponStats* attribute, Ammunition::AmmunitionType ammoType, FiringMode::FiringModeType firingModeType);
+	void setupAttribute(Attribute_WeaponStats* attribute, XKILL_Enums::AmmunitionType ammoType, XKILL_Enums::FiringModeType firingModeType);
 	//! Returns the stored standard ammunition of specified type
-	Ammunition& getStandardAmmunition(Ammunition::AmmunitionType type);
+	Ammunition& getStandardAmmunition(XKILL_Enums::AmmunitionType type);
 	//! Returns the stored standard firing mode of specified type
-	FiringMode& getStandardFiringMode(FiringMode::FiringModeType type);
+	FiringMode& getStandardFiringMode(XKILL_Enums::FiringModeType type);
 
 private:
 	//! Stores a version of each standard ammunition
-	static Ammunition standardAmmunitions[Ammunition::NROFAMMUNITIONTYPES];
+	static Ammunition standardAmmunitions[XKILL_Enums::AmmunitionType::NROFAMMUNITIONTYPES];
 	//! Stores a version of each standard firing mode
-	static FiringMode standardFiringModes[FiringMode::NROFFIRINGMODETYPES];
+	static FiringMode standardFiringModes[XKILL_Enums::FiringModeType::NROFFIRINGMODETYPES];
 
 	//! Used to make sure that the class is only initialized once, is a dirty workaround
 	static bool hasInitialized; 

@@ -112,8 +112,6 @@ float InputAxisObject::formatValue(int value) //Fix deadzone, is square for the 
 	if(inverted_)
 		doubleAxis = -doubleAxis;
 
-	//doubleAxis = (pow(doubleAxis, 3));
-
 	return (float)doubleAxis;
 }
 

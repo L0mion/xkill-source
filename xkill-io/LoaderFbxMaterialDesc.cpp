@@ -168,3 +168,19 @@ std::vector<FbxProceduralTexture*>	LoaderFbxMaterialDesc::getFbxProceduralTextur
 {
 	return fbxProceduralTextures_;
 }
+
+MaterialDesc LoaderFbxMaterialDesc::getMaterialDesc()
+{
+	MaterialDesc material;
+
+	material.ambientTerm_ = ambient_;
+	material.diffuseTerm_ = diffuse_;
+	material.specularTerm_ = specular_;
+	material.specularPower_ = shininess_;
+	material.reflectivity_ = Float3(reflectivity_, reflectivity_, reflectivity_);
+	material.transperency_ = opacity_;
+	material.emissive_ = emissive_;
+	material.shinyness_ = shininess_;
+
+	return material;
+}

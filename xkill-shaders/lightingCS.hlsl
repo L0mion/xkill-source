@@ -33,6 +33,7 @@ SamplerState ss : register(s0);
 groupshared uint tileMinDepthInt;
 groupshared uint tileMaxDepthInt;
 groupshared uint tileLightNum; //Number of lights intersecting tile.
+
 groupshared uint tileLightIndices[TILE_MAX_LIGHTS]; //Indices to lights intersecting tile.
 
 [numthreads(TILE_DIM, TILE_DIM, 1)]
@@ -57,14 +58,16 @@ void lightingCS(
 	GroupMemoryBarrierWithGroupSync();
 	
 	//Sample G-Buffers. Data prefetching?
-	float2 texCoord = float2((float)(threadIDDispatch.x + viewportTopX)/(float)screenWidth,(float)(threadIDDispatch.y + viewportTopY)/(float)screenHeight);
+	float2 texCoord = float2(
+		(float)(threadIDDispatch.x + viewportTopX) / (float)screenWidth,
+		(float)(threadIDDispatch.y + viewportTopY) / (float)screenHeight);
 	float4	gAlbedo		= gBufferAlbedo		.SampleLevel(ss, texCoord, 0);
 	float4	gNormal		= gBufferNormal		.SampleLevel(ss, texCoord, 0);
 	float4	gMaterial	= gBufferMaterial	.SampleLevel(ss, texCoord, 0); //At the moment, world space position is stored in Material-buffer.
 	float	gDepth		= gBufferDepth.SampleLevel(ss, texCoord, 0).x; 
 	
-	//Get surface position.
-	float3 surfacePosV = UtilReconstructPositionViewSpace(texCoord, gDepth, projectionInverse);
+	//Reconstruct view-space position from depth. Observe the normalized coordinates sent to method.
+	float3 surfacePosV = UtilReconstructPositionViewSpace(float2(threadIDDispatch.x / viewportWidth, threadIDDispatch.y / viewportHeight), gDepth, projectionInverse); 
 	
 	uint pixelDepthInt = asuint(surfacePosV.z); //Interlocked functions can only be applied onto ints.
 	if(gDepth != 1.0f)
@@ -77,8 +80,10 @@ void lightingCS(
 	float tileMaxDepthF = asfloat(tileMaxDepthInt);
 	
 	Frustum frustum = ExtractFrustumPlanes(
-		screenWidth, 
-		screenHeight, 
+		viewportWidth,
+		viewportHeight, 
+		viewportTopX,
+		viewportTopY,
 		TILE_DIM, 
 		blockID.xy, 
 		projection._11,
@@ -98,8 +103,8 @@ void lightingCS(
 			bool inFrustum = true;
 			[unroll] for(uint j = 0; j < 6; j++)
 			{
-				float d = dot(frustum._[j], mul(float4(lightsPos[lightIndex], 1.0f), view)); //lightsPos[lightIndex].pos
-				inFrustum = inFrustum && (d >= -lightsPoint[lightIndex].range);
+				float d = dot(frustum._[j], mul(float4(lightsPos[lightIndex], 1.0f), view)) + lightsPoint[lightIndex].range;
+				inFrustum = inFrustum && !(d < 0);
 			}
 			
 			if(inFrustum && tileLightNum < TILE_MAX_LIGHTS)
@@ -153,7 +158,7 @@ void lightingCS(
 		LightPoint(
 			toEyeV,
 			descPoint,
-			mul(float4(lightsPos[tileLightIndices[i]], 1.0f), view), //lightsPos[tileLightIndices[i]].pos
+			mul(float4(lightsPos[tileLightIndices[i]], 1.0f), view).xyz,
 			surfaceMaterial,
 			surfaceNormalV,
 			surfacePosV,
@@ -162,7 +167,7 @@ void lightingCS(
 		Diffuse		+= diffuse;
 		Specular	+= specular;
 	}
-	
+
 	//TILING DEMO:
 	for(i = 0; i < tileLightNum; i++) //Apply culled point-lights.
 	{
@@ -171,20 +176,3 @@ void lightingCS(
 	
 	output[uint2(threadIDDispatch.x + viewportTopX, threadIDDispatch.y + viewportTopY)] = Ambient + Diffuse + Specular;
 }
-
-//Draw all point-lights:
-//for(i = 0; i < numLightsPoint; i++)
-//{
-//	LightDescPoint descPoint = lightsPoint[i];
-//	LightPoint(
-//		toEyeV,
-//		descPoint,
-//		mul(float4(lightsPos[i].pos, 1.0f), view).xyz, //
-//		surfaceMaterial,
-//		surfaceNormalV,
-//		surfacePosV,
-//		ambient, diffuse, specular);	
-//	Ambient		+= ambient;
-//	Diffuse		+= diffuse;
-//	Specular	+= specular;
-//}

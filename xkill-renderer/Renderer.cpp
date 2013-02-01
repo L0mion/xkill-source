@@ -1,5 +1,4 @@
 #include <xkill-utilities/Util.h>
-#include <xkill-utilities/MeshMaterial.h>
 
 #include "ManagementD3D.h"
 #include "ManagementFX.h"
@@ -411,6 +410,8 @@ void Renderer::render()
 		vpData.viewportTopY = static_cast<unsigned int>(ssAt->ssTopLeftY);
 		vpData.zNear		= camAt->zNear;
 		vpData.zFar			= camAt->zFar;
+		vpData.viewportWidth	= ssAt->ssWidth;
+		vpData.viewportHeight	= ssAt->ssHeight;
 		vpDatas[i]			= vpData;
 
 		renderViewportToGBuffer(vpData);
@@ -452,24 +453,15 @@ void Renderer::renderViewportToGBuffer(ViewportData& vpData)
 		vpData.viewportTopX,
 		vpData.viewportTopY,
 		vpData.zNear,
-		vpData.zFar);
+		vpData.zFar,
+		vpData.viewportWidth,
+		vpData.viewportHeight);
 
 	std::map<unsigned int, InstancedData*> instancesMap = managementInstance_->getInstancesMap();
 	for(std::map<unsigned int, InstancedData*>::iterator i = instancesMap.begin(); i != instancesMap.end(); i++)
 	{
 		renderInstance(i->first, i->second);
 	}
-
-	//Render renderattributes
-	//Attribute_Render* renderAt;
-	//while(itrRender.hasNext())
-	//{
-	//	renderAt = itrRender.getNext();
-	//	renderAttribute(
-	//		renderAt, 
-	//		vpData.view, 
-	//		vpData.proj);
-	//}
 
 	//Make me use iterators!
 	Attribute_DebugShape* debugShapeAt;
@@ -491,13 +483,11 @@ void Renderer::renderViewportToGBuffer(ViewportData& vpData)
 		drawBulletPhysicsDebugLines(vpData.view, vpData.proj);
 	}
 	
+	//Unset and clean.
 	managementGBuffer_->unsetGBuffersAndDepthBufferAsRenderTargets(devcon);
-
 	managementFX_->unsetAll(devcon);
 	managementFX_->unsetLayout(devcon);
-
 	managementSS_->unsetSS(devcon, TypeFX_PS, 0);
-
 	devcon->RSSetState(nullptr);
 }
 void Renderer::renderViewportToBackBuffer(ViewportData& vpData)
@@ -523,13 +513,14 @@ void Renderer::renderViewportToBackBuffer(ViewportData& vpData)
 		vpData.viewportTopX,
 		vpData.viewportTopY,
 		vpData.zNear,
-		vpData.zFar);
+		vpData.zFar,
+		vpData.viewportWidth,
+		vpData.viewportHeight);
 
 	//Connect g-buffers to shader.
 	managementGBuffer_->setGBuffersAsCSShaderResources(devcon);
 
 	//Set lights.
-	//managementLight_->transformLightViewSpacePoss(devcon, vpData.view);
 	managementLight_->setLightSRVCS(devcon, LIGHTBUFFERTYPE_DIR,		LIGHT_SRV_REGISTER_DIR);
 	managementLight_->setLightSRVCS(devcon, LIGHTBUFFERTYPE_POINT,		LIGHT_SRV_REGISTER_POINT);
 	managementLight_->setLightSRVCS(devcon, LIGHTBUFFERTYPE_SPOT,		LIGHT_SRV_REGISTER_SPOT);
@@ -544,6 +535,11 @@ void Renderer::renderViewportToBackBuffer(ViewportData& vpData)
 	devcon->Dispatch(dispatchX, dispatchY, 1);
 
 	//Unset and clean.
+	managementLight_->unsetLightSRVCS(devcon, LIGHTBUFFERTYPE_DIR,		LIGHT_SRV_REGISTER_DIR);
+	managementLight_->unsetLightSRVCS(devcon, LIGHTBUFFERTYPE_POINT,	LIGHT_SRV_REGISTER_POINT);
+	managementLight_->unsetLightSRVCS(devcon, LIGHTBUFFERTYPE_SPOT,		LIGHT_SRV_REGISTER_SPOT);
+	managementLight_->unsetLightSRVCS(devcon, LIGHTBUFFERTYPE_POS_VIEW,	LIGHT_SRV_REGISTER_POS);
+
 	managementFX_->unsetShader(devcon, SHADERID_CS_DEFAULT);
 
 	managementD3D_->unsetUAVBackBufferCS();
@@ -566,35 +562,43 @@ void Renderer::renderInstance(unsigned int meshID, InstancedData* instance)
 	UINT offset[2] = { 0, 0 };
 	ID3D11Buffer* vbs[2] = 
 	{ 
-		modelD3D->getVertexBuffer()->getVB(), 
+		modelD3D->getVertexBuffer(), 
 		instance->getDataBuffer()
 	};
 	devcon->IASetVertexBuffers(0, 2, vbs, stride, offset);
 	
 	std::vector<SubsetD3D*>		subsetD3Ds	= modelD3D->getSubsetD3Ds();
-	std::vector<MeshMaterial>	materials	= modelD3D->getMaterials();
+	std::vector<MaterialDesc>	materials	= modelD3D->getMaterials();
 	for(unsigned int i = 0; i < subsetD3Ds.size(); i++)
 	{
-		IB* ib	= subsetD3Ds[i]->getIndexBuffer();
 		unsigned int materialIndex	= subsetD3Ds[i]->getMaterialIndex();
 
 		renderSubset(
-			ib,
+			subsetD3Ds[i],
 			materials[materialIndex],
 			instance->getDataCountCur());
 	}
+
+	//Unset vertex buffers. (In case of the instance buffer needing to be mapped to in ManagementInstance)
+	ID3D11Buffer* nullVBs[2] = { NULL, NULL };
+	devcon->IASetVertexBuffers(
+		0, 
+		2, 
+		nullVBs, 
+		offset, 
+		offset);
 }
 void Renderer::renderSubset(
-	IB* ib, 
-	MeshMaterial& material, 
+	SubsetD3D* subset, 
+	MaterialDesc& material, 
 	unsigned int numInstances)
 {
 	ID3D11Device*			device = managementD3D_->getDevice();
 	ID3D11DeviceContext*	devcon = managementD3D_->getDeviceContext();
 
 	//Set textures.
-	ID3D11ShaderResourceView* texAlbedo = managementTex_->getTexSrv(material.getIDAlbedoTex());
-	ID3D11ShaderResourceView* texNormal = managementTex_->getTexSrv(material.getIDNormalTex());
+	ID3D11ShaderResourceView* texAlbedo = managementTex_->getTexSrv(material.idAlbedoTex_);
+	ID3D11ShaderResourceView* texNormal = managementTex_->getTexSrv(material.idNormalTex_);
 	devcon->PSSetShaderResources(0, 1, &texAlbedo);
 	devcon->PSSetShaderResources(1, 1, &texNormal);
 
@@ -604,7 +608,7 @@ void Renderer::renderSubset(
 	managementCB_->updateCBSubset(
 		devcon,
 		dxSpec,
-		material.getSpecularPower());
+		material.specularPower_);
 
 	//Set input layout
 	managementFX_->setLayout(devcon, LAYOUTID_POS_NORM_TEX_INSTANCED);
@@ -612,7 +616,7 @@ void Renderer::renderSubset(
 	//Set index-buffer.
 	UINT offset = 0;
 	devcon->IASetIndexBuffer(
-		ib->getIB(), 
+		subset->getIndexBuffer(), 
 		DXGI_FORMAT_R32_UINT, 
 		offset);
 
@@ -621,7 +625,7 @@ void Renderer::renderSubset(
 
 	//Draw subset.
 	devcon->DrawIndexedInstanced(
-		ib->getNumIndices(),
+		subset->getNumIndices(),
 		numInstances,
 		0, 0, 0);
 }

@@ -31,16 +31,11 @@ MeshMakerObj::MeshMakerObj(
 	loaderMtl_ = nullptr;
 
 	texNameToID_ = texNameToID;
-
-	meshModel_ = new VarStatus<MeshModel>(true);
 }
 MeshMakerObj::~MeshMakerObj()
 {
 	if(loaderObj_)
 		delete loaderObj_;
-
-	if(meshModel_)
-		delete meshModel_;
 
 	//loaderMTL_ not deleted here, as it is managed in loadMTL.
 }
@@ -50,35 +45,30 @@ bool MeshMakerObj::init()
 	bool sucessfulLoad = true;
 
 	//Get time when original file was last edited.
-	WriteTimeUTC writeTimeUTC;
-	sucessfulLoad = getLastWrittenToFile(pathObj_, fileNameObj_, writeTimeUTC);
-	
-	std::string fileNamePGY = getFileNamePGY();
-	if(existingPGY(pathPGY_, fileNamePGY) && sucessfulLoad) //Attempt to load PGY
-		sucessfulLoad = loadPGY(writeTimeUTC);
-	else
-		sucessfulLoad = false;
+	//WriteTimeUTC writeTimeUTC;
+	//sucessfulLoad = getLastWrittenToFile(pathObj_, fileNameObj_, writeTimeUTC);
+	//
+	//std::string fileNamePGY = getFileNamePGY();
+	//if(existingPGY(pathPGY_, fileNamePGY) && sucessfulLoad) //Attempt to load PGY
+	//	sucessfulLoad = loadPGY(writeTimeUTC);
+	//else
+	//	sucessfulLoad = false;
 
-	if(!sucessfulLoad)
+	sucessfulLoad = loadObj();
+	if(sucessfulLoad)
+		sucessfulLoad = loadMaterials();
+	if(sucessfulLoad)
 	{
-		sucessfulLoad = loadObj();
-		if(sucessfulLoad)
-			sucessfulLoad = loadMaterials();
-		if(sucessfulLoad)
-		{
-			Obj obj = loaderObj_->getObj();
-			meshModel_->setVar(makeMesh(obj));
-			sucessfulLoad = makePGY(meshModel_->getVar(), obj.getWriteTimeUTC());
-		}
+		Obj obj = loaderObj_->getObj();
+		meshDesc_ = makeMesh(obj);
+		//sucessfulLoad = makePGY(meshModel_, obj.getWriteTimeUTC());
 	}
-
 	return sucessfulLoad;
 }
 
-MeshModel* MeshMakerObj::claimMesh()
+MeshDesc MeshMakerObj::getMesh()
 {
-	meshModel_->setStatus(false);
-	return meshModel_->getVar();
+	return meshDesc_;
 }
 
 bool MeshMakerObj::loadObj()
@@ -97,35 +87,35 @@ bool MeshMakerObj::loadObj()
 
 	return sucessfulLoad;
 }
-bool MeshMakerObj::loadPGY(WriteTimeUTC writeTimeUTC)
-{
-	MeshModel* loadedMesh = nullptr;
-	bool sucessfulLoad = true;
-	
-	std::string fileNamePgy = getFileNamePGY();
-	LoaderPGY pgyLoader(
-		pathPGY_,
-		fileNamePgy);
-	sucessfulLoad = pgyLoader.init();
+//bool MeshMakerObj::loadPGY(WriteTimeUTC writeTimeUTC)
+//{
+//	MeshModel* loadedMesh = nullptr;
+//	bool sucessfulLoad = true;
+//	
+//	std::string fileNamePgy = getFileNamePGY();
+//	LoaderPGY pgyLoader(
+//		pathPGY_,
+//		fileNamePgy);
+//	sucessfulLoad = pgyLoader.init();
+//
+//	if(sucessfulLoad)
+//	{
+//		if(writeTimeUTC == pgyLoader.getWriteTimeUTC())
+//			meshDesc_->setVar(pgyLoader.getMeshModel());
+//		else
+//			sucessfulLoad = false; //Original file has been modified. Not valid.
+//	}
+//	
+//	return sucessfulLoad;
+//}
 
-	if(sucessfulLoad)
-	{
-		if(writeTimeUTC == pgyLoader.getWriteTimeUTC())
-			meshModel_->setVar(pgyLoader.claimMeshModel());
-		else
-			sucessfulLoad = false; //Original file has been modified. Not valid.
-	}
-	
-	return sucessfulLoad;
-}
-
-bool MeshMakerObj::existingPGY(std::string pathPGY, std::string fileNamePGY)
-{
-	std::string fullPathPGY = pathPGY + fileNamePGY; 
-
-	std::ifstream ifile(fullPathPGY);
-	return ifile.good();
-}
+//bool MeshMakerObj::existingPGY(std::string pathPGY, std::string fileNamePGY)
+//{
+//	std::string fullPathPGY = pathPGY + fileNamePGY; 
+//
+//	std::ifstream ifile(fullPathPGY);
+//	return ifile.good();
+//}
 bool MeshMakerObj::getLastWrittenToFile(std::string path, std::string fileName, WriteTimeUTC& out)
 {
 	WIN32_FIND_DATA findFileData;
@@ -167,25 +157,61 @@ bool MeshMakerObj::getLastWrittenToFile(std::string path, std::string fileName, 
 	return sucessfulRead;
 }
 
-MeshModel* MeshMakerObj::makeMesh(Obj obj)
+MeshDesc MeshMakerObj::makeMesh(Obj obj)
 {
-	MeshGeometry meshGeo = objGeoToMeshGeo(obj.getObjGeometry());
-	MeshOrigins meshOri = OriginsToMeshOrigins();
-	MeshModel* model = new MeshModel(meshGeo, materials_,meshOri);
-	return model;
-}
-bool MeshMakerObj::makePGY(MeshModel* model, WriteTimeUTC writeTimeUTC)
-{
-	std::string fileNamePgy = getFileNamePGY();
-	WriterPGY pgyWriter(
-		*model,
-		writeTimeUTC,
-		pathPGY_,
-		fileNamePgy);
-	bool sucessfulWrite = pgyWriter.init();
+	MeshDesc meshDesc;
+	meshDesc.vertices_	= getVertexDescs(obj.getObjGeometry().getVertices());
+	meshDesc.subsets_	= getSubsetDescs(obj.getObjGeometry().getObjGroups());
+	meshDesc.materials_ = materials_;
 
-	return sucessfulWrite;
+	return meshDesc;
 }
+std::vector<VertexDesc> MeshMakerObj::getVertexDescs(std::vector<VertexPosNormTex> objVertices)
+{
+	std::vector<VertexDesc> vertexDescs(objVertices.size());
+	for(unsigned int i = 0; i < objVertices.size(); i++)
+	{
+		VertexPosNormTex vertexObj = objVertices[i];
+	
+		VertexDesc vertexDesc;
+		vertexDesc.position_			= vertexObj.position_;
+		vertexDesc.normal_				= vertexObj.normal_;
+		vertexDesc.textureCoordinates_	= vertexObj.texcoord_;
+
+		vertexDescs[i] = vertexDesc;
+	}
+
+	return vertexDescs;
+}
+std::vector<SubsetDesc> MeshMakerObj::getSubsetDescs(std::vector<ObjGroup> objGroups)
+{
+	std::vector<SubsetDesc> subsetDescs(objGroups.size());
+	for(unsigned int i = 0; i < objGroups.size(); i++)
+	{
+		ObjGroup objSubset = objGroups[i];
+
+		SubsetDesc subsetDesc;
+		subsetDesc.materialIndex_	= MTLNameToMaterialIndex(objSubset.getMaterial());
+		subsetDesc.indices_			= objSubset.getIndices();
+
+		subsetDescs[i] = subsetDesc;
+	}
+
+	return subsetDescs;
+}
+
+//bool MeshMakerObj::makePGY(MeshModel* model, WriteTimeUTC writeTimeUTC)
+//{
+//	std::string fileNamePgy = getFileNamePGY();
+//	WriterPGY pgyWriter(
+//		*model,
+//		writeTimeUTC,
+//		pathPGY_,
+//		fileNamePgy);
+//	bool sucessfulWrite = pgyWriter.init();
+//
+//	return sucessfulWrite;
+//}
 
 bool MeshMakerObj::loadMaterials()
 {
@@ -199,7 +225,7 @@ bool MeshMakerObj::loadMaterials()
 	}
 	else
 	{ //load default material
-		MeshMaterial default;
+		MaterialDesc default;
 		materials_.push_back(default);
 		materialID_.push_back("default");
 	}
@@ -232,11 +258,7 @@ void MeshMakerObj::loadMTLMaterials(MTL mtl)
 	}
 }
 
-const MeshOrigins MeshMakerObj::OriginsToMeshOrigins()
-{
-	return MeshOrigins(fileNameObj_);
-}
-const MeshMaterial MeshMakerObj::MTLToMeshMaterial(MTLMaterial mtl)
+const MaterialDesc MeshMakerObj::MTLToMeshMaterial(MTLMaterial mtl)
 {
 	Float3 ambientColor		= mtl.getAmbientColor();
 	Float3 diffuseColor		= mtl.getDiffuseColor();
@@ -248,36 +270,19 @@ const MeshMaterial MeshMakerObj::MTLToMeshMaterial(MTLMaterial mtl)
 	std::string texAlbedoName = mtl.getTexDiffuse();
 	std::string texNormalName = mtl.getTexBump();
 	
-	MeshMaterial meshMaterial(
-		ambientColor,
-		diffuseColor,
-		specularColor,
-		specPow,
-		reflectivity,
-		alpha != 0,
-		
-		getTexIDfromName(texAlbedoName),
-		getTexIDfromName(texNormalName));
+	MaterialDesc materialDesc;
+	materialDesc.ambientTerm_	= ambientColor;
+	materialDesc.diffuseTerm_	= diffuseColor;
+	materialDesc.specularTerm_	= specularColor;
+	materialDesc.reflectivity_	= reflectivity;
+	materialDesc.specularPower_	= specPow;
+	materialDesc.transperency_	= alpha != 0;
+	materialDesc.idAlbedoTex_	= getTexIDfromName(texAlbedoName);
+	materialDesc.idNormalTex_	= getTexIDfromName(texNormalName);
 
-	return meshMaterial;
+	return materialDesc;
 }
-const MeshGeometry MeshMakerObj::objGeoToMeshGeo(ObjGeometry objGeo)
-{
-	std::vector<ObjGroup>			objGroups	= objGeo.getObjGroups();
-	std::vector<VertexPosNormTex>	objVertices = objGeo.getVertices();
 
-	std::vector<MeshSubset> meshSubsets;
-	for(unsigned int i = 0; i < objGroups.size(); i++)
-		meshSubsets.push_back(objGroupToMeshSubset(objGroups[i]));
-
-	return MeshGeometry(objVertices, meshSubsets); //format of vertices the same
-}
-const MeshSubset MeshMakerObj::objGroupToMeshSubset(ObjGroup objGroup)
-{
-	std::vector<unsigned int> indices	= objGroup.getIndices();
-	int materialIndex = MTLNameToMaterialIndex(objGroup.getMaterial());
-	return MeshSubset(materialIndex, indices);
-}
 const int MeshMakerObj::MTLNameToMaterialIndex(std::string mtlName)
 {
 	int materialIndex = 0;
@@ -306,7 +311,7 @@ unsigned int MeshMakerObj::getTexIDfromName(std::string texFilename)
 
 	return texID;
 }
-std::string MeshMakerObj::getFileNamePGY()
-{
-	return fileNameObj_ + PGY_SPECS_SUFFIX;
-}
+//std::string MeshMakerObj::getFileNamePGY()
+//{
+//	return fileNameObj_ + PGY_SPECS_SUFFIX;
+//}

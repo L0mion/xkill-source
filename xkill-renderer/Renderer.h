@@ -34,8 +34,8 @@ class ManagementSprites;
 
 class Winfo;
 class TexDesc;
-class IB;
 class MeshMaterial;
+class SubsetD3D;
 
 #include <vector>
 
@@ -85,8 +85,8 @@ private:
 	void renderViewportToBackBuffer(ViewportData& vpData);				//!< Renders to backbuffer.
 	void renderInstance(unsigned int meshID, InstancedData* instance);	//!< Renders an instanced model.
 	void renderSubset(
-		IB* ib, 
-		MeshMaterial& material,
+		SubsetD3D* subset, 
+		MaterialDesc& material,
 		unsigned int numInstances);										//!< Renders a subset.
 	void renderDebugShape(
 		Attribute_DebugShape*	debugShapeAt, 

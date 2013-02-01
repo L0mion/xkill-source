@@ -4,10 +4,12 @@
 
 #include "ModelD3D.h"
 
+
+
 ModelD3D::ModelD3D(
-	VB<VertexPosNormTex>*				vertexBuffer,
+	ID3D11Buffer*						vertexBuffer,
 	const std::vector<SubsetD3D*>		subsets,
-	const std::vector<MeshMaterial>		materials)
+	const std::vector<MaterialDesc>		materials)
 {
 	vertexBuffer_	= vertexBuffer;
 	subsets_		= subsets;
@@ -15,8 +17,7 @@ ModelD3D::ModelD3D(
 }
 ModelD3D::~ModelD3D()
 {
-	if(vertexBuffer_)
-		delete vertexBuffer_;
+	SAFE_RELEASE(vertexBuffer_);
 
 	for(unsigned int i = 0; i < subsets_.size(); i++)
 	{
@@ -25,7 +26,7 @@ ModelD3D::~ModelD3D()
 	}
 }
 
-VB<VertexPosNormTex>*		ModelD3D::getVertexBuffer()
+ID3D11Buffer* ModelD3D::getVertexBuffer()
 {
 	return vertexBuffer_;
 }
@@ -33,7 +34,7 @@ std::vector<SubsetD3D*>&	ModelD3D::getSubsetD3Ds()
 {
 	return subsets_;
 }
-std::vector<MeshMaterial>&	ModelD3D::getMaterials()
+std::vector<MaterialDesc>&	ModelD3D::getMaterials()
 {
 	return materials_;
 }

@@ -1,14 +1,14 @@
 #ifndef XKILL_IO_LOADERPGY_H
 #define XKILL_IO_LOADERPGY_H
 
-#include <xkill-utilities/MeshModel.h>
+#include <xkill-utilities/MeshDesc.h>
 
 #include "Loader.h"
 #include "SpecsPGY.h"
 #include "VarStatus.h"
 
 // Must correspond with WRITER_PGY_VERSION in order to read .pgy sucessfully.
-static const float LOADER_PGY_VERSION = 1.1f;
+static const float LOADER_PGY_VERSION = 1.2f;
 /*
 * 1.1 - Now reads WriteTimeUTC struct from PGY-header.
 */
@@ -28,29 +28,31 @@ public:
 
 	bool init(); //!< Opens specified file and calls loading of binary .pgy-format if the header version number corresponds with the version num of the LoaderPGY.
 
-	MeshModel* claimMeshModel();
+	MeshDesc getMeshModel();
 
 	WriteTimeUTC	getWriteTimeUTC()	const;
 protected:
 private:
-	MeshModel* loadPGY(
+	MeshDesc loadPGY(
 		unsigned int numMaterials,
 		unsigned int numVertices,
 		unsigned int numSubsets); //!< Loads binary .pgy-format.
 	const PGYHeader	loadHeader(); //!< Loads static size PGYHeader from binary .pgy-format.
-	const std::vector<MeshMaterial> loadMaterials(const unsigned int numMaterials); //!< Loads materials from binary .pgy-format.
-	const MeshMaterial loadMaterial(); //!< Loads a single material from binary .pgy-format.
-	const MeshGeometry loadGeometry(
+	const std::vector<MaterialDesc> loadMaterials(const unsigned int numMaterials); //!< Loads materials from binary .pgy-format.
+	MaterialDesc loadMaterial(); //!< Loads a single material from binary .pgy-format.
+	void loadGeometry(
 		const unsigned int numVertices,
-		const unsigned int numSubsets); //!< Reads geometry-data from binary .pgy-format.
-	const std::vector<VertexPosNormTex>	loadVertices(const unsigned int numVertices); //!< Reads vertices from .pgy.
-	const VertexPosNormTex loadVertex(); //!< Reads a single vertex from .pgy.
-	const std::vector<MeshSubset> loadSubsets(const unsigned int numSubsets); //!< Subsets from .pgy.
-	const MeshSubset loadSubset(); //!< Reads a single subset from .pgy.
+		const unsigned int numSubsets,
+		std::vector<VertexDesc>& vertices,
+		std::vector<SubsetDesc>& subsets); //!< Reads geometry-data from binary .pgy-format.
+	void loadVertices(const unsigned int numVertices, std::vector<VertexDesc>& vertices); //!< Reads vertices from .pgy.
+	const VertexDesc loadVertex(); //!< Reads a single vertex from .pgy.
+	void loadSubsets(const unsigned int numSubsets, std::vector<SubsetDesc>& subsets); //!< Subsets from .pgy.
+	const SubsetDesc loadSubset(); //!< Reads a single subset from .pgy.
 
 	WriteTimeUTC writeTimeUTC_;
 
-	VarStatus<MeshModel>* meshModel_; //!< Resulting model read from .pgy.
+	MeshDesc meshDesc_; //!< Resulting model read from .pgy.
 };
 
 #endif //XKILL_IO_LOADERPGY_H

@@ -1,12 +1,15 @@
 #pragma once
 
+#include <string>
+
 #include "dllUtilities.h"
 #include "AttributePointer.h"
 #include "Math.h"
 #include "LightDesc.h"
-#include <string>
-
+#include "MeshDesc.h"
+#include "XKILL_Enums.h"
 #include "DataItem.h"
+#include "MeshVertices.h"
 
 
 /// Used inside \ref COMPONENTS for data processing.
@@ -29,11 +32,11 @@ be modified to suit the need of each Component.
 // Attributes
 ///////////////////////////////////////////
 
-// Enums over each Attribute Type
+// XKILL_Enums over each Attribute Type
 /*
 Just something that can be used if "casting" of
 \ref ATTRIBTUES is needed.
-NOTE: DOXYGEN can not detect Enums combined with DLL
+NOTE: DOXYGEN can not detect XKILL_Enums combined with DLL
 for some reason
 */
 
@@ -321,8 +324,8 @@ struct DLL_U Attribute_Projectile : public IAttribute
 
 	int entityIdOfCreator;		//!< Entity id of the entity that created the projectile.
 	float currentLifeTimeLeft;	//!< Counter counting down the lifetime of the projectile. Is initialized to totalLifeTime. When equal or less than zero, the projectile attribute shall be destroyed.
-	bool explodeOnImnpact;
-	float explosionSphereRadius;
+	XKILL_Enums::AmmunitionType ammunitionType;
+	XKILL_Enums::FiringModeType firingModeType;
 
 	DataItemList* getDataList()
 	{
@@ -330,8 +333,6 @@ struct DLL_U Attribute_Projectile : public IAttribute
 		list->add_AttributePointer(ptr_physics.index,	"ptr_physics");
 		list->add(entityIdOfCreator,					"entityIdOfCreator");
 		list->add(currentLifeTimeLeft,					"currentLifeTimeLeft");
-		list->add(explodeOnImnpact,						"explodeOnImnpact");
-		list->add(explosionSphereRadius,				"explosionSphereRadius");
 
 		return list;
 	}
@@ -340,8 +341,6 @@ struct DLL_U Attribute_Projectile : public IAttribute
 		list->get_AttributePointer(&ptr_physics.index);
 		list->get(&entityIdOfCreator);
 		list->get(&currentLifeTimeLeft);
-		list->get(&explodeOnImnpact);
-		list->get(&explosionSphereRadius);
 	};
 	AttributeType getType(){return ATTRIBUTE_PROJECTILE;}
 	std::string getName(){return "Projectile";}
@@ -737,6 +736,9 @@ struct DLL_U Attribute_Player : public IAttribute
 	float jetpackTimer;			//!< Incremented when using jetpack
 	bool detectedAsDead;
 
+	float meshIDWhenAlive;
+	float meshIDWhenDead;
+
 	DataItemList* getDataList()
 	{
 		DataItemList* list = new DataItemList();
@@ -776,19 +778,22 @@ struct DLL_U Attribute_Player : public IAttribute
 };
 
 
-class MeshModel;
 struct DLL_U Attribute_Mesh : public IAttribute
 {
 	unsigned int	meshID;		//!< ID of mesh, read from .mdldesc-file.
-	MeshModel*		mesh;		//!< Type containing all mesh-related data.
+	MeshDesc		mesh;		//!< Type containing all mesh-related data.
 	bool			dynamic;	//!< Whether or not mesh is supposed to be dynamic physics-wize.
+	std::string		fileName;	//!< Filename of loaded model.
+	VertexType		vertexType;
 
 	void clean();					//!< Does nothing.
 	Attribute_Mesh();				//!< Initializes attribute with default values. Dynamic = false.
 	Attribute_Mesh(
 		unsigned int	id,
-		MeshModel*		mesh,
-		bool			dynamic);	//!< Initializes attribute with passed values.
+		MeshDesc		mesh,
+		bool			dynamic,
+		std::string		fileName,
+		VertexType		vertexType);	//!< Initializes attribute with passed values.
 	~Attribute_Mesh();				//!< Does nothing.
 
 	DataItemList* getDataList()
@@ -893,7 +898,6 @@ struct DLL_U Attribute_PlayerSpawnPoint : public IAttribute
 	std::string getName(){return "PlayerSpawnPoint";}
 };
 
-enum PickupableType;
 struct DLL_U Attribute_PickupablesSpawnPoint : public IAttribute
 {
 	Attribute_PickupablesSpawnPoint();
@@ -901,7 +905,7 @@ struct DLL_U Attribute_PickupablesSpawnPoint : public IAttribute
 
 	AttributePtr<Attribute_Position> ptr_position;
 
-	PickupableType spawnPickupableType;			//!< Type of pickupable spawned by this pickupables spawn point
+	XKILL_Enums::PickupableType spawnPickupableType;			//!< Type of pickupable spawned by this pickupables spawn point
 	float spawnDelayInSeconds;					//!< Delay until a pickupable may spawn
 	float secondsSinceLastSpawn;				//!< Incrementing timer, reset when spawned.
 	float secondsSinceLastPickup;				//!< Incrementing timer, reset when picked up.
@@ -946,7 +950,7 @@ struct DLL_U Attribute_Pickupable : public IAttribute
 	AttributePtr<Attribute_Physics> ptr_physics;
 	AttributePtr<Attribute_PickupablesSpawnPoint> ptr_pickupablesSpawnPoint_creator;	//! The pickupable spawnpoint that spawned this pickupable
 
-	PickupableType pickupableType;						//! MEDKIT, AMMUNITION_BULLET, AMMUNITION_SCATTER, AMMUNITION_EXPLOSIVE, etc
+	XKILL_Enums::PickupableType pickupableType;						//! MEDKIT, AMMUNITION_BULLET, AMMUNITION_SCATTER, AMMUNITION_EXPLOSIVE, etc
 	int amount;											//! Data of pickupable (health, ammo, etc)
 
 	DataItemList* getDataList()
@@ -976,7 +980,7 @@ struct DLL_U Attribute_Pickupable : public IAttribute
 
 class MutatorSettings;
 #include "WeaponStructs.h"
-/// Stores everything needed for the weapon system. The two enums "AmmunitionType" and "FiringMode" is used to preset the weapon settings. These settings are used in GameComponent to simulate the weapon behavior of choice.
+/// Stores everything needed for the weapon system. The two enums "XKILL_Enums::AmmunitionType" and "FiringMode" is used to preset the weapon settings. These settings are used in GameComponent to simulate the weapon behavior of choice.
 /** 
 \ingroup ATTRIBUTES
 */
@@ -985,13 +989,13 @@ struct DLL_U Attribute_WeaponStats : public IAttribute
 	Attribute_WeaponStats();
 	~Attribute_WeaponStats();
 
-	Ammunition ammunition[Ammunition::NROFAMMUNITIONTYPES];
-	FiringMode firingMode[FiringMode::NROFFIRINGMODETYPES];
+	Ammunition ammunition[XKILL_Enums::AmmunitionType::NROFAMMUNITIONTYPES];
+	FiringMode firingMode[XKILL_Enums::FiringModeType::NROFFIRINGMODETYPES];
 
-	Ammunition::AmmunitionType currentAmmunitionType;
-	FiringMode::FiringModeType currentFiringModeType;
+	XKILL_Enums::AmmunitionType currentAmmunitionType;
+	XKILL_Enums::FiringModeType currentFiringModeType;
 
-	void setWeaponStats(Ammunition::AmmunitionType ammunitionType, FiringMode::FiringModeType firingModeType);
+	void setWeaponStats(XKILL_Enums::AmmunitionType ammunitionType, XKILL_Enums::FiringModeType firingModeType);
 
 	std::string getAmmunitionTypeAsString();
 	std::string getFiringModeAsString();

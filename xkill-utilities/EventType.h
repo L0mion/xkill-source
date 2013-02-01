@@ -4,9 +4,11 @@
 #include "dllUtilities.h"
 #include "Math.h"
 #include "LightDesc.h"
-#include "Enums.h"
+#include "XKILL_Enums.h"
 #include "AttributePointer.h"
 #include "AttributeType.h"
+#include "MeshDesc.h"
+#include "MeshVertices.h"
 
 //
 // Events info
@@ -28,11 +30,11 @@ EventManager::getInstance()->sendEvent(&event);
 */
 
 
-// Enums over each Event Type
+// XKILL_Enums over each Event Type
 /*
 Used by EventManager to build each of its queues.
 
-NOTE: DOXYGEN can not detect Enums combined with DLL
+NOTE: DOXYGEN can not detect XKILL_Enums combined with DLL
 for some reason
 */
 
@@ -187,7 +189,7 @@ class DLL_U Event_GetAttribute : public Event
 public:
 	Event_GetAttribute(int attributeEnum);
 
-	int attributeEnum;			//!< An enums stored as an Int since we can't forward declare Enums.
+	int attributeEnum;			//!< An enums stored as an Int since we can't forward declare XKILL_Enums.
 	void* hostVector;			//!< Void pointer to a vector holding Attributes.
 								//!< Requires manual casting.
 	std::vector<int>* owners;	//!< A std::vector<int> of owners corresponding to each
@@ -282,23 +284,29 @@ public:
 	Float3 position;
 	Float3 velocity;
 	Float4 rotation;
-	float damage;
-	float explosionSphereRadius;
 	int entityIdOfCreator;
-	bool explodeOnImpact;
+	XKILL_Enums::AmmunitionType ammunitionType;
+	XKILL_Enums::FiringModeType firingMode;
+	int damage;
 
-	Event_CreateProjectile(Float3 position, Float3 velocity, Float4 rotation, float damage, int entityIdOfCreator, bool explodeOfImpact, float explosionSphereRadius);
+	Event_CreateProjectile(Float3 position, Float3 velocity, Float4 rotation, int entityIdOfCreator, XKILL_Enums::AmmunitionType ammunitionType, XKILL_Enums::FiringModeType firingMode, int damage);
 };
 
-class MeshModel;
 class DLL_U Event_CreateMesh : public Event
 {
 public:
 	unsigned int	id;
-	MeshModel*		mesh;
+	MeshDesc		mesh;
 	bool			dynamic;
+	std::string		fileName;
+	VertexType		vertexType;
 
-	Event_CreateMesh(unsigned int id, MeshModel* mesh, bool dynamic);
+	Event_CreateMesh(
+		unsigned int	id, 
+		MeshDesc		mesh, 
+		bool			dynamic, 
+		std::string		fileName, 
+		VertexType		vertexType);
 };
 
 class TexDesc;
@@ -386,23 +394,22 @@ public:
 	float spawnAreaRadius;
 };
 
-enum PickupableType;
 class DLL_U Event_CreatePickupablesSpawnPoint : public Event
 {
 public:
-	Event_CreatePickupablesSpawnPoint(Float3 spawnPointPosition, PickupableType pickupableType);
+	Event_CreatePickupablesSpawnPoint(Float3 spawnPointPosition, XKILL_Enums::PickupableType pickupableType);
 
 	Float3 spawnPointPosition;
-	PickupableType pickupableType;
+	XKILL_Enums::PickupableType pickupableType;
 };
 
 class DLL_U Event_CreatePickupable : public Event
 {
 public:
-	Event_CreatePickupable(Float3 position, PickupableType pickupableType, AttributePtr<Attribute_PickupablesSpawnPoint> creatorPickupablesSpawnPoint, int amount);
+	Event_CreatePickupable(Float3 position, XKILL_Enums::PickupableType pickupableType, AttributePtr<Attribute_PickupablesSpawnPoint> creatorPickupablesSpawnPoint, int amount);
 
 	Float3 position;
-	PickupableType pickupableType;
+	XKILL_Enums::PickupableType pickupableType;
 	AttributePtr<Attribute_PickupablesSpawnPoint>  creatorPickupablesSpawnPoint;
 	int amount;
 };
@@ -554,9 +561,9 @@ public:
 class DLL_U Event_ModifyPhysicsObject : public Event
 {
 public:
-	Event_ModifyPhysicsObject(ModifyPhysicsObjectData modifyWhatDataInPhysicsObjectData, void* data, int physicsAttributeIndex);
+	Event_ModifyPhysicsObject(XKILL_Enums::ModifyPhysicsObjectData modifyWhatDataInPhysicsObjectData, void* data, int physicsAttributeIndex);
 
-	ModifyPhysicsObjectData modifyWhatDataInPhysicsObjectData;
+	XKILL_Enums::ModifyPhysicsObjectData modifyWhatDataInPhysicsObjectData;
 	void* data;
 	int physicsAttributeIndex;
 };

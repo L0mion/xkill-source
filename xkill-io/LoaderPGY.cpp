@@ -6,12 +6,9 @@ LoaderPGY::LoaderPGY(
 	const std::string filePath, 
 	const std::string fileName) : Loader(filePath, fileName)
 {
-	meshModel_ = new VarStatus<MeshModel>(true);
 }
 LoaderPGY::~LoaderPGY()
 {
-	if(meshModel_)
-		delete meshModel_;
 }
 
 bool LoaderPGY::init()
@@ -34,11 +31,10 @@ bool LoaderPGY::init()
 		writeTimeUTC_ = header.writeTime_; //store for later
 		if(header.versionNum_ == LOADER_PGY_VERSION)
 		{
-			meshModel_->setVar(
-				loadPGY(
+			meshDesc_ =  loadPGY(
 					header.numMaterials_, 
 					header.numVertices_, 
-					header.numSubsets_));
+					header.numSubsets_);
 		}
 		else
 		{
@@ -52,96 +48,97 @@ bool LoaderPGY::init()
 	return sucessfulLoad;
 }
 
-MeshModel* LoaderPGY::claimMeshModel()
+MeshDesc LoaderPGY::getMeshModel()
 {
-	meshModel_->setStatus(false);
-	return meshModel_->getVar();
+	return meshDesc_;
 }
 
-MeshModel* LoaderPGY::loadPGY(
+MeshDesc LoaderPGY::loadPGY(
 	unsigned int numMaterials,
 	unsigned int numVertices,
 	unsigned int numSubsets)
 {
-	std::vector<MeshMaterial> materials;
+	std::vector<MaterialDesc> materials;
 	materials = loadMaterials(numMaterials);
 
-	MeshGeometry geometry;
-	geometry = loadGeometry(
+	std::vector<VertexDesc> vertices;
+	std::vector<SubsetDesc> subsets;
+	loadGeometry(
 		numVertices,
-		numSubsets);
+		numSubsets,
+		vertices,
+		subsets);
 
-	MeshOrigins origins(getFileName());
+	std::string fileName = getFileName();
 
-	return new MeshModel(geometry, materials, origins);
+	MeshDesc meshDesc;
+	meshDesc.materials_		= materials;
+	meshDesc.vertices_		= vertices;
+	meshDesc.subsets_		= subsets;
+	return meshDesc;
 }
 const PGYHeader LoaderPGY::loadHeader()
 {
 	PGYHeader header;
-	ifstream_.read((char*)&header, PGY_SPECS_SIZE_HEADER);
+	ifstream_.read(
+		(char*)&header, 
+		sizeof(PGYHeader));
 	return header;
 }
-const std::vector<MeshMaterial>	LoaderPGY::loadMaterials(const unsigned int numMaterials)
+const std::vector<MaterialDesc>	LoaderPGY::loadMaterials(const unsigned int numMaterials)
 {
-	std::vector<MeshMaterial> materials;
+	std::vector<MaterialDesc> materials;
 	for(unsigned int i = 0; i < numMaterials; i++)
 		materials.push_back(loadMaterial());
 
 	return materials;
 }
-const MeshMaterial LoaderPGY::loadMaterial()
+MaterialDesc LoaderPGY::loadMaterial()
 {
-	MeshMaterial material;
+	MaterialDesc material;
 	ifstream_.read(
 		(char*)&material, 
-		PGY_SPECS_SIZE_MATERIAL);
+		sizeof(MaterialDesc));
 
 	return material;
 }
-const MeshGeometry LoaderPGY::loadGeometry(
+void LoaderPGY::loadGeometry(
 	const unsigned int			numVertices,
-	const unsigned int			numSubsets)
+	const unsigned int			numSubsets,
+	std::vector<VertexDesc>& vertices,
+	std::vector<SubsetDesc>& subsets)
 {
-	std::vector<VertexPosNormTex> vertices;
-	vertices = loadVertices(numVertices);
-
-	std::vector<MeshSubset> subsets;
-	subsets = loadSubsets(numSubsets);
-
-	return MeshGeometry(vertices, subsets);
+	loadVertices(numVertices, vertices);
+	loadSubsets(numSubsets, subsets);
 }
-const std::vector<VertexPosNormTex>	LoaderPGY::loadVertices(const unsigned int numVertices)
+void LoaderPGY::loadVertices(const unsigned int numVertices, std::vector<VertexDesc>& vertices)
 {
-	std::vector<VertexPosNormTex> vertices;
 	for(unsigned int i = 0; i < numVertices; i++)
 		vertices.push_back(loadVertex());
-
-	return vertices;
 }
-const VertexPosNormTex LoaderPGY::loadVertex()
+const VertexDesc LoaderPGY::loadVertex()
 {
-	VertexPosNormTex vertex;
+	VertexDesc vertex;
 	ifstream_.read(
 		(char*)&vertex, 
-		PGY_SPECS_SIZE_VERTEXPOSNORMTEX);
+		sizeof(VertexDesc));
 
 	return vertex;
 }
-const std::vector<MeshSubset> LoaderPGY::loadSubsets(const unsigned int	numSubsets)
+void LoaderPGY::loadSubsets(const unsigned int	numSubsets, std::vector<SubsetDesc>& subsets)
 {
-	std::vector<MeshSubset> subsets;
 	for(unsigned int i = 0; i < numSubsets; i++)
+	{
 		subsets.push_back(loadSubset());
-
-	return subsets;
+	}
 }
-const MeshSubset LoaderPGY::loadSubset()
+const SubsetDesc LoaderPGY::loadSubset()
 {
 	/*Load PGY subset header*/
 	PGYHeaderSubset ssHeader;
 	ifstream_.read(
 		(char*)&ssHeader, 
-		PGY_SPECS_SIZE_HEADER_SUBSET);
+		sizeof(PGYHeaderSubset));
 	unsigned int numIndices = ssHeader.numIndices_;
 
 	/*Load MaterialIndex of subset*/
@@ -161,7 +158,10 @@ const MeshSubset LoaderPGY::loadSubset()
 		indices.push_back(index);
 	}
 
-	return MeshSubset(materialIndex, indices);
+	SubsetDesc subset;
+	subset.materialIndex_	= materialIndex;
+	subset.indices_			= indices;
+	return subset;
 }
 
 WriteTimeUTC LoaderPGY::getWriteTimeUTC() const

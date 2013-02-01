@@ -6,6 +6,8 @@
 
 #include <xkill-utilities/Math.h>
 
+#include <xkill-utilities/MaterialDesc.h>
+
 class LoaderFbxMaterialDesc
 {
 public:
@@ -71,6 +73,8 @@ public:
 	std::vector<FbxFileTexture*>		getFbxFileTextures()		const;
 	std::vector<FbxLayeredTexture*>		getFbxLayeredTextures()		const;
 	std::vector<FbxProceduralTexture*>	getFbxProceduralTextures()	const;
+
+	MaterialDesc getMaterialDesc();
 
 private:
 	Float3	ambient_;		//<! Ambient component of the material.
