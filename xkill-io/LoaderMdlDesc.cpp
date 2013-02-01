@@ -1,8 +1,7 @@
 #include "MdlDesc.h"
 #include "SimpleStringSplitter.h"
 
-#include <xkill-utilities/EventType.h>
-#include <xkill-utilities/EventManager.h>
+#include <xkill-utilities/Util.h>
 
 #include "LoaderMdlDesc.h"
 

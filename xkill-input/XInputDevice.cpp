@@ -10,7 +10,7 @@
 
 #include "InputObjectArray.h"
 
-#include "Converter.h"
+#include <xkill-utilities/Converter.h>
 
 XInputDevice::XInputDevice() : 
 	InputDevice(GUID(), "")
@@ -102,10 +102,12 @@ void XInputDevice::setStandardMappings()
 
 	if(buttons_.size() >= 14)
 	{
-		buttons_[0]->addMapping(InputAction::ACTION_B_CHANGE_AMMUNITIONTYPE);
-		buttons_[1]->addMapping(InputAction::ACTION_B_CHANGE_FIRINGMODE);
-		buttons_[2]->addMapping(InputAction::ACTION_B_KILL_PLAYER);
-		buttons_[4]->addMapping(InputAction::ACTION_B_SPRINT);
+		buttons_[0]->addMapping(InputAction::ACTION_B_JUMP);
+		buttons_[1]->addMapping(InputAction::ACTION_B_CHANGE_AMMUNITIONTYPE);
+		buttons_[2]->addMapping(InputAction::ACTION_B_CHANGE_FIRINGMODE);
+		buttons_[4]->addMapping(InputAction::ACTION_B_JETPACK);
+		buttons_[5]->addMapping(InputAction::ACTION_B_SPRINT);
+		buttons_[7]->addMapping(InputAction::ACTION_B_KILL_PLAYER);
 		buttons_[10]->addMapping(InputAction::ACTION_B_WALK_FORWARD);
 		buttons_[11]->addMapping(InputAction::ACTION_B_WALK_RIGHT);
 		buttons_[12]->addMapping(InputAction::ACTION_B_WALK_BACKWARD);
@@ -115,6 +117,7 @@ void XInputDevice::setStandardMappings()
 	if(triggers_.size() >= 2)
 	{
 		triggers_[0]->addMapping(InputAction::ACTION_B_FIRE);
+		triggers_[1]->addMapping(InputAction::ACTION_B_LOW_SENSITIVITY);
 	}
 }
 

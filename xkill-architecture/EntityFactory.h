@@ -32,14 +32,14 @@ public:
 	// AttributeManager instead of "'positionAttributes_" which will result in error. As long as a shorter naming convention
 	// such as "position" is used, this will not be a problem.
 #define CREATE_ATTRIBUTE(AttributeType, AttributeName, OwnerEntity)						\
-	AttributeType* AttributeName = ((AttributeManager*)AttributeManagerDLLWrapper::getInstance())->AttributeName.createAttribute(OwnerEntity)
+	AttributeType* AttributeName = AttributeManager::instance()->AttributeName.createAttribute(OwnerEntity)
 
 	// Connects the AttributePointer by the name PointerName inside AttributeName with latest AttributePointer created inside AttributeManager.
 	// IMPORTANT: The following formula is used to access AttributeManager, "PointerName+Attributes".
 	// PointerName "position" will result in "positionAttributes" which will work.
 	// PointerName "positionAttribute" will result in "positionAttributeAttributes" which will fail.
 #define CONNECT_ATTRIBUTES(AttributeName, PointerName)									\
-	AttributeName->ptr_##PointerName = ((AttributeManager*)AttributeManagerDLLWrapper::getInstance())->PointerName.getLatestAttributeAsAttributePointer()
+	AttributeName->ptr_##PointerName = AttributeManager::instance()->PointerName.getLatestAttributeAsAttributePointer()
 
 	EntityFactory()
 	{
@@ -60,6 +60,11 @@ public:
 		CREATE_ATTRIBUTE(Attribute_Spatial, spatial, entity);
 		CONNECT_ATTRIBUTES(spatial, position);
 
+		//spatial->ptr_position2 = ((AttributeManager*)AttributeManagerDLLWrapper::getInstance())->position.getLatestAttributeAsAttributePtr();
+		//Attribute_Position* p = spatial->ptr_position2.getAttribute();
+
+		
+
 		CREATE_ATTRIBUTE(Attribute_Render, render, entity);
 		CONNECT_ATTRIBUTES(render, spatial);
 		render->meshID = 0;
@@ -78,6 +83,7 @@ public:
 		physics->meshID = render->meshID;
 		physics->collisionFilterGroup = Attribute_Physics::PLAYER;
 		physics->collisionFilterMask = Attribute_Physics::EVERYTHING;
+		physics->gravity = Float3(0.0f, -0.0f, 0.0f);
 		
 		CREATE_ATTRIBUTE(Attribute_Input, input, entity);
 		CONNECT_ATTRIBUTES(input, physics);
@@ -125,7 +131,7 @@ public:
 		physics->collisionFilterMask = Attribute_Physics::PLAYER | Attribute_Physics::PROJECTILE | Attribute_Physics::FRUSTUM | Attribute_Physics::PICKUPABLE;
 		physics->mass = 0;
 
-		position = ((AttributeManager*)AttributeManagerDLLWrapper::getInstance())->position.createAttribute(entity);
+		position = ATTRIBUTE_MANAGER->position.createAttribute(entity);
 		position->position = Float3(0.0f, 0.5f, 0.0f);
 		
 		//CREATE_ATTRIBUTE(Attribute_Light_Dir, lightDir, entity);
@@ -231,6 +237,24 @@ public:
 
 		CREATE_ATTRIBUTE(Attribute_Render, render, entity);
 		CONNECT_ATTRIBUTES(render, spatial);
+		/*
+		switch (e->pickupableType)
+		{
+		case PickupableType::AMMUNITION_BULLET:
+			render->meshID = 4;
+			break;
+		case PickupableType::AMMUNITION_SCATTER:
+			render->meshID = 5;
+			break;
+		case PickupableType::AMMUNITION_EXPLOSIVE:
+			render->meshID = 6;
+			break;
+		case PickupableType::MEDKIT:
+			render->meshID = 3;
+		default:
+			break;
+		}
+		*/
 		render->meshID = 1;
 
 		CREATE_ATTRIBUTE(Attribute_Physics, physics, entity);
@@ -246,7 +270,7 @@ public:
 		CREATE_ATTRIBUTE(Attribute_Pickupable, pickupable, entity);
 		pickupable->amount = e->amount;
 		pickupable->pickupableType = e->pickupableType;
-		pickupable->ptr_creatorPickupablesSpawnPoint = e->creatorPickupablesSpawnPoint;
+		pickupable->ptr_pickupablesSpawnPoint_creator = e->creatorPickupablesSpawnPoint;
 		CONNECT_ATTRIBUTES(pickupable, position);
 		CONNECT_ATTRIBUTES(pickupable, physics);
 

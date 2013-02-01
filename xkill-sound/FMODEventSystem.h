@@ -43,6 +43,8 @@ public:
 	void StartSoundEventAt(unsigned int index);
 	/** \brief Mutes all sounds.*/
 	void SetMuteSounds(bool mute = true);
+	/** \brief Set volume.*/
+	void SetVolume(float volume);
 
 	std::vector<std::string> GetFMODEventNames();
 
@@ -50,6 +52,7 @@ private:
 	void FMODErrorCheck(FMOD_RESULT result);
 
 	FMOD::EventSystem* mEventsystem;
+	std::vector<FMOD::Event*> mEvents;
 	std::string mSoundEventFileNameWithoutExtension;
 	std::string mMediaPath;
 	int nrOfEvents_;

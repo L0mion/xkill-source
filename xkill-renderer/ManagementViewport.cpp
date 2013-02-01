@@ -1,5 +1,4 @@
-#include <xkill-utilities/EventManager.h>
-#include <xkill-utilities/AttributeType.h>
+#include <xkill-utilities/Util.h>
 
 #include "Winfo.h"
 #include "ManagementViewport.h"

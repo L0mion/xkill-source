@@ -10,7 +10,7 @@
 #include "XInputDevice.h"
 #include "QTInputDevices.h"
 
-#include "Converter.h"
+#include <xkill-utilities/Converter.h>
 
 #include <Windows.h>
 

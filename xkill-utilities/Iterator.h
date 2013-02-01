@@ -180,15 +180,15 @@ public:
     // Returns an item in the vector regardless
     // if it is valid or not, using the Index of
     // the supplied Iterator
-    T* at(AttributePointer attrPointer)
+    T* at(AttributePtr<T> attrPointer)
     {
         return at(attrPointer.index);
     }
 
-	AttributePointer attributePointer(T* attribute)
+	AttributePtr<T> attributePointer(T* attribute)
 	{ 
-		AttributePointer pointer;
-		pointer.init(&_attributes, storageIndex(attribute));
+		AttributePtr<T> pointer;
+		pointer.init(_attributes, storageIndex(attribute));
 		return pointer;
 	}
 

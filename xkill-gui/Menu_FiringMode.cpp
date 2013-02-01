@@ -1,10 +1,25 @@
 #include "Menu_FiringMode.h"
 
-Menu_FiringMode::Menu_FiringMode(Ui::MainMenu* ui)
+Menu_FiringMode::Menu_FiringMode(Ui::MainMenu* ui, QMainWindow* window)
 {
 	this->ui = ui;
 
 	mutatorSettings_ = new MutatorSettings();
+
+	window->connect(ui->radioButton_Weapon_Single,						SIGNAL(clicked()),				window,	SLOT(slot_updateFiringModeMenu()));
+	window->connect(ui->radioButton_Weapon_Semi,						SIGNAL(clicked()),				window,	SLOT(slot_updateFiringModeMenu()));
+	window->connect(ui->radioButton_Weapon_Auto,						SIGNAL(clicked()),				window,	SLOT(slot_updateFiringModeMenu()));
+	
+	window->connect(ui->checkBox_Weapon_Bullet,							SIGNAL(clicked()),				window,	SLOT(slot_firingModeUpdated()));
+	window->connect(ui->checkBox_Weapon_Scatter,						SIGNAL(clicked()),				window,	SLOT(slot_firingModeUpdated()));
+	window->connect(ui->checkBox_Weapon_Explosive,						SIGNAL(clicked()),				window,	SLOT(slot_firingModeUpdated()));
+	window->connect(ui->horizontalSlider_Weapon_ClipSize,				SIGNAL(sliderMoved(int)),		window,	SLOT(slot_firingModeUpdated()));
+	window->connect(ui->horizontalSlider_Weapon_DamageModifier,			SIGNAL(sliderMoved(int)),		window,	SLOT(slot_firingModeUpdated()));
+	window->connect(ui->horizontalSlider_Weapon_ExplosionSphereModifier,SIGNAL(sliderMoved(int)),		window,	SLOT(slot_firingModeUpdated()));
+	window->connect(ui->horizontalSlider_Weapon_RateOfFire,				SIGNAL(sliderMoved(int)),		window,	SLOT(slot_firingModeUpdated()));
+	window->connect(ui->horizontalSlider_Weapon_ReloadTime,				SIGNAL(sliderMoved(int)),		window,	SLOT(slot_firingModeUpdated()));
+
+	window->connect(ui->tabWidget_2,									SIGNAL(currentChanged(int)),	window,	SLOT(slot_updateFiringModeMenu()));
 }
 
 Menu_FiringMode::~Menu_FiringMode()

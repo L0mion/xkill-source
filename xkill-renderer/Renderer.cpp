@@ -1,5 +1,4 @@
-#include <xkill-utilities/EventManager.h>
-#include <xkill-utilities/AttributeType.h>
+#include <xkill-utilities/Util.h>
 #include <xkill-utilities/MeshMaterial.h>
 
 #include "ManagementD3D.h"
@@ -266,6 +265,7 @@ HRESULT Renderer::initManagementLight()
 	HRESULT hr = S_OK;
 
 	managementLight_ = new ManagementLight();
+	managementLight_->init();
 
 	return hr;
 }
@@ -387,7 +387,7 @@ void Renderer::render()
 
 	ViewportData vpData;
 
-	//Render each split-screen seperately
+	//Render each split-screen separately
 	std::vector<SplitScreenViewport>* ssViewports = managementViewport_->getSplitScreenViewports();
 	std::vector<ViewportData> vpDatas(ssViewports->size());
 	for(unsigned int i = 0; i < ssViewports->size(); i++)
@@ -395,8 +395,8 @@ void Renderer::render()
 		ssAt		= ssViewports->at(i).ssAt;
 		camAt		= itrCamera.at(ssAt->ptr_camera);
 
-		spatialAt	= ATTRIBUTE_CAST(Attribute_Spatial, ptr_spatial, camAt);
-		posAt		= ATTRIBUTE_CAST(Attribute_Position, ptr_position, spatialAt);
+		spatialAt	= camAt->ptr_spatial.getAttribute();
+		posAt		= spatialAt->ptr_position.getAttribute();
 
 		managementViewport_->setViewport(devcon, i);
 
@@ -567,7 +567,7 @@ void Renderer::renderInstance(unsigned int meshID, InstancedData* instance)
 	ID3D11Buffer* vbs[2] = 
 	{ 
 		modelD3D->getVertexBuffer()->getVB(), 
-		instance->getInstanceBuffer()
+		instance->getDataBuffer()
 	};
 	devcon->IASetVertexBuffers(0, 2, vbs, stride, offset);
 	
@@ -581,7 +581,7 @@ void Renderer::renderInstance(unsigned int meshID, InstancedData* instance)
 		renderSubset(
 			ib,
 			materials[materialIndex],
-			instance->getInstanceCount());
+			instance->getDataCountCur());
 	}
 }
 void Renderer::renderSubset(

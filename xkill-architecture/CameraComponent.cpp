@@ -1,8 +1,6 @@
 #include "CameraComponent.h"
 
-#include <xkill-utilities/AttributeType.h>
-#include <xkill-utilities/EventType.h>
-#include <xkill-utilities/EventManager.h>
+#include <xkill-utilities/Util.h>
 
 #include <DirectXMath.h>
 #include <windows.h>
@@ -93,10 +91,10 @@ void updateView(Attribute_Camera* camera)
 void updateProj(Attribute_Camera* camera)
 {
 	DirectX::XMFLOAT4X4& projection = *(DirectX::XMFLOAT4X4*)&camera->mat_projection;
-	float& zFar		= camera->zFar;
-	float& zNear	= camera->zNear;
+	float& zFar			= camera->zFar;
+	float& zNear		= camera->zNear;
 	float& aspectRatio	= camera->aspectRatio;
-	float& fieldOfView		= camera->fieldOfView;
+	float& fieldOfView	= camera->fieldOfView;
 
 	ZeroMemory(&projection, sizeof(projection));
 

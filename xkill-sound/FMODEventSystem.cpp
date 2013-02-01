@@ -42,6 +42,19 @@ void FMODEventSystem::Init(std::string mediaPath, std::string soundEventFileName
 void FMODEventSystem::Update()
 {
 	FMODErrorCheck(mEventsystem->update());
+
+	for(unsigned int i = 0; i < mEvents.size(); i++)
+	{
+		FMOD_EVENT_STATE state;
+		if(mEvents[i]->getState(&state) == FMOD_ERR_INVALID_HANDLE)
+		{
+			FMOD::Event* temp = mEvents[mEvents.size() - 1];
+			mEvents[mEvents.size() - 1] = mEvents[i];
+			mEvents[i] = temp;
+
+			mEvents.pop_back();
+		}
+	}
 }
 
 void FMODEventSystem::StartSoundEventAt(unsigned int index)
@@ -51,6 +64,7 @@ void FMODEventSystem::StartSoundEventAt(unsigned int index)
 		FMOD::Event* soundEvent;
 		FMODErrorCheck(mEventsystem->getEventBySystemID(index, FMOD_EVENT_NONBLOCKING, &soundEvent));
 		soundEvent->start();
+		mEvents.push_back(soundEvent);
 	}
 	else
 	{
@@ -66,11 +80,37 @@ void FMODEventSystem::SetMuteSounds(bool mute)
 	{
 		for(int i = 0; i < nrOfEvents; i++)
 		{
-			if(mEventsystem->getEventBySystemID(i, FMOD_EVENT_NONBLOCKING, &soundEvent) == FMOD_OK)
+			if(mEventsystem->getEventBySystemID(i, FMOD_EVENT_INFOONLY, &soundEvent) == FMOD_OK)
 			{
 				soundEvent->setMute(mute);
+			}		
+		}
+	}
+
+	for(unsigned int i = 0; i < mEvents.size(); i++)
+	{
+		mEvents[i]->setMute(mute);
+	}
+}
+
+void FMODEventSystem::SetVolume(float volume)
+{
+	int nrOfEvents;
+	FMOD::Event* soundEvent;
+	if(mEventsystem->getNumEvents(&nrOfEvents) == FMOD_OK)
+	{
+		for(int i = 0; i < nrOfEvents; i++)
+		{
+			if(mEventsystem->getEventBySystemID(i, FMOD_EVENT_INFOONLY, &soundEvent) == FMOD_OK)
+			{
+				soundEvent->setVolume(volume);
 			}
 		}
+	}
+
+	for(unsigned int i = 0; i < mEvents.size(); i++)
+	{
+		mEvents[i]->setVolume(volume);
 	}
 }
 

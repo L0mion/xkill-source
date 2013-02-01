@@ -16,13 +16,56 @@ Manual casting is necessary since DLLs does not support Templates.
 \ingroup xkill-utilities
 */
 
-class DLL_U AttributePointer
+//class DLL_U AttributePointer
+//{
+//public:
+//	void* host;		//!< A void pointer to a std::vector holding attributes of a specific type.
+//	int index;		//!< An index to an attribute in host.
+//
+//	AttributePointer();
+//
+//	void init(void* host, int index);
+//};
+
+#include <vector>
+
+template <class T>
+class AttributePtr
 {
+private:
+	std::vector<T>* _hostArray;
 public:
-	void* host;		//!< A void pointer to a std::vector holding attributes of a specific type.
-	int index;		//!< An index to an attribute in host.
+	int index;
 
-	AttributePointer();
+	static void initClass(std::vector<T>* hostArray)
+	{
+		/*_hostArray = hostArray;
+		_hostArray;*/
+	}
 
-	void init(void* host, int index);
+	AttributePtr()
+	{
+		_hostArray = nullptr;
+		index = -1;
+	}
+
+	bool isEmpty()
+	{
+		return _hostArray == nullptr;
+	}
+
+	void init(std::vector<T>* hostArray, int index)
+	{
+		_hostArray = hostArray;
+		this->index = index;
+	}
+
+	T* getAttribute()
+	{
+		std::vector<T>* v = _hostArray;
+		return &v->at(index);
+	}
 };
+
+//template <class T>
+//std::vector<T>* AttributePtr<T>::_hostArray = NULL;

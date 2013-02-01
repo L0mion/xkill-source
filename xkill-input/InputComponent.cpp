@@ -1,6 +1,6 @@
 #include "InputComponent.h"
 
-#include <xkill-utilities/EventManager.h>
+#include <xkill-utilities/Util.h>
 #include "InputManager.h"
 
 ATTRIBUTES_DECLARE_ALL;
@@ -82,14 +82,6 @@ void InputComponent::onUpdate(float delta)
 	handleInput(delta);
 }
 
-
-#define DEBUGPRINT(dataStream)									\
-{                                                               \
-	std::ostringstream oss;										\
-	oss << dataStream << std::endl;								\
-	printf(oss.str().c_str());									\
-}
-
 void InputComponent::handleInput(float delta)
 {
 	delta = settings->trueDeltaTime;
@@ -98,12 +90,10 @@ void InputComponent::handleInput(float delta)
 	{
 		Attribute_Player* player = itrPlayer.getNext();
 
-		AttributePointer ptr = player->ptr_inputDevice;
-
-		if(ptr.host == nullptr)
+		if(player->ptr_inputDevice.isEmpty())
 			continue;
 
-		InputDevice* device = itrInputDevice.at(ptr)->device;
+		InputDevice* device = player->ptr_inputDevice.getAttribute()->device;
 		Attribute_Input* input = itrInput.at(player->ptr_input);
 
 		if(device == nullptr)
@@ -182,14 +172,14 @@ void InputComponent::handleInput(float delta)
 		if(device->getBoolValue(InputAction::ACTION_B_SPRINT))
 			input->sprint = true;
 
+		device->setSensitivityModifier(device->getFloatValue(InputAction::ACTION_B_LOW_SENSITIVITY, delta));
+
 		float x, y;
 
 		x = input->position.x;
 		y = input->position.y;
 
 		float length = std::sqrt(x*x + y*y);
-
-		DEBUGPRINT("Length: " << length);
 
 		if(length > 1.0f) // The character shouldn't move faster than set speed
 		{

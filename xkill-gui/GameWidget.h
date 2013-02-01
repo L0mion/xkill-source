@@ -8,7 +8,7 @@
 #include <QtCore/QTimer> // needed to implement frame rate
 #include <xkill-architecture/GameManager.h>
 #include <xkill-utilities/IObserver.h>
-#include <xkill-utilities/EventManager.h>
+#include <xkill-utilities/Util.h>
 
 #include "ui_MainWindow.h"
 #include "GameTimer.h"

@@ -53,6 +53,7 @@ struct InputAction
 		ACTION_B_TIME_SPEED_UP,
 
 		ACTION_B_JETPACK,
+		ACTION_B_LOW_SENSITIVITY,
 
 		ACTION_LAST
 	};
@@ -90,5 +91,9 @@ private:
 		InputActionStrings[ACTION_B_RUMBLE_ON]				=	"Turn Rumble On";
 		InputActionStrings[ACTION_B_RUMBLE_OFF]				=	"Turn Rumble Off";
 		InputActionStrings[ACTION_B_TOGGLE_MUTE_SOUND]		=	"Mute Sound";
+		InputActionStrings[ACTION_B_TIME_SPEED_DOWN]		=	"Time Speed Down";
+		InputActionStrings[ACTION_B_TIME_SPEED_UP]			=	"Time Speed Up";
+		InputActionStrings[ACTION_B_JETPACK]				=	"Jetpack";
+		InputActionStrings[ACTION_B_LOW_SENSITIVITY]		=	"Aim";
 	}
 };

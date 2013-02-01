@@ -36,7 +36,11 @@ private:
 	bool splitRowIntoValues(std::string row, std::string& firstStr, std::string& secondStr);
 	std::string removeWhiteSpaceAtBeginningAndEnd(std::string str);
 
+	bool isValid(std::string row);
 	int stringToInt(std::string str);
 	std::string intToString(int n);
 	std::string configMessage();
+
+	void sortConfigMessageTable(std::vector<std::pair<int, std::string>>& table);
+	void swap(std::vector<std::pair<int, std::string>>& table, int first, int second);
 };

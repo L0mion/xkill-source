@@ -29,15 +29,17 @@ PlayerPhysicsObject::~PlayerPhysicsObject()
 bool PlayerPhysicsObject::subClassSpecificInitHook()
 {
 	forceActivationState(DISABLE_DEACTIVATION); //Prevent the player from getting stuck when standing still
+	//setCollisionFlags(getCollisionFlags() | btCollisionObject::CF_KINEMATIC_OBJECT);
+
 	return true;
 }
 
 void PlayerPhysicsObject::onUpdate(float delta)
 {
-	handleInput();
+	handleInput(delta);
 }
 
-void PlayerPhysicsObject::handleInput()
+void PlayerPhysicsObject::handleInput(float delta)
 {
 	//btTransform world2;
 	//world2 = getWorldTransform();
@@ -75,6 +77,7 @@ void PlayerPhysicsObject::handleInput()
 
 		inputAttribute = itrInput.at(playerAttribute->ptr_input);
 
+		//look and move
 		yaw_ += inputAttribute->rotation.x;
 		btVector3 move = playerAttribute->currentSpeed*btVector3(inputAttribute->position.x, 0, inputAttribute->position.y);
 		move = move.rotate(btVector3(0,1,0),yaw_);
@@ -86,14 +89,40 @@ void PlayerPhysicsObject::handleInput()
 		world.setRotation(btQuaternion(yaw_,0,0));
 		setWorldTransform(world);
 
-		if(inputAttribute->jump && playerAttribute->timeSinceLastJump > 1.0f || inputAttribute->jetpack)
+		//Jump
+		if(inputAttribute->jump && playerAttribute->timeSinceLastJump > playerAttribute->delayInSecondsBetweenEachJump && playerAttribute->collidingWithWorld)
 		{
 			applyCentralImpulse(btVector3(0.0f, 5.0f, 0.0f));
 			playerAttribute->timeSinceLastJump = 0.0f;
 		}
 
+		//Jetpack
+		if(inputAttribute->jetpack)
+		{
+			applyCentralImpulse(btVector3(0.0f, 50.0f*delta, 0.0f));
+			playerAttribute->jetpackTimer+=delta;
+			if(playerAttribute->jetpackTimer > 0.1f)
+			{
+				playerAttribute->jetpackTimer = 0.0f;
+				health->health--;
+			}
+		}
+
+		Attribute_Physics* playerPhysicsAttribute = itrPhysics_3.at(attributeIndex_);
+
+		//Prevent player from sliding down slopes
+		if(inputAttribute->position.x == 0.0f && inputAttribute->position.y == 0.0f && playerAttribute->collidingWithWorld && !inputAttribute->jetpack && !inputAttribute->jump)
+		{
+			setFriction(btScalar(100.0f)); //Friction when player are standing still
+			setGravity(btVector3(0.0f, 0.0f, 0.0f));
+		}
+		else //restore friction and gravity
+		{
+			setFriction(btScalar(0.0f));
+			setGravity(btVector3(playerPhysicsAttribute->gravity.x, playerPhysicsAttribute->gravity.y, playerPhysicsAttribute->gravity.z));
+		}
+
 		inputAttribute->jump = false;
 		inputAttribute->jetpack = false;
-
 	}
 }

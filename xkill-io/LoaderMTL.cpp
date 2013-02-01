@@ -1,5 +1,4 @@
-#include <xkill-utilities/EventManager.h>
-
+#include <xkill-utilities/Util.h>
 #include "MTLMaterial.h"
 #include "LoaderMTL.h"
 #include "SimpleStringSplitter.h"

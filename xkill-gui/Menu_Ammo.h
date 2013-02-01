@@ -9,7 +9,7 @@
 class Menu_Ammo
 {
 public:
-	Menu_Ammo(Ui::MainMenu* ui);
+	Menu_Ammo(Ui::MainMenu* ui, QMainWindow* window);
 	~Menu_Ammo();
 
 	//! Updates the qt menu based on the in game data

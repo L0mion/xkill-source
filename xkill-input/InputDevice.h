@@ -70,6 +70,8 @@ public:
 	*/
 	virtual void SetForceFeedback(float leftMotorScale, float rightMotorScale) = 0;
 	virtual bool IsForceFeedbackCapable() = 0;
+	virtual void setForceFeedbackEnabled(bool enabled);
+	virtual bool isForceFeedbackEnabled();
 
 	virtual InputDeviceLayout GetLayout();
 
@@ -117,6 +119,8 @@ public:
 
 	void createObjectVectors();
 
+	void setSensitivityModifier(float value);
+
 protected:
 	InputDeviceLayout inputLayout_;
 	GUID deviceGUID_;
@@ -125,6 +129,8 @@ protected:
 
 	float rumbleTimer_;
 	bool rumbleActive_;
+	bool rumbleEnabled_;
+	float sensitivityModifier_;
 
 	std::vector<InputAxisObject*> axes_;
 	std::vector<InputButtonObject*> buttons_;

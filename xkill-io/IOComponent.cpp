@@ -2,9 +2,8 @@
 #include <tchar.h>
 #include <stdio.h>
 
-#include <xkill-utilities/EventManager.h>
+#include <xkill-utilities/Util.h>
 #include <xkill-utilities/MeshModel.h>
-#include <xkill-utilities/AttributeType.h>
 
 #include "MeshMakerObj.h"
 #include "IOComponent.h"

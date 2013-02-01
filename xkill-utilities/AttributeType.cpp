@@ -117,6 +117,15 @@ Attribute_Sound::~Attribute_Sound()
 {
 }
 
+Attribute_SoundSettings::Attribute_SoundSettings()
+{
+	this->soundMuted = false;
+	this->soundVolume = 1.0f;
+}
+Attribute_SoundSettings::~Attribute_SoundSettings()
+{
+}
+
 Attribute_Camera::Attribute_Camera()
 {
 	ZeroMemory(&mat_projection, sizeof(mat_projection));
@@ -158,6 +167,7 @@ Attribute_Input::Attribute_Input()
 	firePressed = false;
 	changeAmmunitionType = false;
 	changeFiringMode = false;
+	lowSensitivity = false;
 	ZeroMemory(&position,sizeof(position));
 	ZeroMemory(&rotation,sizeof(rotation));
 	DirectX::XMFLOAT3 test;
@@ -183,7 +193,11 @@ Attribute_Player::Attribute_Player()
 	totalExecutionTime = 0;
 	respawnDelay = 5.0f;
 	currentRespawnDelay = 0.0f;
+	delayInSecondsBetweenEachJump = 1.0f;
 	timeSinceLastJump = 0.0f;
+	collidingWithWorld = false;
+	jetpackTimer = 0.0f;
+	detectedAsDead = true;
 
 	walkSpeed = 5.0f;
 	sprintSpeed = walkSpeed*2;

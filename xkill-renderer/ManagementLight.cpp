@@ -1,7 +1,7 @@
 #include <d3d11.h>
 #include <DirectXMath.h>
 
-#include <xkill-utilities/EventManager.h>
+#include <xkill-utilities/Util.h>
 
 #include "ManagementLight.h"
 #include "renderingUtilities.h"
@@ -11,23 +11,56 @@ ATTRIBUTES_DECLARE_ALL;
 ManagementLight::ManagementLight()
 {
 	ATTRIBUTES_INIT_ALL;
+
+	streamDirLight_		= nullptr;
+	streamPointLight_	= nullptr;
+	streamSpotLight_	= nullptr;
+	streamPosLight_		= nullptr;
 }
 ManagementLight::~ManagementLight()
 {
-	//Do nothing.
+	SAFE_DELETE(streamDirLight_);
+	SAFE_DELETE(streamPointLight_);
+	SAFE_DELETE(streamSpotLight_);
+	SAFE_DELETE(streamPosLight_);
+}
+
+void ManagementLight::init()
+{
+	streamDirLight_ = new DataStreamSRV<LightDescDir>(
+		D3D11_BIND_SHADER_RESOURCE, 
+		D3D11_RESOURCE_MISC_BUFFER_STRUCTURED);
+	streamPointLight_ = new DataStreamSRV<LightDescPoint>(
+		D3D11_BIND_SHADER_RESOURCE, 
+		D3D11_RESOURCE_MISC_BUFFER_STRUCTURED);
+	streamSpotLight_ = new DataStreamSRV<LightDescSpot>(
+		D3D11_BIND_SHADER_RESOURCE, 
+		D3D11_RESOURCE_MISC_BUFFER_STRUCTURED);
+	streamPosLight_ = new DataStreamSRV<Float3>(
+		D3D11_BIND_SHADER_RESOURCE, 
+		D3D11_RESOURCE_MISC_BUFFER_STRUCTURED);
 }
 
 void ManagementLight::reset()
 {
+	SAFE_DELETE(streamDirLight_);
+	SAFE_DELETE(streamPointLight_);
+	SAFE_DELETE(streamSpotLight_);
+	SAFE_DELETE(streamPosLight_);
+
+	streamDirLight_		= nullptr;
+	streamPointLight_	= nullptr;
+	streamSpotLight_	= nullptr;
+	streamPosLight_		= nullptr;
 }
 
 void ManagementLight::update(ID3D11Device* device, ID3D11DeviceContext* devcon)
 {
 	//Reset counters.
-	streamDirLight_		.resetStream();
-	streamPointLight_	.resetStream();
-	streamSpotLight_	.resetStream();
-	streamPosLight_		.resetStream();
+	streamDirLight_		->resetStream();
+	streamPointLight_	->resetStream();
+	streamSpotLight_	->resetStream();
+	streamPosLight_		->resetStream();
 
 	//Send new data into streams.
 	updateStreamDirLight();
@@ -36,10 +69,10 @@ void ManagementLight::update(ID3D11Device* device, ID3D11DeviceContext* devcon)
 	//updateStreamPosLight();
 
 	//Map updated streams onto buffers.
-	streamDirLight_		.updateDataStream(device, devcon);
-	streamPointLight_	.updateDataStream(device, devcon);
-	streamSpotLight_	.updateDataStream(device, devcon);
-	streamPosLight_		.updateDataStream(device, devcon);
+	streamDirLight_		->updateDataStream(device, devcon);
+	streamPointLight_	->updateDataStream(device, devcon);
+	streamSpotLight_	->updateDataStream(device, devcon);
+	streamPosLight_		->updateDataStream(device, devcon);
 }
 
 void ManagementLight::setLightSRVCS(
@@ -50,16 +83,16 @@ void ManagementLight::setLightSRVCS(
 	switch (bufferType)
 	{
 	case LIGHTBUFFERTYPE_DIR:
-		streamDirLight_.setStreamSRV(devcon, shaderRegister);
+		streamDirLight_->setStreamSRV(devcon, shaderRegister);
 		break;
 	case LIGHTBUFFERTYPE_POINT:
-		streamPointLight_.setStreamSRV(devcon, shaderRegister);
+		streamPointLight_->setStreamSRV(devcon, shaderRegister);
 		break;
 	case LIGHTBUFFERTYPE_SPOT:
-		streamSpotLight_.setStreamSRV(devcon, shaderRegister);
+		streamSpotLight_->setStreamSRV(devcon, shaderRegister);
 		break;
 	case LIGHTBUFFERTYPE_POS_VIEW:
-		streamPosLight_.setStreamSRV(devcon, shaderRegister);
+		streamPosLight_->setStreamSRV(devcon, shaderRegister);
 		break;
 	}
 }
@@ -70,7 +103,7 @@ void ManagementLight::updateStreamDirLight()
 	while(itrLightDir.hasNext())
 	{
 		lightDirAt	= itrLightDir.getNext();
-		streamDirLight_.pushData(lightDirAt->lightDir);
+		streamDirLight_->pushData(lightDirAt->lightDir);
 	}
 }
 void ManagementLight::updateStreamPointLight()
@@ -82,8 +115,8 @@ void ManagementLight::updateStreamPointLight()
 		lightPointAt = itrLightPoint.getNext();
 		posAt = itrPosition.at(lightPointAt->ptr_position);
 
-		streamPointLight_.pushData(lightPointAt->lightPoint);
-		streamPosLight_.pushData(posAt->position);
+		streamPointLight_->pushData(lightPointAt->lightPoint);
+		streamPosLight_->pushData(posAt->position);
 	}
 }
 void ManagementLight::updateStreamSpotLight()
@@ -95,22 +128,22 @@ void ManagementLight::updateStreamSpotLight()
 		lightSpotAt = itrLightSpot.getNext();
 		posAt = itrPosition.at(lightSpotAt->ptr_position);
 
-		streamSpotLight_.pushData(lightSpotAt->lightSpot);
-		streamPosLight_.pushData(posAt->position);
+		streamSpotLight_->pushData(lightSpotAt->lightSpot);
+		streamPosLight_->pushData(posAt->position);
 	}
 }
 
 unsigned int ManagementLight::getLightDirCurCount()
 {
-	return streamDirLight_.getDataCountCur();
+	return streamDirLight_->getDataCountCur();
 }
 unsigned int ManagementLight::getLightPointCurCount()
 {
-	return streamPointLight_.getDataCountCur();
+	return streamPointLight_->getDataCountCur();
 }
 unsigned int ManagementLight::getLightSpotCurCount()
 {
-	return streamSpotLight_.getDataCountCur();
+	return streamSpotLight_->getDataCountCur();
 }
 
 //void ManagementLight::transformLightViewSpacePoss(ID3D11DeviceContext* devcon, DirectX::XMFLOAT4X4 view)

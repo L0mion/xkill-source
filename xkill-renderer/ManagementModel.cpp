@@ -1,8 +1,7 @@
 #include <d3d11.h>
 #include <Windows.h>
 
-#include <xkill-utilities/EventManager.h>
-#include <xkill-utilities/AttributeType.h>
+#include <xkill-utilities/Util.h>
 #include <xkill-utilities/MeshModel.h>
 #include <xkill-utilities/DebugShape.h>
 
@@ -14,6 +13,8 @@
 #include "IB.h"
 #include "renderingUtilities.h"
 #include "ManagementModel.h"
+
+#include <sstream>
 
 ATTRIBUTES_DECLARE_ALL
 
@@ -112,7 +113,14 @@ HRESULT ManagementModel::createModelD3D(
 	}
 	else
 	{
-		ERROR_MSG(L"ManagementModel::createModelD3D Could not find model!");
+		std::stringstream ss;
+		ss << "ManagementModel::createModelD3D Could not find model with id ";
+		ss << modelID;
+
+		std::string str;
+		str = ss.str();
+		
+		ERROR_MSG(str);
 		hr = S_FALSE;
 	}
 

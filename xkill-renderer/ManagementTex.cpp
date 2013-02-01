@@ -5,10 +5,10 @@
 #include <d3d11.h>
 #include "DDSTextureLoader.h"
 
+#include <xkill-utilities/Util.h>
 #include <xkill-utilities/TexDesc.h>
 #include <xkill-utilities/TexDescHeader.h>
 #include <xkill-utilities/TexDescTex.h>
-#include <xkill-utilities/EventManager.h>
 #include <xkill-utilities/StringConv.h>
 
 #include "Tex.h"

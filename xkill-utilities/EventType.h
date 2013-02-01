@@ -6,6 +6,7 @@
 #include "LightDesc.h"
 #include "Enums.h"
 #include "AttributePointer.h"
+#include "AttributeType.h"
 
 //
 // Events info
@@ -67,6 +68,7 @@ enum DLL_U EventType
 	EVENT_WINDOW_RESIZE,
 	EVENT_INPUT_DEVICE_SEARCH,
 	EVENT_PLAYSOUND,
+	EVENT_UPDATESOUNDSETTINGS,
 	EVENT_RUMBLE,
 	EVENT_PHYSICS_ATTRIBUTES_COLLIDING,
 	EVENT_DRAW_BULLET_PHYSICS_DEBUG_LINES,
@@ -397,11 +399,11 @@ public:
 class DLL_U Event_CreatePickupable : public Event
 {
 public:
-	Event_CreatePickupable(Float3 position, PickupableType pickupableType, AttributePointer creatorPickupablesSpawnPoint, int amount);
+	Event_CreatePickupable(Float3 position, PickupableType pickupableType, AttributePtr<Attribute_PickupablesSpawnPoint> creatorPickupablesSpawnPoint, int amount);
 
 	Float3 position;
 	PickupableType pickupableType;
-	AttributePointer creatorPickupablesSpawnPoint;
+	AttributePtr<Attribute_PickupablesSpawnPoint>  creatorPickupablesSpawnPoint;
 	int amount;
 };
 

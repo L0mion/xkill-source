@@ -1,7 +1,7 @@
 #include "EventToFModConverter.h"
 
 #include <xkill-utilities/EventType.h>
-
+#include <xkill-utilities/Converter.h>
 #include "FileParser.h"
 #include <sstream>
 
@@ -24,13 +24,34 @@ bool EventToFModConverter::init(std::string filepath)
 
 void EventToFModConverter::fillNameConversionArray(std::string filepath)
 {
-	FileParser fp(configMessage());
+	std::string message;
+
+	message = "#" + Converter::ULongToStr(Converter::HashString(configMessage())) + "\n";
+	message += configMessage();
+
+	FileParser fp(message);
 	fp.setFilePath(filepath);
 	fp.setFileName("events.cfg");
+
 	fp.startReading();
 
+	std::string row = "";
+
+	if(!fp.isEmpty())
+	{
+		row = fp.getNextRow();
+	}
+
+	if(!isValid(row))
+	{
+		fp.clean();
+		fp.deleteFile();
+
+		fp.startReading();
+	}
+
 	int number;
-	std::string numberStr, name, row;
+	std::string numberStr, name;
 
 	while(!fp.isEmpty())
 	{
@@ -79,8 +100,9 @@ void EventToFModConverter::addConversion(std::string conversionRow)
 		if(number < -1)
 			return;
 
-		int eventIndex = stringToInt(name);
-		if(eventIndex < 0)	//If true then it wasn't a number
+		std::vector<int> eventIndices;
+		int nameIndex = stringToInt(name);
+		if(nameIndex < 0)	//If true then it wasn't a number
 		{
 			bool matchFound = false;
 
@@ -88,17 +110,23 @@ void EventToFModConverter::addConversion(std::string conversionRow)
 			{
 				if(eventNameToNumberEvent_[i].first == name)	//Search for matching event name
 				{
-					eventIndex = eventNameToNumberEvent_[i].second;
+					eventIndices.push_back(eventNameToNumberEvent_[i].second);
 					matchFound = true;
-					break;
 				}
 			}
 
 			if(!matchFound)
 				return;
 		}
+		else
+		{
+			eventIndices.push_back(nameIndex);
+		}
 
-		eventToFModArray_.push_back(std::pair<int, int>(eventIndex, number));
+		for(unsigned int i = 0; i < eventIndices.size(); i++)
+		{
+			eventToFModArray_.push_back(std::pair<int, int>(eventIndices[i], number));
+		}
 	}
 }
 
@@ -139,6 +167,23 @@ std::string EventToFModConverter::removeWhiteSpaceAtBeginningAndEnd(std::string 
 	str = str.substr(0, strIndex);		//Remove whitespace at the end of the string
 
 	return str;
+}
+
+bool EventToFModConverter::isValid(std::string row)
+{
+	int strIndex;
+
+	strIndex = row.find_first_of("//");		//Remove everything after comment
+	row = row.substr(0, strIndex);
+
+	removeWhiteSpaceAtBeginningAndEnd(row);
+
+	if(row == "" || row[0] != '#')
+		return false;
+
+	std::string hash = "#" + Converter::ULongToStr(Converter::HashString(configMessage()));
+
+	return hash == row;
 }
 
 int EventToFModConverter::stringToInt(std::string str)
@@ -183,17 +228,46 @@ std::string EventToFModConverter::configMessage()
 	message += "// a event number. \n";
 	message += "// This file will be used to convert fmod events to in-game events.\n\n";
 
-	message += intToString(Event_PlaySound::SOUND_DEATH)			+ " = Player Death\n";
-	message += intToString(Event_PlaySound::SOUND_FIRE)				+ " = Fire Gun\n";
-	message += intToString(Event_PlaySound::SOUND_HIT)				+ " = Player Hit\n";
-	message += intToString(Event_PlaySound::SOUND_MUSIC)			+ " = Play Music\n";
-	message += intToString(Event_PlaySound::SOUND_RESPAWN)			+ " = Player Respawn\n";
-	message += intToString(Event_PlaySound::SOUND_WALK)				+ " = Player Walk\n";
-	message += intToString(EVENT_CREATE_EXPLOSIONSPHERE + offset)	+ " = Explosion\n";
-	message += intToString(EVENT_CREATE_PROJECTILE + offset)		+ " = Fire Gun\n";
-	message += intToString(EVENT_PLAYERDEATH + offset)				+ " = Player Death\n";
-	message += intToString(EVENT_CREATE_PICKUPABLE + offset)		+ " = Spawn Pickupable\n";
-	message += intToString(EVENT_CREATE_EXPLOSIONSPHERE + offset)	+ " = Explosion\n";
+	std::vector<std::pair<int, std::string>> table;
+
+	table.push_back(std::pair<int, std::string>(Event_PlaySound::SOUND_DEATH,			"Player Death"));
+	table.push_back(std::pair<int, std::string>(Event_PlaySound::SOUND_FIRE,			"Fire Gun"));
+	table.push_back(std::pair<int, std::string>(Event_PlaySound::SOUND_HIT,				"Player Hit"));
+	table.push_back(std::pair<int, std::string>(Event_PlaySound::SOUND_MUSIC,			"Play Music"));
+	table.push_back(std::pair<int, std::string>(Event_PlaySound::SOUND_RESPAWN,			"Player Respawn"));
+	table.push_back(std::pair<int, std::string>(Event_PlaySound::SOUND_WALK,			"Player Walk"));
+	table.push_back(std::pair<int, std::string>(EVENT_CREATE_PROJECTILE + offset,		"Fire Gun"));
+	table.push_back(std::pair<int, std::string>(EVENT_PLAYERDEATH + offset,				"Player Death"));
+	table.push_back(std::pair<int, std::string>(EVENT_CREATE_PICKUPABLE + offset,		"Spawn Pickupable"));
+	table.push_back(std::pair<int, std::string>(EVENT_CREATE_EXPLOSIONSPHERE + offset,	"Explosion"));
+
+	sortConfigMessageTable(table);
+
+	for(unsigned int i = 0; i < table.size(); i++)
+	{
+		message += Converter::IntToStr(table[i].first) + " = " + table[i].second + "\n";
+	}
 
 	return message;
+}
+
+void EventToFModConverter::sortConfigMessageTable(std::vector<std::pair<int, std::string>>& table)
+{	//Use bubblesort as the table will be short
+	for(unsigned int i = 0; i < table.size(); i++)
+	{
+		for(unsigned int j = i; j < table.size(); j++)
+		{
+			if(table[j] < table[i])
+			{
+				swap(table, i, j);
+			}
+		}
+	}
+}
+
+void EventToFModConverter::swap(std::vector<std::pair<int, std::string>>& table, int first, int second)
+{
+	std::pair<int, std::string> temp = table[first];
+	table[first] = table[second];
+	table[second] = temp;
 }

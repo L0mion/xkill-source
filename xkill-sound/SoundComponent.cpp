@@ -1,7 +1,7 @@
 #include "SoundComponent.h"
 
 #include <xkill-utilities/IObserver.h>
-#include <xkill-utilities/EventManager.h>
+#include <xkill-utilities/Util.h>
 #include "FMODEventSystem.h"
 
 #include "FileParser.h"
@@ -9,8 +9,12 @@
 
 #define SAFE_DELETE(x) if( x ) { delete(x); (x) = NULL; }
 
+ATTRIBUTES_DECLARE_ALL
+
 SoundComponent::SoundComponent()
 {
+	ATTRIBUTES_INIT_ALL
+
 	mFMODEventSystem = NULL;
 	converter = NULL;
 	timer = 0.0f;
@@ -19,6 +23,7 @@ SoundComponent::SoundComponent()
 	SUBSCRIBE_TO_EVENT(this, EVENT_CREATE_PROJECTILE);
 	SUBSCRIBE_TO_EVENT(this, EVENT_PLAYERDEATH);
 	SUBSCRIBE_TO_EVENT(this, EVENT_END_DEATHMATCH);
+	SUBSCRIBE_TO_EVENT(this, EVENT_UPDATESOUNDSETTINGS);
 }
 
 SoundComponent::~SoundComponent()
@@ -60,14 +65,42 @@ void SoundComponent::onEvent(Event* e)
 	{
 		Event_PlaySound* eps = static_cast<Event_PlaySound*>(e);
 		
-		if(eps->muteSound)
-			mFMODEventSystem->SetMuteSounds();
+		if(eps->soundId < 0)
+		{
+			mFMODEventSystem->SetMuteSounds(eps->muteSound);
+
+			//Attribute_SoundSettings* soundSettings;
+			//while(itrSoundSettings.hasNext())
+			//{
+			//	soundSettings = itrSoundSettings.getNext();
+
+			//	soundSettings->soundMuted = eps->muteSound;
+			//}
+
+			settings->soundMuted = eps->muteSound;
+		}
 		else
+		{
 			eventIndex = eps->soundId;
+		}
+	}
+	else if(type == EventType::EVENT_UPDATESOUNDSETTINGS)
+	{
+		//Attribute_SoundSettings* soundSettings;
+		//while(itrSoundSettings.hasNext())
+		//{
+		//	soundSettings = itrSoundSettings.getNext();
+
+		//	mFMODEventSystem->SetMuteSounds(soundSettings->soundMuted);
+		//	mFMODEventSystem->SetVolume(soundSettings->soundVolume);
+		//}
+
+		mFMODEventSystem->SetMuteSounds(settings->soundMuted);
+		mFMODEventSystem->SetVolume(settings->soundVolume);
 	}
 	else
 	{
-		eventIndex = (int)type;
+		eventIndex = (int)type + Event_PlaySound::SOUND_LAST;
 	}
 
 	int fmodEventIndex = converter->getFModIndex(eventIndex);
@@ -81,7 +114,7 @@ void SoundComponent::onUpdate(float delta)
 	if(timer >= 0.5f)
 	{
 		timer = 0.0f;
-		int fmodEventIndex = converter->getFModIndex(2);
+		int fmodEventIndex = converter->getFModIndex(Event_PlaySound::SOUND_WALK);
 		if(fmodEventIndex >= 0)
 			mFMODEventSystem->StartSoundEventAt(fmodEventIndex);
 	}

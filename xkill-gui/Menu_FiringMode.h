@@ -9,7 +9,7 @@
 class Menu_FiringMode
 {
 public:
-	Menu_FiringMode(Ui::MainMenu* ui);
+	Menu_FiringMode(Ui::MainMenu* ui, QMainWindow* window);
 	~Menu_FiringMode();
 
 	//! Updates the qt menu based on the in game data
