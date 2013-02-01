@@ -518,15 +518,6 @@ void GameComponent::event_PhysicsAttributesColliding(Event_PhysicsAttributesColl
 					projectileAttribute->currentLifeTimeLeft = 1.00f;
 				}
 
-
-				//continue
-				//MutatorSettings ms;
-				//Ammunition ammo = ms.getStandardAmmunition(projectileAttribute->ammunitionType);
-				//FiringMode firingMode = ms.getStandardFiringMode(projectileAttribute->firingModeType);
-
-				//float explosionSphereRadius = ammo.explosionSphereFinalRadius;
-				float explosionSphereRadius = 1.0f;
-
 				//Explosion handling.
 				if(projectileAttribute->ammunitionType == XKILL_Enums::AmmunitionType::EXPLOSIVE)
 				{
@@ -541,16 +532,16 @@ void GameComponent::event_PhysicsAttributesColliding(Event_PhysicsAttributesColl
 						}
 					}
 
+					//Kill the projectile that caused the explosion
  					projectileAttribute->currentLifeTimeLeft = 0.0f;
 
 					//Extract projectile position.
-			
 					Attribute_Physics* projectilePhysicsAttribute = itrPhysics.at(projectileAttribute->ptr_physics);
 					Attribute_Spatial* projectileSpatialAttribute = itrSpatial.at(projectilePhysicsAttribute->ptr_spatial);
 					Attribute_Position* projectilePositionAttribute = itrPosition.at(projectileSpatialAttribute->ptr_position);
 
 					//Creates an explosion sphere. Init information is taken from the impacting projectile.
-					SEND_EVENT(&Event_CreateExplosionSphere(projectilePositionAttribute->position, explosionSphereRadius, projectileDamageAttribute->damage, projectileAttribute->entityIdOfCreator));
+					SEND_EVENT(&Event_CreateExplosionSphere(projectilePositionAttribute->position, projectileDamageAttribute->damage, projectileAttribute->entityIdOfCreator, projectileAttribute->ammunitionType, projectileAttribute->firingModeType));
 				}
 			}
 			//SEND_EVENT(&Event_RemoveEntity(entity1->getID())); //Crashes sometimes if removed here

@@ -18,8 +18,8 @@ template <class Vertex>
 class VB;
 class IB;
 
-#include <xkill-utilities\MeshDesc.h>
-#include <xkill-utilities\AttributeType.h>
+#include <xkill-utilities/MeshDesc.h>
+#include <xkill-utilities/AttributeType.h>
 
 #include <map>
 

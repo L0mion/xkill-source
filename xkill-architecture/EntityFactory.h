@@ -149,7 +149,7 @@ public:
 		CONNECT_ATTRIBUTES(physics, render);
 		physics->meshID = render->meshID;
 		
-		physics->linearVelocity = e->velocity; //Float3(e->velocity.x / scale,  e->velocity.y / scale, e->velocity.z / scale);
+		physics->linearVelocity = e->velocity;
 		physics->mass = 100.0f;
 		physics->gravity = Float3(0.0f, 0.0f, 0.0f);
 		physics->collisionResponse = true;
@@ -267,10 +267,12 @@ public:
 		CREATE_ATTRIBUTE(Attribute_Spatial, spatial, entity);
 		CONNECT_ATTRIBUTES(spatial, position);
 
+		/*
 		CREATE_ATTRIBUTE(Attribute_DebugShape, debugShape, entity);	//create temp debug shape
 		CONNECT_ATTRIBUTES(debugShape, spatial);
 		debugShape->shape	= new DebugShapeSphere(e->radius);
 		debugShape->render	= true;
+		*/
 
 		CREATE_ATTRIBUTE(Attribute_Physics, physics, entity);
 		physics->collisionFilterGroup = Attribute_Physics::EXPLOSIONSPHERE;
@@ -283,13 +285,13 @@ public:
 
 		CREATE_ATTRIBUTE(Attribute_ExplosionSphere, explosionSphere, entity);
 		CONNECT_ATTRIBUTES(explosionSphere, physics);
-		explosionSphere->radius = e->radius;
+		explosionSphere->ammunitionType = e->ammunitionType;
+		explosionSphere->firingModeType = e->firingModeType;
 
 		CREATE_ATTRIBUTE(Attribute_Damage, damage, entity);
 		damage->damage = e->damage;
 		damage->owner_entityID = e->entityIdOfCreator;
 	}
-
 
 	void createLightEntity(Entity* entity, Event_CreateLight* e)
 	{

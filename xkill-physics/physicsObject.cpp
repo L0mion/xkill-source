@@ -38,6 +38,12 @@ btVector3 PhysicsObject::subClassCalculateLocalInertiaHook(btScalar mass)
 	return zeroLocalInertia();
 }
 
+btCollisionShape* PhysicsObject::subClassSpecificCollisionShape()
+{
+	Attribute_Physics* physicsAttribute = itrPhysics_.at(attributeIndex_);
+	return CollisionShapes::Instance()->getCollisionShape(physicsAttribute->meshID);
+}
+
 bool PhysicsObject::subClassSpecificInitHook()
 {
 	return true;
@@ -73,16 +79,15 @@ bool PhysicsObject::init(unsigned int attributeIndex,unsigned int collisionFilte
 	btScalar mass = static_cast<btScalar>(physicsAttribute->mass);
 
 	//Resolve mass, local inertia of the collision shape, and also the collision shape itself.
-	btCollisionShape* collisionShape = CollisionShapes::Instance()->getCollisionShape(physicsAttribute->meshID);
+	btCollisionShape* collisionShape = subClassSpecificCollisionShape();
 	setCollisionShape(collisionShape);
 	
 	btVector3 localInertia = subClassCalculateLocalInertiaHook(mass);
 	setMassProps(mass, localInertia); //Set inverse mass and inverse local inertia
-	updateInertiaTensor(); //check
+	updateInertiaTensor();
 	if((getCollisionFlags() & btCollisionObject::CF_STATIC_OBJECT))
 	{
 		btTransform world;
-
 		Attribute_Spatial* spatialAttribute = itrSpatial_PhysicsObject.at(itrPhysics_.at(attributeIndex_)->ptr_spatial);
  		Attribute_Position* positionAttribute = itrPosition_PhysicsObject.at(spatialAttribute->ptr_position);
  		world.setOrigin(convert(positionAttribute->position));
