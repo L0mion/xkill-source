@@ -504,7 +504,8 @@ enum DLL_U EntityType
 	WORLD,
 	PLAYER,
 	PROJECTILE,
-	INPUTDEVICES
+	INPUTDEVICES,
+	RENDERABLE
 };
 
 class DLL_U Event_CreateEntity : public Event

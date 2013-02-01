@@ -63,11 +63,9 @@ public:
 		//spatial->ptr_position2 = ((AttributeManager*)AttributeManagerDLLWrapper::getInstance())->position.getLatestAttributeAsAttributePtr();
 		//Attribute_Position* p = spatial->ptr_position2.getAttribute();
 
-		
-
 		CREATE_ATTRIBUTE(Attribute_Render, render, entity);
 		CONNECT_ATTRIBUTES(render, spatial);
-		render->meshID = 0;
+		render->meshID = 3; //0;
 
 		//CREATE_ATTRIBUTE(Attribute_DebugShape, debugShape, entity);	//create temp debug shape
 		//CONNECT_ATTRIBUTES(debugShape, spatial);
@@ -358,6 +356,32 @@ public:
 		
 
 		inputDevice->device = e->device;
+	}
+
+	
+
+	void createRenderableEntity(Entity* entity)
+	{
+		CREATE_ATTRIBUTE(Attribute_Position, position, entity);
+		position->position  = Float3(0.0f, 4.0f, 0.0f);
+
+		CREATE_ATTRIBUTE(Attribute_Spatial, spatial, entity);
+		CONNECT_ATTRIBUTES(spatial, position);
+		spatial->scale = Float3(0.5f, 0.5f, 0.5f);
+		
+
+		CREATE_ATTRIBUTE(Attribute_Render, render, entity);
+		CONNECT_ATTRIBUTES(render, spatial);
+		render->meshID = 3;
+		
+		CREATE_ATTRIBUTE(Attribute_Physics, physics, entity);
+		CONNECT_ATTRIBUTES(physics, spatial);
+		CONNECT_ATTRIBUTES(physics, render);
+		physics->meshID = render->meshID;
+		physics->collisionFilterGroup = Attribute_Physics::PLAYER;
+		physics->collisionFilterMask = Attribute_Physics::EVERYTHING;
+		physics->gravity = Float3(0.0f, -10.0f, 0.0f);
+	
 	}
 };
 

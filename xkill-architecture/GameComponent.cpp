@@ -788,6 +788,9 @@ void GameComponent::event_StartDeathmatch( Event_StartDeathmatch* e )
 		SEND_EVENT(&Event_CreateEntity(PLAYER));
 	}
 
+	//Create mesh for debugging fbx-loading.
+	SEND_EVENT(&Event_CreateEntity(RENDERABLE));
+
 	// Get window resolution so we can tell renderer to recalculate and resize split screens
 	Event_GetWindowResolution event_getWindowResolution;
 	SEND_EVENT(&event_getWindowResolution);
