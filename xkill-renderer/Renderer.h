@@ -4,6 +4,11 @@
 typedef long HRESULT;
 typedef struct HWND__* HWND;
 
+template<typename T>
+class DataStreamBuffer;
+struct VertexPosNormTexInstanced;
+typedef DataStreamBuffer<VertexPosNormTexInstanced> InstancedData;
+
 namespace DirectX
 {
 	struct XMFLOAT4X4;
@@ -29,17 +34,15 @@ class ManagementSprites;
 
 class Winfo;
 class TexDesc;
-class IB;
 class MeshMaterial;
-class InstancedData;
+class SubsetD3D;
 
 #include <vector>
-
-struct ID3D11Buffer; //Bullet Physics lines
 
 //temp
 class M3DLoader;
 class AnimatedMesh;
+struct ID3D11Buffer; //Bullet Physics lines
 
 //! Module responsible for managing data related to rendering and doing the actual rendering of XKILL.
 /*! Rendering module of XKILL utilizing Deferred Rendering with DirectCompute.
@@ -82,8 +85,8 @@ private:
 	void renderViewportToBackBuffer(ViewportData& vpData);				//!< Renders to backbuffer.
 	void renderInstance(unsigned int meshID, InstancedData* instance);	//!< Renders an instanced model.
 	void renderSubset(
-		IB* ib, 
-		MeshMaterial& material,
+		SubsetD3D* subset, 
+		MaterialDesc& material,
 		unsigned int numInstances);										//!< Renders a subset.
 	void renderDebugShape(
 		Attribute_DebugShape*	debugShapeAt, 

@@ -12,11 +12,17 @@ ATTRIBUTES_DECLARE_ALL
 ExplosionSpherePhysicsObject::ExplosionSpherePhysicsObject()
 	: PhysicsObject()
 {
+	localCopyOfCollisionShape_ = nullptr;
+	radius = 0.0f;
 	ATTRIBUTES_INIT_ALL
 }
 
 ExplosionSpherePhysicsObject::~ExplosionSpherePhysicsObject()
 {
+	if(localCopyOfCollisionShape_ != nullptr)
+	{
+		delete localCopyOfCollisionShape_;
+	}
 }
 
 bool ExplosionSpherePhysicsObject::subClassSpecificInitHook()
@@ -24,8 +30,6 @@ bool ExplosionSpherePhysicsObject::subClassSpecificInitHook()
 	//setCollisionShape(CollisionShapes::Instance()->getCollisionShape(143250));
 	
 	std::vector<int> indices = itrPhysics.ownerAt(attributeIndex_)->getAttributes(ATTRIBUTE_EXPLOSIONSPHERE);
-
-	float radius = 0.0f;
 
 	for(unsigned int i = 0; i < indices.size(); i++)
 	{
@@ -35,13 +39,22 @@ bool ExplosionSpherePhysicsObject::subClassSpecificInitHook()
 			radius = explosionSphere->radius;
 	}
 
+	//Retrieve the collision shape
 	btCollisionShape* collisionShape = getCollisionShape();
-	collisionShape->setLocalScaling(btVector3(radius, radius, radius));
-	
 	btSphereShape* sphere = static_cast<btSphereShape*>(collisionShape);
+	
+	//Create local copy of the collision shape
+	localCopyOfCollisionShape_ = new btSphereShape(*sphere);
+	setCollisionShape(localCopyOfCollisionShape_);
 
-	Attribute_Physics* physicsAttribute = itrPhysics.at(attributeIndex_);
-	physicsAttribute->reloadDataIntoBulletPhysics = true;
-
+	//Scale the local copy of the collosion shape
+	localCopyOfCollisionShape_->setLocalScaling(btVector3(radius, radius, radius));
+	
 	return true;
+}
+
+void ExplosionSpherePhysicsObject::onUpdate(float delta)
+{
+	radius += delta;
+	localCopyOfCollisionShape_->setLocalScaling(btVector3(radius, radius, radius));
 }

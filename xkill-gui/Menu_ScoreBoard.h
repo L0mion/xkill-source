@@ -1,8 +1,6 @@
 #pragma once
 
-#include <xkill-utilities/EventManager.h>
-#include <xkill-utilities/EventType.h>
-#include <xkill-utilities/AttributeType.h>
+#include <xkill-utilities/Util.h>
 #include <QtGui/QDialog>
 #include <QtGui/QKeyEvent>
 #include "ToggleHelper.h"

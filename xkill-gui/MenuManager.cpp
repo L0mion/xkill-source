@@ -1,6 +1,6 @@
 #include "MenuManager.h"
 
-#include <xkill-utilities/EventManager.h>
+#include <xkill-utilities/Util.h>
 
 
 ATTRIBUTES_DECLARE_ALL;
@@ -130,15 +130,15 @@ void HUDWindow::update(Attribute_SplitScreen* splitScreen)
 	{
 		ammo = weaponStats->currentAmmunitionType;
 
-		if(ammo == Ammunition::AmmunitionType::BULLET)
+		if(ammo == XKILL_Enums::AmmunitionType::BULLET)
 		{
 			label_ammoType->setPixmap(QPixmap(QString::fromUtf8(":/xkill/images/a_bullet.png")));
 		}
-		if(ammo == Ammunition::AmmunitionType::SCATTER)
+		if(ammo == XKILL_Enums::AmmunitionType::SCATTER)
 		{
 			label_ammoType->setPixmap(QPixmap(QString::fromUtf8(":/xkill/images/a_scatter.png")));
 		}
-		if(ammo == Ammunition::AmmunitionType::EXPLOSIVE)
+		if(ammo == XKILL_Enums::AmmunitionType::EXPLOSIVE)
 		{
 			label_ammoType->setPixmap(QPixmap(QString::fromUtf8(":/xkill/images/a_explosive.png")));
 		}
@@ -149,15 +149,15 @@ void HUDWindow::update(Attribute_SplitScreen* splitScreen)
 	{
 		weapon = weaponStats->currentFiringModeType;
 
-		if(weapon == FiringMode::FiringModeType::SINGLE)
+		if(weapon == XKILL_Enums::FiringModeType::SINGLE)
 		{
 			label_weaponType->setPixmap(QPixmap(QString::fromUtf8(":/xkill/images/w_single.png")));
 		}
-		if(weapon == FiringMode::FiringModeType::SEMI)
+		if(weapon == XKILL_Enums::FiringModeType::SEMI)
 		{
 			label_weaponType->setPixmap(QPixmap(QString::fromUtf8(":/xkill/images/w_semi.png")));
 		}
-		if(weapon == FiringMode::FiringModeType::AUTO)
+		if(weapon == XKILL_Enums::FiringModeType::AUTO)
 		{
 			label_weaponType->setPixmap(QPixmap(QString::fromUtf8(":/xkill/images/w_auto.png")));
 		}

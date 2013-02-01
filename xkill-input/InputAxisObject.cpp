@@ -7,7 +7,7 @@ InputAxisObject::InputAxisObject(int minValue, int maxValue, bool relativeAxis)
 
 	relativeAxis_ = relativeAxis;
 
-	deadZone_ = 0.25f;
+	deadZone_ = 0.1f;
 
 	value_ = 0.0f;
 }

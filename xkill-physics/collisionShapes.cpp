@@ -7,7 +7,6 @@
 #include <BulletCollision/CollisionShapes/btShapeHull.h>
 
 #include <xkill-utilities/AttributeManager.h>
-#include <xkill-utilities/MeshModel.h>
 
 #include "physicsUtilities.h"
 
@@ -148,7 +147,7 @@ void CollisionShapes::loadCollisionShapes()
 		Attribute_Mesh* meshAttribute = itrMesh.getNext();
 		if(collisionShapesIdToIndex_.find(meshAttribute->meshID) == collisionShapesIdToIndex_.end())
 		{
-			std::string name = meshAttribute->mesh->getOrigins().getName();
+			std::string name = meshAttribute->fileName;
 			name = name.substr(0,name.find("."));
 			name = name.append("RigidBodyShape");
 			btCollisionShape* collisionShape;
@@ -177,7 +176,7 @@ void CollisionShapes::loadCollisionShapes()
 			{
 				//Load from model file
 				filename = std::string("../../xkill-resources/xkill-models/");
-				name = meshAttribute->mesh->getOrigins().getName();
+				name = meshAttribute->fileName;
 				name = name.substr(0,name.find("."));
 				filename = filename.append(name);
 				filename = filename.append(".bullet");

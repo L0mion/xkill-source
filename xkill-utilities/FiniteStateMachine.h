@@ -4,9 +4,8 @@
 #include <stack>
 #include <map>
 
-#include "dllUtilities.h"
 #include "FiniteState.h"
-#include "EventManager.h"
+#include "Util.h"
 
 /// Generic Finite State Machine implementation with stack and event handling.
 /** \ingroup xkill-utilities

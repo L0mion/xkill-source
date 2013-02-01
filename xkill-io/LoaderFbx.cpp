@@ -2,7 +2,7 @@
 
 #include <fbxsdk.h>
 
-#include <xkill-utilities/EventManager.h>
+#include <xkill-utilities/Util.h>
 #include <xkill-utilities/MeshVertices.h>
 
 #include "LoaderFbx.h"
@@ -252,9 +252,6 @@ void LoaderFbx::parseMesh(FbxNode* node)
 	meshLoader_->parseMesh(mesh, &meshDesc);
 	materialLoader_->parseMaterial(mesh, &materialDesc);
 	textureLoader_->parseTexture(mesh, &textureDesc);
-
-	std::vector<VertexPosNormSkinned> vertices = meshDesc.createVerticesPosNormSkinned();
-	std::vector<unsigned int> indices = meshDesc.getIndices();
 
 	modelDescs_.back().setMeshDesc(meshDesc);
 	modelDescs_.back().setMaterialDesc(materialDesc);

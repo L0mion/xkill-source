@@ -1,8 +1,7 @@
 #include "MdlDesc.h"
 #include "SimpleStringSplitter.h"
 
-#include <xkill-utilities/EventType.h>
-#include <xkill-utilities/EventManager.h>
+#include <xkill-utilities/Util.h>
 
 #include "LoaderMdlDesc.h"
 
@@ -204,15 +203,18 @@ void LoaderMdlDesc::loadModel(const std::vector<std::string>& params)
 	unsigned int	modelID;
 	std::string		modelName;
 	std::string		modelDynamic;
+	unsigned int	modelVertexType;
 
 	modelID 		= static_cast<unsigned int>(::atof(params[MDLDESC_PARAM_INDEX_MODEL_ID].c_str()));
 	modelName		= params[MDLDESC_PARAM_INDEX_MODEL_FILENAME].c_str();
 	modelDynamic	= params[MDLDESC_PARAM_INDEX_MODEL_DYNAMIC].c_str();
+	modelVertexType = static_cast<unsigned int>(::atof(params[MDLDESC_PARAM_INDEX_MODEL_VERTEX_TYPE].c_str()));
 
 	models_.push_back(new MdlDescModel(
 		modelID, 
 		modelName, 
-		modelDynamic != "0"));
+		modelDynamic != "0",
+		modelVertexType));
 }
 void LoaderMdlDesc::loadWorld(const std::vector<std::string>& params)
 {
@@ -255,19 +257,19 @@ void LoaderMdlDesc::loadHack(const std::vector<std::string>& params)
 	
 	if( type == "HEL")
 	{
-		events_.push_back( new Event_CreatePickupablesSpawnPoint(position,PickupableType::MEDKIT));
+		events_.push_back( new Event_CreatePickupablesSpawnPoint(position,XKILL_Enums::PickupableType::MEDKIT));
 	}
 	else if( type == "EXP")
 	{
-		events_.push_back( new Event_CreatePickupablesSpawnPoint(position,PickupableType::AMMUNITION_EXPLOSIVE));
+		events_.push_back( new Event_CreatePickupablesSpawnPoint(position,XKILL_Enums::PickupableType::AMMUNITION_EXPLOSIVE));
 	}
 	else if( type == "SHA")
 	{
-		events_.push_back( new Event_CreatePickupablesSpawnPoint(position,PickupableType::AMMUNITION_SCATTER));
+		events_.push_back( new Event_CreatePickupablesSpawnPoint(position,XKILL_Enums::PickupableType::AMMUNITION_SCATTER));
 	}
 	else if( type == "SIN")
 	{
-		events_.push_back( new Event_CreatePickupablesSpawnPoint(position,PickupableType::AMMUNITION_BULLET));
+		events_.push_back( new Event_CreatePickupablesSpawnPoint(position,XKILL_Enums::PickupableType::AMMUNITION_BULLET));
 	}
 }
 void LoaderMdlDesc::loadAmmo(const std::vector<std::string>& params)

@@ -1,9 +1,9 @@
 #include <d3d11.h>
 #include <Windows.h>
 
+#include <xkill-utilities/Util.h>
 #include <xkill-utilities/EventManager.h>
 #include <xkill-utilities/AttributeType.h>
-#include <xkill-utilities/MeshModel.h>
 #include <xkill-utilities/DebugShape.h>
 
 #include "ModelD3D.h"
@@ -14,6 +14,8 @@
 #include "IB.h"
 #include "renderingUtilities.h"
 #include "ManagementModel.h"
+
+#include <sstream>
 
 ATTRIBUTES_DECLARE_ALL
 
@@ -85,21 +87,22 @@ HRESULT ManagementModel::createModelD3D(
 	Attribute_Mesh meshAt;
 	if(getMeshAttribute(modelID, meshAt))
 	{
-		MeshModel* model = meshAt.mesh;
+		MeshDesc model = meshAt.mesh;
 
-		VB<VertexPosNormTex>* vb = new VB<VertexPosNormTex>();
-		std::vector<SubsetD3D*>	subsetD3Ds;
-
+		ID3D11Buffer* vertexBuffer;
 		hr = createVertexBuffer(
 			modelID, 
-			model->getGeometry(), 
-			vb,
+			model.vertices_, 
+			&vertexBuffer,
+			meshAt.vertexType,
 			device);
+
+		std::vector<SubsetD3D*>	subsetD3Ds;
 		if(SUCCEEDED(hr))
 		{
 			hr = createIndexBuffers(
 				modelID, 
-				model->getGeometry(), 
+				model.subsets_, 
 				subsetD3Ds, 
 				device);
 		}
@@ -107,13 +110,15 @@ HRESULT ManagementModel::createModelD3D(
 		{
 			pushModelD3D(
 				modelID,
-				new ModelD3D(vb, subsetD3Ds, model->getMaterials()));
+				new ModelD3D(vertexBuffer, subsetD3Ds, model.materials_));
 		}
 	}
 	else
-	{
-		ERROR_MSG(L"ManagementModel::createModelD3D Could not find model!");
 		hr = S_FALSE;
+	
+	if(FAILED(hr))
+	{
+		ERROR_MSG(L"ManagementModel::createModelD3D An error occured!");
 	}
 
 	return hr;
@@ -140,16 +145,82 @@ bool ManagementModel::getMeshAttribute(unsigned int modelID, Attribute_Mesh& ino
 }
 HRESULT ManagementModel::createVertexBuffer(
 		const unsigned int		modelID, 
-		MeshGeometry&			geometry,
-		VB<VertexPosNormTex>*	vb,
+		std::vector<VertexDesc>	vertices,
+		ID3D11Buffer**			vertexBuffer,
+		VertexType				vertexType,
 		ID3D11Device*			device)
 {
 	HRESULT hr = S_OK;
 
-	hr = vb->init(geometry.getVertices(), device);
+	D3D11_BUFFER_DESC vbd;
+	vbd.Usage			= D3D11_USAGE_DYNAMIC;
+	vbd.BindFlags		= D3D11_BIND_VERTEX_BUFFER;
+	vbd.CPUAccessFlags	= D3D11_CPU_ACCESS_WRITE;
+	vbd.MiscFlags		= 0;
+
+	D3D11_SUBRESOURCE_DATA vinitData;
+	switch(vertexType)
+	{
+	case VERTEX_INVALID:
+		{
+			std::string failed = "ManagementModel::CreateVertexBuffer Invalid vertex type for model: " + modelID;
+			SHOW_MESSAGEBOX(failed);
+			break;
+		}
+	case VERTEX_TYPE_POS_COLOR:
+		{
+			std::vector<VertexPosColor> convertedVertices = convertVertexPosColor(vertices);
+			vbd.ByteWidth = sizeof(VertexPosColor) * convertedVertices.size();
+			vinitData.pSysMem = &convertedVertices.at(0);
+			hr = device->CreateBuffer(&vbd, &vinitData, vertexBuffer);
+			break;
+		}
+	case VERTEX_TYPE_POS_NORM_TEX:
+		{
+			std::vector<VertexPosNormTex> convertedVertices = convertVertexPosNormTex(vertices);
+			vbd.ByteWidth = sizeof(VertexPosNormTex) * convertedVertices.size();
+			vinitData.pSysMem = &convertedVertices.at(0);
+			hr = device->CreateBuffer(&vbd, &vinitData, vertexBuffer);
+			break;
+		}
+		
+		
+	case VERTEX_TYPE_POS_NORM_SKINNED:
+		{
+			std::vector<VertexPosNormSkinned> convertedVertices = convertVertexPosNormSkinned(vertices);
+			vbd.ByteWidth = sizeof(VertexPosNormSkinned) * convertedVertices.size();
+			vinitData.pSysMem = &convertedVertices.at(0);
+			hr = device->CreateBuffer(&vbd, &vinitData, vertexBuffer);
+			break;
+		}
+		
+		
+	case VERTEX_TYPE_POS_NORM_TEX_SKINNED:
+		{
+			std::vector<VertexPosNormTexSkinned> convertedVertices = convertVertexPosNormTexSkinned(vertices);
+			vbd.ByteWidth = sizeof(VertexPosNormTexSkinned) * convertedVertices.size();
+			vinitData.pSysMem = &convertedVertices.at(0);
+			hr = device->CreateBuffer(&vbd, &vinitData, vertexBuffer);
+			break;
+		}
+		
+	case VERTEX_TYPE_POS_NORM_TEX_TAN_SKINNED:
+		{
+			std::vector<VertexPosNormTexTanSkinned> convertedVertices = convertVertexPosNormTexTanSkinned(vertices);
+			vbd.ByteWidth = sizeof(VertexPosNormTexTanSkinned) * convertedVertices.size();
+			vinitData.pSysMem = &convertedVertices.at(0);
+			hr = device->CreateBuffer(&vbd, &vinitData, vertexBuffer);
+			break;
+		}
+	default:
+		std::string failed = "ManagementModel::CreateVertexBuffer Unknown vertex type.";
+		SHOW_MESSAGEBOX(failed);
+		break;
+	}
+
 	if(FAILED(hr))
 	{
-		std::string failed = "Failed to create Vertex Buffer from MeshModel ID: " + modelID;
+		std::string failed = "ManagementModel::CreateVertexBuffer Failed to create Vertex Buffer from MeshModel ID: " + modelID;
 		SHOW_MESSAGEBOX(failed);
 	}
 
@@ -157,24 +228,26 @@ HRESULT ManagementModel::createVertexBuffer(
 }
 HRESULT ManagementModel::createIndexBuffers(
 	const unsigned int			modelID, 
-	MeshGeometry&				geometry, 
+	std::vector<SubsetDesc>		subsets, 
 	std::vector<SubsetD3D*>&	subsetD3Ds,
 	ID3D11Device*				device)
 {
 	HRESULT hr = S_OK;
 
-	std::vector<MeshSubset> subsets = geometry.getSubsets();
 	for(unsigned int i = 0; i < subsets.size() && !FAILED(hr); i++)
 	{
-		IB* ib = new IB();
+		ID3D11Buffer* indexBuffer;
 		hr = createIndexBuffer(
 			modelID,
 			subsets[i],
-			ib,
+			&indexBuffer,
 			device);
 		if(SUCCEEDED(hr))
 		{
-			SubsetD3D* subsetD3D = new SubsetD3D(subsets[i].getMaterialIndex(), ib);
+			SubsetD3D* subsetD3D = new SubsetD3D(
+				subsets[i].materialIndex_, 
+				subsets[i].indices_.size(), 
+				indexBuffer);
 			subsetD3Ds.push_back(subsetD3D);
 		}
 	}
@@ -183,13 +256,27 @@ HRESULT ManagementModel::createIndexBuffers(
 }
 HRESULT ManagementModel::createIndexBuffer(
 	const unsigned int	modelID,
-	MeshSubset&			subset,
-	IB*					ib,
+	SubsetDesc			subset,
+	ID3D11Buffer**		indexBuffer,
 	ID3D11Device*		device)
 {
 	HRESULT hr = S_OK;
 
-	hr = ib->init(subset.getIndices(), device);
+	std::vector<unsigned int> indices = subset.indices_;
+	if(indices.size() <= 0)
+		hr = S_FALSE;
+
+	D3D11_BUFFER_DESC ibd;
+	ibd.Usage			= D3D11_USAGE_DYNAMIC;
+	ibd.ByteWidth		= sizeof(unsigned int) * indices.size();
+	ibd.BindFlags		= D3D11_BIND_INDEX_BUFFER;
+	ibd.CPUAccessFlags	= D3D11_CPU_ACCESS_WRITE;
+	ibd.MiscFlags		= 0;
+
+	D3D11_SUBRESOURCE_DATA vinitData;
+	vinitData.pSysMem = &indices.at(0);
+	hr = device->CreateBuffer(&ibd, &vinitData, indexBuffer);
+
 	if(FAILED(hr))
 	{
 		std::string failed = "Failed to create Index Buffer from MeshModel at index: " + modelID;
@@ -216,6 +303,75 @@ void ManagementModel::pushDebugShapeD3D(
 
 	unsigned int debugShapeD3DIndex = debugShapeD3Ds_.size() - 1;
 	shapeIndextoD3DIndex_.insert(std::pair<unsigned int, unsigned int>(shapeIndex, debugShapeD3DIndex));
+}
+
+std::vector<VertexPosColor> ManagementModel::convertVertexPosColor(std::vector<VertexDesc>& vertices)
+{
+	std::vector<VertexPosColor> convertedVertices(vertices.size());
+	for(unsigned int i = 0; i < vertices.size(); i++)
+	{
+		VertexPosColor vertex = VertexPosColor(vertices[i].position_, vertices[i].color_);
+		convertedVertices[i] = vertex;
+	}
+	return convertedVertices;
+}
+std::vector<VertexPosNormTex> ManagementModel::convertVertexPosNormTex(std::vector<VertexDesc>& vertices)
+{
+	std::vector<VertexPosNormTex> convertedVertices(vertices.size());
+	for(unsigned int i = 0; i < vertices.size(); i++)
+	{
+		VertexPosNormTex vertex = VertexPosNormTex(
+			vertices[i].position_, 
+			vertices[i].normal_,
+			vertices[i].textureCoordinates_);
+		convertedVertices[i] = vertex;
+	}
+	return convertedVertices;
+}
+std::vector<VertexPosNormTexSkinned> ManagementModel::convertVertexPosNormTexSkinned(std::vector<VertexDesc>& vertices)
+{
+	std::vector<VertexPosNormTexSkinned> convertedVertices(vertices.size());
+	for(unsigned int i = 0; i < vertices.size(); i++)
+	{
+		VertexPosNormTexSkinned vertex = VertexPosNormTexSkinned(
+			vertices[i].position_, 
+			vertices[i].normal_,
+			vertices[i].textureCoordinates_,
+			vertices[i].weights_,
+			vertices[i].boneIndices_);
+		convertedVertices[i] = vertex;
+	}
+	return convertedVertices;
+}
+std::vector<VertexPosNormSkinned> ManagementModel::convertVertexPosNormSkinned(std::vector<VertexDesc>& vertices)
+{
+	std::vector<VertexPosNormSkinned> convertedVertices(vertices.size());
+	for(unsigned int i = 0; i < vertices.size(); i++)
+	{
+		VertexPosNormSkinned vertex = VertexPosNormSkinned(
+			vertices[i].position_, 
+			vertices[i].normal_,
+			vertices[i].weights_,
+			vertices[i].boneIndices_);
+		convertedVertices[i] = vertex;
+	}
+	return convertedVertices;
+}
+std::vector<VertexPosNormTexTanSkinned> ManagementModel::convertVertexPosNormTexTanSkinned(std::vector<VertexDesc>& vertices)
+{
+	std::vector<VertexPosNormTexTanSkinned> convertedVertices(vertices.size());
+	for(unsigned int i = 0; i < vertices.size(); i++)
+	{
+		VertexPosNormTexTanSkinned vertex = VertexPosNormTexTanSkinned(
+			vertices[i].position_, 
+			vertices[i].normal_,
+			vertices[i].textureCoordinates_,
+			vertices[i].tangent_,
+			vertices[i].weights_,
+			vertices[i].boneIndices_);
+		convertedVertices[i] = vertex;
+	}
+	return convertedVertices;
 }
 
 void ManagementModel::createDebugShapeD3D(unsigned int shapeIndex, ID3D11Device* device)

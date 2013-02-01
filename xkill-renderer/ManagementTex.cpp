@@ -5,10 +5,10 @@
 #include <d3d11.h>
 #include "DDSTextureLoader.h"
 
+#include <xkill-utilities/Util.h>
 #include <xkill-utilities/TexDesc.h>
 #include <xkill-utilities/TexDescHeader.h>
 #include <xkill-utilities/TexDescTex.h>
-#include <xkill-utilities/EventManager.h>
 #include <xkill-utilities/StringConv.h>
 
 #include "Tex.h"
@@ -51,7 +51,7 @@ HRESULT ManagementTex::handleTexDesc(
 
 	unsigned int	texID;
 	std::string		texFileName;
-	for(unsigned int i = 0; i < texDescs.size() && SUCCEEDED(hr); i++)
+	for(unsigned int i = 0; i < texDescs.size(); i++)
 	{
 		texID		= texDescs.at(i).id_;
 		texFileName	= texDescs.at(i).fileName_;
@@ -61,6 +61,10 @@ HRESULT ManagementTex::handleTexDesc(
 			path,
 			texFileName,
 			device);
+		if(FAILED(hr))
+		{
+			SHOW_MESSAGEBOX("ManagementTex::handleTexDesc Could not load texture: " + texFileName);
+		}
 	}
 
 	return hr;

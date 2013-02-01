@@ -1,6 +1,4 @@
-#include <xkill-utilities/EventManager.h>
-#include <xkill-utilities/AttributeType.h>
-#include <xkill-utilities/MeshMaterial.h>
+#include <xkill-utilities/Util.h>
 
 #include "ManagementD3D.h"
 #include "ManagementFX.h"
@@ -266,6 +264,7 @@ HRESULT Renderer::initManagementLight()
 	HRESULT hr = S_OK;
 
 	managementLight_ = new ManagementLight();
+	managementLight_->init();
 
 	return hr;
 }
@@ -387,7 +386,7 @@ void Renderer::render()
 
 	ViewportData vpData;
 
-	//Render each split-screen seperately
+	//Render each split-screen separately
 	std::vector<SplitScreenViewport>* ssViewports = managementViewport_->getSplitScreenViewports();
 	std::vector<ViewportData> vpDatas(ssViewports->size());
 	for(unsigned int i = 0; i < ssViewports->size(); i++)
@@ -395,8 +394,8 @@ void Renderer::render()
 		ssAt		= ssViewports->at(i).ssAt;
 		camAt		= itrCamera.at(ssAt->ptr_camera);
 
-		spatialAt	= ATTRIBUTE_CAST(Attribute_Spatial, ptr_spatial, camAt);
-		posAt		= ATTRIBUTE_CAST(Attribute_Position, ptr_position, spatialAt);
+		spatialAt	= camAt->ptr_spatial.getAttribute();
+		posAt		= spatialAt->ptr_position.getAttribute();
 
 		managementViewport_->setViewport(devcon, i);
 
@@ -411,6 +410,8 @@ void Renderer::render()
 		vpData.viewportTopY = static_cast<unsigned int>(ssAt->ssTopLeftY);
 		vpData.zNear		= camAt->zNear;
 		vpData.zFar			= camAt->zFar;
+		vpData.viewportWidth	= ssAt->ssWidth;
+		vpData.viewportHeight	= ssAt->ssHeight;
 		vpDatas[i]			= vpData;
 
 		renderViewportToGBuffer(vpData);
@@ -452,7 +453,9 @@ void Renderer::renderViewportToGBuffer(ViewportData& vpData)
 		vpData.viewportTopX,
 		vpData.viewportTopY,
 		vpData.zNear,
-		vpData.zFar);
+		vpData.zFar,
+		vpData.viewportWidth,
+		vpData.viewportHeight);
 
 	std::map<unsigned int, InstancedData*> instancesMap = managementInstance_->getInstancesMap();
 	for(std::map<unsigned int, InstancedData*>::iterator i = instancesMap.begin(); i != instancesMap.end(); i++)
@@ -523,13 +526,14 @@ void Renderer::renderViewportToBackBuffer(ViewportData& vpData)
 		vpData.viewportTopX,
 		vpData.viewportTopY,
 		vpData.zNear,
-		vpData.zFar);
+		vpData.zFar,
+		vpData.viewportWidth,
+		vpData.viewportHeight);
 
 	//Connect g-buffers to shader.
 	managementGBuffer_->setGBuffersAsCSShaderResources(devcon);
 
 	//Set lights.
-	//managementLight_->transformLightViewSpacePoss(devcon, vpData.view);
 	managementLight_->setLightSRVCS(devcon, LIGHTBUFFERTYPE_DIR,		LIGHT_SRV_REGISTER_DIR);
 	managementLight_->setLightSRVCS(devcon, LIGHTBUFFERTYPE_POINT,		LIGHT_SRV_REGISTER_POINT);
 	managementLight_->setLightSRVCS(devcon, LIGHTBUFFERTYPE_SPOT,		LIGHT_SRV_REGISTER_SPOT);
@@ -566,35 +570,34 @@ void Renderer::renderInstance(unsigned int meshID, InstancedData* instance)
 	UINT offset[2] = { 0, 0 };
 	ID3D11Buffer* vbs[2] = 
 	{ 
-		modelD3D->getVertexBuffer()->getVB(), 
-		instance->getInstanceBuffer()
+		modelD3D->getVertexBuffer(), 
+		instance->getDataBuffer()
 	};
 	devcon->IASetVertexBuffers(0, 2, vbs, stride, offset);
 	
 	std::vector<SubsetD3D*>		subsetD3Ds	= modelD3D->getSubsetD3Ds();
-	std::vector<MeshMaterial>	materials	= modelD3D->getMaterials();
+	std::vector<MaterialDesc>	materials	= modelD3D->getMaterials();
 	for(unsigned int i = 0; i < subsetD3Ds.size(); i++)
 	{
-		IB* ib	= subsetD3Ds[i]->getIndexBuffer();
 		unsigned int materialIndex	= subsetD3Ds[i]->getMaterialIndex();
 
 		renderSubset(
-			ib,
+			subsetD3Ds[i],
 			materials[materialIndex],
-			instance->getInstanceCount());
+			instance->getDataCountCur());
 	}
 }
 void Renderer::renderSubset(
-	IB* ib, 
-	MeshMaterial& material, 
+	SubsetD3D* subset, 
+	MaterialDesc& material, 
 	unsigned int numInstances)
 {
 	ID3D11Device*			device = managementD3D_->getDevice();
 	ID3D11DeviceContext*	devcon = managementD3D_->getDeviceContext();
 
 	//Set textures.
-	ID3D11ShaderResourceView* texAlbedo = managementTex_->getTexSrv(material.getIDAlbedoTex());
-	ID3D11ShaderResourceView* texNormal = managementTex_->getTexSrv(material.getIDNormalTex());
+	ID3D11ShaderResourceView* texAlbedo = managementTex_->getTexSrv(material.idAlbedoTex_);
+	ID3D11ShaderResourceView* texNormal = managementTex_->getTexSrv(material.idNormalTex_);
 	devcon->PSSetShaderResources(0, 1, &texAlbedo);
 	devcon->PSSetShaderResources(1, 1, &texNormal);
 
@@ -604,7 +607,7 @@ void Renderer::renderSubset(
 	managementCB_->updateCBSubset(
 		devcon,
 		dxSpec,
-		material.getSpecularPower());
+		material.specularPower_);
 
 	//Set input layout
 	managementFX_->setLayout(devcon, LAYOUTID_POS_NORM_TEX_INSTANCED);
@@ -612,7 +615,7 @@ void Renderer::renderSubset(
 	//Set index-buffer.
 	UINT offset = 0;
 	devcon->IASetIndexBuffer(
-		ib->getIB(), 
+		subset->getIndexBuffer(), 
 		DXGI_FORMAT_R32_UINT, 
 		offset);
 
@@ -621,7 +624,7 @@ void Renderer::renderSubset(
 
 	//Draw subset.
 	devcon->DrawIndexedInstanced(
-		ib->getNumIndices(),
+		subset->getNumIndices(),
 		numInstances,
 		0, 0, 0);
 }
