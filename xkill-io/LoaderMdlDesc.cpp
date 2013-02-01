@@ -261,19 +261,19 @@ void LoaderMdlDesc::loadHack(const std::vector<std::string>& params)
 	
 	if( type == "HEL")
 	{
-		events_.push_back( new Event_CreatePickupablesSpawnPoint(position,PickupableType::MEDKIT));
+		events_.push_back( new Event_CreatePickupablesSpawnPoint(position,XKILL_Enums::PickupableType::MEDKIT));
 	}
 	else if( type == "EXP")
 	{
-		events_.push_back( new Event_CreatePickupablesSpawnPoint(position,PickupableType::AMMUNITION_EXPLOSIVE));
+		events_.push_back( new Event_CreatePickupablesSpawnPoint(position,XKILL_Enums::PickupableType::AMMUNITION_EXPLOSIVE));
 	}
 	else if( type == "SHA")
 	{
-		events_.push_back( new Event_CreatePickupablesSpawnPoint(position,PickupableType::AMMUNITION_SCATTER));
+		events_.push_back( new Event_CreatePickupablesSpawnPoint(position,XKILL_Enums::PickupableType::AMMUNITION_SCATTER));
 	}
 	else if( type == "SIN")
 	{
-		events_.push_back( new Event_CreatePickupablesSpawnPoint(position,PickupableType::AMMUNITION_BULLET));
+		events_.push_back( new Event_CreatePickupablesSpawnPoint(position,XKILL_Enums::PickupableType::AMMUNITION_BULLET));
 	}
 }
 void LoaderMdlDesc::loadAmmo(const std::vector<std::string>& params)

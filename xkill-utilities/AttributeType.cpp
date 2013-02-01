@@ -3,7 +3,7 @@
 #include <windows.h>
 
 #include "DebugShape.h"
-#include "Enums.h"
+#include "XKILL_Enums.h"
 
 IAttribute::IAttribute()
 {
@@ -77,8 +77,8 @@ Attribute_Projectile::Attribute_Projectile()
 {
 	entityIdOfCreator = -1;
 	currentLifeTimeLeft = 10.0f;
-	explodeOnImnpact = false;
-	explosionSphereRadius = 1.0f;
+	ammunitionType = XKILL_Enums::AmmunitionType::BULLET;
+	firingModeType = XKILL_Enums::FiringModeType::SEMI;
 }
 Attribute_Projectile::~Attribute_Projectile()
 {
@@ -188,6 +188,8 @@ Attribute_Player::Attribute_Player()
 	collidingWithWorld = false;
 	jetpackTimer = 0.0f;
 	detectedAsDead = true;
+	meshIDWhenAlive = 7;
+	meshIDWhenDead = 9;
 
 	walkSpeed = 5.0f;
 	sprintSpeed = walkSpeed*2;
@@ -261,7 +263,7 @@ Attribute_PlayerSpawnPoint::~Attribute_PlayerSpawnPoint()
 
 Attribute_PickupablesSpawnPoint::Attribute_PickupablesSpawnPoint()
 {
-	spawnPickupableType = PickupableType::MEDKIT;
+	spawnPickupableType = XKILL_Enums::PickupableType::MEDKIT;
 	spawnDelayInSeconds = 0.0f;
 	secondsSinceLastSpawn = 0.0f;
 	secondsSinceLastPickup = 0.0f;
@@ -274,7 +276,7 @@ Attribute_PickupablesSpawnPoint::~Attribute_PickupablesSpawnPoint()
 
 Attribute_Pickupable::Attribute_Pickupable()
 {
-	pickupableType = PickupableType::MEDKIT;
+	pickupableType = XKILL_Enums::PickupableType::MEDKIT;
 }
 Attribute_Pickupable::~Attribute_Pickupable()
 {
@@ -286,11 +288,11 @@ Attribute_WeaponStats::Attribute_WeaponStats()
 {
 	MutatorSettings ms;
 
-	for(int i = 0; i < Ammunition::NROFAMMUNITIONTYPES; i++)
+	for(int i = 0; i < XKILL_Enums::AmmunitionType::NROFAMMUNITIONTYPES; i++)
 	{
-		for(int j = 0; j < FiringMode::NROFFIRINGMODETYPES; j++)
+		for(int j = 0; j < XKILL_Enums::FiringModeType::NROFFIRINGMODETYPES; j++)
 		{
-			ms.setupAttribute(this, static_cast<Ammunition::AmmunitionType>(i), static_cast<FiringMode::FiringModeType>(j));
+			ms.setupAttribute(this, static_cast<XKILL_Enums::AmmunitionType>(i), static_cast<XKILL_Enums::FiringModeType>(j));
 		}
 	}
 }
@@ -298,7 +300,7 @@ Attribute_WeaponStats::~Attribute_WeaponStats()
 {
 
 }
-void Attribute_WeaponStats::setWeaponStats(Ammunition::AmmunitionType ammunitionType, FiringMode::FiringModeType firingModeType)
+void Attribute_WeaponStats::setWeaponStats(XKILL_Enums::AmmunitionType ammunitionType, XKILL_Enums::FiringModeType firingModeType)
 {
 	currentAmmunitionType = ammunitionType;
 	currentFiringModeType = firingModeType;
@@ -368,13 +370,13 @@ std::string Attribute_WeaponStats::getAmmunitionTypeAsString()
 	std::string ammunitionTypeAsString = "Error in std::string Attribute_WeaponStats::getAmmunitionTypeAsString()";
 	switch(currentAmmunitionType)
 	{
-		case Ammunition::BULLET:
+		case XKILL_Enums::AmmunitionType::BULLET:
 			ammunitionTypeAsString = "Bullet";
 			break;
-		case Ammunition::SCATTER:
+		case XKILL_Enums::AmmunitionType::SCATTER:
 			ammunitionTypeAsString = "Scatter";
 			break;
-		case Ammunition::EXPLOSIVE:
+		case XKILL_Enums::AmmunitionType::EXPLOSIVE:
 			ammunitionTypeAsString = "Explosive";
 			break;
 	}
@@ -385,13 +387,13 @@ std::string Attribute_WeaponStats::getFiringModeAsString()
 	std::string firingModeAsString = "Error in std::string Attribute_WeaponStats::getFiringModesString()";
 	switch(currentFiringModeType)
 	{
-		case FiringMode::SINGLE:
+		case XKILL_Enums::FiringModeType::SINGLE:
 			firingModeAsString = "Single";
 			break;
-		case FiringMode::SEMI:
+		case XKILL_Enums::FiringModeType::SEMI:
 			firingModeAsString = "Semi";
 			break;
-		case FiringMode::AUTO:
+		case XKILL_Enums::FiringModeType::AUTO:
 			firingModeAsString = "Auto";
 			break;
 	}
@@ -420,15 +422,17 @@ DataItemList* Attribute_WeaponStats::getDataList()
 	list->add(ammunition[currentAmmunitionType].spawnVariation,			"displacementSphereRadius");
 	list->add(ammunition[currentAmmunitionType].spread,					"spreadConeRadius");
 
-	list->add(ammunition[currentAmmunitionType].explosive,				"isExplosive");
-	list->add(ammunition[currentAmmunitionType].explosionSphere,		"explosionSphereRadius");
-
+	list->add(ammunition[currentAmmunitionType].explosive,								"isExplosive");
+	list->add(ammunition[currentAmmunitionType].explosionSphereInitialRadius,			"explosionSphereInitialRadius");
+	list->add(ammunition[currentAmmunitionType].explosionSphereFinalRadius,				"explosionSphereFinalRadius");
+	list->add(ammunition[currentAmmunitionType].explosionSphereExplosionDuration,		"explosionSphereExplosionDuration");
+	
 	return list;
 }
 void Attribute_WeaponStats::saveTo(DataItemList* list)
 {
-	currentAmmunitionType	= (Ammunition::AmmunitionType)	list->get_Enum();
-	currentFiringModeType	= (FiringMode::FiringModeType)	list->get_Enum();
+	currentAmmunitionType	= (XKILL_Enums::AmmunitionType)	list->get_Enum();
+	currentFiringModeType	= (XKILL_Enums::FiringModeType)	list->get_Enum();
 
 	list->get(&ammunition[currentAmmunitionType].totalNrOfShots);
 	list->get(&firingMode[currentFiringModeType].clipSize);
@@ -447,7 +451,9 @@ void Attribute_WeaponStats::saveTo(DataItemList* list)
 	list->get(&ammunition[currentAmmunitionType].spread);
 		
 	list->get(&ammunition[currentAmmunitionType].explosive);
-	list->get(&ammunition[currentAmmunitionType].explosionSphere);
+	list->get(&ammunition[currentAmmunitionType].explosionSphereInitialRadius);
+	list->get(&ammunition[currentAmmunitionType].explosionSphereFinalRadius);
+	list->get(&ammunition[currentAmmunitionType].explosionSphereExplosionDuration);
 }
 
 Attribute_DebugShape::Attribute_DebugShape()

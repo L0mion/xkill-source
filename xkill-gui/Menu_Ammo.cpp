@@ -17,7 +17,9 @@ void Menu_Ammo::setSettingsMenu()	// TODO: Set good values for the sliders and m
 	Ammunition* ammo = getAmmoSettings();
 
 	ui->horizontalSlider_Ammo_Damage->setValue(static_cast<int>(ammo->damage));
-	ui->horizontalSlider_Ammo_ExplosionSphere->setValue(static_cast<int>(ammo->explosionSphere * 100.0f));
+	
+	ui->horizontalSlider_Ammo_ExplosionInitialRadius->setValue(static_cast<int>(ammo->explosionSphereInitialRadius * 100.0f));
+	
 	ui->horizontalSlider_Ammo_NrOfProjectiles->setValue(ammo->nrOfProjectiles);
 	ui->horizontalSlider_Ammo_Speed->setValue(static_cast<int>(ammo->speed));
 	ui->horizontalSlider_Ammo_Spread->setValue(static_cast<int>(ammo->spread * 126.6f));
@@ -26,7 +28,7 @@ void Menu_Ammo::setSettingsMenu()	// TODO: Set good values for the sliders and m
 
 	ui->doubleSpinBox_Ammo_Spread->setValue(ammo->spread);
 	ui->doubleSpinBox_Ammo_VelocityVariation->setValue(ammo->velocityVariation);
-	ui->doubleSpinBox_Ammo_ExplosionSphere->setValue(ammo->explosionSphere);
+	ui->doubleSpinBox_Ammo_ExplosionInitialRadius->setValue(ammo->explosionSphereInitialRadius);
 }
 
 void Menu_Ammo::settingsMenuUpdated()
@@ -34,7 +36,7 @@ void Menu_Ammo::settingsMenuUpdated()
 	Ammunition* ammo = getAmmoSettings();
 
 	ammo->damage = static_cast<float>(ui->horizontalSlider_Ammo_Damage->value());
-	ammo->explosionSphere = static_cast<float>(ui->horizontalSlider_Ammo_ExplosionSphere->value()) * 0.01f;
+	ammo->explosionSphereInitialRadius = static_cast<float>(ui->horizontalSlider_Ammo_ExplosionInitialRadius->value()) * 0.01f;
 	ammo->explosive = ui->groupBox_Ammo_Explosive->isChecked();
 	ammo->nrOfProjectiles = ui->horizontalSlider_Ammo_NrOfProjectiles->value();
 	ammo->speed = static_cast<float>(ui->horizontalSlider_Ammo_Speed->value());
@@ -43,24 +45,24 @@ void Menu_Ammo::settingsMenuUpdated()
 
 	ui->doubleSpinBox_Ammo_Spread->setValue(ammo->spread);
 	ui->doubleSpinBox_Ammo_VelocityVariation->setValue(ammo->velocityVariation);
-	ui->doubleSpinBox_Ammo_ExplosionSphere->setValue(ammo->explosionSphere);
+	ui->doubleSpinBox_Ammo_ExplosionInitialRadius->setValue(ammo->explosionSphereInitialRadius);
 }
 
 Ammunition* Menu_Ammo::getAmmoSettings()
 {
-	Ammunition::AmmunitionType ammoType = Ammunition::BULLET;
+	XKILL_Enums::AmmunitionType ammoType = XKILL_Enums::AmmunitionType::BULLET;
 
 	if(ui->radioButton_Ammo_Bullet->isChecked())
 	{
-		ammoType = Ammunition::BULLET;
+		ammoType = XKILL_Enums::AmmunitionType::BULLET;
 	}
 	else if(ui->radioButton_Ammo_Scatter->isChecked())
 	{
-		ammoType = Ammunition::SCATTER;
+		ammoType = XKILL_Enums::AmmunitionType::SCATTER;
 	}
 	else if(ui->radioButton_Ammo_Explosive->isChecked())
 	{
-		ammoType = Ammunition::EXPLOSIVE;
+		ammoType = XKILL_Enums::AmmunitionType::EXPLOSIVE;
 	}
 
 	return &mutatorSettings_->getStandardAmmunition(ammoType);

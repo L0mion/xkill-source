@@ -60,27 +60,12 @@ public:
 		CREATE_ATTRIBUTE(Attribute_Spatial, spatial, entity);
 		CONNECT_ATTRIBUTES(spatial, position);
 
-		//spatial->ptr_position2 = ((AttributeManager*)AttributeManagerDLLWrapper::getInstance())->position.getLatestAttributeAsAttributePtr();
-		//Attribute_Position* p = spatial->ptr_position2.getAttribute();
-
-		
-
 		CREATE_ATTRIBUTE(Attribute_Render, render, entity);
 		CONNECT_ATTRIBUTES(render, spatial);
-		render->meshID = 0;
-
-		//CREATE_ATTRIBUTE(Attribute_DebugShape, debugShape, entity);	//create temp debug shape
-		//CONNECT_ATTRIBUTES(debugShape, spatial);
-		//debugShape->meshID = render->meshID;
-		//debugShape->shape	=  new DebugShapeSphere(1.0f);/*new DebugShapeBB(
-		//	Float3(-0.5f, -0.5f, -0.5f),
-		//	Float3(0.5f, 0.5f, 0.5f)); //new DebugShapeSphere(1.0f);*/
-		//debugShape->render	= true;
 
 		CREATE_ATTRIBUTE(Attribute_Physics, physics, entity);
 		CONNECT_ATTRIBUTES(physics, spatial);
 		CONNECT_ATTRIBUTES(physics, render);
-		physics->meshID = render->meshID;
 		physics->collisionFilterGroup = Attribute_Physics::PLAYER;
 		physics->collisionFilterMask = Attribute_Physics::EVERYTHING;
 		physics->gravity = Float3(0.0f, -0.0f, 0.0f);
@@ -95,8 +80,8 @@ public:
 		health->startHealth = 100;
 
 		CREATE_ATTRIBUTE(Attribute_WeaponStats, weaponStats, entity);
-		weaponStats->currentAmmunitionType = Ammunition::SCATTER;
-		weaponStats->currentFiringModeType = FiringMode::AUTO;
+		weaponStats->currentAmmunitionType = XKILL_Enums::AmmunitionType::SCATTER;
+		weaponStats->currentFiringModeType = XKILL_Enums::FiringModeType::AUTO;
 
 		CREATE_ATTRIBUTE(Attribute_Player, player, entity);
 		CONNECT_ATTRIBUTES(player, render);
@@ -108,6 +93,9 @@ public:
 		CREATE_ATTRIBUTE(Attribute_SplitScreen, splitScreen, entity);
 		CONNECT_ATTRIBUTES(splitScreen, camera);
 		CONNECT_ATTRIBUTES(splitScreen, player);
+
+		render->meshID = player->meshIDWhenAlive;
+		physics->meshID = render->meshID;
 	}
 	
 	void createWorldEntity(Entity* entity, Event_CreateWorld* e)
@@ -152,15 +140,20 @@ public:
 
 		CREATE_ATTRIBUTE(Attribute_Render, render, entity);
 		CONNECT_ATTRIBUTES(render, spatial);
-		render->meshID = 2;
-
-		//CREATE_ATTRIBUTE(Attribute_DebugShape, debugShape, entity);	//create temp debug shape
-		//CONNECT_ATTRIBUTES(debugShape, spatial);
-		//debugShape->meshID = render->meshID;
-		//debugShape->shape	=  nullptr;/*new DebugShapeBB(
-		//	Float3(-0.5f, -0.5f, -0.5f),
-		//	Float3(0.5f, 0.5f, 0.5f)); //new DebugShapeSphere(1.0f);*/
-		//debugShape->render	= false;
+		switch (e->ammunitionType)
+		{
+		case XKILL_Enums::AmmunitionType::BULLET:
+			render->meshID = 10;
+			break;
+		case XKILL_Enums::AmmunitionType::EXPLOSIVE:
+			render->meshID = 8;
+			break;
+		case XKILL_Enums::AmmunitionType::SCATTER:
+			render->meshID = 9;
+			break;
+		default:
+			break;
+		}
 
 		CREATE_ATTRIBUTE(Attribute_Physics, physics, entity);
 		physics->collisionFilterGroup = Attribute_Physics::PROJECTILE;
@@ -169,7 +162,6 @@ public:
 		CONNECT_ATTRIBUTES(physics, render);
 		physics->meshID = render->meshID;
 		
-		float scale = 100.0f;
 		physics->linearVelocity = e->velocity; //Float3(e->velocity.x / scale,  e->velocity.y / scale, e->velocity.z / scale);
 		physics->mass = 100.0f;
 		physics->gravity = Float3(0.0f, 0.0f, 0.0f);
@@ -178,21 +170,21 @@ public:
 		CREATE_ATTRIBUTE(Attribute_Projectile, projectile, entity);
 		CONNECT_ATTRIBUTES(projectile, physics);
 		projectile->entityIdOfCreator = e->entityIdOfCreator;
-		projectile->explodeOnImnpact = e->explodeOnImpact;
-		projectile->explosionSphereRadius = e->explosionSphereRadius;
+		projectile->ammunitionType = e->ammunitionType;
+		projectile->firingModeType = e->firingMode;
 
 		CREATE_ATTRIBUTE(Attribute_Damage, damage, entity);
 		damage->damage = e->damage;
 		damage->owner_entityID = e->entityIdOfCreator;
 
 		//temp, create demo light for each projectile
-		CREATE_ATTRIBUTE(Attribute_Light_Point, lightPoint, entity);
-		CONNECT_ATTRIBUTES(lightPoint, position);
-		lightPoint->lightPoint.ambient		= Float4(0.8f, 0.0f, 0.0f, 1.0f);
-		lightPoint->lightPoint.diffuse		= Float4(0.8f, 0.0f, 0.0f, 1.0f);
-		lightPoint->lightPoint.specular		= Float4(0.8f, 0.0f, 0.0f, 1.0f);
-		lightPoint->lightPoint.range		= 1.0f;
-		lightPoint->lightPoint.attenuation	= Float3(0.0f, 0.1f, 0.0f);
+		//CREATE_ATTRIBUTE(Attribute_Light_Point, lightPoint, entity);
+		//CONNECT_ATTRIBUTES(lightPoint, position);
+		//lightPoint->lightPoint.ambient		= Float4(0.8f, 0.0f, 0.0f, 1.0f);
+		//lightPoint->lightPoint.diffuse		= Float4(0.8f, 0.0f, 0.0f, 1.0f);
+		//lightPoint->lightPoint.specular		= Float4(0.8f, 0.0f, 0.0f, 1.0f);
+		//lightPoint->lightPoint.range		= 1.0f;
+		//lightPoint->lightPoint.attenuation	= Float3(0.0f, 0.1f, 0.0f);
 	}
 
 	void createMesh(Entity* entity, Event_CreateMesh* e)
@@ -225,7 +217,7 @@ public:
 		CREATE_ATTRIBUTE(Attribute_PickupablesSpawnPoint, pickupablesSpawnPoint, entity);
 		CONNECT_ATTRIBUTES(pickupablesSpawnPoint, position);
 		pickupablesSpawnPoint->spawnPickupableType = e->pickupableType;
-		pickupablesSpawnPoint->spawnDelayInSeconds = 0.1f;
+		pickupablesSpawnPoint->spawnDelayInSeconds = 5.0f;
 		pickupablesSpawnPoint->maxNrOfExistingSpawnedPickupables = 1;
 	}
 
@@ -239,25 +231,22 @@ public:
 
 		CREATE_ATTRIBUTE(Attribute_Render, render, entity);
 		CONNECT_ATTRIBUTES(render, spatial);
-		/*
 		switch (e->pickupableType)
 		{
-		case PickupableType::AMMUNITION_BULLET:
+		case XKILL_Enums::PickupableType::AMMUNITION_BULLET:
 			render->meshID = 4;
 			break;
-		case PickupableType::AMMUNITION_SCATTER:
+		case XKILL_Enums::PickupableType::AMMUNITION_SCATTER:
 			render->meshID = 5;
 			break;
-		case PickupableType::AMMUNITION_EXPLOSIVE:
+		case XKILL_Enums::PickupableType::AMMUNITION_EXPLOSIVE:
 			render->meshID = 6;
 			break;
-		case PickupableType::MEDKIT:
+		case XKILL_Enums::PickupableType::MEDKIT:
 			render->meshID = 3;
 		default:
 			break;
 		}
-		*/
-		render->meshID = 1;
 
 		CREATE_ATTRIBUTE(Attribute_Physics, physics, entity);
 		CONNECT_ATTRIBUTES(physics, spatial);
@@ -297,7 +286,7 @@ public:
 		physics->collisionFilterGroup = Attribute_Physics::EXPLOSIONSPHERE;
 		physics->collisionFilterMask = Attribute_Physics::PLAYER;
 		CONNECT_ATTRIBUTES(physics, spatial);
-		physics->collisionResponse = false;
+		physics->collisionResponse = true;
 		physics->mass = 0.0f;
 		physics->gravity = Float3(0.0f, 0.0f, 0.0f);
 		physics->linearVelocity = Float3(0.0f, 0.0f, 0.0f);

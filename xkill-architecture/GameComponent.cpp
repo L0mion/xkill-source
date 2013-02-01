@@ -1,6 +1,7 @@
 #include "GameComponent.h"
 #include <xkill-utilities/AttributeManager.h>
-#include <xkill-utilities/Enums.h>
+#include <xkill-utilities/XKILL_Enums.h>
+#include <xkill-utilities/MutatorSettings.h>
 #include <DirectXMath.h>
 
 #include <iostream>
@@ -104,7 +105,7 @@ void GameComponent::onUpdate(float delta)
 		if(input->changeAmmunitionType)
 		{
 			input->changeAmmunitionType = false;
-			weaponStats->currentAmmunitionType = static_cast<Ammunition::AmmunitionType>((weaponStats->currentAmmunitionType + 1) % Ammunition::AmmunitionType::NROFAMMUNITIONTYPES);
+			weaponStats->currentAmmunitionType = static_cast<XKILL_Enums::AmmunitionType>((weaponStats->currentAmmunitionType + 1) % XKILL_Enums::AmmunitionType::NROFAMMUNITIONTYPES);
 			switchAmmunition(weaponStats);
 			ammo = &weaponStats->ammunition[weaponStats->currentAmmunitionType];
 			
@@ -116,7 +117,7 @@ void GameComponent::onUpdate(float delta)
 		if(input->changeFiringMode)
 		{
 			input->changeFiringMode = false;
-			weaponStats->currentFiringModeType = static_cast<FiringMode::FiringModeType>((weaponStats->currentFiringModeType + 1) % Ammunition::AmmunitionType::NROFAMMUNITIONTYPES);
+			weaponStats->currentFiringModeType = static_cast<XKILL_Enums::FiringModeType>((weaponStats->currentFiringModeType + 1) % XKILL_Enums::AmmunitionType::NROFAMMUNITIONTYPES);
 			switchFiringMode(weaponStats);
 			firingMode = &weaponStats->firingMode[weaponStats->currentFiringModeType];
 
@@ -131,8 +132,8 @@ void GameComponent::onUpdate(float delta)
 		//
 		if(health->health > 0.0f)
 		{
-			if((input->fire && firingMode->type == FiringMode::AUTO) || 
-				input->firePressed && (firingMode->type == FiringMode::SINGLE || firingMode->type == FiringMode::SEMI))
+			if((input->fire && firingMode->type == XKILL_Enums::FiringModeType::AUTO) || 
+				input->firePressed && (firingMode->type == XKILL_Enums::FiringModeType::SINGLE || firingMode->type == XKILL_Enums::FiringModeType::SEMI))
 			{
 				input->fire = false;
 				input->firePressed = false;
@@ -170,6 +171,8 @@ void GameComponent::onUpdate(float delta)
 		{
 			health->health = 0.0f;
 			input->killPlayer = false;
+			player->detectedAsDead = true;
+			player->currentRespawnDelay = 0.0f;
 		}
 
 		if(input->sprint)
@@ -220,7 +223,7 @@ void GameComponent::onUpdate(float delta)
 				physics->gravity = Float3(0.0f, -10.0f, 0.0f);
 				physics->collisionFilterMask = physics->EVERYTHING;
 				physics->collisionResponse = true;
-				physics->meshID = 0;
+				physics->meshID = player->meshIDWhenAlive;
 
 				spatial->rotation = Float4(0.0f, 0.0f, 0.0f, 1.0f);
 				camera->up = Float3(0.0f, 1.0f, 0.0f);
@@ -296,16 +299,16 @@ void GameComponent::onUpdate(float delta)
 				int amount;
 				switch(pickupablesSpawnPoint->spawnPickupableType)
 				{
-				case PickupableType::MEDKIT:
+				case XKILL_Enums::PickupableType::MEDKIT:
 					amount = 1;
 						break;
-				case PickupableType::AMMUNITION_BULLET:
+				case XKILL_Enums::PickupableType::AMMUNITION_BULLET:
 					amount = 100;
 						break;
-				case PickupableType::AMMUNITION_SCATTER:
+				case XKILL_Enums::PickupableType::AMMUNITION_SCATTER:
 					amount = 50;
 						break;
-				case PickupableType::AMMUNITION_EXPLOSIVE:
+				case XKILL_Enums::PickupableType::AMMUNITION_EXPLOSIVE:
 					amount = 10;
 					break;
 				}
@@ -401,7 +404,6 @@ void GameComponent::event_PhysicsAttributesColliding(Event_PhysicsAttributesColl
 	Entity* entity1 = &allEntity->at(itrPhysics.ownerIdAt(e->attribute1_index));
 	Entity* entity2 = &allEntity->at(itrPhysics.ownerIdAt(e->attribute2_index));
 	
-
 	// Handle hit reaction on entity 1
 	// when colliding with entity 2
 
@@ -498,7 +500,7 @@ void GameComponent::event_PhysicsAttributesColliding(Event_PhysicsAttributesColl
 			for(unsigned i=0;i<physicsId.size();i++)
 			{
 				Attribute_Physics* physicsAttribute = itrPhysics.at(physicsId.at(i));
-				SEND_EVENT(&Event_ModifyPhysicsObject(ModifyPhysicsObjectData::GRAVITY, static_cast<void*>(&Float3(0.0f, -10.0f, 0.0f)), physicsId.at(i)));
+				SEND_EVENT(&Event_ModifyPhysicsObject(XKILL_Enums::ModifyPhysicsObjectData::GRAVITY, static_cast<void*>(&Float3(0.0f, -10.0f, 0.0f)), physicsId.at(i)));
 				//physicsAttribute->gravity = Float3(0.0f, -10.0f, 0.0f);
 				//physicsAttribute->linearVelocity = Float3(0.0f, 0.0f, 0.0f);
 				//physicsAttribute->reloadDataIntoBulletPhysics = true;
@@ -516,8 +518,17 @@ void GameComponent::event_PhysicsAttributesColliding(Event_PhysicsAttributesColl
 					projectileAttribute->currentLifeTimeLeft = 1.00f;
 				}
 
+
+				//continue
+				//MutatorSettings ms;
+				//Ammunition ammo = ms.getStandardAmmunition(projectileAttribute->ammunitionType);
+				//FiringMode firingMode = ms.getStandardFiringMode(projectileAttribute->firingModeType);
+
+				//float explosionSphereRadius = ammo.explosionSphereFinalRadius;
+				float explosionSphereRadius = 1.0f;
+
 				//Explosion handling.
-				if(projectileAttribute->explodeOnImnpact)
+				if(projectileAttribute->ammunitionType == XKILL_Enums::AmmunitionType::EXPLOSIVE)
 				{
 					//Get damage from projectile.
 					Attribute_Damage* projectileDamageAttribute;
@@ -539,7 +550,7 @@ void GameComponent::event_PhysicsAttributesColliding(Event_PhysicsAttributesColl
 					Attribute_Position* projectilePositionAttribute = itrPosition.at(projectileSpatialAttribute->ptr_position);
 
 					//Creates an explosion sphere. Init information is taken from the impacting projectile.
-					SEND_EVENT(&Event_CreateExplosionSphere(projectilePositionAttribute->position, projectileAttribute->explosionSphereRadius, projectileDamageAttribute->damage, projectileAttribute->entityIdOfCreator));
+					SEND_EVENT(&Event_CreateExplosionSphere(projectilePositionAttribute->position, explosionSphereRadius, projectileDamageAttribute->damage, projectileAttribute->entityIdOfCreator));
 				}
 			}
 			//SEND_EVENT(&Event_RemoveEntity(entity1->getID())); //Crashes sometimes if removed here
@@ -564,28 +575,28 @@ void GameComponent::event_PhysicsAttributesColliding(Event_PhysicsAttributesColl
 					pickupableAttribute = itrPickupable.at(pickupablesId.at(i));
 					switch(pickupableAttribute->pickupableType)
 					{
-						case PickupableType::MEDKIT:
+						case XKILL_Enums::PickupableType::MEDKIT:
 						{
 								Attribute_Health* health = itrHealth.at(playerAttribute->ptr_health);
 								health->health += pickupableAttribute->amount;
 								break;
 						}
-						case PickupableType::AMMUNITION_BULLET:
+						case XKILL_Enums::PickupableType::AMMUNITION_BULLET:
 						{
 								Attribute_WeaponStats* weaponStatsAttribute = itrWeaponStats.at(playerAttribute->ptr_weaponStats);
-								weaponStatsAttribute->ammunition[Ammunition::BULLET].totalNrOfShots += pickupableAttribute->amount;
+								weaponStatsAttribute->ammunition[XKILL_Enums::AmmunitionType::BULLET].totalNrOfShots += pickupableAttribute->amount;
 								break;
 						}
-						case PickupableType::AMMUNITION_EXPLOSIVE:
+						case XKILL_Enums::PickupableType::AMMUNITION_EXPLOSIVE:
 						{
 								Attribute_WeaponStats* weaponStatsAttribute = itrWeaponStats.at(playerAttribute->ptr_weaponStats);
-								weaponStatsAttribute->ammunition[Ammunition::EXPLOSIVE].totalNrOfShots += pickupableAttribute->amount;
+								weaponStatsAttribute->ammunition[XKILL_Enums::AmmunitionType::EXPLOSIVE].totalNrOfShots += pickupableAttribute->amount;
 								break;
 						}
-						case PickupableType::AMMUNITION_SCATTER:
+						case XKILL_Enums::PickupableType::AMMUNITION_SCATTER:
 						{
 								Attribute_WeaponStats* weaponStatsAttribute = itrWeaponStats.at(playerAttribute->ptr_weaponStats);
-								weaponStatsAttribute->ammunition[Ammunition::SCATTER].totalNrOfShots += pickupableAttribute->amount;
+								weaponStatsAttribute->ammunition[XKILL_Enums::AmmunitionType::SCATTER].totalNrOfShots += pickupableAttribute->amount;
 								break;
 						}
 					}
@@ -798,7 +809,7 @@ void GameComponent::event_StartDeathmatch( Event_StartDeathmatch* e )
 	//Continue
 	for(int i=0;i<10;i++)
 	{
-		SEND_EVENT(&Event_CreatePickupablesSpawnPoint(Float3(2.0f, 5.0f, i-6.0f), PickupableType::MEDKIT));
+		SEND_EVENT(&Event_CreatePickupablesSpawnPoint(Float3(2.0f, 5.0f, i-6.0f), XKILL_Enums::PickupableType::MEDKIT));
 	}
 
 	//SEND_EVENT(&Event_CreatePickupable(Float3(2.0f, 2.0f, 0.0f), Attribute_Pickupable::MEDKIT, 5));
@@ -824,7 +835,7 @@ void GameComponent::event_PlayerDeath(Event_PlayerDeath* e)
 	physics->gravity = Float3(0.0f, -1.0f, 0.0f);
 	physics->collisionFilterMask = physics->WORLD;
 	physics->collisionResponse = true;
-	physics->meshID = 1;
+	physics->meshID = player->meshIDWhenDead;
 	physics->reloadDataIntoBulletPhysics = true;
 
 	player->currentRespawnDelay = player->respawnDelay;
@@ -836,13 +847,13 @@ bool GameComponent::switchAmmunition(Attribute_WeaponStats* weaponStats)
 	bool switchedAmmunition = false;
 	FiringMode* firingMode = &weaponStats->firingMode[weaponStats->currentFiringModeType];
 
-	for(int i = 0; i < Ammunition::NROFAMMUNITIONTYPES; i++)
+	for(int i = 0; i < XKILL_Enums::AmmunitionType::NROFAMMUNITIONTYPES; i++)
 	{
-		weaponStats->currentAmmunitionType = static_cast<Ammunition::AmmunitionType>((weaponStats->currentAmmunitionType + 1) % Ammunition::NROFAMMUNITIONTYPES);
+		weaponStats->currentAmmunitionType = static_cast<XKILL_Enums::AmmunitionType>((weaponStats->currentAmmunitionType + 1) % XKILL_Enums::AmmunitionType::NROFAMMUNITIONTYPES);
 
-		if(weaponStats->currentAmmunitionType == Ammunition::BULLET && firingMode->canShootBullet || 
-			weaponStats->currentAmmunitionType == Ammunition::SCATTER && firingMode->canShootScatter || 
-			weaponStats->currentAmmunitionType == Ammunition::EXPLOSIVE && firingMode->canShootExplosive)
+		if(weaponStats->currentAmmunitionType == XKILL_Enums::AmmunitionType::BULLET && firingMode->canShootBullet || 
+			weaponStats->currentAmmunitionType == XKILL_Enums::AmmunitionType::SCATTER && firingMode->canShootScatter || 
+			weaponStats->currentAmmunitionType == XKILL_Enums::AmmunitionType::EXPLOSIVE && firingMode->canShootExplosive)
 		{
 			switchedAmmunition = true;
 			break;
@@ -858,15 +869,15 @@ bool GameComponent::switchFiringMode(Attribute_WeaponStats* weaponStats)
 
 	FiringMode* firingMode;
 
-	for(int i = 0; i < FiringMode::NROFFIRINGMODETYPES; i++)
+	for(int i = 0; i < XKILL_Enums::FiringModeType::NROFFIRINGMODETYPES; i++)
 	{
-		weaponStats->currentFiringModeType = static_cast<FiringMode::FiringModeType>((weaponStats->currentFiringModeType + 1) % FiringMode::NROFFIRINGMODETYPES);
+		weaponStats->currentFiringModeType = static_cast<XKILL_Enums::FiringModeType>((weaponStats->currentFiringModeType + 1) % XKILL_Enums::FiringModeType::NROFFIRINGMODETYPES);
 
 		firingMode = &weaponStats->firingMode[weaponStats->currentFiringModeType];
 
-		if((weaponStats->currentAmmunitionType == Ammunition::BULLET && firingMode->canShootBullet) ||
-			(weaponStats->currentAmmunitionType == Ammunition::SCATTER && firingMode->canShootScatter) ||
-			(weaponStats->currentAmmunitionType == Ammunition::EXPLOSIVE && firingMode->canShootExplosive))
+		if((weaponStats->currentAmmunitionType == XKILL_Enums::AmmunitionType::BULLET && firingMode->canShootBullet) ||
+			(weaponStats->currentAmmunitionType == XKILL_Enums::AmmunitionType::SCATTER && firingMode->canShootScatter) ||
+			(weaponStats->currentAmmunitionType == XKILL_Enums::AmmunitionType::EXPLOSIVE && firingMode->canShootExplosive))
 		{
 			switchedFiringMode = true;
 			break;
@@ -944,7 +955,7 @@ void GameComponent::shootProjectile(Attribute_Position* position, Attribute_Came
 
 		Float3 velocity(lookAtXMFloat3.x, lookAtXMFloat3.y, lookAtXMFloat3.z);
 		velocity = velocity * ammo->speed;
-					
+
 		//Randomize velocity for each consecutive projectile
 		if(ammo->velocityVariation != 0.0f)
 		{
@@ -972,7 +983,6 @@ void GameComponent::shootProjectile(Attribute_Position* position, Attribute_Came
 			scatterPos.z += randomLO + (float)rand()/((float)RAND_MAX/(randomHI-randomLO));
 		}
 
-		SEND_EVENT(&Event_CreateProjectile(scatterPos, velocity, rotation, ammo->damage * firingMode->damageModifier, 
-					itrPlayer.ownerId(), ammo->explosive, ammo->explosionSphere * firingMode->explosionSphereModifier));
+		SEND_EVENT(&Event_CreateProjectile(scatterPos, velocity, rotation, itrPlayer.ownerId(), ammo->type, firingMode->type, ammo->damage));
 	}
 }
