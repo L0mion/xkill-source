@@ -197,6 +197,9 @@ void DirectInputDevice::setStandardMappings()
 	{
 		buttons_[0]->addMapping(InputAction::ACTION_B_CHANGE_AMMUNITIONTYPE);
 		buttons_[1]->addMapping(InputAction::ACTION_B_CHANGE_FIRINGMODE);
+		buttons_[2]->addMapping(InputAction::ACTION_B_JUMP);
+		buttons_[3]->addMapping(InputAction::ACTION_B_KILL_PLAYER);
+		buttons_[8]->addMapping(InputAction::ACTION_B_SPRINT);
 		buttons_[9]->addMapping(InputAction::ACTION_B_FIRE);
 	}
 	else if(buttons_.size() >= 2)
