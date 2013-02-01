@@ -265,5 +265,6 @@ void CameraComponent::onUpdate(float delta)
 	{
 		Attribute_Camera* camera = itrCamera.getNext();
 		updateView(camera);
+		updateProj(camera);
 	}
 }
