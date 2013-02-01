@@ -55,7 +55,7 @@ public:
 	void addOffsetMatrix(Float4x4 offsetMatrix);
 
 
-	std::vector<VertexDesc> createVertices();
+	void createVertices(std::vector<VertexDesc>& vertices, std::vector<unsigned int>& indexBuffer);
 
 	std::vector<unsigned int> getIndices();
 	
