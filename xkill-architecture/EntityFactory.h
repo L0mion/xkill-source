@@ -140,7 +140,20 @@ public:
 
 		CREATE_ATTRIBUTE(Attribute_Render, render, entity);
 		CONNECT_ATTRIBUTES(render, spatial);
-		render->meshID = 2;
+		switch (e->ammunitionType)
+		{
+		case XKILL_Enums::AmmunitionType::BULLET:
+			render->meshID = 10;
+			break;
+		case XKILL_Enums::AmmunitionType::EXPLOSIVE:
+			render->meshID = 8;
+			break;
+		case XKILL_Enums::AmmunitionType::SCATTER:
+			render->meshID = 9;
+			break;
+		default:
+			break;
+		}
 
 		CREATE_ATTRIBUTE(Attribute_Physics, physics, entity);
 		physics->collisionFilterGroup = Attribute_Physics::PROJECTILE;
@@ -218,7 +231,6 @@ public:
 
 		CREATE_ATTRIBUTE(Attribute_Render, render, entity);
 		CONNECT_ATTRIBUTES(render, spatial);
-		/*
 		switch (e->pickupableType)
 		{
 		case XKILL_Enums::PickupableType::AMMUNITION_BULLET:
@@ -235,8 +247,6 @@ public:
 		default:
 			break;
 		}
-		*/
-		render->meshID = 1;
 
 		CREATE_ATTRIBUTE(Attribute_Physics, physics, entity);
 		CONNECT_ATTRIBUTES(physics, spatial);

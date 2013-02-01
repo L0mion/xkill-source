@@ -188,8 +188,8 @@ Attribute_Player::Attribute_Player()
 	collidingWithWorld = false;
 	jetpackTimer = 0.0f;
 	detectedAsDead = true;
-	meshIDWhenAlive = 0;
-	meshIDWhenDead = 1;
+	meshIDWhenAlive = 7;
+	meshIDWhenDead = 9;
 
 	walkSpeed = 5.0f;
 	sprintSpeed = walkSpeed*2;

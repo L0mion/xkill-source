@@ -33,6 +33,7 @@ SamplerState ss : register(s0);
 groupshared uint tileMinDepthInt;
 groupshared uint tileMaxDepthInt;
 groupshared uint tileLightNum; //Number of lights intersecting tile.
+
 groupshared uint tileLightIndices[TILE_MAX_LIGHTS]; //Indices to lights intersecting tile.
 
 [numthreads(TILE_DIM, TILE_DIM, 1)]
@@ -102,8 +103,8 @@ void lightingCS(
 			bool inFrustum = true;
 			[unroll] for(uint j = 0; j < 6; j++)
 			{
-				float d = dot(frustum._[j], mul(float4(lightsPos[lightIndex], 1.0f), view)); //lightsPos[lightIndex].pos
-				inFrustum = inFrustum && (d >= -lightsPoint[lightIndex].range);
+				float d = dot(frustum._[j], mul(float4(lightsPos[lightIndex], 1.0f), view)) + lightsPoint[lightIndex].range;
+				inFrustum = inFrustum && !(d < 0);
 			}
 			
 			if(inFrustum && tileLightNum < TILE_MAX_LIGHTS)
@@ -157,7 +158,7 @@ void lightingCS(
 		LightPoint(
 			toEyeV,
 			descPoint,
-			mul(float4(lightsPos[tileLightIndices[i]], 1.0f), view), //lightsPos[tileLightIndices[i]].pos
+			mul(float4(lightsPos[tileLightIndices[i]], 1.0f), view).xyz,
 			surfaceMaterial,
 			surfaceNormalV,
 			surfacePosV,
@@ -168,10 +169,10 @@ void lightingCS(
 	}
 
 	//TILING DEMO:
-	//for(i = 0; i < tileLightNum; i++) //Apply culled point-lights.
-	//{
-	//	Diffuse.g += 0.1;
-	//}
+	for(i = 0; i < tileLightNum; i++) //Apply culled point-lights.
+	{
+		Diffuse.g += 0.1;
+	}
 	
 	output[uint2(threadIDDispatch.x + viewportTopX, threadIDDispatch.y + viewportTopY)] = Ambient + Diffuse + Specular;
 }

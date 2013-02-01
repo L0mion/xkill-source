@@ -559,7 +559,7 @@ void exportLevel::commandpart5()
 		row = row + (i+100);
 		row = row + " ";
 		row = row + fn.name();
-		row = row + ".obj 0\n";
+		row = row + ".obj 0 1\n";
 		rows = rows +  row;
 	}
 	
