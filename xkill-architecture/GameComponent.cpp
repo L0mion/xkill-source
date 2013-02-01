@@ -171,6 +171,8 @@ void GameComponent::onUpdate(float delta)
 		{
 			health->health = 0.0f;
 			input->killPlayer = false;
+			player->detectedAsDead = true;
+			player->currentRespawnDelay = 0.0f;
 		}
 
 		if(input->sprint)
@@ -221,7 +223,7 @@ void GameComponent::onUpdate(float delta)
 				physics->gravity = Float3(0.0f, -10.0f, 0.0f);
 				physics->collisionFilterMask = physics->EVERYTHING;
 				physics->collisionResponse = true;
-				physics->meshID = 0;
+				physics->meshID = player->meshIDWhenAlive;
 
 				spatial->rotation = Float4(0.0f, 0.0f, 0.0f, 1.0f);
 				camera->up = Float3(0.0f, 1.0f, 0.0f);
@@ -833,7 +835,7 @@ void GameComponent::event_PlayerDeath(Event_PlayerDeath* e)
 	physics->gravity = Float3(0.0f, -1.0f, 0.0f);
 	physics->collisionFilterMask = physics->WORLD;
 	physics->collisionResponse = true;
-	physics->meshID = 1;
+	physics->meshID = player->meshIDWhenDead;
 	physics->reloadDataIntoBulletPhysics = true;
 
 	player->currentRespawnDelay = player->respawnDelay;

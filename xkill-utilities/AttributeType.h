@@ -704,6 +704,9 @@ struct DLL_U Attribute_Player : public IAttribute
 	float jetpackTimer;			//!< Incremented when using jetpack
 	bool detectedAsDead;
 
+	float meshIDWhenAlive;
+	float meshIDWhenDead;
+
 	DataItemList* getDataList()
 	{
 		DataItemList* list = new DataItemList();

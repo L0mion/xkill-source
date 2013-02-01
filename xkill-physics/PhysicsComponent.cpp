@@ -11,6 +11,7 @@
 #include "ExplosionSpherePhysicsObject.h"
 #include "FrustumPhysicsObject.h"
 #include "PickupablePhysicsObject.h"
+#include "WorldPhysicsObject.h"
 #include "physicsUtilities.h"
 
 #include "CollisionShapes.h"
@@ -262,7 +263,7 @@ void PhysicsComponent::synchronizeWithAttributes(Attribute_Physics* physicsAttri
 			physicsObjects_->at(physicsAttributeIndex) = new PhysicsObject();
 			break;
 		case Attribute_Physics::WORLD:
-			physicsObjects_->at(physicsAttributeIndex) = new PhysicsObject();
+			physicsObjects_->at(physicsAttributeIndex) = new WorldPhysicsObject();
 			break;
 		case Attribute_Physics::PLAYER:
 			physicsObjects_->at(physicsAttributeIndex) = new PlayerPhysicsObject();
