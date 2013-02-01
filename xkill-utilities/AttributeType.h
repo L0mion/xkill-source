@@ -32,7 +32,7 @@ be modified to suit the need of each Component.
 // Attributes
 ///////////////////////////////////////////
 
-// XKILL_Enums over each Attribute Type
+// Enums over each Attribute Type
 /*
 Just something that can be used if "casting" of
 \ref ATTRIBTUES is needed.
@@ -1032,22 +1032,22 @@ struct DLL_U Attribute_ExplosionSphere : public IAttribute
 	~Attribute_ExplosionSphere();
 
 	AttributePtr<Attribute_Physics> ptr_physics;
-	float currentLifeTimeLeft;
-	float radius;
+	float currentLifeTimeLeft;						//!< Updated by Bullet each frame
+	float currentRadius;							//!< Updated by Bullet each frame
+	XKILL_Enums::AmmunitionType ammunitionType;
+	XKILL_Enums::FiringModeType firingModeType;
 
 	DataItemList* getDataList()
 	{
 		DataItemList* list = new DataItemList();
 		list->add_AttributePointer(ptr_physics.index, "ptr_physics");;
 		list->add(currentLifeTimeLeft,	"currentLifeTimeLeft");
-		list->add(radius, "radius");
 		return list;
 	}
 	void saveTo(DataItemList* list)
 	{
 		list->get_AttributePointer(&ptr_physics.index);
 		list->get(&currentLifeTimeLeft);
-		list->get(&radius);
 	};
 	AttributeType getType(){return ATTRIBUTE_EXPLOSIONSPHERE;}
 	std::string getName(){return "ExplosionSphere";}

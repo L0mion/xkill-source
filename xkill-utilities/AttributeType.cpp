@@ -507,6 +507,9 @@ void Attribute_DebugShape::saveTo( DataItemList* list )
 Attribute_ExplosionSphere::Attribute_ExplosionSphere()
 {
 	currentLifeTimeLeft = 1.0f;
+	currentRadius = 0.0f;
+	ammunitionType = XKILL_Enums::AmmunitionType::EXPLOSIVE;
+	firingModeType = XKILL_Enums::FiringModeType::SINGLE;
 }
 Attribute_ExplosionSphere::~Attribute_ExplosionSphere()
 {
