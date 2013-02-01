@@ -892,6 +892,7 @@ struct DLL_U Attribute_PickupablesSpawnPoint : public IAttribute
 		list->add(maxNrOfExistingSpawnedPickupables, "maxNrOfExistingSpawnedPickupables");
 		list->add(currentNrOfExistingSpawnedPickupables, "currentNrOfExistingSpawnedPickupables");
 
+
 		return list;
 	}
 	void saveTo(DataItemList* list)

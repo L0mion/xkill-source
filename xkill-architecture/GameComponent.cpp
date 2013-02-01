@@ -204,7 +204,7 @@ void GameComponent::onUpdate(float delta)
 
 
 				float alive = 3.14/4.0f;
-				float dead = 3.14/2;
+				float dead = 3.14/3;
 				float slerp = (1 - player->currentRespawnDelay/player->respawnDelay);
 				float fov = slerp*dead + (1-slerp)*alive;
 				itrCamera.at(player->ptr_camera)->fieldOfView = fov;
