@@ -169,7 +169,7 @@ void PhysicsComponent::onUpdate(float delta)
 				transform.setOrigin(newPosition);
 				physicsObjects_->at(index)->setWorldTransform(transform);
 
-				DEBUGPRINT("Something that was out of bounds was moved to " << newPosition.x() << " " << newPosition.y() << " " << newPosition.z());
+				DEBUGPRINT("Something that was out of bounds was moved to Ten forward");// << newPosition.x() << " " << newPosition.y() << " " << newPosition.z());
 			}
 		}
 	}

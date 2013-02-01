@@ -215,7 +215,7 @@ void GameComponent::onUpdate(float delta)
 				physics->gravity = Float3(0.0f, -10.0f, 0.0f);
 				physics->collisionFilterMask = physics->EVERYTHING;
 				physics->collisionResponse = true;
-				physics->meshID = 0;
+				physics->meshID = 7;
 
 				spatial->rotation = Float4(0.0f, 0.0f, 0.0f, 1.0f);
 				camera->up = Float3(0.0f, 1.0f, 0.0f);

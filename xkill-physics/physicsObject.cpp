@@ -59,6 +59,7 @@ btVector3 PhysicsObject::zeroLocalInertia()
 
 bool PhysicsObject::init(unsigned int attributeIndex,unsigned int collisionFilterGroup)
 {
+	
 	if(attributeIndex < 0)
 	{
 		return false;

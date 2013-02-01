@@ -62,7 +62,7 @@ public:
 
 		CREATE_ATTRIBUTE(Attribute_Render, render, entity);
 		CONNECT_ATTRIBUTES(render, spatial);
-		render->meshID = 0;
+		render->meshID = 7;
 
 		//CREATE_ATTRIBUTE(Attribute_DebugShape, debugShape, entity);	//create temp debug shape
 		//CONNECT_ATTRIBUTES(debugShape, spatial);
@@ -146,7 +146,7 @@ public:
 
 		CREATE_ATTRIBUTE(Attribute_Render, render, entity);
 		CONNECT_ATTRIBUTES(render, spatial);
-		render->meshID = 2;
+		render->meshID = 10;
 
 		//CREATE_ATTRIBUTE(Attribute_DebugShape, debugShape, entity);	//create temp debug shape
 		//CONNECT_ATTRIBUTES(debugShape, spatial);
@@ -180,13 +180,13 @@ public:
 		damage->owner_entityID = e->entityIdOfCreator;
 
 		//temp, create demo light for each projectile
-		CREATE_ATTRIBUTE(Attribute_Light_Point, lightPoint, entity);
-		CONNECT_ATTRIBUTES(lightPoint, position);
-		lightPoint->lightPoint.ambient		= Float4(0.8f, 0.0f, 0.0f, 1.0f);
-		lightPoint->lightPoint.diffuse		= Float4(0.8f, 0.0f, 0.0f, 1.0f);
-		lightPoint->lightPoint.specular		= Float4(0.8f, 0.0f, 0.0f, 1.0f);
-		lightPoint->lightPoint.range		= 1.0f;
-		lightPoint->lightPoint.attenuation	= Float3(0.0f, 0.1f, 0.0f);
+		//CREATE_ATTRIBUTE(Attribute_Light_Point, lightPoint, entity);
+		//CONNECT_ATTRIBUTES(lightPoint, position);
+		//lightPoint->lightPoint.ambient		= Float4(0.8f, 0.0f, 0.0f, 1.0f);
+		//lightPoint->lightPoint.diffuse		= Float4(0.8f, 0.0f, 0.0f, 1.0f);
+		//lightPoint->lightPoint.specular		= Float4(0.8f, 0.0f, 0.0f, 1.0f);
+		//lightPoint->lightPoint.range		= 1.0f;
+		//lightPoint->lightPoint.attenuation	= Float3(0.0f, 0.1f, 0.0f);
 	}
 
 	void createMesh(Entity* entity, Event_CreateMesh* e)
