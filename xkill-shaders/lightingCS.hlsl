@@ -103,8 +103,8 @@ void lightingCS(
 			bool inFrustum = true;
 			[unroll] for(uint j = 0; j < 6; j++)
 			{
-				float d = dot(frustum._[j], mul(float4(lightsPos[lightIndex], 1.0f), view)); //lightsPos[lightIndex].pos
-				inFrustum = inFrustum && (d >= -lightsPoint[lightIndex].range);
+				float d = dot(frustum._[j], mul(float4(lightsPos[lightIndex], 1.0f), view)) + lightsPoint[lightIndex].range;
+				inFrustum = inFrustum && !(d < 0);
 			}
 			
 			if(inFrustum && tileLightNum < TILE_MAX_LIGHTS)
@@ -169,10 +169,10 @@ void lightingCS(
 	}
 
 	//TILING DEMO:
-	//for(i = 0; i < tileLightNum; i++) //Apply culled point-lights.
-	//{
-	//	Diffuse.g += 0.1;
-	//}
+	for(i = 0; i < tileLightNum; i++) //Apply culled point-lights.
+	{
+		Diffuse.g += 0.1;
+	}
 	
 	output[uint2(threadIDDispatch.x + viewportTopX, threadIDDispatch.y + viewportTopY)] = Ambient + Diffuse + Specular;
 }

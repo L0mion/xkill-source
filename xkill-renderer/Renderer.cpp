@@ -463,17 +463,6 @@ void Renderer::renderViewportToGBuffer(ViewportData& vpData)
 		renderInstance(i->first, i->second);
 	}
 
-	//Render renderattributes
-	//Attribute_Render* renderAt;
-	//while(itrRender.hasNext())
-	//{
-	//	renderAt = itrRender.getNext();
-	//	renderAttribute(
-	//		renderAt, 
-	//		vpData.view, 
-	//		vpData.proj);
-	//}
-
 	//Make me use iterators!
 	Attribute_DebugShape* debugShapeAt;
 	while(itrDebugShape.hasNext())
@@ -494,13 +483,11 @@ void Renderer::renderViewportToGBuffer(ViewportData& vpData)
 		drawBulletPhysicsDebugLines(vpData.view, vpData.proj);
 	}
 	
+	//Unset and clean.
 	managementGBuffer_->unsetGBuffersAndDepthBufferAsRenderTargets(devcon);
-
 	managementFX_->unsetAll(devcon);
 	managementFX_->unsetLayout(devcon);
-
 	managementSS_->unsetSS(devcon, TypeFX_PS, 0);
-
 	devcon->RSSetState(nullptr);
 }
 void Renderer::renderViewportToBackBuffer(ViewportData& vpData)
