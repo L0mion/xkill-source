@@ -24,9 +24,9 @@ void updateView(Attribute_Camera* camera)
 
 	// Add offset to camera position
 	Float3 position = playerPosition;
-	position.x += look.x*0.1f;
-	position.y += look.y*0.1f;
-	position.z += look.z*0.1f;
+	position.x += look.x*0.06f;
+	position.y += look.y*0.06f;
+	position.z += look.z*0.06f;
 
 	float& zFar			= camera->zFar;
 	float& zNear		= camera->zNear;
@@ -265,5 +265,6 @@ void CameraComponent::onUpdate(float delta)
 	{
 		Attribute_Camera* camera = itrCamera.getNext();
 		updateView(camera);
+		updateProj(camera);
 	}
 }

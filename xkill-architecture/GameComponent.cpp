@@ -201,9 +201,17 @@ void GameComponent::onUpdate(float delta)
 			if(player->currentRespawnDelay > 0.0f)
 			{
 				player->currentRespawnDelay -= delta;
+
+
+				float alive = 3.14/4.0f;
+				float dead = 3.14/3;
+				float slerp = (1 - player->currentRespawnDelay/player->respawnDelay);
+				float fov = slerp*dead + (1-slerp)*alive;
+				itrCamera.at(player->ptr_camera)->fieldOfView = fov;
 			}
 			else
 			{
+				itrCamera.at(player->ptr_camera)->fieldOfView =3.14f/4.0f;
 				// If an appropriate spawnpoint was found: spawn at it; otherwise: spawn at origo.
 				Attribute_PlayerSpawnPoint* spawnPointAttribute = findUnoccupiedSpawnPoint();
 				if(spawnPointAttribute != nullptr)

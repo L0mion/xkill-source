@@ -96,6 +96,7 @@ void Menu_Editor::slot_editorRefresh()
 		entityBrowser_add("Projectiles",			&itrProjectile.getAllOwnerId());
 		entityBrowser_add("Pickupables",			&itrPickupable.getAllOwnerId());
 		entityBrowser_add("PickupablesSpawnPoints",	&itrPickupablesSpawnPoint.getAllOwnerId());
+		entityBrowser_add("Lights",					&itrLightPoint.getAllOwnerId());
 	}
 }
 
