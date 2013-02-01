@@ -15,7 +15,7 @@ FMODEventSystem::~FMODEventSystem(void)
 	SAFE_RELEASE(mEventsystem);
 }
 
-void FMODEventSystem::FMODErrorCheck(FMOD_RESULT result)
+bool FMODEventSystem::FMODErrorCheck(FMOD_RESULT result)
 {
 	static bool error = false;
 	if (!error && result != FMOD_OK)
@@ -23,6 +23,8 @@ void FMODEventSystem::FMODErrorCheck(FMOD_RESULT result)
 		printf("FMOD error! (%d) %s\n", result, FMOD_ErrorString(result));
 		error = true;
 	}
+
+	return error;
 }
 
 void FMODEventSystem::Init(std::string mediaPath, std::string soundEventFileName, int maxChannels)
@@ -120,19 +122,21 @@ std::vector<std::string> FMODEventSystem::GetFMODEventNames()
 	std::vector<std::string> names;
 
 	int nrOfEvents;
-	FMODErrorCheck(mEventsystem->getNumEvents(&nrOfEvents));
-
-	for(int i = 0; i < nrOfEvents; i++)
+	if(!FMODErrorCheck(mEventsystem->getNumEvents(&nrOfEvents)))
 	{
-		FMODErrorCheck(mEventsystem->getEventBySystemID(i, FMOD_EVENT_INFOONLY, &e));
+		for(int i = 0; i < nrOfEvents; i++)
+		{
+			FMODErrorCheck(mEventsystem->getEventBySystemID(i, FMOD_EVENT_INFOONLY, &e));
 
-		int nr;
-		FMOD_EVENT_INFO info;
-		char* name;
+			int nr;
+			FMOD_EVENT_INFO info;
+			char* name;
 
-		FMODErrorCheck(e->getInfo(&nr, &name, &info));
-
-		names.push_back(std::string(name));
+			if(!FMODErrorCheck(e->getInfo(&nr, &name, &info)))
+			{
+				names.push_back(std::string(name));
+			}
+		}
 	}
 
 	return names;

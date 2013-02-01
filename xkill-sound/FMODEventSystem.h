@@ -49,7 +49,7 @@ public:
 	std::vector<std::string> GetFMODEventNames();
 
 private:
-	void FMODErrorCheck(FMOD_RESULT result);
+	bool FMODErrorCheck(FMOD_RESULT result);
 
 	FMOD::EventSystem* mEventsystem;
 	std::vector<FMOD::Event*> mEvents;
