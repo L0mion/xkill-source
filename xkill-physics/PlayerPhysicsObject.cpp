@@ -37,7 +37,43 @@ bool PlayerPhysicsObject::subClassSpecificInitHook()
 
 void PlayerPhysicsObject::onUpdate(float delta)
 {
+	PhysicsObject::onUpdate(delta);
+
 	handleInput(delta);
+
+	//Handle players taking off when going up ramps
+	Entity* playerEntity = itrPhysics_3.ownerAt(attributeIndex_);
+	std::vector<int> playerAttributeIndices = playerEntity->getAttributes(ATTRIBUTE_PLAYER);
+	for(unsigned int i = 0; i < playerAttributeIndices.size(); i++)
+	{
+		Attribute_Player* playerAttribute = itrPlayer.at(playerAttributeIndices.at(i));
+		if(!playerAttribute->collidingWithWorld && playerAttribute->timeSinceLastJump > playerAttribute->delayInSecondsBetweenEachJump && getLinearVelocity().y() > 0.0f)
+		{
+			setLinearVelocity(btVector3(getLinearVelocity().x(), 0.0f, getLinearVelocity().z()));
+		}
+		playerAttribute->collidingWithWorld = false;
+	}
+}
+
+void PlayerPhysicsObject::handleOutOfBounds()
+{
+	setGravity(btVector3(0.0f, 0.0f, 0.0f));
+	setLinearVelocity(btVector3(0.0f, 0.0f, 0.0f));
+
+	int playerEntityIndex = itrPhysics_3.ownerIdAt(attributeIndex_);
+	Entity* playerEntity = itrPhysics_3.ownerAt(attributeIndex_);
+				
+	std::vector<int> playerAttributeIndices = playerEntity->getAttributes(ATTRIBUTE_PLAYER);
+	for(unsigned int i = 0; i < playerAttributeIndices.size(); i++)
+	{
+		Attribute_Player* playerAttribute = itrPlayer.at(playerAttributeIndices.at(i));
+		AttributePtr<Attribute_Health> playerHealthAttribute = playerAttribute->ptr_health;
+		if(!playerAttribute->detectedAsDead)
+		{
+			DEBUGPRINT("Player entity " << playerEntityIndex << " was out of bounds");
+			SEND_EVENT(&Event_PlayerDeath(playerAttributeIndices[i]));
+		}
+	}
 }
 
 void PlayerPhysicsObject::handleInput(float delta)
@@ -56,7 +92,6 @@ void PlayerPhysicsObject::handleInput(float delta)
 											   itrSpatial.at(itrPhysics_3.at(attributeIndex_)->ptr_spatial)->rotation.w));*/
 
 	// New code above
-
 
 	std::vector<int> playerAttributes = itrPhysics_3.ownerAt(attributeIndex_)->getAttributes(ATTRIBUTE_PLAYER);
 	

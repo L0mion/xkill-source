@@ -24,9 +24,9 @@ void updateView(AttributePtr<Attribute_Camera> camera)
 
 	// Add offset to camera position
 	Float3 position = playerPosition;
-	position.x += look.x*0.1f;
-	position.y += look.y*0.1f;
-	position.z += look.z*0.1f;
+	//position.x += look.x*0.1f;
+	//position.y += look.y*0.1f;
+	//position.z += look.z*0.1f;
 
 	float& zFar			= camera->zFar;
 	float& zNear		= camera->zNear;

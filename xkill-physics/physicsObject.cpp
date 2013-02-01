@@ -17,6 +17,7 @@
 AttributeIterator<Attribute_Physics> itrPhysics_;
 AttributeIterator<Attribute_Position> itrPosition_PhysicsObject;
 AttributeIterator<Attribute_Spatial> itrSpatial_PhysicsObject;
+static float outOfBoundsIfYIsLowerThanThis;
 
 PhysicsObject::PhysicsObject()
 	: btRigidBody(-1, nullptr, nullptr)
@@ -24,6 +25,7 @@ PhysicsObject::PhysicsObject()
 	itrPhysics_ = ATTRIBUTE_MANAGER->physics.getIterator();
 	itrSpatial_PhysicsObject = ATTRIBUTE_MANAGER->spatial.getIterator();
 	itrPosition_PhysicsObject = ATTRIBUTE_MANAGER->position.getIterator();
+	outOfBoundsIfYIsLowerThanThis = -5.0f;
 }
 
 PhysicsObject::~PhysicsObject()
@@ -86,7 +88,6 @@ bool PhysicsObject::init(unsigned int attributeIndex,unsigned int collisionFilte
  		world.setOrigin(convert(ptr_position->position));
 		world.setRotation(convert(ptr_spatial->rotation));
 		setWorldTransform(world);  //Static physics objects: transform once
-
 	}
 	else
 	{
@@ -127,4 +128,20 @@ unsigned int PhysicsObject::getCollisionFilterGroup() const
 
 void PhysicsObject::onUpdate(float delta)
 {
+	if(getWorldTransform().getOrigin().y() < outOfBoundsIfYIsLowerThanThis)
+	{
+		handleOutOfBounds();
+	}
+}
+
+void PhysicsObject::handleOutOfBounds()
+{
+	btTransform transform;
+	btVector3 newPosition = btVector3(0.0f, 10.0f, 0.0f);
+
+	transform = getWorldTransform();
+	transform.setOrigin(newPosition);
+	setWorldTransform(transform);
+
+	DEBUGPRINT("A physics object was out of bounds. It was moved to a new position " << newPosition.x() << " " << newPosition.y() << " " << newPosition.z());
 }

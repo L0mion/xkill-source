@@ -54,11 +54,14 @@ public:
 	void createPlayerEntity(Entity* entity)
 	{
 		CREATE_ATTRIBUTE(ptr_position, Attribute_Position, position, entity);
+		
 		CREATE_ATTRIBUTE(ptr_spatial, Attribute_Spatial, spatial, entity);
 		ptr_spatial->ptr_position = ptr_position;
+		
 		CREATE_ATTRIBUTE(ptr_render, Attribute_Render, render, entity);
 		ptr_render->ptr_spatial = ptr_spatial;
 		ptr_render->meshID = 0;
+		
 		CREATE_ATTRIBUTE(ptr_physics, Attribute_Physics, physics, entity);
 		ptr_physics->ptr_spatial = ptr_spatial;
 		ptr_physics->ptr_render = ptr_render;
@@ -66,27 +69,37 @@ public:
 		ptr_physics->collisionFilterGroup = Attribute_Physics::PLAYER;
 		ptr_physics->collisionFilterMask = Attribute_Physics::EVERYTHING;
 		ptr_physics->gravity = Float3(0.0f, -0.0f, 0.0f);
+		
 		CREATE_ATTRIBUTE(ptr_input, Attribute_Input, input, entity);
 		ptr_input->ptr_physics = ptr_physics;
+		
 		CREATE_ATTRIBUTE(ptr_health, Attribute_Health, health, entity);
 		ptr_health->startHealth = 100;
+		
 		CREATE_ATTRIBUTE(ptr_weaponStats, Attribute_WeaponStats, weaponStats, entity);
-		ptr_weaponStats->currentAmmunitionType = Ammunition::SCATTER;
-		ptr_weaponStats->currentFiringModeType = FiringMode::AUTO;
+		ptr_weaponStats->currentAmmunitionType = XKILL_Enums::AmmunitionType::SCATTER;
+		ptr_weaponStats->currentFiringModeType = XKILL_Enums::FiringModeType::AUTO;
+		
 		// Create camera
-		AttributePtr<Attribute_Camera> ptr_camera = createCamera(entity); 
+		AttributePtr<Attribute_Camera> ptr_camera = createCamera(entity, ptr_spatial); 
+		
 		CREATE_ATTRIBUTE(ptr_player, Attribute_Player, player, entity);
 		ptr_player->ptr_render = ptr_render;
 		ptr_player->ptr_input = ptr_input;
 		ptr_player->ptr_camera = ptr_camera;
 		ptr_player->ptr_health = ptr_health;
 		ptr_player->ptr_weaponStats = ptr_weaponStats;
+		
 		CREATE_ATTRIBUTE(ptr_splitScreen, Attribute_SplitScreen, splitScreen, entity);
 		ptr_splitScreen->ptr_camera = ptr_camera;
 		ptr_splitScreen->ptr_player = ptr_player;
+
+		// Extra bindings
+		ptr_physics->meshID = ptr_render->meshID;
+		ptr_render->meshID = ptr_player->meshIDWhenAlive;
 	}
 
-	AttributePtr<Attribute_Camera> createCamera(Entity* entity)
+	AttributePtr<Attribute_Camera> createCamera(Entity* entity, AttributePtr<Attribute_Spatial> ptr_parent_spatial)
 	{
 		CREATE_ATTRIBUTE(ptr_position, Attribute_Position, position, entity);
 		CREATE_ATTRIBUTE(ptr_spatial, Attribute_Spatial, spatial, entity);
@@ -96,7 +109,9 @@ public:
 
 		// Add behavior
 		CREATE_ATTRIBUTE(ptr_offset, Behavior_Offset, offset, entity);
-		ptr_offset->offset_position = Float3(0.0f, 2.0f, 0.0f);
+		ptr_offset->ptr_spatial = ptr_spatial;
+		ptr_offset->ptr_parent_spatial = ptr_parent_spatial;
+		ptr_offset->offset_position = Float3(0.0f, 0.0f, 0.0f);
 
 		// Return
 		return ptr_camera;
@@ -125,12 +140,15 @@ public:
 	{
 		CREATE_ATTRIBUTE(ptr_position, Attribute_Position, position, entity);
 		ptr_position->position = e->position;
+
 		CREATE_ATTRIBUTE(ptr_spatial,Attribute_Spatial, spatial, entity);
 		ptr_spatial->ptr_position = ptr_position;
 		ptr_spatial->rotation = e->rotation;
+
 		CREATE_ATTRIBUTE(ptr_render, Attribute_Render, render, entity);
 		ptr_render->ptr_spatial = ptr_spatial;
 		ptr_render->meshID = 2;
+
 		CREATE_ATTRIBUTE(ptr_physics, Attribute_Physics, physics, entity);
 		ptr_physics->ptr_spatial = ptr_spatial;
 		ptr_physics->ptr_render = ptr_render;
@@ -141,14 +159,17 @@ public:
 		ptr_physics->mass = 100.0f;
 		ptr_physics->gravity = Float3(0.0f, 0.0f, 0.0f);
 		ptr_physics->collisionResponse = true;
+
 		CREATE_ATTRIBUTE(ptr_projectile, Attribute_Projectile, projectile, entity);
 		ptr_projectile->ptr_physics = ptr_physics;
 		ptr_projectile->entityIdOfCreator = e->entityIdOfCreator;
-		ptr_projectile->explodeOnImnpact = e->explodeOnImpact;
-		ptr_projectile->explosionSphereRadius = e->explosionSphereRadius;
+		ptr_projectile->ammunitionType = e->ammunitionType;
+		ptr_projectile->firingModeType = e->firingMode;
+
 		CREATE_ATTRIBUTE(ptr_damage, Attribute_Damage, damage, entity);
 		ptr_damage->damage = e->damage;
 		ptr_damage->owner_entityID = e->entityIdOfCreator;
+
 		//temp, create demo light for each projectile
 		CREATE_ATTRIBUTE(ptr_lightPoint, Attribute_Light_Point, lightPoint, entity);
 		ptr_lightPoint->ptr_position			= ptr_position;
@@ -186,7 +207,7 @@ public:
 		CREATE_ATTRIBUTE(ptr_pickupablesSpawnPoint, Attribute_PickupablesSpawnPoint, pickupablesSpawnPoint, entity);
 		ptr_pickupablesSpawnPoint->ptr_position = ptr_position;
 		ptr_pickupablesSpawnPoint->spawnPickupableType = e->pickupableType;
-		ptr_pickupablesSpawnPoint->spawnDelayInSeconds = 0.1f;
+		ptr_pickupablesSpawnPoint->spawnDelayInSeconds = 5.0f;
 		ptr_pickupablesSpawnPoint->maxNrOfExistingSpawnedPickupables = 1;
 	}
 
@@ -201,16 +222,16 @@ public:
 		/*
 		switch (e->pickupableType)
 		{
-		case PickupableType::AMMUNITION_BULLET:
+		case XKILL_Enums::PickupableType::AMMUNITION_BULLET:
 			render->meshID = 4;
 			break;
-		case PickupableType::AMMUNITION_SCATTER:
+		case XKILL_Enums::PickupableType::AMMUNITION_SCATTER:
 			render->meshID = 5;
 			break;
-		case PickupableType::AMMUNITION_EXPLOSIVE:
+		case XKILL_Enums::PickupableType::AMMUNITION_EXPLOSIVE:
 			render->meshID = 6;
 			break;
-		case PickupableType::MEDKIT:
+		case XKILL_Enums::PickupableType::MEDKIT:
 			render->meshID = 3;
 		default:
 			break;
@@ -242,6 +263,7 @@ public:
 	{
 		CREATE_ATTRIBUTE(ptr_position, Attribute_Position, position, entity);
 		ptr_position->position = e->position;
+
 		CREATE_ATTRIBUTE(ptr_spatial, Attribute_Spatial, spatial, entity);
 		ptr_spatial->ptr_position = ptr_position;
 		CREATE_ATTRIBUTE(ptr_debugShape, Attribute_DebugShape, debugShape, entity);
@@ -252,7 +274,7 @@ public:
 		ptr_physics->ptr_spatial = ptr_spatial;
 		ptr_physics->collisionFilterGroup = Attribute_Physics::EXPLOSIONSPHERE;
 		ptr_physics->collisionFilterMask = Attribute_Physics::PLAYER;
-		ptr_physics->collisionResponse = false;
+		ptr_physics->collisionResponse = true;
 		ptr_physics->mass = 0.0f;
 		ptr_physics->gravity = Float3(0.0f, 0.0f, 0.0f);
 		ptr_physics->linearVelocity = Float3(0.0f, 0.0f, 0.0f);

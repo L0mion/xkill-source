@@ -11,6 +11,7 @@
 #include "ExplosionSpherePhysicsObject.h"
 #include "FrustumPhysicsObject.h"
 #include "PickupablePhysicsObject.h"
+#include "WorldPhysicsObject.h"
 #include "physicsUtilities.h"
 
 #include "CollisionShapes.h"
@@ -20,7 +21,6 @@
 ATTRIBUTES_DECLARE_ALL;
 
 static debugDrawDispatcher gDebugDraw;
-static float removePhysicsObjectIfItHasLowerYCoordinateThanThis;
 
 PhysicsComponent::PhysicsComponent() : broadphase_(nullptr),
 									   collisionConfiguration_(nullptr),
@@ -33,7 +33,6 @@ PhysicsComponent::PhysicsComponent() : broadphase_(nullptr),
 	ATTRIBUTES_INIT_ALL;
 	SUBSCRIBE_TO_EVENT(this,EVENT_ATTRIBUTE_UPDATED);
 	SUBSCRIBE_TO_EVENT(this, EVENT_MODIFY_PHYSICS_OBJECT);
-	removePhysicsObjectIfItHasLowerYCoordinateThanThis = -5.0f;
 }
 
 PhysicsComponent::~PhysicsComponent()
@@ -114,7 +113,7 @@ bool PhysicsComponent::init()
 	bulletImporter_ = new btBulletWorldImporter(dynamicsWorld_);
 
 	dynamicsWorld_->setGravity(btVector3(0,-10,0));
-	dynamicsWorld_->setInternalTickCallback(wrapTickCallback,static_cast<void*>(this));
+	dynamicsWorld_->setInternalTickCallback(wrapTickCallback,static_cast<void*>(this)); //Register collision callback
 
 	gDebugDraw.setDebugMode(btIDebugDraw::DBG_DrawWireframe);
 	dynamicsWorld_->setDebugDrawer(&gDebugDraw);
@@ -126,68 +125,15 @@ bool PhysicsComponent::init()
 
 void PhysicsComponent::onUpdate(float delta)
 {
-	//Update physics objects, which are synchronized with physics attributes
+	//Loop through all physics attributes
 	itrPhysics = ATTRIBUTE_MANAGER->physics.getIterator();
 	while(itrPhysics.hasNext())
 	{
 		Attribute_Physics* physicsAttribute = itrPhysics.getNext();
-		unsigned int index = itrPhysics.storageIndex();
+		unsigned int physicsAttributeIndex = itrPhysics.storageIndex();
 
-		synchronizeWithAttributes(physicsAttribute, index);
-		physicsObjects_->at(index)->onUpdate(delta);
-
-		//Handle players taking off when going up ramps
-		if(physicsAttribute->collisionFilterGroup == Attribute_Physics::PLAYER)
-		{
-			Entity* playerEntity = itrPhysics.ownerAt(index);
-			std::vector<int> playerAttributeIndices = playerEntity->getAttributes(ATTRIBUTE_PLAYER);
-			for(unsigned int i = 0; i < playerAttributeIndices.size(); i++)
-			{
-				Attribute_Player* playerAttribute = itrPlayer.at(playerAttributeIndices.at(i));
-				if(!playerAttribute->collidingWithWorld && playerAttribute->timeSinceLastJump > playerAttribute->delayInSecondsBetweenEachJump && physicsObjects_->at(index)->getLinearVelocity().y() > 0.0f)
-				{
-					physicsObjects_->at(index)->setLinearVelocity(btVector3(physicsObjects_->at(index)->getLinearVelocity().x(), 0.0f, physicsObjects_->at(index)->getLinearVelocity().z()));
-				}
-				playerAttribute->collidingWithWorld = false;
-			}
-		}
-
-		//Physics object out of bounds
-		if(physicsObjects_->at(index)->getWorldTransform().getOrigin().y() < removePhysicsObjectIfItHasLowerYCoordinateThanThis)
-		{
-			//Player out of bounds
-			if(physicsAttribute->collisionFilterGroup == Attribute_Physics::PLAYER)
-			{
-				physicsObjects_->at(index)->setGravity(btVector3(0.0f, 0.0f, 0.0f));
-				physicsObjects_->at(index)->setLinearVelocity(btVector3(0.0f, 0.0f, 0.0f));
-
-				int playerEntityIndex = itrPhysics.ownerIdAt(index);
-				Entity* playerEntity = itrPhysics.ownerAt(index);
-				
-				std::vector<int> playerAttributeIndices = playerEntity->getAttributes(ATTRIBUTE_PLAYER);
-				for(unsigned int i = 0; i < playerAttributeIndices.size(); i++)
-				{
-					Attribute_Player* ptr_player = itrPlayer.at(playerAttributeIndices.at(i));
-					AttributePtr<Attribute_Health> ptr_health = ptr_player->ptr_health;
-					if(!ptr_player->detectedAsDead)
-					{
-						DEBUGPRINT("Player entity " << playerEntityIndex << " was out of bounds");
-						SEND_EVENT(&Event_PlayerDeath(playerAttributeIndices[i]));
-					}
-				}
-			}
-			else
-			{
-				btTransform transform;
-				btVector3 newPosition = btVector3(0.0f, 10.0f, 0.0f);
-
-				transform = physicsObjects_->at(index)->getWorldTransform();
-				transform.setOrigin(newPosition);
-				physicsObjects_->at(index)->setWorldTransform(transform);
-
-				DEBUGPRINT("Something that was out of bounds was moved to " << newPosition.x() << " " << newPosition.y() << " " << newPosition.z());
-			}
-		}
+		synchronizeWithAttributes(physicsAttribute, physicsAttributeIndex); //Synchronize physics objects with physics attributes
+		physicsObjects_->at(physicsAttributeIndex)->onUpdate(delta);		//Update physics objects by calling their onUpdate function.
 	}
 
 	updateCulling();
@@ -201,7 +147,7 @@ void PhysicsComponent::onUpdate(float delta)
 		//if(timer > 0.1f)
 		{
 			gDebugDraw.clearDebugVerticesVector();
-			dynamicsWorld_->debugDrawWorld();
+			dynamicsWorld_->debugDrawWorld(); //Calls debugDrawDispatcher::drawLine internally
 			gDebugDraw.queueDebugDrawEvent();
 			//timer = 0.0f;
 		}
@@ -263,7 +209,7 @@ void PhysicsComponent::onEvent(Event* e)
 		{
 			switch(modifyPhysicsObject->modifyWhatDataInPhysicsObjectData)
 			{
-			case GRAVITY:
+			case XKILL_Enums::ModifyPhysicsObjectData::GRAVITY:
 				Float3* gravity = static_cast<Float3*>(modifyPhysicsObject->data);
 				physicsObjects_->at(physicsAttributeIndex)->setGravity(btVector3(gravity->x, gravity->y, gravity->z));
 				break;
@@ -297,7 +243,7 @@ void PhysicsComponent::synchronizeWithAttributes(Attribute_Physics* physicsAttri
 	}
 	*/
 	//Checks if new physiscs attributes were created since last call to this function
-	if(physicsAttributeIndex >= static_cast<int>(physicsObjects_->size()))
+	if(physicsAttributeIndex >= static_cast<unsigned int>(physicsObjects_->size()))
 	{
 		physicsObjects_->push_back(nullptr);
 	}
@@ -317,7 +263,7 @@ void PhysicsComponent::synchronizeWithAttributes(Attribute_Physics* physicsAttri
 			physicsObjects_->at(physicsAttributeIndex) = new PhysicsObject();
 			break;
 		case Attribute_Physics::WORLD:
-			physicsObjects_->at(physicsAttributeIndex) = new PhysicsObject();
+			physicsObjects_->at(physicsAttributeIndex) = new WorldPhysicsObject();
 			break;
 		case Attribute_Physics::PLAYER:
 			physicsObjects_->at(physicsAttributeIndex) = new PlayerPhysicsObject();
@@ -417,6 +363,8 @@ void PhysicsComponent::detectedCollisionsDuringStepSimulation(btScalar timeStep)
 
 void PhysicsComponent::doCulling(unsigned int frustumAttributeIndex, unsigned int objectAttributeIndex)
 {
+
+	//itrRender.at(itrPhysics.at(objectAttributeIndex)->ptr_render)->culling.setBool(frustumAttributeIndex,true);
 	itrPhysics.at(objectAttributeIndex)->ptr_render->cull = true;
 }
 
