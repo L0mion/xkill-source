@@ -41,8 +41,12 @@ bool LoaderMdlDesc::init()
 			ifstream_.close();
 	}
 	else
+	{
+		std::string errorMsg = "Failed to open .mdldesc-file: " + getFileName();
+		SHOW_MESSAGEBOX(errorMsg);
 		sucessfulLoad = false;
-	
+	}
+
 	if(sucessfulLoad)
 		loadMdlDesc();
 	

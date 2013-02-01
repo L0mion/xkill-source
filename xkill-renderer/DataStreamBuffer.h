@@ -65,6 +65,11 @@ public:
 protected:
 	unsigned int getNewMaxCount(unsigned int maxCount, unsigned int targetMaxCount)
 	{
+		if(targetMaxCount < 1)
+		{
+			SHOW_MESSAGEBOX("DataStreamBuffer::getNewMaxCount targetMaxCount too small!");
+		}
+
 		unsigned int newMaxCount = 1;
 		if(maxCount > 0)
 		{
@@ -115,7 +120,7 @@ protected:
 			dataStreamBuffer_, 
 			NULL, 
 			D3D11_MAP_WRITE_DISCARD, 
-			NULL, 
+			NULL, //D3D11_MAP_FLAG_DO_NOT_WAIT, //
 			&map);
 		if(SUCCEEDED(hr))
 		{

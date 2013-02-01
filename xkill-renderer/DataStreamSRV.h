@@ -62,6 +62,14 @@ public:
 			1, 
 			&dataStreamSRV_);
 	}
+	void unsetStreamSRV(ID3D11DeviceContext* devcon, unsigned int shaderRegister)
+	{
+		ID3D11ShaderResourceView* nullSRVs[1] = { NULL };
+		devcon->CSSetShaderResources(
+			shaderRegister, 
+			1, 
+			nullSRVs);
+	}
 protected:
 private:
 	ID3D11ShaderResourceView*	dataStreamSRV_;

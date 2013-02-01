@@ -33,6 +33,7 @@ SamplerState ss : register(s0);
 groupshared uint tileMinDepthInt;
 groupshared uint tileMaxDepthInt;
 groupshared uint tileLightNum; //Number of lights intersecting tile.
+
 groupshared uint tileLightIndices[TILE_MAX_LIGHTS]; //Indices to lights intersecting tile.
 
 [numthreads(TILE_DIM, TILE_DIM, 1)]
@@ -157,7 +158,7 @@ void lightingCS(
 		LightPoint(
 			toEyeV,
 			descPoint,
-			mul(float4(lightsPos[tileLightIndices[i]], 1.0f), view), //lightsPos[tileLightIndices[i]].pos
+			mul(float4(lightsPos[tileLightIndices[i]], 1.0f), view).xyz,
 			surfaceMaterial,
 			surfaceNormalV,
 			surfacePosV,

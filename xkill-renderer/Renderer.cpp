@@ -548,6 +548,11 @@ void Renderer::renderViewportToBackBuffer(ViewportData& vpData)
 	devcon->Dispatch(dispatchX, dispatchY, 1);
 
 	//Unset and clean.
+	managementLight_->unsetLightSRVCS(devcon, LIGHTBUFFERTYPE_DIR,		LIGHT_SRV_REGISTER_DIR);
+	managementLight_->unsetLightSRVCS(devcon, LIGHTBUFFERTYPE_POINT,	LIGHT_SRV_REGISTER_POINT);
+	managementLight_->unsetLightSRVCS(devcon, LIGHTBUFFERTYPE_SPOT,		LIGHT_SRV_REGISTER_SPOT);
+	managementLight_->unsetLightSRVCS(devcon, LIGHTBUFFERTYPE_POS_VIEW,	LIGHT_SRV_REGISTER_POS);
+
 	managementFX_->unsetShader(devcon, SHADERID_CS_DEFAULT);
 
 	managementD3D_->unsetUAVBackBufferCS();
@@ -586,6 +591,15 @@ void Renderer::renderInstance(unsigned int meshID, InstancedData* instance)
 			materials[materialIndex],
 			instance->getDataCountCur());
 	}
+
+	//Unset vertex buffers. (In case of the instance buffer needing to be mapped to in ManagementInstance)
+	ID3D11Buffer* nullVBs[2] = { NULL, NULL };
+	devcon->IASetVertexBuffers(
+		0, 
+		2, 
+		nullVBs, 
+		offset, 
+		offset);
 }
 void Renderer::renderSubset(
 	SubsetD3D* subset, 
