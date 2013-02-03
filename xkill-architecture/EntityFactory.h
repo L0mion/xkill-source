@@ -111,7 +111,7 @@ public:
 		CREATE_ATTRIBUTE(ptr_offset, Behavior_Offset, offset, entity);
 		ptr_offset->ptr_spatial = ptr_spatial;
 		ptr_offset->ptr_parent_spatial = ptr_parent_spatial;
-		ptr_offset->offset_position = Float3(0.0f, 0.0f, 0.0f);
+		ptr_offset->offset_position = Float3(-0.2f, 0.1f, -0.4f);
 
 		// Return
 		return ptr_camera;

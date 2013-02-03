@@ -195,7 +195,7 @@ public:
 	void updateOffset();
 
 	AttributeType getType(){return BEHAVIOR_OFFSET;}
-	std::string getName(){return "B_Offset";}
+	std::string getName(){return "Offset";}
 };
 
 /// Stores the points for both a bounding box and a convex mesh
