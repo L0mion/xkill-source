@@ -94,8 +94,8 @@ void InputComponent::handleInput(float delta)
 		if(player->ptr_inputDevice.isEmpty())
 			continue;
 
-		InputDevice* device = player->ptr_inputDevice.getAttribute()->device;
-		Attribute_Input* input = itrInput.at(player->ptr_input);
+		InputDevice* device = player->ptr_inputDevice->device;
+		AttributePtr<Attribute_Input> input = player->ptr_input;
 
 		if(device == nullptr)
 			continue;

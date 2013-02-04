@@ -365,7 +365,7 @@ void PhysicsComponent::doCulling(unsigned int frustumAttributeIndex, unsigned in
 {
 
 	//itrRender.at(itrPhysics.at(objectAttributeIndex)->ptr_render)->culling.setBool(frustumAttributeIndex,true);
-	itrRender.at(itrPhysics.at(objectAttributeIndex)->ptr_render)->cull = true;
+	itrPhysics.at(objectAttributeIndex)->ptr_render->cull = true;
 }
 
 void PhysicsComponent::updateCulling()

@@ -67,7 +67,7 @@ void PlayerPhysicsObject::handleOutOfBounds()
 	for(unsigned int i = 0; i < playerAttributeIndices.size(); i++)
 	{
 		Attribute_Player* playerAttribute = itrPlayer.at(playerAttributeIndices.at(i));
-		Attribute_Health* playerHealthAttribute = itrHealth.at(playerAttribute->ptr_health);
+		AttributePtr<Attribute_Health> playerHealthAttribute = playerAttribute->ptr_health;
 		if(!playerAttribute->detectedAsDead)
 		{
 			DEBUGPRINT("Player entity " << playerEntityIndex << " was out of bounds");
@@ -95,8 +95,9 @@ void PlayerPhysicsObject::handleInput(float delta)
 
 	std::vector<int> playerAttributes = itrPhysics_3.ownerAt(attributeIndex_)->getAttributes(ATTRIBUTE_PLAYER);
 	
-	Attribute_Input* inputAttribute;
-	Attribute_Player* playerAttribute;
+	
+	AttributePtr<Attribute_Input> ptr_input;
+	Attribute_Player* ptr_player;
 
 	if(playerAttributes.size() > 1)
 	{
@@ -105,24 +106,23 @@ void PlayerPhysicsObject::handleInput(float delta)
 
 	for(unsigned int i=0;i<playerAttributes.size();i++)
 	{
-		playerAttribute = itrPlayer.at(playerAttributes.at(i));
+		ptr_player = itrPlayer.at(playerAttributes.at(i));
 
-		Attribute_Health* health = itrHealth.at(playerAttribute->ptr_health);
+		AttributePtr<Attribute_Health> health = ptr_player->ptr_health;
 		if(health->health <= 0)
 			continue;
 
-		inputAttribute = itrInput.at(playerAttribute->ptr_input);
+		ptr_input = ptr_player->ptr_input;
 
 		//look and move
-		yaw_ += inputAttribute->rotation.x;
-		btVector3 move = playerAttribute->currentSpeed*btVector3(inputAttribute->position.x, 0, inputAttribute->position.y);
+		yaw_ += ptr_input->rotation.x;
+		btVector3 move = ptr_player->currentSpeed*btVector3(ptr_input->position.x, 0, ptr_input->position.y);
 
 		//Airwalk handling
-		if(!playerAttribute->collidingWithWorld)
+		if(!ptr_player->collidingWithWorld)
 		{
 			move *= 0.75f;
 		}
-		
 		move = move.rotate(btVector3(0,1,0),yaw_);
 		move = btVector3(move.x(), getLinearVelocity().y(), move.z());
 		setLinearVelocity(move);
@@ -134,20 +134,20 @@ void PlayerPhysicsObject::handleInput(float delta)
 
 		//Jump
 		float jumpPower = 10.0f;
-		if(inputAttribute->jump && playerAttribute->timeSinceLastJump > playerAttribute->delayInSecondsBetweenEachJump && playerAttribute->collidingWithWorld)
+		if(ptr_input->jump && ptr_player->timeSinceLastJump > ptr_player->delayInSecondsBetweenEachJump && ptr_player->collidingWithWorld)
 		{
 			applyCentralImpulse(btVector3(0.0f, jumpPower, 0.0f));
-			playerAttribute->timeSinceLastJump = 0.0f;
+			ptr_player->timeSinceLastJump = 0.0f;
 		}
 
 		//Jetpack
-		if(inputAttribute->jetpack)
+		if(ptr_input->jetpack)
 		{
 			applyCentralImpulse(btVector3(0.0f, jumpPower*10.0f*delta, 0.0f));
-			playerAttribute->jetpackTimer+=delta;
-			if(playerAttribute->jetpackTimer > 0.1f)
+			ptr_player->jetpackTimer+=delta;
+			if(ptr_player->jetpackTimer > 0.1f)
 			{
-				playerAttribute->jetpackTimer = 0.0f;
+				ptr_player->jetpackTimer = 0.0f;
 				health->health--;
 			}
 		}
@@ -156,7 +156,7 @@ void PlayerPhysicsObject::handleInput(float delta)
 		btVector3 currentplayerGravity = getGravity();
 
 		//When a player is stading still on the ground, prevent it from sliding down slopes by modifying friction and gravity
-		if(inputAttribute->position.x == 0.0f && inputAttribute->position.y == 0.0f && playerAttribute->collidingWithWorld && !inputAttribute->jetpack && !inputAttribute->jump)
+		if(ptr_input->position.x == 0.0f && ptr_input->position.y == 0.0f && ptr_player->collidingWithWorld && !ptr_input->jetpack && !ptr_input->jump)
 		{
 			if(currentplayerGravity.y() != 0.0f)
 			{
@@ -165,7 +165,7 @@ void PlayerPhysicsObject::handleInput(float delta)
 			}
 		}
 		//When moving, restore friction and gravity
-		else if( (inputAttribute->position.x != 0.0f || inputAttribute->position.y != 0.0f))
+		else if( (ptr_input->position.x != 0.0f || ptr_input->position.y != 0.0f))
 		{
 			if(currentplayerGravity.y() != playerPhysicsAttribute->gravity.y)
 			{
@@ -175,12 +175,12 @@ void PlayerPhysicsObject::handleInput(float delta)
 		}
 
 		//Prevent player being able to hang-glide after jumping
-		if(playerAttribute->timeSinceLastJump < playerAttribute->delayInSecondsBetweenEachJump)
+		if(ptr_player->timeSinceLastJump < ptr_player->delayInSecondsBetweenEachJump)
 		{
 			setGravity(btVector3(0.0f, playerPhysicsAttribute->gravity.y*5.0f, 0.0f));
 		}
 
-		inputAttribute->jump = false;
-		inputAttribute->jetpack = false;
+		ptr_input->jump = false;
+		ptr_input->jetpack = false;
 	}
 }

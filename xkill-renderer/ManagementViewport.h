@@ -12,7 +12,7 @@ class Winfo;
 
 struct SplitScreenViewport
 {
-	Attribute_SplitScreen* ssAt;
+	AttributePtr<Attribute_SplitScreen> ptr_splitScreen;
 	D3D11_VIEWPORT viewport;
 };
 

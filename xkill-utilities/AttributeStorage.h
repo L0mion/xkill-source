@@ -89,6 +89,19 @@ public:
 		this->type = type;
 	}
 
+	int storageIndex(T* attribute)
+	{ 
+		int index = attribute - &attributes[0];
+		return index;
+	}
+
+	AttributePtr<T> attributePointer(T* attribute)
+	{ 
+		AttributePtr<T> pointer;
+		pointer.init(&attributes, storageIndex(attribute));
+		return pointer;
+	}
+
 	~AttributeStorage()
 	{
 		for(unsigned i=0; i<attributes.size(); i++)
@@ -104,7 +117,7 @@ public:
 	The caller is responsible for filling
 	out the attribute.
 	*/
-	T* createAttribute(Entity* owner)
+	AttributePtr<T> createAttribute(Entity* owner)
 	{
 		// TRUE: Reuse attribute
 		if(deleted.size() > 0)
@@ -135,7 +148,7 @@ public:
 		EventManager::getInstance()->sendEvent(&e);
 
 		// Get attribute
-		return &attributes[index_lastCreated];
+		return attributePointer(&attributes[index_lastCreated]);
 	}
 
 	void deleteAttribute(int index)

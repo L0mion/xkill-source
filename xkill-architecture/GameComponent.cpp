@@ -76,14 +76,14 @@ void GameComponent::onUpdate(float delta)
 		// Fetch attributes through iterators
 		Attribute_Player*		player		=	itrPlayer		.getNext();
 
-		Attribute_Health*		health		=	player	->	ptr_health		.	getAttribute();
-		Attribute_Camera*		camera		=	player	->	ptr_camera		.	getAttribute();
-		Attribute_Input*		input		=	player	->	ptr_input		.	getAttribute();
-		Attribute_Render*		render		=	player	->	ptr_render		.	getAttribute();
-		Attribute_WeaponStats*	weaponStats	=	player	->	ptr_weaponStats	.	getAttribute();
-		Attribute_Spatial*		spatial		=	render	->	ptr_spatial		.	getAttribute();
-		Attribute_Position*		position	=	spatial	->	ptr_position	.	getAttribute();
-		Attribute_Physics*		physics		=	input	->	ptr_physics		.	getAttribute();
+		AttributePtr<Attribute_Health>			health		=	player	->	ptr_health		;
+		AttributePtr<Attribute_Camera>			camera		=	player	->	ptr_camera		;
+		AttributePtr<Attribute_Input>			input		=	player	->	ptr_input		;
+		AttributePtr<Attribute_Render>			render		=	player	->	ptr_render		;
+		AttributePtr<Attribute_WeaponStats>		weaponStats	=	player	->	ptr_weaponStats	;
+		AttributePtr<Attribute_Spatial>			spatial		=	render	->	ptr_spatial		;
+		AttributePtr<Attribute_Position>		position	=	spatial	->	ptr_position	;
+		AttributePtr<Attribute_Physics>			physics		=	input	->	ptr_physics		;
 
 		Ammunition* ammo = &weaponStats->ammunition[weaponStats->currentAmmunitionType];
 		FiringMode* firingMode = &weaponStats->firingMode[weaponStats->currentFiringModeType];
@@ -207,16 +207,16 @@ void GameComponent::onUpdate(float delta)
 				float dead = 3.14/3;
 				float slerp = (1 - player->currentRespawnDelay/player->respawnDelay);
 				float fov = slerp*dead + (1-slerp)*alive;
-				itrCamera.at(player->ptr_camera)->fieldOfView = fov;
+				player->ptr_camera->fieldOfView = fov;
 			}
 			else
 			{
-				itrCamera.at(player->ptr_camera)->fieldOfView =3.14f/4.0f;
+				player->ptr_camera->fieldOfView =3.14f/4.0f;
 				// If an appropriate spawnpoint was found: spawn at it; otherwise: spawn at origo.
 				Attribute_PlayerSpawnPoint* spawnPointAttribute = findUnoccupiedSpawnPoint();
 				if(spawnPointAttribute != nullptr)
 				{
-					Attribute_Position* spawnPointPositionAttribute = itrPosition.at(spawnPointAttribute->ptr_position);
+					AttributePtr<Attribute_Position> spawnPointPositionAttribute = spawnPointAttribute->ptr_position;
 					position->position = spawnPointPositionAttribute->position; // set player position attribute
 					DEBUGPRINT("Player entity " << itrPlayer.ownerId() << " spawned at " << position->position.x << " " << position->position.y << " " << position->position.z << std::endl);
 				}
@@ -302,7 +302,7 @@ void GameComponent::onUpdate(float delta)
 		{
 			if(pickupablesSpawnPoint->currentNrOfExistingSpawnedPickupables < pickupablesSpawnPoint->maxNrOfExistingSpawnedPickupables)
 			{
-				Attribute_Position* pickupablesSpawnPointPosition = itrPosition.at(pickupablesSpawnPoint->ptr_position);
+				AttributePtr<Attribute_Position> pickupablesSpawnPointPosition = pickupablesSpawnPoint->ptr_position;
 
 				int amount;
 				switch(pickupablesSpawnPoint->spawnPickupableType)
@@ -404,6 +404,17 @@ void GameComponent::onUpdate(float delta)
 			SEND_EVENT(&Event_RemoveEntity(itrExplosionSphere.ownerId()));
 		}
 	}
+
+	//
+	// Update offset
+	//
+
+	while(itrOffset.hasNext())
+	{
+		Behavior_Offset* offset	= itrOffset.getNext();
+		offset->updateOffset();
+	}
+
 }
 
 void GameComponent::event_PhysicsAttributesColliding(Event_PhysicsAttributesColliding* e)
@@ -544,9 +555,9 @@ void GameComponent::event_PhysicsAttributesColliding(Event_PhysicsAttributesColl
  					projectileAttribute->currentLifeTimeLeft = 0.0f;
 
 					//Extract projectile position.
-					Attribute_Physics* projectilePhysicsAttribute = itrPhysics.at(projectileAttribute->ptr_physics);
-					Attribute_Spatial* projectileSpatialAttribute = itrSpatial.at(projectilePhysicsAttribute->ptr_spatial);
-					Attribute_Position* projectilePositionAttribute = itrPosition.at(projectileSpatialAttribute->ptr_position);
+					AttributePtr<Attribute_Physics> projectilePhysicsAttribute = projectileAttribute->ptr_physics;
+					AttributePtr<Attribute_Spatial> projectileSpatialAttribute = projectilePhysicsAttribute->ptr_spatial;
+					AttributePtr<Attribute_Position> projectilePositionAttribute = projectileSpatialAttribute->ptr_position;
 
 					//Creates an explosion sphere. Init information is taken from the impacting projectile.
 					SEND_EVENT(&Event_CreateExplosionSphere(projectilePositionAttribute->position, projectileDamageAttribute->damage, projectileAttribute->entityIdOfCreator, projectileAttribute->ammunitionType, projectileAttribute->firingModeType));
@@ -576,25 +587,25 @@ void GameComponent::event_PhysicsAttributesColliding(Event_PhysicsAttributesColl
 					{
 						case XKILL_Enums::PickupableType::MEDKIT:
 						{
-								Attribute_Health* health = itrHealth.at(playerAttribute->ptr_health);
-								health->health += pickupableAttribute->amount;
+								AttributePtr<Attribute_Health> ptr_health = playerAttribute->ptr_health;
+								ptr_health->health += pickupableAttribute->amount;
 								break;
 						}
 						case XKILL_Enums::PickupableType::AMMUNITION_BULLET:
 						{
-								Attribute_WeaponStats* weaponStatsAttribute = itrWeaponStats.at(playerAttribute->ptr_weaponStats);
+								AttributePtr<Attribute_WeaponStats> weaponStatsAttribute = playerAttribute->ptr_weaponStats;
 								weaponStatsAttribute->ammunition[XKILL_Enums::AmmunitionType::BULLET].totalNrOfShots += pickupableAttribute->amount;
 								break;
 						}
 						case XKILL_Enums::PickupableType::AMMUNITION_EXPLOSIVE:
 						{
-								Attribute_WeaponStats* weaponStatsAttribute = itrWeaponStats.at(playerAttribute->ptr_weaponStats);
+								AttributePtr<Attribute_WeaponStats> weaponStatsAttribute = playerAttribute->ptr_weaponStats;
 								weaponStatsAttribute->ammunition[XKILL_Enums::AmmunitionType::EXPLOSIVE].totalNrOfShots += pickupableAttribute->amount;
 								break;
 						}
 						case XKILL_Enums::PickupableType::AMMUNITION_SCATTER:
 						{
-								Attribute_WeaponStats* weaponStatsAttribute = itrWeaponStats.at(playerAttribute->ptr_weaponStats);
+								AttributePtr<Attribute_WeaponStats> weaponStatsAttribute = playerAttribute->ptr_weaponStats;
 								weaponStatsAttribute->ammunition[XKILL_Enums::AmmunitionType::SCATTER].totalNrOfShots += pickupableAttribute->amount;
 								break;
 						}
@@ -603,9 +614,9 @@ void GameComponent::event_PhysicsAttributesColliding(Event_PhysicsAttributesColl
 			}
 
 			// Decrement number of spawned pickupables for the spawnpoint that spawned the pickupable that the player picked up. Also remove it.
-			Attribute_PickupablesSpawnPoint* pickupablesSpawnPointAttribute = itrPickupablesSpawnPoint.at(pickupableAttribute->ptr_pickupablesSpawnPoint_creator);
-			pickupablesSpawnPointAttribute->currentNrOfExistingSpawnedPickupables--;
-			pickupablesSpawnPointAttribute->secondsSinceLastPickup = 0;
+			AttributePtr<Attribute_PickupablesSpawnPoint> ptr_pickupablesSpawnPoint = pickupableAttribute->ptr_pickupablesSpawnPoint_creator;
+			ptr_pickupablesSpawnPoint->currentNrOfExistingSpawnedPickupables--;
+			ptr_pickupablesSpawnPoint->secondsSinceLastPickup = 0;
 			
 			SEND_EVENT(&Event_RemoveEntity(entity1->getID()));
 		}
@@ -616,7 +627,7 @@ void GameComponent::event_PhysicsAttributesColliding(Event_PhysicsAttributesColl
 		if(entity2->hasAttribute(ATTRIBUTE_PLAYER))
 		{
 			std::vector<int> playerId = entity2->getAttributes(ATTRIBUTE_PLAYER);
-			for(int i=0;i<playerId.size();i++)
+			for(int i=0; i<(int)playerId.size(); i++)
 			{
 				Attribute_Player* playerAttribute = itrPlayer.at(playerId.at(i));
 				playerAttribute->collidingWithWorld = true;
@@ -672,7 +683,7 @@ void GameComponent::event_EndDeathmatch(Event_EndDeathmatch* e)
 
 Attribute_PlayerSpawnPoint* GameComponent::findUnoccupiedSpawnPoint()
 {
-	Attribute_PlayerSpawnPoint* foundSpawnPoint = nullptr;
+	Attribute_PlayerSpawnPoint* ptr_foundSpawnPoint = nullptr;
 	std::vector<Attribute_PlayerSpawnPoint*> unoccupiedSpawnPoints;
 	
 	// Special cases: *no player spawn point, return nullptr.
@@ -680,7 +691,7 @@ Attribute_PlayerSpawnPoint* GameComponent::findUnoccupiedSpawnPoint()
 	if(numSpawnPoints < 1)
 	{
 		DEBUGPRINT("GameComponent::findUnoccupiedSpawnPoint - No spawn point found.");
-		return foundSpawnPoint;
+		return ptr_foundSpawnPoint;
 	}
 
 	//
@@ -691,8 +702,8 @@ Attribute_PlayerSpawnPoint* GameComponent::findUnoccupiedSpawnPoint()
 	while(itrPlayerSpawnPoint.hasNext())
 	{
 		// Fetch attributes
-		foundSpawnPoint = itrPlayerSpawnPoint.getNext();
-		Attribute_Position* position_spawnPoint = itrPosition.at(foundSpawnPoint->ptr_position);
+		ptr_foundSpawnPoint = itrPlayerSpawnPoint.getNext();
+		AttributePtr<Attribute_Position> position_spawnPoint = ptr_foundSpawnPoint->ptr_position;
 		
 		// To prevent spawncamping, check if player spawnpoint is occupied
 		bool isUnoccupied = true;
@@ -700,20 +711,20 @@ Attribute_PlayerSpawnPoint* GameComponent::findUnoccupiedSpawnPoint()
 		while(itrPlayer.hasNext())
 		{
 			Attribute_Player* player	= itrPlayer.getNext();
-			Attribute_Health* health	= itrHealth.at(player->ptr_health);
+			AttributePtr<Attribute_Health> ptr_health	= player->ptr_health;
 
 			// If player is detectedAsDead
-			if(health->health > 0)
+			if(ptr_health->health > 0)
 			{
-				Attribute_Render*	render	= itrRender.at(player->ptr_render);
-				Attribute_Spatial*	spatial	= itrSpatial.at(render->ptr_spatial);
-				Attribute_Position*	position_player	= itrPosition.at(spatial->ptr_position);
+				AttributePtr<Attribute_Render>		render	= player->ptr_render;
+				AttributePtr<Attribute_Spatial>		spatial	= render->ptr_spatial;
+				AttributePtr<Attribute_Position>	position_player	= spatial->ptr_position;
 
 				// calculate distance to player spawn point
 				float distanceToSpawnPoint =  position_player->position.distanceTo(position_spawnPoint->position);
 
 				// if a player is within player spawn point radius
-				if(distanceToSpawnPoint < foundSpawnPoint->spawnArea)
+				if(distanceToSpawnPoint < ptr_foundSpawnPoint->spawnArea)
 				{
 					// spawn point is occupied, abort further testing
 					isUnoccupied = false;
@@ -724,7 +735,7 @@ Attribute_PlayerSpawnPoint* GameComponent::findUnoccupiedSpawnPoint()
 		// TRUE: Player spawn point is unoccupied, add to vector
 		if(isUnoccupied)
 		{
-			unoccupiedSpawnPoints.push_back(foundSpawnPoint); // this vector will be iterated below.
+			unoccupiedSpawnPoints.push_back(ptr_foundSpawnPoint); // this vector will be iterated below.
 		}
 	}
 
@@ -740,30 +751,30 @@ Attribute_PlayerSpawnPoint* GameComponent::findUnoccupiedSpawnPoint()
 	float longestTimeSinceLastSpawn = 0.0f;
 	for(int i=0; i<nrOfUnoccupiedSpawnPoints; i++)
 	{
-		foundSpawnPoint = unoccupiedSpawnPoints.at(i);
-  		if(foundSpawnPoint->secondsSinceLastSpawn >= longestTimeSinceLastSpawn)
+		ptr_foundSpawnPoint = unoccupiedSpawnPoints.at(i);
+  		if(ptr_foundSpawnPoint->secondsSinceLastSpawn >= longestTimeSinceLastSpawn)
 		{
-			longestTimeSinceLastSpawn = foundSpawnPoint->secondsSinceLastSpawn;
+			longestTimeSinceLastSpawn = ptr_foundSpawnPoint->secondsSinceLastSpawn;
  			longestTimeSinceLastSpawnIndex = i;
 		}
 	}
 	if(longestTimeSinceLastSpawnIndex > -1)
 	{
-		foundSpawnPoint = unoccupiedSpawnPoints.at(longestTimeSinceLastSpawnIndex);
+		ptr_foundSpawnPoint = unoccupiedSpawnPoints.at(longestTimeSinceLastSpawnIndex);
 	}
 
 	// If all player spawn points are occupied, pick one at random.
 	if(nrOfUnoccupiedSpawnPoints < 1)
 	{
 		int randomSpawnPointId = Math::randomInt(numSpawnPoints);
-		foundSpawnPoint = itrPlayerSpawnPoint.at(randomSpawnPointId);
+		ptr_foundSpawnPoint = itrPlayerSpawnPoint.at(randomSpawnPointId);
 	}
 
 	// Reset player spawn point timer.
-	if(foundSpawnPoint != nullptr)
-		foundSpawnPoint->secondsSinceLastSpawn = 0.0f;
+	if(ptr_foundSpawnPoint != nullptr)
+		ptr_foundSpawnPoint->secondsSinceLastSpawn = 0.0f;
 
-	return foundSpawnPoint;
+	return ptr_foundSpawnPoint;
 }
 
 void GameComponent::event_StartDeathmatch( Event_StartDeathmatch* e )
@@ -825,8 +836,8 @@ void GameComponent::event_TransferEventsToGame(Event_TransferEventsToGame* e)
 void GameComponent::event_PlayerDeath(Event_PlayerDeath* e)
 {
 	Attribute_Player* player = itrPlayer.at(e->playerIndex);
-	Attribute_Physics* physics = itrPhysics.at(itrInput.at(player->ptr_input)->ptr_physics);
-	Attribute_Health* health = itrHealth.at(player->ptr_health);
+	AttributePtr<Attribute_Physics> physics = player->ptr_input->ptr_physics;
+	AttributePtr<Attribute_Health> health = player->ptr_health;
 	health->health = 0;
 
 	physics->angularVelocity = Float3(0.0f, 0.0f, 0.0f);
@@ -841,7 +852,7 @@ void GameComponent::event_PlayerDeath(Event_PlayerDeath* e)
 	player->detectedAsDead = true;
 }
 
-bool GameComponent::switchAmmunition(Attribute_WeaponStats* weaponStats)
+bool GameComponent::switchAmmunition(AttributePtr<Attribute_WeaponStats> weaponStats)
 {
 	bool switchedAmmunition = false;
 	FiringMode* firingMode = &weaponStats->firingMode[weaponStats->currentFiringModeType];
@@ -862,7 +873,7 @@ bool GameComponent::switchAmmunition(Attribute_WeaponStats* weaponStats)
 	return switchedAmmunition;
 }
 
-bool GameComponent::switchFiringMode(Attribute_WeaponStats* weaponStats)
+bool GameComponent::switchFiringMode(AttributePtr<Attribute_WeaponStats> ptr_weaponStats)
 {
 	bool switchedFiringMode = false;
 
@@ -870,18 +881,18 @@ bool GameComponent::switchFiringMode(Attribute_WeaponStats* weaponStats)
 
 	for(int i = 0; i < XKILL_Enums::FiringModeType::NROFFIRINGMODETYPES; i++)
 	{
-		weaponStats->currentFiringModeType = static_cast<XKILL_Enums::FiringModeType>((weaponStats->currentFiringModeType + 1) % XKILL_Enums::FiringModeType::NROFFIRINGMODETYPES);
+		ptr_weaponStats->currentFiringModeType = static_cast<XKILL_Enums::FiringModeType>((ptr_weaponStats->currentFiringModeType + 1) % XKILL_Enums::FiringModeType::NROFFIRINGMODETYPES);
 
-		firingMode = &weaponStats->firingMode[weaponStats->currentFiringModeType];
+		firingMode = &ptr_weaponStats->firingMode[ptr_weaponStats->currentFiringModeType];
 
-		if((weaponStats->currentAmmunitionType == XKILL_Enums::AmmunitionType::BULLET && firingMode->canShootBullet) ||
-			(weaponStats->currentAmmunitionType == XKILL_Enums::AmmunitionType::SCATTER && firingMode->canShootScatter) ||
-			(weaponStats->currentAmmunitionType == XKILL_Enums::AmmunitionType::EXPLOSIVE && firingMode->canShootExplosive))
+		if((ptr_weaponStats->currentAmmunitionType == XKILL_Enums::AmmunitionType::BULLET && firingMode->canShootBullet) ||
+			(ptr_weaponStats->currentAmmunitionType == XKILL_Enums::AmmunitionType::SCATTER && firingMode->canShootScatter) ||
+			(ptr_weaponStats->currentAmmunitionType == XKILL_Enums::AmmunitionType::EXPLOSIVE && firingMode->canShootExplosive))
 		{
 			switchedFiringMode = true;
 			break;
 		}
-		else if(switchAmmunition(weaponStats))
+		else if(switchAmmunition(ptr_weaponStats))
 		{
 			switchedFiringMode = true;
 			break;
@@ -891,28 +902,28 @@ bool GameComponent::switchFiringMode(Attribute_WeaponStats* weaponStats)
 	return switchedFiringMode;
 }
 
-void GameComponent::shootProjectile(Attribute_Position* position, Attribute_Camera* camera, Attribute_WeaponStats* weaponStats)
+void GameComponent::shootProjectile(AttributePtr<Attribute_Position> ptr_position, AttributePtr<Attribute_Camera> ptr_camera, AttributePtr<Attribute_WeaponStats> ptr_weaponStats)
 {
 	
-	Ammunition* ammo = &weaponStats->ammunition[weaponStats->currentAmmunitionType];
-	FiringMode* firingMode = &weaponStats->firingMode[weaponStats->currentFiringModeType];
+	Ammunition* ammo = &ptr_weaponStats->ammunition[ptr_weaponStats->currentAmmunitionType];
+	FiringMode* firingMode = &ptr_weaponStats->firingMode[ptr_weaponStats->currentFiringModeType];
 
 	// Position
-	Float3 pos = position->position;
+	Float3 pos = ptr_position->position;
 
 	// extract camera orientation to determine velocity
-	DirectX::XMFLOAT3 lookAtXMFloat3((float*)&camera->mat_view.getLookAt());
+	DirectX::XMFLOAT3 lookAtXMFloat3((float*)&ptr_camera->mat_view.getLookAt());
 
 	DirectX::XMVECTOR lookAt = DirectX::XMLoadFloat3(&lookAtXMFloat3);
 	lookAt = DirectX::XMVector3Normalize(lookAt);
 
 	// Rotation
-	camera->mat_view.getRotationOnly();
+	ptr_camera->mat_view.getRotationOnly();
 	//DirectX::XMMATRIX rotationMatrix((float*)&camera->mat_view);
 	DirectX::XMMATRIX rotationMatrix(
-		camera->mat_view._11,	camera->mat_view._21,	camera->mat_view._31,	0.0f,
-		camera->mat_view._12,	camera->mat_view._22,	camera->mat_view._32,	0.0f, 
-		camera->mat_view._13,	camera->mat_view._23,	camera->mat_view._33,	0.0f,
+		ptr_camera->mat_view._11,	ptr_camera->mat_view._21,	ptr_camera->mat_view._31,	0.0f,
+		ptr_camera->mat_view._12,	ptr_camera->mat_view._22,	ptr_camera->mat_view._32,	0.0f, 
+		ptr_camera->mat_view._13,	ptr_camera->mat_view._23,	ptr_camera->mat_view._33,	0.0f,
 		0.0f,					0.0f,					0.0f,					1.0f);
 
 	DirectX::XMVECTOR orientationQuaternion = DirectX::XMQuaternionRotationMatrix(rotationMatrix);

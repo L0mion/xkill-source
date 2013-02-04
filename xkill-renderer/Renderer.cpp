@@ -379,10 +379,10 @@ void Renderer::render()
 		managementLight_->getLightPointCurCount(),
 		managementLight_->getLightSpotCurCount());
 
-	Attribute_Camera*		camAt; 
-	Attribute_Spatial*		spatialAt;
-	Attribute_Position*		posAt;
-	Attribute_SplitScreen*	ssAt;
+	AttributePtr<Attribute_SplitScreen>	ptr_splitScreen;
+	AttributePtr<Attribute_Camera>			ptr_camera; 
+	AttributePtr<Attribute_Spatial>		ptr_spatial;
+	AttributePtr<Attribute_Position>		ptr_position;
 
 	ViewportData vpData;
 
@@ -391,27 +391,26 @@ void Renderer::render()
 	std::vector<ViewportData> vpDatas(ssViewports->size());
 	for(unsigned int i = 0; i < ssViewports->size(); i++)
 	{
-		ssAt		= ssViewports->at(i).ssAt;
-		camAt		= itrCamera.at(ssAt->ptr_camera);
-
-		spatialAt	= camAt->ptr_spatial.getAttribute();
-		posAt		= spatialAt->ptr_position.getAttribute();
+		ptr_splitScreen		= ssViewports->at(i).ptr_splitScreen;
+		ptr_camera			= ptr_splitScreen->ptr_camera;
+		ptr_spatial			= ptr_camera->ptr_spatial;
+		ptr_position		= ptr_spatial->ptr_position;
 
 		managementViewport_->setViewport(devcon, i);
 
 		//Store all the viewport-specific data for the backbuffer-rendering.
-		vpData.camIndex		= ssAt->ptr_camera.index;
-		vpData.view			= DirectX::XMFLOAT4X4(((float*)&camAt->mat_view));
-		vpData.proj			= DirectX::XMFLOAT4X4(((float*)&camAt->mat_projection));
+		vpData.camIndex		= ptr_camera.index();
+		vpData.view			= DirectX::XMFLOAT4X4(((float*)&ptr_camera->mat_view));
+		vpData.proj			= DirectX::XMFLOAT4X4(((float*)&ptr_camera->mat_projection));
 		vpData.viewInv		= managementMath_->calculateMatrixInverse(vpData.view);
 		vpData.projInv		= managementMath_->calculateMatrixInverse(vpData.proj);
-		vpData.eyePos		= *(DirectX::XMFLOAT3*)&posAt->position;
-		vpData.viewportTopX = static_cast<unsigned int>(ssAt->ssTopLeftX);
-		vpData.viewportTopY = static_cast<unsigned int>(ssAt->ssTopLeftY);
-		vpData.zNear		= camAt->zNear;
-		vpData.zFar			= camAt->zFar;
-		vpData.viewportWidth	= ssAt->ssWidth;
-		vpData.viewportHeight	= ssAt->ssHeight;
+		vpData.eyePos		= *(DirectX::XMFLOAT3*)&ptr_position->position;
+		vpData.viewportTopX = static_cast<unsigned int>(ptr_splitScreen->ssTopLeftX);
+		vpData.viewportTopY = static_cast<unsigned int>(ptr_splitScreen->ssTopLeftY);
+		vpData.zNear		= ptr_camera->zNear;
+		vpData.zFar			= ptr_camera->zFar;
+		vpData.viewportWidth	= ptr_splitScreen->ssWidth;
+		vpData.viewportHeight	= ptr_splitScreen->ssHeight;
 		vpDatas[i]			= vpData;
 
 		renderViewportToGBuffer(vpData);
@@ -638,10 +637,10 @@ void Renderer::renderDebugShape(
 	ID3D11Device*			device = managementD3D_->getDevice();
 	ID3D11DeviceContext*	devcon = managementD3D_->getDeviceContext();
 	
-	//Get transform matrices.
-	Attribute_Spatial*	spatialAt			= itrSpatial.at(debugShapeAt->ptr_spatial.index);
-	Attribute_Position*	positionAt			= itrPosition.at(spatialAt->ptr_position.index);
-	DirectX::XMFLOAT4X4 worldMatrix			= managementMath_->calculateWorldMatrix(spatialAt, positionAt);
+	// Get transform matrices.
+	AttributePtr<Attribute_Spatial>	ptr_spatial		= debugShapeAt->ptr_spatial;
+	AttributePtr<Attribute_Position> ptr_position = ptr_spatial->ptr_position;
+	DirectX::XMFLOAT4X4 worldMatrix			= managementMath_->calculateWorldMatrix(ptr_spatial, ptr_position);
 	DirectX::XMFLOAT4X4 worldMatrixInverse	= managementMath_->calculateMatrixInverse(worldMatrix);
 	DirectX::XMFLOAT4X4 finalMatrix			= managementMath_->calculateFinalMatrix(worldMatrix, viewMatrix, projectionMatrix);
 	

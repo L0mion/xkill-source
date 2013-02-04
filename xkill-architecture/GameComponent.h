@@ -1,5 +1,6 @@
 #pragma once
 #include <xkill-utilities/IObserver.h>
+#include <xkill-utilities/AttributePointer.h>
 #include <vector>
 
 class Event_PhysicsAttributesColliding;
@@ -72,8 +73,8 @@ public:
 	*/
 	Attribute_PlayerSpawnPoint* findUnoccupiedSpawnPoint();
 
-	bool switchAmmunition(Attribute_WeaponStats* weaponStats);
-	bool switchFiringMode(Attribute_WeaponStats* weaponStats);
+	bool switchAmmunition(AttributePtr<Attribute_WeaponStats> ptr_weaponStats);
+	bool switchFiringMode(AttributePtr<Attribute_WeaponStats> ptr_weaponStats);
 
-	void shootProjectile(Attribute_Position* position, Attribute_Camera* camera, Attribute_WeaponStats* weaponStats);
+	void shootProjectile(AttributePtr<Attribute_Position> position, AttributePtr<Attribute_Camera> camera, AttributePtr<Attribute_WeaponStats> weaponStats);
 };

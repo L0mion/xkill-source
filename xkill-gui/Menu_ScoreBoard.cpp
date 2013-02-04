@@ -61,10 +61,10 @@ void Menu_ScoreBoard::onUpdate(float delta)
 		{
 			// Extract attributes from a playerAttribute
 			Attribute_Player* player		=	itrPlayer.getNext();
-			Attribute_Health* health		=	itrHealth.at(player->ptr_health.index);
-			Attribute_Render* render		=	itrRender.at(player->ptr_render.index);			
-			Attribute_Spatial* spatial		=	itrSpatial.at(render->ptr_spatial.index);
-			Attribute_Position* position	=	itrPosition.at(spatial->ptr_position.index);
+			AttributePtr<Attribute_Health> health		=	player->ptr_health;
+			AttributePtr<Attribute_Render> render		=	player->ptr_render;			
+			AttributePtr<Attribute_Spatial> spatial		=	render->ptr_spatial;
+			AttributePtr<Attribute_Position> position	=	spatial->ptr_position;
 
 			// Add row
 			QTreeWidgetItem* itm = new QTreeWidgetItem();

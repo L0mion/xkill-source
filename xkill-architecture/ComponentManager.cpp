@@ -161,6 +161,7 @@ void ComponentManager::update(float delta)
 	if(GET_STATE() == STATE_DEATHMATCH)
 	{
 		input_->onUpdate(delta);
+		physics_->onUpdate(delta);
 		if(initialSpawnDelay > 0.0f)
 		{
 			initialSpawnDelay -= delta;
@@ -169,7 +170,6 @@ void ComponentManager::update(float delta)
 		{
 			game_->onUpdate(delta);	
 		}
-		physics_->onUpdate(delta);
 		camera_->onUpdate(delta);
 		sound_->onUpdate(delta);
 		render_->onUpdate(delta);

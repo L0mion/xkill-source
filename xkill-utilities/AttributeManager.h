@@ -78,6 +78,8 @@ public:
 	AttributeStorage<Attribute_Pickupable>				pickupable;
 	AttributeStorage<Attribute_SoundSettings>			soundSettings;
 
+	AttributeStorage<Behavior_Offset>					offset;
+
 	// ADD MORE ABOVE ^
 
 	static AttributeManager* instance();
@@ -109,15 +111,18 @@ public:
 	static AttributeIterator<Attribute_ExplosionSphere>			itrExplosionSphere		;	\
 	static AttributeIterator<Attribute_SplitScreen>				itrSplitScreen			;	\
 	static AttributeIterator<Attribute_PickupablesSpawnPoint>	itrPickupablesSpawnPoint;	\
-	static AttributeIterator<Attribute_Pickupable>				itrPickupable;				\
+	static AttributeIterator<Attribute_Pickupable>				itrPickupable;			;	\
 	static AttributeIterator<Attribute_SoundSettings>			itrSoundSettings		;	\
+	\
+	static AttributeIterator<Behavior_Offset>					itrOffset				;	\
 	\
 	// ADD MORE ABOVE ^
 
 // Inits all attributes
-#define ATTRIBUTES_INIT_ALL																				\
+#define ATTRIBUTES_INIT_ALL																					\
 	settings				= AttributeManager::instance()->settings;										\
 	itr_entity				= AttributeManager::instance()->entities;										\
+	\
 	itrPosition				= AttributeManager::instance()->position					.getIterator();		\
 	itrSpatial				= AttributeManager::instance()->spatial						.getIterator();		\
 	itrRender				= AttributeManager::instance()->render						.getIterator();		\
@@ -142,5 +147,7 @@ public:
 	itrPickupablesSpawnPoint= AttributeManager::instance()->pickupablesSpawnPoint		.getIterator();		\
 	itrPickupable			= AttributeManager::instance()->pickupable					.getIterator();		\
 	itrSoundSettings		= AttributeManager::instance()->soundSettings				.getIterator();		\
+	\
+	itrOffset				= AttributeManager::instance()->offset						.getIterator();		\
 	\
 	// ADD MORE ABOVE ^

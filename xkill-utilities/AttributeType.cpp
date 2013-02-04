@@ -488,7 +488,7 @@ DataItemList* Attribute_DebugShape::getDataList()
 	{
 		DataItemList* list = new DataItemList();
 
-		list->add_AttributePointer(ptr_spatial.index, "ptr_spatial");;
+		list->add(&ptr_spatial, "ptr_spatial");;
 		list->add(meshID,					"meshID");
 		list->add_Enum(shape->shapeType_,	"shape->shapeType");
 		list->add(render,					"render");
@@ -498,7 +498,7 @@ DataItemList* Attribute_DebugShape::getDataList()
 
 void Attribute_DebugShape::saveTo( DataItemList* list )
 {
-	list->get_AttributePointer(&ptr_spatial.index);
+	list->get(&ptr_spatial);
 	list->get(&meshID);
 	shape->shapeType_ = (DebugShapeType)list->get_Enum();
 	list->get(&render);
@@ -513,4 +513,34 @@ Attribute_ExplosionSphere::Attribute_ExplosionSphere()
 }
 Attribute_ExplosionSphere::~Attribute_ExplosionSphere()
 {
+}
+
+void Behavior_Offset::updateOffset()
+{
+	// Make sure we have a parent
+	if(ptr_parent_spatial.isNotEmpty())
+	{
+		// Fetch attributes from parent
+		Float4 parent_rot = ptr_parent_spatial->rotation;
+		Float3 parent_pos = ptr_parent_spatial->ptr_position->position;
+
+
+		//
+		// Add rotation translation relative to parent
+		//
+
+		DirectX::XMVECTOR xv_pos = DirectX::XMLoadFloat3((DirectX::XMFLOAT3*)&offset_position);
+		DirectX::XMVECTOR parent_xv_rot = DirectX::XMLoadFloat4((DirectX::XMFLOAT4*)&parent_rot);
+		DirectX::XMVECTOR xv_pos_offset = DirectX::XMVector3Rotate(xv_pos, parent_xv_rot);
+
+		Float3 pos_offset; DirectX::XMStoreFloat3((DirectX::XMFLOAT3*)&pos_offset, xv_pos_offset);
+
+
+		//
+		// Add position translation relative to parent
+		//
+
+		pos_offset = parent_pos + pos_offset;
+		ptr_spatial->ptr_position->position = pos_offset;		
+	}
 }

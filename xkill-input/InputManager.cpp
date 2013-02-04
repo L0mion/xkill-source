@@ -87,13 +87,13 @@ InputDevice* InputManager::GetDevice(unsigned int playerID)
 
 	while(itrPlayer.hasNext())
 	{
-		Attribute_Player* attribute_player = itrPlayer.getNext();
+		Attribute_Player* ptr_player = itrPlayer.getNext();
 
 		if(itrPlayer.ownerId() == playerID)
 		{
-			if(!attribute_player->ptr_inputDevice.isEmpty())
+			if(!ptr_player->ptr_inputDevice.isEmpty())
 			{
-				device = itrInputDevice.at(attribute_player->ptr_inputDevice)->device;
+				device = ptr_player->ptr_inputDevice->device;
 				break;
 			}
 		}

@@ -129,25 +129,25 @@ void ManagementLight::updateStreamDirLight()
 }
 void ManagementLight::updateStreamPointLight()
 {
-	Attribute_Light_Point*	lightPointAt;
-	Attribute_Position*		posAt;
+	Attribute_Light_Point*	ptr_lightPoint;
+	AttributePtr<Attribute_Position>	ptr_position;
 	while(itrLightPoint.hasNext())
 	{
-		lightPointAt = itrLightPoint.getNext();
-		posAt = itrPosition.at(lightPointAt->ptr_position);
+		ptr_lightPoint = itrLightPoint.getNext();
+		ptr_position = ptr_lightPoint->ptr_position;
 
-		streamPointLight_->pushData(lightPointAt->lightPoint);
-		streamPosLight_->pushData(posAt->position);
+		streamPointLight_->pushData(ptr_lightPoint->lightPoint);
+		streamPosLight_->pushData(ptr_position->position);
 	}
 }
 void ManagementLight::updateStreamSpotLight()
 {
 	Attribute_Light_Spot*	lightSpotAt;
-	Attribute_Position*		posAt;
+	AttributePtr<Attribute_Position>		posAt;
 	while(itrLightSpot.hasNext())
 	{
 		lightSpotAt = itrLightSpot.getNext();
-		posAt = itrPosition.at(lightSpotAt->ptr_position);
+		posAt = lightSpotAt->ptr_position;
 
 		streamSpotLight_->pushData(lightSpotAt->lightSpot);
 		streamPosLight_->pushData(posAt->position);

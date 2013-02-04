@@ -74,6 +74,11 @@ enum DLL_U AttributeType
 	ATTRIBUTE_WEAPONSTATS,
 	ATTRIBUTE_EXPLOSIONSPHERE,
 
+	// Behaviors are attributes with more logic tied to them,
+	// and be should independent of other attributes (should not have pointer to them)
+	// not sure about this yet
+	BEHAVIOR_OFFSET,
+
 	// this is needed, don't touch!
 	ATTRIBUTE_LAST
 };
@@ -147,19 +152,50 @@ struct DLL_U Attribute_Spatial : public IAttribute
 	DataItemList* getDataList()
 	{
 		DataItemList* list = new DataItemList();
-		list->add_AttributePointer(ptr_position.index,	"ptr_position");
+		list->add(&ptr_position,	"ptr_position");
 		list->add(rotation,								"rotation");
 		list->add(scale,								"scale");
 		return list;
 	}
 	void saveTo(DataItemList* list)
 	{
-		list->get_AttributePointer(&ptr_position.index);
+		list->get(&ptr_position);
 		list->get(&rotation);
 		list->get(&scale);
 	};
 	AttributeType getType(){return ATTRIBUTE_SPATIAL;}
 	std::string getName(){return "Spatial";}
+};
+
+struct DLL_U Behavior_Offset : public IAttribute
+{
+private:
+	
+
+public:
+	AttributePtr<Attribute_Spatial> ptr_parent_spatial;
+	AttributePtr<Attribute_Spatial> ptr_spatial;
+
+	Float3 offset_position;
+	Float4 offset_rotation;
+
+	DataItemList* getDataList()
+	{
+		DataItemList* list = new DataItemList();
+		list->add(offset_position,						"offset_position");
+		list->add(offset_rotation,						"offset_rotation");
+		return list;
+	}
+	void saveTo(DataItemList* list)
+	{
+		list->get(&offset_position);
+		list->get(&offset_rotation);
+	};
+
+	void updateOffset();
+
+	AttributeType getType(){return BEHAVIOR_OFFSET;}
+	std::string getName(){return "Offset";}
 };
 
 /// Stores the points for both a bounding box and a convex mesh
@@ -215,20 +251,20 @@ struct DLL_U Attribute_Render : public IAttribute
 	DataItemList* getDataList()
 	{
 		DataItemList* list = new DataItemList();
-		list->add_AttributePointer(ptr_spatial.index,	"ptr_spatial");
-		list->add_AttributePointer(ptr_bounding.index,	"ptr_bounding");
-		list->add(meshID,								"meshID");
-		list->add(textureID,							"textureID");
-		list->add(transparent,							"transparent");
-		list->add(tessellation,							"tessellation");
-		list->add(culling.values[0],					"culling1");
-		list->add(culling.values[1],					"culling2");
+		list->add(&ptr_spatial,			"ptr_spatial");
+		list->add(&ptr_bounding,		"ptr_bounding");
+		list->add(meshID,				"meshID");
+		list->add(textureID,			"textureID");
+		list->add(transparent,			"transparent");
+		list->add(tessellation,			"tessellation");
+		list->add(culling.values[0],	"culling1");
+		list->add(culling.values[1],	"culling2");
 		return list;
 	}
 	void saveTo(DataItemList* list)
 	{
-		list->get_AttributePointer(&ptr_spatial.index);
-		list->get_AttributePointer(&ptr_bounding.index);
+		list->get(&ptr_spatial);
+		list->get(&ptr_bounding);
 		list->get(&meshID);
 		list->get(&textureID);
 		list->get(&transparent);
@@ -281,23 +317,23 @@ struct DLL_U Attribute_Physics : public IAttribute
 	DataItemList* getDataList()
 	{
 		DataItemList* list = new DataItemList();
-		list->add_AttributePointer(ptr_spatial.index,	"ptr_spatial");
-		list->add_AttributePointer(ptr_render.index,	"ptr_render");
-		list->add(linearVelocity,						"linearVelocity");
-		list->add(angularVelocity,						"angularVelocity");
-		list->add(gravity,								"gravity");
-		list->add(mass,									"mass");
-		list->add(meshID,								"meshID");
-		list->add(collisionFilterMask,					"collisionFilterMask");
-		list->add(collisionResponse,					"collisionResponse");
-		list->add(reloadDataIntoBulletPhysics,			"reloadDataIntoBulletPhysics");
+		list->add(&ptr_spatial,					"ptr_spatial");
+		list->add(&ptr_render,					"ptr_render");
+		list->add(linearVelocity,				"linearVelocity");
+		list->add(angularVelocity,				"angularVelocity");
+		list->add(gravity,						"gravity");
+		list->add(mass,							"mass");
+		list->add(meshID,						"meshID");
+		list->add(collisionFilterMask,			"collisionFilterMask");
+		list->add(collisionResponse,			"collisionResponse");
+		list->add(reloadDataIntoBulletPhysics,	"reloadDataIntoBulletPhysics");
 		
 		return list;
 	}
 	void saveTo(DataItemList* list)
 	{
-		list->get_AttributePointer(&ptr_spatial.index);
-		list->get_AttributePointer(&ptr_render.index);
+		list->get(&ptr_spatial);
+		list->get(&ptr_render);
 		list->get(&linearVelocity);
 		list->get(&angularVelocity);
 		list->get(&gravity);
@@ -330,7 +366,7 @@ struct DLL_U Attribute_Projectile : public IAttribute
 	DataItemList* getDataList()
 	{
 		DataItemList* list = new DataItemList();
-		list->add_AttributePointer(ptr_physics.index,	"ptr_physics");
+		list->add(&ptr_physics,	"ptr_physics");
 		list->add(entityIdOfCreator,					"entityIdOfCreator");
 		list->add(currentLifeTimeLeft,					"currentLifeTimeLeft");
 
@@ -338,7 +374,7 @@ struct DLL_U Attribute_Projectile : public IAttribute
 	}
 	void saveTo(DataItemList* list)
 	{
-		list->get_AttributePointer(&ptr_physics.index);
+		list->get(&ptr_physics);
 		list->get(&entityIdOfCreator);
 		list->get(&currentLifeTimeLeft);
 	};
@@ -395,7 +431,7 @@ struct DLL_U Attribute_Light_Point : public IAttribute
 	{
 		DataItemList* list = new DataItemList();
 		
-		list->add_AttributePointer	(ptr_position.index, "ptr_position");
+		list->add(&ptr_position, 			"ptr_position");
 		list->add(lightPoint.ambient,		"ambient");
 		list->add(lightPoint.diffuse,		"diffuse");
 		list->add(lightPoint.specular,		"specular");
@@ -407,7 +443,7 @@ struct DLL_U Attribute_Light_Point : public IAttribute
 	}
 	void saveTo(DataItemList* list)
 	{
-		list->get_AttributePointer(&ptr_position.index);
+		list->get(&ptr_position);
 		list->get(&lightPoint.ambient);
 		list->get(&lightPoint.diffuse);
 		list->get(&lightPoint.specular);
@@ -436,7 +472,7 @@ struct DLL_U Attribute_Light_Spot : public IAttribute
 	{
 		DataItemList* list = new DataItemList();
 		
-		list->add_AttributePointer	(ptr_position.index, "ptr_position");
+		list->add(&ptr_position, 			"ptr_position");
 		list->add(lightSpot.ambient,		"ambient");
 		list->add(lightSpot.diffuse,		"diffuse");
 		list->add(lightSpot.specular,		"specular");
@@ -450,7 +486,7 @@ struct DLL_U Attribute_Light_Spot : public IAttribute
 	}
 	void saveTo(DataItemList* list)
 	{
-		list->get_AttributePointer(&ptr_position.index);
+		list->get(&ptr_position);
 		list->get(&lightSpot.ambient);
 		list->get(&lightSpot.diffuse);
 		list->get(&lightSpot.specular);
@@ -486,8 +522,8 @@ struct DLL_U Attribute_Input : public IAttribute
 	{
 		DataItemList* list = new DataItemList();
 		
-		list->add_AttributePointer(ptr_physics.index, "ptr_physics");
-		list->add(position,					"position");
+		list->add(&ptr_physics, "ptr_physics");
+		list->add(position,				"position");
 		list->add(rotation,					"rotation");
 		list->add(fire,						"fire");
 		list->add(changeAmmunitionType,		"changeAmmunitionType");
@@ -497,7 +533,7 @@ struct DLL_U Attribute_Input : public IAttribute
 	}
 	void saveTo(DataItemList* list)
 	{
-		list->get_AttributePointer(&ptr_physics.index);
+		list->get(&ptr_physics);
 		list->get(&position);
 		list->get(&rotation);
 		list->get(&fire);
@@ -553,13 +589,13 @@ struct DLL_U Attribute_Sound : public IAttribute
 	{
 		DataItemList* list = new DataItemList();
 		
-		list->add_AttributePointer(ptr_position.index, "ptr_position");
+		list->add(&ptr_position, "ptr_position");
 
 		return list;
 	}
 	void saveTo(DataItemList* list)
 	{
-		list->get_AttributePointer(&ptr_position.index);
+		list->get(&ptr_position);
 	};
 	AttributeType getType(){return ATTRIBUTE_SOUND;}
 	std::string getName(){return "Sound";}
@@ -624,22 +660,22 @@ struct DLL_U Attribute_Camera : public IAttribute
 	{
 		DataItemList* list = new DataItemList();
 
-		list->add_AttributePointer(ptr_spatial.index,	"ptr_spatial");
-		list->add(mat_view,								"mat_view");
-		list->add(mat_projection,						"mat_projection");
-		list->add(fieldOfView,							"fieldOfView");
-		list->add(aspectRatio,							"aspectRatio");
-		list->add(zNear,								"zNear");
-		list->add(zFar,									"zFar");
-		list->add(up,									"up");
-		list->add(right,								"right");
-		list->add(look,									"look");
+		list->add(&ptr_spatial,		"ptr_spatial");
+		list->add(mat_view,			"mat_view");
+		list->add(mat_projection,	"mat_projection");
+		list->add(fieldOfView,		"fieldOfView");
+		list->add(aspectRatio,		"aspectRatio");
+		list->add(zNear,			"zNear");
+		list->add(zFar,				"zFar");
+		list->add(up,				"up");
+		list->add(right,			"right");
+		list->add(look,				"look");
 
 		return list;
 	}
 	void saveTo(DataItemList* list)
 	{
-		list->get_AttributePointer(&ptr_spatial.index);
+		list->get(&ptr_spatial);
 		list->get(&mat_view);
 		list->get(&mat_projection);
 		list->get(&fieldOfView);
@@ -677,19 +713,19 @@ struct DLL_U Attribute_SplitScreen : public IAttribute
 	{
 		DataItemList* list = new DataItemList();
 
-		list->add_AttributePointer(ptr_camera.index,	"ptr_camera");
-		list->add_AttributePointer(ptr_player.index,	"ptr_player");
-		list->add(ssTopLeftX,							"ssTopLeftX");
-		list->add(ssTopLeftY,							"ssTopLeftY");
-		list->add(ssWidth,								"ssWidth");
-		list->add(ssHeight,								"ssHeight");
+		list->add(&ptr_camera,	"ptr_camera");
+		list->add(&ptr_player,	"ptr_player");
+		list->add(ssTopLeftX,	"ssTopLeftX");
+		list->add(ssTopLeftY,	"ssTopLeftY");
+		list->add(ssWidth,		"ssWidth");
+		list->add(ssHeight,		"ssHeight");
 
 		return list;
 	}
 	void saveTo(DataItemList* list)
 	{
-		list->get_AttributePointer(&ptr_camera.index);
-		list->get_AttributePointer(&ptr_player.index);
+		list->get(&ptr_camera);
+		list->get(&ptr_player);
 		list->get(&ssTopLeftX);
 		list->get(&ssTopLeftY);
 		list->get(&ssWidth);
@@ -743,11 +779,11 @@ struct DLL_U Attribute_Player : public IAttribute
 	{
 		DataItemList* list = new DataItemList();
 		
-		list->add_AttributePointer(ptr_render.index,		"ptr_render");
-		list->add_AttributePointer(ptr_input.index,			"ptr_input");
-		list->add_AttributePointer(ptr_camera.index,		"ptr_camera");
-		list->add_AttributePointer(ptr_health.index,		"ptr_health");
-		list->add_AttributePointer(ptr_weaponStats.index,	"ptr_weaponStats");
+		list->add(&ptr_render,		"ptr_render");
+		list->add(&ptr_input,			"ptr_input");
+		list->add(&ptr_camera,		"ptr_camera");
+		list->add(&ptr_health,		"ptr_health");
+		list->add(&ptr_weaponStats,	"ptr_weaponStats");
 		list->add(id,					"id");
 		list->add(priority,				"priority");
 		list->add(cycleSteals,			"cycleSteals");
@@ -760,11 +796,11 @@ struct DLL_U Attribute_Player : public IAttribute
 	}
 	void saveTo(DataItemList* list)
 	{
-		list->get_AttributePointer(&ptr_render.index);
-		list->get_AttributePointer(&ptr_input.index);
-		list->get_AttributePointer(&ptr_camera.index);
-		list->get_AttributePointer(&ptr_health.index);
-		list->get_AttributePointer(&ptr_weaponStats.index);
+		list->get(&ptr_render);
+		list->get(&ptr_input);
+		list->get(&ptr_camera);
+		list->get(&ptr_health);
+		list->get(&ptr_weaponStats);
 		list->get(&id);
 		list->get(&priority);
 		list->get(&cycleSteals);
@@ -882,7 +918,7 @@ struct DLL_U Attribute_PlayerSpawnPoint : public IAttribute
 	{
 		DataItemList* list = new DataItemList();
 
-		list->add_AttributePointer(ptr_position.index, "ptr_position");
+		list->add(&ptr_position, "ptr_position");
 		list->add(secondsSinceLastSpawn,	"secondsSinceLastSpawn");
 		list->add(spawnArea,			"spawnArea");
 
@@ -890,7 +926,7 @@ struct DLL_U Attribute_PlayerSpawnPoint : public IAttribute
 	}
 	void saveTo(DataItemList* list)
 	{
-		list->get_AttributePointer(&ptr_position.index);
+		list->get(&ptr_position);
 		list->get(&secondsSinceLastSpawn);
 		list->get(&spawnArea);
 	};
@@ -916,7 +952,7 @@ struct DLL_U Attribute_PickupablesSpawnPoint : public IAttribute
 	{
 		DataItemList* list = new DataItemList();
 
-		list->add_AttributePointer(ptr_position.index, "ptr_position");
+		list->add(&ptr_position, "ptr_position");
 		//list->add(spawnPickupableType, "spawnPickupableType");
 		list->add(spawnDelayInSeconds, "spawnDelayInSeconds");
 		list->add(secondsSinceLastSpawn, "secondsSinceLastSpawn");
@@ -929,7 +965,7 @@ struct DLL_U Attribute_PickupablesSpawnPoint : public IAttribute
 	}
 	void saveTo(DataItemList* list)
 	{
-		list->get_AttributePointer(&ptr_position.index);
+		list->get(&ptr_position);
 		//list->get(&spawnPickupableType);
 		list->get(&spawnDelayInSeconds);
 		list->get(&secondsSinceLastSpawn);
@@ -958,9 +994,9 @@ struct DLL_U Attribute_Pickupable : public IAttribute
 	{
 		DataItemList* list = new DataItemList();
 
-		list->add_AttributePointer(ptr_position.index, "ptr_position");
-		list->add_AttributePointer(ptr_physics.index, "ptr_physics");
-		list->add_AttributePointer(ptr_pickupablesSpawnPoint_creator.index, "ptr_creatorPickupablesSpawnPoint");
+		list->add(&ptr_position, 						"ptr_position");
+		list->add(&ptr_physics, 							"ptr_physics");
+		list->add(&ptr_pickupablesSpawnPoint_creator, 	"ptr_creatorPickupablesSpawnPoint");
 		//list->add_AttributePointer(pickupableType, "pickupableType");
 		list->add(amount, "amount");
 
@@ -968,9 +1004,9 @@ struct DLL_U Attribute_Pickupable : public IAttribute
 	}
 	void saveTo(DataItemList* list)
 	{
-		list->get_AttributePointer(&ptr_position.index);
-		list->get_AttributePointer(&ptr_physics.index);
-		list->get_AttributePointer(&ptr_pickupablesSpawnPoint_creator.index);
+		list->get(&ptr_position);
+		list->get(&ptr_physics);
+		list->get(&ptr_pickupablesSpawnPoint_creator);
 		//list->get_AttributePointer(&pickupableType);
 		list->get(&amount);
 	};
@@ -1041,13 +1077,13 @@ struct DLL_U Attribute_ExplosionSphere : public IAttribute
 	DataItemList* getDataList()
 	{
 		DataItemList* list = new DataItemList();
-		list->add_AttributePointer(ptr_physics.index, "ptr_physics");;
+		list->add(&ptr_physics, "ptr_physics");;
 		list->add(currentLifeTimeLeft,	"currentLifeTimeLeft");
 		return list;
 	}
 	void saveTo(DataItemList* list)
 	{
-		list->get_AttributePointer(&ptr_physics.index);
+		list->get(&ptr_physics);
 		list->get(&currentLifeTimeLeft);
 	};
 	AttributeType getType(){return ATTRIBUTE_EXPLOSIONSPHERE;}
