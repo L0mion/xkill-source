@@ -52,6 +52,8 @@ public:
 		if(FAILED(hr))
 			SHOW_MESSAGEBOX("DataStreamSRV::createSRV device->CreateShaderResourceView failed!");
 
+		SET_D3D_OBJECT_NAME(dataStreamSRV_, "dataStreamSRV");
+
 		return hr;
 	}
 
