@@ -57,6 +57,7 @@ public:
 		
 		CREATE_ATTRIBUTE(ptr_spatial, Attribute_Spatial, spatial, entity);
 		ptr_spatial->ptr_position = ptr_position;
+
 		
 		CREATE_ATTRIBUTE(ptr_render, Attribute_Render, render, entity);
 		ptr_render->ptr_spatial = ptr_spatial;
@@ -369,6 +370,32 @@ public:
 	{
 		CREATE_ATTRIBUTE(ptr_inputDevice, Attribute_InputDevice, inputDevice, entity);
 		ptr_inputDevice->device = e->device;
+	}
+
+	
+
+	void createRenderableEntity(Entity* entity)
+	{
+		CREATE_ATTRIBUTE(Attribute_Position, position, entity);
+		position->position  = Float3(0.0f, 4.0f, 0.0f);
+
+		CREATE_ATTRIBUTE(Attribute_Spatial, spatial, entity);
+		CONNECT_ATTRIBUTES(spatial, position);
+		spatial->scale = Float3(0.5f, 0.5f, 0.5f);
+		
+
+		CREATE_ATTRIBUTE(Attribute_Render, render, entity);
+		CONNECT_ATTRIBUTES(render, spatial);
+		render->meshID = 3;
+		
+		CREATE_ATTRIBUTE(Attribute_Physics, physics, entity);
+		CONNECT_ATTRIBUTES(physics, spatial);
+		CONNECT_ATTRIBUTES(physics, render);
+		physics->meshID = render->meshID;
+		physics->collisionFilterGroup = Attribute_Physics::PLAYER;
+		physics->collisionFilterMask = Attribute_Physics::EVERYTHING;
+		physics->gravity = Float3(0.0f, -10.0f, 0.0f);
+	
 	}
 };
 

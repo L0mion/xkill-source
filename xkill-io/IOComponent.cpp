@@ -297,8 +297,8 @@ bool IOComponent::loadFbx(std::string modelName, std::string modelPath, MdlDescM
 
 	if(fbxModels.size() > 0)
 	{
-		vertices		= fbxModels[0].getMeshDesc().createVertices();
-		indices			= fbxModels[0].getMeshDesc().getIndices();
+		/*vertices		= */fbxModels[0].getMeshDesc().createVertices(vertices, indices);
+		//indices			= fbxModels[0].getMeshDesc().getIndices();
 		materialDesc	= fbxModels[0].getMaterialDesc().getMaterialDesc();
 
 		std::vector<MaterialDesc> materials;

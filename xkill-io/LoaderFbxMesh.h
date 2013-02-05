@@ -192,6 +192,8 @@ private:
 	*/
 	void parseTransformMatrix(FbxCluster* cluster, LoaderFbxMeshDesc* meshDesc);
 	
+	void transform(FbxMesh* mesh);
+
 	//! Finds the root node in a link hierarchy.
 	/*!
 	\param node A node somewhere in the hierarchy.
