@@ -58,7 +58,6 @@ public:
 		return hr;
 	}
 
-	//std::vector<Data>& getData() { return data_; }
 	unsigned int getDataCountCur() { return dataCountCur_; }
 	unsigned int getDataCountMax() { return dataCountMax_; }
 	ID3D11Buffer* getDataBuffer()	{ return dataStreamBuffer_; }
@@ -164,6 +163,8 @@ protected:
 		hr = device->CreateBuffer(&bufferDesc, &initialData, &dataStreamBuffer_);
 		if(FAILED(hr))
 			SHOW_MESSAGEBOX("DataStreambuffer::createBuffer device->CreateBuffer failed!");
+
+		SET_D3D_OBJECT_NAME(dataStreamBuffer_, "dataStreamBuffer");
 
 		return hr;
 	}

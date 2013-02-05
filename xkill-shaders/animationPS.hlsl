@@ -13,7 +13,7 @@ PSOut animationPS(DefaultVSOut pIn)
 	float4 white = float4(0.75f, 0.0f, 0.0f, 1.0f);
 
 	PSOut output;
-	output.normal.xyz = pIn.normalW;
+	output.normal = float4(pIn.normalW, 1.0f);
 	output.albedo = white;
 
 	return output;
