@@ -202,7 +202,6 @@ void GameComponent::onUpdate(float delta)
 			{
 				player->currentRespawnDelay -= delta;
 
-
 				float alive = 3.14/4.0f;
 				float dead = 3.14/3;
 				float slerp = (1 - player->currentRespawnDelay/player->respawnDelay);
@@ -229,7 +228,7 @@ void GameComponent::onUpdate(float delta)
 				player->currentRespawnDelay = player->respawnDelay;
 
 				physics->gravity = Float3(0.0f, -10.0f, 0.0f);
-				physics->collisionFilterMask = physics->EVERYTHING;
+				physics->collisionFilterMask = Attribute_Physics::EVERYTHING;
 				physics->collisionResponse = true;
 				physics->meshID = player->meshIDWhenAlive;
 
@@ -511,8 +510,7 @@ void GameComponent::event_PhysicsAttributesColliding(Event_PhysicsAttributesColl
 		// colliding with...
 		//
 
-		if(entity2->hasAttribute(ATTRIBUTE_PHYSICS) && !entity2->hasAttribute(ATTRIBUTE_PROJECTILE) && !entity2->hasAttribute(ATTRIBUTE_EXPLOSIONSPHERE))
-		//if(entity2->hasAttribute(ATTRIBUTE_PHYSICS) && !entity2->hasAttribute(ATTRIBUTE_PROJECTILE))
+		if(entity2->hasAttribute(ATTRIBUTE_PHYSICS)) //May not be needed
 		{
 			//Set gravity on projectiles colliding with physics objects
 			std::vector<int> physicsId = entity1->getAttributes(ATTRIBUTE_PHYSICS);
@@ -532,10 +530,22 @@ void GameComponent::event_PhysicsAttributesColliding(Event_PhysicsAttributesColl
 				Attribute_Projectile* projectileAttribute = itrProjectile.at(projectileId.at(i));
 
 				//Shorten lifetime of projectile colliding with physics objects
-			/*	if(projectileAttribute->currentLifeTimeLeft > 1.00f)
+				switch(projectileAttribute->ammunitionType)
 				{
-					projectileAttribute->currentLifeTimeLeft = 1.00f;
-				}*/
+				case XKILL_Enums::AmmunitionType::BULLET:
+					if(projectileAttribute->currentLifeTimeLeft > 0.15f)
+					{
+						projectileAttribute->currentLifeTimeLeft = 0.15f;
+					}
+					break;
+				case XKILL_Enums::AmmunitionType::SCATTER:
+					if(projectileAttribute->currentLifeTimeLeft > 1.00f)
+					{
+						projectileAttribute->currentLifeTimeLeft = 1.00f;
+						//SEND_EVENT(&Event_ModifyPhysicsObject(XKILL_Enums::ModifyPhysicsObjectData::VELOCTIY, static_cast<void*>(&Float3(0.0f, 0.0f, 0.0f)), physicsId.at(i)));
+					}
+					break;
+				}
 
 				//Explosion handling.
 				if(projectileAttribute->ammunitionType == XKILL_Enums::AmmunitionType::EXPLOSIVE)
