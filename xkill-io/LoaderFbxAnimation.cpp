@@ -101,19 +101,19 @@ void LoaderFbxAnimation::parseAnimationChannelsGeneralTranslation(FbxNode* node,
 	if(animCurve)
 	{
 		//printf("    TX:\n");
-		parseAnimationCurve(animCurve, animationBones_.back().getTranslationX());
+		parseAnimationCurve(animCurve, animationBones_.back().getKeyframes(FBX_KEYFRAME_INDEX_TRANSLATION_X));
 	}
 	animCurve = node->LclTranslation.GetCurve(animLayer, FBXSDK_CURVENODE_COMPONENT_Y);
 	if(animCurve)
 	{
 		//printf("    TY:\n");
-		parseAnimationCurve(animCurve, animationBones_.back().getTranslationY());
+		parseAnimationCurve(animCurve, animationBones_.back().getKeyframes(FBX_KEYFRAME_INDEX_TRANSLATION_Y));
 	}
 	animCurve = node->LclTranslation.GetCurve(animLayer, FBXSDK_CURVENODE_COMPONENT_Z);
 	if(animCurve)
 	{
 		//printf("    TZ:\n");
-		parseAnimationCurve(animCurve, animationBones_.back().getTranslationZ());
+		parseAnimationCurve(animCurve, animationBones_.back().getKeyframes(FBX_KEYFRAME_INDEX_TRANSLATION_Z));
 	}
 }
 void LoaderFbxAnimation::parseAnimationChannelsGeneralRotation(FbxNode* node, FbxAnimLayer* animLayer, FbxAnimCurve* animCurve)
@@ -122,19 +122,19 @@ void LoaderFbxAnimation::parseAnimationChannelsGeneralRotation(FbxNode* node, Fb
 	if(animCurve)
 	{
 		//printf("    RX:\n");
-		parseAnimationCurve(animCurve, animationBones_.back().getRotationX());
+		parseAnimationCurve(animCurve, animationBones_.back().getKeyframes(FBX_KEYFRAME_INDEX_ROTATION_X));
 	}
 	animCurve = node->LclRotation.GetCurve(animLayer, FBXSDK_CURVENODE_COMPONENT_Y);
 	if(animCurve)
 	{
 		//printf("    RY:\n");
-		parseAnimationCurve(animCurve, animationBones_.back().getRotationY());
+		parseAnimationCurve(animCurve, animationBones_.back().getKeyframes(FBX_KEYFRAME_INDEX_ROTATION_Y));
 	}
 	animCurve = node->LclRotation.GetCurve(animLayer, FBXSDK_CURVENODE_COMPONENT_Z);
 	if(animCurve)
 	{
 		//printf("    RZ:\n");
-		parseAnimationCurve(animCurve, animationBones_.back().getRotationZ());
+		parseAnimationCurve(animCurve, animationBones_.back().getKeyframes(FBX_KEYFRAME_INDEX_ROTATION_Z));
 	}
 }
 void LoaderFbxAnimation::parseAnimationChannelsGeneralScaling(FbxNode* node, FbxAnimLayer* animLayer, FbxAnimCurve* animCurve)
@@ -143,19 +143,19 @@ void LoaderFbxAnimation::parseAnimationChannelsGeneralScaling(FbxNode* node, Fbx
 	if(animCurve)
 	{
 		//printf("    SX:\n");
-		parseAnimationCurve(animCurve, animationBones_.back().getScalingX());
+		parseAnimationCurve(animCurve, animationBones_.back().getKeyframes(FBX_KEYFRAME_INDEX_SCALING_X));
 	}
 	animCurve = node->LclScaling.GetCurve(animLayer, FBXSDK_CURVENODE_COMPONENT_Y);
 	if(animCurve)
 	{
 		//printf("    SY:\n");
-		parseAnimationCurve(animCurve, animationBones_.back().getScalingY());
+		parseAnimationCurve(animCurve, animationBones_.back().getKeyframes(FBX_KEYFRAME_INDEX_SCALING_Y));
 	}
 	animCurve = node->LclScaling.GetCurve(animLayer, FBXSDK_CURVENODE_COMPONENT_Z);
 	if(animCurve)
 	{
 		//printf("    SZ:\n");
-		parseAnimationCurve(animCurve, animationBones_.back().getScalingZ());
+		parseAnimationCurve(animCurve, animationBones_.back().getKeyframes(FBX_KEYFRAME_INDEX_SCALING_Z));
 	}
 }
 void LoaderFbxAnimation::parseAnimationChannelsColor(FbxNodeAttribute* nodeAttribute, FbxAnimLayer* animLayer, FbxAnimCurve* animCurve)
@@ -165,17 +165,17 @@ void LoaderFbxAnimation::parseAnimationChannelsColor(FbxNodeAttribute* nodeAttri
 		animCurve = nodeAttribute->Color.GetCurve(animLayer, FBXSDK_CURVENODE_COLOR_RED);
 		if(animCurve)
 		{
-			parseAnimationCurve(animCurve, animationBones_.back().getColorRed());
+			parseAnimationCurve(animCurve, animationBones_.back().getKeyframes(FBX_KEYFRAME_INDEX_COLOR_RED));
 		}
 		animCurve = nodeAttribute->Color.GetCurve(animLayer, FBXSDK_CURVENODE_COLOR_GREEN);
 		if(animCurve)
 		{
-			parseAnimationCurve(animCurve, animationBones_.back().getColorGreen());
+			parseAnimationCurve(animCurve, animationBones_.back().getKeyframes(FBX_KEYFRAME_INDEX_COLOR_GREEN));
 		}
 		animCurve = nodeAttribute->Color.GetCurve(animLayer, FBXSDK_CURVENODE_COLOR_BLUE);
 		if(animCurve)
 		{
-			parseAnimationCurve(animCurve, animationBones_.back().getColorBlue());
+			parseAnimationCurve(animCurve, animationBones_.back().getKeyframes(FBX_KEYFRAME_INDEX_COLOR_BLUE));
 		}
 	}
 }
@@ -187,17 +187,17 @@ void LoaderFbxAnimation::parseAnimationChannelsLamp(FbxNode* node, FbxAnimLayer*
 		animCurve = light->Intensity.GetCurve(animLayer);
 		if(animCurve)
 		{
-			parseAnimationCurve(animCurve, animationBones_.back().getLightIntensity());
+			parseAnimationCurve(animCurve, animationBones_.back().getKeyframes(FBX_KEYFRAME_INDEX_LIGHT_INTENSITY));
 		}
 		animCurve = light->OuterAngle.GetCurve(animLayer);
 		if(animCurve)
 		{
-			parseAnimationCurve(animCurve, animationBones_.back().getLightOuterAngle());
+			parseAnimationCurve(animCurve, animationBones_.back().getKeyframes(FBX_KEYFRAME_INDEX_LIGHT_OUTER_ANGLE));
 		}
 		animCurve = light->Fog.GetCurve(animLayer);
 		if(animCurve)
 		{
-			parseAnimationCurve(animCurve, animationBones_.back().getLightFog());
+			parseAnimationCurve(animCurve, animationBones_.back().getKeyframes(FBX_KEYFRAME_INDEX_LIGHT_FOG));
 		}
 	}
 }
@@ -209,32 +209,32 @@ void LoaderFbxAnimation::parseAnimationChannelsCamera(FbxNode* node, FbxAnimLaye
 		animCurve = camera->FieldOfView.GetCurve(animLayer);
 		if(animCurve)
 		{
-			parseAnimationCurve(animCurve, animationBones_.back().getCameraFieldOfView());
+			parseAnimationCurve(animCurve, animationBones_.back().getKeyframes(FBX_KEYFRAME_INDEX_CAMERA_FIELD_OF_VIEW));
 		}
 		animCurve = camera->FieldOfViewX.GetCurve(animLayer);
 		if(animCurve)
 		{
-			parseAnimationCurve(animCurve, animationBones_.back().getCameraFieldOfViewX());
+			parseAnimationCurve(animCurve, animationBones_.back().getKeyframes(FBX_KEYFRAME_INDEX_CAMERA_FIELD_OF_VIEW_X));
 		}
 		animCurve = camera->FieldOfViewY.GetCurve(animLayer);
 		if(animCurve)
 		{
-			parseAnimationCurve(animCurve, animationBones_.back().getCameraFieldOfViewY());
+			parseAnimationCurve(animCurve, animationBones_.back().getKeyframes(FBX_KEYFRAME_INDEX_CAMERA_FIELD_OF_VIEW_Y));
 		}
 		animCurve = camera->OpticalCenterX.GetCurve(animLayer);
 		if(animCurve)
 		{
-			parseAnimationCurve(animCurve, animationBones_.back().getCameraOpticalCenterX());
+			parseAnimationCurve(animCurve, animationBones_.back().getKeyframes(FBX_KEYFRAME_INDEX_CAMERA_OPTICAL_CENTER_X));
 		}
 		animCurve = camera->OpticalCenterY.GetCurve(animLayer);
 		if(animCurve)
 		{
-			parseAnimationCurve(animCurve, animationBones_.back().getCameraOpticalCenterY());
+			parseAnimationCurve(animCurve, animationBones_.back().getKeyframes(FBX_KEYFRAME_INDEX_CAMERA_OPTICAL_CENTER_X));
 		}
 		animCurve = camera->Roll.GetCurve(animLayer);
 		if(animCurve)
 		{
-			parseAnimationCurve(animCurve, animationBones_.back().getCameraRoll());
+			parseAnimationCurve(animCurve, animationBones_.back().getKeyframes(FBX_KEYFRAME_INDEX_CAMERA_ROLL));
 		}
 	}
 }
@@ -261,7 +261,7 @@ void LoaderFbxAnimation::parseAnimationChannelsGeometry(FbxNodeAttribute* nodeAt
 					animCurve = geometry->GetShapeChannel(blendShapeIndex, channelIndex, animLayer, true);
 					if(animCurve)
 					{
-						parseAnimationCurve(animCurve, animationBones_.back().getGeometryShapeChannel());
+						parseAnimationCurve(animCurve, animationBones_.back().getKeyframes(FBX_KEYFRAME_INDEX_GEOMETRY_SHAPE_CHANNEL));
 					}
 				}
 			}
@@ -313,7 +313,7 @@ void LoaderFbxAnimation::parseAnimationChannelsPropertyPrimitive(FbxAnimCurveNod
 	{
 		animCurve = curveNode->GetCurve(0U, i);
 		if(animCurve)
-			parseAnimationCurve(animCurve, animationBones_.back().getPropertyPrimitive());
+			parseAnimationCurve(animCurve, animationBones_.back().getKeyframes(FBX_KEYFRAME_INDEX_PROPERTY_PRIMITIVE));
 	}
 }
 void LoaderFbxAnimation::parseAnimationChannelsPropertyVector(FbxAnimCurveNode* curveNode, FbxAnimCurve* animCurve)
@@ -322,19 +322,19 @@ void LoaderFbxAnimation::parseAnimationChannelsPropertyVector(FbxAnimCurveNode* 
 	{
 		animCurve = curveNode->GetCurve(0U, i);
 		if(animCurve)
-			parseAnimationCurve(animCurve, animationBones_.back().getPropertyVector());
+			parseAnimationCurve(animCurve, animationBones_.back().getKeyframes(FBX_KEYFRAME_INDEX_PROPERTY_VECTOR));
 	}
 	for(int i=0; i<curveNode->GetCurveCount(1U); i++)
 	{
 		animCurve = curveNode->GetCurve(1U, i);
 		if(animCurve)
-			parseAnimationCurve(animCurve, animationBones_.back().getPropertyVector());
+			parseAnimationCurve(animCurve, animationBones_.back().getKeyframes(FBX_KEYFRAME_INDEX_PROPERTY_VECTOR));
 	}
 	for(int i=0; i<curveNode->GetCurveCount(2U); i++)
 	{
 		animCurve = curveNode->GetCurve(2U, i);
 		if(animCurve)
-			parseAnimationCurve(animCurve, animationBones_.back().getPropertyVector());
+			parseAnimationCurve(animCurve, animationBones_.back().getKeyframes(FBX_KEYFRAME_INDEX_PROPERTY_VECTOR));
 	}
 }
 void LoaderFbxAnimation::parseAnimationChannelsPropertyEnum(FbxAnimCurveNode* curveNode, FbxAnimCurve* animCurve, FbxProperty* fbxProperty)
@@ -344,7 +344,7 @@ void LoaderFbxAnimation::parseAnimationChannelsPropertyEnum(FbxAnimCurveNode* cu
 	 	 animCurve = curveNode->GetCurve(0U, i);
 	 	 if(animCurve)
 	 	 {
-			 parseAnimationListCurve(animCurve, fbxProperty, animationBones_.back().getPropertyEnum());
+			 parseAnimationListCurve(animCurve, fbxProperty, animationBones_.back().getKeyframes(FBX_KEYFRAME_INDEX_PROPERTY_ENUM));
 	 	 }
 	 }
 }

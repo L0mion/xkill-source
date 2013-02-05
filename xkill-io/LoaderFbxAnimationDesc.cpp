@@ -38,25 +38,37 @@ void LoaderFbxAnimationDesc::setBones(std::vector<LoaderFbxAnimationBone> bones)
 
 void LoaderFbxAnimationDesc::convertToXKillFormat()
 {
+	int numIndices = 9;
+	FbxKeyframeIndex keyframeIndices[] = {FBX_KEYFRAME_INDEX_TRANSLATION_X,
+										FBX_KEYFRAME_INDEX_TRANSLATION_Y,
+										FBX_KEYFRAME_INDEX_TRANSLATION_Z,
+										FBX_KEYFRAME_INDEX_ROTATION_X,
+										FBX_KEYFRAME_INDEX_ROTATION_Y,
+										FBX_KEYFRAME_INDEX_ROTATION_Z,
+										FBX_KEYFRAME_INDEX_SCALING_X,
+										FBX_KEYFRAME_INDEX_SCALING_Y,
+										FBX_KEYFRAME_INDEX_SCALING_Z};
+
 	for(unsigned int boneIndex=0; boneIndex<bones_.size(); boneIndex++)
 	{
-		
+		int numKeyframes = bones_[boneIndex].averageNumKeyframes(keyframeIndices, numIndices);
+		int debug = 1;
 	}
 }
 unsigned int LoaderFbxAnimationDesc::findMaxNumKeyframes(LoaderFbxAnimationBone bone)
 {
 	unsigned int numKeyframes = 0;
-	numKeyframes = DirectX::XMMax(numKeyframes, bone.getTranslationX()->size());
-	numKeyframes = DirectX::XMMax(numKeyframes, bone.getTranslationY()->size());
-	numKeyframes = DirectX::XMMax(numKeyframes, bone.getTranslationZ()->size());
+	numKeyframes = DirectX::XMMax(numKeyframes, bone.getKeyframes(FBX_KEYFRAME_INDEX_TRANSLATION_X)->size());
+	numKeyframes = DirectX::XMMax(numKeyframes, bone.getKeyframes(FBX_KEYFRAME_INDEX_TRANSLATION_Y)->size());
+	numKeyframes = DirectX::XMMax(numKeyframes, bone.getKeyframes(FBX_KEYFRAME_INDEX_TRANSLATION_Z)->size());
 	
-	numKeyframes = DirectX::XMMax(numKeyframes, bone.getScalingX()->size());
-	numKeyframes = DirectX::XMMax(numKeyframes, bone.getScalingY()->size());
-	numKeyframes = DirectX::XMMax(numKeyframes, bone.getScalingZ()->size());
+	numKeyframes = DirectX::XMMax(numKeyframes, bone.getKeyframes(FBX_KEYFRAME_INDEX_SCALING_X)->size());
+	numKeyframes = DirectX::XMMax(numKeyframes, bone.getKeyframes(FBX_KEYFRAME_INDEX_SCALING_Y)->size());
+	numKeyframes = DirectX::XMMax(numKeyframes, bone.getKeyframes(FBX_KEYFRAME_INDEX_SCALING_Z)->size());
 
-	numKeyframes = DirectX::XMMax(numKeyframes, bone.getRotationX()->size());
-	numKeyframes = DirectX::XMMax(numKeyframes, bone.getRotationY()->size());
-	numKeyframes = DirectX::XMMax(numKeyframes, bone.getRotationZ()->size());
+	numKeyframes = DirectX::XMMax(numKeyframes, bone.getKeyframes(FBX_KEYFRAME_INDEX_ROTATION_X)->size());
+	numKeyframes = DirectX::XMMax(numKeyframes, bone.getKeyframes(FBX_KEYFRAME_INDEX_ROTATION_Y)->size());
+	numKeyframes = DirectX::XMMax(numKeyframes, bone.getKeyframes(FBX_KEYFRAME_INDEX_ROTATION_Z)->size());
 
 	return numKeyframes;
 }
@@ -64,52 +76,52 @@ unsigned int LoaderFbxAnimationDesc::findMinNumKeyframes(LoaderFbxAnimationBone 
 {
 	unsigned int numKeyframes = UINT_MAX;
 	bool nonZero = false;
-	if(bone.getTranslationX()->size() > 0)
+	if(bone.getKeyframes(FBX_KEYFRAME_INDEX_TRANSLATION_X)->size() > 0)
 	{
 		nonZero = true;
-		numKeyframes = DirectX::XMMin(numKeyframes, bone.getTranslationX()->size());
+		numKeyframes = DirectX::XMMin(numKeyframes, bone.getKeyframes(FBX_KEYFRAME_INDEX_TRANSLATION_X)->size());
 	}
-	if(bone.getTranslationY()->size() > 0)
+	if(bone.getKeyframes(FBX_KEYFRAME_INDEX_TRANSLATION_Y)->size() > 0)
 	{
 		nonZero = true;
-		numKeyframes = DirectX::XMMin(numKeyframes, bone.getTranslationY()->size());
+		numKeyframes = DirectX::XMMin(numKeyframes, bone.getKeyframes(FBX_KEYFRAME_INDEX_TRANSLATION_Y)->size());
 	}
-	if(bone.getTranslationZ()->size() > 0)
+	if(bone.getKeyframes(FBX_KEYFRAME_INDEX_TRANSLATION_Z)->size() > 0)
 	{
 		nonZero = true;
-		numKeyframes = DirectX::XMMin(numKeyframes, bone.getTranslationZ()->size());
+		numKeyframes = DirectX::XMMin(numKeyframes, bone.getKeyframes(FBX_KEYFRAME_INDEX_TRANSLATION_Z)->size());
 	}
 						
-	if(bone.getScalingX()->size() > 0)
+	if(bone.getKeyframes(FBX_KEYFRAME_INDEX_SCALING_X)->size() > 0)
 	{
 		nonZero = true;
-		numKeyframes = DirectX::XMMin(numKeyframes, bone.getScalingX()->size());
+		numKeyframes = DirectX::XMMin(numKeyframes, bone.getKeyframes(FBX_KEYFRAME_INDEX_SCALING_X)->size());
 	}
-	if(bone.getScalingY()->size() > 0)	
+	if(bone.getKeyframes(FBX_KEYFRAME_INDEX_SCALING_Y)->size() > 0)	
 	{
 		nonZero = true;
-		numKeyframes = DirectX::XMMin(numKeyframes, bone.getScalingY()->size());
+		numKeyframes = DirectX::XMMin(numKeyframes, bone.getKeyframes(FBX_KEYFRAME_INDEX_SCALING_Y)->size());
 	}
-	if(bone.getScalingZ()->size() > 0)
+	if(bone.getKeyframes(FBX_KEYFRAME_INDEX_SCALING_Z)->size() > 0)
 	{
 		nonZero = true;
-		numKeyframes = DirectX::XMMin(numKeyframes, bone.getScalingZ()->size());
+		numKeyframes = DirectX::XMMin(numKeyframes, bone.getKeyframes(FBX_KEYFRAME_INDEX_SCALING_Z)->size());
 	}
 		
-	if(bone.getRotationX()->size() > 0)
+	if(bone.getKeyframes(FBX_KEYFRAME_INDEX_ROTATION_X)->size() > 0)
 	{
 		nonZero = true;
-		numKeyframes = DirectX::XMMin(numKeyframes, bone.getRotationX()->size());
+		numKeyframes = DirectX::XMMin(numKeyframes, bone.getKeyframes(FBX_KEYFRAME_INDEX_ROTATION_X)->size());
 	}
-	if(bone.getRotationY()->size() > 0)
+	if(bone.getKeyframes(FBX_KEYFRAME_INDEX_ROTATION_Y)->size() > 0)
 	{
 		nonZero = true;
-		numKeyframes = DirectX::XMMin(numKeyframes, bone.getRotationY()->size());
+		numKeyframes = DirectX::XMMin(numKeyframes, bone.getKeyframes(FBX_KEYFRAME_INDEX_ROTATION_Y)->size());
 	}
-	if(bone.getRotationZ()->size() > 0)
+	if(bone.getKeyframes(FBX_KEYFRAME_INDEX_ROTATION_Z)->size() > 0)
 	{
 		nonZero = true;
-		numKeyframes = DirectX::XMMin(numKeyframes, bone.getRotationZ()->size());
+		numKeyframes = DirectX::XMMin(numKeyframes, bone.getKeyframes(FBX_KEYFRAME_INDEX_ROTATION_Z)->size());
 	}
 
 	if(!nonZero)
