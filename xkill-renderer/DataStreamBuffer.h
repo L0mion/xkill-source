@@ -157,10 +157,10 @@ protected:
 		bufferDesc.Usage				= D3D11_USAGE_DYNAMIC;
 		bufferDesc.StructureByteStride	= sizeof(Data);
 
-		D3D11_SUBRESOURCE_DATA initialData;
-		initialData.pSysMem = &data_.at(0);
-
-		hr = device->CreateBuffer(&bufferDesc, &initialData, &dataStreamBuffer_);
+		hr = device->CreateBuffer(
+			&bufferDesc, 
+			NULL, 
+			&dataStreamBuffer_);
 		if(FAILED(hr))
 			SHOW_MESSAGEBOX("DataStreambuffer::createBuffer device->CreateBuffer failed!");
 
