@@ -2,6 +2,7 @@
 #define XKILL_IO_LOADERFBXMESH_H
 
 #include <vector>
+#include <DirectXMath.h>
 
 #include <xkill-utilities/Math.h>
 
@@ -192,7 +193,11 @@ private:
 	*/
 	void parseTransformMatrix(FbxCluster* cluster, LoaderFbxMeshDesc* meshDesc);
 	
-	void transform(FbxMesh* mesh);
+	//! Transforms the vertices into the local space.
+	/*!
+	\param mesh The mesh currently being parsed
+	*/
+	void transformVertices(FbxMesh* mesh);
 
 	//! Finds the root node in a link hierarchy.
 	/*!

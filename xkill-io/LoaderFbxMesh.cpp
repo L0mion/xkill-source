@@ -60,7 +60,7 @@ void LoaderFbxMesh::parseMesh(FbxMesh* mesh, LoaderFbxMeshDesc* meshDesc)
 	}
 
 
-	transform(mesh);
+	transformVertices(mesh);
 
 	meshDesc->setPolygonGroupIds(polygonGroupIds_);
 	meshDesc->setVertexPositions(vertexPositions_);
@@ -535,44 +535,12 @@ FbxNode* LoaderFbxMesh::findRoot(FbxNode* node)
 	return node;
 }
 
-
-void LoaderFbxMesh::transform(FbxMesh* mesh)
+void LoaderFbxMesh::transformVertices(FbxMesh* mesh)
 {
-	FbxNode* node = mesh->GetNode();
-	
-	FbxDouble3 fbxRotation		= node->LclRotation.Get();
-	FbxDouble3 fbxScaling		= node->LclScaling.Get();
-	FbxDouble3 fbxTranslation	= node->LclTranslation.Get();
+	FbxNode*	node		= mesh->GetNode();
+	FbxAMatrix	fbxMatrix	= node->EvaluateLocalTransform();
 
-	DirectX::XMFLOAT3 rotation;
-	rotation.x = static_cast<float>(fbxRotation.mData[0]);
-	rotation.y = static_cast<float>(fbxRotation.mData[1]);
-	rotation.z = static_cast<float>(fbxRotation.mData[2]);
-	DirectX::XMFLOAT3 scaling;
-	scaling.x = static_cast<float>(fbxScaling.mData[0]);
-	scaling.y = static_cast<float>(fbxScaling.mData[1]);
-	scaling.z = static_cast<float>(fbxScaling.mData[2]);
-	DirectX::XMFLOAT3 translation;
-	translation.x = static_cast<float>(fbxTranslation.mData[0]);
-	translation.y = static_cast<float>(fbxTranslation.mData[1]);
-	translation.z = static_cast<float>(fbxTranslation.mData[2]);
-
-	DirectX::XMMATRIX xmRotationX, xmRotationY, xmRotationZ;
-	DirectX::XMMATRIX xmScaling;
-	DirectX::XMMATRIX xmTranslation;
 	DirectX::XMMATRIX xmTransform;
-
-	xmRotationX		= DirectX::XMMatrixRotationX(rotation.x);
-	xmRotationY		= DirectX::XMMatrixRotationY(rotation.y);
-	xmRotationZ		= DirectX::XMMatrixRotationZ(rotation.z);
-	xmScaling		= DirectX::XMMatrixScaling(scaling.x, scaling.y, scaling.z);
-	xmTranslation	= DirectX::XMMatrixTranslation(translation.x, translation.y, translation.z);
-
-	xmTransform = xmScaling * xmRotationX * xmRotationY * xmRotationZ * xmTranslation;
-	FbxAMatrix fbxMatrix = node->EvaluateLocalTransform();
-	FbxAMatrix fbxMatrix2 = node->EvaluateGlobalTransform();
-	FbxVector4 fbxScale = node->EvaluateLocalScaling();
-
 	xmTransform = DirectX::XMMATRIX(fbxMatrix.mData[0][0], fbxMatrix.mData[0][1], fbxMatrix.mData[0][2], fbxMatrix.mData[0][3],
 									fbxMatrix.mData[1][0], fbxMatrix.mData[1][1], fbxMatrix.mData[1][2], fbxMatrix.mData[1][3],
 									fbxMatrix.mData[2][0], fbxMatrix.mData[2][1], fbxMatrix.mData[2][2], fbxMatrix.mData[2][3],
@@ -580,7 +548,6 @@ void LoaderFbxMesh::transform(FbxMesh* mesh)
 
 	DirectX::XMFLOAT3 position;
 	DirectX::XMVECTOR xmPosition;
-
 	for(unsigned int i=0; i<vertexPositions_.size(); i++)
 	{
 		position.x = vertexPositions_[i].x;
@@ -594,5 +561,41 @@ void LoaderFbxMesh::transform(FbxMesh* mesh)
 		vertexPositions_[i].x = position.x;
 		vertexPositions_[i].y = position.y;
 		vertexPositions_[i].z = position.z;
+	}
+
+	DirectX::XMFLOAT3 normal;
+	DirectX::XMVECTOR xmNormal;
+	for(unsigned int i=0; i<vertexNormals_.size(); i++)
+	{
+		normal.x = vertexNormals_[i].x;
+		normal.y = vertexNormals_[i].y;
+		normal.z = vertexNormals_[i].z;
+
+		xmNormal = DirectX::XMLoadFloat3(&normal);
+		xmNormal = DirectX::XMVector3TransformNormal(xmNormal, xmTransform);
+
+		DirectX::XMStoreFloat3(&normal, xmNormal);
+		vertexNormals_[i].x = normal.x;
+		vertexNormals_[i].y = normal.y;
+		vertexNormals_[i].z = normal.z;
+	}
+
+	DirectX::XMFLOAT4 tangent;
+	DirectX::XMVECTOR xmTangent;
+	for(unsigned int i=0; i<vertexTangents_.size(); i++)
+	{
+		tangent.x = vertexTangents_[i].x;
+		tangent.y = vertexTangents_[i].y;
+		tangent.z = vertexTangents_[i].z;
+		tangent.w = vertexTangents_[i].w;
+
+		xmTangent = DirectX::XMLoadFloat4(&tangent);
+		xmTangent = DirectX::XMVector4Transform(xmTangent, xmTransform);
+
+		DirectX::XMStoreFloat4(&tangent, xmTangent);
+		vertexTangents_[i].x = tangent.x;
+		vertexTangents_[i].y = tangent.y;
+		vertexTangents_[i].z = tangent.z;
+		vertexTangents_[i].w = tangent.w;
 	}
 }

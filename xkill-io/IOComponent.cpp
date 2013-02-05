@@ -15,6 +15,7 @@
 
 #include "LoaderFbx.h"
 #include "LoaderFbxModelDesc.h"
+#include "LoaderFbxAnimationDesc.h"
 #include "LoaderPGY.h"
 #include "WriterPGY.h"
 
@@ -297,9 +298,15 @@ bool IOComponent::loadFbx(std::string modelName, std::string modelPath, MdlDescM
 
 	if(fbxModels.size() > 0)
 	{
-		/*vertices		= */fbxModels[0].getMeshDesc().createVertices(vertices, indices);
-		//indices			= fbxModels[0].getMeshDesc().getIndices();
+		fbxModels[0].getMeshDesc().createVertices(vertices, indices);
 		materialDesc	= fbxModels[0].getMaterialDesc().getMaterialDesc();
+
+		std::vector<LoaderFbxAnimationDesc> animationDescs = fbxModels[0].getAnimationDescs();
+
+		for(unsigned int i=0; i<animationDescs.size(); i++)
+		{
+			animationDescs[i].convertToXKillFormat();
+		}
 
 		std::vector<MaterialDesc> materials;
 		materials.push_back(materialDesc);

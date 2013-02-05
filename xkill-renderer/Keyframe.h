@@ -3,17 +3,17 @@
 
 #include <cstring>
 
-namespace DirectX
-{
-	struct XMFLOAT3;
-	struct XMFLOAT4;
-};
+#include <DirectXMath.h>
 
 struct Keyframe
 {
 	Keyframe()
 	{
-		memset(this, 0, sizeof(Keyframe));
+		timePosition		= 0;
+		translation			= DirectX::XMFLOAT3(0.0f, 0.0f, 0.0f);
+		scale				= DirectX::XMFLOAT3(0.0f, 0.0f, 0.0f);
+		rotationQuaternion	= DirectX::XMFLOAT4(0.0f, 0.0f, 0.0f, 0.0f);
+
 	}
 
 	float				timePosition;

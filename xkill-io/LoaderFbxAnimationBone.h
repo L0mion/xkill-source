@@ -22,6 +22,10 @@ public:
 	~LoaderFbxAnimationBone();
 
 	const char* getName();
+
+	float getAnimationStartTime();
+	float getAnimationEndTime();
+
 	std::vector<LoaderFbxAnimationKeyFrame>* getTranslationX();
 	std::vector<LoaderFbxAnimationKeyFrame>* getTranslationY();
 	std::vector<LoaderFbxAnimationKeyFrame>* getTranslationZ();
