@@ -260,7 +260,7 @@ void PhysicsComponent::synchronizeWithAttributes(AttributePtr<Attribute_Physics>
 	}
 	*/
 	//Checks if new physiscs attributes were created since last call to this function
-	if(physicsAttributeIndex >= static_cast<unsigned int>(physicsObjects_->size()))
+	if(physicsAttributeIndex >= physicsObjects_->size())
 	{
 		physicsObjects_->push_back(nullptr);
 	}

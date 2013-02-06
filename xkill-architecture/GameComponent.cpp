@@ -483,9 +483,9 @@ void GameComponent::event_PhysicsAttributesColliding(Event_PhysicsAttributesColl
 
 						for(unsigned int i = 0; i < positionID.size(); i++)
 						{
-							Attribute_Position* pos = itrPosition.at(positionID[i]);
+							AttributePtr<Attribute_Position> ptr_position = itrPosition.at(positionID[i]);
 
-							position = pos->position;
+							position = ptr_position->position;
 							use3DAudio = true;
 						}
 					}

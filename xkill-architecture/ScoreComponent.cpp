@@ -59,13 +59,13 @@ void ScoreComponent::onUpdate(float delta)
 
 			while(itrPlayer.hasNext())
 			{
-				Attribute_Player* player = itrPlayer.getNext();
+				AttributePtr<Attribute_Player> ptr_player = itrPlayer.getNext();
 
-				if(player->priority > 0 && player->priority > topPriority)
+				if(ptr_player->priority > 0 && ptr_player->priority > topPriority)
 				{
 					topPlayerIndex = itrPlayer.storageIndex();
-					topPriority = player->priority;
-					player->priority = 0;
+					topPriority = ptr_player->priority;
+					ptr_player->priority = 0;
 				}
 			}
 
