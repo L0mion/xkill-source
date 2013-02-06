@@ -204,7 +204,7 @@ void MainWindow::resizeEvent( QResizeEvent* e )
 
 	while(itrSplitScreen.hasNext())
 	{
-		Attribute_SplitScreen* splitScreen = itrSplitScreen.getNext();
+		AttributePtr<Attribute_SplitScreen> ptr_splitScreen = itrSplitScreen.getNext();
 
 		//splitScreen->
 	}

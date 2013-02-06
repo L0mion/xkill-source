@@ -46,7 +46,7 @@ void PlayerPhysicsObject::onUpdate(float delta)
 	std::vector<int> playerAttributeIndices = playerEntity->getAttributes(ATTRIBUTE_PLAYER);
 	for(unsigned int i = 0; i < playerAttributeIndices.size(); i++)
 	{
-		Attribute_Player* playerAttribute = itrPlayer.at(playerAttributeIndices.at(i));
+		AttributePtr<Attribute_Player> playerAttribute = itrPlayer.at(playerAttributeIndices.at(i));
 		if(!playerAttribute->collidingWithWorld && playerAttribute->timeSinceLastJump > playerAttribute->delayInSecondsBetweenEachJump && getLinearVelocity().y() > 0.0f)
 		{
 			setLinearVelocity(btVector3(getLinearVelocity().x(), 0.0f, getLinearVelocity().z()));
@@ -66,9 +66,9 @@ void PlayerPhysicsObject::handleOutOfBounds()
 	std::vector<int> playerAttributeIndices = playerEntity->getAttributes(ATTRIBUTE_PLAYER);
 	for(unsigned int i = 0; i < playerAttributeIndices.size(); i++)
 	{
-		Attribute_Player* playerAttribute = itrPlayer.at(playerAttributeIndices.at(i));
-		AttributePtr<Attribute_Health> playerHealthAttribute = playerAttribute->ptr_health;
-		if(!playerAttribute->detectedAsDead)
+		AttributePtr<Attribute_Player> ptr_player = itrPlayer.at(playerAttributeIndices.at(i));
+		AttributePtr<Attribute_Health> playerHealthAttribute = ptr_player->ptr_health;
+		if(!ptr_player->detectedAsDead)
 		{
 			DEBUGPRINT("Player entity " << playerEntityIndex << " was out of bounds");
 			SEND_EVENT(&Event_PlayerDeath(playerAttributeIndices[i]));
@@ -97,7 +97,7 @@ void PlayerPhysicsObject::handleInput(float delta)
 	
 	
 	AttributePtr<Attribute_Input> ptr_input;
-	Attribute_Player* ptr_player;
+	AttributePtr<Attribute_Player> ptr_player;
 
 	if(playerAttributes.size() > 1)
 	{
@@ -152,7 +152,7 @@ void PlayerPhysicsObject::handleInput(float delta)
 			}
 		}
 
-		Attribute_Physics* playerPhysicsAttribute = itrPhysics_3.at(attributeIndex_);
+		AttributePtr<Attribute_Physics> ptr_player_physics = itrPhysics_3.at(attributeIndex_);
 		btVector3 currentplayerGravity = getGravity();
 
 		//When a player is stading still on the ground, prevent it from sliding down slopes by modifying friction and gravity
@@ -167,17 +167,17 @@ void PlayerPhysicsObject::handleInput(float delta)
 		//When moving, restore friction and gravity
 		else if( (ptr_input->position.x != 0.0f || ptr_input->position.y != 0.0f))
 		{
-			if(currentplayerGravity.y() != playerPhysicsAttribute->gravity.y)
+			if(currentplayerGravity.y() != ptr_player_physics->gravity.y)
 			{
 				setFriction(btScalar(0.0f));
-				setGravity(btVector3(playerPhysicsAttribute->gravity.x, playerPhysicsAttribute->gravity.y, playerPhysicsAttribute->gravity.z));
+				setGravity(btVector3(ptr_player_physics->gravity.x, ptr_player_physics->gravity.y, ptr_player_physics->gravity.z));
 			}
 		}
 
 		//Prevent player being able to hang-glide after jumping
 		if(ptr_player->timeSinceLastJump < ptr_player->delayInSecondsBetweenEachJump)
 		{
-			setGravity(btVector3(0.0f, playerPhysicsAttribute->gravity.y*5.0f, 0.0f));
+			setGravity(btVector3(0.0f, ptr_player_physics->gravity.y*5.0f, 0.0f));
 		}
 
 		ptr_input->jump = false;

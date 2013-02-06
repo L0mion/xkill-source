@@ -527,12 +527,12 @@ struct DLL_U Attribute_Input : public IAttribute
 	{
 		DataItemList* list = new DataItemList();
 		
-		list->add(&ptr_physics, "ptr_physics");
+		list->add(&ptr_physics,			"ptr_physics");
 		list->add(position,				"position");
-		list->add(rotation,					"rotation");
-		list->add(fire,						"fire");
-		list->add(changeAmmunitionType,		"changeAmmunitionType");
-		list->add(changeFiringMode,			"changeFiringMode");
+		list->add(rotation,				"rotation");
+		list->add(fire,					"fire");
+		list->add(changeAmmunitionType,	"changeAmmunitionType");
+		list->add(changeFiringMode,		"changeFiringMode");
 
 		return list;
 	}
@@ -753,12 +753,14 @@ struct DLL_U Attribute_Player : public IAttribute
 
 	void clean();
 
-	AttributePtr<Attribute_Render> ptr_render;
-	AttributePtr<Attribute_Input> ptr_input;
-	AttributePtr<Attribute_InputDevice> ptr_inputDevice;
-	AttributePtr<Attribute_Camera> ptr_camera;
-	AttributePtr<Attribute_Health> ptr_health;
-	AttributePtr<Attribute_WeaponStats> ptr_weaponStats;
+	AttributePtr<Attribute_Render>			ptr_render;
+	AttributePtr<Attribute_Input>			ptr_input;
+	AttributePtr<Attribute_InputDevice>		ptr_inputDevice;
+	AttributePtr<Attribute_Camera>			ptr_camera;
+	AttributePtr<Attribute_Health>			ptr_health;
+	AttributePtr<Attribute_WeaponStats>		ptr_weaponStats;
+
+	AttributePtr<Attribute_Spatial>			ptr_weaponFireLocation_spatial;
 
 	static int nextId;
 
@@ -769,6 +771,10 @@ struct DLL_U Attribute_Player : public IAttribute
 	float currentSpeed;			//!< Speed used when changing position in "handleInput".
 	float walkSpeed;			//!< Speed when walking.
 	float sprintSpeed;			//!< Speed when sprinting.
+	float currentSprintTime;	//!< Sprinting time left
+	float sprintTime;			//!< Time that can be spent sprinting
+	bool canSprint;				//!< Can the player sprint right now
+	float sprintRechargeRate;	//!< The rate at which the sprint will recharge
 	float respawnDelay;			//!< Time between death and respawn
 	float currentRespawnDelay;	//!< Time until respawn
 	float timeSinceLastJump;	//!< Incrementing timer
@@ -777,18 +783,18 @@ struct DLL_U Attribute_Player : public IAttribute
 	float jetpackTimer;			//!< Incremented when using jetpack
 	bool detectedAsDead;
 
-	float meshIDWhenAlive;
-	float meshIDWhenDead;
+	int meshID_whenAlive;
+	int meshID_whenDead;
 
 	DataItemList* getDataList()
 	{
 		DataItemList* list = new DataItemList();
 		
-		list->add(&ptr_render,		"ptr_render");
+		list->add(&ptr_render,			"ptr_render");
 		list->add(&ptr_input,			"ptr_input");
-		list->add(&ptr_camera,		"ptr_camera");
-		list->add(&ptr_health,		"ptr_health");
-		list->add(&ptr_weaponStats,	"ptr_weaponStats");
+		list->add(&ptr_camera,			"ptr_camera");
+		list->add(&ptr_health,			"ptr_health");
+		list->add(&ptr_weaponStats,		"ptr_weaponStats");
 		list->add(id,					"id");
 		list->add(priority,				"priority");
 		list->add(cycleSteals,			"cycleSteals");

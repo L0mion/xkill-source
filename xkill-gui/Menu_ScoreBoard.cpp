@@ -60,7 +60,7 @@ void Menu_ScoreBoard::onUpdate(float delta)
 		while(itrPlayer.hasNext())
 		{
 			// Extract attributes from a playerAttribute
-			Attribute_Player* player		=	itrPlayer.getNext();
+			AttributePtr<Attribute_Player> player		=	itrPlayer.getNext();
 			AttributePtr<Attribute_Health> health		=	player->ptr_health;
 			AttributePtr<Attribute_Render> render		=	player->ptr_render;			
 			AttributePtr<Attribute_Spatial> spatial		=	render->ptr_spatial;

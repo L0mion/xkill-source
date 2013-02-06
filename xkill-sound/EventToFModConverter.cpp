@@ -236,10 +236,10 @@ std::string EventToFModConverter::configMessage()
 	table.push_back(std::pair<int, std::string>(Event_PlaySound::SOUND_MUSIC,			"Play Music"));
 	table.push_back(std::pair<int, std::string>(Event_PlaySound::SOUND_RESPAWN,			"Player Respawn"));
 	table.push_back(std::pair<int, std::string>(Event_PlaySound::SOUND_WALK,			"Player Walk"));
-	table.push_back(std::pair<int, std::string>(EVENT_CREATE_PROJECTILE + offset,		"Fire Gun"));
-	table.push_back(std::pair<int, std::string>(EVENT_PLAYERDEATH + offset,				"Player Death"));
-	table.push_back(std::pair<int, std::string>(EVENT_CREATE_PICKUPABLE + offset,		"Spawn Pickupable"));
-	table.push_back(std::pair<int, std::string>(EVENT_CREATE_EXPLOSIONSPHERE + offset,	"Explosion"));
+	//table.push_back(std::pair<int, std::string>(EVENT_CREATE_PROJECTILE + offset,		"Fire Gun"));
+	//table.push_back(std::pair<int, std::string>(EVENT_PLAYERDEATH + offset,				"Player Death"));
+	//table.push_back(std::pair<int, std::string>(EVENT_CREATE_PICKUPABLE + offset,		"Spawn Pickupable"));
+	//table.push_back(std::pair<int, std::string>(EVENT_CREATE_EXPLOSIONSPHERE + offset,	"Explosion"));
 
 	sortConfigMessageTable(table);
 
