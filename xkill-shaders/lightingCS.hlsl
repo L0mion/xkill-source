@@ -46,11 +46,11 @@ void lightingCS(
 	//Initialize shared values once per tile
 	if(threadIDBlockIndex == 0)
 	{
-		tileMinDepthInt = 0x7F7FFFFF; //0xFFFFFFFF;
+		tileMinDepthInt = 0xFFFFFFFF;
 		tileMaxDepthInt = 0.0f;
 		tileLightNum	= 0.0f;
 		
-		for(uint i = 0; i < TILE_MAX_LIGHTS; i++)
+		[unroll] for(uint i = 0; i < TILE_MAX_LIGHTS; i++)
 		{
 			tileLightIndices[i] = 0;
 		}
@@ -67,8 +67,12 @@ void lightingCS(
 	float	gDepth		= gBufferDepth.SampleLevel(ss, texCoord, 0).x; 
 	
 	//Reconstruct view-space position from depth. Observe the normalized coordinates sent to method.
-	float3 surfacePosV = UtilReconstructPositionViewSpace(float2(threadIDDispatch.x / viewportWidth, threadIDDispatch.y / viewportHeight), gDepth, projectionInverse); 
+	float3 surfacePosV = UtilReconstructPositionViewSpace(
+		float2(threadIDDispatch.x / viewportWidth, threadIDDispatch.y / viewportHeight), 
+		gDepth, 
+		projectionInverse); 
 	
+	//Get tile depth in view-space.
 	uint pixelDepthInt = asuint(surfacePosV.z); //Interlocked functions can only be applied onto ints.
 	if(gDepth != 1.0f)
 	{
@@ -121,7 +125,11 @@ void lightingCS(
 	if(gDepth == 1.0f)
 		return;
 	
-	float3 normal			= UtilDecodeSphereMap(gNormal.xy);
+	float3 normal = gNormal.xyz; //UtilDecodeSphereMap();
+	normal.x *= 2.0f; normal.x -= 1.0f;
+	normal.y *= 2.0f; normal.y -= 1.0f;
+	normal.z *= 2.0f; normal.z -= 1.0f;
+
 	float3 surfaceNormalV	= normalize(mul(float4(normal, 0.0f), view).xyz);
 	float3 toEyeV			= normalize(float3(0.0f, 0.0f, 0.0f) - surfacePosV);
 	
@@ -173,6 +181,11 @@ void lightingCS(
 	//{
 	//	Diffuse.g += 0.1;
 	//}
-	
+
+	//if(normal.x <= 0.0f && normal.y <= 0.0f && normal.z <= 0.0f)
+	//{
+	//	normal *= -1.0f;
+	//}
+
 	output[uint2(threadIDDispatch.x + viewportTopX, threadIDDispatch.y + viewportTopY)] = Ambient + Diffuse + Specular;
 }
