@@ -477,10 +477,10 @@ void Renderer::renderViewportToGBuffer(ViewportData& vpData)
 		}
 	}
 
-	//if(settings->showDebugPhysics)
-	//{
-	//	drawBulletPhysicsDebugLines(vpData.view, vpData.proj);
-	//}
+	if(settings->showDebugPhysics)
+	{
+		drawBulletPhysicsDebugLines(vpData.view, vpData.proj);
+	}
 	
 	//Unset and clean.
 	managementGBuffer_->unsetGBuffersAndDepthBufferAsRenderTargets(devcon);

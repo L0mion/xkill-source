@@ -10,6 +10,9 @@ ScoreComponent::ScoreComponent()
 	ATTRIBUTES_INIT_ALL
 
 	SUBSCRIBE_TO_EVENT(this, EVENT_PLAYERDEATH);
+
+	schedulerTime_ = 5.0f;
+	currentSchedulerTime_ = schedulerTime_;
 }
 
 ScoreComponent::~ScoreComponent()
@@ -21,11 +24,11 @@ bool ScoreComponent::init()
 {
 	for(unsigned int i = 0; itrPlayer.hasNext(); i++)
 	{
-		playerIndices.push_back(i);
+		playerIndices_.push_back(i);
 		itrPlayer.getNext();
 	}
 
-	sort(playerIndices);
+	sort(playerIndices_);
 
 	return true;
 }
@@ -35,7 +38,7 @@ void ScoreComponent::onEvent(Event* e)
 	switch(e->getType())
 	{
 	case EVENT_PLAYERDEATH:
-		sort(playerIndices);
+		sort(playerIndices_);
 		break;
 	default:
 		break;
@@ -44,7 +47,32 @@ void ScoreComponent::onEvent(Event* e)
 
 void ScoreComponent::onUpdate(float delta)
 {
+	if(GET_STATE() == STATE_DEATHMATCH)
+	{
+		currentSchedulerTime_--;
+		if(currentSchedulerTime_ >= 0.0f)
+		{
+			currentSchedulerTime_ = schedulerTime_;
 
+			int topPlayerIndex = -1;
+			int topPriority = 0;
+
+			while(itrPlayer.hasNext())
+			{
+				Attribute_Player* player = itrPlayer.getNext();
+
+				if(player->priority > 0 && player->priority > topPriority)
+				{
+					topPlayerIndex = itrPlayer.storageIndex();
+					topPriority = player->priority;
+					player->priority = 0;
+				}
+			}
+
+			if(topPlayerIndex >= 0)
+				itrPlayer.at(topPlayerIndex)->totalExecutionTime++;
+		}
+	}
 }
 
 void ScoreComponent::sort(std::vector<int>& elements)

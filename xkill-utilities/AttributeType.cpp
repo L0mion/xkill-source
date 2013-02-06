@@ -199,6 +199,10 @@ Attribute_Player::Attribute_Player()
 	detectedAsDead = true;
 	meshIDWhenAlive = 7;
 	meshIDWhenDead = 9;
+	currentSprintTime = 0;
+	sprintTime = 2.0f;
+	canSprint = true;
+	sprintRechargeRate = 0.2f;
 
 	walkSpeed = 5.0f;
 	sprintSpeed = walkSpeed*2;

@@ -24,6 +24,7 @@ private:
 	FMODEventSystem* mFMODEventSystem;
 	EventToFModConverter* converter;
 	float timer;
+	bool useSound;
 
 	void fillEventsToFModVector(std::string configFilePath);
 
