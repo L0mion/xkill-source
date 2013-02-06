@@ -408,12 +408,27 @@ void GameComponent::onUpdate(float delta)
 	// Update offset
 	//
 
+	while(itrCamera.hasNext())
+	{
+		AttributePtr<Attribute_Camera> ptr_camera = itrCamera.attributePointer(itrCamera.getNext());
+		AttributePtr<Attribute_Spatial> ptr_spatial = ptr_camera->ptr_spatial;
+
+		// Update rotation quaternion so other can read from it
+		{
+			DirectX::XMMATRIX xm_view = DirectX::XMLoadFloat4x4((DirectX::XMFLOAT4X4*)&ptr_camera->mat_view);
+			xm_view = DirectX::XMMatrixInverse(&DirectX::XMMatrixDeterminant(xm_view), xm_view);
+			DirectX::XMVECTOR xv_rot = DirectX::XMQuaternionRotationMatrix(xm_view);
+			DirectX::XMStoreFloat4((DirectX::XMFLOAT4*)&ptr_spatial->rotation, xv_rot);
+		}
+	}
+
 	while(itrOffset.hasNext())
 	{
 		Behavior_Offset* offset	= itrOffset.getNext();
 		offset->updateOffset();
 	}
 
+	
 }
 
 void GameComponent::event_PhysicsAttributesColliding(Event_PhysicsAttributesColliding* e)

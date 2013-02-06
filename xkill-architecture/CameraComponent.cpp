@@ -263,8 +263,9 @@ void CameraComponent::onUpdate(float delta)
 	// Recalculate view
 	while(itrCamera.hasNext())
 	{
-		AttributePtr<Attribute_Camera> camera = itrCamera.attributePointer(itrCamera.getNext());
-		updateView(camera);
-		updateProj(camera);
+		AttributePtr<Attribute_Camera> ptr_camera = itrCamera.attributePointer(itrCamera.getNext());
+		AttributePtr<Attribute_Spatial> ptr_spatial = ptr_camera->ptr_spatial;
+		updateView(ptr_camera);
+		updateProj(ptr_camera);
 	}
 }

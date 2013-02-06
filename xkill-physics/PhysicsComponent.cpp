@@ -387,12 +387,10 @@ void PhysicsComponent::doCulling(unsigned int frustumAttributeIndex, unsigned in
 
 void PhysicsComponent::updateCulling()
 {
-	while(itrRender.hasNext())
+	while(itrPhysics.hasNext())
 	{
-		Attribute_Render * ra = itrRender.getNext();
-		//ra->culling.clear();
-		ra->cull = false;
-		int a =0;
+		Attribute_Physics * ptr_physics = itrPhysics.getNext();
+		ptr_physics->ptr_render->cull = false;
 	}
 	CollisionShapes::Instance()->updateFrustrumShape();
 

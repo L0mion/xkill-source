@@ -60,7 +60,6 @@ public:
 		
 		CREATE_ATTRIBUTE(ptr_render, Attribute_Render, render, entity);
 		ptr_render->ptr_spatial = ptr_spatial;
-		ptr_render->meshID = 0;
 		
 		CREATE_ATTRIBUTE(ptr_physics, Attribute_Physics, physics, entity);
 		ptr_physics->ptr_spatial = ptr_spatial;
@@ -97,6 +96,9 @@ public:
 		// Extra bindings
 		ptr_physics->meshID = ptr_render->meshID;
 		ptr_render->meshID = ptr_player->meshIDWhenAlive;
+		
+		// Attach weapon
+		createWeapon(entity, ptr_spatial, ptr_camera->ptr_spatial);
 	}
 
 	AttributePtr<Attribute_Camera> createCamera(Entity* entity, AttributePtr<Attribute_Spatial> ptr_parent_spatial)
@@ -110,11 +112,28 @@ public:
 		// Add behavior
 		CREATE_ATTRIBUTE(ptr_offset, Behavior_Offset, offset, entity);
 		ptr_offset->ptr_spatial = ptr_spatial;
-		ptr_offset->ptr_parent_spatial = ptr_parent_spatial;
-		ptr_offset->offset_position = Float3(-0.2f, 0.1f, -0.4f);
+		ptr_offset->ptr_parent_spatial_position = ptr_parent_spatial;
+		ptr_offset->offset_position = Float3(0.0f, 0.0f, 0.0f);
 
 		// Return
 		return ptr_camera;
+	}
+
+	void createWeapon(Entity* entity, AttributePtr<Attribute_Spatial> ptr_parent_spatial_position, AttributePtr<Attribute_Spatial> ptr_parent_spatial_rotation)
+	{
+		CREATE_ATTRIBUTE(ptr_position, Attribute_Position, position, entity);
+		CREATE_ATTRIBUTE(ptr_spatial, Attribute_Spatial, spatial, entity);
+		ptr_spatial->ptr_position = ptr_position;
+		CREATE_ATTRIBUTE(ptr_render, Attribute_Render, render, entity);
+		ptr_render->ptr_spatial = ptr_spatial;
+		ptr_render->meshID = 2;
+
+		// Add behavior
+		CREATE_ATTRIBUTE(ptr_offset, Behavior_Offset, offset, entity);
+		ptr_offset->ptr_spatial = ptr_spatial;
+		ptr_offset->ptr_parent_spatial_position = ptr_parent_spatial_position;
+		ptr_offset->ptr_parent_spatial_rotation = ptr_parent_spatial_rotation;
+		ptr_offset->offset_position = Float3(0.23f, -0.2f, 0.4f);
 	}
 	
 	void createWorldEntity(Entity* entity, Event_CreateWorld* e)
