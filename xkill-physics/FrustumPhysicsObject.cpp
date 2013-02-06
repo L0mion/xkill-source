@@ -46,7 +46,7 @@ bool FrustumPhysicsObject::frustumInit(unsigned int attributeIndex,unsigned int 
 	}
 	attributeIndex_ = attributeIndex;
 	collisionFilterGroup_ = collisionFilterGroup;
-	Attribute_Camera* cameraAttribute = itrCamera_3.at(attributeIndex);
+	AttributePtr<Attribute_Camera> ptr_camera = itrCamera_3.at(attributeIndex);
 	btVector3 localInertia;
 	localInertia.setZero();
 	btCollisionShape* collisionShape = CollisionShapes::Instance()->getFrustrumShape(attributeIndex_);

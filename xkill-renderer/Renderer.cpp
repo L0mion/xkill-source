@@ -463,24 +463,24 @@ void Renderer::renderViewportToGBuffer(ViewportData& vpData)
 	}
 
 	//Make me use iterators!
-	Attribute_DebugShape* debugShapeAt;
+	AttributePtr<Attribute_DebugShape> ptr_debugShape;
 	while(itrDebugShape.hasNext())
 	{
-		debugShapeAt = itrDebugShape.getNext();
-		if(debugShapeAt->render)
+		ptr_debugShape = itrDebugShape.getNext();
+		if(ptr_debugShape->render)
 		{
 			renderDebugShape(
-				debugShapeAt,
+				ptr_debugShape,
 				itrDebugShape.storageIndex(),
 				vpData.view, 
 				vpData.proj);
 		}
 	}
 
-	//if(settings->showDebugPhysics)
-	//{
-	//	drawBulletPhysicsDebugLines(vpData.view, vpData.proj);
-	//}
+	if(settings->showDebugPhysics)
+	{
+		drawBulletPhysicsDebugLines(vpData.view, vpData.proj);
+	}
 	
 	//Unset and clean.
 	managementGBuffer_->unsetGBuffersAndDepthBufferAsRenderTargets(devcon);
@@ -629,7 +629,7 @@ void Renderer::renderSubset(
 		0, 0, 0);
 }
 void Renderer::renderDebugShape(
-	Attribute_DebugShape*	debugShapeAt, 
+	AttributePtr<Attribute_DebugShape>	ptr_debugShape, 
 	unsigned int			shapeIndex,
 	DirectX::XMFLOAT4X4		viewMatrix, 
 	DirectX::XMFLOAT4X4		projectionMatrix)
@@ -638,7 +638,7 @@ void Renderer::renderDebugShape(
 	ID3D11DeviceContext*	devcon = managementD3D_->getDeviceContext();
 	
 	// Get transform matrices.
-	AttributePtr<Attribute_Spatial>	ptr_spatial		= debugShapeAt->ptr_spatial;
+	AttributePtr<Attribute_Spatial>	ptr_spatial		= ptr_debugShape->ptr_spatial;
 	AttributePtr<Attribute_Position> ptr_position = ptr_spatial->ptr_position;
 	DirectX::XMFLOAT4X4 worldMatrix			= managementMath_->calculateWorldMatrix(ptr_spatial, ptr_position);
 	DirectX::XMFLOAT4X4 worldMatrixInverse	= managementMath_->calculateMatrixInverse(worldMatrix);

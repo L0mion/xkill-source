@@ -23,7 +23,9 @@ public:
 	virtual void onUpdate(float delta);
 
 private:
-	std::vector<int> playerIndices;						//! Used as a sorted list of playerAttributes according to 'priority'
+	std::vector<int> playerIndices_;		//! Used as a sorted list of playerAttributes according to 'priority'
+	float currentSchedulerTime_;			//! Time until next scheduler selection
+	float schedulerTime_;					//! Time between scheduler selection
 
 	//! Sorts the vector using bubble sort
 	/*!

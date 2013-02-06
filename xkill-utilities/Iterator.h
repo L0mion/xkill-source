@@ -68,12 +68,16 @@ public:
     }
 
     // Returns an Item and steps to next item
-    T* getNext()
+    AttributePtr<T> getNext()
     {
         // Fetch current item, and step to next item
         _nextIndex++;
 		_orderIndex++;
-        return &_attributes->at(storageIndex());
+
+		AttributePtr<T> pointer;
+		pointer.init(_attributes, storageIndex());
+
+        return pointer;
     }
 
 	int storageIndex(T* attribute)
@@ -161,9 +165,12 @@ public:
 
     // Returns an item in the vector regardless
     // if it is valid or not
-    T* at(int index)
+	AttributePtr<T> at(int index)
     {
-        return &_attributes->at(index);
+		AttributePtr<T> pointer;
+		pointer.init(_attributes, index);
+
+        return pointer;
     }
 
 	// Returns an item in the vector regardless
@@ -176,13 +183,6 @@ public:
 
         return attributeVector;
     }
-
-	AttributePtr<T> attributePointer(T* attribute)
-	{ 
-		AttributePtr<T> pointer;
-		pointer.init(_attributes, storageIndex(attribute));
-		return pointer;
-	}
 
 	AttributePtr<T> createAttribute(Entity* e)
 	{ 

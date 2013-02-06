@@ -2,6 +2,7 @@
 #define XKILL_PHYSICS_PHYSICSCOMPONENT2_H
 
 #include <xkill-utilities/IObserver.h>
+#include <xkill-utilities/AttributePointer.h>
 #include "dllPhysics.h"
 template<class T>
 class btAlignedObjectArray;
@@ -43,7 +44,7 @@ private:
 	btAlignedObjectArray<PhysicsObject*>*		physicsObjects_;  //!< List of objects mapping to physics attributes on wich simulation is run
 	btAlignedObjectArray<FrustumPhysicsObject*>* frustumPhysicsObjects_;  //!< List of frustums mapping to cameras wich is used to cull physicsobjects
 
-	void synchronizeWithAttributes(Attribute_Physics* physicsAttribute, int physicsAttributeIndex);  //!< Synronize newly added physicsattributes with physicsobjects
+	void synchronizeWithAttributes(AttributePtr<Attribute_Physics> ptr_physics, int physicsAttributeIndex);  //!< Synronize newly added physicsattributes with physicsobjects
 	void updateCulling();  //!< Update frustums, clear culling data, sync frustums with cameras
 	void doCulling(unsigned int frustumAttributeIndex, unsigned int objectAttributeIndex);  //!< Set culling data based on a collision between frustum and physicsobject
 public:

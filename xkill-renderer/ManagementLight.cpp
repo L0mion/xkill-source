@@ -120,16 +120,16 @@ void ManagementLight::unsetLightSRVCS(
 
 void ManagementLight::updateStreamDirLight()
 {
-	Attribute_Light_Dir* lightDirAt;
+	AttributePtr<Attribute_Light_Dir> ptr_lightDir;
 	while(itrLightDir.hasNext())
 	{
-		lightDirAt	= itrLightDir.getNext();
-		streamDirLight_->pushData(lightDirAt->lightDir);
+		ptr_lightDir = itrLightDir.getNext();
+		streamDirLight_->pushData(ptr_lightDir->lightDir);
 	}
 }
 void ManagementLight::updateStreamPointLight()
 {
-	Attribute_Light_Point*	ptr_lightPoint;
+	AttributePtr<Attribute_Light_Point>	ptr_lightPoint;
 	AttributePtr<Attribute_Position>	ptr_position;
 	while(itrLightPoint.hasNext())
 	{
@@ -142,15 +142,15 @@ void ManagementLight::updateStreamPointLight()
 }
 void ManagementLight::updateStreamSpotLight()
 {
-	Attribute_Light_Spot*	lightSpotAt;
-	AttributePtr<Attribute_Position>		posAt;
+	AttributePtr<Attribute_Light_Spot>	ptr_lightSpot;
+	AttributePtr<Attribute_Position>	ptr_position;
 	while(itrLightSpot.hasNext())
 	{
-		lightSpotAt = itrLightSpot.getNext();
-		posAt = lightSpotAt->ptr_position;
+		ptr_lightSpot = itrLightSpot.getNext();
+		ptr_position = ptr_lightSpot->ptr_position;
 
-		streamSpotLight_->pushData(lightSpotAt->lightSpot);
-		streamPosLight_->pushData(posAt->position);
+		streamSpotLight_->pushData(ptr_lightSpot->lightSpot);
+		streamPosLight_->pushData(ptr_position->position);
 	}
 }
 

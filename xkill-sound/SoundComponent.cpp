@@ -15,14 +15,13 @@ SoundComponent::SoundComponent()
 {
 	ATTRIBUTES_INIT_ALL
 
+	useSound = false;
 	mFMODEventSystem = NULL;
 	converter = NULL;
 	timer = 0.0f;
 
 	SUBSCRIBE_TO_EVENT(this, EVENT_PLAYSOUND);
-	SUBSCRIBE_TO_EVENT(this, EVENT_CREATE_PROJECTILE);
-	SUBSCRIBE_TO_EVENT(this, EVENT_PLAYERDEATH);
-	SUBSCRIBE_TO_EVENT(this, EVENT_END_DEATHMATCH);
+	SUBSCRIBE_TO_EVENT(this, EVENT_START_DEATHMATCH);
 	SUBSCRIBE_TO_EVENT(this, EVENT_UPDATESOUNDSETTINGS);
 }
 
@@ -35,7 +34,7 @@ SoundComponent::~SoundComponent()
 bool SoundComponent::init(std::string configFilePath)
 {
 	mFMODEventSystem = new FMODEventSystem();
-	mFMODEventSystem->Init("../../xkill-resources/xkill-sounds/", "Xkill_Sound.fev", 64);
+	useSound = mFMODEventSystem->Init("../../xkill-resources/xkill-sounds/", "Xkill_Sound.fev", 64);
 
 	//FMODEventSystemProgrammerReportParser fmodEventSystemProgrammerReportParser;
 	//if(!fmodEventSystemProgrammerReportParser.parseProgrammerReport(mFMODEventSystem))
@@ -44,14 +43,13 @@ bool SoundComponent::init(std::string configFilePath)
 	//	return false;
 	//}
 
-	converter = new EventToFModConverter(mFMODEventSystem->GetFMODEventNames());
-	converter->init(configFilePath);
+	if(useSound)
+	{
+		converter = new EventToFModConverter(mFMODEventSystem->GetFMODEventNames());
+		converter->init(configFilePath);
 
-	fillEventsToFModVector(configFilePath);
-
-	int fmodEventIndex = converter->getFModIndex(4);
-	if(fmodEventIndex >= 0)
-		mFMODEventSystem->StartSoundEventAt(fmodEventIndex);
+		fillEventsToFModVector(configFilePath);
+	}
 
 	return true;
 }
@@ -61,28 +59,18 @@ void SoundComponent::onEvent(Event* e)
 	EventType type = e->getType();
 	int eventIndex = -1;
 
+	if(!useSound)
+		return;
+
 	if(type == EventType::EVENT_PLAYSOUND)
 	{
 		Event_PlaySound* eps = static_cast<Event_PlaySound*>(e);
 		
-		if(eps->soundId < 0)
-		{
-			mFMODEventSystem->SetMuteSounds(eps->muteSound);
+		eventIndex = eps->soundId;
 
-			//Attribute_SoundSettings* soundSettings;
-			//while(itrSoundSettings.hasNext())
-			//{
-			//	soundSettings = itrSoundSettings.getNext();
-
-			//	soundSettings->soundMuted = eps->muteSound;
-			//}
-
-			settings->soundMuted = eps->muteSound;
-		}
-		else
-		{
-			eventIndex = eps->soundId;
-		}
+		int fmodEventIndex = converter->getFModIndex(eventIndex);
+		if(fmodEventIndex >= 0)
+			mFMODEventSystem->StartSoundEventAt(fmodEventIndex, eps->position, eps->use3DAudio);
 	}
 	else if(type == EventType::EVENT_UPDATESOUNDSETTINGS)
 	{
@@ -90,7 +78,7 @@ void SoundComponent::onEvent(Event* e)
 		//while(itrSoundSettings.hasNext())
 		//{
 		//	soundSettings = itrSoundSettings.getNext();
-
+		//
 		//	mFMODEventSystem->SetMuteSounds(soundSettings->soundMuted);
 		//	mFMODEventSystem->SetVolume(soundSettings->soundVolume);
 		//}
@@ -98,26 +86,29 @@ void SoundComponent::onEvent(Event* e)
 		mFMODEventSystem->SetMuteSounds(settings->soundMuted);
 		mFMODEventSystem->SetVolume(settings->soundVolume);
 	}
-	else
+	else if(type == EventType::EVENT_START_DEATHMATCH)
 	{
-		eventIndex = (int)type + Event_PlaySound::SOUND_LAST;
+		mFMODEventSystem->UpdateNrOfListeners();
 	}
-
-	int fmodEventIndex = converter->getFModIndex(eventIndex);
-	if(fmodEventIndex >= 0)
-		mFMODEventSystem->StartSoundEventAt(fmodEventIndex);
+	//else
+	//{
+	//	eventIndex = (int)type + Event_PlaySound::SOUND_LAST;
+	//}
 }
 
 void SoundComponent::onUpdate(float delta)
 {
-	timer += delta;
-	if(timer >= 0.5f)
-	{
-		timer = 0.0f;
-		int fmodEventIndex = converter->getFModIndex(Event_PlaySound::SOUND_WALK);
-		if(fmodEventIndex >= 0)
-			mFMODEventSystem->StartSoundEventAt(fmodEventIndex);
-	}
+	if(!useSound)
+		return;
+
+	//timer += delta;
+	//if(timer >= 0.5f)
+	//{
+	//	timer = 0.0f;
+	//	int fmodEventIndex = converter->getFModIndex(Event_PlaySound::SOUND_WALK);
+	//	if(fmodEventIndex >= 0)
+	//		mFMODEventSystem->StartSoundEventAt(fmodEventIndex);
+	//}
 
 	mFMODEventSystem->Update();
 }
