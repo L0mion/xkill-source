@@ -58,7 +58,6 @@ public:
 		return hr;
 	}
 
-	//std::vector<Data>& getData() { return data_; }
 	unsigned int getDataCountCur() { return dataCountCur_; }
 	unsigned int getDataCountMax() { return dataCountMax_; }
 	ID3D11Buffer* getDataBuffer()	{ return dataStreamBuffer_; }
@@ -158,12 +157,14 @@ protected:
 		bufferDesc.Usage				= D3D11_USAGE_DYNAMIC;
 		bufferDesc.StructureByteStride	= sizeof(Data);
 
-		D3D11_SUBRESOURCE_DATA initialData;
-		initialData.pSysMem = &data_.at(0);
-
-		hr = device->CreateBuffer(&bufferDesc, &initialData, &dataStreamBuffer_);
+		hr = device->CreateBuffer(
+			&bufferDesc, 
+			NULL, 
+			&dataStreamBuffer_);
 		if(FAILED(hr))
 			SHOW_MESSAGEBOX("DataStreambuffer::createBuffer device->CreateBuffer failed!");
+
+		SET_D3D_OBJECT_NAME(dataStreamBuffer_, "dataStreamBuffer");
 
 		return hr;
 	}

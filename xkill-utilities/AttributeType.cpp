@@ -518,21 +518,20 @@ Attribute_ExplosionSphere::~Attribute_ExplosionSphere()
 void Behavior_Offset::updateOffset()
 {
 	// Make sure we have a parent
-	if(ptr_parent_spatial.isNotEmpty())
+	if(ptr_parent_spatial_position.isNotEmpty())
 	{
 		// Fetch attributes from parent
-		Float4 parent_rot = ptr_parent_spatial->rotation;
-		Float3 parent_pos = ptr_parent_spatial->ptr_position->position;
+		Float4 parent_rot = ptr_parent_spatial_position->rotation;
+		Float3 parent_pos = ptr_parent_spatial_position->ptr_position->position;
 
 
 		//
-		// Add rotation translation relative to parent
+		// Add translation offset relative to parent
 		//
 
 		DirectX::XMVECTOR xv_pos = DirectX::XMLoadFloat3((DirectX::XMFLOAT3*)&offset_position);
 		DirectX::XMVECTOR parent_xv_rot = DirectX::XMLoadFloat4((DirectX::XMFLOAT4*)&parent_rot);
 		DirectX::XMVECTOR xv_pos_offset = DirectX::XMVector3Rotate(xv_pos, parent_xv_rot);
-
 		Float3 pos_offset; DirectX::XMStoreFloat3((DirectX::XMFLOAT3*)&pos_offset, xv_pos_offset);
 
 
@@ -541,6 +540,24 @@ void Behavior_Offset::updateOffset()
 		//
 
 		pos_offset = parent_pos + pos_offset;
-		ptr_spatial->ptr_position->position = pos_offset;		
+		ptr_spatial->ptr_position->position = pos_offset;
+
+	}
+
+	if(ptr_parent_spatial_rotation.isNotEmpty())
+	{
+		// Fetch attributes from parent
+		Float4 parent_rot = ptr_parent_spatial_rotation->rotation;
+
+		//
+		// Add rotation offset relative to parent
+		//
+
+		DirectX::XMVECTOR xv_rot_offset = DirectX::XMLoadFloat4((DirectX::XMFLOAT4*)&offset_rotation);
+		DirectX::XMVECTOR parent_xv_rot = DirectX::XMLoadFloat4((DirectX::XMFLOAT4*)&parent_rot);
+		xv_rot_offset = DirectX::XMQuaternionMultiply(xv_rot_offset, parent_xv_rot);
+		Float4 rot_offset; DirectX::XMStoreFloat4((DirectX::XMFLOAT4*)&rot_offset, xv_rot_offset);
+
+		ptr_spatial->rotation = rot_offset;
 	}
 }

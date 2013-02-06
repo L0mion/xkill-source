@@ -153,9 +153,9 @@ HRESULT ManagementModel::createVertexBuffer(
 	HRESULT hr = S_OK;
 
 	D3D11_BUFFER_DESC vbd;
-	vbd.Usage			= D3D11_USAGE_DYNAMIC;
+	vbd.Usage			= D3D11_USAGE_IMMUTABLE;
 	vbd.BindFlags		= D3D11_BIND_VERTEX_BUFFER;
-	vbd.CPUAccessFlags	= D3D11_CPU_ACCESS_WRITE;
+	vbd.CPUAccessFlags	= 0; //D3D11_CPU_ACCESS_WRITE
 	vbd.MiscFlags		= 0;
 
 	D3D11_SUBRESOURCE_DATA vinitData;
@@ -267,10 +267,10 @@ HRESULT ManagementModel::createIndexBuffer(
 		hr = S_FALSE;
 
 	D3D11_BUFFER_DESC ibd;
-	ibd.Usage			= D3D11_USAGE_DYNAMIC;
+	ibd.Usage			= D3D11_USAGE_IMMUTABLE;
 	ibd.ByteWidth		= sizeof(unsigned int) * indices.size();
 	ibd.BindFlags		= D3D11_BIND_INDEX_BUFFER;
-	ibd.CPUAccessFlags	= D3D11_CPU_ACCESS_WRITE;
+	ibd.CPUAccessFlags	= 0; //D3D11_CPU_ACCESS_WRITE
 	ibd.MiscFlags		= 0;
 
 	D3D11_SUBRESOURCE_DATA vinitData;
