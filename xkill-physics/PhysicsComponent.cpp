@@ -204,20 +204,37 @@ void PhysicsComponent::onEvent(Event* e)
 	{
 		Event_ModifyPhysicsObject* modifyPhysicsObject = static_cast<Event_ModifyPhysicsObject*>(e);
 
+		//Cast void pointer sent in Event_ModifyPhysicsObject, and modify physics object
 		int physicsAttributeIndex = modifyPhysicsObject->physicsAttributeIndex;
-		if(physicsAttributeIndex < physicsObjects_->size())
+
+		if(physicsAttributeIndex < physicsObjects_->size() && physicsAttributeIndex > -1)
 		{
-			switch(modifyPhysicsObject->modifyWhatDataInPhysicsObjectData)
+			if(physicsObjects_->at(physicsAttributeIndex) != NULL)
 			{
-			case XKILL_Enums::ModifyPhysicsObjectData::GRAVITY:
-				Float3* gravity = static_cast<Float3*>(modifyPhysicsObject->data);
-				physicsObjects_->at(physicsAttributeIndex)->setGravity(btVector3(gravity->x, gravity->y, gravity->z));
-				break;
+				switch(modifyPhysicsObject->modifyWhatDataInPhysicsObjectData)
+				{
+				case XKILL_Enums::ModifyPhysicsObjectData::GRAVITY:
+					{
+						Float3* gravity = static_cast<Float3*>(modifyPhysicsObject->data);
+						physicsObjects_->at(physicsAttributeIndex)->setGravity(btVector3(gravity->x, gravity->y, gravity->z));
+						break;
+					}
+				case XKILL_Enums::ModifyPhysicsObjectData::VELOCTIY:
+					{
+						Float3* velocity = static_cast<Float3*>(modifyPhysicsObject->data);
+						physicsObjects_->at(physicsAttributeIndex)->setLinearVelocity(btVector3(velocity->x, velocity->y, velocity->z));
+						break;
+					}
+				}
+			}
+			else
+			{
+				DEBUGPRINT("Invalid physics attribute id when handling event of type EVENT_MODIFY_PHYSICS_OBJECT, error 1");
 			}
 		}
 		else
 		{
-			DEBUGPRINT("Invalid physics attribute id when handling event of type EVENT_MODIFY_PHYSICS_OBJECT");
+			DEBUGPRINT("Invalid physics attribute id when handling event of type EVENT_MODIFY_PHYSICS_OBJECT, error 2");
 		}
 		break;
 	}
@@ -370,18 +387,10 @@ void PhysicsComponent::doCulling(unsigned int frustumAttributeIndex, unsigned in
 
 void PhysicsComponent::updateCulling()
 {
-	static int testvar = 0;
-	if(testvar < 1)
+	while(itrPhysics.hasNext())
 	{
-		testvar++;
-		return;
-	}
-	while(itrRender.hasNext())
-	{
-		Attribute_Render * ra = itrRender.getNext();
-		//ra->culling.clear();
-		ra->cull = false;
-		int a =0;
+		Attribute_Physics * ptr_physics = itrPhysics.getNext();
+		ptr_physics->ptr_render->cull = false;
 	}
 	CollisionShapes::Instance()->updateFrustrumShape();
 
