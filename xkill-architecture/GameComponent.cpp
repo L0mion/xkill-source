@@ -149,6 +149,7 @@ void GameComponent::onUpdate(float delta)
 					}
 
 					shootProjectile(position, camera, weaponStats);
+					SEND_EVENT(&Event_PlaySound(Event_PlaySound::SOUND_FIRE, position->position, true));
 				}
 				else if(firingMode->nrOfShotsLeftInClip <= 0)
 				{
@@ -175,13 +176,25 @@ void GameComponent::onUpdate(float delta)
 			player->currentRespawnDelay = 0.0f;
 		}
 
-		if(input->sprint)
+		if(input->sprint && player->canSprint)
 		{
+			player->currentSprintTime -= delta;
+			if(player->currentSprintTime < 0)
+				player->canSprint = false;
+
 			player->currentSpeed = player->sprintSpeed;
 			input->sprint = false;
 		}
 		else
 		{
+			player->currentSprintTime += delta * player->sprintRechargeRate;
+	
+			if(player->currentSprintTime > player->sprintTime)
+			{
+				player->currentSprintTime = player->sprintTime;
+				player->canSprint = true;
+			}
+
 			player->currentSpeed = player->walkSpeed;
 		}
 
@@ -243,7 +256,7 @@ void GameComponent::onUpdate(float delta)
 				player->detectedAsDead = false;
 
 				health->health = health->startHealth; // restores player health
-				SEND_EVENT(&Event_PlaySound(Event_PlaySound::SOUND_RESPAWN));
+				SEND_EVENT(&Event_PlaySound(Event_PlaySound::SOUND_RESPAWN, position->position, true));
 			}
 		}
 
@@ -449,6 +462,22 @@ void GameComponent::event_PhysicsAttributesColliding(Event_PhysicsAttributesColl
 				// avoid damage to self
 				if(entity1->getID() != damage->owner_entityID || entity2->hasAttribute(ATTRIBUTE_EXPLOSIONSPHERE))
 				{
+					Float3 position;
+					bool use3DAudio = false;
+
+					if(entity1->hasAttribute(ATTRIBUTE_POSITION))
+					{
+						std::vector<int> positionID = entity1->getAttributes(ATTRIBUTE_POSITION);
+
+						for(unsigned int i = 0; i < positionID.size(); i++)
+						{
+							Attribute_Position* pos = itrPosition.at(positionID[i]);
+
+							position = pos->position;
+							use3DAudio = true;
+						}
+					}
+
 					// Apply damage to all Health attributes
 					for(unsigned j=0; j<healthId.size(); j++)
 					{
@@ -484,11 +513,12 @@ void GameComponent::event_PhysicsAttributesColliding(Event_PhysicsAttributesColl
 							for(unsigned int k = 0; k < playerId.size(); k++)
 							{
 								SEND_EVENT(&Event_PlayerDeath(playerId[k]));
+								SEND_EVENT(&Event_PlaySound(Event_PlaySound::SOUND_DEATH, position, use3DAudio));
 							}
 						}
 						else
 						{
-							SEND_EVENT(&Event_PlaySound(Event_PlaySound::SOUND_HIT));
+							SEND_EVENT(&Event_PlaySound(Event_PlaySound::SOUND_HIT, position, use3DAudio));
 						}
 
 						SEND_EVENT(&Event_Rumble(entity1->getID(), true, 0.2f, 1.0f, 1.0f));

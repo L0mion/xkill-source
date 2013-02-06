@@ -16,10 +16,11 @@ Event_MouseMove::Event_MouseMove(int dx, int dy) : Event(EVENT_MOUSE_MOVE)
 	this->dy = dy;
 }
 
-Event_PlaySound::Event_PlaySound(int soundId, bool muteSound) : Event(EVENT_PLAYSOUND)
+Event_PlaySound::Event_PlaySound(int soundId, Float3 position, bool use3DAudio) : Event(EVENT_PLAYSOUND)
 {
 	this->soundId = soundId;
-	this->muteSound = muteSound;
+	this->position = position;
+	this->use3DAudio = use3DAudio;
 }
 
 Event_Rumble::Event_Rumble(unsigned int deviceNr,

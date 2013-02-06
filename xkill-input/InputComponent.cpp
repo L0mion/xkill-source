@@ -118,8 +118,8 @@ void InputComponent::handleInput(float delta)
 			settings->timeScale -= delta;
 
 
-		if(device->getBoolReleased(InputAction::ACTION_B_TOGGLE_MUTE_SOUND))
-			SEND_EVENT(&Event_PlaySound(-1, true));
+		//if(device->getBoolReleased(InputAction::ACTION_B_TOGGLE_MUTE_SOUND))
+		//	SEND_EVENT(&Event_PlaySound(-1, true));
 
 		if(device->getBoolReleased(InputAction::ACTION_B_RUMBLE_ON))
 		{

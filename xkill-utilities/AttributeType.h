@@ -764,6 +764,10 @@ struct DLL_U Attribute_Player : public IAttribute
 	float currentSpeed;			//!< Speed used when changing position in "handleInput".
 	float walkSpeed;			//!< Speed when walking.
 	float sprintSpeed;			//!< Speed when sprinting.
+	float currentSprintTime;	//!< Sprinting time left
+	float sprintTime;			//!< Time that can be spent sprinting
+	bool canSprint;				//!< Can the player sprint right now
+	float sprintRechargeRate;	//!< The rate at which the sprint will recharge
 	float respawnDelay;			//!< Time between death and respawn
 	float currentRespawnDelay;	//!< Time until respawn
 	float timeSinceLastJump;	//!< Incrementing timer
