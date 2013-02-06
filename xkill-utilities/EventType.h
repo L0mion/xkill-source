@@ -288,9 +288,9 @@ public:
 	int entityIdOfCreator;
 	XKILL_Enums::AmmunitionType ammunitionType;
 	XKILL_Enums::FiringModeType firingMode;
-	int damage;
+	float damage;
 
-	Event_CreateProjectile(Float3 position, Float3 velocity, Float4 rotation, int entityIdOfCreator, XKILL_Enums::AmmunitionType ammunitionType, XKILL_Enums::FiringModeType firingMode, int damage);
+	Event_CreateProjectile(Float3 position, Float3 velocity, Float4 rotation, int entityIdOfCreator, XKILL_Enums::AmmunitionType ammunitionType, XKILL_Enums::FiringModeType firingMode, float damage);
 };
 
 class DLL_U Event_CreateMesh : public Event

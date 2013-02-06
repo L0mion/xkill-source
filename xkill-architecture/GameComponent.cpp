@@ -74,25 +74,25 @@ void GameComponent::onUpdate(float delta)
 	while(itrPlayer.hasNext())
 	{
 		// Fetch attributes through iterators
-		AttributePtr<Attribute_Player>			player		=	itrPlayer		.getNext();
+		AttributePtr<Attribute_Player>			ptr_player		=	itrPlayer		.getNext();
 
-		AttributePtr<Attribute_Health>			health		=	player	->	ptr_health		;
-		AttributePtr<Attribute_Camera>			camera		=	player	->	ptr_camera		;
-		AttributePtr<Attribute_Input>			input		=	player	->	ptr_input		;
-		AttributePtr<Attribute_Render>			render		=	player	->	ptr_render		;
-		AttributePtr<Attribute_WeaponStats>		weaponStats	=	player	->	ptr_weaponStats	;
-		AttributePtr<Attribute_Spatial>			spatial		=	render	->	ptr_spatial		;
-		AttributePtr<Attribute_Position>		position	=	spatial	->	ptr_position	;
-		AttributePtr<Attribute_Physics>			physics		=	input	->	ptr_physics		;
+		AttributePtr<Attribute_Health>			ptr_health		=	ptr_player	->	ptr_health		;
+		AttributePtr<Attribute_Camera>			ptr_camera		=	ptr_player	->	ptr_camera		;
+		AttributePtr<Attribute_Input>			ptr_input		=	ptr_player	->	ptr_input		;
+		AttributePtr<Attribute_Render>			ptr_render		=	ptr_player	->	ptr_render		;
+		AttributePtr<Attribute_WeaponStats>		ptr_weaponStats	=	ptr_player	->	ptr_weaponStats	;
+		AttributePtr<Attribute_Spatial>			ptr_spatial		=	ptr_render	->	ptr_spatial		;
+		AttributePtr<Attribute_Position>		ptr_position	=	ptr_spatial	->	ptr_position	;
+		AttributePtr<Attribute_Physics>			ptr_physics		=	ptr_input	->	ptr_physics		;
 
-		Ammunition* ammo = &weaponStats->ammunition[weaponStats->currentAmmunitionType];
-		FiringMode* firingMode = &weaponStats->firingMode[weaponStats->currentFiringModeType];
+		Ammunition* ammo = &ptr_weaponStats->ammunition[ptr_weaponStats->currentAmmunitionType];
+		FiringMode* firingMode = &ptr_weaponStats->firingMode[ptr_weaponStats->currentFiringModeType];
 
 		//
 		// End of deathmatch logic
 		//
 
-		if(player->priority >= 20)
+		if(ptr_player->priority >= 20)
 		{
 			SEND_EVENT(&Event(EVENT_GAME_OVER));
 		}
@@ -102,41 +102,42 @@ void GameComponent::onUpdate(float delta)
 		// Ammunition logic
 		//
 
-		if(input->changeAmmunitionType)
+		if(ptr_input->changeAmmunitionType)
 		{
-			input->changeAmmunitionType = false;
-			weaponStats->currentAmmunitionType = static_cast<XKILL_Enums::AmmunitionType>((weaponStats->currentAmmunitionType + 1) % XKILL_Enums::AmmunitionType::NROFAMMUNITIONTYPES);
-			switchAmmunition(weaponStats);
-			ammo = &weaponStats->ammunition[weaponStats->currentAmmunitionType];
+			ptr_input->changeAmmunitionType = false;
+			ptr_weaponStats->currentAmmunitionType = static_cast<XKILL_Enums::AmmunitionType>((ptr_weaponStats->currentAmmunitionType + 1) % XKILL_Enums::AmmunitionType::NROFAMMUNITIONTYPES);
+			switchAmmunition(ptr_weaponStats);
+			ammo = &ptr_weaponStats->ammunition[ptr_weaponStats->currentAmmunitionType];
 			
 			DEBUGPRINT(std::endl);
-			DEBUGPRINT("Ammunition type: " << weaponStats->getAmmunitionTypeAsString());
-			DEBUGPRINT("Firing mode: " << weaponStats->getFiringModeAsString());
+			DEBUGPRINT("Ammunition type: " << ptr_weaponStats->getAmmunitionTypeAsString());
+			DEBUGPRINT("Firing mode: " << ptr_weaponStats->getFiringModeAsString());
 		}
 
-		if(input->changeFiringMode)
+		if(ptr_input->changeFiringMode)
 		{
-			input->changeFiringMode = false;
-			weaponStats->currentFiringModeType = static_cast<XKILL_Enums::FiringModeType>((weaponStats->currentFiringModeType + 1) % XKILL_Enums::AmmunitionType::NROFAMMUNITIONTYPES);
-			switchFiringMode(weaponStats);
-			firingMode = &weaponStats->firingMode[weaponStats->currentFiringModeType];
+			ptr_input->changeFiringMode = false;
+			ptr_weaponStats->currentFiringModeType = static_cast<XKILL_Enums::FiringModeType>((ptr_weaponStats->currentFiringModeType + 1) % XKILL_Enums::AmmunitionType::NROFAMMUNITIONTYPES);
+			switchFiringMode(ptr_weaponStats);
+			firingMode = &ptr_weaponStats->firingMode[ptr_weaponStats->currentFiringModeType];
 
 			DEBUGPRINT(std::endl);
-			DEBUGPRINT("Ammunition type: " << weaponStats->getAmmunitionTypeAsString());
-			DEBUGPRINT("Firing mode: " << weaponStats->getFiringModeAsString());
+			DEBUGPRINT("Ammunition type: " << ptr_weaponStats->getAmmunitionTypeAsString());
+			DEBUGPRINT("Firing mode: " << ptr_weaponStats->getFiringModeAsString());
 		}
 
 
 		//
 		// Firing logic
 		//
-		if(health->health > 0.0f)
+
+		if(ptr_health->health > 0.0f)
 		{
-			if((input->fire && firingMode->type == XKILL_Enums::FiringModeType::AUTO) || 
-				input->firePressed && (firingMode->type == XKILL_Enums::FiringModeType::SINGLE || firingMode->type == XKILL_Enums::FiringModeType::SEMI))
+			if((ptr_input->fire && firingMode->type == XKILL_Enums::FiringModeType::AUTO) || 
+				ptr_input->firePressed && (firingMode->type == XKILL_Enums::FiringModeType::SINGLE || firingMode->type == XKILL_Enums::FiringModeType::SEMI))
 			{
-				input->fire = false;
-				input->firePressed = false;
+				ptr_input->fire = false;
+				ptr_input->firePressed = false;
 
 				if(firingMode->cooldownBetweenShots >= 0 && firingMode->cooldownLeft <= 0.0f
 					&& firingMode->nrOfShotsLeftInClip > 0)
@@ -148,8 +149,8 @@ void GameComponent::onUpdate(float delta)
 						firingMode->nrOfShotsLeftInClip--;
 					}
 
-					shootProjectile(position, camera, weaponStats);
-					SEND_EVENT(&Event_PlaySound(Event_PlaySound::SOUND_FIRE, position->position, true));
+					shootProjectile(ptr_position, ptr_camera, ptr_weaponStats);
+					SEND_EVENT(&Event_PlaySound(Event_PlaySound::SOUND_FIRE, ptr_position->position, true));
 				}
 				else if(firingMode->nrOfShotsLeftInClip <= 0)
 				{
@@ -168,34 +169,34 @@ void GameComponent::onUpdate(float delta)
 				}
 			}
 		}
-		if(input->killPlayer)
+		if(ptr_input->killPlayer)
 		{
-			health->health = 0.0f;
-			input->killPlayer = false;
-			player->detectedAsDead = true;
-			player->currentRespawnDelay = 0.0f;
+			ptr_health->health = 0.0f;
+			ptr_input->killPlayer = false;
+			ptr_player->detectedAsDead = true;
+			ptr_player->currentRespawnDelay = 0.0f;
 		}
 
-		if(input->sprint && player->canSprint)
+		if(ptr_input->sprint && ptr_player->canSprint)
 		{
-			player->currentSprintTime -= delta;
-			if(player->currentSprintTime < 0)
-				player->canSprint = false;
+			ptr_player->currentSprintTime -= delta;
+			if(ptr_player->currentSprintTime < 0)
+				ptr_player->canSprint = false;
 
-			player->currentSpeed = player->sprintSpeed;
-			input->sprint = false;
+			ptr_player->currentSpeed = ptr_player->sprintSpeed;
+			ptr_input->sprint = false;
 		}
 		else
 		{
-			player->currentSprintTime += delta * player->sprintRechargeRate;
+			ptr_player->currentSprintTime += delta * ptr_player->sprintRechargeRate;
 	
-			if(player->currentSprintTime > player->sprintTime)
+			if(ptr_player->currentSprintTime > ptr_player->sprintTime)
 			{
-				player->currentSprintTime = player->sprintTime;
-				player->canSprint = true;
+				ptr_player->currentSprintTime = ptr_player->sprintTime;
+				ptr_player->canSprint = true;
 			}
 
-			player->currentSpeed = player->walkSpeed;
+			ptr_player->currentSpeed = ptr_player->walkSpeed;
 		}
 
 		//
@@ -203,63 +204,63 @@ void GameComponent::onUpdate(float delta)
 		//
 
 		// Detect player death
-		if(health->health <= 0.0f && !player->detectedAsDead) 
+		if(ptr_health->health <= 0.0f && !ptr_player->detectedAsDead) 
 		{
 			SEND_EVENT(&Event_PlayerDeath(itrPlayer.storageIndex()));
 		}
 
 		//Handle dead players
-		if(player->detectedAsDead)
+		if(ptr_player->detectedAsDead)
 		{
-			if(player->currentRespawnDelay > 0.0f)
+			if(ptr_player->currentRespawnDelay > 0.0f)
 			{
-				player->currentRespawnDelay -= delta;
+				ptr_player->currentRespawnDelay -= delta;
 
 				float alive = 3.14f/4.0f;
 				float dead = 3.14f/3.0f;
-				float slerp = (1 - player->currentRespawnDelay/player->respawnDelay);
+				float slerp = (1 - ptr_player->currentRespawnDelay/ptr_player->respawnDelay);
 				float fov = slerp*dead + (1-slerp)*alive;
-				player->ptr_camera->fieldOfView = fov;
+				ptr_player->ptr_camera->fieldOfView = fov;
 			}
 			else
 			{
-				player->ptr_camera->fieldOfView =3.14f/4.0f;
+				ptr_player->ptr_camera->fieldOfView =3.14f/4.0f;
 				// If an appropriate spawnpoint was found: spawn at it; otherwise: spawn at origo.
 				AttributePtr<Attribute_PlayerSpawnPoint> ptr_spawnPoint = findUnoccupiedSpawnPoint();
 				if(ptr_spawnPoint.isNotEmpty())
 				{
 					AttributePtr<Attribute_Position> ptr_spawnPoint_position = ptr_spawnPoint->ptr_position;
-					position->position = ptr_spawnPoint_position->position; // set player position attribute
-					DEBUGPRINT("Player entity " << itrPlayer.ownerId() << " spawned at " << position->position.x << " " << position->position.y << " " << position->position.z << std::endl);
+					ptr_position->position = ptr_spawnPoint_position->position; // set player position attribute
+					DEBUGPRINT("Player entity " << itrPlayer.ownerId() << " spawned at " << ptr_position->position.x << " " << ptr_position->position.y << " " << ptr_position->position.z << std::endl);
 				}
 				else
 				{
-					position->position = Float3(0.0f, 0.0f, 0.0f);
-					DEBUGPRINT("No spawn point was found. Player entity " << itrPlayer.ownerId() << " spawned at " << position->position.x << " " << position->position.y << " " << position->position.z << std::endl);
+					ptr_position->position = Float3(0.0f, 0.0f, 0.0f);
+					DEBUGPRINT("No spawn point was found. Player entity " << itrPlayer.ownerId() << " spawned at " << ptr_position->position.x << " " << ptr_position->position.y << " " << ptr_position->position.z << std::endl);
 				}
 
-				player->currentRespawnDelay = player->respawnDelay;
+				ptr_player->currentRespawnDelay = ptr_player->respawnDelay;
 
-				physics->gravity = Float3(0.0f, -10.0f, 0.0f);
-				physics->collisionFilterMask = Attribute_Physics::EVERYTHING;
-				physics->collisionResponse = true;
-				physics->meshID = player->meshIDWhenAlive;
+				ptr_physics->gravity = Float3(0.0f, -10.0f, 0.0f);
+				ptr_physics->collisionFilterMask = Attribute_Physics::EVERYTHING;
+				ptr_physics->collisionResponse = true;
+				ptr_physics->meshID = ptr_player->meshID_whenAlive;
 
-				spatial->rotation = Float4(0.0f, 0.0f, 0.0f, 1.0f);
-				camera->up = Float3(0.0f, 1.0f, 0.0f);
-				camera->right = Float3(1.0f, 0.0f, 0.0f);
-				camera->look = Float3(0.0f, 0.0f, 1.0f);
+				ptr_spatial->rotation = Float4(0.0f, 0.0f, 0.0f, 1.0f);
+				ptr_camera->up = Float3(0.0f, 1.0f, 0.0f);
+				ptr_camera->right = Float3(1.0f, 0.0f, 0.0f);
+				ptr_camera->look = Float3(0.0f, 0.0f, 1.0f);
 				//camera->reset = true; //Reset player rotation.
-				physics->reloadDataIntoBulletPhysics = true;
+				ptr_physics->reloadDataIntoBulletPhysics = true;
 
-				player->detectedAsDead = false;
+				ptr_player->detectedAsDead = false;
 
-				health->health = health->startHealth; // restores player health
-				SEND_EVENT(&Event_PlaySound(Event_PlaySound::SOUND_RESPAWN, position->position, true));
+				ptr_health->health = ptr_health->startHealth; // restores player health
+				SEND_EVENT(&Event_PlaySound(Event_PlaySound::SOUND_RESPAWN, ptr_position->position, true));
 			}
 		}
 
-		player->timeSinceLastJump += delta;
+		ptr_player->timeSinceLastJump += delta;
 	}
 
 
@@ -898,7 +899,7 @@ void GameComponent::event_PlayerDeath(Event_PlayerDeath* e)
 	ptr_physics->gravity = Float3(0.0f, -1.0f, 0.0f);
 	ptr_physics->collisionFilterMask = ptr_physics->WORLD;
 	ptr_physics->collisionResponse = true;
-	ptr_physics->meshID = ptr_player->meshIDWhenDead;
+	ptr_physics->meshID = ptr_player->meshID_whenDead;
 	ptr_physics->reloadDataIntoBulletPhysics = true;
 
 	ptr_player->currentRespawnDelay = ptr_player->respawnDelay;
