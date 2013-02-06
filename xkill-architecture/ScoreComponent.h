@@ -24,8 +24,12 @@ public:
 
 private:
 	std::vector<int> playerIndices_;		//! Used as a sorted list of playerAttributes according to 'priority'
-	float currentSchedulerTime_;			//! Time until next scheduler selection
-	float schedulerTime_;					//! Time between scheduler selection
+	float currentSchedulerTime_;			//! Time until next execution
+	float schedulerTime_;					//! Time between executions
+	float currentCycleTime_;					//! Time until next cycle
+	float cycleTime_;						//!	Length of an cycle
+	bool executionMode_;					//! Is the execution mode active
+	Attribute_Player* executingPlayer_;		//! The player that is executing
 
 	//! Sorts the vector using bubble sort
 	/*!
@@ -44,4 +48,7 @@ private:
 	\param second Second value to swapped
 	*/
 	void swap(std::vector<int>& elements, int first, int second);
+
+	//! Returns true if player1 has more score than player2
+	bool compareAttributes(Attribute_Player* player1, Attribute_Player* player2);
 };

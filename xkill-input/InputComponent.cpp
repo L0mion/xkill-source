@@ -201,6 +201,16 @@ void InputComponent::handleInput(float delta)
 
 void InputComponent::setupPlayerControllerConnection()
 {
+	int playerSize = itrPlayer.size();
+	int inputDeviceSize = itrInputDevice.size();
+
+	int diff = playerSize - inputDeviceSize;
+
+	for(int i = 0; i < diff; i++)
+	{
+		itrPlayer.getNext();
+	}
+
 	while(itrPlayer.hasNext())
 	{
 		Attribute_Player* player = itrPlayer.getNext();

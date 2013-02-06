@@ -173,6 +173,7 @@ void ComponentManager::update(float delta)
 		camera_->onUpdate(delta);
 		sound_->onUpdate(delta);
 		render_->onUpdate(delta);
+		score_->onUpdate(delta);
 	
 		SEND_EVENT(&Event(EVENT_UPDATE));
 	}
