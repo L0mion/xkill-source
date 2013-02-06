@@ -2,6 +2,12 @@
 #define XKILL_IO_LOADER_FBX_ANIMATION_DESC_H
 
 #include <vector>
+#include <map>
+#include <string>
+
+#include <xkill-renderer/AnimationClip.h>
+#include <xkill-renderer/BoneAnimation.h>
+#include <xkill-renderer/Keyframe.h>
 
 #include "LoaderFbxAnimationBone.h"
 
@@ -25,9 +31,12 @@ public:
 	void setName(const char* name);
 	void setBones(std::vector<LoaderFbxAnimationBone> bones);
 
-	void convertToXKillFormat();
+	void convertToXKillFormat(std::map<std::string, AnimationClip*>* animations);
 
 private:
+	void convertBoneToXKillFormat(LoaderFbxAnimationBone fbxBone, BoneAnimation* bone);
+	void createKeyframe(LoaderFbxAnimationBone fbxBone, Keyframe* keyframe, float time);
+
 	unsigned int findMaxNumKeyframes(LoaderFbxAnimationBone bone);
 	unsigned int findMinNumKeyframes(LoaderFbxAnimationBone bone);
 

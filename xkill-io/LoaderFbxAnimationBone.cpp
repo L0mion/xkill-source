@@ -18,7 +18,7 @@ LoaderFbxAnimationBone::~LoaderFbxAnimationBone()
 int LoaderFbxAnimationBone::averageNumKeyframes(FbxKeyframeIndex indices[], int numIndices)
 {
 	int numKeyframes = 0;
-	int numAffectingIndices = 1;
+	int numAffectingIndices = 0;
 
 	for(int i=0; i<numIndices; i++)
 	{
@@ -28,6 +28,9 @@ int LoaderFbxAnimationBone::averageNumKeyframes(FbxKeyframeIndex indices[], int 
 			numAffectingIndices ++;
 		}
 	}
+
+	if(numAffectingIndices == 0)
+		numAffectingIndices = 1;
 
 	return numKeyframes/numAffectingIndices;
 }
