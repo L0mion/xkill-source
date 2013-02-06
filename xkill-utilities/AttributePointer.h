@@ -29,7 +29,7 @@ Manual casting is necessary since DLLs does not support Templates.
 
 #include <vector>
 
-class IAttributePtr
+class DLL_U IAttributePtr
 {
 public:
 	virtual int index() = 0;

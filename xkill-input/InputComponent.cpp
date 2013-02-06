@@ -89,13 +89,13 @@ void InputComponent::handleInput(float delta)
 
 	while(itrPlayer.hasNext())
 	{
-		Attribute_Player* player = itrPlayer.getNext();
+		AttributePtr<Attribute_Player> ptr_player = itrPlayer.getNext();
 
-		if(player->ptr_inputDevice.isEmpty())
+		if(ptr_player->ptr_inputDevice.isEmpty())
 			continue;
 
-		InputDevice* device = player->ptr_inputDevice->device;
-		AttributePtr<Attribute_Input> input = player->ptr_input;
+		InputDevice* device = ptr_player->ptr_inputDevice->device;
+		AttributePtr<Attribute_Input> input = ptr_player->ptr_input;
 
 		if(device == nullptr)
 			continue;
@@ -205,11 +205,11 @@ void InputComponent::setupPlayerControllerConnection()
 {
 	while(itrPlayer.hasNext())
 	{
-		Attribute_Player* player = itrPlayer.getNext();
+		AttributePtr<Attribute_Player> ptr_player = itrPlayer.getNext();
 
 		if(itrInputDevice.hasNext())
 		{
-			player->ptr_inputDevice = itrInputDevice.attributePointer(itrInputDevice.getNext());
+			ptr_player->ptr_inputDevice = itrInputDevice.getNext();
 		}
 		else
 		{

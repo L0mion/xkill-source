@@ -31,20 +31,20 @@ bool ExplosionSpherePhysicsObject::subClassSpecificInitHook()
 	//Get information from Attribute_ExplosionSphere and MutatorSettings and store in class variables accessible from "onUpdate()"
 	MutatorSettings mutatorSettings;
 	Ammunition ammunition;
-	Attribute_ExplosionSphere* explosionSphereAttribute;
+	AttributePtr<Attribute_ExplosionSphere> ptr_explosionSphere;
 	std::vector<int> explosionSphereEntityId = itrPhysics.ownerAt(attributeIndex_)->getAttributes(ATTRIBUTE_EXPLOSIONSPHERE);
 	for(unsigned int i = 0; i < explosionSphereEntityId.size(); i++)
 	{
-		explosionSphereAttribute = itrExplosionSphere.at(explosionSphereEntityId.at(i)); 
+		ptr_explosionSphere = itrExplosionSphere.at(explosionSphereEntityId.at(i)); 
 
-		ammunition = mutatorSettings.getStandardAmmunition(explosionSphereAttribute->ammunitionType);
-		FiringMode firingMode = mutatorSettings.getStandardFiringMode(explosionSphereAttribute->firingModeType);
+		ammunition = mutatorSettings.getStandardAmmunition(ptr_explosionSphere->ammunitionType);
+		FiringMode firingMode = mutatorSettings.getStandardFiringMode(ptr_explosionSphere->firingModeType);
 		
 		float initialRadius = ammunition.explosionSphereInitialRadius * firingMode.explosionSphereModifier;
 		float finalRadius = ammunition.explosionSphereFinalRadius * firingMode.explosionSphereModifier;
-		if(initialRadius > explosionSphereAttribute->currentRadius)
+		if(initialRadius > ptr_explosionSphere->currentRadius)
 		{
-			explosionSphereAttribute->currentRadius = initialRadius;
+			ptr_explosionSphere->currentRadius = initialRadius;
 		}
 
 		if(finalRadius > explosionSphereFinalRadius_)
@@ -56,7 +56,7 @@ bool ExplosionSpherePhysicsObject::subClassSpecificInitHook()
 	}
 
 	//Create local collision shape
-	localCollisionShape_ = new btSphereShape(explosionSphereAttribute->currentRadius);
+	localCollisionShape_ = new btSphereShape(ptr_explosionSphere->currentRadius);
 	setCollisionShape(localCollisionShape_);
 
 	return true;
@@ -68,12 +68,12 @@ void ExplosionSpherePhysicsObject::onUpdate(float delta)
 	std::vector<int> explosionSphereEntityId = itrPhysics.ownerAt(attributeIndex_)->getAttributes(ATTRIBUTE_EXPLOSIONSPHERE);
 	for(unsigned int i = 0; i < explosionSphereEntityId.size(); i++)
 	{
-		Attribute_ExplosionSphere* explosionSphereAttribute = itrExplosionSphere.at(explosionSphereEntityId.at(i));
-		explosionSphereAttribute->currentRadius += explosionSphereExpansionRate_*delta;
-		if(explosionSphereAttribute->currentRadius >= explosionSphereFinalRadius_)
+		AttributePtr<Attribute_ExplosionSphere> ptr_explosionSphere = itrExplosionSphere.at(explosionSphereEntityId.at(i));
+		ptr_explosionSphere->currentRadius += explosionSphereExpansionRate_*delta;
+		if(ptr_explosionSphere->currentRadius >= explosionSphereFinalRadius_)
 		{
-			explosionSphereAttribute->currentRadius = explosionSphereFinalRadius_;
+			ptr_explosionSphere->currentRadius = explosionSphereFinalRadius_;
 		}
-		localCollisionShape_->setLocalScaling(btVector3(explosionSphereAttribute->currentRadius, explosionSphereAttribute->currentRadius, explosionSphereAttribute->currentRadius));
+		localCollisionShape_->setLocalScaling(btVector3(ptr_explosionSphere->currentRadius, ptr_explosionSphere->currentRadius, ptr_explosionSphere->currentRadius));
 	}
 }

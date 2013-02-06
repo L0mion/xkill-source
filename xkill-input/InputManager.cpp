@@ -87,7 +87,7 @@ InputDevice* InputManager::GetDevice(unsigned int playerID)
 
 	while(itrPlayer.hasNext())
 	{
-		Attribute_Player* ptr_player = itrPlayer.getNext();
+		AttributePtr<Attribute_Player>	ptr_player = itrPlayer.getNext();
 
 		if(itrPlayer.ownerId() == playerID)
 		{
