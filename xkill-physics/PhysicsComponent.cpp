@@ -390,7 +390,10 @@ void PhysicsComponent::updateCulling()
 	while(itrPhysics.hasNext())
 	{
 		Attribute_Physics * ptr_physics = itrPhysics.getNext();
-		ptr_physics->ptr_render->cull = false;
+		if(ptr_physics->ptr_render.isNotEmpty())
+		{
+			ptr_physics->ptr_render->cull = false;
+		}
 	}
 	CollisionShapes::Instance()->updateFrustrumShape();
 
