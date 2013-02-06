@@ -1,5 +1,5 @@
-#ifndef XKILL_RENDERER_SKINNEDDATA_H
-#define XKILL_RENDERER_SKINNEDDATA_H
+#ifndef XKILL_UTILITIES_SKINNEDDATA_H
+#define XKILL_UTILITIES_SKINNEDDATA_H
 
 #include <vector>
 #include <map>
@@ -53,4 +53,4 @@ private:
 	std::map<std::string, AnimationClip*>*	animations_;	//!< Map that holds AnimationClips and thier corresponding names.
 };
 
-#endif //XKILL_RENDERER_SKINNEDDATA_H
+#endif //XKILL_UTILITIES_SKINNEDDATA_H

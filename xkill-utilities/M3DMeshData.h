@@ -1,5 +1,5 @@
-#ifndef XKILL_RENDERER_M3DMESHDATA_H
-#define XKILL_RENDERER_M3DMESHDATA_H
+#ifndef XKILL_UTILITIES_M3DMESHDATA_H
+#define XKILL_UTILITIES_M3DMESHDATA_H
 
 #include <DirectXMath.h>
 #include <string>
@@ -56,4 +56,4 @@ struct M3DSubset
 	}
 };
 
-#endif //XKILL_RENDERER_M3DMESHDATA_H
+#endif //XKILL_UTILITIES_M3DMESHDATA_H

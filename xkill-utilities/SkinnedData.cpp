@@ -3,7 +3,6 @@
 #include "SkinnedData.h"
 #include "AnimationClip.h"
 
-#include "renderingUtilities.h"
 
 SkinnedData::SkinnedData()
 {
@@ -14,17 +13,21 @@ SkinnedData::SkinnedData()
 
 SkinnedData::~SkinnedData()
 {
-	SAFE_DELETE(boneHierarchy_);
-	SAFE_DELETE(boneOffsets_);
+	if(boneHierarchy_)
+		delete boneHierarchy_;
+	if(boneOffsets_)
+		delete boneOffsets_;
 	
 	if(animations_)
 	{
 		std::map<std::string, AnimationClip*>::iterator index;
 		for(index = animations_->begin(); index != animations_->end(); index++)
 		{
-			SAFE_DELETE(index->second);
+			if(index->second)
+				delete index->second;
 		}
-		SAFE_DELETE(animations_);
+		if(animations_)
+			delete animations_;
 	}
 }
 
@@ -32,16 +35,21 @@ void SkinnedData::set(std::vector<int>*						 boneHierarchy,
 					   std::vector<DirectX::XMFLOAT4X4>*	 boneOffsets,
 					   std::map<std::string, AnimationClip*>* animations)
 {
-	SAFE_DELETE(boneHierarchy_);
-	SAFE_DELETE(boneOffsets_);
+	if(boneHierarchy_)
+		delete boneHierarchy_;
+	if(boneOffsets_)
+		delete boneOffsets_;
+	
 	if(animations_)
 	{
 		std::map<std::string, AnimationClip*>::iterator index;
 		for(index = animations_->begin(); index != animations_->end(); index++)
 		{
-			SAFE_DELETE(index->second);
+			if(index->second)
+				delete index->second;
 		}
-		SAFE_DELETE(animations_);
+		if(animations_)
+			delete animations_;
 	}
 
 	boneHierarchy_	= boneHierarchy;

@@ -1,9 +1,7 @@
 #include <map>
 #include <string>
 
-#include <xkill-renderer/AnimationClip.h>
-#include <xkill-renderer/BoneAnimation.h>
-#include <xkill-renderer/Keyframe.h>
+#include <DirectXMath.h>
 
 #include "LoaderFbxAnimationDesc.h"
 #include "LoaderFbxAnimationBone.h"
@@ -48,71 +46,73 @@ void LoaderFbxAnimationDesc::convertToXKillFormat(std::map<std::string, Animatio
 	{
 		convertBoneToXKillFormat(bones_[boneIndex], animationClip->getBoneAnimations()->at(boneIndex));
 	}
-
-
 }
 void LoaderFbxAnimationDesc::convertBoneToXKillFormat(LoaderFbxAnimationBone fbxBone, BoneAnimation* bone)
 {
-//	int numIndices = 9;
-//	FbxKeyframeIndex keyframeIndices[] = {FBX_KEYFRAME_INDEX_TRANSLATION_X,
-//										  FBX_KEYFRAME_INDEX_TRANSLATION_Y,
-//										  FBX_KEYFRAME_INDEX_TRANSLATION_Z,
-//										  FBX_KEYFRAME_INDEX_ROTATION_X,
-//										  FBX_KEYFRAME_INDEX_ROTATION_Y,
-//										  FBX_KEYFRAME_INDEX_ROTATION_Z,
-//										  FBX_KEYFRAME_INDEX_SCALING_X,
-//										  FBX_KEYFRAME_INDEX_SCALING_Y,
-//										  FBX_KEYFRAME_INDEX_SCALING_Z};
-//
-//	int numKeyframes = fbxBone.averageNumKeyframes(keyframeIndices, numIndices);
-//		
-//		if(numKeyframes > 0)
-//		{
-//			float startTime = fbxBone.getAnimationStartTime(FBX_KEYFRAME_INDEX_TRANSLATION_X);
-//			float endTime	= fbxBone.getAnimationEndTime(FBX_KEYFRAME_INDEX_TRANSLATION_X);
-//			float timeInterval = (endTime-startTime)/numKeyframes;
-//			float time = startTime;
-//
-//			for(int i=0; i<numKeyframes; i++)
-//			{
-//				
-//
-//				time += timeInterval;
-//			}
-//		}
+	int numIndices = 9;
+	FbxKeyframeIndex keyframeIndices[] = {FBX_KEYFRAME_INDEX_TRANSLATION_X,
+										  FBX_KEYFRAME_INDEX_TRANSLATION_Y,
+										  FBX_KEYFRAME_INDEX_TRANSLATION_Z,
+										  FBX_KEYFRAME_INDEX_ROTATION_X,
+										  FBX_KEYFRAME_INDEX_ROTATION_Y,
+										  FBX_KEYFRAME_INDEX_ROTATION_Z,
+										  FBX_KEYFRAME_INDEX_SCALING_X,
+										  FBX_KEYFRAME_INDEX_SCALING_Y,
+										  FBX_KEYFRAME_INDEX_SCALING_Z};
+
+	int numKeyframes = fbxBone.averageNumKeyframes(keyframeIndices, numIndices);
+	bone = new BoneAnimation();
+	bone->getKeyframes()->resize(numKeyframes);
+
+	if(numKeyframes > 0)
+	{
+		float startTime = fbxBone.getAnimationStartTime(FBX_KEYFRAME_INDEX_TRANSLATION_X);
+		float endTime	= fbxBone.getAnimationEndTime(FBX_KEYFRAME_INDEX_TRANSLATION_X);
+		float timeInterval = (endTime-startTime)/numKeyframes;
+		float time = startTime;
+
+		for(int i=0; i<numKeyframes; i++)
+		{
+			createKeyframe(fbxBone, bone->getKeyframes()->at(i), time);
+			time += timeInterval;
+		}
+	}
 }
 void LoaderFbxAnimationDesc::createKeyframe(LoaderFbxAnimationBone fbxBone, Keyframe* keyframe, float time)
 {
-	//float translationX = fbxBone.interpolateValue(FBX_KEYFRAME_INDEX_TRANSLATION_X, time);
-	//float translationY = fbxBone.interpolateValue(FBX_KEYFRAME_INDEX_TRANSLATION_Y, time);
-	//float translationZ = fbxBone.interpolateValue(FBX_KEYFRAME_INDEX_TRANSLATION_Z, time);
-	//
-	//float rotationX = fbxBone.interpolateValue(FBX_KEYFRAME_INDEX_ROTATION_X, time);
-	//float rotationY = fbxBone.interpolateValue(FBX_KEYFRAME_INDEX_ROTATION_Y, time);
-	//float rotationZ = fbxBone.interpolateValue(FBX_KEYFRAME_INDEX_ROTATION_Z, time);
-	//
-	//float scalingX = fbxBone.interpolateValue(FBX_KEYFRAME_INDEX_SCALING_X, time);
-	//float scalingY = fbxBone.interpolateValue(FBX_KEYFRAME_INDEX_SCALING_Y, time);
-	//float scalingZ = fbxBone.interpolateValue(FBX_KEYFRAME_INDEX_SCALING_Z, time);
-	//if(scalingX == 0 && scalingY == 0 && scalingZ == 0)
-	//{
-	//	scalingX = 1.0f;
-	//	scalingY = 1.0f;
-	//	scalingZ = 1.0f;
-	//}
-	//
-	//keyframe->translation	= DirectX::XMFLOAT3(translationX, translationY, translationZ);
-	//keyframe->scale			= DirectX::XMFLOAT3(scalingX, scalingY, scalingZ);
-	//
-	//DirectX::XMMATRIX xmRotationX = DirectX::XMMatrixRotationX(rotationX);
-	//DirectX::XMMATRIX xmRotationY = DirectX::XMMatrixRotationY(rotationY);
-	//DirectX::XMMATRIX xmRotationZ = DirectX::XMMatrixRotationZ(rotationZ);
-	//
-	//DirectX::XMMATRIX xmRotation = xmRotationX * xmRotationY * xmRotationZ;
-	//DirectX::XMVECTOR xmQuaternion = DirectX::XMQuaternionRotationMatrix(xmRotation);
-	//DirectX::XMFLOAT4 quaternion;
-	//DirectX::XMStoreFloat4(&quaternion, xmQuaternion);
+	keyframe = new Keyframe();
 
+	float translationX = fbxBone.interpolateValue(FBX_KEYFRAME_INDEX_TRANSLATION_X, time);
+	float translationY = fbxBone.interpolateValue(FBX_KEYFRAME_INDEX_TRANSLATION_Y, time);
+	float translationZ = fbxBone.interpolateValue(FBX_KEYFRAME_INDEX_TRANSLATION_Z, time);
+	
+	float rotationX = fbxBone.interpolateValue(FBX_KEYFRAME_INDEX_ROTATION_X, time);
+	float rotationY = fbxBone.interpolateValue(FBX_KEYFRAME_INDEX_ROTATION_Y, time);
+	float rotationZ = fbxBone.interpolateValue(FBX_KEYFRAME_INDEX_ROTATION_Z, time);
+	
+	float scalingX = fbxBone.interpolateValue(FBX_KEYFRAME_INDEX_SCALING_X, time);
+	float scalingY = fbxBone.interpolateValue(FBX_KEYFRAME_INDEX_SCALING_Y, time);
+	float scalingZ = fbxBone.interpolateValue(FBX_KEYFRAME_INDEX_SCALING_Z, time);
+	if(scalingX == 0 && scalingY == 0 && scalingZ == 0)
+	{
+		scalingX = 1.0f;
+		scalingY = 1.0f;
+		scalingZ = 1.0f;
+	}
+	
+	DirectX::XMMATRIX xmRotationX = DirectX::XMMatrixRotationX(rotationX);
+	DirectX::XMMATRIX xmRotationY = DirectX::XMMatrixRotationY(rotationY);
+	DirectX::XMMATRIX xmRotationZ = DirectX::XMMatrixRotationZ(rotationZ);
+	
+	DirectX::XMMATRIX xmRotation = xmRotationX * xmRotationY * xmRotationZ;
+	DirectX::XMVECTOR xmQuaternion = DirectX::XMQuaternionRotationMatrix(xmRotation);
+	DirectX::XMFLOAT4 quaternion;
+	DirectX::XMStoreFloat4(&quaternion, xmQuaternion);
+
+	keyframe->translation			= DirectX::XMFLOAT3(translationX, translationY, translationZ);
+	keyframe->scale					= DirectX::XMFLOAT3(scalingX, scalingY, scalingZ);
+	keyframe->rotationQuaternion	= quaternion;
+	keyframe->timePosition			= time;
 }
 
 unsigned int LoaderFbxAnimationDesc::findMaxNumKeyframes(LoaderFbxAnimationBone bone)

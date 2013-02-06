@@ -1,11 +1,13 @@
-#ifndef XKILL_RENDERER_KEYFRAME_H
-#define XKILL_RENDERER_KEYFRAME_H
+#ifndef XKILL_UTILITIES_KEYFRAME_H
+#define XKILL_UTILITIES_KEYFRAME_H
 
 #include <cstring>
 
 #include <DirectXMath.h>
 
-struct Keyframe
+#include "dllUtilities.h"
+
+struct DLL_U Keyframe
 {
 	Keyframe()
 	{
@@ -22,4 +24,4 @@ struct Keyframe
 	DirectX::XMFLOAT4	rotationQuaternion;
 };
 
-#endif //XKILL_RENDERER_KEYFRAME_H
+#endif //XKILL_UTILITIES_KEYFRAME_H

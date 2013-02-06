@@ -5,9 +5,9 @@
 #include <map>
 #include <string>
 
-#include <xkill-renderer/AnimationClip.h>
-#include <xkill-renderer/BoneAnimation.h>
-#include <xkill-renderer/Keyframe.h>
+#include <xkill-utilities/AnimationClip.h>
+#include <xkill-utilities/BoneAnimation.h>
+#include <xkill-utilities/Keyframe.h>
 
 #include "LoaderFbxAnimationBone.h"
 

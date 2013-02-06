@@ -303,9 +303,10 @@ bool IOComponent::loadFbx(std::string modelName, std::string modelPath, MdlDescM
 
 		std::vector<LoaderFbxAnimationDesc> animationDescs = fbxModels[0].getAnimationDescs();
 
+		std::map<std::string, AnimationClip*>* animations = new std::map<std::string, AnimationClip*>();
 		for(unsigned int i=0; i<animationDescs.size(); i++)
 		{
-			//animationDescs[i].convertToXKillFormat();
+			animationDescs[i].convertToXKillFormat(animations);
 		}
 
 		std::vector<MaterialDesc> materials;
