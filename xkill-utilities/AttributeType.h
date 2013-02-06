@@ -152,9 +152,9 @@ struct DLL_U Attribute_Spatial : public IAttribute
 	DataItemList* getDataList()
 	{
 		DataItemList* list = new DataItemList();
-		list->add(&ptr_position,	"ptr_position");
-		list->add(rotation,								"rotation");
-		list->add(scale,								"scale");
+		list->add(&ptr_position,		"ptr_position");
+		list->add(rotation,				"rotation");
+		list->add(scale,				"scale");
 		return list;
 	}
 	void saveTo(DataItemList* list)
@@ -173,7 +173,8 @@ private:
 	
 
 public:
-	AttributePtr<Attribute_Spatial> ptr_parent_spatial;
+	AttributePtr<Attribute_Spatial> ptr_parent_spatial_position;
+	AttributePtr<Attribute_Spatial> ptr_parent_spatial_rotation;
 	AttributePtr<Attribute_Spatial> ptr_spatial;
 
 	Float3 offset_position;
@@ -182,12 +183,16 @@ public:
 	DataItemList* getDataList()
 	{
 		DataItemList* list = new DataItemList();
+		list->add(&ptr_parent_spatial_position,			"ptr_parent_spatial_position");
+		list->add(&ptr_parent_spatial_rotation,			"ptr_parent_spatial_rotation");
 		list->add(offset_position,						"offset_position");
 		list->add(offset_rotation,						"offset_rotation");
 		return list;
 	}
 	void saveTo(DataItemList* list)
 	{
+		list->get(&ptr_parent_spatial_position);
+		list->get(&ptr_parent_spatial_rotation);
 		list->get(&offset_position);
 		list->get(&offset_rotation);
 	};

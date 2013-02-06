@@ -486,7 +486,7 @@ void Renderer::renderViewportToGBuffer(ViewportData& vpData)
 	managementGBuffer_->unsetGBuffersAndDepthBufferAsRenderTargets(devcon);
 	managementFX_->unsetAll(devcon);
 	managementFX_->unsetLayout(devcon);
-	managementSS_->unsetSS(devcon, TypeFX_PS, 0);
+	//managementSS_->unsetSS(devcon, TypeFX_PS, 0);
 	devcon->RSSetState(nullptr);
 }
 void Renderer::renderViewportToBackBuffer(ViewportData& vpData)
@@ -545,7 +545,7 @@ void Renderer::renderViewportToBackBuffer(ViewportData& vpData)
 	managementD3D_->unsetDepthBufferSRV(GBUFFER_SHADER_REGISTER_DEPTH);
 	managementGBuffer_->unsetGBuffersAsCSShaderResources(devcon);
 
-	devcon->CSSetSamplers(0, 0, nullptr); //move me into managementSS
+	//devcon->CSSetSamplers(0, 0, nullptr); //move me into managementSS
 }
 
 void Renderer::renderInstance(unsigned int meshID, InstancedData* instance)
@@ -834,7 +834,7 @@ void Renderer::drawHudElement(int viewportIndex, unsigned int textureId, DirectX
 	//managementD3D_->unsetUAVBackBufferCS();
 
 	managementFX_->unsetAll(devcon);
-	devcon->PSSetSamplers(0, 0, nullptr);
+	//devcon->PSSetSamplers(0, 0, nullptr);
 	devcon->IASetInputLayout(nullptr);
 	devcon->RSSetState(nullptr);
 }
