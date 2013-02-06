@@ -22,20 +22,11 @@ bool GameManager::init(HWND windowHandle, HWND parentWindowHandle)
 
 	entityManager_ = new EntityManager();
 
-	//// Init world
-	//SEND_EVENT(&Event_CreateEntity(WORLD));
-	//for(int i=0; i<1; i++)
-	//{
-	//	SEND_EVENT(&Event_CreateEntity(PLAYER));
-	//}
-
 	//Initialize components
 	componentManager_ = new ComponentManager();
 	if(!componentManager_->init(windowHandle, parentWindowHandle))
 	{
-		DEBUGPRINT("Component manager failed to init");
-		std::cin.ignore();
-
+		SHOW_MESSAGEBOX("Component manager failed to init");
 		return false;
 	}
 

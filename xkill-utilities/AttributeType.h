@@ -778,6 +778,7 @@ struct DLL_U Attribute_Player : public IAttribute
 	float timeSinceLastJump;	//!< Incrementing timer
 	float delayInSecondsBetweenEachJump;
 	bool collidingWithWorld;	//!< Set y-velocity to zero when not colliding with world and not jumping
+	float timeSinceLastDamageTaken; //!< Incrementing timer. Reset when taking damage.
 	float jetpackTimer;			//!< Incremented when using jetpack
 	bool detectedAsDead;
 
@@ -866,21 +867,22 @@ struct DLL_U Attribute_Health : public IAttribute
 	Attribute_Health();
 	~Attribute_Health();
 
-	float startHealth;
+	float maxHealth;
 	float health;
+	float healthFromLastFrame;
 
 	DataItemList* getDataList()
 	{
 		DataItemList* list = new DataItemList();
 
-		list->add(startHealth,	"startHealth");
+		list->add(maxHealth,	"maxHealth");
 		list->add(health,		"health");
 
 		return list;
 	}
 	void saveTo(DataItemList* list)
 	{
-		list->get(&startHealth);
+		list->get(&maxHealth);
 		list->get(&health);
 	};
 	AttributeType getType(){return ATTRIBUTE_HEALTH;}

@@ -11,6 +11,7 @@ public:
 	~ProjectilePhysicsObject();
 	virtual bool subClassSpecificInitHook();
 	virtual btVector3 subClassCalculateLocalInertiaHook(btScalar mass);
+	virtual btCollisionShape* subClassSpecificCollisionShape();
 };
 
 #endif

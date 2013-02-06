@@ -118,7 +118,7 @@ void HUDWindow::update(Attribute_SplitScreen* splitScreen)
 	progressBar_ammo->setMinimumSize(QSize(200*sizeScale, 16*sizeScale));
 
 	// health & ammo bars
-	int healthRatio = (int)((health->health / health->startHealth) * 100);
+	int healthRatio = (int)((health->health / health->maxHealth) * 100);
 	int ammoRatio = (int)(((float)firingMode->nrOfShotsLeftInClip / firingMode->clipSize) * 100);
 	progressBar_health->setValue(healthRatio);
 	progressBar_ammo->setValue(ammoRatio);

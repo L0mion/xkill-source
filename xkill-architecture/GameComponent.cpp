@@ -4,7 +4,6 @@
 #include <xkill-utilities/MutatorSettings.h>
 #include <DirectXMath.h>
 
-#include <iostream>
 #include <ctime>
 
 // Iterators
@@ -176,7 +175,7 @@ void GameComponent::onUpdate(float delta)
 			player->currentRespawnDelay = 0.0f;
 		}
 
-		if(input->sprint && player->canSprint)
+		if(input->sprint && player->canSprint && player->collidingWithWorld)
 		{
 			player->currentSprintTime -= delta;
 			if(player->currentSprintTime < 0)
@@ -254,12 +253,19 @@ void GameComponent::onUpdate(float delta)
 
 				player->detectedAsDead = false;
 
-				health->health = health->startHealth; // restores player health
+				health->health = health->maxHealth; // restores player health
 				SEND_EVENT(&Event_PlaySound(Event_PlaySound::SOUND_RESPAWN, position->position, true));
 			}
 		}
 
 		player->timeSinceLastJump += delta;
+		player->timeSinceLastDamageTaken += delta;
+
+		if(health->health < health->healthFromLastFrame)
+		{
+			player->timeSinceLastDamageTaken = 0.0f;
+		}
+		health->healthFromLastFrame = health->health;
 	}
 
 
@@ -320,7 +326,7 @@ void GameComponent::onUpdate(float delta)
 				switch(pickupablesSpawnPoint->spawnPickupableType)
 				{
 				case XKILL_Enums::PickupableType::MEDKIT:
-					amount = 1;
+					amount = 20;
 						break;
 				case XKILL_Enums::PickupableType::AMMUNITION_BULLET:
 					amount = 100;
@@ -392,7 +398,6 @@ void GameComponent::onUpdate(float delta)
 				DEBUGPRINT("Total number of shots left: " << ammo->totalNrOfShots);
 			}
 		}
-
 	}
 
 
@@ -440,8 +445,6 @@ void GameComponent::onUpdate(float delta)
 		Behavior_Offset* offset	= itrOffset.getNext();
 		offset->updateOffset();
 	}
-
-	
 }
 
 void GameComponent::event_PhysicsAttributesColliding(Event_PhysicsAttributesColliding* e)
@@ -557,21 +560,11 @@ void GameComponent::event_PhysicsAttributesColliding(Event_PhysicsAttributesColl
 
 		if(entity2->hasAttribute(ATTRIBUTE_PHYSICS)) //May not be needed
 		{
-			//Set gravity on projectiles colliding with physics objects
-			std::vector<int> physicsId = entity1->getAttributes(ATTRIBUTE_PHYSICS);
-			for(unsigned i=0;i<physicsId.size();i++)
-			{
-				Attribute_Physics* physicsAttribute = itrPhysics.at(physicsId.at(i));
-				SEND_EVENT(&Event_ModifyPhysicsObject(XKILL_Enums::ModifyPhysicsObjectData::GRAVITY, static_cast<void*>(&Float3(0.0f, -10.0f, 0.0f)), physicsId.at(i)));
-				//physicsAttribute->gravity = Float3(0.0f, -10.0f, 0.0f);
-				//physicsAttribute->linearVelocity = Float3(0.0f, 0.0f, 0.0f);
-				//physicsAttribute->reloadDataIntoBulletPhysics = true;
-			}
-
 			//Handle PhysicsAttribute of a projectile colliding with another PhysicsAttribute
 			std::vector<int> projectileId = entity1->getAttributes(ATTRIBUTE_PROJECTILE);
 			for(unsigned i=0;i<projectileId.size();i++)
 			{
+				std::vector<int> physicsId = entity1->getAttributes(ATTRIBUTE_PHYSICS);
 				Attribute_Projectile* projectileAttribute = itrProjectile.at(projectileId.at(i));
 
 				//Shorten lifetime of projectile colliding with physics objects
@@ -581,13 +574,24 @@ void GameComponent::event_PhysicsAttributesColliding(Event_PhysicsAttributesColl
 					if(projectileAttribute->currentLifeTimeLeft > 0.15f)
 					{
 						projectileAttribute->currentLifeTimeLeft = 0.15f;
+						SEND_EVENT(&Event_ModifyPhysicsObject(XKILL_Enums::ModifyPhysicsObjectData::GRAVITY, static_cast<void*>(&Float3(0.0f, -10.0f, 0.0f)), physicsId.at(i)));
 					}
 					break;
 				case XKILL_Enums::AmmunitionType::SCATTER:
 					if(projectileAttribute->currentLifeTimeLeft > 1.00f)
 					{
 						projectileAttribute->currentLifeTimeLeft = 1.00f;
-						//SEND_EVENT(&Event_ModifyPhysicsObject(XKILL_Enums::ModifyPhysicsObjectData::VELOCTIY, static_cast<void*>(&Float3(0.0f, 0.0f, 0.0f)), physicsId.at(i)));
+
+						SEND_EVENT(&Event_ModifyPhysicsObject(XKILL_Enums::ModifyPhysicsObjectData::GRAVITY, static_cast<void*>(&Float3(0.0f, -10.0f, 0.0f)), physicsId.at(i)));
+						SEND_EVENT(&Event_ModifyPhysicsObject(XKILL_Enums::ModifyPhysicsObjectData::VELOCITYPERCENTAGE, static_cast<void*>(&Float3(0.1f, 0.1f, 0.1f)), physicsId.at(i)));
+
+						/*
+						SEND_EVENT(&Event_ModifyPhysicsObject(XKILL_Enums::ModifyPhysicsObjectData::VELOCITY, static_cast<void*>(&Float3(0.0f, 0.0f, 0.0f)), physicsId.at(i)));
+
+						bool truthValue = true;
+						void* truthValueAsVoidPointer = static_cast<void*>(&truthValue);
+						SEND_EVENT(&Event_ModifyPhysicsObject(XKILL_Enums::ModifyPhysicsObjectData::FLAG_STATIC, truthValueAsVoidPointer, physicsId.at(i)));
+						*/
 					}
 					break;
 				}
@@ -596,16 +600,6 @@ void GameComponent::event_PhysicsAttributesColliding(Event_PhysicsAttributesColl
 				if(projectileAttribute->ammunitionType == XKILL_Enums::AmmunitionType::EXPLOSIVE)
 				{
 					//Get damage from projectile.
-					Attribute_Damage* projectileDamageAttribute;
-					if(entity1->hasAttribute(ATTRIBUTE_DAMAGE))
-					{
-						std::vector<int> damageId = entity1->getAttributes(ATTRIBUTE_DAMAGE);
-						for(unsigned i=0;i<damageId.size();i++)
-						{
-							projectileDamageAttribute = itrDamage.at(damageId.at(i));
-						}
-					}
-
 					//Kill the projectile that caused the explosion
  					projectileAttribute->currentLifeTimeLeft = 0.0f;
 
@@ -615,7 +609,7 @@ void GameComponent::event_PhysicsAttributesColliding(Event_PhysicsAttributesColl
 					AttributePtr<Attribute_Position> projectilePositionAttribute = projectileSpatialAttribute->ptr_position;
 
 					//Creates an explosion sphere. Init information is taken from the impacting projectile.
-					SEND_EVENT(&Event_CreateExplosionSphere(projectilePositionAttribute->position, projectileDamageAttribute->damage, projectileAttribute->entityIdOfCreator, projectileAttribute->ammunitionType, projectileAttribute->firingModeType));
+					SEND_EVENT(&Event_CreateExplosionSphere(projectilePositionAttribute->position, 1, projectileAttribute->entityIdOfCreator, projectileAttribute->ammunitionType, projectileAttribute->firingModeType));
 				}
 			}
 			//SEND_EVENT(&Event_RemoveEntity(entity1->getID())); //Crashes sometimes if removed here
@@ -627,6 +621,7 @@ void GameComponent::event_PhysicsAttributesColliding(Event_PhysicsAttributesColl
 		Attribute_Pickupable* pickupableAttribute;
 		if(entity2->hasAttribute(ATTRIBUTE_PLAYER))
 		{
+			bool pickedUp = false;
 			//Retrieve player attribute
 			std::vector<int> playerId = entity2->getAttributes(ATTRIBUTE_PLAYER);
 			for(unsigned i=0;i<playerId.size();i++)
@@ -642,38 +637,54 @@ void GameComponent::event_PhysicsAttributesColliding(Event_PhysicsAttributesColl
 					{
 						case XKILL_Enums::PickupableType::MEDKIT:
 						{
-								AttributePtr<Attribute_Health> ptr_health = playerAttribute->ptr_health;
+							AttributePtr<Attribute_Health> ptr_health = playerAttribute->ptr_health;
+							if(ptr_health->health < ptr_health->maxHealth) //Only allow pickup of medkits if the health of the player is below maximum.
+							{
 								ptr_health->health += pickupableAttribute->amount;
-								break;
+								pickedUp = true;
+								if(ptr_health->health > ptr_health->maxHealth) //Prevent player from gaining more than maximum health
+								{
+									ptr_health->health = ptr_health->maxHealth;
+								}
+							}
+							break;
 						}
+
+						//Check ammunition system
 						case XKILL_Enums::PickupableType::AMMUNITION_BULLET:
 						{
-								AttributePtr<Attribute_WeaponStats> weaponStatsAttribute = playerAttribute->ptr_weaponStats;
-								weaponStatsAttribute->ammunition[XKILL_Enums::AmmunitionType::BULLET].totalNrOfShots += pickupableAttribute->amount;
-								break;
+							pickedUp = true;
+							AttributePtr<Attribute_WeaponStats> weaponStatsAttribute = playerAttribute->ptr_weaponStats;
+							weaponStatsAttribute->ammunition[XKILL_Enums::AmmunitionType::BULLET].totalNrOfShots += pickupableAttribute->amount;
+							break;
 						}
 						case XKILL_Enums::PickupableType::AMMUNITION_EXPLOSIVE:
 						{
-								AttributePtr<Attribute_WeaponStats> weaponStatsAttribute = playerAttribute->ptr_weaponStats;
-								weaponStatsAttribute->ammunition[XKILL_Enums::AmmunitionType::EXPLOSIVE].totalNrOfShots += pickupableAttribute->amount;
-								break;
+							pickedUp = true;
+							AttributePtr<Attribute_WeaponStats> weaponStatsAttribute = playerAttribute->ptr_weaponStats;
+							weaponStatsAttribute->ammunition[XKILL_Enums::AmmunitionType::EXPLOSIVE].totalNrOfShots += pickupableAttribute->amount;
+							break;
 						}
 						case XKILL_Enums::PickupableType::AMMUNITION_SCATTER:
 						{
-								AttributePtr<Attribute_WeaponStats> weaponStatsAttribute = playerAttribute->ptr_weaponStats;
-								weaponStatsAttribute->ammunition[XKILL_Enums::AmmunitionType::SCATTER].totalNrOfShots += pickupableAttribute->amount;
-								break;
+							pickedUp = true;
+							AttributePtr<Attribute_WeaponStats> weaponStatsAttribute = playerAttribute->ptr_weaponStats;
+							weaponStatsAttribute->ammunition[XKILL_Enums::AmmunitionType::SCATTER].totalNrOfShots += pickupableAttribute->amount;
+							break;
 						}
 					}
 				}
 			}
 
-			// Decrement number of spawned pickupables for the spawnpoint that spawned the pickupable that the player picked up. Also remove it.
-			AttributePtr<Attribute_PickupablesSpawnPoint> ptr_pickupablesSpawnPoint = pickupableAttribute->ptr_pickupablesSpawnPoint_creator;
-			ptr_pickupablesSpawnPoint->currentNrOfExistingSpawnedPickupables--;
-			ptr_pickupablesSpawnPoint->secondsSinceLastPickup = 0;
+			if(pickedUp)
+			{
+				// Decrement number of spawned pickupables for the spawnpoint that spawned the pickupable that the player picked up. Also remove it.
+				AttributePtr<Attribute_PickupablesSpawnPoint> ptr_pickupablesSpawnPoint = pickupableAttribute->ptr_pickupablesSpawnPoint_creator;
+				ptr_pickupablesSpawnPoint->currentNrOfExistingSpawnedPickupables--;
+				ptr_pickupablesSpawnPoint->secondsSinceLastPickup = 0;
 			
-			SEND_EVENT(&Event_RemoveEntity(entity1->getID()));
+				SEND_EVENT(&Event_RemoveEntity(entity1->getID()));
+			}
 		}
 	}
 	else if(entity1->hasAttribute(ATTRIBUTE_PHYSICS))
@@ -870,14 +881,6 @@ void GameComponent::event_StartDeathmatch( Event_StartDeathmatch* e )
 	int width = event_getWindowResolution.width;
 	int height = event_getWindowResolution.height;
 	SEND_EVENT(&Event_WindowResize(width,height));
-
-	//Continue
-	for(int i=0;i<10;i++)
-	{
-		SEND_EVENT(&Event_CreatePickupablesSpawnPoint(Float3(2.0f, 5.0f, i-6.0f), XKILL_Enums::PickupableType::MEDKIT));
-	}
-
-	//SEND_EVENT(&Event_CreatePickupable(Float3(2.0f, 2.0f, 0.0f), Attribute_Pickupable::MEDKIT, 5));
 
 	// Set state to deathmatch
 	GET_STATE() =  STATE_DEATHMATCH;

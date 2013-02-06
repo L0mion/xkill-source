@@ -195,6 +195,7 @@ Attribute_Player::Attribute_Player()
 	delayInSecondsBetweenEachJump = 1.0f;
 	timeSinceLastJump = delayInSecondsBetweenEachJump+1.0f;
 	collidingWithWorld = false;
+	timeSinceLastDamageTaken = 100.0f;
 	jetpackTimer = 0.0f;
 	detectedAsDead = true;
 	meshIDWhenAlive = 7;
@@ -250,8 +251,9 @@ void Attribute_Mesh::clean()
 
 Attribute_Health::Attribute_Health()
 {
-	startHealth = 1.0f;
+	maxHealth = 100.0f;
 	health = 0.0f;
+	healthFromLastFrame = 0.0f;
 }
 Attribute_Health::~Attribute_Health()
 {

@@ -1,12 +1,8 @@
 #pragma once
 
-#include <xkill-utilities/DebugShape.h>
+//#include <xkill-utilities/DebugShape.h>
 #include <xkill-utilities/Entity.h>
 #include <xkill-utilities/AttributeManager.h>
-#include "EntityManager.h"
-
-#include <vector>
-#include <iostream>
 
 // Iterators
 ATTRIBUTES_DECLARE_ALL;
@@ -73,7 +69,7 @@ public:
 		ptr_input->ptr_physics = ptr_physics;
 		
 		CREATE_ATTRIBUTE(ptr_health, Attribute_Health, health, entity);
-		ptr_health->startHealth = 100;
+		ptr_health->maxHealth = 100;
 		
 		CREATE_ATTRIBUTE(ptr_weaponStats, Attribute_WeaponStats, weaponStats, entity);
 		ptr_weaponStats->currentAmmunitionType = XKILL_Enums::AmmunitionType::SCATTER;
@@ -189,7 +185,7 @@ public:
 		ptr_physics->collisionFilterMask = Attribute_Physics::WORLD | Attribute_Physics::PLAYER | Attribute_Physics::FRUSTUM | Attribute_Physics::PICKUPABLE;
 		ptr_physics->meshID = ptr_render->meshID;
 		ptr_physics->linearVelocity = e->velocity;
-		ptr_physics->mass = 100.0f;
+		ptr_physics->mass = 50.0f;
 		ptr_physics->gravity = Float3(0.0f, 0.0f, 0.0f);
 		ptr_physics->collisionResponse = true;
 
@@ -292,9 +288,9 @@ public:
 		ptr_physics->ptr_spatial = ptr_spatial;
 		ptr_physics->ptr_render = ptr_render;
 		ptr_physics->collisionFilterGroup = Attribute_Physics::PICKUPABLE;
-		ptr_physics->collisionFilterMask = Attribute_Physics::PLAYER | Attribute_Physics::FRUSTUM | Attribute_Physics::WORLD | Attribute_Physics::PICKUPABLE | Attribute_Physics::PROJECTILE;
+		ptr_physics->collisionFilterMask = Attribute_Physics::PLAYER | Attribute_Physics::FRUSTUM | Attribute_Physics::WORLD | Attribute_Physics::PICKUPABLE | Attribute_Physics::PROJECTILE | Attribute_Physics::EXPLOSIONSPHERE;
 		ptr_physics->collisionResponse = true;
-		ptr_physics->mass = 10.0f;
+		ptr_physics->mass = 100.0f;
 		ptr_physics->gravity = Float3(0.0f, -10.0f, 0.0f);
 		ptr_physics->meshID = ptr_render->meshID;
 
@@ -328,7 +324,7 @@ public:
 		CREATE_ATTRIBUTE(ptr_physics, Attribute_Physics, physics, entity);
 		ptr_physics->ptr_spatial = ptr_spatial;
 		ptr_physics->collisionFilterGroup = Attribute_Physics::EXPLOSIONSPHERE;
-		ptr_physics->collisionFilterMask = Attribute_Physics::PLAYER;
+		ptr_physics->collisionFilterMask = Attribute_Physics::PLAYER | Attribute_Physics::PICKUPABLE;
 		ptr_physics->collisionResponse = true;
 		ptr_physics->mass = 0.0f;
 		ptr_physics->gravity = Float3(0.0f, 0.0f, 0.0f);
