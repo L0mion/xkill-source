@@ -15,7 +15,7 @@ GameComponent::GameComponent(void)
 	SUBSCRIBE_TO_EVENT(this, EVENT_PHYSICS_ATTRIBUTES_COLLIDING);
 	SUBSCRIBE_TO_EVENT(this, EVENT_START_DEATHMATCH);
 	SUBSCRIBE_TO_EVENT(this, EVENT_END_DEATHMATCH);
-	SUBSCRIBE_TO_EVENT(this, EVENT_TRANSFEREVENTSTOGAME);
+	SUBSCRIBE_TO_EVENT(this, EVENT_TRANSFER_EVENTS_TO_GAME);
 	SUBSCRIBE_TO_EVENT(this, EVENT_PLAYERDEATH);
 }
 
@@ -54,7 +54,7 @@ void GameComponent::onEvent(Event* e)
 	case EVENT_END_DEATHMATCH:
 		event_EndDeathmatch(static_cast<Event_EndDeathmatch*>(e));
 		break;
-	case EVENT_TRANSFEREVENTSTOGAME:
+	case EVENT_TRANSFER_EVENTS_TO_GAME:
 		event_TransferEventsToGame(static_cast<Event_TransferEventsToGame*>(e));
 		break;
 	case EVENT_PLAYERDEATH:
