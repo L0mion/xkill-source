@@ -71,6 +71,7 @@ Menu_Editor::Menu_Editor( Ui::MainWindowClass& ui, QWidget* parent ) : QWidget(p
 	ui.dockWidget->hide();
 
 	// Show debuglines in debug
+	ui.checkBox_showDebugPhysics->setChecked(true);
 	#ifdef XKILL_DEBUG
 	{
 		ui.checkBox_showDebugPhysics->setChecked(true);

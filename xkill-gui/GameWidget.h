@@ -154,8 +154,7 @@ protected:
 	void event_setMouseLock(bool mouseLook)
 	{
 		// locking / releasing mouse cursor to widget
-		this->
-		hasMouseLock = mouseLook;
+		this->hasMouseLock = mouseLook;
 		if(hasMouseLock)
 		{
 			// hide cursor and set new anchor point
