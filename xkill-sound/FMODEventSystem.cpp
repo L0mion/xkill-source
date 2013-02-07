@@ -59,7 +59,7 @@ bool FMODEventSystem::Init(std::string mediaPath, std::string soundEventFileName
 
 void FMODEventSystem::Update()
 {
-	//if(nrOfListeners_ > 0 || nrOfListeners_ <= 4)
+	if(nrOfListeners_ > 0 || nrOfListeners_ <= 4)
 	{
 		update3DListeners();
 	}
@@ -86,9 +86,17 @@ void FMODEventSystem::StartSoundEventAt(unsigned int index, Float3 position, boo
 	{
 		FMOD::Event* soundEvent;
 		FMODErrorCheck(mEventsystem->getEventBySystemID(index, FMOD_EVENT_NONBLOCKING, &soundEvent));
-		if(use3DAudio/* && nrOfListeners_ > 0 && nrOfListeners_ <= 4*/)
+		if(use3DAudio)
 		{
-			soundEvent->set3DAttributes(&float3ToFModVector(position), NULL);
+			if(nrOfListeners_ > 0 && nrOfListeners_ <= 4)
+			{
+				soundEvent->set3DAttributes(&float3ToFModVector(position), NULL);
+			}
+			else
+			{
+				int fmodProperty = FMOD_2D;
+				FMODErrorCheck(soundEvent->setPropertyByIndex(FMOD_EVENTPROPERTY_MODE, &fmodProperty, true));
+			}
 		}
 		soundEvent->start();
 		mEvents.push_back(soundEvent);
@@ -143,7 +151,7 @@ void FMODEventSystem::SetVolume(float volume)
 
 void FMODEventSystem::UpdateNrOfListeners()
 {
-	nrOfListeners_ = 1;//itrPlayer.size();
+	nrOfListeners_ = itrPlayer.size();
 
 	if(nrOfListeners_ <= 0)
 	{
@@ -151,14 +159,14 @@ void FMODEventSystem::UpdateNrOfListeners()
 	}
 	else if(nrOfListeners_ > 4)
 	{
-		for(unsigned int i = 0; i < nrOfListeners_; i++)
-		{
-			FMODErrorCheck(mEventsystem->set3DListenerAttributes(i++, NULL, NULL, NULL, NULL));
-		}
+		if(FMODErrorCheck(mEventsystem->set3DNumListeners(1)))
+			return;
 	}
-
-	if(FMODErrorCheck(mEventsystem->set3DNumListeners(nrOfListeners_)))
-		return;
+	else
+	{
+		if(FMODErrorCheck(mEventsystem->set3DNumListeners(nrOfListeners_)))
+			return;
+	}
 }
 
 std::vector<std::string> FMODEventSystem::GetFMODEventNames()
@@ -189,13 +197,13 @@ std::vector<std::string> FMODEventSystem::GetFMODEventNames()
 
 void FMODEventSystem::update3DListeners()
 {
+	if(nrOfListeners_ > 4)
+		return;
+
 	int i = 0;
 
 	while(itrPlayer.hasNext())
 	{
-		if(i > 0)
-			break;
-
 		AttributePtr<Attribute_Player> ptr_player = itrPlayer.getNext();
 		FMOD_VECTOR pos, look, up;
 		Float3 float3_pos = ptr_player->ptr_render->ptr_spatial->ptr_position->position;

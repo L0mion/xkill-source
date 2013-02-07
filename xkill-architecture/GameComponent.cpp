@@ -88,16 +88,6 @@ void GameComponent::onUpdate(float delta)
 		FiringMode* firingMode = &ptr_weaponStats->firingMode[ptr_weaponStats->currentFiringModeType];
 
 		//
-		// End of deathmatch logic
-		//
-
-		if(ptr_player->priority >= 20)
-		{
-			SEND_EVENT(&Event(EVENT_GAME_OVER));
-		}
-
-
-		//
 		// Ammunition logic
 		//
 
@@ -524,7 +514,7 @@ void GameComponent::event_PhysicsAttributesColliding(Event_PhysicsAttributesColl
 								AttributePtr<Attribute_Player> ptr_player = itrPlayer.at(playerId.at(k));
 								if(entity1->getID() != damage->owner_entityID) //Award player
 								{
-									ptr_player->priority++;
+									ptr_player->priority += 10;
 								}
 								else //Punish player for blowing himself up
 								{
