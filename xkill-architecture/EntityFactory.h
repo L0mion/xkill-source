@@ -124,7 +124,7 @@ public:
 		CREATE_ATTRIBUTE(ptr_offset, Behavior_Offset, offset, entity);
 		ptr_offset->ptr_spatial = ptr_spatial;
 		ptr_offset->ptr_parent_spatial_position = ptr_parent_spatial;
-		ptr_offset->offset_position = Float3(0.0f, 0.0f, 0.0f);
+		ptr_offset->offset_position = Float3(0.0f, 0.6f, 0.16f);
 
 		// Return
 		return ptr_camera;
@@ -148,7 +148,7 @@ public:
 			ptr_offset->ptr_spatial = ptr_spatial;
 			ptr_offset->ptr_parent_spatial_position = ptr_parent_spatial_position;
 			ptr_offset->ptr_parent_spatial_rotation = ptr_parent_spatial_rotation;
-			ptr_offset->offset_position = Float3(0.23f, -0.2f, 0.4f);
+			ptr_offset->offset_position = Float3(0.23f, 0.4f, 0.56f);
 
 			ptr_weapon_spatial = ptr_spatial;
 		}
