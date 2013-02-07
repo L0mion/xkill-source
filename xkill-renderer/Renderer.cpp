@@ -89,8 +89,8 @@ Renderer::~Renderer()
 	SAFE_RELEASE(debugLinesVertexBuffer_);
 
 	//temp
-	SAFE_DELETE(m3dLoader_);
-	SAFE_DELETE(animatedMesh_);
+//	SAFE_DELETE(m3dLoader_);
+//	SAFE_DELETE(animatedMesh_);
 }
 
 void Renderer::reset()

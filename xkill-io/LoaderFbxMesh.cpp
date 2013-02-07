@@ -433,8 +433,6 @@ void LoaderFbxMesh::parseVertexLinkData(FbxMesh* mesh, LoaderFbxMeshDesc* meshDe
 	int	numClusters	 = 0;
 	int linkMode	 = 0;
 
-	const char* clusterName;
-
 	for(int deformerIndex=0; deformerIndex<numDeformers; deformerIndex++)
 	{
 		numClusters = static_cast<FbxSkin*>(mesh->GetDeformer(deformerIndex, FbxDeformer::eSkin))->GetClusterCount();
@@ -488,7 +486,7 @@ void LoaderFbxMesh::parseLinkHierarchy(FbxNode* rootNode, std::vector<FbxNode*>*
 {
 	nodes->push_back(rootNode);
 	parentIndices->push_back(-1);
-	for(int nodeIndex=0; nodeIndex<nodes->size(); nodeIndex++)
+	for(unsigned int nodeIndex=0; nodeIndex<nodes->size(); nodeIndex++)
 	{
 		for(int childIndex=0; childIndex<nodes->at(nodeIndex)->GetChildCount(); childIndex++)
 		{
@@ -551,10 +549,10 @@ void LoaderFbxMesh::transformVertices(FbxMesh* mesh)
 	FbxAMatrix	fbxMatrix	= node->EvaluateLocalTransform();
 
 	DirectX::XMMATRIX xmTransform;
-	xmTransform = DirectX::XMMATRIX(fbxMatrix.mData[0][0], fbxMatrix.mData[0][1], fbxMatrix.mData[0][2], fbxMatrix.mData[0][3],
-									fbxMatrix.mData[1][0], fbxMatrix.mData[1][1], fbxMatrix.mData[1][2], fbxMatrix.mData[1][3],
-									fbxMatrix.mData[2][0], fbxMatrix.mData[2][1], fbxMatrix.mData[2][2], fbxMatrix.mData[2][3],
-									fbxMatrix.mData[3][0], fbxMatrix.mData[3][1], fbxMatrix.mData[3][2], fbxMatrix.mData[3][3]);
+	xmTransform = DirectX::XMMATRIX(static_cast<float>(fbxMatrix.mData[0][0]), static_cast<float>(fbxMatrix.mData[0][1]), static_cast<float>(fbxMatrix.mData[0][2]), static_cast<float>(fbxMatrix.mData[0][3]),
+									static_cast<float>(fbxMatrix.mData[1][0]), static_cast<float>(fbxMatrix.mData[1][1]), static_cast<float>(fbxMatrix.mData[1][2]), static_cast<float>(fbxMatrix.mData[1][3]),
+									static_cast<float>(fbxMatrix.mData[2][0]), static_cast<float>(fbxMatrix.mData[2][1]), static_cast<float>(fbxMatrix.mData[2][2]), static_cast<float>(fbxMatrix.mData[2][3]),
+									static_cast<float>(fbxMatrix.mData[3][0]), static_cast<float>(fbxMatrix.mData[3][1]), static_cast<float>(fbxMatrix.mData[3][2]), static_cast<float>(fbxMatrix.mData[3][3]));
 
 	DirectX::XMFLOAT3 position;
 	DirectX::XMVECTOR xmPosition;

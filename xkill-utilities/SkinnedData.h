@@ -45,7 +45,7 @@ public:
 							float								timePosition, 
 							std::vector<DirectX::XMFLOAT4X4>*	finalTransforms) const;
 
-	float getBoneCount()								const;
+	unsigned int getBoneCount()							const;
 	float getClipStartTime(const std::string& clipName) const;
 	float getClipEndTime(const std::string& clipName)	const;
 

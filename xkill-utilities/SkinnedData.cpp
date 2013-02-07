@@ -93,7 +93,7 @@ void SkinnedData::getFinalTransforms(const std::string&					clipName,
 	}
 }
 
-float SkinnedData::getBoneCount() const
+unsigned int SkinnedData::getBoneCount() const
 {
 	return boneHierarchy_->size();
 }
