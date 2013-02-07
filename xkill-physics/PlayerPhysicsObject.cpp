@@ -7,6 +7,7 @@ AttributeIterator<Attribute_Physics> itrPhysics_3;
 AttributeIterator<Attribute_Spatial> itrSpatial;
 AttributeIterator<Attribute_Player> itrPlayer;
 AttributeIterator<Attribute_Health> itrHealth;
+//AttributeIterator<Attribute_Ray> itrRay_PlayerPhysicsObject;
 
 PlayerPhysicsObject::PlayerPhysicsObject()
 	: PhysicsObject()
@@ -18,6 +19,7 @@ PlayerPhysicsObject::PlayerPhysicsObject()
 	itrSpatial = ATTRIBUTE_MANAGER->spatial.getIterator();
 	itrPlayer = ATTRIBUTE_MANAGER->player.getIterator();
 	itrHealth = ATTRIBUTE_MANAGER->health.getIterator();
+	//itrRay_PlayerPhysicsObject = ATTRIBUTE_MANAGER->ray.getIterator();
 }
 
 PlayerPhysicsObject::~PlayerPhysicsObject()

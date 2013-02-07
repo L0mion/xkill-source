@@ -9,22 +9,25 @@ class EntityStorage;
 // Settings class
 class DLL_U Settings
 {
+private:
+	float _timeScale;
+
 public:
-	float timeScale;
 	bool showDebugPhysics;
 	std::string currentLevel;
 	float trueDeltaTime;
 	bool soundMuted;
 	float soundVolume;
 
+	float timeScale();
+	void setTimeScale(float timeScale);
+
 	Settings()
 	{
+		_timeScale = 1.0f;
 		trueDeltaTime = 0.0f;
 		currentLevel = "TestArena";
-		timeScale = 1.0f;
 		showDebugPhysics = false;
-
-		
 	}
 };
 
@@ -77,6 +80,7 @@ public:
 	AttributeStorage<Attribute_PickupablesSpawnPoint>	pickupablesSpawnPoint;
 	AttributeStorage<Attribute_Pickupable>				pickupable;
 	AttributeStorage<Attribute_SoundSettings>			soundSettings;
+	AttributeStorage<Attribute_Ray>						ray;
 
 	AttributeStorage<Behavior_Offset>					offset;
 
@@ -113,6 +117,7 @@ public:
 	static AttributeIterator<Attribute_PickupablesSpawnPoint>	itrPickupablesSpawnPoint;	\
 	static AttributeIterator<Attribute_Pickupable>				itrPickupable;			;	\
 	static AttributeIterator<Attribute_SoundSettings>			itrSoundSettings		;	\
+	static AttributeIterator<Attribute_Ray>						itrRay;					;	\
 	\
 	static AttributeIterator<Behavior_Offset>					itrOffset				;	\
 	\
@@ -147,6 +152,7 @@ public:
 	itrPickupablesSpawnPoint= AttributeManager::instance()->pickupablesSpawnPoint		.getIterator();		\
 	itrPickupable			= AttributeManager::instance()->pickupable					.getIterator();		\
 	itrSoundSettings		= AttributeManager::instance()->soundSettings				.getIterator();		\
+	itrRay					= AttributeManager::instance()->ray							.getIterator();		\
 	\
 	itrOffset				= AttributeManager::instance()->offset						.getIterator();		\
 	\

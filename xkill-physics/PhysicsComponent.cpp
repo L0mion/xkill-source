@@ -2,7 +2,7 @@
 
 #include <btBulletDynamicsCommon.h>
 #include "Serialize/BulletWorldImporter/btBulletWorldImporter.h"
-#include "BulletCollision/NarrowPhaseCollision/btRaycastCallback.h"
+#include "BulletCollision/NarrowPhaseCollision/btRaycastCallback.h"//check
 
 #include <xkill-utilities/Util.h>
 
@@ -125,19 +125,7 @@ bool PhysicsComponent::init()
 
 void PhysicsComponent::onUpdate(float delta)
 {
-
-/*
-From Bullet Demo:
-			btCollisionWorld::AllHitsRayResultCallback allResults(from,to);
-			allResults.m_flags |= btTriangleRaycastCallback::kF_KeepUnflippedNormal;
-			m_dynamicsWorld->rayTest(from,to,allResults);
-
-			for (int i=0;i<allResults.m_hitFractions.size();i++)
-			{
-				btVector3 p = from.lerp(to,allResults.m_hitFractions[i]);
-				sDebugDraw.drawSphere(p,0.1,red);
-			}
-*/
+	gDebugDraw.clearDebugVerticesVector();
 
 	//Loop through all physics attributes
 	itrPhysics = ATTRIBUTE_MANAGER->physics.getIterator();
@@ -146,8 +134,32 @@ From Bullet Demo:
 		AttributePtr<Attribute_Physics> ptr_physics = itrPhysics.getNext();
 		unsigned int physicsAttributeIndex = itrPhysics.storageIndex();
 
-		synchronizeWithAttributes(ptr_physics, physicsAttributeIndex); //Synchronize physics objects with physics attributes
-		physicsObjects_->at(physicsAttributeIndex)->onUpdate(delta);		//Update physics objects by calling their onUpdate function.
+		synchronizeWithAttributes(ptr_physics, physicsAttributeIndex);	//Synchronize physics objects with physics attributes
+		physicsObjects_->at(physicsAttributeIndex)->onUpdate(delta);	//Update physics objects by calling their onUpdate function.
+
+		//Should be in PlayerPhysicsAttribute::onUpdate()
+		if(ptr_physics->collisionFilterGroup == ptr_physics->PhysicsAttributeType::PLAYER)
+		{
+			//Calculate player aiming ray
+			Entity* playerEntity = itrPhysics.ownerAt(physicsAttributeIndex);
+			std::vector<int> rayttributeId = playerEntity->getAttributes(ATTRIBUTE_RAY);
+			for(int i=0;i<rayttributeId.size();i++)
+			{
+				AttributePtr<Attribute_Ray> ray = itrRay.at(rayttributeId.at(i));
+				btVector3 from = convert(ray->from);
+				btVector3 to = convert(ray->to);
+				gDebugDraw.drawLine(from,to,btVector4(1,1,1,1));
+				btCollisionWorld::AllHitsRayResultCallback allResults(from, to);
+				allResults.m_flags |= btTriangleRaycastCallback::kF_KeepUnflippedNormal;
+				dynamicsWorld_->rayTest(from,to,allResults);
+
+				for (int i=0;i<allResults.m_hitFractions.size();i++)
+				{
+					btVector3 p = from.lerp(to,allResults.m_hitFractions[i]);
+					gDebugDraw.drawSphere(p,0.1,btVector3(1.0f, 0.0f, 0.0f));
+				}
+			}
+		}
 	}
 
 
@@ -169,7 +181,7 @@ From Bullet Demo:
 	//dynamicsWorld_->updateAabbs();
 	//dynamicsWorld_->computeOverlappingPairs();
 
-	gDebugDraw.clearDebugVerticesVector();
+	
 	///all hits
 	{
 		btVector3 from(1,20,1);
@@ -193,15 +205,8 @@ From Bullet Demo:
 	bool showDebug = ATTRIBUTE_MANAGER->settings->showDebugPhysics;
 	if(showDebug)
 	{
-		//static float timer = 0.0f;
-		//if(timer > 0.1f)
-		{
-			
-			dynamicsWorld_->debugDrawWorld(); //Calls debugDrawDispatcher::drawLine internally
-			gDebugDraw.queueDebugDrawEvent();
-			//timer = 0.0f;
-		}
-		//timer += delta;
+		dynamicsWorld_->debugDrawWorld(); //Calls debugDrawDispatcher::drawLine internally
+		gDebugDraw.queueDebugDrawEvent();
 	}
 
 	FLUSH_QUEUED_EVENTS(EVENT_PHYSICS_ATTRIBUTES_COLLIDING);

@@ -73,6 +73,7 @@ enum DLL_U AttributeType
 	ATTRIBUTE_PICKUPABLE,
 	ATTRIBUTE_WEAPONSTATS,
 	ATTRIBUTE_EXPLOSIONSPHERE,
+	ATTRIBUTE_RAY,
 
 	// Behaviors are attributes with more logic tied to them,
 	// and be should independent of other attributes (should not have pointer to them)
@@ -761,7 +762,6 @@ struct DLL_U Attribute_Player : public IAttribute
 	AttributePtr<Attribute_Camera>			ptr_camera;
 	AttributePtr<Attribute_Health>			ptr_health;
 	AttributePtr<Attribute_WeaponStats>		ptr_weaponStats;
-
 	AttributePtr<Attribute_Spatial>			ptr_weaponFireLocation_spatial;
 
 	static int nextId;
@@ -1103,4 +1103,31 @@ struct DLL_U Attribute_ExplosionSphere : public IAttribute
 	};
 	AttributeType getType(){return ATTRIBUTE_EXPLOSIONSPHERE;}
 	std::string getName(){return "ExplosionSphere";}
+};
+
+struct DLL_U Attribute_Ray : public IAttribute
+{
+	Attribute_Ray();
+	~Attribute_Ray();
+
+	Float3 from;
+	Float3 to;
+
+	/*
+	DataItemList* getDataList()
+	{
+		DataItemList* list = new DataItemList();
+		list->add(&from, "from");;
+		list->add(to,	"to");
+		return list;
+	}
+	void saveTo(DataItemList* list)
+	{
+		list->get(&from);
+		list->get(&to);
+	};
+	*/
+
+	AttributeType getType(){return ATTRIBUTE_RAY;}
+	std::string getName(){return "Ray";}
 };

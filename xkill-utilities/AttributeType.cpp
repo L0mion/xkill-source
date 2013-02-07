@@ -523,6 +523,15 @@ Attribute_ExplosionSphere::~Attribute_ExplosionSphere()
 {
 }
 
+Attribute_Ray::Attribute_Ray()
+{
+	from = Float3(0.0f, 0.0f, 0.0f);
+	to = Float3(0.0f, 0.0f, 0.0f);
+}
+Attribute_Ray::~Attribute_Ray()
+{
+}
+
 void Behavior_Offset::updateOffset()
 {
 	// Make sure we have a parent

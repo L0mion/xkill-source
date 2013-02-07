@@ -110,6 +110,8 @@ public:
 		// Attach weapon
 		AttributePtr<Attribute_Spatial> ptr_weaponFireLocation_spatial = createWeapon(entity, ptr_spatial, ptr_camera->ptr_spatial);
 		ptr_player->ptr_weaponFireLocation_spatial = ptr_weaponFireLocation_spatial;
+
+		CREATE_ATTRIBUTE(ptr_ray, Attribute_Ray, ray, entity);
 	}
 
 	AttributePtr<Attribute_Camera> createCamera(Entity* entity, AttributePtr<Attribute_Spatial> ptr_parent_spatial)
@@ -170,7 +172,7 @@ public:
 			ptr_offset->ptr_spatial = ptr_spatial;
 			ptr_offset->ptr_parent_spatial_position = ptr_weapon_spatial;
 			ptr_offset->ptr_parent_spatial_rotation = ptr_weapon_spatial;
-			ptr_offset->offset_position = Float3(0.0f, 0.0f, 1.0f);
+			ptr_offset->offset_position = Float3(0.0f, 0.06f, 0.32f);
 
 			ptr_fireLocation_spatial = ptr_spatial;
 		}
@@ -202,7 +204,7 @@ public:
 		CREATE_ATTRIBUTE(ptr_position, Attribute_Position, position, entity);
 		ptr_position->position = e->position;
 
-		CREATE_ATTRIBUTE(ptr_spatial,Attribute_Spatial, spatial, entity);
+		CREATE_ATTRIBUTE(ptr_spatial, Attribute_Spatial, spatial, entity);
 		ptr_spatial->ptr_position = ptr_position;
 		ptr_spatial->rotation = e->rotation;
 
