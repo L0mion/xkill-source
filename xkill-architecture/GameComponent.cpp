@@ -540,7 +540,24 @@ void GameComponent::event_PhysicsAttributesColliding(Event_PhysicsAttributesColl
 
 					if(entity2->hasAttribute(ATTRIBUTE_PROJECTILE))
 					{
-						SEND_EVENT(&Event_RemoveEntity(entity2->getID()));
+						//SEND_EVENT(&Event_RemoveEntity(entity2->getID()));
+						// Disarm projectile
+						entity2->removeAttribute(ATTRIBUTE_DAMAGE);
+
+						//
+						// Make projectiles stick to player
+						//
+						
+						if(entity1->hasAttribute(ATTRIBUTE_PHYSICS) && entity2->hasAttribute(ATTRIBUTE_PHYSICS))
+						{
+							AttributePtr<Attribute_Spatial> ptr_target_position = (itrPhysics.getMultiple(entity1->getAttributes(ATTRIBUTE_PHYSICS)).at(0))->ptr_spatial;
+							AttributePtr<Attribute_Spatial> ptr_projectile_spatial = (itrPhysics.getMultiple(entity2->getAttributes(ATTRIBUTE_PHYSICS)).at(0))->ptr_spatial;
+							entity2->removeAttribute(ATTRIBUTE_PHYSICS);
+
+							AttributePtr<Behavior_Offset> ptr_projectile_offset = itrOffset.createAttribute(entity2);
+							ptr_projectile_offset->ptr_spatial = ptr_projectile_spatial;
+							ptr_projectile_offset->ptr_parent_spatial_position = ptr_target_position;
+						}
 					}
 				}
 			}
@@ -557,7 +574,7 @@ void GameComponent::event_PhysicsAttributesColliding(Event_PhysicsAttributesColl
 		{
 			//Handle PhysicsAttribute of a projectile colliding with another PhysicsAttribute
 			std::vector<int> physicsId = entity1->getAttributes(ATTRIBUTE_PHYSICS);
-			for(int i=0;i<physicsId.size();i++)
+			for(int i=0;i<(int)physicsId.size();i++)
 			{
 				std::vector<int> projectileId = entity1->getAttributes(ATTRIBUTE_PROJECTILE);
 				for(unsigned j=0;j<projectileId.size();j++)

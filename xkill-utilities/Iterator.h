@@ -174,13 +174,13 @@ public:
 
 	// Returns an item in the vector regardless
     // if it is valid or not
-    std::vector<T*> getMultiple(std::vector<int> indexVector)
+    std::vector<AttributePtr<T>> getMultiple(std::vector<int> indexVector)
     {
-		std::vector<T*> attributeVector;
+		std::vector<AttributePtr<T>> v;
 		for(int i=0; i<(int)indexVector.size(); i++)
-			attributeVector.push_back(at(indexVector.at(i)));
+			v.push_back(at(indexVector.at(i)));
 
-        return attributeVector;
+        return v;
     }
 
 	AttributePtr<T> createAttribute(Entity* e)
