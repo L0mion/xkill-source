@@ -1,10 +1,7 @@
-#pragma once
 #include "EventManager.h"
 
 #include <vector>
-#include <iostream>
 #include "IObserver.h"
-
 
 EventManager::EventManager()
 {

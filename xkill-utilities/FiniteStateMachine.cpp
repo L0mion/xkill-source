@@ -1,5 +1,4 @@
 #include "FiniteStateMachine.h"
-#include <iostream>
 #include <iterator>
 
 bool FiniteStateMachine::AddState( FiniteState* state )

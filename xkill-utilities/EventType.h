@@ -138,10 +138,11 @@ If muteSound is true then all sounds will be muted
 class DLL_U Event_PlaySound : public Event
 {
 public:
-	Event_PlaySound(int soundId, bool muteSound = false);
+	Event_PlaySound(int soundId, Float3 position, bool use3DAudio = false);
 
 	int soundId;
-	bool muteSound;
+	Float3 position;
+	bool use3DAudio;
 
 	enum sounds
 	{
@@ -287,9 +288,9 @@ public:
 	int entityIdOfCreator;
 	XKILL_Enums::AmmunitionType ammunitionType;
 	XKILL_Enums::FiringModeType firingMode;
-	int damage;
+	float damage;
 
-	Event_CreateProjectile(Float3 position, Float3 velocity, Float4 rotation, int entityIdOfCreator, XKILL_Enums::AmmunitionType ammunitionType, XKILL_Enums::FiringModeType firingMode, int damage);
+	Event_CreateProjectile(Float3 position, Float3 velocity, Float4 rotation, int entityIdOfCreator, XKILL_Enums::AmmunitionType ammunitionType, XKILL_Enums::FiringModeType firingMode, float damage);
 };
 
 class DLL_U Event_CreateMesh : public Event
@@ -562,9 +563,9 @@ public:
 class DLL_U Event_ModifyPhysicsObject : public Event
 {
 public:
-	Event_ModifyPhysicsObject(XKILL_Enums::ModifyPhysicsObjectData modifyWhatDataInPhysicsObjectData, void* data, int physicsAttributeIndex);
+	Event_ModifyPhysicsObject(XKILL_Enums::ModifyPhysicsObjectData modifyWhatDataInPhysicsObjectData, void* data, AttributePtr<Attribute_Physics> ptr_physics);
 
+	AttributePtr<Attribute_Physics> ptr_physics;
 	XKILL_Enums::ModifyPhysicsObjectData modifyWhatDataInPhysicsObjectData;
 	void* data;
-	int physicsAttributeIndex;
 };

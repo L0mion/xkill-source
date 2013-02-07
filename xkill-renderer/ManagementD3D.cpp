@@ -129,9 +129,12 @@ HRESULT ManagementD3D::createDeviceAndSwapChain(const DXGI_SWAP_CHAIN_DESC swapC
 										D3D_DRIVER_TYPE_REFERENCE};
 
 	UINT flags = 0;
-#if defined (_DEBUG) || defined (DEBUG)
-	flags = D3D11_CREATE_DEVICE_DEBUG; //Enables shader debugging with PIX
-#endif //_DEBUG || DEBUG
+	flags |= D3D11_CREATE_DEVICE_SINGLETHREADED;
+	//flags |= D3D11_CREATE_DEVICE_PREVENT_INTERNAL_THREADING_OPTIMIZATIONS;
+
+#if defined(D3D_PROFILE)
+	flags |= D3D11_CREATE_DEVICE_DEBUG; //Enables shader debugging
+#endif //D3D_PROFILE
 
 	unsigned int index = 0;
 	while(index < numDriverTypes && hr != S_OK)

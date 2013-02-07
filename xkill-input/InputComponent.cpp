@@ -89,13 +89,13 @@ void InputComponent::handleInput(float delta)
 
 	while(itrPlayer.hasNext())
 	{
-		Attribute_Player* player = itrPlayer.getNext();
+		AttributePtr<Attribute_Player> ptr_player = itrPlayer.getNext();
 
-		if(player->ptr_inputDevice.isEmpty())
+		if(ptr_player->ptr_inputDevice.isEmpty())
 			continue;
 
-		InputDevice* device = player->ptr_inputDevice->device;
-		AttributePtr<Attribute_Input> input = player->ptr_input;
+		InputDevice* device = ptr_player->ptr_inputDevice->device;
+		AttributePtr<Attribute_Input> input = ptr_player->ptr_input;
 
 		if(device == nullptr)
 			continue;
@@ -105,23 +105,25 @@ void InputComponent::handleInput(float delta)
 		input->rotation.x = device->getFloatValue(InputAction::ACTION_F_LOOK_LR, delta, true);
 		input->rotation.y = device->getFloatValue(InputAction::ACTION_F_LOOK_UD, delta, true);
 
-		if(device->getBoolValue(InputAction::ACTION_B_FIRE))
-			input->fire = true;
-		if(device->getBoolPressed(InputAction::ACTION_B_FIRE))
-			input->firePressed = true;
+		input->fire = device->getBoolValue(InputAction::ACTION_B_FIRE);
+		input->firePressed = device->getBoolPressed(InputAction::ACTION_B_FIRE);
 		if(device->getBoolReleased(InputAction::ACTION_B_CHANGE_AMMUNITIONTYPE))
 			input->changeAmmunitionType = true;
 		if(device->getBoolReleased(InputAction::ACTION_B_CHANGE_FIRINGMODE))
 			input->changeFiringMode = true;
 
 		if(device->getBoolValue(InputAction::ACTION_B_TIME_SPEED_UP))
-			settings->timeScale += delta;
+		{
+			settings->setTimeScale(settings->timeScale() + delta);
+		}
 		if(device->getBoolValue(InputAction::ACTION_B_TIME_SPEED_DOWN))
-			settings->timeScale -= delta;
+		{
+			settings->setTimeScale(settings->timeScale() - delta);
+		}
 
 
-		if(device->getBoolReleased(InputAction::ACTION_B_TOGGLE_MUTE_SOUND))
-			SEND_EVENT(&Event_PlaySound(-1, true));
+		//if(device->getBoolReleased(InputAction::ACTION_B_TOGGLE_MUTE_SOUND))
+		//	SEND_EVENT(&Event_PlaySound(-1, true));
 
 		if(device->getBoolReleased(InputAction::ACTION_B_RUMBLE_ON))
 		{
@@ -203,13 +205,23 @@ void InputComponent::handleInput(float delta)
 
 void InputComponent::setupPlayerControllerConnection()
 {
+	int playerSize = itrPlayer.size();
+	int inputDeviceSize = itrInputDevice.size();
+
+	int diff = playerSize - inputDeviceSize;
+
+	for(int i = 0; i < diff; i++)
+	{
+		itrPlayer.getNext();
+	}
+
 	while(itrPlayer.hasNext())
 	{
-		Attribute_Player* player = itrPlayer.getNext();
+		AttributePtr<Attribute_Player> ptr_player = itrPlayer.getNext();
 
 		if(itrInputDevice.hasNext())
 		{
-			player->ptr_inputDevice = itrInputDevice.attributePointer(itrInputDevice.getNext());
+			ptr_player->ptr_inputDevice = itrInputDevice.getNext();
 		}
 		else
 		{

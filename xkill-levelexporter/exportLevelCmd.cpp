@@ -16,7 +16,6 @@
 #include <maya/MFnTransform.h>
 #include <maya/MQuaternion.h>
 
-
 class exportLevel : public MPxCommand
 {
     public:

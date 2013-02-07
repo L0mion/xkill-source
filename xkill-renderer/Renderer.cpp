@@ -409,8 +409,8 @@ void Renderer::render()
 		vpData.viewportTopY = static_cast<unsigned int>(ptr_splitScreen->ssTopLeftY);
 		vpData.zNear		= ptr_camera->zNear;
 		vpData.zFar			= ptr_camera->zFar;
-		vpData.viewportWidth	= ptr_splitScreen->ssWidth;
-		vpData.viewportHeight	= ptr_splitScreen->ssHeight;
+		vpData.viewportWidth	= (float)ptr_splitScreen->ssWidth;
+		vpData.viewportHeight	= (float)ptr_splitScreen->ssHeight;
 		vpDatas[i]			= vpData;
 
 		renderViewportToGBuffer(vpData);
@@ -463,14 +463,14 @@ void Renderer::renderViewportToGBuffer(ViewportData& vpData)
 	}
 
 	//Make me use iterators!
-	Attribute_DebugShape* debugShapeAt;
+	AttributePtr<Attribute_DebugShape> ptr_debugShape;
 	while(itrDebugShape.hasNext())
 	{
-		debugShapeAt = itrDebugShape.getNext();
-		if(debugShapeAt->render)
+		ptr_debugShape = itrDebugShape.getNext();
+		if(ptr_debugShape->render)
 		{
 			renderDebugShape(
-				debugShapeAt,
+				ptr_debugShape,
 				itrDebugShape.storageIndex(),
 				vpData.view, 
 				vpData.proj);
@@ -486,7 +486,7 @@ void Renderer::renderViewportToGBuffer(ViewportData& vpData)
 	managementGBuffer_->unsetGBuffersAndDepthBufferAsRenderTargets(devcon);
 	managementFX_->unsetAll(devcon);
 	managementFX_->unsetLayout(devcon);
-	managementSS_->unsetSS(devcon, TypeFX_PS, 0);
+	//managementSS_->unsetSS(devcon, TypeFX_PS, 0);
 	devcon->RSSetState(nullptr);
 }
 void Renderer::renderViewportToBackBuffer(ViewportData& vpData)
@@ -545,7 +545,7 @@ void Renderer::renderViewportToBackBuffer(ViewportData& vpData)
 	managementD3D_->unsetDepthBufferSRV(GBUFFER_SHADER_REGISTER_DEPTH);
 	managementGBuffer_->unsetGBuffersAsCSShaderResources(devcon);
 
-	devcon->CSSetSamplers(0, 0, nullptr); //move me into managementSS
+	//devcon->CSSetSamplers(0, 0, nullptr); //move me into managementSS
 }
 
 void Renderer::renderInstance(unsigned int meshID, InstancedData* instance)
@@ -629,7 +629,7 @@ void Renderer::renderSubset(
 		0, 0, 0);
 }
 void Renderer::renderDebugShape(
-	Attribute_DebugShape*	debugShapeAt, 
+	AttributePtr<Attribute_DebugShape>	ptr_debugShape, 
 	unsigned int			shapeIndex,
 	DirectX::XMFLOAT4X4		viewMatrix, 
 	DirectX::XMFLOAT4X4		projectionMatrix)
@@ -638,7 +638,7 @@ void Renderer::renderDebugShape(
 	ID3D11DeviceContext*	devcon = managementD3D_->getDeviceContext();
 	
 	// Get transform matrices.
-	AttributePtr<Attribute_Spatial>	ptr_spatial		= debugShapeAt->ptr_spatial;
+	AttributePtr<Attribute_Spatial>	ptr_spatial		= ptr_debugShape->ptr_spatial;
 	AttributePtr<Attribute_Position> ptr_position = ptr_spatial->ptr_position;
 	DirectX::XMFLOAT4X4 worldMatrix			= managementMath_->calculateWorldMatrix(ptr_spatial, ptr_position);
 	DirectX::XMFLOAT4X4 worldMatrixInverse	= managementMath_->calculateMatrixInverse(worldMatrix);
@@ -834,7 +834,7 @@ void Renderer::drawHudElement(int viewportIndex, unsigned int textureId, DirectX
 	//managementD3D_->unsetUAVBackBufferCS();
 
 	managementFX_->unsetAll(devcon);
-	devcon->PSSetSamplers(0, 0, nullptr);
+	//devcon->PSSetSamplers(0, 0, nullptr);
 	devcon->IASetInputLayout(nullptr);
 	devcon->RSSetState(nullptr);
 }

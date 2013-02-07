@@ -84,17 +84,17 @@ HRESULT ManagementModel::createModelD3D(
 {
 	HRESULT hr = S_OK;
 
-	Attribute_Mesh meshAt;
-	if(getMeshAttribute(modelID, meshAt))
+	AttributePtr<Attribute_Mesh> ptr_mesh;
+	if(getMeshAttribute(modelID, ptr_mesh))
 	{
-		MeshDesc model = meshAt.mesh;
+		MeshDesc model = ptr_mesh->mesh;
 
 		ID3D11Buffer* vertexBuffer;
 		hr = createVertexBuffer(
 			modelID, 
 			model.vertices_, 
 			&vertexBuffer,
-			meshAt.vertexType,
+			ptr_mesh->vertexType,
 			device);
 
 		std::vector<SubsetD3D*>	subsetD3Ds;
@@ -123,10 +123,10 @@ HRESULT ManagementModel::createModelD3D(
 
 	return hr;
 }
-bool ManagementModel::getMeshAttribute(unsigned int modelID, Attribute_Mesh& inout)
+bool ManagementModel::getMeshAttribute(unsigned int modelID, AttributePtr<Attribute_Mesh>& inout)
 {
 	bool foundAt = false;
-	Attribute_Mesh* attr_mesh;
+	AttributePtr<Attribute_Mesh> attr_mesh;
 
 	while(!foundAt && itrMesh.hasNext())
 	{
@@ -134,7 +134,7 @@ bool ManagementModel::getMeshAttribute(unsigned int modelID, Attribute_Mesh& ino
 
 		if(attr_mesh->meshID == modelID)
 		{
-			inout = *attr_mesh;
+			inout = attr_mesh;
 			foundAt = true;
 		}
 	}
@@ -153,9 +153,9 @@ HRESULT ManagementModel::createVertexBuffer(
 	HRESULT hr = S_OK;
 
 	D3D11_BUFFER_DESC vbd;
-	vbd.Usage			= D3D11_USAGE_DYNAMIC;
+	vbd.Usage			= D3D11_USAGE_IMMUTABLE;
 	vbd.BindFlags		= D3D11_BIND_VERTEX_BUFFER;
-	vbd.CPUAccessFlags	= D3D11_CPU_ACCESS_WRITE;
+	vbd.CPUAccessFlags	= 0; //D3D11_CPU_ACCESS_WRITE
 	vbd.MiscFlags		= 0;
 
 	D3D11_SUBRESOURCE_DATA vinitData;
@@ -267,10 +267,10 @@ HRESULT ManagementModel::createIndexBuffer(
 		hr = S_FALSE;
 
 	D3D11_BUFFER_DESC ibd;
-	ibd.Usage			= D3D11_USAGE_DYNAMIC;
+	ibd.Usage			= D3D11_USAGE_IMMUTABLE;
 	ibd.ByteWidth		= sizeof(unsigned int) * indices.size();
 	ibd.BindFlags		= D3D11_BIND_INDEX_BUFFER;
-	ibd.CPUAccessFlags	= D3D11_CPU_ACCESS_WRITE;
+	ibd.CPUAccessFlags	= 0; //D3D11_CPU_ACCESS_WRITE
 	ibd.MiscFlags		= 0;
 
 	D3D11_SUBRESOURCE_DATA vinitData;
@@ -376,8 +376,8 @@ std::vector<VertexPosNormTexTanSkinned> ManagementModel::convertVertexPosNormTex
 
 void ManagementModel::createDebugShapeD3D(unsigned int shapeIndex, ID3D11Device* device)
 {
-	Attribute_DebugShape* debugShapeAt = itrDebugShape.at(shapeIndex);
-	DebugShape* shape = debugShapeAt->shape;
+	AttributePtr<Attribute_DebugShape> ptr_debugShape = itrDebugShape.at(shapeIndex);
+	DebugShape* shape = ptr_debugShape->shape;
 
 	switch(shape->shapeType_)
 	{

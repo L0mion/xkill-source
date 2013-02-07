@@ -45,10 +45,12 @@ CollisionShapes::~CollisionShapes()
 
 btCollisionShape* CollisionShapes::getCollisionShape(unsigned int meshId)
 {
+	btCollisionShape* collisionShape;
 	std::map<unsigned int, unsigned int>::iterator it = collisionShapesIdToIndex_.find(meshId);
 	if(it != collisionShapesIdToIndex_.end())
 	{
-		return collisionShapes_->at(it->second);
+		collisionShape = collisionShapes_->at(it->second);
+		return collisionShape;
 	}
 	else
 	{
@@ -144,10 +146,10 @@ void CollisionShapes::loadCollisionShapes()
 	}
 	while(itrMesh.hasNext())
 	{
-		Attribute_Mesh* meshAttribute = itrMesh.getNext();
-		if(collisionShapesIdToIndex_.find(meshAttribute->meshID) == collisionShapesIdToIndex_.end())
+		AttributePtr<Attribute_Mesh> ptr_mesh = itrMesh.getNext();
+		if(collisionShapesIdToIndex_.find(ptr_mesh->meshID) == collisionShapesIdToIndex_.end())
 		{
-			std::string name = meshAttribute->fileName;
+			std::string name = ptr_mesh->fileName;
 			name = name.substr(0,name.find("."));
 			name = name.append("RigidBodyShape");
 			btCollisionShape* collisionShape;
@@ -162,7 +164,7 @@ void CollisionShapes::loadCollisionShapes()
 				collisionShape->setMargin(0.0f);
 				collisionShape->setLocalScaling(btVector3(1,1,1));
 
-				std::pair<unsigned int, unsigned int>  idToIndex(meshAttribute->meshID,collisionShapes_->size());
+				std::pair<unsigned int, unsigned int>  idToIndex(ptr_mesh->meshID,collisionShapes_->size());
 				collisionShapesIdToIndex_.insert(idToIndex);
 				btCompoundShape* compoundShape = new btCompoundShape();
 				collisionShape->setMargin(0.0);
@@ -176,7 +178,7 @@ void CollisionShapes::loadCollisionShapes()
 			{
 				//Load from model file
 				filename = std::string("../../xkill-resources/xkill-models/");
-				name = meshAttribute->fileName;
+				name = ptr_mesh->fileName;
 				name = name.substr(0,name.find("."));
 				filename = filename.append(name);
 				filename = filename.append(".bullet");
@@ -223,7 +225,7 @@ void CollisionShapes::loadCollisionShapes()
 						transform.setIdentity();
 					}
 					cs->addChildShape(transform,collisionShape);
-					std::pair<unsigned int, unsigned int>  idToIndex(meshAttribute->meshID,collisionShapes_->size());
+					std::pair<unsigned int, unsigned int>  idToIndex(ptr_mesh->meshID,collisionShapes_->size());
 					collisionShapesIdToIndex_.insert(idToIndex);
 					collisionShapes_->push_back(collisionShape);
 					cs->setMargin(0.00);
@@ -260,18 +262,18 @@ void CollisionShapes::updateFrustrumShape()
 		DEBUGPRINT("COLLISIONSHAPES: No cameras to use for frustum creation");
 		return;
 	}
-	Attribute_Camera* cA = itrCamera.at(0);
-	float fovX = atan(cA->aspectRatio*tan(cA->fieldOfView));
+	AttributePtr<Attribute_Camera> ptr_camera = itrCamera.at(0);
+	float fovX = atan(ptr_camera->aspectRatio*tan(ptr_camera->fieldOfView));
 	//cA->zFar =1;
 	btVector3 points[8];
-	points[0] = btVector3(-tan(fovX)*cA->zNear,-tan(cA->fieldOfView)*cA->zNear, cA->zNear);
-	points[1] = btVector3( tan(fovX)*cA->zNear, -tan(cA->fieldOfView)*cA->zNear, cA->zNear);
-	points[2] = btVector3(-tan(fovX)*cA->zNear, tan(cA->fieldOfView)*cA->zNear, cA->zNear);
-	points[3] = btVector3( tan(fovX)*cA->zNear,  tan(cA->fieldOfView)*cA->zNear, cA->zNear);
-	points[4] = btVector3(-tan(fovX)*cA->zFar, -tan(cA->fieldOfView)*cA->zFar,  cA->zFar);
-	points[5] = btVector3( tan(fovX)*cA->zFar,  -tan(cA->fieldOfView)*cA->zFar,  cA->zFar);
-	points[6] = btVector3(-tan(fovX)*cA->zFar,  tan(cA->fieldOfView)*cA->zFar,  cA->zFar);
-	points[7] = btVector3( tan(fovX)*cA->zFar,   tan(cA->fieldOfView)*cA->zFar,  cA->zFar);
+	points[0] = btVector3(-tan(fovX)*ptr_camera->zNear,	-tan(ptr_camera->fieldOfView)*ptr_camera->zNear, ptr_camera->zNear);
+	points[1] = btVector3( tan(fovX)*ptr_camera->zNear,	-tan(ptr_camera->fieldOfView)*ptr_camera->zNear, ptr_camera->zNear);
+	points[2] = btVector3(-tan(fovX)*ptr_camera->zNear,	 tan(ptr_camera->fieldOfView)*ptr_camera->zNear, ptr_camera->zNear);
+	points[3] = btVector3( tan(fovX)*ptr_camera->zNear,	 tan(ptr_camera->fieldOfView)*ptr_camera->zNear, ptr_camera->zNear);
+	points[4] = btVector3(-tan(fovX)*ptr_camera->zFar,	-tan(ptr_camera->fieldOfView)*ptr_camera->zFar,  ptr_camera->zFar);
+	points[5] = btVector3( tan(fovX)*ptr_camera->zFar,	-tan(ptr_camera->fieldOfView)*ptr_camera->zFar,  ptr_camera->zFar);
+	points[6] = btVector3(-tan(fovX)*ptr_camera->zFar,	 tan(ptr_camera->fieldOfView)*ptr_camera->zFar,  ptr_camera->zFar);
+	points[7] = btVector3( tan(fovX)*ptr_camera->zFar,	 tan(ptr_camera->fieldOfView)*ptr_camera->zFar,  ptr_camera->zFar);
 
 	btTriangleMesh* triangleMesh = new btTriangleMesh();
 	triangleMesh->addTriangle(points[0],points[3],points[6]);

@@ -3,9 +3,6 @@
 #include <xkill-utilities/EntityStorage.h>
 #include "EntityFactory.h"
 
-#include <vector>
-#include <iostream>
-
 class EntityManager: public IObserver
 {
 private:

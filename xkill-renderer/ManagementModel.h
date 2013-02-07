@@ -50,7 +50,7 @@ public:
 protected:
 private:
 	HRESULT createModelD3D(const unsigned int modelID, ID3D11Device* device);	//!< Creates a model based on model ID.
-	bool getMeshAttribute(unsigned int modelID, Attribute_Mesh& inout);			//!< Retrieves a MeshAttribute corresponding to modelID, if such exists. Returns whether or not such an attribute was found.
+	bool getMeshAttribute(unsigned int modelID, AttributePtr<Attribute_Mesh>& inout);			//!< Retrieves a MeshAttribute corresponding to modelID, if such exists. Returns whether or not such an attribute was found.
 	HRESULT createVertexBuffer(
 		const unsigned int		modelID, 
 		std::vector<VertexDesc>	vertices,

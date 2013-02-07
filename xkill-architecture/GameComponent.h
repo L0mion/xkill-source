@@ -13,6 +13,7 @@ class Entity;
 struct Attribute_PlayerSpawnPoint;
 struct Attribute_WeaponStats;
 struct Attribute_Position;
+struct Attribute_Spatial;
 struct Attribute_Camera;
 
 template <class T>
@@ -71,10 +72,10 @@ public:
 	If no unoccupied player spawn point is found, one is selected at random. 
 	If there exists no player spawn points at all, nullptr is returned.
 	*/
-	Attribute_PlayerSpawnPoint* findUnoccupiedSpawnPoint();
+	AttributePtr<Attribute_PlayerSpawnPoint> findUnoccupiedSpawnPoint();
 
 	bool switchAmmunition(AttributePtr<Attribute_WeaponStats> ptr_weaponStats);
 	bool switchFiringMode(AttributePtr<Attribute_WeaponStats> ptr_weaponStats);
 
-	void shootProjectile(AttributePtr<Attribute_Position> position, AttributePtr<Attribute_Camera> camera, AttributePtr<Attribute_WeaponStats> weaponStats);
+	void shootProjectile(AttributePtr<Attribute_Spatial> ptr_spatial, AttributePtr<Attribute_WeaponStats> ptr_weaponStats);
 };

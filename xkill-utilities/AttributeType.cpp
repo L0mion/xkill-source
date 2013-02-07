@@ -76,7 +76,8 @@ Attribute_Physics::~Attribute_Physics()
 Attribute_Projectile::Attribute_Projectile()
 {
 	entityIdOfCreator = -1;
-	currentLifeTimeLeft = 10.0f;
+	totalLifeTime = 10.0f;
+	currentLifeTimeLeft = totalLifeTime;
 	ammunitionType = XKILL_Enums::AmmunitionType::BULLET;
 	firingModeType = XKILL_Enums::FiringModeType::SEMI;
 }
@@ -195,10 +196,15 @@ Attribute_Player::Attribute_Player()
 	delayInSecondsBetweenEachJump = 1.0f;
 	timeSinceLastJump = delayInSecondsBetweenEachJump+1.0f;
 	collidingWithWorld = false;
+	timeSinceLastDamageTaken = 100.0f;
 	jetpackTimer = 0.0f;
 	detectedAsDead = true;
-	meshIDWhenAlive = 7;
-	meshIDWhenDead = 9;
+	meshID_whenAlive = 0;
+	meshID_whenDead = 0;
+	currentSprintTime = 0;
+	sprintTime = 2.0f;
+	canSprint = true;
+	sprintRechargeRate = 0.2f;
 
 	walkSpeed = 5.0f;
 	sprintSpeed = walkSpeed*2;
@@ -246,8 +252,9 @@ void Attribute_Mesh::clean()
 
 Attribute_Health::Attribute_Health()
 {
-	startHealth = 1.0f;
+	maxHealth = 100.0f;
 	health = 0.0f;
+	healthFromLastFrame = 0.0f;
 }
 Attribute_Health::~Attribute_Health()
 {
@@ -518,21 +525,20 @@ Attribute_ExplosionSphere::~Attribute_ExplosionSphere()
 void Behavior_Offset::updateOffset()
 {
 	// Make sure we have a parent
-	if(ptr_parent_spatial.isNotEmpty())
+	if(ptr_parent_spatial_position.isNotEmpty())
 	{
 		// Fetch attributes from parent
-		Float4 parent_rot = ptr_parent_spatial->rotation;
-		Float3 parent_pos = ptr_parent_spatial->ptr_position->position;
+		Float4 parent_rot = ptr_parent_spatial_position->rotation;
+		Float3 parent_pos = ptr_parent_spatial_position->ptr_position->position;
 
 
 		//
-		// Add rotation translation relative to parent
+		// Add translation offset relative to parent
 		//
 
 		DirectX::XMVECTOR xv_pos = DirectX::XMLoadFloat3((DirectX::XMFLOAT3*)&offset_position);
 		DirectX::XMVECTOR parent_xv_rot = DirectX::XMLoadFloat4((DirectX::XMFLOAT4*)&parent_rot);
 		DirectX::XMVECTOR xv_pos_offset = DirectX::XMVector3Rotate(xv_pos, parent_xv_rot);
-
 		Float3 pos_offset; DirectX::XMStoreFloat3((DirectX::XMFLOAT3*)&pos_offset, xv_pos_offset);
 
 
@@ -541,6 +547,24 @@ void Behavior_Offset::updateOffset()
 		//
 
 		pos_offset = parent_pos + pos_offset;
-		ptr_spatial->ptr_position->position = pos_offset;		
+		ptr_spatial->ptr_position->position = pos_offset;
+
+	}
+
+	if(ptr_parent_spatial_rotation.isNotEmpty())
+	{
+		// Fetch attributes from parent
+		Float4 parent_rot = ptr_parent_spatial_rotation->rotation;
+
+		//
+		// Add rotation offset relative to parent
+		//
+
+		DirectX::XMVECTOR xv_rot_offset = DirectX::XMLoadFloat4((DirectX::XMFLOAT4*)&offset_rotation);
+		DirectX::XMVECTOR parent_xv_rot = DirectX::XMLoadFloat4((DirectX::XMFLOAT4*)&parent_rot);
+		xv_rot_offset = DirectX::XMQuaternionMultiply(xv_rot_offset, parent_xv_rot);
+		Float4 rot_offset; DirectX::XMStoreFloat4((DirectX::XMFLOAT4*)&rot_offset, xv_rot_offset);
+
+		ptr_spatial->rotation = rot_offset;
 	}
 }

@@ -16,10 +16,11 @@ Event_MouseMove::Event_MouseMove(int dx, int dy) : Event(EVENT_MOUSE_MOVE)
 	this->dy = dy;
 }
 
-Event_PlaySound::Event_PlaySound(int soundId, bool muteSound) : Event(EVENT_PLAYSOUND)
+Event_PlaySound::Event_PlaySound(int soundId, Float3 position, bool use3DAudio) : Event(EVENT_PLAYSOUND)
 {
 	this->soundId = soundId;
-	this->muteSound = muteSound;
+	this->position = position;
+	this->use3DAudio = use3DAudio;
 }
 
 Event_Rumble::Event_Rumble(unsigned int deviceNr,
@@ -74,7 +75,7 @@ Event_ShowMessageBox::Event_ShowMessageBox(std::string message) : Event(EVENT_SH
 	this->message = message;
 }
 
-Event_CreateProjectile::Event_CreateProjectile(Float3 position, Float3 velocity, Float4 rotation, int entityIdOfCreator, XKILL_Enums::AmmunitionType ammunitionType, XKILL_Enums::FiringModeType firingMode, int damage) : Event(EVENT_CREATE_PROJECTILE)
+Event_CreateProjectile::Event_CreateProjectile(Float3 position, Float3 velocity, Float4 rotation, int entityIdOfCreator, XKILL_Enums::AmmunitionType ammunitionType, XKILL_Enums::FiringModeType firingMode, float damage) : Event(EVENT_CREATE_PROJECTILE)
 {
 	this->position = position;
 	this->velocity = velocity;
@@ -221,9 +222,9 @@ Event_DrawBulletPhysicsDebugLines::Event_DrawBulletPhysicsDebugLines(std::vector
 	this->debugLineVertices = debugLineVertices;
 }
 
-Event_ModifyPhysicsObject::Event_ModifyPhysicsObject(XKILL_Enums::ModifyPhysicsObjectData modifyWhatDataInPhysicsObjectData, void* data, int physicsAttributeIndex) : Event(EVENT_MODIFY_PHYSICS_OBJECT)
+Event_ModifyPhysicsObject::Event_ModifyPhysicsObject(XKILL_Enums::ModifyPhysicsObjectData modifyWhatDataInPhysicsObjectData, void* data, AttributePtr<Attribute_Physics> ptr_physics) : Event(EVENT_MODIFY_PHYSICS_OBJECT)
 {
 	this->modifyWhatDataInPhysicsObjectData = modifyWhatDataInPhysicsObjectData;
 	this->data = data;
-	this->physicsAttributeIndex = physicsAttributeIndex;
+	this->ptr_physics = ptr_physics;
 }

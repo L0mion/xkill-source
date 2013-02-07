@@ -29,8 +29,8 @@ private:
 public:
 	HUDWindow(QWidget* parent, int id);
 
-	void parentMoveEvent(Attribute_SplitScreen* splitScreen);
-	void update(Attribute_SplitScreen* player);
+	void parentMoveEvent(AttributePtr<Attribute_SplitScreen> splitScreen);
+	void update(AttributePtr<Attribute_SplitScreen> player);
 };
 
 class HUDManager

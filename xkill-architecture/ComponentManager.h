@@ -41,7 +41,6 @@ private:
 	ScoreComponent*			score_;
 	IOComponent*			ioComponent_;
 
-	float					initialSpawnDelay;
 	float					gameOverDelay;
 public:
 	ComponentManager();

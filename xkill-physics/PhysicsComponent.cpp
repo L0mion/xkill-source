@@ -17,7 +17,6 @@
 #include "CollisionShapes.h"
 #include "debugDrawDispatcher.h"
 
-#include <iostream>
 ATTRIBUTES_DECLARE_ALL;
 
 static debugDrawDispatcher gDebugDraw;
@@ -125,14 +124,29 @@ bool PhysicsComponent::init()
 
 void PhysicsComponent::onUpdate(float delta)
 {
+
+/*
+From Bullet Demo:
+			btCollisionWorld::AllHitsRayResultCallback allResults(from,to);
+			allResults.m_flags |= btTriangleRaycastCallback::kF_KeepUnflippedNormal;
+			m_dynamicsWorld->rayTest(from,to,allResults);
+
+			for (int i=0;i<allResults.m_hitFractions.size();i++)
+			{
+				btVector3 p = from.lerp(to,allResults.m_hitFractions[i]);
+				sDebugDraw.drawSphere(p,0.1,red);
+			}
+*/
+
+
 	//Loop through all physics attributes
 	itrPhysics = ATTRIBUTE_MANAGER->physics.getIterator();
 	while(itrPhysics.hasNext())
 	{
-		Attribute_Physics* physicsAttribute = itrPhysics.getNext();
+		AttributePtr<Attribute_Physics> ptr_physics = itrPhysics.getNext();
 		unsigned int physicsAttributeIndex = itrPhysics.storageIndex();
 
-		synchronizeWithAttributes(physicsAttribute, physicsAttributeIndex); //Synchronize physics objects with physics attributes
+		synchronizeWithAttributes(ptr_physics, physicsAttributeIndex); //Synchronize physics objects with physics attributes
 		physicsObjects_->at(physicsAttributeIndex)->onUpdate(delta);		//Update physics objects by calling their onUpdate function.
 	}
 
@@ -204,20 +218,57 @@ void PhysicsComponent::onEvent(Event* e)
 	{
 		Event_ModifyPhysicsObject* modifyPhysicsObject = static_cast<Event_ModifyPhysicsObject*>(e);
 
-		int physicsAttributeIndex = modifyPhysicsObject->physicsAttributeIndex;
-		if(physicsAttributeIndex < physicsObjects_->size())
+		//Cast void pointer sent in Event_ModifyPhysicsObject, and modify physics object
+		int physicsAttributeIndex = modifyPhysicsObject->ptr_physics.index();
+
+		if(physicsAttributeIndex < physicsObjects_->size() && physicsAttributeIndex > -1)
 		{
-			switch(modifyPhysicsObject->modifyWhatDataInPhysicsObjectData)
+			if(physicsObjects_->at(physicsAttributeIndex) != NULL)
 			{
-			case XKILL_Enums::ModifyPhysicsObjectData::GRAVITY:
-				Float3* gravity = static_cast<Float3*>(modifyPhysicsObject->data);
-				physicsObjects_->at(physicsAttributeIndex)->setGravity(btVector3(gravity->x, gravity->y, gravity->z));
-				break;
+				switch(modifyPhysicsObject->modifyWhatDataInPhysicsObjectData)
+				{
+				case XKILL_Enums::ModifyPhysicsObjectData::GRAVITY:
+					{
+						Float3* gravity = static_cast<Float3*>(modifyPhysicsObject->data);
+						physicsObjects_->at(physicsAttributeIndex)->setGravity(btVector3(gravity->x, gravity->y, gravity->z));
+						break;
+					}
+				case XKILL_Enums::ModifyPhysicsObjectData::VELOCITY:
+					{
+						Float3* velocity = static_cast<Float3*>(modifyPhysicsObject->data);
+						physicsObjects_->at(physicsAttributeIndex)->setLinearVelocity(btVector3(velocity->x, velocity->y, velocity->z));
+						break;
+					}
+				case XKILL_Enums::ModifyPhysicsObjectData::VELOCITYPERCENTAGE:
+					{
+						Float3* velocityPercentage = static_cast<Float3*>(modifyPhysicsObject->data);
+						btVector3 currentLinearVelocity = physicsObjects_->at(physicsAttributeIndex)->getLinearVelocity();
+						physicsObjects_->at(physicsAttributeIndex)->setLinearVelocity(btVector3(currentLinearVelocity.x()*velocityPercentage->x, currentLinearVelocity.y()*velocityPercentage->y, currentLinearVelocity.z()*velocityPercentage->z));
+						break;
+					}
+				case XKILL_Enums::ModifyPhysicsObjectData::FLAG_STATIC:
+					{
+						bool* staticPhysicsObject = static_cast<bool*>(modifyPhysicsObject->data);
+						if(*staticPhysicsObject == true)
+						{
+							physicsObjects_->at(physicsAttributeIndex)->setCollisionFlags(physicsObjects_->at(physicsAttributeIndex)->getCollisionFlags() | btCollisionObject::CF_STATIC_OBJECT);
+						}
+						else if(*staticPhysicsObject == false)
+						{
+							physicsObjects_->at(physicsAttributeIndex)->setCollisionFlags(physicsObjects_->at(physicsAttributeIndex)->getCollisionFlags() & ~ btCollisionObject::CF_STATIC_OBJECT);
+						}
+						break;
+					}
+				}
+			}
+			else
+			{
+				DEBUGPRINT("Invalid physics attribute id when handling event of type EVENT_MODIFY_PHYSICS_OBJECT, error 1");
 			}
 		}
 		else
 		{
-			DEBUGPRINT("Invalid physics attribute id when handling event of type EVENT_MODIFY_PHYSICS_OBJECT");
+			DEBUGPRINT("Invalid physics attribute id when handling event of type EVENT_MODIFY_PHYSICS_OBJECT, error 2");
 		}
 		break;
 	}
@@ -226,7 +277,7 @@ void PhysicsComponent::onEvent(Event* e)
 	}
 }
 
-void PhysicsComponent::synchronizeWithAttributes(Attribute_Physics* physicsAttribute, int physicsAttributeIndex)
+void PhysicsComponent::synchronizeWithAttributes(AttributePtr<Attribute_Physics> ptr_physics, int physicsAttributeIndex)
 {
 	//Also refer to PhysicsComponent::onEvent, handling of EVENT_ATTRIBUTE_UPDATED
 	
@@ -243,12 +294,12 @@ void PhysicsComponent::synchronizeWithAttributes(Attribute_Physics* physicsAttri
 	}
 	*/
 	//Checks if new physiscs attributes were created since last call to this function
-	if(physicsAttributeIndex >= static_cast<unsigned int>(physicsObjects_->size()))
+	if(physicsAttributeIndex >= physicsObjects_->size())
 	{
 		physicsObjects_->push_back(nullptr);
 	}
 	//Synchronize physiscs attributes with internal PhysicsObjects
-	if(physicsAttribute->reloadDataIntoBulletPhysics) //If something has changed in the physics attribute
+	if(ptr_physics->reloadDataIntoBulletPhysics) //If something has changed in the physics attribute
 	{
 		//If the PhysicsObjects already exists, it needs to be removed to safely reset all of its internal Bullet Physics values
 		if(physicsObjects_->at(physicsAttributeIndex) != nullptr)
@@ -257,7 +308,7 @@ void PhysicsComponent::synchronizeWithAttributes(Attribute_Physics* physicsAttri
 			delete physicsObjects_->at(physicsAttributeIndex);
 		}
 		// Determine type of PhysicsObject to create and add to the Bullet Physics world
-		switch(physicsAttribute->collisionFilterGroup)
+		switch(ptr_physics->collisionFilterGroup)
 		{
 		default:
 			physicsObjects_->at(physicsAttributeIndex) = new PhysicsObject();
@@ -278,27 +329,27 @@ void PhysicsComponent::synchronizeWithAttributes(Attribute_Physics* physicsAttri
 			physicsObjects_->at(physicsAttributeIndex) = new PickupablePhysicsObject();
 			break;
 		case Attribute_Physics::EVERYTHING:
-			std::cout << "Error: Attribute_Physics should not have EVERYTHING as collisionFilterGroup" << std::endl;
+			SHOW_MESSAGEBOX("Error: Attribute_Physics should not have EVERYTHING as collisionFilterGroup");
 			break;
 		}
 
 		if(physicsObjects_ != nullptr)
 		{
-			if(physicsObjects_->at(physicsAttributeIndex)->init(physicsAttributeIndex,physicsAttribute->collisionFilterGroup) == true)
+			if(physicsObjects_->at(physicsAttributeIndex)->init(physicsAttributeIndex, ptr_physics->collisionFilterGroup) == true)
 			{
-				dynamicsWorld_->addRigidBody(physicsObjects_->at(physicsAttributeIndex), physicsAttribute->collisionFilterGroup, physicsAttribute->collisionFilterMask);
+				dynamicsWorld_->addRigidBody(physicsObjects_->at(physicsAttributeIndex), ptr_physics->collisionFilterGroup, ptr_physics->collisionFilterMask);
 				//Per object gravity must be set after "addRigidBody"
 				if(!physicsObjects_->at(physicsAttributeIndex)->isStaticOrKinematicObject())
 				{
-					physicsObjects_->at(physicsAttributeIndex)->setGravity(btVector3(physicsAttribute->gravity.x,physicsAttribute->gravity.y, physicsAttribute->gravity.z));
+					physicsObjects_->at(physicsAttributeIndex)->setGravity(btVector3(ptr_physics->gravity.x, ptr_physics->gravity.y, ptr_physics->gravity.z));
 					//physicsObjects_->at(physicsAttributeIndex)->setGravity(btVector3(0,0,0));
 				}
 
-				physicsAttribute->reloadDataIntoBulletPhysics = false;
+				ptr_physics->reloadDataIntoBulletPhysics = false;
 			}
 			else
 			{
-				std::cout << "-->Error initializing PhysicsObject" << std::endl;
+				SHOW_MESSAGEBOX("-->Error initializing PhysicsObject");
 			}
 		}
 	}
@@ -370,24 +421,19 @@ void PhysicsComponent::doCulling(unsigned int frustumAttributeIndex, unsigned in
 
 void PhysicsComponent::updateCulling()
 {
-	static int testvar = 0;
-	if(testvar < 1)
+	while(itrPhysics.hasNext())
 	{
-		testvar++;
-		return;
-	}
-	while(itrRender.hasNext())
-	{
-		Attribute_Render * ra = itrRender.getNext();
-		//ra->culling.clear();
-		ra->cull = false;
-		int a =0;
+		AttributePtr<Attribute_Physics> ptr_physics = itrPhysics.getNext();
+		if(ptr_physics->ptr_render.isNotEmpty())
+		{
+			ptr_physics->ptr_render->cull = false;
+		}
 	}
 	CollisionShapes::Instance()->updateFrustrumShape();
 
 	while(itrCamera.hasNext())
 	{
-		Attribute_Camera* cameraAttribute = itrCamera.getNext();
+		AttributePtr<Attribute_Camera> ptr_camera = itrCamera.getNext();
 		unsigned int index = itrCamera.storageIndex();
 		
 		if(index >= static_cast<unsigned int>(frustumPhysicsObjects_->size()))

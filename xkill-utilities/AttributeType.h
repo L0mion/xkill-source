@@ -152,9 +152,9 @@ struct DLL_U Attribute_Spatial : public IAttribute
 	DataItemList* getDataList()
 	{
 		DataItemList* list = new DataItemList();
-		list->add(&ptr_position,	"ptr_position");
-		list->add(rotation,								"rotation");
-		list->add(scale,								"scale");
+		list->add(&ptr_position,		"ptr_position");
+		list->add(rotation,				"rotation");
+		list->add(scale,				"scale");
 		return list;
 	}
 	void saveTo(DataItemList* list)
@@ -173,7 +173,8 @@ private:
 	
 
 public:
-	AttributePtr<Attribute_Spatial> ptr_parent_spatial;
+	AttributePtr<Attribute_Spatial> ptr_parent_spatial_position;
+	AttributePtr<Attribute_Spatial> ptr_parent_spatial_rotation;
 	AttributePtr<Attribute_Spatial> ptr_spatial;
 
 	Float3 offset_position;
@@ -182,12 +183,16 @@ public:
 	DataItemList* getDataList()
 	{
 		DataItemList* list = new DataItemList();
+		list->add(&ptr_parent_spatial_position,			"ptr_parent_spatial_position");
+		list->add(&ptr_parent_spatial_rotation,			"ptr_parent_spatial_rotation");
 		list->add(offset_position,						"offset_position");
 		list->add(offset_rotation,						"offset_rotation");
 		return list;
 	}
 	void saveTo(DataItemList* list)
 	{
+		list->get(&ptr_parent_spatial_position);
+		list->get(&ptr_parent_spatial_rotation);
 		list->get(&offset_position);
 		list->get(&offset_rotation);
 	};
@@ -359,6 +364,7 @@ struct DLL_U Attribute_Projectile : public IAttribute
 	AttributePtr<Attribute_Physics> ptr_physics;
 
 	int entityIdOfCreator;		//!< Entity id of the entity that created the projectile.
+	float totalLifeTime;
 	float currentLifeTimeLeft;	//!< Counter counting down the lifetime of the projectile. Is initialized to totalLifeTime. When equal or less than zero, the projectile attribute shall be destroyed.
 	XKILL_Enums::AmmunitionType ammunitionType;
 	XKILL_Enums::FiringModeType firingModeType;
@@ -522,12 +528,12 @@ struct DLL_U Attribute_Input : public IAttribute
 	{
 		DataItemList* list = new DataItemList();
 		
-		list->add(&ptr_physics, "ptr_physics");
+		list->add(&ptr_physics,			"ptr_physics");
 		list->add(position,				"position");
-		list->add(rotation,					"rotation");
-		list->add(fire,						"fire");
-		list->add(changeAmmunitionType,		"changeAmmunitionType");
-		list->add(changeFiringMode,			"changeFiringMode");
+		list->add(rotation,				"rotation");
+		list->add(fire,					"fire");
+		list->add(changeAmmunitionType,	"changeAmmunitionType");
+		list->add(changeFiringMode,		"changeFiringMode");
 
 		return list;
 	}
@@ -748,12 +754,14 @@ struct DLL_U Attribute_Player : public IAttribute
 
 	void clean();
 
-	AttributePtr<Attribute_Render> ptr_render;
-	AttributePtr<Attribute_Input> ptr_input;
-	AttributePtr<Attribute_InputDevice> ptr_inputDevice;
-	AttributePtr<Attribute_Camera> ptr_camera;
-	AttributePtr<Attribute_Health> ptr_health;
-	AttributePtr<Attribute_WeaponStats> ptr_weaponStats;
+	AttributePtr<Attribute_Render>			ptr_render;
+	AttributePtr<Attribute_Input>			ptr_input;
+	AttributePtr<Attribute_InputDevice>		ptr_inputDevice;
+	AttributePtr<Attribute_Camera>			ptr_camera;
+	AttributePtr<Attribute_Health>			ptr_health;
+	AttributePtr<Attribute_WeaponStats>		ptr_weaponStats;
+
+	AttributePtr<Attribute_Spatial>			ptr_weaponFireLocation_spatial;
 
 	static int nextId;
 
@@ -764,26 +772,31 @@ struct DLL_U Attribute_Player : public IAttribute
 	float currentSpeed;			//!< Speed used when changing position in "handleInput".
 	float walkSpeed;			//!< Speed when walking.
 	float sprintSpeed;			//!< Speed when sprinting.
+	float currentSprintTime;	//!< Sprinting time left
+	float sprintTime;			//!< Time that can be spent sprinting
+	bool canSprint;				//!< Can the player sprint right now
+	float sprintRechargeRate;	//!< The rate at which the sprint will recharge
 	float respawnDelay;			//!< Time between death and respawn
 	float currentRespawnDelay;	//!< Time until respawn
 	float timeSinceLastJump;	//!< Incrementing timer
 	float delayInSecondsBetweenEachJump;
 	bool collidingWithWorld;	//!< Set y-velocity to zero when not colliding with world and not jumping
+	float timeSinceLastDamageTaken; //!< Incrementing timer. Reset when taking damage.
 	float jetpackTimer;			//!< Incremented when using jetpack
 	bool detectedAsDead;
 
-	float meshIDWhenAlive;
-	float meshIDWhenDead;
+	int meshID_whenAlive;
+	int meshID_whenDead;
 
 	DataItemList* getDataList()
 	{
 		DataItemList* list = new DataItemList();
 		
-		list->add(&ptr_render,		"ptr_render");
+		list->add(&ptr_render,			"ptr_render");
 		list->add(&ptr_input,			"ptr_input");
-		list->add(&ptr_camera,		"ptr_camera");
-		list->add(&ptr_health,		"ptr_health");
-		list->add(&ptr_weaponStats,	"ptr_weaponStats");
+		list->add(&ptr_camera,			"ptr_camera");
+		list->add(&ptr_health,			"ptr_health");
+		list->add(&ptr_weaponStats,		"ptr_weaponStats");
 		list->add(id,					"id");
 		list->add(priority,				"priority");
 		list->add(cycleSteals,			"cycleSteals");
@@ -857,21 +870,22 @@ struct DLL_U Attribute_Health : public IAttribute
 	Attribute_Health();
 	~Attribute_Health();
 
-	float startHealth;
+	float maxHealth;
 	float health;
+	float healthFromLastFrame;
 
 	DataItemList* getDataList()
 	{
 		DataItemList* list = new DataItemList();
 
-		list->add(startHealth,	"startHealth");
+		list->add(maxHealth,	"maxHealth");
 		list->add(health,		"health");
 
 		return list;
 	}
 	void saveTo(DataItemList* list)
 	{
-		list->get(&startHealth);
+		list->get(&maxHealth);
 		list->get(&health);
 	};
 	AttributeType getType(){return ATTRIBUTE_HEALTH;}

@@ -4,6 +4,7 @@
 #include <vector>
 #include <fmod_event.hpp>
 #include <fmod_errors.h>
+#include <xkill-utilities/Math.h>
 
 /** \defgroup xkill-sound XKILL - Sound
  *
@@ -35,25 +36,30 @@ public:
 	  * \param soundEventFileName Attached to path when loading events from a sound event file (.fev).
 	  * \param maxChannels From the FMOD documentation: "The maximum number of channels to be used in FMOD. They are also called 'virtual channels' as you can play as many of these as you want, even if you only have a small number of hardware or software voices. See remarks for more."
       */
-	void Init(std::string mediaPath, std::string soundEventFileName, int maxChannels);
+	bool Init(std::string mediaPath, std::string soundEventFileName, int maxChannels);
 
 	/** \brief Must be called for the event system to work as intended.*/
 	void Update();
 	/** \brief Start a sound event at index in the mSoundEvents vector.*/
-	void StartSoundEventAt(unsigned int index);
+	void StartSoundEventAt(unsigned int index, Float3 position, bool use3DAudio);
 	/** \brief Mutes all sounds.*/
 	void SetMuteSounds(bool mute = true);
 	/** \brief Set volume.*/
 	void SetVolume(float volume);
 
+	void UpdateNrOfListeners();
+
 	std::vector<std::string> GetFMODEventNames();
 
 private:
 	bool FMODErrorCheck(FMOD_RESULT result);
+	void update3DListeners();
+	FMOD_VECTOR float3ToFModVector(Float3 v);
 
 	FMOD::EventSystem* mEventsystem;
 	std::vector<FMOD::Event*> mEvents;
 	std::string mSoundEventFileNameWithoutExtension;
 	std::string mMediaPath;
 	int nrOfEvents_;
+	int nrOfListeners_;
 };

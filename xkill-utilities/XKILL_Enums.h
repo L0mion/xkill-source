@@ -16,7 +16,10 @@ namespace XKILL_Enums
 
 	enum DLL_U ModifyPhysicsObjectData
 	{
-		GRAVITY
+		GRAVITY,
+		VELOCITY,
+		VELOCITYPERCENTAGE,
+		FLAG_STATIC
 	};
 
 	enum DLL_U FiringModeType

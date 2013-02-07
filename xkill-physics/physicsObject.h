@@ -8,7 +8,6 @@ class PhysicsObject
 {
 private:
 	virtual btVector3 subClassCalculateLocalInertiaHook(btScalar mass);		//! May be overridden by subclasses. Is called from init.
-	virtual btCollisionShape* subClassSpecificCollisionShape();				//! May be overridden by subclasses. Is called from the end of init.
 	virtual bool subClassSpecificInitHook();								//! May be overridden by subclasses. Is called from the end of init.
 protected:
 		unsigned int attributeIndex_;										//!< Specifies which PhysicsObject is synchronized with which physics attribute.
@@ -16,6 +15,7 @@ protected:
 
 		btVector3 localInertiaBasedOnCollisionShapeAndMass(btScalar mass);	//!< Called from "subClassCalculateLocalInertiaHook" by subclasses.
 		btVector3 zeroLocalInertia();										//!< Called from "subClassCalculateLocalInertiaHook" by subclasses.
+		virtual btCollisionShape* subClassSpecificCollisionShape();			//! May be overridden by subclasses. Is called from the end of init.
 public:
 	PhysicsObject();
 	virtual ~PhysicsObject();
