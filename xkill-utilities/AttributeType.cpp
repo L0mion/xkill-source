@@ -76,7 +76,8 @@ Attribute_Physics::~Attribute_Physics()
 Attribute_Projectile::Attribute_Projectile()
 {
 	entityIdOfCreator = -1;
-	currentLifeTimeLeft = 10.0f;
+	totalLifeTime = 10.0f;
+	currentLifeTimeLeft = totalLifeTime;
 	ammunitionType = XKILL_Enums::AmmunitionType::BULLET;
 	firingModeType = XKILL_Enums::FiringModeType::SEMI;
 }

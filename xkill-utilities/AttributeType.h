@@ -364,6 +364,7 @@ struct DLL_U Attribute_Projectile : public IAttribute
 	AttributePtr<Attribute_Physics> ptr_physics;
 
 	int entityIdOfCreator;		//!< Entity id of the entity that created the projectile.
+	float totalLifeTime;
 	float currentLifeTimeLeft;	//!< Counter counting down the lifetime of the projectile. Is initialized to totalLifeTime. When equal or less than zero, the projectile attribute shall be destroyed.
 	XKILL_Enums::AmmunitionType ammunitionType;
 	XKILL_Enums::FiringModeType firingModeType;

@@ -206,18 +206,22 @@ public:
 		ptr_spatial->ptr_position = ptr_position;
 		ptr_spatial->rotation = e->rotation;
 
+		//float lifeTime;
 		CREATE_ATTRIBUTE(ptr_render, Attribute_Render, render, entity);
 		ptr_render->ptr_spatial = ptr_spatial;
 		ptr_render->meshID = MODEL_PROJECTILE_SINGLE;
 		switch (e->ammunitionType)
 		{
 		case XKILL_Enums::AmmunitionType::BULLET:
+			//lifeTime = 10.0f;
 			ptr_render->meshID = MODEL_PROJECTILE_SINGLE;
 			break;
 		case XKILL_Enums::AmmunitionType::EXPLOSIVE:
+			//lifeTime = 10.0f;
 			ptr_render->meshID = MODEL_PROJECTILE_EXPLOSIVE;
 			break;
 		case XKILL_Enums::AmmunitionType::SCATTER:
+			//lifeTime = 0.1f;
 			ptr_render->meshID = MODEL_PROJECTILE_SCATTER;
 			break;
 		default:
@@ -240,6 +244,7 @@ public:
 		ptr_projectile->entityIdOfCreator = e->entityIdOfCreator;
 		ptr_projectile->ammunitionType = e->ammunitionType;
 		ptr_projectile->firingModeType = e->firingMode;
+		ptr_projectile->currentLifeTimeLeft = 10.0f;
 
 		CREATE_ATTRIBUTE(ptr_damage, Attribute_Damage, damage, entity);
 		ptr_damage->damage = e->damage;

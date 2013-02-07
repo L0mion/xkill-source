@@ -219,7 +219,7 @@ void PhysicsComponent::onEvent(Event* e)
 		Event_ModifyPhysicsObject* modifyPhysicsObject = static_cast<Event_ModifyPhysicsObject*>(e);
 
 		//Cast void pointer sent in Event_ModifyPhysicsObject, and modify physics object
-		int physicsAttributeIndex = modifyPhysicsObject->physicsAttributeIndex;
+		int physicsAttributeIndex = modifyPhysicsObject->ptr_physics.index();
 
 		if(physicsAttributeIndex < physicsObjects_->size() && physicsAttributeIndex > -1)
 		{

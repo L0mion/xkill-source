@@ -275,20 +275,33 @@ void GameComponent::onUpdate(float delta)
 
 	while(itrProjectile.hasNext())
 	{
-		// Fetch attributes
 		AttributePtr<Attribute_Projectile> projectile = itrProjectile.getNext();
-
-		//
-		// Update projectile lifetime
-		//
-
-		projectile->currentLifeTimeLeft -= delta;
+		projectile->currentLifeTimeLeft -= delta; //Update projectile lifetime
 		if(projectile->currentLifeTimeLeft <= 0)
 		{
 			DEBUGPRINT("Projectile entity " << itrProjectile.ownerId() << " has no lifetime left");
-
-			// remove projectile entity
 			SEND_EVENT(&Event_RemoveEntity(itrProjectile.ownerId()));
+		}
+
+		
+
+		//Handle projectile based on ammunitionType
+		switch(projectile->ammunitionType)
+		{
+		case XKILL_Enums::AmmunitionType::BULLET:
+			break;
+		case XKILL_Enums::AmmunitionType::EXPLOSIVE:
+			break;
+		case XKILL_Enums::AmmunitionType::SCATTER:
+			if( (projectile->totalLifeTime - projectile->currentLifeTimeLeft) < (projectile->totalLifeTime-0.1) )
+			{
+				//Entity* entity = itrPhysics.ownerAt(attributeIndex_);
+				//std::vector<int> physicsId = entity1->getAttributes(ATTRIBUTE_PHYSICS);
+
+
+				//SEND_EVENT(&Event_ModifyPhysicsObject(XKILL_Enums::ModifyPhysicsObjectData::GRAVITY, static_cast<void*>(&Float3(0.0f, -10.0f, 0.0f)), physicsId.at(i)));
+			}
+			break;
 		}
 	}
 
@@ -431,7 +444,7 @@ void GameComponent::onUpdate(float delta)
 		AttributePtr<Attribute_Camera> ptr_camera = itrCamera.getNext();
 		AttributePtr<Attribute_Spatial> ptr_spatial = ptr_camera->ptr_spatial;
 
-		// Update rotation quaternion so other can read from it
+		// Update rotation quaternion so others can read from it
 		{
 			DirectX::XMMATRIX xm_view = DirectX::XMLoadFloat4x4((DirectX::XMFLOAT4X4*)&ptr_camera->mat_view);
 			xm_view = DirectX::XMMatrixInverse(&DirectX::XMMatrixDeterminant(xm_view), xm_view);
@@ -506,13 +519,10 @@ void GameComponent::event_PhysicsAttributesColliding(Event_PhysicsAttributesColl
 						{
 							Entity* creatorOfProjectilePlayerEntity = &allEntity->at(damage->owner_entityID);
 							std::vector<int> playerId = creatorOfProjectilePlayerEntity->getAttributes(ATTRIBUTE_PLAYER);
-
 							for(unsigned k=0;k<playerId.size();k++)
 							{
 								AttributePtr<Attribute_Player> ptr_player = itrPlayer.at(playerId.at(k));
-								
-								//Award player
-								if(entity1->getID() != damage->owner_entityID)
+								if(entity1->getID() != damage->owner_entityID) //Award player
 								{
 									ptr_player->priority++;
 								}
@@ -520,13 +530,10 @@ void GameComponent::event_PhysicsAttributesColliding(Event_PhysicsAttributesColl
 								{
 									ptr_player->priority--;
 								}
-								
 								DEBUGPRINT("Player with entity id " << damage->owner_entityID << " killed player with entity id " << entity1->getID());
 							}
-
 							Entity* playerThatDied = &allEntity->at(itrHealth.ownerIdAt(healthId[j]));
 							playerId = playerThatDied->getAttributes(ATTRIBUTE_PLAYER);
-
 							for(unsigned int k = 0; k < playerId.size(); k++)
 							{
 								SEND_EVENT(&Event_PlayerDeath(playerId[k]));
@@ -537,9 +544,7 @@ void GameComponent::event_PhysicsAttributesColliding(Event_PhysicsAttributesColl
 						{
 							SEND_EVENT(&Event_PlaySound(Event_PlaySound::SOUND_HIT, position, use3DAudio));
 						}
-
 						SEND_EVENT(&Event_Rumble(entity1->getID(), true, 0.2f, 1.0f, 1.0f));
-
 						DEBUGPRINT("DAMAGEEVENT Entity " << entity2->getID() << " damage: " <<  damage->damage << " Entity " << entity1->getID() << " health " << health->health);
 					}
 
@@ -560,66 +565,52 @@ void GameComponent::event_PhysicsAttributesColliding(Event_PhysicsAttributesColl
 
 		if(entity2->hasAttribute(ATTRIBUTE_PHYSICS)) //May not be needed
 		{
-			//Set gravity on projectiles colliding with physics objects
-			std::vector<int> physicsId = entity1->getAttributes(ATTRIBUTE_PHYSICS);
-			for(unsigned i=0;i<physicsId.size();i++)
-			{
-				AttributePtr<Attribute_Physics> ptr_physics = itrPhysics.at(physicsId.at(i));
-				SEND_EVENT(&Event_ModifyPhysicsObject(XKILL_Enums::ModifyPhysicsObjectData::GRAVITY, static_cast<void*>(&Float3(0.0f, -10.0f, 0.0f)), physicsId.at(i)));
-				//physicsAttribute->gravity = Float3(0.0f, -10.0f, 0.0f);
-				//physicsAttribute->linearVelocity = Float3(0.0f, 0.0f, 0.0f);
-				//physicsAttribute->reloadDataIntoBulletPhysics = true;
-			}
-
 			//Handle PhysicsAttribute of a projectile colliding with another PhysicsAttribute
-			std::vector<int> projectileId = entity1->getAttributes(ATTRIBUTE_PROJECTILE);
-			for(unsigned i=0;i<projectileId.size();i++)
+			std::vector<int> physicsId = entity1->getAttributes(ATTRIBUTE_PHYSICS);
+			for(int i=0;i<physicsId.size();i++)
 			{
-				AttributePtr<Attribute_Projectile> ptr_projectile = itrProjectile.at(projectileId.at(i));
-
-				//Shorten lifetime of projectile colliding with physics objects
-				switch(ptr_projectile->ammunitionType)
+				std::vector<int> projectileId = entity1->getAttributes(ATTRIBUTE_PROJECTILE);
+				for(unsigned j=0;j<projectileId.size();j++)
 				{
-				case XKILL_Enums::AmmunitionType::BULLET:
-					if(ptr_projectile->currentLifeTimeLeft > 0.15f)
+					AttributePtr<Attribute_Projectile> ptr_projectile = itrProjectile.at(projectileId.at(i));
+
+					//Determine collision effect based on ammunitionType
+					switch(ptr_projectile->ammunitionType)
 					{
-						ptr_projectile->currentLifeTimeLeft = 0.15f;
-						SEND_EVENT(&Event_ModifyPhysicsObject(XKILL_Enums::ModifyPhysicsObjectData::GRAVITY, static_cast<void*>(&Float3(0.0f, -10.0f, 0.0f)), physicsId.at(i)));
+					case XKILL_Enums::AmmunitionType::BULLET: //Bounce off the wall with not gravity for 1 second
+						if(ptr_projectile->currentLifeTimeLeft > 1.00f)
+						{
+							ptr_projectile->currentLifeTimeLeft = 1.00f;
+							SEND_EVENT(&Event_ModifyPhysicsObject(XKILL_Enums::ModifyPhysicsObjectData::GRAVITY, static_cast<void*>(&Float3(0.0f, -5.0f, 0.0f)), itrPhysics.at(physicsId.at(j))));
+						}
+						break;
+					case XKILL_Enums::AmmunitionType::SCATTER: //Fall down and roll for 1 second
+						if(ptr_projectile->currentLifeTimeLeft > 1.00f)
+						{
+							ptr_projectile->currentLifeTimeLeft = 1.00f;
+
+							SEND_EVENT(&Event_ModifyPhysicsObject(XKILL_Enums::ModifyPhysicsObjectData::GRAVITY, static_cast<void*>(&Float3(0.0f, -10.0f, 0.0f)), itrPhysics.at(physicsId.at(j))));
+							SEND_EVENT(&Event_ModifyPhysicsObject(XKILL_Enums::ModifyPhysicsObjectData::VELOCITYPERCENTAGE, static_cast<void*>(&Float3(0.1f, 0.1f, 0.1f)), itrPhysics.at(physicsId.at(j))));
+						}
+						break;
+					case XKILL_Enums::AmmunitionType::EXPLOSIVE: //Remove projectile and create an explosion sphere in its place
+						{
+							//Kill the projectile that caused the explosion
+ 							ptr_projectile->currentLifeTimeLeft = 0.0f;
+
+							//Extract projectile position.
+							AttributePtr<Attribute_Physics> ptr_projectile_physics	 = ptr_projectile->ptr_physics;
+							AttributePtr<Attribute_Spatial> ptr_projectile_spatial	 = ptr_projectile_physics->ptr_spatial;
+							AttributePtr<Attribute_Position> ptr_projectile_position = ptr_projectile_spatial->ptr_position;
+
+							//Creates an explosion sphere. Init information is taken from the impacting projectile.
+							SEND_EVENT(&Event_CreateExplosionSphere(ptr_projectile_position->position, 1, ptr_projectile->entityIdOfCreator, ptr_projectile->ammunitionType, ptr_projectile->firingModeType));
+							break;
+						}
+					default:
+						SHOW_MESSAGEBOX("PhysicsAttribute collision: unknown ammunitionType"); 
+						break;
 					}
-					break;
-				case XKILL_Enums::AmmunitionType::SCATTER:
-					if(ptr_projectile->currentLifeTimeLeft > 1.00f)
-					{
-						ptr_projectile->currentLifeTimeLeft = 1.00f;
-
-						SEND_EVENT(&Event_ModifyPhysicsObject(XKILL_Enums::ModifyPhysicsObjectData::GRAVITY, static_cast<void*>(&Float3(0.0f, -10.0f, 0.0f)), physicsId.at(i)));
-						SEND_EVENT(&Event_ModifyPhysicsObject(XKILL_Enums::ModifyPhysicsObjectData::VELOCITYPERCENTAGE, static_cast<void*>(&Float3(0.1f, 0.1f, 0.1f)), physicsId.at(i)));
-
-						/*
-						SEND_EVENT(&Event_ModifyPhysicsObject(XKILL_Enums::ModifyPhysicsObjectData::VELOCITY, static_cast<void*>(&Float3(0.0f, 0.0f, 0.0f)), physicsId.at(i)));
-
-						bool truthValue = true;
-						void* truthValueAsVoidPointer = static_cast<void*>(&truthValue);
-						SEND_EVENT(&Event_ModifyPhysicsObject(XKILL_Enums::ModifyPhysicsObjectData::FLAG_STATIC, truthValueAsVoidPointer, physicsId.at(i)));
-						*/
-					}
-					break;
-				}
-
-				//Explosion handling.
-				if(ptr_projectile->ammunitionType == XKILL_Enums::AmmunitionType::EXPLOSIVE)
-				{
-					//Get damage from projectile.
-					//Kill the projectile that caused the explosion
- 					ptr_projectile->currentLifeTimeLeft = 0.0f;
-
-					//Extract projectile position.
-					AttributePtr<Attribute_Physics> ptr_projectile_physics	 = ptr_projectile->ptr_physics;
-					AttributePtr<Attribute_Spatial> ptr_projectile_spatial	 = ptr_projectile_physics->ptr_spatial;
-					AttributePtr<Attribute_Position> ptr_projectile_position	 = ptr_projectile_spatial->ptr_position;
-
-					//Creates an explosion sphere. Init information is taken from the impacting projectile.
-					SEND_EVENT(&Event_CreateExplosionSphere(ptr_projectile_position->position, 1, ptr_projectile->entityIdOfCreator, ptr_projectile->ammunitionType, ptr_projectile->firingModeType));
 				}
 			}
 			//SEND_EVENT(&Event_RemoveEntity(entity1->getID())); //Crashes sometimes if removed here
