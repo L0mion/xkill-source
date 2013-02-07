@@ -183,6 +183,7 @@ void PhysicsComponent::onUpdate(float delta)
 
 	
 	///all hits
+	/*
 	{
 		btVector3 from(1,20,1);
 		btVector3 to(1,-20,1);
@@ -197,6 +198,7 @@ void PhysicsComponent::onUpdate(float delta)
 			gDebugDraw.drawSphere(p,0.1,btVector3(1.0f, 0.0f, 0.0f));
 		}
 	}
+	*/
 
 	updateCulling();
 
