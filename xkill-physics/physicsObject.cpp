@@ -41,7 +41,11 @@ btVector3 PhysicsObject::subClassCalculateLocalInertiaHook(btScalar mass)
 btCollisionShape* PhysicsObject::subClassSpecificCollisionShape()
 {
 	AttributePtr<Attribute_Physics> ptr_physics = itrPhysics_.at(attributeIndex_);
-	return CollisionShapes::Instance()->getCollisionShape(ptr_physics->meshID);
+
+	int meshID = ptr_physics->meshID;
+	btCollisionShape* collisionShape = CollisionShapes::Instance()->getCollisionShape(ptr_physics->meshID);
+
+	return collisionShape;
 }
 
 bool PhysicsObject::subClassSpecificInitHook()

@@ -45,10 +45,12 @@ CollisionShapes::~CollisionShapes()
 
 btCollisionShape* CollisionShapes::getCollisionShape(unsigned int meshId)
 {
+	btCollisionShape* collisionShape;
 	std::map<unsigned int, unsigned int>::iterator it = collisionShapesIdToIndex_.find(meshId);
 	if(it != collisionShapesIdToIndex_.end())
 	{
-		return collisionShapes_->at(it->second);
+		collisionShape = collisionShapes_->at(it->second);
+		return collisionShape;
 	}
 	else
 	{

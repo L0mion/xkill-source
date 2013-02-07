@@ -1,8 +1,5 @@
 #include "EntityStorage.h"
 
-#include <iostream>
-#include "EventManager.h"
-
 EntityStorage::EntityStorage()
 {
 	// Creates Entity 0.

@@ -563,9 +563,9 @@ public:
 class DLL_U Event_ModifyPhysicsObject : public Event
 {
 public:
-	Event_ModifyPhysicsObject(XKILL_Enums::ModifyPhysicsObjectData modifyWhatDataInPhysicsObjectData, void* data, int physicsAttributeIndex);
+	Event_ModifyPhysicsObject(XKILL_Enums::ModifyPhysicsObjectData modifyWhatDataInPhysicsObjectData, void* data, AttributePtr<Attribute_Physics> ptr_physics);
 
+	AttributePtr<Attribute_Physics> ptr_physics;
 	XKILL_Enums::ModifyPhysicsObjectData modifyWhatDataInPhysicsObjectData;
 	void* data;
-	int physicsAttributeIndex;
 };

@@ -222,9 +222,9 @@ Event_DrawBulletPhysicsDebugLines::Event_DrawBulletPhysicsDebugLines(std::vector
 	this->debugLineVertices = debugLineVertices;
 }
 
-Event_ModifyPhysicsObject::Event_ModifyPhysicsObject(XKILL_Enums::ModifyPhysicsObjectData modifyWhatDataInPhysicsObjectData, void* data, int physicsAttributeIndex) : Event(EVENT_MODIFY_PHYSICS_OBJECT)
+Event_ModifyPhysicsObject::Event_ModifyPhysicsObject(XKILL_Enums::ModifyPhysicsObjectData modifyWhatDataInPhysicsObjectData, void* data, AttributePtr<Attribute_Physics> ptr_physics) : Event(EVENT_MODIFY_PHYSICS_OBJECT)
 {
 	this->modifyWhatDataInPhysicsObjectData = modifyWhatDataInPhysicsObjectData;
 	this->data = data;
-	this->physicsAttributeIndex = physicsAttributeIndex;
+	this->ptr_physics = ptr_physics;
 }

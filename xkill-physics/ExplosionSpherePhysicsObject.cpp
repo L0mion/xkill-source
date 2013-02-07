@@ -62,6 +62,11 @@ bool ExplosionSpherePhysicsObject::subClassSpecificInitHook()
 	return true;
 }
 
+btVector3 ExplosionSpherePhysicsObject::subClassCalculateLocalInertiaHook(btScalar mass)
+{
+	return zeroLocalInertia();
+}
+
 void ExplosionSpherePhysicsObject::onUpdate(float delta)
 {
 	//Expand explosion sphere according to mutator settings retrieved in "subClassSpecificInitHook()"

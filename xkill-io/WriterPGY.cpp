@@ -1,5 +1,3 @@
-#include <iostream>
-
 #include <xkill-utilities/Util.h>
 
 #include "WriterPGY.h"
