@@ -105,16 +105,8 @@ void lightingCS(
 		
 		if(lightIndex < numLightsPoint)
 		{
-			bool inFrustum = true;
-			[unroll] for(uint j = 0; j < 6; j++)
-			{
-				float d = dot(
-					frustum._[j],
-					mul(float4(lightsPos[lightIndex], 1.0f), view));
-				inFrustum = inFrustum && (d >= -lightsPoint[lightIndex].range);
-			}
-			
-			if(inFrustum && tileLightNum < TILE_MAX_LIGHTS)
+			if(IntersectSphere(frustum, mul(float4(lightsPos[lightIndex], 1.0f), view), lightsPoint[lightIndex].range) &&
+				tileLightNum < TILE_MAX_LIGHTS)
 			{
 				uint index;
 				InterlockedAdd(tileLightNum, 1, index);

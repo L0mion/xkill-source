@@ -40,4 +40,18 @@ Frustum ExtractFrustumPlanes(
 	return f;
 }
 
+bool IntersectSphere(Frustum f, float4 spherePos, float sphereRadius)
+{
+	bool inFrustum = true;
+	[unroll] for(uint j = 0; j < 6; j++)
+	{
+		float d = dot(
+			f._[j],
+			spherePos);
+		inFrustum = inFrustum && (d >= -sphereRadius);
+	}
+
+	return inFrustum;
+}
+
 #endif //XKILL_RENDERER_TILINGFRUSTUM_HLSL
