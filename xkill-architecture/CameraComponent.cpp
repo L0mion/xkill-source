@@ -177,7 +177,7 @@ void updateAspectRatio()
 	// resize aspect ratios of all cameras 
 	while(itrSplitScreen.hasNext())
 	{
-		Attribute_SplitScreen* ptr_splitScreen = itrSplitScreen.getNext();
+		AttributePtr<Attribute_SplitScreen> ptr_splitScreen = itrSplitScreen.getNext();
 		AttributePtr<Attribute_Camera> ptr_camera = ptr_splitScreen->ptr_camera;
 		AttributePtr<Attribute_Spatial> ptr_spatial = ptr_camera->ptr_spatial;
 		AttributePtr<Attribute_Position> ptr_position = ptr_spatial->ptr_position;
@@ -230,7 +230,7 @@ void CameraComponent::onUpdate(float delta)
 	// Update rotation
 	while(itrPlayer.hasNext())
 	{
-		Attribute_Player* ptr_player = itrPlayer.getNext();
+		AttributePtr<Attribute_Player> ptr_player = itrPlayer.getNext();
 
 		AttributePtr<Attribute_Health> ptr_health = ptr_player->ptr_health;
 		AttributePtr<Attribute_Input> ptr_input = ptr_player->ptr_input;
@@ -263,7 +263,7 @@ void CameraComponent::onUpdate(float delta)
 	// Recalculate view
 	while(itrCamera.hasNext())
 	{
-		AttributePtr<Attribute_Camera> ptr_camera = itrCamera.attributePointer(itrCamera.getNext());
+		AttributePtr<Attribute_Camera> ptr_camera = itrCamera.getNext();
 		AttributePtr<Attribute_Spatial> ptr_spatial = ptr_camera->ptr_spatial;
 		updateView(ptr_camera);
 		updateProj(ptr_camera);

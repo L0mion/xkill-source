@@ -6,6 +6,8 @@
 class ProjectilePhysicsObject
 	: public PhysicsObject
 {
+private:
+	bool localCollisionShape_;
 public:
 	ProjectilePhysicsObject();
 	~ProjectilePhysicsObject();

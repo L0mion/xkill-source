@@ -71,7 +71,7 @@ public:
 	If no unoccupied player spawn point is found, one is selected at random. 
 	If there exists no player spawn points at all, nullptr is returned.
 	*/
-	Attribute_PlayerSpawnPoint* findUnoccupiedSpawnPoint();
+	AttributePtr<Attribute_PlayerSpawnPoint> findUnoccupiedSpawnPoint();
 
 	bool switchAmmunition(AttributePtr<Attribute_WeaponStats> ptr_weaponStats);
 	bool switchFiringMode(AttributePtr<Attribute_WeaponStats> ptr_weaponStats);

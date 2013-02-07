@@ -18,14 +18,17 @@ ProjectilePhysicsObject::ProjectilePhysicsObject()
 
 ProjectilePhysicsObject::~ProjectilePhysicsObject()
 {
-	delete getCollisionShape();
+	if(localCollisionShape_)
+	{
+		delete getCollisionShape();
+	}
 }
 
 bool ProjectilePhysicsObject::subClassSpecificInitHook()
 {
 	//Anti-tunneling using btCollisionObject::setCcdSweptSphereRadius and btCollisionObject::setCcdMotionThreshold
-	Attribute_Physics* physicsAttribute = itrPhysics_ProjectilePhysicsObject.at(attributeIndex_);
-	btCollisionShape* collisionShape = CollisionShapes::Instance()->getCollisionShape(physicsAttribute->meshID);
+	AttributePtr<Attribute_Physics> ptr_physics = itrPhysics_ProjectilePhysicsObject.at(attributeIndex_);
+	btCollisionShape* collisionShape = CollisionShapes::Instance()->getCollisionShape(ptr_physics->meshID);
 	btVector3 boundingSphereCenter;
 	float boundingSphereRadius;
 	collisionShape->getBoundingSphere(boundingSphereCenter, boundingSphereRadius);
@@ -35,9 +38,9 @@ bool ProjectilePhysicsObject::subClassSpecificInitHook()
 	//float speed = velocity.length();
 	setCcdMotionThreshold(boundingSphereRadius);
 
-	setFriction(0.5f);
-	setRollingFriction(0.5f);
-	setRestitution(1.0f);
+	setFriction(btScalar(0.5f));
+	setRollingFriction(btScalar(0.5f));
+	setRestitution(btScalar(1.0f));
 
 	return true;
 }
@@ -54,13 +57,15 @@ btCollisionShape* ProjectilePhysicsObject::subClassSpecificCollisionShape()
 	std::vector<int> projectileId = entity->getAttributes(ATTRIBUTE_PROJECTILE);
 	for(int i=0;i<projectileId.size();i++)
 	{
-		Attribute_Projectile* projectileAttribute = itrProjectile_ProjectilePhysicsObject.at(projectileId.at(i));
-		if(projectileAttribute->ammunitionType == XKILL_Enums::AmmunitionType::SCATTER)
+		AttributePtr<Attribute_Projectile> ptr_projectile = itrProjectile_ProjectilePhysicsObject.at(projectileId.at(i));
+		if(ptr_projectile->ammunitionType == XKILL_Enums::AmmunitionType::SCATTER)
 		{
+			localCollisionShape_ = true;
 			return new btSphereShape(0.15f);
 		}
 		else
 		{
+			localCollisionShape_ = false;
 			return PhysicsObject::subClassSpecificCollisionShape();
 		}
 	}

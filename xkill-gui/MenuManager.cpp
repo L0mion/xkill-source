@@ -88,7 +88,7 @@ HUDWindow::HUDWindow(QWidget* parent, int id) : QMainWindow(parent)
 	resize(horizontalLayout->minimumSize());
 }
 
-void HUDWindow::parentMoveEvent(Attribute_SplitScreen* splitScreen)
+void HUDWindow::parentMoveEvent(AttributePtr<Attribute_SplitScreen> splitScreen)
 {
 	float sizeScale = (float) splitScreen->ssHeight / 1000;
 	sizeScale = 0.75f*sizeScale + 0.25f;
@@ -98,7 +98,7 @@ void HUDWindow::parentMoveEvent(Attribute_SplitScreen* splitScreen)
 	move(x, y);
 }
 
-void HUDWindow::update(Attribute_SplitScreen* splitScreen)
+void HUDWindow::update(AttributePtr<Attribute_SplitScreen> splitScreen)
 {
 	AttributePtr<Attribute_Player>		player		=	splitScreen->ptr_player;
 	AttributePtr<Attribute_Health>		health		=	player->ptr_health;
@@ -195,9 +195,9 @@ void HUDManager::update()
 	int index = 0;
 	while(itrSplitScreen.hasNext())
 	{
-		Attribute_SplitScreen* splitScreen = itrSplitScreen.getNext();
-		huds[index]->update(splitScreen);
-		huds[index]->parentMoveEvent(splitScreen);
+		AttributePtr<Attribute_SplitScreen> ptr_splitScreen = itrSplitScreen.getNext();
+		huds[index]->update(ptr_splitScreen);
+		huds[index]->parentMoveEvent(ptr_splitScreen);
 		index++;
 	}
 }

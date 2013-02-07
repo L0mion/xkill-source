@@ -89,7 +89,7 @@ HRESULT ManagementViewport::initViewportSingle()
 	if(itrSplitScreen.hasNext())
 	{
 		SplitScreenViewport ssViewport;
-		ssViewport.ptr_splitScreen = itrSplitScreen.attributePointer(itrSplitScreen.getNext()); 
+		ssViewport.ptr_splitScreen = itrSplitScreen.getNext(); 
 
 		viewportWidth_	= winfo_->getScreenWidth();
 		viewportHeight_ = winfo_->getScreenHeight();
@@ -131,7 +131,7 @@ HRESULT ManagementViewport::initViewportDouble()
 	while(itrSplitScreen.hasNext() && ssCount < 2)
 	{
 		SplitScreenViewport ssViewport;
-		ssViewport.ptr_splitScreen = itrSplitScreen.attributePointer(itrSplitScreen.getNext());
+		ssViewport.ptr_splitScreen = itrSplitScreen.getNext();
 
 		D3D11_VIEWPORT viewport;
 		ZeroMemory(&viewport, sizeof(D3D11_VIEWPORT));
@@ -202,7 +202,7 @@ HRESULT ManagementViewport::initViewportGrid(unsigned int gridSize)
 			if(itrSplitScreen.hasNext())
 			{
 				SplitScreenViewport ssViewport;
-				ssViewport.ptr_splitScreen = itrSplitScreen.attributePointer(itrSplitScreen.getNext());
+				ssViewport.ptr_splitScreen = itrSplitScreen.getNext();
 
 				viewport.TopLeftX = static_cast<FLOAT>(column * (viewportWidth_ + borderSize_));
 				viewport.TopLeftY = static_cast<FLOAT>(row * (viewportHeight_ + borderSize_));

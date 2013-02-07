@@ -40,8 +40,12 @@ btVector3 PhysicsObject::subClassCalculateLocalInertiaHook(btScalar mass)
 
 btCollisionShape* PhysicsObject::subClassSpecificCollisionShape()
 {
-	Attribute_Physics* physicsAttribute = itrPhysics_.at(attributeIndex_);
-	return CollisionShapes::Instance()->getCollisionShape(physicsAttribute->meshID);
+	AttributePtr<Attribute_Physics> ptr_physics = itrPhysics_.at(attributeIndex_);
+
+	int meshID = ptr_physics->meshID;
+	btCollisionShape* collisionShape = CollisionShapes::Instance()->getCollisionShape(ptr_physics->meshID);
+
+	return collisionShape;
 }
 
 bool PhysicsObject::subClassSpecificInitHook()
@@ -76,8 +80,8 @@ bool PhysicsObject::init(unsigned int attributeIndex,unsigned int collisionFilte
 	collisionFilterGroup_ = collisionFilterGroup;
 
 	//Get the init data from a physics attribute
-	Attribute_Physics* physicsAttribute = itrPhysics_.at(attributeIndex);
-	btScalar mass = static_cast<btScalar>(physicsAttribute->mass);
+	AttributePtr<Attribute_Physics> ptr_physics = itrPhysics_.at(attributeIndex);
+	btScalar mass = static_cast<btScalar>(ptr_physics->mass);
 
 	//Resolve mass, local inertia of the collision shape, and also the collision shape itself.
 	btCollisionShape* collisionShape = subClassSpecificCollisionShape();
@@ -102,16 +106,16 @@ bool PhysicsObject::init(unsigned int attributeIndex,unsigned int collisionFilte
 		MotionState* customMotionState = new MotionState(attributeIndex);
 		setMotionState(customMotionState);
 
-		setAngularVelocity(btVector3(physicsAttribute->angularVelocity.x,
-										physicsAttribute->angularVelocity.y,
-										physicsAttribute->angularVelocity.z));
-		setLinearVelocity(btVector3(physicsAttribute->linearVelocity.x,
-										physicsAttribute->linearVelocity.y,
-										physicsAttribute->linearVelocity.z));
+		setAngularVelocity(btVector3(ptr_physics->angularVelocity.x,
+										ptr_physics->angularVelocity.y,
+										ptr_physics->angularVelocity.z));
+		setLinearVelocity(btVector3(ptr_physics->linearVelocity.x,
+										ptr_physics->linearVelocity.y,
+										ptr_physics->linearVelocity.z));
 		//Gravity is set after "addRigidBody" for non-static physics objects
 	}
 
-	if(physicsAttribute->collisionResponse)
+	if(ptr_physics->collisionResponse)
 	{
 		setCollisionFlags(getCollisionFlags() & ~CF_NO_CONTACT_RESPONSE); //Activate collision response
 	}
