@@ -1,12 +1,11 @@
 #pragma once
 
-#include "AttributeType.h"
+struct IAttribute;
 
 /// Interface to group AttributeStorage of different types together.
 /** 
 \ingroup ARCHITECTURE
 */
-
 class IAttributeStorage
 {
 public:

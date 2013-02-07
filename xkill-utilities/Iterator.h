@@ -1,7 +1,6 @@
 #pragma once
 
 #include "AttributeStorage.h"
-#include "EventManager.h"
 #include "EntityStorage.h"
 
 class Entity;

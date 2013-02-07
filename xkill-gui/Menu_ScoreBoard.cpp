@@ -82,6 +82,7 @@ void Menu_ScoreBoard::onUpdate(float delta)
 		}
 
 		// Sort by score
+		ui.treeWidget->sortItems(1, Qt::DescendingOrder);
 		ui.treeWidget->sortItems(2, Qt::DescendingOrder);
 	}
 }

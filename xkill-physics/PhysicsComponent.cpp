@@ -17,7 +17,6 @@
 #include "CollisionShapes.h"
 #include "debugDrawDispatcher.h"
 
-#include <iostream>
 ATTRIBUTES_DECLARE_ALL;
 
 static debugDrawDispatcher gDebugDraw;
@@ -125,6 +124,21 @@ bool PhysicsComponent::init()
 
 void PhysicsComponent::onUpdate(float delta)
 {
+
+/*
+From Bullet Demo:
+			btCollisionWorld::AllHitsRayResultCallback allResults(from,to);
+			allResults.m_flags |= btTriangleRaycastCallback::kF_KeepUnflippedNormal;
+			m_dynamicsWorld->rayTest(from,to,allResults);
+
+			for (int i=0;i<allResults.m_hitFractions.size();i++)
+			{
+				btVector3 p = from.lerp(to,allResults.m_hitFractions[i]);
+				sDebugDraw.drawSphere(p,0.1,red);
+			}
+*/
+
+
 	//Loop through all physics attributes
 	itrPhysics = ATTRIBUTE_MANAGER->physics.getIterator();
 	while(itrPhysics.hasNext())
@@ -205,7 +219,7 @@ void PhysicsComponent::onEvent(Event* e)
 		Event_ModifyPhysicsObject* modifyPhysicsObject = static_cast<Event_ModifyPhysicsObject*>(e);
 
 		//Cast void pointer sent in Event_ModifyPhysicsObject, and modify physics object
-		int physicsAttributeIndex = modifyPhysicsObject->physicsAttributeIndex;
+		int physicsAttributeIndex = modifyPhysicsObject->ptr_physics.index();
 
 		if(physicsAttributeIndex < physicsObjects_->size() && physicsAttributeIndex > -1)
 		{
@@ -219,10 +233,30 @@ void PhysicsComponent::onEvent(Event* e)
 						physicsObjects_->at(physicsAttributeIndex)->setGravity(btVector3(gravity->x, gravity->y, gravity->z));
 						break;
 					}
-				case XKILL_Enums::ModifyPhysicsObjectData::VELOCTIY:
+				case XKILL_Enums::ModifyPhysicsObjectData::VELOCITY:
 					{
 						Float3* velocity = static_cast<Float3*>(modifyPhysicsObject->data);
 						physicsObjects_->at(physicsAttributeIndex)->setLinearVelocity(btVector3(velocity->x, velocity->y, velocity->z));
+						break;
+					}
+				case XKILL_Enums::ModifyPhysicsObjectData::VELOCITYPERCENTAGE:
+					{
+						Float3* velocityPercentage = static_cast<Float3*>(modifyPhysicsObject->data);
+						btVector3 currentLinearVelocity = physicsObjects_->at(physicsAttributeIndex)->getLinearVelocity();
+						physicsObjects_->at(physicsAttributeIndex)->setLinearVelocity(btVector3(currentLinearVelocity.x()*velocityPercentage->x, currentLinearVelocity.y()*velocityPercentage->y, currentLinearVelocity.z()*velocityPercentage->z));
+						break;
+					}
+				case XKILL_Enums::ModifyPhysicsObjectData::FLAG_STATIC:
+					{
+						bool* staticPhysicsObject = static_cast<bool*>(modifyPhysicsObject->data);
+						if(*staticPhysicsObject == true)
+						{
+							physicsObjects_->at(physicsAttributeIndex)->setCollisionFlags(physicsObjects_->at(physicsAttributeIndex)->getCollisionFlags() | btCollisionObject::CF_STATIC_OBJECT);
+						}
+						else if(*staticPhysicsObject == false)
+						{
+							physicsObjects_->at(physicsAttributeIndex)->setCollisionFlags(physicsObjects_->at(physicsAttributeIndex)->getCollisionFlags() & ~ btCollisionObject::CF_STATIC_OBJECT);
+						}
 						break;
 					}
 				}
@@ -295,7 +329,7 @@ void PhysicsComponent::synchronizeWithAttributes(AttributePtr<Attribute_Physics>
 			physicsObjects_->at(physicsAttributeIndex) = new PickupablePhysicsObject();
 			break;
 		case Attribute_Physics::EVERYTHING:
-			std::cout << "Error: Attribute_Physics should not have EVERYTHING as collisionFilterGroup" << std::endl;
+			SHOW_MESSAGEBOX("Error: Attribute_Physics should not have EVERYTHING as collisionFilterGroup");
 			break;
 		}
 
@@ -315,7 +349,7 @@ void PhysicsComponent::synchronizeWithAttributes(AttributePtr<Attribute_Physics>
 			}
 			else
 			{
-				std::cout << "-->Error initializing PhysicsObject" << std::endl;
+				SHOW_MESSAGEBOX("-->Error initializing PhysicsObject");
 			}
 		}
 	}

@@ -9,10 +9,9 @@ ScoreComponent::ScoreComponent()
 {
 	ATTRIBUTES_INIT_ALL
 
-	SUBSCRIBE_TO_EVENT(this, EVENT_PLAYERDEATH);
+	SUBSCRIBE_TO_EVENT(this, EVENT_START_DEATHMATCH);
 
-	schedulerTime_ = 5.0f;
-	currentSchedulerTime_ = schedulerTime_;
+	executingPlayerIndex_ = -1;
 }
 
 ScoreComponent::~ScoreComponent()
@@ -22,13 +21,16 @@ ScoreComponent::~ScoreComponent()
 
 bool ScoreComponent::init()
 {
-	for(unsigned int i = 0; itrPlayer.hasNext(); i++)
-	{
-		playerIndices_.push_back(i);
-		itrPlayer.getNext();
-	}
+	schedulerTime_ = 30.0f;
+	currentSchedulerTime_ = schedulerTime_;
 
-	sort(playerIndices_);
+	cycleTime_ = 1.0f;
+	currentCycleTime_ = cycleTime_;	
+
+	executionMode_ = false;
+	executingPlayerIndex_ = -1;
+
+	victoryScore_ = 20;
 
 	return true;
 }
@@ -37,8 +39,8 @@ void ScoreComponent::onEvent(Event* e)
 {
 	switch(e->getType())
 	{
-	case EVENT_PLAYERDEATH:
-		sort(playerIndices_);
+	case EVENT_START_DEATHMATCH:
+		init();
 		break;
 	default:
 		break;
@@ -49,57 +51,111 @@ void ScoreComponent::onUpdate(float delta)
 {
 	if(GET_STATE() == STATE_DEATHMATCH)
 	{
-		currentSchedulerTime_--;
-		if(currentSchedulerTime_ >= 0.0f)
-		{
-			currentSchedulerTime_ = schedulerTime_;
+		//if scheduler game mode
+		schedulerScoreCounting(delta);
 
+		//if death match game mode
+		//deathMatchScoreCounting(delta)
+	}
+}
+
+void ScoreComponent::schedulerScoreCounting(float delta)
+{
+	if(executionMode_)
+	{
+		currentCycleTime_ -= delta;
+		if(currentCycleTime_ <= 0.0f)
+		{
+			currentCycleTime_ = cycleTime_;
+
+			if(executingPlayerIndex_ == -1)	// Shouldn't happen, but if it does then leave execution mode
+			{
+				DEBUGPRINT("Score component: Executing player doesn't exist.");
+				executionMode_ = false;
+			}
+			else
+			{
+				AttributePtr<Attribute_Player> executingPlayer = itrPlayer.at(executingPlayerIndex_);
+
+				if(executingPlayer->priority > 0)  // The player still has some priority so give it execution time
+				{
+					executingPlayer->priority--;
+					executingPlayer->totalExecutionTime++;
+				}
+				else								// The player doesn't have any priority left so leave execution mode
+				{
+					executionMode_ = false;
+					executingPlayerIndex_ = -1;
+					currentSchedulerTime_ = schedulerTime_;
+					// Send event to notify other components that we're leaving execution mode
+				}
+			}
+		}
+	}
+	else
+	{
+		currentSchedulerTime_ -= delta;
+		if(currentSchedulerTime_ <= 0.0f)
+		{
 			int topPlayerIndex = -1;
 			int topPriority = 0;
+			bool topPriorityIsTied = false;
 
-			while(itrPlayer.hasNext())
+			while(itrPlayer.hasNext())	// Loop through all player and find if anyone has top priority
 			{
-				AttributePtr<Attribute_Player> ptr_player = itrPlayer.getNext();
+				//Attribute_Player* player = itrPlayer.getNext();
+				AttributePtr<Attribute_Player> player = itrPlayer.getNext();
 
-				if(ptr_player->priority > 0 && ptr_player->priority > topPriority)
+				if(player->priority > 0)
 				{
-					topPlayerIndex = itrPlayer.storageIndex();
-					topPriority = ptr_player->priority;
-					ptr_player->priority = 0;
+					if(player->priority > topPriority)		// Current player had higher priority than last top player
+					{
+						topPlayerIndex = itrPlayer.storageIndex();
+						topPriority = player->priority;
+						topPriorityIsTied = false;
+					}
+					else if(player->priority == topPriority)	// Current player had the same priority as last top player
+					{
+						topPriorityIsTied = true;
+					}
 				}
 			}
 
-			if(topPlayerIndex >= 0)
-				itrPlayer.at(topPlayerIndex)->totalExecutionTime++;
-		}
-	}
-}
-
-void ScoreComponent::sort(std::vector<int>& elements)
-{
-	bool alreadySorted = true;
-
-	for(unsigned int i = 0; i < elements.size(); i++)
-	{
-		alreadySorted = true;
-
-		for(unsigned int j = 0; j < (elements.size() - 1); j++)
-		{
-			if(itrPlayer.at(elements[j])->priority > itrPlayer.at(elements[j + 1])->priority )
+			if(topPlayerIndex == -1)	// All players had zero priority
 			{
-				swap(elements, j, j + 1);
-				alreadySorted = false;
+				// Punish them all
+				currentSchedulerTime_ = schedulerTime_;
+			}
+			else if(topPriorityIsTied)	// Two or more players are tied for the ammount of priority
+			{
+				// Do nothing, wait until a single player is in the lead
+			}
+			else						// Execute the player with highest priority
+			{
+				executingPlayerIndex_ = topPlayerIndex;
+				currentCycleTime_ = cycleTime_;
+				executionMode_ = true;
+				// Send event to notify other components that we're entering execution mode
 			}
 		}
+	}
 
-		if(alreadySorted)
-			break;
+	while(itrPlayer.hasNext())
+	{
+		if(itrPlayer.getNext()->totalExecutionTime >= victoryScore_)
+		{
+			SEND_EVENT(&Event(EVENT_GAME_OVER));
+		}
 	}
 }
 
-void ScoreComponent::swap(std::vector<int>& elements, int first, int second)
+void ScoreComponent::deathMatchScoreCounting(float delta)
 {
-	int temp = elements[first];
-	elements[first] = elements[second];
-	elements[second] = temp;
+	while(itrPlayer.hasNext())
+	{
+		if(itrPlayer.getNext()->priority >= victoryScore_)
+		{
+			SEND_EVENT(&Event(EVENT_GAME_OVER));
+		}
+	}
 }

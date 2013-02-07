@@ -17,6 +17,7 @@ bool WorldPhysicsObject::subClassSpecificInitHook()
 
 btVector3 WorldPhysicsObject::subClassCalculateLocalInertiaHook(btScalar mass)
 {
+	setFriction(1.0f);
 	return zeroLocalInertia();
 }
 
