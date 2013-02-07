@@ -3,6 +3,10 @@
 
 #include <DirectXMath.h>
 
+#include <xkill-utilities/AnimationClip.h>
+#include <xkill-utilities/BoneAnimation.h>
+#include <xkill-utilities/Keyframe.h>
+
 #include "LoaderFbxAnimationDesc.h"
 #include "LoaderFbxAnimationBone.h"
 
@@ -44,8 +48,15 @@ void LoaderFbxAnimationDesc::convertToXKillFormat(std::map<std::string, Animatio
 	
 	for(unsigned int boneIndex=0; boneIndex<bones_.size(); boneIndex++)
 	{
+		animationClip->getBoneAnimations()->at(boneIndex) = new BoneAnimation();
+
+		printf("Bone: %s \n", bones_[boneIndex].getName());
+
 		convertBoneToXKillFormat(bones_[boneIndex], animationClip->getBoneAnimations()->at(boneIndex));
 	}
+
+	std::pair<std::string, AnimationClip*> animation(name_, animationClip);
+	animations->insert(animation);
 }
 void LoaderFbxAnimationDesc::convertBoneToXKillFormat(LoaderFbxAnimationBone fbxBone, BoneAnimation* bone)
 {
@@ -61,7 +72,6 @@ void LoaderFbxAnimationDesc::convertBoneToXKillFormat(LoaderFbxAnimationBone fbx
 										  FBX_KEYFRAME_INDEX_SCALING_Z};
 
 	int numKeyframes = fbxBone.averageNumKeyframes(keyframeIndices, numIndices);
-	bone = new BoneAnimation();
 	bone->getKeyframes()->resize(numKeyframes);
 
 	if(numKeyframes > 0)
@@ -73,15 +83,23 @@ void LoaderFbxAnimationDesc::convertBoneToXKillFormat(LoaderFbxAnimationBone fbx
 
 		for(int i=0; i<numKeyframes; i++)
 		{
+			bone->getKeyframes()->at(i) = new Keyframe();
 			createKeyframe(fbxBone, bone->getKeyframes()->at(i), time);
 			time += timeInterval;
 		}
 	}
+	else
+	{
+		Keyframe* keyframe				= new Keyframe();
+		keyframe->translation			= DirectX::XMFLOAT3(0.0f, 0.0f, 0.0f);
+		keyframe->scale					= DirectX::XMFLOAT3(1.0f, 1.0f, 1.0f);
+		keyframe->rotationQuaternion	= DirectX::XMFLOAT4(0.0f, 0.0f, 0.0f, 0.0f);
+		keyframe->timePosition			= 0.0f;
+		bone->getKeyframes()->push_back(keyframe);
+	}
 }
 void LoaderFbxAnimationDesc::createKeyframe(LoaderFbxAnimationBone fbxBone, Keyframe* keyframe, float time)
 {
-	keyframe = new Keyframe();
-
 	float translationX = fbxBone.interpolateValue(FBX_KEYFRAME_INDEX_TRANSLATION_X, time);
 	float translationY = fbxBone.interpolateValue(FBX_KEYFRAME_INDEX_TRANSLATION_Y, time);
 	float translationZ = fbxBone.interpolateValue(FBX_KEYFRAME_INDEX_TRANSLATION_Z, time);

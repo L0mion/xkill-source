@@ -5,11 +5,11 @@
 #include <map>
 #include <string>
 
-#include <xkill-utilities/AnimationClip.h>
-#include <xkill-utilities/BoneAnimation.h>
-#include <xkill-utilities/Keyframe.h>
-
 #include "LoaderFbxAnimationBone.h"
+
+class AnimationClip;
+class BoneAnimation;
+struct Keyframe;
 
 //! Class for describing a FBX animation.
 /*!

@@ -5,6 +5,8 @@
 #include <map>
 #include <string>
 
+#include "dllUtilities.h"
+
 namespace DirectX
 {
 	struct XMFLOAT4X4;
@@ -16,7 +18,7 @@ class AnimationClip;
 /*!
 \ingroup xkill-renderer
 */
-class SkinnedData
+class DLL_U SkinnedData
 {
 public:
 	//! Initializes SkinnedData to its default state.

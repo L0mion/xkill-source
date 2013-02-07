@@ -80,6 +80,7 @@ float LoaderFbxAnimationBone::keyframeInterpolate(FbxKeyframeIndex index, float 
 			
 			done = true;
 		}
+		i++;
 	}
 
 	return interpolatedValue;
