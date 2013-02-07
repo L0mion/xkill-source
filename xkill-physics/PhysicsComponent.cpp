@@ -129,10 +129,10 @@ void PhysicsComponent::onUpdate(float delta)
 	itrPhysics = ATTRIBUTE_MANAGER->physics.getIterator();
 	while(itrPhysics.hasNext())
 	{
-		Attribute_Physics* physicsAttribute = itrPhysics.getNext();
+		AttributePtr<Attribute_Physics> ptr_physics = itrPhysics.getNext();
 		unsigned int physicsAttributeIndex = itrPhysics.storageIndex();
 
-		synchronizeWithAttributes(physicsAttribute, physicsAttributeIndex); //Synchronize physics objects with physics attributes
+		synchronizeWithAttributes(ptr_physics, physicsAttributeIndex); //Synchronize physics objects with physics attributes
 		physicsObjects_->at(physicsAttributeIndex)->onUpdate(delta);		//Update physics objects by calling their onUpdate function.
 	}
 
@@ -243,7 +243,7 @@ void PhysicsComponent::onEvent(Event* e)
 	}
 }
 
-void PhysicsComponent::synchronizeWithAttributes(Attribute_Physics* physicsAttribute, int physicsAttributeIndex)
+void PhysicsComponent::synchronizeWithAttributes(AttributePtr<Attribute_Physics> ptr_physics, int physicsAttributeIndex)
 {
 	//Also refer to PhysicsComponent::onEvent, handling of EVENT_ATTRIBUTE_UPDATED
 	
@@ -260,12 +260,12 @@ void PhysicsComponent::synchronizeWithAttributes(Attribute_Physics* physicsAttri
 	}
 	*/
 	//Checks if new physiscs attributes were created since last call to this function
-	if(physicsAttributeIndex >= static_cast<unsigned int>(physicsObjects_->size()))
+	if(physicsAttributeIndex >= physicsObjects_->size())
 	{
 		physicsObjects_->push_back(nullptr);
 	}
 	//Synchronize physiscs attributes with internal PhysicsObjects
-	if(physicsAttribute->reloadDataIntoBulletPhysics) //If something has changed in the physics attribute
+	if(ptr_physics->reloadDataIntoBulletPhysics) //If something has changed in the physics attribute
 	{
 		//If the PhysicsObjects already exists, it needs to be removed to safely reset all of its internal Bullet Physics values
 		if(physicsObjects_->at(physicsAttributeIndex) != nullptr)
@@ -274,7 +274,7 @@ void PhysicsComponent::synchronizeWithAttributes(Attribute_Physics* physicsAttri
 			delete physicsObjects_->at(physicsAttributeIndex);
 		}
 		// Determine type of PhysicsObject to create and add to the Bullet Physics world
-		switch(physicsAttribute->collisionFilterGroup)
+		switch(ptr_physics->collisionFilterGroup)
 		{
 		default:
 			physicsObjects_->at(physicsAttributeIndex) = new PhysicsObject();
@@ -301,17 +301,17 @@ void PhysicsComponent::synchronizeWithAttributes(Attribute_Physics* physicsAttri
 
 		if(physicsObjects_ != nullptr)
 		{
-			if(physicsObjects_->at(physicsAttributeIndex)->init(physicsAttributeIndex,physicsAttribute->collisionFilterGroup) == true)
+			if(physicsObjects_->at(physicsAttributeIndex)->init(physicsAttributeIndex, ptr_physics->collisionFilterGroup) == true)
 			{
-				dynamicsWorld_->addRigidBody(physicsObjects_->at(physicsAttributeIndex), physicsAttribute->collisionFilterGroup, physicsAttribute->collisionFilterMask);
+				dynamicsWorld_->addRigidBody(physicsObjects_->at(physicsAttributeIndex), ptr_physics->collisionFilterGroup, ptr_physics->collisionFilterMask);
 				//Per object gravity must be set after "addRigidBody"
 				if(!physicsObjects_->at(physicsAttributeIndex)->isStaticOrKinematicObject())
 				{
-					physicsObjects_->at(physicsAttributeIndex)->setGravity(btVector3(physicsAttribute->gravity.x,physicsAttribute->gravity.y, physicsAttribute->gravity.z));
+					physicsObjects_->at(physicsAttributeIndex)->setGravity(btVector3(ptr_physics->gravity.x, ptr_physics->gravity.y, ptr_physics->gravity.z));
 					//physicsObjects_->at(physicsAttributeIndex)->setGravity(btVector3(0,0,0));
 				}
 
-				physicsAttribute->reloadDataIntoBulletPhysics = false;
+				ptr_physics->reloadDataIntoBulletPhysics = false;
 			}
 			else
 			{
@@ -389,7 +389,7 @@ void PhysicsComponent::updateCulling()
 {
 	while(itrPhysics.hasNext())
 	{
-		Attribute_Physics * ptr_physics = itrPhysics.getNext();
+		AttributePtr<Attribute_Physics> ptr_physics = itrPhysics.getNext();
 		if(ptr_physics->ptr_render.isNotEmpty())
 		{
 			ptr_physics->ptr_render->cull = false;
@@ -399,7 +399,7 @@ void PhysicsComponent::updateCulling()
 
 	while(itrCamera.hasNext())
 	{
-		Attribute_Camera* cameraAttribute = itrCamera.getNext();
+		AttributePtr<Attribute_Camera> ptr_camera = itrCamera.getNext();
 		unsigned int index = itrCamera.storageIndex();
 		
 		if(index >= static_cast<unsigned int>(frustumPhysicsObjects_->size()))

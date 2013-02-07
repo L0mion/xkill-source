@@ -5,6 +5,7 @@
 #include <vector>
 
 struct Attribute_Player;
+template <class T> class AttributePtr;
 
 //! A component to keep track of score
 /*!
@@ -23,32 +24,15 @@ public:
 	virtual void onUpdate(float delta);
 
 private:
-	std::vector<int> playerIndices_;		//! Used as a sorted list of playerAttributes according to 'priority'
-	float currentSchedulerTime_;			//! Time until next execution
-	float schedulerTime_;					//! Time between executions
-	float currentCycleTime_;					//! Time until next cycle
-	float cycleTime_;						//!	Length of an cycle
-	bool executionMode_;					//! Is the execution mode active
-	Attribute_Player* executingPlayer_;		//! The player that is executing
+	float currentSchedulerTime_;						//! Time until next execution
+	float schedulerTime_;								//! Time between executions
+	float currentCycleTime_;							//! Time until next cycle
+	float cycleTime_;									//!	Length of an cycle
+	bool executionMode_;								//! Is the execution mode active
+	unsigned int executingPlayerIndex_;					//! The index of the player that is currently executing
 
-	//! Sorts the vector using bubble sort
-	/*!
-	Sorts using bubble sort as it will be used to sort the scoreboard. This will likely to be
-	a small array and also either sorted or almost sorted most of the time. 
+	int victoryScore_;									//! Score needed to win
 
-	If it's to be used otherwise then it should probably be changed to use some other more 
-	effective algorithm.
-	*/
-	void sort(std::vector<int>& elements);
-
-	//! Swaps value between the 'first' and 'second' element in the array
-	/*!
-	\param elements The vector in which the elements should be swapped
-	\param first First value to be swapped
-	\param second Second value to swapped
-	*/
-	void swap(std::vector<int>& elements, int first, int second);
-
-	//! Returns true if player1 has more score than player2
-	bool compareAttributes(Attribute_Player* player1, Attribute_Player* player2);
+	void schedulerScoreCounting(float delta);						//! Calculate the score according to scheduler game mode
+	void deathMatchScoreCounting(float delta);						//!	Calculate the score according to death match game mode
 };

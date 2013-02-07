@@ -197,8 +197,8 @@ Attribute_Player::Attribute_Player()
 	collidingWithWorld = false;
 	jetpackTimer = 0.0f;
 	detectedAsDead = true;
-	meshIDWhenAlive = 7;
-	meshIDWhenDead = 9;
+	meshID_whenAlive = 0;
+	meshID_whenDead = 0;
 	currentSprintTime = 0;
 	sprintTime = 2.0f;
 	canSprint = true;

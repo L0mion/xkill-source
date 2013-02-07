@@ -205,11 +205,11 @@ void FMODEventSystem::update3DListeners()
 
 	while(itrPlayer.hasNext())
 	{
-		Attribute_Player* player = itrPlayer.getNext();
+		AttributePtr<Attribute_Player> ptr_player = itrPlayer.getNext();
 		FMOD_VECTOR pos, look, up;
-		Float3 float3_pos = player->ptr_render->ptr_spatial->ptr_position->position;
-		Float3 float3_look = player->ptr_camera->look;
-		Float3 float3_up = player->ptr_camera->up;
+		Float3 float3_pos = ptr_player->ptr_render->ptr_spatial->ptr_position->position;
+		Float3 float3_look = ptr_player->ptr_camera->look;
+		Float3 float3_up = ptr_player->ptr_camera->up;
 
 		pos = float3ToFModVector(float3_pos);
 		look = float3ToFModVector(float3_look);
