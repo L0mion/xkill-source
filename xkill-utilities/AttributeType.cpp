@@ -80,6 +80,7 @@ Attribute_Projectile::Attribute_Projectile()
 	currentLifeTimeLeft = totalLifeTime;
 	ammunitionType = XKILL_Enums::AmmunitionType::BULLET;
 	firingModeType = XKILL_Enums::FiringModeType::SEMI;
+	scatterDropped = false;
 }
 Attribute_Projectile::~Attribute_Projectile()
 {

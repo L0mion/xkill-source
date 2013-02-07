@@ -273,26 +273,26 @@ void GameComponent::onUpdate(float delta)
 			SEND_EVENT(&Event_RemoveEntity(itrProjectile.ownerId()));
 		}
 
-		
-
-		//Handle projectile based on ammunitionType
-		switch(projectile->ammunitionType)
+		/*
+		switch(projectile->ammunitionType) //Handle projectile based on ammunitionType
 		{
 		case XKILL_Enums::AmmunitionType::BULLET:
 			break;
 		case XKILL_Enums::AmmunitionType::EXPLOSIVE:
 			break;
 		case XKILL_Enums::AmmunitionType::SCATTER:
-			if( (projectile->totalLifeTime - projectile->currentLifeTimeLeft) < (projectile->totalLifeTime-0.1) )
+			if( ((projectile->totalLifeTime - projectile->currentLifeTimeLeft) < (projectile->totalLifeTime-0.1f)) && projectile->scatterDropped == false)
 			{
-				//Entity* entity = itrPhysics.ownerAt(attributeIndex_);
-				//std::vector<int> physicsId = entity1->getAttributes(ATTRIBUTE_PHYSICS);
+				//SEND_EVENT(&Event_ModifyPhysicsObject(XKILL_Enums::ModifyPhysicsObjectData::GRAVITY, static_cast<void*>(&Float3(0.0f, -10.0f, 0.0f)), projectile->ptr_physics));
 
+				//SEND_EVENT(&Event_ModifyPhysicsObject(XKILL_Enums::ModifyPhysicsObjectData::VELOCITY, static_cast<void*>(&Float3(0.0f, 0.0f, 0.0f)), projectile->ptr_physics));
 
-				//SEND_EVENT(&Event_ModifyPhysicsObject(XKILL_Enums::ModifyPhysicsObjectData::GRAVITY, static_cast<void*>(&Float3(0.0f, -10.0f, 0.0f)), physicsId.at(i)));
+				//SEND_EVENT(&Event_ModifyPhysicsObject(XKILL_Enums::ModifyPhysicsObjectData::VELOCITYPERCENTAGE, static_cast<void*>(&Float3(0.1f, 0.1f, 0.1f)), projectile->ptr_physics));
+				projectile->scatterDropped = true;
 			}
 			break;
 		}
+		*/
 	}
 
 	//
@@ -567,14 +567,14 @@ void GameComponent::event_PhysicsAttributesColliding(Event_PhysicsAttributesColl
 					//Determine collision effect based on ammunitionType
 					switch(ptr_projectile->ammunitionType)
 					{
-					case XKILL_Enums::AmmunitionType::BULLET: //Bounce off the wall with not gravity for 1 second
+					case XKILL_Enums::AmmunitionType::BULLET: //Bounce off the wall
 						if(ptr_projectile->currentLifeTimeLeft > 1.00f)
 						{
 							ptr_projectile->currentLifeTimeLeft = 1.00f;
 							SEND_EVENT(&Event_ModifyPhysicsObject(XKILL_Enums::ModifyPhysicsObjectData::GRAVITY, static_cast<void*>(&Float3(0.0f, -5.0f, 0.0f)), itrPhysics.at(physicsId.at(j))));
 						}
 						break;
-					case XKILL_Enums::AmmunitionType::SCATTER: //Fall down and roll for 1 second
+					case XKILL_Enums::AmmunitionType::SCATTER: //Fall down and roll
 						if(ptr_projectile->currentLifeTimeLeft > 1.00f)
 						{
 							ptr_projectile->currentLifeTimeLeft = 1.00f;
@@ -585,8 +585,7 @@ void GameComponent::event_PhysicsAttributesColliding(Event_PhysicsAttributesColl
 						break;
 					case XKILL_Enums::AmmunitionType::EXPLOSIVE: //Remove projectile and create an explosion sphere in its place
 						{
-							//Kill the projectile that caused the explosion
- 							ptr_projectile->currentLifeTimeLeft = 0.0f;
+ 							ptr_projectile->currentLifeTimeLeft = 0.0f; //Kill the projectile that caused the explosion
 
 							//Extract projectile position.
 							AttributePtr<Attribute_Physics> ptr_projectile_physics	 = ptr_projectile->ptr_physics;
@@ -770,8 +769,8 @@ AttributePtr<Attribute_PlayerSpawnPoint> GameComponent::findUnoccupiedSpawnPoint
 			AttributePtr<Attribute_Player> player		= itrPlayer.getNext();
 			AttributePtr<Attribute_Health> ptr_health	= player->ptr_health;
 
-			// If player is detectedAsDead
-			if(ptr_health->health > 0)
+			// If player is alive
+			if(ptr_health->health > 0 && !player->detectedAsDead)
 			{
 				AttributePtr<Attribute_Render>		render	= player->ptr_render;
 				AttributePtr<Attribute_Spatial>		spatial	= render->ptr_spatial;
@@ -953,7 +952,6 @@ bool GameComponent::switchFiringMode(AttributePtr<Attribute_WeaponStats> ptr_wea
 
 void GameComponent::shootProjectile(AttributePtr<Attribute_Position> ptr_position, AttributePtr<Attribute_Camera> ptr_camera, AttributePtr<Attribute_WeaponStats> ptr_weaponStats)
 {
-	
 	Ammunition* ammo = &ptr_weaponStats->ammunition[ptr_weaponStats->currentAmmunitionType];
 	FiringMode* firingMode = &ptr_weaponStats->firingMode[ptr_weaponStats->currentFiringModeType];
 

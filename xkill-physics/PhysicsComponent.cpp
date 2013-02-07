@@ -2,6 +2,7 @@
 
 #include <btBulletDynamicsCommon.h>
 #include "Serialize/BulletWorldImporter/btBulletWorldImporter.h"
+#include "BulletCollision/NarrowPhaseCollision/btRaycastCallback.h"
 
 #include <xkill-utilities/Util.h>
 
@@ -138,7 +139,6 @@ From Bullet Demo:
 			}
 */
 
-
 	//Loop through all physics attributes
 	itrPhysics = ATTRIBUTE_MANAGER->physics.getIterator();
 	while(itrPhysics.hasNext())
@@ -148,6 +148,42 @@ From Bullet Demo:
 
 		synchronizeWithAttributes(ptr_physics, physicsAttributeIndex); //Synchronize physics objects with physics attributes
 		physicsObjects_->at(physicsAttributeIndex)->onUpdate(delta);		//Update physics objects by calling their onUpdate function.
+	}
+
+
+	//Ray cast
+	/*
+	btVector3 from(1,2,1);
+	btVector3 to(1,-2,1);
+	btCollisionWorld::ClosestRayResultCallback closestResults(from,to);
+	dynamicsWorld_->rayTest(from,to,closestResults);
+	if (closestResults.hasHit())
+	{
+		btVector3 p = from.lerp(to,closestResults.m_closestHitFraction);
+		gDebugDraw.drawSphere(p,0.1,btVector3 (0,0,1));
+		gDebugDraw.drawLine(p,p+closestResults.m_hitNormalWorld,btVector3 (0,0,1));
+	}
+	*/
+
+
+	//dynamicsWorld_->updateAabbs();
+	//dynamicsWorld_->computeOverlappingPairs();
+
+	gDebugDraw.clearDebugVerticesVector();
+	///all hits
+	{
+		btVector3 from(1,20,1);
+		btVector3 to(1,-20,1);
+		gDebugDraw.drawLine(from,to,btVector4(1,1,1,1));
+		btCollisionWorld::AllHitsRayResultCallback allResults(from,to);
+		allResults.m_flags |= btTriangleRaycastCallback::kF_KeepUnflippedNormal;
+		dynamicsWorld_->rayTest(from,to,allResults);
+
+		for (int i=0;i<allResults.m_hitFractions.size();i++)
+		{
+			btVector3 p = from.lerp(to,allResults.m_hitFractions[i]);
+			gDebugDraw.drawSphere(p,0.1,btVector3(1.0f, 0.0f, 0.0f));
+		}
 	}
 
 	updateCulling();
@@ -160,7 +196,7 @@ From Bullet Demo:
 		//static float timer = 0.0f;
 		//if(timer > 0.1f)
 		{
-			gDebugDraw.clearDebugVerticesVector();
+			
 			dynamicsWorld_->debugDrawWorld(); //Calls debugDrawDispatcher::drawLine internally
 			gDebugDraw.queueDebugDrawEvent();
 			//timer = 0.0f;
