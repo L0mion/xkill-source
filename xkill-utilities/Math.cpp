@@ -2,6 +2,7 @@
 #include <math.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <DirectXMath.h>
 
 BoolField::BoolField()
 {
@@ -160,6 +161,18 @@ void Float4::copy(const float* float4)
 	y = float4[1];
 	z = float4[2];
 	w = float4[3];
+}
+
+Float3 Float4::quaternionToVector()
+{
+	using namespace DirectX;
+
+	XMVECTOR xv_rot = XMLoadFloat4((XMFLOAT4*)this);
+	XMVECTOR xv_out = XMVector3Rotate(XMVectorSet(0.0f, 0.0f, 1.0f, 0.0f), xv_rot);
+
+	Float3 f_out; XMStoreFloat3((XMFLOAT3*)&f_out,	xv_out);
+	
+	return f_out;
 }
 
 Float4x4::Float4x4()

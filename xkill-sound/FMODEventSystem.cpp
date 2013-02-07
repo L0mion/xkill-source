@@ -152,7 +152,7 @@ void FMODEventSystem::UpdateNrOfListeners()
 	}
 	else if(nrOfListeners_ > 4)
 	{
-		for(unsigned int i = 0; i < nrOfListeners_; i++)
+		for(int i = 0; i < nrOfListeners_; i++)
 		{
 			FMODErrorCheck(mEventsystem->set3DListenerAttributes(i++, NULL, NULL, NULL, NULL));
 		}
