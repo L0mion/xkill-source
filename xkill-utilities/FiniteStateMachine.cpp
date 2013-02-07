@@ -269,7 +269,7 @@ void FiniteStateMachine::onEvent( Event* e )
 	case EVENT_STATE_CHANGED:
 			handleEvent_StateChanged(static_cast<Event_StateChanged*>(e));
 		break;
-	case EVENT_SYNCSTATECOMMAND:
+	case EVENT_SYNC_STATE_COMMAND:
 			handleEvent_SyncStateCommand(static_cast<Event_SyncStateCommand*>(e));
 		break;
 	default:
