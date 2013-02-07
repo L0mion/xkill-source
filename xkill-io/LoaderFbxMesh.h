@@ -190,8 +190,9 @@ private:
 	/*!
 	\param cluster A FbxCluster containing the nodes matrix.
 	\ param meshDesc Mesh description where the results will be stored.
+	\param index Index of the bone the matrix belongs to.
 	*/
-	void parseTransformMatrix(FbxCluster* cluster, LoaderFbxMeshDesc* meshDesc);
+	void parseTransformMatrix(FbxCluster* cluster, LoaderFbxMeshDesc* meshDesc, int index);
 	
 	//! Transforms the vertices into the local space.
 	/*!

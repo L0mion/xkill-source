@@ -303,6 +303,11 @@ void LoaderFbxMeshDesc::setVertexBoneWeights(std::vector<std::vector<float>> ver
 	vertexBoneWeights_ = vertexBoneWeights;
 }
 
+void LoaderFbxMeshDesc::setOffsetMatrix(unsigned int index, Float4x4 offsetMatrix)
+{
+	if(index < offsetMatrices_.size())
+		offsetMatrices_[index] = offsetMatrix;
+}
 void LoaderFbxMeshDesc::setOffsetMatrices(std::vector<Float4x4> offsetMatrices)
 {
 	offsetMatrices_ = offsetMatrices;

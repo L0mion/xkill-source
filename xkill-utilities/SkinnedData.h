@@ -1,9 +1,11 @@
-#ifndef XKILL_RENDERER_SKINNEDDATA_H
-#define XKILL_RENDERER_SKINNEDDATA_H
+#ifndef XKILL_UTILITIES_SKINNEDDATA_H
+#define XKILL_UTILITIES_SKINNEDDATA_H
 
 #include <vector>
 #include <map>
 #include <string>
+
+#include "dllUtilities.h"
 
 namespace DirectX
 {
@@ -16,7 +18,7 @@ class AnimationClip;
 /*!
 \ingroup xkill-renderer
 */
-class SkinnedData
+class DLL_U SkinnedData
 {
 public:
 	//! Initializes SkinnedData to its default state.
@@ -53,4 +55,4 @@ private:
 	std::map<std::string, AnimationClip*>*	animations_;	//!< Map that holds AnimationClips and thier corresponding names.
 };
 
-#endif //XKILL_RENDERER_SKINNEDDATA_H
+#endif //XKILL_UTILITIES_SKINNEDDATA_H

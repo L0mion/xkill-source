@@ -84,6 +84,7 @@ public:
 	void setVertexBoneIndices(std::vector<std::vector<int>> vertexBoneIndices);
 	void setVertexBoneWeights(std::vector<std::vector<float>> vertexBoneWeights);
 	
+	void setOffsetMatrix(unsigned int index, Float4x4 offsetMatrix);
 	void setOffsetMatrices(std::vector<Float4x4> offsetMatrices);
 	void setBoneParentIndices(std::vector<int> boneParentIndices);
 	void setBoneNodes(std::vector<FbxNode*> boneNodes);

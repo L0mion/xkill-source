@@ -454,6 +454,17 @@ void LoaderFbxMesh::parseVertexLinkData(FbxMesh* mesh, LoaderFbxMeshDesc* meshDe
 			meshDesc->setBoneNodes(nodes);
 			meshDesc->setBoneParentIndices(parentIndices);
 
+			Float4x4 identityMatrix;
+			identityMatrix._11 = 1.0f; identityMatrix._12 = 0.0f; identityMatrix._13 = 0.0f; identityMatrix._14 = 0.0f;
+			identityMatrix._21 = 0.0f; identityMatrix._22 = 1.0f; identityMatrix._23 = 0.0f; identityMatrix._24 = 0.0f;
+			identityMatrix._31 = 0.0f; identityMatrix._32 = 0.0f; identityMatrix._33 = 1.0f; identityMatrix._34 = 0.0f;
+			identityMatrix._41 = 0.0f; identityMatrix._42 = 0.0f; identityMatrix._43 = 0.0f; identityMatrix._44 = 1.0f;
+
+			for(unsigned int i=0; i<nodes.size(); i++)
+			{
+				meshDesc->addOffsetMatrix(identityMatrix);
+			}
+
 			for(int clusterIndex=0; clusterIndex<numClusters; clusterIndex++)
 			{
 				cluster = static_cast<FbxSkin*>(mesh->GetDeformer(0, FbxDeformer::eSkin))->GetCluster(clusterIndex);
@@ -468,7 +479,7 @@ void LoaderFbxMesh::parseVertexLinkData(FbxMesh* mesh, LoaderFbxMeshDesc* meshDe
 				}
 				
 				parseIndicesAndWeights(cluster, meshDesc, nodeIndex);
-				parseTransformMatrix(cluster, meshDesc);
+				parseTransformMatrix(cluster, meshDesc, nodeIndex);
 			}
 		}
 	}
@@ -499,7 +510,7 @@ void LoaderFbxMesh::parseIndicesAndWeights(FbxCluster* cluster, LoaderFbxMeshDes
 		meshDesc->addVertexBoneWeight(indices[i], static_cast<float>(weights[i]));
 	}
 }
-void LoaderFbxMesh::parseTransformMatrix(FbxCluster* cluster, LoaderFbxMeshDesc* meshDesc)
+void LoaderFbxMesh::parseTransformMatrix(FbxCluster* cluster, LoaderFbxMeshDesc* meshDesc, int index)
 {
 	FbxAMatrix fbxMatrix;
 	cluster->GetTransformLinkMatrix(fbxMatrix);
@@ -510,7 +521,7 @@ void LoaderFbxMesh::parseTransformMatrix(FbxCluster* cluster, LoaderFbxMeshDesc*
 		for(int y=0; y<4; y++)
 			offsetMatrix.m[x][y] = static_cast<float>(fbxMatrix.mData[x][y]);
 	}
-	meshDesc->addOffsetMatrix(offsetMatrix);
+	meshDesc->setOffsetMatrix(index, offsetMatrix);
 }
 
 FbxNode* LoaderFbxMesh::findRoot(FbxNode* node)
@@ -523,7 +534,6 @@ FbxNode* LoaderFbxMesh::findRoot(FbxNode* node)
 			if(node->GetParent()->GetNodeAttribute()->GetAttributeType() == FbxNodeAttribute::eSkeleton)
 			{
 				node = node->GetParent();
-				printf("%s\n", node->GetName());
 			}
 			else
 				done = true;
