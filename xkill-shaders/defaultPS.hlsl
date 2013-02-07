@@ -22,7 +22,7 @@ PSOut defaultPS(DefaultVSOut pIn)
 	normal.x = pIn.normalW.x * 0.5f + 0.5f;
 	normal.y = pIn.normalW.y * 0.5f + 0.5f;
 	normal.z = pIn.normalW.z * 0.5f + 0.5f;
-	output.normal.xyz = normal; //UtilEncodeSphereMap(pIn.normalW);
+	output.normal = float4(normal, 0.0f); //UtilEncodeSphereMap(pIn.normalW);
 
 	pIn.texcoord.y		= 1 - pIn.texcoord.y;
 	output.albedo		= texAlbedo.SampleLevel(ss, pIn.texcoord, 0);

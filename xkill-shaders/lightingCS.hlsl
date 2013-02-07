@@ -13,7 +13,7 @@
 #include "constantBuffers.hlsl"
 
 #define TILE_DIM		16
-#define TILE_MAX_LIGHTS	40
+#define TILE_MAX_LIGHTS	10
 
 //Global memory
 RWTexture2D<float4> output : register( u0 );
@@ -74,7 +74,8 @@ void lightingCS(
 	
 	//Get tile depth in view-space.
 	uint pixelDepthInt = asuint(surfacePosV.z); //Interlocked functions can only be applied onto ints.
-	if(gDepth != 1.0f)
+	bool validPixel = surfacePosV.z >= zNear && surfacePosV.z <= zFar;
+	if(validPixel)
 	{
 		InterlockedMin(tileMinDepthInt, pixelDepthInt);
 		InterlockedMax(tileMaxDepthInt, pixelDepthInt);
@@ -107,7 +108,9 @@ void lightingCS(
 			bool inFrustum = true;
 			[unroll] for(uint j = 0; j < 6; j++)
 			{
-				float d = dot(frustum._[j], mul(float4(lightsPos[lightIndex], 1.0f), view)); //lightsPos[lightIndex].pos
+				float d = dot(
+					frustum._[j],
+					mul(float4(lightsPos[lightIndex], 1.0f), view));
 				inFrustum = inFrustum && (d >= -lightsPoint[lightIndex].range);
 			}
 			
@@ -122,7 +125,7 @@ void lightingCS(
 	GroupMemoryBarrierWithGroupSync();
 
 	//Sample depth as quickly as possible to ensure that we do not evualuate irrelevant pixels.
-	if(gDepth == 1.0f)
+	if(!validPixel)
 		return;
 	
 	float3 normal = gNormal.xyz; //UtilDecodeSphereMap();
@@ -180,11 +183,6 @@ void lightingCS(
 	//for(i = 0; i < tileLightNum; i++) //Apply culled point-lights.
 	//{
 	//	Diffuse.g += 0.1;
-	//}
-
-	//if(normal.x <= 0.0f && normal.y <= 0.0f && normal.z <= 0.0f)
-	//{
-	//	normal *= -1.0f;
 	//}
 
 	output[uint2(threadIDDispatch.x + viewportTopX, threadIDDispatch.y + viewportTopY)] = Ambient + Diffuse + Specular;
