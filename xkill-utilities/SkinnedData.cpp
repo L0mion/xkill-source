@@ -93,10 +93,11 @@ void SkinnedData::getFinalTransforms(const std::string&					clipName,
 	}
 }
 
-float SkinnedData::getBoneCount() const
+unsigned int SkinnedData::getBoneCount() const
 {
 	return boneHierarchy_->size();
 }
+
 float SkinnedData::getClipStartTime(const std::string& clipName) const
 {
 	auto clip = animations_->find(clipName);
@@ -106,4 +107,9 @@ float SkinnedData::getClipEndTime(const std::string& clipName) const
 {
 	auto clip = animations_->find(clipName);
 	return clip->second->getClipEndTime();
+}
+
+std::map<std::string, AnimationClip*>* SkinnedData::getAnimations() const
+{
+	return animations_;
 }

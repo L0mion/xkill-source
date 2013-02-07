@@ -3,6 +3,8 @@
 
 #include <string>
 #include <xkill-utilities/MeshDesc.h>
+#include <xkill-utilities/SkinnedData.h>
+#include <xkill-utilities/AnimationClip.h>
 
 #include "Writer.h"
 #include "SpecsPGY.h"
@@ -55,6 +57,8 @@ private:
 	
 	void writeSubset(SubsetDesc subset); //!< Writes a single subset to .pgy.
 	void writeIndex(unsigned int index); //!< Writes a single index to .pgy.
+
+	void writeAnimations(SkinnedData skinnedData);
 
 	MeshDesc		subject_;		//!< Model to be written to .pgy.
 	WriteTimeUTC	writeTimeUTC_;	//!< Time last written to original file being converted into .pgy. Measured in UTC.

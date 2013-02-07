@@ -161,3 +161,22 @@ void WriterPGY::writeIndex(unsigned int index)
 		reinterpret_cast<const char*>(&index), 
 		sizeof(index));
 }
+
+void WriterPGY::writeAnimations(SkinnedData skinnedData)
+{
+	unsigned int numBones = skinnedData.getBoneCount();
+	std::map<std::string, AnimationClip*>* animations = skinnedData.getAnimations();
+	std::map<std::string, AnimationClip*>::iterator index;
+	unsigned int numAnimations = animations->size();
+
+	for(index = animations->begin(); index != animations->end(); index++)
+	{
+		AnimationClip* clip = index->second;
+		std::string clipName = index->first;
+		if(clip)
+		{
+			unsigned int nameSize = clipName.size();
+
+		}
+	}
+}
