@@ -50,12 +50,18 @@ public:
 	float getClipEndTime(const std::string& clipName)	const;
 
 
-	std::map<std::string, AnimationClip*>* getAnimations() const;
+	std::vector<int>*						getBoneHierarchy()	const;
+	std::vector<DirectX::XMFLOAT4X4>*		getBoneOffsets()	const;
+	std::map<std::string, AnimationClip*>*	getAnimations()		const;
+
+	bool isInitialized() const;
 
 private:
 	std::vector<int>*						boneHierarchy_; //!< Vector containing the skeletons hierarchy.
 	std::vector<DirectX::XMFLOAT4X4>*		boneOffsets_;	//!< Vector containing bone offsets.
 	std::map<std::string, AnimationClip*>*	animations_;	//!< Map that holds AnimationClips and thier corresponding names.
+
+	bool initialized_;
 };
 
 #endif //XKILL_UTILITIES_SKINNEDDATA_H
