@@ -13,7 +13,7 @@
 #include "constantBuffers.hlsl"
 
 #define TILE_DIM		16
-#define TILE_MAX_LIGHTS	10
+#define TILE_MAX_LIGHTS	40
 
 //Global memory
 RWTexture2D<float4> output : register( u0 );
