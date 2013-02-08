@@ -297,6 +297,7 @@ struct DLL_U Attribute_Physics : public IAttribute
 		EXPLOSIONSPHERE = 8,
 		FRUSTUM = 16,
 		PICKUPABLE = 32,
+		RAY = 64,
 		EVERYTHING = -1
 	};
 	PhysicsAttributeType collisionFilterGroup;

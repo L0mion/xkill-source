@@ -256,18 +256,18 @@ void GameComponent::onUpdate(float delta)
 		std::vector<int> rayttributeId = playerEntity->getAttributes(ATTRIBUTE_RAY);
 		for(int i=0;i<rayttributeId.size();i++)
 		{
-			Float3 lookAtFarPlaneHorizon = ptr_camera->ptr_spatial->rotation.quaternionToVector();
+			//Float3 lookAtFarPlaneHorizon = ptr_camera->ptr_spatial->rotation.quaternionToVector();
+			Float3 lookAtFarPlaneHorizon = ptr_camera->look;
 			lookAtFarPlaneHorizon.normalize();
 			lookAtFarPlaneHorizon.x = lookAtFarPlaneHorizon.x*ptr_camera->zFar;
 			lookAtFarPlaneHorizon.y = lookAtFarPlaneHorizon.y*ptr_camera->zFar;
 			lookAtFarPlaneHorizon.z = lookAtFarPlaneHorizon.z*ptr_camera->zFar;
-			lookAtFarPlaneHorizon.normalize();
+			//lookAtFarPlaneHorizon.normalize();
 
 			AttributePtr<Attribute_Ray> ray = itrRay.at(rayttributeId.at(i));
-			//ray->from = ptr_camera->ptr_spatial->ptr_position->position;
-			//ray->to = lookAtFarPlaneHorizon;
-			//ray->from = Float3(18,7,-13);
-			//ray->to = Float3(18,25,-13);
+			ray->from = ptr_camera->ptr_spatial->ptr_position->position;
+			//ray->from = ptr_player->ptr_weaponFireLocation_spatial->ptr_position->position;
+			ray->to = lookAtFarPlaneHorizon + ray->from;
 		}
 
 		if(ptr_health->health < ptr_health->healthFromLastFrame)
@@ -458,6 +458,7 @@ void GameComponent::onUpdate(float delta)
 			DirectX::XMMATRIX xm_view = DirectX::XMLoadFloat4x4((DirectX::XMFLOAT4X4*)&ptr_camera->mat_view);
 			xm_view = DirectX::XMMatrixInverse(&DirectX::XMMatrixDeterminant(xm_view), xm_view);
 			DirectX::XMVECTOR xv_rot = DirectX::XMQuaternionRotationMatrix(xm_view);
+			xv_rot = DirectX::XMQuaternionNormalize(xv_rot);
 			DirectX::XMStoreFloat4((DirectX::XMFLOAT4*)&ptr_spatial->rotation, xv_rot);
 		}
 	}

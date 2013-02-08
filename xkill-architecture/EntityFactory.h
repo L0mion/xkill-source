@@ -195,7 +195,7 @@ public:
 		ptr_physics->ptr_render = ptr_render;
 		ptr_physics->meshID = e->meshID;
 		ptr_physics->collisionFilterGroup = Attribute_Physics::WORLD;
-		ptr_physics->collisionFilterMask = Attribute_Physics::PLAYER | Attribute_Physics::PROJECTILE | Attribute_Physics::FRUSTUM | Attribute_Physics::PICKUPABLE;
+		ptr_physics->collisionFilterMask = Attribute_Physics::PLAYER | Attribute_Physics::PROJECTILE | Attribute_Physics::FRUSTUM | Attribute_Physics::PICKUPABLE | Attribute_Physics::RAY;
 		ptr_physics->mass = 0;
 	}
 
@@ -341,7 +341,7 @@ public:
 		ptr_physics->ptr_spatial = ptr_spatial;
 		ptr_physics->ptr_render = ptr_render;
 		ptr_physics->collisionFilterGroup = Attribute_Physics::PICKUPABLE;
-		ptr_physics->collisionFilterMask = Attribute_Physics::PLAYER | Attribute_Physics::FRUSTUM | Attribute_Physics::WORLD | Attribute_Physics::PICKUPABLE | Attribute_Physics::PROJECTILE | Attribute_Physics::EXPLOSIONSPHERE;
+		ptr_physics->collisionFilterMask = Attribute_Physics::PLAYER | Attribute_Physics::FRUSTUM | Attribute_Physics::WORLD | Attribute_Physics::PICKUPABLE | Attribute_Physics::PROJECTILE | Attribute_Physics::EXPLOSIONSPHERE | Attribute_Physics::RAY;
 		ptr_physics->collisionResponse = true;
 		ptr_physics->mass = 10.0f;
 		ptr_physics->gravity = Float3(0.0f, -10.0f, 0.0f);
