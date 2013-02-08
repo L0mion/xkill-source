@@ -46,11 +46,11 @@ void lightingCS(
 	//Initialize shared values once per tile
 	if(threadIDBlockIndex == 0)
 	{
-		tileMinDepthInt = 0x7F7FFFFF; //0xFFFFFFFF;
+		tileMinDepthInt = 0xFFFFFFFF;
 		tileMaxDepthInt = 0.0f;
 		tileLightNum	= 0.0f;
 		
-		for(uint i = 0; i < TILE_MAX_LIGHTS; i++)
+		[unroll] for(uint i = 0; i < TILE_MAX_LIGHTS; i++)
 		{
 			tileLightIndices[i] = 0;
 		}
@@ -67,10 +67,15 @@ void lightingCS(
 	float	gDepth		= gBufferDepth.SampleLevel(ss, texCoord, 0).x; 
 	
 	//Reconstruct view-space position from depth. Observe the normalized coordinates sent to method.
-	float3 surfacePosV = UtilReconstructPositionViewSpace(float2(threadIDDispatch.x / viewportWidth, threadIDDispatch.y / viewportHeight), gDepth, projectionInverse); 
+	float3 surfacePosV = UtilReconstructPositionViewSpace(
+		float2(threadIDDispatch.x / viewportWidth, threadIDDispatch.y / viewportHeight), 
+		gDepth, 
+		projectionInverse); 
 	
+	//Get tile depth in view-space.
 	uint pixelDepthInt = asuint(surfacePosV.z); //Interlocked functions can only be applied onto ints.
-	if(gDepth != 1.0f)
+	bool validPixel = surfacePosV.z >= zNear && surfacePosV.z <= zFar;
+	if(validPixel)
 	{
 		InterlockedMin(tileMinDepthInt, pixelDepthInt);
 		InterlockedMax(tileMaxDepthInt, pixelDepthInt);
@@ -98,30 +103,29 @@ void lightingCS(
 	{
 		uint lightIndex = i * numTileThreads + threadIDBlockIndex;
 		
-		if(lightIndex < numLightsPoint)
+		//If given light is 'valid'.
+		//..and intersects that lights' sphere.
+		if(lightIndex < numLightsPoint &&
+			IntersectSphere(frustum, mul(float4(lightsPos[lightIndex], 1.0f), view), lightsPoint[lightIndex].range))
 		{
-			bool inFrustum = true;
-			[unroll] for(uint j = 0; j < 6; j++)
-			{
-				float d = dot(frustum._[j], mul(float4(lightsPos[lightIndex], 1.0f), view)); //lightsPos[lightIndex].pos
-				inFrustum = inFrustum && (d >= -lightsPoint[lightIndex].range);
-			}
-			
-			if(inFrustum && tileLightNum < TILE_MAX_LIGHTS)
-			{
-				uint index;
-				InterlockedAdd(tileLightNum, 1, index);
-				tileLightIndices[index] = lightIndex;
-			}
+			uint index;
+			InterlockedAdd(tileLightNum, 1, index);
+
+			index = min(index, TILE_MAX_LIGHTS);	//Prevent writing outside of allocated array.
+			tileLightIndices[index] = lightIndex;	//Last light may be overwritten multiple time if TILE_MAX_LIGHTS is breached.
 		}
 	}
 	GroupMemoryBarrierWithGroupSync();
 
 	//Sample depth as quickly as possible to ensure that we do not evualuate irrelevant pixels.
-	if(gDepth == 1.0f)
+	if(!validPixel)
 		return;
 	
-	float3 normal			= UtilDecodeSphereMap(gNormal.xy);
+	float3 normal = gNormal.xyz; //UtilDecodeSphereMap();
+	normal.x *= 2.0f; normal.x -= 1.0f;
+	normal.y *= 2.0f; normal.y -= 1.0f;
+	normal.z *= 2.0f; normal.z -= 1.0f;
+
 	float3 surfaceNormalV	= normalize(mul(float4(normal, 0.0f), view).xyz);
 	float3 toEyeV			= normalize(float3(0.0f, 0.0f, 0.0f) - surfacePosV);
 	
@@ -151,8 +155,8 @@ void lightingCS(
 		Diffuse	+= diffuse; 
 		Specular += specular;
 	}
-	uint tileLightNumLocal = tileLightNum;
-	for(i = 0; i < tileLightNumLocal; i++)
+	uint numLights = min(tileLightNum, TILE_MAX_LIGHTS); //tielLightNum may be bigger than allowed lights.
+	for(i = 0; i < numLights; i++)
 	{
 		LightDescPoint descPoint = lightsPoint[tileLightIndices[i]];
 		LightPoint(
@@ -173,6 +177,6 @@ void lightingCS(
 	//{
 	//	Diffuse.g += 0.1;
 	//}
-	
+
 	output[uint2(threadIDDispatch.x + viewportTopX, threadIDDispatch.y + viewportTopY)] = Ambient + Diffuse + Specular;
 }
