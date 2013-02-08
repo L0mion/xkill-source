@@ -233,5 +233,5 @@ void InputDevice::createObjectVectors()
 
 void InputDevice::setSensitivityModifier(float value)
 {
-	sensitivityModifier_ = 0.1f+(1 - value)*0.9;
+	sensitivityModifier_ = 0.1f+(1 - value)*0.9f;
 }

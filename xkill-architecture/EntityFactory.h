@@ -1,12 +1,8 @@
 #pragma once
 
-#include <xkill-utilities/DebugShape.h>
+//#include <xkill-utilities/DebugShape.h>
 #include <xkill-utilities/Entity.h>
 #include <xkill-utilities/AttributeManager.h>
-#include "EntityManager.h"
-
-#include <vector>
-#include <iostream>
 
 // Iterators
 ATTRIBUTES_DECLARE_ALL;
@@ -22,6 +18,8 @@ The AttributeFactory can be used to facilitate creation of \ref ATTRIBUTES.
 */
 
 
+
+
 class EntityFactory
 {
 public:
@@ -34,12 +32,22 @@ public:
 #define CREATE_ATTRIBUTE(POINTER_NAME, ATTRIBUTE_NAME, STORAGE_NAME, OWNER_ENTITY)						\
 	AttributePtr<ATTRIBUTE_NAME> POINTER_NAME = AttributeManager::instance()->STORAGE_NAME.createAttribute(OWNER_ENTITY);
 
-	// Connects the AttributePointer by the name PointerName inside AttributeName with latest AttributePointer created inside AttributeManager.
-	// IMPORTANT: The following formula is used to access AttributeManager, "PointerName+Attributes".
-	// PointerName "position" will result in "positionAttributes" which will work.
-	// PointerName "positionAttribute" will result in "positionAttributeAttributes" which will fail.
-//#define __CONNECT_ATTRIBUTES(POINTER_NAME, ATTRIBUTE_NAME, CONNECTING_POINTER_NAME)									\
-//	POINTER_NAME.attribute->ATTRIBUTE_NAME = CONNECTING_POINTER_NAME;
+	enum ModelId
+	{
+			MODEL_PLACEHOLDER			= 0,
+
+			MODEL_RIFLE					= 2,
+			MODEL_HEALTHPACK			= 3,
+			MODEL_AMMO_SINGLE			= 4,
+			MODEL_AMMO_SCATTER			= 5,
+			MODEL_AMMO_EXPLOSIVE		= 6,
+			MODEL_PROCESS				= 7,
+			MODEL_PROJECTILE_EXPLOSIVE	= 8,
+			MODEL_PROJECTILE_SCATTER	= 9,
+			MODEL_PROJECTILE_SINGLE		= 10,
+
+			MODEL_LAST
+	};
 
 	EntityFactory()
 	{
@@ -73,7 +81,7 @@ public:
 		ptr_input->ptr_physics = ptr_physics;
 		
 		CREATE_ATTRIBUTE(ptr_health, Attribute_Health, health, entity);
-		ptr_health->startHealth = 100;
+		ptr_health->maxHealth = 100;
 		
 		CREATE_ATTRIBUTE(ptr_weaponStats, Attribute_WeaponStats, weaponStats, entity);
 		ptr_weaponStats->currentAmmunitionType = XKILL_Enums::AmmunitionType::SCATTER;
@@ -88,6 +96,9 @@ public:
 		ptr_player->ptr_camera = ptr_camera;
 		ptr_player->ptr_health = ptr_health;
 		ptr_player->ptr_weaponStats = ptr_weaponStats;
+		ptr_player->meshID_whenAlive = MODEL_PROCESS;
+		ptr_player->meshID_whenDead = MODEL_PROJECTILE_SCATTER;
+		ptr_render->meshID = ptr_player->meshID_whenAlive;
 		
 		CREATE_ATTRIBUTE(ptr_splitScreen, Attribute_SplitScreen, splitScreen, entity);
 		ptr_splitScreen->ptr_camera = ptr_camera;
@@ -95,10 +106,10 @@ public:
 
 		// Extra bindings
 		ptr_physics->meshID = ptr_render->meshID;
-		ptr_render->meshID = ptr_player->meshIDWhenAlive;
 		
 		// Attach weapon
-		createWeapon(entity, ptr_spatial, ptr_camera->ptr_spatial);
+		AttributePtr<Attribute_Spatial> ptr_weaponFireLocation_spatial = createWeapon(entity, ptr_spatial, ptr_camera->ptr_spatial);
+		ptr_player->ptr_weaponFireLocation_spatial = ptr_weaponFireLocation_spatial;
 	}
 
 	AttributePtr<Attribute_Camera> createCamera(Entity* entity, AttributePtr<Attribute_Spatial> ptr_parent_spatial)
@@ -113,27 +124,58 @@ public:
 		CREATE_ATTRIBUTE(ptr_offset, Behavior_Offset, offset, entity);
 		ptr_offset->ptr_spatial = ptr_spatial;
 		ptr_offset->ptr_parent_spatial_position = ptr_parent_spatial;
-		ptr_offset->offset_position = Float3(0.0f, 0.0f, 0.0f);
+		ptr_offset->offset_position = Float3(0.0f, 0.6f, 0.16f);
 
 		// Return
 		return ptr_camera;
 	}
 
-	void createWeapon(Entity* entity, AttributePtr<Attribute_Spatial> ptr_parent_spatial_position, AttributePtr<Attribute_Spatial> ptr_parent_spatial_rotation)
+	 AttributePtr<Attribute_Spatial> createWeapon(Entity* entity, AttributePtr<Attribute_Spatial> ptr_parent_spatial_position, AttributePtr<Attribute_Spatial> ptr_parent_spatial_rotation)
 	{
-		CREATE_ATTRIBUTE(ptr_position, Attribute_Position, position, entity);
-		CREATE_ATTRIBUTE(ptr_spatial, Attribute_Spatial, spatial, entity);
-		ptr_spatial->ptr_position = ptr_position;
-		CREATE_ATTRIBUTE(ptr_render, Attribute_Render, render, entity);
-		ptr_render->ptr_spatial = ptr_spatial;
-		ptr_render->meshID = 2;
+		//
+		// Create weapon
+		//
+		
+		AttributePtr<Attribute_Spatial> ptr_weapon_spatial;
+		{
+			CREATE_ATTRIBUTE(ptr_position, Attribute_Position, position, entity);
+			CREATE_ATTRIBUTE(ptr_spatial, Attribute_Spatial, spatial, entity);
+			ptr_spatial->ptr_position = ptr_position;
+			CREATE_ATTRIBUTE(ptr_render, Attribute_Render, render, entity);
+			ptr_render->ptr_spatial = ptr_spatial;
+			ptr_render->meshID = MODEL_RIFLE;
+			CREATE_ATTRIBUTE(ptr_offset, Behavior_Offset, offset, entity);
+			ptr_offset->ptr_spatial = ptr_spatial;
+			ptr_offset->ptr_parent_spatial_position = ptr_parent_spatial_position;
+			ptr_offset->ptr_parent_spatial_rotation = ptr_parent_spatial_rotation;
+			ptr_offset->offset_position = Float3(0.23f, 0.4f, 0.56f);
 
-		// Add behavior
-		CREATE_ATTRIBUTE(ptr_offset, Behavior_Offset, offset, entity);
-		ptr_offset->ptr_spatial = ptr_spatial;
-		ptr_offset->ptr_parent_spatial_position = ptr_parent_spatial_position;
-		ptr_offset->ptr_parent_spatial_rotation = ptr_parent_spatial_rotation;
-		ptr_offset->offset_position = Float3(0.23f, -0.2f, 0.4f);
+			ptr_weapon_spatial = ptr_spatial;
+		}
+
+		
+		//
+		// Create fire location
+		//
+
+		AttributePtr<Attribute_Spatial> ptr_fireLocation_spatial;
+		{
+			CREATE_ATTRIBUTE(ptr_position, Attribute_Position, position, entity);
+			CREATE_ATTRIBUTE(ptr_spatial, Attribute_Spatial, spatial, entity);
+			ptr_spatial->ptr_position = ptr_position;
+			/*CREATE_ATTRIBUTE(ptr_render, Attribute_Render, render, entity);
+			ptr_render->ptr_spatial = ptr_spatial;
+			ptr_render->meshID = MODEL_HEALTHPACK;*/
+			CREATE_ATTRIBUTE(ptr_offset, Behavior_Offset, offset, entity);
+			ptr_offset->ptr_spatial = ptr_spatial;
+			ptr_offset->ptr_parent_spatial_position = ptr_weapon_spatial;
+			ptr_offset->ptr_parent_spatial_rotation = ptr_weapon_spatial;
+			ptr_offset->offset_position = Float3(0.0f, 0.06f, 0.32f);
+
+			ptr_fireLocation_spatial = ptr_spatial;
+		}
+
+		return ptr_fireLocation_spatial;
 	}
 	
 	void createWorldEntity(Entity* entity, Event_CreateWorld* e)
@@ -160,23 +202,27 @@ public:
 		CREATE_ATTRIBUTE(ptr_position, Attribute_Position, position, entity);
 		ptr_position->position = e->position;
 
-		CREATE_ATTRIBUTE(ptr_spatial,Attribute_Spatial, spatial, entity);
+		CREATE_ATTRIBUTE(ptr_spatial, Attribute_Spatial, spatial, entity);
 		ptr_spatial->ptr_position = ptr_position;
 		ptr_spatial->rotation = e->rotation;
 
+		//float lifeTime;
 		CREATE_ATTRIBUTE(ptr_render, Attribute_Render, render, entity);
 		ptr_render->ptr_spatial = ptr_spatial;
-		ptr_render->meshID = 2;
+		ptr_render->meshID = MODEL_PROJECTILE_SINGLE;
 		switch (e->ammunitionType)
 		{
 		case XKILL_Enums::AmmunitionType::BULLET:
-			ptr_render->meshID = 10;
+			//lifeTime = 10.0f;
+			ptr_render->meshID = MODEL_PROJECTILE_SINGLE;
 			break;
 		case XKILL_Enums::AmmunitionType::EXPLOSIVE:
-			ptr_render->meshID = 8;
+			//lifeTime = 10.0f;
+			ptr_render->meshID = MODEL_PROJECTILE_EXPLOSIVE;
 			break;
 		case XKILL_Enums::AmmunitionType::SCATTER:
-			ptr_render->meshID = 9;
+			//lifeTime = 0.1f;
+			ptr_render->meshID = MODEL_PROJECTILE_SCATTER;
 			break;
 		default:
 			break;
@@ -189,7 +235,7 @@ public:
 		ptr_physics->collisionFilterMask = Attribute_Physics::WORLD | Attribute_Physics::PLAYER | Attribute_Physics::FRUSTUM | Attribute_Physics::PICKUPABLE;
 		ptr_physics->meshID = ptr_render->meshID;
 		ptr_physics->linearVelocity = e->velocity;
-		ptr_physics->mass = 100.0f;
+		ptr_physics->mass = 50.0f;
 		ptr_physics->gravity = Float3(0.0f, 0.0f, 0.0f);
 		ptr_physics->collisionResponse = true;
 
@@ -198,6 +244,7 @@ public:
 		ptr_projectile->entityIdOfCreator = e->entityIdOfCreator;
 		ptr_projectile->ammunitionType = e->ammunitionType;
 		ptr_projectile->firingModeType = e->firingMode;
+		ptr_projectile->currentLifeTimeLeft = 10.0f;
 
 		CREATE_ATTRIBUTE(ptr_damage, Attribute_Damage, damage, entity);
 		ptr_damage->damage = e->damage;
@@ -274,16 +321,16 @@ public:
 		switch (e->pickupableType)
 		{
 		case XKILL_Enums::PickupableType::AMMUNITION_BULLET:
-			ptr_render->meshID = 4;
+			ptr_render->meshID = MODEL_AMMO_SINGLE;
 			break;
 		case XKILL_Enums::PickupableType::AMMUNITION_SCATTER:
-			ptr_render->meshID = 5;
+			ptr_render->meshID = MODEL_AMMO_SCATTER;
 			break;
 		case XKILL_Enums::PickupableType::AMMUNITION_EXPLOSIVE:
-			ptr_render->meshID = 6;
+			ptr_render->meshID = MODEL_AMMO_EXPLOSIVE;
 			break;
 		case XKILL_Enums::PickupableType::MEDKIT:
-			ptr_render->meshID = 3;
+			ptr_render->meshID = MODEL_HEALTHPACK;
 		default:
 			break;
 		}
@@ -292,7 +339,7 @@ public:
 		ptr_physics->ptr_spatial = ptr_spatial;
 		ptr_physics->ptr_render = ptr_render;
 		ptr_physics->collisionFilterGroup = Attribute_Physics::PICKUPABLE;
-		ptr_physics->collisionFilterMask = Attribute_Physics::PLAYER | Attribute_Physics::FRUSTUM | Attribute_Physics::WORLD | Attribute_Physics::PICKUPABLE | Attribute_Physics::PROJECTILE;
+		ptr_physics->collisionFilterMask = Attribute_Physics::PLAYER | Attribute_Physics::FRUSTUM | Attribute_Physics::WORLD | Attribute_Physics::PICKUPABLE | Attribute_Physics::PROJECTILE | Attribute_Physics::EXPLOSIONSPHERE;
 		ptr_physics->collisionResponse = true;
 		ptr_physics->mass = 10.0f;
 		ptr_physics->gravity = Float3(0.0f, -10.0f, 0.0f);
@@ -328,7 +375,7 @@ public:
 		CREATE_ATTRIBUTE(ptr_physics, Attribute_Physics, physics, entity);
 		ptr_physics->ptr_spatial = ptr_spatial;
 		ptr_physics->collisionFilterGroup = Attribute_Physics::EXPLOSIONSPHERE;
-		ptr_physics->collisionFilterMask = Attribute_Physics::PLAYER;
+		ptr_physics->collisionFilterMask = Attribute_Physics::PLAYER | Attribute_Physics::PICKUPABLE;
 		ptr_physics->collisionResponse = true;
 		ptr_physics->mass = 0.0f;
 		ptr_physics->gravity = Float3(0.0f, 0.0f, 0.0f);

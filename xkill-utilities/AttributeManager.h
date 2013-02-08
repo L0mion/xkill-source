@@ -9,22 +9,25 @@ class EntityStorage;
 // Settings class
 class DLL_U Settings
 {
+private:
+	float _timeScale;
+
 public:
-	float timeScale;
 	bool showDebugPhysics;
 	std::string currentLevel;
 	float trueDeltaTime;
 	bool soundMuted;
 	float soundVolume;
 
+	float timeScale();
+	void setTimeScale(float timeScale);
+
 	Settings()
 	{
+		_timeScale = 1.0f;
 		trueDeltaTime = 0.0f;
 		currentLevel = "TestArena";
-		timeScale = 1.0f;
 		showDebugPhysics = false;
-
-		
 	}
 };
 

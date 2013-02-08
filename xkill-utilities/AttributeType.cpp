@@ -76,7 +76,8 @@ Attribute_Physics::~Attribute_Physics()
 Attribute_Projectile::Attribute_Projectile()
 {
 	entityIdOfCreator = -1;
-	currentLifeTimeLeft = 10.0f;
+	totalLifeTime = 10.0f;
+	currentLifeTimeLeft = totalLifeTime;
 	ammunitionType = XKILL_Enums::AmmunitionType::BULLET;
 	firingModeType = XKILL_Enums::FiringModeType::SEMI;
 }
@@ -195,10 +196,15 @@ Attribute_Player::Attribute_Player()
 	delayInSecondsBetweenEachJump = 1.0f;
 	timeSinceLastJump = delayInSecondsBetweenEachJump+1.0f;
 	collidingWithWorld = false;
+	timeSinceLastDamageTaken = 100.0f;
 	jetpackTimer = 0.0f;
 	detectedAsDead = true;
-	meshIDWhenAlive = 7;
-	meshIDWhenDead = 9;
+	meshID_whenAlive = 0;
+	meshID_whenDead = 0;
+	currentSprintTime = 0;
+	sprintTime = 2.0f;
+	canSprint = true;
+	sprintRechargeRate = 0.2f;
 
 	walkSpeed = 5.0f;
 	sprintSpeed = walkSpeed*2;
@@ -246,8 +252,9 @@ void Attribute_Mesh::clean()
 
 Attribute_Health::Attribute_Health()
 {
-	startHealth = 1.0f;
+	maxHealth = 100.0f;
 	health = 0.0f;
+	healthFromLastFrame = 0.0f;
 }
 Attribute_Health::~Attribute_Health()
 {

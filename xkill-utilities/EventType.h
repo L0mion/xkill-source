@@ -48,8 +48,8 @@ enum DLL_U EventType
 	EVENT_GAME_OVER,
 	EVENT_START_DEATHMATCH,
 	EVENT_CREATE_PROJECTILE,
-	EVENT_CREATE_PLAYERSPAWNPOINT,
-	EVENT_CREATE_PICKUPABLESSPAWNPOINT,
+	EVENT_CREATE_PLAYER_SPAWNPOINT,
+	EVENT_CREATE_PICKUPABLES_SPAWNPOINT,
 	EVENT_CREATE_PICKUPABLE,
 	EVENT_CREATE_EXPLOSIONSPHERE,
 	EVENT_CREATE_WORLD,
@@ -59,7 +59,7 @@ enum DLL_U EventType
 	EVENT_STATE_CHANGED,
 	EVENT_CREATE_INPUTDEVICE,
 
-	EVENT_TRANSFEREVENTSTOGAME,
+	EVENT_TRANSFER_EVENTS_TO_GAME,
 
 	EVENT_CHANGE_GAMESTATE,
 	EVENT_GAMERESET,
@@ -67,6 +67,7 @@ enum DLL_U EventType
 	EVENT_MOUSE_MOVE,
 	EVENT_KEY_PRESS,
 	EVENT_MOUSE_PRESS,
+	EVENT_SET_MOUSELOCK,
 	EVENT_WINDOW_RESIZE,
 	EVENT_INPUT_DEVICE_SEARCH,
 	EVENT_PLAYSOUND,
@@ -78,7 +79,7 @@ enum DLL_U EventType
 	EVENT_MODIFY_PHYSICS_OBJECT,
 
 	EVENT_ATTRIBUTE_UPDATED,
-	EVENT_SYNCSTATECOMMAND,
+	EVENT_SYNC_STATE_COMMAND,
 
 	// Get events
 	EVENT_GET_ATTRIBUTE,
@@ -138,10 +139,11 @@ If muteSound is true then all sounds will be muted
 class DLL_U Event_PlaySound : public Event
 {
 public:
-	Event_PlaySound(int soundId, bool muteSound = false);
+	Event_PlaySound(int soundId, Float3 position, bool use3DAudio = false);
 
 	int soundId;
-	bool muteSound;
+	Float3 position;
+	bool use3DAudio;
 
 	enum sounds
 	{
@@ -287,9 +289,9 @@ public:
 	int entityIdOfCreator;
 	XKILL_Enums::AmmunitionType ammunitionType;
 	XKILL_Enums::FiringModeType firingMode;
-	int damage;
+	float damage;
 
-	Event_CreateProjectile(Float3 position, Float3 velocity, Float4 rotation, int entityIdOfCreator, XKILL_Enums::AmmunitionType ammunitionType, XKILL_Enums::FiringModeType firingMode, int damage);
+	Event_CreateProjectile(Float3 position, Float3 velocity, Float4 rotation, int entityIdOfCreator, XKILL_Enums::AmmunitionType ammunitionType, XKILL_Enums::FiringModeType firingMode, float damage);
 };
 
 class DLL_U Event_CreateMesh : public Event
@@ -372,6 +374,14 @@ public:
 	bool isPressed;
 
 	Event_MousePress(int keyEnum, bool isPressed);
+};
+
+class DLL_U Event_SetMouseLock : public Event
+{
+public:
+	bool isLock;
+
+	Event_SetMouseLock(bool isLock);
 };
 
 class DLL_U Event_PlayerDeath : public Event
@@ -562,9 +572,9 @@ public:
 class DLL_U Event_ModifyPhysicsObject : public Event
 {
 public:
-	Event_ModifyPhysicsObject(XKILL_Enums::ModifyPhysicsObjectData modifyWhatDataInPhysicsObjectData, void* data, int physicsAttributeIndex);
+	Event_ModifyPhysicsObject(XKILL_Enums::ModifyPhysicsObjectData modifyWhatDataInPhysicsObjectData, void* data, AttributePtr<Attribute_Physics> ptr_physics);
 
+	AttributePtr<Attribute_Physics> ptr_physics;
 	XKILL_Enums::ModifyPhysicsObjectData modifyWhatDataInPhysicsObjectData;
 	void* data;
-	int physicsAttributeIndex;
 };

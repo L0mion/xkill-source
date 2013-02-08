@@ -50,7 +50,7 @@ void Menu_Input::loadDeviceList()
 	deviceListModel->clear();
 
 	InputDevice* device;
-	Attribute_InputDevice* attr_inputDevice;
+	AttributePtr<Attribute_InputDevice> attr_inputDevice;
 
 	QStandardItem* item;
 
@@ -81,8 +81,8 @@ void Menu_Input::loadInputList(int deviceId)
 	if(deviceId >= itrInputDevice.size())
 		return;
 
-	Attribute_InputDevice* attr_device = itrInputDevice.at(deviceId);
-	currentDevice = attr_device->device;
+	AttributePtr<Attribute_InputDevice> ptr_inputDevice = itrInputDevice.at(deviceId);
+	currentDevice = ptr_inputDevice->device;
 
 	InputAction inputAction;
 
@@ -130,7 +130,7 @@ void Menu_Input::loadInputList(int deviceId)
 
 	ui->tableView_Input->setModel(inputListModel);
 	ui->tableView_Input->setColumnWidth(0,180);
-	ui->tableView_Input->setColumnWidth(1,180);
+	ui->tableView_Input->setColumnWidth(1,344);
 }
 
 void Menu_Input::loadInputSettings(int objectId)
@@ -149,8 +149,8 @@ void Menu_Input::loadInputSettings(int objectId)
 
 void Menu_Input::setInputObject(QModelIndex index)
 {
-	Attribute_InputDevice* attr_device = itrInputDevice.at(ui->comboBox_Input->currentIndex());
-	InputDevice* device = attr_device->device;
+	AttributePtr<Attribute_InputDevice> ptr_inputDevice = itrInputDevice.at(ui->comboBox_Input->currentIndex());
+	InputDevice* device = ptr_inputDevice->device;
 
 	std::vector<int> objectIndex = device->getMappedArray(index.row());
 	if(objectIndex.size() > 0)

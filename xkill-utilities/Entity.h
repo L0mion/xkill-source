@@ -3,6 +3,7 @@
 #include "dllUtilities.h"
 #include "EventManager.h"
 #include <vector>
+enum AttributeType;
 class AttributeController;
 
 

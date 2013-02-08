@@ -3,9 +3,6 @@
 #include <xkill-utilities/EntityStorage.h>
 #include "EntityFactory.h"
 
-#include <vector>
-#include <iostream>
-
 class EntityManager: public IObserver
 {
 private:
@@ -29,8 +26,8 @@ public:
 		SUBSCRIBE_TO_EVENT(this, EVENT_CREATE_PROJECTILE);
 		SUBSCRIBE_TO_EVENT(this, EVENT_CREATE_MESH);
 		SUBSCRIBE_TO_EVENT(this, EVENT_REMOVE_ENTITY);
-		SUBSCRIBE_TO_EVENT(this, EVENT_CREATE_PLAYERSPAWNPOINT);
-		SUBSCRIBE_TO_EVENT(this, EVENT_CREATE_PICKUPABLESSPAWNPOINT);
+		SUBSCRIBE_TO_EVENT(this, EVENT_CREATE_PLAYER_SPAWNPOINT);
+		SUBSCRIBE_TO_EVENT(this, EVENT_CREATE_PICKUPABLES_SPAWNPOINT);
 		SUBSCRIBE_TO_EVENT(this, EVENT_CREATE_PICKUPABLE);
 		SUBSCRIBE_TO_EVENT(this, EVENT_CREATE_EXPLOSIONSPHERE);
 		SUBSCRIBE_TO_EVENT(this, EVENT_CREATE_ENTITY);
@@ -59,10 +56,10 @@ public:
 		case EVENT_CREATE_MESH:
 			event_createmesh(static_cast<Event_CreateMesh*>(e));
 			break;
-		case EVENT_CREATE_PLAYERSPAWNPOINT:
+		case EVENT_CREATE_PLAYER_SPAWNPOINT:
 			event_CreatePlayerSpawnPoint(static_cast<Event_CreatePlayerSpawnPoint*>(e));
 			break;
-		case EVENT_CREATE_PICKUPABLESSPAWNPOINT:
+		case EVENT_CREATE_PICKUPABLES_SPAWNPOINT:
 			event_CreatePickupablesSpawnPoint(static_cast<Event_CreatePickupablesSpawnPoint*>(e));
 			break;
 		case EVENT_CREATE_PICKUPABLE:

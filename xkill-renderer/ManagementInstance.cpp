@@ -29,10 +29,10 @@ void ManagementInstance::update(ID3D11Device* device, ID3D11DeviceContext* devco
 	//Fill instance-lists with updated data.
 	while(itrRender.hasNext())
 	{
-		Attribute_Render* renderAttribute = itrRender.getNext();
-		if(renderAttribute->cull)
+		AttributePtr<Attribute_Render> ptr_render = itrRender.getNext();
+		if(ptr_render->cull)
 		{
-			addRenderAtInstance(renderAttribute);
+			addRenderAtInstance(ptr_render);
 		}
 	}
 
@@ -43,7 +43,7 @@ void ManagementInstance::update(ID3D11Device* device, ID3D11DeviceContext* devco
 	}
 }
 
-void ManagementInstance::addRenderAtInstance(Attribute_Render* ptr_render)
+void ManagementInstance::addRenderAtInstance(AttributePtr<Attribute_Render> ptr_render)
 {
 	AttributePtr<Attribute_Spatial>	ptr_spatial = ptr_render->ptr_spatial;
 	AttributePtr<Attribute_Position> ptr_position = ptr_spatial->ptr_position;
