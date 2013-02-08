@@ -124,7 +124,10 @@ bool PhysicsComponent::init()
 
 void PhysicsComponent::onUpdate(float delta)
 {
-
+	if(!physicsObjects_)
+	{
+		return;
+	}
 /*
 From Bullet Demo:
 			btCollisionWorld::AllHitsRayResultCallback allResults(from,to);
@@ -184,6 +187,7 @@ void PhysicsComponent::onEvent(Event* e)
 		{
 			if(attributeUpdated->isDeleted)
 			{
+				if(physicsObjects_)
 				if(attributeIndex < physicsObjects_->size() && physicsObjects_->at(attributeIndex) != nullptr)
 				{
   					dynamicsWorld_->removeRigidBody(physicsObjects_->at(attributeIndex));
@@ -207,9 +211,12 @@ void PhysicsComponent::onEvent(Event* e)
 		{
 			if(attributeUpdated->isDeleted)
 			{
+				if(physicsObjects_)
+				{
   				dynamicsWorld_->removeRigidBody(frustumPhysicsObjects_->at(attributeIndex));
 				delete frustumPhysicsObjects_->at(attributeIndex);
 				frustumPhysicsObjects_->at(attributeIndex) = nullptr;
+				}
 			}
 		}
 		break;
@@ -221,6 +228,7 @@ void PhysicsComponent::onEvent(Event* e)
 		//Cast void pointer sent in Event_ModifyPhysicsObject, and modify physics object
 		int physicsAttributeIndex = modifyPhysicsObject->ptr_physics.index();
 
+		if(physicsObjects_)
 		if(physicsAttributeIndex < physicsObjects_->size() && physicsAttributeIndex > -1)
 		{
 			if(physicsObjects_->at(physicsAttributeIndex) != NULL)
@@ -294,62 +302,65 @@ void PhysicsComponent::synchronizeWithAttributes(AttributePtr<Attribute_Physics>
 	}
 	*/
 	//Checks if new physiscs attributes were created since last call to this function
-	if(physicsAttributeIndex >= physicsObjects_->size())
+	if(physicsObjects_)
 	{
-		physicsObjects_->push_back(nullptr);
-	}
-	//Synchronize physiscs attributes with internal PhysicsObjects
-	if(ptr_physics->reloadDataIntoBulletPhysics) //If something has changed in the physics attribute
-	{
-		//If the PhysicsObjects already exists, it needs to be removed to safely reset all of its internal Bullet Physics values
-		if(physicsObjects_->at(physicsAttributeIndex) != nullptr)
+		if(physicsAttributeIndex >= physicsObjects_->size())
 		{
-			dynamicsWorld_->removeRigidBody(physicsObjects_->at(physicsAttributeIndex));
-			delete physicsObjects_->at(physicsAttributeIndex);
+			physicsObjects_->push_back(nullptr);
 		}
-		// Determine type of PhysicsObject to create and add to the Bullet Physics world
-		switch(ptr_physics->collisionFilterGroup)
+		//Synchronize physiscs attributes with internal PhysicsObjects
+		if(ptr_physics->reloadDataIntoBulletPhysics) //If something has changed in the physics attribute
 		{
-		default:
-			physicsObjects_->at(physicsAttributeIndex) = new PhysicsObject();
-			break;
-		case Attribute_Physics::WORLD:
-			physicsObjects_->at(physicsAttributeIndex) = new WorldPhysicsObject();
-			break;
-		case Attribute_Physics::PLAYER:
-			physicsObjects_->at(physicsAttributeIndex) = new PlayerPhysicsObject();
-			break;
-		case Attribute_Physics::PROJECTILE:
-			physicsObjects_->at(physicsAttributeIndex) = new ProjectilePhysicsObject();
-			break;
-		case Attribute_Physics::EXPLOSIONSPHERE:
-			physicsObjects_->at(physicsAttributeIndex) = new ExplosionSpherePhysicsObject();
-			break;
-		case Attribute_Physics::PICKUPABLE:
-			physicsObjects_->at(physicsAttributeIndex) = new PickupablePhysicsObject();
-			break;
-		case Attribute_Physics::EVERYTHING:
-			SHOW_MESSAGEBOX("Error: Attribute_Physics should not have EVERYTHING as collisionFilterGroup");
-			break;
-		}
-
-		if(physicsObjects_ != nullptr)
-		{
-			if(physicsObjects_->at(physicsAttributeIndex)->init(physicsAttributeIndex, ptr_physics->collisionFilterGroup) == true)
+			//If the PhysicsObjects already exists, it needs to be removed to safely reset all of its internal Bullet Physics values
+			if(physicsObjects_->at(physicsAttributeIndex) != nullptr)
 			{
-				dynamicsWorld_->addRigidBody(physicsObjects_->at(physicsAttributeIndex), ptr_physics->collisionFilterGroup, ptr_physics->collisionFilterMask);
-				//Per object gravity must be set after "addRigidBody"
-				if(!physicsObjects_->at(physicsAttributeIndex)->isStaticOrKinematicObject())
-				{
-					physicsObjects_->at(physicsAttributeIndex)->setGravity(btVector3(ptr_physics->gravity.x, ptr_physics->gravity.y, ptr_physics->gravity.z));
-					//physicsObjects_->at(physicsAttributeIndex)->setGravity(btVector3(0,0,0));
-				}
-
-				ptr_physics->reloadDataIntoBulletPhysics = false;
+				dynamicsWorld_->removeRigidBody(physicsObjects_->at(physicsAttributeIndex));
+				delete physicsObjects_->at(physicsAttributeIndex);
 			}
-			else
+			// Determine type of PhysicsObject to create and add to the Bullet Physics world
+			switch(ptr_physics->collisionFilterGroup)
 			{
-				SHOW_MESSAGEBOX("-->Error initializing PhysicsObject");
+			default:
+				physicsObjects_->at(physicsAttributeIndex) = new PhysicsObject();
+				break;
+			case Attribute_Physics::WORLD:
+				physicsObjects_->at(physicsAttributeIndex) = new WorldPhysicsObject();
+				break;
+			case Attribute_Physics::PLAYER:
+				physicsObjects_->at(physicsAttributeIndex) = new PlayerPhysicsObject();
+				break;
+			case Attribute_Physics::PROJECTILE:
+				physicsObjects_->at(physicsAttributeIndex) = new ProjectilePhysicsObject();
+				break;
+			case Attribute_Physics::EXPLOSIONSPHERE:
+				physicsObjects_->at(physicsAttributeIndex) = new ExplosionSpherePhysicsObject();
+				break;
+			case Attribute_Physics::PICKUPABLE:
+				physicsObjects_->at(physicsAttributeIndex) = new PickupablePhysicsObject();
+				break;
+			case Attribute_Physics::EVERYTHING:
+				SHOW_MESSAGEBOX("Error: Attribute_Physics should not have EVERYTHING as collisionFilterGroup");
+				break;
+			}
+
+			if(physicsObjects_ != nullptr)
+			{
+				if(physicsObjects_->at(physicsAttributeIndex)->init(physicsAttributeIndex, ptr_physics->collisionFilterGroup) == true)
+				{
+					dynamicsWorld_->addRigidBody(physicsObjects_->at(physicsAttributeIndex), ptr_physics->collisionFilterGroup, ptr_physics->collisionFilterMask);
+					//Per object gravity must be set after "addRigidBody"
+					if(!physicsObjects_->at(physicsAttributeIndex)->isStaticOrKinematicObject())
+					{
+						physicsObjects_->at(physicsAttributeIndex)->setGravity(btVector3(ptr_physics->gravity.x, ptr_physics->gravity.y, ptr_physics->gravity.z));
+						//physicsObjects_->at(physicsAttributeIndex)->setGravity(btVector3(0,0,0));
+					}
+
+					ptr_physics->reloadDataIntoBulletPhysics = false;
+				}
+				else
+				{
+					SHOW_MESSAGEBOX("-->Error initializing PhysicsObject");
+				}
 			}
 		}
 	}

@@ -14,6 +14,7 @@ public:
 	virtual bool subClassSpecificInitHook();
 	virtual btVector3 subClassCalculateLocalInertiaHook(btScalar mass);
 	virtual btCollisionShape* subClassSpecificCollisionShape();
+	virtual void onUpdate(float delta);
 };
 
 #endif

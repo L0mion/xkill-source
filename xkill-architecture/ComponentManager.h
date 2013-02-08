@@ -4,13 +4,14 @@
 #include <xkill-utilities/AttributeManager.h>
 
 class RenderingComponent;
-class PhysicsComponent;
+//class PhysicsComponent;
 class SoundComponent;
 class CameraComponent;
 class InputComponent;
 class GameComponent;
 class ScoreComponent;
 class IOComponent;
+class Component;
 enum StateType;
 
 #ifndef HWND_FORWARD_DECLARATION
@@ -33,7 +34,8 @@ class ComponentManager : public IObserver
 {
 private:
 	RenderingComponent*		render_;
-	PhysicsComponent*		physics_;
+	//PhysicsComponent*		physics_;
+	Component*				physics_;
 	SoundComponent*			sound_;
 	CameraComponent*		camera_;
 	InputComponent*			input_;

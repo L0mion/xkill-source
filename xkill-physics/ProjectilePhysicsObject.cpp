@@ -92,3 +92,7 @@ btCollisionShape* ProjectilePhysicsObject::subClassSpecificCollisionShape()
 		}
 	}
 }
+
+void ProjectilePhysicsObject::onUpdate(float delta)
+{
+}

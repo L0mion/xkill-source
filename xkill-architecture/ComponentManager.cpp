@@ -2,9 +2,11 @@
 
 #include <xkill-io/IOComponent.h>
 #include <xkill-renderer/renderingComponent.h>
-#include <xkill-physics/PhysicsComponent.h>
+//#include <xkill-physics/PhysicsComponent.h>
 #include <xkill-sound/SoundComponent.h>
 #include <xkill-input/InputComponent.h>
+
+#include "Component.h"
 
 #include "CameraComponent.h"
 #include "GameComponent.h"
@@ -63,7 +65,9 @@ bool ComponentManager::init(HWND windowHandle, HWND parentWindowHandle)
 	//state_TemporaryVariableUsedAsSubstituteForStateMachine = SPECIAL_STATE_NONE;
 
 	render_ = new RenderingComponent(windowHandle);
-	physics_ = new PhysicsComponent();
+	//physics_ = new PhysicsComponent();
+	physics_ = new Component("xkill-physics.dll");
+	physics_->load();
 	camera_ = new CameraComponent();
 	game_ = new GameComponent();
 	sound_ = new SoundComponent();
@@ -151,6 +155,7 @@ void ComponentManager::update(float delta)
 	if(GET_STATE() == STATE_DEATHMATCH)
 	{
 		input_->onUpdate(delta);
+		
 		physics_->onUpdate(delta);
 		game_->onUpdate(delta);	
 		camera_->onUpdate(delta);
