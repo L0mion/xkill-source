@@ -31,6 +31,8 @@ public:
 	*/
 	void interpolate(float time, DirectX::XMFLOAT4X4& matrix) const;
 
+	void addKeyframe(Keyframe* keyframe);
+
 	float getStartTime()	const;
 	float getEndTime()		const;
 

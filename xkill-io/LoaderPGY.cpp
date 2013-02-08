@@ -1,3 +1,5 @@
+#include <DirectXMath.h>
+
 #include "LoaderPGY.h"
 
 #include "SpecsPGY.h"
@@ -71,6 +73,8 @@ MeshDesc LoaderPGY::loadPGY(
 
 	std::string fileName = getFileName();
 
+
+	loadAnimations();
 	MeshDesc meshDesc;
 	meshDesc.materials_		= materials;
 	meshDesc.vertices_		= vertices;
@@ -162,6 +166,60 @@ const SubsetDesc LoaderPGY::loadSubset()
 	subset.materialIndex_	= materialIndex;
 	subset.indices_			= indices;
 	return subset;
+}
+
+void LoaderPGY::loadAnimations()
+{
+	PGYHeaderSkinnedData skinnedDataHeader;
+
+	std::vector<int>* boneHierarchy = new std::vector<int>();
+	std::vector<DirectX::XMFLOAT4X4>* boneOffsets = new std::vector<DirectX::XMFLOAT4X4>();
+
+	ifstream_.read((char*)&skinnedDataHeader, sizeof(skinnedDataHeader));
+	for(unsigned int i=0; i<skinnedDataHeader.numBones_; i++)
+	{
+		int parentIndex;
+		ifstream_.read((char*)&parentIndex, sizeof(int));
+		boneHierarchy->push_back(parentIndex);
+	}
+	for(unsigned int i=0; i<skinnedDataHeader.numBones_; i++)
+	{
+		DirectX::XMFLOAT4X4 offsetMatrix;
+		ifstream_.read((char*)&offsetMatrix, sizeof(offsetMatrix));
+		boneOffsets->push_back(offsetMatrix);
+	}
+
+	loadAnimation(skinnedDataHeader.numBones_);
+
+}
+void LoaderPGY::loadAnimation(unsigned int numBones)
+{
+	PGYHeaderAnimation animationHeader;
+	ifstream_.read((char*)&animationHeader, sizeof(animationHeader));
+	
+	std::string animationName;
+	ifstream_.read((char*)&animationName, animationHeader.nameSize_);
+
+	std::vector<BoneAnimation*> boneAnimations;
+
+	for(unsigned int i=0; i<numBones; i++)
+	{
+		PGYHeaderBone boneHeader;
+		ifstream_.read((char*)&boneHeader, sizeof(boneHeader));
+
+		boneAnimations.push_back(new BoneAnimation());
+		loadKeyframes(boneAnimations.at(i), boneHeader.numKeyframes_);
+	}
+
+}
+void LoaderPGY::loadKeyframes(BoneAnimation* bone, unsigned int numKeyframes)
+{
+	for(unsigned int i=0; i<numKeyframes; i++)
+	{
+		Keyframe* keyframe = new Keyframe();
+		ifstream_.read((char*)keyframe, sizeof(Keyframe));
+		bone->addKeyframe(keyframe);
+	}
 }
 
 WriteTimeUTC LoaderPGY::getWriteTimeUTC() const

@@ -3,6 +3,11 @@
 
 #include <xkill-utilities/MeshDesc.h>
 
+#include <xkill-utilities/SkinnedData.h>
+#include <xkill-utilities/AnimationClip.h>
+#include <xkill-utilities/BoneAnimation.h>
+#include <xkill-utilities/Keyframe.h>
+
 #include "Loader.h"
 #include "SpecsPGY.h"
 #include "VarStatus.h"
@@ -49,6 +54,10 @@ private:
 	const VertexDesc loadVertex(); //!< Reads a single vertex from .pgy.
 	void loadSubsets(const unsigned int numSubsets, std::vector<SubsetDesc>& subsets); //!< Subsets from .pgy.
 	const SubsetDesc loadSubset(); //!< Reads a single subset from .pgy.
+
+	void loadAnimations();
+	void loadAnimation(unsigned int numBones);
+	void loadKeyframes(BoneAnimation* bone, unsigned int numKeyframes);
 
 	WriteTimeUTC writeTimeUTC_;
 

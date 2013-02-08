@@ -188,8 +188,8 @@ void WriterPGY::writeAnimations()
 		std::string clipName = index->first;
 		if(clip)
 		{
-			animationHeader.nameSize_ = clipName.size();
-
+			animationHeader.nameSize_ = sizeof(clipName);
+			writeAnimation(clip, clipName, animationHeader, skinnedDataHeader.numBones_);
 		}
 	}
 }
