@@ -32,17 +32,17 @@ Menu_Main::Menu_Main( QWidget* parent ) : QMainWindow(parent), ToggleHelper(this
 	//setAttribute(Qt::WA_TranslucentBackground);
 	setWindowFlags(Qt::WindowStaysOnTopHint);
 
-	ui.verticalLayout_2->setSpacing(0);
-	ui.verticalLayout_2->setMargin(0);
-	ui.verticalLayout->setSpacing(0);
-	ui.verticalLayout->setMargin(0);
+	//ui.verticalLayout_2->setSpacing(0);
+	//ui.verticalLayout_2->setMargin(0);
+	//ui.verticalLayout->setSpacing(0);
+	//ui.verticalLayout->setMargin(0);
 
-	connect(ui.pushButton_exit,			SIGNAL(clicked()),					this,	SLOT(slot_quitToDesktop()));
+	connect(ui.pushButton_exit_5,		SIGNAL(clicked()),					this,	SLOT(slot_quitToDesktop()));
 	connect(ui.pushButton_exit_2,		SIGNAL(clicked()),					this,	SLOT(slot_quitToDesktop()));
 	connect(ui.comboBox_LevelSelect,	SIGNAL(currentIndexChanged(int)),	this,	SLOT(slot_selectLevel(int)));
-	connect(ui.pushButton_AddLevel,		SIGNAL(clicked()),					this,	SLOT(slot_addLevel()));
-	connect(ui.pushButton_SaveLevel,	SIGNAL(clicked()),					this,	SLOT(slot_saveLevel()));
-	connect(ui.pushButton_RemoveLevel,	SIGNAL(clicked()),					this,	SLOT(slot_removeLevel()));
+	//connect(ui.pushButton_AddLevel,		SIGNAL(clicked()),					this,	SLOT(slot_addLevel()));
+	//connect(ui.pushButton_SaveLevel,	SIGNAL(clicked()),					this,	SLOT(slot_saveLevel()));
+	//connect(ui.pushButton_RemoveLevel,	SIGNAL(clicked()),					this,	SLOT(slot_removeLevel()));
 	connect(ui.pushButton_startGame,	SIGNAL(clicked()),					this,	SLOT(slot_startGame()));
 
 	/*
@@ -156,9 +156,9 @@ void Menu_Main::loadXML()
 		QStandardItem* child = allLevelItm->child(i,0);
 		ui.comboBox_LevelSelect->addItem(child->text());
 	}
-	ui.treeView->setModel(levelListModel);
+//	ui.treeView->setModel(levelListModel);
 
-	ui.treeView->setExpanded(allLevelItm->index(), true);
+//	ui.treeView->setExpanded(allLevelItm->index(), true);
 	
 }
 
@@ -184,9 +184,9 @@ void Menu_Main::slot_addLevel()
 
 void Menu_Main::slot_removeLevel()
 {
-	QStandardItem* levels = levelListModel->item(0,0);
-	QModelIndex index = ui.treeView->currentIndex();
-	levels->removeRow(index.row());
+//	QStandardItem* levels = levelListModel->item(0,0);
+//	QModelIndex index = ui.treeView->currentIndex();
+//	levels->removeRow(index.row());
 }
 
 void Menu_Main::slot_saveLevel()
@@ -233,6 +233,9 @@ void Menu_Main::mousePressEvent( QMouseEvent* e )
 
 void Menu_Main::slot_startGame()
 {
+	// Hide mouse
+	SEND_EVENT(&Event_SetMouseLock(true));
+
 	SEND_EVENT(&Event_EndDeathmatch());	//Temporary to remove the "empty" game that is used to paint the menu background black.
 	int num_players = ui.horizontalSlider_numPlayers->value();
 	SEND_EVENT(&Event_StartDeathmatch(num_players));

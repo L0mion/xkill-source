@@ -123,13 +123,13 @@ Event_MousePress::Event_MousePress(int keyEnum, bool isPressed) : Event(EVENT_MO
 	this->isPressed = isPressed;
 }
 
-Event_CreatePlayerSpawnPoint::Event_CreatePlayerSpawnPoint(Float3 spawnPointPosition, float spawnAreaRadius) : Event(EVENT_CREATE_PLAYERSPAWNPOINT)
+Event_CreatePlayerSpawnPoint::Event_CreatePlayerSpawnPoint(Float3 spawnPointPosition, float spawnAreaRadius) : Event(EVENT_CREATE_PLAYER_SPAWNPOINT)
 {
 	this->spawnPointPosition = spawnPointPosition;
 	this->spawnAreaRadius = spawnAreaRadius;
 }
 
-Event_CreatePickupablesSpawnPoint::Event_CreatePickupablesSpawnPoint(Float3 spawnPointPosition, XKILL_Enums::PickupableType pickupableType)  : Event(EVENT_CREATE_PICKUPABLESSPAWNPOINT)
+Event_CreatePickupablesSpawnPoint::Event_CreatePickupablesSpawnPoint(Float3 spawnPointPosition, XKILL_Enums::PickupableType pickupableType)  : Event(EVENT_CREATE_PICKUPABLES_SPAWNPOINT)
 {
 	this->spawnPointPosition = spawnPointPosition;
 	this->pickupableType = pickupableType;
@@ -163,7 +163,7 @@ Event_SyncStateCommand::Event_SyncStateCommand(
 	StateType fromState, 
 	StateType toState, 
 	bool isReplacementState )
-	: Event(EVENT_SYNCSTATECOMMAND)
+	: Event(EVENT_SYNC_STATE_COMMAND)
 {
 	this->sender = sender;
 	this->fromState = fromState;
@@ -201,7 +201,7 @@ Event_CreateLight::Event_CreateLight(Float3 position, Float3 direction, Float3 a
 	this->type = type;
 }
 
-Event_TransferEventsToGame::Event_TransferEventsToGame(std::vector<Event*> events) : Event(EVENT_TRANSFEREVENTSTOGAME)
+Event_TransferEventsToGame::Event_TransferEventsToGame(std::vector<Event*> events) : Event(EVENT_TRANSFER_EVENTS_TO_GAME)
 {
 	this->events = events;
 }
@@ -227,4 +227,9 @@ Event_ModifyPhysicsObject::Event_ModifyPhysicsObject(XKILL_Enums::ModifyPhysicsO
 	this->modifyWhatDataInPhysicsObjectData = modifyWhatDataInPhysicsObjectData;
 	this->data = data;
 	this->ptr_physics = ptr_physics;
+}
+
+Event_SetMouseLock::Event_SetMouseLock( bool isLock ) : Event(EVENT_SET_MOUSELOCK)
+{
+	this->isLock = isLock;
 }

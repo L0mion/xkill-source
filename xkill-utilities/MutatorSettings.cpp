@@ -85,7 +85,7 @@ void MutatorSettings::initStandardAmmunition()
 	ammo->damage			= 50.0f;
 	ammo->explosionSphereInitialRadius = 1.0f;
 	ammo->explosionSphereFinalRadius = 10.0f;
-	ammo->explosionSphereExplosionDuration = 3.0f;
+	ammo->explosionSphereExplosionDuration = 1.0f;
 	ammo->explosive			= true;
 	ammo->nrOfProjectiles	= 1;
 	ammo->spawnVariation	= 0.0f;
