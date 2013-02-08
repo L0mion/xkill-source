@@ -228,3 +228,11 @@ Event_ModifyPhysicsObject::Event_ModifyPhysicsObject(XKILL_Enums::ModifyPhysicsO
 	this->data = data;
 	this->physicsAttributeIndex = physicsAttributeIndex;
 }
+
+Event_HackActivated::Event_HackActivated(float time, XKILL_Enums::HackType hackType, AttributePtr<Attribute_Player> player) : 
+	Event(EVENT_HACK_ACTIVATED)
+{
+	this->time = time;
+	this->hackType = hackType;
+	this->player = player;
+}

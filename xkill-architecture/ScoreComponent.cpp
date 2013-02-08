@@ -2,8 +2,11 @@
 
 #include <xkill-utilities/AttributeManager.h>
 #include <xkill-utilities/EventType.h>
+#include <xkill-utilities/Timer.h>
 
 ATTRIBUTES_DECLARE_ALL
+
+#define SAFE_DELETE(x) {if(x != nullptr) delete x; x = nullptr;}
 
 ScoreComponent::ScoreComponent()
 {
@@ -12,20 +15,20 @@ ScoreComponent::ScoreComponent()
 	SUBSCRIBE_TO_EVENT(this, EVENT_START_DEATHMATCH);
 
 	executingPlayerIndex_ = -1;
+	schedulerTimer_ = nullptr;
+	cycleTimer_ = nullptr;
 }
 
 ScoreComponent::~ScoreComponent()
 {
-
+	SAFE_DELETE(schedulerTimer_);
+	SAFE_DELETE(cycleTimer_);
 }
 
 bool ScoreComponent::init()
 {
-	schedulerTime_ = 30.0f;
-	currentSchedulerTime_ = schedulerTime_;
-
-	cycleTime_ = 1.0f;
-	currentCycleTime_ = cycleTime_;	
+	schedulerTimer_ = new Timer(30.0f);
+	cycleTimer_ = new Timer(1.0f);
 
 	executionMode_ = false;
 	executingPlayerIndex_ = -1;
@@ -55,7 +58,7 @@ void ScoreComponent::onUpdate(float delta)
 		schedulerScoreCounting(delta);
 
 		//if death match game mode
-		//deathMatchScoreCounting(delta)
+		//deathMatchScoreCounting(delta);
 	}
 }
 
@@ -63,10 +66,10 @@ void ScoreComponent::schedulerScoreCounting(float delta)
 {
 	if(executionMode_)
 	{
-		currentCycleTime_ -= delta;
-		if(currentCycleTime_ <= 0.0f)
+		cycleTimer_->update(delta);
+		if(cycleTimer_->hasTimerExpired())
 		{
-			currentCycleTime_ = cycleTime_;
+			cycleTimer_->resetTimer();
 
 			if(executingPlayerIndex_ == -1)	// Shouldn't happen, but if it does then leave execution mode
 			{
@@ -86,7 +89,7 @@ void ScoreComponent::schedulerScoreCounting(float delta)
 				{
 					executionMode_ = false;
 					executingPlayerIndex_ = -1;
-					currentSchedulerTime_ = schedulerTime_;
+					schedulerTimer_->resetTimer();
 					// Send event to notify other components that we're leaving execution mode
 				}
 			}
@@ -94,8 +97,8 @@ void ScoreComponent::schedulerScoreCounting(float delta)
 	}
 	else
 	{
-		currentSchedulerTime_ -= delta;
-		if(currentSchedulerTime_ <= 0.0f)
+		schedulerTimer_->update(delta);
+		if(schedulerTimer_->hasTimerExpired())
 		{
 			int topPlayerIndex = -1;
 			int topPriority = 0;
@@ -124,7 +127,7 @@ void ScoreComponent::schedulerScoreCounting(float delta)
 			if(topPlayerIndex == -1)	// All players had zero priority
 			{
 				// Punish them all
-				currentSchedulerTime_ = schedulerTime_;
+				schedulerTimer_->resetTimer();
 			}
 			else if(topPriorityIsTied)	// Two or more players are tied for the ammount of priority
 			{
@@ -133,7 +136,7 @@ void ScoreComponent::schedulerScoreCounting(float delta)
 			else						// Execute the player with highest priority
 			{
 				executingPlayerIndex_ = topPlayerIndex;
-				currentCycleTime_ = cycleTime_;
+				cycleTimer_->resetTimer();
 				executionMode_ = true;
 				// Send event to notify other components that we're entering execution mode
 			}

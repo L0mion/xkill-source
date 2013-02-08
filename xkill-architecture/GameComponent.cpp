@@ -500,7 +500,7 @@ void GameComponent::event_PhysicsAttributesColliding(Event_PhysicsAttributesColl
 								//Award player
 								if(entity1->getID() != damage->owner_entityID)
 								{
-									ptr_player->priority += 10;
+									ptr_player->priority++;
 								}
 								else //Punish player for blowing himself up
 								{
@@ -599,9 +599,9 @@ void GameComponent::event_PhysicsAttributesColliding(Event_PhysicsAttributesColl
  					ptr_projectile->currentLifeTimeLeft = 0.0f;
 
 					//Extract projectile position.
-					AttributePtr<Attribute_Physics> ptr_projectile_physics	 = ptr_projectile->ptr_physics;
-					AttributePtr<Attribute_Spatial> ptr_projectile_spatial	 = ptr_projectile_physics->ptr_spatial;
-					AttributePtr<Attribute_Position> ptr_projectile_position	 = ptr_projectile_spatial->ptr_position;
+					AttributePtr<Attribute_Physics> ptr_projectile_physics		= ptr_projectile->ptr_physics;
+					AttributePtr<Attribute_Spatial> ptr_projectile_spatial		= ptr_projectile_physics->ptr_spatial;
+					AttributePtr<Attribute_Position> ptr_projectile_position	= ptr_projectile_spatial->ptr_position;
 
 					//Creates an explosion sphere. Init information is taken from the impacting projectile.
 					SEND_EVENT(&Event_CreateExplosionSphere(ptr_projectile_position->position, ptr_projectileDamage->damage, ptr_projectile->entityIdOfCreator, ptr_projectile->ammunitionType, ptr_projectile->firingModeType));

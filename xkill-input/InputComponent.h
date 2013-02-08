@@ -40,6 +40,7 @@ private:
 
 	void handleInput(float delta);
 
+	void normalizeVector(float& x, float& y);
 	void setupPlayerControllerConnection();
 
 	void handleRumbleEvent(Event_Rumble* e);

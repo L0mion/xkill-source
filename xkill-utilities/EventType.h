@@ -58,6 +58,7 @@ enum DLL_U EventType
 	EVENT_REMOVE_ENTITY,
 	EVENT_STATE_CHANGED,
 	EVENT_CREATE_INPUTDEVICE,
+	EVENT_HACK_ACTIVATED,
 
 	EVENT_TRANSFEREVENTSTOGAME,
 
@@ -568,4 +569,14 @@ public:
 	XKILL_Enums::ModifyPhysicsObjectData modifyWhatDataInPhysicsObjectData;
 	void* data;
 	int physicsAttributeIndex;
+};
+
+class DLL_U Event_HackActivated : public Event
+{
+public:
+	Event_HackActivated(float time, XKILL_Enums::HackType hackType, AttributePtr<Attribute_Player> player);
+
+	float time;
+	XKILL_Enums::HackType hackType;
+	AttributePtr<Attribute_Player> player;
 };

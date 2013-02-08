@@ -83,6 +83,7 @@ public slots:
 		// add time manipultion
 		ATTRIBUTE_MANAGER->settings->trueDeltaTime = delta;
 		delta *= ATTRIBUTE_MANAGER->settings->timeScale;
+
 		computeFPS();
 		gameManager.update(delta);
 	};
