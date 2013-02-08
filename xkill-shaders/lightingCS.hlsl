@@ -13,7 +13,7 @@
 #include "constantBuffers.hlsl"
 
 #define TILE_DIM		16
-#define TILE_MAX_LIGHTS	10
+#define TILE_MAX_LIGHTS	40
 
 //Global memory
 RWTexture2D<float4> output : register( u0 );
@@ -103,15 +103,16 @@ void lightingCS(
 	{
 		uint lightIndex = i * numTileThreads + threadIDBlockIndex;
 		
-		if(lightIndex < numLightsPoint)
+		//If given light is 'valid'.
+		//..and intersects that lights' sphere.
+		if(lightIndex < numLightsPoint &&
+			IntersectSphere(frustum, mul(float4(lightsPos[lightIndex], 1.0f), view), lightsPoint[lightIndex].range))
 		{
-			if(IntersectSphere(frustum, mul(float4(lightsPos[lightIndex], 1.0f), view), lightsPoint[lightIndex].range) &&
-				tileLightNum < TILE_MAX_LIGHTS)
-			{
-				uint index;
-				InterlockedAdd(tileLightNum, 1, index);
-				tileLightIndices[index] = lightIndex;
-			}
+			uint index;
+			InterlockedAdd(tileLightNum, 1, index);
+
+			index = min(index, TILE_MAX_LIGHTS);	//Prevent writing outside of allocated array.
+			tileLightIndices[index] = lightIndex;	//Last light may be overwritten multiple time if TILE_MAX_LIGHTS is breached.
 		}
 	}
 	GroupMemoryBarrierWithGroupSync();
@@ -154,8 +155,8 @@ void lightingCS(
 		Diffuse	+= diffuse; 
 		Specular += specular;
 	}
-	uint tileLightNumLocal = tileLightNum;
-	for(i = 0; i < tileLightNumLocal; i++)
+	uint numLights = min(tileLightNum, TILE_MAX_LIGHTS); //tielLightNum may be bigger than allowed lights.
+	for(i = 0; i < numLights; i++)
 	{
 		LightDescPoint descPoint = lightsPoint[tileLightIndices[i]];
 		LightPoint(
