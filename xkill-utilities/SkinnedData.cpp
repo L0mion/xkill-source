@@ -9,8 +9,6 @@ SkinnedData::SkinnedData()
 	boneHierarchy_	= new std::vector<int>();
 	boneOffsets_	= new std::vector<DirectX::XMFLOAT4X4>();
 	animations_		= new std::map<std::string, AnimationClip*>();
-
-	initialized_ = false;
 }
 
 SkinnedData::~SkinnedData()
@@ -57,8 +55,6 @@ void SkinnedData::set(std::vector<int>*						 boneHierarchy,
 	boneHierarchy_	= boneHierarchy;
 	boneOffsets_	= boneOffsets;
 	animations_		= animations;
-
-	initialized_ = true;
 }
 
 void SkinnedData::getFinalTransforms(const std::string&					clipName,
@@ -125,9 +121,4 @@ std::vector<DirectX::XMFLOAT4X4>* SkinnedData::getBoneOffsets() const
 std::map<std::string, AnimationClip*>* SkinnedData::getAnimations() const
 {
 	return animations_;
-}
-
-bool SkinnedData::isInitialized() const
-{
-	return initialized_;
 }

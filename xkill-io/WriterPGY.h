@@ -31,7 +31,7 @@ public:
 		const std::string	filePath,
 		const std::string	fileName,
 		const VertexType	vertexType,
-		const SkinnedData	skinnedData); //!< Forwards path to .obj to parent Loader-class.
+		SkinnedData*	skinnedData); //!< Forwards path to .obj to parent Loader-class.
 	~WriterPGY(); //!< Does nothing.
 
 	bool init(); //! Function initializing writer.
@@ -61,15 +61,15 @@ private:
 	void writeSubset(SubsetDesc subset); //!< Writes a single subset to .pgy.
 	void writeIndex(unsigned int index); //!< Writes a single index to .pgy.
 
-	void writeAnimations(SkinnedData skinnedData);
-	void writeSkinnedData(SkinnedData skinnedData, PGYHeaderSkinnedData skinnedDataHeader);
+	void writeAnimations();
+	void writeSkinnedData(PGYHeaderSkinnedData skinnedDataHeader);
 	void writeAnimation(AnimationClip* animationClip, std::string name, PGYHeaderAnimation animationHeader, int numBones);
 	void writeBone(BoneAnimation* bone);
 
 	MeshDesc		subject_;		//!< Model to be written to .pgy.
 	WriteTimeUTC	writeTimeUTC_;	//!< Time last written to original file being converted into .pgy. Measured in UTC.
 	VertexType		subjectVertexType_;
-	SkinnedData		skinnedData_;
+	SkinnedData*	skinnedData_;
 };
 
 #endif //XKILL_IO_WRITERPGY_H

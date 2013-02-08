@@ -213,7 +213,8 @@ bool IOComponent::loadModel(
 	bool successfulLoad = true;
 
 	MeshDesc meshDesc;
-	SkinnedData skinnedData;
+	SkinnedData* skinnedData = new SkinnedData();
+
 	if(pollFile(modelPath, modelName + ".pgy"))
 	{
 		successfulLoad = loadPGY(modelName + ".pgy", modelPath, modelDesc, meshDesc);
@@ -224,7 +225,7 @@ bool IOComponent::loadModel(
 		switch(fileType)
 		{
 		case FILE_EXTENSION_FBX:
-			successfulLoad = loadFbx(modelName, modelPath, modelDesc, meshDesc, &skinnedData);
+			successfulLoad = loadFbx(modelName, modelPath, modelDesc, meshDesc, skinnedData);
 			break;
 		case FILE_EXTENSION_OBJ:
 			successfulLoad = loadObj(modelName, modelPath, modelDesc, meshDesc);
@@ -232,7 +233,9 @@ bool IOComponent::loadModel(
 		}
 
 		writePGY(modelName + ".pgy", modelPath, meshDesc, (VertexType)modelDesc->vertexType_, skinnedData);
+		
 	}
+	delete skinnedData;
 
 	if(successfulLoad)
 	{
@@ -378,7 +381,7 @@ bool IOComponent::loadPGY(std::string modelName, std::string modelPath, MdlDescM
 	return sucessfulLoad;
 }
 
-bool IOComponent::writePGY(std::string modelName, std::string modelPath, MeshDesc meshDesc, VertexType vertexType, SkinnedData skinnedData)
+bool IOComponent::writePGY(std::string modelName, std::string modelPath, MeshDesc meshDesc, VertexType vertexType, SkinnedData* skinnedData)
 {
 	WriterPGY pgyWriter(
 		meshDesc,
