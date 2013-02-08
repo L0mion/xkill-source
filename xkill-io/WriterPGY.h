@@ -3,6 +3,10 @@
 
 #include <string>
 #include <xkill-utilities/MeshDesc.h>
+#include <xkill-utilities/SkinnedData.h>
+#include <xkill-utilities/AnimationClip.h>
+#include <xkill-utilities/BoneAnimation.h>
+#include <xkill-utilities/Keyframe.h>
 
 #include "Writer.h"
 #include "SpecsPGY.h"
@@ -26,7 +30,8 @@ public:
 		//const WriteTimeUTC	writeTimeUTC,
 		const std::string	filePath,
 		const std::string	fileName,
-		const VertexType	vertexType); //!< Forwards path to .obj to parent Loader-class.
+		const VertexType	vertexType,
+		SkinnedData*	skinnedData); //!< Forwards path to .obj to parent Loader-class.
 	~WriterPGY(); //!< Does nothing.
 
 	bool init(); //! Function initializing writer.
@@ -56,9 +61,15 @@ private:
 	void writeSubset(SubsetDesc subset); //!< Writes a single subset to .pgy.
 	void writeIndex(unsigned int index); //!< Writes a single index to .pgy.
 
+	void writeAnimations();
+	void writeSkinnedData(PGYHeaderSkinnedData skinnedDataHeader);
+	void writeAnimation(AnimationClip* animationClip, std::string name, PGYHeaderAnimation animationHeader, int numBones);
+	void writeBone(BoneAnimation* bone);
+
 	MeshDesc		subject_;		//!< Model to be written to .pgy.
 	WriteTimeUTC	writeTimeUTC_;	//!< Time last written to original file being converted into .pgy. Measured in UTC.
 	VertexType		subjectVertexType_;
+	SkinnedData*	skinnedData_;
 };
 
 #endif //XKILL_IO_WRITERPGY_H

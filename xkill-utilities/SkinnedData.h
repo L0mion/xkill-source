@@ -49,6 +49,10 @@ public:
 	float getClipStartTime(const std::string& clipName) const;
 	float getClipEndTime(const std::string& clipName)	const;
 
+
+	std::vector<int>*						getBoneHierarchy()	const;
+	std::vector<DirectX::XMFLOAT4X4>*		getBoneOffsets()	const;
+	std::map<std::string, AnimationClip*>*	getAnimations()		const;
 private:
 	std::vector<int>*						boneHierarchy_; //!< Vector containing the skeletons hierarchy.
 	std::vector<DirectX::XMFLOAT4X4>*		boneOffsets_;	//!< Vector containing bone offsets.

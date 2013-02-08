@@ -1,3 +1,5 @@
+#include <DirectXMath.h>
+
 #include <xkill-utilities/Util.h>
 
 #include "WriterPGY.h"
@@ -7,15 +9,18 @@ WriterPGY::WriterPGY(
 	//const WriteTimeUTC	writeTimeUTC,
 	const std::string	filePath,
 	const std::string	fileName,
-	const VertexType	vertexType) : Writer(filePath, fileName)
+	const VertexType	vertexType,
+	SkinnedData*	skinnedData) : Writer(filePath, fileName)
 {
 	//writeTimeUTC_	= writeTimeUTC;
 	subject_		= subject;
 	subjectVertexType_ = vertexType;
+
+	skinnedData_ = skinnedData;
 }
 WriterPGY::~WriterPGY()
 {
-	//Do nothing.
+
 }
 
 bool WriterPGY::init()
@@ -50,6 +55,8 @@ void WriterPGY::writePGY()
 	/*Write materials*/
 	writeMaterials(subject_.materials_);
 	writeGeometry(subject_.vertices_, subject_.subsets_);
+
+	writeAnimations();
 }
 const PGYHeader WriterPGY::loadHeader(
 	unsigned int numMaterials,
@@ -160,4 +167,58 @@ void WriterPGY::writeIndex(unsigned int index)
 	ofstream_.write(
 		reinterpret_cast<const char*>(&index), 
 		sizeof(index));
+}
+
+void WriterPGY::writeAnimations()
+{
+	PGYHeaderSkinnedData skinnedDataHeader;
+
+	skinnedDataHeader.numBones_ = skinnedData_->getBoneCount();
+	std::map<std::string, AnimationClip*>* animations = skinnedData_->getAnimations();
+	std::map<std::string, AnimationClip*>::iterator index;
+	skinnedDataHeader.numAnimations_ = animations->size();
+
+	writeSkinnedData(skinnedDataHeader);
+
+	for(index = animations->begin(); index != animations->end(); index++)
+	{
+		PGYHeaderAnimation animationHeader;
+
+		AnimationClip* clip = index->second;
+		std::string clipName = index->first;
+		if(clip)
+		{
+			animationHeader.nameSize_ = clipName.size();
+
+		}
+	}
+}
+void WriterPGY::writeSkinnedData(PGYHeaderSkinnedData skinnedDataHeader)
+{
+	ofstream_.write(reinterpret_cast<const char*>(&skinnedDataHeader), sizeof(skinnedDataHeader));
+
+	for(unsigned int i=0; i<skinnedDataHeader.numBones_; i++)
+		ofstream_.write(reinterpret_cast<const char*>(&skinnedData_->getBoneHierarchy()->at(i)), sizeof(int));
+	for(unsigned int i=0; i<skinnedDataHeader.numBones_; i++)
+		ofstream_.write(reinterpret_cast<const char*>(&skinnedData_->getBoneOffsets()->at(i)), sizeof(DirectX::XMFLOAT4X4));
+}
+void WriterPGY::writeAnimation(AnimationClip* animationClip, std::string name, PGYHeaderAnimation animationHeader, int numBones)
+{
+	ofstream_.write(reinterpret_cast<const char*>(&animationHeader), sizeof(animationHeader));
+	ofstream_.write(reinterpret_cast<const char*>(&name), sizeof(name));
+	
+	for(unsigned int i=0; i<numBones; i++)
+	{
+		writeBone(animationClip->getBoneAnimations()->at(i));
+	}
+}
+void WriterPGY::writeBone(BoneAnimation* bone)
+{
+	PGYHeaderBone boneHeader;
+	boneHeader.numKeyframes_ = bone->getKeyframes()->size();
+	
+	ofstream_.write(reinterpret_cast<const char*>(&boneHeader), sizeof(boneHeader));
+
+	for(unsigned int i=0; i<boneHeader.numKeyframes_; i++)
+		ofstream_.write(reinterpret_cast<const char*>(&bone->getKeyframes()->at(i)), sizeof(Keyframe));
 }

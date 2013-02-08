@@ -213,6 +213,8 @@ bool IOComponent::loadModel(
 	bool successfulLoad = true;
 
 	MeshDesc meshDesc;
+	SkinnedData* skinnedData = new SkinnedData();
+
 	if(pollFile(modelPath, modelName + ".pgy"))
 	{
 		successfulLoad = loadPGY(modelName + ".pgy", modelPath, modelDesc, meshDesc);
@@ -223,15 +225,17 @@ bool IOComponent::loadModel(
 		switch(fileType)
 		{
 		case FILE_EXTENSION_FBX:
-			successfulLoad = loadFbx(modelName, modelPath, modelDesc, meshDesc);
+			successfulLoad = loadFbx(modelName, modelPath, modelDesc, meshDesc, skinnedData);
 			break;
 		case FILE_EXTENSION_OBJ:
 			successfulLoad = loadObj(modelName, modelPath, modelDesc, meshDesc);
 			break;
 		}
 
-		writePGY(modelName + ".pgy", modelPath, meshDesc, (VertexType)modelDesc->vertexType_);
+		writePGY(modelName + ".pgy", modelPath, meshDesc, (VertexType)modelDesc->vertexType_, skinnedData);
+		
 	}
+	delete skinnedData;
 
 	if(successfulLoad)
 	{
@@ -292,12 +296,11 @@ bool IOComponent::loadObj(
 	delete objMaker;
 	return sucessfulMake;
 }
-bool IOComponent::loadFbx(std::string modelName, std::string modelPath, MdlDescModel* modelDesc, MeshDesc& meshDesc)
+bool IOComponent::loadFbx(std::string modelName, std::string modelPath, MdlDescModel* modelDesc, MeshDesc& meshDesc, SkinnedData* skinnedData)
 {
 	bool successfulLoad = true;
 
 	std::vector<LoaderFbxModelDesc> fbxModels = fbxLoader_->load(modelPath+modelName);
-	SkinnedData* skinnedData = new SkinnedData();
 	
 	if(fbxModels.size() > 0)
 	{
@@ -309,11 +312,6 @@ bool IOComponent::loadFbx(std::string modelName, std::string modelPath, MdlDescM
 	}
 	else
 		successfulLoad = false;
-
-	//TEMP
-	if(skinnedData)
-		delete skinnedData;
-	//END OF TEMP
 
 	return successfulLoad;
 }
@@ -383,14 +381,15 @@ bool IOComponent::loadPGY(std::string modelName, std::string modelPath, MdlDescM
 	return sucessfulLoad;
 }
 
-bool IOComponent::writePGY(std::string modelName, std::string modelPath, MeshDesc meshDesc, VertexType vertexType)
+bool IOComponent::writePGY(std::string modelName, std::string modelPath, MeshDesc meshDesc, VertexType vertexType, SkinnedData* skinnedData)
 {
 	WriterPGY pgyWriter(
 		meshDesc,
 		//writeTimeUTC, //fix this
 		modelPath,
 		modelName,
-		vertexType);
+		vertexType,
+		skinnedData);
 	bool sucessfulWrite = pgyWriter.init();
 
 	return sucessfulWrite;

@@ -50,8 +50,6 @@ void LoaderFbxAnimationDesc::convertToXKillFormat(std::map<std::string, Animatio
 	{
 		animationClip->getBoneAnimations()->at(boneIndex) = new BoneAnimation();
 
-		printf("Bone: %s \n", bones_[boneIndex].getName());
-
 		convertBoneToXKillFormat(bones_[boneIndex], animationClip->getBoneAnimations()->at(boneIndex));
 	}
 
