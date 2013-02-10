@@ -1,4 +1,5 @@
 #include "AttributeType.h"
+#include "AttributeManager.h"
 #include <DirectXMath.h>
 #include <windows.h>
 
@@ -534,6 +535,8 @@ Attribute_Ray::~Attribute_Ray()
 
 void Behavior_Offset::updateOffset()
 {
+	using namespace DirectX;
+
 	// Make sure we have a parent
 	if(ptr_parent_spatial_position.isNotEmpty())
 	{
@@ -546,10 +549,10 @@ void Behavior_Offset::updateOffset()
 		// Add translation offset relative to parent
 		//
 
-		DirectX::XMVECTOR xv_pos = DirectX::XMLoadFloat3((DirectX::XMFLOAT3*)&offset_position);
-		DirectX::XMVECTOR parent_xv_rot = DirectX::XMLoadFloat4((DirectX::XMFLOAT4*)&parent_rot);
-		DirectX::XMVECTOR xv_pos_offset = DirectX::XMVector3Rotate(xv_pos, parent_xv_rot);
-		Float3 pos_offset; DirectX::XMStoreFloat3((DirectX::XMFLOAT3*)&pos_offset, xv_pos_offset);
+		XMVECTOR xv_pos = XMLoadFloat3(( XMFLOAT3*)&offset_position);
+		XMVECTOR parent_xv_rot = XMLoadFloat4(( XMFLOAT4*)&parent_rot);
+		XMVECTOR xv_pos_offset = XMVector3Rotate(xv_pos, parent_xv_rot);
+		Float3 pos_offset;  XMStoreFloat3(( XMFLOAT3*)&pos_offset, xv_pos_offset);
 
 
 		//
@@ -563,18 +566,25 @@ void Behavior_Offset::updateOffset()
 
 	if(ptr_parent_spatial_rotation.isNotEmpty())
 	{
-		// Fetch attributes from parent
+		// Fetch attributes
 		Float4 parent_rot = ptr_parent_spatial_rotation->rotation;
-
+		Float4 own_rot = ptr_spatial->rotation;
+		XMVECTOR xv_own_rot =  XMLoadFloat4(( XMFLOAT4*)&own_rot);
 		//
 		// Add rotation offset relative to parent
 		//
 
-		DirectX::XMVECTOR xv_rot_offset = DirectX::XMLoadFloat4((DirectX::XMFLOAT4*)&offset_rotation);
-		DirectX::XMVECTOR parent_xv_rot = DirectX::XMLoadFloat4((DirectX::XMFLOAT4*)&parent_rot);
-		xv_rot_offset = DirectX::XMQuaternionMultiply(xv_rot_offset, parent_xv_rot);
-		Float4 rot_offset; DirectX::XMStoreFloat4((DirectX::XMFLOAT4*)&rot_offset, xv_rot_offset);
+		 XMVECTOR xv_rot_offset =  XMLoadFloat4(( XMFLOAT4*)&offset_rotation);
+		 XMVECTOR parent_xv_rot =  XMLoadFloat4(( XMFLOAT4*)&parent_rot);
+		xv_rot_offset =  XMQuaternionMultiply(xv_rot_offset, parent_xv_rot);
+		
 
+		
+		// Slerp interpolate to smooth out moment
+		float MAGIC_SLERP_NUMBER = 1.0f;
+		xv_rot_offset = XMQuaternionSlerp(xv_rot_offset, xv_own_rot, MAGIC_SLERP_NUMBER*ATTRIBUTE_MANAGER->settings->trueDeltaTime);
+
+		Float4 rot_offset;  XMStoreFloat4(( XMFLOAT4*)&rot_offset, xv_rot_offset);
 		ptr_spatial->rotation = rot_offset;
 	}
 }
