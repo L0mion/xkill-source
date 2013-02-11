@@ -15,7 +15,7 @@ void LoaderFbxTexture::reset()
 {
 }
 
-void LoaderFbxTexture::parseTexture(FbxGeometry* geometry, LoaderFbxTextureDesc* textureDesc)
+void LoaderFbxTexture::parseTexture(FbxGeometry* geometry, std::vector<LoaderFbxTextureDesc>* textureDescs)
 {
 	FbxProperty fbxProperty;
 	if(geometry->GetNode() == NULL)
@@ -34,28 +34,30 @@ void LoaderFbxTexture::parseTexture(FbxGeometry* geometry, LoaderFbxTextureDesc*
 			FBXSDK_FOR_EACH_TEXTURE(textureIndex)
 			{
 				fbxProperty = surfaceMaterial->FindProperty(FbxLayerElement::sTextureChannelNames[textureIndex]);
-				parseTextureByProperty(&fbxProperty, parseHeader, materialIndex, textureDesc);
+				parseTextureByProperty(&fbxProperty, parseHeader, materialIndex, textureDescs);
 			}
 		}
 	}
 
 }
-void LoaderFbxTexture::parseTextureByProperty(FbxProperty* fbxProperty, bool& parseHeader, int materialIndex, LoaderFbxTextureDesc* textureDesc)
+void LoaderFbxTexture::parseTextureByProperty(FbxProperty* fbxProperty, bool& parseHeader, int materialIndex, std::vector<LoaderFbxTextureDesc>* textureDescs)
 {
 	if(fbxProperty->IsValid())
 	{
 		int textureCount = fbxProperty->GetSrcObjectCount<FbxTexture>();
 		for(int textureIndex=0; textureIndex<textureCount; textureIndex++)
 		{
+			LoaderFbxTextureDesc textureDesc;
 			FbxLayeredTexture* layeredTexture = fbxProperty->GetSrcObject<FbxLayeredTexture>(textureIndex);
 			if(layeredTexture)
 			{
-				parseTextureByPropertyLayered(fbxProperty, textureIndex, textureDesc);
+				parseTextureByPropertyLayered(fbxProperty, textureIndex, &textureDesc);
 			}
 			else
 			{
-				parseTextureByPropertyNotLayered(fbxProperty, textureIndex, textureDesc);
+				parseTextureByPropertyNotLayered(fbxProperty, textureIndex, &textureDesc);
 			}
+			textureDescs->push_back(textureDesc);	
 		}
 	}
 }

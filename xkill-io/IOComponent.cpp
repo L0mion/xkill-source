@@ -311,9 +311,9 @@ bool IOComponent::loadFbx(std::string modelName, std::string modelPath, MdlDescM
 	{
 		LoaderFbxMeshDesc mesh = fbxModels[0].getMeshDesc();
 		LoaderFbxMaterialDesc material = fbxModels[0].getMaterialDesc();
-		LoaderFbxTextureDesc texture = fbxModels[0].getTextureDesc();
+		std::vector<LoaderFbxTextureDesc> textures = fbxModels[0].getTextureDescs();
 
-		loadFbxMesh(&mesh, &material, &texture, meshDesc);
+		loadFbxMesh(&mesh, &material, textures, meshDesc);
 		loadFbxAnimation(fbxModels[0].getAnimationDescs(), fbxModels[0].getMeshDesc(), skinnedData);
 	}
 	else
@@ -321,7 +321,7 @@ bool IOComponent::loadFbx(std::string modelName, std::string modelPath, MdlDescM
 
 	return successfulLoad;
 }
-void IOComponent::loadFbxMesh(LoaderFbxMeshDesc* mesh, LoaderFbxMaterialDesc* material, LoaderFbxTextureDesc* texture, MeshDesc& meshDesc)
+void IOComponent::loadFbxMesh(LoaderFbxMeshDesc* mesh, LoaderFbxMaterialDesc* material, std::vector<LoaderFbxTextureDesc> textures, MeshDesc& meshDesc)
 {
 	std::vector<VertexDesc> vertices;
 	std::vector<unsigned int> indices;
@@ -330,8 +330,16 @@ void IOComponent::loadFbxMesh(LoaderFbxMeshDesc* mesh, LoaderFbxMaterialDesc* ma
 	mesh->createVertices(vertices, indices);
 	materialDesc	= material->getMaterialDesc();
 
-	std::string texName = texture->getFileName();
-	materialDesc.idAlbedoTex_ = getTexIDfromName(texName);
+	std::string texName;
+	int texID = 0;
+	materialDesc.idAlbedoTex_ = 0;
+	for(unsigned int i=0; i<textures.size(); i++)
+	{
+		texName = textures[i].getFileName();
+		texID = getTexIDfromName(texName);
+		if(texID != 0)
+			materialDesc.idAlbedoTex_ = texID;
+	}
 
 	std::vector<MaterialDesc> materials;
 	materials.push_back(materialDesc);
