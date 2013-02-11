@@ -62,7 +62,7 @@ bool ComponentManager::init(HWND windowHandle, HWND parentWindowHandle)
 	*/
 //------------------------delete "deathmatchState" and "mainMenuState" somewhere //check-----
 	
-	//Substitute statemchine, enum
+	//Substitute statemachine, enum
 	//state_TemporaryVariableUsedAsSubstituteForStateMachine = SPECIAL_STATE_NONE;
 
 	render_ = new RenderingComponent(windowHandle);
