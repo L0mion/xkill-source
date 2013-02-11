@@ -31,6 +31,7 @@ void Menu_InGame::parentMoveEvent()
 
 void Menu_InGame::slot_return()
 {
+	SEND_EVENT(&Event_SetMouseLock(true));
 	toggleMenu(false);
 }
 

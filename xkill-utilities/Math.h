@@ -112,6 +112,7 @@ struct DLL_U Float4
 		float m[4];
 	};
 
+	Float3 quaternionToVector();
 	Float4();
 	Float4(float x, float y, float z, float w);
 	Float4(Float3 float3, float w);

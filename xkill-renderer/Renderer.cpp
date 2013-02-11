@@ -409,8 +409,8 @@ void Renderer::render()
 		vpData.viewportTopY = static_cast<unsigned int>(ptr_splitScreen->ssTopLeftY);
 		vpData.zNear		= ptr_camera->zNear;
 		vpData.zFar			= ptr_camera->zFar;
-		vpData.viewportWidth	= ptr_splitScreen->ssWidth;
-		vpData.viewportHeight	= ptr_splitScreen->ssHeight;
+		vpData.viewportWidth	= (float)ptr_splitScreen->ssWidth;
+		vpData.viewportHeight	= (float)ptr_splitScreen->ssHeight;
 		vpDatas[i]			= vpData;
 
 		renderViewportToGBuffer(vpData);

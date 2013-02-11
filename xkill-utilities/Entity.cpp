@@ -1,7 +1,6 @@
 #include "Entity.h"
 
 #include "AttributeController.h"
-#include "EventManager.h"
 
 Entity::Entity( int id )
 {

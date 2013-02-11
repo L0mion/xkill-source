@@ -1,7 +1,7 @@
 #pragma once
 
-#include "IAttributeStorage.h"
-#include "EventManager.h"
+class IAttributeStorage;
+enum AttributeType;
 
 /// A handle used by Entity to modify one of its Attributes
 /** 

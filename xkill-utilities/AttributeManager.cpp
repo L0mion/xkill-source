@@ -24,3 +24,19 @@ AttributeManager* AttributeManager::instance()
 	}
 	return &instance;
 }
+
+float Settings::timeScale()
+{
+	return _timeScale;
+}
+
+void Settings::setTimeScale( float timeScale )
+{
+	_timeScale = timeScale;
+
+	if(_timeScale > 2.0f)
+		_timeScale = 2.0f;
+
+	if(_timeScale < 0.01f)
+		_timeScale = 0.01f;
+}

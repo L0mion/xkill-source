@@ -28,5 +28,5 @@ void Timer::resetTimer()
 
 bool Timer::hasTimerExpired()
 {
-	return timeLeft_ > 0.0f;
+	return timeLeft_ <= 0.0f;
 }

@@ -116,9 +116,13 @@ void InputComponent::handleInput(float delta)
 		input->sprint =		device->getBoolValue(InputAction::ACTION_B_SPRINT);
 
 		if(device->getBoolValue(InputAction::ACTION_B_TIME_SPEED_UP))
-			settings->timeScale += delta;
+		{
+			settings->setTimeScale(settings->timeScale() + delta);
+		}
 		if(device->getBoolValue(InputAction::ACTION_B_TIME_SPEED_DOWN))
-			settings->timeScale -= delta;
+		{
+			settings->setTimeScale(settings->timeScale() - delta);
+		}
 
 
 		//if(device->getBoolReleased(InputAction::ACTION_B_TOGGLE_MUTE_SOUND))

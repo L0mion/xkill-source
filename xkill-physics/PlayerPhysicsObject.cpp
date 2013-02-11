@@ -2,9 +2,6 @@
 #include <xkill-utilities/AttributeManager.h>
 #include "physicsUtilities.h"
 
-#include "MotionState.h"
-#include <iostream>
-
 AttributeIterator<Attribute_Input> itrInput;
 AttributeIterator<Attribute_Physics> itrPhysics_3;
 AttributeIterator<Attribute_Spatial> itrSpatial;
@@ -101,7 +98,7 @@ void PlayerPhysicsObject::handleInput(float delta)
 
 	if(playerAttributes.size() > 1)
 	{
-		//std::cout << "More than one controller for one player. Not tested." << std::endl;
+		SHOW_MESSAGEBOX("More than one controller for one player. Not tested.")
 	}
 
 	for(unsigned int i=0;i<playerAttributes.size();i++)
@@ -117,6 +114,12 @@ void PlayerPhysicsObject::handleInput(float delta)
 		//look and move
 		yaw_ += ptr_input->rotation.x;
 		btVector3 move = ptr_player->currentSpeed*btVector3(ptr_input->position.x, 0, ptr_input->position.y);
+
+		//lower player speed when recently damaged
+		if(ptr_player->timeSinceLastDamageTaken < 1.0f)
+		{
+			move *= 0.75f;
+		}
 
 		//Airwalk handling
 		if(!ptr_player->collidingWithWorld)
@@ -155,7 +158,7 @@ void PlayerPhysicsObject::handleInput(float delta)
 		AttributePtr<Attribute_Physics> ptr_player_physics = itrPhysics_3.at(attributeIndex_);
 		btVector3 currentplayerGravity = getGravity();
 
-		//When a player is stading still on the ground, prevent it from sliding down slopes by modifying friction and gravity
+		//When a player is standing still on the ground, prevent it from sliding down slopes by modifying friction and gravity
 		if(ptr_input->position.x == 0.0f && ptr_input->position.y == 0.0f && ptr_player->collidingWithWorld && !ptr_input->jetpack && !ptr_input->jump)
 		{
 			if(currentplayerGravity.y() != 0.0f)

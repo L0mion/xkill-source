@@ -1,5 +1,4 @@
 #include "FMODEventSystem.h"
-#include <iostream>//print error
 
 #include <xkill-utilities/AttributeManager.h>
 

@@ -10,6 +10,7 @@ class CameraComponent;
 class InputComponent;
 class GameComponent;
 class ScoreComponent;
+class HacksComponent;
 class IOComponent;
 enum StateType;
 
@@ -39,9 +40,9 @@ private:
 	InputComponent*			input_;
 	GameComponent*			game_;
 	ScoreComponent*			score_;
+	HacksComponent*			hacks_;
 	IOComponent*			ioComponent_;
 
-	float					initialSpawnDelay;
 	float					gameOverDelay;
 public:
 	ComponentManager();

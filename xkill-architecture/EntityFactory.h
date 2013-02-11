@@ -1,12 +1,8 @@
 #pragma once
 
-#include <xkill-utilities/DebugShape.h>
+//#include <xkill-utilities/DebugShape.h>
 #include <xkill-utilities/Entity.h>
 #include <xkill-utilities/AttributeManager.h>
-#include "EntityManager.h"
-
-#include <vector>
-#include <iostream>
 
 // Iterators
 ATTRIBUTES_DECLARE_ALL;
@@ -85,7 +81,7 @@ public:
 		ptr_input->ptr_physics = ptr_physics;
 		
 		CREATE_ATTRIBUTE(ptr_health, Attribute_Health, health, entity);
-		ptr_health->startHealth = 100;
+		ptr_health->maxHealth = 100;
 		
 		CREATE_ATTRIBUTE(ptr_weaponStats, Attribute_WeaponStats, weaponStats, entity);
 		ptr_weaponStats->currentAmmunitionType = XKILL_Enums::AmmunitionType::SCATTER;
@@ -112,7 +108,10 @@ public:
 		ptr_physics->meshID = ptr_render->meshID;
 		
 		// Attach weapon
-		AttributePtr<Attribute_Spatial> ptr_weaponFireLocation_spatial = createWeapon(entity, ptr_spatial, ptr_camera->ptr_spatial);
+		AttributePtr<Attribute_Spatial> ptr_weapon_spatial;
+		AttributePtr<Attribute_Spatial> ptr_weaponFireLocation_spatial;
+		createWeapon(entity, ptr_spatial, ptr_camera->ptr_spatial, ptr_weapon_spatial, ptr_weaponFireLocation_spatial);
+		ptr_player->ptr_weapon_spatial = ptr_weapon_spatial;
 		ptr_player->ptr_weaponFireLocation_spatial = ptr_weaponFireLocation_spatial;
 	}
 
@@ -128,13 +127,14 @@ public:
 		CREATE_ATTRIBUTE(ptr_offset, Behavior_Offset, offset, entity);
 		ptr_offset->ptr_spatial = ptr_spatial;
 		ptr_offset->ptr_parent_spatial_position = ptr_parent_spatial;
-		ptr_offset->offset_position = Float3(0.0f, 0.0f, 0.0f);
+		ptr_offset->offset_position = Float3(0.0f, 0.6f, 0.16f);
 
 		// Return
 		return ptr_camera;
 	}
 
-	 AttributePtr<Attribute_Spatial> createWeapon(Entity* entity, AttributePtr<Attribute_Spatial> ptr_parent_spatial_position, AttributePtr<Attribute_Spatial> ptr_parent_spatial_rotation)
+	void createWeapon(Entity* entity, AttributePtr<Attribute_Spatial> ptr_parent_spatial_position, AttributePtr<Attribute_Spatial> ptr_parent_spatial_rotation, 
+						AttributePtr<Attribute_Spatial>& ptr_weaponSpatial, AttributePtr<Attribute_Spatial>& ptr_firingLocationSpatial)
 	{
 		//
 		// Create weapon
@@ -152,7 +152,7 @@ public:
 			ptr_offset->ptr_spatial = ptr_spatial;
 			ptr_offset->ptr_parent_spatial_position = ptr_parent_spatial_position;
 			ptr_offset->ptr_parent_spatial_rotation = ptr_parent_spatial_rotation;
-			ptr_offset->offset_position = Float3(0.23f, -0.2f, 0.4f);
+			ptr_offset->offset_position = Float3(0.23f, 0.4f, 0.56f);
 
 			ptr_weapon_spatial = ptr_spatial;
 		}
@@ -174,12 +174,13 @@ public:
 			ptr_offset->ptr_spatial = ptr_spatial;
 			ptr_offset->ptr_parent_spatial_position = ptr_weapon_spatial;
 			ptr_offset->ptr_parent_spatial_rotation = ptr_weapon_spatial;
-			ptr_offset->offset_position = Float3(0.0f, 0.0f, 1.0f);
+			ptr_offset->offset_position = Float3(0.0f, 0.06f, 0.32f);
 
 			ptr_fireLocation_spatial = ptr_spatial;
 		}
 
-		return ptr_fireLocation_spatial;
+		ptr_weaponSpatial = ptr_weapon_spatial;
+		ptr_firingLocationSpatial = ptr_fireLocation_spatial;
 	}
 	
 	void createWorldEntity(Entity* entity, Event_CreateWorld* e)
@@ -206,22 +207,26 @@ public:
 		CREATE_ATTRIBUTE(ptr_position, Attribute_Position, position, entity);
 		ptr_position->position = e->position;
 
-		CREATE_ATTRIBUTE(ptr_spatial,Attribute_Spatial, spatial, entity);
+		CREATE_ATTRIBUTE(ptr_spatial, Attribute_Spatial, spatial, entity);
 		ptr_spatial->ptr_position = ptr_position;
 		ptr_spatial->rotation = e->rotation;
 
+		//float lifeTime;
 		CREATE_ATTRIBUTE(ptr_render, Attribute_Render, render, entity);
 		ptr_render->ptr_spatial = ptr_spatial;
-		ptr_render->meshID = MODEL_PLACEHOLDER;
+		ptr_render->meshID = MODEL_PROJECTILE_SINGLE;
 		switch (e->ammunitionType)
 		{
 		case XKILL_Enums::AmmunitionType::BULLET:
+			//lifeTime = 10.0f;
 			ptr_render->meshID = MODEL_PROJECTILE_SINGLE;
 			break;
 		case XKILL_Enums::AmmunitionType::EXPLOSIVE:
+			//lifeTime = 10.0f;
 			ptr_render->meshID = MODEL_PROJECTILE_EXPLOSIVE;
 			break;
 		case XKILL_Enums::AmmunitionType::SCATTER:
+			//lifeTime = 0.1f;
 			ptr_render->meshID = MODEL_PROJECTILE_SCATTER;
 			break;
 		default:
@@ -235,7 +240,7 @@ public:
 		ptr_physics->collisionFilterMask = Attribute_Physics::WORLD | Attribute_Physics::PLAYER | Attribute_Physics::FRUSTUM | Attribute_Physics::PICKUPABLE;
 		ptr_physics->meshID = ptr_render->meshID;
 		ptr_physics->linearVelocity = e->velocity;
-		ptr_physics->mass = 100.0f;
+		ptr_physics->mass = 50.0f;
 		ptr_physics->gravity = Float3(0.0f, 0.0f, 0.0f);
 		ptr_physics->collisionResponse = true;
 
@@ -244,6 +249,7 @@ public:
 		ptr_projectile->entityIdOfCreator = e->entityIdOfCreator;
 		ptr_projectile->ammunitionType = e->ammunitionType;
 		ptr_projectile->firingModeType = e->firingMode;
+		ptr_projectile->currentLifeTimeLeft = 10.0f;
 
 		CREATE_ATTRIBUTE(ptr_damage, Attribute_Damage, damage, entity);
 		ptr_damage->damage = e->damage;
@@ -338,7 +344,7 @@ public:
 		ptr_physics->ptr_spatial = ptr_spatial;
 		ptr_physics->ptr_render = ptr_render;
 		ptr_physics->collisionFilterGroup = Attribute_Physics::PICKUPABLE;
-		ptr_physics->collisionFilterMask = Attribute_Physics::PLAYER | Attribute_Physics::FRUSTUM | Attribute_Physics::WORLD | Attribute_Physics::PICKUPABLE | Attribute_Physics::PROJECTILE;
+		ptr_physics->collisionFilterMask = Attribute_Physics::PLAYER | Attribute_Physics::FRUSTUM | Attribute_Physics::WORLD | Attribute_Physics::PICKUPABLE | Attribute_Physics::PROJECTILE | Attribute_Physics::EXPLOSIONSPHERE;
 		ptr_physics->collisionResponse = true;
 		ptr_physics->mass = 10.0f;
 		ptr_physics->gravity = Float3(0.0f, -10.0f, 0.0f);
@@ -374,7 +380,7 @@ public:
 		CREATE_ATTRIBUTE(ptr_physics, Attribute_Physics, physics, entity);
 		ptr_physics->ptr_spatial = ptr_spatial;
 		ptr_physics->collisionFilterGroup = Attribute_Physics::EXPLOSIONSPHERE;
-		ptr_physics->collisionFilterMask = Attribute_Physics::PLAYER;
+		ptr_physics->collisionFilterMask = Attribute_Physics::PLAYER | Attribute_Physics::PICKUPABLE;
 		ptr_physics->collisionResponse = true;
 		ptr_physics->mass = 0.0f;
 		ptr_physics->gravity = Float3(0.0f, 0.0f, 0.0f);

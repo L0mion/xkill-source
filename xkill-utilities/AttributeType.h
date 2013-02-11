@@ -364,6 +364,7 @@ struct DLL_U Attribute_Projectile : public IAttribute
 	AttributePtr<Attribute_Physics> ptr_physics;
 
 	int entityIdOfCreator;		//!< Entity id of the entity that created the projectile.
+	float totalLifeTime;
 	float currentLifeTimeLeft;	//!< Counter counting down the lifetime of the projectile. Is initialized to totalLifeTime. When equal or less than zero, the projectile attribute shall be destroyed.
 	XKILL_Enums::AmmunitionType ammunitionType;
 	XKILL_Enums::FiringModeType firingModeType;
@@ -760,6 +761,7 @@ struct DLL_U Attribute_Player : public IAttribute
 	AttributePtr<Attribute_Health>			ptr_health;
 	AttributePtr<Attribute_WeaponStats>		ptr_weaponStats;
 
+	AttributePtr<Attribute_Spatial>			ptr_weapon_spatial;
 	AttributePtr<Attribute_Spatial>			ptr_weaponFireLocation_spatial;
 
 	static int nextId;
@@ -780,6 +782,7 @@ struct DLL_U Attribute_Player : public IAttribute
 	float timeSinceLastJump;	//!< Incrementing timer
 	float delayInSecondsBetweenEachJump;
 	bool collidingWithWorld;	//!< Set y-velocity to zero when not colliding with world and not jumping
+	float timeSinceLastDamageTaken; //!< Incrementing timer. Reset when taking damage.
 	float jetpackTimer;			//!< Incremented when using jetpack
 	bool detectedAsDead;
 
@@ -868,21 +871,22 @@ struct DLL_U Attribute_Health : public IAttribute
 	Attribute_Health();
 	~Attribute_Health();
 
-	float startHealth;
+	float maxHealth;
 	float health;
+	float healthFromLastFrame;
 
 	DataItemList* getDataList()
 	{
 		DataItemList* list = new DataItemList();
 
-		list->add(startHealth,	"startHealth");
+		list->add(maxHealth,	"maxHealth");
 		list->add(health,		"health");
 
 		return list;
 	}
 	void saveTo(DataItemList* list)
 	{
-		list->get(&startHealth);
+		list->get(&maxHealth);
 		list->get(&health);
 	};
 	AttributeType getType(){return ATTRIBUTE_HEALTH;}

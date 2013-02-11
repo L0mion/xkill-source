@@ -130,7 +130,7 @@ void Menu_Input::loadInputList(int deviceId)
 
 	ui->tableView_Input->setModel(inputListModel);
 	ui->tableView_Input->setColumnWidth(0,180);
-	ui->tableView_Input->setColumnWidth(1,180);
+	ui->tableView_Input->setColumnWidth(1,344);
 }
 
 void Menu_Input::loadInputSettings(int objectId)

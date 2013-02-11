@@ -38,6 +38,7 @@ public:
 		
 		// subscribe to events
 		SUBSCRIBE_TO_EVENT(this, EVENT_GET_WINDOW_RESOLUTION);
+		SUBSCRIBE_TO_EVENT(this, EVENT_SET_MOUSELOCK);
 
 		// init game
 		HWND parentWindowHandle = this->winId();
@@ -66,8 +67,8 @@ public:
 		case EVENT_GET_WINDOW_RESOLUTION:
 			event_getWindowResolution((Event_GetWindowResolution*)e);
 			break;
-		case EVENT_GAME_OVER:
-			setMouseLock(false);
+		case EVENT_SET_MOUSELOCK:
+			event_setMouseLock(((Event_SetMouseLock*)e)->isLock);
 			break;
 		default:
 			break;
@@ -82,7 +83,7 @@ public slots:
 		float delta = gameTimer.getDeltaTime();
 		// add time manipultion
 		ATTRIBUTE_MANAGER->settings->trueDeltaTime = delta;
-		delta *= ATTRIBUTE_MANAGER->settings->timeScale;
+		delta *= ATTRIBUTE_MANAGER->settings->timeScale();
 
 		computeFPS();
 		gameManager.update(delta);
@@ -118,7 +119,7 @@ protected:
 		{
 			if(e->key() == Qt::Key_Escape)
 			{
-				setMouseLock(false);
+				event_setMouseLock(false);
 			}
 		}
 
@@ -132,11 +133,11 @@ protected:
 	{
 		// lock / release mouse5
 		if(hasMouseLock && e->button() == Qt::RightButton)
-			setMouseLock(false);
+			event_setMouseLock(false);
 
 		if(!hasMouseLock && e->button() == Qt::LeftButton)
 		{
-			setMouseLock(true);
+			event_setMouseLock(true);
 		}
 		else
 		{
@@ -151,7 +152,7 @@ protected:
 		int keyEnum = e->button();
 		SEND_EVENT(&Event_MousePress(keyEnum, false));
 	}
-	void setMouseLock(bool mouseLook)
+	void event_setMouseLock(bool mouseLook)
 	{
 		// locking / releasing mouse cursor to widget
 		this->

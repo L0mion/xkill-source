@@ -9,12 +9,11 @@
 #include "CameraComponent.h"
 #include "GameComponent.h"
 #include "ScoreComponent.h"
+#include "HacksComponent.h"
 
 #include <xkill-utilities/FiniteStateMachine.h>
 #include <xkill-utilities/FiniteState.h>
 #include "States.h"
-
-#include <iostream>
 
 #define SAFE_DELETE(x) if( x ) { delete(x); (x) = NULL; }
 
@@ -31,6 +30,7 @@ ComponentManager::ComponentManager()
 	input_			= NULL;
 	game_			= NULL;
 	score_			= NULL;
+	hacks_			= NULL;
 	ioComponent_	= NULL;
 }
 ComponentManager::~ComponentManager()
@@ -45,7 +45,8 @@ ComponentManager::~ComponentManager()
 	SAFE_DELETE(camera_);
 	SAFE_DELETE(input_);
 	SAFE_DELETE(game_);
-	SAFE_DELETE(score_)
+	SAFE_DELETE(score_);
+	SAFE_DELETE(hacks_);
 	SAFE_DELETE(ioComponent_);
 }
 
@@ -56,7 +57,7 @@ bool ComponentManager::init(HWND windowHandle, HWND parentWindowHandle)
 	/*
 	FiniteState* deathmatchState = new DeathMatchState(STATE_DEATHMATCH);
 	FiniteState* mainMenuState = new MainMenuState(STATE_MAINMENU);
-	stateMachine_.AddState(deathmatchState);
+	stateMachine_.AddState(deathmatchState);_
 	stateMachine_.AddState(mainMenuState);
 	*/
 //------------------------delete "deathmatchState" and "mainMenuState" somewhere //check-----
@@ -71,55 +72,61 @@ bool ComponentManager::init(HWND windowHandle, HWND parentWindowHandle)
 	sound_ = new SoundComponent();
 	input_ = new InputComponent();
 	score_ = new ScoreComponent();
+	hacks_ = new HacksComponent();
 	ioComponent_ = new IOComponent();
-	initialSpawnDelay = 0;
 
-	if(render_->init() != S_OK)
+	if(FAILED((render_->init())))
 	{
-		std::cout << "RenderingComponent failed to init." << std::endl;
+		SHOW_MESSAGEBOX("RenderingComponent failed to init.");
 		return false;
 	}
 
 	if(!camera_->init())
 	{
-		std::cout << "CameraComponent failed to init." << std::endl;
+		SHOW_MESSAGEBOX("CameraComponent failed to init.");
 		return false;
 	}
 	
 	if(!game_->init())
 	{
-		std::cout << "GameComponent failed to init." << std::endl;
+		SHOW_MESSAGEBOX("GameComponent failed to init.");
 		return false;
 	}
 
 	std::string configPath = "../../xkill-resources/xkill-configs/";
 	if(!sound_->init(configPath))
 	{
-		std::cout << "SoundComponent failed to init." << std::endl;
+		SHOW_MESSAGEBOX("SoundComponent failed to init.");
 		return false;
 	}
 
 	if(!input_->init(parentWindowHandle, configPath))
 	{
-		std::cout << "InputComponent failed to init." << std::endl;
+		SHOW_MESSAGEBOX("InputComponent failed to init.");
 		return false;
 	}
 		
 	if(!score_->init())
 	{
-		std::cout << "ScoreComponent failed to init." << std::endl;
+		SHOW_MESSAGEBOX("ScoreComponent failed to init.");
+		return false;
+	}
+
+	if(!hacks_->init())
+	{
+		SHOW_MESSAGEBOX("HacksComponent failed to init.");
 		return false;
 	}
 
 	if(!ioComponent_->init())
 	{
-		std::cout << "IOComponent failed to init." << std::endl;
+		SHOW_MESSAGEBOX("IOComponent failed to init.");
 		return false;
 	}
 
 	if(!physics_->init())
 	{
-		std::cout << "BulletPhysicsComponent failed to init." << std::endl;
+		SHOW_MESSAGEBOX("BulletPhysicsComponent failed to init.");
 		return false;
 	}
 
@@ -137,13 +144,6 @@ void ComponentManager::onEvent(Event* e)
 	case EVENT_END_DEATHMATCH:
 		GET_STATE() = STATE_MAINMENU;
 		break;
-	case EVENT_START_DEATHMATCH:
-		initialSpawnDelay = 0.0f;
-		#ifdef XKILL_DEBUG
-		{
-			initialSpawnDelay = 2.0f; //Prevent debug lag making physics not registering collision during the initial seconds of the game.
-		}
-		#endif
 	case EVENT_GAME_OVER:
 		gameOverDelay = 10.0f;
 		GET_STATE() = STATE_GAMEOVER;
@@ -162,18 +162,12 @@ void ComponentManager::update(float delta)
 	{
 		input_->onUpdate(delta);
 		physics_->onUpdate(delta);
-		if(initialSpawnDelay > 0.0f)
-		{
-			initialSpawnDelay -= delta;
-		}
-		else
-		{
-			game_->onUpdate(delta);	
-		}
+		game_->onUpdate(delta);	
 		camera_->onUpdate(delta);
 		sound_->onUpdate(delta);
 		render_->onUpdate(delta);
 		score_->onUpdate(delta);
+		hacks_->onUpdate(delta);
 	
 		SEND_EVENT(&Event(EVENT_UPDATE));
 	}

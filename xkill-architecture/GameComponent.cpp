@@ -4,7 +4,6 @@
 #include <xkill-utilities/MutatorSettings.h>
 #include <DirectXMath.h>
 
-#include <iostream>
 #include <ctime>
 
 // Iterators
@@ -16,7 +15,7 @@ GameComponent::GameComponent(void)
 	SUBSCRIBE_TO_EVENT(this, EVENT_PHYSICS_ATTRIBUTES_COLLIDING);
 	SUBSCRIBE_TO_EVENT(this, EVENT_START_DEATHMATCH);
 	SUBSCRIBE_TO_EVENT(this, EVENT_END_DEATHMATCH);
-	SUBSCRIBE_TO_EVENT(this, EVENT_TRANSFEREVENTSTOGAME);
+	SUBSCRIBE_TO_EVENT(this, EVENT_TRANSFER_EVENTS_TO_GAME);
 	SUBSCRIBE_TO_EVENT(this, EVENT_PLAYERDEATH);
 }
 
@@ -55,7 +54,7 @@ void GameComponent::onEvent(Event* e)
 	case EVENT_END_DEATHMATCH:
 		event_EndDeathmatch(static_cast<Event_EndDeathmatch*>(e));
 		break;
-	case EVENT_TRANSFEREVENTSTOGAME:
+	case EVENT_TRANSFER_EVENTS_TO_GAME:
 		event_TransferEventsToGame(static_cast<Event_TransferEventsToGame*>(e));
 		break;
 	case EVENT_PLAYERDEATH:
@@ -139,7 +138,7 @@ void GameComponent::onUpdate(float delta)
 						firingMode->nrOfShotsLeftInClip--;
 					}
 
-					shootProjectile(ptr_position, ptr_camera, ptr_weaponStats);
+					shootProjectile(ptr_player->ptr_weaponFireLocation_spatial, ptr_weaponStats);
 					SEND_EVENT(&Event_PlaySound(Event_PlaySound::SOUND_FIRE, ptr_position->position, true));
 				}
 				else if(firingMode->nrOfShotsLeftInClip <= 0)
@@ -167,7 +166,7 @@ void GameComponent::onUpdate(float delta)
 			ptr_player->currentRespawnDelay = 0.0f;
 		}
 
-		if(ptr_input->sprint && ptr_player->canSprint)
+		if(ptr_input->sprint && ptr_player->canSprint && ptr_player->collidingWithWorld)
 		{
 			ptr_player->currentSprintTime -= delta;
 			if(ptr_player->currentSprintTime < 0)
@@ -240,17 +239,23 @@ void GameComponent::onUpdate(float delta)
 				ptr_camera->up = Float3(0.0f, 1.0f, 0.0f);
 				ptr_camera->right = Float3(1.0f, 0.0f, 0.0f);
 				ptr_camera->look = Float3(0.0f, 0.0f, 1.0f);
-				//camera->reset = true; //Reset player rotation.
 				ptr_physics->reloadDataIntoBulletPhysics = true;
 
 				ptr_player->detectedAsDead = false;
 
-				ptr_health->health = ptr_health->startHealth; // restores player health
+				ptr_health->health = ptr_health->maxHealth; // restores player health
 				SEND_EVENT(&Event_PlaySound(Event_PlaySound::SOUND_RESPAWN, ptr_position->position, true));
 			}
 		}
 
 		ptr_player->timeSinceLastJump += delta;
+		ptr_player->timeSinceLastDamageTaken += delta;
+
+		if(ptr_health->health < ptr_health->healthFromLastFrame)
+		{
+			ptr_player->timeSinceLastDamageTaken = 0.0f;
+		}
+		ptr_health->healthFromLastFrame = ptr_health->health;
 	}
 
 
@@ -260,20 +265,33 @@ void GameComponent::onUpdate(float delta)
 
 	while(itrProjectile.hasNext())
 	{
-		// Fetch attributes
 		AttributePtr<Attribute_Projectile> projectile = itrProjectile.getNext();
-
-		//
-		// Update projectile lifetime
-		//
-
-		projectile->currentLifeTimeLeft -= delta;
+		projectile->currentLifeTimeLeft -= delta; //Update projectile lifetime
 		if(projectile->currentLifeTimeLeft <= 0)
 		{
 			DEBUGPRINT("Projectile entity " << itrProjectile.ownerId() << " has no lifetime left");
-
-			// remove projectile entity
 			SEND_EVENT(&Event_RemoveEntity(itrProjectile.ownerId()));
+		}
+
+		
+
+		//Handle projectile based on ammunitionType
+		switch(projectile->ammunitionType)
+		{
+		case XKILL_Enums::AmmunitionType::BULLET:
+			break;
+		case XKILL_Enums::AmmunitionType::EXPLOSIVE:
+			break;
+		case XKILL_Enums::AmmunitionType::SCATTER:
+			if( (projectile->totalLifeTime - projectile->currentLifeTimeLeft) < (projectile->totalLifeTime-0.1) )
+			{
+				//Entity* entity = itrPhysics.ownerAt(attributeIndex_);
+				//std::vector<int> physicsId = entity1->getAttributes(ATTRIBUTE_PHYSICS);
+
+
+				//SEND_EVENT(&Event_ModifyPhysicsObject(XKILL_Enums::ModifyPhysicsObjectData::GRAVITY, static_cast<void*>(&Float3(0.0f, -10.0f, 0.0f)), physicsId.at(i)));
+			}
+			break;
 		}
 	}
 
@@ -311,7 +329,7 @@ void GameComponent::onUpdate(float delta)
 				switch(ptr_pickupablesSpawnPoint->spawnPickupableType)
 				{
 				case XKILL_Enums::PickupableType::MEDKIT:
-					amount = 1;
+					amount = 20;
 						break;
 				case XKILL_Enums::PickupableType::AMMUNITION_BULLET:
 					amount = 100;
@@ -383,7 +401,6 @@ void GameComponent::onUpdate(float delta)
 				DEBUGPRINT("Total number of shots left: " << ammo->totalNrOfShots);
 			}
 		}
-
 	}
 
 
@@ -417,7 +434,7 @@ void GameComponent::onUpdate(float delta)
 		AttributePtr<Attribute_Camera> ptr_camera = itrCamera.getNext();
 		AttributePtr<Attribute_Spatial> ptr_spatial = ptr_camera->ptr_spatial;
 
-		// Update rotation quaternion so other can read from it
+		// Update rotation quaternion so others can read from it
 		{
 			DirectX::XMMATRIX xm_view = DirectX::XMLoadFloat4x4((DirectX::XMFLOAT4X4*)&ptr_camera->mat_view);
 			xm_view = DirectX::XMMatrixInverse(&DirectX::XMMatrixDeterminant(xm_view), xm_view);
@@ -492,13 +509,10 @@ void GameComponent::event_PhysicsAttributesColliding(Event_PhysicsAttributesColl
 						{
 							Entity* creatorOfProjectilePlayerEntity = &allEntity->at(damage->owner_entityID);
 							std::vector<int> playerId = creatorOfProjectilePlayerEntity->getAttributes(ATTRIBUTE_PLAYER);
-
 							for(unsigned k=0;k<playerId.size();k++)
 							{
 								AttributePtr<Attribute_Player> ptr_player = itrPlayer.at(playerId.at(k));
-								
-								//Award player
-								if(entity1->getID() != damage->owner_entityID)
+								if(entity1->getID() != damage->owner_entityID) //Award player
 								{
 									ptr_player->priority++;
 								}
@@ -506,13 +520,10 @@ void GameComponent::event_PhysicsAttributesColliding(Event_PhysicsAttributesColl
 								{
 									ptr_player->priority--;
 								}
-								
 								DEBUGPRINT("Player with entity id " << damage->owner_entityID << " killed player with entity id " << entity1->getID());
 							}
-
 							Entity* playerThatDied = &allEntity->at(itrHealth.ownerIdAt(healthId[j]));
 							playerId = playerThatDied->getAttributes(ATTRIBUTE_PLAYER);
-
 							for(unsigned int k = 0; k < playerId.size(); k++)
 							{
 								SEND_EVENT(&Event_PlayerDeath(playerId[k]));
@@ -523,9 +534,7 @@ void GameComponent::event_PhysicsAttributesColliding(Event_PhysicsAttributesColl
 						{
 							SEND_EVENT(&Event_PlaySound(Event_PlaySound::SOUND_HIT, position, use3DAudio));
 						}
-
 						SEND_EVENT(&Event_Rumble(entity1->getID(), true, 0.2f, 1.0f, 1.0f));
-
 						DEBUGPRINT("DAMAGEEVENT Entity " << entity2->getID() << " damage: " <<  damage->damage << " Entity " << entity1->getID() << " health " << health->health);
 					}
 
@@ -546,65 +555,52 @@ void GameComponent::event_PhysicsAttributesColliding(Event_PhysicsAttributesColl
 
 		if(entity2->hasAttribute(ATTRIBUTE_PHYSICS)) //May not be needed
 		{
-			//Set gravity on projectiles colliding with physics objects
-			std::vector<int> physicsId = entity1->getAttributes(ATTRIBUTE_PHYSICS);
-			for(unsigned i=0;i<physicsId.size();i++)
-			{
-				AttributePtr<Attribute_Physics> ptr_physics = itrPhysics.at(physicsId.at(i));
-				SEND_EVENT(&Event_ModifyPhysicsObject(XKILL_Enums::ModifyPhysicsObjectData::GRAVITY, static_cast<void*>(&Float3(0.0f, -10.0f, 0.0f)), physicsId.at(i)));
-				//physicsAttribute->gravity = Float3(0.0f, -10.0f, 0.0f);
-				//physicsAttribute->linearVelocity = Float3(0.0f, 0.0f, 0.0f);
-				//physicsAttribute->reloadDataIntoBulletPhysics = true;
-			}
-
 			//Handle PhysicsAttribute of a projectile colliding with another PhysicsAttribute
-			std::vector<int> projectileId = entity1->getAttributes(ATTRIBUTE_PROJECTILE);
-			for(unsigned i=0;i<projectileId.size();i++)
+			std::vector<int> physicsId = entity1->getAttributes(ATTRIBUTE_PHYSICS);
+			for(int i=0;i<physicsId.size();i++)
 			{
-				AttributePtr<Attribute_Projectile> ptr_projectile = itrProjectile.at(projectileId.at(i));
-
-				//Shorten lifetime of projectile colliding with physics objects
-				switch(ptr_projectile->ammunitionType)
+				std::vector<int> projectileId = entity1->getAttributes(ATTRIBUTE_PROJECTILE);
+				for(unsigned j=0;j<projectileId.size();j++)
 				{
-				case XKILL_Enums::AmmunitionType::BULLET:
-					if(ptr_projectile->currentLifeTimeLeft > 0.15f)
-					{
-						ptr_projectile->currentLifeTimeLeft = 0.15f;
-					}
-					break;
-				case XKILL_Enums::AmmunitionType::SCATTER:
-					if(ptr_projectile->currentLifeTimeLeft > 1.00f)
-					{
-						ptr_projectile->currentLifeTimeLeft = 1.00f;
-						//SEND_EVENT(&Event_ModifyPhysicsObject(XKILL_Enums::ModifyPhysicsObjectData::VELOCTIY, static_cast<void*>(&Float3(0.0f, 0.0f, 0.0f)), physicsId.at(i)));
-					}
-					break;
-				}
+					AttributePtr<Attribute_Projectile> ptr_projectile = itrProjectile.at(projectileId.at(i));
 
-				//Explosion handling.
-				if(ptr_projectile->ammunitionType == XKILL_Enums::AmmunitionType::EXPLOSIVE)
-				{
-					//Get damage from projectile.
-					AttributePtr<Attribute_Damage> ptr_projectileDamage;
-					if(entity1->hasAttribute(ATTRIBUTE_DAMAGE))
+					//Determine collision effect based on ammunitionType
+					switch(ptr_projectile->ammunitionType)
 					{
-						std::vector<int> damageId = entity1->getAttributes(ATTRIBUTE_DAMAGE);
-						for(unsigned i=0;i<damageId.size();i++)
+					case XKILL_Enums::AmmunitionType::BULLET: //Bounce off the wall with not gravity for 1 second
+						if(ptr_projectile->currentLifeTimeLeft > 1.00f)
 						{
-							ptr_projectileDamage = itrDamage.at(damageId.at(i));
+							ptr_projectile->currentLifeTimeLeft = 1.00f;
+							SEND_EVENT(&Event_ModifyPhysicsObject(XKILL_Enums::ModifyPhysicsObjectData::GRAVITY, static_cast<void*>(&Float3(0.0f, -5.0f, 0.0f)), itrPhysics.at(physicsId.at(j))));
 						}
+						break;
+					case XKILL_Enums::AmmunitionType::SCATTER: //Fall down and roll for 1 second
+						if(ptr_projectile->currentLifeTimeLeft > 1.00f)
+						{
+							ptr_projectile->currentLifeTimeLeft = 1.00f;
+
+							SEND_EVENT(&Event_ModifyPhysicsObject(XKILL_Enums::ModifyPhysicsObjectData::GRAVITY, static_cast<void*>(&Float3(0.0f, -10.0f, 0.0f)), itrPhysics.at(physicsId.at(j))));
+							SEND_EVENT(&Event_ModifyPhysicsObject(XKILL_Enums::ModifyPhysicsObjectData::VELOCITYPERCENTAGE, static_cast<void*>(&Float3(0.1f, 0.1f, 0.1f)), itrPhysics.at(physicsId.at(j))));
+						}
+						break;
+					case XKILL_Enums::AmmunitionType::EXPLOSIVE: //Remove projectile and create an explosion sphere in its place
+						{
+							//Kill the projectile that caused the explosion
+ 							ptr_projectile->currentLifeTimeLeft = 0.0f;
+
+							//Extract projectile position.
+							AttributePtr<Attribute_Physics> ptr_projectile_physics	 = ptr_projectile->ptr_physics;
+							AttributePtr<Attribute_Spatial> ptr_projectile_spatial	 = ptr_projectile_physics->ptr_spatial;
+							AttributePtr<Attribute_Position> ptr_projectile_position = ptr_projectile_spatial->ptr_position;
+
+							//Creates an explosion sphere. Init information is taken from the impacting projectile.
+							SEND_EVENT(&Event_CreateExplosionSphere(ptr_projectile_position->position, 1, ptr_projectile->entityIdOfCreator, ptr_projectile->ammunitionType, ptr_projectile->firingModeType));
+							break;
+						}
+					default:
+						SHOW_MESSAGEBOX("PhysicsAttribute collision: unknown ammunitionType"); 
+						break;
 					}
-
-					//Kill the projectile that caused the explosion
- 					ptr_projectile->currentLifeTimeLeft = 0.0f;
-
-					//Extract projectile position.
-					AttributePtr<Attribute_Physics> ptr_projectile_physics		= ptr_projectile->ptr_physics;
-					AttributePtr<Attribute_Spatial> ptr_projectile_spatial		= ptr_projectile_physics->ptr_spatial;
-					AttributePtr<Attribute_Position> ptr_projectile_position	= ptr_projectile_spatial->ptr_position;
-
-					//Creates an explosion sphere. Init information is taken from the impacting projectile.
-					SEND_EVENT(&Event_CreateExplosionSphere(ptr_projectile_position->position, ptr_projectileDamage->damage, ptr_projectile->entityIdOfCreator, ptr_projectile->ammunitionType, ptr_projectile->firingModeType));
 				}
 			}
 			//SEND_EVENT(&Event_RemoveEntity(entity1->getID())); //Crashes sometimes if removed here
@@ -616,6 +612,7 @@ void GameComponent::event_PhysicsAttributesColliding(Event_PhysicsAttributesColl
 		AttributePtr<Attribute_Pickupable> ptr_pickupable;
 		if(entity2->hasAttribute(ATTRIBUTE_PLAYER))
 		{
+			bool pickedUp = false;
 			//Retrieve player attribute
 			std::vector<int> playerId = entity2->getAttributes(ATTRIBUTE_PLAYER);
 			for(unsigned i=0;i<playerId.size();i++)
@@ -631,38 +628,54 @@ void GameComponent::event_PhysicsAttributesColliding(Event_PhysicsAttributesColl
 					{
 						case XKILL_Enums::PickupableType::MEDKIT:
 						{
-								AttributePtr<Attribute_Health> ptr_health = ptr_player->ptr_health;
+							AttributePtr<Attribute_Health> ptr_health = ptr_player->ptr_health;
+							if(ptr_health->health < ptr_health->maxHealth) //Only allow pickup of medkits if the health of the player is below maximum.
+							{
 								ptr_health->health += ptr_pickupable->amount;
-								break;
+								pickedUp = true;
+								if(ptr_health->health > ptr_health->maxHealth) //Prevent player from gaining more than maximum health
+								{
+									ptr_health->health = ptr_health->maxHealth;
+								}
+							}
+							break;
 						}
+
+						//Check ammunition system
 						case XKILL_Enums::PickupableType::AMMUNITION_BULLET:
 						{
-								AttributePtr<Attribute_WeaponStats> weaponStatsAttribute = ptr_player->ptr_weaponStats;
-								weaponStatsAttribute->ammunition[XKILL_Enums::AmmunitionType::BULLET].totalNrOfShots += ptr_pickupable->amount;
-								break;
+							pickedUp = true;
+							AttributePtr<Attribute_WeaponStats> weaponStatsAttribute = ptr_player->ptr_weaponStats;
+							weaponStatsAttribute->ammunition[XKILL_Enums::AmmunitionType::BULLET].totalNrOfShots += ptr_pickupable->amount;
+							break;
 						}
 						case XKILL_Enums::PickupableType::AMMUNITION_EXPLOSIVE:
 						{
-								AttributePtr<Attribute_WeaponStats> weaponStatsAttribute = ptr_player->ptr_weaponStats;
-								weaponStatsAttribute->ammunition[XKILL_Enums::AmmunitionType::EXPLOSIVE].totalNrOfShots += ptr_pickupable->amount;
-								break;
+							pickedUp = true;
+							AttributePtr<Attribute_WeaponStats> weaponStatsAttribute = ptr_player->ptr_weaponStats;
+							weaponStatsAttribute->ammunition[XKILL_Enums::AmmunitionType::EXPLOSIVE].totalNrOfShots += ptr_pickupable->amount;
+							break;
 						}
 						case XKILL_Enums::PickupableType::AMMUNITION_SCATTER:
 						{
-								AttributePtr<Attribute_WeaponStats> weaponStatsAttribute = ptr_player->ptr_weaponStats;
-								weaponStatsAttribute->ammunition[XKILL_Enums::AmmunitionType::SCATTER].totalNrOfShots += ptr_pickupable->amount;
-								break;
+							pickedUp = true;
+							AttributePtr<Attribute_WeaponStats> weaponStatsAttribute = ptr_player->ptr_weaponStats;
+							weaponStatsAttribute->ammunition[XKILL_Enums::AmmunitionType::SCATTER].totalNrOfShots += ptr_pickupable->amount;
+							break;
 						}
 					}
 				}
 			}
 
-			// Decrement number of spawned pickupables for the spawnpoint that spawned the pickupable that the player picked up. Also remove it.
-			AttributePtr<Attribute_PickupablesSpawnPoint> ptr_pickupablesSpawnPoint = ptr_pickupable->ptr_pickupablesSpawnPoint_creator;
-			ptr_pickupablesSpawnPoint->currentNrOfExistingSpawnedPickupables--;
-			ptr_pickupablesSpawnPoint->secondsSinceLastPickup = 0;
+			if(pickedUp)
+			{
+				// Decrement number of spawned pickupables for the spawnpoint that spawned the pickupable that the player picked up. Also remove it.
+				AttributePtr<Attribute_PickupablesSpawnPoint> ptr_pickupablesSpawnPoint = ptr_pickupable->ptr_pickupablesSpawnPoint_creator;
+				ptr_pickupablesSpawnPoint->currentNrOfExistingSpawnedPickupables--;
+				ptr_pickupablesSpawnPoint->secondsSinceLastPickup = 0;
 			
-			SEND_EVENT(&Event_RemoveEntity(entity1->getID()));
+				SEND_EVENT(&Event_RemoveEntity(entity1->getID()));
+			}
 		}
 	}
 	else if(entity1->hasAttribute(ATTRIBUTE_PHYSICS))
@@ -860,14 +873,6 @@ void GameComponent::event_StartDeathmatch( Event_StartDeathmatch* e )
 	int height = event_getWindowResolution.height;
 	SEND_EVENT(&Event_WindowResize(width,height));
 
-	//Continue
-	for(int i=0;i<10;i++)
-	{
-		SEND_EVENT(&Event_CreatePickupablesSpawnPoint(Float3(2.0f, 5.0f, i-6.0f), XKILL_Enums::PickupableType::MEDKIT));
-	}
-
-	//SEND_EVENT(&Event_CreatePickupable(Float3(2.0f, 2.0f, 0.0f), Attribute_Pickupable::MEDKIT, 5));
-
 	// Set state to deathmatch
 	GET_STATE() =  STATE_DEATHMATCH;
 }
@@ -946,97 +951,98 @@ bool GameComponent::switchFiringMode(AttributePtr<Attribute_WeaponStats> ptr_wea
 	return switchedFiringMode;
 }
 
-void GameComponent::shootProjectile(AttributePtr<Attribute_Position> ptr_position, AttributePtr<Attribute_Camera> ptr_camera, AttributePtr<Attribute_WeaponStats> ptr_weaponStats)
+void GameComponent::shootProjectile( AttributePtr<Attribute_Spatial> ptr_spatial, AttributePtr<Attribute_WeaponStats> ptr_weaponStats )
 {
-	
+	using namespace DirectX;
+
 	Ammunition* ammo = &ptr_weaponStats->ammunition[ptr_weaponStats->currentAmmunitionType];
 	FiringMode* firingMode = &ptr_weaponStats->firingMode[ptr_weaponStats->currentFiringModeType];
 
-	// Position
-	Float3 pos = ptr_position->position;
+	Float3 pos		=	ptr_spatial->ptr_position->position;
+	Float4 rot		=	ptr_spatial->rotation;
+	Float3 lookAt	=	ptr_spatial->rotation.quaternionToVector();
 
-	// extract camera orientation to determine velocity
-	DirectX::XMFLOAT3 lookAtXMFloat3((float*)&ptr_camera->mat_view.getLookAt());
 
-	DirectX::XMVECTOR lookAt = DirectX::XMLoadFloat3(&lookAtXMFloat3);
-	lookAt = DirectX::XMVector3Normalize(lookAt);
 
-	// Rotation
-	ptr_camera->mat_view.getRotationOnly();
-	//DirectX::XMMATRIX rotationMatrix((float*)&camera->mat_view);
-	DirectX::XMMATRIX rotationMatrix(
-		ptr_camera->mat_view._11,	ptr_camera->mat_view._21,	ptr_camera->mat_view._31,	0.0f,
-		ptr_camera->mat_view._12,	ptr_camera->mat_view._22,	ptr_camera->mat_view._32,	0.0f, 
-		ptr_camera->mat_view._13,	ptr_camera->mat_view._23,	ptr_camera->mat_view._33,	0.0f,
-		0.0f,					0.0f,					0.0f,					1.0f);
+	//// extract camera orientation to determine velocity
+	//DirectX::XMFLOAT3 lookAtXMFloat3((float*)&ptr_camera->mat_view.getLookAt());
 
-	DirectX::XMVECTOR orientationQuaternion = DirectX::XMQuaternionRotationMatrix(rotationMatrix);
-	float orientationQuaternionX = DirectX::XMVectorGetX(orientationQuaternion);
-	float orientationQuaternionY = DirectX::XMVectorGetY(orientationQuaternion);
-	float orientationQuaternionZ = DirectX::XMVectorGetZ(orientationQuaternion);
-	float orientationQuaternionW = DirectX::XMVectorGetW(orientationQuaternion);
+	//DirectX::XMVECTOR lookAt = DirectX::XMLoadFloat3(&lookAtXMFloat3);
+	//lookAt = DirectX::XMVector3Normalize(lookAt);
 
-	Float4 rotation = Float4(orientationQuaternionX, orientationQuaternionY, orientationQuaternionZ, orientationQuaternionW);
+	//// Rotation
+	//ptr_camera->mat_view.getRotationOnly();
+	////DirectX::XMMATRIX rotationMatrix((float*)&camera->mat_view);
+	//DirectX::XMMATRIX rotationMatrix(
+	//	ptr_camera->mat_view._11,	ptr_camera->mat_view._21,	ptr_camera->mat_view._31,	0.0f,
+	//	ptr_camera->mat_view._12,	ptr_camera->mat_view._22,	ptr_camera->mat_view._32,	0.0f, 
+	//	ptr_camera->mat_view._13,	ptr_camera->mat_view._23,	ptr_camera->mat_view._33,	0.0f,
+	//	0.0f,					0.0f,					0.0f,					1.0f);
 
-	DirectX::XMVECTOR newLookAt;
-	float randomLO;
-	float randomHI;
+	//DirectX::XMVECTOR orientationQuaternion = DirectX::XMQuaternionRotationMatrix(rotationMatrix);
+	//float orientationQuaternionX = DirectX::XMVectorGetX(orientationQuaternion);
+	//float orientationQuaternionY = DirectX::XMVectorGetY(orientationQuaternion);
+	//float orientationQuaternionZ = DirectX::XMVectorGetZ(orientationQuaternion);
+	//float orientationQuaternionW = DirectX::XMVectorGetW(orientationQuaternion);
+
+	//Float4 rotation = Float4(orientationQuaternionX, orientationQuaternionY, orientationQuaternionZ, orientationQuaternionW);
+
+
+	//rotation = ptr_camera->ptr_spatial->;
+
+	//DirectX::XMVECTOR newLookAt;
 
 	// Send "Event_CreateProjectile" for each projectile in a shot. Scatter has more than one projectile per shot.
 	for(unsigned int j = 0; j < ammo->nrOfProjectiles; j++)
 	{
-		Float3 scatterPos = pos;
+		Float3 new_pos = pos;
+		Float3 new_lookAt = lookAt;
 
-		lookAtXMFloat3.x = DirectX::XMVectorGetX(lookAt);
-		lookAtXMFloat3.y = DirectX::XMVectorGetY(lookAt);
-		lookAtXMFloat3.z = DirectX::XMVectorGetZ(lookAt);
-
-		// randomize spread cone values (direction of velocity)
+		// Randomize spread cone values (direction of velocity)
 		if(ammo->spread != 0.0f)
 		{
-			randomLO = -ammo->spread*0.5f;
-			randomHI = ammo->spread*0.5f;
-			lookAtXMFloat3.x += randomLO + (float)rand()/((float)RAND_MAX/(randomHI-randomLO));
-			lookAtXMFloat3.y += randomLO + (float)rand()/((float)RAND_MAX/(randomHI-randomLO));
-			lookAtXMFloat3.z += randomLO + (float)rand()/((float)RAND_MAX/(randomHI-randomLO));
+			float RANDOM_LOW = -ammo->spread*0.5f;
+			float RANDOM_HIGH = ammo->spread*0.5f;
+			
+			new_lookAt.x += Math::randomFloat(RANDOM_LOW, RANDOM_HIGH);
+			new_lookAt.y += Math::randomFloat(RANDOM_LOW, RANDOM_HIGH);
+			new_lookAt.z += Math::randomFloat(RANDOM_LOW, RANDOM_HIGH);
+
+			new_lookAt.normalize();
 		}
 
-		newLookAt = DirectX::XMLoadFloat3(&lookAtXMFloat3);
-		newLookAt = DirectX::XMVector3Normalize(newLookAt);
-		lookAtXMFloat3.x = DirectX::XMVectorGetX(newLookAt);
-		lookAtXMFloat3.y = DirectX::XMVectorGetY(newLookAt);
-		lookAtXMFloat3.z = DirectX::XMVectorGetZ(newLookAt);
+		// Determine velocity
+		Float3 velocity = new_lookAt * ammo->speed;
 
-		Float3 velocity(lookAtXMFloat3.x, lookAtXMFloat3.y, lookAtXMFloat3.z);
-		velocity = velocity * ammo->speed;
-
-		//Randomize velocity for each consecutive projectile
+		// Randomize velocity for each consecutive projectile
 		if(ammo->velocityVariation != 0.0f)
 		{
-			randomLO = 1 - ammo->velocityVariation*0.5f;
-			randomHI = 1 + ammo->velocityVariation*0.5f;
-			float randomVelocityDifference = randomLO + (float)rand()/((float)RAND_MAX/(randomHI-randomLO));
-			velocity.x *= randomVelocityDifference;
- 			velocity.y *= randomVelocityDifference;
-			velocity.z *= randomVelocityDifference;
+			float RANDOM_LOW = 1 - ammo->velocityVariation*0.5f;
+			float RANDOM_HIGH = 1 + ammo->velocityVariation*0.5f;
+
+			float velocityDifference = Math::randomFloat(RANDOM_LOW, RANDOM_HIGH);
+
+			velocity.x *= velocityDifference;
+ 			velocity.y *= velocityDifference;
+			velocity.z *= velocityDifference;
 		}
 
-		// add displacement on position (this should be based on the collision shape of the player model)
-		float d = 0.5f;
-		scatterPos.x += lookAtXMFloat3.x*d;
-		scatterPos.y += lookAtXMFloat3.y*d;
-		scatterPos.z += lookAtXMFloat3.z*d;
+		// Add displacement on position (this should be based on the collision shape of the player model)
+		/*float d = 0.5f;
+		new_pos.x += new_lookAt.x*d;
+		new_pos.y += new_lookAt.y*d;
+		new_pos.z += new_lookAt.z*d;*/
 
-		// randomize displacement of each projectile preventing them from spawning at the same position
-		if(ammo->spawnVariation != 0.0f)
-		{
-			randomLO = -ammo->spawnVariation *0.5f;
-			randomHI = ammo->spawnVariation *0.5f;
-			scatterPos.x += randomLO + (float)rand()/((float)RAND_MAX/(randomHI-randomLO));
-			scatterPos.y += randomLO + (float)rand()/((float)RAND_MAX/(randomHI-randomLO));
-			scatterPos.z += randomLO + (float)rand()/((float)RAND_MAX/(randomHI-randomLO));
-		}
+		//// randomize displacement of each projectile preventing them from spawning at the same position
+		//if(ammo->spawnVariation != 0.0f)
+		//{
+		//	randomLO = -ammo->spawnVariation *0.5f;
+		//	randomHI = ammo->spawnVariation *0.5f;
+		//	scatterPos.x += randomLO + (float)rand()/((float)RAND_MAX/(randomHI-randomLO));
+		//	scatterPos.y += randomLO + (float)rand()/((float)RAND_MAX/(randomHI-randomLO));
+		//	scatterPos.z += randomLO + (float)rand()/((float)RAND_MAX/(randomHI-randomLO));
+		//}
 
-		SEND_EVENT(&Event_CreateProjectile(scatterPos, velocity, rotation, itrPlayer.ownerId(), ammo->type, firingMode->type, ammo->damage));
+		SEND_EVENT(&Event_CreateProjectile(new_pos, velocity, rot, itrPlayer.ownerId(), ammo->type, firingMode->type, ammo->damage));
 	}
 }

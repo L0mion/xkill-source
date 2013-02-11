@@ -214,7 +214,7 @@ void Menu_Editor::slot_changed_simulationSpeed(int speed)
 	// Set simulation speed and update label
 	float simulationSpeed = (float)speed/100;
 	ui.label_simulationSpeed->setText(QString::number(simulationSpeed));
-	settings->timeScale = simulationSpeed;
+	settings->setTimeScale(simulationSpeed);
 }
 
 void Menu_Editor::slot_attributeInspector_refresh()
