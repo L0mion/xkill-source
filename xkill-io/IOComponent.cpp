@@ -213,18 +213,22 @@ bool IOComponent::loadModel(
 	bool successfulLoad = true;
 
 	MeshDesc meshDesc;
-	SkinnedData* skinnedData = new SkinnedData();
+	SkinnedData* skinnedData = nullptr;
 
 	if(pollFile(modelPath, modelName + ".pgy"))
 	{
-		successfulLoad = loadPGY(modelName + ".pgy", modelPath, modelDesc, meshDesc);
+		successfulLoad = loadPGY(modelName + ".pgy", modelPath, modelDesc, meshDesc, &skinnedData);
+		if(skinnedData)
+			delete skinnedData;
 	}
 	else
 	{
+		skinnedData = new SkinnedData();
 		FileExtension fileType = findFileType(modelName);
 		switch(fileType)
 		{
 		case FILE_EXTENSION_FBX:
+			
 			successfulLoad = loadFbx(modelName, modelPath, modelDesc, meshDesc, skinnedData);
 			break;
 		case FILE_EXTENSION_OBJ:
@@ -234,8 +238,8 @@ bool IOComponent::loadModel(
 
 		writePGY(modelName + ".pgy", modelPath, meshDesc, (VertexType)modelDesc->vertexType_, skinnedData);
 		
+		delete skinnedData;
 	}
-	delete skinnedData;
 
 	if(successfulLoad)
 	{
@@ -363,8 +367,9 @@ void IOComponent::loadFbxAnimation(std::vector<LoaderFbxAnimationDesc> animation
 	skinnedData->set(boneHierarchy, boneOffsets, animations);
 }
 
-bool IOComponent::loadPGY(std::string modelName, std::string modelPath, MdlDescModel* modelDesc, MeshDesc& meshDesc)
+bool IOComponent::loadPGY(std::string modelName, std::string modelPath, MdlDescModel* modelDesc, MeshDesc& meshDesc, SkinnedData** skinnedData)
 {
+	SkinnedData* tempSkinned = nullptr;
 	bool sucessfulLoad = true;
 
 	LoaderPGY pgyLoader(
@@ -375,8 +380,12 @@ bool IOComponent::loadPGY(std::string modelName, std::string modelPath, MdlDescM
 	if(sucessfulLoad)
 	{
 		meshDesc = pgyLoader.getMeshModel();
+		tempSkinned = pgyLoader.getSkinnedData();
 		//if(writeTimeUTC == pgyLoader.getWriteTimeUTC())
 	}
+
+	(*skinnedData) = tempSkinned;
+	
 
 	return sucessfulLoad;
 }

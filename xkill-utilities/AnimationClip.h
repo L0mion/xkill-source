@@ -35,6 +35,7 @@ public:
 	float getClipEndTime()		const;
 	
 	std::vector<BoneAnimation*>* getBoneAnimations() const;
+	void setBoneAnimations(std::vector<BoneAnimation*>* boneAnimations);
 
 private:
 	std::vector<BoneAnimation*>* boneAnimations_; //!< Vector containing the skeleton

@@ -24,14 +24,14 @@ public:
 	//! Releases all memory and resets BoneAnimation to its default state.
 	~BoneAnimation();
 
+	void addKeyframe(Keyframe* keyframe);
+
 	//! Interpolates the animation on this bone.
 	/*!
 	\param time At which point in the animation the character is currently in.
 	\param matrix A matrix where the result will be stored.
 	*/
 	void interpolate(float time, DirectX::XMFLOAT4X4& matrix) const;
-
-	void addKeyframe(Keyframe* keyframe);
 
 	float getStartTime()	const;
 	float getEndTime()		const;

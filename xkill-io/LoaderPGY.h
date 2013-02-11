@@ -13,7 +13,7 @@
 #include "VarStatus.h"
 
 // Must correspond with WRITER_PGY_VERSION in order to read .pgy sucessfully.
-static const float LOADER_PGY_VERSION = 1.2f;
+static const float LOADER_PGY_VERSION = 1.3f;
 /*
 * 1.1 - Now reads WriteTimeUTC struct from PGY-header.
 */
@@ -34,11 +34,14 @@ public:
 	bool init(); //!< Opens specified file and calls loading of binary .pgy-format if the header version number corresponds with the version num of the LoaderPGY.
 
 	MeshDesc getMeshModel();
+	SkinnedData* getSkinnedData();
 
 	WriteTimeUTC	getWriteTimeUTC()	const;
 protected:
 private:
-	MeshDesc loadPGY(
+	void loadPGY(
+		MeshDesc& meshDesc,
+		SkinnedData** skinnedData,
 		unsigned int numMaterials,
 		unsigned int numVertices,
 		unsigned int numSubsets); //!< Loads binary .pgy-format.
@@ -55,13 +58,14 @@ private:
 	void loadSubsets(const unsigned int numSubsets, std::vector<SubsetDesc>& subsets); //!< Subsets from .pgy.
 	const SubsetDesc loadSubset(); //!< Reads a single subset from .pgy.
 
-	void loadAnimations();
-	void loadAnimation(unsigned int numBones);
+	SkinnedData* loadAnimations();
+	void loadAnimation(unsigned int numBones, std::map<std::string, AnimationClip*>* animations);
 	void loadKeyframes(BoneAnimation* bone, unsigned int numKeyframes);
 
 	WriteTimeUTC writeTimeUTC_;
 
 	MeshDesc meshDesc_; //!< Resulting model read from .pgy.
+	SkinnedData* skinnedData_; //!< Resulting animation read from .pgy.
 };
 
 #endif //XKILL_IO_LOADERPGY_H

@@ -13,7 +13,7 @@
 #include "WriteTime.h"
 
 // !OBS! Be sure to increment WRITER_PGY_VERSION if updating WriterPGY! !OBS!
-static const float WRITER_PGY_VERSION = 1.2f;
+static const float WRITER_PGY_VERSION = 1.3f;
 /*
 * 1.1 - Now writes WriteTimeUTC struct to PGY-header.
 */

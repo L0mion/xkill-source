@@ -8,6 +8,7 @@ LoaderPGY::LoaderPGY(
 	const std::string filePath, 
 	const std::string fileName) : Loader(filePath, fileName)
 {
+	skinnedData_ = nullptr;
 }
 LoaderPGY::~LoaderPGY()
 {
@@ -33,7 +34,9 @@ bool LoaderPGY::init()
 		writeTimeUTC_ = header.writeTime_; //store for later
 		if(header.versionNum_ == LOADER_PGY_VERSION)
 		{
-			meshDesc_ =  loadPGY(
+			loadPGY(
+					meshDesc_,
+					&skinnedData_,
 					header.numMaterials_, 
 					header.numVertices_, 
 					header.numSubsets_);
@@ -55,7 +58,9 @@ MeshDesc LoaderPGY::getMeshModel()
 	return meshDesc_;
 }
 
-MeshDesc LoaderPGY::loadPGY(
+void LoaderPGY::loadPGY(
+	MeshDesc& meshDesc,
+	SkinnedData** skinnedData,
 	unsigned int numMaterials,
 	unsigned int numVertices,
 	unsigned int numSubsets)
@@ -74,12 +79,11 @@ MeshDesc LoaderPGY::loadPGY(
 	std::string fileName = getFileName();
 
 
-	loadAnimations();
-	MeshDesc meshDesc;
+	(*skinnedData) = loadAnimations();
+
 	meshDesc.materials_		= materials;
 	meshDesc.vertices_		= vertices;
 	meshDesc.subsets_		= subsets;
-	return meshDesc;
 }
 const PGYHeader LoaderPGY::loadHeader()
 {
@@ -168,60 +172,92 @@ const SubsetDesc LoaderPGY::loadSubset()
 	return subset;
 }
 
-void LoaderPGY::loadAnimations()
+SkinnedData* LoaderPGY::loadAnimations()
 {
 	PGYHeaderSkinnedData skinnedDataHeader;
-
-	std::vector<int>* boneHierarchy = new std::vector<int>();
-	std::vector<DirectX::XMFLOAT4X4>* boneOffsets = new std::vector<DirectX::XMFLOAT4X4>();
+	SkinnedData* skinnedData = nullptr;
 
 	ifstream_.read((char*)&skinnedDataHeader, sizeof(skinnedDataHeader));
-	for(unsigned int i=0; i<skinnedDataHeader.numBones_; i++)
+	if(skinnedDataHeader.numAnimations_ > 0)
 	{
-		int parentIndex;
-		ifstream_.read((char*)&parentIndex, sizeof(int));
-		boneHierarchy->push_back(parentIndex);
-	}
-	for(unsigned int i=0; i<skinnedDataHeader.numBones_; i++)
-	{
-		DirectX::XMFLOAT4X4 offsetMatrix;
-		ifstream_.read((char*)&offsetMatrix, sizeof(offsetMatrix));
-		boneOffsets->push_back(offsetMatrix);
+		skinnedData = new SkinnedData;
+		
+		std::vector<int>* boneHierarchy = new std::vector<int>();
+		std::vector<DirectX::XMFLOAT4X4>* boneOffsets = new std::vector<DirectX::XMFLOAT4X4>();
+		
+		for(unsigned int i=0; i<skinnedDataHeader.numBones_; i++)
+		{
+			int parentIndex;
+			ifstream_.read((char*)&parentIndex, sizeof(int));
+			boneHierarchy->push_back(parentIndex);
+		}
+		for(unsigned int i=0; i<skinnedDataHeader.numBones_; i++)
+		{
+			DirectX::XMFLOAT4X4 offsetMatrix;
+			ifstream_.read((char*)&offsetMatrix, sizeof(offsetMatrix));
+			boneOffsets->push_back(offsetMatrix);
+		}
+	
+		std::map<std::string, AnimationClip*>* animations = new std::map<std::string, AnimationClip*>();
+		for(unsigned int i=0; i<skinnedDataHeader.numAnimations_; i++)
+			loadAnimation(skinnedDataHeader.numBones_, animations);
+	
+		skinnedData->set(boneHierarchy, boneOffsets, animations);
 	}
 
-	loadAnimation(skinnedDataHeader.numBones_);
-
+	return skinnedData;
 }
-void LoaderPGY::loadAnimation(unsigned int numBones)
+void LoaderPGY::loadAnimation(unsigned int numBones, std::map<std::string, AnimationClip*>* animations)
 {
 	PGYHeaderAnimation animationHeader;
 	ifstream_.read((char*)&animationHeader, sizeof(animationHeader));
 	
+	char* name = new char[animationHeader.nameSize_];
+	ifstream_.read(name, animationHeader.nameSize_);
 	std::string animationName;
-	ifstream_.read((char*)&animationName, animationHeader.nameSize_);
+	for(unsigned int i=0; i<animationHeader.nameSize_; i++)
+	{
+		animationName.push_back(name[i]);
+	}
+	delete []name;
 
-	std::vector<BoneAnimation*> boneAnimations;
+	std::vector<BoneAnimation*>* boneAnimations = new std::vector<BoneAnimation*>();
+	AnimationClip* animationClip = new AnimationClip();
 
 	for(unsigned int i=0; i<numBones; i++)
 	{
 		PGYHeaderBone boneHeader;
 		ifstream_.read((char*)&boneHeader, sizeof(boneHeader));
 
-		boneAnimations.push_back(new BoneAnimation());
-		loadKeyframes(boneAnimations.at(i), boneHeader.numKeyframes_);
+		boneAnimations->push_back(new BoneAnimation());
+		loadKeyframes(boneAnimations->at(i), boneHeader.numKeyframes_);
 	}
 
+	animationClip->setBoneAnimations(boneAnimations);
+	std::pair<std::string, AnimationClip*> animation(animationName, animationClip);
+	animations->insert(animation);
 }
 void LoaderPGY::loadKeyframes(BoneAnimation* bone, unsigned int numKeyframes)
 {
 	for(unsigned int i=0; i<numKeyframes; i++)
 	{
 		Keyframe* keyframe = new Keyframe();
-		ifstream_.read((char*)keyframe, sizeof(Keyframe));
+		Keyframe temp;
+		ifstream_.read((char*)&temp, sizeof(temp));
+
+		keyframe->timePosition = temp.timePosition;
+		keyframe->translation = temp.translation;
+		keyframe->scale = temp.scale;
+		keyframe->rotationQuaternion = temp.rotationQuaternion;
+
 		bone->addKeyframe(keyframe);
 	}
 }
 
+SkinnedData* LoaderPGY::getSkinnedData()
+{
+	return skinnedData_;
+}
 WriteTimeUTC LoaderPGY::getWriteTimeUTC() const
 {
 	return writeTimeUTC_;
