@@ -2,9 +2,13 @@
 #include <tchar.h>
 #include <stdio.h>
 
+#include <DirectXMath.h>
+
 #include <xkill-utilities/Util.h>
 #include <xkill-utilities/EventManager.h>
 #include <xkill-utilities/AttributeType.h>
+
+#include <xkill-utilities/AnimationClip.h>
 
 #include "MeshMakerObj.h"
 #include "IOComponent.h"
@@ -14,7 +18,10 @@
 #include "MdlDescModel.h"
 
 #include "LoaderFbx.h"
+#include "LoaderFbxMeshDesc.h"
+#include "LoaderFbxMaterialDesc.h"
 #include "LoaderFbxModelDesc.h"
+#include "LoaderFbxAnimationDesc.h"
 #include "LoaderPGY.h"
 #include "WriterPGY.h"
 
@@ -206,24 +213,32 @@ bool IOComponent::loadModel(
 	bool successfulLoad = true;
 
 	MeshDesc meshDesc;
+	SkinnedData* skinnedData = nullptr;
+
 	if(pollFile(modelPath, modelName + ".pgy"))
 	{
-		successfulLoad = loadPGY(modelName + ".pgy", modelPath, modelDesc, meshDesc);
+		successfulLoad = loadPGY(modelName + ".pgy", modelPath, modelDesc, meshDesc, &skinnedData);
+		if(skinnedData)
+			delete skinnedData;
 	}
 	else
 	{
+		skinnedData = new SkinnedData();
 		FileExtension fileType = findFileType(modelName);
 		switch(fileType)
 		{
 		case FILE_EXTENSION_FBX:
-			successfulLoad = loadFbx(modelName, modelPath, modelDesc, meshDesc);
+			
+			successfulLoad = loadFbx(modelName, modelPath, modelDesc, meshDesc, skinnedData);
 			break;
 		case FILE_EXTENSION_OBJ:
 			successfulLoad = loadObj(modelName, modelPath, modelDesc, meshDesc);
 			break;
 		}
 
-		writePGY(modelName + ".pgy", modelPath, meshDesc, (VertexType)modelDesc->vertexType_);
+		writePGY(modelName + ".pgy", modelPath, meshDesc, (VertexType)modelDesc->vertexType_, skinnedData);
+		
+		delete skinnedData;
 	}
 
 	if(successfulLoad)
@@ -285,42 +300,76 @@ bool IOComponent::loadObj(
 	delete objMaker;
 	return sucessfulMake;
 }
-bool IOComponent::loadFbx(std::string modelName, std::string modelPath, MdlDescModel* modelDesc, MeshDesc& meshDesc)
+bool IOComponent::loadFbx(std::string modelName, std::string modelPath, MdlDescModel* modelDesc, MeshDesc& meshDesc, SkinnedData* skinnedData)
 {
 	bool successfulLoad = true;
 
 	std::vector<LoaderFbxModelDesc> fbxModels = fbxLoader_->load(modelPath+modelName);
-
-	std::vector<VertexDesc> vertices;
-	std::vector<unsigned int> indices;
-	MaterialDesc materialDesc;
-
+	
 	if(fbxModels.size() > 0)
 	{
-		vertices		= fbxModels[0].getMeshDesc().createVertices();
-		indices			= fbxModels[0].getMeshDesc().getIndices();
-		materialDesc	= fbxModels[0].getMaterialDesc().getMaterialDesc();
+		LoaderFbxMeshDesc mesh = fbxModels[0].getMeshDesc();
+		LoaderFbxMaterialDesc material = fbxModels[0].getMaterialDesc();
 
-		std::vector<MaterialDesc> materials;
-		materials.push_back(materialDesc);
-
-		std::vector<SubsetDesc> subsets;
-		SubsetDesc subset;
-		subset.indices_ = indices;
-		subset.materialIndex_ = 0;
-		subsets.push_back(subset);
-
-		meshDesc.vertices_ = vertices;
-		meshDesc.materials_ = materials;
-		meshDesc.subsets_ = subsets;
+		loadFbxMesh(&mesh, &material, meshDesc);
+		loadFbxAnimation(fbxModels[0].getAnimationDescs(), fbxModels[0].getMeshDesc(), skinnedData);
 	}
 	else
 		successfulLoad = false;
 
 	return successfulLoad;
 }
-bool IOComponent::loadPGY(std::string modelName, std::string modelPath, MdlDescModel* modelDesc, MeshDesc& meshDesc)
+void IOComponent::loadFbxMesh(LoaderFbxMeshDesc* mesh, LoaderFbxMaterialDesc* material, MeshDesc& meshDesc)
 {
+	std::vector<VertexDesc> vertices;
+	std::vector<unsigned int> indices;
+	MaterialDesc materialDesc;
+
+	mesh->createVertices(vertices, indices);
+	materialDesc	= material->getMaterialDesc();
+
+	std::vector<MaterialDesc> materials;
+	materials.push_back(materialDesc);
+
+	std::vector<SubsetDesc> subsets;
+	SubsetDesc subset;
+	subset.indices_ = indices;
+	subset.materialIndex_ = 0;
+	subsets.push_back(subset);
+
+	meshDesc.vertices_ = vertices;
+	meshDesc.materials_ = materials;
+	meshDesc.subsets_ = subsets;
+}
+void IOComponent::loadFbxAnimation(std::vector<LoaderFbxAnimationDesc> animationDescs, LoaderFbxMeshDesc mesh, SkinnedData* skinnedData)
+{
+	std::map<std::string, AnimationClip*>* animations = new std::map<std::string, AnimationClip*>();
+
+	for(unsigned int i=0; i<animationDescs.size(); i++)
+	{
+		animationDescs[i].convertToXKillFormat(animations);
+	}
+
+	std::vector<int>* boneHierarchy = new std::vector<int>();
+	for(unsigned int i=0; i<mesh.getBoneParentIndices().size(); i++)
+		boneHierarchy->push_back(mesh.getBoneParentIndices().at(i));
+	std::vector<DirectX::XMFLOAT4X4>* boneOffsets = new std::vector<DirectX::XMFLOAT4X4>();
+	for(unsigned int i=0; i<mesh.getOffsetMatrices().size(); i++)
+	{
+		DirectX::XMFLOAT4X4 matrix = DirectX::XMFLOAT4X4(
+			mesh.getOffsetMatrices().at(i)._11, mesh.getOffsetMatrices().at(i)._12, mesh.getOffsetMatrices().at(i)._13, mesh.getOffsetMatrices().at(i)._14,
+			mesh.getOffsetMatrices().at(i)._21, mesh.getOffsetMatrices().at(i)._22, mesh.getOffsetMatrices().at(i)._23, mesh.getOffsetMatrices().at(i)._24,
+			mesh.getOffsetMatrices().at(i)._31, mesh.getOffsetMatrices().at(i)._32, mesh.getOffsetMatrices().at(i)._33, mesh.getOffsetMatrices().at(i)._34,
+			mesh.getOffsetMatrices().at(i)._41, mesh.getOffsetMatrices().at(i)._42, mesh.getOffsetMatrices().at(i)._43, mesh.getOffsetMatrices().at(i)._44);
+		boneOffsets->push_back(matrix);
+	}
+
+	skinnedData->set(boneHierarchy, boneOffsets, animations);
+}
+
+bool IOComponent::loadPGY(std::string modelName, std::string modelPath, MdlDescModel* modelDesc, MeshDesc& meshDesc, SkinnedData** skinnedData)
+{
+	SkinnedData* tempSkinned = nullptr;
 	bool sucessfulLoad = true;
 
 	LoaderPGY pgyLoader(
@@ -331,20 +380,25 @@ bool IOComponent::loadPGY(std::string modelName, std::string modelPath, MdlDescM
 	if(sucessfulLoad)
 	{
 		meshDesc = pgyLoader.getMeshModel();
+		tempSkinned = pgyLoader.getSkinnedData();
 		//if(writeTimeUTC == pgyLoader.getWriteTimeUTC())
 	}
+
+	(*skinnedData) = tempSkinned;
+	
 
 	return sucessfulLoad;
 }
 
-bool IOComponent::writePGY(std::string modelName, std::string modelPath, MeshDesc meshDesc, VertexType vertexType)
+bool IOComponent::writePGY(std::string modelName, std::string modelPath, MeshDesc meshDesc, VertexType vertexType, SkinnedData* skinnedData)
 {
 	WriterPGY pgyWriter(
 		meshDesc,
 		//writeTimeUTC, //fix this
 		modelPath,
 		modelName,
-		vertexType);
+		vertexType,
+		skinnedData);
 	bool sucessfulWrite = pgyWriter.init();
 
 	return sucessfulWrite;

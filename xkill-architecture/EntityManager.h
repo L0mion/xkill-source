@@ -109,6 +109,9 @@ public:
 			entityFactory.createWorldEntity(entity, &Event_CreateWorld(Float3(0,0,0),Float4(0,0,0,1),1));
 			DEBUGPRINT("ENTITYMANAGER: Created World in 7 cycles,, Satan took over and this function won't work anymore " << entity->getID());
 			break;
+		case RENDERABLE:
+			entityFactory.createRenderableEntity(entity);
+			break;
 		}
 	}
 

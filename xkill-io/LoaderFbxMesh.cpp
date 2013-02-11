@@ -1,5 +1,7 @@
 #include <sstream>
 
+#include<DirectXMath.h>
+
 #include <fbxsdk.h>
 
 #include <xkill-utilities/Util.h>
@@ -56,6 +58,9 @@ void LoaderFbxMesh::parseMesh(FbxMesh* mesh, LoaderFbxMeshDesc* meshDesc)
 			vertexId++;
 		}
 	}
+
+
+	transformVertices(mesh);
 
 	meshDesc->setPolygonGroupIds(polygonGroupIds_);
 	meshDesc->setVertexPositions(vertexPositions_);
@@ -428,8 +433,6 @@ void LoaderFbxMesh::parseVertexLinkData(FbxMesh* mesh, LoaderFbxMeshDesc* meshDe
 	int	numClusters	 = 0;
 	int linkMode	 = 0;
 
-	const char* clusterName;
-
 	for(int deformerIndex=0; deformerIndex<numDeformers; deformerIndex++)
 	{
 		numClusters = static_cast<FbxSkin*>(mesh->GetDeformer(deformerIndex, FbxDeformer::eSkin))->GetClusterCount();
@@ -449,6 +452,17 @@ void LoaderFbxMesh::parseVertexLinkData(FbxMesh* mesh, LoaderFbxMeshDesc* meshDe
 			meshDesc->setBoneNodes(nodes);
 			meshDesc->setBoneParentIndices(parentIndices);
 
+			Float4x4 identityMatrix;
+			identityMatrix._11 = 1.0f; identityMatrix._12 = 0.0f; identityMatrix._13 = 0.0f; identityMatrix._14 = 0.0f;
+			identityMatrix._21 = 0.0f; identityMatrix._22 = 1.0f; identityMatrix._23 = 0.0f; identityMatrix._24 = 0.0f;
+			identityMatrix._31 = 0.0f; identityMatrix._32 = 0.0f; identityMatrix._33 = 1.0f; identityMatrix._34 = 0.0f;
+			identityMatrix._41 = 0.0f; identityMatrix._42 = 0.0f; identityMatrix._43 = 0.0f; identityMatrix._44 = 1.0f;
+
+			for(unsigned int i=0; i<nodes.size(); i++)
+			{
+				meshDesc->addOffsetMatrix(identityMatrix);
+			}
+
 			for(int clusterIndex=0; clusterIndex<numClusters; clusterIndex++)
 			{
 				cluster = static_cast<FbxSkin*>(mesh->GetDeformer(0, FbxDeformer::eSkin))->GetCluster(clusterIndex);
@@ -463,7 +477,7 @@ void LoaderFbxMesh::parseVertexLinkData(FbxMesh* mesh, LoaderFbxMeshDesc* meshDe
 				}
 				
 				parseIndicesAndWeights(cluster, meshDesc, nodeIndex);
-				parseTransformMatrix(cluster, meshDesc);
+				parseTransformMatrix(cluster, meshDesc, nodeIndex);
 			}
 		}
 	}
@@ -494,7 +508,7 @@ void LoaderFbxMesh::parseIndicesAndWeights(FbxCluster* cluster, LoaderFbxMeshDes
 		meshDesc->addVertexBoneWeight(indices[i], static_cast<float>(weights[i]));
 	}
 }
-void LoaderFbxMesh::parseTransformMatrix(FbxCluster* cluster, LoaderFbxMeshDesc* meshDesc)
+void LoaderFbxMesh::parseTransformMatrix(FbxCluster* cluster, LoaderFbxMeshDesc* meshDesc, int index)
 {
 	FbxAMatrix fbxMatrix;
 	cluster->GetTransformLinkMatrix(fbxMatrix);
@@ -505,7 +519,7 @@ void LoaderFbxMesh::parseTransformMatrix(FbxCluster* cluster, LoaderFbxMeshDesc*
 		for(int y=0; y<4; y++)
 			offsetMatrix.m[x][y] = static_cast<float>(fbxMatrix.mData[x][y]);
 	}
-	meshDesc->addOffsetMatrix(offsetMatrix);
+	meshDesc->setOffsetMatrix(index, offsetMatrix);
 }
 
 FbxNode* LoaderFbxMesh::findRoot(FbxNode* node)
@@ -518,7 +532,6 @@ FbxNode* LoaderFbxMesh::findRoot(FbxNode* node)
 			if(node->GetParent()->GetNodeAttribute()->GetAttributeType() == FbxNodeAttribute::eSkeleton)
 			{
 				node = node->GetParent();
-				printf("%s\n", node->GetName());
 			}
 			else
 				done = true;
@@ -528,4 +541,69 @@ FbxNode* LoaderFbxMesh::findRoot(FbxNode* node)
 	}
 	
 	return node;
+}
+
+void LoaderFbxMesh::transformVertices(FbxMesh* mesh)
+{
+	FbxNode*	node		= mesh->GetNode();
+	FbxAMatrix	fbxMatrix	= node->EvaluateLocalTransform();
+
+	DirectX::XMMATRIX xmTransform;
+	xmTransform = DirectX::XMMATRIX(static_cast<float>(fbxMatrix.mData[0][0]), static_cast<float>(fbxMatrix.mData[0][1]), static_cast<float>(fbxMatrix.mData[0][2]), static_cast<float>(fbxMatrix.mData[0][3]),
+									static_cast<float>(fbxMatrix.mData[1][0]), static_cast<float>(fbxMatrix.mData[1][1]), static_cast<float>(fbxMatrix.mData[1][2]), static_cast<float>(fbxMatrix.mData[1][3]),
+									static_cast<float>(fbxMatrix.mData[2][0]), static_cast<float>(fbxMatrix.mData[2][1]), static_cast<float>(fbxMatrix.mData[2][2]), static_cast<float>(fbxMatrix.mData[2][3]),
+									static_cast<float>(fbxMatrix.mData[3][0]), static_cast<float>(fbxMatrix.mData[3][1]), static_cast<float>(fbxMatrix.mData[3][2]), static_cast<float>(fbxMatrix.mData[3][3]));
+
+	DirectX::XMFLOAT3 position;
+	DirectX::XMVECTOR xmPosition;
+	for(unsigned int i=0; i<vertexPositions_.size(); i++)
+	{
+		position.x = vertexPositions_[i].x;
+		position.y = vertexPositions_[i].y;
+		position.z = vertexPositions_[i].z;
+	
+		xmPosition = DirectX::XMLoadFloat3(&position);
+		xmPosition = DirectX::XMVector3Transform(xmPosition, xmTransform);
+		
+		DirectX::XMStoreFloat3(&position, xmPosition);
+		vertexPositions_[i].x = position.x;
+		vertexPositions_[i].y = position.y;
+		vertexPositions_[i].z = position.z;
+	}
+
+	DirectX::XMFLOAT3 normal;
+	DirectX::XMVECTOR xmNormal;
+	for(unsigned int i=0; i<vertexNormals_.size(); i++)
+	{
+		normal.x = vertexNormals_[i].x;
+		normal.y = vertexNormals_[i].y;
+		normal.z = vertexNormals_[i].z;
+
+		xmNormal = DirectX::XMLoadFloat3(&normal);
+		xmNormal = DirectX::XMVector3TransformNormal(xmNormal, xmTransform);
+
+		DirectX::XMStoreFloat3(&normal, xmNormal);
+		vertexNormals_[i].x = normal.x;
+		vertexNormals_[i].y = normal.y;
+		vertexNormals_[i].z = normal.z;
+	}
+
+	DirectX::XMFLOAT4 tangent;
+	DirectX::XMVECTOR xmTangent;
+	for(unsigned int i=0; i<vertexTangents_.size(); i++)
+	{
+		tangent.x = vertexTangents_[i].x;
+		tangent.y = vertexTangents_[i].y;
+		tangent.z = vertexTangents_[i].z;
+		tangent.w = vertexTangents_[i].w;
+
+		xmTangent = DirectX::XMLoadFloat4(&tangent);
+		xmTangent = DirectX::XMVector4Transform(xmTangent, xmTransform);
+
+		DirectX::XMStoreFloat4(&tangent, xmTangent);
+		vertexTangents_[i].x = tangent.x;
+		vertexTangents_[i].y = tangent.y;
+		vertexTangents_[i].z = tangent.z;
+		vertexTangents_[i].w = tangent.w;
+	}
 }

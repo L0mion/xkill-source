@@ -42,6 +42,23 @@ struct PGYHeaderSubset
 	unsigned int numIndices_;
 };
 
+struct PGYHeaderSkinnedData
+{
+	unsigned int numAnimations_;
+	unsigned int numBones_;
+};
+
+struct PGYHeaderAnimation
+{
+	unsigned int nameSize_;
+};
+
+struct PGYHeaderBone
+{
+	unsigned int numKeyframes_;
+};
+
+
 static const std::string	PGY_SPECS_SUFFIX				= ".pgy";
 static const char			PGY_SPECS_FILETYPE[4]			= "pgy";
 
