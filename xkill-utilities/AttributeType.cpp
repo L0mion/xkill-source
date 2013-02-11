@@ -1065,9 +1065,9 @@ void Behavior_Offset::updateOffset()
 
 
 
-		//// Slerp interpolate to smooth out moment
-		//float MAGIC_SLERP_NUMBER = 1.0f;
-		//xv_rot_offset = XMQuaternionSlerp(xv_rot_offset, xv_own_rot, MAGIC_SLERP_NUMBER*ATTRIBUTE_MANAGER->settings->trueDeltaTime);
+		// Slerp interpolate to smooth out moment
+		float MAGIC_SLERP_NUMBER = 1.0f;
+		xv_rot_offset = XMQuaternionSlerp(xv_rot_offset, xv_own_rot, MAGIC_SLERP_NUMBER*ATTRIBUTE_MANAGER->settings->trueDeltaTime);
 
 		Float4 rot_offset;  XMStoreFloat4(( XMFLOAT4*)&rot_offset, xv_rot_offset);
 		ptr_spatial->rotation = rot_offset;

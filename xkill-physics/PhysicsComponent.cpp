@@ -137,77 +137,77 @@ void PhysicsComponent::onUpdate(float delta)
 		synchronizeWithAttributes(ptr_physics, physicsAttributeIndex);	//Synchronize physics objects with physics attributes
 		physicsObjects_->at(physicsAttributeIndex)->onUpdate(delta);	//Update physics objects by calling their onUpdate function.
 
-		////Should be in PlayerPhysicsAttribute::onUpdate()
-		//if(ptr_physics->collisionFilterGroup == ptr_physics->PhysicsAttributeType::PLAYER)
-		//{
-		//	//Calculate player aiming ray
-		//	Entity* playerEntity = itrPhysics.ownerAt(physicsAttributeIndex);
-		//	std::vector<int> rayttributeId = playerEntity->getAttributes(ATTRIBUTE_RAY);
-		//	for(int i=0;i<rayttributeId.size();i++)
-		//	{
-		//		AttributePtr<Attribute_Ray> ray = itrRay.at(rayttributeId.at(i));
-		//		btVector3 from = convert(ray->from);
-		//		btVector3 to = convert(ray->to);
-		//		gDebugDraw.drawLine(from,to,btVector4(1,1,1,1));
-		//		btCollisionWorld::ClosestRayResultCallback closestResults(from, to);
-		//		closestResults.m_flags |= btTriangleRaycastCallback::kF_KeepUnflippedNormal;
+		//Should be in PlayerPhysicsAttribute::onUpdate()
+		if(ptr_physics->collisionFilterGroup == ptr_physics->PhysicsAttributeType::PLAYER)
+		{
+			//Calculate player aiming ray
+			Entity* playerEntity = itrPhysics.ownerAt(physicsAttributeIndex);
+			std::vector<int> rayttributeId = playerEntity->getAttributes(ATTRIBUTE_RAY);
+			for(int i=0;i<rayttributeId.size();i++)
+			{
+				AttributePtr<Attribute_Ray> ray = itrRay.at(rayttributeId.at(i));
+				btVector3 from = convert(ray->from);
+				btVector3 to = convert(ray->to);
+				gDebugDraw.drawLine(from,to,btVector4(1,1,1,1));
+				btCollisionWorld::ClosestRayResultCallback closestResults(from, to);
+				closestResults.m_flags |= btTriangleRaycastCallback::kF_KeepUnflippedNormal;
 
-		//		//btCollisionWorld::ClosestRayResultCallback closestResults(from, to);
-		//		closestResults.m_collisionFilterGroup = ptr_physics->PhysicsAttributeType::RAY;
-		//		closestResults.m_collisionFilterMask = ptr_physics->PhysicsAttributeType::PLAYER | ptr_physics->PhysicsAttributeType::WORLD;
+				//btCollisionWorld::ClosestRayResultCallback closestResults(from, to);
+				closestResults.m_collisionFilterGroup = ptr_physics->PhysicsAttributeType::RAY;
+				closestResults.m_collisionFilterMask = ptr_physics->PhysicsAttributeType::PLAYER | ptr_physics->PhysicsAttributeType::WORLD;
 
-		//		//Check
-		//		//PLAYER is world
-		//		//WORLD is projectile
-		//		//PROJECTILE is world
+				//Check
+				//PLAYER is world
+				//WORLD is projectile
+				//PROJECTILE is world
 
-		//		//closestResults.m_collisionFilterMask = ptr_physics->PhysicsAttributeType::WORLD | ptr_physics->PhysicsAttributeType::PLAYER | ptr_physics->PhysicsAttributeType::PICKUPABLE;
-		//		//closestResults.m_flags |= btTriangleRaycastCallback::kF_None;
-		//		dynamicsWorld_->rayTest(from,to,closestResults);
-		//		if(closestResults.hasHit())
-		//		{
-		//			btVector3 closestHitPoint = from.lerp(to,closestResults.m_closestHitFraction);
-		//			gDebugDraw.drawSphere(closestHitPoint,0.1,btVector3(1.0f, 0.0f, 0.0f));
-		//			gDebugDraw.drawLine(closestHitPoint,closestHitPoint+closestResults.m_hitNormalWorld,btVector3(1.0f, 0.0f, 0.0f));
-		//			
-		//			std::vector<int> behaviorOffsetAttributeId = playerEntity->getAttributes(BEHAVIOR_OFFSET);
-		//			AttributePtr<Behavior_Offset> behaviorOffset = itrOffset.at(behaviorOffsetAttributeId.at(1));
-		//			btVector3 v1 = to-from;
-		//			v1.normalize();
-		//			btVector3 v2 = closestHitPoint - convert(behaviorOffset->ptr_spatial->ptr_position->position);
-		//			v2.normalize();
-		//			btVector3 a = v1.cross(v2);
-		//			float w = sqrt((v1.length()*v1.length()) * (v2.length()*v2.length())) + v1.dot(v2);
-		//			btQuaternion weaponRotation(a.x(), a.y(), a.z(), w);
-		//			weaponRotation.normalize();
-		//			//weaponRotation = playerRotationinverse * weaponRotation;
-		//			
-		//			//for(int i=0;i<behaviorOffsetAttributeId.size();i++)
-		//			{
-		//				
+				//closestResults.m_collisionFilterMask = ptr_physics->PhysicsAttributeType::WORLD | ptr_physics->PhysicsAttributeType::PLAYER | ptr_physics->PhysicsAttributeType::PICKUPABLE;
+				//closestResults.m_flags |= btTriangleRaycastCallback::kF_None;
+				dynamicsWorld_->rayTest(from,to,closestResults);
+				if(closestResults.hasHit())
+				{
+					btVector3 closestHitPoint = from.lerp(to,closestResults.m_closestHitFraction);
+					gDebugDraw.drawSphere(closestHitPoint,0.1,btVector3(1.0f, 0.0f, 0.0f));
+					gDebugDraw.drawLine(closestHitPoint,closestHitPoint+closestResults.m_hitNormalWorld,btVector3(1.0f, 0.0f, 0.0f));
+					
+					std::vector<int> behaviorOffsetAttributeId = playerEntity->getAttributes(BEHAVIOR_OFFSET);
+					AttributePtr<Behavior_Offset> behaviorOffset = itrOffset.at(behaviorOffsetAttributeId.at(1));
+					btVector3 v1 = to-from;
+					v1.normalize();
+					btVector3 v2 = closestHitPoint - convert(behaviorOffset->ptr_spatial->ptr_position->position);
+					v2.normalize();
+					btVector3 a = v1.cross(v2);
+					float w = sqrt((v1.length()*v1.length()) * (v2.length()*v2.length())) + v1.dot(v2);
+					btQuaternion weaponRotation(a.x(), a.y(), a.z(), w);
+					weaponRotation.normalize();
+					//weaponRotation = playerRotationinverse * weaponRotation;
+					
+					//for(int i=0;i<behaviorOffsetAttributeId.size();i++)
+					{
+						
 
-		//				//weaponRotation = weaponRotation*playerRotationInverse;
+						//weaponRotation = weaponRotation*playerRotationInverse;
 
-		//				behaviorOffset->offset_rotation.x = weaponRotation.x();
-		//				behaviorOffset->offset_rotation.y = weaponRotation.y();
-		//				behaviorOffset->offset_rotation.z = weaponRotation.z();
-		//				behaviorOffset->offset_rotation.w = weaponRotation.w();
-		//			}
-		//		}
-		//		else
-		//		{
-		//			//Standard weapon rotation
-		//		}
+						behaviorOffset->offset_rotation.x = weaponRotation.x();
+						behaviorOffset->offset_rotation.y = weaponRotation.y();
+						behaviorOffset->offset_rotation.z = weaponRotation.z();
+						behaviorOffset->offset_rotation.w = weaponRotation.w();
+					}
+				}
+				else
+				{
+					//Standard weapon rotation
+				}
 
-		//		/*
-		//		for (int i=0;i<closestResults.m_hitFractions.size();i++)
-		//		{
-		//			btVector3 p = from.lerp(to,closestResults.m_hitFractions[i]);
-		//			gDebugDraw.drawSphere(p,0.1,btVector3(1.0f, 0.0f, 0.0f));
-		//		}
-		//		*/
-		//	}
-		//}
+				/*
+				for (int i=0;i<closestResults.m_hitFractions.size();i++)
+				{
+					btVector3 p = from.lerp(to,closestResults.m_hitFractions[i]);
+					gDebugDraw.drawSphere(p,0.1,btVector3(1.0f, 0.0f, 0.0f));
+				}
+				*/
+			}
+		}
 	}
 
 

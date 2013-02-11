@@ -189,9 +189,10 @@ void ComponentManager::update(float delta)
 		game_->onUpdate(delta);
 
 		sound_->onUpdate(delta);
-		render_->onUpdate(delta);
-		score_->onUpdate(delta);
 		hacks_->onUpdate(delta);
+
+		score_->onUpdate(delta);
+		render_->onUpdate(delta);
 	
 		SEND_EVENT(&Event(EVENT_UPDATE));
 	}
