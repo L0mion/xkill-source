@@ -1024,8 +1024,8 @@ Attribute_Ray::~Attribute_Ray()
 DataItemList* Attribute_Ray::getDataList()
 {
 	DataItemList* list = new DataItemList();
-	list->add(&from, "from");;
-	list->add(&to,	"to");
+	list->add(from, "from");;
+	list->add(to,	"to");
 	return list;
 }
 

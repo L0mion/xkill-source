@@ -6,6 +6,7 @@
 
 struct Attribute_Player;
 template <class T> class AttributePtr;
+class Timer;
 
 //! A component to keep track of score
 /*!
@@ -24,10 +25,8 @@ public:
 	virtual void onUpdate(float delta);
 
 private:
-	float currentSchedulerTime_;						//! Time until next execution
-	float schedulerTime_;								//! Time between executions
-	float currentCycleTime_;							//! Time until next cycle
-	float cycleTime_;									//!	Length of an cycle
+	Timer* schedulerTimer_;								//! Keeps track of time left until next execution
+	Timer* cycleTimer_;									//!	Keeps track of time left until next cycle
 	bool executionMode_;								//! Is the execution mode active
 	unsigned int executingPlayerIndex_;					//! The index of the player that is currently executing
 

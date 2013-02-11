@@ -105,12 +105,15 @@ void InputComponent::handleInput(float delta)
 		input->rotation.x = device->getFloatValue(InputAction::ACTION_F_LOOK_LR, delta, true);
 		input->rotation.y = device->getFloatValue(InputAction::ACTION_F_LOOK_UD, delta, true);
 
-		input->fire = device->getBoolValue(InputAction::ACTION_B_FIRE);
-		input->firePressed = device->getBoolPressed(InputAction::ACTION_B_FIRE);
-		if(device->getBoolReleased(InputAction::ACTION_B_CHANGE_AMMUNITIONTYPE))
-			input->changeAmmunitionType = true;
-		if(device->getBoolReleased(InputAction::ACTION_B_CHANGE_FIRINGMODE))
-			input->changeFiringMode = true;
+		input->fire =					device->getBoolValue(InputAction::ACTION_B_FIRE);
+		input->firePressed =			device->getBoolPressed(InputAction::ACTION_B_FIRE);
+		input->changeAmmunitionType =	device->getBoolReleased(InputAction::ACTION_B_CHANGE_AMMUNITIONTYPE);
+		input->changeFiringMode =		device->getBoolReleased(InputAction::ACTION_B_CHANGE_FIRINGMODE);
+
+		input->killPlayer = device->getBoolReleased(InputAction::ACTION_B_KILL_PLAYER);
+		input->jump =		device->getBoolPressed(InputAction::ACTION_B_JUMP);
+		input->jetpack =	device->getBoolValue(InputAction::ACTION_B_JETPACK);
+		input->sprint =		device->getBoolValue(InputAction::ACTION_B_SPRINT);
 
 		if(device->getBoolValue(InputAction::ACTION_B_TIME_SPEED_UP))
 		{
@@ -162,36 +165,10 @@ void InputComponent::handleInput(float delta)
 		
 		if(device->getBoolValue(InputAction::ACTION_B_LOOK_RIGHT))
 			input->rotation.x = 1.0f * delta;
-		
-		if(device->getBoolReleased(InputAction::ACTION_B_KILL_PLAYER))
-			input->killPlayer = true;
-
-		if(device->getBoolPressed(InputAction::ACTION_B_JUMP))
-			input->jump = true;
-
-		if(device->getBoolValue(InputAction::ACTION_B_JETPACK))
-			input->jetpack = true;
-
-		if(device->getBoolValue(InputAction::ACTION_B_SPRINT))
-			input->sprint = true;
 
 		device->setSensitivityModifier(device->getFloatValue(InputAction::ACTION_B_LOW_SENSITIVITY, delta));
 
-		float x, y;
-
-		x = input->position.x;
-		y = input->position.y;
-
-		float length = std::sqrt(x*x + y*y);
-
-		if(length > 1.0f) // The character shouldn't move faster than set speed
-		{
-			x = x/length;
-			y = y/length;
-
-			input->position.x = x;
-			input->position.y = y;
-		}
+		normalizeVector(input->position.x, input->position.y);	// Normalize walk vector, the character shouldn't move faster than set speed
 
 		if(device->GetType() == device->QT_INPUT_DEVICE) // Need to update QT devices since they're event based
 		{
@@ -203,17 +180,21 @@ void InputComponent::handleInput(float delta)
 	}
 }
 
+void InputComponent::normalizeVector(float& x, float& y)
+{
+	float length = std::sqrt(x*x + y*y);
+
+	if(length > 1.0f)
+	{
+		x = x/length;
+		y = y/length;
+	}
+}
+
 void InputComponent::setupPlayerControllerConnection()
 {
 	int playerSize = itrPlayer.size();
 	int inputDeviceSize = itrInputDevice.size();
-
-	int diff = playerSize - inputDeviceSize;
-
-	for(int i = 0; i < diff; i++)
-	{
-		itrPlayer.getNext();
-	}
 
 	while(itrPlayer.hasNext())
 	{

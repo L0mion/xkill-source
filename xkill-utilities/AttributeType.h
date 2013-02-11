@@ -485,6 +485,7 @@ struct DLL_U Attribute_Player : public IAttribute
 	AttributePtr<Attribute_Camera>			ptr_camera;
 	AttributePtr<Attribute_Health>			ptr_health;
 	AttributePtr<Attribute_WeaponStats>		ptr_weaponStats;
+	AttributePtr<Attribute_Spatial>			ptr_weapon_spatial;
 	AttributePtr<Attribute_Spatial>			ptr_weaponFireLocation_spatial;
 
 	static int nextId;

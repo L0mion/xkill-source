@@ -108,7 +108,10 @@ public:
 		ptr_physics->meshID = ptr_render->meshID;
 		
 		// Attach weapon
-		AttributePtr<Attribute_Spatial> ptr_weaponFireLocation_spatial = createWeapon(entity, ptr_spatial, ptr_camera->ptr_spatial);
+		AttributePtr<Attribute_Spatial> ptr_weapon_spatial;
+		AttributePtr<Attribute_Spatial> ptr_weaponFireLocation_spatial;
+		createWeapon(entity, ptr_spatial, ptr_camera->ptr_spatial, ptr_weapon_spatial, ptr_weaponFireLocation_spatial);
+		ptr_player->ptr_weapon_spatial = ptr_weapon_spatial;
 		ptr_player->ptr_weaponFireLocation_spatial = ptr_weaponFireLocation_spatial;
 
 		CREATE_ATTRIBUTE(ptr_ray, Attribute_Ray, ray, entity);
@@ -132,7 +135,8 @@ public:
 		return ptr_camera;
 	}
 
-	 AttributePtr<Attribute_Spatial> createWeapon(Entity* entity, AttributePtr<Attribute_Spatial> ptr_parent_spatial_position, AttributePtr<Attribute_Spatial> ptr_parent_spatial_rotation)
+	void createWeapon(Entity* entity, AttributePtr<Attribute_Spatial> ptr_parent_spatial_position, AttributePtr<Attribute_Spatial> ptr_parent_spatial_rotation, 
+						AttributePtr<Attribute_Spatial>& ptr_weaponSpatial, AttributePtr<Attribute_Spatial>& ptr_firingLocationSpatial)
 	{
 		//
 		// Create weapon
@@ -177,7 +181,8 @@ public:
 			ptr_fireLocation_spatial = ptr_spatial;
 		}
 
-		return ptr_fireLocation_spatial;
+		ptr_weaponSpatial = ptr_weapon_spatial;
+		ptr_firingLocationSpatial = ptr_fireLocation_spatial;
 	}
 	
 	void createWorldEntity(Entity* entity, Event_CreateWorld* e)
