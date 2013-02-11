@@ -72,6 +72,9 @@ void HacksComponent::handleHack(AttributePtr<Attribute_Player>& player, XKILL_En
 	case XKILL_Enums::HackType::SPEEDHACK:
 		player->currentSpeed *= 1.5f;
 		break;
+	case XKILL_Enums::HackType::JETHACK:
+		
+		break;
 	default:
 		break;
 	}

@@ -27,6 +27,9 @@ ScoreComponent::~ScoreComponent()
 
 bool ScoreComponent::init()
 {
+	SAFE_DELETE(schedulerTimer_);
+	SAFE_DELETE(cycleTimer_);
+
 	schedulerTimer_ = new Timer(30.0f);
 	cycleTimer_ = new Timer(1.0f);
 
