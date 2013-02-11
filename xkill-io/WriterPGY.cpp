@@ -189,7 +189,7 @@ void WriterPGY::writeAnimations()
 		if(clip)
 		{
 			animationHeader.nameSize_ = clipName.size();
-
+			writeAnimation(clip, clipName, animationHeader, skinnedDataHeader.numBones_);
 		}
 	}
 }
@@ -205,7 +205,7 @@ void WriterPGY::writeSkinnedData(PGYHeaderSkinnedData skinnedDataHeader)
 void WriterPGY::writeAnimation(AnimationClip* animationClip, std::string name, PGYHeaderAnimation animationHeader, int numBones)
 {
 	ofstream_.write(reinterpret_cast<const char*>(&animationHeader), sizeof(animationHeader));
-	ofstream_.write(reinterpret_cast<const char*>(&name), sizeof(name));
+	ofstream_.write(name.c_str(), name.size());
 	
 	for(unsigned int i=0; i<numBones; i++)
 	{
@@ -220,5 +220,5 @@ void WriterPGY::writeBone(BoneAnimation* bone)
 	ofstream_.write(reinterpret_cast<const char*>(&boneHeader), sizeof(boneHeader));
 
 	for(unsigned int i=0; i<boneHeader.numKeyframes_; i++)
-		ofstream_.write(reinterpret_cast<const char*>(&bone->getKeyframes()->at(i)), sizeof(Keyframe));
+		ofstream_.write(reinterpret_cast<const char*>(bone->getKeyframes()->at(i)), sizeof(Keyframe));
 }

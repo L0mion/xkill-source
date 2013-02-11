@@ -18,6 +18,11 @@ BoneAnimation::~BoneAnimation()
 	delete keyframes_;
 }
 
+void BoneAnimation::addKeyframe(Keyframe* keyframe)
+{
+	keyframes_->push_back(keyframe);
+}
+
 void BoneAnimation::interpolate(float time, DirectX::XMFLOAT4X4& matrix) const
 {
 	if(time <= keyframes_->front()->timePosition)
