@@ -4,12 +4,11 @@
 
 #include "dllUtilities.h"
 #include "AttributePointer.h"
-#include "Math.h"
 #include "LightDesc.h"
-#include "MeshDesc.h"
 #include "XKILL_Enums.h"
-#include "DataItem.h"
+#include "MeshDesc.h"
 #include "MeshVertices.h"
+#include "Math.h"
 
 struct DataItem;
 class DataItemList;

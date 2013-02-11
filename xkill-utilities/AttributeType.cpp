@@ -1,10 +1,9 @@
 #include "AttributeType.h"
 #include "AttributeManager.h"
 #include <DirectXMath.h>
-#include <windows.h>
-
 #include "DebugShape.h"
 #include "XKILL_Enums.h"
+#include "DataItem.h"
 
 IAttribute::IAttribute()
 {
@@ -352,8 +351,8 @@ void Attribute_SoundSettings::saveTo( DataItemList* list )
 
 Attribute_Camera::Attribute_Camera()
 {
-	ZeroMemory(&mat_projection, sizeof(mat_projection));
-	ZeroMemory(&mat_view, sizeof(mat_view));
+	mat_projection = Float4x4(0.0f);
+	mat_view = Float4x4(0.0f);
 
 	aspectRatio = 0.785f;
 	fieldOfView = 0.785f; 
@@ -453,8 +452,10 @@ Attribute_Input::Attribute_Input()
 	changeAmmunitionType = false;
 	changeFiringMode = false;
 	lowSensitivity = false;
-	ZeroMemory(&position,sizeof(position));
-	ZeroMemory(&rotation,sizeof(rotation));
+
+	position = Float2(0.0f, 0.0f);
+	rotation = Float2(0.0f, 0.0f);
+
 	DirectX::XMFLOAT3 test;
 }
 Attribute_Input::~Attribute_Input()

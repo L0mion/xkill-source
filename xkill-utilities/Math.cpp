@@ -177,26 +177,29 @@ Float3 Float4::quaternionToVector()
 
 Float4x4::Float4x4()
 {
-		
-	m[0][0] = 0.0f;
-	m[0][1] = 0.0f;
-	m[0][2] = 0.0f;
-	m[0][3] = 0.0f;
+	Float4x4(0.0f);
+}
+Float4x4::Float4x4(float filler)
+{
+	m[0][0] = filler;
+	m[0][1] = filler;
+	m[0][2] = filler;
+	m[0][3] = filler;
 
-	m[1][0] = 0.0f;
-	m[1][1] = 0.0f;
-	m[1][2] = 0.0f;
-	m[1][3] = 0.0f;
+	m[1][0] = filler;
+	m[1][1] = filler;
+	m[1][2] = filler;
+	m[1][3] = filler;
 
-	m[2][0] = 0.0f;
-	m[2][1] = 0.0f;
-	m[2][2] = 0.0f;
-	m[2][3] = 0.0f;
+	m[2][0] = filler;
+	m[2][1] = filler;
+	m[2][2] = filler;
+	m[2][3] = filler;
 
-	m[3][0] = 0.0f;
-	m[3][1] = 0.0f;
-	m[3][2] = 0.0f;
-	m[3][3] = 0.0f;
+	m[3][0] = filler;
+	m[3][1] = filler;
+	m[3][2] = filler;
+	m[3][3] = filler;
 }
 void Float4x4::copy(float* float4x4)
 {
