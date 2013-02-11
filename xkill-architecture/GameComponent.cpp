@@ -216,7 +216,7 @@ void GameComponent::onUpdate(float delta)
 				ptr_player->ptr_camera->fieldOfView =3.14f/4.0f;
 				// If an appropriate spawnpoint was found: spawn at it; otherwise: spawn at origo.
 				AttributePtr<Attribute_PlayerSpawnPoint> ptr_spawnPoint = findUnoccupiedSpawnPoint();
-				if(ptr_spawnPoint.isNotEmpty())
+				if(ptr_spawnPoint.isValid())
 				{
 					AttributePtr<Attribute_Position> ptr_spawnPoint_position = ptr_spawnPoint->ptr_position;
 					ptr_position->position = ptr_spawnPoint_position->position; // set player position attribute
@@ -442,31 +442,6 @@ void GameComponent::onUpdate(float delta)
 		{
 			SEND_EVENT(&Event_RemoveEntity(itrExplosionSphere.ownerId()));
 		}
-	}
-
-	//
-	// Update offset
-	//
-
-	while(itrCamera.hasNext())
-	{
-		AttributePtr<Attribute_Camera> ptr_camera = itrCamera.getNext();
-		AttributePtr<Attribute_Spatial> ptr_spatial = ptr_camera->ptr_spatial;
-
-		// Update rotation quaternion so others can read from it
-		{
-			DirectX::XMMATRIX xm_view = DirectX::XMLoadFloat4x4((DirectX::XMFLOAT4X4*)&ptr_camera->mat_view);
-			xm_view = DirectX::XMMatrixInverse(&DirectX::XMMatrixDeterminant(xm_view), xm_view);
-			DirectX::XMVECTOR xv_rot = DirectX::XMQuaternionRotationMatrix(xm_view);
-			xv_rot = DirectX::XMQuaternionNormalize(xv_rot);
-			DirectX::XMStoreFloat4((DirectX::XMFLOAT4*)&ptr_spatial->rotation, xv_rot);
-		}
-	}
-
-	while(itrOffset.hasNext())
-	{
-		AttributePtr<Behavior_Offset> ptr_offset = itrOffset.getNext();
-		ptr_offset->updateOffset();
 	}
 }
 
@@ -875,7 +850,7 @@ AttributePtr<Attribute_PlayerSpawnPoint> GameComponent::findUnoccupiedSpawnPoint
 	}
 
 	// Reset player spawn point timer.
-	if(ptr_found_spawnPoint.isNotEmpty())
+	if(ptr_found_spawnPoint.isValid())
 		ptr_found_spawnPoint->secondsSinceLastSpawn = 0.0f;
 
 	return ptr_found_spawnPoint;

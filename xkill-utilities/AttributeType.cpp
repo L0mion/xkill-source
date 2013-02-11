@@ -400,6 +400,16 @@ void Attribute_Camera::saveTo( DataItemList* list )
 	list->get(&look);
 }
 
+void Attribute_Camera::syncSpatialWithAim()
+{
+	// Update rotation quaternion so others can read from it
+	DirectX::XMMATRIX xm_view = DirectX::XMLoadFloat4x4((DirectX::XMFLOAT4X4*)&mat_view);
+	xm_view = DirectX::XMMatrixInverse(&DirectX::XMMatrixDeterminant(xm_view), xm_view);
+	DirectX::XMVECTOR xv_rot = DirectX::XMQuaternionRotationMatrix(xm_view);
+	xv_rot = DirectX::XMQuaternionNormalize(xv_rot);
+	DirectX::XMStoreFloat4((DirectX::XMFLOAT4*)&ptr_spatial->rotation, xv_rot);
+}
+
 Attribute_SplitScreen::Attribute_SplitScreen()
 {
 	ssTopLeftX = 0;
@@ -1039,8 +1049,32 @@ void Behavior_Offset::updateOffset()
 {
 	using namespace DirectX;
 
+	if(!ptr_parent_spatial_rotation.isEmpty())
+	{
+		// Fetch attributes
+		Float4 parent_rot = ptr_parent_spatial_rotation->rotation;
+		Float4 own_rot = ptr_spatial->rotation;
+		XMVECTOR xv_own_rot =  XMLoadFloat4(( XMFLOAT4*)&own_rot);
+		//
+		// Add rotation offset relative to parent
+		//
+
+		XMVECTOR xv_rot_offset =  XMLoadFloat4(( XMFLOAT4*)&offset_rotation);
+		XMVECTOR parent_xv_rot =  XMLoadFloat4(( XMFLOAT4*)&parent_rot);
+		xv_rot_offset =  XMQuaternionMultiply(xv_rot_offset, parent_xv_rot);
+
+
+
+		//// Slerp interpolate to smooth out moment
+		//float MAGIC_SLERP_NUMBER = 1.0f;
+		//xv_rot_offset = XMQuaternionSlerp(xv_rot_offset, xv_own_rot, MAGIC_SLERP_NUMBER*ATTRIBUTE_MANAGER->settings->trueDeltaTime);
+
+		Float4 rot_offset;  XMStoreFloat4(( XMFLOAT4*)&rot_offset, xv_rot_offset);
+		ptr_spatial->rotation = rot_offset;
+	}
+
 	// Make sure we have a parent
-	if(ptr_parent_spatial_position.isNotEmpty())
+	if(!ptr_parent_spatial_position.isEmpty())
 	{
 		// Fetch attributes from parent
 		Float4 parent_rot = ptr_parent_spatial_position->rotation;
@@ -1063,32 +1097,9 @@ void Behavior_Offset::updateOffset()
 
 		pos_offset = parent_pos + pos_offset;
 		ptr_spatial->ptr_position->position = pos_offset;
-
 	}
 
-	if(ptr_parent_spatial_rotation.isNotEmpty())
-	{
-		// Fetch attributes
-		Float4 parent_rot = ptr_parent_spatial_rotation->rotation;
-		Float4 own_rot = ptr_spatial->rotation;
-		XMVECTOR xv_own_rot =  XMLoadFloat4(( XMFLOAT4*)&own_rot);
-		//
-		// Add rotation offset relative to parent
-		//
-
-		 XMVECTOR xv_rot_offset =  XMLoadFloat4(( XMFLOAT4*)&offset_rotation);
-		 XMVECTOR parent_xv_rot =  XMLoadFloat4(( XMFLOAT4*)&parent_rot);
-		xv_rot_offset =  XMQuaternionMultiply(xv_rot_offset, parent_xv_rot);
-		
-
-		
-		//// Slerp interpolate to smooth out moment
-		//float MAGIC_SLERP_NUMBER = 1.0f;
-		//xv_rot_offset = XMQuaternionSlerp(xv_rot_offset, xv_own_rot, MAGIC_SLERP_NUMBER*ATTRIBUTE_MANAGER->settings->trueDeltaTime);
-
-		Float4 rot_offset;  XMStoreFloat4(( XMFLOAT4*)&rot_offset, xv_rot_offset);
-		ptr_spatial->rotation = rot_offset;
-	}
+	
 }
 
 DataItemList* Behavior_Offset::getDataList()
