@@ -47,3 +47,11 @@ std::vector<BoneAnimation*>* AnimationClip::getBoneAnimations() const
 {
 	return boneAnimations_;
 }
+
+void AnimationClip::setBoneAnimations(std::vector<BoneAnimation*>* boneAnimations)
+{
+	if(boneAnimations_)
+		delete boneAnimations_;
+
+	boneAnimations_ = boneAnimations;
+}

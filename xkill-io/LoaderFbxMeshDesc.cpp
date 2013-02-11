@@ -71,11 +71,12 @@ void LoaderFbxMeshDesc::addOffsetMatrix(Float4x4 offsetMatrix)
 	offsetMatrices_.push_back(offsetMatrix);
 }
 
-std::vector<VertexDesc> LoaderFbxMeshDesc::createVertices()
+void LoaderFbxMeshDesc::createVertices(std::vector<VertexDesc>& vertices, std::vector<unsigned int>& indexBuffer)
 {
-	std::vector<VertexDesc> vertices;
+//	std::vector<VertexDesc> vertices;
 	vertices = assembleVertexDesc();
 	vertices = indexVertexDesc(vertices);
+	indexBuffer = indices_;
 
 	if(vertexBoneIndices_.size() > 0 && vertexBoneWeights_.size() > 0)
 	{
@@ -84,7 +85,7 @@ std::vector<VertexDesc> LoaderFbxMeshDesc::createVertices()
 		mapBoneData(&vertices, indices);
 	}
 
-	return vertices;
+	//return vertices;
 }
 std::vector<VertexDesc> LoaderFbxMeshDesc::assembleVertexDesc()
 {
@@ -302,6 +303,11 @@ void LoaderFbxMeshDesc::setVertexBoneWeights(std::vector<std::vector<float>> ver
 	vertexBoneWeights_ = vertexBoneWeights;
 }
 
+void LoaderFbxMeshDesc::setOffsetMatrix(unsigned int index, Float4x4 offsetMatrix)
+{
+	if(index < offsetMatrices_.size())
+		offsetMatrices_[index] = offsetMatrix;
+}
 void LoaderFbxMeshDesc::setOffsetMatrices(std::vector<Float4x4> offsetMatrices)
 {
 	offsetMatrices_ = offsetMatrices;

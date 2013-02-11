@@ -135,6 +135,7 @@ struct DLL_U Float4x4
     };
 
 	Float4x4();
+	Float4x4(float filler);
 	void setIdentity();
 	bool getInverse(Float4x4& inverseOut);
 	Float4 multiply(const Float4& vector);
