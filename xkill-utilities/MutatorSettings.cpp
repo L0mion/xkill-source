@@ -57,10 +57,10 @@ void MutatorSettings::initStandardAmmunition()
 	ammo->explosionSphereFinalRadius = 0.0f;
 	ammo->explosionSphereExplosionDuration = 0.0f;
 	ammo->explosive			= false;
-	ammo->nrOfProjectiles	= 1;
-	ammo->spawnVariation	= 0.0f;
+	ammo->nrOfProjectilesPerSalvo	= 1;
+	ammo->displacementSphereRadius	= 0.0f;
 	ammo->speed				= 60.0f;
-	ammo->spread			= 0.0f;
+	ammo->spreadConeRadius			= 0.0f;
 	ammo->totalNrOfShots	= 1000;
 	ammo->velocityVariation	= 0.0f;
 
@@ -72,10 +72,10 @@ void MutatorSettings::initStandardAmmunition()
 	ammo->explosionSphereFinalRadius = 0.0f;
 	ammo->explosionSphereExplosionDuration = 0.0f;
 	ammo->explosive			= false;
-	ammo->nrOfProjectiles	= 10;
-	ammo->spawnVariation	= 0.02f;
+	ammo->nrOfProjectilesPerSalvo	= 10;
+	ammo->displacementSphereRadius	= 0.02f;
 	ammo->speed				= 30.0f;
-	ammo->spread			= 0.1f;
+	ammo->spreadConeRadius			= 0.1f;
 	ammo->totalNrOfShots	= 1000;
 	ammo->velocityVariation	= 0.5f;
 
@@ -87,10 +87,10 @@ void MutatorSettings::initStandardAmmunition()
 	ammo->explosionSphereFinalRadius = 10.0f;
 	ammo->explosionSphereExplosionDuration = 1.0f;
 	ammo->explosive			= true;
-	ammo->nrOfProjectiles	= 1;
-	ammo->spawnVariation	= 0.0f;
+	ammo->nrOfProjectilesPerSalvo	= 1;
+	ammo->displacementSphereRadius	= 0.0f;
 	ammo->speed				= 5.0f;
-	ammo->spread			= 0.0f;
+	ammo->spreadConeRadius			= 0.0f;
 	ammo->totalNrOfShots	= 1000;
 	ammo->velocityVariation	= 0.0f;
 }

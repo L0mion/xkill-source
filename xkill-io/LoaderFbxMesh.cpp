@@ -472,7 +472,7 @@ void LoaderFbxMesh::parseLinkHierarchy(FbxNode* rootNode, std::vector<FbxNode*>*
 {
 	nodes->push_back(rootNode);
 	parentIndices->push_back(-1);
-	for(int nodeIndex=0; nodeIndex<nodes->size(); nodeIndex++)
+	for(unsigned int nodeIndex=0; nodeIndex<nodes->size(); nodeIndex++)
 	{
 		for(int childIndex=0; childIndex<nodes->at(nodeIndex)->GetChildCount(); childIndex++)
 		{

@@ -34,13 +34,13 @@ void Menu_Ammo::setSettingsMenu()	// TODO: Set good values for the sliders and m
 	
 	ui->horizontalSlider_Ammo_ExplosionInitialRadius->setValue(static_cast<int>(ammo->explosionSphereInitialRadius * 100.0f));
 	
-	ui->horizontalSlider_Ammo_NrOfProjectiles->setValue(ammo->nrOfProjectiles);
+	ui->horizontalSlider_Ammo_NrOfProjectiles->setValue(ammo->nrOfProjectilesPerSalvo);
 	ui->horizontalSlider_Ammo_Speed->setValue(static_cast<int>(ammo->speed));
-	ui->horizontalSlider_Ammo_Spread->setValue(static_cast<int>(ammo->spread * 126.6f));
+	ui->horizontalSlider_Ammo_Spread->setValue(static_cast<int>(ammo->spreadConeRadius * 126.6f));
 	ui->horizontalSlider_Ammo_VelocitVariation->setValue(static_cast<int>(ammo->velocityVariation * 100.0f));
 	ui->groupBox_Ammo_Explosive->setChecked(ammo->explosive);
 
-	ui->doubleSpinBox_Ammo_Spread->setValue(ammo->spread);
+	ui->doubleSpinBox_Ammo_Spread->setValue(ammo->spreadConeRadius);
 	ui->doubleSpinBox_Ammo_VelocityVariation->setValue(ammo->velocityVariation);
 	ui->doubleSpinBox_Ammo_ExplosionInitialRadius->setValue(ammo->explosionSphereInitialRadius);
 }
@@ -52,12 +52,12 @@ void Menu_Ammo::settingsMenuUpdated()
 	ammo->damage = static_cast<float>(ui->horizontalSlider_Ammo_Damage->value());
 	ammo->explosionSphereInitialRadius = static_cast<float>(ui->horizontalSlider_Ammo_ExplosionInitialRadius->value()) * 0.01f;
 	ammo->explosive = ui->groupBox_Ammo_Explosive->isChecked();
-	ammo->nrOfProjectiles = ui->horizontalSlider_Ammo_NrOfProjectiles->value();
+	ammo->nrOfProjectilesPerSalvo = ui->horizontalSlider_Ammo_NrOfProjectiles->value();
 	ammo->speed = static_cast<float>(ui->horizontalSlider_Ammo_Speed->value());
-	ammo->spread = static_cast<float>(ui->horizontalSlider_Ammo_Spread->value()) * 0.0079f;
+	ammo->spreadConeRadius = static_cast<float>(ui->horizontalSlider_Ammo_Spread->value()) * 0.0079f;
 	ammo->velocityVariation = static_cast<float>(ui->horizontalSlider_Ammo_VelocitVariation->value()) * 0.01f;
 
-	ui->doubleSpinBox_Ammo_Spread->setValue(ammo->spread);
+	ui->doubleSpinBox_Ammo_Spread->setValue(ammo->spreadConeRadius);
 	ui->doubleSpinBox_Ammo_VelocityVariation->setValue(ammo->velocityVariation);
 	ui->doubleSpinBox_Ammo_ExplosionInitialRadius->setValue(ammo->explosionSphereInitialRadius);
 }

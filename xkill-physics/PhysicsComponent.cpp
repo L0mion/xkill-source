@@ -143,7 +143,7 @@ void PhysicsComponent::onUpdate(float delta)
 			//Calculate player aiming ray
 			Entity* playerEntity = itrPhysics.ownerAt(physicsAttributeIndex);
 			std::vector<int> rayttributeId = playerEntity->getAttributes(ATTRIBUTE_RAY);
-			for(int i=0;i<rayttributeId.size();i++)
+			for(unsigned int i=0;i<rayttributeId.size();i++)
 			{
 				AttributePtr<Attribute_Ray> ray = itrRay.at(rayttributeId.at(i));
 				btVector3 from = convert(ray->from);
