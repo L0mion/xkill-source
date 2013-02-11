@@ -154,7 +154,7 @@ void PhysicsComponent::onUpdate(float delta)
 
 				//btCollisionWorld::ClosestRayResultCallback closestResults(from, to);
 				closestResults.m_collisionFilterGroup = ptr_physics->PhysicsAttributeType::RAY;
-				closestResults.m_collisionFilterMask = ptr_physics->PhysicsAttributeType::PLAYER;
+				closestResults.m_collisionFilterMask = ptr_physics->PhysicsAttributeType::PLAYER | ptr_physics->PhysicsAttributeType::WORLD;
 
 				//Check
 				//PLAYER is world
@@ -428,9 +428,9 @@ void PhysicsComponent::synchronizeWithAttributes(AttributePtr<Attribute_Physics>
 		{
 			if(physicsObjects_->at(physicsAttributeIndex)->init(physicsAttributeIndex, ptr_physics->collisionFilterGroup) == true)
 			{
-				//dynamicsWorld_->addRigidBody(physicsObjects_->at(physicsAttributeIndex), ptr_physics->collisionFilterGroup, ptr_physics->collisionFilterMask);
+				dynamicsWorld_->addRigidBody(physicsObjects_->at(physicsAttributeIndex), ptr_physics->collisionFilterGroup, ptr_physics->collisionFilterMask);
 
-				dynamicsWorld_->addRigidBody(physicsObjects_->at(physicsAttributeIndex));
+				//dynamicsWorld_->addRigidBody(physicsObjects_->at(physicsAttributeIndex));
 
 				//Per object gravity must be set after "addRigidBody"
 				if(!physicsObjects_->at(physicsAttributeIndex)->isStaticOrKinematicObject())
