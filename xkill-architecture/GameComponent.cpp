@@ -546,7 +546,7 @@ void collision_applyDamage(Entity* entity1, Entity* entity2)
 					// Make projectiles stick to player
 					//
 
-					collision_stickTogether(entity1, entity2);
+					//collision_stickTogether(entity1, entity2);
 				}
 			}
 		}
