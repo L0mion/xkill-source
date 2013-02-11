@@ -1,4 +1,5 @@
 #include "AttributeType.h"
+#include "AttributeManager.h"
 #include <DirectXMath.h>
 #include <windows.h>
 
@@ -12,6 +13,18 @@ IAttribute::~IAttribute()
 {
 }
 
+DataItemList* IAttribute::getDataList()
+{
+	DataItemList* list = new DataItemList();
+	list->add_NotSupported("NOT_IMPLEMENTED");
+	return list;
+}
+
+void IAttribute::saveTo( DataItemList* list )
+{
+	// DO NOTHING
+}
+
 Attribute_Position::Attribute_Position()
 {
 	position.x = 0.0f;
@@ -20,6 +33,18 @@ Attribute_Position::Attribute_Position()
 }
 Attribute_Position::~Attribute_Position()
 {
+}
+
+DataItemList* Attribute_Position::getDataList()
+{
+	DataItemList* list = new DataItemList();
+	list->add(position, "position");
+	return list;
+}
+
+void Attribute_Position::saveTo( DataItemList* list )
+{
+	list->get(&position);
 }
 
 Attribute_Spatial::Attribute_Spatial()
@@ -37,6 +62,22 @@ Attribute_Spatial::~Attribute_Spatial()
 {
 }
 
+DataItemList* Attribute_Spatial::getDataList()
+{
+	DataItemList* list = new DataItemList();
+	list->add(&ptr_position,		"ptr_position");
+	list->add(rotation,				"rotation");
+	list->add(scale,				"scale");
+	return list;
+}
+
+void Attribute_Spatial::saveTo( DataItemList* list )
+{
+	list->get(&ptr_position);
+	list->get(&rotation);
+	list->get(&scale);
+}
+
 Attribute_Render::Attribute_Render()
 {
 	transparent			= false;
@@ -47,6 +88,32 @@ Attribute_Render::Attribute_Render()
 }
 Attribute_Render::~Attribute_Render()
 {
+}
+
+DataItemList* Attribute_Render::getDataList()
+{
+	DataItemList* list = new DataItemList();
+	list->add(&ptr_spatial,			"ptr_spatial");
+	list->add(&ptr_bounding,		"ptr_bounding");
+	list->add(meshID,				"meshID");
+	list->add(textureID,			"textureID");
+	list->add(transparent,			"transparent");
+	list->add(tessellation,			"tessellation");
+	list->add(culling.values[0],	"culling1");
+	list->add(culling.values[1],	"culling2");
+	return list;
+}
+
+void Attribute_Render::saveTo( DataItemList* list )
+{
+	list->get(&ptr_spatial);
+	list->get(&ptr_bounding);
+	list->get(&meshID);
+	list->get(&textureID);
+	list->get(&transparent);
+	list->get(&tessellation);
+	list->get(&culling.values[0]);
+	list->get(&culling.values[1]);
 }
 
 Attribute_Physics::Attribute_Physics()
@@ -73,6 +140,37 @@ Attribute_Physics::~Attribute_Physics()
 {
 }
 
+DataItemList* Attribute_Physics::getDataList()
+{
+	DataItemList* list = new DataItemList();
+	list->add(&ptr_spatial,					"ptr_spatial");
+	list->add(&ptr_render,					"ptr_render");
+	list->add(linearVelocity,				"linearVelocity");
+	list->add(angularVelocity,				"angularVelocity");
+	list->add(gravity,						"gravity");
+	list->add(mass,							"mass");
+	list->add(meshID,						"meshID");
+	list->add(collisionFilterMask,			"collisionFilterMask");
+	list->add(collisionResponse,			"collisionResponse");
+	list->add(reloadDataIntoBulletPhysics,	"reloadDataIntoBulletPhysics");
+
+	return list;
+}
+
+void Attribute_Physics::saveTo( DataItemList* list )
+{
+	list->get(&ptr_spatial);
+	list->get(&ptr_render);
+	list->get(&linearVelocity);
+	list->get(&angularVelocity);
+	list->get(&gravity);
+	list->get(&mass);
+	list->get(&meshID);
+	list->get(&collisionFilterMask);
+	list->get(&collisionResponse);
+	list->get(&reloadDataIntoBulletPhysics);
+}
+
 Attribute_Projectile::Attribute_Projectile()
 {
 	entityIdOfCreator = -1;
@@ -80,9 +178,27 @@ Attribute_Projectile::Attribute_Projectile()
 	currentLifeTimeLeft = totalLifeTime;
 	ammunitionType = XKILL_Enums::AmmunitionType::BULLET;
 	firingModeType = XKILL_Enums::FiringModeType::SEMI;
+	scatterDropped = false;
 }
 Attribute_Projectile::~Attribute_Projectile()
 {
+}
+
+DataItemList* Attribute_Projectile::getDataList()
+{
+	DataItemList* list = new DataItemList();
+	list->add(&ptr_physics,	"ptr_physics");
+	list->add(entityIdOfCreator,					"entityIdOfCreator");
+	list->add(currentLifeTimeLeft,					"currentLifeTimeLeft");
+
+	return list;
+}
+
+void Attribute_Projectile::saveTo( DataItemList* list )
+{
+	list->get(&ptr_physics);
+	list->get(&entityIdOfCreator);
+	list->get(&currentLifeTimeLeft);
 }
 
 Attribute_Light_Dir::Attribute_Light_Dir()
@@ -93,6 +209,27 @@ Attribute_Light_Dir::~Attribute_Light_Dir()
 {
 	//Do nothing.
 }
+
+DataItemList* Attribute_Light_Dir::getDataList()
+{
+	DataItemList* list = new DataItemList();
+
+	list->add(lightDir.ambient,		"ambient");
+	list->add(lightDir.diffuse,		"diffuse");
+	list->add(lightDir.specular,	"specular");
+	list->add(lightDir.direction,	"direction");
+
+	return list;
+}
+
+void Attribute_Light_Dir::saveTo( DataItemList* list )
+{
+	list->get(&lightDir.ambient);
+	list->get(&lightDir.diffuse);
+	list->get(&lightDir.specular);
+	list->get(&lightDir.direction);
+}
+
 Attribute_Light_Point::Attribute_Light_Point()
 {
 
@@ -101,6 +238,33 @@ Attribute_Light_Point::~Attribute_Light_Point()
 {
 	//Do nothing.
 }
+
+DataItemList* Attribute_Light_Point::getDataList()
+{
+	DataItemList* list = new DataItemList();
+
+	list->add(&ptr_position, 			"ptr_position");
+	list->add(lightPoint.ambient,		"ambient");
+	list->add(lightPoint.diffuse,		"diffuse");
+	list->add(lightPoint.specular,		"specular");
+	//list->add(lightPoint.pos,			"pos");
+	list->add(lightPoint.range,			"range");
+	list->add(lightPoint.attenuation,	"attenuation");
+
+	return list;
+}
+
+void Attribute_Light_Point::saveTo( DataItemList* list )
+{
+	list->get(&ptr_position);
+	list->get(&lightPoint.ambient);
+	list->get(&lightPoint.diffuse);
+	list->get(&lightPoint.specular);
+	//list->get(&lightPoint.pos);
+	list->get(&lightPoint.range);
+	list->get(&lightPoint.attenuation);
+}
+
 Attribute_Light_Spot::Attribute_Light_Spot()
 {
 
@@ -110,11 +274,55 @@ Attribute_Light_Spot::~Attribute_Light_Spot()
 	//Do nothing.
 }
 
+DataItemList* Attribute_Light_Spot::getDataList()
+{
+	DataItemList* list = new DataItemList();
+
+	list->add(&ptr_position, 			"ptr_position");
+	list->add(lightSpot.ambient,		"ambient");
+	list->add(lightSpot.diffuse,		"diffuse");
+	list->add(lightSpot.specular,		"specular");
+	//list->add(lightSpot.pos,			"pos");
+	list->add(lightSpot.range,			"range");
+	list->add(lightSpot.direction,		"direction");
+	list->add(lightSpot.spotPow,		"spotPow");
+	list->add(lightSpot.attenuation,	"attenuation");
+
+	return list;
+}
+
+void Attribute_Light_Spot::saveTo( DataItemList* list )
+{
+	list->get(&ptr_position);
+	list->get(&lightSpot.ambient);
+	list->get(&lightSpot.diffuse);
+	list->get(&lightSpot.specular);
+	//list->get(&lightSpot.pos);
+	list->get(&lightSpot.range);
+	list->get(&lightSpot.direction);
+	list->get(&lightSpot.spotPow);
+	list->get(&lightSpot.attenuation);
+}
+
 Attribute_Sound::Attribute_Sound()
 {
 }
 Attribute_Sound::~Attribute_Sound()
 {
+}
+
+DataItemList* Attribute_Sound::getDataList()
+{
+	DataItemList* list = new DataItemList();
+
+	list->add(&ptr_position, "ptr_position");
+
+	return list;
+}
+
+void Attribute_Sound::saveTo( DataItemList* list )
+{
+	list->get(&ptr_position);
 }
 
 Attribute_SoundSettings::Attribute_SoundSettings()
@@ -124,6 +332,22 @@ Attribute_SoundSettings::Attribute_SoundSettings()
 }
 Attribute_SoundSettings::~Attribute_SoundSettings()
 {
+}
+
+DataItemList* Attribute_SoundSettings::getDataList()
+{
+	DataItemList* list = new DataItemList();
+
+	list->add(soundMuted, "Sound Muted");
+	list->add(soundVolume, "Sound Volume");
+
+	return list;
+}
+
+void Attribute_SoundSettings::saveTo( DataItemList* list )
+{
+	list->get(&soundMuted);
+	list->get(&soundVolume);
 }
 
 Attribute_Camera::Attribute_Camera()
@@ -144,6 +368,38 @@ Attribute_Camera::~Attribute_Camera()
 {
 }
 
+DataItemList* Attribute_Camera::getDataList()
+{
+	DataItemList* list = new DataItemList();
+
+	list->add(&ptr_spatial,		"ptr_spatial");
+	list->add(mat_view,			"mat_view");
+	list->add(mat_projection,	"mat_projection");
+	list->add(fieldOfView,		"fieldOfView");
+	list->add(aspectRatio,		"aspectRatio");
+	list->add(zNear,			"zNear");
+	list->add(zFar,				"zFar");
+	list->add(up,				"up");
+	list->add(right,			"right");
+	list->add(look,				"look");
+
+	return list;
+}
+
+void Attribute_Camera::saveTo( DataItemList* list )
+{
+	list->get(&ptr_spatial);
+	list->get(&mat_view);
+	list->get(&mat_projection);
+	list->get(&fieldOfView);
+	list->get(&aspectRatio);
+	list->get(&zNear);
+	list->get(&zFar);
+	list->get(&up);
+	list->get(&right);
+	list->get(&look);
+}
+
 Attribute_SplitScreen::Attribute_SplitScreen()
 {
 	ssTopLeftX = 0;
@@ -155,6 +411,35 @@ Attribute_SplitScreen::Attribute_SplitScreen()
 Attribute_SplitScreen::~Attribute_SplitScreen()
 {
 	//Do nothing.
+}
+
+void Attribute_SplitScreen::saveTo( DataItemList* list )
+{
+	list->get(&ptr_camera);
+	list->get(&ptr_player);
+	list->get(&ssTopLeftX);
+	list->get(&ssTopLeftY);
+	list->get(&ssWidth);
+	list->get(&ssHeight);
+}
+
+DataItemList* Attribute_SplitScreen::getDataList()
+{
+	DataItemList* list = new DataItemList();
+
+	list->add(&ptr_camera,	"ptr_camera");
+	list->add(&ptr_player,	"ptr_player");
+	list->add(ssTopLeftX,	"ssTopLeftX");
+	list->add(ssTopLeftY,	"ssTopLeftY");
+	list->add(ssWidth,		"ssWidth");
+	list->add(ssHeight,		"ssHeight");
+
+	return list;
+}
+
+float Attribute_SplitScreen::getAspectRatio()
+{
+	return (float)ssWidth/(float)ssHeight;
 }
 
 Attribute_Input::Attribute_Input()
@@ -176,12 +461,50 @@ Attribute_Input::~Attribute_Input()
 {
 }
 
+DataItemList* Attribute_Input::getDataList()
+{
+	DataItemList* list = new DataItemList();
+
+	list->add(&ptr_physics,			"ptr_physics");
+	list->add(position,				"position");
+	list->add(rotation,				"rotation");
+	list->add(fire,					"fire");
+	list->add(changeAmmunitionType,	"changeAmmunitionType");
+	list->add(changeFiringMode,		"changeFiringMode");
+
+	return list;
+}
+
+void Attribute_Input::saveTo( DataItemList* list )
+{
+	list->get(&ptr_physics);
+	list->get(&position);
+	list->get(&rotation);
+	list->get(&fire);
+	list->get(&changeAmmunitionType);
+	list->get(&changeFiringMode);
+}
+
 Attribute_InputDevice::Attribute_InputDevice()
 {
 	device = nullptr;
 }
 Attribute_InputDevice::~Attribute_InputDevice()
 {
+}
+
+DataItemList* Attribute_InputDevice::getDataList()
+{
+	DataItemList* list = new DataItemList();
+
+	list->add_NotSupported("device");
+
+	return list;
+}
+
+void Attribute_InputDevice::saveTo( DataItemList* list )
+{
+	list->get_NotSupported();
 }
 
 int Attribute_Player::nextId = 0;
@@ -218,6 +541,42 @@ void Attribute_Player::clean()
 	nextId = 0;
 }
 
+void Attribute_Player::saveTo( DataItemList* list )
+{
+	list->get(&ptr_render);
+	list->get(&ptr_input);
+	list->get(&ptr_camera);
+	list->get(&ptr_health);
+	list->get(&ptr_weaponStats);
+	list->get(&id);
+	list->get(&priority);
+	list->get(&cycleSteals);
+	list->get(&totalExecutionTime);
+	list->get(&currentSpeed);
+	list->get(&walkSpeed);
+	list->get(&sprintSpeed);
+}
+
+DataItemList* Attribute_Player::getDataList()
+{
+	DataItemList* list = new DataItemList();
+
+	list->add(&ptr_render,			"ptr_render");
+	list->add(&ptr_input,			"ptr_input");
+	list->add(&ptr_camera,			"ptr_camera");
+	list->add(&ptr_health,			"ptr_health");
+	list->add(&ptr_weaponStats,		"ptr_weaponStats");
+	list->add(id,					"id");
+	list->add(priority,				"priority");
+	list->add(cycleSteals,			"cycleSteals");
+	list->add(totalExecutionTime,	"totalExecutionTime");
+	list->add(currentSpeed,			"priority");
+	list->add(walkSpeed,			"walkSpeed");
+	list->add(sprintSpeed,			"sprintSpeed");
+
+	return list;
+}
+
 Attribute_Mesh::Attribute_Mesh()
 {
 	this->meshID		= 0;
@@ -250,6 +609,24 @@ void Attribute_Mesh::clean()
 	//}
 }
 
+void Attribute_Mesh::saveTo( DataItemList* list )
+{
+	list->get(&meshID);
+	list->get_NotSupported();
+	list->get(&dynamic);
+}
+
+DataItemList* Attribute_Mesh::getDataList()
+{
+	DataItemList* list = new DataItemList();
+
+	list->add(meshID,		"meshID");
+	list->add_NotSupported(	"mesh");
+	list->add(dynamic,		"dynamic");
+
+	return list;
+}
+
 Attribute_Health::Attribute_Health()
 {
 	maxHealth = 100.0f;
@@ -260,12 +637,44 @@ Attribute_Health::~Attribute_Health()
 {
 }
 
+void Attribute_Health::saveTo( DataItemList* list )
+{
+	list->get(&maxHealth);
+	list->get(&health);
+}
+
+DataItemList* Attribute_Health::getDataList()
+{
+	DataItemList* list = new DataItemList();
+
+	list->add(maxHealth,	"maxHealth");
+	list->add(health,		"health");
+
+	return list;
+}
+
 Attribute_Damage::Attribute_Damage()
 {
 	damage = 1.0f;
 }
 Attribute_Damage::~Attribute_Damage()
 {
+}
+
+void Attribute_Damage::saveTo( DataItemList* list )
+{
+	list->get(&damage);
+	list->get(&owner_entityID);
+}
+
+DataItemList* Attribute_Damage::getDataList()
+{
+	DataItemList* list = new DataItemList();
+
+	list->add(damage,			"damage");
+	list->add(owner_entityID,	"owner_entityID");
+
+	return list;
 }
 
 Attribute_PlayerSpawnPoint::Attribute_PlayerSpawnPoint()
@@ -275,6 +684,24 @@ Attribute_PlayerSpawnPoint::Attribute_PlayerSpawnPoint()
 }
 Attribute_PlayerSpawnPoint::~Attribute_PlayerSpawnPoint()
 {
+}
+
+void Attribute_PlayerSpawnPoint::saveTo( DataItemList* list )
+{
+	list->get(&ptr_position);
+	list->get(&secondsSinceLastSpawn);
+	list->get(&spawnArea);
+}
+
+DataItemList* Attribute_PlayerSpawnPoint::getDataList()
+{
+	DataItemList* list = new DataItemList();
+
+	list->add(&ptr_position, "ptr_position");
+	list->add(secondsSinceLastSpawn,	"secondsSinceLastSpawn");
+	list->add(spawnArea,			"spawnArea");
+
+	return list;
 }
 
 Attribute_PickupablesSpawnPoint::Attribute_PickupablesSpawnPoint()
@@ -290,12 +717,61 @@ Attribute_PickupablesSpawnPoint::~Attribute_PickupablesSpawnPoint()
 {
 }
 
+void Attribute_PickupablesSpawnPoint::saveTo( DataItemList* list )
+{
+	list->get(&ptr_position);
+	//list->get(&spawnPickupableType);
+	list->get(&spawnDelayInSeconds);
+	list->get(&secondsSinceLastSpawn);
+	list->get(&secondsSinceLastPickup);
+	list->get(&maxNrOfExistingSpawnedPickupables);
+	list->get(&currentNrOfExistingSpawnedPickupables);
+}
+
+DataItemList* Attribute_PickupablesSpawnPoint::getDataList()
+{
+	DataItemList* list = new DataItemList();
+
+	list->add(&ptr_position, "ptr_position");
+	//list->add(spawnPickupableType, "spawnPickupableType");
+	list->add(spawnDelayInSeconds, "spawnDelayInSeconds");
+	list->add(secondsSinceLastSpawn, "secondsSinceLastSpawn");
+	list->add(secondsSinceLastPickup, "secondsSinceLastPickup");
+	list->add(maxNrOfExistingSpawnedPickupables, "maxNrOfExistingSpawnedPickupables");
+	list->add(currentNrOfExistingSpawnedPickupables, "currentNrOfExistingSpawnedPickupables");
+
+
+	return list;
+}
+
 Attribute_Pickupable::Attribute_Pickupable()
 {
 	pickupableType = XKILL_Enums::PickupableType::MEDKIT;
 }
 Attribute_Pickupable::~Attribute_Pickupable()
 {
+}
+
+void Attribute_Pickupable::saveTo( DataItemList* list )
+{
+	list->get(&ptr_position);
+	list->get(&ptr_physics);
+	list->get(&ptr_pickupablesSpawnPoint_creator);
+	//list->get_AttributePointer(&pickupableType);
+	list->get(&amount);
+}
+
+DataItemList* Attribute_Pickupable::getDataList()
+{
+	DataItemList* list = new DataItemList();
+
+	list->add(&ptr_position, 						"ptr_position");
+	list->add(&ptr_physics, 							"ptr_physics");
+	list->add(&ptr_pickupablesSpawnPoint_creator, 	"ptr_creatorPickupablesSpawnPoint");
+	//list->add_AttributePointer(pickupableType, "pickupableType");
+	list->add(amount, "amount");
+
+	return list;
 }
 
 #include "WeaponStructs.h"
@@ -522,8 +998,47 @@ Attribute_ExplosionSphere::~Attribute_ExplosionSphere()
 {
 }
 
+DataItemList* Attribute_ExplosionSphere::getDataList()
+{
+	DataItemList* list = new DataItemList();
+	list->add(&ptr_physics, "ptr_physics");;
+	list->add(currentLifeTimeLeft,	"currentLifeTimeLeft");
+	return list;
+}
+
+void Attribute_ExplosionSphere::saveTo( DataItemList* list )
+{
+	list->get(&ptr_physics);
+	list->get(&currentLifeTimeLeft);
+}
+
+Attribute_Ray::Attribute_Ray()
+{
+	from = Float3(0.0f, 0.0f, 0.0f);
+	to = Float3(0.0f, 0.0f, 0.0f);
+}
+Attribute_Ray::~Attribute_Ray()
+{
+}
+
+DataItemList* Attribute_Ray::getDataList()
+{
+	DataItemList* list = new DataItemList();
+	list->add(&from, "from");;
+	list->add(&to,	"to");
+	return list;
+}
+
+void Attribute_Ray::saveTo( DataItemList* list )
+{
+	list->get(&from);
+	list->get(&to);
+}
+
 void Behavior_Offset::updateOffset()
 {
+	using namespace DirectX;
+
 	// Make sure we have a parent
 	if(ptr_parent_spatial_position.isNotEmpty())
 	{
@@ -536,10 +1051,10 @@ void Behavior_Offset::updateOffset()
 		// Add translation offset relative to parent
 		//
 
-		DirectX::XMVECTOR xv_pos = DirectX::XMLoadFloat3((DirectX::XMFLOAT3*)&offset_position);
-		DirectX::XMVECTOR parent_xv_rot = DirectX::XMLoadFloat4((DirectX::XMFLOAT4*)&parent_rot);
-		DirectX::XMVECTOR xv_pos_offset = DirectX::XMVector3Rotate(xv_pos, parent_xv_rot);
-		Float3 pos_offset; DirectX::XMStoreFloat3((DirectX::XMFLOAT3*)&pos_offset, xv_pos_offset);
+		XMVECTOR xv_pos = XMLoadFloat3(( XMFLOAT3*)&offset_position);
+		XMVECTOR parent_xv_rot = XMLoadFloat4(( XMFLOAT4*)&parent_rot);
+		XMVECTOR xv_pos_offset = XMVector3Rotate(xv_pos, parent_xv_rot);
+		Float3 pos_offset;  XMStoreFloat3(( XMFLOAT3*)&pos_offset, xv_pos_offset);
 
 
 		//
@@ -553,18 +1068,50 @@ void Behavior_Offset::updateOffset()
 
 	if(ptr_parent_spatial_rotation.isNotEmpty())
 	{
-		// Fetch attributes from parent
+		// Fetch attributes
 		Float4 parent_rot = ptr_parent_spatial_rotation->rotation;
-
+		Float4 own_rot = ptr_spatial->rotation;
+		XMVECTOR xv_own_rot =  XMLoadFloat4(( XMFLOAT4*)&own_rot);
 		//
 		// Add rotation offset relative to parent
 		//
 
-		DirectX::XMVECTOR xv_rot_offset = DirectX::XMLoadFloat4((DirectX::XMFLOAT4*)&offset_rotation);
-		DirectX::XMVECTOR parent_xv_rot = DirectX::XMLoadFloat4((DirectX::XMFLOAT4*)&parent_rot);
-		xv_rot_offset = DirectX::XMQuaternionMultiply(xv_rot_offset, parent_xv_rot);
-		Float4 rot_offset; DirectX::XMStoreFloat4((DirectX::XMFLOAT4*)&rot_offset, xv_rot_offset);
+		 XMVECTOR xv_rot_offset =  XMLoadFloat4(( XMFLOAT4*)&offset_rotation);
+		 XMVECTOR parent_xv_rot =  XMLoadFloat4(( XMFLOAT4*)&parent_rot);
+		xv_rot_offset =  XMQuaternionMultiply(xv_rot_offset, parent_xv_rot);
+		
 
+		
+		//// Slerp interpolate to smooth out moment
+		//float MAGIC_SLERP_NUMBER = 1.0f;
+		//xv_rot_offset = XMQuaternionSlerp(xv_rot_offset, xv_own_rot, MAGIC_SLERP_NUMBER*ATTRIBUTE_MANAGER->settings->trueDeltaTime);
+
+		Float4 rot_offset;  XMStoreFloat4(( XMFLOAT4*)&rot_offset, xv_rot_offset);
 		ptr_spatial->rotation = rot_offset;
 	}
+}
+
+DataItemList* Behavior_Offset::getDataList()
+{
+	DataItemList* list = new DataItemList();
+	list->add(&ptr_parent_spatial_position,			"ptr_parent_spatial_position");
+	list->add(&ptr_parent_spatial_rotation,			"ptr_parent_spatial_rotation");
+	list->add(offset_position,						"offset_position");
+	list->add(offset_rotation,						"offset_rotation");
+	return list;
+}
+void Behavior_Offset::saveTo( DataItemList* list )
+{
+	list->get(&ptr_parent_spatial_position);
+	list->get(&ptr_parent_spatial_rotation);
+	list->get(&offset_position);
+	list->get(&offset_rotation);
+}
+
+DataItemList* Attribute_Bounding::getDataList()
+{
+	DataItemList* list = new DataItemList();
+	list->add_NotSupported("boxPoints");
+	list->add_NotSupported("bonvexPoints");
+	return list;
 }
