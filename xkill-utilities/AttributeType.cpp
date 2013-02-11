@@ -1030,6 +1030,15 @@ DataItemList* Attribute_Ray::getDataList()
 	return list;
 }
 
+Attribute_Animation::Attribute_Animation()
+{
+	animationID = -1;
+	time = 0.0f;
+}
+Attribute_Animation::~Attribute_Animation()
+{
+}
+
 void Attribute_Ray::saveTo( DataItemList* list )
 {
 	list->get(&from);
@@ -1116,3 +1125,4 @@ DataItemList* Attribute_Bounding::getDataList()
 	list->add_NotSupported("bonvexPoints");
 	return list;
 }
+
