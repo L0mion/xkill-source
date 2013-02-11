@@ -450,4 +450,3 @@ public:
 	//
 
 #undef CREATE_ATTRIBUTE
-//#undef CONNECT_ATTRIBUTES
