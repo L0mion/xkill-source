@@ -80,6 +80,7 @@ public:
 	AttributeStorage<Attribute_PickupablesSpawnPoint>	pickupablesSpawnPoint;
 	AttributeStorage<Attribute_Pickupable>				pickupable;
 	AttributeStorage<Attribute_SoundSettings>			soundSettings;
+	AttributeStorage<Attribute_Ray>						ray;
 
 	AttributeStorage<Behavior_Offset>					offset;
 
@@ -116,6 +117,7 @@ public:
 	static AttributeIterator<Attribute_PickupablesSpawnPoint>	itrPickupablesSpawnPoint;	\
 	static AttributeIterator<Attribute_Pickupable>				itrPickupable;			;	\
 	static AttributeIterator<Attribute_SoundSettings>			itrSoundSettings		;	\
+	static AttributeIterator<Attribute_Ray>						itrRay;					;	\
 	\
 	static AttributeIterator<Behavior_Offset>					itrOffset				;	\
 	\
@@ -150,6 +152,7 @@ public:
 	itrPickupablesSpawnPoint= AttributeManager::instance()->pickupablesSpawnPoint		.getIterator();		\
 	itrPickupable			= AttributeManager::instance()->pickupable					.getIterator();		\
 	itrSoundSettings		= AttributeManager::instance()->soundSettings				.getIterator();		\
+	itrRay					= AttributeManager::instance()->ray							.getIterator();		\
 	\
 	itrOffset				= AttributeManager::instance()->offset						.getIterator();		\
 	\
