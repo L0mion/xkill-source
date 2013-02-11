@@ -479,7 +479,7 @@ void Renderer::renderViewportToGBuffer(ViewportData& vpData)
 
 	if(settings->showDebugPhysics)
 	{
-		drawBulletPhysicsDebugLines(vpData.view, vpData.proj);
+		//drawBulletPhysicsDebugLines(vpData.view, vpData.proj);
 	}
 	
 	//Unset and clean.

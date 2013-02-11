@@ -9,6 +9,7 @@ class LoaderFbx;
 class LoaderFbxModelDesc;
 class LoaderFbxMeshDesc;
 class LoaderFbxMaterialDesc;
+class LoaderFbxTextureDesc;
 
 #include <vector>
 #include <map>
@@ -63,7 +64,7 @@ private:
 
 	bool loadObj(std::string modelName, std::string modelPath, MdlDescModel* modelDesc, MeshDesc& meshDesc);
 	bool loadFbx(std::string modelName, std::string modelPath, MdlDescModel* modelDesc, MeshDesc& meshDesc, SkinnedData* skinnedData);
-	void loadFbxMesh(LoaderFbxMeshDesc* mesh, LoaderFbxMaterialDesc* material, MeshDesc& meshDesc);
+	void loadFbxMesh(LoaderFbxMeshDesc* mesh, LoaderFbxMaterialDesc* material, LoaderFbxTextureDesc* texture, MeshDesc& meshDesc);
 	void loadFbxAnimation(std::vector<LoaderFbxAnimationDesc> animationDescs, LoaderFbxMeshDesc mesh, SkinnedData* skinnedData);
 	bool loadPGY(std::string modelName, std::string modelPath, MdlDescModel* modelDesc, MeshDesc& meshDesc, SkinnedData** skinnedData);
 	bool writePGY(std::string modelName, std::string modelPath, MeshDesc meshDesc, VertexType vertexType, SkinnedData* skinnedData);
@@ -73,6 +74,8 @@ private:
 	bool pollFile(std::string path, std::string fileName);
 
 	std::vector<std::string> getFileNames(LPCTSTR filename);
+
+	unsigned int getTexIDfromName(std::string texFilename);
 
 	std::map<std::string, unsigned int>* texNameToTexID;
 
