@@ -233,3 +233,10 @@ Event_SetMouseLock::Event_SetMouseLock( bool isLock ) : Event(EVENT_SET_MOUSELOC
 {
 	this->isLock = isLock;
 }
+Event_HackActivated::Event_HackActivated(float time, XKILL_Enums::HackType hackType, AttributePtr<Attribute_Player> player) : 
+	Event(EVENT_HACK_ACTIVATED)
+{
+	this->time = time;
+	this->hackType = hackType;
+	this->player = player;
+}

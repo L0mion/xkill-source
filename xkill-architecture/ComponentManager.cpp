@@ -9,6 +9,7 @@
 #include "CameraComponent.h"
 #include "GameComponent.h"
 #include "ScoreComponent.h"
+#include "HacksComponent.h"
 
 #include <xkill-utilities/FiniteStateMachine.h>
 #include <xkill-utilities/FiniteState.h>
@@ -29,6 +30,7 @@ ComponentManager::ComponentManager()
 	input_			= NULL;
 	game_			= NULL;
 	score_			= NULL;
+	hacks_			= NULL;
 	ioComponent_	= NULL;
 }
 ComponentManager::~ComponentManager()
@@ -43,7 +45,8 @@ ComponentManager::~ComponentManager()
 	SAFE_DELETE(camera_);
 	SAFE_DELETE(input_);
 	SAFE_DELETE(game_);
-	SAFE_DELETE(score_)
+	SAFE_DELETE(score_);
+	SAFE_DELETE(hacks_);
 	SAFE_DELETE(ioComponent_);
 }
 
@@ -69,6 +72,7 @@ bool ComponentManager::init(HWND windowHandle, HWND parentWindowHandle)
 	sound_ = new SoundComponent();
 	input_ = new InputComponent();
 	score_ = new ScoreComponent();
+	hacks_ = new HacksComponent();
 	ioComponent_ = new IOComponent();
 
 	if(FAILED((render_->init())))
@@ -105,6 +109,12 @@ bool ComponentManager::init(HWND windowHandle, HWND parentWindowHandle)
 	if(!score_->init())
 	{
 		SHOW_MESSAGEBOX("ScoreComponent failed to init.");
+		return false;
+	}
+
+	if(!hacks_->init())
+	{
+		SHOW_MESSAGEBOX("HacksComponent failed to init.");
 		return false;
 	}
 
@@ -157,6 +167,7 @@ void ComponentManager::update(float delta)
 		sound_->onUpdate(delta);
 		render_->onUpdate(delta);
 		score_->onUpdate(delta);
+		hacks_->onUpdate(delta);
 	
 		SEND_EVENT(&Event(EVENT_UPDATE));
 	}

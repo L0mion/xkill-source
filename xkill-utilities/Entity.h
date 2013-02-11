@@ -54,6 +54,8 @@ public:
 	*/
 	std::vector<int> getAttributes(AttributeType type);
 
+	void removeAttribute( AttributeType type );
+
 	/**
 	TODO
 	*/

@@ -34,7 +34,7 @@ bool ProjectilePhysicsObject::subClassSpecificInitHook()
 	collisionShape->getBoundingSphere(boundingSphereCenter, boundingSphereRadius);
 
 	//Calculate Continuous Collision Detection (CCD) parameters based on collision shape bounding sphere radius
-	setCcdSweptSphereRadius(boundingSphereRadius*0.5); 
+	setCcdSweptSphereRadius(boundingSphereRadius*0.5f); 
 	setCcdMotionThreshold(boundingSphereRadius);
 
 	//Involve speed in CCD?
@@ -44,7 +44,7 @@ bool ProjectilePhysicsObject::subClassSpecificInitHook()
 	//Bullet Physics settings based on ammunitionType
 	Entity* entity = itrPhysics_ProjectilePhysicsObject.ownerAt(attributeIndex_);
 	std::vector<int> projectileId = entity->getAttributes(ATTRIBUTE_PROJECTILE);
-	for(int i=0;i<projectileId.size();i++)
+	for(unsigned i=0;i<projectileId.size();i++)
 	{
 		AttributePtr<Attribute_Projectile> ptr_projectile = itrProjectile_ProjectilePhysicsObject.at(projectileId.at(i));
 
@@ -77,7 +77,7 @@ btCollisionShape* ProjectilePhysicsObject::subClassSpecificCollisionShape()
 {
 	Entity* entity = itrPhysics_ProjectilePhysicsObject.ownerAt(attributeIndex_);
 	std::vector<int> projectileId = entity->getAttributes(ATTRIBUTE_PROJECTILE);
-	for(int i=0;i<projectileId.size();i++)
+	for(unsigned i=0;i<projectileId.size();i++)
 	{
 		AttributePtr<Attribute_Projectile> ptr_projectile = itrProjectile_ProjectilePhysicsObject.at(projectileId.at(i));
 		if(ptr_projectile->ammunitionType == XKILL_Enums::AmmunitionType::SCATTER)

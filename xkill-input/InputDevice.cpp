@@ -25,7 +25,7 @@ InputDevice::InputDevice(GUID deviceGUID, std::string name, unsigned int playerI
 
 	rumbleTimer_ = 0.0f;
 	rumbleActive_ = false;
-	rumbleEnabled_ = true;
+	rumbleEnabled_ = false;
 	sensitivityModifier_ = 1.0f;
 
 	inputObjectArray_ = new InputObjectArray();

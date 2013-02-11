@@ -84,6 +84,7 @@ public slots:
 		// add time manipultion
 		ATTRIBUTE_MANAGER->settings->trueDeltaTime = delta;
 		delta *= ATTRIBUTE_MANAGER->settings->timeScale();
+
 		computeFPS();
 		gameManager.update(delta);
 	};
@@ -154,8 +155,7 @@ protected:
 	void event_setMouseLock(bool mouseLook)
 	{
 		// locking / releasing mouse cursor to widget
-		this->
-		hasMouseLock = mouseLook;
+		this->hasMouseLock = mouseLook;
 		if(hasMouseLock)
 		{
 			// hide cursor and set new anchor point

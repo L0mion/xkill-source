@@ -68,3 +68,15 @@ IAttribute* Entity::getAttributeInterface(int index)
 		attribute = attributes->at(index).getAttribute();
 	return attribute;
 }
+
+void Entity::removeAttribute( AttributeType type )
+{
+	for(unsigned i=0; i<attributes->size(); i++)
+	{
+		if(type == attributes->at(i).getType())
+		{
+			attributes->at(i).remove();
+			attributes->erase(attributes->begin()+i);
+		}
+	}
+}
