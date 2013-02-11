@@ -60,6 +60,7 @@ MainWindow::MainWindow()
 	this->setCentralWidget(gameWidget);
 	
 	menuManager = new MenuManager(gameWidget);
+	mainMenu = new Menu_Main2(this);
 
 	// setup signals and slots
 	connect(ui.actionFullscreen,			SIGNAL(triggered()),					this,			SLOT(slot_toggleFullScreen()));
@@ -77,6 +78,7 @@ MainWindow::~MainWindow()
 {
 	delete gameWidget;
 	delete menuManager;
+	delete mainMenu;
 }
 
 void MainWindow::onUpdate( float delta )

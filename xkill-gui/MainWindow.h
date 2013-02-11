@@ -5,10 +5,11 @@
 #include <QtGui/QMessageBox> // used to display info dialogs
 #include <xkill-utilities/IObserver.h>
 #include <xkill-utilities/Util.h>
- #include <QtGui/QApplication>
+#include <QtGui/QApplication>
 #include "GameWidget.h"
 #include "MenuManager.h"
 #include "Menu_Editor.h"
+#include "Menu_Main2.h"
 
 
 class MainWindow : public QMainWindow, public IObserver
@@ -19,6 +20,7 @@ private:
 	Ui::MainWindowClass ui;
 	MenuManager* menuManager;
 	GameWidget* gameWidget;
+	Menu_Main2* mainMenu;
 	
 
 public:
