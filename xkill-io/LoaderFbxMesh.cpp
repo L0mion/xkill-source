@@ -571,6 +571,11 @@ void LoaderFbxMesh::transformVertices(FbxMesh* mesh)
 		vertexPositions_[i].z = position.z;
 	}
 
+	xmTransform = DirectX::XMMATRIX(static_cast<float>(1.0),				   static_cast<float>(fbxMatrix.mData[0][1]), static_cast<float>(fbxMatrix.mData[0][2]), static_cast<float>(fbxMatrix.mData[0][3]),
+									static_cast<float>(fbxMatrix.mData[1][0]), static_cast<float>(1.0f),				  static_cast<float>(fbxMatrix.mData[1][2]), static_cast<float>(fbxMatrix.mData[1][3]),
+									static_cast<float>(fbxMatrix.mData[2][0]), static_cast<float>(fbxMatrix.mData[2][1]), static_cast<float>(1.0f),					 static_cast<float>(fbxMatrix.mData[2][3]),
+									static_cast<float>(fbxMatrix.mData[3][0]), static_cast<float>(fbxMatrix.mData[3][1]), static_cast<float>(fbxMatrix.mData[3][2]), static_cast<float>(fbxMatrix.mData[3][3]));
+
 	DirectX::XMFLOAT3 normal;
 	DirectX::XMVECTOR xmNormal;
 	for(unsigned int i=0; i<vertexNormals_.size(); i++)
