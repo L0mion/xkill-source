@@ -3,6 +3,7 @@
 #include "renderingUtilities.h"
 #include "Winfo.h"
 #include "ManagementD3D.h"
+#include <comdef.h>
 
 ManagementD3D::ManagementD3D(HWND windowHandle, Winfo* winfo)
 {
@@ -129,11 +130,11 @@ HRESULT ManagementD3D::createDeviceAndSwapChain(const DXGI_SWAP_CHAIN_DESC swapC
 										D3D_DRIVER_TYPE_REFERENCE};
 
 	UINT flags = 0;
-	flags |= D3D11_CREATE_DEVICE_SINGLETHREADED;
+	//flags |= D3D11_CREATE_DEVICE_SINGLETHREADED;
 	//flags |= D3D11_CREATE_DEVICE_PREVENT_INTERNAL_THREADING_OPTIMIZATIONS;
 
 #if defined(D3D_PROFILE)
-	flags |= D3D11_CREATE_DEVICE_DEBUG; //Enables shader debugging
+	//flags |= D3D11_CREATE_DEVICE_DEBUG; //Enables shader debugging
 #endif //D3D_PROFILE
 
 	unsigned int index = 0;
@@ -159,8 +160,15 @@ HRESULT ManagementD3D::createDeviceAndSwapChain(const DXGI_SWAP_CHAIN_DESC swapC
 		index++;
 	}
 	if(FAILED(hr))
-		ERROR_MSG(L"RenderingComponent::createDeviceAndSwapChain D3D11CreateDeviceAndSwapChain failed");
+	{
+		std::string message;
 
+		_com_error err(hr);
+		LPCTSTR errMsg = err.ErrorMessage();
+
+		ERROR_MSG(errMsg);
+		//ERROR_MSG(L"RenderingComponent::createDeviceAndSwapChain D3D11CreateDeviceAndSwapChain failed.");
+	}
 	return hr;
 }
 HRESULT ManagementD3D::initBackBuffer()
