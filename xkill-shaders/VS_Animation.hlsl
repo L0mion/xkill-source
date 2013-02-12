@@ -2,7 +2,7 @@
 #include "constantBuffers.hlsl"
 #include "structs.hlsl"
 
-DefaultVSOut animationVS(AnimationVSIn vsIn)
+DefaultVSOut VS_Animation(AnimationVSIn vsIn)
 {
 	DefaultVSOut output;
 

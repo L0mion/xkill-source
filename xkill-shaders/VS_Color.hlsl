@@ -2,7 +2,7 @@
 #include "constantBuffers.hlsl"
 #include "structs.hlsl"
 
-ColorVSOut colorVS(ColorVSIn colorVSIn)
+ColorVSOut VS_Color(ColorVSIn colorVSIn)
 {
 	ColorVSOut colorVSOut;
 

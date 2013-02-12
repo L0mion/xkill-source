@@ -2,7 +2,7 @@
 #include "constantBuffers.hlsl"
 #include "structs.hlsl"
 
-SpriteVSOut spriteVS(SpriteVSIn vsIn)
+SpriteVSOut VS_Sprite(SpriteVSIn vsIn)
 {
 	SpriteVSOut vsOut;
 

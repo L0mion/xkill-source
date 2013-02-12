@@ -158,7 +158,7 @@ HRESULT ManagementFX::initShaders(ID3D11Device* device)
 HRESULT ManagementFX::initDefaultVS(ID3D11Device* device,			std::wstring shaderPath)
 {
 	HRESULT hr = S_OK;
-	std::wstring completePath = shaderPath + L"defaultVS.cso";
+	std::wstring completePath = shaderPath + L"VS_Default.cso";
 	defaultVS_ = new ShaderVS();
 	hr = defaultVS_->init(device, completePath.c_str());
 
@@ -167,7 +167,7 @@ HRESULT ManagementFX::initDefaultVS(ID3D11Device* device,			std::wstring shaderP
 HRESULT ManagementFX::initDefaultPS(ID3D11Device* device,			std::wstring shaderPath)
 {
 	HRESULT hr = S_OK;
-	std::wstring completePath = shaderPath + L"defaultPS.cso";
+	std::wstring completePath = shaderPath + L"PS_Default.cso";
 	defaultPS_ = new ShaderPS();
 	hr = defaultPS_->init(device, completePath.c_str());
 
@@ -176,7 +176,7 @@ HRESULT ManagementFX::initDefaultPS(ID3D11Device* device,			std::wstring shaderP
 HRESULT ManagementFX::initDefaultDeferredVS(ID3D11Device* device,	std::wstring shaderPath)
 {
 	HRESULT hr = S_OK;
-	std::wstring completePath = shaderPath + L"defaultDeferredVS.cso";
+	std::wstring completePath = shaderPath + L"VS_DefaultDeferred.cso";
 	defaultDeferredVS_ = new ShaderVS();
 	hr = defaultDeferredVS_->init(device, completePath.c_str());
 
@@ -185,7 +185,7 @@ HRESULT ManagementFX::initDefaultDeferredVS(ID3D11Device* device,	std::wstring s
 HRESULT ManagementFX::initDefaultDeferredPS(ID3D11Device* device,	std::wstring shaderPath)
 {
 	HRESULT hr = S_OK;
-	std::wstring completePath = shaderPath + L"defaultDeferredPS.cso";
+	std::wstring completePath = shaderPath + L"PS_DefaultDeferred.cso";
 	defaultDeferredPS_ = new ShaderPS();
 	hr = defaultDeferredPS_->init(device, completePath.c_str());
 
@@ -194,7 +194,7 @@ HRESULT ManagementFX::initDefaultDeferredPS(ID3D11Device* device,	std::wstring s
 HRESULT ManagementFX::initDefaultCS(ID3D11Device* device,			std::wstring shaderPath)
 {
 	HRESULT hr = S_OK;
-	std::wstring completePath = shaderPath + L"lightingCS.cso";
+	std::wstring completePath = shaderPath + L"CS_Lighting.cso";
 	defaultCS_ = new ShaderCS();
 	hr = defaultCS_->init(device, completePath.c_str());
 
@@ -203,7 +203,7 @@ HRESULT ManagementFX::initDefaultCS(ID3D11Device* device,			std::wstring shaderP
 HRESULT ManagementFX::initAnimationVS(ID3D11Device* device,			std::wstring shaderPath)
 {
 	HRESULT hr = S_OK;
-	std::wstring completePath = shaderPath + L"animationVS.cso";
+	std::wstring completePath = shaderPath + L"VS_Animation.cso";
 	animationVS_ = new ShaderVS();
 	hr = animationVS_->init(device, completePath.c_str());
 
@@ -212,7 +212,7 @@ HRESULT ManagementFX::initAnimationVS(ID3D11Device* device,			std::wstring shade
 HRESULT ManagementFX::initAnimationPS(ID3D11Device* device,			std::wstring shaderPath)
 {
 	HRESULT hr = S_OK;
-	std::wstring completePath = shaderPath + L"animationPS.cso";
+	std::wstring completePath = shaderPath + L"PS_Animation.cso";
 	animationPS_ = new ShaderPS();
 	hr = animationPS_->init(device, completePath.c_str());
 
@@ -221,7 +221,7 @@ HRESULT ManagementFX::initAnimationPS(ID3D11Device* device,			std::wstring shade
 HRESULT ManagementFX::initColorVS(ID3D11Device* device,				std::wstring shaderPath)
 {
 	HRESULT hr = S_OK;
-	std::wstring completePath = shaderPath + L"colorVS.cso";
+	std::wstring completePath = shaderPath + L"VS_Color.cso";
 	colorVS_ = new ShaderVS();
 	hr = colorVS_->init(device, completePath.c_str());
 
@@ -230,7 +230,7 @@ HRESULT ManagementFX::initColorVS(ID3D11Device* device,				std::wstring shaderPa
 HRESULT ManagementFX::initColorPS(ID3D11Device* device,				std::wstring shaderPath)
 {
 	HRESULT hr = S_OK;
-	std::wstring completePath = shaderPath + L"colorPS.cso";
+	std::wstring completePath = shaderPath + L"PS_Color.cso";
 	colorPS_ = new ShaderPS();
 	hr = colorPS_->init(device, completePath.c_str());
 
@@ -239,7 +239,7 @@ HRESULT ManagementFX::initColorPS(ID3D11Device* device,				std::wstring shaderPa
 HRESULT ManagementFX::initSpriteVS(ID3D11Device* device,			std::wstring shaderPath)
 {
 	HRESULT hr = S_OK;
-	std::wstring completePath = shaderPath + L"spriteVS.cso";
+	std::wstring completePath = shaderPath + L"VS_Sprite.cso";
 	spriteVS_ = new ShaderVS();
 	hr = spriteVS_->init(device, completePath.c_str());
 
@@ -248,7 +248,7 @@ HRESULT ManagementFX::initSpriteVS(ID3D11Device* device,			std::wstring shaderPa
 HRESULT ManagementFX::initSpritePS(ID3D11Device* device,			std::wstring shaderPath)
 {
 	HRESULT hr = S_OK;
-	std::wstring completePath = shaderPath + L"spritePS.cso";
+	std::wstring completePath = shaderPath + L"PS_Sprite.cso";
 	spritePS_ = new ShaderPS();
 	hr = spritePS_->init(device, completePath.c_str());
 

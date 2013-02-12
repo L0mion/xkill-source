@@ -14,7 +14,7 @@ Texture2D texNormal		: register(t1);
 
 SamplerState ss : register(s0);
 
-PSOut defaultPS(DefaultVSOut pIn)
+PSOut PS_Default(DefaultVSOut pIn)
 {
 	PSOut output;
 

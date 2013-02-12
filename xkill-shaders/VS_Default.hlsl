@@ -1,7 +1,7 @@
 #include "constantBuffers.hlsl"
 #include "structs.hlsl"
 
-DefaultVSOut defaultVS(DefaultVSInInstanced vsIn)
+DefaultVSOut VS_Default(DefaultVSInInstanced vsIn)
 {
 	DefaultVSOut output;
 
