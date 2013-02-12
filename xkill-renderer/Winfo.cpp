@@ -1,5 +1,3 @@
-#include <Windows.h>
-
 #include "Winfo.h"
 
 Winfo::Winfo()

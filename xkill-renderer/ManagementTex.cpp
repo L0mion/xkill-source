@@ -1,7 +1,3 @@
-#include <Windows.h>
-#include <string>
-#include <sstream>
-#include <vector>
 #include <d3d11.h>
 #include "DDSTextureLoader.h"
 

@@ -1,10 +1,12 @@
 #include "InputManager.h"
 
+#include <Xinput.h>
+
 #include <xkill-utilities/AttributeManager.h>
 
 #include "KeyMapper.h"
-
-#include <Xinput.h>
+#include "QTInputDevices.h"
+#include "XInputDevice.h"
 
 //Used for IsXInputDevice function//
 #include <wbemidl.h>			  //

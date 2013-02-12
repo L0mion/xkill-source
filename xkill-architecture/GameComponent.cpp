@@ -581,19 +581,23 @@ void collision_applyDamage(Entity* entity1, Entity* entity2)
 	}
 }
 
-void collision_pickuppable(Entity* entity1, Entity* entity2)
+void collision_pickupable(Entity* entity1, Entity* entity2)
 {
 	if(entity1->hasAttribute(ATTRIBUTE_PICKUPABLE))
 	{
-		AttributePtr<Attribute_Pickupable> ptr_pickupable;
 		if(entity2->hasAttribute(ATTRIBUTE_PLAYER))
 		{
+			AttributePtr<Attribute_Pickupable> ptr_pickupable;
 			bool pickedUp = false;
 			//Retrieve player attribute
 			std::vector<int> playerId = entity2->getAttributes(ATTRIBUTE_PLAYER);
 			for(unsigned i=0;i<playerId.size();i++)
 			{
 				AttributePtr<Attribute_Player> ptr_player = itrPlayer.at(playerId.at(i));
+				AttributePtr<Attribute_WeaponStats>	ptr_weaponStats	=ptr_player->ptr_weaponStats;
+
+				Ammunition* ammo = &ptr_weaponStats->ammunition[ptr_weaponStats->currentAmmunitionType];
+				FiringMode* firingMode = &ptr_weaponStats->firingMode[ptr_weaponStats->currentFiringModeType];
 
 				//Retrieve pickupable attribute
 				std::vector<int> pickupablesId = entity1->getAttributes(ATTRIBUTE_PICKUPABLE);
@@ -616,27 +620,34 @@ void collision_pickuppable(Entity* entity1, Entity* entity2)
 							}
 							break;
 						}
-
-						//Check ammunition system
 					case XKILL_Enums::PickupableType::AMMUNITION_BULLET:
 						{
-							pickedUp = true;
-							AttributePtr<Attribute_WeaponStats> weaponStatsAttribute = ptr_player->ptr_weaponStats;
-							weaponStatsAttribute->ammunition[XKILL_Enums::AmmunitionType::BULLET].currentTotalNrOfShots += ptr_pickupable->amount;
+							if(ammo->currentTotalNrOfShots < ammo->initialTotalNrOfShots)
+							{
+								AttributePtr<Attribute_WeaponStats> weaponStatsAttribute = ptr_player->ptr_weaponStats;
+								weaponStatsAttribute->ammunition[XKILL_Enums::AmmunitionType::BULLET].currentTotalNrOfShots += ptr_pickupable->amount;
+								pickedUp = true;
+							}
 							break;
 						}
 					case XKILL_Enums::PickupableType::AMMUNITION_EXPLOSIVE:
 						{
-							pickedUp = true;
-							AttributePtr<Attribute_WeaponStats> weaponStatsAttribute = ptr_player->ptr_weaponStats;
-							weaponStatsAttribute->ammunition[XKILL_Enums::AmmunitionType::EXPLOSIVE].currentTotalNrOfShots += ptr_pickupable->amount;
+							if(ammo->currentTotalNrOfShots < ammo->initialTotalNrOfShots)
+							{
+								AttributePtr<Attribute_WeaponStats> weaponStatsAttribute = ptr_player->ptr_weaponStats;
+								weaponStatsAttribute->ammunition[XKILL_Enums::AmmunitionType::EXPLOSIVE].currentTotalNrOfShots += ptr_pickupable->amount;
+								pickedUp = true;
+							}
 							break;
 						}
 					case XKILL_Enums::PickupableType::AMMUNITION_SCATTER:
 						{
-							pickedUp = true;
-							AttributePtr<Attribute_WeaponStats> weaponStatsAttribute = ptr_player->ptr_weaponStats;
-							weaponStatsAttribute->ammunition[XKILL_Enums::AmmunitionType::SCATTER].currentTotalNrOfShots += ptr_pickupable->amount;
+							if(ammo->currentTotalNrOfShots < ammo->initialTotalNrOfShots)
+							{
+								AttributePtr<Attribute_WeaponStats> weaponStatsAttribute = ptr_player->ptr_weaponStats;
+								weaponStatsAttribute->ammunition[XKILL_Enums::AmmunitionType::SCATTER].currentTotalNrOfShots += ptr_pickupable->amount;
+								pickedUp = true;
+							}
 							break;
 						}
 					case XKILL_Enums::PickupableType::HACK_SPEEDHACK:
@@ -755,7 +766,7 @@ void GameComponent::event_PhysicsAttributesColliding(Event_PhysicsAttributesColl
 
 	collision_applyDamage(entity1, entity2);
 	collision_projectile(entity1, entity2);
-	collision_pickuppable(entity1, entity2);
+	collision_pickupable(entity1, entity2);
 	collision_playerVsWorld(entity1, entity2);	
 }
 
