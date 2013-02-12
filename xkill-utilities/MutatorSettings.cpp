@@ -61,7 +61,8 @@ void MutatorSettings::initStandardAmmunition()
 	ammo->displacementSphereRadius	= 0.0f;
 	ammo->speed				= 60.0f;
 	ammo->spreadConeRadius			= 0.0f;
-	ammo->totalNrOfShots	= 1000;
+	ammo->initialTotalNrOfShots = 100;
+	ammo->currentTotalNrOfShots	= ammo->initialTotalNrOfShots;
 	ammo->velocityVariation	= 0.0f;
 
 	ammo = &standardAmmunitions[XKILL_Enums::AmmunitionType::SCATTER];
@@ -76,7 +77,8 @@ void MutatorSettings::initStandardAmmunition()
 	ammo->displacementSphereRadius	= 0.02f;
 	ammo->speed				= 30.0f;
 	ammo->spreadConeRadius			= 0.1f;
-	ammo->totalNrOfShots	= 1000;
+	ammo->initialTotalNrOfShots = 100;
+	ammo->currentTotalNrOfShots	= ammo->initialTotalNrOfShots;
 	ammo->velocityVariation	= 0.5f;
 
 	ammo = &standardAmmunitions[XKILL_Enums::AmmunitionType::EXPLOSIVE];
@@ -91,7 +93,8 @@ void MutatorSettings::initStandardAmmunition()
 	ammo->displacementSphereRadius	= 0.0f;
 	ammo->speed				= 5.0f;
 	ammo->spreadConeRadius			= 0.0f;
-	ammo->totalNrOfShots	= 1000;
+	ammo->initialTotalNrOfShots = 100;
+	ammo->currentTotalNrOfShots	= ammo->initialTotalNrOfShots;
 	ammo->velocityVariation	= 0.0f;
 }
 

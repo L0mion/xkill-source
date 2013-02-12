@@ -853,7 +853,7 @@ DataItemList* Attribute_WeaponStats::getDataList()
 	list->add_Enum(currentAmmunitionType,								"ammunitionType");
 	list->add_Enum(currentFiringModeType,								"firingMode");
 
-	list->add(ammunition[currentAmmunitionType].totalNrOfShots,			"totalNrOfShots");
+	list->add(ammunition[currentAmmunitionType].currentTotalNrOfShots,			"currentTotalNrOfShots");
 	list->add(firingMode[currentFiringModeType].clipSize,				"clipSize");
 	list->add(firingMode[currentFiringModeType].nrOfShotsLeftInClip,	"nrOfShotsLeftInClip");
 
@@ -881,7 +881,7 @@ void Attribute_WeaponStats::saveTo(DataItemList* list)
 	currentAmmunitionType	= (XKILL_Enums::AmmunitionType)	list->get_Enum();
 	currentFiringModeType	= (XKILL_Enums::FiringModeType)	list->get_Enum();
 
-	list->get(&ammunition[currentAmmunitionType].totalNrOfShots);
+	list->get(&ammunition[currentAmmunitionType].currentTotalNrOfShots);
 	list->get(&firingMode[currentFiringModeType].clipSize);
 	list->get(&firingMode[currentFiringModeType].nrOfShotsLeftInClip);
 

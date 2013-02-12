@@ -35,6 +35,10 @@ public:
 	Handles Events for GameComponent.
 	*/
 	void onEvent(Event* e);
+
+	/**
+	Handles most game logic for players.
+	*/
 	void onUpdate(float delta);
 
 	/**

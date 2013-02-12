@@ -8,7 +8,8 @@ struct Attribute_WeaponStats;
 //! Stores all data related to ammunition
 struct DLL_U Ammunition
 {
-	unsigned int totalNrOfShots;			//!< Total number of shots that can be fired. A value of -1 denotes unlimited ammunition.
+	unsigned int initialTotalNrOfShots;		//!< Total number of shots that can be fired.
+	unsigned int currentTotalNrOfShots;		//!< Current amount of total number of shots.
 	float speed;							//!< Velocity of the PhysicsAttribute when creating a projectile.
 	float damage;							//!< Damage value of the damage attribute of each projectile created when creating a projectile from this weapon.
 	unsigned int nrOfProjectilesPerSalvo;	//!< If > 1 then scattershot else singleshot.
