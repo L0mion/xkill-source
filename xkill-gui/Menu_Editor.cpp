@@ -3,6 +3,7 @@
 #include <QtGui/QStandardItemModel>
 
 #include <xkill-utilities/Util.h>
+#include <xkill-utilities/DataItem.h>
 
 ATTRIBUTES_DECLARE_ALL;
 

@@ -3,7 +3,6 @@
 #include "SkinnedData.h"
 #include "AnimationClip.h"
 
-#include "renderingUtilities.h"
 
 SkinnedData::SkinnedData()
 {
@@ -14,17 +13,21 @@ SkinnedData::SkinnedData()
 
 SkinnedData::~SkinnedData()
 {
-	SAFE_DELETE(boneHierarchy_);
-	SAFE_DELETE(boneOffsets_);
+	if(boneHierarchy_)
+		delete boneHierarchy_;
+	if(boneOffsets_)
+		delete boneOffsets_;
 	
 	if(animations_)
 	{
 		std::map<std::string, AnimationClip*>::iterator index;
 		for(index = animations_->begin(); index != animations_->end(); index++)
 		{
-			SAFE_DELETE(index->second);
+			if(index->second)
+				delete index->second;
 		}
-		SAFE_DELETE(animations_);
+		if(animations_)
+			delete animations_;
 	}
 }
 
@@ -32,16 +35,21 @@ void SkinnedData::set(std::vector<int>*						 boneHierarchy,
 					   std::vector<DirectX::XMFLOAT4X4>*	 boneOffsets,
 					   std::map<std::string, AnimationClip*>* animations)
 {
-	SAFE_DELETE(boneHierarchy_);
-	SAFE_DELETE(boneOffsets_);
+	if(boneHierarchy_)
+		delete boneHierarchy_;
+	if(boneOffsets_)
+		delete boneOffsets_;
+	
 	if(animations_)
 	{
 		std::map<std::string, AnimationClip*>::iterator index;
 		for(index = animations_->begin(); index != animations_->end(); index++)
 		{
-			SAFE_DELETE(index->second);
+			if(index->second)
+				delete index->second;
 		}
-		SAFE_DELETE(animations_);
+		if(animations_)
+			delete animations_;
 	}
 
 	boneHierarchy_	= boneHierarchy;
@@ -85,10 +93,11 @@ void SkinnedData::getFinalTransforms(const std::string&					clipName,
 	}
 }
 
-float SkinnedData::getBoneCount() const
+unsigned int SkinnedData::getBoneCount() const
 {
 	return boneHierarchy_->size();
 }
+
 float SkinnedData::getClipStartTime(const std::string& clipName) const
 {
 	auto clip = animations_->find(clipName);
@@ -98,4 +107,18 @@ float SkinnedData::getClipEndTime(const std::string& clipName) const
 {
 	auto clip = animations_->find(clipName);
 	return clip->second->getClipEndTime();
+}
+
+std::vector<int>* SkinnedData::getBoneHierarchy() const
+{
+	return boneHierarchy_;
+}
+std::vector<DirectX::XMFLOAT4X4>* SkinnedData::getBoneOffsets() const
+{
+	return boneOffsets_;
+}
+
+std::map<std::string, AnimationClip*>* SkinnedData::getAnimations() const
+{
+	return animations_;
 }

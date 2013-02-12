@@ -1,10 +1,9 @@
-#include <xkill-utilities/MeshVertices.h>
+#include "MeshVertices.h"
 
 #include "AnimatedMesh.h"
 #include "M3DMeshData.h"
 #include "SkinnedData.h"
 
-#include "renderingUtilities.h"
 
 AnimatedMesh::AnimatedMesh()
 {
@@ -22,14 +21,20 @@ AnimatedMesh::AnimatedMesh()
 
 AnimatedMesh::~AnimatedMesh()
 {
-	SAFE_DELETE(vertices_);
-	SAFE_DELETE(indices_);
-	SAFE_DELETE(subsets_);
-	SAFE_DELETE(materials_);
-	SAFE_DELETE(skinInfo_);
-
-	SAFE_RELEASE(vertexBuffer_);
-	SAFE_RELEASE(indexBuffer_);
+	if(vertices_)
+		delete vertices_;
+	if(indices_)
+		delete indices_;
+	if(subsets_)
+		delete subsets_;
+	if(materials_)
+		delete materials_;
+	if(skinInfo_)
+		delete skinInfo_;
+	if(vertexBuffer_)
+		vertexBuffer_->Release();
+	if(indexBuffer_)
+		indexBuffer_->Release();
 }
 
 void AnimatedMesh::update(float delta)

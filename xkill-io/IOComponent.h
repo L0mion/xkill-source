@@ -7,6 +7,8 @@ class MeshMakerObj;
 class MeshModel;
 class LoaderFbx;
 class LoaderFbxModelDesc;
+class LoaderFbxMeshDesc;
+class LoaderFbxMaterialDesc;
 
 #include <vector>
 #include <map>
@@ -16,6 +18,9 @@ class LoaderFbxModelDesc;
 #include "dllIO.h"
 
 #include <xkill-utilities/LeanWindows.h>
+
+#include <xkill-utilities/SkinnedData.h>
+#include "LoaderFbxAnimationDesc.h"
 
 static const std::string PATH_XKILL_RESOURCES		 = "../../xkill-resources/";
 static const std::string PATH_XKILL_RESOURCES_LEVELS = "../../xkill-resources/xkill-level/";
@@ -57,9 +62,11 @@ private:
 		MdlDescModel*	modelDesc);
 
 	bool loadObj(std::string modelName, std::string modelPath, MdlDescModel* modelDesc, MeshDesc& meshDesc);
-	bool loadFbx(std::string modelName, std::string modelPath, MdlDescModel* modelDesc, MeshDesc& meshDesc);
-	bool loadPGY(std::string modelName, std::string modelPath, MdlDescModel* modelDesc, MeshDesc& meshDesc);
-	bool writePGY(std::string modelName, std::string modelPath, MeshDesc meshDesc, VertexType vertexType);
+	bool loadFbx(std::string modelName, std::string modelPath, MdlDescModel* modelDesc, MeshDesc& meshDesc, SkinnedData* skinnedData);
+	void loadFbxMesh(LoaderFbxMeshDesc* mesh, LoaderFbxMaterialDesc* material, MeshDesc& meshDesc);
+	void loadFbxAnimation(std::vector<LoaderFbxAnimationDesc> animationDescs, LoaderFbxMeshDesc mesh, SkinnedData* skinnedData);
+	bool loadPGY(std::string modelName, std::string modelPath, MdlDescModel* modelDesc, MeshDesc& meshDesc, SkinnedData** skinnedData);
+	bool writePGY(std::string modelName, std::string modelPath, MeshDesc meshDesc, VertexType vertexType, SkinnedData* skinnedData);
 
 	FileExtension findFileType(std::string modelName);
 

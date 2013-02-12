@@ -28,9 +28,9 @@
 #include "ViewportData.h"
 
 //temp
-#include "AnimatedMesh.h"
-#include "M3DLoader.h"
-#include "SkinnedData.h"
+//#include "AnimatedMesh.h"
+//#include "M3DLoader.h"
+//#include "SkinnedData.h"
 
 ATTRIBUTES_DECLARE_ALL;
 
@@ -89,8 +89,8 @@ Renderer::~Renderer()
 	SAFE_RELEASE(debugLinesVertexBuffer_);
 
 	//temp
-	SAFE_DELETE(m3dLoader_);
-	SAFE_DELETE(animatedMesh_);
+//	SAFE_DELETE(m3dLoader_);
+//	SAFE_DELETE(animatedMesh_);
 }
 
 void Renderer::reset()
@@ -841,59 +841,59 @@ void Renderer::drawHudElement(int viewportIndex, unsigned int textureId, DirectX
 
 void Renderer::renderAnimatedMesh(DirectX::XMFLOAT4X4 viewMatrix, DirectX::XMFLOAT4X4 projectionMatrix)
 {
-	ID3D11Device*			device = managementD3D_->getDevice();
-	ID3D11DeviceContext*	devcon = managementD3D_->getDeviceContext();
-
-	DirectX::XMFLOAT4X4 worldMatrix(0.01f, 0.0f, 0.0f, 0.0f,
-									0.0f, 0.01f, 0.0f, 0.0f,
-									0.0f, 0.0f, 0.01f, 0.0f,
-									10.0f, 2.3f, 1.0f, 1.0f);
-	DirectX::XMFLOAT4X4 worldMatrixInverse	= worldMatrix;
-	DirectX::XMFLOAT4X4 finalMatrix			= managementMath_->calculateFinalMatrix(worldMatrix, viewMatrix, projectionMatrix);
-	
-	managementCB_->setCB(CB_TYPE_OBJECT, TypeFX_VS, CB_REGISTER_OBJECT, devcon);
-	managementCB_->updateCBObject(devcon, finalMatrix, worldMatrix, worldMatrixInverse);
-	
-	animatedMesh_->update(0.002f);
-	std::vector<DirectX::XMFLOAT4X4> finalTransforms;
-	animatedMesh_->getSkinInfo()->getFinalTransforms("Take1", animatedMesh_->getTimePosition(), &finalTransforms);
-
-	managementCB_->setCB(CB_TYPE_BONE, TypeFX_VS, CB_REGISTER_BONE, devcon);
-	managementCB_->updateCBBone(devcon, finalTransforms);
-
-	managementFX_->setShader(devcon, SHADERID_VS_ANIMATION);
-	managementFX_->setShader(devcon, SHADERID_PS_ANIMATION);
-
-	managementSS_->setSS(devcon, TypeFX_PS, 0, SS_ID_DEFAULT);
-	managementRS_->setRS(devcon, RS_ID_DEFAULT);
-
-	managementGBuffer_->setGBuffersAndDepthBuffer(devcon, managementD3D_->getDepthBuffer());
-
-	managementD3D_->clearDepthBuffer();
-
-	ID3D11Buffer* vertexBuffer = animatedMesh_->getVertexBuffer();
-	UINT stride = sizeof(VertexPosNormTexTanSkinned);
-	UINT offset = 0;
-	devcon->IASetVertexBuffers(
-				0, 
-				1, 
-				&vertexBuffer, 
-				&stride, 
-				&offset);
-	devcon->IASetIndexBuffer(animatedMesh_->getIndexBuffer(), DXGI_FORMAT_R32_UINT, 0);
-	
-	managementFX_->setLayout(devcon, LAYOUTID_POS_NORM_TEX_TAN_SKINNED);
-
-	devcon->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-	devcon->DrawIndexed(animatedMesh_->getNumIndices(), 0, 0);
-
-	managementGBuffer_->unsetGBuffersAndDepthBufferAsRenderTargets(devcon);
-
-	managementFX_->unsetAll(devcon);
-
-	devcon->PSSetSamplers(0, 0, nullptr);
-	devcon->IASetInputLayout(nullptr);
-	devcon->RSSetState(nullptr);
+//	ID3D11Device*			device = managementD3D_->getDevice();
+//	ID3D11DeviceContext*	devcon = managementD3D_->getDeviceContext();
+//
+//	DirectX::XMFLOAT4X4 worldMatrix(0.01f, 0.0f, 0.0f, 0.0f,
+//									0.0f, 0.01f, 0.0f, 0.0f,
+//									0.0f, 0.0f, 0.01f, 0.0f,
+//									10.0f, 2.3f, 1.0f, 1.0f);
+//	DirectX::XMFLOAT4X4 worldMatrixInverse	= worldMatrix;
+//	DirectX::XMFLOAT4X4 finalMatrix			= managementMath_->calculateFinalMatrix(worldMatrix, viewMatrix, projectionMatrix);
+//	
+//	managementCB_->setCB(CB_TYPE_OBJECT, TypeFX_VS, CB_REGISTER_OBJECT, devcon);
+//	managementCB_->updateCBObject(devcon, finalMatrix, worldMatrix, worldMatrixInverse);
+//	
+//	animatedMesh_->update(0.002f);
+//	std::vector<DirectX::XMFLOAT4X4> finalTransforms;
+//	animatedMesh_->getSkinInfo()->getFinalTransforms("Take1", animatedMesh_->getTimePosition(), &finalTransforms);
+//
+//	managementCB_->setCB(CB_TYPE_BONE, TypeFX_VS, CB_REGISTER_BONE, devcon);
+//	managementCB_->updateCBBone(devcon, finalTransforms);
+//
+//	managementFX_->setShader(devcon, SHADERID_VS_ANIMATION);
+//	managementFX_->setShader(devcon, SHADERID_PS_ANIMATION);
+//
+//	managementSS_->setSS(devcon, TypeFX_PS, 0, SS_ID_DEFAULT);
+//	managementRS_->setRS(devcon, RS_ID_DEFAULT);
+//
+//	managementGBuffer_->setGBuffersAndDepthBuffer(devcon, managementD3D_->getDepthBuffer());
+//
+//	managementD3D_->clearDepthBuffer();
+//
+//	ID3D11Buffer* vertexBuffer = animatedMesh_->getVertexBuffer();
+//	UINT stride = sizeof(VertexPosNormTexTanSkinned);
+//	UINT offset = 0;
+//	devcon->IASetVertexBuffers(
+//				0, 
+//				1, 
+//				&vertexBuffer, 
+//				&stride, 
+//				&offset);
+//	devcon->IASetIndexBuffer(animatedMesh_->getIndexBuffer(), DXGI_FORMAT_R32_UINT, 0);
+//	
+//	managementFX_->setLayout(devcon, LAYOUTID_POS_NORM_TEX_TAN_SKINNED);
+//
+//	devcon->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+//	devcon->DrawIndexed(animatedMesh_->getNumIndices(), 0, 0);
+//
+//	managementGBuffer_->unsetGBuffersAndDepthBufferAsRenderTargets(devcon);
+//
+//	managementFX_->unsetAll(devcon);
+//
+//	devcon->PSSetSamplers(0, 0, nullptr);
+//	devcon->IASetInputLayout(nullptr);
+//	devcon->RSSetState(nullptr);
 }
 
 void Renderer::loadTextures(TexDesc* texdesc)

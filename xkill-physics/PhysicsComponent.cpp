@@ -250,7 +250,7 @@ void PhysicsComponent::onUpdate(float delta)
 
 	updateCulling();
 
-	dynamicsWorld_->stepSimulation(delta,0); //Bullet Physics physics simulation
+	dynamicsWorld_->stepSimulation(delta, 0); //Bullet Physics physics simulation
 
 	bool showDebug = ATTRIBUTE_MANAGER->settings->showDebugPhysics;
 	if(showDebug)
@@ -508,7 +508,7 @@ void PhysicsComponent::detectedCollisionsDuringStepSimulation(btScalar timeStep)
 
 void PhysicsComponent::doCulling(unsigned int frustumAttributeIndex, unsigned int objectAttributeIndex)
 {
-	if(itrPhysics.at(objectAttributeIndex)->ptr_render.isNotEmpty())
+	if(itrPhysics.at(objectAttributeIndex)->ptr_render.isValid())
 	{
 		itrPhysics.at(objectAttributeIndex)->ptr_render->cull = true;
 	}
@@ -519,7 +519,7 @@ void PhysicsComponent::updateCulling()
 	while(itrPhysics.hasNext())
 	{
 		AttributePtr<Attribute_Physics> ptr_physics = itrPhysics.getNext();
-		if(ptr_physics->ptr_render.isNotEmpty())
+		if(ptr_physics->ptr_render.isValid())
 		{
 			ptr_physics->ptr_render->cull = false;
 		}

@@ -81,7 +81,7 @@ public:
 		return _hostArray == nullptr;
 	}
 
-	bool isNotEmpty()
+	bool isValid()
 	{
 		return _hostArray != nullptr;
 	}
