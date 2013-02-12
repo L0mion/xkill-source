@@ -22,7 +22,6 @@ private:
 	GameWidget* gameWidget;
 	Menu_Main2* mainMenu;
 	
-
 public:
 	MainWindow();
 	~MainWindow();
@@ -32,16 +31,24 @@ public:
 	void event_showMessageBox(Event_ShowMessageBox* e);
 
 protected:
+protected:
+	void closeEvent(QCloseEvent *event);
 	// Behavior on keyboard input
 	void keyPressEvent(QKeyEvent* e);
+	void mouseReleaseEvent(QMouseEvent *e)
+	{
+		// Inform about key release
+		int keyEnum = e->button();
+		SEND_EVENT(&Event_MousePress(keyEnum, false));
+	}
 	void moveEvent(QMoveEvent *e);
 	void resizeEvent(QResizeEvent* e);;
 	void showMenu();
 	void keyReleaseEvent(QKeyEvent* e);
 
 public slots:
-		void slot_setTitle(QString title);
-		void slot_toggleFullScreen();
+	void slot_setTitle(QString title);
+	void slot_toggleFullScreen();
 };
 
 #endif // MAINWINDOW_H

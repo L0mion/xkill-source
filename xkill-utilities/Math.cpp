@@ -485,3 +485,15 @@ Float4 PlaneNormalize(Float4 plane)
 	float length = sqrt(plane.x*plane.x + plane.y*plane.y + plane.z*plane.z);
 	return Float4(plane.x / length, plane.y / length, plane.z / length, plane.w * length);
 }
+
+Int2::Int2()
+{
+	x = 0;
+	y = 0;
+}
+
+Int2::Int2( int x, int y )
+{
+	this->x = x;
+	this->y = y;
+}

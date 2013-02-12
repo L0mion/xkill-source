@@ -70,6 +70,7 @@ enum DLL_U EventType
 	EVENT_MOUSE_PRESS,
 	EVENT_SET_MOUSELOCK,
 	EVENT_WINDOW_RESIZE,
+	EVENT_WINDOW_MOVE,
 	EVENT_INPUT_DEVICE_SEARCH,
 	EVENT_PLAYSOUND,
 	EVENT_UPDATESOUNDSETTINGS,
@@ -261,6 +262,15 @@ public:
 	Event_WindowResize(int width, int height);
 
 	float getAspectRatio();
+};
+
+class DLL_U Event_WindowMove : public Event
+{
+public:
+	Int2 pos;
+	Int2 oldPos;
+
+	Event_WindowMove(Int2 pos, Int2 oldPos);
 };
 
 

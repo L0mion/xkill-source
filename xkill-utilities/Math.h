@@ -29,6 +29,15 @@ public:
 	private:
 };
 
+struct DLL_U Int2
+{
+	int x;
+	int y;
+
+	Int2();
+	Int2(int x, int y);
+};
+
 struct DLL_U Float2
 {
 	float x;

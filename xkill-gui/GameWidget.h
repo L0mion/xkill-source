@@ -13,7 +13,6 @@
 #include "ui_MainWindow.h"
 #include "GameTimer.h"
 
-
 class GameWidget : public QWidget, public IObserver
 {
 	Q_OBJECT
@@ -75,13 +74,22 @@ public:
 		}
 	}
 
+	void sendPositionEvent()
+	{
+		QPoint qPos = mapToGlobal(QPoint(pos().x(),pos().y()));
+
+		Int2 pos(qPos.x(), qPos.y());
+		//Int2 oldPos(e->oldPos().x(), e->oldPos().y());
+		SEND_EVENT(&Event_WindowMove(pos, Int2()));
+	}
+
 public slots:
 	// Runs every time gameTimer times out
 	void slot_onUpdate()
 	{
 		gameTimer.tick();
 		float delta = gameTimer.getDeltaTime();
-		// add time manipultion
+		// add time manipulation
 		ATTRIBUTE_MANAGER->settings->trueDeltaTime = delta;
 		delta *= ATTRIBUTE_MANAGER->settings->timeScale();
 
@@ -110,9 +118,17 @@ protected:
 		// Inform about resize
 		int width = size().width();
 		int height = size().height();
-		Event_WindowResize event_windowResize(width, height);
-		SEND_EVENT(&event_windowResize);
+		SEND_EVENT(&Event_WindowResize(width, height));
+		sendPositionEvent();
 	}
+
+	void moveEvent(QMoveEvent* e)
+	{
+		QWidget::moveEvent(e);
+
+		sendPositionEvent();
+	}
+
 	void keyPressEvent(QKeyEvent *e)
 	{
 		if(hasMouseLock)
@@ -123,9 +139,10 @@ protected:
 			}
 		}
 
-		int keyEnum = e->key();
-		SEND_EVENT(&Event_KeyPress(keyEnum, true));
-
+		QCoreApplication::sendEvent(parentWidget(), e);
+	}
+	void keyReleaseEventEvent(QKeyEvent *e)
+	{
 		QCoreApplication::sendEvent(parentWidget(), e);
 	}
 	// Behavior on mouse press

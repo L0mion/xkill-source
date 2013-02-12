@@ -240,3 +240,9 @@ Event_HackActivated::Event_HackActivated(float time, XKILL_Enums::HackType hackT
 	this->hackType = hackType;
 	this->player = player;
 }
+
+Event_WindowMove::Event_WindowMove( Int2 pos, Int2 oldPos ) : Event(EVENT_WINDOW_MOVE)
+{
+	this->pos = pos;
+	this->oldPos = oldPos;
+}
