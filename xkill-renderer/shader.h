@@ -28,7 +28,10 @@ enum ShaderID
 	SHADERID_PS_COLOR,
 
 	SHADERID_VS_SPRITE,
-	SHADERID_PS_SPRITE
+	SHADERID_PS_SPRITE,
+
+	SHADERID_VS_POS_NORM_TEX_TAN_INSTANCE,
+	SHADERID_PS_NORMALMAP
 };
 
 /*! \defgroup xkill-renderer-shader xkill-renderer-shader

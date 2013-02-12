@@ -32,4 +32,13 @@ struct VSInPosNormTexTanSkinned
 	uint4  boneIndices	: BONEINDICES;
 };
 
+struct VSInPosNormTexTanInstanced
+{
+	float3		position	: POSITION;
+	float3		normal		: NORMAL;
+	float2		texcoord	: TEXCOORD;
+	float4		tangent		: TANGENT;
+	float4x4	world		: WORLD;
+};
+
 #endif //XKILL_RENDERER_VSIN_HLSL

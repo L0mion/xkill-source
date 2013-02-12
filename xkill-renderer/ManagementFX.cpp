@@ -1,5 +1,3 @@
-//#include <d3d11.h>
-//#include <d3d10.h>
 #include <d3dcompiler.h>
 
 #include "renderingUtilities.h"
@@ -22,11 +20,14 @@ ManagementFX::ManagementFX(bool debugShaders)
 	colorPS_				= nullptr;
 	spriteVS_				= nullptr;
 	spritePS_				= nullptr;
+	vsPosNormTexTanInstanced_ = nullptr;
+	psNormalMap_				= nullptr;
 
 	ilPosColor_				= nullptr;
 	ilPosNormTexInstanced_	= nullptr;
 	ilPosNormTexTanSkinned_ = nullptr;
 	ilPosNormTex_			= nullptr;
+	ilPosNormTexTanInstanced_ = nullptr;
 }
 ManagementFX::~ManagementFX()
 {
@@ -43,11 +44,14 @@ ManagementFX::~ManagementFX()
 	SAFE_DELETE(colorPS_);
 	SAFE_DELETE(spriteVS_);
 	SAFE_DELETE(spritePS_);
+	SAFE_DELETE(vsPosNormTexTanInstanced_);
+	SAFE_DELETE(psNormalMap_);
 
 	SAFE_RELEASE(ilPosColor_);
 	SAFE_RELEASE(ilPosNormTexInstanced_);
 	SAFE_RELEASE(ilPosNormTexTanSkinned_);
 	SAFE_RELEASE(ilPosNormTex_);
+	SAFE_RELEASE(ilPosNormTexTanInstanced_);
 }
 
 void ManagementFX::reset()
@@ -59,6 +63,8 @@ void ManagementFX::reset()
 	defaultCS_->reset();
 	animationVS_->reset();
 	animationPS_->reset();
+	vsPosNormTexTanInstanced_->reset();
+	psNormalMap_->reset();
 }
 
 HRESULT ManagementFX::init(ID3D11Device* device)
@@ -100,6 +106,9 @@ void ManagementFX::setLayout(ID3D11DeviceContext* devcon,	LayoutID layoutID)
 		break;
 	case LAYOUTID_POS_NORM_TEX:
 		il = ilPosNormTex_;
+		break;
+	case LAYOUTID_POS_NORM_TEX_TAN_INSTANCED:
+		il = ilPosNormTexTanInstanced_;
 		break;
 	};
 
@@ -152,13 +161,17 @@ HRESULT ManagementFX::initShaders(ID3D11Device* device)
 		hr = initSpriteVS(device, shaderPath);
 	if(SUCCEEDED(hr))
 		hr = initSpritePS(device, shaderPath);
+	if(SUCCEEDED(hr))
+		hr = initVSPosNormTexTanInstanced(device, shaderPath);
+	if(SUCCEEDED(hr))
+		hr = initPSNormalMap(device, shaderPath);
 	
 	return hr;
 }
 HRESULT ManagementFX::initDefaultVS(ID3D11Device* device,			std::wstring shaderPath)
 {
 	HRESULT hr = S_OK;
-	std::wstring completePath = shaderPath + L"VS_Default.cso";
+	std::wstring completePath = shaderPath + L"VS_PosNormTexInstanced.cso";
 	defaultVS_ = new ShaderVS();
 	hr = defaultVS_->init(device, completePath.c_str());
 
@@ -254,6 +267,24 @@ HRESULT ManagementFX::initSpritePS(ID3D11Device* device,			std::wstring shaderPa
 
 	return hr;
 }
+HRESULT ManagementFX::initVSPosNormTexTanInstanced(ID3D11Device* device, std::wstring shaderPath)
+{
+	HRESULT hr = S_OK;
+	std::wstring completePath = shaderPath + L"VS_PosNormTexTanInstanced.cso";
+	vsPosNormTexTanInstanced_ = new ShaderVS();
+	hr = vsPosNormTexTanInstanced_->init(device, completePath.c_str());
+
+	return hr;
+}
+HRESULT ManagementFX::initPSNormalMap(ID3D11Device*	device, std::wstring shaderPath)
+{
+	HRESULT hr = S_OK;
+	std::wstring completePath = shaderPath + L"PS_NormalMap.cso";
+	psNormalMap_ = new ShaderPS();
+	hr = psNormalMap_->init(device, completePath.c_str());
+
+	return hr;
+}
 
 HRESULT ManagementFX::initILs(ID3D11Device* device)
 {
@@ -263,11 +294,14 @@ HRESULT ManagementFX::initILs(ID3D11Device* device)
 
 	hr = initILPosColor(device);
 	if(SUCCEEDED(hr))
-		hr = initILDefaultVSPosNormTexInstanced(device);
+		hr = initILPosNormTexInstanced(device);
 	if(SUCCEEDED(hr))
 		hr = initILPosNormTexTanSkinned(device);
 	if(SUCCEEDED(hr))
 		hr = initILPosNormTex(device);
+	if(SUCCEEDED(hr))
+		hr = initILPosNormtexTanInstanced(device);
+
 	return hr;
 }
 void ManagementFX::initILManagement()
@@ -288,7 +322,7 @@ HRESULT ManagementFX::initILPosColor(ID3D11Device* device)
 
 	return hr;
 }
-HRESULT ManagementFX::initILDefaultVSPosNormTexInstanced(ID3D11Device* device)
+HRESULT ManagementFX::initILPosNormTexInstanced(ID3D11Device* device)
 {
 	HRESULT hr = S_OK;
 
@@ -331,11 +365,27 @@ HRESULT ManagementFX::initILPosNormTex(ID3D11Device* device)
 {
 	HRESULT hr = S_OK;
 
-	hr = device->CreateInputLayout(managementIED_->getIED(IED_TYPE__POS_NORM_TEX),
-								   managementIED_->getIEDNumElements(IED_TYPE__POS_NORM_TEX),
-								   spriteVS_->getBlob()->GetBufferPointer(),
-								   spriteVS_->getBlob()->GetBufferSize(),
-								   &ilPosNormTex_);
+	hr = device->CreateInputLayout(
+		managementIED_->getIED(IED_TYPE__POS_NORM_TEX),
+		managementIED_->getIEDNumElements(IED_TYPE__POS_NORM_TEX),
+		spriteVS_->getBlob()->GetBufferPointer(),
+		spriteVS_->getBlob()->GetBufferSize(),
+		&ilPosNormTex_);
+
+	return hr;
+}
+HRESULT ManagementFX::initILPosNormtexTanInstanced(ID3D11Device* device)
+{
+	HRESULT hr = S_OK;
+
+	hr = device->CreateInputLayout(
+		managementIED_->getIED(IED_TYPE__POS_NORM_TEX_TAN_INSTANCED), 
+		managementIED_->getIEDNumElements(IED_TYPE__POS_NORM_TEX_TAN_INSTANCED), 
+		vsPosNormTexTanInstanced_->getBlob()->GetBufferPointer(), 
+		vsPosNormTexTanInstanced_->getBlob()->GetBufferSize(), 
+		&ilPosNormTexTanInstanced_);
+	if(FAILED(hr))
+		ERROR_MSG(L"FXManagement::initILPosNormtexTanInstanced CreateInputLayout failed");
 
 	return hr;
 }
@@ -377,6 +427,12 @@ Shader* ManagementFX::getShaderFromID(ShaderID shaderID)
 		break;
 	case SHADERID_PS_SPRITE:
 		shader = spritePS_;
+		break;
+	case SHADERID_VS_POS_NORM_TEX_TAN_INSTANCE:
+		shader = vsPosNormTexTanInstanced_;
+		break;
+	case SHADERID_PS_NORMALMAP:
+		shader = psNormalMap_;
 		break;
 	}
 

@@ -22,4 +22,12 @@ struct SpriteVSOut
 	float2 texcoord	: TEXCOORD;
 };
 
+struct VSOutPosNormWTexTanW
+{
+	float4 position		: SV_POSITION;
+	float3 normalW		: NORMAL;
+	float2 texcoord		: TEXCOORD;
+	float3 tangentW		: TANGENT;
+};
+
 #endif //XKILL_RENDERER_VSOUT_HLSL

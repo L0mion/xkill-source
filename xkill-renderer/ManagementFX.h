@@ -17,7 +17,8 @@ enum LayoutID
 	LAYOUTID_POS_COLOR,
 	LAYOUTID_POS_NORM_TEX_INSTANCED,
 	LAYOUTID_POS_NORM_TEX_TAN_SKINNED,
-	LAYOUTID_POS_NORM_TEX
+	LAYOUTID_POS_NORM_TEX,
+	LAYOUTID_POS_NORM_TEX_TAN_INSTANCED
 };
 
 //! Class maintaing shaders and input layout.
@@ -53,13 +54,16 @@ private:
 	HRESULT initColorPS(ID3D11Device*			device,	std::wstring shaderPath);	//!< Initializes color-shaders.
 	HRESULT initSpriteVS(ID3D11Device*			device, std::wstring shaderPath);	//!< Initializes sprite vertex shader.
 	HRESULT initSpritePS(ID3D11Device*			device, std::wstring shaderPath);	//!< Initializes sprite pixel shader.
+	HRESULT initVSPosNormTexTanInstanced(ID3D11Device* device, std::wstring shaderPath);
+	HRESULT initPSNormalMap(ID3D11Device*		device, std::wstring shaderPath);
 
-	HRESULT initILs(ID3D11Device* device);								//!< Initializes input-layouts.
-	void initILManagement();											//!< Initializes helper-class IEDManagement.
-	HRESULT initILPosColor(ID3D11Device* device);						//!< Initializes input layout of MeshVertex VertexPosColor.
-	HRESULT initILDefaultVSPosNormTexInstanced(ID3D11Device* device);	//!< Initializes input layout of a standard three-component instanced vertex.
-	HRESULT initILPosNormTexTanSkinned(ID3D11Device* device);			//!< Initializes input layout of MeshVertex VertexPosNormTexTanSkinned.
-	HRESULT initILPosNormTex(ID3D11Device* device);						//!< Initializes input layout of MeshVertex VertexPosNormTex.
+	HRESULT initILs(ID3D11Device* device);						//!< Initializes input-layouts.
+	void initILManagement();									//!< Initializes helper-class IEDManagement.
+	HRESULT initILPosColor(ID3D11Device* device);				//!< Initializes input layout of MeshVertex VertexPosColor.
+	HRESULT initILPosNormTexInstanced(ID3D11Device* device);	//!< Initializes input layout of a standard three-component instanced vertex.
+	HRESULT initILPosNormTexTanSkinned(ID3D11Device* device);	//!< Initializes input layout of MeshVertex VertexPosNormTexTanSkinned.
+	HRESULT initILPosNormTex(ID3D11Device* device);				//!< Initializes input layout of MeshVertex VertexPosNormTex.
+	HRESULT initILPosNormtexTanInstanced(ID3D11Device* device);
 
 	Shader* getShaderFromID(ShaderID shaderID);
 
@@ -77,11 +81,14 @@ private:
 	ShaderPS*	colorPS_;
 	ShaderVS*	spriteVS_;			//!< Vertex shader used for sprites.
 	ShaderPS*	spritePS_;			//!< Pixel shader used for sprites.
+	ShaderVS*	vsPosNormTexTanInstanced_;
+	ShaderPS*	psNormalMap_;
 
-	ID3D11InputLayout* ilPosColor_;				//!< Input layout specifying position and color.
-	ID3D11InputLayout* ilPosNormTexInstanced_;	//!< Standard instanced input layout used in default vertex shader.
-	ID3D11InputLayout* ilPosNormTexTanSkinned_;	//!< Input layout for the vertex type VertexPosNormTexTanSkinned.
-	ID3D11InputLayout* ilPosNormTex_;			//!< Input layout for the vertex type VertexPosNormTex.
+	ID3D11InputLayout* ilPosColor_;					//!< Input layout specifying position and color.
+	ID3D11InputLayout* ilPosNormTexInstanced_;		//!< Standard instanced input layout used in default vertex shader.
+	ID3D11InputLayout* ilPosNormTexTanSkinned_;		//!< Input layout for the vertex type VertexPosNormTexTanSkinned.
+	ID3D11InputLayout* ilPosNormTex_;				//!< Input layout for the vertex type VertexPosNormTex.
+	ID3D11InputLayout* ilPosNormTexTanInstanced_;
 };
 
 #endif //XKILL_RENDERER_FXMANAGEMENT_H
