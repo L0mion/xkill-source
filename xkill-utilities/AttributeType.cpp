@@ -123,7 +123,7 @@ Attribute_Physics::Attribute_Physics()
 	
 	meshID = -1;
 
-	collisionFilterGroup = Attribute_Physics::NOTHING;
+	collisionFilterGroup = XKILL_Enums::PhysicsAttributeType::NOTHING;
 	collisionFilterMask = 0;
 
 	gravity = Float3(0.0f, -10.0f, 0.0f);

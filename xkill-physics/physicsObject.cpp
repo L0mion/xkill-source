@@ -69,7 +69,7 @@ btVector3 PhysicsObject::zeroLocalInertia()
 	return localInertia;
 }
 
-bool PhysicsObject::init(unsigned int attributeIndex,unsigned int collisionFilterGroup)
+bool PhysicsObject::init(unsigned int attributeIndex, XKILL_Enums::PhysicsAttributeType collisionFilterGroup)
 {
 	
 	if(attributeIndex < 0)
@@ -132,7 +132,7 @@ unsigned int PhysicsObject::getAttributeIndex() const
 	return attributeIndex_;
 }
 
-unsigned int PhysicsObject::getCollisionFilterGroup() const
+XKILL_Enums::PhysicsAttributeType PhysicsObject::getCollisionFilterGroup() const
 {
 	return collisionFilterGroup_;
 }

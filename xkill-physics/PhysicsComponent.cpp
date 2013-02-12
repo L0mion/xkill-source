@@ -139,7 +139,7 @@ void PhysicsComponent::onUpdate(float delta)
 		physicsObjects_->at(physicsAttributeIndex)->onUpdate(delta);	//Update physics objects by calling their onUpdate function.
 
 		//Should be in PlayerPhysicsAttribute::onUpdate()
-		if(ptr_physics->collisionFilterGroup == ptr_physics->PhysicsAttributeType::PLAYER)
+		if(ptr_physics->collisionFilterGroup == ptr_physics->XKILL_Enums::PhysicsAttributeType::PLAYER)
 		{
 			//Calculate player aiming ray
 			Entity* playerEntity = itrPhysics.ownerAt(physicsAttributeIndex);
@@ -153,17 +153,9 @@ void PhysicsComponent::onUpdate(float delta)
 				btCollisionWorld::ClosestRayResultCallback closestResults(from, to);
 				closestResults.m_flags |= btTriangleRaycastCallback::kF_KeepUnflippedNormal;
 
-				//btCollisionWorld::ClosestRayResultCallback closestResults(from, to);
-				closestResults.m_collisionFilterGroup = ptr_physics->PhysicsAttributeType::RAY;
-				closestResults.m_collisionFilterMask = ptr_physics->PhysicsAttributeType::PLAYER | ptr_physics->PhysicsAttributeType::WORLD;
+				closestResults.m_collisionFilterGroup = ptr_physics->XKILL_Enums::PhysicsAttributeType::RAY;
+				closestResults.m_collisionFilterMask = ptr_physics->XKILL_Enums::PhysicsAttributeType::PLAYER | ptr_physics->XKILL_Enums::PhysicsAttributeType::WORLD;
 
-				//Check
-				//PLAYER is world
-				//WORLD is projectile
-				//PROJECTILE is world
-
-				//closestResults.m_collisionFilterMask = ptr_physics->PhysicsAttributeType::WORLD | ptr_physics->PhysicsAttributeType::PLAYER | ptr_physics->PhysicsAttributeType::PICKUPABLE;
-				//closestResults.m_flags |= btTriangleRaycastCallback::kF_None;
 				dynamicsWorld_->rayTest(from,to,closestResults);
 				if(closestResults.hasHit())
 				{
@@ -183,71 +175,18 @@ void PhysicsComponent::onUpdate(float delta)
 					weaponRotation.normalize();
 					//weaponRotation = playerRotationinverse * weaponRotation;
 					
-					//for(int i=0;i<behaviorOffsetAttributeId.size();i++)
-					{
-						
-
-						//weaponRotation = weaponRotation*playerRotationInverse;
-
-						behaviorOffset->offset_rotation.x = weaponRotation.x();
-						behaviorOffset->offset_rotation.y = weaponRotation.y();
-						behaviorOffset->offset_rotation.z = weaponRotation.z();
-						behaviorOffset->offset_rotation.w = weaponRotation.w();
-					}
+					behaviorOffset->offset_rotation.x = weaponRotation.x();
+					behaviorOffset->offset_rotation.y = weaponRotation.y();
+					behaviorOffset->offset_rotation.z = weaponRotation.z();
+					behaviorOffset->offset_rotation.w = weaponRotation.w();
 				}
 				else
 				{
 					//Standard weapon rotation
 				}
-
-				/*
-				for (int i=0;i<closestResults.m_hitFractions.size();i++)
-				{
-					btVector3 p = from.lerp(to,closestResults.m_hitFractions[i]);
-					gDebugDraw.drawSphere(p,0.1,btVector3(1.0f, 0.0f, 0.0f));
-				}
-				*/
 			}
 		}
 	}
-
-
-	//Ray cast
-	/*
-	btVector3 from(1,2,1);
-	btVector3 to(1,-2,1);
-	btCollisionWorld::ClosestRayResultCallback closestResults(from,to);
-	dynamicsWorld_->rayTest(from,to,closestResults);
-	if (closestResults.hasHit())
-	{
-		btVector3 p = from.lerp(to,closestResults.m_closestHitFraction);
-		gDebugDraw.drawSphere(p,0.1,btVector3 (0,0,1));
-		gDebugDraw.drawLine(p,p+closestResults.m_hitNormalWorld,btVector3 (0,0,1));
-	}
-	*/
-
-
-	//dynamicsWorld_->updateAabbs();
-	//dynamicsWorld_->computeOverlappingPairs();
-
-	
-	///all hits
-	/*
-	{
-		btVector3 from(1,20,1);
-		btVector3 to(1,-20,1);
-		gDebugDraw.drawLine(from,to,btVector4(1,1,1,1));
-		btCollisionWorld::AllHitsRayResultCallback allResults(from,to);
-		allResults.m_flags |= btTriangleRaycastCallback::kF_KeepUnflippedNormal;
-		dynamicsWorld_->rayTest(from,to,allResults);
-
-		for (int i=0;i<allResults.m_hitFractions.size();i++)
-		{
-			btVector3 p = from.lerp(to,allResults.m_hitFractions[i]);
-			gDebugDraw.drawSphere(p,0.1,btVector3(1.0f, 0.0f, 0.0f));
-		}
-	}
-	*/
 
 	updateCulling();
 
@@ -351,6 +290,41 @@ void PhysicsComponent::onEvent(Event* e)
 						}
 						break;
 					}
+				case XKILL_Enums::ModifyPhysicsObjectData::COLLISIONFILTERMASK:
+					{
+						/*
+						short* collisionFilterMask = static_cast<short*>(modifyPhysicsObject->data);
+
+						AttributePtr<Attribute_Physics> ptr_physics = itrPhysics.at(physicsAttributeIndex);
+						PhysicsObject* physicsObject = physicsObjects_->at(physicsAttributeIndex);
+
+						//Change collisionFilterMask
+						ptr_physics->collisionFilterMask = *collisionFilterMask;
+
+						//Save physics object data to physics attribute
+						ptr_physics->angularVelocity = convert(&physicsObject->getAngularVelocity());
+						ptr_physics->collisionFilterGroup = physicsObject->getCollisionFilterGroup(); //check
+						//ptr_physics->collisionResponse = (physicsObject->getCollisionFlags() & btCollisionObject::CF_NO_CONTACT_RESPONSE) == 0; //check
+						ptr_physics->gravity = convert(&physicsObject->getGravity());
+						ptr_physics->linearVelocity = convert(&physicsObject->getLinearVelocity());
+						//ptr_physics->mass = physicsObject->getInvMass();
+						//ptr_physics->meshID = 
+						ptr_physics->reloadDataIntoBulletPhysics = true;
+
+						//SEND EVENT HERE, remove entity 2013-02-12 17.30
+						dynamicsWorld_->removeRigidBody(physicsObjects_->at(physicsAttributeIndex));
+						delete physicsObjects_->at(physicsAttributeIndex);
+
+						//physicsAttributeIndex
+
+						//PhysicsObject* newPhysicsObject = new PhysicsObject();
+						//btRigidBody newPhysicsObject = new btRigidBody();
+
+						//PhysicsObject* physicsObject;
+						//physicsObject->collisionFilterGroup_
+						*/
+					}
+					break;
 				}
 			}
 			else
@@ -373,8 +347,8 @@ void PhysicsComponent::onEvent(Event* e)
 		btCollisionWorld::ClosestRayResultCallback closestResults(from, to);
 		closestResults.m_flags |= btTriangleRaycastCallback::kF_KeepUnflippedNormal;
 
-		closestResults.m_collisionFilterGroup = Attribute_Physics::PhysicsAttributeType::RAY;
-		closestResults.m_collisionFilterMask = Attribute_Physics::PhysicsAttributeType::WORLD | Attribute_Physics::PhysicsAttributeType::PLAYER;
+		closestResults.m_collisionFilterGroup = XKILL_Enums::PhysicsAttributeType::RAY;
+		closestResults.m_collisionFilterMask = XKILL_Enums::PhysicsAttributeType::WORLD | XKILL_Enums::PhysicsAttributeType::PLAYER;
 
 		dynamicsWorld_->rayTest(from, to, closestResults);
 		if(closestResults.hasHit())
@@ -386,7 +360,6 @@ void PhysicsComponent::onEvent(Event* e)
 		{
 			physicsObjectHitByRay->closest_entityId = 0;
 		}
-
 		break;
 	//case EVENT_LOAD_LEVEL:
 	//	break;
@@ -429,22 +402,22 @@ void PhysicsComponent::synchronizeWithAttributes(AttributePtr<Attribute_Physics>
 		default:
 			physicsObjects_->at(physicsAttributeIndex) = new PhysicsObject();
 			break;
-		case Attribute_Physics::WORLD:
+		case XKILL_Enums::PhysicsAttributeType::WORLD:
 			physicsObjects_->at(physicsAttributeIndex) = new WorldPhysicsObject();
 			break;
-		case Attribute_Physics::PLAYER:
+		case XKILL_Enums::PhysicsAttributeType::PLAYER:
 			physicsObjects_->at(physicsAttributeIndex) = new PlayerPhysicsObject();
 			break;
-		case Attribute_Physics::PROJECTILE:
+		case XKILL_Enums::PhysicsAttributeType::PROJECTILE:
 			physicsObjects_->at(physicsAttributeIndex) = new ProjectilePhysicsObject();
 			break;
-		case Attribute_Physics::EXPLOSIONSPHERE:
+		case XKILL_Enums::PhysicsAttributeType::EXPLOSIONSPHERE:
 			physicsObjects_->at(physicsAttributeIndex) = new ExplosionSpherePhysicsObject();
 			break;
-		case Attribute_Physics::PICKUPABLE:
+		case XKILL_Enums::PhysicsAttributeType::PICKUPABLE:
 			physicsObjects_->at(physicsAttributeIndex) = new PickupablePhysicsObject();
 			break;
-		case Attribute_Physics::EVERYTHING:
+		case XKILL_Enums::PhysicsAttributeType::EVERYTHING:
 			SHOW_MESSAGEBOX("Error: Attribute_Physics should not have EVERYTHING as collisionFilterGroup");
 			break;
 		}
@@ -455,13 +428,10 @@ void PhysicsComponent::synchronizeWithAttributes(AttributePtr<Attribute_Physics>
 			{
 				dynamicsWorld_->addRigidBody(physicsObjects_->at(physicsAttributeIndex), ptr_physics->collisionFilterGroup, ptr_physics->collisionFilterMask);
 
-				//dynamicsWorld_->addRigidBody(physicsObjects_->at(physicsAttributeIndex));
-
 				//Per object gravity must be set after "addRigidBody"
 				if(!physicsObjects_->at(physicsAttributeIndex)->isStaticOrKinematicObject())
 				{
 					physicsObjects_->at(physicsAttributeIndex)->setGravity(btVector3(ptr_physics->gravity.x, ptr_physics->gravity.y, ptr_physics->gravity.z));
-					//physicsObjects_->at(physicsAttributeIndex)->setGravity(btVector3(0,0,0));
 				}
 
 				ptr_physics->reloadDataIntoBulletPhysics = false;
@@ -505,16 +475,16 @@ void PhysicsComponent::detectedCollisionsDuringStepSimulation(btScalar timeStep)
 				unsigned int ownerB = itrPhysics.ownerIdAt(objectB->getAttributeIndex());
 
 				//check physicsobjecttype;
-				if(objectA->getCollisionFilterGroup() == Attribute_Physics::FRUSTUM ||
-					objectB->getCollisionFilterGroup() == Attribute_Physics::FRUSTUM)
+				if(objectA->getCollisionFilterGroup() == XKILL_Enums::PhysicsAttributeType::FRUSTUM ||
+					objectB->getCollisionFilterGroup() == XKILL_Enums::PhysicsAttributeType::FRUSTUM)
 				{
-					if(objectA->getCollisionFilterGroup() == Attribute_Physics::FRUSTUM &&
-					   objectB->getCollisionFilterGroup() != Attribute_Physics::FRUSTUM)
+					if(objectA->getCollisionFilterGroup() == XKILL_Enums::PhysicsAttributeType::FRUSTUM &&
+					   objectB->getCollisionFilterGroup() != XKILL_Enums::PhysicsAttributeType::FRUSTUM)
 					{
 						doCulling(objectA->getAttributeIndex(),objectB->getAttributeIndex());
 					}
-					else if(objectA->getCollisionFilterGroup() != Attribute_Physics::FRUSTUM &&
-					   objectB->getCollisionFilterGroup() == Attribute_Physics::FRUSTUM)
+					else if(objectA->getCollisionFilterGroup() != XKILL_Enums::PhysicsAttributeType::FRUSTUM &&
+					   objectB->getCollisionFilterGroup() == XKILL_Enums::PhysicsAttributeType::FRUSTUM)
 					{
 						doCulling(objectB->getAttributeIndex(),objectA->getAttributeIndex());
 					}
@@ -563,9 +533,9 @@ void PhysicsComponent::updateCulling()
 		if(frustumPhysicsObjects_->at(index) == nullptr)
 		{
 			frustumPhysicsObjects_->at(index) = new FrustumPhysicsObject();
-			frustumPhysicsObjects_->at(index)->frustumInit(index,Attribute_Physics::FRUSTUM);
+			frustumPhysicsObjects_->at(index)->frustumInit(index,XKILL_Enums::PhysicsAttributeType::FRUSTUM);
 			int a = dynamicsWorld_->getNumCollisionObjects();
-			dynamicsWorld_->addRigidBody(frustumPhysicsObjects_->at(index),Attribute_Physics::FRUSTUM,Attribute_Physics::EVERYTHING);
+			dynamicsWorld_->addRigidBody(frustumPhysicsObjects_->at(index),XKILL_Enums::PhysicsAttributeType::FRUSTUM,XKILL_Enums::PhysicsAttributeType::EVERYTHING);
 			frustumPhysicsObjects_->at(index)->setGravity(btVector3(0,0,0));
 			int b = dynamicsWorld_->getNumCollisionObjects();
 			if(a==b)

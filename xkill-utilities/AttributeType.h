@@ -216,19 +216,7 @@ struct DLL_U Attribute_Render : public IAttribute
 */
 struct DLL_U Attribute_Physics : public IAttribute
 {
-	enum PhysicsAttributeType
-	{
-		NOTHING = 0,
-		WORLD = 1,
-		PLAYER = 2,
-		PROJECTILE = 4,
-		EXPLOSIONSPHERE = 8,
-		FRUSTUM = 16,
-		PICKUPABLE = 32,
-		RAY = 64,
-		EVERYTHING = -1
-	};
-	PhysicsAttributeType collisionFilterGroup;
+	XKILL_Enums::PhysicsAttributeType collisionFilterGroup;
 
 	Attribute_Physics();
 	~Attribute_Physics();

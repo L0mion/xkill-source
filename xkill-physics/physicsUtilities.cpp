@@ -13,12 +13,17 @@ btVector3 convert(Float3 float3)
 	return btVector3(float3.x, float3.y, float3.z);
 }
 
-btMatrix3x3 convert(Float4x4 matrix)
+Float3 convert(const btVector3* float3)
+{
+	return Float3(float3->x(), float3->y(), float3->z());
+}
+
+btMatrix3x3 convert(Float4x4 float4x4)
 {
 
-	btMatrix3x3 mat = btMatrix3x3(matrix._11,matrix._12,matrix._13,
-					   matrix._21,matrix._22,matrix._23,
-					   matrix._31,matrix._32,matrix._33);
+	btMatrix3x3 mat = btMatrix3x3(float4x4._11,float4x4._12,float4x4._13,
+					   float4x4._21,float4x4._22,float4x4._23,
+					   float4x4._31,float4x4._32,float4x4._33);
 	return mat;
 }
 
