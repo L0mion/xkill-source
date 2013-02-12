@@ -4,6 +4,7 @@
 
 ManagementAnimation::ManagementAnimation()
 {
+	time = 0.0f;
 }
 ManagementAnimation::~ManagementAnimation()
 {
@@ -13,6 +14,19 @@ ManagementAnimation::~ManagementAnimation()
 
 void ManagementAnimation::reset()
 {
+}
+
+SkinnedData* ManagementAnimation::getAnimation(unsigned int index)
+{
+	time += 0.002f;
+	if(time > 1.0f)
+		time = 0.0f;
+
+	SkinnedData* skinnedData = nullptr;
+	if(index < animations_.size())
+		skinnedData = animations_.at(index);
+
+	return skinnedData;
 }
 
 void ManagementAnimation::addAnimation(SkinnedData* skinnedData)

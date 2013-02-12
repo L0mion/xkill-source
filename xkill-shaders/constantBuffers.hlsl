@@ -3,7 +3,7 @@
 
 #pragma pack_matrix(row_major)
 
-#define MAX_NUM_BONES 64
+#define MAX_NUM_BONES 128
 
 cbuffer cbPerInstance : register (b0)
 {

@@ -105,6 +105,8 @@ private:
 	void renderHudElementCrossHair(int viewportIndex, float scaleModifierX); //<! Renders a cross hair in the middle óf each viewport.
 	void drawHudElement(int viewportIndex, unsigned int textureId, DirectX::XMFLOAT4X4 transformationMatrix); //!< Draws a single hud element.
 
+	void renderAnimation(unsigned int meshID, DirectX::XMFLOAT4X4 view, DirectX::XMFLOAT4X4 projection);
+
 	//temp
 	void renderAnimatedMesh(
 		DirectX::XMFLOAT4X4 viewMatrix, 

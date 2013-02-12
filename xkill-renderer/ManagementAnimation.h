@@ -16,6 +16,11 @@ public:
 	virtual void reset();
 
 	void addAnimation(SkinnedData* skinnedData);
+
+	float time;
+
+	SkinnedData* getAnimation(unsigned int index);
+
 private:
 
 	std::vector<SkinnedData*> animations_;

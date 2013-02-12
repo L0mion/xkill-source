@@ -75,7 +75,7 @@ struct CBSubsetDesc
 static const unsigned int CB_SUBSET_DESC_SIZE = 16;
 
 
-static const unsigned int CB_BONE_DESC_NUM_BONES = 64;
+static const unsigned int CB_BONE_DESC_NUM_BONES = 128;
 //! Struct describing a constant buffer.
 /*!
 \ingroup xkill-renderer
