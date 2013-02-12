@@ -145,6 +145,7 @@ void lightingCS(
 	for(i = 0; i < numLightsDir; i++)
 	{
 		LightDescDir descDir = lightsDir[i];
+		descDir.direction = mul(float4(descDir.direction, 0.0f), view);
 		LightDir(
 			toEyeV,
 			descDir,
