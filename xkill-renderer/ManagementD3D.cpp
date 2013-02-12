@@ -123,15 +123,16 @@ HRESULT ManagementD3D::createDeviceAndSwapChain(const DXGI_SWAP_CHAIN_DESC swapC
 	D3D_FEATURE_LEVEL initiatedFeatureLevel;
 	D3D_FEATURE_LEVEL featureLevels[] = {D3D_FEATURE_LEVEL_11_0,
 										 D3D_FEATURE_LEVEL_10_1,
-										 D3D_FEATURE_LEVEL_10_0};
+										 D3D_FEATURE_LEVEL_10_0,
+										 D3D_FEATURE_LEVEL_9_3,
+										 D3D_FEATURE_LEVEL_9_2,
+										 D3D_FEATURE_LEVEL_9_1};
 
 	UINT numDriverTypes = 2;
 	D3D_DRIVER_TYPE driverTypes[] = {	D3D_DRIVER_TYPE_HARDWARE,
 										D3D_DRIVER_TYPE_REFERENCE};
 
 	UINT flags = 0;
-	//flags |= D3D11_CREATE_DEVICE_SINGLETHREADED;
-	//flags |= D3D11_CREATE_DEVICE_PREVENT_INTERNAL_THREADING_OPTIMIZATIONS;
 
 #if defined(D3D_PROFILE)
 	flags |= D3D11_CREATE_DEVICE_DEBUG; //Enables shader debugging
@@ -159,6 +160,13 @@ HRESULT ManagementD3D::createDeviceAndSwapChain(const DXGI_SWAP_CHAIN_DESC swapC
 
 		index++;
 	}
+	if(initiatedFeatureLevel == D3D_FEATURE_LEVEL_9_3 ||
+	   initiatedFeatureLevel == D3D_FEATURE_LEVEL_9_2 ||
+	   initiatedFeatureLevel == D3D_FEATURE_LEVEL_9_1)
+	{
+		ERROR_MSG(L"DirectX Device initiated with DirectX 9.x feature level");
+	}
+
 	if(FAILED(hr))
 	{
 		std::string message;
