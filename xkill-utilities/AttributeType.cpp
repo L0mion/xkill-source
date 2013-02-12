@@ -855,7 +855,7 @@ DataItemList* Attribute_WeaponStats::getDataList()
 
 	list->add(ammunition[currentAmmunitionType].currentTotalNrOfShots,			"currentTotalNrOfShots");
 	list->add(firingMode[currentFiringModeType].clipSize,				"clipSize");
-	list->add(firingMode[currentFiringModeType].nrOfShotsLeftInClip,	"nrOfShotsLeftInClip");
+	//list->add(firingMode[currentFiringModeType].nrOfShotsLeftInClip,	"nrOfShotsLeftInClip");
 
 	list->add(firingMode[currentFiringModeType].reloadTime,				"reloadTime");
 	list->add(firingMode[currentFiringModeType].reloadTimeLeft,			"reloadTimeLeft");
@@ -883,7 +883,7 @@ void Attribute_WeaponStats::saveTo(DataItemList* list)
 
 	list->get(&ammunition[currentAmmunitionType].currentTotalNrOfShots);
 	list->get(&firingMode[currentFiringModeType].clipSize);
-	list->get(&firingMode[currentFiringModeType].nrOfShotsLeftInClip);
+	//list->get(&firingMode[currentFiringModeType].nrOfShotsLeftInClip);
 
 	list->get(&firingMode[currentFiringModeType].reloadTime);
 	list->get(&firingMode[currentFiringModeType].reloadTimeLeft);

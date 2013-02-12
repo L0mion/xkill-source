@@ -133,16 +133,17 @@ void GameComponent::onUpdate(float delta)
 				DEBUGPRINT("Ammunition type: " << ptr_weaponStats->getAmmunitionTypeAsString());
 				DEBUGPRINT("Firing mode: " << ptr_weaponStats->getFiringModeAsString());
 			}
+			int ammoIndex = ammo->type;
 
 			//--------------------------------------------------------------------------------------
 			// Non-automatic weapon reload logic (also refer to automatic weapon reload logic)
 			//--------------------------------------------------------------------------------------
 			if(ptr_input->reload)
 			{
-				if(firingMode->nrOfShotsLeftInClip > 0 && firingMode->nrOfShotsLeftInClip != firingMode->clipSize)
+				if(firingMode->nrOfShotsLeftInClip[ammoIndex] > 0 && firingMode->nrOfShotsLeftInClip[ammoIndex] != firingMode->clipSize)
 				{
-					ammo->currentTotalNrOfShots += firingMode->nrOfShotsLeftInClip;
-					firingMode->nrOfShotsLeftInClip = 0; //Set nrOfShotsLeftInClip to 0, forcing automatic weapon reload
+					ammo->currentTotalNrOfShots += firingMode->nrOfShotsLeftInClip[ammoIndex];
+					firingMode->nrOfShotsLeftInClip[ammoIndex] = 0; //Set nrOfShotsLeftInClip to 0, forcing automatic weapon reload
 				}
 			}
 
@@ -153,21 +154,21 @@ void GameComponent::onUpdate(float delta)
 				ptr_input->firePressed && (firingMode->type == XKILL_Enums::FiringModeType::SINGLE || firingMode->type == XKILL_Enums::FiringModeType::SEMI))
 			{
 				DEBUGPRINT("ammo->currentTotalNrOfShots: " << ammo->currentTotalNrOfShots);
-				DEBUGPRINT("firingMode->nrOfShotsLeftInClip: " << firingMode->nrOfShotsLeftInClip);
+				DEBUGPRINT("firingMode->nrOfShotsLeftInClip: " << firingMode->nrOfShotsLeftInClip[ammoIndex]);
 				ptr_input->fire = false;
 				ptr_input->firePressed = false;
 
 				if(firingMode->cooldownBetweenShots >= 0 && firingMode->cooldownLeft <= 0.0f
-					&& firingMode->nrOfShotsLeftInClip > 0)
+					&& firingMode->nrOfShotsLeftInClip[ammoIndex] > 0)
 				{
 					firingMode->cooldownLeft = firingMode->cooldownBetweenShots;
 					ammo->currentTotalNrOfShots--;
-					firingMode->nrOfShotsLeftInClip--;
+					firingMode->nrOfShotsLeftInClip[ammoIndex]--;
 
 					shootProjectile(ptr_player->ptr_weaponFireLocation_spatial, ptr_weaponStats);
 					SEND_EVENT(&Event_PlaySound(Event_PlaySound::SOUND_FIRE, ptr_position->position, true));
 				}
-				else if(firingMode->nrOfShotsLeftInClip <= 0)
+				else if(firingMode->nrOfShotsLeftInClip[ammoIndex] <= 0)
 				{
 					if(ammo->currentTotalNrOfShots <= 0)
 					{
@@ -307,8 +308,16 @@ void GameComponent::onUpdate(float delta)
 				ptr_physics->reloadDataIntoBulletPhysics = true;
 
 				ptr_health->health = ptr_health->maxHealth; // restores player health
-				firingMode->nrOfShotsLeftInClip = firingMode->clipSize;
-				ammo->currentTotalNrOfShots = ammo->initialTotalNrOfShots;
+
+				MutatorSettings ms;
+
+				for(int i = 0; i < XKILL_Enums::AmmunitionType::NROFAMMUNITIONTYPES; i++)
+				{
+					for(int j = 0; j < XKILL_Enums::FiringModeType::NROFFIRINGMODETYPES; j++)
+					{
+						ms.setupAttribute(ptr_weaponStats, static_cast<XKILL_Enums::AmmunitionType>(i), static_cast<XKILL_Enums::FiringModeType>(j));
+					}
+				}
 
 				ptr_player->ptr_camera->fieldOfView =3.14f/4.0f;
 				ptr_player->currentRespawnDelay = ptr_player->respawnDelay;
@@ -436,12 +445,14 @@ void GameComponent::onUpdate(float delta)
 		Ammunition* ammo = &weaponStats->ammunition[weaponStats->currentAmmunitionType];
 		FiringMode* firingMode = &weaponStats->firingMode[weaponStats->currentFiringModeType];
 
+		int ammoIndex = ammo->type;
+
 		firingMode->cooldownLeft -= delta; // Weapon cooldown logic
 
 		//--------------------------------------------------------------------------------------
 		// Automatic weapon reload logic
 		//--------------------------------------------------------------------------------------
-		if(ammo->currentTotalNrOfShots > 0 && firingMode->nrOfShotsLeftInClip <= 0)
+		if(ammo->currentTotalNrOfShots > 0 && firingMode->nrOfShotsLeftInClip[ammoIndex] <= 0)
 		{
 			firingMode->reloadTimeLeft -= delta;
 			if(firingMode->reloadTimeLeft <= 0)
@@ -450,15 +461,15 @@ void GameComponent::onUpdate(float delta)
 
 				if(firingMode->clipSize > ammo->currentTotalNrOfShots)
 				{
-					firingMode->nrOfShotsLeftInClip = ammo->currentTotalNrOfShots;
+					firingMode->nrOfShotsLeftInClip[ammoIndex] = ammo->currentTotalNrOfShots;
 				}
 				else
 				{
-					firingMode->nrOfShotsLeftInClip = firingMode->clipSize;
+					firingMode->nrOfShotsLeftInClip[ammoIndex] = firingMode->clipSize;
 				}
 
 				DEBUGPRINT("Weapon was automatically reloaded.");
-				DEBUGPRINT("Ammo in current clip: " << firingMode->nrOfShotsLeftInClip);
+				DEBUGPRINT("Ammo in current clip: " << firingMode->nrOfShotsLeftInClip[ammoIndex]);
 				DEBUGPRINT("Total number of shots left: " << ammo->currentTotalNrOfShots);
 			}
 		}

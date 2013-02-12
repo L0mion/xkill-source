@@ -169,7 +169,7 @@ void Menu_Main::slot_selectLevel( int levelId )
 	{
 		QStandardItem* name = levels->child(levelId,0);
 		QStandardItem* desc = name->child(0,0);
-		ui.textBrowser_LevelInfo->setText(desc->text());
+		//ui.textBrowser_LevelInfo->setText(desc->text());
 	}
 }
 

@@ -38,7 +38,7 @@ struct DLL_U FiringMode
 	float damageModifier;
 	float explosionSphereModifier;
 
-	unsigned int nrOfShotsLeftInClip;	//!< Current number of shots left in the current clip.
+	unsigned int nrOfShotsLeftInClip[XKILL_Enums::AmmunitionType::NROFAMMUNITIONTYPES];	//!< Current number of shots left in the current clip for each ammunition.
 	float reloadTimeLeft;				//!< Reload progress, when lesser or equal to 0 the weapon is reloaded.
 	float cooldownLeft;					//!< Number of seconds until a new shot can be fired.
 
