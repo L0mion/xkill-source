@@ -24,15 +24,26 @@ MutatorSettings::~MutatorSettings()
 
 }
 
+void MutatorSettings::setupAttribute(AttributePtr<Attribute_WeaponStats> attribute_ptr)
+{
+	setupAttribute(attribute_ptr, attribute_ptr->currentAmmunitionType, attribute_ptr->currentFiringModeType);
+}
+
+void MutatorSettings::setupAttribute(AttributePtr<Attribute_WeaponStats> attribute_ptr, XKILL_Enums::AmmunitionType ammoType, XKILL_Enums::FiringModeType firingModeType)
+{
+	attribute_ptr->ammunition[ammoType] = Ammunition(standardAmmunitions[ammoType]);
+	attribute_ptr->firingMode[firingModeType] = FiringMode(standardFiringModes[firingModeType]);
+}
+
 void MutatorSettings::setupAttribute(Attribute_WeaponStats* attribute)
 {
 	setupAttribute(attribute, attribute->currentAmmunitionType, attribute->currentFiringModeType);
 }
 
-void MutatorSettings::setupAttribute(Attribute_WeaponStats* attribute, XKILL_Enums::AmmunitionType ammo, XKILL_Enums::FiringModeType firingMode)
+void MutatorSettings::setupAttribute(Attribute_WeaponStats* attribute, XKILL_Enums::AmmunitionType ammoType, XKILL_Enums::FiringModeType firingModeType)
 {
-	attribute->ammunition[ammo] = Ammunition(standardAmmunitions[ammo]);
-	attribute->firingMode[firingMode] = FiringMode(standardFiringModes[firingMode]);
+	attribute->ammunition[ammoType] = Ammunition(standardAmmunitions[ammoType]);
+	attribute->firingMode[firingModeType] = FiringMode(standardFiringModes[firingModeType]);
 }
 
 Ammunition& MutatorSettings::getStandardAmmunition(XKILL_Enums::AmmunitionType type)
@@ -113,9 +124,13 @@ void MutatorSettings::initStandardFiringModes()
 	firingMode->explosionSphereModifier	= 1.0f;
 	firingMode->cooldownBetweenShots	= 0.0f;
 	firingMode->reloadTime				= 1.0f;
-	firingMode->nrOfShotsLeftInClip		= firingMode->clipSize;
 	firingMode->cooldownLeft			= firingMode->cooldownBetweenShots;
 	firingMode->reloadTimeLeft			= firingMode->reloadTime;
+
+	for(int i = 0; i < XKILL_Enums::AmmunitionType::NROFAMMUNITIONTYPES; i++)
+	{
+		firingMode->nrOfShotsLeftInClip[i] = firingMode->clipSize;
+	}
 
 	firingMode = &standardFiringModes[XKILL_Enums::FiringModeType::SEMI];
 
@@ -128,9 +143,13 @@ void MutatorSettings::initStandardFiringModes()
 	firingMode->explosionSphereModifier	= 0.5f;
 	firingMode->cooldownBetweenShots	= 0.0f;
 	firingMode->reloadTime				= 2.0f;
-	firingMode->nrOfShotsLeftInClip		= firingMode->clipSize;
 	firingMode->cooldownLeft			= firingMode->cooldownBetweenShots;
 	firingMode->reloadTimeLeft			= firingMode->reloadTime;
+
+	for(int i = 0; i < XKILL_Enums::AmmunitionType::NROFAMMUNITIONTYPES; i++)
+	{
+		firingMode->nrOfShotsLeftInClip[i] = firingMode->clipSize;
+	}
 
 	firingMode = &standardFiringModes[XKILL_Enums::FiringModeType::AUTO];
 
@@ -143,7 +162,11 @@ void MutatorSettings::initStandardFiringModes()
 	firingMode->explosionSphereModifier	= 0.15f;
 	firingMode->cooldownBetweenShots	= 0.1f;
 	firingMode->reloadTime				= 5.0f;
-	firingMode->nrOfShotsLeftInClip		= firingMode->clipSize;
 	firingMode->cooldownLeft			= firingMode->cooldownBetweenShots;
 	firingMode->reloadTimeLeft			= firingMode->reloadTime;
+
+	for(int i = 0; i < XKILL_Enums::AmmunitionType::NROFAMMUNITIONTYPES; i++)
+	{
+		firingMode->nrOfShotsLeftInClip[i] = firingMode->clipSize;
+	}
 }

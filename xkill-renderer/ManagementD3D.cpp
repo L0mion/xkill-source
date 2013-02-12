@@ -134,7 +134,7 @@ HRESULT ManagementD3D::createDeviceAndSwapChain(const DXGI_SWAP_CHAIN_DESC swapC
 	//flags |= D3D11_CREATE_DEVICE_PREVENT_INTERNAL_THREADING_OPTIMIZATIONS;
 
 #if defined(D3D_PROFILE)
-	//flags |= D3D11_CREATE_DEVICE_DEBUG; //Enables shader debugging
+	flags |= D3D11_CREATE_DEVICE_DEBUG; //Enables shader debugging
 #endif //D3D_PROFILE
 
 	unsigned int index = 0;
