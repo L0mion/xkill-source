@@ -532,7 +532,7 @@ Attribute_Player::Attribute_Player()
 	timeSinceLastJump = delayInSecondsBetweenEachJump+1.0f;
 	collidingWithWorld = false;
 	timeSinceLastDamageTaken = 100.0f;
-	jetpackTimer = 0.0f;
+	jetpack = false;
 	detectedAsDead = true;
 	meshID_whenAlive = 0;
 	meshID_whenDead = 0;

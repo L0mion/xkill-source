@@ -10,6 +10,11 @@ class Timer;
 
 class Event_HackActivated;
 
+//! Component handling hacks
+/*
+Must run between game component and physics component
+*/
+
 class HacksComponent : public IObserver
 {
 public:
@@ -24,9 +29,11 @@ public:
 private:
 	std::vector<std::vector<std::pair<Timer*, AttributePtr<Attribute_Player>>*>> activeHacks_;
 
-	void handleHack(AttributePtr<Attribute_Player>& player, XKILL_Enums::HackType hackType);
+	void handleHack(AttributePtr<Attribute_Player>& ptr_player, XKILL_Enums::HackType hackType);
 
 	void handleHackActivatedEvent(Event_HackActivated* e);
+
+	bool updateTimer(AttributePtr<Attribute_Player>& ptr_player, XKILL_Enums::HackType hackType);
 
 	void removeIndexFromVector(std::vector<std::pair<Timer*, AttributePtr<Attribute_Player>>*>& vector, unsigned int index);
 };

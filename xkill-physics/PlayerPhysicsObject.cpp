@@ -146,15 +146,15 @@ void PlayerPhysicsObject::handleInput(float delta)
 		}
 
 		//Jetpack
-		if(ptr_input->jetpack)
+		if(ptr_player->jetpack || ptr_input->jetpack) //input-jetpack is temporary for debugging purposes
 		{
 			applyCentralImpulse(btVector3(0.0f, jumpPower*10.0f*delta, 0.0f));
-			ptr_player->jetpackTimer+=delta;
-			if(ptr_player->jetpackTimer > 0.1f)
-			{
-				ptr_player->jetpackTimer = 0.0f;
-				health->health--;
-			}
+			//ptr_player->jetpackTimer+=delta;
+			//if(ptr_player->jetpackTimer > 0.1f)
+			//{
+			//	ptr_player->jetpackTimer = 0.0f;
+			//	health->health--;
+			//}
 		}
 
 		AttributePtr<Attribute_Physics> ptr_player_physics = itrPhysics_3.at(attributeIndex_);
@@ -184,8 +184,5 @@ void PlayerPhysicsObject::handleInput(float delta)
 		{
 			setGravity(btVector3(0.0f, ptr_player_physics->gravity.y*5.0f, 0.0f));
 		}
-
-		ptr_input->jump = false;
-		ptr_input->jetpack = false;
 	}
 }

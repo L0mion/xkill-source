@@ -30,3 +30,8 @@ bool Timer::hasTimerExpired()
 {
 	return timeLeft_ <= 0.0f;
 }
+
+float Timer::getTimeLeft()
+{
+	return timeLeft_;
+}
