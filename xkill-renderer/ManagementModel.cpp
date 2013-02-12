@@ -212,6 +212,14 @@ HRESULT ManagementModel::createVertexBuffer(
 			hr = device->CreateBuffer(&vbd, &vinitData, vertexBuffer);
 			break;
 		}
+	case VERTEX_TYPE_POS_NORM_TEX_TAN:
+		{
+			std::vector<VertexPosNormTexTan> convertedVertices = convertVertexPosNormTexTan(vertices);
+			vbd.ByteWidth = sizeof(VertexPosNormTexTan) * convertedVertices.size();
+			vinitData.pSysMem = &convertedVertices.at(0);
+			hr = device->CreateBuffer(&vbd, &vinitData, vertexBuffer);
+			break;
+		}
 	default:
 		std::string failed = "ManagementModel::CreateVertexBuffer Unknown vertex type.";
 		SHOW_MESSAGEBOX(failed);
@@ -369,6 +377,20 @@ std::vector<VertexPosNormTexTanSkinned> ManagementModel::convertVertexPosNormTex
 			vertices[i].tangent_,
 			vertices[i].weights_,
 			vertices[i].boneIndices_);
+		convertedVertices[i] = vertex;
+	}
+	return convertedVertices;
+}
+std::vector<VertexPosNormTexTan> ManagementModel::convertVertexPosNormTexTan(std::vector<VertexDesc>& vertices)
+{
+	std::vector<VertexPosNormTexTan> convertedVertices(vertices.size());
+	for(unsigned int i = 0; i < vertices.size(); i++)
+	{
+		VertexPosNormTexTan vertex = VertexPosNormTexTan(
+			vertices[i].position_, 
+			vertices[i].normal_,
+			vertices[i].textureCoordinates_,
+			vertices[i].tangent_);
 		convertedVertices[i] = vertex;
 	}
 	return convertedVertices;

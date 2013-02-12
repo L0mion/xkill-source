@@ -12,6 +12,7 @@ enum DLL_U VertexType
 	VERTEX_TYPE_POS_NORM_SKINNED,
 	VERTEX_TYPE_POS_NORM_TEX_SKINNED,
 	VERTEX_TYPE_POS_NORM_TEX_TAN_SKINNED,
+	VERTEX_TYPE_POS_NORM_TEX_TAN,
 
 	VERTEX_INVALID
 };
@@ -149,6 +150,37 @@ struct DLL_U VertexPosNormTexTanSkinned
 		weights_	= weights;
 		for(unsigned int i=0; i<NUM_BONES_PER_VERTEX; i++)
 		boneIndices_[i] = boneIndices[i];
+	}
+};
+
+struct DLL_U VertexPosNormTexTan
+{
+	Float3		 position_;							 //!< Position in model-space.
+	Float3		 normal_;							 //!< Normal in model-space.
+	Float2		 texcoord_;							 //!< Texture coordinates.
+	Float4		 tangent_;							 //!< Tangent in model-space.
+
+	//! Default constructor setting all member variables to zero.
+	VertexPosNormTexTan()
+	{
+		position_	= Float3(0.0f, 0.0f, 0.0f);
+		normal_		= Float3(0.0f, 0.0f, 0.0f);
+		texcoord_	= Float2(0.0f, 0.0f);
+		tangent_	= Float4(0.0f, 0.0f, 0.0f, 0.0f);
+	}
+	//! Constructor setting members to specific values.
+	/*!
+	\param position Position in model-space.
+	\patam normal Normal in model-space.
+	\param texcoord Texture coordinates.
+	\param tangent Tangent in model-space.
+	*/
+	VertexPosNormTexTan(Float3 position, Float3 normal, Float2 texcoord,	Float4 tangent)
+	{
+		position_	= position;
+		normal_		= normal;
+		texcoord_	= texcoord;
+		tangent_	= tangent;
 	}
 };
 

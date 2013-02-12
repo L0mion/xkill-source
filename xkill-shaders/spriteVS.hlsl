@@ -1,8 +1,9 @@
 
 #include "constantBuffers.hlsl"
-#include "structs.hlsl"
+#include "VSOut.hlsl"
+#include "VSIn.hlsl"
 
-SpriteVSOut spriteVS(SpriteVSIn vsIn)
+SpriteVSOut spriteVS(VSInPosNormTex vsIn)
 {
 	SpriteVSOut vsOut;
 
