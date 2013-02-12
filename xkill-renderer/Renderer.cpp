@@ -1,4 +1,5 @@
 #include <xkill-utilities/Util.h>
+#include <xkill-utilities/SkinnedData.h>
 
 #include "ManagementD3D.h"
 #include "ManagementFX.h"
@@ -14,6 +15,7 @@
 #include "ManagementMath.h"
 #include "ManagementInstance.h"
 #include "ManagementSprites.h"
+#include "ManagementAnimation.h"
 
 #include "Winfo.h"
 #include "ModelD3D.h"
@@ -40,20 +42,21 @@ Renderer::Renderer(HWND windowHandle)
 	
 	winfo_ = nullptr;
 
-	managementD3D_		= nullptr;
-	managementFX_		= nullptr;
-	managementCB_		= nullptr;
-	managementLight_	= nullptr;
-	managementViewport_	= nullptr;
-	managementModel_	= nullptr;
-	managementTex_		= nullptr;
-	managementSS_		= nullptr;
-	managementRS_		= nullptr;
-	managementGBuffer_	= nullptr;
-	managementDebug_	= nullptr;
-	managementMath_		= nullptr;
-	managementInstance_ = nullptr;
-	managementSprites_  = nullptr;
+	managementD3D_		 = nullptr;
+	managementFX_		 = nullptr;
+	managementCB_		 = nullptr;
+	managementLight_	 = nullptr;
+	managementViewport_	 = nullptr;
+	managementModel_	 = nullptr;
+	managementTex_		 = nullptr;
+	managementSS_		 = nullptr;
+	managementRS_		 = nullptr;
+	managementGBuffer_	 = nullptr;
+	managementDebug_	 = nullptr;
+	managementMath_		 = nullptr;
+	managementInstance_  = nullptr;
+	managementSprites_   = nullptr;
+	managementAnimation_ = nullptr;
 
 	attributesRenderOwner_	= nullptr;
 
@@ -82,6 +85,7 @@ Renderer::~Renderer()
 	SAFE_DELETE(managementMath_);
 	SAFE_DELETE(managementInstance_);
 	SAFE_DELETE(managementSprites_);
+	SAFE_DELETE(managementAnimation_);
 
 	//d3dDebug_->reportLiveDeviceObjects();
 	SAFE_DELETE(managementDebug_);
@@ -105,6 +109,7 @@ void Renderer::reset()
 	SAFE_RESET(managementRS_);
 	SAFE_RESET(managementGBuffer_);
 	SAFE_RESET(managementSprites_);
+	SAFE_RESET(managementAnimation_);
 }
 HRESULT Renderer::resize(unsigned int screenWidth, unsigned int screenHeight)
 {
@@ -176,6 +181,7 @@ HRESULT Renderer::init()
 	if(SUCCEEDED(hr))
 		hr = initManagementSprites();
 	initManagementInstance();
+	initManagementAnimation();
 
 	//temp
 	/*
@@ -346,6 +352,10 @@ HRESULT Renderer::initManagementSprites()
 	hr = managementSprites_->init(managementD3D_->getDevice());
 	return hr;
 }
+void Renderer::initManagementAnimation()
+{
+	managementAnimation_ = new ManagementAnimation();
+}
 
 void Renderer::update()
 {
@@ -380,9 +390,9 @@ void Renderer::render()
 		managementLight_->getLightSpotCurCount());
 
 	AttributePtr<Attribute_SplitScreen>	ptr_splitScreen;
-	AttributePtr<Attribute_Camera>			ptr_camera; 
+	AttributePtr<Attribute_Camera>		ptr_camera; 
 	AttributePtr<Attribute_Spatial>		ptr_spatial;
-	AttributePtr<Attribute_Position>		ptr_position;
+	AttributePtr<Attribute_Position>	ptr_position;
 
 	ViewportData vpData;
 
@@ -399,19 +409,19 @@ void Renderer::render()
 		managementViewport_->setViewport(devcon, i);
 
 		//Store all the viewport-specific data for the backbuffer-rendering.
-		vpData.camIndex		= ptr_camera.index();
-		vpData.view			= DirectX::XMFLOAT4X4(((float*)&ptr_camera->mat_view));
-		vpData.proj			= DirectX::XMFLOAT4X4(((float*)&ptr_camera->mat_projection));
-		vpData.viewInv		= managementMath_->calculateMatrixInverse(vpData.view);
-		vpData.projInv		= managementMath_->calculateMatrixInverse(vpData.proj);
-		vpData.eyePos		= *(DirectX::XMFLOAT3*)&ptr_position->position;
-		vpData.viewportTopX = static_cast<unsigned int>(ptr_splitScreen->ssTopLeftX);
-		vpData.viewportTopY = static_cast<unsigned int>(ptr_splitScreen->ssTopLeftY);
-		vpData.zNear		= ptr_camera->zNear;
-		vpData.zFar			= ptr_camera->zFar;
+		vpData.camIndex			= ptr_camera.index();
+		vpData.view				= DirectX::XMFLOAT4X4(((float*)&ptr_camera->mat_view));
+		vpData.proj				= DirectX::XMFLOAT4X4(((float*)&ptr_camera->mat_projection));
+		vpData.viewInv			= managementMath_->calculateMatrixInverse(vpData.view);
+		vpData.projInv			= managementMath_->calculateMatrixInverse(vpData.proj);
+		vpData.eyePos			= *(DirectX::XMFLOAT3*)&ptr_position->position;
+		vpData.viewportTopX		= static_cast<unsigned int>(ptr_splitScreen->ssTopLeftX);
+		vpData.viewportTopY		= static_cast<unsigned int>(ptr_splitScreen->ssTopLeftY);
+		vpData.zNear			= ptr_camera->zNear;
+		vpData.zFar				= ptr_camera->zFar;
 		vpData.viewportWidth	= (float)ptr_splitScreen->ssWidth;
 		vpData.viewportHeight	= (float)ptr_splitScreen->ssHeight;
-		vpDatas[i]			= vpData;
+		vpDatas[i]				= vpData;
 
 		renderViewportToGBuffer(vpData);
 	}
@@ -587,10 +597,7 @@ void Renderer::renderInstance(unsigned int meshID, InstancedData* instance)
 		offset, 
 		offset);
 }
-void Renderer::renderSubset(
-	SubsetD3D* subset, 
-	MaterialDesc& material, 
-	unsigned int numInstances)
+void Renderer::renderSubset(SubsetD3D* subset, MaterialDesc& material, unsigned int numInstances)
 {
 	ID3D11Device*			device = managementD3D_->getDevice();
 	ID3D11DeviceContext*	devcon = managementD3D_->getDeviceContext();
@@ -899,4 +906,8 @@ void Renderer::renderAnimatedMesh(DirectX::XMFLOAT4X4 viewMatrix, DirectX::XMFLO
 void Renderer::loadTextures(TexDesc* texdesc)
 {
 	managementTex_->handleTexDesc(texdesc, managementD3D_->getDevice());
+}
+void Renderer::addAnimation(SkinnedData* skinnedData)
+{
+	managementAnimation_->addAnimation(skinnedData);
 }

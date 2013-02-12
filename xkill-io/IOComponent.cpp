@@ -218,8 +218,8 @@ bool IOComponent::loadModel(
 	if(pollFile(modelPath, modelName + ".pgy"))
 	{
 		successfulLoad = loadPGY(modelName + ".pgy", modelPath, modelDesc, meshDesc, &skinnedData);
-		if(skinnedData)
-			delete skinnedData;
+		//if(skinnedData)
+		//	delete skinnedData;
 	}
 	else
 	{
@@ -238,7 +238,16 @@ bool IOComponent::loadModel(
 
 		writePGY(modelName + ".pgy", modelPath, meshDesc, (VertexType)modelDesc->vertexType_, skinnedData);
 		
-		delete skinnedData;
+		//delete skinnedData;
+	}
+
+	if(skinnedData)
+	{
+		if(skinnedData->getAnimations()->size() > 0)
+		{
+			Event_AnimationLoaded animationEvent(modelDesc->modelID_, skinnedData);
+			SEND_EVENT(&animationEvent);
+		}
 	}
 
 	if(successfulLoad)

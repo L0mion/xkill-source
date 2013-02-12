@@ -9,6 +9,7 @@
 #include "AttributeType.h"
 #include "MeshDesc.h"
 #include "MeshVertices.h"
+#include "SkinnedData.h"
 
 //
 // Events info
@@ -81,6 +82,8 @@ enum DLL_U EventType
 
 	EVENT_ATTRIBUTE_UPDATED,
 	EVENT_SYNC_STATE_COMMAND,
+
+	EVENT_ANIMATION_LOADED,
 
 	// Get events
 	EVENT_GET_ATTRIBUTE,
@@ -589,4 +592,14 @@ public:
 	float time;
 	XKILL_Enums::HackType hackType;
 	AttributePtr<Attribute_Player> player;
+};
+
+
+class DLL_U Event_AnimationLoaded : public Event
+{
+public:
+	Event_AnimationLoaded(unsigned int meshID, SkinnedData* skinnedData);
+
+	unsigned int meshID;
+	SkinnedData* skinnedData;
 };

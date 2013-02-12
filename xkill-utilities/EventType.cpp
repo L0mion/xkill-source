@@ -240,3 +240,9 @@ Event_HackActivated::Event_HackActivated(float time, XKILL_Enums::HackType hackT
 	this->hackType = hackType;
 	this->player = player;
 }
+
+Event_AnimationLoaded::Event_AnimationLoaded(unsigned int meshID, SkinnedData* skinnedData) : Event(EVENT_ANIMATION_LOADED)
+{
+	this->meshID = meshID;
+	this->skinnedData = skinnedData;
+}
