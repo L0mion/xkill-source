@@ -433,9 +433,6 @@ void Renderer::renderViewportToGBuffer(ViewportData& vpData)
 	if(animatedMesh_)
 		renderAnimatedMesh(vpData.view, vpData.proj);
 
-	managementFX_->setShader(devcon, SHADERID_VS_DEFAULT);
-	managementFX_->setShader(devcon, SHADERID_PS_DEFAULT);
-
 	managementSS_->setSS(devcon, TypeFX_PS, 0, SS_ID_DEFAULT);
 	managementRS_->setRS(devcon, RS_ID_DEFAULT);
 
@@ -556,8 +553,31 @@ void Renderer::renderInstance(unsigned int meshID, InstancedData* instance)
 	//Fetch renderer representation of model.
 	ModelD3D* modelD3D	= managementModel_->getModelD3D(meshID, device);
 
+	UINT stride[2];
+	stride[1] = sizeof(VertexPosNormTexInstanced);
+	if(modelD3D->getVertexType() == VERTEX_TYPE_POS_NORM_TEX_TAN)
+	{
+		managementFX_->setShader(devcon, SHADERID_VS_POS_NORM_TEX_TAN_INSTANCE);
+		managementFX_->setShader(devcon, SHADERID_PS_NORMALMAP);
+
+		//Set input layout
+		managementFX_->setLayout(devcon, LAYOUTID_POS_NORM_TEX_TAN_INSTANCED);
+
+		stride[0] = sizeof(VertexPosNormTexTan);
+	}
+	else
+	{
+		managementFX_->setShader(devcon, SHADERID_VS_DEFAULT);
+		managementFX_->setShader(devcon, SHADERID_PS_DEFAULT);
+	
+		//Set input layout
+		managementFX_->setLayout(devcon, LAYOUTID_POS_NORM_TEX_INSTANCED);
+	
+		stride[0] = sizeof(VertexPosNormTex);
+	}
+
 	//Set vertex buffer.
-	UINT stride[2] = { sizeof(VertexPosNormTex), sizeof(VertexPosNormTexInstanced) };
+	//UINT stride[2] = { sizeof(VertexPosNormTex), sizeof(VertexPosNormTexInstanced) };
 	UINT offset[2] = { 0, 0 };
 	ID3D11Buffer* vbs[2] = 
 	{ 
@@ -596,8 +616,8 @@ void Renderer::renderSubset(
 	ID3D11DeviceContext*	devcon = managementD3D_->getDeviceContext();
 
 	//Set textures.
-	ID3D11ShaderResourceView* texAlbedo = managementTex_->getTexSrv(material.idAlbedoTex_);
-	ID3D11ShaderResourceView* texNormal = managementTex_->getTexSrv(material.idNormalTex_);
+	ID3D11ShaderResourceView* texAlbedo = managementTex_->getTexSrv(19); //material.idAlbedoTex_
+	ID3D11ShaderResourceView* texNormal = managementTex_->getTexSrv(20); //material.idNormalTex_
 	devcon->PSSetShaderResources(0, 1, &texAlbedo);
 	devcon->PSSetShaderResources(1, 1, &texNormal);
 
@@ -610,7 +630,7 @@ void Renderer::renderSubset(
 		material.specularPower_);
 
 	//Set input layout
-	managementFX_->setLayout(devcon, LAYOUTID_POS_NORM_TEX_INSTANCED);
+	//managementFX_->setLayout(devcon, LAYOUTID_POS_NORM_TEX_INSTANCED);
 
 	//Set index-buffer.
 	UINT offset = 0;

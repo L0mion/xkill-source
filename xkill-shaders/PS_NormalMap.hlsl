@@ -4,6 +4,26 @@
 #include "constantBuffers.hlsl"
 #include "VSOut.hlsl"
 
+float3 NormalSampleToWorldSpace(
+	float3 normalMapSample,
+	float3 unitNormalW,
+	float3 tangentW)
+{
+	//Uncompress each component from [0, 1] to [-1, 1].
+	float3 normalT = 2.0f * normalMapSample - 1.0f;
+	
+		//Build orthonormal basis.
+		float3 N = unitNormalW;
+		float3 T = normalize(tangentW - dot(tangentW, N) * N);
+		float3 B = cross(N, T);
+
+		float3x3 TBN = float3x3(T, B, N);
+
+		//Transform from tangent space to world space.
+		float3 bumpedNormalW = mul(normalT, TBN);
+		return bumpedNormalW;
+}
+
 struct PSOut
 {
 	float4 normal	: SV_TARGET0;
@@ -20,7 +40,12 @@ PSOut PS_NormalMap(VSOutPosNormWTexTanW pIn)
 {
 	PSOut output;
 
-	float3 normal = normalize(pIn.normalW);
+	float3 bumpedNormalW = NormalSampleToWorldSpace(
+		texNormal.SampleLevel(ss, pIn.texcoord, 0).xyz,
+		normalize(pIn.normalW),
+		pIn.tangentW);
+
+	float3 normal = bumpedNormalW; //normalize(pIn.normalW);
 	normal.x = normal.x * 0.5f + 0.5f;
 	normal.y = normal.y * 0.5f + 0.5f;
 	normal.z = normal.z * 0.5f + 0.5f;
