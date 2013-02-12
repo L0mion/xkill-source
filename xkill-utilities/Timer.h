@@ -12,6 +12,7 @@ public:
 
 	void setStartTime(float time);
 	void resetTimer();
+	float getTimeLeft();
 	bool hasTimerExpired();
 
 private:

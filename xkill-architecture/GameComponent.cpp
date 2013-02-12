@@ -188,6 +188,8 @@ void GameComponent::onUpdate(float delta)
 			ptr_player->currentSpeed = ptr_player->walkSpeed;
 		}
 
+		ptr_player->jetpack = false;
+
 		//
 		// Health and respawn logic
 		//
@@ -277,7 +279,6 @@ void GameComponent::onUpdate(float delta)
 		ptr_health->healthFromLastFrame = ptr_health->health;
 	}
 
-
 	//
 	// Update projectiles
 	//
@@ -359,6 +360,8 @@ void GameComponent::onUpdate(float delta)
 				case XKILL_Enums::PickupableType::AMMUNITION_EXPLOSIVE:
 					amount = 10;
 					break;
+				case XKILL_Enums::PickupableType::HACK_SPEEDHACK:
+					amount = 5000;											//Will be handled as milliseconds
 				}
 
 				//Each pickupable knows it pickupablesSpawnPoint creator
@@ -634,6 +637,22 @@ void collision_pickuppable(Entity* entity1, Entity* entity2)
 							pickedUp = true;
 							AttributePtr<Attribute_WeaponStats> weaponStatsAttribute = ptr_player->ptr_weaponStats;
 							weaponStatsAttribute->ammunition[XKILL_Enums::AmmunitionType::SCATTER].totalNrOfShots += ptr_pickupable->amount;
+							break;
+						}
+					case XKILL_Enums::PickupableType::HACK_SPEEDHACK:
+						{
+							pickedUp = true;
+							float time = static_cast<float>(ptr_pickupable->amount);
+							time /= 1000.0f;
+							SEND_EVENT(&Event_HackActivated(time, XKILL_Enums::HackType::SPEEDHACK, ptr_player));
+							break;
+						}
+					case XKILL_Enums::PickupableType::HACK_JETHACK:
+						{
+							pickedUp = true;
+							float time = static_cast<float>(ptr_pickupable->amount);
+							time /= 1000.0f;
+							SEND_EVENT(&Event_HackActivated(time, XKILL_Enums::HackType::JETHACK, ptr_player));
 							break;
 						}
 					}

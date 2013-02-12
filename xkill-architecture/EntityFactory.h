@@ -338,7 +338,9 @@ public:
 			break;
 		case XKILL_Enums::PickupableType::MEDKIT:
 			ptr_render->meshID = MODEL_HEALTHPACK;
+			break;
 		default:
+			ptr_render->meshID = MODEL_HEALTHPACK;
 			break;
 		}
 

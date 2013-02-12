@@ -128,7 +128,7 @@ bool ComponentManager::init(HWND windowHandle, HWND parentWindowHandle)
 	{
 		SHOW_MESSAGEBOX("BulletPhysicsComponent failed to init.");
 		return false;
-	}
+	}	
 
 	//SEND_EVENT(&Event_PlaySound(Event_PlaySound::SOUND_MUSIC, Float3(), false));
 

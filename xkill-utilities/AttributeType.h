@@ -505,9 +505,9 @@ struct DLL_U Attribute_Player : public IAttribute
 	float currentRespawnDelay;	//!< Time until respawn
 	float timeSinceLastJump;	//!< Incrementing timer
 	float delayInSecondsBetweenEachJump;
-	bool collidingWithWorld;	//!< Set y-velocity to zero when not colliding with world and not jumping
-	float timeSinceLastDamageTaken; //!< Incrementing timer. Reset when taking damage.
-	float jetpackTimer;			//!< Incremented when using jetpack
+	bool collidingWithWorld;			//!< Set y-velocity to zero when not colliding with world and not jumping
+	float timeSinceLastDamageTaken;		//!< Incrementing timer. Reset when taking damage.
+	bool jetpack;						//!< Use jetpack		
 	bool detectedAsDead;
 
 	int meshID_whenAlive;
