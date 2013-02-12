@@ -462,6 +462,7 @@ Attribute_Input::Attribute_Input()
 	changeAmmunitionType = false;
 	changeFiringMode = false;
 	lowSensitivity = false;
+	reload = false;
 
 	position = Float2(0.0f, 0.0f);
 	rotation = Float2(0.0f, 0.0f);
@@ -531,7 +532,7 @@ Attribute_Player::Attribute_Player()
 	timeSinceLastJump = delayInSecondsBetweenEachJump+1.0f;
 	collidingWithWorld = false;
 	timeSinceLastDamageTaken = 100.0f;
-	jetpackTimer = 0.0f;
+	jetpack = false;
 	detectedAsDead = true;
 	meshID_whenAlive = 0;
 	meshID_whenDead = 0;
@@ -810,63 +811,6 @@ void Attribute_WeaponStats::setWeaponStats(XKILL_Enums::AmmunitionType ammunitio
 
 	MutatorSettings ms;
 	ms.setupAttribute(this);
-
-	//totalNrOfShots = 1000;
-	//clipSize = 10;
-	//reloadTime = 0.0f;
-	//nrOfProjectilesForEachShot = 1;
-	//displacementSphereRadius = 0.0f;
-	//spreadConeRadius = 0.0f;
-	//isExplosive = false;
-	//velocityDifference = 0.0f;
-	//
-	//switch(ammunitionType)
-	//{
-	//case BULLET: //One powerful accurate bullet.
-	//	velocityOfEachProjectile = 40.0f;
-	//	damgeOfEachProjectile = 5;
-	//	break;
-	//case SCATTER: //Many weak and less accurate bullets.
-	//	velocityOfEachProjectile = 10.0f;
-	//	nrOfProjectilesForEachShot = 10;
-	//	damgeOfEachProjectile = 2;
-	//	displacementSphereRadius = 0.02f;
-	//	spreadConeRadius = 0.2f;
-	//	velocityDifference = 0.5f;
-	//	break;
-	//case EXPLOSIVE: //One powerful accurate exploding bullet.
-	//	velocityOfEachProjectile = 5.0f;
-	//	damgeOfEachProjectile = 10;
-	//	explosionSphereRadius = 1.0f;
-	//	isExplosive = true;
-	//	break;
-	//}
-	//
-	//switch(firingMode)
-	//{
-	//case SINGLE: //Reload after each shot. Fast reload time.
-	//	cooldownBetweenShots = 0.0f;
-	//	reloadTime = 1.0f;
-	//	clipSize = 1;
-	//	break;
-	//case SEMI: //Reload after a number of shots. Medium load time.
-	//	cooldownBetweenShots = 0.5f;
-	//	reloadTime = 2.0f;
-	//	explosionSphereRadius *= 0.5f;
-	//	clipSize = 10;
-	//	break;
-	//case AUTO: //Reload after a large number of shots. Long reload time.
-	//	cooldownBetweenShots = 0.1f;
-	//	reloadTime = 3.0f;
-	//	explosionSphereRadius *= 0.15f;
-	//	clipSize = 50;
-	//	break;
-	//}
-	//
-	//cooldownLeft = cooldownBetweenShots;
-	//reloadTimeLeft = reloadTime;
-	//
-	//nrOfShotsLeftInClip = clipSize;
 }
 std::string Attribute_WeaponStats::getAmmunitionTypeAsString()
 {
@@ -909,7 +853,7 @@ DataItemList* Attribute_WeaponStats::getDataList()
 	list->add_Enum(currentAmmunitionType,								"ammunitionType");
 	list->add_Enum(currentFiringModeType,								"firingMode");
 
-	list->add(ammunition[currentAmmunitionType].totalNrOfShots,			"totalNrOfShots");
+	list->add(ammunition[currentAmmunitionType].currentTotalNrOfShots,			"currentTotalNrOfShots");
 	list->add(firingMode[currentFiringModeType].clipSize,				"clipSize");
 	list->add(firingMode[currentFiringModeType].nrOfShotsLeftInClip,	"nrOfShotsLeftInClip");
 
@@ -918,14 +862,14 @@ DataItemList* Attribute_WeaponStats::getDataList()
 	list->add(firingMode[currentFiringModeType].cooldownBetweenShots,	"cooldownBetweenShots");
 	list->add(firingMode[currentFiringModeType].cooldownLeft,			"cooldownLeft");
 
-	list->add(ammunition[currentAmmunitionType].speed,					"velocityOfEachProjectile");
-	list->add(ammunition[currentAmmunitionType].nrOfProjectiles,		"nrOfProjectilesForEachShot");
-	list->add(ammunition[currentAmmunitionType].damage,					"damageOfEachProjectile");
+	list->add(ammunition[currentAmmunitionType].speed,					"speed");
+	list->add(ammunition[currentAmmunitionType].nrOfProjectilesPerSalvo,		"nrOfProjectilesPerSalvo");
+	list->add(ammunition[currentAmmunitionType].damage,					"damage");
 
-	list->add(ammunition[currentAmmunitionType].spawnVariation,			"displacementSphereRadius");
-	list->add(ammunition[currentAmmunitionType].spread,					"spreadConeRadius");
+	list->add(ammunition[currentAmmunitionType].displacementSphereRadius,			"displacementSphereRadius");
+	list->add(ammunition[currentAmmunitionType].spreadConeRadius,					"spreadConeRadius");
 
-	list->add(ammunition[currentAmmunitionType].explosive,								"isExplosive");
+	list->add(ammunition[currentAmmunitionType].explosive,								"explosive");
 	list->add(ammunition[currentAmmunitionType].explosionSphereInitialRadius,			"explosionSphereInitialRadius");
 	list->add(ammunition[currentAmmunitionType].explosionSphereFinalRadius,				"explosionSphereFinalRadius");
 	list->add(ammunition[currentAmmunitionType].explosionSphereExplosionDuration,		"explosionSphereExplosionDuration");
@@ -937,7 +881,7 @@ void Attribute_WeaponStats::saveTo(DataItemList* list)
 	currentAmmunitionType	= (XKILL_Enums::AmmunitionType)	list->get_Enum();
 	currentFiringModeType	= (XKILL_Enums::FiringModeType)	list->get_Enum();
 
-	list->get(&ammunition[currentAmmunitionType].totalNrOfShots);
+	list->get(&ammunition[currentAmmunitionType].currentTotalNrOfShots);
 	list->get(&firingMode[currentFiringModeType].clipSize);
 	list->get(&firingMode[currentFiringModeType].nrOfShotsLeftInClip);
 
@@ -947,11 +891,11 @@ void Attribute_WeaponStats::saveTo(DataItemList* list)
 	list->get(&firingMode[currentFiringModeType].cooldownLeft);
 	
 	list->get(&ammunition[currentAmmunitionType].speed);
-	list->get(&ammunition[currentAmmunitionType].nrOfProjectiles);
+	list->get(&ammunition[currentAmmunitionType].nrOfProjectilesPerSalvo);
 	list->get(&ammunition[currentAmmunitionType].damage);
 	
-	list->get(&ammunition[currentAmmunitionType].spawnVariation);
-	list->get(&ammunition[currentAmmunitionType].spread);
+	list->get(&ammunition[currentAmmunitionType].displacementSphereRadius);
+	list->get(&ammunition[currentAmmunitionType].spreadConeRadius);
 		
 	list->get(&ammunition[currentAmmunitionType].explosive);
 	list->get(&ammunition[currentAmmunitionType].explosionSphereInitialRadius);

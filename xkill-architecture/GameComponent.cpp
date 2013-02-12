@@ -36,7 +36,7 @@ bool GameComponent::init()
 	ATTRIBUTES_INIT_ALL;
 
 	srand((unsigned)time(NULL));
-
+	
 	return true;
 }
 
@@ -66,13 +66,12 @@ void GameComponent::onEvent(Event* e)
 
 void GameComponent::onUpdate(float delta)
 {
-	//
-	// Update players
-	//
-
+	//--------------------------------------------------------------------------------------
+	// Handle player attributes
+	//--------------------------------------------------------------------------------------
 	while(itrPlayer.hasNext())
 	{
-		// Fetch attributes through iterators
+		//Fetch player-related attributes
 		AttributePtr<Attribute_Player>			ptr_player		=	itrPlayer		.getNext();
 
 		AttributePtr<Attribute_Health>			ptr_health		=	ptr_player	->	ptr_health		;
@@ -87,63 +86,90 @@ void GameComponent::onUpdate(float delta)
 		Ammunition* ammo = &ptr_weaponStats->ammunition[ptr_weaponStats->currentAmmunitionType];
 		FiringMode* firingMode = &ptr_weaponStats->firingMode[ptr_weaponStats->currentFiringModeType];
 
-		//
-		// Ammunition logic
-		//
-
-		if(ptr_input->changeAmmunitionType)
+		//--------------------------------------------------------------------------------------
+		// State: player is alive
+		//--------------------------------------------------------------------------------------
+		if(ptr_health->health > 0.0f && !ptr_player->detectedAsDead)
 		{
-			ptr_input->changeAmmunitionType = false;
-			ptr_weaponStats->currentAmmunitionType = static_cast<XKILL_Enums::AmmunitionType>((ptr_weaponStats->currentAmmunitionType + 1) % XKILL_Enums::AmmunitionType::NROFAMMUNITIONTYPES);
-			switchAmmunition(ptr_weaponStats);
-			ammo = &ptr_weaponStats->ammunition[ptr_weaponStats->currentAmmunitionType];
+			//--------------------------------------------------------------------------------------
+			// Ammunition logic: Ammunnition change, firing mode change.
+			//--------------------------------------------------------------------------------------
+			bool ammunitionSwitchReload = false;
+			if(ptr_input->changeAmmunitionType)
+			{
+				ptr_input->changeAmmunitionType = false;
+				ptr_weaponStats->currentAmmunitionType = static_cast<XKILL_Enums::AmmunitionType>((ptr_weaponStats->currentAmmunitionType + 1) % XKILL_Enums::AmmunitionType::NROFAMMUNITIONTYPES);
+				bool successfullySwitchedAmmunition = switchAmmunition(ptr_weaponStats);
+				if(successfullySwitchedAmmunition)
+				{
+					ammo = &ptr_weaponStats->ammunition[ptr_weaponStats->currentAmmunitionType];
+				}
+				else
+				{
+					DEBUGPRINT("Failed to switch ammunition. Succeeded in playing 'beep' sound");
+					DEBUGPRINT("\a");
+				}
+				DEBUGPRINT(std::endl);
+				DEBUGPRINT("Ammunition type: " << ptr_weaponStats->getAmmunitionTypeAsString());
+				DEBUGPRINT("Firing mode: " << ptr_weaponStats->getFiringModeAsString());
+			}
 
-			DEBUGPRINT(std::endl);
-			DEBUGPRINT("Ammunition type: " << ptr_weaponStats->getAmmunitionTypeAsString());
-			DEBUGPRINT("Firing mode: " << ptr_weaponStats->getFiringModeAsString());
-		}
+			if(ptr_input->changeFiringMode)
+			{
+				ptr_input->changeFiringMode = false;
+				ptr_weaponStats->currentFiringModeType = static_cast<XKILL_Enums::FiringModeType>((ptr_weaponStats->currentFiringModeType + 1) % XKILL_Enums::AmmunitionType::NROFAMMUNITIONTYPES);
+				bool successfullySwitcheFiringModeOrAmmunnition = switchFiringMode(ptr_weaponStats);
+				if(successfullySwitcheFiringModeOrAmmunnition)
+				{
+					firingMode = &ptr_weaponStats->firingMode[ptr_weaponStats->currentFiringModeType];
+				}
+				else
+				{
+					DEBUGPRINT("Failed to switch firing mode. Succeeded in playing 'beep' sound");
+					DEBUGPRINT("\a");
+				}
+			
+				DEBUGPRINT(std::endl);
+				DEBUGPRINT("Ammunition type: " << ptr_weaponStats->getAmmunitionTypeAsString());
+				DEBUGPRINT("Firing mode: " << ptr_weaponStats->getFiringModeAsString());
+			}
 
-		if(ptr_input->changeFiringMode)
-		{
-			ptr_input->changeFiringMode = false;
-			ptr_weaponStats->currentFiringModeType = static_cast<XKILL_Enums::FiringModeType>((ptr_weaponStats->currentFiringModeType + 1) % XKILL_Enums::AmmunitionType::NROFAMMUNITIONTYPES);
-			switchFiringMode(ptr_weaponStats);
-			firingMode = &ptr_weaponStats->firingMode[ptr_weaponStats->currentFiringModeType];
+			//--------------------------------------------------------------------------------------
+			// Non-automatic weapon reload logic (also refer to automatic weapon reload logic)
+			//--------------------------------------------------------------------------------------
+			if(ptr_input->reload)
+			{
+				if(firingMode->nrOfShotsLeftInClip > 0 && firingMode->nrOfShotsLeftInClip != firingMode->clipSize)
+				{
+					ammo->currentTotalNrOfShots += firingMode->nrOfShotsLeftInClip;
+					firingMode->nrOfShotsLeftInClip = 0; //Set nrOfShotsLeftInClip to 0, forcing automatic weapon reload
+				}
+			}
 
-			DEBUGPRINT(std::endl);
-			DEBUGPRINT("Ammunition type: " << ptr_weaponStats->getAmmunitionTypeAsString());
-			DEBUGPRINT("Firing mode: " << ptr_weaponStats->getFiringModeAsString());
-		}
-
-
-		//
-		// Firing logic
-		//
-
-		if(ptr_health->health > 0.0f)
-		{
+			//--------------------------------------------------------------------------------------
+			// Firing logic: shootProjectile
+			//--------------------------------------------------------------------------------------
 			if((ptr_input->fire && firingMode->type == XKILL_Enums::FiringModeType::AUTO) || 
 				ptr_input->firePressed && (firingMode->type == XKILL_Enums::FiringModeType::SINGLE || firingMode->type == XKILL_Enums::FiringModeType::SEMI))
 			{
+				DEBUGPRINT("ammo->currentTotalNrOfShots: " << ammo->currentTotalNrOfShots);
+				DEBUGPRINT("firingMode->nrOfShotsLeftInClip: " << firingMode->nrOfShotsLeftInClip);
 				ptr_input->fire = false;
 				ptr_input->firePressed = false;
 
 				if(firingMode->cooldownBetweenShots >= 0 && firingMode->cooldownLeft <= 0.0f
 					&& firingMode->nrOfShotsLeftInClip > 0)
 				{
-					if(ammo->totalNrOfShots != -1) // special case: debug machine gun. Unlimited number of shots.
-					{
-						firingMode->cooldownLeft = firingMode->cooldownBetweenShots;
-						ammo->totalNrOfShots--;
-						firingMode->nrOfShotsLeftInClip--;
-					}
+					firingMode->cooldownLeft = firingMode->cooldownBetweenShots;
+					ammo->currentTotalNrOfShots--;
+					firingMode->nrOfShotsLeftInClip--;
 
 					shootProjectile(ptr_player->ptr_weaponFireLocation_spatial, ptr_weaponStats);
 					SEND_EVENT(&Event_PlaySound(Event_PlaySound::SOUND_FIRE, ptr_position->position, true));
 				}
 				else if(firingMode->nrOfShotsLeftInClip <= 0)
 				{
-					if(ammo->totalNrOfShots <= 0)
+					if(ammo->currentTotalNrOfShots <= 0)
 					{
 						DEBUGPRINT("Cannot shoot: Out of ammo.");
 					}
@@ -157,50 +183,80 @@ void GameComponent::onUpdate(float delta)
 					DEBUGPRINT("Cannot shoot: weapon cooldown. Be patient.");
 				}
 			}
-		}
-		if(ptr_input->killPlayer)
-		{
-			ptr_health->health = 0.0f;
-			ptr_input->killPlayer = false;
-			ptr_player->detectedAsDead = true;
-			ptr_player->currentRespawnDelay = 0.0f;
-		}
 
-		if(ptr_input->sprint && ptr_player->canSprint && ptr_player->collidingWithWorld)
-		{
-			ptr_player->currentSprintTime -= delta;
-			if(ptr_player->currentSprintTime < 0)
-				ptr_player->canSprint = false;
-
-			ptr_player->currentSpeed = ptr_player->sprintSpeed;
-			ptr_input->sprint = false;
-		}
-		else
-		{
-			ptr_player->currentSprintTime += delta * ptr_player->sprintRechargeRate;
-
-			if(ptr_player->currentSprintTime > ptr_player->sprintTime)
+			//--------------------------------------------------------------------------------------
+			// Sprint (run) logic
+			//--------------------------------------------------------------------------------------
+			if(ptr_input->sprint && ptr_player->canSprint && ptr_player->collidingWithWorld)
 			{
-				ptr_player->currentSprintTime = ptr_player->sprintTime;
-				ptr_player->canSprint = true;
+				ptr_player->currentSprintTime -= delta;
+				if(ptr_player->currentSprintTime < 0)
+				{
+					ptr_player->canSprint = false;
+				}
+
+				ptr_player->currentSpeed = ptr_player->sprintSpeed;
+				ptr_input->sprint = false;
+			}
+			else
+			{
+				ptr_player->currentSprintTime += delta * ptr_player->sprintRechargeRate;
+				if(ptr_player->currentSprintTime > ptr_player->sprintTime)
+				{
+					ptr_player->currentSprintTime = ptr_player->sprintTime;
+					ptr_player->canSprint = true;
+				}
+				ptr_player->currentSpeed = ptr_player->walkSpeed;
 			}
 
-			ptr_player->currentSpeed = ptr_player->walkSpeed;
+			//--------------------------------------------------------------------------------------
+			// Update player aiming ray
+			//--------------------------------------------------------------------------------------
+			Entity* playerEntity = itrPlayer.owner();
+			std::vector<int> rayttributeId = playerEntity->getAttributes(ATTRIBUTE_RAY);
+			for(unsigned int i=0;i<rayttributeId.size();i++)
+			{
+				//Float3 lookAtFarPlaneHorizon = ptr_camera->ptr_spatial->rotation.quaternionToVector();
+				Float3 lookAtFarPlaneHorizon = ptr_camera->look;
+				lookAtFarPlaneHorizon.normalize();
+				lookAtFarPlaneHorizon.x = lookAtFarPlaneHorizon.x*ptr_camera->zFar;
+				lookAtFarPlaneHorizon.y = lookAtFarPlaneHorizon.y*ptr_camera->zFar;
+				lookAtFarPlaneHorizon.z = lookAtFarPlaneHorizon.z*ptr_camera->zFar;
+
+				AttributePtr<Attribute_Ray> ray = itrRay.at(rayttributeId.at(i));
+				ray->from = ptr_camera->ptr_spatial->ptr_position->position;
+				//ray->from = ptr_player->ptr_weaponFireLocation_spatial->ptr_position->position;
+				ray->to = lookAtFarPlaneHorizon + ray->from;
+			}
+
+			//--------------------------------------------------------------------------------------
+			// Damage taken bookkeeping (Not tested. Idea was to lower player speed when the player took damage) 
+			//-------------------------------------------------------------------------------------
+			if(ptr_health->health < ptr_health->healthFromLastFrame)
+			{
+				ptr_player->timeSinceLastDamageTaken = 0.0f;
+			}
+			ptr_health->healthFromLastFrame = ptr_health->health;
+
+			ptr_player->timeSinceLastJump += delta;
+			ptr_player->timeSinceLastDamageTaken += delta;
+			ptr_player->jetpack = false;
 		}
-
-		//
-		// Health and respawn logic
-		//
-
-		// Detect player death
-		if(ptr_health->health <= 0.0f && !ptr_player->detectedAsDead) 
+		//--------------------------------------------------------------------------------------
+		// State: player is neither alive nor dead. Player was alive, but is now detected as being dead.
+		//--------------------------------------------------------------------------------------
+		else if(ptr_health->health <= 0.0f && !ptr_player->detectedAsDead) //The "detectedAsDead" flag is used to prevent the "Event_PlayerDeath" event from being sent more than once.
 		{
 			SEND_EVENT(&Event_PlayerDeath(itrPlayer.storageIndex()));
 		}
-
-		//Handle dead players
-		if(ptr_player->detectedAsDead)
+		//--------------------------------------------------------------------------------------
+		// State: player is dead
+		//--------------------------------------------------------------------------------------
+		else if(ptr_player->detectedAsDead) 
 		{
+			//--------------------------------------------------------------------------------------
+			// Handle dead player
+			//--------------------------------------------------------------------------------------
 			if(ptr_player->currentRespawnDelay > 0.0f)
 			{
 				ptr_player->currentRespawnDelay -= delta;
@@ -211,25 +267,30 @@ void GameComponent::onUpdate(float delta)
 				float fov = slerp*dead + (1-slerp)*alive;
 				ptr_player->ptr_camera->fieldOfView = fov;
 			}
-			else
+			//--------------------------------------------------------------------------------------
+			// Respawn player
+			//--------------------------------------------------------------------------------------
+			else 
 			{
-				ptr_player->ptr_camera->fieldOfView =3.14f/4.0f;
-				// If an appropriate spawnpoint was found: spawn at it; otherwise: spawn at origo.
+				//--------------------------------------------------------------------------------------
+				// Spawn point
+				//--------------------------------------------------------------------------------------
 				AttributePtr<Attribute_PlayerSpawnPoint> ptr_spawnPoint = findUnoccupiedSpawnPoint();
-				if(ptr_spawnPoint.isValid())
+				if(ptr_spawnPoint.isValid()) //If an appropriate spawnpoint was found: spawn at it
 				{
 					AttributePtr<Attribute_Position> ptr_spawnPoint_position = ptr_spawnPoint->ptr_position;
 					ptr_position->position = ptr_spawnPoint_position->position; // set player position attribute
 					DEBUGPRINT("Player entity " << itrPlayer.ownerId() << " spawned at " << ptr_position->position.x << " " << ptr_position->position.y << " " << ptr_position->position.z << std::endl);
 				}
-				else
+				else //otherwise: spawn at origo.
 				{
 					ptr_position->position = Float3(0.0f, 0.0f, 0.0f);
 					DEBUGPRINT("No spawn point was found. Player entity " << itrPlayer.ownerId() << " spawned at " << ptr_position->position.x << " " << ptr_position->position.y << " " << ptr_position->position.z << std::endl);
 				}
 
-				ptr_player->currentRespawnDelay = ptr_player->respawnDelay;
-
+				//--------------------------------------------------------------------------------------
+				// Reset player
+				//--------------------------------------------------------------------------------------
 				ptr_physics->gravity = Float3(0.0f, -10.0f, 0.0f);
 				ptr_physics->collisionFilterMask = Attribute_Physics::EVERYTHING;
 				ptr_physics->collisionResponse = true;
@@ -241,47 +302,32 @@ void GameComponent::onUpdate(float delta)
 				ptr_camera->look = Float3(0.0f, 0.0f, 1.0f);
 				ptr_physics->reloadDataIntoBulletPhysics = true;
 
-				ptr_player->detectedAsDead = false;
-
 				ptr_health->health = ptr_health->maxHealth; // restores player health
+				firingMode->nrOfShotsLeftInClip = firingMode->clipSize;
+				ammo->currentTotalNrOfShots = ammo->initialTotalNrOfShots;
+
+				ptr_player->ptr_camera->fieldOfView =3.14f/4.0f;
+				ptr_player->currentRespawnDelay = ptr_player->respawnDelay;
+				ptr_player->detectedAsDead = false;
 				SEND_EVENT(&Event_PlaySound(Event_PlaySound::SOUND_RESPAWN, ptr_position->position, true));
 			}
 		}
 
-		ptr_player->timeSinceLastJump += delta;
-		ptr_player->timeSinceLastDamageTaken += delta;
-
-		//Update player aiming ray
-		Entity* playerEntity = itrPlayer.owner();
-		std::vector<int> rayttributeId = playerEntity->getAttributes(ATTRIBUTE_RAY);
-		for(int i=0;i<rayttributeId.size();i++)
+		//--------------------------------------------------------------------------------------
+		// Instant respawn of player, used for debugging
+		//--------------------------------------------------------------------------------------
+		if(ptr_input->killPlayer)
 		{
-			//Float3 lookAtFarPlaneHorizon = ptr_camera->ptr_spatial->rotation.quaternionToVector();
-			Float3 lookAtFarPlaneHorizon = ptr_camera->look;
-			lookAtFarPlaneHorizon.normalize();
-			lookAtFarPlaneHorizon.x = lookAtFarPlaneHorizon.x*ptr_camera->zFar;
-			lookAtFarPlaneHorizon.y = lookAtFarPlaneHorizon.y*ptr_camera->zFar;
-			lookAtFarPlaneHorizon.z = lookAtFarPlaneHorizon.z*ptr_camera->zFar;
-			//lookAtFarPlaneHorizon.normalize();
-
-			AttributePtr<Attribute_Ray> ray = itrRay.at(rayttributeId.at(i));
-			ray->from = ptr_camera->ptr_spatial->ptr_position->position;
-			//ray->from = ptr_player->ptr_weaponFireLocation_spatial->ptr_position->position;
-			ray->to = lookAtFarPlaneHorizon + ray->from;
+			ptr_health->health = 0.0f;
+			ptr_input->killPlayer = false;
+			ptr_player->detectedAsDead = true;
+			ptr_player->currentRespawnDelay = 0.0f;
 		}
-
-		if(ptr_health->health < ptr_health->healthFromLastFrame)
-		{
-			ptr_player->timeSinceLastDamageTaken = 0.0f;
-		}
-		ptr_health->healthFromLastFrame = ptr_health->health;
 	}
 
-
-	//
-	// Update projectiles
-	//
-
+	//--------------------------------------------------------------------------------------
+	// Handle projectile attributes
+	//--------------------------------------------------------------------------------------
 	while(itrProjectile.hasNext())
 	{
 		AttributePtr<Attribute_Projectile> projectile = itrProjectile.getNext();
@@ -314,21 +360,18 @@ void GameComponent::onUpdate(float delta)
 		*/
 	}
 
-	//
-	// Update player spawn points
-	//
-
-
+	//--------------------------------------------------------------------------------------
+	// Handle player spawn point attributes
+	//--------------------------------------------------------------------------------------
 	while(itrPlayerSpawnPoint.hasNext())
 	{
 		AttributePtr<Attribute_PlayerSpawnPoint> ptr_spawnPoint	= itrPlayerSpawnPoint.getNext();
 		ptr_spawnPoint->secondsSinceLastSpawn += delta;
 	}
 
-	//
-	// Update pickupables spawn points
-	//
-
+	//--------------------------------------------------------------------------------------
+	// Handle pickupables spawn point attributes
+	//--------------------------------------------------------------------------------------
 	while(itrPickupablesSpawnPoint.hasNext())
 	{
 		AttributePtr<Attribute_PickupablesSpawnPoint> ptr_pickupablesSpawnPoint = itrPickupablesSpawnPoint.getNext();
@@ -359,6 +402,8 @@ void GameComponent::onUpdate(float delta)
 				case XKILL_Enums::PickupableType::AMMUNITION_EXPLOSIVE:
 					amount = 10;
 					break;
+				case XKILL_Enums::PickupableType::HACK_SPEEDHACK:
+					amount = 5000;											//Will be handled as milliseconds
 				}
 
 				//Each pickupable knows it pickupablesSpawnPoint creator
@@ -370,45 +415,38 @@ void GameComponent::onUpdate(float delta)
 	}
 
 	//check
+	//--------------------------------------------------------------------------------------
+	// Handle pickupable attributes
+	//--------------------------------------------------------------------------------------
 	//while(itrPickupable.hasNext())
 	//{
 	//	Attribute_Pickupable* pickupable = itrPickupable.getNext();
-	//	pickupable;
 	//}
 
-	//
-	// Update weapons stats
-	//
-
+	//--------------------------------------------------------------------------------------
+	// Handle weapons stats attributes
+	//--------------------------------------------------------------------------------------
 	while(itrWeaponStats.hasNext())
 	{
-		// Fetch attribute
 		AttributePtr<Attribute_WeaponStats> weaponStats = itrWeaponStats.getNext();
-
 		Ammunition* ammo = &weaponStats->ammunition[weaponStats->currentAmmunitionType];
 		FiringMode* firingMode = &weaponStats->firingMode[weaponStats->currentFiringModeType];
 
-		//
-		// Weapon cooldown logic
-		//
+		firingMode->cooldownLeft -= delta; // Weapon cooldown logic
 
-		firingMode->cooldownLeft -= delta;
-
-
-		//
-		// Weapon reload logic
-		//
-
-		if(ammo->totalNrOfShots > 0 && firingMode->nrOfShotsLeftInClip <= 0)
+		//--------------------------------------------------------------------------------------
+		// Automatic weapon reload logic
+		//--------------------------------------------------------------------------------------
+		if(ammo->currentTotalNrOfShots > 0 && firingMode->nrOfShotsLeftInClip <= 0)
 		{
 			firingMode->reloadTimeLeft -= delta;
 			if(firingMode->reloadTimeLeft <= 0)
 			{
 				firingMode->reloadTimeLeft = firingMode->reloadTime;
 
-				if(firingMode->clipSize > ammo->totalNrOfShots)
+				if(firingMode->clipSize > ammo->currentTotalNrOfShots)
 				{
-					firingMode->nrOfShotsLeftInClip = ammo->totalNrOfShots;
+					firingMode->nrOfShotsLeftInClip = ammo->currentTotalNrOfShots;
 				}
 				else
 				{
@@ -417,26 +455,17 @@ void GameComponent::onUpdate(float delta)
 
 				DEBUGPRINT("Weapon was automatically reloaded.");
 				DEBUGPRINT("Ammo in current clip: " << firingMode->nrOfShotsLeftInClip);
-				DEBUGPRINT("Total number of shots left: " << ammo->totalNrOfShots);
+				DEBUGPRINT("Total number of shots left: " << ammo->currentTotalNrOfShots);
 			}
 		}
 	}
 
-
-	//
-	// Update explosion sphere
-	//
-
+	//--------------------------------------------------------------------------------------
+	// Handle explosion sphere attributes
+	//--------------------------------------------------------------------------------------
 	while(itrExplosionSphere.hasNext())
 	{
-		// Fetch attributes
 		AttributePtr<Attribute_ExplosionSphere> ptr_explosionSphere = itrExplosionSphere.getNext();
-
-
-		//
-		// Lifetime logic
-		//
-
 		ptr_explosionSphere->currentLifeTimeLeft -= delta;
 		if(ptr_explosionSphere->currentLifeTimeLeft <= 0.0f)
 		{
@@ -457,7 +486,6 @@ void collision_stickTogether(Entity* entity1, Entity* entity2)
 		ptr_projectile_offset->ptr_spatial = ptr_projectile_spatial;
 		ptr_projectile_offset->ptr_parent_spatial_position = ptr_target_spatial;
 		ptr_projectile_offset->ptr_parent_spatial_rotation = ptr_target_spatial;
-
 
 		Float3 offsetVector = ptr_projectile_spatial->ptr_position->position - ptr_target_spatial->ptr_position->position;
 		ptr_projectile_offset->offset_position = offsetVector;
@@ -594,21 +622,37 @@ void collision_pickuppable(Entity* entity1, Entity* entity2)
 						{
 							pickedUp = true;
 							AttributePtr<Attribute_WeaponStats> weaponStatsAttribute = ptr_player->ptr_weaponStats;
-							weaponStatsAttribute->ammunition[XKILL_Enums::AmmunitionType::BULLET].totalNrOfShots += ptr_pickupable->amount;
+							weaponStatsAttribute->ammunition[XKILL_Enums::AmmunitionType::BULLET].currentTotalNrOfShots += ptr_pickupable->amount;
 							break;
 						}
 					case XKILL_Enums::PickupableType::AMMUNITION_EXPLOSIVE:
 						{
 							pickedUp = true;
 							AttributePtr<Attribute_WeaponStats> weaponStatsAttribute = ptr_player->ptr_weaponStats;
-							weaponStatsAttribute->ammunition[XKILL_Enums::AmmunitionType::EXPLOSIVE].totalNrOfShots += ptr_pickupable->amount;
+							weaponStatsAttribute->ammunition[XKILL_Enums::AmmunitionType::EXPLOSIVE].currentTotalNrOfShots += ptr_pickupable->amount;
 							break;
 						}
 					case XKILL_Enums::PickupableType::AMMUNITION_SCATTER:
 						{
 							pickedUp = true;
 							AttributePtr<Attribute_WeaponStats> weaponStatsAttribute = ptr_player->ptr_weaponStats;
-							weaponStatsAttribute->ammunition[XKILL_Enums::AmmunitionType::SCATTER].totalNrOfShots += ptr_pickupable->amount;
+							weaponStatsAttribute->ammunition[XKILL_Enums::AmmunitionType::SCATTER].currentTotalNrOfShots += ptr_pickupable->amount;
+							break;
+						}
+					case XKILL_Enums::PickupableType::HACK_SPEEDHACK:
+						{
+							pickedUp = true;
+							float time = static_cast<float>(ptr_pickupable->amount);
+							time /= 1000.0f;
+							SEND_EVENT(&Event_HackActivated(time, XKILL_Enums::HackType::SPEEDHACK, ptr_player));
+							break;
+						}
+					case XKILL_Enums::PickupableType::HACK_JETHACK:
+						{
+							pickedUp = true;
+							float time = static_cast<float>(ptr_pickupable->amount);
+							time /= 1000.0f;
+							SEND_EVENT(&Event_HackActivated(time, XKILL_Enums::HackType::JETHACK, ptr_player));
 							break;
 						}
 					}
@@ -634,7 +678,7 @@ void collision_projectile(Entity* entity1, Entity* entity2)
 	{
 		// Handle PhysicsAttribute of a projectile colliding with another PhysicsAttribute
 		std::vector<int> physicsId = entity1->getAttributes(ATTRIBUTE_PHYSICS);
-		for(int i=0;i<physicsId.size();i++)
+		for(unsigned int i=0;i<physicsId.size();i++)
 		{
 			std::vector<int> projectileId = entity1->getAttributes(ATTRIBUTE_PROJECTILE);
 			for(unsigned j=0;j<projectileId.size();j++)
@@ -872,7 +916,6 @@ void GameComponent::event_StartDeathmatch( Event_StartDeathmatch* e )
 	}
 	*/
 
-
 	//
 	// Create level entities
 	//
@@ -888,9 +931,16 @@ void GameComponent::event_StartDeathmatch( Event_StartDeathmatch* e )
 		SEND_EVENT(&Event_CreateEntity(PLAYER));
 	}
 
+	//Ensure ammunition disablement (selected from menu)
+	while(itrPlayer.hasNext())
+	{
+		AttributePtr<Attribute_Player>			ptr_player		=	itrPlayer		.getNext();
+		AttributePtr<Attribute_WeaponStats>		ptr_weaponStats	=	ptr_player	->	ptr_weaponStats	;
+		switchFiringMode(ptr_weaponStats);
+	}
+
 	//Create mesh for debugging fbx-loading.
 	SEND_EVENT(&Event_CreateEntity(RENDERABLE));
-
 	// Get window resolution so we can tell renderer to recalculate and resize split screens
 	Event_GetWindowResolution event_getWindowResolution;
 	SEND_EVENT(&event_getWindowResolution);
@@ -935,6 +985,7 @@ bool GameComponent::switchAmmunition(AttributePtr<Attribute_WeaponStats> weaponS
 	{
 		weaponStats->currentAmmunitionType = static_cast<XKILL_Enums::AmmunitionType>((weaponStats->currentAmmunitionType + 1) % XKILL_Enums::AmmunitionType::NROFAMMUNITIONTYPES);
 
+		//Try switching of ammunition
 		if(weaponStats->currentAmmunitionType == XKILL_Enums::AmmunitionType::BULLET && firingMode->canShootBullet || 
 			weaponStats->currentAmmunitionType == XKILL_Enums::AmmunitionType::SCATTER && firingMode->canShootScatter || 
 			weaponStats->currentAmmunitionType == XKILL_Enums::AmmunitionType::EXPLOSIVE && firingMode->canShootExplosive)
@@ -959,6 +1010,7 @@ bool GameComponent::switchFiringMode(AttributePtr<Attribute_WeaponStats> ptr_wea
 
 		firingMode = &ptr_weaponStats->firingMode[ptr_weaponStats->currentFiringModeType];
 
+		//Try switching of firing mode
 		if((ptr_weaponStats->currentAmmunitionType == XKILL_Enums::AmmunitionType::BULLET && firingMode->canShootBullet) ||
 			(ptr_weaponStats->currentAmmunitionType == XKILL_Enums::AmmunitionType::SCATTER && firingMode->canShootScatter) ||
 			(ptr_weaponStats->currentAmmunitionType == XKILL_Enums::AmmunitionType::EXPLOSIVE && firingMode->canShootExplosive))
@@ -966,7 +1018,7 @@ bool GameComponent::switchFiringMode(AttributePtr<Attribute_WeaponStats> ptr_wea
 			switchedFiringMode = true;
 			break;
 		}
-		else if(switchAmmunition(ptr_weaponStats))
+		else if(switchAmmunition(ptr_weaponStats)) //switch firing mode AND ammunition
 		{
 			switchedFiringMode = true;
 			break;
@@ -986,16 +1038,16 @@ void GameComponent::shootProjectile( AttributePtr<Attribute_Spatial> ptr_spatial
 	Float3 lookAt	=	ptr_spatial->rotation.quaternionToVector();
 
 	// Send "Event_CreateProjectile" for each projectile in a shot. Scatter has more than one projectile per shot.
-	for(unsigned int j = 0; j < ammo->nrOfProjectiles; j++)
+	for(unsigned int j = 0; j < ammo->nrOfProjectilesPerSalvo; j++)
 	{
 		Float3 new_pos = pos;
 		Float3 new_lookAt = lookAt;
 
-		// Randomize spread cone values (direction of velocity)
-		if(ammo->spread != 0.0f)
+		// Randomize spreadConeRadius cone values (direction of velocity)
+		if(ammo->spreadConeRadius != 0.0f)
 		{
-			float RANDOM_LOW = -ammo->spread*0.5f;
-			float RANDOM_HIGH = ammo->spread*0.5f;
+			float RANDOM_LOW = -ammo->spreadConeRadius*0.5f;
+			float RANDOM_HIGH = ammo->spreadConeRadius*0.5f;
 
 			new_lookAt.x += Math::randomFloat(RANDOM_LOW, RANDOM_HIGH);
 			new_lookAt.y += Math::randomFloat(RANDOM_LOW, RANDOM_HIGH);
@@ -1027,10 +1079,10 @@ void GameComponent::shootProjectile( AttributePtr<Attribute_Spatial> ptr_spatial
 		new_pos.z += new_lookAt.z*d;*/
 
 		//// randomize displacement of each projectile preventing them from spawning at the same position
-		//if(ammo->spawnVariation != 0.0f)
+		//if(ammo->displacementSphereRadius != 0.0f)
 		//{
-		//	randomLO = -ammo->spawnVariation *0.5f;
-		//	randomHI = ammo->spawnVariation *0.5f;
+		//	randomLO = -ammo->displacementSphereRadius *0.5f;
+		//	randomHI = ammo->displacementSphereRadius *0.5f;
 		//	scatterPos.x += randomLO + (float)rand()/((float)RAND_MAX/(randomHI-randomLO));
 		//	scatterPos.y += randomLO + (float)rand()/((float)RAND_MAX/(randomHI-randomLO));
 		//	scatterPos.z += randomLO + (float)rand()/((float)RAND_MAX/(randomHI-randomLO));
