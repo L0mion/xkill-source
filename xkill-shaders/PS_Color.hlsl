@@ -1,5 +1,5 @@
 #include "constantBuffers.hlsl"
-#include "structs.hlsl"
+#include "VSOut.hlsl"
 
 struct PSOut
 {

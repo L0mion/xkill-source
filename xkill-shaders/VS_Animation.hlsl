@@ -1,8 +1,9 @@
 
 #include "constantBuffers.hlsl"
-#include "structs.hlsl"
+#include "VSIn.hlsl"
+#include "VSOut.hlsl"
 
-DefaultVSOut VS_Animation(AnimationVSIn vsIn)
+DefaultVSOut VS_Animation(VSInPosNormTexTanSkinned vsIn)
 {
 	DefaultVSOut output;
 

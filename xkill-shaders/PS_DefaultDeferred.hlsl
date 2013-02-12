@@ -1,5 +1,5 @@
 
-#include "structs.hlsl"
+#include "VSOut.hlsl"
 
 struct PSOut
 {

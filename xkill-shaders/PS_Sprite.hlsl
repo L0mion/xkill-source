@@ -1,6 +1,6 @@
 
 #include "constantBuffers.hlsl"
-#include "structs.hlsl"
+#include "VSOut.hlsl"
 
 Texture2D tex : register (t0);
 

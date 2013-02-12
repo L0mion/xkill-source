@@ -1,4 +1,5 @@
 #include "structs.hlsl"
+#include "VSOut.hlsl"
 
 DefaultVSOut VS_DefaultDeferred(quad_vertex vertex)
 {
