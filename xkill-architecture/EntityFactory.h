@@ -155,7 +155,7 @@ public:
 			ptr_offset->ptr_spatial = ptr_spatial;
 			ptr_offset->ptr_parent_spatial_position = ptr_parent_spatial_position;
 			ptr_offset->ptr_parent_spatial_rotation = ptr_parent_spatial_rotation;
-			ptr_offset->offset_position = Float3(0.23f, 0.4f, 0.56f);
+			ptr_offset->offset_position = Float3(0.23f, 0.5f, 0.2f);
 
 			ptr_weapon_spatial = ptr_spatial;
 		}
@@ -177,7 +177,7 @@ public:
 			ptr_offset->ptr_spatial = ptr_spatial;
 			ptr_offset->ptr_parent_spatial_position = ptr_weapon_spatial;
 			ptr_offset->ptr_parent_spatial_rotation = ptr_weapon_spatial;
-			ptr_offset->offset_position = Float3(0.0f, 0.06f, 0.32f);
+			ptr_offset->offset_position = Float3(0.0f, 0.06f, 1.0f);
 
 			ptr_fireLocation_spatial = ptr_spatial;
 		}

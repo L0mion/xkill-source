@@ -439,6 +439,7 @@ struct DLL_U Attribute_Camera : public IAttribute
 	Float3 right;		//!< Always aims to the right of the camera, perpendicular to look.
 	Float3 look;		//!< The direction in which the camera is aimed.
 
+	void syncSpatialWithAim();
 	DataItemList* getDataList();
 	void saveTo(DataItemList* list);;
 	AttributeType getType(){return ATTRIBUTE_CAMERA;}
