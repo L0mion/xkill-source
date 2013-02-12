@@ -33,6 +33,7 @@ PhysicsComponent::PhysicsComponent() : broadphase_(nullptr),
 	ATTRIBUTES_INIT_ALL;
 	SUBSCRIBE_TO_EVENT(this,EVENT_ATTRIBUTE_UPDATED);
 	SUBSCRIBE_TO_EVENT(this, EVENT_MODIFY_PHYSICS_OBJECT);
+	SUBSCRIBE_TO_EVENT(this, EVENT_GET_PHYSICS_OBJECT_HIT_BY_RAY);
 }
 
 PhysicsComponent::~PhysicsComponent()
@@ -363,6 +364,30 @@ void PhysicsComponent::onEvent(Event* e)
 		}
 		break;
 	}
+	case EVENT_GET_PHYSICS_OBJECT_HIT_BY_RAY:
+		Event_GetPhysicsObjectHitByRay* physicsObjectHitByRay = static_cast<Event_GetPhysicsObjectHitByRay*>(e);
+
+		btVector3 from = convert(physicsObjectHitByRay->from);
+		btVector3 to = convert(physicsObjectHitByRay->to);
+
+		btCollisionWorld::ClosestRayResultCallback closestResults(from, to);
+		closestResults.m_flags |= btTriangleRaycastCallback::kF_KeepUnflippedNormal;
+
+		closestResults.m_collisionFilterGroup = Attribute_Physics::PhysicsAttributeType::RAY;
+		closestResults.m_collisionFilterMask = Attribute_Physics::PhysicsAttributeType::WORLD | Attribute_Physics::PhysicsAttributeType::PLAYER;
+
+		dynamicsWorld_->rayTest(from, to, closestResults);
+		if(closestResults.hasHit())
+		{
+			const PhysicsObject* hitObject = static_cast<const PhysicsObject*>(closestResults.m_collisionObject);
+			physicsObjectHitByRay->closest_entityId = itrPhysics.ownerIdAt(hitObject->getAttributeIndex());
+		}
+		else
+		{
+			physicsObjectHitByRay->closest_entityId = 0;
+		}
+
+		break;
 	//case EVENT_LOAD_LEVEL:
 	//	break;
 	}

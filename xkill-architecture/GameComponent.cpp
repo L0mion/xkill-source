@@ -227,8 +227,12 @@ void GameComponent::onUpdate(float delta)
 				ray->from = ptr_camera->ptr_spatial->ptr_position->position;
 				//ray->from = ptr_player->ptr_weaponFireLocation_spatial->ptr_position->position;
 				ray->to = lookAtFarPlaneHorizon + ray->from;
-			}
 
+				Event_GetPhysicsObjectHitByRay ev(ray->from, ray->to);
+				SEND_EVENT(&ev);
+				DEBUGPRINT("ev.closest_entityId: " << ev.closest_entityId);
+			}
+			
 			//--------------------------------------------------------------------------------------
 			// Damage taken bookkeeping (Not tested. Idea was to lower player speed when the player took damage) 
 			//-------------------------------------------------------------------------------------

@@ -87,6 +87,7 @@ enum DLL_U EventType
 	EVENT_GET_ENTITIES,
 	EVENT_GET_WINDOW_RESOLUTION,
 	EVENT_GET_WINDOW_HANDLE,
+	EVENT_GET_PHYSICS_OBJECT_HIT_BY_RAY,
 
 	// Utilities
 	EVENT_CREATE_MESH,
@@ -589,4 +590,14 @@ public:
 	float time;
 	XKILL_Enums::HackType hackType;
 	AttributePtr<Attribute_Player> player;
+};
+
+class DLL_U Event_GetPhysicsObjectHitByRay : public Event
+{
+public:
+	Event_GetPhysicsObjectHitByRay(Float3 from, Float3 to);
+
+	Float3 from;
+	Float3 to;
+	int closest_entityId; // 0 if no Entity
 };

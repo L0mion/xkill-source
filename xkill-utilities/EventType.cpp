@@ -240,3 +240,9 @@ Event_HackActivated::Event_HackActivated(float time, XKILL_Enums::HackType hackT
 	this->hackType = hackType;
 	this->player = player;
 }
+
+Event_GetPhysicsObjectHitByRay::Event_GetPhysicsObjectHitByRay(Float3 from, Float3 to) : Event(EVENT_GET_PHYSICS_OBJECT_HIT_BY_RAY)
+{
+	this->from = from;
+	this->to = to;
+}
