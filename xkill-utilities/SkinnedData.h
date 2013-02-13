@@ -1,9 +1,11 @@
-#ifndef XKILL_RENDERER_SKINNEDDATA_H
-#define XKILL_RENDERER_SKINNEDDATA_H
+#ifndef XKILL_UTILITIES_SKINNEDDATA_H
+#define XKILL_UTILITIES_SKINNEDDATA_H
 
 #include <vector>
 #include <map>
 #include <string>
+
+#include "dllUtilities.h"
 
 namespace DirectX
 {
@@ -16,7 +18,7 @@ class AnimationClip;
 /*!
 \ingroup xkill-renderer
 */
-class SkinnedData
+class DLL_U SkinnedData
 {
 public:
 	//! Initializes SkinnedData to its default state.
@@ -43,14 +45,18 @@ public:
 							float								timePosition, 
 							std::vector<DirectX::XMFLOAT4X4>*	finalTransforms) const;
 
-	float getBoneCount()								const;
+	unsigned int getBoneCount()							const;
 	float getClipStartTime(const std::string& clipName) const;
 	float getClipEndTime(const std::string& clipName)	const;
 
+
+	std::vector<int>*						getBoneHierarchy()	const;
+	std::vector<DirectX::XMFLOAT4X4>*		getBoneOffsets()	const;
+	std::map<std::string, AnimationClip*>*	getAnimations()		const;
 private:
 	std::vector<int>*						boneHierarchy_; //!< Vector containing the skeletons hierarchy.
 	std::vector<DirectX::XMFLOAT4X4>*		boneOffsets_;	//!< Vector containing bone offsets.
 	std::map<std::string, AnimationClip*>*	animations_;	//!< Map that holds AnimationClips and thier corresponding names.
 };
 
-#endif //XKILL_RENDERER_SKINNEDDATA_H
+#endif //XKILL_UTILITIES_SKINNEDDATA_H

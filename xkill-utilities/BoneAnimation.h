@@ -1,7 +1,9 @@
-#ifndef XKILL_RENDERER_BONEANIMATION_H
-#define XKILL_RENDERER_BONEANIMATION_H
+#ifndef XKILL_UTILITIES_BONEANIMATION_H
+#define XKILL_UTILITIES_BONEANIMATION_H
 
 #include <vector>
+
+#include "dllUtilities.h"
 
 namespace DirectX
 {
@@ -14,13 +16,15 @@ struct Keyframe;
 /*!
 \ingroup xkill-renderer
 */
-class BoneAnimation
+class DLL_U BoneAnimation
 {
 public:
 	//! Initializes BoneAnimation to its default state.
 	BoneAnimation();
 	//! Releases all memory and resets BoneAnimation to its default state.
 	~BoneAnimation();
+
+	void addKeyframe(Keyframe* keyframe);
 
 	//! Interpolates the animation on this bone.
 	/*!
@@ -55,4 +59,4 @@ private:
 	std::vector<Keyframe*>* keyframes_; //!< Vectvor containing the keyframes for this bone.
 };
 
-#endif //XKILL_RENDERER_BONEANIMATION_H
+#endif //XKILL_UTILITIES_BONEANIMATION_H

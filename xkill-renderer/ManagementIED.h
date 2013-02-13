@@ -9,7 +9,9 @@ enum IED_TYPE
 	IED_TYPE__POS_NORM_TEX_INSTANCED,
 
 	IED_TYPE__POS_COLOR,
-	IED_TYPE__POS_NORM_TEX_TAN_SKINNED
+	IED_TYPE__POS_NORM_TEX_TAN_SKINNED,
+
+	IED_TYPE__POS_NORM_TEX_TAN_INSTANCED
 };
 
 //! Stores predefined types of Input Element descriptions required to initialize Input Layouts.
@@ -32,6 +34,7 @@ private:
 	void initIEDPosNormTexInstanced();
 	void initIEDPosColor();				//!< Initializes IED consisting of Position- and Color-attributes.
 	void initIEDPosNormTexTanSkinned();	//!< Initializes IED consisting of Position-, Normal-, TexCoord-, Tangent-, Weights- and BoneIndices-attributes.
+	void initIEDPosNormTexTanInstanced();
 
 	D3D11_INPUT_ELEMENT_DESC createIED(
 		LPCSTR						semanticName,
@@ -71,6 +74,9 @@ private:
 
 	static const unsigned int iedPosNormTexTanSkinnedNumElements_ = 6;
 	D3D11_INPUT_ELEMENT_DESC iedPosNormTexTanSkinned_[iedPosNormTexTanSkinnedNumElements_];
+
+	static const unsigned int iedPosNormTexTanInstancedNumElements_ = 8;
+	D3D11_INPUT_ELEMENT_DESC iedPosNormTexTanInstanced_[iedPosNormTexTanInstancedNumElements_];
 };
 
 #endif //XKILL_RENDERER_ILMANAGEMENT_H

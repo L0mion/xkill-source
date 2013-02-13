@@ -7,10 +7,12 @@
 
 
 ModelD3D::ModelD3D(
+	VertexType							vertexType,
 	ID3D11Buffer*						vertexBuffer,
 	const std::vector<SubsetD3D*>		subsets,
 	const std::vector<MaterialDesc>		materials)
 {
+	vertexType_ = vertexType;
 	vertexBuffer_	= vertexBuffer;
 	subsets_		= subsets;
 	materials_		= materials;
@@ -37,4 +39,8 @@ std::vector<SubsetD3D*>&	ModelD3D::getSubsetD3Ds()
 std::vector<MaterialDesc>&	ModelD3D::getMaterials()
 {
 	return materials_;
+}
+VertexType ModelD3D::getVertexType()
+{
+	return vertexType_;
 }

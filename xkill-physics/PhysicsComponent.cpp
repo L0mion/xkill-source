@@ -138,7 +138,7 @@ void PhysicsComponent::onUpdate(float delta)
 		physicsObjects_->at(physicsAttributeIndex)->onUpdate(delta,dynamicsWorld_);	//Update physics objects by calling their onUpdate function.
 
 		//Should be in PlayerPhysicsAttribute::onUpdate()
-		if(ptr_physics->collisionFilterGroup == ptr_physics->PhysicsAttributeType::PLAYER)
+		if(ptr_physics->collisionFilterGroup == XKILL_Enums::PhysicsAttributeType::PLAYER)
 		{
 			//Calculate player aiming ray
 			Entity* playerEntity = itrPhysics.ownerAt(physicsAttributeIndex);
@@ -153,8 +153,8 @@ void PhysicsComponent::onUpdate(float delta)
 				closestResults.m_flags |= btTriangleRaycastCallback::kF_KeepUnflippedNormal;
 
 				//btCollisionWorld::ClosestRayResultCallback closestResults(from, to);
-				closestResults.m_collisionFilterGroup = ptr_physics->PhysicsAttributeType::RAY;
-				closestResults.m_collisionFilterMask = ptr_physics->PhysicsAttributeType::PLAYER | ptr_physics->PhysicsAttributeType::WORLD;
+				closestResults.m_collisionFilterGroup = XKILL_Enums::PhysicsAttributeType::RAY;
+				closestResults.m_collisionFilterMask = XKILL_Enums::PhysicsAttributeType::PLAYER | XKILL_Enums::PhysicsAttributeType::WORLD;
 
 				//Check
 				//PLAYER is world
@@ -403,22 +403,22 @@ void PhysicsComponent::synchronizeWithAttributes(AttributePtr<Attribute_Physics>
 		default:
 			physicsObjects_->at(physicsAttributeIndex) = new PhysicsObject();
 			break;
-		case Attribute_Physics::WORLD:
+		case XKILL_Enums::PhysicsAttributeType::WORLD:
 			physicsObjects_->at(physicsAttributeIndex) = new WorldPhysicsObject();
 			break;
-		case Attribute_Physics::PLAYER:
+		case XKILL_Enums::PhysicsAttributeType::PLAYER:
 			physicsObjects_->at(physicsAttributeIndex) = new PlayerPhysicsObject();
 			break;
-		case Attribute_Physics::PROJECTILE:
+		case XKILL_Enums::PhysicsAttributeType::PROJECTILE:
 			physicsObjects_->at(physicsAttributeIndex) = new ProjectilePhysicsObject();
 			break;
-		case Attribute_Physics::EXPLOSIONSPHERE:
+		case XKILL_Enums::PhysicsAttributeType::EXPLOSIONSPHERE:
 			physicsObjects_->at(physicsAttributeIndex) = new ExplosionSpherePhysicsObject();
 			break;
-		case Attribute_Physics::PICKUPABLE:
+		case XKILL_Enums::PhysicsAttributeType::PICKUPABLE:
 			physicsObjects_->at(physicsAttributeIndex) = new PickupablePhysicsObject();
 			break;
-		case Attribute_Physics::EVERYTHING:
+		case XKILL_Enums::PhysicsAttributeType::EVERYTHING:
 			SHOW_MESSAGEBOX("Error: Attribute_Physics should not have EVERYTHING as collisionFilterGroup");
 			break;
 		}
@@ -479,16 +479,16 @@ void PhysicsComponent::detectedCollisionsDuringStepSimulation(btScalar timeStep)
 				unsigned int ownerB = itrPhysics.ownerIdAt(objectB->getAttributeIndex());
 
 				//check physicsobjecttype;
-				if(objectA->getCollisionFilterGroup() == Attribute_Physics::FRUSTUM ||
-					objectB->getCollisionFilterGroup() == Attribute_Physics::FRUSTUM)
+				if(objectA->getCollisionFilterGroup() == XKILL_Enums::PhysicsAttributeType::FRUSTUM ||
+					objectB->getCollisionFilterGroup() == XKILL_Enums::PhysicsAttributeType::FRUSTUM)
 				{
-					if(objectA->getCollisionFilterGroup() == Attribute_Physics::FRUSTUM &&
-					   objectB->getCollisionFilterGroup() != Attribute_Physics::FRUSTUM)
+					if(objectA->getCollisionFilterGroup() == XKILL_Enums::PhysicsAttributeType::FRUSTUM &&
+					   objectB->getCollisionFilterGroup() != XKILL_Enums::PhysicsAttributeType::FRUSTUM)
 					{
 						doCulling(objectA->getAttributeIndex(),objectB->getAttributeIndex());
 					}
-					else if(objectA->getCollisionFilterGroup() != Attribute_Physics::FRUSTUM &&
-					   objectB->getCollisionFilterGroup() == Attribute_Physics::FRUSTUM)
+					else if(objectA->getCollisionFilterGroup() != XKILL_Enums::PhysicsAttributeType::FRUSTUM &&
+					   objectB->getCollisionFilterGroup() == XKILL_Enums::PhysicsAttributeType::FRUSTUM)
 					{
 						doCulling(objectB->getAttributeIndex(),objectA->getAttributeIndex());
 					}
@@ -507,7 +507,7 @@ void PhysicsComponent::detectedCollisionsDuringStepSimulation(btScalar timeStep)
 
 void PhysicsComponent::doCulling(unsigned int frustumAttributeIndex, unsigned int objectAttributeIndex)
 {
-	if(itrPhysics.at(objectAttributeIndex)->ptr_render.isNotEmpty())
+	if(!itrPhysics.at(objectAttributeIndex)->ptr_render.isEmpty())
 	{
 		itrPhysics.at(objectAttributeIndex)->ptr_render->cull = true;
 	}
@@ -518,7 +518,7 @@ void PhysicsComponent::updateCulling()
 	while(itrPhysics.hasNext())
 	{
 		AttributePtr<Attribute_Physics> ptr_physics = itrPhysics.getNext();
-		if(ptr_physics->ptr_render.isNotEmpty())
+		if(!ptr_physics->ptr_render.isEmpty())
 		{
 			ptr_physics->ptr_render->cull = false;
 		}
@@ -537,9 +537,9 @@ void PhysicsComponent::updateCulling()
 		if(frustumPhysicsObjects_->at(index) == nullptr)
 		{
 			frustumPhysicsObjects_->at(index) = new FrustumPhysicsObject();
-			frustumPhysicsObjects_->at(index)->frustumInit(index,Attribute_Physics::FRUSTUM);
+			frustumPhysicsObjects_->at(index)->frustumInit(index,XKILL_Enums::PhysicsAttributeType::FRUSTUM);
 			int a = dynamicsWorld_->getNumCollisionObjects();
-			dynamicsWorld_->addRigidBody(frustumPhysicsObjects_->at(index),Attribute_Physics::FRUSTUM,Attribute_Physics::EVERYTHING);
+			dynamicsWorld_->addRigidBody(frustumPhysicsObjects_->at(index),XKILL_Enums::PhysicsAttributeType::FRUSTUM,XKILL_Enums::PhysicsAttributeType::EVERYTHING);
 			frustumPhysicsObjects_->at(index)->setGravity(btVector3(0,0,0));
 			int b = dynamicsWorld_->getNumCollisionObjects();
 			if(a==b)

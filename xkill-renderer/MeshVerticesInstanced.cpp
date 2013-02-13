@@ -1,6 +1,6 @@
 #include "MeshVerticesInstanced.h"
 
-VertexPosNormTexInstanced::VertexPosNormTexInstanced()
+VertexInstanced::VertexInstanced()
 {
 	world_._11 = 0.0f;
 	world_._12 = 0.0f;
@@ -22,7 +22,7 @@ VertexPosNormTexInstanced::VertexPosNormTexInstanced()
 	world_._43 = 0.0f;
 	world_._44 = 0.0f;
 }
-VertexPosNormTexInstanced::~VertexPosNormTexInstanced()
+VertexInstanced::~VertexInstanced()
 {
 	//Do nothing.
 }

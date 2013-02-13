@@ -10,7 +10,7 @@ public:
 	FrustumPhysicsObject();
 	~FrustumPhysicsObject();
 	virtual void onUpdate(float delta);
-	bool frustumInit(unsigned int attributeIndex,unsigned int collisionFilterGroup);
+	bool frustumInit(unsigned int attributeIndex,short);
 };
 
 #endif

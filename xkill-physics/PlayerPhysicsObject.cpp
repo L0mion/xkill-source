@@ -45,8 +45,8 @@ void PlayerPhysicsObject::onUpdate(float delta,btDynamicsWorld* dynamicWorld)
 	btVector3 from = getWorldTransform().getOrigin();
 	btVector3 to = from - btVector3(0,50,0);
 	btCollisionWorld::ClosestRayResultCallback ray(from,to);
-	ray.m_collisionFilterGroup = Attribute_Physics::PhysicsAttributeType::RAY;
-	ray.m_collisionFilterMask =  Attribute_Physics::PhysicsAttributeType::WORLD;
+	ray.m_collisionFilterGroup = XKILL_Enums::PhysicsAttributeType::RAY;
+	ray.m_collisionFilterMask =  XKILL_Enums::PhysicsAttributeType::WORLD;
 	dynamicWorld->rayTest(from,to,ray);
 	if(ray.hasHit())
 	{
@@ -147,10 +147,13 @@ void PlayerPhysicsObject::handleInput(float delta)
 		}
 
 		//Airwalk handling
-		if(!ptr_player->collidingWithWorld)
+		/*if(!ptr_player->collidingWithWorld)
 		{
 			move *= 0.75f;
 		}
+		*/
+
+		// move player
 		move = move.rotate(btVector3(0,1,0),yaw_);
 		move = btVector3(move.x(), getLinearVelocity().y(), move.z());
 		setLinearVelocity(move);
@@ -162,22 +165,22 @@ void PlayerPhysicsObject::handleInput(float delta)
 
 		//Jump
 		float jumpPower = 10.0f;
-		if(ptr_input->jump && ptr_player->timeSinceLastJump > ptr_player->delayInSecondsBetweenEachJump && ptr_player->collidingWithWorld)
+		/*if(ptr_input->jump && ptr_player->timeSinceLastJump > ptr_player->delayInSecondsBetweenEachJump && ptr_player->collidingWithWorld)
 		{
 			applyCentralImpulse(btVector3(0.0f, jumpPower, 0.0f));
 			ptr_player->timeSinceLastJump = 0.0f;
-		}
+		}*/
 
 		//Jetpack
-		if(ptr_input->jetpack)
+		if(ptr_player->jetpack /*|| ptr_input->jetpack*/) //input-jetpack is temporary for debugging purposes
 		{
 			applyCentralImpulse(btVector3(0.0f, jumpPower*10.0f*delta, 0.0f));
-			ptr_player->jetpackTimer+=delta;
-			if(ptr_player->jetpackTimer > 0.1f)
-			{
-				ptr_player->jetpackTimer = 0.0f;
-				health->health--;
-			}
+			//ptr_player->jetpackTimer+=delta;
+			//if(ptr_player->jetpackTimer > 0.1f)
+			//{
+			//	ptr_player->jetpackTimer = 0.0f;
+			//	health->health--;
+			//}
 		}
 
 		AttributePtr<Attribute_Physics> ptr_player_physics = itrPhysics_3.at(attributeIndex_);
@@ -207,8 +210,5 @@ void PlayerPhysicsObject::handleInput(float delta)
 		//{
 		//	setGravity(btVector3(0.0f, ptr_player_physics->gravity.y*5.0f, 0.0f));
 		//}
-
-		//ptr_input->jump = false;
-		//ptr_input->jetpack = false;
 	}
 }

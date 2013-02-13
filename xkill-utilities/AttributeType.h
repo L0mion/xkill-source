@@ -9,6 +9,7 @@
 #include "MeshDesc.h"
 #include "MeshVertices.h"
 #include "Math.h"
+#include "Timer.h"
 
 struct DataItem;
 class DataItemList;
@@ -216,19 +217,7 @@ struct DLL_U Attribute_Render : public IAttribute
 */
 struct DLL_U Attribute_Physics : public IAttribute
 {
-	enum PhysicsAttributeType
-	{
-		NOTHING = 0,
-		WORLD = 1,
-		PLAYER = 2,
-		PROJECTILE = 4,
-		EXPLOSIONSPHERE = 8,
-		FRUSTUM = 16,
-		PICKUPABLE = 32,
-		RAY = 64,
-		EVERYTHING = -1
-	};
-	unsigned int collisionFilterGroup;
+	short collisionFilterGroup;
 
 	Attribute_Physics();
 	~Attribute_Physics();
@@ -350,6 +339,7 @@ struct DLL_U Attribute_Input : public IAttribute
 	bool changeAmmunitionType;
 	bool changeFiringMode;
 	bool lowSensitivity;
+	bool reload;
 
 	DataItemList* getDataList();
 	void saveTo(DataItemList* list);;
@@ -437,6 +427,7 @@ struct DLL_U Attribute_Camera : public IAttribute
 	Float3 right;		//!< Always aims to the right of the camera, perpendicular to look.
 	Float3 look;		//!< The direction in which the camera is aimed.
 
+	void syncSpatialWithAim();
 	DataItemList* getDataList();
 	void saveTo(DataItemList* list);;
 	AttributeType getType(){return ATTRIBUTE_CAMERA;}
@@ -500,13 +491,12 @@ struct DLL_U Attribute_Player : public IAttribute
 	float sprintTime;			//!< Time that can be spent sprinting
 	bool canSprint;				//!< Can the player sprint right now
 	float sprintRechargeRate;	//!< The rate at which the sprint will recharge
-	float respawnDelay;			//!< Time between death and respawn
-	float currentRespawnDelay;	//!< Time until respawn
+	Timer respawnTimer;		//!< Keeps track of when a dead player should respawn
 	float timeSinceLastJump;	//!< Incrementing timer
 	float delayInSecondsBetweenEachJump;
-	bool collidingWithWorld;	//!< Set y-velocity to zero when not colliding with world and not jumping
-	float timeSinceLastDamageTaken; //!< Incrementing timer. Reset when taking damage.
-	float jetpackTimer;			//!< Incremented when using jetpack
+	bool collidingWithWorld;			//!< Set y-velocity to zero when not colliding with world and not jumping
+	float timeSinceLastDamageTaken;		//!< Incrementing timer. Reset when taking damage.
+	bool jetpack;						//!< Use jetpack		
 	bool detectedAsDead;
 
 	int meshID_whenAlive;
@@ -580,7 +570,7 @@ struct DLL_U Attribute_PlayerSpawnPoint : public IAttribute
 	AttributePtr<Attribute_Position> ptr_position;
 
 	float secondsSinceLastSpawn;	//!< Is reset when a player spawns at the spawn point.
-	float spawnArea;				//!< Defines the spawn point zone, a horizontal circle area.
+	float spawnArea;				//!< Defines the spawn point zone, a horizontal circle area (might have changed to sphere)
 
 	DataItemList* getDataList();
 	void saveTo(DataItemList* list);;
@@ -595,12 +585,12 @@ struct DLL_U Attribute_PickupablesSpawnPoint : public IAttribute
 
 	AttributePtr<Attribute_Position> ptr_position;
 
-	XKILL_Enums::PickupableType spawnPickupableType;			//!< Type of pickupable spawned by this pickupables spawn point
-	float spawnDelayInSeconds;					//!< Delay until a pickupable may spawn
-	float secondsSinceLastSpawn;				//!< Incrementing timer, reset when spawned.
-	float secondsSinceLastPickup;				//!< Incrementing timer, reset when picked up.
-	int maxNrOfExistingSpawnedPickupables;		//!< Is checked against "currentNrOfExistingSpawnedPickupables"
-	int currentNrOfExistingSpawnedPickupables;	//!< Incremented when a pickubalbe is spawned from this pickupables spawn point. Decremented when a pickupable is picked up
+	XKILL_Enums::PickupableType spawnPickupableType;	//!< Type of pickupable spawned by this pickupables spawn point
+	float spawnDelayInSeconds;							//!< Delay until a pickupable may spawn
+	float secondsSinceLastSpawn;						//!< Incrementing timer, reset when spawned.
+	float secondsSinceLastPickup;						//!< Incrementing timer, reset when picked up.
+	int maxNrOfExistingSpawnedPickupables;				//!< Is checked against "currentNrOfExistingSpawnedPickupables"
+	int currentNrOfExistingSpawnedPickupables;			//!< Incremented when a pickubalbe is spawned from this pickupables spawn point. Decremented when a pickupable is picked up
 
 	DataItemList* getDataList();
 	void saveTo(DataItemList* list);;
@@ -618,7 +608,7 @@ struct DLL_U Attribute_Pickupable : public IAttribute
 	AttributePtr<Attribute_Physics> ptr_physics;
 	AttributePtr<Attribute_PickupablesSpawnPoint> ptr_pickupablesSpawnPoint_creator;	//! The pickupable spawnpoint that spawned this pickupable
 
-	XKILL_Enums::PickupableType pickupableType;						//! MEDKIT, AMMUNITION_BULLET, AMMUNITION_SCATTER, AMMUNITION_EXPLOSIVE, etc
+	XKILL_Enums::PickupableType pickupableType;			//! MEDKIT, AMMUNITION_BULLET, AMMUNITION_SCATTER, AMMUNITION_EXPLOSIVE, etc
 	int amount;											//! Data of pickupable (health, ammo, etc)
 
 	DataItemList* getDataList();
@@ -663,7 +653,6 @@ struct DLL_U Attribute_DebugShape : public IAttribute
 	~Attribute_DebugShape();
 	void clean();
 
-	
 	AttributePtr<Attribute_Spatial> ptr_spatial;
 
 	unsigned int	meshID;		//!< ID of mesh
@@ -682,8 +671,8 @@ struct DLL_U Attribute_ExplosionSphere : public IAttribute
 	~Attribute_ExplosionSphere();
 
 	AttributePtr<Attribute_Physics> ptr_physics;
-	float currentLifeTimeLeft;						//!< Updated by Bullet each frame
-	float currentRadius;							//!< Updated by Bullet each frame
+	float currentLifeTimeLeft;
+	float currentRadius;							//!< Incremented in ExplosionSpherePhysicsObject::onUpdate
 	XKILL_Enums::AmmunitionType ammunitionType;
 	XKILL_Enums::FiringModeType firingModeType;
 

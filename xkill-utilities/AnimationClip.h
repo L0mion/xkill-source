@@ -1,7 +1,9 @@
-#ifndef XKILL_RENDERER_ANIMATIONCLIP_H
-#define XKILL_RENDERER_ANIMATIONCLIP_H
+#ifndef XKILL_UTILITIES_ANIMATIONCLIP_H
+#define XKILL_UTILITIES_ANIMATIONCLIP_H
 
 #include <vector>
+
+#include "dllUtilities.h"
 
 namespace DirectX
 {
@@ -14,7 +16,7 @@ class BoneAnimation;
 /*!
 \ingroup xkill-renderer
 */
-class AnimationClip
+class DLL_U AnimationClip
 {
 public:
 	//! Initializes AnimationClip to its default state.
@@ -33,9 +35,10 @@ public:
 	float getClipEndTime()		const;
 	
 	std::vector<BoneAnimation*>* getBoneAnimations() const;
+	void setBoneAnimations(std::vector<BoneAnimation*>* boneAnimations);
 
 private:
 	std::vector<BoneAnimation*>* boneAnimations_; //!< Vector containing the skeleton
 };	
 
-#endif //XKILL_RENDERER_ANIMATIONCLIP_H
+#endif //XKILL_UTILITIES_ANIMATIONCLIP_H

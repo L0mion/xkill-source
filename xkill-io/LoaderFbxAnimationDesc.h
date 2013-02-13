@@ -2,8 +2,14 @@
 #define XKILL_IO_LOADER_FBX_ANIMATION_DESC_H
 
 #include <vector>
+#include <map>
+#include <string>
 
 #include "LoaderFbxAnimationBone.h"
+
+class AnimationClip;
+class BoneAnimation;
+struct Keyframe;
 
 //! Class for describing a FBX animation.
 /*!
@@ -25,7 +31,15 @@ public:
 	void setName(const char* name);
 	void setBones(std::vector<LoaderFbxAnimationBone> bones);
 
+	void convertToXKillFormat(std::map<std::string, AnimationClip*>* animations);
+
 private:
+	void convertBoneToXKillFormat(LoaderFbxAnimationBone fbxBone, BoneAnimation* bone);
+	void createKeyframe(LoaderFbxAnimationBone fbxBone, Keyframe* keyframe, float time);
+
+	unsigned int findMaxNumKeyframes(LoaderFbxAnimationBone bone);
+	unsigned int findMinNumKeyframes(LoaderFbxAnimationBone bone);
+
 	const char* name_; //<! Name of the animaiton.
 
 	std::vector<LoaderFbxAnimationBone> bones_; //<! Containing all the bones used in the animation.

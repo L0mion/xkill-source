@@ -62,7 +62,7 @@ bool ComponentManager::init(HWND windowHandle, HWND parentWindowHandle)
 	*/
 //------------------------delete "deathmatchState" and "mainMenuState" somewhere //check-----
 	
-	//Substitute statemchine, enum
+	//Substitute statemachine, enum
 	//state_TemporaryVariableUsedAsSubstituteForStateMachine = SPECIAL_STATE_NONE;
 
 	render_ = new RenderingComponent(windowHandle);
@@ -128,7 +128,7 @@ bool ComponentManager::init(HWND windowHandle, HWND parentWindowHandle)
 	{
 		SHOW_MESSAGEBOX("BulletPhysicsComponent failed to init.");
 		return false;
-	}
+	}	
 
 	//SEND_EVENT(&Event_PlaySound(Event_PlaySound::SOUND_MUSIC, Float3(), false));
 
@@ -153,6 +153,25 @@ void ComponentManager::onEvent(Event* e)
 	}
 }
 
+void updateCamera()
+{
+	AttributeIterator<Attribute_Camera> itrCamera = ATTRIBUTE_MANAGER->camera.getIterator();
+	while(itrCamera.hasNext())
+	{
+		itrCamera.getNext()->syncSpatialWithAim();
+	}
+}
+
+void updateOffset()
+{
+	AttributeIterator<Behavior_Offset> itrOffset = ATTRIBUTE_MANAGER->offset.getIterator();
+	while(itrOffset.hasNext())
+	{
+		AttributePtr<Behavior_Offset> ptr_offset = itrOffset.getNext();
+		ptr_offset->updateOffset();
+	}
+}
+
 void ComponentManager::update(float delta)
 {
 	//// PUT SOMETHING 
@@ -162,12 +181,18 @@ void ComponentManager::update(float delta)
 	{
 		input_->onUpdate(delta);
 		physics_->onUpdate(delta);
-		game_->onUpdate(delta);	
+		updateOffset();
 		camera_->onUpdate(delta);
+		updateCamera();
+		updateOffset();
+		
+		game_->onUpdate(delta);
+
 		sound_->onUpdate(delta);
-		render_->onUpdate(delta);
-		score_->onUpdate(delta);
 		hacks_->onUpdate(delta);
+
+		score_->onUpdate(delta);
+		render_->onUpdate(delta);
 	
 		SEND_EVENT(&Event(EVENT_UPDATE));
 	}
