@@ -639,8 +639,8 @@ void Renderer::renderSubset(
 	ID3D11DeviceContext*	devcon = managementD3D_->getDeviceContext();
 
 	//Set textures.
-	ID3D11ShaderResourceView* texAlbedo = managementTex_->getTexSrv(material.idAlbedoTex_);
-	ID3D11ShaderResourceView* texNormal = managementTex_->getTexSrv(material.idNormalTex_);
+	ID3D11ShaderResourceView* texAlbedo = managementTex_->getTexSrv(19); //material.idAlbedoTex_
+	ID3D11ShaderResourceView* texNormal = managementTex_->getTexSrv(20); //material.idNormalTex_
 	devcon->PSSetShaderResources(0, 1, &texAlbedo);
 	devcon->PSSetShaderResources(1, 1, &texNormal);
 
@@ -651,9 +651,6 @@ void Renderer::renderSubset(
 		devcon,
 		dxSpec,
 		material.specularPower_);
-
-	//Set input layout
-	//managementFX_->setLayout(devcon, LAYOUTID_POS_NORM_TEX_INSTANCED);
 
 	//Set index-buffer.
 	UINT offset = 0;
