@@ -85,7 +85,7 @@ private:
 	std::vector<VertexPosNormTexSkinned> convertVertexPosNormTexSkinned(std::vector<VertexDesc>& vertices);
 	std::vector<VertexPosNormSkinned> convertVertexPosNormSkinned(std::vector<VertexDesc>& vertices);
 	std::vector<VertexPosNormTexTanSkinned> convertVertexPosNormTexTanSkinned(std::vector<VertexDesc>& vertices);
-
+	std::vector<VertexPosNormTexTan> convertVertexPosNormTexTan(std::vector<VertexDesc>& vertices);
 
 	bool			existingModelD3D(const int unsigned modelID);			//!< Checks whether or a model corresponding to passed ID exists or not.
 	unsigned int	getModelD3DIndex(const int unsigned modelID);			//!< Gets index in vector containing ModelD3Ds based on model ID.

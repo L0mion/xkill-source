@@ -1,5 +1,5 @@
 #include "constantBuffers.hlsl"
-#include "structs.hlsl"
+#include "VSOut.hlsl"
 #include "UtilSphereMapTransform.hlsl"
 
 struct PSOut
@@ -14,14 +14,14 @@ Texture2D texNormal		: register(t1);
 
 SamplerState ss : register(s0);
 
-PSOut defaultPS(DefaultVSOut pIn)
+PSOut PS_Default(DefaultVSOut pIn)
 {
 	PSOut output;
 
-	float3 normal;
-	normal.x = pIn.normalW.x * 0.5f + 0.5f;
-	normal.y = pIn.normalW.y * 0.5f + 0.5f;
-	normal.z = pIn.normalW.z * 0.5f + 0.5f;
+	float3 normal = normalize(pIn.normalW);
+	normal.x = normal.x * 0.5f + 0.5f;
+	normal.y = normal.y * 0.5f + 0.5f;
+	normal.z = normal.z * 0.5f + 0.5f;
 	output.normal = float4(normal, 0.0f); //UtilEncodeSphereMap(pIn.normalW);
 
 	pIn.texcoord.y		= 1 - pIn.texcoord.y;

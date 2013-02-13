@@ -1,4 +1,4 @@
-#include "structs.hlsl"
+#include "VSOut.hlsl"
 
 struct PSOut
 {
@@ -8,7 +8,7 @@ struct PSOut
 
 SamplerState ss : register(s0);
 
-PSOut animationPS(DefaultVSOut pIn)
+PSOut PS_Animation(DefaultVSOut pIn)
 {
 	float4 white = float4(0.75f, 0.0f, 0.0f, 1.0f);
 

@@ -1,7 +1,8 @@
 #include "constantBuffers.hlsl"
-#include "structs.hlsl"
+#include "VSIn.hlsl"
+#include "VSOut.hlsl"
 
-DefaultVSOut defaultVS(DefaultVSInInstanced vsIn)
+DefaultVSOut VS_PosNormTexInstanced(VSInPosNormTexInstanced vsIn)
 {
 	DefaultVSOut output;
 

@@ -1,5 +1,5 @@
 
-#include "structs.hlsl"
+#include "VSOut.hlsl"
 
 struct PSOut
 {
@@ -12,7 +12,7 @@ Texture2D gBufferAlbedo : register( t1 );
 
 SamplerState ss : register(s0);
 
-float4 defaultDeferredPS(DefaultVSOut pIn) : SV_TARGET
+float4 PS_DefaultDeferred(DefaultVSOut pIn) : SV_TARGET
 {
 	float4 color = gBufferAlbedo.Sample(ss, pIn.texcoord);
 
