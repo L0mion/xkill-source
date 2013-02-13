@@ -730,7 +730,7 @@ void collision_projectile(Entity* entity1, Entity* entity2)
 						SEND_EVENT(&Event_ModifyPhysicsObject(XKILL_Enums::ModifyPhysicsObjectData::VELOCITYPERCENTAGE, static_cast<void*>(&Float3(0.1f, 0.1f, 0.1f)), itrPhysics.at(physicsId.at(j))));
 
 						//Collide with projectiles
-						short collisionFilterMask = itrPhysics.at(physicsId.at(j))->collisionFilterMask;
+						short collisionFilterMask = itrPhysics.at(physicsId.at(j))->collisionFilterMask | XKILL_Enums::PhysicsAttributeType::PROJECTILE;
 						SEND_EVENT(&Event_ModifyPhysicsObject(XKILL_Enums::ModifyPhysicsObjectData::COLLISIONFILTERMASK, static_cast<void*>(&collisionFilterMask), itrPhysics.at(physicsId.at(j))));
 					}
 					break;
