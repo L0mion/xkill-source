@@ -2,6 +2,7 @@
 #define XKILL_RENDERER_SHADER_H
 
 typedef long HRESULT;
+typedef const wchar_t* LPCWSTR; 
 
 struct ID3D11Device;
 struct ID3D11DeviceContext;
