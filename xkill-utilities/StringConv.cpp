@@ -1,6 +1,5 @@
-#include <Windows.h>
-
 #include "StringConv.h"
+#include <Windows.h>
 
 std::string uintToString(const unsigned int uint)
 {

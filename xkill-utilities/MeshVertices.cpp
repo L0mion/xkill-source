@@ -68,3 +68,22 @@ VertexPosNormTexSkinned::VertexPosNormTexSkinned(Float3 position,
 	for(unsigned int i=0; i<4; i++)
 		boneIndices_[i] = boneIndices[i];
 }
+
+VertexPosNormTexTan::VertexPosNormTexTan()
+{
+	position_	= Float3(0.0f, 0.0f, 0.0f);
+	normal_		= Float3(0.0f, 0.0f, 0.0f);
+	texcoord_	= Float2(0.0f, 0.0f);
+	tangent_	= Float4(0.0f, 0.0f, 0.0f, 0.0f);
+}
+VertexPosNormTexTan::VertexPosNormTexTan(
+	Float3 position, 
+	Float3 normal, 
+	Float2 texcoord,
+	Float4 tangent)
+{
+	position_	= position;
+	normal_		= normal;
+	texcoord_	= texcoord;
+	tangent_	= tangent;
+}

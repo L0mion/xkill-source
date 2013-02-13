@@ -4,7 +4,6 @@
 #include <vector>
 
 #include <xkill-utilities/MeshVertices.h>
-
 #include <xkill-utilities/MaterialDesc.h>
 
 struct ID3D11Buffer;
@@ -24,6 +23,7 @@ public:
 	\param ibs	A collection of index buffers.
 	*/
 	ModelD3D(
+		VertexType							vertexType,
 		ID3D11Buffer*						vertexBuffer,
 		const std::vector<SubsetD3D*>		subsets,
 		const std::vector<MaterialDesc>		materials);
@@ -33,11 +33,13 @@ public:
 	std::vector<SubsetD3D*>&	getSubsetD3Ds();
 	std::vector<MaterialDesc>&	getMaterials();
 	ID3D11Buffer*				getVertexBuffer();
+	VertexType					getVertexType();
 protected:
 private:
 	std::vector<SubsetD3D*>		subsets_;		//!< Index buffers.
 	std::vector<MaterialDesc>	materials_;		//!< Materials.
 	ID3D11Buffer*				vertexBuffer_;
+	VertexType					vertexType_;
 };
 
 /*

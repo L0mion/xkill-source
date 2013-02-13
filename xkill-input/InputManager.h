@@ -2,21 +2,14 @@
 
 #include <xkill-utilities/AttributeType.h>
 #include <xkill-utilities/EventType.h>
-
-#include "InputDevice.h"
-#include "DirectInputDevice.h"
-#include "DirectInputMouse.h"
-#include "DirectInputKeyboard.h"
-#include "XInputDevice.h"
-#include "QTInputDevices.h"
-
 #include <xkill-utilities/Converter.h>
 
-#include <Windows.h>
+#include "DirectInputDevice.h"
 
 #include <string>
 #include <vector>
 
+class QTInputDevices;
 class KeyMapper;
 
 //! Detects and manages devices and their input.

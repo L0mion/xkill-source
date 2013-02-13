@@ -3,7 +3,6 @@
 #include <xkill-utilities/Util.h>
 
 #include <DirectXMath.h>
-#include <windows.h>
 
 ATTRIBUTES_DECLARE_ALL;
 
@@ -96,7 +95,7 @@ void updateProj(AttributePtr<Attribute_Camera> camera)
 	float& aspectRatio	= camera->aspectRatio;
 	float& fieldOfView	= camera->fieldOfView;
 
-	ZeroMemory(&projection, sizeof(projection));
+	memset(&projection, 0, sizeof(projection));
 
 	projection(0, 0) = 1/(aspectRatio*(tan(fieldOfView/2)));
 	projection(1, 1) = 1/(tan(fieldOfView/2));

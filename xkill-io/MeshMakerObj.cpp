@@ -1,4 +1,3 @@
-#include <fstream>
 #include <windows.h>
 
 #include <xkill-utilities/Util.h>

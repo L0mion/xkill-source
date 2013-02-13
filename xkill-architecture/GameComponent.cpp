@@ -229,8 +229,12 @@ void GameComponent::onUpdate(float delta)
 				ray->from = ptr_camera->ptr_spatial->ptr_position->position;
 				//ray->from = ptr_player->ptr_weaponFireLocation_spatial->ptr_position->position;
 				ray->to = lookAtFarPlaneHorizon + ray->from;
-			}
 
+				//Event_GetPhysicsObjectHitByRay ev(ray->from, ray->to);
+				//SEND_EVENT(&ev);
+				//DEBUGPRINT("ev.closest_entityId: " << ev.closest_entityId);
+			}
+			
 			//--------------------------------------------------------------------------------------
 			// Damage taken bookkeeping (Not tested. Idea was to lower player speed when the player took damage) 
 			//-------------------------------------------------------------------------------------
@@ -294,7 +298,7 @@ void GameComponent::onUpdate(float delta)
 				// Reset player
 				//--------------------------------------------------------------------------------------
 				ptr_physics->gravity = Float3(0.0f, -10.0f, 0.0f);
-				ptr_physics->collisionFilterMask = Attribute_Physics::EVERYTHING;
+				ptr_physics->collisionFilterMask = XKILL_Enums::PhysicsAttributeType::EVERYTHING;
 				ptr_physics->collisionResponse = true;
 				ptr_physics->meshID = ptr_player->meshID_whenAlive;
 
@@ -593,19 +597,23 @@ void collision_applyDamage(Entity* entity1, Entity* entity2)
 	}
 }
 
-void collision_pickuppable(Entity* entity1, Entity* entity2)
+void collision_pickupable(Entity* entity1, Entity* entity2)
 {
 	if(entity1->hasAttribute(ATTRIBUTE_PICKUPABLE))
 	{
-		AttributePtr<Attribute_Pickupable> ptr_pickupable;
 		if(entity2->hasAttribute(ATTRIBUTE_PLAYER))
 		{
+			AttributePtr<Attribute_Pickupable> ptr_pickupable;
 			bool pickedUp = false;
 			//Retrieve player attribute
 			std::vector<int> playerId = entity2->getAttributes(ATTRIBUTE_PLAYER);
 			for(unsigned i=0;i<playerId.size();i++)
 			{
 				AttributePtr<Attribute_Player> ptr_player = itrPlayer.at(playerId.at(i));
+				AttributePtr<Attribute_WeaponStats>	ptr_weaponStats	=ptr_player->ptr_weaponStats;
+
+				Ammunition* ammo = &ptr_weaponStats->ammunition[ptr_weaponStats->currentAmmunitionType];
+				FiringMode* firingMode = &ptr_weaponStats->firingMode[ptr_weaponStats->currentFiringModeType];
 
 				//Retrieve pickupable attribute
 				std::vector<int> pickupablesId = entity1->getAttributes(ATTRIBUTE_PICKUPABLE);
@@ -628,27 +636,34 @@ void collision_pickuppable(Entity* entity1, Entity* entity2)
 							}
 							break;
 						}
-
-						//Check ammunition system
 					case XKILL_Enums::PickupableType::AMMUNITION_BULLET:
 						{
-							pickedUp = true;
-							AttributePtr<Attribute_WeaponStats> weaponStatsAttribute = ptr_player->ptr_weaponStats;
-							weaponStatsAttribute->ammunition[XKILL_Enums::AmmunitionType::BULLET].currentTotalNrOfShots += ptr_pickupable->amount;
+							if(ammo->currentTotalNrOfShots < ammo->initialTotalNrOfShots)
+							{
+								AttributePtr<Attribute_WeaponStats> weaponStatsAttribute = ptr_player->ptr_weaponStats;
+								weaponStatsAttribute->ammunition[XKILL_Enums::AmmunitionType::BULLET].currentTotalNrOfShots += ptr_pickupable->amount;
+								pickedUp = true;
+							}
 							break;
 						}
 					case XKILL_Enums::PickupableType::AMMUNITION_EXPLOSIVE:
 						{
-							pickedUp = true;
-							AttributePtr<Attribute_WeaponStats> weaponStatsAttribute = ptr_player->ptr_weaponStats;
-							weaponStatsAttribute->ammunition[XKILL_Enums::AmmunitionType::EXPLOSIVE].currentTotalNrOfShots += ptr_pickupable->amount;
+							if(ammo->currentTotalNrOfShots < ammo->initialTotalNrOfShots)
+							{
+								AttributePtr<Attribute_WeaponStats> weaponStatsAttribute = ptr_player->ptr_weaponStats;
+								weaponStatsAttribute->ammunition[XKILL_Enums::AmmunitionType::EXPLOSIVE].currentTotalNrOfShots += ptr_pickupable->amount;
+								pickedUp = true;
+							}
 							break;
 						}
 					case XKILL_Enums::PickupableType::AMMUNITION_SCATTER:
 						{
-							pickedUp = true;
-							AttributePtr<Attribute_WeaponStats> weaponStatsAttribute = ptr_player->ptr_weaponStats;
-							weaponStatsAttribute->ammunition[XKILL_Enums::AmmunitionType::SCATTER].currentTotalNrOfShots += ptr_pickupable->amount;
+							if(ammo->currentTotalNrOfShots < ammo->initialTotalNrOfShots)
+							{
+								AttributePtr<Attribute_WeaponStats> weaponStatsAttribute = ptr_player->ptr_weaponStats;
+								weaponStatsAttribute->ammunition[XKILL_Enums::AmmunitionType::SCATTER].currentTotalNrOfShots += ptr_pickupable->amount;
+								pickedUp = true;
+							}
 							break;
 						}
 					case XKILL_Enums::PickupableType::HACK_SPEEDHACK:
@@ -707,13 +722,17 @@ void collision_projectile(Entity* entity1, Entity* entity2)
 						//SEND_EVENT(&Event_ModifyPhysicsObject(XKILL_Enums::ModifyPhysicsObjectData::GRAVITY, static_cast<void*>(&Float3(0.0f, -5.0f, 0.0f)), itrPhysics.at(physicsId.at(j))));
 					}
 					break;
-				case XKILL_Enums::AmmunitionType::SCATTER: //Fall down and roll
+				case XKILL_Enums::AmmunitionType::SCATTER: //Fall down and roll, also collide with projectiles
 					if(ptr_projectile->currentLifeTimeLeft > 1.00f)
 					{
 						ptr_projectile->currentLifeTimeLeft = 1.00f;
 
 						SEND_EVENT(&Event_ModifyPhysicsObject(XKILL_Enums::ModifyPhysicsObjectData::GRAVITY, static_cast<void*>(&Float3(0.0f, -10.0f, 0.0f)), itrPhysics.at(physicsId.at(j))));
 						SEND_EVENT(&Event_ModifyPhysicsObject(XKILL_Enums::ModifyPhysicsObjectData::VELOCITYPERCENTAGE, static_cast<void*>(&Float3(0.1f, 0.1f, 0.1f)), itrPhysics.at(physicsId.at(j))));
+
+						//Collide with projectiles
+						short collisionFilterMask = itrPhysics.at(physicsId.at(j))->collisionFilterMask | XKILL_Enums::PhysicsAttributeType::PROJECTILE;
+						SEND_EVENT(&Event_ModifyPhysicsObject(XKILL_Enums::ModifyPhysicsObjectData::COLLISIONFILTERMASK, static_cast<void*>(&collisionFilterMask), itrPhysics.at(physicsId.at(j))));
 					}
 					break;
 				case XKILL_Enums::AmmunitionType::EXPLOSIVE: //Remove projectile and create an explosion sphere in its place
@@ -797,7 +816,7 @@ void GameComponent::event_PhysicsAttributesColliding(Event_PhysicsAttributesColl
 
 	collision_applyDamage(entity1, entity2);
 	collision_projectile(entity1, entity2);
-	collision_pickuppable(entity1, entity2);
+	collision_pickupable(entity1, entity2);
 	collision_playerVsWorld(entity1, entity2);	
 	collision_playerVsExplosionSphere(entity1, entity2);
 }
@@ -1010,7 +1029,7 @@ void GameComponent::event_PlayerDeath(Event_PlayerDeath* e)
 	ptr_physics->angularVelocity = Float3(0.0f, 0.0f, 0.0f);
 	ptr_physics->linearVelocity = Float3(0.0f, 0.0f, 0.0f);
 	ptr_physics->gravity = Float3(0.0f, -1.0f, 0.0f);
-	ptr_physics->collisionFilterMask = ptr_physics->WORLD;
+	ptr_physics->collisionFilterMask = XKILL_Enums::PhysicsAttributeType::WORLD;
 	ptr_physics->collisionResponse = true;
 	ptr_physics->meshID = ptr_player->meshID_whenDead;
 	ptr_physics->reloadDataIntoBulletPhysics = true;

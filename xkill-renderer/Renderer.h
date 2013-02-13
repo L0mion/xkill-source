@@ -6,8 +6,8 @@ typedef struct HWND__* HWND;
 
 template<typename T>
 class DataStreamBuffer;
-struct VertexPosNormTexInstanced;
-typedef DataStreamBuffer<VertexPosNormTexInstanced> InstancedData;
+struct VertexInstanced;
+typedef DataStreamBuffer<VertexInstanced> InstancedData;
 
 namespace DirectX
 {
@@ -38,6 +38,8 @@ class MeshMaterial;
 class SubsetD3D;
 
 #include <vector>
+
+#include "ShadingDesc.h"
 
 //temp
 class M3DLoader;
@@ -84,6 +86,8 @@ private:
 		ViewportData& vpData);											//!< Renders to g-buffer.
 	void renderViewportToBackBuffer(ViewportData& vpData);				//!< Renders to backbuffer.
 	void renderInstance(unsigned int meshID, InstancedData* instance);	//!< Renders an instanced model.
+	ShadingDesc deriveShadingDesc(VertexType vertexType);
+	void setShadingDesc(ShadingDesc shadingDesc);
 	void renderSubset(
 		SubsetD3D* subset, 
 		MaterialDesc& material,

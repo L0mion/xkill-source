@@ -22,7 +22,8 @@ namespace XKILL_Enums
 		VELOCITY,
 		VELOCITYPERCENTAGE,
 		FLAG_STATIC,
-		GIVE_IMPULSE
+		GIVE_IMPULSE,
+		COLLISIONFILTERMASK
 	};
 
 	enum DLL_U FiringModeType
@@ -48,5 +49,18 @@ namespace XKILL_Enums
 		JETHACK,
 
 		NROFHACKTYPES
+	};
+
+	enum DLL_U PhysicsAttributeType
+	{
+		NOTHING = 0,
+		WORLD = 1,
+		PLAYER = 2,
+		PROJECTILE = 4,
+		EXPLOSIONSPHERE = 8,
+		FRUSTUM = 16,
+		PICKUPABLE = 32,
+		RAY = 64,
+		EVERYTHING = -1
 	};
 }

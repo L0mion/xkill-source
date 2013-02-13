@@ -7,7 +7,7 @@
 
 #pragma comment( lib, "dxguid.lib")
 
-#include <Windows.h>
+//#include <Windows.h>
 #include <d3d11.h>
 #include <string>
 #include <D3DCommon.h>

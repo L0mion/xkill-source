@@ -2,6 +2,7 @@
 
 #include <xkill-utilities/Util.h>
 #include "InputManager.h"
+#include "QTInputDevices.h"
 
 ATTRIBUTES_DECLARE_ALL;
 

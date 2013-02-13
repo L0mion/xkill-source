@@ -69,7 +69,7 @@ btVector3 PhysicsObject::zeroLocalInertia()
 	return localInertia;
 }
 
-bool PhysicsObject::init(unsigned int attributeIndex,unsigned int collisionFilterGroup)
+bool PhysicsObject::init(unsigned int attributeIndex, XKILL_Enums::PhysicsAttributeType collisionFilterGroup)
 {
 	
 	if(attributeIndex < 0)
@@ -132,9 +132,23 @@ unsigned int PhysicsObject::getAttributeIndex() const
 	return attributeIndex_;
 }
 
-unsigned int PhysicsObject::getCollisionFilterGroup() const
+XKILL_Enums::PhysicsAttributeType PhysicsObject::getCollisionFilterGroup() const
 {
 	return collisionFilterGroup_;
+}
+
+void PhysicsObject::writeNonSynchronizedPhysicsObjectDataToPhysicsAttribute()
+{
+	AttributePtr<Attribute_Physics> ptr_physics = itrPhysics_.at(attributeIndex_);
+
+	ptr_physics->angularVelocity = convert(&getAngularVelocity());
+	ptr_physics->collisionFilterGroup = getCollisionFilterGroup();
+	ptr_physics->collisionResponse = (getCollisionFlags() & btCollisionObject::CF_NO_CONTACT_RESPONSE) == 0;
+	ptr_physics->gravity = convert(&getGravity());
+	ptr_physics->linearVelocity = convert(&getLinearVelocity());
+	//ptr_physics->collisionFilterMask = 
+	//ptr_physics->mass = physicsObject->getInvMass(); //only mass inverse is stored in physics object
+	//ptr_physics->meshID = //not stored in physics object
 }
 
 void PhysicsObject::onUpdate(float delta)

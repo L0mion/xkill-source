@@ -433,9 +433,6 @@ void Renderer::renderViewportToGBuffer(ViewportData& vpData)
 	if(animatedMesh_)
 		renderAnimatedMesh(vpData.view, vpData.proj);
 
-	managementFX_->setShader(devcon, SHADERID_VS_DEFAULT);
-	managementFX_->setShader(devcon, SHADERID_PS_DEFAULT);
-
 	managementSS_->setSS(devcon, TypeFX_PS, 0, SS_ID_DEFAULT);
 	managementRS_->setRS(devcon, RS_ID_DEFAULT);
 
@@ -556,15 +553,17 @@ void Renderer::renderInstance(unsigned int meshID, InstancedData* instance)
 	//Fetch renderer representation of model.
 	ModelD3D* modelD3D	= managementModel_->getModelD3D(meshID, device);
 
+	ShadingDesc shadingDesc = deriveShadingDesc(modelD3D->getVertexType());
+	setShadingDesc(shadingDesc);
+
 	//Set vertex buffer.
-	UINT stride[2] = { sizeof(VertexPosNormTex), sizeof(VertexPosNormTexInstanced) };
 	UINT offset[2] = { 0, 0 };
 	ID3D11Buffer* vbs[2] = 
 	{ 
 		modelD3D->getVertexBuffer(), 
 		instance->getDataBuffer()
 	};
-	devcon->IASetVertexBuffers(0, 2, vbs, stride, offset);
+	devcon->IASetVertexBuffers(0, 2, vbs, shadingDesc.stride_, offset);
 	
 	std::vector<SubsetD3D*>		subsetD3Ds	= modelD3D->getSubsetD3Ds();
 	std::vector<MaterialDesc>	materials	= modelD3D->getMaterials();
@@ -587,6 +586,50 @@ void Renderer::renderInstance(unsigned int meshID, InstancedData* instance)
 		offset, 
 		offset);
 }
+
+ShadingDesc Renderer::deriveShadingDesc(VertexType vertexType)
+{
+	ShadingDesc shadingDesc;
+	switch(vertexType)
+	{
+	case VERTEX_TYPE_POS_NORM_TEX_TAN:
+		{
+			shadingDesc.vsID_ = SHADERID_VS_POS_NORM_TEX_TAN_INSTANCE;
+			shadingDesc.psID_ = SHADERID_PS_NORMALMAP;
+
+			shadingDesc.layoutID_ = LAYOUTID_POS_NORM_TEX_TAN_INSTANCED;
+
+			shadingDesc.stride_[0] = sizeof(VertexPosNormTexTan);
+			shadingDesc.stride_[1] = sizeof(VertexInstanced);
+			break;
+		}
+	default:
+		{
+			shadingDesc.vsID_ = SHADERID_VS_DEFAULT;
+			shadingDesc.psID_ = SHADERID_PS_DEFAULT;
+
+			shadingDesc.layoutID_ = LAYOUTID_POS_NORM_TEX_INSTANCED;
+
+			shadingDesc.stride_[0] = sizeof(VertexPosNormTex);
+			shadingDesc.stride_[1] = sizeof(VertexInstanced);
+			break;
+		}
+	}
+
+	return shadingDesc;
+}
+void Renderer::setShadingDesc(ShadingDesc shadingDesc)
+{
+	ID3D11DeviceContext* devcon = managementD3D_->getDeviceContext();
+
+	//Set shaders
+	managementFX_->setShader(devcon, shadingDesc.vsID_);
+	managementFX_->setShader(devcon, shadingDesc.psID_);
+
+	//Set layout
+	managementFX_->setLayout(devcon, shadingDesc.layoutID_);
+}
+
 void Renderer::renderSubset(
 	SubsetD3D* subset, 
 	MaterialDesc& material, 
@@ -596,8 +639,8 @@ void Renderer::renderSubset(
 	ID3D11DeviceContext*	devcon = managementD3D_->getDeviceContext();
 
 	//Set textures.
-	ID3D11ShaderResourceView* texAlbedo = managementTex_->getTexSrv(material.idAlbedoTex_);
-	ID3D11ShaderResourceView* texNormal = managementTex_->getTexSrv(material.idNormalTex_);
+	ID3D11ShaderResourceView* texAlbedo = managementTex_->getTexSrv(19); //material.idAlbedoTex_
+	ID3D11ShaderResourceView* texNormal = managementTex_->getTexSrv(20); //material.idNormalTex_
 	devcon->PSSetShaderResources(0, 1, &texAlbedo);
 	devcon->PSSetShaderResources(1, 1, &texNormal);
 
@@ -608,9 +651,6 @@ void Renderer::renderSubset(
 		devcon,
 		dxSpec,
 		material.specularPower_);
-
-	//Set input layout
-	managementFX_->setLayout(devcon, LAYOUTID_POS_NORM_TEX_INSTANCED);
 
 	//Set index-buffer.
 	UINT offset = 0;
