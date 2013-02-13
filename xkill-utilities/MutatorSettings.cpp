@@ -62,51 +62,51 @@ void MutatorSettings::initStandardAmmunition()
 
 	ammo = &standardAmmunitions[XKILL_Enums::AmmunitionType::BULLET];
 
-	ammo->type				= XKILL_Enums::AmmunitionType::BULLET;
-	ammo->damage			= 20.0f;
-	ammo->explosionSphereInitialRadius = 0.0f;
-	ammo->explosionSphereFinalRadius = 0.0f;
-	ammo->explosionSphereExplosionDuration = 0.0f;
-	ammo->explosive			= false;
-	ammo->nrOfProjectilesPerSalvo	= 1;
-	ammo->displacementSphereRadius	= 0.0f;
-	ammo->speed				= 60.0f;
-	ammo->spreadConeRadius			= 0.0f;
-	ammo->initialTotalNrOfShots = 100;
-	ammo->currentTotalNrOfShots	= ammo->initialTotalNrOfShots;
-	ammo->velocityVariation	= 0.0f;
+	ammo->type								= XKILL_Enums::AmmunitionType::BULLET;
+	ammo->damage							= 20.0f;
+	ammo->explosionSphereInitialRadius		= 0.0f;
+	ammo->explosionSphereFinalRadius		= 0.0f;
+	ammo->explosionSphereExplosionDuration	= 0.0f;
+	ammo->explosive							= false;
+	ammo->nrOfProjectilesPerSalvo			= 1;
+	ammo->displacementSphereRadius			= 0.0f;
+	ammo->speed								= 60.0f;
+	ammo->spreadConeRadius					= 0.0f;
+	ammo->initialTotalNrOfShots				= 100;
+	ammo->currentTotalNrOfShots				= ammo->initialTotalNrOfShots;
+	ammo->velocityVariation					= 0.0f;
 
 	ammo = &standardAmmunitions[XKILL_Enums::AmmunitionType::SCATTER];
 
-	ammo->type				= XKILL_Enums::AmmunitionType::SCATTER;
-	ammo->damage			= 3.0f;
-	ammo->explosionSphereInitialRadius = 0.0f;
-	ammo->explosionSphereFinalRadius = 0.0f;
-	ammo->explosionSphereExplosionDuration = 0.0f;
-	ammo->explosive			= false;
-	ammo->nrOfProjectilesPerSalvo	= 10;
-	ammo->displacementSphereRadius	= 0.02f;
-	ammo->speed				= 30.0f;
-	ammo->spreadConeRadius			= 0.1f;
-	ammo->initialTotalNrOfShots = 100;
-	ammo->currentTotalNrOfShots	= ammo->initialTotalNrOfShots;
-	ammo->velocityVariation	= 0.5f;
+	ammo->type								= XKILL_Enums::AmmunitionType::SCATTER;
+	ammo->damage							= 3.0f;
+	ammo->explosionSphereInitialRadius		= 0.0f;
+	ammo->explosionSphereFinalRadius		= 0.0f;
+	ammo->explosionSphereExplosionDuration	= 0.0f;
+	ammo->explosive							= false;
+	ammo->nrOfProjectilesPerSalvo			= 10;
+	ammo->displacementSphereRadius			= 0.02f;
+	ammo->speed								= 30.0f;
+	ammo->spreadConeRadius					= 0.1f;
+	ammo->initialTotalNrOfShots				= 100;
+	ammo->currentTotalNrOfShots				= ammo->initialTotalNrOfShots;
+	ammo->velocityVariation					= 0.5f;
 
 	ammo = &standardAmmunitions[XKILL_Enums::AmmunitionType::EXPLOSIVE];
 
-	ammo->type				= XKILL_Enums::AmmunitionType::EXPLOSIVE;
-	ammo->damage			= 50.0f;
-	ammo->explosionSphereInitialRadius = 1.0f;
-	ammo->explosionSphereFinalRadius = 10.0f;
-	ammo->explosionSphereExplosionDuration = 1.0f;
-	ammo->explosive			= true;
-	ammo->nrOfProjectilesPerSalvo	= 1;
-	ammo->displacementSphereRadius	= 0.0f;
-	ammo->speed				= 5.0f;
-	ammo->spreadConeRadius			= 0.0f;
-	ammo->initialTotalNrOfShots = 100;
-	ammo->currentTotalNrOfShots	= ammo->initialTotalNrOfShots;
-	ammo->velocityVariation	= 0.0f;
+	ammo->type								= XKILL_Enums::AmmunitionType::EXPLOSIVE;
+	ammo->damage							= 50.0f;
+	ammo->explosionSphereInitialRadius		= 1.0f;
+	ammo->explosionSphereFinalRadius		= 10.0f;
+	ammo->explosionSphereExplosionDuration	= 1.0f;
+	ammo->explosive							= true;
+	ammo->nrOfProjectilesPerSalvo			= 1;
+	ammo->displacementSphereRadius			= 0.0f;
+	ammo->speed								= 5.0f;
+	ammo->spreadConeRadius					= 0.0f;
+	ammo->initialTotalNrOfShots				= 100;
+	ammo->currentTotalNrOfShots				= ammo->initialTotalNrOfShots;
+	ammo->velocityVariation					= 0.0f;
 }
 
 void MutatorSettings::initStandardFiringModes()

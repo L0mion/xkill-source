@@ -21,7 +21,8 @@ namespace XKILL_Enums
 		GRAVITY,
 		VELOCITY,
 		VELOCITYPERCENTAGE,
-		FLAG_STATIC
+		FLAG_STATIC,
+		GIVE_IMPULSE
 	};
 
 	enum DLL_U FiringModeType

@@ -255,6 +255,19 @@ void PhysicsComponent::onUpdate(float delta)
 	bool showDebug = ATTRIBUTE_MANAGER->settings->showDebugPhysics;
 	if(showDebug)
 	{
+		for (int i=dynamicsWorld_->getNumCollisionObjects()-1; i>=0 ;i--)
+		{
+			//Get motion state world transform and store it as an internal world transform, which is the position used by "debugDrawWorld"
+			btCollisionObject* obj = dynamicsWorld_->getCollisionObjectArray()[i];
+			btRigidBody* body = btRigidBody::upcast(obj);
+			btTransform world;
+			if(body->getMotionState())
+			{
+				body->getMotionState()->setWorldTransform(body->getWorldTransform());
+				/*worldTransforms[i] = world;
+				body->setWorldTransform(world);*/
+			}
+		}
 		dynamicsWorld_->debugDrawWorld(); //Calls debugDrawDispatcher::drawLine internally
 		gDebugDraw.queueDebugDrawEvent();
 	}
@@ -349,6 +362,14 @@ void PhysicsComponent::onEvent(Event* e)
 							physicsObjects_->at(physicsAttributeIndex)->setCollisionFlags(physicsObjects_->at(physicsAttributeIndex)->getCollisionFlags() & ~ btCollisionObject::CF_STATIC_OBJECT);
 						}
 						break;
+					}
+				case XKILL_Enums::ModifyPhysicsObjectData::GIVE_IMPULSE:
+					{
+						Float3* impulseVector = static_cast<Float3*>(modifyPhysicsObject->data);
+
+						btVector3 impulse = convert(*impulseVector);
+
+						physicsObjects_->at(physicsAttributeIndex)->applyCentralImpulse(impulse);
 					}
 				}
 			}

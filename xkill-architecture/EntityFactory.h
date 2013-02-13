@@ -386,7 +386,7 @@ public:
 		ptr_physics->ptr_spatial = ptr_spatial;
 		ptr_physics->collisionFilterGroup = Attribute_Physics::EXPLOSIONSPHERE;
 		ptr_physics->collisionFilterMask = Attribute_Physics::PLAYER | Attribute_Physics::PICKUPABLE;
-		ptr_physics->collisionResponse = true;
+		ptr_physics->collisionResponse = false;
 		ptr_physics->mass = 0.0f;
 		ptr_physics->gravity = Float3(0.0f, 0.0f, 0.0f);
 		ptr_physics->linearVelocity = Float3(0.0f, 0.0f, 0.0f);
@@ -397,7 +397,7 @@ public:
 		ptr_explosionSphere->firingModeType = e->firingModeType;
 
 		CREATE_ATTRIBUTE(ptr_damage, Attribute_Damage, damage, entity);
-		ptr_damage->damage = e->damage;
+		ptr_damage->damage = 0.0f; //e->damage;
 		ptr_damage->owner_entityID = e->entityIdOfCreator;
 	}
 

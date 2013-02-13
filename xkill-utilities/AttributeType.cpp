@@ -526,8 +526,7 @@ Attribute_Player::Attribute_Player()
 	priority = 0;
 	cycleSteals = 0;
 	totalExecutionTime = 0;
-	respawnDelay = 5.0f;
-	currentRespawnDelay = 0.0f;
+	respawnTimer.setStartTime(5.0f);
 	delayInSecondsBetweenEachJump = 1.0f;
 	timeSinceLastJump = delayInSecondsBetweenEachJump+1.0f;
 	collidingWithWorld = false;

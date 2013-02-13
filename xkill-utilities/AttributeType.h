@@ -9,6 +9,7 @@
 #include "MeshDesc.h"
 #include "MeshVertices.h"
 #include "Math.h"
+#include "Timer.h"
 
 struct DataItem;
 class DataItemList;
@@ -502,8 +503,7 @@ struct DLL_U Attribute_Player : public IAttribute
 	float sprintTime;			//!< Time that can be spent sprinting
 	bool canSprint;				//!< Can the player sprint right now
 	float sprintRechargeRate;	//!< The rate at which the sprint will recharge
-	float respawnDelay;			//!< Time between death and respawn
-	float currentRespawnDelay;	//!< Time until respawn
+	Timer respawnTimer;		//!< Keeps track of when a dead player should respawn
 	float timeSinceLastJump;	//!< Incrementing timer
 	float delayInSecondsBetweenEachJump;
 	bool collidingWithWorld;			//!< Set y-velocity to zero when not colliding with world and not jumping

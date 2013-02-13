@@ -2,6 +2,7 @@
 #include <xkill-utilities/AttributeManager.h>
 #include <xkill-utilities/XKILL_Enums.h>
 #include <xkill-utilities/MutatorSettings.h>
+#include <xkill-utilities/Timer.h>
 #include <DirectXMath.h>
 
 #include <ctime>
@@ -258,13 +259,13 @@ void GameComponent::onUpdate(float delta)
 			//--------------------------------------------------------------------------------------
 			// Handle dead player
 			//--------------------------------------------------------------------------------------
-			if(ptr_player->currentRespawnDelay > 0.0f)
+			if(!ptr_player->respawnTimer.hasTimerExpired())
 			{
-				ptr_player->currentRespawnDelay -= delta;
+				ptr_player->respawnTimer.update(delta);
 
 				float alive = 3.14f/4.0f;
 				float dead = 3.14f/3.0f;
-				float slerp = (1 - ptr_player->currentRespawnDelay/ptr_player->respawnDelay);
+				float slerp = (1 - ptr_player->respawnTimer.getTimeLeft()/ptr_player->respawnTimer.getStartTime());
 				float fov = slerp*dead + (1-slerp)*alive;
 				ptr_player->ptr_camera->fieldOfView = fov;
 			}
@@ -316,7 +317,7 @@ void GameComponent::onUpdate(float delta)
 				}
 
 				ptr_player->ptr_camera->fieldOfView =3.14f/4.0f;
-				ptr_player->currentRespawnDelay = ptr_player->respawnDelay;
+				ptr_player->respawnTimer.resetTimer();
 				ptr_player->detectedAsDead = false;
 				SEND_EVENT(&Event_PlaySound(Event_PlaySound::SOUND_RESPAWN, ptr_position->position, true));
 			}
@@ -330,7 +331,7 @@ void GameComponent::onUpdate(float delta)
 			ptr_health->health = 0.0f;
 			ptr_input->killPlayer = false;
 			ptr_player->detectedAsDead = true;
-			ptr_player->currentRespawnDelay = 0.0f;
+			ptr_player->respawnTimer.zeroTimer();
 		}
 	}
 
@@ -702,8 +703,8 @@ void collision_projectile(Entity* entity1, Entity* entity2)
 				case XKILL_Enums::AmmunitionType::BULLET: //Bounce off the wall
 					if(ptr_projectile->currentLifeTimeLeft > 1.00f)
 					{
-						ptr_projectile->currentLifeTimeLeft = 1.00f;
-						SEND_EVENT(&Event_ModifyPhysicsObject(XKILL_Enums::ModifyPhysicsObjectData::GRAVITY, static_cast<void*>(&Float3(0.0f, -5.0f, 0.0f)), itrPhysics.at(physicsId.at(j))));
+						//ptr_projectile->currentLifeTimeLeft = 1.00f;
+						//SEND_EVENT(&Event_ModifyPhysicsObject(XKILL_Enums::ModifyPhysicsObjectData::GRAVITY, static_cast<void*>(&Float3(0.0f, -5.0f, 0.0f)), itrPhysics.at(physicsId.at(j))));
 					}
 					break;
 				case XKILL_Enums::AmmunitionType::SCATTER: //Fall down and roll
@@ -755,6 +756,36 @@ void collision_playerVsWorld(Entity* entity1, Entity* entity2)
 	}
 }
 
+void collision_playerVsExplosionSphere(Entity* entity1, Entity* entity2)
+{
+	if(entity1->hasAttribute(ATTRIBUTE_EXPLOSIONSPHERE))
+	{
+		if(entity2->hasAttribute(ATTRIBUTE_PLAYER))
+		{
+			std::vector<int> explosionSphereID = entity1->getAttributes(ATTRIBUTE_EXPLOSIONSPHERE);
+			for(unsigned int i = 0; i < explosionSphereID.size(); i++)
+			{
+				AttributePtr<Attribute_ExplosionSphere> ptr_explosionSphere = itrExplosionSphere.at(explosionSphereID.at(i));
+
+				std::vector<int> playerID = entity2->getAttributes(ATTRIBUTE_PLAYER);
+				for(unsigned int j = 0; j < explosionSphereID.size(); j++)
+				{
+					AttributePtr<Attribute_Player> ptr_player = itrPlayer.at(playerID.at(j));
+
+					Float3 playerPosition = ptr_player->ptr_render->ptr_spatial->ptr_position->position;
+					Float3 explosionSpherePosition = ptr_explosionSphere->ptr_physics->ptr_spatial->ptr_position->position;
+
+					Float3 impulseVector = playerPosition - explosionSpherePosition;
+
+					impulseVector = impulseVector * 3.0f;
+
+					SEND_EVENT(&Event_ModifyPhysicsObject(XKILL_Enums::ModifyPhysicsObjectData::GIVE_IMPULSE, static_cast<void*>(&impulseVector), ptr_player->ptr_input->ptr_physics));
+				}
+			}
+		}
+	}
+}
+
 void GameComponent::event_PhysicsAttributesColliding(Event_PhysicsAttributesColliding* e)
 {
 	// Fetch Entities so we can inspect their attributes
@@ -768,6 +799,7 @@ void GameComponent::event_PhysicsAttributesColliding(Event_PhysicsAttributesColl
 	collision_projectile(entity1, entity2);
 	collision_pickuppable(entity1, entity2);
 	collision_playerVsWorld(entity1, entity2);	
+	collision_playerVsExplosionSphere(entity1, entity2);
 }
 
 void GameComponent::event_EndDeathmatch(Event_EndDeathmatch* e)
@@ -983,7 +1015,7 @@ void GameComponent::event_PlayerDeath(Event_PlayerDeath* e)
 	ptr_physics->meshID = ptr_player->meshID_whenDead;
 	ptr_physics->reloadDataIntoBulletPhysics = true;
 
-	ptr_player->currentRespawnDelay = ptr_player->respawnDelay;
+	ptr_player->respawnTimer.resetTimer();
 	ptr_player->detectedAsDead = true;
 }
 
