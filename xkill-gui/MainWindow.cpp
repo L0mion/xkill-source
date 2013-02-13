@@ -29,6 +29,8 @@ struct Test
 
 MainWindow::MainWindow()
 {
+	QWidget::installEventFilter(this);
+
 	// Create console
 	AllocConsole();
 	SetConsoleTitle(L"Debug console");
@@ -61,7 +63,7 @@ MainWindow::MainWindow()
 	
 	// init tools
 	menuManager = new MenuManager(gameWidget);
-	mainMenu = new Menu_Main2(this);
+	menu = new Menu_Main2(this);
 	new Menu_Editor(ui, this);
 
 	// setup signals and slots
@@ -105,7 +107,7 @@ void MainWindow::keyPressEvent( QKeyEvent* e )
 		slot_toggleFullScreen();
 
 	if((e->key()==Qt::Key_F4) && (e->modifiers()==Qt::AltModifier))
-		MainWindow::close();
+		SEND_EVENT(&Event(EVENT_QUIT_TO_DESKTOP));
 
 	if((e->key()==Qt::Key_F1))
 		ui.dockWidget->toggleViewAction()->activate(QAction::Trigger);
@@ -197,5 +199,11 @@ void MainWindow::closeEvent( QCloseEvent *event )
 {
 	delete gameWidget;
 	delete menuManager;
-	delete mainMenu;
+	delete menu;
+}
+
+void MainWindow::paintEvent( QPaintEvent* e )
+{
+	QWidget::paintEvent(e);
+	menu->raise();
 }

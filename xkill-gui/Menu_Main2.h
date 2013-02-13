@@ -18,7 +18,7 @@ public:
 	{
 		this->parent = parent;
 		ui.setupUi(this);
-		QWidget::setWindowFlags(Qt::FramelessWindowHint | Qt::WindowStaysOnTopHint);
+		QWidget::setWindowFlags(Qt::FramelessWindowHint);
 		QWidget::setAttribute(Qt::WA_TranslucentBackground);
 		QWidget::show();
 		
@@ -49,15 +49,16 @@ public:
 	void event_windowResize(Event_WindowResize* e)
 	{
 		resize(e->width, e->height);
-		ui.label_background->resize(e->width, e->height);
+		ui.label_background->resize(width(), height());
+		ui.label_background->lower();
 	}
 
 	void keyPressEvent(QKeyEvent *e)
 	{
-		QCoreApplication::sendEvent(parentWidget(), e);
+		QCoreApplication::sendEvent(parent, e);
 	}
-	void keyReleaseEventEvent(QKeyEvent *e)
+	void keyReleaseEvent(QKeyEvent *e)
 	{
-		QCoreApplication::sendEvent(parentWidget(), e);
+		QCoreApplication::sendEvent(parent, e);
 	}
 };

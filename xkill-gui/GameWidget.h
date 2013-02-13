@@ -110,7 +110,11 @@ public slots:
 	};
 
 protected:
-	void paintEvent(QPaintEvent* e){}; // should not be implemented
+	void paintEvent(QPaintEvent* e)
+	{
+		raise();
+
+	}; // should not be implemented
 	void resizeEvent(QResizeEvent* e)
 	{
 		QWidget::resizeEvent(e);
