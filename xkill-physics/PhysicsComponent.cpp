@@ -135,7 +135,7 @@ void PhysicsComponent::onUpdate(float delta)
 		unsigned int physicsAttributeIndex = itrPhysics.storageIndex();
 
 		synchronizeWithAttributes(ptr_physics, physicsAttributeIndex);	//Synchronize physics objects with physics attributes
-		physicsObjects_->at(physicsAttributeIndex)->onUpdate(delta);	//Update physics objects by calling their onUpdate function.
+		physicsObjects_->at(physicsAttributeIndex)->onUpdate(delta,dynamicsWorld_);	//Update physics objects by calling their onUpdate function.
 
 		//Should be in PlayerPhysicsAttribute::onUpdate()
 		if(ptr_physics->collisionFilterGroup == ptr_physics->PhysicsAttributeType::PLAYER)
@@ -249,9 +249,8 @@ void PhysicsComponent::onUpdate(float delta)
 	*/
 
 	updateCulling();
-
+	
 	dynamicsWorld_->stepSimulation(delta,0); //Bullet Physics physics simulation
-
 	bool showDebug = ATTRIBUTE_MANAGER->settings->showDebugPhysics;
 	if(showDebug)
 	{

@@ -137,7 +137,7 @@ unsigned int PhysicsObject::getCollisionFilterGroup() const
 	return collisionFilterGroup_;
 }
 
-void PhysicsObject::onUpdate(float delta)
+void PhysicsObject::onUpdate(float delta,btDynamicsWorld* dynamicWorld)
 {
 	if(getWorldTransform().getOrigin().y() < outOfBoundsIfYIsLowerThanThis)
 	{

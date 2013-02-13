@@ -44,7 +44,7 @@ bool HoverPhysicsObject::subClassSpecificInitHook()
 	setWorldTransform(world);
 }
 
-void HoverPhysicsObject::onUpdate(float delta)
+void HoverPhysicsObject::onUpdate(float delta,btDynamicsWorld* dynamicWorld)
 {
 	btQuaternion q;
 	btVector3 pos;

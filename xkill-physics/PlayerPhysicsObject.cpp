@@ -1,5 +1,7 @@
 #include "PlayerPhysicsObject.h"
 #include <xkill-utilities/AttributeManager.h>
+#include <btBulletDynamicsCommon.h>
+#include "BulletCollision/NarrowPhaseCollision/btRaycastCallback.h"
 #include "physicsUtilities.h"
 
 AttributeIterator<Attribute_Input> itrInput;
@@ -34,14 +36,35 @@ bool PlayerPhysicsObject::subClassSpecificInitHook()
 	return true;
 }
 
-void PlayerPhysicsObject::onUpdate(float delta)
+void PlayerPhysicsObject::onUpdate(float delta,btDynamicsWorld* dynamicWorld)
 {
-	PhysicsObject::onUpdate(delta);
+	PhysicsObject::onUpdate(delta,dynamicWorld);
 
 	handleInput(delta);
 
+	btVector3 from = getWorldTransform().getOrigin();
+	btVector3 to = from - btVector3(0,50,0);
+	btCollisionWorld::ClosestRayResultCallback ray(from,to);
+	ray.m_collisionFilterGroup = Attribute_Physics::PhysicsAttributeType::RAY;
+	ray.m_collisionFilterMask =  Attribute_Physics::PhysicsAttributeType::WORLD;
+	dynamicWorld->rayTest(from,to,ray);
+	if(ray.hasHit())
+	{
+		btVector3 point = from.lerp(to,ray.m_closestHitFraction);
+		float length = (point - from).length();
+		float height = 1;
+		if(height-length > 0)
+		{
+			btTransform t;
+			t= getWorldTransform();
+			t.setOrigin(t.getOrigin() + btVector3(0,height-length,0)*delta/0.25);
+			setWorldTransform(t);
+			setLinearVelocity(getLinearVelocity()+btVector3(0,-getLinearVelocity().y(),0));
+			//applyCentralForce(-getGravity());
+		}
+	}
 	//Handle players taking off when going up ramps
-	Entity* playerEntity = itrPhysics_3.ownerAt(attributeIndex_);
+	/*Entity* playerEntity = itrPhysics_3.ownerAt(attributeIndex_);
 	std::vector<int> playerAttributeIndices = playerEntity->getAttributes(ATTRIBUTE_PLAYER);
 	for(unsigned int i = 0; i < playerAttributeIndices.size(); i++)
 	{
@@ -51,7 +74,7 @@ void PlayerPhysicsObject::onUpdate(float delta)
 			setLinearVelocity(btVector3(getLinearVelocity().x(), 0.0f, getLinearVelocity().z()));
 		}
 		playerAttribute->collidingWithWorld = false;
-	}
+	}*/
 }
 
 void PlayerPhysicsObject::handleOutOfBounds()
@@ -160,32 +183,32 @@ void PlayerPhysicsObject::handleInput(float delta)
 		AttributePtr<Attribute_Physics> ptr_player_physics = itrPhysics_3.at(attributeIndex_);
 		btVector3 currentplayerGravity = getGravity();
 
-		//When a player is standing still on the ground, prevent it from sliding down slopes by modifying friction and gravity
-		if(ptr_input->position.x == 0.0f && ptr_input->position.y == 0.0f && ptr_player->collidingWithWorld && !ptr_input->jetpack && !ptr_input->jump)
-		{
-			if(currentplayerGravity.y() != 0.0f)
-			{
-				setFriction(btScalar(100.0f));
-				setGravity(btVector3(0.0f, 0.0f, 0.0f));
-			}
-		}
-		//When moving, restore friction and gravity
-		else if( (ptr_input->position.x != 0.0f || ptr_input->position.y != 0.0f))
-		{
-			if(currentplayerGravity.y() != ptr_player_physics->gravity.y)
-			{
-				setFriction(btScalar(0.0f));
-				setGravity(btVector3(ptr_player_physics->gravity.x, ptr_player_physics->gravity.y, ptr_player_physics->gravity.z));
-			}
-		}
+		////When a player is standing still on the ground, prevent it from sliding down slopes by modifying friction and gravity
+		//if(ptr_input->position.x == 0.0f && ptr_input->position.y == 0.0f && ptr_player->collidingWithWorld && !ptr_input->jetpack && !ptr_input->jump)
+		//{
+		//	if(currentplayerGravity.y() != 0.0f)
+		//	{
+		//		setFriction(btScalar(100.0f));
+		//		setGravity(btVector3(0.0f, 0.0f, 0.0f));
+		//	}
+		//}
+		////When moving, restore friction and gravity
+		//else if( (ptr_input->position.x != 0.0f || ptr_input->position.y != 0.0f))
+		//{
+		//	if(currentplayerGravity.y() != ptr_player_physics->gravity.y)
+		//	{
+		//		setFriction(btScalar(0.0f));
+		//		setGravity(btVector3(ptr_player_physics->gravity.x, ptr_player_physics->gravity.y, ptr_player_physics->gravity.z));
+		//	}
+		//}
 
-		//Prevent player being able to hang-glide after jumping
-		if(ptr_player->timeSinceLastJump < ptr_player->delayInSecondsBetweenEachJump)
-		{
-			setGravity(btVector3(0.0f, ptr_player_physics->gravity.y*5.0f, 0.0f));
-		}
+		////Prevent player being able to hang-glide after jumping
+		//if(ptr_player->timeSinceLastJump < ptr_player->delayInSecondsBetweenEachJump)
+		//{
+		//	setGravity(btVector3(0.0f, ptr_player_physics->gravity.y*5.0f, 0.0f));
+		//}
 
-		ptr_input->jump = false;
-		ptr_input->jetpack = false;
+		//ptr_input->jump = false;
+		//ptr_input->jetpack = false;
 	}
 }

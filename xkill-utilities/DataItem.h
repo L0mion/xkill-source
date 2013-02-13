@@ -2,6 +2,7 @@
 
 #include "Math.h"
 #include "AttributePointer.h"
+#include "AttributeType.h"
 
 #include <vector>
 #include <string>
@@ -254,6 +255,8 @@ public:
 	{
 		x->setIndex(*getNext()->value._int);
 	}
+
+
 	int get_Enum()
 	{
 		int x = *getNext()->value._int;

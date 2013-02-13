@@ -228,7 +228,7 @@ struct DLL_U Attribute_Physics : public IAttribute
 		RAY = 64,
 		EVERYTHING = -1
 	};
-	PhysicsAttributeType collisionFilterGroup;
+	unsigned int collisionFilterGroup;
 
 	Attribute_Physics();
 	~Attribute_Physics();
