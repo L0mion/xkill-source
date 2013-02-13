@@ -37,7 +37,7 @@ groupshared uint tileLightNum; //Number of lights intersecting tile.
 groupshared uint tileLightIndices[TILE_MAX_LIGHTS]; //Indices to lights intersecting tile.
 
 [numthreads(TILE_DIM, TILE_DIM, 1)]
-void lightingCS(
+void CS_Lighting(
 	uint3	blockID				: SV_GroupID,
 	uint	threadIDBlockIndex	: SV_GroupIndex,
 	uint3	threadIDDispatch	: SV_DispatchThreadID,
@@ -145,6 +145,7 @@ void lightingCS(
 	for(i = 0; i < numLightsDir; i++)
 	{
 		LightDescDir descDir = lightsDir[i];
+		descDir.direction = mul(float4(descDir.direction, 0.0f), view);
 		LightDir(
 			toEyeV,
 			descDir,

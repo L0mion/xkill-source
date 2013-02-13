@@ -19,7 +19,7 @@ struct Attribute_Render;
 #include "MeshVerticesInstanced.h"
 #include "DataStreamBuffer.h"
 
-typedef DataStreamBuffer<VertexPosNormTexInstanced> InstancedData;
+typedef DataStreamBuffer<VertexInstanced> InstancedData;
 
 class ManagementInstance
 {

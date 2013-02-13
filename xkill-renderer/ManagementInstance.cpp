@@ -48,7 +48,7 @@ void ManagementInstance::addRenderAtInstance(AttributePtr<Attribute_Render> ptr_
 	AttributePtr<Attribute_Spatial>	ptr_spatial = ptr_render->ptr_spatial;
 	AttributePtr<Attribute_Position> ptr_position = ptr_spatial->ptr_position;
 
-	VertexPosNormTexInstanced newInstance;
+	VertexInstanced newInstance;
 	newInstance.world_ = calculateWorldMatrix(ptr_spatial, ptr_position);
 
 	InstancedData* instancedData = getInstancesFromMeshID(ptr_render->meshID);

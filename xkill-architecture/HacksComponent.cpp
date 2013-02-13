@@ -53,7 +53,7 @@ void HacksComponent::onUpdate(float delta)
 		{
 			timer = activeHacks_[i][j]->first;
 
-			if(updateTimer(activeHacks_[i][j]->second, static_cast<XKILL_Enums::HackType>(i)))
+			if(shouldUpdateTimer(activeHacks_[i][j]->second, static_cast<XKILL_Enums::HackType>(i)))
 				timer->update(delta);
 
 			if(timer->hasTimerExpired())
@@ -64,13 +64,13 @@ void HacksComponent::onUpdate(float delta)
 			}
 			else
 			{
-				handleHack(activeHacks_[i][j]->second, static_cast<XKILL_Enums::HackType>(i));
+				updateHack(activeHacks_[i][j]->second, static_cast<XKILL_Enums::HackType>(i));
 			}
 		}
 	}
 }
 	
-void HacksComponent::handleHack(AttributePtr<Attribute_Player>& ptr_player, XKILL_Enums::HackType hackType)
+void HacksComponent::updateHack(AttributePtr<Attribute_Player>& ptr_player, XKILL_Enums::HackType hackType)
 {
 	switch(hackType)
 	{
@@ -116,7 +116,7 @@ void HacksComponent::handleHackActivatedEvent(Event_HackActivated* e)
 	}
 }
 
-bool HacksComponent::updateTimer(AttributePtr<Attribute_Player>& ptr_player, XKILL_Enums::HackType hackType)
+bool HacksComponent::shouldUpdateTimer(AttributePtr<Attribute_Player>& ptr_player, XKILL_Enums::HackType hackType)
 {
 	bool updateTimer = false;
 

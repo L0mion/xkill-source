@@ -12,6 +12,7 @@ enum DLL_U VertexType
 	VERTEX_TYPE_POS_NORM_SKINNED,
 	VERTEX_TYPE_POS_NORM_TEX_SKINNED,
 	VERTEX_TYPE_POS_NORM_TEX_TAN_SKINNED,
+	VERTEX_TYPE_POS_NORM_TEX_TAN,
 
 	VERTEX_INVALID
 };
@@ -150,6 +151,35 @@ struct DLL_U VertexPosNormTexTanSkinned
 		for(unsigned int i=0; i<NUM_BONES_PER_VERTEX; i++)
 		boneIndices_[i] = boneIndices[i];
 	}
+};
+
+struct DLL_U VertexPosNormTexTan
+{
+	Float3 position_;	//!< Float3 vector specifying position in model-space of vertex.
+	Float3 normal_;		//!< Float3 vector specifying normal in model-space of vertex.
+	Float2 texcoord_;	//!< Float3 vector specifying texture-coordinates.
+	Float4 tangent_;
+
+	//! Default constructor of Vertex.
+	/*!
+	Initializes Vertex to default values.
+	position	= 0, 0, 0
+	normal		= 0, 0, 0
+	texcoord	= 0, 0
+	tangent		= 0, 0, 0, 0
+	*/
+	VertexPosNormTexTan();
+	//! Constructor setting members to specific values.
+	/*!
+	\param position	Position in model-space of vertex.
+	\param normal	Normal in model-space of vertex.
+	\param texcoord	Texture-coordinates.
+	*/
+	VertexPosNormTexTan(
+		Float3 position, 
+		Float3 normal, 
+		Float2 texcoord,
+		Float4 tangent);
 };
 
 #endif //XKILL_RENDERER_MESHVERTICES_H

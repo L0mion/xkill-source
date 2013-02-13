@@ -3,10 +3,10 @@
 
 #include <DirectXMath.h>
 
-struct VertexPosNormTexInstanced
+struct VertexInstanced
 {
-	VertexPosNormTexInstanced();
-	~VertexPosNormTexInstanced();
+	VertexInstanced();
+	~VertexInstanced();
 
 	DirectX::XMFLOAT4X4 world_;
 };

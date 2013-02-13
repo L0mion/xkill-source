@@ -129,6 +129,7 @@ void PlayerPhysicsObject::handleInput(float delta)
 			move *= 0.75f;
 		}
 		move = move.rotate(btVector3(0,1,0),yaw_);
+
 		move = btVector3(move.x(), getLinearVelocity().y(), move.z());
 		setLinearVelocity(move);
 
@@ -160,29 +161,29 @@ void PlayerPhysicsObject::handleInput(float delta)
 		AttributePtr<Attribute_Physics> ptr_player_physics = itrPhysics_3.at(attributeIndex_);
 		btVector3 currentplayerGravity = getGravity();
 
-		//When a player is standing still on the ground, prevent it from sliding down slopes by modifying friction and gravity
-		if(ptr_input->position.x == 0.0f && ptr_input->position.y == 0.0f && ptr_player->collidingWithWorld && !ptr_input->jetpack && !ptr_input->jump)
-		{
-			if(currentplayerGravity.y() != 0.0f)
-			{
-				setFriction(btScalar(100.0f));
-				setGravity(btVector3(0.0f, 0.0f, 0.0f));
-			}
-		}
-		//When moving, restore friction and gravity
-		else if( (ptr_input->position.x != 0.0f || ptr_input->position.y != 0.0f))
-		{
-			if(currentplayerGravity.y() != ptr_player_physics->gravity.y)
-			{
-				setFriction(btScalar(0.0f));
-				setGravity(btVector3(ptr_player_physics->gravity.x, ptr_player_physics->gravity.y, ptr_player_physics->gravity.z));
-			}
-		}
+		////When a player is standing still on the ground, prevent it from sliding down slopes by modifying friction and gravity
+		//if(ptr_input->position.x == 0.0f && ptr_input->position.y == 0.0f && ptr_player->collidingWithWorld && !ptr_input->jetpack && !ptr_input->jump)
+		//{
+		//	if(currentplayerGravity.y() != 0.0f)
+		//	{
+		//		setFriction(btScalar(100.0f));
+		//		setGravity(btVector3(0.0f, 0.0f, 0.0f));
+		//	}
+		//}
+		////When moving, restore friction and gravity
+		//else if( (ptr_input->position.x != 0.0f || ptr_input->position.y != 0.0f))
+		//{
+		//	if(currentplayerGravity.y() != ptr_player_physics->gravity.y)
+		//	{
+		//		setFriction(btScalar(0.0f));
+		//		setGravity(btVector3(ptr_player_physics->gravity.x, ptr_player_physics->gravity.y, ptr_player_physics->gravity.z));
+		//	}
+		//}
 
-		//Prevent player being able to hang-glide after jumping
-		if(ptr_player->timeSinceLastJump < ptr_player->delayInSecondsBetweenEachJump)
-		{
-			setGravity(btVector3(0.0f, ptr_player_physics->gravity.y*5.0f, 0.0f));
-		}
+		////Prevent player being able to hang-glide after jumping
+		//if(ptr_player->timeSinceLastJump < ptr_player->delayInSecondsBetweenEachJump)
+		//{
+		//	setGravity(btVector3(0.0f, ptr_player_physics->gravity.y*5.0f, 0.0f));
+		//}
 	}
 }
