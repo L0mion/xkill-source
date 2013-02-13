@@ -8,9 +8,9 @@ GBuffer::GBuffer(
 	DXGI_FORMAT		texFormat)
 {
 	this->texWidth_		= texWidth;
-	this->texHeight_		= texHeight;
+	this->texHeight_	= texHeight;
 	this->texAliasing_	= texAliasing;
-	this->texFormat_		= texFormat;
+	this->texFormat_	= texFormat;
 
 	tex_ = nullptr;
 	srv_ = nullptr;
@@ -107,8 +107,16 @@ ID3D11ShaderResourceView* GBuffer::getSRV()
 {
 	return srv_;
 }
-
 ID3D11RenderTargetView* GBuffer::getRTV()
 {
 	return rtv_;
+}
+
+unsigned int GBuffer::getTexWidth() const
+{
+	return texWidth_;
+}
+unsigned int GBuffer::getTexHeight() const
+{
+	return texHeight_;
 }

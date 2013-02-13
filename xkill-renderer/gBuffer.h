@@ -57,6 +57,8 @@ public:
 
 	ID3D11ShaderResourceView*	getSRV();
 	ID3D11RenderTargetView*		getRTV();
+	unsigned int getTexWidth() const;
+	unsigned int getTexHeight() const;
 private:
 	//! Initializes the texture of GBuffer
 	/*! Creates a description based on dimensions and formats sent to GBuffer via constructor and 

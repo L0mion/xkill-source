@@ -50,7 +50,7 @@ HRESULT ManagementGBuffer::resize(ID3D11Device* device)
 	{
 		hr = gBuffers_[i]->resize(
 			device, 
-			winfo_->getScreenWidth(), 
+			winfo_->getScreenWidth(),
 			winfo_->getScreenHeight());
 	}
 
