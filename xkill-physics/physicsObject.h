@@ -27,7 +27,8 @@ public:
 	bool init(unsigned int attributeIndex, XKILL_Enums::PhysicsAttributeType);
 	unsigned int getAttributeIndex() const;  //!< Returns the attribute index that the physicsobject maps to
 	XKILL_Enums::PhysicsAttributeType getCollisionFilterGroup() const;  //!< Returns the filter group the object belongs to, ex: XKILL_Enums::PhysicsAttributeType::WORLD
-	
+	void writeNonSynchronizedPhysicsObjectDataToPhysicsAttribute();
+
 	virtual void onUpdate(float delta);
 	virtual void handleOutOfBounds(); //!< Standard out of bounds handling: move object to a new position
 };

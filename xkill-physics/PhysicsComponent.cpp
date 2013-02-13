@@ -292,49 +292,29 @@ void PhysicsComponent::onEvent(Event* e)
 					}
 				case XKILL_Enums::ModifyPhysicsObjectData::COLLISIONFILTERMASK:
 					{
-						/*
-						short* collisionFilterMask = static_cast<short*>(modifyPhysicsObject->data);
+						/*In order to modify "collisionFilterMask", a physics objects needs to be removed from the Bullet Physics dynamics world and then readded using "addRigidBody", where "collisionFilterMask" is passed as argument.
+						Write physics object data to physics attribute, modify "collisionFilterMask", and set the "reloadDataIntoBulletPhysics" flag, and this class will handle the removal and addition of the physics object.*/
+						
+						short* collisionFilterMaskFromEvent = static_cast<short*>(modifyPhysicsObject->data);
 
 						AttributePtr<Attribute_Physics> ptr_physics = itrPhysics.at(physicsAttributeIndex);
 						PhysicsObject* physicsObject = physicsObjects_->at(physicsAttributeIndex);
 
-						//Change collisionFilterMask
-						ptr_physics->collisionFilterMask = *collisionFilterMask;
-
-						//Save physics object data to physics attribute
-						ptr_physics->angularVelocity = convert(&physicsObject->getAngularVelocity());
-						ptr_physics->collisionFilterGroup = physicsObject->getCollisionFilterGroup(); //check
-						//ptr_physics->collisionResponse = (physicsObject->getCollisionFlags() & btCollisionObject::CF_NO_CONTACT_RESPONSE) == 0; //check
-						ptr_physics->gravity = convert(&physicsObject->getGravity());
-						ptr_physics->linearVelocity = convert(&physicsObject->getLinearVelocity());
-						//ptr_physics->mass = physicsObject->getInvMass();
-						//ptr_physics->meshID = 
+						physicsObject->writeNonSynchronizedPhysicsObjectDataToPhysicsAttribute();
+						ptr_physics->collisionFilterMask = *collisionFilterMaskFromEvent;
 						ptr_physics->reloadDataIntoBulletPhysics = true;
-
-						//SEND EVENT HERE, remove entity 2013-02-12 17.30
-						dynamicsWorld_->removeRigidBody(physicsObjects_->at(physicsAttributeIndex));
-						delete physicsObjects_->at(physicsAttributeIndex);
-
-						//physicsAttributeIndex
-
-						//PhysicsObject* newPhysicsObject = new PhysicsObject();
-						//btRigidBody newPhysicsObject = new btRigidBody();
-
-						//PhysicsObject* physicsObject;
-						//physicsObject->collisionFilterGroup_
-						*/
 					}
 					break;
 				}
 			}
 			else
 			{
-				DEBUGPRINT("Invalid physics attribute id when handling event of type EVENT_MODIFY_PHYSICS_OBJECT, error 1");
+				SHOW_MESSAGEBOX("Invalid physics attribute id when handling event of type EVENT_MODIFY_PHYSICS_OBJECT, error 1");
 			}
 		}
 		else
 		{
-			DEBUGPRINT("Invalid physics attribute id when handling event of type EVENT_MODIFY_PHYSICS_OBJECT, error 2");
+			SHOW_MESSAGEBOX("Invalid physics attribute id when handling event of type EVENT_MODIFY_PHYSICS_OBJECT, error 2");
 		}
 		break;
 	}

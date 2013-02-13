@@ -229,8 +229,8 @@ void GameComponent::onUpdate(float delta)
 				//ray->from = ptr_player->ptr_weaponFireLocation_spatial->ptr_position->position;
 				ray->to = lookAtFarPlaneHorizon + ray->from;
 
-				Event_GetPhysicsObjectHitByRay ev(ray->from, ray->to);
-				SEND_EVENT(&ev);
+				//Event_GetPhysicsObjectHitByRay ev(ray->from, ray->to);
+				//SEND_EVENT(&ev);
 				//DEBUGPRINT("ev.closest_entityId: " << ev.closest_entityId);
 			}
 			
@@ -721,7 +721,7 @@ void collision_projectile(Entity* entity1, Entity* entity2)
 						SEND_EVENT(&Event_ModifyPhysicsObject(XKILL_Enums::ModifyPhysicsObjectData::GRAVITY, static_cast<void*>(&Float3(0.0f, -5.0f, 0.0f)), itrPhysics.at(physicsId.at(j))));
 					}
 					break;
-				case XKILL_Enums::AmmunitionType::SCATTER: //Fall down and roll
+				case XKILL_Enums::AmmunitionType::SCATTER: //Fall down and roll, also collide with projectiles
 					if(ptr_projectile->currentLifeTimeLeft > 1.00f)
 					{
 						ptr_projectile->currentLifeTimeLeft = 1.00f;
@@ -729,9 +729,9 @@ void collision_projectile(Entity* entity1, Entity* entity2)
 						SEND_EVENT(&Event_ModifyPhysicsObject(XKILL_Enums::ModifyPhysicsObjectData::GRAVITY, static_cast<void*>(&Float3(0.0f, -10.0f, 0.0f)), itrPhysics.at(physicsId.at(j))));
 						SEND_EVENT(&Event_ModifyPhysicsObject(XKILL_Enums::ModifyPhysicsObjectData::VELOCITYPERCENTAGE, static_cast<void*>(&Float3(0.1f, 0.1f, 0.1f)), itrPhysics.at(physicsId.at(j))));
 
-						//CHECK
-						//short collisionFilterMask = XKILL_Enums::PhysicsAttributeType::WORLD | XKILL_Enums::PhysicsAttributeType::PROJECTILE | XKILL_Enums::PhysicsAttributeType::PLAYER;
-						//SEND_EVENT(&Event_ModifyPhysicsObject(XKILL_Enums::ModifyPhysicsObjectData::COLLISIONFILTERMASK, static_cast<void*>(&collisionFilterMask), itrPhysics.at(physicsId.at(j))));
+						//Collide with projectiles
+						short collisionFilterMask = itrPhysics.at(physicsId.at(j))->collisionFilterMask;
+						SEND_EVENT(&Event_ModifyPhysicsObject(XKILL_Enums::ModifyPhysicsObjectData::COLLISIONFILTERMASK, static_cast<void*>(&collisionFilterMask), itrPhysics.at(physicsId.at(j))));
 					}
 					break;
 				case XKILL_Enums::AmmunitionType::EXPLOSIVE: //Remove projectile and create an explosion sphere in its place
