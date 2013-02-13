@@ -21,9 +21,11 @@ public:
 		QWidget::setWindowFlags(Qt::FramelessWindowHint);
 		QWidget::setAttribute(Qt::WA_TranslucentBackground);
 		QWidget::show();
+		QWidget::raise();
 		
 		SUBSCRIBE_TO_EVENT(this, EVENT_WINDOW_MOVE);
 		SUBSCRIBE_TO_EVENT(this, EVENT_WINDOW_RESIZE);
+
 	}
 	~Menu_Main2();
 	void onEvent(Event* e)
@@ -44,6 +46,7 @@ public:
 	void event_windowMove(Event_WindowMove* e)
 	{
 		move(e->pos.x, e->pos.y);
+		QWidget::raise();
 	}
 
 	void event_windowResize(Event_WindowResize* e)
@@ -51,6 +54,7 @@ public:
 		resize(e->width, e->height);
 		ui.label_background->resize(width(), height());
 		ui.label_background->lower();
+		QWidget::raise();
 	}
 
 	void keyPressEvent(QKeyEvent *e)

@@ -1,7 +1,7 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
-#include <QtGui/qevent.h>
+#include <QtGui/QFocusEvent>
 #include <QtGui/QMouseEvent> // needed to grab mouse input
 #include <QtGui/QMessageBox> // used to display info dialogs
 #include <xkill-utilities/IObserver.h>
@@ -40,23 +40,32 @@ protected:
 	void showMenu();
 	void keyReleaseEvent(QKeyEvent* e);
 
-	bool event(QEvent* e)
+	//bool event(QEvent* e)
+	//{
+	//	// A custom event filter
+	//	bool result = true;
+
+	//	// Make sure menu is always drawn on top of this window
+	//	// event though it is a separate window
+	//	switch(e->type())
+	//	{ 
+	//	case QEvent::WindowActivate :
+	//	case QEvent::FocusIn :
+	//		menu->raise();
+	//		return false;
+	//		break;
+	//	default:
+	//		// Perform logic as normal
+	//		//bool result = QMainWindow::event(e) ;
+	//		break;
+	//	};
+
+	//	return result;
+	//}
+
+	void focusInEvent( QFocusEvent* )
 	{
-		// A custom event filter
-
-		// Perform logic as normal
-		bool result = QMainWindow::event(e) ;
-
-		// Make sure menu is always drawn on top of this window
-		// event though it is a separate window
-		switch(e->type())
-		{
-		case QEvent::WindowActivate :
-			menu->raise();
-			break;
-		};
-
-		return result;
+		menu->raise();
 	}
 	void paintEvent(QPaintEvent* e);
 
