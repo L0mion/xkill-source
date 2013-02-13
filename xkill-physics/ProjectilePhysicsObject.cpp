@@ -60,7 +60,7 @@ bool ProjectilePhysicsObject::subClassSpecificInitHook()
 		case XKILL_Enums::AmmunitionType::SCATTER:
 			setFriction(btScalar(0.5f));
 			setRollingFriction(btScalar(0.5f));
-			setRestitution(btScalar(1.0f));
+			setRestitution(btScalar(0.1f));
 			break;
 		}
 	}

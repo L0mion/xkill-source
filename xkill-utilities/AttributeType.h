@@ -498,6 +498,7 @@ struct DLL_U Attribute_Player : public IAttribute
 	float timeSinceLastDamageTaken;		//!< Incrementing timer. Reset when taking damage.
 	bool jetpack;						//!< Use jetpack		
 	bool detectedAsDead;
+	bool executing;				//!< True if selected by the scheduler (ScoreComponent.cpp)
 
 	int meshID_whenAlive;
 	int meshID_whenDead;

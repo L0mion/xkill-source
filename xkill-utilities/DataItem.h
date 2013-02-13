@@ -185,7 +185,7 @@ public:
 	{
 		DataItem d;
 		d.label = label;
-		d.value._int =  new int(x);
+		d.value._int = new int(x);
 		d.type = DataItem::_INT;
 		content.push_back(d);
 	}
@@ -193,7 +193,7 @@ public:
 	{
 		DataItem d;
 		d.label = label;
-		d.value._int =  new int(x->index());
+		d.value._int = new int(x->index());
 		d.type = DataItem::_ATTRIBUTE_POINTER;
 		content.push_back(d);
 	}
