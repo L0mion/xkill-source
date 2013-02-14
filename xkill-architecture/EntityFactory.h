@@ -77,7 +77,7 @@ public:
 		ptr_physics->collisionFilterGroup = XKILL_Enums::PhysicsAttributeType::PLAYER;
 		ptr_physics->collisionFilterMask = XKILL_Enums::PhysicsAttributeType::EVERYTHING;
 		ptr_physics->gravity = Float3(0.0f, -0.0f, 0.0f);
-		ptr_physics->mass = 85;
+		ptr_physics->mass = 1.0f;
 		
 		CREATE_ATTRIBUTE(ptr_input, Attribute_Input, input, entity);
 		ptr_input->ptr_physics = ptr_physics;

@@ -35,7 +35,7 @@ public:
 private:
 	HWND windowHandle_;
 	Renderer* renderer_;
-	 
+
 	void event_WindowResize();
 	void event_PostDescTex(Event_LoadTextures* e);
 };

@@ -2,10 +2,9 @@
 
 #include <xkill-utilities/IObserver.h>
 
-#include <vector>
-
-struct Attribute_Player;
-template <class T> class AttributePtr;
+//#include <vector>
+//struct Attribute_Player;
+//template <class T> class AttributePtr;
 class Timer;
 
 //! A component to keep track of score

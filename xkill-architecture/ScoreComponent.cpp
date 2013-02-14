@@ -30,7 +30,7 @@ bool ScoreComponent::init()
 	SAFE_DELETE(schedulerTimer_);
 	SAFE_DELETE(cycleTimer_);
 
-	schedulerTimer_ = new Timer(30.0f);
+	schedulerTimer_ = new Timer(10.0f);
 	cycleTimer_ = new Timer(1.0f);
 
 	executionMode_ = false;
