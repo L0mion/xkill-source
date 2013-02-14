@@ -69,6 +69,7 @@ void PlayerPhysicsObject::handleOutOfBounds()
 		AttributePtr<Attribute_Health> playerHealthAttribute = ptr_player->ptr_health;
 		if(!ptr_player->detectedAsDead)
 		{
+			ptr_player->priority--;
 			DEBUGPRINT("Player entity " << playerEntityIndex << " was out of bounds");
 			SEND_EVENT(&Event_PlayerDeath(playerAttributeIndices[i]));
 		}

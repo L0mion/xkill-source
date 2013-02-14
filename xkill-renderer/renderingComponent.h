@@ -7,17 +7,11 @@
 #define _WIN32_WINNT	0x0601
 #pragma warning(pop)
 
-typedef struct HWND__* HWND;
-
-class Renderer;
-
-#include <stdio.h>
-#include <d3d11.h>
-#include <vector>
-
+#include "dllRenderer.h"
 #include <xkill-utilities/IObserver.h>
 
-#include "dllRenderer.h"
+typedef struct HWND__* HWND;
+class Renderer;
 
 /*! \defgroup xkill-renderer xkill-renderer
 	Rendering Component of XKILL. */
@@ -34,7 +28,7 @@ public:
 	~RenderingComponent();
 
 	void reset();
-	HRESULT init();
+	bool init();
 
 	void onUpdate(float delta);	//!< Runs a frame for RenderingComponent.
 	void onEvent(Event* e);		//!< Receives events for RenderingComponent.

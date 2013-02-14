@@ -55,7 +55,7 @@ Renderer::Renderer(HWND windowHandle)
 	managementInstance_ = nullptr;
 	managementSprites_  = nullptr;
 
-	attributesRenderOwner_	= nullptr;
+	//attributesRenderOwner_	= nullptr;
 
 	ATTRIBUTES_INIT_ALL;
 

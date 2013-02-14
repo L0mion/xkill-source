@@ -393,7 +393,7 @@ public:
 		ptr_explosionSphere->firingModeType = e->firingModeType;
 
 		CREATE_ATTRIBUTE(ptr_damage, Attribute_Damage, damage, entity);
-		ptr_damage->damage = 0.0f; //e->damage;
+		ptr_damage->damage = e->damage;
 		ptr_damage->owner_entityID = e->entityIdOfCreator;
 	}
 

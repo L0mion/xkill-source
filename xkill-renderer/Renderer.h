@@ -37,7 +37,7 @@ class TexDesc;
 class MeshMaterial;
 class SubsetD3D;
 
-#include <vector>
+//#include <vector>
 
 #include "ShadingDesc.h"
 
@@ -131,8 +131,8 @@ private:
 
 	ID3D11Buffer* debugLinesVertexBuffer_;		//!< Might want to move this into some manager of some sort.
 
-	std::vector<int>* attributesRenderOwner_;	//!< Holds owners of render-attributes.
-	std::vector<int>* attributesCameraOwner_;
+	//std::vector<int>* attributesRenderOwner_;	//!< Holds owners of render-attributes.
+	//std::vector<int>* attributesCameraOwner_;
 
 	//temp
 	M3DLoader*		m3dLoader_;
