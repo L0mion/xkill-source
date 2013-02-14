@@ -45,39 +45,6 @@ Menu_Main::Menu_Main( QWidget* parent ) : QMainWindow(parent), ToggleHelper(this
 	//connect(ui.pushButton_RemoveLevel,	SIGNAL(clicked()),					this,	SLOT(slot_removeLevel()));
 	connect(ui.pushButton_startGame,	SIGNAL(clicked()),					this,	SLOT(slot_startGame()));
 
-	/*
-	
-	connect(ui.radioButton_Ammo_Bullet,							SIGNAL(clicked()),					this,	SLOT(slot_updateAmmoMenu()));
-	connect(ui.radioButton_Ammo_Scatter,						SIGNAL(clicked()),					this,	SLOT(slot_updateAmmoMenu()));
-	connect(ui.radioButton_Ammo_Explosive,						SIGNAL(clicked()),					this,	SLOT(slot_updateAmmoMenu()));
-
-	connect(ui.horizontalSlider_Ammo_Damage,					SIGNAL(sliderMoved(int)),			this,	SLOT(slot_ammoMenuUpdated()));
-	connect(ui.horizontalSlider_Ammo_ExplosionInitialRadius,			SIGNAL(sliderMoved(int)),			this,	SLOT(slot_ammoMenuUpdated()));
-	connect(ui.horizontalSlider_Ammo_NrOfProjectiles,			SIGNAL(sliderMoved(int)),			this,	SLOT(slot_ammoMenuUpdated()));
-	connect(ui.horizontalSlider_Ammo_Speed,						SIGNAL(sliderMoved(int)),			this,	SLOT(slot_ammoMenuUpdated()));
-	connect(ui.horizontalSlider_Ammo_Spread,					SIGNAL(sliderMoved(int)),			this,	SLOT(slot_ammoMenuUpdated()));
-	connect(ui.horizontalSlider_Ammo_VelocitVariation,			SIGNAL(sliderMoved(int)),			this,	SLOT(slot_ammoMenuUpdated()));
-	connect(ui.groupBox_Ammo_Explosive,							SIGNAL(clicked()),					this,	SLOT(slot_ammoMenuUpdated()));
-
-	connect(ui.radioButton_Weapon_Single,						SIGNAL(clicked()),					this,	SLOT(slot_updateFiringModeMenu()));
-	connect(ui.radioButton_Weapon_Semi,							SIGNAL(clicked()),					this,	SLOT(slot_updateFiringModeMenu()));
-	connect(ui.radioButton_Weapon_Auto,							SIGNAL(clicked()),					this,	SLOT(slot_updateFiringModeMenu()));
-
-	connect(ui.checkBox_Weapon_Bullet,							SIGNAL(clicked()),					this,	SLOT(slot_firingModeUpdated()));
-	connect(ui.checkBox_Weapon_Scatter,							SIGNAL(clicked()),					this,	SLOT(slot_firingModeUpdated()));
-	connect(ui.checkBox_Weapon_Explosive,						SIGNAL(clicked()),					this,	SLOT(slot_firingModeUpdated()));
-	connect(ui.horizontalSlider_Weapon_ClipSize,				SIGNAL(sliderMoved(int)),			this,	SLOT(slot_firingModeUpdated()));
-	connect(ui.horizontalSlider_Weapon_DamageModifier,			SIGNAL(sliderMoved(int)),			this,	SLOT(slot_firingModeUpdated()));
-	connect(ui.horizontalSlider_Weapon_ExplosionSphereModifier,	SIGNAL(sliderMoved(int)),			this,	SLOT(slot_firingModeUpdated()));
-	connect(ui.horizontalSlider_Weapon_RateOfFire,				SIGNAL(sliderMoved(int)),			this,	SLOT(slot_firingModeUpdated()));
-	connect(ui.horizontalSlider_Weapon_ReloadTime,				SIGNAL(sliderMoved(int)),			this,	SLOT(slot_firingModeUpdated()));
-
-	connect(ui.tabWidget_2,										SIGNAL(currentChanged(int)),		this,	SLOT(slot_updateAmmoMenu()));
-	connect(ui.tabWidget_2,										SIGNAL(currentChanged(int)),		this,	SLOT(slot_updateFiringModeMenu()));
-	
-	
-	*/
-	
 	// Set num players to 2
 	ui.horizontalSlider_numPlayers->setValue(2);
 
@@ -237,8 +204,17 @@ void Menu_Main::slot_startGame()
 	SEND_EVENT(&Event_SetMouseLock(true));
 
 	SEND_EVENT(&Event_EndDeathmatch());	//Temporary to remove the "empty" game that is used to paint the menu background black.
+
+	settings->cycleLimit = ui.horizontalSlider_cycleLimit->value();
+	settings->timeLimit = ui.horizontalSlider_timeLimit->value() * 60.0f;
+
 	int num_players = ui.horizontalSlider_numPlayers->value();
 	SEND_EVENT(&Event_StartDeathmatch(num_players));
+
+	while(itrPlayer.hasNext())
+	{
+		itrPlayer.getNext()->respawnTimer.setStartTime(static_cast<float>(ui.horizontalSlider_respawnTime->value()));
+	}
 
 	ToggleHelper::toggleMenu(false);
 }

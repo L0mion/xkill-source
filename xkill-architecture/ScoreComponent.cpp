@@ -17,26 +17,36 @@ ScoreComponent::ScoreComponent()
 	executingPlayerIndex_ = -1;
 	schedulerTimer_ = nullptr;
 	cycleTimer_ = nullptr;
+	gameTimer_ = nullptr;
 }
 
 ScoreComponent::~ScoreComponent()
 {
 	SAFE_DELETE(schedulerTimer_);
 	SAFE_DELETE(cycleTimer_);
+	SAFE_DELETE(gameTimer_);
 }
 
 bool ScoreComponent::init()
 {
 	SAFE_DELETE(schedulerTimer_);
 	SAFE_DELETE(cycleTimer_);
+	SAFE_DELETE(gameTimer_);
 
 	schedulerTimer_ = new Timer(30.0f);
 	cycleTimer_ = new Timer(1.0f);
 
+	gameTimer_ = new Timer(settings->timeLimit);
+
+	if(settings->timeLimit < 0.001f)
+	{
+		gameTimer_->setActive(false);
+		gameTimer_->setStartTime(1.0f);
+		gameTimer_->resetTimer();
+	}
+
 	executionMode_ = false;
 	executingPlayerIndex_ = -1;
-
-	victoryScore_ = 20;
 
 	return true;
 }
@@ -62,6 +72,12 @@ void ScoreComponent::onUpdate(float delta)
 
 		//if death match game mode
 		//deathMatchScoreCounting(delta);
+
+		gameTimer_->update(delta);
+		if(gameTimer_->hasTimerExpired())
+		{
+			SEND_EVENT(&Event(EVENT_GAME_OVER));
+		}
 	}
 }
 
@@ -148,7 +164,7 @@ void ScoreComponent::schedulerScoreCounting(float delta)
 
 	while(itrPlayer.hasNext())
 	{
-		if(itrPlayer.getNext()->totalExecutionTime >= victoryScore_)
+		if(itrPlayer.getNext()->totalExecutionTime >= settings->cycleLimit)
 		{
 			SEND_EVENT(&Event(EVENT_GAME_OVER));
 		}
@@ -159,7 +175,7 @@ void ScoreComponent::deathMatchScoreCounting(float delta)
 {
 	while(itrPlayer.hasNext())
 	{
-		if(itrPlayer.getNext()->priority >= victoryScore_)
+		if(itrPlayer.getNext()->priority >= settings->cycleLimit)
 		{
 			SEND_EVENT(&Event(EVENT_GAME_OVER));
 		}

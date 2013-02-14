@@ -718,8 +718,8 @@ void collision_projectile(Entity* entity1, Entity* entity2)
 				case XKILL_Enums::AmmunitionType::BULLET: //Bounce off the wall
 					if(ptr_projectile->currentLifeTimeLeft > 1.00f)
 					{
-						//ptr_projectile->currentLifeTimeLeft = 1.00f;
-						//SEND_EVENT(&Event_ModifyPhysicsObject(XKILL_Enums::ModifyPhysicsObjectData::GRAVITY, static_cast<void*>(&Float3(0.0f, -5.0f, 0.0f)), itrPhysics.at(physicsId.at(j))));
+						ptr_projectile->currentLifeTimeLeft = 1.00f;
+						SEND_EVENT(&Event_ModifyPhysicsObject(XKILL_Enums::ModifyPhysicsObjectData::GRAVITY, static_cast<void*>(&Float3(0.0f, -5.0f, 0.0f)), itrPhysics.at(physicsId.at(j))));
 					}
 					break;
 				case XKILL_Enums::AmmunitionType::SCATTER: //Fall down and roll, also collide with projectiles
