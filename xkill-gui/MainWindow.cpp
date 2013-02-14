@@ -60,7 +60,7 @@ MainWindow::MainWindow()
 	// init game
 	gameWidget = new GameWidget(this);
 	this->setCentralWidget(gameWidget);
-	
+
 	// init tools
 	menuManager = new MenuManager(gameWidget);
 	menu = new Menu_Main2(this);
@@ -73,12 +73,15 @@ MainWindow::MainWindow()
 	connect(ui.actionQuit,					SIGNAL(triggered()),					this,			SLOT(close()));
 	connect(gameWidget,						SIGNAL(signal_fpsChanged(QString)),		this,			SLOT(slot_setTitle(QString)));
 	connect(gameWidget,						SIGNAL(signal_fpsChanged(QString)),		this,			SLOT(slot_setTitle(QString)));
+
+	this->installEventFilter(this);
 	
 	
 }
 
 MainWindow::~MainWindow()
 {
+	UNSUBSCRIBE_TO_EVENTS(this);
 }
 
 void MainWindow::onUpdate( float delta )
@@ -106,7 +109,7 @@ void MainWindow::keyPressEvent( QKeyEvent* e )
 	if((e->key()==Qt::Key_Return) && (e->modifiers()==Qt::AltModifier))
 		slot_toggleFullScreen();
 
-	if((e->key()==Qt::Key_F4) && (e->modifiers()==Qt::AltModifier))
+	if((e->key()==Qt::Key_F4)  && (e->modifiers()==Qt::AltModifier))
 		SEND_EVENT(&Event(EVENT_QUIT_TO_DESKTOP));
 
 	if((e->key()==Qt::Key_F1))

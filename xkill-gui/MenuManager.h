@@ -23,8 +23,8 @@ private:
 	XKILL_Enums::AmmunitionType ammo;
 	XKILL_Enums::FiringModeType weapon;
 	
-	QHBoxLayout *horizontalLayout;
-	 QVBoxLayout *verticalLayout;
+	QHBoxLayout* horizontalLayout;
+	QVBoxLayout* verticalLayout;
 
 public:
 	HUDWindow(QWidget* parent, int id);

@@ -22,6 +22,7 @@ InputComponent::InputComponent()
 
 InputComponent::~InputComponent()
 {
+	UNSUBSCRIBE_TO_EVENTS(this);
 	SAFE_DELETE(inputManager_);
 }
 

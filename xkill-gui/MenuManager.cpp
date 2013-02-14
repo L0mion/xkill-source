@@ -16,7 +16,6 @@ HUDWindow::HUDWindow(QWidget* parent, int id) : QMainWindow(parent)
 	show();
 
 
-
 	//
 	// build menu
 	//

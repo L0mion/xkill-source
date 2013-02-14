@@ -63,6 +63,51 @@ protected:
 	//	return result;
 	//}
 
+	bool eventFilter(QObject* object, QEvent* e)
+	{
+		QEvent::Type type = e->type();
+
+		/*
+		if (e->type() == QEvent::WindowActivate)
+		{
+		menu->raise();
+		}
+
+		if (e->type() == QEvent::ActivationChange)
+		{
+		menu->raise();
+		}
+
+		if (e->type() == QEvent::UpdateRequest)
+		{
+		menu->raise();
+		}
+
+		if (e->type() == 174)
+		{
+		menu->raise();
+		}
+
+		*/
+
+		if (e->type() == QEvent::WindowTitleChange)
+		{
+			return false;
+		}
+		if (e->type() == QEvent::NonClientAreaMouseMove)
+		{
+			return false;
+		}
+		if (e->type() == QEvent::HoverMove)
+		{
+			return false;
+		}
+
+		//DEBUGPRINT("Event " << type);
+		
+		return false;
+	}
+
 	void focusInEvent( QFocusEvent* )
 	{
 		menu->raise();
