@@ -12,7 +12,7 @@ public:
 	HoverPhysicsObject();
 	~HoverPhysicsObject();
 	virtual bool subClassSpecificInitHook();
-	virtual void onUpdate(float delta);
+	virtual void onUpdate(float delta,btDynamicsWorld* dynamicWorld);
 
 };
 

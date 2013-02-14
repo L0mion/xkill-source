@@ -10,7 +10,7 @@ public:
 	FrustumPhysicsObject();
 	~FrustumPhysicsObject();
 	virtual void onUpdate(float delta);
-	bool frustumInit(unsigned int attributeIndex,XKILL_Enums::PhysicsAttributeType);
+	bool frustumInit(unsigned int attributeIndex,short);
 };
 
 #endif

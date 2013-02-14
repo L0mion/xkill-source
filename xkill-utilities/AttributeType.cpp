@@ -149,6 +149,7 @@ DataItemList* Attribute_Physics::getDataList()
 	list->add(gravity,						"gravity");
 	list->add(mass,							"mass");
 	list->add(meshID,						"meshID");
+	list->add(collisionFilterGroup,			"collisionFilterGroup");
 	list->add(collisionFilterMask,			"collisionFilterMask");
 	list->add(collisionResponse,			"collisionResponse");
 	list->add(reloadDataIntoBulletPhysics,	"reloadDataIntoBulletPhysics");
@@ -165,6 +166,7 @@ void Attribute_Physics::saveTo( DataItemList* list )
 	list->get(&gravity);
 	list->get(&mass);
 	list->get(&meshID);
+	list->get(&collisionFilterGroup);
 	list->get(&collisionFilterMask);
 	list->get(&collisionResponse);
 	list->get(&reloadDataIntoBulletPhysics);
