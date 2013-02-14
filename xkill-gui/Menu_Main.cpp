@@ -55,7 +55,14 @@ Menu_Main::Menu_Main( QWidget* parent ) : QMainWindow(parent), ToggleHelper(this
 
 	QStringList columnNames;
 
-	loadXML();
+	Event_GetFileList* fileList = new Event_GetFileList("../../xkill-resources/xkill-level/TestArena/*.mdldesc");
+	SEND_EVENT(fileList);
+
+	int t = 0;
+
+	delete fileList;
+
+	//loadXML();
 
 	input_Menu = new Menu_Input(&ui, this);
 	input_Menu->Init(new QStandardItemModel(0, 2, this), new QStandardItemModel(0, 1, this));

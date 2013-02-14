@@ -88,6 +88,7 @@ enum DLL_U EventType
 	EVENT_GET_WINDOW_RESOLUTION,
 	EVENT_GET_WINDOW_HANDLE,
 	EVENT_GET_ENTITY_ID_OF_PHYSICS_OBJECT_HIT_BY_RAY,
+	EVENT_GET_FILE_LIST,
 
 	// Utilities
 	EVENT_CREATE_MESH,
@@ -589,4 +590,16 @@ public:
 	Float3 to;
 	short collisionFilterMask;
 	int closest_entityId; //!< 0 if no Entity
+};
+
+class DLL_U Event_GetFileList : public Event
+{
+public:
+	/**
+	\param filepathAndExtension Should look like this: path\*.extension
+	*/
+	Event_GetFileList(std::string filepathAndExtension); 
+
+	std::string filepathAndExtension;
+	std::vector<std::string> filenames;
 };
