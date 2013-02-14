@@ -25,14 +25,14 @@ void RenderingComponent::reset()
 {
 	SAFE_RESET(renderer_);
 }
-HRESULT RenderingComponent::init()
+bool RenderingComponent::init()
 {
 	HRESULT hr = S_OK;
 	
 	renderer_ = new Renderer(windowHandle_);
 	hr = renderer_->init();
 
-	return hr;
+	return SUCCEEDED(hr);
 }
 
 void RenderingComponent::onUpdate(float delta)

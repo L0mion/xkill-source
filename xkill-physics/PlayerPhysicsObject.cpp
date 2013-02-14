@@ -92,6 +92,7 @@ void PlayerPhysicsObject::handleOutOfBounds()
 		AttributePtr<Attribute_Health> playerHealthAttribute = ptr_player->ptr_health;
 		if(!ptr_player->detectedAsDead)
 		{
+			ptr_player->priority--;
 			DEBUGPRINT("Player entity " << playerEntityIndex << " was out of bounds");
 			SEND_EVENT(&Event_PlayerDeath(playerAttributeIndices[i]));
 		}
@@ -172,7 +173,7 @@ void PlayerPhysicsObject::handleInput(float delta)
 		}*/
 
 		//Jetpack
-		if(ptr_player->jetpack /*|| ptr_input->jetpack*/) //input-jetpack is temporary for debugging purposes
+		if(ptr_player->jetpack || ptr_input->jetpack) //input-jetpack is temporary for debugging purposes
 		{
 			applyCentralImpulse(btVector3(0.0f, jumpPower*10.0f*delta, 0.0f));
 			//ptr_player->jetpackTimer+=delta;

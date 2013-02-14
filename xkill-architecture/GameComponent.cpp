@@ -592,26 +592,35 @@ void collision_applyDamage(Entity* entity1, Entity* entity2)
 					// If a player was killed by the collision, give priority (score) to the player that created the DamageAttribute
 					if(health->health <= 0)
 					{
-						Entity* creatorOfProjectilePlayerEntity = itr_entity->at(damage->owner_entityID);
-						std::vector<int> playerId = creatorOfProjectilePlayerEntity->getAttributes(ATTRIBUTE_PLAYER);
-						for(unsigned k=0;k<playerId.size();k++)
-						{
-							AttributePtr<Attribute_Player> ptr_player = itrPlayer.at(playerId.at(k));
-							if(entity1->getID() != damage->owner_entityID) //Award player
-							{
-								ptr_player->priority++;
-							}
-							else //Punish player for blowing himself up
-							{
-								ptr_player->priority--;
-							}
-							DEBUGPRINT("Player with entity id " << damage->owner_entityID << " killed player with entity id " << entity1->getID());
-						}
 						Entity* playerThatDied = itr_entity->at(itrHealth.ownerIdAt(healthId[j]));
-						playerId = playerThatDied->getAttributes(ATTRIBUTE_PLAYER);
-						for(unsigned int k = 0; k < playerId.size(); k++)
+						std::vector<int> playerThatDiedId = playerThatDied->getAttributes(ATTRIBUTE_PLAYER);
+
+						Entity* creatorOfProjectilePlayerEntity = itr_entity->at(damage->owner_entityID);
+						std::vector<int> creatorOfProjectilePlayerId = creatorOfProjectilePlayerEntity->getAttributes(ATTRIBUTE_PLAYER);
+						for(unsigned k=0;k<creatorOfProjectilePlayerId.size();k++)
 						{
-							SEND_EVENT(&Event_PlayerDeath(playerId[k]));
+							for(unsigned l=0;l<playerThatDiedId.size();l++)
+							{
+								AttributePtr<Attribute_Player> playerThatDied_ptr_player = itrPlayer.at(playerThatDiedId.at(l));
+								if(!playerThatDied_ptr_player->detectedAsDead) //Prevent player from receiving priority based on number of fatal hits
+								{
+									AttributePtr<Attribute_Player> creatorOfProjectile_ptr_player = itrPlayer.at(creatorOfProjectilePlayerId.at(k));
+									if(entity1->getID() != damage->owner_entityID) //Award player
+									{
+										creatorOfProjectile_ptr_player->priority++;
+									}
+									else //Punish player for blowing himself up
+									{
+										creatorOfProjectile_ptr_player->priority--;
+									}
+									DEBUGPRINT("Player with entity id " << damage->owner_entityID << " killed player with entity id " << entity1->getID());
+								}
+							}
+						}
+
+						for(unsigned int k = 0; k < playerThatDiedId.size(); k++)
+						{
+							SEND_EVENT(&Event_PlayerDeath(playerThatDiedId[k]));
 							SEND_EVENT(&Event_PlaySound(Event_PlaySound::SOUND_DEATH, position, use3DAudio));
 						}
 					}
@@ -1041,8 +1050,7 @@ void GameComponent::event_StartDeathmatch( Event_StartDeathmatch* e )
 		AttributePtr<Attribute_Player>			ptr_player		=	itrPlayer		.getNext();
 		AttributePtr<Attribute_WeaponStats>		ptr_weaponStats	=	ptr_player	->	ptr_weaponStats	;
 		switchFiringMode(ptr_weaponStats);
-
-		SEND_EVENT(&Event_HackActivated(10000.0f, XKILL_Enums::HackType::JETHACK, ptr_player));
+		SEND_EVENT(&Event_HackActivated(1000.0f, XKILL_Enums::HackType::JETHACK, ptr_player));
 	}
 
 	//Create mesh for debugging fbx-loading.

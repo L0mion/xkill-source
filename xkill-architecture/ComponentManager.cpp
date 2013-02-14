@@ -1,5 +1,6 @@
 #include "ComponentManager.h"
 
+#include <xkill-utilities/AttributeManager.h>
 #include <xkill-io/IOComponent.h>
 #include <xkill-renderer/renderingComponent.h>
 #include <xkill-physics/PhysicsComponent.h>
@@ -11,9 +12,9 @@
 #include "ScoreComponent.h"
 #include "HacksComponent.h"
 
-#include <xkill-utilities/FiniteStateMachine.h>
-#include <xkill-utilities/FiniteState.h>
-#include "States.h"
+//#include <xkill-utilities/FiniteStateMachine.h>
+//#include <xkill-utilities/FiniteState.h>
+//#include "States.h"
 
 #define SAFE_DELETE(x) if( x ) { delete(x); (x) = NULL; }
 
@@ -75,7 +76,7 @@ bool ComponentManager::init(HWND windowHandle, HWND parentWindowHandle)
 	hacks_ = new HacksComponent();
 	ioComponent_ = new IOComponent();
 
-	if(FAILED((render_->init())))
+	if(!(render_->init()))
 	{
 		SHOW_MESSAGEBOX("RenderingComponent failed to init.");
 		return false;
