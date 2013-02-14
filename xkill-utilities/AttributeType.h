@@ -217,7 +217,7 @@ struct DLL_U Attribute_Render : public IAttribute
 */
 struct DLL_U Attribute_Physics : public IAttribute
 {
-	XKILL_Enums::PhysicsAttributeType collisionFilterGroup;
+	short collisionFilterGroup;
 
 	Attribute_Physics();
 	~Attribute_Physics();

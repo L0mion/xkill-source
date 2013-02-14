@@ -15,7 +15,7 @@ public:
 	~ExplosionSpherePhysicsObject();
 	virtual bool subClassSpecificInitHook();
 	virtual btVector3 subClassCalculateLocalInertiaHook(btScalar mass);
-	virtual void onUpdate(float delta);
+	virtual void onUpdate(float delta,btDynamicsWorld* dynamicWorld);
 };
 
 #endif

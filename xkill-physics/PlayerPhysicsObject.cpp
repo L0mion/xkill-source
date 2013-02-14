@@ -1,5 +1,7 @@
 #include "PlayerPhysicsObject.h"
 #include <xkill-utilities/AttributeManager.h>
+#include <btBulletDynamicsCommon.h>
+#include "BulletCollision/NarrowPhaseCollision/btRaycastCallback.h"
 #include "physicsUtilities.h"
 
 AttributeIterator<Attribute_Input> itrInput;
@@ -34,14 +36,35 @@ bool PlayerPhysicsObject::subClassSpecificInitHook()
 	return true;
 }
 
-void PlayerPhysicsObject::onUpdate(float delta)
+void PlayerPhysicsObject::onUpdate(float delta,btDynamicsWorld* dynamicWorld)
 {
-	PhysicsObject::onUpdate(delta);
+	PhysicsObject::onUpdate(delta,dynamicWorld);
 
 	handleInput(delta);
 
+	btVector3 from = getWorldTransform().getOrigin();
+	btVector3 to = from - btVector3(0,50,0);
+	btCollisionWorld::ClosestRayResultCallback ray(from,to);
+	ray.m_collisionFilterGroup = XKILL_Enums::PhysicsAttributeType::RAY;
+	ray.m_collisionFilterMask =  XKILL_Enums::PhysicsAttributeType::WORLD;
+	dynamicWorld->rayTest(from,to,ray);
+	if(ray.hasHit())
+	{
+		btVector3 point = from.lerp(to,ray.m_closestHitFraction);
+		float length = (point - from).length();
+		float height = 1;
+		if(height-length > 0)
+		{
+			btTransform t;
+			t= getWorldTransform();
+			t.setOrigin(t.getOrigin() + btVector3(0,height-length,0)*delta/0.25);
+			setWorldTransform(t);
+			setLinearVelocity(getLinearVelocity()+btVector3(0,-getLinearVelocity().y(),0));
+			//applyCentralForce(-getGravity());
+		}
+	}
 	//Handle players taking off when going up ramps
-	Entity* playerEntity = itrPhysics_3.ownerAt(attributeIndex_);
+	/*Entity* playerEntity = itrPhysics_3.ownerAt(attributeIndex_);
 	std::vector<int> playerAttributeIndices = playerEntity->getAttributes(ATTRIBUTE_PLAYER);
 	for(unsigned int i = 0; i < playerAttributeIndices.size(); i++)
 	{
@@ -51,7 +74,7 @@ void PlayerPhysicsObject::onUpdate(float delta)
 			setLinearVelocity(btVector3(getLinearVelocity().x(), 0.0f, getLinearVelocity().z()));
 		}
 		playerAttribute->collidingWithWorld = false;
-	}
+	}*/
 }
 
 void PlayerPhysicsObject::handleOutOfBounds()
@@ -125,12 +148,14 @@ void PlayerPhysicsObject::handleInput(float delta)
 		}
 
 		//Airwalk handling
-		if(!ptr_player->collidingWithWorld)
+		/*if(!ptr_player->collidingWithWorld)
 		{
 			move *= 0.75f;
 		}
-		move = move.rotate(btVector3(0,1,0),yaw_);
+		*/
 
+		// move player
+		move = move.rotate(btVector3(0,1,0),yaw_);
 		move = btVector3(move.x(), getLinearVelocity().y(), move.z());
 		setLinearVelocity(move);
 
@@ -141,14 +166,14 @@ void PlayerPhysicsObject::handleInput(float delta)
 
 		//Jump
 		float jumpPower = 10.0f;
-		if(ptr_input->jump && ptr_player->timeSinceLastJump > ptr_player->delayInSecondsBetweenEachJump && ptr_player->collidingWithWorld)
+		/*if(ptr_input->jump && ptr_player->timeSinceLastJump > ptr_player->delayInSecondsBetweenEachJump && ptr_player->collidingWithWorld)
 		{
 			applyCentralImpulse(btVector3(0.0f, jumpPower, 0.0f));
 			ptr_player->timeSinceLastJump = 0.0f;
-		}
+		}*/
 
 		//Jetpack
-		if(ptr_player->jetpack || ptr_input->jetpack) //input-jetpack is temporary for debugging purposes
+		if(ptr_player->jetpack /*|| ptr_input->jetpack*/) //input-jetpack is temporary for debugging purposes
 		{
 			applyCentralImpulse(btVector3(0.0f, jumpPower*10.0f*delta, 0.0f));
 			//ptr_player->jetpackTimer+=delta;

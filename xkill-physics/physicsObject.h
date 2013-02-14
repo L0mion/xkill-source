@@ -4,6 +4,8 @@
 #include <BulletDynamics/Dynamics/btRigidBody.h>
 #include <xkill-utilities\XKILL_Enums.h>
 
+class btDynamicsWorld;
+
 class PhysicsObject
 	: public btRigidBody
 {
@@ -12,7 +14,7 @@ private:
 	virtual bool subClassSpecificInitHook();								//! May be overridden by subclasses. Is called from the end of init.
 protected:
 		unsigned int attributeIndex_;										//!< Specifies which PhysicsObject is synchronized with which physics attribute.
-		XKILL_Enums::PhysicsAttributeType collisionFilterGroup_;		//!< The filter group the object belongs to, ex: XKILL_Enums::PhysicsAttributeType::WORLD.
+		short collisionFilterGroup_;		//!< The filter group the object belongs to, ex: XKILL_Enums::PhysicsAttributeType::WORLD.
 
 		btVector3 localInertiaBasedOnCollisionShapeAndMass(btScalar mass);	//!< Called from "subClassCalculateLocalInertiaHook" by subclasses.
 		btVector3 zeroLocalInertia();										//!< Called from "subClassCalculateLocalInertiaHook" by subclasses.
@@ -24,12 +26,12 @@ public:
 	/*!
 	\param attributeIndex The physics attribute index.
 	*/
-	bool init(unsigned int attributeIndex, XKILL_Enums::PhysicsAttributeType);
+	bool init(unsigned int attributeIndex, short collisionFilterGroup);
 	unsigned int getAttributeIndex() const;  //!< Returns the attribute index that the physicsobject maps to
-	XKILL_Enums::PhysicsAttributeType getCollisionFilterGroup() const;  //!< Returns the filter group the object belongs to, ex: XKILL_Enums::PhysicsAttributeType::WORLD
+	short getCollisionFilterGroup() const;  //!< Returns the filter group the object belongs to, ex: XKILL_Enums::PhysicsAttributeType::WORLD
 	void writeNonSynchronizedPhysicsObjectDataToPhysicsAttribute();
 
-	virtual void onUpdate(float delta);
+	virtual void onUpdate(float delta,btDynamicsWorld* dynamicWorld);
 	virtual void handleOutOfBounds(); //!< Standard out of bounds handling: move object to a new position
 };
 

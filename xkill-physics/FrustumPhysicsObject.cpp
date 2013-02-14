@@ -38,7 +38,7 @@ void FrustumPhysicsObject::onUpdate(float delta)
 	setCollisionShape(CollisionShapes::Instance()->getFrustrumShape(attributeIndex_));
 }
 
-bool FrustumPhysicsObject::frustumInit(unsigned int attributeIndex,XKILL_Enums::PhysicsAttributeType collisionFilterGroup)
+bool FrustumPhysicsObject::frustumInit(unsigned int attributeIndex,short collisionFilterGroup)
 {
 	if(attributeIndex < 0)
 	{
