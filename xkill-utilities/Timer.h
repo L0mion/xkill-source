@@ -18,7 +18,11 @@ public:
 	float getTimeLeft();
 	bool hasTimerExpired();
 
+	void setActive(bool active);
+	bool isActive();
+
 private:
 	float timeLeft_;
 	float startTime_;
+	bool isActive_;
 };
