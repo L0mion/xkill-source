@@ -33,7 +33,7 @@ PSOut PS_Default(DefaultVSOut pIn)
 	output.albedo = float4(albedo, 0.0f);
 	
 	//Fill material RTV
-	output.material	= float4(specularTerm, 0.0f);
+	output.material		= float4(specularTerm, specularPower);
 
 	return output;
 }

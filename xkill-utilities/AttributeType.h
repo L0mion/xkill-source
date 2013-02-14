@@ -9,6 +9,7 @@
 #include "MeshDesc.h"
 #include "MeshVertices.h"
 #include "Math.h"
+#include "Timer.h"
 
 struct DataItem;
 class DataItemList;
@@ -216,7 +217,7 @@ struct DLL_U Attribute_Render : public IAttribute
 */
 struct DLL_U Attribute_Physics : public IAttribute
 {
-	XKILL_Enums::PhysicsAttributeType collisionFilterGroup;
+	short collisionFilterGroup;
 
 	Attribute_Physics();
 	~Attribute_Physics();
@@ -490,14 +491,14 @@ struct DLL_U Attribute_Player : public IAttribute
 	float sprintTime;			//!< Time that can be spent sprinting
 	bool canSprint;				//!< Can the player sprint right now
 	float sprintRechargeRate;	//!< The rate at which the sprint will recharge
-	float respawnDelay;			//!< Time between death and respawn
-	float currentRespawnDelay;	//!< Time until respawn
+	Timer respawnTimer;		//!< Keeps track of when a dead player should respawn
 	float timeSinceLastJump;	//!< Incrementing timer
 	float delayInSecondsBetweenEachJump;
 	bool collidingWithWorld;			//!< Set y-velocity to zero when not colliding with world and not jumping
 	float timeSinceLastDamageTaken;		//!< Incrementing timer. Reset when taking damage.
 	bool jetpack;						//!< Use jetpack		
 	bool detectedAsDead;
+	bool executing;				//!< True if selected by the scheduler (ScoreComponent.cpp)
 
 	int meshID_whenAlive;
 	int meshID_whenDead;

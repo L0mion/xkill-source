@@ -27,13 +27,14 @@ public:
 	virtual void onUpdate(float delta);
 
 private:
-	std::vector<std::vector<std::pair<Timer*, AttributePtr<Attribute_Player>>*>> activeHacks_;
-
-	void handleHack(AttributePtr<Attribute_Player>& ptr_player, XKILL_Enums::HackType hackType);
-
+	//! A vector of size NROFHACKS with vectors that contains pairs for each active hack of that type.
+	std::vector<std::vector<std::pair<Timer*, AttributePtr<Attribute_Player>>*>> activeHacks_; 
+	//! Updates the hack for that player
+	void updateHack(AttributePtr<Attribute_Player>& ptr_player, XKILL_Enums::HackType hackType);
+	//! Handles an hackActivatedEvent and creates a timer/player pair.
 	void handleHackActivatedEvent(Event_HackActivated* e);
-
-	bool updateTimer(AttributePtr<Attribute_Player>& ptr_player, XKILL_Enums::HackType hackType);
-
+	//! Checks if the hack should update. Used for hacks that should update under a certain condition, i.e. when a button is pressed.
+	bool shouldUpdateTimer(AttributePtr<Attribute_Player>& ptr_player, XKILL_Enums::HackType hackType);
+	//! Removes the pair at index 'index' from the vector
 	void removeIndexFromVector(std::vector<std::pair<Timer*, AttributePtr<Attribute_Player>>*>& vector, unsigned int index);
 };

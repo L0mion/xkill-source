@@ -149,6 +149,7 @@ DataItemList* Attribute_Physics::getDataList()
 	list->add(gravity,						"gravity");
 	list->add(mass,							"mass");
 	list->add(meshID,						"meshID");
+	list->add(collisionFilterGroup,			"collisionFilterGroup");
 	list->add(collisionFilterMask,			"collisionFilterMask");
 	list->add(collisionResponse,			"collisionResponse");
 	list->add(reloadDataIntoBulletPhysics,	"reloadDataIntoBulletPhysics");
@@ -165,6 +166,7 @@ void Attribute_Physics::saveTo( DataItemList* list )
 	list->get(&gravity);
 	list->get(&mass);
 	list->get(&meshID);
+	list->get(&collisionFilterGroup);
 	list->get(&collisionFilterMask);
 	list->get(&collisionResponse);
 	list->get(&reloadDataIntoBulletPhysics);
@@ -526,8 +528,7 @@ Attribute_Player::Attribute_Player()
 	priority = 0;
 	cycleSteals = 0;
 	totalExecutionTime = 0;
-	respawnDelay = 5.0f;
-	currentRespawnDelay = 0.0f;
+	respawnTimer.setStartTime(5.0f);
 	delayInSecondsBetweenEachJump = 1.0f;
 	timeSinceLastJump = delayInSecondsBetweenEachJump+1.0f;
 	collidingWithWorld = false;
@@ -540,6 +541,7 @@ Attribute_Player::Attribute_Player()
 	sprintTime = 2.0f;
 	canSprint = true;
 	sprintRechargeRate = 0.2f;
+	executing = false;
 
 	walkSpeed = 5.0f;
 	sprintSpeed = walkSpeed*2;
@@ -850,29 +852,29 @@ DataItemList* Attribute_WeaponStats::getDataList()
 {
 	DataItemList* list = new DataItemList();
 
-	list->add_Enum(currentAmmunitionType,								"ammunitionType");
-	list->add_Enum(currentFiringModeType,								"firingMode");
+	list->add_Enum(currentAmmunitionType,											"ammunitionType");
+	list->add_Enum(currentFiringModeType,											"firingMode");
 
-	list->add(ammunition[currentAmmunitionType].currentTotalNrOfShots,			"currentTotalNrOfShots");
-	list->add(firingMode[currentFiringModeType].clipSize,				"clipSize");
-	//list->add(firingMode[currentFiringModeType].nrOfShotsLeftInClip,	"nrOfShotsLeftInClip");
+	list->add(ammunition[currentAmmunitionType].currentTotalNrOfShots,				"currentTotalNrOfShots");
+	list->add(firingMode[currentFiringModeType].clipSize,							"clipSize");
+	//list->add(firingMode[currentFiringModeType].nrOfShotsLeftInClip,				"nrOfShotsLeftInClip");
 
-	list->add(firingMode[currentFiringModeType].reloadTime,				"reloadTime");
-	list->add(firingMode[currentFiringModeType].reloadTimeLeft,			"reloadTimeLeft");
-	list->add(firingMode[currentFiringModeType].cooldownBetweenShots,	"cooldownBetweenShots");
-	list->add(firingMode[currentFiringModeType].cooldownLeft,			"cooldownLeft");
+	list->add(firingMode[currentFiringModeType].reloadTime,							"reloadTime");
+	list->add(firingMode[currentFiringModeType].reloadTimeLeft,						"reloadTimeLeft");
+	list->add(firingMode[currentFiringModeType].cooldownBetweenShots,				"cooldownBetweenShots");
+	list->add(firingMode[currentFiringModeType].cooldownLeft,						"cooldownLeft");
 
-	list->add(ammunition[currentAmmunitionType].speed,					"speed");
-	list->add(ammunition[currentAmmunitionType].nrOfProjectilesPerSalvo,		"nrOfProjectilesPerSalvo");
-	list->add(ammunition[currentAmmunitionType].damage,					"damage");
+	list->add(ammunition[currentAmmunitionType].speed,								"speed");
+	list->add(ammunition[currentAmmunitionType].nrOfProjectilesPerSalvo,			"nrOfProjectilesPerSalvo");
+	list->add(ammunition[currentAmmunitionType].damage,								"damage");
 
 	list->add(ammunition[currentAmmunitionType].displacementSphereRadius,			"displacementSphereRadius");
 	list->add(ammunition[currentAmmunitionType].spreadConeRadius,					"spreadConeRadius");
 
-	list->add(ammunition[currentAmmunitionType].explosive,								"explosive");
-	list->add(ammunition[currentAmmunitionType].explosionSphereInitialRadius,			"explosionSphereInitialRadius");
-	list->add(ammunition[currentAmmunitionType].explosionSphereFinalRadius,				"explosionSphereFinalRadius");
-	list->add(ammunition[currentAmmunitionType].explosionSphereExplosionDuration,		"explosionSphereExplosionDuration");
+	list->add(ammunition[currentAmmunitionType].explosive,							"explosive");
+	list->add(ammunition[currentAmmunitionType].explosionSphereInitialRadius,		"explosionSphereInitialRadius");
+	list->add(ammunition[currentAmmunitionType].explosionSphereFinalRadius,			"explosionSphereFinalRadius");
+	list->add(ammunition[currentAmmunitionType].explosionSphereExplosionDuration,	"explosionSphereExplosionDuration");
 	
 	return list;
 }

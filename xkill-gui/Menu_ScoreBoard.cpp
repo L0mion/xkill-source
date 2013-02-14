@@ -73,6 +73,13 @@ void Menu_ScoreBoard::onUpdate(float delta)
 			itm->setText(2, QString::number(player->priority));
 			itm->setText(3, QString::number(player->cycleSteals));
 			itm->setText(4, QString::number(health->health));
+			
+			//Mark executing player as red in the scoreboard
+			if(player->executing)
+			{
+				 itm->setForeground(0 , QBrush(Qt::red));
+			}
+
 			int pos_x = position->position.x;
 			int pos_y = position->position.y;
 			int pos_z = position->position.z;

@@ -5,6 +5,7 @@
 class DLL_U Timer
 {
 public:
+	Timer();
 	Timer(float startTime);
 	~Timer();
 
@@ -12,10 +13,16 @@ public:
 
 	void setStartTime(float time);
 	void resetTimer();
+	void zeroTimer();
+	float getStartTime();
 	float getTimeLeft();
 	bool hasTimerExpired();
+
+	void setActive(bool active);
+	bool isActive();
 
 private:
 	float timeLeft_;
 	float startTime_;
+	bool isActive_;
 };

@@ -19,6 +19,12 @@ Menu_FiringMode::Menu_FiringMode(Ui::MainMenu* ui, QMainWindow* window)
 	window->connect(ui->horizontalSlider_Weapon_RateOfFire,				SIGNAL(sliderMoved(int)),		window,	SLOT(slot_firingModeUpdated()));
 	window->connect(ui->horizontalSlider_Weapon_ReloadTime,				SIGNAL(sliderMoved(int)),		window,	SLOT(slot_firingModeUpdated()));
 
+	window->connect(ui->horizontalSlider_Weapon_ClipSize,				SIGNAL(sliderReleased()),		window,	SLOT(slot_firingModeUpdated()));
+	window->connect(ui->horizontalSlider_Weapon_DamageModifier,			SIGNAL(sliderReleased()),		window,	SLOT(slot_firingModeUpdated()));
+	window->connect(ui->horizontalSlider_Weapon_ExplosionSphereModifier,SIGNAL(sliderReleased()),		window,	SLOT(slot_firingModeUpdated()));
+	window->connect(ui->horizontalSlider_Weapon_RateOfFire,				SIGNAL(sliderReleased()),		window,	SLOT(slot_firingModeUpdated()));
+	window->connect(ui->horizontalSlider_Weapon_ReloadTime,				SIGNAL(sliderReleased()),		window,	SLOT(slot_firingModeUpdated()));
+
 	window->connect(ui->tabWidget_2,									SIGNAL(currentChanged(int)),	window,	SLOT(slot_updateFiringModeMenu()));
 }
 

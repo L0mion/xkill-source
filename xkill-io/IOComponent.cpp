@@ -29,6 +29,8 @@ IOComponent::IOComponent()
 {
 	texNameToTexID = nullptr;
 	fbxLoader_ = nullptr;
+
+	SUBSCRIBE_TO_EVENT(this, EVENT_GET_FILE_LIST);
 }
 IOComponent::~IOComponent()
 {
@@ -481,4 +483,16 @@ void IOComponent::reset()
 
 void IOComponent::onEvent(Event* e)
 {
+	switch(e->getType())
+	{
+	case EVENT_GET_FILE_LIST:
+		{
+		Event_GetFileList* getFileListEvent = static_cast<Event_GetFileList*>(e);
+
+		getFileListEvent->filenames = getFileNames(LPCTSTR(getFileListEvent->filepathAndExtension.c_str()));
+		break;
+		}
+	default:
+		break;
+	}
 }

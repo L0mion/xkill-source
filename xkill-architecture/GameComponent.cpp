@@ -2,6 +2,7 @@
 #include <xkill-utilities/AttributeManager.h>
 #include <xkill-utilities/XKILL_Enums.h>
 #include <xkill-utilities/MutatorSettings.h>
+#include <xkill-utilities/Timer.h>
 #include <DirectXMath.h>
 
 #include <ctime>
@@ -214,9 +215,12 @@ void GameComponent::onUpdate(float delta)
 			// Update player aiming ray
 			//--------------------------------------------------------------------------------------
 			Entity* playerEntity = itrPlayer.owner();
-			std::vector<int> rayttributeId = playerEntity->getAttributes(ATTRIBUTE_RAY);
-			for(unsigned int i=0;i<rayttributeId.size();i++)
+			std::vector<int> rayAttributeId = playerEntity->getAttributes(ATTRIBUTE_RAY);
+			for(unsigned int i=0;i<rayAttributeId.size();i++)
 			{
+				//--------------------------------------------------------------------------------------
+				// Draw ray and hit points by putting it in an attribute for Bullet Physics to handle
+				//--------------------------------------------------------------------------------------
 				//Float3 lookAtFarPlaneHorizon = ptr_camera->ptr_spatial->rotation.quaternionToVector();
 				Float3 lookAtFarPlaneHorizon = ptr_camera->look;
 				lookAtFarPlaneHorizon.normalize();
@@ -224,14 +228,53 @@ void GameComponent::onUpdate(float delta)
 				lookAtFarPlaneHorizon.y = lookAtFarPlaneHorizon.y*ptr_camera->zFar;
 				lookAtFarPlaneHorizon.z = lookAtFarPlaneHorizon.z*ptr_camera->zFar;
 
-				AttributePtr<Attribute_Ray> ray = itrRay.at(rayttributeId.at(i));
+				AttributePtr<Attribute_Ray> ray = itrRay.at(rayAttributeId.at(i));
 				ray->from = ptr_camera->ptr_spatial->ptr_position->position;
 				//ray->from = ptr_player->ptr_weaponFireLocation_spatial->ptr_position->position;
 				ray->to = lookAtFarPlaneHorizon + ray->from;
 
-				//Event_GetPhysicsObjectHitByRay ev(ray->from, ray->to);
-				//SEND_EVENT(&ev);
-				//DEBUGPRINT("ev.closest_entityId: " << ev.closest_entityId);
+				//--------------------------------------------------------------------------------------
+				// Do ray test directly by sending an "Event_GetEntityIdOfPhysicsObjectHitByRay" event. The result is stored in the event.
+				//--------------------------------------------------------------------------------------
+				std::vector<int> rayCastingPlayerAttributeId = playerEntity->getAttributes(ATTRIBUTE_PLAYER);
+				for(unsigned int i=0;i<rayCastingPlayerAttributeId.size();i++)
+				{
+					AttributePtr<Attribute_Player> rayCastingPlayerAttribute = itrPlayer.at(rayCastingPlayerAttributeId.at(i));
+					
+					if(rayCastingPlayerAttribute->executing) //shoot execution laser ray
+					{
+						short collisionFilterMask = XKILL_Enums::PhysicsAttributeType::PLAYER | XKILL_Enums::PhysicsAttributeType::WORLD;
+						Event_GetEntityIdOfPhysicsObjectHitByRay ev(ray->from, ray->to, collisionFilterMask);
+						SEND_EVENT(&ev);
+				
+						Entity* entityHitByRay = &allEntity->at(ev.closest_entityId);
+						std::vector<int> playerHitByRayAttributeId = entityHitByRay->getAttributes(ATTRIBUTE_PLAYER);
+						for(unsigned int j=0;j<playerHitByRayAttributeId.size();j++)
+						{
+							//Player hit by his own ray
+							if(ev.closest_entityId == playerEntity->getID())
+							{
+								SHOW_MESSAGEBOX("Player hit by ray casted by himself. The current code assumes that this is unwanted behavior, therefore this message box is now brought to you");
+							}
+							else if(entityHitByRay->hasAttribute(ATTRIBUTE_PLAYER))
+							{
+								DEBUGPRINT("Player with attribute id " << playerHitByRayAttributeId.at(j) << "hit by execution laser");
+						
+								SEND_EVENT(&Event_PlayerDeath(playerHitByRayAttributeId.at(j)));
+
+								std::vector<int> positionID = entityHitByRay->getAttributes(ATTRIBUTE_POSITION);
+								for(unsigned int i = 0; i < positionID.size(); i++)
+								{
+									AttributePtr<Attribute_Position> ptr_position = itrPosition.at(positionID[i]);
+									bool use3DAudio = true;
+									SEND_EVENT(&Event_PlaySound(Event_PlaySound::SOUND_DEATH, ptr_position->position, use3DAudio));
+								}
+
+								rayCastingPlayerAttribute->priority++;
+							}
+						}
+					}
+				}
 			}
 			
 			//--------------------------------------------------------------------------------------
@@ -262,13 +305,13 @@ void GameComponent::onUpdate(float delta)
 			//--------------------------------------------------------------------------------------
 			// Handle dead player
 			//--------------------------------------------------------------------------------------
-			if(ptr_player->currentRespawnDelay > 0.0f)
+			if(!ptr_player->respawnTimer.hasTimerExpired())
 			{
-				ptr_player->currentRespawnDelay -= delta;
+				ptr_player->respawnTimer.update(delta);
 
 				float alive = 3.14f/4.0f;
 				float dead = 3.14f/3.0f;
-				float slerp = (1 - ptr_player->currentRespawnDelay/ptr_player->respawnDelay);
+				float slerp = (1 - ptr_player->respawnTimer.getTimeLeft()/ptr_player->respawnTimer.getStartTime());
 				float fov = slerp*dead + (1-slerp)*alive;
 				ptr_player->ptr_camera->fieldOfView = fov;
 			}
@@ -320,7 +363,7 @@ void GameComponent::onUpdate(float delta)
 				}
 
 				ptr_player->ptr_camera->fieldOfView =3.14f/4.0f;
-				ptr_player->currentRespawnDelay = ptr_player->respawnDelay;
+				ptr_player->respawnTimer.resetTimer();
 				ptr_player->detectedAsDead = false;
 				SEND_EVENT(&Event_PlaySound(Event_PlaySound::SOUND_RESPAWN, ptr_position->position, true));
 			}
@@ -334,7 +377,7 @@ void GameComponent::onUpdate(float delta)
 			ptr_health->health = 0.0f;
 			ptr_input->killPlayer = false;
 			ptr_player->detectedAsDead = true;
-			ptr_player->currentRespawnDelay = 0.0f;
+			ptr_player->respawnTimer.zeroTimer();
 		}
 	}
 
@@ -549,26 +592,35 @@ void collision_applyDamage(Entity* entity1, Entity* entity2)
 					// If a player was killed by the collision, give priority (score) to the player that created the DamageAttribute
 					if(health->health <= 0)
 					{
-						Entity* creatorOfProjectilePlayerEntity = itr_entity->at(damage->owner_entityID);
-						std::vector<int> playerId = creatorOfProjectilePlayerEntity->getAttributes(ATTRIBUTE_PLAYER);
-						for(unsigned k=0;k<playerId.size();k++)
-						{
-							AttributePtr<Attribute_Player> ptr_player = itrPlayer.at(playerId.at(k));
-							if(entity1->getID() != damage->owner_entityID) //Award player
-							{
-								ptr_player->priority += 10;
-							}
-							else //Punish player for blowing himself up
-							{
-								ptr_player->priority--;
-							}
-							DEBUGPRINT("Player with entity id " << damage->owner_entityID << " killed player with entity id " << entity1->getID());
-						}
 						Entity* playerThatDied = itr_entity->at(itrHealth.ownerIdAt(healthId[j]));
-						playerId = playerThatDied->getAttributes(ATTRIBUTE_PLAYER);
-						for(unsigned int k = 0; k < playerId.size(); k++)
+						std::vector<int> playerThatDiedId = playerThatDied->getAttributes(ATTRIBUTE_PLAYER);
+
+						Entity* creatorOfProjectilePlayerEntity = itr_entity->at(damage->owner_entityID);
+						std::vector<int> creatorOfProjectilePlayerId = creatorOfProjectilePlayerEntity->getAttributes(ATTRIBUTE_PLAYER);
+						for(unsigned k=0;k<creatorOfProjectilePlayerId.size();k++)
 						{
-							SEND_EVENT(&Event_PlayerDeath(playerId[k]));
+							for(unsigned l=0;l<playerThatDiedId.size();l++)
+							{
+								AttributePtr<Attribute_Player> playerThatDied_ptr_player = itrPlayer.at(playerThatDiedId.at(l));
+								if(!playerThatDied_ptr_player->detectedAsDead) //Prevent player from receiving priority based on number of fatal hits
+								{
+									AttributePtr<Attribute_Player> creatorOfProjectile_ptr_player = itrPlayer.at(creatorOfProjectilePlayerId.at(k));
+									if(entity1->getID() != damage->owner_entityID) //Award player
+									{
+										creatorOfProjectile_ptr_player->priority++;
+									}
+									else //Punish player for blowing himself up
+									{
+										creatorOfProjectile_ptr_player->priority--;
+									}
+									DEBUGPRINT("Player with entity id " << damage->owner_entityID << " killed player with entity id " << entity1->getID());
+								}
+							}
+						}
+
+						for(unsigned int k = 0; k < playerThatDiedId.size(); k++)
+						{
+							SEND_EVENT(&Event_PlayerDeath(playerThatDiedId[k]));
 							SEND_EVENT(&Event_PlaySound(Event_PlaySound::SOUND_DEATH, position, use3DAudio));
 						}
 					}
@@ -774,6 +826,36 @@ void collision_playerVsWorld(Entity* entity1, Entity* entity2)
 	}
 }
 
+void collision_playerVsExplosionSphere(Entity* entity1, Entity* entity2)
+{
+	if(entity1->hasAttribute(ATTRIBUTE_EXPLOSIONSPHERE))
+	{
+		if(entity2->hasAttribute(ATTRIBUTE_PLAYER))
+		{
+			std::vector<int> explosionSphereID = entity1->getAttributes(ATTRIBUTE_EXPLOSIONSPHERE);
+			for(unsigned int i = 0; i < explosionSphereID.size(); i++)
+			{
+				AttributePtr<Attribute_ExplosionSphere> ptr_explosionSphere = itrExplosionSphere.at(explosionSphereID.at(i));
+
+				std::vector<int> playerID = entity2->getAttributes(ATTRIBUTE_PLAYER);
+				for(unsigned int j = 0; j < explosionSphereID.size(); j++)
+				{
+					AttributePtr<Attribute_Player> ptr_player = itrPlayer.at(playerID.at(j));
+
+					Float3 playerPosition = ptr_player->ptr_render->ptr_spatial->ptr_position->position;
+					Float3 explosionSpherePosition = ptr_explosionSphere->ptr_physics->ptr_spatial->ptr_position->position;
+
+					Float3 impulseVector = playerPosition - explosionSpherePosition;
+
+					impulseVector = impulseVector * 3.0f;
+
+					SEND_EVENT(&Event_ModifyPhysicsObject(XKILL_Enums::ModifyPhysicsObjectData::GIVE_IMPULSE, static_cast<void*>(&impulseVector), ptr_player->ptr_input->ptr_physics));
+				}
+			}
+		}
+	}
+}
+
 void GameComponent::event_PhysicsAttributesColliding(Event_PhysicsAttributesColliding* e)
 {
 	// Fetch Entities so we can inspect their attributes
@@ -787,6 +869,7 @@ void GameComponent::event_PhysicsAttributesColliding(Event_PhysicsAttributesColl
 	collision_projectile(entity1, entity2);
 	collision_pickupable(entity1, entity2);
 	collision_playerVsWorld(entity1, entity2);	
+	collision_playerVsExplosionSphere(entity1, entity2);
 }
 
 void GameComponent::event_EndDeathmatch(Event_EndDeathmatch* e)
@@ -967,6 +1050,7 @@ void GameComponent::event_StartDeathmatch( Event_StartDeathmatch* e )
 		AttributePtr<Attribute_Player>			ptr_player		=	itrPlayer		.getNext();
 		AttributePtr<Attribute_WeaponStats>		ptr_weaponStats	=	ptr_player	->	ptr_weaponStats	;
 		switchFiringMode(ptr_weaponStats);
+		SEND_EVENT(&Event_HackActivated(1000.0f, XKILL_Enums::HackType::JETHACK, ptr_player));
 	}
 
 	//Create mesh for debugging fbx-loading.
@@ -989,7 +1073,7 @@ void GameComponent::event_TransferEventsToGame(Event_TransferEventsToGame* e)
 
 void GameComponent::event_PlayerDeath(Event_PlayerDeath* e)
 {
-	AttributePtr<Attribute_Player> ptr_player = itrPlayer.at(e->playerIndex);
+	AttributePtr<Attribute_Player> ptr_player = itrPlayer.at(e->playerAttributeIndex);
 	AttributePtr<Attribute_Physics> ptr_physics = ptr_player->ptr_input->ptr_physics;
 	AttributePtr<Attribute_Health> ptr_health = ptr_player->ptr_health;
 	ptr_health->health = 0;
@@ -1002,7 +1086,7 @@ void GameComponent::event_PlayerDeath(Event_PlayerDeath* e)
 	ptr_physics->meshID = ptr_player->meshID_whenDead;
 	ptr_physics->reloadDataIntoBulletPhysics = true;
 
-	ptr_player->currentRespawnDelay = ptr_player->respawnDelay;
+	ptr_player->respawnTimer.resetTimer();
 	ptr_player->detectedAsDead = true;
 }
 
