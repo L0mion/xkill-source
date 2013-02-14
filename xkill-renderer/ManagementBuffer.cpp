@@ -1,8 +1,11 @@
+#include <cassert>
+
 #include "Winfo.h"
-#include "gBuffer.h"
+#include "Buffer_SrvRtv.h"
+#include "Buffer_SrvRtvUav.h"
 #include "renderingUtilities.h"
 
-#include "ManagementGBuffer.h"
+#include "ManagementBuffer.h"
 
 DXGI_FORMAT getFormat(GBUFFER_FORMAT format)
 {
@@ -24,25 +27,34 @@ DXGI_FORMAT getFormat(GBUFFER_FORMAT format)
 	return dxgiFormat;
 }
 
-ManagementGBuffer::ManagementGBuffer(Winfo* winfo)
+ManagementBuffer::ManagementBuffer(Winfo* winfo)
 {
 	winfo_ = winfo;
 
 	for(unsigned int i = 0; i < GBUFFERID_NUM_BUFFERS; i++)
 		gBuffers_[i] = nullptr;
+
+	glowHigh_	= nullptr;
+	glowLow_	= nullptr;
 }
-ManagementGBuffer::~ManagementGBuffer()
+ManagementBuffer::~ManagementBuffer()
 {
 	for(unsigned int i = 0; i < GBUFFERID_NUM_BUFFERS; i++)
 		SAFE_DELETE(gBuffers_[i]);
+
+	SAFE_DELETE(glowHigh_);
+	SAFE_DELETE(glowLow_);
 }
 
-void ManagementGBuffer::reset()
+void ManagementBuffer::reset()
 {
 	for(unsigned int i = 0; i < GBUFFERID_NUM_BUFFERS; i++)
 		SAFE_RESET(gBuffers_[i]);
+
+	SAFE_RESET(glowHigh_);
+	SAFE_RESET(glowLow_);
 }
-HRESULT ManagementGBuffer::resize(ID3D11Device* device)
+HRESULT ManagementBuffer::resize(ID3D11Device* device)
 {
 	HRESULT hr = S_OK;
 
@@ -54,82 +66,143 @@ HRESULT ManagementGBuffer::resize(ID3D11Device* device)
 			winfo_->getScreenHeight());
 	}
 
+	if(SUCCEEDED(hr))
+	{
+		hr = glowHigh_->resize(
+			device,
+			winfo_->getScreenWidth(),
+			winfo_->getScreenHeight());
+	}
+	if(SUCCEEDED(hr))
+	{
+		hr = glowLow_->resize(
+			device,
+			glowLow_->getTexWidth(),
+			glowLow_->getTexHeight()); //Maintain given resolution.
+	}
+
 	return hr;
 }
 
-HRESULT ManagementGBuffer::init(ID3D11Device* device)
+HRESULT ManagementBuffer::init(ID3D11Device* device)
 {
 	HRESULT hr = S_OK;
 
+	//Init g-buffers
 	hr = initAlbedo(device);
 	if(SUCCEEDED(hr))
 		hr = initNormal(device);
 	if(SUCCEEDED(hr))
 		hr = initMaterial(device);
 
+	if(SUCCEEDED(hr))
+		hr = initGlow(device);
+
 	return hr;
 }
-HRESULT ManagementGBuffer::initAlbedo(ID3D11Device* device)
+HRESULT ManagementBuffer::initAlbedo(ID3D11Device* device)
 {
 	HRESULT hr = S_OK;
 
-	GBuffer* gBuffer = nullptr;
-	gBuffer = new GBuffer(
+	Buffer_SrvRtv* gBuffer = nullptr;
+	gBuffer = new Buffer_SrvRtv(
 		winfo_->getScreenWidth(),
 		winfo_->getScreenHeight(),
 		MULTISAMPLES_GBUFFERS, 
-		getFormat(GBUFFER_FORMAT_ALBEDO));
+		getFormat(GBUFFER_FORMAT_ALBEDO),
+		false);
 	hr = gBuffer->init(device);
 
 	gBuffers_[GBUFFERID_ALBEDO] = gBuffer;
 
 	return hr;
 }
-HRESULT ManagementGBuffer::initNormal(ID3D11Device* device)
+HRESULT ManagementBuffer::initNormal(ID3D11Device* device)
 {
 	HRESULT hr = S_OK;
 
-	GBuffer* gBuffer = nullptr;
-	gBuffer = new GBuffer(
+	Buffer_SrvRtv* gBuffer = nullptr;
+	gBuffer = new Buffer_SrvRtv(
 		winfo_->getScreenWidth(), 
 		winfo_->getScreenHeight(), 
 		MULTISAMPLES_GBUFFERS, 
-		getFormat(GBUFFER_FORMAT_NORMAL));
+		getFormat(GBUFFER_FORMAT_NORMAL),
+		false);
 	hr = gBuffer->init(device);
 
 	gBuffers_[GBUFFERID_NORMAL] = gBuffer;
 
 	return hr;
 }
-HRESULT ManagementGBuffer::initMaterial(ID3D11Device* device)
+HRESULT ManagementBuffer::initMaterial(ID3D11Device* device)
 {
 	HRESULT hr = S_OK;
 
-	GBuffer* gBuffer = nullptr;
-	gBuffer = new GBuffer(
+	Buffer_SrvRtv* gBuffer = nullptr;
+	gBuffer = new Buffer_SrvRtv(
 		winfo_->getScreenWidth(), 
 		winfo_->getScreenHeight(), 
 		MULTISAMPLES_GBUFFERS, 
-		getFormat(GBUFFER_FORMAT_MATERIAL));
+		getFormat(GBUFFER_FORMAT_MATERIAL),
+		false);
 	hr = gBuffer->init(device);
 	
 	gBuffers_[GBUFFERID_MATERIAL] = gBuffer;
 
 	return hr;
 }
-
-void ManagementGBuffer::clearGBuffers(ID3D11DeviceContext* devcon)
+HRESULT ManagementBuffer::initGlow(ID3D11Device* device)
 {
+	HRESULT hr = S_OK;
+
+	//Init GlowBufLow
+	glowHigh_ = new Buffer_SrvRtvUav(
+		winfo_->getScreenWidth(), 
+		winfo_->getScreenHeight(),
+		MULTISAMPLES_GBUFFERS, //?
+		getFormat(GBUFFER_FORMAT_GLOW_HIGH),
+		false);
+	hr = glowHigh_->init(device);
+
+	//Init GlowBufHigh
+	unsigned int width, height;
+	switch(GLOWBUFLOW_GLOW_BUFFER_DIMENSIONS)
+	{
+	case HALF_SCREEN_RES:
+		width = winfo_->getScreenWidth() / 2;
+		height = winfo_->getScreenHeight() / 2;
+		break;
+	default:
+		assert(false);
+	}
+
+	glowLow_ = new Buffer_SrvRtvUav(
+		width, 
+		height,
+		MULTISAMPLES_GBUFFERS, //?
+		getFormat(GBUFFER_FORMAT_GLOW_LOW),
+		false);
+	hr = glowLow_->init(device);
+
+	return hr;
+}
+
+void ManagementBuffer::clearBuffers(ID3D11DeviceContext* devcon)
+{
+	//Clear all G-Buffers.
 	ID3D11RenderTargetView* renderTargets[GBUFFERID_NUM_BUFFERS];
-	for(int i=0; i<GBUFFERID_NUM_BUFFERS; i++)
+	for(int i = 0; i < GBUFFERID_NUM_BUFFERS; i++)
 		renderTargets[i] = gBuffers_[i]->getRTV();
 	
-	//clear all gbuffers in black
 	devcon->ClearRenderTargetView(renderTargets[GBUFFERID_ALBEDO],		CLEARCOLOR_BLACK);
 	devcon->ClearRenderTargetView(renderTargets[GBUFFERID_NORMAL],		CLEARCOLOR_BLACK);
 	devcon->ClearRenderTargetView(renderTargets[GBUFFERID_MATERIAL],	CLEARCOLOR_BLACK);
+
+	//Clear glow-buffers.
+	devcon->ClearRenderTargetView(glowHigh_->getRTV(), CLEARCOLOR_BLACK);
+	devcon->ClearRenderTargetView(glowLow_->getRTV(), CLEARCOLOR_BLACK);
 }
-void ManagementGBuffer::setGBuffersAndDepthBuffer(
+void ManagementBuffer::setBuffersAndDepthBufferAsRenderTargets(
 	ID3D11DeviceContext*	devcon, 
 	ID3D11DepthStencilView*	depthBuffer)
 {
@@ -142,12 +215,9 @@ void ManagementGBuffer::setGBuffersAndDepthBuffer(
 		renderTargets, 
 		depthBuffer);
 }
-void ManagementGBuffer::unsetGBuffersAndDepthBufferAsRenderTargets(ID3D11DeviceContext* devcon)
+void ManagementBuffer::unsetBuffersAndDepthBufferAsRenderTargets(ID3D11DeviceContext* devcon)
 {
 	ID3D11RenderTargetView* renderTargets[GBUFFERID_NUM_BUFFERS];
-	for(int i = 0; i < GBUFFERID_NUM_BUFFERS; i++)
-		renderTargets[i] = gBuffers_[i]->getRTV();
-
 	for(int i = 0; i < GBUFFERID_NUM_BUFFERS; i++)
 		renderTargets[i] = nullptr;
 
@@ -156,10 +226,10 @@ void ManagementGBuffer::unsetGBuffersAndDepthBufferAsRenderTargets(ID3D11DeviceC
 		renderTargets, 
 		NULL);
 }
-void ManagementGBuffer::setGBuffersAsCSShaderResources(ID3D11DeviceContext* devcon)
+void ManagementBuffer::setBuffersAsCSShaderResources(ID3D11DeviceContext* devcon)
 {
 	ID3D11ShaderResourceView* resourceViews[GBUFFERID_NUM_BUFFERS];
-	for(int i=0; i<GBUFFERID_NUM_BUFFERS; i++)
+	for(int i = 0; i < GBUFFERID_NUM_BUFFERS; i++)
 		resourceViews[i] = gBuffers_[i]->getSRV();
 
 	devcon->CSSetShaderResources(
@@ -167,11 +237,14 @@ void ManagementGBuffer::setGBuffersAsCSShaderResources(ID3D11DeviceContext* devc
 		GBUFFERID_NUM_BUFFERS, 
 		resourceViews);
 }
-void ManagementGBuffer::unsetGBuffersAsCSShaderResources(ID3D11DeviceContext* devcon)
+void ManagementBuffer::unsetBuffersAsCSShaderResources(ID3D11DeviceContext* devcon)
 {
 	ID3D11ShaderResourceView* resourceViews[GBUFFERID_NUM_BUFFERS];
 	for(int i = 0; i < GBUFFERID_NUM_BUFFERS; i++)
 		resourceViews[i] = nullptr;
 
-	devcon->CSSetShaderResources(0, GBUFFERID_NUM_BUFFERS, resourceViews);
+	devcon->CSSetShaderResources(
+		0, 
+		GBUFFERID_NUM_BUFFERS, 
+		resourceViews);
 }

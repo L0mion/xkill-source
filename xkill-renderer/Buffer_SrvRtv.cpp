@@ -1,11 +1,12 @@
-#include "gBuffer.h"
+#include "Buffer_SrvRtv.h"
 #include "renderingUtilities.h"
 
-GBuffer::GBuffer(
+Buffer_SrvRtv::Buffer_SrvRtv(
 	unsigned int	texWidth,
 	unsigned int	texHeight,
 	unsigned int	texAliasing,
-	DXGI_FORMAT		texFormat)
+	DXGI_FORMAT		texFormat,
+	bool			maintainGivenResolution)
 {
 	this->texWidth_		= texWidth;
 	this->texHeight_	= texHeight;
@@ -15,22 +16,24 @@ GBuffer::GBuffer(
 	tex_ = nullptr;
 	srv_ = nullptr;
 	rtv_ = nullptr;
+
+	maintainGivenResolution_ = maintainGivenResolution;
 }
-GBuffer::~GBuffer()
+Buffer_SrvRtv::~Buffer_SrvRtv()
 {
 	SAFE_RELEASE(tex_);
 	SAFE_RELEASE(srv_);
 	SAFE_RELEASE(rtv_);
 }
 
-void GBuffer::reset()
+void Buffer_SrvRtv::reset()
 {
 	SAFE_RELEASE(tex_);
 	SAFE_RELEASE(srv_);
 	SAFE_RELEASE(rtv_);
 }
 
-HRESULT GBuffer::resize(ID3D11Device* device, unsigned int texWidth, unsigned int texHeight)
+HRESULT Buffer_SrvRtv::resize(ID3D11Device* device, unsigned int texWidth, unsigned int texHeight)
 {
 	HRESULT hr = S_OK;
 	
@@ -43,7 +46,7 @@ HRESULT GBuffer::resize(ID3D11Device* device, unsigned int texWidth, unsigned in
 	return hr;
 }
 
-HRESULT GBuffer::init(ID3D11Device* device)
+HRESULT Buffer_SrvRtv::init(ID3D11Device* device)
 {
 	HRESULT hr = S_OK;
 
@@ -55,7 +58,7 @@ HRESULT GBuffer::init(ID3D11Device* device)
 
 	return hr;
 }
-HRESULT GBuffer::initTex(ID3D11Device* device)
+HRESULT Buffer_SrvRtv::initTex(ID3D11Device* device)
 {
 	HRESULT hr = S_OK;
 
@@ -68,13 +71,15 @@ HRESULT GBuffer::initTex(ID3D11Device* device)
 	descTex.Format		= texFormat_;
 	descTex.SampleDesc.Count = texAliasing_;
 	descTex.Usage		= D3D11_USAGE_DEFAULT;
-	descTex.BindFlags	= D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE;
+	descTex.BindFlags	= 
+		D3D11_BIND_RENDER_TARGET	| 
+		D3D11_BIND_SHADER_RESOURCE;
 
 	hr = device->CreateTexture2D(&descTex, NULL, &tex_);
 
 	return hr;
 }
-HRESULT GBuffer::initSRV(ID3D11Device* device)
+HRESULT Buffer_SrvRtv::initSRV(ID3D11Device* device)
 {
 	HRESULT hr = S_OK;
 	
@@ -89,7 +94,7 @@ HRESULT GBuffer::initSRV(ID3D11Device* device)
 
 	return hr;
 }
-HRESULT GBuffer::initRTV(ID3D11Device* device)
+HRESULT Buffer_SrvRtv::initRTV(ID3D11Device* device)
 {
 	HRESULT hr = S_OK;
 
@@ -103,20 +108,25 @@ HRESULT GBuffer::initRTV(ID3D11Device* device)
 	return hr;
 }
 
-ID3D11ShaderResourceView* GBuffer::getSRV()
+ID3D11ShaderResourceView* Buffer_SrvRtv::getSRV()
 {
 	return srv_;
 }
-ID3D11RenderTargetView* GBuffer::getRTV()
+ID3D11RenderTargetView* Buffer_SrvRtv::getRTV()
 {
 	return rtv_;
 }
 
-unsigned int GBuffer::getTexWidth() const
+unsigned int Buffer_SrvRtv::getTexWidth() const
 {
 	return texWidth_;
 }
-unsigned int GBuffer::getTexHeight() const
+unsigned int Buffer_SrvRtv::getTexHeight() const
 {
 	return texHeight_;
+}
+
+bool Buffer_SrvRtv::MaintainGivenResolution() const
+{
+	return maintainGivenResolution_;
 }

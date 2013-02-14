@@ -9,7 +9,7 @@
 #include "ManagementTex.h"
 #include "ManagementSS.h"
 #include "ManagementRS.h"
-#include "ManagementGBuffer.h"
+#include "ManagementBuffer.h"
 #include "ManagementDebug.h"
 #include "ManagementMath.h"
 #include "ManagementInstance.h"
@@ -17,7 +17,7 @@
 
 #include "Winfo.h"
 #include "ModelD3D.h"
-#include "gBuffer.h"
+#include "Buffer_SrvRtv.h"
 #include "SubsetD3D.h"
 #include "DebugShapeD3D.h"
 #include "VB.h"
@@ -317,7 +317,7 @@ HRESULT Renderer::initManagementGBuffer()
 {
 	HRESULT hr = S_OK;
 
-	managementGBuffer_ = new ManagementGBuffer(winfo_);
+	managementGBuffer_ = new ManagementBuffer(winfo_);
 	hr = managementGBuffer_->init(managementD3D_->getDevice());
 
 	return hr;
@@ -363,7 +363,7 @@ void Renderer::render()
 	ID3D11DeviceContext* devcon = managementD3D_->getDeviceContext();
 
 	//Clear g-buffers and depth buffer.
-	managementGBuffer_->clearGBuffers(devcon);
+	managementGBuffer_->clearBuffers(devcon);
 	managementD3D_->clearDepthBuffer();
 	managementD3D_->clearBackBuffer();
 
@@ -380,9 +380,9 @@ void Renderer::render()
 		managementLight_->getLightSpotCurCount());
 
 	AttributePtr<Attribute_SplitScreen>	ptr_splitScreen;
-	AttributePtr<Attribute_Camera>			ptr_camera; 
+	AttributePtr<Attribute_Camera>		ptr_camera; 
 	AttributePtr<Attribute_Spatial>		ptr_spatial;
-	AttributePtr<Attribute_Position>		ptr_position;
+	AttributePtr<Attribute_Position>	ptr_position;
 
 	ViewportData vpData;
 
@@ -436,7 +436,7 @@ void Renderer::renderViewportToGBuffer(ViewportData& vpData)
 	managementSS_->setSS(devcon, TypeFX_PS, 0, SS_ID_DEFAULT);
 	managementRS_->setRS(devcon, RS_ID_DEFAULT);
 
-	managementGBuffer_->setGBuffersAndDepthBuffer(devcon, managementD3D_->getDepthBuffer());
+	managementGBuffer_->setBuffersAndDepthBufferAsRenderTargets(devcon, managementD3D_->getDepthBuffer());
 
 	//Update per-viewport constant buffer.
 	managementCB_->setCB(CB_TYPE_CAMERA, TypeFX_VS, CB_REGISTER_CAMERA, managementD3D_->getDeviceContext());
@@ -480,7 +480,7 @@ void Renderer::renderViewportToGBuffer(ViewportData& vpData)
 	}
 	
 	//Unset and clean.
-	managementGBuffer_->unsetGBuffersAndDepthBufferAsRenderTargets(devcon);
+	managementGBuffer_->unsetBuffersAndDepthBufferAsRenderTargets(devcon);
 	managementFX_->unsetAll(devcon);
 	managementFX_->unsetLayout(devcon);
 	//managementSS_->unsetSS(devcon, TypeFX_PS, 0);
@@ -514,7 +514,7 @@ void Renderer::renderViewportToBackBuffer(ViewportData& vpData)
 		vpData.viewportHeight);
 
 	//Connect g-buffers to shader.
-	managementGBuffer_->setGBuffersAsCSShaderResources(devcon);
+	managementGBuffer_->setBuffersAsCSShaderResources(devcon);
 
 	//Set lights.
 	managementLight_->setLightSRVCS(devcon, LIGHTBUFFERTYPE_DIR,		LIGHT_SRV_REGISTER_DIR);
@@ -540,7 +540,7 @@ void Renderer::renderViewportToBackBuffer(ViewportData& vpData)
 
 	managementD3D_->unsetUAVBackBufferCS();
 	managementD3D_->unsetDepthBufferSRV(GBUFFER_SHADER_REGISTER_DEPTH);
-	managementGBuffer_->unsetGBuffersAsCSShaderResources(devcon);
+	managementGBuffer_->unsetBuffersAsCSShaderResources(devcon);
 
 	//devcon->CSSetSamplers(0, 0, nullptr); //move me into managementSS
 }

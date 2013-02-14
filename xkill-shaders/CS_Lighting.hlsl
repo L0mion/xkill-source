@@ -63,7 +63,7 @@ void CS_Lighting(
 		(float)(threadIDDispatch.y + viewportTopY) / (float)screenHeight);
 	float4	gAlbedo		= gBufferAlbedo		.SampleLevel(ss, texCoord, 0);
 	float4	gNormal		= gBufferNormal		.SampleLevel(ss, texCoord, 0);
-	float4	gMaterial	= gBufferMaterial	.SampleLevel(ss, texCoord, 0); //At the moment, world space position is stored in Material-buffer.
+	float4	gMaterial	= gBufferMaterial	.SampleLevel(ss, texCoord, 0);
 	float	gDepth		= gBufferDepth.SampleLevel(ss, texCoord, 0).x; 
 	
 	//Reconstruct view-space position from depth. Observe the normalized coordinates sent to method.
@@ -121,7 +121,7 @@ void CS_Lighting(
 	if(!validPixel)
 		return;
 	
-	float3 normal = gNormal.xyz; //UtilDecodeSphereMap();
+	float3 normal = gNormal.xyz;
 	normal.x *= 2.0f; normal.x -= 1.0f;
 	normal.y *= 2.0f; normal.y -= 1.0f;
 	normal.z *= 2.0f; normal.z -= 1.0f;
@@ -134,7 +134,7 @@ void CS_Lighting(
 	{
 		/*Ambient*/		gAlbedo,
 		/*Diffuse*/		gAlbedo,
-		/*Specular*/	float4(0.3f, 0.3f, 0.3f, 1.0f)
+		/*Specular*/	gMaterial,
 	};
 	
 	//Do lighting
@@ -145,7 +145,7 @@ void CS_Lighting(
 	for(i = 0; i < numLightsDir; i++)
 	{
 		LightDescDir descDir = lightsDir[i];
-		descDir.direction = mul(float4(descDir.direction, 0.0f), view);
+		descDir.direction = mul(float4(descDir.direction, 0.0f), view).xyz;
 		LightDir(
 			toEyeV,
 			descDir,
@@ -179,5 +179,6 @@ void CS_Lighting(
 	//	Diffuse.g += 0.1;
 	//}
 
-	output[uint2(threadIDDispatch.x + viewportTopX, threadIDDispatch.y + viewportTopY)] = Ambient + Diffuse + Specular;
+	output[uint2(threadIDDispatch.x + viewportTopX, threadIDDispatch.y + viewportTopY)] = gAlbedo;//Ambient + Diffuse + Specular;
+	//glowHigh.SampleLevel(ss, texCoord, 0); //
 }

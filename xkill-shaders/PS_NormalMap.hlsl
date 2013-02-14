@@ -1,28 +1,9 @@
 #ifndef XKILL_RENDERER_PS_NORMALMAP_HLSL
 #define XKILL_RENDERER_PS_NORMALMAP_HLSL
 
+#include "UtilNormalMap.hlsl"
 #include "constantBuffers.hlsl"
 #include "VSOut.hlsl"
-
-float3 NormalSampleToWorldSpace(
-	float3 normalMapSample,
-	float3 unitNormalW,
-	float3 tangentW)
-{
-	//Uncompress each component from [0, 1] to [-1, 1].
-	float3 normalT = 2.0f * normalMapSample - 1.0f;
-	
-		//Build orthonormal basis.
-		float3 N = unitNormalW;
-		float3 T = normalize(tangentW - dot(tangentW, N) * N);
-		float3 B = cross(N, T);
-
-		float3x3 TBN = float3x3(T, B, N);
-
-		//Transform from tangent space to world space.
-		float3 bumpedNormalW = mul(normalT, TBN);
-		return bumpedNormalW;
-}
 
 struct PSOut
 {
@@ -40,21 +21,35 @@ PSOut PS_NormalMap(VSOutPosNormWTexTanW pIn)
 {
 	PSOut output;
 
-	float3 bumpedNormalW = NormalSampleToWorldSpace(
-		texNormal.SampleLevel(ss, pIn.texcoord, 0).xyz,
+	pIn.texcoord.y = 1 - pIn.texcoord.y; //wat
+
+	//Sample textures
+	float4 normalSample	= texNormal.SampleLevel(ss, pIn.texcoord, 0);
+	float4 albedoSample	= texAlbedo.SampleLevel(ss, pIn.texcoord, 0);
+
+	//Fill normal RTV
+	float3 normal = NormalSampleToWorldSpace(
+		normalSample.xyz,
 		normalize(pIn.normalW),
 		pIn.tangentW);
-
-	float3 normal = bumpedNormalW; //normalize(pIn.normalW);
 	normal.x = normal.x * 0.5f + 0.5f;
 	normal.y = normal.y * 0.5f + 0.5f;
 	normal.z = normal.z * 0.5f + 0.5f;
 	output.normal = float4(normal, 0.0f);
 
-	pIn.texcoord.y		= 1 - pIn.texcoord.y;
-	output.albedo		= texAlbedo.SampleLevel(ss, pIn.texcoord, 0);
+	//Fill albedo RTV
+	output.albedo = float4(albedoSample.xyz, 0.0f);
 	
-	output.material		= float4(1.0f, 1.0f, 1.0f, 1.0f);
+	//Fill material RTV
+	output.material	= float4(specularTerm, 0.0f);
+
+	//Fill glow RTV
+	//output.glowHigh = float4(0.0f, 0.0f, 0.0f, 0.0f);
+	//if(normalSample.w > 0.0f)
+	//{
+	//	float3 glowColor = albedoSample.xyz * normalSample.w;
+	//	output.glowHigh = float4(glowColor, 1.0f);
+	//}
 
 	return output;
 }
