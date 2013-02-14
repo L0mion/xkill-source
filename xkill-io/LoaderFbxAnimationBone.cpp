@@ -101,6 +101,20 @@ float LoaderFbxAnimationBone::getAnimationEndTime(FbxKeyframeIndex index)
 	if(keyframes_[index].size() > 0)
 		endTime = keyframes_[index].back().time_;
 
+	int keyframesIndex = 0;
+
+	int size = 0;
+	for(int i=0; i<keyframes_.size(); i++)
+	{
+		if(keyframes_.at(i).size()>size)
+		{
+			size = keyframes_.at(i).size();
+			keyframesIndex = i;
+		}
+	}
+	if(keyframes_[keyframesIndex].size() > 0)
+		endTime = keyframes_[keyframesIndex].back().time_;
+
 	return endTime;
 }
 

@@ -21,6 +21,8 @@ public:
 
 	SkinnedData* getAnimation(unsigned int index);
 
+	void debug_clearOffsetMatrices(unsigned int index);
+
 private:
 
 	std::vector<SkinnedData*> animations_;
