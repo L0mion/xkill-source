@@ -136,10 +136,10 @@ void PhysicsComponent::onUpdate(float delta)
 		unsigned int physicsAttributeIndex = itrPhysics.storageIndex();
 
 		synchronizeWithAttributes(ptr_physics, physicsAttributeIndex);	//Synchronize physics objects with physics attributes
-		physicsObjects_->at(physicsAttributeIndex)->onUpdate(delta);	//Update physics objects by calling their onUpdate function.
+		physicsObjects_->at(physicsAttributeIndex)->onUpdate(delta,dynamicsWorld_);	//Update physics objects by calling their onUpdate function.
 
 		//Should be in PlayerPhysicsAttribute::onUpdate()
-		if(ptr_physics->collisionFilterGroup == ptr_physics->XKILL_Enums::PhysicsAttributeType::PLAYER)
+		if(ptr_physics->collisionFilterGroup == XKILL_Enums::PhysicsAttributeType::PLAYER)
 		{
 			//Calculate if the player aiming ray hit something
 			Entity* playerEntity = itrPhysics.ownerAt(physicsAttributeIndex);
@@ -153,8 +153,8 @@ void PhysicsComponent::onUpdate(float delta)
 				btCollisionWorld::ClosestRayResultCallback closestResults(from, to);
 				closestResults.m_flags |= btTriangleRaycastCallback::kF_KeepUnflippedNormal;
 
-				closestResults.m_collisionFilterGroup = ptr_physics->XKILL_Enums::PhysicsAttributeType::RAY;
-				closestResults.m_collisionFilterMask = ptr_physics->XKILL_Enums::PhysicsAttributeType::PLAYER | ptr_physics->XKILL_Enums::PhysicsAttributeType::WORLD;
+				closestResults.m_collisionFilterGroup = XKILL_Enums::PhysicsAttributeType::RAY;
+				closestResults.m_collisionFilterMask = XKILL_Enums::PhysicsAttributeType::PLAYER | XKILL_Enums::PhysicsAttributeType::WORLD;
 
 				dynamicsWorld_->rayTest(from,to,closestResults);
 				if(closestResults.hasHit())

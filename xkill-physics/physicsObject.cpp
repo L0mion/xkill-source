@@ -69,7 +69,7 @@ btVector3 PhysicsObject::zeroLocalInertia()
 	return localInertia;
 }
 
-bool PhysicsObject::init(unsigned int attributeIndex, XKILL_Enums::PhysicsAttributeType collisionFilterGroup)
+bool PhysicsObject::init(unsigned int attributeIndex, short collisionFilterGroup)
 {
 	
 	if(attributeIndex < 0)
@@ -132,7 +132,7 @@ unsigned int PhysicsObject::getAttributeIndex() const
 	return attributeIndex_;
 }
 
-XKILL_Enums::PhysicsAttributeType PhysicsObject::getCollisionFilterGroup() const
+short PhysicsObject::getCollisionFilterGroup() const
 {
 	return collisionFilterGroup_;
 }
@@ -150,10 +150,8 @@ void PhysicsObject::writeNonSynchronizedPhysicsObjectDataToPhysicsAttribute()
 	//ptr_physics->mass = physicsObject->getInvMass(); //only mass inverse is stored in physics object
 	//ptr_physics->meshID = //not stored in physics object
 }
-
-void PhysicsObject::onUpdate(float delta)
-{
-	if(getWorldTransform().getOrigin().y() < outOfBoundsIfYIsLowerThanThis)
+void PhysicsObject::onUpdate(float delta,btDynamicsWorld* dynamicWorld)
+{	if(getWorldTransform().getOrigin().y() < outOfBoundsIfYIsLowerThanThis)
 	{
 		handleOutOfBounds();
 	}

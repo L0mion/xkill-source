@@ -12,9 +12,10 @@ public:
 	PlayerPhysicsObject();
 	~PlayerPhysicsObject();
 	bool subClassSpecificInitHook();
-	virtual void onUpdate(float delta);
+	virtual void onUpdate(float delta,btDynamicsWorld* dynamicWorld);
 	virtual void handleOutOfBounds();
 	virtual void handleInput(float delta);
+
 };
 
 #endif
