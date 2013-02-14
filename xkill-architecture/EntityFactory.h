@@ -77,7 +77,7 @@ public:
 		ptr_physics->collisionFilterGroup = XKILL_Enums::PhysicsAttributeType::PLAYER;
 		ptr_physics->collisionFilterMask = XKILL_Enums::PhysicsAttributeType::EVERYTHING;
 		ptr_physics->gravity = Float3(0.0f, -0.0f, 0.0f);
-		ptr_physics->mass = 1.0f;
+		ptr_physics->mass = 85.0f;
 		
 		CREATE_ATTRIBUTE(ptr_input, Attribute_Input, input, entity);
 		ptr_input->ptr_physics = ptr_physics;
@@ -240,7 +240,7 @@ public:
 		ptr_physics->collisionFilterMask = XKILL_Enums::PhysicsAttributeType::WORLD | XKILL_Enums::PhysicsAttributeType::PLAYER | XKILL_Enums::PhysicsAttributeType::FRUSTUM | XKILL_Enums::PhysicsAttributeType::PICKUPABLE;
 		ptr_physics->meshID = ptr_render->meshID;
 		ptr_physics->linearVelocity = e->velocity;
-		ptr_physics->mass = 50.0f;
+		ptr_physics->mass = 1.0f;
 		ptr_physics->gravity = Float3(0.0f, 0.0f, 0.0f);
 		ptr_physics->collisionResponse = true;
 
