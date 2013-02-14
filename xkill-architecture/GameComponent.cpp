@@ -215,9 +215,12 @@ void GameComponent::onUpdate(float delta)
 			// Update player aiming ray
 			//--------------------------------------------------------------------------------------
 			Entity* playerEntity = itrPlayer.owner();
-			std::vector<int> rayttributeId = playerEntity->getAttributes(ATTRIBUTE_RAY);
-			for(unsigned int i=0;i<rayttributeId.size();i++)
+			std::vector<int> rayAttributeId = playerEntity->getAttributes(ATTRIBUTE_RAY);
+			for(unsigned int i=0;i<rayAttributeId.size();i++)
 			{
+				//--------------------------------------------------------------------------------------
+				// Draw ray and hit points by putting it in an attribute for Bullet Physics to handle
+				//--------------------------------------------------------------------------------------
 				//Float3 lookAtFarPlaneHorizon = ptr_camera->ptr_spatial->rotation.quaternionToVector();
 				Float3 lookAtFarPlaneHorizon = ptr_camera->look;
 				lookAtFarPlaneHorizon.normalize();
@@ -225,14 +228,53 @@ void GameComponent::onUpdate(float delta)
 				lookAtFarPlaneHorizon.y = lookAtFarPlaneHorizon.y*ptr_camera->zFar;
 				lookAtFarPlaneHorizon.z = lookAtFarPlaneHorizon.z*ptr_camera->zFar;
 
-				AttributePtr<Attribute_Ray> ray = itrRay.at(rayttributeId.at(i));
+				AttributePtr<Attribute_Ray> ray = itrRay.at(rayAttributeId.at(i));
 				ray->from = ptr_camera->ptr_spatial->ptr_position->position;
 				//ray->from = ptr_player->ptr_weaponFireLocation_spatial->ptr_position->position;
 				ray->to = lookAtFarPlaneHorizon + ray->from;
 
-				//Event_GetPhysicsObjectHitByRay ev(ray->from, ray->to);
-				//SEND_EVENT(&ev);
-				//DEBUGPRINT("ev.closest_entityId: " << ev.closest_entityId);
+				//--------------------------------------------------------------------------------------
+				// Do ray test directly by sending an "Event_GetEntityIdOfPhysicsObjectHitByRay" event. The result is stored in the event.
+				//--------------------------------------------------------------------------------------
+				std::vector<int> rayCastingPlayerAttributeId = playerEntity->getAttributes(ATTRIBUTE_PLAYER);
+				for(unsigned int i=0;i<rayCastingPlayerAttributeId.size();i++)
+				{
+					AttributePtr<Attribute_Player> rayCastingPlayerAttribute = itrPlayer.at(rayCastingPlayerAttributeId.at(i));
+					
+					if(rayCastingPlayerAttribute->executing) //shoot execution laser ray
+					{
+						short collisionFilterMask = XKILL_Enums::PhysicsAttributeType::PLAYER | XKILL_Enums::PhysicsAttributeType::WORLD;
+						Event_GetEntityIdOfPhysicsObjectHitByRay ev(ray->from, ray->to, collisionFilterMask);
+						SEND_EVENT(&ev);
+				
+						Entity* entityHitByRay = &allEntity->at(ev.closest_entityId);
+						std::vector<int> playerHitByRayAttributeId = entityHitByRay->getAttributes(ATTRIBUTE_PLAYER);
+						for(unsigned int j=0;j<playerHitByRayAttributeId.size();j++)
+						{
+							//Player hit by his own ray
+							if(ev.closest_entityId == playerEntity->getID())
+							{
+								SHOW_MESSAGEBOX("Player hit by ray casted by himself. The current code assumes that this is unwanted behavior, therefore this message box is now brought to you");
+							}
+							else if(entityHitByRay->hasAttribute(ATTRIBUTE_PLAYER))
+							{
+								DEBUGPRINT("Player with attribute id " << playerHitByRayAttributeId.at(j) << "hit by execution laser");
+						
+								SEND_EVENT(&Event_PlayerDeath(playerHitByRayAttributeId.at(j)));
+
+								std::vector<int> positionID = entityHitByRay->getAttributes(ATTRIBUTE_POSITION);
+								for(unsigned int i = 0; i < positionID.size(); i++)
+								{
+									AttributePtr<Attribute_Position> ptr_position = itrPosition.at(positionID[i]);
+									bool use3DAudio = true;
+									SEND_EVENT(&Event_PlaySound(Event_PlaySound::SOUND_DEATH, ptr_position->position, use3DAudio));
+								}
+
+								rayCastingPlayerAttribute->priority++;
+							}
+						}
+					}
+				}
 			}
 			
 			//--------------------------------------------------------------------------------------
@@ -557,7 +599,7 @@ void collision_applyDamage(Entity* entity1, Entity* entity2)
 							AttributePtr<Attribute_Player> ptr_player = itrPlayer.at(playerId.at(k));
 							if(entity1->getID() != damage->owner_entityID) //Award player
 							{
-								ptr_player->priority += 10;
+								ptr_player->priority++;
 							}
 							else //Punish player for blowing himself up
 							{
@@ -1021,7 +1063,7 @@ void GameComponent::event_TransferEventsToGame(Event_TransferEventsToGame* e)
 
 void GameComponent::event_PlayerDeath(Event_PlayerDeath* e)
 {
-	AttributePtr<Attribute_Player> ptr_player = itrPlayer.at(e->playerIndex);
+	AttributePtr<Attribute_Player> ptr_player = itrPlayer.at(e->playerAttributeIndex);
 	AttributePtr<Attribute_Physics> ptr_physics = ptr_player->ptr_input->ptr_physics;
 	AttributePtr<Attribute_Health> ptr_health = ptr_player->ptr_health;
 	ptr_health->health = 0;

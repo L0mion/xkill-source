@@ -33,7 +33,7 @@ PhysicsComponent::PhysicsComponent() : broadphase_(nullptr),
 	ATTRIBUTES_INIT_ALL;
 	SUBSCRIBE_TO_EVENT(this,EVENT_ATTRIBUTE_UPDATED);
 	SUBSCRIBE_TO_EVENT(this, EVENT_MODIFY_PHYSICS_OBJECT);
-	SUBSCRIBE_TO_EVENT(this, EVENT_GET_PHYSICS_OBJECT_HIT_BY_RAY);
+	SUBSCRIBE_TO_EVENT(this, EVENT_GET_ENTITY_ID_OF_PHYSICS_OBJECT_HIT_BY_RAY);
 }
 
 PhysicsComponent::~PhysicsComponent()
@@ -141,7 +141,7 @@ void PhysicsComponent::onUpdate(float delta)
 		//Should be in PlayerPhysicsAttribute::onUpdate()
 		if(ptr_physics->collisionFilterGroup == ptr_physics->XKILL_Enums::PhysicsAttributeType::PLAYER)
 		{
-			//Calculate player aiming ray
+			//Calculate if the player aiming ray hit something
 			Entity* playerEntity = itrPhysics.ownerAt(physicsAttributeIndex);
 			std::vector<int> rayttributeId = playerEntity->getAttributes(ATTRIBUTE_RAY);
 			for(unsigned int i=0;i<rayttributeId.size();i++)
@@ -163,6 +163,7 @@ void PhysicsComponent::onUpdate(float delta)
 					gDebugDraw.drawSphere(closestHitPoint,0.1,btVector3(1.0f, 0.0f, 0.0f));
 					gDebugDraw.drawLine(closestHitPoint,closestHitPoint+closestResults.m_hitNormalWorld,btVector3(1.0f, 0.0f, 0.0f));
 					
+					//Rotate weapon
 					std::vector<int> behaviorOffsetAttributeId = playerEntity->getAttributes(BEHAVIOR_OFFSET);
 					AttributePtr<Behavior_Offset> behaviorOffset = itrOffset.at(behaviorOffsetAttributeId.at(1));
 					btVector3 v1 = to-from;
@@ -173,8 +174,6 @@ void PhysicsComponent::onUpdate(float delta)
 					float w = sqrt((v1.length()*v1.length()) * (v2.length()*v2.length())) + v1.dot(v2);
 					btQuaternion weaponRotation(a.x(), a.y(), a.z(), w);
 					weaponRotation.normalize();
-					//weaponRotation = playerRotationinverse * weaponRotation;
-					
 					behaviorOffset->offset_rotation.x = weaponRotation.x();
 					behaviorOffset->offset_rotation.y = weaponRotation.y();
 					behaviorOffset->offset_rotation.z = weaponRotation.z();
@@ -338,11 +337,11 @@ void PhysicsComponent::onEvent(Event* e)
 		}
 		break;
 	}
-	case EVENT_GET_PHYSICS_OBJECT_HIT_BY_RAY:
-		Event_GetPhysicsObjectHitByRay* physicsObjectHitByRay = static_cast<Event_GetPhysicsObjectHitByRay*>(e);
+	case EVENT_GET_ENTITY_ID_OF_PHYSICS_OBJECT_HIT_BY_RAY:
+		Event_GetEntityIdOfPhysicsObjectHitByRay* event_GetEntityIdOfPhysicsObjectHitByRay = static_cast<Event_GetEntityIdOfPhysicsObjectHitByRay*>(e);
 
-		btVector3 from = convert(physicsObjectHitByRay->from);
-		btVector3 to = convert(physicsObjectHitByRay->to);
+		btVector3 from = convert(event_GetEntityIdOfPhysicsObjectHitByRay->from);
+		btVector3 to = convert(event_GetEntityIdOfPhysicsObjectHitByRay->to);
 
 		btCollisionWorld::ClosestRayResultCallback closestResults(from, to);
 		closestResults.m_flags |= btTriangleRaycastCallback::kF_KeepUnflippedNormal;
@@ -354,11 +353,11 @@ void PhysicsComponent::onEvent(Event* e)
 		if(closestResults.hasHit())
 		{
 			const PhysicsObject* hitObject = static_cast<const PhysicsObject*>(closestResults.m_collisionObject);
-			physicsObjectHitByRay->closest_entityId = itrPhysics.ownerIdAt(hitObject->getAttributeIndex());
+			event_GetEntityIdOfPhysicsObjectHitByRay->closest_entityId = itrPhysics.ownerIdAt(hitObject->getAttributeIndex());
 		}
 		else
 		{
-			physicsObjectHitByRay->closest_entityId = 0;
+			event_GetEntityIdOfPhysicsObjectHitByRay->closest_entityId = 0;
 		}
 		break;
 	//case EVENT_LOAD_LEVEL:

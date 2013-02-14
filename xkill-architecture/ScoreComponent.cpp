@@ -106,9 +106,13 @@ void ScoreComponent::schedulerScoreCounting(float delta)
 				}
 				else								// The player doesn't have any priority left so leave execution mode
 				{
+					AttributePtr<Attribute_Player> player = itrPlayer.at(executingPlayerIndex_);
+					player->executing = false;;
+
 					executionMode_ = false;
 					executingPlayerIndex_ = -1;
 					schedulerTimer_->resetTimer();
+
 					// Send event to notify other components that we're leaving execution mode
 				}
 			}
@@ -157,6 +161,9 @@ void ScoreComponent::schedulerScoreCounting(float delta)
 				executingPlayerIndex_ = topPlayerIndex;
 				cycleTimer_->resetTimer();
 				executionMode_ = true;
+
+				AttributePtr<Attribute_Player> player = itrPlayer.at(executingPlayerIndex_);
+				player->executing = true;
 				// Send event to notify other components that we're entering execution mode
 			}
 		}
