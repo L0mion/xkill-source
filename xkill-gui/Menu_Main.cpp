@@ -49,18 +49,36 @@ Menu_Main::Menu_Main( QWidget* parent ) : QMainWindow(parent), ToggleHelper(this
 	ui.horizontalSlider_numPlayers->setValue(2);
 
 	filePath = QString("../../xkill-resources/xkill-scripts/levels.xml");
-	levelListModel = new QStandardItemModel(0, 1, this);
 
 	//editorModel->setHorizontalHeaderItem(1, new QStandardItem("ID"));
 
 	QStringList columnNames;
 
-	Event_GetFileList* fileList = new Event_GetFileList("../../xkill-resources/xkill-level/TestArena/*.mdldesc");
+	Event_GetFileList* fileList = new Event_GetFileList("../../xkill-resources/xkill-level/", ".mdldesc");
 	SEND_EVENT(fileList);
 
-	int t = 0;
-
+	std::vector<std::string> filenames = fileList->filenames;
+	
 	delete fileList;
+
+	levelListModel = new QStandardItemModel(0, filenames.size(), this);
+
+	for(unsigned int i = 0; i < filenames.size(); i++)
+	{
+		std::string filename = filenames[i];
+		int strIndex = std::string::npos;
+		strIndex = filename.find_first_of(".");
+
+		if(strIndex != std::string::npos)
+			filename = filename.substr(0, strIndex);
+
+		QString qStr = filename.c_str();
+		QStandardItem* stdItem = new QStandardItem(qStr);
+
+		levelListModel->appendRow(stdItem);
+	}
+
+	ui.comboBox_LevelSelect->setModel(levelListModel);
 
 	//loadXML();
 
@@ -143,6 +161,7 @@ void Menu_Main::slot_selectLevel( int levelId )
 	{
 		QStandardItem* name = levels->child(levelId,0);
 		QStandardItem* desc = name->child(0,0);
+		settings->currentLevel = name->text().toStdString();
 	//	ui.textBrowser_LevelInfo->setText(desc->text());
 	}
 }

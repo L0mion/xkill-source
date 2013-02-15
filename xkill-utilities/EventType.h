@@ -598,8 +598,9 @@ public:
 	/**
 	\param filepathAndExtension Should look like this: path\*.extension
 	*/
-	Event_GetFileList(std::string filepathAndExtension); 
+	Event_GetFileList(std::string filepath, std::string extension); 
 
-	std::string filepathAndExtension;
+	std::string filepath;
+	std::string extension;
 	std::vector<std::string> filenames;
 };
