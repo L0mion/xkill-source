@@ -56,6 +56,8 @@ public slots:
 		void slot_soundMenuUpdated();
 
 protected:
+	std::vector<std::string> levelNames_;
+
 	void keyPressEvent(QKeyEvent* e);
 	void mousePressEvent(QMouseEvent* e);
 };

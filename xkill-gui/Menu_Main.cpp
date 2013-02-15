@@ -75,6 +75,7 @@ Menu_Main::Menu_Main( QWidget* parent ) : QMainWindow(parent), ToggleHelper(this
 		QString qStr = filename.c_str();
 		QStandardItem* stdItem = new QStandardItem(qStr);
 
+		levelNames_.push_back(filename);
 		levelListModel->appendRow(stdItem);
 	}
 
@@ -161,8 +162,13 @@ void Menu_Main::slot_selectLevel( int levelId )
 	{
 		QStandardItem* name = levels->child(levelId,0);
 		QStandardItem* desc = name->child(0,0);
-		settings->currentLevel = name->text().toStdString();
 	//	ui.textBrowser_LevelInfo->setText(desc->text());
+	}
+
+	if(levelId >= 0 && levelId < levelNames_.size())
+	{
+		SEND_EVENT(&Event_LoadLevel(levelNames_[levelId]));
+		//settings->currentLevel = levelNames_[levelId];
 	}
 }
 

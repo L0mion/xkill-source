@@ -106,6 +106,12 @@ void Renderer::reset()
 	SAFE_RESET(managementGBuffer_);
 	SAFE_RESET(managementSprites_);
 }
+
+void Renderer::unloadModels()
+{
+	managementModel_->unloadModels();
+}
+
 HRESULT Renderer::resize(unsigned int screenWidth, unsigned int screenHeight)
 {
 	//Get number of split-screens

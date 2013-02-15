@@ -31,6 +31,7 @@ IOComponent::IOComponent()
 	fbxLoader_ = nullptr;
 
 	SUBSCRIBE_TO_EVENT(this, EVENT_GET_FILE_LIST);
+	SUBSCRIBE_TO_EVENT(this, EVENT_LOAD_LEVEL);
 }
 IOComponent::~IOComponent()
 {
@@ -128,8 +129,8 @@ bool IOComponent::initMdlDescs()
 	{
 		SHOW_MESSAGEBOX("Couldn't locate any .mdldesc-files in xkill-resources/.");
 	}
-	Settings* settings = ATTRIBUTE_MANAGER->settings;
-	sucessfulLoad = initLvlMdlDesc(settings->currentLevel);
+	//Settings* settings = ATTRIBUTE_MANAGER->settings;
+	//sucessfulLoad = initLvlMdlDesc(settings->currentLevel);
 
 	return sucessfulLoad;
 }
@@ -531,23 +532,41 @@ void IOComponent::onEvent(Event* e)
 {
 	switch(e->getType())
 	{
-	case EVENT_GET_FILE_LIST:
+		case EVENT_GET_FILE_LIST:
 		{
-		Event_GetFileList* getFileListEvent = static_cast<Event_GetFileList*>(e);
+			Event_GetFileList* getFileListEvent = static_cast<Event_GetFileList*>(e);
 
-		std::wstring filepath;
-		filepath.assign(getFileListEvent->filepath.begin(), getFileListEvent->filepath.end());
+			std::wstring filepath;
+			filepath.assign(getFileListEvent->filepath.begin(), getFileListEvent->filepath.end());
 
-		std::wstring extension;
-		extension.assign(getFileListEvent->extension.begin(), getFileListEvent->extension.end());
+			std::wstring extension;
+			extension.assign(getFileListEvent->extension.begin(), getFileListEvent->extension.end());
 
-		std::wstring filename;
-		filename.append(extension);
+			std::wstring filename;
+			filename.append(extension);
 
-		getFileListEvent->filenames = getFileNames(filepath.c_str(), filename.c_str(), true);
-		break;
+			getFileListEvent->filenames = getFileNames(filepath.c_str(), filename.c_str(), true);
+			break;
 		}
-	default:
-		break;
+		case EVENT_LOAD_LEVEL:
+		{
+			Event_LoadLevel* loadLevelEvent = static_cast<Event_LoadLevel*>(e);
+
+			SEND_EVENT(&Event(EVENT_UNLOAD_LEVEL));
+
+			if(initLvlMdlDesc(loadLevelEvent->levelName))
+			{
+				ATTRIBUTE_MANAGER->settings->currentLevel = loadLevelEvent->levelName;
+				SEND_EVENT(&Event(EVENT_LOAD_LEVEL_BULLET));
+			}
+			else
+			{
+				
+			}
+
+			break;
+		}
+		default:
+			break;
 	}
 }

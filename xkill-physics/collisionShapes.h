@@ -23,6 +23,7 @@ public:
 	btCollisionShape* getFrustrumShape(unsigned int cameraIndex);  //!< return the frustum of the camera given by index
 	void updateFrustrumShape();  //!< Syncronize the frustum with the cameras
 	void loadCollisionShapes();  //!< Reads collision shapes of level and individual objects and store them for easy access
+	void unloadCollisionShapes();	//!< Remove collision shapes
 	static CollisionShapes* Instance();
 	static CollisionShapes* instance;
 };

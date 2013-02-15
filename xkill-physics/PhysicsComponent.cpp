@@ -34,6 +34,8 @@ PhysicsComponent::PhysicsComponent() : broadphase_(nullptr),
 	SUBSCRIBE_TO_EVENT(this,EVENT_ATTRIBUTE_UPDATED);
 	SUBSCRIBE_TO_EVENT(this, EVENT_MODIFY_PHYSICS_OBJECT);
 	SUBSCRIBE_TO_EVENT(this, EVENT_GET_ENTITY_ID_OF_PHYSICS_OBJECT_HIT_BY_RAY);
+	SUBSCRIBE_TO_EVENT(this, EVENT_UNLOAD_LEVEL);
+	SUBSCRIBE_TO_EVENT(this, EVENT_LOAD_LEVEL_BULLET);
 }
 
 PhysicsComponent::~PhysicsComponent()
@@ -338,6 +340,7 @@ void PhysicsComponent::onEvent(Event* e)
 		break;
 	}
 	case EVENT_GET_ENTITY_ID_OF_PHYSICS_OBJECT_HIT_BY_RAY:
+		{
 		Event_GetEntityIdOfPhysicsObjectHitByRay* event_GetEntityIdOfPhysicsObjectHitByRay = static_cast<Event_GetEntityIdOfPhysicsObjectHitByRay*>(e);
 
 		btVector3 from = convert(event_GetEntityIdOfPhysicsObjectHitByRay->from);
@@ -360,8 +363,13 @@ void PhysicsComponent::onEvent(Event* e)
 			event_GetEntityIdOfPhysicsObjectHitByRay->closest_entityId = 0;
 		}
 		break;
-	//case EVENT_LOAD_LEVEL:
-	//	break;
+		}
+	case EVENT_LOAD_LEVEL_BULLET:
+		CollisionShapes::Instance()->loadCollisionShapes();
+		break;
+	case EVENT_UNLOAD_LEVEL:
+		CollisionShapes::Instance()->unloadCollisionShapes();
+		break;
 	}
 }
 

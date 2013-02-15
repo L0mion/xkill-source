@@ -272,3 +272,9 @@ Event_GetFileList::Event_GetFileList(std::string filepath, std::string extension
 	this->filepath = filepath;
 	this->extension = extension;
 }
+
+Event_LoadLevel::Event_LoadLevel(std::string levelName) : 
+	Event(EVENT_LOAD_LEVEL)
+{
+	this->levelName = levelName;
+}
