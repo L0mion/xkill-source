@@ -106,6 +106,12 @@ void Renderer::reset()
 	SAFE_RESET(managementGBuffer_);
 	SAFE_RESET(managementSprites_);
 }
+
+void Renderer::unloadModels()
+{
+	managementModel_->unloadModels();
+}
+
 HRESULT Renderer::resize(unsigned int screenWidth, unsigned int screenHeight)
 {
 	//Get number of split-screens
@@ -639,8 +645,8 @@ void Renderer::renderSubset(
 	ID3D11DeviceContext*	devcon = managementD3D_->getDeviceContext();
 
 	//Set textures.
-	ID3D11ShaderResourceView* texAlbedo = managementTex_->getTexSrv(19); //material.idAlbedoTex_
-	ID3D11ShaderResourceView* texNormal = managementTex_->getTexSrv(20); //material.idNormalTex_
+	ID3D11ShaderResourceView* texAlbedo = managementTex_->getTexSrv(material.idAlbedoTex_);
+	ID3D11ShaderResourceView* texNormal = managementTex_->getTexSrv(material.idNormalTex_);
 	devcon->PSSetShaderResources(0, 1, &texAlbedo);
 	devcon->PSSetShaderResources(1, 1, &texNormal);
 

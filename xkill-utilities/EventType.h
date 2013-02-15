@@ -94,6 +94,9 @@ enum DLL_U EventType
 	EVENT_CREATE_MESH,
 	EVENT_CREATE_LIGHT_D3D,
 	EVENT_LOAD_TEXTURES,
+	EVENT_LOAD_LEVEL,
+	EVENT_LOAD_LEVEL_BULLET,
+	EVENT_UNLOAD_LEVEL,
 	EVENT_SHOW_MESSAGEBOX,
 
 	// this is needed, don't touch!
@@ -598,8 +601,17 @@ public:
 	/**
 	\param filepathAndExtension Should look like this: path\*.extension
 	*/
-	Event_GetFileList(std::string filepathAndExtension); 
+	Event_GetFileList(std::string filepath, std::string extension); 
 
-	std::string filepathAndExtension;
+	std::string filepath;
+	std::string extension;
 	std::vector<std::string> filenames;
+};
+
+class DLL_U Event_LoadLevel : public Event
+{
+public:
+	Event_LoadLevel(std::string levelName);
+
+	std::string levelName;
 };

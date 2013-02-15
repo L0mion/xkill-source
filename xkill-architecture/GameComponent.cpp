@@ -7,6 +7,8 @@
 
 #include <ctime>
 
+#define SAFE_DELETE(x) {if(x != nullptr) delete x; x = nullptr;}
+
 // Iterators
 ATTRIBUTES_DECLARE_ALL;
 
@@ -18,6 +20,7 @@ GameComponent::GameComponent(void)
 	SUBSCRIBE_TO_EVENT(this, EVENT_END_DEATHMATCH);
 	SUBSCRIBE_TO_EVENT(this, EVENT_TRANSFER_EVENTS_TO_GAME);
 	SUBSCRIBE_TO_EVENT(this, EVENT_PLAYERDEATH);
+	SUBSCRIBE_TO_EVENT(this, EVENT_UNLOAD_LEVEL);
 }
 
 GameComponent::~GameComponent(void)
@@ -60,6 +63,10 @@ void GameComponent::onEvent(Event* e)
 		break;
 	case EVENT_PLAYERDEATH:
 		event_PlayerDeath(static_cast<Event_PlayerDeath*>(e));
+		break;
+	case EVENT_UNLOAD_LEVEL:
+		event_UnloadLevel();
+		break;
 	default:
 		break;
 	}
@@ -1013,7 +1020,7 @@ void GameComponent::event_StartDeathmatch( Event_StartDeathmatch* e )
 		AttributePtr<Attribute_WeaponStats>		ptr_weaponStats	=	ptr_player	->	ptr_weaponStats	;
 		switchFiringMode(ptr_weaponStats);	//Ensure ammunition disablement (selected from menu)
 		
-		SEND_EVENT(&Event_HackActivated(1000.0f, XKILL_Enums::HackType::JETHACK, ptr_player));
+		//SEND_EVENT(&Event_HackActivated(1000.0f, XKILL_Enums::HackType::JETHACK, ptr_player));
 	}
 
 	//Create mesh for debugging fbx-loading.
@@ -1051,6 +1058,46 @@ void GameComponent::event_PlayerDeath(Event_PlayerDeath* e)
 
 	ptr_player->respawnTimer.resetTimer();
 	ptr_player->detectedAsDead = true;
+}
+
+void GameComponent::event_UnloadLevel()
+{
+	std::vector<Event*>::iterator it = levelEvents_.begin();
+	for(; it != levelEvents_.end(); it++)
+	{
+		SAFE_DELETE(*it);
+	}
+
+	levelEvents_.clear();
+
+	//while(itrPhysics.hasNext())
+	//{
+	//	itrPhysics.getNext();
+	//	SEND_EVENT(&Event_RemoveEntity(itrPhysics.ownerId()));
+	//}
+	//while(itrPlayerSpawnPoint.hasNext())
+	//{
+	//	itrPlayerSpawnPoint.getNext();
+	//	SEND_EVENT(&Event_RemoveEntity(itrPlayerSpawnPoint.ownerId()));
+	//}
+
+	//while(itrLightDir.hasNext())
+	//{
+	//	itrLightDir.getNext();
+	//	SEND_EVENT(&Event_RemoveEntity(itrLightDir.ownerId()));
+	//}
+
+	//while(itrLightPoint.hasNext())
+	//{
+	//	itrLightPoint.getNext();
+	//	SEND_EVENT(&Event_RemoveEntity(itrLightPoint.ownerId()));
+	//}
+
+	//while(itrLightSpot.hasNext())
+	//{
+	//	itrLightSpot.getNext();
+	//	SEND_EVENT(&Event_RemoveEntity(itrLightSpot.ownerId()));
+	//}
 }
 
 bool GameComponent::switchAmmunition(AttributePtr<Attribute_WeaponStats> weaponStats)

@@ -50,6 +50,19 @@ HRESULT ManagementModel::init()
 	return hr;
 }
 
+void ManagementModel::unloadModels()
+{
+	//Delete our models.
+	for(unsigned int i = 0; i < modelD3Ds_.size(); i++)
+	{
+		if(modelD3Ds_[i])
+			delete modelD3Ds_[i];
+	}
+	modelD3Ds_.clear();
+
+	modelIDtoIndex_.clear();
+}
+
 ModelD3D* ManagementModel::getModelD3D(
 	const unsigned int	modelID, 
 	ID3D11Device*		device)	

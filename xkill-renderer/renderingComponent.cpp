@@ -12,6 +12,7 @@ RenderingComponent::RenderingComponent(HWND windowHandle)
 	SUBSCRIBE_TO_EVENT(this, EVENT_WINDOW_RESIZE);
 	SUBSCRIBE_TO_EVENT(this, EVENT_LOAD_TEXTURES);
 	SUBSCRIBE_TO_EVENT(this, EVENT_GAMERESET);
+	SUBSCRIBE_TO_EVENT(this, EVENT_UNLOAD_LEVEL);
 
 	windowHandle_	= windowHandle;
 	renderer_		= nullptr;
@@ -64,6 +65,9 @@ void RenderingComponent::onEvent( Event* e )
 		break;
 	case EVENT_LOAD_TEXTURES:
 		event_PostDescTex((Event_LoadTextures*)e);
+		break;
+	case EVENT_UNLOAD_LEVEL:
+		renderer_->unloadModels();
 		break;
 	default:
 		break;
