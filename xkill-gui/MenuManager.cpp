@@ -81,6 +81,13 @@ HUDWindow::HUDWindow(QWidget* parent, int id) : QMainWindow(parent)
 	label_weaponType->setScaledContents(true);
 	horizontalLayout->addWidget(label_weaponType);
 
+
+	// total ammo
+	label_totalAmmoLeft = new QLabel("Test");
+	horizontalLayout->addWidget(label_totalAmmoLeft);
+
+
+
 	QWidget* mainWidget = new QWidget();
 	mainWidget->setLayout(horizontalLayout);
 	setCentralWidget(mainWidget);
@@ -163,6 +170,11 @@ void HUDWindow::update(AttributePtr<Attribute_SplitScreen> splitScreen)
 			label_weaponType->setPixmap(QPixmap(QString::fromUtf8(":/xkill/images/w_auto.png")));
 		}
 	}
+
+	// total ammo left	
+	QString num_totalShots = QString::number(weaponStats->ammunition[ammoIndex].currentTotalNrOfShots);
+	label_totalAmmoLeft->setText(num_totalShots);
+
 	resize(horizontalLayout->minimumSize());
 }
 
