@@ -27,16 +27,30 @@ public:
 		
 		SUBSCRIBE_TO_EVENT(this, EVENT_WINDOW_MOVE);
 		SUBSCRIBE_TO_EVENT(this, EVENT_WINDOW_RESIZE);
-
-		ui.frame_main->move(0,0);
-		ui.frame_start->move(0,0);
-		ui.frame_settings->move(0,0);
 		
+		// Center background 
+		ui.label_background->move(0,0);
+
+		// Hide unused menus
 		ui.frame_main->hide();
 		ui.frame_start->hide();
+		ui.frame_customize->hide();
 		ui.frame_settings->hide();
-
+		ui.frame_video->hide();
+		ui.frame_audio->hide();
+		ui.frame_input->hide();
+		
+		// Show main menu
 		push_menu(ui.frame_main);
+
+		// Setup buttons
+		connect(ui.pushButton_start, SIGNAL(clicked()),	this, SLOT(slot_menu_start()));
+		connect(ui.pushButton_customize, SIGNAL(clicked()),	this, SLOT(slot_menu_customize()));
+		connect(ui.pushButton_settings, SIGNAL(clicked()),	this, SLOT(slot_menu_settings()));
+		connect(ui.pushButton_video, SIGNAL(clicked()),	this, SLOT(slot_menu_video()));
+		connect(ui.pushButton_audio, SIGNAL(clicked()),	this, SLOT(slot_menu_audio()));
+		connect(ui.pushButton_input, SIGNAL(clicked()),	this, SLOT(slot_menu_input()));
+		connect(ui.pushButton_quit, SIGNAL(clicked()),	this, SLOT(slot_menu_quit()));
 	}
 	~Menu_Main2()
 	{
@@ -60,7 +74,7 @@ public:
 
 	void push_menu(QFrame* menu)
 	{
-		// Hide previous menu if any
+		// Hide previous menu, if any
 		if(menuStack.size() > 0)
 		{
 			QFrame* topMenu = menuStack.back();
@@ -68,16 +82,28 @@ public:
 		}
 
 		// Show new menu
-		ui.frame_main->resize(ui.label_background->width(), ui.label_background->height());
+		menu->move(0,0);
+		menu->resize(width(), height());
 		menu->show();
 		menuStack.push_back(menu);
 	}
 
 	void pop_menu()
 	{
-		QFrame* topMenu = menuStack.back();
-		topMenu->hide();
-		menuStack.pop_back();
+		// Make sure rot-menu is not poped
+		if(menuStack.size() > 1)
+		{
+			// Pop current menu
+			QFrame* topMenu = menuStack.back();
+			topMenu->hide();
+			menuStack.pop_back();
+
+			// Show previous menu
+			QFrame* menu = menuStack.back();
+			menu->move(0,0);
+			menu->resize(width(), height());
+			menu->show();
+		}
 	}
 
 	void menuResize()
@@ -90,6 +116,7 @@ public:
 
 		// Resize current menu
 		topMenu->resize(width(), height());
+		//topMenu->resize(ui,->minimumSize());
 	}
 
 
@@ -132,6 +159,47 @@ public:
 	}
 
 	void closeEvent(QCloseEvent* event)
+	{
+		SEND_EVENT(&Event(EVENT_QUIT_TO_DESKTOP));
+	}
+
+protected:
+	void mousePressEvent(QMouseEvent *e)
+	{
+		if(e->button() == Qt::RightButton)
+			pop_menu();
+	}
+
+private slots:
+	void slot_menu_main()
+	{
+		push_menu(ui.frame_main);
+	}
+	void slot_menu_start()
+	{
+		push_menu(ui.frame_start);
+	}
+	void slot_menu_settings()
+	{
+		push_menu(ui.frame_settings);
+	}
+	void slot_menu_video()
+	{
+		push_menu(ui.frame_video);
+	}
+	void slot_menu_audio()
+	{
+		push_menu(ui.frame_audio);
+	}
+	void slot_menu_customize()
+	{
+		push_menu(ui.frame_customize);
+	}
+	void slot_menu_input()
+	{
+		push_menu(ui.frame_input);
+	}
+	void slot_menu_quit()
 	{
 		SEND_EVENT(&Event(EVENT_QUIT_TO_DESKTOP));
 	}
