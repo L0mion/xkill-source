@@ -1088,34 +1088,34 @@ void GameComponent::event_UnloadLevel()
 
 	levelEvents_.clear();
 
-	while(itrPhysics.hasNext())
-	{
-		itrPhysics.getNext();
-		SEND_EVENT(&Event_RemoveEntity(itrPhysics.ownerId()));
-	}
-	while(itrPlayerSpawnPoint.hasNext())
-	{
-		itrPlayerSpawnPoint.getNext();
-		SEND_EVENT(&Event_RemoveEntity(itrPlayerSpawnPoint.ownerId()));
-	}
+	//while(itrPhysics.hasNext())
+	//{
+	//	itrPhysics.getNext();
+	//	SEND_EVENT(&Event_RemoveEntity(itrPhysics.ownerId()));
+	//}
+	//while(itrPlayerSpawnPoint.hasNext())
+	//{
+	//	itrPlayerSpawnPoint.getNext();
+	//	SEND_EVENT(&Event_RemoveEntity(itrPlayerSpawnPoint.ownerId()));
+	//}
 
-	while(itrLightDir.hasNext())
-	{
-		itrLightDir.getNext();
-		SEND_EVENT(&Event_RemoveEntity(itrLightDir.ownerId()));
-	}
+	//while(itrLightDir.hasNext())
+	//{
+	//	itrLightDir.getNext();
+	//	SEND_EVENT(&Event_RemoveEntity(itrLightDir.ownerId()));
+	//}
 
-	while(itrLightPoint.hasNext())
-	{
-		itrLightPoint.getNext();
-		SEND_EVENT(&Event_RemoveEntity(itrLightPoint.ownerId()));
-	}
+	//while(itrLightPoint.hasNext())
+	//{
+	//	itrLightPoint.getNext();
+	//	SEND_EVENT(&Event_RemoveEntity(itrLightPoint.ownerId()));
+	//}
 
-	while(itrLightSpot.hasNext())
-	{
-		itrLightSpot.getNext();
-		SEND_EVENT(&Event_RemoveEntity(itrLightSpot.ownerId()));
-	}
+	//while(itrLightSpot.hasNext())
+	//{
+	//	itrLightSpot.getNext();
+	//	SEND_EVENT(&Event_RemoveEntity(itrLightSpot.ownerId()));
+	//}
 }
 
 bool GameComponent::switchAmmunition(AttributePtr<Attribute_WeaponStats> weaponStats)
