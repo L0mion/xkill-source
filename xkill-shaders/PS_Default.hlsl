@@ -7,6 +7,7 @@ struct PSOut
 	float4 normal	: SV_TARGET0;
 	float4 albedo	: SV_TARGET1;
 	float4 material : SV_TARGET2;
+	float4 glowHigh : SV_TARGET3;
 };
 
 Texture2D texAlbedo		: register(t0);
@@ -34,6 +35,8 @@ PSOut PS_Default(DefaultVSOut pIn)
 	
 	//Fill material RTV
 	output.material	= float4(specularTerm, 1.0f); //specularPower
+
+	output.glowHigh = float4(albedo, 1.0f);//float4(albedo.r, 0.0f, 0.0f, 1.0f);
 
 	return output;
 }

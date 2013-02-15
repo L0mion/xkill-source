@@ -18,14 +18,15 @@
 //Global memory
 RWTexture2D<float4> output : register( u0 );
 
-Texture2D gBufferNormal		: register( t0 );
-Texture2D gBufferAlbedo		: register( t1 );
-Texture2D gBufferMaterial	: register( t2 );
-Texture2D gBufferDepth		: register( t3 );
-StructuredBuffer<LightDescDir>		lightsDir	: register( t4 );
-StructuredBuffer<LightDescPoint>	lightsPoint	: register( t5 );
-StructuredBuffer<LightDescSpot>		lightsSpot	: register( t6 );
-StructuredBuffer<float3>			lightsPos	: register( t7 );
+Texture2D gBufferNormal				: register( t0 );
+Texture2D gBufferAlbedo				: register( t1 );
+Texture2D gBufferMaterial			: register( t2 );
+Texture2D bufferGlowHigh			: register( t3 ); //Register shared in PS_DownSample
+Texture2D bufferDepth				: register( t4 ); //Hi, please notice me if you intend to sequently add buffers. I can be pretty dangerous if one does not! Yarr.
+StructuredBuffer<LightDescDir>		lightsDir	: register( t5 );
+StructuredBuffer<LightDescPoint>	lightsPoint	: register( t6 );
+StructuredBuffer<LightDescSpot>		lightsSpot	: register( t7 );
+StructuredBuffer<float3>			lightsPos	: register( t8 );
 
 SamplerState ss : register(s0);
 
@@ -64,7 +65,7 @@ void CS_Lighting(
 	float4	gAlbedo		= gBufferAlbedo		.SampleLevel(ss, texCoord, 0);
 	float4	gNormal		= gBufferNormal		.SampleLevel(ss, texCoord, 0);
 	float4	gMaterial	= gBufferMaterial	.SampleLevel(ss, texCoord, 0);
-	float	gDepth		= gBufferDepth.SampleLevel(ss, texCoord, 0).x; 
+	float	gDepth		= bufferDepth.SampleLevel(ss, texCoord, 0).x; 
 	
 	//Reconstruct view-space position from depth. Observe the normalized coordinates sent to method.
 	float3 surfacePosV = UtilReconstructPositionViewSpace(
@@ -182,5 +183,5 @@ void CS_Lighting(
 	output[
 		uint2(
 			threadIDDispatch.x + viewportTopX, 
-			threadIDDispatch.y + viewportTopY)] = float4(Ambient.xyz + Diffuse.xyz + Specular.xyz, 1.0f);
+			threadIDDispatch.y + viewportTopY)] = bufferGlowHigh.SampleLevel(ss, texCoord, 0); //float4(Ambient.xyz + Diffuse.xyz + Specular.xyz, 1.0f);
 }

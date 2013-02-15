@@ -34,8 +34,9 @@ enum GLOW_BUFFER_DIMENSIONS
 {
 	HALF_SCREEN_RES
 };
-
 static const GLOW_BUFFER_DIMENSIONS GLOWBUFLOW_GLOW_BUFFER_DIMENSIONS = HALF_SCREEN_RES;
+
+static const unsigned int SHADER_REGISTER_GLOW = 3;
 
 class ManagementBuffer
 {
@@ -52,6 +53,11 @@ public:
 	void unsetBuffersAndDepthBufferAsRenderTargets(ID3D11DeviceContext* devcon);
 	void setBuffersAsCSShaderResources(ID3D11DeviceContext* devcon);
 	void unsetBuffersAsCSShaderResources(ID3D11DeviceContext* devcon);
+
+	void setGlowLowAsRTV(ID3D11DeviceContext* devcon);
+	void unsetGlowLowAsRTV(ID3D11DeviceContext* devcon);
+	void setGlowHighAsSRV(ID3D11DeviceContext* devcon);
+	void unsetGlowHighAsSrv(ID3D11DeviceContext* devcon);
 protected:
 private:
 	HRESULT initAlbedo(ID3D11Device* device);

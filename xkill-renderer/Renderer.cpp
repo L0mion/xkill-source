@@ -27,11 +27,6 @@
 #include "Renderer.h"
 #include "ViewportData.h"
 
-//temp
-//#include "AnimatedMesh.h"
-//#include "M3DLoader.h"
-//#include "SkinnedData.h"
-
 ATTRIBUTES_DECLARE_ALL;
 
 Renderer::Renderer(HWND windowHandle)
@@ -49,7 +44,7 @@ Renderer::Renderer(HWND windowHandle)
 	managementTex_		= nullptr;
 	managementSS_		= nullptr;
 	managementRS_		= nullptr;
-	managementGBuffer_	= nullptr;
+	managementBuffer_	= nullptr;
 	managementDebug_	= nullptr;
 	managementMath_		= nullptr;
 	managementInstance_ = nullptr;
@@ -78,7 +73,7 @@ Renderer::~Renderer()
 	SAFE_DELETE(managementTex_);
 	SAFE_DELETE(managementSS_);
 	SAFE_DELETE(managementRS_);
-	SAFE_DELETE(managementGBuffer_);
+	SAFE_DELETE(managementBuffer_);
 	SAFE_DELETE(managementMath_);
 	SAFE_DELETE(managementInstance_);
 	SAFE_DELETE(managementSprites_);
@@ -103,7 +98,7 @@ void Renderer::reset()
 	SAFE_RESET(managementViewport_);
 	SAFE_RESET(managementSS_);
 	SAFE_RESET(managementRS_);
-	SAFE_RESET(managementGBuffer_);
+	SAFE_RESET(managementBuffer_);
 	SAFE_RESET(managementSprites_);
 }
 HRESULT Renderer::resize(unsigned int screenWidth, unsigned int screenHeight)
@@ -126,7 +121,7 @@ HRESULT Renderer::resize(unsigned int screenWidth, unsigned int screenHeight)
 
 	hr = managementD3D_->resize();
 	if(SUCCEEDED(hr))
-		hr = managementGBuffer_->resize(managementD3D_->getDevice());
+		hr = managementBuffer_->resize(managementD3D_->getDevice());
 	if(SUCCEEDED(hr))
 		hr = managementViewport_->resize();
 
@@ -317,8 +312,8 @@ HRESULT Renderer::initManagementGBuffer()
 {
 	HRESULT hr = S_OK;
 
-	managementGBuffer_ = new ManagementBuffer(winfo_);
-	hr = managementGBuffer_->init(managementD3D_->getDevice());
+	managementBuffer_ = new ManagementBuffer(winfo_);
+	hr = managementBuffer_->init(managementD3D_->getDevice());
 
 	return hr;
 }
@@ -363,7 +358,7 @@ void Renderer::render()
 	ID3D11DeviceContext* devcon = managementD3D_->getDeviceContext();
 
 	//Clear g-buffers and depth buffer.
-	managementGBuffer_->clearBuffers(devcon);
+	managementBuffer_->clearBuffers(devcon);
 	managementD3D_->clearDepthBuffer();
 	managementD3D_->clearBackBuffer();
 
@@ -385,6 +380,8 @@ void Renderer::render()
 	AttributePtr<Attribute_Position>	ptr_position;
 
 	ViewportData vpData;
+
+	managementBuffer_->setBuffersAndDepthBufferAsRenderTargets(devcon, managementD3D_->getDepthBuffer());
 
 	//Render each split-screen separately
 	std::vector<SplitScreenViewport>* ssViewports = managementViewport_->getSplitScreenViewports();
@@ -415,6 +412,9 @@ void Renderer::render()
 
 		renderViewportToGBuffer(vpData);
 	}
+	managementBuffer_->unsetBuffersAndDepthBufferAsRenderTargets(devcon);
+
+	doBlurPass();
 
 	//Render everything to backbuffer.
 	for(unsigned int i = 0; i < vpDatas.size(); i++)
@@ -435,8 +435,6 @@ void Renderer::renderViewportToGBuffer(ViewportData& vpData)
 
 	managementSS_->setSS(devcon, TypeFX_PS, 0, SS_ID_DEFAULT);
 	managementRS_->setRS(devcon, RS_ID_DEFAULT);
-
-	managementGBuffer_->setBuffersAndDepthBufferAsRenderTargets(devcon, managementD3D_->getDepthBuffer());
 
 	//Update per-viewport constant buffer.
 	managementCB_->setCB(CB_TYPE_CAMERA, TypeFX_VS, CB_REGISTER_CAMERA, managementD3D_->getDeviceContext());
@@ -480,7 +478,6 @@ void Renderer::renderViewportToGBuffer(ViewportData& vpData)
 	}
 	
 	//Unset and clean.
-	managementGBuffer_->unsetBuffersAndDepthBufferAsRenderTargets(devcon);
 	managementFX_->unsetAll(devcon);
 	managementFX_->unsetLayout(devcon);
 	//managementSS_->unsetSS(devcon, TypeFX_PS, 0);
@@ -495,7 +492,7 @@ void Renderer::renderViewportToBackBuffer(ViewportData& vpData)
 	managementD3D_->setUAVBackBufferCS();
 
 	//Set shader.
-	managementFX_->setShader(devcon, SHADERID_CS_DEFAULT);
+	managementFX_->setShader(devcon, SHADERID_CS_LIGHTING);
 
 	//Set constant buffers.
 	managementCB_->setCB(CB_TYPE_FRAME,		TypeFX_CS, CB_REGISTER_FRAME,	devcon);
@@ -514,7 +511,7 @@ void Renderer::renderViewportToBackBuffer(ViewportData& vpData)
 		vpData.viewportHeight);
 
 	//Connect g-buffers to shader.
-	managementGBuffer_->setBuffersAsCSShaderResources(devcon);
+	managementBuffer_->setBuffersAsCSShaderResources(devcon);
 
 	//Set lights.
 	managementLight_->setLightSRVCS(devcon, LIGHTBUFFERTYPE_DIR,		LIGHT_SRV_REGISTER_DIR);
@@ -536,11 +533,11 @@ void Renderer::renderViewportToBackBuffer(ViewportData& vpData)
 	managementLight_->unsetLightSRVCS(devcon, LIGHTBUFFERTYPE_SPOT,		LIGHT_SRV_REGISTER_SPOT);
 	managementLight_->unsetLightSRVCS(devcon, LIGHTBUFFERTYPE_POS_VIEW,	LIGHT_SRV_REGISTER_POS);
 
-	managementFX_->unsetShader(devcon, SHADERID_CS_DEFAULT);
+	managementFX_->unsetShader(devcon, SHADERID_CS_LIGHTING);
 
 	managementD3D_->unsetUAVBackBufferCS();
 	managementD3D_->unsetDepthBufferSRV(GBUFFER_SHADER_REGISTER_DEPTH);
-	managementGBuffer_->unsetBuffersAsCSShaderResources(devcon);
+	managementBuffer_->unsetBuffersAsCSShaderResources(devcon);
 
 	//devcon->CSSetSamplers(0, 0, nullptr); //move me into managementSS
 }
@@ -605,7 +602,7 @@ ShadingDesc Renderer::deriveShadingDesc(VertexType vertexType)
 		}
 	default:
 		{
-			shadingDesc.vsID_ = SHADERID_VS_DEFAULT;
+			shadingDesc.vsID_ = SHADERID_VS_POS_NORM_TEX_INSTANCE;
 			shadingDesc.psID_ = SHADERID_PS_DEFAULT;
 
 			shadingDesc.layoutID_ = LAYOUTID_POS_NORM_TEX_INSTANCED;
@@ -726,6 +723,41 @@ void Renderer::renderDebugShape(
 
 	//Draw subset.
 	devcon->Draw(numVertices, 0);
+}
+
+void Renderer::doBlurPass()
+{
+	ID3D11DeviceContext* devcon = managementD3D_->getDeviceContext();
+
+	D3D11_VIEWPORT viewport;
+	ZeroMemory(&viewport, sizeof(D3D11_VIEWPORT));
+	viewport.TopLeftX	= 0;
+	viewport.TopLeftY	= 0;
+	viewport.Width		= static_cast<FLOAT>(winfo_->getScreenWidth());
+	viewport.Height		= static_cast<FLOAT>(winfo_->getScreenHeight());
+	viewport.MinDepth	= 0;
+	viewport.MaxDepth	= 1;
+	devcon->RSSetViewports(1, &viewport);
+
+	managementSS_->setSS(devcon, TypeFX_PS, 0, SS_ID_DEFAULT);
+	managementRS_->setRS(devcon, RS_ID_DEFAULT);
+	
+	devcon->IASetVertexBuffers(0, 0, nullptr, 0, 0);
+	devcon->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
+	managementFX_->setShader(devcon, SHADERID_VS_SCREENQUAD);
+	managementFX_->setShader(devcon, SHADERID_PS_DOWNSAMPLE);
+	managementBuffer_->setGlowLowAsRTV(devcon);
+	managementBuffer_->setGlowHighAsSRV(devcon);
+	devcon->Draw(4, 0); //Draw four arbitrary vertices.
+
+	managementBuffer_->unsetGlowHighAsSrv(devcon);
+	managementBuffer_->unsetGlowLowAsRTV(devcon);
+	managementFX_->unsetAll(devcon);
+
+	//Deactivate depth-buffer
+	//Downsample blur-texture
+	//Blur downsampled blur-texture
+	//Sample back up again
 }
 
 void Renderer::drawBulletPhysicsDebugLines(

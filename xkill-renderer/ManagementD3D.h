@@ -15,7 +15,7 @@ struct VertexPosNormTex;
 
 class Winfo;
 
-static const unsigned int GBUFFER_SHADER_REGISTER_DEPTH = 3;
+static const unsigned int GBUFFER_SHADER_REGISTER_DEPTH = 4;
 
 static const FLOAT CLEAR_COLOR_BACKBUFFER[4] = { 0.0f, 0.0f, 0.0f, 1.0f };
 

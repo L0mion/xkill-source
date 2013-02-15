@@ -75,10 +75,13 @@ HRESULT ManagementBuffer::resize(ID3D11Device* device)
 	}
 	if(SUCCEEDED(hr))
 	{
+		unsigned int width	= winfo_->getScreenWidth()	/ 2;
+		unsigned int height = winfo_->getScreenHeight()	/ 2;
+
 		hr = glowLow_->resize(
 			device,
-			glowLow_->getTexWidth(),
-			glowLow_->getTexHeight()); //Maintain given resolution.
+			width,
+			height);
 	}
 
 	return hr;
@@ -155,7 +158,7 @@ HRESULT ManagementBuffer::initGlow(ID3D11Device* device)
 {
 	HRESULT hr = S_OK;
 
-	//Init GlowBufLow
+	//Init GlowBufHigh
 	glowHigh_ = new Buffer_SrvRtvUav(
 		winfo_->getScreenWidth(), 
 		winfo_->getScreenHeight(),
@@ -164,20 +167,11 @@ HRESULT ManagementBuffer::initGlow(ID3D11Device* device)
 		false);
 	hr = glowHigh_->init(device);
 
-	//Init GlowBufHigh
-	unsigned int width, height;
-	switch(GLOWBUFLOW_GLOW_BUFFER_DIMENSIONS)
-	{
-	case HALF_SCREEN_RES:
-		width = winfo_->getScreenWidth() / 2;
-		height = winfo_->getScreenHeight() / 2;
-		break;
-	default:
-		assert(false);
-	}
-
+	//Init GlowBufLow
+	unsigned int width	= winfo_->getScreenWidth()  / 2;
+	unsigned int height	= winfo_->getScreenHeight() / 2;
 	glowLow_ = new Buffer_SrvRtvUav(
-		width, 
+		width,
 		height,
 		MULTISAMPLES_GBUFFERS, //?
 		getFormat(GBUFFER_FORMAT_GLOW_LOW),
@@ -206,45 +200,89 @@ void ManagementBuffer::setBuffersAndDepthBufferAsRenderTargets(
 	ID3D11DeviceContext*	devcon, 
 	ID3D11DepthStencilView*	depthBuffer)
 {
-	ID3D11RenderTargetView* renderTargets[GBUFFERID_NUM_BUFFERS];
+	ID3D11RenderTargetView* renderTargets[GBUFFERID_NUM_BUFFERS + 1];
 	for(int i = 0; i < GBUFFERID_NUM_BUFFERS; i++)
 		renderTargets[i] = gBuffers_[i]->getRTV();
 
+	renderTargets[GBUFFERID_NUM_BUFFERS] = glowHigh_->getRTV();
+
 	devcon->OMSetRenderTargets(
-		GBUFFERID_NUM_BUFFERS,
+		GBUFFERID_NUM_BUFFERS + 1,
 		renderTargets, 
 		depthBuffer);
 }
 void ManagementBuffer::unsetBuffersAndDepthBufferAsRenderTargets(ID3D11DeviceContext* devcon)
 {
-	ID3D11RenderTargetView* renderTargets[GBUFFERID_NUM_BUFFERS];
-	for(int i = 0; i < GBUFFERID_NUM_BUFFERS; i++)
+	ID3D11RenderTargetView* renderTargets[GBUFFERID_NUM_BUFFERS + 1];
+	for(int i = 0; i < GBUFFERID_NUM_BUFFERS + 1; i++)
 		renderTargets[i] = nullptr;
 
 	devcon->OMSetRenderTargets(
-		GBUFFERID_NUM_BUFFERS, 
+		GBUFFERID_NUM_BUFFERS + 1, 
 		renderTargets, 
 		NULL);
 }
 void ManagementBuffer::setBuffersAsCSShaderResources(ID3D11DeviceContext* devcon)
 {
-	ID3D11ShaderResourceView* resourceViews[GBUFFERID_NUM_BUFFERS];
+	ID3D11ShaderResourceView* resourceViews[GBUFFERID_NUM_BUFFERS + 1];
 	for(int i = 0; i < GBUFFERID_NUM_BUFFERS; i++)
 		resourceViews[i] = gBuffers_[i]->getSRV();
 
+	resourceViews[GBUFFERID_NUM_BUFFERS] = glowLow_->getSRV(); //
+
 	devcon->CSSetShaderResources(
 		0, 
-		GBUFFERID_NUM_BUFFERS, 
+		GBUFFERID_NUM_BUFFERS + 1,
 		resourceViews);
 }
 void ManagementBuffer::unsetBuffersAsCSShaderResources(ID3D11DeviceContext* devcon)
 {
-	ID3D11ShaderResourceView* resourceViews[GBUFFERID_NUM_BUFFERS];
-	for(int i = 0; i < GBUFFERID_NUM_BUFFERS; i++)
+	ID3D11ShaderResourceView* resourceViews[GBUFFERID_NUM_BUFFERS + 1];
+	for(int i = 0; i < GBUFFERID_NUM_BUFFERS + 1; i++)
 		resourceViews[i] = nullptr;
 
 	devcon->CSSetShaderResources(
 		0, 
-		GBUFFERID_NUM_BUFFERS, 
+		GBUFFERID_NUM_BUFFERS + 1, 
 		resourceViews);
+}
+
+void ManagementBuffer::setGlowLowAsRTV(ID3D11DeviceContext* devcon)
+{
+	ID3D11RenderTargetView* renderTargets[1];
+	renderTargets[0] = glowLow_->getRTV();
+
+	devcon->OMSetRenderTargets(
+		1,
+		renderTargets,
+		NULL);
+}
+void ManagementBuffer::unsetGlowLowAsRTV(ID3D11DeviceContext* devcon)
+{
+	ID3D11RenderTargetView* renderTargets[1];
+	renderTargets[0] = nullptr;
+
+	devcon->OMSetRenderTargets(
+		1, 
+		renderTargets, 
+		NULL);
+}
+
+void ManagementBuffer::setGlowHighAsSRV(ID3D11DeviceContext* devcon)
+{
+	ID3D11ShaderResourceView* srv = glowHigh_->getSRV();
+
+	devcon->PSSetShaderResources(
+		SHADER_REGISTER_GLOW, 
+		1, 
+		&srv);
+}
+void ManagementBuffer::unsetGlowHighAsSrv(ID3D11DeviceContext* devcon)
+{
+	ID3D11ShaderResourceView* nullViews[1] = { nullptr };
+
+	devcon->PSSetShaderResources(
+		SHADER_REGISTER_GLOW,
+		1,
+		nullViews);
 }
