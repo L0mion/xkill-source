@@ -18,7 +18,16 @@ HacksComponent::HacksComponent()
 
 HacksComponent::~HacksComponent()
 {
+	for(unsigned int i = 0; i < XKILL_Enums::HackType::NROFHACKTYPES; i++)
+	{
+		std::vector<std::pair<Timer*, AttributePtr<Attribute_Player>>*>& vector = activeHacks_[i];
 
+		for(unsigned int j = 0; j < vector.size(); j++)
+		{
+			SAFE_DELETE(vector[j]->first);
+			SAFE_DELETE(vector[j]);
+		}
+	}
 }
 
 bool HacksComponent::init()

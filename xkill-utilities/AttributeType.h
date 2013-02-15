@@ -492,9 +492,6 @@ struct DLL_U Attribute_Player : public IAttribute
 	bool canSprint;				//!< Can the player sprint right now
 	float sprintRechargeRate;	//!< The rate at which the sprint will recharge
 	Timer respawnTimer;		//!< Keeps track of when a dead player should respawn
-	float timeSinceLastJump;	//!< Incrementing timer
-	float delayInSecondsBetweenEachJump;
-	bool collidingWithWorld;			//!< Set y-velocity to zero when not colliding with world and not jumping
 	float timeSinceLastDamageTaken;		//!< Incrementing timer. Reset when taking damage.
 	bool jetpack;						//!< Use jetpack		
 	bool detectedAsDead;

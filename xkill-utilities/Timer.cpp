@@ -2,12 +2,14 @@
 
 Timer::Timer()
 {
+	isActive_ = true;
 	startTime_ = 0.0f;
 	resetTimer();
 }
 
 Timer::Timer(float startTime)
 {
+	isActive_ = true;
 	startTime_ = startTime;
 	resetTimer();
 }
@@ -19,7 +21,8 @@ Timer::~Timer()
 
 void Timer::update(float delta)
 {
-	timeLeft_ -= delta;
+	if(isActive_)
+		timeLeft_ -= delta;
 }
 
 void Timer::setStartTime(float time)
@@ -50,4 +53,14 @@ float Timer::getStartTime()
 float Timer::getTimeLeft()
 {
 	return timeLeft_;
+}
+
+void Timer::setActive(bool active)
+{
+	isActive_ = active;
+}
+
+bool Timer::isActive()
+{
+	return isActive_;
 }

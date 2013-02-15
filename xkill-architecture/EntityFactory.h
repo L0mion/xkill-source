@@ -66,7 +66,6 @@ public:
 		CREATE_ATTRIBUTE(ptr_spatial, Attribute_Spatial, spatial, entity);
 		ptr_spatial->ptr_position = ptr_position;
 
-		
 		CREATE_ATTRIBUTE(ptr_render, Attribute_Render, render, entity);
 		ptr_render->ptr_spatial = ptr_spatial;
 		
@@ -76,8 +75,8 @@ public:
 		ptr_physics->meshID = ptr_render->meshID;
 		ptr_physics->collisionFilterGroup = XKILL_Enums::PhysicsAttributeType::PLAYER;
 		ptr_physics->collisionFilterMask = XKILL_Enums::PhysicsAttributeType::EVERYTHING;
-		ptr_physics->gravity = Float3(0.0f, -0.0f, 0.0f);
-		ptr_physics->mass = 85;
+		ptr_physics->gravity = Float3(0.0f, -10.0f, 0.0f);
+		ptr_physics->mass = 85.0f;
 		
 		CREATE_ATTRIBUTE(ptr_input, Attribute_Input, input, entity);
 		ptr_input->ptr_physics = ptr_physics;
@@ -117,6 +116,17 @@ public:
 		ptr_player->ptr_weaponFireLocation_spatial = ptr_weaponFireLocation_spatial;
 
 		CREATE_ATTRIBUTE(ptr_ray, Attribute_Ray, ray, entity);
+
+		/*
+		CREATE_ATTRIBUTE(ptr_lightPoint, Attribute_Light_Point, lightPoint, entity);
+		ptr_lightPoint->ptr_position			= ptr_position;
+		Float4 color = Float4(1.0f, 0.0f, 0.0f, 1.0f);
+		ptr_lightPoint->lightPoint.ambient		= Float4(0.0f, 0.0f, 0.0f, 1.0f);
+		ptr_lightPoint->lightPoint.diffuse		= color;
+		ptr_lightPoint->lightPoint.specular		= color;
+		ptr_lightPoint->lightPoint.range		= 1.0f;
+		ptr_lightPoint->lightPoint.attenuation	= Float3(0.0f, 30.0f, 0.0f);
+		*/
 	}
 
 	AttributePtr<Attribute_Camera> createCamera(Entity* entity, AttributePtr<Attribute_Spatial> ptr_parent_spatial)
@@ -240,7 +250,7 @@ public:
 		ptr_physics->collisionFilterMask = XKILL_Enums::PhysicsAttributeType::WORLD | XKILL_Enums::PhysicsAttributeType::PLAYER | XKILL_Enums::PhysicsAttributeType::FRUSTUM | XKILL_Enums::PhysicsAttributeType::PICKUPABLE;
 		ptr_physics->meshID = ptr_render->meshID;
 		ptr_physics->linearVelocity = e->velocity;
-		ptr_physics->mass = 50.0f;
+		ptr_physics->mass = 1.0f;
 		ptr_physics->gravity = Float3(0.0f, 0.0f, 0.0f);
 		ptr_physics->collisionResponse = true;
 
@@ -383,7 +393,7 @@ public:
 		ptr_physics->ptr_spatial = ptr_spatial;
 		ptr_physics->collisionFilterGroup = XKILL_Enums::PhysicsAttributeType::EXPLOSIONSPHERE;
 		ptr_physics->collisionFilterMask = XKILL_Enums::PhysicsAttributeType::PLAYER | XKILL_Enums::PhysicsAttributeType::PICKUPABLE;
-		ptr_physics->collisionResponse = false;
+		ptr_physics->collisionResponse = true;
 		ptr_physics->mass = 0.0f;
 		ptr_physics->gravity = Float3(0.0f, 0.0f, 0.0f);
 		ptr_physics->linearVelocity = Float3(0.0f, 0.0f, 0.0f);
@@ -394,7 +404,7 @@ public:
 		ptr_explosionSphere->firingModeType = e->firingModeType;
 
 		CREATE_ATTRIBUTE(ptr_damage, Attribute_Damage, damage, entity);
-		ptr_damage->damage = 0.0f; //e->damage;
+		ptr_damage->damage = e->damage;
 		ptr_damage->owner_entityID = e->entityIdOfCreator;
 	}
 

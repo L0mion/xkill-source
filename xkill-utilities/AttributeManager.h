@@ -15,6 +15,8 @@ private:
 public:
 	bool showDebugPhysics;
 	std::string currentLevel;
+	float timeLimit;
+	int cycleLimit;
 	float trueDeltaTime;
 	bool soundMuted;
 	float soundVolume;
@@ -27,6 +29,8 @@ public:
 		_timeScale = 1.0f;
 		trueDeltaTime = 0.0f;
 		currentLevel = "TestArena";
+		timeLimit = -1.0f;
+		cycleLimit = 35;
 		showDebugPhysics = false;
 	}
 };

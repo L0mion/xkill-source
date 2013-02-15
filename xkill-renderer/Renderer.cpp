@@ -55,7 +55,7 @@ Renderer::Renderer(HWND windowHandle)
 	managementInstance_ = nullptr;
 	managementSprites_  = nullptr;
 
-	attributesRenderOwner_	= nullptr;
+	//attributesRenderOwner_	= nullptr;
 
 	ATTRIBUTES_INIT_ALL;
 
@@ -645,8 +645,15 @@ void Renderer::renderSubset(
 	devcon->PSSetShaderResources(1, 1, &texNormal);
 
 	//Set per-subset constant buffer.
-	managementCB_->setCB(CB_TYPE_SUBSET, TypeFX_PS, CB_REGISTER_SUBSET, devcon);
-	DirectX::XMFLOAT3 dxSpec(1.0f, 1.0f, 1.0f); //((float*)&material.getSpecularTerm());
+	managementCB_->setCB(
+		CB_TYPE_SUBSET, 
+		TypeFX_PS, 
+		CB_REGISTER_SUBSET, 
+		devcon);
+	DirectX::XMFLOAT3 dxSpec(
+		material.specularTerm_.x, 
+		material.specularTerm_.y, 
+		material.specularTerm_.z);
 	managementCB_->updateCBSubset(
 		devcon,
 		dxSpec,

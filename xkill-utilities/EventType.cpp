@@ -265,3 +265,9 @@ Event_GetEntityIdOfPhysicsObjectHitByRay::Event_GetEntityIdOfPhysicsObjectHitByR
 	this->to = to;
 	this->collisionFilterMask = collisionFilterMask;
 }
+
+Event_GetFileList::Event_GetFileList(std::string filepathAndExtension) : 
+	Event(EVENT_GET_FILE_LIST)
+{
+	this->filepathAndExtension = filepathAndExtension;
+}
