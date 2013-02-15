@@ -54,7 +54,7 @@ PSOut PS_NormalMap(VSOutPosNormWTexTanW pIn)
 	pIn.texcoord.y		= 1 - pIn.texcoord.y;
 	output.albedo		= texAlbedo.SampleLevel(ss, pIn.texcoord, 0);
 	
-	output.material		= float4(1.0f, 1.0f, 1.0f, 1.0f);
+	output.material		= float4(specularTerm, 0.5f); //specpow
 
 	return output;
 }

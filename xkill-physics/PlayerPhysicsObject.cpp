@@ -41,7 +41,7 @@ void PlayerPhysicsObject::onUpdate(float delta)
 	PhysicsObject::onUpdate(delta);
 
 	handleInput(delta);
-
+	float height = 1;
 	//--------------------------------------------------------------------------------------
 	// Hovering
 	//-------------------------------------------------------------------------------------
