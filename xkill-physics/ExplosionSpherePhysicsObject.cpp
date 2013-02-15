@@ -67,7 +67,7 @@ btVector3 ExplosionSpherePhysicsObject::subClassCalculateLocalInertiaHook(btScal
 	return zeroLocalInertia();
 }
 
-void ExplosionSpherePhysicsObject::onUpdate(float delta,btDynamicsWorld* dynamicWorld)
+void ExplosionSpherePhysicsObject::onUpdate(float delta)
 {
 	//Expand explosion sphere according to mutator settings retrieved in "subClassSpecificInitHook()"
 	std::vector<int> explosionSphereEntityId = itrPhysics.ownerAt(attributeIndex_)->getAttributes(ATTRIBUTE_EXPLOSIONSPHERE);

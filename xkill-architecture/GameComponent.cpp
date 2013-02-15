@@ -189,7 +189,7 @@ void GameComponent::onUpdate(float delta)
 			//--------------------------------------------------------------------------------------
 			// Sprint (run) logic
 			//--------------------------------------------------------------------------------------
-			if(ptr_input->sprint && ptr_player->canSprint && ptr_player->collidingWithWorld)
+			if(ptr_input->sprint && ptr_player->canSprint)
 			{
 				ptr_player->currentSprintTime -= delta;
 				if(ptr_player->currentSprintTime < 0)
@@ -286,7 +286,6 @@ void GameComponent::onUpdate(float delta)
 			}
 			ptr_health->healthFromLastFrame = ptr_health->health;
 
-			ptr_player->timeSinceLastJump += delta;
 			ptr_player->timeSinceLastDamageTaken += delta;
 			ptr_player->jetpack = false;
 		}
@@ -809,23 +808,6 @@ void collision_projectile(Entity* entity1, Entity* entity2)
 	}
 }
 
-void collision_playerVsWorld(Entity* entity1, Entity* entity2)
-{
-	if(entity1->hasAttribute(ATTRIBUTE_PHYSICS))
-	{
-		//Player colliding with world
-		if(entity2->hasAttribute(ATTRIBUTE_PLAYER))
-		{
-			std::vector<int> playerId = entity2->getAttributes(ATTRIBUTE_PLAYER);
-			for(int i=0; i<(int)playerId.size(); i++)
-			{
-				AttributePtr<Attribute_Player> ptr_player = itrPlayer.at(playerId.at(i));
-				ptr_player->collidingWithWorld = true;
-			}
-		}
-	}
-}
-
 void collision_playerVsExplosionSphere(Entity* entity1, Entity* entity2)
 {
 	if(entity1->hasAttribute(ATTRIBUTE_EXPLOSIONSPHERE))
@@ -868,7 +850,6 @@ void GameComponent::event_PhysicsAttributesColliding(Event_PhysicsAttributesColl
 	collision_applyDamage(entity1, entity2);
 	collision_projectile(entity1, entity2);
 	collision_pickupable(entity1, entity2);
-	collision_playerVsWorld(entity1, entity2);	
 	collision_playerVsExplosionSphere(entity1, entity2);
 }
 
@@ -1044,12 +1025,12 @@ void GameComponent::event_StartDeathmatch( Event_StartDeathmatch* e )
 		SEND_EVENT(&Event_CreateEntity(PLAYER));
 	}
 
-	//Ensure ammunition disablement (selected from menu)
 	while(itrPlayer.hasNext())
 	{
 		AttributePtr<Attribute_Player>			ptr_player		=	itrPlayer		.getNext();
 		AttributePtr<Attribute_WeaponStats>		ptr_weaponStats	=	ptr_player	->	ptr_weaponStats	;
-		switchFiringMode(ptr_weaponStats);
+		switchFiringMode(ptr_weaponStats);	//Ensure ammunition disablement (selected from menu)
+		
 		SEND_EVENT(&Event_HackActivated(1000.0f, XKILL_Enums::HackType::JETHACK, ptr_player));
 	}
 

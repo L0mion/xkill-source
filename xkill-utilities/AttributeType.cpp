@@ -529,9 +529,6 @@ Attribute_Player::Attribute_Player()
 	cycleSteals = 0;
 	totalExecutionTime = 0;
 	respawnTimer.setStartTime(5.0f);
-	delayInSecondsBetweenEachJump = 1.0f;
-	timeSinceLastJump = delayInSecondsBetweenEachJump+1.0f;
-	collidingWithWorld = false;
 	timeSinceLastDamageTaken = 100.0f;
 	jetpack = false;
 	detectedAsDead = true;

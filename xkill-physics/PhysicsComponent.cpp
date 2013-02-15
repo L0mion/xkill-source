@@ -115,6 +115,7 @@ bool PhysicsComponent::init()
 
 	dynamicsWorld_->setGravity(btVector3(0,-10,0));
 	dynamicsWorld_->setInternalTickCallback(wrapTickCallback,static_cast<void*>(this)); //Register collision callback
+	PhysicsObject::setDynamicsWorld(dynamicsWorld_); //Make dynamicsWorld_ accessible from physics objects
 
 	gDebugDraw.setDebugMode(btIDebugDraw::DBG_DrawWireframe);
 	dynamicsWorld_->setDebugDrawer(&gDebugDraw);
@@ -136,7 +137,7 @@ void PhysicsComponent::onUpdate(float delta)
 		unsigned int physicsAttributeIndex = itrPhysics.storageIndex();
 
 		synchronizeWithAttributes(ptr_physics, physicsAttributeIndex);	//Synchronize physics objects with physics attributes
-		physicsObjects_->at(physicsAttributeIndex)->onUpdate(delta,dynamicsWorld_);	//Update physics objects by calling their onUpdate function.
+		physicsObjects_->at(physicsAttributeIndex)->onUpdate(delta);	//Update physics objects by calling their onUpdate function.
 
 		//Should be in PlayerPhysicsAttribute::onUpdate()
 		if(ptr_physics->collisionFilterGroup == XKILL_Enums::PhysicsAttributeType::PLAYER)
