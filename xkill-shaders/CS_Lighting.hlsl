@@ -134,7 +134,7 @@ void CS_Lighting(
 	{
 		/*Ambient*/		gAlbedo,
 		/*Diffuse*/		gAlbedo,
-		/*Specular*/	float4(0.3f, 0.3f, 0.3f, 1.0f)
+		/*Specular*/	gMaterial
 	};
 	
 	//Do lighting
@@ -179,5 +179,8 @@ void CS_Lighting(
 	//	Diffuse.g += 0.1;
 	//}
 
-	output[uint2(threadIDDispatch.x + viewportTopX, threadIDDispatch.y + viewportTopY)] = Ambient + Diffuse + Specular;
+	output[
+		uint2(
+			threadIDDispatch.x + viewportTopX, 
+			threadIDDispatch.y + viewportTopY)] = float4(Ambient.xyz + Diffuse.xyz + Specular.xyz, 1.0f);
 }
