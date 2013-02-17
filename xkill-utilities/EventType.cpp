@@ -36,13 +36,6 @@ Event_Rumble::Event_Rumble(unsigned int deviceNr,
 	this->rightScale = rightScale;
 }
 
-Event_GetAttribute::Event_GetAttribute(int attributeEnum) : Event(EVENT_GET_ATTRIBUTE)
-{
-	this->attributeEnum = attributeEnum;
-		
-	hostVector = 0;
-	owners = 0;
-}
 
 Event_GetEntities::Event_GetEntities() : Event(EVENT_GET_ENTITIES)
 {

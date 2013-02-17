@@ -150,7 +150,7 @@ void ScoreComponent::schedulerScoreCounting(float delta)
 	{
 		if(itrPlayer.getNext()->totalExecutionTime >= victoryScore_)
 		{
-			SEND_EVENT(&Event(EVENT_GAME_OVER));
+			SEND_EVENT(&Event(EVENT_GAMEOVER));
 		}
 	}
 }
@@ -161,7 +161,7 @@ void ScoreComponent::deathMatchScoreCounting(float delta)
 	{
 		if(itrPlayer.getNext()->priority >= victoryScore_)
 		{
-			SEND_EVENT(&Event(EVENT_GAME_OVER));
+			SEND_EVENT(&Event(EVENT_GAMEOVER));
 		}
 	}
 }

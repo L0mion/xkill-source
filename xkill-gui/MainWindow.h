@@ -33,86 +33,13 @@ public:
 
 protected:
 	void closeEvent(QCloseEvent *event);
-	// Behavior on keyboard input
 	void keyPressEvent(QKeyEvent* e);
+	void keyReleaseEvent(QKeyEvent* e);
 	void moveEvent(QMoveEvent *e);
 	void resizeEvent(QResizeEvent* e);;
 	void showMenu();
-	void keyReleaseEvent(QKeyEvent* e);
+	
 
-	//bool event(QEvent* e)
-	//{
-	//	// A custom event filter
-	//	bool result = true;
-
-	//	// Make sure menu is always drawn on top of this window
-	//	// event though it is a separate window
-	//	switch(e->type())
-	//	{ 
-	//	case QEvent::WindowActivate :
-	//	case QEvent::FocusIn :
-	//		menu->raise();
-	//		return false;
-	//		break;
-	//	default:
-	//		// Perform logic as normal
-	//		//bool result = QMainWindow::event(e) ;
-	//		break;
-	//	};
-
-	//	return result;
-	//}
-
-	bool eventFilter(QObject* object, QEvent* e)
-	{
-		QEvent::Type type = e->type();
-
-		/*
-		if (e->type() == QEvent::WindowActivate)
-		{
-		menu->raise();
-		}
-
-		if (e->type() == QEvent::ActivationChange)
-		{
-		menu->raise();
-		}
-
-		if (e->type() == QEvent::UpdateRequest)
-		{
-		menu->raise();
-		}
-
-		if (e->type() == 174)
-		{
-		menu->raise();
-		}
-
-		*/
-
-		if (e->type() == QEvent::WindowTitleChange)
-		{
-			return false;
-		}
-		if (e->type() == QEvent::NonClientAreaMouseMove)
-		{
-			return false;
-		}
-		if (e->type() == QEvent::HoverMove)
-		{
-			return false;
-		}
-
-		//DEBUGPRINT("Event " << type);
-		
-		return false;
-	}
-
-	void focusInEvent( QFocusEvent* )
-	{
-		menu->raise();
-	}
-	void paintEvent(QPaintEvent* e);
 
 public slots:
 	void slot_setTitle(QString title);

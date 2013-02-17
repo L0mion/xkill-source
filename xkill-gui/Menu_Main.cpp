@@ -233,14 +233,7 @@ void Menu_Main::mousePressEvent( QMouseEvent* e )
 
 void Menu_Main::slot_startGame()
 {
-	// Hide mouse
-	SEND_EVENT(&Event_SetMouseLock(true));
-
-	SEND_EVENT(&Event_EndDeathmatch());	//Temporary to remove the "empty" game that is used to paint the menu background black.
-	int num_players = ui.horizontalSlider_numPlayers->value();
-	SEND_EVENT(&Event_StartDeathmatch(num_players));
-
-	ToggleHelper::toggleMenu(false);
+	
 }
 
 void Menu_Main::slot_loadInputList(int deviceId)

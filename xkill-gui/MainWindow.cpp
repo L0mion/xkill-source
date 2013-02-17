@@ -204,9 +204,3 @@ void MainWindow::closeEvent( QCloseEvent *event )
 	delete menuManager;
 	delete menu;
 }
-
-void MainWindow::paintEvent( QPaintEvent* e )
-{
-	QWidget::paintEvent(e);
-	menu->raise();
-}
