@@ -278,3 +278,10 @@ Event_LoadLevel::Event_LoadLevel(std::string levelName) :
 {
 	this->levelName = levelName;
 }
+
+Event_AnimationLoaded::Event_AnimationLoaded(unsigned int meshID, SkinnedData* skinnedData) : Event(EVENT_ANIMATION_LOADED)
+{
+	this->meshID = meshID;
+	this->skinnedData = skinnedData;
+}
+

@@ -1,6 +1,7 @@
 #include <xkill-utilities/AttributeType.h>
 #include <xkill-utilities/Util.h>
 #include <xkill-utilities/TexDesc.h>
+#include <xkill-utilities/SkinnedData.h>
 
 #include "Renderer.h"
 #include "renderingUtilities.h"
@@ -13,6 +14,7 @@ RenderingComponent::RenderingComponent(HWND windowHandle)
 	SUBSCRIBE_TO_EVENT(this, EVENT_LOAD_TEXTURES);
 	SUBSCRIBE_TO_EVENT(this, EVENT_GAMERESET);
 	SUBSCRIBE_TO_EVENT(this, EVENT_UNLOAD_LEVEL);
+	SUBSCRIBE_TO_EVENT(this, EVENT_ANIMATION_LOADED);
 
 	windowHandle_	= windowHandle;
 	renderer_		= nullptr;
@@ -69,6 +71,9 @@ void RenderingComponent::onEvent( Event* e )
 	case EVENT_UNLOAD_LEVEL:
 		renderer_->unloadModels();
 		break;
+	case EVENT_ANIMATION_LOADED:
+		event_AnimationLoaded((Event_AnimationLoaded*)e);
+		break;
 	default:
 		break;
 	}
@@ -92,4 +97,8 @@ void RenderingComponent::event_PostDescTex(Event_LoadTextures* e)
 	renderer_->loadTextures(texDesc);
 
 	delete texDesc;
+}
+void RenderingComponent::event_AnimationLoaded(Event_AnimationLoaded* e)
+{
+	renderer_->addAnimation(e->skinnedData);
 }

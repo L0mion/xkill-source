@@ -179,7 +179,7 @@ void LoaderFbxMeshDesc::mapBoneData(std::vector<VertexDesc>* vertices, std::vect
 		vertices->at(i).weights_.x = vertexBoneWeights_[indices[i]][0];
 		vertices->at(i).weights_.y = vertexBoneWeights_[indices[i]][1];
 		vertices->at(i).weights_.z = vertexBoneWeights_[indices[i]][2];
-		for(int boneIndex=0; i<NUM_BONES_PER_VERTEX; i++)
+		for(int boneIndex=0; boneIndex<NUM_BONES_PER_VERTEX; boneIndex++)
 		{
 			vertices->at(i).boneIndices_[boneIndex] = vertexBoneIndices_[indices[i]][boneIndex];
 		}

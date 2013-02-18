@@ -438,7 +438,7 @@ void LoaderFbxMesh::parseVertexLinkData(FbxMesh* mesh, LoaderFbxMeshDesc* meshDe
 		numClusters = static_cast<FbxSkin*>(mesh->GetDeformer(deformerIndex, FbxDeformer::eSkin))->GetClusterCount();
 		if(numClusters > 0)
 		{
-			cluster = static_cast<FbxSkin*>(mesh->GetDeformer(0, FbxDeformer::eSkin))->GetCluster(0);
+			cluster = static_cast<FbxSkin*>(mesh->GetDeformer(deformerIndex, FbxDeformer::eSkin))->GetCluster(0);
 		}
 		if(cluster)
 		{
@@ -465,7 +465,7 @@ void LoaderFbxMesh::parseVertexLinkData(FbxMesh* mesh, LoaderFbxMeshDesc* meshDe
 
 			for(int clusterIndex=0; clusterIndex<numClusters; clusterIndex++)
 			{
-				cluster = static_cast<FbxSkin*>(mesh->GetDeformer(0, FbxDeformer::eSkin))->GetCluster(clusterIndex);
+				cluster = static_cast<FbxSkin*>(mesh->GetDeformer(deformerIndex, FbxDeformer::eSkin))->GetCluster(clusterIndex);
 				unsigned int nodeIndex=0; 
 				bool equal = false;
 				while(!equal && nodeIndex<nodes.size())
