@@ -35,6 +35,8 @@ public:
 
 	HRESULT init();	//!< Initializes DebugShapes-object.
 
+	void unloadModels(); //!< Unload all models
+
 	//! Gets a ModelD3D-type object from ModelManagement, based on ModelID.
 	/*! If model is not known to ModelManagement; ModelManagement will attempt to load model.
 	\param modelID	ID of model.

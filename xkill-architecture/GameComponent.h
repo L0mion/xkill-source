@@ -67,6 +67,11 @@ public:
 	void event_PlayerDeath(Event_PlayerDeath* e);
 
 	/**
+	Unload current level
+	*/
+	void event_UnloadLevel();
+
+	/**
 	Finds an unoccupied spawn point (no other player inside its radius). 
 	Prioritizes spawn points that least recently spawned a player. 
 	If no unoccupied spawn point is found, one is selected at random. 

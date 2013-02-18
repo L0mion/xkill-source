@@ -57,6 +57,7 @@ public:
 	~Renderer();					//!< Releases all memory and returns to default state.
 	
 	void	reset();				//!< Resets RenderingComponent to default state.
+	void	unloadModels();			//!< Unloads all models in ManagementModel
 	HRESULT	resize(
 		unsigned int screenWidth, 
 		unsigned int screenHeight);	//!< Resizes all management objects that are affected by a change in screen resolution.

@@ -7,6 +7,8 @@
 
 #include <ctime>
 
+#define SAFE_DELETE(x) {if(x != nullptr) delete x; x = nullptr;}
+
 // Iterators
 ATTRIBUTES_DECLARE_ALL;
 
@@ -18,6 +20,7 @@ GameComponent::GameComponent(void)
 	SUBSCRIBE_TO_EVENT(this, EVENT_END_DEATHMATCH);
 	SUBSCRIBE_TO_EVENT(this, EVENT_TRANSFER_EVENTS_TO_GAME);
 	SUBSCRIBE_TO_EVENT(this, EVENT_PLAYERDEATH);
+	SUBSCRIBE_TO_EVENT(this, EVENT_UNLOAD_LEVEL);
 }
 
 GameComponent::~GameComponent(void)
@@ -60,6 +63,10 @@ void GameComponent::onEvent(Event* e)
 		break;
 	case EVENT_PLAYERDEATH:
 		event_PlayerDeath(static_cast<Event_PlayerDeath*>(e));
+		break;
+	case EVENT_UNLOAD_LEVEL:
+		event_UnloadLevel();
+		break;
 	default:
 		break;
 	}
@@ -110,9 +117,6 @@ void GameComponent::onUpdate(float delta)
 					DEBUGPRINT("Failed to switch ammunition. Succeeded in playing 'beep' sound");
 					DEBUGPRINT("\a");
 				}
-				DEBUGPRINT(std::endl);
-				DEBUGPRINT("Ammunition type: " << ptr_weaponStats->getAmmunitionTypeAsString());
-				DEBUGPRINT("Firing mode: " << ptr_weaponStats->getFiringModeAsString());
 			}
 
 			if(ptr_input->changeFiringMode)
@@ -130,9 +134,6 @@ void GameComponent::onUpdate(float delta)
 					DEBUGPRINT("\a");
 				}
 			
-				DEBUGPRINT(std::endl);
-				DEBUGPRINT("Ammunition type: " << ptr_weaponStats->getAmmunitionTypeAsString());
-				DEBUGPRINT("Firing mode: " << ptr_weaponStats->getFiringModeAsString());
 			}
 			int ammoIndex = ammo->type;
 
@@ -154,8 +155,6 @@ void GameComponent::onUpdate(float delta)
 			if((ptr_input->fire && firingMode->type == XKILL_Enums::FiringModeType::AUTO) || 
 				ptr_input->firePressed && (firingMode->type == XKILL_Enums::FiringModeType::SINGLE || firingMode->type == XKILL_Enums::FiringModeType::SEMI))
 			{
-				DEBUGPRINT("ammo->currentTotalNrOfShots: " << ammo->currentTotalNrOfShots);
-				DEBUGPRINT("firingMode->nrOfShotsLeftInClip: " << firingMode->nrOfShotsLeftInClip[ammoIndex]);
 				ptr_input->fire = false;
 				ptr_input->firePressed = false;
 
@@ -189,7 +188,7 @@ void GameComponent::onUpdate(float delta)
 			//--------------------------------------------------------------------------------------
 			// Sprint (run) logic
 			//--------------------------------------------------------------------------------------
-			if(ptr_input->sprint && ptr_player->canSprint && ptr_player->collidingWithWorld)
+			if(ptr_input->sprint && ptr_player->canSprint)
 			{
 				ptr_player->currentSprintTime -= delta;
 				if(ptr_player->currentSprintTime < 0)
@@ -286,7 +285,6 @@ void GameComponent::onUpdate(float delta)
 			}
 			ptr_health->healthFromLastFrame = ptr_health->health;
 
-			ptr_player->timeSinceLastJump += delta;
 			ptr_player->timeSinceLastDamageTaken += delta;
 			ptr_player->jetpack = false;
 		}
@@ -510,10 +508,6 @@ void GameComponent::onUpdate(float delta)
 				{
 					firingMode->nrOfShotsLeftInClip[ammoIndex] = firingMode->clipSize;
 				}
-
-				DEBUGPRINT("Weapon was automatically reloaded.");
-				DEBUGPRINT("Ammo in current clip: " << firingMode->nrOfShotsLeftInClip[ammoIndex]);
-				DEBUGPRINT("Total number of shots left: " << ammo->currentTotalNrOfShots);
 			}
 		}
 	}
@@ -809,23 +803,6 @@ void collision_projectile(Entity* entity1, Entity* entity2)
 	}
 }
 
-void collision_playerVsWorld(Entity* entity1, Entity* entity2)
-{
-	if(entity1->hasAttribute(ATTRIBUTE_PHYSICS))
-	{
-		//Player colliding with world
-		if(entity2->hasAttribute(ATTRIBUTE_PLAYER))
-		{
-			std::vector<int> playerId = entity2->getAttributes(ATTRIBUTE_PLAYER);
-			for(int i=0; i<(int)playerId.size(); i++)
-			{
-				AttributePtr<Attribute_Player> ptr_player = itrPlayer.at(playerId.at(i));
-				ptr_player->collidingWithWorld = true;
-			}
-		}
-	}
-}
-
 void collision_playerVsExplosionSphere(Entity* entity1, Entity* entity2)
 {
 	if(entity1->hasAttribute(ATTRIBUTE_EXPLOSIONSPHERE))
@@ -868,7 +845,6 @@ void GameComponent::event_PhysicsAttributesColliding(Event_PhysicsAttributesColl
 	collision_applyDamage(entity1, entity2);
 	collision_projectile(entity1, entity2);
 	collision_pickupable(entity1, entity2);
-	collision_playerVsWorld(entity1, entity2);	
 	collision_playerVsExplosionSphere(entity1, entity2);
 }
 
@@ -909,12 +885,6 @@ void GameComponent::event_EndDeathmatch(Event_EndDeathmatch* e)
 		itrLightSpot.getNext();
 		SEND_EVENT(&Event_RemoveEntity(itrLightSpot.ownerId()));
 	}
-
-	DEBUGPRINT("x--------------x");
-	DEBUGPRINT("-x------------x-");
-	DEBUGPRINT("DEATHMATCH ENDED");
-	DEBUGPRINT("-x------------x-");
-	DEBUGPRINT("x--------------x");
 }
 
 AttributePtr<Attribute_PlayerSpawnPoint> GameComponent::findUnoccupiedSpawnPoint()
@@ -1044,13 +1014,13 @@ void GameComponent::event_StartDeathmatch( Event_StartDeathmatch* e )
 		SEND_EVENT(&Event_CreateEntity(PLAYER));
 	}
 
-	//Ensure ammunition disablement (selected from menu)
 	while(itrPlayer.hasNext())
 	{
 		AttributePtr<Attribute_Player>			ptr_player		=	itrPlayer		.getNext();
 		AttributePtr<Attribute_WeaponStats>		ptr_weaponStats	=	ptr_player	->	ptr_weaponStats	;
-		switchFiringMode(ptr_weaponStats);
-		SEND_EVENT(&Event_HackActivated(1000.0f, XKILL_Enums::HackType::JETHACK, ptr_player));
+		switchFiringMode(ptr_weaponStats);	//Ensure ammunition disablement (selected from menu)
+		
+		//SEND_EVENT(&Event_HackActivated(1000.0f, XKILL_Enums::HackType::JETHACK, ptr_player));
 	}
 
 	//Create mesh for debugging fbx-loading.
@@ -1088,6 +1058,46 @@ void GameComponent::event_PlayerDeath(Event_PlayerDeath* e)
 
 	ptr_player->respawnTimer.resetTimer();
 	ptr_player->detectedAsDead = true;
+}
+
+void GameComponent::event_UnloadLevel()
+{
+	std::vector<Event*>::iterator it = levelEvents_.begin();
+	for(; it != levelEvents_.end(); it++)
+	{
+		SAFE_DELETE(*it);
+	}
+
+	levelEvents_.clear();
+
+	//while(itrPhysics.hasNext())
+	//{
+	//	itrPhysics.getNext();
+	//	SEND_EVENT(&Event_RemoveEntity(itrPhysics.ownerId()));
+	//}
+	//while(itrPlayerSpawnPoint.hasNext())
+	//{
+	//	itrPlayerSpawnPoint.getNext();
+	//	SEND_EVENT(&Event_RemoveEntity(itrPlayerSpawnPoint.ownerId()));
+	//}
+
+	//while(itrLightDir.hasNext())
+	//{
+	//	itrLightDir.getNext();
+	//	SEND_EVENT(&Event_RemoveEntity(itrLightDir.ownerId()));
+	//}
+
+	//while(itrLightPoint.hasNext())
+	//{
+	//	itrLightPoint.getNext();
+	//	SEND_EVENT(&Event_RemoveEntity(itrLightPoint.ownerId()));
+	//}
+
+	//while(itrLightSpot.hasNext())
+	//{
+	//	itrLightSpot.getNext();
+	//	SEND_EVENT(&Event_RemoveEntity(itrLightSpot.ownerId()));
+	//}
 }
 
 bool GameComponent::switchAmmunition(AttributePtr<Attribute_WeaponStats> weaponStats)

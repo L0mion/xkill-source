@@ -1,7 +1,7 @@
 #include "PickupablePhysicsObject.h"
+#include "btBulletDynamicsCommon.h"
 
-#include <BulletCollision/CollisionShapes/btCollisionShape.h>
-
+#include <xkill-utilities\Util.h>//check temp
 PickupablePhysicsObject::PickupablePhysicsObject()
 	: PhysicsObject()
 {
@@ -19,4 +19,11 @@ bool PickupablePhysicsObject::subClassSpecificInitHook()
 btVector3 PickupablePhysicsObject::subClassCalculateLocalInertiaHook(btScalar mass)
 {
 	return localInertiaBasedOnCollisionShapeAndMass(mass);
+}
+
+void PickupablePhysicsObject::onUpdate(float delta)
+{
+	Hover(delta, 1.0f);
+	setLinearVelocity(btVector3(0.0f, getLinearVelocity().y(), 0.0f)); //Prevent pickupable from floating away
+	setAngularVelocity(getAngularVelocity().absolute()*0.9f); //Gradually slow down spinning
 }
