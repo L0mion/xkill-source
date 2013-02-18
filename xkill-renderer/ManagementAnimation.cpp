@@ -20,7 +20,7 @@ void ManagementAnimation::reset()
 
 SkinnedData* ManagementAnimation::getAnimation(unsigned int index)
 {
-	time += 0.01f;
+	time += 0.001f;
 	if(time > 10.0f)
 		time = 0.0f;
 

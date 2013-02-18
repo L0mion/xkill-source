@@ -73,7 +73,7 @@ void ManagementIED::initIEDPosNormTexTanSkinned()
 	iedPosNormTexTanSkinned_[2] = createIED(semanticTexcoord_,		DXGI_FORMAT_R32G32_FLOAT,		semanticIndex, D3D11_INPUT_PER_VERTEX_DATA, dataStepRate);
 	iedPosNormTexTanSkinned_[3] = createIED(semanticTangent_,		DXGI_FORMAT_R32G32B32A32_FLOAT,	semanticIndex, D3D11_INPUT_PER_VERTEX_DATA, dataStepRate);
 	iedPosNormTexTanSkinned_[4] = createIED(semanticWeights_,		DXGI_FORMAT_R32G32B32_FLOAT,	semanticIndex, D3D11_INPUT_PER_VERTEX_DATA, dataStepRate);
-	iedPosNormTexTanSkinned_[5] = createIED(semanticBoneIndices_,	DXGI_FORMAT_R8G8B8A8_UINT,		semanticIndex, D3D11_INPUT_PER_VERTEX_DATA, dataStepRate);
+	iedPosNormTexTanSkinned_[5] = createIED(semanticBoneIndices_,	DXGI_FORMAT_R32G32B32A32_UINT,		semanticIndex, D3D11_INPUT_PER_VERTEX_DATA, dataStepRate);
 }
 
 unsigned int ManagementIED::getIEDNumElements(IED_TYPE iedType)

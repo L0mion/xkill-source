@@ -865,7 +865,7 @@ void Renderer::renderAnimation(unsigned int meshID, DirectX::XMFLOAT4X4 view, Di
 
 	std::vector<DirectX::XMFLOAT4X4> finalTransforms;
 	managementAnimation_->debug_clearOffsetMatrices(0);
-	managementAnimation_->getAnimation(0)->getFinalTransforms("ArmatureAction_001", managementAnimation_->time, &finalTransforms);
+	managementAnimation_->getAnimation(0)->getFinalTransforms("ArmatureAction", managementAnimation_->time, &finalTransforms);
 
 	managementCB_->setCB(CB_TYPE_BONE, TypeFX_VS, CB_REGISTER_BONE, devcon);
 	managementCB_->updateCBBone(devcon, finalTransforms);
