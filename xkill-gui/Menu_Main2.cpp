@@ -10,6 +10,8 @@ struct keyFrame
 
 Menu_Main2::Menu_Main2( QWidget* parent ) : QMainWindow()
 {
+	loadCustomFonts();
+
 	this->parent = parent;
 	ui.setupUi(this);
 	QWidget::setWindowFlags(Qt::FramelessWindowHint);
@@ -20,6 +22,8 @@ Menu_Main2::Menu_Main2( QWidget* parent ) : QMainWindow()
 	SUBSCRIBE_TO_EVENT(this, EVENT_WINDOW_MOVE);
 	SUBSCRIBE_TO_EVENT(this, EVENT_WINDOW_RESIZE);
 	SUBSCRIBE_TO_EVENT(this, EVENT_ENABLE_MENU);
+
+	
 
 	// Center background 
 	ui.label_background->move(0,0);
@@ -64,7 +68,7 @@ Menu_Main2::Menu_Main2( QWidget* parent ) : QMainWindow()
 	std::string fileName = "../../xkill-resources/xkill-gui/images/animations/menu_opening.gif"; 
 	openingAnimation->setFileName(fileName.c_str());
 	if(!openingAnimation->isValid()) // error checking
-		SHOW_MESSAGEBOX("Could not find " + fileName);
+		SHOW_MESSAGEBOX("Could not open " + fileName + ". Either the file is missing, or \"imageformats/qgif4.dll\" is missing.");
 	openingAnimation->setParent(this); // prevents memory leaks
 	ui.label_openingAnimation->setMovie(openingAnimation);
 	openingAnimation->start();
@@ -84,5 +88,34 @@ void Menu_Main2::mousePressEvent( QMouseEvent *e )
 		// Skip opening, if at opening (index 0)
 		if(menuStack.size()==1)
 			endOpening();
+	}
+}
+
+void Menu_Main2::loadCustomFonts()
+{
+	QStringList list;
+	list << "arcade_interlaced.ttf" << "arcade_rounded.ttf";
+	int fontID(-1);
+	bool fontWarningShown(false);
+	for (QStringList::const_iterator constIterator = list.constBegin(); constIterator != list.constEnd(); ++constIterator) 
+	{
+		QFile res(":/xkill/fonts/" + *constIterator);
+		if(res.open(QIODevice::ReadOnly) == false)
+		{
+			if(fontWarningShown == false)
+			{
+				SHOW_MESSAGEBOX("Problem loading custom font");
+				fontWarningShown = true;
+			}
+		} 
+		else 
+		{
+			fontID = QFontDatabase::addApplicationFontFromData(res.readAll());
+			if (fontID == -1 && fontWarningShown == false)
+			{
+				SHOW_MESSAGEBOX("Problem loading custom font");
+				fontWarningShown = true;
+			}
+		}
 	}
 }

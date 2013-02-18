@@ -3,6 +3,7 @@
 #include <QtGui/QMainWindow>
 #include <QtGui/QKeyEvent>
 #include <QtGui/QMovie>
+#include <QtGui/QFontDatabase>
 #include <xkill-utilities/Util.h>
 #include "ui_MainMenu2.h"
 #include <vector>
@@ -23,6 +24,7 @@ public:
 	{
 		UNSUBSCRIBE_TO_EVENTS(this);
 	}
+
 	void onEvent(Event* e)
 	{
 		EventType type = e->getType();
@@ -44,6 +46,8 @@ public:
 			break;
 		}
 	}
+
+	void loadCustomFonts();
 	void push_menu(QFrame* menu)
 	{
 		// Hide previous menu, if any
@@ -123,6 +127,11 @@ public:
 
 	void keyPressEvent(QKeyEvent *e)
 	{
+		if(e->key() == Qt::Key_Escape)
+		{
+			pop_menu();
+		}
+
 		QCoreApplication::sendEvent(parent, e);
 	}
 	void keyReleaseEvent(QKeyEvent *e)

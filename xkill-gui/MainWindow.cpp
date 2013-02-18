@@ -74,8 +74,16 @@ MainWindow::MainWindow()
 	connect(gameWidget,						SIGNAL(signal_fpsChanged(QString)),		this,			SLOT(slot_setTitle(QString)));
 	connect(gameWidget,						SIGNAL(signal_fpsChanged(QString)),		this,			SLOT(slot_setTitle(QString)));
 
+	// Listen to incomming event
 	this->installEventFilter(this);
 	
+	
+	// Start RELEASE in fullscreen, and DEBUG in Windowed
+	slot_toggleFullScreen();
+#if defined(DEBUG) | defined(_DEBUG)
+	slot_toggleFullScreen();
+#endif
+
 	
 }
 
