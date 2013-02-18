@@ -20,11 +20,12 @@ void ManagementAnimation::reset()
 
 SkinnedData* ManagementAnimation::getAnimation(unsigned int index)
 {
-	time += 0.001f;
+	time += 0.01f;
 	if(time > 10.0f)
 		time = 0.0f;
 
 	SkinnedData* skinnedData = nullptr;
+
 	if(index < animations_.size())
 		skinnedData = animations_.at(index);
 

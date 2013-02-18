@@ -58,7 +58,7 @@ void LoaderFbxAnimationDesc::convertToXKillFormat(std::map<std::string, Animatio
 }
 void LoaderFbxAnimationDesc::convertBoneToXKillFormat(LoaderFbxAnimationBone fbxBone, BoneAnimation* bone)
 {
-	int numIndices = 9;
+	//int numIndices = 9;
 	FbxKeyframeIndex keyframeIndices[] = {FBX_KEYFRAME_INDEX_TRANSLATION_X,
 										  FBX_KEYFRAME_INDEX_TRANSLATION_Y,
 										  FBX_KEYFRAME_INDEX_TRANSLATION_Z,
@@ -91,7 +91,7 @@ void LoaderFbxAnimationDesc::convertBoneToXKillFormat(LoaderFbxAnimationBone fbx
 		Keyframe* keyframe				= new Keyframe();
 		keyframe->translation			= DirectX::XMFLOAT3(0.0f, 0.0f, 0.0f);
 		keyframe->scale					= DirectX::XMFLOAT3(1.0f, 1.0f, 1.0f);
-		keyframe->rotationQuaternion	= DirectX::XMFLOAT4(0.0f, 0.0f, 0.0f, 0.0f);
+		keyframe->rotationQuaternion	= DirectX::XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f);
 		keyframe->timePosition			= 0.0f;
 		bone->getKeyframes()->push_back(keyframe);
 	}
