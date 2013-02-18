@@ -117,9 +117,6 @@ void GameComponent::onUpdate(float delta)
 					DEBUGPRINT("Failed to switch ammunition. Succeeded in playing 'beep' sound");
 					DEBUGPRINT("\a");
 				}
-				DEBUGPRINT(std::endl);
-				DEBUGPRINT("Ammunition type: " << ptr_weaponStats->getAmmunitionTypeAsString());
-				DEBUGPRINT("Firing mode: " << ptr_weaponStats->getFiringModeAsString());
 			}
 
 			if(ptr_input->changeFiringMode)
@@ -137,9 +134,6 @@ void GameComponent::onUpdate(float delta)
 					DEBUGPRINT("\a");
 				}
 			
-				DEBUGPRINT(std::endl);
-				DEBUGPRINT("Ammunition type: " << ptr_weaponStats->getAmmunitionTypeAsString());
-				DEBUGPRINT("Firing mode: " << ptr_weaponStats->getFiringModeAsString());
 			}
 			int ammoIndex = ammo->type;
 
@@ -161,8 +155,6 @@ void GameComponent::onUpdate(float delta)
 			if((ptr_input->fire && firingMode->type == XKILL_Enums::FiringModeType::AUTO) || 
 				ptr_input->firePressed && (firingMode->type == XKILL_Enums::FiringModeType::SINGLE || firingMode->type == XKILL_Enums::FiringModeType::SEMI))
 			{
-				DEBUGPRINT("ammo->currentTotalNrOfShots: " << ammo->currentTotalNrOfShots);
-				DEBUGPRINT("firingMode->nrOfShotsLeftInClip: " << firingMode->nrOfShotsLeftInClip[ammoIndex]);
 				ptr_input->fire = false;
 				ptr_input->firePressed = false;
 
@@ -516,10 +508,6 @@ void GameComponent::onUpdate(float delta)
 				{
 					firingMode->nrOfShotsLeftInClip[ammoIndex] = firingMode->clipSize;
 				}
-
-				DEBUGPRINT("Weapon was automatically reloaded.");
-				DEBUGPRINT("Ammo in current clip: " << firingMode->nrOfShotsLeftInClip[ammoIndex]);
-				DEBUGPRINT("Total number of shots left: " << ammo->currentTotalNrOfShots);
 			}
 		}
 	}
@@ -897,12 +885,6 @@ void GameComponent::event_EndDeathmatch(Event_EndDeathmatch* e)
 		itrLightSpot.getNext();
 		SEND_EVENT(&Event_RemoveEntity(itrLightSpot.ownerId()));
 	}
-
-	DEBUGPRINT("x--------------x");
-	DEBUGPRINT("-x------------x-");
-	DEBUGPRINT("DEATHMATCH ENDED");
-	DEBUGPRINT("-x------------x-");
-	DEBUGPRINT("x--------------x");
 }
 
 AttributePtr<Attribute_PlayerSpawnPoint> GameComponent::findUnoccupiedSpawnPoint()
