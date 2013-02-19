@@ -78,9 +78,6 @@ void SkinnedData::getFinalTransforms(const std::string&					clipName,
 	for(unsigned int i=0; i<numBones; ++i)
 	{
 		DirectX::XMMATRIX offset = DirectX::XMLoadFloat4x4(&boneOffsets_->at(i));
-
-		//offset = DirectX::XMMatrixTranspose(offset);
-
 		DirectX::XMMATRIX toRoot = DirectX::XMLoadFloat4x4(&toRootTransforms[i]);
 		DirectX::XMStoreFloat4x4(&finalTransforms->at(i), DirectX::XMMatrixMultiply(offset, toRoot));
 	}

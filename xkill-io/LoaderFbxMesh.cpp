@@ -475,7 +475,7 @@ void LoaderFbxMesh::parseVertexLinkData(FbxMesh* mesh, LoaderFbxMeshDesc* meshDe
 					else
 						nodeIndex++;
 				}
-				
+
 				parseIndicesAndWeights(cluster, meshDesc, nodeIndex);
 				parseTransformMatrix(cluster, meshDesc, nodeIndex);
 			}
@@ -526,11 +526,13 @@ void LoaderFbxMesh::parseTransformMatrix(FbxCluster* cluster, LoaderFbxMeshDesc*
 
 	Float4x4 offsetMatrix;
 	
+	//Fbx uses column major matrices and XKILL expects row major therefor the transform matrix is transposed.
 	for(int x=0; x<4; x++)
 	{
 		for(int y=0; y<4; y++)
-			offsetMatrix.m[x][y] = static_cast<float>(fbxMatrix.mData[x][y]);
+			offsetMatrix.m[y][x] = static_cast<float>(fbxMatrix.mData[x][y]);
 	}
+
 
 	meshDesc->setOffsetMatrix(index, offsetMatrix);
 }

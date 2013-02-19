@@ -449,8 +449,8 @@ void Renderer::renderViewportToGBuffer(ViewportData& vpData)
 	ID3D11Device*			device = managementD3D_->getDevice();
 	ID3D11DeviceContext*	devcon = managementD3D_->getDeviceContext();
 
-	if(animatedMesh_)
-		renderAnimatedMesh(vpData.view, vpData.proj);
+	//if(animatedMesh_)
+	//	renderAnimatedMesh(vpData.view, vpData.proj);
 
 	managementFX_->setShader(devcon, SHADERID_VS_DEFAULT);
 	managementFX_->setShader(devcon, SHADERID_PS_DEFAULT);
@@ -479,9 +479,9 @@ void Renderer::renderViewportToGBuffer(ViewportData& vpData)
 	std::map<unsigned int, InstancedData*> instancesMap = managementInstance_->getInstancesMap();
 	for(std::map<unsigned int, InstancedData*>::iterator i = instancesMap.begin(); i != instancesMap.end(); i++)
 	{
-		//if(i->first == 12)
-		//	renderAnimation(i->first, vpData.view, vpData.proj);
-		//else
+		if(i->first == 12)
+			renderAnimation(i->first, vpData.view, vpData.proj);
+		else
 			renderInstance(i->first, i->second);
 	}
 
