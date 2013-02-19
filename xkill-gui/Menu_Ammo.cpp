@@ -1,6 +1,6 @@
 #include "Menu_Ammo.h"
 
-Menu_Ammo::Menu_Ammo(Ui::MainMenu* ui, QMainWindow* window)
+Menu_Ammo::Menu_Ammo(Ui::MainWindow* ui, QMainWindow* window)
 {
 	this->ui = ui;
 
@@ -9,16 +9,17 @@ Menu_Ammo::Menu_Ammo(Ui::MainMenu* ui, QMainWindow* window)
 	window->connect(ui->radioButton_Ammo_Bullet,						SIGNAL(clicked()),			window,	SLOT(slot_updateAmmoMenu()));
 	window->connect(ui->radioButton_Ammo_Scatter,						SIGNAL(clicked()),			window,	SLOT(slot_updateAmmoMenu()));
 	window->connect(ui->radioButton_Ammo_Explosive,						SIGNAL(clicked()),			window,	SLOT(slot_updateAmmoMenu()));
-
+	
 	window->connect(ui->horizontalSlider_Ammo_Damage,					SIGNAL(sliderMoved(int)),	window,	SLOT(slot_ammoMenuUpdated()));
-	window->connect(ui->horizontalSlider_Ammo_ExplosionInitialRadius,	SIGNAL(sliderMoved(int)),	window,	SLOT(slot_ammoMenuUpdated()));
-	window->connect(ui->horizontalSlider_Ammo_NrOfProjectiles,			SIGNAL(sliderMoved(int)),	window,	SLOT(slot_ammoMenuUpdated()));
 	window->connect(ui->horizontalSlider_Ammo_Speed,					SIGNAL(sliderMoved(int)),	window,	SLOT(slot_ammoMenuUpdated()));
-	window->connect(ui->horizontalSlider_Ammo_Spread,					SIGNAL(sliderMoved(int)),	window,	SLOT(slot_ammoMenuUpdated()));
+	window->connect(ui->horizontalSlider_Ammo_NrOfProjectiles,			SIGNAL(sliderMoved(int)),	window,	SLOT(slot_ammoMenuUpdated()));
 	window->connect(ui->horizontalSlider_Ammo_VelocitVariation,			SIGNAL(sliderMoved(int)),	window,	SLOT(slot_ammoMenuUpdated()));
-	window->connect(ui->groupBox_Ammo_Explosive,						SIGNAL(clicked()),			window,	SLOT(slot_ammoMenuUpdated()));
+	window->connect(ui->horizontalSlider_Ammo_Spread,					SIGNAL(sliderMoved(int)),	window,	SLOT(slot_ammoMenuUpdated()));
 
-	window->connect(ui->tabWidget_2,									SIGNAL(currentChanged(int)),window,	SLOT(slot_updateAmmoMenu()));
+	window->connect(ui->checkBox_Ammo_Explosive,						SIGNAL(clicked()),			window,	SLOT(slot_ammoMenuUpdated()));
+	window->connect(ui->horizontalSlider_Ammo_ExplosionInitialRadius,	SIGNAL(sliderMoved(int)),	window,	SLOT(slot_ammoMenuUpdated()));
+	window->connect(ui->horizontalSlider_Ammo_ExplosionInitialRadius,	SIGNAL(sliderMoved(int)),	window,	SLOT(slot_ammoMenuUpdated()));
+	//window->connect(ui->tabWidget_2,									SIGNAL(currentChanged(int)),window,	SLOT(slot_updateAmmoMenu()));
 }
 
 Menu_Ammo::~Menu_Ammo()

@@ -27,10 +27,7 @@ public:
 	QStandardItemModel* levelListModel;
 	QString filePath;
 
-	Menu_Input* input_Menu;
-	Menu_Ammo* ammo_Menu;
-	Menu_FiringMode* firingMode_Menu;
-	Menu_Sound* sound_Menu;
+	
 
 	void loadXML();
 

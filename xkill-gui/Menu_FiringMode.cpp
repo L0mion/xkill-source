@@ -1,6 +1,6 @@
 #include "Menu_FiringMode.h"
 
-Menu_FiringMode::Menu_FiringMode(Ui::MainMenu* ui, QMainWindow* window)
+Menu_FiringMode::Menu_FiringMode(Ui::MainWindow* ui, QMainWindow* window)
 {
 	this->ui = ui;
 

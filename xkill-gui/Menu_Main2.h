@@ -8,6 +8,11 @@
 #include "ui_MainMenu2.h"
 #include <vector>
 
+#include "Menu_Input.h"
+#include "Menu_Ammo.h"
+#include "Menu_FiringMode.h"
+#include "Menu_Sound.h"
+
 class Menu_Main2 : public QMainWindow, IObserver
 {
 	Q_OBJECT
@@ -18,134 +23,30 @@ private:
 	std::vector<QFrame*> menuStack; // Used as state machine to return to the previous menu
 	QMovie* openingAnimation;
 
-public:
-	Menu_Main2(QWidget* parent);
-	~Menu_Main2()
-	{
-		UNSUBSCRIBE_TO_EVENTS(this);
-	}
-
-	void onEvent(Event* e)
-	{
-		EventType type = e->getType();
-		switch (type) 
-		{
-		case EVENT_ENABLE_MENU:
-			if(((Event_EnableMenu*)e)->enableMenu)
-				this->show();
-			else
-				this->hide();
-			break;
-		case EVENT_WINDOW_MOVE:
-			event_windowMove((Event_WindowMove*)e);
-			break;
-		case EVENT_WINDOW_RESIZE:
-			event_windowResize((Event_WindowResize*)e);
-			break;
-		default:
-			break;
-		}
-	}
+	Menu_Input*			input_Menu;
+	Menu_Ammo*			ammo_Menu;
+	Menu_FiringMode*	firingMode_Menu;
+	Menu_Sound*			sound_Menu;
 
 	void loadCustomFonts();
-	void push_menu(QFrame* menu)
-	{
-		// Hide previous menu, if any
-		if(menuStack.size() > 0)
-		{
-			QFrame* topMenu = menuStack.back();
-			topMenu->hide();
-		}
+	void loadOpeningGif();
+	void push_menu(QFrame* menu);
+	void pop_menu();
+	void menuResize();
+public:
+	Menu_Main2(QWidget* parent);
+	~Menu_Main2();
 
-		// Show new menu
-		menu->move(0,0);
-		menu->resize(width(), height());
-		menu->show();
-		menuStack.push_back(menu);
-
-		SEND_EVENT(&Event_PlaySound(Event_PlaySound::SOUND_BUTTON_CLICK));
-	}
-	void pop_menu()
-	{
-		// Make sure rot-menu is not poped
-		if(menuStack.size() > 2)
-		{
-			// Pop current menu
-			QFrame* topMenu = menuStack.back();
-			topMenu->hide();
-			menuStack.pop_back();
-
-			// Show previous menu
-			QFrame* menu = menuStack.back();
-			menu->move(0,0);
-			menu->resize(width(), height());
-			menu->show();
-		}
-	}
-	void menuResize()
-	{
-		QFrame* topMenu = menuStack.back();
-
-		// Resize background
-		ui.label_openingAnimation->resize(width(), height());
-		ui.label_background->resize(width(), height());
-		ui.label_openingAnimation->lower();
-		ui.label_background->lower();
-		
-		// Resize current menu
-		topMenu->resize(width(), height());
-	}
-
-
-	void event_windowMove(Event_WindowMove* e)
-	{
-		move(e->pos.x, e->pos.y);
-	}
-
-	void alwaysOnTop(bool on)
-	{
-		if(on)
-		{
-			// Enable Window Stay on Top flag
-			this->setWindowFlags(this->windowFlags() | Qt::WindowStaysOnTopHint);
-		}
-		else
-		{
-			// Disable Window Stay on Top flag
-			this->setWindowFlags(this->windowFlags() & ~Qt::WindowStaysOnTopHint);
-		}
-	}
-
-	void event_windowResize(Event_WindowResize* e)
-	{
-		// Resize window
-		resize(e->width, e->height);
-
-		// Make sure menu is resized as well
-		menuResize();
-	}
-
-	void keyPressEvent(QKeyEvent *e)
-	{
-		if(e->key() == Qt::Key_Escape)
-		{
-			pop_menu();
-		}
-
-		QCoreApplication::sendEvent(parent, e);
-	}
-	void keyReleaseEvent(QKeyEvent *e)
-	{
-		QCoreApplication::sendEvent(parent, e);
-	}
-
-	void closeEvent(QCloseEvent* event)
-	{
-		SEND_EVENT(&Event(EVENT_QUIT_TO_DESKTOP));
-	}
+	void onEvent(Event* e);
+	void event_windowMove(Event_WindowMove* e);
+	void alwaysOnTop(bool on);
+	void closeEvent(QCloseEvent* event);
+	void event_windowResize(Event_WindowResize* e);
 
 protected:
-	void mousePressEvent(QMouseEvent *e);
+	void mousePressEvent(QMouseEvent* e);
+	void keyPressEvent(QKeyEvent* e);
+	void keyReleaseEvent(QKeyEvent* e);
 
 private slots:
 	void openingAnimation_frameChanged(int frameNumber )

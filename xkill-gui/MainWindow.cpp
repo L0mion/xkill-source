@@ -62,7 +62,6 @@ MainWindow::MainWindow()
 	this->setCentralWidget(gameWidget);
 
 	// init tools
-	menuManager = new MenuManager(gameWidget);
 	menu = new Menu_Main2(this);
 	new Menu_Editor(ui, this);
 
@@ -114,17 +113,49 @@ void MainWindow::onEvent( Event* e )
 
 void MainWindow::keyPressEvent( QKeyEvent* e )
 {
+	// Toggle fullscreen
 	if((e->key()==Qt::Key_Return) && (e->modifiers()==Qt::AltModifier))
 		slot_toggleFullScreen();
 
+	// Exit program
 	if((e->key()==Qt::Key_F4)  && (e->modifiers()==Qt::AltModifier))
 		SEND_EVENT(&Event(EVENT_QUIT_TO_DESKTOP));
 
+	// Toggle editor
 	if((e->key()==Qt::Key_F1))
 		ui.dockWidget->toggleViewAction()->activate(QAction::Trigger);
 
-	// Detect keypress in menu
-	menuManager->keyPressEvent(e);
+	
+	//
+	// Menu controlls during in-game
+	//
+
+	if(GET_STATE() == STATE_DEATHMATCH)
+	{
+		switch (e->key()) 
+		{
+			// Return to menu
+		case Qt::Key_Escape:
+			SEND_EVENT(&Event_EnableMenu(true));
+			break;
+		default:
+			break;
+		}
+	}
+	if(GET_STATE() == STATE_GAMEOVER)
+	{
+		switch (e->key())
+		{
+			// Return to menu
+		case Qt::Key_Escape:
+			GET_STATE() = STATE_MAINMENU;
+			SEND_EVENT(&Event_EndDeathmatch());
+			SEND_EVENT(&Event_StartDeathmatch(0));	//To get a black background, for now run the game with zero players
+			break;
+		default:
+			break;
+		}
+	}
 
 	// Inform about key press
 	SEND_EVENT(&Event_KeyPress(e->key(), true));
@@ -173,8 +204,7 @@ void MainWindow::slot_toggleFullScreen()
 
 void MainWindow::keyReleaseEvent( QKeyEvent* e )
 {
-	// Detect keypress in menu
-	menuManager->keyReleaseEvent(e);
+ 
 
 	// Inform about key release
 	SEND_EVENT(&Event_KeyPress(e->key(), false));
@@ -188,14 +218,10 @@ void MainWindow::slot_setTitle( QString title )
 void MainWindow::resizeEvent( QResizeEvent* e )
 {
 	QWidget::resizeEvent(e);
-
-	// Reposition menu
-	menuManager->moveEvent();
 }
 
 void MainWindow::moveEvent( QMoveEvent *e )
 {
-	menuManager->moveEvent();
 	gameWidget->sendPositionEvent();
 }
 
@@ -209,6 +235,5 @@ void MainWindow::event_showMessageBox( Event_ShowMessageBox* e )
 void MainWindow::closeEvent( QCloseEvent *event )
 {
 	delete gameWidget;
-	delete menuManager;
 	delete menu;
 }

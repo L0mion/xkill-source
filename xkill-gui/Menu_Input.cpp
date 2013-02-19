@@ -13,7 +13,7 @@
 
 ATTRIBUTES_DECLARE_ALL
 
-Menu_Input::Menu_Input(Ui::MainMenu* ui, QMainWindow* window)
+Menu_Input::Menu_Input(Ui::MainWindow* ui, QMainWindow* window)
 {
 	ATTRIBUTES_INIT_ALL
 

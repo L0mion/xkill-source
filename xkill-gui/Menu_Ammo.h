@@ -1,6 +1,6 @@
 #pragma once
 
-#include "ui_MainMenu.h"
+#include "ui_MainMenu2.h"
 
 #include <xkill-utilities/MutatorSettings.h>
 
@@ -9,7 +9,7 @@
 class Menu_Ammo
 {
 public:
-	Menu_Ammo(Ui::MainMenu* ui, QMainWindow* window);
+	Menu_Ammo(Ui::MainWindow* ui, QMainWindow* window);
 	~Menu_Ammo();
 
 	//! Updates the qt menu based on the in game data
@@ -19,7 +19,7 @@ public:
 
 private:
 	//! A local pointer to the qt menu
-	Ui::MainMenu* ui;
+	Ui::MainWindow* ui;
 	//! Used to change in game standard values
 	MutatorSettings* mutatorSettings_;
 

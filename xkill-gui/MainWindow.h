@@ -19,7 +19,6 @@ class MainWindow : public QMainWindow, public IObserver
 
 private:
 	Ui::MainWindowClass ui;
-	MenuManager* menuManager;
 	GameWidget* gameWidget;
 	Menu_Main2* menu;
 	

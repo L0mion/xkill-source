@@ -232,48 +232,11 @@ MenuManager::MenuManager( QWidget* parent )
 
 void MenuManager::keyPressEvent( QKeyEvent* e )
 {
-	if(GET_STATE() == STATE_DEATHMATCH)
-	{
-		//JON: Part of STATE_DEATHMATCH in synced FSM. I.e DeathmatchMenuState::onEvent should listen to keyPressEvents
-		switch (e->key()) 
-		{
-		case Qt::Key_Escape:
-			inGameMenu->toggleMenu(); //JON: Set flag in for triggering state transition on update?
-			inGameMenu->setWindowFlags(Qt::WindowStaysOnTopHint);
-			break;
-		case Qt::Key_Tab:
-			scoreBoard->toggleMenu(true);
-			break;
-		default:
-			break;
-		}
-	}
-	if(GET_STATE() == STATE_GAMEOVER)
-	{
-		switch (e->key())
-		{
-		case Qt::Key_Escape:
-			GET_STATE() = STATE_MAINMENU;
-			SEND_EVENT(&Event_EndDeathmatch());
-			SEND_EVENT(&Event_StartDeathmatch(0));	//To get a black background, for now run the game with zero players
-			break;
-		default:
-			break;
-		}
-	}
 }
 
 void MenuManager::keyReleaseEvent( QKeyEvent* e )
 {
-	switch (e->key()) 
-	{
 
-	case Qt::Key_Tab:
-		scoreBoard->toggleMenu(false);
-		break;
-	default:
-		break;
-	}
 }
 
 void MenuManager::onEvent( Event* e )

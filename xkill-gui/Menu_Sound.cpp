@@ -5,7 +5,7 @@
 
 ATTRIBUTES_DECLARE_ALL
 
-Menu_Sound::Menu_Sound(Ui::MainMenu* ui, QMainWindow* window)
+Menu_Sound::Menu_Sound(Ui::MainWindow* ui, QMainWindow* window)
 {
 	ATTRIBUTES_INIT_ALL
 
@@ -13,8 +13,6 @@ Menu_Sound::Menu_Sound(Ui::MainMenu* ui, QMainWindow* window)
 
 	window->connect(ui->checkBox_Sound_Mute,			SIGNAL(clicked()),			window, SLOT(slot_soundMenuUpdated()));
 	window->connect(ui->horizontalSlider_Sound_Volume,	SIGNAL(valueChanged(int)),	window, SLOT(slot_soundMenuUpdated()));
-
-
 }
 
 Menu_Sound::~Menu_Sound()

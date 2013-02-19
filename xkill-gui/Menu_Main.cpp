@@ -12,10 +12,7 @@
 #include <QtGui/QStandardItemModel>
 #include <QtGui/QMessageBox>
 
-#include "Menu_Input.h"
-#include "Menu_Ammo.h"
-#include "Menu_FiringMode.h"
-#include "Menu_Sound.h"
+
 
 #include "Menu_Editor.h"
 
@@ -89,20 +86,10 @@ Menu_Main::Menu_Main( QWidget* parent ) : QMainWindow(parent), ToggleHelper(this
 	QStringList columnNames;
 
 	loadXML();
-
-	input_Menu = new Menu_Input(&ui, this);
-	input_Menu->Init(new QStandardItemModel(0, 2, this), new QStandardItemModel(0, 1, this));
-	ammo_Menu = new Menu_Ammo(&ui, this);
-	firingMode_Menu = new Menu_FiringMode(&ui, this);
-	sound_Menu = new Menu_Sound(&ui, this);
 }
 
 Menu_Main::~Menu_Main()
 {
-	delete input_Menu;
-	delete ammo_Menu;
-	delete firingMode_Menu;
-	delete sound_Menu;
 }
 
 void Menu_Main::parentMoveEvent()
@@ -238,47 +225,43 @@ void Menu_Main::slot_startGame()
 
 void Menu_Main::slot_loadInputList(int deviceId)
 {
-	input_Menu->loadInputList(deviceId);
+
 }
 
 void Menu_Main::slot_loadInputSettings(QModelIndex index)
 {
-	input_Menu->loadInputSettings(index.row());
+	
 }
 
 void Menu_Main::slot_inputSettingsChanged()
 {
-	input_Menu->updateMenu();
+
 }
 
 void Menu_Main::slot_setInputObject(QModelIndex index)
 {
-	input_Menu->setInputObject(index);
+	
 }
 
 void Menu_Main::slot_updateAmmoMenu()
 {
-	ammo_Menu->setSettingsMenu();
+
 }
 
 void Menu_Main::slot_ammoMenuUpdated()
 {
-	ammo_Menu->settingsMenuUpdated();
 }
 
 void Menu_Main::slot_updateFiringModeMenu()
 {
-	firingMode_Menu->setSettingsMenu();
 }
 
 void Menu_Main::slot_firingModeUpdated()
 {
-	firingMode_Menu->settingsMenuUpdated();
 }
 
 void Menu_Main::slot_soundMenuUpdated()
 {
-	sound_Menu->updateMenu();
 }
 
 void Menu_Main::slot_quitToDesktop()
