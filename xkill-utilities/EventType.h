@@ -80,6 +80,8 @@ enum DLL_U EventType
 	EVENT_PLAYERDEATH,
 	EVENT_PHYSICS_ATTRIBUTES_COLLIDING,
 	EVENT_SYNC_STATE_COMMAND,
+	EVENT_GET_ENTITY_ID_OF_PHYSICS_OBJECT_HIT_BY_RAY,
+	EVENT_GET_FILE_LIST,
 
 	// Creation/Destruction
 	EVENT_TRANSFER_EVENTS_TO_GAME,
@@ -90,6 +92,7 @@ enum DLL_U EventType
 	EVENT_CREATE_EXPLOSIONSPHERE,
 	EVENT_CREATE_WORLD,
 	EVENT_CREATE_LIGHT,
+	EVENT_CREATE_CORPSE,
 	EVENT_CREATE_ENTITY,
 	EVENT_REMOVE_ENTITY,
 	EVENT_STATE_CHANGED,
@@ -101,6 +104,9 @@ enum DLL_U EventType
 	EVENT_CREATE_MESH,
 	EVENT_CREATE_LIGHT_D3D,
 	EVENT_LOAD_TEXTURES,
+	EVENT_LOAD_LEVEL,
+	EVENT_LOAD_LEVEL_BULLET,
+	EVENT_UNLOAD_LEVEL,
 	EVENT_SHOW_MESSAGEBOX,
 
 	// this is needed, don't touch!
@@ -221,18 +227,12 @@ public:
 class DLL_U Event_AttributeUpdated : public Event
 {
 public:
-	Event_AttributeUpdated(int index, int attributeEnum) : Event(EVENT_ATTRIBUTE_UPDATED)
-	{
-		this->index = index;
-		this->attributeEnum = attributeEnum;
-		isCreated = false;
-		isDeleted = false;
-	}
-
 	int attributeEnum;
 	int index;
 	bool isCreated;
 	bool isDeleted;
+
+	Event_AttributeUpdated(int index, int attributeEnum);
 };
 
 /// Returns access to a vector of Entity from EntityManager.
@@ -341,12 +341,9 @@ class TexDesc;
 class DLL_U Event_LoadTextures : public Event
 {
 public:
+	Event_LoadTextures(TexDesc* texDesc);
+	
 	TexDesc* texDesc_;
-
-	Event_LoadTextures(TexDesc* texDesc) : Event(EVENT_LOAD_TEXTURES)
-	{
-		texDesc_ = texDesc;
-	}
 };
 
 /// Used in GameComponent
@@ -412,12 +409,9 @@ public:
 class DLL_U Event_PlayerDeath : public Event
 {
 public:
-	int playerIndex; //Index of the player that died
-
-	Event_PlayerDeath(int playerIndex) : Event(EVENT_PLAYERDEATH)
-	{
-		this->playerIndex = playerIndex;
-	}
+	Event_PlayerDeath(int playerAttributeIndex);
+	
+	int playerAttributeIndex; //Attribute index of the player that died
 };
 
 class DLL_U Event_CreatePlayerSpawnPoint : public Event
@@ -540,6 +534,15 @@ public:
 	unsigned int type;
 };
 
+class DLL_U Event_CreateCorpse : public Event
+{
+public:
+	//! Create a corpse matching player
+	Event_CreateCorpse(AttributePtr<Attribute_Player> ptr_player);
+	
+	AttributePtr<Attribute_Player> ptr_player;
+};
+
 class DLL_U Event_TransferEventsToGame : public Event
 {
 public:
@@ -562,6 +565,7 @@ public:
 	Event_CreateEntity(EntityType entityType);
 
 	EntityType entityType;
+	Entity* entity;
 };
 
 class InputObjectArray;
@@ -613,4 +617,36 @@ public:
 	float time;
 	XKILL_Enums::HackType hackType;
 	AttributePtr<Attribute_Player> player;
+};
+
+class DLL_U Event_GetEntityIdOfPhysicsObjectHitByRay : public Event
+{
+public:
+	Event_GetEntityIdOfPhysicsObjectHitByRay(Float3 from, Float3 to, short collisionFilterMask);
+
+	Float3 from;
+	Float3 to;
+	short collisionFilterMask;
+	int closest_entityId; //!< 0 if no Entity
+};
+
+class DLL_U Event_GetFileList : public Event
+{
+public:
+	/**
+	\param filepathAndExtension Should look like this: path\*.extension
+	*/
+	Event_GetFileList(std::string filepath, std::string extension); 
+
+	std::string filepath;
+	std::string extension;
+	std::vector<std::string> filenames;
+};
+
+class DLL_U Event_LoadLevel : public Event
+{
+public:
+	Event_LoadLevel(std::string levelName);
+
+	std::string levelName;
 };

@@ -3,6 +3,7 @@
 #include "renderingUtilities.h"
 #include "Winfo.h"
 #include "ManagementD3D.h"
+#include <comdef.h>
 
 ManagementD3D::ManagementD3D(HWND windowHandle, Winfo* winfo)
 {
@@ -122,15 +123,16 @@ HRESULT ManagementD3D::createDeviceAndSwapChain(const DXGI_SWAP_CHAIN_DESC swapC
 	D3D_FEATURE_LEVEL initiatedFeatureLevel;
 	D3D_FEATURE_LEVEL featureLevels[] = {D3D_FEATURE_LEVEL_11_0,
 										 D3D_FEATURE_LEVEL_10_1,
-										 D3D_FEATURE_LEVEL_10_0};
+										 D3D_FEATURE_LEVEL_10_0,
+										 D3D_FEATURE_LEVEL_9_3,
+										 D3D_FEATURE_LEVEL_9_2,
+										 D3D_FEATURE_LEVEL_9_1};
 
 	UINT numDriverTypes = 2;
 	D3D_DRIVER_TYPE driverTypes[] = {	D3D_DRIVER_TYPE_HARDWARE,
 										D3D_DRIVER_TYPE_REFERENCE};
 
 	UINT flags = 0;
-	flags |= D3D11_CREATE_DEVICE_SINGLETHREADED;
-	//flags |= D3D11_CREATE_DEVICE_PREVENT_INTERNAL_THREADING_OPTIMIZATIONS;
 
 #if defined(D3D_PROFILE)
 	flags |= D3D11_CREATE_DEVICE_DEBUG; //Enables shader debugging
@@ -158,9 +160,23 @@ HRESULT ManagementD3D::createDeviceAndSwapChain(const DXGI_SWAP_CHAIN_DESC swapC
 
 		index++;
 	}
-	if(FAILED(hr))
-		ERROR_MSG(L"RenderingComponent::createDeviceAndSwapChain D3D11CreateDeviceAndSwapChain failed");
+	if(initiatedFeatureLevel == D3D_FEATURE_LEVEL_9_3 ||
+	   initiatedFeatureLevel == D3D_FEATURE_LEVEL_9_2 ||
+	   initiatedFeatureLevel == D3D_FEATURE_LEVEL_9_1)
+	{
+		ERROR_MSG(L"DirectX Device initiated with DirectX 9.x feature level");
+	}
 
+	if(FAILED(hr))
+	{
+		std::string message;
+
+		_com_error err(hr);
+		LPCTSTR errMsg = err.ErrorMessage();
+
+		ERROR_MSG(errMsg);
+		//ERROR_MSG(L"RenderingComponent::createDeviceAndSwapChain D3D11CreateDeviceAndSwapChain failed.");
+	}
 	return hr;
 }
 HRESULT ManagementD3D::initBackBuffer()

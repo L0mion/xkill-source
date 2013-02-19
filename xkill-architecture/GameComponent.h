@@ -35,6 +35,10 @@ public:
 	Handles Events for GameComponent.
 	*/
 	void onEvent(Event* e);
+
+	/**
+	Handles most game logic for players.
+	*/
 	void onUpdate(float delta);
 
 	/**
@@ -68,6 +72,11 @@ public:
 	void event_PlayerDeath(Event_PlayerDeath* e);
 
 	/**
+	Unload current level
+	*/
+	void event_UnloadLevel();
+
+	/**
 	Finds an unoccupied spawn point (no other player inside its radius). 
 	Prioritizes spawn points that least recently spawned a player. 
 	If no unoccupied spawn point is found, one is selected at random. 
@@ -82,5 +91,6 @@ public:
 	bool switchAmmunition(AttributePtr<Attribute_WeaponStats> ptr_weaponStats);
 	bool switchFiringMode(AttributePtr<Attribute_WeaponStats> ptr_weaponStats);
 
+	void updateAimingRay(Entity* playerEntity, AttributePtr<Attribute_Camera> ptr_camera);
 	void shootProjectile(AttributePtr<Attribute_Spatial> ptr_spatial, AttributePtr<Attribute_WeaponStats> ptr_weaponStats);
 };

@@ -42,50 +42,11 @@ Menu_Main::Menu_Main( QWidget* parent ) : QMainWindow(parent), ToggleHelper(this
 	//connect(ui.pushButton_RemoveLevel,	SIGNAL(clicked()),					this,	SLOT(slot_removeLevel()));
 	connect(ui.pushButton_startGame,	SIGNAL(clicked()),					this,	SLOT(slot_startGame()));
 
-	/*
-	
-	connect(ui.radioButton_Ammo_Bullet,							SIGNAL(clicked()),					this,	SLOT(slot_updateAmmoMenu()));
-	connect(ui.radioButton_Ammo_Scatter,						SIGNAL(clicked()),					this,	SLOT(slot_updateAmmoMenu()));
-	connect(ui.radioButton_Ammo_Explosive,						SIGNAL(clicked()),					this,	SLOT(slot_updateAmmoMenu()));
-
-	connect(ui.horizontalSlider_Ammo_Damage,					SIGNAL(sliderMoved(int)),			this,	SLOT(slot_ammoMenuUpdated()));
-	connect(ui.horizontalSlider_Ammo_ExplosionInitialRadius,			SIGNAL(sliderMoved(int)),			this,	SLOT(slot_ammoMenuUpdated()));
-	connect(ui.horizontalSlider_Ammo_NrOfProjectiles,			SIGNAL(sliderMoved(int)),			this,	SLOT(slot_ammoMenuUpdated()));
-	connect(ui.horizontalSlider_Ammo_Speed,						SIGNAL(sliderMoved(int)),			this,	SLOT(slot_ammoMenuUpdated()));
-	connect(ui.horizontalSlider_Ammo_Spread,					SIGNAL(sliderMoved(int)),			this,	SLOT(slot_ammoMenuUpdated()));
-	connect(ui.horizontalSlider_Ammo_VelocitVariation,			SIGNAL(sliderMoved(int)),			this,	SLOT(slot_ammoMenuUpdated()));
-	connect(ui.groupBox_Ammo_Explosive,							SIGNAL(clicked()),					this,	SLOT(slot_ammoMenuUpdated()));
-
-	connect(ui.radioButton_Weapon_Single,						SIGNAL(clicked()),					this,	SLOT(slot_updateFiringModeMenu()));
-	connect(ui.radioButton_Weapon_Semi,							SIGNAL(clicked()),					this,	SLOT(slot_updateFiringModeMenu()));
-	connect(ui.radioButton_Weapon_Auto,							SIGNAL(clicked()),					this,	SLOT(slot_updateFiringModeMenu()));
-
-	connect(ui.checkBox_Weapon_Bullet,							SIGNAL(clicked()),					this,	SLOT(slot_firingModeUpdated()));
-	connect(ui.checkBox_Weapon_Scatter,							SIGNAL(clicked()),					this,	SLOT(slot_firingModeUpdated()));
-	connect(ui.checkBox_Weapon_Explosive,						SIGNAL(clicked()),					this,	SLOT(slot_firingModeUpdated()));
-	connect(ui.horizontalSlider_Weapon_ClipSize,				SIGNAL(sliderMoved(int)),			this,	SLOT(slot_firingModeUpdated()));
-	connect(ui.horizontalSlider_Weapon_DamageModifier,			SIGNAL(sliderMoved(int)),			this,	SLOT(slot_firingModeUpdated()));
-	connect(ui.horizontalSlider_Weapon_ExplosionSphereModifier,	SIGNAL(sliderMoved(int)),			this,	SLOT(slot_firingModeUpdated()));
-	connect(ui.horizontalSlider_Weapon_RateOfFire,				SIGNAL(sliderMoved(int)),			this,	SLOT(slot_firingModeUpdated()));
-	connect(ui.horizontalSlider_Weapon_ReloadTime,				SIGNAL(sliderMoved(int)),			this,	SLOT(slot_firingModeUpdated()));
-
-	connect(ui.tabWidget_2,										SIGNAL(currentChanged(int)),		this,	SLOT(slot_updateAmmoMenu()));
-	connect(ui.tabWidget_2,										SIGNAL(currentChanged(int)),		this,	SLOT(slot_updateFiringModeMenu()));
-	
-	
-	*/
-	
 	// Set num players to 2
 	ui.horizontalSlider_numPlayers->setValue(2);
 
-	filePath = QString("../../xkill-resources/xkill-scripts/levels.xml");
-	levelListModel = new QStandardItemModel(0, 1, this);
 
-	//editorModel->setHorizontalHeaderItem(1, new QStandardItem("ID"));
-
-	QStringList columnNames;
-
-	loadXML();
+	//loadXML();
 }
 
 Menu_Main::~Menu_Main()
@@ -103,70 +64,76 @@ void Menu_Main::parentMoveEvent()
 
 void Menu_Main::loadXML()
 {
-	levelListModel->clear();
-
-	// load XML file
-	QDomDocument document;
-	QFile* file = new QFile(filePath);
-	if(!file->open(QIODevice::ReadOnly | QIODevice::Text))
-	{
-		QMessageBox::information(0, "Error", "Failed to find XML file"); return;
-	}
-	if(!document.setContent(file))
-	{
-		QMessageBox::information(0, "Error", "Failed to parse XML file to open XML file");  return;
-	}
-	file->close();
-	delete file;
-
-	// read all levels to ItemModel
-	QStandardItem* root = new QStandardItem("Levels");
-	levelListModel->appendRow(root);
-	levelListModel->item(0);
-	QDomElement xmlRoot = document.firstChildElement();
-	QDomNodeList allLevel = xmlRoot.elementsByTagName("Level");
-	for(int i=0; i<allLevel.count(); i++)
-	{
-		// parse level
-		QDomElement level = allLevel.at(i).toElement();
-		QStandardItem* name = new QStandardItem(level.attribute("Name"));
-		QStandardItem* description = new QStandardItem(level.attribute("Description"));
-		root->appendRow(name);
-		name->appendRow(description);
-	}
-
-	// parse model and build stuff from it
-	ui.comboBox_LevelSelect->clear();
-	QStandardItem* allLevelItm = levelListModel->item(0,0);
-	for(int i=0; i<allLevelItm->rowCount(); i++)
-	{
-		QStandardItem* child = allLevelItm->child(i,0);
-		ui.comboBox_LevelSelect->addItem(child->text());
-	}
-//	ui.treeView->setModel(levelListModel);
-
-//	ui.treeView->setExpanded(allLevelItm->index(), true);
-	
+//	levelListModel->clear();
+//
+//	// load XML file
+//	QDomDocument document;
+//	QFile* file = new QFile(filePath);
+//	if(!file->open(QIODevice::ReadOnly | QIODevice::Text))
+//	{
+//		QMessageBox::information(0, "Error", "Failed to find XML file"); return;
+//	}
+//	if(!document.setContent(file))
+//	{
+//		QMessageBox::information(0, "Error", "Failed to parse XML file to open XML file");  return;
+//	}
+//	file->close();
+//	delete file;
+//
+//	// read all levels to ItemModel
+//	QStandardItem* root = new QStandardItem("Levels");
+//	levelListModel->appendRow(root);
+//	levelListModel->item(0);
+//	QDomElement xmlRoot = document.firstChildElement();
+//	QDomNodeList allLevel = xmlRoot.elementsByTagName("Level");
+//	for(int i=0; i<allLevel.count(); i++)
+//	{
+//		// parse level
+//		QDomElement level = allLevel.at(i).toElement();
+//		QStandardItem* name = new QStandardItem(level.attribute("Name"));
+//		QStandardItem* description = new QStandardItem(level.attribute("Description"));
+//		root->appendRow(name);
+//		name->appendRow(description);
+//	}
+//
+//	// parse model and build stuff from it
+//	ui.comboBox_LevelSelect->clear();
+//	QStandardItem* allLevelItm = levelListModel->item(0,0);
+//	for(int i=0; i<allLevelItm->rowCount(); i++)
+//	{
+//		QStandardItem* child = allLevelItm->child(i,0);
+//		ui.comboBox_LevelSelect->addItem(child->text());
+//	}
+////	ui.treeView->setModel(levelListModel);
+//
+////	ui.treeView->setExpanded(allLevelItm->index(), true);
+//	
 }
 
 void Menu_Main::slot_selectLevel( int levelId )
 {
-	QStandardItem* levels = levelListModel->item(0,0);
-	if(levels->rowCount()>levelId && levelId>=0)
-	{
-		QStandardItem* name = levels->child(levelId,0);
-		QStandardItem* desc = name->child(0,0);
-		ui.textBrowser_LevelInfo->setText(desc->text());
-	}
+	//QStandardItem* levels = levelListModel->item(0,0);
+	//if(levels->rowCount()>levelId && levelId>=0)
+	//{
+	//	QStandardItem* name = levels->child(levelId,0);
+	//	QStandardItem* desc = name->child(0,0);
+	////	ui.textBrowser_LevelInfo->setText(desc->text());
+	//}
+
+	//if(levelId >= 0 && levelId < levelNames_.size())
+	//{
+	//	SEND_EVENT(&Event_LoadLevel(levelNames_[levelId]));
+	//	//settings->currentLevel = levelNames_[levelId];
+	//}
 }
 
 void Menu_Main::slot_addLevel()
 {
-	QStandardItem* desc = new QStandardItem("Description");
+	/*QStandardItem* desc = new QStandardItem("Description");
 	QStandardItem* name = new QStandardItem("Name");
 	name->appendRow(desc);
 	QStandardItem* levels = levelListModel->item(0,0);
-	levels->appendRow(name);
+	levels->appendRow(name);*/
 }
 
 void Menu_Main::slot_removeLevel()
@@ -178,34 +145,34 @@ void Menu_Main::slot_removeLevel()
 
 void Menu_Main::slot_saveLevel()
 {
-	// make root node
-	QDomDocument document;
-	QDomElement xmlroot = document.createElement("xkill");
-	document.appendChild(xmlroot);
+	//// make root node
+	//QDomDocument document;
+	//QDomElement xmlroot = document.createElement("xkill");
+	//document.appendChild(xmlroot);
 
-	// parse model into level xml
-	QStandardItem* levels = levelListModel->item(0,0);
-	for(int i=0; i<levels->rowCount(); i++)
-	{
-		QDomElement xmlbook = document.createElement("Level");
-		QStandardItem* name = levels->child(i,0);
-		QStandardItem* desc = name->child(0,0);
-		xmlbook.setAttribute("Name",name->text());
-		xmlbook.setAttribute("Description", desc->text());
-		xmlroot.appendChild(xmlbook);
-	}
+	//// parse model into level xml
+	//QStandardItem* levels = levelListModel->item(0,0);
+	//for(int i=0; i<levels->rowCount(); i++)
+	//{
+	//	QDomElement xmlbook = document.createElement("Level");
+	//	QStandardItem* name = levels->child(i,0);
+	//	QStandardItem* desc = name->child(0,0);
+	//	xmlbook.setAttribute("Name",name->text());
+	//	xmlbook.setAttribute("Description", desc->text());
+	//	xmlroot.appendChild(xmlbook);
+	//}
 
-	// save to disk
-	QFile file(filePath);
-	if(!file.open(QIODevice::WriteOnly | QIODevice::Text))
-	{
-		QMessageBox::information(0, "Error", "Failed to write file");  return;
-	}
-	QTextStream stream(&file);
-	stream << document.toString();
-	file.close();
+	//// save to disk
+	//QFile file(filePath);
+	//if(!file.open(QIODevice::WriteOnly | QIODevice::Text))
+	//{
+	//	QMessageBox::information(0, "Error", "Failed to write file");  return;
+	//}
+	//QTextStream stream(&file);
+	//stream << document.toString();
+	//file.close();
 
-	loadXML();
+	//loadXML();
 }
 
 void Menu_Main::keyPressEvent( QKeyEvent* e )
@@ -220,7 +187,6 @@ void Menu_Main::mousePressEvent( QMouseEvent* e )
 
 void Menu_Main::slot_startGame()
 {
-	
 }
 
 void Menu_Main::slot_loadInputList(int deviceId)

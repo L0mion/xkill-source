@@ -24,15 +24,26 @@ MutatorSettings::~MutatorSettings()
 
 }
 
+void MutatorSettings::setupAttribute(AttributePtr<Attribute_WeaponStats> attribute_ptr)
+{
+	setupAttribute(attribute_ptr, attribute_ptr->currentAmmunitionType, attribute_ptr->currentFiringModeType);
+}
+
+void MutatorSettings::setupAttribute(AttributePtr<Attribute_WeaponStats> attribute_ptr, XKILL_Enums::AmmunitionType ammoType, XKILL_Enums::FiringModeType firingModeType)
+{
+	attribute_ptr->ammunition[ammoType] = Ammunition(standardAmmunitions[ammoType]);
+	attribute_ptr->firingMode[firingModeType] = FiringMode(standardFiringModes[firingModeType]);
+}
+
 void MutatorSettings::setupAttribute(Attribute_WeaponStats* attribute)
 {
 	setupAttribute(attribute, attribute->currentAmmunitionType, attribute->currentFiringModeType);
 }
 
-void MutatorSettings::setupAttribute(Attribute_WeaponStats* attribute, XKILL_Enums::AmmunitionType ammo, XKILL_Enums::FiringModeType firingMode)
+void MutatorSettings::setupAttribute(Attribute_WeaponStats* attribute, XKILL_Enums::AmmunitionType ammoType, XKILL_Enums::FiringModeType firingModeType)
 {
-	attribute->ammunition[ammo] = Ammunition(standardAmmunitions[ammo]);
-	attribute->firingMode[firingMode] = FiringMode(standardFiringModes[firingMode]);
+	attribute->ammunition[ammoType] = Ammunition(standardAmmunitions[ammoType]);
+	attribute->firingMode[firingModeType] = FiringMode(standardFiringModes[firingModeType]);
 }
 
 Ammunition& MutatorSettings::getStandardAmmunition(XKILL_Enums::AmmunitionType type)
@@ -51,48 +62,51 @@ void MutatorSettings::initStandardAmmunition()
 
 	ammo = &standardAmmunitions[XKILL_Enums::AmmunitionType::BULLET];
 
-	ammo->type				= XKILL_Enums::AmmunitionType::BULLET;
-	ammo->damage			= 20.0f;
-	ammo->explosionSphereInitialRadius = 0.0f;
-	ammo->explosionSphereFinalRadius = 0.0f;
-	ammo->explosionSphereExplosionDuration = 0.0f;
-	ammo->explosive			= false;
-	ammo->nrOfProjectiles	= 1;
-	ammo->spawnVariation	= 0.0f;
-	ammo->speed				= 60.0f;
-	ammo->spread			= 0.0f;
-	ammo->totalNrOfShots	= 1000;
-	ammo->velocityVariation	= 0.0f;
+	ammo->type								= XKILL_Enums::AmmunitionType::BULLET;
+	ammo->damage							= 20.0f;
+	ammo->explosionSphereInitialRadius		= 0.0f;
+	ammo->explosionSphereFinalRadius		= 0.0f;
+	ammo->explosionSphereExplosionDuration	= 0.0f;
+	ammo->explosive							= false;
+	ammo->nrOfProjectilesPerSalvo			= 1;
+	ammo->displacementSphereRadius			= 0.0f;
+	ammo->speed								= 60.0f;
+	ammo->spreadConeRadius					= 0.0f;
+	ammo->initialTotalNrOfShots				= 100;
+	ammo->currentTotalNrOfShots				= ammo->initialTotalNrOfShots;
+	ammo->velocityVariation					= 0.0f;
 
 	ammo = &standardAmmunitions[XKILL_Enums::AmmunitionType::SCATTER];
 
-	ammo->type				= XKILL_Enums::AmmunitionType::SCATTER;
-	ammo->damage			= 3.0f;
-	ammo->explosionSphereInitialRadius = 0.0f;
-	ammo->explosionSphereFinalRadius = 0.0f;
-	ammo->explosionSphereExplosionDuration = 0.0f;
-	ammo->explosive			= false;
-	ammo->nrOfProjectiles	= 10;
-	ammo->spawnVariation	= 0.02f;
-	ammo->speed				= 30.0f;
-	ammo->spread			= 0.1f;
-	ammo->totalNrOfShots	= 1000;
-	ammo->velocityVariation	= 0.5f;
+	ammo->type								= XKILL_Enums::AmmunitionType::SCATTER;
+	ammo->damage							= 3.0f;
+	ammo->explosionSphereInitialRadius		= 0.0f;
+	ammo->explosionSphereFinalRadius		= 0.0f;
+	ammo->explosionSphereExplosionDuration	= 0.0f;
+	ammo->explosive							= false;
+	ammo->nrOfProjectilesPerSalvo			= 10;
+	ammo->displacementSphereRadius			= 0.02f;
+	ammo->speed								= 30.0f;
+	ammo->spreadConeRadius					= 0.1f;
+	ammo->initialTotalNrOfShots				= 20;
+	ammo->currentTotalNrOfShots				= ammo->initialTotalNrOfShots;
+	ammo->velocityVariation					= 0.5f;
 
 	ammo = &standardAmmunitions[XKILL_Enums::AmmunitionType::EXPLOSIVE];
 
-	ammo->type				= XKILL_Enums::AmmunitionType::EXPLOSIVE;
-	ammo->damage			= 50.0f;
-	ammo->explosionSphereInitialRadius = 1.0f;
-	ammo->explosionSphereFinalRadius = 10.0f;
-	ammo->explosionSphereExplosionDuration = 1.0f;
-	ammo->explosive			= true;
-	ammo->nrOfProjectiles	= 1;
-	ammo->spawnVariation	= 0.0f;
-	ammo->speed				= 5.0f;
-	ammo->spread			= 0.0f;
-	ammo->totalNrOfShots	= 1000;
-	ammo->velocityVariation	= 0.0f;
+	ammo->type								= XKILL_Enums::AmmunitionType::EXPLOSIVE;
+	ammo->damage							= 50.0f;
+	ammo->explosionSphereInitialRadius		= 1.0f;
+	ammo->explosionSphereFinalRadius		= 10.0f;
+	ammo->explosionSphereExplosionDuration	= 1.0f;
+	ammo->explosive							= true;
+	ammo->nrOfProjectilesPerSalvo			= 1;
+	ammo->displacementSphereRadius			= 0.0f;
+	ammo->speed								= 5.0f;
+	ammo->spreadConeRadius					= 0.0f;
+	ammo->initialTotalNrOfShots				= 100;
+	ammo->currentTotalNrOfShots				= ammo->initialTotalNrOfShots;
+	ammo->velocityVariation					= 0.0f;
 }
 
 void MutatorSettings::initStandardFiringModes()
@@ -110,9 +124,13 @@ void MutatorSettings::initStandardFiringModes()
 	firingMode->explosionSphereModifier	= 1.0f;
 	firingMode->cooldownBetweenShots	= 0.0f;
 	firingMode->reloadTime				= 1.0f;
-	firingMode->nrOfShotsLeftInClip		= firingMode->clipSize;
 	firingMode->cooldownLeft			= firingMode->cooldownBetweenShots;
-	firingMode->reloadTimeLeft			= firingMode->reloadTime;
+	firingMode->reloadTimeLeft			= 0.0f;
+
+	for(int i = 0; i < XKILL_Enums::AmmunitionType::NROFAMMUNITIONTYPES; i++)
+	{
+		firingMode->nrOfShotsLeftInClip[i] = 0;
+	}
 
 	firingMode = &standardFiringModes[XKILL_Enums::FiringModeType::SEMI];
 
@@ -125,9 +143,13 @@ void MutatorSettings::initStandardFiringModes()
 	firingMode->explosionSphereModifier	= 0.5f;
 	firingMode->cooldownBetweenShots	= 0.0f;
 	firingMode->reloadTime				= 2.0f;
-	firingMode->nrOfShotsLeftInClip		= firingMode->clipSize;
 	firingMode->cooldownLeft			= firingMode->cooldownBetweenShots;
-	firingMode->reloadTimeLeft			= firingMode->reloadTime;
+	firingMode->reloadTimeLeft			= 0.0f;
+
+	for(int i = 0; i < XKILL_Enums::AmmunitionType::NROFAMMUNITIONTYPES; i++)
+	{
+		firingMode->nrOfShotsLeftInClip[i] = 0;
+	}
 
 	firingMode = &standardFiringModes[XKILL_Enums::FiringModeType::AUTO];
 
@@ -140,7 +162,11 @@ void MutatorSettings::initStandardFiringModes()
 	firingMode->explosionSphereModifier	= 0.15f;
 	firingMode->cooldownBetweenShots	= 0.1f;
 	firingMode->reloadTime				= 5.0f;
-	firingMode->nrOfShotsLeftInClip		= firingMode->clipSize;
 	firingMode->cooldownLeft			= firingMode->cooldownBetweenShots;
-	firingMode->reloadTimeLeft			= firingMode->reloadTime;
+	firingMode->reloadTimeLeft			= 0.0f;
+
+	for(int i = 0; i < XKILL_Enums::AmmunitionType::NROFAMMUNITIONTYPES; i++)
+	{
+		firingMode->nrOfShotsLeftInClip[i] = 0;
+	}
 }

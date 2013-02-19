@@ -1,23 +1,20 @@
 #include "PhysicsObject.h"
 
-#include <btBulletDynamicsCommon.h>
-
-
 #include <xkill-utilities/AttributeManager.h>
-
-#include "physicsUtilities.h"
 #include <xkill-utilities/Util.h>
-
-
 #include "CollisionShapes.h"
 #include "MotionState.h"
-
 #include "PhysicsUtilities.h"
+#include "PhysicsComponent.h"
+
+#include <btBulletDynamicsCommon.h>
 
 AttributeIterator<Attribute_Physics> itrPhysics_;
 AttributeIterator<Attribute_Position> itrPosition_PhysicsObject;
 AttributeIterator<Attribute_Spatial> itrSpatial_PhysicsObject;
 static float outOfBoundsIfYIsLowerThanThis;
+
+btDiscreteDynamicsWorld* PhysicsObject::dynamicsWorld_ = NULL;
 
 PhysicsObject::PhysicsObject()
 	: btRigidBody(-1, nullptr, nullptr)
@@ -69,7 +66,32 @@ btVector3 PhysicsObject::zeroLocalInertia()
 	return localInertia;
 }
 
-bool PhysicsObject::init(unsigned int attributeIndex,unsigned int collisionFilterGroup)
+void PhysicsObject::Hover(float delta, float hoverHeight)
+{
+	btVector3 from = getWorldTransform().getOrigin();
+	btVector3 to = from - btVector3(0.0f,hoverHeight*2.0f,0.0f);
+	btCollisionWorld::ClosestRayResultCallback ray(from,to);
+	ray.m_collisionFilterGroup = XKILL_Enums::PhysicsAttributeType::RAY;
+	ray.m_collisionFilterMask = XKILL_Enums::PhysicsAttributeType::WORLD;
+	dynamicsWorld_->rayTest(from,to,ray); //cast ray from player position straight down
+	if(ray.hasHit())
+	{
+		btVector3 point = from.lerp(to,ray.m_closestHitFraction);
+		float length = (point - from).length();
+		float something = hoverHeight-length;
+		if(something > 0.0f)
+		{
+			btTransform worldTransform;
+			worldTransform = getWorldTransform();
+			worldTransform.setOrigin(worldTransform.getOrigin() + btVector3(0.0f,something,0.0f)*delta/0.25f);
+			setWorldTransform(worldTransform);
+
+			setLinearVelocity(getLinearVelocity()+btVector3(0.0f,-getLinearVelocity().y(),0.0f));
+		}
+	}
+}
+
+bool PhysicsObject::init(unsigned int attributeIndex, short collisionFilterGroup)
 {
 	
 	if(attributeIndex < 0)
@@ -132,14 +154,26 @@ unsigned int PhysicsObject::getAttributeIndex() const
 	return attributeIndex_;
 }
 
-unsigned int PhysicsObject::getCollisionFilterGroup() const
+short PhysicsObject::getCollisionFilterGroup() const
 {
 	return collisionFilterGroup_;
 }
 
-void PhysicsObject::onUpdate(float delta)
+void PhysicsObject::writeNonSynchronizedPhysicsObjectDataToPhysicsAttribute()
 {
-	if(getWorldTransform().getOrigin().y() < outOfBoundsIfYIsLowerThanThis)
+	AttributePtr<Attribute_Physics> ptr_physics = itrPhysics_.at(attributeIndex_);
+
+	ptr_physics->angularVelocity = convert(&getAngularVelocity());
+	ptr_physics->collisionFilterGroup = getCollisionFilterGroup();
+	ptr_physics->collisionResponse = (getCollisionFlags() & btCollisionObject::CF_NO_CONTACT_RESPONSE) == 0;
+	ptr_physics->gravity = convert(&getGravity());
+	ptr_physics->linearVelocity = convert(&getLinearVelocity());
+	//ptr_physics->collisionFilterMask = 
+	//ptr_physics->mass = physicsObject->getInvMass(); //only mass inverse is stored in physics object
+	//ptr_physics->meshID = //not stored in physics object
+}
+void PhysicsObject::onUpdate(float delta)
+{	if(getWorldTransform().getOrigin().y() < outOfBoundsIfYIsLowerThanThis)
 	{
 		handleOutOfBounds();
 	}

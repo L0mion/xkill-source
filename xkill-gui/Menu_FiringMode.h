@@ -6,12 +6,15 @@
 
 //! A class to handle interaction between the tab "Weapon" and the game
 
-class Menu_FiringMode
+class Menu_FiringMode : QObject
 {
+	Q_OBJECT
+
 public:
 	Menu_FiringMode(Ui::MainWindow* ui, QMainWindow* window);
 	~Menu_FiringMode();
 
+public slots:
 	//! Updates the qt menu based on the in game data
 	void setSettingsMenu();
 	//! Updates the in game data based on the qt menu

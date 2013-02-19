@@ -24,8 +24,10 @@ class LoaderFbxMaterialDesc;
 
 static const std::string PATH_XKILL_RESOURCES		 = "../../xkill-resources/";
 static const std::string PATH_XKILL_RESOURCES_LEVELS = "../../xkill-resources/xkill-level/";
-static const LPCTSTR PATH_TEXDESC					 = L"../../xkill-resources/*.texdesc";
-static const LPCTSTR PATH_MDLDESC					 = L"../../xkill-resources/*.mdldesc";
+static const LPCTSTR PATH_TEXDESC					 = L"../../xkill-resources/";
+static const LPCTSTR EXTENSION_TEXDESC				 = L".texdesc";
+static const LPCTSTR PATH_MDLDESC					 = L"../../xkill-resources/";
+static const LPCTSTR EXTENSION_MDLDESC				 = L".mdldesc";
 
 enum FileExtension
 {
@@ -72,7 +74,7 @@ private:
 
 	bool pollFile(std::string path, std::string fileName);
 
-	std::vector<std::string> getFileNames(LPCTSTR filename);
+	std::vector<std::string> getFileNames(LPCTSTR filepath, LPCTSTR filename, bool recursiveSearch = false);
 
 	std::map<std::string, unsigned int>* texNameToTexID;
 

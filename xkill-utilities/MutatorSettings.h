@@ -1,8 +1,10 @@
 #pragma once
 #include "XKILL_Enums.h"
 #include "dllUtilities.h"
+#include "AttributePointer.h"
 
 struct Attribute_WeaponStats;
+
 
 #include "WeaponStructs.h"
 
@@ -14,6 +16,10 @@ public:
 	MutatorSettings();
 	~MutatorSettings();
 
+	//! Initializes the current ammunition and firing mode of the attribute pointer
+	void setupAttribute(AttributePtr<Attribute_WeaponStats> attribute_ptr);
+	//! Initializes the specified ammunition and firing mode of the attribute pointer
+	void setupAttribute(AttributePtr<Attribute_WeaponStats> attribute_ptr, XKILL_Enums::AmmunitionType ammoType, XKILL_Enums::FiringModeType firingModeType);
 	//! Initializes the current ammunition and firing mode of the attribute
 	void setupAttribute(Attribute_WeaponStats* attribute);
 	//! Initializes the specified ammunition and firing mode of the attribute

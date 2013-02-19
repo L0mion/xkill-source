@@ -66,7 +66,6 @@ public:
 		CREATE_ATTRIBUTE(ptr_spatial, Attribute_Spatial, spatial, entity);
 		ptr_spatial->ptr_position = ptr_position;
 
-		
 		CREATE_ATTRIBUTE(ptr_render, Attribute_Render, render, entity);
 		ptr_render->ptr_spatial = ptr_spatial;
 		
@@ -74,9 +73,10 @@ public:
 		ptr_physics->ptr_spatial = ptr_spatial;
 		ptr_physics->ptr_render = ptr_render;
 		ptr_physics->meshID = ptr_render->meshID;
-		ptr_physics->collisionFilterGroup = Attribute_Physics::PLAYER;
-		ptr_physics->collisionFilterMask = Attribute_Physics::EVERYTHING;
-		ptr_physics->gravity = Float3(0.0f, -0.0f, 0.0f);
+		ptr_physics->collisionFilterGroup = XKILL_Enums::PhysicsAttributeType::PLAYER;
+		ptr_physics->collisionFilterMask = XKILL_Enums::PhysicsAttributeType::EVERYTHING;
+		ptr_physics->gravity = Float3(0.0f, -10.0f, 0.0f);
+		ptr_physics->mass = 85.0f;
 		
 		CREATE_ATTRIBUTE(ptr_input, Attribute_Input, input, entity);
 		ptr_input->ptr_physics = ptr_physics;
@@ -116,6 +116,17 @@ public:
 		ptr_player->ptr_weaponFireLocation_spatial = ptr_weaponFireLocation_spatial;
 
 		CREATE_ATTRIBUTE(ptr_ray, Attribute_Ray, ray, entity);
+
+		/*
+		CREATE_ATTRIBUTE(ptr_lightPoint, Attribute_Light_Point, lightPoint, entity);
+		ptr_lightPoint->ptr_position			= ptr_position;
+		Float4 color = Float4(1.0f, 0.0f, 0.0f, 1.0f);
+		ptr_lightPoint->lightPoint.ambient		= Float4(0.0f, 0.0f, 0.0f, 1.0f);
+		ptr_lightPoint->lightPoint.diffuse		= color;
+		ptr_lightPoint->lightPoint.specular		= color;
+		ptr_lightPoint->lightPoint.range		= 1.0f;
+		ptr_lightPoint->lightPoint.attenuation	= Float3(0.0f, 30.0f, 0.0f);
+		*/
 	}
 
 	AttributePtr<Attribute_Camera> createCamera(Entity* entity, AttributePtr<Attribute_Spatial> ptr_parent_spatial)
@@ -200,8 +211,10 @@ public:
 		ptr_physics->ptr_spatial = ptr_spatial;
 		ptr_physics->ptr_render = ptr_render;
 		ptr_physics->meshID = e->meshID;
-		ptr_physics->collisionFilterGroup = Attribute_Physics::WORLD;
-		ptr_physics->collisionFilterMask = Attribute_Physics::PLAYER | Attribute_Physics::PROJECTILE | Attribute_Physics::FRUSTUM | Attribute_Physics::PICKUPABLE | Attribute_Physics::RAY;
+		ptr_physics->collisionFilterGroup = XKILL_Enums::PhysicsAttributeType::WORLD;
+		ptr_physics->collisionFilterMask = XKILL_Enums::PhysicsAttributeType::PLAYER | XKILL_Enums::PhysicsAttributeType::PROJECTILE;
+		ptr_physics->collisionFilterMask = ptr_physics->collisionFilterMask | XKILL_Enums::PhysicsAttributeType::FRUSTUM | XKILL_Enums::PhysicsAttributeType::PICKUPABLE;
+		ptr_physics->collisionFilterMask = ptr_physics->collisionFilterMask | XKILL_Enums::PhysicsAttributeType::RAY | XKILL_Enums::PhysicsAttributeType::PROP;
 		ptr_physics->mass = 0;
 	}
 
@@ -214,22 +227,18 @@ public:
 		ptr_spatial->ptr_position = ptr_position;
 		ptr_spatial->rotation = e->rotation;
 
-		//float lifeTime;
 		CREATE_ATTRIBUTE(ptr_render, Attribute_Render, render, entity);
 		ptr_render->ptr_spatial = ptr_spatial;
 		ptr_render->meshID = MODEL_PROJECTILE_SINGLE;
 		switch (e->ammunitionType)
 		{
 		case XKILL_Enums::AmmunitionType::BULLET:
-			//lifeTime = 10.0f;
 			ptr_render->meshID = MODEL_PROJECTILE_SINGLE;
 			break;
 		case XKILL_Enums::AmmunitionType::EXPLOSIVE:
-			//lifeTime = 10.0f;
 			ptr_render->meshID = MODEL_PROJECTILE_EXPLOSIVE;
 			break;
 		case XKILL_Enums::AmmunitionType::SCATTER:
-			//lifeTime = 0.1f;
 			ptr_render->meshID = MODEL_PROJECTILE_SCATTER;
 			break;
 		default:
@@ -239,11 +248,11 @@ public:
 		CREATE_ATTRIBUTE(ptr_physics, Attribute_Physics, physics, entity);
 		ptr_physics->ptr_spatial = ptr_spatial;
 		ptr_physics->ptr_render = ptr_render;
-		ptr_physics->collisionFilterGroup = Attribute_Physics::PROJECTILE;
-		ptr_physics->collisionFilterMask = Attribute_Physics::WORLD | Attribute_Physics::PLAYER | Attribute_Physics::FRUSTUM | Attribute_Physics::PICKUPABLE;
+		ptr_physics->collisionFilterGroup = XKILL_Enums::PhysicsAttributeType::PROJECTILE;
+		ptr_physics->collisionFilterMask = XKILL_Enums::PhysicsAttributeType::WORLD | XKILL_Enums::PhysicsAttributeType::PLAYER | XKILL_Enums::PhysicsAttributeType::FRUSTUM | XKILL_Enums::PhysicsAttributeType::PICKUPABLE | XKILL_Enums::PhysicsAttributeType::PROP;
 		ptr_physics->meshID = ptr_render->meshID;
 		ptr_physics->linearVelocity = e->velocity;
-		ptr_physics->mass = 50.0f;
+		ptr_physics->mass = 1.0f;
 		ptr_physics->gravity = Float3(0.0f, 0.0f, 0.0f);
 		ptr_physics->collisionResponse = true;
 
@@ -339,15 +348,17 @@ public:
 			break;
 		case XKILL_Enums::PickupableType::MEDKIT:
 			ptr_render->meshID = MODEL_HEALTHPACK;
+			break;
 		default:
+			ptr_render->meshID = MODEL_HEALTHPACK;
 			break;
 		}
 
 		CREATE_ATTRIBUTE(ptr_physics, Attribute_Physics, physics, entity);
 		ptr_physics->ptr_spatial = ptr_spatial;
 		ptr_physics->ptr_render = ptr_render;
-		ptr_physics->collisionFilterGroup = Attribute_Physics::PICKUPABLE;
-		ptr_physics->collisionFilterMask = Attribute_Physics::PLAYER | Attribute_Physics::FRUSTUM | Attribute_Physics::WORLD | Attribute_Physics::PICKUPABLE | Attribute_Physics::PROJECTILE | Attribute_Physics::EXPLOSIONSPHERE | Attribute_Physics::RAY;
+		ptr_physics->collisionFilterGroup = XKILL_Enums::PhysicsAttributeType::PICKUPABLE;
+		ptr_physics->collisionFilterMask = XKILL_Enums::PhysicsAttributeType::PLAYER | XKILL_Enums::PhysicsAttributeType::FRUSTUM | XKILL_Enums::PhysicsAttributeType::WORLD | XKILL_Enums::PhysicsAttributeType::PICKUPABLE | XKILL_Enums::PhysicsAttributeType::PROJECTILE | XKILL_Enums::PhysicsAttributeType::EXPLOSIONSPHERE | XKILL_Enums::PhysicsAttributeType::RAY;
 		ptr_physics->collisionResponse = true;
 		ptr_physics->mass = 10.0f;
 		ptr_physics->gravity = Float3(0.0f, -10.0f, 0.0f);
@@ -382,8 +393,8 @@ public:
 
 		CREATE_ATTRIBUTE(ptr_physics, Attribute_Physics, physics, entity);
 		ptr_physics->ptr_spatial = ptr_spatial;
-		ptr_physics->collisionFilterGroup = Attribute_Physics::EXPLOSIONSPHERE;
-		ptr_physics->collisionFilterMask = Attribute_Physics::PLAYER | Attribute_Physics::PICKUPABLE;
+		ptr_physics->collisionFilterGroup = XKILL_Enums::PhysicsAttributeType::EXPLOSIONSPHERE;
+		ptr_physics->collisionFilterMask = XKILL_Enums::PhysicsAttributeType::PLAYER | XKILL_Enums::PhysicsAttributeType::PICKUPABLE;
 		ptr_physics->collisionResponse = true;
 		ptr_physics->mass = 0.0f;
 		ptr_physics->gravity = Float3(0.0f, 0.0f, 0.0f);
@@ -438,14 +449,11 @@ public:
 		}
 	}
 
-
 	void createInputDevice(Entity* entity, Event_CreateInputDevice* e)
 	{
 		CREATE_ATTRIBUTE(ptr_inputDevice, Attribute_InputDevice, inputDevice, entity);
 		ptr_inputDevice->device = e->device;
 	}
-
-	
 
 	void createRenderableEntity(Entity* entity)
 	{
@@ -464,9 +472,42 @@ public:
 		ptr_physics->ptr_spatial = ptr_spatial;
 		ptr_physics->ptr_render = ptr_render;
 		ptr_physics->meshID = ptr_render->meshID;
-		ptr_physics->collisionFilterGroup = Attribute_Physics::PLAYER;
-		ptr_physics->collisionFilterMask = Attribute_Physics::EVERYTHING;
+		ptr_physics->collisionFilterGroup = XKILL_Enums::PhysicsAttributeType::PLAYER;
+		ptr_physics->collisionFilterMask = XKILL_Enums::PhysicsAttributeType::EVERYTHING;
 		ptr_physics->gravity = Float3(0.0f, -10.0f, 0.0f);
+	}
+
+	void createCorpseEntity(Entity* entity, Event_CreateCorpse* e)
+	{
+		createRenderableEntity(entity);
+
+		AttributePtr<Attribute_Player> ptr_player = e->ptr_player;
+		AttributePtr<Attribute_Physics> ptr_physics = ptr_player->ptr_input->ptr_physics;
+
+		std::vector<int> physicsId = entity->getAttributes(ATTRIBUTE_PHYSICS);
+		for(unsigned int i = 0; i < physicsId.size(); i++)
+		{
+			AttributePtr<Attribute_Physics> ptr_corpsePhysics = itrPhysics.at(physicsId.at(i));
+
+			ptr_corpsePhysics->meshID = ptr_physics->meshID;
+			ptr_corpsePhysics->gravity = ptr_physics->gravity;
+			ptr_corpsePhysics->mass = ptr_physics->mass / 3.0f;
+			ptr_corpsePhysics->angularVelocity = ptr_physics->angularVelocity;
+			ptr_corpsePhysics->linearVelocity = ptr_physics->linearVelocity;
+			ptr_corpsePhysics->collisionResponse = true;
+			ptr_corpsePhysics->collisionFilterGroup = XKILL_Enums::PhysicsAttributeType::PROP;
+			ptr_corpsePhysics->collisionFilterMask = XKILL_Enums::PhysicsAttributeType::WORLD | XKILL_Enums::PhysicsAttributeType::FRUSTUM | XKILL_Enums::PhysicsAttributeType::PROJECTILE | XKILL_Enums::PhysicsAttributeType::RAY;
+			ptr_corpsePhysics->reloadDataIntoBulletPhysics = true;
+
+			ptr_corpsePhysics->ptr_render->meshID = ptr_physics->ptr_render->meshID;
+			ptr_corpsePhysics->ptr_render->textureID = ptr_physics->ptr_render->textureID;
+			ptr_corpsePhysics->ptr_spatial->rotation = ptr_physics->ptr_spatial->rotation;
+			ptr_corpsePhysics->ptr_spatial->scale = ptr_physics->ptr_spatial->scale;
+
+			ptr_corpsePhysics->ptr_spatial->ptr_position->position = ptr_physics->ptr_spatial->ptr_position->position;
+
+			ptr_player->corpseEntityId = entity->getID();
+		}
 	}
 };
 

@@ -11,8 +11,8 @@ Menu_Sound::Menu_Sound(Ui::MainWindow* ui, QMainWindow* window)
 
 	this->ui = ui;
 
-	window->connect(ui->checkBox_Sound_Mute,			SIGNAL(clicked()),			window, SLOT(slot_soundMenuUpdated()));
-	window->connect(ui->horizontalSlider_Sound_Volume,	SIGNAL(valueChanged(int)),	window, SLOT(slot_soundMenuUpdated()));
+	connect(ui->checkBox_Sound_Mute,			SIGNAL(clicked()),			this, SLOT(settingsMenuUpdated()));
+	connect(ui->horizontalSlider_Sound_Volume,	SIGNAL(valueChanged(int)),	this, SLOT(settingsMenuUpdated()));
 }
 
 Menu_Sound::~Menu_Sound()
@@ -20,7 +20,7 @@ Menu_Sound::~Menu_Sound()
 
 }
 
-void Menu_Sound::updateMenu()
+void Menu_Sound::settingsMenuUpdated()
 {
 	//Attribute_SoundSettings* soundSettings;
 	//while(itrSoundSettings.hasNext())

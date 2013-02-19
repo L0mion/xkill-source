@@ -36,7 +36,6 @@ public:
 		resize(800, 800);
 		
 		// subscribe to events
-		SUBSCRIBE_TO_EVENT(this, EVENT_STARTGAME);
 		SUBSCRIBE_TO_EVENT(this, EVENT_GET_WINDOW_RESOLUTION);
 		SUBSCRIBE_TO_EVENT(this, EVENT_SET_MOUSELOCK);
 

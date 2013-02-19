@@ -19,13 +19,13 @@ Menu_Input::Menu_Input(Ui::MainWindow* ui, QMainWindow* window)
 
 	this->ui = ui;
 	
-	window->connect(ui->comboBox_Input,				SIGNAL(currentIndexChanged(int)),	window,		SLOT(slot_loadInputList(int)));
-	window->connect(ui->tableView_Input,			SIGNAL(clicked(QModelIndex)),		window,		SLOT(slot_loadInputSettings(QModelIndex)));
-	window->connect(ui->tableView_Input,			SIGNAL(clicked(QModelIndex)),		window,		SLOT(slot_setInputObject(QModelIndex)));
-	window->connect(ui->horizontalSlider_Input,		SIGNAL(sliderMoved(int)),			window,		SLOT(slot_inputSettingsChanged()));
-	window->connect(ui->checkBox_Input_Inverted,	SIGNAL(clicked()),					window,		SLOT(slot_inputSettingsChanged()));
-	window->connect(ui->pushButton_Input,			SIGNAL(clicked()),					window,		SLOT(slot_inputSettingsChanged()));
-	window->connect(ui->checkBox_Input_Rumble,		SIGNAL(clicked()),					window,		SLOT(slot_inputSettingsChanged()));
+	window->connect(ui->comboBox_Input,				SIGNAL(currentIndexChanged(int)),	this,		SLOT(loadInputList(int)));
+	window->connect(ui->tableView_Input,			SIGNAL(clicked(QModelIndex)),		this,		SLOT(loadInputSettings(QModelIndex)));
+	window->connect(ui->tableView_Input,			SIGNAL(clicked(QModelIndex)),		this,		SLOT(setInputObject(QModelIndex)));
+	window->connect(ui->horizontalSlider_Input,		SIGNAL(sliderMoved(int)),			this,		SLOT(settingsMenuUpdated()));
+	window->connect(ui->checkBox_Input_Inverted,	SIGNAL(clicked()),					this,		SLOT(settingsMenuUpdated()));
+	window->connect(ui->pushButton_Input,			SIGNAL(clicked()),					this,		SLOT(settingsMenuUpdated()));
+	window->connect(ui->checkBox_Input_Rumble,		SIGNAL(clicked()),					this,		SLOT(settingsMenuUpdated()));
 }
 
 Menu_Input::~Menu_Input()
@@ -164,7 +164,7 @@ void Menu_Input::setInputObject(QModelIndex index)
 	}
 }
 
-void Menu_Input::updateMenu()
+void Menu_Input::settingsMenuUpdated()
 {
 	if(currentObject != nullptr)
 	{

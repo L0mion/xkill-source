@@ -6,8 +6,8 @@ typedef struct HWND__* HWND;
 
 template<typename T>
 class DataStreamBuffer;
-struct VertexPosNormTexInstanced;
-typedef DataStreamBuffer<VertexPosNormTexInstanced> InstancedData;
+struct VertexInstanced;
+typedef DataStreamBuffer<VertexInstanced> InstancedData;
 
 namespace DirectX
 {
@@ -37,7 +37,9 @@ class TexDesc;
 class MeshMaterial;
 class SubsetD3D;
 
-#include <vector>
+//#include <vector>
+
+#include "ShadingDesc.h"
 
 //temp
 class M3DLoader;
@@ -55,6 +57,7 @@ public:
 	~Renderer();					//!< Releases all memory and returns to default state.
 	
 	void	reset();				//!< Resets RenderingComponent to default state.
+	void	unloadModels();			//!< Unloads all models in ManagementModel
 	HRESULT	resize(
 		unsigned int screenWidth, 
 		unsigned int screenHeight);	//!< Resizes all management objects that are affected by a change in screen resolution.
@@ -84,6 +87,8 @@ private:
 		ViewportData& vpData);											//!< Renders to g-buffer.
 	void renderViewportToBackBuffer(ViewportData& vpData);				//!< Renders to backbuffer.
 	void renderInstance(unsigned int meshID, InstancedData* instance);	//!< Renders an instanced model.
+	ShadingDesc deriveShadingDesc(VertexType vertexType);
+	void setShadingDesc(ShadingDesc shadingDesc);
 	void renderSubset(
 		SubsetD3D* subset, 
 		MaterialDesc& material,
@@ -127,8 +132,8 @@ private:
 
 	ID3D11Buffer* debugLinesVertexBuffer_;		//!< Might want to move this into some manager of some sort.
 
-	std::vector<int>* attributesRenderOwner_;	//!< Holds owners of render-attributes.
-	std::vector<int>* attributesCameraOwner_;
+	//std::vector<int>* attributesRenderOwner_;	//!< Holds owners of render-attributes.
+	//std::vector<int>* attributesCameraOwner_;
 
 	//temp
 	M3DLoader*		m3dLoader_;

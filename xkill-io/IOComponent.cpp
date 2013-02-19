@@ -1,6 +1,6 @@
 #include <windows.h>
-#include <tchar.h>
-#include <stdio.h>
+//#include <tchar.h>
+//#include <stdio.h>
 
 #include <DirectXMath.h>
 
@@ -29,6 +29,9 @@ IOComponent::IOComponent()
 {
 	texNameToTexID = nullptr;
 	fbxLoader_ = nullptr;
+
+	SUBSCRIBE_TO_EVENT(this, EVENT_GET_FILE_LIST);
+	SUBSCRIBE_TO_EVENT(this, EVENT_LOAD_LEVEL);
 }
 IOComponent::~IOComponent()
 {
@@ -61,7 +64,7 @@ bool IOComponent::initTexDescs()
 
 	std::vector<std::string> texDescFiles;
 
-	texDescFiles = getFileNames(PATH_TEXDESC);
+	texDescFiles = getFileNames(PATH_TEXDESC, EXTENSION_TEXDESC);
 
 	if(texDescFiles.size() > 0)
 	{
@@ -115,7 +118,7 @@ bool IOComponent::initMdlDescs()
 	bool sucessfulLoad = true;
 
 	std::vector<std::string> mdlDescFiles;
-	mdlDescFiles = getFileNames(PATH_MDLDESC);
+	mdlDescFiles = getFileNames(PATH_MDLDESC, EXTENSION_MDLDESC);
 
 	if(mdlDescFiles.size() > 0)
 	{
@@ -126,8 +129,8 @@ bool IOComponent::initMdlDescs()
 	{
 		SHOW_MESSAGEBOX("Couldn't locate any .mdldesc-files in xkill-resources/.");
 	}
-	Settings* settings = ATTRIBUTE_MANAGER->settings;
-	sucessfulLoad = initLvlMdlDesc(settings->currentLevel);
+	//Settings* settings = ATTRIBUTE_MANAGER->settings;
+	//sucessfulLoad = initLvlMdlDesc(settings->currentLevel);
 
 	return sucessfulLoad;
 }
@@ -444,15 +447,61 @@ bool IOComponent::pollFile(std::string path, std::string fileName)
 	return ifile.good();
 }
 
-std::vector<std::string> IOComponent::getFileNames(const LPCTSTR filename)
+std::vector<std::string> IOComponent::getFileNames(const LPCTSTR filepath, const LPCTSTR filename, bool recursiveSearch)
 {
 	std::vector<std::string> foundFiles;
 
 	WIN32_FIND_DATA findFileData;
 	HANDLE searchHandleWinAPI;
+	std::wstring fullpath;
+
+	//Go down in the folder hierarchy 
+
+	if(recursiveSearch)
+	{
+		fullpath = filepath;
+		fullpath.append(L"*");
+
+		searchHandleWinAPI = FindFirstFile(
+			fullpath.c_str(),
+			&findFileData);
+
+		if(searchHandleWinAPI != INVALID_HANDLE_VALUE)
+		{
+			do 
+			{
+				if(findFileData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
+				{
+					if(wcscmp(findFileData.cFileName, L".") == 0 || wcscmp(findFileData.cFileName, L"..") == 0)
+						continue;
+
+					std::wstring path = filepath;
+
+					path.append(findFileData.cFileName);
+					path.append(L"/");
+
+					std::vector<std::string> result = getFileNames(path.c_str(), filename, recursiveSearch);
+
+					for(unsigned int i = 0; i < result.size(); i++)
+					{
+						foundFiles.push_back(result.at(i));
+					}
+				}
+
+			} while(FindNextFile(searchHandleWinAPI, &findFileData));
+			FindClose(searchHandleWinAPI);
+		}
+
+	}
+
+	//Add files to array
+
+	fullpath = filepath;
+	fullpath.append(L"*");
+	fullpath.append(filename);
 
 	searchHandleWinAPI = FindFirstFile(
-		filename,
+		fullpath.c_str(),
 		&findFileData);
 
 	if(searchHandleWinAPI != INVALID_HANDLE_VALUE)
@@ -481,4 +530,43 @@ void IOComponent::reset()
 
 void IOComponent::onEvent(Event* e)
 {
+	switch(e->getType())
+	{
+		case EVENT_GET_FILE_LIST:
+		{
+			Event_GetFileList* getFileListEvent = static_cast<Event_GetFileList*>(e);
+
+			std::wstring filepath;
+			filepath.assign(getFileListEvent->filepath.begin(), getFileListEvent->filepath.end());
+
+			std::wstring extension;
+			extension.assign(getFileListEvent->extension.begin(), getFileListEvent->extension.end());
+
+			std::wstring filename;
+			filename.append(extension);
+
+			getFileListEvent->filenames = getFileNames(filepath.c_str(), filename.c_str(), true);
+			break;
+		}
+		case EVENT_LOAD_LEVEL:
+		{
+			Event_LoadLevel* loadLevelEvent = static_cast<Event_LoadLevel*>(e);
+
+			SEND_EVENT(&Event(EVENT_UNLOAD_LEVEL));
+
+			if(initLvlMdlDesc(loadLevelEvent->levelName))
+			{
+				ATTRIBUTE_MANAGER->settings->currentLevel = loadLevelEvent->levelName;
+				SEND_EVENT(&Event(EVENT_LOAD_LEVEL_BULLET));
+			}
+			else
+			{
+				
+			}
+
+			break;
+		}
+		default:
+			break;
+	}
 }

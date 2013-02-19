@@ -15,6 +15,7 @@ public:
 	virtual void onUpdate(float delta);
 	virtual void handleOutOfBounds();
 	virtual void handleInput(float delta);
+
 };
 
 #endif

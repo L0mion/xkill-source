@@ -60,6 +60,8 @@ btCollisionShape* CollisionShapes::getCollisionShape(unsigned int meshId)
 
 void CollisionShapes::loadCollisionShapes()
 {
+	unloadCollisionShapes();
+
 	//btTriangleMesh file load (memory leak, otherwise functioning)
 	/*
 	Attribute_Mesh* meshAttribute;
@@ -236,6 +238,29 @@ void CollisionShapes::loadCollisionShapes()
 		}
 	}
 }
+
+void CollisionShapes::unloadCollisionShapes()
+{
+	for(int i = 0; i < collisionShapes_->size(); i++)
+	{
+		if(collisionShapes_->at(i)->getShapeType() == COMPOUND_SHAPE_PROXYTYPE)
+		{
+			for(int j = static_cast<btCompoundShape*>(collisionShapes_->at(i))->getNumChildShapes()-1; j > 0 ; j--)
+			{
+				delete static_cast<btCompoundShape*>(collisionShapes_->at(i))->getChildShape(j);
+			}
+		}
+		delete collisionShapes_->at(i);
+	}
+
+	collisionShapes_->clear();
+	collisionShapesIdToIndex_.clear();
+
+	importer_->deleteAllData();
+	delete importer_;
+	importer_ = new btBulletWorldImporter();
+}
+
 
 CollisionShapes* CollisionShapes::instance = nullptr;
 

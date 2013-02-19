@@ -1,5 +1,4 @@
 #include "MainWindow.h"
-#include <Windows.h>
 
 #include <QtGui/QLayout> 
 #include <QtGui/QPushButton>
@@ -9,7 +8,6 @@
 
 // Stuff used to allocate console
 // no idea what most of it does
-#include <stdio.h>
 #include <io.h>
 #include <fcntl.h>
 #include <Windows.h>

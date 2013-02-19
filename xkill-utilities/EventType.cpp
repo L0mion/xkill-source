@@ -37,6 +37,14 @@ Event_Rumble::Event_Rumble(unsigned int deviceNr,
 }
 
 
+Event_AttributeUpdated::Event_AttributeUpdated(int index, int attributeEnum) : Event(EVENT_ATTRIBUTE_UPDATED)
+{
+	this->index = index;
+	this->attributeEnum = attributeEnum;
+	isCreated = false;
+	isDeleted = false;
+}
+
 Event_GetEntities::Event_GetEntities() : Event(EVENT_GET_ENTITIES)
 {
 }
@@ -93,6 +101,11 @@ Event_CreateMesh::Event_CreateMesh(
 	this->vertexType = vertexType;
 }
 
+Event_LoadTextures::Event_LoadTextures(TexDesc* texDesc) : Event(EVENT_LOAD_TEXTURES)
+{
+	texDesc_ = texDesc;
+}
+
 Event_PhysicsAttributesColliding::Event_PhysicsAttributesColliding(int attribute1_index, int attribute2_index) : Event(EVENT_PHYSICS_ATTRIBUTES_COLLIDING)
 {
 	this->attribute1_index = attribute1_index;
@@ -114,6 +127,11 @@ Event_MousePress::Event_MousePress(int keyEnum, bool isPressed) : Event(EVENT_MO
 {
 	this->keyEnum = keyEnum;
 	this->isPressed = isPressed;
+}
+
+Event_PlayerDeath::Event_PlayerDeath(int playerAttributeIndex) : Event(EVENT_PLAYERDEATH)
+{
+	this->playerAttributeIndex = playerAttributeIndex;
 }
 
 Event_CreatePlayerSpawnPoint::Event_CreatePlayerSpawnPoint(Float3 spawnPointPosition, float spawnAreaRadius) : Event(EVENT_CREATE_PLAYER_SPAWNPOINT)
@@ -194,6 +212,11 @@ Event_CreateLight::Event_CreateLight(Float3 position, Float3 direction, Float3 a
 	this->type = type;
 }
 
+Event_CreateCorpse::Event_CreateCorpse(AttributePtr<Attribute_Player> ptr_player) : Event(EVENT_CREATE_CORPSE)
+{
+	this->ptr_player = ptr_player;
+}
+
 Event_TransferEventsToGame::Event_TransferEventsToGame(std::vector<Event*> events) : Event(EVENT_TRANSFER_EVENTS_TO_GAME)
 {
 	this->events = events;
@@ -238,4 +261,24 @@ Event_WindowMove::Event_WindowMove( Int2 pos, Int2 oldPos ) : Event(EVENT_WINDOW
 {
 	this->pos = pos;
 	this->oldPos = oldPos;
+}
+
+Event_GetEntityIdOfPhysicsObjectHitByRay::Event_GetEntityIdOfPhysicsObjectHitByRay(Float3 from, Float3 to, short collisionFilterMask) : Event(EVENT_GET_ENTITY_ID_OF_PHYSICS_OBJECT_HIT_BY_RAY)
+{
+	this->from = from;
+	this->to = to;
+	this->collisionFilterMask = collisionFilterMask;
+}
+
+Event_GetFileList::Event_GetFileList(std::string filepath, std::string extension) : 
+	Event(EVENT_GET_FILE_LIST)
+{
+	this->filepath = filepath;
+	this->extension = extension;
+}
+
+Event_LoadLevel::Event_LoadLevel(std::string levelName) : 
+	Event(EVENT_LOAD_LEVEL)
+{
+	this->levelName = levelName;
 }

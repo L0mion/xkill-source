@@ -84,6 +84,34 @@ Menu_Main2::Menu_Main2( QWidget* parent ) : QMainWindow()
 	ammo_Menu = new Menu_Ammo(&ui, this);
 	firingMode_Menu = new Menu_FiringMode(&ui, this);
 	sound_Menu = new Menu_Sound(&ui, this);
+
+	// init level menu
+	filePath = QString("../../xkill-resources/xkill-scripts/levels.xml");
+	//editorModel->setHorizontalHeaderItem(1, new QStandardItem("ID"));
+	QStringList columnNames;
+	Event_GetFileList* fileList = new Event_GetFileList("../../xkill-resources/xkill-level/", ".mdldesc");
+	SEND_EVENT(fileList);
+	std::vector<std::string> filenames = fileList->filenames;
+	delete fileList;
+	levelListModel = new QStandardItemModel(0, filenames.size(), this);
+	for(unsigned int i = 0; i < filenames.size(); i++)
+	{
+		std::string filename = filenames[i];
+		int strIndex = std::string::npos;
+		strIndex = filename.find_first_of(".");
+
+		if(strIndex != std::string::npos)
+			filename = filename.substr(0, strIndex);
+
+		QString qStr = filename.c_str();
+		QStandardItem* stdItem = new QStandardItem(qStr);
+
+		levelNames.push_back(filename);
+		levelListModel->appendRow(stdItem);
+	}
+
+	SEND_EVENT(&Event_LoadLevel(levelNames[0]));
+	//ui.comboBox_LevelSelect->setModel(levelListModel);
 }
 
 void Menu_Main2::mousePressEvent( QMouseEvent *e )
@@ -229,7 +257,16 @@ void Menu_Main2::onEvent( Event* e )
 	{
 	case EVENT_ENABLE_MENU:
 		if(((Event_EnableMenu*)e)->enableMenu)
+		{
+			// Refresh menu
+			input_Menu->settingsMenuUpdated();
+			ammo_Menu->settingsMenuUpdated();
+			firingMode_Menu->settingsMenuUpdated();
+			sound_Menu->settingsMenuUpdated();
+
+			// Display menu
 			this->show();
+		}
 		else
 			this->hide();
 		break;
@@ -254,7 +291,7 @@ Menu_Main2::~Menu_Main2()
 	delete sound_Menu;
 }
 
-void QT_NAMESPACE::QWidget::closeEvent( QCloseEvent* event )
+void Menu_Main2::closeEvent( QCloseEvent* event )
 {
 	SEND_EVENT(&Event(EVENT_QUIT_TO_DESKTOP));
 }

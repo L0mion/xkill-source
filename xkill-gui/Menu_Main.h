@@ -24,11 +24,6 @@ public:
 
 	void parentMoveEvent();
 
-	QStandardItemModel* levelListModel;
-	QString filePath;
-
-	
-
 	void loadXML();
 
 public slots:
@@ -53,6 +48,7 @@ public slots:
 		void slot_soundMenuUpdated();
 
 protected:
+
 	void keyPressEvent(QKeyEvent* e);
 	void mousePressEvent(QMouseEvent* e);
 };

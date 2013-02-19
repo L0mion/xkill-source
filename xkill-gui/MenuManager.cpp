@@ -80,6 +80,13 @@ HUDWindow::HUDWindow(QWidget* parent, int id) : QMainWindow(parent)
 	label_weaponType->setScaledContents(true);
 	horizontalLayout->addWidget(label_weaponType);
 
+
+	// total ammo
+	label_totalAmmoLeft = new QLabel("Test");
+	horizontalLayout->addWidget(label_totalAmmoLeft);
+
+
+
 	QWidget* mainWidget = new QWidget();
 	mainWidget->setLayout(horizontalLayout);
 	setCentralWidget(mainWidget);
@@ -115,10 +122,11 @@ void HUDWindow::update(AttributePtr<Attribute_SplitScreen> splitScreen)
 	progressBar_ammo->setMaximumSize(QSize(200*sizeScale, 16*sizeScale));
 	progressBar_health->setMinimumSize(QSize(200*sizeScale, 16*sizeScale));
 	progressBar_ammo->setMinimumSize(QSize(200*sizeScale, 16*sizeScale));
-
+	
 	// health & ammo bars
 	int healthRatio = (int)((health->health / health->maxHealth) * 100);
-	int ammoRatio = (int)(((float)firingMode->nrOfShotsLeftInClip / firingMode->clipSize) * 100);
+	int ammoIndex = ammunition->type;
+	int ammoRatio = (int)(((float)firingMode->nrOfShotsLeftInClip[ammoIndex] / firingMode->clipSize) * 100);
 	progressBar_health->setValue(healthRatio);
 	progressBar_ammo->setValue(ammoRatio);
 	progressBar_health->update();
@@ -161,6 +169,11 @@ void HUDWindow::update(AttributePtr<Attribute_SplitScreen> splitScreen)
 			label_weaponType->setPixmap(QPixmap(QString::fromUtf8(":/xkill/images/w_auto.png")));
 		}
 	}
+
+	// total ammo left	
+	QString num_totalShots = QString::number(weaponStats->ammunition[ammoIndex].currentTotalNrOfShots);
+	label_totalAmmoLeft->setText(num_totalShots);
+
 	resize(horizontalLayout->minimumSize());
 }
 

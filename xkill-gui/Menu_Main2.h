@@ -23,6 +23,11 @@ private:
 	std::vector<QFrame*> menuStack; // Used as state machine to return to the previous menu
 	QMovie* openingAnimation;
 
+	// Level menu
+	std::vector<std::string> levelNames;
+	QStandardItemModel* levelListModel;
+	QString filePath;
+
 	Menu_Input*			input_Menu;
 	Menu_Ammo*			ammo_Menu;
 	Menu_FiringMode*	firingMode_Menu;
@@ -49,6 +54,21 @@ protected:
 	void keyReleaseEvent(QKeyEvent* e);
 
 private slots:
+	void slot_menu_startgame()
+	{
+		// Apply menu settings
+		SETTINGS->cycleLimit = ui.horizontalSlider_cycleLimit->value();
+		SETTINGS->timeLimit = ui.horizontalSlider_timeLimit->value() * 60.0f;
+		SETTINGS->numPlayers = ui.horizontalSlider_numPlayers->value();
+		AttributeIterator<Attribute_Player> itrPlayer = ATTRIBUTE_MANAGER->player.getIterator();
+		while(itrPlayer.hasNext())
+		{
+			itrPlayer.getNext()->respawnTimer.setStartTime(static_cast<float>(ui.horizontalSlider_respawnTime->value()));
+		}
+
+		// Start game
+		SEND_EVENT(&Event(EVENT_STARTGAME));
+	}
 	void openingAnimation_frameChanged(int frameNumber )
 	{
 		int lastFrame = openingAnimation->frameCount()-1;
@@ -91,10 +111,6 @@ private slots:
 	void slot_menu_audio()
 	{
 		push_menu(ui.frame_audio);
-	}
-	void slot_menu_startgame()
-	{
-		SEND_EVENT(&Event(EVENT_STARTGAME));
 	}
 	void slot_menu_customize()
 	{

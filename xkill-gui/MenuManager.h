@@ -20,6 +20,7 @@ private:
     QProgressBar *progressBar_ammo;
 	QLabel *label_weaponType;
     QLabel *label_ammoType;
+	QLabel *label_totalAmmoLeft;
 	XKILL_Enums::AmmunitionType ammo;
 	XKILL_Enums::FiringModeType weapon;
 	

@@ -1,7 +1,5 @@
 #include <d3d11.h>
-#include <Windows.h>
 
-#include <xkill-utilities/Util.h>
 #include <xkill-utilities/EventManager.h>
 #include <xkill-utilities/AttributeType.h>
 #include <xkill-utilities/DebugShape.h>
@@ -14,8 +12,6 @@
 #include "IB.h"
 #include "renderingUtilities.h"
 #include "ManagementModel.h"
-
-#include <sstream>
 
 ATTRIBUTES_DECLARE_ALL
 
@@ -54,6 +50,19 @@ HRESULT ManagementModel::init()
 	return hr;
 }
 
+void ManagementModel::unloadModels()
+{
+	//Delete our models.
+	for(unsigned int i = 0; i < modelD3Ds_.size(); i++)
+	{
+		if(modelD3Ds_[i])
+			delete modelD3Ds_[i];
+	}
+	modelD3Ds_.clear();
+
+	modelIDtoIndex_.clear();
+}
+
 ModelD3D* ManagementModel::getModelD3D(
 	const unsigned int	modelID, 
 	ID3D11Device*		device)	
@@ -88,6 +97,7 @@ HRESULT ManagementModel::createModelD3D(
 	if(getMeshAttribute(modelID, ptr_mesh))
 	{
 		MeshDesc model = ptr_mesh->mesh;
+		VertexType vertexType = ptr_mesh->vertexType;
 
 		ID3D11Buffer* vertexBuffer;
 		hr = createVertexBuffer(
@@ -110,7 +120,7 @@ HRESULT ManagementModel::createModelD3D(
 		{
 			pushModelD3D(
 				modelID,
-				new ModelD3D(vertexBuffer, subsetD3Ds, model.materials_));
+				new ModelD3D(vertexType, vertexBuffer, subsetD3Ds, model.materials_));
 		}
 	}
 	else
@@ -208,6 +218,14 @@ HRESULT ManagementModel::createVertexBuffer(
 		{
 			std::vector<VertexPosNormTexTanSkinned> convertedVertices = convertVertexPosNormTexTanSkinned(vertices);
 			vbd.ByteWidth = sizeof(VertexPosNormTexTanSkinned) * convertedVertices.size();
+			vinitData.pSysMem = &convertedVertices.at(0);
+			hr = device->CreateBuffer(&vbd, &vinitData, vertexBuffer);
+			break;
+		}
+	case VERTEX_TYPE_POS_NORM_TEX_TAN:
+		{
+			std::vector<VertexPosNormTexTan> convertedVertices = convertVertexPosNormTexTan(vertices);
+			vbd.ByteWidth = sizeof(VertexPosNormTexTan) * convertedVertices.size();
 			vinitData.pSysMem = &convertedVertices.at(0);
 			hr = device->CreateBuffer(&vbd, &vinitData, vertexBuffer);
 			break;
@@ -369,6 +387,20 @@ std::vector<VertexPosNormTexTanSkinned> ManagementModel::convertVertexPosNormTex
 			vertices[i].tangent_,
 			vertices[i].weights_,
 			vertices[i].boneIndices_);
+		convertedVertices[i] = vertex;
+	}
+	return convertedVertices;
+}
+std::vector<VertexPosNormTexTan> ManagementModel::convertVertexPosNormTexTan(std::vector<VertexDesc>& vertices)
+{
+	std::vector<VertexPosNormTexTan> convertedVertices(vertices.size());
+	for(unsigned int i = 0; i < vertices.size(); i++)
+	{
+		VertexPosNormTexTan vertex = VertexPosNormTexTan(
+			vertices[i].position_, 
+			vertices[i].normal_,
+			vertices[i].textureCoordinates_,
+			vertices[i].tangent_);
 		convertedVertices[i] = vertex;
 	}
 	return convertedVertices;
