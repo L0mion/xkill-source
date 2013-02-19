@@ -132,7 +132,7 @@ bool ComponentManager::init(HWND windowHandle, HWND parentWindowHandle)
 	}	
 
 	SEND_EVENT(&Event_PlaySound(Event_PlaySound::SOUND_MUSIC, Float3(), false));
-
+	inputDeviceSearchTime_ = 0;
 	// Returns that everything went ok
 	return true;
 }
@@ -146,7 +146,7 @@ void ComponentManager::onEvent(Event* e)
 		GET_STATE() = STATE_MAINMENU;
 		break;
 	case EVENT_GAME_OVER:
-		gameOverDelay = 10.0f;
+		gameOverDelay_ = 10.0f;
 		GET_STATE() = STATE_GAMEOVER;
 		break;
 	default:
@@ -203,9 +203,9 @@ void ComponentManager::update(float delta)
 		input_->onUpdate(delta);
 		render_->onUpdate(delta);
 
-		if(gameOverDelay > 0.0f)
+		if(gameOverDelay_ > 0.0f)
 		{
-			gameOverDelay -= delta;
+			gameOverDelay_ -= delta;
 		}
 		else
 		{
@@ -214,7 +214,11 @@ void ComponentManager::update(float delta)
 	}
 	else if(GET_STATE() == STATE_MAINMENU)
 	{
-		SEND_EVENT(&Event(EVENT_INPUT_DEVICE_SEARCH));
+		if(inputDeviceSearchTime_ <= 0)
+		{
+			SEND_EVENT(&Event(EVENT_INPUT_DEVICE_SEARCH));
+			inputDeviceSearchTime_ = 1.0f;	//Do a search every second
+		}
 
 		sound_->onUpdate(delta);
 		input_->onUpdate(delta);
