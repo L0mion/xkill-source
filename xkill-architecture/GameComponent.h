@@ -86,6 +86,6 @@ public:
 	bool switchAmmunition(AttributePtr<Attribute_WeaponStats> ptr_weaponStats);
 	bool switchFiringMode(AttributePtr<Attribute_WeaponStats> ptr_weaponStats);
 
-	void aimRifle(Entity* playerEntity, AttributePtr<Attribute_Camera> ptr_camera);
+	void updateAimingRay(Entity* playerEntity, AttributePtr<Attribute_Camera> ptr_camera);
 	void shootProjectile(AttributePtr<Attribute_Spatial> ptr_spatial, AttributePtr<Attribute_WeaponStats> ptr_weaponStats);
 };

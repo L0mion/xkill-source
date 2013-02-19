@@ -539,6 +539,7 @@ Attribute_Player::Attribute_Player()
 	canSprint = true;
 	sprintRechargeRate = 0.2f;
 	executing = false;
+	corpseEntityId = -1;
 
 	walkSpeed = 5.0f;
 	sprintSpeed = walkSpeed*2;

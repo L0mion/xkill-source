@@ -13,6 +13,7 @@
 #include "FrustumPhysicsObject.h"
 #include "PickupablePhysicsObject.h"
 #include "WorldPhysicsObject.h"
+#include "PropPhysicsObject.h"
 #include "physicsUtilities.h"
 
 #include "CollisionShapes.h"
@@ -424,6 +425,9 @@ void PhysicsComponent::synchronizeWithAttributes(AttributePtr<Attribute_Physics>
 			break;
 		case XKILL_Enums::PhysicsAttributeType::PICKUPABLE:
 			physicsObjects_->at(physicsAttributeIndex) = new PickupablePhysicsObject();
+			break;
+		case XKILL_Enums::PhysicsAttributeType::PROP:
+			physicsObjects_->at(physicsAttributeIndex) = new PropPhysicsObject();
 			break;
 		case XKILL_Enums::PhysicsAttributeType::EVERYTHING:
 			SHOW_MESSAGEBOX("Error: Attribute_Physics should not have EVERYTHING as collisionFilterGroup");

@@ -54,6 +54,7 @@ enum DLL_U EventType
 	EVENT_CREATE_EXPLOSIONSPHERE,
 	EVENT_CREATE_WORLD,
 	EVENT_CREATE_LIGHT,
+	EVENT_CREATE_CORPSE,
 	EVENT_CREATE_ENTITY,
 	EVENT_REMOVE_ENTITY,
 	EVENT_STATE_CHANGED,
@@ -509,6 +510,15 @@ public:
 	unsigned int type;
 };
 
+class DLL_U Event_CreateCorpse : public Event
+{
+public:
+	//! Create a corpse matching player
+	Event_CreateCorpse(AttributePtr<Attribute_Player> ptr_player);
+	
+	AttributePtr<Attribute_Player> ptr_player;
+};
+
 class DLL_U Event_TransferEventsToGame : public Event
 {
 public:
@@ -531,6 +541,7 @@ public:
 	Event_CreateEntity(EntityType entityType);
 
 	EntityType entityType;
+	Entity* entity;
 };
 
 class InputObjectArray;

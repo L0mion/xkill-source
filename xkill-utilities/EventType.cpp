@@ -219,6 +219,11 @@ Event_CreateLight::Event_CreateLight(Float3 position, Float3 direction, Float3 a
 	this->type = type;
 }
 
+Event_CreateCorpse::Event_CreateCorpse(AttributePtr<Attribute_Player> ptr_player) : Event(EVENT_CREATE_CORPSE)
+{
+	this->ptr_player = ptr_player;
+}
+
 Event_TransferEventsToGame::Event_TransferEventsToGame(std::vector<Event*> events) : Event(EVENT_TRANSFER_EVENTS_TO_GAME)
 {
 	this->events = events;

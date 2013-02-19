@@ -32,6 +32,7 @@ public:
 		SUBSCRIBE_TO_EVENT(this, EVENT_CREATE_EXPLOSIONSPHERE);
 		SUBSCRIBE_TO_EVENT(this, EVENT_CREATE_ENTITY);
 		SUBSCRIBE_TO_EVENT(this, EVENT_CREATE_INPUTDEVICE);
+		SUBSCRIBE_TO_EVENT(this, EVENT_CREATE_CORPSE);
 
 		SUBSCRIBE_TO_EVENT(this, EVENT_CREATE_WORLD);
 		SUBSCRIBE_TO_EVENT(this, EVENT_CREATE_LIGHT);
@@ -80,6 +81,9 @@ public:
 		case EVENT_CREATE_LIGHT:
 			event_CreateLight(static_cast<Event_CreateLight*>(e));
 			break;
+		case EVENT_CREATE_CORPSE:
+			event_CreateCorpse(static_cast<Event_CreateCorpse*>(e));
+			break;
 		default:
 			break;
 		}
@@ -99,6 +103,7 @@ public:
 	{
 		EntityType type = e->entityType;
 		Entity* entity = createEntity();
+		e->entity = entity;
 		switch(type)
 		{
 		case PLAYER:
@@ -168,5 +173,12 @@ public:
 		Entity* entity = createEntity();
 		entityFactory.createLightEntity(entity, e);
 		DEBUGPRINT("ENTITYMANAGER: Created light entity " << entity->getID());
+	}
+
+	void event_CreateCorpse(Event_CreateCorpse* e)
+	{
+		Entity* entity = createEntity();
+		entityFactory.createCorpseEntity(entity, e);
+		DEBUGPRINT("ENTITYMANAGER: Created corpse entity " << entity->getID());
 	}
 };

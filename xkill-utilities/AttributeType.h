@@ -477,6 +477,7 @@ struct DLL_U Attribute_Player : public IAttribute
 	AttributePtr<Attribute_WeaponStats>		ptr_weaponStats;
 	AttributePtr<Attribute_Spatial>			ptr_weapon_spatial;
 	AttributePtr<Attribute_Spatial>			ptr_weaponFireLocation_spatial;
+	//AttributePtr<Attribute_Physics>			ptr_playerCorpse;
 
 	static int nextId;
 
@@ -496,6 +497,7 @@ struct DLL_U Attribute_Player : public IAttribute
 	bool jetpack;						//!< Use jetpack		
 	bool detectedAsDead;
 	bool executing;				//!< True if selected by the scheduler (ScoreComponent.cpp)
+	int corpseEntityId;
 
 	int meshID_whenAlive;
 	int meshID_whenDead;
