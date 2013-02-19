@@ -62,6 +62,20 @@ void Float2::copy(const float* float2)
 	y = float2[1];
 }
 
+void Float2::lerp( Float2 *v, float factor )
+{
+	x =  x * (1.0f - factor) + v->x * factor;
+	y =  y * (1.0f - factor) + v->y * factor;
+}
+
+Float2 Float2::lerp( Float2 *v1, Float2 *v2, float factor )
+{
+	Float2 v;
+	v.x = v1->x * (1.0f - factor) + v2->x * factor;
+	v.y = v1->y * (1.0f - factor) + v2->y * factor;
+	return v;
+}
+
 Float3::Float3()
 {
 	x = 0.0f;
@@ -484,4 +498,16 @@ Float4 PlaneNormalize(Float4 plane)
 {
 	float length = sqrt(plane.x*plane.x + plane.y*plane.y + plane.z*plane.z);
 	return Float4(plane.x / length, plane.y / length, plane.z / length, plane.w * length);
+}
+
+Int2::Int2()
+{
+	x = 0;
+	y = 0;
+}
+
+Int2::Int2( int x, int y )
+{
+	this->x = x;
+	this->y = y;
 }

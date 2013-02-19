@@ -24,14 +24,6 @@ public:
 
 	void parentMoveEvent();
 
-	QStandardItemModel* levelListModel;
-	QString filePath;
-
-	Menu_Input* input_Menu;
-	Menu_Ammo* ammo_Menu;
-	Menu_FiringMode* firingMode_Menu;
-	Menu_Sound* sound_Menu;
-
 	void loadXML();
 
 public slots:
@@ -56,7 +48,6 @@ public slots:
 		void slot_soundMenuUpdated();
 
 protected:
-	std::vector<std::string> levelNames_;
 
 	void keyPressEvent(QKeyEvent* e);
 	void mousePressEvent(QMouseEvent* e);
