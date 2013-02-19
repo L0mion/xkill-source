@@ -62,7 +62,7 @@ void CS_Blur_Horz(
 	
 	//Blur pixel:
 	float4 blur = float4(0.0f, 0.0f, 0.0f, 1.0f);
-	[unroll] for(int i = -blurRadius; i <= blurRadius; ++i)
+	[unroll] for(i = -blurRadius; i <= blurRadius; ++i) //OBS - As HLSL may be strange sometimes, the iterating variable declared in this scope may behave in weird ways. (if a variable of the same name has been declared similarily before. (e.g. unsigned int i)
 	{
 		int k = threadIDBlock.x + blurRadius + i;
 		blur += blurKernel[i + blurRadius] * sharedCache[k];
