@@ -415,7 +415,14 @@ void Renderer::render()
 	}
 	managementBuffer_->unsetBuffersAndDepthBufferAsRenderTargets(devcon);
 
-	doBlurPass();
+	//Apply some effects.
+	downSampleBlur();
+	unsigned int numBlurs = 1;
+	for(unsigned int i = 0; i < numBlurs; i++)
+	{
+		blurHorizontally();
+		blurVertically();
+	}
 
 	//Render everything to backbuffer.
 	for(unsigned int i = 0; i < vpDatas.size(); i++)
@@ -726,7 +733,7 @@ void Renderer::renderDebugShape(
 	devcon->Draw(numVertices, 0);
 }
 
-void Renderer::doBlurPass()
+void Renderer::downSampleBlur()
 {
 	ID3D11DeviceContext* devcon = managementD3D_->getDeviceContext();
 
@@ -735,21 +742,26 @@ void Renderer::doBlurPass()
 
 	managementSS_->setSS(devcon, TypeFX_PS, 0, SS_ID_DEFAULT);
 	managementRS_->setRS(devcon, RS_ID_DEFAULT);
-	
+
 	devcon->IASetVertexBuffers(0, 0, nullptr, 0, 0);
 	devcon->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
 	managementFX_->setShader(devcon, SHADERID_VS_SCREENQUAD);
 	managementFX_->setShader(devcon, SHADERID_PS_DOWNSAMPLE);
 	managementBuffer_->setGlowLowAsRTV(devcon);
-	managementBuffer_->setGlowHighAsSRV(devcon);
+	managementBuffer_->setGlowHighAsSRV(devcon, SHADER_REGISTER_SRV_GLOW_HIGH);
 	devcon->Draw(4, 0); //Draw four arbitrary vertices.
 
-	managementBuffer_->unsetGlowHighAsSrv(devcon);
+	managementBuffer_->unsetGlowHighAsSrv(devcon, SHADER_REGISTER_SRV_GLOW_HIGH);
 	managementBuffer_->unsetGlowLowAsRTV(devcon);
 	managementFX_->unsetAll(devcon);
-
+}
+void Renderer::blurHorizontally()
+{
+	ID3D11DeviceContext* devcon = managementD3D_->getDeviceContext();
+	
 	managementFX_->setShader(devcon, SHADERID_CS_BLUR_HORZ);
-
+	
+	//Update glow constant buffer:
 	managementCB_->setCB(CB_TYPE_BLUR, TypeFX_CS, CB_REGISTER_BLUR, devcon);
 	float blurKernel[11] = 
 	{
@@ -766,46 +778,72 @@ void Renderer::doBlurPass()
 		0.05f
 	};
 	managementCB_->updateCBBlur(devcon, blurKernel);
+	
+	managementBuffer_->setGlowLowAsSRV(devcon, 9);		//Low as input
+	managementBuffer_->setGlowLowUtilAsUAV(devcon, 1);	//Util as output
+	
+	unsigned int numBlocksX = (unsigned int)ceilf(winfo_->getScreenWidth() / 256.0f);
+	devcon->Dispatch(numBlocksX, winfo_->getScreenHeight(), 1);
 
-	Buffer_SrvRtvUav* glowLow = managementBuffer_->getGlowLow();
-	ID3D11ShaderResourceView* srv = glowLow->getSRV();
-	devcon->CSSetShaderResources(
-		9, 
-		1, 
-		&srv);
-
-	Buffer_SrvRtvUav* glowLowUtil = managementBuffer_->getGlowLowUtil();
-	ID3D11UnorderedAccessView* uav = glowLowUtil->getUAV();
-	devcon->CSSetUnorderedAccessViews(
-		1, 
-		1, 
-		&uav,
-		nullptr);
-
-	unsigned int blurs = 1;
-	for(unsigned int i = 0; i < blurs; i++)
-	{
-		unsigned int numBlocksX = (unsigned int)ceilf(winfo_->getScreenWidth() / 256.0f);
-		devcon->Dispatch(numBlocksX, winfo_->getScreenHeight(), 1);
-	}
-
+	//null shit
 	ID3D11UnorderedAccessView* uavs[] = { nullptr };
-	devcon->CSSetUnorderedAccessViews(
-		1, 
-		1, 
-		uavs, 
-		nullptr);
-
+	devcon->CSSetUnorderedAccessViews(1, 1, uavs, nullptr);
 	ID3D11ShaderResourceView* nullViews[1] = { nullptr };
-	devcon->CSSetShaderResources(
-		9,
-		1,
-		nullViews);
+	devcon->CSSetShaderResources(9, 1, nullViews);
+	managementFX_->unsetShader(devcon, SHADERID_CS_BLUR_HORZ);
+}
+void Renderer::blurVertically()
+{
+	ID3D11DeviceContext* devcon = managementD3D_->getDeviceContext();
+	
+	managementFX_->setShader(devcon, SHADERID_CS_BLUR_VERT);
+	
+	managementCB_->setCB(CB_TYPE_BLUR, TypeFX_CS, CB_REGISTER_BLUR, devcon);
+	
+	managementBuffer_->setGlowLowAsUAV(devcon, 1);
+	managementBuffer_->setGlowLowUtilAsSRV(devcon, 9);
+	
+	unsigned int numBlocksY = (unsigned int)ceilf(winfo_->getScreenHeight() / 256.0f);
+	devcon->Dispatch(winfo_->getScreenWidth(), numBlocksY, 1);
+	
+	//null shit
+	ID3D11UnorderedAccessView* uavs[] = { nullptr };
+	devcon->CSSetUnorderedAccessViews(1, 1, uavs, nullptr);
+	ID3D11ShaderResourceView* nullViews[1] = { nullptr };
+	devcon->CSSetShaderResources(9, 1, nullViews);
+	managementFX_->unsetShader(devcon, SHADERID_CS_BLUR_VERT);
+}
 
-	//Deactivate depth-buffer
-	//Downsample blur-texture
-	//Blur downsampled blur-texture
-	//Sample back up again
+void Renderer::upSampleBlur()
+{
+	ID3D11DeviceContext* devcon = managementD3D_->getDeviceContext();
+	
+	D3D11_VIEWPORT upSampleViewport_;
+	ZeroMemory(&upSampleViewport_, sizeof(D3D11_VIEWPORT));
+	upSampleViewport_.TopLeftX	= 0;
+	upSampleViewport_.TopLeftY	= 0;
+	upSampleViewport_.Width		= static_cast<FLOAT>(winfo_->getScreenWidth());
+	upSampleViewport_.Height	= static_cast<FLOAT>(winfo_->getScreenHeight());
+	upSampleViewport_.MinDepth	= 0;
+	upSampleViewport_.MaxDepth	= 1;
+	devcon->RSSetViewports(1, &upSampleViewport_);
+	
+	managementSS_->setSS(devcon, TypeFX_PS, 0, SS_ID_DEFAULT);
+	managementRS_->setRS(devcon, RS_ID_DEFAULT);
+	
+	devcon->IASetVertexBuffers(0, 0, nullptr, 0, 0);
+	devcon->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
+	managementFX_->setShader(devcon, SHADERID_VS_SCREENQUAD);
+	managementFX_->setShader(devcon, SHADERID_PS_DOWNSAMPLE);
+
+	managementBuffer_->setGlowHighAsRTV(devcon);
+	managementBuffer_->setGlowLowAsSRV(devcon, 3);
+
+	devcon->Draw(4, 0); //Draw four arbitrary vertices.
+	
+	managementBuffer_->unsetGlowHighAsRTV(devcon);
+	managementBuffer_->unsetGlowLowAsSRV(devcon, 3);
+	managementFX_->unsetAll(devcon);
 }
 
 void Renderer::drawBulletPhysicsDebugLines(

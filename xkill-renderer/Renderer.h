@@ -100,7 +100,10 @@ private:
 		DirectX::XMFLOAT4X4		viewMatrix, 
 		DirectX::XMFLOAT4X4		projectionMatrix); //!< Renders a debug shape, such as a bounding sphere.
 
-	void doBlurPass();
+	void downSampleBlur();
+	void blurHorizontally();
+	void blurVertically();
+	void upSampleBlur();
 
 	void drawBulletPhysicsDebugLines(
 		DirectX::XMFLOAT4X4		viewMatrix, 

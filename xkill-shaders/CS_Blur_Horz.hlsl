@@ -3,6 +3,25 @@
 
 #include "CS_Blur.hlsl"
 
+/*
+Note to self:
+Add to weights in blur-kernel to add lighting to scene. (brighter)
+Subtract from weights in blur-kernel to remove lighting from the scene. (darker)
+*/
+
+#include "constantBuffers.hlsl"
+
+#define blurRadius 5
+#define N 256
+#define sharedCacheSize (N + 2 * blurRadius)
+
+//Global memory:
+Texture2D			toBlur	: register ( t9 );
+RWTexture2D<float4>	blurred	: register ( u1 ); 
+
+//Shared memory:
+groupshared float4 sharedCache[sharedCacheSize];
+
 [numthreads(N, 1, 1)]
 void CS_Blur_Horz(
 	int3	threadIDDispatch	: SV_DispatchThreadID,
@@ -10,14 +29,14 @@ void CS_Blur_Horz(
 {
 	//Extract blurring kernel:
 	float blurKernel[NUM_BLUR_KERNEL_ELEMENTS_UNCOMPRESSED];
-	[unroll] for(unsigned int i = 0; i < NUM_BLUR_KERNEL_ELEMENTS_COMPRESSED; i++)
+	[unroll] for(int i = 0; i < NUM_BLUR_KERNEL_ELEMENTS_COMPRESSED; i++)
 	{
-		blurKernel[i]		= blurKernelCompressed[i].x;
-		blurKernel[i + 1]	= blurKernelCompressed[i].y;
-		blurKernel[i + 2]	= blurKernelCompressed[i].z;
-		blurKernel[i + 3]	= blurKernelCompressed[i].a;
+		blurKernel[i * 4]		= blurKernelCompressed[i].x;
+		blurKernel[i * 4 + 1]	= blurKernelCompressed[i].y;
+		blurKernel[i * 4 + 2]	= blurKernelCompressed[i].z;
+		blurKernel[i * 4 + 3]	= blurKernelCompressed[i].a;
 	}
-	
+
 	//Load texel into shared memory to reduce memory bandwidth:
 	int2 xy = min(
 		threadIDDispatch.xy, 
@@ -43,7 +62,7 @@ void CS_Blur_Horz(
 	
 	//Blur pixel:
 	float4 blur = float4(0.0f, 0.0f, 0.0f, 1.0f);
-	[unroll] for(i = -blurRadius; i <= blurRadius; ++i)
+	[unroll] for(int i = -blurRadius; i <= blurRadius; ++i)
 	{
 		int k = threadIDBlock.x + blurRadius + i;
 		blur += blurKernel[i + blurRadius] * sharedCache[k];

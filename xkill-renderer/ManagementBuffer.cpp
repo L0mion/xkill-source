@@ -194,7 +194,6 @@ HRESULT ManagementBuffer::initGlow(ID3D11Device* device, ID3D11DeviceContext* de
 	downSampleViewport_.Height		= static_cast<FLOAT>(downSampleHeight_);
 	downSampleViewport_.MinDepth	= 0;
 	downSampleViewport_.MaxDepth	= 1;
-	devcon->RSSetViewports(1, &downSampleViewport_);
 
 	return hr;
 }
@@ -247,7 +246,7 @@ void ManagementBuffer::setBuffersAsCSShaderResources(ID3D11DeviceContext* devcon
 	for(int i = 0; i < GBUFFERID_NUM_BUFFERS; i++)
 		resourceViews[i] = gBuffers_[i]->getSRV();
 
-	resourceViews[GBUFFERID_NUM_BUFFERS] = glowLowUtil_->getSRV();//glowLow_->getSRV(); //
+	resourceViews[GBUFFERID_NUM_BUFFERS] = glowLow_->getSRV();
 
 	devcon->CSSetShaderResources(
 		0, 
@@ -264,46 +263,6 @@ void ManagementBuffer::unsetBuffersAsCSShaderResources(ID3D11DeviceContext* devc
 		0, 
 		GBUFFERID_NUM_BUFFERS + 1, 
 		resourceViews);
-}
-
-void ManagementBuffer::setGlowLowAsRTV(ID3D11DeviceContext* devcon)
-{
-	ID3D11RenderTargetView* renderTargets[1];
-	renderTargets[0] = glowLow_->getRTV();
-
-	devcon->OMSetRenderTargets(
-		1,
-		renderTargets,
-		NULL);
-}
-void ManagementBuffer::unsetGlowLowAsRTV(ID3D11DeviceContext* devcon)
-{
-	ID3D11RenderTargetView* renderTargets[1];
-	renderTargets[0] = nullptr;
-
-	devcon->OMSetRenderTargets(
-		1, 
-		renderTargets, 
-		NULL);
-}
-
-void ManagementBuffer::setGlowHighAsSRV(ID3D11DeviceContext* devcon)
-{
-	ID3D11ShaderResourceView* srv = glowHigh_->getSRV();
-
-	devcon->PSSetShaderResources(
-		SHADER_REGISTER_GLOW, 
-		1, 
-		&srv);
-}
-void ManagementBuffer::unsetGlowHighAsSrv(ID3D11DeviceContext* devcon)
-{
-	ID3D11ShaderResourceView* nullViews[1] = { nullptr };
-
-	devcon->PSSetShaderResources(
-		SHADER_REGISTER_GLOW,
-		1,
-		nullViews);
 }
 
 DXGI_FORMAT ManagementBuffer::getFormat(GBUFFER_FORMAT format)
@@ -339,3 +298,202 @@ D3D11_VIEWPORT ManagementBuffer::getDownSampledViewport()
 {
 	return downSampleViewport_;
 }
+
+void ManagementBuffer::setGlowLowAsRTV(ID3D11DeviceContext*		devcon)
+{
+	ID3D11RenderTargetView* renderTargets[1];
+	renderTargets[0] = glowLow_->getRTV();
+
+	devcon->OMSetRenderTargets(
+		1,
+		renderTargets,
+		NULL);
+}
+void ManagementBuffer::unsetGlowLowAsRTV(ID3D11DeviceContext*	devcon)
+{
+	ID3D11RenderTargetView* renderTargets[1];
+	renderTargets[0] = nullptr;
+
+	devcon->OMSetRenderTargets(
+		1, 
+		renderTargets, 
+		NULL);
+}
+void ManagementBuffer::setGlowLowAsSRV(ID3D11DeviceContext*		devcon, unsigned int shaderRegister)
+{
+	ID3D11ShaderResourceView* resourceViews[1];
+	resourceViews[0] = glowLow_->getSRV();
+
+	devcon->CSSetShaderResources(
+		shaderRegister, 
+		1,
+		resourceViews);
+}
+void ManagementBuffer::unsetGlowLowAsSRV(ID3D11DeviceContext*	devcon, unsigned int shaderRegister)
+{
+	ID3D11ShaderResourceView* resourceViews[1];
+	resourceViews[0] = nullptr;
+
+	devcon->CSSetShaderResources(
+		shaderRegister, 
+		1,
+		resourceViews);
+}
+void ManagementBuffer::setGlowLowAsUAV(ID3D11DeviceContext* devcon, unsigned int shaderRegister)
+{
+	ID3D11UnorderedAccessView* uav = glowLow_->getUAV();
+	devcon->CSSetUnorderedAccessViews(
+		shaderRegister, 
+		1, 
+		&uav, 
+		nullptr);
+}
+
+void ManagementBuffer::setGlowHighAsSRV(ID3D11DeviceContext*	devcon, unsigned int shaderRegister)
+{
+	ID3D11ShaderResourceView* srv = glowHigh_->getSRV();
+
+	devcon->PSSetShaderResources(
+		shaderRegister, 
+		1, 
+		&srv);
+}
+void ManagementBuffer::unsetGlowHighAsSrv(ID3D11DeviceContext*	devcon, unsigned int shaderRegister)
+{
+	ID3D11ShaderResourceView* nullViews[1] = { nullptr };
+
+	devcon->PSSetShaderResources(
+		shaderRegister,
+		1,
+		nullViews);
+}
+void ManagementBuffer::setGlowHighAsRTV(ID3D11DeviceContext* devcon)
+{
+	ID3D11RenderTargetView* renderTargets[1];
+	renderTargets[0] = glowHigh_->getRTV();
+
+	devcon->OMSetRenderTargets(
+		1,
+		renderTargets,
+		NULL);
+}
+void ManagementBuffer::unsetGlowHighAsRTV(ID3D11DeviceContext* devcon)
+{
+	ID3D11RenderTargetView* renderTargets[1];
+	renderTargets[0] = nullptr;
+
+	devcon->OMSetRenderTargets(
+		1, 
+		renderTargets, 
+		NULL);
+}
+
+void ManagementBuffer::setGlowLowUtilAsUAV(ID3D11DeviceContext* devcon, unsigned int shaderRegister)
+{
+	ID3D11UnorderedAccessView* uav = glowLowUtil_->getUAV();
+	devcon->CSSetUnorderedAccessViews(
+		shaderRegister, 
+		1, 
+		&uav, 
+		nullptr);
+}
+void ManagementBuffer::setGlowLowUtilAsSRV(ID3D11DeviceContext* devcon, unsigned int shaderRegister)
+{
+	ID3D11ShaderResourceView* resourceViews[1];
+	resourceViews[0] = glowLowUtil_->getSRV();
+
+	devcon->CSSetShaderResources(
+		shaderRegister, 
+		1,
+		resourceViews);
+}
+
+//void ManagementBuffer::setGlow(ID3D11DeviceContext* devcon, GLOW_SET glowSet, TYPE_SET typeSet, unsigned int registerSet)
+//{
+//	Buffer_SrvRtvUav* glowBuf = nullptr;
+//	switch(glowSet)
+//	{
+//	case GLOW_SET_HIGH:
+//		glowBuf = glowHigh_;
+//		break;
+//	case GLOW_SET_LOW:
+//		glowBuf = glowLow_;
+//		break;
+//	case GLOW_SET_UTIL:
+//		glowBuf = glowLowUtil_;
+//		break;
+//	}
+//
+//	switch(typeSet)
+//	{
+//	case TYPE_SET_RTV:
+//		{
+//			ID3D11RenderTargetView* renderTargets[1];
+//			renderTargets[0] = glowBuf->getRTV();
+//
+//			devcon->OMSetRenderTargets(
+//				1,
+//				renderTargets,
+//				NULL);
+//
+//			break;
+//		}
+//	case TYPE_SET_SRV:
+//		{
+//			ID3D11ShaderResourceView* srv = glowBuf->getSRV();
+//			devcon->CSSetShaderResources(
+//				registerSet, 
+//				1, 
+//				&srv);
+//			break;
+//		}
+//	case TYPE_SET_UAV:
+//		{
+//			ID3D11UnorderedAccessView* uav = glowBuf->getUAV();
+//			devcon->CSSetUnorderedAccessViews(
+//				registerSet, 
+//				1, 
+//				&uav,
+//				nullptr);
+//			break;
+//		}
+//	}
+//}
+//void ManagementBuffer::unsetGlow(ID3D11DeviceContext* devcon, TYPE_SET typeSet, unsigned int registerSet)
+//{
+//	switch (typeSet)
+//	{
+//	case TYPE_SET_RTV:
+//		{
+//			ID3D11RenderTargetView* renderTargets[1];
+//			renderTargets[0] = nullptr;
+//
+//			devcon->OMSetRenderTargets(
+//				1, 
+//				renderTargets, 
+//				NULL);
+//			break;
+//		}
+//	case TYPE_SET_SRV:
+//		{
+//			ID3D11ShaderResourceView* resourceViews[1];
+//			resourceViews[0] = nullptr;
+//			
+//			devcon->CSSetShaderResources(
+//				registerSet, 
+//				1,
+//				resourceViews);
+//			break;
+//		}
+//	case TYPE_SET_UAV:
+//		{
+//			ID3D11UnorderedAccessView* uavs[] = { nullptr };
+//			devcon->CSSetUnorderedAccessViews(
+//				registerSet, 
+//				1, 
+//				uavs, 
+//				nullptr);
+//			break;
+//		}
+//	}
+//}
