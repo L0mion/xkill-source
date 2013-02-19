@@ -13,27 +13,21 @@ SkinnedData::SkinnedData()
 
 SkinnedData::~SkinnedData()
 {
-	if(boneHierarchy_)
-		delete boneHierarchy_;
-	if(boneOffsets_)
-		delete boneOffsets_;
-	
-	if(animations_)
-	{
-		std::map<std::string, AnimationClip*>::iterator index;
-		for(index = animations_->begin(); index != animations_->end(); index++)
-		{
-			if(index->second)
-				delete index->second;
-		}
-		if(animations_)
-			delete animations_;
-	}
+	unset();
 }
 
 void SkinnedData::set(std::vector<int>*						 boneHierarchy,
 					   std::vector<DirectX::XMFLOAT4X4>*	 boneOffsets,
 					   std::map<std::string, AnimationClip*>* animations)
+{
+	unset();
+
+	boneHierarchy_	= boneHierarchy;
+	boneOffsets_	= boneOffsets;
+	animations_		= animations;
+}
+
+void SkinnedData::unset()
 {
 	if(boneHierarchy_)
 		delete boneHierarchy_;
@@ -51,10 +45,6 @@ void SkinnedData::set(std::vector<int>*						 boneHierarchy,
 		if(animations_)
 			delete animations_;
 	}
-
-	boneHierarchy_	= boneHierarchy;
-	boneOffsets_	= boneOffsets;
-	animations_		= animations;
 }
 
 void SkinnedData::getFinalTransforms(const std::string&					clipName,
@@ -67,14 +57,14 @@ void SkinnedData::getFinalTransforms(const std::string&					clipName,
 
 	std::vector<DirectX::XMFLOAT4X4> toParentTransforms(numBones);
 
-	auto clip = animations_->find(clipName);
+ 	auto clip = animations_->find(clipName);
 	clip->second->interpolate(timePosition, toParentTransforms);
 
 	std::vector<DirectX::XMFLOAT4X4> toRootTransforms(numBones);
 
 	toRootTransforms[0] = toParentTransforms[0];
 
-	for(unsigned int i=1; i<numBones; i++)
+	for(unsigned int i=1; i<numBones; ++i)
 	{
 		DirectX::XMMATRIX toParent = DirectX::XMLoadFloat4x4(&toParentTransforms[i]);
 		int parentIndex = boneHierarchy_->at(i);
@@ -85,7 +75,7 @@ void SkinnedData::getFinalTransforms(const std::string&					clipName,
 		DirectX::XMStoreFloat4x4(&toRootTransforms[i], toRoot);
 	}
 
-	for(unsigned int i=0; i<numBones; i++)
+	for(unsigned int i=0; i<numBones; ++i)
 	{
 		DirectX::XMMATRIX offset = DirectX::XMLoadFloat4x4(&boneOffsets_->at(i));
 		DirectX::XMMATRIX toRoot = DirectX::XMLoadFloat4x4(&toRootTransforms[i]);

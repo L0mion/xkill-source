@@ -67,9 +67,10 @@ void ManagementIED::initIEDPosColor()
 	iedPosColor_[0] = createIED(semanticPosition_,	DXGI_FORMAT_R32G32B32_FLOAT, semanticIndex, D3D11_INPUT_PER_VERTEX_DATA, dataStepRate);
 	iedPosColor_[1] = createIED(semanticColor_,		DXGI_FORMAT_R32G32B32_FLOAT, semanticIndex, D3D11_INPUT_PER_VERTEX_DATA, dataStepRate);
 }
+
 void ManagementIED::initIEDPosNormTexTanSkinned()
 {
-	unsigned int semanticIndex	= 0;
+	unsigned int semanticIndex	= 0; //why 0? refer to D3D11_APPEND_ALIGNED_ELEMENT
 	unsigned int dataStepRate	= 0;
 
 	iedPosNormTexTanSkinned_[0] = createIED(semanticPosition_,		DXGI_FORMAT_R32G32B32_FLOAT,	semanticIndex, D3D11_INPUT_PER_VERTEX_DATA, dataStepRate);
@@ -77,8 +78,9 @@ void ManagementIED::initIEDPosNormTexTanSkinned()
 	iedPosNormTexTanSkinned_[2] = createIED(semanticTexcoord_,		DXGI_FORMAT_R32G32_FLOAT,		semanticIndex, D3D11_INPUT_PER_VERTEX_DATA, dataStepRate);
 	iedPosNormTexTanSkinned_[3] = createIED(semanticTangent_,		DXGI_FORMAT_R32G32B32A32_FLOAT,	semanticIndex, D3D11_INPUT_PER_VERTEX_DATA, dataStepRate);
 	iedPosNormTexTanSkinned_[4] = createIED(semanticWeights_,		DXGI_FORMAT_R32G32B32_FLOAT,	semanticIndex, D3D11_INPUT_PER_VERTEX_DATA, dataStepRate);
-	iedPosNormTexTanSkinned_[5] = createIED(semanticBoneIndices_,	DXGI_FORMAT_R32G32B32A32_UINT,		semanticIndex, D3D11_INPUT_PER_VERTEX_DATA, dataStepRate);
+	iedPosNormTexTanSkinned_[5] = createIED(semanticBoneIndices_,	DXGI_FORMAT_R32G32B32A32_UINT,	semanticIndex, D3D11_INPUT_PER_VERTEX_DATA, dataStepRate);
 }
+
 void ManagementIED::initIEDPosNormTexTanInstanced()
 {
 	iedPosNormTexTanInstanced_[0] = createIED(semanticPosition_,		DXGI_FORMAT_R32G32B32_FLOAT,	0, D3D11_INPUT_PER_VERTEX_DATA,		0);

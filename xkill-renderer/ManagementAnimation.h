@@ -10,15 +10,18 @@
 
 class ManagementAnimation : public D3DInterface
 {
+private:
+	float timePosition;
+
 public:
 	ManagementAnimation();
 	virtual ~ManagementAnimation();
 	virtual void reset();
+	float getTimePosition(){return timePosition;}
 
 	void addAnimation(SkinnedData* skinnedData);
 
-	float time;
-
+	void update(float delta, std::string clipName);
 	SkinnedData* getAnimation(unsigned int index);
 
 	void debug_clearOffsetMatrices(unsigned int index);
