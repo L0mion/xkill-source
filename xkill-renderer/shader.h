@@ -12,26 +12,6 @@ struct ID3D10Blob;
 
 #include "d3dInterface.h"
 
-enum ShaderID
-{
-	SHADERID_VS_POS_NORM_TEX_INSTANCE,
-	SHADERID_VS_ANIMATION,
-	SHADERID_VS_COLOR,
-	SHADERID_VS_SPRITE,
-	SHADERID_VS_POS_NORM_TEX_TAN_INSTANCE,
-	SHADERID_VS_SCREENQUAD,
-
-	SHADERID_PS_DEFAULT,
-	SHADERID_PS_ANIMATION,
-	SHADERID_PS_COLOR,
-	SHADERID_PS_SPRITE,
-	SHADERID_PS_NORMALMAP,
-	SHADERID_PS_DOWNSAMPLE,
-
-	SHADERID_CS_LIGHTING,
-	SHADERID_CS_BLUR_HORZ
-};
-
 /*! \defgroup xkill-renderer-shader xkill-renderer-shader
 	Package wrapping shader-objects in DirectX.
 	\ingroup xkill-renderer

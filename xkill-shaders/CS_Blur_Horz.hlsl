@@ -43,7 +43,7 @@ void CS_Blur_Horz(
 	
 	//Blur pixel:
 	float4 blur = float4(0.0f, 0.0f, 0.0f, 1.0f);
-	[unroll] for(int i = -blurRadius; i <= blurRadius; ++i)
+	[unroll] for(i = -blurRadius; i <= blurRadius; ++i)
 	{
 		int k = threadIDBlock.x + blurRadius + i;
 		blur += blurKernel[i + blurRadius] * sharedCache[k];

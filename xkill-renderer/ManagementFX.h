@@ -12,6 +12,27 @@ struct ID3D11DeviceContext;
 #include "shaderPS.h"
 #include "shaderCS.h"
 
+enum ShaderID
+{
+	SHADERID_VS_POS_NORM_TEX_INSTANCE,
+	SHADERID_VS_ANIMATION,
+	SHADERID_VS_COLOR,
+	SHADERID_VS_SPRITE,
+	SHADERID_VS_POS_NORM_TEX_TAN_INSTANCE,
+	SHADERID_VS_SCREENQUAD,
+
+	SHADERID_PS_DEFAULT,
+	SHADERID_PS_ANIMATION,
+	SHADERID_PS_COLOR,
+	SHADERID_PS_SPRITE,
+	SHADERID_PS_NORMALMAP,
+	SHADERID_PS_DOWNSAMPLE,
+
+	SHADERID_CS_LIGHTING,
+	SHADERID_CS_BLUR_HORZ,
+	SHADERID_CS_BLUR_VERT
+};
+
 enum LayoutID
 {
 	LAYOUTID_POS_COLOR,
@@ -60,6 +81,7 @@ private:
 
 	HRESULT initCSLighting(ID3D11Device* device, std::wstring shaderPath);	//!< Initializes defaultCS.
 	HRESULT initCSBlurHorz(ID3D11Device* device, std::wstring shaderPath);
+	HRESULT initCSBlurVert(ID3D11Device* device, std::wstring shaderPath);
 
 	HRESULT initILs(ID3D11Device* device);						//!< Initializes input-layouts.
 	void initILManagement();									//!< Initializes helper-class IEDManagement.
@@ -90,6 +112,7 @@ private:
 
 	ShaderCS* csLighting_; //!< Default compute shader.
 	ShaderCS* csBlurHorz_;
+	ShaderCS* csBlurVert_;
 
 	ID3D11InputLayout* ilPosColor_;					//!< Input layout specifying position and color.
 	ID3D11InputLayout* ilPosNormTexInstanced_;		//!< Standard instanced input layout used in default vertex shader.
