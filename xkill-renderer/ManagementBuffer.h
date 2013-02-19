@@ -30,13 +30,9 @@ static const GBUFFER_FORMAT GBUFFER_FORMAT_MATERIAL		= R16_G16_B16_A16__FLOAT;
 static const GBUFFER_FORMAT GBUFFER_FORMAT_GLOW_HIGH	= R8_G8_B8_A8__UNORM;
 static const GBUFFER_FORMAT GBUFFER_FORMAT_GLOW_LOW		= R8_G8_B8_A8__UNORM;
 
-enum GLOW_BUFFER_DIMENSIONS
-{
-	HALF_SCREEN_RES
-};
-static const GLOW_BUFFER_DIMENSIONS GLOWBUFLOW_GLOW_BUFFER_DIMENSIONS = HALF_SCREEN_RES;
-
 static const unsigned int SHADER_REGISTER_GLOW = 3;
+
+static const unsigned int DOWNSAMPLE_SCREEN_RES_FACTOR = 4;
 
 class ManagementBuffer
 {
@@ -46,7 +42,7 @@ public:
 
 	void reset();
 	HRESULT resize(ID3D11Device* device);
-	HRESULT init(ID3D11Device* device);
+	HRESULT init(ID3D11Device* device, ID3D11DeviceContext* devcon);
 
 	void clearBuffers(ID3D11DeviceContext* devcon);
 	void setBuffersAndDepthBufferAsRenderTargets(ID3D11DeviceContext*	devcon, ID3D11DepthStencilView*	depthBuffer);
@@ -58,20 +54,37 @@ public:
 	void unsetGlowLowAsRTV(ID3D11DeviceContext* devcon);
 	void setGlowHighAsSRV(ID3D11DeviceContext* devcon);
 	void unsetGlowHighAsSrv(ID3D11DeviceContext* devcon);
+
+	D3D11_VIEWPORT getDownSampledViewport();
+
+	Buffer_SrvRtvUav* getGlowLow() { return glowLow_; }
+	Buffer_SrvRtvUav* getGlowLowUtil() { return glowLowUtil_; }
 protected:
 private:
 	HRESULT initAlbedo(ID3D11Device* device);
 	HRESULT initNormal(ID3D11Device* device);
 	HRESULT initMaterial(ID3D11Device* device);
-	HRESULT initGlow(ID3D11Device* device);
+	HRESULT initGlow(ID3D11Device* device, ID3D11DeviceContext* devcon);
+
+	DXGI_FORMAT getFormat(GBUFFER_FORMAT format);
+	void getDownSampleDim(
+		unsigned int screenWidth,
+		unsigned int screenHeight,
+		unsigned int& downSampleWidth, 
+		unsigned int& downSampleHeight);
 
 	/*desc*/
 	Winfo* winfo_;
 
 	Buffer_SrvRtv* gBuffers_[GBUFFERID_NUM_BUFFERS];	//!< Containing data for deferred rendering.
 
+	//Glow
+	unsigned int downSampleWidth_;
+	unsigned int downSampleHeight_;
+	D3D11_VIEWPORT downSampleViewport_;
 	Buffer_SrvRtvUav* glowHigh_;
 	Buffer_SrvRtvUav* glowLow_;
+	Buffer_SrvRtvUav* glowLowUtil_;
 };
 
 #endif //XKILL_RENDERER_MANAGEMENTBUFFER_H

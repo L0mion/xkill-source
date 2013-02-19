@@ -5,8 +5,7 @@ Buffer_SrvRtv::Buffer_SrvRtv(
 	unsigned int	texWidth,
 	unsigned int	texHeight,
 	unsigned int	texAliasing,
-	DXGI_FORMAT		texFormat,
-	bool			maintainGivenResolution)
+	DXGI_FORMAT		texFormat)
 {
 	this->texWidth_		= texWidth;
 	this->texHeight_	= texHeight;
@@ -16,8 +15,6 @@ Buffer_SrvRtv::Buffer_SrvRtv(
 	tex_ = nullptr;
 	srv_ = nullptr;
 	rtv_ = nullptr;
-
-	maintainGivenResolution_ = maintainGivenResolution;
 }
 Buffer_SrvRtv::~Buffer_SrvRtv()
 {
@@ -124,9 +121,4 @@ unsigned int Buffer_SrvRtv::getTexWidth() const
 unsigned int Buffer_SrvRtv::getTexHeight() const
 {
 	return texHeight_;
-}
-
-bool Buffer_SrvRtv::MaintainGivenResolution() const
-{
-	return maintainGivenResolution_;
 }

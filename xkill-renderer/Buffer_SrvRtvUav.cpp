@@ -5,8 +5,7 @@ Buffer_SrvRtvUav::Buffer_SrvRtvUav(
 	unsigned int	texWidth,
 	unsigned int	texHeight,
 	unsigned int	texAliasing,
-	DXGI_FORMAT		texFormat,
-	bool			maintainGivenResolution) : Buffer_SrvRtv(texWidth, texHeight, texAliasing, texFormat, maintainGivenResolution)
+	DXGI_FORMAT		texFormat) : Buffer_SrvRtv(texWidth, texHeight, texAliasing, texFormat)
 {
 	uav_ = nullptr;
 }

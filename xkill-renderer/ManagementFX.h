@@ -58,7 +58,8 @@ private:
 	HRESULT initPSNormalMap(ID3D11Device*	device, std::wstring shaderPath);
 	HRESULT initPSDownSample(ID3D11Device*	device, std::wstring shaderPath);
 
-	HRESULT initCSLighting(ID3D11Device* device,	std::wstring shaderPath);	//!< Initializes defaultCS.
+	HRESULT initCSLighting(ID3D11Device* device, std::wstring shaderPath);	//!< Initializes defaultCS.
+	HRESULT initCSBlurHorz(ID3D11Device* device, std::wstring shaderPath);
 
 	HRESULT initILs(ID3D11Device* device);						//!< Initializes input-layouts.
 	void initILManagement();									//!< Initializes helper-class IEDManagement.
@@ -87,7 +88,8 @@ private:
 	ShaderPS*	psNormalMap_;
 	ShaderPS*	psDownSample_;
 
-	ShaderCS*	csLighting_;			//!< Default compute shader.
+	ShaderCS* csLighting_; //!< Default compute shader.
+	ShaderCS* csBlurHorz_;
 
 	ID3D11InputLayout* ilPosColor_;					//!< Input layout specifying position and color.
 	ID3D11InputLayout* ilPosNormTexInstanced_;		//!< Standard instanced input layout used in default vertex shader.

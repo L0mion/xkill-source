@@ -30,8 +30,7 @@ public:
 		unsigned int	texWidth,
 		unsigned int	texHeight,
 		unsigned int	texAliasing,
-		DXGI_FORMAT		texFormat,
-		bool			maintainGivenResolution);
+		DXGI_FORMAT		texFormat);
 	//! Clears memory and sets Gbuffer to default state.
 	~Buffer_SrvRtv();
 
@@ -60,7 +59,6 @@ public:
 	ID3D11RenderTargetView*		getRTV();
 	unsigned int getTexWidth() const;
 	unsigned int getTexHeight() const;
-	bool MaintainGivenResolution() const;
 
 protected:
 	unsigned int	texWidth_;		//!< Width of texture.
@@ -96,8 +94,6 @@ private:
 	\sa initTex
 	*/
 	HRESULT initRTV(ID3D11Device* device);
-
-	bool maintainGivenResolution_;
 };
 
 #endif //XKILL_RENDERER_BUFFER_SRVRTV_H

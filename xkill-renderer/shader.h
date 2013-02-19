@@ -28,7 +28,8 @@ enum ShaderID
 	SHADERID_PS_NORMALMAP,
 	SHADERID_PS_DOWNSAMPLE,
 
-	SHADERID_CS_LIGHTING
+	SHADERID_CS_LIGHTING,
+	SHADERID_CS_BLUR_HORZ
 };
 
 /*! \defgroup xkill-renderer-shader xkill-renderer-shader

@@ -12,6 +12,7 @@ ManagementCB::ManagementCB()
 	cbSubset_	= nullptr;
 	cbBone_		= nullptr;
 	cbSprite_	= nullptr;
+	cbBlur_		= nullptr;
 }
 ManagementCB::~ManagementCB()
 {
@@ -22,6 +23,7 @@ ManagementCB::~ManagementCB()
 	SAFE_RELEASE(cbSubset_);
 	SAFE_RELEASE(cbBone_);
 	SAFE_RELEASE(cbSprite_);
+	SAFE_RELEASE(cbBlur_);
 }
 void ManagementCB::reset()
 {
@@ -32,6 +34,7 @@ void ManagementCB::reset()
 	SAFE_RELEASE(cbSubset_);
 	SAFE_RELEASE(cbBone_);
 	SAFE_RELEASE(cbSprite_);
+	SAFE_RELEASE(cbBlur_);
 }
 
 void ManagementCB::updateCBInstance(ID3D11DeviceContext*	devcon,
@@ -126,7 +129,36 @@ void ManagementCB::updateCBSprite(ID3D11DeviceContext* devcon, DirectX::XMFLOAT4
 
 	devcon->UpdateSubresource(cbSprite_, 0, 0, &cbDesc, 0, 0);
 }
+void ManagementCB::updateCBBlur(
+	ID3D11DeviceContext* devcon,
+	float blurKernel[11])
+{
+	DirectX::XMFLOAT4 compressedBlurKernel[NUM_BLUR_KERNEL_ELEMENTS_COMPRESSED];
+	//Fill in compressed description:
+	compressedBlurKernel[0] = DirectX::XMFLOAT4(
+		blurKernel[0],
+		blurKernel[1],
+		blurKernel[2],
+		blurKernel[3]);
+	compressedBlurKernel[1] = DirectX::XMFLOAT4(
+		blurKernel[4],
+		blurKernel[5],
+		blurKernel[6],
+		blurKernel[7]);
+	compressedBlurKernel[2] = DirectX::XMFLOAT4(
+		blurKernel[8],
+		blurKernel[9],
+		blurKernel[10],
+		0.0f); //empty
 
+	CBBlurDesc cbDesc;
+	for(unsigned int i = 0; i < NUM_BLUR_KERNEL_ELEMENTS_COMPRESSED; i++)
+	{
+		cbDesc.blurKernelCompressed[i] = compressedBlurKernel[i];
+	}
+
+	devcon->UpdateSubresource(cbBlur_, 0, 0, &cbDesc, 0, 0);
+}
 
 void ManagementCB::setCB(
 	CB_TYPE					cbType, 
@@ -158,6 +190,9 @@ void ManagementCB::setCB(
 		break;
 	case CB_TYPE_SPRITE:
 		cb = cbSprite_;
+		break;
+	case CB_TYPE_BLUR:
+		cb = cbBlur_;
 		break;
 	}
 
@@ -202,6 +237,8 @@ HRESULT ManagementCB::init(ID3D11Device* device)
 		hr = initCBBone(device);
 	if(SUCCEEDED(hr))
 		hr = initCBSprite(device);
+	if(SUCCEEDED(hr))
+		hr = initCBBlur(device);
 
 	return hr;
 }
@@ -328,6 +365,24 @@ HRESULT ManagementCB::initCBSprite(ID3D11Device* device)
 	hr = device->CreateBuffer(&bufferDesc, NULL, &cbSprite_);
 	if(FAILED(hr))
 		ERROR_MSG(L"CBManagement::initCBSprite | device->CreateBuffer | Failed!");
+
+	return hr;
+}
+HRESULT ManagementCB::initCBBlur(ID3D11Device* device)
+{
+	HRESULT hr = S_OK;
+
+	D3D11_BUFFER_DESC bufferDesc;
+	ZeroMemory(&bufferDesc, sizeof(bufferDesc));
+
+	bufferDesc.Usage			= D3D11_USAGE_DEFAULT;
+	bufferDesc.ByteWidth		= CB_BLUR_DESC_SIZE;
+	bufferDesc.BindFlags		= D3D11_BIND_CONSTANT_BUFFER;
+	bufferDesc.CPUAccessFlags	= 0;
+
+	hr = device->CreateBuffer(&bufferDesc, NULL, &cbBlur_);
+	if(FAILED(hr))
+		ERROR_MSG(L"CBManagement::initCBBlur | device->CreateBuffer | Failed!");
 
 	return hr;
 }

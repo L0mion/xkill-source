@@ -54,7 +54,7 @@ public:
 	//! Sets the variable rtvBackBuffer as a render target.
 	void setRenderTargetViewBackBuffer();
 	//! Removes rtvBackBuffer as render target.
-	void unsetRenderTargetViewBackBufer();
+	void unsetRenderTargetViewBackBuffer();
 
 	//! Presents the back buffer.
 	void present();

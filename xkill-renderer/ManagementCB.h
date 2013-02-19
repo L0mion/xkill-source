@@ -16,7 +16,8 @@ enum CB_TYPE
 	CB_TYPE_OBJECT,
 	CB_TYPE_SUBSET,
 	CB_TYPE_BONE,
-	CB_TYPE_SPRITE
+	CB_TYPE_SPRITE,
+	CB_TYPE_BLUR
 };
 
 static const unsigned int CB_REGISTER_INSTANCE	= 0;
@@ -26,6 +27,7 @@ static const unsigned int CB_REGISTER_OBJECT	= 3;
 static const unsigned int CB_REGISTER_SUBSET	= 4;
 static const unsigned int CB_REGISTER_BONE		= 5;
 static const unsigned int CB_REGISTER_SPRITE	= 6;
+static const unsigned int CB_REGISTER_BLUR		= 7;
 
 //static const unsigned int 
 
@@ -77,6 +79,9 @@ public:
 	void updateCBSprite(
 		ID3D11DeviceContext* devcon,
 		DirectX::XMFLOAT4X4 transformMatrix); //!< Updates the constant buffer cbSprite.
+	void updateCBBlur(
+		ID3D11DeviceContext* devcon,
+		float blurKernel[11]);
 		
 	void setCB(
 		CB_TYPE					cbType, 
@@ -92,6 +97,7 @@ private:
 	HRESULT initCBObject(ID3D11Device* device);		//!< Initializes the buffer cbObject_.
 	HRESULT initCBBone(ID3D11Device* device);		//!< Initializes the buffer cbBone_.
 	HRESULT initCBSubset(ID3D11Device* device);		//!< Initializes the buffer cbSubset_.
+	HRESULT initCBBlur(ID3D11Device* device);
 
 	//! Initializes a the buffer cbSprite_.
 	/*!
@@ -108,6 +114,7 @@ private:
 	ID3D11Buffer* cbSubset_;	//!< A constant buffer that will be updated once per subset.
 	ID3D11Buffer* cbBone_;		//!< A constant buffer containing bones and will be updated for each animated object.
 	ID3D11Buffer* cbSprite_;	//!< A constant buffer containing transformation matrix for a sprite.
+	ID3D11Buffer* cbBlur_;
 };
 
 #endif

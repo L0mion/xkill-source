@@ -285,9 +285,12 @@ void ManagementD3D::unsetDepthBufferSRV(unsigned int shaderRegister)
 }
 void ManagementD3D::setRenderTargetViewBackBuffer()
 {
-	devcon_->OMSetRenderTargets(1, &rtvBackBuffer_, dsvDepthBuffer_);
+	devcon_->OMSetRenderTargets(
+		1, 
+		&rtvBackBuffer_, 
+		dsvDepthBuffer_);
 }
-void ManagementD3D::unsetRenderTargetViewBackBufer()
+void ManagementD3D::unsetRenderTargetViewBackBuffer()
 {
 //	devcon_->OMSetRenderTargets(1, nullptr, nullptr);
 }

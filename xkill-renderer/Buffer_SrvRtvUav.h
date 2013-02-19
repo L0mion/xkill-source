@@ -10,8 +10,7 @@ public:
 		unsigned int	texWidth,
 		unsigned int	texHeight,
 		unsigned int	texAliasing,
-		DXGI_FORMAT		texFormat,
-		bool			maintainGivenResolution);
+		DXGI_FORMAT		texFormat);
 	~Buffer_SrvRtvUav();
 
 	void reset();

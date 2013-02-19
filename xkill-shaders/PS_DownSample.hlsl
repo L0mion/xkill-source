@@ -12,17 +12,17 @@ Texture2D highTex : register( t3 ); //Register shared in CS_Lighting
 
 SamplerState ss : register(s0);
 
-//SamplerState SampleType
-//{
-//    Filter = MIN_MAG_MIP_LINEAR;
-//    AddressU = Wrap;
-//    AddressV = Wrap;
-//};
+SamplerState TestSampler
+{
+    Filter = MIN_MAG_MIP_LINEAR;
+    AddressU = Wrap;
+    AddressV = Wrap;
+};
 
 PSOut PS_DownSample(VSOutPosTex pIn)
 {
 	PSOut psOut;
-	psOut.lowTex = highTex.Sample(ss, pIn.texcoord);
+	psOut.lowTex = highTex.Sample(TestSampler, pIn.texcoord);
 
 	return psOut;
 }

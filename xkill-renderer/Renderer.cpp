@@ -27,6 +27,9 @@
 #include "Renderer.h"
 #include "ViewportData.h"
 
+//temp
+#include "Buffer_SrvRtvUav.h"
+
 ATTRIBUTES_DECLARE_ALL;
 
 Renderer::Renderer(HWND windowHandle)
@@ -49,8 +52,6 @@ Renderer::Renderer(HWND windowHandle)
 	managementMath_		= nullptr;
 	managementInstance_ = nullptr;
 	managementSprites_  = nullptr;
-
-	//attributesRenderOwner_	= nullptr;
 
 	ATTRIBUTES_INIT_ALL;
 
@@ -313,7 +314,7 @@ HRESULT Renderer::initManagementGBuffer()
 	HRESULT hr = S_OK;
 
 	managementBuffer_ = new ManagementBuffer(winfo_);
-	hr = managementBuffer_->init(managementD3D_->getDevice());
+	hr = managementBuffer_->init(managementD3D_->getDevice(), managementD3D_->getDeviceContext());
 
 	return hr;
 }
@@ -729,14 +730,7 @@ void Renderer::doBlurPass()
 {
 	ID3D11DeviceContext* devcon = managementD3D_->getDeviceContext();
 
-	D3D11_VIEWPORT viewport;
-	ZeroMemory(&viewport, sizeof(D3D11_VIEWPORT));
-	viewport.TopLeftX	= 0;
-	viewport.TopLeftY	= 0;
-	viewport.Width		= static_cast<FLOAT>(winfo_->getScreenWidth());
-	viewport.Height		= static_cast<FLOAT>(winfo_->getScreenHeight());
-	viewport.MinDepth	= 0;
-	viewport.MaxDepth	= 1;
+	D3D11_VIEWPORT viewport = managementBuffer_->getDownSampledViewport();
 	devcon->RSSetViewports(1, &viewport);
 
 	managementSS_->setSS(devcon, TypeFX_PS, 0, SS_ID_DEFAULT);
@@ -753,6 +747,60 @@ void Renderer::doBlurPass()
 	managementBuffer_->unsetGlowHighAsSrv(devcon);
 	managementBuffer_->unsetGlowLowAsRTV(devcon);
 	managementFX_->unsetAll(devcon);
+
+	managementFX_->setShader(devcon, SHADERID_CS_BLUR_HORZ);
+
+	managementCB_->setCB(CB_TYPE_BLUR, TypeFX_CS, CB_REGISTER_BLUR, devcon);
+	float blurKernel[11] = 
+	{
+		0.05f, 
+		0.05f, 
+		0.1f, 
+		0.1f, 
+		0.1f, 
+		0.2f,
+		0.1f,
+		0.1f,
+		0.1f,
+		0.05f,
+		0.05f
+	};
+	managementCB_->updateCBBlur(devcon, blurKernel);
+
+	Buffer_SrvRtvUav* glowLow = managementBuffer_->getGlowLow();
+	ID3D11ShaderResourceView* srv = glowLow->getSRV();
+	devcon->CSSetShaderResources(
+		9, 
+		1, 
+		&srv);
+
+	Buffer_SrvRtvUav* glowLowUtil = managementBuffer_->getGlowLowUtil();
+	ID3D11UnorderedAccessView* uav = glowLowUtil->getUAV();
+	devcon->CSSetUnorderedAccessViews(
+		1, 
+		1, 
+		&uav,
+		nullptr);
+
+	unsigned int blurs = 1;
+	for(unsigned int i = 0; i < blurs; i++)
+	{
+		unsigned int numBlocksX = (unsigned int)ceilf(winfo_->getScreenWidth() / 256.0f);
+		devcon->Dispatch(numBlocksX, winfo_->getScreenHeight(), 1);
+	}
+
+	ID3D11UnorderedAccessView* uavs[] = { nullptr };
+	devcon->CSSetUnorderedAccessViews(
+		1, 
+		1, 
+		uavs, 
+		nullptr);
+
+	ID3D11ShaderResourceView* nullViews[1] = { nullptr };
+	devcon->CSSetShaderResources(
+		9,
+		1,
+		nullViews);
 
 	//Deactivate depth-buffer
 	//Downsample blur-texture
@@ -909,7 +957,7 @@ void Renderer::drawHudElement(int viewportIndex, unsigned int textureId, DirectX
 	devcon->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 	devcon->DrawIndexed(NUM_SPRITE_INDICES, 0, 0);
 
-	managementD3D_->unsetRenderTargetViewBackBufer();
+	managementD3D_->unsetRenderTargetViewBackBuffer();
 	//managementD3D_->unsetUAVBackBufferCS();
 
 	managementFX_->unsetAll(devcon);
