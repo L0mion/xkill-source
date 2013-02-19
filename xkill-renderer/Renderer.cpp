@@ -364,8 +364,10 @@ void Renderer::initManagementAnimation()
 	managementAnimation_ = new ManagementAnimation();
 }
 
-void Renderer::update()
+void Renderer::update(float delta)
 {
+	delta_ = delta; //Needed by ManagementAnimation::update
+
 	ID3D11Device*			device = managementD3D_->getDevice();
 	ID3D11DeviceContext*	devcon = managementD3D_->getDeviceContext();
 
@@ -924,8 +926,11 @@ void Renderer::renderAnimation(unsigned int meshID, DirectX::XMFLOAT4X4 view, Di
 	managementCB_->setCB(CB_TYPE_OBJECT, TypeFX_VS, CB_REGISTER_OBJECT, devcon);
 	managementCB_->updateCBObject(devcon, finalMatrix, worldMatrix, worldMatrixInverse);
 
+	std::string clipName = "ArmatureAction";
 	std::vector<DirectX::XMFLOAT4X4> finalTransforms;
-	managementAnimation_->getAnimation(0)->getFinalTransforms("ArmatureAction", managementAnimation_->time, &finalTransforms);
+
+	managementAnimation_->update(delta_, clipName);
+	managementAnimation_->getAnimation(0)->getFinalTransforms(clipName, managementAnimation_->getTimePosition(), &finalTransforms);
 
 	managementCB_->setCB(CB_TYPE_BONE, TypeFX_VS, CB_REGISTER_BONE, devcon);
 	managementCB_->updateCBBone(devcon, finalTransforms);
