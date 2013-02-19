@@ -1,6 +1,10 @@
 
 #include <DirectXMath.h>
 
+#include <xkill-utilities/AnimationClip.h>
+#include <xkill-utilities/BoneAnimation.h>
+#include <xkill-utilities/Keyframe.h>
+
 #include "ManagementAnimation.h"
 #include "renderingUtilities.h"
 

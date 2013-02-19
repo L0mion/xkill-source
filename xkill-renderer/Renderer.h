@@ -144,6 +144,8 @@ private:
 	//temp
 	M3DLoader*		m3dLoader_;
 	AnimatedMesh*	animatedMesh_;
+
+	void initDebugAnimation();
 };			
 			
 #endif //XKILL_RENDERER_RENDERER_H

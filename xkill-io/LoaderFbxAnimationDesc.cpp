@@ -122,8 +122,8 @@ void LoaderFbxAnimationDesc::createKeyframe(LoaderFbxAnimationBone fbxBone, Keyf
 	
 	DirectX::XMMATRIX xmRotation = xmRotationX * xmRotationY * xmRotationZ;
 	DirectX::XMVECTOR xmQuaternion = DirectX::XMQuaternionRotationMatrix(xmRotation);
-	DirectX::XMQuaternionNormalize(xmQuaternion);
 	DirectX::XMFLOAT4 quaternion;
+
 	DirectX::XMStoreFloat4(&quaternion, xmQuaternion);
 
 	keyframe->translation			= DirectX::XMFLOAT3(translationX, translationY, translationZ);

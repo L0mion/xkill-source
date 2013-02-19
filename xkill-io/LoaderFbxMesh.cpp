@@ -512,6 +512,18 @@ void LoaderFbxMesh::parseTransformMatrix(FbxCluster* cluster, LoaderFbxMeshDesc*
 {
 	FbxAMatrix fbxMatrix;
 	cluster->GetTransformLinkMatrix(fbxMatrix);
+	
+	FbxAMatrix fbxGeometry;
+	FbxVector4 fbxTranslation, fbxRotation, fbxScaling;
+
+	FbxNode* node	= cluster->GetLink();
+	fbxTranslation	= node->GetGeometricTranslation(FbxNode::eSourcePivot);
+	fbxRotation		= node->GetGeometricRotation(FbxNode::eSourcePivot);
+	fbxScaling		= node->GetGeometricScaling(FbxNode::eSourcePivot);
+	fbxGeometry.SetTRS(fbxTranslation, fbxRotation, fbxScaling);
+
+	fbxMatrix *= fbxGeometry;
+
 	Float4x4 offsetMatrix;
 	
 	for(int x=0; x<4; x++)
@@ -519,6 +531,7 @@ void LoaderFbxMesh::parseTransformMatrix(FbxCluster* cluster, LoaderFbxMeshDesc*
 		for(int y=0; y<4; y++)
 			offsetMatrix.m[x][y] = static_cast<float>(fbxMatrix.mData[x][y]);
 	}
+
 	meshDesc->setOffsetMatrix(index, offsetMatrix);
 }
 
@@ -553,6 +566,8 @@ void LoaderFbxMesh::transformVertices(FbxMesh* mesh)
 									static_cast<float>(fbxMatrix.mData[1][0]), static_cast<float>(fbxMatrix.mData[1][1]), static_cast<float>(fbxMatrix.mData[1][2]), static_cast<float>(fbxMatrix.mData[1][3]),
 									static_cast<float>(fbxMatrix.mData[2][0]), static_cast<float>(fbxMatrix.mData[2][1]), static_cast<float>(fbxMatrix.mData[2][2]), static_cast<float>(fbxMatrix.mData[2][3]),
 									static_cast<float>(fbxMatrix.mData[3][0]), static_cast<float>(fbxMatrix.mData[3][1]), static_cast<float>(fbxMatrix.mData[3][2]), static_cast<float>(fbxMatrix.mData[3][3]));
+
+	xmTransform = DirectX::XMMatrixTranspose(xmTransform);
 
 	DirectX::XMFLOAT3 position;
 	DirectX::XMVECTOR xmPosition;

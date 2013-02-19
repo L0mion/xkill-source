@@ -18,8 +18,7 @@ DefaultVSOut VS_Animation(VSInPosNormTexTanSkinned vsIn)
 
 	for(int i=0; i<4; i++)
 	{
-		//Can at the moment only use one bone to influense each vertex
-		position	+= weights[i] * mul(float4(vsIn.position, 1.0f), boneTransforms[vsIn.boneIndices[1]]).xyz;
+		position	+= weights[i] * mul(float4(vsIn.position, 1.0f), boneTransforms[vsIn.boneIndices[i]]).xyz;
 		normal		+= weights[i] * mul(vsIn.normal, (float3x3)boneTransforms[vsIn.boneIndices[i]]);
 	}
 
