@@ -38,7 +38,6 @@ void BoneAnimation::keyframeFirst(DirectX::XMFLOAT4X4& matrix) const
 	DirectX::XMVECTOR scale					= DirectX::XMLoadFloat3(&keyframes_->front()->scale);
 	DirectX::XMVECTOR translation			= DirectX::XMLoadFloat3(&keyframes_->front()->translation);
 	DirectX::XMVECTOR rotationQuaternion	= DirectX::XMLoadFloat4(&keyframes_->front()->rotationQuaternion);
-	DirectX::XMQuaternionNormalize(rotationQuaternion);
 
 	DirectX::XMVECTOR zero = DirectX::XMVectorSet(0.0f, 0.0f, 0.0f, 1.0f);
 	DirectX::XMStoreFloat4x4(&matrix, DirectX::XMMatrixAffineTransformation(scale, zero, rotationQuaternion, translation));
@@ -49,7 +48,6 @@ void BoneAnimation::keyframeLast(DirectX::XMFLOAT4X4& matrix) const
 	DirectX::XMVECTOR scale					= DirectX::XMLoadFloat3(&keyframes_->back()->scale);
 	DirectX::XMVECTOR translation			= DirectX::XMLoadFloat3(&keyframes_->back()->translation);
 	DirectX::XMVECTOR rotationQuaternion	= DirectX::XMLoadFloat4(&keyframes_->back()->rotationQuaternion);
-	DirectX::XMQuaternionNormalize(rotationQuaternion);
 
 	DirectX::XMVECTOR zero = DirectX::XMVectorSet(0.0f, 0.0f, 0.0f, 1.0f);
 	DirectX::XMStoreFloat4x4(&matrix, DirectX::XMMatrixAffineTransformation(scale, zero, rotationQuaternion, translation));
@@ -76,14 +74,10 @@ void BoneAnimation::keyframeInterpolate(float time, DirectX::XMFLOAT4X4& matrix)
 			
 			DirectX::XMVECTOR rotationQuaternion0 = DirectX::XMLoadFloat4(&keyframes_->at(index)->rotationQuaternion);
 			DirectX::XMVECTOR rotationQuaternion1 = DirectX::XMLoadFloat4(&keyframes_->at(index+1)->rotationQuaternion);
-			DirectX::XMQuaternionNormalize(rotationQuaternion0);
-			DirectX::XMQuaternionNormalize(rotationQuaternion1);
 
 			DirectX::XMVECTOR scale				 = DirectX::XMVectorLerp(scale0, scale1, lerpPercent);
 			DirectX::XMVECTOR translation		 = DirectX::XMVectorLerp(translation0, translation1, lerpPercent);
 			DirectX::XMVECTOR rotationQuaternion = DirectX::XMQuaternionSlerp(rotationQuaternion0, rotationQuaternion1, lerpPercent);
-
-			DirectX::XMQuaternionNormalize(rotationQuaternion);
 
 			DirectX::XMVECTOR zero = DirectX::XMVectorSet(0.0f, 0.0f, 0.0f, 1.0f);
 			DirectX::XMStoreFloat4x4(&matrix, DirectX::XMMatrixAffineTransformation(scale, zero, rotationQuaternion, translation));

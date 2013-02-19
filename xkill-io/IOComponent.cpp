@@ -226,11 +226,11 @@ bool IOComponent::loadModel(
 	}
 	else
 	{
+		skinnedData = new SkinnedData();
 		FileExtension fileType = findFileType(modelName);
 		switch(fileType)
 		{
 		case FILE_EXTENSION_FBX:
-			skinnedData = new SkinnedData();
 			successfulLoad = loadFbx(modelName, modelPath, modelDesc, meshDesc, skinnedData);
 			break;
 		case FILE_EXTENSION_OBJ:
