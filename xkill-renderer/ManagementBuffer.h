@@ -52,7 +52,8 @@ public:
 
 	void setGlowLowAsRTV(ID3D11DeviceContext* devcon);
 	void unsetGlowLowAsRTV(ID3D11DeviceContext* devcon);
-	void setGlowLowAsSRV(ID3D11DeviceContext* devcon, unsigned int shaderRegister);
+	void setGlowLowAsSRVToCS(ID3D11DeviceContext* devcon, unsigned int shaderRegister);
+	void setGlowLowAsSRVToPS(ID3D11DeviceContext* devcon, unsigned int shaderRegister);
 	void unsetGlowLowAsSRV(ID3D11DeviceContext* devcon, unsigned int shaderRegister);
 	void setGlowLowAsUAV(ID3D11DeviceContext* devcon, unsigned int shaderRegister);
 	

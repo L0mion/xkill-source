@@ -423,6 +423,7 @@ void Renderer::render()
 		blurHorizontally();
 		blurVertically();
 	}
+	upSampleBlur();
 
 	//Render everything to backbuffer.
 	for(unsigned int i = 0; i < vpDatas.size(); i++)
@@ -779,7 +780,7 @@ void Renderer::blurHorizontally()
 	};
 	managementCB_->updateCBBlur(devcon, blurKernel);
 	
-	managementBuffer_->setGlowLowAsSRV(devcon, 9);		//Low as input
+	managementBuffer_->setGlowLowAsSRVToCS(devcon, 9);		//Low as input
 	managementBuffer_->setGlowLowUtilAsUAV(devcon, 1);	//Util as output
 	
 	unsigned int numBlocksX = (unsigned int)ceilf(winfo_->getScreenWidth() / 256.0f);
@@ -811,9 +812,8 @@ void Renderer::blurVertically()
 	devcon->CSSetUnorderedAccessViews(1, 1, uavs, nullptr);
 	ID3D11ShaderResourceView* nullViews[1] = { nullptr };
 	devcon->CSSetShaderResources(9, 1, nullViews);
-	managementFX_->unsetShader(devcon, SHADERID_CS_BLUR_VERT);
+	managementFX_->unsetAll(devcon); //unsetShader(devcon, SHADERID_CS_BLUR_VERT);
 }
-
 void Renderer::upSampleBlur()
 {
 	ID3D11DeviceContext* devcon = managementD3D_->getDeviceContext();
@@ -837,7 +837,7 @@ void Renderer::upSampleBlur()
 	managementFX_->setShader(devcon, SHADERID_PS_DOWNSAMPLE);
 
 	managementBuffer_->setGlowHighAsRTV(devcon);
-	managementBuffer_->setGlowLowAsSRV(devcon, 3);
+	managementBuffer_->setGlowLowAsSRVToPS(devcon, 3); //not being set properly?
 
 	devcon->Draw(4, 0); //Draw four arbitrary vertices.
 	

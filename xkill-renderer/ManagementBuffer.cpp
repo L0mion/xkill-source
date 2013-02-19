@@ -246,7 +246,7 @@ void ManagementBuffer::setBuffersAsCSShaderResources(ID3D11DeviceContext* devcon
 	for(int i = 0; i < GBUFFERID_NUM_BUFFERS; i++)
 		resourceViews[i] = gBuffers_[i]->getSRV();
 
-	resourceViews[GBUFFERID_NUM_BUFFERS] = glowLow_->getSRV();
+	resourceViews[GBUFFERID_NUM_BUFFERS] = glowHigh_->getSRV();
 
 	devcon->CSSetShaderResources(
 		0, 
@@ -319,12 +319,22 @@ void ManagementBuffer::unsetGlowLowAsRTV(ID3D11DeviceContext*	devcon)
 		renderTargets, 
 		NULL);
 }
-void ManagementBuffer::setGlowLowAsSRV(ID3D11DeviceContext*		devcon, unsigned int shaderRegister)
+void ManagementBuffer::setGlowLowAsSRVToCS(ID3D11DeviceContext*		devcon, unsigned int shaderRegister)
 {
 	ID3D11ShaderResourceView* resourceViews[1];
 	resourceViews[0] = glowLow_->getSRV();
 
 	devcon->CSSetShaderResources(
+		shaderRegister, 
+		1,
+		resourceViews);
+}
+void ManagementBuffer::setGlowLowAsSRVToPS(ID3D11DeviceContext* devcon, unsigned int shaderRegister)
+{
+	ID3D11ShaderResourceView* resourceViews[1];
+	resourceViews[0] = glowLow_->getSRV();
+
+	devcon->PSSetShaderResources(
 		shaderRegister, 
 		1,
 		resourceViews);

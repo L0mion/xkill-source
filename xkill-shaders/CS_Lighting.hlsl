@@ -180,8 +180,11 @@ void CS_Lighting(
 	//	Diffuse.g += 0.1;
 	//}
 
+	float3 litPixel = Ambient.xyz + Diffuse.xyz + Specular.xyz;
+	float3 glowPixel = bufferGlowHigh.SampleLevel(ss, texCoord, 0);
+	litPixel = min(litPixel + glowPixel, 1.0f); //additive blending
 	output[
 		uint2(
 			threadIDDispatch.x + viewportTopX, 
-			threadIDDispatch.y + viewportTopY)] = bufferGlowHigh.SampleLevel(ss, texCoord, 0); //float4(Ambient.xyz + Diffuse.xyz + Specular.xyz, 1.0f);
+			threadIDDispatch.y + viewportTopY)] = float4(litPixel, 1.0f);
 }
