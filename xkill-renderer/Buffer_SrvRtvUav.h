@@ -1,6 +1,13 @@
 #ifndef XKILL_RENDERER_BUFFER_SRVRTVUAV_H
 #define XKILL_RENDERER_BUFFER_SRVRTVUAV_H
 
+typedef long HRESULT;
+
+enum DXGI_FORMAT;
+
+struct ID3D11UnorderedAccessView;
+struct ID3D11Device;
+
 #include "Buffer_SrvRtv.h"
 
 class Buffer_SrvRtvUav : public Buffer_SrvRtv
