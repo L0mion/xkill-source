@@ -81,6 +81,7 @@ Attribute_Render::Attribute_Render()
 {
 	transparent			= false;
 	tessellation		= false;
+	cull = true;
 
 	meshID			= 0;
 	textureID		= 0;

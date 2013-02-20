@@ -42,7 +42,8 @@ private:
 	HacksComponent*			hacks_;
 	IOComponent*			ioComponent_;
 
-	float					gameOverDelay;
+	float					gameOverDelay_;
+	float					inputDeviceSearchTime_;
 public:
 	ComponentManager();
 	~ComponentManager();

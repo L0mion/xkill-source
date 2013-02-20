@@ -30,4 +30,10 @@ struct VSOutPosNormWTexTanW
 	float3 tangentW		: TANGENT;
 };
 
+struct VSOutPosTex
+{
+	float4 position : SV_POSITION;
+	float2 texcoord : TEXCOORD;
+};
+
 #endif //XKILL_RENDERER_VSOUT_HLSL

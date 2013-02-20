@@ -26,7 +26,7 @@ class ManagementModel;
 class ManagementTex;
 class ManagementSS;
 class ManagementRS;
-class ManagementGBuffer;
+class ManagementBuffer;
 class ManagementDebug;
 class ManagementMath;
 class ManagementInstance;
@@ -40,6 +40,11 @@ class SubsetD3D;
 //#include <vector>
 
 #include "ShadingDesc.h"
+
+//#define VISUALLEAKDETECTOR;
+#if (defined(DEBUG) || defined(_DEBUG)) && defined(VISUALLEAKDETECTOR)
+	#include <vld.h>
+#endif
 
 //temp
 class M3DLoader;
@@ -99,6 +104,11 @@ private:
 		DirectX::XMFLOAT4X4		viewMatrix, 
 		DirectX::XMFLOAT4X4		projectionMatrix); //!< Renders a debug shape, such as a bounding sphere.
 
+	void downSampleBlur();
+	void blurHorizontally();
+	void blurVertically();
+	void upSampleBlur();
+
 	void drawBulletPhysicsDebugLines(
 		DirectX::XMFLOAT4X4		viewMatrix, 
 		DirectX::XMFLOAT4X4		projectionMatrix); //!<A vertex buffer is recreated when a EVENT_DRAW_BULLET_PHYSICS_DEBUG_LINES event is present in the event queue.
@@ -124,7 +134,7 @@ private:
 	ManagementTex*		managementTex_;			//!< Maintains textures to be used in shaders.
 	ManagementSS*		managementSS_;			//!< Maintaining sampler states.
 	ManagementRS*		managementRS_;			//!< Maintaining rasterizer states.
-	ManagementGBuffer*	managementGBuffer_;		//!< Maintains the G-Buffers of application.
+	ManagementBuffer*	managementBuffer_;		//!< Maintains the G-Buffers of application.
 	ManagementDebug*	managementDebug_;		//!< Used for detecting live COM-objects.
 	ManagementMath*		managementMath_;		//!< Loads dx-math vectors into generic-type vectors and maintains other math-related functions.
 	ManagementInstance*	managementInstance_;	//!< Maintains all instances of respective model in the game.

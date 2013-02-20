@@ -160,45 +160,29 @@ void CollisionManager::collision_pickupable(Entity* entity1, Entity* entity2)
 					case XKILL_Enums::PickupableType::MEDKIT:
 						{
 							AttributePtr<Attribute_Health> ptr_health = ptr_player->ptr_health;
-							if(ptr_health->health < ptr_health->maxHealth) //Only allow pickup of medkits if the health of the player is below maximum.
-							{
-								ptr_health->health += ptr_pickupable->amount;
-								pickedUp = true;
-								if(ptr_health->health > ptr_health->maxHealth) //Prevent player from gaining more than maximum health
-								{
-									ptr_health->health = ptr_health->maxHealth;
-								}
-							}
+							ptr_health->health = getAmountAfterPickup(ptr_health->health, ptr_health->maxHealth, ptr_pickupable->amount);
+							pickedUp = true;
 							break;
 						}
 					case XKILL_Enums::PickupableType::AMMUNITION_BULLET:
 						{
-							if(ammo->currentTotalNrOfShots < ammo->initialTotalNrOfShots)
-							{
-								AttributePtr<Attribute_WeaponStats> weaponStatsAttribute = ptr_player->ptr_weaponStats;
-								weaponStatsAttribute->ammunition[XKILL_Enums::AmmunitionType::BULLET].currentTotalNrOfShots += ptr_pickupable->amount;
-								pickedUp = true;
-							}
+							AttributePtr<Attribute_WeaponStats> weaponStatsAttribute = ptr_player->ptr_weaponStats;
+							weaponStatsAttribute->ammunition[XKILL_Enums::AmmunitionType::BULLET].currentTotalNrOfShots = getAmountAfterPickup(weaponStatsAttribute->ammunition[XKILL_Enums::AmmunitionType::BULLET].currentTotalNrOfShots, weaponStatsAttribute->ammunition[XKILL_Enums::AmmunitionType::BULLET].initialTotalNrOfShots, ptr_pickupable->amount);
+							pickedUp = true;
 							break;
 						}
 					case XKILL_Enums::PickupableType::AMMUNITION_EXPLOSIVE:
 						{
-							if(ammo->currentTotalNrOfShots < ammo->initialTotalNrOfShots)
-							{
-								AttributePtr<Attribute_WeaponStats> weaponStatsAttribute = ptr_player->ptr_weaponStats;
-								weaponStatsAttribute->ammunition[XKILL_Enums::AmmunitionType::EXPLOSIVE].currentTotalNrOfShots += ptr_pickupable->amount;
-								pickedUp = true;
-							}
+							AttributePtr<Attribute_WeaponStats> weaponStatsAttribute = ptr_player->ptr_weaponStats;
+							weaponStatsAttribute->ammunition[XKILL_Enums::AmmunitionType::EXPLOSIVE].currentTotalNrOfShots = getAmountAfterPickup(weaponStatsAttribute->ammunition[XKILL_Enums::AmmunitionType::EXPLOSIVE].currentTotalNrOfShots, weaponStatsAttribute->ammunition[XKILL_Enums::AmmunitionType::EXPLOSIVE].initialTotalNrOfShots, ptr_pickupable->amount);
+							pickedUp = true;
 							break;
 						}
 					case XKILL_Enums::PickupableType::AMMUNITION_SCATTER:
 						{
-							if(ammo->currentTotalNrOfShots < ammo->initialTotalNrOfShots)
-							{
-								AttributePtr<Attribute_WeaponStats> weaponStatsAttribute = ptr_player->ptr_weaponStats;
-								weaponStatsAttribute->ammunition[XKILL_Enums::AmmunitionType::SCATTER].currentTotalNrOfShots += ptr_pickupable->amount;
-								pickedUp = true;
-							}
+							AttributePtr<Attribute_WeaponStats> weaponStatsAttribute = ptr_player->ptr_weaponStats;
+							weaponStatsAttribute->ammunition[XKILL_Enums::AmmunitionType::SCATTER].currentTotalNrOfShots = getAmountAfterPickup(weaponStatsAttribute->ammunition[XKILL_Enums::AmmunitionType::SCATTER].currentTotalNrOfShots, weaponStatsAttribute->ammunition[XKILL_Enums::AmmunitionType::SCATTER].initialTotalNrOfShots, ptr_pickupable->amount);
+							pickedUp = true;
 							break;
 						}
 					case XKILL_Enums::PickupableType::HACK_SPEEDHACK:
@@ -321,4 +305,18 @@ void CollisionManager::collision_playerVsExplosionSphere(Entity* entity1, Entity
 			}
 		}
 	}
+}
+
+float CollisionManager::getAmountAfterPickup(float currentAmount, float maxAmount, float pickupAmount)
+{
+	float newAmount = currentAmount;
+	if(currentAmount < maxAmount)  //Pickup if currently below maximum amount
+	{
+		newAmount = currentAmount + pickupAmount;
+		if(newAmount > maxAmount) //Prevent picking up more than maximum
+		{
+			newAmount = maxAmount;
+		}
+	}
+	return newAmount;
 }

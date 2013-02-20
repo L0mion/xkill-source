@@ -27,11 +27,11 @@ public:
 
 	Settings()
 	{
-		numPlayers = 1;
+		numPlayers = 2;
 		_timeScale = 1.0f;
 		trueDeltaTime = 0.0f;
 		currentLevel = "TestArena";
-		timeLimit = -1.0f;
+		timeLimit = 0.0f;
 		cycleLimit = 35;
 		showDebugPhysics = false;
 	}
