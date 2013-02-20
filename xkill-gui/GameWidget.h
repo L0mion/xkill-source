@@ -50,7 +50,6 @@ public:
 		updateTimer->setInterval(0);
 		connect(updateTimer, SIGNAL(timeout()), this, SLOT(slot_onUpdate()));
 		updateTimer->start();
-		
 	};
 	~GameWidget()
 	{

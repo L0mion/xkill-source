@@ -3,7 +3,7 @@
 InputObject::InputObject(void)
 {
 	inverted_ = false;
-	sensitivity_ = 3.0f;
+	sensitivity_ = 5.0f;
 	name_ = "<NO_NAME>";
 }
 

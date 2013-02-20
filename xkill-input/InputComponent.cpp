@@ -102,10 +102,16 @@ void InputComponent::handleInput(float delta)
 		if(device == nullptr)
 			continue;
 
+		device->setSensitivityModifier(device->getFloatValue(InputAction::ACTION_B_LOW_SENSITIVITY, delta));
+
 		input->position.x = device->getFloatValue(InputAction::ACTION_F_WALK_LR, delta);
 		input->position.y = device->getFloatValue(InputAction::ACTION_F_WALK_FB, delta);
 		input->rotation.x = device->getFloatValue(InputAction::ACTION_F_LOOK_LR, delta, true);
 		input->rotation.y = device->getFloatValue(InputAction::ACTION_F_LOOK_UD, delta, true);
+
+		//Float2 rot = device->getFormattedFloatPair(InputAction::ACTION_F_LOOK_LR, InputAction::ACTION_F_LOOK_UD, delta, true);
+		//input->rotation.x = rot.x;
+		//input->rotation.y = rot.y;
 
 		input->fire =					device->getBoolValue(InputAction::ACTION_B_FIRE);
 		input->firePressed =			device->getBoolPressed(InputAction::ACTION_B_FIRE);
@@ -168,8 +174,6 @@ void InputComponent::handleInput(float delta)
 		
 		if(device->getBoolValue(InputAction::ACTION_B_LOOK_RIGHT))
 			input->rotation.x = 1.0f * delta;
-
-		device->setSensitivityModifier(device->getFloatValue(InputAction::ACTION_B_LOW_SENSITIVITY, delta));
 
 		normalizeVector(input->position.x, input->position.y);	// Normalize walk vector, the character shouldn't move faster than set speed
 

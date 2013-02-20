@@ -191,6 +191,52 @@ bool InputDevice::getBoolPressed(int mapping)
 	return false;
 }
 
+Float2 InputDevice::getFormattedFloatPair(int firstMapping, int secondMapping, float delta, bool useSensitivity)
+{
+	Float2 result, value;
+	int firstIndex, secondIndex;
+
+	for(unsigned int i = 0; i < mappedObjects_[firstMapping].size(); i++)
+	{
+		firstIndex = mappedObjects_[firstMapping][i];
+		value.x = inputObjectArray_->inputObjects[firstIndex]->getValueFloat();
+
+		for(unsigned int j = 0; j < mappedObjects_[secondMapping].size(); j++)
+		{
+			secondIndex = mappedObjects_[secondMapping][i];
+			value.y = inputObjectArray_->inputObjects[secondIndex]->getValueFloat();
+
+			if(value.length() > 1.0f)
+				value.normalize();
+
+			float modifier = powf(value.length(), 3.0f);
+			// value.x *= modifier;
+			// value.y *= modifier;
+
+			if(useSensitivity)
+			{
+				float sensitivity;
+				sensitivity = inputObjectArray_->inputObjects[firstIndex]->getSensitivity()*sensitivityModifier_;
+				value.x *= sensitivity;
+				sensitivity = inputObjectArray_->inputObjects[secondIndex]->getSensitivity()*sensitivityModifier_;
+				value.y *= sensitivity;
+
+				if(inputObjectArray_->inputObjects[firstIndex]->needsDelta())
+					value.x *= delta;
+				if(inputObjectArray_->inputObjects[secondIndex]->needsDelta())
+					value.y *= delta;
+			}
+
+			if(value.length() > result.length())
+			{
+				result = value;
+			}
+		}
+	}
+
+	return result;
+}
+
 std::vector<int> InputDevice::getMappedArray(int mapping)	//Switch to unsigned
 {
 	return mappedObjects_[mapping];
@@ -198,9 +244,10 @@ std::vector<int> InputDevice::getMappedArray(int mapping)	//Switch to unsigned
 
 unsigned long InputDevice::getHash()
 {
-	std::string str = getStandardMappingsString();
+	std::string str = __TIME__;//getStandardMappingsString();
+	str += __DATE__;
 
-	str += Converter::IntToStr(InputAction::ACTION_LAST);
+	//str += Converter::IntToStr(InputAction::ACTION_LAST);
 
 	return Converter::HashString(str);
 }

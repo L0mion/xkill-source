@@ -136,7 +136,7 @@ void GameComponent::onUpdate(float delta)
 
 					if(firingMode->nrOfShotsLeftInClip[ptr_weaponStats->currentAmmunitionType] > ammo->currentTotalNrOfShots)
 					{
-
+						firingMode->nrOfShotsLeftInClip[ptr_weaponStats->currentAmmunitionType] = ammo->currentTotalNrOfShots;
 					}
 				}
 				else
@@ -153,9 +153,10 @@ void GameComponent::onUpdate(float delta)
 			//--------------------------------------------------------------------------------------
 			if(ptr_input->reload)
 			{
-				if(firingMode->nrOfShotsLeftInClip[ammoIndex] > 0 && firingMode->nrOfShotsLeftInClip[ammoIndex] != firingMode->clipSize)
+				if(firingMode->nrOfShotsLeftInClip[ammoIndex] > 0 && firingMode->nrOfShotsLeftInClip[ammoIndex] != firingMode->clipSize 
+					&& firingMode->nrOfShotsLeftInClip[ammoIndex] > ammo->currentTotalNrOfShots)
 				{
-					ammo->currentTotalNrOfShots += firingMode->nrOfShotsLeftInClip[ammoIndex];
+					//ammo->currentTotalNrOfShots += firingMode->nrOfShotsLeftInClip[ammoIndex];
 					firingMode->nrOfShotsLeftInClip[ammoIndex] = 0; //Set nrOfShotsLeftInClip to 0, forcing automatic weapon reload
 				}
 			}
@@ -811,7 +812,7 @@ void GameComponent::updateAimingRay(Entity* playerEntity, AttributePtr<Attribute
 		{
 			AttributePtr<Attribute_Player> rayCastingPlayerAttribute = itrPlayer.at(rayCastingPlayerAttributeId.at(i));
 					
-			if(rayCastingPlayerAttribute->executing) //shoot execution laser ray
+			if(rayCastingPlayerAttribute->executing) //shoot Laser Automatic Sniper Execution Ray (do not look into the beam)
 			{
 				short collisionFilterMask = XKILL_Enums::PhysicsAttributeType::PLAYER | XKILL_Enums::PhysicsAttributeType::WORLD;
 				Event_GetEntityIdOfPhysicsObjectHitByRay ev(ray->from, ray->to, collisionFilterMask);
