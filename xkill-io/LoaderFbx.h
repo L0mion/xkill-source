@@ -68,6 +68,7 @@ private:
 	*/
 	void parseMesh(fbxsdk_2014_0_beta2::FbxNode* node);
 	
+
 	LoaderFbxMesh*		meshLoader_;		//<! An object used to load meshe data.
 	LoaderFbxMaterial*	materialLoader_;	//<! An object used to load material data.
 	LoaderFbxTexture*	textureLoader_;		//<! An object used to load texture data.

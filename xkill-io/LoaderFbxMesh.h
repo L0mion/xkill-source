@@ -194,7 +194,7 @@ private:
 	*/
 	void parseTransformMatrix(FbxCluster* cluster, LoaderFbxMeshDesc* meshDesc, int index);
 	
-	//! Transforms the vertices into the local space.
+	//! Transforms the vertices into local space.
 	/*!
 	\param mesh The mesh currently being parsed
 	*/

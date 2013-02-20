@@ -443,11 +443,12 @@ void LoaderFbxMesh::parseVertexLinkData(FbxMesh* mesh, LoaderFbxMeshDesc* meshDe
 		if(cluster)
 		{
 			FbxNode* node = cluster->GetLink();
-
+		
 			node = findRoot(node);
 			std::vector<FbxNode*> nodes;
 			std::vector<int> parentIndices;
 			parseLinkHierarchy(node, &nodes, &parentIndices);
+
 
 			meshDesc->setBoneNodes(nodes);
 			meshDesc->setBoneParentIndices(parentIndices);
@@ -522,7 +523,7 @@ void LoaderFbxMesh::parseTransformMatrix(FbxCluster* cluster, LoaderFbxMeshDesc*
 	fbxScaling		= node->GetGeometricScaling(FbxNode::eSourcePivot);
 	fbxGeometry.SetTRS(fbxTranslation, fbxRotation, fbxScaling);
 
-	fbxMatrix *= fbxGeometry;
+	//fbxMatrix *= fbxGeometry;
 
 	Float4x4 offsetMatrix;
 	
@@ -580,7 +581,7 @@ void LoaderFbxMesh::transformVertices(FbxMesh* mesh)
 		position.z = vertexPositions_[i].z;
 	
 		xmPosition = DirectX::XMLoadFloat3(&position);
-		xmPosition = DirectX::XMVector3Transform(xmPosition, xmTransform);
+		xmPosition = DirectX::XMVector3TransformCoord(xmPosition, xmTransform);
 		
 		DirectX::XMStoreFloat3(&position, xmPosition);
 		vertexPositions_[i].x = position.x;
