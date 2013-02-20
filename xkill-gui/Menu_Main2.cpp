@@ -131,7 +131,7 @@ void Menu_Main2::mousePressEvent( QMouseEvent *e )
 void Menu_Main2::loadCustomFonts()
 {
 	QStringList list;
-	list << "arcade_interlaced.ttf" << "arcade_rounded.ttf";
+	list << "arcade_interlaced.ttf" << "arcade_rounded.ttf" << "arista_light.ttf";;
 	int fontID(-1);
 	bool fontWarningShown(false);
 	for (QStringList::const_iterator constIterator = list.constBegin(); constIterator != list.constEnd(); ++constIterator) 
@@ -141,7 +141,8 @@ void Menu_Main2::loadCustomFonts()
 		{
 			if(fontWarningShown == false)
 			{
-				SHOW_MESSAGEBOX("Problem loading custom font");
+				std::string fontName = (*constIterator).toStdString();
+				SHOW_MESSAGEBOX("Problem loading custom font \"" + fontName + "\".");
 				fontWarningShown = true;
 			}
 		} 
