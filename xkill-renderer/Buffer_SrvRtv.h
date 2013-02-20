@@ -1,98 +1,41 @@
 #ifndef XKILL_RENDERER_BUFFER_SRVRTV_H
 #define XKILL_RENDERER_BUFFER_SRVRTV_H
 
-#include <d3d11.h>
+typedef long HRESULT;
 
-#include "d3dInterface.h"
+enum DXGI_FORMAT;
 
-//! Holds resources for each g-buffer.
-/*!
-Each GBuffer-object contains a ID3D11Texture2D*-, ID3D11ShaderResourceView*- 
-and a ID3D11RenderTargetView*-object, along with a description of 
-said g-buffer (texture dimensions, format and aliasing-settings).
-	\ingroup xkill-renderer
-	\sa ID3D11Texture2D
-	\sa ID3D11ShaderResourceView
-	\sa ID3D11RenderTargetView
+struct ID3D11RenderTargetView;
+struct ID3D11Device;
+
+#include "Buffer_Srv.h"
+
+/*
+Give me these settings, please:
+D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE
+D3D11_USAGE_DEFAULT
 */
-class Buffer_SrvRtv : public D3DInterface
+
+class Buffer_SrvRtv : public Buffer_Srv
 {
 public:
-	//! Sets default state of GBuffer.
-	/*!
-	\param texWidth		Width of g-buffer texture.
-	\param texHeight	Height of g-buffer texture.
-	\param texAliasing	Anti-aliasing samples of texture.
-	\param texFormat	Format of texture.
-	\sa DXGI_FORMAT
-	*/
 	Buffer_SrvRtv(
 		unsigned int	texWidth,
 		unsigned int	texHeight,
 		unsigned int	texAliasing,
-		DXGI_FORMAT		texFormat);
-	//! Clears memory and sets Gbuffer to default state.
-	~Buffer_SrvRtv();
+		DXGI_FORMAT		texFormat,
+		UINT			texBindFlags,
+		D3D11_USAGE		texUsage);
+	virtual ~Buffer_SrvRtv();
 
-	//! Clears memory and sets Gbuffer to default state.
 	virtual void reset();
 
-	//! Resizes textures and views to fit the new screen size.
-	/*!
-	\param screenWidth The new screen width.
-	\param screenHeight the new screen height.
-	\return Any error encountered.
-	*/
-	HRESULT resize(ID3D11Device* device, unsigned int texWidth, unsigned int texHeight);
-
-	//! Initializes g-buffer. Creates a texture-, shader resource view- and a render target view-object.
-	/*!
-	\param device DirectX Device pointer.
-	\return Any error that might've occured.
-	\sa initTex
-	\sa initSRV
-	\sa initRTV
-	*/
 	virtual HRESULT init(ID3D11Device* device);
 
-	ID3D11ShaderResourceView*	getSRV();
-	ID3D11RenderTargetView*		getRTV();
-	unsigned int getTexWidth() const;
-	unsigned int getTexHeight() const;
-
+	ID3D11RenderTargetView* getRTV() { return rtv_; }
 protected:
-	unsigned int	texWidth_;		//!< Width of texture.
-	unsigned int	texHeight_;		//!< Height of texture.
-	unsigned int	texAliasing_;	//!< Anti-aliasing samples of texture.
-	DXGI_FORMAT		texFormat_;		//!< Format of texture.
-
-	ID3D11Texture2D*			tex_;	//!< Texture of GBuffer.
-	ID3D11ShaderResourceView*	srv_;	//!< Handle to texture used by shader.
-	ID3D11RenderTargetView*		rtv_;	//!< Used by shader to render to texture.
-
+	ID3D11RenderTargetView*	rtv_; //!< Used by shader to render to texture.
 private:
-	//! Initializes the texture of GBuffer
-	/*! Creates a description based on dimensions and formats sent to GBuffer via constructor and 
-	creates a ID3D11Texture2D-object based on that description.
-	\param device DirectX Device pointer.
-	\return Any error that might've occured.
-	*/
-	virtual HRESULT initTex(ID3D11Device* device);
-	//! Initializes the shader resource view of GBuffer.
-	/*! Creates a description based on dimensions and formats sent to GBuffer via constructor and creates
-	a ID3D11ShaderResourceView based on texture created in initTex.
-	\param device DirectX Device pointer.
-	\return Any error that might've occured.
-	\sa initTex
-	*/
-	HRESULT initSRV(ID3D11Device* device);
-	//! Initializes the render target view of Gbuffer
-	/*! Creates a description based on dimensions and formats sent to GBuffer via constructor and creates
-	a ID3D11RenderTargetView based on texture created in initTex.
-	\param device DirectX Device pointer.
-	\return Any error that might've occured.
-	\sa initTex
-	*/
 	HRESULT initRTV(ID3D11Device* device);
 };
 
