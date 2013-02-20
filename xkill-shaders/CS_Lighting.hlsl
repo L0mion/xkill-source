@@ -18,14 +18,15 @@
 //Global memory
 RWTexture2D<float4> output : register( u0 );
 
-Texture2D gBufferNormal		: register( t0 );
-Texture2D gBufferAlbedo		: register( t1 );
-Texture2D gBufferMaterial	: register( t2 );
-Texture2D gBufferDepth		: register( t3 );
-StructuredBuffer<LightDescDir>		lightsDir	: register( t4 );
-StructuredBuffer<LightDescPoint>	lightsPoint	: register( t5 );
-StructuredBuffer<LightDescSpot>		lightsSpot	: register( t6 );
-StructuredBuffer<float3>			lightsPos	: register( t7 );
+Texture2D gBufferNormal				: register( t0 );
+Texture2D gBufferAlbedo				: register( t1 );
+Texture2D gBufferMaterial			: register( t2 );
+Texture2D bufferGlowHigh			: register( t3 ); //Register shared in PS_DownSample
+Texture2D bufferDepth				: register( t4 ); //Hi, please notice me if you intend to sequently add buffers. I can be pretty dangerous if one does not! Yarr.
+StructuredBuffer<LightDescDir>		lightsDir	: register( t5 );
+StructuredBuffer<LightDescPoint>	lightsPoint	: register( t6 );
+StructuredBuffer<LightDescSpot>		lightsSpot	: register( t7 );
+StructuredBuffer<float3>			lightsPos	: register( t8 );
 
 SamplerState ss : register(s0);
 
@@ -63,8 +64,8 @@ void CS_Lighting(
 		(float)(threadIDDispatch.y + viewportTopY) / (float)screenHeight);
 	float4	gAlbedo		= gBufferAlbedo		.SampleLevel(ss, texCoord, 0);
 	float4	gNormal		= gBufferNormal		.SampleLevel(ss, texCoord, 0);
-	float4	gMaterial	= gBufferMaterial	.SampleLevel(ss, texCoord, 0); //At the moment, world space position is stored in Material-buffer.
-	float	gDepth		= gBufferDepth.SampleLevel(ss, texCoord, 0).x; 
+	float4	gMaterial	= gBufferMaterial	.SampleLevel(ss, texCoord, 0);
+	float	gDepth		= bufferDepth.SampleLevel(ss, texCoord, 0).x; 
 	
 	//Reconstruct view-space position from depth. Observe the normalized coordinates sent to method.
 	float3 surfacePosV = UtilReconstructPositionViewSpace(
@@ -121,7 +122,7 @@ void CS_Lighting(
 	if(!validPixel)
 		return;
 	
-	float3 normal = gNormal.xyz; //UtilDecodeSphereMap();
+	float3 normal = gNormal.xyz;
 	normal.x *= 2.0f; normal.x -= 1.0f;
 	normal.y *= 2.0f; normal.y -= 1.0f;
 	normal.z *= 2.0f; normal.z -= 1.0f;
@@ -145,7 +146,7 @@ void CS_Lighting(
 	for(i = 0; i < numLightsDir; i++)
 	{
 		LightDescDir descDir = lightsDir[i];
-		descDir.direction = mul(float4(descDir.direction, 0.0f), view);
+		descDir.direction = mul(float4(descDir.direction, 0.0f), view).xyz;
 		LightDir(
 			toEyeV,
 			descDir,
@@ -179,8 +180,11 @@ void CS_Lighting(
 	//	Diffuse.g += 0.1;
 	//}
 
+	float3 litPixel = Ambient.xyz + Diffuse.xyz + Specular.xyz;
+	float3 glowPixel = bufferGlowHigh.SampleLevel(ss, texCoord, 0);
+	litPixel = min(litPixel + glowPixel, 1.0f); //additive blending
 	output[
 		uint2(
 			threadIDDispatch.x + viewportTopX, 
-			threadIDDispatch.y + viewportTopY)] = float4(Ambient.xyz + Diffuse.xyz + Specular.xyz, 1.0f);
+			threadIDDispatch.y + viewportTopY)] = float4(litPixel, 1.0f);
 }
