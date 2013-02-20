@@ -754,12 +754,37 @@ void Renderer::downSampleBlur()
 	devcon->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
 	managementFX_->setShader(devcon, SHADERID_VS_SCREENQUAD);
 	managementFX_->setShader(devcon, SHADERID_PS_DOWNSAMPLE);
-	managementBuffer_->setGlowLowAsRTV(devcon);
-	managementBuffer_->setGlowHighAsSRV(devcon, SHADER_REGISTER_SRV_GLOW_HIGH);
+	managementBuffer_->setGlow(
+		devcon,
+		SET_ID_GLOW_LOW,
+		SET_TYPE_RTV,
+		SET_STAGE_PS, //stage irrelevant
+		0); //register irrelevant
+	//managementBuffer_->setGlowLowAsRTV(devcon);
+	
+	managementBuffer_->setGlow(
+		devcon,
+		SET_ID_GLOW_HIGH,
+		SET_TYPE_SRV,
+		SET_STAGE_PS,
+		SHADER_REGISTER_DOWNSAMPLE_INPUT);
+	//managementBuffer_->setGlowHighAsSRV(devcon, SHADER_REGISTER_SRV_GLOW_HIGH);
 	devcon->Draw(4, 0); //Draw four arbitrary vertices.
 
-	managementBuffer_->unsetGlowHighAsSrv(devcon, SHADER_REGISTER_SRV_GLOW_HIGH);
-	managementBuffer_->unsetGlowLowAsRTV(devcon);
+	managementBuffer_->unset(
+		devcon,
+		SET_TYPE_SRV,
+		SET_STAGE_PS,
+		SHADER_REGISTER_DOWNSAMPLE_INPUT);
+	//managementBuffer_->unsetGlowHighAsSrv(devcon, SHADER_REGISTER_SRV_GLOW_HIGH);
+	
+	managementBuffer_->unset(
+		devcon,
+		SET_TYPE_RTV,
+		SET_STAGE_CS, //stage irrelevant
+		0); //register irrelevant
+	//managementBuffer_->unsetGlowLowAsRTV(devcon);
+
 	managementFX_->unsetAll(devcon);
 }
 void Renderer::blurHorizontally()
@@ -786,17 +811,42 @@ void Renderer::blurHorizontally()
 	};
 	managementCB_->updateCBBlur(devcon, blurKernel);
 	
-	managementBuffer_->setGlowLowAsSRVToCS(devcon, 9);		//Low as input
-	managementBuffer_->setGlowLowUtilAsUAV(devcon, 1);	//Util as output
+	managementBuffer_->setGlow(
+		devcon,
+		SET_ID_GLOW_LOW,
+		SET_TYPE_SRV,
+		SET_STAGE_CS,
+		SHADER_REGISTER_BLUR_INPUT);
+	//managementBuffer_->setGlowLowAsSRVToCS(devcon, 9);	//Low as input
+
+	managementBuffer_->setGlow(
+		devcon,
+		SET_ID_GLOW_LOW_UTIL,
+		SET_TYPE_UAV,
+		SET_STAGE_CS,
+		SHADER_REGISTER_BLUR_OUTPUT);
+	//managementBuffer_->setGlowLowUtilAsUAV(devcon, 1);	//Util as output
 	
 	unsigned int numBlocksX = (unsigned int)ceilf(winfo_->getScreenWidth() / 256.0f);
 	devcon->Dispatch(numBlocksX, winfo_->getScreenHeight(), 1);
 
 	//null shit
-	ID3D11UnorderedAccessView* uavs[] = { nullptr };
-	devcon->CSSetUnorderedAccessViews(1, 1, uavs, nullptr);
-	ID3D11ShaderResourceView* nullViews[1] = { nullptr };
-	devcon->CSSetShaderResources(9, 1, nullViews);
+	managementBuffer_->unset(
+		devcon,
+		SET_TYPE_UAV,
+		SET_STAGE_CS,
+		SHADER_REGISTER_BLUR_OUTPUT);
+	//ID3D11UnorderedAccessView* uavs[] = { nullptr };
+	//devcon->CSSetUnorderedAccessViews(1, 1, uavs, nullptr);
+	
+	managementBuffer_->unset(
+		devcon,
+		SET_TYPE_SRV,
+		SET_STAGE_CS,
+		SHADER_REGISTER_BLUR_INPUT);
+	//ID3D11ShaderResourceView* nullViews[1] = { nullptr };
+	//devcon->CSSetShaderResources(9, 1, nullViews);
+	
 	managementFX_->unsetShader(devcon, SHADERID_CS_BLUR_HORZ);
 }
 void Renderer::blurVertically()
@@ -807,17 +857,42 @@ void Renderer::blurVertically()
 	
 	managementCB_->setCB(CB_TYPE_BLUR, TypeFX_CS, CB_REGISTER_BLUR, devcon);
 	
-	managementBuffer_->setGlowLowAsUAV(devcon, 1);
-	managementBuffer_->setGlowLowUtilAsSRV(devcon, 9);
+	managementBuffer_->setGlow(
+		devcon,
+		SET_ID_GLOW_LOW,
+		SET_TYPE_UAV,
+		SET_STAGE_CS,
+		SHADER_REGISTER_BLUR_OUTPUT);
+	//managementBuffer_->setGlowLowAsUAV(devcon, 1);
+	
+	managementBuffer_->setGlow(
+		devcon,
+		SET_ID_GLOW_LOW_UTIL,
+		SET_TYPE_SRV,
+		SET_STAGE_CS,
+		SHADER_REGISTER_BLUR_INPUT);
+	//managementBuffer_->setGlowLowUtilAsSRV(devcon, 9);
 	
 	unsigned int numBlocksY = (unsigned int)ceilf(winfo_->getScreenHeight() / 256.0f);
 	devcon->Dispatch(winfo_->getScreenWidth(), numBlocksY, 1);
 	
 	//null shit
-	ID3D11UnorderedAccessView* uavs[] = { nullptr };
-	devcon->CSSetUnorderedAccessViews(1, 1, uavs, nullptr);
-	ID3D11ShaderResourceView* nullViews[1] = { nullptr };
-	devcon->CSSetShaderResources(9, 1, nullViews);
+	managementBuffer_->unset(
+		devcon,
+		SET_TYPE_UAV,
+		SET_STAGE_CS,
+		SHADER_REGISTER_BLUR_OUTPUT);
+	//ID3D11UnorderedAccessView* uavs[] = { nullptr };
+	//devcon->CSSetUnorderedAccessViews(1, 1, uavs, nullptr);
+
+	managementBuffer_->unset(
+		devcon,
+		SET_TYPE_SRV,
+		SET_STAGE_CS,
+		SHADER_REGISTER_BLUR_INPUT);
+	//ID3D11ShaderResourceView* nullViews[1] = { nullptr };
+	//devcon->CSSetShaderResources(9, 1, nullViews);
+	
 	managementFX_->unsetAll(devcon); //unsetShader(devcon, SHADERID_CS_BLUR_VERT);
 }
 void Renderer::upSampleBlur()
@@ -842,13 +917,37 @@ void Renderer::upSampleBlur()
 	managementFX_->setShader(devcon, SHADERID_VS_SCREENQUAD);
 	managementFX_->setShader(devcon, SHADERID_PS_DOWNSAMPLE);
 
-	managementBuffer_->setGlowHighAsRTV(devcon);
-	managementBuffer_->setGlowLowAsSRVToPS(devcon, 3); //not being set properly?
+	managementBuffer_->setGlow(
+		devcon,
+		SET_ID_GLOW_HIGH,
+		SET_TYPE_RTV,
+		SET_STAGE_PS, //stage irrelevant
+		0); //register irrelevant
+	//managementBuffer_->setGlowHighAsRTV(devcon);
+	managementBuffer_->setGlow(
+		devcon,
+		SET_ID_GLOW_LOW,
+		SET_TYPE_SRV,
+		SET_STAGE_PS,
+		SHADER_REGISTER_DOWNSAMPLE_INPUT);
+	//managementBuffer_->setGlowLowAsSRVToPS(devcon, 3);
 
 	devcon->Draw(4, 0); //Draw four arbitrary vertices.
 	
-	managementBuffer_->unsetGlowHighAsRTV(devcon);
-	managementBuffer_->unsetGlowLowAsSRV(devcon, 3);
+	managementBuffer_->unset(
+		devcon,
+		SET_TYPE_RTV,
+		SET_STAGE_PS, //stage irrelevant
+		0); //register irrelevant
+	//managementBuffer_->unsetGlowHighAsRTV(devcon);
+	
+	managementBuffer_->unset(
+		devcon,
+		SET_TYPE_SRV,
+		SET_STAGE_PS,
+		SHADER_REGISTER_DOWNSAMPLE_INPUT);
+	//managementBuffer_->unsetGlowLowAsSRV(devcon, 3);
+	
 	managementFX_->unsetAll(devcon);
 }
 
