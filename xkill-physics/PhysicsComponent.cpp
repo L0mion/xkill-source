@@ -254,9 +254,9 @@ void PhysicsComponent::onEvent(Event* e)
 		{
 			if(attributeUpdated->isDeleted)
 			{
-  				dynamicsWorld_->removeRigidBody(frustumPhysicsObjects_->at(attributeIndex));
-				delete frustumPhysicsObjects_->at(attributeIndex);
-				frustumPhysicsObjects_->at(attributeIndex) = nullptr;
+  				//dynamicsWorld_->removeRigidBody(frustumPhysicsObjects_->at(attributeIndex));
+				//delete frustumPhysicsObjects_->at(attributeIndex);
+				//frustumPhysicsObjects_->at(attributeIndex) = nullptr;
 			}
 		}
 		break;
