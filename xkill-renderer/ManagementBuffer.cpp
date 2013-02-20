@@ -120,7 +120,9 @@ HRESULT ManagementBuffer::initAlbedo(ID3D11Device* device)
 		winfo_->getScreenWidth(),
 		winfo_->getScreenHeight(),
 		MULTISAMPLES_GBUFFERS, 
-		getFormat(GBUFFER_FORMAT_ALBEDO));
+		getFormat(GBUFFER_FORMAT_ALBEDO),
+		D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE,
+		D3D11_USAGE_DEFAULT);
 	hr = gBuffer->init(device);
 
 	gBuffers_[GBUFFERID_ALBEDO] = gBuffer;
@@ -136,7 +138,9 @@ HRESULT ManagementBuffer::initNormal(ID3D11Device* device)
 		winfo_->getScreenWidth(), 
 		winfo_->getScreenHeight(), 
 		MULTISAMPLES_GBUFFERS, 
-		getFormat(GBUFFER_FORMAT_NORMAL));
+		getFormat(GBUFFER_FORMAT_NORMAL),
+		D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE,
+		D3D11_USAGE_DEFAULT);
 	hr = gBuffer->init(device);
 
 	gBuffers_[GBUFFERID_NORMAL] = gBuffer;
@@ -152,7 +156,9 @@ HRESULT ManagementBuffer::initMaterial(ID3D11Device* device)
 		winfo_->getScreenWidth(), 
 		winfo_->getScreenHeight(), 
 		MULTISAMPLES_GBUFFERS, 
-		getFormat(GBUFFER_FORMAT_MATERIAL));
+		getFormat(GBUFFER_FORMAT_MATERIAL),
+		D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE,
+		D3D11_USAGE_DEFAULT);
 	hr = gBuffer->init(device);
 	
 	gBuffers_[GBUFFERID_MATERIAL] = gBuffer;
@@ -168,7 +174,9 @@ HRESULT ManagementBuffer::initGlow(ID3D11Device* device, ID3D11DeviceContext* de
 		winfo_->getScreenWidth(), 
 		winfo_->getScreenHeight(),
 		MULTISAMPLES_GBUFFERS, //?
-		getFormat(GBUFFER_FORMAT_GLOW_HIGH));
+		getFormat(GBUFFER_FORMAT_GLOW_HIGH),
+		D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE | D3D11_BIND_UNORDERED_ACCESS,
+		D3D11_USAGE_DEFAULT);
 	hr = glowHigh_->init(device);
 
 	//Init GlowBufLow with pre-computed dimensions.
@@ -176,14 +184,18 @@ HRESULT ManagementBuffer::initGlow(ID3D11Device* device, ID3D11DeviceContext* de
 		downSampleWidth_,
 		downSampleHeight_,
 		MULTISAMPLES_GBUFFERS, //?
-		getFormat(GBUFFER_FORMAT_GLOW_LOW));
+		getFormat(GBUFFER_FORMAT_GLOW_LOW),
+		D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE | D3D11_BIND_UNORDERED_ACCESS,
+		D3D11_USAGE_DEFAULT);
 	hr = glowLow_->init(device);
 
 	glowLowUtil_ = new Buffer_SrvRtvUav(
 		downSampleWidth_,
 		downSampleHeight_,
 		MULTISAMPLES_GBUFFERS, //?
-		getFormat(GBUFFER_FORMAT_GLOW_LOW));
+		getFormat(GBUFFER_FORMAT_GLOW_LOW),
+		D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE | D3D11_BIND_UNORDERED_ACCESS,
+		D3D11_USAGE_DEFAULT);
 	hr = glowLowUtil_->init(device);
 
 	//Init downsampled glowmap viewport.
