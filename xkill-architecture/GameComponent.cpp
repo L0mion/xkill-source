@@ -128,6 +128,12 @@ void GameComponent::onUpdate(float delta)
 				if(successfullySwitcheFiringModeOrAmmunnition)
 				{
 					firingMode = &ptr_weaponStats->firingMode[ptr_weaponStats->currentFiringModeType];
+					ammo = &ptr_weaponStats->ammunition[ptr_weaponStats->currentAmmunitionType];
+
+					if(firingMode->nrOfShotsLeftInClip[ptr_weaponStats->currentAmmunitionType] > ammo->currentTotalNrOfShots)
+					{
+
+					}
 				}
 				else
 				{
