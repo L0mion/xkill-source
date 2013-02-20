@@ -41,7 +41,10 @@ class SubsetD3D;
 
 #include "ShadingDesc.h"
 
-#include <vld.h>
+//#define VISUALLEAKDETECTOR;
+#if (defined(DEBUG) || defined(_DEBUG)) && defined(VISUALLEAKDETECTOR)
+	#include <vld.h>
+#endif
 
 //temp
 class M3DLoader;

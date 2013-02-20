@@ -16,15 +16,6 @@
 
 ATTRIBUTES_DECLARE_ALL
 
-struct Test
-{
-	// const static int attributeType = ATTRIBUTE_POSITION;
-
-	Float3 up;			//!< Always aims up from the camera, perpendicular to look.
-	Float3 right;		//!< Always aims to the right of the camera, perpendicular to look.
-	Float3 look;		//!< The direction in which the camera is aimed. 
-};
-
 MainWindow::MainWindow()
 {
 	QWidget::installEventFilter(this);
@@ -75,13 +66,12 @@ MainWindow::MainWindow()
 	this->installEventFilter(this);
 	
 	
-	// Start RELEASE in fullscreen, and DEBUG in Windowed
+	// Start RELEASE in fullscreen, and DEBUG in Windowed, also avoid menu if DEBUG
 	slot_toggleFullScreen();
-#if defined(DEBUG) | defined(_DEBUG)
+#if defined(DEBUG) || defined(_DEBUG)
 	slot_toggleFullScreen();
+	SEND_EVENT(&Event(EVENT_STARTGAME)); //Skips menu in DEBUG
 #endif
-
-	
 }
 
 MainWindow::~MainWindow()
