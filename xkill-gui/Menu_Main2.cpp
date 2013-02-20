@@ -259,10 +259,10 @@ void Menu_Main2::onEvent( Event* e )
 		if(((Event_EnableMenu*)e)->enableMenu)
 		{
 			// Refresh menu
-			input_Menu->settingsMenuUpdated();
-			ammo_Menu->settingsMenuUpdated();
-			firingMode_Menu->settingsMenuUpdated();
-			sound_Menu->settingsMenuUpdated();
+			//input_Menu->setSettingsMenu();
+			ammo_Menu->setSettingsMenu();
+			firingMode_Menu->setSettingsMenu();
+			//sound_Menu->setSettingsMenu();
 
 			// Display menu
 			this->show();
