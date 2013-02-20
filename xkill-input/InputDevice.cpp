@@ -198,9 +198,10 @@ std::vector<int> InputDevice::getMappedArray(int mapping)	//Switch to unsigned
 
 unsigned long InputDevice::getHash()
 {
-	std::string str = getStandardMappingsString();
+	std::string str = __TIME__;//getStandardMappingsString();
+	str += __DATE__;
 
-	str += Converter::IntToStr(InputAction::ACTION_LAST);
+	//str += Converter::IntToStr(InputAction::ACTION_LAST);
 
 	return Converter::HashString(str);
 }

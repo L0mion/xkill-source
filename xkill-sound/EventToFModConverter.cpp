@@ -181,7 +181,11 @@ bool EventToFModConverter::isValid(std::string row)
 	if(row == "" || row[0] != '#')
 		return false;
 
-	std::string hash = "#" + Converter::ULongToStr(Converter::HashString(configMessage()));
+	std::string hashMessage = configMessage();
+	hashMessage += __TIME__;
+	hashMessage += __DATE__;
+
+	std::string hash = "#" + Converter::ULongToStr(Converter::HashString(hashMessage));
 
 	return hash == row;
 }
@@ -228,18 +232,21 @@ std::string EventToFModConverter::configMessage()
 	message += "// a event number. \n";
 	message += "// This file will be used to convert fmod events to in-game events.\n\n";
 
-	std::vector<std::pair<int, std::string>> table;
+	std::vector<std::pair<int, std::string>> table;		
 
 	table.push_back(std::pair<int, std::string>(Event_PlaySound::SOUND_DEATH,			"Player Death"));
 	table.push_back(std::pair<int, std::string>(Event_PlaySound::SOUND_FIRE,			"Fire Gun"));
+	table.push_back(std::pair<int, std::string>(Event_PlaySound::SOUND_GAME_MUSIC,		"Game Music"));
 	table.push_back(std::pair<int, std::string>(Event_PlaySound::SOUND_HIT,				"Player Hit"));
-	table.push_back(std::pair<int, std::string>(Event_PlaySound::SOUND_MUSIC,			"Play Music"));
+	table.push_back(std::pair<int, std::string>(Event_PlaySound::SOUND_MENU_MUSIC,		"Menu Music"));
 	table.push_back(std::pair<int, std::string>(Event_PlaySound::SOUND_RESPAWN,			"Player Respawn"));
 	table.push_back(std::pair<int, std::string>(Event_PlaySound::SOUND_WALK,			"Player Walk"));
+	table.push_back(std::pair<int, std::string>(Event_PlaySound::SOUND_BUTTON_CLICK,	"Button Click"));
+	table.push_back(std::pair<int, std::string>(Event_PlaySound::SOUND_OPENING_ANIMATION,"Opening Animation"));
 	//table.push_back(std::pair<int, std::string>(EVENT_CREATE_PROJECTILE + offset,		"Fire Gun"));
-	//table.push_back(std::pair<int, std::string>(EVENT_PLAYERDEATH + offset,				"Player Death"));
+	//table.push_back(std::pair<int, std::string>(EVENT_PLAYERDEATH + offset,			"Player Death"));
 	//table.push_back(std::pair<int, std::string>(EVENT_CREATE_PICKUPABLE + offset,		"Spawn Pickupable"));
-	//table.push_back(std::pair<int, std::string>(EVENT_CREATE_EXPLOSIONSPHERE + offset,	"Explosion"));
+	//table.push_back(std::pair<int, std::string>(EVENT_CREATE_EXPLOSIONSPHERE + offset,"Explosion"));
 
 	sortConfigMessageTable(table);
 
