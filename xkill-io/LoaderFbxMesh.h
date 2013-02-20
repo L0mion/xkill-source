@@ -47,7 +47,7 @@ public:
 	\param mesh A FbxMesh object.
 	\param meshDesc Contains all information extracted from the FbxMesh.
 	*/
-	void parseMesh(FbxMesh* mesh, LoaderFbxMeshDesc* meshDesc);
+	void parseMesh(FbxMesh* mesh, FbxPose* fbxPose, LoaderFbxMeshDesc* meshDesc);
 private:
 	//! Parses polygon groups in the mesh.
 	/*!
@@ -171,7 +171,7 @@ private:
 	\param mesh The mesh to be parsed.
 	\param meshDesc Mesh description that will store the results.
 	*/
-	void parseVertexLinkData(FbxMesh* mesh, LoaderFbxMeshDesc* meshDesc);
+	void parseVertexLinkData(FbxMesh* mesh, FbxPose* fbxPose, LoaderFbxMeshDesc* meshDesc);
 	//! Steps through the link hierarchy and index the link nodes and saves them in a vector.
 	/*!
 	\param rootNode Node at the root of the hierarchy.
@@ -192,8 +192,13 @@ private:
 	\ param meshDesc Mesh description where the results will be stored.
 	\param index Index of the bone the matrix belongs to.
 	*/
-	void parseTransformMatrix(FbxCluster* cluster, LoaderFbxMeshDesc* meshDesc, int index);
-	
+	void parseTransformMatrix(FbxCluster* cluster, FbxMesh* mesh, FbxPose* fbxPose, LoaderFbxMeshDesc* meshDesc, int index);
+	FbxAMatrix parseTransformMatrixAssociateModel(FbxCluster* cluster, FbxMesh* mesh, FbxPose* fbxPose);
+	FbxAMatrix parseTransformMatrixOther(FbxCluster* cluster, FbxMesh* mesh, FbxPose* fbxPose);
+	FbxAMatrix getGeometry(FbxNode* node);
+	FbxAMatrix getGlobalPosition(FbxNode* node, FbxTime time, FbxPose* pose);
+	FbxAMatrix getPoseMatrix(FbxPose* pose, int nodeIndex);
+
 	//! Transforms the vertices into local space.
 	/*!
 	\param mesh The mesh currently being parsed

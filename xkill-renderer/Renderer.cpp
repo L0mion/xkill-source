@@ -930,7 +930,7 @@ void Renderer::renderAnimation(unsigned int meshID, DirectX::XMFLOAT4X4 view, Di
 	std::vector<DirectX::XMFLOAT4X4> finalTransforms;
 
 	managementAnimation_->update(delta_, clipName);
-	managementAnimation_->getAnimation(0)->getFinalTransforms(clipName, 0.0f/*managementAnimation_->getTimePosition()*/, &finalTransforms);
+	managementAnimation_->getAnimation(0)->getFinalTransforms(clipName, managementAnimation_->getTimePosition(), &finalTransforms);
 
 	managementCB_->setCB(CB_TYPE_BONE, TypeFX_VS, CB_REGISTER_BONE, devcon);
 	managementCB_->updateCBBone(devcon, finalTransforms);
