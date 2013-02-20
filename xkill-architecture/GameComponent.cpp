@@ -812,7 +812,7 @@ void GameComponent::updateAimingRay(Entity* playerEntity, AttributePtr<Attribute
 		{
 			AttributePtr<Attribute_Player> rayCastingPlayerAttribute = itrPlayer.at(rayCastingPlayerAttributeId.at(i));
 					
-			if(rayCastingPlayerAttribute->executing) //shoot execution laser ray
+			if(rayCastingPlayerAttribute->executing) //shoot Laser Automatic Sniper Execution Ray (do not look into the beam)
 			{
 				short collisionFilterMask = XKILL_Enums::PhysicsAttributeType::PLAYER | XKILL_Enums::PhysicsAttributeType::WORLD;
 				Event_GetEntityIdOfPhysicsObjectHitByRay ev(ray->from, ray->to, collisionFilterMask);

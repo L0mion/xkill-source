@@ -13,4 +13,6 @@ public:
 	void collision_pickupable(Entity* entity1, Entity* entity2);
 	void collision_projectile(Entity* entity1, Entity* entity2);
 	void collision_playerVsExplosionSphere(Entity* entity1, Entity* entity2);
+
+	float getAmountAfterPickup(float currentAmount, float maxAmount, float pickupAmount);
 };
