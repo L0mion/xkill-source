@@ -217,8 +217,6 @@ struct DLL_U Attribute_Render : public IAttribute
 */
 struct DLL_U Attribute_Physics : public IAttribute
 {
-	short collisionFilterGroup;
-
 	Attribute_Physics();
 	~Attribute_Physics();
 
@@ -230,7 +228,8 @@ struct DLL_U Attribute_Physics : public IAttribute
 	Float3 gravity;
 	float mass;
 	unsigned int meshID; //collisionShapeIndex;
-	short int collisionFilterMask;
+	short collisionFilterGroup;
+	short collisionFilterMask;
 	//CollisionShape
 	//friction
 	//restitution
@@ -585,12 +584,12 @@ struct DLL_U Attribute_PickupablesSpawnPoint : public IAttribute
 
 	AttributePtr<Attribute_Position> ptr_position;
 
-	XKILL_Enums::PickupableType spawnPickupableType;	//!< Type of pickupable spawned by this pickupables spawn point
+	XKILL_Enums::PickupableType spawnPickupableType;	//!< Type of pickupable spawned by this pickupables spawn point.
 	float spawnDelayInSeconds;							//!< Delay until a pickupable may spawn
 	float secondsSinceLastSpawn;						//!< Incrementing timer, reset when spawned.
 	float secondsSinceLastPickup;						//!< Incrementing timer, reset when picked up.
 	int maxNrOfExistingSpawnedPickupables;				//!< Is checked against "currentNrOfExistingSpawnedPickupables"
-	int currentNrOfExistingSpawnedPickupables;			//!< Incremented when a pickubalbe is spawned from this pickupables spawn point. Decremented when a pickupable is picked up
+	int currentNrOfExistingSpawnedPickupables;			//!< Incremented when a pickupable is spawned from this pickupables spawn point. Decremented when a pickupable is picked up.
 
 	DataItemList* getDataList();
 	void saveTo(DataItemList* list);;
@@ -689,6 +688,7 @@ struct DLL_U Attribute_Ray : public IAttribute
 
 	Float3 from;
 	Float3 to;
+	bool render;
 
 	DataItemList* getDataList();
 	void saveTo(DataItemList* list);;

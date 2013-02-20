@@ -91,6 +91,13 @@ public:
 	bool switchAmmunition(AttributePtr<Attribute_WeaponStats> ptr_weaponStats);
 	bool switchFiringMode(AttributePtr<Attribute_WeaponStats> ptr_weaponStats);
 
-	void updateAimingRay(Entity* playerEntity, AttributePtr<Attribute_Camera> ptr_camera);
+	/**
+	Creates an aiming ray by sending a ray cast event handled by PhysicsComponent.
+	Retrieves the result (what the ray hit, and the hit point) from the sent event.
+	Updates the ray attribute of the current player according to the result from the sent event.
+	If the current player is executing the ray is interpreted as a Laser Automatic Sniper Execution Ray and render is set to true.
+	Else the aiming ray is interpreted as what the player is looking at and render is set to false.
+	*/
+	void updateAndInterpretAimingRay(Entity* playerEntity, AttributePtr<Attribute_Camera> ptr_camera);
 	void shootProjectile(AttributePtr<Attribute_Spatial> ptr_spatial, AttributePtr<Attribute_WeaponStats> ptr_weaponStats);
 };

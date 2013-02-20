@@ -80,7 +80,7 @@ enum DLL_U EventType
 	EVENT_PLAYERDEATH,
 	EVENT_PHYSICS_ATTRIBUTES_COLLIDING,
 	EVENT_SYNC_STATE_COMMAND,
-	EVENT_GET_ENTITY_ID_OF_PHYSICS_OBJECT_HIT_BY_RAY,
+	EVENT_CLOSEST_RAY_CAST,
 	EVENT_GET_FILE_LIST,
 
 	// Creation/Destruction
@@ -619,15 +619,19 @@ public:
 	AttributePtr<Attribute_Player> player;
 };
 
-class DLL_U Event_GetEntityIdOfPhysicsObjectHitByRay : public Event
+class DLL_U Event_ClosestRayCast : public Event
 {
 public:
-	Event_GetEntityIdOfPhysicsObjectHitByRay(Float3 from, Float3 to, short collisionFilterMask);
+	Event_ClosestRayCast(Float3 from, Float3 to, short collisionFilterMask);
 
-	Float3 from;
-	Float3 to;
-	short collisionFilterMask;
-	int closest_entityId; //!< 0 if no Entity
+	//Event input varaibles:
+	Float3 from;										//!< Point from where the ray originates
+	Float3 to;											//!< Point where the ray ends
+	short collisionFilterMask;							//!< What types of Physics objects (refer to XKILL_Enums::PhysicsAttributeType) the ray should collide with during its travel from from to to
+	
+	//Event output varaibles:
+	int EntityIdOfOwnerToClosestPhysicsObjectHitByRay;	//!< Set to 0 if no entity was hit by the ray.
+	Float3 ClosestHitPoint;								//!< The world space hit point where the ray hit the physics object
 };
 
 class DLL_U Event_GetFileList : public Event

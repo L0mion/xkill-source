@@ -972,6 +972,7 @@ Attribute_Ray::Attribute_Ray()
 {
 	from = Float3(0.0f, 0.0f, 0.0f);
 	to = Float3(0.0f, 0.0f, 0.0f);
+	render = false;
 }
 Attribute_Ray::~Attribute_Ray()
 {

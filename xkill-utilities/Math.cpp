@@ -88,6 +88,7 @@ Float3::Float3(float x, float y, float z)
 	this->y = y;
 	this->z = z;
 }
+
 void Float3::copy(const float* float3)
 {
 	//memcpy(this, float3, sizeof(Float3));
@@ -175,6 +176,16 @@ void Float4::copy(const float* float4)
 	y = float4[1];
 	z = float4[2];
 	w = float4[3];
+}
+
+Float4& Float4::normalize()
+{
+	const float length = sqrtf(x * x + y * y + z * z + w * w);
+	x /= length;
+	y /= length;
+	z /= length;
+	w /= length;
+	return *this;
 }
 
 Float3 Float4::quaternionToVector()
@@ -402,7 +413,6 @@ Float4x4 Float4x4::multiply(const Float4x4& matrix)
 
 void Float4x4::setIdentity()
 {
-		
 	m[0][0] = 1.0f;
 	m[0][1] = 0.0f;
 	m[0][2] = 0.0f;

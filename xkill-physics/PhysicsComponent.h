@@ -20,6 +20,8 @@ class PhysicsObject;
 class FrustumPhysicsObject;
 class CollisionObject;
 
+class Event_ClosestRayCast;
+
 /*! \defgroup xkill-physics xkill-physics
 	Physics Component of XKILL. */
 
@@ -53,6 +55,7 @@ public:
 	bool init();
 	void onUpdate(float delta);  //!< loop through all physics objects, synchronizeWithAttributes, update physicsobjects, update culling and step simulation
 	void onEvent(Event* e);  //!< handle events for the physicscomponent, mostly deletion/change events of physicsobjects
+	void handleEvent_ClosestRayCast(Event_ClosestRayCast* event_ClosestRayCast);
 
 	void detectedCollisionsDuringStepSimulation(btScalar timeStep);  //!< Recieve and filter out collisions in simulation and translate accordingly
 };

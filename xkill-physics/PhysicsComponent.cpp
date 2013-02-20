@@ -34,7 +34,7 @@ PhysicsComponent::PhysicsComponent() : broadphase_(nullptr),
 	ATTRIBUTES_INIT_ALL;
 	SUBSCRIBE_TO_EVENT(this,EVENT_ATTRIBUTE_UPDATED);
 	SUBSCRIBE_TO_EVENT(this, EVENT_MODIFY_PHYSICS_OBJECT);
-	SUBSCRIBE_TO_EVENT(this, EVENT_GET_ENTITY_ID_OF_PHYSICS_OBJECT_HIT_BY_RAY);
+	SUBSCRIBE_TO_EVENT(this, EVENT_CLOSEST_RAY_CAST);
 	SUBSCRIBE_TO_EVENT(this, EVENT_UNLOAD_LEVEL);
 	SUBSCRIBE_TO_EVENT(this, EVENT_LOAD_LEVEL_BULLET);
 }
@@ -141,54 +141,6 @@ void PhysicsComponent::onUpdate(float delta)
 
 		synchronizeWithAttributes(ptr_physics, physicsAttributeIndex);	//Synchronize physics objects with physics attributes
 		physicsObjects_->at(physicsAttributeIndex)->onUpdate(delta);	//Update physics objects by calling their onUpdate function.
-
-		//Should be in PlayerPhysicsAttribute::onUpdate()
-		if(ptr_physics->collisionFilterGroup == XKILL_Enums::PhysicsAttributeType::PLAYER)
-		{
-			//Calculate if the player aiming ray hit something
-			Entity* playerEntity = itrPhysics.ownerAt(physicsAttributeIndex);
-			std::vector<int> rayttributeId = playerEntity->getAttributes(ATTRIBUTE_RAY);
-			for(unsigned int i=0;i<rayttributeId.size();i++)
-			{
-				AttributePtr<Attribute_Ray> ray = itrRay.at(rayttributeId.at(i));
-				btVector3 from = convert(ray->from);
-				btVector3 to = convert(ray->to);
-				gDebugDraw.drawLine(from,to,btVector4(1,1,1,1));
-				btCollisionWorld::ClosestRayResultCallback closestResults(from, to);
-				closestResults.m_flags |= btTriangleRaycastCallback::kF_KeepUnflippedNormal;
-
-				closestResults.m_collisionFilterGroup = XKILL_Enums::PhysicsAttributeType::RAY;
-				closestResults.m_collisionFilterMask = XKILL_Enums::PhysicsAttributeType::PLAYER | XKILL_Enums::PhysicsAttributeType::WORLD;
-
-				dynamicsWorld_->rayTest(from,to,closestResults);
-				if(closestResults.hasHit())
-				{
-					btVector3 closestHitPoint = from.lerp(to,closestResults.m_closestHitFraction);
-					gDebugDraw.drawSphere(closestHitPoint,0.1,btVector3(1.0f, 0.0f, 0.0f));
-					gDebugDraw.drawLine(closestHitPoint,closestHitPoint+closestResults.m_hitNormalWorld,btVector3(1.0f, 0.0f, 0.0f));
-					
-					//Rotate weapon
-					std::vector<int> behaviorOffsetAttributeId = playerEntity->getAttributes(BEHAVIOR_OFFSET);
-					AttributePtr<Behavior_Offset> behaviorOffset = itrOffset.at(behaviorOffsetAttributeId.at(1));
-					btVector3 v1 = to-from;
-					v1.normalize();
-					btVector3 v2 = closestHitPoint - convert(behaviorOffset->ptr_spatial->ptr_position->position);
-					v2.normalize();
-					btVector3 a = v1.cross(v2);
-					float w = sqrt((v1.length()*v1.length()) * (v2.length()*v2.length())) + v1.dot(v2);
-					btQuaternion weaponRotation(a.x(), a.y(), a.z(), w);
-					weaponRotation.normalize();
-					behaviorOffset->offset_rotation.x = weaponRotation.x();
-					behaviorOffset->offset_rotation.y = weaponRotation.y();
-					behaviorOffset->offset_rotation.z = weaponRotation.z();
-					behaviorOffset->offset_rotation.w = weaponRotation.w();
-				}
-				else
-				{
-					//Standard weapon rotation
-				}
-			}
-		}
 	}
 
 	//updateCulling();
@@ -324,11 +276,10 @@ void PhysicsComponent::onEvent(Event* e)
 				case XKILL_Enums::ModifyPhysicsObjectData::GIVE_IMPULSE:
 					{
 						Float3* impulseVector = static_cast<Float3*>(modifyPhysicsObject->data);
-
 						btVector3 impulse = convert(*impulseVector);
-
 						physicsObjects_->at(physicsAttributeIndex)->applyCentralImpulse(impulse);
-					}				}
+					}
+				}
 			}
 			else
 			{
@@ -341,29 +292,10 @@ void PhysicsComponent::onEvent(Event* e)
 		}
 		break;
 	}
-	case EVENT_GET_ENTITY_ID_OF_PHYSICS_OBJECT_HIT_BY_RAY:
+	case EVENT_CLOSEST_RAY_CAST:
 		{
-		Event_GetEntityIdOfPhysicsObjectHitByRay* event_GetEntityIdOfPhysicsObjectHitByRay = static_cast<Event_GetEntityIdOfPhysicsObjectHitByRay*>(e);
-
-		btVector3 from = convert(event_GetEntityIdOfPhysicsObjectHitByRay->from);
-		btVector3 to = convert(event_GetEntityIdOfPhysicsObjectHitByRay->to);
-
-		btCollisionWorld::ClosestRayResultCallback closestResults(from, to);
-		closestResults.m_flags |= btTriangleRaycastCallback::kF_KeepUnflippedNormal;
-
-		closestResults.m_collisionFilterGroup = XKILL_Enums::PhysicsAttributeType::RAY;
-		closestResults.m_collisionFilterMask = XKILL_Enums::PhysicsAttributeType::WORLD | XKILL_Enums::PhysicsAttributeType::PLAYER;
-
-		dynamicsWorld_->rayTest(from, to, closestResults);
-		if(closestResults.hasHit())
-		{
-			const PhysicsObject* hitObject = static_cast<const PhysicsObject*>(closestResults.m_collisionObject);
-			event_GetEntityIdOfPhysicsObjectHitByRay->closest_entityId = itrPhysics.ownerIdAt(hitObject->getAttributeIndex());
-		}
-		else
-		{
-			event_GetEntityIdOfPhysicsObjectHitByRay->closest_entityId = 0;
-		}
+			Event_ClosestRayCast* event_ClosestRayCast = static_cast<Event_ClosestRayCast*>(e);
+			handleEvent_ClosestRayCast(event_ClosestRayCast);
 		break;
 		}
 	case EVENT_LOAD_LEVEL_BULLET:
@@ -375,22 +307,40 @@ void PhysicsComponent::onEvent(Event* e)
 	}
 }
 
+void PhysicsComponent::handleEvent_ClosestRayCast(Event_ClosestRayCast* event_ClosestRayCast)
+{
+	btVector3 from = convert(event_ClosestRayCast->from);
+	btVector3 to = convert(event_ClosestRayCast->to);
+
+	btCollisionWorld::ClosestRayResultCallback closestResults(from, to);
+	closestResults.m_flags |= btTriangleRaycastCallback::kF_KeepUnflippedNormal; //check, what is this? (2013-02-20 11.24)
+	closestResults.m_collisionFilterGroup = XKILL_Enums::PhysicsAttributeType::RAY;
+	closestResults.m_collisionFilterMask = event_ClosestRayCast->collisionFilterMask;
+
+	dynamicsWorld_->rayTest(from, to, closestResults); //Bullet Physics ray cast
+
+	//--------------------------------------------------------------------------------------
+	// Special case event handling: the result of the event is stored in the event.
+	//--------------------------------------------------------------------------------------
+	if(closestResults.hasHit())
+	{
+		const PhysicsObject* hitObject = static_cast<const PhysicsObject*>(closestResults.m_collisionObject);
+		event_ClosestRayCast->EntityIdOfOwnerToClosestPhysicsObjectHitByRay = itrPhysics.ownerIdAt(hitObject->getAttributeIndex());
+			
+		const btVector3 closestHitPoint = from.lerp(to,closestResults.m_closestHitFraction);
+		event_ClosestRayCast->ClosestHitPoint = convert(&closestHitPoint);
+	}
+	else
+	{
+		event_ClosestRayCast->EntityIdOfOwnerToClosestPhysicsObjectHitByRay = 0; //0 denotes that no physics object was hit by the ray
+		event_ClosestRayCast->ClosestHitPoint = Float3(0.0f, 0.0f, 0.0f);
+	}
+}
+
 void PhysicsComponent::synchronizeWithAttributes(AttributePtr<Attribute_Physics> ptr_physics, int physicsAttributeIndex)
 {
 	//Also refer to PhysicsComponent::onEvent, handling of EVENT_ATTRIBUTE_UPDATED
-	
-	//Old physics attribute <--> physics object remove synchronization
-	/*
-	for(int i = 0; i < itrPhysics.storageSize(); i++)
-	{
-		if( itrPhysics.ownerIdAt(i) == 0 && physicsObjects_->at(i) != nullptr)
-		{
-			dynamicsWorld_->removeRigidBody(physicsObjects_->at(i));
-			delete physicsObjects_->at(i);
-			physicsObjects_->at(i) = nullptr;
-		}
-	}
-	*/
+
 	//Checks if new physiscs attributes were created since last call to this function
 	if(physicsAttributeIndex >= physicsObjects_->size())
 	{
@@ -440,7 +390,7 @@ void PhysicsComponent::synchronizeWithAttributes(AttributePtr<Attribute_Physics>
 			{
 				dynamicsWorld_->addRigidBody(physicsObjects_->at(physicsAttributeIndex), ptr_physics->collisionFilterGroup, ptr_physics->collisionFilterMask);
 
-				//Per object gravity must be set after "addRigidBody"
+				//Per object gravity must be set after "btDiscreteDynamicsWorld::addRigidBody"
 				if(!physicsObjects_->at(physicsAttributeIndex)->isStaticOrKinematicObject())
 				{
 					physicsObjects_->at(physicsAttributeIndex)->setGravity(btVector3(ptr_physics->gravity.x, ptr_physics->gravity.y, ptr_physics->gravity.z));
@@ -450,7 +400,7 @@ void PhysicsComponent::synchronizeWithAttributes(AttributePtr<Attribute_Physics>
 			}
 			else
 			{
-				SHOW_MESSAGEBOX("-->Error initializing PhysicsObject");
+				SHOW_MESSAGEBOX("-->Error initializing PhysicsObject. PhysicsComponent::synchronizeWithAttributes failed");
 			}
 		}
 	}
@@ -486,6 +436,9 @@ void PhysicsComponent::detectedCollisionsDuringStepSimulation(btScalar timeStep)
 				unsigned int ownerA = itrPhysics.ownerIdAt(objectA->getAttributeIndex());
 				unsigned int ownerB = itrPhysics.ownerIdAt(objectB->getAttributeIndex());
 
+				//--------------------------------------------------------------------------------------
+				// Global frustum culling
+				//--------------------------------------------------------------------------------------
 				//check physicsobjecttype;
 				//if(objectA->getCollisionFilterGroup() == XKILL_Enums::PhysicsAttributeType::FRUSTUM ||
 				//	objectB->getCollisionFilterGroup() == XKILL_Enums::PhysicsAttributeType::FRUSTUM)

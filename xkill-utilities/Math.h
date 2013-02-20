@@ -67,7 +67,7 @@ struct DLL_U Float3
 	float* asFloat();
 
 	Float3&	normalize();
-	Float3	cross(const Float3& vec) const;
+	Float3 cross(const Float3& vec) const;
 	float dot(Float3 vec);
 	void lerp(Float3 *v, float factor);
 	float length();
@@ -128,6 +128,7 @@ struct DLL_U Float4
 	Float4(float x, float y, float z, float w);
 	Float4(Float3 float3, float w);
 	void copy(const float* float4);
+	Float4& normalize();
 };
 
 struct DLL_U Float4x4

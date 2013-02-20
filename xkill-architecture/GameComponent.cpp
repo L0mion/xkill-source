@@ -225,7 +225,7 @@ void GameComponent::onUpdate(float delta)
 			// Update player aiming ray
 			//--------------------------------------------------------------------------------------
 			Entity* playerEntity = itrPlayer.owner();
-			updateAimingRay(playerEntity, ptr_camera);
+			updateAndInterpretAimingRay(playerEntity, ptr_camera);
 			
 			//--------------------------------------------------------------------------------------
 			// Damage taken bookkeeping (Not tested. Idea was to lower player speed when the player took damage) 
@@ -783,68 +783,106 @@ bool GameComponent::switchFiringMode(AttributePtr<Attribute_WeaponStats> ptr_wea
 	return switchedFiringMode;
 }
 
-void GameComponent::updateAimingRay(Entity* playerEntity, AttributePtr<Attribute_Camera> ptr_camera)
+void GameComponent::updateAndInterpretAimingRay(Entity* playerEntity, AttributePtr<Attribute_Camera> ptr_camera)
 {
-	std::vector<int> rayAttributeId = playerEntity->getAttributes(ATTRIBUTE_RAY);
-	for(unsigned int i=0;i<rayAttributeId.size();i++)
+	Float3 lookAtFarPlaneHorizon = ptr_camera->look;
+	lookAtFarPlaneHorizon.normalize();
+	lookAtFarPlaneHorizon = lookAtFarPlaneHorizon * ptr_camera->zFar;
+
+	Float3 from = ptr_camera->ptr_spatial->ptr_position->position;
+	Float3 to = lookAtFarPlaneHorizon + from;
+
+	std::vector<int> rayCastingPlayerAttributeId = playerEntity->getAttributes(ATTRIBUTE_PLAYER);
+	for(unsigned int i=0;i<rayCastingPlayerAttributeId.size();i++)
 	{
 		//--------------------------------------------------------------------------------------
-		// Draw ray and hit points by putting it in an attribute for Bullet Physics to handle
-		//--------------------------------------------------------------------------------------
-		//Float3 lookAtFarPlaneHorizon = ptr_camera->ptr_spatial->rotation.quaternionToVector();
-		Float3 lookAtFarPlaneHorizon = ptr_camera->look;
-		lookAtFarPlaneHorizon.normalize();
-		lookAtFarPlaneHorizon.x = lookAtFarPlaneHorizon.x*ptr_camera->zFar;
-		lookAtFarPlaneHorizon.y = lookAtFarPlaneHorizon.y*ptr_camera->zFar;
-		lookAtFarPlaneHorizon.z = lookAtFarPlaneHorizon.z*ptr_camera->zFar;
-
-		AttributePtr<Attribute_Ray> ray = itrRay.at(rayAttributeId.at(i));
-		ray->from = ptr_camera->ptr_spatial->ptr_position->position;
-		//ray->from = ptr_player->ptr_weaponFireLocation_spatial->ptr_position->position;
-		ray->to = lookAtFarPlaneHorizon + ray->from;
+		// Send event handled by PhysicsComponent. Result is stored in the event.
+		//-------------------------------------------------------------------------------------
+		short rayCollisionFilterMask = XKILL_Enums::PhysicsAttributeType::PLAYER | XKILL_Enums::PhysicsAttributeType::WORLD;
+		Event_ClosestRayCast event_ClosestRayCast(from, to, rayCollisionFilterMask);
+		SEND_EVENT(&event_ClosestRayCast);
 
 		//--------------------------------------------------------------------------------------
-		// Do ray test directly by sending an "Event_GetEntityIdOfPhysicsObjectHitByRay" event. The result is stored in the event.
+		// Retrieve result from sent event
 		//--------------------------------------------------------------------------------------
-		std::vector<int> rayCastingPlayerAttributeId = playerEntity->getAttributes(ATTRIBUTE_PLAYER);
-		for(unsigned int i=0;i<rayCastingPlayerAttributeId.size();i++)
+		float entityIdOfOwnerToClosestPhysicsObjectHitByRay = event_ClosestRayCast.EntityIdOfOwnerToClosestPhysicsObjectHitByRay;
+		Float3 closestHitPoint = event_ClosestRayCast.ClosestHitPoint;
+		Entity* entityHitByRay = &allEntity->at(entityIdOfOwnerToClosestPhysicsObjectHitByRay);
+		
+		//--------------------------------------------------------------------------------------
+		// Update ray attribute
+		//-------------------------------------------------------------------------------------
+		AttributePtr<Attribute_Ray> ray;
+		std::vector<int> rayAttributeId = playerEntity->getAttributes(ATTRIBUTE_RAY);
+		for(unsigned int j=0;j<rayAttributeId.size();j++)
 		{
-			AttributePtr<Attribute_Player> rayCastingPlayerAttribute = itrPlayer.at(rayCastingPlayerAttributeId.at(i));
-					
-			if(rayCastingPlayerAttribute->executing) //shoot Laser Automatic Sniper Execution Ray (do not look into the beam)
+			ray = itrRay.at(rayAttributeId.at(j));
+			ray->from = from;	//ray->from = ptr_player->ptr_weaponFireLocation_spatial->ptr_position->position;
+			ray->to = closestHitPoint;
+		}
+
+		//--------------------------------------------------------------------------------------
+		// If the player is executing, interpret the aiming ray as a Laser Automatic Sniper Execution Ray
+		//--------------------------------------------------------------------------------------
+		AttributePtr<Attribute_Player> rayCastingPlayerAttribute = itrPlayer.at(rayCastingPlayerAttributeId.at(i));	
+		if(rayCastingPlayerAttribute->executing) 
+		{
+			ray->render = true;
+
+			std::vector<int> playerHitByRayAttributeId = entityHitByRay->getAttributes(ATTRIBUTE_PLAYER);
+			for(unsigned int j=0;j<playerHitByRayAttributeId.size();j++)
 			{
-				short collisionFilterMask = XKILL_Enums::PhysicsAttributeType::PLAYER | XKILL_Enums::PhysicsAttributeType::WORLD;
-				Event_GetEntityIdOfPhysicsObjectHitByRay ev(ray->from, ray->to, collisionFilterMask);
-				SEND_EVENT(&ev);
-				
-				Entity* entityHitByRay = &allEntity->at(ev.closest_entityId);
-				std::vector<int> playerHitByRayAttributeId = entityHitByRay->getAttributes(ATTRIBUTE_PLAYER);
-				for(unsigned int j=0;j<playerHitByRayAttributeId.size();j++)
+				if(entityIdOfOwnerToClosestPhysicsObjectHitByRay == playerEntity->getID()) //Ray hit the originator of the ray
 				{
-					//Player hit by his own ray
-					if(ev.closest_entityId == playerEntity->getID())
-					{
-						//SHOW_MESSAGEBOX("Player hit by ray casted by himself. The current code assumes that this is unwanted behavior, therefore this message box is now brought to you");
-					}
-					else if(entityHitByRay->hasAttribute(ATTRIBUTE_PLAYER))
-					{
-						DEBUGPRINT("Player with attribute id " << playerHitByRayAttributeId.at(j) << "hit by execution laser");
-						
-						SEND_EVENT(&Event_PlayerDeath(playerHitByRayAttributeId.at(j)));
+					DEBUGPRINT("Player hit by ray casted by himself.");
+					DEBUGPRINT("---->O....");
+					DEBUGPRINT("..../|\"....");
+					DEBUGPRINT("....xxx....");
+				}
+				else if(entityHitByRay->hasAttribute(ATTRIBUTE_PLAYER)) //Ray hit another player
+				{
+					DEBUGPRINT("Player with attribute id " << playerHitByRayAttributeId.at(j) << "hit by Laser Automatic Sniper Execution Ray");
+					
+					SEND_EVENT(&Event_PlayerDeath(playerHitByRayAttributeId.at(j)));
 
-						std::vector<int> positionID = entityHitByRay->getAttributes(ATTRIBUTE_POSITION);
-						for(unsigned int i = 0; i < positionID.size(); i++)
-						{
-							AttributePtr<Attribute_Position> ptr_position = itrPosition.at(positionID[i]);
-							bool use3DAudio = true;
-							SEND_EVENT(&Event_PlaySound(Event_PlaySound::SOUND_DEATH, ptr_position->position, use3DAudio));
-						}
-
-						rayCastingPlayerAttribute->priority++;
+					std::vector<int> positionID = entityHitByRay->getAttributes(ATTRIBUTE_POSITION);
+					for(unsigned int i = 0; i < positionID.size(); i++)
+					{
+						AttributePtr<Attribute_Position> ptr_position = itrPosition.at(positionID[i]);
+						bool use3DAudio = true;
+						SEND_EVENT(&Event_PlaySound(Event_PlaySound::SOUND_DEATH, ptr_position->position, use3DAudio));
 					}
+
+					rayCastingPlayerAttribute->priority++;
 				}
 			}
 		}
+		//--------------------------------------------------------------------------------------
+		// Interpret the ray as what the player is looking at
+		//--------------------------------------------------------------------------------------
+		else
+		{
+			ray->render = false;
+		}
+
+		//--------------------------------------------------------------------------------------
+		// Set weapon rotation depending on how far away the aiming ray hit something
+		//--------------------------------------------------------------------------------------
+		std::vector<int> behaviorOffsetAttributeId = playerEntity->getAttributes(BEHAVIOR_OFFSET);
+		AttributePtr<Behavior_Offset> behaviorOffset = itrOffset.at(behaviorOffsetAttributeId.at(1));
+		
+		Float3 playerLookDirection = to - from;
+		playerLookDirection.normalize();
+
+		Float3 weaponLookDirection = closestHitPoint - behaviorOffset->ptr_spatial->ptr_position->position;
+		weaponLookDirection.normalize();
+
+		Float3 quaternionXYZ = playerLookDirection.cross(weaponLookDirection);
+		float quaternionW = sqrt((playerLookDirection.length()*playerLookDirection.length()) * (weaponLookDirection.length()*weaponLookDirection.length())) + playerLookDirection.dot(weaponLookDirection);
+
+		Float4 newWeaponRotationQuaternion(quaternionXYZ.x, quaternionXYZ.y, quaternionXYZ.z, quaternionW);
+		newWeaponRotationQuaternion.normalize();
+		behaviorOffset->offset_rotation = newWeaponRotationQuaternion; //Set weapon rotation
 	}
 }
 
