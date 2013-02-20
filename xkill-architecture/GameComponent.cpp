@@ -136,7 +136,7 @@ void GameComponent::onUpdate(float delta)
 
 					if(firingMode->nrOfShotsLeftInClip[ptr_weaponStats->currentAmmunitionType] > ammo->currentTotalNrOfShots)
 					{
-
+						firingMode->nrOfShotsLeftInClip[ptr_weaponStats->currentAmmunitionType] = ammo->currentTotalNrOfShots;
 					}
 				}
 				else
@@ -153,9 +153,10 @@ void GameComponent::onUpdate(float delta)
 			//--------------------------------------------------------------------------------------
 			if(ptr_input->reload)
 			{
-				if(firingMode->nrOfShotsLeftInClip[ammoIndex] > 0 && firingMode->nrOfShotsLeftInClip[ammoIndex] != firingMode->clipSize)
+				if(firingMode->nrOfShotsLeftInClip[ammoIndex] > 0 && firingMode->nrOfShotsLeftInClip[ammoIndex] != firingMode->clipSize 
+					&& firingMode->nrOfShotsLeftInClip[ammoIndex] > ammo->currentTotalNrOfShots)
 				{
-					ammo->currentTotalNrOfShots += firingMode->nrOfShotsLeftInClip[ammoIndex];
+					//ammo->currentTotalNrOfShots += firingMode->nrOfShotsLeftInClip[ammoIndex];
 					firingMode->nrOfShotsLeftInClip[ammoIndex] = 0; //Set nrOfShotsLeftInClip to 0, forcing automatic weapon reload
 				}
 			}

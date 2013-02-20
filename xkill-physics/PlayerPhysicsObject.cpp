@@ -57,6 +57,43 @@ void PlayerPhysicsObject::onUpdate(float delta)
 	}
 }
 
+void PlayerPhysicsObject::Hover(float delta, float hoverHeight)
+{
+	float deltaHeightMaximum = 0.0f;
+	btVector3 offset[] = {btVector3(0.75f, 0.0f, 0.75f),
+						  btVector3(0.75f, 0.0f, -0.75f),
+						  btVector3(-0.75f, 0.0f, 0.75f),
+						  btVector3(-0.75f, 0.0f, -0.75f)};
+	for(unsigned int i=0; i<4; i++)
+	{
+		btVector3 from = getWorldTransform().getOrigin() + offset[i];
+		btVector3 to = from - btVector3(0.0f,hoverHeight*2.0f,0.0f) + offset[i];
+		btCollisionWorld::ClosestRayResultCallback ray(from,to);
+		ray.m_collisionFilterGroup = XKILL_Enums::PhysicsAttributeType::RAY;
+		ray.m_collisionFilterMask = XKILL_Enums::PhysicsAttributeType::WORLD;
+		dynamicsWorld_->rayTest(from,to,ray); //cast ray from player position straight down
+		if(ray.hasHit())
+		{
+			btVector3 point = from.lerp(to,ray.m_closestHitFraction);
+			float length = (point - from).length();
+			float deltaHeight = hoverHeight-length;
+			if(deltaHeight > deltaHeightMaximum)
+			{
+				deltaHeightMaximum = deltaHeight;
+			}
+		}
+	}
+	if(deltaHeightMaximum > 0.0f)
+	{
+		btTransform worldTransform;
+		worldTransform = getWorldTransform();
+		worldTransform.setOrigin(worldTransform.getOrigin() + btVector3(0.0f,deltaHeightMaximum,0.0f)*delta/0.25f);
+		setWorldTransform(worldTransform);
+
+		setLinearVelocity(getLinearVelocity()+btVector3(0.0f,-getLinearVelocity().y(),0.0f));
+	}
+}
+
 void PlayerPhysicsObject::handleOutOfBounds()
 {
 	setGravity(btVector3(0.0f, 0.0f, 0.0f));

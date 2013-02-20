@@ -27,7 +27,7 @@
 
 IOComponent::IOComponent()
 {
-	texNameToTexID = nullptr;
+	texNameToTexID_ = nullptr;
 	fbxLoader_ = nullptr;
 
 	SUBSCRIBE_TO_EVENT(this, EVENT_GET_FILE_LIST);
@@ -35,8 +35,8 @@ IOComponent::IOComponent()
 }
 IOComponent::~IOComponent()
 {
-	if(texNameToTexID)
-		delete texNameToTexID;
+	if(texNameToTexID_)
+		delete texNameToTexID_;
 
 	if(fbxLoader_)
 		delete fbxLoader_;
@@ -49,7 +49,7 @@ bool IOComponent::init()
 	fbxLoader_ = new LoaderFbx();
 	fbxLoader_->init();
 
-	texNameToTexID = new std::map<std::string, unsigned int>();
+	texNameToTexID_ = new std::map<std::string, unsigned int>();
 
 	sucessfulInit = initTexDescs();
 	if(sucessfulInit)
@@ -95,7 +95,7 @@ bool IOComponent::initTexDesc(std::string filename)
 			unsigned int texID		= textureDescriptions[i].id_; 
 
 			std::pair<std::string, unsigned int> newMapping(texFilename, texID);
-			texNameToTexID->insert(newMapping);
+			texNameToTexID_->insert(newMapping);
 		}
 
 		Event_LoadTextures e(texDesc);
@@ -275,7 +275,7 @@ bool IOComponent::loadObj(
 		modelPath, 
 		modelName, 
 		modelPath,
-		texNameToTexID);
+		texNameToTexID_);
 	sucessfulMake = objMaker->init();
 
 	if(sucessfulMake)
@@ -311,10 +311,11 @@ bool IOComponent::loadFbx(std::string modelName, std::string modelPath, MdlDescM
 	
 	if(fbxModels.size() > 0)
 	{
-		LoaderFbxMeshDesc mesh = fbxModels[0].getMeshDesc();
-		LoaderFbxMaterialDesc material = fbxModels[0].getMaterialDesc();
+		LoaderFbxMeshDesc mesh						= fbxModels[0].getMeshDesc();
+		LoaderFbxMaterialDesc material				= fbxModels[0].getMaterialDesc();
+		std::vector<LoaderFbxTextureDesc> textures	= fbxModels[0].getTextureDescs();
 
-		loadFbxMesh(&mesh, &material, meshDesc);
+		loadFbxMesh(&mesh, &material, meshDesc, textures);
 		loadFbxAnimation(fbxModels[0].getAnimationDescs(), fbxModels[0].getMeshDesc(), skinnedData);
 	}
 	else
@@ -322,7 +323,7 @@ bool IOComponent::loadFbx(std::string modelName, std::string modelPath, MdlDescM
 
 	return successfulLoad;
 }
-void IOComponent::loadFbxMesh(LoaderFbxMeshDesc* mesh, LoaderFbxMaterialDesc* material, MeshDesc& meshDesc)
+void IOComponent::loadFbxMesh(LoaderFbxMeshDesc* mesh, LoaderFbxMaterialDesc* material, MeshDesc& meshDesc, std::vector<LoaderFbxTextureDesc> texDescs)
 {
 	std::vector<VertexDesc> vertices;
 	std::vector<unsigned int> indices;
@@ -330,6 +331,11 @@ void IOComponent::loadFbxMesh(LoaderFbxMeshDesc* mesh, LoaderFbxMaterialDesc* ma
 
 	mesh->createVertices(vertices, indices);
 	materialDesc	= material->getMaterialDesc();
+
+	if(texDescs.size() > 0)
+		materialDesc.idAlbedoTex_ = getTexIDfromName(texDescs.at(0).getFileName());
+	if(texDescs.size() > 1)
+		materialDesc.idNormalTex_ = getTexIDfromName(texDescs.at(1).getFileName());
 
 	std::vector<MaterialDesc> materials;
 	materials.push_back(materialDesc);
@@ -522,6 +528,18 @@ std::vector<std::string> IOComponent::getFileNames(const LPCTSTR filepath, const
 	}
 
 	return foundFiles;
+}
+
+unsigned int IOComponent::getTexIDfromName(std::string texFilename)
+{
+	unsigned int texID = 0;
+
+	std::map<std::string, unsigned int>::iterator it;
+	it = texNameToTexID_->find(texFilename);
+	if(it != texNameToTexID_->end())
+		texID = it->second;
+
+	return texID;
 }
 
 void IOComponent::reset()

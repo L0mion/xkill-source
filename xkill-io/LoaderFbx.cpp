@@ -244,9 +244,9 @@ void LoaderFbx::parseMesh(FbxNode* node)
 {
 	modelDescs_.push_back(LoaderFbxModelDesc());
 
-	LoaderFbxMeshDesc		meshDesc;
-	LoaderFbxMaterialDesc	materialDesc;
-	LoaderFbxTextureDesc	textureDesc;
+	LoaderFbxMeshDesc					meshDesc;
+	LoaderFbxMaterialDesc				materialDesc;
+	std::vector<LoaderFbxTextureDesc>	textureDesc;
 
 	FbxMesh* mesh = (FbxMesh*)node->GetNodeAttribute();
 	meshLoader_->parseMesh(mesh, &meshDesc);

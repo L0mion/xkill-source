@@ -76,6 +76,19 @@ Float2 Float2::lerp( Float2 *v1, Float2 *v2, float factor )
 	return v;
 }
 
+Float2& Float2::normalize()
+{
+	float lengthFloat = length();
+	x /= lengthFloat;
+	y /= lengthFloat;
+	return *this;
+}
+
+float Float2::length()
+{
+	return sqrtf(x*x + y*y);
+}
+
 Float3::Float3()
 {
 	x = 0.0f;

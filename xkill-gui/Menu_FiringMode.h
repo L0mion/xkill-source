@@ -23,6 +23,10 @@ public slots:
 private:
 	//! A local pointer to the qt menu
 	Ui::MainWindow* ui;
+
+	// Lock to prevent menu from updating if we are setting values
+	bool updateLock;
+
 	//! Used to change in game standard values
 	MutatorSettings* mutatorSettings_;
 
