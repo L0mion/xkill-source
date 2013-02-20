@@ -132,6 +132,12 @@ void GameComponent::onUpdate(float delta)
 				if(successfullySwitcheFiringModeOrAmmunnition)
 				{
 					firingMode = &ptr_weaponStats->firingMode[ptr_weaponStats->currentFiringModeType];
+					ammo = &ptr_weaponStats->ammunition[ptr_weaponStats->currentAmmunitionType];
+
+					if(firingMode->nrOfShotsLeftInClip[ptr_weaponStats->currentAmmunitionType] > ammo->currentTotalNrOfShots)
+					{
+
+					}
 				}
 				else
 				{
@@ -294,7 +300,11 @@ void GameComponent::onUpdate(float delta)
 				ptr_physics->reloadDataIntoBulletPhysics = true;
 				
 				if(ptr_player->corpseEntityId > 0)
+				{
 					SEND_EVENT(&Event_RemoveEntity(ptr_player->corpseEntityId));
+				}
+
+				ptr_player->ptr_render->cull = true;
 
 				ptr_player->corpseEntityId = -1;
 				ptr_health->health = ptr_health->maxHealth; // restores player health
@@ -692,7 +702,11 @@ void GameComponent::event_PlayerDeath(Event_PlayerDeath* e)
 	AttributePtr<Attribute_Health> ptr_health = ptr_player->ptr_health;
 	ptr_health->health = 0;
 
-	SEND_EVENT(&Event_CreateCorpse(ptr_player));
+	if(ptr_player->corpseEntityId == -1)
+	{
+		SEND_EVENT(&Event_CreateCorpse(ptr_player));
+		ptr_player->ptr_render->cull = false;
+	}
 
 	ptr_physics->angularVelocity = Float3(0.0f, 0.0f, 0.0f);
 	ptr_physics->linearVelocity = Float3(0.0f, 0.0f, 0.0f);
@@ -810,7 +824,7 @@ void GameComponent::updateAimingRay(Entity* playerEntity, AttributePtr<Attribute
 					//Player hit by his own ray
 					if(ev.closest_entityId == playerEntity->getID())
 					{
-						SHOW_MESSAGEBOX("Player hit by ray casted by himself. The current code assumes that this is unwanted behavior, therefore this message box is now brought to you");
+						//SHOW_MESSAGEBOX("Player hit by ray casted by himself. The current code assumes that this is unwanted behavior, therefore this message box is now brought to you");
 					}
 					else if(entityHitByRay->hasAttribute(ATTRIBUTE_PLAYER))
 					{
