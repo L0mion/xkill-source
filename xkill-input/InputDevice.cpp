@@ -195,23 +195,34 @@ Float2 InputDevice::getFormattedFloatPair(int firstMapping, int secondMapping, f
 {
 	Float2 result, value;
 	int firstIndex, secondIndex;
+	bool firstIsAbsolute, secondIsAbsolute;
 
 	for(unsigned int i = 0; i < mappedObjects_[firstMapping].size(); i++)
 	{
 		firstIndex = mappedObjects_[firstMapping][i];
 		value.x = inputObjectArray_->inputObjects[firstIndex]->getValueFloat();
+		firstIsAbsolute = inputObjectArray_->inputObjects[firstIndex]->needsDelta();
 
 		for(unsigned int j = 0; j < mappedObjects_[secondMapping].size(); j++)
 		{
 			secondIndex = mappedObjects_[secondMapping][i];
 			value.y = inputObjectArray_->inputObjects[secondIndex]->getValueFloat();
+			secondIsAbsolute = inputObjectArray_->inputObjects[secondIndex]->needsDelta();
 
 			if(value.length() > 1.0f)
-				value.normalize();
+			{
+				float length = value.length();
+				if(firstIsAbsolute)
+					value.x /= length;
+				if(secondIsAbsolute)
+					value.y /= length;
+			}
 
 			float modifier = powf(value.length(), 3.0f);
-			// value.x *= modifier;
-			// value.y *= modifier;
+			if(firstIsAbsolute)
+				value.x *= modifier;
+			if(secondIsAbsolute)
+				value.y *= modifier;
 
 			if(useSensitivity)
 			{
@@ -221,9 +232,9 @@ Float2 InputDevice::getFormattedFloatPair(int firstMapping, int secondMapping, f
 				sensitivity = inputObjectArray_->inputObjects[secondIndex]->getSensitivity()*sensitivityModifier_;
 				value.y *= sensitivity;
 
-				if(inputObjectArray_->inputObjects[firstIndex]->needsDelta())
+				if(firstIsAbsolute)
 					value.x *= delta;
-				if(inputObjectArray_->inputObjects[secondIndex]->needsDelta())
+				if(secondIsAbsolute)
 					value.y *= delta;
 			}
 
