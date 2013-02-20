@@ -13,6 +13,7 @@ private:
 	float _timeScale;
 
 public:
+	int numPlayers;
 	bool showDebugPhysics;
 	std::string currentLevel;
 	float timeLimit;
@@ -26,10 +27,11 @@ public:
 
 	Settings()
 	{
+		numPlayers = 2;
 		_timeScale = 1.0f;
 		trueDeltaTime = 0.0f;
 		currentLevel = "TestArena";
-		timeLimit = -1.0f;
+		timeLimit = 0.0f;
 		cycleLimit = 35;
 		showDebugPhysics = false;
 	}
@@ -92,6 +94,9 @@ public:
 
 	static AttributeManager* instance();
 };
+
+#define SETTINGS															\
+AttributeManager::instance()->settings
 
 // Declares all attributes
 #define ATTRIBUTES_DECLARE_ALL															\

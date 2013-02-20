@@ -81,6 +81,7 @@ Attribute_Render::Attribute_Render()
 {
 	transparent			= false;
 	tessellation		= false;
+	cull = true;
 
 	meshID			= 0;
 	textureID		= 0;
@@ -539,6 +540,7 @@ Attribute_Player::Attribute_Player()
 	canSprint = true;
 	sprintRechargeRate = 0.2f;
 	executing = false;
+	corpseEntityId = -1;
 
 	walkSpeed = 5.0f;
 	sprintSpeed = walkSpeed*2;

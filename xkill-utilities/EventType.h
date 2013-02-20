@@ -41,13 +41,53 @@ for some reason
 
 enum DLL_U EventType
 {
-	// Inform events
+	// Game states
 	EVENT_QUIT_TO_DESKTOP,
+	EVENT_ENABLE_MENU,
+	EVENT_ENABLE_HUD,
 
-	EVENT_PLAYERDEATH,
-	EVENT_END_DEATHMATCH,
-	EVENT_GAME_OVER,
+	// Game-loop
+	EVENT_UPDATE,
+	EVENT_STARTGAME,
+	EVENT_GAMEOVER,
 	EVENT_START_DEATHMATCH,
+	EVENT_END_DEATHMATCH,
+	EVENT_GAMERESET,
+	EVENT_INPUT_DEVICE_SEARCH,
+
+	// System
+	EVENT_ATTRIBUTE_UPDATED,
+	EVENT_UPDATESOUNDSETTINGS,
+	EVENT_DRAW_BULLET_PHYSICS_DEBUG_LINES,
+	EVENT_MODIFY_PHYSICS_OBJECT,
+
+	// Input
+	EVENT_KEY_PRESS,
+	EVENT_MOUSE_PRESS,
+	EVENT_MOUSE_MOVE,
+	EVENT_SET_MOUSELOCK,
+	EVENT_WINDOW_RESIZE,
+	EVENT_WINDOW_MOVE,
+	EVENT_SPLITSCREEN_CHANGED,
+	EVENT_RUMBLE,
+	EVENT_PLAYSOUND,
+
+	EVENT_ANIMATION_LOADED,
+
+	// Get events
+	EVENT_GET_ENTITIES,
+	EVENT_GET_WINDOW_RESOLUTION,
+	EVENT_GET_WINDOW_HANDLE,
+
+	// Gameplay events
+	EVENT_PLAYERDEATH,
+	EVENT_PHYSICS_ATTRIBUTES_COLLIDING,
+	EVENT_SYNC_STATE_COMMAND,
+	EVENT_GET_ENTITY_ID_OF_PHYSICS_OBJECT_HIT_BY_RAY,
+	EVENT_GET_FILE_LIST,
+
+	// Creation/Destruction
+	EVENT_TRANSFER_EVENTS_TO_GAME,
 	EVENT_CREATE_PROJECTILE,
 	EVENT_CREATE_PLAYER_SPAWNPOINT,
 	EVENT_CREATE_PICKUPABLES_SPAWNPOINT,
@@ -55,43 +95,13 @@ enum DLL_U EventType
 	EVENT_CREATE_EXPLOSIONSPHERE,
 	EVENT_CREATE_WORLD,
 	EVENT_CREATE_LIGHT,
+	EVENT_CREATE_CORPSE,
 	EVENT_CREATE_ENTITY,
 	EVENT_REMOVE_ENTITY,
 	EVENT_STATE_CHANGED,
 	EVENT_CREATE_INPUTDEVICE,
 	EVENT_HACK_ACTIVATED,
-
-	EVENT_TRANSFER_EVENTS_TO_GAME,
-
 	EVENT_CHANGE_GAMESTATE,
-	EVENT_GAMERESET,
-	EVENT_UPDATE,
-	EVENT_MOUSE_MOVE,
-	EVENT_KEY_PRESS,
-	EVENT_MOUSE_PRESS,
-	EVENT_SET_MOUSELOCK,
-	EVENT_WINDOW_RESIZE,
-	EVENT_INPUT_DEVICE_SEARCH,
-	EVENT_PLAYSOUND,
-	EVENT_UPDATESOUNDSETTINGS,
-	EVENT_RUMBLE,
-	EVENT_PHYSICS_ATTRIBUTES_COLLIDING,
-	EVENT_DRAW_BULLET_PHYSICS_DEBUG_LINES,
-	EVENT_SPLITSCREEN_CHANGED,
-	EVENT_MODIFY_PHYSICS_OBJECT,
-
-	EVENT_ATTRIBUTE_UPDATED,
-	EVENT_SYNC_STATE_COMMAND,
-
-	EVENT_ANIMATION_LOADED,
-
-	// Get events
-	EVENT_GET_ATTRIBUTE,
-	EVENT_GET_ENTITIES,
-	EVENT_GET_WINDOW_RESOLUTION,
-	EVENT_GET_WINDOW_HANDLE,
-	EVENT_GET_ENTITY_ID_OF_PHYSICS_OBJECT_HIT_BY_RAY,
-	EVENT_GET_FILE_LIST,
 
 	// Utilities
 	EVENT_CREATE_MESH,
@@ -148,7 +158,7 @@ If muteSound is true then all sounds will be muted
 class DLL_U Event_PlaySound : public Event
 {
 public:
-	Event_PlaySound(int soundId, Float3 position, bool use3DAudio = false);
+	Event_PlaySound(int soundId, Float3 position = Float3(), bool use3DAudio = false);
 
 	int soundId;
 	Float3 position;
@@ -161,7 +171,10 @@ public:
 		SOUND_RESPAWN,
 		SOUND_FIRE,
 		SOUND_DEATH,
-		SOUND_MUSIC,
+		SOUND_GAME_MUSIC,
+		SOUND_MENU_MUSIC,
+		SOUND_BUTTON_CLICK,
+		SOUND_OPENING_ANIMATION,
 
 		SOUND_LAST
 	};
@@ -191,20 +204,24 @@ public:
 	float rightScale;
 };
 
-/// Returns access to \ref ATTRIBUTES.
-/**
-\ingroup events
-*/
-class DLL_U Event_GetAttribute : public Event
+class DLL_U Event_EnableHud : public Event
 {
 public:
-	Event_GetAttribute(int attributeEnum);
+	Event_EnableHud(bool enableHud) : Event(EVENT_ENABLE_HUD)
+	{
+		this->enableHud = enableHud;
+	}
+	bool enableHud;
+};
 
-	int attributeEnum;			//!< An enums stored as an Int since we can't forward declare XKILL_Enums.
-	void* hostVector;			//!< Void pointer to a vector holding Attributes.
-								//!< Requires manual casting.
-	std::vector<int>* owners;	//!< A std::vector<int> of owners corresponding to each
-								//!< attribute.
+class DLL_U Event_EnableMenu : public Event
+{
+public:
+	Event_EnableMenu(bool enableMenu) : Event(EVENT_ENABLE_MENU)
+	{
+		this->enableMenu = enableMenu;
+	}
+	bool enableMenu;
 };
 
 /// Returns access to \ref ATTRIBUTES.
@@ -263,6 +280,15 @@ public:
 	Event_WindowResize(int width, int height);
 
 	float getAspectRatio();
+};
+
+class DLL_U Event_WindowMove : public Event
+{
+public:
+	Int2 pos;
+	Int2 oldPos;
+
+	Event_WindowMove(Int2 pos, Int2 oldPos);
 };
 
 
@@ -512,6 +538,15 @@ public:
 	unsigned int type;
 };
 
+class DLL_U Event_CreateCorpse : public Event
+{
+public:
+	//! Create a corpse matching player
+	Event_CreateCorpse(AttributePtr<Attribute_Player> ptr_player);
+	
+	AttributePtr<Attribute_Player> ptr_player;
+};
+
 class DLL_U Event_TransferEventsToGame : public Event
 {
 public:
@@ -534,6 +569,7 @@ public:
 	Event_CreateEntity(EntityType entityType);
 
 	EntityType entityType;
+	Entity* entity;
 };
 
 class InputObjectArray;

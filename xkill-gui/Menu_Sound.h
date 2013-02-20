@@ -1,15 +1,17 @@
 #pragma once
 
-#include "ui_MainMenu.h"
+#include "ui_MainMenu2.h"
 
-class Menu_Sound
+class Menu_Sound : QObject
 {
+	Q_OBJECT
 public:
-	Menu_Sound(Ui::MainMenu* ui, QMainWindow* window);
+	Menu_Sound(Ui::MainWindow* ui, QMainWindow* window);
 	~Menu_Sound();
 
-	void updateMenu();
+public slots:
+	void settingsMenuUpdated();
 
 private:
-	Ui::MainMenu* ui;
+	Ui::MainWindow* ui;
 };

@@ -61,6 +61,7 @@ namespace XKILL_Enums
 		FRUSTUM = 16,
 		PICKUPABLE = 32,
 		RAY = 64,
+		PROP = 128,
 		EVERYTHING = -1
 	};
 }

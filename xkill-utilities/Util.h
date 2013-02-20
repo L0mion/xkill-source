@@ -61,10 +61,6 @@
 #define GET_ATTRIBUTES(AttributePointer)							\
 	&(AttributeManager::instance())->AttributePointer.attributes;
 
-// Fetches a vector<AttributeType>* of a specific Attribute
-// from AttributeManager.
-//#define GET_ATTRIBUTE_OWNERS(OwnerPointer)							\
-//	&((AttributeManager*)AttributeManagerDLLWrapper::getInstance())->OwnerPointer.owners;
 
 // Fetches a owners of a specific Attribute from AttributeManager
 #define GET_ENTITIES(EntityPointer)									\

@@ -29,6 +29,15 @@ public:
 	private:
 };
 
+struct DLL_U Int2
+{
+	int x;
+	int y;
+
+	Int2();
+	Int2(int x, int y);
+};
+
 struct DLL_U Float2
 {
 	float x;
@@ -37,6 +46,10 @@ struct DLL_U Float2
 	Float2();
 	Float2(float x, float y);
 	void copy(const float* float2);
+	void lerp( Float2 *v, float factor );
+	Float2 lerp( Float2 *v1, Float2 *v2, float factor );
+	Float2& normalize();
+	float length();
 };
 
 //

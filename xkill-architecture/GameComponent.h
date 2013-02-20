@@ -42,6 +42,11 @@ public:
 	void onUpdate(float delta);
 
 	/**
+	Uniform way of starting the game
+	*/
+	void startGame();
+
+	/**
 	Handle PhysicsAttributes collision for one of two PhysicsAttributes participating in the collision.
 	*/
 	void event_PhysicsAttributesColliding(Event_PhysicsAttributesColliding* e);
@@ -86,5 +91,6 @@ public:
 	bool switchAmmunition(AttributePtr<Attribute_WeaponStats> ptr_weaponStats);
 	bool switchFiringMode(AttributePtr<Attribute_WeaponStats> ptr_weaponStats);
 
+	void updateAimingRay(Entity* playerEntity, AttributePtr<Attribute_Camera> ptr_camera);
 	void shootProjectile(AttributePtr<Attribute_Spatial> ptr_spatial, AttributePtr<Attribute_WeaponStats> ptr_weaponStats);
 };

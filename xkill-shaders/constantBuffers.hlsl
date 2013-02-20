@@ -65,4 +65,26 @@ cbuffer cbSprite : register (b6)
 	float4x4 spriteMatrix;
 }
 
+#define NUM_BLUR_KERNEL_ELEMENTS_COMPRESSED		3
+#define NUM_BLUR_KERNEL_ELEMENTS_UNCOMPRESSED	12
+cbuffer cbBlur : register ( b7 )
+{
+	float4 blurKernelCompressed[NUM_BLUR_KERNEL_ELEMENTS_COMPRESSED];
+
+	// = 
+	//{
+	//	0.05f, 
+	//	0.05f, 
+	//	0.1f, 
+	//	0.1f, 
+	//	0.1f, 
+	//	0.2f,
+	//	0.1f,
+	//	0.1f,
+	//	0.1f,
+	//	0.05f,
+	//	0.05f
+	//}; //Must sum to 1.0f if no color should be added or removed from scene.
+};
+
 #endif //XKILL_RENDERER_CONSTANTBUFFERS_HLSL

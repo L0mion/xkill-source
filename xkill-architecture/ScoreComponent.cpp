@@ -76,7 +76,7 @@ void ScoreComponent::onUpdate(float delta)
 		gameTimer_->update(delta);
 		if(gameTimer_->hasTimerExpired())
 		{
-			SEND_EVENT(&Event(EVENT_GAME_OVER));
+			SEND_EVENT(&Event(EVENT_GAMEOVER));
 		}
 	}
 }
@@ -173,7 +173,7 @@ void ScoreComponent::schedulerScoreCounting(float delta)
 	{
 		if(itrPlayer.getNext()->totalExecutionTime >= settings->cycleLimit)
 		{
-			SEND_EVENT(&Event(EVENT_GAME_OVER));
+			SEND_EVENT(&Event(EVENT_GAMEOVER));
 		}
 	}
 }
@@ -184,7 +184,7 @@ void ScoreComponent::deathMatchScoreCounting(float delta)
 	{
 		if(itrPlayer.getNext()->priority >= settings->cycleLimit)
 		{
-			SEND_EVENT(&Event(EVENT_GAME_OVER));
+			SEND_EVENT(&Event(EVENT_GAMEOVER));
 		}
 	}
 }

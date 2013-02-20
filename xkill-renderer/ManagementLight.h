@@ -22,10 +22,10 @@ struct ID3D11Buffer;
 struct ID3D11Device;
 struct ID3D11DeviceContext;
 
-static const unsigned int LIGHT_SRV_REGISTER_DIR	= 4;
-static const unsigned int LIGHT_SRV_REGISTER_POINT	= 5;
-static const unsigned int LIGHT_SRV_REGISTER_SPOT	= 6;
-static const unsigned int LIGHT_SRV_REGISTER_POS	= 7;
+static const unsigned int LIGHT_SRV_REGISTER_DIR	= 5;
+static const unsigned int LIGHT_SRV_REGISTER_POINT	= 6;
+static const unsigned int LIGHT_SRV_REGISTER_SPOT	= 7;
+static const unsigned int LIGHT_SRV_REGISTER_POS	= 8;
 
 enum DLL_U LightBufferType
 { 

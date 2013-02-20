@@ -26,7 +26,7 @@ class ManagementModel;
 class ManagementTex;
 class ManagementSS;
 class ManagementRS;
-class ManagementGBuffer;
+class ManagementBuffer;
 class ManagementDebug;
 class ManagementMath;
 class ManagementInstance;
@@ -41,6 +41,11 @@ class SubsetD3D;
 //#include <vector>
 
 #include "ShadingDesc.h"
+
+//#define VISUALLEAKDETECTOR;
+#if (defined(DEBUG) || defined(_DEBUG)) && defined(VISUALLEAKDETECTOR)
+	#include <vld.h>
+#endif
 
 //temp
 class M3DLoader;
@@ -102,6 +107,11 @@ private:
 		DirectX::XMFLOAT4X4		viewMatrix, 
 		DirectX::XMFLOAT4X4		projectionMatrix); //!< Renders a debug shape, such as a bounding sphere.
 
+	void downSampleBlur();
+	void blurHorizontally();
+	void blurVertically();
+	void upSampleBlur();
+
 	void drawBulletPhysicsDebugLines(
 		DirectX::XMFLOAT4X4		viewMatrix, 
 		DirectX::XMFLOAT4X4		projectionMatrix); //!<A vertex buffer is recreated when a EVENT_DRAW_BULLET_PHYSICS_DEBUG_LINES event is present in the event queue.
@@ -135,6 +145,7 @@ private:
 	ManagementInstance*		managementInstance_;	//!< Maintains all instances of respective model in the game.
 	ManagementSprites*		managementSprites_;		//!< Maintaining sprites.
 	ManagementAnimation*	managementAnimation_;	//!< Maintaining animations.
+
 
 	ID3D11Buffer* debugLinesVertexBuffer_;		//!< Might want to move this into some manager of some sort.
 	

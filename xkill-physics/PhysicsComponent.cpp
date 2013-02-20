@@ -13,6 +13,7 @@
 #include "FrustumPhysicsObject.h"
 #include "PickupablePhysicsObject.h"
 #include "WorldPhysicsObject.h"
+#include "PropPhysicsObject.h"
 #include "physicsUtilities.h"
 
 #include "CollisionShapes.h"
@@ -190,7 +191,7 @@ void PhysicsComponent::onUpdate(float delta)
 		}
 	}
 
-	updateCulling();
+	//updateCulling();
 
 	dynamicsWorld_->stepSimulation(delta, 0); //Bullet Physics physics simulation
 
@@ -253,9 +254,9 @@ void PhysicsComponent::onEvent(Event* e)
 		{
 			if(attributeUpdated->isDeleted)
 			{
-  				dynamicsWorld_->removeRigidBody(frustumPhysicsObjects_->at(attributeIndex));
-				delete frustumPhysicsObjects_->at(attributeIndex);
-				frustumPhysicsObjects_->at(attributeIndex) = nullptr;
+  				//dynamicsWorld_->removeRigidBody(frustumPhysicsObjects_->at(attributeIndex));
+				//delete frustumPhysicsObjects_->at(attributeIndex);
+				//frustumPhysicsObjects_->at(attributeIndex) = nullptr;
 			}
 		}
 		break;
@@ -425,6 +426,9 @@ void PhysicsComponent::synchronizeWithAttributes(AttributePtr<Attribute_Physics>
 		case XKILL_Enums::PhysicsAttributeType::PICKUPABLE:
 			physicsObjects_->at(physicsAttributeIndex) = new PickupablePhysicsObject();
 			break;
+		case XKILL_Enums::PhysicsAttributeType::PROP:
+			physicsObjects_->at(physicsAttributeIndex) = new PropPhysicsObject();
+			break;
 		case XKILL_Enums::PhysicsAttributeType::EVERYTHING:
 			SHOW_MESSAGEBOX("Error: Attribute_Physics should not have EVERYTHING as collisionFilterGroup");
 			break;
@@ -483,21 +487,21 @@ void PhysicsComponent::detectedCollisionsDuringStepSimulation(btScalar timeStep)
 				unsigned int ownerB = itrPhysics.ownerIdAt(objectB->getAttributeIndex());
 
 				//check physicsobjecttype;
-				if(objectA->getCollisionFilterGroup() == XKILL_Enums::PhysicsAttributeType::FRUSTUM ||
-					objectB->getCollisionFilterGroup() == XKILL_Enums::PhysicsAttributeType::FRUSTUM)
-				{
-					if(objectA->getCollisionFilterGroup() == XKILL_Enums::PhysicsAttributeType::FRUSTUM &&
-					   objectB->getCollisionFilterGroup() != XKILL_Enums::PhysicsAttributeType::FRUSTUM)
-					{
-						doCulling(objectA->getAttributeIndex(),objectB->getAttributeIndex());
-					}
-					else if(objectA->getCollisionFilterGroup() != XKILL_Enums::PhysicsAttributeType::FRUSTUM &&
-					   objectB->getCollisionFilterGroup() == XKILL_Enums::PhysicsAttributeType::FRUSTUM)
-					{
-						doCulling(objectB->getAttributeIndex(),objectA->getAttributeIndex());
-					}
-				}
-				else
+				//if(objectA->getCollisionFilterGroup() == XKILL_Enums::PhysicsAttributeType::FRUSTUM ||
+				//	objectB->getCollisionFilterGroup() == XKILL_Enums::PhysicsAttributeType::FRUSTUM)
+				//{
+				//	if(objectA->getCollisionFilterGroup() == XKILL_Enums::PhysicsAttributeType::FRUSTUM &&
+				//	   objectB->getCollisionFilterGroup() != XKILL_Enums::PhysicsAttributeType::FRUSTUM)
+				//	{
+				//		doCulling(objectA->getAttributeIndex(),objectB->getAttributeIndex());
+				//	}
+				//	else if(objectA->getCollisionFilterGroup() != XKILL_Enums::PhysicsAttributeType::FRUSTUM &&
+				//	   objectB->getCollisionFilterGroup() == XKILL_Enums::PhysicsAttributeType::FRUSTUM)
+				//	{
+				//		doCulling(objectB->getAttributeIndex(),objectA->getAttributeIndex());
+				//	}
+				//}
+				//else
 				{
 					//std::cout << "\nCollision between " << ownerA << " & " << ownerB;
 					QUEUE_EVENT(new Event_PhysicsAttributesColliding(objectA->getAttributeIndex(), objectB->getAttributeIndex()));

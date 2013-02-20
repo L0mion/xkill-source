@@ -94,6 +94,8 @@ public:
 	//! Returns if any object that is mapped to that number was pressed
 	virtual bool getBoolPressed(int mapping);
 
+	virtual Float2 getFormattedFloatPair(int firstMapping, int secondMapping, float delta, bool useSensitivity = false);
+
 	virtual std::vector<int> getMappedArray(int mapping);
 
 	//! Sets standard mappings
