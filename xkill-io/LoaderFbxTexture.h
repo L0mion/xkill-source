@@ -1,6 +1,8 @@
 #ifndef XKILL_IO_LOADERFBXTEXTURE_H
 #define XKILL_IO_LOADERFBXTEXTURE_H
 
+#include <vector>
+
 namespace fbxsdk_2014_0_beta2
 {
 	class FbxGeometry;
@@ -29,7 +31,7 @@ public:
 	\param geometry A FbxGeometry object from where the texture data will be retrieved.
 	\param textureDesc Texture description where the results will be stored.
 	*/
-	void parseTexture(FbxGeometry* geometry, LoaderFbxTextureDesc* textureDesc);
+	void parseTexture(FbxGeometry* geometry, std::vector<LoaderFbxTextureDesc>* textureDescs);
 private:
 	//! Retrieve texture data from a FbxProperty.
 	/*!
@@ -38,7 +40,7 @@ private:
 	\param materialIndex Currently unused.
 	\param textureDesc Texture description where the results will be stored.
 	*/
-	void parseTextureByProperty(FbxProperty* fbxProperty, bool& parseHeader, int materialIndex, LoaderFbxTextureDesc* textureDesc);
+	void parseTextureByProperty(FbxProperty* fbxProperty, bool& parseHeader, int materialIndex, std::vector<LoaderFbxTextureDesc>* textureDescs);
 	//! Retrieve a layered texture from the property.
 	/*!
 	\param fbxProperty The proprty containing the texture data.
