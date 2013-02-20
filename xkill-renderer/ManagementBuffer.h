@@ -30,9 +30,29 @@ static const GBUFFER_FORMAT GBUFFER_FORMAT_MATERIAL		= R16_G16_B16_A16__FLOAT;
 static const GBUFFER_FORMAT GBUFFER_FORMAT_GLOW_HIGH	= R8_G8_B8_A8__UNORM;
 static const GBUFFER_FORMAT GBUFFER_FORMAT_GLOW_LOW		= R8_G8_B8_A8__UNORM;
 
-static const unsigned int SHADER_REGISTER_SRV_GLOW_HIGH = 3;
+static const unsigned int SHADER_REGISTER_DOWNSAMPLE_INPUT = 3;
+static const unsigned int SHADER_REGISTER_BLUR_INPUT	= 9;
+static const unsigned int SHADER_REGISTER_BLUR_OUTPUT	= 1;
 
 static const unsigned int DOWNSAMPLE_SCREEN_RES_FACTOR = 4;
+
+enum SET_TYPE
+{
+	SET_TYPE_SRV,
+	SET_TYPE_RTV,
+	SET_TYPE_UAV
+};
+enum SET_STAGE
+{
+	SET_STAGE_PS,
+	SET_STAGE_CS
+};
+enum SET_ID
+{
+	SET_ID_GLOW_HIGH,
+	SET_ID_GLOW_LOW,
+	SET_ID_GLOW_LOW_UTIL
+};
 
 class ManagementBuffer
 {
@@ -50,23 +70,17 @@ public:
 	void setBuffersAsCSShaderResources(ID3D11DeviceContext* devcon);
 	void unsetBuffersAsCSShaderResources(ID3D11DeviceContext* devcon);
 
-	void setGlowLowAsRTV(ID3D11DeviceContext* devcon);
-	void unsetGlowLowAsRTV(ID3D11DeviceContext* devcon);
-	void setGlowLowAsSRVToCS(ID3D11DeviceContext* devcon, unsigned int shaderRegister);
-	void setGlowLowAsSRVToPS(ID3D11DeviceContext* devcon, unsigned int shaderRegister);
-	void unsetGlowLowAsSRV(ID3D11DeviceContext* devcon, unsigned int shaderRegister);
-	void setGlowLowAsUAV(ID3D11DeviceContext* devcon, unsigned int shaderRegister);
-	
-	void setGlowHighAsSRV(ID3D11DeviceContext* devcon, unsigned int shaderRegister);
-	void unsetGlowHighAsSrv(ID3D11DeviceContext* devcon, unsigned int shaderRegister);
-	void setGlowHighAsRTV(ID3D11DeviceContext* devcon);
-	void unsetGlowHighAsRTV(ID3D11DeviceContext* devcon);
-	
-	void setGlowLowUtilAsUAV(ID3D11DeviceContext* devcon, unsigned int shaderRegister);
-	void setGlowLowUtilAsSRV(ID3D11DeviceContext* devcon, unsigned int shaderRegister);
-
-	//void setGlow(ID3D11DeviceContext* devcon, GLOW_SET glowSet, TYPE_SET typeSet, unsigned int registerSet);
-	//void unsetGlow(ID3D11DeviceContext* devcon, TYPE_SET typeSet, unsigned int registerSet);
+	void setGlow(
+		ID3D11DeviceContext* devcon,
+		SET_ID setID, 
+		SET_TYPE setType, 
+		SET_STAGE setStage, 
+		unsigned int shaderRegister);
+	void unset(
+		ID3D11DeviceContext* devcon,
+		SET_TYPE setType,
+		SET_STAGE setStage,
+		unsigned int shaderRegister);
 
 	D3D11_VIEWPORT getDownSampledViewport();
 

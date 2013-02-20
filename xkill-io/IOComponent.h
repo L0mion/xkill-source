@@ -21,6 +21,7 @@ class LoaderFbxMaterialDesc;
 
 #include <xkill-utilities/SkinnedData.h>
 #include "LoaderFbxAnimationDesc.h"
+#include "LoaderFbxTextureDesc.h"
 
 static const std::string PATH_XKILL_RESOURCES		 = "../../xkill-resources/";
 static const std::string PATH_XKILL_RESOURCES_LEVELS = "../../xkill-resources/xkill-level/";
@@ -65,7 +66,7 @@ private:
 
 	bool loadObj(std::string modelName, std::string modelPath, MdlDescModel* modelDesc, MeshDesc& meshDesc);
 	bool loadFbx(std::string modelName, std::string modelPath, MdlDescModel* modelDesc, MeshDesc& meshDesc, SkinnedData* skinnedData);
-	void loadFbxMesh(LoaderFbxMeshDesc* mesh, LoaderFbxMaterialDesc* material, MeshDesc& meshDesc);
+	void loadFbxMesh(LoaderFbxMeshDesc* mesh, LoaderFbxMaterialDesc* material, MeshDesc& meshDesc, std::vector<LoaderFbxTextureDesc> texDescs);
 	void loadFbxAnimation(std::vector<LoaderFbxAnimationDesc> animationDescs, LoaderFbxMeshDesc mesh, SkinnedData* skinnedData);
 	bool loadPGY(std::string modelName, std::string modelPath, MdlDescModel* modelDesc, MeshDesc& meshDesc, SkinnedData** skinnedData);
 	bool writePGY(std::string modelName, std::string modelPath, MeshDesc meshDesc, VertexType vertexType, SkinnedData* skinnedData);
@@ -76,7 +77,9 @@ private:
 
 	std::vector<std::string> getFileNames(LPCTSTR filepath, LPCTSTR filename, bool recursiveSearch = false);
 
-	std::map<std::string, unsigned int>* texNameToTexID;
+	unsigned int getTexIDfromName(std::string texFilename);
+
+	std::map<std::string, unsigned int>* texNameToTexID_;
 
 	LoaderFbx* fbxLoader_;
 };

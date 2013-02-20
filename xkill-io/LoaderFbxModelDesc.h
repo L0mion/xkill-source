@@ -22,17 +22,17 @@ public:
 
 	LoaderFbxMeshDesc					getMeshDesc();
 	LoaderFbxMaterialDesc				getMaterialDesc();
-	LoaderFbxTextureDesc				getTextureDesc();
+	std::vector<LoaderFbxTextureDesc>	getTextureDescs();
 	std::vector<LoaderFbxAnimationDesc>	getAnimationDescs();
 
 	void setMeshDesc(LoaderFbxMeshDesc meshDesc);
 	void setMaterialDesc(LoaderFbxMaterialDesc materialDesc);
-	void setTextureDesc(LoaderFbxTextureDesc textureDesc);
+	void setTextureDesc(std::vector<LoaderFbxTextureDesc> textureDescs);
 	void setAnimationDescs(std::vector<LoaderFbxAnimationDesc> animationDescs);
 private:
 	LoaderFbxMeshDesc					meshDesc_;		 //<! Describing mesh data.
 	LoaderFbxMaterialDesc				materialDesc_;	 //<! Describing material data.
-	LoaderFbxTextureDesc				textureDesc_;	 //<! Describing texture data.
+	std::vector<LoaderFbxTextureDesc>	textureDescs_;	 //<! Describing texture data.
 	std::vector<LoaderFbxAnimationDesc>	animationDescs_; //<! Describing animation data.
 };
 
