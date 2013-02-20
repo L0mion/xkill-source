@@ -63,77 +63,65 @@ void CollisionShapes::loadCollisionShapes()
 	unloadCollisionShapes();
 
 	//btTriangleMesh file load (memory leak, otherwise functioning)
-	/*
-	Attribute_Mesh* meshAttribute;
-	while(itrMesh.hasNext())
-	{
-		meshAttribute = itrMesh.getNext();
-		std::vector<VertexPosNormTex> vertices;
+	
 
+	//while(itrMesh.hasNext())
+	//{
+	//	auto meshAttribute = itrMesh.getNext();
 
+	//	//----------------------------------
+	//	//-->check MEMORY LEAK
+	//	btTriangleMesh *triangleMesh = new btTriangleMesh(); 
+	//	//<--
+	//	//----------------------------------
 
-		//----------------------------------
-		//-->check MEMORY LEAK
-		btTriangleMesh *triangleMesh = new btTriangleMesh(); 
-		//<--
-		//----------------------------------
+	//	auto vertices = meshAttribute->mesh.vertices_;
+	//	for( unsigned int i = 0; i < meshAttribute->mesh.subsets_.size(); i++)
+	//	{
+	//		auto indices = meshAttribute->mesh.subsets_.at(i).indices_;
+	//		for(unsigned int k = 0; k+2 < indices.size(); k+=3)
+	//		{
+	//			triangleMesh->addTriangle(btVector3(vertices[indices[k]].position_.x,
+	//												vertices[indices[k]].position_.y,
+	//												vertices[indices[k]].position_.z),
+	//										btVector3(vertices[indices[k+1]].position_.x,
+	//												vertices[indices[k+1]].position_.y,
+	//												vertices[indices[k+1]].position_.z),
+	//										btVector3(vertices[indices[k+2]].position_.x,
+	//												vertices[indices[k+2]].position_.y,
+	//												vertices[indices[k+2]].position_.z));
+	//		}
+	//	}
 
+	//	if(meshAttribute->dynamic)
+	//	{
+	//		btConvexTriangleMeshShape tcs(triangleMesh);
+	//	
+	//		btShapeHull hull(&tcs);
+	//		hull.buildHull(0);
+	//		tcs.setUserPointer(&hull);
+	//		btConvexHullShape* convexShape = new btConvexHullShape;
+	//		for(int i=0; i< hull.numVertices(); i++)
+	//		{
+	//			convexShape->addPoint(hull.getVertexPointer()[i]);
+	//		}
 
+	//		collisionShapes_->push_back(convexShape);
+	//		delete triangleMesh;
+	//	}
+	//	else
+	//	{
+	//		btBvhTriangleMeshShape* staticShape = new btBvhTriangleMeshShape(triangleMesh,true);
+	//		collisionShapes_->push_back(staticShape);
+	//		int a = staticShape->getShapeType();
+	//		//triangleMeshes_push_back(triangleMesh);
+	//	}
 
-		vertices = meshAttribute->mesh->getGeometry().getVertices();
-		unsigned int numSubsets = meshAttribute->mesh->getGeometry().getNumSubsets();
-		std::vector<unsigned int> indices;
-		for(unsigned int j = 0; j < numSubsets; j++)
-		{
-			indices = meshAttribute->mesh->getGeometry().getSubsets().at(j).getIndices();
-			unsigned int numIndices = indices.size();
-			for(unsigned int k = 0; k+2 < numIndices; k+=3)
-			{
-				btVector3 a = btVector3(vertices[indices[k]].position_.x,
-													vertices[indices[k]].position_.y,
-													vertices[indices[k]].position_.z);
-				triangleMesh->addTriangle(btVector3(vertices[indices[k]].position_.x,
-													vertices[indices[k]].position_.y,
-													vertices[indices[k]].position_.z),
-											btVector3(vertices[indices[k+1]].position_.x,
-													vertices[indices[k+1]].position_.y,
-													vertices[indices[k+1]].position_.z),
-											btVector3(vertices[indices[k+2]].position_.x,
-													vertices[indices[k+2]].position_.y,
-													vertices[indices[k+2]].position_.z));
-			}
-		}
-
-		if(meshAttribute->dynamic)
-		{
-			btConvexTriangleMeshShape tcs(triangleMesh);
-		
-			btShapeHull hull(&tcs);
-			hull.buildHull(0);
-			tcs.setUserPointer(&hull);
-			btConvexHullShape* convexShape = new btConvexHullShape;
-			for(int i=0; i< hull.numVertices(); i++)
-			{
-				convexShape->addPoint(hull.getVertexPointer()[i]);
-			}
-
-			collisionShapes_->push_back(convexShape);
-			delete triangleMesh;
-		}
-		else
-		{
-			btBvhTriangleMeshShape* staticShape = new btBvhTriangleMeshShape(triangleMesh,true);
-			collisionShapes_->push_back(staticShape);
-			int a = staticShape->getShapeType();
-			//triangleMeshes_push_back(triangleMesh);
-		}
-
-		unsigned int meshID		= meshAttribute->meshID;
-		unsigned int meshIndex	= collisionShapes_->size() - 1;
-		std::pair<unsigned int, unsigned int> idtoindex(meshID, meshIndex);
-		collisionShapesIdToIndex_.insert(idtoindex);
-	}
-	*/
+	//	unsigned int meshID		= meshAttribute->meshID;
+	//	unsigned int meshIndex	= collisionShapes_->size() - 1;
+	//	std::pair<unsigned int, unsigned int> idtoindex(meshID, meshIndex);
+	//	collisionShapesIdToIndex_.insert(idtoindex);
+	//}
 
 	//.bullet file loading
 	Settings* settings = ATTRIBUTE_MANAGER->settings;
@@ -193,7 +181,7 @@ void CollisionShapes::loadCollisionShapes()
 					//if(!name.compare("xkill_processRigidBody"))
 					//{
 					//	btBoxShape* box = static_cast<btBoxShape*>(loadedShape);
-					//	btVector3 half = box->getHalfExtentsWithMargin();
+					//	btVector3 half = box->getHal fExtentsWithMargin();
 					//	//btCapsuleShape* capsule = new btCapsuleShape( half.x() > half.z() ? half.x() : half.z(), half.y());
 					//	//btSphereShape* sphere = new btSphereShape(0.2f);
 					//	//collisionShape = capsule;
