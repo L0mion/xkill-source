@@ -36,13 +36,6 @@ Event_Rumble::Event_Rumble(unsigned int deviceNr,
 	this->rightScale = rightScale;
 }
 
-Event_GetAttribute::Event_GetAttribute(int attributeEnum) : Event(EVENT_GET_ATTRIBUTE)
-{
-	this->attributeEnum = attributeEnum;
-		
-	hostVector = 0;
-	owners = 0;
-}
 
 Event_AttributeUpdated::Event_AttributeUpdated(int index, int attributeEnum) : Event(EVENT_ATTRIBUTE_UPDATED)
 {
@@ -262,6 +255,12 @@ Event_HackActivated::Event_HackActivated(float time, XKILL_Enums::HackType hackT
 	this->time = time;
 	this->hackType = hackType;
 	this->player = player;
+}
+
+Event_WindowMove::Event_WindowMove( Int2 pos, Int2 oldPos ) : Event(EVENT_WINDOW_MOVE)
+{
+	this->pos = pos;
+	this->oldPos = oldPos;
 }
 
 Event_GetEntityIdOfPhysicsObjectHitByRay::Event_GetEntityIdOfPhysicsObjectHitByRay(Float3 from, Float3 to, short collisionFilterMask) : Event(EVENT_GET_ENTITY_ID_OF_PHYSICS_OBJECT_HIT_BY_RAY)

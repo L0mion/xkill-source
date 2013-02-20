@@ -1,31 +1,29 @@
 #include "Menu_FiringMode.h"
 
-Menu_FiringMode::Menu_FiringMode(Ui::MainMenu* ui, QMainWindow* window)
+Menu_FiringMode::Menu_FiringMode(Ui::MainWindow* ui, QMainWindow* window)
 {
 	this->ui = ui;
-
+	
 	mutatorSettings_ = new MutatorSettings();
 
-	window->connect(ui->radioButton_Weapon_Single,						SIGNAL(clicked()),				window,	SLOT(slot_updateFiringModeMenu()));
-	window->connect(ui->radioButton_Weapon_Semi,						SIGNAL(clicked()),				window,	SLOT(slot_updateFiringModeMenu()));
-	window->connect(ui->radioButton_Weapon_Auto,						SIGNAL(clicked()),				window,	SLOT(slot_updateFiringModeMenu()));
+	connect(ui->radioButton_Weapon_Single,						SIGNAL(clicked()),				this,	SLOT(setSettingsMenu()));
+	connect(ui->radioButton_Weapon_Semi,						SIGNAL(clicked()),				this,	SLOT(setSettingsMenu()));
+	connect(ui->radioButton_Weapon_Auto,						SIGNAL(clicked()),				this,	SLOT(setSettingsMenu()));
 	
-	window->connect(ui->checkBox_Weapon_Bullet,							SIGNAL(clicked()),				window,	SLOT(slot_firingModeUpdated()));
-	window->connect(ui->checkBox_Weapon_Scatter,						SIGNAL(clicked()),				window,	SLOT(slot_firingModeUpdated()));
-	window->connect(ui->checkBox_Weapon_Explosive,						SIGNAL(clicked()),				window,	SLOT(slot_firingModeUpdated()));
-	window->connect(ui->horizontalSlider_Weapon_ClipSize,				SIGNAL(sliderMoved(int)),		window,	SLOT(slot_firingModeUpdated()));
-	window->connect(ui->horizontalSlider_Weapon_DamageModifier,			SIGNAL(sliderMoved(int)),		window,	SLOT(slot_firingModeUpdated()));
-	window->connect(ui->horizontalSlider_Weapon_ExplosionSphereModifier,SIGNAL(sliderMoved(int)),		window,	SLOT(slot_firingModeUpdated()));
-	window->connect(ui->horizontalSlider_Weapon_RateOfFire,				SIGNAL(sliderMoved(int)),		window,	SLOT(slot_firingModeUpdated()));
-	window->connect(ui->horizontalSlider_Weapon_ReloadTime,				SIGNAL(sliderMoved(int)),		window,	SLOT(slot_firingModeUpdated()));
+	connect(ui->checkBox_Weapon_Bullet,							SIGNAL(clicked()),				this,	SLOT(settingsMenuUpdated()));
+	connect(ui->checkBox_Weapon_Scatter,						SIGNAL(clicked()),				this,	SLOT(settingsMenuUpdated()));
+	connect(ui->checkBox_Weapon_Explosive,						SIGNAL(clicked()),				this,	SLOT(settingsMenuUpdated()));
+	connect(ui->horizontalSlider_Weapon_ClipSize,				SIGNAL(sliderMoved(int)),		this,	SLOT(settingsMenuUpdated()));
+	connect(ui->horizontalSlider_Weapon_DamageModifier,			SIGNAL(sliderMoved(int)),		this,	SLOT(settingsMenuUpdated()));
+	connect(ui->horizontalSlider_Weapon_ExplosionSphereModifier,SIGNAL(sliderMoved(int)),		this,	SLOT(settingsMenuUpdated()));
+	connect(ui->horizontalSlider_Weapon_RateOfFire,				SIGNAL(sliderMoved(int)),		this,	SLOT(settingsMenuUpdated()));
+	connect(ui->horizontalSlider_Weapon_ReloadTime,				SIGNAL(sliderMoved(int)),		this,	SLOT(settingsMenuUpdated()));
 
-	window->connect(ui->horizontalSlider_Weapon_ClipSize,				SIGNAL(sliderReleased()),		window,	SLOT(slot_firingModeUpdated()));
-	window->connect(ui->horizontalSlider_Weapon_DamageModifier,			SIGNAL(sliderReleased()),		window,	SLOT(slot_firingModeUpdated()));
-	window->connect(ui->horizontalSlider_Weapon_ExplosionSphereModifier,SIGNAL(sliderReleased()),		window,	SLOT(slot_firingModeUpdated()));
-	window->connect(ui->horizontalSlider_Weapon_RateOfFire,				SIGNAL(sliderReleased()),		window,	SLOT(slot_firingModeUpdated()));
-	window->connect(ui->horizontalSlider_Weapon_ReloadTime,				SIGNAL(sliderReleased()),		window,	SLOT(slot_firingModeUpdated()));
-
-	window->connect(ui->tabWidget_2,									SIGNAL(currentChanged(int)),	window,	SLOT(slot_updateFiringModeMenu()));
+	connect(ui->horizontalSlider_Weapon_ClipSize,				SIGNAL(sliderReleased()),		this,	SLOT(settingsMenuUpdated()));
+	connect(ui->horizontalSlider_Weapon_DamageModifier,			SIGNAL(sliderReleased()),		this,	SLOT(settingsMenuUpdated()));
+	connect(ui->horizontalSlider_Weapon_ExplosionSphereModifier,SIGNAL(sliderReleased()),		this,	SLOT(settingsMenuUpdated()));
+	connect(ui->horizontalSlider_Weapon_RateOfFire,				SIGNAL(sliderReleased()),		this,	SLOT(settingsMenuUpdated()));
+	connect(ui->horizontalSlider_Weapon_ReloadTime,				SIGNAL(sliderReleased()),		this,	SLOT(settingsMenuUpdated()));
 }
 
 Menu_FiringMode::~Menu_FiringMode()
@@ -46,9 +44,9 @@ void Menu_FiringMode::setSettingsMenu()	// TODO: Set good values for the sliders
 	ui->horizontalSlider_Weapon_RateOfFire->setValue(static_cast<int>(1.0f / firingMode->cooldownBetweenShots));
 	ui->horizontalSlider_Weapon_ReloadTime->setValue(static_cast<int>(firingMode->reloadTime * 100.0f));
 
-	ui->doubleSpinBox_FiringMode_ReloadTime->setValue(firingMode->reloadTime);
+	/*ui->doubleSpinBox_FiringMode_ReloadTime->setValue(firingMode->reloadTime);
 	ui->doubleSpinBox_FiringMode_DamageModifier->setValue(firingMode->damageModifier);
-	ui->doubleSpinBox_FiringMode_ExplosionSphereModifier->setValue(firingMode->explosionSphereModifier);
+	ui->doubleSpinBox_FiringMode_ExplosionSphereModifier->setValue(firingMode->explosionSphereModifier);*/
 }
 
 void Menu_FiringMode::settingsMenuUpdated()
@@ -64,9 +62,9 @@ void Menu_FiringMode::settingsMenuUpdated()
 	firingMode->explosionSphereModifier = static_cast<float>(ui->horizontalSlider_Weapon_ExplosionSphereModifier->value()) * 0.01f;
 	firingMode->reloadTime = static_cast<float>(ui->horizontalSlider_Weapon_ReloadTime->value()) * 0.01f;
 
-	ui->doubleSpinBox_FiringMode_ReloadTime->setValue(firingMode->reloadTime);
+	/*ui->doubleSpinBox_FiringMode_ReloadTime->setValue(firingMode->reloadTime);
 	ui->doubleSpinBox_FiringMode_DamageModifier->setValue(firingMode->damageModifier);
-	ui->doubleSpinBox_FiringMode_ExplosionSphereModifier->setValue(firingMode->explosionSphereModifier);
+	ui->doubleSpinBox_FiringMode_ExplosionSphereModifier->setValue(firingMode->explosionSphereModifier);*/
 }
 
 FiringMode* Menu_FiringMode::getFiringModeSettings()

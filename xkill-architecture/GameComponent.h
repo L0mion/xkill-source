@@ -42,6 +42,11 @@ public:
 	void onUpdate(float delta);
 
 	/**
+	Uniform way of starting the game
+	*/
+	void startGame();
+
+	/**
 	Handle PhysicsAttributes collision for one of two PhysicsAttributes participating in the collision.
 	*/
 	void event_PhysicsAttributesColliding(Event_PhysicsAttributesColliding* e);

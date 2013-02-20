@@ -18,8 +18,7 @@ ATTRIBUTES_DECLARE_ALL
 
 struct Test
 {
-	//const static int attributeType = ATTRIBUTE_POSITION;
-
+	// const static int attributeType = ATTRIBUTE_POSITION;
 
 	Float3 up;			//!< Always aims up from the camera, perpendicular to look.
 	Float3 right;		//!< Always aims to the right of the camera, perpendicular to look.
@@ -28,11 +27,7 @@ struct Test
 
 MainWindow::MainWindow()
 {
-	ATTRIBUTES_INIT_ALL
-
-	// subscribe to events
-	SUBSCRIBE_TO_EVENT(this, EVENT_SHOW_MESSAGEBOX);
-	SUBSCRIBE_TO_EVENT(this, EVENT_QUIT_TO_DESKTOP);
+	QWidget::installEventFilter(this);
 
 	// Create console
 	AllocConsole();
@@ -46,9 +41,16 @@ MainWindow::MainWindow()
 	*stdout = *fp;
 	setvbuf( stdout, NULL, _IONBF, 0 ); 
 
+	// Init iterators
+	ATTRIBUTES_INIT_ALL;
+
+	// subscribe to events
+	SUBSCRIBE_TO_EVENT(this, EVENT_SHOW_MESSAGEBOX);
+	SUBSCRIBE_TO_EVENT(this, EVENT_QUIT_TO_DESKTOP);
+
 	// create UI generated from XML file
 	ui.setupUi(this);
-//	QApplication::setStyle(new QPlastiqueStyle);
+	ui.mainToolBar->hide();
 	MainWindow::setWindowTitle("XKILL");
 	resize(800, 600);
 	QWidget::setAttribute(Qt::WA_PaintOnScreen);
@@ -56,8 +58,10 @@ MainWindow::MainWindow()
 	// init game
 	gameWidget = new GameWidget(this);
 	this->setCentralWidget(gameWidget);
-	
-	menuManager = new MenuManager(gameWidget);
+
+	// init tools
+	menu = new Menu_Main2(this);
+	new Menu_Editor(ui, this);
 
 	// setup signals and slots
 	connect(ui.actionFullscreen,			SIGNAL(triggered()),					this,			SLOT(slot_toggleFullScreen()));
@@ -65,16 +69,24 @@ MainWindow::MainWindow()
 	ui.actionCap_FPS->setChecked(true);
 	connect(ui.actionQuit,					SIGNAL(triggered()),					this,			SLOT(close()));
 	connect(gameWidget,						SIGNAL(signal_fpsChanged(QString)),		this,			SLOT(slot_setTitle(QString)));
+	connect(gameWidget,						SIGNAL(signal_fpsChanged(QString)),		this,			SLOT(slot_setTitle(QString)));
 
+	// Listen to incomming event
+	this->installEventFilter(this);
 	
-	new Menu_Editor(ui, this);
+	
+	// Start RELEASE in fullscreen, and DEBUG in Windowed
+	slot_toggleFullScreen();
+#if defined(DEBUG) | defined(_DEBUG)
+	slot_toggleFullScreen();
+#endif
+
 	
 }
 
 MainWindow::~MainWindow()
 {
-	delete gameWidget;
-	delete menuManager;
+	UNSUBSCRIBE_TO_EVENTS(this);
 }
 
 void MainWindow::onUpdate( float delta )
@@ -99,35 +111,49 @@ void MainWindow::onEvent( Event* e )
 
 void MainWindow::keyPressEvent( QKeyEvent* e )
 {
+	// Toggle fullscreen
 	if((e->key()==Qt::Key_Return) && (e->modifiers()==Qt::AltModifier))
 		slot_toggleFullScreen();
 
-	if((e->key()==Qt::Key_F4) && (e->modifiers()==Qt::AltModifier))
-		MainWindow::close();
+	// Exit program
+	if((e->key()==Qt::Key_F4)  && (e->modifiers()==Qt::AltModifier))
+		SEND_EVENT(&Event(EVENT_QUIT_TO_DESKTOP));
 
+	// Toggle editor
 	if((e->key()==Qt::Key_F1))
 		ui.dockWidget->toggleViewAction()->activate(QAction::Trigger);
 
+	
+	//
+	// Menu controlls during in-game
+	//
 
-	//switch (e->key()) 
-	//{
-	//case Qt::Key_Escape:
-	//	// TRUE: Quit program
-	//	if(ui.actionFullscreen->isChecked())
-	//		ui.actionFullscreen->setChecked(false);
-	//	// ELSE: Quit fullscreen
-	//	else
-	//		MainWindow::close();
-	//	break;
-	//case Qt::Key_Tab:
-	//	menu->toggleMenu();
-	//	break;
-	//default:
-	//	break;
-	//}
-
-	// Detect keypress in menu
-	menuManager->keyPressEvent(e);
+	if(GET_STATE() == STATE_DEATHMATCH)
+	{
+		switch (e->key()) 
+		{
+			// Return to menu
+		case Qt::Key_Escape:
+			SEND_EVENT(&Event_EnableMenu(true));
+			break;
+		default:
+			break;
+		}
+	}
+	if(GET_STATE() == STATE_GAMEOVER)
+	{
+		switch (e->key())
+		{
+			// Return to menu
+		case Qt::Key_Escape:
+			GET_STATE() = STATE_MAINMENU;
+			SEND_EVENT(&Event_EndDeathmatch());
+			SEND_EVENT(&Event_StartDeathmatch(0));	//To get a black background, for now run the game with zero players
+			break;
+		default:
+			break;
+		}
+	}
 
 	// Inform about key press
 	SEND_EVENT(&Event_KeyPress(e->key(), true));
@@ -166,20 +192,17 @@ void MainWindow::slot_toggleFullScreen()
 {
 	if(this->isFullScreen())
 	{
-		ui.mainToolBar->show();
 		this->showNormal();
 	}
 	else
 	{
-		ui.mainToolBar->hide();
 		this->showFullScreen();
 	}
 }
 
 void MainWindow::keyReleaseEvent( QKeyEvent* e )
 {
-	// Detect keypress in menu
-	menuManager->keyReleaseEvent(e);
+ 
 
 	// Inform about key release
 	SEND_EVENT(&Event_KeyPress(e->key(), false));
@@ -193,26 +216,11 @@ void MainWindow::slot_setTitle( QString title )
 void MainWindow::resizeEvent( QResizeEvent* e )
 {
 	QWidget::resizeEvent(e);
-
-	// Reposition menu
-	menuManager->moveEvent();
-
-	QSize size = e->size();
-
-
-	while(itrSplitScreen.hasNext())
-	{
-		AttributePtr<Attribute_SplitScreen> ptr_splitScreen = itrSplitScreen.getNext();
-
-		//splitScreen->
-	}
-
-	SEND_EVENT(&Event(EVENT_SPLITSCREEN_CHANGED));
 }
 
 void MainWindow::moveEvent( QMoveEvent *e )
 {
-	menuManager->moveEvent();
+	gameWidget->sendPositionEvent();
 }
 
 void MainWindow::event_showMessageBox( Event_ShowMessageBox* e )
@@ -220,4 +228,10 @@ void MainWindow::event_showMessageBox( Event_ShowMessageBox* e )
 	QString message(e->message.c_str());
 
 	QMessageBox::information(0, "Error", message);
+}
+
+void MainWindow::closeEvent( QCloseEvent *event )
+{
+	delete gameWidget;
+	delete menu;
 }

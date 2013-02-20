@@ -20,7 +20,7 @@
 
 ComponentManager::ComponentManager()
 {
-	SUBSCRIBE_TO_EVENT(this, EVENT_GAME_OVER);
+	SUBSCRIBE_TO_EVENT(this, EVENT_GAMEOVER);
 	SUBSCRIBE_TO_EVENT(this, EVENT_END_DEATHMATCH);
 	SUBSCRIBE_TO_EVENT(this, EVENT_START_DEATHMATCH);
 
@@ -145,7 +145,7 @@ void ComponentManager::onEvent(Event* e)
 	case EVENT_END_DEATHMATCH:
 		GET_STATE() = STATE_MAINMENU;
 		break;
-	case EVENT_GAME_OVER:
+	case EVENT_GAMEOVER:
 		gameOverDelay_ = 10.0f;
 		GET_STATE() = STATE_GAMEOVER;
 		break;

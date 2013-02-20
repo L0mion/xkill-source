@@ -22,6 +22,7 @@ public:
 	void entityBrowser_add(QString name, std::vector<int>* owners);
 	void entityInspector_add(int index, QString name);
 	void onEvent(Event* e);
+
 public slots:
 	void slot_editorRefresh();
 	void slot_clicked_entityBrowser(QModelIndex index);

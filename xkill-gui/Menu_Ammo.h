@@ -1,17 +1,20 @@
 #pragma once
 
-#include "ui_MainMenu.h"
+#include "ui_MainMenu2.h"
 
 #include <xkill-utilities/MutatorSettings.h>
 
 //! A class to handle interaction between the tab "Ammunition" and the game
 
-class Menu_Ammo
+class Menu_Ammo : QObject
 {
+	Q_OBJECT
+
 public:
-	Menu_Ammo(Ui::MainMenu* ui, QMainWindow* window);
+	Menu_Ammo(Ui::MainWindow* ui, QMainWindow* window);
 	~Menu_Ammo();
 
+public slots:
 	//! Updates the qt menu based on the in game data
 	void setSettingsMenu();
 	//! Updates the in game data based on the qt menu
@@ -19,7 +22,7 @@ public:
 
 private:
 	//! A local pointer to the qt menu
-	Ui::MainMenu* ui;
+	Ui::MainWindow* ui;
 	//! Used to change in game standard values
 	MutatorSettings* mutatorSettings_;
 

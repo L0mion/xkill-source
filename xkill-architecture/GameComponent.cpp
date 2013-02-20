@@ -16,6 +16,7 @@ ATTRIBUTES_DECLARE_ALL;
 
 GameComponent::GameComponent(void)
 {
+	SUBSCRIBE_TO_EVENT(this, EVENT_STARTGAME);
 	SUBSCRIBE_TO_EVENT(this, EVENT_PHYSICS_ATTRIBUTES_COLLIDING);
 	SUBSCRIBE_TO_EVENT(this, EVENT_START_DEATHMATCH);
 	SUBSCRIBE_TO_EVENT(this, EVENT_END_DEATHMATCH);
@@ -50,6 +51,9 @@ void GameComponent::onEvent(Event* e)
 	EventType type = e->getType();
 	switch (type) 
 	{
+	case EVENT_STARTGAME:
+		startGame();
+		break;
 	case EVENT_PHYSICS_ATTRIBUTES_COLLIDING:
 		event_PhysicsAttributesColliding(static_cast<Event_PhysicsAttributesColliding*>(e));
 		break;
@@ -680,9 +684,9 @@ void GameComponent::event_StartDeathmatch( Event_StartDeathmatch* e )
 	SEND_EVENT(&event_getWindowResolution);
 	int width = event_getWindowResolution.width;
 	int height = event_getWindowResolution.height;
-	SEND_EVENT(&Event_WindowResize(width,height));
+	SEND_EVENT(&Event_WindowResize(width, height));
 
-	// Set state to deathmatch
+	//Set state to deathmatch
 	GET_STATE() =  STATE_DEATHMATCH;
 }
 
@@ -906,4 +910,23 @@ void GameComponent::shootProjectile( AttributePtr<Attribute_Spatial> ptr_spatial
 
 		SEND_EVENT(&Event_CreateProjectile(new_pos, velocity, rot, itrPlayer.ownerId(), ammo->type, firingMode->type, ammo->damage));
 	}
+}
+
+void GameComponent::startGame()
+{
+	// Hide mouse & menu so it is not distracting from game play
+	SEND_EVENT(&Event_SetMouseLock(true));
+	SEND_EVENT(&Event_EnableHud(true));
+	SEND_EVENT(&Event_EnableMenu(false));
+
+	// Make sure game ends properly before starting a new game
+	SEND_EVENT(&Event_EndDeathmatch());
+
+	// Set state deathmatch
+	GET_STATE() = STATE_DEATHMATCH;
+
+	// Start deathmatch; the only gamemode so far
+	// we also have to specify the number of players top start with
+	int numPlayers = SETTINGS->numPlayers;
+	SEND_EVENT(&Event_StartDeathmatch(numPlayers));
 }
