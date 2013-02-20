@@ -97,4 +97,11 @@ struct CBSpriteDesc
 };
 static const unsigned int CB_SPRITE_DESC_SIZE = 64;
 
+static const unsigned int NUM_BLUR_KERNEL_ELEMENTS_COMPRESSED = 3;
+struct CBBlurDesc
+{
+	DirectX::XMFLOAT4 blurKernelCompressed[NUM_BLUR_KERNEL_ELEMENTS_COMPRESSED];
+};
+static const unsigned int CB_BLUR_DESC_SIZE = 48;
+
 #endif //XKILL_RENDERER_CBDESC_H

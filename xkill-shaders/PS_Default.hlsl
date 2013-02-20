@@ -7,6 +7,7 @@ struct PSOut
 	float4 normal	: SV_TARGET0;
 	float4 albedo	: SV_TARGET1;
 	float4 material : SV_TARGET2;
+	float4 glowHigh : SV_TARGET3;
 };
 
 Texture2D texAlbedo		: register(t0);
@@ -22,12 +23,20 @@ PSOut PS_Default(DefaultVSOut pIn)
 	normal.x = normal.x * 0.5f + 0.5f;
 	normal.y = normal.y * 0.5f + 0.5f;
 	normal.z = normal.z * 0.5f + 0.5f;
-	output.normal = float4(normal, 0.0f); //UtilEncodeSphereMap(pIn.normalW);
-
-	pIn.texcoord.y		= 1 - pIn.texcoord.y;
-	output.albedo		= texAlbedo.SampleLevel(ss, pIn.texcoord, 0);
 	
-	output.material		= float4(specularTerm, 0.5f); //specpow
+	//Fill normal RTV
+	output.normal = float4(normal, 0.0f); 
+
+	pIn.texcoord.y	= 1 - pIn.texcoord.y;
+	float3 albedo	= texAlbedo.SampleLevel(ss, pIn.texcoord, 0).xyz;
+
+	//Fill albedo RTV
+	output.albedo = float4(albedo, 0.0f);
+	
+	//Fill material RTV
+	output.material	= float4(specularTerm, 1.0f); //specularPower
+
+	output.glowHigh = float4(0.0f, 0.0f, 0.0f, 1.0f);//float4(albedo.r, 0.0f, 0.0f, 1.0f);
 
 	return output;
 }
