@@ -43,7 +43,7 @@ HRESULT Buffer_SrvDsv::init(ID3D11Device* device)
 {
 	HRESULT hr = S_OK;
 
-	Buffer_Srv::init(device);
+	hr = Buffer_Srv::init(device);
 	if(SUCCEEDED(hr))
 		hr = initDSV(device);
 

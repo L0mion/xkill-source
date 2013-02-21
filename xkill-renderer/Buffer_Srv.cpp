@@ -34,13 +34,12 @@ Buffer_Srv::Buffer_Srv(
 
 	DXGI_FORMAT srvFormat)
 {
-	Buffer_Srv::Buffer_Srv(
-		texWidth, 
-		texHeight, 
-		texAliasing, 
-		texFormat, 
-		texBindFlags, 
-		texUsage);
+	texWidth_		= texWidth;
+	texHeight_		= texHeight;
+	texAliasing_	= texAliasing;
+	texFormat_		= texFormat;
+	texBindFlags_	= texBindFlags;
+	texUsage_		= texUsage;
 	
 	srvFormat_ = srvFormat;
 }

@@ -15,7 +15,7 @@ Texture2D texNormal		: register(t1);
 
 SamplerState ss : register(s0);
 
-PSOut PS_Default(DefaultVSOut pIn)
+PSOut PS_Default(VSOutPosNormWTex pIn)
 {
 	PSOut output;
 
@@ -36,7 +36,7 @@ PSOut PS_Default(DefaultVSOut pIn)
 	//Fill material RTV
 	output.material	= float4(specularTerm, 1.0f); //specularPower
 
-	output.glowHigh = float4(0.0f, 0.0f, 0.0f, 1.0f);//float4(albedo.r, 0.0f, 0.0f, 1.0f);
+	output.glowHigh = float4(0.0f, 0.0f, 0.0f, 1.0f);
 
 	return output;
 }

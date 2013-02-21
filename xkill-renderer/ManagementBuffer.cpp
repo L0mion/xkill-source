@@ -2,6 +2,7 @@
 
 #include "Winfo.h"
 #include "Buffer_SrvRtv.h"
+#include "Buffer_SrvDsv.h"
 #include "Buffer_SrvRtvUav.h"
 #include "renderingUtilities.h"
 
@@ -24,6 +25,8 @@ ManagementBuffer::ManagementBuffer(Winfo* winfo)
 	glowLowUtil_	= nullptr;
 
 	ZeroMemory(&downSampleViewport_, sizeof(D3D11_VIEWPORT));
+
+	shadowMap_ = nullptr;
 }
 ManagementBuffer::~ManagementBuffer()
 {
@@ -33,6 +36,8 @@ ManagementBuffer::~ManagementBuffer()
 	SAFE_DELETE(glowHigh_);
 	SAFE_DELETE(glowLow_);
 	SAFE_DELETE(glowLowUtil_);
+
+	SAFE_DELETE(shadowMap_);
 }
 
 void ManagementBuffer::reset()
@@ -43,6 +48,8 @@ void ManagementBuffer::reset()
 	SAFE_RESET(glowHigh_);
 	SAFE_RESET(glowLow_);
 	SAFE_RESET(glowLowUtil_);
+
+	SAFE_RESET(shadowMap_);
 }
 HRESULT ManagementBuffer::resize(ID3D11Device* device)
 {
@@ -92,6 +99,14 @@ HRESULT ManagementBuffer::resize(ID3D11Device* device)
 			downSampleHeight_);
 	}
 
+	if(SUCCEEDED(hr))
+	{
+		hr = shadowMap_->resize(
+			device, 
+			SHADOWMAP_WIDTH, 
+			SHADOWMAP_HEIGHT);
+	}
+
 	return hr;
 }
 
@@ -108,6 +123,9 @@ HRESULT ManagementBuffer::init(ID3D11Device* device, ID3D11DeviceContext* devcon
 
 	if(SUCCEEDED(hr))
 		hr = initGlow(device, devcon);
+
+	if(SUCCEEDED(hr))
+		hr = initShadow(device);
 
 	return hr;
 }
@@ -206,6 +224,23 @@ HRESULT ManagementBuffer::initGlow(ID3D11Device* device, ID3D11DeviceContext* de
 	downSampleViewport_.Height		= static_cast<FLOAT>(downSampleHeight_);
 	downSampleViewport_.MinDepth	= 0;
 	downSampleViewport_.MaxDepth	= 1;
+
+	return hr;
+}
+HRESULT ManagementBuffer::initShadow(ID3D11Device* device)
+{
+	HRESULT hr = S_OK;
+
+	shadowMap_ = new Buffer_SrvDsv(
+		SHADOWMAP_WIDTH,
+		SHADOWMAP_HEIGHT,
+		1,
+		DXGI_FORMAT_R24G8_TYPELESS,
+		D3D11_BIND_DEPTH_STENCIL | D3D11_BIND_SHADER_RESOURCE,
+		D3D11_USAGE_DEFAULT,
+		DXGI_FORMAT_R24_UNORM_X8_TYPELESS,
+		DXGI_FORMAT_D24_UNORM_S8_UINT);
+	hr = shadowMap_->init(device);
 
 	return hr;
 }
@@ -401,7 +436,7 @@ void ManagementBuffer::unset(
 	}
 }
 
-DXGI_FORMAT ManagementBuffer::getFormat(GBUFFER_FORMAT format)
+DXGI_FORMAT ManagementBuffer::getFormat(BUFFER_FORMAT format)
 {
 	DXGI_FORMAT dxgiFormat = DXGI_FORMAT::DXGI_FORMAT_UNKNOWN;
 

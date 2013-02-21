@@ -5,6 +5,7 @@ typedef long HRESULT;
 
 class Winfo;
 class Buffer_SrvRtv;
+class Buffer_SrvDsv;
 class Buffer_SrvRtvUav;
 
 struct ID3D11Device;
@@ -17,24 +18,27 @@ static const FLOAT CLEARCOLOR_RED[]		= { 1.0f, 0.0f, 0.0f, 1.0f };
 static const FLOAT CLEARCOLOR_GREEN[]	= { 0.0f, 1.0f, 0.0f, 1.0f };
 static const FLOAT CLEARCOLOR_BLUE[]	= { 0.0f, 0.0f, 1.0f, 1.0f };
 
-enum GBUFFER_FORMAT
+enum BUFFER_FORMAT
 {
 	R8_G8_B8_A8__UNORM,
 	R16_G16_B16_A16__FLOAT,
 	R32_G32_B32_A32__FLOAT
 };
 
-static const GBUFFER_FORMAT GBUFFER_FORMAT_ALBEDO		= R8_G8_B8_A8__UNORM;
-static const GBUFFER_FORMAT GBUFFER_FORMAT_NORMAL		= R16_G16_B16_A16__FLOAT;
-static const GBUFFER_FORMAT GBUFFER_FORMAT_MATERIAL		= R16_G16_B16_A16__FLOAT;
-static const GBUFFER_FORMAT GBUFFER_FORMAT_GLOW_HIGH	= R8_G8_B8_A8__UNORM;
-static const GBUFFER_FORMAT GBUFFER_FORMAT_GLOW_LOW		= R8_G8_B8_A8__UNORM;
+static const BUFFER_FORMAT GBUFFER_FORMAT_ALBEDO	= R8_G8_B8_A8__UNORM;
+static const BUFFER_FORMAT GBUFFER_FORMAT_NORMAL	= R16_G16_B16_A16__FLOAT;
+static const BUFFER_FORMAT GBUFFER_FORMAT_MATERIAL	= R16_G16_B16_A16__FLOAT;
+static const BUFFER_FORMAT GBUFFER_FORMAT_GLOW_HIGH	= R8_G8_B8_A8__UNORM;
+static const BUFFER_FORMAT GBUFFER_FORMAT_GLOW_LOW	= R8_G8_B8_A8__UNORM;
 
 static const unsigned int SHADER_REGISTER_DOWNSAMPLE_INPUT = 3;
 static const unsigned int SHADER_REGISTER_BLUR_INPUT	= 9;
 static const unsigned int SHADER_REGISTER_BLUR_OUTPUT	= 1;
 
 static const unsigned int DOWNSAMPLE_SCREEN_RES_FACTOR = 4;
+
+static const unsigned int SHADOWMAP_WIDTH	= 800;
+static const unsigned int SHADOWMAP_HEIGHT	= 800;
 
 enum SET_TYPE
 {
@@ -92,8 +96,9 @@ private:
 	HRESULT initNormal(ID3D11Device* device);
 	HRESULT initMaterial(ID3D11Device* device);
 	HRESULT initGlow(ID3D11Device* device, ID3D11DeviceContext* devcon);
+	HRESULT initShadow(ID3D11Device* device);
 
-	DXGI_FORMAT getFormat(GBUFFER_FORMAT format);
+	DXGI_FORMAT getFormat(BUFFER_FORMAT format);
 	void getDownSampleDim(
 		unsigned int screenWidth,
 		unsigned int screenHeight,
@@ -112,6 +117,8 @@ private:
 	Buffer_SrvRtvUav* glowHigh_;
 	Buffer_SrvRtvUav* glowLow_;
 	Buffer_SrvRtvUav* glowLowUtil_;
+
+	Buffer_SrvDsv* shadowMap_;
 };
 
 #endif //XKILL_RENDERER_MANAGEMENTBUFFER_H

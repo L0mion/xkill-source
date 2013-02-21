@@ -1,10 +1,9 @@
 #ifndef XKILL_RENDERER_VSOUT_HLSL
 #define XKILL_RENDERER_VSOUT_HLSL
 
-struct DefaultVSOut
+struct VSOutPosNormWTex
 {
 	float4 position		: SV_POSITION;
-	float3 positionW	: POSITION;
 	float3 normalW		: NORMAL;
 	float2 texcoord		: TEXCOORD;
 };
