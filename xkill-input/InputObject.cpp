@@ -11,6 +11,21 @@ InputObject::~InputObject(void)
 {
 }
 
+void InputObject::update(float delta)
+{
+	if(useAcceleration_)
+	{
+		if(inAccelerationZone_)
+		{
+			currentAcceleration_ += accelerationRate_ * delta;
+			if(currentAcceleration_ > maxAcceleration_)
+			{
+				currentAcceleration_ = maxAcceleration_;
+			}
+		}
+	}
+}
+
 void InputObject::setInverted(bool inverted)
 {
 	inverted_ = inverted;
@@ -29,6 +44,21 @@ void InputObject::setSensitivity(float sensitivity)
 float InputObject::getSensitivity()
 {
 	return sensitivity_;
+}
+
+void InputObject::setUseAcceleration_(bool useAcceleration)
+{
+	useAcceleration_ = useAcceleration;
+}
+
+void InputObject::setAccelerationRate(float accelerationRate)
+{
+	accelerationRate_ = accelerationRate;
+}
+
+void InputObject::setMaxAcceleration(float maxAcceleration)
+{
+	maxAcceleration_ = maxAcceleration;
 }
 
 bool InputObject::needsDelta()
