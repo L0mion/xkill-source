@@ -27,7 +27,7 @@ void Menu_HUDManager::onEvent( Event* e )
 		computeNewPosition((Event_WindowMove*)e);
 		break;
 	case EVENT_STARTGAME:
-		computeNumHuds();
+		mapHudsToSplitscreen();
 		break;
 	case EVENT_WINDOW_RESIZE:
 		computeNewResolution((Event_WindowResize*)e);
@@ -37,19 +37,22 @@ void Menu_HUDManager::onEvent( Event* e )
 	}
 }
 
-void Menu_HUDManager::computeNumHuds()
+void Menu_HUDManager::mapHudsToSplitscreen()
 {
-	// Balance attributes / vs huds
-	int numSplitScreen = itrSplitScreen.count();
-	while(numSplitScreen > huds.size())
+	// Delete previous huds
+	for(int i=0; i<huds.size(); i++)
 	{
-		huds.push_back(new Menu_HUD(parent, huds.size()));
+		delete huds[i];
 	}
-	while(numSplitScreen < huds.size())
+	huds.clear();
+	
+
+	// Map new HUDs to split screens
+	while(itrSplitScreen.hasNext())
 	{
-		delete huds.back();
-		huds.pop_back();
-	}	
+		AttributePtr<Attribute_SplitScreen> ptr_splitScreen = itrSplitScreen.getNext();
+		huds.push_back(new Menu_HUD(ptr_splitScreen));
+	}
 }
 
 void Menu_HUDManager::updateHuds()
@@ -59,7 +62,7 @@ void Menu_HUDManager::updateHuds()
 	while(itrSplitScreen.hasNext())
 	{
 		AttributePtr<Attribute_SplitScreen> ptr_splitScreen = itrSplitScreen.getNext();
-		huds[index]->refresh(ptr_splitScreen);
+		//huds[index]->refresh(ptr_splitScreen);
 		index++;
 	}
 }

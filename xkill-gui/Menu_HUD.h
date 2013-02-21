@@ -9,18 +9,44 @@
 #include <vector>
 class Attribute_SplitScreen;
 
-class Menu_HUD : public QMainWindow
+class Menu_HUD : public QMainWindow , IObserver
 {
 private:
+	AttributePtr<Attribute_SplitScreen> splitScreen;
 
 public:
-	Menu_HUD(QWidget* parent, int id)
+	Menu_HUD(AttributePtr<Attribute_SplitScreen> splitScreen)
 	{
-
+		this->splitScreen = splitScreen;
 	}
-	void refresh(AttributePtr<Attribute_SplitScreen> splitScreen)
+	void mapPositionToParent()
 	{
+		int x = 20 + splitScreen->ssTopLeftX;
+		int y = splitScreen->ssTopLeftY + splitScreen->ssHeight - this->height();
+		move(x, y);
+	}
+	void refresh()
+	{
+	}
+	void computeNewResolution()
+	{
+		/*resize();*/
+	}
 
+	void onEvent(Event* e)
+	{
+		EventType type = e->getType();
+		switch (type) 
+		{
+		case EVENT_WINDOW_MOVE:
+			mapPositionToParent();
+			break;
+		case EVENT_SPLITSCREEN_CHANGED:
+			computeNewResolution();
+			break;
+		default:
+			break;
+		}
 	}
 };
 
@@ -36,7 +62,7 @@ public:
 	Menu_HUDManager(QWidget* parent);
 	void updateHuds();
 	
-	void computeNumHuds();
+	void mapHudsToSplitscreen();
 	void computeNewPosition(Event_WindowMove* e)
 	{
 		e->pos;
