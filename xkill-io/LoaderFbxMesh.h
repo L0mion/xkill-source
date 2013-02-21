@@ -193,10 +193,10 @@ private:
 	\param index Index of the bone the matrix belongs to.
 	*/
 	void parseTransformMatrix(FbxCluster* cluster, FbxMesh* mesh, FbxPose* fbxPose, LoaderFbxMeshDesc* meshDesc, int index);
-	FbxAMatrix parseTransformMatrixAssociateModel(FbxCluster* cluster, FbxMesh* mesh, FbxPose* fbxPose);
-	FbxAMatrix parseTransformMatrixOther(FbxCluster* cluster, FbxMesh* mesh, FbxPose* fbxPose);
+	FbxAMatrix parseTransformMatrixAssociateModel(FbxCluster* cluster, FbxMesh* mesh, FbxPose* fbxPose, FbxAMatrix parentGlobalPosition);
+	FbxAMatrix parseTransformMatrixOther(FbxCluster* cluster, FbxMesh* mesh, FbxPose* fbxPose, FbxAMatrix parentGlobalPosition);
 	FbxAMatrix getGeometry(FbxNode* node);
-	FbxAMatrix getGlobalPosition(FbxNode* node, FbxTime time, FbxPose* pose);
+	FbxAMatrix getGlobalPosition(FbxNode* node, FbxTime time, FbxPose* pose, FbxAMatrix* parentGlobalPosition);
 	FbxAMatrix getPoseMatrix(FbxPose* pose, int nodeIndex);
 
 	//! Transforms the vertices into local space.

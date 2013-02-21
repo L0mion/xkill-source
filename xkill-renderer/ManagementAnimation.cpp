@@ -22,25 +22,17 @@ void ManagementAnimation::reset()
 {
 }
 
-void ManagementAnimation::update(float delta, std::string clipName)
+void ManagementAnimation::update(float delta, std::string clipName, int animationIndex)
 {
-	timePosition += delta;
-
-	int nrOfSkinnedData = animations_.size();
-	for(unsigned int i=0; i<nrOfSkinnedData; i++)
+	if(animationIndex >= 0 && animationIndex <animations_.size());
 	{
-		SkinnedData* skinnedData = animations_.at(i);
+		timePosition += delta;
+		SkinnedData* skinnedData = animations_.at(animationIndex);
 		if(timePosition > skinnedData->getClipEndTime(clipName))
 		{
 			timePosition = 0.0f;
 		}
 	}
-
-	/*
-	timePosition += 0.01f;
-	if(timePosition > 10.0f)
-		timePosition = 0.0f;
-	*/
 }
 
 SkinnedData* ManagementAnimation::getAnimation(unsigned int index)

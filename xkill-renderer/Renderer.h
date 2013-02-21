@@ -139,7 +139,7 @@ private:
 	ManagementTex*			managementTex_;			//!< Maintains textures to be used in shaders.
 	ManagementSS*			managementSS_;			//!< Maintaining sampler states.
 	ManagementRS*			managementRS_;			//!< Maintaining rasterizer states.
-	ManagementGBuffer*		managementGBuffer_;		//!< Maintains the G-Buffers of application.
+	ManagementBuffer*		managementBuffer_;		//!< Maintains the G-Buffers of application.
 	ManagementDebug*		managementDebug_;		//!< Used for detecting live COM-objects.
 	ManagementMath*			managementMath_;		//!< Loads dx-math vectors into generic-type vectors and maintains other math-related functions.
 	ManagementInstance*		managementInstance_;	//!< Maintains all instances of respective model in the game.

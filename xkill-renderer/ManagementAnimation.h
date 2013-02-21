@@ -21,7 +21,7 @@ public:
 
 	void addAnimation(SkinnedData* skinnedData);
 
-	void update(float delta, std::string clipName);
+	void update(float delta, std::string clipName, int animationIndex);
 	SkinnedData* getAnimation(unsigned int index);
 
 	void debug_clearOffsetMatrices(unsigned int index);

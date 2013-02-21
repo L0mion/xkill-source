@@ -55,6 +55,8 @@ public:
 	std::vector<DirectX::XMFLOAT4X4>*		getBoneOffsets()	const;
 	std::map<std::string, AnimationClip*>*	getAnimations()		const;
 private:
+	AnimationClip* getAnimationClip(std::string clipName) const;
+
 	std::vector<int>*						boneHierarchy_; //!< Vector containing the skeletons hierarchy.
 	std::vector<DirectX::XMFLOAT4X4>*		boneOffsets_;	//!< Vector containing bone offsets.
 	std::map<std::string, AnimationClip*>*	animations_;	//!< Map that holds AnimationClips and thier corresponding names.

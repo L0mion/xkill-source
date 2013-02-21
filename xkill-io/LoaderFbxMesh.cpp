@@ -513,11 +513,13 @@ void LoaderFbxMesh::parseTransformMatrix(FbxCluster* cluster, FbxMesh* mesh, Fbx
 {
 	FbxCluster::ELinkMode clusterMode = cluster->GetLinkMode();
 
+	FbxTime time(0);
+	FbxAMatrix parentGlobalPosition = getGlobalPosition(mesh->GetNode(), time, fbxPose, &parentGlobalPosition);
 	FbxAMatrix fbxMatrix;
 	if(clusterMode == FbxCluster::eAdditive && cluster->GetAssociateModel())
-		fbxMatrix = parseTransformMatrixAssociateModel(cluster, mesh, fbxPose);
+		fbxMatrix = parseTransformMatrixAssociateModel(cluster, mesh, fbxPose, parentGlobalPosition);
 	else
-		fbxMatrix = parseTransformMatrixOther(cluster, mesh, fbxPose);
+		fbxMatrix = parseTransformMatrixOther(cluster, mesh, fbxPose, parentGlobalPosition);
 
 	Float4x4 offsetMatrix;
 	
@@ -531,7 +533,7 @@ void LoaderFbxMesh::parseTransformMatrix(FbxCluster* cluster, FbxMesh* mesh, Fbx
 
 	meshDesc->setOffsetMatrix(index, offsetMatrix);
 }
-FbxAMatrix LoaderFbxMesh::parseTransformMatrixAssociateModel(FbxCluster* cluster, FbxMesh* mesh, FbxPose* fbxPose)
+FbxAMatrix LoaderFbxMesh::parseTransformMatrixAssociateModel(FbxCluster* cluster, FbxMesh* mesh, FbxPose* fbxPose, FbxAMatrix parentGlobalPosition)
 {
 	FbxAMatrix associateGeometry;
 	FbxAMatrix associateGlobalInitPosition;
@@ -551,24 +553,24 @@ FbxAMatrix LoaderFbxMesh::parseTransformMatrixAssociateModel(FbxCluster* cluster
 
 	associateGeometry = getGeometry(cluster->GetAssociateModel());
 	associateGlobalInitPosition *= associateGeometry;
-	associateGlobalCurrentPosition = getGlobalPosition(cluster->GetAssociateModel(), time, fbxPose);
+	associateGlobalCurrentPosition = getGlobalPosition(cluster->GetAssociateModel(), time, fbxPose, nullptr);
 
 	cluster->GetTransformMatrix(referenceGlobalInitPosition);
 	referenceGeometry = getGeometry(mesh->GetNode());
 	referenceGlobalInitPosition *= referenceGeometry;
-	referenceGlobalCurrentPosition = mesh->GetNode()->EvaluateGlobalTransform(time);
+	referenceGlobalCurrentPosition = parentGlobalPosition;
 
 	cluster->GetTransformLinkMatrix(clusterGlobalInitPosition);
 	clusterGeometry = getGeometry(cluster->GetLink());
 	clusterGlobalInitPosition *= clusterGeometry;
-	clusterGlobalCurrentPosition = getGlobalPosition(cluster->GetLink(), time, fbxPose);
+	clusterGlobalCurrentPosition = getGlobalPosition(cluster->GetLink(), time, fbxPose, nullptr);
 
 	FbxAMatrix offsetMatrix = referenceGlobalInitPosition.Inverse() * associateGlobalInitPosition * associateGlobalCurrentPosition.Inverse() *
 			clusterGlobalCurrentPosition * clusterGlobalInitPosition.Inverse() * referenceGlobalInitPosition;
 
 	return offsetMatrix;
 }
-FbxAMatrix LoaderFbxMesh::parseTransformMatrixOther(FbxCluster* cluster, FbxMesh* mesh, FbxPose* fbxPose)
+FbxAMatrix LoaderFbxMesh::parseTransformMatrixOther(FbxCluster* cluster, FbxMesh* mesh, FbxPose* fbxPose, FbxAMatrix parentGlobalPosition)
 {
 	FbxAMatrix referenceGeometry;
 	FbxAMatrix referenceGlobalInitPosition;
@@ -584,12 +586,12 @@ FbxAMatrix LoaderFbxMesh::parseTransformMatrixOther(FbxCluster* cluster, FbxMesh
 	FbxTime time(0);
 
 	cluster->GetTransformMatrix(referenceGlobalInitPosition);
-	referenceGlobalCurrentPosition = mesh->GetNode()->EvaluateGlobalTransform(time);
+	referenceGlobalCurrentPosition = parentGlobalPosition;
 	referenceGeometry = getGeometry(mesh->GetNode());
 	referenceGlobalInitPosition *= referenceGeometry;
 
 	cluster->GetTransformLinkMatrix(clusterGeometry);
-	clusterGlobalCurrentPosition = getGlobalPosition(cluster->GetLink(), time, fbxPose);
+	clusterGlobalCurrentPosition = getGlobalPosition(cluster->GetLink(), time, fbxPose, nullptr);
 
 	clusterRelativeInitPosition = clusterGlobalInitPosition.Inverse() * referenceGlobalInitPosition;
 	clusterRelativeCurrentPositionInverse = referenceGlobalCurrentPosition.Inverse() * clusterGlobalCurrentPosition;
@@ -609,7 +611,7 @@ FbxAMatrix LoaderFbxMesh::getGeometry(FbxNode* node)
 
 	return fbxGeometry;
 }
-FbxAMatrix LoaderFbxMesh::getGlobalPosition(FbxNode* node, FbxTime time, FbxPose* pose)
+FbxAMatrix LoaderFbxMesh::getGlobalPosition(FbxNode* node, FbxTime time, FbxPose* pose, FbxAMatrix* parentGlobalPosition)
 {
 	FbxAMatrix globalPosition;
 
@@ -621,10 +623,22 @@ FbxAMatrix LoaderFbxMesh::getGlobalPosition(FbxNode* node, FbxTime time, FbxPose
 		if(nodeIndex > -1)
 		{
 			if(pose->IsBindPose() || !pose->IsLocalMatrix(nodeIndex))
-			{
 				globalPosition = getPoseMatrix(pose, nodeIndex);
-				positionFound = true;
+			else
+			{
+				FbxAMatrix localParentGlobalPosition;
+				if(parentGlobalPosition)
+					localParentGlobalPosition = *parentGlobalPosition;
+				else
+				{
+					if(node->GetParent())
+						localParentGlobalPosition = getGlobalPosition(node->GetParent(), time, pose, nullptr);
+				}
+
+				FbxAMatrix localPosition = getPoseMatrix(pose, nodeIndex);
+				globalPosition = localParentGlobalPosition * localPosition;
 			}
+			positionFound = true;
 		}
 	}
 
