@@ -4,11 +4,11 @@ Menu_FiringMode::Menu_FiringMode(Ui::MainWindow* ui, QMainWindow* window)
 {
 	this->ui = ui;
 	updateLock = false;
-
 	mutatorSettings_ = new MutatorSettings();
+	
 
-	// Init settings menu
-	setSettingsMenu();
+	// Set standard values
+	reset();
 
 	// Connects slots
 	connect(ui->radioButton_Weapon_Single,						SIGNAL(clicked()),				this,	SLOT(setSettingsMenu()));
@@ -19,17 +19,13 @@ Menu_FiringMode::Menu_FiringMode(Ui::MainWindow* ui, QMainWindow* window)
 	connect(ui->checkBox_Weapon_Scatter,						SIGNAL(clicked()),				this,	SLOT(settingsMenuUpdated()));
 	connect(ui->checkBox_Weapon_Explosive,						SIGNAL(clicked()),				this,	SLOT(settingsMenuUpdated()));
 	
-	connect(ui->horizontalSlider_Weapon_ClipSize,				SIGNAL(sliderMoved(int)),		this,	SLOT(settingsMenuUpdated()));
-	connect(ui->horizontalSlider_Weapon_DamageModifier,			SIGNAL(sliderMoved(int)),		this,	SLOT(settingsMenuUpdated()));
-	connect(ui->horizontalSlider_Weapon_ExplosionSphereModifier,SIGNAL(sliderMoved(int)),		this,	SLOT(settingsMenuUpdated()));
-	connect(ui->horizontalSlider_Weapon_RateOfFire,				SIGNAL(sliderMoved(int)),		this,	SLOT(settingsMenuUpdated()));
-	connect(ui->horizontalSlider_Weapon_ReloadTime,				SIGNAL(sliderMoved(int)),		this,	SLOT(settingsMenuUpdated()));
+	connect(ui->horizontalSlider_Weapon_ClipSize,				SIGNAL(valueChanged(int)),		this,	SLOT(settingsMenuUpdated()));
+	connect(ui->horizontalSlider_Weapon_ReloadTime,				SIGNAL(valueChanged(int)),		this,	SLOT(settingsMenuUpdated()));
+	connect(ui->horizontalSlider_Weapon_RateOfFire,				SIGNAL(valueChanged(int)),		this,	SLOT(settingsMenuUpdated()));
+	connect(ui->horizontalSlider_Weapon_DamageModifier,			SIGNAL(valueChanged(int)),		this,	SLOT(settingsMenuUpdated()));
+	connect(ui->horizontalSlider_Weapon_ExplosionSphereModifier,SIGNAL(valueChanged(int)),		this,	SLOT(settingsMenuUpdated()));
 
-	connect(ui->horizontalSlider_Weapon_ClipSize,				SIGNAL(sliderReleased()),		this,	SLOT(settingsMenuUpdated()));
-	connect(ui->horizontalSlider_Weapon_DamageModifier,			SIGNAL(sliderReleased()),		this,	SLOT(settingsMenuUpdated()));
-	connect(ui->horizontalSlider_Weapon_ExplosionSphereModifier,SIGNAL(sliderReleased()),		this,	SLOT(settingsMenuUpdated()));
-	connect(ui->horizontalSlider_Weapon_RateOfFire,				SIGNAL(sliderReleased()),		this,	SLOT(settingsMenuUpdated()));
-	connect(ui->horizontalSlider_Weapon_ReloadTime,				SIGNAL(sliderReleased()),		this,	SLOT(settingsMenuUpdated()));
+	connect(ui->pushButton_Weapon_Reset,						SIGNAL(clicked()),				this,	SLOT(reset()));
 }
 
 Menu_FiringMode::~Menu_FiringMode()
@@ -109,4 +105,13 @@ FiringMode* Menu_FiringMode::getFiringModeSettings()
 	}
 
 	return &mutatorSettings_->getStandardFiringMode(firingMode);
+}
+
+void Menu_FiringMode::reset()
+{
+	// Reset settings
+	mutatorSettings_->initStandardFiringModes();
+
+	// Init settings menu
+	setSettingsMenu();
 }

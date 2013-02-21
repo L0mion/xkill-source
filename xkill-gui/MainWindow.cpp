@@ -70,7 +70,7 @@ MainWindow::MainWindow()
 	slot_toggleFullScreen();
 #if defined(DEBUG) || defined(_DEBUG)
 	slot_toggleFullScreen();
-	SEND_EVENT(&Event(EVENT_STARTGAME)); //Skips menu in DEBUG
+	//SEND_EVENT(&Event(EVENT_STARTGAME)); //Skips menu in DEBUG
 #endif
 }
 
