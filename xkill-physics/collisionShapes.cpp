@@ -270,7 +270,7 @@ void CollisionShapes::updateFrustrumShape()
 		delete frustrumShape_;
 		frustrumShape_ = nullptr;
 	}
-	if(!itrCamera.size())
+	if(!itrCamera.count())
 	{
 		DEBUGPRINT("COLLISIONSHAPES: No cameras to use for frustum creation");
 		return;

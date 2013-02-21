@@ -151,7 +151,7 @@ void FMODEventSystem::SetVolume(float volume)
 
 void FMODEventSystem::UpdateNrOfListeners()
 {
-	nrOfListeners_ = itrPlayer.size();
+	nrOfListeners_ = itrPlayer.count();
 
 	if(nrOfListeners_ <= 0)
 	{

@@ -12,7 +12,7 @@
 
 class Attribute_SplitScreen;
 
-class HUDWindow : public QMainWindow
+class HUDWindow2 : public QMainWindow
 {
 private:
 	int id;
@@ -28,7 +28,7 @@ private:
 	QVBoxLayout* verticalLayout;
 
 public:
-	HUDWindow(QWidget* parent, int id);
+	HUDWindow2(QWidget* parent, int id);
 
 	void parentMoveEvent(AttributePtr<Attribute_SplitScreen> splitScreen);
 	void update(AttributePtr<Attribute_SplitScreen> player);
@@ -37,7 +37,7 @@ public:
 class HUDManager
 {
 private:
-	std::vector<HUDWindow*> huds;
+	std::vector<HUDWindow2*> huds;
 	QWidget* parent;
 public:
 	HUDManager();

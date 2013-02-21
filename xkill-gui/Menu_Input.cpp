@@ -78,7 +78,7 @@ void Menu_Input::loadInputList(int deviceId)
 
 	inputListModel->setHorizontalHeaderLabels(qStringList);
 
-	if(deviceId >= itrInputDevice.size())
+	if(deviceId >= itrInputDevice.count())
 		return;
 
 	AttributePtr<Attribute_InputDevice> ptr_inputDevice = itrInputDevice.at(deviceId);

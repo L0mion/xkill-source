@@ -111,10 +111,8 @@ public:
 		return (int)_allOwnerId->size();
 	}
 
-	
-
-	// Returns nr of non-deleted attributes. Non optimized! 
-	int size()
+	// Returns nr of non-deleted attributes.
+	int count()
 	{
 		return _attributeStorage->size();
 	}

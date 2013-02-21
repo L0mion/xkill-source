@@ -12,7 +12,6 @@
 #include "Menu_Editor.h"
 #include "Menu_Main2.h"
 
-
 class MainWindow : public QMainWindow, public IObserver
 {
 	Q_OBJECT
