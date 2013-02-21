@@ -39,25 +39,29 @@ bool PlayerPhysicsObject::subClassSpecificInitHook()
 void PlayerPhysicsObject::onUpdate(float delta)
 {
 	PhysicsObject::onUpdate(delta);
-
-	handleInput(delta);
-	float height = 1;
+		
 	//--------------------------------------------------------------------------------------
 	// Hovering
 	//-------------------------------------------------------------------------------------
-	
+	float height = 1;
 	std::vector<int> playerAttributes = itrPhysics_3.ownerAt(attributeIndex_)->getAttributes(ATTRIBUTE_PLAYER);
 	for(unsigned int i=0;i<playerAttributes.size();i++)
 	{
 		AttributePtr<Attribute_Player> ptr_player = itrPlayer.at(playerAttributes.at(i));
-		if(!(ptr_player->jetpack))
+		
+		if(!ptr_player->detectedAsDead)
 		{
-			Hover(delta, 1.0f);
+			handleInput(delta);
+		}
+
+		if( !(ptr_player->jetpack) && !(ptr_player->detectedAsDead) )
+		{
+			hover(delta, height);
 		}
 	}
 }
 
-void PlayerPhysicsObject::Hover(float delta, float hoverHeight)
+void PlayerPhysicsObject::hover(float delta, float hoverHeight)
 {
 	float deltaHeightMaximum = 0.0f;
 	btVector3 offset[] = {btVector3(0.75f, 0.0f, 0.75f),
@@ -92,6 +96,30 @@ void PlayerPhysicsObject::Hover(float delta, float hoverHeight)
 
 		setLinearVelocity(getLinearVelocity()+btVector3(0.0f,-getLinearVelocity().y(),0.0f));
 	}
+}
+
+btVector3 PlayerPhysicsObject::subClassCalculateLocalInertiaHook(btScalar mass)
+{
+	Entity* playerEntity = itrPhysics_3.ownerAt(attributeIndex_);
+	std::vector<int> playerId = playerEntity->getAttributes(ATTRIBUTE_PLAYER);
+	bool detectedAsDead = false;
+
+	for(unsigned int i = 0; i < playerId.size(); i++)
+	{
+		detectedAsDead = itrPlayer.at(playerId.at(i))->detectedAsDead;
+	}
+
+	btVector3 localInertia;
+	if(detectedAsDead)
+	{
+		localInertia = localInertiaBasedOnCollisionShapeAndMass(itrPhysics_3.at(attributeIndex_)->mass);
+	}
+	else
+	{
+		localInertia = zeroLocalInertia();
+	}
+
+	return localInertia;
 }
 
 void PlayerPhysicsObject::handleOutOfBounds()

@@ -107,7 +107,7 @@ void ScoreComponent::schedulerScoreCounting(float delta)
 				else								// The player doesn't have any priority left so leave execution mode
 				{
 					AttributePtr<Attribute_Player> player = itrPlayer.at(executingPlayerIndex_);
-					player->executing = false;;
+					player->executing = false;
 
 					executionMode_ = false;
 					executingPlayerIndex_ = -1;
@@ -164,6 +164,7 @@ void ScoreComponent::schedulerScoreCounting(float delta)
 
 				AttributePtr<Attribute_Player> player = itrPlayer.at(executingPlayerIndex_);
 				player->executing = true;
+				DEBUGPRINT("Player with attribute index " << executingPlayerIndex_ << " is executing. Beware of his laserous eyes");
 				// Send event to notify other components that we're entering execution mode
 			}
 		}

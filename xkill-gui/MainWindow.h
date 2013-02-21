@@ -35,7 +35,7 @@ protected:
 	void keyPressEvent(QKeyEvent* e);
 	void keyReleaseEvent(QKeyEvent* e);
 	void moveEvent(QMoveEvent *e);
-	void resizeEvent(QResizeEvent* e);;
+	void resizeEvent(QResizeEvent* e);
 	void showMenu();
 	
 

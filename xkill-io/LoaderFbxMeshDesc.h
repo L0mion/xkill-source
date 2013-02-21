@@ -114,22 +114,22 @@ private:
 	*/
 	bool float4Equal(Float4 f1, Float4 f2);
 
-	std::vector<unsigned int> indices_;			//<! Vector containing indices to a vertex vector.
+	std::vector<unsigned int> indices_;			//!< Vector containing indices to a vertex vector.
 
-	std::vector<int>		polygonGroupIds_;	//<! Contains vertex polygon group ids.
-	std::vector<Float3>		vertexPositions_;	//<! Contains vertex positions.
-	std::vector<Float4>		vertexColors_;		//<! Contains vertex colors.
-	std::vector<Float3>		vertexNormals_;		//<! Contains vertex normals.
-	std::vector<Float2>		vertexUVs_;			//<! Contains vertex uv-coordinates.
-	std::vector<Float4>		vertexTangents_;	//<! Contains vertex tangents.
-	std::vector<Float4>		vertexBinormals_;	//<! Contains vertex binormals.
+	std::vector<int>		polygonGroupIds_;	//!< Contains vertex polygon group ids.
+	std::vector<Float3>		vertexPositions_;	//!< Contains vertex positions.
+	std::vector<Float4>		vertexColors_;		//!< Contains vertex colors.
+	std::vector<Float3>		vertexNormals_;		//!< Contains vertex normals.
+	std::vector<Float2>		vertexUVs_;			//!< Contains vertex uv-coordinates.
+	std::vector<Float4>		vertexTangents_;	//!< Contains vertex tangents.
+	std::vector<Float4>		vertexBinormals_;	//!< Contains vertex binormals.
 
-	std::vector<std::vector<int>> vertexBoneIndices_;	//<! Contains vertex bone indices.
-	std::vector<std::vector<float>> vertexBoneWeights_;	//<! Contains vertex bone weights.
+	std::vector<std::vector<int>> vertexBoneIndices_;	//!< Contains vertex bone indices.
+	std::vector<std::vector<float>> vertexBoneWeights_;	//!< Contains vertex bone weights.
 
-	std::vector<Float4x4> offsetMatrices_;					//<! Contains offset matrices used to transform vertices into the skeletons lokal space.
-	std::vector<int> boneParentIndices_;					//<! Contains the hierarchy of bones.
-	std::vector<fbxsdk_2014_0_beta2::FbxNode*> boneNodes_;	//<! Contains the nodes for every bone in the skeleton.
+	std::vector<Float4x4> offsetMatrices_;					//!< Contains offset matrices used to transform vertices into the skeletons lokal space.
+	std::vector<int> boneParentIndices_;					//!< Contains the hierarchy of bones.
+	std::vector<fbxsdk_2014_0_beta2::FbxNode*> boneNodes_;	//!< Contains the nodes for every bone in the skeleton.
 };
 
 #endif //XKILL_IO_LOADERFBXMESHDESC_H

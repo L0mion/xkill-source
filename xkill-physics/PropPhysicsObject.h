@@ -10,6 +10,7 @@ public:
 	~PropPhysicsObject();
 
 	virtual btVector3 subClassCalculateLocalInertiaHook(btScalar mass);
+	virtual bool subClassSpecificInitHook();
 };
 
 #endif

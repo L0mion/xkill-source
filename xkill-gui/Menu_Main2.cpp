@@ -133,7 +133,7 @@ void Menu_Main2::mousePressEvent( QMouseEvent *e )
 void Menu_Main2::loadCustomFonts()
 {
 	QStringList list;
-	list << "arcade_interlaced.ttf" << "arcade_rounded.ttf" << "arista_light.ttf";;
+	list << "arcade_interlaced.ttf" << "arcade_rounded.ttf" << "arista_light.ttf";
 	int fontID(-1);
 	bool fontWarningShown(false);
 	for (QStringList::const_iterator constIterator = list.constBegin(); constIterator != list.constEnd(); ++constIterator) 

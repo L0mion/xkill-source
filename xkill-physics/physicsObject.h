@@ -20,7 +20,7 @@ protected:
 		btVector3 localInertiaBasedOnCollisionShapeAndMass(btScalar mass);	//!< Called from "subClassCalculateLocalInertiaHook" by subclasses.
 		btVector3 zeroLocalInertia();										//!< Called from "subClassCalculateLocalInertiaHook" by subclasses.
 		virtual btCollisionShape* subClassSpecificCollisionShape();			//!< May be overridden by subclasses. Is called from the end of init.
-		virtual void Hover(float delta, float hoverHeight);							//!< Hover above ground by sening a ray straight down from the Physics Object's position.
+		virtual void hover(float delta, float hoverHeight);					//!< hover above ground by sening a ray straight down from the Physics Object's position.
 public:
 	PhysicsObject();
 	virtual ~PhysicsObject();
