@@ -372,6 +372,10 @@ void KeyMapper::handleAxisObjectSettings(InputAxisObject* axis, std::string sett
 			if(floatValue >= 0.0f)
 				axis->setSensitivity(floatValue);
 			break;
+		case 'A':
+			if(Converter::StrToUInt(settingsPair->second, intValue))
+				axis->setUseAcceleration(intValue > 0);
+			break;
 		default:
 			break;
 		};
@@ -531,6 +535,7 @@ std::string KeyMapper::getAxesString(std::vector<InputAxisObject*>* axes)
 		axesString += "D=" + Converter::FloatToStr(axis->getDeadZone()) + " ";
 		axesString += "I=" + Converter::IntToStr((int)axis->isInverted()) + " ";
 		axesString += "S=" + Converter::FloatToStr(axis->getSensitivity()) + " ";
+		axesString += "A=" + Converter::IntToStr((int)axis->useAcceleration()) + " ";
 
 		std::vector<int>* mappings = axis->getMappings();
 
