@@ -44,6 +44,7 @@ enum DLL_U EventType
 	EVENT_QUIT_TO_DESKTOP,
 	EVENT_ENABLE_MENU,
 	EVENT_ENABLE_HUD,
+	EVENT_SHOW_FULLSCREEN,
 
 	// Game-loop
 	EVENT_UPDATE,
@@ -147,6 +148,14 @@ public:
 
 	int dx;
 	int dy;
+};
+
+class DLL_U Event_SetFullscreen : public Event
+{
+public:
+	Event_SetFullscreen(bool on);
+
+	bool on;
 };
 
 /**
