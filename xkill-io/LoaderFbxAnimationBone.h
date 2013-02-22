@@ -71,7 +71,7 @@ private:
 	float keyframeLast(FbxKeyframeIndex index);
 	float keyframeInterpolate(FbxKeyframeIndex index, float time);
 
-	const char*	name_; //<! Name of the bone.
+	const char*	name_; //!< Name of the bone.
 	std::vector<std::vector<LoaderFbxAnimationKeyFrame>> keyframes_;
 };
 

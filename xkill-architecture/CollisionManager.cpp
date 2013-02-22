@@ -101,12 +101,6 @@ void CollisionManager::collision_applyDamage(Entity* entity1, Entity* entity2)
 								}
 							}
 						}
-
-						for(unsigned int k = 0; k < playerThatDiedId.size(); k++)
-						{
-							SEND_EVENT(&Event_PlayerDeath(playerThatDiedId[k]));
-							SEND_EVENT(&Event_PlaySound(Event_PlaySound::SOUND_DEATH, position, use3DAudio));
-						}
 					}
 					else
 					{

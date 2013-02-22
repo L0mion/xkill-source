@@ -97,8 +97,8 @@ struct DLL_U IAttribute
 	virtual void clean(){};
 	virtual ~IAttribute();
 
-	virtual DataItemList* getDataList();;
-	virtual void saveTo(DataItemList* list);;
+	virtual DataItemList* getDataList();
+	virtual void saveTo(DataItemList* list);
 	virtual AttributeType getType(){return ATTRIBUTE_UNKOWN;}
 	virtual std::string getName(){return "UNKOWN";}
 };
@@ -116,7 +116,7 @@ struct DLL_U Attribute_Position : public IAttribute
 	Float3 position;
 
 	DataItemList* getDataList();
-	void saveTo(DataItemList* list);;
+	void saveTo(DataItemList* list);
 	AttributeType getType(){return ATTRIBUTE_POSITION;}
 	std::string getName(){return "Position";}
 };
@@ -136,7 +136,7 @@ struct DLL_U Attribute_Spatial : public IAttribute
 	Float3 scale;
 
 	DataItemList* getDataList();
-	void saveTo(DataItemList* list);;
+	void saveTo(DataItemList* list);
 	AttributeType getType(){return ATTRIBUTE_SPATIAL;}
 	std::string getName(){return "Spatial";}
 };
@@ -155,7 +155,7 @@ public:
 	Float4 offset_rotation;
 
 	DataItemList* getDataList();
-	void saveTo(DataItemList* list);;
+	void saveTo(DataItemList* list);
 
 	void updateOffset();
 
@@ -206,7 +206,7 @@ struct DLL_U Attribute_Render : public IAttribute
 	bool cull;
 
 	DataItemList* getDataList();
-	void saveTo(DataItemList* list);;
+	void saveTo(DataItemList* list);
 	AttributeType getType(){return ATTRIBUTE_RENDER;}
 	std::string getName(){return "Render";}
 };
@@ -238,7 +238,7 @@ struct DLL_U Attribute_Physics : public IAttribute
 	bool reloadDataIntoBulletPhysics;
 
 	DataItemList* getDataList();
-	void saveTo(DataItemList* list);;
+	void saveTo(DataItemList* list);
 	AttributeType getType(){return ATTRIBUTE_PHYSICS;}
 	std::string getName(){return "Physics";}
 };
@@ -262,7 +262,7 @@ struct DLL_U Attribute_Projectile : public IAttribute
 	bool scatterDropped;
 
 	DataItemList* getDataList();
-	void saveTo(DataItemList* list);;
+	void saveTo(DataItemList* list);
 	AttributeType getType(){return ATTRIBUTE_PROJECTILE;}
 	std::string getName(){return "Projectile";}
 };
@@ -278,7 +278,7 @@ struct DLL_U Attribute_Light_Dir : public IAttribute
 
 	LightDescDir lightDir;
 	DataItemList* getDataList();
-	void saveTo(DataItemList* list);;
+	void saveTo(DataItemList* list);
 	AttributeType getType(){return ATTRIBUTE_LIGHT_DIRECTIONAL;}
 	std::string getName(){return "LightDir";}
 };
@@ -297,7 +297,7 @@ struct DLL_U Attribute_Light_Point : public IAttribute
 	LightDescPoint lightPoint;
 
 	DataItemList* getDataList();
-	void saveTo(DataItemList* list);;
+	void saveTo(DataItemList* list);
 	AttributeType getType(){return ATTRIBUTE_LIGHT_POINT;}
 	std::string getName(){return "LightPoint";}
 };
@@ -316,7 +316,7 @@ struct DLL_U Attribute_Light_Spot : public IAttribute
 	LightDescSpot lightSpot;
 
 	DataItemList* getDataList();
-	void saveTo(DataItemList* list);;
+	void saveTo(DataItemList* list);
 	AttributeType getType(){return ATTRIBUTE_LIGHT_SPOT;}
 	std::string getName(){return "LightSpot";}
 };
@@ -341,7 +341,7 @@ struct DLL_U Attribute_Input : public IAttribute
 	bool reload;
 
 	DataItemList* getDataList();
-	void saveTo(DataItemList* list);;
+	void saveTo(DataItemList* list);
 	AttributeType getType(){return ATTRIBUTE_INPUT;}
 	std::string getName(){return "Input";}
 };
@@ -361,7 +361,7 @@ struct DLL_U Attribute_InputDevice : public IAttribute
 	InputDevice* device;
 
 	DataItemList* getDataList();
-	void saveTo(DataItemList* list);;
+	void saveTo(DataItemList* list);
 	AttributeType getType(){return ATTRIBUTE_INPUTDEVICE;}
 	std::string getName(){return "InputDevice";}
 };
@@ -378,7 +378,7 @@ struct DLL_U Attribute_Sound : public IAttribute
 	AttributePtr<Attribute_Position> ptr_position;
 
 	DataItemList* getDataList();
-	void saveTo(DataItemList* list);;
+	void saveTo(DataItemList* list);
 	AttributeType getType(){return ATTRIBUTE_SOUND;}
 	std::string getName(){return "Sound";}
 };
@@ -396,7 +396,7 @@ struct DLL_U Attribute_SoundSettings : public IAttribute
 	//EventToFModConverter* converter;
 	
 	DataItemList* getDataList();
-	void saveTo(DataItemList* list);;
+	void saveTo(DataItemList* list);
 
 	AttributeType getType(){return ATTRIBUTE_SOUNDSETTINGS;}
 	std::string getName(){return "SoundSettings";}
@@ -428,7 +428,7 @@ struct DLL_U Attribute_Camera : public IAttribute
 
 	void syncSpatialWithAim();
 	DataItemList* getDataList();
-	void saveTo(DataItemList* list);;
+	void saveTo(DataItemList* list);
 	AttributeType getType(){return ATTRIBUTE_CAMERA;}
 	std::string getName(){return "Camera";}
 };
@@ -450,7 +450,7 @@ struct DLL_U Attribute_SplitScreen : public IAttribute
 
 	float getAspectRatio();
 	DataItemList* getDataList();
-	void saveTo(DataItemList* list);;
+	void saveTo(DataItemList* list);
 	AttributeType getType(){return ATTRIBUTE_SPLITSCREEN;}
 	std::string getName(){return "SplitScreen";}
 };
@@ -476,7 +476,6 @@ struct DLL_U Attribute_Player : public IAttribute
 	AttributePtr<Attribute_WeaponStats>		ptr_weaponStats;
 	AttributePtr<Attribute_Spatial>			ptr_weapon_spatial;
 	AttributePtr<Attribute_Spatial>			ptr_weaponFireLocation_spatial;
-	//AttributePtr<Attribute_Physics>			ptr_playerCorpse;
 
 	static int nextId;
 
@@ -496,13 +495,9 @@ struct DLL_U Attribute_Player : public IAttribute
 	bool jetpack;						//!< Use jetpack		
 	bool detectedAsDead;
 	bool executing;				//!< True if selected by the scheduler (ScoreComponent.cpp)
-	int corpseEntityId;			//!< The id of the corpse entity that will be create upon player death
-
-	int meshID_whenAlive;
-	int meshID_whenDead;
 
 	DataItemList* getDataList();
-	void saveTo(DataItemList* list);;
+	void saveTo(DataItemList* list);
 	AttributeType getType(){return ATTRIBUTE_PLAYER;}
 	std::string getName(){return "Player";}
 };
@@ -527,7 +522,7 @@ struct DLL_U Attribute_Mesh : public IAttribute
 	~Attribute_Mesh();				//!< Does nothing.
 
 	DataItemList* getDataList();
-	void saveTo(DataItemList* list);;
+	void saveTo(DataItemList* list);
 	AttributeType getType(){return ATTRIBUTE_MESH;}
 	std::string getName(){return "Mesh";}
 };
@@ -542,7 +537,7 @@ struct DLL_U Attribute_Health : public IAttribute
 	float healthFromLastFrame;
 
 	DataItemList* getDataList();
-	void saveTo(DataItemList* list);;
+	void saveTo(DataItemList* list);
 	AttributeType getType(){return ATTRIBUTE_HEALTH;}
 	std::string getName(){return "Health";}
 };
@@ -556,7 +551,7 @@ struct DLL_U Attribute_Damage : public IAttribute
 	int owner_entityID;
 
 	DataItemList* getDataList();
-	void saveTo(DataItemList* list);;
+	void saveTo(DataItemList* list);
 	AttributeType getType(){return ATTRIBUTE_DAMAGE;}
 	std::string getName(){return "Damage";}
 };
@@ -572,7 +567,7 @@ struct DLL_U Attribute_PlayerSpawnPoint : public IAttribute
 	float spawnArea;				//!< Defines the spawn point zone, a horizontal circle area (might have changed to sphere)
 
 	DataItemList* getDataList();
-	void saveTo(DataItemList* list);;
+	void saveTo(DataItemList* list);
 	AttributeType getType(){return ATTRIBUTE_PLAYERSPAWNPOINT;}
 	std::string getName(){return "PlayerSpawnPoint";}
 };
@@ -592,7 +587,7 @@ struct DLL_U Attribute_PickupablesSpawnPoint : public IAttribute
 	int currentNrOfExistingSpawnedPickupables;			//!< Incremented when a pickupable is spawned from this pickupables spawn point. Decremented when a pickupable is picked up.
 
 	DataItemList* getDataList();
-	void saveTo(DataItemList* list);;
+	void saveTo(DataItemList* list);
 
 	AttributeType getType(){return ATTRIBUTE_PICKUPABLESSPAWNPOINT;}
 	std::string getName(){return "PickupablesSpawnPoint";}
@@ -611,7 +606,7 @@ struct DLL_U Attribute_Pickupable : public IAttribute
 	int amount;											//! Data of pickupable (health, ammo, etc)
 
 	DataItemList* getDataList();
-	void saveTo(DataItemList* list);;
+	void saveTo(DataItemList* list);
 
 	AttributeType getType(){return ATTRIBUTE_PICKUPABLE;}
 	std::string getName(){return "Pickupable";}
@@ -619,7 +614,7 @@ struct DLL_U Attribute_Pickupable : public IAttribute
 
 class MutatorSettings;
 #include "WeaponStructs.h"
-/// Stores everything needed for the weapon system. The two enums "XKILL_Enums::AmmunitionType" and "FiringMode" is used to preset the weapon settings. These settings are used in GameComponent to simulate the weapon behavior of choice.
+/// Stores everything needed for the weapon system. The two enums "XKILL_Enums::AmmunitionType" and "XKILL_Enums::FiringModeType" is used to preset the weapon settings. These settings are used in GameComponent to simulate the weapon behavior of choice.
 /** 
 \ingroup ATTRIBUTES
 */
@@ -659,7 +654,7 @@ struct DLL_U Attribute_DebugShape : public IAttribute
 	bool			render;
 
 	DataItemList* getDataList();
-	void saveTo(DataItemList* list);;
+	void saveTo(DataItemList* list);
 	AttributeType getType(){return ATTRIBUTE_WEAPONSTATS;}
 	std::string getName(){return "WeaponStats";}
 };
@@ -676,7 +671,7 @@ struct DLL_U Attribute_ExplosionSphere : public IAttribute
 	XKILL_Enums::FiringModeType firingModeType;
 
 	DataItemList* getDataList();
-	void saveTo(DataItemList* list);;
+	void saveTo(DataItemList* list);
 	AttributeType getType(){return ATTRIBUTE_EXPLOSIONSPHERE;}
 	std::string getName(){return "ExplosionSphere";}
 };
@@ -691,7 +686,7 @@ struct DLL_U Attribute_Ray : public IAttribute
 	bool render;
 
 	DataItemList* getDataList();
-	void saveTo(DataItemList* list);;
+	void saveTo(DataItemList* list);
 
 	AttributeType getType(){return ATTRIBUTE_RAY;}
 	std::string getName(){return "Ray";}

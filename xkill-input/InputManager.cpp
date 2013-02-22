@@ -279,7 +279,7 @@ BOOL InputManager::isXInputDevice( const GUID* pGuidProductFromDirectInput )				
         goto LCleanup;																					//
 																										//
     // Loop over all devices																			//
-    for( ;; )																							//
+    for( ; ; )																							//
     {																									//
         // Get 20 at a time																				//
         hr = pEnumDevices->Next( 10000, 20, pDevices, &uReturned );										//

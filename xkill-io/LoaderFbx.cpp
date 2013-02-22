@@ -171,7 +171,7 @@ bool LoaderFbx::loadScene(std::string filename)
 
         for(int i = 0; i < animStackCount; i++)
         {
-            FbxTakeInfo* takeInfo = fbxImporter->GetTakeInfo(i);;
+            FbxTakeInfo* takeInfo = fbxImporter->GetTakeInfo(i);
 
             FBXSDK_printf("    Animation Stack %d\n", i);
             FBXSDK_printf("         Name: \"%s\"\n", takeInfo->mName.Buffer());

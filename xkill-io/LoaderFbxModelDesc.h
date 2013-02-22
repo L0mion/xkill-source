@@ -30,10 +30,10 @@ public:
 	void setTextureDesc(std::vector<LoaderFbxTextureDesc> textureDescs);
 	void setAnimationDescs(std::vector<LoaderFbxAnimationDesc> animationDescs);
 private:
-	LoaderFbxMeshDesc					meshDesc_;		 //<! Describing mesh data.
-	LoaderFbxMaterialDesc				materialDesc_;	 //<! Describing material data.
-	std::vector<LoaderFbxTextureDesc>	textureDescs_;	 //<! Describing texture data.
-	std::vector<LoaderFbxAnimationDesc>	animationDescs_; //<! Describing animation data.
+	LoaderFbxMeshDesc					meshDesc_;		 //!< Describing mesh data.
+	LoaderFbxMaterialDesc				materialDesc_;	 //!< Describing material data.
+	std::vector<LoaderFbxTextureDesc>	textureDescs_;	 //!< Describing texture data.
+	std::vector<LoaderFbxAnimationDesc>	animationDescs_; //!< Describing animation data.
 };
 
 #endif // XKILL_IO_LOADER_FBX_MODEL_DESC_H

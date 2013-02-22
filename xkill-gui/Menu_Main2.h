@@ -12,6 +12,8 @@
 #include "Menu_Ammo.h"
 #include "Menu_FiringMode.h"
 #include "Menu_Sound.h"
+#include "Menu_HUD.h"
+
 
 class Menu_Main2 : public QMainWindow, IObserver
 {
@@ -32,6 +34,7 @@ private:
 	Menu_Ammo*			ammo_Menu;
 	Menu_FiringMode*	firingMode_Menu;
 	Menu_Sound*			sound_Menu;
+	Menu_HUDManager*	hud;
 
 	void loadCustomFonts();
 	void loadOpeningGif();

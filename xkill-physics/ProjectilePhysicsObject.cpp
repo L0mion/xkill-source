@@ -6,6 +6,8 @@
 #include <xkill-utilities/AttributeManager.h>
 #include "collisionShapes.h"
 
+#define SAFE_DELETE(x) {if(x != nullptr) delete x; x = nullptr;}
+
 AttributeIterator<Attribute_Physics> itrPhysics_ProjectilePhysicsObject;
 AttributeIterator<Attribute_Projectile> itrProjectile_ProjectilePhysicsObject;
 
@@ -18,10 +20,6 @@ ProjectilePhysicsObject::ProjectilePhysicsObject()
 
 ProjectilePhysicsObject::~ProjectilePhysicsObject()
 {
-	if(localCollisionShape_)
-	{
-		delete getCollisionShape();
-	}
 }
 
 bool ProjectilePhysicsObject::subClassSpecificInitHook()
@@ -75,20 +73,28 @@ btVector3 ProjectilePhysicsObject::subClassCalculateLocalInertiaHook(btScalar ma
 
 btCollisionShape* ProjectilePhysicsObject::subClassSpecificCollisionShape()
 {
+	btCollisionShape* collisionShape = nullptr;
+
 	Entity* entity = itrPhysics_ProjectilePhysicsObject.ownerAt(attributeIndex_);
 	std::vector<int> projectileId = entity->getAttributes(ATTRIBUTE_PROJECTILE);
 	for(unsigned i=0;i<projectileId.size();i++)
 	{
 		AttributePtr<Attribute_Projectile> ptr_projectile = itrProjectile_ProjectilePhysicsObject.at(projectileId.at(i));
-		if(ptr_projectile->ammunitionType == XKILL_Enums::AmmunitionType::SCATTER)
+		switch(ptr_projectile->ammunitionType)
 		{
-			localCollisionShape_ = true;
-			return new btSphereShape(0.15f);
-		}
-		else
-		{
-			localCollisionShape_ = false;
+		case XKILL_Enums::AmmunitionType::SCATTER:
 			return PhysicsObject::subClassSpecificCollisionShape();
+			//collisionShape = CollisionShapes::Instance()->scatterProjectileCollisionShape;
+			break;
+		case XKILL_Enums::AmmunitionType::BULLET:
+			return PhysicsObject::subClassSpecificCollisionShape();
+			//collisionShape = CollisionShapes::Instance()->bulletProjectileCollisionShape;
+			break;
+		case XKILL_Enums::AmmunitionType::EXPLOSIVE:
+			return PhysicsObject::subClassSpecificCollisionShape();
+			//collisionShape = CollisionShapes::Instance()->explosiveProjectileCollisionShape;
+			break;
 		}
 	}
+	return collisionShape;
 }

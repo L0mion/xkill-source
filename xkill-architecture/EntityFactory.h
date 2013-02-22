@@ -32,23 +32,6 @@ public:
 #define CREATE_ATTRIBUTE(POINTER_NAME, ATTRIBUTE_NAME, STORAGE_NAME, OWNER_ENTITY)						\
 	AttributePtr<ATTRIBUTE_NAME> POINTER_NAME = AttributeManager::instance()->STORAGE_NAME.createAttribute(OWNER_ENTITY);
 
-	enum ModelId
-	{
-			MODEL_PLACEHOLDER			= 0,
-
-			MODEL_RIFLE					= 2,
-			MODEL_HEALTHPACK			= 3,
-			MODEL_AMMO_SINGLE			= 4,
-			MODEL_AMMO_SCATTER			= 5,
-			MODEL_AMMO_EXPLOSIVE		= 6,
-			MODEL_PROCESS				= 7,
-			MODEL_PROJECTILE_EXPLOSIVE	= 8,
-			MODEL_PROJECTILE_SCATTER	= 9,
-			MODEL_PROJECTILE_SINGLE		= 10,
-
-			MODEL_LAST
-	};
-
 	EntityFactory()
 	{
 		ATTRIBUTES_INIT_ALL;
@@ -68,6 +51,7 @@ public:
 
 		CREATE_ATTRIBUTE(ptr_render, Attribute_Render, render, entity);
 		ptr_render->ptr_spatial = ptr_spatial;
+		ptr_render->meshID = XKILL_Enums::ModelId::PLAYERCONTROLLEDCHARACTER;
 		
 		CREATE_ATTRIBUTE(ptr_physics, Attribute_Physics, physics, entity);
 		ptr_physics->ptr_spatial = ptr_spatial;
@@ -96,17 +80,11 @@ public:
 		ptr_player->ptr_camera = ptr_camera;
 		ptr_player->ptr_health = ptr_health;
 		ptr_player->ptr_weaponStats = ptr_weaponStats;
-		ptr_player->meshID_whenAlive = MODEL_PROCESS;
-		ptr_player->meshID_whenDead = MODEL_PROJECTILE_SCATTER;
-		ptr_render->meshID = ptr_player->meshID_whenAlive;
-		
+
 		CREATE_ATTRIBUTE(ptr_splitScreen, Attribute_SplitScreen, splitScreen, entity);
 		ptr_splitScreen->ptr_camera = ptr_camera;
 		ptr_splitScreen->ptr_player = ptr_player;
 
-		// Extra bindings
-		ptr_physics->meshID = ptr_render->meshID;
-		
 		// Attach weapon
 		AttributePtr<Attribute_Spatial> ptr_weapon_spatial;
 		AttributePtr<Attribute_Spatial> ptr_weaponFireLocation_spatial;
@@ -160,7 +138,7 @@ public:
 			ptr_spatial->ptr_position = ptr_position;
 			CREATE_ATTRIBUTE(ptr_render, Attribute_Render, render, entity);
 			ptr_render->ptr_spatial = ptr_spatial;
-			ptr_render->meshID = MODEL_RIFLE;
+			ptr_render->meshID = XKILL_Enums::ModelId::RIFLE;
 			CREATE_ATTRIBUTE(ptr_offset, Behavior_Offset, offset, entity);
 			ptr_offset->ptr_spatial = ptr_spatial;
 			ptr_offset->ptr_parent_spatial_position = ptr_parent_spatial_position;
@@ -182,7 +160,7 @@ public:
 			ptr_spatial->ptr_position = ptr_position;
 			/*CREATE_ATTRIBUTE(ptr_render, Attribute_Render, render, entity);
 			ptr_render->ptr_spatial = ptr_spatial;
-			ptr_render->meshID = MODEL_HEALTHPACK;*/
+			ptr_render->meshID = XKILL_Enums::ModelId::PICKUPABLE_HEALTHPACK;*/
 			CREATE_ATTRIBUTE(ptr_offset, Behavior_Offset, offset, entity);
 			ptr_offset->ptr_spatial = ptr_spatial;
 			ptr_offset->ptr_parent_spatial_position = ptr_weapon_spatial;
@@ -228,17 +206,17 @@ public:
 
 		CREATE_ATTRIBUTE(ptr_render, Attribute_Render, render, entity);
 		ptr_render->ptr_spatial = ptr_spatial;
-		ptr_render->meshID = MODEL_PROJECTILE_SINGLE;
+		ptr_render->meshID = XKILL_Enums::ModelId::PROJECTILE_BULLET;
 		switch (e->ammunitionType)
 		{
 		case XKILL_Enums::AmmunitionType::BULLET:
-			ptr_render->meshID = MODEL_PROJECTILE_SINGLE;
+			ptr_render->meshID = XKILL_Enums::ModelId::PROJECTILE_BULLET;
 			break;
 		case XKILL_Enums::AmmunitionType::EXPLOSIVE:
-			ptr_render->meshID = MODEL_PROJECTILE_EXPLOSIVE;
+			ptr_render->meshID = XKILL_Enums::ModelId::PROJECTILE_EXPLOSIVE;
 			break;
 		case XKILL_Enums::AmmunitionType::SCATTER:
-			ptr_render->meshID = MODEL_PROJECTILE_SCATTER;
+			ptr_render->meshID = XKILL_Enums::ModelId::PROJECTILE_SCATTER;
 			break;
 		default:
 			break;
@@ -337,19 +315,19 @@ public:
 		switch (e->pickupableType)
 		{
 		case XKILL_Enums::PickupableType::AMMUNITION_BULLET:
-			ptr_render->meshID = MODEL_AMMO_SINGLE;
+			ptr_render->meshID = XKILL_Enums::ModelId::PICKUPABLE_AMMO_SINGLE;
 			break;
 		case XKILL_Enums::PickupableType::AMMUNITION_SCATTER:
-			ptr_render->meshID = MODEL_AMMO_SCATTER;
+			ptr_render->meshID = XKILL_Enums::ModelId::PICKUPABLE_AMMO_SCATTER;
 			break;
 		case XKILL_Enums::PickupableType::AMMUNITION_EXPLOSIVE:
-			ptr_render->meshID = MODEL_AMMO_EXPLOSIVE;
+			ptr_render->meshID = XKILL_Enums::ModelId::PICKUPABLE_AMMO_EXPLOSIVE;
 			break;
 		case XKILL_Enums::PickupableType::MEDKIT:
-			ptr_render->meshID = MODEL_HEALTHPACK;
+			ptr_render->meshID = XKILL_Enums::ModelId::PICKUPABLE_HEALTHPACK;
 			break;
 		default:
-			ptr_render->meshID = MODEL_HEALTHPACK;
+			ptr_render->meshID = XKILL_Enums::ModelId::PICKUPABLE_HEALTHPACK;
 			break;
 		}
 
@@ -481,6 +459,7 @@ public:
 		ptr_physics->gravity = Float3(0.0f, -10.0f, 0.0f);
 	}
 
+	//not used as of 2013-02-21 17.30
 	void createCorpseEntity(Entity* entity, Event_CreateCorpse* e)
 	{
 		createRenderableEntity(entity);
@@ -509,8 +488,6 @@ public:
 			ptr_corpsePhysics->ptr_spatial->scale = ptr_physics->ptr_spatial->scale;
 
 			ptr_corpsePhysics->ptr_spatial->ptr_position->position = ptr_physics->ptr_spatial->ptr_position->position;
-
-			ptr_player->corpseEntityId = entity->getID();
 		}
 	}
 };
