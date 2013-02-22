@@ -3,21 +3,33 @@
 #include <QtGui/QMainWindow>
 #include <xkill-utilities/Util.h>
 
-#include "Menu_Main.h"
+#include <QtGui/QMainWindow>
 #include <xkill-utilities/WeaponStructs.h>
 #include <QtGui/QProgressBar>
 #include <vector>
+
+#include "ui_Menu_HUD.h"
+
 class Attribute_SplitScreen;
 
-class Menu_HUD : public QMainWindow , IObserver
+class Menu_HUD : public QWidget , IObserver
 {
 private:
 	AttributePtr<Attribute_SplitScreen> splitScreen;
+	Ui::Menu_HUD ui;
 
 public:
-	Menu_HUD(AttributePtr<Attribute_SplitScreen> splitScreen)
+	Menu_HUD(AttributePtr<Attribute_SplitScreen> splitScreen, QWidget* parent) : QWidget(parent)
 	{
+		ui.setupUi(this);
+		QWidget::setAttribute(Qt::WA_ShowWithoutActivating);
+		QWidget::setAttribute(Qt::WA_TransparentForMouseEvents);
+		
+
 		this->splitScreen = splitScreen;
+		hide();
+		move(0,0);
+
 	}
 	void mapPositionToParent()
 	{

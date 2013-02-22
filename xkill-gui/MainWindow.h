@@ -42,6 +42,7 @@ protected:
 public slots:
 	void slot_setTitle(QString title);
 	void slot_toggleFullScreen();
+	void setFullScreen(bool on);
 };
 
 #endif // MAINWINDOW_H

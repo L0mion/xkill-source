@@ -43,6 +43,7 @@ void Settings::setTimeScale( float timeScale )
 
 Settings::Settings()
 {
+	numErrors = 0;
 	soundVolume = 0.1f;
 	numPlayers = 2;
 	_timeScale = 1.0f;

@@ -7,6 +7,10 @@ Menu_HUDManager::Menu_HUDManager( QWidget* parent ) : QObject(parent)
 	ATTRIBUTES_INIT_ALL;
 
 	this->parent = parent;
+
+	// Events
+	SUBSCRIBE_TO_EVENT(this, EVENT_ENABLE_HUD);
+	SUBSCRIBE_TO_EVENT(this, EVENT_STARTGAME);
 }
 
 void Menu_HUDManager::onEvent( Event* e )
@@ -45,13 +49,12 @@ void Menu_HUDManager::mapHudsToSplitscreen()
 		delete huds[i];
 	}
 	huds.clear();
-	
 
 	// Map new HUDs to split screens
 	while(itrSplitScreen.hasNext())
 	{
 		AttributePtr<Attribute_SplitScreen> ptr_splitScreen = itrSplitScreen.getNext();
-		huds.push_back(new Menu_HUD(ptr_splitScreen));
+		huds.push_back(new Menu_HUD(ptr_splitScreen, parent));
 	}
 }
 
