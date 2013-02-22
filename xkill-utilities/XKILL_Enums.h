@@ -80,6 +80,8 @@ namespace XKILL_Enums
 		PROJECTILE_SCATTER			= 9,
 		PROJECTILE_BULLET			= 10,
 
+		BOX							= 13,
+
 		MODEL_LAST
 	};
 }
