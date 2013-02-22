@@ -270,6 +270,11 @@ Event_ClosestRayCast::Event_ClosestRayCast(Float3 from, Float3 to, short collisi
 	this->collisionFilterMask = collisionFilterMask;
 }
 
+Event_PlayerExecuting::Event_PlayerExecuting(int executingPlayerIndex) : Event(EVENT_PLAYER_EXECUTING)
+{
+	this->executingPlayerIndex = executingPlayerIndex;
+}
+
 Event_GetFileList::Event_GetFileList(std::string filepath, std::string extension) : Event(EVENT_GET_FILE_LIST)
 {
 	this->filepath = filepath;

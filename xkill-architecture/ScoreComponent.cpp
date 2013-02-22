@@ -114,6 +114,7 @@ void ScoreComponent::schedulerScoreCounting(float delta)
 					schedulerTimer_->resetTimer();
 
 					// Send event to notify other components that we're leaving execution mode
+					SEND_EVENT(&Event(EVENT_PLAYER_DONE_EXECUTING));
 				}
 			}
 		}
@@ -164,7 +165,9 @@ void ScoreComponent::schedulerScoreCounting(float delta)
 
 				AttributePtr<Attribute_Player> player = itrPlayer.at(executingPlayerIndex_);
 				player->executing = true;
+
 				// Send event to notify other components that we're entering execution mode
+				SEND_EVENT(&Event_PlayerExecuting(executingPlayerIndex_));
 			}
 		}
 	}

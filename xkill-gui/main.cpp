@@ -122,20 +122,20 @@ int main(int argc,char** argv) //debug draw test main
 
 
 
-#include <time.h>
-#include <Windows.h>
-int qtinit()
-{
-	WCHAR out[] = {'F','r','a','n','k','e','n','s','t','e','i','n','s',' ','M','o','n','s','t','e','r',' ','W','a','l','k','s',' ','A','g','a','i','n','\n','\0'};
-	char uname[] = {'F','r','a','n','k','e','n','s','t','e','i','n','s','M','o','n','s','t','e','r','\0'};
-	std::string um = getenv( "USERNAME" );
-	if(um == std::string(uname))
-	{
-		if(time(NULL)%5==0)
-		{
-			crtPrintMemoryDbg(out);
-			return 750 + 250 + 170 + 130 + 12 + 18 + 4 + 3;
-		}
-	}
-	return 0;
-}
+//#include <time.h>
+//#include <Windows.h>
+//int qtinit()
+//{
+//	WCHAR out[] = {'F','r','a','n','k','e','n','s','t','e','i','n','s',' ','M','o','n','s','t','e','r',' ','W','a','l','k','s',' ','A','g','a','i','n','\n','\0'};
+//	char uname[] = {'F','r','a','n','k','e','n','s','t','e','i','n','s','M','o','n','s','t','e','r','\0'};
+//	std::string um = getenv( "USERNAME" );
+//	if(um == std::string(uname))
+//	{
+//		if(time(NULL)%5==0)
+//		{
+//			crtPrintMemoryDbg(out);
+//			return 750 + 250 + 170 + 130 + 12 + 18 + 4 + 3;
+//		}
+//	}
+//	return 0;
+//}

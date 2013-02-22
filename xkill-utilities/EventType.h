@@ -81,6 +81,8 @@ enum DLL_U EventType
 	EVENT_PHYSICS_ATTRIBUTES_COLLIDING,
 	EVENT_SYNC_STATE_COMMAND,
 	EVENT_CLOSEST_RAY_CAST,
+	EVENT_PLAYER_EXECUTING,
+	EVENT_PLAYER_DONE_EXECUTING,
 	EVENT_GET_FILE_LIST,
 
 	// Creation/Destruction
@@ -634,6 +636,14 @@ public:
 	int EntityIdOfOwnerToClosestPhysicsObjectHitByRay;	//!< Set to 0 if no entity was hit by the ray.
 	Float3 ClosestHitPoint;								//!< The world space hit point where the ray hit the physics object
 };
+
+class DLL_U Event_PlayerExecuting : public Event
+{
+public:
+	Event_PlayerExecuting(int executingPlayerIndex);
+
+	int executingPlayerIndex;
+};	
 
 class DLL_U Event_GetFileList : public Event
 {
