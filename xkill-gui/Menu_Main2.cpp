@@ -59,6 +59,7 @@ Menu_Main2::Menu_Main2( QWidget* parent ) : QMainWindow()
 	ui.frame_audio->hide();
 	ui.frame_input->hide();
 	ui.frame_credits->hide();
+	show();
 
 	// show main menu
 	push_menu(ui.frame_opening);
@@ -215,8 +216,13 @@ void Menu_Main2::alwaysOnTop( bool on )
 {
 	if(on)
 	{
-		// Enable Window Stay on Top flag
-		this->setWindowFlags(this->windowFlags() | Qt::WindowStaysOnTopHint);
+		// Only set if no errors occured
+		// This prevents a bug where the window cannot be closed
+		if(SETTINGS->numErrors == 0)
+		{
+			// Enable Window Stay on Top flag
+			this->setWindowFlags(this->windowFlags() | Qt::WindowStaysOnTopHint);
+		}
 	}
 	else
 	{
@@ -269,10 +275,13 @@ void Menu_Main2::onEvent( Event* e )
 			//sound_Menu->setSettingsMenu();
 
 			// Display menu
-			this->show();
+			showMenu();
 		}
 		else
-			this->hide();
+		{
+			// Hide menu
+			hideMenu();
+		}
 		break;
 	case EVENT_WINDOW_MOVE:
 		event_windowMove((Event_WindowMove*)e);

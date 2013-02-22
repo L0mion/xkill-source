@@ -130,6 +130,7 @@ void CollisionShapes::loadCollisionShapes()
 	filename = filename.append("/");
 	filename = filename.append(settings->currentLevel);
 	filename = filename.append(".bullet");
+	SHOW_MESSAGEBOX("Blarg");
 	if(!importer_->loadFile(filename.c_str()))
 	{
 		DEBUGPRINT("Level .bullet-file could not be loaded");
