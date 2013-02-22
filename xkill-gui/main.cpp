@@ -2,7 +2,7 @@
 #include <QtGui/QApplication>
 
 #pragma warning(disable: 4099)
-#define crtPrintMemoryDbg OutputDebugString
+//#define crtPrintMemoryDbg OutputDebugString
 //#include <vld.h>
 
 /// If you can't tell what the main() is for you should have your programming license revoked

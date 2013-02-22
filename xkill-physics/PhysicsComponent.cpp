@@ -317,12 +317,12 @@ void PhysicsComponent::onEvent(Event* e)
 			}
 			else
 			{
-				SHOW_MESSAGEBOX("Invalid physics attribute id when handling event of type EVENT_MODIFY_PHYSICS_OBJECT, error 1");
+				ERROR_MESSAGEBOX("Invalid physics attribute id when handling event of type EVENT_MODIFY_PHYSICS_OBJECT, error 1");
 			}
 		}
 		else
 		{
-			SHOW_MESSAGEBOX("Invalid physics attribute id when handling event of type EVENT_MODIFY_PHYSICS_OBJECT, error 2");
+			ERROR_MESSAGEBOX("Invalid physics attribute id when handling event of type EVENT_MODIFY_PHYSICS_OBJECT, error 2");
 		}
 		break;
 	}
@@ -414,7 +414,7 @@ void PhysicsComponent::synchronizeWithAttributes(AttributePtr<Attribute_Physics>
 			physicsObjects_->at(physicsAttributeIndex) = new PropPhysicsObject();
 			break;
 		case XKILL_Enums::PhysicsAttributeType::EVERYTHING:
-			SHOW_MESSAGEBOX("Error: Attribute_Physics should not have EVERYTHING as collisionFilterGroup");
+			ERROR_MESSAGEBOX("Error: Attribute_Physics should not have EVERYTHING as collisionFilterGroup");
 			break;
 		}
 
@@ -434,7 +434,7 @@ void PhysicsComponent::synchronizeWithAttributes(AttributePtr<Attribute_Physics>
 			}
 			else
 			{
-				SHOW_MESSAGEBOX("-->Error initializing PhysicsObject. PhysicsComponent::synchronizeWithAttributes failed");
+				ERROR_MESSAGEBOX("-->Error initializing PhysicsObject. PhysicsComponent::synchronizeWithAttributes failed");
 			}
 		}
 	}

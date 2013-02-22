@@ -59,7 +59,7 @@ HRESULT ManagementTex::handleTexDesc(
 			device);
 		if(FAILED(hr))
 		{
-			SHOW_MESSAGEBOX("ManagementTex::handleTexDesc Could not load texture: " + texFileName);
+			ERROR_MESSAGEBOX("ManagementTex::handleTexDesc Could not load texture: " + texFileName);
 		}
 	}
 
@@ -111,7 +111,7 @@ void ManagementTex::pushTex(
 			" already exists in TexManagement under Index " + 
 			uintToString(texsIndex)							+ 
 			".";
-		SHOW_MESSAGEBOX(errorMsg);
+		ERROR_MESSAGEBOX(errorMsg);
 	}
 }
 

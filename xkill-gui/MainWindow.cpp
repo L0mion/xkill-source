@@ -57,7 +57,6 @@ MainWindow::MainWindow()
 	new Menu_Editor(ui, this);
 	menu = new Menu_Main2(this);
 	
-
 	// setup signals and slots
 	connect(ui.actionFullscreen,			SIGNAL(triggered()),					this,			SLOT(slot_toggleFullScreen()));
 	connect(ui.actionCap_FPS,				SIGNAL(toggled(bool)),					gameWidget,		SLOT(slot_toggleCapFPS(bool)));
@@ -69,12 +68,12 @@ MainWindow::MainWindow()
 	// Listen to incomming event
 	this->installEventFilter(this);
 
+	slot_toggleFullScreen();			//Fullscreen
 
-	// Start RELEASE in fullscreen, and DEBUG in Windowed, also avoid menu if DEBUG
-	slot_toggleFullScreen();
+	// DEBUG build specific settings (setAlwaysOnTopAndShow(false) is set in Menu_Main2::Menu_Main2() if DEBUG)
 #if defined(DEBUG) || defined(_DEBUG)
-	slot_toggleFullScreen();
-	//SEND_EVENT(&Event(EVENT_STARTGAME)); //Skips menu in DEBUG
+	slot_toggleFullScreen();			//Windowed
+	SEND_EVENT(&Event(EVENT_STARTGAME));//Skips menu in DEBUG
 #endif
 }
 
@@ -135,11 +134,24 @@ void MainWindow::keyPressEvent( QKeyEvent* e )
 		{
 			// Return to menu
 		case Qt::Key_Escape:
+			menu->setAlwaysOnTopAndShow(true);
 			SEND_EVENT(&Event_EnableMenu(true));
 			break;
 		default:
 			break;
 		}
+	}
+	if(GET_STATE() == STATE_MAINMENU)
+	{
+		//switch(e->key())
+		//{
+		//case Qt::Key_Escape:
+		//	menu->setAlwaysOnTopAndShow(false);	//check
+		//	SEND_EVENT(&Event_EnableMenu(false)); //check
+		//	break;
+		//default:
+		//	break;
+		//}
 	}
 	if(GET_STATE() == STATE_GAMEOVER)
 	{
@@ -149,7 +161,6 @@ void MainWindow::keyPressEvent( QKeyEvent* e )
 		case Qt::Key_Escape:
 			GET_STATE() = STATE_MAINMENU;
 			SEND_EVENT(&Event_EndDeathmatch());
-			SEND_EVENT(&Event_StartDeathmatch(0));	//To get a black background, for now run the game with zero players
 			break;
 		default:
 			break;
@@ -237,7 +248,7 @@ void MainWindow::event_showMessageBox( Event_ShowMessageBox* e )
 	SEND_EVENT(&Event_SetFullscreen(false));
 	if(menu != NULL)
 	{
-		menu->alwaysOnTop(false);
+		menu->setAlwaysOnTopAndShow(false);
 	}
 
 	// Show message

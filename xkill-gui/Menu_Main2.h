@@ -69,7 +69,7 @@ public:
 
 	void onEvent(Event* e);
 	void event_windowMove(Event_WindowMove* e);
-	void alwaysOnTop(bool on);
+	void setAlwaysOnTopAndShow(bool on);
 	void closeEvent(QCloseEvent* event);
 	void event_windowResize(Event_WindowResize* e);
 

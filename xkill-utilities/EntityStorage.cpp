@@ -68,7 +68,7 @@ void EntityStorage::deleteEntity( int id )
 	if(id == 0)
 	{
 		std::string message = "Trying to delete 'Entity 0'. Entity 0 is used to mark deleted Attributes and is not allowed to be deleted.";
-		SHOW_MESSAGEBOX(message);
+		ERROR_MESSAGEBOX(message);
 	}
 	// ELSE: Delete Entity
 	else

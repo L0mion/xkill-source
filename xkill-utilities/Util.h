@@ -46,7 +46,7 @@
 	EventManager::getInstance()->addObserver(Subscriber, EventType);
 
 // Fetches a owners of a specific Attribute from AttributeManager
-#define SHOW_MESSAGEBOX(Message)									\
+#define ERROR_MESSAGEBOX(Message)									\
 {																	\
 	Event_ShowMessageBox e(Message);								\
 	EventManager::getInstance()->sendEvent(&e);						\

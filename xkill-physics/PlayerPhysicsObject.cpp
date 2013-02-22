@@ -158,7 +158,7 @@ void PlayerPhysicsObject::handleInput(float delta)
 	std::vector<int> playerAttributes = itrPhysics_3.ownerAt(attributeIndex_)->getAttributes(ATTRIBUTE_PLAYER);
 	if(playerAttributes.size() > 1)
 	{
-		SHOW_MESSAGEBOX("More than one controller for one player. Not tested.")
+		ERROR_MESSAGEBOX("More than one controller for one player. Not tested.")
 	}
 	for(unsigned int i=0;i<playerAttributes.size();i++)
 	{

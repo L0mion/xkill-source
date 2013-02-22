@@ -262,7 +262,7 @@ void CollisionManager::collision_projectile(Entity* entity1, Entity* entity2)
 						break;
 					}
 				default:
-					SHOW_MESSAGEBOX("PhysicsAttribute collision: unknown ammunitionType"); 
+					ERROR_MESSAGEBOX("PhysicsAttribute collision: unknown ammunitionType"); 
 					break;
 				}
 			}

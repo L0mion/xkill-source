@@ -134,7 +134,7 @@ void CollisionShapes::loadCollisionShapes()
 	std::string path = std::string("../../xkill-resources/xkill-level/") + settings->currentLevel + "/" + settings->currentLevel + ".bullet";
 	if(!importer_->loadFile(path.c_str()))
 	{
-		SHOW_MESSAGEBOX("Level .bullet-file could not be loaded.\nPath: " + path);
+		ERROR_MESSAGEBOX("Level .bullet-file could not be loaded.\nPath: " + path);
 	}
 
 	//--------------------------------------------------------------------------------------

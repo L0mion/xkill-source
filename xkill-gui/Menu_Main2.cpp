@@ -15,7 +15,7 @@ void Menu_Main2::loadOpeningGif()
 	std::string fileName = "../../xkill-resources/xkill-gui/images/animations/menu_opening.gif"; 
 	openingAnimation->setFileName(fileName.c_str());
 	if(!openingAnimation->isValid()) // error checking
-		SHOW_MESSAGEBOX("Could not open " + fileName + ". Either the file is missing, or \"imageformats/qgif4.dll\" is missing.");
+		ERROR_MESSAGEBOX("Could not open " + fileName + ". Either the file is missing, or \"imageformats/qgif4.dll\" is missing.");
 	openingAnimation->setParent(this); // prevents memory leaks
 	ui.label_openingAnimation->setMovie(openingAnimation);
 	openingAnimation->start();
@@ -30,9 +30,14 @@ Menu_Main2::Menu_Main2( QWidget* parent ) : QMainWindow()
 	this->parent = parent;
 	ui.setupUi(this);
 	QWidget::setWindowFlags(Qt::FramelessWindowHint);
-	alwaysOnTop(true);
-	QWidget::setAttribute(Qt::WA_TranslucentBackground);
-	QWidget::show();
+	QWidget::setAttribute(Qt::WA_TranslucentBackground);		
+	
+	setAlwaysOnTopAndShow(true);
+#if defined(DEBUG) || defined(_DEBUG)
+	setAlwaysOnTopAndShow(false);	//May interfere with debugging using breakpoints if not set to false in DEBUG
+#endif
+	
+	//QWidget::show();
 	loadOpeningGif();
 
 	// Events
@@ -115,7 +120,6 @@ Menu_Main2::Menu_Main2( QWidget* parent ) : QMainWindow()
 	SEND_EVENT(&Event_LoadLevel(levelNames[0]));
 	SETTINGS->currentLevel = levelNames[0];
 	//ui.comboBox_LevelSelect->setModel(levelListModel);
-
 }
 
 void Menu_Main2::mousePressEvent( QMouseEvent *e )
@@ -146,7 +150,7 @@ void Menu_Main2::loadCustomFonts()
 			if(fontWarningShown == false)
 			{
 				std::string fontName = (*constIterator).toStdString();
-				SHOW_MESSAGEBOX("Problem loading custom font \"" + fontName + "\".");
+				ERROR_MESSAGEBOX("Problem loading custom font \"" + fontName + "\".");
 				fontWarningShown = true;
 			}
 		} 
@@ -155,7 +159,7 @@ void Menu_Main2::loadCustomFonts()
 			fontID = QFontDatabase::addApplicationFontFromData(res.readAll());
 			if (fontID == -1 && fontWarningShown == false)
 			{
-				SHOW_MESSAGEBOX("Problem loading custom font");
+				ERROR_MESSAGEBOX("Problem loading custom font");
 				fontWarningShown = true;
 			}
 		}
@@ -212,16 +216,21 @@ void Menu_Main2::menuResize()
 	topMenu->resize(width(), height());
 }
 
-void Menu_Main2::alwaysOnTop( bool on )
+void Menu_Main2::setAlwaysOnTopAndShow( bool on )
 {
-	if(on)
+	// Only set if no errors occured
+	// This prevents a bug where the window cannot be closed
+	if(SETTINGS->numErrors == 0)
 	{
-		// Only set if no errors occured
-		// This prevents a bug where the window cannot be closed
-		if(SETTINGS->numErrors == 0)
+		if(on)
 		{
 			// Enable Window Stay on Top flag
 			this->setWindowFlags(this->windowFlags() | Qt::WindowStaysOnTopHint);
+		}
+		else
+		{
+			// Disable Window Stay on Top flag
+			this->setWindowFlags(this->windowFlags() & ~Qt::WindowStaysOnTopHint);
 		}
 	}
 	else
@@ -229,6 +238,8 @@ void Menu_Main2::alwaysOnTop( bool on )
 		// Disable Window Stay on Top flag
 		this->setWindowFlags(this->windowFlags() & ~Qt::WindowStaysOnTopHint);
 	}
+
+	this->show();
 }
 
 void Menu_Main2::event_windowMove( Event_WindowMove* e )

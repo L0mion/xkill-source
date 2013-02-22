@@ -72,7 +72,7 @@ bool IOComponent::initTexDescs()
 			sucessfulLoad = initTexDesc(texDescFiles.at(i));
 	}
 	else
-		SHOW_MESSAGEBOX("Couldn't locate any .texdesc-files in xkill-resources/.");
+		ERROR_MESSAGEBOX("Couldn't locate any .texdesc-files in xkill-resources/.");
 
 	return sucessfulLoad;
 }
@@ -104,7 +104,7 @@ bool IOComponent::initTexDesc(std::string filename)
 	else
 	{
 		std::string errorMsg = "Failed to load .texdesc-file: " + filename;
-		SHOW_MESSAGEBOX(errorMsg);
+		ERROR_MESSAGEBOX(errorMsg);
 	}
 	
 	//Clear memory allocated
@@ -127,7 +127,7 @@ bool IOComponent::initMdlDescs()
 	}
 	else
 	{
-		SHOW_MESSAGEBOX("Couldn't locate any .mdldesc-files in xkill-resources/.");
+		ERROR_MESSAGEBOX("Couldn't locate any .mdldesc-files in xkill-resources/.");
 	}
 	//Settings* settings = ATTRIBUTE_MANAGER->settings;
 	//sucessfulLoad = initLvlMdlDesc(settings->currentLevel);
@@ -160,7 +160,7 @@ bool IOComponent::initMdlDesc(std::string filename)
 	else
 	{
 		std::string errorMsg = "Failed to load .mdldesc-file: " + filename;
-		SHOW_MESSAGEBOX(errorMsg);
+		ERROR_MESSAGEBOX(errorMsg);
 	}
 	
 	//Clear memory allocated
@@ -199,7 +199,7 @@ bool IOComponent::initLvlMdlDesc(std::string filename)
 	else
 	{
 		std::string errorMsg = "Failed to load .mdldesc-file: " + filename;
-		SHOW_MESSAGEBOX(errorMsg);
+		ERROR_MESSAGEBOX(errorMsg);
 	}
 	
 	//Clear memory allocated
@@ -257,7 +257,7 @@ bool IOComponent::loadModel(
 	else
 	{
 		std::string errorMsg = "Could not load model: " + modelPath + modelName;
-		SHOW_MESSAGEBOX(errorMsg);
+		ERROR_MESSAGEBOX(errorMsg);
 	}
 
 	return successfulLoad;
@@ -297,7 +297,7 @@ bool IOComponent::loadObj(
 	//else
 	//{
 	//	std::string errorMsg = "Could not load model: " + modelPath + modelName;
-	//	SHOW_MESSAGEBOX(errorMsg);
+	//	ERROR_MESSAGEBOX(errorMsg);
 	//}
 
 	delete objMaker;
