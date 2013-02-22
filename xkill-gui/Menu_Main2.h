@@ -40,7 +40,29 @@ private:
 	void loadOpeningGif();
 	void push_menu(QFrame* menu);
 	void pop_menu();
-	void menuResize();
+	void menuResize(); 
+	bool isHidden()
+	{
+		
+	}
+	void hideMenu()
+	{
+		if(menuStack.size() > 0)
+		{
+			QFrame* topMenu = menuStack.back();
+			topMenu->hide();
+			ui.label_background->hide();
+		}
+	}
+	void showMenu()
+	{
+		if(menuStack.size() > 0)
+		{
+			QFrame* topMenu = menuStack.back();
+			topMenu->show();
+			ui.label_background->show();
+		}
+	}
 public:
 	Menu_Main2(QWidget* parent);
 	~Menu_Main2();

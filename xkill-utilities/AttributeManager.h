@@ -13,6 +13,7 @@ private:
 	float _timeScale;
 
 public:
+	int numErrors;
 	int numPlayers;
 	bool showDebugPhysics;
 	std::string currentLevel;

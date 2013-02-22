@@ -285,3 +285,8 @@ Event_LoadLevel::Event_LoadLevel(std::string levelName) : Event(EVENT_LOAD_LEVEL
 {
 	this->levelName = levelName;
 }
+
+Event_SetFullscreen::Event_SetFullscreen( bool on ) : Event(EVENT_SHOW_FULLSCREEN)
+{
+	this->on = on;
+}
