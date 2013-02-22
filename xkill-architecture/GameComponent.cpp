@@ -807,9 +807,12 @@ void GameComponent::updateAndInterpretAimingRay(Entity* playerEntity, AttributeP
 			ray->to = closestHitPoint;
 
 			Float3 rayVector = (ray->to - ray->from);
-			ray->ptr_render->ptr_spatial->ptr_position->position = ray->from;//rayVector/2.0f + ray->from;
-			ray->ptr_render->ptr_spatial->scale = Float3(0.1f, 0.1f, 0.1f);//rayVector.length()/2.0f);
-			ray->ptr_render->ptr_spatial->rotation = rayCastingPlayerAttribute->ptr_weapon_spatial->rotation;//rayCastingPlayerAttribute->ptr_camera->ptr_spatial->rotation;
+			ray->ptr_render->ptr_spatial->ptr_position->position = rayVector/2.0f + ray->from;
+			ray->ptr_render->ptr_spatial->scale = Float3(0.01f, 0.01f, rayVector.length()/2.0f);
+			ray->ptr_render->ptr_spatial->rotation = rayCastingPlayerAttribute->ptr_weaponFireLocation_spatial->rotation;//rayCastingPlayerAttribute->ptr_camera->ptr_spatial->rotation;
+
+			//ray->ptr_render->cull = false;
+			ray->render = false;
 
 			//--------------------------------------------------------------------------------------
 			// If the player is executing, interpret the aiming ray as a Laser Automatic Sniper Execution Ray

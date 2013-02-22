@@ -145,6 +145,7 @@ private:
 	ManagementSprites*  managementSprites_;		//!< Maintaining sprites.
 
 	ID3D11Buffer* debugLinesVertexBuffer_;		//!< Might want to move this into some manager of some sort.
+	ID3D11Buffer*			rayBuffer;
 
 	//std::vector<int>* attributesRenderOwner_;	//!< Holds owners of render-attributes.
 	//std::vector<int>* attributesCameraOwner_;

@@ -56,6 +56,7 @@ Renderer::Renderer(HWND windowHandle)
 	ATTRIBUTES_INIT_ALL;
 
 	debugLinesVertexBuffer_ = nullptr;
+	rayBuffer				= nullptr;
 
 	//temp
 	m3dLoader_		= nullptr;
@@ -83,6 +84,7 @@ Renderer::~Renderer()
 	SAFE_DELETE(managementDebug_);
 
 	SAFE_RELEASE(debugLinesVertexBuffer_);
+	SAFE_RELEASE(rayBuffer);
 
 	//temp
 //	SAFE_DELETE(m3dLoader_);
@@ -1020,7 +1022,6 @@ void Renderer::drawBulletPhysicsDebugLines(
 
 void Renderer::drawLaser(DirectX::XMFLOAT4X4 viewMatrix, DirectX::XMFLOAT4X4 projectionMatrix)
 {
-	ID3D11Buffer*			rayBuffer;
 	ID3D11Device*			device = managementD3D_->getDevice();
 	ID3D11DeviceContext*	devcon = managementD3D_->getDeviceContext();
 
