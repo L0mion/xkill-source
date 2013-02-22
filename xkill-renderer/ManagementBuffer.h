@@ -44,7 +44,7 @@ enum SET_TYPE
 {
 	SET_TYPE_SRV,
 	SET_TYPE_RTV,
-	SET_TYPE_UAV
+	SET_TYPE_UAV,
 };
 enum SET_STAGE
 {
@@ -55,7 +55,7 @@ enum SET_ID
 {
 	SET_ID_GLOW_HIGH,
 	SET_ID_GLOW_LOW,
-	SET_ID_GLOW_LOW_UTIL
+	SET_ID_GLOW_LOW_UTIL,
 };
 
 class ManagementBuffer
@@ -87,9 +87,9 @@ public:
 		unsigned int shaderRegister);
 
 	D3D11_VIEWPORT getDownSampledViewport();
+	D3D11_VIEWPORT getShadowViewport();
 
-	Buffer_SrvRtvUav* getGlowLow() { return glowLow_; }
-	Buffer_SrvRtvUav* getGlowLowUtil() { return glowLowUtil_; }
+	Buffer_SrvDsv* getShadow() { return shadowMap_; }
 protected:
 private:
 	HRESULT initAlbedo(ID3D11Device* device);
@@ -119,6 +119,7 @@ private:
 	Buffer_SrvRtvUav* glowLowUtil_;
 
 	Buffer_SrvDsv* shadowMap_;
+	D3D11_VIEWPORT shadowViewport_;
 };
 
 #endif //XKILL_RENDERER_MANAGEMENTBUFFER_H

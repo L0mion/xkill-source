@@ -1,4 +1,5 @@
 #include <xkill-utilities/Util.h>
+#include <DirectXMath.h>
 
 #include "ManagementD3D.h"
 #include "ManagementFX.h"
@@ -27,8 +28,16 @@
 #include "Renderer.h"
 #include "ViewportData.h"
 
-//temp
-#include "Buffer_SrvRtvUav.h"
+//tmep
+#include "Buffer_SrvDsv.h"
+
+struct BoundingSphere
+{
+	DirectX::XMFLOAT3 center;
+	float radius;
+
+	BoundingSphere() { center = DirectX::XMFLOAT3(0.0f, 0.0f, 0.0f); radius = 0.0f; }
+};
 
 ATTRIBUTES_DECLARE_ALL;
 
@@ -388,6 +397,9 @@ void Renderer::render()
 
 	ViewportData vpData;
 
+	//Do shadows pre-pass:
+	buildShadows();
+
 	managementBuffer_->setBuffersAndDepthBufferAsRenderTargets(devcon, managementD3D_->getDepthBuffer());
 
 	//Render each split-screen separately
@@ -469,7 +481,7 @@ void Renderer::renderViewportToGBuffer(ViewportData& vpData)
 	std::map<unsigned int, InstancedData*> instancesMap = managementInstance_->getInstancesMap();
 	for(std::map<unsigned int, InstancedData*>::iterator i = instancesMap.begin(); i != instancesMap.end(); i++)
 	{
-		renderInstance(i->first, i->second);
+		renderInstance(i->first, i->second, false);
 	}
 
 	//Make me use iterators!
@@ -557,7 +569,7 @@ void Renderer::renderViewportToBackBuffer(ViewportData& vpData)
 	//devcon->CSSetSamplers(0, 0, nullptr); //move me into managementSS
 }
 
-void Renderer::renderInstance(unsigned int meshID, InstancedData* instance)
+void Renderer::renderInstance(unsigned int meshID, InstancedData* instance, bool shadowmap)
 {
 	ID3D11Device*			device = managementD3D_->getDevice();
 	ID3D11DeviceContext*	devcon = managementD3D_->getDeviceContext();
@@ -565,7 +577,7 @@ void Renderer::renderInstance(unsigned int meshID, InstancedData* instance)
 	//Fetch renderer representation of model.
 	ModelD3D* modelD3D	= managementModel_->getModelD3D(meshID, device);
 
-	ShadingDesc shadingDesc = deriveShadingDesc(modelD3D->getVertexType());
+	ShadingDesc shadingDesc = deriveShadingDesc(modelD3D->getVertexType(), shadowmap);
 	setShadingDesc(shadingDesc);
 
 	//Set vertex buffer.
@@ -586,7 +598,8 @@ void Renderer::renderInstance(unsigned int meshID, InstancedData* instance)
 		renderSubset(
 			subsetD3Ds[i],
 			materials[materialIndex],
-			instance->getDataCountCur());
+			instance->getDataCountCur(),
+			shadowmap);
 	}
 
 	//Unset vertex buffers. (In case of the instance buffer needing to be mapped to in ManagementInstance)
@@ -599,7 +612,7 @@ void Renderer::renderInstance(unsigned int meshID, InstancedData* instance)
 		offset);
 }
 
-ShadingDesc Renderer::deriveShadingDesc(VertexType vertexType)
+ShadingDesc Renderer::deriveShadingDesc(VertexType vertexType, bool shadowmap)
 {
 	ShadingDesc shadingDesc;
 	switch(vertexType)
@@ -628,6 +641,9 @@ ShadingDesc Renderer::deriveShadingDesc(VertexType vertexType)
 		}
 	}
 
+	if(shadowmap)
+		shadingDesc.psID_ = SHADERID_PS_BUILD_SHADOWMAP_POS_NORM_TEX;
+
 	return shadingDesc;
 }
 void Renderer::setShadingDesc(ShadingDesc shadingDesc)
@@ -645,31 +661,35 @@ void Renderer::setShadingDesc(ShadingDesc shadingDesc)
 void Renderer::renderSubset(
 	SubsetD3D* subset, 
 	MaterialDesc& material, 
-	unsigned int numInstances)
+	unsigned int numInstances,
+	bool shadowmap)
 {
 	ID3D11Device*			device = managementD3D_->getDevice();
 	ID3D11DeviceContext*	devcon = managementD3D_->getDeviceContext();
 
-	//Set textures.
-	ID3D11ShaderResourceView* texAlbedo = managementTex_->getTexSrv(material.idAlbedoTex_);
-	ID3D11ShaderResourceView* texNormal = managementTex_->getTexSrv(material.idNormalTex_);
-	devcon->PSSetShaderResources(0, 1, &texAlbedo);
-	devcon->PSSetShaderResources(1, 1, &texNormal);
-
-	//Set per-subset constant buffer.
-	managementCB_->setCB(
-		CB_TYPE_SUBSET, 
-		TypeFX_PS, 
-		CB_REGISTER_SUBSET, 
-		devcon);
-	DirectX::XMFLOAT3 dxSpec(
-		material.specularTerm_.x, 
-		material.specularTerm_.y, 
-		material.specularTerm_.z);
-	managementCB_->updateCBSubset(
-		devcon,
-		dxSpec,
-		material.specularPower_);
+	//Only set such resources if needed. These are not needed during shadow-pass.
+	if(!shadowmap)
+	{
+		ID3D11ShaderResourceView* texAlbedo = managementTex_->getTexSrv(material.idAlbedoTex_);
+		ID3D11ShaderResourceView* texNormal = managementTex_->getTexSrv(material.idNormalTex_);
+		devcon->PSSetShaderResources(0, 1, &texAlbedo);
+		devcon->PSSetShaderResources(1, 1, &texNormal);
+	
+		//Set per-subset constant buffer.
+		managementCB_->setCB(
+			CB_TYPE_SUBSET, 
+			TypeFX_PS, 
+			CB_REGISTER_SUBSET, 
+			devcon);
+		DirectX::XMFLOAT3 dxSpec(
+			material.specularTerm_.x, 
+			material.specularTerm_.y, 
+			material.specularTerm_.z);
+		managementCB_->updateCBSubset(
+			devcon,
+			dxSpec,
+			material.specularPower_);
+	}
 
 	//Set index-buffer.
 	UINT offset = 0;
@@ -678,7 +698,6 @@ void Renderer::renderSubset(
 		DXGI_FORMAT_R32_UINT, 
 		offset);
 
-	//Set topology. Where to put this?
 	devcon->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
 	//Draw subset.
@@ -740,6 +759,123 @@ void Renderer::renderDebugShape(
 	devcon->Draw(numVertices, 0);
 }
 
+//Shadows
+void Renderer::buildShadows()
+{
+	ID3D11DeviceContext* devcon = managementD3D_->getDeviceContext();
+
+	//Get shadow transform:
+	BoundingSphere sphere;
+	sphere.center = DirectX::XMFLOAT3(0.0f, 0.0f, 0.0f);
+	sphere.radius = sqrtf(25.0f * 25.0f);//10.0f * 10.0f + 15.0f * 15.0f);
+
+	LightDescDir dirLight;
+	AttributePtr<Attribute_Light_Dir> ptr_lightDir;
+	if(itrLightDir.hasNext())
+	{
+		ptr_lightDir = itrLightDir.getNext();
+		dirLight = ptr_lightDir->lightDir;
+
+		static float rotationAngle = 0.0f;
+		rotationAngle += 0.0001f;
+		DirectX::XMMATRIX R = DirectX::XMMatrixRotationY(rotationAngle);
+
+		DirectX::XMFLOAT3 tempDir = DirectX::XMFLOAT3(dirLight.direction.x, dirLight.direction.y, dirLight.direction.z);
+		DirectX::XMVECTOR tempDir2 = XMLoadFloat3(&tempDir);
+		tempDir2 = DirectX::XMVector3TransformNormal(tempDir2, R);
+		DirectX::XMStoreFloat3(&tempDir, tempDir2);
+
+		ptr_lightDir->lightDir.direction = Float3(tempDir.x, tempDir.y, tempDir.z);
+	}
+	else
+		throw 0;
+	itrLightDir.resetIndex();
+
+	DirectX::XMFLOAT3 direction = DirectX::XMFLOAT3(dirLight.direction.x, dirLight.direction.y, dirLight.direction.z);
+	DirectX::XMVECTOR lightDir = DirectX::XMLoadFloat3(&direction);
+
+	DirectX::XMFLOAT3 lightPosFix = DirectX::XMFLOAT3(
+		-2.0f * sphere.radius * direction.x,
+		-2.0f * sphere.radius * direction.y,
+		-2.0f * sphere.radius * direction.z); //-2.0f * sphere.radius * lightDir;
+	DirectX::XMVECTOR lightPos = DirectX::XMLoadFloat3(&lightPosFix);
+	DirectX::XMVECTOR targetPos = DirectX::XMLoadFloat3(&sphere.center);
+	DirectX::XMVECTOR up = DirectX::XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
+
+	DirectX::XMMATRIX V = DirectX::XMMatrixLookAtLH(lightPos, targetPos, up);
+
+	//Transform bounding sphere to light-space:
+	DirectX::XMFLOAT3 sphereCenterLS;
+	DirectX::XMStoreFloat3(&sphereCenterLS, DirectX::XMVector3TransformCoord(targetPos, V));
+
+	float l = sphereCenterLS.x - sphere.radius;
+	float b = sphereCenterLS.y - sphere.radius;
+	float n = sphereCenterLS.z - sphere.radius;
+	float r = sphereCenterLS.x + sphere.radius;
+	float t = sphereCenterLS.y + sphere.radius;
+	float f = sphereCenterLS.z + sphere.radius;
+	DirectX::XMMATRIX P = DirectX::XMMatrixOrthographicOffCenterLH(l, r, b, t, n, f);
+
+	//Transform NDC-space [-1, +1]^2 to texture space [0, 1]^2
+	DirectX::XMMATRIX T(
+		0.5f,	0.0f,	0.0f,	0.0f,
+		0.0f,	-0.5f,	0.0f,	0.0f,
+		0.0f,	0.0f,	1.0f,	0.0f,
+		0.5f,	0.5f,	0.0f,	1.0f);
+
+	DirectX::XMMATRIX S = V * P * T;
+
+	DirectX::XMFLOAT4X4 view;
+	XMStoreFloat4x4(&view, V);
+
+	DirectX::XMFLOAT4X4 proj;
+	XMStoreFloat4x4(&proj, P);
+
+	DirectX::XMFLOAT4X4 shadowTransform;
+	XMStoreFloat4x4(&shadowTransform, S);
+
+	//Render the shadowmap:
+	Buffer_SrvDsv* shadowMap = managementBuffer_->getShadow();
+
+	//Set viewport to encompass entire map.
+	D3D11_VIEWPORT vp = managementBuffer_->getShadowViewport();
+	devcon->RSSetViewports(1, &vp);
+
+	managementRS_->setRS(devcon, RS_ID_DEPTH); //Set rasterizer state with depth bias to avoid shadow acne
+
+	ID3D11DepthStencilView* dsv = shadowMap->getDSV();
+	devcon->ClearDepthStencilView(dsv, D3D11_CLEAR_DEPTH, 1.0f, 0);
+
+	ID3D11RenderTargetView* renderTargets[1] = { NULL };
+	devcon->OMSetRenderTargets(1, renderTargets, dsv); //set null rendertargets, as we want no colour-writes. Set dsv.
+
+	//Update per-viewport constant buffer.
+	managementCB_->setCB(CB_TYPE_CAMERA, TypeFX_VS, CB_REGISTER_CAMERA, managementD3D_->getDeviceContext());
+	managementCB_->updateCBCamera(
+		managementD3D_->getDeviceContext(),
+		/*View: */			view,
+		/*View Inverse: */	managementMath_->getIdentityMatrix(),
+		/*Proj: */			proj,//managementMath_->getIdentityMatrix(),
+		/*Proj Inverse: */	managementMath_->getIdentityMatrix(),
+		/*EyePos: */		DirectX::XMFLOAT3(0.0f, 0.0f, 0.0f), //Irrelevant
+		/*ViewportTopX: */	0.0f, //Irrelevant					
+		/*ViewportTopY: */	0.0f, //Irrelevant
+		/*zNear: */			0.0f, //Irrelevant
+		/*zFar: */			0.0f, //Irrelevant
+		/*ViewportWidth: */ 0.0f,	//Irrelevant
+		/*ViewportHeight: */ 0.0f);	//Irrelevant
+
+	std::map<unsigned int, InstancedData*> instancesMap = managementInstance_->getInstancesMap();
+	for(std::map<unsigned int, InstancedData*>::iterator i = instancesMap.begin(); i != instancesMap.end(); i++)
+	{
+		renderInstance(i->first, i->second, true);
+	}
+
+	//Unset shizzle
+	devcon->OMSetRenderTargets(1, renderTargets, NULL);
+}
+
+//Glow effect
 void Renderer::downSampleBlur()
 {
 	ID3D11DeviceContext* devcon = managementD3D_->getDeviceContext();

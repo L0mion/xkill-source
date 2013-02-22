@@ -71,7 +71,7 @@ private:
 	void updateStreamSpotLight();
 	//void updateStreamPosLight();
 
-	DataStreamSRV<LightDescDir>*		streamDirLight_;
+	DataStreamSRV<LightDescDir>*	streamDirLight_;
 	DataStreamSRV<LightDescPoint>*	streamPointLight_;
 	DataStreamSRV<LightDescSpot>*	streamSpotLight_;
 	DataStreamSRV<Float3>*			streamPosLight_;

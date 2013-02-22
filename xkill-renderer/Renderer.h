@@ -91,19 +91,24 @@ private:
 	void renderViewportToGBuffer(
 		ViewportData& vpData);											//!< Renders to g-buffer.
 	void renderViewportToBackBuffer(ViewportData& vpData);				//!< Renders to backbuffer.
-	void renderInstance(unsigned int meshID, InstancedData* instance);	//!< Renders an instanced model.
-	ShadingDesc deriveShadingDesc(VertexType vertexType);
+	void renderInstance(unsigned int meshID, InstancedData* instance, bool shadowmap);	//!< Renders an instanced model.
+	ShadingDesc deriveShadingDesc(VertexType vertexType, bool shadowmap);
 	void setShadingDesc(ShadingDesc shadingDesc);
 	void renderSubset(
 		SubsetD3D* subset, 
 		MaterialDesc& material,
-		unsigned int numInstances);										//!< Renders a subset.
+		unsigned int numInstances,
+		bool shadowmap);	//!< Renders a subset.
 	void renderDebugShape(
 		AttributePtr<Attribute_DebugShape>	ptr_debugShape, 
 		unsigned int			shapeIndex,
 		DirectX::XMFLOAT4X4		viewMatrix, 
 		DirectX::XMFLOAT4X4		projectionMatrix); //!< Renders a debug shape, such as a bounding sphere.
 
+	//Shadows
+	void buildShadows();
+
+	//Glow effect
 	void downSampleBlur();
 	void blurHorizontally();
 	void blurVertically();

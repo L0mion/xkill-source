@@ -27,6 +27,7 @@ enum ShaderID
 	SHADERID_PS_SPRITE,
 	SHADERID_PS_NORMALMAP,
 	SHADERID_PS_DOWNSAMPLE,
+	SHADERID_PS_BUILD_SHADOWMAP_POS_NORM_TEX,
 
 	SHADERID_CS_LIGHTING,
 	SHADERID_CS_BLUR_HORZ,
@@ -72,12 +73,13 @@ private:
 	HRESULT initVSPosNormTexTanInstanced(ID3D11Device*	device, std::wstring shaderPath);
 	HRESULT initVSScreenQuad(ID3D11Device*				device, std::wstring shaderPath);
 
-	HRESULT initPSDefault(ID3D11Device*		device,	std::wstring shaderPath);	//!< Initializes defaultPS.
-	HRESULT initPSColor(ID3D11Device*		device,	std::wstring shaderPath);	//!< Initializes color-shaders.
-	HRESULT initPSAnimation(ID3D11Device*	device,	std::wstring shaderPath);	//!< Initializes animationPS.
-	HRESULT initPSSprite(ID3D11Device*		device, std::wstring shaderPath);	//!< Initializes sprite pixel shader.
-	HRESULT initPSNormalMap(ID3D11Device*	device, std::wstring shaderPath);
-	HRESULT initPSDownSample(ID3D11Device*	device, std::wstring shaderPath);
+	HRESULT initPSDefault(ID3D11Device*				device,	std::wstring shaderPath);	//!< Initializes defaultPS.
+	HRESULT initPSColor(ID3D11Device*				device,	std::wstring shaderPath);	//!< Initializes color-shaders.
+	HRESULT initPSAnimation(ID3D11Device*			device,	std::wstring shaderPath);	//!< Initializes animationPS.
+	HRESULT initPSSprite(ID3D11Device*				device, std::wstring shaderPath);	//!< Initializes sprite pixel shader.
+	HRESULT initPSNormalMap(ID3D11Device*			device, std::wstring shaderPath);
+	HRESULT initPSDownSample(ID3D11Device*			device, std::wstring shaderPath);
+	HRESULT initPSBuildShadowMapPosNormTex(ID3D11Device*	device, std::wstring shaderPath);
 
 	HRESULT initCSLighting(ID3D11Device* device, std::wstring shaderPath);	//!< Initializes defaultCS.
 	HRESULT initCSBlurHorz(ID3D11Device* device, std::wstring shaderPath);
@@ -109,6 +111,7 @@ private:
 	ShaderPS*	psSprite_;			//!< Pixel shader used for sprites.
 	ShaderPS*	psNormalMap_;
 	ShaderPS*	psDownSample_;
+	ShaderPS*	psBuildShadowMapPosNormTex_;
 
 	ShaderCS* csLighting_; //!< Default compute shader.
 	ShaderCS* csBlurHorz_;

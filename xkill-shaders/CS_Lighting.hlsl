@@ -186,5 +186,7 @@ void CS_Lighting(
 	output[
 		uint2(
 			threadIDDispatch.x + viewportTopX, 
-			threadIDDispatch.y + viewportTopY)] = float4(litPixel, 1.0f);
+			threadIDDispatch.y + viewportTopY)] = 
+		//float4(bufferGlowHigh.SampleLevel(ss, texCoord, 0).xyz,	1.0f);
+		float4(litPixel, 1.0f);
 }

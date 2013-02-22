@@ -14,6 +14,8 @@ namespace DirectX
 struct VertexPosNormTex;
 
 class Winfo;
+class Buffer_SrvDsv;
+class Buffer_SrvRtvUav;
 
 static const unsigned int GBUFFER_SHADER_REGISTER_DEPTH = 4;
 
@@ -122,11 +124,10 @@ private:
 	IDXGISwapChain*				swapChain_;							//!< DirectX swap chain.
 	ID3D11RenderTargetView*		rtvBackBuffer_;						//!< Used to render to texBackBuffer.
 	ID3D11UnorderedAccessView*	uavBackBuffer_;						//!< Used to render to texBackBuffer using DirectCompute.
-	ID3D11DepthStencilView*		dsvDepthBuffer_;					//!< Used to render to texDepthBuffer.
-	ID3D11ShaderResourceView*	srvDepthBuffer_;
 
-	ID3D11Texture2D*			texBackBuffer_;						//!< Contains the final image.
-	ID3D11Texture2D*			texDepthBuffer_;					//!< Saves the depth of each rendered pixel.
+	Buffer_SrvDsv* depthBuffer_;
+
+	ID3D11Texture2D*			texBackBuffer_;						//!< Contains the final image.6
 };
 
 #endif //XKILL_RENDERER_D3DMANAGEMENT_H

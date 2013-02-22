@@ -56,7 +56,7 @@ HRESULT Buffer_SrvDsv::initDSV(ID3D11Device* device)
 	D3D11_DEPTH_STENCIL_VIEW_DESC dsvDesc;
 	dsvDesc.Flags				= 0;
 	dsvDesc.Format				= dsvFormat_;
-	dsvDesc.ViewDimension		= D3D11_DSV_DIMENSION_TEXTURE2D;
+	dsvDesc.ViewDimension		= D3D11_DSV_DIMENSION_TEXTURE2DMS; //D3D11_DSV_DIMENSION_TEXTURE2D
 	dsvDesc.Texture2D.MipSlice	= 0;
 
 	hr = device->CreateDepthStencilView(

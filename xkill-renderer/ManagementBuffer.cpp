@@ -23,10 +23,10 @@ ManagementBuffer::ManagementBuffer(Winfo* winfo)
 	glowHigh_		= nullptr;
 	glowLow_		= nullptr;
 	glowLowUtil_	= nullptr;
-
 	ZeroMemory(&downSampleViewport_, sizeof(D3D11_VIEWPORT));
 
 	shadowMap_ = nullptr;
+	ZeroMemory(&shadowViewport_, sizeof(D3D11_VIEWPORT));
 }
 ManagementBuffer::~ManagementBuffer()
 {
@@ -64,6 +64,9 @@ HRESULT ManagementBuffer::resize(ID3D11Device* device)
 	//Be sure to update viewport with new dimensions as well.
 	downSampleViewport_.Width	= static_cast<FLOAT>(downSampleWidth_);
 	downSampleViewport_.Height	= static_cast<FLOAT>(downSampleHeight_);
+
+	shadowViewport_.Width	= SHADOWMAP_WIDTH;
+	shadowViewport_.Height	= SHADOWMAP_HEIGHT;
 
 	for(unsigned int i = 0; i < GBUFFERID_NUM_BUFFERS && SUCCEEDED(hr); i++)
 	{
@@ -242,6 +245,14 @@ HRESULT ManagementBuffer::initShadow(ID3D11Device* device)
 		DXGI_FORMAT_D24_UNORM_S8_UINT);
 	hr = shadowMap_->init(device);
 
+	ZeroMemory(&shadowViewport_, sizeof(D3D11_VIEWPORT));
+	downSampleViewport_.TopLeftX	= 0;
+	downSampleViewport_.TopLeftY	= 0;
+	downSampleViewport_.Width		= static_cast<FLOAT>(SHADOWMAP_WIDTH);
+	downSampleViewport_.Height		= static_cast<FLOAT>(SHADOWMAP_HEIGHT);
+	downSampleViewport_.MinDepth	= 0.0f;
+	downSampleViewport_.MaxDepth	= 1.0f;
+
 	return hr;
 }
 
@@ -293,7 +304,7 @@ void ManagementBuffer::setBuffersAsCSShaderResources(ID3D11DeviceContext* devcon
 	for(int i = 0; i < GBUFFERID_NUM_BUFFERS; i++)
 		resourceViews[i] = gBuffers_[i]->getSRV();
 
-	resourceViews[GBUFFERID_NUM_BUFFERS] = glowHigh_->getSRV();
+	resourceViews[GBUFFERID_NUM_BUFFERS] = glowHigh_->getSRV(); //shadowMap_->getSRV(); //
 
 	devcon->CSSetShaderResources(
 		0, 
@@ -468,4 +479,8 @@ void ManagementBuffer::getDownSampleDim(
 D3D11_VIEWPORT ManagementBuffer::getDownSampledViewport()
 {
 	return downSampleViewport_;
+}
+D3D11_VIEWPORT ManagementBuffer::getShadowViewport()
+{
+	return shadowViewport_;
 }
