@@ -1042,7 +1042,7 @@ void Renderer::renderAnimation(unsigned int meshID, DirectX::XMFLOAT4X4 view, Di
 	DirectX::XMFLOAT4X4 worldMatrix(1.0f, 0.0f, 0.0f, 0.0f,
 									0.0f, 1.0f, 0.0f, 0.0f,
 									0.0f, 0.0f, 1.0f, 0.0f,
-									0.0f, 3.0f, 0.0f, 1.0f);
+									0.0f, 5.0f, 0.0f, 1.0f);
 	DirectX::XMFLOAT4X4 worldMatrixInverse	= worldMatrix;
 	DirectX::XMFLOAT4X4 finalMatrix			= managementMath_->calculateFinalMatrix(worldMatrix, view, projection);
 	
@@ -1061,7 +1061,7 @@ void Renderer::renderAnimation(unsigned int meshID, DirectX::XMFLOAT4X4 view, Di
 	managementFX_->setShader(devcon, SHADERID_VS_ANIMATION);
 	managementFX_->setShader(devcon, SHADERID_PS_ANIMATION);
 	managementSS_->setSS(devcon, TypeFX_PS, 0, SS_ID_DEFAULT);
-	managementRS_->setRS(devcon, RS_ID_DEFAULT);
+	managementRS_->setRS(devcon, RS_ID_WIREFRAME);
 
 	managementBuffer_->setBuffersAndDepthBufferAsRenderTargets(devcon, managementD3D_->getDepthBuffer());
 
@@ -1081,8 +1081,8 @@ void Renderer::renderAnimation(unsigned int meshID, DirectX::XMFLOAT4X4 view, Di
 	devcon->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 	devcon->DrawIndexed(modelD3D->getSubsetD3Ds().at(0)->getNumIndices(), 0, 0);
 
-	//managementFX_->setShader(devcon, SHADERID_VS_DEFAULT);
-	//managementFX_->setShader(devcon, SHADERID_PS_DEFAULT);
+
+	managementRS_->setRS(devcon, RS_ID_DEFAULT);
 }
 
 void Renderer::renderAnimatedMesh(DirectX::XMFLOAT4X4 viewMatrix, DirectX::XMFLOAT4X4 projectionMatrix)

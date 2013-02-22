@@ -193,8 +193,8 @@ private:
 	\param index Index of the bone the matrix belongs to.
 	*/
 	void parseTransformMatrix(FbxCluster* cluster, FbxMesh* mesh, FbxPose* fbxPose, LoaderFbxMeshDesc* meshDesc, int index);
-	FbxAMatrix parseTransformMatrixAssociateModel(FbxCluster* cluster, FbxMesh* mesh, FbxPose* fbxPose, FbxAMatrix parentGlobalPosition);
-	FbxAMatrix parseTransformMatrixOther(FbxCluster* cluster, FbxMesh* mesh, FbxPose* fbxPose, FbxAMatrix parentGlobalPosition);
+	FbxAMatrix parseTransformMatrixAssociateModel(FbxCluster* cluster, FbxMesh* mesh, FbxPose* fbxPose, FbxAMatrix globalPosition);
+	FbxAMatrix parseTransformMatrixOther(FbxCluster* cluster, FbxMesh* mesh, FbxPose* fbxPose, FbxAMatrix globalPosition);
 	FbxAMatrix getGeometry(FbxNode* node);
 	FbxAMatrix getGlobalPosition(FbxNode* node, FbxTime time, FbxPose* pose, FbxAMatrix* parentGlobalPosition);
 	FbxAMatrix getPoseMatrix(FbxPose* pose, int nodeIndex);

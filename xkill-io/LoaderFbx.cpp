@@ -74,13 +74,13 @@ std::vector<LoaderFbxModelDesc> LoaderFbx::load(std::string filename)
 	if(success)
 		success = loadScene(filename);
 
-	if(fbxScene_)
-	{
-		FbxAxisSystem sceneAxisSystem = fbxScene_->GetGlobalSettings().GetAxisSystem();
-		FbxAxisSystem xkillAxisSystem = FbxAxisSystem(FbxAxisSystem::eDirectX);
-		if(sceneAxisSystem != xkillAxisSystem);
-			fbxScene_->GetGlobalSettings().SetAxisSystem(xkillAxisSystem);
-	}
+	//if(fbxScene_)
+	//{
+	//	FbxAxisSystem sceneAxisSystem = fbxScene_->GetGlobalSettings().GetAxisSystem();
+	//	FbxAxisSystem xkillAxisSystem = FbxAxisSystem(FbxAxisSystem::eDirectX);
+	//	if(sceneAxisSystem != xkillAxisSystem);
+	//		fbxScene_->GetGlobalSettings().SetAxisSystem(xkillAxisSystem);
+	//}
 
 	FbxNode* node = fbxScene_->GetRootNode();
 	if(node)
