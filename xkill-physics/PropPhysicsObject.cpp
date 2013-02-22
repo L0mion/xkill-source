@@ -14,3 +14,10 @@ btVector3 PropPhysicsObject::subClassCalculateLocalInertiaHook(btScalar mass)
 {
 	return localInertiaBasedOnCollisionShapeAndMass(mass);
 }
+
+bool PropPhysicsObject::subClassSpecificInitHook()
+{
+	forceActivationState(DISABLE_DEACTIVATION);
+
+	return true;
+}

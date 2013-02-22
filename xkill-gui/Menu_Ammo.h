@@ -14,12 +14,6 @@ public:
 	Menu_Ammo(Ui::MainWindow* ui, QMainWindow* window);
 	~Menu_Ammo();
 
-public slots:
-	//! Updates the qt menu based on the in game data
-	void setSettingsMenu();
-	//! Updates the in game data based on the qt menu
-	void settingsMenuUpdated();
-
 private:
 	//! A local pointer to the qt menu
 	Ui::MainWindow* ui;
@@ -32,4 +26,14 @@ private:
 
 	//! Gets the ammunition that is to be changed or read data from
 	Ammunition* getAmmoSettings();
+
+public slots:
+	//! Reset to standard values
+	void reset();
+
+	//! Updates the qt menu based on the in game data
+	void setSettingsMenu();
+
+	//! Updates the in game data based on the qt menu
+	void settingsMenuUpdated();
 };

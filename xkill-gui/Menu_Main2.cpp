@@ -59,6 +59,7 @@ Menu_Main2::Menu_Main2( QWidget* parent ) : QMainWindow()
 	ui.frame_audio->hide();
 	ui.frame_input->hide();
 	ui.frame_credits->hide();
+	show();
 
 	// show main menu
 	push_menu(ui.frame_opening);
@@ -84,6 +85,7 @@ Menu_Main2::Menu_Main2( QWidget* parent ) : QMainWindow()
 	ammo_Menu = new Menu_Ammo(&ui, this);
 	firingMode_Menu = new Menu_FiringMode(&ui, this);
 	sound_Menu = new Menu_Sound(&ui, this);
+	hud = new Menu_HUDManager(this);
 
 	// init level menu
 	filePath = QString("../../xkill-resources/xkill-scripts/levels.xml");
@@ -133,7 +135,7 @@ void Menu_Main2::mousePressEvent( QMouseEvent *e )
 void Menu_Main2::loadCustomFonts()
 {
 	QStringList list;
-	list << "arcade_interlaced.ttf" << "arcade_rounded.ttf" << "arista_light.ttf";;
+	list << "arcade_interlaced.ttf" << "arcade_rounded.ttf" << "arista_light.ttf" << "digital_7_mono.ttf";
 	int fontID(-1);
 	bool fontWarningShown(false);
 	for (QStringList::const_iterator constIterator = list.constBegin(); constIterator != list.constEnd(); ++constIterator) 
@@ -214,8 +216,13 @@ void Menu_Main2::alwaysOnTop( bool on )
 {
 	if(on)
 	{
-		// Enable Window Stay on Top flag
-		this->setWindowFlags(this->windowFlags() | Qt::WindowStaysOnTopHint);
+		// Only set if no errors occured
+		// This prevents a bug where the window cannot be closed
+		if(SETTINGS->numErrors == 0)
+		{
+			// Enable Window Stay on Top flag
+			this->setWindowFlags(this->windowFlags() | Qt::WindowStaysOnTopHint);
+		}
 	}
 	else
 	{
@@ -268,10 +275,13 @@ void Menu_Main2::onEvent( Event* e )
 			//sound_Menu->setSettingsMenu();
 
 			// Display menu
-			this->show();
+			showMenu();
 		}
 		else
-			this->hide();
+		{
+			// Hide menu
+			hideMenu();
+		}
 		break;
 	case EVENT_WINDOW_MOVE:
 		event_windowMove((Event_WindowMove*)e);
@@ -298,3 +308,4 @@ void Menu_Main2::closeEvent( QCloseEvent* event )
 {
 	SEND_EVENT(&Event(EVENT_QUIT_TO_DESKTOP));
 }
+

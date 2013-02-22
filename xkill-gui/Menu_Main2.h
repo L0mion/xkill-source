@@ -12,6 +12,8 @@
 #include "Menu_Ammo.h"
 #include "Menu_FiringMode.h"
 #include "Menu_Sound.h"
+#include "Menu_HUD.h"
+
 
 class Menu_Main2 : public QMainWindow, IObserver
 {
@@ -32,12 +34,35 @@ private:
 	Menu_Ammo*			ammo_Menu;
 	Menu_FiringMode*	firingMode_Menu;
 	Menu_Sound*			sound_Menu;
+	Menu_HUDManager*	hud;
 
 	void loadCustomFonts();
 	void loadOpeningGif();
 	void push_menu(QFrame* menu);
 	void pop_menu();
-	void menuResize();
+	void menuResize(); 
+	bool isHidden()
+	{
+		
+	}
+	void hideMenu()
+	{
+		if(menuStack.size() > 0)
+		{
+			QFrame* topMenu = menuStack.back();
+			topMenu->hide();
+			ui.label_background->hide();
+		}
+	}
+	void showMenu()
+	{
+		if(menuStack.size() > 0)
+		{
+			QFrame* topMenu = menuStack.back();
+			topMenu->show();
+			ui.label_background->show();
+		}
+	}
 public:
 	Menu_Main2(QWidget* parent);
 	~Menu_Main2();

@@ -6,11 +6,10 @@
 class ProjectilePhysicsObject
 	: public PhysicsObject
 {
-private:
-	bool localCollisionShape_;
 public:
 	ProjectilePhysicsObject();
 	~ProjectilePhysicsObject();
+private:
 	virtual bool subClassSpecificInitHook();
 	virtual btVector3 subClassCalculateLocalInertiaHook(btScalar mass);
 	virtual btCollisionShape* subClassSpecificCollisionShape();

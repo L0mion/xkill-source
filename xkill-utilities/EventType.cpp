@@ -270,6 +270,11 @@ Event_ClosestRayCast::Event_ClosestRayCast(Float3 from, Float3 to, short collisi
 	this->collisionFilterMask = collisionFilterMask;
 }
 
+Event_PlayerExecuting::Event_PlayerExecuting(int executingPlayerIndex) : Event(EVENT_PLAYER_EXECUTING)
+{
+	this->executingPlayerIndex = executingPlayerIndex;
+}
+
 Event_GetFileList::Event_GetFileList(std::string filepath, std::string extension) : Event(EVENT_GET_FILE_LIST)
 {
 	this->filepath = filepath;
@@ -279,4 +284,9 @@ Event_GetFileList::Event_GetFileList(std::string filepath, std::string extension
 Event_LoadLevel::Event_LoadLevel(std::string levelName) : Event(EVENT_LOAD_LEVEL)
 {
 	this->levelName = levelName;
+}
+
+Event_SetFullscreen::Event_SetFullscreen( bool on ) : Event(EVENT_SHOW_FULLSCREEN)
+{
+	this->on = on;
 }

@@ -10,6 +10,8 @@
 
 #include "physicsUtilities.h"
 
+#include "physicsObject.h"
+
 AttributeIterator<Attribute_Mesh> itrMesh;
 AttributeIterator<Attribute_Camera> itrCamera;
 
@@ -19,28 +21,27 @@ CollisionShapes::CollisionShapes()
 	itrCamera = ATTRIBUTE_MANAGER->camera.getIterator();
 	collisionShapes_ = new btAlignedObjectArray<btCollisionShape*>();
 	defaultShape_ = new btSphereShape(btScalar(1.0f));
-	frustrumShape_ = nullptr;
+	//frustumShape_ = nullptr;
 	importer_ = new btBulletWorldImporter();
+
+	scatterProjectileCollisionShape = new btSphereShape(0.15f);
+	/* The boundingSphereRadius is too large, that is why this code is commented out (2013-02-21 13.17)
+	btVector3 boundingSphereCenter;
+	btScalar boundingSphereRadius;
+	getCollisionShape(XKILL_Enums::ModelId::PROJECTILE_SCATTER)->getBoundingSphere(boundingSphereCenter, boundingSphereRadius);
+	scatterProjectileCollisionShape = new btSphereShape(boundingSphereRadius);
+	*/
 }
 
 CollisionShapes::~CollisionShapes()
 {
-	for(int i = 0; i < collisionShapes_->size(); i++)
-	{
-		if(collisionShapes_->at(i)->getShapeType() == COMPOUND_SHAPE_PROXYTYPE)
-		{
-			for(int j = static_cast<btCompoundShape*>(collisionShapes_->at(i))->getNumChildShapes()-1; j > 0 ; j--)
-			{
-				delete static_cast<btCompoundShape*>(collisionShapes_->at(i))->getChildShape(j);
-			}
-		}
-		delete collisionShapes_->at(i);
-	}
+	unloadCollisionShapes();
+
 	delete collisionShapes_;
 	delete defaultShape_;
-	delete frustrumShape_;
-	importer_->deleteAllData();
 	delete importer_;
+
+	delete scatterProjectileCollisionShape;
 }
 
 btCollisionShape* CollisionShapes::getCollisionShape(unsigned int meshId)
@@ -61,9 +62,11 @@ btCollisionShape* CollisionShapes::getCollisionShape(unsigned int meshId)
 void CollisionShapes::loadCollisionShapes()
 {
 	unloadCollisionShapes();
+	importer_ = new btBulletWorldImporter();
 
 	//btTriangleMesh file load (memory leak, otherwise functioning)
 	
+	//check lunch
 
 	//while(itrMesh.hasNext())
 	//{
@@ -147,8 +150,6 @@ void CollisionShapes::loadCollisionShapes()
 			loadedShape = importer_->getCollisionShapeByName(name.c_str());
 			if(loadedShape != nullptr)
 			{
-				//REMOVE
-				
 				btVector3 scaling = loadedShape->getLocalScaling();
 				collisionShape = new btBoxShape(scaling/2);
 				collisionShape->setMargin(0.0f);
@@ -178,49 +179,61 @@ void CollisionShapes::loadCollisionShapes()
 					loadedShape = importer_->getCollisionShapeByIndex(importer_->getNumCollisionShapes()-1);//name.c_str());
 				if(loadedShape != nullptr)
 				{
-					//if(!name.compare("xkill_processRigidBody"))
-					//{
-					//	btBoxShape* box = static_cast<btBoxShape*>(loadedShape);
-					//	btVector3 half = box->getHal fExtentsWithMargin();
-					//	//btCapsuleShape* capsule = new btCapsuleShape( half.x() > half.z() ? half.x() : half.z(), half.y());
-					//	//btSphereShape* sphere = new btSphereShape(0.2f);
-					//	//collisionShape = capsule;
-					//	//collisionShapes_->push_back(sphere);
-					//	//collisionShapes_->push_back(capsule);
-					//	//collisionShape = sphere;
-					//}
-					name = name.append("Shape");
-					if(loadedShape->getShapeType() == BOX_SHAPE_PROXYTYPE)
+					if(!name.compare("processRigidBody"))
 					{
-						btVector3 scaling = loadedShape->getLocalScaling();
-						collisionShape = new btBoxShape(scaling/2);
-						collisionShape->setMargin(0.0f);
-						collisionShape->setLocalScaling(btVector3(1,1,1));
-						//collisionShape = new btBoxShape(*static_cast<btBoxShape*>(loadedShape));
-					}
-					else if(loadedShape->getShapeType() == CAPSULE_SHAPE_PROXYTYPE)
-					{
-						collisionShape = new btCapsuleShape(*static_cast<btCapsuleShape*>(loadedShape));
-					}
-					btCompoundShape* cs = new btCompoundShape();
-
-					btRigidBody* rb =importer_->getRigidBodyByName(name.c_str());
-					btTransform transform;
-					if(rb!=nullptr)
-					{
-						transform = rb->getWorldTransform();
+						btScalar height = 0.75f;
+						btScalar radius = 0.25f;
+						collisionShape = new btCapsuleShape(radius, height);
+						//btBoxShape* box = static_cast<btBoxShape*>(loadedShape);
+						//btVector3 half = box->getHal fExtentsWithMargin();
+						//btCapsuleShape* capsule = new btCapsuleShape( half.x() > half.z() ? half.x() : half.z(), half.y());
+						//btSphereShape* sphere = new btSphereShape(0.2f);
+						//collisionShape = capsule;
+						//collisionShapes_->push_back(sphere);
+						//collisionShapes_->push_back(capsule);
+						//collisionShape = sphere;
+						btCompoundShape* cs = new btCompoundShape();
+						cs->addChildShape(btTransform(btQuaternion(0.0f,0.0f,0.0f,0.0f), btVector3(0.0f,0.0f,0.0f)),collisionShape);
+						std::pair<unsigned int, unsigned int>  idToIndex(ptr_mesh->meshID,collisionShapes_->size());
+						collisionShapesIdToIndex_.insert(idToIndex);
+						collisionShapes_->push_back(collisionShape);
+						cs->setMargin(0.00);
+						collisionShapes_->push_back(cs);
 					}
 					else
 					{
-						transform.setIdentity();
+						name = name.append("Shape");
+						if(loadedShape->getShapeType() == BOX_SHAPE_PROXYTYPE)
+						{
+							btVector3 scaling = loadedShape->getLocalScaling();
+							collisionShape = new btBoxShape(scaling/2);
+							collisionShape->setMargin(0.0f);
+							collisionShape->setLocalScaling(btVector3(1,1,1));
+							//collisionShape = new btBoxShape(*static_cast<btBoxShape*>(loadedShape));
+						}
+						else if(loadedShape->getShapeType() == CAPSULE_SHAPE_PROXYTYPE)
+						{
+							collisionShape = new btCapsuleShape(*static_cast<btCapsuleShape*>(loadedShape));
+						}
+						btCompoundShape* cs = new btCompoundShape();
+
+						btRigidBody* rb =importer_->getRigidBodyByName(name.c_str());
+						btTransform transform;
+						if(rb!=nullptr)
+						{
+							transform = rb->getWorldTransform();
+						}
+						else
+						{
+							transform.setIdentity();
+						}
+						cs->addChildShape(transform,collisionShape);
+						std::pair<unsigned int, unsigned int>  idToIndex(ptr_mesh->meshID,collisionShapes_->size());
+						collisionShapesIdToIndex_.insert(idToIndex);
+						collisionShapes_->push_back(collisionShape);
+						cs->setMargin(0.00);
+						collisionShapes_->push_back(cs);
 					}
-					cs->addChildShape(transform,collisionShape);
-					std::pair<unsigned int, unsigned int>  idToIndex(ptr_mesh->meshID,collisionShapes_->size());
-					collisionShapesIdToIndex_.insert(idToIndex);
-					collisionShapes_->push_back(collisionShape);
-					cs->setMargin(0.00);
-					collisionShapes_->push_back(cs);;
-					
 				}
 			}
 		}
@@ -244,9 +257,12 @@ void CollisionShapes::unloadCollisionShapes()
 	collisionShapes_->clear();
 	collisionShapesIdToIndex_.clear();
 
-	importer_->deleteAllData();
-	delete importer_;
-	importer_ = new btBulletWorldImporter();
+	if(importer_)
+	{
+		importer_->deleteAllData();
+		delete importer_;
+		importer_ = nullptr;
+	}
 }
 
 
@@ -263,14 +279,14 @@ CollisionShapes* CollisionShapes::Instance()
 
 
 
-void CollisionShapes::updateFrustrumShape()
+void CollisionShapes::updateFrustumShape()
 {	
-	if(frustrumShape_ != nullptr)
+	if(frustumShape_ != nullptr)
 	{
-		delete frustrumShape_;
-		frustrumShape_ = nullptr;
+		delete frustumShape_;
+		frustumShape_ = nullptr;
 	}
-	if(!itrCamera.size())
+	if(!itrCamera.count())
 	{
 		DEBUGPRINT("COLLISIONSHAPES: No cameras to use for frustum creation");
 		return;
@@ -305,16 +321,16 @@ void CollisionShapes::updateFrustrumShape()
 		btVector3 a = hull->getVertexPointer()[index];
 		int b = 2;
 	}
-	frustrumShape_ = convexShape;
+	frustumShape_ = convexShape;
 
 	delete hull;
 	delete tcs;
 	delete triangleMesh;
 }
 
-btCollisionShape* CollisionShapes::getFrustrumShape(unsigned int cameraIndex)
+btCollisionShape* CollisionShapes::getFrustumShape(unsigned int cameraIndex)
 {
 	//static btSphereShape a(1);	
 	//return &a;
-	return frustrumShape_;
+	return frustumShape_;
 }

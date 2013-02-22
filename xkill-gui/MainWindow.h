@@ -12,7 +12,6 @@
 #include "Menu_Editor.h"
 #include "Menu_Main2.h"
 
-
 class MainWindow : public QMainWindow, public IObserver
 {
 	Q_OBJECT
@@ -35,7 +34,7 @@ protected:
 	void keyPressEvent(QKeyEvent* e);
 	void keyReleaseEvent(QKeyEvent* e);
 	void moveEvent(QMoveEvent *e);
-	void resizeEvent(QResizeEvent* e);;
+	void resizeEvent(QResizeEvent* e);
 	void showMenu();
 	
 
@@ -43,6 +42,7 @@ protected:
 public slots:
 	void slot_setTitle(QString title);
 	void slot_toggleFullScreen();
+	void setFullScreen(bool on);
 };
 
 #endif // MAINWINDOW_H

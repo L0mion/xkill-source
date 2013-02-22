@@ -52,24 +52,24 @@ public:
 	int			getTextureUse();
 private:
 	
-	const char* textureName_;		//<! Name of the texture
-	const char* fileName_;			//<! The textures file name.
+	const char* textureName_;		//!< Name of the texture
+	const char* fileName_;			//!< The textures file name.
 									
-	Float2	scale_;					//<! Texture scale.
-	Float2	translation_;			//<! Texture translation.
-	Float3	rotation_;				//<! Texture rotation.
-	bool	swap_;					//<! Swap flag.
-	int		alphaSource_;			//<! Source of alpha
-	int		croppingLeft_;			//<! Left cropping.
-	int		croppingTop_;			//<! Top cropping.
-	int		croppingRight_;			//<! Right cropping.
-	int		croppingBottom_;		//<! Bottom cropping.
-	int		mappingType_;			//<! Type of mapping.
-	int		planarMappingNormal_;	//<! Normal mapping planar.
-	int		blendMode_;				//<! Blend mode.
-	float	defaultAlpha_;			//<! Default alpha value.
-	int		materialUse_;			//<! How materials are used.
-	int		textureUse_;			//<! How texture is used.
+	Float2	scale_;					//!< Texture scale.
+	Float2	translation_;			//!< Texture translation.
+	Float3	rotation_;				//!< Texture rotation.
+	bool	swap_;					//!< Swap flag.
+	int		alphaSource_;			//!< Source of alpha
+	int		croppingLeft_;			//!< Left cropping.
+	int		croppingTop_;			//!< Top cropping.
+	int		croppingRight_;			//!< Right cropping.
+	int		croppingBottom_;		//!< Bottom cropping.
+	int		mappingType_;			//!< Type of mapping.
+	int		planarMappingNormal_;	//!< Normal mapping planar.
+	int		blendMode_;				//!< Blend mode.
+	float	defaultAlpha_;			//!< Default alpha value.
+	int		materialUse_;			//!< How materials are used.
+	int		textureUse_;			//!< How texture is used.
 };
 
 #endif //XKILL_IO_LOADERFBXTEXTUREDESC_H

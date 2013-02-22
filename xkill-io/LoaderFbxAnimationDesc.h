@@ -40,9 +40,9 @@ private:
 	unsigned int findMaxNumKeyframes(LoaderFbxAnimationBone bone);
 	unsigned int findMinNumKeyframes(LoaderFbxAnimationBone bone);
 
-	const char* name_; //<! Name of the animaiton.
+	const char* name_; //!< Name of the animaiton.
 
-	std::vector<LoaderFbxAnimationBone> bones_; //<! Containing all the bones used in the animation.
+	std::vector<LoaderFbxAnimationBone> bones_; //!< Containing all the bones used in the animation.
 
 };
 

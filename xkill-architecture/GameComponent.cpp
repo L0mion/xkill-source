@@ -289,29 +289,15 @@ void GameComponent::onUpdate(float delta)
 				//--------------------------------------------------------------------------------------
 				// Reset player
 				//--------------------------------------------------------------------------------------
-				ptr_physics->gravity = Float3(0.0f, -10.0f, 0.0f);
-				ptr_physics->collisionFilterMask = XKILL_Enums::PhysicsAttributeType::EVERYTHING;
-				ptr_physics->collisionResponse = true;
-				ptr_physics->meshID = ptr_player->meshID_whenAlive;
-
 				ptr_spatial->rotation = Float4(0.0f, 0.0f, 0.0f, 1.0f);
 				ptr_camera->up = Float3(0.0f, 1.0f, 0.0f);
 				ptr_camera->right = Float3(1.0f, 0.0f, 0.0f);
 				ptr_camera->look = Float3(0.0f, 0.0f, 1.0f);
 				ptr_physics->reloadDataIntoBulletPhysics = true;
 				
-				if(ptr_player->corpseEntityId > 0)
-				{
-					SEND_EVENT(&Event_RemoveEntity(ptr_player->corpseEntityId));
-				}
-
-				ptr_player->ptr_render->cull = true;
-
-				ptr_player->corpseEntityId = -1;
 				ptr_health->health = ptr_health->maxHealth; // restores player health
 
 				MutatorSettings ms;
-
 				for(int i = 0; i < XKILL_Enums::AmmunitionType::NROFAMMUNITIONTYPES; i++)
 				{
 					for(int j = 0; j < XKILL_Enums::FiringModeType::NROFFIRINGMODETYPES; j++)
@@ -703,22 +689,14 @@ void GameComponent::event_PlayerDeath(Event_PlayerDeath* e)
 	AttributePtr<Attribute_Health> ptr_health = ptr_player->ptr_health;
 	ptr_health->health = 0;
 
-	if(ptr_player->corpseEntityId == -1)
-	{
-		SEND_EVENT(&Event_CreateCorpse(ptr_player));
-		ptr_player->ptr_render->cull = false;
-	}
-
-	ptr_physics->angularVelocity = Float3(0.0f, 0.0f, 0.0f);
-	ptr_physics->linearVelocity = Float3(0.0f, 0.0f, 0.0f);
-	ptr_physics->gravity = Float3(0.0f, -1.0f, 0.0f);
-	ptr_physics->collisionFilterMask = XKILL_Enums::PhysicsAttributeType::WORLD;
-	ptr_physics->collisionResponse = true;
-	ptr_physics->meshID = ptr_player->meshID_whenDead;
-	ptr_physics->reloadDataIntoBulletPhysics = true;
-
 	ptr_player->respawnTimer.resetTimer();
 	ptr_player->detectedAsDead = true;
+
+	bool recalculateLocalInertia = true;
+	SEND_EVENT(&Event_ModifyPhysicsObject(XKILL_Enums::ModifyPhysicsObjectData::IF_TRUE_RECALCULATE_LOCAL_INERTIA_ELSE_SET_TO_ZERO, static_cast<void*>(&recalculateLocalInertia), ptr_physics));
+
+	Float3 position = ptr_player->ptr_render->ptr_spatial->ptr_position->position;
+	SEND_EVENT(&Event_PlaySound(Event_PlaySound::SOUND_DEATH, position, true));
 }
 
 void GameComponent::event_UnloadLevel()
@@ -842,19 +820,19 @@ void GameComponent::updateAndInterpretAimingRay(Entity* playerEntity, AttributeP
 				}
 				else if(entityHitByRay->hasAttribute(ATTRIBUTE_PLAYER)) //Ray hit another player
 				{
-					DEBUGPRINT("Player with attribute id " << playerHitByRayAttributeId.at(j) << "hit by Laser Automatic Sniper Execution Ray");
-					
-					SEND_EVENT(&Event_PlayerDeath(playerHitByRayAttributeId.at(j)));
-
-					std::vector<int> positionID = entityHitByRay->getAttributes(ATTRIBUTE_POSITION);
-					for(unsigned int i = 0; i < positionID.size(); i++)
+					std::vector<int> hitPlayerId = entityHitByRay->getAttributes(ATTRIBUTE_PLAYER);
+					for(int i=0;i<hitPlayerId.size();i++)
 					{
-						AttributePtr<Attribute_Position> ptr_position = itrPosition.at(positionID[i]);
-						bool use3DAudio = true;
-						SEND_EVENT(&Event_PlaySound(Event_PlaySound::SOUND_DEATH, ptr_position->position, use3DAudio));
-					}
+						AttributePtr<Attribute_Player> playerAttribute = itrPlayer.at(hitPlayerId.at(i));
+						if(!playerAttribute->detectedAsDead)
+						{
+							DEBUGPRINT("Player with attribute id " << playerHitByRayAttributeId.at(j) << " hit by Laser Automatic Sniper Execution Ray");
+					
+							SEND_EVENT(&Event_PlayerDeath(playerHitByRayAttributeId.at(j)));
 
-					rayCastingPlayerAttribute->priority++;
+							rayCastingPlayerAttribute->priority++;
+						}
+					}
 				}
 			}
 		}

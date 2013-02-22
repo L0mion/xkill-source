@@ -13,6 +13,7 @@ private:
 	float _timeScale;
 
 public:
+	int numErrors;
 	int numPlayers;
 	bool showDebugPhysics;
 	std::string currentLevel;
@@ -25,16 +26,7 @@ public:
 	float timeScale();
 	void setTimeScale(float timeScale);
 
-	Settings()
-	{
-		numPlayers = 2;
-		_timeScale = 1.0f;
-		trueDeltaTime = 0.0f;
-		currentLevel = "TestArena";
-		timeLimit = 0.0f;
-		cycleLimit = 35;
-		showDebugPhysics = false;
-	}
+	Settings();
 };
 
 

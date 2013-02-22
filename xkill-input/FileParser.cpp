@@ -35,7 +35,7 @@ bool FileParser::startReading()
 
 	if(!startReading(0))
 	{
-		couldRead = true;
+		couldRead = false;
 		endOfFile_ = true;
 	}
 

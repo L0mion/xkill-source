@@ -200,8 +200,8 @@ void InputComponent::normalizeVector(float& x, float& y)
 
 void InputComponent::setupPlayerControllerConnection()
 {
-	int playerSize = itrPlayer.size();
-	int inputDeviceSize = itrInputDevice.size();
+	int playerSize = itrPlayer.count();
+	int inputDeviceSize = itrInputDevice.count();
 
 	while(itrPlayer.hasNext())
 	{

@@ -23,6 +23,8 @@ public:
 	InputObject(void);
 	virtual ~InputObject(void);
 
+	virtual void update(float delta);
+
 	virtual InputObjectType GetType() = 0;
 
 	virtual float getValueFloat() = 0;
@@ -35,6 +37,14 @@ public:
 
 	virtual void setSensitivity(float sensitivity);
 	virtual float getSensitivity();
+
+	virtual void setUseAcceleration(bool useAcceleration);
+	virtual void setIsInAccelerationZone(bool inAccelerationZone);
+	virtual void setAccelerationRate(float accelerationRate);
+	virtual void setMaxAcceleration(float maxAcceleration);
+
+	virtual bool useAcceleration();
+	virtual float getAcceleration();
 
 	virtual void setName(std::string name);
 	virtual std::string getName();
@@ -58,9 +68,14 @@ protected:
 	bool inverted_;
 	float sensitivity_;
 
+	bool useAcceleration_;
+	bool inAccelerationZone_;
+	float currentAcceleration_;
+	float accelerationRate_;
+	float maxAcceleration_;
+
 	void removeMapping(std::vector<int>* vector, int mapping);
 	bool hasMapping(std::vector<int>* vector, int mapping);
 
 	void swap(std::vector<int>* vector, int firstIndex, int secondIndex);
 };
-

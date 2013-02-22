@@ -206,13 +206,13 @@ private:
 	*/
 	FbxNode* findRoot(FbxNode* node);
 
-	std::vector<int>	polygonGroupIds_; //<! Vector for storing polygon group ids.
-	std::vector<Float3> vertexPositions_; //<! Vector for storing positoins.
-	std::vector<Float4> vertexColors_;	  //<! Vector for storing colors.
-	std::vector<Float3> vertexNormals_;	  //<! Vector for storing normals.
-	std::vector<Float2> vertexUVs_;		  //<! Vector for storing uv-coordintaes.
-	std::vector<Float4> vertexTangents_;  //<! Vector for storing tangents.
-	std::vector<Float4> vertexBinormals_; //<! Vector for storing binormals.
+	std::vector<int>	polygonGroupIds_; //!< Vector for storing polygon group ids.
+	std::vector<Float3> vertexPositions_; //!< Vector for storing positions.
+	std::vector<Float4> vertexColors_;	  //!< Vector for storing colors.
+	std::vector<Float3> vertexNormals_;	  //!< Vector for storing normals.
+	std::vector<Float2> vertexUVs_;		  //!< Vector for storing uv-coordinates.
+	std::vector<Float4> vertexTangents_;  //!< Vector for storing tangents.
+	std::vector<Float4> vertexBinormals_; //!< Vector for storing binormals.
 };
 
 #endif

@@ -44,6 +44,7 @@ enum DLL_U EventType
 	EVENT_QUIT_TO_DESKTOP,
 	EVENT_ENABLE_MENU,
 	EVENT_ENABLE_HUD,
+	EVENT_SHOW_FULLSCREEN,
 
 	// Game-loop
 	EVENT_UPDATE,
@@ -81,6 +82,8 @@ enum DLL_U EventType
 	EVENT_PHYSICS_ATTRIBUTES_COLLIDING,
 	EVENT_SYNC_STATE_COMMAND,
 	EVENT_CLOSEST_RAY_CAST,
+	EVENT_PLAYER_EXECUTING,
+	EVENT_PLAYER_DONE_EXECUTING,
 	EVENT_GET_FILE_LIST,
 
 	// Creation/Destruction
@@ -145,6 +148,14 @@ public:
 
 	int dx;
 	int dy;
+};
+
+class DLL_U Event_SetFullscreen : public Event
+{
+public:
+	Event_SetFullscreen(bool on);
+
+	bool on;
 };
 
 /**
@@ -628,12 +639,20 @@ public:
 	//Event input varaibles:
 	Float3 from;										//!< Point from where the ray originates
 	Float3 to;											//!< Point where the ray ends
-	short collisionFilterMask;							//!< What types of Physics objects (refer to XKILL_Enums::PhysicsAttributeType) the ray should collide with during its travel from from to to
+	short collisionFilterMask;							//!< What types of physics objects (refer to XKILL_Enums::PhysicsAttributeType) the ray should collide with during its travel from from to to
 	
 	//Event output varaibles:
-	int EntityIdOfOwnerToClosestPhysicsObjectHitByRay;	//!< Set to 0 if no entity was hit by the ray.
+	int EntityIdOfOwnerToClosestPhysicsObjectHitByRay;	//!< Set to 0 if no entity was hit by the ray
 	Float3 ClosestHitPoint;								//!< The world space hit point where the ray hit the physics object
 };
+
+class DLL_U Event_PlayerExecuting : public Event
+{
+public:
+	Event_PlayerExecuting(int executingPlayerIndex);
+
+	int executingPlayerIndex;
+};	
 
 class DLL_U Event_GetFileList : public Event
 {

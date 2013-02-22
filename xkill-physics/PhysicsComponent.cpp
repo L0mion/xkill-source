@@ -16,12 +16,12 @@
 #include "PropPhysicsObject.h"
 #include "physicsUtilities.h"
 
-#include "CollisionShapes.h"
 #include "debugDrawDispatcher.h"
+#include "CollisionShapes.h"
 
 ATTRIBUTES_DECLARE_ALL;
 
-static debugDrawDispatcher gDebugDraw;
+debugDrawDispatcher* debugDrawer_ = nullptr;
 
 PhysicsComponent::PhysicsComponent() : broadphase_(nullptr),
 									   collisionConfiguration_(nullptr),
@@ -100,6 +100,12 @@ PhysicsComponent::~PhysicsComponent()
 	{
 		delete bulletImporter_;
 	}
+
+	if(debugDrawer_ != nullptr)
+	{
+		delete debugDrawer_;
+	}
+
 	delete CollisionShapes::Instance();
 }
 
@@ -118,19 +124,22 @@ bool PhysicsComponent::init()
 
 	dynamicsWorld_->setGravity(btVector3(0,-10,0));
 	dynamicsWorld_->setInternalTickCallback(wrapTickCallback,static_cast<void*>(this)); //Register collision callback
+	
+	debugDrawer_ = new debugDrawDispatcher();
+	debugDrawer_->setDebugMode(btIDebugDraw::DBG_DrawWireframe);
+	dynamicsWorld_->setDebugDrawer(debugDrawer_);
+	
 	PhysicsObject::setDynamicsWorld(dynamicsWorld_); //Make dynamicsWorld_ accessible from physics objects
+	PhysicsObject::setDebugDrawer(debugDrawer_);
 
-	gDebugDraw.setDebugMode(btIDebugDraw::DBG_DrawWireframe);
-	dynamicsWorld_->setDebugDrawer(&gDebugDraw);
-
-	CollisionShapes::Instance()->loadCollisionShapes();
+	//CollisionShapes::Instance()->loadCollisionShapes();
 	
 	return true;
 }
 
 void PhysicsComponent::onUpdate(float delta)
 {
-	gDebugDraw.clearDebugVerticesVector();
+	debugDrawer_->clearDebugVerticesVector();
 
 	//Loop through all physics attributes
 	itrPhysics = ATTRIBUTE_MANAGER->physics.getIterator();
@@ -164,7 +173,7 @@ void PhysicsComponent::onUpdate(float delta)
 			}
 		}
 		dynamicsWorld_->debugDrawWorld(); //Calls debugDrawDispatcher::drawLine internally
-		gDebugDraw.queueDebugDrawEvent();
+		debugDrawer_->queueDebugDrawEvent();
 	}
 
 	FLUSH_QUEUED_EVENTS(EVENT_PHYSICS_ATTRIBUTES_COLLIDING);
@@ -217,44 +226,48 @@ void PhysicsComponent::onEvent(Event* e)
 	{
 		Event_ModifyPhysicsObject* modifyPhysicsObject = static_cast<Event_ModifyPhysicsObject*>(e);
 
-		//Cast void pointer sent in Event_ModifyPhysicsObject, and modify physics object
 		int physicsAttributeIndex = modifyPhysicsObject->ptr_physics.index();
-
 		if(physicsAttributeIndex < physicsObjects_->size() && physicsAttributeIndex > -1)
 		{
-			if(physicsObjects_->at(physicsAttributeIndex) != NULL)
+			PhysicsObject* physicsObject = physicsObjects_->at(physicsAttributeIndex);
+			if(physicsObject != NULL)
 			{
+				//Cast void pointer sent in Event_ModifyPhysicsObject to its expected data type and modify physics object accordingly
 				switch(modifyPhysicsObject->modifyWhatDataInPhysicsObjectData)
 				{
 				case XKILL_Enums::ModifyPhysicsObjectData::GRAVITY:
 					{
 						Float3* gravity = static_cast<Float3*>(modifyPhysicsObject->data);
-						physicsObjects_->at(physicsAttributeIndex)->setGravity(btVector3(gravity->x, gravity->y, gravity->z));
+						
+						physicsObject->setGravity(btVector3(gravity->x, gravity->y, gravity->z));
 						break;
 					}
 				case XKILL_Enums::ModifyPhysicsObjectData::VELOCITY:
 					{
 						Float3* velocity = static_cast<Float3*>(modifyPhysicsObject->data);
-						physicsObjects_->at(physicsAttributeIndex)->setLinearVelocity(btVector3(velocity->x, velocity->y, velocity->z));
+						
+						physicsObject->setLinearVelocity(btVector3(velocity->x, velocity->y, velocity->z));
 						break;
 					}
 				case XKILL_Enums::ModifyPhysicsObjectData::VELOCITYPERCENTAGE:
 					{
 						Float3* velocityPercentage = static_cast<Float3*>(modifyPhysicsObject->data);
-						btVector3 currentLinearVelocity = physicsObjects_->at(physicsAttributeIndex)->getLinearVelocity();
-						physicsObjects_->at(physicsAttributeIndex)->setLinearVelocity(btVector3(currentLinearVelocity.x()*velocityPercentage->x, currentLinearVelocity.y()*velocityPercentage->y, currentLinearVelocity.z()*velocityPercentage->z));
+						
+						btVector3 currentLinearVelocity = physicsObject->getLinearVelocity();
+						physicsObject->setLinearVelocity(btVector3(currentLinearVelocity.x()*velocityPercentage->x, currentLinearVelocity.y()*velocityPercentage->y, currentLinearVelocity.z()*velocityPercentage->z));
 						break;
 					}
 				case XKILL_Enums::ModifyPhysicsObjectData::FLAG_STATIC:
 					{
 						bool* staticPhysicsObject = static_cast<bool*>(modifyPhysicsObject->data);
+						
 						if(*staticPhysicsObject == true)
 						{
-							physicsObjects_->at(physicsAttributeIndex)->setCollisionFlags(physicsObjects_->at(physicsAttributeIndex)->getCollisionFlags() | btCollisionObject::CF_STATIC_OBJECT);
+							physicsObject->setCollisionFlags(physicsObject->getCollisionFlags() | btCollisionObject::CF_STATIC_OBJECT);
 						}
 						else if(*staticPhysicsObject == false)
 						{
-							physicsObjects_->at(physicsAttributeIndex)->setCollisionFlags(physicsObjects_->at(physicsAttributeIndex)->getCollisionFlags() & ~ btCollisionObject::CF_STATIC_OBJECT);
+							physicsObject->setCollisionFlags(physicsObject->getCollisionFlags() & ~ btCollisionObject::CF_STATIC_OBJECT);
 						}
 						break;
 					}
@@ -266,8 +279,6 @@ void PhysicsComponent::onEvent(Event* e)
 						short* collisionFilterMaskFromEvent = static_cast<short*>(modifyPhysicsObject->data);
 
 						AttributePtr<Attribute_Physics> ptr_physics = itrPhysics.at(physicsAttributeIndex);
-						PhysicsObject* physicsObject = physicsObjects_->at(physicsAttributeIndex);
-
 						physicsObject->writeNonSynchronizedPhysicsObjectDataToPhysicsAttribute();
 						ptr_physics->collisionFilterMask = *collisionFilterMaskFromEvent;
 						ptr_physics->reloadDataIntoBulletPhysics = true;
@@ -276,8 +287,31 @@ void PhysicsComponent::onEvent(Event* e)
 				case XKILL_Enums::ModifyPhysicsObjectData::GIVE_IMPULSE:
 					{
 						Float3* impulseVector = static_cast<Float3*>(modifyPhysicsObject->data);
+
 						btVector3 impulse = convert(*impulseVector);
-						physicsObjects_->at(physicsAttributeIndex)->applyCentralImpulse(impulse);
+						physicsObject->applyCentralImpulse(impulse);
+						break;
+					}
+				case XKILL_Enums::ModifyPhysicsObjectData::IF_TRUE_RECALCULATE_LOCAL_INERTIA_ELSE_SET_TO_ZERO:
+					{
+						bool* recalculateLocalInertia = static_cast<bool*>(modifyPhysicsObject->data);
+
+						btVector3 localInertia = btVector3(0.0f, 0.0f, 0.0f);
+						btScalar mass = itrPhysics.at(physicsAttributeIndex)->mass;
+						if(*recalculateLocalInertia == true)
+						{
+							btCollisionShape* collisionShape = physicsObject->getCollisionShape();
+							collisionShape->calculateLocalInertia(mass, localInertia);
+
+							physicsObject->setMassProps(mass, localInertia);
+							physicsObject->updateInertiaTensor();
+						}
+						else
+						{
+							physicsObject->setMassProps(mass, localInertia);
+						}
+
+						break;
 					}
 				}
 			}
@@ -484,7 +518,7 @@ void PhysicsComponent::updateCulling()
 			ptr_physics->ptr_render->cull = false;
 		}
 	}
-	CollisionShapes::Instance()->updateFrustrumShape();
+	CollisionShapes::Instance()->updateFrustumShape();
 
 	while(itrCamera.hasNext())
 	{
