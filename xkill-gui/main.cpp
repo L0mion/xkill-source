@@ -14,7 +14,7 @@
 //#include <windows.h>
 //#include <stdio.h>
 //#include <lmcons.h>
-int qtinit();
+//int qtinit();
 int main(int argc,char** argv) //debug draw test main
 {
 	// Detect memory leaks
@@ -23,7 +23,7 @@ int main(int argc,char** argv) //debug draw test main
 #endif
 
 	// Create MainWindow
-	QApplication a(argc, argv); int r = qtinit(); if(r) return r;
+	QApplication a(argc, argv); //int r = qtinit(); if(r) return r;
 	MainWindow w;
 	w.show();
 
