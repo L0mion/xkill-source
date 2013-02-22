@@ -6,6 +6,7 @@
 #include "MotionState.h"
 #include "PhysicsUtilities.h"
 #include "PhysicsComponent.h"
+#include "debugDrawDispatcher.h"
 
 #include <btBulletDynamicsCommon.h>
 
@@ -15,6 +16,7 @@ AttributeIterator<Attribute_Spatial> itrSpatial_PhysicsObject;
 static float outOfBoundsIfYIsLowerThanThis;
 
 btDiscreteDynamicsWorld* PhysicsObject::dynamicsWorld_ = NULL;
+debugDrawDispatcher* PhysicsObject::debugDrawer_ = NULL;
 
 PhysicsObject::PhysicsObject()
 	: btRigidBody(-1, nullptr, nullptr)

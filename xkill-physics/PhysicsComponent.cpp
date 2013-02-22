@@ -16,12 +16,12 @@
 #include "PropPhysicsObject.h"
 #include "physicsUtilities.h"
 
-#include "CollisionShapes.h"
 #include "debugDrawDispatcher.h"
+#include "CollisionShapes.h"
 
 ATTRIBUTES_DECLARE_ALL;
 
-static debugDrawDispatcher gDebugDraw;
+debugDrawDispatcher* debugDrawer_ = nullptr;
 
 PhysicsComponent::PhysicsComponent() : broadphase_(nullptr),
 									   collisionConfiguration_(nullptr),
@@ -100,6 +100,12 @@ PhysicsComponent::~PhysicsComponent()
 	{
 		delete bulletImporter_;
 	}
+
+	if(debugDrawer_ != nullptr)
+	{
+		delete debugDrawer_;
+	}
+
 	delete CollisionShapes::Instance();
 }
 
@@ -118,10 +124,13 @@ bool PhysicsComponent::init()
 
 	dynamicsWorld_->setGravity(btVector3(0,-10,0));
 	dynamicsWorld_->setInternalTickCallback(wrapTickCallback,static_cast<void*>(this)); //Register collision callback
+	
+	debugDrawer_ = new debugDrawDispatcher();
+	debugDrawer_->setDebugMode(btIDebugDraw::DBG_DrawWireframe);
+	dynamicsWorld_->setDebugDrawer(debugDrawer_);
+	
 	PhysicsObject::setDynamicsWorld(dynamicsWorld_); //Make dynamicsWorld_ accessible from physics objects
-
-	gDebugDraw.setDebugMode(btIDebugDraw::DBG_DrawWireframe);
-	dynamicsWorld_->setDebugDrawer(&gDebugDraw);
+	PhysicsObject::setDebugDrawer(debugDrawer_);
 
 	//CollisionShapes::Instance()->loadCollisionShapes();
 	
@@ -130,7 +139,7 @@ bool PhysicsComponent::init()
 
 void PhysicsComponent::onUpdate(float delta)
 {
-	gDebugDraw.clearDebugVerticesVector();
+	debugDrawer_->clearDebugVerticesVector();
 
 	//Loop through all physics attributes
 	itrPhysics = ATTRIBUTE_MANAGER->physics.getIterator();
@@ -164,7 +173,7 @@ void PhysicsComponent::onUpdate(float delta)
 			}
 		}
 		dynamicsWorld_->debugDrawWorld(); //Calls debugDrawDispatcher::drawLine internally
-		gDebugDraw.queueDebugDrawEvent();
+		debugDrawer_->queueDebugDrawEvent();
 	}
 
 	FLUSH_QUEUED_EVENTS(EVENT_PHYSICS_ATTRIBUTES_COLLIDING);

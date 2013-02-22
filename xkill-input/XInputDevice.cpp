@@ -96,7 +96,9 @@ void XInputDevice::setStandardMappings()
 		axes_[0]->addMapping(InputAction::ACTION_F_WALK_LR);
 		axes_[1]->addMapping(InputAction::ACTION_F_WALK_FB);
 		axes_[2]->addMapping(InputAction::ACTION_F_LOOK_LR);
+		axes_[2]->setUseAcceleration(true);
 		axes_[3]->addMapping(InputAction::ACTION_F_LOOK_UD);
+		axes_[3]->setUseAcceleration(true);
 		axes_[3]->setInverted(true);
 	}
 

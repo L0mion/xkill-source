@@ -48,6 +48,7 @@ void EventToFModConverter::fillNameConversionArray(std::string filepath)
 		fp.deleteFile();
 
 		fp.startReading();
+		fp.startReading();
 	}
 
 	int number;
@@ -93,6 +94,7 @@ void EventToFModConverter::addConversion(std::string conversionRow)
 				if(fmodEventNames_[i] == numberStr)
 				{
 					number = i;
+					break;
 				}
 			}
 		}

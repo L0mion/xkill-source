@@ -14,7 +14,9 @@
 
 #include "ui_MainWindow.h"
 
-ATTRIBUTES_DECLARE_ALL
+ATTRIBUTES_DECLARE_ALL;
+
+
 
 MainWindow::MainWindow()
 {

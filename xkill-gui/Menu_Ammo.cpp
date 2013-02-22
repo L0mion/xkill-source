@@ -3,12 +3,11 @@
 Menu_Ammo::Menu_Ammo(Ui::MainWindow* ui, QMainWindow* window)
 {
 	this->ui = ui;
+	mutatorSettings_ = new MutatorSettings();
 	updateLock = false;
 
-	mutatorSettings_ = new MutatorSettings();
-
-	// Init settings menu
-	setSettingsMenu();
+	// Set standard values
+	reset();
 
 	// Connects slots
 	connect(ui->radioButton_Ammo_Bullet,						SIGNAL(clicked()),			this,	SLOT(setSettingsMenu()));
@@ -25,7 +24,9 @@ Menu_Ammo::Menu_Ammo(Ui::MainWindow* ui, QMainWindow* window)
 
 	connect(ui->horizontalSlider_Ammo_ExplosionInitialRadius,	SIGNAL(valueChanged(int)),	this,	SLOT(settingsMenuUpdated()));
 	connect(ui->horizontalSlider_Ammo_ExplosionFinalRadius,		SIGNAL(valueChanged(int)),	this,	SLOT(settingsMenuUpdated()));
-	connect(ui->horizontalSlider_Ammo_ExplosionDuration,		SIGNAL(valueChanged(int)),	this,	SLOT(settingsMenuUpdated()));																
+	connect(ui->horizontalSlider_Ammo_ExplosionDuration,		SIGNAL(valueChanged(int)),	this,	SLOT(settingsMenuUpdated()));			
+
+	connect(ui->pushButton_Ammo_Reset,							SIGNAL(clicked()),			this,	SLOT(reset()));
 }
 
 Menu_Ammo::~Menu_Ammo()
@@ -111,4 +112,13 @@ Ammunition* Menu_Ammo::getAmmoSettings()
 	}
 
 	return &mutatorSettings_->getStandardAmmunition(ammoType);
+}
+
+void Menu_Ammo::reset()
+{
+	// Reset settings
+	mutatorSettings_->initStandardAmmunition();
+
+	// Init settings menu
+	setSettingsMenu();
 }

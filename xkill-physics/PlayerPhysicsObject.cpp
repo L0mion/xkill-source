@@ -3,6 +3,7 @@
 #include <btBulletDynamicsCommon.h>
 #include "BulletCollision/NarrowPhaseCollision/btRaycastCallback.h"
 #include "physicsUtilities.h"
+#include "debugDrawDispatcher.h"
 
 AttributeIterator<Attribute_Input> itrInput;
 AttributeIterator<Attribute_Physics> itrPhysics_3;
@@ -64,14 +65,21 @@ void PlayerPhysicsObject::onUpdate(float delta)
 void PlayerPhysicsObject::hover(float delta, float hoverHeight)
 {
 	float deltaHeightMaximum = 0.0f;
-	btVector3 offset[] = {btVector3(0.75f, 0.0f, 0.75f),
-						  btVector3(0.75f, 0.0f, -0.75f),
-						  btVector3(-0.75f, 0.0f, 0.75f),
-						  btVector3(-0.75f, 0.0f, -0.75f)};
+	btVector3 offset[] = {btVector3( 0.19f, 0.0f,  0.19f),
+						  btVector3( 0.19f, 0.0f, -0.19f),
+						  btVector3(-0.19f, 0.0f,  0.19f),
+						  btVector3(-0.19f, 0.0f, -0.19f)};
 	for(unsigned int i=0; i<4; i++)
 	{
-		btVector3 from = getWorldTransform().getOrigin() + offset[i];
-		btVector3 to = from - btVector3(0.0f,hoverHeight*2.0f,0.0f) + offset[i];
+		btVector3 from = btVector3(0.0f, 0.0f, 0.0f);
+		btVector3 to = (from - btVector3(0.0f,hoverHeight*2.0f,0.0f)) + offset[i];
+		from += offset[i];
+		
+		from += getWorldTransform().getOrigin();
+		to   += getWorldTransform().getOrigin();
+
+		btQuaternion btqt = getWorldTransform().getRotation();
+		
 		btCollisionWorld::ClosestRayResultCallback ray(from,to);
 		ray.m_collisionFilterGroup = XKILL_Enums::PhysicsAttributeType::RAY;
 		ray.m_collisionFilterMask = XKILL_Enums::PhysicsAttributeType::WORLD;
@@ -86,6 +94,7 @@ void PlayerPhysicsObject::hover(float delta, float hoverHeight)
 				deltaHeightMaximum = deltaHeight;
 			}
 		}
+		debugDrawer_->drawLine(from, to, btVector3(0.2f, 1.0f, 0.2f));
 	}
 	if(deltaHeightMaximum > 0.0f)
 	{

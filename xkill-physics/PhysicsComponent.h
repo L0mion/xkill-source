@@ -21,6 +21,7 @@ class FrustumPhysicsObject;
 class CollisionObject;
 
 class Event_ClosestRayCast;
+class debugDrawDispatcher;
 
 /*! \defgroup xkill-physics xkill-physics
 	Physics Component of XKILL. */
@@ -42,6 +43,7 @@ private:
 	btSequentialImpulseConstraintSolver*		solver_; //!< Solve impulse equations
 	btDiscreteDynamicsWorld*					dynamicsWorld_; //!< Used to handle simulation
 	btBulletWorldImporter*						bulletImporter_; //!< Used to import collisionshapes from .bullet files
+	debugDrawDispatcher*						debugDrawer_;
 
 	btAlignedObjectArray<PhysicsObject*>*		physicsObjects_;  //!< List of objects mapping to physics attributes on wich simulation is run
 	btAlignedObjectArray<FrustumPhysicsObject*>* frustumPhysicsObjects_;  //!< List of frustums mapping to cameras wich is used to cull physicsobjects
