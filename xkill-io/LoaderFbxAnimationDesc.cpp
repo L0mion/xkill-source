@@ -128,7 +128,7 @@ void LoaderFbxAnimationDesc::createKeyframe(LoaderFbxAnimationBone fbxBone, Keyf
 
 	keyframe->translation			= DirectX::XMFLOAT3(translationX, translationY, translationZ);
 	keyframe->scale					= DirectX::XMFLOAT3(scalingX, scalingY, scalingZ);
-	keyframe->rotationQuaternion	= DirectX::XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f); //quaternion;
+	keyframe->rotationQuaternion	= quaternion;
 	keyframe->timePosition			= time;
 }
 

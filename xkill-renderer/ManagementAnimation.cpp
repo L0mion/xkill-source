@@ -26,9 +26,9 @@ void ManagementAnimation::update(float delta, std::string clipName, int animatio
 {
 	if(animationIndex >= 0 && animationIndex <animations_.size())
 	{
-		timePosition += 0.005f;
+		timePosition += delta;
 		SkinnedData* skinnedData = animations_.at(animationIndex);
-		if(timePosition > 10.0f/*skinnedData->getClipEndTime(clipName)*/)
+		if(timePosition > skinnedData->getClipEndTime(clipName))
 		{
 			timePosition = 0.0f;
 		}

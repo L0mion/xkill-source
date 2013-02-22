@@ -60,7 +60,7 @@ void LoaderFbxMesh::parseMesh(FbxMesh* mesh, FbxPose* fbxPose, LoaderFbxMeshDesc
 	}
 
 
-	transformVertices(mesh);
+//	transformVertices(mesh);
 
 	meshDesc->setPolygonGroupIds(polygonGroupIds_);
 	meshDesc->setVertexPositions(vertexPositions_);
@@ -460,7 +460,18 @@ void LoaderFbxMesh::parseVertexLinkData(FbxMesh* mesh, FbxPose* fbxPose, LoaderF
 
 			for(unsigned int i=0; i<nodes.size(); i++)
 			{
-				meshDesc->addOffsetMatrix(identityMatrix);
+				FbxAMatrix matrixTransform;
+				matrixTransform = nodes[i]->EvaluateGlobalTransform(FbxTime(0));
+
+				matrixTransform = matrixTransform.Transpose();
+				Float4x4 offsetMatrix;
+				for(int x=0; x<4; x++)
+				{
+					for(int y=0; y<4; y++)
+						offsetMatrix.m[x][y] = static_cast<float>(matrixTransform.mData[x][y]);
+				}
+
+				meshDesc->addOffsetMatrix(offsetMatrix);
 			}
 
 			for(int clusterIndex=0; clusterIndex<numClusters; clusterIndex++)
