@@ -14,9 +14,7 @@
 
 #include "ui_MainWindow.h"
 
-ATTRIBUTES_DECLARE_ALL;
-
-
+ATTRIBUTES_DECLARE_ALL
 
 MainWindow::MainWindow()
 {
@@ -217,6 +215,7 @@ void MainWindow::moveEvent( QMoveEvent *e )
 
 void MainWindow::event_showMessageBox( Event_ShowMessageBox* e )
 {
+	menu->alwaysOnTop(false);
 	QString message(e->message.c_str());
 
 	QMessageBox::information(0, "Error", message);

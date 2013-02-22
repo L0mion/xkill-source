@@ -21,9 +21,9 @@ public:
 	~CollisionShapes();
 	btCollisionShape* getCollisionShape(unsigned int meshId);  //!< return the collisionshape of given meshID
 	btCollisionShape* getFrustumShape(unsigned int cameraIndex);  //!< return the frustum of the camera given by index
-	void updateFrustumShape();  //!< Syncronize the frustum with the cameras
+	void updateFrustumShape();  //!< Synchronizes the frustum with the cameras
 	void loadCollisionShapes();  //!< Reads collision shapes of level and individual objects and store them for easy access
-	void unloadCollisionShapes();	//!< Remove collision shapes
+	void unloadCollisionShapes();	//!< Removes collision shapes
 	btCollisionShape* getDefaultShape(){return defaultShape_;}
 	static CollisionShapes* Instance();
 	static CollisionShapes* instance;

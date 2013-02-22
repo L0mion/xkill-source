@@ -827,7 +827,7 @@ void GameComponent::updateAndInterpretAimingRay(Entity* playerEntity, AttributeP
 						if(!playerAttribute->detectedAsDead)
 						{
 							DEBUGPRINT("Player with attribute id " << playerHitByRayAttributeId.at(j) << " hit by Laser Automatic Sniper Execution Ray");
-					
+
 							SEND_EVENT(&Event_PlayerDeath(playerHitByRayAttributeId.at(j)));
 
 							rayCastingPlayerAttribute->priority++;

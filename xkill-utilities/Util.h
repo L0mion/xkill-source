@@ -79,7 +79,7 @@
 #define BULLETPHYSICSDEBUGDRAW false //render Bullet Physics debug lines true/false
 #define DEBUGPRINT(dataStream)
 #endif
-// Defines DEBUGPRINT to a cout function in Debug configuration
+// Defines DEBUGPRINT to a printf utilizing std::ostringstream function in Debug configuration
 #ifdef XKILL_DEBUG
 #define BULLETPHYSICSDEBUGDRAW true //render Bullet Physics debug lines true/false
 #include <sstream>

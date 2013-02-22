@@ -84,7 +84,7 @@ Menu_Main2::Menu_Main2( QWidget* parent ) : QMainWindow()
 	ammo_Menu = new Menu_Ammo(&ui, this);
 	firingMode_Menu = new Menu_FiringMode(&ui, this);
 	sound_Menu = new Menu_Sound(&ui, this);
-	hud = new Menu_HUDManager(this);
+	//hud = new Menu_HUDManager(this);
 
 	// init level menu
 	filePath = QString("../../xkill-resources/xkill-scripts/levels.xml");
