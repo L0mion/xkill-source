@@ -10,8 +10,6 @@ struct PSOut
 Texture2D texAlbedo		: register(t0);
 Texture2D texNormal		: register(t1);
 
-SamplerState ss : register(s0);
-
 PSOut PS_Color(ColorVSOut colorPSIn)
 {
 	PSOut output;

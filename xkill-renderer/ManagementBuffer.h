@@ -35,10 +35,11 @@ static const unsigned int SHADER_REGISTER_DOWNSAMPLE_INPUT = 3;
 static const unsigned int SHADER_REGISTER_BLUR_INPUT	= 9;
 static const unsigned int SHADER_REGISTER_BLUR_OUTPUT	= 1;
 
+static const unsigned int SHADER_REGISTER_SHADOWMAP = 4;
+
 static const unsigned int DOWNSAMPLE_SCREEN_RES_FACTOR = 4;
 
-static const unsigned int SHADOWMAP_WIDTH	= 800;
-static const unsigned int SHADOWMAP_HEIGHT	= 800;
+static const unsigned int SHADOWMAP_DIM = 1024;
 
 enum SET_TYPE
 {

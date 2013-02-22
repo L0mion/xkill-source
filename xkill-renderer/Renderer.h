@@ -40,6 +40,7 @@ class SubsetD3D;
 //#include <vector>
 
 #include "ShadingDesc.h"
+#include "ShadowMapping.h"
 
 //#define VISUALLEAKDETECTOR;
 #if (defined(DEBUG) || defined(_DEBUG)) && defined(VISUALLEAKDETECTOR)
@@ -68,7 +69,7 @@ public:
 		unsigned int screenHeight);	//!< Resizes all management objects that are affected by a change in screen resolution.
 	HRESULT	init();					//!< Initializes members and prepares render.
 	void	update();
-	void	render();	//!< Renders a frame.
+	void	render(double delta);	//!< Renders a frame.
 	void	loadTextures(TexDesc* texdesc); //!< Forwards information related to what textures Renderer is to load to Renderer-object.
 protected:
 private:
@@ -106,7 +107,9 @@ private:
 		DirectX::XMFLOAT4X4		projectionMatrix); //!< Renders a debug shape, such as a bounding sphere.
 
 	//Shadows
-	void buildShadows();
+
+	DirectX::XMFLOAT4X4	buildShadows(double delta);
+	ShadowMatrices constructShadowMatrices(SceneBounds bounds, Float3 lightDirection);
 
 	//Glow effect
 	void downSampleBlur();

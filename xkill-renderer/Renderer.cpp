@@ -31,14 +31,6 @@
 //tmep
 #include "Buffer_SrvDsv.h"
 
-struct BoundingSphere
-{
-	DirectX::XMFLOAT3 center;
-	float radius;
-
-	BoundingSphere() { center = DirectX::XMFLOAT3(0.0f, 0.0f, 0.0f); radius = 0.0f; }
-};
-
 ATTRIBUTES_DECLARE_ALL;
 
 Renderer::Renderer(HWND windowHandle)
@@ -369,7 +361,7 @@ void Renderer::update()
 	//Update instances.
 	managementInstance_->update(device, devcon);
 }
-void Renderer::render()
+void Renderer::render(double delta)
 {
 	ID3D11DeviceContext* devcon = managementD3D_->getDeviceContext();
 
@@ -377,6 +369,9 @@ void Renderer::render()
 	managementBuffer_->clearBuffers(devcon);
 	managementD3D_->clearDepthBuffer();
 	managementD3D_->clearBackBuffer();
+
+	//Do shadows pre-pass:
+	DirectX::XMFLOAT4X4 shadowMapTransform = buildShadows(delta);
 
 	//Update per-frame constant buffer.
 	managementCB_->setCB(
@@ -386,6 +381,7 @@ void Renderer::render()
 		devcon);
 	managementCB_->updateCBFrame(
 		devcon,
+		shadowMapTransform,
 		managementLight_->getLightDirCurCount(),
 		managementLight_->getLightPointCurCount(),
 		managementLight_->getLightSpotCurCount());
@@ -396,9 +392,6 @@ void Renderer::render()
 	AttributePtr<Attribute_Position>	ptr_position;
 
 	ViewportData vpData;
-
-	//Do shadows pre-pass:
-	buildShadows();
 
 	managementBuffer_->setBuffersAndDepthBufferAsRenderTargets(devcon, managementD3D_->getDepthBuffer());
 
@@ -507,7 +500,7 @@ void Renderer::renderViewportToGBuffer(ViewportData& vpData)
 	//Unset and clean.
 	managementFX_->unsetAll(devcon);
 	managementFX_->unsetLayout(devcon);
-	//managementSS_->unsetSS(devcon, TypeFX_PS, 0);
+	managementSS_->unsetSS(devcon, TypeFX_PS, 0);
 	devcon->RSSetState(nullptr);
 }
 void Renderer::renderViewportToBackBuffer(ViewportData& vpData)
@@ -548,6 +541,7 @@ void Renderer::renderViewportToBackBuffer(ViewportData& vpData)
 	
 	//Set default samplerstate.
 	managementSS_->setSS(devcon, TypeFX_CS, 0, SS_ID_DEFAULT);
+	managementSS_->setSS(devcon, TypeFX_CS, 1, SS_ID_SHADOW);
 
 	//Call compute shader kernel.
 	unsigned int dispatchX = winfo_->getCSDispathX() / managementViewport_->getNumViewportsX();
@@ -566,7 +560,8 @@ void Renderer::renderViewportToBackBuffer(ViewportData& vpData)
 	managementD3D_->unsetDepthBufferSRV(GBUFFER_SHADER_REGISTER_DEPTH);
 	managementBuffer_->unsetBuffersAsCSShaderResources(devcon);
 
-	//devcon->CSSetSamplers(0, 0, nullptr); //move me into managementSS
+	managementSS_->unsetSS(devcon, TypeFX_CS, 0);
+	managementSS_->unsetSS(devcon, TypeFX_CS, 1);
 }
 
 void Renderer::renderInstance(unsigned int meshID, InstancedData* instance, bool shadowmap)
@@ -760,14 +755,14 @@ void Renderer::renderDebugShape(
 }
 
 //Shadows
-void Renderer::buildShadows()
+DirectX::XMFLOAT4X4	Renderer::buildShadows(double delta)
 {
 	ID3D11DeviceContext* devcon = managementD3D_->getDeviceContext();
 
 	//Get shadow transform:
-	BoundingSphere sphere;
-	sphere.center = DirectX::XMFLOAT3(0.0f, 0.0f, 0.0f);
-	sphere.radius = sqrtf(25.0f * 25.0f);//10.0f * 10.0f + 15.0f * 15.0f);
+	SceneBounds bounds;
+	bounds.center = DirectX::XMFLOAT3(0.0f, 0.0f, 0.0f); //Origo.
+	bounds.radius = sqrtf(25.0f * 25.0f); //Radius of scene really ought to be calculated instead of fixed.
 
 	LightDescDir dirLight;
 	AttributePtr<Attribute_Light_Dir> ptr_lightDir;
@@ -777,62 +772,22 @@ void Renderer::buildShadows()
 		dirLight = ptr_lightDir->lightDir;
 
 		static float rotationAngle = 0.0f;
-		rotationAngle += 0.0001f;
+		rotationAngle += 0.0001f * delta;
 		DirectX::XMMATRIX R = DirectX::XMMatrixRotationY(rotationAngle);
-
+		
 		DirectX::XMFLOAT3 tempDir = DirectX::XMFLOAT3(dirLight.direction.x, dirLight.direction.y, dirLight.direction.z);
 		DirectX::XMVECTOR tempDir2 = XMLoadFloat3(&tempDir);
 		tempDir2 = DirectX::XMVector3TransformNormal(tempDir2, R);
 		DirectX::XMStoreFloat3(&tempDir, tempDir2);
-
+		
 		ptr_lightDir->lightDir.direction = Float3(tempDir.x, tempDir.y, tempDir.z);
 	}
 	else
 		throw 0;
 	itrLightDir.resetIndex();
 
-	DirectX::XMFLOAT3 direction = DirectX::XMFLOAT3(dirLight.direction.x, dirLight.direction.y, dirLight.direction.z);
-	DirectX::XMVECTOR lightDir = DirectX::XMLoadFloat3(&direction);
-
-	DirectX::XMFLOAT3 lightPosFix = DirectX::XMFLOAT3(
-		-2.0f * sphere.radius * direction.x,
-		-2.0f * sphere.radius * direction.y,
-		-2.0f * sphere.radius * direction.z); //-2.0f * sphere.radius * lightDir;
-	DirectX::XMVECTOR lightPos = DirectX::XMLoadFloat3(&lightPosFix);
-	DirectX::XMVECTOR targetPos = DirectX::XMLoadFloat3(&sphere.center);
-	DirectX::XMVECTOR up = DirectX::XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
-
-	DirectX::XMMATRIX V = DirectX::XMMatrixLookAtLH(lightPos, targetPos, up);
-
-	//Transform bounding sphere to light-space:
-	DirectX::XMFLOAT3 sphereCenterLS;
-	DirectX::XMStoreFloat3(&sphereCenterLS, DirectX::XMVector3TransformCoord(targetPos, V));
-
-	float l = sphereCenterLS.x - sphere.radius;
-	float b = sphereCenterLS.y - sphere.radius;
-	float n = sphereCenterLS.z - sphere.radius;
-	float r = sphereCenterLS.x + sphere.radius;
-	float t = sphereCenterLS.y + sphere.radius;
-	float f = sphereCenterLS.z + sphere.radius;
-	DirectX::XMMATRIX P = DirectX::XMMatrixOrthographicOffCenterLH(l, r, b, t, n, f);
-
-	//Transform NDC-space [-1, +1]^2 to texture space [0, 1]^2
-	DirectX::XMMATRIX T(
-		0.5f,	0.0f,	0.0f,	0.0f,
-		0.0f,	-0.5f,	0.0f,	0.0f,
-		0.0f,	0.0f,	1.0f,	0.0f,
-		0.5f,	0.5f,	0.0f,	1.0f);
-
-	DirectX::XMMATRIX S = V * P * T;
-
-	DirectX::XMFLOAT4X4 view;
-	XMStoreFloat4x4(&view, V);
-
-	DirectX::XMFLOAT4X4 proj;
-	XMStoreFloat4x4(&proj, P);
-
-	DirectX::XMFLOAT4X4 shadowTransform;
-	XMStoreFloat4x4(&shadowTransform, S);
+	ShadowMatrices shadowMatrices;
+	shadowMatrices = constructShadowMatrices(bounds, dirLight.direction);
 
 	//Render the shadowmap:
 	Buffer_SrvDsv* shadowMap = managementBuffer_->getShadow();
@@ -844,8 +799,6 @@ void Renderer::buildShadows()
 	managementRS_->setRS(devcon, RS_ID_DEPTH); //Set rasterizer state with depth bias to avoid shadow acne
 
 	ID3D11DepthStencilView* dsv = shadowMap->getDSV();
-	devcon->ClearDepthStencilView(dsv, D3D11_CLEAR_DEPTH, 1.0f, 0);
-
 	ID3D11RenderTargetView* renderTargets[1] = { NULL };
 	devcon->OMSetRenderTargets(1, renderTargets, dsv); //set null rendertargets, as we want no colour-writes. Set dsv.
 
@@ -853,9 +806,9 @@ void Renderer::buildShadows()
 	managementCB_->setCB(CB_TYPE_CAMERA, TypeFX_VS, CB_REGISTER_CAMERA, managementD3D_->getDeviceContext());
 	managementCB_->updateCBCamera(
 		managementD3D_->getDeviceContext(),
-		/*View: */			view,
+		/*View: */			shadowMatrices.view_,
 		/*View Inverse: */	managementMath_->getIdentityMatrix(),
-		/*Proj: */			proj,//managementMath_->getIdentityMatrix(),
+		/*Proj: */			shadowMatrices.proj_,//managementMath_->getIdentityMatrix(),
 		/*Proj Inverse: */	managementMath_->getIdentityMatrix(),
 		/*EyePos: */		DirectX::XMFLOAT3(0.0f, 0.0f, 0.0f), //Irrelevant
 		/*ViewportTopX: */	0.0f, //Irrelevant					
@@ -868,11 +821,71 @@ void Renderer::buildShadows()
 	std::map<unsigned int, InstancedData*> instancesMap = managementInstance_->getInstancesMap();
 	for(std::map<unsigned int, InstancedData*>::iterator i = instancesMap.begin(); i != instancesMap.end(); i++)
 	{
-		renderInstance(i->first, i->second, true);
+		//if(i->first == 7 ) //Check for what models ought to cast shadows?
+			renderInstance(i->first, i->second, true);
 	}
 
 	//Unset shizzle
 	devcon->OMSetRenderTargets(1, renderTargets, NULL);
+
+	return shadowMatrices.shadowMapTransform_;
+}
+ShadowMatrices Renderer::constructShadowMatrices(SceneBounds bounds, Float3 lightDirection)
+{
+	//Position of directional light being the back of viewing frustum.
+	DirectX::XMVECTOR lightPos = DirectX::XMLoadFloat3(&(DirectX::XMFLOAT3(
+		-2.0f * bounds.radius * lightDirection.x,
+		-2.0f * bounds.radius * lightDirection.y,
+		-2.0f * bounds.radius * lightDirection.z)));
+	DirectX::XMVECTOR targetPos = DirectX::XMLoadFloat3(&bounds.center); //Looking at center of the scene.
+	DirectX::XMVECTOR up = DirectX::XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
+
+	//Build view-matrix:
+	DirectX::XMMATRIX V = DirectX::XMMatrixLookAtLH(
+		lightPos, 
+		targetPos, 
+		up);
+
+	//Transform bounding sphere to light-space:
+	DirectX::XMFLOAT3 sphereCenterLS;
+	DirectX::XMStoreFloat3(&sphereCenterLS, DirectX::XMVector3TransformCoord(targetPos, V));
+
+	//Establish frustum:
+	float l = sphereCenterLS.x - bounds.radius;
+	float b = sphereCenterLS.y - bounds.radius;
+	float n = sphereCenterLS.z - bounds.radius;
+	float r = sphereCenterLS.x + bounds.radius;
+	float t = sphereCenterLS.y + bounds.radius;
+	float f = sphereCenterLS.z + bounds.radius;
+
+	//Build projection-matrix:
+	DirectX::XMMATRIX P = DirectX::XMMatrixOrthographicOffCenterLH(
+		l, 
+		r, 
+		b, 
+		t, 
+		n, 
+		f);
+
+	//Transform NDC-space [-1, +1]^2 to texture space [0, 1]^2
+	DirectX::XMMATRIX T(
+		0.5f,	0.0f,	0.0f,	0.0f,
+		0.0f,	-0.5f,	0.0f,	0.0f,
+		0.0f,	0.0f,	1.0f,	0.0f,
+		0.5f,	0.5f,	0.0f,	1.0f);
+	DirectX::XMMATRIX S = V * P * T;
+
+	ShadowMatrices shadowMatrices;
+	XMStoreFloat4x4(
+		&(shadowMatrices.shadowMapTransform_), 
+		S);
+	XMStoreFloat4x4(
+		&(shadowMatrices.view_), 
+		V);
+	XMStoreFloat4x4(
+		&(shadowMatrices.proj_), 
+		P);
+	return shadowMatrices;
 }
 
 //Glow effect
@@ -918,6 +931,8 @@ void Renderer::downSampleBlur()
 		0); //register irrelevant
 
 	managementFX_->unsetAll(devcon);
+
+	managementSS_->unsetSS(devcon, TypeFX_PS, 0);
 }
 void Renderer::blurHorizontally()
 {
@@ -1029,13 +1044,13 @@ void Renderer::upSampleBlur()
 	upSampleViewport_.MaxDepth	= 1;
 	devcon->RSSetViewports(1, &upSampleViewport_);
 	
-	managementSS_->setSS(devcon, TypeFX_PS, 0, SS_ID_DEFAULT);
-	managementRS_->setRS(devcon, RS_ID_DEFAULT);
-	
 	devcon->IASetVertexBuffers(0, 0, nullptr, 0, 0);
 	devcon->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
 	managementFX_->setShader(devcon, SHADERID_VS_SCREENQUAD);
 	managementFX_->setShader(devcon, SHADERID_PS_DOWNSAMPLE);
+
+	managementSS_->setSS(devcon, TypeFX_PS, 0, SS_ID_DEFAULT);
+	managementRS_->setRS(devcon, RS_ID_DEFAULT);
 
 	managementBuffer_->setGlow(
 		devcon,
@@ -1065,6 +1080,8 @@ void Renderer::upSampleBlur()
 		SHADER_REGISTER_DOWNSAMPLE_INPUT);
 	
 	managementFX_->unsetAll(devcon);
+
+	managementSS_->unsetSS(devcon, TypeFX_PS, 0);
 }
 
 void Renderer::drawBulletPhysicsDebugLines(
@@ -1191,7 +1208,7 @@ void Renderer::drawHudElement(int viewportIndex, unsigned int textureId, DirectX
 	managementFX_->setShader(devcon, SHADERID_VS_SPRITE);
 	managementFX_->setShader(devcon, SHADERID_PS_SPRITE);
 	
-	managementSS_->setSS(devcon, TypeFX_PS, 0, SS_ID_SPRITE);
+	managementSS_->setSS(devcon, TypeFX_PS, 0, SS_ID_DEFAULT);
 	managementRS_->setRS(devcon, RS_ID_DEFAULT);
 
 	ID3D11ShaderResourceView* tex = managementTex_->getTexSrv(textureId);
@@ -1220,6 +1237,7 @@ void Renderer::drawHudElement(int viewportIndex, unsigned int textureId, DirectX
 	//managementD3D_->unsetUAVBackBufferCS();
 
 	managementFX_->unsetAll(devcon);
+	managementSS_->unsetSS(devcon, TypeFX_PS, 0);
 	//devcon->PSSetSamplers(0, 0, nullptr);
 	devcon->IASetInputLayout(nullptr);
 	devcon->RSSetState(nullptr);

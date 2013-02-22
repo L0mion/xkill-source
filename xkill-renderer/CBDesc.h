@@ -22,12 +22,14 @@ static const unsigned int CB_INSTANCE_DESC_SIZE = 16;
 */
 struct CBFrameDesc
 {
+	DirectX::XMFLOAT4X4 shadowMapTransform_;
+
 	unsigned int numLightsDir;
 	unsigned int numLightsPoint;
 	unsigned int numLightsSpot;
 	unsigned int pad1;
 };
-static const unsigned int CB_FRAME_DESC_SIZE = 16;
+static const unsigned int CB_FRAME_DESC_SIZE = 80;
 
 struct CBCameraDesc
 {
