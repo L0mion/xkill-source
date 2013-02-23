@@ -237,10 +237,7 @@ MenuManager::MenuManager( QWidget* parent )
 	
 	mainMenu->toggleMenu(true);
 
-	SUBSCRIBE_TO_EVENT(this, EVENT_ENABLE_MENU);
-	SUBSCRIBE_TO_EVENT(this, EVENT_UPDATE);
-	SUBSCRIBE_TO_EVENT(this, EVENT_END_DEATHMATCH);
-	SUBSCRIBE_TO_EVENT(this, EVENT_GAMEOVER);
+
 }
 
 void MenuManager::keyPressEvent( QKeyEvent* e )
@@ -254,40 +251,6 @@ void MenuManager::keyReleaseEvent( QKeyEvent* e )
 
 void MenuManager::onEvent( Event* e )
 {
-	EventType type = e->getType();
-	static int refreshRate = 2;
-	static int test = refreshRate;
-	switch(type) 
-	{
-	case EVENT_UPDATE:
-		// HACK: Makes the menu update every 20 frame
-		test--;
-		if(test<0)
-		{
-			hudManager.update();
-			scoreBoard->onUpdate(1.0f);
-			test = refreshRate;
-		}
-		break;
-	case EVENT_ENABLE_MENU:
-		{
-			// Hide show menu
-			bool enableMenu = ((Event_EnableMenu*)e)->enableMenu;
-			mainMenu->toggleMenu(enableMenu);
-		}
-		break;
-	case EVENT_END_DEATHMATCH:
-		scoreBoard->toggleMenu(false);
-		inGameMenu->toggleMenu(false);
-		break;
-	case EVENT_GAMEOVER:
-		scoreBoard->toggleMenu(true);
-		scoreBoard->onUpdate(0.01f);
-		inGameMenu->toggleMenu(false);
-		mainMenu->toggleMenu(false);
-	default:
-		break;
-	}
 }
 
 void MenuManager::onUpdate( float delta )

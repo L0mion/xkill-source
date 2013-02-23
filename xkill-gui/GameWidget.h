@@ -73,15 +73,16 @@ public:
 		}
 	}
 
-
-
-	void sendPositionEvent()
+	Int2 getGlobalPosition()
 	{
 		QPoint qPos = mapToGlobal(QPoint(pos().x(),pos().y()));
 
-		Int2 pos(qPos.x(), qPos.y());
-		//Int2 oldPos(e->oldPos().x(), e->oldPos().y());
-		SEND_EVENT(&Event_WindowMove(pos, Int2()));
+		return Int2(qPos.x(), qPos.y());
+	}
+
+	void sendPositionEvent()
+	{
+		SEND_EVENT(&Event_WindowMove(getGlobalPosition(), Int2()));
 	}
 
 public slots:
@@ -135,14 +136,6 @@ protected:
 
 	void keyPressEvent(QKeyEvent *e)
 	{
-		if(hasMouseLock)
-		{
-			if(e->key() == Qt::Key_Escape)
-			{
-				event_setMouseLock(false);
-			}
-		}
-
 		QCoreApplication::sendEvent(parentWidget(), e);
 	}
 	void keyReleaseEventEvent(QKeyEvent *e)

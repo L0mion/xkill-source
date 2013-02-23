@@ -1,7 +1,8 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
-#include <QtGui/QFocusEvent>
+#include <QtCore/QEvent>
+#include <QtGui/QMouseEvent> // needed to grab mouse input
 #include <QtGui/QMouseEvent> // needed to grab mouse input
 #include <QtGui/QMessageBox> // used to display info dialogs
 #include <xkill-utilities/IObserver.h>
@@ -28,6 +29,7 @@ public:
 	void onUpdate(float delta);
 	void onEvent(Event* e);
 	void event_showMessageBox(Event_ShowMessageBox* e);
+	bool eventFilter(QObject* object, QEvent* event);
 
 protected:
 	void closeEvent(QCloseEvent *event);
@@ -37,7 +39,6 @@ protected:
 	void resizeEvent(QResizeEvent* e);
 	void showMenu();
 	
-
 
 public slots:
 	void slot_setTitle(QString title);

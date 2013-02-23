@@ -21,9 +21,13 @@ void Menu_HUDManager::onEvent( Event* e )
 	case EVENT_ENABLE_HUD:
 		if(((Event_EnableHud*)e)->enableHud)
 		{
+			/*for(int i=0; i<huds.size(); i++)
+				huds[i]->show();*/
 		}
 		else
 		{
+			for(int i=0; i<huds.size(); i++)
+				huds[i]->hide();
 		}
 	
 		break;

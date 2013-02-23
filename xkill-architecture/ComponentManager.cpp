@@ -175,9 +175,14 @@ void updateOffset()
 
 void ComponentManager::update(float delta)
 {
+	// Performs necessary per-frame updating of some sub-parts of EventManager.
+	EventManager::getInstance()->update(delta);
+
+
 	//// PUT SOMETHING 
 	/// DONT SPAWN PLAYERS FIRST FRAMES
 	/// PUT SOMETHING
+
 	if(GET_STATE() == STATE_DEATHMATCH)
 	{
 		input_->onUpdate(delta);

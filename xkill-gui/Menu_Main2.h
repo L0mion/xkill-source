@@ -41,10 +41,6 @@ private:
 	void push_menu(QFrame* menu);
 	void pop_menu();
 	void menuResize(); 
-	bool isHidden()
-	{
-		
-	}
 	void hideMenu()
 	{
 		if(menuStack.size() > 0)
@@ -53,6 +49,7 @@ private:
 			topMenu->hide();
 			ui.label_background->hide();
 		}
+		raise();
 	}
 	void showMenu()
 	{
@@ -62,6 +59,7 @@ private:
 			topMenu->show();
 			ui.label_background->show();
 		}
+		raise();
 	}
 public:
 	Menu_Main2(QWidget* parent);
@@ -69,6 +67,13 @@ public:
 
 	void onEvent(Event* e);
 	void event_windowMove(Event_WindowMove* e);
+
+	/**
+	Causes the overlay to always be shown on top
+	even on top of other applications.
+	DEPRICATED: Shouldn't be needed anymore. Overlay
+	is instead updated every time MainWindow gains focus.
+	*/
 	void alwaysOnTop(bool on);
 	void closeEvent(QCloseEvent* event);
 	void event_windowResize(Event_WindowResize* e);
