@@ -226,19 +226,22 @@ void CollisionManager::collision_projectile(Entity* entity1, Entity* entity2)
 				AttributePtr<Attribute_Projectile> ptr_projectile = itrProjectile.at(projectileId.at(i));
 
 				//Determine collision effect based on ammunitionType
+				float deathDelay = 2.0f;
 				switch(ptr_projectile->ammunitionType)
 				{
 				case XKILL_Enums::AmmunitionType::BULLET: //Bounce off the wall
-					if(ptr_projectile->currentLifeTimeLeft > 1.00f)
+					deathDelay = 5.0f;
+					if(ptr_projectile->currentLifeTimeLeft > deathDelay)
 					{
-						ptr_projectile->currentLifeTimeLeft = 1.00f;
+						ptr_projectile->currentLifeTimeLeft = deathDelay;
 						SEND_EVENT(&Event_ModifyPhysicsObject(XKILL_Enums::ModifyPhysicsObjectData::GRAVITY, static_cast<void*>(&Float3(0.0f, -5.0f, 0.0f)), itrPhysics.at(physicsId.at(j))));
 					}
 					break;
 				case XKILL_Enums::AmmunitionType::SCATTER: //Fall down and roll, also collide with projectiles
-					if(ptr_projectile->currentLifeTimeLeft > 1.00f)
+					deathDelay = 5.0f;
+					if(ptr_projectile->currentLifeTimeLeft > deathDelay)
 					{
-						ptr_projectile->currentLifeTimeLeft = 1.00f;
+						ptr_projectile->currentLifeTimeLeft = deathDelay;
 
 						SEND_EVENT(&Event_ModifyPhysicsObject(XKILL_Enums::ModifyPhysicsObjectData::GRAVITY, static_cast<void*>(&Float3(0.0f, -10.0f, 0.0f)), itrPhysics.at(physicsId.at(j))));
 						SEND_EVENT(&Event_ModifyPhysicsObject(XKILL_Enums::ModifyPhysicsObjectData::VELOCITYPERCENTAGE, static_cast<void*>(&Float3(0.1f, 0.1f, 0.1f)), itrPhysics.at(physicsId.at(j))));
@@ -246,6 +249,10 @@ void CollisionManager::collision_projectile(Entity* entity1, Entity* entity2)
 						//Collide with projectiles
 						short collisionFilterMask = itrPhysics.at(physicsId.at(j))->collisionFilterMask | XKILL_Enums::PhysicsAttributeType::PROJECTILE;
 						SEND_EVENT(&Event_ModifyPhysicsObject(XKILL_Enums::ModifyPhysicsObjectData::COLLISIONFILTERMASK, static_cast<void*>(&collisionFilterMask), itrPhysics.at(physicsId.at(j))));
+					
+						// MATT: This makes the initial collision smoother by adding a delay of one frame.
+						// ON A SECOND NOTE: Not used, because delaying collision makes bullets rain from the sky.
+						//POST_DELAYED_EVENT(new Event_ModifyPhysicsObject(XKILL_Enums::ModifyPhysicsObjectData::COLLISIONFILTERMASK, static_cast<void*>(&collisionFilterMask), itrPhysics.at(physicsId.at(j))), 0.0f);
 					}
 					break;
 				case XKILL_Enums::AmmunitionType::EXPLOSIVE: //Remove projectile and create an explosion sphere in its place

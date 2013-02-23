@@ -30,20 +30,17 @@ Menu_Main2::Menu_Main2( QWidget* parent ) : QMainWindow()
 	this->parent = parent;
 	ui.setupUi(this);
 	QWidget::setWindowFlags(Qt::FramelessWindowHint);
-	QWidget::setAttribute(Qt::WA_TranslucentBackground);		
-	
-	setAlwaysOnTopAndShow(true);
-#if defined(DEBUG) || defined(_DEBUG)
-	setAlwaysOnTopAndShow(false);	//May interfere with debugging using breakpoints if not set to false in DEBUG
-#endif
-	
-	//QWidget::show();
+	//alwaysOnTop(true);
+	QWidget::setAttribute(Qt::WA_TranslucentBackground);
+	QWidget::show();
 	loadOpeningGif();
 
 	// Events
+	SUBSCRIBE_TO_EVENT(this, EVENT_WINDOW_FOCUS_CHANGED);
 	SUBSCRIBE_TO_EVENT(this, EVENT_WINDOW_MOVE);
 	SUBSCRIBE_TO_EVENT(this, EVENT_WINDOW_RESIZE);
 	SUBSCRIBE_TO_EVENT(this, EVENT_ENABLE_MENU);
+	SUBSCRIBE_TO_EVENT(this, EVENT_UPDATE);
 
 
 	//
@@ -124,15 +121,18 @@ Menu_Main2::Menu_Main2( QWidget* parent ) : QMainWindow()
 
 void Menu_Main2::mousePressEvent( QMouseEvent *e )
 {
-	if(e->button() == Qt::RightButton)
+	if(GET_STATE() == STATE_MAINMENU)
 	{
-		pop_menu();
-	}
-	if(e->button() == Qt::LeftButton)
-	{
-		// Skip opening, if at opening (index 0)
-		if(menuStack.size()==1)
-			endOpening();
+		if(e->button() == Qt::RightButton)
+		{
+			pop_menu();
+		}
+		if(e->button() == Qt::LeftButton)
+		{
+			// Skip opening, if at opening (index 0)
+			if(menuStack.size()==1)
+				endOpening();
+		}
 	}
 }
 
@@ -191,14 +191,14 @@ void Menu_Main2::pop_menu()
 	{
 		// Pop current menu
 		QFrame* topMenu = menuStack.back();
-		topMenu->hide();
+		hideMenu();
 		menuStack.pop_back();
 
 		// Show previous menu
 		QFrame* menu = menuStack.back();
 		menu->move(0,0);
 		menu->resize(width(), height());
-		menu->show();
+		showMenu();
 	}
 }
 
@@ -216,22 +216,12 @@ void Menu_Main2::menuResize()
 	topMenu->resize(width(), height());
 }
 
-void Menu_Main2::setAlwaysOnTopAndShow( bool on )
+void Menu_Main2::setAlwaysOnTop( bool on )
 {
-	// Only set if no errors occured
-	// This prevents a bug where the window cannot be closed
-	if(SETTINGS->numErrors == 0)
+	if(on)
 	{
-		if(on)
-		{
-			// Enable Window Stay on Top flag
-			this->setWindowFlags(this->windowFlags() | Qt::WindowStaysOnTopHint);
-		}
-		else
-		{
-			// Disable Window Stay on Top flag
-			this->setWindowFlags(this->windowFlags() & ~Qt::WindowStaysOnTopHint);
-		}
+		// Enable Window Stay on Top flag
+		this->setWindowFlags(this->windowFlags() | Qt::WindowStaysOnTopHint);
 	}
 	else
 	{
@@ -245,13 +235,17 @@ void Menu_Main2::setAlwaysOnTopAndShow( bool on )
 void Menu_Main2::event_windowMove( Event_WindowMove* e )
 {
 	move(e->pos.x, e->pos.y);
+	raise();
 }
 
 void Menu_Main2::keyPressEvent( QKeyEvent *e )
 {
-	if(e->key() == Qt::Key_Escape)
+	if(GET_STATE() == STATE_MAINMENU)
 	{
-		pop_menu();
+		if(e->key() == Qt::Key_Escape)
+		{
+			pop_menu();
+		}
 	}
 
 	QCoreApplication::sendEvent(parent, e);
@@ -276,6 +270,9 @@ void Menu_Main2::onEvent( Event* e )
 	EventType type = e->getType();
 	switch (type) 
 	{
+	case EVENT_WINDOW_FOCUS_CHANGED:
+		raise();
+		break;
 	case EVENT_ENABLE_MENU:
 		if(((Event_EnableMenu*)e)->enableMenu)
 		{
