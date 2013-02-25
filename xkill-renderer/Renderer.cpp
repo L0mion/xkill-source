@@ -361,7 +361,7 @@ void Renderer::update()
 	//Update instances.
 	managementInstance_->update(device, devcon);
 }
-void Renderer::render(double delta)
+void Renderer::render()
 {
 	ID3D11DeviceContext* devcon = managementD3D_->getDeviceContext();
 
@@ -371,7 +371,7 @@ void Renderer::render(double delta)
 	managementD3D_->clearBackBuffer();
 
 	//Do shadows pre-pass:
-	DirectX::XMFLOAT4X4 shadowMapTransform = buildShadows(delta);
+	DirectX::XMFLOAT4X4 shadowMapTransform = buildShadows();
 
 	//Update per-frame constant buffer.
 	managementCB_->setCB(
@@ -755,7 +755,7 @@ void Renderer::renderDebugShape(
 }
 
 //Shadows
-DirectX::XMFLOAT4X4	Renderer::buildShadows(double delta)
+DirectX::XMFLOAT4X4	Renderer::buildShadows()
 {
 	ID3D11DeviceContext* devcon = managementD3D_->getDeviceContext();
 
@@ -782,8 +782,6 @@ DirectX::XMFLOAT4X4	Renderer::buildShadows(double delta)
 		//
 		//ptr_lightDir->lightDir.direction = Float3(tempDir.x, tempDir.y, tempDir.z);
 	}
-	else
-		throw 0;
 	itrLightDir.resetIndex();
 
 	ShadowMatrices shadowMatrices;
@@ -815,8 +813,8 @@ DirectX::XMFLOAT4X4	Renderer::buildShadows(double delta)
 		/*ViewportTopY: */	0.0f, //Irrelevant
 		/*zNear: */			0.0f, //Irrelevant
 		/*zFar: */			0.0f, //Irrelevant
-		/*ViewportWidth: */ 0.0f,	//Irrelevant
-		/*ViewportHeight: */ 0.0f);	//Irrelevant
+		/*ViewportWidth: */ 0,	//Irrelevant
+		/*ViewportHeight: */ 0);	//Irrelevant
 
 	std::map<unsigned int, InstancedData*> instancesMap = managementInstance_->getInstancesMap();
 	for(std::map<unsigned int, InstancedData*>::iterator i = instancesMap.begin(); i != instancesMap.end(); i++)
