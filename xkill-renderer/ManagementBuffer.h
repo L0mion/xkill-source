@@ -46,6 +46,7 @@ enum SET_TYPE
 	SET_TYPE_SRV,
 	SET_TYPE_RTV,
 	SET_TYPE_UAV,
+	SET_TYPE_DSV
 };
 enum SET_STAGE
 {
@@ -57,6 +58,7 @@ enum SET_ID
 	SET_ID_GLOW_HIGH,
 	SET_ID_GLOW_LOW,
 	SET_ID_GLOW_LOW_UTIL,
+	SET_ID_SHADOW
 };
 
 class ManagementBuffer
@@ -75,12 +77,12 @@ public:
 	void setBuffersAsCSShaderResources(ID3D11DeviceContext* devcon);
 	void unsetBuffersAsCSShaderResources(ID3D11DeviceContext* devcon);
 
-	void setGlow(
+	void setBuffer(
 		ID3D11DeviceContext* devcon,
 		SET_ID setID, 
 		SET_TYPE setType, 
 		SET_STAGE setStage, 
-		unsigned int shaderRegister);
+		unsigned int shaderRegister); //!< This function can be dangerous if one's not careful. Be sure not to set SET_TYPE to something not corresponding to SET_ID.
 	void unset(
 		ID3D11DeviceContext* devcon,
 		SET_TYPE setType,
@@ -89,8 +91,6 @@ public:
 
 	D3D11_VIEWPORT getDownSampledViewport();
 	D3D11_VIEWPORT getShadowViewport();
-
-	Buffer_SrvDsv* getShadow() { return shadowMap_; }
 protected:
 private:
 	HRESULT initAlbedo(ID3D11Device* device);

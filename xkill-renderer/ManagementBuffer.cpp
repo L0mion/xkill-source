@@ -328,9 +328,9 @@ void ManagementBuffer::unsetBuffersAsCSShaderResources(ID3D11DeviceContext* devc
 		resourceViews);
 }
 
-void ManagementBuffer::setGlow(ID3D11DeviceContext* devcon, SET_ID setID, SET_TYPE setType, SET_STAGE setStage, unsigned int shaderRegister)
+void ManagementBuffer::setBuffer(ID3D11DeviceContext* devcon, SET_ID setID, SET_TYPE setType, SET_STAGE setStage, unsigned int shaderRegister)
 {
-	Buffer_SrvRtvUav* buffer = nullptr;
+	Buffer_Srv* buffer = nullptr;
 	switch (setID)
 	{
 	case SET_ID_GLOW_HIGH:
@@ -342,6 +342,9 @@ void ManagementBuffer::setGlow(ID3D11DeviceContext* devcon, SET_ID setID, SET_TY
 	case SET_ID_GLOW_LOW_UTIL:
 		buffer = glowLowUtil_;
 		break;
+	case SET_ID_SHADOW:
+		buffer = shadowMap_;
+		break;
 	}
 
 	ID3D11DepthStencilView* dsv = NULL; //for brevity
@@ -350,7 +353,7 @@ void ManagementBuffer::setGlow(ID3D11DeviceContext* devcon, SET_ID setID, SET_TY
 	case SET_TYPE_RTV:
 		{
 			ID3D11RenderTargetView* renderTargets[1];
-			renderTargets[0] = buffer->getRTV();
+			renderTargets[0] = ((Buffer_SrvRtv*)buffer)->getRTV();
 
 			devcon->OMSetRenderTargets(
 				1,
@@ -383,13 +386,23 @@ void ManagementBuffer::setGlow(ID3D11DeviceContext* devcon, SET_ID setID, SET_TY
 		}
 	case SET_TYPE_UAV:
 		{
-			ID3D11UnorderedAccessView* uav = buffer->getUAV();
+			ID3D11UnorderedAccessView* uav = ((Buffer_SrvRtvUav*)buffer)->getUAV();
 			devcon->CSSetUnorderedAccessViews(
 				shaderRegister, 
 				1, 
 				&uav, 
 				nullptr);
 
+			break;
+		}
+	case SET_TYPE_DSV:
+		{
+			dsv = shadowMap_->getDSV();
+			ID3D11RenderTargetView* renderTargets[1] = { NULL };
+			devcon->OMSetRenderTargets(
+				1, //register and stage irrelevant
+				renderTargets, 
+				dsv); //set null rendertargets, as we want no colour-writes.
 			break;
 		}
 	}
@@ -447,6 +460,12 @@ void ManagementBuffer::unset(
 				uavs, 
 				nullptr);
 
+			break;
+		}
+	case SET_TYPE_DSV:
+		{
+			ID3D11RenderTargetView* renderTargets[1] = { NULL };
+			devcon->OMSetRenderTargets(1, renderTargets, NULL);
 			break;
 		}
 	}

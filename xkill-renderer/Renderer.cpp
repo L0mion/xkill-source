@@ -789,18 +789,18 @@ DirectX::XMFLOAT4X4	Renderer::buildShadows(double delta)
 	ShadowMatrices shadowMatrices;
 	shadowMatrices = constructShadowMatrices(bounds, dirLight.direction);
 
-	//Render the shadowmap:
-	Buffer_SrvDsv* shadowMap = managementBuffer_->getShadow();
-
 	//Set viewport to encompass entire map.
 	D3D11_VIEWPORT vp = managementBuffer_->getShadowViewport();
 	devcon->RSSetViewports(1, &vp);
 
 	managementRS_->setRS(devcon, RS_ID_DEPTH); //Set rasterizer state with depth bias to avoid shadow acne
 
-	ID3D11DepthStencilView* dsv = shadowMap->getDSV();
-	ID3D11RenderTargetView* renderTargets[1] = { NULL };
-	devcon->OMSetRenderTargets(1, renderTargets, dsv); //set null rendertargets, as we want no colour-writes. Set dsv.
+	managementBuffer_->setBuffer(
+		devcon, 
+		SET_ID_SHADOW, 
+		SET_TYPE_DSV, 
+		SET_STAGE_CS, //stage irrelevant
+		0); //register irrelevant
 
 	//Update per-viewport constant buffer.
 	managementCB_->setCB(CB_TYPE_CAMERA, TypeFX_VS, CB_REGISTER_CAMERA, managementD3D_->getDeviceContext());
@@ -808,7 +808,7 @@ DirectX::XMFLOAT4X4	Renderer::buildShadows(double delta)
 		managementD3D_->getDeviceContext(),
 		/*View: */			shadowMatrices.view_,
 		/*View Inverse: */	managementMath_->getIdentityMatrix(),
-		/*Proj: */			shadowMatrices.proj_,//managementMath_->getIdentityMatrix(),
+		/*Proj: */			shadowMatrices.proj_,
 		/*Proj Inverse: */	managementMath_->getIdentityMatrix(),
 		/*EyePos: */		DirectX::XMFLOAT3(0.0f, 0.0f, 0.0f), //Irrelevant
 		/*ViewportTopX: */	0.0f, //Irrelevant					
@@ -826,7 +826,7 @@ DirectX::XMFLOAT4X4	Renderer::buildShadows(double delta)
 	}
 
 	//Unset shizzle
-	devcon->OMSetRenderTargets(1, renderTargets, NULL);
+	managementBuffer_->unset(devcon, SET_TYPE_DSV, SET_STAGE_CS, 0); //register and stage irrelevant
 	managementRS_->unsetRS(devcon);
 
 	return shadowMatrices.shadowMapTransform_;
@@ -904,14 +904,14 @@ void Renderer::downSampleBlur()
 	devcon->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
 	managementFX_->setShader(devcon, SHADERID_VS_SCREENQUAD);
 	managementFX_->setShader(devcon, SHADERID_PS_DOWNSAMPLE);
-	managementBuffer_->setGlow(
+	managementBuffer_->setBuffer(
 		devcon,
 		SET_ID_GLOW_LOW,
 		SET_TYPE_RTV,
 		SET_STAGE_PS, //stage irrelevant
 		0); //register irrelevant
 	
-	managementBuffer_->setGlow(
+	managementBuffer_->setBuffer(
 		devcon,
 		SET_ID_GLOW_HIGH,
 		SET_TYPE_SRV,
@@ -959,14 +959,14 @@ void Renderer::blurHorizontally()
 	};
 	managementCB_->updateCBBlur(devcon, blurKernel);
 	
-	managementBuffer_->setGlow(
+	managementBuffer_->setBuffer(
 		devcon,
 		SET_ID_GLOW_LOW,
 		SET_TYPE_SRV,
 		SET_STAGE_CS,
 		SHADER_REGISTER_BLUR_INPUT);
 
-	managementBuffer_->setGlow(
+	managementBuffer_->setBuffer(
 		devcon,
 		SET_ID_GLOW_LOW_UTIL,
 		SET_TYPE_UAV,
@@ -999,14 +999,14 @@ void Renderer::blurVertically()
 	
 	managementCB_->setCB(CB_TYPE_BLUR, TypeFX_CS, CB_REGISTER_BLUR, devcon);
 	
-	managementBuffer_->setGlow(
+	managementBuffer_->setBuffer(
 		devcon,
 		SET_ID_GLOW_LOW,
 		SET_TYPE_UAV,
 		SET_STAGE_CS,
 		SHADER_REGISTER_BLUR_OUTPUT);
 	
-	managementBuffer_->setGlow(
+	managementBuffer_->setBuffer(
 		devcon,
 		SET_ID_GLOW_LOW_UTIL,
 		SET_TYPE_SRV,
@@ -1053,13 +1053,13 @@ void Renderer::upSampleBlur()
 	managementSS_->setSS(devcon, TypeFX_PS, 0, SS_ID_DEFAULT);
 	managementRS_->setRS(devcon, RS_ID_DEFAULT);
 
-	managementBuffer_->setGlow(
+	managementBuffer_->setBuffer(
 		devcon,
 		SET_ID_GLOW_HIGH,
 		SET_TYPE_RTV,
 		SET_STAGE_PS, //stage irrelevant
 		0); //register irrelevant
-	managementBuffer_->setGlow(
+	managementBuffer_->setBuffer(
 		devcon,
 		SET_ID_GLOW_LOW,
 		SET_TYPE_SRV,
