@@ -25,12 +25,10 @@ CollisionShapes::CollisionShapes()
 	importer_ = new btBulletWorldImporter();
 
 	scatterProjectileCollisionShape = new btSphereShape(0.15f);
-	/* The boundingSphereRadius is too large, that is why this code is commented out (2013-02-21 13.17)
-	btVector3 boundingSphereCenter;
-	btScalar boundingSphereRadius;
-	getCollisionShape(XKILL_Enums::ModelId::PROJECTILE_SCATTER)->getBoundingSphere(boundingSphereCenter, boundingSphereRadius);
-	scatterProjectileCollisionShape = new btSphereShape(boundingSphereRadius);
-	*/
+
+	float height = 0.75f;
+	float radius = 0.25f;
+	playerCollisionShape = new btCapsuleShape(radius, height);
 }
 
 CollisionShapes::~CollisionShapes()
@@ -42,6 +40,7 @@ CollisionShapes::~CollisionShapes()
 	delete importer_;
 
 	delete scatterProjectileCollisionShape;
+	delete playerCollisionShape;
 }
 
 btCollisionShape* CollisionShapes::getCollisionShape(unsigned int meshId)
@@ -126,129 +125,131 @@ void CollisionShapes::loadCollisionShapes()
 	//	collisionShapesIdToIndex_.insert(idtoindex);
 	//}
 
+	std::string resourcePath = "../../xkill-resources/";
 
-	//--------------------------------------------------------------------------------------
-	// Load .bullet file for current level
-	//--------------------------------------------------------------------------------------
 	Settings* settings = ATTRIBUTE_MANAGER->settings;
-	std::string path = std::string("../../xkill-resources/xkill-level/") + settings->currentLevel + "/" + settings->currentLevel + ".bullet";
-	if(!importer_->loadFile(path.c_str()))
+	std::string path = std::string(resourcePath + "xkill-level/") + settings->currentLevel + "/" + settings->currentLevel + ".bullet";
+	if(importer_->loadFile(path.c_str()))
+	{
+		DEBUGPRINT("Sucessfully loaded the .bullet file for " << path);
+	}
+	else
 	{
 		ERROR_MESSAGEBOX("Level .bullet-file could not be loaded.\nPath: " + path);
 	}
 
+	//check 2013-02-25 17.29-
+	/*
+	while(itrMesh.hasNext())
+	{
+		AttributePtr<Attribute_Mesh> ptr_mesh = itrMesh.getNext();
+		std::string path = std::string(resourcePath + "xkill-models/");
+		path = path.append(ptr_mesh->fileName + ".bullet");
+		importer_->loadFile(path.c_str());
+	}
+
+	while(itrMesh.hasNext())
+	{
+		AttributePtr<Attribute_Mesh> ptr_mesh = itrMesh.getNext();
+		int meshId = ptr_mesh->meshID;
+
+		std::string name = ptr_mesh->fileName;
+		name = name.substr(0,name.find("."));
+		name = name.append("RigidBodyShape");
+		btCollisionShape* loadedShape = importer_->getCollisionShapeByName(name.c_str()); //Find a collision shape in any .bullet file loaded by a "btBulletWorldImporter"
+		
+		if(loadedShape->getShapeType() == BOX_SHAPE_PROXYTYPE)
+		{
+			btVector3 scaling = loadedShape->getLocalScaling();
+						
+			btTransform transform;
+			btRigidBody* rigidbody = importer_->getRigidBodyByName(name.c_str());
+			if(rigidbody != nullptr)
+			{
+				transform = rigidbody->getWorldTransform();
+			}
+			else
+			{
+				transform.setIdentity();
+			}
+			addBoxCollisionShape(&scaling, &transform, meshId);
+		}
+		else
+		{
+			ERROR_MESSAGEBOX("Unsupported shape type found");
+		}
+	}
+	*/
+	
 	//--------------------------------------------------------------------------------------
-	// Try loading .bullet files for models, if they exist
+	// Find mapping between mesh files and collision shapes contained in .bullet files
+	// Assume that a mesh file name of "center1Corner.obj" corresponds to a collision shape named "center1CornerRigidBodyShape".
 	//--------------------------------------------------------------------------------------
 	while(itrMesh.hasNext())
 	{
 		AttributePtr<Attribute_Mesh> ptr_mesh = itrMesh.getNext();
-		if(collisionShapesIdToIndex_.find(ptr_mesh->meshID) == collisionShapesIdToIndex_.end())
+		int meshId = ptr_mesh->meshID;
+
+		std::string name = ptr_mesh->fileName;
+		name = name.substr(0,name.find("."));
+		name = name.append("RigidBodyShape"); 
+		btCollisionShape* loadedShape = importer_->getCollisionShapeByName(name.c_str()); //Find a collision shape in any .bullet file loaded by a "btBulletWorldImporter"
+		//---------------------------------------------------------------------------------------
+		// If a mapping is found: add box shape
+		//--------------------------------------------------------------------------------------
+		if(loadedShape != nullptr)
 		{
-			std::string name = ptr_mesh->fileName;
+			btVector3 scaling = loadedShape->getLocalScaling();
+			btTransform transform = importer_->getRigidBodyByName(name.c_str())->getWorldTransform();
+			addBoxCollisionShape(&scaling, &transform, meshId);
+		}
+		//--------------------------------------------------------------------------------------
+		// Else: Load a new .bullet file and search for a rigid body. A rigid body is used for retrieving position and rotation (world transform).
+		//--------------------------------------------------------------------------------------
+		else
+		{
+			std::string path = std::string(resourcePath + "xkill-models/");
+			std::string bulletFile;
+			name = ptr_mesh->fileName;
 			name = name.substr(0,name.find("."));
-			name = name.append("RigidBodyShape"); //Assume that all collision shapes have "RigidBodyShape" appended to their name
+			path = path.append(name + ".bullet");
+			bulletFile = path;
+			name = name.append("RigidBody");
 
-			btCollisionShape* collisionShape;
-			btCollisionShape* loadedShape;
-			loadedShape = importer_->getCollisionShapeByName(name.c_str());
 			//--------------------------------------------------------------------------------------
-			// If the .bullet file contained {meshName}+RigidBodyShape (example: model file name: rifle.obj; {meshName}+RigidBodyShape = rifleRigidBodyShape)
+			// If .bullet file exists
 			//--------------------------------------------------------------------------------------
-			if(loadedShape != nullptr)
+			if(importer_->loadFile(path.c_str()))
 			{
-				//--------------------------------------------------------------------------------------
-				// Create box shape with correct scaling and reset margin (This loader only supports box shapes).
-				//--------------------------------------------------------------------------------------
-				btVector3 scaling = loadedShape->getLocalScaling();
-				collisionShape = new btBoxShape(scaling/2);
-				collisionShape->setMargin(0.0f);
-				collisionShape->setLocalScaling(btVector3(1,1,1));
-
-				//--------------------------------------------------------------------------------------
-				// Map global mesh id to internal collision shape index
-				//--------------------------------------------------------------------------------------
-				std::pair<unsigned int, unsigned int> idToIndex(ptr_mesh->meshID, collisionShapes_->size());
-				collisionShapesIdToIndex_.insert(idToIndex);
-				
-				btCompoundShape* compoundShape = new btCompoundShape();
-				//collisionShape->setMargin(0.0);
-				compoundShape->addChildShape(importer_->getRigidBodyByName(name.c_str())->getWorldTransform(),collisionShape);
-				compoundShape->setMargin(0.0);
-				collisionShapes_->push_back(compoundShape);
-				collisionShapes_->push_back(collisionShape);
+				loadedShape = importer_->getCollisionShapeByIndex(importer_->getNumCollisionShapes()-1);//name.c_str());
 			}
-			//--------------------------------------------------------------------------------------
-			// Else: Load from model file
-			//--------------------------------------------------------------------------------------
 			else
 			{
-				std::string path = std::string("../../xkill-resources/xkill-models/");
-				name = ptr_mesh->fileName;
-				name = name.substr(0,name.find("."));
-				path = path.append(name);
-				path = path.append(".bullet");
-				name = name.append("RigidBody");
+				int g =5 ;
+			}
 
-				if(importer_->loadFile(path.c_str()))
-					loadedShape = importer_->getCollisionShapeByIndex(importer_->getNumCollisionShapes()-1);//name.c_str());
-				if(loadedShape != nullptr)
+			if(loadedShape != nullptr)
+			{
+				name = name.append("Shape");
+				if(loadedShape->getShapeType() == BOX_SHAPE_PROXYTYPE)
 				{
-					if(!name.compare("processRigidBody"))
+					btVector3 scaling = loadedShape->getLocalScaling();
+						
+					btTransform transform;
+					btRigidBody* rigidbody = importer_->getRigidBodyByName(name.c_str());
+					if(rigidbody != nullptr)
 					{
-						btScalar height = 0.75f;
-						btScalar radius = 0.25f;
-						collisionShape = new btCapsuleShape(radius, height);
-						//btBoxShape* box = static_cast<btBoxShape*>(loadedShape);
-						//btVector3 half = box->getHal fExtentsWithMargin();
-						//btCapsuleShape* capsule = new btCapsuleShape( half.x() > half.z() ? half.x() : half.z(), half.y());
-						//btSphereShape* sphere = new btSphereShape(0.2f);
-						//collisionShape = capsule;
-						//collisionShapes_->push_back(sphere);
-						//collisionShapes_->push_back(capsule);
-						//collisionShape = sphere;
-						btCompoundShape* cs = new btCompoundShape();
-						cs->addChildShape(btTransform(btQuaternion(0.0f,0.0f,0.0f,0.0f), btVector3(0.0f,0.0f,0.0f)),collisionShape);
-						std::pair<unsigned int, unsigned int>  idToIndex(ptr_mesh->meshID,collisionShapes_->size());
-						collisionShapesIdToIndex_.insert(idToIndex);
-						collisionShapes_->push_back(collisionShape);
-						cs->setMargin(0.00);
-						collisionShapes_->push_back(cs);
+						transform = rigidbody->getWorldTransform();
 					}
 					else
 					{
-						name = name.append("Shape");
-						if(loadedShape->getShapeType() == BOX_SHAPE_PROXYTYPE)
-						{
-							btVector3 scaling = loadedShape->getLocalScaling();
-							collisionShape = new btBoxShape(scaling/2);
-							collisionShape->setMargin(0.0f);
-							collisionShape->setLocalScaling(btVector3(1,1,1));
-							//collisionShape = new btBoxShape(*static_cast<btBoxShape*>(loadedShape));
-						}
-						else if(loadedShape->getShapeType() == CAPSULE_SHAPE_PROXYTYPE)
-						{
-							collisionShape = new btCapsuleShape(*static_cast<btCapsuleShape*>(loadedShape));
-						}
-						btCompoundShape* cs = new btCompoundShape();
-
-						btRigidBody* rb =importer_->getRigidBodyByName(name.c_str());
-						btTransform transform;
-						if(rb!=nullptr)
-						{
-							transform = rb->getWorldTransform();
-						}
-						else
-						{
-							transform.setIdentity();
-						}
-						cs->addChildShape(transform,collisionShape);
-						std::pair<unsigned int, unsigned int>  idToIndex(ptr_mesh->meshID,collisionShapes_->size());
-						collisionShapesIdToIndex_.insert(idToIndex);
-						collisionShapes_->push_back(collisionShape);
-						cs->setMargin(0.00);
-						collisionShapes_->push_back(cs);
+						transform.setIdentity();
 					}
+					addBoxCollisionShape(&scaling, &transform, meshId);
+				}
+				else
+				{
+					ERROR_MESSAGEBOX("Unsupported shape type found in " + bulletFile);
 				}
 			}
 		}
@@ -257,19 +258,13 @@ void CollisionShapes::loadCollisionShapes()
 
 void CollisionShapes::unloadCollisionShapes()
 {
-	for(int i = 0; i < collisionShapes_->size(); i++)
+	int nrOfChildShapes = collisionShapes_->size();
+	for(int i = 0; i < nrOfChildShapes; i++)
 	{
-		if(collisionShapes_->at(i)->getShapeType() == COMPOUND_SHAPE_PROXYTYPE)
-		{
-			for(int j = static_cast<btCompoundShape*>(collisionShapes_->at(i))->getNumChildShapes()-1; j > 0 ; j--)
-			{
-				delete static_cast<btCompoundShape*>(collisionShapes_->at(i))->getChildShape(j);
-			}
-		}
 		delete collisionShapes_->at(i);
 	}
-
 	collisionShapes_->clear();
+
 	collisionShapesIdToIndex_.clear();
 
 	if(importer_)
@@ -348,4 +343,28 @@ btCollisionShape* CollisionShapes::getFrustumShape(unsigned int cameraIndex)
 	//static btSphereShape a(1);	
 	//return &a;
 	return frustumShape_;
+}
+
+void CollisionShapes::addBoxCollisionShape(btVector3* scaling, btTransform* transform, int meshId)
+{
+	btCollisionShape* collisionShape = new btBoxShape(*scaling/2);
+	collisionShape->setMargin(0.0f);
+	collisionShape->setLocalScaling(btVector3(1,1,1));
+
+	mapInternalCollisionShapeIndexToGlobalMeshId(meshId);
+
+	//--------------------------------------------------------------------------------------
+	// Create a compound shape with the created box as child shape.
+	//--------------------------------------------------------------------------------------
+	btCompoundShape* compoundShape = new btCompoundShape();
+	compoundShape->addChildShape(*transform, collisionShape);
+	compoundShape->setMargin(0.0);
+	collisionShapes_->push_back(compoundShape); //Add this for later access
+	collisionShapes_->push_back(collisionShape); //Add this so that it can be deallocated easily
+}
+
+void CollisionShapes::mapInternalCollisionShapeIndexToGlobalMeshId(int meshId)
+{
+	std::pair<unsigned int, unsigned int> idToIndex(meshId, collisionShapes_->size());
+	collisionShapesIdToIndex_.insert(idToIndex);
 }

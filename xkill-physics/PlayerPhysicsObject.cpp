@@ -4,6 +4,7 @@
 #include "BulletCollision/NarrowPhaseCollision/btRaycastCallback.h"
 #include "physicsUtilities.h"
 #include "debugDrawDispatcher.h"
+#include "collisionShapes.h"
 
 AttributeIterator<Attribute_Input> itrInput;
 AttributeIterator<Attribute_Physics> itrPhysics_3;
@@ -212,4 +213,9 @@ void PlayerPhysicsObject::handleInput(float delta)
 			}
 		}
 	}
+}
+
+btCollisionShape* PlayerPhysicsObject::subClassSpecificCollisionShape()
+{
+	return CollisionShapes::Instance()->playerCollisionShape;
 }
