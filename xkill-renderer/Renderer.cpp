@@ -499,7 +499,7 @@ void Renderer::renderViewportToGBuffer(ViewportData& vpData)
 		drawBulletPhysicsDebugLines(vpData.view, vpData.proj);
 	}
 
-	//drawLaser(vpData.view, vpData.proj);
+	drawLaser(vpData.view, vpData.proj);
 	
 	//Unset and clean.
 	managementFX_->unsetAll(devcon);
