@@ -818,7 +818,7 @@ void GameComponent::updateAndInterpretAimingRay(Entity* playerEntity, AttributeP
 			ray->ptr_render->ptr_spatial->rotation = rayCastingPlayerAttribute->ptr_weapon_spatial->rotation;//rayCastingPlayerAttribute->ptr_camera->ptr_spatial->rotation;
 
 			ray->ptr_render->cull = false;
-			ray->render = true;
+			//ray->render = true;
 
 			//--------------------------------------------------------------------------------------
 			// If the player is executing, interpret the aiming ray as a Laser Automatic Sniper Execution Ray
