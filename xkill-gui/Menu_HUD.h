@@ -19,27 +19,17 @@ private:
 	Ui::Menu_HUD ui;
 
 public:
-	Menu_HUD(AttributePtr<Attribute_SplitScreen> splitScreen, QWidget* parent) : QWidget(parent)
-	{
-		ui.setupUi(this);
-		QWidget::setAttribute(Qt::WA_ShowWithoutActivating);
-		QWidget::setAttribute(Qt::WA_TransparentForMouseEvents);
-		
-
-		this->splitScreen = splitScreen;
-		hide();
-		refresh();
-	}
+	Menu_HUD(AttributePtr<Attribute_SplitScreen> splitScreen, QWidget* parent);
 	void mapPositionToParent()
 	{
 		int x = 20 + splitScreen->ssTopLeftX;
 		int y = splitScreen->ssTopLeftY + splitScreen->ssHeight - this->height();
 		move(x, y);
+
+		SUBSCRIBE_TO_EVENT(this, EVENT_WINDOW_MOVE);
+		SUBSCRIBE_TO_EVENT(this, EVENT_SPLITSCREEN_CHANGED);
 	}
-	void refresh()
-	{
-		move(splitScreen->ssTopLeftX,splitScreen->ssTopLeftY);
-	}
+	void refresh();
 	void computeNewResolution()
 	{
 		/*resize();*/
@@ -52,9 +42,6 @@ public:
 		{
 		case EVENT_WINDOW_MOVE:
 			mapPositionToParent();
-			break;
-		case EVENT_SPLITSCREEN_CHANGED:
-			refresh();
 			break;
 		default:
 			break;
@@ -69,6 +56,7 @@ class Menu_HUDManager : public QObject , IObserver
 private:
 	std::vector<Menu_HUD*> huds;
 	QWidget* parent;
+	bool isEnabled;
 
 public:
 	Menu_HUDManager(QWidget* parent);
@@ -77,7 +65,7 @@ public:
 	void mapHudsToSplitscreen();
 	void computeNewPosition(Event_WindowMove* e)
 	{
-		e->pos;
+
 	}
 	void computeNewResolution(Event_WindowResize* e)
 	{
