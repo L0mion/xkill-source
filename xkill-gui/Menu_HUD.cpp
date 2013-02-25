@@ -79,68 +79,33 @@ void Menu_HUDManager::updateHuds()
 
 void Menu_HUD::refresh()
 {
-	{
-		//ui.frame_center->move(0, 0);
-
-		// Center of split-screen
-		Float2 center;
-		center.x = splitScreen->ssTopLeftX + splitScreen->ssWidth/2 ;
-		center.y = splitScreen->ssTopLeftY + splitScreen->ssHeight/2;
-		
-		Float2 split;
-		split.x = splitScreen->ssWidth ;
-		split.y = splitScreen->ssHeight;
-
-		QPoint p;
-
-		QPoint p1;
-		{
-			QWidget* w_target = this;
-			QWidget* w = ui.label_aim;
-			p = ui.label_aim->pos();
-			do 
-			{
-				p = w->mapTo(w->parentWidget(), p);
-				w = w->parentWidget();
-
-			} while(w != w_target);
-		}
+	Float2 screenSize;
+	screenSize.x = splitScreen->ssWidth;
+	screenSize.y = splitScreen->ssHeight;
 
 
+	// Move center HUD to center
+	Float2 centerPos;
+	centerPos.x = screenSize.x * 0.5f - ui.frame_center->width()* 0.5f;
+	centerPos.y = screenSize.y * 0.5f - ui.frame_center->height()* 0.5f;
+	ui.frame_center->move(centerPos.x, centerPos.y);
+
+	// Move botton HUD to bottom
+	Float2 bottomPos;
+	ui.frame_bottom->resize(screenSize.x - screenSize.x*0.00f * 2, ui.frame_bottom->height());
+	bottomPos.x = screenSize.x * 0.5f - ui.frame_bottom->width()* 0.5f;
+	bottomPos.y = screenSize.y - screenSize.x*0.00f - ui.frame_bottom->height()* 1.0f;
+	ui.frame_bottom->move(bottomPos.x, bottomPos.y);
 
 
-		//// Center of cross-hair relative to frame
-		//QPoint g_aimPos = ui.label_aim->mapToGlobal(QPoint(0,0));
-		//QPoint g_parent = ui.frame_center->mapToGlobal(QPoint(0,0));
-		//QPoint q_aimPos = g_aimPos - g_parent;
-		//Float2 aimPos;
-		//aimPos.x =  q_aimPos.x();
-		//aimPos.y =  q_aimPos.y();
-
-
-
-		//
-		// Translate cross-hair to center
-		//
-
-		/*Float2 d;
-		d =  center - aimPos;
-
-		Float2 framePos;
-		framePos.x = ui.frame_center->pos().x();
-		framePos.y = ui.frame_center->pos().y();
-
-		Float2 newPos = framePos + d;
-		*/
-
-		ui.frame_center->move(p.x(), p.y());
-	}
 }
 
 Menu_HUD::Menu_HUD( AttributePtr<Attribute_SplitScreen> splitScreen, QWidget* parent ) : QWidget(parent)
 {
 	ui.setupUi(this);
 	this->splitScreen = splitScreen;
+	Float2 pos(splitScreen->ssTopLeftX, splitScreen->ssTopLeftY);
+	move(splitScreen->ssTopLeftX, splitScreen->ssTopLeftY);
 	resize(splitScreen->ssWidth, splitScreen->ssHeight);
 	hide();
 

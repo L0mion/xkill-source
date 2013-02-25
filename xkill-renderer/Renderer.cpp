@@ -1252,15 +1252,17 @@ void Renderer::drawLaser(DirectX::XMFLOAT4X4 viewMatrix, DirectX::XMFLOAT4X4 pro
 
 void Renderer::renderHudElements(int viewportIndex)
 {
-	//Since drawn directly in screen space hud elements are not affected by the camera's aspect ratio,
-	//Therefor when there are two viewports the hud elements needs to be scaled by 0.5 along the x-axis
-	//to keep thier proportions.
-	float scaleModifierX = 1.0f;
-	int numViewports = managementViewport_->getNumViewportsX() * managementViewport_->getNumViewportsY();
-	if(numViewports == 2)
-		scaleModifierX = 0.5f;
+	// MATT: Not used anymore, replaced with HUD in Qt
 
-	renderHudElementCrossHair(viewportIndex, scaleModifierX);
+	////Since drawn directly in screen space hud elements are not affected by the camera's aspect ratio,
+	////Therefor when there are two viewports the hud elements needs to be scaled by 0.5 along the x-axis
+	////to keep thier proportions.
+	//float scaleModifierX = 1.0f;
+	//int numViewports = managementViewport_->getNumViewportsX() * managementViewport_->getNumViewportsY();
+	//if(numViewports == 2)
+	//	scaleModifierX = 0.5f;
+
+	//renderHudElementCrossHair(viewportIndex, scaleModifierX);
 }
 void Renderer::renderHudElementCrossHair(int viewportIndex, float scaleModifierX)
 {

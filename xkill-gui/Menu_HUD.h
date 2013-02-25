@@ -25,9 +25,6 @@ public:
 		int x = 20 + splitScreen->ssTopLeftX;
 		int y = splitScreen->ssTopLeftY + splitScreen->ssHeight - this->height();
 		move(x, y);
-
-		SUBSCRIBE_TO_EVENT(this, EVENT_WINDOW_MOVE);
-		SUBSCRIBE_TO_EVENT(this, EVENT_SPLITSCREEN_CHANGED);
 	}
 	void refresh();
 	void computeNewResolution()
@@ -40,9 +37,6 @@ public:
 		EventType type = e->getType();
 		switch (type) 
 		{
-		case EVENT_WINDOW_MOVE:
-			mapPositionToParent();
-			break;
 		default:
 			break;
 		}
