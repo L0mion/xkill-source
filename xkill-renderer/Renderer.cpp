@@ -494,7 +494,7 @@ void Renderer::renderViewportToGBuffer(ViewportData& vpData)
 		drawBulletPhysicsDebugLines(vpData.view, vpData.proj);
 	}
 
-	//drawLaser(vpData.view, vpData.proj);
+	drawLaser(vpData.view, vpData.proj);
 	
 	//Unset and clean.
 	managementFX_->unsetAll(devcon);
@@ -1031,7 +1031,7 @@ void Renderer::drawLaser(DirectX::XMFLOAT4X4 viewMatrix, DirectX::XMFLOAT4X4 pro
 	{
 		AttributePtr<Attribute_Ray> rayAttribute = itrRay.getNext();
 		
-		//if(rayAttribute->render)
+		if(rayAttribute->render)
 		{
 			rays.push_back(VertexPosColor(rayAttribute->from, Float3(1.0f, 0.3f, 0.3f)));
 			rays.push_back(VertexPosColor(rayAttribute->to, Float3(1.0f, 0.3f, 0.3f)));
@@ -1040,6 +1040,8 @@ void Renderer::drawLaser(DirectX::XMFLOAT4X4 viewMatrix, DirectX::XMFLOAT4X4 pro
 
 	if(rays.size() > 0)
 	{
+		SAFE_RELEASE(rayBuffer);
+
 		D3D11_BUFFER_DESC vbd;
 		vbd.Usage			= D3D11_USAGE_DYNAMIC;
 		vbd.ByteWidth		= sizeof(VertexPosColor) * rays.size();
