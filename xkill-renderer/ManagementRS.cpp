@@ -34,6 +34,10 @@ void ManagementRS::setRS(ID3D11DeviceContext* devcon, RS_ID rsId)
 		break;
 	}
 }
+void ManagementRS::unsetRS(ID3D11DeviceContext* devcon)
+{
+	devcon->RSSetState(nullptr);
+}
 
 HRESULT ManagementRS::init(ID3D11Device* device)
 {

@@ -39,7 +39,7 @@ static const unsigned int SHADER_REGISTER_SHADOWMAP = 4;
 
 static const unsigned int DOWNSAMPLE_SCREEN_RES_FACTOR = 4;
 
-static const unsigned int SHADOWMAP_DIM = 1024;
+static const unsigned int SHADOWMAP_DIM = 1024; //Remember to also set dimensions in CS_Lighting (SHADOWMAP_SIZE)
 
 enum SET_TYPE
 {

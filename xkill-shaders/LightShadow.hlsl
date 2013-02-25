@@ -1,9 +1,9 @@
 #ifndef XKILL_RENDERER_LIGHTSHADOW_HLSL
 #define XKILL_RENDERER_LIGHTSHADOW_HLSL
 
-static const unsigned int SHADOWMAP_SIZE = 1024; //Dimensions of shadowmap.
-static const float SHADOWMAP_DX	= 1.0f / (float)SHADOWMAP_SIZE;
-static const unsigned int SHADOWMAP_NUM_PCF_SAMPLES = 9;
+static const unsigned int	SHADOWMAP_SIZE				= 1024; //Dimensions of shadowmap.
+static const unsigned int	SHADOWMAP_NUM_PCF_SAMPLES	= 9;
+static const float			SHADOWMAP_DX				= 1.0f / (float)SHADOWMAP_SIZE;
 
 float LightShadow(
 	SamplerComparisonState ssShadow,
@@ -14,14 +14,12 @@ float LightShadow(
 
 	float depth = shadowPosH.z; //Depth in NDC-space.
 
-	const float dx = SHADOWMAP_DX; //Texel size.
-
 	//Prepare PCF-Filtering:
 	const float2 offsets[SHADOWMAP_NUM_PCF_SAMPLES] = 
 	{
-		float2(-dx, -dx),	float2(0.0f, -dx),	float2(dx, -dx),
-		float2(-dx, 0.0f),	float2(0.0f, 0.0f),	float2(dx, 0.0f),
-		float2(-dx, +dx),	float2(0.0f, +dx),	float2(dx, +dx)
+		float2(-SHADOWMAP_DX, -SHADOWMAP_DX),	float2(0.0f, -SHADOWMAP_DX),	float2(SHADOWMAP_DX, -SHADOWMAP_DX),
+		float2(-SHADOWMAP_DX, 0.0f),			float2(0.0f, 0.0f),				float2(SHADOWMAP_DX, 0.0f),
+		float2(-SHADOWMAP_DX, +SHADOWMAP_DX),	float2(0.0f, +SHADOWMAP_DX),	float2(SHADOWMAP_DX, +SHADOWMAP_DX)
 	};
 
 	//Box Filter 3x3 PCF-Filtering:

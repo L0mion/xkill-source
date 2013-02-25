@@ -141,7 +141,7 @@ void CS_Lighting(
 		/*Specular*/	gMaterial
 	};
 	
-	//Do lighting
+	//Do lighting:
 	float4 Ambient	= float4(0.0f, 0.0f, 0.0f, 0.0f);
 	float4 Diffuse	= float4(0.0f, 0.0f, 0.0f, 0.0f);
 	float4 Specular	= float4(0.0f, 0.0f, 0.0f, 0.0f);
@@ -157,12 +157,15 @@ void CS_Lighting(
 			surfaceNormalV,
 			ambient, diffuse, specular);
 
-		float4 surfacePosW = mul(float4(surfacePosV, 1.0f), viewInverse);
-		float4 posH = mul(surfacePosW, shadowMapTransform);
-		float shadow = LightShadow(ssShadow, bufferShadowMap, posH);
-		
-		diffuse		*= shadow;
-		specular	*= shadow;
+		if(i == 0)
+		{
+			//Apply shadow onto first directional light:
+			float4 surfacePosW = mul(float4(surfacePosV, 1.0f), viewInverse);
+			float4 posH = mul(surfacePosW, shadowMapTransform);
+			float shadow = LightShadow(ssShadow, bufferShadowMap, posH);
+			diffuse		*= shadow;
+			specular	*= shadow;
+		}
 
 		Ambient	+= ambient;	
 		Diffuse	+= diffuse; 

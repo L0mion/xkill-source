@@ -774,12 +774,12 @@ DirectX::XMFLOAT4X4	Renderer::buildShadows(double delta)
 		static float rotationAngle = 0.0f;
 		rotationAngle += 0.0001f * delta;
 		DirectX::XMMATRIX R = DirectX::XMMatrixRotationY(rotationAngle);
-		
+
 		DirectX::XMFLOAT3 tempDir = DirectX::XMFLOAT3(dirLight.direction.x, dirLight.direction.y, dirLight.direction.z);
 		DirectX::XMVECTOR tempDir2 = XMLoadFloat3(&tempDir);
 		tempDir2 = DirectX::XMVector3TransformNormal(tempDir2, R);
 		DirectX::XMStoreFloat3(&tempDir, tempDir2);
-		
+
 		ptr_lightDir->lightDir.direction = Float3(tempDir.x, tempDir.y, tempDir.z);
 	}
 	else
@@ -822,11 +822,12 @@ DirectX::XMFLOAT4X4	Renderer::buildShadows(double delta)
 	for(std::map<unsigned int, InstancedData*>::iterator i = instancesMap.begin(); i != instancesMap.end(); i++)
 	{
 		//if(i->first == 7 ) //Check for what models ought to cast shadows?
-			renderInstance(i->first, i->second, true);
+		renderInstance(i->first, i->second, true);
 	}
 
 	//Unset shizzle
 	devcon->OMSetRenderTargets(1, renderTargets, NULL);
+	managementRS_->unsetRS(devcon);
 
 	return shadowMatrices.shadowMapTransform_;
 }

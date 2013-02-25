@@ -32,6 +32,8 @@ public:
 	*/
 	void setRS(ID3D11DeviceContext* devcon, RS_ID rsId);
 
+	void unsetRS(ID3D11DeviceContext* devcon);
+
 	//! Initializes RSManagement's members.
 	/*!
 	\return Return any error encountered.
