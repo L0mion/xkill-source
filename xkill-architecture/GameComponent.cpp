@@ -850,6 +850,8 @@ void GameComponent::updateAndInterpretAimingRay(Entity* playerEntity, AttributeP
 
 								SEND_EVENT(&Event_PlayerDeath(playerHitByRayAttributeId.at(j)));
 
+								SEND_EVENT(&Event_ModifyPhysicsObject(XKILL_Enums::ModifyPhysicsObjectData::GIVE_IMPULSE, static_cast<void*>(&(rayVector*200.0f)), playerAttribute->ptr_input->ptr_physics));
+
 								rayCastingPlayerAttribute->priority++;
 							}
 						}
@@ -870,7 +872,7 @@ void GameComponent::updateAndInterpretAimingRay(Entity* playerEntity, AttributeP
 			std::vector<int> behaviorOffsetAttributeId = playerEntity->getAttributes(BEHAVIOR_OFFSET);
 			AttributePtr<Behavior_Offset> behaviorOffset = itrOffset.at(behaviorOffsetAttributeId.at(1));
 		
-			Float3 playerLookDirection = to - from;
+			Float3 playerLookDirection = closestHitPoint - ptr_camera->ptr_spatial->ptr_position->position;
 			playerLookDirection.normalize();
 
 			Float3 weaponLookDirection = closestHitPoint - rayCastingPlayerAttribute->ptr_weapon_spatial->ptr_position->position;//behaviorOffset->ptr_spatial->ptr_position->position;
