@@ -764,23 +764,23 @@ DirectX::XMFLOAT4X4	Renderer::buildShadows(double delta)
 	bounds.center = DirectX::XMFLOAT3(0.0f, 0.0f, 0.0f); //Origo.
 	bounds.radius = sqrtf(25.0f * 25.0f); //Radius of scene really ought to be calculated instead of fixed.
 
-	LightDescDir dirLight;
+	LightDescDir dirLight = LightDescDir(); //default construct
 	AttributePtr<Attribute_Light_Dir> ptr_lightDir;
 	if(itrLightDir.hasNext())
 	{
 		ptr_lightDir = itrLightDir.getNext();
 		dirLight = ptr_lightDir->lightDir;
 
-		static float rotationAngle = 0.0f;
-		rotationAngle += 0.0001f * delta;
-		DirectX::XMMATRIX R = DirectX::XMMatrixRotationY(rotationAngle);
-
-		DirectX::XMFLOAT3 tempDir = DirectX::XMFLOAT3(dirLight.direction.x, dirLight.direction.y, dirLight.direction.z);
-		DirectX::XMVECTOR tempDir2 = XMLoadFloat3(&tempDir);
-		tempDir2 = DirectX::XMVector3TransformNormal(tempDir2, R);
-		DirectX::XMStoreFloat3(&tempDir, tempDir2);
-
-		ptr_lightDir->lightDir.direction = Float3(tempDir.x, tempDir.y, tempDir.z);
+		//static float rotationAngle = 0.0f;
+		//rotationAngle += 0.0001f * delta;
+		//DirectX::XMMATRIX R = DirectX::XMMatrixRotationY(rotationAngle);
+		//
+		//DirectX::XMFLOAT3 tempDir = DirectX::XMFLOAT3(dirLight.direction.x, dirLight.direction.y, dirLight.direction.z);
+		//DirectX::XMVECTOR tempDir2 = XMLoadFloat3(&tempDir);
+		//tempDir2 = DirectX::XMVector3TransformNormal(tempDir2, R);
+		//DirectX::XMStoreFloat3(&tempDir, tempDir2);
+		//
+		//ptr_lightDir->lightDir.direction = Float3(tempDir.x, tempDir.y, tempDir.z);
 	}
 	else
 		throw 0;
