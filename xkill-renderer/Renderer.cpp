@@ -808,13 +808,13 @@ DirectX::XMFLOAT4X4	Renderer::buildShadows()
 		/*View Inverse: */	managementMath_->getIdentityMatrix(),
 		/*Proj: */			shadowMatrices.proj_,
 		/*Proj Inverse: */	managementMath_->getIdentityMatrix(),
-		/*EyePos: */		DirectX::XMFLOAT3(0.0f, 0.0f, 0.0f), //Irrelevant
-		/*ViewportTopX: */	0.0f, //Irrelevant					
-		/*ViewportTopY: */	0.0f, //Irrelevant
-		/*zNear: */			0.0f, //Irrelevant
-		/*zFar: */			0.0f, //Irrelevant
-		/*ViewportWidth: */ 0,	//Irrelevant
-		/*ViewportHeight: */ 0);	//Irrelevant
+		/*EyePos: */		DirectX::XMFLOAT3(0.0f, 0.0f, 0.0f),	//Irrelevant
+		/*ViewportTopX: */	0,										//Irrelevant					
+		/*ViewportTopY: */	0,										//Irrelevant
+		/*zNear: */			0.0f,									//Irrelevant
+		/*zFar: */			0.0f,									//Irrelevant
+		/*ViewportWidth: */ 0.0f,									//Irrelevant
+		/*ViewportHeight: */ 0.0f);									//Irrelevant
 
 	std::map<unsigned int, InstancedData*> instancesMap = managementInstance_->getInstancesMap();
 	for(std::map<unsigned int, InstancedData*>::iterator i = instancesMap.begin(); i != instancesMap.end(); i++)
