@@ -17,6 +17,7 @@ ATTRIBUTES_DECLARE_ALL;
 GameComponent::GameComponent(void)
 {
 	SUBSCRIBE_TO_EVENT(this, EVENT_STARTGAME);
+	SUBSCRIBE_TO_EVENT(this, EVENT_ENDGAME);
 	SUBSCRIBE_TO_EVENT(this, EVENT_PHYSICS_ATTRIBUTES_COLLIDING);
 	SUBSCRIBE_TO_EVENT(this, EVENT_START_DEATHMATCH);
 	SUBSCRIBE_TO_EVENT(this, EVENT_END_DEATHMATCH);
@@ -53,6 +54,9 @@ void GameComponent::onEvent(Event* e)
 	{
 	case EVENT_STARTGAME:
 		startGame();
+		break;
+	case EVENT_ENDGAME:
+		endGame();
 		break;
 	case EVENT_PHYSICS_ATTRIBUTES_COLLIDING:
 		event_PhysicsAttributesColliding(static_cast<Event_PhysicsAttributesColliding*>(e));
@@ -526,6 +530,8 @@ void GameComponent::event_EndDeathmatch(Event_EndDeathmatch* e)
 		itrLightSpot.getNext();
 		SEND_EVENT(&Event_RemoveEntity(itrLightSpot.ownerId()));
 	}
+
+	// Show
 }
 
 AttributePtr<Attribute_PlayerSpawnPoint> GameComponent::findUnoccupiedSpawnPoint()
@@ -827,7 +833,7 @@ void GameComponent::updateAndInterpretAimingRay(Entity* playerEntity, AttributeP
 						if(!playerAttribute->detectedAsDead)
 						{
 							DEBUGPRINT("Player with attribute id " << playerHitByRayAttributeId.at(j) << " hit by Laser Automatic Sniper Execution Ray");
-					
+
 							SEND_EVENT(&Event_PlayerDeath(playerHitByRayAttributeId.at(j)));
 
 							rayCastingPlayerAttribute->priority++;
@@ -946,4 +952,16 @@ void GameComponent::startGame()
 	// we also have to specify the number of players top start with
 	int numPlayers = SETTINGS->numPlayers;
 	SEND_EVENT(&Event_StartDeathmatch(numPlayers));
+}
+
+void GameComponent::endGame()
+{
+	// Re-enable menu so the player can decide what to do next 
+	SEND_EVENT(&Event_SetMouseLock(false));
+	SEND_EVENT(&Event_EnableHud(false));
+	SEND_EVENT(&Event_EnableMenu(true));
+
+	GET_STATE() = STATE_MAINMENU;
+	//SEND_EVENT(&Event_EndDeathmatch());
+	//SEND_EVENT(&Event_StartDeathmatch(0));	//To get a black background, for now run the game with zero players
 }
