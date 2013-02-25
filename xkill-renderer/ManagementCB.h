@@ -48,6 +48,7 @@ public:
 		 const unsigned int		screenHeight);		//!< Updates the constant buffer cbInstance.
 	void updateCBFrame(
 		ID3D11DeviceContext*	devcon,
+		DirectX::XMFLOAT4X4		shadowMapTransform,
 		unsigned int			numLightsDir,
 		unsigned int			numLightsPoint,
 		unsigned int			numLightsSpot);		//!< Updates the constant buffer cbFrame.
