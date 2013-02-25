@@ -39,7 +39,6 @@ void Menu_InGame::slot_quitToMenu()
 {
 	GET_STATE() = STATE_MAINMENU;
 	SEND_EVENT(&Event_EndDeathmatch());
-	//SEND_EVENT(&Event_StartDeathmatch(0));
 }
 
 void Menu_InGame::slot_quitToDesktop()

@@ -23,8 +23,11 @@ public:
 		DirectX::XMFLOAT4X4 viewMatrix,
 		DirectX::XMFLOAT4X4 projectionMatrix);
 	DirectX::XMFLOAT4X4 calculateMatrixInverse(DirectX::XMFLOAT4X4 matrix);
+
+	DirectX::XMFLOAT4X4 getIdentityMatrix() { return identityMatrix_; }
 protected:
 private:
+	DirectX::XMFLOAT4X4 identityMatrix_;
 };
 
 #endif //XKILL_RENDERER_MANAGEMENTMATH_H

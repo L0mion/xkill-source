@@ -47,6 +47,11 @@ public:
 	void startGame();
 
 	/**
+	Uniform way of ending the game
+	*/
+	void endGame();
+
+	/**
 	Handle PhysicsAttributes collision for one of two PhysicsAttributes participating in the collision.
 	*/
 	void event_PhysicsAttributesColliding(Event_PhysicsAttributesColliding* e);

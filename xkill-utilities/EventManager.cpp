@@ -7,7 +7,11 @@ EventManager::EventManager()
 {
 	state_TemporaryVariableUsedAsSubstituteForStateMachine = STATE_MAINMENU;
 
+	//
 	// Build vectors with all events
+	//
+
+	// Subscribers
 	subscribers = new std::vector<std::vector<IObserver*>>;
 	for(int i=0; i<EVENT_LAST; i++)
 	{
@@ -15,12 +19,20 @@ EventManager::EventManager()
 		subscribers->push_back(v);
 	}
 
-	// Build vectors with all events
+	// Queues
 	queues = new std::vector<std::vector<Event*>>;
 	for(int i=0; i<EVENT_LAST; i++)
 	{
 		std::vector<Event*> v;
 		queues->push_back(v);
+	}
+	
+	// Delayed queues
+	delayedQueues = new std::vector<std::vector<DelayedEvent>>;
+	for(int i=0; i<EVENT_LAST; i++)
+	{
+		std::vector<DelayedEvent> v;
+		delayedQueues->push_back(v);
 	}
 }
 
@@ -89,6 +101,7 @@ EventManager::~EventManager()
 
 	delete subscribers;
 	delete queues;
+	delete delayedQueues;
 }
 
 void EventManager::queueEvent( Event* e )
@@ -127,6 +140,82 @@ void EventManager::cleanAllQueues()
 	{
 		flushQueuedEvents((EventType)i);
 	}
+
+	// Delete all remaining delayed events
+	for(unsigned i=0; i<delayedQueues->size(); i++)
+	{
+		for(unsigned j=0; j<delayedQueues->at(i).size(); j++)
+		{
+			Event* e = delayedQueues->at(i)[j].getEvent();
+			delete e;
+		}
+	}
+	delayedQueues->clear();
+}
+
+void EventManager::update( float delta )
+{
+	sendExpiredDelayedEvents(delta);
+}
+
+void EventManager::sendExpiredDelayedEvents( float delta )
+{
+	// Loop through each queue corresponding to each event
+	// and send all events of that type
+	for(unsigned i=0; i<delayedQueues->size(); i++)
+	{
+		for(unsigned j=0; j<delayedQueues->at(i).size(); j++)
+		{
+			DelayedEvent* delayedEvent = &delayedQueues->at(i)[j];
+
+			if(delayedEvent->isReady(delta))
+			{
+				Event* e = delayedEvent->getEvent();
+
+				sendEvent(e);
+
+				// delete event
+				delete e;
+
+				// delete DelayedEvent from vector using swap-trick O(1)
+				delayedQueues->at(i)[j] = delayedQueues->at(i).back();
+				delayedQueues->at(i).pop_back();
+
+				// repeat this index since it has been changed into an unvisited element
+				j--; 
+			}
+		}
+	}
+}
+
+void EventManager::postDelayedEvent( Event* e, float delay )
+{
+	int index = e->getType();
+	delayedQueues->at(index).push_back(DelayedEvent(e, delay));
 }
 
 
+
+DelayedEvent::DelayedEvent( Event* e, float delay )
+{
+	this->e = e;
+	this->delay = delay;
+}
+
+bool DelayedEvent::isReady( float delta )
+{
+	// Decrement timer
+	if(delay > 0.0f)
+		delay -= delta;
+
+	// Check expiration condition
+	if(delay <= 0.0f)
+		return true;
+
+	return false;
+}
+
+Event* DelayedEvent::getEvent()
+{
+	return e;
+}
