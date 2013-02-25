@@ -95,7 +95,6 @@ void PhysicsObject::hover(float delta, float hoverHeight)
 
 bool PhysicsObject::init(unsigned int attributeIndex, short collisionFilterGroup)
 {
-	
 	if(attributeIndex < 0)
 	{
 		return false;
@@ -115,7 +114,7 @@ bool PhysicsObject::init(unsigned int attributeIndex, short collisionFilterGroup
 	}
 	else
 	{
-		SHOW_MESSAGEBOX("Error in PhysicsObject::init. Expected collision shape pointer unexpectedly set to nullptr. Using default shape instead.");
+		ERROR_MESSAGEBOX("Error in PhysicsObject::init. Expected collision shape pointer unexpectedly set to nullptr. Using default shape instead.");
 		setCollisionShape(CollisionShapes::Instance()->getDefaultShape());
 	}
 	

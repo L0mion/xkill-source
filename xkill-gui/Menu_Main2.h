@@ -74,7 +74,8 @@ public:
 	DEPRICATED: Shouldn't be needed anymore. Overlay
 	is instead updated every time MainWindow gains focus.
 	*/
-	void alwaysOnTop(bool on);
+	void setAlwaysOnTop(bool on);
+
 	void closeEvent(QCloseEvent* event);
 	void event_windowResize(Event_WindowResize* e);
 

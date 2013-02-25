@@ -66,7 +66,7 @@ protected:
 	{
 		if(targetMaxCount < 1)
 		{
-			SHOW_MESSAGEBOX("DataStreamBuffer::getNewMaxCount targetMaxCount too small!");
+			ERROR_MESSAGEBOX("DataStreamBuffer::getNewMaxCount targetMaxCount too small!");
 		}
 
 		unsigned int newMaxCount = 1;
@@ -128,7 +128,7 @@ protected:
 		}
 		else
 		{
-			SHOW_MESSAGEBOX("DataStreamShader::mapBuffer devcon->Map failed!");
+			ERROR_MESSAGEBOX("DataStreamShader::mapBuffer devcon->Map failed!");
 		}
 
 		return hr;
@@ -162,7 +162,7 @@ protected:
 			NULL, 
 			&dataStreamBuffer_);
 		if(FAILED(hr))
-			SHOW_MESSAGEBOX("DataStreambuffer::createBuffer device->CreateBuffer failed!");
+			ERROR_MESSAGEBOX("DataStreambuffer::createBuffer device->CreateBuffer failed!");
 
 		SET_D3D_OBJECT_NAME(dataStreamBuffer_, "dataStreamBuffer");
 

@@ -78,56 +78,56 @@ bool ComponentManager::init(HWND windowHandle, HWND parentWindowHandle)
 
 	if(!(render_->init()))
 	{
-		SHOW_MESSAGEBOX("RenderingComponent failed to init.");
+		ERROR_MESSAGEBOX("RenderingComponent failed to init.");
 		return false;
 	}
 
 	if(!camera_->init())
 	{
-		SHOW_MESSAGEBOX("CameraComponent failed to init.");
+		ERROR_MESSAGEBOX("CameraComponent failed to init.");
 		return false;
 	}
 	
 	if(!game_->init())
 	{
-		SHOW_MESSAGEBOX("GameComponent failed to init.");
+		ERROR_MESSAGEBOX("GameComponent failed to init.");
 		return false;
 	}
 
 	std::string configPath = "../../xkill-resources/xkill-configs/";
 	if(!sound_->init(configPath))
 	{
-		SHOW_MESSAGEBOX("SoundComponent failed to init.");
+		ERROR_MESSAGEBOX("SoundComponent failed to init.");
 		return false;
 	}
 
 	if(!input_->init(parentWindowHandle, configPath))
 	{
-		SHOW_MESSAGEBOX("InputComponent failed to init.");
+		ERROR_MESSAGEBOX("InputComponent failed to init.");
 		return false;
 	}
 		
 	if(!score_->init())
 	{
-		SHOW_MESSAGEBOX("ScoreComponent failed to init.");
+		ERROR_MESSAGEBOX("ScoreComponent failed to init.");
 		return false;
 	}
 
 	if(!hacks_->init())
 	{
-		SHOW_MESSAGEBOX("HacksComponent failed to init.");
+		ERROR_MESSAGEBOX("HacksComponent failed to init.");
 		return false;
 	}
 
 	if(!ioComponent_->init())
 	{
-		SHOW_MESSAGEBOX("IOComponent failed to init.");
+		ERROR_MESSAGEBOX("IOComponent failed to init.");
 		return false;
 	}
 
 	if(!physics_->init())
 	{
-		SHOW_MESSAGEBOX("BulletPhysicsComponent failed to init.");
+		ERROR_MESSAGEBOX("BulletPhysicsComponent failed to init.");
 		return false;
 	}	
 

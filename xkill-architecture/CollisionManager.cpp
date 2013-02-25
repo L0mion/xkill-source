@@ -269,7 +269,7 @@ void CollisionManager::collision_projectile(Entity* entity1, Entity* entity2)
 						break;
 					}
 				default:
-					SHOW_MESSAGEBOX("PhysicsAttribute collision: unknown ammunitionType"); 
+					ERROR_MESSAGEBOX("PhysicsAttribute collision: unknown ammunitionType"); 
 					break;
 				}
 			}
@@ -308,15 +308,15 @@ void CollisionManager::collision_playerVsExplosionSphere(Entity* entity1, Entity
 	}
 }
 
-float CollisionManager::getAmountAfterPickup(float currentAmount, float maxAmount, float pickupAmount)
+int CollisionManager::getAmountAfterPickup(int currentAmount, int maxAmount, int pickupAmount)
 {
-	float newAmount = currentAmount;
-	if(currentAmount < maxAmount)  //Pickup if currently below maximum amount
+	int newAmount = currentAmount;
+	if(currentAmount < maxAmount)					//Pickup if currently below maximum amount
 	{
-		newAmount = currentAmount + pickupAmount;
-		if(newAmount > maxAmount) //Prevent picking up more than maximum
+		newAmount = currentAmount + pickupAmount;	//Pickup
+		if(newAmount > maxAmount)
 		{
-			newAmount = maxAmount;
+			newAmount = maxAmount;					//Prevent picking up more than maximum
 		}
 	}
 	return newAmount;

@@ -126,17 +126,20 @@ void CollisionShapes::loadCollisionShapes()
 	//	collisionShapesIdToIndex_.insert(idtoindex);
 	//}
 
-	//.bullet file loading
+
+	//--------------------------------------------------------------------------------------
+	// Load .bullet file for current level
+	//--------------------------------------------------------------------------------------
 	Settings* settings = ATTRIBUTE_MANAGER->settings;
-	std::string filename = std::string("../../xkill-resources/xkill-level/");
-	filename = filename.append(settings->currentLevel);
-	filename = filename.append("/");
-	filename = filename.append(settings->currentLevel);
-	filename = filename.append(".bullet");
-	if(!importer_->loadFile(filename.c_str()))
+	std::string path = std::string("../../xkill-resources/xkill-level/") + settings->currentLevel + "/" + settings->currentLevel + ".bullet";
+	if(!importer_->loadFile(path.c_str()))
 	{
-		DEBUGPRINT("Level .bullet-file could not be loaded");
+		ERROR_MESSAGEBOX("Level .bullet-file could not be loaded.\nPath: " + path);
 	}
+
+	//--------------------------------------------------------------------------------------
+	// Load .bullet files for models
+	//--------------------------------------------------------------------------------------
 	while(itrMesh.hasNext())
 	{
 		AttributePtr<Attribute_Mesh> ptr_mesh = itrMesh.getNext();
@@ -145,6 +148,7 @@ void CollisionShapes::loadCollisionShapes()
 			std::string name = ptr_mesh->fileName;
 			name = name.substr(0,name.find("."));
 			name = name.append("RigidBodyShape");
+
 			btCollisionShape* collisionShape;
 			btCollisionShape* loadedShape;
 			loadedShape = importer_->getCollisionShapeByName(name.c_str());
@@ -168,14 +172,14 @@ void CollisionShapes::loadCollisionShapes()
 			else
 			{
 				//Load from model file
-				filename = std::string("../../xkill-resources/xkill-models/");
+				std::string path = std::string("../../xkill-resources/xkill-models/");
 				name = ptr_mesh->fileName;
 				name = name.substr(0,name.find("."));
-				filename = filename.append(name);
-				filename = filename.append(".bullet");
+				path = path.append(name);
+				path = path.append(".bullet");
 				name = name.append("RigidBody");
 
-				if(importer_->loadFile(filename.c_str()))
+				if(importer_->loadFile(path.c_str()))
 					loadedShape = importer_->getCollisionShapeByIndex(importer_->getNumCollisionShapes()-1);//name.c_str());
 				if(loadedShape != nullptr)
 				{

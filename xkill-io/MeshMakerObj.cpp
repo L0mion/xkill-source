@@ -82,7 +82,7 @@ bool MeshMakerObj::loadObj()
 	sucessfulLoad = loaderObj_->init();
 
 	if(!sucessfulLoad)
-		SHOW_MESSAGEBOX("Failed to load .obj-file: " + pathObj_ + fileNameObj_);
+		ERROR_MESSAGEBOX("Failed to load .obj-file: " + pathObj_ + fileNameObj_);
 
 	return sucessfulLoad;
 }
@@ -241,7 +241,7 @@ bool MeshMakerObj::loadMTL(std::string fileNameMTL)
 	if(sucessfulLoad)
 		loadMTLMaterials(loaderMtl_->getMTL());
 	else
-		SHOW_MESSAGEBOX("Failed to load .mtl-file: " + pathMTL_ + fileNameMTL);
+		ERROR_MESSAGEBOX("Failed to load .mtl-file: " + pathMTL_ + fileNameMTL);
 
 	delete loaderMtl_; //clear memory
 

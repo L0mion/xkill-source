@@ -50,7 +50,7 @@
 	EventManager::getInstance()->addObserver(SUBSCRIBER, EVENT_TYPE);
 
 // Fetches a owners of a specific Attribute from AttributeManager
-#define SHOW_MESSAGEBOX(MESSAGE)									\
+#define ERROR_MESSAGEBOX(MESSAGE)									\
 {																	\
 	Event_ShowMessageBox e(MESSAGE);								\
 	EventManager::getInstance()->sendEvent(&e);						\
@@ -83,7 +83,7 @@
 #define BULLETPHYSICSDEBUGDRAW false //render Bullet Physics debug lines true/false
 #define DEBUGPRINT(DATA_STREAM)
 #endif
-// Defines DEBUGPRINT to a cout function in Debug configuration
+// Defines DEBUGPRINT to a printf utilizing std::ostringstream function in Debug configuration
 #ifdef XKILL_DEBUG
 #define BULLETPHYSICSDEBUGDRAW true //render Bullet Physics debug lines true/false
 #include <sstream>

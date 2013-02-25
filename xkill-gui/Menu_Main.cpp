@@ -23,11 +23,11 @@ Menu_Main::Menu_Main( QWidget* parent ) : QMainWindow(parent), ToggleHelper(this
 	ATTRIBUTES_INIT_ALL
 
 	ui.setupUi(this);
-	QWidget::setAttribute(Qt::WA_TranslucentBackground, true);
-	QWidget::setWindowFlags(Qt::SplashScreen);
+		//QWidget::setAttribute(Qt::WA_TranslucentBackground, true);
+		//QWidget::setWindowFlags(Qt::SplashScreen);
 	//setAttribute(Qt::WA_TransparentForMouseEvents);
 	//setAttribute(Qt::WA_TranslucentBackground);
-	setWindowFlags(Qt::WindowStaysOnTopHint);
+		//setWindowFlags(Qt::WindowStaysOnTopHint);
 
 	//ui.verticalLayout_2->setSpacing(0);
 	//ui.verticalLayout_2->setMargin(0);
