@@ -21,8 +21,8 @@ void Menu_HUDManager::onEvent( Event* e )
 	case EVENT_ENABLE_HUD:
 		if(((Event_EnableHud*)e)->enableHud)
 		{
-			/*for(int i=0; i<huds.size(); i++)
-				huds[i]->show();*/
+			for(int i=0; i<huds.size(); i++)
+				huds[i]->show();
 		}
 		else
 		{
@@ -36,6 +36,7 @@ void Menu_HUDManager::onEvent( Event* e )
 		break;
 	case EVENT_STARTGAME:
 		mapHudsToSplitscreen();
+		SEND_EVENT(&Event_EnableHud(true));
 		break;
 	case EVENT_WINDOW_RESIZE:
 		computeNewResolution((Event_WindowResize*)e);
