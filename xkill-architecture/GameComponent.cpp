@@ -790,9 +790,14 @@ void GameComponent::updateAndInterpretAimingRay(Entity* playerEntity, AttributeP
 		//--------------------------------------------------------------------------------------
 		// Retrieve result from sent event
 		//--------------------------------------------------------------------------------------
-		float entityIdOfOwnerToClosestPhysicsObjectHitByRay = event_ClosestRayCast.EntityIdOfOwnerToClosestPhysicsObjectHitByRay;
+		int entityIdOfOwnerToClosestPhysicsObjectHitByRay = event_ClosestRayCast.EntityIdOfOwnerToClosestPhysicsObjectHitByRay;
 		Float3 closestHitPoint = event_ClosestRayCast.ClosestHitPoint;
 		Entity* entityHitByRay = &allEntity->at(entityIdOfOwnerToClosestPhysicsObjectHitByRay);
+
+		if(entityIdOfOwnerToClosestPhysicsObjectHitByRay == 0)
+		{
+			closestHitPoint = to;
+		}
 		
 		//--------------------------------------------------------------------------------------
 		// Update ray attribute
@@ -801,73 +806,83 @@ void GameComponent::updateAndInterpretAimingRay(Entity* playerEntity, AttributeP
 		std::vector<int> rayAttributeId = playerEntity->getAttributes(ATTRIBUTE_RAY);
 		for(unsigned int j=0;j<rayAttributeId.size();j++)
 		{
+			AttributePtr<Attribute_Player> rayCastingPlayerAttribute = itrPlayer.at(rayCastingPlayerAttributeId.at(i));	
+
 			ray = itrRay.at(rayAttributeId.at(j));
-			ray->from = from;	//ray->from = ptr_player->ptr_weaponFireLocation_spatial->ptr_position->position;
+			/*ray->from = from;*/	ray->from = rayCastingPlayerAttribute->ptr_weaponFireLocation_spatial->ptr_position->position;
 			ray->to = closestHitPoint;
-		}
 
-		//--------------------------------------------------------------------------------------
-		// If the player is executing, interpret the aiming ray as a Laser Automatic Sniper Execution Ray
-		//--------------------------------------------------------------------------------------
-		AttributePtr<Attribute_Player> rayCastingPlayerAttribute = itrPlayer.at(rayCastingPlayerAttributeId.at(i));	
-		if(rayCastingPlayerAttribute->executing) 
-		{
-			ray->render = true;
+			Float3 rayVector = (ray->to - ray->from);
+			ray->ptr_render->ptr_spatial->ptr_position->position = rayVector/2.0f + ray->from;
+			ray->ptr_render->ptr_spatial->scale = Float3(0.01f, 0.01f, rayVector.length()/2.0f);
+			ray->ptr_render->ptr_spatial->rotation = rayCastingPlayerAttribute->ptr_weapon_spatial->rotation;//rayCastingPlayerAttribute->ptr_camera->ptr_spatial->rotation;
 
-			std::vector<int> playerHitByRayAttributeId = entityHitByRay->getAttributes(ATTRIBUTE_PLAYER);
-			for(unsigned int j=0;j<playerHitByRayAttributeId.size();j++)
+			ray->ptr_render->cull = false;
+			//ray->render = true;
+
+			//--------------------------------------------------------------------------------------
+			// If the player is executing, interpret the aiming ray as a Laser Automatic Sniper Execution Ray
+			//--------------------------------------------------------------------------------------
+			if(rayCastingPlayerAttribute->executing) 
 			{
-				if(entityIdOfOwnerToClosestPhysicsObjectHitByRay == playerEntity->getID()) //Ray hit the originator of the ray
+				//ray->render = true;
+				ray->ptr_render->cull = true;
+
+				std::vector<int> playerHitByRayAttributeId = entityHitByRay->getAttributes(ATTRIBUTE_PLAYER);
+				for(unsigned int j=0;j<playerHitByRayAttributeId.size();j++)
 				{
-					DEBUGPRINT("Player hit by ray casted by himself.");
-					DEBUGPRINT("---->O....");
-					DEBUGPRINT("..../|\"....");
-					DEBUGPRINT("....xxx....");
-				}
-				else if(entityHitByRay->hasAttribute(ATTRIBUTE_PLAYER)) //Ray hit another player
-				{
-					std::vector<int> hitPlayerId = entityHitByRay->getAttributes(ATTRIBUTE_PLAYER);
-					for(int i=0;i<hitPlayerId.size();i++)
+					if(entityIdOfOwnerToClosestPhysicsObjectHitByRay == playerEntity->getID()) //Ray hit the originator of the ray
 					{
-						AttributePtr<Attribute_Player> playerAttribute = itrPlayer.at(hitPlayerId.at(i));
-						if(!playerAttribute->detectedAsDead)
+						DEBUGPRINT("Player hit by ray casted by himself.");
+						DEBUGPRINT("---->O....");
+						DEBUGPRINT("..../|\"....");
+						DEBUGPRINT("....xxx....");
+					}
+					else if(entityHitByRay->hasAttribute(ATTRIBUTE_PLAYER)) //Ray hit another player
+					{
+						std::vector<int> hitPlayerId = entityHitByRay->getAttributes(ATTRIBUTE_PLAYER);
+						for(int i=0;i<hitPlayerId.size();i++)
 						{
-							DEBUGPRINT("Player with attribute id " << playerHitByRayAttributeId.at(j) << " hit by Laser Automatic Sniper Execution Ray");
+							AttributePtr<Attribute_Player> playerAttribute = itrPlayer.at(hitPlayerId.at(i));
+							if(!playerAttribute->detectedAsDead)
+							{
+								DEBUGPRINT("Player with attribute id " << playerHitByRayAttributeId.at(j) << " hit by Laser Automatic Sniper Execution Ray");
 
-							SEND_EVENT(&Event_PlayerDeath(playerHitByRayAttributeId.at(j)));
+								SEND_EVENT(&Event_PlayerDeath(playerHitByRayAttributeId.at(j)));
 
-							rayCastingPlayerAttribute->priority++;
+								rayCastingPlayerAttribute->priority++;
+							}
 						}
 					}
 				}
 			}
-		}
-		//--------------------------------------------------------------------------------------
-		// Interpret the ray as what the player is looking at
-		//--------------------------------------------------------------------------------------
-		else
-		{
-			ray->render = false;
-		}
+			//--------------------------------------------------------------------------------------
+			// Interpret the ray as what the player is looking at
+			//--------------------------------------------------------------------------------------
+			else
+			{
+				//ray->render = false;
+			}
 
-		//--------------------------------------------------------------------------------------
-		// Set weapon rotation depending on how far away the aiming ray hit something
-		//--------------------------------------------------------------------------------------
-		std::vector<int> behaviorOffsetAttributeId = playerEntity->getAttributes(BEHAVIOR_OFFSET);
-		AttributePtr<Behavior_Offset> behaviorOffset = itrOffset.at(behaviorOffsetAttributeId.at(1));
+			//--------------------------------------------------------------------------------------
+			// Set weapon rotation depending on how far away the aiming ray hit something
+			//--------------------------------------------------------------------------------------
+			std::vector<int> behaviorOffsetAttributeId = playerEntity->getAttributes(BEHAVIOR_OFFSET);
+			AttributePtr<Behavior_Offset> behaviorOffset = itrOffset.at(behaviorOffsetAttributeId.at(1));
 		
-		Float3 playerLookDirection = to - from;
-		playerLookDirection.normalize();
+			Float3 playerLookDirection = to - from;
+			playerLookDirection.normalize();
 
-		Float3 weaponLookDirection = closestHitPoint - behaviorOffset->ptr_spatial->ptr_position->position;
-		weaponLookDirection.normalize();
+			Float3 weaponLookDirection = closestHitPoint - rayCastingPlayerAttribute->ptr_weapon_spatial->ptr_position->position;//behaviorOffset->ptr_spatial->ptr_position->position;
+			weaponLookDirection.normalize();
 
-		Float3 quaternionXYZ = playerLookDirection.cross(weaponLookDirection);
-		float quaternionW = sqrt((playerLookDirection.length()*playerLookDirection.length()) * (weaponLookDirection.length()*weaponLookDirection.length())) + playerLookDirection.dot(weaponLookDirection);
+			Float3 quaternionXYZ = playerLookDirection.cross(weaponLookDirection);
+			float quaternionW = sqrt((playerLookDirection.length()*playerLookDirection.length()) * (weaponLookDirection.length()*weaponLookDirection.length())) + playerLookDirection.dot(weaponLookDirection);
 
-		Float4 newWeaponRotationQuaternion(quaternionXYZ.x, quaternionXYZ.y, quaternionXYZ.z, quaternionW);
-		newWeaponRotationQuaternion.normalize();
-		behaviorOffset->offset_rotation = newWeaponRotationQuaternion; //Set weapon rotation
+			Float4 newWeaponRotationQuaternion(quaternionXYZ.x, quaternionXYZ.y, quaternionXYZ.z, quaternionW);
+			newWeaponRotationQuaternion.normalize();
+			behaviorOffset->offset_rotation = newWeaponRotationQuaternion; //Set weapon rotation
+		}
 	}
 }
 

@@ -121,6 +121,10 @@ private:
 		DirectX::XMFLOAT4X4		viewMatrix, 
 		DirectX::XMFLOAT4X4		projectionMatrix); //!<A vertex buffer is recreated when a EVENT_DRAW_BULLET_PHYSICS_DEBUG_LINES event is present in the event queue.
 
+	void drawLaser(
+		DirectX::XMFLOAT4X4		viewMatrix,
+		DirectX::XMFLOAT4X4		projectionMatrix); //!< Draw all lasers using ray attributes
+
 	void renderHudElements(int viewportIndex); //!< Reders hud elements such as the cross hair.
 	void renderHudElementCrossHair(int viewportIndex, float scaleModifierX); //!< Renders a cross hair in the middle óf each viewport.
 	void drawHudElement(int viewportIndex, unsigned int textureId, DirectX::XMFLOAT4X4 transformationMatrix); //!< Draws a single hud element.
@@ -149,6 +153,7 @@ private:
 	ManagementSprites*  managementSprites_;		//!< Maintaining sprites.
 
 	ID3D11Buffer* debugLinesVertexBuffer_;		//!< Might want to move this into some manager of some sort.
+	ID3D11Buffer*			rayBuffer;
 
 	//std::vector<int>* attributesRenderOwner_;	//!< Holds owners of render-attributes.
 	//std::vector<int>* attributesCameraOwner_;

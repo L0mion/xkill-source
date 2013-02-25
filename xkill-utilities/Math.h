@@ -74,6 +74,8 @@ struct DLL_U Float3
 	void lerp(Float3 *v, float factor);
 	float length();
 	float distanceTo(Float3 v);
+
+	Float3 operator/(float scalar);
 };
 
 

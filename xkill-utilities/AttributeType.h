@@ -681,6 +681,8 @@ struct DLL_U Attribute_Ray : public IAttribute
 	Attribute_Ray();
 	~Attribute_Ray();
 
+	AttributePtr<Attribute_Render> ptr_render;
+
 	Float3 from;
 	Float3 to;
 	bool render;
