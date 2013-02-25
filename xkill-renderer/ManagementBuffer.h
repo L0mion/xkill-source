@@ -25,11 +25,12 @@ enum BUFFER_FORMAT
 	R32_G32_B32_A32__FLOAT
 };
 
-static const BUFFER_FORMAT GBUFFER_FORMAT_ALBEDO	= R8_G8_B8_A8__UNORM;
-static const BUFFER_FORMAT GBUFFER_FORMAT_NORMAL	= R16_G16_B16_A16__FLOAT;
-static const BUFFER_FORMAT GBUFFER_FORMAT_MATERIAL	= R16_G16_B16_A16__FLOAT;
-static const BUFFER_FORMAT GBUFFER_FORMAT_GLOW_HIGH	= R8_G8_B8_A8__UNORM;
-static const BUFFER_FORMAT GBUFFER_FORMAT_GLOW_LOW	= R8_G8_B8_A8__UNORM;
+static const BUFFER_FORMAT BUFFER_FORMAT_ALBEDO	= R8_G8_B8_A8__UNORM;
+static const BUFFER_FORMAT BUFFER_FORMAT_NORMAL	= R16_G16_B16_A16__FLOAT;
+static const BUFFER_FORMAT BUFFER_FORMAT_MATERIAL	= R16_G16_B16_A16__FLOAT;
+static const BUFFER_FORMAT BUFFER_FORMAT_GLOW_HIGH	= R8_G8_B8_A8__UNORM;
+static const BUFFER_FORMAT BUFFER_FORMAT_GLOW_LOW	= R8_G8_B8_A8__UNORM;
+static const BUFFER_FORMAT BUFFER_FORMAT_SSAO		= R32_G32_B32_A32__FLOAT; //Temp format.
 
 static const unsigned int SHADER_REGISTER_DOWNSAMPLE_INPUT = 3;
 static const unsigned int SHADER_REGISTER_BLUR_INPUT	= 9;
@@ -40,6 +41,8 @@ static const unsigned int SHADER_REGISTER_SHADOWMAP = 4;
 static const unsigned int DOWNSAMPLE_SCREEN_RES_FACTOR = 4;
 
 static const unsigned int SHADOWMAP_DIM = 1024; //Remember to also set dimensions in CS_Lighting (SHADOWMAP_SIZE)
+
+static const unsigned int SSAO_MAP_SCREEN_RES_FACTOR = 2;
 
 enum SET_TYPE
 {
@@ -98,6 +101,7 @@ private:
 	HRESULT initMaterial(ID3D11Device* device);
 	HRESULT initGlow(ID3D11Device* device, ID3D11DeviceContext* devcon);
 	HRESULT initShadow(ID3D11Device* device);
+	HRESULT initSSAO(ID3D11Device* device);
 
 	DXGI_FORMAT getFormat(BUFFER_FORMAT format);
 	void getDownSampleDim(
@@ -105,6 +109,11 @@ private:
 		unsigned int screenHeight,
 		unsigned int& downSampleWidth, 
 		unsigned int& downSampleHeight);
+	void getSSAODim(
+		unsigned int screenWidth,
+		unsigned int screenHeight,
+		unsigned int& ssaoWidth,
+		unsigned int& ssaoHeight);
 
 	/*desc*/
 	Winfo* winfo_;
@@ -121,6 +130,11 @@ private:
 
 	Buffer_SrvDsv* shadowMap_;
 	D3D11_VIEWPORT shadowViewport_;
+
+	unsigned int ssaoWidth_;
+	unsigned int ssaoHeight_;
+	Buffer_SrvRtv* ssaoMap_;
+	D3D11_VIEWPORT ssaoViewport_;
 };
 
 #endif //XKILL_RENDERER_MANAGEMENTBUFFER_H

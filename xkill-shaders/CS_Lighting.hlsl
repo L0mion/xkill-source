@@ -129,6 +129,7 @@ void CS_Lighting(
 	normal.x *= 2.0f; normal.x -= 1.0f;
 	normal.y *= 2.0f; normal.y -= 1.0f;
 	normal.z *= 2.0f; normal.z -= 1.0f;
+	//float3 normal = decode(gNormal.xy);
 
 	float3 surfaceNormalV	= normalize(mul(float4(normal, 0.0f), view).xyz);
 	float3 toEyeV			= normalize(float3(0.0f, 0.0f, 0.0f) - surfacePosV);
@@ -201,6 +202,5 @@ void CS_Lighting(
 		uint2(
 			threadIDDispatch.x + viewportTopX, 
 			threadIDDispatch.y + viewportTopY)] = 
-		//float4(bufferShadowMap.SampleLevel(ss, texCoord, 0).rrr, 1.0f);
 		float4(litPixel, 1.0f);
 }

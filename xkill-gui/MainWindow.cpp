@@ -123,6 +123,15 @@ void MainWindow::keyPressEvent( QKeyEvent* e )
 	if((e->key()==Qt::Key_F2))
 		SEND_EVENT(&Event(EVENT_STARTGAME));
 
+	// Toggle editor
+
+	if((e->key()==Qt::Key_F3))
+	{
+		static bool first = true;
+		first = !first;
+		gameWidget->slot_toggleCapFPS(first);
+	}
+
 	
 	
 	//

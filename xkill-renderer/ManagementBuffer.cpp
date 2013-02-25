@@ -23,10 +23,17 @@ ManagementBuffer::ManagementBuffer(Winfo* winfo)
 	glowHigh_		= nullptr;
 	glowLow_		= nullptr;
 	glowLowUtil_	= nullptr;
+	downSampleWidth_	= 1; //Set these to an arbitrary >0 value as resize() will be called before init. This requires a positive value.
+	downSampleHeight_	= 1;
 	ZeroMemory(&downSampleViewport_, sizeof(D3D11_VIEWPORT));
 
 	shadowMap_ = nullptr;
 	ZeroMemory(&shadowViewport_, sizeof(D3D11_VIEWPORT));
+
+	ssaoWidth_	= 1; //Set these to an arbitrary >0 value as resize() will be called before init. This requires a positive value.
+	ssaoHeight_ = 1;
+	ssaoMap_ = nullptr;
+	ZeroMemory(&ssaoViewport_, sizeof(D3D11_VIEWPORT));
 }
 ManagementBuffer::~ManagementBuffer()
 {
@@ -38,6 +45,8 @@ ManagementBuffer::~ManagementBuffer()
 	SAFE_DELETE(glowLowUtil_);
 
 	SAFE_DELETE(shadowMap_);
+
+	SAFE_DELETE(ssaoMap_);
 }
 
 void ManagementBuffer::reset()
@@ -50,23 +59,24 @@ void ManagementBuffer::reset()
 	SAFE_RESET(glowLowUtil_);
 
 	SAFE_RESET(shadowMap_);
+
+	SAFE_RESET(ssaoMap_);
 }
 HRESULT ManagementBuffer::resize(ID3D11Device* device)
 {
 	HRESULT hr = S_OK;
 
-	//New Downsample dimensions.
+	//Get new dimensions:
 	getDownSampleDim(
 		winfo_->getScreenWidth(), 
 		winfo_->getScreenHeight(), 
 		downSampleWidth_, 
 		downSampleHeight_);
-	//Be sure to update viewport with new dimensions as well.
-	downSampleViewport_.Width	= static_cast<FLOAT>(downSampleWidth_);
-	downSampleViewport_.Height	= static_cast<FLOAT>(downSampleHeight_);
-
-	shadowViewport_.Width	= SHADOWMAP_DIM;
-	shadowViewport_.Height	= SHADOWMAP_DIM;
+	getSSAODim(
+		winfo_->getScreenWidth(),
+		winfo_->getScreenHeight(),
+		ssaoWidth_,
+		ssaoHeight_);
 
 	for(unsigned int i = 0; i < GBUFFERID_NUM_BUFFERS && SUCCEEDED(hr); i++)
 	{
@@ -110,6 +120,14 @@ HRESULT ManagementBuffer::resize(ID3D11Device* device)
 			SHADOWMAP_DIM);
 	}
 
+	if(SUCCEEDED(hr))
+	{
+		hr = ssaoMap_->resize(
+			device,
+			ssaoWidth_,
+			ssaoHeight_);
+	}
+
 	return hr;
 }
 
@@ -130,6 +148,9 @@ HRESULT ManagementBuffer::init(ID3D11Device* device, ID3D11DeviceContext* devcon
 	if(SUCCEEDED(hr))
 		hr = initShadow(device);
 
+	if(SUCCEEDED(hr))
+		hr = initSSAO(device);
+
 	return hr;
 }
 HRESULT ManagementBuffer::initAlbedo(ID3D11Device* device)
@@ -141,7 +162,7 @@ HRESULT ManagementBuffer::initAlbedo(ID3D11Device* device)
 		winfo_->getScreenWidth(),
 		winfo_->getScreenHeight(),
 		MULTISAMPLES_GBUFFERS, 
-		getFormat(GBUFFER_FORMAT_ALBEDO),
+		getFormat(BUFFER_FORMAT_ALBEDO),
 		D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE,
 		D3D11_USAGE_DEFAULT);
 	hr = gBuffer->init(device);
@@ -159,7 +180,7 @@ HRESULT ManagementBuffer::initNormal(ID3D11Device* device)
 		winfo_->getScreenWidth(), 
 		winfo_->getScreenHeight(), 
 		MULTISAMPLES_GBUFFERS, 
-		getFormat(GBUFFER_FORMAT_NORMAL),
+		getFormat(BUFFER_FORMAT_NORMAL),
 		D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE,
 		D3D11_USAGE_DEFAULT);
 	hr = gBuffer->init(device);
@@ -177,7 +198,7 @@ HRESULT ManagementBuffer::initMaterial(ID3D11Device* device)
 		winfo_->getScreenWidth(), 
 		winfo_->getScreenHeight(), 
 		MULTISAMPLES_GBUFFERS, 
-		getFormat(GBUFFER_FORMAT_MATERIAL),
+		getFormat(BUFFER_FORMAT_MATERIAL),
 		D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE,
 		D3D11_USAGE_DEFAULT);
 	hr = gBuffer->init(device);
@@ -195,7 +216,7 @@ HRESULT ManagementBuffer::initGlow(ID3D11Device* device, ID3D11DeviceContext* de
 		winfo_->getScreenWidth(), 
 		winfo_->getScreenHeight(),
 		MULTISAMPLES_GBUFFERS, //?
-		getFormat(GBUFFER_FORMAT_GLOW_HIGH),
+		getFormat(BUFFER_FORMAT_GLOW_HIGH),
 		D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE | D3D11_BIND_UNORDERED_ACCESS,
 		D3D11_USAGE_DEFAULT);
 	hr = glowHigh_->init(device);
@@ -205,7 +226,7 @@ HRESULT ManagementBuffer::initGlow(ID3D11Device* device, ID3D11DeviceContext* de
 		downSampleWidth_,
 		downSampleHeight_,
 		MULTISAMPLES_GBUFFERS, //?
-		getFormat(GBUFFER_FORMAT_GLOW_LOW),
+		getFormat(BUFFER_FORMAT_GLOW_LOW),
 		D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE | D3D11_BIND_UNORDERED_ACCESS,
 		D3D11_USAGE_DEFAULT);
 	hr = glowLow_->init(device);
@@ -214,7 +235,7 @@ HRESULT ManagementBuffer::initGlow(ID3D11Device* device, ID3D11DeviceContext* de
 		downSampleWidth_,
 		downSampleHeight_,
 		MULTISAMPLES_GBUFFERS, //?
-		getFormat(GBUFFER_FORMAT_GLOW_LOW),
+		getFormat(BUFFER_FORMAT_GLOW_LOW),
 		D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE | D3D11_BIND_UNORDERED_ACCESS,
 		D3D11_USAGE_DEFAULT);
 	hr = glowLowUtil_->init(device);
@@ -252,6 +273,28 @@ HRESULT ManagementBuffer::initShadow(ID3D11Device* device)
 	shadowViewport_.Height		= static_cast<FLOAT>(SHADOWMAP_DIM);
 	shadowViewport_.MinDepth	= 0.0f;
 	shadowViewport_.MaxDepth	= 1.0f;
+
+	return hr;
+}
+HRESULT ManagementBuffer::initSSAO(ID3D11Device* device)
+{
+	HRESULT hr = S_OK;
+
+	ssaoMap_ = new Buffer_SrvRtv(
+		ssaoWidth_,
+		ssaoHeight_,
+		1,
+		getFormat(BUFFER_FORMAT_SSAO),
+		D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE,
+		D3D11_USAGE_DEFAULT);
+
+	ZeroMemory(&ssaoViewport_, sizeof(D3D11_VIEWPORT));
+	ssaoViewport_.TopLeftX	= 0;
+	ssaoViewport_.TopLeftY	= 0;
+	ssaoViewport_.Width		= static_cast<FLOAT>(ssaoWidth_);
+	ssaoViewport_.Height	= static_cast<FLOAT>(ssaoHeight_);
+	ssaoViewport_.MinDepth	= 0.0f;
+	ssaoViewport_.MaxDepth	= 1.0f;
 
 	return hr;
 }
@@ -498,6 +541,15 @@ void ManagementBuffer::getDownSampleDim(
 {
 	downSampleWidth		= screenWidth	/ DOWNSAMPLE_SCREEN_RES_FACTOR;
 	downSampleHeight	= screenHeight	/ DOWNSAMPLE_SCREEN_RES_FACTOR;
+}
+void ManagementBuffer::getSSAODim(
+	unsigned int screenWidth,
+	unsigned int screenHeight,
+	unsigned int& ssaoWidth,
+	unsigned int& ssaoHeight)
+{
+	ssaoWidth	= screenWidth	/ SSAO_MAP_SCREEN_RES_FACTOR;
+	ssaoHeight	= screenHeight	/ SSAO_MAP_SCREEN_RES_FACTOR;
 }
 
 D3D11_VIEWPORT ManagementBuffer::getDownSampledViewport()

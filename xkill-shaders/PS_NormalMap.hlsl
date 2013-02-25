@@ -4,6 +4,7 @@
 #include "UtilNormalMap.hlsl"
 #include "constantBuffers.hlsl"
 #include "VSOut.hlsl"
+#include "UtilSphereMapTransform.hlsl"
 
 struct PSOut
 {
@@ -36,7 +37,7 @@ PSOut PS_NormalMap(VSOutPosNormWTexTanW pIn)
 	normal.x = normal.x * 0.5f + 0.5f;
 	normal.y = normal.y * 0.5f + 0.5f;
 	normal.z = normal.z * 0.5f + 0.5f;
-	output.normal = float4(normal, 0.0f);
+	output.normal = float4(normal, 0.0f); 
 
 	//Fill albedo RTV
 	output.albedo = float4(albedoSample.xyz, 0.0f);
