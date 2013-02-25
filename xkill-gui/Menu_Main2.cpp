@@ -61,6 +61,7 @@ Menu_Main2::Menu_Main2( QWidget* parent ) : QMainWindow()
 	ui.frame_audio->hide();
 	ui.frame_input->hide();
 	ui.frame_credits->hide();
+	ui.label_background->hide();
 	show();
 
 	// show main menu

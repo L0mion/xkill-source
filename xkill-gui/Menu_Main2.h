@@ -43,6 +43,8 @@ private:
 	void menuResize(); 
 	void hideMenu()
 	{
+		endOpening();
+
 		if(menuStack.size() > 0)
 		{
 			QFrame* topMenu = menuStack.back();
@@ -57,8 +59,9 @@ private:
 		{
 			QFrame* topMenu = menuStack.back();
 			topMenu->show();
-			ui.label_background->show();
 		}
+
+		//ui.label_background->show();
 		raise();
 	}
 public:
@@ -104,7 +107,7 @@ private slots:
 	{
 		int lastFrame = openingAnimation->frameCount()-1;
 
-		// Stop animaiton when last frame is reached
+		// Stop animation when last frame is reached
 		if(frameNumber >= lastFrame)
 		{
 			endOpening();
@@ -112,12 +115,16 @@ private slots:
 	}
 	void endOpening()
 	{
-		int lastFrame = openingAnimation->frameCount()-1;
-		openingAnimation->jumpToFrame(lastFrame);
-		openingAnimation->stop();
-		ui.label_openingAnimation->hide();
+		// Skip opening, if at opening (index 0)
+		if(menuStack.size()==1)
+		{
+			int lastFrame = openingAnimation->frameCount()-1;
+			openingAnimation->jumpToFrame(lastFrame);
+			openingAnimation->stop();
+			ui.label_openingAnimation->hide();
 
-		slot_menu_main();
+			slot_menu_main();
+		}
 	}
 	void setNumPlayers(int numPlayers)
 	{
