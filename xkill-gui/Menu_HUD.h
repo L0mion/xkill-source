@@ -28,8 +28,7 @@ public:
 
 		this->splitScreen = splitScreen;
 		hide();
-		move(0,0);
-
+		refresh();
 	}
 	void mapPositionToParent()
 	{
@@ -39,6 +38,7 @@ public:
 	}
 	void refresh()
 	{
+		move(splitScreen->ssTopLeftX,splitScreen->ssTopLeftY);
 	}
 	void computeNewResolution()
 	{
@@ -54,7 +54,7 @@ public:
 			mapPositionToParent();
 			break;
 		case EVENT_SPLITSCREEN_CHANGED:
-			computeNewResolution();
+			refresh();
 			break;
 		default:
 			break;
