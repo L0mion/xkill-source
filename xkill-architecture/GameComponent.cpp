@@ -954,11 +954,6 @@ void GameComponent::shootProjectile( AttributePtr<Attribute_Spatial> ptr_spatial
 
 void GameComponent::startGame()
 {
-	// Hide mouse & menu so it is not distracting from game play
-	SEND_EVENT(&Event_SetMouseLock(true));
-	SEND_EVENT(&Event_EnableHud(true));
-	SEND_EVENT(&Event_EnableMenu(false));
-
 	// Make sure game ends properly before starting a new game
 	SEND_EVENT(&Event_EndDeathmatch());
 
@@ -966,19 +961,24 @@ void GameComponent::startGame()
 	GET_STATE() = STATE_DEATHMATCH;
 
 	// Start deathmatch; the only gamemode so far
-	// we also have to specify the number of players top start with
+	// we also have to specify the number of players to start with
 	int numPlayers = SETTINGS->numPlayers;
 	SEND_EVENT(&Event_StartDeathmatch(numPlayers));
+
+	// Hide mouse & menu so it is not distracting from game play
+	SEND_EVENT(&Event_SetMouseLock(true));
+	SEND_EVENT(&Event_EnableHud(true));
+	SEND_EVENT(&Event_EnableMenu(false));
 }
 
 void GameComponent::endGame()
 {
+	GET_STATE() = STATE_MAINMENU;
+	//SEND_EVENT(&Event_EndDeathmatch());
+	//SEND_EVENT(&Event_StartDeathmatch(0));	//To get a black background, for now run the game with zero players
+
 	// Re-enable menu so the player can decide what to do next 
 	SEND_EVENT(&Event_SetMouseLock(false));
 	SEND_EVENT(&Event_EnableHud(false));
 	SEND_EVENT(&Event_EnableMenu(true));
-
-	GET_STATE() = STATE_MAINMENU;
-	//SEND_EVENT(&Event_EndDeathmatch());
-	//SEND_EVENT(&Event_StartDeathmatch(0));	//To get a black background, for now run the game with zero players
 }
