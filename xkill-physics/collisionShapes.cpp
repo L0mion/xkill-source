@@ -138,7 +138,7 @@ void CollisionShapes::loadCollisionShapes()
 	}
 
 	//--------------------------------------------------------------------------------------
-	// Load .bullet files for models
+	// Try loading .bullet files for models, if they exist
 	//--------------------------------------------------------------------------------------
 	while(itrMesh.hasNext())
 	{
@@ -147,31 +147,42 @@ void CollisionShapes::loadCollisionShapes()
 		{
 			std::string name = ptr_mesh->fileName;
 			name = name.substr(0,name.find("."));
-			name = name.append("RigidBodyShape");
+			name = name.append("RigidBodyShape"); //Assume that all collision shapes have "RigidBodyShape" appended to their name
 
 			btCollisionShape* collisionShape;
 			btCollisionShape* loadedShape;
 			loadedShape = importer_->getCollisionShapeByName(name.c_str());
+			//--------------------------------------------------------------------------------------
+			// If the .bullet file contained {meshName}+RigidBodyShape (example: model file name: rifle.obj; {meshName}+RigidBodyShape = rifleRigidBodyShape)
+			//--------------------------------------------------------------------------------------
 			if(loadedShape != nullptr)
 			{
+				//--------------------------------------------------------------------------------------
+				// Create box shape with correct scaling and reset margin (This loader only supports box shapes).
+				//--------------------------------------------------------------------------------------
 				btVector3 scaling = loadedShape->getLocalScaling();
 				collisionShape = new btBoxShape(scaling/2);
 				collisionShape->setMargin(0.0f);
 				collisionShape->setLocalScaling(btVector3(1,1,1));
 
-				std::pair<unsigned int, unsigned int>  idToIndex(ptr_mesh->meshID,collisionShapes_->size());
+				//--------------------------------------------------------------------------------------
+				// Map global mesh id to internal collision shape index
+				//--------------------------------------------------------------------------------------
+				std::pair<unsigned int, unsigned int> idToIndex(ptr_mesh->meshID, collisionShapes_->size());
 				collisionShapesIdToIndex_.insert(idToIndex);
-				btCompoundShape* compoundShape = new btCompoundShape();
-				collisionShape->setMargin(0.0);
 				
+				btCompoundShape* compoundShape = new btCompoundShape();
+				//collisionShape->setMargin(0.0);
 				compoundShape->addChildShape(importer_->getRigidBodyByName(name.c_str())->getWorldTransform(),collisionShape);
 				compoundShape->setMargin(0.0);
 				collisionShapes_->push_back(compoundShape);
 				collisionShapes_->push_back(collisionShape);
 			}
+			//--------------------------------------------------------------------------------------
+			// Else: Load from model file
+			//--------------------------------------------------------------------------------------
 			else
 			{
-				//Load from model file
 				std::string path = std::string("../../xkill-resources/xkill-models/");
 				name = ptr_mesh->fileName;
 				name = name.substr(0,name.find("."));
