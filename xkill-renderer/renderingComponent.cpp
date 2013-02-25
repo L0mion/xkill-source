@@ -39,7 +39,7 @@ bool RenderingComponent::init()
 void RenderingComponent::onUpdate(float delta)
 {
 	renderer_->update();
-	renderer_->render(delta);
+	renderer_->render();
 }
 
 void RenderingComponent::onEvent( Event* e )
