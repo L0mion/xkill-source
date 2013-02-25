@@ -38,9 +38,13 @@ public:
 	virtual void setSensitivity(float sensitivity);
 	virtual float getSensitivity();
 
-	virtual void setUseAcceleration_(bool useAcceleration);
+	virtual void setUseAcceleration(bool useAcceleration);
+	virtual void setIsInAccelerationZone(bool inAccelerationZone);
 	virtual void setAccelerationRate(float accelerationRate);
 	virtual void setMaxAcceleration(float maxAcceleration);
+
+	virtual bool useAcceleration();
+	virtual float getAcceleration();
 
 	virtual void setName(std::string name);
 	virtual std::string getName();

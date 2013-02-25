@@ -40,6 +40,7 @@ class SubsetD3D;
 //#include <vector>
 
 #include "ShadingDesc.h"
+#include "ShadowMapping.h"
 
 //#define VISUALLEAKDETECTOR;
 #if (defined(DEBUG) || defined(_DEBUG)) && defined(VISUALLEAKDETECTOR)
@@ -68,7 +69,7 @@ public:
 		unsigned int screenHeight);	//!< Resizes all management objects that are affected by a change in screen resolution.
 	HRESULT	init();					//!< Initializes members and prepares render.
 	void	update();
-	void	render();	//!< Renders a frame.
+	void	render(double delta);	//!< Renders a frame.
 	void	loadTextures(TexDesc* texdesc); //!< Forwards information related to what textures Renderer is to load to Renderer-object.
 protected:
 private:
@@ -91,19 +92,26 @@ private:
 	void renderViewportToGBuffer(
 		ViewportData& vpData);											//!< Renders to g-buffer.
 	void renderViewportToBackBuffer(ViewportData& vpData);				//!< Renders to backbuffer.
-	void renderInstance(unsigned int meshID, InstancedData* instance);	//!< Renders an instanced model.
-	ShadingDesc deriveShadingDesc(VertexType vertexType);
+	void renderInstance(unsigned int meshID, InstancedData* instance, bool shadowmap);	//!< Renders an instanced model.
+	ShadingDesc deriveShadingDesc(VertexType vertexType, bool shadowmap);
 	void setShadingDesc(ShadingDesc shadingDesc);
 	void renderSubset(
 		SubsetD3D* subset, 
 		MaterialDesc& material,
-		unsigned int numInstances);										//!< Renders a subset.
+		unsigned int numInstances,
+		bool shadowmap);	//!< Renders a subset.
 	void renderDebugShape(
 		AttributePtr<Attribute_DebugShape>	ptr_debugShape, 
 		unsigned int			shapeIndex,
 		DirectX::XMFLOAT4X4		viewMatrix, 
 		DirectX::XMFLOAT4X4		projectionMatrix); //!< Renders a debug shape, such as a bounding sphere.
 
+	//Shadows
+
+	DirectX::XMFLOAT4X4	buildShadows(double delta);
+	ShadowMatrices constructShadowMatrices(SceneBounds bounds, Float3 lightDirection);
+
+	//Glow effect
 	void downSampleBlur();
 	void blurHorizontally();
 	void blurVertically();
@@ -114,7 +122,7 @@ private:
 		DirectX::XMFLOAT4X4		projectionMatrix); //!<A vertex buffer is recreated when a EVENT_DRAW_BULLET_PHYSICS_DEBUG_LINES event is present in the event queue.
 
 	void renderHudElements(int viewportIndex); //!< Reders hud elements such as the cross hair.
-	void renderHudElementCrossHair(int viewportIndex, float scaleModifierX); //<! Renders a cross hair in the middle óf each viewport.
+	void renderHudElementCrossHair(int viewportIndex, float scaleModifierX); //!< Renders a cross hair in the middle óf each viewport.
 	void drawHudElement(int viewportIndex, unsigned int textureId, DirectX::XMFLOAT4X4 transformationMatrix); //!< Draws a single hud element.
 
 	//temp

@@ -2,6 +2,7 @@
 
 #include "Winfo.h"
 #include "Buffer_SrvRtv.h"
+#include "Buffer_SrvDsv.h"
 #include "Buffer_SrvRtvUav.h"
 #include "renderingUtilities.h"
 
@@ -22,8 +23,10 @@ ManagementBuffer::ManagementBuffer(Winfo* winfo)
 	glowHigh_		= nullptr;
 	glowLow_		= nullptr;
 	glowLowUtil_	= nullptr;
-
 	ZeroMemory(&downSampleViewport_, sizeof(D3D11_VIEWPORT));
+
+	shadowMap_ = nullptr;
+	ZeroMemory(&shadowViewport_, sizeof(D3D11_VIEWPORT));
 }
 ManagementBuffer::~ManagementBuffer()
 {
@@ -33,6 +36,8 @@ ManagementBuffer::~ManagementBuffer()
 	SAFE_DELETE(glowHigh_);
 	SAFE_DELETE(glowLow_);
 	SAFE_DELETE(glowLowUtil_);
+
+	SAFE_DELETE(shadowMap_);
 }
 
 void ManagementBuffer::reset()
@@ -43,6 +48,8 @@ void ManagementBuffer::reset()
 	SAFE_RESET(glowHigh_);
 	SAFE_RESET(glowLow_);
 	SAFE_RESET(glowLowUtil_);
+
+	SAFE_RESET(shadowMap_);
 }
 HRESULT ManagementBuffer::resize(ID3D11Device* device)
 {
@@ -57,6 +64,9 @@ HRESULT ManagementBuffer::resize(ID3D11Device* device)
 	//Be sure to update viewport with new dimensions as well.
 	downSampleViewport_.Width	= static_cast<FLOAT>(downSampleWidth_);
 	downSampleViewport_.Height	= static_cast<FLOAT>(downSampleHeight_);
+
+	shadowViewport_.Width	= SHADOWMAP_DIM;
+	shadowViewport_.Height	= SHADOWMAP_DIM;
 
 	for(unsigned int i = 0; i < GBUFFERID_NUM_BUFFERS && SUCCEEDED(hr); i++)
 	{
@@ -92,6 +102,14 @@ HRESULT ManagementBuffer::resize(ID3D11Device* device)
 			downSampleHeight_);
 	}
 
+	if(SUCCEEDED(hr))
+	{
+		hr = shadowMap_->resize(
+			device, 
+			SHADOWMAP_DIM, 
+			SHADOWMAP_DIM);
+	}
+
 	return hr;
 }
 
@@ -108,6 +126,9 @@ HRESULT ManagementBuffer::init(ID3D11Device* device, ID3D11DeviceContext* devcon
 
 	if(SUCCEEDED(hr))
 		hr = initGlow(device, devcon);
+
+	if(SUCCEEDED(hr))
+		hr = initShadow(device);
 
 	return hr;
 }
@@ -209,6 +230,31 @@ HRESULT ManagementBuffer::initGlow(ID3D11Device* device, ID3D11DeviceContext* de
 
 	return hr;
 }
+HRESULT ManagementBuffer::initShadow(ID3D11Device* device)
+{
+	HRESULT hr = S_OK;
+
+	shadowMap_ = new Buffer_SrvDsv(
+		SHADOWMAP_DIM,
+		SHADOWMAP_DIM,
+		1,
+		DXGI_FORMAT_R24G8_TYPELESS,
+		D3D11_BIND_DEPTH_STENCIL | D3D11_BIND_SHADER_RESOURCE,
+		D3D11_USAGE_DEFAULT,
+		DXGI_FORMAT_R24_UNORM_X8_TYPELESS,
+		DXGI_FORMAT_D24_UNORM_S8_UINT);
+	hr = shadowMap_->init(device);
+
+	ZeroMemory(&shadowViewport_, sizeof(D3D11_VIEWPORT));
+	shadowViewport_.TopLeftX	= 0;
+	shadowViewport_.TopLeftY	= 0;
+	shadowViewport_.Width		= static_cast<FLOAT>(SHADOWMAP_DIM);
+	shadowViewport_.Height		= static_cast<FLOAT>(SHADOWMAP_DIM);
+	shadowViewport_.MinDepth	= 0.0f;
+	shadowViewport_.MaxDepth	= 1.0f;
+
+	return hr;
+}
 
 void ManagementBuffer::clearBuffers(ID3D11DeviceContext* devcon)
 {
@@ -225,6 +271,10 @@ void ManagementBuffer::clearBuffers(ID3D11DeviceContext* devcon)
 	devcon->ClearRenderTargetView(glowHigh_->getRTV(), CLEARCOLOR_BLACK);
 	devcon->ClearRenderTargetView(glowLow_->getRTV(), CLEARCOLOR_BLACK);
 	devcon->ClearRenderTargetView(glowLowUtil_->getRTV(), CLEARCOLOR_BLACK);
+
+	//Clear shadowmap
+	ID3D11DepthStencilView* dsv = shadowMap_->getDSV();
+	devcon->ClearDepthStencilView(dsv, D3D11_CLEAR_DEPTH, 1.0f, 0);
 }
 void ManagementBuffer::setBuffersAndDepthBufferAsRenderTargets(
 	ID3D11DeviceContext*	devcon, 
@@ -254,32 +304,33 @@ void ManagementBuffer::unsetBuffersAndDepthBufferAsRenderTargets(ID3D11DeviceCon
 }
 void ManagementBuffer::setBuffersAsCSShaderResources(ID3D11DeviceContext* devcon)
 {
-	ID3D11ShaderResourceView* resourceViews[GBUFFERID_NUM_BUFFERS + 1];
+	ID3D11ShaderResourceView* resourceViews[GBUFFERID_NUM_BUFFERS + 2];
 	for(int i = 0; i < GBUFFERID_NUM_BUFFERS; i++)
 		resourceViews[i] = gBuffers_[i]->getSRV();
 
 	resourceViews[GBUFFERID_NUM_BUFFERS] = glowHigh_->getSRV();
+	resourceViews[GBUFFERID_NUM_BUFFERS + 1] = shadowMap_->getSRV();
 
 	devcon->CSSetShaderResources(
 		0, 
-		GBUFFERID_NUM_BUFFERS + 1,
+		GBUFFERID_NUM_BUFFERS + 2,
 		resourceViews);
 }
 void ManagementBuffer::unsetBuffersAsCSShaderResources(ID3D11DeviceContext* devcon)
 {
-	ID3D11ShaderResourceView* resourceViews[GBUFFERID_NUM_BUFFERS + 1];
-	for(int i = 0; i < GBUFFERID_NUM_BUFFERS + 1; i++)
+	ID3D11ShaderResourceView* resourceViews[GBUFFERID_NUM_BUFFERS + 2];
+	for(int i = 0; i < GBUFFERID_NUM_BUFFERS + 2; i++)
 		resourceViews[i] = nullptr;
 
 	devcon->CSSetShaderResources(
 		0, 
-		GBUFFERID_NUM_BUFFERS + 1, 
+		GBUFFERID_NUM_BUFFERS + 2, 
 		resourceViews);
 }
 
-void ManagementBuffer::setGlow(ID3D11DeviceContext* devcon, SET_ID setID, SET_TYPE setType, SET_STAGE setStage, unsigned int shaderRegister)
+void ManagementBuffer::setBuffer(ID3D11DeviceContext* devcon, SET_ID setID, SET_TYPE setType, SET_STAGE setStage, unsigned int shaderRegister)
 {
-	Buffer_SrvRtvUav* buffer = nullptr;
+	Buffer_Srv* buffer = nullptr;
 	switch (setID)
 	{
 	case SET_ID_GLOW_HIGH:
@@ -291,6 +342,9 @@ void ManagementBuffer::setGlow(ID3D11DeviceContext* devcon, SET_ID setID, SET_TY
 	case SET_ID_GLOW_LOW_UTIL:
 		buffer = glowLowUtil_;
 		break;
+	case SET_ID_SHADOW:
+		buffer = shadowMap_;
+		break;
 	}
 
 	ID3D11DepthStencilView* dsv = NULL; //for brevity
@@ -299,7 +353,7 @@ void ManagementBuffer::setGlow(ID3D11DeviceContext* devcon, SET_ID setID, SET_TY
 	case SET_TYPE_RTV:
 		{
 			ID3D11RenderTargetView* renderTargets[1];
-			renderTargets[0] = buffer->getRTV();
+			renderTargets[0] = ((Buffer_SrvRtv*)buffer)->getRTV();
 
 			devcon->OMSetRenderTargets(
 				1,
@@ -332,13 +386,23 @@ void ManagementBuffer::setGlow(ID3D11DeviceContext* devcon, SET_ID setID, SET_TY
 		}
 	case SET_TYPE_UAV:
 		{
-			ID3D11UnorderedAccessView* uav = buffer->getUAV();
+			ID3D11UnorderedAccessView* uav = ((Buffer_SrvRtvUav*)buffer)->getUAV();
 			devcon->CSSetUnorderedAccessViews(
 				shaderRegister, 
 				1, 
 				&uav, 
 				nullptr);
 
+			break;
+		}
+	case SET_TYPE_DSV:
+		{
+			dsv = shadowMap_->getDSV();
+			ID3D11RenderTargetView* renderTargets[1] = { NULL };
+			devcon->OMSetRenderTargets(
+				1, //register and stage irrelevant
+				renderTargets, 
+				dsv); //set null rendertargets, as we want no colour-writes.
 			break;
 		}
 	}
@@ -398,10 +462,16 @@ void ManagementBuffer::unset(
 
 			break;
 		}
+	case SET_TYPE_DSV:
+		{
+			ID3D11RenderTargetView* renderTargets[1] = { NULL };
+			devcon->OMSetRenderTargets(1, renderTargets, NULL);
+			break;
+		}
 	}
 }
 
-DXGI_FORMAT ManagementBuffer::getFormat(GBUFFER_FORMAT format)
+DXGI_FORMAT ManagementBuffer::getFormat(BUFFER_FORMAT format)
 {
 	DXGI_FORMAT dxgiFormat = DXGI_FORMAT::DXGI_FORMAT_UNKNOWN;
 
@@ -433,4 +503,8 @@ void ManagementBuffer::getDownSampleDim(
 D3D11_VIEWPORT ManagementBuffer::getDownSampledViewport()
 {
 	return downSampleViewport_;
+}
+D3D11_VIEWPORT ManagementBuffer::getShadowViewport()
+{
+	return shadowViewport_;
 }

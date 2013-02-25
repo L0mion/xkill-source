@@ -19,6 +19,8 @@ ATTRIBUTES_DECLARE_ALL
 MainWindow::MainWindow()
 {
 	QWidget::installEventFilter(this);
+	menu = NULL;
+	gameWidget = NULL;
 
 	// Create console
 	AllocConsole();
@@ -36,6 +38,7 @@ MainWindow::MainWindow()
 	ATTRIBUTES_INIT_ALL;
 
 	// subscribe to events
+	SUBSCRIBE_TO_EVENT(this, EVENT_SHOW_FULLSCREEN);
 	SUBSCRIBE_TO_EVENT(this, EVENT_SHOW_MESSAGEBOX);
 	SUBSCRIBE_TO_EVENT(this, EVENT_QUIT_TO_DESKTOP);
 
@@ -51,9 +54,9 @@ MainWindow::MainWindow()
 	this->setCentralWidget(gameWidget);
 
 	// init tools
-	menu = new Menu_Main2(this);
 	new Menu_Editor(ui, this);
-
+	menu = new Menu_Main2(this);
+	
 	// setup signals and slots
 	connect(ui.actionFullscreen,			SIGNAL(triggered()),					this,			SLOT(slot_toggleFullScreen()));
 	connect(ui.actionCap_FPS,				SIGNAL(toggled(bool)),					gameWidget,		SLOT(slot_toggleCapFPS(bool)));
@@ -64,13 +67,13 @@ MainWindow::MainWindow()
 
 	// Listen to incomming event
 	this->installEventFilter(this);
-	
-	
-	// Start RELEASE in fullscreen, and DEBUG in Windowed, also avoid menu if DEBUG
-	slot_toggleFullScreen();
+
+	slot_toggleFullScreen();			//Fullscreen
+
+	// DEBUG build specific settings (setAlwaysOnTopAndShow(false) is set in Menu_Main2::Menu_Main2() if DEBUG)
 #if defined(DEBUG) || defined(_DEBUG)
-	slot_toggleFullScreen();
-	//SEND_EVENT(&Event(EVENT_STARTGAME)); //Skips menu in DEBUG
+	slot_toggleFullScreen();			//Windowed
+	SEND_EVENT(&Event(EVENT_STARTGAME));//Skips menu in DEBUG
 #endif
 }
 
@@ -88,6 +91,9 @@ void MainWindow::onEvent( Event* e )
 	EventType type = e->getType();
 	switch (type) 
 	{
+	case EVENT_SHOW_FULLSCREEN:
+		setFullScreen(((Event_SetFullscreen*)e)->on);
+		break;
 	case EVENT_QUIT_TO_DESKTOP:
 		QWidget::close();
 		break;
@@ -101,7 +107,7 @@ void MainWindow::onEvent( Event* e )
 
 void MainWindow::keyPressEvent( QKeyEvent* e )
 {
-	// Toggle fullscreen
+	// Toggle full screen
 	if((e->key()==Qt::Key_Return) && (e->modifiers()==Qt::AltModifier))
 		slot_toggleFullScreen();
 
@@ -113,32 +119,45 @@ void MainWindow::keyPressEvent( QKeyEvent* e )
 	if((e->key()==Qt::Key_F1))
 		ui.dockWidget->toggleViewAction()->activate(QAction::Trigger);
 
+	// Skip menu
+	if((e->key()==Qt::Key_F2))
+		SEND_EVENT(&Event(EVENT_STARTGAME));
+
+	
 	
 	//
-	// Menu controlls during in-game
+	// Menu controls during in-game
 	//
 
 	if(GET_STATE() == STATE_DEATHMATCH)
 	{
 		switch (e->key()) 
 		{
-			// Return to menu
 		case Qt::Key_Escape:
-			SEND_EVENT(&Event_EnableMenu(true));
+			SEND_EVENT(&Event(EVENT_ENDGAME));
 			break;
 		default:
 			break;
 		}
 	}
+	if(GET_STATE() == STATE_MAINMENU)
+	{
+		//switch(e->key())
+		//{
+		//case Qt::Key_Escape:
+		//	menu->setAlwaysOnTopAndShow(false);	//check
+		//	SEND_EVENT(&Event_EnableMenu(false)); //check
+		//	break;
+		//default:
+		//	break;
+		//}
+	}
 	if(GET_STATE() == STATE_GAMEOVER)
 	{
 		switch (e->key())
 		{
-			// Return to menu
 		case Qt::Key_Escape:
-			GET_STATE() = STATE_MAINMENU;
-			SEND_EVENT(&Event_EndDeathmatch());
-			SEND_EVENT(&Event_StartDeathmatch(0));	//To get a black background, for now run the game with zero players
+			SEND_EVENT(&Event(EVENT_ENDGAME));
 			break;
 		default:
 			break;
@@ -192,8 +211,6 @@ void MainWindow::slot_toggleFullScreen()
 
 void MainWindow::keyReleaseEvent( QKeyEvent* e )
 {
- 
-
 	// Inform about key release
 	SEND_EVENT(&Event_KeyPress(e->key(), false));
 }
@@ -210,13 +227,22 @@ void MainWindow::resizeEvent( QResizeEvent* e )
 
 void MainWindow::moveEvent( QMoveEvent *e )
 {
-	gameWidget->sendPositionEvent();
+	if(gameWidget != NULL)
+	{
+		gameWidget->sendPositionEvent();
+	}
 }
 
 void MainWindow::event_showMessageBox( Event_ShowMessageBox* e )
 {
-	QString message(e->message.c_str());
+	// Count errors
+	SETTINGS->numErrors++;
 
+	// Turn off fullscreen to prevent freezeup
+	SEND_EVENT(&Event_SetFullscreen(false));
+
+	// Show message
+	QString message(e->message.c_str());
 	QMessageBox::information(0, "Error", message);
 }
 
@@ -224,4 +250,37 @@ void MainWindow::closeEvent( QCloseEvent *event )
 {
 	delete gameWidget;
 	delete menu;
+}
+
+void MainWindow::setFullScreen( bool on )
+{
+	if(on)
+		this->showFullScreen();
+	else
+		this->showNormal();
+}
+
+bool MainWindow::eventFilter( QObject* object, QEvent* event )
+{
+	QEvent::Type type = event->type();
+
+	/*if(type == QEvent::NonClientAreaMouseMove)
+	return false;
+	if(type == QEvent::WindowTitleChange)
+	return false;
+	DEBUGPRINT("Event: " << type);*/
+
+	if(type == QEvent::NonClientAreaMouseButtonPress)
+	{
+		POST_DELAYED_EVENT(new Event(EVENT_WINDOW_FOCUS_CHANGED), 0.0f);
+		DEBUGPRINT("Event: NonClientAreaMouseButtonPress"); 
+	}
+
+	if(type == QEvent::WindowActivate)
+	{
+		SEND_EVENT(&Event(EVENT_WINDOW_FOCUS_CHANGED));
+		DEBUGPRINT("Event: WindowActivate"); 
+	}
+
+	return false;
 }

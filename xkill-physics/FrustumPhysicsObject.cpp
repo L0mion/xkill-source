@@ -35,7 +35,7 @@ void FrustumPhysicsObject::onUpdate(float delta)
 	world.setOrigin(pos);
 	setWorldTransform(world);
 	
-	setCollisionShape(CollisionShapes::Instance()->getFrustrumShape(attributeIndex_));
+	setCollisionShape(CollisionShapes::Instance()->getFrustumShape(attributeIndex_));
 }
 
 bool FrustumPhysicsObject::frustumInit(unsigned int attributeIndex,short collisionFilterGroup)
@@ -49,7 +49,7 @@ bool FrustumPhysicsObject::frustumInit(unsigned int attributeIndex,short collisi
 	AttributePtr<Attribute_Camera> ptr_camera = itrCamera_3.at(attributeIndex);
 	btVector3 localInertia;
 	localInertia.setZero();
-	btCollisionShape* collisionShape = CollisionShapes::Instance()->getFrustrumShape(attributeIndex_);
+	btCollisionShape* collisionShape = CollisionShapes::Instance()->getFrustumShape(attributeIndex_);
 	btScalar mass = static_cast<btScalar>(1);
 	setMassProps(mass, localInertia);
 	setCollisionShape(collisionShape);

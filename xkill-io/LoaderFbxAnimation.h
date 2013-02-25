@@ -167,7 +167,7 @@ private:
 	void parseAnimationListCurve(FbxAnimCurve* animCurve, FbxProperty* fbxProperty, std::vector<LoaderFbxAnimationKeyFrame>* keyFrames);
 
 
-	std::vector<LoaderFbxAnimationBone> animationBones_; //<! Vector containing bones. Here each bone is a collection of key frames.
+	std::vector<LoaderFbxAnimationBone> animationBones_; //!< Vector containing bones. Here each bone is a collection of key frames.
 };
 
 #endif //XKILL_IO_LOADERFBXANIMATION_H

@@ -40,3 +40,16 @@ void Settings::setTimeScale( float timeScale )
 	if(_timeScale < 0.01f)
 		_timeScale = 0.01f;
 }
+
+Settings::Settings()
+{
+	numErrors = 0;
+	soundVolume = 0.1f;
+	numPlayers = 2;
+	_timeScale = 1.0f;
+	trueDeltaTime = 0.0f;
+	currentLevel = "TestArena";
+	timeLimit = 0.0f;
+	cycleLimit = 35;
+	showDebugPhysics = false;
+}

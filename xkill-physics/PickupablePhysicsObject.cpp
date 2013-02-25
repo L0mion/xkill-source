@@ -23,7 +23,7 @@ btVector3 PickupablePhysicsObject::subClassCalculateLocalInertiaHook(btScalar ma
 
 void PickupablePhysicsObject::onUpdate(float delta)
 {
-	Hover(delta, 1.0f);
+	hover(delta, 1.0f);
 	setLinearVelocity(btVector3(0.0f, getLinearVelocity().y(), 0.0f)); //Prevent pickupable from floating away
 	setAngularVelocity(getAngularVelocity().absolute()*0.9f); //Gradually slow down spinning
 }

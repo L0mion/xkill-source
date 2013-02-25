@@ -68,7 +68,7 @@ btVector3 PhysicsObject::zeroLocalInertia()
 	return localInertia;
 }
 
-void PhysicsObject::Hover(float delta, float hoverHeight)
+void PhysicsObject::hover(float delta, float hoverHeight)
 {
 	btVector3 from = getWorldTransform().getOrigin();
 	btVector3 to = from - btVector3(0.0f,hoverHeight*2.0f,0.0f);
@@ -95,7 +95,6 @@ void PhysicsObject::Hover(float delta, float hoverHeight)
 
 bool PhysicsObject::init(unsigned int attributeIndex, short collisionFilterGroup)
 {
-	
 	if(attributeIndex < 0)
 	{
 		return false;
@@ -109,7 +108,15 @@ bool PhysicsObject::init(unsigned int attributeIndex, short collisionFilterGroup
 
 	//Resolve mass, local inertia of the collision shape, and also the collision shape itself.
 	btCollisionShape* collisionShape = subClassSpecificCollisionShape();
-	setCollisionShape(collisionShape);
+	if(collisionShape != nullptr)
+	{
+		setCollisionShape(collisionShape);
+	}
+	else
+	{
+		ERROR_MESSAGEBOX("Error in PhysicsObject::init. Expected collision shape pointer unexpectedly set to nullptr. Using default shape instead.");
+		setCollisionShape(CollisionShapes::Instance()->getDefaultShape());
+	}
 	
 	btVector3 localInertia = subClassCalculateLocalInertiaHook(mass);
 	setMassProps(mass, localInertia); //Set inverse mass and inverse local inertia

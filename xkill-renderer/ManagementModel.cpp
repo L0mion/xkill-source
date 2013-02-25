@@ -174,7 +174,7 @@ HRESULT ManagementModel::createVertexBuffer(
 	case VERTEX_INVALID:
 		{
 			std::string failed = "ManagementModel::CreateVertexBuffer Invalid vertex type for model: " + modelID;
-			SHOW_MESSAGEBOX(failed);
+			ERROR_MESSAGEBOX(failed);
 			break;
 		}
 	case VERTEX_TYPE_POS_COLOR:
@@ -232,14 +232,14 @@ HRESULT ManagementModel::createVertexBuffer(
 		}
 	default:
 		std::string failed = "ManagementModel::CreateVertexBuffer Unknown vertex type.";
-		SHOW_MESSAGEBOX(failed);
+		ERROR_MESSAGEBOX(failed);
 		break;
 	}
 
 	if(FAILED(hr))
 	{
 		std::string failed = "ManagementModel::CreateVertexBuffer Failed to create Vertex Buffer from MeshModel ID: " + modelID;
-		SHOW_MESSAGEBOX(failed);
+		ERROR_MESSAGEBOX(failed);
 	}
 
 	return hr;
@@ -298,7 +298,7 @@ HRESULT ManagementModel::createIndexBuffer(
 	if(FAILED(hr))
 	{
 		std::string failed = "Failed to create Index Buffer from MeshModel at index: " + modelID;
-		SHOW_MESSAGEBOX(failed);
+		ERROR_MESSAGEBOX(failed);
 	}
 
 	return hr;
@@ -426,7 +426,7 @@ void ManagementModel::createDebugShapeD3D(unsigned int shapeIndex, ID3D11Device*
 		//Log warning
 		break;
 	default:
-		SHOW_MESSAGEBOX("ManagementModel::createDebugShapeD3D: Failed to load DebugShapeD3D, no regognized DEBUG_SHAPE-enum.");
+		ERROR_MESSAGEBOX("ManagementModel::createDebugShapeD3D: Failed to load DebugShapeD3D, no regognized DEBUG_SHAPE-enum.");
 		break;
 	}
 }

@@ -61,6 +61,11 @@ void InputDevice::Update(float deltaTime)
 			rumbleActive_ = StopForceFeedback();
 		}
 	}
+
+	for(unsigned int i = 0; i < inputObjectArray_->inputObjects.size(); i++)
+	{
+		inputObjectArray_->inputObjects[i]->update(deltaTime);
+	}
 }
 
 void InputDevice::RunForceFeedback(float timer)
@@ -196,22 +201,27 @@ Float2 InputDevice::getFormattedFloatPair(int firstMapping, int secondMapping, f
 	Float2 result, value;
 	int firstIndex, secondIndex;
 	bool firstIsAbsolute, secondIsAbsolute;
+	InputObject* firstObject;
+	InputObject* secondObject;
 
 	for(unsigned int i = 0; i < mappedObjects_[firstMapping].size(); i++)
 	{
 		firstIndex = mappedObjects_[firstMapping][i];
-		value.x = inputObjectArray_->inputObjects[firstIndex]->getValueFloat();
-		firstIsAbsolute = inputObjectArray_->inputObjects[firstIndex]->needsDelta();
+		firstObject = inputObjectArray_->inputObjects[firstIndex];
+		value.x = firstObject->getValueFloat();
+		firstIsAbsolute = firstObject->needsDelta();
 
 		for(unsigned int j = 0; j < mappedObjects_[secondMapping].size(); j++)
 		{
 			secondIndex = mappedObjects_[secondMapping][i];
-			value.y = inputObjectArray_->inputObjects[secondIndex]->getValueFloat();
-			secondIsAbsolute = inputObjectArray_->inputObjects[secondIndex]->needsDelta();
+			secondObject = inputObjectArray_->inputObjects[secondIndex];
+			value.y = secondObject->getValueFloat();
+			secondIsAbsolute = secondObject->needsDelta();
 
-			if(value.length() > 1.0f)
+			float length = value.length();
+
+			if(length > 1.0f)
 			{
-				float length = value.length();
 				if(firstIsAbsolute)
 					value.x /= length;
 				if(secondIsAbsolute)
@@ -224,12 +234,32 @@ Float2 InputDevice::getFormattedFloatPair(int firstMapping, int secondMapping, f
 			if(secondIsAbsolute)
 				value.y *= modifier;
 
+			if(firstObject->useAcceleration())
+			{
+				if(length > 0.95f)
+					firstObject->setIsInAccelerationZone(true);
+				else
+					firstObject->setIsInAccelerationZone(false);
+
+				value.x *= firstObject->getAcceleration();
+			}
+
+			if(secondObject->useAcceleration())
+			{
+				if(length > 0.95f)
+					secondObject->setIsInAccelerationZone(true);
+				else
+					secondObject->setIsInAccelerationZone(false);
+
+				value.y *= secondObject->getAcceleration();
+			}
+
 			if(useSensitivity)
 			{
 				float sensitivity;
-				sensitivity = inputObjectArray_->inputObjects[firstIndex]->getSensitivity()*sensitivityModifier_;
+				sensitivity = firstObject->getSensitivity()*sensitivityModifier_;
 				value.x *= sensitivity;
-				sensitivity = inputObjectArray_->inputObjects[secondIndex]->getSensitivity()*sensitivityModifier_;
+				sensitivity = secondObject->getSensitivity()*sensitivityModifier_;
 				value.y *= sensitivity;
 
 				if(firstIsAbsolute)

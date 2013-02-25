@@ -15,7 +15,7 @@ void Menu_Main2::loadOpeningGif()
 	std::string fileName = "../../xkill-resources/xkill-gui/images/animations/menu_opening.gif"; 
 	openingAnimation->setFileName(fileName.c_str());
 	if(!openingAnimation->isValid()) // error checking
-		SHOW_MESSAGEBOX("Could not open " + fileName + ". Either the file is missing, or \"imageformats/qgif4.dll\" is missing.");
+		ERROR_MESSAGEBOX("Could not open " + fileName + ". Either the file is missing, or \"imageformats/qgif4.dll\" is missing.");
 	openingAnimation->setParent(this); // prevents memory leaks
 	ui.label_openingAnimation->setMovie(openingAnimation);
 	openingAnimation->start();
@@ -30,15 +30,17 @@ Menu_Main2::Menu_Main2( QWidget* parent ) : QMainWindow()
 	this->parent = parent;
 	ui.setupUi(this);
 	QWidget::setWindowFlags(Qt::FramelessWindowHint);
-	alwaysOnTop(true);
+	//alwaysOnTop(true);
 	QWidget::setAttribute(Qt::WA_TranslucentBackground);
 	QWidget::show();
 	loadOpeningGif();
 
 	// Events
+	SUBSCRIBE_TO_EVENT(this, EVENT_WINDOW_FOCUS_CHANGED);
 	SUBSCRIBE_TO_EVENT(this, EVENT_WINDOW_MOVE);
 	SUBSCRIBE_TO_EVENT(this, EVENT_WINDOW_RESIZE);
 	SUBSCRIBE_TO_EVENT(this, EVENT_ENABLE_MENU);
+	SUBSCRIBE_TO_EVENT(this, EVENT_UPDATE);
 
 
 	//
@@ -59,6 +61,7 @@ Menu_Main2::Menu_Main2( QWidget* parent ) : QMainWindow()
 	ui.frame_audio->hide();
 	ui.frame_input->hide();
 	ui.frame_credits->hide();
+	show();
 
 	// show main menu
 	push_menu(ui.frame_opening);
@@ -84,6 +87,7 @@ Menu_Main2::Menu_Main2( QWidget* parent ) : QMainWindow()
 	ammo_Menu = new Menu_Ammo(&ui, this);
 	firingMode_Menu = new Menu_FiringMode(&ui, this);
 	sound_Menu = new Menu_Sound(&ui, this);
+	//hud = new Menu_HUDManager(this);
 
 	// init level menu
 	filePath = QString("../../xkill-resources/xkill-scripts/levels.xml");
@@ -113,27 +117,29 @@ Menu_Main2::Menu_Main2( QWidget* parent ) : QMainWindow()
 	SEND_EVENT(&Event_LoadLevel(levelNames[0]));
 	SETTINGS->currentLevel = levelNames[0];
 	//ui.comboBox_LevelSelect->setModel(levelListModel);
-
 }
 
 void Menu_Main2::mousePressEvent( QMouseEvent *e )
 {
-	if(e->button() == Qt::RightButton)
+	if(GET_STATE() == STATE_MAINMENU)
 	{
-		pop_menu();
-	}
-	if(e->button() == Qt::LeftButton)
-	{
-		// Skip opening, if at opening (index 0)
-		if(menuStack.size()==1)
-			endOpening();
+		if(e->button() == Qt::RightButton)
+		{
+			pop_menu();
+		}
+		if(e->button() == Qt::LeftButton)
+		{
+			// Skip opening, if at opening (index 0)
+			if(menuStack.size()==1)
+				endOpening();
+		}
 	}
 }
 
 void Menu_Main2::loadCustomFonts()
 {
 	QStringList list;
-	list << "arcade_interlaced.ttf" << "arcade_rounded.ttf" << "arista_light.ttf";;
+	list << "arcade_interlaced.ttf" << "arcade_rounded.ttf" << "arista_light.ttf" << "digital_7_mono.ttf";
 	int fontID(-1);
 	bool fontWarningShown(false);
 	for (QStringList::const_iterator constIterator = list.constBegin(); constIterator != list.constEnd(); ++constIterator) 
@@ -144,7 +150,7 @@ void Menu_Main2::loadCustomFonts()
 			if(fontWarningShown == false)
 			{
 				std::string fontName = (*constIterator).toStdString();
-				SHOW_MESSAGEBOX("Problem loading custom font \"" + fontName + "\".");
+				ERROR_MESSAGEBOX("Problem loading custom font \"" + fontName + "\".");
 				fontWarningShown = true;
 			}
 		} 
@@ -153,7 +159,7 @@ void Menu_Main2::loadCustomFonts()
 			fontID = QFontDatabase::addApplicationFontFromData(res.readAll());
 			if (fontID == -1 && fontWarningShown == false)
 			{
-				SHOW_MESSAGEBOX("Problem loading custom font");
+				ERROR_MESSAGEBOX("Problem loading custom font");
 				fontWarningShown = true;
 			}
 		}
@@ -185,14 +191,14 @@ void Menu_Main2::pop_menu()
 	{
 		// Pop current menu
 		QFrame* topMenu = menuStack.back();
-		topMenu->hide();
+		hideMenu();
 		menuStack.pop_back();
 
 		// Show previous menu
 		QFrame* menu = menuStack.back();
 		menu->move(0,0);
 		menu->resize(width(), height());
-		menu->show();
+		showMenu();
 	}
 }
 
@@ -210,7 +216,7 @@ void Menu_Main2::menuResize()
 	topMenu->resize(width(), height());
 }
 
-void Menu_Main2::alwaysOnTop( bool on )
+void Menu_Main2::setAlwaysOnTop( bool on )
 {
 	if(on)
 	{
@@ -222,18 +228,24 @@ void Menu_Main2::alwaysOnTop( bool on )
 		// Disable Window Stay on Top flag
 		this->setWindowFlags(this->windowFlags() & ~Qt::WindowStaysOnTopHint);
 	}
+
+	this->show();
 }
 
 void Menu_Main2::event_windowMove( Event_WindowMove* e )
 {
 	move(e->pos.x, e->pos.y);
+	raise();
 }
 
 void Menu_Main2::keyPressEvent( QKeyEvent *e )
 {
-	if(e->key() == Qt::Key_Escape)
+	if(GET_STATE() == STATE_MAINMENU)
 	{
-		pop_menu();
+		if(e->key() == Qt::Key_Escape)
+		{
+			pop_menu();
+		}
 	}
 
 	QCoreApplication::sendEvent(parent, e);
@@ -258,6 +270,9 @@ void Menu_Main2::onEvent( Event* e )
 	EventType type = e->getType();
 	switch (type) 
 	{
+	case EVENT_WINDOW_FOCUS_CHANGED:
+		raise();
+		break;
 	case EVENT_ENABLE_MENU:
 		if(((Event_EnableMenu*)e)->enableMenu)
 		{
@@ -268,10 +283,13 @@ void Menu_Main2::onEvent( Event* e )
 			//sound_Menu->setSettingsMenu();
 
 			// Display menu
-			this->show();
+			showMenu();
 		}
 		else
-			this->hide();
+		{
+			// Hide menu
+			hideMenu();
+		}
 		break;
 	case EVENT_WINDOW_MOVE:
 		event_windowMove((Event_WindowMove*)e);
@@ -298,3 +316,4 @@ void Menu_Main2::closeEvent( QCloseEvent* event )
 {
 	SEND_EVENT(&Event(EVENT_QUIT_TO_DESKTOP));
 }
+

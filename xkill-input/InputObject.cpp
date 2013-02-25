@@ -3,8 +3,14 @@
 InputObject::InputObject(void)
 {
 	inverted_ = false;
-	sensitivity_ = 5.0f;
+	sensitivity_ = 2.0f;
 	name_ = "<NO_NAME>";
+
+	useAcceleration_ = false;
+	inAccelerationZone_ = false;
+	currentAcceleration_ = 1.0f;
+	accelerationRate_ = 2.5f;
+	maxAcceleration_ = 2.5f;
 }
 
 InputObject::~InputObject(void)
@@ -22,6 +28,10 @@ void InputObject::update(float delta)
 			{
 				currentAcceleration_ = maxAcceleration_;
 			}
+		}
+		else
+		{
+			currentAcceleration_ = 1.0f;
 		}
 	}
 }
@@ -46,7 +56,7 @@ float InputObject::getSensitivity()
 	return sensitivity_;
 }
 
-void InputObject::setUseAcceleration_(bool useAcceleration)
+void InputObject::setUseAcceleration(bool useAcceleration)
 {
 	useAcceleration_ = useAcceleration;
 }
@@ -59,6 +69,21 @@ void InputObject::setAccelerationRate(float accelerationRate)
 void InputObject::setMaxAcceleration(float maxAcceleration)
 {
 	maxAcceleration_ = maxAcceleration;
+}
+
+void InputObject::setIsInAccelerationZone(bool inAccelerationZone)
+{
+	inAccelerationZone_ = inAccelerationZone;
+}
+
+bool InputObject::useAcceleration()
+{
+	return useAcceleration_;
+}
+
+float InputObject::getAcceleration()
+{
+	return currentAcceleration_;
 }
 
 bool InputObject::needsDelta()

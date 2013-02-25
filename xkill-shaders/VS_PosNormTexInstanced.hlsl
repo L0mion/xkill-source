@@ -2,13 +2,12 @@
 #include "VSIn.hlsl"
 #include "VSOut.hlsl"
 
-DefaultVSOut VS_PosNormTexInstanced(VSInPosNormTexInstanced vsIn)
+VSOutPosNormWTex VS_PosNormTexInstanced(VSInPosNormTexInstanced vsIn)
 {
-	DefaultVSOut output;
+	VSOutPosNormWTex output;
 
 	float4 pos = float4(vsIn.position, 1.0f);
 	pos = mul(pos, vsIn.world);
-	output.positionW = pos.xyz;
 	pos = mul(pos, view);
 	pos = mul(pos, projection);
 	output.position	= pos;

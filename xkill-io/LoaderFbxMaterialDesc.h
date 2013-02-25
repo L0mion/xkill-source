@@ -77,17 +77,17 @@ public:
 	MaterialDesc getMaterialDesc();
 
 private:
-	Float3	ambient_;		//<! Ambient component of the material.
-	Float3	diffuse_;		//<! Diffuse component of the material.
-	Float3	specular_;		//<! Specular component of the material.
-	Float3	emissive_;		//<! Emissive component of the material.
-	float	opacity_;		//<! Opacity component of the material.
-	float	shininess_;		//<! Shininess component of the material.
-	float	reflectivity_;	//<! Reflectivity component of the material.
+	Float3	ambient_;		//!< Ambient component of the material.
+	Float3	diffuse_;		//!< Diffuse component of the material.
+	Float3	specular_;		//!< Specular component of the material.
+	Float3	emissive_;		//!< Emissive component of the material.
+	float	opacity_;		//!< Opacity component of the material.
+	float	shininess_;		//!< Shininess component of the material.
+	float	reflectivity_;	//!< Reflectivity component of the material.
 
-	std::vector<FbxFileTexture*>		fbxFileTextures_;		//<! Contains file textures.
-	std::vector<FbxLayeredTexture*>		fbxLayeredTextures_;	//<! Contains layered textures.
-	std::vector<FbxProceduralTexture*>	fbxProceduralTextures_;	//<! Contains procedural textures.
+	std::vector<FbxFileTexture*>		fbxFileTextures_;		//!< Contains file textures.
+	std::vector<FbxLayeredTexture*>		fbxLayeredTextures_;	//!< Contains layered textures.
+	std::vector<FbxProceduralTexture*>	fbxProceduralTextures_;	//!< Contains procedural textures.
 };
 
 #endif //XKILL_IO_LOADERFBXMATERIALDESC_H

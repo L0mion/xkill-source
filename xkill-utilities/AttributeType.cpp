@@ -533,14 +533,11 @@ Attribute_Player::Attribute_Player()
 	timeSinceLastDamageTaken = 100.0f;
 	jetpack = false;
 	detectedAsDead = true;
-	meshID_whenAlive = 0;
-	meshID_whenDead = 0;
 	currentSprintTime = 0;
 	sprintTime = 2.0f;
 	canSprint = true;
 	sprintRechargeRate = 0.2f;
 	executing = false;
-	corpseEntityId = -1;
 
 	walkSpeed = 5.0f;
 	sprintSpeed = walkSpeed*2;
@@ -927,7 +924,7 @@ DataItemList* Attribute_DebugShape::getDataList()
 	{
 		DataItemList* list = new DataItemList();
 
-		list->add(&ptr_spatial, "ptr_spatial");;
+		list->add(&ptr_spatial, "ptr_spatial");
 		list->add(meshID,					"meshID");
 		list->add_Enum(shape->shapeType_,	"shape->shapeType");
 		list->add(render,					"render");
@@ -957,7 +954,7 @@ Attribute_ExplosionSphere::~Attribute_ExplosionSphere()
 DataItemList* Attribute_ExplosionSphere::getDataList()
 {
 	DataItemList* list = new DataItemList();
-	list->add(&ptr_physics, "ptr_physics");;
+	list->add(&ptr_physics, "ptr_physics");
 	list->add(currentLifeTimeLeft,	"currentLifeTimeLeft");
 	return list;
 }
@@ -981,7 +978,7 @@ Attribute_Ray::~Attribute_Ray()
 DataItemList* Attribute_Ray::getDataList()
 {
 	DataItemList* list = new DataItemList();
-	list->add(from, "from");;
+	list->add(from, "from");
 	list->add(to,	"to");
 	return list;
 }

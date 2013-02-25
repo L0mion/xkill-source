@@ -5,7 +5,7 @@
 
 ATTRIBUTES_DECLARE_ALL;
 
-HUDWindow::HUDWindow(QWidget* parent, int id) : QMainWindow(parent)
+HUDWindow2::HUDWindow2(QWidget* parent, int id) : QMainWindow(parent)
 {
 	this->id = id;
 
@@ -94,7 +94,7 @@ HUDWindow::HUDWindow(QWidget* parent, int id) : QMainWindow(parent)
 	resize(horizontalLayout->minimumSize());
 }
 
-void HUDWindow::parentMoveEvent(AttributePtr<Attribute_SplitScreen> splitScreen)
+void HUDWindow2::parentMoveEvent(AttributePtr<Attribute_SplitScreen> splitScreen)
 {
 	float sizeScale = (float) splitScreen->ssHeight / 1000;
 	sizeScale = 0.75f*sizeScale + 0.25f;
@@ -104,7 +104,7 @@ void HUDWindow::parentMoveEvent(AttributePtr<Attribute_SplitScreen> splitScreen)
 	move(x, y);
 }
 
-void HUDWindow::update(AttributePtr<Attribute_SplitScreen> splitScreen)
+void HUDWindow2::update(AttributePtr<Attribute_SplitScreen> splitScreen)
 {
 	AttributePtr<Attribute_Player>		player		=	splitScreen->ptr_player;
 	AttributePtr<Attribute_Health>		health		=	player->ptr_health;
@@ -192,10 +192,10 @@ HUDManager::HUDManager(QWidget* parent)
 void HUDManager::update()
 {
 	// Balance attributes / vs huds
-	int num_splitScreen = itrSplitScreen.size();
+	int num_splitScreen = itrSplitScreen.count();
 	while(num_splitScreen>huds.size())
 	{
-		huds.push_back(new HUDWindow(parent, huds.size()));
+		huds.push_back(new HUDWindow2(parent, huds.size()));
 	}
 	while(num_splitScreen<huds.size())
 	{
@@ -218,7 +218,7 @@ void HUDManager::createHUD()
 {
 	for(int i=0; i<5; i++)
 	{
-		huds.push_back(new HUDWindow(parent, i));
+		huds.push_back(new HUDWindow2(parent, i));
 	}
 }
 
@@ -237,10 +237,7 @@ MenuManager::MenuManager( QWidget* parent )
 	
 	mainMenu->toggleMenu(true);
 
-	SUBSCRIBE_TO_EVENT(this, EVENT_ENABLE_MENU);
-	SUBSCRIBE_TO_EVENT(this, EVENT_UPDATE);
-	SUBSCRIBE_TO_EVENT(this, EVENT_END_DEATHMATCH);
-	SUBSCRIBE_TO_EVENT(this, EVENT_GAMEOVER);
+
 }
 
 void MenuManager::keyPressEvent( QKeyEvent* e )
@@ -254,40 +251,6 @@ void MenuManager::keyReleaseEvent( QKeyEvent* e )
 
 void MenuManager::onEvent( Event* e )
 {
-	EventType type = e->getType();
-	static int refreshRate = 2;
-	static int test = refreshRate;
-	switch(type) 
-	{
-	case EVENT_UPDATE:
-		// HACK: Makes the menu update every 20 frame
-		test--;
-		if(test<0)
-		{
-			hudManager.update();
-			scoreBoard->onUpdate(1.0f);
-			test = refreshRate;
-		}
-		break;
-	case EVENT_ENABLE_MENU:
-		{
-			// Hide show menu
-			bool enableMenu = ((Event_EnableMenu*)e)->enableMenu;
-			mainMenu->toggleMenu(enableMenu);
-		}
-		break;
-	case EVENT_END_DEATHMATCH:
-		scoreBoard->toggleMenu(false);
-		inGameMenu->toggleMenu(false);
-		break;
-	case EVENT_GAMEOVER:
-		scoreBoard->toggleMenu(true);
-		scoreBoard->onUpdate(0.01f);
-		inGameMenu->toggleMenu(false);
-		mainMenu->toggleMenu(false);
-	default:
-		break;
-	}
 }
 
 void MenuManager::onUpdate( float delta )

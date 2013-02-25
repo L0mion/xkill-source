@@ -43,7 +43,8 @@ public:
 
 	virtual HRESULT init(ID3D11Device* device);
 
-	ID3D11ShaderResourceView* getSRV() { return srv_; }
+	ID3D11Texture2D*			getTex() { return tex_; }
+	ID3D11ShaderResourceView*	getSRV() { return srv_; }
 protected:
 	ID3D11Texture2D*			tex_;	//!< Texture. What more do you want? Piss off.
 	ID3D11ShaderResourceView*	srv_;	//!< Handle to texture used by shader.

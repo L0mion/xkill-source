@@ -26,7 +26,7 @@ bool GameManager::init(HWND windowHandle, HWND parentWindowHandle)
 	componentManager_ = new ComponentManager();
 	if(!componentManager_->init(windowHandle, parentWindowHandle))
 	{
-		SHOW_MESSAGEBOX("Component manager failed to init");
+		ERROR_MESSAGEBOX("Component manager failed to init");
 		return false;
 	}
 
