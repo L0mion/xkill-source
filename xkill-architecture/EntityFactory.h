@@ -45,6 +45,8 @@ public:
 			MODEL_PROJECTILE_EXPLOSIVE	= 8,
 			MODEL_PROJECTILE_SCATTER	= 9,
 			MODEL_PROJECTILE_SINGLE		= 10,
+			MODEL_JETPACK				= 13,
+			MODEL_SPEEDHACK				= 14,
 
 			MODEL_LAST
 	};
@@ -347,6 +349,12 @@ public:
 			break;
 		case XKILL_Enums::PickupableType::MEDKIT:
 			ptr_render->meshID = MODEL_HEALTHPACK;
+			break;
+		case XKILL_Enums::PickupableType::HACK_JETHACK:
+			ptr_render->meshID = MODEL_JETPACK;
+			break;
+		case XKILL_Enums::PickupableType::HACK_SPEEDHACK:
+			ptr_render->meshID = MODEL_SPEEDHACK;
 			break;
 		default:
 			ptr_render->meshID = MODEL_HEALTHPACK;
