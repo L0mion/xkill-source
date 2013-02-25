@@ -89,6 +89,8 @@ public:
 	void setBoneParentIndices(std::vector<int> boneParentIndices);
 	void setBoneNodes(std::vector<FbxNode*> boneNodes);
 
+	void setFbxMesh(FbxMesh* fbxMesh);
+
 private:
 	std::vector<VertexDesc> assembleVertexDesc();
 	std::vector<VertexDesc> indexVertexDesc(std::vector<VertexDesc> vertices);
@@ -130,6 +132,8 @@ private:
 	std::vector<Float4x4> offsetMatrices_;					//<! Contains offset matrices used to transform vertices into the skeletons lokal space.
 	std::vector<int> boneParentIndices_;					//<! Contains the hierarchy of bones.
 	std::vector<fbxsdk_2014_0_beta2::FbxNode*> boneNodes_;	//<! Contains the nodes for every bone in the skeleton.
+
+	FbxMesh* fbxMesh_; //!< Fbx mesh object.
 };
 
 #endif //XKILL_IO_LOADERFBXMESHDESC_H

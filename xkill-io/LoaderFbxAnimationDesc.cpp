@@ -116,19 +116,23 @@ void LoaderFbxAnimationDesc::createKeyframe(LoaderFbxAnimationBone fbxBone, Keyf
 		scalingZ = 1.0f;
 	}
 	
-	DirectX::XMMATRIX xmRotationX = DirectX::XMMatrixRotationX(rotationX * (DirectX::XM_PI / 180.0f));
+	DirectX::XMVECTOR xmTemp = DirectX::XMQuaternionRotationRollPitchYaw(rotationZ * (DirectX::XM_PI / 180.0f), rotationY * (DirectX::XM_PI / 180.0f), rotationX * (DirectX::XM_PI / 180.0f));
+	DirectX::XMFLOAT4 temp;
+	DirectX::XMStoreFloat4(&temp, xmTemp);
+
+	DirectX::XMMATRIX xmRotationX = DirectX::XMMatrixRotationX(-rotationX * (DirectX::XM_PI / 180.0f));
 	DirectX::XMMATRIX xmRotationY = DirectX::XMMatrixRotationY(rotationY * (DirectX::XM_PI / 180.0f));
 	DirectX::XMMATRIX xmRotationZ = DirectX::XMMatrixRotationZ(rotationZ * (DirectX::XM_PI / 180.0f));
 	
-	DirectX::XMMATRIX xmRotation = xmRotationX * xmRotationY * xmRotationZ;
+	DirectX::XMMATRIX xmRotation = xmRotationZ * xmRotationY * xmRotationX;
 	DirectX::XMVECTOR xmQuaternion = DirectX::XMQuaternionRotationMatrix(xmRotation);
 	DirectX::XMFLOAT4 quaternion;
-
+	DirectX::XMQuaternionNormalize(xmQuaternion);
 	DirectX::XMStoreFloat4(&quaternion, xmQuaternion);
 
 	keyframe->translation			= DirectX::XMFLOAT3(translationX, translationY, translationZ);
 	keyframe->scale					= DirectX::XMFLOAT3(scalingX, scalingY, scalingZ);
-	keyframe->rotationQuaternion	= quaternion;
+	keyframe->rotationQuaternion	= temp; //DirectX::XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f); //quaternion;
 	keyframe->timePosition			= time;
 }
 

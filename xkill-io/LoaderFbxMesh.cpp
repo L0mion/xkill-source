@@ -31,6 +31,8 @@ void LoaderFbxMesh::parseMesh(FbxMesh* mesh, FbxPose* fbxPose, LoaderFbxMeshDesc
 {
 	reset();
 
+	meshDesc->setFbxMesh(mesh);
+
 	int polygonVertexCount = mesh->GetPolygonVertexCount();
 	int polygonCount = mesh->GetPolygonCount();
 	int numControlPonts = mesh->GetControlPointsCount();
@@ -460,18 +462,19 @@ void LoaderFbxMesh::parseVertexLinkData(FbxMesh* mesh, FbxPose* fbxPose, LoaderF
 
 			for(unsigned int i=0; i<nodes.size(); i++)
 			{
-				FbxAMatrix matrixTransform;
-				matrixTransform = nodes[i]->EvaluateGlobalTransform(FbxTime(0));
+				//FbxAMatrix matrixTransform;
+				//matrixTransform = nodes[i]->EvaluateGlobalTransform(FbxTime(0));
+				//matrixTransform = getGlobalPosition(nodes[i], FbxTime(0), fbxPose, &matrixTransform);
+				//
+				//matrixTransform = matrixTransform.Transpose();
+				//Float4x4 offsetMatrix;
+				//for(int x=0; x<4; x++)
+				//{
+				//	for(int y=0; y<4; y++)
+				//		offsetMatrix.m[x][y] = static_cast<float>(matrixTransform.mData[x][y]);
+				//}
 
-				matrixTransform = matrixTransform.Transpose();
-				Float4x4 offsetMatrix;
-				for(int x=0; x<4; x++)
-				{
-					for(int y=0; y<4; y++)
-						offsetMatrix.m[x][y] = static_cast<float>(matrixTransform.mData[x][y]);
-				}
-
-				meshDesc->addOffsetMatrix(offsetMatrix);
+				meshDesc->addOffsetMatrix(identityMatrix);
 			}
 
 			for(int clusterIndex=0; clusterIndex<numClusters; clusterIndex++)
@@ -517,6 +520,8 @@ void LoaderFbxMesh::parseIndicesAndWeights(FbxCluster* cluster, LoaderFbxMeshDes
 	
 	for(int i =0; i<numIndices; i++)
 	{
+		int index = indices[i];
+		double weight = weights[i];
 		meshDesc->addVertexBoneIndex(indices[i], nodeIndex);
 		meshDesc->addVertexBoneWeight(indices[i], static_cast<float>(weights[i]));
 	}
@@ -676,7 +681,6 @@ FbxAMatrix LoaderFbxMesh::getPoseMatrix(FbxPose* pose, int nodeIndex)
 
 	return poseMatrix;
 }
-
 
 FbxNode* LoaderFbxMesh::findRoot(FbxNode* node)
 {
