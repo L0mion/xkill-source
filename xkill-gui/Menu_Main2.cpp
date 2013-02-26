@@ -61,7 +61,7 @@ Menu_Main2::Menu_Main2( QWidget* parent ) : QMainWindow()
 	ui.frame_audio->hide();
 	ui.frame_input->hide();
 	ui.frame_credits->hide();
-	ui.label_background->hide();
+	//ui.label_background->hide();
 	show();
 
 	// show main menu
@@ -88,7 +88,7 @@ Menu_Main2::Menu_Main2( QWidget* parent ) : QMainWindow()
 	ammo_Menu = new Menu_Ammo(&ui, this);
 	firingMode_Menu = new Menu_FiringMode(&ui, this);
 	sound_Menu = new Menu_Sound(&ui, this);
-	//hud = new Menu_HUDManager(this);
+	hud = new Menu_HUDManager(this);
 
 	// init level menu
 	filePath = QString("../../xkill-resources/xkill-scripts/levels.xml");

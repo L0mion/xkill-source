@@ -7,10 +7,11 @@ Menu_HUDManager::Menu_HUDManager( QWidget* parent ) : QObject(parent)
 	ATTRIBUTES_INIT_ALL;
 
 	this->parent = parent;
+	isEnabled = false;
 
 	// Events
 	SUBSCRIBE_TO_EVENT(this, EVENT_ENABLE_HUD);
-	SUBSCRIBE_TO_EVENT(this, EVENT_STARTGAME);
+	SUBSCRIBE_TO_EVENT(this, EVENT_SPLITSCREEN_CHANGED);
 }
 
 void Menu_HUDManager::onEvent( Event* e )
@@ -19,27 +20,26 @@ void Menu_HUDManager::onEvent( Event* e )
 	switch (type) 
 	{
 	case EVENT_ENABLE_HUD:
+		
 		if(((Event_EnableHud*)e)->enableHud)
 		{
+			isEnabled = true;
+
 			for(int i=0; i<huds.size(); i++)
 				huds[i]->show();
 		}
 		else
 		{
+			isEnabled = false;
+
 			for(int i=0; i<huds.size(); i++)
 				huds[i]->hide();
 		}
+
 	
 		break;
-	case EVENT_WINDOW_MOVE:
-		computeNewPosition((Event_WindowMove*)e);
-		break;
-	case EVENT_STARTGAME:
+	case EVENT_SPLITSCREEN_CHANGED:
 		mapHudsToSplitscreen();
-		SEND_EVENT(&Event_EnableHud(true));
-		break;
-	case EVENT_WINDOW_RESIZE:
-		computeNewResolution((Event_WindowResize*)e);
 		break;
 	default:
 		break;
@@ -60,6 +60,8 @@ void Menu_HUDManager::mapHudsToSplitscreen()
 	{
 		AttributePtr<Attribute_SplitScreen> ptr_splitScreen = itrSplitScreen.getNext();
 		huds.push_back(new Menu_HUD(ptr_splitScreen, parent));
+		if(isEnabled)
+			huds.back()->show();
 	}
 }
 
@@ -73,4 +75,140 @@ void Menu_HUDManager::updateHuds()
 		//huds[index]->refresh(ptr_splitScreen);
 		index++;
 	}
+}
+
+void Menu_HUD::mapToSplitscreen()
+{
+	Float2 screenSize;
+	screenSize.x = splitScreen->ssWidth;
+	screenSize.y = splitScreen->ssHeight;
+
+	Float2 centerPos;
+	centerPos.x = screenSize.x * 0.5f;
+	centerPos.y = screenSize.y * 0.5f;
+
+
+	// Move center HUD to center
+	ui.frame_center->move(centerPos.x - ui.frame_center->width()* 0.5f, centerPos.y - ui.frame_center->height()* 0.5f);
+	
+	// Place statusbars
+	Float2 barPos;
+	barPos.x = screenSize.x * 0.05f;
+	barPos.y = 0;
+	Float2 barMiddle(ui.progressBar_health->width() * 0.5f, ui.progressBar_health->height() * 0.5f);
+	ui.progressBar_health->move(centerPos.x - barPos.x - barMiddle.x, centerPos.y - barPos.y - barMiddle.y);
+	ui.progressBar_ammo->move(centerPos.x + barPos.x - barMiddle.x, centerPos.y + barPos.y - barMiddle.y);
+
+	// Move botton HUD to bottom
+	Float2 bottomPos;
+	ui.frame_bottom->resize(screenSize.x - screenSize.x*0.00f * 2, ui.frame_bottom->height());
+	bottomPos.x = screenSize.x * 0.5f - ui.frame_bottom->width()* 0.5f;
+	bottomPos.y = screenSize.y - screenSize.x*0.005f - ui.frame_bottom->height()* 1.0f;
+	ui.frame_bottom->move(bottomPos.x, bottomPos.y);
+}
+
+void Menu_HUD::refresh()
+{
+	AttributePtr<Attribute_Player>		player		=	splitScreen->ptr_player;
+	AttributePtr<Attribute_Health>		health		=	player->ptr_health;
+	AttributePtr<Attribute_WeaponStats>	weaponStats	=	player->ptr_weaponStats;
+
+	Ammunition* ammunition = &weaponStats->ammunition[weaponStats->currentAmmunitionType];
+	FiringMode* firingMode = &weaponStats->firingMode[weaponStats->currentFiringModeType];
+	int ammoIndex = ammunition->type;
+
+	//
+	// Show ammunition info
+	//
+
+	ui.label_ammo->setNum((int)firingMode->nrOfShotsLeftInClip[ammoIndex]);
+	ui.label_totalAmmo->setNum((int)weaponStats->ammunition[ammoIndex].currentTotalNrOfShots);
+	int ammoRatio = (int)(((float)firingMode->nrOfShotsLeftInClip[ammoIndex] / firingMode->clipSize) * 100);
+	int reloadRatio = (int)(((float)firingMode->reloadTimeLeft / firingMode->reloadTime) * 100);
+	
+	// Hide progress bar if full
+	if(ammoRatio == 100)
+	{
+		
+		if(!ui.progressBar_ammo->isHidden())
+			ui.progressBar_ammo->hide();
+	}
+	// ELSE: Show progressbar & update value
+	else
+	{
+		if(ui.progressBar_ammo->isHidden())
+				ui.progressBar_ammo->show();
+
+		// Show reload time
+		if(reloadRatio < 100)
+		{
+			ui.progressBar_ammo->setValue(100 - reloadRatio);
+		}
+		// Show ammo
+		else
+		{
+			ui.progressBar_ammo->setValue(ammoRatio);
+		}
+		ui.progressBar_ammo->update();
+	}
+
+
+	//
+	// Show health info
+	//
+
+	ui.label_health->setNum((int)health->health);
+	int healthRatio = (int)((health->health / health->maxHealth) * 100);
+	// Hide progress bar if full
+	if(healthRatio == 100)
+	{
+		
+		if(!ui.progressBar_health->isHidden())
+			ui.progressBar_health->hide();
+	}
+	// ELSE: Show progressbar & update value
+	else
+	{
+		if(ui.progressBar_health->isHidden())
+			ui.progressBar_health->show();
+
+		ui.progressBar_health->setValue(healthRatio);
+		ui.progressBar_health->update();
+	}
+	
+}
+
+Menu_HUD::Menu_HUD( AttributePtr<Attribute_SplitScreen> splitScreen, QWidget* parent ) : QWidget(parent)
+{
+	ui.setupUi(this);
+	this->splitScreen = splitScreen;
+	Float2 pos(splitScreen->ssTopLeftX, splitScreen->ssTopLeftY);
+	move(splitScreen->ssTopLeftX, splitScreen->ssTopLeftY);
+	resize(splitScreen->ssWidth, splitScreen->ssHeight);
+	hide();
+
+	QWidget::setAttribute(Qt::WA_ShowWithoutActivating);
+	QWidget::setAttribute(Qt::WA_TransparentForMouseEvents);
+
+	SUBSCRIBE_TO_EVENT(this, EVENT_UPDATE);
+	
+	mapToSplitscreen();
+}
+
+void Menu_HUD::onEvent( Event* e )
+{
+	EventType type = e->getType();
+	switch (type) 
+	{
+	case EVENT_UPDATE:
+		refresh();
+		break;
+	default:
+		break;
+	}
+}
+
+Menu_HUD::~Menu_HUD()
+{
+	UNSUBSCRIBE_TO_EVENTS(this);
 }
