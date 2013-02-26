@@ -93,10 +93,10 @@ void Menu_HUD::mapToSplitscreen()
 	
 	// Place statusbars
 	Float2 barPos;
-	barPos.x = screenSize.x * 0.05f;
-	barPos.y = 0;
+	barPos.x = screenSize.x * 0.08f;
+	barPos.y = screenSize.y * 0.01f;
 	Float2 barMiddle(ui.progressBar_health->width() * 0.5f, ui.progressBar_health->height() * 0.5f);
-	ui.progressBar_health->move(centerPos.x - barPos.x - barMiddle.x, centerPos.y - barPos.y - barMiddle.y);
+	ui.progressBar_health->move(centerPos.x - barPos.x - barMiddle.x, centerPos.y + barPos.y - barMiddle.y);
 	ui.progressBar_ammo->move(centerPos.x + barPos.x - barMiddle.x, centerPos.y + barPos.y - barMiddle.y);
 
 	// Move botton HUD to bottom
@@ -116,40 +116,57 @@ void Menu_HUD::refresh()
 	Ammunition* ammunition = &weaponStats->ammunition[weaponStats->currentAmmunitionType];
 	FiringMode* firingMode = &weaponStats->firingMode[weaponStats->currentFiringModeType];
 	int ammoIndex = ammunition->type;
+	float fadeTime = 1.0f;
 
 	//
 	// Show ammunition info
 	//
 
-	ui.label_ammo->setNum((int)firingMode->nrOfShotsLeftInClip[ammoIndex]);
+	int numAmmo = firingMode->nrOfShotsLeftInClip[ammoIndex];
+	int clipSize = firingMode->clipSize;
+	ui.label_ammo->setNum(numAmmo);
 	ui.label_totalAmmo->setNum((int)weaponStats->ammunition[ammoIndex].currentTotalNrOfShots);
-	int ammoRatio = (int)(((float)firingMode->nrOfShotsLeftInClip[ammoIndex] / firingMode->clipSize) * 100);
-	int reloadRatio = (int)(((float)firingMode->reloadTimeLeft / firingMode->reloadTime) * 100);
+	int prev_ammoRatio = ui.progressBar_ammo->value();
+	int ammoRatio = (int)((numAmmo / (float)clipSize) * 100);
+	int reloadRatio = (int)((firingMode->reloadTimeLeft / (float)firingMode->reloadTime) * 100);
 	
-	// Hide progress bar if full
-	if(ammoRatio == 100)
+	// Show menu if health has changed otherwise fade after a few seconds
+	if(ammoRatio != prev_ammoRatio)
 	{
-		
-		if(!ui.progressBar_ammo->isHidden())
-			ui.progressBar_ammo->hide();
-	}
-	// ELSE: Show progressbar & update value
-	else
-	{
-		if(ui.progressBar_ammo->isHidden())
-				ui.progressBar_ammo->show();
+		ammoFade = fadeTime;
 
-		// Show reload time
+		// Show reload bar
 		if(reloadRatio < 100)
 		{
 			ui.progressBar_ammo->setValue(100 - reloadRatio);
 		}
-		// Show ammo
+		// Show ammo bar
 		else
 		{
 			ui.progressBar_ammo->setValue(ammoRatio);
 		}
+	}
+	// Hide bar if full
+	if(ammoRatio == 100)
+		ammoFade = 0.0f;
+
+	// Perform fade
+	if(ammoFade > 0.0f)
+	{
+		ammoFade -= SETTINGS->trueDeltaTime;
+
+		// Show progress bar if hidden
+		if(ui.progressBar_ammo->isHidden())
+			ui.progressBar_ammo->show();
+
+		
 		ui.progressBar_ammo->update();
+	}
+	else
+	{
+		// Hide progress bar if shown
+		if(!ui.progressBar_ammo->isHidden())
+			ui.progressBar_ammo->hide();
 	}
 
 
@@ -159,23 +176,33 @@ void Menu_HUD::refresh()
 
 	ui.label_health->setNum((int)health->health);
 	int healthRatio = (int)((health->health / health->maxHealth) * 100);
-	// Hide progress bar if full
-	if(healthRatio == 100)
+
+	// Show menu if health has changed otherwise fade after a few seconds
+	if(healthRatio != ui.progressBar_health->value())
 	{
-		
-		if(!ui.progressBar_health->isHidden())
-			ui.progressBar_health->hide();
+		healthFade = fadeTime;
 	}
-	// ELSE: Show progressbar & update value
-	else
+	/*if(ui.progressBar_health->value() == 100)
+		healthFade = 0.0f;*/
+		
+	if(healthFade > 0.0f)
 	{
+		healthFade -= SETTINGS->trueDeltaTime;
+
+		// Show progress bar if hidden
 		if(ui.progressBar_health->isHidden())
 			ui.progressBar_health->show();
 
+		// Update value
 		ui.progressBar_health->setValue(healthRatio);
 		ui.progressBar_health->update();
 	}
-	
+	else
+	{
+		// Hide progress bar if shown
+		if(!ui.progressBar_health->isHidden())
+			ui.progressBar_health->hide();
+	}
 }
 
 Menu_HUD::Menu_HUD( AttributePtr<Attribute_SplitScreen> splitScreen, QWidget* parent ) : QWidget(parent)

@@ -17,6 +17,10 @@ class Menu_HUD : public QWidget , IObserver
 private:
 	AttributePtr<Attribute_SplitScreen> splitScreen;
 	Ui::Menu_HUD ui;
+	float healthFade;
+	float ammoFade;
+	float healthRatio;
+	int ammoRatio;
 
 public:
 	Menu_HUD(AttributePtr<Attribute_SplitScreen> splitScreen, QWidget* parent);
