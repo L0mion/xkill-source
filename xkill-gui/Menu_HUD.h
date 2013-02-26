@@ -20,27 +20,11 @@ private:
 
 public:
 	Menu_HUD(AttributePtr<Attribute_SplitScreen> splitScreen, QWidget* parent);
-	void mapPositionToParent()
-	{
-		int x = 20 + splitScreen->ssTopLeftX;
-		int y = splitScreen->ssTopLeftY + splitScreen->ssHeight - this->height();
-		move(x, y);
-	}
-	void refresh();
-	void computeNewResolution()
-	{
-		/*resize();*/
-	}
+	~Menu_HUD();
 
-	void onEvent(Event* e)
-	{
-		EventType type = e->getType();
-		switch (type) 
-		{
-		default:
-			break;
-		}
-	}
+	void mapToSplitscreen();
+	void refresh();
+	void onEvent(Event* e);
 };
 
 class Menu_HUDManager : public QObject , IObserver
