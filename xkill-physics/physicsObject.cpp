@@ -42,7 +42,11 @@ btCollisionShape* PhysicsObject::subClassSpecificCollisionShape()
 	AttributePtr<Attribute_Physics> ptr_physics = itrPhysics_.at(attributeIndex_);
 
 	int meshID = ptr_physics->meshID;
-	btCollisionShape* collisionShape = CollisionShapes::Instance()->getCollisionShape(ptr_physics->meshID);
+	if(meshID == 3)
+	{
+		int g =5;
+	}
+	btCollisionShape* collisionShape = CollisionShapes::Instance()->getCollisionShape(meshID);
 
 	return collisionShape;
 }
@@ -182,7 +186,8 @@ void PhysicsObject::writeNonSynchronizedPhysicsObjectDataToPhysicsAttribute()
 	//ptr_physics->meshID = //not stored in physics object
 }
 void PhysicsObject::onUpdate(float delta)
-{	if(getWorldTransform().getOrigin().y() < outOfBoundsIfYIsLowerThanThis)
+{	
+	if(getWorldTransform().getOrigin().y() < outOfBoundsIfYIsLowerThanThis)
 	{
 		handleOutOfBounds();
 	}

@@ -3,12 +3,17 @@
 
 #include <map>
 
+#include <xkill-utilities/AttributePointer.h>
+
 template<class T>
 class btAlignedObjectArray;
 class btBulletWorldImporter;
 class btCollisionShape;
 class btVector3;
 class btTransform;
+class btTriangleMesh;
+
+struct Attribute_Mesh;
 
 class CollisionShapes
 {
@@ -19,10 +24,14 @@ private:
 	btAlignedObjectArray<btCollisionShape*>* collisionShapes_;  //!< List of added collision shapes
 	std::map<unsigned int, unsigned int> collisionShapesIdToIndex_;  //!< Mapping the internal collision shape index with the global mesh id
 
+	btAlignedObjectArray<btCollisionShape*>* unusedCollisionShapes_; //!<Child shapes to compound shapes may be stored here for deallocation possibility
+	btAlignedObjectArray<btTriangleMesh*>* triangleMeshDeallocation_; //!< Triangle meshes may be stored here for deallocation possibility
+
 	btCollisionShape* defaultShape_;  //!< a default shape given if the correct one cannot be found
 	btCollisionShape* frustumShape_;  //!< The shape of frustums
 
-	void mapInternalCollisionShapeIndexToGlobalMeshId(int meshId);
+	void mapCollisionShapeToGlobalMeshId(int meshId, btCollisionShape* collisionShape);
+	void findMappingBetweenMeshFilesAndBulletFiles();
 
 public:
 	~CollisionShapes();
@@ -34,6 +43,7 @@ public:
 	btCollisionShape* getDefaultShape(){return defaultShape_;}
 
 	void addBoxCollisionShape(btVector3* scaling, btTransform* transform, int meshId);
+	void loadTrianglesFromMeshAsCollisionShape(AttributePtr<Attribute_Mesh> ptr_mesh);
 	
 	static CollisionShapes* Instance();
 	static CollisionShapes* instance;
