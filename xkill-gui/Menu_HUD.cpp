@@ -205,6 +205,58 @@ void Menu_HUD::refresh()
 	}
 }
 
+class HudMessage
+{
+private:
+	float lifetime;
+
+public:
+	HudMessage()
+	{
+		lifetime = 5.0f;
+	}
+	bool isExpired()
+	{
+		// Decrement timer
+		if(lifetime > 0.0f)
+			lifetime -= SETTINGS->trueDeltaTime;
+
+		// Check expiration condition
+		if(lifetime <= 0.0f)
+			return true;
+
+		return false;
+	}
+};
+
+class HudMessage_Manager
+{
+private:
+	SimpleQueue<HudMessage*> stack;
+
+public:
+	HudMessage_Manager()
+	{
+		stack.push(new HudMessage());
+	}
+	~HudMessage_Manager()
+	{
+		for(int i=0; i<stack.count(); i++)
+			delete stack.at(i);
+	}
+
+	void update()
+	{
+		for(int i=0; i<stack.count(); i++)
+		{
+			if(stack.at(i)->isExpired())
+			{
+				delete stack.pop();
+			}
+		}
+	}
+};
+
 Menu_HUD::Menu_HUD( AttributePtr<Attribute_SplitScreen> splitScreen, QWidget* parent ) : QWidget(parent)
 {
 	ui.setupUi(this);
