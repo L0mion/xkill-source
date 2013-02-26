@@ -536,13 +536,13 @@ void LoaderFbxMesh::parseTransformMatrix(FbxCluster* cluster, FbxMesh* mesh, Fbx
 	globalPosition = globalPosition * geometryOffset;
 	
 	FbxAMatrix fbxMatrix;
-//	if(clusterMode == FbxCluster::eAdditive && cluster->GetAssociateModel())
-//		fbxMatrix = parseTransformMatrixAssociateModel(cluster, mesh, fbxPose, globalPosition);
-//	else
-//		fbxMatrix = parseTransformMatrixOther(cluster, mesh, fbxPose, globalPosition);
+	if(clusterMode == FbxCluster::eAdditive && cluster->GetAssociateModel())
+		fbxMatrix = parseTransformMatrixAssociateModel(cluster, mesh, fbxPose, globalPosition);
+	else
+		fbxMatrix = parseTransformMatrixOther(cluster, mesh, fbxPose, globalPosition);
 
-	cluster->GetTransformMatrix(fbxMatrix);
-	fbxMatrix *= getGeometry(cluster->GetLink());
+//	cluster->GetTransformMatrix(fbxMatrix);
+//	fbxMatrix *= getGeometry(cluster->GetLink());
 
 	Float4x4 offsetMatrix;
 	

@@ -1052,7 +1052,7 @@ void Renderer::renderAnimation(unsigned int meshID, DirectX::XMFLOAT4X4 view, Di
 	std::string clipName = "ArmatureAction";
 	std::vector<DirectX::XMFLOAT4X4> finalTransforms;
 
-	managementAnimation_->update(0.005, clipName, 3);
+	managementAnimation_->update(0.01, clipName, 3);
 	managementAnimation_->getAnimation(3)->getFinalTransforms(clipName, managementAnimation_->getTimePosition(), &finalTransforms);
 
 	managementCB_->setCB(CB_TYPE_BONE, TypeFX_VS, CB_REGISTER_BONE, devcon);
