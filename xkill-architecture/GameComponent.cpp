@@ -826,7 +826,7 @@ void GameComponent::updateAndInterpretAimingRay(Entity* playerEntity, AttributeP
 			if(rayCastingPlayerAttribute->executing) 
 			{
 				//ray->render = true;
-				ray->ptr_render->cull = true;
+				//ray->ptr_render->cull = true;
 
 				std::vector<int> playerHitByRayAttributeId = entityHitByRay->getAttributes(ATTRIBUTE_PLAYER);
 				for(unsigned int j=0;j<playerHitByRayAttributeId.size();j++)
@@ -835,7 +835,7 @@ void GameComponent::updateAndInterpretAimingRay(Entity* playerEntity, AttributeP
 					{
 						DEBUGPRINT("Player hit by ray casted by himself.");
 						DEBUGPRINT("---->O....");
-						DEBUGPRINT("..../|\"....");
+						DEBUGPRINT("..../|\....");
 						DEBUGPRINT("....xxx....");
 					}
 					else if(entityHitByRay->hasAttribute(ATTRIBUTE_PLAYER)) //Ray hit another player
@@ -850,7 +850,7 @@ void GameComponent::updateAndInterpretAimingRay(Entity* playerEntity, AttributeP
 
 								SEND_EVENT(&Event_PlayerDeath(playerHitByRayAttributeId.at(j)));
 
-								SEND_EVENT(&Event_ModifyPhysicsObject(XKILL_Enums::ModifyPhysicsObjectData::GIVE_IMPULSE, static_cast<void*>(&(rayVector*200.0f)), playerAttribute->ptr_input->ptr_physics));
+								SEND_EVENT(&Event_ModifyPhysicsObject(XKILL_Enums::ModifyPhysicsObjectData::GIVE_IMPULSE, static_cast<void*>(&(rayVector*800.0f)), playerAttribute->ptr_input->ptr_physics));
 
 								rayCastingPlayerAttribute->priority++;
 							}
@@ -863,6 +863,7 @@ void GameComponent::updateAndInterpretAimingRay(Entity* playerEntity, AttributeP
 			//--------------------------------------------------------------------------------------
 			else
 			{
+
 				//ray->render = false;
 			}
 

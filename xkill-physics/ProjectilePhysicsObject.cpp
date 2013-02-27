@@ -25,6 +25,7 @@ ProjectilePhysicsObject::~ProjectilePhysicsObject()
 bool ProjectilePhysicsObject::subClassSpecificInitHook()
 {
 	//Anti-tunneling using btCollisionObject::setCcdSweptSphereRadius and btCollisionObject::setCcdMotionThreshold
+	
 	AttributePtr<Attribute_Physics> ptr_physics = itrPhysics_ProjectilePhysicsObject.at(attributeIndex_);
 	btCollisionShape* collisionShape = CollisionShapes::Instance()->getCollisionShape(ptr_physics->meshID);
 	btVector3 boundingSphereCenter;
@@ -45,7 +46,7 @@ bool ProjectilePhysicsObject::subClassSpecificInitHook()
 	for(unsigned i=0;i<projectileId.size();i++)
 	{
 		AttributePtr<Attribute_Projectile> ptr_projectile = itrProjectile_ProjectilePhysicsObject.at(projectileId.at(i));
-
+		
 		switch(ptr_projectile->ammunitionType)
 		{
 		case XKILL_Enums::AmmunitionType::BULLET:
@@ -95,4 +96,11 @@ btCollisionShape* ProjectilePhysicsObject::subClassSpecificCollisionShape()
 		}
 	}
 	return collisionShape;
+}
+
+void ProjectilePhysicsObject::handleOutOfBounds()
+{
+	Entity* ownerEntityOfPhysicsAttribute = itrPhysics_ProjectilePhysicsObject.ownerAt(attributeIndex_);
+	int entityOwnerId = ownerEntityOfPhysicsAttribute->getID();
+	SEND_EVENT(&Event_RemoveEntity(entityOwnerId));
 }

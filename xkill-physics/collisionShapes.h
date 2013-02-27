@@ -32,6 +32,7 @@ private:
 
 	void mapCollisionShapeToGlobalMeshId(int meshId, btCollisionShape* collisionShape);
 	void findMappingBetweenMeshFilesAndBulletFiles();
+	void deallocateImporter();
 
 public:
 	~CollisionShapes();

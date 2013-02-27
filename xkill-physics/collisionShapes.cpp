@@ -52,12 +52,7 @@ CollisionShapes::~CollisionShapes()
 	}
 	delete unusedCollisionShapes_;
 	
-	if(importer_)
-	{
-		importer_->deleteAllData();
-		delete importer_;
-		importer_ = nullptr;
-	}
+	deallocateImporter();
 
 	delete scatterProjectileCollisionShape;
 	delete playerCollisionShape;
@@ -99,12 +94,7 @@ void CollisionShapes::loadCollisionShapes()
 		findMappingBetweenMeshFilesAndBulletFiles();
 		
 		//Reallocate importer to prevent loading the level collision shapes twice
-		if(importer_)
-		{
-			importer_->deleteAllData();
-			delete importer_;
-			importer_ = nullptr;
-		}
+		deallocateImporter();
 		importer_ = new btBulletWorldImporter();
 
 	}
@@ -153,12 +143,7 @@ void CollisionShapes::unloadCollisionShapes()
 
 	collisionShapesIdToIndex_.clear();
 
-	if(importer_)
-	{
-		importer_->deleteAllData();
-		delete importer_;
-		importer_ = nullptr;
-	}
+	deallocateImporter();
 }
 
 
@@ -333,5 +318,15 @@ void CollisionShapes::findMappingBetweenMeshFilesAndBulletFiles()
 				ERROR_MESSAGEBOX("CollisionShapes::findMappingBetweenMeshFilesAndBulletFiles, rigid body " + name + " has no collision shape.");
 			}
 		}
+	}
+}
+
+void CollisionShapes::deallocateImporter()
+{
+	if(importer_)
+	{
+		importer_->deleteAllData();
+		delete importer_;
+		importer_ = nullptr;
 	}
 }
