@@ -52,6 +52,22 @@ struct DLL_U Float2
 	float length();
 };
 
+inline Float2 operator-(const Float2& left, const Float2& right)
+{
+	Float2 ret(
+		left.x - right.x,
+		left.y - right.y);
+	return ret;
+}
+
+inline Float2 operator+(const Float2& left, const Float2& right)
+{
+	Float2 ret(
+		left.x + right.x,
+		left.y + right.y);
+	return ret;
+}
+
 //
 // Float3
 //

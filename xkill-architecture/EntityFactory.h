@@ -328,7 +328,7 @@ public:
 		switch (e->pickupableType)
 		{
 		case XKILL_Enums::PickupableType::AMMUNITION_BULLET:
-			ptr_render->meshID = XKILL_Enums::ModelId::PICKUPABLE_AMMO_SINGLE;
+			ptr_render->meshID = XKILL_Enums::ModelId::PICKUPABLE_AMMO_BULLET;
 			break;
 		case XKILL_Enums::PickupableType::AMMUNITION_SCATTER:
 			ptr_render->meshID = XKILL_Enums::ModelId::PICKUPABLE_AMMO_SCATTER;
