@@ -105,6 +105,9 @@ void Menu_HUD::mapToSplitscreen()
 	bottomPos.x = screenSize.x * 0.5f - ui.frame_bottom->width()* 0.5f;
 	bottomPos.y = screenSize.y - screenSize.x*0.005f - ui.frame_bottom->height()* 1.0f;
 	ui.frame_bottom->move(bottomPos.x, bottomPos.y);
+
+	// Move hud messages to center
+	hudMessage_manager.move(centerPos);
 }
 
 void Menu_HUD::refresh()
@@ -117,6 +120,7 @@ void Menu_HUD::refresh()
 	FiringMode* firingMode = &weaponStats->firingMode[weaponStats->currentFiringModeType];
 	int ammoIndex = ammunition->type;
 	float fadeTime = 1.0f;
+
 
 	//
 	// Show ammunition info
@@ -182,8 +186,6 @@ void Menu_HUD::refresh()
 	{
 		healthFade = fadeTime;
 	}
-	/*if(ui.progressBar_health->value() == 100)
-		healthFade = 0.0f;*/
 		
 	if(healthFade > 0.0f)
 	{
@@ -199,67 +201,24 @@ void Menu_HUD::refresh()
 	}
 	else
 	{
-		// Hide progress bar if shown
+		// Hide progress-bar if shown
 		if(!ui.progressBar_health->isHidden())
 			ui.progressBar_health->hide();
 	}
+
+
+	//
+	// Display HUD-messages
+	//
+
+	hudMessage_manager.update();
 }
-
-class HudMessage
-{
-private:
-	float lifetime;
-
-public:
-	HudMessage()
-	{
-		lifetime = 5.0f;
-	}
-	bool isExpired()
-	{
-		// Decrement timer
-		if(lifetime > 0.0f)
-			lifetime -= SETTINGS->trueDeltaTime;
-
-		// Check expiration condition
-		if(lifetime <= 0.0f)
-			return true;
-
-		return false;
-	}
-};
-
-class HudMessage_Manager
-{
-private:
-	SimpleQueue<HudMessage*> stack;
-
-public:
-	HudMessage_Manager()
-	{
-		stack.push(new HudMessage());
-	}
-	~HudMessage_Manager()
-	{
-		for(int i=0; i<stack.count(); i++)
-			delete stack.at(i);
-	}
-
-	void update()
-	{
-		for(int i=0; i<stack.count(); i++)
-		{
-			if(stack.at(i)->isExpired())
-			{
-				delete stack.pop();
-			}
-		}
-	}
-};
 
 Menu_HUD::Menu_HUD( AttributePtr<Attribute_SplitScreen> splitScreen, QWidget* parent ) : QWidget(parent)
 {
 	ui.setupUi(this);
+	hudMessage_manager.init(this);
+
 	this->splitScreen = splitScreen;
 	Float2 pos(splitScreen->ssTopLeftX, splitScreen->ssTopLeftY);
 	move(splitScreen->ssTopLeftX, splitScreen->ssTopLeftY);
@@ -274,10 +233,10 @@ Menu_HUD::Menu_HUD( AttributePtr<Attribute_SplitScreen> splitScreen, QWidget* pa
 	mapToSplitscreen();
 }
 
-void Menu_HUD::onEvent( Event* e )
+void Menu_HUD::onEvent(Event* e)
 {
 	EventType type = e->getType();
-	switch (type) 
+	switch(type) 
 	{
 	case EVENT_UPDATE:
 		refresh();

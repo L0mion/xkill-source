@@ -141,7 +141,6 @@ public:
 			ptr_render->meshID = XKILL_Enums::ModelId::RIFLE;
 			CREATE_ATTRIBUTE(ptr_offset, Behavior_Offset, offset, entity);
 			ptr_offset->ptr_spatial = ptr_spatial;
-			ptr_offset->ptr_parent_spatial_position = ptr_parent_spatial_position;
 			ptr_offset->ptr_parent_spatial_rotation = ptr_parent_spatial_rotation;
 			ptr_offset->offset_position = Float3(0.23f, 0.5f, 0.2f);
 

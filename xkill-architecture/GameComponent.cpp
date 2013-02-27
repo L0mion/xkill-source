@@ -817,7 +817,7 @@ void GameComponent::updateAndInterpretAimingRay(Entity* playerEntity, AttributeP
 			ray->ptr_render->ptr_spatial->scale = Float3(0.01f, 0.01f, rayVector.length()/2.0f);
 			ray->ptr_render->ptr_spatial->rotation = rayCastingPlayerAttribute->ptr_weapon_spatial->rotation;//rayCastingPlayerAttribute->ptr_camera->ptr_spatial->rotation;
 
-			ray->ptr_render->cull = false;
+			//ray->ptr_render->cull = false;
 			//ray->render = true;
 
 			//--------------------------------------------------------------------------------------
