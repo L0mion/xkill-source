@@ -86,14 +86,14 @@ public:
 		ptr_splitScreen->ptr_player = ptr_player;
 
 		// Attach weapon
-		AttributePtr<Attribute_Spatial> ptr_weapon_spatial;
+		AttributePtr<Behavior_Offset> ptr_weapon_offset;
 		AttributePtr<Attribute_Spatial> ptr_weaponFireLocation_spatial;
-		createWeapon(entity, ptr_spatial, ptr_camera->ptr_spatial, ptr_weapon_spatial, ptr_weaponFireLocation_spatial);
-		ptr_player->ptr_weapon_spatial = ptr_weapon_spatial;
+		createWeapon(entity, ptr_spatial, ptr_camera->ptr_spatial, ptr_weapon_offset, ptr_weaponFireLocation_spatial);
+		ptr_player->ptr_weapon_offset = ptr_weapon_offset;
 		ptr_player->ptr_weaponFireLocation_spatial = ptr_weaponFireLocation_spatial;
 
 		CREATE_ATTRIBUTE(ptr_ray, Attribute_Ray, ray, entity);
-		createDeathRay(entity, ptr_ray);
+		createLaserAutomaticSniperExecutionRay(entity, ptr_ray);
 		/*
 		CREATE_ATTRIBUTE(ptr_lightPoint, Attribute_Light_Point, lightPoint, entity);
 		ptr_lightPoint->ptr_position			= ptr_position;
@@ -125,7 +125,7 @@ public:
 	}
 
 	void createWeapon(Entity* entity, AttributePtr<Attribute_Spatial> ptr_parent_spatial_position, AttributePtr<Attribute_Spatial> ptr_parent_spatial_rotation, 
-						AttributePtr<Attribute_Spatial>& ptr_weaponSpatial, AttributePtr<Attribute_Spatial>& ptr_firingLocationSpatial)
+		AttributePtr<Behavior_Offset>& ptr_weaponOffset, AttributePtr<Attribute_Spatial>& ptr_firingLocationSpatial)
 	{
 		//
 		// Create weapon
@@ -142,10 +142,11 @@ public:
 			CREATE_ATTRIBUTE(ptr_offset, Behavior_Offset, offset, entity);
 			ptr_offset->ptr_spatial = ptr_spatial;
 			ptr_offset->ptr_parent_spatial_position = ptr_parent_spatial_position;
-			ptr_offset->ptr_parent_spatial_rotation = ptr_parent_spatial_rotation;
+			//ptr_offset->ptr_parent_spatial_rotation = ptr_parent_spatial_rotation;
 			ptr_offset->offset_position = Float3(0.23f, 0.5f, 0.2f);
 
 			ptr_weapon_spatial = ptr_spatial;
+			ptr_weaponOffset = ptr_offset;
 		}
 
 		
@@ -165,16 +166,15 @@ public:
 			ptr_offset->ptr_spatial = ptr_spatial;
 			ptr_offset->ptr_parent_spatial_position = ptr_weapon_spatial;
 			ptr_offset->ptr_parent_spatial_rotation = ptr_weapon_spatial;
-			ptr_offset->offset_position = Float3(0.0f, 0.06f, 1.0f);
+			ptr_offset->offset_position = Float3(0.0f, 0.06f, 0.6f);
 
 			ptr_fireLocation_spatial = ptr_spatial;
 		}
 
-		ptr_weaponSpatial = ptr_weapon_spatial;
 		ptr_firingLocationSpatial = ptr_fireLocation_spatial;
 	}
 
-	void createDeathRay(Entity* entity, AttributePtr<Attribute_Ray> ptr_ray)
+	void createLaserAutomaticSniperExecutionRay(Entity* entity, AttributePtr<Attribute_Ray> ptr_ray)
 	{
 		CREATE_ATTRIBUTE(ptr_render, Attribute_Render, render, entity);
 		ptr_ray->ptr_render = ptr_render;
