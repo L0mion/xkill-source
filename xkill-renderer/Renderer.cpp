@@ -1166,8 +1166,8 @@ void Renderer::buildSSAOMap(ViewportData& vpData)
 		viewportHeight);
 	
 	managementCB_->setCB(CB_TYPE_SSAO, TypeFX_CS, CB_REGISTER_SSAO, devcon);
-	unsigned int ssaoWidth	= winfo_->getScreenWidth()	/ SSAO_MAP_SCREEN_RES_FACTOR;
-	unsigned int ssaoHeight	= winfo_->getScreenHeight()	/ SSAO_MAP_SCREEN_RES_FACTOR;
+	float ssaoWidth		= (float)winfo_->getScreenWidth()	/ (float)SSAO_MAP_SCREEN_RES_FACTOR;
+	float ssaoHeight	= (float)winfo_->getScreenHeight()	/ (float)SSAO_MAP_SCREEN_RES_FACTOR;
 	managementCB_->updateCBSSAO(
 		devcon,
 		/*SSAOMap Width*/	ssaoWidth,
@@ -1175,10 +1175,10 @@ void Renderer::buildSSAOMap(ViewportData& vpData)
 	
 	//Dispatch motherfucker
 	unsigned int SSAO_BLOCK_DIM = 16;
-	unsigned int csDispatchX = ssaoWidth	/ SSAO_BLOCK_DIM;
-	unsigned int csDispatchY = ssaoHeight	/ SSAO_BLOCK_DIM;
-	unsigned int dispatchX = csDispatchX / managementViewport_->getNumViewportsX();
-	unsigned int dispatchY = csDispatchY / managementViewport_->getNumViewportsY();
+	float csDispatchX = ssaoWidth	/ (float)SSAO_BLOCK_DIM;
+	float csDispatchY = ssaoHeight	/ (float)SSAO_BLOCK_DIM;
+	unsigned int dispatchX = ceil(csDispatchX / (float)managementViewport_->getNumViewportsX());
+	unsigned int dispatchY = ceil(csDispatchY / (float)managementViewport_->getNumViewportsY());
 	devcon->Dispatch(dispatchX, dispatchY, 1);
 	
 	//Unser shader
