@@ -388,9 +388,9 @@ void ManagementBuffer::clearBuffers(ID3D11DeviceContext* devcon)
 	for(int i = 0; i < GBUFFERID_NUM_BUFFERS; i++)
 		renderTargets[i] = gBuffers_[i]->getRTV();
 	
-	devcon->ClearRenderTargetView(renderTargets[GBUFFERID_ALBEDO],		CLEARCOLOR_BLACK);
-	devcon->ClearRenderTargetView(renderTargets[GBUFFERID_NORMAL],		CLEARCOLOR_BLACK);
-	devcon->ClearRenderTargetView(renderTargets[GBUFFERID_MATERIAL],	CLEARCOLOR_BLACK);
+	devcon->ClearRenderTargetView(renderTargets[GBUFFERID_ALBEDO],		CLEARCOLOR_RED);
+	devcon->ClearRenderTargetView(renderTargets[GBUFFERID_NORMAL],		CLEARCOLOR_BLUE);
+	devcon->ClearRenderTargetView(renderTargets[GBUFFERID_MATERIAL],	CLEARCOLOR_GREEN);
 
 	//Clear glow-buffers:
 	devcon->ClearRenderTargetView(glowHigh_->getRTV(), CLEARCOLOR_BLACK);
