@@ -56,6 +56,8 @@ struct DLL_U Float2
 // Float3
 //
 
+struct Float4;
+
 struct DLL_U Float3
 {
 	float x;
@@ -74,6 +76,7 @@ struct DLL_U Float3
 	void lerp(Float3 *v, float factor);
 	float length();
 	float distanceTo(Float3 v);
+	Float3 rotateWithQuaternion(Float4 quaternion);
 
 	Float3 operator/(float scalar);
 };
@@ -133,6 +136,12 @@ struct DLL_U Float4
 	Float4(Float3 float3, float w);
 	void copy(const float* float4);
 	Float4& normalize();
+	Float4& quaternionFromAxis(Float3 axis, float angle);
+	Float4 quaternionInverse();
+	Float4 quaternionMultiply(Float4 quaternion);
+	Float4 quaternionLookAt(Float3 pos, Float3 cameraPos);
+	Float4 operator+(Float4 float4);
+	Float4 operator*(Float4 float4);
 };
 
 struct DLL_U Float4x4
