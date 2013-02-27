@@ -827,7 +827,6 @@ void GameComponent::updateAndInterpretAimingRay(Entity* playerEntity, AttributeP
 			ptr_offset->updateOffset();
 		}
 
-		
 		//--------------------------------------------------------------------------------------
 		// Update ray attribute
 		//-------------------------------------------------------------------------------------
@@ -840,7 +839,7 @@ void GameComponent::updateAndInterpretAimingRay(Entity* playerEntity, AttributeP
 			//--------------------------------------------------------------------------------------
 			// If the player is executing, interpret the aiming ray as a Laser Automatic Sniper Execution Ray
 			//--------------------------------------------------------------------------------------
-			if(rayCastingPlayerAttribute->executing) 
+			if(rayCastingPlayerAttribute->executing)
 			{
 				updateAndInterpretLaser(ray, rayCastingPlayerAttribute, ptr_camera);
 				ray->ptr_render->cull = true;
@@ -896,10 +895,10 @@ void GameComponent::updateAndInterpretLaser(AttributePtr<Attribute_Ray> ptr_ray,
 	{
 		if(entityIdOfOwnerToClosestPhysicsObjectHitByRay == itrPlayer.ownerIdAt(ptr_player.index())) //Ray hit the originator of the ray
 		{
-			DEBUGPRINT("Player hit by ray casted by himself.");
-			DEBUGPRINT("---->O....");
-			DEBUGPRINT("..../|\"....");
-			DEBUGPRINT("....xxx....");
+			//DEBUGPRINT("Player hit by ray casted by himself.");
+			//DEBUGPRINT("---->O....");
+			//DEBUGPRINT("..../|\....");
+			//DEBUGPRINT("....xxx....");
 		}
 		else if(entityHitByRay->hasAttribute(ATTRIBUTE_PLAYER)) //Ray hit another player
 		{

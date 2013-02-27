@@ -179,6 +179,7 @@ bool IOComponent::initLvlMdlDesc(std::string filename)
 	filename.append(".mdldesc");
 	LoaderMdlDesc* loader = new LoaderMdlDesc(filename, path);
 
+	DEBUGPRINT("Loading level... " + path);
 	sucessfulLoad = loader->init();
 	
 	if(sucessfulLoad)
@@ -195,6 +196,7 @@ bool IOComponent::initLvlMdlDesc(std::string filename)
 		}
 
 		delete mdlDesc; //clear when finished
+		DEBUGPRINT("...level loading completed");
 	}
 	else
 	{
