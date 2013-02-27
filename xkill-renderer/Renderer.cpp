@@ -1145,18 +1145,45 @@ void Renderer::buildSSAOMap(ViewportData& vpData)
 		1, 
 		&uav, 
 		nullptr);
+
+	//Set normalbuffer as srv
+	managementBuffer_->setBuffer(
+		devcon, 
+		SET_ID_NORMAL, 
+		SET_TYPE_SRV, 
+		SET_STAGE_CS, 
+		0);
+
+	//Set depth as srv
+	managementD3D_->setDepthBufferSRV(GBUFFER_SHADER_REGISTER_DEPTH);
+
+	//Set random buf
+	managementBuffer_->setRandomBuf(devcon, 11);
+
+	managementSS_->setSS(devcon, TypeFX_CS, 0, SS_ID_NORMAL);
+	managementSS_->setSS(devcon, TypeFX_CS, 1, SS_ID_DEPTH);
+	managementSS_->setSS(devcon, TypeFX_CS, 2, SS_ID_RANDOM);
 	
 	managementCB_->setCB(CB_TYPE_CAMERA, TypeFX_CS, CB_REGISTER_CAMERA,	devcon);
+
+	static const DirectX::XMMATRIX T(
+		0.5f, 0.0f, 0.0f, 0.0f,
+		0.0f, -0.5f, 0.0f, 0.0f,
+		0.0f, 0.0f, 1.0f, 0.0f,
+		0.5f, 0.5f, 0.0f, 1.0f);
+	DirectX::XMMATRIX PT = DirectX::XMMatrixMultiply(XMLoadFloat4x4(&vpData.proj), T);
+	DirectX::XMFLOAT4X4 PTStore;
+	DirectX::XMStoreFloat4x4(&PTStore, PT);
 
 	unsigned int viewportTopX	= vpData.viewportTopX	/ SSAO_MAP_SCREEN_RES_FACTOR;
 	unsigned int viewportTopY	= vpData.viewportTopY	/ SSAO_MAP_SCREEN_RES_FACTOR;
 	unsigned int viewportWidth	= vpData.viewportWidth	/ SSAO_MAP_SCREEN_RES_FACTOR;
 	unsigned int viewportHeight	= vpData.viewportHeight	/ SSAO_MAP_SCREEN_RES_FACTOR;
 	managementCB_->updateCBCamera(managementD3D_->getDeviceContext(),
-		/*Irrelevant*/ managementMath_->getIdentityMatrix(),	//vpData.view,
+		vpData.view,
 		/*Irrelevant*/ managementMath_->getIdentityMatrix(),	//vpData.viewInv,
-		/*Irrelevant*/ managementMath_->getIdentityMatrix(),	//vpData.proj,
-		/*Irrelevant*/ managementMath_->getIdentityMatrix(),	//vpData.projInv,
+		PTStore,												//vpData.proj,
+		vpData.projInv,
 		/*Irrelevant*/ DirectX::XMFLOAT3(0.0f, 0.0f, 0.0f),		//vpData.eyePos,
 		viewportTopX,
 		viewportTopY,
@@ -1170,8 +1197,13 @@ void Renderer::buildSSAOMap(ViewportData& vpData)
 	float ssaoHeight	= (float)winfo_->getScreenHeight()	/ (float)SSAO_MAP_SCREEN_RES_FACTOR;
 	managementCB_->updateCBSSAO(
 		devcon,
-		/*SSAOMap Width*/	ssaoWidth,
-		/*SSAOMap Height*/	ssaoHeight);
+		/*Offset Kernel*/			offsetKernel_,
+		/*SSAOMap Width*/			ssaoWidth,
+		/*SSAOMap Height*/			ssaoHeight,
+		/*Occlusion Radius*/		0.5f,
+		/*Occlusion Fade Start*/	0.2f,
+		/*Occlusion Fade End*/		2.0f,
+		/*Surface Epsilon*/			0.05f);
 	
 	//Dispatch motherfucker
 	unsigned int SSAO_BLOCK_DIM = 16;
@@ -1191,6 +1223,14 @@ void Renderer::buildSSAOMap(ViewportData& vpData)
 		1, 
 		uavs, 
 		nullptr);
+
+	managementSS_->unsetSS(devcon, TypeFX_CS, 0);
+	managementSS_->unsetSS(devcon, TypeFX_CS, 1);
+	managementSS_->unsetSS(devcon, TypeFX_CS, 2);
+	
+	managementBuffer_->unset(devcon, SET_TYPE_SRV, SET_STAGE_CS, 0);
+	managementD3D_->unsetDepthBufferSRV(GBUFFER_SHADER_REGISTER_DEPTH);
+	managementBuffer_->unset(devcon, SET_TYPE_SRV, SET_STAGE_CS, 11);
 }
 
 void Renderer::drawBulletPhysicsDebugLines(

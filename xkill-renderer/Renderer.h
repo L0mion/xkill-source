@@ -38,8 +38,6 @@ class TexDesc;
 class MeshMaterial;
 class SubsetD3D;
 
-//#include <vector>
-
 #include "ShadingDesc.h"
 #include "ShadowMapping.h"
 

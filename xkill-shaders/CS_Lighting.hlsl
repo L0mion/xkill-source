@@ -19,13 +19,13 @@
 //Global memory
 RWTexture2D<float4> output : register( u0 );
 
-Texture2D gBufferNormal				: register( t0 );
+Texture2D gBufferNormal				: register( t0 ); //Register shared in CS_SSAO
 Texture2D gBufferAlbedo				: register( t1 );
 Texture2D gBufferMaterial			: register( t2 );
 Texture2D bufferGlowHigh			: register( t3 ); //Register shared in PS_DownSample
 Texture2D bufferShadowMap			: register( t4 );
 Texture2D bufferSSAO				: register( t5 );
-Texture2D bufferDepth				: register( t6 ); //Hi, please notice me if you intend to sequently add buffers. I can be pretty dangerous if one does not! Yarr.
+Texture2D bufferDepth				: register( t6 ); //Register shared in CS_SSAO. Also, beware of me. Yarr!
 StructuredBuffer<LightDescDir>		lightsDir	: register( t7 );
 StructuredBuffer<LightDescPoint>	lightsPoint	: register( t8 );
 StructuredBuffer<LightDescSpot>		lightsSpot	: register( t9 );
@@ -195,7 +195,7 @@ void CS_Lighting(
 	//	Diffuse.g += 0.1;
 	//}
 
-	float3 ssao = bufferSSAO.SampleLevel(ss, texCoord, 0).xyz;
+	float3 ssao = bufferSSAO.SampleLevel(ss, texCoord, 0).rrr;
 
 	float3 litPixel = Ambient.xyz + Diffuse.xyz + Specular.xyz;
 	float3 glowPixel = bufferGlowHigh.SampleLevel(ss, texCoord, 0).xyz;
@@ -204,5 +204,5 @@ void CS_Lighting(
 		uint2(
 			threadIDDispatch.x + viewportTopX, 
 			threadIDDispatch.y + viewportTopY)] = 
-		float4(litPixel, 1.0f);
+		float4(ssao, 1.0f);
 }

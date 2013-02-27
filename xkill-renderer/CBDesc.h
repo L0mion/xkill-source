@@ -108,12 +108,17 @@ static const unsigned int CB_BLUR_DESC_SIZE = 48;
 
 struct CBSSAODesc
 {
+	DirectX::XMFLOAT4 offsetKernel[14];
 	unsigned int ssaoWidth;
 	unsigned int ssaoHeight;
+	float occlusionRadius;
+	float occlusionFadeStart;
+	float occlusionFadeEnd;
+	float surfaceEpsilon;
 
-	unsigned int pad1;
-	unsigned int pad2;
+	unsigned int pad7;
+	unsigned int pad8;
 };
-static const unsigned int CB_SSAO_DESC_SIZE = 16;
+static const unsigned int CB_SSAO_DESC_SIZE = 256;
 
 #endif //XKILL_RENDERER_CBDESC_H

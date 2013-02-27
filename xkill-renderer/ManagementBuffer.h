@@ -66,7 +66,9 @@ enum SET_ID
 	SET_ID_GLOW_HIGH,
 	SET_ID_GLOW_LOW,
 	SET_ID_GLOW_LOW_UTIL,
-	SET_ID_SHADOW
+	SET_ID_SHADOW,
+	SET_ID_NORMAL,
+	SET_ID_RANDOM
 };
 
 class ManagementBuffer
@@ -102,6 +104,13 @@ public:
 
 	//temp
 	Buffer_SrvRtvUav* getSSAO() { return ssaoMap_; }
+
+	void setRandomBuf(ID3D11DeviceContext* devcon, unsigned int shaderRegister)
+	{ 
+		ID3D11ShaderResourceView* resourceViews[1];
+		resourceViews[0] = randomSRV_;
+		devcon->CSSetShaderResources(shaderRegister, 1, resourceViews);
+	}
 protected:
 private:
 	HRESULT initAlbedo(		ID3D11Device* device);

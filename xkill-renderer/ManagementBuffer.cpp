@@ -475,6 +475,9 @@ void ManagementBuffer::setBuffer(ID3D11DeviceContext* devcon, SET_ID setID, SET_
 	case SET_ID_SHADOW:
 		buffer = shadowMap_;
 		break;
+	case SET_ID_NORMAL:
+		buffer = gBuffers_[GBUFFERID_NORMAL];
+		break;
 	}
 
 	ID3D11DepthStencilView* dsv = NULL; //for brevity
