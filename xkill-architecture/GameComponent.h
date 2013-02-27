@@ -15,6 +15,8 @@ struct Attribute_WeaponStats;
 struct Attribute_Position;
 struct Attribute_Spatial;
 struct Attribute_Camera;
+struct Attribute_Player;
+struct Attribute_Ray;
 
 template <class T>
 class LinkFrame;
@@ -104,5 +106,6 @@ public:
 	Else the aiming ray is interpreted as what the player is looking at and render is set to false.
 	*/
 	void updateAndInterpretAimingRay(Entity* playerEntity, AttributePtr<Attribute_Camera> ptr_camera);
+	void updateAndInterpretLaser(AttributePtr<Attribute_Ray> ptr_ray, AttributePtr<Attribute_Player> ptr_player, AttributePtr<Attribute_Camera> ptr_camera);
 	void shootProjectile(AttributePtr<Attribute_Spatial> ptr_spatial, AttributePtr<Attribute_WeaponStats> ptr_weaponStats);
 };

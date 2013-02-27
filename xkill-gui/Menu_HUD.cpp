@@ -65,18 +65,6 @@ void Menu_HUDManager::mapHudsToSplitscreen()
 	}
 }
 
-void Menu_HUDManager::updateHuds()
-{
-	// Update huds
-	int index = 0;
-	while(itrSplitScreen.hasNext())
-	{
-		AttributePtr<Attribute_SplitScreen> ptr_splitScreen = itrSplitScreen.getNext();
-		//huds[index]->refresh(ptr_splitScreen);
-		index++;
-	}
-}
-
 void Menu_HUD::mapToSplitscreen()
 {
 	Float2 screenSize;
@@ -217,9 +205,9 @@ void Menu_HUD::refresh()
 Menu_HUD::Menu_HUD( AttributePtr<Attribute_SplitScreen> splitScreen, QWidget* parent ) : QWidget(parent)
 {
 	ui.setupUi(this);
-	hudMessage_manager.init(this);
-
 	this->splitScreen = splitScreen;
+	hudMessage_manager.init(this, splitScreen);
+
 	Float2 pos(splitScreen->ssTopLeftX, splitScreen->ssTopLeftY);
 	move(splitScreen->ssTopLeftX, splitScreen->ssTopLeftY);
 	resize(splitScreen->ssWidth, splitScreen->ssHeight);

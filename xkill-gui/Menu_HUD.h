@@ -10,8 +10,6 @@
 
 #include "ui_Menu_HUD.h"
 
-#include <xkill-utilities/Converter.h>
-
 class Attribute_SplitScreen;
 
 class HudMessage
@@ -21,12 +19,9 @@ private:
 	QLabel* message;
 
 public:
-	HudMessage(QWidget* parent)
+	HudMessage(Event_PostHudMessage* e, QWidget* parent)
 	{
-		static int i = 0;
-		i++;
-		std::string test = "Terminated Fortran " + Converter::IntToStr(i);
-		message = new QLabel(test.c_str());
+		message = new QLabel(e->message.c_str());
 
 		message->setParent(parent);
 		lifetime = 2.0f;
@@ -64,6 +59,7 @@ private:
 	SimpleQueue<HudMessage*> stack;
 	QWidget* parent;
 	Float2 position;
+	AttributePtr<Attribute_SplitScreen> splitScreen;
 
 public:
 	HudMessage_Manager()
@@ -77,9 +73,10 @@ public:
 		for(int i=0; i<stack.count(); i++)
 			delete stack.at(i);
 	}
-	void init(QWidget* parent)
+	void init(QWidget* parent, AttributePtr<Attribute_SplitScreen> splitScreen)
 	{
 		this->parent = parent;
+		this->splitScreen = splitScreen;
 	}
 
 	void move(Float2 position)
@@ -96,16 +93,21 @@ public:
 		}
 	}
 
-	void addMessage()
+	void addMessage(Event_PostHudMessage* e)
 	{
-		// Messages should not exceed 5
+		// Ignore messages aimed at other players
+		if(splitScreen->ptr_player != e->ptr_subject_player)
+			return;
+
+		// Limit simultaneous show messages 
+		// to 5 to not overwhelm the player
 		if(stack.count() + 1 > 5)
 			removeTopMessage();
 
 		// Add message to stack
-		stack.push(new HudMessage(parent));
+		stack.push(new HudMessage(e, parent));
 
-		// Translate old messages to make room for new message
+		// Show new messages above old messages
 		int numStacks = stack.count();
 		for(int i=0; i<numStacks; i++)
 		{
@@ -130,7 +132,7 @@ public:
 		switch (type) 
 		{
 		case EVENT_POST_HUD_MESSAGE:
-			addMessage();
+			addMessage((Event_PostHudMessage*)e);
 			break;
 		default:
 			break;
@@ -138,7 +140,7 @@ public:
 	}
 };
 
-class Menu_HUD : public QWidget , IObserver
+class Menu_HUD : public QWidget, IObserver
 {
 private:
 	AttributePtr<Attribute_SplitScreen> splitScreen;
@@ -167,16 +169,6 @@ private:
 
 public:
 	Menu_HUDManager(QWidget* parent);
-	void updateHuds();
-	
 	void mapHudsToSplitscreen();
-	void computeNewPosition(Event_WindowMove* e)
-	{
-
-	}
-	void computeNewResolution(Event_WindowResize* e)
-	{
-	}
-
 	void onEvent(Event* e);
 };
