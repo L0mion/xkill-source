@@ -53,10 +53,10 @@ Renderer::Renderer(HWND windowHandle)
 	managementMath_		= nullptr;
 	managementInstance_ = nullptr;
 	managementSprites_  = nullptr;
+	debugLinesVertexBuffer_ = nullptr;
 
 	ATTRIBUTES_INIT_ALL;
 
-	debugLinesVertexBuffer_ = nullptr;
 	rayBuffer				= nullptr;
 
 	//temp

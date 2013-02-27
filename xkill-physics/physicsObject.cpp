@@ -24,7 +24,7 @@ PhysicsObject::PhysicsObject()
 	itrPhysics_ = ATTRIBUTE_MANAGER->physics.getIterator();
 	itrSpatial_PhysicsObject = ATTRIBUTE_MANAGER->spatial.getIterator();
 	itrPosition_PhysicsObject = ATTRIBUTE_MANAGER->position.getIterator();
-	outOfBoundsIfYIsLowerThanThis = -5.0f;
+	outOfBoundsIfYIsLowerThanThis = -10.0f;
 }
 
 PhysicsObject::~PhysicsObject()

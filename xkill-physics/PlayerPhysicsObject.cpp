@@ -45,7 +45,7 @@ void PlayerPhysicsObject::onUpdate(float delta)
 	//--------------------------------------------------------------------------------------
 	// Hovering
 	//-------------------------------------------------------------------------------------
-	float height = 1;
+	float height = 1.5;
 	std::vector<int> playerAttributes = itrPhysics_3.ownerAt(attributeIndex_)->getAttributes(ATTRIBUTE_PLAYER);
 	for(unsigned int i=0;i<playerAttributes.size();i++)
 	{
@@ -207,7 +207,7 @@ void PlayerPhysicsObject::handleInput(float delta)
 			float jetpackPower = -getGravity().y()*1.5f;
 			world = getWorldTransform();
 			btVector3 velocity = getLinearVelocity();
-			if(world.getOrigin().y() < 8.0f)
+			if(world.getOrigin().y() < 18.0f)
 			{
 				setLinearVelocity(btVector3(move.x(), velocity.y()+jetpackPower*delta, move.z()));
 			}
