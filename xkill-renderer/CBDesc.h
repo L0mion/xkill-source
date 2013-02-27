@@ -106,4 +106,14 @@ struct CBBlurDesc
 };
 static const unsigned int CB_BLUR_DESC_SIZE = 48;
 
+struct CBSSAODesc
+{
+	unsigned int ssaoWidth;
+	unsigned int ssaoHeight;
+
+	unsigned int pad1;
+	unsigned int pad2;
+};
+static const unsigned int CB_SSAO_DESC_SIZE = 16;
+
 #endif //XKILL_RENDERER_CBDESC_H

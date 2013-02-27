@@ -11,8 +11,9 @@ typedef DataStreamBuffer<VertexInstanced> InstancedData;
 
 namespace DirectX
 {
-	struct XMFLOAT4X4;
 	struct XMFLOAT3;
+	struct XMFLOAT4;
+	struct XMFLOAT4X4;
 };
 
 struct ViewportData;
@@ -88,6 +89,7 @@ private:
 	void	initManagementMath();		//!< Initializes ManagementMath, which manages math-related functions and loading of dx-vectors into generic-type vectors utilizing SIMD.
 	void	initManagementInstance();	//!< Initializes ManagementInstance, which manages all the instances of the various models.
 	HRESULT initManagementSprites();	//!< Initializes ManagementSprites, which manages all sprites.
+	void	initSSAO();
 
 	void renderViewportToGBuffer(
 		ViewportData& vpData);											//!< Renders to g-buffer.
@@ -107,8 +109,7 @@ private:
 		DirectX::XMFLOAT4X4		projectionMatrix); //!< Renders a debug shape, such as a bounding sphere.
 
 	//Shadows
-
-	DirectX::XMFLOAT4X4	buildShadows();
+	DirectX::XMFLOAT4X4	buildShadowMap();
 	ShadowMatrices constructShadowMatrices(SceneBounds bounds, Float3 lightDirection);
 
 	//Glow effect
@@ -116,6 +117,10 @@ private:
 	void blurHorizontally();
 	void blurVertically();
 	void upSampleBlur();
+
+	//SSAO
+	void buildOffsetKernel();
+	void buildSSAOMap(ViewportData& vpData);
 
 	void drawBulletPhysicsDebugLines(
 		DirectX::XMFLOAT4X4		viewMatrix, 
@@ -150,8 +155,8 @@ private:
 
 	ID3D11Buffer* debugLinesVertexBuffer_;		//!< Might want to move this into some manager of some sort.
 
-	//std::vector<int>* attributesRenderOwner_;	//!< Holds owners of render-attributes.
-	//std::vector<int>* attributesCameraOwner_;
+	//SSAO
+	DirectX::XMFLOAT4 offsetKernel_[14]; //These are to be moved into appropriate manager later on when SSAO works.
 
 	//temp
 	M3DLoader*		m3dLoader_;

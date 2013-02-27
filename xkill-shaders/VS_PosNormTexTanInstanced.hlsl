@@ -15,7 +15,10 @@ VSOutPosNormWTexTanW VS_PosNormTexTanInstanced(VSInPosNormTexTanInstanced vsIn)
 	pos = mul(pos, projection);
 	output.position	= pos;
 
-	output.normalW = mul(float4(vsIn.normal, 0.0f), vsIn.world).xyz;
+	float4 normal = float4(vsIn.normal, 0.0f);
+	normal = mul(normal, vsIn.world);
+	//normal = mul(normal, view);
+	output.normalW = normal.xyz;
 
 	output.tangentW = mul(vsIn.tangent.xyz, (float3x3)vsIn.world);
 

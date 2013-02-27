@@ -17,7 +17,8 @@ enum CB_TYPE
 	CB_TYPE_SUBSET,
 	CB_TYPE_BONE,
 	CB_TYPE_SPRITE,
-	CB_TYPE_BLUR
+	CB_TYPE_BLUR,
+	CB_TYPE_SSAO
 };
 
 static const unsigned int CB_REGISTER_INSTANCE	= 0;
@@ -28,6 +29,7 @@ static const unsigned int CB_REGISTER_SUBSET	= 4;
 static const unsigned int CB_REGISTER_BONE		= 5;
 static const unsigned int CB_REGISTER_SPRITE	= 6;
 static const unsigned int CB_REGISTER_BLUR		= 7;
+static const unsigned int CB_REGISTER_SSAO		= 8;
 
 //static const unsigned int 
 
@@ -83,6 +85,10 @@ public:
 	void updateCBBlur(
 		ID3D11DeviceContext* devcon,
 		float blurKernel[11]);
+	void updateCBSSAO(
+		ID3D11DeviceContext* devcon,
+		unsigned int ssaoWidth,
+		unsigned int ssaoHeight);
 		
 	void setCB(
 		CB_TYPE					cbType, 
@@ -92,21 +98,15 @@ public:
 
 	HRESULT init(ID3D11Device* device); //! Initializes CBManagement.
 private:
-	HRESULT initCBInstance(ID3D11Device* device);	//!< Initializes the buffer cbInstance_.
-	HRESULT initCBFrame(ID3D11Device* device);		//!< Initializes the buffer cbFrame_.
-	HRESULT initCBCamera(ID3D11Device* device);		//!< Initializes the buffer cbCamera_.
-	HRESULT initCBObject(ID3D11Device* device);		//!< Initializes the buffer cbObject_.
-	HRESULT initCBBone(ID3D11Device* device);		//!< Initializes the buffer cbBone_.
-	HRESULT initCBSubset(ID3D11Device* device);		//!< Initializes the buffer cbSubset_.
-	HRESULT initCBBlur(ID3D11Device* device);
-
-	//! Initializes a the buffer cbSprite_.
-	/*!
-	\return Any error encountered.
-	\param device Pointer to DirectX Device.
-	\sa cbSprite_
-	*/
-	HRESULT initCBSprite(ID3D11Device* device);
+	HRESULT initCBInstance(	ID3D11Device* device);	//!< Initializes the buffer cbInstance_.
+	HRESULT initCBFrame(	ID3D11Device* device);	//!< Initializes the buffer cbFrame_.
+	HRESULT initCBCamera(	ID3D11Device* device);	//!< Initializes the buffer cbCamera_.
+	HRESULT initCBObject(	ID3D11Device* device);	//!< Initializes the buffer cbObject_.
+	HRESULT initCBBone(		ID3D11Device* device);	//!< Initializes the buffer cbBone_.
+	HRESULT initCBSubset(	ID3D11Device* device);	//!< Initializes the buffer cbSubset_.
+	HRESULT initCBBlur(		ID3D11Device* device);
+	HRESULT initCBSprite(	ID3D11Device* device);
+	HRESULT initCBSSAO(		ID3D11Device* device);
 
 	ID3D11Buffer* cbInstance_;	//!< A constant buffer that will be updated once per instance.
 	ID3D11Buffer* cbFrame_;		//!< A constant buffer that will be updated every frame.
@@ -116,6 +116,7 @@ private:
 	ID3D11Buffer* cbBone_;		//!< A constant buffer containing bones and will be updated for each animated object.
 	ID3D11Buffer* cbSprite_;	//!< A constant buffer containing transformation matrix for a sprite.
 	ID3D11Buffer* cbBlur_;
+	ID3D11Buffer* cbSSAO_;
 };
 
 #endif

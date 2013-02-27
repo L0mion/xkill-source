@@ -1,24 +1,43 @@
 #ifndef XKILL_RENDERER_UTILSPHEREMAPTRANSFORM_HLSL
 #define XKILL_RENDERER_UTILSPHEREMAPTRANSFORM_HLSL
 
-float2 encode(float3 n)
+float2 encode(float3 normal)
 {
-	float2 encode = n.xy;
-	encode.x *= 0.5f; encode.x += 0.5f;
-	encode.y *= 0.5f; encode.y += 0.5f;
-
-	return encode;
+    float oneMinusZ = 1.0f - normal.z;
+    float p = sqrt(normal.x * normal.x + normal.y * normal.y + oneMinusZ * oneMinusZ);
+    return normal.xy / p * 0.5f + 0.5f;
 }
 
-float3 decode (float2 enc)
+float3 decode(float2 normalEnc)
 {
-	float3 decode = float3(enc, 0.0f);
-	decode.x *= 2.0f; decode.x -= 1.0f;
-	decode.y *= 2.0f; decode.y -= 1.0f;
-	decode.z = sqrt(1.0f - decode.x * decode.x - decode.y * decode.y);
-
-	return decode;
+    float2 tmp = normalEnc - normalEnc * normalEnc;
+    float f = tmp.x + tmp.y;
+    float m = sqrt(4.0f * f - 1.0f);
+    
+    float3 n;
+    n.xy = m * (normalEnc * 4.0f - 2.0f);
+    n.z  = 3.0f - 8.0f * f;
+    return n;
 }
+
+//float2 encode(float3 n)
+//{
+//	float2 encode = n.xy;
+//	encode.x *= 0.5f; encode.x += 0.5f;
+//	encode.y *= 0.5f; encode.y += 0.5f;
+//
+//	return encode;
+//}
+//
+//float3 decode (float2 enc)
+//{
+//	float3 decode = float3(enc, 0.0f);
+//	decode.x *= 2.0f; decode.x -= 1.0f;
+//	decode.y *= 2.0f; decode.y -= 1.0f;
+//	decode.z = sqrt(1.0f - decode.x * decode.x - decode.y * decode.y);
+//
+//	return decode;
+//}
 
 float2 ReconstructZEncode(float3 normal)
 {

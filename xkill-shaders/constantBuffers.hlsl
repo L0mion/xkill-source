@@ -89,4 +89,13 @@ cbuffer cbBlur : register ( b7 )
 	//}; //Must sum to 1.0f if no color should be added or removed from scene.
 };
 
+cbuffer cbSSAO : register ( b8 )
+{
+	uint ssaoWidth;
+	uint ssaoHeight;
+
+	uint pad7;
+	uint pad8;
+};
+
 #endif //XKILL_RENDERER_CONSTANTBUFFERS_HLSL

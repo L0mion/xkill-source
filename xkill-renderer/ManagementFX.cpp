@@ -27,6 +27,7 @@ ManagementFX::ManagementFX(bool debugShaders)
 	csLighting_	= nullptr;
 	csBlurHorz_ = nullptr;
 	csBlurVert_ = nullptr;
+	csSSAO_		= nullptr;
 
 	ilPosColor_				= nullptr;
 	ilPosNormTexInstanced_	= nullptr;
@@ -56,6 +57,7 @@ ManagementFX::~ManagementFX()
 	SAFE_DELETE(csLighting_);
 	SAFE_DELETE(csBlurHorz_);
 	SAFE_DELETE(csBlurVert_);
+	SAFE_DELETE(csSSAO_);
 
 	SAFE_RELEASE(ilPosColor_);
 	SAFE_RELEASE(ilPosNormTexInstanced_);
@@ -73,17 +75,18 @@ void ManagementFX::reset()
 	vsPosNormTexTanInstanced_	->reset();
 	vsScreenQuad_				->reset();
 
-	psDefault_				->reset();
-	psAnimation_			->reset();
-	psColor_				->reset();
-	psSprite_				->reset();
-	psNormalMap_			->reset();
-	psDownSample_			->reset();
+	psDefault_					->reset();
+	psAnimation_				->reset();
+	psColor_					->reset();
+	psSprite_					->reset();
+	psNormalMap_				->reset();
+	psDownSample_				->reset();
 	psBuildShadowMapPosNormTex_	->reset();
 
-	csLighting_->reset();
-	csBlurHorz_->reset();
-	csBlurVert_->reset();
+	csLighting_	->reset();
+	csBlurHorz_	->reset();
+	csBlurVert_	->reset();
+	csSSAO_		->reset();
 }
 
 HRESULT ManagementFX::init(ID3D11Device* device)
@@ -192,6 +195,8 @@ HRESULT ManagementFX::initShaders(ID3D11Device* device)
 		hr = initCSBlurHorz(device, shaderPath);
 	if(SUCCEEDED(hr))
 		hr = initCSBlurVert(device, shaderPath);
+	if(SUCCEEDED(hr))
+		hr = initCSSSAO(device, shaderPath);
 	
 	return hr;
 }
@@ -341,6 +346,16 @@ HRESULT ManagementFX::initCSBlurVert(ID3D11Device* device, std::wstring shaderPa
 	std::wstring completePath = shaderPath + L"CS_Blur_Vert.cso";
 	csBlurVert_ = new ShaderCS();
 	hr = csBlurVert_->init(device, completePath.c_str());
+
+	return hr;
+}
+HRESULT ManagementFX::initCSSSAO(ID3D11Device* device, std::wstring shaderPath)
+{
+	HRESULT hr = S_OK;
+
+	std::wstring completePath = shaderPath + L"CS_SSAO.cso";
+	csSSAO_ = new ShaderCS();
+	hr = csSSAO_->init(device, completePath.c_str());
 
 	return hr;
 }
@@ -503,6 +518,9 @@ Shader* ManagementFX::getShaderFromID(ShaderID shaderID)
 		break;
 	case SHADERID_CS_BLUR_VERT:
 		shader = csBlurVert_;
+		break;
+	case SHADERID_CS_SSAO:
+		shader = csSSAO_;
 		break;
 	}
 

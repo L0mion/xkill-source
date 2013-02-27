@@ -1,4 +1,6 @@
 #include <cassert>
+#include <DirectXMath.h>
+#include <DirectXPackedVector.h>
 
 #include "Winfo.h"
 #include "Buffer_SrvRtv.h"
@@ -7,6 +9,8 @@
 #include "renderingUtilities.h"
 
 #include "ManagementBuffer.h"
+
+typedef DirectX::PackedVector::XMCOLOR XMCOLOR;
 
 ManagementBuffer::ManagementBuffer(Winfo* winfo)
 {
@@ -20,6 +24,7 @@ ManagementBuffer::ManagementBuffer(Winfo* winfo)
 	for(unsigned int i = 0; i < GBUFFERID_NUM_BUFFERS; i++)
 		gBuffers_[i] = nullptr;
 
+	//Glow
 	glowHigh_		= nullptr;
 	glowLow_		= nullptr;
 	glowLowUtil_	= nullptr;
@@ -27,13 +32,18 @@ ManagementBuffer::ManagementBuffer(Winfo* winfo)
 	downSampleHeight_	= 1;
 	ZeroMemory(&downSampleViewport_, sizeof(D3D11_VIEWPORT));
 
+	//Shadowmap
 	shadowMap_ = nullptr;
 	ZeroMemory(&shadowViewport_, sizeof(D3D11_VIEWPORT));
 
+	//SSAO
 	ssaoWidth_	= 1; //Set these to an arbitrary >0 value as resize() will be called before init. This requires a positive value.
 	ssaoHeight_ = 1;
 	ssaoMap_ = nullptr;
 	ZeroMemory(&ssaoViewport_, sizeof(D3D11_VIEWPORT));
+
+	randomTex_ = nullptr;
+	randomSRV_ = nullptr;
 }
 ManagementBuffer::~ManagementBuffer()
 {
@@ -47,6 +57,9 @@ ManagementBuffer::~ManagementBuffer()
 	SAFE_DELETE(shadowMap_);
 
 	SAFE_DELETE(ssaoMap_);
+
+	SAFE_RELEASE(randomTex_);
+	SAFE_RELEASE(randomSRV_);
 }
 
 void ManagementBuffer::reset()
@@ -128,6 +141,31 @@ HRESULT ManagementBuffer::resize(ID3D11Device* device)
 			ssaoHeight_);
 	}
 
+	//Also resize viewports:
+	ZeroMemory(&downSampleViewport_, sizeof(D3D11_VIEWPORT));
+	downSampleViewport_.TopLeftX	= 0;
+	downSampleViewport_.TopLeftY	= 0;
+	downSampleViewport_.Width		= static_cast<FLOAT>(downSampleWidth_);
+	downSampleViewport_.Height		= static_cast<FLOAT>(downSampleHeight_);
+	downSampleViewport_.MinDepth	= 0;
+	downSampleViewport_.MaxDepth	= 1;
+
+	ZeroMemory(&shadowViewport_, sizeof(D3D11_VIEWPORT));
+	shadowViewport_.TopLeftX	= 0;
+	shadowViewport_.TopLeftY	= 0;
+	shadowViewport_.Width		= static_cast<FLOAT>(SHADOWMAP_DIM);
+	shadowViewport_.Height		= static_cast<FLOAT>(SHADOWMAP_DIM);
+	shadowViewport_.MinDepth	= 0.0f;
+	shadowViewport_.MaxDepth	= 1.0f;
+
+	ZeroMemory(&ssaoViewport_, sizeof(D3D11_VIEWPORT));
+	ssaoViewport_.TopLeftX	= 0;
+	ssaoViewport_.TopLeftY	= 0;
+	ssaoViewport_.Width		= static_cast<FLOAT>(ssaoWidth_);
+	ssaoViewport_.Height	= static_cast<FLOAT>(ssaoHeight_);
+	ssaoViewport_.MinDepth	= 0.0f;
+	ssaoViewport_.MaxDepth	= 1.0f;
+
 	return hr;
 }
 
@@ -150,6 +188,9 @@ HRESULT ManagementBuffer::init(ID3D11Device* device, ID3D11DeviceContext* devcon
 
 	if(SUCCEEDED(hr))
 		hr = initSSAO(device);
+
+	if(SUCCEEDED(hr))
+		hr = initRandom(device);
 
 	return hr;
 }
@@ -280,12 +321,12 @@ HRESULT ManagementBuffer::initSSAO(ID3D11Device* device)
 {
 	HRESULT hr = S_OK;
 
-	ssaoMap_ = new Buffer_SrvRtv(
+	ssaoMap_ = new Buffer_SrvRtvUav(
 		ssaoWidth_,
 		ssaoHeight_,
 		1,
 		getFormat(BUFFER_FORMAT_SSAO),
-		D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE,
+		D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE | D3D11_BIND_UNORDERED_ACCESS,
 		D3D11_USAGE_DEFAULT);
 
 	ZeroMemory(&ssaoViewport_, sizeof(D3D11_VIEWPORT));
@@ -295,6 +336,47 @@ HRESULT ManagementBuffer::initSSAO(ID3D11Device* device)
 	ssaoViewport_.Height	= static_cast<FLOAT>(ssaoHeight_);
 	ssaoViewport_.MinDepth	= 0.0f;
 	ssaoViewport_.MaxDepth	= 1.0f;
+
+	return hr;
+}
+HRESULT ManagementBuffer::initRandom(ID3D11Device* device)
+{
+	HRESULT hr = S_OK;
+
+	D3D11_TEXTURE2D_DESC texDesc;
+	texDesc.Width				= RANDOM_DIM;
+	texDesc.Height				= RANDOM_DIM;
+	texDesc.MipLevels			= 1;
+	texDesc.ArraySize			= 1;
+	texDesc.Format				= getFormat(R8_G8_B8_A8__UNORM);
+	texDesc.SampleDesc.Count	= 1;
+	texDesc.SampleDesc.Quality	= 0;
+	texDesc.Usage				= D3D11_USAGE_IMMUTABLE;
+	texDesc.BindFlags			= D3D11_BIND_SHADER_RESOURCE;
+	texDesc.CPUAccessFlags		= 0;
+	texDesc.MiscFlags			= 0;
+
+	D3D11_SUBRESOURCE_DATA initData = { 0 };
+	initData.SysMemPitch = RANDOM_DIM * sizeof(XMCOLOR);
+
+	XMCOLOR color[256 * 256];
+	for(int i = 0; i < 256; ++i)
+	{
+		for(int j = 0; j < 256; ++j)
+		{
+			DirectX::XMFLOAT3 v(
+				GET_RANDOM(), 
+				GET_RANDOM(), 
+				GET_RANDOM());
+
+			color[i * 256 + j] = XMCOLOR(v.x, v.y, v.z, 0.0f);
+		}
+	}
+	initData.pSysMem = color;
+
+	hr = device->CreateTexture2D(&texDesc, &initData, &randomTex_);
+	if(SUCCEEDED(hr))
+		hr = device->CreateShaderResourceView(randomTex_, NULL, &randomSRV_);
 
 	return hr;
 }
@@ -310,14 +392,18 @@ void ManagementBuffer::clearBuffers(ID3D11DeviceContext* devcon)
 	devcon->ClearRenderTargetView(renderTargets[GBUFFERID_NORMAL],		CLEARCOLOR_BLACK);
 	devcon->ClearRenderTargetView(renderTargets[GBUFFERID_MATERIAL],	CLEARCOLOR_BLACK);
 
-	//Clear glow-buffers.
+	//Clear glow-buffers:
 	devcon->ClearRenderTargetView(glowHigh_->getRTV(), CLEARCOLOR_BLACK);
 	devcon->ClearRenderTargetView(glowLow_->getRTV(), CLEARCOLOR_BLACK);
 	devcon->ClearRenderTargetView(glowLowUtil_->getRTV(), CLEARCOLOR_BLACK);
 
-	//Clear shadowmap
+	//Clear shadowmap:
 	ID3D11DepthStencilView* dsv = shadowMap_->getDSV();
 	devcon->ClearDepthStencilView(dsv, D3D11_CLEAR_DEPTH, 1.0f, 0);
+
+	//Clear SSAO-map:
+	ID3D11RenderTargetView* rtv = ssaoMap_->getRTV();
+	devcon->ClearRenderTargetView(rtv, CLEARCOLOR_BLACK);
 }
 void ManagementBuffer::setBuffersAndDepthBufferAsRenderTargets(
 	ID3D11DeviceContext*	devcon, 
@@ -347,27 +433,28 @@ void ManagementBuffer::unsetBuffersAndDepthBufferAsRenderTargets(ID3D11DeviceCon
 }
 void ManagementBuffer::setBuffersAsCSShaderResources(ID3D11DeviceContext* devcon)
 {
-	ID3D11ShaderResourceView* resourceViews[GBUFFERID_NUM_BUFFERS + 2];
+	ID3D11ShaderResourceView* resourceViews[GBUFFERID_NUM_BUFFERS + 3];
 	for(int i = 0; i < GBUFFERID_NUM_BUFFERS; i++)
 		resourceViews[i] = gBuffers_[i]->getSRV();
 
-	resourceViews[GBUFFERID_NUM_BUFFERS] = glowHigh_->getSRV();
-	resourceViews[GBUFFERID_NUM_BUFFERS + 1] = shadowMap_->getSRV();
+	resourceViews[GBUFFERID_NUM_BUFFERS]		= glowHigh_->getSRV();
+	resourceViews[GBUFFERID_NUM_BUFFERS + 1]	= shadowMap_->getSRV();
+	resourceViews[GBUFFERID_NUM_BUFFERS + 2]	= ssaoMap_->getSRV();
 
 	devcon->CSSetShaderResources(
 		0, 
-		GBUFFERID_NUM_BUFFERS + 2,
+		GBUFFERID_NUM_BUFFERS + 3,
 		resourceViews);
 }
 void ManagementBuffer::unsetBuffersAsCSShaderResources(ID3D11DeviceContext* devcon)
 {
-	ID3D11ShaderResourceView* resourceViews[GBUFFERID_NUM_BUFFERS + 2];
-	for(int i = 0; i < GBUFFERID_NUM_BUFFERS + 2; i++)
+	ID3D11ShaderResourceView* resourceViews[GBUFFERID_NUM_BUFFERS + 3];
+	for(int i = 0; i < GBUFFERID_NUM_BUFFERS + 3; i++)
 		resourceViews[i] = nullptr;
 
 	devcon->CSSetShaderResources(
 		0, 
-		GBUFFERID_NUM_BUFFERS + 2, 
+		GBUFFERID_NUM_BUFFERS + 3, 
 		resourceViews);
 }
 
@@ -528,6 +615,9 @@ DXGI_FORMAT ManagementBuffer::getFormat(BUFFER_FORMAT format)
 		break;
 	case R32_G32_B32_A32__FLOAT:
 		dxgiFormat = DXGI_FORMAT::DXGI_FORMAT_R32G32B32A32_FLOAT;
+		break;
+	case R16__FLOAT:
+		dxgiFormat = DXGI_FORMAT::DXGI_FORMAT_R16_FLOAT;
 		break;
 	}
 

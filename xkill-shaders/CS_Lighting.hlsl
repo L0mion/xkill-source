@@ -24,11 +24,12 @@ Texture2D gBufferAlbedo				: register( t1 );
 Texture2D gBufferMaterial			: register( t2 );
 Texture2D bufferGlowHigh			: register( t3 ); //Register shared in PS_DownSample
 Texture2D bufferShadowMap			: register( t4 );
-Texture2D bufferDepth				: register( t5 ); //Hi, please notice me if you intend to sequently add buffers. I can be pretty dangerous if one does not! Yarr.
-StructuredBuffer<LightDescDir>		lightsDir	: register( t6 );
-StructuredBuffer<LightDescPoint>	lightsPoint	: register( t7 );
-StructuredBuffer<LightDescSpot>		lightsSpot	: register( t8 );
-StructuredBuffer<float3>			lightsPos	: register( t9 );
+Texture2D bufferSSAO				: register( t5 );
+Texture2D bufferDepth				: register( t6 ); //Hi, please notice me if you intend to sequently add buffers. I can be pretty dangerous if one does not! Yarr.
+StructuredBuffer<LightDescDir>		lightsDir	: register( t7 );
+StructuredBuffer<LightDescPoint>	lightsPoint	: register( t8 );
+StructuredBuffer<LightDescSpot>		lightsSpot	: register( t9 );
+StructuredBuffer<float3>			lightsPos	: register( t10 );
 
 SamplerState			ss			: register( s0 );
 SamplerComparisonState	ssShadow	: register( s1 );
@@ -129,9 +130,8 @@ void CS_Lighting(
 	normal.x *= 2.0f; normal.x -= 1.0f;
 	normal.y *= 2.0f; normal.y -= 1.0f;
 	normal.z *= 2.0f; normal.z -= 1.0f;
-	//float3 normal = decode(gNormal.xy);
 
-	float3 surfaceNormalV	= normalize(mul(float4(normal, 0.0f), view).xyz);
+	float3 surfaceNormalV	= mul(float4(normal, 0.0f), view).xyz;
 	float3 toEyeV			= normalize(float3(0.0f, 0.0f, 0.0f) - surfacePosV);
 	
 	//Specify surface material.
@@ -195,6 +195,8 @@ void CS_Lighting(
 	//	Diffuse.g += 0.1;
 	//}
 
+	float3 ssao = bufferSSAO.SampleLevel(ss, texCoord, 0).xyz;
+
 	float3 litPixel = Ambient.xyz + Diffuse.xyz + Specular.xyz;
 	float3 glowPixel = bufferGlowHigh.SampleLevel(ss, texCoord, 0).xyz;
 	litPixel = min(litPixel + glowPixel, 1.0f); //additive blending
@@ -202,5 +204,5 @@ void CS_Lighting(
 		uint2(
 			threadIDDispatch.x + viewportTopX, 
 			threadIDDispatch.y + viewportTopY)] = 
-		float4(litPixel, 1.0f);
+		float4(ssao, 1.0f);
 }

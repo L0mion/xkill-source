@@ -31,7 +31,8 @@ enum ShaderID
 
 	SHADERID_CS_LIGHTING,
 	SHADERID_CS_BLUR_HORZ,
-	SHADERID_CS_BLUR_VERT
+	SHADERID_CS_BLUR_VERT,
+	SHADERID_CS_SSAO
 };
 
 enum LayoutID
@@ -81,9 +82,10 @@ private:
 	HRESULT initPSDownSample(ID3D11Device*			device, std::wstring shaderPath);
 	HRESULT initPSBuildShadowMapPosNormTex(ID3D11Device*	device, std::wstring shaderPath);
 
-	HRESULT initCSLighting(ID3D11Device* device, std::wstring shaderPath);	//!< Initializes defaultCS.
-	HRESULT initCSBlurHorz(ID3D11Device* device, std::wstring shaderPath);
-	HRESULT initCSBlurVert(ID3D11Device* device, std::wstring shaderPath);
+	HRESULT initCSLighting(	ID3D11Device* device, std::wstring shaderPath);	//!< Initializes defaultCS.
+	HRESULT initCSBlurHorz(	ID3D11Device* device, std::wstring shaderPath);
+	HRESULT initCSBlurVert(	ID3D11Device* device, std::wstring shaderPath);
+	HRESULT initCSSSAO(		ID3D11Device* device, std::wstring shaderPath);
 
 	HRESULT initILs(ID3D11Device* device);						//!< Initializes input-layouts.
 	void initILManagement();									//!< Initializes helper-class IEDManagement.
@@ -116,6 +118,7 @@ private:
 	ShaderCS* csLighting_; //!< Default compute shader.
 	ShaderCS* csBlurHorz_;
 	ShaderCS* csBlurVert_;
+	ShaderCS* csSSAO_;
 
 	ID3D11InputLayout* ilPosColor_;					//!< Input layout specifying position and color.
 	ID3D11InputLayout* ilPosNormTexInstanced_;		//!< Standard instanced input layout used in default vertex shader.

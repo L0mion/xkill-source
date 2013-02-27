@@ -28,10 +28,10 @@
 #include "Renderer.h"
 #include "ViewportData.h"
 
-//tmep
-#include "Buffer_SrvDsv.h"
-
 ATTRIBUTES_DECLARE_ALL;
+
+//temp
+#include "Buffer_SrvRtvUav.h"
 
 Renderer::Renderer(HWND windowHandle)
 {
@@ -179,6 +179,8 @@ HRESULT Renderer::init()
 	if(SUCCEEDED(hr))
 		hr = initManagementSprites();
 	initManagementInstance();
+
+	initSSAO();
 
 	//temp
 	/*
@@ -349,6 +351,10 @@ HRESULT Renderer::initManagementSprites()
 	hr = managementSprites_->init(managementD3D_->getDevice());
 	return hr;
 }
+void Renderer::initSSAO()
+{
+	buildOffsetKernel();
+}
 
 void Renderer::update()
 {
@@ -371,7 +377,7 @@ void Renderer::render()
 	managementD3D_->clearBackBuffer();
 
 	//Do shadows pre-pass:
-	DirectX::XMFLOAT4X4 shadowMapTransform = buildShadows();
+	DirectX::XMFLOAT4X4 shadowMapTransform = buildShadowMap();
 
 	//Update per-frame constant buffer.
 	managementCB_->setCB(
@@ -426,7 +432,7 @@ void Renderer::render()
 	}
 	managementBuffer_->unsetBuffersAndDepthBufferAsRenderTargets(devcon);
 
-	//Apply some effects.
+	//Blur glowmap:
 	downSampleBlur();
 	unsigned int numBlurs = 1;
 	for(unsigned int i = 0; i < numBlurs; i++)
@@ -436,7 +442,11 @@ void Renderer::render()
 	}
 	upSampleBlur();
 
-	//Render everything to backbuffer.
+	//Compute SSAO for each viewport:
+	for(unsigned int i = 0; i < vpDatas.size(); i++)
+		buildSSAOMap(vpDatas[i]);
+
+	//Render everything to backbuffer:
 	for(unsigned int i = 0; i < vpDatas.size(); i++)
 		renderViewportToBackBuffer(vpDatas[i]);
 
@@ -755,7 +765,7 @@ void Renderer::renderDebugShape(
 }
 
 //Shadows
-DirectX::XMFLOAT4X4	Renderer::buildShadows()
+DirectX::XMFLOAT4X4	Renderer::buildShadowMap()
 {
 	ID3D11DeviceContext* devcon = managementD3D_->getDeviceContext();
 
@@ -930,7 +940,6 @@ void Renderer::downSampleBlur()
 		0); //register irrelevant
 
 	managementFX_->unsetAll(devcon);
-
 	managementSS_->unsetSS(devcon, TypeFX_PS, 0);
 }
 void Renderer::blurHorizontally()
@@ -1081,6 +1090,101 @@ void Renderer::upSampleBlur()
 	managementFX_->unsetAll(devcon);
 
 	managementSS_->unsetSS(devcon, TypeFX_PS, 0);
+}
+
+//SSAO
+void Renderer::buildOffsetKernel()
+{
+	//Purpose of this function is to establish fourteen uniformly distributed vectors.
+	//We do this by selecting the eight corners of a cube, and the 6 center points of each face.
+
+	//Cube corners:
+	offsetKernel_[0] = DirectX::XMFLOAT4(+1.0f, +1.0f, +1.0f, 0.0f);
+	offsetKernel_[1] = DirectX::XMFLOAT4(-1.0f, -1.0f, -1.0f, 0.0f);
+	offsetKernel_[2] = DirectX::XMFLOAT4(-1.0f, +1.0f, +1.0f, 0.0f);
+	offsetKernel_[3] = DirectX::XMFLOAT4(+1.0f, -1.0f, -1.0f, 0.0f);
+	offsetKernel_[4] = DirectX::XMFLOAT4(+1.0f, +1.0f, -1.0f, 0.0f);
+	offsetKernel_[5] = DirectX::XMFLOAT4(-1.0f, -1.0f, +1.0f, 0.0f);
+	offsetKernel_[6] = DirectX::XMFLOAT4(-1.0f, +1.0f, -1.0f, 0.0f);
+	offsetKernel_[7] = DirectX::XMFLOAT4(+1.0f, -1.0f, +1.0f, 0.0f);
+
+	//Cube faces:
+	offsetKernel_[8] =	DirectX::XMFLOAT4(-1.0f,	0.0f,	0.0f,	0.0f);
+	offsetKernel_[9] =	DirectX::XMFLOAT4(+1.0f,	0.0f,	0.0f,	0.0f);
+	offsetKernel_[10] =	DirectX::XMFLOAT4(0.0f,		-1.0f,	0.0f,	0.0f);
+	offsetKernel_[11] =	DirectX::XMFLOAT4(0.0f,		+1.0f,	0.0f,	0.0f);
+	offsetKernel_[12] =	DirectX::XMFLOAT4(0.0f,		0.0f,	-1.0f,	0.0f);
+	offsetKernel_[13] =	DirectX::XMFLOAT4(0.0f,		0.0f,	+1.0f,	0.0f);
+
+	//Randomize the lengths of these vectors:
+	for(unsigned int i = 0; i < 14; i++)
+	{
+		DirectX::XMVECTOR v = DirectX::XMVector4Normalize(XMLoadFloat4(&offsetKernel_[i]));
+		DirectX::XMStoreFloat4(&offsetKernel_[i], v);
+
+		//Scale vector
+		float s = managementMath_->getRandom(0.25f, 1.0f); //Random inbetween 0.25f and 1.0f.
+		offsetKernel_[i].x *= s;
+		offsetKernel_[i].y *= s;
+		offsetKernel_[i].z *= s;
+	}
+}
+void Renderer::buildSSAOMap(ViewportData& vpData)
+{
+	ID3D11DeviceContext* devcon = managementD3D_->getDeviceContext();
+	
+	managementFX_->setShader(devcon, SHADERID_CS_SSAO);
+	
+	Buffer_SrvRtvUav* ssaoMap = managementBuffer_->getSSAO();
+	
+	//Set uav
+	ID3D11UnorderedAccessView* uav = ssaoMap->getUAV();
+	devcon->CSSetUnorderedAccessViews(
+		1, //register 1 
+		1, 
+		&uav, 
+		nullptr);
+	
+	managementCB_->setCB(CB_TYPE_CAMERA, TypeFX_CS, CB_REGISTER_CAMERA,	devcon);
+	managementCB_->updateCBCamera(managementD3D_->getDeviceContext(),
+		/*Irrelevant*/ managementMath_->getIdentityMatrix(),	//vpData.view,
+		/*Irrelevant*/ managementMath_->getIdentityMatrix(),	//vpData.viewInv,
+		/*Irrelevant*/ managementMath_->getIdentityMatrix(),	//vpData.proj,
+		/*Irrelevant*/ managementMath_->getIdentityMatrix(),	//vpData.projInv,
+		/*Irrelevant*/ DirectX::XMFLOAT3(0.0f, 0.0f, 0.0f),		//vpData.eyePos,
+		vpData.viewportTopX / SSAO_MAP_SCREEN_RES_FACTOR,
+		vpData.viewportTopY / SSAO_MAP_SCREEN_RES_FACTOR,
+		/*Irrelevant*/ 0.0f,									//vpData.zNear,
+		/*Irrelevant*/ 0.0f,									//vpData.zFar,
+		vpData.viewportWidth	/ SSAO_MAP_SCREEN_RES_FACTOR,
+		vpData.viewportHeight	/ SSAO_MAP_SCREEN_RES_FACTOR);
+	
+	managementCB_->setCB(CB_TYPE_SSAO, TypeFX_CS, CB_REGISTER_SSAO, devcon);
+	unsigned int ssaoWidth	= winfo_->getScreenWidth()	/ SSAO_MAP_SCREEN_RES_FACTOR;
+	unsigned int ssaoHeight	= winfo_->getScreenHeight()	/ SSAO_MAP_SCREEN_RES_FACTOR;
+	managementCB_->updateCBSSAO(
+		devcon,
+		/*SSAOMap Width*/	ssaoWidth,
+		/*SSAOMap Height*/	ssaoHeight);
+	
+	//Dispatch motherfucker
+	unsigned int SSAO_BLOCK_DIM = 32;
+	unsigned int csDispatchX = ssaoWidth	/ SSAO_BLOCK_DIM;
+	unsigned int csDispatchY = ssaoHeight	/ SSAO_BLOCK_DIM;
+	unsigned int dispatchX = csDispatchX / managementViewport_->getNumViewportsX();
+	unsigned int dispatchY = csDispatchY / managementViewport_->getNumViewportsY();
+	devcon->Dispatch(dispatchX, dispatchY, 1);
+	
+	//Unser shader
+	managementFX_->unsetShader(devcon, SHADERID_CS_SSAO);
+	
+	//Unset uav
+	ID3D11UnorderedAccessView* uavs[] = { nullptr };
+	devcon->CSSetUnorderedAccessViews(
+		1, //register 1 
+		1, 
+		uavs, 
+		nullptr);
 }
 
 void Renderer::drawBulletPhysicsDebugLines(
