@@ -825,7 +825,6 @@ void GameComponent::updateAndInterpretAimingRay(Entity* playerEntity, AttributeP
 			ptr_offset->updateOffset();
 		}
 
-		
 		//--------------------------------------------------------------------------------------
 		// Update ray attribute
 		//-------------------------------------------------------------------------------------
@@ -838,7 +837,7 @@ void GameComponent::updateAndInterpretAimingRay(Entity* playerEntity, AttributeP
 			//--------------------------------------------------------------------------------------
 			// If the player is executing, interpret the aiming ray as a Laser Automatic Sniper Execution Ray
 			//--------------------------------------------------------------------------------------
-			//if(rayCastingPlayerAttribute->executing)  //Temporary!! //check
+			if(rayCastingPlayerAttribute->executing)
 			{
 				updateAndInterpretLaser(ray, rayCastingPlayerAttribute, ptr_camera);
 				ray->ptr_render->cull = true;
@@ -846,10 +845,10 @@ void GameComponent::updateAndInterpretAimingRay(Entity* playerEntity, AttributeP
 			//--------------------------------------------------------------------------------------
 			// Interpret the ray as what the player is looking at
 			//--------------------------------------------------------------------------------------
-			//else //check
-			//{
-			//	ray->ptr_render->cull = false;
-			//}
+			else
+			{
+				ray->ptr_render->cull = false;
+			}
 		}
 	}
 }
