@@ -204,5 +204,5 @@ void CS_Lighting(
 		uint2(
 			threadIDDispatch.x + viewportTopX, 
 			threadIDDispatch.y + viewportTopY)] = 
-		float4(ssao, 1.0f);
+		float4(litPixel, 1.0f);
 }

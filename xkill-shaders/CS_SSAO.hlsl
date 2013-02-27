@@ -5,7 +5,7 @@
 
 RWTexture2D<float4> ssao : register( u1 );
 
-#define SSAO_BLOCK_DIM 32
+#define SSAO_BLOCK_DIM 16
 [numthreads(SSAO_BLOCK_DIM, SSAO_BLOCK_DIM, 1)]
 void CS_SSAO(
 	//uint3	blockID				: SV_GroupID,

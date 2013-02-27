@@ -118,8 +118,9 @@ HRESULT Renderer::resize(unsigned int screenWidth, unsigned int screenHeight)
 	HRESULT hr = S_OK;
 	unsigned int numViewports, csDispatchX, csDispatchY;
 	numViewports	= numSS;
-	csDispatchX		= screenWidth	/ CS_TILE_SIZE;
-	csDispatchY		= screenHeight	/ CS_TILE_SIZE;
+
+	csDispatchX	= ceil((float)screenWidth	/ (float)CS_TILE_SIZE);
+	csDispatchY	= ceil((float)screenHeight	/ (float)CS_TILE_SIZE);
 	winfo_->init(
 		screenWidth, 
 		screenHeight, 
@@ -554,8 +555,8 @@ void Renderer::renderViewportToBackBuffer(ViewportData& vpData)
 	managementSS_->setSS(devcon, TypeFX_CS, 1, SS_ID_SHADOW);
 
 	//Call compute shader kernel.
-	unsigned int dispatchX = winfo_->getCSDispathX() / managementViewport_->getNumViewportsX();
-	unsigned int dispatchY = winfo_->getCSDispathY() / managementViewport_->getNumViewportsY();
+	unsigned int dispatchX = ceil((float)winfo_->getCSDispathX() / (float)managementViewport_->getNumViewportsX());
+	unsigned int dispatchY = ceil((float)winfo_->getCSDispathY() / (float)managementViewport_->getNumViewportsY());
 	devcon->Dispatch(dispatchX, dispatchY, 1);
 
 	//Unset and clean.
@@ -1146,18 +1147,23 @@ void Renderer::buildSSAOMap(ViewportData& vpData)
 		nullptr);
 	
 	managementCB_->setCB(CB_TYPE_CAMERA, TypeFX_CS, CB_REGISTER_CAMERA,	devcon);
+
+	unsigned int viewportTopX	= vpData.viewportTopX	/ SSAO_MAP_SCREEN_RES_FACTOR;
+	unsigned int viewportTopY	= vpData.viewportTopY	/ SSAO_MAP_SCREEN_RES_FACTOR;
+	unsigned int viewportWidth	= vpData.viewportWidth	/ SSAO_MAP_SCREEN_RES_FACTOR;
+	unsigned int viewportHeight	= vpData.viewportHeight	/ SSAO_MAP_SCREEN_RES_FACTOR;
 	managementCB_->updateCBCamera(managementD3D_->getDeviceContext(),
 		/*Irrelevant*/ managementMath_->getIdentityMatrix(),	//vpData.view,
 		/*Irrelevant*/ managementMath_->getIdentityMatrix(),	//vpData.viewInv,
 		/*Irrelevant*/ managementMath_->getIdentityMatrix(),	//vpData.proj,
 		/*Irrelevant*/ managementMath_->getIdentityMatrix(),	//vpData.projInv,
 		/*Irrelevant*/ DirectX::XMFLOAT3(0.0f, 0.0f, 0.0f),		//vpData.eyePos,
-		vpData.viewportTopX / SSAO_MAP_SCREEN_RES_FACTOR,
-		vpData.viewportTopY / SSAO_MAP_SCREEN_RES_FACTOR,
+		viewportTopX,
+		viewportTopY,
 		/*Irrelevant*/ 0.0f,									//vpData.zNear,
 		/*Irrelevant*/ 0.0f,									//vpData.zFar,
-		vpData.viewportWidth	/ SSAO_MAP_SCREEN_RES_FACTOR,
-		vpData.viewportHeight	/ SSAO_MAP_SCREEN_RES_FACTOR);
+		viewportWidth,
+		viewportHeight);
 	
 	managementCB_->setCB(CB_TYPE_SSAO, TypeFX_CS, CB_REGISTER_SSAO, devcon);
 	unsigned int ssaoWidth	= winfo_->getScreenWidth()	/ SSAO_MAP_SCREEN_RES_FACTOR;
@@ -1168,7 +1174,7 @@ void Renderer::buildSSAOMap(ViewportData& vpData)
 		/*SSAOMap Height*/	ssaoHeight);
 	
 	//Dispatch motherfucker
-	unsigned int SSAO_BLOCK_DIM = 32;
+	unsigned int SSAO_BLOCK_DIM = 16;
 	unsigned int csDispatchX = ssaoWidth	/ SSAO_BLOCK_DIM;
 	unsigned int csDispatchY = ssaoHeight	/ SSAO_BLOCK_DIM;
 	unsigned int dispatchX = csDispatchX / managementViewport_->getNumViewportsX();
