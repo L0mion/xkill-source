@@ -52,6 +52,22 @@ struct DLL_U Float2
 	float length();
 };
 
+inline Float2 operator-(const Float2& left, const Float2& right)
+{
+	Float2 ret(
+		left.x - right.x,
+		left.y - right.y);
+	return ret;
+}
+
+inline Float2 operator+(const Float2& left, const Float2& right)
+{
+	Float2 ret(
+		left.x + right.x,
+		left.y + right.y);
+	return ret;
+}
+
 //
 // Float3
 //
@@ -74,6 +90,8 @@ struct DLL_U Float3
 	void lerp(Float3 *v, float factor);
 	float length();
 	float distanceTo(Float3 v);
+
+	Float3 operator/(float scalar);
 };
 
 

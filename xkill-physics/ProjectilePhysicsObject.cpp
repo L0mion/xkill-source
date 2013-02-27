@@ -83,16 +83,14 @@ btCollisionShape* ProjectilePhysicsObject::subClassSpecificCollisionShape()
 		switch(ptr_projectile->ammunitionType)
 		{
 		case XKILL_Enums::AmmunitionType::SCATTER:
-			return PhysicsObject::subClassSpecificCollisionShape();
-			//collisionShape = CollisionShapes::Instance()->scatterProjectileCollisionShape;
+			//return PhysicsObject::subClassSpecificCollisionShape();
+			collisionShape = CollisionShapes::Instance()->scatterProjectileCollisionShape;
 			break;
 		case XKILL_Enums::AmmunitionType::BULLET:
 			return PhysicsObject::subClassSpecificCollisionShape();
-			//collisionShape = CollisionShapes::Instance()->bulletProjectileCollisionShape;
 			break;
 		case XKILL_Enums::AmmunitionType::EXPLOSIVE:
 			return PhysicsObject::subClassSpecificCollisionShape();
-			//collisionShape = CollisionShapes::Instance()->explosiveProjectileCollisionShape;
 			break;
 		}
 	}

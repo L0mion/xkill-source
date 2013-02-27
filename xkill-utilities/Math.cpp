@@ -161,6 +161,15 @@ float* Float3::asFloat()
 	return asFloat;
 }
 
+Float3 Float3::operator/(float scalar)
+{
+	Float3 float3(*this);
+	float3.x /= scalar;
+	float3.y /= scalar;
+	float3.z /= scalar;
+	return float3;
+}
+
 Float4::Float4()
 {
 	x = 0.0f;

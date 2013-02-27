@@ -201,6 +201,5 @@ void CS_Lighting(
 		uint2(
 			threadIDDispatch.x + viewportTopX, 
 			threadIDDispatch.y + viewportTopY)] = 
-		//float4(bufferShadowMap.SampleLevel(ss, texCoord, 0).rrr, 1.0f);
 		float4(litPixel, 1.0f);
 }

@@ -93,7 +93,7 @@ public:
 		ptr_player->ptr_weaponFireLocation_spatial = ptr_weaponFireLocation_spatial;
 
 		CREATE_ATTRIBUTE(ptr_ray, Attribute_Ray, ray, entity);
-
+		createDeathRay(entity, ptr_ray);
 		/*
 		CREATE_ATTRIBUTE(ptr_lightPoint, Attribute_Light_Point, lightPoint, entity);
 		ptr_lightPoint->ptr_position			= ptr_position;
@@ -172,6 +172,19 @@ public:
 
 		ptr_weaponSpatial = ptr_weapon_spatial;
 		ptr_firingLocationSpatial = ptr_fireLocation_spatial;
+	}
+
+	void createDeathRay(Entity* entity, AttributePtr<Attribute_Ray> ptr_ray)
+	{
+		CREATE_ATTRIBUTE(ptr_render, Attribute_Render, render, entity);
+		ptr_ray->ptr_render = ptr_render;
+		ptr_render->cull = true;
+		ptr_render->meshID = XKILL_Enums::ModelId::BOX;
+		CREATE_ATTRIBUTE(ptr_spatial, Attribute_Spatial, spatial, entity);
+		ptr_render->ptr_spatial = ptr_spatial;
+		ptr_spatial->scale = Float3(0.01f, 0.01f, 0.01f);
+		CREATE_ATTRIBUTE(ptr_position, Attribute_Position, position, entity);
+		ptr_spatial->ptr_position = ptr_position;
 	}
 	
 	void createWorldEntity(Entity* entity, Event_CreateWorld* e)
@@ -315,7 +328,7 @@ public:
 		switch (e->pickupableType)
 		{
 		case XKILL_Enums::PickupableType::AMMUNITION_BULLET:
-			ptr_render->meshID = XKILL_Enums::ModelId::PICKUPABLE_AMMO_SINGLE;
+			ptr_render->meshID = XKILL_Enums::ModelId::PICKUPABLE_AMMO_BULLET;
 			break;
 		case XKILL_Enums::PickupableType::AMMUNITION_SCATTER:
 			ptr_render->meshID = XKILL_Enums::ModelId::PICKUPABLE_AMMO_SCATTER;
