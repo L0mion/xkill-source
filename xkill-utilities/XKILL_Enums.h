@@ -82,7 +82,7 @@ namespace XKILL_Enums
 		PICKUPABLE_JETPACK			= 13,
 		PICKUPABLE_SPEEDHACK		= 14,
 
-		BOX							= 13,
+		BOX							= 15,
 
 		MODEL_LAST
 	};

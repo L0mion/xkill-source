@@ -330,9 +330,12 @@ void CollisionShapes::findMappingBetweenMeshFilesAndBulletFiles()
 			}
 			else
 			{
-				loadTrianglesFromMeshAsCollisionShape(ptr_mesh);
 				ERROR_MESSAGEBOX("CollisionShapes::findMappingBetweenMeshFilesAndBulletFiles, rigid body " + name + " has no collision shape.");
 			}
+		}
+		else
+		{
+			loadTrianglesFromMeshAsCollisionShape(ptr_mesh);
 		}
 	}
 }
