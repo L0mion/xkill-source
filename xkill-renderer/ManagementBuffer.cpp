@@ -10,7 +10,7 @@
 
 #include "ManagementBuffer.h"
 
-//typedef DirectX::PackedVector::XMCOLOR XMCOLOR;
+typedef DirectX::PackedVector::XMCOLOR XMCOLOR;
 
 ManagementBuffer::ManagementBuffer(Winfo* winfo)
 {
@@ -343,7 +343,7 @@ HRESULT ManagementBuffer::initRandom(ID3D11Device* device)
 {
 	HRESULT hr = S_OK;
 
-	DXGI_FORMAT randomFormat = getFormat(R8_G8_B8_A8__UNORM);
+	DXGI_FORMAT randomFormat = getFormat(R32_G32_B32_A32__FLOAT);
 
 	D3D11_TEXTURE2D_DESC texDesc;
 	texDesc.Width				= RANDOM_DIM;
@@ -371,11 +371,18 @@ HRESULT ManagementBuffer::initRandom(ID3D11Device* device)
 		for(int j = 0; j < RANDOM_DIM; ++j)
 		{
 			DirectX::XMFLOAT3 v(
-				GET_RANDOM(-1.0f, 1.0f), //GET_RANDOM()
-				GET_RANDOM(-1.0f, 1.0f), //GET_RANDOM()
-				0.0f);					 //GET_RANDOM()
+				GET_RANDOM(-1.0f, 1.0f),
+				GET_RANDOM(-1.0f, 1.0f),
+				0.0f);
+
+			DirectX::XMVECTOR normalized = DirectX::XMVector3Normalize(XMLoadFloat3(&v));
+			DirectX::XMStoreFloat3(&v, normalized);
 	
-			color[i * RANDOM_DIM + j] = DirectX::XMFLOAT4(v.x, v.y, v.z, 0.0f);
+			color[i * RANDOM_DIM + j] = DirectX::XMFLOAT4(
+				v.x * 0.5f + 0.5f, //Compress from [-1, +1] to [0, +1].
+				v.y * 0.5f + 0.5f, //Compress from [-1, +1] to [0, +1]. 
+				v.z * 0.5f + 0.5f, //Compress from [-1, +1] to [0, +1].
+				0.0f);
 		}
 	}
 	initData.pSysMem = color;

@@ -190,7 +190,7 @@ HRESULT ManagementSS::initSSNormal(ID3D11Device* device)
 	ssDesc.BorderColor[0] = 0.0f;
 	ssDesc.BorderColor[1] = 0.0f;
 	ssDesc.BorderColor[2] = 0.0f;
-	ssDesc.BorderColor[3] = 1.0f;
+	ssDesc.BorderColor[3] = 0.0f;
 
 	hr = device->CreateSamplerState(&ssDesc, &ssNormal_);
 	if(FAILED(hr))
@@ -236,11 +236,6 @@ HRESULT ManagementSS::initSSRandom(ID3D11Device* device)
 	ssDesc.ComparisonFunc	= D3D11_COMPARISON_NEVER;
 	ssDesc.MinLOD			= 0;
 	ssDesc.MaxLOD			= D3D11_FLOAT32_MAX;
-
-	ssDesc.BorderColor[0] = 1.0f;
-	ssDesc.BorderColor[1] = 1.0f;
-	ssDesc.BorderColor[2] = 1.0f;
-	ssDesc.BorderColor[3] = 1.0f;
 
 	hr = device->CreateSamplerState(&ssDesc, &ssRandom_);
 	if(FAILED(hr))

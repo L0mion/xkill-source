@@ -42,7 +42,8 @@ void CS_SSAO(
 	normal.z *= 2.0f; normal.z -= 1.0f;
 	float3 occludeeNormal = mul(float4(normal, 0.0f), view).xyz;
 
-	float3 random = bufferRandom.SampleLevel(ssNormal, texCoord, 0).xyz; //ssRandom tiles random-texture.
+	float3 random = bufferRandom.SampleLevel(ssNormal, texCoord, 0).rgb; //ssRandom tiles random-texture.
+	random *= 2.0f; random -= 1.0f; //Map from [0, 1] to [-1, +1]
 
 	//Use Grahm-Schmidt to establish a orthogonal change-of-basis matrix which will reorient offset kernel
 	//along occludeeNormal. This also does the random rotation.
