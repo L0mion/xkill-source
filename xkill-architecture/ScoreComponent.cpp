@@ -179,7 +179,7 @@ void ScoreComponent::schedulerScoreCounting(float delta)
 				SEND_EVENT(&Event_PlayerExecuting(executingPlayerIndex_));
 
 				// Post hud messages
-				{Event_PostHudMessage e("", ptr_player); e.setHtmlMessage("Picked up ", "Scatter Ammunition", "+" + str_amount); SEND_EVENT(&e);}
+				//{Event_PostHudMessage e("", ptr_player); e.setHtmlMessage("Picked up ", "Scatter Ammunition", "+" + str_amount); SEND_EVENT(&e);}
 				
 				{Event_PostHudMessage e("Two players have tied priority"); e.receiver = Event_PostHudMessage::RECEIVER_ALL;  e.setStyle(Event_PostHudMessage::STYLE_SUBTILE); SEND_EVENT(&e);}
 

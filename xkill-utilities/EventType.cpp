@@ -302,7 +302,7 @@ Event_PostHudMessage::Event_PostHudMessage( std::string message, AttributePtr<At
 
 void Event_PostHudMessage::setStyle( Style style )
 {
-	styleSheet = "color: rgba(255, 255, 255, 220);";
+	styleSheet = "color: rgba(255, 255, 255, 220); font-size:12pt;";
 
 	if(style == STYLE_NORMAL){}
 	if(style == STYLE_SUBTILE)
@@ -311,12 +311,13 @@ void Event_PostHudMessage::setStyle( Style style )
 		styleSheet = "color: rgba(255, 0, 0, 255); font-size:15pt;";
 }
 
-void Event_PostHudMessage::setHtmlMessage( std::string prefex, std::string subject, std::string suffix  /*= ""*/ )
+void Event_PostHudMessage::setHtmlMessage( std::string prefex, std::string subject, std::string suffix /*= ""*/, std::string description /*= ""*/ )
 {
-	prefex = "<span style='color:#a7a7a7;'>" + prefex +" </span>";
-	subject = "<span style='color:#ffffff;'>" + subject +" </span>";
-	if(suffix != "")
-		suffix = "<span style='color:#a7a7a7;'>(" + suffix +")</span>";
+	prefex = "<span style='color: rgba(255, 255, 255, 180);'>" + prefex + " </span>";
+	subject = "<span style='color: rgba(255, 255, 255, 240);'>" + subject + " </span>";
+	suffix = "<span style='color: rgba(255, 255, 255, 180);'>" + suffix + " </span>";
+	if(description != "")
+		description = "<span style='color: rgba(255, 255, 255, 180);'>(</span><span style='color: rgba(255, 255, 255, 240);'>" + description + "</span><span style='color: rgba(255, 255, 255, 180);'>)</span>";
 
-	message = prefex + subject + suffix ;
+	message = prefex + subject + suffix + description ;
 }

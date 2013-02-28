@@ -124,13 +124,7 @@ void MainWindow::keyPressEvent( QKeyEvent* e )
 		SEND_EVENT(&Event(EVENT_STARTGAME));
 
 	if((e->key()==Qt::Key_1))
-	{
-		Event_PostHudMessage e("");
-		e.receiver = Event_PostHudMessage::RECEIVER_ALL;
-		e.setStyle(Event_PostHudMessage::STYLE_NORMAL);
-		e.message = "Punish them all";
-		SEND_EVENT(&e);
-	}
+	{Event_PostHudMessage e(""); e.setHtmlMessage("Picked up", "Bullet Ammunition", "50"); SEND_EVENT(&e);}
 	if((e->key()==Qt::Key_2))
 	{Event_PostHudMessage e("<p align='center'><span style='font-size:15pt;'>NullProcess is executing</span><br><span style='color: rgba(255, 0, 0, 255); font-size:35pt;'>Punish them all</span></p>"); e.receiver = Event_PostHudMessage::RECEIVER_ALL; e.setStyle(Event_PostHudMessage::STYLE_SUBTILE); SEND_EVENT(&e);}
 	if((e->key()==Qt::Key_3))
