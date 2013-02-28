@@ -158,7 +158,8 @@ void CollisionManager::collision_pickupable(Entity* entity1, Entity* entity2)
 							AttributePtr<Attribute_Health> ptr_health = ptr_player->ptr_health;
 							ptr_health->health = getAmountAfterPickup(ptr_health->health, ptr_health->maxHealth, ptr_pickupable->amount);
 							pickedUp = true;
-							SEND_EVENT(&Event_PostHudMessage("Picked up MedPatch (+" + str_amount + ")", ptr_player));
+							// Post HUD message
+							{Event_PostHudMessage e("", ptr_player); e.setHtmlMessage("Picked up ", "HealthPatch", "(+" + str_amount + ")"); SEND_EVENT(&e);}
 							break;
 						}
 					case XKILL_Enums::PickupableType::AMMUNITION_BULLET:
@@ -166,7 +167,8 @@ void CollisionManager::collision_pickupable(Entity* entity1, Entity* entity2)
 							AttributePtr<Attribute_WeaponStats> weaponStatsAttribute = ptr_player->ptr_weaponStats;
 							weaponStatsAttribute->ammunition[XKILL_Enums::AmmunitionType::BULLET].currentTotalNrOfShots = getAmountAfterPickup(weaponStatsAttribute->ammunition[XKILL_Enums::AmmunitionType::BULLET].currentTotalNrOfShots, weaponStatsAttribute->ammunition[XKILL_Enums::AmmunitionType::BULLET].initialTotalNrOfShots, ptr_pickupable->amount);
 							pickedUp = true;
-							SEND_EVENT(&Event_PostHudMessage("Picked up Bullet Ammunition (+" + str_amount + ")", ptr_player));
+							// Post HUD message
+							{Event_PostHudMessage e("", ptr_player); e.setHtmlMessage("Picked up ", "Bullet Ammunition", "(+" + str_amount + ")"); SEND_EVENT(&e);}
 							break;
 						}
 					case XKILL_Enums::PickupableType::AMMUNITION_EXPLOSIVE:
@@ -174,7 +176,8 @@ void CollisionManager::collision_pickupable(Entity* entity1, Entity* entity2)
 							AttributePtr<Attribute_WeaponStats> weaponStatsAttribute = ptr_player->ptr_weaponStats;
 							weaponStatsAttribute->ammunition[XKILL_Enums::AmmunitionType::EXPLOSIVE].currentTotalNrOfShots = getAmountAfterPickup(weaponStatsAttribute->ammunition[XKILL_Enums::AmmunitionType::EXPLOSIVE].currentTotalNrOfShots, weaponStatsAttribute->ammunition[XKILL_Enums::AmmunitionType::EXPLOSIVE].initialTotalNrOfShots, ptr_pickupable->amount);
 							pickedUp = true;
-							SEND_EVENT(&Event_PostHudMessage("Picked up Explosive Ammunition (+" + str_amount + ")", ptr_player));
+							// Post HUD message
+							{Event_PostHudMessage e("", ptr_player); e.setHtmlMessage("Picked up ", "Explosive Ammunition", "(+" + str_amount + ")"); SEND_EVENT(&e);}
 							break;
 						}
 					case XKILL_Enums::PickupableType::AMMUNITION_SCATTER:
@@ -182,7 +185,8 @@ void CollisionManager::collision_pickupable(Entity* entity1, Entity* entity2)
 							AttributePtr<Attribute_WeaponStats> weaponStatsAttribute = ptr_player->ptr_weaponStats;
 							weaponStatsAttribute->ammunition[XKILL_Enums::AmmunitionType::SCATTER].currentTotalNrOfShots = getAmountAfterPickup(weaponStatsAttribute->ammunition[XKILL_Enums::AmmunitionType::SCATTER].currentTotalNrOfShots, weaponStatsAttribute->ammunition[XKILL_Enums::AmmunitionType::SCATTER].initialTotalNrOfShots, ptr_pickupable->amount);
 							pickedUp = true;
-							SEND_EVENT(&Event_PostHudMessage("Picked up Scatter Ammunition (+" + str_amount + ")", ptr_player));
+							// Post HUD message
+							{Event_PostHudMessage e("", ptr_player); e.setHtmlMessage("Picked up ", "Scatter Ammunition", "(+" + str_amount + ")"); SEND_EVENT(&e);}
 							break;
 						}
 					case XKILL_Enums::PickupableType::HACK_SPEEDHACK:
@@ -191,6 +195,8 @@ void CollisionManager::collision_pickupable(Entity* entity1, Entity* entity2)
 							float time = static_cast<float>(ptr_pickupable->amount);
 							time /= 1000.0f;
 							SEND_EVENT(&Event_HackActivated(time, XKILL_Enums::HackType::SPEEDHACK, ptr_player));
+							// Post HUD message
+							{Event_PostHudMessage e("", ptr_player); e.setHtmlMessage("Picked up ", "Speedhack"); SEND_EVENT(&e);}
 							SEND_EVENT(&Event_PostHudMessage("Picked up Speedhack", ptr_player));
 							break;
 						}
