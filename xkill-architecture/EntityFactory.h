@@ -339,6 +339,12 @@ public:
 		case XKILL_Enums::PickupableType::MEDKIT:
 			ptr_render->meshID = XKILL_Enums::ModelId::PICKUPABLE_HEALTHPACK;
 			break;
+		case XKILL_Enums::PickupableType::HACK_JETHACK:
+			ptr_render->meshID = XKILL_Enums::ModelId::PICKUPABLE_JETPACK;
+			break;
+		case XKILL_Enums::PickupableType::HACK_SPEEDHACK:
+			ptr_render->meshID = XKILL_Enums::ModelId::PICKUPABLE_SPEEDHACK;
+			break;
 		default:
 			ptr_render->meshID = XKILL_Enums::ModelId::PICKUPABLE_HEALTHPACK;
 			break;
