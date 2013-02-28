@@ -27,6 +27,7 @@ private:
 
 	// Level menu
 	std::vector<std::string> levelNames;
+	int levelCurrent;
 	QStandardItemModel* levelListModel;
 	QString filePath;
 
@@ -64,6 +65,8 @@ private:
 		//ui.label_background->show();
 		raise();
 	}
+	void updateLevelSelectionInterface();
+
 public:
 	Menu_Main2(QWidget* parent);
 	~Menu_Main2();
@@ -137,6 +140,8 @@ private slots:
 	void slot_menu_start()
 	{
 		push_menu(ui.frame_start);
+		std::string levelName = levelNames[levelCurrent];
+		SEND_EVENT(&Event_LoadLevel(levelName));
 	}
 	void slot_menu_settings()
 	{
@@ -166,4 +171,6 @@ private slots:
 	{
 		SEND_EVENT(&Event(EVENT_QUIT_TO_DESKTOP));
 	}
+	void slot_menu_next_level();
+	void slot_menu_previous_level();
 };

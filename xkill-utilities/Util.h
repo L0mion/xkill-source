@@ -5,7 +5,7 @@
 #include "EventManager.h"
 #include "AttributeManager.h"
 #include "FiniteState.h"
-
+#include "SimpleQueue.h"
 #include <vector>
 
 

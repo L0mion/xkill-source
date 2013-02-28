@@ -93,7 +93,7 @@ public:
 		ptr_player->ptr_weaponFireLocation_spatial = ptr_weaponFireLocation_spatial;
 
 		CREATE_ATTRIBUTE(ptr_ray, Attribute_Ray, ray, entity);
-		createDeathRay(entity, ptr_ray);
+		createLaserAutomaticSniperExecutionRay(entity, ptr_ray);
 		/*
 		CREATE_ATTRIBUTE(ptr_lightPoint, Attribute_Light_Point, lightPoint, entity);
 		ptr_lightPoint->ptr_position			= ptr_position;
@@ -174,7 +174,7 @@ public:
 		ptr_firingLocationSpatial = ptr_fireLocation_spatial;
 	}
 
-	void createDeathRay(Entity* entity, AttributePtr<Attribute_Ray> ptr_ray)
+	void createLaserAutomaticSniperExecutionRay(Entity* entity, AttributePtr<Attribute_Ray> ptr_ray)
 	{
 		CREATE_ATTRIBUTE(ptr_render, Attribute_Render, render, entity);
 		ptr_ray->ptr_render = ptr_render;
