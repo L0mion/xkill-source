@@ -65,7 +65,7 @@ void CS_SSAO(
 	float3x3 tbn		= float3x3(tangent, bitangent, occludeeNormal);
 
 	float occlusion	= 0.0f;
-	float radius	= 250.0f; //pass this in a constant buffer
+	float radius	= 2.0f; //pass this in a constant buffer
 	for(unsigned int i = 0; i < 14; i++)
 	{
 		//Get view-space position of occluding point:
