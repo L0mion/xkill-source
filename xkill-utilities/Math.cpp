@@ -241,7 +241,7 @@ Float4& Float4::quaternionFromAxis(Float3 axis, float angle)
 	z = rotation.z;
 	w = rotation.w;
 
-	return rotation;
+	return *this;
 }
 
 Float4 Float4::quaternionInverse()
