@@ -10,7 +10,7 @@
 
 #include "ManagementBuffer.h"
 
-typedef DirectX::PackedVector::XMCOLOR XMCOLOR;
+//typedef DirectX::PackedVector::XMCOLOR XMCOLOR;
 
 ManagementBuffer::ManagementBuffer(Winfo* winfo)
 {
@@ -343,12 +343,14 @@ HRESULT ManagementBuffer::initRandom(ID3D11Device* device)
 {
 	HRESULT hr = S_OK;
 
+	DXGI_FORMAT randomFormat = getFormat(R8_G8_B8_A8__UNORM);
+
 	D3D11_TEXTURE2D_DESC texDesc;
 	texDesc.Width				= RANDOM_DIM;
 	texDesc.Height				= RANDOM_DIM;
 	texDesc.MipLevels			= 1;
 	texDesc.ArraySize			= 1;
-	texDesc.Format				= getFormat(R8_G8_B8_A8__UNORM);
+	texDesc.Format				= randomFormat;
 	texDesc.SampleDesc.Count	= 1;
 	texDesc.SampleDesc.Quality	= 0;
 	texDesc.Usage				= D3D11_USAGE_IMMUTABLE;
@@ -357,29 +359,39 @@ HRESULT ManagementBuffer::initRandom(ID3D11Device* device)
 	texDesc.MiscFlags			= 0;
 
 	D3D11_SUBRESOURCE_DATA initData = { 0 };
-	initData.SysMemPitch = RANDOM_DIM * sizeof(XMCOLOR);
+	initData.SysMemPitch = RANDOM_DIM * sizeof(DirectX::XMFLOAT4);
 
 	//Generate set of random values used to rotate offset kernel.
 	//Z component is zero due to our kernel being oriented along the z-axis. 
 	//Because of that, we want the random rotation to be around that axis.
-	XMCOLOR color[256 * 256];
-	for(int i = 0; i < 256; ++i)
+	DirectX::XMFLOAT4 color[RANDOM_DIM * RANDOM_DIM];
+	ZeroMemory(&color, sizeof(DirectX::XMFLOAT4) * RANDOM_DIM * RANDOM_DIM);
+	for(int i = 0; i < RANDOM_DIM; ++i)
 	{
-		for(int j = 0; j < 256; ++j)
+		for(int j = 0; j < RANDOM_DIM; ++j)
 		{
 			DirectX::XMFLOAT3 v(
 				GET_RANDOM(-1.0f, 1.0f), //GET_RANDOM()
 				GET_RANDOM(-1.0f, 1.0f), //GET_RANDOM()
 				0.0f);					 //GET_RANDOM()
-
-			color[i * 256 + j] = XMCOLOR(v.x, v.y, v.z, 0.0f);
+	
+			color[i * RANDOM_DIM + j] = DirectX::XMFLOAT4(v.x, v.y, v.z, 0.0f);
 		}
 	}
 	initData.pSysMem = color;
 
 	hr = device->CreateTexture2D(&texDesc, &initData, &randomTex_);
 	if(SUCCEEDED(hr))
-		hr = device->CreateShaderResourceView(randomTex_, NULL, &randomSRV_);
+	{
+		D3D11_SHADER_RESOURCE_VIEW_DESC descSRV;
+		ZeroMemory(&descSRV, sizeof(descSRV));
+		descSRV.Format						= randomFormat;
+		descSRV.ViewDimension				= D3D11_SRV_DIMENSION_TEXTURE2D;
+		descSRV.Texture2D.MostDetailedMip	= 0;
+		descSRV.Texture2D.MipLevels			= 1;
+
+		hr = device->CreateShaderResourceView(randomTex_, &descSRV, &randomSRV_);
+	}
 
 	return hr;
 }

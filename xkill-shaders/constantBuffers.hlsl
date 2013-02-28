@@ -92,15 +92,11 @@ cbuffer cbBlur : register ( b7 )
 cbuffer cbSSAO : register ( b8 )
 {
 	float4 offsetKernel[14];
+	
 	uint ssaoWidth;
 	uint ssaoHeight;
 	float occlusionRadius;
-	float occlusionFadeStart;
-	float occlusionFadeEnd;
-	float surfaceEpsilon;
-
 	uint pad7;
-	uint pad8;
 };
 
 #endif //XKILL_RENDERER_CONSTANTBUFFERS_HLSL

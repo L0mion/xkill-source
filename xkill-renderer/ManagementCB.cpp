@@ -169,18 +169,12 @@ void ManagementCB::updateCBSSAO(
 	DirectX::XMFLOAT4 offsetKernel[14],
 	unsigned int ssaoWidth,
 	unsigned int ssaoHeight,
-	float occlusionRadius,
-	float occlusionFadeStart,
-	float occlusionFadeEnd,
-	float surfaceEpsilon)
+	float occlusionRadius)
 {
 	CBSSAODesc cbDesc;
 	cbDesc.ssaoWidth			= ssaoWidth;
 	cbDesc.ssaoHeight			= ssaoHeight;
 	cbDesc.occlusionRadius		= occlusionRadius;
-	cbDesc.occlusionFadeStart	= occlusionFadeStart;
-	cbDesc.occlusionFadeEnd		= occlusionFadeEnd;
-	cbDesc.surfaceEpsilon		= surfaceEpsilon;
 
 	for(unsigned int i = 0; i < 14; i++)
 		cbDesc.offsetKernel[i] = offsetKernel[i];

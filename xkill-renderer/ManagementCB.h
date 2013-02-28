@@ -90,10 +90,7 @@ public:
 		DirectX::XMFLOAT4 offsetKernel[14],
 		unsigned int ssaoWidth,
 		unsigned int ssaoHeight,
-		float occlusionRadius,
-		float occlusionFadeStart,
-		float occlusionFadeEnd,
-		float surfaceEpsilon);
+		float occlusionRadius);
 		
 	void setCB(
 		CB_TYPE					cbType, 

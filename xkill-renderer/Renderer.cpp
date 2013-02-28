@@ -1108,55 +1108,22 @@ void Renderer::buildOffsetKernel()
 		//Normalize.
 		DirectX::XMVECTOR v = DirectX::XMVector4Normalize(XMLoadFloat4(&offsetKernel_[i]));
 		DirectX::XMStoreFloat4(&offsetKernel_[i], v);
-	
-		float scale;
+
 		//At this point we have created a hemisphere with sample points distributed along the surface.
-		//We then wish to distribute these points in the sphere. This may be done in several ways.
-		
-		// * Simply randomize lengths of these vectors:
-		//scale = GET_RANDOM(0.0f, 1.0f);
-		// * ...or create a falloff so that occlussion is less influenced by points further away:
+		//We then wish to distribute these points in the sphere. First, randomize the lengths of these vectors:
+		float scale = GET_RANDOM(0.0f, 1.0f);
+		offsetKernel_[i].x *= scale;
+		offsetKernel_[i].y *= scale;
+		offsetKernel_[i].z *= scale;
+	
+		//...then create a falloff so that occlussion is less influenced by points further away:
 		scale = (float)i / (float)14;
 		scale = LERP(0.1f, 1.0f, scale * scale);
-		//Use what seems to work the best.
 		
 		offsetKernel_[i].x *= scale;
 		offsetKernel_[i].y *= scale;
 		offsetKernel_[i].z *= scale;
 	}
-
-	////Purpose of this function is to establish fourteen uniformly distributed vectors.
-	////We do this by selecting the eight corners of a cube, and the 6 center points of each face.
-	////Cube corners:
-	//offsetKernel_[0] = DirectX::XMFLOAT4(+1.0f, +1.0f, +1.0f, 0.0f);
-	//offsetKernel_[1] = DirectX::XMFLOAT4(-1.0f, -1.0f, -1.0f, 0.0f);
-	//offsetKernel_[2] = DirectX::XMFLOAT4(-1.0f, +1.0f, +1.0f, 0.0f);
-	//offsetKernel_[3] = DirectX::XMFLOAT4(+1.0f, -1.0f, -1.0f, 0.0f);
-	//offsetKernel_[4] = DirectX::XMFLOAT4(+1.0f, +1.0f, -1.0f, 0.0f);
-	//offsetKernel_[5] = DirectX::XMFLOAT4(-1.0f, -1.0f, +1.0f, 0.0f);
-	//offsetKernel_[6] = DirectX::XMFLOAT4(-1.0f, +1.0f, -1.0f, 0.0f);
-	//offsetKernel_[7] = DirectX::XMFLOAT4(+1.0f, -1.0f, +1.0f, 0.0f);
-	//
-	////Cube faces:
-	//offsetKernel_[8] =	DirectX::XMFLOAT4(-1.0f,	0.0f,	0.0f,	0.0f);
-	//offsetKernel_[9] =	DirectX::XMFLOAT4(+1.0f,	0.0f,	0.0f,	0.0f);
-	//offsetKernel_[10] =	DirectX::XMFLOAT4(0.0f,		-1.0f,	0.0f,	0.0f);
-	//offsetKernel_[11] =	DirectX::XMFLOAT4(0.0f,		+1.0f,	0.0f,	0.0f);
-	//offsetKernel_[12] =	DirectX::XMFLOAT4(0.0f,		0.0f,	-1.0f,	0.0f);
-	//offsetKernel_[13] =	DirectX::XMFLOAT4(0.0f,		0.0f,	+1.0f,	0.0f);
-	//
-	////Randomize the lengths of these vectors:
-	//for(unsigned int i = 0; i < 14; i++)
-	//{
-	//	DirectX::XMVECTOR v = DirectX::XMVector4Normalize(XMLoadFloat4(&offsetKernel_[i]));
-	//	DirectX::XMStoreFloat4(&offsetKernel_[i], v);
-	//
-	//	//Scale vector
-	//	float s = managementMath_->getRandom(0.25f, 1.0f); //Random inbetween 0.25f and 1.0f.
-	//	offsetKernel_[i].x *= s;
-	//	offsetKernel_[i].y *= s;
-	//	offsetKernel_[i].z *= s;
-	//}
 }
 void Renderer::buildSSAOMap(ViewportData& vpData)
 {
@@ -1220,10 +1187,7 @@ void Renderer::buildSSAOMap(ViewportData& vpData)
 		/*Offset Kernel*/			offsetKernel_,
 		/*SSAOMap Width*/			ssaoWidth,
 		/*SSAOMap Height*/			ssaoHeight,
-		/*Occlusion Radius*/		0.5f,
-		/*Occlusion Fade Start*/	0.2f,
-		/*Occlusion Fade End*/		2.0f,
-		/*Surface Epsilon*/			0.05f);
+		/*Occlusion Radius*/		2.0f);
 	
 	//Dispatch motherfucker
 	unsigned int SSAO_BLOCK_DIM = 16;
