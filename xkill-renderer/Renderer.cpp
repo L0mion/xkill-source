@@ -53,10 +53,11 @@ Renderer::Renderer(HWND windowHandle)
 	managementMath_		= nullptr;
 	managementInstance_ = nullptr;
 	managementSprites_  = nullptr;
+	debugLinesVertexBuffer_ = nullptr;
 
 	ATTRIBUTES_INIT_ALL;
 
-	debugLinesVertexBuffer_ = nullptr;
+	rayBuffer				= nullptr;
 
 	//temp
 	m3dLoader_		= nullptr;
@@ -84,6 +85,7 @@ Renderer::~Renderer()
 	SAFE_DELETE(managementDebug_);
 
 	SAFE_RELEASE(debugLinesVertexBuffer_);
+	SAFE_RELEASE(rayBuffer);
 
 	//temp
 //	SAFE_DELETE(m3dLoader_);
@@ -496,6 +498,8 @@ void Renderer::renderViewportToGBuffer(ViewportData& vpData)
 	{
 		drawBulletPhysicsDebugLines(vpData.view, vpData.proj);
 	}
+
+	drawLaser(vpData.view, vpData.proj);
 	
 	//Unset and clean.
 	managementFX_->unsetAll(devcon);
@@ -762,7 +766,7 @@ DirectX::XMFLOAT4X4	Renderer::buildShadows()
 	//Get shadow transform:
 	SceneBounds bounds;
 	bounds.center = DirectX::XMFLOAT3(0.0f, 0.0f, 0.0f); //Origo.
-	bounds.radius = sqrtf(25.0f * 25.0f); //Radius of scene really ought to be calculated instead of fixed.
+	bounds.radius = 38;//sqrtf(25.0f * 25.0f); //Radius of scene really ought to be calculated instead of fixed.
 
 	LightDescDir dirLight = LightDescDir(); //default construct
 	AttributePtr<Attribute_Light_Dir> ptr_lightDir;
@@ -1168,17 +1172,97 @@ void Renderer::drawBulletPhysicsDebugLines(
 	}
 }
 
+void Renderer::drawLaser(DirectX::XMFLOAT4X4 viewMatrix, DirectX::XMFLOAT4X4 projectionMatrix)
+{
+	ID3D11Device*			device = managementD3D_->getDevice();
+	ID3D11DeviceContext*	devcon = managementD3D_->getDeviceContext();
+
+	std::vector<VertexPosColor> rays;
+
+	while(itrRay.hasNext())
+	{
+		AttributePtr<Attribute_Ray> rayAttribute = itrRay.getNext();
+		
+		if(rayAttribute->render)
+		{
+			rays.push_back(VertexPosColor(rayAttribute->from, Float3(1.0f, 0.3f, 0.3f)));
+			rays.push_back(VertexPosColor(rayAttribute->to, Float3(1.0f, 0.3f, 0.3f)));
+		}
+	}
+
+	if(rays.size() > 0)
+	{
+		SAFE_RELEASE(rayBuffer);
+
+		D3D11_BUFFER_DESC vbd;
+		vbd.Usage			= D3D11_USAGE_DYNAMIC;
+		vbd.ByteWidth		= sizeof(VertexPosColor) * rays.size();
+		vbd.BindFlags		= D3D11_BIND_VERTEX_BUFFER;
+		vbd.CPUAccessFlags	= D3D11_CPU_ACCESS_WRITE;
+		vbd.MiscFlags		= 0;
+
+		D3D11_SUBRESOURCE_DATA vinitData;
+		vinitData.pSysMem = rays.data();
+
+		//Create vertex buffer
+		HRESULT hr;
+		hr = device->CreateBuffer(&vbd, &vinitData, &rayBuffer);
+	}
+
+	if(rayBuffer)
+	{
+		DirectX::XMFLOAT4X4 identityMatrix
+		(
+			1.0f,	0.0f,	0.0f,	0.0f,
+			0.0f,	1.0f,	0.0f,	0.0f,
+			0.0f,	0.0f,	1.0f,	0.0f,
+			0.0f,	0.0f,	0.0f,	1.0f
+		);
+
+		DirectX::XMFLOAT4X4 worldMatrix			= identityMatrix;
+		DirectX::XMFLOAT4X4 worldMatrixInverse	= identityMatrix;
+		DirectX::XMFLOAT4X4 finalMatrix			= managementMath_->calculateFinalMatrix(worldMatrix, viewMatrix, projectionMatrix);
+					
+		managementFX_->setShader(devcon, SHADERID_VS_COLOR);
+		managementFX_->setShader(devcon, SHADERID_PS_COLOR);
+
+		//Update per-object constant buffer.
+		managementCB_->setCB(CB_TYPE_OBJECT, TypeFX_VS, CB_REGISTER_OBJECT, devcon);
+		managementCB_->updateCBObject(
+			devcon, 
+			finalMatrix, 
+			worldMatrix, 
+			worldMatrixInverse);
+
+		UINT stride = sizeof(VertexPosColor);
+		UINT offset = 0;
+		devcon->IASetVertexBuffers(
+			0, 
+			1, 
+			&rayBuffer, 
+			&stride, 
+			&offset);
+
+		managementFX_->setLayout(devcon, LAYOUTID_POS_COLOR);
+
+		devcon->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_LINELIST);
+		devcon->Draw(rays.size(), 0);
+	}
+}
+
 void Renderer::renderHudElements(int viewportIndex)
 {
-	//Since drawn directly in screen space hud elements are not affected by the camera's aspect ratio,
-	//Therefor when there are two viewports the hud elements needs to be scaled by 0.5 along the x-axis
-	//to keep thier proportions.
-	float scaleModifierX = 1.0f;
-	int numViewports = managementViewport_->getNumViewportsX() * managementViewport_->getNumViewportsY();
-	if(numViewports == 2)
-		scaleModifierX = 0.5f;
+	// MATT: Not used anymore, replaced with HUD in Qt
 
-	renderHudElementCrossHair(viewportIndex, scaleModifierX);
+	////Since drawn directly in screen space hud elements are not affected by the camera's aspect ratio,
+	////Therefor when there are two viewports the hud elements needs to be scaled by 0.5 along the x-axis
+	////to keep thier proportions.
+	//float scaleModifierX = 1.0f;
+	//int numViewports = managementViewport_->getNumViewportsX() * managementViewport_->getNumViewportsY();
+	//if(numViewports == 2)
+	//	scaleModifierX = 0.5f;
+
+	//renderHudElementCrossHair(viewportIndex, scaleModifierX);
 }
 void Renderer::renderHudElementCrossHair(int viewportIndex, float scaleModifierX)
 {

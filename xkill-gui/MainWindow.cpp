@@ -123,8 +123,10 @@ void MainWindow::keyPressEvent( QKeyEvent* e )
 	if((e->key()==Qt::Key_F2))
 		SEND_EVENT(&Event(EVENT_STARTGAME));
 
-	
-	
+	// Skip menu
+	if((e->key()==Qt::Key_1))
+		SEND_EVENT(&Event_PostHudMessage("Hello world"));
+
 	//
 	// Menu controls during in-game
 	//

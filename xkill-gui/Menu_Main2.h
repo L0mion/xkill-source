@@ -27,6 +27,7 @@ private:
 
 	// Level menu
 	std::vector<std::string> levelNames;
+	int levelCurrent;
 	QStandardItemModel* levelListModel;
 	QString filePath;
 
@@ -43,6 +44,8 @@ private:
 	void menuResize(); 
 	void hideMenu()
 	{
+		endOpening();
+
 		if(menuStack.size() > 0)
 		{
 			QFrame* topMenu = menuStack.back();
@@ -57,10 +60,13 @@ private:
 		{
 			QFrame* topMenu = menuStack.back();
 			topMenu->show();
-			ui.label_background->show();
 		}
+
+		//ui.label_background->show();
 		raise();
 	}
+	void updateLevelSelectionInterface();
+
 public:
 	Menu_Main2(QWidget* parent);
 	~Menu_Main2();
@@ -97,6 +103,10 @@ private slots:
 			itrPlayer.getNext()->respawnTimer.setStartTime(static_cast<float>(ui.horizontalSlider_respawnTime->value()));
 		}
 
+		// Load selected level
+		std::string levelName = levelNames[levelCurrent];
+		SEND_EVENT(&Event_LoadLevel(levelName));
+
 		// Start game
 		SEND_EVENT(&Event(EVENT_STARTGAME));
 	}
@@ -104,7 +114,7 @@ private slots:
 	{
 		int lastFrame = openingAnimation->frameCount()-1;
 
-		// Stop animaiton when last frame is reached
+		// Stop animation when last frame is reached
 		if(frameNumber >= lastFrame)
 		{
 			endOpening();
@@ -112,12 +122,16 @@ private slots:
 	}
 	void endOpening()
 	{
-		int lastFrame = openingAnimation->frameCount()-1;
-		openingAnimation->jumpToFrame(lastFrame);
-		openingAnimation->stop();
-		ui.label_openingAnimation->hide();
+		// Skip opening, if at opening (index 0)
+		if(menuStack.size()==1)
+		{
+			int lastFrame = openingAnimation->frameCount()-1;
+			openingAnimation->jumpToFrame(lastFrame);
+			openingAnimation->stop();
+			ui.label_openingAnimation->hide();
 
-		slot_menu_main();
+			slot_menu_main();
+		}
 	}
 	void setNumPlayers(int numPlayers)
 	{
@@ -159,4 +173,6 @@ private slots:
 	{
 		SEND_EVENT(&Event(EVENT_QUIT_TO_DESKTOP));
 	}
+	void slot_menu_next_level();
+	void slot_menu_previous_level();
 };

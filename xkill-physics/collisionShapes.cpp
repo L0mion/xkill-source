@@ -20,17 +20,17 @@ CollisionShapes::CollisionShapes()
 	itrMesh = ATTRIBUTE_MANAGER->mesh.getIterator();
 	itrCamera = ATTRIBUTE_MANAGER->camera.getIterator();
 	collisionShapes_ = new btAlignedObjectArray<btCollisionShape*>();
+	triangleMeshDeallocation_ = new btAlignedObjectArray<btTriangleMesh*>();
+	unusedCollisionShapes_ = new btAlignedObjectArray<btCollisionShape*>();
 	defaultShape_ = new btSphereShape(btScalar(1.0f));
 	//frustumShape_ = nullptr;
 	importer_ = new btBulletWorldImporter();
 
 	scatterProjectileCollisionShape = new btSphereShape(0.15f);
-	/* The boundingSphereRadius is too large, that is why this code is commented out (2013-02-21 13.17)
-	btVector3 boundingSphereCenter;
-	btScalar boundingSphereRadius;
-	getCollisionShape(XKILL_Enums::ModelId::PROJECTILE_SCATTER)->getBoundingSphere(boundingSphereCenter, boundingSphereRadius);
-	scatterProjectileCollisionShape = new btSphereShape(boundingSphereRadius);
-	*/
+
+	float height = 0.75f;
+	float radius = 0.25f;
+	playerCollisionShape = new btCapsuleShape(radius, height);
 }
 
 CollisionShapes::~CollisionShapes()
@@ -39,9 +39,23 @@ CollisionShapes::~CollisionShapes()
 
 	delete collisionShapes_;
 	delete defaultShape_;
-	delete importer_;
+
+	for(int i=0;i<triangleMeshDeallocation_->size();i++)
+	{
+		delete triangleMeshDeallocation_->at(i);
+	}
+	delete triangleMeshDeallocation_;
+
+	for(int i=0;i<unusedCollisionShapes_->size();i++)
+	{
+		delete unusedCollisionShapes_->at(i);
+	}
+	delete unusedCollisionShapes_;
+	
+	deallocateImporter();
 
 	delete scatterProjectileCollisionShape;
+	delete playerCollisionShape;
 }
 
 btCollisionShape* CollisionShapes::getCollisionShape(unsigned int meshId)
@@ -63,210 +77,73 @@ void CollisionShapes::loadCollisionShapes()
 {
 	unloadCollisionShapes();
 	importer_ = new btBulletWorldImporter();
-
-	//btTriangleMesh file load (memory leak, otherwise functioning)
 	
-	//check lunch
+	DEBUGPRINT("-->Loading collision shapes...");
 
-	//while(itrMesh.hasNext())
-	//{
-	//	auto meshAttribute = itrMesh.getNext();
-
-	//	//----------------------------------
-	//	//-->check MEMORY LEAK
-	//	btTriangleMesh *triangleMesh = new btTriangleMesh(); 
-	//	//<--
-	//	//----------------------------------
-
-	//	auto vertices = meshAttribute->mesh.vertices_;
-	//	for( unsigned int i = 0; i < meshAttribute->mesh.subsets_.size(); i++)
-	//	{
-	//		auto indices = meshAttribute->mesh.subsets_.at(i).indices_;
-	//		for(unsigned int k = 0; k+2 < indices.size(); k+=3)
-	//		{
-	//			triangleMesh->addTriangle(btVector3(vertices[indices[k]].position_.x,
-	//												vertices[indices[k]].position_.y,
-	//												vertices[indices[k]].position_.z),
-	//										btVector3(vertices[indices[k+1]].position_.x,
-	//												vertices[indices[k+1]].position_.y,
-	//												vertices[indices[k+1]].position_.z),
-	//										btVector3(vertices[indices[k+2]].position_.x,
-	//												vertices[indices[k+2]].position_.y,
-	//												vertices[indices[k+2]].position_.z));
-	//		}
-	//	}
-
-	//	if(meshAttribute->dynamic)
-	//	{
-	//		btConvexTriangleMeshShape tcs(triangleMesh);
-	//	
-	//		btShapeHull hull(&tcs);
-	//		hull.buildHull(0);
-	//		tcs.setUserPointer(&hull);
-	//		btConvexHullShape* convexShape = new btConvexHullShape;
-	//		for(int i=0; i< hull.numVertices(); i++)
-	//		{
-	//			convexShape->addPoint(hull.getVertexPointer()[i]);
-	//		}
-
-	//		collisionShapes_->push_back(convexShape);
-	//		delete triangleMesh;
-	//	}
-	//	else
-	//	{
-	//		btBvhTriangleMeshShape* staticShape = new btBvhTriangleMeshShape(triangleMesh,true);
-	//		collisionShapes_->push_back(staticShape);
-	//		int a = staticShape->getShapeType();
-	//		//triangleMeshes_push_back(triangleMesh);
-	//	}
-
-	//	unsigned int meshID		= meshAttribute->meshID;
-	//	unsigned int meshIndex	= collisionShapes_->size() - 1;
-	//	std::pair<unsigned int, unsigned int> idtoindex(meshID, meshIndex);
-	//	collisionShapesIdToIndex_.insert(idtoindex);
-	//}
-
-
+	std::string resourcePath = "../../xkill-resources/";
 	//--------------------------------------------------------------------------------------
-	// Load .bullet file for current level
+	// Load .bullet file corresponding with level pieces.
 	//--------------------------------------------------------------------------------------
+	
 	Settings* settings = ATTRIBUTE_MANAGER->settings;
-	std::string path = std::string("../../xkill-resources/xkill-level/") + settings->currentLevel + "/" + settings->currentLevel + ".bullet";
-	if(!importer_->loadFile(path.c_str()))
+	std::string path = std::string(resourcePath + "xkill-level/") + settings->currentLevel + "/" + settings->currentLevel + ".bullet";
+	DEBUGPRINT("Trying to load level .bullet file with path... " << path);
+	if(importer_->loadFile(path.c_str())) //unknown chunk
 	{
-		ERROR_MESSAGEBOX("Level .bullet-file could not be loaded.\nPath: " + path);
+		DEBUGPRINT("...suceeded in loaded level .bullet file");
+		findMappingBetweenMeshFilesAndBulletFiles();
+		
+		//Reallocate importer to prevent loading the level collision shapes twice
+		deallocateImporter();
+		importer_ = new btBulletWorldImporter();
+
 	}
-
-	//--------------------------------------------------------------------------------------
-	// Load .bullet files for models
-	//--------------------------------------------------------------------------------------
-	while(itrMesh.hasNext())
+	else //If no level .bullet file exists, load triangles as collision shape
 	{
-		AttributePtr<Attribute_Mesh> ptr_mesh = itrMesh.getNext();
-		if(collisionShapesIdToIndex_.find(ptr_mesh->meshID) == collisionShapesIdToIndex_.end())
+		DEBUGPRINT("...failed to load level .bullet file" << "\n\nThe level will be loaded with triangles as collision shapes.");
+		while(itrMesh.hasNext())
 		{
-			std::string name = ptr_mesh->fileName;
-			name = name.substr(0,name.find("."));
-			name = name.append("RigidBodyShape");
-
-			btCollisionShape* collisionShape;
-			btCollisionShape* loadedShape;
-			loadedShape = importer_->getCollisionShapeByName(name.c_str());
-			if(loadedShape != nullptr)
+			AttributePtr<Attribute_Mesh> ptr_mesh = itrMesh.getNext();
+			if(ptr_mesh->meshID >=100) //Level pieces have mesh ids higher than 99
 			{
-				btVector3 scaling = loadedShape->getLocalScaling();
-				collisionShape = new btBoxShape(scaling/2);
-				collisionShape->setMargin(0.0f);
-				collisionShape->setLocalScaling(btVector3(1,1,1));
-
-				std::pair<unsigned int, unsigned int>  idToIndex(ptr_mesh->meshID,collisionShapes_->size());
-				collisionShapesIdToIndex_.insert(idToIndex);
-				btCompoundShape* compoundShape = new btCompoundShape();
-				collisionShape->setMargin(0.0);
-				
-				compoundShape->addChildShape(importer_->getRigidBodyByName(name.c_str())->getWorldTransform(),collisionShape);
-				compoundShape->setMargin(0.0);
-				collisionShapes_->push_back(compoundShape);
-				collisionShapes_->push_back(collisionShape);
-			}
-			else
-			{
-				//Load from model file
-				std::string path = std::string("../../xkill-resources/xkill-models/");
-				name = ptr_mesh->fileName;
-				name = name.substr(0,name.find("."));
-				path = path.append(name);
-				path = path.append(".bullet");
-				name = name.append("RigidBody");
-
-				if(importer_->loadFile(path.c_str()))
-					loadedShape = importer_->getCollisionShapeByIndex(importer_->getNumCollisionShapes()-1);//name.c_str());
-				if(loadedShape != nullptr)
-				{
-					if(!name.compare("processRigidBody"))
-					{
-						btScalar height = 0.75f;
-						btScalar radius = 0.25f;
-						collisionShape = new btCapsuleShape(radius, height);
-						//btBoxShape* box = static_cast<btBoxShape*>(loadedShape);
-						//btVector3 half = box->getHal fExtentsWithMargin();
-						//btCapsuleShape* capsule = new btCapsuleShape( half.x() > half.z() ? half.x() : half.z(), half.y());
-						//btSphereShape* sphere = new btSphereShape(0.2f);
-						//collisionShape = capsule;
-						//collisionShapes_->push_back(sphere);
-						//collisionShapes_->push_back(capsule);
-						//collisionShape = sphere;
-						btCompoundShape* cs = new btCompoundShape();
-						cs->addChildShape(btTransform(btQuaternion(0.0f,0.0f,0.0f,0.0f), btVector3(0.0f,0.0f,0.0f)),collisionShape);
-						std::pair<unsigned int, unsigned int>  idToIndex(ptr_mesh->meshID,collisionShapes_->size());
-						collisionShapesIdToIndex_.insert(idToIndex);
-						collisionShapes_->push_back(collisionShape);
-						cs->setMargin(0.00);
-						collisionShapes_->push_back(cs);
-					}
-					else
-					{
-						name = name.append("Shape");
-						if(loadedShape->getShapeType() == BOX_SHAPE_PROXYTYPE)
-						{
-							btVector3 scaling = loadedShape->getLocalScaling();
-							collisionShape = new btBoxShape(scaling/2);
-							collisionShape->setMargin(0.0f);
-							collisionShape->setLocalScaling(btVector3(1,1,1));
-							//collisionShape = new btBoxShape(*static_cast<btBoxShape*>(loadedShape));
-						}
-						else if(loadedShape->getShapeType() == CAPSULE_SHAPE_PROXYTYPE)
-						{
-							collisionShape = new btCapsuleShape(*static_cast<btCapsuleShape*>(loadedShape));
-						}
-						btCompoundShape* cs = new btCompoundShape();
-
-						btRigidBody* rb =importer_->getRigidBodyByName(name.c_str());
-						btTransform transform;
-						if(rb!=nullptr)
-						{
-							transform = rb->getWorldTransform();
-						}
-						else
-						{
-							transform.setIdentity();
-						}
-						cs->addChildShape(transform,collisionShape);
-						std::pair<unsigned int, unsigned int>  idToIndex(ptr_mesh->meshID,collisionShapes_->size());
-						collisionShapesIdToIndex_.insert(idToIndex);
-						collisionShapes_->push_back(collisionShape);
-						cs->setMargin(0.00);
-						collisionShapes_->push_back(cs);
-					}
-				}
+				loadTrianglesFromMeshAsCollisionShape(ptr_mesh);
 			}
 		}
 	}
+
+	//--------------------------------------------------------------------------------------
+	// Load all .bullet files potentially corresponding to mesh files.
+	// Assume "center1Corner.obj" corresponds to .bullet file "center1Corner.bullet".
+	//--------------------------------------------------------------------------------------
+	DEBUGPRINT("Mapping meshes with rigid bodies in .bullet files...");
+	while(itrMesh.hasNext())
+	{
+		AttributePtr<Attribute_Mesh> ptr_mesh = itrMesh.getNext();
+		std::string meshName = ptr_mesh->fileName;
+		meshName = meshName.substr(0,meshName.find("."));
+
+		std::string path = std::string(resourcePath + "xkill-models/");
+		path = path.append(meshName + ".bullet");
+		if(importer_->loadFile(path.c_str()))
+		{
+			DEBUGPRINT("Assuming mapping between " + ptr_mesh->fileName + " and " + meshName + ".bullet");
+		}
+	}
+	findMappingBetweenMeshFilesAndBulletFiles();
 }
 
 void CollisionShapes::unloadCollisionShapes()
 {
-	for(int i = 0; i < collisionShapes_->size(); i++)
+	int nrOfChildShapes = collisionShapes_->size();
+	for(int i = 0; i < nrOfChildShapes; i++)
 	{
-		if(collisionShapes_->at(i)->getShapeType() == COMPOUND_SHAPE_PROXYTYPE)
-		{
-			for(int j = static_cast<btCompoundShape*>(collisionShapes_->at(i))->getNumChildShapes()-1; j > 0 ; j--)
-			{
-				delete static_cast<btCompoundShape*>(collisionShapes_->at(i))->getChildShape(j);
-			}
-		}
 		delete collisionShapes_->at(i);
 	}
-
 	collisionShapes_->clear();
+
 	collisionShapesIdToIndex_.clear();
 
-	if(importer_)
-	{
-		importer_->deleteAllData();
-		delete importer_;
-		importer_ = nullptr;
-	}
+	deallocateImporter();
 }
 
 
@@ -337,4 +214,123 @@ btCollisionShape* CollisionShapes::getFrustumShape(unsigned int cameraIndex)
 	//static btSphereShape a(1);	
 	//return &a;
 	return frustumShape_;
+}
+
+void CollisionShapes::addBoxCollisionShape(btVector3* scaling, btTransform* transform, int meshId)
+{
+	btCollisionShape* collisionShape = new btBoxShape(*scaling/2);
+	collisionShape->setMargin(0.0f);
+	collisionShape->setLocalScaling(btVector3(1,1,1));
+
+	//--------------------------------------------------------------------------------------
+	// Create a compound shape with the created box as child shape.
+	//--------------------------------------------------------------------------------------
+	btCompoundShape* compoundShape = new btCompoundShape();
+	compoundShape->addChildShape(*transform, collisionShape);
+	compoundShape->setMargin(0.0);
+	mapCollisionShapeToGlobalMeshId(meshId, compoundShape);
+
+	unusedCollisionShapes_->push_back(collisionShape); //Add this to deallocation list
+}
+
+void CollisionShapes::loadTrianglesFromMeshAsCollisionShape(AttributePtr<Attribute_Mesh> ptr_mesh)
+{
+	btTriangleMesh* triangleMesh = new btTriangleMesh();
+
+	std::vector<VertexDesc> vertices = ptr_mesh->mesh.vertices_;
+	for(unsigned int i=0;i<ptr_mesh->mesh.subsets_.size();i++)
+	{
+		std::vector<unsigned int> indices = ptr_mesh->mesh.subsets_.at(i).indices_;
+		for(unsigned int j=0;j+2<indices.size();j+=3)
+		{
+			btVector3 vertexA = btVector3(vertices[indices[j]].position_.x, vertices[indices[j]].position_.y, vertices[indices[j]].position_.z);
+			btVector3 vertexB = btVector3(vertices[indices[j+1]].position_.x, vertices[indices[j+1]].position_.y, vertices[indices[j+1]].position_.z);
+			btVector3 vertexC = btVector3(vertices[indices[j+2]].position_.x, vertices[indices[j+2]].position_.y, vertices[indices[j+2]].position_.z);
+
+			triangleMesh->addTriangle(vertexA, vertexB, vertexC);
+		}
+	}
+	if(ptr_mesh->dynamic)
+	{
+		btConvexTriangleMeshShape tcs(triangleMesh);
+
+		btShapeHull hull(&tcs);
+		hull.buildHull(0);
+		//tcs.setUserPointer(&hull);
+		btConvexHullShape* convexShape = new btConvexHullShape;
+		for(int i=0; i< hull.numVertices(); i++)
+		{
+			convexShape->addPoint(hull.getVertexPointer()[i]);
+		}
+
+		mapCollisionShapeToGlobalMeshId(ptr_mesh->meshID, convexShape);
+		delete triangleMesh;
+	}
+	else
+	{
+		btBvhTriangleMeshShape* triangleMeshShape = new btBvhTriangleMeshShape(triangleMesh, true);
+		mapCollisionShapeToGlobalMeshId(ptr_mesh->meshID, triangleMeshShape);
+		triangleMeshDeallocation_->push_back(triangleMesh);
+	}
+}
+
+void CollisionShapes::mapCollisionShapeToGlobalMeshId(int meshId, btCollisionShape* collisionShape)
+{
+	std::pair<unsigned int, unsigned int> idToIndex(meshId, collisionShapes_->size());
+	collisionShapesIdToIndex_.insert(idToIndex);
+
+	collisionShapes_->push_back(collisionShape);
+}
+
+void CollisionShapes::findMappingBetweenMeshFilesAndBulletFiles()
+{
+	//--------------------------------------------------------------------------------------
+	// Find mapping between mesh files and collision shapes contained in .bullet files.
+	// Assume that a mesh file name of "center1Corner.obj" corresponds to a collision shape named "center1CornerRigidBodyShape".
+	//--------------------------------------------------------------------------------------
+	while(itrMesh.hasNext())
+	{
+		AttributePtr<Attribute_Mesh> ptr_mesh = itrMesh.getNext();
+		
+		std::string name = ptr_mesh->fileName;	//"center1Corner.obj"
+		name = name.substr(0,name.find("."));	//"center1Corner"
+		name = name.append("RigidBodyShape");	//"center1CornerRigidBodyShape"
+
+		btRigidBody* rigidbody = importer_->getRigidBodyByName(name.c_str()); //Find rigid body inside .bullet file
+		if(rigidbody != NULL)
+		{
+			btCollisionShape* loadedShape = rigidbody->getCollisionShape(); //Extract collision shape from rigid body found inside .bullet file
+			if(loadedShape != NULL)
+			{
+				if(loadedShape->getShapeType() == BOX_SHAPE_PROXYTYPE)
+				{
+					btVector3 scaling = loadedShape->getLocalScaling();			
+					btTransform transform = rigidbody->getWorldTransform();
+					addBoxCollisionShape(&scaling, &transform, ptr_mesh->meshID);
+				}
+				else
+				{
+					ERROR_MESSAGEBOX("CollisionShapes::findMappingBetweenMeshFilesAndBulletFiles, unsupported shape type found in rigid body " + name);
+				}
+			}
+			else
+			{
+				ERROR_MESSAGEBOX("CollisionShapes::findMappingBetweenMeshFilesAndBulletFiles, rigid body " + name + " has no collision shape.");
+			}
+		}
+		else
+		{
+			loadTrianglesFromMeshAsCollisionShape(ptr_mesh); //check 2013-02-27 17.03
+		}
+	}
+}
+
+void CollisionShapes::deallocateImporter()
+{
+	if(importer_)
+	{
+		importer_->deleteAllData();
+		delete importer_;
+		importer_ = nullptr;
+	}
 }

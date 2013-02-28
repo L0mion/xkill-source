@@ -474,7 +474,7 @@ struct DLL_U Attribute_Player : public IAttribute
 	AttributePtr<Attribute_Camera>			ptr_camera;
 	AttributePtr<Attribute_Health>			ptr_health;
 	AttributePtr<Attribute_WeaponStats>		ptr_weaponStats;
-	AttributePtr<Attribute_Spatial>			ptr_weapon_spatial;
+	AttributePtr<Behavior_Offset>			ptr_weapon_offset;
 	AttributePtr<Attribute_Spatial>			ptr_weaponFireLocation_spatial;
 
 	static int nextId;
@@ -680,6 +680,8 @@ struct DLL_U Attribute_Ray : public IAttribute
 {
 	Attribute_Ray();
 	~Attribute_Ray();
+
+	AttributePtr<Attribute_Render> ptr_render;
 
 	Float3 from;
 	Float3 to;

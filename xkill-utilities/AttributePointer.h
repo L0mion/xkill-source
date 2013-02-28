@@ -54,6 +54,11 @@ public:
 		return _index == ptr._index;
 	}
 
+	bool operator!=(AttributePtr<T>& ptr)
+	{
+		return _index != ptr._index;
+	}
+
 	static void initClass(std::vector<T>* hostArray)
 	{
 		/*_hostArray = hostArray;

@@ -24,7 +24,7 @@ PhysicsObject::PhysicsObject()
 	itrPhysics_ = ATTRIBUTE_MANAGER->physics.getIterator();
 	itrSpatial_PhysicsObject = ATTRIBUTE_MANAGER->spatial.getIterator();
 	itrPosition_PhysicsObject = ATTRIBUTE_MANAGER->position.getIterator();
-	outOfBoundsIfYIsLowerThanThis = -5.0f;
+	outOfBoundsIfYIsLowerThanThis = -10.0f;
 }
 
 PhysicsObject::~PhysicsObject()
@@ -42,7 +42,11 @@ btCollisionShape* PhysicsObject::subClassSpecificCollisionShape()
 	AttributePtr<Attribute_Physics> ptr_physics = itrPhysics_.at(attributeIndex_);
 
 	int meshID = ptr_physics->meshID;
-	btCollisionShape* collisionShape = CollisionShapes::Instance()->getCollisionShape(ptr_physics->meshID);
+	if(meshID == 3)
+	{
+		int g =5;
+	}
+	btCollisionShape* collisionShape = CollisionShapes::Instance()->getCollisionShape(meshID);
 
 	return collisionShape;
 }
@@ -182,7 +186,8 @@ void PhysicsObject::writeNonSynchronizedPhysicsObjectDataToPhysicsAttribute()
 	//ptr_physics->meshID = //not stored in physics object
 }
 void PhysicsObject::onUpdate(float delta)
-{	if(getWorldTransform().getOrigin().y() < outOfBoundsIfYIsLowerThanThis)
+{	
+	if(getWorldTransform().getOrigin().y() < outOfBoundsIfYIsLowerThanThis)
 	{
 		handleOutOfBounds();
 	}

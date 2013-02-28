@@ -75,7 +75,7 @@ Menu_Editor::Menu_Editor( Ui::MainWindowClass& ui, QWidget* parent ) : QWidget(p
 	ui.checkBox_showDebugPhysics->setChecked(false);
 #ifdef XKILL_DEBUG
 	{
-		ui.checkBox_showDebugPhysics->setChecked(true);
+		ui.checkBox_showDebugPhysics->setChecked(false);
 	}
 #endif
 }

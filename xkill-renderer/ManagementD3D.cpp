@@ -282,7 +282,7 @@ void ManagementD3D::clearDepthBuffer()
 }
 void ManagementD3D::clearBackBuffer()
 {
-	devcon_->ClearUnorderedAccessViewFloat(uavBackBuffer_, CLEAR_COLOR_BACKBUFFER);
+	devcon_->ClearUnorderedAccessViewFloat(uavBackBuffer_, CLEAR_COLOR_BACKBUFFER_BLACK);
 }
 
 ID3D11Device*				ManagementD3D::getDevice()			const

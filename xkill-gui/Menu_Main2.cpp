@@ -25,6 +25,9 @@ void Menu_Main2::loadOpeningGif()
 
 Menu_Main2::Menu_Main2( QWidget* parent ) : QMainWindow()
 {
+	// Make overlay accessible to other widgets
+	SETTINGS->overlayWidget = this;
+
 	// Init
 	loadCustomFonts();
 	this->parent = parent;
@@ -61,6 +64,7 @@ Menu_Main2::Menu_Main2( QWidget* parent ) : QMainWindow()
 	ui.frame_audio->hide();
 	ui.frame_input->hide();
 	ui.frame_credits->hide();
+	//ui.label_background->hide();
 	show();
 
 	// show main menu
@@ -78,6 +82,9 @@ Menu_Main2::Menu_Main2( QWidget* parent ) : QMainWindow()
 	connect(ui.pushButton_quit, SIGNAL(clicked()),	this, SLOT(slot_menu_quit()));
 	connect(ui.horizontalSlider_numPlayers, SIGNAL(valueChanged(int)),	this, SLOT(setNumPlayers(int)));
 
+	connect(ui.pushButton_levelNext, SIGNAL(clicked()),	this, SLOT(slot_menu_next_level()));
+	connect(ui.pushButton_levelPrevious, SIGNAL(clicked()),	this, SLOT(slot_menu_previous_level()));
+	
 	// standard values
 	ui.horizontalSlider_numPlayers->setValue(SETTINGS->numPlayers);
 
@@ -87,16 +94,20 @@ Menu_Main2::Menu_Main2( QWidget* parent ) : QMainWindow()
 	ammo_Menu = new Menu_Ammo(&ui, this);
 	firingMode_Menu = new Menu_FiringMode(&ui, this);
 	sound_Menu = new Menu_Sound(&ui, this);
-	//hud = new Menu_HUDManager(this);
+	hud = new Menu_HUDManager(this);
 
 	// init level menu
 	filePath = QString("../../xkill-resources/xkill-scripts/levels.xml");
-	//editorModel->setHorizontalHeaderItem(1, new QStandardItem("ID"));
-	QStringList columnNames;
+	levelCurrent = 0;
+
 	Event_GetFileList* fileList = new Event_GetFileList("../../xkill-resources/xkill-level/", ".mdldesc");
 	SEND_EVENT(fileList);
 	std::vector<std::string> filenames = fileList->filenames;
 	delete fileList;
+
+	//editorModel->setHorizontalHeaderItem(1, new QStandardItem("ID"));
+
+	QStringList columnNames;
 	levelListModel = new QStandardItemModel(0, filenames.size(), this);
 	for(unsigned int i = 0; i < filenames.size(); i++)
 	{
@@ -114,9 +125,27 @@ Menu_Main2::Menu_Main2( QWidget* parent ) : QMainWindow()
 		levelListModel->appendRow(stdItem);
 	}
 
-	SEND_EVENT(&Event_LoadLevel(levelNames[0]));
-	SETTINGS->currentLevel = levelNames[0];
 	//ui.comboBox_LevelSelect->setModel(levelListModel);
+
+	SEND_EVENT(&Event_LoadLevel(levelNames[levelCurrent]));
+	SETTINGS->currentLevel = levelNames[levelCurrent];
+
+	updateLevelSelectionInterface();
+}
+
+void Menu_Main2::updateLevelSelectionInterface()
+{
+	std::string levelName = levelNames[levelCurrent];
+	std::string imagePath = "../../xkill-resources/xkill-level/" + levelName + "/" + levelName + ".png";
+
+	ui.label_levelNameText->setText(levelName.c_str());
+
+	ui.label_level_image->setPixmap(QPixmap(QString::fromUtf8(imagePath.c_str())));
+	const QPixmap* pixmap = ui.label_level_image->pixmap();
+	if(pixmap->isNull()) //If no level-specific image was found, try displaying a default image as replacement
+	{
+		ui.label_level_image->setPixmap(QPixmap(QString::fromUtf8("../../xkill-resources/xkill-gui/images/icons/levels/arena1.png")));
+	}
 }
 
 void Menu_Main2::mousePressEvent( QMouseEvent *e )
@@ -317,3 +346,16 @@ void Menu_Main2::closeEvent( QCloseEvent* event )
 	SEND_EVENT(&Event(EVENT_QUIT_TO_DESKTOP));
 }
 
+void Menu_Main2::slot_menu_next_level()
+{
+	levelCurrent++;
+	levelCurrent %= levelNames.size();
+	updateLevelSelectionInterface();
+}
+
+void Menu_Main2::slot_menu_previous_level()
+{
+	levelCurrent--;
+	levelCurrent %= levelNames.size();
+	updateLevelSelectionInterface();
+}

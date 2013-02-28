@@ -4,6 +4,7 @@
 #include "BulletCollision/NarrowPhaseCollision/btRaycastCallback.h"
 #include "physicsUtilities.h"
 #include "debugDrawDispatcher.h"
+#include "collisionShapes.h"
 
 AttributeIterator<Attribute_Input> itrInput;
 AttributeIterator<Attribute_Physics> itrPhysics_3;
@@ -15,7 +16,7 @@ AttributeIterator<Attribute_Health> itrHealth;
 PlayerPhysicsObject::PlayerPhysicsObject()
 	: PhysicsObject()
 {
-	yaw_ = 0;
+	
 
 	itrInput = ATTRIBUTE_MANAGER->input.getIterator();
 	itrPhysics_3 = ATTRIBUTE_MANAGER->physics.getIterator();
@@ -23,6 +24,9 @@ PlayerPhysicsObject::PlayerPhysicsObject()
 	itrPlayer = ATTRIBUTE_MANAGER->player.getIterator();
 	itrHealth = ATTRIBUTE_MANAGER->health.getIterator();
 	//itrRay_PlayerPhysicsObject = ATTRIBUTE_MANAGER->ray.getIterator();
+
+	
+	yaw_ = 0;
 }
 
 PlayerPhysicsObject::~PlayerPhysicsObject()
@@ -33,7 +37,8 @@ bool PlayerPhysicsObject::subClassSpecificInitHook()
 {
 	forceActivationState(DISABLE_DEACTIVATION); //Prevent the player from getting stuck when standing still
 	//setCollisionFlags(getCollisionFlags() | btCollisionObject::CF_KINEMATIC_OBJECT);
-
+	Float4 q= itrSpatial.at(attributeIndex_)->rotation;
+	yaw_ = -atan2(2*q.y*q.w-2*q.x*q.z , 1 - 2*q.y*q.y - 2*q.z*q.z);
 	return true;
 }
 
@@ -44,7 +49,7 @@ void PlayerPhysicsObject::onUpdate(float delta)
 	//--------------------------------------------------------------------------------------
 	// Hovering
 	//-------------------------------------------------------------------------------------
-	float height = 1;
+	float height = 1.5;
 	std::vector<int> playerAttributes = itrPhysics_3.ownerAt(attributeIndex_)->getAttributes(ATTRIBUTE_PLAYER);
 	for(unsigned int i=0;i<playerAttributes.size();i++)
 	{
@@ -206,10 +211,15 @@ void PlayerPhysicsObject::handleInput(float delta)
 			float jetpackPower = -getGravity().y()*1.5f;
 			world = getWorldTransform();
 			btVector3 velocity = getLinearVelocity();
-			if(world.getOrigin().y() < 8.0f)
+			if(world.getOrigin().y() < 18.0f)
 			{
 				setLinearVelocity(btVector3(move.x(), velocity.y()+jetpackPower*delta, move.z()));
 			}
 		}
 	}
+}
+
+btCollisionShape* PlayerPhysicsObject::subClassSpecificCollisionShape()
+{
+	return CollisionShapes::Instance()->playerCollisionShape;
 }

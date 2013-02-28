@@ -124,7 +124,7 @@ void CS_Lighting(
 	//Sample depth as quickly as possible to ensure that we do not evualuate irrelevant pixels.
 	if(!validPixel)
 		return;
-	
+
 	float3 normal = gNormal.xyz;
 	normal.x *= 2.0f; normal.x -= 1.0f;
 	normal.y *= 2.0f; normal.y -= 1.0f;
@@ -201,6 +201,5 @@ void CS_Lighting(
 		uint2(
 			threadIDDispatch.x + viewportTopX, 
 			threadIDDispatch.y + viewportTopY)] = 
-		//float4(bufferShadowMap.SampleLevel(ss, texCoord, 0).rrr, 1.0f);
 		float4(litPixel, 1.0f);
 }

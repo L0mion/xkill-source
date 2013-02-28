@@ -38,6 +38,8 @@ class exportLevel : public MPxCommand
 		void commandpart4(); //!< export objs
 		void commandpart5(); //!< export .mdldesc
 
+		bool quad;
+
 		MSelectionList rigidbodies;  //!< holds selected rigidbodies in scene
 		MSelectionList meshes;  //!< holds selected meshes in scene
 		MSelectionList instances;  //!< holds selected instances in scene
@@ -604,6 +606,67 @@ void exportLevel::commandpart5()
 					row = row + mRotation.w;
 					row = row + "\n";
 					rows = rows +  row;
+
+					if(quad)
+					{
+						MGlobal::displayInfo(output);
+						row = "w ";
+						row = row + (i+100);
+						row = row + " ";
+						row = row + -mTranslation.x;
+						row = row + " ";
+						row = row + mTranslation.y;
+						row = row + " ";
+						row = row + mTranslation.z;
+						row = row + " ";
+						row = row + mRotation.x;
+						row = row + " ";
+						row = row + mRotation.y;
+						row = row + " ";
+						row = row + mRotation.z;
+						row = row + " ";
+						row = row + mRotation.w;
+						row = row + "\n";
+						rows = rows +  row;
+
+						row = "w ";
+						row = row + (i+100);
+						row = row + " ";
+						row = row + mTranslation.x;
+						row = row + " ";
+						row = row + mTranslation.y;
+						row = row + " ";
+						row = row + -mTranslation.z;
+						row = row + " ";
+						row = row + mRotation.x;
+						row = row + " ";
+						row = row + mRotation.y;
+						row = row + " ";
+						row = row + mRotation.z;
+						row = row + " ";
+						row = row + mRotation.w;
+						row = row + "\n";
+						rows = rows +  row;
+
+						row = "w ";
+						row = row + (i+100);
+						row = row + " ";
+						row = row + -mTranslation.x;
+						row = row + " ";
+						row = row + mTranslation.y;
+						row = row + " ";
+						row = row + -mTranslation.z;
+						row = row + " ";
+						row = row + mRotation.x;
+						row = row + " ";
+						row = row + mRotation.y;
+						row = row + " ";
+						row = row + mRotation.z;
+						row = row + " ";
+						row = row + mRotation.w;
+						row = row + "\n";
+						rows = rows +  row;
+					}
 				}
 			}
 		}
@@ -772,15 +835,23 @@ MStatus exportLevel::doIt( const MArgList& args)
 	{
 		if( args.asString(i) == "-v" || args.asString(i) == "-verbose" )
 		{
+			MGlobal::displayInfo("verboseflag\n");
 			verbose = true;
 		}
 		if( args.asString(i) == "-c" || args.asString(i) == "-clear" )
 		{
+			MGlobal::displayInfo("clearflag\n");
 			clearhist = true;
 		}
 		if( args.asString(i) == "-p" || args.asString(i) == "-part" )
 		{
+			MGlobal::displayInfo("partflag\n");
 			part = args.asInt(++i);
+		}
+		if( args.asString(i) == "-q" || args.asString(i) == "-quad" )
+		{
+			MGlobal::displayInfo("quadflag\n");
+			quad = true;
 		}
 	}
 	if(part == -1)
@@ -852,7 +923,7 @@ void* exportLevel::creator()
 }
 MStatus initializePlugin( MObject obj ) //!< Registers the plugin command data
 {
-    MFnPlugin plugin( obj, "XKill-team", "0.1", "Any" );
+    MFnPlugin plugin( obj, "XKill-team", "0.2", "Any" );
     plugin.registerCommand( "exportLevel", exportLevel::creator );
     return MS::kSuccess;
 } 

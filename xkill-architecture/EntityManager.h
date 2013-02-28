@@ -158,7 +158,7 @@ public:
 	{
 		Entity* entity = createEntity();
 		entityFactory.createWorldEntity(entity, e);
-		DEBUGPRINT("ENTITYMANAGER: Created world entity " << entity->getID());
+		//DEBUGPRINT("ENTITYMANAGER: Created world entity " << entity->getID());
 	}
 
 	void event_CreateInputDevice(Event_CreateInputDevice* e)
