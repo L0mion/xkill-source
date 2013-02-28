@@ -359,15 +359,18 @@ HRESULT ManagementBuffer::initRandom(ID3D11Device* device)
 	D3D11_SUBRESOURCE_DATA initData = { 0 };
 	initData.SysMemPitch = RANDOM_DIM * sizeof(XMCOLOR);
 
+	//Generate set of random values used to rotate offset kernel.
+	//Z component is zero due to our kernel being oriented along the z-axis. 
+	//Because of that, we want the random rotation to be around that axis.
 	XMCOLOR color[256 * 256];
 	for(int i = 0; i < 256; ++i)
 	{
 		for(int j = 0; j < 256; ++j)
 		{
 			DirectX::XMFLOAT3 v(
-				GET_RANDOM(), 
-				GET_RANDOM(), 
-				GET_RANDOM());
+				GET_RANDOM(-1.0f, 1.0f), //GET_RANDOM()
+				GET_RANDOM(-1.0f, 1.0f), //GET_RANDOM()
+				0.0f);					 //GET_RANDOM()
 
 			color[i * 256 + j] = XMCOLOR(v.x, v.y, v.z, 0.0f);
 		}
