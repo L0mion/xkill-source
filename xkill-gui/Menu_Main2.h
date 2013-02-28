@@ -103,6 +103,10 @@ private slots:
 			itrPlayer.getNext()->respawnTimer.setStartTime(static_cast<float>(ui.horizontalSlider_respawnTime->value()));
 		}
 
+		// Load selected level
+		std::string levelName = levelNames[levelCurrent];
+		SEND_EVENT(&Event_LoadLevel(levelName));
+
 		// Start game
 		SEND_EVENT(&Event(EVENT_STARTGAME));
 	}
@@ -140,8 +144,6 @@ private slots:
 	void slot_menu_start()
 	{
 		push_menu(ui.frame_start);
-		std::string levelName = levelNames[levelCurrent];
-		SEND_EVENT(&Event_LoadLevel(levelName));
 	}
 	void slot_menu_settings()
 	{
