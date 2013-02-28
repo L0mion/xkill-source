@@ -88,6 +88,7 @@ enum DLL_U EventType
 	EVENT_PLAYER_EXECUTING,
 	EVENT_PLAYER_DONE_EXECUTING,
 	EVENT_GET_FILE_LIST,
+	EVENT_POST_HUD_MESSAGE,
 
 	// Creation/Destruction
 	EVENT_TRANSFER_EVENTS_TO_GAME,
@@ -159,6 +160,21 @@ public:
 	Event_SetFullscreen(bool on);
 
 	bool on;
+};
+
+class DLL_U Event_PostHudMessage : public Event
+{
+public:
+	Event_PostHudMessage(std::string message, AttributePtr<Attribute_Player> ptr_subject_player = AttributePtr<Attribute_Player>(), bool subtle = false) : Event(EVENT_POST_HUD_MESSAGE)
+	{
+		this->ptr_subject_player = ptr_subject_player;
+		this->message = message;
+		this->subtle = subtle;
+	}
+
+	std::string message;
+	AttributePtr<Attribute_Player> ptr_subject_player;
+	bool subtle;
 };
 
 /**

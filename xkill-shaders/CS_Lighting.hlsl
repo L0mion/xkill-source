@@ -124,7 +124,7 @@ void CS_Lighting(
 	//Sample depth as quickly as possible to ensure that we do not evualuate irrelevant pixels.
 	if(!validPixel)
 		return;
-	
+
 	float3 normal = gNormal.xyz;
 	normal.x *= 2.0f; normal.x -= 1.0f;
 	normal.y *= 2.0f; normal.y -= 1.0f;

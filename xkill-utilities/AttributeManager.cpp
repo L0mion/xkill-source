@@ -45,7 +45,7 @@ Settings::Settings()
 {
 	numErrors = 0;
 	soundVolume = 0.1f;
-	numPlayers = 2;
+	numPlayers = 1;
 	_timeScale = 1.0f;
 	trueDeltaTime = 0.0f;
 	currentLevel = "TestArena";

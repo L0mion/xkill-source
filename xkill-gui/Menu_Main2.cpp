@@ -25,6 +25,9 @@ void Menu_Main2::loadOpeningGif()
 
 Menu_Main2::Menu_Main2( QWidget* parent ) : QMainWindow()
 {
+	// Make overlay accessible to other widgets
+	SETTINGS->overlayWidget = this;
+
 	// Init
 	loadCustomFonts();
 	this->parent = parent;

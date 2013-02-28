@@ -65,18 +65,6 @@ void Menu_HUDManager::mapHudsToSplitscreen()
 	}
 }
 
-void Menu_HUDManager::updateHuds()
-{
-	// Update huds
-	int index = 0;
-	while(itrSplitScreen.hasNext())
-	{
-		AttributePtr<Attribute_SplitScreen> ptr_splitScreen = itrSplitScreen.getNext();
-		//huds[index]->refresh(ptr_splitScreen);
-		index++;
-	}
-}
-
 void Menu_HUD::mapToSplitscreen()
 {
 	Float2 screenSize;
@@ -105,6 +93,9 @@ void Menu_HUD::mapToSplitscreen()
 	bottomPos.x = screenSize.x * 0.5f - ui.frame_bottom->width()* 0.5f;
 	bottomPos.y = screenSize.y - screenSize.x*0.005f - ui.frame_bottom->height()* 1.0f;
 	ui.frame_bottom->move(bottomPos.x, bottomPos.y);
+
+	// Move hud messages to center
+	hudMessage_manager.move(centerPos);
 }
 
 void Menu_HUD::refresh()
@@ -117,6 +108,7 @@ void Menu_HUD::refresh()
 	FiringMode* firingMode = &weaponStats->firingMode[weaponStats->currentFiringModeType];
 	int ammoIndex = ammunition->type;
 	float fadeTime = 1.0f;
+
 
 	//
 	// Show ammunition info
@@ -182,8 +174,6 @@ void Menu_HUD::refresh()
 	{
 		healthFade = fadeTime;
 	}
-	/*if(ui.progressBar_health->value() == 100)
-		healthFade = 0.0f;*/
 		
 	if(healthFade > 0.0f)
 	{
@@ -199,16 +189,25 @@ void Menu_HUD::refresh()
 	}
 	else
 	{
-		// Hide progress bar if shown
+		// Hide progress-bar if shown
 		if(!ui.progressBar_health->isHidden())
 			ui.progressBar_health->hide();
 	}
+
+
+	//
+	// Display HUD-messages
+	//
+
+	hudMessage_manager.update();
 }
 
 Menu_HUD::Menu_HUD( AttributePtr<Attribute_SplitScreen> splitScreen, QWidget* parent ) : QWidget(parent)
 {
 	ui.setupUi(this);
 	this->splitScreen = splitScreen;
+	hudMessage_manager.init(this, splitScreen);
+
 	Float2 pos(splitScreen->ssTopLeftX, splitScreen->ssTopLeftY);
 	move(splitScreen->ssTopLeftX, splitScreen->ssTopLeftY);
 	resize(splitScreen->ssWidth, splitScreen->ssHeight);
@@ -222,10 +221,10 @@ Menu_HUD::Menu_HUD( AttributePtr<Attribute_SplitScreen> splitScreen, QWidget* pa
 	mapToSplitscreen();
 }
 
-void Menu_HUD::onEvent( Event* e )
+void Menu_HUD::onEvent(Event* e)
 {
 	EventType type = e->getType();
-	switch (type) 
+	switch(type) 
 	{
 	case EVENT_UPDATE:
 		refresh();

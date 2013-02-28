@@ -157,11 +157,18 @@ void GameComponent::onUpdate(float delta)
 			//--------------------------------------------------------------------------------------
 			if(ptr_input->reload)
 			{
-				if(firingMode->nrOfShotsLeftInClip[ammoIndex] > 0 && firingMode->nrOfShotsLeftInClip[ammoIndex] != firingMode->clipSize 
-					&& firingMode->nrOfShotsLeftInClip[ammoIndex] > ammo->currentTotalNrOfShots)
+				ammo->isReloading = true;
+
+				if(ammo->canShootWhileReloading)
 				{
-					//ammo->currentTotalNrOfShots += firingMode->nrOfShotsLeftInClip[ammoIndex];
-					firingMode->nrOfShotsLeftInClip[ammoIndex] = 0; //Set nrOfShotsLeftInClip to 0, forcing automatic weapon reload
+					int nrOfShotsToLoad = firingMode->clipSize;
+					if(firingMode->clipSize > ammo->currentTotalNrOfShots)
+					{
+						nrOfShotsToLoad = ammo->currentTotalNrOfShots;
+					}
+
+					float reloadTimeFraction = (1.0f - (static_cast<float>(firingMode->nrOfShotsLeftInClip[ammoIndex])/static_cast<float>(nrOfShotsToLoad)));
+					firingMode->reloadTimeLeft = reloadTimeFraction * firingMode->reloadTime;
 				}
 			}
 
@@ -175,11 +182,13 @@ void GameComponent::onUpdate(float delta)
 				ptr_input->firePressed = false;
 
 				if(firingMode->cooldownBetweenShots >= 0 && firingMode->cooldownLeft <= 0.0f
-					&& firingMode->nrOfShotsLeftInClip[ammoIndex] > 0)
+					&& firingMode->nrOfShotsLeftInClip[ammoIndex] > 0 && (!ammo->isReloading || ammo->canShootWhileReloading))
 				{
 					firingMode->cooldownLeft = firingMode->cooldownBetweenShots;
 					ammo->currentTotalNrOfShots--;
 					firingMode->nrOfShotsLeftInClip[ammoIndex]--;
+
+					ammo->isReloading = false;
 
 					shootProjectile(ptr_player->ptr_weaponFireLocation_spatial, ptr_weaponStats);
 					SEND_EVENT(&Event_PlaySound(Event_PlaySound::SOUND_FIRE, ptr_position->position, true));
@@ -293,10 +302,32 @@ void GameComponent::onUpdate(float delta)
 				//--------------------------------------------------------------------------------------
 				// Reset player
 				//--------------------------------------------------------------------------------------
-				ptr_spatial->rotation = Float4(0.0f, 0.0f, 0.0f, 1.0f);
+				
+				//Point camera towards center
+				ptr_camera->up = Float3(0.0f, 1.0f, 0.0f);
+				ptr_camera->look = Float3(-ptr_position->position.x, 0.0f, -ptr_position->position.z);
+				ptr_camera->look = ptr_camera->look.normalize();
+				ptr_camera->right = ptr_camera->up.cross(ptr_camera->look);
+				
+				DirectX::XMVECTOR eye,lookat,up,quat;
+				DirectX::XMMATRIX rotation;
+				DirectX::XMFLOAT4 quaternion;
+				
+				up = DirectX::XMLoadFloat3(&DirectX::XMFLOAT3(0,1,0));
+				eye = DirectX::XMLoadFloat3(&DirectX::XMFLOAT3(ptr_position->position.asFloat()));
+				lookat = DirectX::XMLoadFloat3(&DirectX::XMFLOAT3(0,0,0));
+				
+				rotation = DirectX::XMMatrixLookAtLH(eye,lookat,up);
+				quat = DirectX::XMQuaternionRotationMatrix(rotation);
+				DirectX::XMStoreFloat4(&quaternion,quat);
+
+				ptr_spatial->rotation = Float4(quaternion.x,quaternion.y,quaternion.z,quaternion.w);
+
+				//ptr_spatial->rotation = Float4(0.0f, 1.0f, 1.0f, 1.0f).normalize();
+				/*ptr_spatial->rotation = Float4(0.0f, 0.0f, 0.0f, 1.0f);
 				ptr_camera->up = Float3(0.0f, 1.0f, 0.0f);
 				ptr_camera->right = Float3(1.0f, 0.0f, 0.0f);
-				ptr_camera->look = Float3(0.0f, 0.0f, 1.0f);
+				ptr_camera->look = Float3(0.0f, 0.0f, 1.0f);*/
 				ptr_physics->reloadDataIntoBulletPhysics = true;
 				
 				ptr_health->health = ptr_health->maxHealth; // restores player health
@@ -408,6 +439,8 @@ void GameComponent::onUpdate(float delta)
 					break;
 				case XKILL_Enums::PickupableType::HACK_SPEEDHACK:
 					amount = 5000;											//Will be handled as milliseconds
+				case XKILL_Enums::PickupableType::HACK_JETHACK:
+					amount = 5000;											//Will be handled as milliseconds
 				}
 
 				//Each pickupable knows it pickupablesSpawnPoint creator
@@ -443,12 +476,27 @@ void GameComponent::onUpdate(float delta)
 		//--------------------------------------------------------------------------------------
 		// Automatic weapon reload logic
 		//--------------------------------------------------------------------------------------
-		if(ammo->currentTotalNrOfShots > 0 && firingMode->nrOfShotsLeftInClip[ammoIndex] <= 0)
+		if(ammo->currentTotalNrOfShots > 0 && firingMode->nrOfShotsLeftInClip[ammoIndex] <= 0 && !ammo->isReloading)
+		{
+			ammo->isReloading = true;
+			int nrOfShotsToLoad = firingMode->clipSize;
+			if(firingMode->clipSize > ammo->currentTotalNrOfShots)
+			{
+				nrOfShotsToLoad = ammo->currentTotalNrOfShots;
+			}
+
+			float reloadTimeFraction = (1.0f - (static_cast<float>(firingMode->nrOfShotsLeftInClip[ammoIndex])/static_cast<float>(nrOfShotsToLoad)));
+			firingMode->reloadTimeLeft = reloadTimeFraction * firingMode->reloadTime;
+		}
+
+		if(ammo->isReloading)
 		{
 			firingMode->reloadTimeLeft -= delta;
+
 			if(firingMode->reloadTimeLeft <= 0)
 			{
 				firingMode->reloadTimeLeft = firingMode->reloadTime;
+				ammo->isReloading = false;
 
 				if(firingMode->clipSize > ammo->currentTotalNrOfShots)
 				{
@@ -457,6 +505,24 @@ void GameComponent::onUpdate(float delta)
 				else
 				{
 					firingMode->nrOfShotsLeftInClip[ammoIndex] = firingMode->clipSize;
+				}
+			}
+			else if(ammo->canShootWhileReloading)
+			{
+				float reloadTimeFraction	= (1.0f - (firingMode->reloadTimeLeft/firingMode->reloadTime));
+				float clipFraction			= (static_cast<float>(firingMode->nrOfShotsLeftInClip[ammoIndex])/static_cast<float>(firingMode->clipSize));
+
+				int nrOfShotsLeftToLoad = firingMode->clipSize;
+				if(firingMode->clipSize > ammo->currentTotalNrOfShots)
+				{
+					nrOfShotsLeftToLoad = ammo->currentTotalNrOfShots;
+				}
+
+				nrOfShotsLeftToLoad -= firingMode->nrOfShotsLeftInClip[ammoIndex];
+
+				if(reloadTimeFraction > clipFraction && nrOfShotsLeftToLoad > 0)
+				{
+					firingMode->nrOfShotsLeftInClip[ammoIndex]++;
 				}
 			}
 		}
@@ -667,7 +733,7 @@ void GameComponent::event_StartDeathmatch( Event_StartDeathmatch* e )
 		AttributePtr<Attribute_WeaponStats>		ptr_weaponStats	=	ptr_player	->	ptr_weaponStats	;
 		switchFiringMode(ptr_weaponStats);	//Ensure ammunition disablement (selected from menu)
 		
-		SEND_EVENT(&Event_HackActivated(1000.0f, XKILL_Enums::HackType::JETHACK, ptr_player));
+		SEND_EVENT(&Event_HackActivated(5000.0f, XKILL_Enums::HackType::JETHACK, ptr_player));
 	}
 
 	//Create mesh for debugging fbx-loading.
@@ -856,7 +922,7 @@ void GameComponent::updateAndInterpretAimingRay(Entity* rayCastingPlayerEntity, 
 			//--------------------------------------------------------------------------------------
 			// If the player is executing, interpret the aiming ray as a Laser Automatic Sniper Execution Ray
 			//--------------------------------------------------------------------------------------
-			if(rayCastingPlayerAttribute->executing)
+			if(rayCastingPlayerAttribute->executing && !rayCastingPlayerAttribute->detectedAsDead) 
 			{
 				updateAndInterpretLaser(ray, rayCastingPlayerAttribute, ptr_camera);
 				ray->ptr_render->cull = true;
@@ -934,7 +1000,6 @@ void GameComponent::updateAndInterpretLaser(AttributePtr<Attribute_Ray> ptr_ray,
 				}
 
 				SEND_EVENT(&Event_ModifyPhysicsObject(XKILL_Enums::ModifyPhysicsObjectData::GIVE_IMPULSE, static_cast<void*>(&(rayVector*20.0f)), playerAttribute->ptr_input->ptr_physics));
-
 			}
 		}
 	}

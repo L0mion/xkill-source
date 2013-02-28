@@ -22,6 +22,7 @@ public:
 	float trueDeltaTime;
 	bool soundMuted;
 	float soundVolume;
+	void* overlayWidget;
 
 	float timeScale();
 	void setTimeScale(float timeScale);

@@ -75,6 +75,6 @@ void EntityStorage::deleteEntity( int id )
 	{
 		entities[id].deleteAttributes();
 		deleted.push(id);
-		DEBUGPRINT("ENTITYMANAGER: Removed Entity " << id);
+		//DEBUGPRINT("ENTITYMANAGER: Removed Entity " << id);
 	}
 }

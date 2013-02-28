@@ -16,11 +16,13 @@ struct DLL_U Ammunition
 	float spreadConeRadius;					//!< Randomizes the orientation of each projectile's velocity vector inside this cone.
 	float velocityVariation;				//!< Randomizes the speed of a projectile around a given range. If velocityVariation is 4, speed will be randomized in the range 2<->6. If 1, randomization range till be 0.5<->1.5.
 	float displacementSphereRadius;			//!< Randomizes the position of each projectile inside this sphere.
+	bool canShootWhileReloading;			//!< Can you shoot halfway through reloading this ammunition
+	bool isReloading;						//!< Are we reloading the weapon
 
 	bool explosive;							//!< Determines if projectiles created from this weapon will explode on impact.
-	float explosionSphereInitialRadius;
-	float explosionSphereFinalRadius;
-	float explosionSphereExplosionDuration;
+	float explosionSphereInitialRadius;		//!< The initial radius of an explosion sphere created from this projectile
+	float explosionSphereFinalRadius;		//!< The final radius of an explosion sphere created from this projectile
+	float explosionSphereExplosionDuration;	//!< The life time of an explosion sphere created from this projectile
 
 	XKILL_Enums::AmmunitionType type;
 };
