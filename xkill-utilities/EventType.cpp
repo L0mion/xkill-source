@@ -263,7 +263,14 @@ Event_WindowMove::Event_WindowMove( Int2 pos, Int2 oldPos ) : Event(EVENT_WINDOW
 	this->oldPos = oldPos;
 }
 
-Event_ClosestRayCast::Event_ClosestRayCast(Float3 from, Float3 to, short collisionFilterMask) : Event(EVENT_CLOSEST_RAY_CAST)
+Event_ClosestHitRayCast::Event_ClosestHitRayCast(Float3 from, Float3 to, short collisionFilterMask) : Event(EVENT_CLOSEST_HIT_RAY_CAST)
+{
+	this->from = from;
+	this->to = to;
+	this->collisionFilterMask = collisionFilterMask;
+}
+
+Event_AllHitsRayCast::Event_AllHitsRayCast(Float3 from, Float3 to, short collisionFilterMask) : Event(EVENT_ALL_HITS_RAY_CAST)
 {
 	this->from = from;
 	this->to = to;

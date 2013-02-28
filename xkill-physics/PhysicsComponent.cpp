@@ -19,6 +19,8 @@
 #include "debugDrawDispatcher.h"
 #include "CollisionShapes.h"
 
+#include <algorithm> //std::sort
+
 ATTRIBUTES_DECLARE_ALL;
 
 debugDrawDispatcher* debugDrawer_ = nullptr;
@@ -34,7 +36,8 @@ PhysicsComponent::PhysicsComponent() : broadphase_(nullptr),
 	ATTRIBUTES_INIT_ALL;
 	SUBSCRIBE_TO_EVENT(this,EVENT_ATTRIBUTE_UPDATED);
 	SUBSCRIBE_TO_EVENT(this, EVENT_MODIFY_PHYSICS_OBJECT);
-	SUBSCRIBE_TO_EVENT(this, EVENT_CLOSEST_RAY_CAST);
+	SUBSCRIBE_TO_EVENT(this, EVENT_CLOSEST_HIT_RAY_CAST);
+	SUBSCRIBE_TO_EVENT(this, EVENT_ALL_HITS_RAY_CAST);
 	SUBSCRIBE_TO_EVENT(this, EVENT_UNLOAD_LEVEL);
 	SUBSCRIBE_TO_EVENT(this, EVENT_LOAD_LEVEL_BULLET);
 }
@@ -326,10 +329,16 @@ void PhysicsComponent::onEvent(Event* e)
 		}
 		break;
 	}
-	case EVENT_CLOSEST_RAY_CAST:
+	case EVENT_CLOSEST_HIT_RAY_CAST:
 		{
-			Event_ClosestRayCast* event_ClosestRayCast = static_cast<Event_ClosestRayCast*>(e);
+			Event_ClosestHitRayCast* event_ClosestRayCast = static_cast<Event_ClosestHitRayCast*>(e);
 			handleEvent_ClosestRayCast(event_ClosestRayCast);
+		break;
+		}
+	case EVENT_ALL_HITS_RAY_CAST:
+		{
+			Event_AllHitsRayCast* event_AllHitsRayCast = static_cast<Event_AllHitsRayCast*>(e);
+			handleEvent_AllHitsRayCast(event_AllHitsRayCast);
 		break;
 		}
 	case EVENT_LOAD_LEVEL_BULLET:
@@ -341,7 +350,7 @@ void PhysicsComponent::onEvent(Event* e)
 	}
 }
 
-void PhysicsComponent::handleEvent_ClosestRayCast(Event_ClosestRayCast* event_ClosestRayCast)
+void PhysicsComponent::handleEvent_ClosestRayCast(Event_ClosestHitRayCast* event_ClosestRayCast)
 {
 	btVector3 from = convert(event_ClosestRayCast->from);
 	btVector3 to = convert(event_ClosestRayCast->to);
@@ -364,11 +373,50 @@ void PhysicsComponent::handleEvent_ClosestRayCast(Event_ClosestRayCast* event_Cl
 		const btVector3 closestHitPoint = from.lerp(to,closestResults.m_closestHitFraction);
 		event_ClosestRayCast->ClosestHitPoint = convert(&closestHitPoint);
 	}
-	else
+	else //Ray did not hit anything
 	{
 		event_ClosestRayCast->EntityIdOfOwnerToClosestPhysicsObjectHitByRay = 0; //0 denotes that no physics object was hit by the ray
-		event_ClosestRayCast->ClosestHitPoint = Float3(0.0f, 0.0f, 0.0f);
+		event_ClosestRayCast->ClosestHitPoint = event_ClosestRayCast->to; //There was no closest hit point, i.e. the closest hit point was the destination point of the ray
 	}
+}
+
+struct sort_mapHitPointToEntityId
+{
+    bool operator()(std::pair<Float3, int> &left, std::pair<Float3, int> &right)
+	{
+        return left.first < right.first;
+    }
+};
+void PhysicsComponent::handleEvent_AllHitsRayCast(Event_AllHitsRayCast* event_AllHitsRayCast)
+{
+	btVector3 from = convert(event_AllHitsRayCast->from);
+	btVector3 to = convert(event_AllHitsRayCast->to);
+
+	btCollisionWorld::AllHitsRayResultCallback allResults(from,to);
+	allResults.m_flags |= btTriangleRaycastCallback::kF_KeepUnflippedNormal; //check, what is this? (2013-02-28 11.53)
+	allResults.m_collisionFilterGroup = XKILL_Enums::PhysicsAttributeType::RAY;
+	allResults.m_collisionFilterMask = event_AllHitsRayCast->collisionFilterMask;
+
+	dynamicsWorld_->rayTest(from,to,allResults); //Bullet Physics ray cast
+
+	//--------------------------------------------------------------------------------------
+	// Special case event handling: the result of the event is stored in the event.
+	//--------------------------------------------------------------------------------------
+	int nrOfHits = allResults.m_hitFractions.size();
+	for(int i=0;i<nrOfHits;i++)
+	{
+		const PhysicsObject* hitObject = static_cast<const PhysicsObject*>(allResults.m_collisionObjects.at(i));
+		int entityId = itrPhysics.ownerIdAt(hitObject->getAttributeIndex());
+
+		const btVector3 currentHitPoint = from.lerp(to,allResults.m_hitFractions.at(i));
+		Float3 hitPoint = convert(&currentHitPoint);
+
+		event_AllHitsRayCast->mapHitPointToEntityId.push_back(std::pair<Float3, int>(hitPoint, entityId));
+	}
+	//--------------------------------------------------------------------------------------
+	// Sort mapHitPointToEntityId so that the closer hitpoint has lower vector indices
+	//--------------------------------------------------------------------------------------
+	std::sort(event_AllHitsRayCast->mapHitPointToEntityId.begin(), event_AllHitsRayCast->mapHitPointToEntityId.end(), sort_mapHitPointToEntityId());
 }
 
 void PhysicsComponent::synchronizeWithAttributes(AttributePtr<Attribute_Physics> ptr_physics, int physicsAttributeIndex)

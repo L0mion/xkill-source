@@ -154,29 +154,45 @@ void CollisionManager::collision_pickupable(Entity* entity1, Entity* entity2)
 					case XKILL_Enums::PickupableType::MEDKIT:
 						{
 							AttributePtr<Attribute_Health> ptr_health = ptr_player->ptr_health;
-							ptr_health->health = getAmountAfterPickup(ptr_health->health, ptr_health->maxHealth, ptr_pickupable->amount);
-							pickedUp = true;
+							int pickedUpAmount = getPickedUpAmount(ptr_health->health, ptr_health->maxHealth, ptr_pickupable->amount);
+							if(pickedUpAmount > 0)
+							{
+								ptr_health->health += pickedUpAmount;
+								pickedUp = true;
+							}
 							break;
 						}
 					case XKILL_Enums::PickupableType::AMMUNITION_BULLET:
 						{
 							AttributePtr<Attribute_WeaponStats> weaponStatsAttribute = ptr_player->ptr_weaponStats;
-							weaponStatsAttribute->ammunition[XKILL_Enums::AmmunitionType::BULLET].currentTotalNrOfShots = getAmountAfterPickup(weaponStatsAttribute->ammunition[XKILL_Enums::AmmunitionType::BULLET].currentTotalNrOfShots, weaponStatsAttribute->ammunition[XKILL_Enums::AmmunitionType::BULLET].initialTotalNrOfShots, ptr_pickupable->amount);
-							pickedUp = true;
+							int pickedUpAmount = getPickedUpAmount(weaponStatsAttribute->ammunition[XKILL_Enums::AmmunitionType::BULLET].currentTotalNrOfShots, weaponStatsAttribute->ammunition[XKILL_Enums::AmmunitionType::BULLET].initialTotalNrOfShots, ptr_pickupable->amount);
+							if(pickedUpAmount > 0)
+							{
+								weaponStatsAttribute->ammunition[XKILL_Enums::AmmunitionType::BULLET].currentTotalNrOfShots += pickedUpAmount;
+								pickedUp = true;
+							}
 							break;
 						}
 					case XKILL_Enums::PickupableType::AMMUNITION_EXPLOSIVE:
 						{
 							AttributePtr<Attribute_WeaponStats> weaponStatsAttribute = ptr_player->ptr_weaponStats;
-							weaponStatsAttribute->ammunition[XKILL_Enums::AmmunitionType::EXPLOSIVE].currentTotalNrOfShots = getAmountAfterPickup(weaponStatsAttribute->ammunition[XKILL_Enums::AmmunitionType::EXPLOSIVE].currentTotalNrOfShots, weaponStatsAttribute->ammunition[XKILL_Enums::AmmunitionType::EXPLOSIVE].initialTotalNrOfShots, ptr_pickupable->amount);
-							pickedUp = true;
+							int pickedUpAmount = getPickedUpAmount(weaponStatsAttribute->ammunition[XKILL_Enums::AmmunitionType::EXPLOSIVE].currentTotalNrOfShots, weaponStatsAttribute->ammunition[XKILL_Enums::AmmunitionType::EXPLOSIVE].initialTotalNrOfShots, ptr_pickupable->amount);
+							if(pickedUpAmount > 0)
+							{
+								weaponStatsAttribute->ammunition[XKILL_Enums::AmmunitionType::EXPLOSIVE].currentTotalNrOfShots += pickedUpAmount;
+								pickedUp = true;
+							}
 							break;
 						}
 					case XKILL_Enums::PickupableType::AMMUNITION_SCATTER:
 						{
 							AttributePtr<Attribute_WeaponStats> weaponStatsAttribute = ptr_player->ptr_weaponStats;
-							weaponStatsAttribute->ammunition[XKILL_Enums::AmmunitionType::SCATTER].currentTotalNrOfShots = getAmountAfterPickup(weaponStatsAttribute->ammunition[XKILL_Enums::AmmunitionType::SCATTER].currentTotalNrOfShots, weaponStatsAttribute->ammunition[XKILL_Enums::AmmunitionType::SCATTER].initialTotalNrOfShots, ptr_pickupable->amount);
-							pickedUp = true;
+							int pickedUpAmount = getPickedUpAmount(weaponStatsAttribute->ammunition[XKILL_Enums::AmmunitionType::SCATTER].currentTotalNrOfShots, weaponStatsAttribute->ammunition[XKILL_Enums::AmmunitionType::SCATTER].initialTotalNrOfShots, ptr_pickupable->amount);
+							if(pickedUpAmount > 0)
+							{
+								weaponStatsAttribute->ammunition[XKILL_Enums::AmmunitionType::SCATTER].currentTotalNrOfShots += pickedUpAmount;
+								pickedUp = true;
+							}
 							break;
 						}
 					case XKILL_Enums::PickupableType::HACK_SPEEDHACK:
@@ -308,16 +324,17 @@ void CollisionManager::collision_playerVsExplosionSphere(Entity* entity1, Entity
 	}
 }
 
-int CollisionManager::getAmountAfterPickup(int currentAmount, int maxAmount, int pickupAmount)
+int CollisionManager::getPickedUpAmount(int currentAmount, int maxAmount, int tryPickupAmount)
 {
-	int newAmount = currentAmount;
-	if(currentAmount < maxAmount)					//Pickup if currently below maximum amount
+	int pickedUpAmount = 0;
+	if(currentAmount < maxAmount) //Pickup if currently below maximum amount
 	{
-		newAmount = currentAmount + pickupAmount;	//Pickup
-		if(newAmount > maxAmount)
+		int pickupFullAmount = currentAmount + tryPickupAmount;
+		if(pickupFullAmount > maxAmount)
 		{
-			newAmount = maxAmount;					//Prevent picking up more than maximum
+			int difference = pickupFullAmount - maxAmount;
+			pickedUpAmount = tryPickupAmount - difference;
 		}
 	}
-	return newAmount;
+	return pickedUpAmount;
 }
