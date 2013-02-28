@@ -179,7 +179,7 @@ public:
 		CREATE_ATTRIBUTE(ptr_render, Attribute_Render, render, entity);
 		ptr_ray->ptr_render = ptr_render;
 		ptr_render->cull = true;
-		ptr_render->meshID = XKILL_Enums::ModelId::BOX;
+		ptr_render->meshID = XKILL_Enums::ModelId::LASER;
 		CREATE_ATTRIBUTE(ptr_spatial, Attribute_Spatial, spatial, entity);
 		ptr_render->ptr_spatial = ptr_spatial;
 		ptr_spatial->scale = Float3(0.01f, 0.01f, 0.01f);
