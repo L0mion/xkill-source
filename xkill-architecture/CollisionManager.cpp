@@ -2,6 +2,7 @@
 
 #include <xkill-utilities/Entity.h>
 #include <xkill-utilities/AttributeManager.h>
+#include <xkill-utilities/Converter.h>
 
 ATTRIBUTES_DECLARE_ALL;
 
@@ -149,6 +150,7 @@ void CollisionManager::collision_pickupable(Entity* entity1, Entity* entity2)
 				for(unsigned i=0;i<pickupablesId.size();i++)
 				{
 					ptr_pickupable = itrPickupable.at(pickupablesId.at(i));
+					std::string str_amount = Converter::IntToStr(ptr_pickupable->amount);
 					switch(ptr_pickupable->pickupableType)
 					{
 					case XKILL_Enums::PickupableType::MEDKIT:
@@ -156,6 +158,7 @@ void CollisionManager::collision_pickupable(Entity* entity1, Entity* entity2)
 							AttributePtr<Attribute_Health> ptr_health = ptr_player->ptr_health;
 							ptr_health->health = getAmountAfterPickup(ptr_health->health, ptr_health->maxHealth, ptr_pickupable->amount);
 							pickedUp = true;
+							SEND_EVENT(&Event_PostHudMessage("Picked up MedPatch (+" + str_amount + ")", ptr_player));
 							break;
 						}
 					case XKILL_Enums::PickupableType::AMMUNITION_BULLET:
@@ -163,6 +166,7 @@ void CollisionManager::collision_pickupable(Entity* entity1, Entity* entity2)
 							AttributePtr<Attribute_WeaponStats> weaponStatsAttribute = ptr_player->ptr_weaponStats;
 							weaponStatsAttribute->ammunition[XKILL_Enums::AmmunitionType::BULLET].currentTotalNrOfShots = getAmountAfterPickup(weaponStatsAttribute->ammunition[XKILL_Enums::AmmunitionType::BULLET].currentTotalNrOfShots, weaponStatsAttribute->ammunition[XKILL_Enums::AmmunitionType::BULLET].initialTotalNrOfShots, ptr_pickupable->amount);
 							pickedUp = true;
+							SEND_EVENT(&Event_PostHudMessage("Picked up Bullet Ammunition (+" + str_amount + ")", ptr_player));
 							break;
 						}
 					case XKILL_Enums::PickupableType::AMMUNITION_EXPLOSIVE:
@@ -170,6 +174,7 @@ void CollisionManager::collision_pickupable(Entity* entity1, Entity* entity2)
 							AttributePtr<Attribute_WeaponStats> weaponStatsAttribute = ptr_player->ptr_weaponStats;
 							weaponStatsAttribute->ammunition[XKILL_Enums::AmmunitionType::EXPLOSIVE].currentTotalNrOfShots = getAmountAfterPickup(weaponStatsAttribute->ammunition[XKILL_Enums::AmmunitionType::EXPLOSIVE].currentTotalNrOfShots, weaponStatsAttribute->ammunition[XKILL_Enums::AmmunitionType::EXPLOSIVE].initialTotalNrOfShots, ptr_pickupable->amount);
 							pickedUp = true;
+							SEND_EVENT(&Event_PostHudMessage("Picked up Explosive Ammunition (+" + str_amount + ")", ptr_player));
 							break;
 						}
 					case XKILL_Enums::PickupableType::AMMUNITION_SCATTER:
@@ -177,6 +182,7 @@ void CollisionManager::collision_pickupable(Entity* entity1, Entity* entity2)
 							AttributePtr<Attribute_WeaponStats> weaponStatsAttribute = ptr_player->ptr_weaponStats;
 							weaponStatsAttribute->ammunition[XKILL_Enums::AmmunitionType::SCATTER].currentTotalNrOfShots = getAmountAfterPickup(weaponStatsAttribute->ammunition[XKILL_Enums::AmmunitionType::SCATTER].currentTotalNrOfShots, weaponStatsAttribute->ammunition[XKILL_Enums::AmmunitionType::SCATTER].initialTotalNrOfShots, ptr_pickupable->amount);
 							pickedUp = true;
+							SEND_EVENT(&Event_PostHudMessage("Picked up Scatter Ammunition (+" + str_amount + ")", ptr_player));
 							break;
 						}
 					case XKILL_Enums::PickupableType::HACK_SPEEDHACK:
@@ -185,6 +191,7 @@ void CollisionManager::collision_pickupable(Entity* entity1, Entity* entity2)
 							float time = static_cast<float>(ptr_pickupable->amount);
 							time /= 1000.0f;
 							SEND_EVENT(&Event_HackActivated(time, XKILL_Enums::HackType::SPEEDHACK, ptr_player));
+							SEND_EVENT(&Event_PostHudMessage("Picked up Speedhack", ptr_player));
 							break;
 						}
 					case XKILL_Enums::PickupableType::HACK_JETHACK:
@@ -193,6 +200,7 @@ void CollisionManager::collision_pickupable(Entity* entity1, Entity* entity2)
 							float time = static_cast<float>(ptr_pickupable->amount);
 							time /= 1000.0f;
 							SEND_EVENT(&Event_HackActivated(time, XKILL_Enums::HackType::JETHACK, ptr_player));
+							SEND_EVENT(&Event_PostHudMessage("Picked up Jethack", ptr_player));
 							break;
 						}
 					}
