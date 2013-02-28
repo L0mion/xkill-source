@@ -766,7 +766,7 @@ DirectX::XMFLOAT4X4	Renderer::buildShadows()
 	//Get shadow transform:
 	SceneBounds bounds;
 	bounds.center = DirectX::XMFLOAT3(0.0f, 0.0f, 0.0f); //Origo.
-	bounds.radius = sqrtf(25.0f * 25.0f); //Radius of scene really ought to be calculated instead of fixed.
+	bounds.radius = 38;//sqrtf(25.0f * 25.0f); //Radius of scene really ought to be calculated instead of fixed.
 
 	LightDescDir dirLight = LightDescDir(); //default construct
 	AttributePtr<Attribute_Light_Dir> ptr_lightDir;

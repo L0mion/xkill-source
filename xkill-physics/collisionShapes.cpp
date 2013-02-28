@@ -320,7 +320,7 @@ void CollisionShapes::findMappingBetweenMeshFilesAndBulletFiles()
 		}
 		else
 		{
-			//loadTrianglesFromMeshAsCollisionShape(ptr_mesh); //check 2013-02-27 17.03
+			loadTrianglesFromMeshAsCollisionShape(ptr_mesh); //check 2013-02-27 17.03
 		}
 	}
 }
