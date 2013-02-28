@@ -71,4 +71,6 @@ static float GET_RANDOM(float min, float max)
 	return random;
 }
 
+#define LERP(x, y, s)	( x * (1 - s) + y * s )
+
 #endif //XKILL_RENDERER_RENDERINGUTILITIES_H

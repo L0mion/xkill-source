@@ -83,7 +83,7 @@ void CS_SSAO(
 
 	float access = 1.0f - occlusionSum;
 
-	float3 output = randVec;//float3(saturate(pow(access, 4.0f)), 0.0f, 0.0f);
+	float3 output = float3(saturate(pow(access, 4.0f)), 0.0f, 0.0f);
 	ssao[
 		uint2(
 			threadIDDispatch.x + viewportTopX, 
