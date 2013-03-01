@@ -167,8 +167,8 @@ void Menu_HUD::refresh()
 	//
 
 	ui.label_health->setNum((int)health->health);
-	ui.label_priority->setNum((int)player->priority);
-	ui.label_priority->setNum((int)player->cycles);
+	ui.label_priority->setNum(player->priority);
+	ui.label_cycles->setNum(player->cycles);
 	int healthRatio = (int)((health->health / health->maxHealth) * 100);
 
 	// Show menu if health has changed otherwise fade after a few seconds

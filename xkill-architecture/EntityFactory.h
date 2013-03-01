@@ -7,6 +7,54 @@
 // Iterators
 ATTRIBUTES_DECLARE_ALL;
 
+class NameGenerator
+{
+private:
+	std::vector<std::string> names;
+
+public:
+	void reset()
+	{
+		addName("Algol");
+		addName("Haskell");
+		addName("Fortran");
+		addName("Pascal");
+		addName("Erlang");
+		addName("Lisp");
+		addName("Occam");
+		addName("Brainfuck");
+		addName("Formac ");
+		addName("Quiktran");
+		addName("Cowsel");
+		addName("Blarrhgh");
+		addName("Xargs");
+		addName("Echo");
+		addName("Cksum");
+	}
+	void addName(std::string name)
+	{
+		names.push_back(name);
+	}
+	std::string getName()
+	{
+		// Reset names if all have been picked
+		if(names.size() <= 0)
+			reset();
+
+		// Pick random name
+		int numNames = names.size();
+		int index = Math::randomInt(0, numNames-1);
+		std::string name = names.at(index);
+
+		// Remove name using Swap-Trick
+		names.at(index) = names.back();
+		names.pop_back();
+
+		// Return name
+		return name;
+	}
+};
+
 /// A factory for creating Entities and assigning multiple \ref ATTRIBUTES in a flexible way.
 /** 
 Filling out each Attribute and connecting chains of 
@@ -17,11 +65,11 @@ The AttributeFactory can be used to facilitate creation of \ref ATTRIBUTES.
 \ingroup ARCHITECTURE
 */
 
-
-
-
 class EntityFactory
 {
+private:
+	NameGenerator nameGenerator;
+
 public:
 	// Creates an AttributeType (e.g. PositionAttribute) with name AttributeName (e.g. position) owned by Entity OwnerEntity.
 	// IMPORTANT: AttributeName (e.g. position) is used to access attributes from AttributeManager (e.g. positionAttributes_).
@@ -80,6 +128,7 @@ public:
 		ptr_player->ptr_camera = ptr_camera;
 		ptr_player->ptr_health = ptr_health;
 		ptr_player->ptr_weaponStats = ptr_weaponStats;
+		ptr_player->playerName = nameGenerator.getName();
 
 		CREATE_ATTRIBUTE(ptr_splitScreen, Attribute_SplitScreen, splitScreen, entity);
 		ptr_splitScreen->ptr_camera = ptr_camera;
