@@ -182,7 +182,5 @@ MaterialDesc LoaderFbxMaterialDesc::getMaterialDesc()
 	material.emissive_ = emissive_;
 	material.shinyness_ = shininess_;
 	
-
-
 	return material;
 }

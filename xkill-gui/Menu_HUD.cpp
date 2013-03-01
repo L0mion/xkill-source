@@ -1,5 +1,5 @@
 #include "Menu_HUD.h"
-
+#include <xkill-utilities/Converter.h>
 ATTRIBUTES_DECLARE_ALL;
 
 Menu_HUDManager::Menu_HUDManager( QWidget* parent ) : QObject(parent)
@@ -237,4 +237,63 @@ void Menu_HUD::onEvent(Event* e)
 Menu_HUD::~Menu_HUD()
 {
 	UNSUBSCRIBE_TO_EVENTS(this);
+}
+
+HudMessage::HudMessage( Event_PostHudMessage* e, QWidget* parent )
+{
+	// Apply message
+	message = new QLabel(e->message.c_str());
+	message->setAlignment(Qt::AlignHCenter);
+
+	// Draw label in parent window
+	message->setParent(parent);
+
+	// Apply stylesheet
+	message->setStyleSheet(e->styleSheet.c_str());
+
+	// Display for a certain time
+	lifetime = 3.0f;
+
+	// Show label
+	message->show();
+}
+
+void HudMessage_Manager::addMessage( Event_PostHudMessage* e )
+{
+	Event_PostHudMessage::Receiver re= e->receiver;
+
+	// Ignore messages aimed at other players
+	if(e->receiver == Event_PostHudMessage::RECEIVER_ONLY_SUBJECT)
+	{
+		if(splitScreen->ptr_player != e->ptr_subject_player)
+			return;
+	}
+	if(e->receiver == Event_PostHudMessage::RECEIVER_ALL_BUT_SUBJECT)
+	{
+		if(splitScreen->ptr_player == e->ptr_subject_player)
+			return;
+	}
+
+	// Limit simultaneous show messages 
+	// to 5 to not overwhelm the player
+	if(stack.count() + 1 > 5)
+		removeTopMessage();
+
+	// Add message to stack
+	stack.push(new HudMessage(e, parent));
+
+	// Show new messages above old messages
+	int numStacks = stack.count();
+	int offset = 20*3.8f;
+	for(int i=numStacks-1; i>=0; i--)
+	{
+		int height = stack.at(i)->getHeight();
+		offset += height;
+
+		Float2 newPos;
+		newPos.x = position.x;
+		newPos.y = position.y + offset - height * 0.5f;
+
+		stack.at(i)->move(newPos);
+	}
 }
