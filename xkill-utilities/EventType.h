@@ -179,7 +179,7 @@ public:
 
 	Event_PostHudMessage(std::string message, AttributePtr<Attribute_Player> ptr_subject_player = AttributePtr<Attribute_Player>() );
 	void setStyle(Style style);
-	void setHtmlMessage(std::string prefex, std::string subject, std::string suffix = "", std::string description = "");
+	void setHtmlMessage(std::string prefex, std::string subject = "", std::string suffix = "", std::string description = "");
 
 	Receiver receiver;
 	std::string message;

@@ -313,11 +313,15 @@ void Event_PostHudMessage::setStyle( Style style )
 
 void Event_PostHudMessage::setHtmlMessage( std::string prefex, std::string subject, std::string suffix /*= ""*/, std::string description /*= ""*/ )
 {
-	prefex = "<span style='color: rgba(255, 255, 255, 180);'>" + prefex + " </span>";
-	subject = "<span style='color: rgba(255, 255, 255, 240);'>" + subject + " </span>";
-	suffix = "<span style='color: rgba(255, 255, 255, 180);'>" + suffix + " </span>";
-	if(description != "")
-		description = "<span style='color: rgba(255, 255, 255, 180);'>(</span><span style='color: rgba(255, 255, 255, 240);'>" + description + "</span><span style='color: rgba(255, 255, 255, 180);'>)</span>";
+	std::string text_normal = "<span style='color: rgba(255, 255, 255, 240);'>";
+	std::string text_subtile = "<span style='color: rgba(200, 200, 200, 230);'>";
+	std::string text_end = "</span>";
 
-	message = prefex + subject + suffix + description ;
+	prefex = text_subtile + prefex + text_end;
+	subject = text_normal + subject + text_end;
+	suffix = text_subtile + suffix + text_end;
+	if(description != "")
+		description = text_subtile + "(" + text_subtile + description + text_end + text_subtile + ")" + text_end;
+
+	message = prefex + " " + subject + " " + suffix + " " + description ;
 }
