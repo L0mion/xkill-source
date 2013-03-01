@@ -91,7 +91,7 @@ void CollisionShapes::loadCollisionShapes()
 	if(importer_->loadFile(path.c_str())) //unknown chunk
 	{
 		DEBUGPRINT("...suceeded in loaded level .bullet file");
-		findMappingBetweenMeshFilesAndBulletFiles();
+		findMappingBetweenMeshFilesAndBulletFiles(true);
 		
 		//Reallocate importer to prevent loading the level collision shapes twice
 		deallocateImporter();
@@ -129,7 +129,7 @@ void CollisionShapes::loadCollisionShapes()
 			DEBUGPRINT("Assuming mapping between " + ptr_mesh->fileName + " and " + meshName + ".bullet");
 		}
 	}
-	findMappingBetweenMeshFilesAndBulletFiles();
+	findMappingBetweenMeshFilesAndBulletFiles(false);
 }
 
 void CollisionShapes::unloadCollisionShapes()
@@ -282,7 +282,7 @@ void CollisionShapes::mapCollisionShapeToGlobalMeshId(int meshId, btCollisionSha
 	collisionShapes_->push_back(collisionShape);
 }
 
-void CollisionShapes::findMappingBetweenMeshFilesAndBulletFiles()
+void CollisionShapes::findMappingBetweenMeshFilesAndBulletFiles(bool levelPass)
 {
 	//--------------------------------------------------------------------------------------
 	// Find mapping between mesh files and collision shapes contained in .bullet files.
@@ -320,7 +320,8 @@ void CollisionShapes::findMappingBetweenMeshFilesAndBulletFiles()
 		}
 		else
 		{
-			loadTrianglesFromMeshAsCollisionShape(ptr_mesh); //check 2013-02-27 17.03
+			if(!levelPass)
+				loadTrianglesFromMeshAsCollisionShape(ptr_mesh); //check 2013-02-27 17.03
 		}
 	}
 }

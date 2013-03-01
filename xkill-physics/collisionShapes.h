@@ -31,7 +31,7 @@ private:
 	btCollisionShape* frustumShape_;  //!< The shape of frustums
 
 	void mapCollisionShapeToGlobalMeshId(int meshId, btCollisionShape* collisionShape);
-	void findMappingBetweenMeshFilesAndBulletFiles();
+	void findMappingBetweenMeshFilesAndBulletFiles(bool levelPass);
 	void deallocateImporter();
 
 public:
