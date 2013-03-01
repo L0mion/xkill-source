@@ -399,7 +399,7 @@ public:
 
 		CREATE_ATTRIBUTE(ptr_render, Attribute_Render, render, entity);
 		ptr_render->ptr_spatial = ptr_spatial;
-		ptr_render->meshID = 12;
+		ptr_render->meshID = XKILL_Enums::ModelId::EXPLOSION;
 
 		CREATE_ATTRIBUTE(ptr_explosionSphere, Attribute_ExplosionSphere, explosionSphere, entity);
 		ptr_explosionSphere->ptr_physics = ptr_physics;

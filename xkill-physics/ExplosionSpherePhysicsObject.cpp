@@ -79,6 +79,7 @@ void ExplosionSpherePhysicsObject::onUpdate(float delta)
 		{
 			ptr_explosionSphere->currentRadius = explosionSphereFinalRadius_;
 		}
+		itrPhysics.at(attributeIndex_)->ptr_spatial->scale = Float3(ptr_explosionSphere->currentRadius,ptr_explosionSphere->currentRadius,ptr_explosionSphere->currentRadius);
 		localCollisionShape_->setLocalScaling(btVector3(ptr_explosionSphere->currentRadius, ptr_explosionSphere->currentRadius, ptr_explosionSphere->currentRadius));
 	}
 }
