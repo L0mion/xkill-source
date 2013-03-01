@@ -195,9 +195,15 @@ private:
 	void parseTransformMatrix(FbxCluster* cluster, FbxMesh* mesh, FbxPose* fbxPose, LoaderFbxMeshDesc* meshDesc, int index);
 	FbxAMatrix parseTransformMatrixAssociateModel(FbxCluster* cluster, FbxMesh* mesh, FbxPose* fbxPose, FbxAMatrix globalPosition);
 	FbxAMatrix parseTransformMatrixOther(FbxCluster* cluster, FbxMesh* mesh, FbxPose* fbxPose, FbxAMatrix globalPosition);
+	
+	FbxAMatrix parseTransformMatrix_debug(FbxCluster* cluster, FbxMesh* mesh, FbxPose* fbxPose, FbxAMatrix globalPosition);
+
 	FbxAMatrix getGeometry(FbxNode* node);
 	FbxAMatrix getGlobalPosition(FbxNode* node, FbxTime time, FbxPose* pose, FbxAMatrix* parentGlobalPosition);
 	FbxAMatrix getPoseMatrix(FbxPose* pose, int nodeIndex);
+
+	FbxAMatrix convertToLeftHanded(FbxAMatrix fbxMatrix);
+	Float4x4 translateMatrixToFloat4x4(FbxAMatrix fbxMatrix);
 
 	//! Transforms the vertices into local space.
 	/*!

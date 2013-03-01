@@ -1039,9 +1039,9 @@ void Renderer::renderAnimation(unsigned int meshID, DirectX::XMFLOAT4X4 view, Di
 
 	ModelD3D* modelD3D	= managementModel_->getModelD3D(meshID, device);
 
-	DirectX::XMFLOAT4X4 worldMatrix(1.0f, 0.0f, 0.0f, 0.0f,
-									0.0f, 1.0f, 0.0f, 0.0f,
-									0.0f, 0.0f, 1.0f, 0.0f,
+	DirectX::XMFLOAT4X4 worldMatrix(0.01f, 0.0f, 0.0f, 0.0f,
+									0.0f, 0.01f, 0.0f, 0.0f,
+									0.0f, 0.0f, 0.01f, 0.0f,
 									0.0f, 4.0f, 0.0f, 1.0f);
 	DirectX::XMFLOAT4X4 worldMatrixInverse	= worldMatrix;
 	DirectX::XMFLOAT4X4 finalMatrix			= managementMath_->calculateFinalMatrix(worldMatrix, view, projection);
@@ -1049,10 +1049,10 @@ void Renderer::renderAnimation(unsigned int meshID, DirectX::XMFLOAT4X4 view, Di
 	managementCB_->setCB(CB_TYPE_OBJECT, TypeFX_VS, CB_REGISTER_OBJECT, devcon);
 	managementCB_->updateCBObject(devcon, finalMatrix, worldMatrix, worldMatrixInverse);
 
-	std::string clipName = "ArmatureAction";
+	std::string clipName = "punch";
 	std::vector<DirectX::XMFLOAT4X4> finalTransforms;
 
-	managementAnimation_->update(0.01, clipName, 3);
+	managementAnimation_->update(0.002, clipName, 3);
 	managementAnimation_->getAnimation(3)->getFinalTransforms(clipName, managementAnimation_->getTimePosition(), &finalTransforms);
 
 	managementCB_->setCB(CB_TYPE_BONE, TypeFX_VS, CB_REGISTER_BONE, devcon);

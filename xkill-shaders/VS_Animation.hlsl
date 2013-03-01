@@ -16,14 +16,20 @@ DefaultVSOut VS_Animation(VSInPosNormTexTanSkinned vsIn)
 	float3 position = float3(0.0f, 0.0f, 0.0f);
 	float3 normal	= float3(0.0f, 0.0f, 0.0f);
 
+	float4x4 boneTransform = 0;
+
 	for(int i=0; i<4; i++)
 	{
-		position	+= weights[i] * mul(float4(vsIn.position, 1.0f), boneTransforms[vsIn.boneIndices[i]]).xyz;
-		normal		+= weights[i] * mul(vsIn.normal, (float3x3)boneTransforms[vsIn.boneIndices[i]]);
+		boneTransform += boneTransforms[vsIn.boneIndices[i]] * weights[i];
+
+		//position	+= weights[i] * mul(float4(vsIn.position, 1.0f), boneTransforms[vsIn.boneIndices[i]]).xyz;
+		//normal	+= weights[i] * mul(vsIn.normal, (float3x3)boneTransforms[vsIn.boneIndices[i]]);
 	}
 
-//	position = vsIn.position;
-//	normal = vsIn.normal;
+	position = vsIn.position;
+	normal = vsIn.normal;
+	
+	position = mul(position, boneTransform).xyz;
 
 	output.position		= mul(float4(position, 1.0f), finalMatrix);
 	output.positionW	= mul(float4(position, 1.0f), worldMatrix).xyz;
