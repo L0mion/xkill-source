@@ -93,11 +93,12 @@ void CollisionManager::collision_applyDamage(Entity* entity1, Entity* entity2)
 									if(entity1->getID() != damage->owner_entityID) //Award player
 									{
 										creatorOfProjectile_ptr_player->priority++;
-										{Event_PostHudMessage e("", creatorOfProjectile_ptr_player); e.setHtmlMessage("You terminated", "???", "", "+1 priority"); SEND_EVENT(&e);}
-										{Event_PostHudMessage e("", playerThatDied_ptr_player); e.setHtmlMessage("Terminated by", "???"); SEND_EVENT(&e);}
+										{Event_PostHudMessage e("", creatorOfProjectile_ptr_player); e.setHtmlMessage("You terminated", playerThatDied_ptr_player->playerName, "", "+1 priority"); SEND_EVENT(&e);}
+										{Event_PostHudMessage e("", playerThatDied_ptr_player); e.setHtmlMessage("Terminated by", creatorOfProjectile_ptr_player->playerName); SEND_EVENT(&e);}
 									}
 									else //Punish player for blowing himself up
 									{
+										{Event_PostHudMessage e("", creatorOfProjectile_ptr_player); e.setHtmlMessage("You self-terminated","","", "-1 priority"); SEND_EVENT(&e);}
 										creatorOfProjectile_ptr_player->priority--;
 									}
 									DEBUGPRINT("Player with entity id " << damage->owner_entityID << " killed player with entity id " << entity1->getID());
