@@ -182,7 +182,7 @@ void ScoreComponent::schedulerScoreCounting(float delta)
 				// Post hud messages
 				{Event_PostHudMessage e("", ptr_player); e.setHtmlMessage("Now running in", "Kernel Mode"); SEND_EVENT(&e);}
 				{Event_PostHudMessage e("", ptr_player); e.setHtmlMessage("Chosen by Scheduler"); SEND_EVENT(&e);}
-				{Event_PostHudMessage e("", ptr_player); e.setHtmlMessage("", "???", "is executing"); e.receiver = Event_PostHudMessage::RECEIVER_ALL_BUT_SUBJECT; SEND_EVENT(&e);}
+				{Event_PostHudMessage e("", ptr_player); e.setHtmlMessage("", ptr_player->playerName, "is executing"); e.receiver = Event_PostHudMessage::RECEIVER_ALL_BUT_SUBJECT; SEND_EVENT(&e);}
 			}
 		}
 	}
