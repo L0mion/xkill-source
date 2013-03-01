@@ -359,7 +359,7 @@ Attribute_Camera::Attribute_Camera()
 
 	aspectRatio = 0.785f;
 	fieldOfView = 0.785f; 
-	zFar = 40.0f;
+	zFar = 70.0f;
 	zNear = 0.01f;
 
 	up		= Float3(0.0f, 1.0f, 0.0f);
@@ -528,19 +528,16 @@ Attribute_Player::Attribute_Player()
 	id = nextId++;
 	priority = 0;
 	cycleSteals = 0;
-	totalExecutionTime = 0;
+	cycles = 0;
 	respawnTimer.setStartTime(5.0f);
 	timeSinceLastDamageTaken = 100.0f;
 	jetpack = false;
 	detectedAsDead = true;
-	meshID_whenAlive = 0;
-	meshID_whenDead = 0;
 	currentSprintTime = 0;
 	sprintTime = 2.0f;
 	canSprint = true;
 	sprintRechargeRate = 0.2f;
 	executing = false;
-	corpseEntityId = -1;
 
 	walkSpeed = 5.0f;
 	sprintSpeed = walkSpeed*2;
@@ -564,7 +561,7 @@ void Attribute_Player::saveTo( DataItemList* list )
 	list->get(&id);
 	list->get(&priority);
 	list->get(&cycleSteals);
-	list->get(&totalExecutionTime);
+	list->get(&cycles);
 	list->get(&currentSpeed);
 	list->get(&walkSpeed);
 	list->get(&sprintSpeed);
@@ -582,7 +579,7 @@ DataItemList* Attribute_Player::getDataList()
 	list->add(id,					"id");
 	list->add(priority,				"priority");
 	list->add(cycleSteals,			"cycleSteals");
-	list->add(totalExecutionTime,	"totalExecutionTime");
+	list->add(cycles,	"totalExecutionTime");
 	list->add(currentSpeed,			"priority");
 	list->add(walkSpeed,			"walkSpeed");
 	list->add(sprintSpeed,			"sprintSpeed");
@@ -927,7 +924,7 @@ DataItemList* Attribute_DebugShape::getDataList()
 	{
 		DataItemList* list = new DataItemList();
 
-		list->add(&ptr_spatial, "ptr_spatial");;
+		list->add(&ptr_spatial, "ptr_spatial");
 		list->add(meshID,					"meshID");
 		list->add_Enum(shape->shapeType_,	"shape->shapeType");
 		list->add(render,					"render");
@@ -957,7 +954,7 @@ Attribute_ExplosionSphere::~Attribute_ExplosionSphere()
 DataItemList* Attribute_ExplosionSphere::getDataList()
 {
 	DataItemList* list = new DataItemList();
-	list->add(&ptr_physics, "ptr_physics");;
+	list->add(&ptr_physics, "ptr_physics");
 	list->add(currentLifeTimeLeft,	"currentLifeTimeLeft");
 	return list;
 }
@@ -972,6 +969,7 @@ Attribute_Ray::Attribute_Ray()
 {
 	from = Float3(0.0f, 0.0f, 0.0f);
 	to = Float3(0.0f, 0.0f, 0.0f);
+	render = false;
 }
 Attribute_Ray::~Attribute_Ray()
 {
@@ -980,7 +978,7 @@ Attribute_Ray::~Attribute_Ray()
 DataItemList* Attribute_Ray::getDataList()
 {
 	DataItemList* list = new DataItemList();
-	list->add(from, "from");;
+	list->add(from, "from");
 	list->add(to,	"to");
 	return list;
 }

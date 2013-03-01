@@ -3,6 +3,7 @@
 #include "LightPos.hlsl"
 #include "LightDir.hlsl"
 #include "LightPoint.hlsl"
+#include "LightShadow.hlsl"
 
 #include "TilingFrustum.hlsl"
 
@@ -22,13 +23,15 @@ Texture2D gBufferNormal				: register( t0 );
 Texture2D gBufferAlbedo				: register( t1 );
 Texture2D gBufferMaterial			: register( t2 );
 Texture2D bufferGlowHigh			: register( t3 ); //Register shared in PS_DownSample
-Texture2D bufferDepth				: register( t4 ); //Hi, please notice me if you intend to sequently add buffers. I can be pretty dangerous if one does not! Yarr.
-StructuredBuffer<LightDescDir>		lightsDir	: register( t5 );
-StructuredBuffer<LightDescPoint>	lightsPoint	: register( t6 );
-StructuredBuffer<LightDescSpot>		lightsSpot	: register( t7 );
-StructuredBuffer<float3>			lightsPos	: register( t8 );
+Texture2D bufferShadowMap			: register( t4 );
+Texture2D bufferDepth				: register( t5 ); //Hi, please notice me if you intend to sequently add buffers. I can be pretty dangerous if one does not! Yarr.
+StructuredBuffer<LightDescDir>		lightsDir	: register( t6 );
+StructuredBuffer<LightDescPoint>	lightsPoint	: register( t7 );
+StructuredBuffer<LightDescSpot>		lightsSpot	: register( t8 );
+StructuredBuffer<float3>			lightsPos	: register( t9 );
 
-SamplerState ss : register(s0);
+SamplerState			ss			: register( s0 );
+SamplerComparisonState	ssShadow	: register( s1 );
 
 //Shared memory
 groupshared uint tileMinDepthInt;
@@ -100,7 +103,7 @@ void CS_Lighting(
 	//Cull lights with tile
 	uint numTileThreads = TILE_DIM * TILE_DIM;
 	uint numPasses = (numLightsPoint + numTileThreads - 1) / numTileThreads; //Passes required by tile threads to cover all lights.
-	for(uint i = 0; i < numPasses; ++i)
+	for(uint i = 0; i < numPasses; i++)
 	{
 		uint lightIndex = i * numTileThreads + threadIDBlockIndex;
 		
@@ -121,7 +124,7 @@ void CS_Lighting(
 	//Sample depth as quickly as possible to ensure that we do not evualuate irrelevant pixels.
 	if(!validPixel)
 		return;
-	
+
 	float3 normal = gNormal.xyz;
 	normal.x *= 2.0f; normal.x -= 1.0f;
 	normal.y *= 2.0f; normal.y -= 1.0f;
@@ -138,7 +141,7 @@ void CS_Lighting(
 		/*Specular*/	gMaterial
 	};
 	
-	//Do lighting
+	//Do lighting:
 	float4 Ambient	= float4(0.0f, 0.0f, 0.0f, 0.0f);
 	float4 Diffuse	= float4(0.0f, 0.0f, 0.0f, 0.0f);
 	float4 Specular	= float4(0.0f, 0.0f, 0.0f, 0.0f);
@@ -153,6 +156,17 @@ void CS_Lighting(
 			surfaceMaterial,
 			surfaceNormalV,
 			ambient, diffuse, specular);
+
+		if(i == 0)
+		{
+			//Apply shadow onto first directional light:
+			float4 surfacePosW = mul(float4(surfacePosV, 1.0f), viewInverse);
+			float4 posH = mul(surfacePosW, shadowMapTransform);
+			float shadow = LightShadow(ssShadow, bufferShadowMap, posH);
+			diffuse		*= shadow;
+			specular	*= shadow;
+		}
+
 		Ambient	+= ambient;	
 		Diffuse	+= diffuse; 
 		Specular += specular;
@@ -181,10 +195,11 @@ void CS_Lighting(
 	//}
 
 	float3 litPixel = Ambient.xyz + Diffuse.xyz + Specular.xyz;
-	float3 glowPixel = bufferGlowHigh.SampleLevel(ss, texCoord, 0);
+	float3 glowPixel = bufferGlowHigh.SampleLevel(ss, texCoord, 0).xyz;
 	litPixel = min(litPixel + glowPixel, 1.0f); //additive blending
 	output[
 		uint2(
 			threadIDDispatch.x + viewportTopX, 
-			threadIDDispatch.y + viewportTopY)] = float4(litPixel, 1.0f);
+			threadIDDispatch.y + viewportTopY)] = 
+		float4(litPixel, 1.0f);
 }

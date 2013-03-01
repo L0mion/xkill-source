@@ -134,6 +134,7 @@ private:
 	std::vector<fbxsdk_2014_0_beta2::FbxNode*> boneNodes_;	//<! Contains the nodes for every bone in the skeleton.
 
 	FbxMesh* fbxMesh_; //!< Fbx mesh object.
+
 };
 
 #endif //XKILL_IO_LOADERFBXMESHDESC_H

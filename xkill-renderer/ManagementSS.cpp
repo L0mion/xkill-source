@@ -4,19 +4,19 @@
 
 ManagementSS::ManagementSS()
 {
-	ssDefault_ = nullptr;
-	ssSprite_  = nullptr;
+	ssDefault_	= nullptr;
+	ssShadow_	= nullptr;
 }
 ManagementSS::~ManagementSS()
 {
 	SAFE_RELEASE(ssDefault_);
-	SAFE_RELEASE(ssSprite_);
+	SAFE_RELEASE(ssShadow_);
 }
 
 void ManagementSS::reset()
 {
 	SAFE_RELEASE(ssDefault_);
-	SAFE_RELEASE(ssSprite_);
+	SAFE_RELEASE(ssShadow_);
 }
 
 void ManagementSS::setSS(
@@ -32,8 +32,9 @@ void ManagementSS::setSS(
 	case SS_ID_DEFAULT:
 		ss = ssDefault_;
 		break;
-	case SS_ID_SPRITE:
-		ss = ssSprite_;
+	case SS_ID_SHADOW:
+		ss = ssShadow_;
+		break;
 	default:
 		ss = ssDefault_; // Should we really set a 'default' samplerstate this way?
 		break;
@@ -95,6 +96,8 @@ HRESULT ManagementSS::init(ID3D11Device* device)
 	HRESULT hr = S_OK;
 
 	hr = initSSDefault(device);
+	if(SUCCEEDED(hr))
+		hr = initSSShadow(device);
 
 	return hr;
 }
@@ -118,24 +121,28 @@ HRESULT ManagementSS::initSSDefault(ID3D11Device* device)
 
 	return hr;
 }
-
-HRESULT ManagementSS::initSSSprite(ID3D11Device* device)
+HRESULT ManagementSS::initSSShadow(ID3D11Device* device)
 {
 	HRESULT hr = S_OK;
 
-	D3D11_SAMPLER_DESC sampDesc;
-    ZeroMemory(&sampDesc, sizeof(sampDesc));
-	sampDesc.Filter		= D3D11_FILTER_COMPARISON_MIN_MAG_LINEAR_MIP_POINT;
-    sampDesc.AddressU	= D3D11_TEXTURE_ADDRESS_CLAMP;
-    sampDesc.AddressV	= D3D11_TEXTURE_ADDRESS_CLAMP;
-    sampDesc.AddressW	= D3D11_TEXTURE_ADDRESS_CLAMP;
-    sampDesc.ComparisonFunc = D3D11_COMPARISON_NEVER;
-    sampDesc.MinLOD		= 0;
-    sampDesc.MaxLOD		= D3D11_FLOAT32_MAX;
+	D3D11_SAMPLER_DESC ssDesc;
+	ZeroMemory(&ssDesc, sizeof(ssDesc));
+	ssDesc.Filter			= D3D11_FILTER_COMPARISON_MIN_MAG_LINEAR_MIP_POINT;
+	ssDesc.AddressU			= D3D11_TEXTURE_ADDRESS_BORDER;
+	ssDesc.AddressV			= D3D11_TEXTURE_ADDRESS_BORDER;
+	ssDesc.AddressW			= D3D11_TEXTURE_ADDRESS_BORDER;
+	ssDesc.ComparisonFunc	= D3D11_COMPARISON_LESS_EQUAL;
+	ssDesc.MinLOD			= 0;
+	ssDesc.MaxLOD			= D3D11_FLOAT32_MAX;
 
-	hr = device->CreateSamplerState(&sampDesc, &ssSprite_);
+	ssDesc.BorderColor[0] = 0.0f;
+	ssDesc.BorderColor[1] = 0.0f;
+	ssDesc.BorderColor[2] = 0.0f;
+	ssDesc.BorderColor[3] = 0.0f;
+
+	hr = device->CreateSamplerState(&ssDesc, &ssShadow_);
 	if(FAILED(hr))
-		ERROR_MSG(L"SSManagement::initSSCrossHair CreateSamplerState failed");
+		ERROR_MSG(L"SSManagement::initSSShadow CreateSamplerState failed");
 
 	return hr;
 }

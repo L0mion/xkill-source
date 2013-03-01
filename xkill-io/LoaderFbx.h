@@ -67,17 +67,17 @@ private:
 	\param node A FbxNode with a FbxNodeAttribute of tye eMesh.
 	*/
 	void parseMesh(fbxsdk_2014_0_beta2::FbxNode* node);
-	
 
 	LoaderFbxMesh*		meshLoader_;		//<! An object used to load meshe data.
 	LoaderFbxMaterial*	materialLoader_;	//<! An object used to load material data.
 	LoaderFbxTexture*	textureLoader_;		//<! An object used to load texture data.
 	LoaderFbxAnimation*	animationLoader_;	//<! An object used to load animation data.
 
-	fbxsdk_2014_0_beta2::FbxManager* fbxManager_;	//<! Manages all fbx related objects.
-	fbxsdk_2014_0_beta2::FbxScene*	 fbxScene_;		//<! Object containing information for a loaded fbx-scene
 
-	std::vector<LoaderFbxModelDesc> modelDescs_; //<! Vector containg descriptions of all the loaded models
+	fbxsdk_2014_0_beta2::FbxManager* fbxManager_;	//!< Manages all fbx related objects.
+	fbxsdk_2014_0_beta2::FbxScene*	 fbxScene_;		//!< Object containing information for a loaded fbx-scene
+
+	std::vector<LoaderFbxModelDesc> modelDescs_; //!< Vector containg descriptions of all the loaded models
 };
 
 #endif

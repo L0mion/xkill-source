@@ -1,5 +1,9 @@
 #include <xkill-utilities/Util.h>
+
 #include <xkill-utilities/SkinnedData.h>
+
+#include <DirectXMath.h>
+
 
 #include "ManagementD3D.h"
 #include "ManagementFX.h"
@@ -29,12 +33,17 @@
 #include "Renderer.h"
 #include "ViewportData.h"
 
+
 //temp
 #include "AnimatedMesh.h"
 #include "M3DLoader.h"
 //#include "SkinnedData.h"
 
 #include "Buffer_SrvRtvUav.h"
+
+//tmep
+#include "Buffer_SrvDsv.h"
+
 
 
 ATTRIBUTES_DECLARE_ALL;
@@ -45,25 +54,26 @@ Renderer::Renderer(HWND windowHandle)
 	
 	winfo_ = nullptr;
 
-	managementD3D_		 = nullptr;
-	managementFX_		 = nullptr;
-	managementCB_		 = nullptr;
-	managementLight_	 = nullptr;
-	managementViewport_	 = nullptr;
-	managementModel_	 = nullptr;
-	managementTex_		 = nullptr;
-	managementSS_		 = nullptr;
-	managementRS_		 = nullptr;
-	managementBuffer_	 = nullptr;
-	managementDebug_	 = nullptr;
-	managementMath_		 = nullptr;
-	managementInstance_  = nullptr;
-	managementSprites_   = nullptr;
-	managementAnimation_ = nullptr;
+	managementD3D_		= nullptr;
+	managementFX_		= nullptr;
+	managementCB_		= nullptr;
+	managementLight_	= nullptr;
+	managementViewport_	= nullptr;
+	managementModel_	= nullptr;
+	managementTex_		= nullptr;
+	managementSS_		= nullptr;
+	managementRS_		= nullptr;
+	managementBuffer_	= nullptr;
+	managementDebug_	= nullptr;
+	managementMath_		= nullptr;
+	managementInstance_ = nullptr;
+	managementSprites_  = nullptr;
+	debugLinesVertexBuffer_ = nullptr;
+
 
 	ATTRIBUTES_INIT_ALL;
 
-	debugLinesVertexBuffer_ = nullptr;
+	rayBuffer				= nullptr;
 
 	//temp
 	m3dLoader_		= nullptr;
@@ -92,6 +102,7 @@ Renderer::~Renderer()
 	SAFE_DELETE(managementDebug_);
 
 	SAFE_RELEASE(debugLinesVertexBuffer_);
+	SAFE_RELEASE(rayBuffer);
 
 	//temp
 //	SAFE_DELETE(m3dLoader_);
@@ -121,7 +132,7 @@ void Renderer::unloadModels()
 HRESULT Renderer::resize(unsigned int screenWidth, unsigned int screenHeight)
 {
 	//Get number of split-screens
-	unsigned int numSS = itrSplitScreen.size();
+	unsigned int numSS = itrSplitScreen.count();
 	
 	//Initialize new windo-type object.
 	HRESULT hr = S_OK;
@@ -215,7 +226,7 @@ void Renderer::initWinfo()
 	unsigned int screenWidth, screenHeight, numViewports, csDispatchX, csDispatchY;
 	screenWidth		= windowResolution.width;
 	screenHeight	= windowResolution.height;
-	numViewports	= itrCamera.size();
+	numViewports	= itrCamera.count();
 	csDispatchX		= screenWidth	/ CS_TILE_SIZE;
 	csDispatchY		= screenHeight	/ CS_TILE_SIZE;
 
@@ -387,6 +398,9 @@ void Renderer::render()
 	managementD3D_->clearDepthBuffer();
 	managementD3D_->clearBackBuffer();
 
+	//Do shadows pre-pass:
+	DirectX::XMFLOAT4X4 shadowMapTransform = buildShadows();
+
 	//Update per-frame constant buffer.
 	managementCB_->setCB(
 		CB_TYPE_FRAME, 
@@ -395,6 +409,7 @@ void Renderer::render()
 		devcon);
 	managementCB_->updateCBFrame(
 		devcon,
+		shadowMapTransform,
 		managementLight_->getLightDirCurCount(),
 		managementLight_->getLightPointCurCount(),
 		managementLight_->getLightSpotCurCount());
@@ -516,11 +531,13 @@ void Renderer::renderViewportToGBuffer(ViewportData& vpData)
 	{
 		drawBulletPhysicsDebugLines(vpData.view, vpData.proj);
 	}
+
+	drawLaser(vpData.view, vpData.proj);
 	
 	//Unset and clean.
 	managementFX_->unsetAll(devcon);
 	managementFX_->unsetLayout(devcon);
-	//managementSS_->unsetSS(devcon, TypeFX_PS, 0);
+	managementSS_->unsetSS(devcon, TypeFX_PS, 0);
 	devcon->RSSetState(nullptr);
 }
 void Renderer::renderViewportToBackBuffer(ViewportData& vpData)
@@ -561,6 +578,7 @@ void Renderer::renderViewportToBackBuffer(ViewportData& vpData)
 	
 	//Set default samplerstate.
 	managementSS_->setSS(devcon, TypeFX_CS, 0, SS_ID_DEFAULT);
+	managementSS_->setSS(devcon, TypeFX_CS, 1, SS_ID_SHADOW);
 
 	//Call compute shader kernel.
 	unsigned int dispatchX = winfo_->getCSDispathX() / managementViewport_->getNumViewportsX();
@@ -579,18 +597,21 @@ void Renderer::renderViewportToBackBuffer(ViewportData& vpData)
 	managementD3D_->unsetDepthBufferSRV(GBUFFER_SHADER_REGISTER_DEPTH);
 	managementBuffer_->unsetBuffersAsCSShaderResources(devcon);
 
-	//devcon->CSSetSamplers(0, 0, nullptr); //move me into managementSS
+	managementSS_->unsetSS(devcon, TypeFX_CS, 0);
+	managementSS_->unsetSS(devcon, TypeFX_CS, 1);
 }
 
-void Renderer::renderInstance(unsigned int meshID, InstancedData* instance)
+void Renderer::renderInstance(unsigned int meshID, InstancedData* instance, bool shadowmap)
 {
 	ID3D11Device*			device = managementD3D_->getDevice();
 	ID3D11DeviceContext*	devcon = managementD3D_->getDeviceContext();
 
 	//Fetch renderer representation of model.
 	ModelD3D* modelD3D	= managementModel_->getModelD3D(meshID, device);
+	if(modelD3D == nullptr)
+		return;
 
-	ShadingDesc shadingDesc = deriveShadingDesc(modelD3D->getVertexType());
+	ShadingDesc shadingDesc = deriveShadingDesc(modelD3D->getVertexType(), shadowmap);
 	setShadingDesc(shadingDesc);
 
 	//Set vertex buffer.
@@ -611,7 +632,8 @@ void Renderer::renderInstance(unsigned int meshID, InstancedData* instance)
 		renderSubset(
 			subsetD3Ds[i],
 			materials[materialIndex],
-			instance->getDataCountCur());
+			instance->getDataCountCur(),
+			shadowmap);
 	}
 
 	//Unset vertex buffers. (In case of the instance buffer needing to be mapped to in ManagementInstance)
@@ -624,7 +646,7 @@ void Renderer::renderInstance(unsigned int meshID, InstancedData* instance)
 		offset);
 }
 
-ShadingDesc Renderer::deriveShadingDesc(VertexType vertexType)
+ShadingDesc Renderer::deriveShadingDesc(VertexType vertexType, bool shadowmap)
 {
 	ShadingDesc shadingDesc;
 	switch(vertexType)
@@ -653,6 +675,9 @@ ShadingDesc Renderer::deriveShadingDesc(VertexType vertexType)
 		}
 	}
 
+	if(shadowmap)
+		shadingDesc.psID_ = SHADERID_PS_BUILD_SHADOWMAP_POS_NORM_TEX;
+
 	return shadingDesc;
 }
 void Renderer::setShadingDesc(ShadingDesc shadingDesc)
@@ -667,31 +692,39 @@ void Renderer::setShadingDesc(ShadingDesc shadingDesc)
 	managementFX_->setLayout(devcon, shadingDesc.layoutID_);
 }
 
-void Renderer::renderSubset(SubsetD3D* subset, MaterialDesc& material, unsigned int numInstances)
+
+void Renderer::renderSubset(
+	SubsetD3D* subset, 
+	MaterialDesc& material, 
+	unsigned int numInstances,
+	bool shadowmap)
 {
 	ID3D11Device*			device = managementD3D_->getDevice();
 	ID3D11DeviceContext*	devcon = managementD3D_->getDeviceContext();
 
-	//Set textures.
-	ID3D11ShaderResourceView* texAlbedo = managementTex_->getTexSrv(material.idAlbedoTex_);
-	ID3D11ShaderResourceView* texNormal = managementTex_->getTexSrv(material.idNormalTex_);
-	devcon->PSSetShaderResources(0, 1, &texAlbedo);
-	devcon->PSSetShaderResources(1, 1, &texNormal);
-
-	//Set per-subset constant buffer.
-	managementCB_->setCB(
-		CB_TYPE_SUBSET, 
-		TypeFX_PS, 
-		CB_REGISTER_SUBSET, 
-		devcon);
-	DirectX::XMFLOAT3 dxSpec(
-		material.specularTerm_.x, 
-		material.specularTerm_.y, 
-		material.specularTerm_.z);
-	managementCB_->updateCBSubset(
-		devcon,
-		dxSpec,
-		material.specularPower_);
+	//Only set such resources if needed. These are not needed during shadow-pass.
+	if(!shadowmap)
+	{
+		ID3D11ShaderResourceView* texAlbedo = managementTex_->getTexSrv(material.idAlbedoTex_);
+		ID3D11ShaderResourceView* texNormal = managementTex_->getTexSrv(material.idNormalTex_);
+		devcon->PSSetShaderResources(0, 1, &texAlbedo);
+		devcon->PSSetShaderResources(1, 1, &texNormal);
+	
+		//Set per-subset constant buffer.
+		managementCB_->setCB(
+			CB_TYPE_SUBSET, 
+			TypeFX_PS, 
+			CB_REGISTER_SUBSET, 
+			devcon);
+		DirectX::XMFLOAT3 dxSpec(
+			material.specularTerm_.x, 
+			material.specularTerm_.y, 
+			material.specularTerm_.z);
+		managementCB_->updateCBSubset(
+			devcon,
+			dxSpec,
+			material.specularPower_);
+	}
 
 	//Set index-buffer.
 	UINT offset = 0;
@@ -700,7 +733,6 @@ void Renderer::renderSubset(SubsetD3D* subset, MaterialDesc& material, unsigned 
 		DXGI_FORMAT_R32_UINT, 
 		offset);
 
-	//Set topology. Where to put this?
 	devcon->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
 	//Draw subset.
@@ -762,6 +794,140 @@ void Renderer::renderDebugShape(
 	devcon->Draw(numVertices, 0);
 }
 
+//Shadows
+DirectX::XMFLOAT4X4	Renderer::buildShadows()
+{
+	ID3D11DeviceContext* devcon = managementD3D_->getDeviceContext();
+
+	//Get shadow transform:
+	SceneBounds bounds;
+	bounds.center = DirectX::XMFLOAT3(0.0f, 0.0f, 0.0f); //Origo.
+	bounds.radius = 38;//sqrtf(25.0f * 25.0f); //Radius of scene really ought to be calculated instead of fixed.
+
+	LightDescDir dirLight = LightDescDir(); //default construct
+	AttributePtr<Attribute_Light_Dir> ptr_lightDir;
+	if(itrLightDir.hasNext())
+	{
+		ptr_lightDir = itrLightDir.getNext();
+		dirLight = ptr_lightDir->lightDir;
+
+		//static float rotationAngle = 0.0f;
+		//rotationAngle += 0.0001f * delta;
+		//DirectX::XMMATRIX R = DirectX::XMMatrixRotationY(rotationAngle);
+		//
+		//DirectX::XMFLOAT3 tempDir = DirectX::XMFLOAT3(dirLight.direction.x, dirLight.direction.y, dirLight.direction.z);
+		//DirectX::XMVECTOR tempDir2 = XMLoadFloat3(&tempDir);
+		//tempDir2 = DirectX::XMVector3TransformNormal(tempDir2, R);
+		//DirectX::XMStoreFloat3(&tempDir, tempDir2);
+		//
+		//ptr_lightDir->lightDir.direction = Float3(tempDir.x, tempDir.y, tempDir.z);
+	}
+	itrLightDir.resetIndex();
+
+	ShadowMatrices shadowMatrices;
+	shadowMatrices = constructShadowMatrices(bounds, dirLight.direction);
+
+	//Set viewport to encompass entire map.
+	D3D11_VIEWPORT vp = managementBuffer_->getShadowViewport();
+	devcon->RSSetViewports(1, &vp);
+
+	managementRS_->setRS(devcon, RS_ID_DEPTH); //Set rasterizer state with depth bias to avoid shadow acne
+
+	managementBuffer_->setBuffer(
+		devcon, 
+		SET_ID_SHADOW, 
+		SET_TYPE_DSV, 
+		SET_STAGE_CS, //stage irrelevant
+		0); //register irrelevant
+
+	//Update per-viewport constant buffer.
+	managementCB_->setCB(CB_TYPE_CAMERA, TypeFX_VS, CB_REGISTER_CAMERA, managementD3D_->getDeviceContext());
+	managementCB_->updateCBCamera(
+		managementD3D_->getDeviceContext(),
+		/*View: */			shadowMatrices.view_,
+		/*View Inverse: */	managementMath_->getIdentityMatrix(),
+		/*Proj: */			shadowMatrices.proj_,
+		/*Proj Inverse: */	managementMath_->getIdentityMatrix(),
+		/*EyePos: */		DirectX::XMFLOAT3(0.0f, 0.0f, 0.0f), //Irrelevant
+		/*ViewportTopX: */	0.0f, //Irrelevant					
+		/*ViewportTopY: */	0.0f, //Irrelevant
+		/*zNear: */			0.0f, //Irrelevant
+		/*zFar: */			0.0f, //Irrelevant
+		/*ViewportWidth: */ 0,	//Irrelevant
+		/*ViewportHeight: */ 0);	//Irrelevant
+
+	std::map<unsigned int, InstancedData*> instancesMap = managementInstance_->getInstancesMap();
+	for(std::map<unsigned int, InstancedData*>::iterator i = instancesMap.begin(); i != instancesMap.end(); i++)
+	{
+		//if(i->first == 7 ) //Check for what models ought to cast shadows?
+		renderInstance(i->first, i->second, true);
+	}
+
+	//Unset shizzle
+	managementBuffer_->unset(devcon, SET_TYPE_DSV, SET_STAGE_CS, 0); //register and stage irrelevant
+	managementRS_->unsetRS(devcon);
+
+	return shadowMatrices.shadowMapTransform_;
+}
+ShadowMatrices Renderer::constructShadowMatrices(SceneBounds bounds, Float3 lightDirection)
+{
+	//Position of directional light being the back of viewing frustum.
+	DirectX::XMVECTOR lightPos = DirectX::XMLoadFloat3(&(DirectX::XMFLOAT3(
+		-2.0f * bounds.radius * lightDirection.x,
+		-2.0f * bounds.radius * lightDirection.y,
+		-2.0f * bounds.radius * lightDirection.z)));
+	DirectX::XMVECTOR targetPos = DirectX::XMLoadFloat3(&bounds.center); //Looking at center of the scene.
+	DirectX::XMVECTOR up = DirectX::XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
+
+	//Build view-matrix:
+	DirectX::XMMATRIX V = DirectX::XMMatrixLookAtLH(
+		lightPos, 
+		targetPos, 
+		up);
+
+	//Transform bounding sphere to light-space:
+	DirectX::XMFLOAT3 sphereCenterLS;
+	DirectX::XMStoreFloat3(&sphereCenterLS, DirectX::XMVector3TransformCoord(targetPos, V));
+
+	//Establish frustum:
+	float l = sphereCenterLS.x - bounds.radius;
+	float b = sphereCenterLS.y - bounds.radius;
+	float n = sphereCenterLS.z - bounds.radius;
+	float r = sphereCenterLS.x + bounds.radius;
+	float t = sphereCenterLS.y + bounds.radius;
+	float f = sphereCenterLS.z + bounds.radius;
+
+	//Build projection-matrix:
+	DirectX::XMMATRIX P = DirectX::XMMatrixOrthographicOffCenterLH(
+		l, 
+		r, 
+		b, 
+		t, 
+		n, 
+		f);
+
+	//Transform NDC-space [-1, +1]^2 to texture space [0, 1]^2
+	DirectX::XMMATRIX T(
+		0.5f,	0.0f,	0.0f,	0.0f,
+		0.0f,	-0.5f,	0.0f,	0.0f,
+		0.0f,	0.0f,	1.0f,	0.0f,
+		0.5f,	0.5f,	0.0f,	1.0f);
+	DirectX::XMMATRIX S = V * P * T;
+
+	ShadowMatrices shadowMatrices;
+	XMStoreFloat4x4(
+		&(shadowMatrices.shadowMapTransform_), 
+		S);
+	XMStoreFloat4x4(
+		&(shadowMatrices.view_), 
+		V);
+	XMStoreFloat4x4(
+		&(shadowMatrices.proj_), 
+		P);
+	return shadowMatrices;
+}
+
+//Glow effect
 void Renderer::downSampleBlur()
 {
 	ID3D11DeviceContext* devcon = managementD3D_->getDeviceContext();
@@ -776,13 +942,36 @@ void Renderer::downSampleBlur()
 	devcon->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
 	managementFX_->setShader(devcon, SHADERID_VS_SCREENQUAD);
 	managementFX_->setShader(devcon, SHADERID_PS_DOWNSAMPLE);
-	managementBuffer_->setGlowLowAsRTV(devcon);
-	managementBuffer_->setGlowHighAsSRV(devcon, SHADER_REGISTER_SRV_GLOW_HIGH);
+	managementBuffer_->setBuffer(
+		devcon,
+		SET_ID_GLOW_LOW,
+		SET_TYPE_RTV,
+		SET_STAGE_PS, //stage irrelevant
+		0); //register irrelevant
+	
+	managementBuffer_->setBuffer(
+		devcon,
+		SET_ID_GLOW_HIGH,
+		SET_TYPE_SRV,
+		SET_STAGE_PS,
+		SHADER_REGISTER_DOWNSAMPLE_INPUT);
 	devcon->Draw(4, 0); //Draw four arbitrary vertices.
 
-	managementBuffer_->unsetGlowHighAsSrv(devcon, SHADER_REGISTER_SRV_GLOW_HIGH);
-	managementBuffer_->unsetGlowLowAsRTV(devcon);
+	managementBuffer_->unset(
+		devcon,
+		SET_TYPE_SRV,
+		SET_STAGE_PS,
+		SHADER_REGISTER_DOWNSAMPLE_INPUT);
+	
+	managementBuffer_->unset(
+		devcon,
+		SET_TYPE_RTV,
+		SET_STAGE_CS, //stage irrelevant
+		0); //register irrelevant
+
 	managementFX_->unsetAll(devcon);
+
+	managementSS_->unsetSS(devcon, TypeFX_PS, 0);
 }
 void Renderer::blurHorizontally()
 {
@@ -808,17 +997,36 @@ void Renderer::blurHorizontally()
 	};
 	managementCB_->updateCBBlur(devcon, blurKernel);
 	
-	managementBuffer_->setGlowLowAsSRVToCS(devcon, 9);		//Low as input
-	managementBuffer_->setGlowLowUtilAsUAV(devcon, 1);	//Util as output
+	managementBuffer_->setBuffer(
+		devcon,
+		SET_ID_GLOW_LOW,
+		SET_TYPE_SRV,
+		SET_STAGE_CS,
+		SHADER_REGISTER_BLUR_INPUT);
+
+	managementBuffer_->setBuffer(
+		devcon,
+		SET_ID_GLOW_LOW_UTIL,
+		SET_TYPE_UAV,
+		SET_STAGE_CS,
+		SHADER_REGISTER_BLUR_OUTPUT);
 	
 	unsigned int numBlocksX = (unsigned int)ceilf(winfo_->getScreenWidth() / 256.0f);
 	devcon->Dispatch(numBlocksX, winfo_->getScreenHeight(), 1);
 
 	//null shit
-	ID3D11UnorderedAccessView* uavs[] = { nullptr };
-	devcon->CSSetUnorderedAccessViews(1, 1, uavs, nullptr);
-	ID3D11ShaderResourceView* nullViews[1] = { nullptr };
-	devcon->CSSetShaderResources(9, 1, nullViews);
+	managementBuffer_->unset(
+		devcon,
+		SET_TYPE_UAV,
+		SET_STAGE_CS,
+		SHADER_REGISTER_BLUR_OUTPUT);
+	
+	managementBuffer_->unset(
+		devcon,
+		SET_TYPE_SRV,
+		SET_STAGE_CS,
+		SHADER_REGISTER_BLUR_INPUT);
+	
 	managementFX_->unsetShader(devcon, SHADERID_CS_BLUR_HORZ);
 }
 void Renderer::blurVertically()
@@ -829,17 +1037,36 @@ void Renderer::blurVertically()
 	
 	managementCB_->setCB(CB_TYPE_BLUR, TypeFX_CS, CB_REGISTER_BLUR, devcon);
 	
-	managementBuffer_->setGlowLowAsUAV(devcon, 1);
-	managementBuffer_->setGlowLowUtilAsSRV(devcon, 9);
+	managementBuffer_->setBuffer(
+		devcon,
+		SET_ID_GLOW_LOW,
+		SET_TYPE_UAV,
+		SET_STAGE_CS,
+		SHADER_REGISTER_BLUR_OUTPUT);
+	
+	managementBuffer_->setBuffer(
+		devcon,
+		SET_ID_GLOW_LOW_UTIL,
+		SET_TYPE_SRV,
+		SET_STAGE_CS,
+		SHADER_REGISTER_BLUR_INPUT);
 	
 	unsigned int numBlocksY = (unsigned int)ceilf(winfo_->getScreenHeight() / 256.0f);
 	devcon->Dispatch(winfo_->getScreenWidth(), numBlocksY, 1);
 	
 	//null shit
-	ID3D11UnorderedAccessView* uavs[] = { nullptr };
-	devcon->CSSetUnorderedAccessViews(1, 1, uavs, nullptr);
-	ID3D11ShaderResourceView* nullViews[1] = { nullptr };
-	devcon->CSSetShaderResources(9, 1, nullViews);
+	managementBuffer_->unset(
+		devcon,
+		SET_TYPE_UAV,
+		SET_STAGE_CS,
+		SHADER_REGISTER_BLUR_OUTPUT);
+
+	managementBuffer_->unset(
+		devcon,
+		SET_TYPE_SRV,
+		SET_STAGE_CS,
+		SHADER_REGISTER_BLUR_INPUT);
+	
 	managementFX_->unsetAll(devcon); //unsetShader(devcon, SHADERID_CS_BLUR_VERT);
 }
 void Renderer::upSampleBlur()
@@ -856,22 +1083,44 @@ void Renderer::upSampleBlur()
 	upSampleViewport_.MaxDepth	= 1;
 	devcon->RSSetViewports(1, &upSampleViewport_);
 	
-	managementSS_->setSS(devcon, TypeFX_PS, 0, SS_ID_DEFAULT);
-	managementRS_->setRS(devcon, RS_ID_DEFAULT);
-	
 	devcon->IASetVertexBuffers(0, 0, nullptr, 0, 0);
 	devcon->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
 	managementFX_->setShader(devcon, SHADERID_VS_SCREENQUAD);
 	managementFX_->setShader(devcon, SHADERID_PS_DOWNSAMPLE);
 
-	managementBuffer_->setGlowHighAsRTV(devcon);
-	managementBuffer_->setGlowLowAsSRVToPS(devcon, 3); //not being set properly?
+	managementSS_->setSS(devcon, TypeFX_PS, 0, SS_ID_DEFAULT);
+	managementRS_->setRS(devcon, RS_ID_DEFAULT);
+
+	managementBuffer_->setBuffer(
+		devcon,
+		SET_ID_GLOW_HIGH,
+		SET_TYPE_RTV,
+		SET_STAGE_PS, //stage irrelevant
+		0); //register irrelevant
+	managementBuffer_->setBuffer(
+		devcon,
+		SET_ID_GLOW_LOW,
+		SET_TYPE_SRV,
+		SET_STAGE_PS,
+		SHADER_REGISTER_DOWNSAMPLE_INPUT);
 
 	devcon->Draw(4, 0); //Draw four arbitrary vertices.
 	
-	managementBuffer_->unsetGlowHighAsRTV(devcon);
-	managementBuffer_->unsetGlowLowAsSRV(devcon, 3);
+	managementBuffer_->unset(
+		devcon,
+		SET_TYPE_RTV,
+		SET_STAGE_PS, //stage irrelevant
+		0); //register irrelevant
+	
+	managementBuffer_->unset(
+		devcon,
+		SET_TYPE_SRV,
+		SET_STAGE_PS,
+		SHADER_REGISTER_DOWNSAMPLE_INPUT);
+	
 	managementFX_->unsetAll(devcon);
+
+	managementSS_->unsetSS(devcon, TypeFX_PS, 0);
 }
 
 void Renderer::drawBulletPhysicsDebugLines(
@@ -959,17 +1208,97 @@ void Renderer::drawBulletPhysicsDebugLines(
 	}
 }
 
+void Renderer::drawLaser(DirectX::XMFLOAT4X4 viewMatrix, DirectX::XMFLOAT4X4 projectionMatrix)
+{
+	ID3D11Device*			device = managementD3D_->getDevice();
+	ID3D11DeviceContext*	devcon = managementD3D_->getDeviceContext();
+
+	std::vector<VertexPosColor> rays;
+
+	while(itrRay.hasNext())
+	{
+		AttributePtr<Attribute_Ray> rayAttribute = itrRay.getNext();
+		
+		if(rayAttribute->render)
+		{
+			rays.push_back(VertexPosColor(rayAttribute->from, Float3(1.0f, 0.3f, 0.3f)));
+			rays.push_back(VertexPosColor(rayAttribute->to, Float3(1.0f, 0.3f, 0.3f)));
+		}
+	}
+
+	if(rays.size() > 0)
+	{
+		SAFE_RELEASE(rayBuffer);
+
+		D3D11_BUFFER_DESC vbd;
+		vbd.Usage			= D3D11_USAGE_DYNAMIC;
+		vbd.ByteWidth		= sizeof(VertexPosColor) * rays.size();
+		vbd.BindFlags		= D3D11_BIND_VERTEX_BUFFER;
+		vbd.CPUAccessFlags	= D3D11_CPU_ACCESS_WRITE;
+		vbd.MiscFlags		= 0;
+
+		D3D11_SUBRESOURCE_DATA vinitData;
+		vinitData.pSysMem = rays.data();
+
+		//Create vertex buffer
+		HRESULT hr;
+		hr = device->CreateBuffer(&vbd, &vinitData, &rayBuffer);
+	}
+
+	if(rayBuffer)
+	{
+		DirectX::XMFLOAT4X4 identityMatrix
+		(
+			1.0f,	0.0f,	0.0f,	0.0f,
+			0.0f,	1.0f,	0.0f,	0.0f,
+			0.0f,	0.0f,	1.0f,	0.0f,
+			0.0f,	0.0f,	0.0f,	1.0f
+		);
+
+		DirectX::XMFLOAT4X4 worldMatrix			= identityMatrix;
+		DirectX::XMFLOAT4X4 worldMatrixInverse	= identityMatrix;
+		DirectX::XMFLOAT4X4 finalMatrix			= managementMath_->calculateFinalMatrix(worldMatrix, viewMatrix, projectionMatrix);
+					
+		managementFX_->setShader(devcon, SHADERID_VS_COLOR);
+		managementFX_->setShader(devcon, SHADERID_PS_COLOR);
+
+		//Update per-object constant buffer.
+		managementCB_->setCB(CB_TYPE_OBJECT, TypeFX_VS, CB_REGISTER_OBJECT, devcon);
+		managementCB_->updateCBObject(
+			devcon, 
+			finalMatrix, 
+			worldMatrix, 
+			worldMatrixInverse);
+
+		UINT stride = sizeof(VertexPosColor);
+		UINT offset = 0;
+		devcon->IASetVertexBuffers(
+			0, 
+			1, 
+			&rayBuffer, 
+			&stride, 
+			&offset);
+
+		managementFX_->setLayout(devcon, LAYOUTID_POS_COLOR);
+
+		devcon->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_LINELIST);
+		devcon->Draw(rays.size(), 0);
+	}
+}
+
 void Renderer::renderHudElements(int viewportIndex)
 {
-	//Since drawn directly in screen space hud elements are not affected by the camera's aspect ratio,
-	//Therefor when there are two viewports the hud elements needs to be scaled by 0.5 along the x-axis
-	//to keep thier proportions.
-	float scaleModifierX = 1.0f;
-	int numViewports = managementViewport_->getNumViewportsX() * managementViewport_->getNumViewportsY();
-	if(numViewports == 2)
-		scaleModifierX = 0.5f;
+	// MATT: Not used anymore, replaced with HUD in Qt
 
-	renderHudElementCrossHair(viewportIndex, scaleModifierX);
+	////Since drawn directly in screen space hud elements are not affected by the camera's aspect ratio,
+	////Therefor when there are two viewports the hud elements needs to be scaled by 0.5 along the x-axis
+	////to keep thier proportions.
+	//float scaleModifierX = 1.0f;
+	//int numViewports = managementViewport_->getNumViewportsX() * managementViewport_->getNumViewportsY();
+	//if(numViewports == 2)
+	//	scaleModifierX = 0.5f;
+
+	//renderHudElementCrossHair(viewportIndex, scaleModifierX);
 }
 void Renderer::renderHudElementCrossHair(int viewportIndex, float scaleModifierX)
 {
@@ -998,7 +1327,7 @@ void Renderer::drawHudElement(int viewportIndex, unsigned int textureId, DirectX
 	managementFX_->setShader(devcon, SHADERID_VS_SPRITE);
 	managementFX_->setShader(devcon, SHADERID_PS_SPRITE);
 	
-	managementSS_->setSS(devcon, TypeFX_PS, 0, SS_ID_SPRITE);
+	managementSS_->setSS(devcon, TypeFX_PS, 0, SS_ID_DEFAULT);
 	managementRS_->setRS(devcon, RS_ID_DEFAULT);
 
 	ID3D11ShaderResourceView* tex = managementTex_->getTexSrv(textureId);
@@ -1027,6 +1356,7 @@ void Renderer::drawHudElement(int viewportIndex, unsigned int textureId, DirectX
 	//managementD3D_->unsetUAVBackBufferCS();
 
 	managementFX_->unsetAll(devcon);
+	managementSS_->unsetSS(devcon, TypeFX_PS, 0);
 	//devcon->PSSetSamplers(0, 0, nullptr);
 	devcon->IASetInputLayout(nullptr);
 	devcon->RSSetState(nullptr);

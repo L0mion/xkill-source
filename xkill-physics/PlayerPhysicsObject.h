@@ -15,7 +15,9 @@ public:
 	virtual void onUpdate(float delta);
 	virtual void handleOutOfBounds();
 	virtual void handleInput(float delta);
-
+	virtual void hover(float delta, float hoverHeight);
+	virtual btVector3 subClassCalculateLocalInertiaHook(btScalar mass);
+	virtual btCollisionShape* subClassSpecificCollisionShape();
 };
 
 #endif

@@ -78,7 +78,7 @@ void Menu_Input::loadInputList(int deviceId)
 
 	inputListModel->setHorizontalHeaderLabels(qStringList);
 
-	if(deviceId >= itrInputDevice.size())
+	if(deviceId >= itrInputDevice.count())
 		return;
 
 	AttributePtr<Attribute_InputDevice> ptr_inputDevice = itrInputDevice.at(deviceId);
@@ -169,8 +169,7 @@ void Menu_Input::settingsMenuUpdated()
 	if(currentObject != nullptr)
 	{
 		currentObject->setInverted(ui->checkBox_Input_Inverted->isChecked());
-		//Hot fix
-		//currentObject->setSensitivity((static_cast<float>(ui->horizontalSlider_Input->value()))/5000.0f);
+		currentObject->setSensitivity((static_cast<float>(ui->horizontalSlider_Input->value()))/5000.0f);
 	}
 
 	if(currentDevice != nullptr)

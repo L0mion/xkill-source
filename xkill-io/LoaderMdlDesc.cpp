@@ -43,7 +43,7 @@ bool LoaderMdlDesc::init()
 	else
 	{
 		std::string errorMsg = "Failed to open .mdldesc-file: " + getFileName();
-		SHOW_MESSAGEBOX(errorMsg);
+		ERROR_MESSAGEBOX(errorMsg);
 		sucessfulLoad = false;
 	}
 
@@ -274,6 +274,14 @@ void LoaderMdlDesc::loadHack(const std::vector<std::string>& params)
 	else if( type == "SIN")
 	{
 		events_.push_back( new Event_CreatePickupablesSpawnPoint(position,XKILL_Enums::PickupableType::AMMUNITION_BULLET));
+	}
+	else if( type == "SPE")
+	{
+		events_.push_back( new Event_CreatePickupablesSpawnPoint(position,XKILL_Enums::PickupableType::HACK_SPEEDHACK));
+	}
+	else if( type == "JET")
+	{
+		events_.push_back( new Event_CreatePickupablesSpawnPoint(position,XKILL_Enums::PickupableType::HACK_JETHACK));
 	}
 }
 void LoaderMdlDesc::loadAmmo(const std::vector<std::string>& params)

@@ -319,7 +319,7 @@ void LoaderMTL::printFail(const std::string curLine)
 	std::string lineNum = std::to_string(lineNum_);
 	std::string failed	= " parsing failed at line " + lineNum + ": " + curLine;
 
-	SHOW_MESSAGEBOX(failed);
+	ERROR_MESSAGEBOX(failed);
 }
 
 MTL LoaderMTL::getMTL()

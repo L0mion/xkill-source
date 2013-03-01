@@ -108,7 +108,7 @@ bool LoaderFbx::createFbxManager()
 	if(!fbxManager_)
 	{
 		success = false;
-		SHOW_MESSAGEBOX("LoaderFbx::createFbxManager | fbxManager_ could not be created!");
+		ERROR_MESSAGEBOX("LoaderFbx::createFbxManager | fbxManager_ could not be created!");
 	}
 	else
 	{
@@ -129,7 +129,7 @@ bool LoaderFbx::createFbxScene()
 	if(!fbxScene_)
 	{
 		success = false;
-		SHOW_MESSAGEBOX("LoaderFbx::createFbxScene | fbxScene_ could not be created");
+		ERROR_MESSAGEBOX("LoaderFbx::createFbxScene | fbxScene_ could not be created");
 	}
 	return success;
 }
@@ -152,7 +152,7 @@ bool LoaderFbx::loadScene(std::string filename)
 		message.str("");
 		message << "LoaderFbx::loadScene | Call to FbxImporter::Initialize() failed! \n Error returned: " 
 				<< fbxImporter->GetStatus().GetErrorString();
-		SHOW_MESSAGEBOX(message.str());
+		ERROR_MESSAGEBOX(message.str());
 
 		if(fbxImporter->GetStatus().GetCode() == FbxStatus::eInvalidFileVersion)
 		{
@@ -160,7 +160,7 @@ bool LoaderFbx::loadScene(std::string filename)
 			message.str("");
 			message << "FBX file format version for this FBX SDK is " << sdkMajor << "." << sdkMinor << "." << sdkRevision << "\n"
 					<< "FBX file format version for file " << filename << " is " << fileMajor << "." << fileMinor << "." << fileRevision;
-			SHOW_MESSAGEBOX(message.str());
+			ERROR_MESSAGEBOX(message.str());
 		}
 	}
 	if(fbxImporter->IsFBX())
@@ -180,7 +180,7 @@ bool LoaderFbx::loadScene(std::string filename)
 
         for(int i = 0; i < animStackCount; i++)
         {
-            FbxTakeInfo* takeInfo = fbxImporter->GetTakeInfo(i);;
+            FbxTakeInfo* takeInfo = fbxImporter->GetTakeInfo(i);
 
             FBXSDK_printf("    Animation Stack %d\n", i);
             FBXSDK_printf("         Name: \"%s\"\n", takeInfo->mName.Buffer());
@@ -220,7 +220,7 @@ bool LoaderFbx::loadScene(std::string filename)
 		message.str("");
 		message << "LoaderFbx::loadScene | Call to FbxImporter::Import() failed! \n Error returned: "
 				<< fbxImporter->GetStatus().GetErrorString();
-		SHOW_MESSAGEBOX(message.str());
+		ERROR_MESSAGEBOX(message.str());
 	}
 
 	return success;
@@ -253,9 +253,9 @@ void LoaderFbx::parseMesh(FbxNode* node)
 {
 	modelDescs_.push_back(LoaderFbxModelDesc());
 
-	LoaderFbxMeshDesc		meshDesc;
-	LoaderFbxMaterialDesc	materialDesc;
-	LoaderFbxTextureDesc	textureDesc;
+	LoaderFbxMeshDesc					meshDesc;
+	LoaderFbxMaterialDesc				materialDesc;
+	std::vector<LoaderFbxTextureDesc>	textureDesc;
 
 	int poseCount = fbxScene_->GetPoseCount();
 	FbxPose* fbxPose = nullptr;

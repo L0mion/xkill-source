@@ -9,6 +9,8 @@ enum RS_ID
 {
 	RS_ID_DEFAULT,
 	RS_ID_WIREFRAME
+	RS_ID_DEPTH
+
 };
 
 //! Class for maintaining rasterizer states.
@@ -32,6 +34,8 @@ public:
 	*/
 	void setRS(ID3D11DeviceContext* devcon, RS_ID rsId);
 
+	void unsetRS(ID3D11DeviceContext* devcon);
+
 	//! Initializes RSManagement's members.
 	/*!
 	\return Return any error encountered.
@@ -47,6 +51,7 @@ private:
 	\sa rsDefault_
 	*/
 	HRESULT initRSDefault(ID3D11Device* device);
+
 	//! Initializes the variable rsWireframe_.
 	/*!
 	\return Return any error encountered.
@@ -54,9 +59,12 @@ private:
 	\sa rsWireframe_
 	*/
 	HRESULT initRSWireframe(ID3D11Device* device);
-
+	HRESULT initRSDepth(ID3D11Device* device);
+	
 	ID3D11RasterizerState* rsDefault_; //!< A rasterizer state object.
 	ID3D11RasterizerState* rsWireframe_; //!< A rasterizer state using wireframe.
+	ID3D11RasterizerState* rsDepth_;
+
 };
 
 #endif //XKILL_RENDERER_RSMANAGEMENT_H

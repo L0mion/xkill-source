@@ -2,6 +2,7 @@
 
 #include "Winfo.h"
 #include "Buffer_SrvRtv.h"
+#include "Buffer_SrvDsv.h"
 #include "Buffer_SrvRtvUav.h"
 #include "renderingUtilities.h"
 
@@ -22,8 +23,10 @@ ManagementBuffer::ManagementBuffer(Winfo* winfo)
 	glowHigh_		= nullptr;
 	glowLow_		= nullptr;
 	glowLowUtil_	= nullptr;
-
 	ZeroMemory(&downSampleViewport_, sizeof(D3D11_VIEWPORT));
+
+	shadowMap_ = nullptr;
+	ZeroMemory(&shadowViewport_, sizeof(D3D11_VIEWPORT));
 }
 ManagementBuffer::~ManagementBuffer()
 {
@@ -33,6 +36,8 @@ ManagementBuffer::~ManagementBuffer()
 	SAFE_DELETE(glowHigh_);
 	SAFE_DELETE(glowLow_);
 	SAFE_DELETE(glowLowUtil_);
+
+	SAFE_DELETE(shadowMap_);
 }
 
 void ManagementBuffer::reset()
@@ -43,6 +48,8 @@ void ManagementBuffer::reset()
 	SAFE_RESET(glowHigh_);
 	SAFE_RESET(glowLow_);
 	SAFE_RESET(glowLowUtil_);
+
+	SAFE_RESET(shadowMap_);
 }
 HRESULT ManagementBuffer::resize(ID3D11Device* device)
 {
@@ -57,6 +64,9 @@ HRESULT ManagementBuffer::resize(ID3D11Device* device)
 	//Be sure to update viewport with new dimensions as well.
 	downSampleViewport_.Width	= static_cast<FLOAT>(downSampleWidth_);
 	downSampleViewport_.Height	= static_cast<FLOAT>(downSampleHeight_);
+
+	shadowViewport_.Width	= SHADOWMAP_DIM;
+	shadowViewport_.Height	= SHADOWMAP_DIM;
 
 	for(unsigned int i = 0; i < GBUFFERID_NUM_BUFFERS && SUCCEEDED(hr); i++)
 	{
@@ -92,6 +102,14 @@ HRESULT ManagementBuffer::resize(ID3D11Device* device)
 			downSampleHeight_);
 	}
 
+	if(SUCCEEDED(hr))
+	{
+		hr = shadowMap_->resize(
+			device, 
+			SHADOWMAP_DIM, 
+			SHADOWMAP_DIM);
+	}
+
 	return hr;
 }
 
@@ -109,6 +127,9 @@ HRESULT ManagementBuffer::init(ID3D11Device* device, ID3D11DeviceContext* devcon
 	if(SUCCEEDED(hr))
 		hr = initGlow(device, devcon);
 
+	if(SUCCEEDED(hr))
+		hr = initShadow(device);
+
 	return hr;
 }
 HRESULT ManagementBuffer::initAlbedo(ID3D11Device* device)
@@ -120,7 +141,9 @@ HRESULT ManagementBuffer::initAlbedo(ID3D11Device* device)
 		winfo_->getScreenWidth(),
 		winfo_->getScreenHeight(),
 		MULTISAMPLES_GBUFFERS, 
-		getFormat(GBUFFER_FORMAT_ALBEDO));
+		getFormat(GBUFFER_FORMAT_ALBEDO),
+		D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE,
+		D3D11_USAGE_DEFAULT);
 	hr = gBuffer->init(device);
 
 	gBuffers_[GBUFFERID_ALBEDO] = gBuffer;
@@ -136,7 +159,9 @@ HRESULT ManagementBuffer::initNormal(ID3D11Device* device)
 		winfo_->getScreenWidth(), 
 		winfo_->getScreenHeight(), 
 		MULTISAMPLES_GBUFFERS, 
-		getFormat(GBUFFER_FORMAT_NORMAL));
+		getFormat(GBUFFER_FORMAT_NORMAL),
+		D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE,
+		D3D11_USAGE_DEFAULT);
 	hr = gBuffer->init(device);
 
 	gBuffers_[GBUFFERID_NORMAL] = gBuffer;
@@ -152,7 +177,9 @@ HRESULT ManagementBuffer::initMaterial(ID3D11Device* device)
 		winfo_->getScreenWidth(), 
 		winfo_->getScreenHeight(), 
 		MULTISAMPLES_GBUFFERS, 
-		getFormat(GBUFFER_FORMAT_MATERIAL));
+		getFormat(GBUFFER_FORMAT_MATERIAL),
+		D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE,
+		D3D11_USAGE_DEFAULT);
 	hr = gBuffer->init(device);
 	
 	gBuffers_[GBUFFERID_MATERIAL] = gBuffer;
@@ -168,7 +195,9 @@ HRESULT ManagementBuffer::initGlow(ID3D11Device* device, ID3D11DeviceContext* de
 		winfo_->getScreenWidth(), 
 		winfo_->getScreenHeight(),
 		MULTISAMPLES_GBUFFERS, //?
-		getFormat(GBUFFER_FORMAT_GLOW_HIGH));
+		getFormat(GBUFFER_FORMAT_GLOW_HIGH),
+		D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE | D3D11_BIND_UNORDERED_ACCESS,
+		D3D11_USAGE_DEFAULT);
 	hr = glowHigh_->init(device);
 
 	//Init GlowBufLow with pre-computed dimensions.
@@ -176,14 +205,18 @@ HRESULT ManagementBuffer::initGlow(ID3D11Device* device, ID3D11DeviceContext* de
 		downSampleWidth_,
 		downSampleHeight_,
 		MULTISAMPLES_GBUFFERS, //?
-		getFormat(GBUFFER_FORMAT_GLOW_LOW));
+		getFormat(GBUFFER_FORMAT_GLOW_LOW),
+		D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE | D3D11_BIND_UNORDERED_ACCESS,
+		D3D11_USAGE_DEFAULT);
 	hr = glowLow_->init(device);
 
 	glowLowUtil_ = new Buffer_SrvRtvUav(
 		downSampleWidth_,
 		downSampleHeight_,
 		MULTISAMPLES_GBUFFERS, //?
-		getFormat(GBUFFER_FORMAT_GLOW_LOW));
+		getFormat(GBUFFER_FORMAT_GLOW_LOW),
+		D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE | D3D11_BIND_UNORDERED_ACCESS,
+		D3D11_USAGE_DEFAULT);
 	hr = glowLowUtil_->init(device);
 
 	//Init downsampled glowmap viewport.
@@ -194,6 +227,31 @@ HRESULT ManagementBuffer::initGlow(ID3D11Device* device, ID3D11DeviceContext* de
 	downSampleViewport_.Height		= static_cast<FLOAT>(downSampleHeight_);
 	downSampleViewport_.MinDepth	= 0;
 	downSampleViewport_.MaxDepth	= 1;
+
+	return hr;
+}
+HRESULT ManagementBuffer::initShadow(ID3D11Device* device)
+{
+	HRESULT hr = S_OK;
+
+	shadowMap_ = new Buffer_SrvDsv(
+		SHADOWMAP_DIM,
+		SHADOWMAP_DIM,
+		1,
+		DXGI_FORMAT_R24G8_TYPELESS,
+		D3D11_BIND_DEPTH_STENCIL | D3D11_BIND_SHADER_RESOURCE,
+		D3D11_USAGE_DEFAULT,
+		DXGI_FORMAT_R24_UNORM_X8_TYPELESS,
+		DXGI_FORMAT_D24_UNORM_S8_UINT);
+	hr = shadowMap_->init(device);
+
+	ZeroMemory(&shadowViewport_, sizeof(D3D11_VIEWPORT));
+	shadowViewport_.TopLeftX	= 0;
+	shadowViewport_.TopLeftY	= 0;
+	shadowViewport_.Width		= static_cast<FLOAT>(SHADOWMAP_DIM);
+	shadowViewport_.Height		= static_cast<FLOAT>(SHADOWMAP_DIM);
+	shadowViewport_.MinDepth	= 0.0f;
+	shadowViewport_.MaxDepth	= 1.0f;
 
 	return hr;
 }
@@ -213,6 +271,10 @@ void ManagementBuffer::clearBuffers(ID3D11DeviceContext* devcon)
 	devcon->ClearRenderTargetView(glowHigh_->getRTV(), CLEARCOLOR_BLACK);
 	devcon->ClearRenderTargetView(glowLow_->getRTV(), CLEARCOLOR_BLACK);
 	devcon->ClearRenderTargetView(glowLowUtil_->getRTV(), CLEARCOLOR_BLACK);
+
+	//Clear shadowmap
+	ID3D11DepthStencilView* dsv = shadowMap_->getDSV();
+	devcon->ClearDepthStencilView(dsv, D3D11_CLEAR_DEPTH, 1.0f, 0);
 }
 void ManagementBuffer::setBuffersAndDepthBufferAsRenderTargets(
 	ID3D11DeviceContext*	devcon, 
@@ -242,30 +304,174 @@ void ManagementBuffer::unsetBuffersAndDepthBufferAsRenderTargets(ID3D11DeviceCon
 }
 void ManagementBuffer::setBuffersAsCSShaderResources(ID3D11DeviceContext* devcon)
 {
-	ID3D11ShaderResourceView* resourceViews[GBUFFERID_NUM_BUFFERS + 1];
+	ID3D11ShaderResourceView* resourceViews[GBUFFERID_NUM_BUFFERS + 2];
 	for(int i = 0; i < GBUFFERID_NUM_BUFFERS; i++)
 		resourceViews[i] = gBuffers_[i]->getSRV();
 
 	resourceViews[GBUFFERID_NUM_BUFFERS] = glowHigh_->getSRV();
+	resourceViews[GBUFFERID_NUM_BUFFERS + 1] = shadowMap_->getSRV();
 
 	devcon->CSSetShaderResources(
 		0, 
-		GBUFFERID_NUM_BUFFERS + 1,
+		GBUFFERID_NUM_BUFFERS + 2,
 		resourceViews);
 }
 void ManagementBuffer::unsetBuffersAsCSShaderResources(ID3D11DeviceContext* devcon)
 {
-	ID3D11ShaderResourceView* resourceViews[GBUFFERID_NUM_BUFFERS + 1];
-	for(int i = 0; i < GBUFFERID_NUM_BUFFERS + 1; i++)
+	ID3D11ShaderResourceView* resourceViews[GBUFFERID_NUM_BUFFERS + 2];
+	for(int i = 0; i < GBUFFERID_NUM_BUFFERS + 2; i++)
 		resourceViews[i] = nullptr;
 
 	devcon->CSSetShaderResources(
 		0, 
-		GBUFFERID_NUM_BUFFERS + 1, 
+		GBUFFERID_NUM_BUFFERS + 2, 
 		resourceViews);
 }
 
-DXGI_FORMAT ManagementBuffer::getFormat(GBUFFER_FORMAT format)
+void ManagementBuffer::setBuffer(ID3D11DeviceContext* devcon, SET_ID setID, SET_TYPE setType, SET_STAGE setStage, unsigned int shaderRegister)
+{
+	Buffer_Srv* buffer = nullptr;
+	switch (setID)
+	{
+	case SET_ID_GLOW_HIGH:
+		buffer = glowHigh_;
+		break;
+	case SET_ID_GLOW_LOW:
+		buffer = glowLow_;
+		break;
+	case SET_ID_GLOW_LOW_UTIL:
+		buffer = glowLowUtil_;
+		break;
+	case SET_ID_SHADOW:
+		buffer = shadowMap_;
+		break;
+	}
+
+	ID3D11DepthStencilView* dsv = NULL; //for brevity
+	switch (setType)
+	{
+	case SET_TYPE_RTV:
+		{
+			ID3D11RenderTargetView* renderTargets[1];
+			renderTargets[0] = ((Buffer_SrvRtv*)buffer)->getRTV();
+
+			devcon->OMSetRenderTargets(
+				1,
+				renderTargets,
+				dsv); //shader reg irrelevant
+			break;
+		}
+	case SET_TYPE_SRV:
+		{
+			ID3D11ShaderResourceView* resourceViews[1];
+			resourceViews[0] = buffer->getSRV();
+
+			switch(setStage)
+			{
+			case SET_STAGE_PS:
+				devcon->PSSetShaderResources(
+					shaderRegister, 
+					1,
+					resourceViews);
+				break;
+			case SET_STAGE_CS:
+				devcon->CSSetShaderResources(
+					shaderRegister, 
+					1,
+					resourceViews);
+				break;
+			}
+			
+			break;
+		}
+	case SET_TYPE_UAV:
+		{
+			ID3D11UnorderedAccessView* uav = ((Buffer_SrvRtvUav*)buffer)->getUAV();
+			devcon->CSSetUnorderedAccessViews(
+				shaderRegister, 
+				1, 
+				&uav, 
+				nullptr);
+
+			break;
+		}
+	case SET_TYPE_DSV:
+		{
+			dsv = shadowMap_->getDSV();
+			ID3D11RenderTargetView* renderTargets[1] = { NULL };
+			devcon->OMSetRenderTargets(
+				1, //register and stage irrelevant
+				renderTargets, 
+				dsv); //set null rendertargets, as we want no colour-writes.
+			break;
+		}
+	}
+}
+void ManagementBuffer::unset(
+	ID3D11DeviceContext* devcon,
+	SET_TYPE setType,
+	SET_STAGE setStage,
+	unsigned int shaderRegister)
+{
+	ID3D11DepthStencilView* dsv = NULL; //for brevity
+	switch (setType)
+	{
+	case SET_TYPE_RTV:
+		{
+			ID3D11RenderTargetView* renderTargets[1];
+			renderTargets[0] = nullptr;
+
+			devcon->OMSetRenderTargets(
+				1, 
+				renderTargets, 
+				dsv); //register irrelevant
+
+			break;
+		}
+	case SET_TYPE_SRV:
+		{
+			ID3D11ShaderResourceView* resourceViews[1];
+			resourceViews[0] = nullptr;
+
+			switch (setStage)
+			{
+			case SET_STAGE_PS:
+				devcon->PSSetShaderResources(
+					shaderRegister, 
+					1,
+					resourceViews);
+				break;
+			case SET_STAGE_CS:
+				devcon->CSSetShaderResources(
+					shaderRegister, 
+					1,
+					resourceViews);
+				break;
+			}
+
+			break;
+		}
+	case SET_TYPE_UAV:
+		{
+			ID3D11UnorderedAccessView* uavs[] = { nullptr };
+			devcon->CSSetUnorderedAccessViews(
+				shaderRegister, 
+				1, 
+				uavs, 
+				nullptr);
+
+			break;
+		}
+	case SET_TYPE_DSV:
+		{
+			ID3D11RenderTargetView* renderTargets[1] = { NULL };
+			devcon->OMSetRenderTargets(1, renderTargets, NULL);
+			break;
+		}
+	}
+}
+
+DXGI_FORMAT ManagementBuffer::getFormat(BUFFER_FORMAT format)
 {
 	DXGI_FORMAT dxgiFormat = DXGI_FORMAT::DXGI_FORMAT_UNKNOWN;
 
@@ -298,212 +504,7 @@ D3D11_VIEWPORT ManagementBuffer::getDownSampledViewport()
 {
 	return downSampleViewport_;
 }
-
-void ManagementBuffer::setGlowLowAsRTV(ID3D11DeviceContext*		devcon)
+D3D11_VIEWPORT ManagementBuffer::getShadowViewport()
 {
-	ID3D11RenderTargetView* renderTargets[1];
-	renderTargets[0] = glowLow_->getRTV();
-
-	devcon->OMSetRenderTargets(
-		1,
-		renderTargets,
-		NULL);
+	return shadowViewport_;
 }
-void ManagementBuffer::unsetGlowLowAsRTV(ID3D11DeviceContext*	devcon)
-{
-	ID3D11RenderTargetView* renderTargets[1];
-	renderTargets[0] = nullptr;
-
-	devcon->OMSetRenderTargets(
-		1, 
-		renderTargets, 
-		NULL);
-}
-void ManagementBuffer::setGlowLowAsSRVToCS(ID3D11DeviceContext*		devcon, unsigned int shaderRegister)
-{
-	ID3D11ShaderResourceView* resourceViews[1];
-	resourceViews[0] = glowLow_->getSRV();
-
-	devcon->CSSetShaderResources(
-		shaderRegister, 
-		1,
-		resourceViews);
-}
-void ManagementBuffer::setGlowLowAsSRVToPS(ID3D11DeviceContext* devcon, unsigned int shaderRegister)
-{
-	ID3D11ShaderResourceView* resourceViews[1];
-	resourceViews[0] = glowLow_->getSRV();
-
-	devcon->PSSetShaderResources(
-		shaderRegister, 
-		1,
-		resourceViews);
-}
-void ManagementBuffer::unsetGlowLowAsSRV(ID3D11DeviceContext*	devcon, unsigned int shaderRegister)
-{
-	ID3D11ShaderResourceView* resourceViews[1];
-	resourceViews[0] = nullptr;
-
-	devcon->CSSetShaderResources(
-		shaderRegister, 
-		1,
-		resourceViews);
-}
-void ManagementBuffer::setGlowLowAsUAV(ID3D11DeviceContext* devcon, unsigned int shaderRegister)
-{
-	ID3D11UnorderedAccessView* uav = glowLow_->getUAV();
-	devcon->CSSetUnorderedAccessViews(
-		shaderRegister, 
-		1, 
-		&uav, 
-		nullptr);
-}
-
-void ManagementBuffer::setGlowHighAsSRV(ID3D11DeviceContext*	devcon, unsigned int shaderRegister)
-{
-	ID3D11ShaderResourceView* srv = glowHigh_->getSRV();
-
-	devcon->PSSetShaderResources(
-		shaderRegister, 
-		1, 
-		&srv);
-}
-void ManagementBuffer::unsetGlowHighAsSrv(ID3D11DeviceContext*	devcon, unsigned int shaderRegister)
-{
-	ID3D11ShaderResourceView* nullViews[1] = { nullptr };
-
-	devcon->PSSetShaderResources(
-		shaderRegister,
-		1,
-		nullViews);
-}
-void ManagementBuffer::setGlowHighAsRTV(ID3D11DeviceContext* devcon)
-{
-	ID3D11RenderTargetView* renderTargets[1];
-	renderTargets[0] = glowHigh_->getRTV();
-
-	devcon->OMSetRenderTargets(
-		1,
-		renderTargets,
-		NULL);
-}
-void ManagementBuffer::unsetGlowHighAsRTV(ID3D11DeviceContext* devcon)
-{
-	ID3D11RenderTargetView* renderTargets[1];
-	renderTargets[0] = nullptr;
-
-	devcon->OMSetRenderTargets(
-		1, 
-		renderTargets, 
-		NULL);
-}
-
-void ManagementBuffer::setGlowLowUtilAsUAV(ID3D11DeviceContext* devcon, unsigned int shaderRegister)
-{
-	ID3D11UnorderedAccessView* uav = glowLowUtil_->getUAV();
-	devcon->CSSetUnorderedAccessViews(
-		shaderRegister, 
-		1, 
-		&uav, 
-		nullptr);
-}
-void ManagementBuffer::setGlowLowUtilAsSRV(ID3D11DeviceContext* devcon, unsigned int shaderRegister)
-{
-	ID3D11ShaderResourceView* resourceViews[1];
-	resourceViews[0] = glowLowUtil_->getSRV();
-
-	devcon->CSSetShaderResources(
-		shaderRegister, 
-		1,
-		resourceViews);
-}
-
-//void ManagementBuffer::setGlow(ID3D11DeviceContext* devcon, GLOW_SET glowSet, TYPE_SET typeSet, unsigned int registerSet)
-//{
-//	Buffer_SrvRtvUav* glowBuf = nullptr;
-//	switch(glowSet)
-//	{
-//	case GLOW_SET_HIGH:
-//		glowBuf = glowHigh_;
-//		break;
-//	case GLOW_SET_LOW:
-//		glowBuf = glowLow_;
-//		break;
-//	case GLOW_SET_UTIL:
-//		glowBuf = glowLowUtil_;
-//		break;
-//	}
-//
-//	switch(typeSet)
-//	{
-//	case TYPE_SET_RTV:
-//		{
-//			ID3D11RenderTargetView* renderTargets[1];
-//			renderTargets[0] = glowBuf->getRTV();
-//
-//			devcon->OMSetRenderTargets(
-//				1,
-//				renderTargets,
-//				NULL);
-//
-//			break;
-//		}
-//	case TYPE_SET_SRV:
-//		{
-//			ID3D11ShaderResourceView* srv = glowBuf->getSRV();
-//			devcon->CSSetShaderResources(
-//				registerSet, 
-//				1, 
-//				&srv);
-//			break;
-//		}
-//	case TYPE_SET_UAV:
-//		{
-//			ID3D11UnorderedAccessView* uav = glowBuf->getUAV();
-//			devcon->CSSetUnorderedAccessViews(
-//				registerSet, 
-//				1, 
-//				&uav,
-//				nullptr);
-//			break;
-//		}
-//	}
-//}
-//void ManagementBuffer::unsetGlow(ID3D11DeviceContext* devcon, TYPE_SET typeSet, unsigned int registerSet)
-//{
-//	switch (typeSet)
-//	{
-//	case TYPE_SET_RTV:
-//		{
-//			ID3D11RenderTargetView* renderTargets[1];
-//			renderTargets[0] = nullptr;
-//
-//			devcon->OMSetRenderTargets(
-//				1, 
-//				renderTargets, 
-//				NULL);
-//			break;
-//		}
-//	case TYPE_SET_SRV:
-//		{
-//			ID3D11ShaderResourceView* resourceViews[1];
-//			resourceViews[0] = nullptr;
-//			
-//			devcon->CSSetShaderResources(
-//				registerSet, 
-//				1,
-//				resourceViews);
-//			break;
-//		}
-//	case TYPE_SET_UAV:
-//		{
-//			ID3D11UnorderedAccessView* uavs[] = { nullptr };
-//			devcon->CSSetUnorderedAccessViews(
-//				registerSet, 
-//				1, 
-//				uavs, 
-//				nullptr);
-//			break;
-//		}
-//	}
-//}

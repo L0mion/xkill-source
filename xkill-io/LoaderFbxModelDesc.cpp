@@ -16,9 +16,9 @@ LoaderFbxMaterialDesc	LoaderFbxModelDesc::getMaterialDesc()
 {
 	return materialDesc_;
 }
-LoaderFbxTextureDesc	LoaderFbxModelDesc::getTextureDesc()
+std::vector<LoaderFbxTextureDesc>	LoaderFbxModelDesc::getTextureDescs()
 {
-	return textureDesc_;
+	return textureDescs_;
 }
 std::vector<LoaderFbxAnimationDesc>	LoaderFbxModelDesc::getAnimationDescs()
 {
@@ -33,9 +33,9 @@ void LoaderFbxModelDesc::setMaterialDesc(LoaderFbxMaterialDesc materialDesc)
 {
 	materialDesc_ = materialDesc;
 }
-void LoaderFbxModelDesc::setTextureDesc(LoaderFbxTextureDesc textureDesc)
+void LoaderFbxModelDesc::setTextureDesc(std::vector<LoaderFbxTextureDesc> textureDescs)
 {
-	textureDesc_ = textureDesc;
+	textureDescs_ = textureDescs;
 }
 void LoaderFbxModelDesc::setAnimationDescs(std::vector<LoaderFbxAnimationDesc>	animationDescs)
 {

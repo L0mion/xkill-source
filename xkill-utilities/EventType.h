@@ -45,10 +45,12 @@ enum DLL_U EventType
 	EVENT_QUIT_TO_DESKTOP,
 	EVENT_ENABLE_MENU,
 	EVENT_ENABLE_HUD,
+	EVENT_SHOW_FULLSCREEN,
 
 	// Game-loop
-	EVENT_UPDATE,
 	EVENT_STARTGAME,
+	EVENT_ENDGAME,
+	EVENT_UPDATE,
 	EVENT_GAMEOVER,
 	EVENT_START_DEATHMATCH,
 	EVENT_END_DEATHMATCH,
@@ -68,6 +70,7 @@ enum DLL_U EventType
 	EVENT_SET_MOUSELOCK,
 	EVENT_WINDOW_RESIZE,
 	EVENT_WINDOW_MOVE,
+	EVENT_WINDOW_FOCUS_CHANGED,
 	EVENT_SPLITSCREEN_CHANGED,
 	EVENT_RUMBLE,
 	EVENT_PLAYSOUND,
@@ -83,8 +86,12 @@ enum DLL_U EventType
 	EVENT_PLAYERDEATH,
 	EVENT_PHYSICS_ATTRIBUTES_COLLIDING,
 	EVENT_SYNC_STATE_COMMAND,
-	EVENT_GET_ENTITY_ID_OF_PHYSICS_OBJECT_HIT_BY_RAY,
+	EVENT_CLOSEST_HIT_RAY_CAST,
+	EVENT_ALL_HITS_RAY_CAST,
+	EVENT_PLAYER_EXECUTING,
+	EVENT_PLAYER_DONE_EXECUTING,
 	EVENT_GET_FILE_LIST,
+	EVENT_POST_HUD_MESSAGE,
 
 	// Creation/Destruction
 	EVENT_TRANSFER_EVENTS_TO_GAME,
@@ -148,6 +155,40 @@ public:
 
 	int dx;
 	int dy;
+};
+
+class DLL_U Event_SetFullscreen : public Event
+{
+public:
+	Event_SetFullscreen(bool on);
+
+	bool on;
+};
+
+class DLL_U Event_PostHudMessage : public Event
+{
+public:
+	enum Receiver
+	{
+		RECEIVER_ONLY_SUBJECT,
+		RECEIVER_ALL_BUT_SUBJECT,
+		RECEIVER_ALL,
+	};
+	enum Style
+	{
+		STYLE_NORMAL,
+		STYLE_SUBTILE,
+		STYLE_WARNING
+	};
+
+	Event_PostHudMessage(std::string message, AttributePtr<Attribute_Player> ptr_subject_player = AttributePtr<Attribute_Player>() );
+	void setStyle(Style style);
+	void setHtmlMessage(std::string prefex, std::string subject = "", std::string suffix = "", std::string description = "");
+
+	Receiver receiver;
+	std::string message;
+	AttributePtr<Attribute_Player> ptr_subject_player;
+	std::string styleSheet;
 };
 
 /**
@@ -623,16 +664,42 @@ public:
 	AttributePtr<Attribute_Player> player;
 };
 
-class DLL_U Event_GetEntityIdOfPhysicsObjectHitByRay : public Event
+class DLL_U Event_ClosestHitRayCast : public Event
 {
 public:
-	Event_GetEntityIdOfPhysicsObjectHitByRay(Float3 from, Float3 to, short collisionFilterMask);
+	Event_ClosestHitRayCast(Float3 from, Float3 to, short collisionFilterMask);
 
-	Float3 from;
-	Float3 to;
-	short collisionFilterMask;
-	int closest_entityId; //!< 0 if no Entity
+	//Event input variables:
+	Float3 from;										//!< Point from where the ray originates
+	Float3 to;											//!< Point where the ray ends
+	short collisionFilterMask;							//!< What types of physics objects (refer to XKILL_Enums::PhysicsAttributeType) the ray should collide with during its travel from "from" to "to"
+	
+	//Event output variables:
+	int EntityIdOfOwnerToClosestPhysicsObjectHitByRay;	//!< Set to 0 if no entity was hit by the ray
+	Float3 ClosestHitPoint;								//!< If the ray did not hit any physics object, "ClosestHitPoint" will be set to "to".
 };
+
+class DLL_U Event_AllHitsRayCast : public Event
+{
+public:
+	Event_AllHitsRayCast(Float3 from, Float3 to, short collisionFilterMask);
+
+	//Event input variables:
+	Float3 from;										//!< Point from where the ray originates
+	Float3 to;											//!< Point where the ray ends
+	short collisionFilterMask;							//!< What types of physics objects (refer to XKILL_Enums::PhysicsAttributeType) the ray should collide with during its travel from "from" to "to"
+	
+	//Event output variables:
+	std::vector<std::pair<Float3, int>> mapHitPointToEntityId; //!< Empty if the ray did not hit anything
+};
+
+class DLL_U Event_PlayerExecuting : public Event
+{
+public:
+	Event_PlayerExecuting(int executingPlayerIndex);
+
+	int executingPlayerIndex;
+};	
 
 class DLL_U Event_GetFileList : public Event
 {

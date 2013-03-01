@@ -2,6 +2,7 @@
 
 #include <xkill-utilities/Entity.h>
 #include <xkill-utilities/AttributeManager.h>
+#include <xkill-utilities/Converter.h>
 
 ATTRIBUTES_DECLARE_ALL;
 
@@ -92,6 +93,8 @@ void CollisionManager::collision_applyDamage(Entity* entity1, Entity* entity2)
 									if(entity1->getID() != damage->owner_entityID) //Award player
 									{
 										creatorOfProjectile_ptr_player->priority++;
+										{Event_PostHudMessage e("", creatorOfProjectile_ptr_player); e.setHtmlMessage("You terminated", "???", "", "+1 priority"); SEND_EVENT(&e);}
+										{Event_PostHudMessage e("", playerThatDied_ptr_player); e.setHtmlMessage("Terminated by", "???"); SEND_EVENT(&e);}
 									}
 									else //Punish player for blowing himself up
 									{
@@ -100,12 +103,6 @@ void CollisionManager::collision_applyDamage(Entity* entity1, Entity* entity2)
 									DEBUGPRINT("Player with entity id " << damage->owner_entityID << " killed player with entity id " << entity1->getID());
 								}
 							}
-						}
-
-						for(unsigned int k = 0; k < playerThatDiedId.size(); k++)
-						{
-							SEND_EVENT(&Event_PlayerDeath(playerThatDiedId[k]));
-							SEND_EVENT(&Event_PlaySound(Event_PlaySound::SOUND_DEATH, position, use3DAudio));
 						}
 					}
 					else
@@ -160,29 +157,61 @@ void CollisionManager::collision_pickupable(Entity* entity1, Entity* entity2)
 					case XKILL_Enums::PickupableType::MEDKIT:
 						{
 							AttributePtr<Attribute_Health> ptr_health = ptr_player->ptr_health;
-							ptr_health->health = getAmountAfterPickup(ptr_health->health, ptr_health->maxHealth, ptr_pickupable->amount);
-							pickedUp = true;
+							int pickedUpAmount = getPickedUpAmount(ptr_health->health, ptr_health->maxHealth, ptr_pickupable->amount);
+							if(pickedUpAmount > 0)
+							{
+								ptr_health->health += pickedUpAmount;
+								pickedUp = true;
+
+								// Post HUD message
+								{Event_PostHudMessage e("", ptr_player); e.setHtmlMessage("Picked up", "HealthPatch", "", "+" + Converter::IntToStr(pickedUpAmount)); SEND_EVENT(&e);}
+							}
+							
 							break;
 						}
 					case XKILL_Enums::PickupableType::AMMUNITION_BULLET:
 						{
 							AttributePtr<Attribute_WeaponStats> weaponStatsAttribute = ptr_player->ptr_weaponStats;
-							weaponStatsAttribute->ammunition[XKILL_Enums::AmmunitionType::BULLET].currentTotalNrOfShots = getAmountAfterPickup(weaponStatsAttribute->ammunition[XKILL_Enums::AmmunitionType::BULLET].currentTotalNrOfShots, weaponStatsAttribute->ammunition[XKILL_Enums::AmmunitionType::BULLET].initialTotalNrOfShots, ptr_pickupable->amount);
-							pickedUp = true;
+							Ammunition* ammo = &weaponStatsAttribute->ammunition[XKILL_Enums::AmmunitionType::BULLET];
+							int pickedUpAmount = getPickedUpAmount(ammo->currentTotalNrOfShots, ammo->maxTotalNrOfShots, ptr_pickupable->amount);
+							if(pickedUpAmount > 0)
+							{
+								weaponStatsAttribute->ammunition[XKILL_Enums::AmmunitionType::BULLET].currentTotalNrOfShots += pickedUpAmount;
+								pickedUp = true;
+				
+								// Post HUD message
+								{Event_PostHudMessage e("", ptr_player); e.setHtmlMessage("Picked up", "Bullet Ammunition", "", "+" + Converter::IntToStr(pickedUpAmount)); SEND_EVENT(&e);}
+							}
 							break;
 						}
 					case XKILL_Enums::PickupableType::AMMUNITION_EXPLOSIVE:
 						{
 							AttributePtr<Attribute_WeaponStats> weaponStatsAttribute = ptr_player->ptr_weaponStats;
-							weaponStatsAttribute->ammunition[XKILL_Enums::AmmunitionType::EXPLOSIVE].currentTotalNrOfShots = getAmountAfterPickup(weaponStatsAttribute->ammunition[XKILL_Enums::AmmunitionType::EXPLOSIVE].currentTotalNrOfShots, weaponStatsAttribute->ammunition[XKILL_Enums::AmmunitionType::EXPLOSIVE].initialTotalNrOfShots, ptr_pickupable->amount);
-							pickedUp = true;
+							Ammunition* ammo = &weaponStatsAttribute->ammunition[XKILL_Enums::AmmunitionType::EXPLOSIVE];
+							int pickedUpAmount = getPickedUpAmount(ammo->currentTotalNrOfShots, ammo->maxTotalNrOfShots, ptr_pickupable->amount);
+							if(pickedUpAmount > 0)
+							{
+								weaponStatsAttribute->ammunition[XKILL_Enums::AmmunitionType::EXPLOSIVE].currentTotalNrOfShots += pickedUpAmount;
+								pickedUp = true;
+
+								// Post HUD message
+								{Event_PostHudMessage e("", ptr_player); e.setHtmlMessage("Picked up", "Explosive Ammunition", "", "+" + Converter::IntToStr(pickedUpAmount)); SEND_EVENT(&e);}
+							}
 							break;
 						}
 					case XKILL_Enums::PickupableType::AMMUNITION_SCATTER:
 						{
 							AttributePtr<Attribute_WeaponStats> weaponStatsAttribute = ptr_player->ptr_weaponStats;
-							weaponStatsAttribute->ammunition[XKILL_Enums::AmmunitionType::SCATTER].currentTotalNrOfShots = getAmountAfterPickup(weaponStatsAttribute->ammunition[XKILL_Enums::AmmunitionType::SCATTER].currentTotalNrOfShots, weaponStatsAttribute->ammunition[XKILL_Enums::AmmunitionType::SCATTER].initialTotalNrOfShots, ptr_pickupable->amount);
-							pickedUp = true;
+							Ammunition* ammo = &weaponStatsAttribute->ammunition[XKILL_Enums::AmmunitionType::SCATTER];
+							int pickedUpAmount = getPickedUpAmount(ammo->currentTotalNrOfShots, ammo->maxTotalNrOfShots, ptr_pickupable->amount);
+							if(pickedUpAmount > 0)
+							{
+								weaponStatsAttribute->ammunition[XKILL_Enums::AmmunitionType::SCATTER].currentTotalNrOfShots += pickedUpAmount;
+								pickedUp = true;
+
+								// Post HUD message
+								{Event_PostHudMessage e("", ptr_player); e.setHtmlMessage("Picked up", "Scatter Ammunition", "", "+" + Converter::IntToStr(pickedUpAmount)); SEND_EVENT(&e);}
+							}
 							break;
 						}
 					case XKILL_Enums::PickupableType::HACK_SPEEDHACK:
@@ -191,6 +220,9 @@ void CollisionManager::collision_pickupable(Entity* entity1, Entity* entity2)
 							float time = static_cast<float>(ptr_pickupable->amount);
 							time /= 1000.0f;
 							SEND_EVENT(&Event_HackActivated(time, XKILL_Enums::HackType::SPEEDHACK, ptr_player));
+
+							// Post HUD message
+							{Event_PostHudMessage e("", ptr_player); e.setHtmlMessage("Picked up", "Speedhack", "", "+" + Converter::IntToStr(ptr_pickupable->amount) + " seconds"); SEND_EVENT(&e);}
 							break;
 						}
 					case XKILL_Enums::PickupableType::HACK_JETHACK:
@@ -199,6 +231,9 @@ void CollisionManager::collision_pickupable(Entity* entity1, Entity* entity2)
 							float time = static_cast<float>(ptr_pickupable->amount);
 							time /= 1000.0f;
 							SEND_EVENT(&Event_HackActivated(time, XKILL_Enums::HackType::JETHACK, ptr_player));
+
+							// Post HUD message
+							{Event_PostHudMessage e("", ptr_player); e.setHtmlMessage("Picked up", "Jethack", "", "+" + Converter::IntToStr(ptr_pickupable->amount) + " seconds"); SEND_EVENT(&e);}
 							break;
 						}
 					}
@@ -232,19 +267,22 @@ void CollisionManager::collision_projectile(Entity* entity1, Entity* entity2)
 				AttributePtr<Attribute_Projectile> ptr_projectile = itrProjectile.at(projectileId.at(i));
 
 				//Determine collision effect based on ammunitionType
+				float deathDelay = 2.0f;
 				switch(ptr_projectile->ammunitionType)
 				{
 				case XKILL_Enums::AmmunitionType::BULLET: //Bounce off the wall
-					if(ptr_projectile->currentLifeTimeLeft > 1.00f)
+					deathDelay = 5.0f;
+					if(ptr_projectile->currentLifeTimeLeft > deathDelay)
 					{
-						ptr_projectile->currentLifeTimeLeft = 1.00f;
+						ptr_projectile->currentLifeTimeLeft = deathDelay;
 						SEND_EVENT(&Event_ModifyPhysicsObject(XKILL_Enums::ModifyPhysicsObjectData::GRAVITY, static_cast<void*>(&Float3(0.0f, -5.0f, 0.0f)), itrPhysics.at(physicsId.at(j))));
 					}
 					break;
 				case XKILL_Enums::AmmunitionType::SCATTER: //Fall down and roll, also collide with projectiles
-					if(ptr_projectile->currentLifeTimeLeft > 1.00f)
+					deathDelay = 5.0f;
+					if(ptr_projectile->currentLifeTimeLeft > deathDelay)
 					{
-						ptr_projectile->currentLifeTimeLeft = 1.00f;
+						ptr_projectile->currentLifeTimeLeft = deathDelay;
 
 						SEND_EVENT(&Event_ModifyPhysicsObject(XKILL_Enums::ModifyPhysicsObjectData::GRAVITY, static_cast<void*>(&Float3(0.0f, -10.0f, 0.0f)), itrPhysics.at(physicsId.at(j))));
 						SEND_EVENT(&Event_ModifyPhysicsObject(XKILL_Enums::ModifyPhysicsObjectData::VELOCITYPERCENTAGE, static_cast<void*>(&Float3(0.1f, 0.1f, 0.1f)), itrPhysics.at(physicsId.at(j))));
@@ -252,6 +290,10 @@ void CollisionManager::collision_projectile(Entity* entity1, Entity* entity2)
 						//Collide with projectiles
 						short collisionFilterMask = itrPhysics.at(physicsId.at(j))->collisionFilterMask | XKILL_Enums::PhysicsAttributeType::PROJECTILE;
 						SEND_EVENT(&Event_ModifyPhysicsObject(XKILL_Enums::ModifyPhysicsObjectData::COLLISIONFILTERMASK, static_cast<void*>(&collisionFilterMask), itrPhysics.at(physicsId.at(j))));
+					
+						// MATT: This makes the initial collision smoother by adding a delay of one frame.
+						// ON A SECOND NOTE: Not used, because delaying collision makes bullets rain from the sky.
+						//POST_DELAYED_EVENT(new Event_ModifyPhysicsObject(XKILL_Enums::ModifyPhysicsObjectData::COLLISIONFILTERMASK, static_cast<void*>(&collisionFilterMask), itrPhysics.at(physicsId.at(j))), 0.0f);
 					}
 					break;
 				case XKILL_Enums::AmmunitionType::EXPLOSIVE: //Remove projectile and create an explosion sphere in its place
@@ -268,7 +310,7 @@ void CollisionManager::collision_projectile(Entity* entity1, Entity* entity2)
 						break;
 					}
 				default:
-					SHOW_MESSAGEBOX("PhysicsAttribute collision: unknown ammunitionType"); 
+					ERROR_MESSAGEBOX("PhysicsAttribute collision: unknown ammunitionType"); 
 					break;
 				}
 			}
@@ -307,16 +349,21 @@ void CollisionManager::collision_playerVsExplosionSphere(Entity* entity1, Entity
 	}
 }
 
-float CollisionManager::getAmountAfterPickup(float currentAmount, float maxAmount, float pickupAmount)
+int CollisionManager::getPickedUpAmount(int currentAmount, int maxAmount, int tryPickupAmount)
 {
-	float newAmount = currentAmount;
-	if(currentAmount < maxAmount)  //Pickup if currently below maximum amount
+	int pickedUpAmount = 0;
+	if(currentAmount < maxAmount) //Pickup if currently below maximum amount
 	{
-		newAmount = currentAmount + pickupAmount;
-		if(newAmount > maxAmount) //Prevent picking up more than maximum
+		int pickupFullAmount = currentAmount + tryPickupAmount;
+		if(pickupFullAmount > maxAmount) //Max capping
 		{
-			newAmount = maxAmount;
+			int difference = pickupFullAmount - maxAmount;
+			pickedUpAmount = tryPickupAmount - difference;
+		}
+		else //Pickup
+		{
+			pickedUpAmount = tryPickupAmount;
 		}
 	}
-	return newAmount;
+	return pickedUpAmount;
 }

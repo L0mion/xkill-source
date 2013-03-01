@@ -2,7 +2,7 @@
 #define XKILL_PHYSICS_PHYSICSUTILITIES
 
 
-static const float WorldScaling = 100.0f;
+//static const float WorldScaling = 100.0f;
 
 class btVector3;
 class btQuaternion;

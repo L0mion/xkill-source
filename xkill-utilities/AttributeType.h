@@ -99,8 +99,8 @@ struct DLL_U IAttribute
 	virtual void clean(){};
 	virtual ~IAttribute();
 
-	virtual DataItemList* getDataList();;
-	virtual void saveTo(DataItemList* list);;
+	virtual DataItemList* getDataList();
+	virtual void saveTo(DataItemList* list);
 	virtual AttributeType getType(){return ATTRIBUTE_UNKOWN;}
 	virtual std::string getName(){return "UNKOWN";}
 };
@@ -118,7 +118,7 @@ struct DLL_U Attribute_Position : public IAttribute
 	Float3 position;
 
 	DataItemList* getDataList();
-	void saveTo(DataItemList* list);;
+	void saveTo(DataItemList* list);
 	AttributeType getType(){return ATTRIBUTE_POSITION;}
 	std::string getName(){return "Position";}
 };
@@ -138,7 +138,7 @@ struct DLL_U Attribute_Spatial : public IAttribute
 	Float3 scale;
 
 	DataItemList* getDataList();
-	void saveTo(DataItemList* list);;
+	void saveTo(DataItemList* list);
 	AttributeType getType(){return ATTRIBUTE_SPATIAL;}
 	std::string getName(){return "Spatial";}
 };
@@ -157,7 +157,7 @@ public:
 	Float4 offset_rotation;
 
 	DataItemList* getDataList();
-	void saveTo(DataItemList* list);;
+	void saveTo(DataItemList* list);
 
 	void updateOffset();
 
@@ -208,7 +208,7 @@ struct DLL_U Attribute_Render : public IAttribute
 	bool cull;
 
 	DataItemList* getDataList();
-	void saveTo(DataItemList* list);;
+	void saveTo(DataItemList* list);
 	AttributeType getType(){return ATTRIBUTE_RENDER;}
 	std::string getName(){return "Render";}
 };
@@ -219,8 +219,6 @@ struct DLL_U Attribute_Render : public IAttribute
 */
 struct DLL_U Attribute_Physics : public IAttribute
 {
-	short collisionFilterGroup;
-
 	Attribute_Physics();
 	~Attribute_Physics();
 
@@ -232,7 +230,8 @@ struct DLL_U Attribute_Physics : public IAttribute
 	Float3 gravity;
 	float mass;
 	unsigned int meshID; //collisionShapeIndex;
-	short int collisionFilterMask;
+	short collisionFilterGroup;
+	short collisionFilterMask;
 	//CollisionShape
 	//friction
 	//restitution
@@ -241,7 +240,7 @@ struct DLL_U Attribute_Physics : public IAttribute
 	bool reloadDataIntoBulletPhysics;
 
 	DataItemList* getDataList();
-	void saveTo(DataItemList* list);;
+	void saveTo(DataItemList* list);
 	AttributeType getType(){return ATTRIBUTE_PHYSICS;}
 	std::string getName(){return "Physics";}
 };
@@ -265,7 +264,7 @@ struct DLL_U Attribute_Projectile : public IAttribute
 	bool scatterDropped;
 
 	DataItemList* getDataList();
-	void saveTo(DataItemList* list);;
+	void saveTo(DataItemList* list);
 	AttributeType getType(){return ATTRIBUTE_PROJECTILE;}
 	std::string getName(){return "Projectile";}
 };
@@ -281,7 +280,7 @@ struct DLL_U Attribute_Light_Dir : public IAttribute
 
 	LightDescDir lightDir;
 	DataItemList* getDataList();
-	void saveTo(DataItemList* list);;
+	void saveTo(DataItemList* list);
 	AttributeType getType(){return ATTRIBUTE_LIGHT_DIRECTIONAL;}
 	std::string getName(){return "LightDir";}
 };
@@ -300,7 +299,7 @@ struct DLL_U Attribute_Light_Point : public IAttribute
 	LightDescPoint lightPoint;
 
 	DataItemList* getDataList();
-	void saveTo(DataItemList* list);;
+	void saveTo(DataItemList* list);
 	AttributeType getType(){return ATTRIBUTE_LIGHT_POINT;}
 	std::string getName(){return "LightPoint";}
 };
@@ -319,7 +318,7 @@ struct DLL_U Attribute_Light_Spot : public IAttribute
 	LightDescSpot lightSpot;
 
 	DataItemList* getDataList();
-	void saveTo(DataItemList* list);;
+	void saveTo(DataItemList* list);
 	AttributeType getType(){return ATTRIBUTE_LIGHT_SPOT;}
 	std::string getName(){return "LightSpot";}
 };
@@ -344,7 +343,7 @@ struct DLL_U Attribute_Input : public IAttribute
 	bool reload;
 
 	DataItemList* getDataList();
-	void saveTo(DataItemList* list);;
+	void saveTo(DataItemList* list);
 	AttributeType getType(){return ATTRIBUTE_INPUT;}
 	std::string getName(){return "Input";}
 };
@@ -364,7 +363,7 @@ struct DLL_U Attribute_InputDevice : public IAttribute
 	InputDevice* device;
 
 	DataItemList* getDataList();
-	void saveTo(DataItemList* list);;
+	void saveTo(DataItemList* list);
 	AttributeType getType(){return ATTRIBUTE_INPUTDEVICE;}
 	std::string getName(){return "InputDevice";}
 };
@@ -381,7 +380,7 @@ struct DLL_U Attribute_Sound : public IAttribute
 	AttributePtr<Attribute_Position> ptr_position;
 
 	DataItemList* getDataList();
-	void saveTo(DataItemList* list);;
+	void saveTo(DataItemList* list);
 	AttributeType getType(){return ATTRIBUTE_SOUND;}
 	std::string getName(){return "Sound";}
 };
@@ -399,7 +398,7 @@ struct DLL_U Attribute_SoundSettings : public IAttribute
 	//EventToFModConverter* converter;
 	
 	DataItemList* getDataList();
-	void saveTo(DataItemList* list);;
+	void saveTo(DataItemList* list);
 
 	AttributeType getType(){return ATTRIBUTE_SOUNDSETTINGS;}
 	std::string getName(){return "SoundSettings";}
@@ -431,7 +430,7 @@ struct DLL_U Attribute_Camera : public IAttribute
 
 	void syncSpatialWithAim();
 	DataItemList* getDataList();
-	void saveTo(DataItemList* list);;
+	void saveTo(DataItemList* list);
 	AttributeType getType(){return ATTRIBUTE_CAMERA;}
 	std::string getName(){return "Camera";}
 };
@@ -453,7 +452,7 @@ struct DLL_U Attribute_SplitScreen : public IAttribute
 
 	float getAspectRatio();
 	DataItemList* getDataList();
-	void saveTo(DataItemList* list);;
+	void saveTo(DataItemList* list);
 	AttributeType getType(){return ATTRIBUTE_SPLITSCREEN;}
 	std::string getName(){return "SplitScreen";}
 };
@@ -477,16 +476,15 @@ struct DLL_U Attribute_Player : public IAttribute
 	AttributePtr<Attribute_Camera>			ptr_camera;
 	AttributePtr<Attribute_Health>			ptr_health;
 	AttributePtr<Attribute_WeaponStats>		ptr_weaponStats;
-	AttributePtr<Attribute_Spatial>			ptr_weapon_spatial;
+	AttributePtr<Behavior_Offset>			ptr_weapon_offset;
 	AttributePtr<Attribute_Spatial>			ptr_weaponFireLocation_spatial;
-	//AttributePtr<Attribute_Physics>			ptr_playerCorpse;
 
 	static int nextId;
 
 	int id;						//!< The id of the player process. Used to identify a player attribute in GameComponent when firing projectiles.
 	int priority;				//!< Priority of the player process. Higher value means higher priority. The scheduler will choose the process with the highest priority for execution.
 	int cycleSteals;			//!< Total number of cycle steals for the player process. Cycle steals steal priority from other player processes.
-	int totalExecutionTime;		//!< Total execution time of the player process, used ased final score in the deathmatch. The game session winner is the player with the most total execution time as awarded by the scheduler.
+	int cycles;		//!< Total execution time of the player process, used ased final score in the deathmatch. The game session winner is the player with the most total execution time as awarded by the scheduler.
 	float currentSpeed;			//!< Speed used when changing position in "handleInput".
 	float walkSpeed;			//!< Speed when walking.
 	float sprintSpeed;			//!< Speed when sprinting.
@@ -494,18 +492,14 @@ struct DLL_U Attribute_Player : public IAttribute
 	float sprintTime;			//!< Time that can be spent sprinting
 	bool canSprint;				//!< Can the player sprint right now
 	float sprintRechargeRate;	//!< The rate at which the sprint will recharge
-	Timer respawnTimer;		//!< Keeps track of when a dead player should respawn
+	Timer respawnTimer;			//!< Keeps track of when a dead player should respawn
 	float timeSinceLastDamageTaken;		//!< Incrementing timer. Reset when taking damage.
-	bool jetpack;						//!< Use jetpack		
-	bool detectedAsDead;
+	bool jetpack;				//!< Use jetpack		
+	bool detectedAsDead;		//!< The player is dead
 	bool executing;				//!< True if selected by the scheduler (ScoreComponent.cpp)
-	int corpseEntityId;			//!< The id of the corpse entity that will be create upon player death
-
-	int meshID_whenAlive;
-	int meshID_whenDead;
 
 	DataItemList* getDataList();
-	void saveTo(DataItemList* list);;
+	void saveTo(DataItemList* list);
 	AttributeType getType(){return ATTRIBUTE_PLAYER;}
 	std::string getName(){return "Player";}
 };
@@ -530,7 +524,7 @@ struct DLL_U Attribute_Mesh : public IAttribute
 	~Attribute_Mesh();				//!< Does nothing.
 
 	DataItemList* getDataList();
-	void saveTo(DataItemList* list);;
+	void saveTo(DataItemList* list);
 	AttributeType getType(){return ATTRIBUTE_MESH;}
 	std::string getName(){return "Mesh";}
 };
@@ -545,7 +539,7 @@ struct DLL_U Attribute_Health : public IAttribute
 	float healthFromLastFrame;
 
 	DataItemList* getDataList();
-	void saveTo(DataItemList* list);;
+	void saveTo(DataItemList* list);
 	AttributeType getType(){return ATTRIBUTE_HEALTH;}
 	std::string getName(){return "Health";}
 };
@@ -559,7 +553,7 @@ struct DLL_U Attribute_Damage : public IAttribute
 	int owner_entityID;
 
 	DataItemList* getDataList();
-	void saveTo(DataItemList* list);;
+	void saveTo(DataItemList* list);
 	AttributeType getType(){return ATTRIBUTE_DAMAGE;}
 	std::string getName(){return "Damage";}
 };
@@ -575,7 +569,7 @@ struct DLL_U Attribute_PlayerSpawnPoint : public IAttribute
 	float spawnArea;				//!< Defines the spawn point zone, a horizontal circle area (might have changed to sphere)
 
 	DataItemList* getDataList();
-	void saveTo(DataItemList* list);;
+	void saveTo(DataItemList* list);
 	AttributeType getType(){return ATTRIBUTE_PLAYERSPAWNPOINT;}
 	std::string getName(){return "PlayerSpawnPoint";}
 };
@@ -587,15 +581,15 @@ struct DLL_U Attribute_PickupablesSpawnPoint : public IAttribute
 
 	AttributePtr<Attribute_Position> ptr_position;
 
-	XKILL_Enums::PickupableType spawnPickupableType;	//!< Type of pickupable spawned by this pickupables spawn point
+	XKILL_Enums::PickupableType spawnPickupableType;	//!< Type of pickupable spawned by this pickupables spawn point.
 	float spawnDelayInSeconds;							//!< Delay until a pickupable may spawn
 	float secondsSinceLastSpawn;						//!< Incrementing timer, reset when spawned.
 	float secondsSinceLastPickup;						//!< Incrementing timer, reset when picked up.
 	int maxNrOfExistingSpawnedPickupables;				//!< Is checked against "currentNrOfExistingSpawnedPickupables"
-	int currentNrOfExistingSpawnedPickupables;			//!< Incremented when a pickubalbe is spawned from this pickupables spawn point. Decremented when a pickupable is picked up
+	int currentNrOfExistingSpawnedPickupables;			//!< Incremented when a pickupable is spawned from this pickupables spawn point. Decremented when a pickupable is picked up.
 
 	DataItemList* getDataList();
-	void saveTo(DataItemList* list);;
+	void saveTo(DataItemList* list);
 
 	AttributeType getType(){return ATTRIBUTE_PICKUPABLESSPAWNPOINT;}
 	std::string getName(){return "PickupablesSpawnPoint";}
@@ -614,7 +608,7 @@ struct DLL_U Attribute_Pickupable : public IAttribute
 	int amount;											//! Data of pickupable (health, ammo, etc)
 
 	DataItemList* getDataList();
-	void saveTo(DataItemList* list);;
+	void saveTo(DataItemList* list);
 
 	AttributeType getType(){return ATTRIBUTE_PICKUPABLE;}
 	std::string getName(){return "Pickupable";}
@@ -622,7 +616,7 @@ struct DLL_U Attribute_Pickupable : public IAttribute
 
 class MutatorSettings;
 #include "WeaponStructs.h"
-/// Stores everything needed for the weapon system. The two enums "XKILL_Enums::AmmunitionType" and "FiringMode" is used to preset the weapon settings. These settings are used in GameComponent to simulate the weapon behavior of choice.
+/// Stores everything needed for the weapon system. The two enums "XKILL_Enums::AmmunitionType" and "XKILL_Enums::FiringModeType" is used to preset the weapon settings. These settings are used in GameComponent to simulate the weapon behavior of choice.
 /** 
 \ingroup ATTRIBUTES
 */
@@ -662,7 +656,7 @@ struct DLL_U Attribute_DebugShape : public IAttribute
 	bool			render;
 
 	DataItemList* getDataList();
-	void saveTo(DataItemList* list);;
+	void saveTo(DataItemList* list);
 	AttributeType getType(){return ATTRIBUTE_WEAPONSTATS;}
 	std::string getName(){return "WeaponStats";}
 };
@@ -679,7 +673,7 @@ struct DLL_U Attribute_ExplosionSphere : public IAttribute
 	XKILL_Enums::FiringModeType firingModeType;
 
 	DataItemList* getDataList();
-	void saveTo(DataItemList* list);;
+	void saveTo(DataItemList* list);
 	AttributeType getType(){return ATTRIBUTE_EXPLOSIONSPHERE;}
 	std::string getName(){return "ExplosionSphere";}
 };
@@ -689,11 +683,14 @@ struct DLL_U Attribute_Ray : public IAttribute
 	Attribute_Ray();
 	~Attribute_Ray();
 
+	AttributePtr<Attribute_Render> ptr_render;
+
 	Float3 from;
 	Float3 to;
+	bool render;
 
 	DataItemList* getDataList();
-	void saveTo(DataItemList* list);;
+	void saveTo(DataItemList* list);
 
 	AttributeType getType(){return ATTRIBUTE_RAY;}
 	std::string getName(){return "Ray";}

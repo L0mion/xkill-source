@@ -5,6 +5,7 @@
 #include <xkill-utilities\XKILL_Enums.h>
 
 class btDiscreteDynamicsWorld;
+class debugDrawDispatcher;
 
 class PhysicsObject
 	: public btRigidBody
@@ -16,11 +17,12 @@ protected:
 		unsigned int attributeIndex_;										//!< Specifies which PhysicsObject is synchronized with which physics attribute.
 		short collisionFilterGroup_;										//!< The filter group the object belongs to, ex: XKILL_Enums::PhysicsAttributeType::WORLD.
 		static btDiscreteDynamicsWorld*	dynamicsWorld_;						//!< Gives all physics objects access to the dynamics world. Deallocation is handled in the destructor of PhysicsComponent.
+		static debugDrawDispatcher*	debugDrawer_;							//!< Gives all physics objects access to the debug drawer. Deallocation is handled in the destructor of PhysicsComponent.
 
 		btVector3 localInertiaBasedOnCollisionShapeAndMass(btScalar mass);	//!< Called from "subClassCalculateLocalInertiaHook" by subclasses.
 		btVector3 zeroLocalInertia();										//!< Called from "subClassCalculateLocalInertiaHook" by subclasses.
 		virtual btCollisionShape* subClassSpecificCollisionShape();			//!< May be overridden by subclasses. Is called from the end of init.
-		void Hover(float delta, float hoverHeight);							//!< Hover above ground by sening a ray straight down from the Physics Object's position.
+		virtual void hover(float delta, float hoverHeight);					//!< hover above ground by sening a ray straight down from the Physics Object's position.
 public:
 	PhysicsObject();
 	virtual ~PhysicsObject();
@@ -35,7 +37,9 @@ public:
 
 	virtual void onUpdate(float delta);
 	virtual void handleOutOfBounds(); //!< Standard out of bounds handling: move object to a new position
+
 	static void setDynamicsWorld(btDiscreteDynamicsWorld* dynamicsWorld){dynamicsWorld_=dynamicsWorld;}
+	static void setDebugDrawer(debugDrawDispatcher* debugDrawer){debugDrawer_=debugDrawer;}
 };
 
 #endif

@@ -3,9 +3,9 @@
 #include "VSIn.hlsl"
 #include "VSOut.hlsl"
 
-DefaultVSOut VS_Animation(VSInPosNormTexTanSkinned vsIn)
+VSOutPosNormWTex VS_Animation(VSInPosNormTexTanSkinned vsIn)
 {
-	DefaultVSOut output;
+	VSOutPosNormWTex output;
 
 	float weights[4] = {0.0f, 0.0f, 0.0f, 0.0f};
 	weights[0] = vsIn.weights.x;
@@ -31,9 +31,11 @@ DefaultVSOut VS_Animation(VSInPosNormTexTanSkinned vsIn)
 	
 	position = mul(position, boneTransform).xyz;
 
+
 	output.position		= mul(float4(position, 1.0f), finalMatrix);
 	output.positionW	= mul(float4(position, 1.0f), worldMatrix).xyz;
 	output.normalW		= mul(float4(normal, 0.0f), worldMatrix).xyz;
+
 	output.texcoord		= vsIn.texcoord;
 	return output;
 }

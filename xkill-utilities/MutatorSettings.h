@@ -28,6 +28,10 @@ public:
 	Ammunition& getStandardAmmunition(XKILL_Enums::AmmunitionType type);
 	//! Returns the stored standard firing mode of specified type
 	FiringMode& getStandardFiringMode(XKILL_Enums::FiringModeType type);
+	//! Initializes the standardAmmunitions array
+	void initStandardAmmunition();
+	//! Initializes the standardFiringModes array
+	void initStandardFiringModes();
 
 private:
 	//! Stores a version of each standard ammunition
@@ -37,9 +41,4 @@ private:
 
 	//! Used to make sure that the class is only initialized once, is a dirty workaround
 	static bool hasInitialized; 
-
-	//! Initializes the standardAmmunitions array
-	void initStandardAmmunition();
-	//! Initializes the standardFiringModes array
-	void initStandardFiringModes();
 };

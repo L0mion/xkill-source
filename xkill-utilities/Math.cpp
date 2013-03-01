@@ -101,6 +101,7 @@ Float3::Float3(float x, float y, float z)
 	this->y = y;
 	this->z = z;
 }
+
 void Float3::copy(const float* float3)
 {
 	//memcpy(this, float3, sizeof(Float3));
@@ -154,10 +155,34 @@ float Float3::distanceTo( Float3 v )
 	return v3.length();
 }
 
+Float3 Float3::rotateWithQuaternion(Float4 quaternion)
+{
+	using namespace DirectX;
+
+	XMVECTOR xmVector   = XMLoadFloat3((XMFLOAT3*)this);
+	XMVECTOR xmRotation = XMLoadFloat4((XMFLOAT4*)&quaternion);
+
+	xmVector = XMVector3Rotate(xmVector, xmRotation);
+
+	Float3 result;
+	XMStoreFloat3((XMFLOAT3*)&result, xmVector);
+
+	return result;
+}
+
 float* Float3::asFloat()
 {
 	float* asFloat = (float*)this;
 	return asFloat;
+}
+
+Float3 Float3::operator/(float scalar)
+{
+	Float3 float3(*this);
+	float3.x /= scalar;
+	float3.y /= scalar;
+	float3.z /= scalar;
+	return float3;
 }
 
 Float4::Float4()
@@ -190,6 +215,106 @@ void Float4::copy(const float* float4)
 	w = float4[3];
 }
 
+Float4& Float4::normalize()
+{
+	const float length = sqrtf(x * x + y * y + z * z + w * w);
+	x /= length;
+	y /= length;
+	z /= length;
+	w /= length;
+	return *this;
+}
+
+Float4& Float4::quaternionFromAxis(Float3 axis, float angle)
+{
+	using namespace DirectX;
+
+	XMVECTOR xmAxis = XMLoadFloat3((XMFLOAT3*)&axis);
+
+	XMVECTOR xmRotation = XMQuaternionRotationNormal(xmAxis, angle);
+
+	Float4 rotation;
+	XMStoreFloat4((XMFLOAT4*)&rotation, xmRotation);
+
+	x = rotation.x;
+	y = rotation.y;
+	z = rotation.z;
+	w = rotation.w;
+
+	return *this;
+}
+
+Float4 Float4::quaternionInverse()
+{
+	using namespace DirectX;
+
+	XMVECTOR v = XMLoadFloat4((XMFLOAT4*)this);
+
+	v = XMQuaternionInverse(v);
+
+	Float4 inverse;
+	XMStoreFloat4((XMFLOAT4*)&inverse, v);
+
+	return inverse;
+}
+
+Float4 Float4::quaternionMultiply(Float4 quaternion)
+{
+	using namespace DirectX;
+
+	XMVECTOR q1 = XMLoadFloat4((XMFLOAT4*)this);
+	XMVECTOR q2 = XMLoadFloat4((XMFLOAT4*)&quaternion);
+
+	XMVECTOR xmMultiplication = XMQuaternionMultiply(q1, q1);
+
+	Float4 multiplication;
+	XMStoreFloat4((XMFLOAT4*)&multiplication, xmMultiplication);
+
+	return multiplication;
+}
+
+Float4 Float4::quaternionLookAt(Float3 pos, Float3 cameraPos)
+{
+	using namespace DirectX;
+
+	XMVECTOR xmPos = XMLoadFloat3((XMFLOAT3*)&pos);
+	XMVECTOR xmCameraPos = XMLoadFloat3((XMFLOAT3*)&cameraPos);
+	XMVECTOR xmUp  = XMLoadFloat3((XMFLOAT3*)&Float3(0.0f, 1.0f, 0.0f));
+
+	XMMATRIX xmRotationMatrix = XMMatrixLookAtLH(xmCameraPos, xmPos, xmUp);
+
+	XMVECTOR xmQuaternion = XMQuaternionRotationMatrix(xmRotationMatrix);
+
+	Float4 quaternion;
+	XMStoreFloat4((XMFLOAT4*)&quaternion, xmQuaternion);
+
+	return quaternion;
+}
+
+Float4 Float4::operator+(Float4 float4)
+{
+	Float4 result;
+
+	result.x = this->x + float4.x;
+	result.y = this->y + float4.y;
+	result.z = this->z + float4.z;
+	result.w = this->w + float4.w;
+
+	return result;
+}
+
+Float4 Float4::operator*(Float4 float4)
+{
+	Float4 result;
+
+	result.x = this->x * float4.x;
+	result.y = this->y * float4.y;
+	result.z = this->z * float4.z;
+	result.w = this->w * float4.w;
+
+	return result;
+}
+
 Float3 Float4::quaternionToVector()
 {
 	using namespace DirectX;
@@ -198,7 +323,7 @@ Float3 Float4::quaternionToVector()
 	XMVECTOR xv_out = XMVector3Rotate(XMVectorSet(0.0f, 0.0f, 1.0f, 0.0f), xv_rot);
 
 	Float3 f_out; XMStoreFloat3((XMFLOAT3*)&f_out,	xv_out);
-	
+
 	return f_out;
 }
 
@@ -415,7 +540,6 @@ Float4x4 Float4x4::multiply(const Float4x4& matrix)
 
 void Float4x4::setIdentity()
 {
-		
 	m[0][0] = 1.0f;
 	m[0][1] = 0.0f;
 	m[0][2] = 0.0f;

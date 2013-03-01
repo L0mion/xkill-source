@@ -15,6 +15,8 @@ struct Attribute_WeaponStats;
 struct Attribute_Position;
 struct Attribute_Spatial;
 struct Attribute_Camera;
+struct Attribute_Player;
+struct Attribute_Ray;
 
 template <class T>
 class LinkFrame;
@@ -45,6 +47,11 @@ public:
 	Uniform way of starting the game
 	*/
 	void startGame();
+
+	/**
+	Uniform way of ending the game
+	*/
+	void endGame();
 
 	/**
 	Handle PhysicsAttributes collision for one of two PhysicsAttributes participating in the collision.
@@ -91,6 +98,14 @@ public:
 	bool switchAmmunition(AttributePtr<Attribute_WeaponStats> ptr_weaponStats);
 	bool switchFiringMode(AttributePtr<Attribute_WeaponStats> ptr_weaponStats);
 
-	void updateAimingRay(Entity* playerEntity, AttributePtr<Attribute_Camera> ptr_camera);
+	/**
+	Creates an aiming ray by sending a ray cast event handled by PhysicsComponent.
+	Retrieves the result (what the ray hit, and the hit point) from the sent event.
+	Updates the ray attribute of the current player according to the result from the sent event.
+	If the current player is executing the ray is interpreted as a Laser Automatic Sniper Execution Ray.
+	Else the aiming ray is interpreted as what the player is looking at.
+	*/
+	void updateAndInterpretAimingRay(Entity* rayCastingPlayerEntity, AttributePtr<Attribute_Camera> ptr_camera);
+	void updateAndInterpretLaser(AttributePtr<Attribute_Ray> ptr_ray, AttributePtr<Attribute_Player> ptr_player, AttributePtr<Attribute_Camera> ptr_camera);
 	void shootProjectile(AttributePtr<Attribute_Spatial> ptr_spatial, AttributePtr<Attribute_WeaponStats> ptr_weaponStats);
 };

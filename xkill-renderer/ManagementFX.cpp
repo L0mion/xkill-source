@@ -16,12 +16,13 @@ ManagementFX::ManagementFX(bool debugShaders)
 	vsPosNormTexTanInstanced_	= nullptr;
 	vsScreenQuad_				= nullptr;
 
-	psDefault_		= nullptr;
-	psAnimation_	= nullptr;
-	psColor_		= nullptr;
-	psSprite_		= nullptr;
-	psNormalMap_	= nullptr;
-	psDownSample_	= nullptr;
+	psDefault_				= nullptr;
+	psAnimation_			= nullptr;
+	psColor_				= nullptr;
+	psSprite_				= nullptr;
+	psNormalMap_			= nullptr;
+	psDownSample_			= nullptr;
+	psBuildShadowMapPosNormTex_	= nullptr;
 
 	csLighting_	= nullptr;
 	csBlurHorz_ = nullptr;
@@ -50,6 +51,7 @@ ManagementFX::~ManagementFX()
 	SAFE_DELETE(psSprite_);
 	SAFE_DELETE(psNormalMap_);
 	SAFE_DELETE(psDownSample_);
+	SAFE_DELETE(psBuildShadowMapPosNormTex_);
 	
 	SAFE_DELETE(csLighting_);
 	SAFE_DELETE(csBlurHorz_);
@@ -69,14 +71,15 @@ void ManagementFX::reset()
 	vsColor_					->reset();
 	vsSprite_					->reset();
 	vsPosNormTexTanInstanced_	->reset();
-	//vsScreenQuad_				->reset();
+	vsScreenQuad_				->reset();
 
-	psDefault_		->reset();
-	psAnimation_	->reset();
-	psColor_		->reset();
-	psSprite_		->reset();
-	psNormalMap_	->reset();
-	//psDownSample_	->reset();
+	psDefault_				->reset();
+	psAnimation_			->reset();
+	psColor_				->reset();
+	psSprite_				->reset();
+	psNormalMap_			->reset();
+	psDownSample_			->reset();
+	psBuildShadowMapPosNormTex_	->reset();
 
 	csLighting_->reset();
 	csBlurHorz_->reset();
@@ -180,6 +183,8 @@ HRESULT ManagementFX::initShaders(ID3D11Device* device)
 		hr = initPSNormalMap(device, shaderPath);
 	if(SUCCEEDED(hr))
 		hr = initPSDownSample(device, shaderPath);
+	if(SUCCEEDED(hr))
+		hr = initPSBuildShadowMapPosNormTex(device, shaderPath);
 
 	if(SUCCEEDED(hr))
 		hr = initCSLighting(device, shaderPath);
@@ -190,7 +195,7 @@ HRESULT ManagementFX::initShaders(ID3D11Device* device)
 	
 	return hr;
 }
-HRESULT ManagementFX::initVSPosNormTexInstanced(ID3D11Device* device,		std::wstring shaderPath)
+HRESULT ManagementFX::initVSPosNormTexInstanced(				ID3D11Device* device, std::wstring shaderPath)
 {
 	HRESULT hr = S_OK;
 	std::wstring completePath = shaderPath + L"VS_PosNormTexInstanced.cso";
@@ -199,7 +204,7 @@ HRESULT ManagementFX::initVSPosNormTexInstanced(ID3D11Device* device,		std::wstr
 
 	return hr;
 }
-HRESULT ManagementFX::initVSAnimation(ID3D11Device* device,					std::wstring shaderPath)
+HRESULT ManagementFX::initVSAnimation(							ID3D11Device* device, std::wstring shaderPath)
 {
 	HRESULT hr = S_OK;
 	std::wstring completePath = shaderPath + L"VS_Animation.cso";
@@ -208,7 +213,7 @@ HRESULT ManagementFX::initVSAnimation(ID3D11Device* device,					std::wstring sha
 
 	return hr;
 }
-HRESULT ManagementFX::initVSColor(ID3D11Device* device,						std::wstring shaderPath)
+HRESULT ManagementFX::initVSColor(								ID3D11Device* device, std::wstring shaderPath)
 {
 	HRESULT hr = S_OK;
 	std::wstring completePath = shaderPath + L"VS_Color.cso";
@@ -217,7 +222,7 @@ HRESULT ManagementFX::initVSColor(ID3D11Device* device,						std::wstring shader
 
 	return hr;
 }
-HRESULT ManagementFX::initVSSprite(ID3D11Device* device,					std::wstring shaderPath)
+HRESULT ManagementFX::initVSSprite(								ID3D11Device* device, std::wstring shaderPath)
 {
 	HRESULT hr = S_OK;
 	std::wstring completePath = shaderPath + L"VS_Sprite.cso";
@@ -226,7 +231,7 @@ HRESULT ManagementFX::initVSSprite(ID3D11Device* device,					std::wstring shader
 
 	return hr;
 }
-HRESULT ManagementFX::initVSPosNormTexTanInstanced(ID3D11Device* device,	std::wstring shaderPath)
+HRESULT ManagementFX::initVSPosNormTexTanInstanced(				ID3D11Device* device, std::wstring shaderPath)
 {
 	HRESULT hr = S_OK;
 	std::wstring completePath = shaderPath + L"VS_PosNormTexTanInstanced.cso";
@@ -235,7 +240,7 @@ HRESULT ManagementFX::initVSPosNormTexTanInstanced(ID3D11Device* device,	std::ws
 
 	return hr;
 }
-HRESULT ManagementFX::initVSScreenQuad(ID3D11Device* device,				std::wstring shaderPath)
+HRESULT ManagementFX::initVSScreenQuad(							ID3D11Device* device, std::wstring shaderPath)
 {
 	HRESULT hr = S_OK;
 
@@ -246,7 +251,7 @@ HRESULT ManagementFX::initVSScreenQuad(ID3D11Device* device,				std::wstring sha
 	return hr;
 }
 
-HRESULT ManagementFX::initPSDefault(ID3D11Device* device,		std::wstring shaderPath)
+HRESULT ManagementFX::initPSDefault(					ID3D11Device* device,	std::wstring shaderPath)
 {
 	HRESULT hr = S_OK;
 	std::wstring completePath = shaderPath + L"PS_Default.cso";
@@ -255,7 +260,7 @@ HRESULT ManagementFX::initPSDefault(ID3D11Device* device,		std::wstring shaderPa
 
 	return hr;
 }
-HRESULT ManagementFX::initPSAnimation(ID3D11Device* device,		std::wstring shaderPath)
+HRESULT ManagementFX::initPSAnimation(					ID3D11Device* device,	std::wstring shaderPath)
 {
 	HRESULT hr = S_OK;
 	std::wstring completePath = shaderPath + L"PS_Animation.cso";
@@ -264,7 +269,7 @@ HRESULT ManagementFX::initPSAnimation(ID3D11Device* device,		std::wstring shader
 
 	return hr;
 }
-HRESULT ManagementFX::initPSColor(ID3D11Device* device,			std::wstring shaderPath)
+HRESULT ManagementFX::initPSColor(						ID3D11Device* device,	std::wstring shaderPath)
 {
 	HRESULT hr = S_OK;
 	std::wstring completePath = shaderPath + L"PS_Color.cso";
@@ -273,7 +278,7 @@ HRESULT ManagementFX::initPSColor(ID3D11Device* device,			std::wstring shaderPat
 
 	return hr;
 }
-HRESULT ManagementFX::initPSSprite(ID3D11Device* device,		std::wstring shaderPath)
+HRESULT ManagementFX::initPSSprite(						ID3D11Device* device,	std::wstring shaderPath)
 {
 	HRESULT hr = S_OK;
 	std::wstring completePath = shaderPath + L"PS_Sprite.cso";
@@ -282,7 +287,7 @@ HRESULT ManagementFX::initPSSprite(ID3D11Device* device,		std::wstring shaderPat
 
 	return hr;
 }
-HRESULT ManagementFX::initPSNormalMap(ID3D11Device*	device,		std::wstring shaderPath)
+HRESULT ManagementFX::initPSNormalMap(					ID3D11Device* device,	std::wstring shaderPath)
 {
 	HRESULT hr = S_OK;
 	std::wstring completePath = shaderPath + L"PS_NormalMap.cso";
@@ -291,13 +296,23 @@ HRESULT ManagementFX::initPSNormalMap(ID3D11Device*	device,		std::wstring shader
 
 	return hr;
 }
-HRESULT ManagementFX::initPSDownSample(ID3D11Device* device,	std::wstring shaderPath)
+HRESULT ManagementFX::initPSDownSample(					ID3D11Device* device,	std::wstring shaderPath)
 {
 	HRESULT hr = S_OK;
 	
 	std::wstring completePath = shaderPath + L"PS_DownSample.cso";
 	psDownSample_ = new ShaderPS();
 	hr = psDownSample_->init(device, completePath.c_str());
+
+	return hr;
+}
+HRESULT ManagementFX::initPSBuildShadowMapPosNormTex(	ID3D11Device* device,	std::wstring shaderPath)
+{
+	HRESULT hr = S_OK;
+
+	std::wstring completePath = shaderPath + L"PS_BuildShadowMapPosNormTex.cso";
+	psBuildShadowMapPosNormTex_ = new ShaderPS();
+	hr = psBuildShadowMapPosNormTex_->init(device, completePath.c_str());
 
 	return hr;
 }
@@ -476,6 +491,9 @@ Shader* ManagementFX::getShaderFromID(ShaderID shaderID)
 		break;
 	case SHADERID_PS_DOWNSAMPLE:
 		shader = psDownSample_;
+		break;
+	case SHADERID_PS_BUILD_SHADOWMAP_POS_NORM_TEX:
+		shader = psBuildShadowMapPosNormTex_;
 		break;
 
 	case SHADERID_CS_LIGHTING:

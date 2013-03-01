@@ -6,6 +6,7 @@
 #include "MotionState.h"
 #include "PhysicsUtilities.h"
 #include "PhysicsComponent.h"
+#include "debugDrawDispatcher.h"
 
 #include <btBulletDynamicsCommon.h>
 
@@ -15,6 +16,7 @@ AttributeIterator<Attribute_Spatial> itrSpatial_PhysicsObject;
 static float outOfBoundsIfYIsLowerThanThis;
 
 btDiscreteDynamicsWorld* PhysicsObject::dynamicsWorld_ = NULL;
+debugDrawDispatcher* PhysicsObject::debugDrawer_ = NULL;
 
 PhysicsObject::PhysicsObject()
 	: btRigidBody(-1, nullptr, nullptr)
@@ -22,7 +24,7 @@ PhysicsObject::PhysicsObject()
 	itrPhysics_ = ATTRIBUTE_MANAGER->physics.getIterator();
 	itrSpatial_PhysicsObject = ATTRIBUTE_MANAGER->spatial.getIterator();
 	itrPosition_PhysicsObject = ATTRIBUTE_MANAGER->position.getIterator();
-	outOfBoundsIfYIsLowerThanThis = -5.0f;
+	outOfBoundsIfYIsLowerThanThis = -10.0f;
 }
 
 PhysicsObject::~PhysicsObject()
@@ -40,7 +42,11 @@ btCollisionShape* PhysicsObject::subClassSpecificCollisionShape()
 	AttributePtr<Attribute_Physics> ptr_physics = itrPhysics_.at(attributeIndex_);
 
 	int meshID = ptr_physics->meshID;
-	btCollisionShape* collisionShape = CollisionShapes::Instance()->getCollisionShape(ptr_physics->meshID);
+	if(meshID == 3)
+	{
+		int g =5;
+	}
+	btCollisionShape* collisionShape = CollisionShapes::Instance()->getCollisionShape(meshID);
 
 	return collisionShape;
 }
@@ -66,7 +72,7 @@ btVector3 PhysicsObject::zeroLocalInertia()
 	return localInertia;
 }
 
-void PhysicsObject::Hover(float delta, float hoverHeight)
+void PhysicsObject::hover(float delta, float hoverHeight)
 {
 	btVector3 from = getWorldTransform().getOrigin();
 	btVector3 to = from - btVector3(0.0f,hoverHeight*2.0f,0.0f);
@@ -93,7 +99,6 @@ void PhysicsObject::Hover(float delta, float hoverHeight)
 
 bool PhysicsObject::init(unsigned int attributeIndex, short collisionFilterGroup)
 {
-	
 	if(attributeIndex < 0)
 	{
 		return false;
@@ -107,7 +112,15 @@ bool PhysicsObject::init(unsigned int attributeIndex, short collisionFilterGroup
 
 	//Resolve mass, local inertia of the collision shape, and also the collision shape itself.
 	btCollisionShape* collisionShape = subClassSpecificCollisionShape();
-	setCollisionShape(collisionShape);
+	if(collisionShape != nullptr)
+	{
+		setCollisionShape(collisionShape);
+	}
+	else
+	{
+		ERROR_MESSAGEBOX("Error in PhysicsObject::init. Expected collision shape pointer unexpectedly set to nullptr. Using default shape instead.");
+		setCollisionShape(CollisionShapes::Instance()->getDefaultShape());
+	}
 	
 	btVector3 localInertia = subClassCalculateLocalInertiaHook(mass);
 	setMassProps(mass, localInertia); //Set inverse mass and inverse local inertia
@@ -173,7 +186,8 @@ void PhysicsObject::writeNonSynchronizedPhysicsObjectDataToPhysicsAttribute()
 	//ptr_physics->meshID = //not stored in physics object
 }
 void PhysicsObject::onUpdate(float delta)
-{	if(getWorldTransform().getOrigin().y() < outOfBoundsIfYIsLowerThanThis)
+{	
+	if(getWorldTransform().getOrigin().y() < outOfBoundsIfYIsLowerThanThis)
 	{
 		handleOutOfBounds();
 	}

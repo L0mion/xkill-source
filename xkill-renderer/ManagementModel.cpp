@@ -67,14 +67,21 @@ ModelD3D* ManagementModel::getModelD3D(
 	const unsigned int	modelID, 
 	ID3D11Device*		device)	
 {
+	HRESULT hr = S_OK;
+
 	if(!existingModelD3D(modelID))
 	{
-		HRESULT hr = S_OK;
 		hr = createModelD3D(modelID, device);
 	}
 
-	unsigned int modelD3DIndex = getModelD3DIndex(modelID);
-	return modelD3Ds_[modelD3DIndex];
+	ModelD3D* model = nullptr;
+	if(hr == S_OK)
+	{
+		unsigned int modelD3DIndex = getModelD3DIndex(modelID);
+		model = modelD3Ds_[modelD3DIndex];
+	}
+
+	return model;
 }
 DebugShapeD3D* ManagementModel::getDebugShapeD3D(
 	const unsigned int	shapeIndex,
@@ -124,11 +131,9 @@ HRESULT ManagementModel::createModelD3D(
 		}
 	}
 	else
-		hr = S_FALSE;
-	
-	if(FAILED(hr))
 	{
-		ERROR_MSG(L"ManagementModel::createModelD3D An error occured!");
+		hr = S_FALSE;
+		ERROR_MSG(L"ManagementModel::createModelD3D Could not find a MeshAttribute corresponding to modelID!");
 	}
 
 	return hr;
@@ -148,7 +153,6 @@ bool ManagementModel::getMeshAttribute(unsigned int modelID, AttributePtr<Attrib
 			foundAt = true;
 		}
 	}
-
 	itrMesh.resetIndex();
 
 	return foundAt;
@@ -174,7 +178,7 @@ HRESULT ManagementModel::createVertexBuffer(
 	case VERTEX_INVALID:
 		{
 			std::string failed = "ManagementModel::CreateVertexBuffer Invalid vertex type for model: " + modelID;
-			SHOW_MESSAGEBOX(failed);
+			ERROR_MESSAGEBOX(failed);
 			break;
 		}
 	case VERTEX_TYPE_POS_COLOR:
@@ -232,14 +236,14 @@ HRESULT ManagementModel::createVertexBuffer(
 		}
 	default:
 		std::string failed = "ManagementModel::CreateVertexBuffer Unknown vertex type.";
-		SHOW_MESSAGEBOX(failed);
+		ERROR_MESSAGEBOX(failed);
 		break;
 	}
 
 	if(FAILED(hr))
 	{
 		std::string failed = "ManagementModel::CreateVertexBuffer Failed to create Vertex Buffer from MeshModel ID: " + modelID;
-		SHOW_MESSAGEBOX(failed);
+		ERROR_MESSAGEBOX(failed);
 	}
 
 	return hr;
@@ -304,7 +308,7 @@ HRESULT ManagementModel::createIndexBuffer(
 	if(FAILED(hr))
 	{
 		std::string failed = "Failed to create Index Buffer from MeshModel at index: " + modelID;
-		SHOW_MESSAGEBOX(failed);
+		ERROR_MESSAGEBOX(failed);
 	}
 
 	return hr;
@@ -432,7 +436,7 @@ void ManagementModel::createDebugShapeD3D(unsigned int shapeIndex, ID3D11Device*
 		//Log warning
 		break;
 	default:
-		SHOW_MESSAGEBOX("ManagementModel::createDebugShapeD3D: Failed to load DebugShapeD3D, no regognized DEBUG_SHAPE-enum.");
+		ERROR_MESSAGEBOX("ManagementModel::createDebugShapeD3D: Failed to load DebugShapeD3D, no regognized DEBUG_SHAPE-enum.");
 		break;
 	}
 }
@@ -496,8 +500,12 @@ bool ManagementModel::existingModelD3D(const int unsigned modelID)
 }
 unsigned int ManagementModel::getModelD3DIndex(const int unsigned modelID)
 {
+	unsigned int index = 0;
 	std::map<unsigned int, unsigned int>::iterator it = modelIDtoIndex_.find(modelID);
-	return (*it).second;
+	if(it != modelIDtoIndex_.end())
+		index = (*it).second;
+
+	return index;
 }
 
 bool ManagementModel::existingDebugShapeD3D(const unsigned int shapeIndex)

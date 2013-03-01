@@ -181,6 +181,6 @@ MaterialDesc LoaderFbxMaterialDesc::getMaterialDesc()
 	material.transperency_ = opacity_;
 	material.emissive_ = emissive_;
 	material.shinyness_ = shininess_;
-
+	
 	return material;
 }
