@@ -40,6 +40,7 @@ PhysicsComponent::PhysicsComponent() : broadphase_(nullptr),
 	SUBSCRIBE_TO_EVENT(this, EVENT_ALL_HITS_RAY_CAST);
 	SUBSCRIBE_TO_EVENT(this, EVENT_UNLOAD_LEVEL);
 	SUBSCRIBE_TO_EVENT(this, EVENT_LOAD_LEVEL_BULLET);
+	SUBSCRIBE_TO_EVENT(this, EVENT_NULL_PROCESS_STOPPED_EXECUTING);
 }
 
 PhysicsComponent::~PhysicsComponent()
@@ -347,6 +348,46 @@ void PhysicsComponent::onEvent(Event* e)
 	case EVENT_UNLOAD_LEVEL:
 		CollisionShapes::Instance()->unloadCollisionShapes();
 		break;
+	case EVENT_NULL_PROCESS_STOPPED_EXECUTING:
+		{
+			while(itrPhysics.hasNext())
+			{
+				AttributePtr<Attribute_Physics> ptr_physics = itrPhysics.getNext();
+				if(ptr_physics->collisionFilterGroup == XKILL_Enums::PhysicsAttributeType::PROP)
+				{
+					PropPhysicsObject* propPhysicsObject = static_cast<PropPhysicsObject*>(physicsObjects_->at(ptr_physics.index()));
+					
+					ptr_physics->collisionFilterGroup = XKILL_Enums::PhysicsAttributeType::WORLD;
+					ptr_physics->collisionFilterMask = XKILL_Enums::PhysicsAttributeType::PLAYER | XKILL_Enums::PhysicsAttributeType::PROJECTILE;
+					ptr_physics->ptr_spatial->ptr_position->position = Float3(propPhysicsObject->worldOrigin_.x(),propPhysicsObject->worldOrigin_.y(),propPhysicsObject->worldOrigin_.z());
+					
+					//check
+					//btTransform trans = propPhysicsObject->getWorldTransform();
+					//trans.setOrigin(propPhysicsObject->worldOrigin_);
+					//propPhysicsObject->setWorldTransform(trans);
+
+					propPhysicsObject->setCollisionFlags(propPhysicsObject->getCollisionFlags() | btCollisionObject::CF_STATIC_OBJECT);
+
+					ptr_physics->gravity = Float3(0.0f, 0.0f, 0.0f);
+					ptr_physics->linearVelocity = Float3(0.0f, 0.0f, 0.0f);
+					ptr_physics->mass = 0;
+					ptr_physics->reloadDataIntoBulletPhysics = true;
+				}
+			}
+
+			/*
+			while(itrPhysics.hasNext())
+			{
+				AttributePtr<Attribute_Physics> ptr_physics = itrPhysics.getNext();
+				if(ptr_physics->collisionFilterGroup == XKILL_Enums::PhysicsAttributeType::PROP)
+				{
+					int t =5;
+				}
+			}
+			*/
+
+		break;
+		}
 	}
 }
 

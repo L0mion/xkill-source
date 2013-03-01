@@ -157,11 +157,14 @@ void ScoreComponent::schedulerScoreCounting(float delta)
 				//{Event_PostHudMessage e("<p align='center'><span style='font-size:15pt;'>NullProcess is executing</span><br><span style='color: rgba(255, 0, 0, 255); font-size:35pt;'>Punish them all</span></p>"); e.receiver = Event_PostHudMessage::RECEIVER_ALL; e.setStyle(Event_PostHudMessage::STYLE_SUBTILE); SEND_EVENT(&e);}
 				{Event_PostHudMessage e("Punish them all"); e.receiver = Event_PostHudMessage::RECEIVER_ALL; e.setStyle(Event_PostHudMessage::STYLE_WARNING); SEND_EVENT(&e);}
 				{Event_PostHudMessage e("NullProcess is executing"); e.receiver = Event_PostHudMessage::RECEIVER_ALL; e.setStyle(Event_PostHudMessage::STYLE_SUBTILE); SEND_EVENT(&e);}
+				
+				SEND_EVENT(&Event(EVENT_NULL_PROCESS_STARTED_EXECUTING));
 			}
 			else if(topPriorityIsTied)	// Two or more players are tied for the ammount of priority
 			{
 				// Do nothing, wait until a single player is in the lead
 
+				SEND_EVENT(&Event(EVENT_NULL_PROCESS_STARTED_EXECUTING));
 				// Post hud message
 				{Event_PostHudMessage e("Two players have tied priority"); e.receiver = Event_PostHudMessage::RECEIVER_ALL;  e.setStyle(Event_PostHudMessage::STYLE_SUBTILE); SEND_EVENT(&e);}
 			}
@@ -178,6 +181,7 @@ void ScoreComponent::schedulerScoreCounting(float delta)
 
 				// Send event to notify other components that we're entering execution mode
 				SEND_EVENT(&Event_PlayerExecuting(executingPlayerIndex_));
+				SEND_EVENT(&Event(EVENT_NULL_PROCESS_STOPPED_EXECUTING));
 
 				// Post hud messages
 				{Event_PostHudMessage e("", ptr_player); e.setHtmlMessage("Now running in", "Kernel Mode"); SEND_EVENT(&e);}

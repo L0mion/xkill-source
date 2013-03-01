@@ -4,6 +4,7 @@
 #include <xkill-utilities/XKILL_Enums.h>
 #include <xkill-utilities/MutatorSettings.h>
 #include <xkill-utilities/Timer.h>
+#include <xkill-utilities/Converter.h>
 #include <DirectXMath.h>
 
 #include <ctime>
@@ -24,6 +25,8 @@ GameComponent::GameComponent(void)
 	SUBSCRIBE_TO_EVENT(this, EVENT_TRANSFER_EVENTS_TO_GAME);
 	SUBSCRIBE_TO_EVENT(this, EVENT_PLAYERDEATH);
 	SUBSCRIBE_TO_EVENT(this, EVENT_UNLOAD_LEVEL);
+	SUBSCRIBE_TO_EVENT(this, EVENT_NULL_PROCESS_STARTED_EXECUTING);
+	SUBSCRIBE_TO_EVENT(this, EVENT_NULL_PROCESS_STOPPED_EXECUTING);
 }
 
 GameComponent::~GameComponent(void)
@@ -39,10 +42,11 @@ bool GameComponent::init()
 {
 	//Fetch list of stuff used in logic
 	GET_ENTITIES(allEntity);
-
 	ATTRIBUTES_INIT_ALL;
 
 	srand((unsigned)time(NULL));
+
+	nullProcessExecuting = false;
 	
 	return true;
 }
@@ -76,6 +80,12 @@ void GameComponent::onEvent(Event* e)
 	case EVENT_UNLOAD_LEVEL:
 		event_UnloadLevel();
 		break;
+	case EVENT_NULL_PROCESS_STARTED_EXECUTING:
+		nullProcessExecuting = true;
+		break;
+	case EVENT_NULL_PROCESS_STOPPED_EXECUTING:
+		nullProcessExecuting = false;
+		break;
 	default:
 		break;
 	}
@@ -99,7 +109,7 @@ void GameComponent::onUpdate(float delta)
 		AttributePtr<Attribute_Spatial>			ptr_spatial		=	ptr_render	->	ptr_spatial		;
 		AttributePtr<Attribute_Position>		ptr_position	=	ptr_spatial	->	ptr_position	;
 		AttributePtr<Attribute_Physics>			ptr_physics		=	ptr_input	->	ptr_physics		;
-
+		
 		Ammunition* ammo = &ptr_weaponStats->ammunition[ptr_weaponStats->currentAmmunitionType];
 		FiringMode* firingMode = &ptr_weaponStats->firingMode[ptr_weaponStats->currentFiringModeType];
 
@@ -544,6 +554,37 @@ void GameComponent::onUpdate(float delta)
 			SEND_EVENT(&Event_RemoveEntity(itrExplosionSphere.ownerId()));
 		}
 	}
+
+
+	//--------------------------------------------------------------------------------------
+	// Drop random world pieces
+	//--------------------------------------------------------------------------------------
+	std::vector<int> worldPiecesIndices;
+	if(nullProcessExecuting)
+	{
+		while(itrPhysics.hasNext())
+		{
+			AttributePtr<Attribute_Physics> ptr_physics = itrPhysics.getNext();
+			if(ptr_physics->collisionFilterGroup == XKILL_Enums::PhysicsAttributeType::WORLD)
+			{
+				worldPiecesIndices.push_back(ptr_physics.index());
+			}
+		}
+
+		for(unsigned int i = 0; i < 10; i++)
+		{
+			AttributePtr<Attribute_Physics> ptr_physics;
+			int randomIndex = rand()%worldPiecesIndices.size();
+			ptr_physics = itrPhysics.at(worldPiecesIndices.at(randomIndex));
+			ptr_physics->collisionFilterGroup = XKILL_Enums::PhysicsAttributeType::PROP;
+			ptr_physics->collisionFilterMask = XKILL_Enums::PhysicsAttributeType::NOTHING;
+			ptr_physics->mass = 1;
+			ptr_physics->reloadDataIntoBulletPhysics = true;
+
+			worldPiecesIndices.at(randomIndex) = worldPiecesIndices.back();
+			worldPiecesIndices.pop_back();
+		}
+	}
 }
 
 void GameComponent::event_PhysicsAttributesColliding(Event_PhysicsAttributesColliding* e)
@@ -865,7 +906,7 @@ void GameComponent::updateAndInterpretAimingRay(Entity* rayCastingPlayerEntity, 
 	// Handle result from sent event to find a valid hit point for the casted ray
 	//--------------------------------------------------------------------------------------
 	Float3 hitPoint;
-	Entity* entityHitByRay;
+	Entity* entityHitByRay = nullptr;
 	int nrOfHits = event_AllHitsRayCast.mapHitPointToEntityId.size();
 	if(nrOfHits > 0) //If ray hit something
 	{

@@ -9,8 +9,11 @@ public:
 	PropPhysicsObject();
 	~PropPhysicsObject();
 
+	btVector3 worldOrigin_;
+
 	virtual btVector3 subClassCalculateLocalInertiaHook(btScalar mass);
 	virtual bool subClassSpecificInitHook();
+	virtual void handleOutOfBounds();
 };
 
 #endif
