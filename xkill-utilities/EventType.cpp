@@ -263,7 +263,14 @@ Event_WindowMove::Event_WindowMove( Int2 pos, Int2 oldPos ) : Event(EVENT_WINDOW
 	this->oldPos = oldPos;
 }
 
-Event_ClosestRayCast::Event_ClosestRayCast(Float3 from, Float3 to, short collisionFilterMask) : Event(EVENT_CLOSEST_RAY_CAST)
+Event_ClosestHitRayCast::Event_ClosestHitRayCast(Float3 from, Float3 to, short collisionFilterMask) : Event(EVENT_CLOSEST_HIT_RAY_CAST)
+{
+	this->from = from;
+	this->to = to;
+	this->collisionFilterMask = collisionFilterMask;
+}
+
+Event_AllHitsRayCast::Event_AllHitsRayCast(Float3 from, Float3 to, short collisionFilterMask) : Event(EVENT_ALL_HITS_RAY_CAST)
 {
 	this->from = from;
 	this->to = to;
@@ -289,4 +296,39 @@ Event_LoadLevel::Event_LoadLevel(std::string levelName) : Event(EVENT_LOAD_LEVEL
 Event_SetFullscreen::Event_SetFullscreen( bool on ) : Event(EVENT_SHOW_FULLSCREEN)
 {
 	this->on = on;
+}
+
+Event_PostHudMessage::Event_PostHudMessage( std::string message, AttributePtr<Attribute_Player> ptr_subject_player /*= AttributePtr<Attribute_Player>() */ ) : Event(EVENT_POST_HUD_MESSAGE)
+{
+	this->message = message;
+	this->ptr_subject_player = ptr_subject_player;
+	this->receiver = RECEIVER_ONLY_SUBJECT;
+
+	setStyle(STYLE_NORMAL);
+}
+
+void Event_PostHudMessage::setStyle( Style style )
+{
+	styleSheet = "color: rgba(255, 255, 255, 220); font-size:12pt;";
+
+	if(style == STYLE_NORMAL){}
+	if(style == STYLE_SUBTILE)
+		styleSheet = "color: rgba(255, 255, 255, 100);";
+	if(style == STYLE_WARNING)
+		styleSheet = "color: rgba(255, 0, 0, 255); font-size:15pt;";
+}
+
+void Event_PostHudMessage::setHtmlMessage( std::string prefex, std::string subject, std::string suffix /*= ""*/, std::string description /*= ""*/ )
+{
+	std::string text_normal = "<span style='color: rgba(255, 255, 255, 240);'>";
+	std::string text_subtile = "<span style='color: rgba(200, 200, 200, 230);'>";
+	std::string text_end = "</span>";
+
+	prefex = text_subtile + prefex + text_end;
+	subject = text_normal + subject + text_end;
+	suffix = text_subtile + suffix + text_end;
+	if(description != "")
+		description = text_subtile + "(" + text_subtile + description + text_end + text_subtile + ")" + text_end;
+
+	message = prefex + " " + subject + " " + suffix + " " + description ;
 }

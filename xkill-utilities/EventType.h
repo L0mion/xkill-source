@@ -83,7 +83,8 @@ enum DLL_U EventType
 	EVENT_PLAYERDEATH,
 	EVENT_PHYSICS_ATTRIBUTES_COLLIDING,
 	EVENT_SYNC_STATE_COMMAND,
-	EVENT_CLOSEST_RAY_CAST,
+	EVENT_CLOSEST_HIT_RAY_CAST,
+	EVENT_ALL_HITS_RAY_CAST,
 	EVENT_PLAYER_EXECUTING,
 	EVENT_PLAYER_DONE_EXECUTING,
 	EVENT_GET_FILE_LIST,
@@ -164,16 +165,27 @@ public:
 class DLL_U Event_PostHudMessage : public Event
 {
 public:
-	Event_PostHudMessage(std::string message, AttributePtr<Attribute_Player> ptr_subject_player = AttributePtr<Attribute_Player>(), bool subtle = false) : Event(EVENT_POST_HUD_MESSAGE)
+	enum Receiver
 	{
-		this->ptr_subject_player = ptr_subject_player;
-		this->message = message;
-		this->subtle = subtle;
-	}
+		RECEIVER_ONLY_SUBJECT,
+		RECEIVER_ALL_BUT_SUBJECT,
+		RECEIVER_ALL,
+	};
+	enum Style
+	{
+		STYLE_NORMAL,
+		STYLE_SUBTILE,
+		STYLE_WARNING
+	};
 
+	Event_PostHudMessage(std::string message, AttributePtr<Attribute_Player> ptr_subject_player = AttributePtr<Attribute_Player>() );
+	void setStyle(Style style);
+	void setHtmlMessage(std::string prefex, std::string subject = "", std::string suffix = "", std::string description = "");
+
+	Receiver receiver;
 	std::string message;
 	AttributePtr<Attribute_Player> ptr_subject_player;
-	bool subtle;
+	std::string styleSheet;
 };
 
 /**
@@ -649,19 +661,33 @@ public:
 	AttributePtr<Attribute_Player> player;
 };
 
-class DLL_U Event_ClosestRayCast : public Event
+class DLL_U Event_ClosestHitRayCast : public Event
 {
 public:
-	Event_ClosestRayCast(Float3 from, Float3 to, short collisionFilterMask);
+	Event_ClosestHitRayCast(Float3 from, Float3 to, short collisionFilterMask);
 
-	//Event input varaibles:
+	//Event input variables:
 	Float3 from;										//!< Point from where the ray originates
 	Float3 to;											//!< Point where the ray ends
-	short collisionFilterMask;							//!< What types of physics objects (refer to XKILL_Enums::PhysicsAttributeType) the ray should collide with during its travel from from to to
+	short collisionFilterMask;							//!< What types of physics objects (refer to XKILL_Enums::PhysicsAttributeType) the ray should collide with during its travel from "from" to "to"
 	
-	//Event output varaibles:
+	//Event output variables:
 	int EntityIdOfOwnerToClosestPhysicsObjectHitByRay;	//!< Set to 0 if no entity was hit by the ray
-	Float3 ClosestHitPoint;								//!< The world space hit point where the ray hit the physics object
+	Float3 ClosestHitPoint;								//!< If the ray did not hit any physics object, "ClosestHitPoint" will be set to "to".
+};
+
+class DLL_U Event_AllHitsRayCast : public Event
+{
+public:
+	Event_AllHitsRayCast(Float3 from, Float3 to, short collisionFilterMask);
+
+	//Event input variables:
+	Float3 from;										//!< Point from where the ray originates
+	Float3 to;											//!< Point where the ray ends
+	short collisionFilterMask;							//!< What types of physics objects (refer to XKILL_Enums::PhysicsAttributeType) the ray should collide with during its travel from "from" to "to"
+	
+	//Event output variables:
+	std::vector<std::pair<Float3, int>> mapHitPointToEntityId; //!< Empty if the ray did not hit anything
 };
 
 class DLL_U Event_PlayerExecuting : public Event
