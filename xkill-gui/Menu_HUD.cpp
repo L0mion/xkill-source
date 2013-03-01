@@ -100,12 +100,12 @@ void Menu_HUD::mapToSplitscreen()
 
 void Menu_HUD::refresh()
 {
-	AttributePtr<Attribute_Player>		player		=	splitScreen->ptr_player;
-	AttributePtr<Attribute_Health>		health		=	player->ptr_health;
-	AttributePtr<Attribute_WeaponStats>	weaponStats	=	player->ptr_weaponStats;
+	AttributePtr<Attribute_Player>		ptr_player		=	splitScreen->ptr_player;
+	AttributePtr<Attribute_Health>		ptr_health		=	ptr_player->ptr_health;
+	AttributePtr<Attribute_WeaponStats>	ptr_weaponStats	=	ptr_player->ptr_weaponStats;
 
-	Ammunition* ammunition = &weaponStats->ammunition[weaponStats->currentAmmunitionType];
-	FiringMode* firingMode = &weaponStats->firingMode[weaponStats->currentFiringModeType];
+	Ammunition* ammunition = &ptr_weaponStats->ammunition[ptr_weaponStats->currentAmmunitionType];
+	FiringMode* firingMode = &ptr_weaponStats->firingMode[ptr_weaponStats->currentFiringModeType];
 	int ammoIndex = ammunition->type;
 	float fadeTime = 1.0f;
 
@@ -117,7 +117,7 @@ void Menu_HUD::refresh()
 	int numAmmo = firingMode->nrOfShotsLeftInClip[ammoIndex];
 	int clipSize = firingMode->clipSize;
 	ui.label_ammo->setNum(numAmmo);
-	ui.label_totalAmmo->setNum((int)weaponStats->ammunition[ammoIndex].currentTotalNrOfShots);
+	ui.label_totalAmmo->setNum((int)ptr_weaponStats->ammunition[ammoIndex].currentTotalNrOfShots);
 	int prev_ammoRatio = ui.progressBar_ammo->value();
 	int ammoRatio = (int)((numAmmo / (float)clipSize) * 100);
 	int reloadRatio = (int)((firingMode->reloadTimeLeft / (float)firingMode->reloadTime) * 100);
@@ -166,10 +166,10 @@ void Menu_HUD::refresh()
 	// Show health info
 	//
 
-	ui.label_health->setNum((int)health->health);
-	ui.label_priority->setNum(player->priority);
-	ui.label_cycles->setNum(player->cycles);
-	int healthRatio = (int)((health->health / health->maxHealth) * 100);
+	ui.label_health->setNum((int)ptr_health->health);
+	ui.label_priority->setNum(ptr_player->priority);
+	ui.label_cycles->setNum(ptr_player->cycles);
+	int healthRatio = (int)((ptr_health->health / ptr_health->maxHealth) * 100);
 
 	// Show menu if health has changed otherwise fade after a few seconds
 	if(healthRatio != ui.progressBar_health->value())
@@ -202,6 +202,33 @@ void Menu_HUD::refresh()
 	//
 
 	hudMessage_manager.update();
+
+
+	// Scheduling
+	/*ui.label_priority_advantage->setNum((int)ptr_health->health);
+
+	ui.label_schedulingTimer->setNum((int)ptr_health->health);*/
+
+	//ptr_player
+	//while(itrPlayer.hasNext())	// Loop through all player and find if anyone has top priority
+	//{
+	//	//Attribute_Player* player = itrPlayer.getNext();
+	//	AttributePtr<Attribute_Player> player = itrPlayer.getNext();
+
+	//	if(player->priority > 0)
+	//	{
+	//		if(player->priority > topPriority)		// Current player had higher priority than last top player
+	//		{
+	//			topPlayerIndex = itrPlayer.storageIndex();
+	//			topPriority = player->priority;
+	//			topPriorityIsTied = false;
+	//		}
+	//		else if(player->priority == topPriority)	// Current player had the same priority as last top player
+	//		{
+	//			topPriorityIsTied = true;
+	//		}
+	//	}
+	//}
 }
 
 Menu_HUD::Menu_HUD( AttributePtr<Attribute_SplitScreen> splitScreen, QWidget* parent ) : QWidget(parent)
