@@ -250,9 +250,9 @@ public:
 		ptr_physics->ptr_render = ptr_render;
 		ptr_physics->meshID = e->meshID;
 		ptr_physics->collisionFilterGroup = XKILL_Enums::PhysicsAttributeType::WORLD;
-		ptr_physics->collisionFilterMask = XKILL_Enums::PhysicsAttributeType::PLAYER | XKILL_Enums::PhysicsAttributeType::PROJECTILE;
-		ptr_physics->collisionFilterMask = ptr_physics->collisionFilterMask | XKILL_Enums::PhysicsAttributeType::FRUSTUM | XKILL_Enums::PhysicsAttributeType::PICKUPABLE;
-		ptr_physics->collisionFilterMask = ptr_physics->collisionFilterMask | XKILL_Enums::PhysicsAttributeType::RAY | XKILL_Enums::PhysicsAttributeType::PROP;
+		ptr_physics->collisionFilterMask = XKILL_Enums::PhysicsAttributeType::PLAYER | XKILL_Enums::PhysicsAttributeType::PROJECTILE |
+			XKILL_Enums::PhysicsAttributeType::FRUSTUM | XKILL_Enums::PhysicsAttributeType::PICKUPABLE |
+			XKILL_Enums::PhysicsAttributeType::RAY | XKILL_Enums::PhysicsAttributeType::PROP;
 		ptr_physics->mass = 0;
 	}
 

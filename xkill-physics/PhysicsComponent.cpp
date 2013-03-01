@@ -358,14 +358,11 @@ void PhysicsComponent::onEvent(Event* e)
 					PropPhysicsObject* propPhysicsObject = static_cast<PropPhysicsObject*>(physicsObjects_->at(ptr_physics.index()));
 					
 					ptr_physics->collisionFilterGroup = XKILL_Enums::PhysicsAttributeType::WORLD;
-					ptr_physics->collisionFilterMask = XKILL_Enums::PhysicsAttributeType::PLAYER | XKILL_Enums::PhysicsAttributeType::PROJECTILE;
+					ptr_physics->collisionFilterMask = XKILL_Enums::PhysicsAttributeType::PLAYER | XKILL_Enums::PhysicsAttributeType::PROJECTILE |
+						XKILL_Enums::PhysicsAttributeType::FRUSTUM | XKILL_Enums::PhysicsAttributeType::PICKUPABLE |
+						XKILL_Enums::PhysicsAttributeType::RAY | XKILL_Enums::PhysicsAttributeType::PROP;
 					ptr_physics->ptr_spatial->ptr_position->position = Float3(propPhysicsObject->worldOrigin_.x(),propPhysicsObject->worldOrigin_.y(),propPhysicsObject->worldOrigin_.z());
 					
-					//check
-					//btTransform trans = propPhysicsObject->getWorldTransform();
-					//trans.setOrigin(propPhysicsObject->worldOrigin_);
-					//propPhysicsObject->setWorldTransform(trans);
-
 					propPhysicsObject->setCollisionFlags(propPhysicsObject->getCollisionFlags() | btCollisionObject::CF_STATIC_OBJECT);
 
 					ptr_physics->gravity = Float3(0.0f, 0.0f, 0.0f);
