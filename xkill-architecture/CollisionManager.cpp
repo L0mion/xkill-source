@@ -355,10 +355,14 @@ int CollisionManager::getPickedUpAmount(int currentAmount, int maxAmount, int tr
 	if(currentAmount < maxAmount) //Pickup if currently below maximum amount
 	{
 		int pickupFullAmount = currentAmount + tryPickupAmount;
-		if(pickupFullAmount > maxAmount)
+		if(pickupFullAmount > maxAmount) //Max capping
 		{
 			int difference = pickupFullAmount - maxAmount;
 			pickedUpAmount = tryPickupAmount - difference;
+		}
+		else //Pickup
+		{
+			pickedUpAmount = tryPickupAmount;
 		}
 	}
 	return pickedUpAmount;
