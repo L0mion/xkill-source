@@ -172,7 +172,8 @@ void CollisionManager::collision_pickupable(Entity* entity1, Entity* entity2)
 					case XKILL_Enums::PickupableType::AMMUNITION_BULLET:
 						{
 							AttributePtr<Attribute_WeaponStats> weaponStatsAttribute = ptr_player->ptr_weaponStats;
-							int pickedUpAmount = getPickedUpAmount(weaponStatsAttribute->ammunition[XKILL_Enums::AmmunitionType::BULLET].currentTotalNrOfShots, weaponStatsAttribute->ammunition[XKILL_Enums::AmmunitionType::BULLET].initialTotalNrOfShots, ptr_pickupable->amount);
+							Ammunition* ammo = &weaponStatsAttribute->ammunition[XKILL_Enums::AmmunitionType::BULLET];
+							int pickedUpAmount = getPickedUpAmount(ammo->currentTotalNrOfShots, ammo->maxTotalNrOfShots, ptr_pickupable->amount);
 							if(pickedUpAmount > 0)
 							{
 								weaponStatsAttribute->ammunition[XKILL_Enums::AmmunitionType::BULLET].currentTotalNrOfShots += pickedUpAmount;
@@ -186,7 +187,8 @@ void CollisionManager::collision_pickupable(Entity* entity1, Entity* entity2)
 					case XKILL_Enums::PickupableType::AMMUNITION_EXPLOSIVE:
 						{
 							AttributePtr<Attribute_WeaponStats> weaponStatsAttribute = ptr_player->ptr_weaponStats;
-							int pickedUpAmount = getPickedUpAmount(weaponStatsAttribute->ammunition[XKILL_Enums::AmmunitionType::EXPLOSIVE].currentTotalNrOfShots, weaponStatsAttribute->ammunition[XKILL_Enums::AmmunitionType::EXPLOSIVE].initialTotalNrOfShots, ptr_pickupable->amount);
+							Ammunition* ammo = &weaponStatsAttribute->ammunition[XKILL_Enums::AmmunitionType::EXPLOSIVE];
+							int pickedUpAmount = getPickedUpAmount(ammo->currentTotalNrOfShots, ammo->maxTotalNrOfShots, ptr_pickupable->amount);
 							if(pickedUpAmount > 0)
 							{
 								weaponStatsAttribute->ammunition[XKILL_Enums::AmmunitionType::EXPLOSIVE].currentTotalNrOfShots += pickedUpAmount;
@@ -200,7 +202,8 @@ void CollisionManager::collision_pickupable(Entity* entity1, Entity* entity2)
 					case XKILL_Enums::PickupableType::AMMUNITION_SCATTER:
 						{
 							AttributePtr<Attribute_WeaponStats> weaponStatsAttribute = ptr_player->ptr_weaponStats;
-							int pickedUpAmount = getPickedUpAmount(weaponStatsAttribute->ammunition[XKILL_Enums::AmmunitionType::SCATTER].currentTotalNrOfShots, weaponStatsAttribute->ammunition[XKILL_Enums::AmmunitionType::SCATTER].initialTotalNrOfShots, ptr_pickupable->amount);
+							Ammunition* ammo = &weaponStatsAttribute->ammunition[XKILL_Enums::AmmunitionType::SCATTER];
+							int pickedUpAmount = getPickedUpAmount(ammo->currentTotalNrOfShots, ammo->maxTotalNrOfShots, ptr_pickupable->amount);
 							if(pickedUpAmount > 0)
 							{
 								weaponStatsAttribute->ammunition[XKILL_Enums::AmmunitionType::SCATTER].currentTotalNrOfShots += pickedUpAmount;
@@ -219,7 +222,7 @@ void CollisionManager::collision_pickupable(Entity* entity1, Entity* entity2)
 							SEND_EVENT(&Event_HackActivated(time, XKILL_Enums::HackType::SPEEDHACK, ptr_player));
 
 							// Post HUD message
-							{Event_PostHudMessage e("", ptr_player); e.setHtmlMessage("Picked up", "Speedhack", "", "+" + Converter::IntToStr(ptr_pickupable->amount) + "seconds"); SEND_EVENT(&e);}
+							{Event_PostHudMessage e("", ptr_player); e.setHtmlMessage("Picked up", "Speedhack", "", "+" + Converter::IntToStr(ptr_pickupable->amount) + " seconds"); SEND_EVENT(&e);}
 							break;
 						}
 					case XKILL_Enums::PickupableType::HACK_JETHACK:
@@ -230,7 +233,7 @@ void CollisionManager::collision_pickupable(Entity* entity1, Entity* entity2)
 							SEND_EVENT(&Event_HackActivated(time, XKILL_Enums::HackType::JETHACK, ptr_player));
 
 							// Post HUD message
-							{Event_PostHudMessage e("", ptr_player); e.setHtmlMessage("Picked up", "Jethack", "", "+" + Converter::IntToStr(ptr_pickupable->amount) + "seconds"); SEND_EVENT(&e);}
+							{Event_PostHudMessage e("", ptr_player); e.setHtmlMessage("Picked up", "Jethack", "", "+" + Converter::IntToStr(ptr_pickupable->amount) + " seconds"); SEND_EVENT(&e);}
 							break;
 						}
 					}
@@ -352,10 +355,14 @@ int CollisionManager::getPickedUpAmount(int currentAmount, int maxAmount, int tr
 	if(currentAmount < maxAmount) //Pickup if currently below maximum amount
 	{
 		int pickupFullAmount = currentAmount + tryPickupAmount;
-		if(pickupFullAmount > maxAmount)
+		if(pickupFullAmount > maxAmount) //Max capping
 		{
 			int difference = pickupFullAmount - maxAmount;
 			pickedUpAmount = tryPickupAmount - difference;
+		}
+		else //Pickup
+		{
+			pickedUpAmount = tryPickupAmount;
 		}
 	}
 	return pickedUpAmount;

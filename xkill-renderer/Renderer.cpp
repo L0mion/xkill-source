@@ -575,6 +575,8 @@ void Renderer::renderInstance(unsigned int meshID, InstancedData* instance, bool
 
 	//Fetch renderer representation of model.
 	ModelD3D* modelD3D	= managementModel_->getModelD3D(meshID, device);
+	if(modelD3D == nullptr)
+		return;
 
 	ShadingDesc shadingDesc = deriveShadingDesc(modelD3D->getVertexType(), shadowmap);
 	setShadingDesc(shadingDesc);
