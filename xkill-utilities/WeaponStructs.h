@@ -8,7 +8,8 @@ struct Attribute_WeaponStats;
 //! Stores all data related to ammunition
 struct DLL_U Ammunition
 {
-	unsigned int initialTotalNrOfShots;		//!< Total number of shots that can be fired.
+	unsigned int maxTotalNrOfShots;			//!< The maximum number of shots that can be carried of this type of ammunition.
+	unsigned int initialTotalNrOfShots;		//!< Number of shots a player spawns with.
 	unsigned int currentTotalNrOfShots;		//!< Current amount of total number of shots.
 	float speed;							//!< Velocity of the PhysicsAttribute when creating a projectile.
 	float damage;							//!< Damage value of the damage attribute of each projectile created when creating a projectile from this weapon.
@@ -16,8 +17,8 @@ struct DLL_U Ammunition
 	float spreadConeRadius;					//!< Randomizes the orientation of each projectile's velocity vector inside this cone.
 	float velocityVariation;				//!< Randomizes the speed of a projectile around a given range. If velocityVariation is 4, speed will be randomized in the range 2<->6. If 1, randomization range till be 0.5<->1.5.
 	float displacementSphereRadius;			//!< Randomizes the position of each projectile inside this sphere.
-	bool canShootWhileReloading;			//!< Can you shoot halfway through reloading this ammunition
-	bool isReloading;						//!< Are we reloading the weapon
+	bool canShootWhileReloading;			//!< Can you shoot halfway through reloading this ammunition?
+	bool isReloading;						//!< Are we reloading the weapon?
 
 	bool explosive;							//!< Determines if projectiles created from this weapon will explode on impact.
 	float explosionSphereInitialRadius;		//!< The initial radius of an explosion sphere created from this projectile

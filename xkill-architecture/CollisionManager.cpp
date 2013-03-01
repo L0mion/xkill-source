@@ -164,7 +164,8 @@ void CollisionManager::collision_pickupable(Entity* entity1, Entity* entity2)
 					case XKILL_Enums::PickupableType::AMMUNITION_BULLET:
 						{
 							AttributePtr<Attribute_WeaponStats> weaponStatsAttribute = ptr_player->ptr_weaponStats;
-							weaponStatsAttribute->ammunition[XKILL_Enums::AmmunitionType::BULLET].currentTotalNrOfShots = getAmountAfterPickup(weaponStatsAttribute->ammunition[XKILL_Enums::AmmunitionType::BULLET].currentTotalNrOfShots, weaponStatsAttribute->ammunition[XKILL_Enums::AmmunitionType::BULLET].initialTotalNrOfShots, ptr_pickupable->amount);
+							Ammunition* ammo = &weaponStatsAttribute->ammunition[XKILL_Enums::AmmunitionType::BULLET];
+							ammo->currentTotalNrOfShots = getAmountAfterPickup(ammo->currentTotalNrOfShots, ammo->maxTotalNrOfShots, ptr_pickupable->amount);
 							pickedUp = true;
 							SEND_EVENT(&Event_PostHudMessage("Picked up Bullet Ammunition (+" + str_amount + ")", ptr_player));
 							break;
@@ -172,7 +173,8 @@ void CollisionManager::collision_pickupable(Entity* entity1, Entity* entity2)
 					case XKILL_Enums::PickupableType::AMMUNITION_EXPLOSIVE:
 						{
 							AttributePtr<Attribute_WeaponStats> weaponStatsAttribute = ptr_player->ptr_weaponStats;
-							weaponStatsAttribute->ammunition[XKILL_Enums::AmmunitionType::EXPLOSIVE].currentTotalNrOfShots = getAmountAfterPickup(weaponStatsAttribute->ammunition[XKILL_Enums::AmmunitionType::EXPLOSIVE].currentTotalNrOfShots, weaponStatsAttribute->ammunition[XKILL_Enums::AmmunitionType::EXPLOSIVE].initialTotalNrOfShots, ptr_pickupable->amount);
+							Ammunition* ammo = &weaponStatsAttribute->ammunition[XKILL_Enums::AmmunitionType::EXPLOSIVE];
+							ammo->currentTotalNrOfShots = getAmountAfterPickup(ammo->currentTotalNrOfShots, ammo->maxTotalNrOfShots, ptr_pickupable->amount);			
 							pickedUp = true;
 							SEND_EVENT(&Event_PostHudMessage("Picked up Explosive Ammunition (+" + str_amount + ")", ptr_player));
 							break;
@@ -180,7 +182,8 @@ void CollisionManager::collision_pickupable(Entity* entity1, Entity* entity2)
 					case XKILL_Enums::PickupableType::AMMUNITION_SCATTER:
 						{
 							AttributePtr<Attribute_WeaponStats> weaponStatsAttribute = ptr_player->ptr_weaponStats;
-							weaponStatsAttribute->ammunition[XKILL_Enums::AmmunitionType::SCATTER].currentTotalNrOfShots = getAmountAfterPickup(weaponStatsAttribute->ammunition[XKILL_Enums::AmmunitionType::SCATTER].currentTotalNrOfShots, weaponStatsAttribute->ammunition[XKILL_Enums::AmmunitionType::SCATTER].initialTotalNrOfShots, ptr_pickupable->amount);
+							Ammunition* ammo = &weaponStatsAttribute->ammunition[XKILL_Enums::AmmunitionType::SCATTER];
+							ammo->currentTotalNrOfShots = getAmountAfterPickup(ammo->currentTotalNrOfShots, ammo->maxTotalNrOfShots, ptr_pickupable->amount);
 							pickedUp = true;
 							SEND_EVENT(&Event_PostHudMessage("Picked up Scatter Ammunition (+" + str_amount + ")", ptr_player));
 							break;

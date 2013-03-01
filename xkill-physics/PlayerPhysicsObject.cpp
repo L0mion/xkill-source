@@ -50,7 +50,7 @@ void PlayerPhysicsObject::onUpdate(float delta)
 	for(unsigned int i=0;i<playerAttributes.size();i++)
 	{
 		AttributePtr<Attribute_Player> ptr_player = itrPlayer.at(playerAttributes.at(i));
-		
+		               
 		if(!ptr_player->detectedAsDead)
 		{
 			handleInput(delta);

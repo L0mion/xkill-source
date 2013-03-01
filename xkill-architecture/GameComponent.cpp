@@ -465,6 +465,11 @@ void GameComponent::onUpdate(float delta)
 
 			float reloadTimeFraction = (1.0f - (static_cast<float>(firingMode->nrOfShotsLeftInClip[ammoIndex])/static_cast<float>(nrOfShotsToLoad)));
 			firingMode->reloadTimeLeft = reloadTimeFraction * firingMode->reloadTime;
+
+			if(ammo->canShootWhileReloading)
+			{
+
+			}
 		}
 
 		if(ammo->isReloading)
