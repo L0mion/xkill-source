@@ -102,7 +102,7 @@ void ScoreComponent::schedulerScoreCounting(float delta)
 				if(executingPlayer->priority > 0)  // The player still has some priority so give it execution time
 				{
 					executingPlayer->priority--;
-					executingPlayer->totalExecutionTime++;
+					executingPlayer->cycles++;
 				}
 				else								// The player doesn't have any priority left so leave execution mode
 				{
@@ -189,7 +189,7 @@ void ScoreComponent::schedulerScoreCounting(float delta)
 
 	while(itrPlayer.hasNext())
 	{
-		if(itrPlayer.getNext()->totalExecutionTime >= settings->cycleLimit)
+		if(itrPlayer.getNext()->cycles >= settings->cycleLimit)
 		{
 			SEND_EVENT(&Event(EVENT_GAMEOVER));
 		}
