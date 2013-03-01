@@ -494,7 +494,7 @@ void GameComponent::onUpdate(float delta)
 
 			if(ammo->canShootWhileReloading)
 			{
-
+				firingMode->reloadTimeLeft += firingMode->reloadTime * 0.1f;
 			}
 		}
 

@@ -202,7 +202,7 @@ void CollisionManager::collision_pickupable(Entity* entity1, Entity* entity2)
 					case XKILL_Enums::PickupableType::AMMUNITION_SCATTER:
 						{
 							AttributePtr<Attribute_WeaponStats> weaponStatsAttribute = ptr_player->ptr_weaponStats;
-							Ammunition* ammo = &weaponStatsAttribute->ammunition[XKILL_Enums::AmmunitionType::BULLET];
+							Ammunition* ammo = &weaponStatsAttribute->ammunition[XKILL_Enums::AmmunitionType::SCATTER];
 							int pickedUpAmount = getPickedUpAmount(ammo->currentTotalNrOfShots, ammo->maxTotalNrOfShots, ptr_pickupable->amount);
 							if(pickedUpAmount > 0)
 							{
