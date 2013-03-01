@@ -525,10 +525,10 @@ void Attribute_InputDevice::saveTo( DataItemList* list )
 int Attribute_Player::nextId = 0;
 Attribute_Player::Attribute_Player()
 {
-	id = nextId++;
+	//id = nextId++;
 	priority = 0;
 	cycleSteals = 0;
-	totalExecutionTime = 0;
+	cycles = 0;
 	respawnTimer.setStartTime(5.0f);
 	timeSinceLastDamageTaken = 100.0f;
 	jetpack = false;
@@ -538,6 +538,7 @@ Attribute_Player::Attribute_Player()
 	canSprint = true;
 	sprintRechargeRate = 0.2f;
 	executing = false;
+	playerName = "NaN";
 
 	walkSpeed = 5.0f;
 	sprintSpeed = walkSpeed*2;
@@ -558,10 +559,10 @@ void Attribute_Player::saveTo( DataItemList* list )
 	list->get(&ptr_camera);
 	list->get(&ptr_health);
 	list->get(&ptr_weaponStats);
-	list->get(&id);
+	//list->get(&id);
 	list->get(&priority);
 	list->get(&cycleSteals);
-	list->get(&totalExecutionTime);
+	list->get(&cycles);
 	list->get(&currentSpeed);
 	list->get(&walkSpeed);
 	list->get(&sprintSpeed);
@@ -576,10 +577,10 @@ DataItemList* Attribute_Player::getDataList()
 	list->add(&ptr_camera,			"ptr_camera");
 	list->add(&ptr_health,			"ptr_health");
 	list->add(&ptr_weaponStats,		"ptr_weaponStats");
-	list->add(id,					"id");
+	//list->add(id,					"id");
 	list->add(priority,				"priority");
 	list->add(cycleSteals,			"cycleSteals");
-	list->add(totalExecutionTime,	"totalExecutionTime");
+	list->add(cycles,	"totalExecutionTime");
 	list->add(currentSpeed,			"priority");
 	list->add(walkSpeed,			"walkSpeed");
 	list->add(sprintSpeed,			"sprintSpeed");

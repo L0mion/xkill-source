@@ -452,9 +452,9 @@ void GameComponent::onUpdate(float delta)
 					amount = 10;
 					break;
 				case XKILL_Enums::PickupableType::HACK_SPEEDHACK:
-					amount = 5000;											//Will be handled as milliseconds
+					amount = 5;		//seconds
 				case XKILL_Enums::PickupableType::HACK_JETHACK:
-					amount = 5000;											//Will be handled as milliseconds
+					amount = 5;		//seconds
 				}
 
 				//Each pickupable knows it pickupablesSpawnPoint creator
@@ -501,6 +501,11 @@ void GameComponent::onUpdate(float delta)
 
 			float reloadTimeFraction = (1.0f - (static_cast<float>(firingMode->nrOfShotsLeftInClip[ammoIndex])/static_cast<float>(nrOfShotsToLoad)));
 			firingMode->reloadTimeLeft = reloadTimeFraction * firingMode->reloadTime;
+
+			if(ammo->canShootWhileReloading)
+			{
+				firingMode->reloadTimeLeft += firingMode->reloadTime * 0.1f;
+			}
 		}
 
 		if(ammo->isReloading)

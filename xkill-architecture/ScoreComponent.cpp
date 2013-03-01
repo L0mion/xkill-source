@@ -33,7 +33,7 @@ bool ScoreComponent::init()
 	SAFE_DELETE(cycleTimer_);
 	SAFE_DELETE(gameTimer_);
 
-	schedulerTimer_ = new Timer(10.0f);
+	schedulerTimer_ = new Timer(60.0f);
 	cycleTimer_ = new Timer(1.0f);
 
 	gameTimer_ = new Timer(settings->timeLimit);
@@ -102,7 +102,7 @@ void ScoreComponent::schedulerScoreCounting(float delta)
 				if(executingPlayer->priority > 0)  // The player still has some priority so give it execution time
 				{
 					executingPlayer->priority--;
-					executingPlayer->totalExecutionTime++;
+					executingPlayer->cycles++;
 				}
 				else								// The player doesn't have any priority left so leave execution mode
 				{
@@ -186,14 +186,14 @@ void ScoreComponent::schedulerScoreCounting(float delta)
 				// Post hud messages
 				{Event_PostHudMessage e("", ptr_player); e.setHtmlMessage("Now running in", "Kernel Mode"); SEND_EVENT(&e);}
 				{Event_PostHudMessage e("", ptr_player); e.setHtmlMessage("Chosen by Scheduler"); SEND_EVENT(&e);}
-				{Event_PostHudMessage e("", ptr_player); e.setHtmlMessage("", "???", "is executing"); e.receiver = Event_PostHudMessage::RECEIVER_ALL_BUT_SUBJECT; SEND_EVENT(&e);}
+				{Event_PostHudMessage e("", ptr_player); e.setHtmlMessage("", ptr_player->playerName, "is executing"); e.receiver = Event_PostHudMessage::RECEIVER_ALL_BUT_SUBJECT; SEND_EVENT(&e);}
 			}
 		}
 	}
 
 	while(itrPlayer.hasNext())
 	{
-		if(itrPlayer.getNext()->totalExecutionTime >= settings->cycleLimit)
+		if(itrPlayer.getNext()->cycles >= settings->cycleLimit)
 		{
 			SEND_EVENT(&Event(EVENT_GAMEOVER));
 		}

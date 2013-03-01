@@ -75,6 +75,7 @@ void MutatorSettings::initStandardAmmunition()
 	ammo->spreadConeRadius					= 0.0f;
 	ammo->initialTotalNrOfShots				= 100;
 	ammo->currentTotalNrOfShots				= ammo->initialTotalNrOfShots;
+	ammo->maxTotalNrOfShots					= 100;
 	ammo->velocityVariation					= 0.0f;
 	ammo->canShootWhileReloading			= false;
 
@@ -93,6 +94,7 @@ void MutatorSettings::initStandardAmmunition()
 	ammo->spreadConeRadius					= 0.1f;
 	ammo->initialTotalNrOfShots				= 20;
 	ammo->currentTotalNrOfShots				= ammo->initialTotalNrOfShots;
+	ammo->maxTotalNrOfShots					= 100;
 	ammo->velocityVariation					= 0.5f;
 	ammo->canShootWhileReloading			= true;
 
@@ -109,8 +111,9 @@ void MutatorSettings::initStandardAmmunition()
 	ammo->displacementSphereRadius			= 0.0f;
 	ammo->speed								= 5.0f;
 	ammo->spreadConeRadius					= 0.0f;
-	ammo->initialTotalNrOfShots				= 100;
+	ammo->initialTotalNrOfShots				= 20;
 	ammo->currentTotalNrOfShots				= ammo->initialTotalNrOfShots;
+	ammo->maxTotalNrOfShots					= 100;
 	ammo->velocityVariation					= 0.0f;
 	ammo->canShootWhileReloading			= false;
 }

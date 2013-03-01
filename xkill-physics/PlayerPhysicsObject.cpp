@@ -55,7 +55,7 @@ void PlayerPhysicsObject::onUpdate(float delta)
 	for(unsigned int i=0;i<playerAttributes.size();i++)
 	{
 		AttributePtr<Attribute_Player> ptr_player = itrPlayer.at(playerAttributes.at(i));
-		
+		               
 		if(!ptr_player->detectedAsDead)
 		{
 			handleInput(delta);
@@ -71,10 +71,10 @@ void PlayerPhysicsObject::onUpdate(float delta)
 void PlayerPhysicsObject::hover(float delta, float hoverHeight)
 {
 	float deltaHeightMaximum = 0.0f;
-	btVector3 offset[] = {btVector3( 0.19f, 0.0f,  0.19f),
-						  btVector3( 0.19f, 0.0f, -0.19f),
-						  btVector3(-0.19f, 0.0f,  0.19f),
-						  btVector3(-0.19f, 0.0f, -0.19f)};
+	btVector3 offset[] = {btVector3( 0.15f, 0.0f,  0.15f),
+						  btVector3( 0.15f, 0.0f, -0.15f),
+						  btVector3(-0.15f, 0.0f,  0.15f),
+						  btVector3(-0.15f, 0.0f, -0.15f)};
 	for(unsigned int i=0; i<4; i++)
 	{
 		btVector3 from = btVector3(0.0f, 0.0f, 0.0f);
