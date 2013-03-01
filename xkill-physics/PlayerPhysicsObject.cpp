@@ -37,7 +37,8 @@ bool PlayerPhysicsObject::subClassSpecificInitHook()
 {
 	forceActivationState(DISABLE_DEACTIVATION); //Prevent the player from getting stuck when standing still
 	//setCollisionFlags(getCollisionFlags() | btCollisionObject::CF_KINEMATIC_OBJECT);
-	Float4 q= itrSpatial.at(attributeIndex_)->rotation;
+	
+	Float4 q = itrPhysics_3.at(attributeIndex_)->ptr_spatial->rotation;
 	yaw_ = -atan2(2*q.y*q.w-2*q.x*q.z , 1 - 2*q.y*q.y - 2*q.z*q.z);
 	return true;
 }

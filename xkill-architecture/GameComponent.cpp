@@ -304,30 +304,34 @@ void GameComponent::onUpdate(float delta)
 				//--------------------------------------------------------------------------------------
 				
 				//Point camera towards center
-				ptr_camera->up = Float3(0.0f, 1.0f, 0.0f);
-				ptr_camera->look = Float3(-ptr_position->position.x, 0.0f, -ptr_position->position.z);
-				ptr_camera->look = ptr_camera->look.normalize();
-				ptr_camera->right = ptr_camera->up.cross(ptr_camera->look);
+				Float3 pos2d(-ptr_position->position.x, 0.0f, -ptr_position->position.z);
+				if(pos2d.length() > 0.1)
+				{
+					ptr_camera->up = Float3(0.0f, 1.0f, 0.0f);
+					ptr_camera->look = Float3(-ptr_position->position.x, 0.0f, -ptr_position->position.z).normalize();
+					ptr_camera->right = ptr_camera->up.cross(ptr_camera->look);
 				
-				DirectX::XMVECTOR eye,lookat,up,quat;
-				DirectX::XMMATRIX rotation;
-				DirectX::XMFLOAT4 quaternion;
+					DirectX::XMVECTOR eye,lookat,up,quat;
+					DirectX::XMMATRIX rotation;
+					DirectX::XMFLOAT4 quaternion;
 				
-				up = DirectX::XMLoadFloat3(&DirectX::XMFLOAT3(0,1,0));
-				eye = DirectX::XMLoadFloat3(&DirectX::XMFLOAT3(ptr_position->position.asFloat()));
-				lookat = DirectX::XMLoadFloat3(&DirectX::XMFLOAT3(0,0,0));
+					up = DirectX::XMLoadFloat3(&DirectX::XMFLOAT3(0,1,0));
+					eye = DirectX::XMLoadFloat3(&DirectX::XMFLOAT3(ptr_position->position.asFloat()));
+					lookat = DirectX::XMLoadFloat3(&DirectX::XMFLOAT3(0,0,0));
 				
-				rotation = DirectX::XMMatrixLookAtLH(eye,lookat,up);
-				quat = DirectX::XMQuaternionRotationMatrix(rotation);
-				DirectX::XMStoreFloat4(&quaternion,quat);
+					rotation = DirectX::XMMatrixLookAtLH(eye,lookat,up);
+					quat = DirectX::XMQuaternionRotationMatrix(rotation);
+					DirectX::XMStoreFloat4(&quaternion,quat);
 
-				ptr_spatial->rotation = Float4(quaternion.x,quaternion.y,quaternion.z,quaternion.w);
-
-				//ptr_spatial->rotation = Float4(0.0f, 1.0f, 1.0f, 1.0f).normalize();
-				/*ptr_spatial->rotation = Float4(0.0f, 0.0f, 0.0f, 1.0f);
-				ptr_camera->up = Float3(0.0f, 1.0f, 0.0f);
-				ptr_camera->right = Float3(1.0f, 0.0f, 0.0f);
-				ptr_camera->look = Float3(0.0f, 0.0f, 1.0f);*/
+					ptr_spatial->rotation = Float4(quaternion.x,quaternion.y,quaternion.z,quaternion.w);
+				}
+				else
+				{
+					ptr_spatial->rotation = Float4(0.0f, 0.0f, 0.0f, 1.0f);
+					ptr_camera->up = Float3(0.0f, 1.0f, 0.0f);
+					ptr_camera->right = Float3(1.0f, 0.0f, 0.0f);
+					ptr_camera->look = Float3(0.0f, 0.0f, 1.0f);
+				}
 				ptr_physics->reloadDataIntoBulletPhysics = true;
 				
 				ptr_health->health = ptr_health->maxHealth; // restores player health
@@ -597,6 +601,8 @@ void GameComponent::event_EndDeathmatch(Event_EndDeathmatch* e)
 		SEND_EVENT(&Event_RemoveEntity(itrLightSpot.ownerId()));
 	}
 
+	
+
 	// Show
 }
 
@@ -778,6 +784,11 @@ void GameComponent::event_UnloadLevel()
 	{
 		SAFE_DELETE(*it);
 	}
+	/*while(itrMesh.hasNext())
+	{
+		itrMesh.getNext();
+		SEND_EVENT(&Event_RemoveEntity(itrMesh.ownerId()));
+	}*/
 
 	levelEvents_.clear();
 }
