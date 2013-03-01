@@ -143,16 +143,15 @@ public:
 
 		CREATE_ATTRIBUTE(ptr_ray, Attribute_Ray, ray, entity);
 		createLaserAutomaticSniperExecutionRay(entity, ptr_ray);
-		/*
+		
 		CREATE_ATTRIBUTE(ptr_lightPoint, Attribute_Light_Point, lightPoint, entity);
 		ptr_lightPoint->ptr_position			= ptr_position;
 		Float4 color = Float4(1.0f, 0.0f, 0.0f, 1.0f);
 		ptr_lightPoint->lightPoint.ambient		= Float4(0.0f, 0.0f, 0.0f, 1.0f);
 		ptr_lightPoint->lightPoint.diffuse		= color;
 		ptr_lightPoint->lightPoint.specular		= color;
-		ptr_lightPoint->lightPoint.range		= 1.0f;
-		ptr_lightPoint->lightPoint.attenuation	= Float3(0.0f, 30.0f, 0.0f);
-		*/
+		ptr_lightPoint->lightPoint.range		= 4.0f;
+		ptr_lightPoint->lightPoint.attenuation	= Float3(0.0f, 2.0f, 0.0f);
 	}
 
 	AttributePtr<Attribute_Camera> createCamera(Entity* entity, AttributePtr<Attribute_Spatial> ptr_parent_spatial)
