@@ -152,10 +152,17 @@ void ScoreComponent::schedulerScoreCounting(float delta)
 			{
 				// Punish them all
 				schedulerTimer_->resetTimer();
+				
+				// Post hud message
+				{Event_PostHudMessage e("<p align='center'><span style='font-size:15pt;'>NullProcess is executing</span><br><span style='color: rgba(255, 0, 0, 255); font-size:35pt;'>Punish them all</span></p>"); e.receiver = Event_PostHudMessage::RECEIVER_ALL; e.setStyle(Event_PostHudMessage::STYLE_SUBTILE); SEND_EVENT(&e);}
+				
 			}
 			else if(topPriorityIsTied)	// Two or more players are tied for the ammount of priority
 			{
 				// Do nothing, wait until a single player is in the lead
+
+				// Post hud message
+				{Event_PostHudMessage e("Two players have tied priority"); e.receiver = Event_PostHudMessage::RECEIVER_ALL;  e.setStyle(Event_PostHudMessage::STYLE_SUBTILE); SEND_EVENT(&e);}
 			}
 			else						// Execute the player with highest priority
 			{
@@ -163,11 +170,18 @@ void ScoreComponent::schedulerScoreCounting(float delta)
 				cycleTimer_->resetTimer();
 				executionMode_ = true;
 
-				AttributePtr<Attribute_Player> player = itrPlayer.at(executingPlayerIndex_);
-				player->executing = true;
+				AttributePtr<Attribute_Player> ptr_player = itrPlayer.at(executingPlayerIndex_);
+				ptr_player->executing = true;
 				DEBUGPRINT("Player with attribute index " << executingPlayerIndex_ << " is executing. Beware of his laserous eyes");
+
+
 				// Send event to notify other components that we're entering execution mode
 				SEND_EVENT(&Event_PlayerExecuting(executingPlayerIndex_));
+
+				// Post hud messages
+				{Event_PostHudMessage e("", ptr_player); e.setHtmlMessage("Now running in", "Kernel Mode"); SEND_EVENT(&e);}
+				{Event_PostHudMessage e("", ptr_player); e.setHtmlMessage("Chosen by Scheduler"); SEND_EVENT(&e);}
+				{Event_PostHudMessage e("", ptr_player); e.setHtmlMessage("", "???", "is executing"); e.receiver = Event_PostHudMessage::RECEIVER_ALL_BUT_SUBJECT; SEND_EVENT(&e);}
 			}
 		}
 	}

@@ -123,9 +123,26 @@ void MainWindow::keyPressEvent( QKeyEvent* e )
 	if((e->key()==Qt::Key_F2))
 		SEND_EVENT(&Event(EVENT_STARTGAME));
 
-	// Skip menu
 	if((e->key()==Qt::Key_1))
-		SEND_EVENT(&Event_PostHudMessage("Hello world"));
+	{Event_PostHudMessage e(""); e.setHtmlMessage("Picked up", "Bullet Ammunition", "50"); SEND_EVENT(&e);}
+	if((e->key()==Qt::Key_2))
+	{Event_PostHudMessage e("<p align='center'><span style='font-size:15pt;'>NullProcess is executing</span><br><span style='color: rgba(255, 0, 0, 255); font-size:35pt;'>Punish them all</span></p>"); e.receiver = Event_PostHudMessage::RECEIVER_ALL; e.setStyle(Event_PostHudMessage::STYLE_SUBTILE); SEND_EVENT(&e);}
+	if((e->key()==Qt::Key_3))
+	{
+		Event_PostHudMessage e("");
+		e.receiver = Event_PostHudMessage::RECEIVER_ALL;
+		e.setStyle(Event_PostHudMessage::STYLE_WARNING);
+		e.message = "Punish them all";
+		SEND_EVENT(&e);
+	}
+	if((e->key()==Qt::Key_4))
+	{
+		Event_PostHudMessage e("");
+		e.setHtmlMessage("You terminated", "Blarrhgh", "+2 priority");
+		e.receiver = Event_PostHudMessage::RECEIVER_ALL;
+		SEND_EVENT(&e);
+	}
+
 
 	//
 	// Menu controls during in-game
@@ -137,6 +154,13 @@ void MainWindow::keyPressEvent( QKeyEvent* e )
 		{
 		case Qt::Key_Escape:
 			SEND_EVENT(&Event(EVENT_ENDGAME));
+			break;
+		case Qt::Key_F11:
+			{
+				static bool hideHud = false;
+				hideHud = !hideHud;
+				SEND_EVENT(&Event_EnableHud(!hideHud));
+			}
 			break;
 		default:
 			break;

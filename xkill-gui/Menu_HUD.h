@@ -19,17 +19,14 @@ private:
 	QLabel* message;
 
 public:
-	HudMessage(Event_PostHudMessage* e, QWidget* parent)
-	{
-		message = new QLabel(e->message.c_str());
-
-		message->setParent(parent);
-		lifetime = 2.0f;
-		message->show();
-	}
+	HudMessage(Event_PostHudMessage* e, QWidget* parent);
 	~HudMessage()
 	{
 		delete message;
+	}
+	int getHeight()
+	{
+		return message->height();
 	}
 	void move(Float2 position)
 	{
@@ -93,33 +90,7 @@ public:
 		}
 	}
 
-	void addMessage(Event_PostHudMessage* e)
-	{
-		// Ignore messages aimed at other players
-		if(splitScreen->ptr_player != e->ptr_subject_player)
-			return;
-
-		// Limit simultaneous show messages 
-		// to 5 to not overwhelm the player
-		if(stack.count() + 1 > 5)
-			removeTopMessage();
-
-		// Add message to stack
-		stack.push(new HudMessage(e, parent));
-
-		// Show new messages above old messages
-		int numStacks = stack.count();
-		for(int i=0; i<numStacks; i++)
-		{
-			int spacing = 20;
-
-			Float2 newPos;
-			newPos.x = position.x;
-			newPos.y = position.y + (numStacks - i)*spacing + spacing*3.8f;
-
-			stack.at(i)->move(newPos);
-		}
-	}
+	void addMessage(Event_PostHudMessage* e);
 
 	void removeTopMessage()
 	{
