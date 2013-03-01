@@ -438,9 +438,9 @@ void GameComponent::onUpdate(float delta)
 					amount = 10;
 					break;
 				case XKILL_Enums::PickupableType::HACK_SPEEDHACK:
-					amount = 5000;											//Will be handled as milliseconds
+					amount = 5;		//seconds
 				case XKILL_Enums::PickupableType::HACK_JETHACK:
-					amount = 5000;											//Will be handled as milliseconds
+					amount = 5;		//seconds
 				}
 
 				//Each pickupable knows it pickupablesSpawnPoint creator
