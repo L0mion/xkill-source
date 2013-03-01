@@ -230,12 +230,17 @@ HRESULT ManagementSS::initSSRandom(ID3D11Device* device)
 	D3D11_SAMPLER_DESC ssDesc;
 	ZeroMemory(&ssDesc, sizeof(ssDesc));
 	ssDesc.Filter			= D3D11_FILTER_MIN_MAG_LINEAR_MIP_POINT;
-	ssDesc.AddressU			= D3D11_TEXTURE_ADDRESS_CLAMP;
-	ssDesc.AddressV			= D3D11_TEXTURE_ADDRESS_CLAMP;
-	ssDesc.AddressW			= D3D11_TEXTURE_ADDRESS_CLAMP;
+	ssDesc.AddressU			= D3D11_TEXTURE_ADDRESS_WRAP;
+	ssDesc.AddressV			= D3D11_TEXTURE_ADDRESS_WRAP;
+	ssDesc.AddressW			= D3D11_TEXTURE_ADDRESS_WRAP;
 	ssDesc.ComparisonFunc	= D3D11_COMPARISON_NEVER;
 	ssDesc.MinLOD			= 0;
 	ssDesc.MaxLOD			= D3D11_FLOAT32_MAX;
+
+	ssDesc.BorderColor[0] = 0.0f;
+	ssDesc.BorderColor[1] = 0.0f;
+	ssDesc.BorderColor[2] = 0.0f;
+	ssDesc.BorderColor[3] = 0.0f;
 
 	hr = device->CreateSamplerState(&ssDesc, &ssRandom_);
 	if(FAILED(hr))

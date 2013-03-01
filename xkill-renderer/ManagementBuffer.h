@@ -32,7 +32,7 @@ static const BUFFER_FORMAT BUFFER_FORMAT_NORMAL		= R16_G16_B16_A16__FLOAT;
 static const BUFFER_FORMAT BUFFER_FORMAT_MATERIAL	= R16_G16_B16_A16__FLOAT;
 static const BUFFER_FORMAT BUFFER_FORMAT_GLOW_HIGH	= R8_G8_B8_A8__UNORM;
 static const BUFFER_FORMAT BUFFER_FORMAT_GLOW_LOW	= R8_G8_B8_A8__UNORM;
-static const BUFFER_FORMAT BUFFER_FORMAT_SSAO		= R16__FLOAT;
+static const BUFFER_FORMAT BUFFER_FORMAT_SSAO		= R16_G16_B16_A16__FLOAT;//R16__FLOAT;
 static const BUFFER_FORMAT BUFFER_FORMAT_RANDOM		= R8_G8_B8_A8__UNORM;
 
 static const unsigned int SHADER_REGISTER_DOWNSAMPLE_INPUT = 3;
@@ -47,7 +47,7 @@ static const unsigned int SHADOWMAP_DIM = 1024; //Remember to also set dimension
 
 static const unsigned int SSAO_MAP_SCREEN_RES_FACTOR = 2;
 
-static const unsigned int RANDOM_DIM = 64; //Lower this a lot.
+static const unsigned int RANDOM_DIM = 4; //Lower this a lot.
 
 enum SET_TYPE
 {

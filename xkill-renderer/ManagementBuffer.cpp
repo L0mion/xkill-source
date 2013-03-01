@@ -361,7 +361,7 @@ HRESULT ManagementBuffer::initRandom(ID3D11Device* device)
 	D3D11_SUBRESOURCE_DATA initData = { 0 };
 	initData.SysMemPitch = RANDOM_DIM * sizeof(DirectX::XMFLOAT4);
 
-	//Generate set of random values used to rotate offset kernel.
+	//Generate set of random, normalized, vectors used to rotate offset kernel.
 	//Z component is zero due to our kernel being oriented along the z-axis. 
 	//Because of that, we want the random rotation to be around that axis.
 	DirectX::XMFLOAT4 color[RANDOM_DIM * RANDOM_DIM];

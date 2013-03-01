@@ -15,7 +15,9 @@ SamplerState ssNormal	: register( s0 );
 SamplerState ssDepth	: register( s1 );
 SamplerState ssRandom	: register( s2 );
 
-#define SSAO_BLOCK_DIM 16
+#define SSAO_BLOCK_DIM	16
+#define RANDOM_DIM		4
+
 [numthreads(SSAO_BLOCK_DIM, SSAO_BLOCK_DIM, 1)]
 void CS_SSAO(
 	//uint3	blockID				: SV_GroupID,
@@ -40,19 +42,25 @@ void CS_SSAO(
 	normal.x *= 2.0f; normal.x -= 1.0f;
 	normal.y *= 2.0f; normal.y -= 1.0f;
 	normal.z *= 2.0f; normal.z -= 1.0f;
-	float3 occludeeNormal = mul(float4(normal, 0.0f), view).xyz;
+	float3 occludeeNormal = normalize(mul(float4(normal, 0.0f), view).xyz);
 
-	float3 random = bufferRandom.SampleLevel(ssNormal, texCoord, 0).rgb; //ssRandom tiles random-texture.
+	float2 scaleTile = float2((float)ssaoWidth / (float)RANDOM_DIM, (float)ssaoHeight / (float)RANDOM_DIM); //Move me into a constant buffer.
+	float3 random = bufferRandom.SampleLevel(ssRandom, texCoord * scaleTile, 0).rgb; //Tile random-texture using scaleTile.
 	random *= 2.0f; random -= 1.0f; //Map from [0, 1] to [-1, +1]
+	random = normalize(random);
 
-	//Use Grahm-Schmidt to establish a orthogonal change-of-basis matrix which will reorient offset kernel
-	//along occludeeNormal. This also does the random rotation.
+	//--------------
+	//Purpose of this next bit of code is to establish an orthonormal change-of-basis matrix which will
+	//re-orient offset-kernel along occludeeNormal. Incorporated here is also the random rotation of sample hemisphere.
+	//--------------
+	// * occludeeNormal and random make up the normalized two-dimensional basis V2.
+	// * Use Grahm-Schmidt to establish three-dimensional orthonormal basis V3.
 	float3 tangent		= normalize(random - occludeeNormal * dot(random, occludeeNormal));
 	float3 bitangent	= cross(occludeeNormal, tangent);
 	float3x3 tbn		= float3x3(tangent, bitangent, occludeeNormal);
 
 	float occlusion	= 0.0f;
-	float radius	= 50.0f;//occlusionRadius; //removeme
+	float radius	= 25.0f;//occlusionRadius; //removeme
 	for(unsigned int i = 0; i < 14; i++)
 	{
 		//Get view-space position of occluding point:
@@ -91,7 +99,7 @@ void CS_SSAO(
 		uint2(
 			threadIDDispatch.x + viewportTopX, 
 			threadIDDispatch.y + viewportTopY)] = 
-		random.x;
+		float4(occlusion, 1.0f, 1.0f, 1.0f);
 }
 
 #endif //XKILL_RENDERER_CS_SSAO_HLSL
