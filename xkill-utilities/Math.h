@@ -95,6 +95,7 @@ struct DLL_U Float3
 	Float3 rotateWithQuaternion(Float4 quaternion);
 
 	Float3 operator/(float scalar);
+	bool operator<(Float3 rhs) {return length() < rhs.length();} //!< used in std::sort
 };
 
 

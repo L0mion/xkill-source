@@ -118,7 +118,7 @@ void HacksComponent::handleHackActivatedEvent(Event_HackActivated* e)
 
 	if(!existed)
 	{
-		Timer* timer = new Timer(e->time);
+		Timer* timer = new Timer(e->time * 1000.0f); //Convert from s to ms
 		activeHacks_[e->hackType].push_back(new std::pair<Timer*, AttributePtr<Attribute_Player>>(timer, e->player));
 
 		DEBUGPRINT("New hack " << Converter::IntToStr(e->hackType) << " was created with value " << Converter::IntToStr(e->time));

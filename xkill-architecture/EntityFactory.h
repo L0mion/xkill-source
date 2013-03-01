@@ -325,6 +325,7 @@ public:
 		
 		CREATE_ATTRIBUTE(ptr_render, Attribute_Render, render, entity);
 		ptr_render->ptr_spatial = ptr_spatial;
+
 		switch (e->pickupableType)
 		{
 		case XKILL_Enums::PickupableType::AMMUNITION_BULLET:
@@ -359,6 +360,42 @@ public:
 		ptr_physics->mass = 10.0f;
 		ptr_physics->gravity = Float3(0.0f, -10.0f, 0.0f);
 		ptr_physics->meshID = ptr_render->meshID;
+
+		CREATE_ATTRIBUTE(ptr_lightPoint, Attribute_Light_Point, lightPoint, entity);
+		ptr_lightPoint->ptr_position			= ptr_position;
+
+		Float4 color;
+		
+		switch (e->pickupableType)
+		{
+		case XKILL_Enums::PickupableType::AMMUNITION_BULLET:
+			color = Float4(0.4f, 0.0f, 0.9f, 1.0f);
+			break;
+		case XKILL_Enums::PickupableType::AMMUNITION_SCATTER:
+			color = Float4(1.0f, 0.8f, 0.0f, 1.0f);
+			break;
+		case XKILL_Enums::PickupableType::AMMUNITION_EXPLOSIVE:
+			color = Float4(0.2f, 0.2f, 0.8f, 1.0f);
+			break;
+		case XKILL_Enums::PickupableType::MEDKIT:
+			color = Float4(1.0f, 0.1f, 0.1f, 1.0f);
+			break;
+		case XKILL_Enums::PickupableType::HACK_JETHACK:
+			color = Float4(0.5f, 1.0f, 0.5f, 1.0f);
+			break;
+		case XKILL_Enums::PickupableType::HACK_SPEEDHACK:
+			color = Float4(1.0f, 1.0f, 1.0f, 1.0f);
+			break;
+		default:
+			color = Float4(0.0f, 1.0f, 0.0f, 1.0f);
+			break;
+		}
+
+		ptr_lightPoint->lightPoint.ambient		= Float4(0.0f, 0.0f, 0.0f, 1.0f);
+		ptr_lightPoint->lightPoint.diffuse		= color;
+		ptr_lightPoint->lightPoint.specular		= color;
+		ptr_lightPoint->lightPoint.range		= 1.5f;
+		ptr_lightPoint->lightPoint.attenuation	= Float3(0.0f, 15.0f, 0.0f);
 
 		CREATE_ATTRIBUTE(ptr_pickupable, Attribute_Pickupable, pickupable, entity);
 		ptr_pickupable->ptr_position = ptr_position;
@@ -399,7 +436,7 @@ public:
 
 		CREATE_ATTRIBUTE(ptr_render, Attribute_Render, render, entity);
 		ptr_render->ptr_spatial = ptr_spatial;
-		ptr_render->meshID = 12;
+		ptr_render->meshID = XKILL_Enums::ModelId::EXPLOSION;
 
 		CREATE_ATTRIBUTE(ptr_explosionSphere, Attribute_ExplosionSphere, explosionSphere, entity);
 		ptr_explosionSphere->ptr_physics = ptr_physics;

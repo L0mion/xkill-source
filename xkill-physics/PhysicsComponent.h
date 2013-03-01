@@ -1,5 +1,5 @@
-#ifndef XKILL_PHYSICS_PHYSICSCOMPONENT2_H
-#define XKILL_PHYSICS_PHYSICSCOMPONENT2_H
+#ifndef XKILL_PHYSICS_PHYSICSCOMPONENT_H
+#define XKILL_PHYSICS_PHYSICSCOMPONENT_H
 
 #include <xkill-utilities/IObserver.h>
 #include <xkill-utilities/AttributePointer.h>
@@ -20,7 +20,8 @@ class PhysicsObject;
 class FrustumPhysicsObject;
 class CollisionObject;
 
-class Event_ClosestRayCast;
+class Event_ClosestHitRayCast;
+class Event_AllHitsRayCast;
 class debugDrawDispatcher;
 
 /*! \defgroup xkill-physics xkill-physics
@@ -57,9 +58,10 @@ public:
 	bool init();
 	void onUpdate(float delta);  //!< loop through all physics objects, synchronizeWithAttributes, update physicsobjects, update culling and step simulation
 	void onEvent(Event* e);  //!< handle events for the physicscomponent, mostly deletion/change events of physicsobjects
-	void handleEvent_ClosestRayCast(Event_ClosestRayCast* event_ClosestRayCast);
+	void handleEvent_ClosestRayCast(Event_ClosestHitRayCast* event_ClosestRayCast);
+	void handleEvent_AllHitsRayCast(Event_AllHitsRayCast* event_AllHitsRayCast);
 
-	void detectedCollisionsDuringStepSimulation(btScalar timeStep);  //!< Recieve and filter out collisions in simulation and translate accordingly
+	void detectedCollisionsDuringStepSimulation(btScalar timeStep);  //!< Receive and filter out collisions in simulation and translate accordingly
 };
 
 #endif

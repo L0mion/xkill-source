@@ -482,7 +482,7 @@ struct DLL_U Attribute_Player : public IAttribute
 	int id;						//!< The id of the player process. Used to identify a player attribute in GameComponent when firing projectiles.
 	int priority;				//!< Priority of the player process. Higher value means higher priority. The scheduler will choose the process with the highest priority for execution.
 	int cycleSteals;			//!< Total number of cycle steals for the player process. Cycle steals steal priority from other player processes.
-	int totalExecutionTime;		//!< Total execution time of the player process, used ased final score in the deathmatch. The game session winner is the player with the most total execution time as awarded by the scheduler.
+	int cycles;		//!< Total execution time of the player process, used ased final score in the deathmatch. The game session winner is the player with the most total execution time as awarded by the scheduler.
 	float currentSpeed;			//!< Speed used when changing position in "handleInput".
 	float walkSpeed;			//!< Speed when walking.
 	float sprintSpeed;			//!< Speed when sprinting.
@@ -490,10 +490,10 @@ struct DLL_U Attribute_Player : public IAttribute
 	float sprintTime;			//!< Time that can be spent sprinting
 	bool canSprint;				//!< Can the player sprint right now
 	float sprintRechargeRate;	//!< The rate at which the sprint will recharge
-	Timer respawnTimer;		//!< Keeps track of when a dead player should respawn
+	Timer respawnTimer;			//!< Keeps track of when a dead player should respawn
 	float timeSinceLastDamageTaken;		//!< Incrementing timer. Reset when taking damage.
-	bool jetpack;						//!< Use jetpack		
-	bool detectedAsDead;
+	bool jetpack;				//!< Use jetpack		
+	bool detectedAsDead;		//!< The player is dead
 	bool executing;				//!< True if selected by the scheduler (ScoreComponent.cpp)
 
 	DataItemList* getDataList();

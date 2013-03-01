@@ -83,6 +83,7 @@ namespace XKILL_Enums
 		PICKUPABLE_SPEEDHACK		= 14,
 
 		LASER						= 15,
+		EXPLOSION					= 16,
 
 		MODEL_LAST
 	};

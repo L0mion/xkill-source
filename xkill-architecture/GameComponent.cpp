@@ -304,30 +304,34 @@ void GameComponent::onUpdate(float delta)
 				//--------------------------------------------------------------------------------------
 				
 				//Point camera towards center
-				ptr_camera->up = Float3(0.0f, 1.0f, 0.0f);
-				ptr_camera->look = Float3(-ptr_position->position.x, 0.0f, -ptr_position->position.z);
-				ptr_camera->look = ptr_camera->look.normalize();
-				ptr_camera->right = ptr_camera->up.cross(ptr_camera->look);
+				Float3 pos2d(-ptr_position->position.x, 0.0f, -ptr_position->position.z);
+				if(pos2d.length() > 0.1)
+				{
+					ptr_camera->up = Float3(0.0f, 1.0f, 0.0f);
+					ptr_camera->look = Float3(-ptr_position->position.x, 0.0f, -ptr_position->position.z).normalize();
+					ptr_camera->right = ptr_camera->up.cross(ptr_camera->look);
 				
-				DirectX::XMVECTOR eye,lookat,up,quat;
-				DirectX::XMMATRIX rotation;
-				DirectX::XMFLOAT4 quaternion;
+					DirectX::XMVECTOR eye,lookat,up,quat;
+					DirectX::XMMATRIX rotation;
+					DirectX::XMFLOAT4 quaternion;
 				
-				up = DirectX::XMLoadFloat3(&DirectX::XMFLOAT3(0,1,0));
-				eye = DirectX::XMLoadFloat3(&DirectX::XMFLOAT3(ptr_position->position.asFloat()));
-				lookat = DirectX::XMLoadFloat3(&DirectX::XMFLOAT3(0,0,0));
+					up = DirectX::XMLoadFloat3(&DirectX::XMFLOAT3(0,1,0));
+					eye = DirectX::XMLoadFloat3(&DirectX::XMFLOAT3(ptr_position->position.asFloat()));
+					lookat = DirectX::XMLoadFloat3(&DirectX::XMFLOAT3(0,0,0));
 				
-				rotation = DirectX::XMMatrixLookAtLH(eye,lookat,up);
-				quat = DirectX::XMQuaternionRotationMatrix(rotation);
-				DirectX::XMStoreFloat4(&quaternion,quat);
+					rotation = DirectX::XMMatrixLookAtLH(eye,lookat,up);
+					quat = DirectX::XMQuaternionRotationMatrix(rotation);
+					DirectX::XMStoreFloat4(&quaternion,quat);
 
-				ptr_spatial->rotation = Float4(quaternion.x,quaternion.y,quaternion.z,quaternion.w);
-
-				//ptr_spatial->rotation = Float4(0.0f, 1.0f, 1.0f, 1.0f).normalize();
-				/*ptr_spatial->rotation = Float4(0.0f, 0.0f, 0.0f, 1.0f);
-				ptr_camera->up = Float3(0.0f, 1.0f, 0.0f);
-				ptr_camera->right = Float3(1.0f, 0.0f, 0.0f);
-				ptr_camera->look = Float3(0.0f, 0.0f, 1.0f);*/
+					ptr_spatial->rotation = Float4(quaternion.x,quaternion.y,quaternion.z,quaternion.w);
+				}
+				else
+				{
+					ptr_spatial->rotation = Float4(0.0f, 0.0f, 0.0f, 1.0f);
+					ptr_camera->up = Float3(0.0f, 1.0f, 0.0f);
+					ptr_camera->right = Float3(1.0f, 0.0f, 0.0f);
+					ptr_camera->look = Float3(0.0f, 0.0f, 1.0f);
+				}
 				ptr_physics->reloadDataIntoBulletPhysics = true;
 				
 				ptr_health->health = ptr_health->maxHealth; // restores player health
@@ -438,9 +442,9 @@ void GameComponent::onUpdate(float delta)
 					amount = 10;
 					break;
 				case XKILL_Enums::PickupableType::HACK_SPEEDHACK:
-					amount = 5000;											//Will be handled as milliseconds
+					amount = 5;		//seconds
 				case XKILL_Enums::PickupableType::HACK_JETHACK:
-					amount = 5000;											//Will be handled as milliseconds
+					amount = 5;		//seconds
 				}
 
 				//Each pickupable knows it pickupablesSpawnPoint creator
@@ -487,6 +491,11 @@ void GameComponent::onUpdate(float delta)
 
 			float reloadTimeFraction = (1.0f - (static_cast<float>(firingMode->nrOfShotsLeftInClip[ammoIndex])/static_cast<float>(nrOfShotsToLoad)));
 			firingMode->reloadTimeLeft = reloadTimeFraction * firingMode->reloadTime;
+
+			if(ammo->canShootWhileReloading)
+			{
+				firingMode->reloadTimeLeft += firingMode->reloadTime * 0.1f;
+			}
 		}
 
 		if(ammo->isReloading)
@@ -596,6 +605,8 @@ void GameComponent::event_EndDeathmatch(Event_EndDeathmatch* e)
 		itrLightSpot.getNext();
 		SEND_EVENT(&Event_RemoveEntity(itrLightSpot.ownerId()));
 	}
+
+	
 
 	// Show
 }
@@ -778,6 +789,11 @@ void GameComponent::event_UnloadLevel()
 	{
 		SAFE_DELETE(*it);
 	}
+	/*while(itrMesh.hasNext())
+	{
+		itrMesh.getNext();
+		SEND_EVENT(&Event_RemoveEntity(itrMesh.ownerId()));
+	}*/
 
 	levelEvents_.clear();
 }
@@ -834,51 +850,70 @@ bool GameComponent::switchFiringMode(AttributePtr<Attribute_WeaponStats> ptr_wea
 	return switchedFiringMode;
 }
 
-void GameComponent::updateAndInterpretAimingRay(Entity* playerEntity, AttributePtr<Attribute_Camera> ptr_camera)
+void GameComponent::updateAndInterpretAimingRay(Entity* rayCastingPlayerEntity, AttributePtr<Attribute_Camera> ptr_camera)
 {
+	//--------------------------------------------------------------------------------------
+	// Camera look vector ray test to far plane z. Send ray test event handled by PhysicsComponent.
+	//--------------------------------------------------------------------------------------
 	Float3 lookAtFarPlaneHorizon = ptr_camera->look;
 	lookAtFarPlaneHorizon.normalize();
 	lookAtFarPlaneHorizon = lookAtFarPlaneHorizon * ptr_camera->zFar;
 
-	Float3 from = ptr_camera->ptr_spatial->ptr_position->position;
-	Float3 to = lookAtFarPlaneHorizon + from;
+	Float3 rayOrigin = ptr_camera->ptr_spatial->ptr_position->position;
+	Float3 rayDestination = lookAtFarPlaneHorizon + rayOrigin;
 
-	std::vector<int> rayCastingPlayerAttributeId = playerEntity->getAttributes(ATTRIBUTE_PLAYER);
+	short rayCollisionFilterMask = XKILL_Enums::PhysicsAttributeType::PLAYER | XKILL_Enums::PhysicsAttributeType::WORLD | XKILL_Enums::PhysicsAttributeType::PICKUPABLE;
+	Event_AllHitsRayCast event_AllHitsRayCast(rayOrigin, rayDestination, rayCollisionFilterMask);
+	SEND_EVENT(&event_AllHitsRayCast);
+
+	//--------------------------------------------------------------------------------------
+	// Handle result from sent event to find a valid hit point for the casted ray
+	//--------------------------------------------------------------------------------------
+	Float3 hitPoint;
+	Entity* entityHitByRay;
+	int nrOfHits = event_AllHitsRayCast.mapHitPointToEntityId.size();
+	if(nrOfHits > 0) //If ray hit something
+	{
+		int hitEntityId = 0;
+		for(int i=0;i<nrOfHits;i++)
+		{
+			hitEntityId = event_AllHitsRayCast.mapHitPointToEntityId.at(i).second;
+			if(hitEntityId == rayCastingPlayerEntity->getID())
+			{
+				continue; //If player hit himself, take next hit point
+			}
+			else
+			{
+				hitPoint = event_AllHitsRayCast.mapHitPointToEntityId.at(i).first;
+				entityHitByRay = &allEntity->at(hitEntityId);
+				break; //Valid hit point found
+			}
+		}
+	}
+	else //If ray did not hit anything, set hitpoint to camera look far plane z
+	{
+		hitPoint = rayDestination;
+	}
+	
+	//--------------------------------------------------------------------------------------
+	// Update weapon rotation and ray attribute
+	//--------------------------------------------------------------------------------------
+	std::vector<int> rayCastingPlayerAttributeId = rayCastingPlayerEntity->getAttributes(ATTRIBUTE_PLAYER);
 	for(unsigned int i=0;i<rayCastingPlayerAttributeId.size();i++)
 	{
 		AttributePtr<Attribute_Player> rayCastingPlayerAttribute = itrPlayer.at(rayCastingPlayerAttributeId.at(i));	
-
+		
 		//--------------------------------------------------------------------------------------
-		// Send event handled by PhysicsComponent. Result is stored in the event.
-		//-------------------------------------------------------------------------------------
-		short rayCollisionFilterMask = XKILL_Enums::PhysicsAttributeType::PLAYER | XKILL_Enums::PhysicsAttributeType::WORLD | XKILL_Enums::PhysicsAttributeType::PICKUPABLE;
-		Event_ClosestRayCast event_ClosestRayCast(from, to, rayCollisionFilterMask);
-		SEND_EVENT(&event_ClosestRayCast);
-
+		// Set weapon rotation depending on how far away the aiming ray hit something (closestHitPoint)
 		//--------------------------------------------------------------------------------------
-		// Retrieve result from sent event
-		//--------------------------------------------------------------------------------------
-		int entityIdOfOwnerToClosestPhysicsObjectHitByRay = event_ClosestRayCast.EntityIdOfOwnerToClosestPhysicsObjectHitByRay;
-		Float3 closestHitPoint = event_ClosestRayCast.ClosestHitPoint;
-		Entity* entityHitByRay = &allEntity->at(entityIdOfOwnerToClosestPhysicsObjectHitByRay);
-
-		if(entityIdOfOwnerToClosestPhysicsObjectHitByRay == 0)
-		{
-			closestHitPoint = to;
-		}
-
-		//--------------------------------------------------------------------------------------
-		// Set weapon rotation depending on how far away the aiming ray hit something
-		//--------------------------------------------------------------------------------------
-		Float3 playerLookDirection = closestHitPoint - ptr_camera->ptr_spatial->ptr_position->position;
+		Float3 playerLookDirection = hitPoint - ptr_camera->ptr_spatial->ptr_position->position;
 		playerLookDirection.normalize();
 
-		Float3 weaponLookDirection = closestHitPoint - rayCastingPlayerAttribute->ptr_weapon_offset->ptr_spatial->ptr_position->position;
+		Float3 weaponLookDirection = hitPoint - rayCastingPlayerAttribute->ptr_weapon_offset->ptr_spatial->ptr_position->position;
 		weaponLookDirection.normalize();
 
 		Float4 newWeaponRotationQuaternion;
-		newWeaponRotationQuaternion = newWeaponRotationQuaternion.quaternionLookAt(closestHitPoint, 
-												rayCastingPlayerAttribute->ptr_weapon_offset->ptr_spatial->ptr_position->position);
+		newWeaponRotationQuaternion = newWeaponRotationQuaternion.quaternionLookAt(hitPoint, rayCastingPlayerAttribute->ptr_weapon_offset->ptr_spatial->ptr_position->position);
 		newWeaponRotationQuaternion.normalize();
 
 		rayCastingPlayerAttribute->ptr_weapon_offset->ptr_spatial->rotation = newWeaponRotationQuaternion.quaternionInverse(); //Set weapon rotation
@@ -895,7 +930,7 @@ void GameComponent::updateAndInterpretAimingRay(Entity* playerEntity, AttributeP
 		// Update ray attribute
 		//-------------------------------------------------------------------------------------
 		AttributePtr<Attribute_Ray> ray;
-		std::vector<int> rayAttributeId = playerEntity->getAttributes(ATTRIBUTE_RAY);
+		std::vector<int> rayAttributeId = rayCastingPlayerEntity->getAttributes(ATTRIBUTE_RAY);
 		for(unsigned int j=0;j<rayAttributeId.size();j++)
 		{
 			ray = itrRay.at(rayAttributeId.at(j));
@@ -914,6 +949,7 @@ void GameComponent::updateAndInterpretAimingRay(Entity* playerEntity, AttributeP
 			else
 			{
 				ray->ptr_render->cull = false;
+				//entityHitByRay might be used here (2013-02-28 17.24)
 			}
 		}
 	}
@@ -929,7 +965,7 @@ void GameComponent::updateAndInterpretLaser(AttributePtr<Attribute_Ray> ptr_ray,
 	Float3 to = weaponLook + from;
 
 	short rayCollisionFilterMask = XKILL_Enums::PhysicsAttributeType::PLAYER | XKILL_Enums::PhysicsAttributeType::WORLD | XKILL_Enums::PhysicsAttributeType::PICKUPABLE;
-	Event_ClosestRayCast event_WeaponRay(from, to, rayCollisionFilterMask);
+	Event_ClosestHitRayCast event_WeaponRay(from, to, rayCollisionFilterMask);
 	SEND_EVENT(&event_WeaponRay);
 
 	int entityIdOfOwnerToClosestPhysicsObjectHitByRay = event_WeaponRay.EntityIdOfOwnerToClosestPhysicsObjectHitByRay;
