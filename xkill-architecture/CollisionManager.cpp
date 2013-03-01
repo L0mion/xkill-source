@@ -89,6 +89,8 @@ void CollisionManager::collision_applyDamage(Entity* entity1, Entity* entity2)
 								AttributePtr<Attribute_Player> playerThatDied_ptr_player = itrPlayer.at(playerThatDiedId.at(l));
 								if(!playerThatDied_ptr_player->detectedAsDead) //Prevent player from receiving priority based on number of fatal hits
 								{
+									playerThatDied_ptr_player->detectedAsDead = true;
+									SEND_EVENT(&Event_PlayerDeath(playerThatDiedId.at(l)));
 									AttributePtr<Attribute_Player> creatorOfProjectile_ptr_player = itrPlayer.at(creatorOfProjectilePlayerId.at(k));
 									if(entity1->getID() != damage->owner_entityID) //Award player
 									{
