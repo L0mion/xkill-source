@@ -15,35 +15,46 @@ class Attribute_SplitScreen;
 class HudMessage
 {
 private:
-	float lifetime;
-	QLabel* message;
+	float _lifetime;
+	QLabel* _label;
+	Float2 _targetPosition;
 
 public:
 	HudMessage(Event_PostHudMessage* e, QWidget* parent);
 	~HudMessage()
 	{
-		delete message;
+		delete _label;
 	}
 	int getHeight()
 	{
-		return message->height();
+		return _label->height();
 	}
-	void move(Float2 position)
+
+	void setPosition(Float2 position);
+
+	void setTargetPosition(Float2 position)
 	{
 		// Offset relative to center of label
-		position.x -= message->width() * 0.5f;
-		position.y -= message->height() * 0.5f;
+		position.x -= _label->width() * 0.5f;
+		position.y -= _label->height() * 0.5f;
 
-		message->move(position.x, position.y);
+		_targetPosition = position;
+	}
+
+	void updatePosition();
+	
+	void update()
+	{
+		updatePosition();
+		
+		// Decrement timer
+		if(_lifetime > 0.0f)
+			_lifetime -= SETTINGS->trueDeltaTime;
 	}
 	bool isExpired()
 	{
-		// Decrement timer
-		if(lifetime > 0.0f)
-			lifetime -= SETTINGS->trueDeltaTime;
-
 		// Check expiration condition
-		if(lifetime <= 0.0f)
+		if(_lifetime <= 0.0f)
 			return true;
 
 		return false;
@@ -85,6 +96,7 @@ public:
 	{
 		for(int i=0; i<stack.count(); i++)
 		{
+			stack.at(i)->update();
 			if(stack.at(i)->isExpired())
 				removeTopMessage();
 		}
@@ -119,6 +131,8 @@ private:
 	HudMessage_Manager hudMessage_manager;
 	float healthFade;
 	float ammoFade;
+	int prev_ammoRatio;
+	int prev_reloadRatio;
 
 public:
 	Menu_HUD(AttributePtr<Attribute_SplitScreen> splitScreen, QWidget* parent);
