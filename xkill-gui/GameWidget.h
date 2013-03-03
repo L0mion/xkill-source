@@ -91,6 +91,14 @@ public slots:
 	{
 		gameTimer.tick();
 		float delta = gameTimer.getDeltaTime();
+		
+		// Keep the game stable by preventing 
+		// delta time from getting to big, which
+		// usually happens during loading times.
+		float deltaLimit = 1.0f / 5; // always simulate at least 1.0 / x fps
+		if(delta > deltaLimit)
+			delta = deltaLimit;
+
 		// add time manipulation
 		ATTRIBUTE_MANAGER->settings->trueDeltaTime = delta;
 		delta *= ATTRIBUTE_MANAGER->settings->timeScale();

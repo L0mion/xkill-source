@@ -94,7 +94,7 @@ void Menu_HUD::mapToSplitscreen()
 	bottomPos.y = screenSize.y - screenSize.x*0.005f - ui.frame_bottom->height()* 1.0f;
 	ui.frame_bottom->move(bottomPos.x, bottomPos.y);
 
-	// Move hud messages to center
+	// Move HUD messages to center
 	hudMessage_manager.move(centerPos);
 }
 
@@ -123,21 +123,19 @@ void Menu_HUD::refresh()
 	int reloadRatio = (int)((firingMode->reloadTimeLeft / (float)firingMode->reloadTime) * 100);
 	
 	// Show menu if health has changed otherwise fade after a few seconds
-	if(ammoRatio != prev_ammoRatio)
+	if(reloadRatio == 100 && ammoRatio != prev_ammoRatio)
 	{
+		prev_ammoRatio = ammoRatio;
 		ammoFade = fadeTime;
-
-		// Show reload bar
-		if(reloadRatio < 100)
-		{
-			ui.progressBar_ammo->setValue(100 - reloadRatio);
-		}
-		// Show ammo bar
-		else
-		{
-			ui.progressBar_ammo->setValue(ammoRatio);
-		}
+		ui.progressBar_ammo->setValue(ammoRatio);
 	}
+	if(reloadRatio != prev_reloadRatio)
+	{
+		prev_reloadRatio = reloadRatio;
+		ammoFade = fadeTime;
+		ui.progressBar_ammo->setValue(100 - reloadRatio);
+	}
+	
 	// Hide bar if full
 	if(ammoRatio == 100)
 		ammoFade = 0.0f;
@@ -268,23 +266,51 @@ Menu_HUD::~Menu_HUD()
 	UNSUBSCRIBE_TO_EVENTS(this);
 }
 
-HudMessage::HudMessage( Event_PostHudMessage* e, QWidget* parent )
+HudMessage::HudMessage( Event_PostHudMessage* e, QWidget* parent)
 {
-	// Apply message
-	message = new QLabel(e->message.c_str());
-	message->setAlignment(Qt::AlignHCenter);
-
-	// Draw label in parent window
-	message->setParent(parent);
+	// Create label
+	_label = new QLabel(e->message.c_str());
+	_label->setAlignment(Qt::AlignHCenter);
+	_label->setParent(parent);
 
 	// Apply stylesheet
-	message->setStyleSheet(e->styleSheet.c_str());
+	_label->setStyleSheet(e->styleSheet.c_str());
 
 	// Display for a certain time
-	lifetime = 3.0f;
+	_lifetime = 3.0f;
 
 	// Show label
-	message->show();
+	_label->show();
+}
+
+void HudMessage::updatePosition()
+{
+	// Interpolate position
+	Float2 currentPos;
+	currentPos.x = _label->pos().x();
+	currentPos.y = _label->pos().y();
+
+	float factor = 5.0f * SETTINGS->trueDeltaTime;
+	if(factor > 1.0f)
+		factor = 1.0f;
+	Float2 newPos = Float2::lerp(&currentPos, &_targetPosition, factor);
+
+	_label->move(newPos.x, newPos.y);
+}
+
+void HudMessage::setPosition(Float2 position)
+{
+	setTargetPosition(position);
+
+	position = _targetPosition;
+
+	// An additional offset,
+	// creates a cool interpolation
+	// when a new label is created
+	position = position + Float2(_label->width() * 0.0f, -_label->height() * 1.0f);
+
+	// Move
+	_label->move(position.x, position.y);
 }
 
 void HudMessage_Manager::addMessage( Event_PostHudMessage* e )
@@ -304,16 +330,22 @@ void HudMessage_Manager::addMessage( Event_PostHudMessage* e )
 	}
 
 	// Limit simultaneous show messages 
-	// to 5 to not overwhelm the player
-	if(stack.count() + 1 > 5)
+	// to not overwhelm the player
+	const int kMaxMessages = 8;
+	if(stack.count() + 1 > kMaxMessages)
 		removeTopMessage();
 
 	// Add message to stack
-	stack.push(new HudMessage(e, parent));
+	HudMessage* m = new HudMessage(e, parent);
+	stack.push(m);
 
 	// Show new messages above old messages
 	int numStacks = stack.count();
 	int offset = 20*3.8f;
+	Float2 newPos;
+	newPos.x = position.x;
+	newPos.y = position.y + offset;
+	m->setPosition(newPos);
 	for(int i=numStacks-1; i>=0; i--)
 	{
 		int height = stack.at(i)->getHeight();
@@ -323,6 +355,6 @@ void HudMessage_Manager::addMessage( Event_PostHudMessage* e )
 		newPos.x = position.x;
 		newPos.y = position.y + offset - height * 0.5f;
 
-		stack.at(i)->move(newPos);
+		stack.at(i)->setTargetPosition(newPos);
 	}
 }
