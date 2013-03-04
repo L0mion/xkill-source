@@ -195,9 +195,9 @@ void CS_Lighting(
 	//	Diffuse.g += 0.1;
 	//}
 
-	float3 ssao = bufferSSAO.SampleLevel(ss, texCoord, 0).rrr;
+	float3 ssao = bufferSSAO.SampleLevel(ss, texCoord, 0).rgb;
 	//ssao *= 2.0f; ssao -= 1.0f;
-	//
+	
 	//if(ssao.x < 0.0f)
 	//	ssao.x *= -1.0f;
 	//if(ssao.y < 0.0f)
@@ -205,12 +205,12 @@ void CS_Lighting(
 	//if(ssao.z < 0.0f)
 	//	ssao.z *= -1.0f;
 
-	float3 litPixel = Ambient.xyz + Diffuse.xyz + Specular.xyz;
+	float3 litPixel = Ambient.xyz * ssao.r + Diffuse.xyz + Specular.xyz;
 	float3 glowPixel = bufferGlowHigh.SampleLevel(ss, texCoord, 0).xyz;
 	litPixel = min(litPixel + glowPixel, 1.0f); //additive blending
 	output[
 		uint2(
 			threadIDDispatch.x + viewportTopX, 
 			threadIDDispatch.y + viewportTopY)] = 
-		float4(ssao, 1.0f);
+		float4(ssao.rrr, 1.0f);
 }

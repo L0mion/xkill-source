@@ -47,7 +47,7 @@ static const unsigned int SHADOWMAP_DIM = 1024; //Remember to also set dimension
 
 static const unsigned int SSAO_MAP_SCREEN_RES_FACTOR = 2;
 
-static const unsigned int RANDOM_DIM = 4; //Lower this a lot.
+static const unsigned int RANDOM_DIM = 64; //Lower this
 
 enum SET_TYPE
 {

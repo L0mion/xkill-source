@@ -371,17 +371,17 @@ HRESULT ManagementBuffer::initRandom(ID3D11Device* device)
 		for(int j = 0; j < RANDOM_DIM; ++j)
 		{
 			DirectX::XMFLOAT3 v(
-				GET_RANDOM(-1.0f, 1.0f),
-				GET_RANDOM(-1.0f, 1.0f),
-				0.0f);
+				GET_RANDOM(0.0f, 1.0f),
+				GET_RANDOM(0.0f, 1.0f),
+				GET_RANDOM(0.0f, 1.0f));
 
 			DirectX::XMVECTOR normalized = DirectX::XMVector3Normalize(XMLoadFloat3(&v));
 			DirectX::XMStoreFloat3(&v, normalized);
 	
 			color[i * RANDOM_DIM + j] = DirectX::XMFLOAT4(
-				v.x * 0.5f + 0.5f, //Compress from [-1, +1] to [0, +1].
-				v.y * 0.5f + 0.5f, //Compress from [-1, +1] to [0, +1]. 
-				v.z * 0.5f + 0.5f, //Compress from [-1, +1] to [0, +1].
+				v.x,// * 0.5f + 0.5f, //Compress from [-1, +1] to [0, +1].
+				v.y,// * 0.5f + 0.5f, //Compress from [-1, +1] to [0, +1]. 
+				v.z,// * 0.5f + 0.5f, //Compress from [-1, +1] to [0, +1].
 				0.0f);
 		}
 	}

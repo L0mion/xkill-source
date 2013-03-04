@@ -16,7 +16,27 @@ SamplerState ssDepth	: register( s1 );
 SamplerState ssRandom	: register( s2 );
 
 #define SSAO_BLOCK_DIM	16
-#define RANDOM_DIM		4
+#define RANDOM_DIM		64
+
+float occlusionFunc(in float2 tcoord,in float2 uv, in float3 p, in float3 cnorm)
+{
+	//float3 diff = getPosition(tcoord + uv) - p;
+	float occluderDepth = bufferDepth.SampleLevel(ssDepth, tcoord + uv, 0).x;
+	float3 occluder = UtilReconstructPositionViewSpace(
+		tcoord + uv,
+		occluderDepth, 
+		projectionInverse);
+	float3 diff = occluder - p;
+
+	const float3 v = normalize(diff);
+
+	float g_scale = 1.0f;
+	const float d = length(diff)*g_scale;
+
+	float g_bias = 0.0f;
+	float g_intensity = 1.0f;
+	return max(0.0,dot(cnorm,v)-g_bias)*(1.0/(1.0+d))*g_intensity;
+}
 
 [numthreads(SSAO_BLOCK_DIM, SSAO_BLOCK_DIM, 1)]
 void CS_SSAO(
@@ -27,13 +47,15 @@ void CS_SSAO(
 	)
 {
 	float2 texCoord = float2(
-		(float)(threadIDDispatch.x + viewportTopX)	/ (float)ssaoWidth,
-		(float)(threadIDDispatch.y + viewportTopY)	/ (float)ssaoHeight);
+		(float)(threadIDDispatch.x + viewportTopX)	/ (float)ssaoWidth,	  //Divided by the total width of ssao-map.
+		(float)(threadIDDispatch.y + viewportTopY)	/ (float)ssaoHeight); //Divided by the total height of ssao-map.
 
 	//Get view-space position of occluded point:
 	float occludeeDepth = bufferDepth.SampleLevel(ssDepth, texCoord, 0).x;
 	float3 occludee = UtilReconstructPositionViewSpace(
-		float2((float)threadIDDispatch.x / viewportWidth, (float)threadIDDispatch.y / viewportHeight),
+		float2(
+			(float)threadIDDispatch.x / viewportWidth, 
+			(float)threadIDDispatch.y / viewportHeight),
 		occludeeDepth, 
 		projectionInverse); //Should we use current viewports here - or the viewport dimensions previously used?
 
@@ -46,8 +68,50 @@ void CS_SSAO(
 
 	float2 scaleTile = float2((float)ssaoWidth / (float)RANDOM_DIM, (float)ssaoHeight / (float)RANDOM_DIM); //Move me into a constant buffer.
 	float3 random = bufferRandom.SampleLevel(ssRandom, texCoord * scaleTile, 0).rgb; //Tile random-texture using scaleTile.
-	random *= 2.0f; random -= 1.0f; //Map from [0, 1] to [-1, +1]
+	//random *= 2.0f; random -= 1.0f; //Map from [0, 1] to [-1, +1]
 	random = normalize(random);
+
+	const float2 vec[4] =
+	{
+		float2(1,0),
+		float2(-1,0),
+		float2(0,1),
+		float2(0,-1)
+	};
+
+	float radius = 1.0f; //make me constant buf
+	float rad = radius / occludee.z;
+
+	float occlusion = 0.0f;
+	for(unsigned int i = 0.0f; i < 4; i++)
+	{
+		float2 coord1 = reflect(vec[i], random) * rad;
+		float2 coord2 = float2(
+		coord1.x * 0.707f - coord1.y * 0.707f,
+		coord1.x * 0.707f + coord1.y * 0.707f); //wat
+	
+		occlusion += occlusionFunc(texCoord, coord1 * 0.25f, occludee, occludeeNormal);
+		occlusion += occlusionFunc(texCoord, coord2 * 0.5f,	occludee, occludeeNormal);
+		occlusion += occlusionFunc(texCoord, coord1 * 0.75f,	occludee, occludeeNormal);
+		occlusion += occlusionFunc(texCoord, coord2 * 1.0f,	occludee, occludeeNormal);
+	}
+	occlusion /= 4.0f * 4.0f; //first one i
+
+
+	occlusion = 1.0f - occlusion; //(occlusion / 14); //saturate(pow(access, 4.0f))
+	ssao[
+		uint2(
+			threadIDDispatch.x + viewportTopX, 
+			threadIDDispatch.y + viewportTopY)] = 
+		float4(occludee.z / 40.0f, 0.0f, 0.0f, 1.0f);
+}
+
+/*
+
+
+	
+
+	
 
 	//--------------
 	//Purpose of this next bit of code is to establish an orthonormal change-of-basis matrix which will
@@ -94,12 +158,7 @@ void CS_SSAO(
 		occlusion += occlusionFactor * rangeCheck;
 	}
 
-	occlusion = 1.0f - (occlusion / 14); //saturate(pow(access, 4.0f))
-	ssao[
-		uint2(
-			threadIDDispatch.x + viewportTopX, 
-			threadIDDispatch.y + viewportTopY)] = 
-		float4(occlusion, 1.0f, 1.0f, 1.0f);
-}
+	
+*/
 
 #endif //XKILL_RENDERER_CS_SSAO_HLSL
