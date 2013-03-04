@@ -573,7 +573,7 @@ void GameComponent::onUpdate(float delta)
 			{
 				worldPiecesIndices.push_back(ptr_physics.index());
 			}
-		}
+		}  
 
 		for(unsigned int i = 0; i < 10; i++)
 		{

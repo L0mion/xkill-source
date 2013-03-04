@@ -69,7 +69,6 @@ MainWindow::MainWindow()
 	this->installEventFilter(this);
 
 	slot_toggleFullScreen();			//Fullscreen
-
 	// DEBUG build specific settings (setAlwaysOnTopAndShow(false) is set in Menu_Main2::Menu_Main2() if DEBUG)
 #if defined(DEBUG) || defined(_DEBUG)
 	slot_toggleFullScreen();			//Windowed
@@ -107,6 +106,7 @@ void MainWindow::onEvent( Event* e )
 
 void MainWindow::keyPressEvent( QKeyEvent* e )
 {
+	
 	// Toggle full screen
 	if((e->key()==Qt::Key_Return) && (e->modifiers()==Qt::AltModifier))
 		slot_toggleFullScreen();
@@ -123,6 +123,7 @@ void MainWindow::keyPressEvent( QKeyEvent* e )
 	if((e->key()==Qt::Key_F2))
 		SEND_EVENT(&Event(EVENT_STARTGAME));
 
+	
 	if((e->key()==Qt::Key_1))
 	{
 		{Event_PostHudMessage e("Punish them all"); e.receiver = Event_PostHudMessage::RECEIVER_ALL; e.setStyle(Event_PostHudMessage::STYLE_WARNING); SEND_EVENT(&e);}
@@ -150,7 +151,7 @@ void MainWindow::keyPressEvent( QKeyEvent* e )
 		e.receiver = Event_PostHudMessage::RECEIVER_ALL;
 		SEND_EVENT(&e);
 	}
-
+	
 
 	//
 	// Menu controls during in-game
@@ -174,6 +175,7 @@ void MainWindow::keyPressEvent( QKeyEvent* e )
 			break;
 		}
 	}
+	
 	if(GET_STATE() == STATE_MAINMENU)
 	{
 		//switch(e->key())

@@ -127,6 +127,7 @@ Menu_Main2::Menu_Main2( QWidget* parent ) : QMainWindow()
 
 	//ui.comboBox_LevelSelect->setModel(levelListModel);
 
+	levelCurrent++;//check
 	SEND_EVENT(&Event_LoadLevel(levelNames[levelCurrent]));
 	SETTINGS->currentLevel = levelNames[levelCurrent];
 
