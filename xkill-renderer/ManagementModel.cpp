@@ -289,7 +289,7 @@ HRESULT ManagementModel::createIndexBuffer(
 	{
 		std::string failed = "Failed to create Index Buffer from MeshModel at index: " + modelID;
 		failed += "\nManagementModel::createIndexBuffer, too few indices when trying to create index buffer.";
-		SHOW_MESSAGEBOX(failed);
+	//	SHOW_MESSAGEBOX(failed);
 		hr = S_FALSE;
 		return hr;
 	}

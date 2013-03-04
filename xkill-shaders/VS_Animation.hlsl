@@ -33,7 +33,6 @@ VSOutPosNormWTex VS_Animation(VSInPosNormTexTanSkinned vsIn)
 
 
 	output.position		= mul(float4(position, 1.0f), finalMatrix);
-	output.positionW	= mul(float4(position, 1.0f), worldMatrix).xyz;
 	output.normalW		= mul(float4(normal, 0.0f), worldMatrix).xyz;
 
 	output.texcoord		= vsIn.texcoord;

@@ -509,7 +509,7 @@ void Renderer::renderViewportToGBuffer(ViewportData& vpData)
 		if(i->first == 12)
 			renderAnimation(i->first, vpData.view, vpData.proj);
 		else
-			renderInstance(i->first, i->second);
+			renderInstance(i->first, i->second, false);
 	}
 
 	//Make me use iterators!
@@ -1369,9 +1369,9 @@ void Renderer::renderAnimation(unsigned int meshID, DirectX::XMFLOAT4X4 view, Di
 
 	ModelD3D* modelD3D	= managementModel_->getModelD3D(meshID, device);
 
-	DirectX::XMFLOAT4X4 worldMatrix(0.01f, 0.0f, 0.0f, 0.0f,
-									0.0f, 0.01f, 0.0f, 0.0f,
-									0.0f, 0.0f, 0.01f, 0.0f,
+	DirectX::XMFLOAT4X4 worldMatrix(0.005f, 0.0f, 0.0f, 0.0f,
+									0.0f, 0.005f, 0.0f, 0.0f,
+									0.0f, 0.0f, 0.005f, 0.0f,
 									0.0f, 4.0f, 0.0f, 1.0f);
 	DirectX::XMFLOAT4X4 worldMatrixInverse	= worldMatrix;
 	DirectX::XMFLOAT4X4 finalMatrix			= managementMath_->calculateFinalMatrix(worldMatrix, view, projection);
