@@ -1,4 +1,6 @@
 #include "Menu_HUD.h"
+
+#include <QtCore/QDateTime>
 #include <xkill-utilities/Converter.h>
 ATTRIBUTES_DECLARE_ALL;
 
@@ -68,13 +70,20 @@ void Menu_HUDManager::mapHudsToSplitscreen()
 void Menu_HUD::mapToSplitscreen()
 {
 	Float2 screenSize;
-	screenSize.x = splitScreen->ssWidth;
-	screenSize.y = splitScreen->ssHeight;
+	screenSize.x = ptr_splitScreen->ssWidth;
+	screenSize.y = ptr_splitScreen->ssHeight;
 
 	Float2 centerPos;
 	centerPos.x = screenSize.x * 0.5f;
 	centerPos.y = screenSize.y * 0.5f;
 
+	// Hide unused labels
+	ui.label_helper->hide();
+
+	// Move stretch death overlay across screen
+	ui.label_deathOverlay->move(0, 0);
+	ui.label_deathOverlay->resize(ptr_splitScreen->ssWidth, ptr_splitScreen->ssHeight);
+	ui.label_deathOverlay->hide();
 
 	// Move center HUD to center
 	ui.frame_center->move(centerPos.x - ui.frame_center->width()* 0.5f, centerPos.y - ui.frame_center->height()* 0.5f);
@@ -94,13 +103,20 @@ void Menu_HUD::mapToSplitscreen()
 	bottomPos.y = screenSize.y - screenSize.x*0.005f - ui.frame_bottom->height()* 1.0f;
 	ui.frame_bottom->move(bottomPos.x, bottomPos.y);
 
+	// Move top HUD to top
+	Float2 topPos;
+	ui.frame_top->resize(screenSize.x - screenSize.x*0.00f * 2, ui.frame_top->height());
+	topPos.x = screenSize.x * 0.5f - ui.frame_top->width()* 0.5f;
+	topPos.y = screenSize.x*0.005f;
+	ui.frame_top->move(topPos.x, topPos.y);
+
 	// Move HUD messages to center
 	hudMessage_manager.move(centerPos);
 }
 
 void Menu_HUD::refresh()
 {
-	AttributePtr<Attribute_Player>		ptr_player		=	splitScreen->ptr_player;
+	AttributePtr<Attribute_Player>		ptr_player		=	ptr_splitScreen->ptr_player;
 	AttributePtr<Attribute_Health>		ptr_health		=	ptr_player->ptr_health;
 	AttributePtr<Attribute_WeaponStats>	ptr_weaponStats	=	ptr_player->ptr_weaponStats;
 
@@ -202,37 +218,43 @@ void Menu_HUD::refresh()
 	hudMessage_manager.update();
 
 
+	// Show death effects
+	if(ptr_player->detectedAsDead)
+	{
+		if(ui.label_deathOverlay->isHidden())
+		{
+			ui.label_deathOverlay->show();
+			ui.frame_top->hide();
+			ui.frame_center->hide();
+			ui.frame_bottom->hide();
+			ui.progressBar_health->hide();
+			ui.progressBar_ammo->hide();
+		}
+	}
+	else
+	{
+		if(!ui.label_deathOverlay->isHidden())
+		{
+			ui.label_deathOverlay->hide();
+			ui.frame_top->show();
+			ui.frame_center->show();
+			ui.frame_bottom->show();
+		}
+	}
+
+
 	// Scheduling
-	/*ui.label_priority_advantage->setNum((int)ptr_health->health);
+	//ui.label_priority_advantage->setNum((int)ptr_health->health);
+	QString str_time = QDateTime::fromTime_t(SETTINGS->timeUntilScheduling).toString("mm:ss");
+	ui.label_schedulingTimer->setText(str_time);
 
-	ui.label_schedulingTimer->setNum((int)ptr_health->health);*/
-
-	//ptr_player
-	//while(itrPlayer.hasNext())	// Loop through all player and find if anyone has top priority
-	//{
-	//	//Attribute_Player* player = itrPlayer.getNext();
-	//	AttributePtr<Attribute_Player> player = itrPlayer.getNext();
-
-	//	if(player->priority > 0)
-	//	{
-	//		if(player->priority > topPriority)		// Current player had higher priority than last top player
-	//		{
-	//			topPlayerIndex = itrPlayer.storageIndex();
-	//			topPriority = player->priority;
-	//			topPriorityIsTied = false;
-	//		}
-	//		else if(player->priority == topPriority)	// Current player had the same priority as last top player
-	//		{
-	//			topPriorityIsTied = true;
-	//		}
-	//	}
-	//}
+	
 }
 
 Menu_HUD::Menu_HUD( AttributePtr<Attribute_SplitScreen> splitScreen, QWidget* parent ) : QWidget(parent)
 {
 	ui.setupUi(this);
-	this->splitScreen = splitScreen;
+	this->ptr_splitScreen = splitScreen;
 	hudMessage_manager.init(this, splitScreen);
 
 	Float2 pos(splitScreen->ssTopLeftX, splitScreen->ssTopLeftY);
