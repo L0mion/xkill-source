@@ -86,8 +86,9 @@ void Menu_HUD::mapToSplitscreen()
 	ui.label_deathOverlay->hide();
 
 	// Move center HUD to center
-	ui.frame_center->move(centerPos.x - ui.frame_center->width()* 0.5f, centerPos.y - ui.frame_center->height()* 0.5f);
-	
+	ui.label_aim->move(centerPos.x - ui.label_aim->width()* 0.5f, centerPos.y - ui.label_aim->height()* 0.5f);
+	ui.label_firingMode->move(centerPos.x - ui.label_firingMode->width()* 0.5f + 10, centerPos.y - ui.label_firingMode->height()* 0.5f);
+
 	// Place statusbars
 	Float2 barPos;
 	barPos.x = screenSize.x * 0.08f;
@@ -102,6 +103,9 @@ void Menu_HUD::mapToSplitscreen()
 	bottomPos.x = screenSize.x * 0.5f - ui.frame_bottom->width()* 0.5f;
 	bottomPos.y = screenSize.y - screenSize.x*0.005f - ui.frame_bottom->height()* 1.0f;
 	ui.frame_bottom->move(bottomPos.x, bottomPos.y);
+	Float2 bottomCenterPos = bottomPos;
+	bottomCenterPos.x = screenSize.x * 0.5f - ui.groupBox_bottomCenter->width()* 0.5f;
+	ui.groupBox_bottomCenter->move(bottomCenterPos.x, bottomCenterPos.y);
 
 	// Move top HUD to top
 	Float2 topPos;
@@ -122,6 +126,7 @@ void Menu_HUD::refresh()
 
 	Ammunition* ammunition = &ptr_weaponStats->ammunition[ptr_weaponStats->currentAmmunitionType];
 	FiringMode* firingMode = &ptr_weaponStats->firingMode[ptr_weaponStats->currentFiringModeType];
+	int firingIndex = firingMode->type;
 	int ammoIndex = ammunition->type;
 	float fadeTime = 1.0f;
 
@@ -190,6 +195,10 @@ void Menu_HUD::refresh()
 	{
 		healthFade = fadeTime;
 	}
+
+	// Hide bar if dead
+	if(ptr_player->detectedAsDead)
+		healthFade = 0.0f;
 		
 	if(healthFade > 0.0f)
 	{
@@ -225,8 +234,10 @@ void Menu_HUD::refresh()
 		{
 			ui.label_deathOverlay->show();
 			ui.frame_top->hide();
-			ui.frame_center->hide();
+			ui.label_aim->hide();
+			ui.label_firingMode->hide();
 			ui.frame_bottom->hide();
+
 			ui.progressBar_health->hide();
 			ui.progressBar_ammo->hide();
 		}
@@ -237,7 +248,8 @@ void Menu_HUD::refresh()
 		{
 			ui.label_deathOverlay->hide();
 			ui.frame_top->show();
-			ui.frame_center->show();
+			ui.label_aim->show();
+			ui.label_firingMode->show();
 			ui.frame_bottom->show();
 		}
 	}
@@ -248,7 +260,89 @@ void Menu_HUD::refresh()
 	QString str_time = QDateTime::fromTime_t(SETTINGS->timeUntilScheduling).toString("mm:ss");
 	ui.label_schedulingTimer->setText(str_time);
 
-	
+
+	//
+	// Set cross-hair based on selected ammo
+	//
+
+	// Only change if weapon has been switched
+	if(index_crosshair != ammoIndex)
+	{
+		index_crosshair = ammoIndex;
+
+		// Determine image
+		QString path;
+		switch(index_crosshair) 
+		{
+		case XKILL_Enums::BULLET:
+			path = ":/xkill/images/icons/cross_hairs/crosshair_bullet.png";
+			break;
+		case XKILL_Enums::SCATTER:
+			path = ":/xkill/images/icons/cross_hairs/crosshair_scatter.png";
+			break;
+		case XKILL_Enums::EXPLOSIVE:
+			path = ":/xkill/images/icons/cross_hairs/crosshair_explosive.png";
+			break;
+		default:
+			path = ":/xkill/images/icons/default.png";
+			break;
+		}
+
+		// Set image to label
+		 ui.label_aim->setPixmap(path);
+	}
+
+
+	//
+	// Set indicator based on firiring-mode
+	//
+
+	// Only change if weapon has been switched
+	if(index_firingMode != firingIndex)
+	{
+		index_firingMode = firingIndex;
+		firingModeFade = fadeTime;
+
+		// Determine image
+		QString path;
+		switch(index_firingMode)
+		{
+		case XKILL_Enums::SINGLE:
+			path = ":/xkill/images/icons/cross_hairs/firing_single.png";
+			break;
+		case XKILL_Enums::SEMI:
+			path = ":/xkill/images/icons/cross_hairs/firing_semi.png";
+			break;
+		case XKILL_Enums::AUTO:
+			path = ":/xkill/images/icons/cross_hairs/firing_auto.png";
+			break;
+		default:
+			path = ":/xkill/images/icons/default.png";
+			break;
+		}
+
+		// Set image to label
+		ui.label_firingMode->setPixmap(path);
+	}
+
+	if(firingModeFade > 0.0f)
+	{
+		firingModeFade -= SETTINGS->trueDeltaTime;
+
+		// Show progress bar if hidden
+		if(ui.label_firingMode->isHidden())
+			ui.label_firingMode->show();
+
+		// Update value
+		ui.progressBar_health->setValue(healthRatio);
+		ui.progressBar_health->update();
+	}
+	else
+	{
+		// Hide progress-bar if shown
+		if(!ui.label_firingMode->isHidden())
+			ui.label_firingMode->hide();
+	}
 }
 
 Menu_HUD::Menu_HUD( AttributePtr<Attribute_SplitScreen> splitScreen, QWidget* parent ) : QWidget(parent)

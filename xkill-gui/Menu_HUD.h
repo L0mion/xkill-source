@@ -131,6 +131,9 @@ private:
 	HudMessage_Manager hudMessage_manager;
 	float healthFade;
 	float ammoFade;
+	float firingModeFade;
+	int index_crosshair;
+	int index_firingMode;
 	int prev_ammoRatio;
 	int prev_reloadRatio;
 
