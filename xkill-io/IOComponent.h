@@ -34,7 +34,9 @@ enum FileExtension
 {
 	FILE_EXTENSION_UNKNOWN,
 	FILE_EXTENSION_OBJ,
-	FILE_EXTENSION_FBX
+	FILE_EXTENSION_FBX,
+	FILE_EXTENSION_MD5MESH,
+	FILE_EXTENSION_MD5ANIM
 };
 
 //! Component loading and writing from/to file.
@@ -68,6 +70,9 @@ private:
 	bool loadFbx(std::string modelName, std::string modelPath, MdlDescModel* modelDesc, MeshDesc& meshDesc, SkinnedData* skinnedData);
 	void loadFbxMesh(LoaderFbxMeshDesc* mesh, LoaderFbxMaterialDesc* material, MeshDesc& meshDesc, std::vector<LoaderFbxTextureDesc> texDescs);
 	void loadFbxAnimation(std::vector<LoaderFbxAnimationDesc> animationDescs, LoaderFbxMeshDesc mesh, SkinnedData* skinnedData);
+	
+	bool loadMD5(std::string modelName, std::string modelPath, MdlDescModel* modelDesc, MeshDesc& meshDesc);
+
 	bool loadPGY(std::string modelName, std::string modelPath, MdlDescModel* modelDesc, MeshDesc& meshDesc, SkinnedData** skinnedData);
 	bool writePGY(std::string modelName, std::string modelPath, MeshDesc meshDesc, VertexType vertexType, SkinnedData* skinnedData);
 

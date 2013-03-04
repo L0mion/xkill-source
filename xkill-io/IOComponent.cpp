@@ -17,6 +17,7 @@
 #include "MdlDesc.h"
 #include "MdlDescModel.h"
 
+#include "LoaderMD5.h"
 #include "LoaderFbx.h"
 #include "LoaderFbxMeshDesc.h"
 #include "LoaderFbxMaterialDesc.h"
@@ -238,6 +239,9 @@ bool IOComponent::loadModel(
 		case FILE_EXTENSION_OBJ:
 			successfulLoad = loadObj(modelName, modelPath, modelDesc, meshDesc);
 			break;
+		case FILE_EXTENSION_MD5MESH:
+			successfulLoad = loadMD5(modelName, modelPath, modelDesc, meshDesc);
+			break;
 		}
 
 		writePGY(modelName + ".pgy", modelPath, meshDesc, (VertexType)modelDesc->vertexType_, skinnedData);
@@ -386,6 +390,13 @@ void IOComponent::loadFbxAnimation(std::vector<LoaderFbxAnimationDesc> animation
 	skinnedData->set(boneHierarchy, boneOffsets, animations);
 }
 
+bool IOComponent::loadMD5(std::string modelName, std::string modelPath, MdlDescModel* modelDesc, MeshDesc& meshDesc)
+{
+	LoaderMD5 loaderMD5;
+	loaderMD5.loadModel(modelPath+modelName);
+	return false;
+}
+
 bool IOComponent::loadPGY(std::string modelName, std::string modelPath, MdlDescModel* modelDesc, MeshDesc& meshDesc, SkinnedData** skinnedData)
 {
 	SkinnedData* tempSkinned = nullptr;
@@ -439,9 +450,11 @@ FileExtension IOComponent::findFileType(std::string modelName)
 	bool typeObj = true;
 	bool typeFbx = true;
 
-	std::string extensionFbx = "fbx";
-	std::string extensionFBX = "FBX";
-	std::string extensionObj = "obj";
+	std::string extensionFbx	 = "fbx";
+	std::string extensionFBX	 = "FBX";
+	std::string extensionObj	 = "obj";
+	std::string extensionMD5mesh = "md5mesh";
+	std::string extensionMD5anim = "md5anim";
 
 	if(strcmp(extension.c_str(), extensionFbx.c_str()) == 0)
 		type = FILE_EXTENSION_FBX;
@@ -449,6 +462,10 @@ FileExtension IOComponent::findFileType(std::string modelName)
 		type = FILE_EXTENSION_FBX;
 	else if(strcmp(extension.c_str(), extensionObj.c_str()) == 0)
 		type = FILE_EXTENSION_OBJ;
+	else if(strcmp(extension.c_str(), extensionMD5mesh.c_str()) == 0)
+		type = FILE_EXTENSION_MD5MESH;
+	else if(strcmp(extension.c_str(), extensionMD5anim.c_str()) == 0)
+		type = FILE_EXTENSION_MD5ANIM;
 	else
 		type = FILE_EXTENSION_UNKNOWN;
 
