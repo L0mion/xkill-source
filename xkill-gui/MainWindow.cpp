@@ -123,6 +123,15 @@ void MainWindow::keyPressEvent( QKeyEvent* e )
 	if((e->key()==Qt::Key_F2))
 		SEND_EVENT(&Event(EVENT_STARTGAME));
 
+	// Toggle cap fps
+	if((e->key()==Qt::Key_F3))
+	{
+		if(!ui.actionCap_FPS->isChecked())
+			ui.actionCap_FPS->setChecked(true);
+		else
+			ui.actionCap_FPS->setChecked(false);
+	}
+
 	if((e->key()==Qt::Key_1))
 	{
 		{Event_PostHudMessage e("Punish them all"); e.receiver = Event_PostHudMessage::RECEIVER_ALL; e.setStyle(Event_PostHudMessage::STYLE_WARNING); SEND_EVENT(&e);}
