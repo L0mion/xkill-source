@@ -13,6 +13,7 @@ ScoreComponent::ScoreComponent()
 	ATTRIBUTES_INIT_ALL
 
 	SUBSCRIBE_TO_EVENT(this, EVENT_START_DEATHMATCH);
+	SUBSCRIBE_TO_EVENT(this, EVENT_END_DEATHMATCH);
 
 	executingPlayerIndex_ = -1;
 	schedulerTimer_ = nullptr;
@@ -33,7 +34,7 @@ bool ScoreComponent::init()
 	SAFE_DELETE(cycleTimer_);
 	SAFE_DELETE(gameTimer_);
 
-	schedulerTimer_ = new Timer(60.0f);
+	schedulerTimer_ = new Timer(10.0f);
 	cycleTimer_ = new Timer(1.0f);
 
 	gameTimer_ = new Timer(settings->timeLimit);
@@ -57,6 +58,16 @@ void ScoreComponent::onEvent(Event* e)
 	{
 	case EVENT_START_DEATHMATCH:
 		init();
+		break;
+	case EVENT_END_DEATHMATCH:
+		if(executionMode_)
+		{
+			SEND_EVENT(&Event(EVENT_PLAYER_DONE_EXECUTING));
+		}
+		else
+		{
+			SEND_EVENT(&Event(EVENT_NULL_PROCESS_STOPPED_EXECUTING));
+		}
 		break;
 	default:
 		break;
