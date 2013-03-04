@@ -1,8 +1,8 @@
-#include "MeshVertices.h"
+#include <xkill-utilities/MeshVertices.h>
 
 #include "AnimatedMesh.h"
-#include "M3DMeshData.h"
-#include "SkinnedData.h"
+#include <xkill-utilities/M3DMeshData.h>
+#include <xkill-utilities/SkinnedData.h>
 
 
 AnimatedMesh::AnimatedMesh()

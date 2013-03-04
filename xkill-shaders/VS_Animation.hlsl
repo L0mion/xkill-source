@@ -16,16 +16,25 @@ VSOutPosNormWTex VS_Animation(VSInPosNormTexTanSkinned vsIn)
 	float3 position = float3(0.0f, 0.0f, 0.0f);
 	float3 normal	= float3(0.0f, 0.0f, 0.0f);
 
+	float4x4 boneTransform = 0;
+
 	for(int i=0; i<4; i++)
 	{
-		//Can at the moment only use one bone to influense each vertex
-		position	+= weights[i]*mul(boneTransforms[vsIn.boneIndices[0]], float4(vsIn.position, 1.0f)).xyz;
-		normal		+= weights[i]*mul((float3x3)boneTransforms[vsIn.boneIndices[i]], vsIn.normal);
+		boneTransform += boneTransforms[vsIn.boneIndices[i]] * weights[i];
+
+		//position	+= weights[i] * mul(float4(vsIn.position, 1.0f), boneTransforms[vsIn.boneIndices[i]]).xyz;
+		//normal	+= weights[i] * mul(vsIn.normal, (float3x3)boneTransforms[vsIn.boneIndices[i]]);
 	}
 
+	position = vsIn.position;
+	normal = vsIn.normal;
+	
+	position = mul(position, boneTransform).xyz;
 
-	output.position		= mul(finalMatrix, float4(position, 1.0f));
-	output.normalW		= mul(worldMatrix, float4(normal, 0.0f)).xyz;
+
+	output.position		= mul(float4(position, 1.0f), finalMatrix);
+	output.normalW		= mul(float4(normal, 0.0f), worldMatrix).xyz;
+
 	output.texcoord		= vsIn.texcoord;
 	return output;
 }

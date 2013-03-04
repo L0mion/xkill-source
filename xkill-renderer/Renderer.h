@@ -31,6 +31,7 @@ class ManagementDebug;
 class ManagementMath;
 class ManagementInstance;
 class ManagementSprites;
+class ManagementAnimation;
 
 class Winfo;
 class TexDesc;
@@ -48,8 +49,8 @@ class SubsetD3D;
 #endif
 
 //temp
-class M3DLoader;
-class AnimatedMesh;
+//class M3DLoader;
+//class AnimatedMesh;
 struct ID3D11Buffer; //Bullet Physics lines
 
 //! Module responsible for managing data related to rendering and doing the actual rendering of XKILL.
@@ -66,11 +67,12 @@ public:
 	void	unloadModels();			//!< Unloads all models in ManagementModel
 	HRESULT	resize(
 		unsigned int screenWidth, 
-		unsigned int screenHeight);	//!< Resizes all management objects that are affected by a change in screen resolution.
-	HRESULT	init();					//!< Initializes members and prepares render.
-	void	update();
-	void	render();	//!< Renders a frame.
+		unsigned int screenHeight);			//!< Resizes all management objects that are affected by a change in screen resolution.
+	HRESULT	init();							//!< Initializes members and prepares render.
+	void	update(float delta);
+	void	render();						//!< Renders a frame.
 	void	loadTextures(TexDesc* texdesc); //!< Forwards information related to what textures Renderer is to load to Renderer-object.
+	void	addAnimation(SkinnedData* skinnedData); //!<Forwards a loaded animation to ManagementAnimation.
 protected:
 private:
 	void initWinfo();					//!< Sends resolution event to find out current resolution, and stores this info in a Winfo-type object. This object is then shared as a pointer amongst Renderer's members.
@@ -88,6 +90,7 @@ private:
 	void	initManagementMath();		//!< Initializes ManagementMath, which manages math-related functions and loading of dx-vectors into generic-type vectors utilizing SIMD.
 	void	initManagementInstance();	//!< Initializes ManagementInstance, which manages all the instances of the various models.
 	HRESULT initManagementSprites();	//!< Initializes ManagementSprites, which manages all sprites.
+	void	initManagementAnimation();	//!< Initialized ManageManagementAnimation, which manages all animations.
 
 	void renderViewportToGBuffer(
 		ViewportData& vpData);											//!< Renders to g-buffer.
@@ -129,6 +132,8 @@ private:
 	void renderHudElementCrossHair(int viewportIndex, float scaleModifierX); //!< Renders a cross hair in the middle óf each viewport.
 	void drawHudElement(int viewportIndex, unsigned int textureId, DirectX::XMFLOAT4X4 transformationMatrix); //!< Draws a single hud element.
 
+	void renderAnimation(unsigned int meshID, DirectX::XMFLOAT4X4 view, DirectX::XMFLOAT4X4 projection);
+
 	//temp
 	void renderAnimatedMesh(
 		DirectX::XMFLOAT4X4 viewMatrix, 
@@ -137,30 +142,38 @@ private:
 	HWND	windowHandle_;	//!< Handle to WinAPI-window.
 	Winfo*	winfo_;			//!< Holds information related to screen dimensions. Object is shared thruought Renderer's members.
 
-	ManagementD3D*		managementD3D_;			//!< Maintains core D3D-objects.
-	ManagementFX*		managementFX_;			//!< Maintaining shaders and input-layouts.
-	ManagementCB*		managementCB_;			//!< Maintaining constant buffers.
-	ManagementLight*	managementLight_;		//!< Maintaining lights.
-	ManagementViewport* managementViewport_;	//!< Maintaining viewports.
-	ManagementModel*	managementModel_;		//!< Maintains the rendering view of a mesh, such as vertex- and index-buffers.
-	ManagementTex*		managementTex_;			//!< Maintains textures to be used in shaders.
-	ManagementSS*		managementSS_;			//!< Maintaining sampler states.
-	ManagementRS*		managementRS_;			//!< Maintaining rasterizer states.
-	ManagementBuffer*	managementBuffer_;		//!< Maintains the G-Buffers of application.
-	ManagementDebug*	managementDebug_;		//!< Used for detecting live COM-objects.
-	ManagementMath*		managementMath_;		//!< Loads dx-math vectors into generic-type vectors and maintains other math-related functions.
-	ManagementInstance*	managementInstance_;	//!< Maintains all instances of respective model in the game.
-	ManagementSprites*  managementSprites_;		//!< Maintaining sprites.
+	ManagementD3D*			managementD3D_;			//!< Maintains core D3D-objects.
+	ManagementFX*			managementFX_;			//!< Maintaining shaders and input-layouts.
+	ManagementCB*			managementCB_;			//!< Maintaining constant buffers.
+	ManagementLight*		managementLight_;		//!< Maintaining lights.
+	ManagementViewport*		managementViewport_;	//!< Maintaining viewports.
+	ManagementModel*		managementModel_;		//!< Maintains the rendering view of a mesh, such as vertex- and index-buffers.
+	ManagementTex*			managementTex_;			//!< Maintains textures to be used in shaders.
+	ManagementSS*			managementSS_;			//!< Maintaining sampler states.
+	ManagementRS*			managementRS_;			//!< Maintaining rasterizer states.
+	ManagementBuffer*		managementBuffer_;		//!< Maintains the G-Buffers of application.
+	ManagementDebug*		managementDebug_;		//!< Used for detecting live COM-objects.
+	ManagementMath*			managementMath_;		//!< Loads dx-math vectors into generic-type vectors and maintains other math-related functions.
+	ManagementInstance*		managementInstance_;	//!< Maintains all instances of respective model in the game.
+	ManagementSprites*		managementSprites_;		//!< Maintaining sprites.
+	ManagementAnimation*	managementAnimation_;	//!< Maintaining animations.
+
 
 	ID3D11Buffer* debugLinesVertexBuffer_;		//!< Might want to move this into some manager of some sort.
+	
+	float delta_;
+
 	ID3D11Buffer*			rayBuffer;
+
 
 	//std::vector<int>* attributesRenderOwner_;	//!< Holds owners of render-attributes.
 	//std::vector<int>* attributesCameraOwner_;
 
 	//temp
-	M3DLoader*		m3dLoader_;
-	AnimatedMesh*	animatedMesh_;
+	//M3DLoader*		m3dLoader_;
+	//AnimatedMesh*	animatedMesh_;
+
+	void initDebugAnimation();
 };			
 			
 #endif //XKILL_RENDERER_RENDERER_H

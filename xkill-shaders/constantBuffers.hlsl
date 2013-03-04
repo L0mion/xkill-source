@@ -3,7 +3,7 @@
 
 #pragma pack_matrix(row_major)
 
-#define MAX_NUM_BONES 64
+#define MAX_NUM_BONES 96
 
 cbuffer cbPerInstance : register (b0)
 {
@@ -59,7 +59,7 @@ cbuffer cbPerSubset : register (b4)
 
 cbuffer cbBones : register (b5)
 {
-	float4x4 boneTransforms[MAX_NUM_BONES];
+	row_major float4x4 boneTransforms[MAX_NUM_BONES];
 };
 
 cbuffer cbSprite : register (b6)

@@ -9,6 +9,7 @@
 #include "AttributeType.h"
 #include "MeshDesc.h"
 #include "MeshVertices.h"
+#include "SkinnedData.h"
 
 //
 // Events info
@@ -73,6 +74,8 @@ enum DLL_U EventType
 	EVENT_SPLITSCREEN_CHANGED,
 	EVENT_RUMBLE,
 	EVENT_PLAYSOUND,
+
+	EVENT_ANIMATION_LOADED,
 
 	// Get events
 	EVENT_GET_ENTITIES,
@@ -720,3 +723,13 @@ public:
 
 	std::string levelName;
 };
+
+class DLL_U Event_AnimationLoaded : public Event
+{
+public:
+	Event_AnimationLoaded(unsigned int meshID, SkinnedData* skinnedData);
+
+	unsigned int meshID;
+	SkinnedData* skinnedData;
+};
+

@@ -74,6 +74,15 @@ std::vector<LoaderFbxModelDesc> LoaderFbx::load(std::string filename)
 	if(success)
 		success = loadScene(filename);
 
+
+	FbxAxisSystem sceneAxisSystem = fbxScene_->GetGlobalSettings().GetAxisSystem();
+	FbxAxisSystem xkillAxisSystem(FbxAxisSystem::eDirectX);
+	if(sceneAxisSystem != xkillAxisSystem)
+		xkillAxisSystem.ConvertScene(fbxScene_);
+	
+	sceneAxisSystem = fbxScene_->GetGlobalSettings().GetAxisSystem();
+
+
 	FbxNode* node = fbxScene_->GetRootNode();
 	if(node)
 	{
@@ -248,8 +257,16 @@ void LoaderFbx::parseMesh(FbxNode* node)
 	LoaderFbxMaterialDesc				materialDesc;
 	std::vector<LoaderFbxTextureDesc>	textureDesc;
 
+	int poseCount = fbxScene_->GetPoseCount();
+	FbxPose* fbxPose = nullptr;
+	for(int i=0; i<poseCount; i++)
+	{
+		if(fbxScene_->GetPose(i)->IsBindPose())
+			fbxPose = fbxScene_->GetPose(i);
+	}
+
 	FbxMesh* mesh = (FbxMesh*)node->GetNodeAttribute();
-	meshLoader_->parseMesh(mesh, &meshDesc);
+	meshLoader_->parseMesh(mesh, nullptr, &meshDesc);
 	materialLoader_->parseMaterial(mesh, &materialDesc);
 	textureLoader_->parseTexture(mesh, &textureDesc);
 

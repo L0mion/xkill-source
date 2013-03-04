@@ -76,6 +76,8 @@ enum DLL_U AttributeType
 	ATTRIBUTE_EXPLOSIONSPHERE,
 	ATTRIBUTE_RAY,
 
+	ATTRIBUTE_ANIMATION,
+
 	// Behaviors are attributes with more logic tied to them,
 	// and be should independent of other attributes (should not have pointer to them)
 	// not sure about this yet
@@ -693,4 +695,16 @@ struct DLL_U Attribute_Ray : public IAttribute
 
 	AttributeType getType(){return ATTRIBUTE_RAY;}
 	std::string getName(){return "Ray";}
+};
+
+struct DLL_U Attribute_Animation : public IAttribute
+{
+	Attribute_Animation();
+	~Attribute_Animation();
+
+	int animationID;
+	float time;
+
+	AttributeType getType(){return ATTRIBUTE_ANIMATION;}
+	std::string getName(){return "Animation";}
 };
