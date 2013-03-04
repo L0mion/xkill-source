@@ -16,6 +16,33 @@
 //#include <xkill-utilities/FiniteState.h>
 //#include "States.h"
 
+//// timer defines
+
+#define XKILLPROFILING // commment away to skip profiling
+#ifdef XKILLPROFILING
+#include <xkill-utilities\Converter.h>
+#include <time.h>
+#include <iostream>
+#include <Windows.h>
+static float outside;
+static std::vector<float> inputtimer;
+static std::vector<float> physicstimer;
+static std::vector<float> cameratimer;
+static std::vector<float> gametimer;
+static std::vector<float> soundtimer;
+static std::vector<float> hackstimer;
+static std::vector<float> scoretimer;
+static std::vector<float> rendertimer;
+static std::vector<float> totaltimer;
+#define calctime(vectorname, call ) {  clock_t deltatimevar = clock();	\
+							call \
+							vectorname.push_back(((float)(clock()-deltatimevar))/((float)CLOCKS_PER_SEC));} 
+#define outputaverage(outname, vectorname) {float sum=0; for(unsigned int i=0;i<vectorname.size();i++) { sum += vectorname.at(i);} std::string out = outname;  out +=" "; sum = sum/(float)vectorname.size(); out += Converter::FloatToStr(sum); out +=" "; out += Converter::IntToStr((int)(100.0f*sum/totalAverage));  out +="\n"; OutputDebugStringA(out.c_str()); }
+#else
+#define calctime(vectorname, call ) call
+#define outputaverage(outname, vectorname)
+#endif
+
 #define SAFE_DELETE(x) if( x ) { delete(x); (x) = NULL; }
 
 ComponentManager::ComponentManager()
@@ -23,6 +50,8 @@ ComponentManager::ComponentManager()
 	SUBSCRIBE_TO_EVENT(this, EVENT_GAMEOVER);
 	SUBSCRIBE_TO_EVENT(this, EVENT_END_DEATHMATCH);
 	SUBSCRIBE_TO_EVENT(this, EVENT_START_DEATHMATCH);
+	
+	
 
 	render_			= NULL;
 	physics_		= NULL;
@@ -39,6 +68,22 @@ ComponentManager::~ComponentManager()
 	//
 	// Clean up behind ourselves like good little programmers
 	//
+#ifdef XKILLPROFILING
+	float totalAverage = 0; for(unsigned int i=0;i<totaltimer.size();i++) { totalAverage += totaltimer.at(i);} totalAverage = totalAverage/(float)totaltimer.size();
+	outputaverage("input",	inputtimer)
+	outputaverage("camera",	cameratimer)
+	outputaverage("game",	gametimer)
+	outputaverage("sound",	soundtimer)
+	outputaverage("hacks",	hackstimer)
+	outputaverage("score",	scoretimer)
+	outputaverage("physics",physicstimer)
+	outputaverage("render",	rendertimer)
+	outputaverage("total",	totaltimer)
+	std::string out = Converter::FloatToStr(totaltimer.size()*totalAverage);
+	out += "\n";
+	out += Converter::FloatToStr(outside);
+	OutputDebugStringA(out.c_str());
+#endif
 
 	SAFE_DELETE(render_);
 	SAFE_DELETE(physics_);
@@ -173,6 +218,10 @@ void updateOffset()
 	}
 }
 
+
+
+
+
 void ComponentManager::update(float delta)
 {
 	// Performs necessary per-frame updating of some sub-parts of EventManager.
@@ -185,21 +234,31 @@ void ComponentManager::update(float delta)
 
 	if(GET_STATE() == STATE_DEATHMATCH)
 	{
-		input_->onUpdate(delta);
-		physics_->onUpdate(delta);
+#ifdef XKILLPROFILING
+		static clock_t deltatimevartotal2;
+		clock_t deltatimevartotal = clock();
+		outside += ((float)(deltatimevartotal-deltatimevartotal2))/((float)CLOCKS_PER_SEC);
+#endif
+		calctime(inputtimer,input_->onUpdate(delta);)
+		calctime(physicstimer,physics_->onUpdate(delta);)
 		updateOffset();
-		camera_->onUpdate(delta);
+		calctime(cameratimer,camera_->onUpdate(delta);)
 		updateCamera();
 		updateOffset();
 		
-		game_->onUpdate(delta);
+		calctime(gametimer,game_->onUpdate(delta);)
 
-		sound_->onUpdate(delta);
-		hacks_->onUpdate(delta);
+		calctime(soundtimer,sound_->onUpdate(delta);)
+		calctime(hackstimer,hacks_->onUpdate(delta);)
 
-		score_->onUpdate(delta);
-		render_->onUpdate(delta);
+		calctime(scoretimer,score_->onUpdate(delta);)
+		calctime(rendertimer,render_->onUpdate(delta);)
 	
+#ifdef XKILLPROFILING
+		deltatimevartotal2 = clock();
+		totaltimer.push_back(((float)(deltatimevartotal2-deltatimevartotal))/((float)CLOCKS_PER_SEC));
+#endif
+
 		SEND_EVENT(&Event(EVENT_UPDATE));
 	}
 	else if(GET_STATE() == STATE_GAMEOVER)
