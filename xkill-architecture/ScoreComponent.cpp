@@ -34,7 +34,7 @@ bool ScoreComponent::init()
 	SAFE_DELETE(gameTimer_);
 
 	schedulerTimer_ = new Timer(10.0f);
-	cycleTimer_ = new Timer(1.0f);
+	cycleTimer_ = new Timer(3.0f);
 
 	gameTimer_ = new Timer(settings->timeLimit);
 
@@ -130,7 +130,6 @@ void ScoreComponent::schedulerScoreCounting(float delta)
 
 			while(itrPlayer.hasNext())	// Loop through all player and find if anyone has top priority
 			{
-				//Attribute_Player* player = itrPlayer.getNext();
 				AttributePtr<Attribute_Player> player = itrPlayer.getNext();
 
 				if(player->priority > 0)
