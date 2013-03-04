@@ -126,7 +126,7 @@ public:
 class Menu_HUD : public QWidget, IObserver
 {
 private:
-	AttributePtr<Attribute_SplitScreen> splitScreen;
+	AttributePtr<Attribute_SplitScreen> ptr_splitScreen;
 	Ui::Menu_HUD ui;
 	HudMessage_Manager hudMessage_manager;
 	float healthFade;

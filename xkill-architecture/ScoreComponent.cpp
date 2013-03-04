@@ -122,6 +122,7 @@ void ScoreComponent::schedulerScoreCounting(float delta)
 	else
 	{
 		schedulerTimer_->update(delta);
+		SETTINGS->timeUntilScheduling = schedulerTimer_->getTimeLeft();
 		if(schedulerTimer_->hasTimerExpired())
 		{
 			int topPlayerIndex = -1;

@@ -100,7 +100,7 @@ void CollisionManager::collision_applyDamage(Entity* entity1, Entity* entity2)
 									}
 									else //Punish player for blowing himself up
 									{
-										{Event_PostHudMessage e("", creatorOfProjectile_ptr_player); e.setHtmlMessage("You self-terminated","","", "-1 priority"); SEND_EVENT(&e);}
+										{Event_PostHudMessage e("", creatorOfProjectile_ptr_player); e.setHtmlMessage("You","self-terminated","", "-1 priority"); SEND_EVENT(&e);}
 										creatorOfProjectile_ptr_player->priority--;
 									}
 									DEBUGPRINT("Player with entity id " << damage->owner_entityID << " killed player with entity id " << entity1->getID());

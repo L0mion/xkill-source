@@ -146,7 +146,7 @@ void MainWindow::keyPressEvent( QKeyEvent* e )
 	if((e->key()==Qt::Key_4))
 	{
 		Event_PostHudMessage e("");
-		e.setHtmlMessage("You terminated", "Blarrhgh", "+2 priority");
+		e.setHtmlMessage("You terminated", "Blarrhgh", "", "+2 priority");
 		e.receiver = Event_PostHudMessage::RECEIVER_ALL;
 		SEND_EVENT(&e);
 	}
