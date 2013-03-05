@@ -247,7 +247,7 @@ void Menu_HUD::refresh()
 			ui.progressBar_health->hide();
 			ui.progressBar_ammo->hide();
 
-			ui.frame_scoreboard->hide();
+			ui.frame_scoreboard->show();
 		}
 	}
 	else
@@ -260,7 +260,7 @@ void Menu_HUD::refresh()
 			ui.label_firingMode->show();
 			ui.frame_bottom->show();
 
-			ui.frame_scoreboard->hide();
+			ui.frame_scoreboard->show();
 		}
 	}
 

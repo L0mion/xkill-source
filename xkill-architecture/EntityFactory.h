@@ -171,7 +171,7 @@ public:
 		ptr_lightPoint->lightPoint.diffuse		= color;
 		ptr_lightPoint->lightPoint.specular		= color;
 		ptr_lightPoint->lightPoint.range		= 4.0f;
-		ptr_lightPoint->lightPoint.attenuation	= Float3(0.0f, 2.0f, 0.0f);*/
+		ptr_lightPoint->lightPoint.attenuation	= Float3(0.0f, 2.0f, 0.0f);
 	}
 
 	AttributePtr<Attribute_Camera> createCamera(Entity* entity, AttributePtr<Attribute_Spatial> ptr_parent_spatial)
