@@ -320,7 +320,8 @@ void Event_PostHudMessage::setStyle( Style style )
 
 
 	// Add an additional black background
-	styleSheet += "background-color: rgba(0, 0, 0, 50); padding: 1px 7px; font-size:14pt; ";
+	styleSheet += "background-color: rgba(0, 0, 0, 50); padding: 2px 10px; font-size: 15px;";
+	//styleSheet += "font-size: 30px; font-family: pxll; font-weight: normal;";
 }
 
 void Event_PostHudMessage::setHtmlMessage( std::string prefex, std::string subject, std::string suffix /*= ""*/, std::string description /*= ""*/ )
