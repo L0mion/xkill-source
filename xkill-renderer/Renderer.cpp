@@ -30,10 +30,11 @@
 
 //tmep
 #include "Buffer_SrvDsv.h"
+#include "TimerDX.h"
 
 ATTRIBUTES_DECLARE_ALL;
 
-#define XKILLPROFILING // commment away to skip profiling
+//#define XKILLPROFILING // commment away to skip profiling
 #ifdef XKILLPROFILING
 #include <xkill-utilities\Converter.h>
 #include <time.h>
@@ -50,10 +51,23 @@ static std::vector<float> hudtimer;
 static std::vector<float> presenttimer;
 static std::vector<float> cleartimer;
 static std::vector<float> cbtimer;
-#define calctime(vectorname, call ) {  clock_t deltatimevar = clock();	\
-							call devcon->Flush();\
-							vectorname.push_back(((float)(clock()-deltatimevar))/((float)CLOCKS_PER_SEC));} 
-#define outputaverage(outname, vectorname) {float sum=0; for(unsigned int i=0;i<vectorname.size();i++) { sum += vectorname.at(i);} std::string out = outname;  out +=" "; sum = sum/(float)vectorname.size(); out +=Converter::FloatToStr(sum); out +="\n"; OutputDebugStringA(out.c_str()); }
+
+static TimerDX dxlightstimer;
+static TimerDX dxinstancetimer;
+static TimerDX dxshadowtimer;
+static TimerDX dxgbuffertimer;
+static TimerDX dxbackbuffertimer;
+static TimerDX dxglowtimer;
+static TimerDX dxhudtimer;
+static TimerDX dxpresenttimer;
+static TimerDX dxcleartimer;
+static TimerDX dxcbtimer;
+
+#define calctime(vectorname, call ) { dx##vectorname.startTimer(devcon);	\
+							call \
+							dx##vectorname.stopTimer(devcon); \
+							vectorname.push_back(dx##vectorname.Time(devcon));} 
+#define outputaverage(outname, vectorname) {float sum=0; for(unsigned int i=0;i<vectorname.size();i++) { sum += vectorname.at(i);} std::string out = outname;  out +=" "; sum = sum/(float)vectorname.size()/1000.0f; out +=Converter::FloatToStr(sum); out +="\n"; OutputDebugStringA(out.c_str()); }
 #else
 #define calctime(vectorname, call ) call
 #define outputaverage(outname, vectorname)
@@ -95,16 +109,16 @@ Renderer::~Renderer()
 {
 
 #ifdef XKILLPROFILING
-	
+	ID3D11DeviceContext* devcon = managementD3D_->getDeviceContext();
 	outputaverage("\nlight",	lightstimer)
 	outputaverage("instance",	instancetimer)
-	outputaverage("clear",	cleartimer)
-	outputaverage("cb",	cbtimer)
-	outputaverage("shadow",	shadowtimer)
+	outputaverage("clear",		cleartimer)
+	outputaverage("cb",			cbtimer)
+	outputaverage("shadow",		shadowtimer)
 	outputaverage("gbuffer",	gbuffertimer)
 	outputaverage("backbuffer",	backbuffertimer)
-	outputaverage("glow",	glowtimer)
-	outputaverage("hud",hudtimer)
+	outputaverage("glow",		glowtimer)
+	outputaverage("hud",		hudtimer)
 	outputaverage("present",	presenttimer)
 #endif
 
@@ -238,6 +252,21 @@ HRESULT Renderer::init()
 					   animatedMesh_->getSkinInfo());
 	animatedMesh_->init(managementD3D_->getDevice());
 	*/
+
+
+#ifdef XKILLPROFILING
+	ID3D11Device* device = managementD3D_->getDevice();
+	dxlightstimer.init(device);
+	dxinstancetimer.init(device);
+	dxshadowtimer.init(device);
+	dxgbuffertimer.init(device);
+	dxbackbuffertimer.init(device);
+	dxglowtimer.init(device);
+	dxhudtimer.init(device);
+	dxpresenttimer.init(device);
+	dxcleartimer.init(device);
+	dxcbtimer.init(device);
+#endif //XKILLPROFILING 
 
 	return hr;
 }
