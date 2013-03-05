@@ -309,19 +309,25 @@ Event_PostHudMessage::Event_PostHudMessage( std::string message, AttributePtr<At
 
 void Event_PostHudMessage::setStyle( Style style )
 {
-	styleSheet = "color: rgba(255, 255, 255, 220); font-size:12pt;";
+	styleSheet = "color: rgba(255, 255, 255, 220);";
+
 
 	if(style == STYLE_NORMAL){}
 	if(style == STYLE_SUBTILE)
 		styleSheet = "color: rgba(255, 255, 255, 100);";
 	if(style == STYLE_WARNING)
 		styleSheet = "color: rgba(255, 0, 0, 255); font-size:15pt;";
+
+
+	// Add an additional black background
+	styleSheet += "background-color: rgba(0, 0, 0, 50); padding: 2px 10px; font-size: 15px;";
+	//styleSheet += "font-size: 30px; font-family: pxll; font-weight: normal;";
 }
 
 void Event_PostHudMessage::setHtmlMessage( std::string prefex, std::string subject, std::string suffix /*= ""*/, std::string description /*= ""*/ )
 {
 	std::string text_normal = "<span style='color: rgba(255, 255, 255, 240);'>";
-	std::string text_subtile = "<span style='color: rgba(200, 200, 200, 230);'>";
+	std::string text_subtile = "<span style='color: rgba(255, 255, 255, 100);'>";
 	std::string text_end = "</span>";
 
 	prefex = text_subtile + prefex + text_end;

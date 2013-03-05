@@ -125,13 +125,12 @@ Menu_Main2::Menu_Main2( QWidget* parent ) : QMainWindow()
 		levelListModel->appendRow(stdItem);
 	}
 
-	//ui.comboBox_LevelSelect->setModel(levelListModel);
-
-	levelCurrent++;//check
+	// Load level
+	slot_menu_next_level(); // skip to next level
 	SEND_EVENT(&Event_LoadLevel(levelNames[levelCurrent]));
 	SETTINGS->currentLevel = levelNames[levelCurrent];
-
 	updateLevelSelectionInterface();
+	
 }
 
 void Menu_Main2::updateLevelSelectionInterface()
@@ -169,7 +168,17 @@ void Menu_Main2::mousePressEvent( QMouseEvent *e )
 void Menu_Main2::loadCustomFonts()
 {
 	QStringList list;
-	list << "arcade_interlaced.ttf" << "arcade_rounded.ttf" << "arista_light.ttf" << "digital_7_mono.ttf" << "angies_new_house.ttf";
+	list 
+		<< "arcade_interlaced.ttf" 
+		<< "arcade_rounded.ttf" 
+		<< "arista_light.ttf" 
+		<< "digital_7_mono.ttf" 
+		<< "angies_new_house.ttf" 
+		<< "pixel_square_10.ttf" 
+		<< "pixel_square_bold10.ttf" 
+		<< "pxll.ttf" 
+		<< "computerfont.ttf"
+		<< "statix.ttf";
 	int fontID(-1);
 	bool fontWarningShown(false);
 	for (QStringList::const_iterator constIterator = list.constBegin(); constIterator != list.constEnd(); ++constIterator) 

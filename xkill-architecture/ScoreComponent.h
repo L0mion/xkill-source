@@ -28,8 +28,16 @@ private:
 	Timer* cycleTimer_;							//!	Keeps track of time left until next cycle
 	Timer* gameTimer_;							//! Keeps track of current session time and when it's over
 	bool executionMode_;						//! Is the execution mode active
+	bool nullProcessExecuting_;					//! Is the null process executing
 	unsigned int executingPlayerIndex_;			//! The index of the player that is currently executing
 
 	void schedulerScoreCounting(float delta);	//! Calculate the score according to scheduler game mode
 	void deathMatchScoreCounting(float delta);	//!	Calculate the score according to death match game mode
+
+	void handleExecutionMode(float delta);		//! Handle an player executing
+	void handleSchedulerMode(float delta);		//! Handle null process running and scheduler mode
+
+	void activateNullProcess();					//! Activate null process
+	void deactivateNullProcess();				//! Deactivate null process
+	void executePlayer(int playerIndex);		//! Enter execution mode and execute the player with index 'playerIndex'
 };

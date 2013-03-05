@@ -23,6 +23,7 @@ public:
 	bool soundMuted;
 	float soundVolume;
 	void* overlayWidget;
+	float timeUntilScheduling;
 
 	float timeScale();
 	void setTimeScale(float timeScale);

@@ -45,6 +45,7 @@ private:
 	btDiscreteDynamicsWorld*					dynamicsWorld_; //!< Used to handle simulation
 	btBulletWorldImporter*						bulletImporter_; //!< Used to import collisionshapes from .bullet files
 	debugDrawDispatcher*						debugDrawer_;
+	bool										nullProcessExecuting_;
 
 	btAlignedObjectArray<PhysicsObject*>*		physicsObjects_;  //!< List of objects mapping to physics attributes on wich simulation is run
 	btAlignedObjectArray<FrustumPhysicsObject*>* frustumPhysicsObjects_;  //!< List of frustums mapping to cameras wich is used to cull physicsobjects
@@ -52,6 +53,7 @@ private:
 	void synchronizeWithAttributes(AttributePtr<Attribute_Physics> ptr_physics, int physicsAttributeIndex);  //!< Synronize newly added physicsattributes with physicsobjects
 	void updateCulling();  //!< Update frustums, clear culling data, sync frustums with cameras
 	void doCulling(unsigned int frustumAttributeIndex, unsigned int objectAttributeIndex);  //!< Set culling data based on a collision between frustum and physicsobject
+	void razeWorld();
 public:
 	PhysicsComponent();
 	~PhysicsComponent();

@@ -360,16 +360,6 @@ void PhysicsComponent::onEvent(Event* e)
 				{
 					if(physicsObjects_->at(ptr_physics.index()) != nullptr)
 					{
-						std::string className = typeid( *(physicsObjects_->at(ptr_physics.index())) ).name();
-
-						OUTPUT_WINDOW_PRINT("Attribute index: " << ptr_physics.index());
-						OUTPUT_WINDOW_PRINT("Classname: " << className.c_str());
-
-						if(className != "class PropPhysicsObject")
-						{
-							OUTPUT_WINDOW_PRINT("ERROR");
-						}
-						
 						PropPhysicsObject* propPhysicsObject = static_cast<PropPhysicsObject*>(physicsObjects_->at(ptr_physics.index()));
 						
 						ptr_physics->collisionFilterGroup = XKILL_Enums::PhysicsAttributeType::WORLD;
@@ -379,13 +369,13 @@ void PhysicsComponent::onEvent(Event* e)
 
 						ptr_physics->ptr_spatial->ptr_position->position = Float3(propPhysicsObject->worldOrigin_.x(),propPhysicsObject->worldOrigin_.y(),propPhysicsObject->worldOrigin_.z());
 					
-						propPhysicsObject->setCollisionFlags(propPhysicsObject->getCollisionFlags() | btCollisionObject::CF_STATIC_OBJECT);
+						propPhysicsObject->setCollisionFlags(propPhysicsObject->getCollisionFlags() | btCollisionObject::CF_STATIC_OBJECT);//check, might not be needed
 
 						ptr_physics->gravity = Float3(0.0f, 0.0f, 0.0f);
 						ptr_physics->linearVelocity = Float3(0.0f, 0.0f, 0.0f);
 						ptr_physics->mass = 0;
 						ptr_physics->collisionResponse = true;
-						//ptr_physics->reloadDataIntoBulletPhysics = true;
+
 						SEND_EVENT(&Event_ReloadPhysicsAttributeDataIntoBulletPhysics(ptr_physics.index()));
 					}
 				}

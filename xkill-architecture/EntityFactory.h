@@ -97,8 +97,28 @@ public:
 		CREATE_ATTRIBUTE(ptr_ray, Attribute_Ray, ray, entity);
 		createLaserAutomaticSniperExecutionRay(entity, ptr_ray);
 		
+
+		AttributePtr<Attribute_Spatial> ptr_light_spatial;
+		AttributePtr<Attribute_Spatial> ptr_spatial_tmp = ptr_spatial;
+		{
+			CREATE_ATTRIBUTE(ptr_position, Attribute_Position, position, entity);
+			CREATE_ATTRIBUTE(ptr_spatial, Attribute_Spatial, spatial, entity);
+			ptr_spatial->ptr_position = ptr_position;
+			CREATE_ATTRIBUTE(ptr_offset, Behavior_Offset, offset, entity);
+			ptr_offset->ptr_spatial = ptr_spatial;
+			ptr_offset->ptr_parent_spatial_position = ptr_spatial_tmp;
+			ptr_offset->ptr_parent_spatial_rotation = ptr_spatial_tmp;
+			ptr_offset->offset_position = Float3(0.0f, -0.6f, 0.0f);
+
+			ptr_light_spatial = ptr_spatial;
+
+			CREATE_ATTRIBUTE(ptr_render, Attribute_Render, render, entity);
+			ptr_render->ptr_spatial = ptr_spatial;
+			ptr_render->meshID = XKILL_Enums::ModelId::PROJECTILE_BULLET;
+		}
+
 		CREATE_ATTRIBUTE(ptr_lightPoint, Attribute_Light_Point, lightPoint, entity);
-		ptr_lightPoint->ptr_position			= ptr_position;
+		ptr_lightPoint->ptr_position			= ptr_light_spatial->ptr_position;
 		Float4 color = Float4(1.0f, 0.0f, 0.0f, 1.0f);
 		ptr_lightPoint->lightPoint.ambient		= Float4(0.0f, 0.0f, 0.0f, 1.0f);
 		ptr_lightPoint->lightPoint.diffuse		= color;

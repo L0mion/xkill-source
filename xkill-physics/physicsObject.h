@@ -4,6 +4,8 @@
 #include <BulletDynamics/Dynamics/btRigidBody.h>
 #include <xkill-utilities\XKILL_Enums.h>
 
+#include <string>
+
 class btDiscreteDynamicsWorld;
 class debugDrawDispatcher;
 

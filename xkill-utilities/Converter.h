@@ -34,7 +34,8 @@ public:
 	static std::string FloatToStr(float f)
 	{
 		std::stringstream ss;
-		ss << std::setprecision(5) << f;
+		ss << std::fixed;
+		ss << f;
 		return ss.str();
 	}
 

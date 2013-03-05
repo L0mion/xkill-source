@@ -14,7 +14,6 @@
 // Iterators
 ATTRIBUTES_DECLARE_ALL;
 
-
 GameComponent::GameComponent(void)
 {
 	SUBSCRIBE_TO_EVENT(this, EVENT_STARTGAME);
@@ -273,7 +272,7 @@ void GameComponent::onUpdate(float delta)
 		//--------------------------------------------------------------------------------------
 		// State: player is dead
 		//--------------------------------------------------------------------------------------
-		else if(ptr_player->detectedAsDead) 
+		else if(ptr_player->detectedAsDead)
 		{
 			//--------------------------------------------------------------------------------------
 			// Handle dead player
@@ -291,7 +290,7 @@ void GameComponent::onUpdate(float delta)
 			//--------------------------------------------------------------------------------------
 			// Respawn player
 			//--------------------------------------------------------------------------------------
-			else 
+			else if(!nullProcessExecuting)
 			{
 				//--------------------------------------------------------------------------------------
 				// Spawn point
@@ -453,8 +452,10 @@ void GameComponent::onUpdate(float delta)
 					break;
 				case XKILL_Enums::PickupableType::HACK_SPEEDHACK:
 					amount = 5;		//seconds
+					break;
 				case XKILL_Enums::PickupableType::HACK_JETHACK:
 					amount = 5;		//seconds
+					break;
 				}
 
 				//Each pickupable knows it pickupablesSpawnPoint creator
@@ -575,11 +576,10 @@ void GameComponent::onUpdate(float delta)
 			}
 		}  
 
-		for(unsigned int i = 0; i < 100; i++)
+		for(unsigned int i = 0; i < 10; i++)
 		{
 			if(worldPiecesIndices.size() <= 0)
 			{
-				SEND_EVENT(&Event(EVENT_NULL_PROCESS_STOPPED_EXECUTING)); //check
 				break;
 			}
 
@@ -595,7 +595,6 @@ void GameComponent::onUpdate(float delta)
 			ptr_physics->mass = 1;
 
 			SEND_EVENT(&Event_ReloadPhysicsAttributeDataIntoBulletPhysics(ptr_physics.index()));
-
 
 			worldPiecesIndices.at(randomIndex) = worldPiecesIndices.back();
 			worldPiecesIndices.pop_back();
@@ -1055,7 +1054,7 @@ void GameComponent::updateAndInterpretLaser(AttributePtr<Attribute_Ray> ptr_ray,
 		else if(entityHitByRay->hasAttribute(ATTRIBUTE_PLAYER)) //Ray hit another player
 		{
 			std::vector<int> hitPlayerId = entityHitByRay->getAttributes(ATTRIBUTE_PLAYER);
-			for(int i=0;i<hitPlayerId.size();i++)
+			for(int i=0; i<hitPlayerId.size(); i++)
 			{
 				AttributePtr<Attribute_Player> playerAttribute = itrPlayer.at(hitPlayerId.at(i));
 				if(!playerAttribute->detectedAsDead)
@@ -1152,6 +1151,9 @@ void GameComponent::startGame()
 
 	// Hide mouse & menu so it is not distracting from game play
 	SEND_EVENT(&Event_SetMouseLock(true));
+
+	// Make sure the correct windows are shown
+	SEND_EVENT(&Event(EVENT_FOCUS_MAINWINDOW));
 	SEND_EVENT(&Event_EnableHud(true));
 	SEND_EVENT(&Event_EnableMenu(false));
 }
