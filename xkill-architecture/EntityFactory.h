@@ -544,7 +544,7 @@ public:
 	void createRenderableEntity(Entity* entity)
 	{
 		CREATE_ATTRIBUTE(ptr_position, Attribute_Position, position, entity);
-		ptr_position->position = Float3(7.0f, 10.0f, 0.0f);
+		ptr_position->position = Float3(8.0f, 10.0f, 0.0f);
 
 		CREATE_ATTRIBUTE(ptr_spatial, Attribute_Spatial, spatial, entity);
 		ptr_spatial->ptr_position = ptr_position;
