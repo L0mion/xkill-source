@@ -144,14 +144,26 @@ public:
 		CREATE_ATTRIBUTE(ptr_ray, Attribute_Ray, ray, entity);
 		createLaserAutomaticSniperExecutionRay(entity, ptr_ray);
 		
+		/*AttributePtr<Attribute_Spatial> ptr_playerbottom_spatial;
+		{
+			CREATE_ATTRIBUTE(ptr_position, Attribute_Position, position, entity);
+			CREATE_ATTRIBUTE(ptr_spatial, Attribute_Spatial, spatial, entity);
+			ptr_spatial->ptr_position = ptr_position;
+			CREATE_ATTRIBUTE(ptr_offset, Behavior_Offset, offset, entity);
+			ptr_offset->ptr_spatial = ptr_spatial;
+			ptr_offset->ptr_parent_spatial_position = ptr_spatial;
+			ptr_offset->offset_position = Float3(0.0f, -0.5f, 0.0f);
+
+			ptr_playerbottom_spatial = ptr_spatial;
+		}
 		CREATE_ATTRIBUTE(ptr_lightPoint, Attribute_Light_Point, lightPoint, entity);
-		ptr_lightPoint->ptr_position			= ptr_position;
+		ptr_lightPoint->ptr_position			= ptr_playerbottom_spatial->ptr_position;
 		Float4 color = Float4(1.0f, 0.0f, 0.0f, 1.0f);
 		ptr_lightPoint->lightPoint.ambient		= Float4(0.0f, 0.0f, 0.0f, 1.0f);
 		ptr_lightPoint->lightPoint.diffuse		= color;
 		ptr_lightPoint->lightPoint.specular		= color;
 		ptr_lightPoint->lightPoint.range		= 4.0f;
-		ptr_lightPoint->lightPoint.attenuation	= Float3(0.0f, 2.0f, 0.0f);
+		ptr_lightPoint->lightPoint.attenuation	= Float3(0.0f, 2.0f, 0.0f);*/
 	}
 
 	AttributePtr<Attribute_Camera> createCamera(Entity* entity, AttributePtr<Attribute_Spatial> ptr_parent_spatial)
