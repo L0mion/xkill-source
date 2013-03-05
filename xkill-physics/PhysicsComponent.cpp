@@ -355,7 +355,7 @@ void PhysicsComponent::onEvent(Event* e)
 				AttributePtr<Attribute_Physics> ptr_physics = itrPhysics.getNext();
 				if(ptr_physics->collisionFilterGroup == XKILL_Enums::PhysicsAttributeType::PROP)
 				{
-					PropPhysicsObject* propPhysicsObject = static_cast<PropPhysicsObject*>(physicsObjects_->at(ptr_physics.index()));
+					PropPhysicsObject* propPhysicsObject = static_cast<PropPhysicsObject*>(physicsObjects_->at(itrPhysics.storageIndex()));
 					
 					ptr_physics->collisionFilterGroup = XKILL_Enums::PhysicsAttributeType::WORLD;
 					ptr_physics->collisionFilterMask = XKILL_Enums::PhysicsAttributeType::PLAYER | XKILL_Enums::PhysicsAttributeType::PROJECTILE |
@@ -366,7 +366,7 @@ void PhysicsComponent::onEvent(Event* e)
 					propPhysicsObject->setCollisionFlags(propPhysicsObject->getCollisionFlags() | btCollisionObject::CF_STATIC_OBJECT);
 
 					ptr_physics->gravity = Float3(0.0f, 0.0f, 0.0f);
-					ptr_physics->linearVelocity = Float3(0.0f, 0.0f, 0.0f);
+					ptr_physics->linearVelocity = Float3(0.0f, 0.0f, 0.0f); 
 					ptr_physics->mass = 0;
 					ptr_physics->reloadDataIntoBulletPhysics = true;
 				}

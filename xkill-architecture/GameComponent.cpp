@@ -273,7 +273,7 @@ void GameComponent::onUpdate(float delta)
 		//--------------------------------------------------------------------------------------
 		// State: player is dead
 		//--------------------------------------------------------------------------------------
-		else if(ptr_player->detectedAsDead) 
+		else if(ptr_player->detectedAsDead)
 		{
 			//--------------------------------------------------------------------------------------
 			// Handle dead player
@@ -291,7 +291,7 @@ void GameComponent::onUpdate(float delta)
 			//--------------------------------------------------------------------------------------
 			// Respawn player
 			//--------------------------------------------------------------------------------------
-			else 
+			else if(!nullProcessExecuting)
 			{
 				//--------------------------------------------------------------------------------------
 				// Spawn point
@@ -564,37 +564,37 @@ void GameComponent::onUpdate(float delta)
 	//--------------------------------------------------------------------------------------
 	// Drop random world pieces
 	//--------------------------------------------------------------------------------------
-	//std::vector<int> worldPiecesIndices;
-	//if(nullProcessExecuting)
-	//{
-	//	while(itrPhysics.hasNext())
-	//	{
-	//		AttributePtr<Attribute_Physics> ptr_physics = itrPhysics.getNext();
-	//		if(ptr_physics->collisionFilterGroup == XKILL_Enums::PhysicsAttributeType::WORLD)
-	//		{
-	//			worldPiecesIndices.push_back(ptr_physics.index());
-	//		}
-	//	}
+	std::vector<int> worldPiecesIndices;
+	if(nullProcessExecuting)
+	{
+		while(itrPhysics.hasNext())
+		{
+			AttributePtr<Attribute_Physics> ptr_physics = itrPhysics.getNext();
+			if(ptr_physics->collisionFilterGroup == XKILL_Enums::PhysicsAttributeType::WORLD)
+			{
+				worldPiecesIndices.push_back(ptr_physics.index());
+			}
+		}
 
-	//	for(unsigned int i = 0; i < 10; i++)
-	//	{
-	//		if(worldPiecesIndices.size() <= 0)
-	//		{
-	//			break;
-	//		}
+		for(unsigned int i = 0; i < 10; i++)
+		{
+			if(worldPiecesIndices.size() <= 0)
+			{
+				break;
+			}
 
-	//		AttributePtr<Attribute_Physics> ptr_physics;
-	//		int randomIndex = rand()%worldPiecesIndices.size();
-	//		ptr_physics = itrPhysics.at(worldPiecesIndices.at(randomIndex));
-	//		ptr_physics->collisionFilterGroup = XKILL_Enums::PhysicsAttributeType::PROP;
-	//		ptr_physics->collisionFilterMask = XKILL_Enums::PhysicsAttributeType::NOTHING;
-	//		ptr_physics->mass = 1;
-	//		ptr_physics->reloadDataIntoBulletPhysics = true;
+			AttributePtr<Attribute_Physics> ptr_physics;
+			int randomIndex = rand()%worldPiecesIndices.size();
+			ptr_physics = itrPhysics.at(worldPiecesIndices.at(randomIndex));
+			ptr_physics->collisionFilterGroup = XKILL_Enums::PhysicsAttributeType::PROP;
+			ptr_physics->collisionFilterMask = XKILL_Enums::PhysicsAttributeType::NOTHING;
+			ptr_physics->mass = 1;
+			ptr_physics->reloadDataIntoBulletPhysics = true;
 
-	//		worldPiecesIndices.at(randomIndex) = worldPiecesIndices.back();
-	//		worldPiecesIndices.pop_back();
-	//	}
-	//}
+			worldPiecesIndices.at(randomIndex) = worldPiecesIndices.back();
+			worldPiecesIndices.pop_back();
+		}
+	}
 }
 
 void GameComponent::event_PhysicsAttributesColliding(Event_PhysicsAttributesColliding* e)

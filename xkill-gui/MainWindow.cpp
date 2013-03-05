@@ -118,7 +118,7 @@ void MainWindow::keyPressEvent( QKeyEvent* e )
 	// Toggle editor
 	if((e->key()==Qt::Key_F1))
 		ui.dockWidget->toggleViewAction()->activate(QAction::Trigger);
-
+	
 	// Skip menu
 	if((e->key()==Qt::Key_F2))
 		SEND_EVENT(&Event(EVENT_STARTGAME));
