@@ -8,6 +8,7 @@
 
 #include "LoaderMD5JointDesc.h"
 #include "LoaderMD5MeshDesc.h"
+#include "LoaderMD5ModelDesc.h"
 
 class LoaderMD5
 {
@@ -15,7 +16,7 @@ public:
 	LoaderMD5();
 	~LoaderMD5();
 
-	bool loadModel(const std::string& filename);
+	bool loadModel(const std::string& filename, LoaderMD5ModelDesc* modelDesc);
 	bool loadAnimation(const std::string& filename);
 
 private:
@@ -40,6 +41,9 @@ private:
 	void ignoreLine(std::ifstream& file, int length);
 	void removeQuotes(std::string& str);
 	void computeQuaternionW(DirectX::XMFLOAT4& quaternion);
+
+	DirectX::XMFLOAT3 normalizeVector(DirectX::XMFLOAT3 vec);
+	DirectX::XMFLOAT3 rotateVector(DirectX::XMFLOAT3 vec, DirectX::XMFLOAT4 quaternion);
 
 	std::ifstream infile_;
 	int fileLength_;

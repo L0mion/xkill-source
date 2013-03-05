@@ -506,9 +506,9 @@ void Renderer::renderViewportToGBuffer(ViewportData& vpData)
 	std::map<unsigned int, InstancedData*> instancesMap = managementInstance_->getInstancesMap();
 	for(std::map<unsigned int, InstancedData*>::iterator i = instancesMap.begin(); i != instancesMap.end(); i++)
 	{
-		if(i->first == 12)
-			renderAnimation(i->first, vpData.view, vpData.proj);
-		else
+	//	if(i->first == 12)
+	//		renderAnimation(i->first, vpData.view, vpData.proj);
+	//	else
 			renderInstance(i->first, i->second, false);
 	}
 
@@ -860,7 +860,8 @@ DirectX::XMFLOAT4X4	Renderer::buildShadows()
 	for(std::map<unsigned int, InstancedData*>::iterator i = instancesMap.begin(); i != instancesMap.end(); i++)
 	{
 		//if(i->first == 7 ) //Check for what models ought to cast shadows?
-		renderInstance(i->first, i->second, true);
+		if(i->first != 12)
+			renderInstance(i->first, i->second, true);
 	}
 
 	//Unset shizzle
@@ -1369,9 +1370,9 @@ void Renderer::renderAnimation(unsigned int meshID, DirectX::XMFLOAT4X4 view, Di
 
 	ModelD3D* modelD3D	= managementModel_->getModelD3D(meshID, device);
 
-	DirectX::XMFLOAT4X4 worldMatrix(0.005f, 0.0f, 0.0f, 0.0f,
-									0.0f, 0.005f, 0.0f, 0.0f,
-									0.0f, 0.0f, 0.005f, 0.0f,
+	DirectX::XMFLOAT4X4 worldMatrix(0.1f, 0.0f, 0.0f, 0.0f,
+									0.0f, 0.1f, 0.0f, 0.0f,
+									0.0f, 0.0f, 0.1f, 0.0f,
 									6.0f, 3.0f, 0.0f, 1.0f);
 	DirectX::XMFLOAT4X4 worldMatrixInverse	= worldMatrix;
 	DirectX::XMFLOAT4X4 finalMatrix			= managementMath_->calculateFinalMatrix(worldMatrix, view, projection);

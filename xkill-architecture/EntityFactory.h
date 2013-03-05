@@ -544,11 +544,12 @@ public:
 	void createRenderableEntity(Entity* entity)
 	{
 		CREATE_ATTRIBUTE(ptr_position, Attribute_Position, position, entity);
-		ptr_position->position = Float3(0.0f, 2.1f, 0.0f);
+		ptr_position->position = Float3(7.0f, 10.0f, 0.0f);
 
 		CREATE_ATTRIBUTE(ptr_spatial, Attribute_Spatial, spatial, entity);
 		ptr_spatial->ptr_position = ptr_position;
-		ptr_spatial->scale = Float3(0.01f, 0.01f, 0.01f);
+		ptr_spatial->scale = Float3(0.1f, 0.1f, 0.1f);
+		ptr_spatial->rotation = Float4(-0.707f, 0.0, 0.0f, 0.707f);
 		
 		CREATE_ATTRIBUTE(ptr_render, Attribute_Render, render, entity);
 		ptr_render->ptr_spatial = ptr_spatial;

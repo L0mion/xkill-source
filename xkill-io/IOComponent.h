@@ -2,6 +2,7 @@
 #define XKILL_IO_IOCOMPONENT_H
 
 struct MdlDescModel;
+struct LoaderMD5ModelDesc;
 
 class MeshMakerObj;
 class MeshModel;
@@ -72,6 +73,9 @@ private:
 	void loadFbxAnimation(std::vector<LoaderFbxAnimationDesc> animationDescs, LoaderFbxMeshDesc mesh, SkinnedData* skinnedData);
 	
 	bool loadMD5(std::string modelName, std::string modelPath, MdlDescModel* modelDesc, MeshDesc& meshDesc);
+	void loadMD5AssembleVertices(std::vector<VertexDesc>* vertices, LoaderMD5ModelDesc* md5Model);
+	void loadMD5AssembleSubsets(std::vector<SubsetDesc>* subsets, LoaderMD5ModelDesc* md5Model);
+	void loadMD5AssembleMaterials(std::vector<MaterialDesc>* materials, LoaderMD5ModelDesc* md5Model);
 
 	bool loadPGY(std::string modelName, std::string modelPath, MdlDescModel* modelDesc, MeshDesc& meshDesc, SkinnedData** skinnedData);
 	bool writePGY(std::string modelName, std::string modelPath, MeshDesc meshDesc, VertexType vertexType, SkinnedData* skinnedData);

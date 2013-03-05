@@ -19,7 +19,7 @@ LoaderMD5::~LoaderMD5()
 		infile_.close();
 }
 
-bool LoaderMD5::loadModel(const std::string& filename)
+bool LoaderMD5::loadModel(const std::string& filename, LoaderMD5ModelDesc* modelDesc)
 {
 	reset();
 
@@ -49,7 +49,10 @@ bool LoaderMD5::loadModel(const std::string& filename)
 		infile_ >> param;
 	}
 
-	return false;
+	modelDesc->joints_ = joints_;
+	modelDesc->meshes_ = meshes_;
+	
+	return true;
 }
 
 void LoaderMD5::parseParamMD5Version()
@@ -121,7 +124,8 @@ void LoaderMD5::parseParamMesh()
 		infile_ >> param;
 	}
 
-
+	prepareMesh(mesh);
+	prepareNormals(mesh);
 
 	meshes_.push_back(mesh);
 	
@@ -167,9 +171,9 @@ void LoaderMD5::parseParamNumTris(LoaderMD5MeshDesc& mesh)
 		ignoreLine(infile_, fileLength_);
 
 		mesh.triangles_.push_back(triangle);
-		mesh.indices_.push_back(static_cast<unsigned int>(triangle.indices_[0]));
-		mesh.indices_.push_back(static_cast<unsigned int>(triangle.indices_[1]));
-		mesh.indices_.push_back(static_cast<unsigned int>(triangle.indices_[2]));
+		mesh.indices_.push_back(static_cast<unsigned int>(triangle.indices_[2]));	//0
+		mesh.indices_.push_back(static_cast<unsigned int>(triangle.indices_[1]));	//1
+		mesh.indices_.push_back(static_cast<unsigned int>(triangle.indices_[0]));	//2
 	}
 }
 void LoaderMD5::parseParamNumWeights(LoaderMD5MeshDesc& mesh)
@@ -208,11 +212,7 @@ void LoaderMD5::prepareMesh(LoaderMD5MeshDesc& mesh)
 			LoaderMD5JointDesc& joint = joints_[weight.jointID_];
 
 			//joint.orientationQuaternion_ * weight.position_;
-			DirectX::XMVECTOR xmQuaternion = DirectX::XMLoadFloat4(&joint.orientationQuaternion_);
-			DirectX::XMVECTOR xmPosition = DirectX::XMLoadFloat3(&weight.position_);
-			DirectX::XMVECTOR xmRotationPosition = DirectX::XMVector3Rotate(xmPosition, xmQuaternion);
-			DirectX::XMFLOAT3 rotationPosition;
-			DirectX::XMStoreFloat3(&rotationPosition, xmRotationPosition);
+			DirectX::XMFLOAT3 rotationPosition = rotateVector(weight.position_, joint.orientationQuaternion_);
 
 			DirectX::XMFLOAT3 position;
 			position.x = (joint.position_.x + rotationPosition.x) * weight.bias_;
@@ -260,9 +260,7 @@ void LoaderMD5::prepareNormals(LoaderMD5MeshDesc& mesh)
 		LoaderMD5VertexDesc& vertex = mesh.vertices_[vertexIndex];
 		DirectX::XMFLOAT3 normal = vertex.normal_;
 		
-		DirectX::XMVECTOR xmNormal = DirectX::XMLoadFloat3(&normal);
-		xmNormal = DirectX::XMVector3Normalize(xmNormal);
-		DirectX::XMStoreFloat3(&normal, xmNormal);
+		normal = normalizeVector(normal);
 		
 		mesh.normals_.push_back(normal);
 
@@ -271,8 +269,11 @@ void LoaderMD5::prepareNormals(LoaderMD5MeshDesc& mesh)
 		{
 			const LoaderMD5WeightDesc& weight = mesh.weights_[vertex.startWeight_ + weightIndex];
 			const LoaderMD5JointDesc& joint = joints_[weight.jointID_];
+			normal = rotateVector(normal, joint.orientationQuaternion_);
 
-
+			vertex.normal_.x += normal.x * weight.bias_;
+			vertex.normal_.y += normal.y * weight.bias_;
+			vertex.normal_.z += normal.z * weight.bias_;
 		}
 	}
 }
@@ -313,9 +314,35 @@ void LoaderMD5::removeQuotes(std::string& str)
 }
 void LoaderMD5::computeQuaternionW(DirectX::XMFLOAT4& quaternion)
 {
-	float t = 1.0f -(quaternion.x * quaternion.x) - (quaternion.y * quaternion.y) - (quaternion.z * quaternion.z);
-	if(t < 0.0f)
-		quaternion.w = 0.0f;
-	else
-		quaternion.w = -sqrtf(t);
+	float t = 1.0f - ( quaternion.x * quaternion.x ) - ( quaternion.y * quaternion.y ) - ( quaternion.z * quaternion.z );
+    if ( t < 0.0f )
+    {
+        quaternion.w = 0.0f;
+    }
+    else
+    {
+        quaternion.w = -sqrtf(t);
+    }
+}
+
+DirectX::XMFLOAT3 LoaderMD5::normalizeVector(DirectX::XMFLOAT3 vec)
+{
+	DirectX::XMVECTOR xmVec = DirectX::XMLoadFloat3(&vec);
+	xmVec = DirectX::XMVector3Normalize(xmVec);
+	
+	DirectX::XMFLOAT3 result;
+	DirectX::XMStoreFloat3(&result, xmVec);
+
+	return result;
+}
+DirectX::XMFLOAT3 LoaderMD5::rotateVector(DirectX::XMFLOAT3 vec, DirectX::XMFLOAT4 quaternion)
+{
+	DirectX::XMVECTOR xmQuaternion = DirectX::XMLoadFloat4(&quaternion);
+	DirectX::XMVECTOR xmVec = DirectX::XMLoadFloat3(&vec);
+	xmVec = DirectX::XMVector3Rotate(xmVec, xmQuaternion);
+	
+	DirectX::XMFLOAT3 result;
+	DirectX::XMStoreFloat3(&result, xmVec);
+
+	return result;
 }

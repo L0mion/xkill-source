@@ -18,6 +18,8 @@
 #include "MdlDescModel.h"
 
 #include "LoaderMD5.h"
+#include "LoaderMD5ModelDesc.h"
+
 #include "LoaderFbx.h"
 #include "LoaderFbxMeshDesc.h"
 #include "LoaderFbxMaterialDesc.h"
@@ -393,8 +395,96 @@ void IOComponent::loadFbxAnimation(std::vector<LoaderFbxAnimationDesc> animation
 bool IOComponent::loadMD5(std::string modelName, std::string modelPath, MdlDescModel* modelDesc, MeshDesc& meshDesc)
 {
 	LoaderMD5 loaderMD5;
-	loaderMD5.loadModel(modelPath+modelName);
-	return false;
+	LoaderMD5ModelDesc md5Model;
+	loaderMD5.loadModel(modelPath+modelName, &md5Model);
+
+	std::vector<VertexDesc> vertices;
+	std::vector<SubsetDesc> subsets;
+	std::vector<MaterialDesc> materials;
+
+	loadMD5AssembleVertices(&vertices, &md5Model);
+	loadMD5AssembleSubsets(&subsets, &md5Model);
+	loadMD5AssembleMaterials(&materials, &md5Model);
+
+	meshDesc.vertices_	= vertices;
+	meshDesc.subsets_	= subsets;
+	meshDesc.materials_ = materials;
+
+	return true;
+}
+void IOComponent::loadMD5AssembleVertices(std::vector<VertexDesc>* vertices, LoaderMD5ModelDesc* md5Model)
+{
+	for(unsigned int meshIndex=0; meshIndex<md5Model->meshes_.size(); meshIndex++)
+	{
+		std::vector<LoaderMD5VertexDesc> md5Vertices = md5Model->meshes_[meshIndex].vertices_;
+		for(unsigned int vertexIndex=0; vertexIndex<md5Vertices.size(); vertexIndex++)
+		{
+			VertexDesc vertex;
+			vertex.position_.x = md5Vertices[vertexIndex].position_.x;
+			vertex.position_.y = md5Vertices[vertexIndex].position_.y;
+			vertex.position_.z = md5Vertices[vertexIndex].position_.z;
+	
+			vertex.normal_.x = md5Vertices[vertexIndex].normal_.x;
+			vertex.normal_.y = md5Vertices[vertexIndex].normal_.y;
+			vertex.normal_.z = md5Vertices[vertexIndex].normal_.z;
+	
+			vertex.textureCoordinates_.x = md5Vertices[vertexIndex].texcoord_.x;
+			vertex.textureCoordinates_.y = md5Vertices[vertexIndex].texcoord_.y;
+			vertices->push_back(vertex);
+		}
+	}
+}
+void IOComponent::loadMD5AssembleSubsets(std::vector<SubsetDesc>* subsets, LoaderMD5ModelDesc* md5Model)
+{
+	std::vector<unsigned int> indices;
+	int numVertices = 0;
+	for(unsigned int meshIndex=0; meshIndex<md5Model->meshes_.size(); meshIndex++)
+	{
+		indices.clear();
+		std::vector<unsigned int> md5Indices = md5Model->meshes_[meshIndex].indices_;
+		for(unsigned int i=0; i<md5Indices.size(); i++)
+		{
+			indices.push_back(md5Indices[i]+numVertices);
+		}
+		numVertices += md5Model->meshes_[meshIndex].vertices_.size();
+		
+		SubsetDesc subset;
+		subset.indices_ = indices;
+		subset.materialIndex_ = meshIndex;
+		subsets->push_back(subset);
+	}
+}
+void IOComponent::loadMD5AssembleMaterials(std::vector<MaterialDesc>* materials, LoaderMD5ModelDesc* md5Model)
+{
+	for(unsigned int meshIndex=0; meshIndex<md5Model->meshes_.size(); meshIndex++)
+	{
+		MaterialDesc material;
+
+		std::string textureName = md5Model->meshes_[meshIndex].shader_;
+		bool atExtension = false;
+		std::string extension = "dds";
+		int extensionIndex = 0;
+		for(unsigned int i=0; i<textureName.size(); i++)
+		{
+			if(atExtension)
+			{
+				if(extensionIndex < extension.size())
+				{
+					textureName.at(i) = extension.at(extensionIndex);
+					extensionIndex++;
+				}
+				else
+					textureName.erase(i);
+			}
+			if(textureName.at(i) == '.')
+				atExtension = true;
+		}
+
+
+		material.idAlbedoTex_ = getTexIDfromName(textureName);
+
+		materials->push_back(material);
+	}
 }
 
 bool IOComponent::loadPGY(std::string modelName, std::string modelPath, MdlDescModel* modelDesc, MeshDesc& meshDesc, SkinnedData** skinnedData)

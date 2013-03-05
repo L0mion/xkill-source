@@ -27,7 +27,7 @@ PSOut PS_Default(VSOutPosNormWTex pIn)
 	//Fill normal RTV
 	output.normal = float4(normal, 0.0f); 
 
-	pIn.texcoord.y	= 1 - pIn.texcoord.y;
+//	pIn.texcoord.y	= 1 - pIn.texcoord.y;
 	float3 albedo	= texAlbedo.SampleLevel(ss, pIn.texcoord, 0).xyz;
 
 	//Fill albedo RTV
