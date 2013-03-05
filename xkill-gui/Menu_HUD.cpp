@@ -79,6 +79,7 @@ void Menu_HUD::mapToSplitscreen()
 
 	// Hide unused labels
 	ui.label_helper->hide();
+	ui.frame_test->hide();
 
 	// Move stretch death overlay across screen
 	ui.label_deathOverlay->move(0, 0);
@@ -88,6 +89,10 @@ void Menu_HUD::mapToSplitscreen()
 	// Move center HUD to center
 	ui.label_aim->move(centerPos.x - ui.label_aim->width()* 0.5f, centerPos.y - ui.label_aim->height()* 0.5f);
 	ui.label_firingMode->move(centerPos.x - ui.label_firingMode->width()* 0.5f + 10, centerPos.y - ui.label_firingMode->height()* 0.5f);
+
+	// Move scoreboard to center
+	ui.frame_scoreboard->hide();
+	ui.frame_scoreboard->move(centerPos.x - ui.frame_scoreboard->width()* 0.5f, centerPos.y - ui.frame_scoreboard->height()* 0.5f);
 
 	// Place statusbars
 	Float2 barPos;
@@ -208,6 +213,7 @@ void Menu_HUD::refresh()
 		if(ui.progressBar_health->isHidden())
 			ui.progressBar_health->show();
 
+
 		// Update value
 		ui.progressBar_health->setValue(healthRatio);
 		ui.progressBar_health->update();
@@ -240,6 +246,8 @@ void Menu_HUD::refresh()
 
 			ui.progressBar_health->hide();
 			ui.progressBar_ammo->hide();
+
+			ui.frame_scoreboard->show();
 		}
 	}
 	else
@@ -251,6 +259,8 @@ void Menu_HUD::refresh()
 			ui.label_aim->show();
 			ui.label_firingMode->show();
 			ui.frame_bottom->show();
+
+			ui.frame_scoreboard->show();
 		}
 	}
 

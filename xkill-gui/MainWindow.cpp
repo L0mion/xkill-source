@@ -46,7 +46,7 @@ MainWindow::MainWindow()
 	ui.setupUi(this);
 	ui.mainToolBar->hide();
 	MainWindow::setWindowTitle("XKILL");
-	resize(800, 600);
+	resize(1000, 600);
 	QWidget::setAttribute(Qt::WA_PaintOnScreen);
 
 	// init game
@@ -142,7 +142,7 @@ void MainWindow::keyPressEvent( QKeyEvent* e )
 		// Post hud messages
 		{Event_PostHudMessage e("");  e.receiver = Event_PostHudMessage::RECEIVER_ALL;e.setHtmlMessage("Now running in", "Kernel Mode"); SEND_EVENT(&e);}
 		{Event_PostHudMessage e(""); e.receiver = Event_PostHudMessage::RECEIVER_ALL; e.setHtmlMessage("Chosen by Scheduler"); SEND_EVENT(&e);}
-		{Event_PostHudMessage e("");  e.receiver = Event_PostHudMessage::RECEIVER_ALL;e.setHtmlMessage("Blarrghh", "is executing"); e.receiver = Event_PostHudMessage::RECEIVER_ALL_BUT_SUBJECT; SEND_EVENT(&e);}
+		{Event_PostHudMessage e("");  e.receiver = Event_PostHudMessage::RECEIVER_ALL;e.setHtmlMessage("","Blarrghh", "is executing"); e.receiver = Event_PostHudMessage::RECEIVER_ALL_BUT_SUBJECT; SEND_EVENT(&e);}
 	}
 	if((e->key()==Qt::Key_3))
 	{
