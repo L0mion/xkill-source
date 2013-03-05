@@ -27,6 +27,7 @@
 #include "TypeFX.h"
 #include "Renderer.h"
 #include "ViewportData.h"
+#include "CameraInstances.h"
 
 //tmep
 #include "Buffer_SrvDsv.h"
@@ -473,7 +474,11 @@ void Renderer::renderViewportToGBuffer(ViewportData& vpData)
 		vpData.viewportWidth,
 		vpData.viewportHeight);
 
-	std::map<unsigned int, InstancedData*> instancesMap = managementInstance_->getInstancesMap();
+	CameraInstances* cameraInstances = managementInstance_->getCameraInstancesFromCameraIndex(vpData.camIndex);
+	if(cameraInstances == nullptr)
+		return; 
+
+	std::map<unsigned int, InstancedData*> instancesMap = cameraInstances->getInstancesMap();
 	for(std::map<unsigned int, InstancedData*>::iterator i = instancesMap.begin(); i != instancesMap.end(); i++)
 	{
 		renderInstance(i->first, i->second, false);
@@ -794,44 +799,44 @@ DirectX::XMFLOAT4X4	Renderer::buildShadows()
 	shadowMatrices = constructShadowMatrices(bounds, dirLight.direction);
 
 	//Set viewport to encompass entire map.
-	D3D11_VIEWPORT vp = managementBuffer_->getShadowViewport();
-	devcon->RSSetViewports(1, &vp);
-
-	managementRS_->setRS(devcon, RS_ID_DEPTH); //Set rasterizer state with depth bias to avoid shadow acne
-
-	managementBuffer_->setBuffer(
-		devcon, 
-		SET_ID_SHADOW, 
-		SET_TYPE_DSV, 
-		SET_STAGE_CS, //stage irrelevant
-		0); //register irrelevant
-
-	//Update per-viewport constant buffer.
-	managementCB_->setCB(CB_TYPE_CAMERA, TypeFX_VS, CB_REGISTER_CAMERA, managementD3D_->getDeviceContext());
-	managementCB_->updateCBCamera(
-		managementD3D_->getDeviceContext(),
-		/*View: */			shadowMatrices.view_,
-		/*View Inverse: */	managementMath_->getIdentityMatrix(),
-		/*Proj: */			shadowMatrices.proj_,
-		/*Proj Inverse: */	managementMath_->getIdentityMatrix(),
-		/*EyePos: */		DirectX::XMFLOAT3(0.0f, 0.0f, 0.0f),	//Irrelevant
-		/*ViewportTopX: */	0,										//Irrelevant					
-		/*ViewportTopY: */	0,										//Irrelevant
-		/*zNear: */			0.0f,									//Irrelevant
-		/*zFar: */			0.0f,									//Irrelevant
-		/*ViewportWidth: */ 0.0f,									//Irrelevant
-		/*ViewportHeight: */ 0.0f);									//Irrelevant
-
-	std::map<unsigned int, InstancedData*> instancesMap = managementInstance_->getInstancesMap();
-	for(std::map<unsigned int, InstancedData*>::iterator i = instancesMap.begin(); i != instancesMap.end(); i++)
-	{
-		//if(i->first == 7 ) //Check for what models ought to cast shadows?
-		renderInstance(i->first, i->second, true);
-	}
-
-	//Unset shizzle
-	managementBuffer_->unset(devcon, SET_TYPE_DSV, SET_STAGE_CS, 0); //register and stage irrelevant
-	managementRS_->unsetRS(devcon);
+	//D3D11_VIEWPORT vp = managementBuffer_->getShadowViewport();
+	//devcon->RSSetViewports(1, &vp);
+	//
+	//managementRS_->setRS(devcon, RS_ID_DEPTH); //Set rasterizer state with depth bias to avoid shadow acne
+	//
+	//managementBuffer_->setBuffer(
+	//	devcon, 
+	//	SET_ID_SHADOW, 
+	//	SET_TYPE_DSV, 
+	//	SET_STAGE_CS, //stage irrelevant
+	//	0); //register irrelevant
+	//
+	////Update per-viewport constant buffer.
+	//managementCB_->setCB(CB_TYPE_CAMERA, TypeFX_VS, CB_REGISTER_CAMERA, managementD3D_->getDeviceContext());
+	//managementCB_->updateCBCamera(
+	//	managementD3D_->getDeviceContext(),
+	//	/*View: */			shadowMatrices.view_,
+	//	/*View Inverse: */	managementMath_->getIdentityMatrix(),
+	//	/*Proj: */			shadowMatrices.proj_,
+	//	/*Proj Inverse: */	managementMath_->getIdentityMatrix(),
+	//	/*EyePos: */		DirectX::XMFLOAT3(0.0f, 0.0f, 0.0f),	//Irrelevant
+	//	/*ViewportTopX: */	0,										//Irrelevant					
+	//	/*ViewportTopY: */	0,										//Irrelevant
+	//	/*zNear: */			0.0f,									//Irrelevant
+	//	/*zFar: */			0.0f,									//Irrelevant
+	//	/*ViewportWidth: */ 0.0f,									//Irrelevant
+	//	/*ViewportHeight: */ 0.0f);									//Irrelevant
+	//
+	//std::map<unsigned int, InstancedData*> instancesMap = managementInstance_->getInstancesMap();
+	//for(std::map<unsigned int, InstancedData*>::iterator i = instancesMap.begin(); i != instancesMap.end(); i++)
+	//{
+	//	//if(i->first == 7 ) //Check for what models ought to cast shadows?
+	//	renderInstance(i->first, i->second, true);
+	//}
+	//
+	////Unset shizzle
+	//managementBuffer_->unset(devcon, SET_TYPE_DSV, SET_STAGE_CS, 0); //register and stage irrelevant
+	//managementRS_->unsetRS(devcon);
 
 	return shadowMatrices.shadowMapTransform_;
 }
