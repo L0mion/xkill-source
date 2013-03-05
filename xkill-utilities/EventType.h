@@ -61,6 +61,7 @@ enum DLL_U EventType
 	EVENT_UPDATESOUNDSETTINGS,
 	EVENT_DRAW_BULLET_PHYSICS_DEBUG_LINES,
 	EVENT_MODIFY_PHYSICS_OBJECT,
+	EVENT_RELOAD_PHYSICS_ATTRIBUTE_DATA_INTO_BULLET_PHYSICS,
 
 	// Input
 	EVENT_KEY_PRESS,
@@ -719,4 +720,12 @@ public:
 	Event_LoadLevel(std::string levelName);
 
 	std::string levelName;
+};
+
+class DLL_U Event_ReloadPhysicsAttributeDataIntoBulletPhysics : public Event
+{
+public:
+	Event_ReloadPhysicsAttributeDataIntoBulletPhysics(int physicsAttributeId);
+
+	int physicsAttributeId;
 };

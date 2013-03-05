@@ -584,12 +584,18 @@ void GameComponent::onUpdate(float delta)
 			}
 
 			AttributePtr<Attribute_Physics> ptr_physics;
-			int randomIndex = rand()%worldPiecesIndices.size();
+			int randomIndex = rand()%worldPiecesIndices.size(); //check
+			//int randomIndex = worldPiecesIndices.size()-1;
+
 			ptr_physics = itrPhysics.at(worldPiecesIndices.at(randomIndex));
 			ptr_physics->collisionFilterGroup = XKILL_Enums::PhysicsAttributeType::PROP;
 			ptr_physics->collisionFilterMask = XKILL_Enums::PhysicsAttributeType::NOTHING;
+			ptr_physics->collisionResponse = false;
+			ptr_physics->gravity = Float3(0.0f, -10.0f, 0.0f);
 			ptr_physics->mass = 1;
-			ptr_physics->reloadDataIntoBulletPhysics = true;
+
+			SEND_EVENT(&Event_ReloadPhysicsAttributeDataIntoBulletPhysics(ptr_physics.index()));
+
 
 			worldPiecesIndices.at(randomIndex) = worldPiecesIndices.back();
 			worldPiecesIndices.pop_back();

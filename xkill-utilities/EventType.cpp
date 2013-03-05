@@ -332,3 +332,8 @@ void Event_PostHudMessage::setHtmlMessage( std::string prefex, std::string subje
 
 	message = prefex + " " + subject + " " + suffix + " " + description ;
 }
+
+Event_ReloadPhysicsAttributeDataIntoBulletPhysics::Event_ReloadPhysicsAttributeDataIntoBulletPhysics(int physicsAttributeId) : Event(EVENT_RELOAD_PHYSICS_ATTRIBUTE_DATA_INTO_BULLET_PHYSICS)
+{
+	this->physicsAttributeId = physicsAttributeId;
+}

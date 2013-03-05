@@ -79,12 +79,11 @@ void CollisionShapes::loadCollisionShapes()
 	importer_ = new btBulletWorldImporter();
 	
 	DEBUGPRINT("-->Loading collision shapes...");
-
 	std::string resourcePath = "../../xkill-resources/";
+	
 	//--------------------------------------------------------------------------------------
 	// Load .bullet file corresponding with level pieces.
 	//--------------------------------------------------------------------------------------
-	
 	Settings* settings = ATTRIBUTE_MANAGER->settings;
 	std::string path = std::string(resourcePath + "xkill-level/") + settings->currentLevel + "/" + settings->currentLevel + ".bullet";
 	DEBUGPRINT("Trying to load level .bullet file with path... " << path);
