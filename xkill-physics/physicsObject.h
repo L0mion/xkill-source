@@ -42,8 +42,6 @@ public:
 
 	static void setDynamicsWorld(btDiscreteDynamicsWorld* dynamicsWorld){dynamicsWorld_=dynamicsWorld;}
 	static void setDebugDrawer(debugDrawDispatcher* debugDrawer){debugDrawer_=debugDrawer;}
-
-	virtual std::string getName() {return "PhysicsObject";}
 };
 
 #endif

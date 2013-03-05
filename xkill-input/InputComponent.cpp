@@ -120,7 +120,7 @@ void InputComponent::handleInput(float delta)
 
 		input->killPlayer = device->getBoolReleased(InputAction::ACTION_B_KILL_PLAYER);
 		input->jump =		device->getBoolPressed(InputAction::ACTION_B_JUMP);
-		input->jetpack =	!device->getBoolValue(InputAction::ACTION_B_JETPACK);
+		input->jetpack =	device->getBoolValue(InputAction::ACTION_B_JETPACK);
 		input->sprint =		device->getBoolValue(InputAction::ACTION_B_SPRINT);
 
 		input->reload =		device->getBoolPressed(InputAction::ACTION_B_RELOAD);

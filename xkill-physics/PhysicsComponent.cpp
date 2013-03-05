@@ -23,16 +23,6 @@
 
 ATTRIBUTES_DECLARE_ALL;
 
-#include <Windows.h>
-#include <sstream>
-
-#define OUTPUT_WINDOW_PRINT(stream)		\
-{										\
- std::wostringstream os;				\
- os << stream << "\n";					\
- OutputDebugString(os.str().c_str());	\
-}
-
 debugDrawDispatcher* debugDrawer_ = nullptr;
 
 PhysicsComponent::PhysicsComponent() : broadphase_(nullptr),
@@ -52,6 +42,8 @@ PhysicsComponent::PhysicsComponent() : broadphase_(nullptr),
 	SUBSCRIBE_TO_EVENT(this, EVENT_LOAD_LEVEL_BULLET);
 	SUBSCRIBE_TO_EVENT(this, EVENT_NULL_PROCESS_STARTED_EXECUTING);
 	SUBSCRIBE_TO_EVENT(this, EVENT_NULL_PROCESS_STOPPED_EXECUTING);
+
+	nullProcessExecuting_ = false;
 }
 
 PhysicsComponent::~PhysicsComponent()
@@ -146,6 +138,8 @@ bool PhysicsComponent::init()
 	
 	PhysicsObject::setDynamicsWorld(dynamicsWorld_); //Make dynamicsWorld_ accessible from physics objects
 	PhysicsObject::setDebugDrawer(debugDrawer_);
+
+	nullProcessExecuting_ = false;
 
 	//CollisionShapes::Instance()->loadCollisionShapes();
 	
@@ -372,27 +366,20 @@ void PhysicsComponent::onEvent(Event* e)
 				AttributePtr<Attribute_Physics> ptr_physics = itrPhysics.getNext();
 				if(ptr_physics->collisionFilterGroup == XKILL_Enums::PhysicsAttributeType::PROP)
 				{
-					if(physicsObjects_->at(itrPhysics.storageIndex())->getName() == "PropPhysicsObject")
-					{
-						PropPhysicsObject* propPhysicsObject = static_cast<PropPhysicsObject*>(physicsObjects_->at(itrPhysics.storageIndex()));
+					PropPhysicsObject* propPhysicsObject = static_cast<PropPhysicsObject*>(physicsObjects_->at(itrPhysics.storageIndex()));
 					
-						ptr_physics->collisionFilterGroup = XKILL_Enums::PhysicsAttributeType::WORLD;
-						ptr_physics->collisionFilterMask = XKILL_Enums::PhysicsAttributeType::PLAYER | XKILL_Enums::PhysicsAttributeType::PROJECTILE |
-							XKILL_Enums::PhysicsAttributeType::FRUSTUM | XKILL_Enums::PhysicsAttributeType::PICKUPABLE |
-							XKILL_Enums::PhysicsAttributeType::RAY | XKILL_Enums::PhysicsAttributeType::PROP;
-						ptr_physics->ptr_spatial->ptr_position->position = Float3(propPhysicsObject->worldOrigin_.x(),propPhysicsObject->worldOrigin_.y(),propPhysicsObject->worldOrigin_.z());
+					ptr_physics->collisionFilterGroup = XKILL_Enums::PhysicsAttributeType::WORLD;
+					ptr_physics->collisionFilterMask = XKILL_Enums::PhysicsAttributeType::PLAYER | XKILL_Enums::PhysicsAttributeType::PROJECTILE |
+						XKILL_Enums::PhysicsAttributeType::FRUSTUM | XKILL_Enums::PhysicsAttributeType::PICKUPABLE |
+						XKILL_Enums::PhysicsAttributeType::RAY | XKILL_Enums::PhysicsAttributeType::PROP;
+					ptr_physics->ptr_spatial->ptr_position->position = Float3(propPhysicsObject->worldOrigin_.x(),propPhysicsObject->worldOrigin_.y(),propPhysicsObject->worldOrigin_.z());
 					
-						propPhysicsObject->setCollisionFlags(propPhysicsObject->getCollisionFlags() | btCollisionObject::CF_STATIC_OBJECT);
+					propPhysicsObject->setCollisionFlags(propPhysicsObject->getCollisionFlags() | btCollisionObject::CF_STATIC_OBJECT);
 
-						ptr_physics->gravity = Float3(0.0f, 0.0f, 0.0f);
-						ptr_physics->linearVelocity = Float3(0.0f, 0.0f, 0.0f); 
-						ptr_physics->mass = 0;
-						ptr_physics->reloadDataIntoBulletPhysics = true;
-					}
-					else
-					{
-						OUTPUT_WINDOW_PRINT("Index of liar: " << itrPhysics.storageIndex());
-					}
+					ptr_physics->gravity = Float3(0.0f, 0.0f, 0.0f);
+					ptr_physics->linearVelocity = Float3(0.0f, 0.0f, 0.0f); 
+					ptr_physics->mass = 0;
+					ptr_physics->reloadDataIntoBulletPhysics = true;
 				}
 			}
 
@@ -635,7 +622,7 @@ void PhysicsComponent::razeWorld()
 			}
 		}
 
-		for(unsigned int i = 0; i < 100; i++)
+		for(unsigned int i = 0; i < 10; i++)
 		{
 			if(worldPiecesIndices.size() <= 0)
 			{
@@ -643,7 +630,7 @@ void PhysicsComponent::razeWorld()
 			}
 
 			AttributePtr<Attribute_Physics> ptr_physics;
-			int randomIndex = worldPiecesIndices.size() - 1;
+			int randomIndex = rand()%worldPiecesIndices.size();
 			ptr_physics = itrPhysics.at(worldPiecesIndices.at(randomIndex));
 			ptr_physics->collisionFilterGroup = XKILL_Enums::PhysicsAttributeType::PROP;
 			ptr_physics->collisionFilterMask = XKILL_Enums::PhysicsAttributeType::NOTHING;

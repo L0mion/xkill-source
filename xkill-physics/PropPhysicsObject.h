@@ -14,8 +14,6 @@ public:
 	virtual btVector3 subClassCalculateLocalInertiaHook(btScalar mass);
 	virtual bool subClassSpecificInitHook();
 	virtual void handleOutOfBounds();
-
-	virtual std::string getName() {return "PropPhysicsObject";}
 };
 
 #endif

@@ -6,16 +6,6 @@
 
 ATTRIBUTES_DECLARE_ALL
 
-#include <Windows.h>
-#include <sstream>
-
-#define OUTPUT_WINDOW_PRINT(stream)		\
-{										\
- std::wostringstream os;				\
- os << stream << "\n";					\
- OutputDebugString(os.str().c_str());	\
-}
-
 #define SAFE_DELETE(x) {if(x != nullptr) delete x; x = nullptr;}
 
 ScoreComponent::ScoreComponent()
@@ -264,7 +254,6 @@ void ScoreComponent::deactivateNullProcess()
 {
 	nullProcessExecuting_ = false;
 	SEND_EVENT(&Event(EVENT_NULL_PROCESS_STOPPED_EXECUTING));
-	OUTPUT_WINDOW_PRINT("Null process stopped.");
 }
 
 void ScoreComponent::executePlayer(int playerIndex)
