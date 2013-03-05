@@ -143,6 +143,7 @@ public:
 
 	void mapToSplitscreen();
 	void refresh();
+	void refreshScoreboard();
 	void onEvent(Event* e);
 };
 

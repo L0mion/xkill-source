@@ -91,7 +91,7 @@ void Menu_HUD::mapToSplitscreen()
 	ui.label_firingMode->move(centerPos.x - ui.label_firingMode->width()* 0.5f + 10, centerPos.y - ui.label_firingMode->height()* 0.5f);
 
 	// Move scoreboard to center
-	ui.frame_scoreboard->hide();
+	ui.frame_scoreboard->show();
 	ui.frame_scoreboard->move(centerPos.x - ui.frame_scoreboard->width()* 0.5f, centerPos.y - ui.frame_scoreboard->height()* 0.5f);
 
 	// Place statusbars
@@ -372,6 +372,7 @@ Menu_HUD::Menu_HUD( AttributePtr<Attribute_SplitScreen> splitScreen, QWidget* pa
 	SUBSCRIBE_TO_EVENT(this, EVENT_UPDATE);
 	
 	mapToSplitscreen();
+	refreshScoreboard();
 }
 
 void Menu_HUD::onEvent(Event* e)
@@ -390,6 +391,34 @@ void Menu_HUD::onEvent(Event* e)
 Menu_HUD::~Menu_HUD()
 {
 	UNSUBSCRIBE_TO_EVENTS(this);
+}
+
+void Menu_HUD::refreshScoreboard()
+{
+	// Build scoreboard
+	while(itrPlayer.hasNext())
+	{
+		AttributePtr<Attribute_Player> ptr_player =	itrPlayer.getNext();
+
+		QHBoxLayout* layout_entry = new QHBoxLayout();
+
+		QLabel* label_process = new QLabel(ptr_player->playerName);
+		QLabel* label_cycles = new QLabel();
+		label_cycles->setNum(ptr_player->cycles);
+		QLabel* label_priority = new QLabel();
+		label_priority->setNum(ptr_player->priority);
+
+		layout_entry->addWidget(label_process);
+		layout_entry->addWidget(label_cycles);
+		layout_entry->addWidget(label_priority);
+
+		ui.verticalLayout_scoreboard->addLayout(layout_entry);
+	}
+
+	// Add entry into scoreboard
+	{
+		
+	}
 }
 
 HudMessage::HudMessage( Event_PostHudMessage* e, QWidget* parent)
