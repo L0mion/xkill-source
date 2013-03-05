@@ -1049,7 +1049,7 @@ void GameComponent::updateAndInterpretLaser(AttributePtr<Attribute_Ray> ptr_ray,
 		else if(entityHitByRay->hasAttribute(ATTRIBUTE_PLAYER)) //Ray hit another player
 		{
 			std::vector<int> hitPlayerId = entityHitByRay->getAttributes(ATTRIBUTE_PLAYER);
-			for(int i=0;i<hitPlayerId.size();i++)
+			for(int i=0; i<hitPlayerId.size(); i++)
 			{
 				AttributePtr<Attribute_Player> playerAttribute = itrPlayer.at(hitPlayerId.at(i));
 				if(!playerAttribute->detectedAsDead)
@@ -1146,6 +1146,9 @@ void GameComponent::startGame()
 
 	// Hide mouse & menu so it is not distracting from game play
 	SEND_EVENT(&Event_SetMouseLock(true));
+
+	// Make sure the correct windows are shown
+	SEND_EVENT(&Event(EVENT_FOCUS_MAINWINDOW));
 	SEND_EVENT(&Event_EnableHud(true));
 	SEND_EVENT(&Event_EnableMenu(false));
 }

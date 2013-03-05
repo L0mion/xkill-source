@@ -194,10 +194,10 @@ void ScoreComponent::handleSchedulerMode(float delta)
 		}
 	}
 
-
 	if(!nullProcessExecuting_)
 	{
 		schedulerTimer_->update(delta);
+		SETTINGS->timeUntilScheduling = schedulerTimer_->getTimeLeft();
 		if(schedulerTimer_->hasTimerExpired())
 		{
 			if(topPlayerIndex == -1)	// All players had zero priority

@@ -33,6 +33,34 @@
 
 ATTRIBUTES_DECLARE_ALL;
 
+#define XKILLPROFILING // commment away to skip profiling
+#ifdef XKILLPROFILING
+#include <xkill-utilities\Converter.h>
+#include <time.h>
+#include <iostream>
+#include <Windows.h>
+static float outside;
+static std::vector<float> lightstimer;
+static std::vector<float> instancetimer;
+static std::vector<float> shadowtimer;
+static std::vector<float> gbuffertimer;
+static std::vector<float> backbuffertimer;
+static std::vector<float> glowtimer;
+static std::vector<float> hudtimer;
+static std::vector<float> presenttimer;
+static std::vector<float> cleartimer;
+static std::vector<float> cbtimer;
+#define calctime(vectorname, call ) {  clock_t deltatimevar = clock();	\
+							call devcon->Flush();\
+							vectorname.push_back(((float)(clock()-deltatimevar))/((float)CLOCKS_PER_SEC));} 
+#define outputaverage(outname, vectorname) {float sum=0; for(unsigned int i=0;i<vectorname.size();i++) { sum += vectorname.at(i);} std::string out = outname;  out +=" "; sum = sum/(float)vectorname.size(); out +=Converter::FloatToStr(sum); out +="\n"; OutputDebugStringA(out.c_str()); }
+#else
+#define calctime(vectorname, call ) call
+#define outputaverage(outname, vectorname)
+#endif
+
+#define SAFE_DELETE(x) if( x ) { delete(x); (x) = NULL; }
+
 Renderer::Renderer(HWND windowHandle)
 {
 	windowHandle_	= windowHandle;
@@ -65,6 +93,21 @@ Renderer::Renderer(HWND windowHandle)
 }
 Renderer::~Renderer()	
 {
+
+#ifdef XKILLPROFILING
+	
+	outputaverage("\nlight",	lightstimer)
+	outputaverage("instance",	instancetimer)
+	outputaverage("clear",	cleartimer)
+	outputaverage("cb",	cbtimer)
+	outputaverage("shadow",	shadowtimer)
+	outputaverage("gbuffer",	gbuffertimer)
+	outputaverage("backbuffer",	backbuffertimer)
+	outputaverage("glow",	glowtimer)
+	outputaverage("hud",hudtimer)
+	outputaverage("present",	presenttimer)
+#endif
+
 	SAFE_DELETE(winfo_);
 
 	SAFE_DELETE(managementD3D_);
@@ -358,94 +401,107 @@ void Renderer::update()
 	ID3D11DeviceContext*	devcon = managementD3D_->getDeviceContext();
 
 	//Update lights.
-	managementLight_->update(device, devcon);
-
+	calctime(lightstimer,managementLight_->update(device, devcon);)
 	//Update instances.
-	managementInstance_->update(device, devcon);
+	calctime(instancetimer,managementInstance_->update(device, devcon);)
 }
 void Renderer::render()
 {
 	ID3D11DeviceContext* devcon = managementD3D_->getDeviceContext();
 
 	//Clear g-buffers and depth buffer.
-	managementBuffer_->clearBuffers(devcon);
-	managementD3D_->clearDepthBuffer();
-	managementD3D_->clearBackBuffer();
-
+	calctime(cleartimer,
+		managementBuffer_->clearBuffers(devcon);
+		managementD3D_->clearDepthBuffer();
+		managementD3D_->clearBackBuffer();
+	)
 	//Do shadows pre-pass:
-	DirectX::XMFLOAT4X4 shadowMapTransform = buildShadows();
+	DirectX::XMFLOAT4X4 shadowMapTransform;
+	calctime(shadowtimer, shadowMapTransform = buildShadows();)
 
 	//Update per-frame constant buffer.
-	managementCB_->setCB(
-		CB_TYPE_FRAME, 
-		TypeFX_VS, 
-		CB_REGISTER_FRAME, 
-		devcon);
-	managementCB_->updateCBFrame(
-		devcon,
-		shadowMapTransform,
-		managementLight_->getLightDirCurCount(),
-		managementLight_->getLightPointCurCount(),
-		managementLight_->getLightSpotCurCount());
-
 	AttributePtr<Attribute_SplitScreen>	ptr_splitScreen;
 	AttributePtr<Attribute_Camera>		ptr_camera; 
 	AttributePtr<Attribute_Spatial>		ptr_spatial;
 	AttributePtr<Attribute_Position>	ptr_position;
 
 	ViewportData vpData;
+	calctime(cbtimer,
+		managementCB_->setCB(
+			CB_TYPE_FRAME, 
+			TypeFX_VS, 
+			CB_REGISTER_FRAME, 
+			devcon);
+		managementCB_->updateCBFrame(
+			devcon,
+			shadowMapTransform,
+			managementLight_->getLightDirCurCount(),
+			managementLight_->getLightPointCurCount(),
+			managementLight_->getLightSpotCurCount());
 
-	managementBuffer_->setBuffersAndDepthBufferAsRenderTargets(devcon, managementD3D_->getDepthBuffer());
+		
+
+		managementBuffer_->setBuffersAndDepthBufferAsRenderTargets(devcon, managementD3D_->getDepthBuffer());
+	)
 
 	//Render each split-screen separately
 	std::vector<SplitScreenViewport>* ssViewports = managementViewport_->getSplitScreenViewports();
 	std::vector<ViewportData> vpDatas(ssViewports->size());
-	for(unsigned int i = 0; i < ssViewports->size(); i++)
-	{
-		ptr_splitScreen		= ssViewports->at(i).ptr_splitScreen;
-		ptr_camera			= ptr_splitScreen->ptr_camera;
-		ptr_spatial			= ptr_camera->ptr_spatial;
-		ptr_position		= ptr_spatial->ptr_position;
+	calctime(gbuffertimer,
+		for(unsigned int i = 0; i < ssViewports->size(); i++)
+		{
+			ptr_splitScreen		= ssViewports->at(i).ptr_splitScreen;
+			ptr_camera			= ptr_splitScreen->ptr_camera;
+			ptr_spatial			= ptr_camera->ptr_spatial;
+			ptr_position		= ptr_spatial->ptr_position;
 
-		managementViewport_->setViewport(devcon, i);
+			managementViewport_->setViewport(devcon, i);
 
-		//Store all the viewport-specific data for the backbuffer-rendering.
-		vpData.camIndex		= ptr_camera.index();
-		vpData.view			= DirectX::XMFLOAT4X4(((float*)&ptr_camera->mat_view));
-		vpData.proj			= DirectX::XMFLOAT4X4(((float*)&ptr_camera->mat_projection));
-		vpData.viewInv		= managementMath_->calculateMatrixInverse(vpData.view);
-		vpData.projInv		= managementMath_->calculateMatrixInverse(vpData.proj);
-		vpData.eyePos		= *(DirectX::XMFLOAT3*)&ptr_position->position;
-		vpData.viewportTopX = static_cast<unsigned int>(ptr_splitScreen->ssTopLeftX);
-		vpData.viewportTopY = static_cast<unsigned int>(ptr_splitScreen->ssTopLeftY);
-		vpData.zNear		= ptr_camera->zNear;
-		vpData.zFar			= ptr_camera->zFar;
-		vpData.viewportWidth	= (float)ptr_splitScreen->ssWidth;
-		vpData.viewportHeight	= (float)ptr_splitScreen->ssHeight;
-		vpDatas[i]			= vpData;
+			//Store all the viewport-specific data for the backbuffer-rendering.
+			vpData.camIndex		= ptr_camera.index();
+			vpData.view			= DirectX::XMFLOAT4X4(((float*)&ptr_camera->mat_view));
+			vpData.proj			= DirectX::XMFLOAT4X4(((float*)&ptr_camera->mat_projection));
+			vpData.viewInv		= managementMath_->calculateMatrixInverse(vpData.view);
+			vpData.projInv		= managementMath_->calculateMatrixInverse(vpData.proj);
+			vpData.eyePos		= *(DirectX::XMFLOAT3*)&ptr_position->position;
+			vpData.viewportTopX = static_cast<unsigned int>(ptr_splitScreen->ssTopLeftX);
+			vpData.viewportTopY = static_cast<unsigned int>(ptr_splitScreen->ssTopLeftY);
+			vpData.zNear		= ptr_camera->zNear;
+			vpData.zFar			= ptr_camera->zFar;
+			vpData.viewportWidth	= (float)ptr_splitScreen->ssWidth;
+			vpData.viewportHeight	= (float)ptr_splitScreen->ssHeight;
+			vpDatas[i]			= vpData;
 
-		renderViewportToGBuffer(vpData);
-	}
-	managementBuffer_->unsetBuffersAndDepthBufferAsRenderTargets(devcon);
+			renderViewportToGBuffer(vpData);
+		}
+		managementBuffer_->unsetBuffersAndDepthBufferAsRenderTargets(devcon);
+	)
 
 	//Apply some effects.
-	downSampleBlur();
-	unsigned int numBlurs = 1;
-	for(unsigned int i = 0; i < numBlurs; i++)
-	{
-		blurHorizontally();
-		blurVertically();
-	}
-	upSampleBlur();
+	calctime(glowtimer,
+		downSampleBlur();
+		unsigned int numBlurs = 1;
+		for(unsigned int i = 0; i < numBlurs; i++)
+		{
+			blurHorizontally();
+			blurVertically();
+		}
+		upSampleBlur();
+	)
 
 	//Render everything to backbuffer.
-	for(unsigned int i = 0; i < vpDatas.size(); i++)
-		renderViewportToBackBuffer(vpDatas[i]);
+	calctime(backbuffertimer,
+		for(unsigned int i = 0; i < vpDatas.size(); i++)
+			renderViewportToBackBuffer(vpDatas[i]);
+	)
 
-	for(unsigned int i=0; i< vpDatas.size(); i++)
-		renderHudElements(i);
-
-	managementD3D_->present();
+	calctime(hudtimer,
+		for(unsigned int i=0; i< vpDatas.size(); i++)
+			renderHudElements(i);
+	)
+	calctime(presenttimer,
+		managementD3D_->present();
+	)
 }
 void Renderer::renderViewportToGBuffer(ViewportData& vpData)									
 {

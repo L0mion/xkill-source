@@ -2,7 +2,7 @@
 
 #include <string>
 #include <sstream>
-
+#include <iomanip>
 //! A converter class
 
 class Converter
@@ -33,6 +33,7 @@ public:
 	static std::string FloatToStr(float f)
 	{
 		std::stringstream ss;
+		ss << std::fixed;
 		ss << f;
 		return ss.str();
 	}
