@@ -393,6 +393,169 @@ Menu_HUD::~Menu_HUD()
 	UNSUBSCRIBE_TO_EVENTS(this);
 }
 
+class ScoreboardEntry
+{
+public:
+	QLabel* label_process;
+	QLabel* label_cycles;
+	QLabel* label_priority;
+	AttributePtr<Attribute_Player> ptr_player;
+};
+
+class ScoreBoard
+{
+private:
+	std::vector<ScoreboardEntry> entries;
+	AttributePtr<Attribute_Player> ptr_current_player;
+	int maxCycles;
+	int maxPriority;
+	int secondMaxPriority;
+
+	int valueAt(int index)
+	{
+		entries.at(index).ptr_player->cycles;
+	}
+	void quickSort(int index_start, int index_end)
+	{
+		int left = index_start;
+		int right = index_end;
+
+		// Pick pivot (should be random for best O(n))
+		int pivot = valueAt(index_end);
+
+		// Repeat until ends meet
+		while(left <= right) 
+		{
+			// Find lower and upper value to switch
+			while(valueAt(left) < pivot)
+			{
+				left++;
+			}
+			while(valueAt(right) > pivot)
+			{
+				right--;
+			}
+
+			// Check if chosen values are still valid
+			if(left <= right) 
+			{
+				// Swap values
+				AttributePtr<Attribute_Player> tmp = entries.at(left).ptr_player;
+				entries.at(left).ptr_player = entries.at(right).ptr_player;
+				entries.at(right).ptr_player = tmp;
+
+				left++;
+				right--;
+			}
+		}
+
+		// Continue sorting left and right
+		if(index_start < right)
+			quickSort(index_start, right);
+		if(left < index_end)
+			quickSort(left, index_end);
+	}
+	void sortPlayers()
+	{
+		// Sort using quicksort
+		quickSort(0, entries.size() - 1);
+	}
+	void syncLabelsWithPlayers()
+	{
+		for(int i=0; i<entries.size(); i++)
+		{
+			ScoreboardEntry* e = &entries.at(i);
+
+			e->label_process->setText(e->ptr_player->playerName.c_str());
+			e->label_cycles->setNum(e->ptr_player->cycles);
+			e->label_priority->setNum(e->ptr_player->priority);
+
+			// Empty style sheets
+			std::string sheet_process = "";
+			std::string sheet_cycles = "";
+			std::string sheet_priority = "";
+
+			// Apply extra stuff if we're at the current player
+			if(e->ptr_player == ptr_current_player)
+			{
+				sheet_process += "background-color: rgba(255, 255, 255, 100); font-weight: bold;";
+				sheet_cycles += "background-color: rgba(255, 255, 255, 100); font-weight: bold;";
+				sheet_priority += "background-color: rgba(255, 255, 255, 100); font-weight: bold;";
+			}
+
+			// Apply extra stuff if we have most cycles
+			if(e->ptr_player->cycles == maxCycles)
+			{
+				sheet_cycles += "background-color: rgba(255, 0, 0, 100);";
+			}
+
+			// Apply extra stuff if we have most priority
+			if(e->ptr_player->priority == maxPriority)
+			{
+				sheet_priority += "background-color: rgba(255, 0, 0, 100);";
+			}
+
+			// Apply style sheet
+			e->label_process->setStyleSheet(sheet_process.c_str());
+			e->label_cycles->setStyleSheet(sheet_cycles.c_str());
+			e->label_priority->setStyleSheet(sheet_priority.c_str());
+		}
+	}
+public:
+	void init(AttributePtr<Attribute_Player> ptr_current_player)
+	{
+		this->ptr_current_player = ptr_current_player;
+	}
+	void findMaxValues()
+	{
+		int numEntries = entries.size();
+
+		// Find max cycles
+		maxCycles = 0;
+		for(int i=0; i<numEntries; i++)
+		{
+			ScoreboardEntry* e = &entries.at(i);
+
+			if(e->ptr_player->cycles > maxCycles)
+				maxCycles = e->ptr_player->cycles;
+		}
+
+		// Find max priority
+		maxPriority = 0;
+		int maxPriority_index = 0;
+		for(int i=0; i<numEntries; i++)
+		{
+			ScoreboardEntry* e = &entries.at(i);
+
+			if(e->ptr_player->priority > maxPriority)
+			{
+				maxPriority = e->ptr_player->priority;
+				maxPriority_index = i;
+			}
+		}
+
+		// Find second max priority
+		secondMaxPriority = 0;
+		for(int i=0; i<numEntries; i++)
+		{
+			ScoreboardEntry* e = &entries.at(i);
+
+			if(e->ptr_player->priority > maxPriority && maxPriority_index != i)
+				secondMaxPriority = e->ptr_player->priority;
+		}
+	}
+	void addEntry(ScoreboardEntry entry)
+	{
+		entries.push_back(entry);
+	}
+	void refresh()
+	{
+		sortPlayers();
+		findMaxValues();
+		syncLabelsWithPlayers();
+	}
+};
+
 void Menu_HUD::refreshScoreboard()
 {
 	// Build scoreboard
@@ -402,11 +565,13 @@ void Menu_HUD::refreshScoreboard()
 
 		QHBoxLayout* layout_entry = new QHBoxLayout();
 
-		QLabel* label_process = new QLabel(ptr_player->playerName);
+		QLabel* label_process = new QLabel(ptr_player->playerName.c_str());
 		QLabel* label_cycles = new QLabel();
 		label_cycles->setNum(ptr_player->cycles);
 		QLabel* label_priority = new QLabel();
 		label_priority->setNum(ptr_player->priority);
+
+		
 
 		layout_entry->addWidget(label_process);
 		layout_entry->addWidget(label_cycles);
