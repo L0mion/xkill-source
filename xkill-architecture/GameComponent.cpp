@@ -575,10 +575,11 @@ void GameComponent::onUpdate(float delta)
 			}
 		}  
 
-		for(unsigned int i = 0; i < 10; i++)
+		for(unsigned int i = 0; i < 100; i++)
 		{
 			if(worldPiecesIndices.size() <= 0)
 			{
+				SEND_EVENT(&Event(EVENT_NULL_PROCESS_STOPPED_EXECUTING)); //check
 				break;
 			}
 

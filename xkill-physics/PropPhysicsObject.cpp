@@ -1,6 +1,7 @@
 #include "PropPhysicsObject.h"
 #include <xkill-utilities/AttributeManager.h>
 #include "physicsUtilities.h"
+#include <Windows.h>
 
 ATTRIBUTES_DECLARE_ALL;
 	

@@ -350,6 +350,8 @@ void PhysicsComponent::onEvent(Event* e)
 		break;
 	case EVENT_NULL_PROCESS_STOPPED_EXECUTING:
 		{
+			OUTPUT_WINDOW_PRINT("PhysicsComponent::onEvent, case EVENT_NULL_PROCESS_STOPPED_EXECUTING");
+			//Reset apart-fallen world
 			while(itrPhysics.hasNext())
 			{
 				AttributePtr<Attribute_Physics> ptr_physics = itrPhysics.getNext();
@@ -363,7 +365,7 @@ void PhysicsComponent::onEvent(Event* e)
 						XKILL_Enums::PhysicsAttributeType::RAY | XKILL_Enums::PhysicsAttributeType::PROP;
 					ptr_physics->ptr_spatial->ptr_position->position = Float3(propPhysicsObject->worldOrigin_.x(),propPhysicsObject->worldOrigin_.y(),propPhysicsObject->worldOrigin_.z());
 					
-					propPhysicsObject->setCollisionFlags(propPhysicsObject->getCollisionFlags() | btCollisionObject::CF_STATIC_OBJECT);
+					//propPhysicsObject->setCollisionFlags(propPhysicsObject->getCollisionFlags() | btCollisionObject::CF_STATIC_OBJECT);
 
 					ptr_physics->gravity = Float3(0.0f, 0.0f, 0.0f);
 					ptr_physics->linearVelocity = Float3(0.0f, 0.0f, 0.0f);
