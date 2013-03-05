@@ -215,15 +215,15 @@ void PhysicsComponent::onEvent(Event* e)
 				itrPhysics.at(attributeIndex)->reloadDataIntoBulletPhysics = true;
 			}
 		}
-		else if(attributeUpdated->attributeEnum == ATTRIBUTE_CAMERA)
+		/*else if(attributeUpdated->attributeEnum == ATTRIBUTE_CAMERA)
 		{
 			if(attributeUpdated->isDeleted)
 			{
-  				//dynamicsWorld_->removeRigidBody(frustumPhysicsObjects_->at(attributeIndex));
-				//delete frustumPhysicsObjects_->at(attributeIndex);
-				//frustumPhysicsObjects_->at(attributeIndex) = nullptr;
+  				dynamicsWorld_->removeRigidBody(frustumPhysicsObjects_->at(attributeIndex));
+				delete frustumPhysicsObjects_->at(attributeIndex);
+				frustumPhysicsObjects_->at(attributeIndex) = nullptr;
 			}
-		}
+		}*/
 		break;
 	}
 	case EVENT_MODIFY_PHYSICS_OBJECT:
@@ -560,21 +560,21 @@ void PhysicsComponent::detectedCollisionsDuringStepSimulation(btScalar timeStep)
 				// Global frustum culling
 				//--------------------------------------------------------------------------------------
 				//check physicsobjecttype;
-				//if(objectA->getCollisionFilterGroup() == XKILL_Enums::PhysicsAttributeType::FRUSTUM ||
-				//	objectB->getCollisionFilterGroup() == XKILL_Enums::PhysicsAttributeType::FRUSTUM)
-				//{
-				//	if(objectA->getCollisionFilterGroup() == XKILL_Enums::PhysicsAttributeType::FRUSTUM &&
-				//	   objectB->getCollisionFilterGroup() != XKILL_Enums::PhysicsAttributeType::FRUSTUM)
-				//	{
-				//		doCulling(objectA->getAttributeIndex(),objectB->getAttributeIndex());
-				//	}
-				//	else if(objectA->getCollisionFilterGroup() != XKILL_Enums::PhysicsAttributeType::FRUSTUM &&
-				//	   objectB->getCollisionFilterGroup() == XKILL_Enums::PhysicsAttributeType::FRUSTUM)
-				//	{
-				//		doCulling(objectB->getAttributeIndex(),objectA->getAttributeIndex());
-				//	}
-				//}
-				//else
+				/*if(objectA->getCollisionFilterGroup() == XKILL_Enums::PhysicsAttributeType::FRUSTUM ||
+					objectB->getCollisionFilterGroup() == XKILL_Enums::PhysicsAttributeType::FRUSTUM)
+				{
+					if(objectA->getCollisionFilterGroup() == XKILL_Enums::PhysicsAttributeType::FRUSTUM &&
+					   objectB->getCollisionFilterGroup() != XKILL_Enums::PhysicsAttributeType::FRUSTUM)
+					{
+						doCulling(objectA->getAttributeIndex(),objectB->getAttributeIndex());
+					}
+					else if(objectA->getCollisionFilterGroup() != XKILL_Enums::PhysicsAttributeType::FRUSTUM &&
+					   objectB->getCollisionFilterGroup() == XKILL_Enums::PhysicsAttributeType::FRUSTUM)
+					{
+						doCulling(objectB->getAttributeIndex(),objectA->getAttributeIndex());
+					}
+				}
+				else*/
 				{
 					//std::cout << "\nCollision between " << ownerA << " & " << ownerB;
 					QUEUE_EVENT(new Event_PhysicsAttributesColliding(objectA->getAttributeIndex(), objectB->getAttributeIndex()));
@@ -590,7 +590,9 @@ void PhysicsComponent::doCulling(unsigned int frustumAttributeIndex, unsigned in
 {
 	if(itrPhysics.at(objectAttributeIndex)->ptr_render.isValid())
 	{
-		itrPhysics.at(objectAttributeIndex)->ptr_render->cull = true;
+		if(frustumAttributeIndex==0)
+			itrPhysics.at(objectAttributeIndex)->ptr_render->cull = true;
+		//itrPhysics.at(objectAttributeIndex)->ptr_render->culling.setBool(0,true);
 	}
 }
 
@@ -601,6 +603,7 @@ void PhysicsComponent::updateCulling()
 		AttributePtr<Attribute_Physics> ptr_physics = itrPhysics.getNext();
 		if(ptr_physics->ptr_render.isValid())
 		{
+			ptr_physics->ptr_render->culling.clear();
 			ptr_physics->ptr_render->cull = false;
 		}
 	}

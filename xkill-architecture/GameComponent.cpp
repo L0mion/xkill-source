@@ -588,7 +588,7 @@ void GameComponent::onUpdate(float delta)
 
 			worldPiecesIndices.at(randomIndex) = worldPiecesIndices.back();
 			worldPiecesIndices.pop_back();
-		}
+		}  
 	}
 }
 
