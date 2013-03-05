@@ -14,7 +14,6 @@
 // Iterators
 ATTRIBUTES_DECLARE_ALL;
 
-
 GameComponent::GameComponent(void)
 {
 	SUBSCRIBE_TO_EVENT(this, EVENT_STARTGAME);
@@ -453,8 +452,10 @@ void GameComponent::onUpdate(float delta)
 					break;
 				case XKILL_Enums::PickupableType::HACK_SPEEDHACK:
 					amount = 5;		//seconds
+					break;
 				case XKILL_Enums::PickupableType::HACK_JETHACK:
 					amount = 5;		//seconds
+					break;
 				}
 
 				//Each pickupable knows it pickupablesSpawnPoint creator
@@ -557,42 +558,6 @@ void GameComponent::onUpdate(float delta)
 		if(ptr_explosionSphere->currentLifeTimeLeft <= 0.0f)
 		{
 			SEND_EVENT(&Event_RemoveEntity(itrExplosionSphere.ownerId()));
-		}
-	}
-
-
-	//--------------------------------------------------------------------------------------
-	// Drop random world pieces
-	//--------------------------------------------------------------------------------------
-	std::vector<int> worldPiecesIndices;
-	if(nullProcessExecuting)
-	{
-		while(itrPhysics.hasNext())
-		{
-			AttributePtr<Attribute_Physics> ptr_physics = itrPhysics.getNext();
-			if(ptr_physics->collisionFilterGroup == XKILL_Enums::PhysicsAttributeType::WORLD)
-			{
-				worldPiecesIndices.push_back(ptr_physics.index());
-			}
-		}
-
-		for(unsigned int i = 0; i < 10; i++)
-		{
-			if(worldPiecesIndices.size() <= 0)
-			{
-				break;
-			}
-
-			AttributePtr<Attribute_Physics> ptr_physics;
-			int randomIndex = rand()%worldPiecesIndices.size();
-			ptr_physics = itrPhysics.at(worldPiecesIndices.at(randomIndex));
-			ptr_physics->collisionFilterGroup = XKILL_Enums::PhysicsAttributeType::PROP;
-			ptr_physics->collisionFilterMask = XKILL_Enums::PhysicsAttributeType::NOTHING;
-			ptr_physics->mass = 1;
-			ptr_physics->reloadDataIntoBulletPhysics = true;
-
-			worldPiecesIndices.at(randomIndex) = worldPiecesIndices.back();
-			worldPiecesIndices.pop_back();
 		}
 	}
 }

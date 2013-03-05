@@ -23,6 +23,16 @@
 
 ATTRIBUTES_DECLARE_ALL;
 
+#include <Windows.h>
+#include <sstream>
+
+#define OUTPUT_WINDOW_PRINT(stream)		\
+{										\
+ std::wostringstream os;				\
+ os << stream << "\n";					\
+ OutputDebugString(os.str().c_str());	\
+}
+
 debugDrawDispatcher* debugDrawer_ = nullptr;
 
 PhysicsComponent::PhysicsComponent() : broadphase_(nullptr),
@@ -40,6 +50,7 @@ PhysicsComponent::PhysicsComponent() : broadphase_(nullptr),
 	SUBSCRIBE_TO_EVENT(this, EVENT_ALL_HITS_RAY_CAST);
 	SUBSCRIBE_TO_EVENT(this, EVENT_UNLOAD_LEVEL);
 	SUBSCRIBE_TO_EVENT(this, EVENT_LOAD_LEVEL_BULLET);
+	SUBSCRIBE_TO_EVENT(this, EVENT_NULL_PROCESS_STARTED_EXECUTING);
 	SUBSCRIBE_TO_EVENT(this, EVENT_NULL_PROCESS_STOPPED_EXECUTING);
 }
 
@@ -144,6 +155,8 @@ bool PhysicsComponent::init()
 void PhysicsComponent::onUpdate(float delta)
 {
 	debugDrawer_->clearDebugVerticesVector();
+
+	razeWorld();
 
 	//Loop through all physics attributes
 	itrPhysics = ATTRIBUTE_MANAGER->physics.getIterator();
@@ -348,27 +361,38 @@ void PhysicsComponent::onEvent(Event* e)
 	case EVENT_UNLOAD_LEVEL:
 		CollisionShapes::Instance()->unloadCollisionShapes();
 		break;
+	case EVENT_NULL_PROCESS_STARTED_EXECUTING:
+		nullProcessExecuting_ = true;
+		break;
 	case EVENT_NULL_PROCESS_STOPPED_EXECUTING:
 		{
+			nullProcessExecuting_ = false;
 			while(itrPhysics.hasNext())
 			{
 				AttributePtr<Attribute_Physics> ptr_physics = itrPhysics.getNext();
 				if(ptr_physics->collisionFilterGroup == XKILL_Enums::PhysicsAttributeType::PROP)
 				{
-					PropPhysicsObject* propPhysicsObject = static_cast<PropPhysicsObject*>(physicsObjects_->at(itrPhysics.storageIndex()));
+					if(physicsObjects_->at(itrPhysics.storageIndex())->getName() == "PropPhysicsObject")
+					{
+						PropPhysicsObject* propPhysicsObject = static_cast<PropPhysicsObject*>(physicsObjects_->at(itrPhysics.storageIndex()));
 					
-					ptr_physics->collisionFilterGroup = XKILL_Enums::PhysicsAttributeType::WORLD;
-					ptr_physics->collisionFilterMask = XKILL_Enums::PhysicsAttributeType::PLAYER | XKILL_Enums::PhysicsAttributeType::PROJECTILE |
-						XKILL_Enums::PhysicsAttributeType::FRUSTUM | XKILL_Enums::PhysicsAttributeType::PICKUPABLE |
-						XKILL_Enums::PhysicsAttributeType::RAY | XKILL_Enums::PhysicsAttributeType::PROP;
-					ptr_physics->ptr_spatial->ptr_position->position = Float3(propPhysicsObject->worldOrigin_.x(),propPhysicsObject->worldOrigin_.y(),propPhysicsObject->worldOrigin_.z());
+						ptr_physics->collisionFilterGroup = XKILL_Enums::PhysicsAttributeType::WORLD;
+						ptr_physics->collisionFilterMask = XKILL_Enums::PhysicsAttributeType::PLAYER | XKILL_Enums::PhysicsAttributeType::PROJECTILE |
+							XKILL_Enums::PhysicsAttributeType::FRUSTUM | XKILL_Enums::PhysicsAttributeType::PICKUPABLE |
+							XKILL_Enums::PhysicsAttributeType::RAY | XKILL_Enums::PhysicsAttributeType::PROP;
+						ptr_physics->ptr_spatial->ptr_position->position = Float3(propPhysicsObject->worldOrigin_.x(),propPhysicsObject->worldOrigin_.y(),propPhysicsObject->worldOrigin_.z());
 					
-					propPhysicsObject->setCollisionFlags(propPhysicsObject->getCollisionFlags() | btCollisionObject::CF_STATIC_OBJECT);
+						propPhysicsObject->setCollisionFlags(propPhysicsObject->getCollisionFlags() | btCollisionObject::CF_STATIC_OBJECT);
 
-					ptr_physics->gravity = Float3(0.0f, 0.0f, 0.0f);
-					ptr_physics->linearVelocity = Float3(0.0f, 0.0f, 0.0f); 
-					ptr_physics->mass = 0;
-					ptr_physics->reloadDataIntoBulletPhysics = true;
+						ptr_physics->gravity = Float3(0.0f, 0.0f, 0.0f);
+						ptr_physics->linearVelocity = Float3(0.0f, 0.0f, 0.0f); 
+						ptr_physics->mass = 0;
+						ptr_physics->reloadDataIntoBulletPhysics = true;
+					}
+					else
+					{
+						OUTPUT_WINDOW_PRINT("Index of liar: " << itrPhysics.storageIndex());
+					}
 				}
 			}
 
@@ -591,6 +615,45 @@ void PhysicsComponent::doCulling(unsigned int frustumAttributeIndex, unsigned in
 	if(itrPhysics.at(objectAttributeIndex)->ptr_render.isValid())
 	{
 		itrPhysics.at(objectAttributeIndex)->ptr_render->cull = true;
+	}
+}
+
+void PhysicsComponent::razeWorld()
+{
+	//--------------------------------------------------------------------------------------
+	// Drop random world pieces
+	//--------------------------------------------------------------------------------------
+	std::vector<int> worldPiecesIndices;
+	if(nullProcessExecuting_)
+	{
+		while(itrPhysics.hasNext())
+		{
+			AttributePtr<Attribute_Physics> ptr_physics = itrPhysics.getNext();
+			if(ptr_physics->collisionFilterGroup == XKILL_Enums::PhysicsAttributeType::WORLD)
+			{
+				worldPiecesIndices.push_back(ptr_physics.index());
+			}
+		}
+
+		for(unsigned int i = 0; i < 100; i++)
+		{
+			if(worldPiecesIndices.size() <= 0)
+			{
+				break;
+			}
+
+			AttributePtr<Attribute_Physics> ptr_physics;
+			int randomIndex = worldPiecesIndices.size() - 1;
+			ptr_physics = itrPhysics.at(worldPiecesIndices.at(randomIndex));
+			ptr_physics->collisionFilterGroup = XKILL_Enums::PhysicsAttributeType::PROP;
+			ptr_physics->collisionFilterMask = XKILL_Enums::PhysicsAttributeType::NOTHING;
+			ptr_physics->gravity = Float3(0.0f, -10.0f, 0.0f);
+			ptr_physics->mass = 1;
+			ptr_physics->reloadDataIntoBulletPhysics = true;
+
+			worldPiecesIndices.at(randomIndex) = worldPiecesIndices.back();
+			worldPiecesIndices.pop_back();
+		}
 	}
 }
 
