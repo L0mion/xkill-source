@@ -205,7 +205,7 @@ void CS_Lighting(
 	//if(ssao.z < 0.0f)
 	//	ssao.z *= -1.0f;
 
-	float3 litPixel = Ambient.xyz * ssao.r + Diffuse.xyz + Specular.xyz;
+	float3 litPixel = Ambient.xyz * (1.0f - ssao.r) + Diffuse.xyz + Specular.xyz;
 	float3 glowPixel = bufferGlowHigh.SampleLevel(ss, texCoord, 0).xyz;
 	litPixel = min(litPixel + glowPixel, 1.0f); //additive blending
 	output[

@@ -1161,10 +1161,10 @@ void Renderer::buildSSAOMap(ViewportData& vpData)
 	
 	managementCB_->setCB(CB_TYPE_CAMERA, TypeFX_CS, CB_REGISTER_CAMERA,	devcon);
 
-	unsigned int viewportTopX	= vpData.viewportTopX	/ SSAO_MAP_SCREEN_RES_FACTOR;
-	unsigned int viewportTopY	= vpData.viewportTopY	/ SSAO_MAP_SCREEN_RES_FACTOR;
-	unsigned int viewportWidth	= vpData.viewportWidth	/ SSAO_MAP_SCREEN_RES_FACTOR;
-	unsigned int viewportHeight	= vpData.viewportHeight	/ SSAO_MAP_SCREEN_RES_FACTOR;
+	unsigned int viewportTopX	= (float)vpData.viewportTopX	/ (float)SSAO_MAP_SCREEN_RES_FACTOR; //RISKY?
+	unsigned int viewportTopY	= (float)vpData.viewportTopY	/ (float)SSAO_MAP_SCREEN_RES_FACTOR; //RISKY?
+	unsigned int viewportWidth	= (float)vpData.viewportWidth	/ (float)SSAO_MAP_SCREEN_RES_FACTOR; //RISKY?
+	unsigned int viewportHeight	= (float)vpData.viewportHeight	/ (float)SSAO_MAP_SCREEN_RES_FACTOR; //RISKY?
 	managementCB_->updateCBCamera(managementD3D_->getDeviceContext(),
 		vpData.view,
 		managementMath_->getIdentityMatrix(),					//Irrelevant
