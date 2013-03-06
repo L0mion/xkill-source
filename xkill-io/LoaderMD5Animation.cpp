@@ -15,6 +15,8 @@ LoaderMD5Animation::LoaderMD5Animation()
 }
 LoaderMD5Animation::~LoaderMD5Animation()
 {
+	if(infile_.is_open())
+		infile_.close();
 }
 
 void LoaderMD5Animation::loadAnimation(const std::string& filename)
