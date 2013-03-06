@@ -91,7 +91,7 @@ void Menu_HUD::mapToSplitscreen()
 	ui.label_firingMode->move(centerPos.x - ui.label_firingMode->width()* 0.5f + 10, centerPos.y - ui.label_firingMode->height()* 0.5f);
 
 	// Move scoreboard to center
-	ui.frame_scoreboard->show();
+	ui.frame_scoreboard->hide();
 	ui.frame_scoreboard->move(centerPos.x - ui.frame_scoreboard->width()* 0.5f, centerPos.y - ui.frame_scoreboard->height()* 0.5f);
 
 	// Place statusbars
@@ -135,6 +135,11 @@ void Menu_HUD::refresh()
 	int ammoIndex = ammunition->type;
 	float fadeTime = 1.0f;
 
+	//
+	// Update Scoreboard
+	//
+
+	scoreboard.refresh();
 
 	//
 	// Show ammunition info
@@ -260,13 +265,38 @@ void Menu_HUD::refresh()
 			ui.label_firingMode->show();
 			ui.frame_bottom->show();
 
-			ui.frame_scoreboard->show();
+			ui.frame_scoreboard->hide();
 		}
 	}
 
 
-	// Scheduling
-	//ui.label_priority_advantage->setNum((int)ptr_health->health);
+	//
+	// Scheduling info
+	//
+
+	// Determine priority advantage
+	{
+		std::string str_priorityAdvantage = "";
+
+		int scoreDiff = scoreboard.maxCycles - ptr_player->cycles;
+
+		// If first player, show score difference to second closest
+		if(scoreDiff == 0)
+			scoreDiff = scoreboard.maxCycles - scoreboard.secondMaxPriority;
+		// ELSE: Show score difference to second closest
+		else
+			scoreDiff = ptr_player->cycles - scoreboard.maxCycles;
+
+		// Set label
+		
+		if(scoreDiff >= 0)
+			ui.label_priority_advantage->setText("+" +QString::number(scoreDiff));
+		else
+			ui.label_priority_advantage->setNum(scoreDiff);
+			
+	}
+	
+	
 	QString str_time = QDateTime::fromTime_t(SETTINGS->timeUntilScheduling).toString("mm:ss");
 	ui.label_schedulingTimer->setText(str_time);
 
@@ -355,15 +385,48 @@ void Menu_HUD::refresh()
 	}
 }
 
+void Menu_HUD::initScoreboard()
+{
+	// Init helper class
+	scoreboard.init(ptr_splitScreen->ptr_player);
+
+	// Build scoreboard
+	while(itrPlayer.hasNext())
+	{
+		// Add entry into GUI
+		AttributePtr<Attribute_Player> ptr_player =	itrPlayer.getNext();
+
+		QHBoxLayout* layout_entry = new QHBoxLayout();
+
+		QLabel* label_process = new QLabel();
+		QLabel* label_cycles = new QLabel();
+		QLabel* label_priority = new QLabel();
+
+		layout_entry->addWidget(label_process);
+		layout_entry->addWidget(label_cycles);
+		layout_entry->addWidget(label_priority);
+
+		ui.verticalLayout_scoreboard->addLayout(layout_entry);
+
+
+		// Add entry into scoreBoard class
+		ScoreboardEntry entry;
+		entry.label_process = label_process;
+		entry.label_cycles = label_cycles;
+		entry.label_priority = label_priority;
+		entry.ptr_player = ptr_player;
+		scoreboard.addEntry(entry);
+	}
+}
+
 Menu_HUD::Menu_HUD( AttributePtr<Attribute_SplitScreen> splitScreen, QWidget* parent ) : QWidget(parent)
 {
 	ui.setupUi(this);
-	this->ptr_splitScreen = splitScreen;
-	hudMessage_manager.init(this, splitScreen);
+	ptr_splitScreen = splitScreen;
 
-	Float2 pos(splitScreen->ssTopLeftX, splitScreen->ssTopLeftY);
-	move(splitScreen->ssTopLeftX, splitScreen->ssTopLeftY);
-	resize(splitScreen->ssWidth, splitScreen->ssHeight);
+	Float2 pos(ptr_splitScreen->ssTopLeftX, ptr_splitScreen->ssTopLeftY);
+	move(ptr_splitScreen->ssTopLeftX, ptr_splitScreen->ssTopLeftY);
+	resize(ptr_splitScreen->ssWidth, ptr_splitScreen->ssHeight);
 	hide();
 
 	QWidget::setAttribute(Qt::WA_ShowWithoutActivating);
@@ -371,8 +434,9 @@ Menu_HUD::Menu_HUD( AttributePtr<Attribute_SplitScreen> splitScreen, QWidget* pa
 
 	SUBSCRIBE_TO_EVENT(this, EVENT_UPDATE);
 	
+	hudMessage_manager.init(this, ptr_splitScreen);
 	mapToSplitscreen();
-	refreshScoreboard();
+	initScoreboard();
 }
 
 void Menu_HUD::onEvent(Event* e)
@@ -393,198 +457,6 @@ Menu_HUD::~Menu_HUD()
 	UNSUBSCRIBE_TO_EVENTS(this);
 }
 
-class ScoreboardEntry
-{
-public:
-	QLabel* label_process;
-	QLabel* label_cycles;
-	QLabel* label_priority;
-	AttributePtr<Attribute_Player> ptr_player;
-};
-
-class ScoreBoard
-{
-private:
-	std::vector<ScoreboardEntry> entries;
-	AttributePtr<Attribute_Player> ptr_current_player;
-	int maxCycles;
-	int maxPriority;
-	int secondMaxPriority;
-
-	int valueAt(int index)
-	{
-		entries.at(index).ptr_player->cycles;
-	}
-	void quickSort(int index_start, int index_end)
-	{
-		int left = index_start;
-		int right = index_end;
-
-		// Pick pivot (should be random for best O(n))
-		int pivot = valueAt(index_end);
-
-		// Repeat until ends meet
-		while(left <= right) 
-		{
-			// Find lower and upper value to switch
-			while(valueAt(left) < pivot)
-			{
-				left++;
-			}
-			while(valueAt(right) > pivot)
-			{
-				right--;
-			}
-
-			// Check if chosen values are still valid
-			if(left <= right) 
-			{
-				// Swap values
-				AttributePtr<Attribute_Player> tmp = entries.at(left).ptr_player;
-				entries.at(left).ptr_player = entries.at(right).ptr_player;
-				entries.at(right).ptr_player = tmp;
-
-				left++;
-				right--;
-			}
-		}
-
-		// Continue sorting left and right
-		if(index_start < right)
-			quickSort(index_start, right);
-		if(left < index_end)
-			quickSort(left, index_end);
-	}
-	void sortPlayers()
-	{
-		// Sort using quicksort
-		quickSort(0, entries.size() - 1);
-	}
-	void syncLabelsWithPlayers()
-	{
-		for(int i=0; i<entries.size(); i++)
-		{
-			ScoreboardEntry* e = &entries.at(i);
-
-			e->label_process->setText(e->ptr_player->playerName.c_str());
-			e->label_cycles->setNum(e->ptr_player->cycles);
-			e->label_priority->setNum(e->ptr_player->priority);
-
-			// Empty style sheets
-			std::string sheet_process = "";
-			std::string sheet_cycles = "";
-			std::string sheet_priority = "";
-
-			// Apply extra stuff if we're at the current player
-			if(e->ptr_player == ptr_current_player)
-			{
-				sheet_process += "background-color: rgba(255, 255, 255, 100); font-weight: bold;";
-				sheet_cycles += "background-color: rgba(255, 255, 255, 100); font-weight: bold;";
-				sheet_priority += "background-color: rgba(255, 255, 255, 100); font-weight: bold;";
-			}
-
-			// Apply extra stuff if we have most cycles
-			if(e->ptr_player->cycles == maxCycles)
-			{
-				sheet_cycles += "background-color: rgba(255, 0, 0, 100);";
-			}
-
-			// Apply extra stuff if we have most priority
-			if(e->ptr_player->priority == maxPriority)
-			{
-				sheet_priority += "background-color: rgba(255, 0, 0, 100);";
-			}
-
-			// Apply style sheet
-			e->label_process->setStyleSheet(sheet_process.c_str());
-			e->label_cycles->setStyleSheet(sheet_cycles.c_str());
-			e->label_priority->setStyleSheet(sheet_priority.c_str());
-		}
-	}
-public:
-	void init(AttributePtr<Attribute_Player> ptr_current_player)
-	{
-		this->ptr_current_player = ptr_current_player;
-	}
-	void findMaxValues()
-	{
-		int numEntries = entries.size();
-
-		// Find max cycles
-		maxCycles = 0;
-		for(int i=0; i<numEntries; i++)
-		{
-			ScoreboardEntry* e = &entries.at(i);
-
-			if(e->ptr_player->cycles > maxCycles)
-				maxCycles = e->ptr_player->cycles;
-		}
-
-		// Find max priority
-		maxPriority = 0;
-		int maxPriority_index = 0;
-		for(int i=0; i<numEntries; i++)
-		{
-			ScoreboardEntry* e = &entries.at(i);
-
-			if(e->ptr_player->priority > maxPriority)
-			{
-				maxPriority = e->ptr_player->priority;
-				maxPriority_index = i;
-			}
-		}
-
-		// Find second max priority
-		secondMaxPriority = 0;
-		for(int i=0; i<numEntries; i++)
-		{
-			ScoreboardEntry* e = &entries.at(i);
-
-			if(e->ptr_player->priority > maxPriority && maxPriority_index != i)
-				secondMaxPriority = e->ptr_player->priority;
-		}
-	}
-	void addEntry(ScoreboardEntry entry)
-	{
-		entries.push_back(entry);
-	}
-	void refresh()
-	{
-		sortPlayers();
-		findMaxValues();
-		syncLabelsWithPlayers();
-	}
-};
-
-void Menu_HUD::refreshScoreboard()
-{
-	// Build scoreboard
-	while(itrPlayer.hasNext())
-	{
-		AttributePtr<Attribute_Player> ptr_player =	itrPlayer.getNext();
-
-		QHBoxLayout* layout_entry = new QHBoxLayout();
-
-		QLabel* label_process = new QLabel(ptr_player->playerName.c_str());
-		QLabel* label_cycles = new QLabel();
-		label_cycles->setNum(ptr_player->cycles);
-		QLabel* label_priority = new QLabel();
-		label_priority->setNum(ptr_player->priority);
-
-		
-
-		layout_entry->addWidget(label_process);
-		layout_entry->addWidget(label_cycles);
-		layout_entry->addWidget(label_priority);
-
-		ui.verticalLayout_scoreboard->addLayout(layout_entry);
-	}
-
-	// Add entry into scoreboard
-	{
-		
-	}
-}
 
 HudMessage::HudMessage( Event_PostHudMessage* e, QWidget* parent)
 {
