@@ -60,6 +60,7 @@ private:
 		{
 			QFrame* topMenu = menuStack.back();
 			topMenu->show();
+			this->activateWindow();
 		}
 
 		//ui.label_background->show();

@@ -1047,7 +1047,7 @@ void GameComponent::updateAndInterpretLaser(AttributePtr<Attribute_Ray> ptr_ray,
 		else if(entityHitByRay->hasAttribute(ATTRIBUTE_PLAYER)) //Ray hit another player
 		{
 			std::vector<int> hitPlayerId = entityHitByRay->getAttributes(ATTRIBUTE_PLAYER);
-			for(int i=0; i<hitPlayerId.size(); i++)
+			for(int i=0; i<(int)hitPlayerId.size(); i++)
 			{
 				AttributePtr<Attribute_Player> hitPlayerAttribute = itrPlayer.at(hitPlayerId.at(i));
 				if(!hitPlayerAttribute->detectedAsDead)
@@ -1157,6 +1157,13 @@ void GameComponent::startGame()
 	SEND_EVENT(&Event(EVENT_FOCUS_MAINWINDOW));
 	SEND_EVENT(&Event_EnableHud(true));
 	SEND_EVENT(&Event_EnableMenu(false));
+
+	// Inform players about their name
+	while(itrPlayer.hasNext())
+	{
+		AttributePtr<Attribute_Player>			ptr_player		=	itrPlayer		.getNext();
+		{Event_PostHudMessage e("", ptr_player); e.setHtmlMessage("Welcome", ptr_player->playerName); SEND_EVENT(&e);}
+	}
 }
 
 void GameComponent::endGame()
