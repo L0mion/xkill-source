@@ -88,6 +88,7 @@ void Menu_Editor::slot_editorRefresh()
 		num_rows = 0;
 
 		// Fill columns
+		entityBrowser_add("Settings",				&itrSettings.getAllOwnerId());
 		entityBrowser_add("Players",				&itrPlayer.getAllOwnerId());
 		entityBrowser_add("Positions",				&itrPosition.getAllOwnerId());
 		entityBrowser_add("PlayerSpawnPoints",		&itrPlayerSpawnPoint.getAllOwnerId());

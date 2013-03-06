@@ -1,6 +1,6 @@
 #include "AttributeManager.h"
 #include "EntityStorage.h"
-
+#include "DataItem.h"
 
 
 void AttributeManager::createEntityStorage()
@@ -11,7 +11,6 @@ void AttributeManager::createEntityStorage()
 AttributeManager::~AttributeManager()
 {
 	delete entities;
-	delete settings;
 }
 
 AttributeManager* AttributeManager::instance()
@@ -53,4 +52,18 @@ Settings::Settings()
 	timeLimit = 0.0f;
 	cycleLimit = 35;
 	showDebugPhysics = false;
+}
+
+DataItemList* Settings::getDataList()
+{
+	DataItemList* list = new DataItemList();
+
+	list->add(soundVolume, "soundVolume");
+
+	return list;
+}
+
+void Settings::saveTo( DataItemList* list )
+{
+	list->get(&soundVolume);
 }
