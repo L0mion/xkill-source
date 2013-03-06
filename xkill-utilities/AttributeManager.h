@@ -7,7 +7,7 @@ class EntityStorage;
 //static Entity* settings_entity;
 
 // Settings class
-class DLL_U Settings
+class DLL_U Attribute_Settings  : public IAttribute
 {
 private:
 	float _timeScale;
@@ -28,7 +28,15 @@ public:
 	float timeScale();
 	void setTimeScale(float timeScale);
 
-	Settings();
+	Attribute_Settings();
+
+
+	DataItemList* getDataList();
+
+	void saveTo( DataItemList* list );
+
+	AttributeType getType(){return ATTRIBUTE_SETTINGS;}
+	std::string getName(){return "Settings";}
 };
 
 
@@ -45,7 +53,6 @@ private:
 	AttributeManager()
 	{
 		createEntityStorage();
-		settings = new Settings;
 	}
 
 	void createEntityStorage();
@@ -53,9 +60,9 @@ private:
 public:
 	~AttributeManager();
 
-	Settings* settings;
 	EntityStorage* entities;
 
+	AttributeStorage<Attribute_Settings>				settings;
 	AttributeStorage<Attribute_Position>				position;
 	AttributeStorage<Attribute_Spatial>					spatial;
 	AttributeStorage<Attribute_Render>					render;
@@ -94,8 +101,8 @@ AttributeManager::instance()->settings
 
 // Declares all attributes
 #define ATTRIBUTES_DECLARE_ALL															\
-	static Settings												*settings				;	\
 	static EntityStorage										*itr_entity				;	\
+	static AttributeIterator<Attribute_Settings>				itrSettings				;	\
 	static AttributeIterator<Attribute_Position>				itrPosition				;	\
 	static AttributeIterator<Attribute_Spatial>					itrSpatial				;	\
 	static AttributeIterator<Attribute_Render>					itrRender				;	\
@@ -128,9 +135,9 @@ AttributeManager::instance()->settings
 
 // Inits all attributes
 #define ATTRIBUTES_INIT_ALL																					\
-	settings				= AttributeManager::instance()->settings;										\
 	itr_entity				= AttributeManager::instance()->entities;										\
 	\
+	itrSettings				= AttributeManager::instance()->settings					.getIterator();		\
 	itrPosition				= AttributeManager::instance()->position					.getIterator();		\
 	itrSpatial				= AttributeManager::instance()->spatial						.getIterator();		\
 	itrRender				= AttributeManager::instance()->render						.getIterator();		\
