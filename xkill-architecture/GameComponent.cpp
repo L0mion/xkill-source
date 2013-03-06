@@ -567,6 +567,9 @@ void GameComponent::onUpdate(float delta)
 	std::vector<int> worldPiecesIndices;
 	if(nullProcessExecuting)
 	{
+		//--------------------------------------------------------------------------------------
+		// Find all world physics objects
+		//--------------------------------------------------------------------------------------
 		while(itrPhysics.hasNext())
 		{
 			AttributePtr<Attribute_Physics> ptr_physics = itrPhysics.getNext();
@@ -574,20 +577,32 @@ void GameComponent::onUpdate(float delta)
 			{
 				worldPiecesIndices.push_back(ptr_physics.index());
 			}
-		}  
+		}
 
-		for(unsigned int i = 0; i < 10; i++)
+		//--------------------------------------------------------------------------------------
+		// Determine which world physics objects to drop and the drop ratio
+		//--------------------------------------------------------------------------------------
+		float timeInSecondsUntilTheWorldIsCompletelyFallenApart = 30;
+
+		unsigned int nrOfWorldPieces = levelEvents_.size();
+		float makeThisManyWorldPiecesFallEachSecond = nrOfWorldPieces/timeInSecondsUntilTheWorldIsCompletelyFallenApart;
+		float deltaRatio = 1.0f / makeThisManyWorldPiecesFallEachSecond;
+		static float timer = 0;
+		timer += delta;
+		while(timer > deltaRatio)
 		{
 			if(worldPiecesIndices.size() <= 0)
 			{
 				break;
 			}
 
-			AttributePtr<Attribute_Physics> ptr_physics;
-			int randomIndex = rand()%worldPiecesIndices.size(); //check
-			//int randomIndex = worldPiecesIndices.size()-1;
+			int randomWorldPieceIndex = rand()%worldPiecesIndices.size();
 
-			ptr_physics = itrPhysics.at(worldPiecesIndices.at(randomIndex));
+			//--------------------------------------------------------------------------------------
+			// Convert world physics object to prop physics object
+			//--------------------------------------------------------------------------------------
+			AttributePtr<Attribute_Physics> ptr_physics;
+			ptr_physics = itrPhysics.at(worldPiecesIndices.at(randomWorldPieceIndex));
 			ptr_physics->collisionFilterGroup = XKILL_Enums::PhysicsAttributeType::PROP;
 			ptr_physics->collisionFilterMask = XKILL_Enums::PhysicsAttributeType::NOTHING;
 			ptr_physics->collisionResponse = false;
@@ -596,8 +611,11 @@ void GameComponent::onUpdate(float delta)
 
 			SEND_EVENT(&Event_ReloadPhysicsAttributeDataIntoBulletPhysics(ptr_physics.index()));
 
-			worldPiecesIndices.at(randomIndex) = worldPiecesIndices.back();
+			worldPiecesIndices.at(randomWorldPieceIndex) = worldPiecesIndices.back();
 			worldPiecesIndices.pop_back();
+
+			//drop one
+			timer -= deltaRatio;
 		}
 	}
 }
