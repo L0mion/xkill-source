@@ -21,8 +21,8 @@ SamplerState ssRandom	: register( s2 );
 float occlusionFunc(float2 texGlobal, float2 texOffset, float3 occludee, float3 occludeeNormal)
 {
 	float2 dispatch = (texGlobal + texOffset);
-	dispatch.x *= ssaoWidth;	dispatch.x - viewportTopX;
-	dispatch.y *= ssaoHeight;	dispatch.y - viewportTopY;
+	dispatch.x *= ssaoWidth;	dispatch.x -= viewportTopX;
+	dispatch.y *= ssaoHeight;	dispatch.y -= viewportTopY;
 	float2 texLocal = float2(
 			dispatch.x / viewportWidth, 
 			dispatch.y / viewportHeight);
@@ -52,16 +52,17 @@ float occlusionFunc(float2 texGlobal, float2 texOffset, float3 occludee, float3 
 [numthreads(SSAO_BLOCK_DIM, SSAO_BLOCK_DIM, 1)]
 void CS_SSAO(uint3 threadIDDispatch	: SV_DispatchThreadID)
 {
+	//Convert [0-ssaoWidth, 0-ssaoHeight] -> [0, 1]
 	float2 texCoord = float2(
-		(float)(threadIDDispatch.x + viewportTopX)	/ (float)ssaoWidth,	  //Divided by the total width of ssao-map.
-		(float)(threadIDDispatch.y + viewportTopY)	/ (float)ssaoHeight); //Divided by the total height of ssao-map.
+		(float)(threadIDDispatch.x + viewportTopX)	/ (float)ssaoWidth,
+		(float)(threadIDDispatch.y + viewportTopY)	/ (float)ssaoHeight);
 
 	//Get view-space position of occluded point:
 	float occludeeDepth = bufferDepth.SampleLevel(ssDepth, texCoord, 0).x;
 	float3 occludee = UtilReconstructPositionViewSpace(
 		float2(
 			(float)threadIDDispatch.x / viewportWidth,
-			(float)threadIDDispatch.y / viewportHeight),
+			(float)threadIDDispatch.y / viewportHeight), //Convert [0-ssaoWidth, 0-ssaoHeight] -> [0, 1]
 		occludeeDepth, 
 		projectionInverse);
 
