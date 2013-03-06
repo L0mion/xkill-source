@@ -1149,10 +1149,10 @@ void Renderer::buildSSAOMap(ViewportData& vpData)
 		devcon,
 		/*SSAOMap Width*/			ssaoWidth,
 		/*SSAOMap Height*/			ssaoHeight,
-		/*Occlusion Radius*/		1.0f,
-		/*Occlusion Scale*/			1.0f,
-		/*Occlusion Bias*/			0.0f,
-		/*Occlusion Intensity*/		1.0f);
+		/*Occlusion Radius*/		0.5f,
+		/*Occlusion Scale*/			0.7f,
+		/*Occlusion Bias*/			0.1f,
+		/*Occlusion Intensity*/		2.0f);
 	
 	//Dispatch motherfucker
 	unsigned int SSAO_BLOCK_DIM = 16;

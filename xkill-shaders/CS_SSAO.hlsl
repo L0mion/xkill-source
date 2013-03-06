@@ -109,7 +109,6 @@ void CS_SSAO(uint3 threadIDDispatch	: SV_DispatchThreadID)
 	}
 	occlusion /= numSamples * 4.0f;
 
-
 	occlusion = 1.0f - occlusion;
 	occlusion = saturate(pow(occlusion, 4.0f)); //Make occlusion appear more dramatic.
 	ssao[
