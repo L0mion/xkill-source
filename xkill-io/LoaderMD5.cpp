@@ -23,11 +23,11 @@ bool LoaderMD5::loadModel(const std::string& filename, LoaderMD5ModelDesc* model
 	return true;
 }
 
-bool LoaderMD5::loadAnimation(const std::string& filename)
+bool LoaderMD5::loadAnimation(const std::string& filename, LoaderMD5AnimationDesc* animationDesc)
 {
 	LoaderMD5Animation loaderAnimation;
 
-	loaderAnimation.loadAnimation(filename);
+	loaderAnimation.loadAnimation(filename, animationDesc);
 
 	return true;
 }

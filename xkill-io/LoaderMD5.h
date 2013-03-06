@@ -6,9 +6,9 @@
 
 #include <DirectXMath.h>
 
-#include "LoaderMD5JointDesc.h"
 #include "LoaderMD5MeshDesc.h"
 #include "LoaderMD5ModelDesc.h"
+#include "LoaderMD5AnimationDesc.h"
 
 class LoaderMD5
 {
@@ -17,7 +17,7 @@ public:
 	~LoaderMD5();
 
 	bool loadModel(const std::string& filename, LoaderMD5ModelDesc* modelDesc);
-	bool loadAnimation(const std::string& filename);
+	bool loadAnimation(const std::string& filename, LoaderMD5AnimationDesc* animationDesc);
 
 private:
 	

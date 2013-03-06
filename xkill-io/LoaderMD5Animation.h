@@ -4,6 +4,7 @@
 #include <vector>
 #include <fstream>
 
+#include "LoaderMD5AnimationDesc.h"
 #include "LoaderMD5JointInfo.h"
 #include "LoaderMD5BoundsDesc.h"
 #include "LoaderMD5BaseFrameDesc.h"
@@ -16,7 +17,7 @@ public:
 	LoaderMD5Animation();
 	~LoaderMD5Animation();
 
-	void loadAnimation(const std::string& filename);
+	void loadAnimation(const std::string& filename, LoaderMD5AnimationDesc* animationDesc);
 
 private:
 	

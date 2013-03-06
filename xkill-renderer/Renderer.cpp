@@ -506,9 +506,9 @@ void Renderer::renderViewportToGBuffer(ViewportData& vpData)
 	std::map<unsigned int, InstancedData*> instancesMap = managementInstance_->getInstancesMap();
 	for(std::map<unsigned int, InstancedData*>::iterator i = instancesMap.begin(); i != instancesMap.end(); i++)
 	{
-	//	if(i->first == 12)
-	//		renderAnimation(i->first, vpData.view, vpData.proj);
-	//	else
+		if(i->first == 12)
+			renderAnimation(i->first, vpData.view, vpData.proj);
+		else
 			renderInstance(i->first, i->second, false);
 	}
 
@@ -1370,9 +1370,9 @@ void Renderer::renderAnimation(unsigned int meshID, DirectX::XMFLOAT4X4 view, Di
 
 	ModelD3D* modelD3D	= managementModel_->getModelD3D(meshID, device);
 
-	DirectX::XMFLOAT4X4 worldMatrix(0.1f, 0.0f, 0.0f, 0.0f,
-									0.0f, 0.1f, 0.0f, 0.0f,
-									0.0f, 0.0f, 0.1f, 0.0f,
+	DirectX::XMFLOAT4X4 worldMatrix(0.01f, 0.0f, 0.0f, 0.0f,
+									0.0f, 0.01f, 0.0f, 0.0f,
+									0.0f, 0.0f, 0.01f, 0.0f,
 									6.0f, 3.0f, 0.0f, 1.0f);
 	DirectX::XMFLOAT4X4 worldMatrixInverse	= worldMatrix;
 	DirectX::XMFLOAT4X4 finalMatrix			= managementMath_->calculateFinalMatrix(worldMatrix, view, projection);
@@ -1380,9 +1380,9 @@ void Renderer::renderAnimation(unsigned int meshID, DirectX::XMFLOAT4X4 view, Di
 	managementCB_->setCB(CB_TYPE_OBJECT, TypeFX_VS, CB_REGISTER_OBJECT, devcon);
 	managementCB_->updateCBObject(devcon, finalMatrix, worldMatrix, worldMatrixInverse);
 
-	std::string clipName = "punch";
+	std::string clipName = "Default";
 	std::vector<DirectX::XMFLOAT4X4> finalTransforms;
-	managementAnimation_->debug_clearOffsetMatrices(3);
+	//managementAnimation_->debug_clearOffsetMatrices(3);
 	managementAnimation_->update(0.002, clipName, 3);
 	managementAnimation_->getAnimation(3)->getFinalTransforms(clipName, managementAnimation_->getTimePosition(), &finalTransforms);
 

@@ -19,7 +19,7 @@ LoaderMD5Animation::~LoaderMD5Animation()
 		infile_.close();
 }
 
-void LoaderMD5Animation::loadAnimation(const std::string& filename)
+void LoaderMD5Animation::loadAnimation(const std::string& filename, LoaderMD5AnimationDesc* animationDesc)
 {
 	reset();
 
@@ -60,6 +60,11 @@ void LoaderMD5Animation::loadAnimation(const std::string& filename)
 	frameDuration_		= 1.0f / static_cast<float>(frameRate_);
 	animationDuration_	= frameDuration_ * static_cast<float>(numFrames_);
 	animationTime_		= 0.0f;
+
+	animationDesc->frameDuration_ = frameDuration_;
+	animationDesc->baseFrames_	  = baseFrames_;
+	animationDesc->skeletons_	  = skeletons_;
+	animationDesc->jointInfos_	  = jointInfos_;
 
 	infile_.close();
 }

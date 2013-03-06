@@ -18,6 +18,7 @@
 #include "MdlDescModel.h"
 
 #include "LoaderMD5.h"
+#include "LoaderMD5AnimationDesc.h"
 #include "LoaderMD5ModelDesc.h"
 #include "LoaderMD5WeightDesc.h"
 
@@ -214,10 +215,7 @@ bool IOComponent::initLvlMdlDesc(std::string filename)
 	return sucessfulLoad;
 }
 
-bool IOComponent::loadModel(
-	std::string		modelName,
-	std::string		modelPath,
-	MdlDescModel*	modelDesc)
+bool IOComponent::loadModel(std::string	modelName, std::string	modelPath, MdlDescModel* modelDesc)
 {
 	bool successfulLoad = true;
 
@@ -243,7 +241,7 @@ bool IOComponent::loadModel(
 			successfulLoad = loadObj(modelName, modelPath, modelDesc, meshDesc);
 			break;
 		case FILE_EXTENSION_MD5MESH:
-			successfulLoad = loadMD5(modelName, modelPath, modelDesc, meshDesc);
+			successfulLoad = loadMD5(modelName, modelPath, modelDesc, meshDesc, skinnedData);
 			break;
 		}
 
@@ -279,11 +277,8 @@ bool IOComponent::loadModel(
 
 	return successfulLoad;
 }
-bool IOComponent::loadObj(
-	std::string modelName, 
-	std::string modelPath, 
-	MdlDescModel* modelDesc, 
-	MeshDesc& meshDesc)
+
+bool IOComponent::loadObj(std::string modelName, std::string modelPath, MdlDescModel* modelDesc, MeshDesc& meshDesc)
 {
 	bool sucessfulMake = true;
 
@@ -320,6 +315,7 @@ bool IOComponent::loadObj(
 	delete objMaker;
 	return sucessfulMake;
 }
+
 bool IOComponent::loadFbx(std::string modelName, std::string modelPath, MdlDescModel* modelDesc, MeshDesc& meshDesc, SkinnedData* skinnedData)
 {
 	bool successfulLoad = true;
@@ -393,25 +389,26 @@ void IOComponent::loadFbxAnimation(std::vector<LoaderFbxAnimationDesc> animation
 	skinnedData->set(boneHierarchy, boneOffsets, animations);
 }
 
-bool IOComponent::loadMD5(std::string modelName, std::string modelPath, MdlDescModel* modelDesc, MeshDesc& meshDesc)
+bool IOComponent::loadMD5(std::string modelName, std::string modelPath, MdlDescModel* modelDesc, MeshDesc& meshDesc, SkinnedData* skinnedData)
 {
 	LoaderMD5 loaderMD5;
 	LoaderMD5ModelDesc md5Model;
 	loaderMD5.loadModel(modelPath+modelName, &md5Model);
 
-	loaderMD5.loadAnimation(modelPath+ "boblampclean.md5anim");
+	LoaderMD5AnimationDesc md5Animation;
+	loaderMD5.loadAnimation(modelPath+ "boblampclean.md5anim", &md5Animation);
 
 	std::vector<VertexDesc> vertices;
 	std::vector<SubsetDesc> subsets;
 	std::vector<MaterialDesc> materials;
-
 	loadMD5AssembleVertices(&vertices, &md5Model);
 	loadMD5AssembleSubsets(&subsets, &md5Model);
 	loadMD5AssembleMaterials(&materials, &md5Model);
-
 	meshDesc.vertices_	= vertices;
 	meshDesc.subsets_	= subsets;
 	meshDesc.materials_ = materials;
+
+	loadMD5AssembleAnimation(skinnedData, &md5Animation);
 
 	return true;
 }
@@ -439,7 +436,7 @@ void IOComponent::loadMD5AssembleVertices(std::vector<VertexDesc>* vertices, Loa
 			if(numWeights > 4)
 				numWeights = 4;
 
-			float weights[4];
+			float weights[4] = {0};
 			int startWeight = md5Vertices[vertexIndex].startWeight_;
 			for(int i=0; i<numWeights; i++)
 			{
@@ -505,6 +502,57 @@ void IOComponent::loadMD5AssembleMaterials(std::vector<MaterialDesc>* materials,
 
 		materials->push_back(material);
 	}
+}
+void IOComponent::loadMD5AssembleAnimation(SkinnedData* skinnedData, LoaderMD5AnimationDesc* md5Animation)
+{
+	AnimationClip* animationClip = new AnimationClip();
+	std::vector<LoaderMD5BaseFrameDesc> baseFrames = md5Animation->baseFrames_;
+	std::vector<LoaderMD5JointInfo> jointInfos = md5Animation->jointInfos_;
+
+	std::vector<DirectX::XMFLOAT4X4>* boneOffsets = new std::vector<DirectX::XMFLOAT4X4>();
+	std::vector<int>* boneHierarchy = new std::vector<int>();
+	for(unsigned int i=0; i<jointInfos.size(); i++)
+		boneHierarchy->push_back(jointInfos[i].parentID_);
+
+	DirectX::XMFLOAT3 scale(1.0f, 1.0f, 1.0f);
+	DirectX::XMVECTOR xmZero = DirectX::XMVectorSet(0.0f, 0.0f, 0.0f, 1.0f);
+	for(unsigned int i=0; i<baseFrames.size(); i++)
+	{
+		DirectX::XMVECTOR xmScale		= DirectX::XMLoadFloat3(&scale);
+		DirectX::XMVECTOR xmTranslation = DirectX::XMLoadFloat3(&baseFrames[i].position_);
+		DirectX::XMVECTOR xmRotation	= DirectX::XMLoadFloat4(&baseFrames[i].orientationQuaternion_);
+
+		DirectX::XMFLOAT4X4 matrix;
+		DirectX::XMStoreFloat4x4(&matrix, DirectX::XMMatrixAffineTransformation(xmScale, xmZero, xmRotation, xmTranslation));
+		boneOffsets->push_back(matrix);
+	}
+
+	std::vector<LoaderMD5FrameSkeleton> frameSkeletons = md5Animation->skeletons_;
+	animationClip->getBoneAnimations()->resize(jointInfos.size());
+	for(unsigned int i=0; i<animationClip->getBoneAnimations()->size(); i++)
+	{
+		animationClip->getBoneAnimations()->at(i) = new BoneAnimation();
+	}
+
+	for(unsigned int frameIndex=0; frameIndex<frameSkeletons.size(); frameIndex++)
+	{
+		for(unsigned int jointIndex=0; jointIndex<frameSkeletons[frameIndex].joints_.size(); jointIndex++)
+		{
+			Keyframe* keyframe = new Keyframe();
+			keyframe->rotationQuaternion = frameSkeletons[frameIndex].joints_[jointIndex].orientationQuaternion_;
+			keyframe->translation = frameSkeletons[frameIndex].joints_[jointIndex].position_;
+			keyframe->scale = DirectX::XMFLOAT3(1.0f, 1.0f, 1.0f);
+			keyframe->timePosition = md5Animation->frameDuration_ * frameIndex;
+			
+			animationClip->getBoneAnimations()->at(jointIndex)->addKeyframe(keyframe);
+		}
+	}
+
+	std::map<std::string, AnimationClip*>* animations = new std::map<std::string, AnimationClip*>();
+	std::pair<std::string, AnimationClip*> animation("Default", animationClip);
+	animations->insert(animation);
+
+	skinnedData->set(boneHierarchy, boneOffsets, animations);
 }
 
 bool IOComponent::loadPGY(std::string modelName, std::string modelPath, MdlDescModel* modelDesc, MeshDesc& meshDesc, SkinnedData** skinnedData)
