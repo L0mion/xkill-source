@@ -19,14 +19,43 @@ bool PickupablePhysicsObject::subClassSpecificInitHook()
 
 btVector3 PickupablePhysicsObject::subClassCalculateLocalInertiaHook(btScalar mass)
 {
+	btVector3 onlyY = (btVector3(0.0f, 1.0f, 0.0f));
+	setAngularFactor(onlyY);	//Only allow rotation around y-axis
+	setLinearFactor(onlyY);		//Only allow movement in up and down y-axis
+
 	return localInertiaBasedOnCollisionShapeAndMass(mass);
 }
 
 void PickupablePhysicsObject::onUpdate(float delta)
 {
 	hover(delta, 1.0f);
-	setLinearVelocity(btVector3(0.0f, getLinearVelocity().y(), 0.0f)); //Prevent pickupable from floating away
-	setAngularVelocity(btVector3(0.0f, 1.0f, 0.0f)); //Make pickupables spin around y-axis
+	
+	float deltaRatio = 1.0f / 5.0f;
+	static float timer = 0;
+	timer += delta;
+
+	float angularVelocityY = getAngularVelocity().y();
+	if(abs(angularVelocityY) > 1.0f)
+	{
+		while(timer > deltaRatio)
+		{
+			setAngularVelocity(btVector3(0.0f, angularVelocityY*0.9, 0.0f)); //Gradually slow down excessive spinning
+			timer -= deltaRatio;
+		}
+	}
+	else
+	{
+		angularVelocityY = getAngularVelocity().y();
+		if(angularVelocityY > 0.0f)
+		{
+			setAngularVelocity(btVector3(0.0f, 1.0f, 0.0f)); //Make pickupables spin around y-axis
+		}
+		else
+		{
+			setAngularVelocity(btVector3(0.0f, -1.0f, 0.0f)); //Make pickupables spin around y-axis
+		}
+	}
+
 	//setAngularVelocity(getAngularVelocity().absolute()*0.9f); //Gradually slow down spinning
 
 	/*
