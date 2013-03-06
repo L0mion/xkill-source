@@ -37,13 +37,9 @@ private:
 	void prepareNormals(LoaderMD5MeshDesc& mesh);
 
 	void reset();
-	int getFileLength(const std::string& filename);
-	void ignoreLine(std::ifstream& file, int length);
-	void removeQuotes(std::string& str);
-	void computeQuaternionW(DirectX::XMFLOAT4& quaternion);
+	
 
-	DirectX::XMFLOAT3 normalizeVector(DirectX::XMFLOAT3 vec);
-	DirectX::XMFLOAT3 rotateVector(DirectX::XMFLOAT3 vec, DirectX::XMFLOAT4 quaternion);
+	
 
 	std::ifstream infile_;
 	int fileLength_;

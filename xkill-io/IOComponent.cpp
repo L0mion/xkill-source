@@ -19,6 +19,7 @@
 
 #include "LoaderMD5.h"
 #include "LoaderMD5ModelDesc.h"
+#include "LoaderMD5WeightDesc.h"
 
 #include "LoaderFbx.h"
 #include "LoaderFbxMeshDesc.h"
@@ -398,6 +399,8 @@ bool IOComponent::loadMD5(std::string modelName, std::string modelPath, MdlDescM
 	LoaderMD5ModelDesc md5Model;
 	loaderMD5.loadModel(modelPath+modelName, &md5Model);
 
+	loaderMD5.loadAnimation(modelPath+ "boblampclean.md5anim");
+
 	std::vector<VertexDesc> vertices;
 	std::vector<SubsetDesc> subsets;
 	std::vector<MaterialDesc> materials;
@@ -417,6 +420,7 @@ void IOComponent::loadMD5AssembleVertices(std::vector<VertexDesc>* vertices, Loa
 	for(unsigned int meshIndex=0; meshIndex<md5Model->meshes_.size(); meshIndex++)
 	{
 		std::vector<LoaderMD5VertexDesc> md5Vertices = md5Model->meshes_[meshIndex].vertices_;
+		std::vector<LoaderMD5WeightDesc> md5Weights = md5Model->meshes_[meshIndex].weights_;
 		for(unsigned int vertexIndex=0; vertexIndex<md5Vertices.size(); vertexIndex++)
 		{
 			VertexDesc vertex;
@@ -430,6 +434,22 @@ void IOComponent::loadMD5AssembleVertices(std::vector<VertexDesc>* vertices, Loa
 	
 			vertex.textureCoordinates_.x = md5Vertices[vertexIndex].texcoord_.x;
 			vertex.textureCoordinates_.y = md5Vertices[vertexIndex].texcoord_.y;
+			
+			int numWeights = md5Vertices[vertexIndex].numWeights_;
+			if(numWeights > 4)
+				numWeights = 4;
+
+			float weights[4];
+			int startWeight = md5Vertices[vertexIndex].startWeight_;
+			for(int i=0; i<numWeights; i++)
+			{
+				weights[i] = md5Weights[startWeight+i].bias_;
+				vertex.boneIndices_[i] = md5Weights[startWeight+i].jointID_;
+			}
+			vertex.weights_.x = weights[0];
+			vertex.weights_.y = weights[1];
+			vertex.weights_.z = weights[2];
+			
 			vertices->push_back(vertex);
 		}
 	}

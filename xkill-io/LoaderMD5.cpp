@@ -1,6 +1,8 @@
 #include <iostream>
 
 #include "LoaderMD5.h"
+#include "LoaderMD5Animation.h"
+#include "LoaderMD5Helper.h"
 
 LoaderMD5::LoaderMD5()
 {
@@ -23,7 +25,7 @@ bool LoaderMD5::loadModel(const std::string& filename, LoaderMD5ModelDesc* model
 {
 	reset();
 
-	fileLength_ = getFileLength(filename);
+	fileLength_ = MD5Helper::getFileLength(filename);
 
 	std::string param;
 
@@ -49,9 +51,20 @@ bool LoaderMD5::loadModel(const std::string& filename, LoaderMD5ModelDesc* model
 		infile_ >> param;
 	}
 
+	infile_.close();
+
 	modelDesc->joints_ = joints_;
 	modelDesc->meshes_ = meshes_;
 	
+	return true;
+}
+
+bool LoaderMD5::loadAnimation(const std::string& filename)
+{
+	LoaderMD5Animation loaderAnimation;
+
+	loaderAnimation.loadAnimation(filename);
+
 	return true;
 }
 
@@ -62,7 +75,7 @@ void LoaderMD5::parseParamMD5Version()
 void LoaderMD5::parseParamCommandline()
 {
 	//Comandline is uninteresting information and will therefor be ignored.
-	ignoreLine(infile_, fileLength_);
+	MD5Helper::ignoreLine(infile_, fileLength_);
 }
 void LoaderMD5::parseParamNumJoints()
 {
@@ -88,11 +101,11 @@ void LoaderMD5::parseParamJoints()
 				>> joint.position_.x >> joint.position_.y >> joint.position_.z >> dummy >> dummy
 				>> joint.orientationQuaternion_.x >> joint.orientationQuaternion_.y >> joint.orientationQuaternion_.z >> dummy;
 		
-		removeQuotes(joint.name_);
-		computeQuaternionW(joint.orientationQuaternion_);
+		MD5Helper::removeQuotes(joint.name_);
+		MD5Helper::computeQuaternionW(joint.orientationQuaternion_);
 		joints_.push_back(joint);
 
-		ignoreLine(infile_, fileLength_);
+		MD5Helper::ignoreLine(infile_, fileLength_);
 	}
 
 	//Read the '}' character.
@@ -119,7 +132,7 @@ void LoaderMD5::parseParamMesh()
 		else if(param == "numweights")
 			parseParamNumWeights(mesh);
 		else
-			ignoreLine(infile_, fileLength_);
+			MD5Helper::ignoreLine(infile_, fileLength_);
 
 		infile_ >> param;
 	}
@@ -133,15 +146,15 @@ void LoaderMD5::parseParamMesh()
 void LoaderMD5::parseParamShader(LoaderMD5MeshDesc& mesh)
 {
 	infile_ >> mesh.shader_;
-	removeQuotes(mesh.shader_);
-	ignoreLine(infile_, fileLength_);
+	MD5Helper::removeQuotes(mesh.shader_);
+	MD5Helper::ignoreLine(infile_, fileLength_);
 }
 void LoaderMD5::parseParamNumVerts(LoaderMD5MeshDesc& mesh)
 {
 	std::string dummy;
 	int numVertices = 0;
 	infile_ >> numVertices;
-	ignoreLine(infile_, fileLength_);
+	MD5Helper::ignoreLine(infile_, fileLength_);
 
 	for(int i=0; i<numVertices; i++)
 	{
@@ -151,7 +164,7 @@ void LoaderMD5::parseParamNumVerts(LoaderMD5MeshDesc& mesh)
 				>> vertex.texcoord_.x >> vertex.texcoord_.y >> dummy // u v )
 				>> vertex.startWeight_ >> vertex.numWeights_; 
 
-		ignoreLine(infile_, fileLength_);
+		MD5Helper::ignoreLine(infile_, fileLength_);
 		mesh.vertices_.push_back(vertex);
 		mesh.texcoords_.push_back(vertex.texcoord_);
 	}
@@ -162,13 +175,13 @@ void LoaderMD5::parseParamNumTris(LoaderMD5MeshDesc& mesh)
 	int numTriangles;
 	infile_ >> numTriangles;
 
-	ignoreLine(infile_, fileLength_);
+	MD5Helper::ignoreLine(infile_, fileLength_);
 	for(int i=0; i<numTriangles; i++)
 	{
 		LoaderMD5TriangleDesc triangle;
 		infile_ >> dummy >> dummy >> triangle.indices_[0] >> triangle.indices_[1] >> triangle.indices_[2];
 
-		ignoreLine(infile_, fileLength_);
+		MD5Helper::ignoreLine(infile_, fileLength_);
 
 		mesh.triangles_.push_back(triangle);
 		mesh.indices_.push_back(static_cast<unsigned int>(triangle.indices_[2]));	//0
@@ -181,17 +194,16 @@ void LoaderMD5::parseParamNumWeights(LoaderMD5MeshDesc& mesh)
 	std::string dummy;
 	int numWeights;
 	infile_ >> numWeights;
-	ignoreLine(infile_, fileLength_);
+	MD5Helper::ignoreLine(infile_, fileLength_);
 	for(int i=0; i<numWeights; i++)
 	{
 		LoaderMD5WeightDesc weight;
 		infile_ >> dummy >> dummy >> weight.jointID_ >> weight.bias_ >> dummy					//weight weightIndex ..... (
 				>> weight.position_.x >> weight.position_.y >> weight.position_.z >> dummy;		// )
-		ignoreLine(infile_, fileLength_);
+		MD5Helper::ignoreLine(infile_, fileLength_);
 		mesh.weights_.push_back(weight);
 	}
 }
-
 
 void LoaderMD5::prepareMesh(LoaderMD5MeshDesc& mesh)
 {
@@ -212,7 +224,7 @@ void LoaderMD5::prepareMesh(LoaderMD5MeshDesc& mesh)
 			LoaderMD5JointDesc& joint = joints_[weight.jointID_];
 
 			//joint.orientationQuaternion_ * weight.position_;
-			DirectX::XMFLOAT3 rotationPosition = rotateVector(weight.position_, joint.orientationQuaternion_);
+			DirectX::XMFLOAT3 rotationPosition = MD5Helper::rotateVector(weight.position_, joint.orientationQuaternion_);
 
 			DirectX::XMFLOAT3 position;
 			position.x = (joint.position_.x + rotationPosition.x) * weight.bias_;
@@ -260,7 +272,7 @@ void LoaderMD5::prepareNormals(LoaderMD5MeshDesc& mesh)
 		LoaderMD5VertexDesc& vertex = mesh.vertices_[vertexIndex];
 		DirectX::XMFLOAT3 normal = vertex.normal_;
 		
-		normal = normalizeVector(normal);
+		normal = MD5Helper::normalizeVector(normal);
 		
 		mesh.normals_.push_back(normal);
 
@@ -269,7 +281,7 @@ void LoaderMD5::prepareNormals(LoaderMD5MeshDesc& mesh)
 		{
 			const LoaderMD5WeightDesc& weight = mesh.weights_[vertex.startWeight_ + weightIndex];
 			const LoaderMD5JointDesc& joint = joints_[weight.jointID_];
-			normal = rotateVector(normal, joint.orientationQuaternion_);
+			normal = MD5Helper::rotateVector(normal, joint.orientationQuaternion_);
 
 			vertex.normal_.x += normal.x * weight.bias_;
 			vertex.normal_.y += normal.y * weight.bias_;
@@ -288,61 +300,4 @@ void LoaderMD5::reset()
 	
 	joints_.clear();
 	meshes_.clear();
-}
-
-int LoaderMD5::getFileLength(const std::string& filename)
-{
-	long begin, end;
-	std::ifstream file(filename);
-	begin = file.tellg();
-	file.seekg(0, std::ios::end);
-	end = file.tellg();
-	file.close();
-
-	int fileLength = end-begin;
-	return fileLength;
-}
-void LoaderMD5::ignoreLine(std::ifstream& file, int length)
-{
-	file.ignore(length, '\n');
-}
-void LoaderMD5::removeQuotes(std::string& str)
-{
-	size_t n;
-	while( (n = str.find('\"')) != std::string::npos)
-		str.erase(n, 1);
-}
-void LoaderMD5::computeQuaternionW(DirectX::XMFLOAT4& quaternion)
-{
-	float t = 1.0f - ( quaternion.x * quaternion.x ) - ( quaternion.y * quaternion.y ) - ( quaternion.z * quaternion.z );
-    if ( t < 0.0f )
-    {
-        quaternion.w = 0.0f;
-    }
-    else
-    {
-        quaternion.w = -sqrtf(t);
-    }
-}
-
-DirectX::XMFLOAT3 LoaderMD5::normalizeVector(DirectX::XMFLOAT3 vec)
-{
-	DirectX::XMVECTOR xmVec = DirectX::XMLoadFloat3(&vec);
-	xmVec = DirectX::XMVector3Normalize(xmVec);
-	
-	DirectX::XMFLOAT3 result;
-	DirectX::XMStoreFloat3(&result, xmVec);
-
-	return result;
-}
-DirectX::XMFLOAT3 LoaderMD5::rotateVector(DirectX::XMFLOAT3 vec, DirectX::XMFLOAT4 quaternion)
-{
-	DirectX::XMVECTOR xmQuaternion = DirectX::XMLoadFloat4(&quaternion);
-	DirectX::XMVECTOR xmVec = DirectX::XMLoadFloat3(&vec);
-	xmVec = DirectX::XMVector3Rotate(xmVec, xmQuaternion);
-	
-	DirectX::XMFLOAT3 result;
-	DirectX::XMStoreFloat3(&result, xmVec);
-
-	return result;
 }
