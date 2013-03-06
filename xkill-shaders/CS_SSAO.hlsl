@@ -35,8 +35,8 @@ float occlusionFunc(float2 texGlobal, float2 texOffset, float3 occludee, float3 
 		projectionInverse);
 
 	//Clip samples with large depth-differences.
-	if(abs(occludee.z - occluder.z) > occlusionRadius) //Consider putting this condition in a seperate var?
-		return 0.0f;
+	//if(abs(occludee.z - occluder.z) > occlusionRadius) //Consider putting this condition in a seperate var?
+	//	return 0.0f;
 
 	//Get vector pointing to occluder.
 	float3 diff = occluder - occludee;
@@ -63,7 +63,7 @@ void CS_SSAO(uint3 threadIDDispatch	: SV_DispatchThreadID)
 			(float)threadIDDispatch.x / viewportWidth,
 			(float)threadIDDispatch.y / viewportHeight),
 		occludeeDepth, 
-		projectionInverse); //Should we use current viewports here - or the viewport dimensions previously used?
+		projectionInverse);
 
 	//Get view-space normal of occluded point:
 	float3 normal = gBufferNormal.SampleLevel(ssNormal, texCoord, 0).xyz;
@@ -88,13 +88,15 @@ void CS_SSAO(uint3 threadIDDispatch	: SV_DispatchThreadID)
 	};
 
 	//Sampling radius is scaled as geometry is further away.
-	float rad = occlusionRadius / occludee.z;
+	float radius = occlusionRadius;
+	if(occludee.z > 1.0f)
+		 radius /= occludee.z;
 
 	float occlusion = 0.0f;
 	unsigned int numSamples = 4;
 	for(unsigned int i = 0.0f; i < numSamples; i++)
 	{
-		float2 coord1 = reflect(vec[i], random) * rad;	//Original sampling coordinates at 90 degrees.
+		float2 coord1 = reflect(vec[i], random) * radius;	//Original sampling coordinates at 90 degrees.
 		float2 coord2 = float2(
 		coord1.x * 0.707f - coord1.y * 0.707f,
 		coord1.x * 0.707f + coord1.y * 0.707f);			//...the same coordinates rotated 45 degrees:
@@ -113,56 +115,7 @@ void CS_SSAO(uint3 threadIDDispatch	: SV_DispatchThreadID)
 		uint2(
 			threadIDDispatch.x + viewportTopX, 
 			threadIDDispatch.y + viewportTopY)] = 
-		float4(occlusion, 0.0f, 0.0f, 1.0f);
+		occlusion;
 }
-
-/*
-	//--------------
-	//Purpose of this next bit of code is to establish an orthonormal change-of-basis matrix which will
-	//re-orient offset-kernel along occludeeNormal. Incorporated here is also the random rotation of sample hemisphere.
-	//--------------
-	// * occludeeNormal and random make up the normalized two-dimensional basis V2.
-	// * Use Grahm-Schmidt to establish three-dimensional orthonormal basis V3.
-	float3 tangent		= normalize(random - occludeeNormal * dot(random, occludeeNormal));
-	float3 bitangent	= cross(occludeeNormal, tangent);
-	float3x3 tbn		= float3x3(tangent, bitangent, occludeeNormal);
-
-	float occlusion	= 0.0f;
-	float radius	= 25.0f;//occlusionRadius; //removeme
-	for(unsigned int i = 0; i < 14; i++)
-	{
-		//Get view-space position of occluding point:
-		float3 occluder = mul(offsetKernel[i].xyz, tbn);
-		occluder = occluder * radius + occludee;
-
-		//Project the view-space occluder into screen-space in order to get texture-coordinates:
-		float4 offset = float4(occluder, 1.0f);
-		offset = mul(offset, projection);
-		offset.xy /= offset.w; //Complete projection.
-		offset.xy = offset.xy * 0.5f + 0.5f; //Convert from [-1, +1] to [0, 1].
-
-		//Sample depth and re-construct view-space position of point in order to get view-space depth:
-		float occluderDepth = bufferDepth.SampleLevel(ssDepth, offset.xy, 0).x;
-		float3 occluderV = UtilReconstructPositionViewSpace(
-			float2(offset.xy),
-			occluderDepth, 
-			projectionInverse);
-
-		//Range-check is used to avoid gaining occlusion from big depth-differences at edges of geometry.
-		float rangeCheck = 0.0f;
-		if(abs(occludee.z - occluderV.z) < radius)
-		{
-			rangeCheck = 1.0f;
-		}
-		float occlusionFactor = 0.0f;
-		if(occluderV.z <= occluder.z)
-		{
-			occlusionFactor = 1.0f;
-		}
-		occlusion += occlusionFactor * rangeCheck;
-	}
-
-	
-*/
 
 #endif //XKILL_RENDERER_CS_SSAO_HLSL
