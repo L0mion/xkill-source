@@ -1162,7 +1162,7 @@ void GameComponent::startGame()
 	while(itrPlayer.hasNext())
 	{
 		AttributePtr<Attribute_Player>			ptr_player		=	itrPlayer		.getNext();
-		{Event_PostHudMessage e("", ptr_player); e.setHtmlMessage("Welcome", ptr_player->playerName); SEND_EVENT(&e);}
+		{Event_PostHudMessage e("", ptr_player); e.setHtmlMessage("Your nickname is", ptr_player->playerName); SEND_EVENT(&e);}
 	}
 }
 
