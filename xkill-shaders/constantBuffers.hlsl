@@ -91,12 +91,22 @@ cbuffer cbBlur : register ( b7 )
 
 cbuffer cbSSAO : register ( b8 )
 {
-	float4 offsetKernel[14];
-	
 	uint ssaoWidth;
 	uint ssaoHeight;
 	float occlusionRadius;
+	float occlusionScale;
+	
+	float occlusionBias;
+	float occlusionIntensity;
 	uint pad7;
+	uint pad8;
+
+	/*
+	occlusionScale:		scales distance between occluders and occludee.
+    occlusionBias:		controls the width of the occlusion cone considered by the occludee.
+    occlusionRadius:	the sampling radius.
+    occlusionIntensity: the ao intensity.
+	*/
 };
 
 #endif //XKILL_RENDERER_CONSTANTBUFFERS_HLSL

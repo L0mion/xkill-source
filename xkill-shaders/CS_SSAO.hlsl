@@ -34,24 +34,23 @@ float occlusionFunc(float2 texGlobal, float2 texOffset, float3 occludee, float3 
 		occluderDepth, 
 		projectionInverse);
 
+	//Clip samples with large depth-differences.
+	if(abs(occludee.z - occluder.z) > occlusionRadius) //Consider putting this condition in a seperate var?
+		return 0.0f;
+
+	//Get vector pointing to occluder.
 	float3 diff = occluder - occludee;
 	const float3 v = normalize(diff);
 
-	float g_scale = 1.0f;
-	const float d = length(diff) * g_scale;
+	//Get distance to occluder.
+	const float d = length(diff) * occlusionScale;
 
-	float g_bias = 0.0f;
-	float g_intensity = 1.0f;
-	return max(0.0,	dot(occludeeNormal, v) - g_bias) * (1.0 / (1.0 + d)) * g_intensity;
+	//Apply occlusion-formulae.
+	return max(0.0f, dot(occludeeNormal, v) - occlusionBias) * (1.0f / (1.0f + d)) * occlusionIntensity;
 }
 
 [numthreads(SSAO_BLOCK_DIM, SSAO_BLOCK_DIM, 1)]
-void CS_SSAO(
-	//uint3	blockID				: SV_GroupID,
-	//uint	threadIDBlockIndex	: SV_GroupIndex,
-	uint3	threadIDDispatch	: SV_DispatchThreadID
-	//uint3	threadIDBlock		: SV_GroupThreadID,
-	)
+void CS_SSAO(uint3 threadIDDispatch	: SV_DispatchThreadID)
 {
 	float2 texCoord = float2(
 		(float)(threadIDDispatch.x + viewportTopX)	/ (float)ssaoWidth,	  //Divided by the total width of ssao-map.
@@ -79,6 +78,7 @@ void CS_SSAO(
 	random *= 2.0f; random -= 1.0f; //Map from [0, 1] to [-1, +1]
 	random = normalize(random);
 
+	//Sample kernel
 	const float2 vec[4] =
 	{
 		float2( 1,  0),
@@ -87,11 +87,12 @@ void CS_SSAO(
 		float2( 0, -1)
 	};
 
-	float radius = 1.0f; //make me constant buf
-	float rad = radius / occludee.z;
+	//Sampling radius is scaled as geometry is further away.
+	float rad = occlusionRadius / occludee.z;
 
 	float occlusion = 0.0f;
-	for(unsigned int i = 0.0f; i < 4; i++)
+	unsigned int numSamples = 4;
+	for(unsigned int i = 0.0f; i < numSamples; i++)
 	{
 		float2 coord1 = reflect(vec[i], random) * rad;	//Original sampling coordinates at 90 degrees.
 		float2 coord2 = float2(
@@ -103,11 +104,11 @@ void CS_SSAO(
 		occlusion += occlusionFunc(texCoord, coord1 * 0.75f, occludee, occludeeNormal);
 		occlusion += occlusionFunc(texCoord, coord2 * 1.0f,	 occludee, occludeeNormal);
 	}
-	occlusion /= 4.0f * 4.0f; //first one i
+	occlusion /= numSamples * 4.0f;
 
 
 	occlusion = 1.0f - occlusion;
-	occlusion = saturate(pow(occlusion, 4.0f));
+	occlusion = saturate(pow(occlusion, 4.0f)); //Make occlusion appear more dramatic.
 	ssao[
 		uint2(
 			threadIDDispatch.x + viewportTopX, 

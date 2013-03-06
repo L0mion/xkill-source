@@ -45,7 +45,7 @@ static const unsigned int DOWNSAMPLE_SCREEN_RES_FACTOR = 4;
 
 static const unsigned int SHADOWMAP_DIM = 1024; //Remember to also set dimensions in CS_Lighting (SHADOWMAP_SIZE)
 
-static const unsigned int SSAO_MAP_SCREEN_RES_FACTOR = 1;//2;
+static const unsigned int SSAO_MAP_SCREEN_RES_FACTOR = 2;
 
 static const unsigned int RANDOM_DIM = 64; //Lower this?
 

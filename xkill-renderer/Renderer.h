@@ -87,7 +87,6 @@ private:
 	void	initManagementMath();		//!< Initializes ManagementMath, which manages math-related functions and loading of dx-vectors into generic-type vectors utilizing SIMD.
 	void	initManagementInstance();	//!< Initializes ManagementInstance, which manages all the instances of the various models.
 	HRESULT initManagementSprites();	//!< Initializes ManagementSprites, which manages all sprites.
-	void	initSSAO();
 
 	void renderViewportToGBuffer(
 		ViewportData& vpData);											//!< Renders to g-buffer.
@@ -117,7 +116,6 @@ private:
 	void upSampleBlur();
 
 	//SSAO
-	void buildOffsetKernel();
 	void buildSSAOMap(ViewportData& vpData);
 
 	void drawBulletPhysicsDebugLines(
@@ -152,9 +150,6 @@ private:
 	ManagementSprites*  managementSprites_;		//!< Maintaining sprites.
 
 	ID3D11Buffer* debugLinesVertexBuffer_;		//!< Might want to move this into some manager of some sort.
-
-	//SSAO
-	DirectX::XMFLOAT4 offsetKernel_[14]; //These are to be moved into appropriate manager later on when SSAO works.
 
 	//temp
 	M3DLoader*		m3dLoader_;

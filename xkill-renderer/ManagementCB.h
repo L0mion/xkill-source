@@ -87,10 +87,12 @@ public:
 		float blurKernel[11]);
 	void updateCBSSAO(
 		ID3D11DeviceContext* devcon,
-		DirectX::XMFLOAT4 offsetKernel[14],
 		unsigned int ssaoWidth,
 		unsigned int ssaoHeight,
-		float occlusionRadius);
+		float occlusionRadius,
+		float occlusionScale,
+		float occlusionBias,
+		float occlusionIntensity);
 		
 	void setCB(
 		CB_TYPE					cbType, 

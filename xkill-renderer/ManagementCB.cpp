@@ -166,18 +166,20 @@ void ManagementCB::updateCBBlur(
 }
 void ManagementCB::updateCBSSAO(
 	ID3D11DeviceContext* devcon,
-	DirectX::XMFLOAT4 offsetKernel[14],
 	unsigned int ssaoWidth,
 	unsigned int ssaoHeight,
-	float occlusionRadius)
+	float occlusionRadius,
+	float occlusionScale,
+	float occlusionBias,
+	float occlusionIntensity)
 {
 	CBSSAODesc cbDesc;
 	cbDesc.ssaoWidth			= ssaoWidth;
 	cbDesc.ssaoHeight			= ssaoHeight;
 	cbDesc.occlusionRadius		= occlusionRadius;
-
-	for(unsigned int i = 0; i < 14; i++)
-		cbDesc.offsetKernel[i] = offsetKernel[i];
+	cbDesc.occlusionScale		= occlusionScale;
+	cbDesc.occlusionBias		= occlusionBias;
+	cbDesc.occlusionIntensity	= occlusionIntensity;
 
 	devcon->UpdateSubresource(cbSSAO_, 0, 0, &cbDesc, 0, 0);
 }

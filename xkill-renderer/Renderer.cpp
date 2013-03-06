@@ -181,8 +181,6 @@ HRESULT Renderer::init()
 		hr = initManagementSprites();
 	initManagementInstance();
 
-	initSSAO();
-
 	//temp
 	/*
 	m3dLoader_ = new M3DLoader();
@@ -351,10 +349,6 @@ HRESULT Renderer::initManagementSprites()
 	managementSprites_ = new ManagementSprites();
 	hr = managementSprites_->init(managementD3D_->getDevice());
 	return hr;
-}
-void Renderer::initSSAO()
-{
-	buildOffsetKernel();
 }
 
 void Renderer::update()
@@ -1094,37 +1088,6 @@ void Renderer::upSampleBlur()
 }
 
 //SSAO
-void Renderer::buildOffsetKernel()
-{
-	//Generate evenly distributed points in a hemisphere oriented along the z-axis:
-	for(unsigned int i = 0; i < 14; i++)
-	{
-		offsetKernel_[i] = DirectX::XMFLOAT4(
-			GET_RANDOM(-1.0f, 1.0f),
-			GET_RANDOM(-1.0f, 1.0f),
-			GET_RANDOM(0.0f, 1.0f),
-			0.0f);
-		
-		//Normalize.
-		DirectX::XMVECTOR v = DirectX::XMVector4Normalize(XMLoadFloat4(&offsetKernel_[i]));
-		DirectX::XMStoreFloat4(&offsetKernel_[i], v);
-
-		//At this point we have created a hemisphere with sample points distributed along the surface.
-		//We then wish to distribute these points in the sphere. First, randomize the lengths of these vectors:
-		float scale = GET_RANDOM(0.0f, 1.0f);
-		offsetKernel_[i].x *= scale;
-		offsetKernel_[i].y *= scale;
-		offsetKernel_[i].z *= scale;
-	
-		//...then create a falloff so that occlussion is less influenced by points further away:
-		scale = (float)i / (float)14;
-		scale = LERP(0.1f, 1.0f, scale * scale);
-		
-		offsetKernel_[i].x *= scale;
-		offsetKernel_[i].y *= scale;
-		offsetKernel_[i].z *= scale;
-	}
-}
 void Renderer::buildSSAOMap(ViewportData& vpData)
 {
 	ID3D11DeviceContext* devcon = managementD3D_->getDeviceContext();
@@ -1184,10 +1147,12 @@ void Renderer::buildSSAOMap(ViewportData& vpData)
 
 	managementCB_->updateCBSSAO(
 		devcon,
-		/*Offset Kernel*/			offsetKernel_,
 		/*SSAOMap Width*/			ssaoWidth,
 		/*SSAOMap Height*/			ssaoHeight,
-		/*Occlusion Radius*/		2.0f);
+		/*Occlusion Radius*/		1.0f,
+		/*Occlusion Scale*/			1.0f,
+		/*Occlusion Bias*/			0.0f,
+		/*Occlusion Intensity*/		1.0f);
 	
 	//Dispatch motherfucker
 	unsigned int SSAO_BLOCK_DIM = 16;
