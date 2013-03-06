@@ -96,6 +96,8 @@ struct DLL_U Float3
 
 	Float3 operator/(float scalar);
 	bool operator<(Float3 rhs) {return length() < rhs.length();} //!< used in std::sort
+	bool operator==(Float3 rhs);
+	bool operator!=(Float3 rhs);
 };
 
 
@@ -148,11 +150,13 @@ struct DLL_U Float4
 	};
 
 	Float3 quaternionToVector();
+	Float4 quaternionFromVector(Float3 pos, Float3 vector, Float3 up);
 	Float4();
 	Float4(float x, float y, float z, float w);
 	Float4(Float3 float3, float w);
 	void copy(const float* float4);
 	Float4& normalize();
+	Float4 Float4::slerp(Float4 vector, float factor);
 	Float4& quaternionFromAxis(Float3 axis, float angle);
 	Float4 quaternionInverse();
 	Float4 quaternionMultiply(Float4 quaternion);

@@ -143,8 +143,9 @@ void ScoreComponent::handleExecutionMode(float delta)
 	{
 		AttributePtr<Attribute_Player> executingPlayer = itrPlayer.at(executingPlayerIndex_);
 
-		if(executingPlayer->priority > 0)  // The player still has some priority so give it execution time
+		if(priorityWhenSelectedForExecution > 0) // The player still has some priority so give it execution time
 		{
+			priorityWhenSelectedForExecution--;
 			executingPlayer->priority--;
 			executingPlayer->cycles++;
 		}
@@ -264,6 +265,7 @@ void ScoreComponent::executePlayer(int playerIndex)
 
 	AttributePtr<Attribute_Player> ptr_player = itrPlayer.at(executingPlayerIndex_);
 	ptr_player->executing = true;
+	priorityWhenSelectedForExecution = ptr_player->priority;
 	DEBUGPRINT("Player with attribute index " << executingPlayerIndex_ << " is executing. Beware of his laserous eyes");
 
 

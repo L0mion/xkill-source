@@ -351,7 +351,6 @@ void PhysicsComponent::onEvent(Event* e)
 		break;
 	case EVENT_NULL_PROCESS_STOPPED_EXECUTING:
 		{
-			OUTPUT_WINDOW_PRINT("PhysicsComponent::onEvent, case EVENT_NULL_PROCESS_STOPPED_EXECUTING");
 			//Reset apart-fallen world
 			while(itrPhysics.hasNext())
 			{

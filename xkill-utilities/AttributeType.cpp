@@ -538,6 +538,11 @@ Attribute_Player::Attribute_Player()
 	canSprint = true;
 	sprintRechargeRate = 0.2f;
 	executing = false;
+	speedHackActive = false;
+	jetHackActive = false;
+	cycleHackActive = false;
+
+
 	playerName = "NaN";
 
 	walkSpeed = 5.0f;

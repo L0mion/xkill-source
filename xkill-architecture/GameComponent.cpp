@@ -435,30 +435,8 @@ void GameComponent::onUpdate(float delta)
 			{
 				AttributePtr<Attribute_Position> pickupablesSpawnPointPosition = ptr_pickupablesSpawnPoint->ptr_position;
 
-				int amount;
-				switch(ptr_pickupablesSpawnPoint->spawnPickupableType)
-				{
-				case XKILL_Enums::PickupableType::MEDKIT:
-					amount = 20;
-					break;
-				case XKILL_Enums::PickupableType::AMMUNITION_BULLET:
-					amount = 100;
-					break;
-				case XKILL_Enums::PickupableType::AMMUNITION_SCATTER:
-					amount = 50;
-					break;
-				case XKILL_Enums::PickupableType::AMMUNITION_EXPLOSIVE:
-					amount = 10;
-					break;
-				case XKILL_Enums::PickupableType::HACK_SPEEDHACK:
-					amount = 5;		//seconds
-					break;
-				case XKILL_Enums::PickupableType::HACK_JETHACK:
-					amount = 5;		//seconds
-					break;
-				}
-
 				//Each pickupable knows it pickupablesSpawnPoint creator
+				int amount = -1; //Deprecated as of 2013-03-07 15.25 (refer to Attribute_Pickupable)
 				AttributePtr<Attribute_PickupablesSpawnPoint> ptr_creator_pickupablesSpawnPoint = ptr_pickupablesSpawnPoint;
 				SEND_EVENT(&Event_CreatePickupable(pickupablesSpawnPointPosition->position, ptr_pickupablesSpawnPoint->spawnPickupableType, ptr_creator_pickupablesSpawnPoint, amount));
 				ptr_pickupablesSpawnPoint->secondsSinceLastSpawn = 0.0f;
@@ -813,7 +791,7 @@ void GameComponent::event_StartDeathmatch( Event_StartDeathmatch* e )
 		AttributePtr<Attribute_WeaponStats>		ptr_weaponStats	=	ptr_player	->	ptr_weaponStats	;
 		switchFiringMode(ptr_weaponStats);	//Ensure ammunition disablement (selected from menu)
 		
-		SEND_EVENT(&Event_HackActivated(5000.0f, XKILL_Enums::HackType::JETHACK, ptr_player));
+		//SEND_EVENT(&Event_HackActivated(5000.0f, XKILL_Enums::HackType::JETHACK, ptr_player));
 	}
 
 	//Create mesh for debugging fbx-loading.
@@ -1064,27 +1042,32 @@ void GameComponent::updateAndInterpretLaser(AttributePtr<Attribute_Ray> ptr_ray,
 	{
 		if(entityIdOfOwnerToClosestPhysicsObjectHitByRay == itrPlayer.ownerIdAt(ptr_player.index())) //Ray hit the originator of the ray
 		{
-			//DEBUGPRINT("Player hit by ray casted by himself.");
-			//DEBUGPRINT("---->O....");
-			//DEBUGPRINT("..../|\....");
-			//DEBUGPRINT("....xxx....");
+			DEBUGPRINT("Player hit by ray casted by himself.");
 		}
 		else if(entityHitByRay->hasAttribute(ATTRIBUTE_PLAYER)) //Ray hit another player
 		{
 			std::vector<int> hitPlayerId = entityHitByRay->getAttributes(ATTRIBUTE_PLAYER);
 			for(int i=0; i<hitPlayerId.size(); i++)
 			{
-				AttributePtr<Attribute_Player> playerAttribute = itrPlayer.at(hitPlayerId.at(i));
-				if(!playerAttribute->detectedAsDead)
+				AttributePtr<Attribute_Player> hitPlayerAttribute = itrPlayer.at(hitPlayerId.at(i));
+				if(!hitPlayerAttribute->detectedAsDead)
 				{
-					DEBUGPRINT("Player with attribute id " << playerHitByRayAttributeId.at(j) << " hit by Laser Automatic Sniper Execution Ray");
+					if(!ptr_player->cycleHackActive)
+					{
+						ptr_player->cycles++;
+						{Event_PostHudMessage e("", ptr_player); e.setHtmlMessage("You exterminated", hitPlayerAttribute->playerName, "", "+1 cycle"); SEND_EVENT(&e);}
+					}
+					else
+					{
+						ptr_player->priority++;
+						{Event_PostHudMessage e("", ptr_player); e.setHtmlMessage("You exterminated", hitPlayerAttribute->playerName, "", "+1 priority"); SEND_EVENT(&e);}
+					}
+					{Event_PostHudMessage e("", hitPlayerAttribute); e.setHtmlMessage("Terminated by", ptr_player->playerName); SEND_EVENT(&e);}
 
 					SEND_EVENT(&Event_PlayerDeath(playerHitByRayAttributeId.at(j)));
-
-					ptr_player->priority++;
 				}
 
-				SEND_EVENT(&Event_ModifyPhysicsObject(XKILL_Enums::ModifyPhysicsObjectData::GIVE_IMPULSE, static_cast<void*>(&(rayVector*20.0f)), playerAttribute->ptr_input->ptr_physics));
+				SEND_EVENT(&Event_ModifyPhysicsObject(XKILL_Enums::ModifyPhysicsObjectData::GIVE_IMPULSE, static_cast<void*>(&(rayVector*20.0f)), hitPlayerAttribute->ptr_input->ptr_physics));
 			}
 		}
 	}

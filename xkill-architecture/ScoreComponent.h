@@ -30,6 +30,7 @@ private:
 	bool executionMode_;						//! Is the execution mode active
 	bool nullProcessExecuting_;					//! Is the null process executing
 	unsigned int executingPlayerIndex_;			//! The index of the player that is currently executing
+	int priorityWhenSelectedForExecution;		//! Store player priority of the player selected for execution. During execution the player may gain more priority than when selcted.
 
 	void schedulerScoreCounting(float delta);	//! Calculate the score according to scheduler game mode
 	void deathMatchScoreCounting(float delta);	//!	Calculate the score according to death match game mode
