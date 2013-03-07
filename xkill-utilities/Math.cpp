@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <DirectXMath.h>
+#include <time.h> 
 
 BoolField::BoolField()
 {
@@ -639,6 +640,11 @@ float Math::randomFloat( float min, float max )
 	float diff = max - min;
 	float r = random * diff;
 	return min + r;
+}
+
+void Math::init()
+{
+	srand (time(NULL));
 }
 
 float PlaneDotCoord(Float4 plane, Float3 coord)
