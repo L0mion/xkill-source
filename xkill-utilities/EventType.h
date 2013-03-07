@@ -74,6 +74,7 @@ enum DLL_U EventType
 	EVENT_SPLITSCREEN_CHANGED,
 	EVENT_RUMBLE,
 	EVENT_PLAYSOUND,
+	EVENT_STOPSOUND,
 	EVENT_FOCUS_MAINWINDOW,
 
 	// Get events
@@ -193,8 +194,6 @@ public:
 };
 
 /**
-If muteSound is true then all sounds will be muted
-
 \ingroup events
 */
 class DLL_U Event_PlaySound : public Event
@@ -205,21 +204,17 @@ public:
 	int soundId;
 	Float3 position;
 	bool use3DAudio;
+};
 
-	enum sounds
-	{
-		SOUND_WALK,
-		SOUND_HIT,
-		SOUND_RESPAWN,
-		SOUND_FIRE,
-		SOUND_DEATH,
-		SOUND_GAME_MUSIC,
-		SOUND_MENU_MUSIC,
-		SOUND_BUTTON_CLICK,
-		SOUND_OPENING_ANIMATION,
+/**
+\ingroup events
+*/
+class DLL_U Event_StopSound : public Event
+{
+public:
+	Event_StopSound(int soundId);
 
-		SOUND_LAST
-	};
+	int soundId;
 };
 
 //! Will trigger rumble in devices[deviceNr]

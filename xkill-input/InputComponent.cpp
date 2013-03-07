@@ -106,7 +106,7 @@ void InputComponent::handleInput(float delta)
 
 		input->position.x = device->getFloatValue(InputAction::ACTION_F_WALK_LR, delta);
 		input->position.y = device->getFloatValue(InputAction::ACTION_F_WALK_FB, delta);
-		//input->rotation.x = device->getFloatValue(InputAction::ACTION_F_LOOK_LR, delta, true);
+		//input->rotation.x = device->getFloatValue(InputAction::ACTION_F_LOOK_LR, delta, tr2ue);
 		//input->rotation.y = device->getFloatValue(InputAction::ACTION_F_LOOK_UD, delta, true);
 
 		Float2 rot = device->getFormattedFloatPair(InputAction::ACTION_F_LOOK_LR, InputAction::ACTION_F_LOOK_UD, delta, true);
@@ -119,7 +119,11 @@ void InputComponent::handleInput(float delta)
 		input->changeFiringMode =		device->getBoolReleased(InputAction::ACTION_B_CHANGE_FIRINGMODE);
 
 		input->killPlayer = device->getBoolReleased(InputAction::ACTION_B_KILL_PLAYER);
-		input->jump =		device->getBoolPressed(InputAction::ACTION_B_JUMP);
+		//input->jump =		device->getBoolPressed(InputAction::ACTION_B_JUMP);
+
+		if(device->getBoolPressed(InputAction::ACTION_B_JUMP))
+			ptr_player->priority++;
+
 		input->jetpack =	device->getBoolValue(InputAction::ACTION_B_JETPACK);
 		input->sprint =		device->getBoolValue(InputAction::ACTION_B_SPRINT);
 

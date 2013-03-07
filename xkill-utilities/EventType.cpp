@@ -23,6 +23,11 @@ Event_PlaySound::Event_PlaySound(int soundId, Float3 position, bool use3DAudio) 
 	this->use3DAudio = use3DAudio;
 }
 
+Event_StopSound::Event_StopSound(int soundId) : Event(EVENT_STOPSOUND)
+{
+	this->soundId = soundId;
+}
+
 Event_Rumble::Event_Rumble(unsigned int deviceNr,
 						   bool runRumble,
 						   float duration,

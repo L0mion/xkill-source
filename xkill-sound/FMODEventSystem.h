@@ -42,6 +42,8 @@ public:
 	void Update();
 	/** \brief Start a sound event at index in the mSoundEvents vector.*/
 	void StartSoundEventAt(unsigned int index, Float3 position, bool use3DAudio);
+	/** \brief Stop playing the event at index.*/
+	void StopSoundEventAt(unsigned int index);
 	/** \brief Mutes all sounds.*/
 	void SetMuteSounds(bool mute = true);
 	/** \brief Set volume.*/
@@ -57,7 +59,7 @@ private:
 	FMOD_VECTOR float3ToFModVector(Float3 v);
 
 	FMOD::EventSystem* mEventsystem;
-	std::vector<FMOD::Event*> mEvents;
+	std::vector<std::pair<FMOD::Event*, int>> mEvents;
 	std::string mSoundEventFileNameWithoutExtension;
 	std::string mMediaPath;
 	int nrOfEvents_;

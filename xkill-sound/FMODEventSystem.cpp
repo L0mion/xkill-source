@@ -69,11 +69,13 @@ void FMODEventSystem::Update()
 	for(unsigned int i = 0; i < mEvents.size(); i++)
 	{
 		FMOD_EVENT_STATE state;
-		if(mEvents[i]->getState(&state) == FMOD_ERR_INVALID_HANDLE)
+
+		if(mEvents[i].first->getState(&state) == FMOD_ERR_INVALID_HANDLE)
 		{
-			FMOD::Event* temp = mEvents[mEvents.size() - 1];
-			mEvents[mEvents.size() - 1] = mEvents[i];
-			mEvents[i] = temp;
+
+			FMOD::Event* temp = mEvents[mEvents.size() - 1].first;
+			mEvents[mEvents.size() - 1].first = mEvents[i].first;
+			mEvents[i].first = temp;
 
 			mEvents.pop_back();
 		}
@@ -99,11 +101,29 @@ void FMODEventSystem::StartSoundEventAt(unsigned int index, Float3 position, boo
 			}
 		}
 		soundEvent->start();
-		mEvents.push_back(soundEvent);
+		mEvents.push_back(std::pair<FMOD::Event*, int>(soundEvent, index));
 	}
 	else
 	{
 		//std::cout << "error in \"FMODEventSystem.h\" in function \"void FMODEventSystem::StartSoundEventAt(int index)\"" << std::endl;
+	}
+}
+
+void FMODEventSystem::StopSoundEventAt(unsigned int index)
+{
+	for(unsigned int i = 0; i < mEvents.size(); i++)
+	{
+		if(mEvents[i].second == index)
+		{
+			mEvents[i].first->stop();
+
+			FMOD::Event* temp = mEvents[mEvents.size() - 1].first;
+			mEvents[mEvents.size() - 1].first = mEvents[i].first;
+			mEvents[i].first = temp;
+
+			mEvents.pop_back();
+			i--;
+		}
 	}
 }
 
@@ -124,7 +144,7 @@ void FMODEventSystem::SetMuteSounds(bool mute)
 
 	for(unsigned int i = 0; i < mEvents.size(); i++)
 	{
-		mEvents[i]->setMute(mute);
+		mEvents[i].first->setMute(mute);
 	}
 }
 
@@ -145,7 +165,7 @@ void FMODEventSystem::SetVolume(float volume)
 
 	for(unsigned int i = 0; i < mEvents.size(); i++)
 	{
-		mEvents[i]->setVolume(volume);
+		mEvents[i].first->setVolume(volume);
 	}
 }
 

@@ -176,7 +176,7 @@ bool ComponentManager::init(HWND windowHandle, HWND parentWindowHandle)
 		return false;
 	}	
 
-	SEND_EVENT(&Event_PlaySound(Event_PlaySound::SOUND_MENU_MUSIC, Float3(), false));
+	//SEND_EVENT(&Event_PlaySound(XKILL_Enums::Sound::SOUND_MENU_MUSIC, Float3(), false));
 	inputDeviceSearchTime_ = 0;
 	// Returns that everything went ok
 	return true;

@@ -110,7 +110,7 @@ void CollisionManager::collision_applyDamage(Entity* entity1, Entity* entity2)
 					}
 					else
 					{
-						SEND_EVENT(&Event_PlaySound(Event_PlaySound::SOUND_HIT, position, use3DAudio));
+						SEND_EVENT(&Event_PlaySound(XKILL_Enums::Sound::SOUND_HIT, position, use3DAudio));
 					}
 					SEND_EVENT(&Event_Rumble(entity1->getID(), true, 0.2f, 1.0f, 1.0f));
 					DEBUGPRINT("DAMAGEEVENT Entity " << entity2->getID() << " damage: " <<  damage->damage << " Entity " << entity1->getID() << " health " << health->health);

@@ -200,7 +200,7 @@ void GameComponent::onUpdate(float delta)
 					ammo->isReloading = false;
 
 					shootProjectile(ptr_player->ptr_weaponFireLocation_spatial, ptr_weaponStats);
-					SEND_EVENT(&Event_PlaySound(Event_PlaySound::SOUND_FIRE, ptr_position->position, true));
+					SEND_EVENT(&Event_PlaySound(XKILL_Enums::Sound::SOUND_FIRE, ptr_position->position, true));
 				}
 				else if(firingMode->nrOfShotsLeftInClip[ammoIndex] <= 0)
 				{
@@ -357,7 +357,7 @@ void GameComponent::onUpdate(float delta)
 				ptr_player->ptr_camera->fieldOfView =3.14f/4.0f;
 				ptr_player->respawnTimer.resetTimer();
 				ptr_player->detectedAsDead = false;
-				SEND_EVENT(&Event_PlaySound(Event_PlaySound::SOUND_RESPAWN, ptr_position->position, true));
+				SEND_EVENT(&Event_PlaySound(XKILL_Enums::Sound::SOUND_RESPAWN, ptr_position->position, true));
 			}
 		}
 
@@ -830,7 +830,7 @@ void GameComponent::event_PlayerDeath(Event_PlayerDeath* e)
 	SEND_EVENT(&Event_ModifyPhysicsObject(XKILL_Enums::ModifyPhysicsObjectData::IF_TRUE_RECALCULATE_LOCAL_INERTIA_ELSE_SET_TO_ZERO, static_cast<void*>(&recalculateLocalInertia), ptr_physics));
 
 	Float3 position = ptr_player->ptr_render->ptr_spatial->ptr_position->position;
-	SEND_EVENT(&Event_PlaySound(Event_PlaySound::SOUND_DEATH, position, true));
+	SEND_EVENT(&Event_PlaySound(XKILL_Enums::Sound::SOUND_DEATH, position, true));
 }
 
 void GameComponent::event_UnloadLevel()
