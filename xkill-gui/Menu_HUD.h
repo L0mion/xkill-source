@@ -355,6 +355,7 @@ private:
 	HudMessage_Manager hudMessage_manager;
 	ScoreBoard scoreboard;
 
+	float scoreboardFade;
 	float healthFade;
 	float ammoFade;
 	float firingModeFade;

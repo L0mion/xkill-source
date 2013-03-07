@@ -143,11 +143,6 @@ void Menu_HUD::refresh()
 	int ammoIndex = ammunition->type;
 	float fadeTime = 1.0f;
 
-	//
-	// Update Scoreboard
-	//
-
-	scoreboard.refresh();
 
 	//
 	// Show ammunition info
@@ -259,8 +254,6 @@ void Menu_HUD::refresh()
 
 			ui.progressBar_health->hide();
 			ui.progressBar_ammo->hide();
-
-			ui.frame_scoreboard->show();
 		}
 	}
 	else
@@ -272,10 +265,41 @@ void Menu_HUD::refresh()
 			ui.label_aim->show();
 			ui.label_firingMode->show();
 			ui.frame_bottom->show();
+		}
+	}
 
+	//
+	// Update Scoreboard
+	//
+	
+	scoreboard.refresh();
+	if(ptr_player->detectedAsDead)
+	{
+		// Show scoreboard if delay has expired
+		if(scoreboardFade > 0.0f)
+			scoreboardFade -= SETTINGS->trueDeltaTime;
+		if(scoreboardFade <= 0.0f)
+		{
+			// Show scoreboard if hidden
+			if(ui.frame_scoreboard->isHidden())
+			{
+				ui.frame_scoreboard->show();
+			}
+		}
+	}
+	else
+	{
+		// Reset scoreboard timer
+		scoreboardFade = 1.0f;
+
+		// Hide scoreboard if shown
+		if(!ui.frame_scoreboard->isHidden())
+		{
 			ui.frame_scoreboard->hide();
 		}
 	}
+
+	
 
 
 	//
