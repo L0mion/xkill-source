@@ -508,7 +508,7 @@ public:
 
 		CREATE_ATTRIBUTE(ptr_spatial, Attribute_Spatial, spatial, entity);
 		ptr_spatial->ptr_position = ptr_position;
-		ptr_spatial->scale = Float3(0.1f, 0.1f, 0.1f);
+		ptr_spatial->scale = Float3(0.5f, 0.5f, 0.5f);
 		ptr_spatial->rotation = Float4(-0.707f, 0.0, 0.0f, 0.707f);
 		
 		CREATE_ATTRIBUTE(ptr_render, Attribute_Render, render, entity);

@@ -396,7 +396,7 @@ bool IOComponent::loadMD5(std::string modelName, std::string modelPath, MdlDescM
 	loaderMD5.loadModel(modelPath+modelName, &md5Model);
 
 	LoaderMD5AnimationDesc md5Animation;
-	loaderMD5.loadAnimation(modelPath+ "boblampclean.md5anim", &md5Animation);
+	loaderMD5.loadAnimation(modelPath+ "test.md5anim", &md5Animation);
 
 	std::vector<VertexDesc> vertices;
 	std::vector<SubsetDesc> subsets;
