@@ -123,12 +123,32 @@ void Menu_HUD::mapToSplitscreen()
 	// Move HUD messages to center
 	hudMessage_manager.move(centerPos);
 
+	//// Create weapon select
+	//{
+	//	QLabel l = new QLabel(this);
+	//	l->setPixmap(":/xkill/images/icons/cross_hairs/crosshair_bullet.png");
 
-	// EASTER EGG
-	if(true)
-	{
-		
-	}
+	//	// Determine image
+	//	QString path;
+	//	switch(index_crosshair) 
+	//	{
+	//	case XKILL_Enums::BULLET:
+	//		path = ":/xkill/images/icons/cross_hairs/crosshair_bullet.png";
+	//		break;
+	//	case XKILL_Enums::SCATTER:
+	//		path = ":/xkill/images/icons/cross_hairs/crosshair_scatter.png";
+	//		break;
+	//	case XKILL_Enums::EXPLOSIVE:
+	//		path = ":/xkill/images/icons/cross_hairs/crosshair_explosive.png";
+	//		break;
+	//	default:
+	//		path = ":/xkill/images/icons/default.png";
+	//		break;
+	//	}
+
+	//	// Set image to label
+	//	ui.label_aim->setPixmap(path);
+	//}
 }
 
 void Menu_HUD::refresh()
@@ -439,7 +459,7 @@ void Menu_HUD::refresh()
 void Menu_HUD::initScoreboard()
 {
 	// Init helper class
-	scoreboard.init(ptr_splitScreen->ptr_player);
+	scoreboard.init(ptr_splitScreen->ptr_player, ui.frame_scoreboard);
 
 	// Build scoreboard
 	while(itrPlayer.hasNext())
@@ -452,6 +472,10 @@ void Menu_HUD::initScoreboard()
 		QLabel* label_process = new QLabel();
 		QLabel* label_cycles = new QLabel();
 		QLabel* label_priority = new QLabel();
+
+		//label_process->setMaximumWidth(100);
+		label_cycles->setMaximumWidth(80);
+		label_priority->setMaximumWidth(80);
 
 		layout_entry->addWidget(label_process);
 		layout_entry->addWidget(label_cycles);
@@ -599,5 +623,87 @@ void HudMessage_Manager::addMessage( Event_PostHudMessage* e )
 		newPos.y = position.y + offset - height * 0.5f;
 
 		stack.at(i)->setTargetPosition(newPos);
+	}
+}
+
+void ScoreBoard::syncLabelsWithPlayers()
+{
+	for(int i=0; i<entries.size(); i++)
+	{
+		ScoreboardEntry* e = &entries.at(i);
+
+		// Detect if label has changed
+		if(e->ptr_player->playerName != e->playerName)
+			e->isChanged = true;
+		if(e->ptr_player->cycles != e->cycles)
+			e->isChanged = true;
+		if(e->ptr_player->priority != e->priority)
+			e->isChanged = true;
+		e->isChanged = true;
+
+		// Update label
+		if(e->isChanged)
+		{
+			e->isChanged = false;
+
+			// Set text
+			e->label_process->setText(e->ptr_player->playerName.c_str());
+			e->label_cycles->setNum(e->ptr_player->cycles);
+			e->label_priority->setNum(e->ptr_player->priority);
+
+			// Empty style sheets
+			std::string sheet_process = "";
+			std::string sheet_cycles = "";
+			std::string sheet_priority = "";
+
+			// Apply extra stuff if we're at the current player
+			if(e->ptr_player == ptr_current_player)
+			{
+				sheet_process += "background-color: rgba(255, 255, 255, 100); font-weight: bold;";
+				sheet_cycles += "background-color: rgba(255, 255, 255, 100); font-weight: bold;";
+				sheet_priority += "background-color: rgba(255, 255, 255, 100); font-weight: bold;";
+			}
+
+			// Apply extra stuff if we have most cycles
+			if(e->ptr_player->cycles == maxCycles)
+			{
+				sheet_cycles += "background-color: rgba(0, 255, 0, 100);";
+			}
+
+			// Apply extra stuff if we have most priority
+			if(e->ptr_player->priority == maxPriority)
+			{
+				sheet_priority += "background-color: rgba(0, 255, 0, 100);";
+			}
+
+			// Apply style sheet
+			e->label_process->setStyleSheet(sheet_process.c_str());
+			e->label_cycles->setStyleSheet(sheet_cycles.c_str());
+			e->label_priority->setStyleSheet(sheet_priority.c_str());
+
+
+			// Resize scoreboard to fit long
+			// player names if needed
+			const int kMinLabelSize = 150;
+			int labelSize = e->label_process->sizeHint().width();
+			if(labelSize < kMinLabelSize)
+				labelSize = kMinLabelSize;
+			if(labelSize > maxLabelSize)
+			{
+				maxLabelSize = labelSize;
+
+				const int kPadding = 75;
+				const int kColumnWidth = 100;
+				int new_scoreboardWidth = kPadding;
+				int a = e->label_process->sizeHint().width();
+				a = e->label_process->width();
+
+				new_scoreboardWidth += labelSize;
+				new_scoreboardWidth += kColumnWidth;
+				new_scoreboardWidth += kColumnWidth;
+
+				frame_scoreboard->resize(new_scoreboardWidth, frame_scoreboard->height());
+			}
+		}
 	}
 }
