@@ -203,14 +203,14 @@ void LoaderMD5Animation::buildFrameSkeleton(std::vector<LoaderMD5FrameSkeleton>&
 
 		MD5Helper::computeQuaternionW(animatedJoint.orientationQuaternion_);
 
-		if(animatedJoint.parent_ >= 0)
-		{
-			LoaderMD5SkeletonJointDesc& parentJoint = skeleton.joints_[animatedJoint.parent_];
-			DirectX::XMFLOAT3 rotatedPosition = MD5Helper::rotateVector(parentJoint.position_, parentJoint.orientationQuaternion_);
-			animatedJoint.position_ = MD5Helper::addVectors(parentJoint.position_, rotatedPosition);
-			animatedJoint.orientationQuaternion_ = MD5Helper::multiplyQuaternions(parentJoint.orientationQuaternion_, animatedJoint.orientationQuaternion_);
-			animatedJoint.orientationQuaternion_ = MD5Helper::normalizeQuaternion(animatedJoint.orientationQuaternion_);
-		}
+		//if(animatedJoint.parent_ >= 0)
+		//{
+		//	LoaderMD5SkeletonJointDesc& parentJoint = skeleton.joints_[animatedJoint.parent_];
+		//	DirectX::XMFLOAT3 rotatedPosition = MD5Helper::rotateVector(parentJoint.position_, parentJoint.orientationQuaternion_);
+		//	animatedJoint.position_ = MD5Helper::addVectors(parentJoint.position_, rotatedPosition);
+		//	animatedJoint.orientationQuaternion_ = MD5Helper::multiplyQuaternions(parentJoint.orientationQuaternion_, animatedJoint.orientationQuaternion_);
+		//	animatedJoint.orientationQuaternion_ = MD5Helper::normalizeQuaternion(animatedJoint.orientationQuaternion_);
+		//}
 
 		skeleton.joints_.push_back(animatedJoint);
 	}

@@ -408,7 +408,7 @@ bool IOComponent::loadMD5(std::string modelName, std::string modelPath, MdlDescM
 	meshDesc.subsets_	= subsets;
 	meshDesc.materials_ = materials;
 
-	loadMD5AssembleAnimation(skinnedData, &md5Animation);
+	loadMD5AssembleAnimation(skinnedData, &md5Animation, &md5Model);
 
 	return true;
 }
@@ -503,29 +503,18 @@ void IOComponent::loadMD5AssembleMaterials(std::vector<MaterialDesc>* materials,
 		materials->push_back(material);
 	}
 }
-void IOComponent::loadMD5AssembleAnimation(SkinnedData* skinnedData, LoaderMD5AnimationDesc* md5Animation)
+void IOComponent::loadMD5AssembleAnimation(SkinnedData* skinnedData, LoaderMD5AnimationDesc* md5Animation, LoaderMD5ModelDesc* md5Model)
 {
 	AnimationClip* animationClip = new AnimationClip();
-	std::vector<LoaderMD5BaseFrameDesc> baseFrames = md5Animation->baseFrames_;
 	std::vector<LoaderMD5JointInfo> jointInfos = md5Animation->jointInfos_;
-
-	std::vector<DirectX::XMFLOAT4X4>* boneOffsets = new std::vector<DirectX::XMFLOAT4X4>();
+	
 	std::vector<int>* boneHierarchy = new std::vector<int>();
 	for(unsigned int i=0; i<jointInfos.size(); i++)
 		boneHierarchy->push_back(jointInfos[i].parentID_);
 
-	DirectX::XMFLOAT3 scale(1.0f, 1.0f, 1.0f);
-	DirectX::XMVECTOR xmZero = DirectX::XMVectorSet(0.0f, 0.0f, 0.0f, 1.0f);
-	for(unsigned int i=0; i<baseFrames.size(); i++)
-	{
-		DirectX::XMVECTOR xmScale		= DirectX::XMLoadFloat3(&scale);
-		DirectX::XMVECTOR xmTranslation = DirectX::XMLoadFloat3(&baseFrames[i].position_);
-		DirectX::XMVECTOR xmRotation	= DirectX::XMLoadFloat4(&baseFrames[i].orientationQuaternion_);
-
-		DirectX::XMFLOAT4X4 matrix;
-		DirectX::XMStoreFloat4x4(&matrix, DirectX::XMMatrixAffineTransformation(xmScale, xmZero, xmRotation, xmTranslation));
-		boneOffsets->push_back(matrix);
-	}
+	std::vector<DirectX::XMFLOAT4X4>* boneOffsets = new std::vector<DirectX::XMFLOAT4X4>();
+	for(unsigned int i=0; i<md5Model->boneOffsets_.size(); i++)
+		boneOffsets->push_back(md5Model->boneOffsets_[i]);
 
 	std::vector<LoaderMD5FrameSkeleton> frameSkeletons = md5Animation->skeletons_;
 	animationClip->getBoneAnimations()->resize(jointInfos.size());

@@ -8,8 +8,9 @@
 
 struct LoaderMD5ModelDesc
 {
-	std::vector<LoaderMD5JointDesc> joints_;
-	std::vector<LoaderMD5MeshDesc> meshes_;
+	std::vector<LoaderMD5JointDesc>  joints_;
+	std::vector<LoaderMD5MeshDesc>	 meshes_;
+	std::vector<DirectX::XMFLOAT4X4> boneOffsets_;
 };
 
 #endif //XKILL_IO_LOADER_MD5_MODEL_DESC_H

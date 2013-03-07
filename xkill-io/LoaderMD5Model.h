@@ -35,11 +35,10 @@ private:
 	void prepareMesh(LoaderMD5MeshDesc& mesh);
 	void prepareNormals(LoaderMD5MeshDesc& mesh);
 
+	void buildBindPose(std::vector<LoaderMD5JointDesc> joints);
+
 	void reset();
 	
-
-	
-
 	std::ifstream infile_;
 	int fileLength_;
 
@@ -48,6 +47,9 @@ private:
 	int numMeshes_;
 
 	bool hasAnimation_;
+
+	std::vector<DirectX::XMFLOAT4X4> bindPose_;
+	std::vector<DirectX::XMFLOAT4X4> bindPoseInverse_;
 
 	std::vector<LoaderMD5JointDesc> joints_;
 	std::vector<LoaderMD5MeshDesc>  meshes_;

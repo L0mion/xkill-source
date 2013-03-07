@@ -478,13 +478,6 @@ void Renderer::renderViewportToGBuffer(ViewportData& vpData)
 	ID3D11Device*			device = managementD3D_->getDevice();
 	ID3D11DeviceContext*	devcon = managementD3D_->getDeviceContext();
 
-	//if(animatedMesh_)
-	//	renderAnimatedMesh(vpData.view, vpData.proj);
-
-	//managementFX_->setShader(devcon, SHADERID_VS_DEFAULT);
-	//managementFX_->setShader(devcon, SHADERID_PS_DEFAULT);
-
-
 	managementSS_->setSS(devcon, TypeFX_PS, 0, SS_ID_DEFAULT);
 	managementRS_->setRS(devcon, RS_ID_DEFAULT);
 
@@ -1365,16 +1358,29 @@ void Renderer::drawHudElement(int viewportIndex, unsigned int textureId, DirectX
 
 void Renderer::renderAnimation(unsigned int meshID, DirectX::XMFLOAT4X4 view, DirectX::XMFLOAT4X4 projection)
 {
+	AttributePtr<Attribute_Spatial> ptr_spatial;
+	AttributePtr<Attribute_Position> ptr_position;
+	bool done = false;
+	while(itrRender.hasNext() && !done)
+	{
+		AttributePtr<Attribute_Render> ptr_render = itrRender.getNext();
+		if(ptr_render->meshID == meshID)
+		{
+			ptr_spatial = ptr_render->ptr_spatial;
+			ptr_position = ptr_render->ptr_spatial->ptr_position;
+			done = true;
+		}
+	}
+	itrRender.resetIndex();
+
 	ID3D11Device*			device = managementD3D_->getDevice();
 	ID3D11DeviceContext*	devcon = managementD3D_->getDeviceContext();
 
 	ModelD3D* modelD3D	= managementModel_->getModelD3D(meshID, device);
 
-	DirectX::XMFLOAT4X4 worldMatrix(0.01f, 0.0f, 0.0f, 0.0f,
-									0.0f, 0.01f, 0.0f, 0.0f,
-									0.0f, 0.0f, 0.01f, 0.0f,
-									6.0f, 3.0f, 0.0f, 1.0f);
-	DirectX::XMFLOAT4X4 worldMatrixInverse	= worldMatrix;
+	
+	DirectX::XMFLOAT4X4 worldMatrix			= managementMath_->calculateWorldMatrix(ptr_spatial, ptr_position);
+	DirectX::XMFLOAT4X4 worldMatrixInverse	= managementMath_->calculateMatrixInverse(worldMatrix);
 	DirectX::XMFLOAT4X4 finalMatrix			= managementMath_->calculateFinalMatrix(worldMatrix, view, projection);
 	
 	managementCB_->setCB(CB_TYPE_OBJECT, TypeFX_VS, CB_REGISTER_OBJECT, devcon);
@@ -1382,17 +1388,16 @@ void Renderer::renderAnimation(unsigned int meshID, DirectX::XMFLOAT4X4 view, Di
 
 	std::string clipName = "Default";
 	std::vector<DirectX::XMFLOAT4X4> finalTransforms;
-	//managementAnimation_->debug_clearOffsetMatrices(3);
-	managementAnimation_->update(0.002, clipName, 3);
+	managementAnimation_->update(0.006, clipName, 3);
 	managementAnimation_->getAnimation(3)->getFinalTransforms(clipName, managementAnimation_->getTimePosition(), &finalTransforms);
 
 	managementCB_->setCB(CB_TYPE_BONE, TypeFX_VS, CB_REGISTER_BONE, devcon);
 	managementCB_->updateCBBone(devcon, finalTransforms);
 
 	managementFX_->setShader(devcon, SHADERID_VS_ANIMATION);
-	managementFX_->setShader(devcon, SHADERID_PS_ANIMATION);
+	managementFX_->setShader(devcon, SHADERID_PS_DEFAULT);
 	managementSS_->setSS(devcon, TypeFX_PS, 0, SS_ID_DEFAULT);
-	managementRS_->setRS(devcon, RS_ID_WIREFRAME);
+	managementRS_->setRS(devcon, RS_ID_DEFAULT);
 
 	managementBuffer_->setBuffersAndDepthBufferAsRenderTargets(devcon, managementD3D_->getDepthBuffer());
 
@@ -1405,12 +1410,25 @@ void Renderer::renderAnimation(unsigned int meshID, DirectX::XMFLOAT4X4 view, Di
 				&vertexBuffer, 
 				&stride, 
 				&offset);
-	devcon->IASetIndexBuffer(modelD3D->getSubsetD3Ds().at(0)->getIndexBuffer(), DXGI_FORMAT_R32_UINT, 0);
-	
-	managementFX_->setLayout(devcon, LAYOUTID_POS_NORM_TEX_TAN_SKINNED);
-	
-	devcon->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-	devcon->DrawIndexed(modelD3D->getSubsetD3Ds().at(0)->getNumIndices(), 0, 0);
+
+	std::vector<MaterialDesc> materials = modelD3D->getMaterials();
+	std::vector<SubsetD3D*> subsets = modelD3D->getSubsetD3Ds();
+
+	for(unsigned int i=0; i<modelD3D->getSubsetD3Ds().size(); i++)
+	{
+		MaterialDesc material = materials[subsets.at(i)->getMaterialIndex()];
+
+		ID3D11ShaderResourceView* texAlbedo = managementTex_->getTexSrv(material.idAlbedoTex_);
+		ID3D11ShaderResourceView* texNormal = managementTex_->getTexSrv(material.idNormalTex_);
+		devcon->PSSetShaderResources(0, 1, &texAlbedo);
+		devcon->PSSetShaderResources(1, 1, &texNormal);
+
+		devcon->IASetIndexBuffer(subsets.at(i)->getIndexBuffer(), DXGI_FORMAT_R32_UINT, 0);
+		managementFX_->setLayout(devcon, LAYOUTID_POS_NORM_TEX_TAN_SKINNED);
+		devcon->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+		devcon->DrawIndexed(subsets.at(i)->getNumIndices(), 0, 0);
+	}
+
 
 
 	managementRS_->setRS(devcon, RS_ID_DEFAULT);

@@ -1,6 +1,8 @@
 #include "LoaderMD5Model.h"
 #include "LoaderMD5Helper.h"
 
+
+
 LoaderMD5Model::LoaderMD5Model()
 {
 	fileLength_ = 0;
@@ -48,8 +50,9 @@ bool LoaderMD5Model::loadModel(const std::string& filename, LoaderMD5ModelDesc* 
 
 	infile_.close();
 
-	modelDesc->joints_ = joints_;
-	modelDesc->meshes_ = meshes_;
+	modelDesc->joints_		= joints_;
+	modelDesc->meshes_		= meshes_;
+	modelDesc->boneOffsets_ = bindPoseInverse_;
 	
 	return true;
 }
@@ -96,6 +99,8 @@ void LoaderMD5Model::parseParamJoints()
 
 	//Read the '}' character.
 	infile_ >> dummy;
+
+	buildBindPose(joints_);
 }
 void LoaderMD5Model::parseParamMesh()
 {
@@ -273,6 +278,34 @@ void LoaderMD5Model::prepareNormals(LoaderMD5MeshDesc& mesh)
 			vertex.normal_.y += normal.y * weight.bias_;
 			vertex.normal_.z += normal.z * weight.bias_;
 		}
+	}
+}
+
+void LoaderMD5Model::buildBindPose(std::vector<LoaderMD5JointDesc> joints)
+{
+	bindPose_.clear();
+	bindPoseInverse_.clear();
+
+	std::vector<LoaderMD5JointDesc>::const_iterator iter = joints.begin();
+	while(iter != joints.end())
+	{
+		const LoaderMD5JointDesc& joint = (*iter);
+		DirectX::XMVECTOR xmRotation = DirectX::XMLoadFloat4(&joint.orientationQuaternion_);
+
+		DirectX::XMMATRIX xmTranslationMatrix	 = DirectX::XMMatrixTranslation(joint.position_.x, joint.position_.y, joint.position_.z);
+		DirectX::XMMATRIX xmRotationMatrix		 = DirectX::XMMatrixRotationQuaternion(xmRotation);
+		DirectX::XMMATRIX xmBoneTransform		 = xmRotationMatrix * xmTranslationMatrix;
+		DirectX::XMVECTOR xmBoneDeterminant		 = DirectX::XMMatrixDeterminant(xmBoneTransform);
+		DirectX::XMMATRIX xmBoneTransformInverse = DirectX::XMMatrixInverse(&xmBoneDeterminant, xmBoneTransform);
+
+		DirectX::XMFLOAT4X4 boneTransform, boneTransformInverse;
+		DirectX::XMStoreFloat4x4(&boneTransform, xmBoneTransform);
+		DirectX::XMStoreFloat4x4(&boneTransformInverse, xmBoneTransformInverse);
+
+		bindPose_.push_back(boneTransform);
+		bindPoseInverse_.push_back(boneTransformInverse);
+
+		++iter;
 	}
 }
 
