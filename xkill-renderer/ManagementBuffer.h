@@ -12,6 +12,8 @@ class Buffer_SrvRtvUav;
 struct ID3D11Device;
 struct ID3D11DeviceContext;
 
+#include <map>
+
 #include "gBufferID.h"
 
 static const FLOAT CLEARCOLOR_BLACK[]	= { 0.0f, 0.0f, 0.0f, 1.0f };
@@ -24,15 +26,16 @@ enum BUFFER_FORMAT
 	R8_G8_B8_A8__UNORM,
 	R16_G16_B16_A16__FLOAT,
 	R32_G32_B32_A32__FLOAT,
-	R16__FLOAT
+	R16__FLOAT,
+	R8__FLOAT
 };
 
 static const BUFFER_FORMAT BUFFER_FORMAT_ALBEDO		= R8_G8_B8_A8__UNORM;
 static const BUFFER_FORMAT BUFFER_FORMAT_NORMAL		= R16_G16_B16_A16__FLOAT;
-static const BUFFER_FORMAT BUFFER_FORMAT_MATERIAL	= R16_G16_B16_A16__FLOAT;
+static const BUFFER_FORMAT BUFFER_FORMAT_MATERIAL	= R16_G16_B16_A16__FLOAT; //Lower me?
 static const BUFFER_FORMAT BUFFER_FORMAT_GLOW_HIGH	= R8_G8_B8_A8__UNORM;
 static const BUFFER_FORMAT BUFFER_FORMAT_GLOW_LOW	= R8_G8_B8_A8__UNORM;
-static const BUFFER_FORMAT BUFFER_FORMAT_SSAO		= R16_G16_B16_A16__FLOAT;//R16__FLOAT;
+static const BUFFER_FORMAT BUFFER_FORMAT_SSAO		= R8__FLOAT;//R16__FLOAT;
 static const BUFFER_FORMAT BUFFER_FORMAT_RANDOM		= R8_G8_B8_A8__UNORM;
 
 static const unsigned int SHADER_REGISTER_DOWNSAMPLE_INPUT = 3;
@@ -84,7 +87,7 @@ public:
 	void clearBuffers(ID3D11DeviceContext* devcon);
 	void setBuffersAndDepthBufferAsRenderTargets(ID3D11DeviceContext*	devcon, ID3D11DepthStencilView*	depthBuffer);
 	void unsetBuffersAndDepthBufferAsRenderTargets(ID3D11DeviceContext* devcon);
-	void setBuffersAsCSShaderResources(ID3D11DeviceContext* devcon);
+	void setBuffersAsCSShaderResources(ID3D11Device* device, ID3D11DeviceContext* devcon, unsigned int camIndex);
 	void unsetBuffersAsCSShaderResources(ID3D11DeviceContext* devcon);
 
 	void setBuffer(
@@ -99,11 +102,10 @@ public:
 		SET_STAGE setStage,
 		unsigned int shaderRegister);
 
+	Buffer_SrvRtvUav* getSSAO(ID3D11Device* device, unsigned int camIndex);
+
 	D3D11_VIEWPORT getDownSampledViewport();
 	D3D11_VIEWPORT getShadowViewport();
-
-	//temp
-	Buffer_SrvRtvUav* getSSAO() { return ssaoMap_; }
 
 	void setRandomBuf(ID3D11DeviceContext* devcon, unsigned int shaderRegister)
 	{ 
@@ -111,6 +113,11 @@ public:
 		resourceViews[0] = randomSRV_;
 		devcon->CSSetShaderResources(shaderRegister, 1, resourceViews);
 	}
+
+	unsigned int getSSAOWidth();
+	unsigned int getSSAOHeight();
+	unsigned int getSSAOViewportWidth();
+	unsigned int getSSAOViewportHeight();
 protected:
 private:
 	HRESULT initAlbedo(		ID3D11Device* device);
@@ -151,10 +158,11 @@ private:
 	D3D11_VIEWPORT shadowViewport_;
 
 	//SSAO
-	unsigned int ssaoWidth_;
+	unsigned int ssaoWidth_;			//Total dimensions of all viewport-specific ssao-buffers
 	unsigned int ssaoHeight_;
-	Buffer_SrvRtvUav* ssaoMap_;
-	D3D11_VIEWPORT ssaoViewport_;
+	unsigned int ssaoViewportWidth_;	//Dimensions of viewport-specific ssao-buffers
+	unsigned int ssaoViewportHeight_;
+	std::map<unsigned int, Buffer_SrvRtvUav*> ssaos_; //Buffer_SrvRtvUav* ssaoMap_;
 
 	ID3D11Texture2D*			randomTex_;
 	ID3D11ShaderResourceView*	randomSRV_;

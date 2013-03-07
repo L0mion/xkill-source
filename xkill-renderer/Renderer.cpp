@@ -119,20 +119,29 @@ HRESULT Renderer::resize(unsigned int screenWidth, unsigned int screenHeight)
 	unsigned int numViewports, csDispatchX, csDispatchY;
 	numViewports	= numSS;
 
-	csDispatchX	= ceil((float)screenWidth	/ (float)CS_TILE_SIZE);
-	csDispatchY	= ceil((float)screenHeight	/ (float)CS_TILE_SIZE);
+	csDispatchX	= (unsigned int)(ceil((float)screenWidth	/ (float)CS_TILE_SIZE));
+	csDispatchY	= (unsigned int)(ceil((float)screenHeight	/ (float)CS_TILE_SIZE));
 	winfo_->init(
 		screenWidth, 
 		screenHeight, 
 		numViewports, 
 		csDispatchX, 
-		csDispatchY);
+		csDispatchY,
+		0,  //These will be initialized later down the init-chain.
+		0); //These will be initialized later down the init-chain.
+
+	// ! OBS!
+	// managementViewport is now initialized before managementD3D and managementBuffer
+	// because number of viewports in X- and Y- needs to be established before
+	// initializing managementBuffer.
+	// Winfo is thusly updated in managementViewport->resize with this data.
+	// ! OBS!
+	if(SUCCEEDED(hr))
+		hr = managementViewport_->resize();
 
 	hr = managementD3D_->resize();
 	if(SUCCEEDED(hr))
 		hr = managementBuffer_->resize(managementD3D_->getDevice());
-	if(SUCCEEDED(hr))
-		hr = managementViewport_->resize();
 
 	//Update per-instance constant-buffer.
 	ID3D11DeviceContext* devcon = managementD3D_->getDeviceContext();
@@ -176,7 +185,7 @@ HRESULT Renderer::init()
 //		hr = initManagementDebug();
 	initManagementMath();
 	if(SUCCEEDED(hr))
-		hr = initManagementGBuffer();
+		hr = initManagementBuffer();
 	if(SUCCEEDED(hr))
 		hr = initManagementSprites();
 	initManagementInstance();
@@ -215,7 +224,9 @@ void Renderer::initWinfo()
 		screenHeight, 
 		numViewports, 
 		csDispatchX, 
-		csDispatchY);
+		csDispatchY,
+		0,	//These will be initialized in initManagementViewport
+		0); //These will be initialized in initManagementViewport
 }
 HRESULT Renderer::initManagementD3D()
 {
@@ -317,7 +328,7 @@ HRESULT Renderer::initManagementRS()
 
 	return hr;
 }
-HRESULT Renderer::initManagementGBuffer()
+HRESULT Renderer::initManagementBuffer()
 {
 	HRESULT hr = S_OK;
 
@@ -510,7 +521,8 @@ void Renderer::renderViewportToGBuffer(ViewportData& vpData)
 }
 void Renderer::renderViewportToBackBuffer(ViewportData& vpData)
 {
-	ID3D11DeviceContext* devcon = managementD3D_->getDeviceContext();
+	ID3D11Device*			device = managementD3D_->getDevice();
+	ID3D11DeviceContext*	devcon = managementD3D_->getDeviceContext();
 
 	//Set backbuffer.
 	managementD3D_->setDepthBufferSRV(GBUFFER_SHADER_REGISTER_DEPTH);
@@ -536,7 +548,7 @@ void Renderer::renderViewportToBackBuffer(ViewportData& vpData)
 		vpData.viewportHeight);
 
 	//Connect g-buffers to shader.
-	managementBuffer_->setBuffersAsCSShaderResources(devcon);
+	managementBuffer_->setBuffersAsCSShaderResources(device, devcon, vpData.camIndex);
 
 	//Set lights.
 	managementLight_->setLightSRVCS(devcon, LIGHTBUFFERTYPE_DIR,		LIGHT_SRV_REGISTER_DIR);
@@ -549,8 +561,8 @@ void Renderer::renderViewportToBackBuffer(ViewportData& vpData)
 	managementSS_->setSS(devcon, TypeFX_CS, 1, SS_ID_SHADOW);
 
 	//Call compute shader kernel.
-	unsigned int dispatchX = ceil((float)winfo_->getCSDispathX() / (float)managementViewport_->getNumViewportsX());
-	unsigned int dispatchY = ceil((float)winfo_->getCSDispathY() / (float)managementViewport_->getNumViewportsY());
+	unsigned int dispatchX = (unsigned int)(ceil((float)winfo_->getCSDispathX() / (float)managementViewport_->getNumViewportsX()));
+	unsigned int dispatchY = (unsigned int)(ceil((float)winfo_->getCSDispathY() / (float)managementViewport_->getNumViewportsY()));
 	devcon->Dispatch(dispatchX, dispatchY, 1);
 
 	//Unset and clean.
@@ -1090,12 +1102,13 @@ void Renderer::upSampleBlur()
 //SSAO
 void Renderer::buildSSAOMap(ViewportData& vpData)
 {
-	ID3D11DeviceContext* devcon = managementD3D_->getDeviceContext();
+	ID3D11Device*			device = managementD3D_->getDevice();
+	ID3D11DeviceContext*	devcon = managementD3D_->getDeviceContext();
 	
 	managementFX_->setShader(devcon, SHADERID_CS_SSAO);
 	
-	Buffer_SrvRtvUav* ssaoMap = managementBuffer_->getSSAO();
-	
+	Buffer_SrvRtvUav* ssaoMap = managementBuffer_->getSSAO(device, vpData.camIndex);
+
 	//Set uav
 	ID3D11UnorderedAccessView* uav = ssaoMap->getUAV();
 	devcon->CSSetUnorderedAccessViews(
@@ -1121,29 +1134,27 @@ void Renderer::buildSSAOMap(ViewportData& vpData)
 	managementSS_->setSS(devcon, TypeFX_CS, 0, SS_ID_NORMAL);
 	managementSS_->setSS(devcon, TypeFX_CS, 1, SS_ID_DEPTH);
 	managementSS_->setSS(devcon, TypeFX_CS, 2, SS_ID_RANDOM);
-	
+
 	managementCB_->setCB(CB_TYPE_CAMERA, TypeFX_CS, CB_REGISTER_CAMERA,	devcon);
 
-	unsigned int viewportTopX	= (float)vpData.viewportTopX	/ (float)SSAO_MAP_SCREEN_RES_FACTOR; //RISKY?
-	unsigned int viewportTopY	= (float)vpData.viewportTopY	/ (float)SSAO_MAP_SCREEN_RES_FACTOR; //RISKY?
-	unsigned int viewportWidth	= (float)vpData.viewportWidth	/ (float)SSAO_MAP_SCREEN_RES_FACTOR; //RISKY?
-	unsigned int viewportHeight	= (float)vpData.viewportHeight	/ (float)SSAO_MAP_SCREEN_RES_FACTOR; //RISKY?
+	unsigned int viewportTopX	= (unsigned int)((float)vpData.viewportTopX		/ (float)SSAO_MAP_SCREEN_RES_FACTOR);
+	unsigned int viewportTopY	= (unsigned int)((float)vpData.viewportTopY		/ (float)SSAO_MAP_SCREEN_RES_FACTOR);
 	managementCB_->updateCBCamera(managementD3D_->getDeviceContext(),
-		vpData.view,
 		managementMath_->getIdentityMatrix(),					//Irrelevant
-		vpData.proj,
+		managementMath_->getIdentityMatrix(),					//Irrelevant
+		managementMath_->getIdentityMatrix(),					//Irrelevant
 		vpData.projInv,
 		DirectX::XMFLOAT3(0.0f, 0.0f, 0.0f),					//Irrelevant
-		viewportTopX,											//New viewport-dimensions
-		viewportTopY,											//New viewport-dimensions
-		vpData.viewportWidth,									//Instead used to send original viewport-dimensions.
-		vpData.viewportHeight,									//Instead used to send original viewport-dimensions.
-		viewportWidth,
-		viewportHeight);
-	
+		viewportTopX,
+		viewportTopY,
+		0,														//Irrelevant.
+		0,														//Irrelevant.
+		managementBuffer_->getSSAOViewportWidth(),
+		managementBuffer_->getSSAOViewportHeight());
+
 	managementCB_->setCB(CB_TYPE_SSAO, TypeFX_CS, CB_REGISTER_SSAO, devcon);
-	float ssaoWidth		= (float)winfo_->getScreenWidth()	/ (float)SSAO_MAP_SCREEN_RES_FACTOR;
-	float ssaoHeight	= (float)winfo_->getScreenHeight()	/ (float)SSAO_MAP_SCREEN_RES_FACTOR;
+	float ssaoWidth		= managementBuffer_->getSSAOWidth(); //(float)winfo_->getScreenWidth()	/ (float)SSAO_MAP_SCREEN_RES_FACTOR;
+	float ssaoHeight	= managementBuffer_->getSSAOHeight(); //(float)winfo_->getScreenHeight()	/ (float)SSAO_MAP_SCREEN_RES_FACTOR;
 
 	managementCB_->updateCBSSAO(
 		devcon,
@@ -1153,18 +1164,18 @@ void Renderer::buildSSAOMap(ViewportData& vpData)
 		/*Occlusion Scale*/			0.7f,
 		/*Occlusion Bias*/			0.1f,
 		/*Occlusion Intensity*/		2.0f);
-	
+
 	//Dispatch motherfucker
 	unsigned int SSAO_BLOCK_DIM = 16;
 	float csDispatchX = ssaoWidth	/ (float)SSAO_BLOCK_DIM;
 	float csDispatchY = ssaoHeight	/ (float)SSAO_BLOCK_DIM;
-	unsigned int dispatchX = ceil(csDispatchX / (float)managementViewport_->getNumViewportsX());
-	unsigned int dispatchY = ceil(csDispatchY / (float)managementViewport_->getNumViewportsY());
+	unsigned int dispatchX = (unsigned int)(ceil(csDispatchX / (float)managementViewport_->getNumViewportsX()));
+	unsigned int dispatchY = (unsigned int)(ceil(csDispatchY / (float)managementViewport_->getNumViewportsY()));
 	devcon->Dispatch(dispatchX, dispatchY, 1);
-	
+
 	//Unser shader
 	managementFX_->unsetShader(devcon, SHADERID_CS_SSAO);
-	
+
 	//Unset uav
 	ID3D11UnorderedAccessView* uavs[] = { nullptr };
 	devcon->CSSetUnorderedAccessViews(
@@ -1176,7 +1187,7 @@ void Renderer::buildSSAOMap(ViewportData& vpData)
 	managementSS_->unsetSS(devcon, TypeFX_CS, 0);
 	managementSS_->unsetSS(devcon, TypeFX_CS, 1);
 	managementSS_->unsetSS(devcon, TypeFX_CS, 2);
-	
+
 	managementBuffer_->unset(devcon, SET_TYPE_SRV, SET_STAGE_CS, 0);
 	managementD3D_->unsetDepthBufferSRV(GBUFFER_SHADER_REGISTER_DEPTH);
 	managementBuffer_->unset(devcon, SET_TYPE_SRV, SET_STAGE_CS, 11);

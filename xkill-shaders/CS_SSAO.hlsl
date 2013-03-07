@@ -97,7 +97,7 @@ void CS_SSAO(uint3 threadIDDispatch	: SV_DispatchThreadID)
 	unsigned int numSamples = 4;
 	for(unsigned int i = 0.0f; i < numSamples; i++)
 	{
-		float2 coord1 = reflect(vec[i], random) * radius;	//Original sampling coordinates at 90 degrees.
+		float2 coord1 = reflect(vec[i], random.xy) * radius;	//Original sampling coordinates at 90 degrees.
 		float2 coord2 = float2(
 		coord1.x * 0.707f - coord1.y * 0.707f,
 		coord1.x * 0.707f + coord1.y * 0.707f);			//...the same coordinates rotated 45 degrees:
@@ -113,8 +113,8 @@ void CS_SSAO(uint3 threadIDDispatch	: SV_DispatchThreadID)
 	occlusion = saturate(pow(occlusion, 4.0f)); //Make occlusion appear more dramatic.
 	ssao[
 		uint2(
-			threadIDDispatch.x + viewportTopX, 
-			threadIDDispatch.y + viewportTopY)] = 
+			threadIDDispatch.x, 
+			threadIDDispatch.y)] = 
 		occlusion;
 }
 

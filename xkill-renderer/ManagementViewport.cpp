@@ -12,6 +12,8 @@ ManagementViewport::ManagementViewport(Winfo* winfo)
 
 	viewportWidth_	= 0;
 	viewportHeight_ = 0;
+	numViewportsX_	= 1;
+	numViewportsY_	= 1;
 
 	borderSize_ = 2;
 
@@ -76,6 +78,17 @@ HRESULT ManagementViewport::init()
 		else
 			hr = initViewportGrid(gridSize);
 	}
+
+	//By this stage, number of viewports in X- and Y has been determined.
+	//Initialize Winfo with this updated data:
+	winfo_->init(
+		winfo_->getScreenWidth(),
+		winfo_->getScreenHeight(),
+		winfo_->getNumViewports(),
+		winfo_->getCSDispathX(),
+		winfo_->getCSDispathY(),
+		numViewportsX_,
+		numViewportsY_);
 
 	// Inform about change in splitscreen
 	SEND_EVENT(&Event(EVENT_SPLITSCREEN_CHANGED));

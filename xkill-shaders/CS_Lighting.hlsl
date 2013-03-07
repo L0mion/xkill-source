@@ -194,8 +194,12 @@ void CS_Lighting(
 	//{
 	//	Diffuse.g += 0.1;
 	//}
-
-	float ssao = bufferSSAO.SampleLevel(ss, texCoord, 0);
+	float ssao = bufferSSAO.SampleLevel(
+		ss, 
+		float2(
+			(float)(threadIDDispatch.x) / (float)viewportWidth,
+			(float)(threadIDDispatch.y) / (float)viewportHeight), 
+		0);
 
 	float3 litPixel = Ambient.xyz * (ssao.r) + Diffuse.xyz + Specular.xyz;
 	float3 glowPixel = bufferGlowHigh.SampleLevel(ss, texCoord, 0).xyz;

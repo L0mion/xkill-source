@@ -82,7 +82,7 @@ private:
 	HRESULT initManagementViewport();	//!< Creates a ManagementViewport object that in turn will create the specified amount of viewports.
 	HRESULT initManagementSS();			//!< Creates a ManagementSS object that will maintain sampler states.
 	HRESULT initManagementRS();			//!< Creates a ManagementRS object that will maintain rasterizer states.
-	HRESULT initManagementGBuffer();	//!< Creates a ManagementGBuffer-type object that will maintain the application's g-buffers.
+	HRESULT initManagementBuffer();	//!< Creates a ManagementGBuffer-type object that will maintain the application's g-buffers.
 	HRESULT initManagementDebug();		//!< Initializes ManagementDebug, which holds data allowing advanced detection of COM-leaks in D3D.
 	void	initManagementMath();		//!< Initializes ManagementMath, which manages math-related functions and loading of dx-vectors into generic-type vectors utilizing SIMD.
 	void	initManagementInstance();	//!< Initializes ManagementInstance, which manages all the instances of the various models.

@@ -39,8 +39,8 @@ ManagementBuffer::ManagementBuffer(Winfo* winfo)
 	//SSAO
 	ssaoWidth_	= 1; //Set these to an arbitrary >0 value as resize() will be called before init. This requires a positive value.
 	ssaoHeight_ = 1;
-	ssaoMap_ = nullptr;
-	ZeroMemory(&ssaoViewport_, sizeof(D3D11_VIEWPORT));
+	ssaoViewportWidth_	= 1;
+	ssaoViewportHeight_	= 1;
 
 	randomTex_ = nullptr;
 	randomSRV_ = nullptr;
@@ -56,7 +56,10 @@ ManagementBuffer::~ManagementBuffer()
 
 	SAFE_DELETE(shadowMap_);
 
-	SAFE_DELETE(ssaoMap_);
+	for(std::map<unsigned int, Buffer_SrvRtvUav*>::iterator i = ssaos_.begin(); i != ssaos_.end(); i++)
+	{
+		SAFE_DELETE(i->second);
+	}
 
 	SAFE_RELEASE(randomTex_);
 	SAFE_RELEASE(randomSRV_);
@@ -73,7 +76,11 @@ void ManagementBuffer::reset()
 
 	SAFE_RESET(shadowMap_);
 
-	SAFE_RESET(ssaoMap_);
+	for(std::map<unsigned int, Buffer_SrvRtvUav*>::iterator i = ssaos_.begin(); i != ssaos_.end(); i++)
+	{
+		SAFE_DELETE(i->second);
+	}
+	ssaos_.clear();
 }
 HRESULT ManagementBuffer::resize(ID3D11Device* device)
 {
@@ -135,10 +142,7 @@ HRESULT ManagementBuffer::resize(ID3D11Device* device)
 
 	if(SUCCEEDED(hr))
 	{
-		hr = ssaoMap_->resize(
-			device,
-			ssaoWidth_,
-			ssaoHeight_);
+		hr = initSSAO(device);
 	}
 
 	//Also resize viewports:
@@ -157,14 +161,6 @@ HRESULT ManagementBuffer::resize(ID3D11Device* device)
 	shadowViewport_.Height		= static_cast<FLOAT>(SHADOWMAP_DIM);
 	shadowViewport_.MinDepth	= 0.0f;
 	shadowViewport_.MaxDepth	= 1.0f;
-
-	ZeroMemory(&ssaoViewport_, sizeof(D3D11_VIEWPORT));
-	ssaoViewport_.TopLeftX	= 0;
-	ssaoViewport_.TopLeftY	= 0;
-	ssaoViewport_.Width		= static_cast<FLOAT>(ssaoWidth_);
-	ssaoViewport_.Height	= static_cast<FLOAT>(ssaoHeight_);
-	ssaoViewport_.MinDepth	= 0.0f;
-	ssaoViewport_.MaxDepth	= 1.0f;
 
 	return hr;
 }
@@ -321,21 +317,15 @@ HRESULT ManagementBuffer::initSSAO(ID3D11Device* device)
 {
 	HRESULT hr = S_OK;
 
-	ssaoMap_ = new Buffer_SrvRtvUav(
-		ssaoWidth_,
-		ssaoHeight_,
-		1,
-		getFormat(BUFFER_FORMAT_SSAO),
-		D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE | D3D11_BIND_UNORDERED_ACCESS,
-		D3D11_USAGE_DEFAULT);
-
-	ZeroMemory(&ssaoViewport_, sizeof(D3D11_VIEWPORT));
-	ssaoViewport_.TopLeftX	= 0;
-	ssaoViewport_.TopLeftY	= 0;
-	ssaoViewport_.Width		= static_cast<FLOAT>(ssaoWidth_);
-	ssaoViewport_.Height	= static_cast<FLOAT>(ssaoHeight_);
-	ssaoViewport_.MinDepth	= 0.0f;
-	ssaoViewport_.MaxDepth	= 1.0f;
+	//Get new ssao total dimensions.
+	getSSAODim(winfo_->getScreenWidth(), winfo_->getScreenHeight(), ssaoWidth_, ssaoHeight_);
+	
+	//Calculate dimensions of the smaller textures making up the larger texture.
+	// ! OBS !
+	// We assume winfo has been updated with this data.
+	// ! OBS !
+	ssaoViewportWidth_	= ssaoWidth_	/ winfo_->getNumViewportsX();
+	ssaoViewportHeight_	= ssaoHeight_	/ winfo_->getNumViewportsY(); 
 
 	return hr;
 }
@@ -423,9 +413,13 @@ void ManagementBuffer::clearBuffers(ID3D11DeviceContext* devcon)
 	ID3D11DepthStencilView* dsv = shadowMap_->getDSV();
 	devcon->ClearDepthStencilView(dsv, D3D11_CLEAR_DEPTH, 1.0f, 0);
 
-	//Clear SSAO-map:
-	ID3D11RenderTargetView* rtv = ssaoMap_->getRTV();
-	devcon->ClearRenderTargetView(rtv, CLEARCOLOR_BLACK);
+	//Clear SSAO-maps:
+	ID3D11RenderTargetView* rtv;
+	for(std::map<unsigned int, Buffer_SrvRtvUav*>::iterator i = ssaos_.begin(); i != ssaos_.end(); i++)
+	{
+		rtv = i->second->getRTV();
+		devcon->ClearRenderTargetView(rtv, CLEARCOLOR_BLACK);
+	}
 }
 void ManagementBuffer::setBuffersAndDepthBufferAsRenderTargets(
 	ID3D11DeviceContext*	devcon, 
@@ -453,7 +447,7 @@ void ManagementBuffer::unsetBuffersAndDepthBufferAsRenderTargets(ID3D11DeviceCon
 		renderTargets, 
 		NULL);
 }
-void ManagementBuffer::setBuffersAsCSShaderResources(ID3D11DeviceContext* devcon)
+void ManagementBuffer::setBuffersAsCSShaderResources(ID3D11Device* device, ID3D11DeviceContext* devcon, unsigned int camIndex)
 {
 	ID3D11ShaderResourceView* resourceViews[GBUFFERID_NUM_BUFFERS + 3];
 	for(int i = 0; i < GBUFFERID_NUM_BUFFERS; i++)
@@ -461,7 +455,7 @@ void ManagementBuffer::setBuffersAsCSShaderResources(ID3D11DeviceContext* devcon
 
 	resourceViews[GBUFFERID_NUM_BUFFERS]		= glowHigh_->getSRV();
 	resourceViews[GBUFFERID_NUM_BUFFERS + 1]	= shadowMap_->getSRV();
-	resourceViews[GBUFFERID_NUM_BUFFERS + 2]	= ssaoMap_->getSRV();
+	resourceViews[GBUFFERID_NUM_BUFFERS + 2]	= getSSAO(device, camIndex)->getSRV();
 
 	devcon->CSSetShaderResources(
 		0, 
@@ -478,6 +472,33 @@ void ManagementBuffer::unsetBuffersAsCSShaderResources(ID3D11DeviceContext* devc
 		0, 
 		GBUFFERID_NUM_BUFFERS + 3, 
 		resourceViews);
+}
+
+Buffer_SrvRtvUav* ManagementBuffer::getSSAO(ID3D11Device* device, unsigned int camIndex)
+{
+	Buffer_SrvRtvUav* ssao = nullptr;
+	auto it = ssaos_.find(camIndex);
+	if(it != ssaos_.end())
+	{
+		ssao = it->second;
+	}
+	else
+	{
+		ssao = new Buffer_SrvRtvUav(
+			ssaoViewportWidth_,
+			ssaoViewportHeight_,
+			1,
+			getFormat(BUFFER_FORMAT_SSAO),
+			D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE | D3D11_BIND_UNORDERED_ACCESS,
+			D3D11_USAGE_DEFAULT);
+		HRESULT hr = ssao->init(device);
+
+		//assert(hr);
+
+		ssaos_.insert(std::pair<unsigned int, Buffer_SrvRtvUav*>(camIndex, ssao));
+	}
+
+	return ssao;
 }
 
 void ManagementBuffer::setBuffer(ID3D11DeviceContext* devcon, SET_ID setID, SET_TYPE setType, SET_STAGE setStage, unsigned int shaderRegister)
@@ -644,6 +665,9 @@ DXGI_FORMAT ManagementBuffer::getFormat(BUFFER_FORMAT format)
 	case R16__FLOAT:
 		dxgiFormat = DXGI_FORMAT::DXGI_FORMAT_R16_FLOAT;
 		break;
+	case R8__FLOAT:
+		dxgiFormat = DXGI_FORMAT::DXGI_FORMAT_R8_UNORM;
+		break;
 	}
 
 	return dxgiFormat;
@@ -674,4 +698,21 @@ D3D11_VIEWPORT ManagementBuffer::getDownSampledViewport()
 D3D11_VIEWPORT ManagementBuffer::getShadowViewport()
 {
 	return shadowViewport_;
+}
+
+unsigned int ManagementBuffer::getSSAOWidth()
+{
+	return ssaoWidth_;
+}
+unsigned int ManagementBuffer::getSSAOHeight()
+{
+	return ssaoHeight_;
+}
+unsigned int ManagementBuffer::getSSAOViewportWidth()
+{
+	return ssaoViewportWidth_;
+}
+unsigned int ManagementBuffer::getSSAOViewportHeight()
+{
+	return ssaoViewportHeight_;
 }
