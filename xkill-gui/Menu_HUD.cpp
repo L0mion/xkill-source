@@ -702,7 +702,15 @@ void ScoreBoard::syncLabelsWithPlayers()
 				new_scoreboardWidth += kColumnWidth;
 				new_scoreboardWidth += kColumnWidth;
 
+				// Resize scorboard
 				frame_scoreboard->resize(new_scoreboardWidth, frame_scoreboard->height());
+
+				// Reposition scoreboard to center to acommodate change in size
+				QWidget* parent_scoreboard = frame_scoreboard->parentWidget();
+				Float2 centerPos;
+				centerPos.x = parent_scoreboard->width() * 0.5f;
+				centerPos.y = parent_scoreboard->height() * 0.5f;
+				frame_scoreboard->move(centerPos.x - frame_scoreboard->width()* 0.5f, centerPos.y - frame_scoreboard->height()* 0.5f);
 			}
 		}
 	}
