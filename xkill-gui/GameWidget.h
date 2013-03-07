@@ -104,8 +104,8 @@ public slots:
 			delta = deltaLimit;
 
 		// add time manipulation
-		ATTRIBUTE_MANAGER->settings->trueDeltaTime = delta;
-		delta *= ATTRIBUTE_MANAGER->settings->timeScale();
+		SETTINGS->trueDeltaTime = delta;
+		delta *= SETTINGS->timeScale();
 
 		computeFPS();
 		gameManager.update(delta);

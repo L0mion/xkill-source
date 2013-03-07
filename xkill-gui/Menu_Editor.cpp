@@ -217,7 +217,7 @@ void Menu_Editor::slot_changed_simulationSpeed(int speed)
 	// Set simulation speed and update label
 	float simulationSpeed = (float)speed/100;
 	ui.label_simulationSpeed->setText(QString::number(simulationSpeed));
-	settings->setTimeScale(simulationSpeed);
+	SETTINGS->setTimeScale(simulationSpeed);
 }
 
 void Menu_Editor::slot_attributeInspector_refresh()
@@ -612,7 +612,7 @@ void Menu_Editor::slot_attributeInspector_itemChanged()
 
 void Menu_Editor::slot_showDebugPhysics()
 {
-	settings->showDebugPhysics = ui.checkBox_showDebugPhysics->isChecked();
+	SETTINGS->showDebugPhysics = ui.checkBox_showDebugPhysics->isChecked();
 }
 
 

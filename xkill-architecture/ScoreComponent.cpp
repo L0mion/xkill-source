@@ -39,9 +39,9 @@ bool ScoreComponent::init()
 	schedulerTimer_ = new Timer(30.0f);
 	cycleTimer_ = new Timer(1.0f);
 
-	gameTimer_ = new Timer(settings->timeLimit);
+	gameTimer_ = new Timer(SETTINGS->timeLimit);
 
-	if(settings->timeLimit < 0.001f)
+	if(SETTINGS->timeLimit < 0.001f)
 	{
 		gameTimer_->setActive(false);
 		gameTimer_->setStartTime(1.0f);
@@ -114,7 +114,7 @@ void ScoreComponent::schedulerScoreCounting(float delta)
 
 	while(itrPlayer.hasNext())
 	{
-		if(itrPlayer.getNext()->cycles >= settings->cycleLimit)
+		if(itrPlayer.getNext()->cycles >= SETTINGS->cycleLimit)
 		{
 			SEND_EVENT(&Event(EVENT_GAMEOVER));
 		}
@@ -125,7 +125,7 @@ void ScoreComponent::deathMatchScoreCounting(float delta)
 {
 	while(itrPlayer.hasNext())
 	{
-		if(itrPlayer.getNext()->priority >= settings->cycleLimit)
+		if(itrPlayer.getNext()->priority >= SETTINGS->cycleLimit)
 		{
 			SEND_EVENT(&Event(EVENT_GAMEOVER));
 		}

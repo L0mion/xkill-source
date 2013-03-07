@@ -87,7 +87,7 @@ void InputComponent::onUpdate(float delta)
 
 void InputComponent::handleInput(float delta)
 {
-	delta = settings->trueDeltaTime;
+	delta = SETTINGS->trueDeltaTime;
 
 	while(itrPlayer.hasNext())
 	{
@@ -127,11 +127,11 @@ void InputComponent::handleInput(float delta)
 
 		if(device->getBoolValue(InputAction::ACTION_B_TIME_SPEED_UP))
 		{
-			settings->setTimeScale(settings->timeScale() + delta);
+			SETTINGS->setTimeScale(SETTINGS->timeScale() + delta);
 		}
 		if(device->getBoolValue(InputAction::ACTION_B_TIME_SPEED_DOWN))
 		{
-			settings->setTimeScale(settings->timeScale() - delta);
+			SETTINGS->setTimeScale(SETTINGS->timeScale() - delta);
 		}
 
 

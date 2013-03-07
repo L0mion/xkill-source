@@ -50,12 +50,7 @@ public:
 class DLL_U AttributeManager
 {
 private:
-	AttributeManager()
-	{
-		createEntityStorage();
-	}
-
-	void createEntityStorage();
+	AttributeManager();
 
 public:
 	~AttributeManager();
@@ -97,7 +92,7 @@ public:
 };
 
 #define SETTINGS															\
-AttributeManager::instance()->settings
+AttributeManager::instance()->settings.at(0)
 
 // Declares all attributes
 #define ATTRIBUTES_DECLARE_ALL															\

@@ -3,10 +3,6 @@
 #include "DataItem.h"
 
 
-void AttributeManager::createEntityStorage()
-{
-	entities = new EntityStorage;
-}
 
 AttributeManager::~AttributeManager()
 {
@@ -24,12 +20,21 @@ AttributeManager* AttributeManager::instance()
 	return &instance;
 }
 
-float Settings::timeScale()
+AttributeManager::AttributeManager()
+{
+	// Create entity storage
+	entities = new EntityStorage;
+	
+	// Create settings attribute which holds all in game settings
+	settings.createAttribute(entities->createEntity());
+}
+
+float Attribute_Settings::timeScale()
 {
 	return _timeScale;
 }
 
-void Settings::setTimeScale( float timeScale )
+void Attribute_Settings::setTimeScale( float timeScale )
 {
 	_timeScale = timeScale;
 
@@ -40,7 +45,7 @@ void Settings::setTimeScale( float timeScale )
 		_timeScale = 0.01f;
 }
 
-Settings::Settings()
+Attribute_Settings::Attribute_Settings()
 {
 	timeUntilScheduling = 0.0f;
 	numErrors = 0;
@@ -54,7 +59,7 @@ Settings::Settings()
 	showDebugPhysics = false;
 }
 
-DataItemList* Settings::getDataList()
+DataItemList* Attribute_Settings::getDataList()
 {
 	DataItemList* list = new DataItemList();
 
@@ -63,7 +68,7 @@ DataItemList* Settings::getDataList()
 	return list;
 }
 
-void Settings::saveTo( DataItemList* list )
+void Attribute_Settings::saveTo( DataItemList* list )
 {
 	list->get(&soundVolume);
 }

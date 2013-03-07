@@ -161,7 +161,7 @@ void PhysicsComponent::onUpdate(float delta)
 
 	dynamicsWorld_->stepSimulation(delta, 0); //Bullet Physics physics simulation
 
-	bool showDebug = ATTRIBUTE_MANAGER->settings->showDebugPhysics;
+	bool showDebug = SETTINGS->showDebugPhysics;
 	if(showDebug)
 	{
 		for (int i=dynamicsWorld_->getNumCollisionObjects()-1; i>=0 ;i--)
