@@ -348,3 +348,8 @@ Event_ReloadPhysicsAttributeDataIntoBulletPhysics::Event_ReloadPhysicsAttributeD
 {
 	this->physicsAttributeId = physicsAttributeId;
 }
+
+Event_MouseWheel::Event_MouseWheel( int value ) : Event(EVENT_MOUSE_WHEEL)
+{
+	this->value = value;
+}

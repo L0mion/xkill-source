@@ -161,7 +161,7 @@ void PhysicsComponent::onUpdate(float delta)
 
 	dynamicsWorld_->stepSimulation(delta, 0); //Bullet Physics physics simulation
 
-	bool showDebug = ATTRIBUTE_MANAGER->settings->showDebugPhysics;
+	bool showDebug = SETTINGS->showDebugPhysics;
 	if(showDebug)
 	{
 		for (int i=dynamicsWorld_->getNumCollisionObjects()-1; i>=0 ;i--)
@@ -351,7 +351,6 @@ void PhysicsComponent::onEvent(Event* e)
 		break;
 	case EVENT_NULL_PROCESS_STOPPED_EXECUTING:
 		{
-			OUTPUT_WINDOW_PRINT("PhysicsComponent::onEvent, case EVENT_NULL_PROCESS_STOPPED_EXECUTING");
 			//Reset apart-fallen world
 			while(itrPhysics.hasNext())
 			{

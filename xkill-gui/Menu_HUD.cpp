@@ -2,6 +2,7 @@
 
 #include <QtCore/QDateTime>
 #include <xkill-utilities/Converter.h>
+#include <QtGui/QMovie>
 ATTRIBUTES_DECLARE_ALL;
 
 Menu_HUDManager::Menu_HUDManager( QWidget* parent ) : QObject(parent)
@@ -121,6 +122,13 @@ void Menu_HUD::mapToSplitscreen()
 
 	// Move HUD messages to center
 	hudMessage_manager.move(centerPos);
+
+
+	// EASTER EGG
+	if(true)
+	{
+		
+	}
 }
 
 void Menu_HUD::refresh()
@@ -135,6 +143,11 @@ void Menu_HUD::refresh()
 	int ammoIndex = ammunition->type;
 	float fadeTime = 1.0f;
 
+	//
+	// Update Scoreboard
+	//
+
+	scoreboard.refresh();
 
 	//
 	// Show ammunition info
@@ -260,13 +273,38 @@ void Menu_HUD::refresh()
 			ui.label_firingMode->show();
 			ui.frame_bottom->show();
 
-			ui.frame_scoreboard->show();
+			ui.frame_scoreboard->hide();
 		}
 	}
 
 
-	// Scheduling
-	//ui.label_priority_advantage->setNum((int)ptr_health->health);
+	//
+	// Scheduling info
+	//
+
+	// Determine priority advantage
+	{
+		std::string str_priorityAdvantage = "";
+
+		int scoreDiff = scoreboard.maxCycles - ptr_player->cycles;
+
+		// If first player, show score difference to second closest
+		if(scoreDiff == 0)
+			scoreDiff = scoreboard.maxCycles - scoreboard.secondMaxPriority;
+		// ELSE: Show score difference to second closest
+		else
+			scoreDiff = ptr_player->cycles - scoreboard.maxCycles;
+
+		// Set label
+		
+		if(scoreDiff >= 0)
+			ui.label_priority_advantage->setText("+" +QString::number(scoreDiff));
+		else
+			ui.label_priority_advantage->setNum(scoreDiff);
+			
+	}
+	
+	
 	QString str_time = QDateTime::fromTime_t(SETTINGS->timeUntilScheduling).toString("mm:ss");
 	ui.label_schedulingTimer->setText(str_time);
 
@@ -300,6 +338,25 @@ void Menu_HUD::refresh()
 
 		// Set image to label
 		 ui.label_aim->setPixmap(path);
+
+		 // EASTER EGG
+		 if(index_crosshair == XKILL_Enums::EXPLOSIVE)
+		 {
+			 // If a specific user
+			 std::string username = getenv( "USERNAME" );
+			 if(username == "FrankensteinsMonster2")
+			 {
+				 QMovie* movie = new QMovie(this);
+				 movie->setCacheMode(QMovie::CacheAll);
+				 movie->setFileName("../../xkill-resources/xkill-gui/images/animations/menu_opening.gif");
+				 ui.label_xAmmo->setMovie(movie);
+				 ui.label_xAmmo->setScaledContents(true);
+				 QSize sizeLimit(100, 100);
+				 ui.label_xAmmo->setMinimumSize(sizeLimit);
+				 ui.label_xAmmo->setMaximumSize(sizeLimit);
+				 movie->start();
+			 }
+		 }
 	}
 
 
@@ -355,15 +412,48 @@ void Menu_HUD::refresh()
 	}
 }
 
+void Menu_HUD::initScoreboard()
+{
+	// Init helper class
+	scoreboard.init(ptr_splitScreen->ptr_player);
+
+	// Build scoreboard
+	while(itrPlayer.hasNext())
+	{
+		// Add entry into GUI
+		AttributePtr<Attribute_Player> ptr_player =	itrPlayer.getNext();
+
+		QHBoxLayout* layout_entry = new QHBoxLayout();
+
+		QLabel* label_process = new QLabel();
+		QLabel* label_cycles = new QLabel();
+		QLabel* label_priority = new QLabel();
+
+		layout_entry->addWidget(label_process);
+		layout_entry->addWidget(label_cycles);
+		layout_entry->addWidget(label_priority);
+
+		ui.verticalLayout_scoreboard->addLayout(layout_entry);
+
+
+		// Add entry into scoreBoard class
+		ScoreboardEntry entry;
+		entry.label_process = label_process;
+		entry.label_cycles = label_cycles;
+		entry.label_priority = label_priority;
+		entry.ptr_player = ptr_player;
+		scoreboard.addEntry(entry);
+	}
+}
+
 Menu_HUD::Menu_HUD( AttributePtr<Attribute_SplitScreen> splitScreen, QWidget* parent ) : QWidget(parent)
 {
 	ui.setupUi(this);
-	this->ptr_splitScreen = splitScreen;
-	hudMessage_manager.init(this, splitScreen);
+	ptr_splitScreen = splitScreen;
 
-	Float2 pos(splitScreen->ssTopLeftX, splitScreen->ssTopLeftY);
-	move(splitScreen->ssTopLeftX, splitScreen->ssTopLeftY);
-	resize(splitScreen->ssWidth, splitScreen->ssHeight);
+	Float2 pos(ptr_splitScreen->ssTopLeftX, ptr_splitScreen->ssTopLeftY);
+	move(ptr_splitScreen->ssTopLeftX, ptr_splitScreen->ssTopLeftY);
+	resize(ptr_splitScreen->ssWidth, ptr_splitScreen->ssHeight);
 	hide();
 
 	QWidget::setAttribute(Qt::WA_ShowWithoutActivating);
@@ -371,7 +461,9 @@ Menu_HUD::Menu_HUD( AttributePtr<Attribute_SplitScreen> splitScreen, QWidget* pa
 
 	SUBSCRIBE_TO_EVENT(this, EVENT_UPDATE);
 	
+	hudMessage_manager.init(this, ptr_splitScreen);
 	mapToSplitscreen();
+	initScoreboard();
 }
 
 void Menu_HUD::onEvent(Event* e)
@@ -391,6 +483,7 @@ Menu_HUD::~Menu_HUD()
 {
 	UNSUBSCRIBE_TO_EVENTS(this);
 }
+
 
 HudMessage::HudMessage( Event_PostHudMessage* e, QWidget* parent)
 {

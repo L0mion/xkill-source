@@ -16,6 +16,7 @@ InputComponent::InputComponent()
 	SUBSCRIBE_TO_EVENT(this, EVENT_MOUSE_MOVE);
 	SUBSCRIBE_TO_EVENT(this, EVENT_KEY_PRESS);
 	SUBSCRIBE_TO_EVENT(this, EVENT_MOUSE_PRESS);
+	SUBSCRIBE_TO_EVENT(this, EVENT_MOUSE_WHEEL);
 
 	inputManager_ = nullptr;
 	newDeviceSearchTimer_ = 0.0f;
@@ -76,6 +77,13 @@ void InputComponent::onEvent(Event* e)
 	{
 		setupPlayerControllerConnection();
 	}
+	if(type == EVENT_MOUSE_WHEEL)
+	{
+		Event_MouseWheel* emw = static_cast<Event_MouseWheel*>(e);
+		emw->value;
+
+		// TODO: Handle mousewheel
+	}
 }
 
 void InputComponent::onUpdate(float delta)
@@ -87,7 +95,7 @@ void InputComponent::onUpdate(float delta)
 
 void InputComponent::handleInput(float delta)
 {
-	delta = settings->trueDeltaTime;
+	delta = SETTINGS->trueDeltaTime;
 
 	while(itrPlayer.hasNext())
 	{
@@ -131,11 +139,11 @@ void InputComponent::handleInput(float delta)
 
 		if(device->getBoolValue(InputAction::ACTION_B_TIME_SPEED_UP))
 		{
-			settings->setTimeScale(settings->timeScale() + delta);
+			SETTINGS->setTimeScale(SETTINGS->timeScale() + delta);
 		}
 		if(device->getBoolValue(InputAction::ACTION_B_TIME_SPEED_DOWN))
 		{
-			settings->setTimeScale(settings->timeScale() - delta);
+			SETTINGS->setTimeScale(SETTINGS->timeScale() - delta);
 		}
 
 

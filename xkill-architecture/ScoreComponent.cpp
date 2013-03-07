@@ -39,9 +39,9 @@ bool ScoreComponent::init()
 	schedulerTimer_ = new Timer(10.0f);
 	cycleTimer_ = new Timer(1.0f);
 
-	gameTimer_ = new Timer(settings->timeLimit);
+	gameTimer_ = new Timer(SETTINGS->timeLimit);
 
-	if(settings->timeLimit < 0.001f)
+	if(SETTINGS->timeLimit < 0.001f)
 	{
 		gameTimer_->setActive(false);
 		gameTimer_->setStartTime(1.0f);
@@ -114,7 +114,7 @@ void ScoreComponent::schedulerScoreCounting(float delta)
 
 	while(itrPlayer.hasNext())
 	{
-		if(itrPlayer.getNext()->cycles >= settings->cycleLimit)
+		if(itrPlayer.getNext()->cycles >= SETTINGS->cycleLimit)
 		{
 			SEND_EVENT(&Event(EVENT_GAMEOVER));
 		}
@@ -125,7 +125,7 @@ void ScoreComponent::deathMatchScoreCounting(float delta)
 {
 	while(itrPlayer.hasNext())
 	{
-		if(itrPlayer.getNext()->priority >= settings->cycleLimit)
+		if(itrPlayer.getNext()->priority >= SETTINGS->cycleLimit)
 		{
 			SEND_EVENT(&Event(EVENT_GAMEOVER));
 		}
@@ -143,8 +143,9 @@ void ScoreComponent::handleExecutionMode(float delta)
 	{
 		AttributePtr<Attribute_Player> executingPlayer = itrPlayer.at(executingPlayerIndex_);
 
-		if(executingPlayer->priority > 0)  // The player still has some priority so give it execution time
+		if(priorityWhenSelectedForExecution > 0) // The player still has some priority so give it execution time
 		{
+			priorityWhenSelectedForExecution--;
 			executingPlayer->priority--;
 			executingPlayer->cycles++;
 		}
@@ -209,7 +210,7 @@ void ScoreComponent::handleSchedulerMode(float delta)
 				// Post hud message
 				//{Event_PostHudMessage e("<p align='center'><span style='font-size:15pt;'>NullProcess is executing</span><br><span style='color: rgba(255, 0, 0, 255); font-size:35pt;'>Punish them all</span></p>"); e.receiver = Event_PostHudMessage::RECEIVER_ALL; e.setStyle(Event_PostHudMessage::STYLE_SUBTILE); SEND_EVENT(&e);}
 				{Event_PostHudMessage e("Punish them all"); e.receiver = Event_PostHudMessage::RECEIVER_ALL; e.setStyle(Event_PostHudMessage::STYLE_WARNING); SEND_EVENT(&e);}
-				{Event_PostHudMessage e("NullProcess is executing"); e.receiver = Event_PostHudMessage::RECEIVER_ALL; e.setStyle(Event_PostHudMessage::STYLE_SUBTILE); SEND_EVENT(&e);}
+				{Event_PostHudMessage e("");  e.receiver = Event_PostHudMessage::RECEIVER_ALL; e.setHtmlMessage("","NullProcess", "is executing"); SEND_EVENT(&e);}
 			}
 			else if(topPriorityIsTied)	// Two or more players are tied for the ammount of priority
 			{
@@ -267,6 +268,7 @@ void ScoreComponent::executePlayer(int playerIndex)
 
 	AttributePtr<Attribute_Player> ptr_player = itrPlayer.at(executingPlayerIndex_);
 	ptr_player->executing = true;
+	priorityWhenSelectedForExecution = ptr_player->priority;
 	DEBUGPRINT("Player with attribute index " << executingPlayerIndex_ << " is executing. Beware of his laserous eyes");
 
 

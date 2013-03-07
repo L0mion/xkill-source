@@ -123,12 +123,238 @@ public:
 	}
 };
 
+class ScoreboardEntry
+{
+public:
+	QLabel* label_process;
+	QLabel* label_cycles;
+	QLabel* label_priority;
+
+	bool isChanged;
+
+	std::string playerName;
+	int cycles;
+	int priority;
+
+	AttributePtr<Attribute_Player> ptr_player;
+
+	ScoreboardEntry()
+	{
+		isChanged = true;
+	}
+};
+
+class ScoreBoard
+{
+private:
+	std::vector<ScoreboardEntry> entries;
+	AttributePtr<Attribute_Player> ptr_current_player;
+
+	int valueAt(int index)
+	{
+		return entries.at(index).ptr_player->cycles;
+	}
+	void bubbleSort()
+	{
+		int numEntries = entries.size();
+		bool swapped = true;
+
+		int j = 0;
+		while(swapped) 
+		{
+			swapped = false;
+			j++;
+			for(int i=0; i<numEntries-j; i++)
+			{
+				if(valueAt(i) < valueAt(i + 1))
+				{
+					// Swap values
+					AttributePtr<Attribute_Player> tmp = entries.at(i).ptr_player;
+					entries.at(i).ptr_player = entries.at(i+1).ptr_player;
+					entries.at(i+1).ptr_player = tmp;
+
+					swapped = true;
+				}
+			}
+		}
+	}
+
+	void quickSort(int index_start, int index_end)
+	{
+		int left = index_start;
+		int right = index_end;
+
+		// Pick pivot (should be random for best O(n))
+		int pivot = valueAt(index_end);
+
+		// Repeat until ends meet
+		while(left < right) 
+		{
+			// Find lower and upper values to switch
+			while(valueAt(left) < pivot)
+			{
+				left++;
+			}
+			while(valueAt(right) > pivot)
+			{
+				right--;
+			}
+
+			// Check if chosen values are still valid
+			if(left < right) 
+			{
+				// Swap values
+				AttributePtr<Attribute_Player> tmp = entries.at(left).ptr_player;
+				entries.at(left).ptr_player = entries.at(right).ptr_player;
+				entries.at(right).ptr_player = tmp;
+
+				left++;
+				right--;
+			}
+		}
+
+		// Continue sorting left and right
+		if(index_start < right)
+			quickSort(index_start, right);
+		if(left < index_end)
+			quickSort(left, index_end);
+	}
+	void sortPlayers()
+	{
+		// Sort using bubblesort
+		bubbleSort();
+
+		//// Sort using quicksort
+		//quickSort(0, entries.size() - 1);
+	}
+	void syncLabelsWithPlayers()
+	{
+		for(int i=0; i<entries.size(); i++)
+		{
+			ScoreboardEntry* e = &entries.at(i);
+
+			// Detect if label has changed
+			if(e->ptr_player->playerName != e->playerName)
+				e->isChanged = true;
+			if(e->ptr_player->cycles != e->cycles)
+				e->isChanged = true;
+			if(e->ptr_player->priority != e->priority)
+				e->isChanged = true;
+			e->isChanged = true;
+
+			// Update label
+			if(e->isChanged)
+			{
+				e->isChanged = false;
+
+				// Set text
+				e->label_process->setText(e->ptr_player->playerName.c_str());
+				e->label_cycles->setNum(e->ptr_player->cycles);
+				e->label_priority->setNum(e->ptr_player->priority);
+
+				// Empty style sheets
+				std::string sheet_process = "";
+				std::string sheet_cycles = "";
+				std::string sheet_priority = "";
+
+				// Apply extra stuff if we're at the current player
+				if(e->ptr_player == ptr_current_player)
+				{
+					sheet_process += "background-color: rgba(255, 255, 255, 100); font-weight: bold;";
+					sheet_cycles += "background-color: rgba(255, 255, 255, 100); font-weight: bold;";
+					sheet_priority += "background-color: rgba(255, 255, 255, 100); font-weight: bold;";
+				}
+
+				// Apply extra stuff if we have most cycles
+				if(e->ptr_player->cycles == maxCycles)
+				{
+					sheet_cycles += "background-color: rgba(0, 255, 0, 100);";
+				}
+
+				// Apply extra stuff if we have most priority
+				if(e->ptr_player->priority == maxPriority)
+				{
+					sheet_priority += "background-color: rgba(0, 255, 0, 100);";
+				}
+
+				// Apply style sheet
+				e->label_process->setStyleSheet(sheet_process.c_str());
+				e->label_cycles->setStyleSheet(sheet_cycles.c_str());
+				e->label_priority->setStyleSheet(sheet_priority.c_str());
+			}
+		}
+	}
+public:
+	int maxCycles;
+	int maxPriority;
+	int secondMaxPriority;
+
+	void init(AttributePtr<Attribute_Player> ptr_current_player)
+	{
+		this->ptr_current_player = ptr_current_player;
+	}
+	void findMaxValues()
+	{
+		int numEntries = entries.size();
+
+		// Find max cycles
+		maxCycles = 0;
+		for(int i=0; i<numEntries; i++)
+		{
+			ScoreboardEntry* e = &entries.at(i);
+
+			if(e->ptr_player->cycles > maxCycles)
+				maxCycles = e->ptr_player->cycles;
+		}
+
+		// Find max priority
+		maxPriority = 0;
+		int maxPriority_index = 0;
+		for(int i=0; i<numEntries; i++)
+		{
+			ScoreboardEntry* e = &entries.at(i);
+
+			if(e->ptr_player->priority > maxPriority)
+			{
+				maxPriority = e->ptr_player->priority;
+				maxPriority_index = i;
+			}
+		}
+
+		// Find second max priority
+		secondMaxPriority = 0;
+		for(int i=0; i<numEntries; i++)
+		{
+			ScoreboardEntry* e = &entries.at(i);
+
+			if(e->ptr_player->priority > maxPriority && maxPriority_index != i)
+				secondMaxPriority = e->ptr_player->priority;
+		}
+	}
+	void addEntry(ScoreboardEntry entry)
+	{
+		entry.playerName = entry.ptr_player->playerName;
+		entry.cycles = entry.ptr_player->cycles;
+		entry.priority = entry.ptr_player->priority;
+
+		entries.push_back(entry);
+	}
+	void refresh()
+	{
+		sortPlayers();
+		findMaxValues();
+		syncLabelsWithPlayers();
+	}
+};
+
 class Menu_HUD : public QWidget, IObserver
 {
 private:
 	AttributePtr<Attribute_SplitScreen> ptr_splitScreen;
 	Ui::Menu_HUD ui;
 	HudMessage_Manager hudMessage_manager;
+	ScoreBoard scoreboard;
+
 	float healthFade;
 	float ammoFade;
 	float firingModeFade;
@@ -143,6 +369,7 @@ public:
 
 	void mapToSplitscreen();
 	void refresh();
+	void initScoreboard();
 	void onEvent(Event* e);
 };
 

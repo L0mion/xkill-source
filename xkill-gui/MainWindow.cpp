@@ -135,7 +135,7 @@ void MainWindow::keyPressEvent( QKeyEvent* e )
 	if((e->key()==Qt::Key_1))
 	{
 		{Event_PostHudMessage e("Punish them all"); e.receiver = Event_PostHudMessage::RECEIVER_ALL; e.setStyle(Event_PostHudMessage::STYLE_WARNING); SEND_EVENT(&e);}
-		{Event_PostHudMessage e("NullProcess is executing"); e.receiver = Event_PostHudMessage::RECEIVER_ALL; e.setStyle(Event_PostHudMessage::STYLE_SUBTILE); SEND_EVENT(&e);}
+		{Event_PostHudMessage e("");  e.receiver = Event_PostHudMessage::RECEIVER_ALL; e.setHtmlMessage("","NullProcess", "is executing"); SEND_EVENT(&e);}
 	}
 	if((e->key()==Qt::Key_2))
 	{
@@ -327,4 +327,15 @@ bool MainWindow::eventFilter( QObject* object, QEvent* event )
 	}
 
 	return false;
+}
+
+void MainWindow::wheelEvent( QWheelEvent* e )
+{
+	int value = 0;
+	if(e->delta() > 0)
+		value = 1;
+	if(e->delta() < 0)
+		value = -1;
+
+	SEND_EVENT(&Event_MouseWheel(value));
 }
