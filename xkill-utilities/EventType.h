@@ -62,6 +62,7 @@ enum DLL_U EventType
 	EVENT_UPDATESOUNDSETTINGS,
 	EVENT_DRAW_BULLET_PHYSICS_DEBUG_LINES,
 	EVENT_MODIFY_PHYSICS_OBJECT,
+	EVENT_RELOAD_PHYSICS_ATTRIBUTE_DATA_INTO_BULLET_PHYSICS,
 
 	// Input
 	EVENT_KEY_PRESS,
@@ -74,6 +75,7 @@ enum DLL_U EventType
 	EVENT_SPLITSCREEN_CHANGED,
 	EVENT_RUMBLE,
 	EVENT_PLAYSOUND,
+	EVENT_FOCUS_MAINWINDOW,
 
 	EVENT_ANIMATION_LOADED,
 
@@ -733,3 +735,10 @@ public:
 	SkinnedData* skinnedData;
 };
 
+class DLL_U Event_ReloadPhysicsAttributeDataIntoBulletPhysics : public Event
+{
+public:
+	Event_ReloadPhysicsAttributeDataIntoBulletPhysics(int physicsAttributeId);
+
+	int physicsAttributeId;
+};

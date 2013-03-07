@@ -15,7 +15,7 @@ Menu_Sound::Menu_Sound(Ui::MainWindow* ui, QMainWindow* window)
 	connect(ui->horizontalSlider_Sound_Volume,	SIGNAL(valueChanged(int)),	this, SLOT(settingsMenuUpdated()));
 
 	// Set standard values
-	ui->horizontalSlider_Sound_Volume->setValue(settings->soundVolume * 100.0f);
+	ui->horizontalSlider_Sound_Volume->setValue(SETTINGS->soundVolume * 100.0f);
 }
 
 Menu_Sound::~Menu_Sound()
@@ -34,8 +34,8 @@ void Menu_Sound::settingsMenuUpdated()
 	//	soundSettings->soundVolume = static_cast<float>(ui->horizontalSlider_Sound_Volume->value()) / 100.0f;		
 	//}
 
-	settings->soundMuted = ui->checkBox_Sound_Mute->isChecked();
-	settings->soundVolume = static_cast<float>(ui->horizontalSlider_Sound_Volume->value()) / 100.0f;		
+	SETTINGS->soundMuted = ui->checkBox_Sound_Mute->isChecked();
+	SETTINGS->soundVolume = static_cast<float>(ui->horizontalSlider_Sound_Volume->value()) / 100.0f;		
 
 	SEND_EVENT(&Event(EVENT_UPDATESOUNDSETTINGS));
 }

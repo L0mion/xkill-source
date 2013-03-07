@@ -748,7 +748,7 @@ void IOComponent::onEvent(Event* e)
 
 			if(initLvlMdlDesc(loadLevelEvent->levelName))
 			{
-				ATTRIBUTE_MANAGER->settings->currentLevel = loadLevelEvent->levelName;
+				SETTINGS->currentLevel = loadLevelEvent->levelName;
 				SEND_EVENT(&Event(EVENT_LOAD_LEVEL_BULLET));
 			}
 			else

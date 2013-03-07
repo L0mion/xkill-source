@@ -46,6 +46,7 @@ enum DLL_U AttributeType
 {
 	ATTRIBUTE_UNKOWN,
 
+	ATTRIBUTE_SETTINGS,
 	ATTRIBUTE_POSITION,
 	ATTRIBUTE_SPATIAL,
 	ATTRIBUTE_RENDER,
@@ -498,6 +499,9 @@ struct DLL_U Attribute_Player : public IAttribute
 	bool jetpack;				//!< Use jetpack		
 	bool detectedAsDead;		//!< The player is dead
 	bool executing;				//!< True if selected by the scheduler (ScoreComponent.cpp)
+	bool speedHackActive;
+	bool jetHackActive;
+	bool cycleHackActive;
 
 	DataItemList* getDataList();
 	void saveTo(DataItemList* list);
@@ -606,7 +610,7 @@ struct DLL_U Attribute_Pickupable : public IAttribute
 	AttributePtr<Attribute_PickupablesSpawnPoint> ptr_pickupablesSpawnPoint_creator;	//! The pickupable spawnpoint that spawned this pickupable
 
 	XKILL_Enums::PickupableType pickupableType;			//! MEDKIT, AMMUNITION_BULLET, AMMUNITION_SCATTER, AMMUNITION_EXPLOSIVE, etc
-	int amount;											//! Data of pickupable (health, ammo, etc)
+	int amount;											//! Data of pickupable (health, ammo, etc) //Deprecated as of 2013-03-06 15.25. Amount is determined on pickup instead of at spawn time.
 
 	DataItemList* getDataList();
 	void saveTo(DataItemList* list);

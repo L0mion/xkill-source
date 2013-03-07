@@ -35,6 +35,9 @@ private:
 	void handleHackActivatedEvent(Event_HackActivated* e);
 	//! Checks if the hack should update. Used for hacks that should update under a certain condition, i.e. when a button is pressed.
 	bool shouldUpdateTimer(AttributePtr<Attribute_Player>& ptr_player, XKILL_Enums::HackType hackType);
+	void removeAllPlayerHacks(AttributePtr<Attribute_Player> playerAttribute);
 	//! Removes the pair at index 'index' from the vector
 	void removeIndexFromVector(std::vector<std::pair<Timer*, AttributePtr<Attribute_Player>>*>& vector, unsigned int index);
+
+	void setPlayerAttributeHackFlags(AttributePtr<Attribute_Player> player, XKILL_Enums::HackType hacktype, bool truthValue);
 };

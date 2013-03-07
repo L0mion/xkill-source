@@ -38,6 +38,7 @@ public:
 		// subscribe to events
 		SUBSCRIBE_TO_EVENT(this, EVENT_GET_WINDOW_RESOLUTION);
 		SUBSCRIBE_TO_EVENT(this, EVENT_SET_MOUSELOCK);
+		SUBSCRIBE_TO_EVENT(this, EVENT_FOCUS_MAINWINDOW);
 
 		// init game
 		HWND parentWindowHandle = this->winId();
@@ -67,6 +68,9 @@ public:
 			break;
 		case EVENT_SET_MOUSELOCK:
 			event_setMouseLock(((Event_SetMouseLock*)e)->isLock);
+			break;
+		case EVENT_FOCUS_MAINWINDOW:
+			this->activateWindow();
 			break;
 		default:
 			break;
@@ -100,8 +104,8 @@ public slots:
 			delta = deltaLimit;
 
 		// add time manipulation
-		ATTRIBUTE_MANAGER->settings->trueDeltaTime = delta;
-		delta *= ATTRIBUTE_MANAGER->settings->timeScale();
+		SETTINGS->trueDeltaTime = delta;
+		delta *= SETTINGS->timeScale();
 
 		computeFPS();
 		gameManager.update(delta);

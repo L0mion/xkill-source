@@ -4,56 +4,9 @@
 #include <xkill-utilities/Entity.h>
 #include <xkill-utilities/AttributeManager.h>
 
+#include "NameGenerator.h"
 // Iterators
 ATTRIBUTES_DECLARE_ALL;
-
-class NameGenerator
-{
-private:
-	std::vector<std::string> names;
-
-public:
-	void reset()
-	{
-		addName("Algol");
-		addName("Haskell");
-		addName("Fortran");
-		addName("Pascal");
-		addName("Erlang");
-		addName("Lisp");
-		addName("Occam");
-		addName("Brainfuck");
-		addName("Formac ");
-		addName("Quiktran");
-		addName("Cowsel");
-		addName("Blarrhgh");
-		addName("Xargs");
-		addName("Echo");
-		addName("Cksum");
-	}
-	void addName(std::string name)
-	{
-		names.push_back(name);
-	}
-	std::string getName()
-	{
-		// Reset names if all have been picked
-		if(names.size() <= 0)
-			reset();
-
-		// Pick random name
-		int numNames = names.size();
-		int index = Math::randomInt(0, numNames-1);
-		std::string name = names.at(index);
-
-		// Remove name using Swap-Trick
-		names.at(index) = names.back();
-		names.pop_back();
-
-		// Return name
-		return name;
-	}
-};
 
 /// A factory for creating Entities and assigning multiple \ref ATTRIBUTES in a flexible way.
 /** 
@@ -144,8 +97,28 @@ public:
 		CREATE_ATTRIBUTE(ptr_ray, Attribute_Ray, ray, entity);
 		createLaserAutomaticSniperExecutionRay(entity, ptr_ray);
 		
+
+		AttributePtr<Attribute_Spatial> ptr_light_spatial;
+		AttributePtr<Attribute_Spatial> ptr_spatial_tmp = ptr_spatial;
+		{
+			CREATE_ATTRIBUTE(ptr_position, Attribute_Position, position, entity);
+			CREATE_ATTRIBUTE(ptr_spatial, Attribute_Spatial, spatial, entity);
+			ptr_spatial->ptr_position = ptr_position;
+			CREATE_ATTRIBUTE(ptr_offset, Behavior_Offset, offset, entity);
+			ptr_offset->ptr_spatial = ptr_spatial;
+			ptr_offset->ptr_parent_spatial_position = ptr_spatial_tmp;
+			ptr_offset->ptr_parent_spatial_rotation = ptr_spatial_tmp;
+			ptr_offset->offset_position = Float3(0.0f, -0.6f, 0.0f);
+
+			ptr_light_spatial = ptr_spatial;
+
+			CREATE_ATTRIBUTE(ptr_render, Attribute_Render, render, entity);
+			ptr_render->ptr_spatial = ptr_spatial;
+			ptr_render->meshID = XKILL_Enums::ModelId::PROJECTILE_BULLET;
+		}
+
 		CREATE_ATTRIBUTE(ptr_lightPoint, Attribute_Light_Point, lightPoint, entity);
-		ptr_lightPoint->ptr_position			= ptr_position;
+		ptr_lightPoint->ptr_position			= ptr_light_spatial->ptr_position;
 		Float4 color = Float4(1.0f, 0.0f, 0.0f, 1.0f);
 		ptr_lightPoint->lightPoint.ambient		= Float4(0.0f, 0.0f, 0.0f, 1.0f);
 		ptr_lightPoint->lightPoint.diffuse		= color;
@@ -249,6 +222,7 @@ public:
 		ptr_physics->ptr_spatial = ptr_spatial;
 		ptr_physics->ptr_render = ptr_render;
 		ptr_physics->meshID = e->meshID;
+		ptr_physics->gravity = Float3(0.0f, 0.0f, 0.0f);
 		ptr_physics->collisionFilterGroup = XKILL_Enums::PhysicsAttributeType::WORLD;
 		ptr_physics->collisionFilterMask = XKILL_Enums::PhysicsAttributeType::PLAYER | XKILL_Enums::PhysicsAttributeType::PROJECTILE |
 			XKILL_Enums::PhysicsAttributeType::FRUSTUM | XKILL_Enums::PhysicsAttributeType::PICKUPABLE |
@@ -374,27 +348,41 @@ public:
 		CREATE_ATTRIBUTE(ptr_render, Attribute_Render, render, entity);
 		ptr_render->ptr_spatial = ptr_spatial;
 
+		Float4 color;
 		switch (e->pickupableType)
 		{
 		case XKILL_Enums::PickupableType::AMMUNITION_BULLET:
+			color = Float4(0.4f, 0.0f, 0.9f, 1.0f);
 			ptr_render->meshID = XKILL_Enums::ModelId::PICKUPABLE_AMMO_BULLET;
 			break;
 		case XKILL_Enums::PickupableType::AMMUNITION_SCATTER:
+			color = Float4(1.0f, 0.8f, 0.0f, 1.0f);
 			ptr_render->meshID = XKILL_Enums::ModelId::PICKUPABLE_AMMO_SCATTER;
 			break;
 		case XKILL_Enums::PickupableType::AMMUNITION_EXPLOSIVE:
+			color = Float4(0.2f, 0.2f, 0.8f, 1.0f);
 			ptr_render->meshID = XKILL_Enums::ModelId::PICKUPABLE_AMMO_EXPLOSIVE;
 			break;
 		case XKILL_Enums::PickupableType::MEDKIT:
+			color = Float4(1.0f, 0.1f, 0.1f, 1.0f);
 			ptr_render->meshID = XKILL_Enums::ModelId::PICKUPABLE_HEALTHPACK;
 			break;
 		case XKILL_Enums::PickupableType::HACK_JETHACK:
+			color = Float4(0.5f, 1.0f, 0.5f, 1.0f);
 			ptr_render->meshID = XKILL_Enums::ModelId::PICKUPABLE_JETPACK;
 			break;
 		case XKILL_Enums::PickupableType::HACK_SPEEDHACK:
+			color = Float4(1.0f, 1.0f, 1.0f, 1.0f);
 			ptr_render->meshID = XKILL_Enums::ModelId::PICKUPABLE_SPEEDHACK;
 			break;
+		case XKILL_Enums::PickupableType::HACK_CYCLEHACK:
+			//ptr_render->meshID = XKILL_Enums::ModelId::PICKUPABLE_CYCLEHACK; //check
+			break;
+		case XKILL_Enums::PickupableType::HACK_RANDOMHACK:
+			//ptr_render->meshID = XKILL_Enums::ModelId::PICKUPABLE_RANDOMHACK; //check
+			break;
 		default:
+			color = Float4(0.0f, 1.0f, 0.0f, 1.0f);
 			ptr_render->meshID = XKILL_Enums::ModelId::PICKUPABLE_HEALTHPACK;
 			break;
 		}
@@ -403,7 +391,7 @@ public:
 		ptr_physics->ptr_spatial = ptr_spatial;
 		ptr_physics->ptr_render = ptr_render;
 		ptr_physics->collisionFilterGroup = XKILL_Enums::PhysicsAttributeType::PICKUPABLE;
-		ptr_physics->collisionFilterMask = XKILL_Enums::PhysicsAttributeType::PLAYER | XKILL_Enums::PhysicsAttributeType::FRUSTUM | XKILL_Enums::PhysicsAttributeType::WORLD | XKILL_Enums::PhysicsAttributeType::PICKUPABLE | XKILL_Enums::PhysicsAttributeType::PROJECTILE | XKILL_Enums::PhysicsAttributeType::EXPLOSIONSPHERE | XKILL_Enums::PhysicsAttributeType::RAY;
+		ptr_physics->collisionFilterMask = XKILL_Enums::PhysicsAttributeType::PLAYER | XKILL_Enums::PhysicsAttributeType::FRUSTUM | XKILL_Enums::PhysicsAttributeType::WORLD | XKILL_Enums::PhysicsAttributeType::PICKUPABLE | XKILL_Enums::PhysicsAttributeType::RAY | XKILL_Enums::PhysicsAttributeType::PROJECTILE | XKILL_Enums::PhysicsAttributeType::EXPLOSIONSPHERE;
 		ptr_physics->collisionResponse = true;
 		ptr_physics->mass = 10.0f;
 		ptr_physics->gravity = Float3(0.0f, -10.0f, 0.0f);
@@ -411,34 +399,6 @@ public:
 
 		CREATE_ATTRIBUTE(ptr_lightPoint, Attribute_Light_Point, lightPoint, entity);
 		ptr_lightPoint->ptr_position			= ptr_position;
-
-		Float4 color;
-		
-		switch (e->pickupableType)
-		{
-		case XKILL_Enums::PickupableType::AMMUNITION_BULLET:
-			color = Float4(0.4f, 0.0f, 0.9f, 1.0f);
-			break;
-		case XKILL_Enums::PickupableType::AMMUNITION_SCATTER:
-			color = Float4(1.0f, 0.8f, 0.0f, 1.0f);
-			break;
-		case XKILL_Enums::PickupableType::AMMUNITION_EXPLOSIVE:
-			color = Float4(0.2f, 0.2f, 0.8f, 1.0f);
-			break;
-		case XKILL_Enums::PickupableType::MEDKIT:
-			color = Float4(1.0f, 0.1f, 0.1f, 1.0f);
-			break;
-		case XKILL_Enums::PickupableType::HACK_JETHACK:
-			color = Float4(0.5f, 1.0f, 0.5f, 1.0f);
-			break;
-		case XKILL_Enums::PickupableType::HACK_SPEEDHACK:
-			color = Float4(1.0f, 1.0f, 1.0f, 1.0f);
-			break;
-		default:
-			color = Float4(0.0f, 1.0f, 0.0f, 1.0f);
-			break;
-		}
-
 		ptr_lightPoint->lightPoint.ambient		= Float4(0.0f, 0.0f, 0.0f, 1.0f);
 		ptr_lightPoint->lightPoint.diffuse		= color;
 		ptr_lightPoint->lightPoint.specular		= color;

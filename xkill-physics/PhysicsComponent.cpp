@@ -41,6 +41,7 @@ PhysicsComponent::PhysicsComponent() : broadphase_(nullptr),
 	SUBSCRIBE_TO_EVENT(this, EVENT_UNLOAD_LEVEL);
 	SUBSCRIBE_TO_EVENT(this, EVENT_LOAD_LEVEL_BULLET);
 	SUBSCRIBE_TO_EVENT(this, EVENT_NULL_PROCESS_STOPPED_EXECUTING);
+	SUBSCRIBE_TO_EVENT(this, EVENT_RELOAD_PHYSICS_ATTRIBUTE_DATA_INTO_BULLET_PHYSICS);
 }
 
 PhysicsComponent::~PhysicsComponent()
@@ -160,7 +161,7 @@ void PhysicsComponent::onUpdate(float delta)
 
 	dynamicsWorld_->stepSimulation(delta, 0); //Bullet Physics physics simulation
 
-	bool showDebug = ATTRIBUTE_MANAGER->settings->showDebugPhysics;
+	bool showDebug = SETTINGS->showDebugPhysics;
 	if(showDebug)
 	{
 		for (int i=dynamicsWorld_->getNumCollisionObjects()-1; i>=0 ;i--)
@@ -350,40 +351,46 @@ void PhysicsComponent::onEvent(Event* e)
 		break;
 	case EVENT_NULL_PROCESS_STOPPED_EXECUTING:
 		{
+			//Reset apart-fallen world
 			while(itrPhysics.hasNext())
 			{
 				AttributePtr<Attribute_Physics> ptr_physics = itrPhysics.getNext();
 				if(ptr_physics->collisionFilterGroup == XKILL_Enums::PhysicsAttributeType::PROP)
 				{
-					PropPhysicsObject* propPhysicsObject = static_cast<PropPhysicsObject*>(physicsObjects_->at(ptr_physics.index()));
-					
-					ptr_physics->collisionFilterGroup = XKILL_Enums::PhysicsAttributeType::WORLD;
-					ptr_physics->collisionFilterMask = XKILL_Enums::PhysicsAttributeType::PLAYER | XKILL_Enums::PhysicsAttributeType::PROJECTILE |
-						XKILL_Enums::PhysicsAttributeType::FRUSTUM | XKILL_Enums::PhysicsAttributeType::PICKUPABLE |
-						XKILL_Enums::PhysicsAttributeType::RAY | XKILL_Enums::PhysicsAttributeType::PROP;
-					ptr_physics->ptr_spatial->ptr_position->position = Float3(propPhysicsObject->worldOrigin_.x(),propPhysicsObject->worldOrigin_.y(),propPhysicsObject->worldOrigin_.z());
-					
-					propPhysicsObject->setCollisionFlags(propPhysicsObject->getCollisionFlags() | btCollisionObject::CF_STATIC_OBJECT);
+					if(physicsObjects_->at(ptr_physics.index()) != nullptr)
+					{
+						PropPhysicsObject* propPhysicsObject = static_cast<PropPhysicsObject*>(physicsObjects_->at(ptr_physics.index()));
+						
+						ptr_physics->collisionFilterGroup = XKILL_Enums::PhysicsAttributeType::WORLD;
+						ptr_physics->collisionFilterMask = XKILL_Enums::PhysicsAttributeType::PLAYER | XKILL_Enums::PhysicsAttributeType::PROJECTILE |
+							XKILL_Enums::PhysicsAttributeType::FRUSTUM | XKILL_Enums::PhysicsAttributeType::PICKUPABLE |
+							XKILL_Enums::PhysicsAttributeType::RAY | XKILL_Enums::PhysicsAttributeType::PROP;
 
-					ptr_physics->gravity = Float3(0.0f, 0.0f, 0.0f);
-					ptr_physics->linearVelocity = Float3(0.0f, 0.0f, 0.0f);
-					ptr_physics->mass = 0;
-					ptr_physics->reloadDataIntoBulletPhysics = true;
+						ptr_physics->ptr_spatial->ptr_position->position = Float3(propPhysicsObject->worldOrigin_.x(),propPhysicsObject->worldOrigin_.y(),propPhysicsObject->worldOrigin_.z());
+					
+						propPhysicsObject->setCollisionFlags(propPhysicsObject->getCollisionFlags() | btCollisionObject::CF_STATIC_OBJECT);//check, might not be needed
+
+						ptr_physics->gravity = Float3(0.0f, 0.0f, 0.0f);
+						ptr_physics->linearVelocity = Float3(0.0f, 0.0f, 0.0f);
+						ptr_physics->mass = 0;
+						ptr_physics->collisionResponse = true;
+
+						SEND_EVENT(&Event_ReloadPhysicsAttributeDataIntoBulletPhysics(ptr_physics.index()));
+					}
 				}
 			}
-
-			/*
-			while(itrPhysics.hasNext())
-			{
-				AttributePtr<Attribute_Physics> ptr_physics = itrPhysics.getNext();
-				if(ptr_physics->collisionFilterGroup == XKILL_Enums::PhysicsAttributeType::PROP)
-				{
-					int t =5;
-				}
-			}
-			*/
-
 		break;
+		}
+	case EVENT_RELOAD_PHYSICS_ATTRIBUTE_DATA_INTO_BULLET_PHYSICS:
+		{
+			Event_ReloadPhysicsAttributeDataIntoBulletPhysics* event_ReloadPhysicsAttributeDataIntoBulletPhysics = static_cast<Event_ReloadPhysicsAttributeDataIntoBulletPhysics*>(e);
+			int physicsAttributeId = event_ReloadPhysicsAttributeDataIntoBulletPhysics->physicsAttributeId;
+			AttributePtr<Attribute_Physics> ptr_physics = itrPhysics.at(physicsAttributeId);
+
+			ptr_physics->reloadDataIntoBulletPhysics = true;
+			synchronizeWithAttributes(ptr_physics, physicsAttributeId);
+
+			break;
 		}
 	}
 }
@@ -466,7 +473,7 @@ void PhysicsComponent::synchronizeWithAttributes(AttributePtr<Attribute_Physics>
 	{
 		physicsObjects_->push_back(nullptr);
 	}
-	//Synchronize physiscs attributes with internal PhysicsObjects
+	//Synchronize physics attributes with internal PhysicsObjects
 	if(ptr_physics->reloadDataIntoBulletPhysics) //If something has changed in the physics attribute
 	{
 		//If the PhysicsObjects already exists, it needs to be removed to safely reset all of its internal Bullet Physics values

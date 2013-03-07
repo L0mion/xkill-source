@@ -1,4 +1,6 @@
 #include "Menu_HUD.h"
+
+#include <QtCore/QDateTime>
 #include <xkill-utilities/Converter.h>
 ATTRIBUTES_DECLARE_ALL;
 
@@ -68,17 +70,30 @@ void Menu_HUDManager::mapHudsToSplitscreen()
 void Menu_HUD::mapToSplitscreen()
 {
 	Float2 screenSize;
-	screenSize.x = splitScreen->ssWidth;
-	screenSize.y = splitScreen->ssHeight;
+	screenSize.x = ptr_splitScreen->ssWidth;
+	screenSize.y = ptr_splitScreen->ssHeight;
 
 	Float2 centerPos;
 	centerPos.x = screenSize.x * 0.5f;
 	centerPos.y = screenSize.y * 0.5f;
 
+	// Hide unused labels
+	ui.label_helper->hide();
+	ui.frame_test->hide();
+
+	// Move stretch death overlay across screen
+	ui.label_deathOverlay->move(0, 0);
+	ui.label_deathOverlay->resize(ptr_splitScreen->ssWidth, ptr_splitScreen->ssHeight);
+	ui.label_deathOverlay->hide();
 
 	// Move center HUD to center
-	ui.frame_center->move(centerPos.x - ui.frame_center->width()* 0.5f, centerPos.y - ui.frame_center->height()* 0.5f);
-	
+	ui.label_aim->move(centerPos.x - ui.label_aim->width()* 0.5f, centerPos.y - ui.label_aim->height()* 0.5f);
+	ui.label_firingMode->move(centerPos.x - ui.label_firingMode->width()* 0.5f + 10, centerPos.y - ui.label_firingMode->height()* 0.5f);
+
+	// Move scoreboard to center
+	ui.frame_scoreboard->hide();
+	ui.frame_scoreboard->move(centerPos.x - ui.frame_scoreboard->width()* 0.5f, centerPos.y - ui.frame_scoreboard->height()* 0.5f);
+
 	// Place statusbars
 	Float2 barPos;
 	barPos.x = screenSize.x * 0.08f;
@@ -93,6 +108,16 @@ void Menu_HUD::mapToSplitscreen()
 	bottomPos.x = screenSize.x * 0.5f - ui.frame_bottom->width()* 0.5f;
 	bottomPos.y = screenSize.y - screenSize.x*0.005f - ui.frame_bottom->height()* 1.0f;
 	ui.frame_bottom->move(bottomPos.x, bottomPos.y);
+	Float2 bottomCenterPos = bottomPos;
+	bottomCenterPos.x = screenSize.x * 0.5f - ui.groupBox_bottomCenter->width()* 0.5f;
+	ui.groupBox_bottomCenter->move(bottomCenterPos.x, bottomCenterPos.y);
+
+	// Move top HUD to top
+	Float2 topPos;
+	ui.frame_top->resize(screenSize.x - screenSize.x*0.00f * 2, ui.frame_top->height());
+	topPos.x = screenSize.x * 0.5f - ui.frame_top->width()* 0.5f;
+	topPos.y = screenSize.x*0.005f;
+	ui.frame_top->move(topPos.x, topPos.y);
 
 	// Move HUD messages to center
 	hudMessage_manager.move(centerPos);
@@ -100,15 +125,21 @@ void Menu_HUD::mapToSplitscreen()
 
 void Menu_HUD::refresh()
 {
-	AttributePtr<Attribute_Player>		ptr_player		=	splitScreen->ptr_player;
+	AttributePtr<Attribute_Player>		ptr_player		=	ptr_splitScreen->ptr_player;
 	AttributePtr<Attribute_Health>		ptr_health		=	ptr_player->ptr_health;
 	AttributePtr<Attribute_WeaponStats>	ptr_weaponStats	=	ptr_player->ptr_weaponStats;
 
 	Ammunition* ammunition = &ptr_weaponStats->ammunition[ptr_weaponStats->currentAmmunitionType];
 	FiringMode* firingMode = &ptr_weaponStats->firingMode[ptr_weaponStats->currentFiringModeType];
+	int firingIndex = firingMode->type;
 	int ammoIndex = ammunition->type;
 	float fadeTime = 1.0f;
 
+	//
+	// Update Scoreboard
+	//
+
+	scoreboard.refresh();
 
 	//
 	// Show ammunition info
@@ -174,6 +205,10 @@ void Menu_HUD::refresh()
 	{
 		healthFade = fadeTime;
 	}
+
+	// Hide bar if dead
+	if(ptr_player->detectedAsDead)
+		healthFade = 0.0f;
 		
 	if(healthFade > 0.0f)
 	{
@@ -182,6 +217,7 @@ void Menu_HUD::refresh()
 		// Show progress bar if hidden
 		if(ui.progressBar_health->isHidden())
 			ui.progressBar_health->show();
+
 
 		// Update value
 		ui.progressBar_health->setValue(healthRatio);
@@ -202,42 +238,195 @@ void Menu_HUD::refresh()
 	hudMessage_manager.update();
 
 
-	// Scheduling
-	/*ui.label_priority_advantage->setNum((int)ptr_health->health);
+	// Show death effects
+	if(ptr_player->detectedAsDead)
+	{
+		if(ui.label_deathOverlay->isHidden())
+		{
+			ui.label_deathOverlay->show();
+			ui.frame_top->hide();
+			ui.label_aim->hide();
+			ui.label_firingMode->hide();
+			ui.frame_bottom->hide();
 
-	ui.label_schedulingTimer->setNum((int)ptr_health->health);*/
+			ui.progressBar_health->hide();
+			ui.progressBar_ammo->hide();
 
-	//ptr_player
-	//while(itrPlayer.hasNext())	// Loop through all player and find if anyone has top priority
-	//{
-	//	//Attribute_Player* player = itrPlayer.getNext();
-	//	AttributePtr<Attribute_Player> player = itrPlayer.getNext();
+			ui.frame_scoreboard->show();
+		}
+	}
+	else
+	{
+		if(!ui.label_deathOverlay->isHidden())
+		{
+			ui.label_deathOverlay->hide();
+			ui.frame_top->show();
+			ui.label_aim->show();
+			ui.label_firingMode->show();
+			ui.frame_bottom->show();
 
-	//	if(player->priority > 0)
-	//	{
-	//		if(player->priority > topPriority)		// Current player had higher priority than last top player
-	//		{
-	//			topPlayerIndex = itrPlayer.storageIndex();
-	//			topPriority = player->priority;
-	//			topPriorityIsTied = false;
-	//		}
-	//		else if(player->priority == topPriority)	// Current player had the same priority as last top player
-	//		{
-	//			topPriorityIsTied = true;
-	//		}
-	//	}
-	//}
+			ui.frame_scoreboard->hide();
+		}
+	}
+
+
+	//
+	// Scheduling info
+	//
+
+	// Determine priority advantage
+	{
+		std::string str_priorityAdvantage = "";
+
+		int scoreDiff = scoreboard.maxCycles - ptr_player->cycles;
+
+		// If first player, show score difference to second closest
+		if(scoreDiff == 0)
+			scoreDiff = scoreboard.maxCycles - scoreboard.secondMaxPriority;
+		// ELSE: Show score difference to second closest
+		else
+			scoreDiff = ptr_player->cycles - scoreboard.maxCycles;
+
+		// Set label
+		
+		if(scoreDiff >= 0)
+			ui.label_priority_advantage->setText("+" +QString::number(scoreDiff));
+		else
+			ui.label_priority_advantage->setNum(scoreDiff);
+			
+	}
+	
+	
+	QString str_time = QDateTime::fromTime_t(SETTINGS->timeUntilScheduling).toString("mm:ss");
+	ui.label_schedulingTimer->setText(str_time);
+
+
+	//
+	// Set cross-hair based on selected ammo
+	//
+
+	// Only change if weapon has been switched
+	if(index_crosshair != ammoIndex)
+	{
+		index_crosshair = ammoIndex;
+
+		// Determine image
+		QString path;
+		switch(index_crosshair) 
+		{
+		case XKILL_Enums::BULLET:
+			path = ":/xkill/images/icons/cross_hairs/crosshair_bullet.png";
+			break;
+		case XKILL_Enums::SCATTER:
+			path = ":/xkill/images/icons/cross_hairs/crosshair_scatter.png";
+			break;
+		case XKILL_Enums::EXPLOSIVE:
+			path = ":/xkill/images/icons/cross_hairs/crosshair_explosive.png";
+			break;
+		default:
+			path = ":/xkill/images/icons/default.png";
+			break;
+		}
+
+		// Set image to label
+		 ui.label_aim->setPixmap(path);
+	}
+
+
+	//
+	// Set indicator based on firiring-mode
+	//
+
+	// Only change if weapon has been switched
+	if(index_firingMode != firingIndex)
+	{
+		index_firingMode = firingIndex;
+		firingModeFade = fadeTime;
+
+		// Determine image
+		QString path;
+		switch(index_firingMode)
+		{
+		case XKILL_Enums::SINGLE:
+			path = ":/xkill/images/icons/cross_hairs/firing_single.png";
+			break;
+		case XKILL_Enums::SEMI:
+			path = ":/xkill/images/icons/cross_hairs/firing_semi.png";
+			break;
+		case XKILL_Enums::AUTO:
+			path = ":/xkill/images/icons/cross_hairs/firing_auto.png";
+			break;
+		default:
+			path = ":/xkill/images/icons/default.png";
+			break;
+		}
+
+		// Set image to label
+		ui.label_firingMode->setPixmap(path);
+	}
+
+	if(firingModeFade > 0.0f)
+	{
+		firingModeFade -= SETTINGS->trueDeltaTime;
+
+		// Show progress bar if hidden
+		if(ui.label_firingMode->isHidden())
+			ui.label_firingMode->show();
+
+		// Update value
+		ui.progressBar_health->setValue(healthRatio);
+		ui.progressBar_health->update();
+	}
+	else
+	{
+		// Hide progress-bar if shown
+		if(!ui.label_firingMode->isHidden())
+			ui.label_firingMode->hide();
+	}
+}
+
+void Menu_HUD::initScoreboard()
+{
+	// Init helper class
+	scoreboard.init(ptr_splitScreen->ptr_player);
+
+	// Build scoreboard
+	while(itrPlayer.hasNext())
+	{
+		// Add entry into GUI
+		AttributePtr<Attribute_Player> ptr_player =	itrPlayer.getNext();
+
+		QHBoxLayout* layout_entry = new QHBoxLayout();
+
+		QLabel* label_process = new QLabel();
+		QLabel* label_cycles = new QLabel();
+		QLabel* label_priority = new QLabel();
+
+		layout_entry->addWidget(label_process);
+		layout_entry->addWidget(label_cycles);
+		layout_entry->addWidget(label_priority);
+
+		ui.verticalLayout_scoreboard->addLayout(layout_entry);
+
+
+		// Add entry into scoreBoard class
+		ScoreboardEntry entry;
+		entry.label_process = label_process;
+		entry.label_cycles = label_cycles;
+		entry.label_priority = label_priority;
+		entry.ptr_player = ptr_player;
+		scoreboard.addEntry(entry);
+	}
 }
 
 Menu_HUD::Menu_HUD( AttributePtr<Attribute_SplitScreen> splitScreen, QWidget* parent ) : QWidget(parent)
 {
 	ui.setupUi(this);
-	this->splitScreen = splitScreen;
-	hudMessage_manager.init(this, splitScreen);
+	ptr_splitScreen = splitScreen;
 
-	Float2 pos(splitScreen->ssTopLeftX, splitScreen->ssTopLeftY);
-	move(splitScreen->ssTopLeftX, splitScreen->ssTopLeftY);
-	resize(splitScreen->ssWidth, splitScreen->ssHeight);
+	Float2 pos(ptr_splitScreen->ssTopLeftX, ptr_splitScreen->ssTopLeftY);
+	move(ptr_splitScreen->ssTopLeftX, ptr_splitScreen->ssTopLeftY);
+	resize(ptr_splitScreen->ssWidth, ptr_splitScreen->ssHeight);
 	hide();
 
 	QWidget::setAttribute(Qt::WA_ShowWithoutActivating);
@@ -245,7 +434,9 @@ Menu_HUD::Menu_HUD( AttributePtr<Attribute_SplitScreen> splitScreen, QWidget* pa
 
 	SUBSCRIBE_TO_EVENT(this, EVENT_UPDATE);
 	
+	hudMessage_manager.init(this, ptr_splitScreen);
 	mapToSplitscreen();
+	initScoreboard();
 }
 
 void Menu_HUD::onEvent(Event* e)
@@ -265,6 +456,7 @@ Menu_HUD::~Menu_HUD()
 {
 	UNSUBSCRIBE_TO_EVENTS(this);
 }
+
 
 HudMessage::HudMessage( Event_PostHudMessage* e, QWidget* parent)
 {

@@ -14,7 +14,6 @@
 // Iterators
 ATTRIBUTES_DECLARE_ALL;
 
-
 GameComponent::GameComponent(void)
 {
 	SUBSCRIBE_TO_EVENT(this, EVENT_STARTGAME);
@@ -273,7 +272,7 @@ void GameComponent::onUpdate(float delta)
 		//--------------------------------------------------------------------------------------
 		// State: player is dead
 		//--------------------------------------------------------------------------------------
-		else if(ptr_player->detectedAsDead) 
+		else if(ptr_player->detectedAsDead)
 		{
 			//--------------------------------------------------------------------------------------
 			// Handle dead player
@@ -291,7 +290,7 @@ void GameComponent::onUpdate(float delta)
 			//--------------------------------------------------------------------------------------
 			// Respawn player
 			//--------------------------------------------------------------------------------------
-			else 
+			else if(!nullProcessExecuting)
 			{
 				//--------------------------------------------------------------------------------------
 				// Spawn point
@@ -436,28 +435,8 @@ void GameComponent::onUpdate(float delta)
 			{
 				AttributePtr<Attribute_Position> pickupablesSpawnPointPosition = ptr_pickupablesSpawnPoint->ptr_position;
 
-				int amount;
-				switch(ptr_pickupablesSpawnPoint->spawnPickupableType)
-				{
-				case XKILL_Enums::PickupableType::MEDKIT:
-					amount = 20;
-					break;
-				case XKILL_Enums::PickupableType::AMMUNITION_BULLET:
-					amount = 100;
-					break;
-				case XKILL_Enums::PickupableType::AMMUNITION_SCATTER:
-					amount = 50;
-					break;
-				case XKILL_Enums::PickupableType::AMMUNITION_EXPLOSIVE:
-					amount = 10;
-					break;
-				case XKILL_Enums::PickupableType::HACK_SPEEDHACK:
-					amount = 5;		//seconds
-				case XKILL_Enums::PickupableType::HACK_JETHACK:
-					amount = 5;		//seconds
-				}
-
 				//Each pickupable knows it pickupablesSpawnPoint creator
+				int amount = -1; //Deprecated as of 2013-03-07 15.25 (refer to Attribute_Pickupable)
 				AttributePtr<Attribute_PickupablesSpawnPoint> ptr_creator_pickupablesSpawnPoint = ptr_pickupablesSpawnPoint;
 				SEND_EVENT(&Event_CreatePickupable(pickupablesSpawnPointPosition->position, ptr_pickupablesSpawnPoint->spawnPickupableType, ptr_creator_pickupablesSpawnPoint, amount));
 				ptr_pickupablesSpawnPoint->secondsSinceLastSpawn = 0.0f;
@@ -560,13 +539,15 @@ void GameComponent::onUpdate(float delta)
 		}
 	}
 
-
 	//--------------------------------------------------------------------------------------
 	// Drop random world pieces
 	//--------------------------------------------------------------------------------------
 	std::vector<int> worldPiecesIndices;
 	if(nullProcessExecuting)
 	{
+		//--------------------------------------------------------------------------------------
+		// Find all world physics objects
+		//--------------------------------------------------------------------------------------
 		while(itrPhysics.hasNext())
 		{
 			AttributePtr<Attribute_Physics> ptr_physics = itrPhysics.getNext();
@@ -576,18 +557,43 @@ void GameComponent::onUpdate(float delta)
 			}
 		}
 
-		for(unsigned int i = 0; i < 10; i++)
+		//--------------------------------------------------------------------------------------
+		// Determine which world physics objects to drop and the drop ratio
+		//--------------------------------------------------------------------------------------
+		float timeInSecondsUntilTheWorldIsCompletelyFallenApart = 30;
+
+		unsigned int nrOfWorldPieces = levelEvents_.size();
+		float makeThisManyWorldPiecesFallEachSecond = nrOfWorldPieces/timeInSecondsUntilTheWorldIsCompletelyFallenApart;
+		float deltaRatio = 1.0f / makeThisManyWorldPiecesFallEachSecond;
+		static float timer = 0;
+		timer += delta;
+		while(timer > deltaRatio)
 		{
+			if(worldPiecesIndices.size() <= 0)
+			{
+				break;
+			}
+
+			int randomWorldPieceIndex = rand()%worldPiecesIndices.size();
+
+			//--------------------------------------------------------------------------------------
+			// Convert world physics object to prop physics object
+			//--------------------------------------------------------------------------------------
 			AttributePtr<Attribute_Physics> ptr_physics;
-			int randomIndex = rand()%worldPiecesIndices.size();
-			ptr_physics = itrPhysics.at(worldPiecesIndices.at(randomIndex));
+			ptr_physics = itrPhysics.at(worldPiecesIndices.at(randomWorldPieceIndex));
 			ptr_physics->collisionFilterGroup = XKILL_Enums::PhysicsAttributeType::PROP;
 			ptr_physics->collisionFilterMask = XKILL_Enums::PhysicsAttributeType::NOTHING;
+			ptr_physics->collisionResponse = false;
+			ptr_physics->gravity = Float3(0.0f, -10.0f, 0.0f);
 			ptr_physics->mass = 1;
-			ptr_physics->reloadDataIntoBulletPhysics = true;
 
-			worldPiecesIndices.at(randomIndex) = worldPiecesIndices.back();
+			SEND_EVENT(&Event_ReloadPhysicsAttributeDataIntoBulletPhysics(ptr_physics.index()));
+
+			worldPiecesIndices.at(randomWorldPieceIndex) = worldPiecesIndices.back();
 			worldPiecesIndices.pop_back();
+
+			//drop one
+			timer -= deltaRatio;
 		}
 	}
 }
@@ -785,7 +791,7 @@ void GameComponent::event_StartDeathmatch( Event_StartDeathmatch* e )
 		AttributePtr<Attribute_WeaponStats>		ptr_weaponStats	=	ptr_player	->	ptr_weaponStats	;
 		switchFiringMode(ptr_weaponStats);	//Ensure ammunition disablement (selected from menu)
 		
-		SEND_EVENT(&Event_HackActivated(5000.0f, XKILL_Enums::HackType::JETHACK, ptr_player));
+		//SEND_EVENT(&Event_HackActivated(5000.0f, XKILL_Enums::HackType::JETHACK, ptr_player));
 	}
 
 	//Create mesh for debugging fbx-loading.
@@ -1036,27 +1042,32 @@ void GameComponent::updateAndInterpretLaser(AttributePtr<Attribute_Ray> ptr_ray,
 	{
 		if(entityIdOfOwnerToClosestPhysicsObjectHitByRay == itrPlayer.ownerIdAt(ptr_player.index())) //Ray hit the originator of the ray
 		{
-			//DEBUGPRINT("Player hit by ray casted by himself.");
-			//DEBUGPRINT("---->O....");
-			//DEBUGPRINT("..../|\....");
-			//DEBUGPRINT("....xxx....");
+			DEBUGPRINT("Player hit by ray casted by himself.");
 		}
 		else if(entityHitByRay->hasAttribute(ATTRIBUTE_PLAYER)) //Ray hit another player
 		{
 			std::vector<int> hitPlayerId = entityHitByRay->getAttributes(ATTRIBUTE_PLAYER);
-			for(int i=0;i<hitPlayerId.size();i++)
+			for(int i=0; i<(int)hitPlayerId.size(); i++)
 			{
-				AttributePtr<Attribute_Player> playerAttribute = itrPlayer.at(hitPlayerId.at(i));
-				if(!playerAttribute->detectedAsDead)
+				AttributePtr<Attribute_Player> hitPlayerAttribute = itrPlayer.at(hitPlayerId.at(i));
+				if(!hitPlayerAttribute->detectedAsDead)
 				{
-					DEBUGPRINT("Player with attribute id " << playerHitByRayAttributeId.at(j) << " hit by Laser Automatic Sniper Execution Ray");
+					if(!ptr_player->cycleHackActive)
+					{
+						ptr_player->cycles++;
+						{Event_PostHudMessage e("", ptr_player); e.setHtmlMessage("You exterminated", hitPlayerAttribute->playerName, "", "+1 cycle"); SEND_EVENT(&e);}
+					}
+					else
+					{
+						ptr_player->priority++;
+						{Event_PostHudMessage e("", ptr_player); e.setHtmlMessage("You exterminated", hitPlayerAttribute->playerName, "", "+1 priority"); SEND_EVENT(&e);}
+					}
+					{Event_PostHudMessage e("", hitPlayerAttribute); e.setHtmlMessage("Terminated by", ptr_player->playerName); SEND_EVENT(&e);}
 
 					SEND_EVENT(&Event_PlayerDeath(playerHitByRayAttributeId.at(j)));
-
-					ptr_player->priority++;
 				}
 
-				SEND_EVENT(&Event_ModifyPhysicsObject(XKILL_Enums::ModifyPhysicsObjectData::GIVE_IMPULSE, static_cast<void*>(&(rayVector*20.0f)), playerAttribute->ptr_input->ptr_physics));
+				SEND_EVENT(&Event_ModifyPhysicsObject(XKILL_Enums::ModifyPhysicsObjectData::GIVE_IMPULSE, static_cast<void*>(&(rayVector*20.0f)), hitPlayerAttribute->ptr_input->ptr_physics));
 			}
 		}
 	}
@@ -1141,8 +1152,18 @@ void GameComponent::startGame()
 
 	// Hide mouse & menu so it is not distracting from game play
 	SEND_EVENT(&Event_SetMouseLock(true));
+
+	// Make sure the correct windows are shown
+	SEND_EVENT(&Event(EVENT_FOCUS_MAINWINDOW));
 	SEND_EVENT(&Event_EnableHud(true));
 	SEND_EVENT(&Event_EnableMenu(false));
+
+	// Inform players about their name
+	while(itrPlayer.hasNext())
+	{
+		AttributePtr<Attribute_Player>			ptr_player		=	itrPlayer		.getNext();
+		{Event_PostHudMessage e("", ptr_player); e.setHtmlMessage("Your nickname is", ptr_player->playerName); SEND_EVENT(&e);}
+	}
 }
 
 void GameComponent::endGame()

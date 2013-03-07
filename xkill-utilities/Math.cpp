@@ -185,6 +185,20 @@ Float3 Float3::operator/(float scalar)
 	return float3;
 }
 
+bool Float3::operator==(Float3 rhs)
+{
+	float epsilon = 0.0001f;
+
+	return	(x <= rhs.x + epsilon && x >= rhs.x - epsilon) &&
+			(y <= rhs.y + epsilon && y >= rhs.y - epsilon) &&
+			(z <= rhs.z + epsilon && z >= rhs.z - epsilon);
+}
+
+bool Float3::operator!=(Float3 rhs)
+{
+	return !operator==(rhs);
+}
+
 Float4::Float4()
 {
 	x = 0.0f;
@@ -223,6 +237,21 @@ Float4& Float4::normalize()
 	z /= length;
 	w /= length;
 	return *this;
+}
+
+Float4 Float4::slerp(Float4 vector, float factor)
+{
+	using namespace DirectX;
+
+	XMVECTOR q1 = XMLoadFloat4((XMFLOAT4*)this);
+	XMVECTOR q2 = XMLoadFloat4((XMFLOAT4*)&vector);
+
+	XMVECTOR xmRotation = XMQuaternionSlerp(q1, q2, factor);
+
+	Float4 rotation;
+	XMStoreFloat4((XMFLOAT4*)&rotation, xmRotation);
+
+	return rotation;
 }
 
 Float4& Float4::quaternionFromAxis(Float3 axis, float angle)
@@ -325,6 +354,22 @@ Float3 Float4::quaternionToVector()
 	Float3 f_out; XMStoreFloat3((XMFLOAT3*)&f_out,	xv_out);
 
 	return f_out;
+}
+
+Float4 Float4::quaternionFromVector(Float3 pos, Float3 vector, Float3 up)
+{
+	using namespace DirectX;
+
+	XMVECTOR xmVector = XMLoadFloat3((XMFLOAT3*)&vector);
+	XMVECTOR xmUp	  = XMLoadFloat3((XMFLOAT3*)&up);
+	XMVECTOR xmPos	  = XMLoadFloat3((XMFLOAT3*)&pos);
+
+	XMVECTOR xmRotation = XMQuaternionRotationMatrix(XMMatrixLookToLH(xmPos, xmVector, xmUp));
+
+	Float4 rotation;
+	XMStoreFloat4((XMFLOAT4*)&rotation, xmRotation);
+
+	return rotation;
 }
 
 Float4x4::Float4x4()
