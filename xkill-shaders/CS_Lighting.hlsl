@@ -125,31 +125,34 @@ void CS_Lighting(
 	//Sample depth as quickly as possible to ensure that we do not evualuate irrelevant pixels.
 	if(!validPixel)
 		return;
-	
-	float3 normal = gNormal.xyz;
-	normal.x *= 2.0f; normal.x -= 1.0f;
-	normal.y *= 2.0f; normal.y -= 1.0f;
-	normal.z *= 2.0f; normal.z -= 1.0f;
 
-	float3 surfaceNormalV	= mul(float4(normal, 0.0f), view).xyz;
-	float3 toEyeV			= normalize(float3(0.0f, 0.0f, 0.0f) - surfacePosV);
+	//MOVE ME INTO BELOW IF-CASE:
+	float ssao = bufferSSAO.SampleLevel(ss, texCoord, 0);
 	
-	//Specify surface material.
-	LightSurfaceMaterial surfaceMaterial =
-	{
-		/*Ambient*/		gAlbedo,
-		/*Diffuse*/		gAlbedo,
-		/*Specular*/	gMaterial
-	};
-	
+	//Only apply lighting if valid Specular power.
 	float4 Ambient	= float4(gAlbedo.xyz, 0.0f);
 	float4 Diffuse	= float4(0.0f, 0.0f, 0.0f, 0.0f);
 	float4 Specular	= float4(0.0f, 0.0f, 0.0f, 0.0f);
-	if(gMaterial.a > 0.0f) //specularPower
+	if(gMaterial.a > 0.0f)
 	{
 		Ambient	= float4(0.0f, 0.0f, 0.0f, 0.0f);
 
-		//Do lighting:
+		//Establish view-space normal.
+		float3 normal = gNormal.xyz;
+		normal.x *= 2.0f; normal.x -= 1.0f;
+		normal.y *= 2.0f; normal.y -= 1.0f;
+		normal.z *= 2.0f; normal.z -= 1.0f;
+		float3 surfaceNormalV	= mul(float4(normal, 0.0f), view).xyz;
+		float3 toEyeV			= normalize(float3(0.0f, 0.0f, 0.0f) - surfacePosV);
+		
+		//Specify surface material.
+		LightSurfaceMaterial surfaceMaterial =
+		{
+			/*Ambient*/		gAlbedo,
+			/*Diffuse*/		gAlbedo,
+			/*Specular*/	gMaterial
+		};
+
 		float4 ambient, diffuse, specular;
 		for(i = 0; i < numLightsDir; i++)
 		{
@@ -193,20 +196,12 @@ void CS_Lighting(
 			Specular	+= specular;
 		}
 
-		float ssao = bufferSSAO.SampleLevel(ss, texCoord, 0);
+		//Apply SSAO to ambient lighting only.
 		Ambient *= ssao.r;
 	}
-
-	
-
-	//TILING DEMO:
-	//for(i = 0; i < tileLightNum; i++) //Apply culled point-lights.
-	//{
-	//	Diffuse.g += 0.1;
-	//}
-
-	
 	float3 litPixel = Ambient.xyz  + Diffuse.xyz + Specular.xyz;
+
+	//Use additive blending to add glow to the final image.
 	float3 glowPixel = bufferGlowHigh.SampleLevel(ss, texCoord, 0).xyz;
 	litPixel = min(litPixel + glowPixel, 1.0f); //additive blending
 
@@ -214,5 +209,11 @@ void CS_Lighting(
 		uint2(
 			threadIDDispatch.x + viewportTopX, 
 			threadIDDispatch.y + viewportTopY)] = 
-		float4(litPixel, 1.0f);
+		float4(ssao.rrr, 1.0f);
 }
+
+//TILING DEMO:
+//for(i = 0; i < tileLightNum; i++) //Apply culled point-lights.
+//{
+//	Diffuse.g += 0.1;
+//}
