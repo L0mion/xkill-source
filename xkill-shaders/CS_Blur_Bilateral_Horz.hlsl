@@ -1,42 +1,7 @@
 #ifndef XKILL_RENDERER_CS_BLUR_BILATERAL_HORZ_HLSL
 #define XKILL_RENDERER_CS_BLUR_BILATERAL_HORZ_HLSL
 
-#include "CS_Blur.hlsl"
-
-SamplerState ssNormal	: register( s0 );
-SamplerState ssDepth	: register( s1 );
-
-//Global
-Texture2D gBufferNormal : register( t0	);
-Texture2D bufferDepth	: register(	t6	);
-
-//Shared
-groupshared float	sharedDepth[sharedCacheSize];	
-groupshared float3	sharedNormV[sharedCacheSize];
-
-float3 GetNormalV(float3 normalW)
-{
-	normalW.x *= 2.0f; normalW.x -= 1.0f;
-	normalW.y *= 2.0f; normalW.y -= 1.0f;
-	normalW.z *= 2.0f; normalW.z -= 1.0f;
-
-	return normalize(mul(float4(normalW, 0.0f), view).xyz);
-}
-float2 GetTexCoordGlobal(int2 xy)
-{
-	return float2(
-		(float)(xy.x + viewportTopX) / (float)ssaoWidth,
-		(float)(xy.y + viewportTopY) / (float)ssaoHeight);
-}
-
-void CacheData(int index, int2 xy)
-{
-	float2 xyGlobal = GetTexCoordGlobal(xy);
-
-	sharedCache[index] = toBlur[xy];
-	sharedDepth[index] = bufferDepth				.SampleLevel(ssDepth,	xyGlobal, 0).x;
-	sharedNormV[index] = GetNormalV(gBufferNormal	.SampleLevel(ssNormal,	xyGlobal, 0).xyz);
-}
+#include "CS_Blur_Bilateral.hlsl"
 
 [numthreads(N, 1, 1)]
 void CS_Blur_Bilateral_Horz(
@@ -51,7 +16,7 @@ void CS_Blur_Bilateral_Horz(
 		toBlur.Length.xy - 1); //Clamp out of bound samples that occur at image borders.
 	CacheData(
 		threadIDBlock.x + blurRadius,
-		xy);
+		xy + uint2(viewportTopX, viewportTopY));
 	
 	//Have some pixels read an additional texel into shared memory to make up for blurRadius:
 	if(threadIDBlock.x < blurRadius)
@@ -61,7 +26,7 @@ void CS_Blur_Bilateral_Horz(
 			threadIDDispatch.y);
 		CacheData(
 			threadIDBlock.x,
-			xy);
+			xy + uint2(viewportTopX, viewportTopY));
 	}
 	if(threadIDBlock.x >= N - blurRadius)
 	{
@@ -70,7 +35,7 @@ void CS_Blur_Bilateral_Horz(
 			threadIDDispatch.y);
 		CacheData(
 			threadIDBlock.x + 2 * blurRadius,
-			xy);
+			xy + uint2(viewportTopX, viewportTopY));
 	}
 	GroupMemoryBarrierWithGroupSync();
 
@@ -103,7 +68,9 @@ void CS_Blur_Bilateral_Horz(
 
 	//Compensate discarded samples by making total weights sum to 1.
 	blur /= totalWeight;
-	blurred[threadIDDispatch.xy] = blur;
+	blurred[uint2(
+		threadIDDispatch.x + viewportTopX,
+		threadIDDispatch.y + viewportTopY)] = blur;
 }
 
 #endif //XKILL_RENDERER_CS_BLUR_BILATERAL_HORZ_HLSL

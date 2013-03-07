@@ -39,8 +39,8 @@ ManagementBuffer::ManagementBuffer(Winfo* winfo)
 	//SSAO
 	ssaoWidth_	= 1; //Set these to an arbitrary >0 value as resize() will be called before init. This requires a positive value.
 	ssaoHeight_ = 1;
-	ssaoMap_ = nullptr;
-	ZeroMemory(&ssaoViewport_, sizeof(D3D11_VIEWPORT));
+	ssao_		= nullptr;
+	ssaoUtil_	= nullptr;
 
 	randomTex_ = nullptr;
 	randomSRV_ = nullptr;
@@ -56,7 +56,8 @@ ManagementBuffer::~ManagementBuffer()
 
 	SAFE_DELETE(shadowMap_);
 
-	SAFE_DELETE(ssaoMap_);
+	SAFE_DELETE(ssao_);
+	SAFE_DELETE(ssaoUtil_);
 
 	SAFE_RELEASE(randomTex_);
 	SAFE_RELEASE(randomSRV_);
@@ -72,8 +73,9 @@ void ManagementBuffer::reset()
 	SAFE_RESET(glowLowUtil_);
 
 	SAFE_RESET(shadowMap_);
+	SAFE_RESET(ssaoUtil_);
 
-	SAFE_RESET(ssaoMap_);
+	SAFE_RESET(ssao_);
 }
 HRESULT ManagementBuffer::resize(ID3D11Device* device)
 {
@@ -135,7 +137,14 @@ HRESULT ManagementBuffer::resize(ID3D11Device* device)
 
 	if(SUCCEEDED(hr))
 	{
-		hr = ssaoMap_->resize(
+		hr = ssao_->resize(
+			device,
+			ssaoWidth_,
+			ssaoHeight_);
+	}
+	if(SUCCEEDED(hr))
+	{
+		hr = ssaoUtil_->resize(
 			device,
 			ssaoWidth_,
 			ssaoHeight_);
@@ -157,14 +166,6 @@ HRESULT ManagementBuffer::resize(ID3D11Device* device)
 	shadowViewport_.Height		= static_cast<FLOAT>(SHADOWMAP_DIM);
 	shadowViewport_.MinDepth	= 0.0f;
 	shadowViewport_.MaxDepth	= 1.0f;
-
-	ZeroMemory(&ssaoViewport_, sizeof(D3D11_VIEWPORT));
-	ssaoViewport_.TopLeftX	= 0;
-	ssaoViewport_.TopLeftY	= 0;
-	ssaoViewport_.Width		= static_cast<FLOAT>(ssaoWidth_);
-	ssaoViewport_.Height	= static_cast<FLOAT>(ssaoHeight_);
-	ssaoViewport_.MinDepth	= 0.0f;
-	ssaoViewport_.MaxDepth	= 1.0f;
 
 	return hr;
 }
@@ -321,21 +322,26 @@ HRESULT ManagementBuffer::initSSAO(ID3D11Device* device)
 {
 	HRESULT hr = S_OK;
 
-	ssaoMap_ = new Buffer_SrvRtvUav(
+	ssao_ = new Buffer_SrvRtvUav(
 		ssaoWidth_,
 		ssaoHeight_,
 		1,
 		getFormat(BUFFER_FORMAT_SSAO),
 		D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE | D3D11_BIND_UNORDERED_ACCESS,
 		D3D11_USAGE_DEFAULT);
+	hr = ssao_->init(device);
 
-	ZeroMemory(&ssaoViewport_, sizeof(D3D11_VIEWPORT));
-	ssaoViewport_.TopLeftX	= 0;
-	ssaoViewport_.TopLeftY	= 0;
-	ssaoViewport_.Width		= static_cast<FLOAT>(ssaoWidth_);
-	ssaoViewport_.Height	= static_cast<FLOAT>(ssaoHeight_);
-	ssaoViewport_.MinDepth	= 0.0f;
-	ssaoViewport_.MaxDepth	= 1.0f;
+	if(SUCCEEDED(hr))
+	{
+		ssaoUtil_ = new Buffer_SrvRtvUav(
+			ssaoWidth_,
+			ssaoHeight_,
+			1,
+			getFormat(BUFFER_FORMAT_SSAO),
+			D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE | D3D11_BIND_UNORDERED_ACCESS,
+			D3D11_USAGE_DEFAULT);
+		hr = ssaoUtil_->init(device);
+	}
 
 	return hr;
 }
@@ -424,7 +430,9 @@ void ManagementBuffer::clearBuffers(ID3D11DeviceContext* devcon)
 	devcon->ClearDepthStencilView(dsv, D3D11_CLEAR_DEPTH, 1.0f, 0);
 
 	//Clear SSAO-map:
-	ID3D11RenderTargetView* rtv = ssaoMap_->getRTV();
+	ID3D11RenderTargetView* rtv = ssao_->getRTV();
+	devcon->ClearRenderTargetView(rtv, CLEARCOLOR_BLACK);
+	rtv = ssaoUtil_->getRTV();
 	devcon->ClearRenderTargetView(rtv, CLEARCOLOR_BLACK);
 }
 void ManagementBuffer::setBuffersAndDepthBufferAsRenderTargets(
@@ -461,7 +469,7 @@ void ManagementBuffer::setBuffersAsCSShaderResources(ID3D11DeviceContext* devcon
 
 	resourceViews[GBUFFERID_NUM_BUFFERS]		= glowHigh_->getSRV();
 	resourceViews[GBUFFERID_NUM_BUFFERS + 1]	= shadowMap_->getSRV();
-	resourceViews[GBUFFERID_NUM_BUFFERS + 2]	= ssaoMap_->getSRV();
+	resourceViews[GBUFFERID_NUM_BUFFERS + 2]	= ssao_->getSRV();
 
 	devcon->CSSetShaderResources(
 		0, 
@@ -499,6 +507,12 @@ void ManagementBuffer::setBuffer(ID3D11DeviceContext* devcon, SET_ID setID, SET_
 		break;
 	case SET_ID_NORMAL:
 		buffer = gBuffers_[GBUFFERID_NORMAL];
+		break;
+	case SET_ID_SSAO:
+		buffer = ssao_;
+		break;
+	case SET_ID_SSAO_UTIL:
+		buffer = ssaoUtil_;
 		break;
 	}
 
@@ -640,6 +654,9 @@ DXGI_FORMAT ManagementBuffer::getFormat(BUFFER_FORMAT format)
 		break;
 	case R32_G32_B32_A32__FLOAT:
 		dxgiFormat = DXGI_FORMAT::DXGI_FORMAT_R32G32B32A32_FLOAT;
+		break;
+	case R8__FLOAT:
+		dxgiFormat = DXGI_FORMAT::DXGI_FORMAT_R8_UNORM;
 		break;
 	case R16__FLOAT:
 		dxgiFormat = DXGI_FORMAT::DXGI_FORMAT_R16_FLOAT;

@@ -119,8 +119,8 @@ HRESULT Renderer::resize(unsigned int screenWidth, unsigned int screenHeight)
 	unsigned int numViewports, csDispatchX, csDispatchY;
 	numViewports	= numSS;
 
-	csDispatchX	= ceil((float)screenWidth	/ (float)CS_TILE_SIZE);
-	csDispatchY	= ceil((float)screenHeight	/ (float)CS_TILE_SIZE);
+	csDispatchX	= (unsigned int)ceil((float)screenWidth	/ (float)CS_TILE_SIZE);
+	csDispatchY	= (unsigned int)ceil((float)screenHeight	/ (float)CS_TILE_SIZE);
 	winfo_->init(
 		screenWidth, 
 		screenHeight, 
@@ -549,8 +549,8 @@ void Renderer::renderViewportToBackBuffer(ViewportData& vpData)
 	managementSS_->setSS(devcon, TypeFX_CS, 1, SS_ID_SHADOW);
 
 	//Call compute shader kernel.
-	unsigned int dispatchX = ceil((float)winfo_->getCSDispathX() / (float)managementViewport_->getNumViewportsX());
-	unsigned int dispatchY = ceil((float)winfo_->getCSDispathY() / (float)managementViewport_->getNumViewportsY());
+	unsigned int dispatchX = (unsigned int)ceil((float)winfo_->getCSDispathX() / (float)managementViewport_->getNumViewportsX());
+	unsigned int dispatchY = (unsigned int)ceil((float)winfo_->getCSDispathY() / (float)managementViewport_->getNumViewportsY());
 	devcon->Dispatch(dispatchX, dispatchY, 1);
 
 	//Unset and clean.
@@ -1094,15 +1094,15 @@ void Renderer::buildSSAOMap(ViewportData& vpData)
 	
 	managementFX_->setShader(devcon, SHADERID_CS_SSAO);
 	
-	Buffer_SrvRtvUav* ssaoMap = managementBuffer_->getSSAO();
+	//Buffer_SrvRtvUav* ssaoMap = managementBuffer_->getSSAO();
 	
 	//Set uav
-	ID3D11UnorderedAccessView* uav = ssaoMap->getUAV();
-	devcon->CSSetUnorderedAccessViews(
-		1, //register 1 
-		1, 
-		&uav, 
-		nullptr);
+	managementBuffer_->setBuffer(
+		devcon, 
+		SET_ID_SSAO, 
+		SET_TYPE_UAV, 
+		SET_STAGE_CS, 
+		1); //register 1
 
 	//Set normalbuffer as srv
 	managementBuffer_->setBuffer(
@@ -1110,7 +1110,7 @@ void Renderer::buildSSAOMap(ViewportData& vpData)
 		SET_ID_NORMAL, 
 		SET_TYPE_SRV, 
 		SET_STAGE_CS, 
-		0);
+		0); //register 0
 
 	//Set depth as srv
 	managementD3D_->setDepthBufferSRV(GBUFFER_SHADER_REGISTER_DEPTH);
@@ -1124,10 +1124,10 @@ void Renderer::buildSSAOMap(ViewportData& vpData)
 	
 	managementCB_->setCB(CB_TYPE_CAMERA, TypeFX_CS, CB_REGISTER_CAMERA,	devcon);
 
-	unsigned int viewportTopX	= (float)vpData.viewportTopX	/ (float)SSAO_MAP_SCREEN_RES_FACTOR; //RISKY?
-	unsigned int viewportTopY	= (float)vpData.viewportTopY	/ (float)SSAO_MAP_SCREEN_RES_FACTOR; //RISKY?
-	unsigned int viewportWidth	= (float)vpData.viewportWidth	/ (float)SSAO_MAP_SCREEN_RES_FACTOR; //RISKY?
-	unsigned int viewportHeight	= (float)vpData.viewportHeight	/ (float)SSAO_MAP_SCREEN_RES_FACTOR; //RISKY?
+	unsigned int viewportTopX	= (unsigned int)((float)vpData.viewportTopX		/ (float)SSAO_MAP_SCREEN_RES_FACTOR); //RISKY?
+	unsigned int viewportTopY	= (unsigned int)((float)vpData.viewportTopY		/ (float)SSAO_MAP_SCREEN_RES_FACTOR); //RISKY?
+	unsigned int viewportWidth	= (unsigned int)((float)vpData.viewportWidth	/ (float)SSAO_MAP_SCREEN_RES_FACTOR); //RISKY?
+	unsigned int viewportHeight	= (unsigned int)((float)vpData.viewportHeight	/ (float)SSAO_MAP_SCREEN_RES_FACTOR); //RISKY?
 	managementCB_->updateCBCamera(managementD3D_->getDeviceContext(),
 		vpData.view,
 		managementMath_->getIdentityMatrix(),					//Irrelevant
@@ -1138,8 +1138,8 @@ void Renderer::buildSSAOMap(ViewportData& vpData)
 		viewportTopY,											//New viewport-dimensions
 		vpData.viewportWidth,									//Instead used to send original viewport-dimensions.
 		vpData.viewportHeight,									//Instead used to send original viewport-dimensions.
-		viewportWidth,
-		viewportHeight);
+		(float)viewportWidth,
+		(float)viewportHeight);
 	
 	managementCB_->setCB(CB_TYPE_SSAO, TypeFX_CS, CB_REGISTER_SSAO, devcon);
 	float ssaoWidth		= (float)winfo_->getScreenWidth()	/ (float)SSAO_MAP_SCREEN_RES_FACTOR;
@@ -1147,8 +1147,8 @@ void Renderer::buildSSAOMap(ViewportData& vpData)
 
 	managementCB_->updateCBSSAO(
 		devcon,
-		/*SSAOMap Width*/			ssaoWidth,
-		/*SSAOMap Height*/			ssaoHeight,
+		/*SSAOMap Width*/			(unsigned int)ssaoWidth,
+		/*SSAOMap Height*/			(unsigned int)ssaoHeight,
 		/*Occlusion Radius*/		0.2f,	//Experiment with these to mod SSAO. More info under constantBuffers.hlsl
 		/*Occlusion Scale*/			0.7f,	//Experiment with these to mod SSAO. More info under constantBuffers.hlsl
 		/*Occlusion Bias*/			0.1f,	//Experiment with these to mod SSAO. More info under constantBuffers.hlsl
@@ -1158,20 +1158,58 @@ void Renderer::buildSSAOMap(ViewportData& vpData)
 	unsigned int SSAO_BLOCK_DIM = 16;
 	float csDispatchX = ssaoWidth	/ (float)SSAO_BLOCK_DIM;
 	float csDispatchY = ssaoHeight	/ (float)SSAO_BLOCK_DIM;
-	unsigned int dispatchX = ceil(csDispatchX / (float)managementViewport_->getNumViewportsX());
-	unsigned int dispatchY = ceil(csDispatchY / (float)managementViewport_->getNumViewportsY());
+	unsigned int dispatchX = (unsigned int)ceil(csDispatchX / (float)managementViewport_->getNumViewportsX());
+	unsigned int dispatchY = (unsigned int)ceil(csDispatchY / (float)managementViewport_->getNumViewportsY());
 	devcon->Dispatch(dispatchX, dispatchY, 1);
-	
+
 	//Unser shader
 	managementFX_->unsetShader(devcon, SHADERID_CS_SSAO);
+
+	//////////////////////////////////////////////////////////////////////////
+	//Do blur
+	//////////////////////////////////////////////////////////////////////////
 	
-	//Unset uav
 	ID3D11UnorderedAccessView* uavs[] = { nullptr };
 	devcon->CSSetUnorderedAccessViews(
 		1, //register 1 
 		1, 
 		uavs, 
 		nullptr);
+
+	//set
+	managementFX_->setShader(devcon, SHADERID_CS_BLUR_BILATERAL_HORZ);
+	managementBuffer_->setBuffer(devcon, SET_ID_SSAO, SET_TYPE_SRV, SET_STAGE_CS, 9);
+	managementBuffer_->setBuffer(devcon, SET_ID_SSAO_UTIL, SET_TYPE_UAV, SET_STAGE_CS, 1);
+
+	unsigned int numBlocksX = (unsigned int)ceilf(viewportWidth / 256.0f);
+	devcon->Dispatch(numBlocksX, viewportHeight, 1);
+
+	managementBuffer_->unset(devcon, SET_TYPE_UAV, SET_STAGE_CS, 1);
+	managementBuffer_->unset(devcon, SET_TYPE_SRV, SET_STAGE_CS, 9);
+
+	managementFX_->setShader(devcon, SHADERID_CS_BLUR_BILATERAL_VERT);
+
+	managementBuffer_->setBuffer(devcon, SET_ID_SSAO_UTIL, SET_TYPE_SRV, SET_STAGE_CS, 9);
+	managementBuffer_->setBuffer(devcon, SET_ID_SSAO, SET_TYPE_UAV, SET_STAGE_CS, 1);
+
+	unsigned int numBlocksY = (unsigned int)ceilf(viewportHeight / 256.0f);
+	devcon->Dispatch(viewportWidth, numBlocksY, 1);
+
+	//unset
+	managementBuffer_->unset(devcon, SET_TYPE_SRV, SET_STAGE_CS, 9);
+	devcon->CSSetUnorderedAccessViews(
+		1, //register 1 
+		1, 
+		uavs, 
+		nullptr);
+
+	//Unser shader
+	managementFX_->unsetShader(devcon, SHADERID_CS_BLUR_BILATERAL_VERT);
+
+
+	//////////////////////////////////////////////////////////////////////////
+	//Do blur
+	//////////////////////////////////////////////////////////////////////////
 
 	managementSS_->unsetSS(devcon, TypeFX_CS, 0);
 	managementSS_->unsetSS(devcon, TypeFX_CS, 1);

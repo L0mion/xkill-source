@@ -25,7 +25,8 @@ enum BUFFER_FORMAT
 	R8_G8_B8_A8__UNORM,
 	R16_G16_B16_A16__FLOAT,
 	R32_G32_B32_A32__FLOAT,
-	R16__FLOAT
+	R16__FLOAT,
+	R8__FLOAT
 };
 
 static const BUFFER_FORMAT BUFFER_FORMAT_ALBEDO		= R8_G8_B8_A8__UNORM;
@@ -33,7 +34,7 @@ static const BUFFER_FORMAT BUFFER_FORMAT_NORMAL		= R16_G16_B16_A16__FLOAT;
 static const BUFFER_FORMAT BUFFER_FORMAT_MATERIAL	= R16_G16_B16_A16__FLOAT;
 static const BUFFER_FORMAT BUFFER_FORMAT_GLOW_HIGH	= R8_G8_B8_A8__UNORM;
 static const BUFFER_FORMAT BUFFER_FORMAT_GLOW_LOW	= R8_G8_B8_A8__UNORM;
-static const BUFFER_FORMAT BUFFER_FORMAT_SSAO		= R16_G16_B16_A16__FLOAT;//R16__FLOAT;
+static const BUFFER_FORMAT BUFFER_FORMAT_SSAO		= R8__FLOAT;
 static const BUFFER_FORMAT BUFFER_FORMAT_RANDOM		= R8_G8_B8_A8__UNORM;
 
 static const unsigned int SHADER_REGISTER_DOWNSAMPLE_INPUT = 3;
@@ -69,7 +70,9 @@ enum SET_ID
 	SET_ID_GLOW_LOW_UTIL,
 	SET_ID_SHADOW,
 	SET_ID_NORMAL,
-	SET_ID_RANDOM
+	SET_ID_RANDOM,
+	SET_ID_SSAO,
+	SET_ID_SSAO_UTIL
 };
 
 class ManagementBuffer
@@ -104,7 +107,7 @@ public:
 	D3D11_VIEWPORT getShadowViewport();
 
 	//temp
-	Buffer_SrvRtvUav* getSSAO() { return ssaoMap_; }
+	Buffer_SrvRtvUav* getSSAO() { return ssao_; }
 
 	void setRandomBuf(ID3D11DeviceContext* devcon, unsigned int shaderRegister)
 	{ 
@@ -154,8 +157,8 @@ private:
 	//SSAO
 	unsigned int ssaoWidth_;
 	unsigned int ssaoHeight_;
-	Buffer_SrvRtvUav* ssaoMap_;
-	D3D11_VIEWPORT ssaoViewport_;
+	Buffer_SrvRtvUav* ssao_;		//this doesnt necesserily need to be an rtv if we don't upscale.
+	Buffer_SrvRtvUav* ssaoUtil_;
 
 	ID3D11Texture2D*			randomTex_;
 	ID3D11ShaderResourceView*	randomSRV_;
