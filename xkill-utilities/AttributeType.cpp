@@ -359,8 +359,8 @@ Attribute_Camera::Attribute_Camera()
 
 	aspectRatio = 0.785f;
 	fieldOfView = 0.785f; 
-	zFar = 40.0f;
-	zNear = 0.01f;
+	zFar	= 75.0f;
+	zNear	= 0.01f;
 
 	up		= Float3(0.0f, 1.0f, 0.0f);
 	right	= Float3(1.0f, 0.0f, 0.0f);

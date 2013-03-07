@@ -142,52 +142,62 @@ void CS_Lighting(
 		/*Specular*/	gMaterial
 	};
 	
-	//Do lighting:
-	float4 Ambient	= float4(0.0f, 0.0f, 0.0f, 0.0f);
+	float4 Ambient	= float4(gAlbedo.xyz, 0.0f);
 	float4 Diffuse	= float4(0.0f, 0.0f, 0.0f, 0.0f);
 	float4 Specular	= float4(0.0f, 0.0f, 0.0f, 0.0f);
-	float4 ambient, diffuse, specular;
-	for(i = 0; i < numLightsDir; i++)
+	if(gMaterial.a > 0.0f) //specularPower
 	{
-		LightDescDir descDir = lightsDir[i];
-		descDir.direction = mul(float4(descDir.direction, 0.0f), view).xyz;
-		LightDir(
-			toEyeV,
-			descDir,
-			surfaceMaterial,
-			surfaceNormalV,
-			ambient, diffuse, specular);
+		Ambient	= float4(0.0f, 0.0f, 0.0f, 0.0f);
 
-		if(i == 0)
+		//Do lighting:
+		float4 ambient, diffuse, specular;
+		for(i = 0; i < numLightsDir; i++)
 		{
-			//Apply shadow onto first directional light:
-			float4 surfacePosW = mul(float4(surfacePosV, 1.0f), viewInverse);
-			float4 posH = mul(surfacePosW, shadowMapTransform);
-			float shadow = LightShadow(ssShadow, bufferShadowMap, posH);
-			diffuse		*= shadow;
-			specular	*= shadow;
+			LightDescDir descDir = lightsDir[i];
+			descDir.direction = mul(float4(descDir.direction, 0.0f), view).xyz;
+			LightDir(
+				toEyeV,
+				descDir,
+				surfaceMaterial,
+				surfaceNormalV,
+				ambient, diffuse, specular);
+
+			if(i == 0)
+			{
+				//Apply shadow onto first directional light:
+				float4 surfacePosW = mul(float4(surfacePosV, 1.0f), viewInverse);
+				float4 posH = mul(surfacePosW, shadowMapTransform);
+				float shadow = LightShadow(ssShadow, bufferShadowMap, posH);
+				diffuse		*= shadow;
+				specular	*= shadow;
+			}
+
+			Ambient	+= ambient;	
+			Diffuse	+= diffuse; 
+			Specular += specular;
+		}
+		uint numLights = min(tileLightNum, TILE_MAX_LIGHTS); //tielLightNum may be bigger than allowed lights.
+		for(i = 0; i < numLights; i++)
+		{
+			LightDescPoint descPoint = lightsPoint[tileLightIndices[i]];
+			LightPoint(
+				toEyeV,
+				descPoint,
+				mul(float4(lightsPos[tileLightIndices[i]], 1.0f), view).xyz,
+				surfaceMaterial,
+				surfaceNormalV,
+				surfacePosV,
+				ambient, diffuse, specular);	
+			Ambient		+= ambient;
+			Diffuse		+= diffuse;
+			Specular	+= specular;
 		}
 
-		Ambient	+= ambient;	
-		Diffuse	+= diffuse; 
-		Specular += specular;
+		float ssao = bufferSSAO.SampleLevel(ss, texCoord, 0);
+		Ambient *= ssao.r;
 	}
-	uint numLights = min(tileLightNum, TILE_MAX_LIGHTS); //tielLightNum may be bigger than allowed lights.
-	for(i = 0; i < numLights; i++)
-	{
-		LightDescPoint descPoint = lightsPoint[tileLightIndices[i]];
-		LightPoint(
-			toEyeV,
-			descPoint,
-			mul(float4(lightsPos[tileLightIndices[i]], 1.0f), view).xyz,
-			surfaceMaterial,
-			surfaceNormalV,
-			surfacePosV,
-			ambient, diffuse, specular);	
-		Ambient		+= ambient;
-		Diffuse		+= diffuse;
-		Specular	+= specular;
-	}
+
+	
 
 	//TILING DEMO:
 	//for(i = 0; i < tileLightNum; i++) //Apply culled point-lights.
@@ -195,9 +205,8 @@ void CS_Lighting(
 	//	Diffuse.g += 0.1;
 	//}
 
-	float ssao = bufferSSAO.SampleLevel(ss, texCoord, 0);
-
-	float3 litPixel = Ambient.xyz * (ssao.r) + Diffuse.xyz + Specular.xyz;
+	
+	float3 litPixel = Ambient.xyz  + Diffuse.xyz + Specular.xyz;
 	float3 glowPixel = bufferGlowHigh.SampleLevel(ss, texCoord, 0).xyz;
 	litPixel = min(litPixel + glowPixel, 1.0f); //additive blending
 
@@ -205,5 +214,5 @@ void CS_Lighting(
 		uint2(
 			threadIDDispatch.x + viewportTopX, 
 			threadIDDispatch.y + viewportTopY)] = 
-		float4(ssao.rrr, 1.0f);
+		float4(litPixel, 1.0f);
 }

@@ -34,7 +34,7 @@ PSOut PS_Default(VSOutPosNormWTex pIn)
 	output.albedo = float4(albedo, 0.0f);
 	
 	//Fill material RTV
-	output.material	= float4(specularTerm, 1.0f); //specularPower
+	output.material	= float4(specularTerm, specularPower);
 
 	output.glowHigh = float4(0.0f, 0.0f, 0.0f, 1.0f);
 

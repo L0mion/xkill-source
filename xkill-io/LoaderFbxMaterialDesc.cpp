@@ -176,7 +176,7 @@ MaterialDesc LoaderFbxMaterialDesc::getMaterialDesc()
 	material.ambientTerm_ = ambient_;
 	material.diffuseTerm_ = diffuse_;
 	material.specularTerm_ = specular_;
-	material.specularPower_ = shininess_;
+	material.specularPower_ = reflectivity_; //shininess_;
 	material.reflectivity_ = Float3(reflectivity_, reflectivity_, reflectivity_);
 	material.transperency_ = opacity_;
 	material.emissive_ = emissive_;

@@ -15,6 +15,7 @@ struct ID3D11DeviceContext;
 #include "gBufferID.h"
 
 static const FLOAT CLEARCOLOR_BLACK[]	= { 0.0f, 0.0f, 0.0f, 1.0f };
+static const FLOAT CLEARCOLOR_WHITE[]	= { 0.0f, 0.0f, 0.0f, 1.0f };
 static const FLOAT CLEARCOLOR_RED[]		= { 1.0f, 0.0f, 0.0f, 1.0f };
 static const FLOAT CLEARCOLOR_GREEN[]	= { 0.0f, 1.0f, 0.0f, 1.0f };
 static const FLOAT CLEARCOLOR_BLUE[]	= { 0.0f, 0.0f, 1.0f, 1.0f };
