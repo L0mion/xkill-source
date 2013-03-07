@@ -127,7 +127,7 @@ void CS_Lighting(
 		return;
 
 	//MOVE ME INTO BELOW IF-CASE:
-	float ssao = bufferSSAO.SampleLevel(ss, texCoord, 0);
+	float ssao = bufferSSAO.SampleLevel(ss, texCoord, 0).x;
 	
 	//Only apply lighting if valid Specular power.
 	float4 Ambient	= float4(gAlbedo.xyz, 0.0f);
@@ -209,7 +209,7 @@ void CS_Lighting(
 		uint2(
 			threadIDDispatch.x + viewportTopX, 
 			threadIDDispatch.y + viewportTopY)] = 
-		float4(ssao.rrr, 1.0f);
+		float4(litPixel, 1.0f);
 }
 
 //TILING DEMO:
