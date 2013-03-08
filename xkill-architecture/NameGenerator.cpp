@@ -952,7 +952,7 @@ void NameGenerator::reset()
 	addName("for the love of God");
 	addName("ogre in tent");
 	addName("claim to fame");
-	addName("precariously precocious");
+	addName("precariously precautious");
 	addName("sensitivity");
 	addName("hand cannon");
 	addName("friday");
@@ -1102,6 +1102,9 @@ void NameGenerator::reset()
 	addName("the higher quantum");
 	addName("brain rating");
 	addName("humanity");
+	addName("solver");
+	addName("raid by night");
+	addName("pinned down");
 	
 	//C++ keywords
 	addName("alignas");

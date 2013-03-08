@@ -53,14 +53,12 @@ void ManagementCB::updateCBInstance(ID3D11DeviceContext*	devcon,
 void ManagementCB::updateCBFrame(ID3D11DeviceContext* devcon,
 								 DirectX::XMFLOAT4X4 shadowMapTransform,
 								 unsigned int numLightsDir,
-								 unsigned int numLightsPoint,
-								 unsigned int numLightsSpot)
+								 unsigned int numLightsPoint)
 {
 	CBFrameDesc cbDesc;
 	cbDesc.shadowMapTransform_ = shadowMapTransform;
 	cbDesc.numLightsDir		= numLightsDir;
 	cbDesc.numLightsPoint	= numLightsPoint;
-	cbDesc.numLightsSpot	= numLightsSpot;
 
 	devcon->UpdateSubresource(cbFrame_, 0, 0, &cbDesc, 0, 0);
 }

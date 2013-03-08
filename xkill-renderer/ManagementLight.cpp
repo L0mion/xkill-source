@@ -14,14 +14,12 @@ ManagementLight::ManagementLight()
 
 	streamDirLight_		= nullptr;
 	streamPointLight_	= nullptr;
-	streamSpotLight_	= nullptr;
 	streamPosLight_		= nullptr;
 }
 ManagementLight::~ManagementLight()
 {
 	SAFE_DELETE(streamDirLight_);
 	SAFE_DELETE(streamPointLight_);
-	SAFE_DELETE(streamSpotLight_);
 	SAFE_DELETE(streamPosLight_);
 }
 
@@ -33,9 +31,6 @@ void ManagementLight::init()
 	streamPointLight_ = new DataStreamSRV<LightDescPoint>(
 		D3D11_BIND_SHADER_RESOURCE, 
 		D3D11_RESOURCE_MISC_BUFFER_STRUCTURED);
-	streamSpotLight_ = new DataStreamSRV<LightDescSpot>(
-		D3D11_BIND_SHADER_RESOURCE, 
-		D3D11_RESOURCE_MISC_BUFFER_STRUCTURED);
 	streamPosLight_ = new DataStreamSRV<Float3>(
 		D3D11_BIND_SHADER_RESOURCE, 
 		D3D11_RESOURCE_MISC_BUFFER_STRUCTURED);
@@ -45,12 +40,10 @@ void ManagementLight::reset()
 {
 	SAFE_DELETE(streamDirLight_);
 	SAFE_DELETE(streamPointLight_);
-	SAFE_DELETE(streamSpotLight_);
 	SAFE_DELETE(streamPosLight_);
 
 	streamDirLight_		= nullptr;
 	streamPointLight_	= nullptr;
-	streamSpotLight_	= nullptr;
 	streamPosLight_		= nullptr;
 }
 
@@ -59,19 +52,16 @@ void ManagementLight::update(ID3D11Device* device, ID3D11DeviceContext* devcon)
 	//Reset counters.
 	streamDirLight_		->resetStream();
 	streamPointLight_	->resetStream();
-	streamSpotLight_	->resetStream();
 	streamPosLight_		->resetStream();
 
 	//Send new data into streams.
 	updateStreamDirLight();
 	updateStreamPointLight();
-	updateStreamSpotLight();
 	//updateStreamPosLight();
 
 	//Map updated streams onto buffers.
 	streamDirLight_		->updateDataStream(device, devcon);
 	streamPointLight_	->updateDataStream(device, devcon);
-	streamSpotLight_	->updateDataStream(device, devcon);
 	streamPosLight_		->updateDataStream(device, devcon);
 }
 
@@ -87,9 +77,6 @@ void ManagementLight::setLightSRVCS(
 		break;
 	case LIGHTBUFFERTYPE_POINT:
 		streamPointLight_->setStreamSRV(devcon, shaderRegister);
-		break;
-	case LIGHTBUFFERTYPE_SPOT:
-		streamSpotLight_->setStreamSRV(devcon, shaderRegister);
 		break;
 	case LIGHTBUFFERTYPE_POS_VIEW:
 		streamPosLight_->setStreamSRV(devcon, shaderRegister);
@@ -108,9 +95,6 @@ void ManagementLight::unsetLightSRVCS(
 		break;
 	case LIGHTBUFFERTYPE_POINT:
 		streamPointLight_->unsetStreamSRV(devcon, shaderRegister);
-		break;
-	case LIGHTBUFFERTYPE_SPOT:
-		streamSpotLight_->unsetStreamSRV(devcon, shaderRegister);
 		break;
 	case LIGHTBUFFERTYPE_POS_VIEW:
 		streamPosLight_->unsetStreamSRV(devcon, shaderRegister);
@@ -140,19 +124,6 @@ void ManagementLight::updateStreamPointLight()
 		streamPosLight_->pushData(ptr_position->position);
 	}
 }
-void ManagementLight::updateStreamSpotLight()
-{
-	AttributePtr<Attribute_Light_Spot>	ptr_lightSpot;
-	AttributePtr<Attribute_Position>	ptr_position;
-	while(itrLightSpot.hasNext())
-	{
-		ptr_lightSpot = itrLightSpot.getNext();
-		ptr_position = ptr_lightSpot->ptr_position;
-
-		streamSpotLight_->pushData(ptr_lightSpot->lightSpot);
-		streamPosLight_->pushData(ptr_position->position);
-	}
-}
 
 unsigned int ManagementLight::getLightDirCurCount()
 {
@@ -161,8 +132,4 @@ unsigned int ManagementLight::getLightDirCurCount()
 unsigned int ManagementLight::getLightPointCurCount()
 {
 	return streamPointLight_->getDataCountCur();
-}
-unsigned int ManagementLight::getLightSpotCurCount()
-{
-	return streamSpotLight_->getDataCountCur();
 }
