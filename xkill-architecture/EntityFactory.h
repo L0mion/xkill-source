@@ -332,8 +332,26 @@ public:
 		CREATE_ATTRIBUTE(ptr_pickupablesSpawnPoint, Attribute_PickupablesSpawnPoint, pickupablesSpawnPoint, entity);
 		ptr_pickupablesSpawnPoint->ptr_position = ptr_position;
 		ptr_pickupablesSpawnPoint->spawnPickupableType = e->pickupableType;
-		ptr_pickupablesSpawnPoint->spawnDelayInSeconds = 5.0f;
 		ptr_pickupablesSpawnPoint->maxNrOfExistingSpawnedPickupables = 1;
+
+		switch(e->pickupableType)
+		{
+		case XKILL_Enums::PickupableType::HACK_CYCLEHACK:
+			ptr_pickupablesSpawnPoint->spawnDelayInSeconds = 15.0f;
+			break;
+		case XKILL_Enums::PickupableType::HACK_JETHACK:
+			ptr_pickupablesSpawnPoint->spawnDelayInSeconds = 10.0f;
+			break;
+		case XKILL_Enums::PickupableType::HACK_RANDOMHACK:
+			ptr_pickupablesSpawnPoint->spawnDelayInSeconds = 5.0f;
+			break;
+		case XKILL_Enums::PickupableType::HACK_SPEEDHACK:
+			ptr_pickupablesSpawnPoint->spawnDelayInSeconds = 3.5f;
+			break;
+		default:
+			ptr_pickupablesSpawnPoint->spawnDelayInSeconds = 7.5f;
+			break;
+		}
 	}
 
 	void createPickupableEntity(Entity* entity, Event_CreatePickupable* e)
@@ -375,10 +393,10 @@ public:
 			ptr_render->meshID = XKILL_Enums::ModelId::PICKUPABLE_SPEEDHACK;
 			break;
 		case XKILL_Enums::PickupableType::HACK_CYCLEHACK:
-			//ptr_render->meshID = XKILL_Enums::ModelId::PICKUPABLE_CYCLEHACK; //check
+			ptr_render->meshID = XKILL_Enums::ModelId::PICKUPABLE_CYCLEHACK; //check
 			break;
 		case XKILL_Enums::PickupableType::HACK_RANDOMHACK:
-			//ptr_render->meshID = XKILL_Enums::ModelId::PICKUPABLE_RANDOMHACK; //check
+			ptr_render->meshID = XKILL_Enums::ModelId::PICKUPABLE_RANDOMHACK; //check
 			break;
 		default:
 			color = Float4(0.0f, 1.0f, 0.0f, 1.0f);

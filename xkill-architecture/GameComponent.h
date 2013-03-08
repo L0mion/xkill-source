@@ -40,9 +40,14 @@ public:
 	void onEvent(Event* e);
 
 	/**
-	Handles most game logic for players.
+	Handles game logic.
 	*/
 	void onUpdate(float delta);
+
+	/**
+	Called from "onUpdate". Handles most game logic for players.
+	*/
+	void updatePlayerAttributes(float delta);
 
 	/**
 	Uniform way of starting the game
