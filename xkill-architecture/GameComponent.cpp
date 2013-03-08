@@ -91,7 +91,7 @@ void GameComponent::onEvent(Event* e)
 }
 
 void GameComponent::onUpdate(float delta)
-{new int;
+{
 	//--------------------------------------------------------------------------------------
 	// Handle player attributes
 	//--------------------------------------------------------------------------------------

@@ -312,6 +312,10 @@ public:
 	{
 		_firingIndex = -1;
 	}
+	~WeaponInfoHud()
+	{
+
+	}
 	void init(QWidget* groupBox, QLayout* layout)
 	{
 		_firingGroupBox = groupBox;

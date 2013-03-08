@@ -720,7 +720,6 @@ void WeaponInfoHud::update( int firingIndex )
 		_firingFade = 1.0f;
 	}
 
-
 	// Fade box
 	if(_firingFade > 0.0f)
 	{
@@ -732,6 +731,17 @@ void WeaponInfoHud::update( int firingIndex )
 
 			_firingGroupBox->hide();
 		}
+		_firingGroupBox->hide();
+
+		// Interpolate position
+		float factor = 5.0f * SETTINGS->trueDeltaTime;
+		if(factor > 1.0f)
+			factor = 1.0f;
+		Float2 currentPos;
+		currentPos.x = _firingGroupBox->pos().x();
+		currentPos.y = _firingGroupBox->pos().y();
+		Float2 newPos = Float2::lerp(&currentPos, &_targetPosition, factor);
+		_firingGroupBox->move(newPos.x, newPos.y);
 	}
 	else
 	{
@@ -739,6 +749,12 @@ void WeaponInfoHud::update( int firingIndex )
 		if(!_firingGroupBox->isHidden())
 		{
 			_firingGroupBox->hide();
+
+			// Make window start a bit outsude window to create
+			// a animation effect, due to interpolation of position
+			Float2 startPos = _targetPosition;
+			startPos.x = _firingGroupBox->parentWidget()->width();
+			_firingGroupBox->move(startPos.x, startPos.y);
 		}
 	}
 }
