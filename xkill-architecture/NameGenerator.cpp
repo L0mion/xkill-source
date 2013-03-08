@@ -1101,6 +1101,7 @@ void NameGenerator::reset()
 	addName("quantum leap");
 	addName("the higher quantum");
 	addName("brain rating");
+	addName("humanity");
 	
 	//C++ keywords
 	addName("alignas");
