@@ -127,7 +127,7 @@ HRESULT ManagementModel::createModelD3D(
 		{
 			pushModelD3D(
 				modelID,
-				new ModelD3D(vertexType, vertexBuffer, subsetD3Ds, model.materials_));
+				new ModelD3D(vertexType, vertexBuffer, subsetD3Ds, model.materials_, model.skinnedData_));
 		}
 	}
 	else

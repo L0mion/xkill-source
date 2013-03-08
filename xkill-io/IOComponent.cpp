@@ -252,6 +252,8 @@ bool IOComponent::loadModel(std::string	modelName, std::string	modelPath, MdlDes
 	{
 		if(skinnedData->getAnimations()->size() > 0)
 		{
+			meshDesc.skinnedData_ = skinnedData;
+
 			Event_AnimationLoaded animationEvent(modelDesc->modelID_, skinnedData);
 			SEND_EVENT(&animationEvent);
 		}

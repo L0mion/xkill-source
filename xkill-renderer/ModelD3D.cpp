@@ -10,12 +10,15 @@ ModelD3D::ModelD3D(
 	VertexType							vertexType,
 	ID3D11Buffer*						vertexBuffer,
 	const std::vector<SubsetD3D*>		subsets,
-	const std::vector<MaterialDesc>		materials)
+	const std::vector<MaterialDesc>		materials,
+	SkinnedData*						skinnedData)
 {
 	vertexType_ = vertexType;
 	vertexBuffer_	= vertexBuffer;
 	subsets_		= subsets;
 	materials_		= materials;
+	skinnedData_	= skinnedData;
+
 }
 ModelD3D::~ModelD3D()
 {
@@ -43,4 +46,19 @@ std::vector<MaterialDesc>&	ModelD3D::getMaterials()
 VertexType ModelD3D::getVertexType()
 {
 	return vertexType_;
+}
+SkinnedData* ModelD3D::getSkinnedData()
+{
+	return skinnedData_;
+}
+
+bool ModelD3D::hasAnimation()
+{
+	bool animation = false;
+	if(skinnedData_)
+	{
+		if(skinnedData_->getAnimations()->size() > 0)
+			animation = true;
+	}
+	return animation;
 }

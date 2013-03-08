@@ -6,17 +6,6 @@ MeshDesc::MeshDesc()
 }
 MeshDesc::~MeshDesc()
 {
-	if(skinnedData_)
-		delete skinnedData_;
-}
-
-bool MeshDesc::hasAnimation()
-{
-	bool animation = false;
-	if(skinnedData_)
-	{
-		if(skinnedData_->getAnimations()->size() > 0)
-			animation = true;
-	}
-	return animation;
+//	if(skinnedData_)
+//		delete skinnedData_;
 }

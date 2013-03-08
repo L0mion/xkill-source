@@ -14,8 +14,6 @@ class DLL_U MeshDesc
 public:
 	MeshDesc();
 	~MeshDesc();
-
-	bool hasAnimation();
 protected:
 public:
 	std::vector<VertexDesc> vertices_;
