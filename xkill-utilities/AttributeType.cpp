@@ -485,7 +485,6 @@ void Attribute_InputDevice::saveTo( DataItemList* list )
 int Attribute_Player::nextId = 0;
 Attribute_Player::Attribute_Player()
 {
-	//id = nextId++;
 	priority = 0;
 	cycleSteals = 0;
 	cycles = 0;
