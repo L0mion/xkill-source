@@ -97,6 +97,7 @@ ComponentManager::~ComponentManager()
 	SAFE_DELETE(score_);
 	SAFE_DELETE(hacks_);
 	SAFE_DELETE(ioComponent_);
+	SAFE_DELETE(cullingComponent_);
 }
 
 bool ComponentManager::init(HWND windowHandle, HWND parentWindowHandle)
