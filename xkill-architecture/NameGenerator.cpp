@@ -21,6 +21,7 @@ void NameGenerator::reset()
 	addName("Xargs");
 	addName("Echo");
 	addName("Cksum");
+	addName("0xBAADF00D");
 
 	addName("Assembly");
 	addName("C");
@@ -28,7 +29,7 @@ void NameGenerator::reset()
 	addName("Simula");
 	addName("Modula");
 	addName("Java");
-	addName("not a name");
+	addName("not-a-name");
 	addName("semaphore");
 	addName("loop");
 	addName("break");
@@ -304,7 +305,7 @@ void NameGenerator::reset()
 	addName("reset");
 	addName("unrecoverable");
 	addName("data failed to be");
-	addName("system overload");
+	addName("system-overload");
 	addName("reborn as Maya");
 	addName("invaluable token");
 	addName("MyClass");
@@ -319,7 +320,7 @@ void NameGenerator::reset()
 	addName("failed to load file");
 	addName("constant");
 	addName("variable");
-	addName("member of society");
+	addName("member-of-society");
 	addName("edit");
 	addName("almost valid");
 	addName("Battle In Operating System (BIOS)");
@@ -348,7 +349,7 @@ void NameGenerator::reset()
 	addName("take branch");
 	addName("escape");
 	addName("unordered sequence");
-	addName("briefer than life");
+	addName("briefer-than-life");
 	addName("call on fail");
 	addName("railway on ice");
 	addName("injection");
@@ -449,6 +450,9 @@ void NameGenerator::addName(std::string name)
 {
 	names.push_back(name);
 }
+
+#pragma warning(disable: 4996)
+
 std::string NameGenerator::getName()
 {
 	// Reset names if all have been picked
@@ -463,6 +467,25 @@ std::string NameGenerator::getName()
 	// Remove name using Swap-Trick
 	names.at(index) = names.back();
 	names.pop_back();
+
+
+	// EASTER EGG
+	static bool wasShown = false;
+	static int numStarts = 0;
+	if(numStarts < 3)
+		numStarts++;
+	else
+	{
+		if(!wasShown)
+		{
+			if(Math::randomInt(0, 10) == 10)
+			{
+				wasShown = true;
+				name = getenv( "USERNAME" );
+			}
+		}
+	}
+		
 
 	// Return name
 	return name;

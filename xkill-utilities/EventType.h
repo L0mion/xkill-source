@@ -68,6 +68,7 @@ enum DLL_U EventType
 	EVENT_KEY_PRESS,
 	EVENT_MOUSE_PRESS,
 	EVENT_MOUSE_MOVE,
+	EVENT_MOUSE_WHEEL,
 	EVENT_SET_MOUSELOCK,
 	EVENT_WINDOW_RESIZE,
 	EVENT_WINDOW_MOVE,
@@ -445,6 +446,14 @@ public:
 	bool isPressed;
 
 	Event_MousePress(int keyEnum, bool isPressed);
+};
+
+class DLL_U Event_MouseWheel : public Event
+{
+public:
+	int value;
+
+	Event_MouseWheel(int value);
 };
 
 class DLL_U Event_SetMouseLock : public Event

@@ -2,6 +2,7 @@
 
 #include <QtCore/QDateTime>
 #include <xkill-utilities/Converter.h>
+#include <QtGui/QMovie>
 ATTRIBUTES_DECLARE_ALL;
 
 Menu_HUDManager::Menu_HUDManager( QWidget* parent ) : QObject(parent)
@@ -121,6 +122,38 @@ void Menu_HUD::mapToSplitscreen()
 
 	// Move HUD messages to center
 	hudMessage_manager.move(centerPos);
+
+	// Create weapon info
+	{
+		const int kIconSize = 32;
+		Float2 weaponInfoPos;
+		weaponInfoPos.x = ui.frame_bottom->pos().x() + ui.frame_bottom->width() - 15;
+		weaponInfoPos.y = ui.frame_bottom->pos().y();
+		
+		{
+			QLabel* l = new QLabel();
+			l->setPixmap(QString(":/xkill/images/icons/cross_hairs/crosshair_bullet.png"));
+			ui.verticalLayout_weaponInfo->addWidget(l);
+		}
+		{
+			QLabel* l = new QLabel();
+			l->setPixmap(QString(":/xkill/images/icons/cross_hairs/crosshair_explosive.png"));
+			ui.verticalLayout_weaponInfo->addWidget(l);
+		}
+		{
+			QLabel* l = new QLabel();
+			l->setPixmap(QString(":/xkill/images/icons/cross_hairs/crosshair_scatter.png"));
+			ui.verticalLayout_weaponInfo->addWidget(l);
+		}
+
+		{
+			ui.groupBox_weaponInfo->resize(ui.groupBox_weaponInfo->sizeHint());
+			ui.groupBox_weaponInfo->move(0, 0);
+			ui.groupBox_weaponInfo->move(weaponInfoPos.x - ui.groupBox_weaponInfo->width(), weaponInfoPos.y - ui.groupBox_weaponInfo->height());
+		}
+	}
+	ui.groupBox_weaponInfo->hide();
+	ui.groupBox_weaponInfo2->hide();
 }
 
 void Menu_HUD::refresh()
@@ -135,11 +168,6 @@ void Menu_HUD::refresh()
 	int ammoIndex = ammunition->type;
 	float fadeTime = 1.0f;
 
-	//
-	// Update Scoreboard
-	//
-
-	scoreboard.refresh();
 
 	//
 	// Show ammunition info
@@ -251,8 +279,6 @@ void Menu_HUD::refresh()
 
 			ui.progressBar_health->hide();
 			ui.progressBar_ammo->hide();
-
-			ui.frame_scoreboard->show();
 		}
 	}
 	else
@@ -264,10 +290,41 @@ void Menu_HUD::refresh()
 			ui.label_aim->show();
 			ui.label_firingMode->show();
 			ui.frame_bottom->show();
+		}
+	}
 
+	//
+	// Update Scoreboard
+	//
+	
+	scoreboard.refresh();
+	if(ptr_player->detectedAsDead)
+	{
+		// Show scoreboard if delay has expired
+		if(scoreboardFade > 0.0f)
+			scoreboardFade -= SETTINGS->trueDeltaTime;
+		if(scoreboardFade <= 0.0f)
+		{
+			// Show scoreboard if hidden
+			if(ui.frame_scoreboard->isHidden())
+			{
+				ui.frame_scoreboard->show();
+			}
+		}
+	}
+	else
+	{
+		// Reset scoreboard timer
+		scoreboardFade = 1.0f;
+
+		// Hide scoreboard if shown
+		if(!ui.frame_scoreboard->isHidden())
+		{
 			ui.frame_scoreboard->hide();
 		}
 	}
+
+	
 
 
 	//
@@ -330,6 +387,25 @@ void Menu_HUD::refresh()
 
 		// Set image to label
 		 ui.label_aim->setPixmap(path);
+
+		 // EASTER EGG
+		 if(index_crosshair == XKILL_Enums::EXPLOSIVE)
+		 {
+			 // If a specific user
+			 std::string username = getenv( "USERNAME" );
+			 if(username == "FrankensteinsMonster2")
+			 {
+				 QMovie* movie = new QMovie(this);
+				 movie->setCacheMode(QMovie::CacheAll);
+				 movie->setFileName("../../xkill-resources/xkill-gui/images/animations/menu_opening.gif");
+				 ui.label_xAmmo->setMovie(movie);
+				 ui.label_xAmmo->setScaledContents(true);
+				 QSize sizeLimit(100, 100);
+				 ui.label_xAmmo->setMinimumSize(sizeLimit);
+				 ui.label_xAmmo->setMaximumSize(sizeLimit);
+				 movie->start();
+			 }
+		 }
 	}
 
 
@@ -388,7 +464,7 @@ void Menu_HUD::refresh()
 void Menu_HUD::initScoreboard()
 {
 	// Init helper class
-	scoreboard.init(ptr_splitScreen->ptr_player);
+	scoreboard.init(ptr_splitScreen->ptr_player, ui.frame_scoreboard);
 
 	// Build scoreboard
 	while(itrPlayer.hasNext())
@@ -401,6 +477,10 @@ void Menu_HUD::initScoreboard()
 		QLabel* label_process = new QLabel();
 		QLabel* label_cycles = new QLabel();
 		QLabel* label_priority = new QLabel();
+
+		//label_process->setMaximumWidth(100);
+		label_cycles->setMaximumWidth(80);
+		label_priority->setMaximumWidth(80);
 
 		layout_entry->addWidget(label_process);
 		layout_entry->addWidget(label_cycles);
@@ -548,5 +628,95 @@ void HudMessage_Manager::addMessage( Event_PostHudMessage* e )
 		newPos.y = position.y + offset - height * 0.5f;
 
 		stack.at(i)->setTargetPosition(newPos);
+	}
+}
+
+void ScoreBoard::syncLabelsWithPlayers()
+{
+	for(int i=0; i<entries.size(); i++)
+	{
+		ScoreboardEntry* e = &entries.at(i);
+
+		// Detect if label has changed
+		if(e->ptr_player->playerName != e->playerName)
+			e->isChanged = true;
+		if(e->ptr_player->cycles != e->cycles)
+			e->isChanged = true;
+		if(e->ptr_player->priority != e->priority)
+			e->isChanged = true;
+		e->isChanged = true;
+
+		// Update label
+		if(e->isChanged)
+		{
+			e->isChanged = false;
+
+			// Set text
+			e->label_process->setText(e->ptr_player->playerName.c_str());
+			e->label_cycles->setNum(e->ptr_player->cycles);
+			e->label_priority->setNum(e->ptr_player->priority);
+
+			// Empty style sheets
+			std::string sheet_process = "";
+			std::string sheet_cycles = "";
+			std::string sheet_priority = "";
+
+			// Apply extra stuff if we're at the current player
+			if(e->ptr_player == ptr_current_player)
+			{
+				sheet_process += "background-color: rgba(255, 255, 255, 100); font-weight: bold;";
+				sheet_cycles += "background-color: rgba(255, 255, 255, 100); font-weight: bold;";
+				sheet_priority += "background-color: rgba(255, 255, 255, 100); font-weight: bold;";
+			}
+
+			// Apply extra stuff if we have most cycles
+			if(e->ptr_player->cycles == maxCycles)
+			{
+				sheet_cycles += "background-color: rgba(0, 255, 0, 100);";
+			}
+
+			// Apply extra stuff if we have most priority
+			if(e->ptr_player->priority == maxPriority)
+			{
+				sheet_priority += "background-color: rgba(0, 255, 0, 100);";
+			}
+
+			// Apply style sheet
+			e->label_process->setStyleSheet(sheet_process.c_str());
+			e->label_cycles->setStyleSheet(sheet_cycles.c_str());
+			e->label_priority->setStyleSheet(sheet_priority.c_str());
+
+
+			// Resize scoreboard to fit long
+			// player names if needed
+			const int kMinLabelSize = 150;
+			int labelSize = e->label_process->sizeHint().width();
+			if(labelSize < kMinLabelSize)
+				labelSize = kMinLabelSize;
+			if(labelSize > maxLabelSize)
+			{
+				maxLabelSize = labelSize;
+
+				const int kPadding = 75;
+				const int kColumnWidth = 100;
+				int new_scoreboardWidth = kPadding;
+				int a = e->label_process->sizeHint().width();
+				a = e->label_process->width();
+
+				new_scoreboardWidth += labelSize;
+				new_scoreboardWidth += kColumnWidth;
+				new_scoreboardWidth += kColumnWidth;
+
+				// Resize scorboard
+				frame_scoreboard->resize(new_scoreboardWidth, frame_scoreboard->height());
+
+				// Reposition scoreboard to center to acommodate change in size
+				QWidget* parent_scoreboard = frame_scoreboard->parentWidget();
+				Float2 centerPos;
+				centerPos.x = parent_scoreboard->width() * 0.5f;
+				centerPos.y = parent_scoreboard->height() * 0.5f;
+				frame_scoreboard->move(centerPos.x - frame_scoreboard->width()* 0.5f, centerPos.y - frame_scoreboard->height()* 0.5f);
+			}
+		}
 	}
 }

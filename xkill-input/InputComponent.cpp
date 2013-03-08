@@ -16,6 +16,7 @@ InputComponent::InputComponent()
 	SUBSCRIBE_TO_EVENT(this, EVENT_MOUSE_MOVE);
 	SUBSCRIBE_TO_EVENT(this, EVENT_KEY_PRESS);
 	SUBSCRIBE_TO_EVENT(this, EVENT_MOUSE_PRESS);
+	SUBSCRIBE_TO_EVENT(this, EVENT_MOUSE_WHEEL);
 
 	inputManager_ = nullptr;
 	newDeviceSearchTimer_ = 0.0f;
@@ -75,6 +76,13 @@ void InputComponent::onEvent(Event* e)
 	if(type == EVENT_START_DEATHMATCH)
 	{
 		setupPlayerControllerConnection();
+	}
+	if(type == EVENT_MOUSE_WHEEL)
+	{
+		Event_MouseWheel* emw = static_cast<Event_MouseWheel*>(e);
+		emw->value;
+
+		// TODO: Handle mousewheel
 	}
 }
 
