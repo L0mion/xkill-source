@@ -26,7 +26,7 @@ struct CBFrameDesc
 
 	unsigned int numLightsDir;
 	unsigned int numLightsPoint;
-	unsigned int numLightsSpot;
+	unsigned int pad0;
 	unsigned int pad1;
 };
 static const unsigned int CB_FRAME_DESC_SIZE = 80;

@@ -28,8 +28,7 @@ Texture2D bufferSSAO				: register( t5 );
 Texture2D bufferDepth				: register( t6 ); //Register shared in CS_SSAO and CS_Blur_Bilateral. Also, beware of me. Yarr!
 StructuredBuffer<LightDescDir>		lightsDir	: register( t7 );
 StructuredBuffer<LightDescPoint>	lightsPoint	: register( t8 );
-StructuredBuffer<LightDescSpot>		lightsSpot	: register( t9 );
-StructuredBuffer<float3>			lightsPos	: register( t10 );
+StructuredBuffer<float3>			lightsPos	: register( t9 );
 
 SamplerState			ss			: register( s0 );
 SamplerComparisonState	ssShadow	: register( s1 );

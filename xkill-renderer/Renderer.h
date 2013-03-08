@@ -99,11 +99,6 @@ private:
 		MaterialDesc& material,
 		unsigned int numInstances,
 		bool shadowmap);	//!< Renders a subset.
-	void renderDebugShape(
-		AttributePtr<Attribute_DebugShape>	ptr_debugShape, 
-		unsigned int			shapeIndex,
-		DirectX::XMFLOAT4X4		viewMatrix, 
-		DirectX::XMFLOAT4X4		projectionMatrix); //!< Renders a debug shape, such as a bounding sphere.
 
 	//Shadows
 	DirectX::XMFLOAT4X4	buildShadowMap();

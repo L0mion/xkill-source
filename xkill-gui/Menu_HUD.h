@@ -294,6 +294,76 @@ public:
 	}
 };
 
+class WeaponInfoHud
+{
+private:
+	QWidget* _firingGroupBox;
+	QLayout* _firingLayout;
+
+	int _firingIndex;
+	float _firingFade;
+
+	Float2 _targetPosition;
+
+	std::vector<QWidget*> _firingIcons;
+
+public:
+	WeaponInfoHud()
+	{
+		_firingIndex = -1;
+	}
+	void init(QWidget* groupBox, QLayout* layout)
+	{
+		_firingGroupBox = groupBox;
+		_firingLayout = layout;
+
+		// Add weapon icons, one for each weapon
+		addFiringIcon(":/xkill/images/icons/cross_hairs/crosshair_bullet.png");
+		addFiringIcon(":/xkill/images/icons/cross_hairs/crosshair_scatter.png");
+		addFiringIcon(":/xkill/images/icons/cross_hairs/crosshair_explosive.png");
+	}
+
+	void update(int firingIndex);
+
+	void addFiringIcon(std::string path)
+	{
+		// Add icon to layout
+		QLabel* l = new QLabel();
+		l->setPixmap(QString(path.c_str()));
+		_firingLayout->addWidget(l);
+		_firingIcons.push_back(l);
+
+		// Rearrange layout to make new items appear at
+		// top instead of bottom, this is quite ineffective,
+		// but seems to be the only way of solving it in Qt,
+		// since we don't have a lot of icons it should not affect performance in practice
+		int numPreviousIcons = _firingIcons.size() - 1;
+		for(int i=0; i<numPreviousIcons; i++)
+		{
+			_firingLayout->addWidget(_firingLayout->takeAt(0)->widget());
+		}
+
+		// Resize group box to accommodate new size
+		_firingGroupBox->resize(_firingGroupBox->sizeHint());
+	}
+
+	void setPosition(Float2 position)
+	{
+		// We don't want to care how 
+		// many items is in the menu, therefore
+		// offset position relative to height
+		position.y -= _firingGroupBox->height();
+
+		// Set target
+		_targetPosition = position;
+	}
+
+	int width()
+	{
+		return _firingGroupBox->width();
+	}
+};
+
 class Menu_HUD : public QWidget, IObserver
 {
 private:
@@ -301,6 +371,7 @@ private:
 	Ui::Menu_HUD ui;
 	HudMessage_Manager hudMessage_manager;
 	ScoreBoard scoreboard;
+	WeaponInfoHud weaponInfoHud;
 
 	float scoreboardFade;
 	float healthFade;

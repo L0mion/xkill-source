@@ -665,12 +665,6 @@ void GameComponent::event_EndDeathmatch(Event_EndDeathmatch* e)
 		SEND_EVENT(&Event_RemoveEntity(itrLightPoint.ownerId()));
 	}
 
-	while(itrLightSpot.hasNext())
-	{
-		itrLightSpot.getNext();
-		SEND_EVENT(&Event_RemoveEntity(itrLightSpot.ownerId()));
-	}
-
 	//check
 	while(itrPickupable.hasNext())
 	{
@@ -1022,14 +1016,17 @@ void GameComponent::updateAndInterpretAimingRay(Entity* rayCastingPlayerEntity, 
 			if(rayCastingPlayerAttribute->executing && !rayCastingPlayerAttribute->detectedAsDead) 
 			{
 				updateAndInterpretLaser(ray, rayCastingPlayerAttribute, ptr_camera);
-				ray->ptr_render->cull = true;
+				ray->ptr_render->culling.values[0] = INT_MAX;
+				ray->ptr_render->culling.values[1] = INT_MAX;
+				ray->ptr_render->culling.values[2] = INT_MAX;
+				ray->ptr_render->culling.values[3] = INT_MAX;
 			}
 			//--------------------------------------------------------------------------------------
 			// Interpret the ray as what the player is looking at
 			//--------------------------------------------------------------------------------------
 			else
 			{
-				ray->ptr_render->cull = false;
+				ray->ptr_render->culling.clear();
 				//entityHitByRay might be used here (2013-02-28 17.24)
 			}
 		}

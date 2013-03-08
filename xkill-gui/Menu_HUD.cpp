@@ -123,37 +123,14 @@ void Menu_HUD::mapToSplitscreen()
 	// Move HUD messages to center
 	hudMessage_manager.move(centerPos);
 
-	// Create weapon info
-	{
-		const int kIconSize = 32;
-		Float2 weaponInfoPos;
-		weaponInfoPos.x = ui.frame_bottom->pos().x() + ui.frame_bottom->width() - 15;
-		weaponInfoPos.y = ui.frame_bottom->pos().y();
-		
-		{
-			QLabel* l = new QLabel();
-			l->setPixmap(QString(":/xkill/images/icons/cross_hairs/crosshair_bullet.png"));
-			ui.verticalLayout_weaponInfo->addWidget(l);
-		}
-		{
-			QLabel* l = new QLabel();
-			l->setPixmap(QString(":/xkill/images/icons/cross_hairs/crosshair_explosive.png"));
-			ui.verticalLayout_weaponInfo->addWidget(l);
-		}
-		{
-			QLabel* l = new QLabel();
-			l->setPixmap(QString(":/xkill/images/icons/cross_hairs/crosshair_scatter.png"));
-			ui.verticalLayout_weaponInfo->addWidget(l);
-		}
 
-		{
-			ui.groupBox_weaponInfo->resize(ui.groupBox_weaponInfo->sizeHint());
-			ui.groupBox_weaponInfo->move(0, 0);
-			ui.groupBox_weaponInfo->move(weaponInfoPos.x - ui.groupBox_weaponInfo->width(), weaponInfoPos.y - ui.groupBox_weaponInfo->height());
-		}
-	}
-	ui.groupBox_weaponInfo->hide();
+	// Create weapon info
+	weaponInfoHud.init(ui.groupBox_weaponInfo, ui.verticalLayout_weaponInfo);
 	ui.groupBox_weaponInfo2->hide();
+	Float2 weaponInfoPos;
+	weaponInfoPos.x = ui.frame_bottom->pos().x() + ui.frame_bottom->width() - 15 - weaponInfoHud.width();
+	weaponInfoPos.y = ui.frame_bottom->pos().y();
+	weaponInfoHud.setPosition(weaponInfoPos);
 }
 
 void Menu_HUD::refresh()
@@ -168,6 +145,11 @@ void Menu_HUD::refresh()
 	int ammoIndex = ammunition->type;
 	float fadeTime = 1.0f;
 
+	//
+	// Update weapon info hud
+	//
+
+	weaponInfoHud.update(firingIndex);
 
 	//
 	// Show ammunition info
@@ -393,11 +375,11 @@ void Menu_HUD::refresh()
 		 {
 			 // If a specific user
 			 std::string username = getenv( "USERNAME" );
-			 if(username == "FrankensteinsMonster2")
+			 if(username == "Professor Membrane")
 			 {
 				 QMovie* movie = new QMovie(this);
 				 movie->setCacheMode(QMovie::CacheAll);
-				 movie->setFileName("../../xkill-resources/xkill-gui/images/animations/menu_opening.gif");
+				 movie->setFileName("../../xkill-resources/xkill-gui/images/animations/tmp.gif");
 				 ui.label_xAmmo->setMovie(movie);
 				 ui.label_xAmmo->setScaledContents(true);
 				 QSize sizeLimit(100, 100);
@@ -717,6 +699,46 @@ void ScoreBoard::syncLabelsWithPlayers()
 				centerPos.y = parent_scoreboard->height() * 0.5f;
 				frame_scoreboard->move(centerPos.x - frame_scoreboard->width()* 0.5f, centerPos.y - frame_scoreboard->height()* 0.5f);
 			}
+		}
+	}
+}
+
+void WeaponInfoHud::update( int firingIndex )
+{
+	// Detect change in firing mode
+	if(_firingIndex != firingIndex)
+	{
+		// Clear previous selection
+		if(_firingIndex >= 0)
+			_firingIcons.at(_firingIndex)->setStyleSheet("");
+
+		// Select new
+		_firingIndex = firingIndex;
+		_firingIcons.at(_firingIndex)->setStyleSheet("background: rgba(0, 255, 255, 100);");
+
+		// Set face timer
+		_firingFade = 1.0f;
+	}
+
+
+	// Fade box
+	if(_firingFade > 0.0f)
+	{
+		_firingFade -= SETTINGS->trueDeltaTime;
+
+		// Show box if hidden
+		if(_firingGroupBox->isHidden())
+		{
+
+			_firingGroupBox->hide();
+		}
+	}
+	else
+	{
+		// Hide box if show
+		if(!_firingGroupBox->isHidden())
+		{
+			_firingGroupBox->hide();
 		}
 	}
 }
