@@ -109,7 +109,7 @@ void MutatorSettings::initStandardAmmunition()
 	ammo->explosive							= true;
 	ammo->nrOfProjectilesPerSalvo			= 1;
 	ammo->displacementSphereRadius			= 0.0f;
-	ammo->speed								= 5.0f;
+	ammo->speed								= 10.0f;
 	ammo->spreadConeRadius					= 0.0f;
 	ammo->initialTotalNrOfShots				= 20;
 	ammo->currentTotalNrOfShots				= ammo->initialTotalNrOfShots;

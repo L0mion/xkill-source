@@ -149,6 +149,8 @@ class ScoreBoard
 private:
 	std::vector<ScoreboardEntry> entries;
 	AttributePtr<Attribute_Player> ptr_current_player;
+	QWidget* frame_scoreboard;
+	int maxLabelSize;
 
 	int valueAt(int index)
 	{
@@ -227,70 +229,15 @@ private:
 		//// Sort using quicksort
 		//quickSort(0, entries.size() - 1);
 	}
-	void syncLabelsWithPlayers()
-	{
-		for(int i=0; i<entries.size(); i++)
-		{
-			ScoreboardEntry* e = &entries.at(i);
-
-			// Detect if label has changed
-			if(e->ptr_player->playerName != e->playerName)
-				e->isChanged = true;
-			if(e->ptr_player->cycles != e->cycles)
-				e->isChanged = true;
-			if(e->ptr_player->priority != e->priority)
-				e->isChanged = true;
-			e->isChanged = true;
-
-			// Update label
-			if(e->isChanged)
-			{
-				e->isChanged = false;
-
-				// Set text
-				e->label_process->setText(e->ptr_player->playerName.c_str());
-				e->label_cycles->setNum(e->ptr_player->cycles);
-				e->label_priority->setNum(e->ptr_player->priority);
-
-				// Empty style sheets
-				std::string sheet_process = "";
-				std::string sheet_cycles = "";
-				std::string sheet_priority = "";
-
-				// Apply extra stuff if we're at the current player
-				if(e->ptr_player == ptr_current_player)
-				{
-					sheet_process += "background-color: rgba(255, 255, 255, 100); font-weight: bold;";
-					sheet_cycles += "background-color: rgba(255, 255, 255, 100); font-weight: bold;";
-					sheet_priority += "background-color: rgba(255, 255, 255, 100); font-weight: bold;";
-				}
-
-				// Apply extra stuff if we have most cycles
-				if(e->ptr_player->cycles == maxCycles)
-				{
-					sheet_cycles += "background-color: rgba(0, 255, 0, 100);";
-				}
-
-				// Apply extra stuff if we have most priority
-				if(e->ptr_player->priority == maxPriority)
-				{
-					sheet_priority += "background-color: rgba(0, 255, 0, 100);";
-				}
-
-				// Apply style sheet
-				e->label_process->setStyleSheet(sheet_process.c_str());
-				e->label_cycles->setStyleSheet(sheet_cycles.c_str());
-				e->label_priority->setStyleSheet(sheet_priority.c_str());
-			}
-		}
-	}
+	void syncLabelsWithPlayers();
 public:
 	int maxCycles;
 	int maxPriority;
 	int secondMaxPriority;
 
-	void init(AttributePtr<Attribute_Player> ptr_current_player)
+	void init(AttributePtr<Attribute_Player> ptr_current_player, QWidget* frame_scoreboard)
 	{
+		this->frame_scoreboard = frame_scoreboard;
 		this->ptr_current_player = ptr_current_player;
 	}
 	void findMaxValues()
