@@ -1201,10 +1201,10 @@ void Renderer::buildSSAOMap(ViewportData& vpData)
 		devcon,
 		/*SSAOMap Width*/			(unsigned int)ssaoWidth,
 		/*SSAOMap Height*/			(unsigned int)ssaoHeight,
-		/*Occlusion Radius*/		0.2f,	//Experiment with these to mod SSAO. More info under constantBuffers.hlsl
-		/*Occlusion Scale*/			0.7f,	//Experiment with these to mod SSAO. More info under constantBuffers.hlsl
-		/*Occlusion Bias*/			0.1f,	//Experiment with these to mod SSAO. More info under constantBuffers.hlsl
-		/*Occlusion Intensity*/		2.0f);	//Experiment with these to mod SSAO. More info under constantBuffers.hlsl
+		/*Occlusion Radius*/		SETTINGS->occlusionRadius,		
+		/*Occlusion Scale*/			SETTINGS->occlusionScale,		
+		/*Occlusion Bias*/			SETTINGS->occlusionBias,		
+		/*Occlusion Intensity*/		SETTINGS->occlusionIntensity);	
 	
 	//Dispatch motherfucker
 	unsigned int SSAO_BLOCK_DIM = 16;
