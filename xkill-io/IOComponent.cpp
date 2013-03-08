@@ -235,7 +235,7 @@ bool IOComponent::loadModel(std::string	modelName, std::string	modelPath, MdlDes
 		switch(fileType)
 		{
 		case FILE_EXTENSION_FBX:
-			successfulLoad = loadFbx(modelName, modelPath, modelDesc, meshDesc, skinnedData);
+			successfulLoad = loadFbx(modelName, modelPath, modelDesc, meshDesc, nullptr);
 			break;
 		case FILE_EXTENSION_OBJ:
 			successfulLoad = loadObj(modelName, modelPath, modelDesc, meshDesc);
@@ -246,8 +246,6 @@ bool IOComponent::loadModel(std::string	modelName, std::string	modelPath, MdlDes
 		}
 
 		writePGY(modelName + ".pgy", modelPath, meshDesc, (VertexType)modelDesc->vertexType_, skinnedData);
-		
-		//delete skinnedData;
 	}
 
 	if(skinnedData)
@@ -329,7 +327,7 @@ bool IOComponent::loadFbx(std::string modelName, std::string modelPath, MdlDescM
 		std::vector<LoaderFbxTextureDesc> textures	= fbxModels[0].getTextureDescs();
 
 		loadFbxMesh(&mesh, &material, meshDesc, textures);
-		loadFbxAnimation(fbxModels[0].getAnimationDescs(), fbxModels[0].getMeshDesc(), skinnedData);
+		//loadFbxAnimation(fbxModels[0].getAnimationDescs(), fbxModels[0].getMeshDesc(), skinnedData);
 	}
 	else
 		successfulLoad = false;
@@ -365,28 +363,31 @@ void IOComponent::loadFbxMesh(LoaderFbxMeshDesc* mesh, LoaderFbxMaterialDesc* ma
 }
 void IOComponent::loadFbxAnimation(std::vector<LoaderFbxAnimationDesc> animationDescs, LoaderFbxMeshDesc mesh, SkinnedData* skinnedData)
 {
-	std::map<std::string, AnimationClip*>* animations = new std::map<std::string, AnimationClip*>();
-
-	for(unsigned int i=0; i<animationDescs.size(); i++)
+	if(skinnedData)
 	{
-		animationDescs[i].convertToXKillFormat(animations);
-	}
+		std::map<std::string, AnimationClip*>* animations = new std::map<std::string, AnimationClip*>();
 
-	std::vector<int>* boneHierarchy = new std::vector<int>();
-	for(unsigned int i=0; i<mesh.getBoneParentIndices().size(); i++)
-		boneHierarchy->push_back(mesh.getBoneParentIndices().at(i));
-	std::vector<DirectX::XMFLOAT4X4>* boneOffsets = new std::vector<DirectX::XMFLOAT4X4>();
-	for(unsigned int i=0; i<mesh.getOffsetMatrices().size(); i++)
-	{
-		DirectX::XMFLOAT4X4 matrix = DirectX::XMFLOAT4X4(
-			mesh.getOffsetMatrices().at(i)._11, mesh.getOffsetMatrices().at(i)._12, mesh.getOffsetMatrices().at(i)._13, mesh.getOffsetMatrices().at(i)._14,
-			mesh.getOffsetMatrices().at(i)._21, mesh.getOffsetMatrices().at(i)._22, mesh.getOffsetMatrices().at(i)._23, mesh.getOffsetMatrices().at(i)._24,
-			mesh.getOffsetMatrices().at(i)._31, mesh.getOffsetMatrices().at(i)._32, mesh.getOffsetMatrices().at(i)._33, mesh.getOffsetMatrices().at(i)._34,
-			mesh.getOffsetMatrices().at(i)._41, mesh.getOffsetMatrices().at(i)._42, mesh.getOffsetMatrices().at(i)._43, mesh.getOffsetMatrices().at(i)._44);
-		boneOffsets->push_back(matrix);
-	}
+		for(unsigned int i=0; i<animationDescs.size(); i++)
+		{
+			animationDescs[i].convertToXKillFormat(animations);
+		}
 
-	skinnedData->set(boneHierarchy, boneOffsets, animations);
+		std::vector<int>* boneHierarchy = new std::vector<int>();
+		for(unsigned int i=0; i<mesh.getBoneParentIndices().size(); i++)
+			boneHierarchy->push_back(mesh.getBoneParentIndices().at(i));
+		std::vector<DirectX::XMFLOAT4X4>* boneOffsets = new std::vector<DirectX::XMFLOAT4X4>();
+		for(unsigned int i=0; i<mesh.getOffsetMatrices().size(); i++)
+		{
+			DirectX::XMFLOAT4X4 matrix = DirectX::XMFLOAT4X4(
+				mesh.getOffsetMatrices().at(i)._11, mesh.getOffsetMatrices().at(i)._12, mesh.getOffsetMatrices().at(i)._13, mesh.getOffsetMatrices().at(i)._14,
+				mesh.getOffsetMatrices().at(i)._21, mesh.getOffsetMatrices().at(i)._22, mesh.getOffsetMatrices().at(i)._23, mesh.getOffsetMatrices().at(i)._24,
+				mesh.getOffsetMatrices().at(i)._31, mesh.getOffsetMatrices().at(i)._32, mesh.getOffsetMatrices().at(i)._33, mesh.getOffsetMatrices().at(i)._34,
+				mesh.getOffsetMatrices().at(i)._41, mesh.getOffsetMatrices().at(i)._42, mesh.getOffsetMatrices().at(i)._43, mesh.getOffsetMatrices().at(i)._44);
+			boneOffsets->push_back(matrix);
+		}
+
+		skinnedData->set(boneHierarchy, boneOffsets, animations);
+	}
 }
 
 bool IOComponent::loadMD5(std::string modelName, std::string modelPath, MdlDescModel* modelDesc, MeshDesc& meshDesc, SkinnedData* skinnedData)
