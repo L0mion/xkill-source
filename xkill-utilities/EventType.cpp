@@ -320,7 +320,8 @@ void Event_PostHudMessage::setStyle( Style style )
 
 
 	// Add an additional black background
-	styleSheet += "background-color: rgba(0, 0, 0, 50); padding: 1px 7px; font-size:14pt; ";
+	styleSheet += "background-color: rgba(0, 0, 0, 50); padding: 2px 10px; font-size: 15px;";
+	//styleSheet += "font-size: 30px; font-family: pxll; font-weight: normal;";
 }
 
 void Event_PostHudMessage::setHtmlMessage( std::string prefex, std::string subject, std::string suffix /*= ""*/, std::string description /*= ""*/ )
@@ -336,4 +337,14 @@ void Event_PostHudMessage::setHtmlMessage( std::string prefex, std::string subje
 		description = text_subtile + "(" + text_subtile + description + text_end + text_subtile + ")" + text_end;
 
 	message = prefex + " " + subject + " " + suffix + " " + description ;
+}
+
+Event_ReloadPhysicsAttributeDataIntoBulletPhysics::Event_ReloadPhysicsAttributeDataIntoBulletPhysics(int physicsAttributeId) : Event(EVENT_RELOAD_PHYSICS_ATTRIBUTE_DATA_INTO_BULLET_PHYSICS)
+{
+	this->physicsAttributeId = physicsAttributeId;
+}
+
+Event_MouseWheel::Event_MouseWheel( int value ) : Event(EVENT_MOUSE_WHEEL)
+{
+	this->value = value;
 }

@@ -4,6 +4,8 @@
 #include <BulletDynamics/Dynamics/btRigidBody.h>
 #include <xkill-utilities\XKILL_Enums.h>
 
+#include <string>
+
 class btDiscreteDynamicsWorld;
 class debugDrawDispatcher;
 
@@ -19,10 +21,12 @@ protected:
 		static btDiscreteDynamicsWorld*	dynamicsWorld_;						//!< Gives all physics objects access to the dynamics world. Deallocation is handled in the destructor of PhysicsComponent.
 		static debugDrawDispatcher*	debugDrawer_;							//!< Gives all physics objects access to the debug drawer. Deallocation is handled in the destructor of PhysicsComponent.
 
-		btVector3 localInertiaBasedOnCollisionShapeAndMass(btScalar mass);	//!< Called from "subClassCalculateLocalInertiaHook" by subclasses.
-		btVector3 zeroLocalInertia();										//!< Called from "subClassCalculateLocalInertiaHook" by subclasses.
+		btVector3 localInertiaBasedOnCollisionShapeAndMass(btScalar mass);	//!< Called from "subClassCalculateLocalInertiaHook" by some subclasses.
+		btVector3 zeroLocalInertia();										//!< Called from "subClassCalculateLocalInertiaHook" by some subclasses.
+		void removePhysicsAttributeCorrespondingToThisPhysicsObject();		//!< Called from "handleOutOfBounds" by some subclasses.
 		virtual btCollisionShape* subClassSpecificCollisionShape();			//!< May be overridden by subclasses. Is called from the end of init.
-		virtual void hover(float delta, float hoverHeight);					//!< hover above ground by sening a ray straight down from the Physics Object's position.
+		virtual void hover(float delta, float hoverHeight);					//!< Hover above ground by sending a ray straight down from the position of the Physics Object.
+		
 public:
 	PhysicsObject();
 	virtual ~PhysicsObject();

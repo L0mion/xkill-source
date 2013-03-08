@@ -539,6 +539,11 @@ Attribute_Player::Attribute_Player()
 	canSprint = true;
 	sprintRechargeRate = 0.2f;
 	executing = false;
+	speedHackActive = false;
+	jetHackActive = false;
+	cycleHackActive = false;
+
+
 	playerName = "NaN";
 
 	walkSpeed = 5.0f;
@@ -778,7 +783,7 @@ DataItemList* Attribute_Pickupable::getDataList()
 	DataItemList* list = new DataItemList();
 
 	list->add(&ptr_position, 						"ptr_position");
-	list->add(&ptr_physics, 							"ptr_physics");
+	list->add(&ptr_physics, 						"ptr_physics");
 	list->add(&ptr_pickupablesSpawnPoint_creator, 	"ptr_creatorPickupablesSpawnPoint");
 	//list->add_AttributePointer(pickupableType, "pickupableType");
 	list->add(amount, "amount");
@@ -1001,6 +1006,7 @@ void Behavior_Offset::updateOffset()
 		Float4 parent_rot = ptr_parent_spatial_rotation->rotation;
 		Float4 own_rot = ptr_spatial->rotation;
 		XMVECTOR xv_own_rot =  XMLoadFloat4(( XMFLOAT4*)&own_rot);
+
 		//
 		// Add rotation offset relative to parent
 		//
@@ -1010,10 +1016,9 @@ void Behavior_Offset::updateOffset()
 		xv_rot_offset =  XMQuaternionMultiply(xv_rot_offset, parent_xv_rot);
 
 
-
-		// Slerp interpolate to smooth out moment
-		float MAGIC_SLERP_NUMBER = 1.0f;
-		xv_rot_offset = XMQuaternionSlerp(xv_rot_offset, xv_own_rot, MAGIC_SLERP_NUMBER*ATTRIBUTE_MANAGER->settings->trueDeltaTime);
+		//// Slerp interpolate to smooth out moment
+		//float MAGIC_SLERP_NUMBER = 1.0f;
+		//xv_rot_offset = XMQuaternionSlerp(xv_rot_offset, xv_own_rot, MAGIC_SLERP_NUMBER*ATTRIBUTE_MANAGER->settings->trueDeltaTime);
 
 		Float4 rot_offset;  XMStoreFloat4(( XMFLOAT4*)&rot_offset, xv_rot_offset);
 		ptr_spatial->rotation = rot_offset;

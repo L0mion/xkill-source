@@ -62,17 +62,7 @@ void ManagementInstance::addInstance(AttributePtr<Attribute_Render> ptr_render)
 	while(itrCamera.hasNext())
 	{
 		AttributePtr<Attribute_Camera> ptr_camera = itrCamera.getNext();
-
-		/*Float3 p0 = ptr_position->position;
-		Float3 p1 = ptr_camera->ptr_spatial->ptr_position->position;
-		Float3 p2 = ptr_camera->ptr_spatial->ptr_position->position + ptr_camera->look;
-		
-		float l = (p2-p1).length();
-		float t = (p1-p0).dot(p2-p1)/(l*l);*/
-
-		//Add instance to camera if not culled.
-		//if(t < 0) //
-		if(ptr_render->culling.getBool(0))//ptr_camera.index()))
+		if(ptr_render->culling.getBool(ptr_camera.index()))
 		{
 			addCameraInstance(ptr_camera, ptr_render->meshID, instance);
 		}

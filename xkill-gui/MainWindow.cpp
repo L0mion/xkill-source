@@ -46,7 +46,7 @@ MainWindow::MainWindow()
 	ui.setupUi(this);
 	ui.mainToolBar->hide();
 	MainWindow::setWindowTitle("XKILL");
-	resize(800, 600);
+	resize(1000, 600);
 	QWidget::setAttribute(Qt::WA_PaintOnScreen);
 
 	// init game
@@ -69,7 +69,6 @@ MainWindow::MainWindow()
 	this->installEventFilter(this);
 
 	slot_toggleFullScreen();			//Fullscreen
-
 	// DEBUG build specific settings (setAlwaysOnTopAndShow(false) is set in Menu_Main2::Menu_Main2() if DEBUG)
 #if defined(DEBUG) || defined(_DEBUG)
 	slot_toggleFullScreen();			//Windowed
@@ -107,6 +106,7 @@ void MainWindow::onEvent( Event* e )
 
 void MainWindow::keyPressEvent( QKeyEvent* e )
 {
+	
 	// Toggle full screen
 	if((e->key()==Qt::Key_Return) && (e->modifiers()==Qt::AltModifier))
 		slot_toggleFullScreen();
@@ -118,7 +118,7 @@ void MainWindow::keyPressEvent( QKeyEvent* e )
 	// Toggle editor
 	if((e->key()==Qt::Key_F1))
 		ui.dockWidget->toggleViewAction()->activate(QAction::Trigger);
-
+	
 	// Skip menu
 	if((e->key()==Qt::Key_F2))
 		SEND_EVENT(&Event(EVENT_STARTGAME));
@@ -135,14 +135,14 @@ void MainWindow::keyPressEvent( QKeyEvent* e )
 	if((e->key()==Qt::Key_1))
 	{
 		{Event_PostHudMessage e("Punish them all"); e.receiver = Event_PostHudMessage::RECEIVER_ALL; e.setStyle(Event_PostHudMessage::STYLE_WARNING); SEND_EVENT(&e);}
-		{Event_PostHudMessage e("NullProcess is executing"); e.receiver = Event_PostHudMessage::RECEIVER_ALL; e.setStyle(Event_PostHudMessage::STYLE_SUBTILE); SEND_EVENT(&e);}
+		{Event_PostHudMessage e("");  e.receiver = Event_PostHudMessage::RECEIVER_ALL; e.setHtmlMessage("","NullProcess", "is executing"); SEND_EVENT(&e);}
 	}
 	if((e->key()==Qt::Key_2))
 	{
 		// Post hud messages
 		{Event_PostHudMessage e("");  e.receiver = Event_PostHudMessage::RECEIVER_ALL;e.setHtmlMessage("Now running in", "Kernel Mode"); SEND_EVENT(&e);}
 		{Event_PostHudMessage e(""); e.receiver = Event_PostHudMessage::RECEIVER_ALL; e.setHtmlMessage("Chosen by Scheduler"); SEND_EVENT(&e);}
-		{Event_PostHudMessage e("");  e.receiver = Event_PostHudMessage::RECEIVER_ALL;e.setHtmlMessage("Blarrghh", "is executing"); e.receiver = Event_PostHudMessage::RECEIVER_ALL_BUT_SUBJECT; SEND_EVENT(&e);}
+		{Event_PostHudMessage e("");  e.receiver = Event_PostHudMessage::RECEIVER_ALL;e.setHtmlMessage("","Blarrghh", "is executing"); e.receiver = Event_PostHudMessage::RECEIVER_ALL_BUT_SUBJECT; SEND_EVENT(&e);}
 	}
 	if((e->key()==Qt::Key_3))
 	{
@@ -159,7 +159,7 @@ void MainWindow::keyPressEvent( QKeyEvent* e )
 		e.receiver = Event_PostHudMessage::RECEIVER_ALL;
 		SEND_EVENT(&e);
 	}
-
+	
 
 	//
 	// Menu controls during in-game
@@ -183,6 +183,7 @@ void MainWindow::keyPressEvent( QKeyEvent* e )
 			break;
 		}
 	}
+	
 	if(GET_STATE() == STATE_MAINMENU)
 	{
 		//switch(e->key())
@@ -326,4 +327,15 @@ bool MainWindow::eventFilter( QObject* object, QEvent* event )
 	}
 
 	return false;
+}
+
+void MainWindow::wheelEvent( QWheelEvent* e )
+{
+	int value = 0;
+	if(e->delta() > 0)
+		value = 1;
+	if(e->delta() < 0)
+		value = -1;
+
+	SEND_EVENT(&Event_MouseWheel(value));
 }

@@ -40,14 +40,7 @@ btVector3 PhysicsObject::subClassCalculateLocalInertiaHook(btScalar mass)
 btCollisionShape* PhysicsObject::subClassSpecificCollisionShape()
 {
 	AttributePtr<Attribute_Physics> ptr_physics = itrPhysics_.at(attributeIndex_);
-
-	int meshID = ptr_physics->meshID;
-	if(meshID == 3)
-	{
-		int g =5;
-	}
-	btCollisionShape* collisionShape = CollisionShapes::Instance()->getCollisionShape(meshID);
-
+	btCollisionShape* collisionShape = CollisionShapes::Instance()->getCollisionShape(ptr_physics->meshID);
 	return collisionShape;
 }
 
@@ -70,6 +63,13 @@ btVector3 PhysicsObject::zeroLocalInertia()
 	btVector3 localInertia;
 	localInertia.setZero();
 	return localInertia;
+}
+
+void PhysicsObject::removePhysicsAttributeCorrespondingToThisPhysicsObject()
+{
+	Entity* ownerEntityOfPhysicsAttribute = itrPhysics_.ownerAt(attributeIndex_);
+	int entityOwnerId = ownerEntityOfPhysicsAttribute->getID();
+	SEND_EVENT(&Event_RemoveEntity(entityOwnerId));
 }
 
 void PhysicsObject::hover(float delta, float hoverHeight)
@@ -187,10 +187,24 @@ void PhysicsObject::writeNonSynchronizedPhysicsObjectDataToPhysicsAttribute()
 }
 void PhysicsObject::onUpdate(float delta)
 {	
+	//OUTPUT_WINDOW_PRINT("getWorldTransform().getOrigin().y(): " << getWorldTransform().getOrigin().y());
+	
+	AttributePtr<Attribute_Physics> physicsAttribute = itrPhysics_.at(attributeIndex_);
+	Float3 position = physicsAttribute->ptr_spatial->ptr_position->position;
+	if(position.y < outOfBoundsIfYIsLowerThanThis)
 	if(getWorldTransform().getOrigin().y() < outOfBoundsIfYIsLowerThanThis)
 	{
 		handleOutOfBounds();
 	}
+	if(physicsAttribute->collisionFilterGroup == XKILL_Enums::PhysicsAttributeType::PICKUPABLE)
+	{
+		OUTPUT_WINDOW_PRINT("position.y: " << position.y);
+	}
+
+	//if(getWorldTransform().getOrigin().y() < outOfBoundsIfYIsLowerThanThis)
+	//{
+	//	handleOutOfBounds();
+	//}
 }
 
 void PhysicsObject::handleOutOfBounds()

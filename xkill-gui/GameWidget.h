@@ -99,13 +99,13 @@ public slots:
 		// Keep the game stable by preventing 
 		// delta time from getting to big, which
 		// usually happens during loading times.
-		float deltaLimit = 1.0f / 5; // always simulate at least 1.0 / x fps
+		float deltaLimit = 1.0f / 10; // always simulate at least 1.0 / x fps
 		if(delta > deltaLimit)
 			delta = deltaLimit;
 
 		// add time manipulation
-		ATTRIBUTE_MANAGER->settings->trueDeltaTime = delta;
-		delta *= ATTRIBUTE_MANAGER->settings->timeScale();
+		SETTINGS->trueDeltaTime = delta;
+		delta *= SETTINGS->timeScale();
 
 		computeFPS();
 		gameManager.update(delta);
@@ -151,6 +151,10 @@ protected:
 		QCoreApplication::sendEvent(parentWidget(), e);
 	}
 	void keyReleaseEventEvent(QKeyEvent *e)
+	{
+		QCoreApplication::sendEvent(parentWidget(), e);
+	}
+	void wheelEvent(QWheelEvent *e)
 	{
 		QCoreApplication::sendEvent(parentWidget(), e);
 	}

@@ -1,17 +1,12 @@
 #include "AttributeManager.h"
 #include "EntityStorage.h"
+#include "DataItem.h"
 
 
-
-void AttributeManager::createEntityStorage()
-{
-	entities = new EntityStorage;
-}
 
 AttributeManager::~AttributeManager()
 {
 	delete entities;
-	delete settings;
 }
 
 AttributeManager* AttributeManager::instance()
@@ -25,12 +20,21 @@ AttributeManager* AttributeManager::instance()
 	return &instance;
 }
 
-float Settings::timeScale()
+AttributeManager::AttributeManager()
+{
+	// Create entity storage
+	entities = new EntityStorage;
+	
+	// Create settings attribute which holds all in game settings
+	settings.createAttribute(entities->createEntity());
+}
+
+float Attribute_Settings::timeScale()
 {
 	return _timeScale;
 }
 
-void Settings::setTimeScale( float timeScale )
+void Attribute_Settings::setTimeScale( float timeScale )
 {
 	_timeScale = timeScale;
 
@@ -41,7 +45,7 @@ void Settings::setTimeScale( float timeScale )
 		_timeScale = 0.01f;
 }
 
-Settings::Settings()
+Attribute_Settings::Attribute_Settings()
 {
 	timeUntilScheduling = 0.0f;
 	numErrors = 0;
@@ -53,4 +57,18 @@ Settings::Settings()
 	timeLimit = 0.0f;
 	cycleLimit = 35;
 	showDebugPhysics = false;
+}
+
+DataItemList* Attribute_Settings::getDataList()
+{
+	DataItemList* list = new DataItemList();
+
+	list->add(soundVolume, "soundVolume");
+
+	return list;
+}
+
+void Attribute_Settings::saveTo( DataItemList* list )
+{
+	list->get(&soundVolume);
 }

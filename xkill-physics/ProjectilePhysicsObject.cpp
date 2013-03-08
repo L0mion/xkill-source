@@ -100,7 +100,5 @@ btCollisionShape* ProjectilePhysicsObject::subClassSpecificCollisionShape()
 
 void ProjectilePhysicsObject::handleOutOfBounds()
 {
-	Entity* ownerEntityOfPhysicsAttribute = itrPhysics_ProjectilePhysicsObject.ownerAt(attributeIndex_);
-	int entityOwnerId = ownerEntityOfPhysicsAttribute->getID();
-	SEND_EVENT(&Event_RemoveEntity(entityOwnerId));
+	removePhysicsAttributeCorrespondingToThisPhysicsObject();
 }

@@ -36,7 +36,7 @@ void CullingComponent::onEvent(Event* e)
 		while(itrRender.hasNext())
 		{
 			AttributePtr<Attribute_Render> ptr_render = itrRender.getNext();
-			if(ptr_render->meshID > 99)
+			if(ptr_render->meshID == 200)
 			{
 				Float3 position = ptr_render->ptr_spatial->ptr_position->position;
 				if(min_.x > ((int)position.x))
@@ -58,7 +58,7 @@ void CullingComponent::onEvent(Event* e)
 		while(itrRender.hasNext())
 		{
 			AttributePtr<Attribute_Render> ptr_render = itrRender.getNext();
-			if(ptr_render->meshID > 99)
+			if(ptr_render->meshID == 200)
 			{
 				Int2 pos = Int2((int)ptr_render->ptr_spatial->ptr_position->position.x-min_.x,(int)ptr_render->ptr_spatial->ptr_position->position.z-min_.y);
 				nodes_.at((pos.x) + (pos.y) * width).push_back(ptr_render);
@@ -135,7 +135,7 @@ void CullingComponent::onUpdate(float delta)
 	while(itrRender.hasNext())
 	{
 		AttributePtr<Attribute_Render> ptr_render = itrRender.getNext();
-		if(ptr_render->meshID > 99)
+		if(ptr_render->meshID != XKILL_Enums::ModelId::LASER && ptr_render->meshID != 201)
 		{
 			ptr_render->culling.clear();
 		}
@@ -143,6 +143,26 @@ void CullingComponent::onUpdate(float delta)
 	while(itrCamera.hasNext())
 	{
 		AttributePtr<Attribute_Camera> ptr_camera = itrCamera.getNext();
+		//quadtreecull
 		cameraVsNode(min_,max_,ptr_camera);
+		//simple cull
+		while(itrRender.hasNext())
+		{
+			AttributePtr<Attribute_Render> ptr_render = itrRender.getNext();
+			if(ptr_render->meshID != XKILL_Enums::ModelId::LASER && ptr_render->meshID != 200 && ptr_render->meshID != 201)
+			{
+				Float3 p0 = ptr_render->ptr_spatial->ptr_position->position;
+				Float3 p1 = ptr_camera->ptr_spatial->ptr_position->position;
+				Float3 p2 = ptr_camera->ptr_spatial->ptr_position->position + ptr_camera->look;
+		
+				float l = (p2-p1).length();
+				float t = (p1-p0).dot(p2-p1)/(l*l);
+				if(t < 0)
+				{
+					ptr_render->culling.setBool(ptr_camera.index(),true);
+				}
+			}
+		}
 	}
+
 }

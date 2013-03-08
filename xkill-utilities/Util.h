@@ -8,6 +8,8 @@
 #include "SimpleQueue.h"
 #include <vector>
 
+#include <Windows.h> //OutputDebugString
+#include <sstream> //std::ostringstream
 
 //
 // EVIL MACROS
@@ -86,7 +88,6 @@
 // Defines DEBUGPRINT to a printf utilizing std::ostringstream function in Debug configuration
 #ifdef XKILL_DEBUG
 #define BULLETPHYSICSDEBUGDRAW true //render Bullet Physics debug lines true/false
-#include <sstream>
 #define DEBUGPRINT(DATA_STREAM)									\
 	{															\
 	std::ostringstream oss;										\
@@ -94,5 +95,13 @@
 	printf(oss.str().c_str());									\
 	}
 #endif
+
+// Print string to the "Output" window of Visual Studio using OutputDebugString
+#define OUTPUT_WINDOW_PRINT(stream)				\
+{												\
+	std::wostringstream os;						\
+	os << stream << "\n";						\
+	OutputDebugString(os.str().c_str());		\
+}
 
 // END OF EVIL

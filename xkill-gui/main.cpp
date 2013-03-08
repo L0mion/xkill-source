@@ -23,6 +23,7 @@ int main(int argc,char** argv) //debug draw test main
 #endif
 
 	// Create MainWindow
+	Math::init();
 	QApplication a(argc, argv); //int r = qtinit(); if(r) return r;
 	MainWindow w;
 	w.show();
