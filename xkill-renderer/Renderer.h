@@ -41,7 +41,7 @@ class SubsetD3D;
 #include "ShadingDesc.h"
 #include "ShadowMapping.h"
 
-//#define VISUALLEAKDETECTOR;
+//#define VISUALLEAKDETECTOR
 #if (defined(DEBUG) || defined(_DEBUG)) && defined(VISUALLEAKDETECTOR)
 	#include <vld.h>
 #endif
@@ -150,6 +150,8 @@ private:
 
 	ID3D11Buffer* debugLinesVertexBuffer_;		//!< Might want to move this into some manager of some sort.
 	ID3D11Buffer*			rayBuffer;
+
+	ShadowMatrices shadowMatrices_;
 
 	//temp
 	M3DLoader*		m3dLoader_;

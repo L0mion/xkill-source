@@ -25,9 +25,12 @@ public:
 	ManagementInstance();	//!< Calls attributes init-macro.
 	~ManagementInstance();	//!< Clears all InstancedData held by ManagementInstance.
 
+	void init();
+
 	void update(ID3D11Device* device, ID3D11DeviceContext* devcon); //!< Resets all InstancedData in map. Fills each InstancedData with updated instances. Calls update-method on all InstancedData-objects.
 
 	CameraInstances* getCameraInstancesFromCameraIndex(unsigned int camIndex);
+	CameraInstances* getShadowInstances();
 protected:
 private:
 	void addInstance(AttributePtr<Attribute_Render> ptr_render);
@@ -42,6 +45,7 @@ private:
 	std::map<
 		unsigned int,
 		CameraInstances*> cameraInstancesMap_;
+	CameraInstances* shadowInstances_;;
 };
 
 #endif //XKILL_RENDERER_MANAGEMENTRENDERAT_H

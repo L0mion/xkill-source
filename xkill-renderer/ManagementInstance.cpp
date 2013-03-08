@@ -10,6 +10,8 @@ ATTRIBUTES_DECLARE_ALL;
 ManagementInstance::ManagementInstance()
 {
 	ATTRIBUTES_INIT_ALL;
+
+	shadowInstances_ = nullptr;
 }
 ManagementInstance::~ManagementInstance()
 {
@@ -20,6 +22,8 @@ ManagementInstance::~ManagementInstance()
 	{
 		SAFE_DELETE(i->second);
 	}
+
+	SAFE_DELETE(shadowInstances_);
 }
 
 void ManagementInstance::update(ID3D11Device* device, ID3D11DeviceContext* devcon)
@@ -32,6 +36,7 @@ void ManagementInstance::update(ID3D11Device* device, ID3D11DeviceContext* devco
 	{
 		i->second->reset();
 	}
+	shadowInstances_->reset();
 
 	//Fill instance-lists with updated data.
 	while(itrRender.hasNext())
@@ -47,6 +52,12 @@ void ManagementInstance::update(ID3D11Device* device, ID3D11DeviceContext* devco
 	{
 		i->second->update(device, devcon);
 	}
+	shadowInstances_->update(device, devcon);
+}
+
+void ManagementInstance::init()
+{
+	shadowInstances_ = new CameraInstances();
 }
 
 void ManagementInstance::addInstance(AttributePtr<Attribute_Render> ptr_render)
@@ -67,6 +78,9 @@ void ManagementInstance::addInstance(AttributePtr<Attribute_Render> ptr_render)
 			addCameraInstance(ptr_camera, ptr_render->meshID, instance);
 		}
 	}
+
+	if(ptr_render->meshID == 200)
+		shadowInstances_->addInstance(ptr_render->meshID, instance);
 }
 void ManagementInstance::addCameraInstance(
 	AttributePtr<Attribute_Camera> ptr_camera,
@@ -131,7 +145,10 @@ CameraInstances* ManagementInstance::getCameraInstancesFromCameraIndex(unsigned 
 
 	return cameraInstances;
 }
-
+CameraInstances* ManagementInstance::getShadowInstances()
+{
+	return shadowInstances_;
+}
 //InstancedData* ManagementInstance::getInstancesFromMeshID(unsigned int meshID)
 //{
 //	InstancedData* instancedData = nullptr;
