@@ -91,7 +91,7 @@ void GameComponent::onEvent(Event* e)
 }
 
 void GameComponent::onUpdate(float delta)
-{
+{new int;
 	//--------------------------------------------------------------------------------------
 	// Handle player attributes
 	//--------------------------------------------------------------------------------------
@@ -804,7 +804,7 @@ void GameComponent::event_StartDeathmatch( Event_StartDeathmatch* e )
 		AttributePtr<Attribute_WeaponStats>		ptr_weaponStats	=	ptr_player	->	ptr_weaponStats	;
 		switchFiringMode(ptr_weaponStats);	//Ensure ammunition disablement (selected from menu)
 		
-		SEND_EVENT(&Event_HackActivated(5000.0f, XKILL_Enums::HackType::JETHACK, ptr_player)); //check jetpack giveaway
+		//SEND_EVENT(&Event_HackActivated(5000.0f, XKILL_Enums::HackType::JETHACK, ptr_player)); //check jetpack giveaway
 	}
 
 	//Create mesh for debugging fbx-loading.
@@ -964,16 +964,18 @@ void GameComponent::updateAndInterpretAimingRay(Entity* rayCastingPlayerEntity, 
 		AttributePtr<Attribute_Player> rayCastingPlayerAttribute = itrPlayer.at(rayCastingPlayerAttributeId.at(i));	
 		
 		//--------------------------------------------------------------------------------------
-		// Set weapon rotation depending on how far away the aiming ray hit something (closestHitPoint)
+		// Rotate weapon. Set weapon rotation depending on how far away the aiming ray hit something (closestHitPoint)
 		//--------------------------------------------------------------------------------------
 		Float3 playerLookDirection = hitPoint - ptr_camera->ptr_spatial->ptr_position->position;
 		playerLookDirection.normalize();
 
-		Float3 weaponLookDirection = hitPoint - rayCastingPlayerAttribute->ptr_weapon_offset->ptr_spatial->ptr_position->position;
-		weaponLookDirection.normalize();
+		Float3 from = rayCastingPlayerAttribute->ptr_weapon_offset->ptr_spatial->ptr_position->position;
+
+		//Float3 weaponLookDirection = hitPoint - from;
+		//weaponLookDirection.normalize();
 
 		Float4 newWeaponRotationQuaternion;
-		newWeaponRotationQuaternion = newWeaponRotationQuaternion.quaternionLookAt(hitPoint, rayCastingPlayerAttribute->ptr_weapon_offset->ptr_spatial->ptr_position->position);
+		newWeaponRotationQuaternion = newWeaponRotationQuaternion.quaternionLookAt(hitPoint, from);
 		newWeaponRotationQuaternion.normalize();
 
 		rayCastingPlayerAttribute->ptr_weapon_offset->ptr_spatial->rotation = newWeaponRotationQuaternion.quaternionInverse(); //Set weapon rotation
@@ -1035,8 +1037,10 @@ void GameComponent::updateAndInterpretLaser(AttributePtr<Attribute_Ray> ptr_ray,
 	{
 		closestHitPoint = to;
 	}
-
+	
+	//--------------------------------------------------------------------------------------
 	// Rotate laser
+	//--------------------------------------------------------------------------------------
 	ptr_ray->from = ptr_player->ptr_weaponFireLocation_spatial->ptr_position->position;
 	ptr_ray->to = closestHitPoint;
 

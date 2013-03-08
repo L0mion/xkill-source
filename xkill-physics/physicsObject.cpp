@@ -187,18 +187,12 @@ void PhysicsObject::writeNonSynchronizedPhysicsObjectDataToPhysicsAttribute()
 }
 void PhysicsObject::onUpdate(float delta)
 {	
-	//OUTPUT_WINDOW_PRINT("getWorldTransform().getOrigin().y(): " << getWorldTransform().getOrigin().y());
-	
 	AttributePtr<Attribute_Physics> physicsAttribute = itrPhysics_.at(attributeIndex_);
 	Float3 position = physicsAttribute->ptr_spatial->ptr_position->position;
 	if(position.y < outOfBoundsIfYIsLowerThanThis)
 	if(getWorldTransform().getOrigin().y() < outOfBoundsIfYIsLowerThanThis)
 	{
 		handleOutOfBounds();
-	}
-	if(physicsAttribute->collisionFilterGroup == XKILL_Enums::PhysicsAttributeType::PICKUPABLE)
-	{
-		OUTPUT_WINDOW_PRINT("position.y: " << position.y);
 	}
 
 	//if(getWorldTransform().getOrigin().y() < outOfBoundsIfYIsLowerThanThis)
