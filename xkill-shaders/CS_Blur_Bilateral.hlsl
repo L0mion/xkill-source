@@ -25,8 +25,8 @@ float3 GetNormalV(float3 normalW)
 float2 GetTexCoordGlobal(int2 xy)
 {
 	return float2(
-		(float)(xy.x + viewportTopX) / (float)ssaoWidth,
-		(float)(xy.y + viewportTopY) / (float)ssaoHeight);
+		(float)(xy.x /* + viewportTopX*/) / (float)ssaoWidth,
+		(float)(xy.y /* + viewportTopY*/) / (float)ssaoHeight);
 }
 
 void CacheData(int index, int2 xy)
@@ -34,8 +34,8 @@ void CacheData(int index, int2 xy)
 	float2 xyGlobal = GetTexCoordGlobal(xy);
 
 	sharedCache[index] = toBlur[xy];
-	sharedDepth[index] = bufferDepth				.SampleLevel(ssDepth,	xyGlobal, 0).x;
-	sharedNormV[index] = GetNormalV(gBufferNormal	.SampleLevel(ssNormal,	xyGlobal, 0).xyz);
+	sharedDepth[index] = bufferDepth				.SampleLevel(ssDepth,	xyGlobal,	0).x;
+	sharedNormV[index] = GetNormalV(gBufferNormal	.SampleLevel(ssNormal,	xyGlobal,	0).xyz);
 }
 
 #endif //XKILL_RENDERER_CS_BLUR_BILATERAL_HLSL

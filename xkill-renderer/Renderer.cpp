@@ -1181,6 +1181,8 @@ void Renderer::buildSSAOMap(ViewportData& vpData)
 	managementBuffer_->setBuffer(devcon, SET_ID_SSAO, SET_TYPE_SRV, SET_STAGE_CS, 9);
 	managementBuffer_->setBuffer(devcon, SET_ID_SSAO_UTIL, SET_TYPE_UAV, SET_STAGE_CS, 1);
 
+	managementCB_->setCB(CB_TYPE_BLUR, TypeFX_CS, CB_REGISTER_BLUR, devcon);
+
 	unsigned int numBlocksX = (unsigned int)ceilf(viewportWidth / 256.0f);
 	devcon->Dispatch(numBlocksX, viewportHeight, 1);
 

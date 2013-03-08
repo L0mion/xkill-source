@@ -9,33 +9,32 @@ void CS_Blur_Bilateral_Vert(
 	int3	threadIDBlock		: SV_GroupThreadID)
 {
 	const BlurKernel blurKernel = ExtractBlurKernel();
+	const int2 dispatch = threadIDDispatch.xy + int2(viewportTopX, viewportTopY);
 
 	//Load texel, depth and view-space normal into shared memory to reduce memory bandwidth:
-	int2 xy = min(
-		threadIDDispatch.xy, 
-		toBlur.Length.xy - 1); //Clamp out of bound samples that occur at image borders.
+	int2 xy = min(dispatch, toBlur.Length.xy - 1); //Clamp out of bound samples that occur at image borders.
 	CacheData(
 		threadIDBlock.y + blurRadius,
-		xy + uint2(viewportTopX, viewportTopY));
+		xy);
 
 	//Have some pixels read an additional texel into shared memory to make up for blurRadius:
 	if(threadIDBlock.y < blurRadius)
 	{
 		xy = int2(
-			threadIDDispatch.x, 
-			max(threadIDDispatch.y - blurRadius, 0)); //Clamp out of bound samples that occur at image borders. 
+			dispatch.x, 
+			max(dispatch.y - blurRadius, 0)); //Clamp out of bound samples that occur at image borders. 
 		CacheData(
 			threadIDBlock.y,
-			xy + uint2(viewportTopX, viewportTopY));
+			xy);
 	}
 	if(threadIDBlock.y >= N - blurRadius)
 	{
 		xy = int2(
-			threadIDDispatch.x, //Clamp out of bound samples that occur at image borders.
-			min(threadIDDispatch.y + blurRadius, toBlur.Length.y - 1));
+			dispatch.x, //Clamp out of bound samples that occur at image borders.
+			min(dispatch.y + blurRadius, toBlur.Length.y - 1));
 		CacheData(
 			threadIDBlock.y + 2 * blurRadius,
-			xy + uint2(viewportTopX, viewportTopY));
+			xy);
 	}
 	GroupMemoryBarrierWithGroupSync();
 
