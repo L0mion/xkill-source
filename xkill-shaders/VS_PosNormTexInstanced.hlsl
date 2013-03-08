@@ -12,7 +12,10 @@ VSOutPosNormWTex VS_PosNormTexInstanced(VSInPosNormTexInstanced vsIn)
 	pos = mul(pos, projection);
 	output.position	= pos;
 
-	output.normalW = mul(float4(vsIn.normal, 0.0f), vsIn.world).xyz;
+	float4 normal = float4(vsIn.normal, 0.0f);
+	normal = mul(normal, vsIn.world);	//world space
+	//normal = mul(normal, view);			//view space
+	output.normalW = normal.xyz;
 
 	output.texcoord	= vsIn.texcoord;
 
