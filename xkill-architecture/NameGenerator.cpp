@@ -1118,8 +1118,27 @@ void NameGenerator::reset()
 	addName("selection of section");
 	addName("candyland");
 	addName("paper art");
+	addName("reserved vector");
+	addName("all ways");
+	addName("cover-up operation");
+	addName("major breakthrough");
+	addName("commander");
+	addName("make");
+	addName("mixed case");
+	addName("half-eaten birthday cake");
+	addName("burning candles");
+	addName("wreck of Titanic");
+	addName("find me if you can");
+	addName("hit or miss");
+	addName("funny bone");
+	addName("flintstone authority");
+	addName("unauthorized");
+	addName("inside of glass eye");
+	addName("spectrum of pain");
+	addName("low-level");
+	addName("high-level");
+	addName("");
 
-	
 	//C++ keywords
 	addName("alignas");
 	addName("alignof");
