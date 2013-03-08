@@ -1105,6 +1105,10 @@ void NameGenerator::reset()
 	addName("solver");
 	addName("raid by night");
 	addName("pinned down");
+	addName("windbreaker");
+	addName("fine leather jackets");
+	addName("hazardous player");
+
 	
 	//C++ keywords
 	addName("alignas");
