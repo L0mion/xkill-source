@@ -25,7 +25,11 @@ public:
 	void* overlayWidget;
 	float timeUntilScheduling;
 
-	
+	//ssao
+	float occlusionRadius;
+	float occlusionScale;
+	float occlusionBias;
+	float occlusionIntensity;
 
 	float timeScale();
 	void setTimeScale(float timeScale);

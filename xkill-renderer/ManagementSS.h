@@ -10,7 +10,10 @@ enum SS_ID
 {
 	SS_ID_DEFAULT,
 	SS_ID_SPRITE,
-	SS_ID_SHADOW
+	SS_ID_SHADOW,
+	SS_ID_NORMAL,
+	SS_ID_DEPTH,
+	SS_ID_RANDOM
 };
 
 //! Class for maintaining sampler states.
@@ -38,18 +41,18 @@ public:
 
 	void unsetSS();
 private:
-	//! Initializes the variable ssDefault_.
-	/*!
-	\return Return any error encountered.
-	\param device A pointer to a DirectX Device.
-	\sa ssDefault_
-	*/
 	HRESULT initSSDefault(ID3D11Device* device);
-
 	HRESULT initSSShadow(ID3D11Device* device);
+	HRESULT initSSNormal(ID3D11Device* device);
+	HRESULT initSSDepth(ID3D11Device* device);
+	HRESULT initSSRandom(ID3D11Device* device);
 
 	ID3D11SamplerState* ssDefault_;	//!< A sampler state object.
 	ID3D11SamplerState* ssShadow_;
+
+	ID3D11SamplerState* ssNormal_;
+	ID3D11SamplerState* ssDepth_;
+	ID3D11SamplerState* ssRandom_;
 };
 
 #endif //XKILL_RENDERER_SSMANAGEMENT_H

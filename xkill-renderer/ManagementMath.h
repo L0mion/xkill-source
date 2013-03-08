@@ -24,6 +24,9 @@ public:
 		DirectX::XMFLOAT4X4 projectionMatrix);
 	DirectX::XMFLOAT4X4 calculateMatrixInverse(DirectX::XMFLOAT4X4 matrix);
 
+	float getRandom();
+	float getRandom(float min, float max);
+
 	DirectX::XMFLOAT4X4 getIdentityMatrix() { return identityMatrix_; }
 protected:
 private:
