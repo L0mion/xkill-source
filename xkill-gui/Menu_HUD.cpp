@@ -123,32 +123,37 @@ void Menu_HUD::mapToSplitscreen()
 	// Move HUD messages to center
 	hudMessage_manager.move(centerPos);
 
-	//// Create weapon select
-	//{
-	//	QLabel l = new QLabel(this);
-	//	l->setPixmap(":/xkill/images/icons/cross_hairs/crosshair_bullet.png");
+	// Create weapon info
+	{
+		const int kIconSize = 32;
+		Float2 weaponInfoPos;
+		weaponInfoPos.x = ui.frame_bottom->pos().x() + ui.frame_bottom->width() - 15;
+		weaponInfoPos.y = ui.frame_bottom->pos().y();
+		
+		{
+			QLabel* l = new QLabel();
+			l->setPixmap(QString(":/xkill/images/icons/cross_hairs/crosshair_bullet.png"));
+			ui.verticalLayout_weaponInfo->addWidget(l);
+		}
+		{
+			QLabel* l = new QLabel();
+			l->setPixmap(QString(":/xkill/images/icons/cross_hairs/crosshair_explosive.png"));
+			ui.verticalLayout_weaponInfo->addWidget(l);
+		}
+		{
+			QLabel* l = new QLabel();
+			l->setPixmap(QString(":/xkill/images/icons/cross_hairs/crosshair_scatter.png"));
+			ui.verticalLayout_weaponInfo->addWidget(l);
+		}
 
-	//	// Determine image
-	//	QString path;
-	//	switch(index_crosshair) 
-	//	{
-	//	case XKILL_Enums::BULLET:
-	//		path = ":/xkill/images/icons/cross_hairs/crosshair_bullet.png";
-	//		break;
-	//	case XKILL_Enums::SCATTER:
-	//		path = ":/xkill/images/icons/cross_hairs/crosshair_scatter.png";
-	//		break;
-	//	case XKILL_Enums::EXPLOSIVE:
-	//		path = ":/xkill/images/icons/cross_hairs/crosshair_explosive.png";
-	//		break;
-	//	default:
-	//		path = ":/xkill/images/icons/default.png";
-	//		break;
-	//	}
-
-	//	// Set image to label
-	//	ui.label_aim->setPixmap(path);
-	//}
+		{
+			ui.groupBox_weaponInfo->resize(ui.groupBox_weaponInfo->sizeHint());
+			ui.groupBox_weaponInfo->move(0, 0);
+			ui.groupBox_weaponInfo->move(weaponInfoPos.x - ui.groupBox_weaponInfo->width(), weaponInfoPos.y - ui.groupBox_weaponInfo->height());
+		}
+	}
+	ui.groupBox_weaponInfo->hide();
+	ui.groupBox_weaponInfo2->hide();
 }
 
 void Menu_HUD::refresh()
