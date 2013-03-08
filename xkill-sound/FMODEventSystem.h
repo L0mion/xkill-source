@@ -40,6 +40,13 @@ class FMODEventSystem
 		int eventIndex;
 		int ownerPlayerEntityId;
 		FMOD::Event* FmodEvent;
+
+		//FmodEventStruct& operator=(const FmodEventStruct& rhs)
+		//{
+		//	this->eventIndex = rhs.eventIndex;
+		//	this->ownerPlayerEntityId = rhs.ownerPlayerEntityId;
+		//	this->FmodEvent = rhs.FmodEvent;
+		//}
 	};
 
 public:
@@ -59,6 +66,8 @@ public:
 	void StartSoundEventAt(unsigned int index, int ownerPlayerEntityId, Float3 position, bool use3DAudio);
 	/** \brief Stop playing the event at index.*/
 	void StopSoundEventAt(unsigned int index, int ownerPlayerEntityId);
+	/** \brief Stop all sounds except music.*/
+	void StopAllSoundEffects();
 	/** \brief Mutes all sounds.*/
 	void SetMuteSounds(bool mute = true);
 	/** \brief Set volume.*/

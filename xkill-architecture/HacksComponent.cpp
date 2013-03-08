@@ -15,6 +15,9 @@ HacksComponent::HacksComponent()
 
 	SUBSCRIBE_TO_EVENT(this, EVENT_HACK_ACTIVATED);
 	SUBSCRIBE_TO_EVENT(this, EVENT_PLAYERDEATH);
+	SUBSCRIBE_TO_EVENT(this, EVENT_END_DEATHMATCH);
+	SUBSCRIBE_TO_EVENT(this, EVENT_GAMEOVER);
+	SUBSCRIBE_TO_EVENT(this, EVENT_ENDGAME);
 }
 
 HacksComponent::~HacksComponent()
@@ -54,8 +57,19 @@ void HacksComponent::onEvent(Event* e)
 		{
 			Event_PlayerDeath* event_PlayerDeath = static_cast<Event_PlayerDeath*>(e);
 			removeAllPlayerHacks(itrPlayer.at(event_PlayerDeath->playerAttributeIndex));
+			break;
 		}
-		break;
+	case EVENT_END_DEATHMATCH:
+	case EVENT_GAMEOVER:
+	case EVENT_ENDGAME:
+		{
+			while(itrPlayer.hasNext())
+			{
+				removeAllPlayerHacks(itrPlayer.getNext());
+			}
+
+			break;
+		}
 	default:
 		{
 			break;
@@ -79,9 +93,8 @@ void HacksComponent::onUpdate(float delta)
 			if(timer->hasTimerExpired())
 			{
 				setPlayerAttributeHackFlags(activeHacks_[i][j]->second, static_cast<XKILL_Enums::HackType>(i), false);
-				removeIndexFromVector(activeHacks_[i], j);
-
 				SEND_EVENT(&Event_StopSound(XKILL_Enums::Sound::SOUND_JETPACK, itrPlayer.ownerIdAt(activeHacks_[i][j]->second.index())));
+				removeIndexFromVector(activeHacks_[i], j);
 
 				DEBUGPRINT("Hack " << Converter::IntToStr(i) << " expired.");
 			}

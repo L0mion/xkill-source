@@ -24,6 +24,9 @@ SoundComponent::SoundComponent()
 	SUBSCRIBE_TO_EVENT(this, EVENT_PLAYSOUND);
 	SUBSCRIBE_TO_EVENT(this, EVENT_STOPSOUND);
 	SUBSCRIBE_TO_EVENT(this, EVENT_START_DEATHMATCH);
+	SUBSCRIBE_TO_EVENT(this, EVENT_GAMEOVER);
+	SUBSCRIBE_TO_EVENT(this, EVENT_END_DEATHMATCH);
+	SUBSCRIBE_TO_EVENT(this, EVENT_ENDGAME);
 	SUBSCRIBE_TO_EVENT(this, EVENT_UPDATESOUNDSETTINGS);
 }
 
@@ -100,6 +103,10 @@ void SoundComponent::onEvent(Event* e)
 		int fmodEventIndex = converter->getFModIndex(eventIndex);
 		if(fmodEventIndex >= 0)
 			mFMODEventSystem->StopSoundEventAt(fmodEventIndex, ess->ownerEntityId);
+	}
+	else if(type == EVENT_GAMEOVER || type == EVENT_END_DEATHMATCH || type == EVENT_ENDGAME)
+	{
+		mFMODEventSystem->StopAllSoundEffects();
 	}
 }
 

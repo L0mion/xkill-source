@@ -117,15 +117,37 @@ void FMODEventSystem::StopSoundEventAt(unsigned int index, int ownerPlayerEntity
 		{
 			mEvents[i].FmodEvent->stop();
 
+			FmodEventStruct temp = mEvents[mEvents.size() - 1];
+			mEvents[mEvents.size() - 1] = mEvents[i];
+			mEvents[i] = temp;
+
+			mEvents.pop_back();
+			i--;
+		}
+	}
+}
+
+void FMODEventSystem::StopAllSoundEffects()
+{
+	for(unsigned int i = 0; i < mEvents.size(); i++)
+	{
+		FMOD::EventGroup* group;
+		mEvents[i].FmodEvent->getParentGroup(&group);
+
+		char* charGroupName;
+		group->getInfo(nullptr, &charGroupName);
+		std::string groupName(charGroupName);
+
+		if(groupName != "Music")
+		{
+			mEvents[i].FmodEvent->stop();
+
 			FMOD::Event* temp = mEvents[mEvents.size() - 1].FmodEvent;
 			mEvents[mEvents.size() - 1].FmodEvent = mEvents[i].FmodEvent;
 			mEvents[i].FmodEvent = temp;
 
 			mEvents.pop_back();
 			i--;
-
-			if(ownerPlayerEntityId < 0)
-				break;
 		}
 	}
 }
