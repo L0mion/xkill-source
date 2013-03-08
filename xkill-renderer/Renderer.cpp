@@ -20,7 +20,6 @@
 #include "ModelD3D.h"
 #include "Buffer_SrvRtv.h"
 #include "SubsetD3D.h"
-#include "DebugShapeD3D.h"
 #include "VB.h"
 #include "IB.h"
 #include "renderingUtilities.h"
@@ -30,7 +29,7 @@
 
 ATTRIBUTES_DECLARE_ALL;
 
-//#define XKILLPROFILING // commment away to skip profiling
+#define XKILLPROFILING // commment away to skip profiling
 #ifdef XKILLPROFILING
 #include <xkill-utilities\Converter.h>
 #include <time.h>
@@ -55,9 +54,6 @@ static std::vector<float> cbtimer;
 #define calctime(vectorname, call ) call
 #define outputaverage(outname, vectorname)
 #endif
-
-//temp
-#include "Buffer_SrvRtvUav.h"
 
 Renderer::Renderer(HWND windowHandle)
 {
@@ -320,7 +316,6 @@ HRESULT Renderer::initManagementModel()
 	HRESULT hr = S_OK;
 
 	managementModel_ = new ManagementModel();
-	hr = managementModel_->init();
 
 	return hr;
 }
@@ -434,8 +429,7 @@ void Renderer::render()
 			devcon,
 			shadowMapTransform,
 			managementLight_->getLightDirCurCount(),
-			managementLight_->getLightPointCurCount(),
-			managementLight_->getLightSpotCurCount());
+			managementLight_->getLightPointCurCount());
 
 		
 
@@ -530,21 +524,6 @@ void Renderer::renderViewportToGBuffer(ViewportData& vpData)
 		renderInstance(i->first, i->second, false);
 	}
 
-	//Make me use iterators!
-	AttributePtr<Attribute_DebugShape> ptr_debugShape;
-	while(itrDebugShape.hasNext())
-	{
-		ptr_debugShape = itrDebugShape.getNext();
-		if(ptr_debugShape->render)
-		{
-			renderDebugShape(
-				ptr_debugShape,
-				itrDebugShape.storageIndex(),
-				vpData.view, 
-				vpData.proj);
-		}
-	}
-
 	if(SETTINGS->showDebugPhysics)
 	{
 		drawBulletPhysicsDebugLines(vpData.view, vpData.proj);
@@ -591,7 +570,6 @@ void Renderer::renderViewportToBackBuffer(ViewportData& vpData)
 	//Set lights.
 	managementLight_->setLightSRVCS(devcon, LIGHTBUFFERTYPE_DIR,		LIGHT_SRV_REGISTER_DIR);
 	managementLight_->setLightSRVCS(devcon, LIGHTBUFFERTYPE_POINT,		LIGHT_SRV_REGISTER_POINT);
-	managementLight_->setLightSRVCS(devcon, LIGHTBUFFERTYPE_SPOT,		LIGHT_SRV_REGISTER_SPOT);
 	managementLight_->setLightSRVCS(devcon, LIGHTBUFFERTYPE_POS_VIEW,	LIGHT_SRV_REGISTER_POS);
 	
 	//Set default samplerstate.
@@ -606,7 +584,6 @@ void Renderer::renderViewportToBackBuffer(ViewportData& vpData)
 	//Unset and clean.
 	managementLight_->unsetLightSRVCS(devcon, LIGHTBUFFERTYPE_DIR,		LIGHT_SRV_REGISTER_DIR);
 	managementLight_->unsetLightSRVCS(devcon, LIGHTBUFFERTYPE_POINT,	LIGHT_SRV_REGISTER_POINT);
-	managementLight_->unsetLightSRVCS(devcon, LIGHTBUFFERTYPE_SPOT,		LIGHT_SRV_REGISTER_SPOT);
 	managementLight_->unsetLightSRVCS(devcon, LIGHTBUFFERTYPE_POS_VIEW,	LIGHT_SRV_REGISTER_POS);
 
 	managementFX_->unsetShader(devcon, SHADERID_CS_LIGHTING);
@@ -758,58 +735,6 @@ void Renderer::renderSubset(
 		numInstances,
 		0, 0, 0);
 }
-void Renderer::renderDebugShape(
-	AttributePtr<Attribute_DebugShape>	ptr_debugShape, 
-	unsigned int			shapeIndex,
-	DirectX::XMFLOAT4X4		viewMatrix, 
-	DirectX::XMFLOAT4X4		projectionMatrix)
-{
-	ID3D11Device*			device = managementD3D_->getDevice();
-	ID3D11DeviceContext*	devcon = managementD3D_->getDeviceContext();
-	
-	// Get transform matrices.
-	AttributePtr<Attribute_Spatial>	ptr_spatial		= ptr_debugShape->ptr_spatial;
-	AttributePtr<Attribute_Position> ptr_position = ptr_spatial->ptr_position;
-	DirectX::XMFLOAT4X4 worldMatrix			= managementMath_->calculateWorldMatrix(ptr_spatial, ptr_position);
-	DirectX::XMFLOAT4X4 worldMatrixInverse	= managementMath_->calculateMatrixInverse(worldMatrix);
-	DirectX::XMFLOAT4X4 finalMatrix			= managementMath_->calculateFinalMatrix(worldMatrix, viewMatrix, projectionMatrix);
-	
-	managementFX_->setShader(devcon, SHADERID_VS_COLOR);
-	managementFX_->setShader(devcon, SHADERID_PS_COLOR);
-
-	//Update per-object constant buffer.
-	managementCB_->setCB(CB_TYPE_OBJECT, TypeFX_VS, CB_REGISTER_OBJECT, devcon);
-	managementCB_->updateCBObject(
-		devcon, 
-		finalMatrix, 
-		worldMatrix, 
-		worldMatrixInverse);
-	
-	//Fetch renderer representation of shape.
-	DebugShapeD3D* shapeD3D = managementModel_->getDebugShapeD3D(shapeIndex, device);
-	
-	//Set vertex buffer.
-	ID3D11Buffer* vertexBuffer	= shapeD3D->getVB()->getVB();
-	unsigned int numVertices	= shapeD3D->getVB()->getNumVertices();
-
-	UINT stride = sizeof(VertexPosColor);
-	UINT offset = 0;
-	devcon->IASetVertexBuffers(
-		0, 
-		1, 
-		&vertexBuffer, 
-		&stride, 
-		&offset);
-
-	//Set input layout
-	managementFX_->setLayout(devcon, LAYOUTID_POS_COLOR);
-
-	//Set topology. Where to put this?
-	devcon->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_LINELIST);
-
-	//Draw subset.
-	devcon->Draw(numVertices, 0);
-}
 
 //Shadows
 DirectX::XMFLOAT4X4	Renderer::buildShadowMap()
@@ -819,7 +744,7 @@ DirectX::XMFLOAT4X4	Renderer::buildShadowMap()
 	//Get shadow transform:
 	SceneBounds bounds;
 	bounds.center = DirectX::XMFLOAT3(0.0f, 0.0f, 0.0f); //Origo.
-	bounds.radius = 38;//sqrtf(25.0f * 25.0f); //Radius of scene really ought to be calculated instead of fixed.
+	bounds.radius = 38; //Radius of scene really ought to be calculated instead of fixed.
 
 	LightDescDir dirLight = LightDescDir(); //default construct
 	AttributePtr<Attribute_Light_Dir> ptr_lightDir;
@@ -827,17 +752,6 @@ DirectX::XMFLOAT4X4	Renderer::buildShadowMap()
 	{
 		ptr_lightDir = itrLightDir.getNext();
 		dirLight = ptr_lightDir->lightDir;
-
-		//static float rotationAngle = 0.0f;
-		//rotationAngle += 0.0001f * delta;
-		//DirectX::XMMATRIX R = DirectX::XMMatrixRotationY(rotationAngle);
-		//
-		//DirectX::XMFLOAT3 tempDir = DirectX::XMFLOAT3(dirLight.direction.x, dirLight.direction.y, dirLight.direction.z);
-		//DirectX::XMVECTOR tempDir2 = XMLoadFloat3(&tempDir);
-		//tempDir2 = DirectX::XMVector3TransformNormal(tempDir2, R);
-		//DirectX::XMStoreFloat3(&tempDir, tempDir2);
-		//
-		//ptr_lightDir->lightDir.direction = Float3(tempDir.x, tempDir.y, tempDir.z);
 	}
 	itrLightDir.resetIndex();
 
@@ -1145,8 +1059,6 @@ void Renderer::buildSSAOMap(ViewportData& vpData)
 	ID3D11DeviceContext* devcon = managementD3D_->getDeviceContext();
 	
 	managementFX_->setShader(devcon, SHADERID_CS_SSAO);
-	
-	//Buffer_SrvRtvUav* ssaoMap = managementBuffer_->getSSAO();
 	
 	//Set uav
 	managementBuffer_->setBuffer(

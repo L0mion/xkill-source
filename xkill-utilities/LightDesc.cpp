@@ -27,6 +27,7 @@ LightDescPoint::~LightDescPoint()
 	//Do nothing.
 }
 
+/*
 LightDescSpot::LightDescSpot()
 {
 	ambient		= Float4(0.0f, 0.0f, 0.0f, 0.0f);
@@ -42,3 +43,4 @@ LightDescSpot::~LightDescSpot()
 {
 	//Do nothing.
 }
+*/

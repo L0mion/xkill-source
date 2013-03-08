@@ -647,12 +647,6 @@ void GameComponent::event_EndDeathmatch(Event_EndDeathmatch* e)
 		SEND_EVENT(&Event_RemoveEntity(itrLightPoint.ownerId()));
 	}
 
-	while(itrLightSpot.hasNext())
-	{
-		itrLightSpot.getNext();
-		SEND_EVENT(&Event_RemoveEntity(itrLightSpot.ownerId()));
-	}
-
 	//check
 	while(itrPickupable.hasNext())
 	{
