@@ -9,6 +9,7 @@
 class DLL_U Math
 {
 public:
+	static void init();
 	static int randomInt(int value);
 	static int randomInt(int min, int max);
 	static float randomFloat(float min, float max);

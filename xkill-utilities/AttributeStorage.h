@@ -54,6 +54,12 @@ public:
 		AttributePtr<T>::initClass(&attributes);
 	}
 
+	T* at(int index)
+	{
+		return &attributes.at(index);
+	}
+
+
 	int size()
 	{
 		return num_attributes;

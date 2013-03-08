@@ -328,3 +328,14 @@ bool MainWindow::eventFilter( QObject* object, QEvent* event )
 
 	return false;
 }
+
+void MainWindow::wheelEvent( QWheelEvent* e )
+{
+	int value = 0;
+	if(e->delta() > 0)
+		value = 1;
+	if(e->delta() < 0)
+		value = -1;
+
+	SEND_EVENT(&Event_MouseWheel(value));
+}

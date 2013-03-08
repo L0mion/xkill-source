@@ -26,7 +26,7 @@ void NameGenerator::reset()
 	addName("Simula");
 	addName("Modula");
 	addName("Java");
-	addName("not a name");
+	addName("not-a-name");
 	addName("semaphore");
 	addName("loop");
 	addName("breakpoint");
@@ -223,7 +223,6 @@ void NameGenerator::reset()
 	addName("imperative");
 	addName("agile");
 	addName("message");
-	addName("event");
 	addName("launch");
 	addName("word");
 	addName("integer");
@@ -292,7 +291,7 @@ void NameGenerator::reset()
 	addName("reset");
 	addName("unrecoverable");
 	addName("data failed to be");
-	addName("system overload");
+	addName("system-overload");
 	addName("reborn as Maya");
 	addName("invaluable token");
 	addName("MyClass");
@@ -307,7 +306,7 @@ void NameGenerator::reset()
 	addName("failed to load file");
 	addName("constant");
 	addName("variable");
-	addName("member of society");
+	addName("member-of-society");
 	addName("edit");
 	addName("almost valid");
 	addName("Battle In Operating System (BIOS)");
@@ -336,7 +335,7 @@ void NameGenerator::reset()
 	addName("take branch");
 	addName("escape");
 	addName("unordered sequence");
-	addName("briefer than life");
+	addName("briefer-than-life");
 	addName("call on fail");
 	addName("railway on ice");
 	addName("injection");
@@ -374,6 +373,7 @@ void NameGenerator::reset()
 	addName("shareware");
 	addName("freeware");
 	addName("bloatware");
+	addName("malware");
 	addName("shortest path");
 	addName("Dijkstra's algorithm");
 	addName("divide and conquer");
@@ -669,7 +669,7 @@ void NameGenerator::reset()
 	addName("soundsnap");
 	addName("aborted operation");
 	addName("does not compute");
-	addName("recalulation");
+	addName("recalculation");
 	addName("recalcitrant");
 	addName("burn the code");
 	addName("tried");
@@ -787,7 +787,7 @@ void NameGenerator::reset()
 	addName("closed coffin");
 	addName("smoke particles");
 	addName("plugin");
-	addName("Front-side bus");
+	addName("front-side bus");
 	addName("forlorn castles");
 	addName("cascading something");
 	addName("replayability");
@@ -816,6 +816,7 @@ void NameGenerator::reset()
 	addName("galaxy treatment");
 	addName("fried ham");
 	addName("strong typing");
+	addName("weak typing");
 	addName("pop a baloon");
 	addName("push");
 	addName("pulley");
@@ -881,7 +882,7 @@ void NameGenerator::reset()
 	addName("transmitter");
 	addName("blown to smithereens");
 	addName("stop and execuse");
-	addName("|God|");
+	addName("<>|God|<>");
 	addName("Jesus");
 	addName("remarkably plain wrong");
 	addName("cane-wielding forrester");
@@ -902,7 +903,7 @@ void NameGenerator::reset()
 	addName("collaboration effort");
 	addName("useless garbage");
 	addName("window of opportunity");
-	addName("fortunate recovery");
+	addName("recover");
 	addName("unexpected permission");
 	addName("enter");
 	addName("active window");
@@ -962,8 +963,8 @@ void NameGenerator::reset()
 	addName("testing environment");
 	addName("set head to next");
 	addName("It's O.K. I think");
-	addName("monkey trapped in spaceship");
-	addName("another color");
+	addName("monkey in a négligée");
+	addName("pick another color");
 	addName("plaster duster");
 	addName("pencil sharpener");
 	addName("I wonder");
@@ -978,7 +979,58 @@ void NameGenerator::reset()
 	addName("Frank D. Luna");
 	addName("trailing zero");
 	addName("backtrack");
-	
+	addName("Göran Fries");
+	addName("gcc");
+	addName("MSVCP110.dll");
+	addName("digital scrumboard");
+	addName("Danjer Cove");
+	addName("lossless loser");
+	addName("it's time to choose");
+	addName("planet workload");
+	addName("overslept overclocking");
+	addName("Island CX");
+	addName("The undergas");
+	addName("wirt's leg");
+	addName("first day of summer");
+	addName("do that later");
+	addName("fundamental flaw");
+	addName("metadata");
+	addName("lawbreaker");
+	addName("jawbreaker");
+	addName("the one");
+	addName("ore and mercury");
+	addName("my companion seemed to know the way");
+	addName("to arms and feet");
+	addName("captain's locker");
+	addName("mundane-looking farmer");
+	addName("dreaming processor");
+	addName("landscape architect");
+	addName("paintbrush of serenity");
+	addName("painter of two minds");
+	addName("use your experience");
+	addName("trigger happy");
+	addName("Sputnik");
+	addName("I digress");
+	addName("previous transgressions");
+	addName("channel open");
+	addName("something on your mind?");
+	addName("identify target");
+	addName("boots of blinding speed");
+	addName("transmit coordinates");
+	addName("dishevelled appearance");
+	addName("malevolent virus");
+	addName("magnitude of scale");
+	addName("flower of ipecac");
+	addName("chilling flamethrower");
+	addName("chainsaw and lawn mower");
+	addName("child-abducting demon");
+	addName("down to earth and back again");
+	addName("for each and every year");
+	addName("smell of rain");
+	addName("fear of anxiety");
+	addName("anthrax powder");
+	addName("wrong pivot");
+	addName("last of the living");
 	
 	//C++ keywords
 	addName("alignas");
@@ -1070,6 +1122,9 @@ void NameGenerator::addName(std::string name)
 {
 	names.push_back(name);
 }
+
+#pragma warning(disable: 4996)
+
 std::string NameGenerator::getName()
 {
 	// Reset names if all have been picked
@@ -1084,6 +1139,25 @@ std::string NameGenerator::getName()
 	// Remove name using Swap-Trick
 	names.at(index) = names.back();
 	names.pop_back();
+
+
+	// EASTER EGG
+	static bool wasShown = false;
+	static int numStarts = 0;
+	if(numStarts < 3)
+		numStarts++;
+	else
+	{
+		if(!wasShown)
+		{
+			if(Math::randomInt(0, 10) == 10)
+			{
+				wasShown = true;
+				name = getenv( "USERNAME" );
+			}
+		}
+	}
+		
 
 	// Return name
 	return name;
