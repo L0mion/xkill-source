@@ -175,7 +175,16 @@ void CollisionManager::collision_pickupable(Entity* entity1, Entity* entity2)
 							{
 								int randomPickupableTypeInt = rand()%XKILL_Enums::PickupableType::NROFPICKUPABLETYPES;
 								ptr_pickupable->pickupableType = (XKILL_Enums::PickupableType)randomPickupableTypeInt;
-								randomHack = true;
+
+								//--------------------------------------------------------------------------------------
+								// List of all hacks retrievable from random hack
+								//--------------------------------------------------------------------------------------
+								if(ptr_pickupable->pickupableType == XKILL_Enums::PickupableType::HACK_SPEEDHACK ||
+								ptr_pickupable->pickupableType == XKILL_Enums::PickupableType::HACK_JETHACK ||
+								ptr_pickupable->pickupableType == XKILL_Enums::PickupableType::HACK_CYCLEHACK)
+								{
+									randomHack = true;//check
+								}
 								break;
 							}
 
@@ -269,7 +278,6 @@ void CollisionManager::collision_pickupable(Entity* entity1, Entity* entity2)
 								amount = 10+rand()%20;
 								pickedUp = true;
 								float time = static_cast<float>(amount);
-								time /= 1000.0f;
 								SEND_EVENT(&Event_HackActivated(time, XKILL_Enums::HackType::CYCLEHACK, ptr_player));
 
 								// Post HUD message
@@ -277,7 +285,7 @@ void CollisionManager::collision_pickupable(Entity* entity1, Entity* entity2)
 								break;
 							}
 						}
-					}while(randomHack && infiniteLoopController < 100);
+					}while(randomHack && infiniteLoopController < 300);
 				}
 			}
 

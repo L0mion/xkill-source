@@ -118,7 +118,7 @@ void GameComponent::onUpdate(float delta)
 		if(ptr_health->health > 0.0f && !ptr_player->detectedAsDead)
 		{
 			//--------------------------------------------------------------------------------------
-			// Ammunition logic: Ammunnition change, firing mode change.
+			// Ammunition logic: Ammunition change, firing mode change.
 			//--------------------------------------------------------------------------------------
 			bool ammunitionSwitchReload = false;
 			if(ptr_input->changeAmmunitionType)

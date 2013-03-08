@@ -1137,7 +1137,9 @@ void NameGenerator::reset()
 	addName("spectrum of pain");
 	addName("low-level");
 	addName("high-level");
-	addName("");
+	addName("metro gremlin");
+	addName("keep single");
+	addName("stay put");
 
 	//C++ keywords
 	addName("alignas");
