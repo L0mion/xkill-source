@@ -6,17 +6,29 @@ ManagementSS::ManagementSS()
 {
 	ssDefault_	= nullptr;
 	ssShadow_	= nullptr;
+
+	ssNormal_	= nullptr;
+	ssDepth_	= nullptr;
+	ssRandom_	= nullptr;
 }
 ManagementSS::~ManagementSS()
 {
 	SAFE_RELEASE(ssDefault_);
 	SAFE_RELEASE(ssShadow_);
+
+	SAFE_RELEASE(ssNormal_);
+	SAFE_RELEASE(ssDepth_);
+	SAFE_RELEASE(ssRandom_);
 }
 
 void ManagementSS::reset()
 {
 	SAFE_RELEASE(ssDefault_);
 	SAFE_RELEASE(ssShadow_);
+
+	SAFE_RELEASE(ssNormal_);
+	SAFE_RELEASE(ssDepth_);
+	SAFE_RELEASE(ssRandom_);
 }
 
 void ManagementSS::setSS(
@@ -34,6 +46,15 @@ void ManagementSS::setSS(
 		break;
 	case SS_ID_SHADOW:
 		ss = ssShadow_;
+		break;
+	case SS_ID_NORMAL:
+		ss = ssNormal_;
+		break;
+	case SS_ID_DEPTH:
+		ss = ssDepth_;
+		break;
+	case SS_ID_RANDOM:
+		ss = ssRandom_;
 		break;
 	default:
 		ss = ssDefault_; // Should we really set a 'default' samplerstate this way?
@@ -98,6 +119,12 @@ HRESULT ManagementSS::init(ID3D11Device* device)
 	hr = initSSDefault(device);
 	if(SUCCEEDED(hr))
 		hr = initSSShadow(device);
+	if(SUCCEEDED(hr))
+		hr = initSSNormal(device);
+	if(SUCCEEDED(hr))
+		hr = initSSDepth(device);
+	if(SUCCEEDED(hr))
+		hr = initSSRandom(device);
 
 	return hr;
 }
@@ -143,6 +170,81 @@ HRESULT ManagementSS::initSSShadow(ID3D11Device* device)
 	hr = device->CreateSamplerState(&ssDesc, &ssShadow_);
 	if(FAILED(hr))
 		ERROR_MSG(L"SSManagement::initSSShadow CreateSamplerState failed");
+
+	return hr;
+}
+HRESULT ManagementSS::initSSNormal(ID3D11Device* device)
+{
+	HRESULT hr = S_OK;
+
+	D3D11_SAMPLER_DESC ssDesc;
+	ZeroMemory(&ssDesc, sizeof(ssDesc));
+	ssDesc.Filter			= D3D11_FILTER_MIN_MAG_LINEAR_MIP_POINT;
+	ssDesc.AddressU			= D3D11_TEXTURE_ADDRESS_BORDER;
+	ssDesc.AddressV			= D3D11_TEXTURE_ADDRESS_BORDER;
+	ssDesc.AddressW			= D3D11_TEXTURE_ADDRESS_BORDER;
+	ssDesc.ComparisonFunc	= D3D11_COMPARISON_NEVER;
+	ssDesc.MinLOD			= 0;
+	ssDesc.MaxLOD			= D3D11_FLOAT32_MAX;
+
+	ssDesc.BorderColor[0] = 0.0f;
+	ssDesc.BorderColor[1] = 0.0f;
+	ssDesc.BorderColor[2] = 0.0f;
+	ssDesc.BorderColor[3] = 0.0f;
+
+	hr = device->CreateSamplerState(&ssDesc, &ssNormal_);
+	if(FAILED(hr))
+		ERROR_MSG(L"SSManagement::initSSNormal CreateSamplerState failed");
+
+	return hr;
+}
+HRESULT ManagementSS::initSSDepth(ID3D11Device* device)
+{
+	HRESULT hr = S_OK;
+
+	D3D11_SAMPLER_DESC ssDesc;
+	ZeroMemory(&ssDesc, sizeof(ssDesc));
+	ssDesc.Filter			= D3D11_FILTER_MIN_MAG_LINEAR_MIP_POINT;
+	ssDesc.AddressU			= D3D11_TEXTURE_ADDRESS_BORDER;
+	ssDesc.AddressV			= D3D11_TEXTURE_ADDRESS_BORDER;
+	ssDesc.AddressW			= D3D11_TEXTURE_ADDRESS_BORDER;
+	ssDesc.ComparisonFunc	= D3D11_COMPARISON_NEVER;
+	ssDesc.MinLOD			= 0;
+	ssDesc.MaxLOD			= D3D11_FLOAT32_MAX;
+
+	ssDesc.BorderColor[0] = 1e5f;
+	ssDesc.BorderColor[1] = 1e5f;
+	ssDesc.BorderColor[2] = 1e5f;
+	ssDesc.BorderColor[3] = 1e5f;
+
+	hr = device->CreateSamplerState(&ssDesc, &ssDepth_);
+	if(FAILED(hr))
+		ERROR_MSG(L"SSManagement::initSSDepth CreateSamplerState failed");
+
+	return hr;
+}
+HRESULT ManagementSS::initSSRandom(ID3D11Device* device)
+{
+	HRESULT hr = S_OK;
+
+	D3D11_SAMPLER_DESC ssDesc;
+	ZeroMemory(&ssDesc, sizeof(ssDesc));
+	ssDesc.Filter			= D3D11_FILTER_MIN_MAG_LINEAR_MIP_POINT;
+	ssDesc.AddressU			= D3D11_TEXTURE_ADDRESS_WRAP;
+	ssDesc.AddressV			= D3D11_TEXTURE_ADDRESS_WRAP;
+	ssDesc.AddressW			= D3D11_TEXTURE_ADDRESS_WRAP;
+	ssDesc.ComparisonFunc	= D3D11_COMPARISON_NEVER;
+	ssDesc.MinLOD			= 0;
+	ssDesc.MaxLOD			= D3D11_FLOAT32_MAX;
+
+	ssDesc.BorderColor[0] = 0.0f;
+	ssDesc.BorderColor[1] = 0.0f;
+	ssDesc.BorderColor[2] = 0.0f;
+	ssDesc.BorderColor[3] = 0.0f;
+
+	hr = device->CreateSamplerState(&ssDesc, &ssRandom_);
+	if(FAILED(hr))
+		ERROR_MSG(L"SSManagement::initSSRandom CreateSamplerState failed");
 
 	return hr;
 }
