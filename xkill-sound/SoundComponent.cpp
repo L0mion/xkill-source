@@ -72,7 +72,7 @@ void SoundComponent::onEvent(Event* e)
 
 		int fmodEventIndex = converter->getFModIndex(eventIndex);
 		if(fmodEventIndex >= 0)
-			mFMODEventSystem->StartSoundEventAt(fmodEventIndex, eps->position, eps->use3DAudio);
+			mFMODEventSystem->StartSoundEventAt(fmodEventIndex, eps->ownerEntityId, eps->position, eps->use3DAudio);
 	}
 	else if(type == EventType::EVENT_UPDATESOUNDSETTINGS)
 	{
@@ -93,13 +93,13 @@ void SoundComponent::onEvent(Event* e)
 	}
 	else if(type == EventType::EVENT_STOPSOUND)
 	{
-		Event_PlaySound* eps = static_cast<Event_PlaySound*>(e);
+		Event_StopSound* ess = static_cast<Event_StopSound*>(e);
 		
-		eventIndex = eps->soundId;
+		eventIndex = ess->soundId;
 
 		int fmodEventIndex = converter->getFModIndex(eventIndex);
 		if(fmodEventIndex >= 0)
-			mFMODEventSystem->StopSoundEventAt(fmodEventIndex);
+			mFMODEventSystem->StopSoundEventAt(fmodEventIndex, ess->ownerEntityId);
 	}
 }
 

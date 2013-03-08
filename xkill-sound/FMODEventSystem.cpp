@@ -70,19 +70,19 @@ void FMODEventSystem::Update()
 	{
 		FMOD_EVENT_STATE state;
 
-		if(mEvents[i].first->getState(&state) == FMOD_ERR_INVALID_HANDLE)
+		if(mEvents[i].FmodEvent->getState(&state) == FMOD_ERR_INVALID_HANDLE)
 		{
 
-			FMOD::Event* temp = mEvents[mEvents.size() - 1].first;
-			mEvents[mEvents.size() - 1].first = mEvents[i].first;
-			mEvents[i].first = temp;
+			FMOD::Event* temp = mEvents[mEvents.size() - 1].FmodEvent;
+			mEvents[mEvents.size() - 1].FmodEvent = mEvents[i].FmodEvent;
+			mEvents[i].FmodEvent = temp;
 
 			mEvents.pop_back();
 		}
 	}
 }
 
-void FMODEventSystem::StartSoundEventAt(unsigned int index, Float3 position, bool use3DAudio)
+void FMODEventSystem::StartSoundEventAt(unsigned int index, int ownerPlayerEntityId, Float3 position, bool use3DAudio)
 {
 	if(index < (unsigned int)nrOfEvents_)
 	{
@@ -101,7 +101,7 @@ void FMODEventSystem::StartSoundEventAt(unsigned int index, Float3 position, boo
 			}
 		}
 		soundEvent->start();
-		mEvents.push_back(std::pair<FMOD::Event*, int>(soundEvent, index));
+		mEvents.push_back(FmodEventStruct(index, ownerPlayerEntityId, soundEvent));
 	}
 	else
 	{
@@ -109,20 +109,23 @@ void FMODEventSystem::StartSoundEventAt(unsigned int index, Float3 position, boo
 	}
 }
 
-void FMODEventSystem::StopSoundEventAt(unsigned int index)
+void FMODEventSystem::StopSoundEventAt(unsigned int index, int ownerPlayerEntityId)
 {
 	for(unsigned int i = 0; i < mEvents.size(); i++)
 	{
-		if(mEvents[i].second == index)
+		if(mEvents[i].eventIndex == index && mEvents[i].ownerPlayerEntityId == ownerPlayerEntityId)
 		{
-			mEvents[i].first->stop();
+			mEvents[i].FmodEvent->stop();
 
-			FMOD::Event* temp = mEvents[mEvents.size() - 1].first;
-			mEvents[mEvents.size() - 1].first = mEvents[i].first;
-			mEvents[i].first = temp;
+			FMOD::Event* temp = mEvents[mEvents.size() - 1].FmodEvent;
+			mEvents[mEvents.size() - 1].FmodEvent = mEvents[i].FmodEvent;
+			mEvents[i].FmodEvent = temp;
 
 			mEvents.pop_back();
 			i--;
+
+			if(ownerPlayerEntityId < 0)
+				break;
 		}
 	}
 }
@@ -144,7 +147,7 @@ void FMODEventSystem::SetMuteSounds(bool mute)
 
 	for(unsigned int i = 0; i < mEvents.size(); i++)
 	{
-		mEvents[i].first->setMute(mute);
+		mEvents[i].FmodEvent->setMute(mute);
 	}
 }
 
@@ -165,7 +168,7 @@ void FMODEventSystem::SetVolume(float volume)
 
 	for(unsigned int i = 0; i < mEvents.size(); i++)
 	{
-		mEvents[i].first->setVolume(volume);
+		mEvents[i].FmodEvent->setVolume(volume);
 	}
 }
 

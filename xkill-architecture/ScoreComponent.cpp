@@ -154,13 +154,14 @@ void ScoreComponent::handleExecutionMode(float delta)
 			AttributePtr<Attribute_Player> player = itrPlayer.at(executingPlayerIndex_);
 			player->executing = false;
 
+			SEND_EVENT(&Event_StopSound(XKILL_Enums::Sound::SOUND_LASER, itrPlayer.ownerIdAt(executingPlayerIndex_)));
+
 			executionMode_ = false;
 			executingPlayerIndex_ = -1;
 			schedulerTimer_->resetTimer();
 
 			// Send event to notify other components that we're leaving execution mode
 			SEND_EVENT(&Event(EVENT_PLAYER_DONE_EXECUTING));
-			SEND_EVENT(&Event_StopSound(XKILL_Enums::Sound::SOUND_LASER));
 		}
 	}
 }
@@ -274,7 +275,7 @@ void ScoreComponent::executePlayer(int playerIndex)
 
 	// Send event to notify other components that we're entering execution mode
 	SEND_EVENT(&Event_PlayerExecuting(executingPlayerIndex_));
-	SEND_EVENT(&Event_PlaySound(XKILL_Enums::Sound::SOUND_LASER));
+	SEND_EVENT(&Event_PlaySound(XKILL_Enums::Sound::SOUND_LASER, itrPlayer.ownerIdAt(playerIndex)));
 
 	// Post hud messages
 	{Event_PostHudMessage e("", ptr_player); e.setHtmlMessage("Now running in", "Kernel Mode"); SEND_EVENT(&e);}

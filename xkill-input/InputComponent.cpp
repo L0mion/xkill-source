@@ -133,6 +133,19 @@ void InputComponent::handleInput(float delta)
 			ptr_player->priority++;
 
 		input->jetpack =	device->getBoolValue(InputAction::ACTION_B_JETPACK);
+
+		if(ptr_player->jetHackActive)
+		{
+			if(device->getBoolPressed(InputAction::ACTION_B_JETPACK))
+			{
+				SEND_EVENT(&Event_PlaySound(XKILL_Enums::Sound::SOUND_JETPACK, itrPlayer.ownerIdAt(ptr_player.index()), ptr_player->ptr_render->ptr_spatial->ptr_position->position, false));
+			}
+			else if(device->getBoolReleased(InputAction::ACTION_B_JETPACK))
+			{
+				SEND_EVENT(&Event_StopSound(XKILL_Enums::Sound::SOUND_JETPACK, itrPlayer.ownerIdAt(ptr_player.index())));
+			}
+		}
+
 		input->sprint =		device->getBoolValue(InputAction::ACTION_B_SPRINT);
 
 		input->reload =		device->getBoolPressed(InputAction::ACTION_B_RELOAD);

@@ -200,9 +200,13 @@ public:
 class DLL_U Event_PlaySound : public Event
 {
 public:
-	Event_PlaySound(int soundId, Float3 position = Float3(), bool use3DAudio = false);
+	/**
+	\param ownerPlayerId Set to '-1' if no owner
+	*/
+	Event_PlaySound(int soundId, int ownerEntityId = -1, Float3 position = Float3(), bool use3DAudio = false);
 
 	int soundId;
+	int ownerEntityId;
 	Float3 position;
 	bool use3DAudio;
 };
@@ -213,9 +217,10 @@ public:
 class DLL_U Event_StopSound : public Event
 {
 public:
-	Event_StopSound(int soundId);
+	Event_StopSound(int soundId, int ownerEntityId = -1);
 
 	int soundId;
+	int ownerEntityId;
 };
 
 //! Will trigger rumble in devices[deviceNr]

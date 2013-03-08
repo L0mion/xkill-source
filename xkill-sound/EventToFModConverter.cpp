@@ -247,6 +247,7 @@ std::string EventToFModConverter::configMessage()
 	table.push_back(std::pair<int, std::string>(XKILL_Enums::Sound::SOUND_OPENING_ANIMATION,	"Opening Animation"));
 	table.push_back(std::pair<int, std::string>(XKILL_Enums::Sound::SOUND_LASER,				"Laser"));
 	table.push_back(std::pair<int, std::string>(XKILL_Enums::Sound::SOUND_RUMBLE,				"Rumble"));
+	table.push_back(std::pair<int, std::string>(XKILL_Enums::Sound::SOUND_JETPACK,				"Jetpack"));
 	//table.push_back(std::pair<int, std::string>(EVENT_CREATE_PROJECTILE + offset,				"Fire Gun"));
 	//table.push_back(std::pair<int, std::string>(EVENT_PLAYERDEATH + offset,					"Player Death"));
 	//table.push_back(std::pair<int, std::string>(EVENT_CREATE_PICKUPABLE + offset,				"Spawn Pickupable"));
