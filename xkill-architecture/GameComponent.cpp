@@ -14,24 +14,6 @@
 // Iterators
 ATTRIBUTES_DECLARE_ALL;
 
-Float4 _TEMP_LOCAL_VERSION_quaternionLookAt(Float3 pos, Float3 cameraPos)
-{
-	using namespace DirectX;
-
-	XMVECTOR xmPos = XMLoadFloat3((XMFLOAT3*)&pos);
-	XMVECTOR xmCameraPos = XMLoadFloat3((XMFLOAT3*)&cameraPos);
-	XMVECTOR xmUp  = XMLoadFloat3((XMFLOAT3*)&Float3(0.0f, 1.0f, 0.0f));
-
-	XMMATRIX xmRotationMatrix = XMMatrixLookAtLH(xmCameraPos, xmPos, xmUp);
-
-	XMVECTOR xmQuaternion = XMQuaternionRotationMatrix(xmRotationMatrix);
-
-	Float4 quaternion;
-	XMStoreFloat4((XMFLOAT4*)&quaternion, xmQuaternion);
-
-	return quaternion;
-}
-
 GameComponent::GameComponent(void)
 {
 	SUBSCRIBE_TO_EVENT(this, EVENT_STARTGAME);
@@ -987,8 +969,7 @@ void GameComponent::updateAndInterpretAimingRay(Entity* rayCastingPlayerEntity, 
 		//weaponLookDirection.normalize();
 
 		Float4 newWeaponRotationQuaternion;
-		//newWeaponRotationQuaternion = newWeaponRotationQuaternion.quaternionLookAt(hitPoint, from);
-		newWeaponRotationQuaternion = _TEMP_LOCAL_VERSION_quaternionLookAt(hitPoint, from);
+		newWeaponRotationQuaternion = newWeaponRotationQuaternion.quaternionLookAt(hitPoint, from);
 		newWeaponRotationQuaternion.normalize();
 
 		rayCastingPlayerAttribute->ptr_weapon_offset->ptr_spatial->rotation = newWeaponRotationQuaternion.quaternionInverse(); //Set weapon rotation

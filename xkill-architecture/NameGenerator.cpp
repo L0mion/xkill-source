@@ -881,7 +881,7 @@ void NameGenerator::reset()
 	addName("play anywhere");
 	addName("transmitter");
 	addName("blown to smithereens");
-	addName("stop and execuse");
+	addName("stop and execute");
 	addName("<>|God|<>");
 	addName("Jesus");
 	addName("remarkably plain wrong");
@@ -1107,7 +1107,17 @@ void NameGenerator::reset()
 	addName("pinned down");
 	addName("windbreaker");
 	addName("fine leather jackets");
-	addName("hazardous player");
+	addName("hazardous material");
+	addName("new int");
+	addName("guarding guard");
+	addName("bow and arrow");
+	addName("Flyer 1");
+	addName("out of ammo");
+	addName("sense modifiction");
+	addName("treasure map");
+	addName("selection of section");
+	addName("candyland");
+	addName("paper art");
 
 	
 	//C++ keywords
