@@ -178,7 +178,7 @@ public:
 		CREATE_ATTRIBUTE(ptr_offset, Behavior_Offset, offset, entity);
 		ptr_offset->ptr_spatial = ptr_spatial;
 		ptr_offset->ptr_parent_spatial_position = ptr_parent_spatial;
-		ptr_offset->offset_position = Float3(0.0f, 0.6f, 0.16f);
+		ptr_offset->offset_position = Float3(0.0f, 0.3f, 0.36f);
 
 		// Return
 		return ptr_camera;
@@ -203,7 +203,7 @@ public:
 			ptr_offset->ptr_spatial = ptr_spatial;
 			ptr_offset->ptr_parent_spatial_position = ptr_parent_spatial_position;
 			//ptr_offset->ptr_parent_spatial_rotation = ptr_parent_spatial_rotation;
-			ptr_offset->offset_position = Float3(0.23f, 0.5f, 0.2f);
+			ptr_offset->offset_position = Float3(-0.43f, -0.21f, 0.3f);
 
 			ptr_weapon_spatial = ptr_spatial;
 			ptr_weaponOffset = ptr_offset;
@@ -444,7 +444,7 @@ public:
 			color = Float4(0.5f, 1.0f, 0.5f, 1.0f);
 			break;
 		case XKILL_Enums::PickupableType::HACK_SPEEDHACK:
-			color = Float4(1.0f, 1.0f, 1.0f, 1.0f);
+			color = Float4(1.0f, 0.0f, 1.0f, 1.0f);
 			break;
 		default:
 			color = Float4(0.0f, 1.0f, 0.0f, 1.0f);

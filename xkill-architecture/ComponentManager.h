@@ -11,6 +11,7 @@ class GameComponent;
 class ScoreComponent;
 class HacksComponent;
 class IOComponent;
+class CullingComponent;
 enum StateType;
 
 #ifndef HWND_FORWARD_DECLARATION
@@ -41,6 +42,7 @@ private:
 	ScoreComponent*			score_;
 	HacksComponent*			hacks_;
 	IOComponent*			ioComponent_;
+	CullingComponent*		cullingComponent_;
 
 	float					gameOverDelay_;
 	float					inputDeviceSearchTime_;

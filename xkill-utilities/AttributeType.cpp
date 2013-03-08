@@ -82,6 +82,7 @@ Attribute_Render::Attribute_Render()
 	transparent			= false;
 	tessellation		= false;
 	cull = true;
+	culling.values[0]=culling.values[1]=culling.values[2]=culling.values[3]=INT_MAX;
 
 	meshID			= 0;
 	textureID		= 0;

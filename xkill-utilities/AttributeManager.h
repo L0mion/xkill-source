@@ -25,6 +25,8 @@ public:
 	void* overlayWidget;
 	float timeUntilScheduling;
 
+	
+
 	float timeScale();
 	void setTimeScale(float timeScale);
 

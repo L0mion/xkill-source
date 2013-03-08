@@ -23,7 +23,7 @@ CollisionShapes::CollisionShapes()
 	triangleMeshDeallocation_ = new btAlignedObjectArray<btTriangleMesh*>();
 	unusedCollisionShapes_ = new btAlignedObjectArray<btCollisionShape*>();
 	defaultShape_ = new btSphereShape(btScalar(1.0f));
-	//frustumShape_ = nullptr;
+	frustumShape_ = nullptr;
 	importer_ = new btBulletWorldImporter();
 
 	scatterProjectileCollisionShape = new btSphereShape(0.15f);
