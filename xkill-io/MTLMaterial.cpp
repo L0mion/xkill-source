@@ -8,7 +8,7 @@ MTLMaterial::MTLMaterial(const std::string name)
 	diffuseColor_	= Float3(0.0f, 0.0f, 0.0f);
 	specularColor_	= Float3(0.0f, 0.0f, 0.0f);
 	
-	specularPow_	= 0.0f;
+	specularPow_	= 1.0f;
 	alpha_			= 0.0f;
 
 	texAmbient_		= "";

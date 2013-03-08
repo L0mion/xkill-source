@@ -17,7 +17,7 @@ class Winfo;
 class Buffer_SrvDsv;
 class Buffer_SrvRtvUav;
 
-static const unsigned int GBUFFER_SHADER_REGISTER_DEPTH = 5;
+static const unsigned int GBUFFER_SHADER_REGISTER_DEPTH = 6;
 
 static const FLOAT CLEAR_COLOR_BACKBUFFER_BLACK[4] = { 0.0f, 0.0f, 0.0f, 1.0f };
 static const FLOAT CLEAR_COLOR_BACKBUFFER_WHITE[4] = { 1.0f, 1.0f, 1.0f, 1.0f };

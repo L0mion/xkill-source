@@ -37,7 +37,7 @@ bool ScoreComponent::init()
 	SAFE_DELETE(gameTimer_);
 
 	schedulerTimer_ = new Timer(30.0f);
-	cycleTimer_ = new Timer(1.0f);
+	cycleTimer_ = new Timer(2.0f);
 
 	gameTimer_ = new Timer(SETTINGS->timeLimit);
 
@@ -117,6 +117,7 @@ void ScoreComponent::schedulerScoreCounting(float delta)
 		if(itrPlayer.getNext()->cycles >= SETTINGS->cycleLimit)
 		{
 			SEND_EVENT(&Event(EVENT_GAMEOVER));
+			break;
 		}
 	}
 }
@@ -128,6 +129,7 @@ void ScoreComponent::deathMatchScoreCounting(float delta)
 		if(itrPlayer.getNext()->priority >= SETTINGS->cycleLimit)
 		{
 			SEND_EVENT(&Event(EVENT_GAMEOVER));
+			break;
 		}
 	}
 }

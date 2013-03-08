@@ -153,7 +153,7 @@ void PhysicsComponent::onUpdate(float delta)
 		AttributePtr<Attribute_Physics> ptr_physics = itrPhysics.getNext();
 		unsigned int physicsAttributeIndex = itrPhysics.storageIndex();
 
-		synchronizeWithAttributes(ptr_physics, physicsAttributeIndex);	//Synchronize physics objects with physics attributes
+		synchronizeWithAttributes(ptr_physics, physicsAttributeIndex);	//Synchronize physics objects with physics attributes.
 		physicsObjects_->at(physicsAttributeIndex)->onUpdate(delta);	//Update physics objects by calling their onUpdate function.
 	}
 
