@@ -52,8 +52,7 @@ public:
 		ID3D11DeviceContext*	devcon,
 		DirectX::XMFLOAT4X4		shadowMapTransform,
 		unsigned int			numLightsDir,
-		unsigned int			numLightsPoint,
-		unsigned int			numLightsSpot);		//!< Updates the constant buffer cbFrame.
+		unsigned int			numLightsPoint);		//!< Updates the constant buffer cbFrame.
 	void updateCBCamera(
 		ID3D11DeviceContext* devcon,
 		DirectX::XMFLOAT4X4	 viewMatrix,

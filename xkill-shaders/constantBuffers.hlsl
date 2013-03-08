@@ -19,7 +19,7 @@ cbuffer cbPerFrame : register (b1)
 
 	uint numLightsDir;
 	uint numLightsPoint;
-	uint numLightsSpot;
+	uint pad0;
 	uint pad3;
 };
 

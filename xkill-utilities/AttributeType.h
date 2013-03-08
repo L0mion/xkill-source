@@ -50,7 +50,6 @@ enum DLL_U AttributeType
 	ATTRIBUTE_POSITION,
 	ATTRIBUTE_SPATIAL,
 	ATTRIBUTE_RENDER,
-	ATTRIBUTE_DEBUGSHAPE,
 	ATTRIBUTE_PHYSICS,
 	ATTRIBUTE_CAMERA,
 	ATTRIBUTE_SPLITSCREEN,
@@ -302,25 +301,6 @@ struct DLL_U Attribute_Light_Point : public IAttribute
 	AttributeType getType(){return ATTRIBUTE_LIGHT_POINT;}
 	std::string getName(){return "LightPoint";}
 };
-/// Represents a spot-light. The LightDescSpot-struct is directly mapped to GPU.
-/** 
-OBS! The pos-attribute in LightDescSpot must be updated with the corresponding value in AttributePointer ptr_position-type in order to have the correct position! OBS!
-\ingroup ATTRIBUTES
-*/
-struct DLL_U Attribute_Light_Spot : public IAttribute
-{
-	Attribute_Light_Spot();
-	~Attribute_Light_Spot(); //!< Does nothing.
-
-	AttributePtr<Attribute_Position> ptr_position; //!< The correct position of spotlight.
-
-	LightDescSpot lightSpot;
-
-	DataItemList* getDataList();
-	void saveTo(DataItemList* list);
-	AttributeType getType(){return ATTRIBUTE_LIGHT_SPOT;}
-	std::string getName(){return "LightSpot";}
-};
 
 struct DLL_U Attribute_Input : public IAttribute
 {
@@ -481,7 +461,6 @@ struct DLL_U Attribute_Player : public IAttribute
 	static int nextId;
 
 	std::string playerName;
-	//int id;						//!< The id of the player process. Used to identify a player attribute in GameComponent when firing projectiles.
 	int priority;				//!< Priority of the player process. Higher value means higher priority. The scheduler will choose the process with the highest priority for execution.
 	int cycleSteals;			//!< Total number of cycle steals for the player process. Cycle steals steal priority from other player processes.
 	int cycles;		//!< Total execution time of the player process, used ased final score in the deathmatch. The game session winner is the player with the most total execution time as awarded by the scheduler.
@@ -645,24 +624,6 @@ struct DLL_U Attribute_WeaponStats : public IAttribute
 	std::string getName(){return "WeaponStats";}
 };
 
-struct DebugShape;
-struct DLL_U Attribute_DebugShape : public IAttribute
-{
-	Attribute_DebugShape();
-	~Attribute_DebugShape();
-	void clean();
-
-	AttributePtr<Attribute_Spatial> ptr_spatial;
-
-	unsigned int	meshID;		//!< ID of mesh
-	DebugShape*		shape;
-	bool			render;
-
-	DataItemList* getDataList();
-	void saveTo(DataItemList* list);
-	AttributeType getType(){return ATTRIBUTE_WEAPONSTATS;}
-	std::string getName(){return "WeaponStats";}
-};
 
 struct DLL_U Attribute_ExplosionSphere : public IAttribute
 {
