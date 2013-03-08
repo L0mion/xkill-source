@@ -395,8 +395,10 @@ bool IOComponent::loadMD5(std::string modelName, std::string modelPath, MdlDescM
 	LoaderMD5ModelDesc md5Model;
 	loaderMD5.loadModel(modelPath+modelName, &md5Model);
 
+	std::string animationName = loadMD5FindAnimationName(modelName);
+
 	LoaderMD5AnimationDesc md5Animation;
-	loaderMD5.loadAnimation(modelPath+ "test.md5anim", &md5Animation);
+	loaderMD5.loadAnimation(modelPath+ animationName, &md5Animation);
 
 	std::vector<VertexDesc> vertices;
 	std::vector<SubsetDesc> subsets;
@@ -543,6 +545,25 @@ void IOComponent::loadMD5AssembleAnimation(SkinnedData* skinnedData, LoaderMD5An
 
 	skinnedData->set(boneHierarchy, boneOffsets, animations);
 }
+std::string IOComponent::loadMD5FindAnimationName(std::string modelName)
+{
+	bool atExtension = false;
+	std::string animationName = modelName;
+	std::string extension = "md5anim";
+	unsigned int extensionIndex = 0;
+	for(unsigned int i=0; i<animationName.size(); i++)
+	{
+		if(atExtension)
+		{
+			animationName.at(i) = extension.at(extensionIndex);
+			extensionIndex++;
+		}
+		if(animationName.at(i) == '.')
+			atExtension = true;
+	}
+	return animationName;
+}
+
 
 bool IOComponent::loadPGY(std::string modelName, std::string modelPath, MdlDescModel* modelDesc, MeshDesc& meshDesc, SkinnedData** skinnedData)
 {

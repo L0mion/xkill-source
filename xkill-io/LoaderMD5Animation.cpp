@@ -19,7 +19,7 @@ LoaderMD5Animation::~LoaderMD5Animation()
 		infile_.close();
 }
 
-void LoaderMD5Animation::loadAnimation(const std::string& filename, LoaderMD5AnimationDesc* animationDesc)
+bool LoaderMD5Animation::loadAnimation(const std::string& filename, LoaderMD5AnimationDesc* animationDesc)
 {
 	reset();
 
@@ -27,6 +27,10 @@ void LoaderMD5Animation::loadAnimation(const std::string& filename, LoaderMD5Ani
 
 	std::string param;
 	infile_.open(filename.c_str());
+	
+	if(!infile_.is_open())
+		return false;
+	
 	infile_ >> param;
 
 	while(!infile_.eof())
@@ -67,6 +71,9 @@ void LoaderMD5Animation::loadAnimation(const std::string& filename, LoaderMD5Ani
 	animationDesc->jointInfos_	  = jointInfos_;
 
 	infile_.close();
+
+
+	return true;
 }
 
 void LoaderMD5Animation::parseParamMD5Version()

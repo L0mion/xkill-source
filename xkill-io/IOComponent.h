@@ -78,6 +78,7 @@ private:
 	void loadMD5AssembleSubsets(std::vector<SubsetDesc>* subsets, LoaderMD5ModelDesc* md5Model);
 	void loadMD5AssembleMaterials(std::vector<MaterialDesc>* materials, LoaderMD5ModelDesc* md5Model);
 	void loadMD5AssembleAnimation(SkinnedData* skinnedData, LoaderMD5AnimationDesc* md5Animation, LoaderMD5ModelDesc* md5Model);
+	std::string loadMD5FindAnimationName(std::string modelName);
 
 	bool loadPGY(std::string modelName, std::string modelPath, MdlDescModel* modelDesc, MeshDesc& meshDesc, SkinnedData** skinnedData);
 	bool writePGY(std::string modelName, std::string modelPath, MeshDesc meshDesc, VertexType vertexType, SkinnedData* skinnedData);

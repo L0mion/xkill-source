@@ -28,6 +28,9 @@ bool LoaderMD5Model::loadModel(const std::string& filename, LoaderMD5ModelDesc* 
 
 	infile_.open(filename.c_str());
 
+	if(!infile_.is_open())
+		return false;
+
 	infile_ >> param;
 	while(!infile_.eof())
 	{

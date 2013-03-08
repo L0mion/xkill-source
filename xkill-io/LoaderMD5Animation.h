@@ -17,7 +17,7 @@ public:
 	LoaderMD5Animation();
 	~LoaderMD5Animation();
 
-	void loadAnimation(const std::string& filename, LoaderMD5AnimationDesc* animationDesc);
+	bool loadAnimation(const std::string& filename, LoaderMD5AnimationDesc* animationDesc);
 
 private:
 	

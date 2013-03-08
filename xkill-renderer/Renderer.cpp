@@ -1445,7 +1445,7 @@ void Renderer::renderAnimation(unsigned int meshID, DirectX::XMFLOAT4X4 view, Di
 
 	std::string clipName = "Default";
 	std::vector<DirectX::XMFLOAT4X4> finalTransforms;
-	managementAnimation_->update(0.006, clipName, 7);
+	managementAnimation_->update(0.01, clipName, 7);
 	managementAnimation_->getAnimation(7)->getFinalTransforms(clipName, managementAnimation_->getTimePosition(), &finalTransforms);
 
 	managementCB_->setCB(CB_TYPE_BONE, TypeFX_VS, CB_REGISTER_BONE, devcon);
@@ -1485,8 +1485,6 @@ void Renderer::renderAnimation(unsigned int meshID, DirectX::XMFLOAT4X4 view, Di
 		devcon->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 		devcon->DrawIndexed(subsets.at(i)->getNumIndices(), 0, 0);
 	}
-
-
 
 	managementRS_->setRS(devcon, RS_ID_DEFAULT);
 }
