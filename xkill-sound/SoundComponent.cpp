@@ -1,5 +1,6 @@
 #include "SoundComponent.h"
 
+#include <xkill-utilities/XKILL_Enums.h>
 #include <xkill-utilities/IObserver.h>
 #include <xkill-utilities/Util.h>
 #include "FMODEventSystem.h"
@@ -21,7 +22,11 @@ SoundComponent::SoundComponent()
 	timer = 0.0f;
 
 	SUBSCRIBE_TO_EVENT(this, EVENT_PLAYSOUND);
+	SUBSCRIBE_TO_EVENT(this, EVENT_STOPSOUND);
 	SUBSCRIBE_TO_EVENT(this, EVENT_START_DEATHMATCH);
+	SUBSCRIBE_TO_EVENT(this, EVENT_GAMEOVER);
+	SUBSCRIBE_TO_EVENT(this, EVENT_END_DEATHMATCH);
+	SUBSCRIBE_TO_EVENT(this, EVENT_ENDGAME);
 	SUBSCRIBE_TO_EVENT(this, EVENT_UPDATESOUNDSETTINGS);
 }
 
@@ -70,7 +75,7 @@ void SoundComponent::onEvent(Event* e)
 
 		int fmodEventIndex = converter->getFModIndex(eventIndex);
 		if(fmodEventIndex >= 0)
-			mFMODEventSystem->StartSoundEventAt(fmodEventIndex, eps->position, eps->use3DAudio);
+			mFMODEventSystem->StartSoundEventAt(fmodEventIndex, eps->ownerEntityId, eps->position, eps->use3DAudio);
 	}
 	else if(type == EventType::EVENT_UPDATESOUNDSETTINGS)
 	{
@@ -89,10 +94,20 @@ void SoundComponent::onEvent(Event* e)
 	{
 		mFMODEventSystem->UpdateNrOfListeners();
 	}
-	//else
-	//{
-	//	eventIndex = (int)type + Event_PlaySound::SOUND_LAST;
-	//}
+	else if(type == EventType::EVENT_STOPSOUND)
+	{
+		Event_StopSound* ess = static_cast<Event_StopSound*>(e);
+		
+		eventIndex = ess->soundId;
+
+		int fmodEventIndex = converter->getFModIndex(eventIndex);
+		if(fmodEventIndex >= 0)
+			mFMODEventSystem->StopSoundEventAt(fmodEventIndex, ess->ownerEntityId);
+	}
+	else if(type == EVENT_GAMEOVER || type == EVENT_END_DEATHMATCH || type == EVENT_ENDGAME)
+	{
+		mFMODEventSystem->StopAllSoundEffects();
+	}
 }
 
 void SoundComponent::onUpdate(float delta)
@@ -104,7 +119,7 @@ void SoundComponent::onUpdate(float delta)
 	//if(timer >= 0.5f)
 	//{
 	//	timer = 0.0f;
-	//	int fmodEventIndex = converter->getFModIndex(Event_PlaySound::SOUND_WALK);
+	//	int fmodEventIndex = converter->getFModIndex(XKILL_Enums::Sound::SOUND_WALK);
 	//	if(fmodEventIndex >= 0)
 	//		mFMODEventSystem->StartSoundEventAt(fmodEventIndex);
 	//}

@@ -223,7 +223,7 @@ std::string EventToFModConverter::intToString(int n)
 
 std::string EventToFModConverter::configMessage()
 {
-	int offset = Event_PlaySound::SOUND_LAST;
+	int offset = XKILL_Enums::Sound::SOUND_LAST;
 	std::string message;
 
 	message += "// This file is a conversion table between in-game event numbers and names.\n";
@@ -236,19 +236,22 @@ std::string EventToFModConverter::configMessage()
 
 	std::vector<std::pair<int, std::string>> table;		
 
-	table.push_back(std::pair<int, std::string>(Event_PlaySound::SOUND_DEATH,			"Player Death"));
-	table.push_back(std::pair<int, std::string>(Event_PlaySound::SOUND_FIRE,			"Fire Gun"));
-	table.push_back(std::pair<int, std::string>(Event_PlaySound::SOUND_GAME_MUSIC,		"Game Music"));
-	table.push_back(std::pair<int, std::string>(Event_PlaySound::SOUND_HIT,				"Player Hit"));
-	table.push_back(std::pair<int, std::string>(Event_PlaySound::SOUND_MENU_MUSIC,		"Menu Music"));
-	table.push_back(std::pair<int, std::string>(Event_PlaySound::SOUND_RESPAWN,			"Player Respawn"));
-	table.push_back(std::pair<int, std::string>(Event_PlaySound::SOUND_WALK,			"Player Walk"));
-	table.push_back(std::pair<int, std::string>(Event_PlaySound::SOUND_BUTTON_CLICK,	"Button Click"));
-	table.push_back(std::pair<int, std::string>(Event_PlaySound::SOUND_OPENING_ANIMATION,"Opening Animation"));
-	//table.push_back(std::pair<int, std::string>(EVENT_CREATE_PROJECTILE + offset,		"Fire Gun"));
-	//table.push_back(std::pair<int, std::string>(EVENT_PLAYERDEATH + offset,			"Player Death"));
-	//table.push_back(std::pair<int, std::string>(EVENT_CREATE_PICKUPABLE + offset,		"Spawn Pickupable"));
-	//table.push_back(std::pair<int, std::string>(EVENT_CREATE_EXPLOSIONSPHERE + offset,"Explosion"));
+	table.push_back(std::pair<int, std::string>(XKILL_Enums::Sound::SOUND_DEATH,				"Player Death"));
+	table.push_back(std::pair<int, std::string>(XKILL_Enums::Sound::SOUND_FIRE,					"Fire Gun"));
+	table.push_back(std::pair<int, std::string>(XKILL_Enums::Sound::SOUND_GAME_MUSIC,			"Game Music"));
+	table.push_back(std::pair<int, std::string>(XKILL_Enums::Sound::SOUND_HIT,					"Player Hit"));
+	table.push_back(std::pair<int, std::string>(XKILL_Enums::Sound::SOUND_MENU_MUSIC,			"Menu Music"));
+	table.push_back(std::pair<int, std::string>(XKILL_Enums::Sound::SOUND_RESPAWN,				"Player Respawn"));
+	table.push_back(std::pair<int, std::string>(XKILL_Enums::Sound::SOUND_WALK,					"Player Walk"));
+	table.push_back(std::pair<int, std::string>(XKILL_Enums::Sound::SOUND_BUTTON_CLICK,			"Button Click"));
+	table.push_back(std::pair<int, std::string>(XKILL_Enums::Sound::SOUND_OPENING_ANIMATION,	"Opening Animation"));
+	table.push_back(std::pair<int, std::string>(XKILL_Enums::Sound::SOUND_LASER,				"Laser"));
+	table.push_back(std::pair<int, std::string>(XKILL_Enums::Sound::SOUND_RUMBLE,				"Rumble"));
+	table.push_back(std::pair<int, std::string>(XKILL_Enums::Sound::SOUND_JETPACK,				"Jetpack"));
+	//table.push_back(std::pair<int, std::string>(EVENT_CREATE_PROJECTILE + offset,				"Fire Gun"));
+	//table.push_back(std::pair<int, std::string>(EVENT_PLAYERDEATH + offset,					"Player Death"));
+	//table.push_back(std::pair<int, std::string>(EVENT_CREATE_PICKUPABLE + offset,				"Spawn Pickupable"));
+	//table.push_back(std::pair<int, std::string>(EVENT_CREATE_EXPLOSIONSPHERE + offset,		"Explosion"));
 
 	sortConfigMessageTable(table);
 
