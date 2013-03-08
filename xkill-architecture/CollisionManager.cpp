@@ -118,7 +118,7 @@ void CollisionManager::collision_applyDamage(Entity* entity1, Entity* entity2)
 					}
 					else
 					{
-						SEND_EVENT(&Event_PlaySound(Event_PlaySound::SOUND_HIT, position, use3DAudio));
+						SEND_EVENT(&Event_PlaySound(XKILL_Enums::Sound::SOUND_HIT, entity1->getID(), position, use3DAudio));
 					}
 					SEND_EVENT(&Event_Rumble(entity1->getID(), true, 0.2f, 1.0f, 1.0f));
 					DEBUGPRINT("DAMAGEEVENT Entity " << entity2->getID() << " damage: " <<  damage->damage << " Entity " << entity1->getID() << " health " << health->health);
@@ -246,8 +246,7 @@ void CollisionManager::collision_pickupable(Entity* entity1, Entity* entity2)
 							{
 								amount = 5+rand()%10;
 								pickedUp = true;
-								float time = static_cast<float>(ptr_pickupable->amount);
-								time /= 1000.0f;
+								float time = static_cast<float>(amount);
 								SEND_EVENT(&Event_HackActivated(time, XKILL_Enums::HackType::SPEEDHACK, ptr_player));
 
 								// Post HUD message
@@ -258,8 +257,7 @@ void CollisionManager::collision_pickupable(Entity* entity1, Entity* entity2)
 							{
 								amount = 10+rand()%20;
 								pickedUp = true;
-								float time = static_cast<float>(ptr_pickupable->amount);
-								time /= 1000.0f;
+								float time = static_cast<float>(amount);
 								SEND_EVENT(&Event_HackActivated(time, XKILL_Enums::HackType::JETHACK, ptr_player));
 
 								// Post HUD message
@@ -270,7 +268,7 @@ void CollisionManager::collision_pickupable(Entity* entity1, Entity* entity2)
 							{
 								amount = 10+rand()%20;
 								pickedUp = true;
-								float time = static_cast<float>(ptr_pickupable->amount);
+								float time = static_cast<float>(amount);
 								time /= 1000.0f;
 								SEND_EVENT(&Event_HackActivated(time, XKILL_Enums::HackType::CYCLEHACK, ptr_player));
 

@@ -15,6 +15,9 @@ HacksComponent::HacksComponent()
 
 	SUBSCRIBE_TO_EVENT(this, EVENT_HACK_ACTIVATED);
 	SUBSCRIBE_TO_EVENT(this, EVENT_PLAYERDEATH);
+	SUBSCRIBE_TO_EVENT(this, EVENT_END_DEATHMATCH);
+	SUBSCRIBE_TO_EVENT(this, EVENT_GAMEOVER);
+	SUBSCRIBE_TO_EVENT(this, EVENT_ENDGAME);
 }
 
 HacksComponent::~HacksComponent()
@@ -54,8 +57,19 @@ void HacksComponent::onEvent(Event* e)
 		{
 			Event_PlayerDeath* event_PlayerDeath = static_cast<Event_PlayerDeath*>(e);
 			removeAllPlayerHacks(itrPlayer.at(event_PlayerDeath->playerAttributeIndex));
+			break;
 		}
-		break;
+	case EVENT_END_DEATHMATCH:
+	case EVENT_GAMEOVER:
+	case EVENT_ENDGAME:
+		{
+			while(itrPlayer.hasNext())
+			{
+				removeAllPlayerHacks(itrPlayer.getNext());
+			}
+
+			break;
+		}
 	default:
 		{
 			break;
@@ -79,6 +93,7 @@ void HacksComponent::onUpdate(float delta)
 			if(timer->hasTimerExpired())
 			{
 				setPlayerAttributeHackFlags(activeHacks_[i][j]->second, static_cast<XKILL_Enums::HackType>(i), false);
+				SEND_EVENT(&Event_StopSound(XKILL_Enums::Sound::SOUND_JETPACK, itrPlayer.ownerIdAt(activeHacks_[i][j]->second.index())));
 				removeIndexFromVector(activeHacks_[i], j);
 
 				DEBUGPRINT("Hack " << Converter::IntToStr(i) << " expired.");
@@ -120,7 +135,7 @@ void HacksComponent::handleHackActivatedEvent(Event_HackActivated* e)
 				activeHacks_[e->hackType][i]->first->setStartTime(e->time);
 				activeHacks_[e->hackType][i]->first->resetTimer();
 
-				DEBUGPRINT("Existing hack " << Converter::IntToStr(e->hackType) << " #" << Converter::IntToStr(i) << " was reset with value " << Converter::IntToStr(e->time));
+				DEBUGPRINT("Existing hack " << Converter::IntToStr(e->hackType) << " #" << Converter::IntToStr(i) << " was reset with value " << Converter::FloatToStr(e->time));
 			}
 			existed = true;
 
@@ -130,11 +145,11 @@ void HacksComponent::handleHackActivatedEvent(Event_HackActivated* e)
 
 	if(!existed)
 	{
-		Timer* timer = new Timer(e->time * 1000.0f); //Convert from s to ms
+		Timer* timer = new Timer(e->time); //Convert from s to ms
 		activeHacks_[e->hackType].push_back(new std::pair<Timer*, AttributePtr<Attribute_Player>>(timer, e->player));
 		setPlayerAttributeHackFlags(e->player, e->hackType, true);
 
-		DEBUGPRINT("Player picked up hack " << Converter::IntToStr(e->hackType) << " with value " << Converter::IntToStr(e->time));
+		DEBUGPRINT("Player picked up hack " << Converter::IntToStr(e->hackType) << " with value " << Converter::FloatToStr(e->time));
 	}
 }
 
@@ -167,7 +182,7 @@ void HacksComponent::removeAllPlayerHacks(AttributePtr<Attribute_Player> playerA
 		{
 			if(playerAttribute == activeHacks_[i][j]->second)
 			{
-				setPlayerAttributeHackFlags(activeHacks_[i][j]->second, static_cast<XKILL_Enums::HackType>(i), false);
+				//setPlayerAttributeHackFlags(activeHacks_[i][j]->second, static_cast<XKILL_Enums::HackType>(i), false);
 				removeIndexFromVector(activeHacks_[i], j);
 			}
 		}

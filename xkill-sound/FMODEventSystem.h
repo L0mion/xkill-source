@@ -27,6 +27,28 @@ class FMODEventSystem
 {
 	friend class FMODEventSystemProgrammerReportParser;
 
+	struct FmodEventStruct
+	{
+		FmodEventStruct(){};
+		FmodEventStruct(int eventIndex, int ownerPlayerEntityId, FMOD::Event* FmodEvent)
+		{
+			this->eventIndex = eventIndex; 
+			this->ownerPlayerEntityId = ownerPlayerEntityId; 
+			this->FmodEvent = FmodEvent;
+		}
+
+		int eventIndex;
+		int ownerPlayerEntityId;
+		FMOD::Event* FmodEvent;
+
+		//FmodEventStruct& operator=(const FmodEventStruct& rhs)
+		//{
+		//	this->eventIndex = rhs.eventIndex;
+		//	this->ownerPlayerEntityId = rhs.ownerPlayerEntityId;
+		//	this->FmodEvent = rhs.FmodEvent;
+		//}
+	};
+
 public:
 	FMODEventSystem(void);
 	~FMODEventSystem(void);
@@ -41,7 +63,11 @@ public:
 	/** \brief Must be called for the event system to work as intended.*/
 	void Update();
 	/** \brief Start a sound event at index in the mSoundEvents vector.*/
-	void StartSoundEventAt(unsigned int index, Float3 position, bool use3DAudio);
+	void StartSoundEventAt(unsigned int index, int ownerPlayerEntityId, Float3 position, bool use3DAudio);
+	/** \brief Stop playing the event at index.*/
+	void StopSoundEventAt(unsigned int index, int ownerPlayerEntityId);
+	/** \brief Stop all sounds except music.*/
+	void StopAllSoundEffects();
 	/** \brief Mutes all sounds.*/
 	void SetMuteSounds(bool mute = true);
 	/** \brief Set volume.*/
@@ -57,7 +83,7 @@ private:
 	FMOD_VECTOR float3ToFModVector(Float3 v);
 
 	FMOD::EventSystem* mEventsystem;
-	std::vector<FMOD::Event*> mEvents;
+	std::vector<FmodEventStruct> mEvents;
 	std::string mSoundEventFileNameWithoutExtension;
 	std::string mMediaPath;
 	int nrOfEvents_;

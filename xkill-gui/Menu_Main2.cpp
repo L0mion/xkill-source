@@ -19,7 +19,7 @@ void Menu_Main2::loadOpeningGif()
 	openingAnimation->setParent(this); // prevents memory leaks
 	ui.label_openingAnimation->setMovie(openingAnimation);
 	openingAnimation->start();
-	SEND_EVENT(&Event_PlaySound(Event_PlaySound::SOUND_OPENING_ANIMATION));
+	SEND_EVENT(&Event_PlaySound(XKILL_Enums::Sound::SOUND_OPENING_ANIMATION));
 	connect(openingAnimation, SIGNAL(frameChanged(int)),	this, SLOT(openingAnimation_frameChanged(int)));
 }
 
@@ -220,7 +220,7 @@ void Menu_Main2::push_menu( QFrame* menu )
 	menu->show();
 	menuStack.push_back(menu);
 
-	SEND_EVENT(&Event_PlaySound(Event_PlaySound::SOUND_BUTTON_CLICK));
+	SEND_EVENT(&Event_PlaySound(XKILL_Enums::Sound::SOUND_BUTTON_CLICK));
 }
 
 void Menu_Main2::pop_menu()
