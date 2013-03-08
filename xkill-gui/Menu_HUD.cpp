@@ -280,7 +280,7 @@ void Menu_HUD::refresh()
 	//
 	
 	scoreboard.refresh();
-	if(ptr_player->detectedAsDead)
+	if(ptr_player->detectedAsDead || GET_STATE() == STATE_GAMEOVER)
 	{
 		// Show scoreboard if delay has expired
 		if(scoreboardFade > 0.0f)

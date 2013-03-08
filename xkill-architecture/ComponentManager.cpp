@@ -226,7 +226,7 @@ void ComponentManager::update(float delta)
 {
 	// Performs necessary per-frame updating of some sub-parts of EventManager.
 	EventManager::getInstance()->update(delta);
-
+	SEND_EVENT(&Event(EVENT_UPDATE));
 
 	//// PUT SOMETHING 
 	/// DONT SPAWN PLAYERS FIRST FRAMES
@@ -258,13 +258,12 @@ void ComponentManager::update(float delta)
 		deltatimevartotal2 = clock();
 		totaltimer.push_back(((float)(deltatimevartotal2-deltatimevartotal))/((float)CLOCKS_PER_SEC));
 #endif
-
-		SEND_EVENT(&Event(EVENT_UPDATE));
 	}
 	else if(GET_STATE() == STATE_GAMEOVER)
 	{
 		sound_->onUpdate(delta);
-		input_->onUpdate(delta);
+		physics_->onUpdate(delta);
+		//input_->onUpdate(delta);
 		render_->onUpdate(delta);
 
 		if(gameOverDelay_ > 0.0f)
@@ -273,7 +272,9 @@ void ComponentManager::update(float delta)
 		}
 		else
 		{
-			SEND_EVENT(&Event_EndDeathmatch());
+
+			//SEND_EVENT(&Event_EndDeathmatch());
+			SEND_EVENT(&Event(EVENT_ENDGAME));
 		}
 	}
 	else if(GET_STATE() == STATE_MAINMENU)

@@ -25,6 +25,12 @@ public:
 	void* overlayWidget;
 	float timeUntilScheduling;
 
+	//ssao
+	float occlusionRadius;
+	float occlusionScale;
+	float occlusionBias;
+	float occlusionIntensity;
+
 	float timeScale();
 	void setTimeScale(float timeScale);
 
@@ -61,7 +67,6 @@ public:
 	AttributeStorage<Attribute_Position>				position;
 	AttributeStorage<Attribute_Spatial>					spatial;
 	AttributeStorage<Attribute_Render>					render;
-	AttributeStorage<Attribute_DebugShape>				debugShape;
 	AttributeStorage<Attribute_Physics>					physics;
 	AttributeStorage<Attribute_Camera>					camera;
 	AttributeStorage<Attribute_Input>					input;
@@ -71,7 +76,6 @@ public:
 	AttributeStorage<Attribute_Projectile>				projectile;
 	AttributeStorage<Attribute_Light_Dir>				lightDir;
 	AttributeStorage<Attribute_Light_Point>				lightPoint;
-	AttributeStorage<Attribute_Light_Spot>				lightSpot;
 	AttributeStorage<Attribute_Mesh>					mesh;
 	AttributeStorage<Attribute_Health>					health;
 	AttributeStorage<Attribute_Damage>					damage;
@@ -101,7 +105,6 @@ AttributeManager::instance()->settings.at(0)
 	static AttributeIterator<Attribute_Position>				itrPosition				;	\
 	static AttributeIterator<Attribute_Spatial>					itrSpatial				;	\
 	static AttributeIterator<Attribute_Render>					itrRender				;	\
-	static AttributeIterator<Attribute_DebugShape>				itrDebugShape			;	\
 	static AttributeIterator<Attribute_Physics>					itrPhysics				;	\
 	static AttributeIterator<Attribute_Camera>					itrCamera				;	\
 	static AttributeIterator<Attribute_Input>					itrInput				;	\
@@ -111,7 +114,6 @@ AttributeManager::instance()->settings.at(0)
 	static AttributeIterator<Attribute_Projectile>				itrProjectile			;	\
 	static AttributeIterator<Attribute_Light_Dir>				itrLightDir				;	\
 	static AttributeIterator<Attribute_Light_Point>				itrLightPoint			;	\
-	static AttributeIterator<Attribute_Light_Spot>				itrLightSpot			;	\
 	static AttributeIterator<Attribute_Mesh>					itrMesh					;	\
 	static AttributeIterator<Attribute_Health>					itrHealth				;	\
 	static AttributeIterator<Attribute_Damage>					itrDamage				;	\
@@ -136,7 +138,6 @@ AttributeManager::instance()->settings.at(0)
 	itrPosition				= AttributeManager::instance()->position					.getIterator();		\
 	itrSpatial				= AttributeManager::instance()->spatial						.getIterator();		\
 	itrRender				= AttributeManager::instance()->render						.getIterator();		\
-	itrDebugShape			= AttributeManager::instance()->debugShape					.getIterator();		\
 	itrPhysics				= AttributeManager::instance()->physics						.getIterator();		\
 	itrCamera				= AttributeManager::instance()->camera						.getIterator();		\
 	itrInput				= AttributeManager::instance()->input						.getIterator();		\
@@ -146,7 +147,6 @@ AttributeManager::instance()->settings.at(0)
 	itrProjectile			= AttributeManager::instance()->projectile					.getIterator();		\
 	itrLightDir				= AttributeManager::instance()->lightDir					.getIterator();		\
 	itrLightPoint			= AttributeManager::instance()->lightPoint					.getIterator();		\
-	itrLightSpot			= AttributeManager::instance()->lightSpot					.getIterator();		\
 	itrMesh					= AttributeManager::instance()->mesh						.getIterator();		\
 	itrHealth				= AttributeManager::instance()->health						.getIterator();		\
 	itrDamage				= AttributeManager::instance()->damage						.getIterator();		\

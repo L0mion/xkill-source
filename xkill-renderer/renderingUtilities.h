@@ -61,4 +61,16 @@ inline void SET_D3D_OBJECT_NAME(
 #endif //D3D_PROFILE
 }
 
+static float GET_RANDOM()
+{
+	return (float)(rand()) / (float)RAND_MAX;
+}
+static float GET_RANDOM(float min, float max)
+{
+	float random = min + GET_RANDOM() * (max - min);
+	return random;
+}
+
+#define LERP(x, y, s)	( x * (1 - s) + y * s )
+
 #endif //XKILL_RENDERER_RENDERINGUTILITIES_H

@@ -1,6 +1,5 @@
 #pragma once
 
-//#include <xkill-utilities/DebugShape.h>
 #include <xkill-utilities/Entity.h>
 #include <xkill-utilities/AttributeManager.h>
 
@@ -425,13 +424,6 @@ public:
 		CREATE_ATTRIBUTE(ptr_spatial, Attribute_Spatial, spatial, entity);
 		ptr_spatial->ptr_position = ptr_position;
 
-		/*
-		CREATE_ATTRIBUTE(ptr_debugShape, Attribute_DebugShape, debugShape, entity);
-		ptr_debugShape->ptr_spatial = ptr_spatial;
-		ptr_debugShape->shape	= new DebugShapeSphere(e->radius);
-		ptr_debugShape->render	= true;
-		*/
-
 		CREATE_ATTRIBUTE(ptr_physics, Attribute_Physics, physics, entity);
 		ptr_physics->ptr_spatial = ptr_spatial;
 		ptr_physics->collisionFilterGroup = XKILL_Enums::PhysicsAttributeType::EXPLOSIONSPHERE;
@@ -481,17 +473,7 @@ public:
 		}
 		else if(e->type == 3)
 		{
-			CREATE_ATTRIBUTE(ptr_position, Attribute_Position, position, entity);
-			ptr_position->position = e->position;
-			CREATE_ATTRIBUTE(ptr_lightSpot, Attribute_Light_Spot, lightSpot, entity);
-			ptr_lightSpot->ptr_position = ptr_position;
-			ptr_lightSpot->lightSpot.ambient = Float4(e->ambient,1);
-			ptr_lightSpot->lightSpot.diffuse = Float4(e->diffuse,1);
-			ptr_lightSpot->lightSpot.specular = Float4(e->specular,1);
-			ptr_lightSpot->lightSpot.attenuation = e->attenuation;
-			ptr_lightSpot->lightSpot.direction = e->direction;
-			ptr_lightSpot->lightSpot.range = e->range;
-			ptr_lightSpot->lightSpot.spotPow = e->spotPow;
+			ERROR_MESSAGEBOX("Trying to instantiate spot-light. Engine does not support this!");
 		}
 	}
 

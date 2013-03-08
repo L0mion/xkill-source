@@ -1,7 +1,6 @@
 #include "AttributeType.h"
 #include "AttributeManager.h"
 #include <DirectXMath.h>
-#include "DebugShape.h"
 #include "XKILL_Enums.h"
 #include "DataItem.h"
 
@@ -267,45 +266,6 @@ void Attribute_Light_Point::saveTo( DataItemList* list )
 	list->get(&lightPoint.attenuation);
 }
 
-Attribute_Light_Spot::Attribute_Light_Spot()
-{
-
-}
-Attribute_Light_Spot::~Attribute_Light_Spot()
-{
-	//Do nothing.
-}
-
-DataItemList* Attribute_Light_Spot::getDataList()
-{
-	DataItemList* list = new DataItemList();
-
-	list->add(&ptr_position, 			"ptr_position");
-	list->add(lightSpot.ambient,		"ambient");
-	list->add(lightSpot.diffuse,		"diffuse");
-	list->add(lightSpot.specular,		"specular");
-	//list->add(lightSpot.pos,			"pos");
-	list->add(lightSpot.range,			"range");
-	list->add(lightSpot.direction,		"direction");
-	list->add(lightSpot.spotPow,		"spotPow");
-	list->add(lightSpot.attenuation,	"attenuation");
-
-	return list;
-}
-
-void Attribute_Light_Spot::saveTo( DataItemList* list )
-{
-	list->get(&ptr_position);
-	list->get(&lightSpot.ambient);
-	list->get(&lightSpot.diffuse);
-	list->get(&lightSpot.specular);
-	//list->get(&lightSpot.pos);
-	list->get(&lightSpot.range);
-	list->get(&lightSpot.direction);
-	list->get(&lightSpot.spotPow);
-	list->get(&lightSpot.attenuation);
-}
-
 Attribute_Sound::Attribute_Sound()
 {
 }
@@ -359,8 +319,8 @@ Attribute_Camera::Attribute_Camera()
 
 	aspectRatio = 0.785f;
 	fieldOfView = 0.785f; 
-	zFar = 70.0f;
-	zNear = 0.01f;
+	zFar	= 75.0f;
+	zNear	= 0.01f;
 
 	up		= Float3(0.0f, 1.0f, 0.0f);
 	right	= Float3(1.0f, 0.0f, 0.0f);
@@ -525,7 +485,6 @@ void Attribute_InputDevice::saveTo( DataItemList* list )
 int Attribute_Player::nextId = 0;
 Attribute_Player::Attribute_Player()
 {
-	//id = nextId++;
 	priority = 0;
 	cycleSteals = 0;
 	cycles = 0;
@@ -905,45 +864,6 @@ void Attribute_WeaponStats::saveTo(DataItemList* list)
 	list->get(&ammunition[currentAmmunitionType].explosionSphereInitialRadius);
 	list->get(&ammunition[currentAmmunitionType].explosionSphereFinalRadius);
 	list->get(&ammunition[currentAmmunitionType].explosionSphereExplosionDuration);
-}
-
-Attribute_DebugShape::Attribute_DebugShape()
-{
-	shape	= nullptr;
-	render	= false;
-}
-Attribute_DebugShape::~Attribute_DebugShape()
-{
-	//Do nothing.
-}
-void Attribute_DebugShape::clean()
-{
-	if(shape)
-	{
-		delete shape;
-		shape = nullptr;
-	}
-	render = false;
-}
-
-DataItemList* Attribute_DebugShape::getDataList()
-	{
-		DataItemList* list = new DataItemList();
-
-		list->add(&ptr_spatial, "ptr_spatial");
-		list->add(meshID,					"meshID");
-		list->add_Enum(shape->shapeType_,	"shape->shapeType");
-		list->add(render,					"render");
-
-		return list;
-	}
-
-void Attribute_DebugShape::saveTo( DataItemList* list )
-{
-	list->get(&ptr_spatial);
-	list->get(&meshID);
-	shape->shapeType_ = (DebugShapeType)list->get_Enum();
-	list->get(&render);
 }
 
 Attribute_ExplosionSphere::Attribute_ExplosionSphere()

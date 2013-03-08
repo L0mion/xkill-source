@@ -20,7 +20,6 @@
 #include "ModelD3D.h"
 #include "Buffer_SrvRtv.h"
 #include "SubsetD3D.h"
-#include "DebugShapeD3D.h"
 #include "VB.h"
 #include "IB.h"
 #include "renderingUtilities.h"
@@ -28,12 +27,9 @@
 #include "Renderer.h"
 #include "ViewportData.h"
 
-//tmep
-#include "Buffer_SrvDsv.h"
-
 ATTRIBUTES_DECLARE_ALL;
 
-//#define XKILLPROFILING // commment away to skip profiling
+#define XKILLPROFILING // commment away to skip profiling
 #ifdef XKILLPROFILING
 #include <xkill-utilities\Converter.h>
 #include <time.h>
@@ -58,8 +54,6 @@ static std::vector<float> cbtimer;
 #define calctime(vectorname, call ) call
 #define outputaverage(outname, vectorname)
 #endif
-
-#define SAFE_DELETE(x) if( x ) { delete(x); (x) = NULL; }
 
 Renderer::Renderer(HWND windowHandle)
 {
@@ -163,8 +157,9 @@ HRESULT Renderer::resize(unsigned int screenWidth, unsigned int screenHeight)
 	HRESULT hr = S_OK;
 	unsigned int numViewports, csDispatchX, csDispatchY;
 	numViewports	= numSS;
-	csDispatchX		= screenWidth	/ CS_TILE_SIZE;
-	csDispatchY		= screenHeight	/ CS_TILE_SIZE;
+
+	csDispatchX	= (unsigned int)ceil((float)screenWidth	/ (float)CS_TILE_SIZE);
+	csDispatchY	= (unsigned int)ceil((float)screenHeight	/ (float)CS_TILE_SIZE);
 	winfo_->init(
 		screenWidth, 
 		screenHeight, 
@@ -321,7 +316,6 @@ HRESULT Renderer::initManagementModel()
 	HRESULT hr = S_OK;
 
 	managementModel_ = new ManagementModel();
-	hr = managementModel_->init();
 
 	return hr;
 }
@@ -416,8 +410,7 @@ void Renderer::render()
 		managementD3D_->clearBackBuffer();
 	)
 	//Do shadows pre-pass:
-	DirectX::XMFLOAT4X4 shadowMapTransform;
-	calctime(shadowtimer, shadowMapTransform = buildShadows();)
+	DirectX::XMFLOAT4X4 shadowMapTransform = buildShadowMap();
 
 	//Update per-frame constant buffer.
 	AttributePtr<Attribute_SplitScreen>	ptr_splitScreen;
@@ -436,8 +429,7 @@ void Renderer::render()
 			devcon,
 			shadowMapTransform,
 			managementLight_->getLightDirCurCount(),
-			managementLight_->getLightPointCurCount(),
-			managementLight_->getLightSpotCurCount());
+			managementLight_->getLightPointCurCount());
 
 		
 
@@ -476,32 +468,29 @@ void Renderer::render()
 		}
 		managementBuffer_->unsetBuffersAndDepthBufferAsRenderTargets(devcon);
 	)
+	
+	//Blur glowmap:
+	downSampleBlur();
+	unsigned int numBlurs = 1;
+	for(unsigned int i = 0; i < numBlurs; i++)
+	{
+		blurHorizontally();
+		blurVertically();
+	}
+	upSampleBlur();
 
-	//Apply some effects.
-	calctime(glowtimer,
-		downSampleBlur();
-		unsigned int numBlurs = 1;
-		for(unsigned int i = 0; i < numBlurs; i++)
-		{
-			blurHorizontally();
-			blurVertically();
-		}
-		upSampleBlur();
-	)
+	//Compute SSAO for each viewport:
+	for(unsigned int i = 0; i < vpDatas.size(); i++)
+		buildSSAOMap(vpDatas[i]);
 
-	//Render everything to backbuffer.
-	calctime(backbuffertimer,
-		for(unsigned int i = 0; i < vpDatas.size(); i++)
-			renderViewportToBackBuffer(vpDatas[i]);
-	)
+	//Render everything to backbuffer:
+	for(unsigned int i = 0; i < vpDatas.size(); i++)
+		renderViewportToBackBuffer(vpDatas[i]);
 
-	calctime(hudtimer,
-		for(unsigned int i=0; i< vpDatas.size(); i++)
-			renderHudElements(i);
-	)
-	calctime(presenttimer,
-		managementD3D_->present();
-	)
+	for(unsigned int i=0; i< vpDatas.size(); i++)
+		renderHudElements(i);
+
+	managementD3D_->present();
 }
 void Renderer::renderViewportToGBuffer(ViewportData& vpData)									
 {
@@ -533,21 +522,6 @@ void Renderer::renderViewportToGBuffer(ViewportData& vpData)
 	for(std::map<unsigned int, InstancedData*>::iterator i = instancesMap.begin(); i != instancesMap.end(); i++)
 	{
 		renderInstance(i->first, i->second, false);
-	}
-
-	//Make me use iterators!
-	AttributePtr<Attribute_DebugShape> ptr_debugShape;
-	while(itrDebugShape.hasNext())
-	{
-		ptr_debugShape = itrDebugShape.getNext();
-		if(ptr_debugShape->render)
-		{
-			renderDebugShape(
-				ptr_debugShape,
-				itrDebugShape.storageIndex(),
-				vpData.view, 
-				vpData.proj);
-		}
 	}
 
 	if(SETTINGS->showDebugPhysics)
@@ -596,7 +570,6 @@ void Renderer::renderViewportToBackBuffer(ViewportData& vpData)
 	//Set lights.
 	managementLight_->setLightSRVCS(devcon, LIGHTBUFFERTYPE_DIR,		LIGHT_SRV_REGISTER_DIR);
 	managementLight_->setLightSRVCS(devcon, LIGHTBUFFERTYPE_POINT,		LIGHT_SRV_REGISTER_POINT);
-	managementLight_->setLightSRVCS(devcon, LIGHTBUFFERTYPE_SPOT,		LIGHT_SRV_REGISTER_SPOT);
 	managementLight_->setLightSRVCS(devcon, LIGHTBUFFERTYPE_POS_VIEW,	LIGHT_SRV_REGISTER_POS);
 	
 	//Set default samplerstate.
@@ -604,14 +577,13 @@ void Renderer::renderViewportToBackBuffer(ViewportData& vpData)
 	managementSS_->setSS(devcon, TypeFX_CS, 1, SS_ID_SHADOW);
 
 	//Call compute shader kernel.
-	unsigned int dispatchX = winfo_->getCSDispathX() / managementViewport_->getNumViewportsX();
-	unsigned int dispatchY = winfo_->getCSDispathY() / managementViewport_->getNumViewportsY();
+	unsigned int dispatchX = (unsigned int)ceil((float)winfo_->getCSDispathX() / (float)managementViewport_->getNumViewportsX());
+	unsigned int dispatchY = (unsigned int)ceil((float)winfo_->getCSDispathY() / (float)managementViewport_->getNumViewportsY());
 	devcon->Dispatch(dispatchX, dispatchY, 1);
 
 	//Unset and clean.
 	managementLight_->unsetLightSRVCS(devcon, LIGHTBUFFERTYPE_DIR,		LIGHT_SRV_REGISTER_DIR);
 	managementLight_->unsetLightSRVCS(devcon, LIGHTBUFFERTYPE_POINT,	LIGHT_SRV_REGISTER_POINT);
-	managementLight_->unsetLightSRVCS(devcon, LIGHTBUFFERTYPE_SPOT,		LIGHT_SRV_REGISTER_SPOT);
 	managementLight_->unsetLightSRVCS(devcon, LIGHTBUFFERTYPE_POS_VIEW,	LIGHT_SRV_REGISTER_POS);
 
 	managementFX_->unsetShader(devcon, SHADERID_CS_LIGHTING);
@@ -763,68 +735,16 @@ void Renderer::renderSubset(
 		numInstances,
 		0, 0, 0);
 }
-void Renderer::renderDebugShape(
-	AttributePtr<Attribute_DebugShape>	ptr_debugShape, 
-	unsigned int			shapeIndex,
-	DirectX::XMFLOAT4X4		viewMatrix, 
-	DirectX::XMFLOAT4X4		projectionMatrix)
-{
-	ID3D11Device*			device = managementD3D_->getDevice();
-	ID3D11DeviceContext*	devcon = managementD3D_->getDeviceContext();
-	
-	// Get transform matrices.
-	AttributePtr<Attribute_Spatial>	ptr_spatial		= ptr_debugShape->ptr_spatial;
-	AttributePtr<Attribute_Position> ptr_position = ptr_spatial->ptr_position;
-	DirectX::XMFLOAT4X4 worldMatrix			= managementMath_->calculateWorldMatrix(ptr_spatial, ptr_position);
-	DirectX::XMFLOAT4X4 worldMatrixInverse	= managementMath_->calculateMatrixInverse(worldMatrix);
-	DirectX::XMFLOAT4X4 finalMatrix			= managementMath_->calculateFinalMatrix(worldMatrix, viewMatrix, projectionMatrix);
-	
-	managementFX_->setShader(devcon, SHADERID_VS_COLOR);
-	managementFX_->setShader(devcon, SHADERID_PS_COLOR);
-
-	//Update per-object constant buffer.
-	managementCB_->setCB(CB_TYPE_OBJECT, TypeFX_VS, CB_REGISTER_OBJECT, devcon);
-	managementCB_->updateCBObject(
-		devcon, 
-		finalMatrix, 
-		worldMatrix, 
-		worldMatrixInverse);
-	
-	//Fetch renderer representation of shape.
-	DebugShapeD3D* shapeD3D = managementModel_->getDebugShapeD3D(shapeIndex, device);
-	
-	//Set vertex buffer.
-	ID3D11Buffer* vertexBuffer	= shapeD3D->getVB()->getVB();
-	unsigned int numVertices	= shapeD3D->getVB()->getNumVertices();
-
-	UINT stride = sizeof(VertexPosColor);
-	UINT offset = 0;
-	devcon->IASetVertexBuffers(
-		0, 
-		1, 
-		&vertexBuffer, 
-		&stride, 
-		&offset);
-
-	//Set input layout
-	managementFX_->setLayout(devcon, LAYOUTID_POS_COLOR);
-
-	//Set topology. Where to put this?
-	devcon->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_LINELIST);
-
-	//Draw subset.
-	devcon->Draw(numVertices, 0);
-}
 
 //Shadows
-DirectX::XMFLOAT4X4	Renderer::buildShadows()
+DirectX::XMFLOAT4X4	Renderer::buildShadowMap()
 {
 	ID3D11DeviceContext* devcon = managementD3D_->getDeviceContext();
 
 	//Get shadow transform:
 	SceneBounds bounds;
 	bounds.center = DirectX::XMFLOAT3(0.0f, 0.0f, 0.0f); //Origo.
-	bounds.radius = 38;//sqrtf(25.0f * 25.0f); //Radius of scene really ought to be calculated instead of fixed.
+	bounds.radius = 38; //Radius of scene really ought to be calculated instead of fixed.
 
 	LightDescDir dirLight = LightDescDir(); //default construct
 	AttributePtr<Attribute_Light_Dir> ptr_lightDir;
@@ -832,17 +752,6 @@ DirectX::XMFLOAT4X4	Renderer::buildShadows()
 	{
 		ptr_lightDir = itrLightDir.getNext();
 		dirLight = ptr_lightDir->lightDir;
-
-		//static float rotationAngle = 0.0f;
-		//rotationAngle += 0.0001f * delta;
-		//DirectX::XMMATRIX R = DirectX::XMMatrixRotationY(rotationAngle);
-		//
-		//DirectX::XMFLOAT3 tempDir = DirectX::XMFLOAT3(dirLight.direction.x, dirLight.direction.y, dirLight.direction.z);
-		//DirectX::XMVECTOR tempDir2 = XMLoadFloat3(&tempDir);
-		//tempDir2 = DirectX::XMVector3TransformNormal(tempDir2, R);
-		//DirectX::XMStoreFloat3(&tempDir, tempDir2);
-		//
-		//ptr_lightDir->lightDir.direction = Float3(tempDir.x, tempDir.y, tempDir.z);
 	}
 	itrLightDir.resetIndex();
 
@@ -992,7 +901,6 @@ void Renderer::downSampleBlur()
 		0); //register irrelevant
 
 	managementFX_->unsetAll(devcon);
-
 	managementSS_->unsetSS(devcon, TypeFX_PS, 0);
 }
 void Renderer::blurHorizontally()
@@ -1143,6 +1051,139 @@ void Renderer::upSampleBlur()
 	managementFX_->unsetAll(devcon);
 
 	managementSS_->unsetSS(devcon, TypeFX_PS, 0);
+}
+
+//SSAO
+void Renderer::buildSSAOMap(ViewportData& vpData)
+{
+	ID3D11DeviceContext* devcon = managementD3D_->getDeviceContext();
+	
+	managementFX_->setShader(devcon, SHADERID_CS_SSAO);
+	
+	//Set uav
+	managementBuffer_->setBuffer(
+		devcon, 
+		SET_ID_SSAO, 
+		SET_TYPE_UAV, 
+		SET_STAGE_CS, 
+		1); //register 1
+
+	//Set normalbuffer as srv
+	managementBuffer_->setBuffer(
+		devcon, 
+		SET_ID_NORMAL, 
+		SET_TYPE_SRV, 
+		SET_STAGE_CS, 
+		0); //register 0
+
+	//Set depth as srv
+	managementD3D_->setDepthBufferSRV(GBUFFER_SHADER_REGISTER_DEPTH);
+
+	//Set random buf
+	managementBuffer_->setRandomBuf(devcon, 11);
+
+	managementSS_->setSS(devcon, TypeFX_CS, 0, SS_ID_NORMAL);
+	managementSS_->setSS(devcon, TypeFX_CS, 1, SS_ID_DEPTH);
+	managementSS_->setSS(devcon, TypeFX_CS, 2, SS_ID_RANDOM);
+	
+	managementCB_->setCB(CB_TYPE_CAMERA, TypeFX_CS, CB_REGISTER_CAMERA,	devcon);
+
+	unsigned int viewportTopX	= (unsigned int)((float)vpData.viewportTopX		/ (float)SSAO_MAP_SCREEN_RES_FACTOR); //RISKY?
+	unsigned int viewportTopY	= (unsigned int)((float)vpData.viewportTopY		/ (float)SSAO_MAP_SCREEN_RES_FACTOR); //RISKY?
+	unsigned int viewportWidth	= (unsigned int)((float)vpData.viewportWidth	/ (float)SSAO_MAP_SCREEN_RES_FACTOR); //RISKY?
+	unsigned int viewportHeight	= (unsigned int)((float)vpData.viewportHeight	/ (float)SSAO_MAP_SCREEN_RES_FACTOR); //RISKY?
+	managementCB_->updateCBCamera(managementD3D_->getDeviceContext(),
+		vpData.view,
+		managementMath_->getIdentityMatrix(),					//Irrelevant
+		vpData.proj,
+		vpData.projInv,
+		DirectX::XMFLOAT3(0.0f, 0.0f, 0.0f),					//Irrelevant
+		viewportTopX,											//New viewport-dimensions
+		viewportTopY,											//New viewport-dimensions
+		vpData.viewportWidth,									//Instead used to send original viewport-dimensions.
+		vpData.viewportHeight,									//Instead used to send original viewport-dimensions.
+		(float)viewportWidth,
+		(float)viewportHeight);
+	
+	managementCB_->setCB(CB_TYPE_SSAO, TypeFX_CS, CB_REGISTER_SSAO, devcon);
+	float ssaoWidth		= (float)winfo_->getScreenWidth()	/ (float)SSAO_MAP_SCREEN_RES_FACTOR;
+	float ssaoHeight	= (float)winfo_->getScreenHeight()	/ (float)SSAO_MAP_SCREEN_RES_FACTOR;
+
+	managementCB_->updateCBSSAO(
+		devcon,
+		/*SSAOMap Width*/			(unsigned int)ssaoWidth,
+		/*SSAOMap Height*/			(unsigned int)ssaoHeight,
+		/*Occlusion Radius*/		SETTINGS->occlusionRadius,		
+		/*Occlusion Scale*/			SETTINGS->occlusionScale,		
+		/*Occlusion Bias*/			SETTINGS->occlusionBias,		
+		/*Occlusion Intensity*/		SETTINGS->occlusionIntensity);	
+	
+	//Dispatch motherfucker
+	unsigned int SSAO_BLOCK_DIM = 16;
+	float csDispatchX = ssaoWidth	/ (float)SSAO_BLOCK_DIM;
+	float csDispatchY = ssaoHeight	/ (float)SSAO_BLOCK_DIM;
+	unsigned int dispatchX = (unsigned int)ceil(csDispatchX / (float)managementViewport_->getNumViewportsX());
+	unsigned int dispatchY = (unsigned int)ceil(csDispatchY / (float)managementViewport_->getNumViewportsY());
+	devcon->Dispatch(dispatchX, dispatchY, 1);
+
+	//Unser shader
+	managementFX_->unsetShader(devcon, SHADERID_CS_SSAO);
+
+	//////////////////////////////////////////////////////////////////////////
+	//Do blur
+	//////////////////////////////////////////////////////////////////////////
+	
+	ID3D11UnorderedAccessView* uavs[] = { nullptr };
+	devcon->CSSetUnorderedAccessViews(
+		1, //register 1 
+		1, 
+		uavs, 
+		nullptr);
+
+	//set
+	managementFX_->setShader(devcon, SHADERID_CS_BLUR_BILATERAL_HORZ);
+	managementBuffer_->setBuffer(devcon, SET_ID_SSAO, SET_TYPE_SRV, SET_STAGE_CS, 9);
+	managementBuffer_->setBuffer(devcon, SET_ID_SSAO_UTIL, SET_TYPE_UAV, SET_STAGE_CS, 1);
+
+	managementCB_->setCB(CB_TYPE_BLUR, TypeFX_CS, CB_REGISTER_BLUR, devcon);
+
+	unsigned int numBlocksX = (unsigned int)ceilf(viewportWidth / 256.0f);
+	devcon->Dispatch(numBlocksX, viewportHeight, 1);
+
+	managementBuffer_->unset(devcon, SET_TYPE_UAV, SET_STAGE_CS, 1);
+	managementBuffer_->unset(devcon, SET_TYPE_SRV, SET_STAGE_CS, 9);
+
+	managementFX_->setShader(devcon, SHADERID_CS_BLUR_BILATERAL_VERT);
+
+	managementBuffer_->setBuffer(devcon, SET_ID_SSAO_UTIL, SET_TYPE_SRV, SET_STAGE_CS, 9);
+	managementBuffer_->setBuffer(devcon, SET_ID_SSAO, SET_TYPE_UAV, SET_STAGE_CS, 1);
+
+	unsigned int numBlocksY = (unsigned int)ceilf(viewportHeight / 256.0f);
+	devcon->Dispatch(viewportWidth, numBlocksY, 1);
+
+	//unset
+	managementBuffer_->unset(devcon, SET_TYPE_SRV, SET_STAGE_CS, 9);
+	devcon->CSSetUnorderedAccessViews(
+		1, //register 1 
+		1, 
+		uavs, 
+		nullptr);
+
+	//Unser shader
+	managementFX_->unsetShader(devcon, SHADERID_CS_BLUR_BILATERAL_VERT);
+
+
+	//////////////////////////////////////////////////////////////////////////
+	//Do blur
+	//////////////////////////////////////////////////////////////////////////
+
+	managementSS_->unsetSS(devcon, TypeFX_CS, 0);
+	managementSS_->unsetSS(devcon, TypeFX_CS, 1);
+	managementSS_->unsetSS(devcon, TypeFX_CS, 2);
+	
+	managementBuffer_->unset(devcon, SET_TYPE_SRV, SET_STAGE_CS, 0);
+	managementD3D_->unsetDepthBufferSRV(GBUFFER_SHADER_REGISTER_DEPTH);
+	managementBuffer_->unset(devcon, SET_TYPE_SRV, SET_STAGE_CS, 11);
 }
 
 void Renderer::drawBulletPhysicsDebugLines(
