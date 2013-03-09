@@ -1,236 +1,371 @@
 #include "Menu_Main.h"
-#include <QtGui/QKeyEvent>
-#include <xkill-utilities/Util.h>
-#include <xkill-utilities/AttributeType.h>
-#include <xkill-utilities/AttributeManager.h>
 
-#include <xkill-input/InputDevice.h>
-#include <xkill-input/InputObjectArray.h>
-#include <xkill-input/InputObject.h>
-
-#include <QtXml/QtXml>
 #include <QtGui/QStandardItemModel>
-#include <QtGui/QMessageBox>
 
-
-
-#include "Menu_Editor.h"
-
-ATTRIBUTES_DECLARE_ALL
-
-Menu_Main::Menu_Main( QWidget* parent ) : QMainWindow(parent), ToggleHelper(this)
+struct keyFrame
 {
-	ATTRIBUTES_INIT_ALL
+	Float2 pos;
+	float duration;
+};
 
+void Menu_Main::loadOpeningGif()
+{
+	openingAnimation = new QMovie(this);
+	openingAnimation->setCacheMode(QMovie::CacheAll);
+	std::string fileName = "../../xkill-resources/xkill-gui/images/animations/menu_opening.gif"; 
+	openingAnimation->setFileName(fileName.c_str());
+	if(!openingAnimation->isValid()) // error checking
+		ERROR_MESSAGEBOX("Could not open " + fileName + ". Either the file is missing, or \"imageformats/qgif4.dll\" is missing.");
+	openingAnimation->setParent(this); // prevents memory leaks
+	ui.label_openingAnimation->setMovie(openingAnimation);
+	openingAnimation->start();
+	SEND_EVENT(&Event_PlaySound(XKILL_Enums::Sound::SOUND_OPENING_ANIMATION));
+	connect(openingAnimation, SIGNAL(frameChanged(int)),	this, SLOT(openingAnimation_frameChanged(int)));
+}
+
+Menu_Main::Menu_Main( QWidget* parent ) : QMainWindow()
+{
+	// Make overlay accessible to other widgets
+	SETTINGS->overlayWidget = this;
+
+	// Init
+	loadCustomFonts();
+	this->parent = parent;
 	ui.setupUi(this);
-		//QWidget::setAttribute(Qt::WA_TranslucentBackground, true);
-		//QWidget::setWindowFlags(Qt::SplashScreen);
-	//setAttribute(Qt::WA_TransparentForMouseEvents);
-	//setAttribute(Qt::WA_TranslucentBackground);
-		//setWindowFlags(Qt::WindowStaysOnTopHint);
+	QWidget::setWindowFlags(Qt::FramelessWindowHint);
+	//alwaysOnTop(true);
+	QWidget::setAttribute(Qt::WA_TranslucentBackground);
+	QWidget::show();
+	loadOpeningGif();
 
-	//ui.verticalLayout_2->setSpacing(0);
-	//ui.verticalLayout_2->setMargin(0);
-	//ui.verticalLayout->setSpacing(0);
-	//ui.verticalLayout->setMargin(0);
-
-	connect(ui.pushButton_exit_5,		SIGNAL(clicked()),					this,	SLOT(slot_quitToDesktop()));
-	connect(ui.pushButton_exit_2,		SIGNAL(clicked()),					this,	SLOT(slot_quitToDesktop()));
-	connect(ui.comboBox_LevelSelect,	SIGNAL(currentIndexChanged(int)),	this,	SLOT(slot_selectLevel(int)));
-	//connect(ui.pushButton_AddLevel,		SIGNAL(clicked()),					this,	SLOT(slot_addLevel()));
-	//connect(ui.pushButton_SaveLevel,	SIGNAL(clicked()),					this,	SLOT(slot_saveLevel()));
-	//connect(ui.pushButton_RemoveLevel,	SIGNAL(clicked()),					this,	SLOT(slot_removeLevel()));
-	connect(ui.pushButton_startGame,	SIGNAL(clicked()),					this,	SLOT(slot_startGame()));
-
-	// Set num players to 2
-	ui.horizontalSlider_numPlayers->setValue(2);
+	// Events
+	SUBSCRIBE_TO_EVENT(this, EVENT_WINDOW_FOCUS_CHANGED);
+	SUBSCRIBE_TO_EVENT(this, EVENT_WINDOW_MOVE);
+	SUBSCRIBE_TO_EVENT(this, EVENT_WINDOW_RESIZE);
+	SUBSCRIBE_TO_EVENT(this, EVENT_ENABLE_MENU);
+	SUBSCRIBE_TO_EVENT(this, EVENT_UPDATE);
 
 
-	//loadXML();
+	//
+	// Setup GUI
+	//
+
+	// center background 
+	ui.label_background->move(0,0);
+	ui.label_openingAnimation->move(0,0);
+
+	// hide unused menus
+	ui.frame_opening->hide();
+	ui.frame_main->hide();
+	ui.frame_start->hide();
+	ui.frame_customize->hide();
+	ui.frame_settings->hide();
+	ui.frame_video->hide();
+	ui.frame_audio->hide();
+	ui.frame_input->hide();
+	ui.frame_credits->hide();
+	//ui.label_background->hide();
+	show();
+
+	// show main menu
+	push_menu(ui.frame_opening);
+
+	// signals
+	connect(ui.pushButton_start, SIGNAL(clicked()),	this, SLOT(slot_menu_start()));
+	connect(ui.pushButton_startgame, SIGNAL(clicked()),	this, SLOT(slot_menu_startgame()));
+	connect(ui.pushButton_customize, SIGNAL(clicked()),	this, SLOT(slot_menu_customize()));
+	connect(ui.pushButton_settings, SIGNAL(clicked()),	this, SLOT(slot_menu_settings()));
+	connect(ui.pushButton_video, SIGNAL(clicked()),	this, SLOT(slot_menu_video()));
+	connect(ui.pushButton_audio, SIGNAL(clicked()),	this, SLOT(slot_menu_audio()));
+	connect(ui.pushButton_input, SIGNAL(clicked()),	this, SLOT(slot_menu_input()));
+	connect(ui.pushButton_credits, SIGNAL(clicked()),	this, SLOT(slot_menu_credits()));
+	connect(ui.pushButton_quit, SIGNAL(clicked()),	this, SLOT(slot_menu_quit()));
+	connect(ui.horizontalSlider_numPlayers, SIGNAL(valueChanged(int)),	this, SLOT(setNumPlayers(int)));
+
+	connect(ui.pushButton_levelNext, SIGNAL(clicked()),	this, SLOT(slot_menu_next_level()));
+	connect(ui.pushButton_levelPrevious, SIGNAL(clicked()),	this, SLOT(slot_menu_previous_level()));
+	
+	// standard values
+	ui.horizontalSlider_numPlayers->setValue(SETTINGS->numPlayers);
+
+	// init sub-menus
+	input_Menu = new Menu_Input(&ui, this);
+	input_Menu->Init(new QStandardItemModel(0, 2, this), new QStandardItemModel(0, 1, this));
+	ammo_Menu = new Menu_Ammo(&ui, this);
+	firingMode_Menu = new Menu_FiringMode(&ui, this);
+	sound_Menu = new Menu_Sound(&ui, this);
+	hud = new Menu_HUDManager(this);
+
+	// init level menu
+	filePath = QString("../../xkill-resources/xkill-scripts/levels.xml");
+	levelCurrent = 0;
+
+	Event_GetFileList* fileList = new Event_GetFileList("../../xkill-resources/xkill-level/", ".mdldesc");
+	SEND_EVENT(fileList);
+	std::vector<std::string> filenames = fileList->filenames;
+	delete fileList;
+
+	//editorModel->setHorizontalHeaderItem(1, new QStandardItem("ID"));
+
+	QStringList columnNames;
+	levelListModel = new QStandardItemModel(0, filenames.size(), this);
+	for(unsigned int i = 0; i < filenames.size(); i++)
+	{
+		std::string filename = filenames[i];
+		int strIndex = std::string::npos;
+		strIndex = filename.find_first_of(".");
+
+		if(strIndex != std::string::npos)
+			filename = filename.substr(0, strIndex);
+
+		QString qStr = filename.c_str();
+		QStandardItem* stdItem = new QStandardItem(qStr);
+
+		levelNames.push_back(filename);
+		levelListModel->appendRow(stdItem);
+	}
+
+	// Load level
+	slot_menu_next_level(); // skip to next level
+	SEND_EVENT(&Event_LoadLevel(levelNames[levelCurrent]));
+	SETTINGS->currentLevel = levelNames[levelCurrent];
+	updateLevelSelectionInterface();
+	
+}
+
+void Menu_Main::updateLevelSelectionInterface()
+{
+	std::string levelName = levelNames[levelCurrent];
+	std::string imagePath = "../../xkill-resources/xkill-level/" + levelName + "/" + levelName + ".png";
+
+	ui.label_levelNameText->setText(levelName.c_str());
+
+	ui.label_level_image->setPixmap(QPixmap(QString::fromUtf8(imagePath.c_str())));
+	const QPixmap* pixmap = ui.label_level_image->pixmap();
+	if(pixmap->isNull()) //If no level-specific image was found, try displaying a default image as replacement
+	{
+		ui.label_level_image->setPixmap(QPixmap(QString::fromUtf8("../../xkill-resources/xkill-gui/images/icons/levels/arena1.png")));
+	}
+}
+
+void Menu_Main::mousePressEvent( QMouseEvent *e )
+{
+	if(GET_STATE() == STATE_MAINMENU)
+	{
+		if(e->button() == Qt::RightButton)
+		{
+			pop_menu();
+		}
+		if(e->button() == Qt::LeftButton)
+		{
+			// Skip opening, if at opening (index 0)
+			if(menuStack.size()==1)
+				endOpening();
+		}
+	}
+}
+
+void Menu_Main::loadCustomFonts()
+{
+	QStringList list;
+	list 
+		<< "arcade_interlaced.ttf" 
+		<< "arcade_rounded.ttf" 
+		<< "arista_light.ttf" 
+		<< "digital_7_mono.ttf" 
+		<< "angies_new_house.ttf" 
+		<< "pixel_square_10.ttf" 
+		<< "pixel_square_bold10.ttf" 
+		<< "pxll.ttf" 
+		<< "computerfont.ttf"
+		<< "statix.ttf";
+	int fontID(-1);
+	bool fontWarningShown(false);
+	for (QStringList::const_iterator constIterator = list.constBegin(); constIterator != list.constEnd(); ++constIterator) 
+	{
+		QFile res(":/xkill/fonts/" + *constIterator);
+		if(res.open(QIODevice::ReadOnly) == false)
+		{
+			if(fontWarningShown == false)
+			{
+				std::string fontName = (*constIterator).toStdString();
+				ERROR_MESSAGEBOX("Problem loading custom font \"" + fontName + "\".");
+				fontWarningShown = true;
+			}
+		} 
+		else 
+		{
+			fontID = QFontDatabase::addApplicationFontFromData(res.readAll());
+			if (fontID == -1 && fontWarningShown == false)
+			{
+				ERROR_MESSAGEBOX("Problem loading custom font");
+				fontWarningShown = true;
+			}
+		}
+	}
+}
+
+void Menu_Main::push_menu( QFrame* menu )
+{
+	// Hide previous menu, if any
+	if(menuStack.size() > 0)
+	{
+		QFrame* topMenu = menuStack.back();
+		topMenu->hide();
+	}
+
+	// Show new menu
+	menu->move(0,0);
+	menu->resize(width(), height());
+	menu->show();
+	menuStack.push_back(menu);
+
+	SEND_EVENT(&Event_PlaySound(XKILL_Enums::Sound::SOUND_BUTTON_CLICK));
+}
+
+void Menu_Main::pop_menu()
+{
+	// Make sure rot-menu is not poped
+	if(menuStack.size() > 2)
+	{
+		// Pop current menu
+		QFrame* topMenu = menuStack.back();
+		hideMenu();
+		menuStack.pop_back();
+
+		// Show previous menu
+		QFrame* menu = menuStack.back();
+		menu->move(0,0);
+		menu->resize(width(), height());
+		showMenu();
+	}
+}
+
+void Menu_Main::menuResize()
+{
+	QFrame* topMenu = menuStack.back();
+
+	// Resize background
+	ui.label_openingAnimation->resize(width(), height());
+	ui.label_background->resize(width(), height());
+	ui.label_openingAnimation->lower();
+	ui.label_background->lower();
+
+	// Resize current menu
+	topMenu->resize(width(), height());
+}
+
+void Menu_Main::setAlwaysOnTop( bool on )
+{
+	if(on)
+	{
+		// Enable Window Stay on Top flag
+		this->setWindowFlags(this->windowFlags() | Qt::WindowStaysOnTopHint);
+	}
+	else
+	{
+		// Disable Window Stay on Top flag
+		this->setWindowFlags(this->windowFlags() & ~Qt::WindowStaysOnTopHint);
+	}
+
+	this->show();
+}
+
+void Menu_Main::event_windowMove( Event_WindowMove* e )
+{
+	move(e->pos.x, e->pos.y);
+	raise();
+}
+
+void Menu_Main::keyPressEvent( QKeyEvent *e )
+{
+	if(GET_STATE() == STATE_MAINMENU)
+	{
+		if(e->key() == Qt::Key_Escape)
+		{
+			pop_menu();
+		}
+	}
+
+	QCoreApplication::sendEvent(parent, e);
+}
+
+void Menu_Main::keyReleaseEvent( QKeyEvent *e )
+{
+	QCoreApplication::sendEvent(parent, e);
+}
+
+void Menu_Main::event_windowResize( Event_WindowResize* e )
+{
+	// Resize window
+	resize(e->width, e->height);
+
+	// Make sure menu is resized as well
+	menuResize();
+}
+
+void Menu_Main::onEvent( Event* e )
+{
+	EventType type = e->getType();
+	switch (type) 
+	{
+	case EVENT_WINDOW_FOCUS_CHANGED:
+		raise();
+		break;
+	case EVENT_ENABLE_MENU:
+		if(((Event_EnableMenu*)e)->enableMenu)
+		{
+			// Refresh menu
+			//input_Menu->setSettingsMenu();
+			ammo_Menu->setSettingsMenu();
+			firingMode_Menu->setSettingsMenu();
+			//sound_Menu->setSettingsMenu();
+
+			// Display menu
+			showMenu();
+		}
+		else
+		{
+			// Hide menu
+			hideMenu();
+		}
+		break;
+	case EVENT_WINDOW_MOVE:
+		event_windowMove((Event_WindowMove*)e);
+		break;
+	case EVENT_WINDOW_RESIZE:
+		event_windowResize((Event_WindowResize*)e);
+		break;
+	default:
+		break;
+	}
 }
 
 Menu_Main::~Menu_Main()
 {
+	UNSUBSCRIBE_TO_EVENTS(this);
+
+	delete input_Menu;
+	delete ammo_Menu;
+	delete firingMode_Menu;
+	delete sound_Menu;
 }
 
-void Menu_Main::parentMoveEvent()
-{
-	QPoint pos = parentWidget()->pos();
-	pos = QPoint();
-	int x = pos.x() + parentWidget()->width()/2 - this->width()/2;
-	int y = pos.y() + parentWidget()->height()/2 - this->height()/2;
-	move(x, y);
-}
-
-void Menu_Main::loadXML()
-{
-//	levelListModel->clear();
-//
-//	// load XML file
-//	QDomDocument document;
-//	QFile* file = new QFile(filePath);
-//	if(!file->open(QIODevice::ReadOnly | QIODevice::Text))
-//	{
-//		QMessageBox::information(0, "Error", "Failed to find XML file"); return;
-//	}
-//	if(!document.setContent(file))
-//	{
-//		QMessageBox::information(0, "Error", "Failed to parse XML file to open XML file");  return;
-//	}
-//	file->close();
-//	delete file;
-//
-//	// read all levels to ItemModel
-//	QStandardItem* root = new QStandardItem("Levels");
-//	levelListModel->appendRow(root);
-//	levelListModel->item(0);
-//	QDomElement xmlRoot = document.firstChildElement();
-//	QDomNodeList allLevel = xmlRoot.elementsByTagName("Level");
-//	for(int i=0; i<allLevel.count(); i++)
-//	{
-//		// parse level
-//		QDomElement level = allLevel.at(i).toElement();
-//		QStandardItem* name = new QStandardItem(level.attribute("Name"));
-//		QStandardItem* description = new QStandardItem(level.attribute("Description"));
-//		root->appendRow(name);
-//		name->appendRow(description);
-//	}
-//
-//	// parse model and build stuff from it
-//	ui.comboBox_LevelSelect->clear();
-//	QStandardItem* allLevelItm = levelListModel->item(0,0);
-//	for(int i=0; i<allLevelItm->rowCount(); i++)
-//	{
-//		QStandardItem* child = allLevelItm->child(i,0);
-//		ui.comboBox_LevelSelect->addItem(child->text());
-//	}
-////	ui.treeView->setModel(levelListModel);
-//
-////	ui.treeView->setExpanded(allLevelItm->index(), true);
-//	
-}
-
-void Menu_Main::slot_selectLevel( int levelId )
-{
-	//QStandardItem* levels = levelListModel->item(0,0);
-	//if(levels->rowCount()>levelId && levelId>=0)
-	//{
-	//	QStandardItem* name = levels->child(levelId,0);
-	//	QStandardItem* desc = name->child(0,0);
-	////	ui.textBrowser_LevelInfo->setText(desc->text());
-	//}
-
-	//if(levelId >= 0 && levelId < levelNames_.size())
-	//{
-	//	SEND_EVENT(&Event_LoadLevel(levelNames_[levelId]));
-	//	//settings->currentLevel = levelNames_[levelId];
-	//}
-}
-
-void Menu_Main::slot_addLevel()
-{
-	/*QStandardItem* desc = new QStandardItem("Description");
-	QStandardItem* name = new QStandardItem("Name");
-	name->appendRow(desc);
-	QStandardItem* levels = levelListModel->item(0,0);
-	levels->appendRow(name);*/
-}
-
-void Menu_Main::slot_removeLevel()
-{
-//	QStandardItem* levels = levelListModel->item(0,0);
-//	QModelIndex index = ui.treeView->currentIndex();
-//	levels->removeRow(index.row());
-}
-
-void Menu_Main::slot_saveLevel()
-{
-	//// make root node
-	//QDomDocument document;
-	//QDomElement xmlroot = document.createElement("xkill");
-	//document.appendChild(xmlroot);
-
-	//// parse model into level xml
-	//QStandardItem* levels = levelListModel->item(0,0);
-	//for(int i=0; i<levels->rowCount(); i++)
-	//{
-	//	QDomElement xmlbook = document.createElement("Level");
-	//	QStandardItem* name = levels->child(i,0);
-	//	QStandardItem* desc = name->child(0,0);
-	//	xmlbook.setAttribute("Name",name->text());
-	//	xmlbook.setAttribute("Description", desc->text());
-	//	xmlroot.appendChild(xmlbook);
-	//}
-
-	//// save to disk
-	//QFile file(filePath);
-	//if(!file.open(QIODevice::WriteOnly | QIODevice::Text))
-	//{
-	//	QMessageBox::information(0, "Error", "Failed to write file");  return;
-	//}
-	//QTextStream stream(&file);
-	//stream << document.toString();
-	//file.close();
-
-	//loadXML();
-}
-
-void Menu_Main::keyPressEvent( QKeyEvent* e )
-{
-	QCoreApplication::sendEvent(parentWidget(), e);
-}
-
-void Menu_Main::mousePressEvent( QMouseEvent* e )
-{
-	e->accept(); // avoids propagating event to parent
-}
-
-void Menu_Main::slot_startGame()
-{
-}
-
-void Menu_Main::slot_loadInputList(int deviceId)
-{
-
-}
-
-void Menu_Main::slot_loadInputSettings(QModelIndex index)
-{
-	
-}
-
-void Menu_Main::slot_inputSettingsChanged()
-{
-
-}
-
-void Menu_Main::slot_setInputObject(QModelIndex index)
-{
-	
-}
-
-void Menu_Main::slot_updateAmmoMenu()
-{
-
-}
-
-void Menu_Main::slot_ammoMenuUpdated()
-{
-}
-
-void Menu_Main::slot_updateFiringModeMenu()
-{
-}
-
-void Menu_Main::slot_firingModeUpdated()
-{
-}
-
-void Menu_Main::slot_soundMenuUpdated()
-{
-}
-
-void Menu_Main::slot_quitToDesktop()
+void Menu_Main::closeEvent( QCloseEvent* event )
 {
 	SEND_EVENT(&Event(EVENT_QUIT_TO_DESKTOP));
+}
+
+void Menu_Main::slot_menu_next_level()
+{
+	levelCurrent++;
+	levelCurrent %= levelNames.size();
+	updateLevelSelectionInterface();
+}
+
+void Menu_Main::slot_menu_previous_level()
+{
+	levelCurrent--;
+	levelCurrent %= levelNames.size();
+	updateLevelSelectionInterface();
 }

@@ -55,7 +55,7 @@ MainWindow::MainWindow()
 
 	// init tools
 	new Menu_Editor(ui, this);
-	menu = new Menu_Main2(this);
+	menu = new Menu_Main(this);
 	
 	// setup signals and slots
 	connect(ui.actionFullscreen,			SIGNAL(triggered()),					this,			SLOT(slot_toggleFullScreen()));

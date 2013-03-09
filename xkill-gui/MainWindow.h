@@ -9,9 +9,8 @@
 #include <xkill-utilities/Util.h>
 #include <QtGui/QApplication>
 #include "GameWidget.h"
-#include "MenuManager.h"
 #include "Menu_Editor.h"
-#include "Menu_Main2.h"
+#include "Menu_Main.h"
 
 class MainWindow : public QMainWindow, public IObserver
 {
@@ -20,7 +19,7 @@ class MainWindow : public QMainWindow, public IObserver
 private:
 	Ui::MainWindowClass ui;
 	GameWidget* gameWidget;
-	Menu_Main2* menu;
+	Menu_Main* menu;
 	
 public:
 	MainWindow();

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "ui_MainMenu2.h"
+#include "ui_MainMenu.h"
 
 class QStandardItemModel;
 class InputObject;
