@@ -93,11 +93,9 @@ void Menu_HUD::mapToSplitscreen()
 	weaponInfoHud.init(ui.groupBox_weaponInfo, ui.verticalLayout_weaponInfo, ui.groupBox_weaponInfo_subHud, ui.horizontalLayout_weaponInfo_subHud);
 	ui.groupBox_weaponInfo2->hide();
 	Float2 weaponInfoPos;
-	weaponInfoPos.x = ui.frame_bottom->parentWidget()->width() - weaponInfoHud.width() + 1;
+	weaponInfoPos.x = ui.frame_bottom->parentWidget()->width() + 1;
 	weaponInfoPos.y = ui.frame_bottom->pos().y();
-	weaponInfoHud.setPositionOnShow(weaponInfoPos);
-	weaponInfoPos.x = ui.frame_bottom->parentWidget()->width() + 10;
-	weaponInfoHud.setPositionOnHide(weaponInfoPos);
+	weaponInfoHud.setPosition(weaponInfoPos);
 }
 
 void Menu_HUD::refresh()
@@ -116,7 +114,7 @@ void Menu_HUD::refresh()
 	// Update weapon info hud
 	//
 
-	weaponInfoHud.update(firingIndex);
+	weaponInfoHud.update(firingIndex, ammoIndex);
 
 	//
 	// Show ammunition info

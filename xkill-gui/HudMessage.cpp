@@ -37,7 +37,7 @@ void HudMessage::setPosition( Float2 position )
 	// An additional offset,
 	// creates a cool interpolation
 	// when a new label is created
-	position = position + Float2(_label->width() * 0.0f, -_label->height() * 1.0f);
+	position = position + Float2(-_label->height() * 4.0f, -_label->height() * 0.0f);
 
 	// Move
 	_label->move(position.x, position.y);
