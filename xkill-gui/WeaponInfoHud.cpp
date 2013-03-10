@@ -41,6 +41,10 @@ void WeaponInfoHud::update( int iconIndex, int iconIndex_subHud )
 
 		// Set face timer
 		_fadeTimer = 1.0f;
+
+		// Extent show time on sub info-box
+		if(_fadeTimer_subHud > 0.0f)
+			_fadeTimer_subHud = 1.0f;
 	}
 
 	// Detect change in ammo
@@ -56,6 +60,10 @@ void WeaponInfoHud::update( int iconIndex, int iconIndex_subHud )
 
 		// Set face timer
 		_fadeTimer_subHud = 1.0f;
+
+		// Extent show time on main info-box
+		if(_fadeTimer > 0.0f)
+			_fadeTimer = 1.0f;
 	}
 
 
@@ -75,29 +83,63 @@ void WeaponInfoHud::update( int iconIndex, int iconIndex_subHud )
 	// and offset the determined position 
 	// relative to info-box size
 
+	const int kHidingEpsilon = 10;
 	if(_fadeTimer > 0.0f)
 	{
+		// Show position
 		targetPos = _position;
 		targetPos.x -= _groupBox->width();
 		targetPos.y -= _groupBox->height();
 	}
 	else
 	{
+		// Hiding position
 		targetPos = _position;
 		targetPos.y -= _groupBox->height();
+		targetPos.x += kHidingEpsilon;
 	}
+
 	if(_fadeTimer_subHud > 0.0f)
 	{
+		// Show position
 		targetPos_subHud = _position;
 		targetPos_subHud.x -= _groupBox_subHud->width();
 		targetPos_subHud.y -= _groupBox_subHud->height();
+
+		// Adapt sub-box to be shown together with main-box
 		if(_fadeTimer > 0.0f)
-			targetPos_subHud.x -= _groupBox->width();
+		{
+			targetPos_subHud.x += - _groupBox->width();
+			//targetPos_subHud.y += - (32 + 9) * _iconIndex;
+			
+			// Remove left margins to make them
+			// they fit together more nicely
+			QMargins margins = _groupBox_subHud->layout()->contentsMargins();
+			if(margins.right() != 0)
+			{
+				margins.setRight(0);
+				_groupBox_subHud->layout()->setContentsMargins(margins);
+				_groupBox_subHud->resize(_groupBox_subHud->sizeHint());
+			}
+		}
+		else
+		{
+			// Restore margins if we have tampered with it
+			QMargins margins = _groupBox_subHud->layout()->contentsMargins();
+			if(margins.right() == 0)
+			{
+				margins.setRight(9);
+				_groupBox_subHud->layout()->setContentsMargins(margins);
+				_groupBox_subHud->resize(_groupBox_subHud->sizeHint());
+			}
+		}
 	}
 	else
 	{
+		// Hiding position
 		targetPos_subHud = _position;
 		targetPos_subHud.y -= _groupBox_subHud->height();
+		targetPos_subHud.x += kHidingEpsilon;
 	}
 
 

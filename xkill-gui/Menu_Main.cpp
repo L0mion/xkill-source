@@ -177,8 +177,12 @@ void Menu_Main::loadCustomFonts()
 		<< "pixel_square_10.ttf" 
 		<< "pixel_square_bold10.ttf" 
 		<< "pxll.ttf" 
-		<< "computerfont.ttf"
+		<< "king_richard.ttf"
+		<< "bebas_neue.otf"
+		<< "kenyan_coffee.ttf"
 		<< "statix.ttf";
+
+	
 	int fontID(-1);
 	bool fontWarningShown(false);
 	for (QStringList::const_iterator constIterator = list.constBegin(); constIterator != list.constEnd(); ++constIterator) 
