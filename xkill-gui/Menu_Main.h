@@ -98,6 +98,8 @@ private slots:
 		SETTINGS->cycleLimit = ui.horizontalSlider_cycleLimit->value();
 		SETTINGS->timeLimit = ui.horizontalSlider_timeLimit->value() * 60.0f;
 		SETTINGS->numPlayers = ui.horizontalSlider_numPlayers->value();
+		//SETTINGS->schedulerTime = ui.horizontalSlider_priorityToCycleRate()->value();
+
 		AttributeIterator<Attribute_Player> itrPlayer = ATTRIBUTE_MANAGER->player.getIterator();
 		while(itrPlayer.hasNext())
 		{

@@ -530,7 +530,7 @@ void NameGenerator::reset()
 	addName("crazy man on the street");
 	addName("index of value");
 	addName("assumption");
-	addName("resume last assumption");
+	addName("resume lastest assumption");
 	addName("xyzzy");
 	addName("clear buffer");
 	addName("week-old branch");
@@ -965,7 +965,7 @@ void NameGenerator::reset()
 	addName("It's O.K. I think");
 	addName("monkey in a négligée");
 	addName("pick another color");
-	addName("plaster duster");
+	addName("plaster apron");
 	addName("pencil sharpener");
 	addName("I wonder");
 	addName("comparision outside set");
@@ -1145,10 +1145,29 @@ void NameGenerator::reset()
 	addName("www.xkill.se");
 	addName("template system");
 	addName("plenty of balloons");
-	addName("threshing");
+	addName("thrashing");
 	addName("Deep Blue");
 	addName("HAL 9000");
 	addName("editor's choice");
+	addName("just a tool");
+	addName("run ran crash");
+	addName("cultivating garlic");
+	addName("gas duster");
+	addName("logical reasoning xor");
+	addName("version outdated");
+	addName("seamless integration");
+	addName("unexpected attendance");
+	addName("aforementioned but forgotten");
+	addName("had a lucky start");
+	addName("show the way");
+	addName("implicitly correct");
+	addName("on the right track with wrong ticket");
+	addName("roses in bloom");
+	addName("King Richard");
+	addName("Ebas Neue");
+	addName("typecast");
+	addName("missing before");
+	
 
 	//C++ keywords
 	addName("alignas");

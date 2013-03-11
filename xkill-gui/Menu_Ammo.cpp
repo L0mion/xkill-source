@@ -50,9 +50,9 @@ void Menu_Ammo::setSettingsMenu()	// TODO: Set good values for the sliders and m
 
 	ui->checkBox_Ammo_Explosive							->	setChecked(ammo->explosive);
 
-	ui->horizontalSlider_Ammo_ExplosionDuration			->	setValue(static_cast<int>(ammo->explosionSphereExplosionDuration * 100.0f));
-	ui->horizontalSlider_Ammo_ExplosionInitialRadius	->	setValue(static_cast<int>(ammo->explosionSphereInitialRadius * 100.0f));
-	ui->horizontalSlider_Ammo_ExplosionFinalRadius		->	setValue(static_cast<int>(ammo->explosionSphereFinalRadius * 100.0f));
+	ui->horizontalSlider_Ammo_ExplosionDuration			->	setValue(static_cast<int>(ammo->explosionSphereExplosionDuration * 10.0f));
+	ui->horizontalSlider_Ammo_ExplosionInitialRadius	->	setValue(static_cast<int>(ammo->explosionSphereInitialRadius * 5.0f));
+	ui->horizontalSlider_Ammo_ExplosionFinalRadius		->	setValue(static_cast<int>(ammo->explosionSphereFinalRadius * 5.0f));
 
 	// Release lock
 	updateLock = false;
@@ -68,19 +68,31 @@ void Menu_Ammo::settingsMenuUpdated()
 	{
 		Ammunition* ammo = getAmmoSettings();
 
+		if(ui->checkBox_Ammo_Explosive->isChecked())
+		{
+			ui->horizontalSlider_Ammo_ExplosionDuration->setEnabled(true);
+			ui->horizontalSlider_Ammo_ExplosionInitialRadius->setEnabled(true);
+			ui->horizontalSlider_Ammo_ExplosionFinalRadius->setEnabled(true);
+		}
+		else
+		{
+			ui->horizontalSlider_Ammo_ExplosionDuration->setEnabled(false);
+			ui->horizontalSlider_Ammo_ExplosionInitialRadius->setEnabled(false);
+			ui->horizontalSlider_Ammo_ExplosionFinalRadius->setEnabled(false);
+		}
+
 		// Read from sliders
 		ammo->damage							= static_cast<float>(ui->horizontalSlider_Ammo_Damage->value());
 		ammo->speed								= static_cast<float>(ui->horizontalSlider_Ammo_Speed->value());
 		ammo->nrOfProjectilesPerSalvo			= ui->horizontalSlider_Ammo_NrOfProjectiles->value();
 		ammo->velocityVariation					= static_cast<float>(ui->horizontalSlider_Ammo_VelocitVariation->value()) * 0.01f;
 		ammo->spreadConeRadius					= static_cast<float>(ui->horizontalSlider_Ammo_Spread->value()) * 3.14f / 180;
-		//ammo->spreadConeRadius					= static_cast<float>(ui->horizontalSlider_Ammo_Spread->value()) * 111.0079f;
 
 		ammo->explosive							= ui->checkBox_Ammo_Explosive->isChecked();
 
-		ammo->explosionSphereInitialRadius		= static_cast<float>(ui->horizontalSlider_Ammo_ExplosionInitialRadius->value()) * 0.01f;
-		ammo->explosionSphereFinalRadius		= static_cast<float>(ui->horizontalSlider_Ammo_ExplosionFinalRadius->value()) * 0.01f;
-		ammo->explosionSphereExplosionDuration	= static_cast<float>(ui->horizontalSlider_Ammo_ExplosionDuration->value()) * 0.01f;
+		ammo->explosionSphereExplosionDuration	= static_cast<float>(ui->horizontalSlider_Ammo_ExplosionDuration->value()) * 0.1f;
+		ammo->explosionSphereInitialRadius		= static_cast<float>(ui->horizontalSlider_Ammo_ExplosionInitialRadius->value()) * 0.2f;
+		ammo->explosionSphereFinalRadius		= static_cast<float>(ui->horizontalSlider_Ammo_ExplosionFinalRadius->value()) * 0.2f;
 
 		// Update labels
 		ui->label_Ammo_Damage					->	setNum(ammo->damage);
