@@ -366,7 +366,7 @@ void NameGenerator::reset()
 	addName("hexadecimal decimal");
 	addName("hex to the seventh power");
 	addName("power of two");
-	addName("reversable operation");
+	addName("reversible operation");
 	addName("irreversible condition");
 	addName("hardware");
 	addName("software");
@@ -1140,6 +1140,15 @@ void NameGenerator::reset()
 	addName("metro gremlin");
 	addName("keep single");
 	addName("stay put");
+	addName("kenyan coffee");
+	addName("Kalaydean whah");
+	addName("www.xkill.se");
+	addName("template system");
+	addName("plenty of balloons");
+	addName("threshing");
+	addName("Deep Blue");
+	addName("HAL 9000");
+	addName("editor's choice");
 
 	//C++ keywords
 	addName("alignas");
