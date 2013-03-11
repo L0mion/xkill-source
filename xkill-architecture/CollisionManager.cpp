@@ -74,6 +74,18 @@ void CollisionManager::collision_applyDamage(Entity* entity1, Entity* entity2)
 					AttributePtr<Attribute_Health> health = itrHealth.at(healthId[j]);
 					health->health -= damage->damage;
 
+					// Send feedback to all players
+					std::vector<AttributePtr<Attribute_Player>> players_takingDamage = itrPlayer.getMultiple(entity1->getAttributes(ATTRIBUTE_PLAYER));
+					for(int i=0; i<(int)players_takingDamage.size(); i++)
+					{
+						SEND_EVENT(&Event_PlayerTakingDamage(players_takingDamage[i]));
+					}
+					std::vector<AttributePtr<Attribute_Player>> players_hittingTargetas = itrPlayer.getMultiple(itr_entity->at(damage->owner_entityID)->getAttributes(ATTRIBUTE_PLAYER));
+					for(int i=0; i<(int)players_hittingTargetas.size(); i++)
+					{
+						SEND_EVENT(&Event_PlayerTargetHit(players_hittingTargetas[i]));
+					}
+
 					// If a player was killed by the collision, give priority (score) to the player that created the DamageAttribute
 					if(health->health <= 0)
 					{

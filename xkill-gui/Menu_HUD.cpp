@@ -22,10 +22,19 @@ Menu_HUD::Menu_HUD( AttributePtr<Attribute_SplitScreen> splitScreen, QWidget* pa
 	QWidget::setAttribute(Qt::WA_TransparentForMouseEvents);
 
 	SUBSCRIBE_TO_EVENT(this, EVENT_UPDATE);
+	SUBSCRIBE_TO_EVENT(this, EVENT_PLAYER_TARGET_HIT);
+	SUBSCRIBE_TO_EVENT(this, EVENT_PLAYER_TAKING_DAMAGE);
 
 	hudMessage_manager.init(this, ptr_splitScreen);
 	mapToSplitscreen();
 	initScoreboard();
+
+	hitOverlayFade				= 0.0f;
+	crosshair_targetHitFade		= 0.0f;
+	scoreboardFade				= 0.0f;
+	healthFade					= 0.0f;
+	ammoFade					= 0.0f;
+	firingModeFade				= 0.0f;
 }
 
 Menu_HUD::~Menu_HUD()
@@ -57,7 +66,9 @@ void Menu_HUD::mapToSplitscreen()
 
 	// Move center HUD to center
 	ui.label_aim->move(centerPos.x - ui.label_aim->width()* 0.5f, centerPos.y - ui.label_aim->height()* 0.5f);
+	ui.label_aim_targetHit->move(centerPos.x - ui.label_aim_targetHit->width()* 0.5f, centerPos.y - ui.label_aim_targetHit->height()* 0.5f);
 	ui.label_firingMode->move(centerPos.x - ui.label_firingMode->width()* 0.5f + 10, centerPos.y - ui.label_firingMode->height()* 0.5f);
+
 
 	// Move scoreboard to center
 	ui.frame_scoreboard->hide();
@@ -217,31 +228,41 @@ void Menu_HUD::refresh()
 
 
 	// Show hit effects
-	if(ptr_player->detectedAsDead)
-	{
-		if(ui.label_deathOverlay->isHidden())
-		{
-			ui.label_deathOverlay->show();
-			ui.frame_top->hide();
-			ui.label_aim->hide();
-			ui.label_firingMode->hide();
-			ui.frame_bottom->hide();
 
-			ui.progressBar_health->hide();
-			ui.progressBar_ammo->hide();
+	// Player is damaged
+	if(hitOverlayFade > 0.0f)
+	{
+		hitOverlayFade -= SETTINGS->trueDeltaTime;
+		if(ui.label_hitOverlay->isHidden())
+		{
+			ui.label_hitOverlay->show();
 		}
 	}
 	else
 	{
-		if(!ui.label_deathOverlay->isHidden())
+		if(!ui.label_hitOverlay->isHidden())
 		{
-			ui.label_deathOverlay->hide();
-			ui.frame_top->show();
-			ui.label_aim->show();
-			ui.label_firingMode->show();
-			ui.frame_bottom->show();
+			ui.label_hitOverlay->hide();
 		}
 	}
+
+	// Player damages another player
+	if(crosshair_targetHitFade > 0.0f)
+	{
+		crosshair_targetHitFade -= SETTINGS->trueDeltaTime;
+		if(ui.label_aim_targetHit->isHidden())
+		{
+			ui.label_aim_targetHit->show();
+		}
+	}
+	else
+	{
+		if(!ui.label_aim_targetHit->isHidden())
+		{
+			ui.label_aim_targetHit->hide();
+		}
+	}
+
 
 	// Show death effects
 	if(ptr_player->detectedAsDead)
@@ -275,7 +296,7 @@ void Menu_HUD::refresh()
 	//
 
 	scoreboard.refresh();
-	if(ptr_player->detectedAsDead || GET_STATE() == STATE_GAMEOVER ||  true)
+	if(ptr_player->detectedAsDead || GET_STATE() == STATE_GAMEOVER)
 	{
 		// Show scoreboard if delay has expired
 		if(scoreboardFade > 0.0f)
@@ -437,31 +458,35 @@ void Menu_HUD::refresh()
 			ui.label_firingMode->hide();
 	}
 
-
+	 
 	// Update scoreboard progress bars
+	bool isEnabled_cycleLimit = SETTINGS->cycleLimit != 0;
+	bool isEnabled_timeLimit = SETTINGS->timeLimit != 0;
 	int highestCycles = scoreboard.maxCycles;
-	if(scoreboard.previousMaxCycles != highestCycles)
+	if(isEnabled_cycleLimit && scoreboard.previousMaxCycles != highestCycles)
 	{
 		scoreboard.previousMaxCycles = highestCycles;
 
 		// Perform update
-		int cyclesLimit = 25;
+		int cyclesLimit = SETTINGS->cycleLimit;
 		int cycleRatio = (int)((highestCycles/(float)cyclesLimit) * 100);
 		ui.progressBar_cycleRatio->setValue(cycleRatio);
+		ui.progressBar_cycleRatio->update();
 		QString str_cycleRatio = QString::number(highestCycles) + "/" + QString::number(cyclesLimit)  + " Cycles";
 		ui.label_cycleRatio->setText(str_cycleRatio);
 	}
-	int currentTime = scoreboard.maxCycles;
-	if(scoreboard.previousTime != currentTime)
+	int currentTime = SETTINGS->timeLimit - SETTINGS->timeLeft;
+	if(isEnabled_timeLimit && scoreboard.previousTime != currentTime)
 	{
 		scoreboard.previousTime = currentTime;
 
 		// Perform update
-		int timeLimit = 25;
+		int timeLimit = SETTINGS->timeLimit;
 		int timeRatio = (int)((currentTime/(float)timeLimit) * 100);
-		ui.progressBar_cycleRatio->setValue(timeRatio);
-		QString str_cycleRatio = QString::number(currentTime) + "/" + QString::number(timeLimit)  + " Time";
-		ui.label_cycleRatio->setText(str_cycleRatio);
+		ui.progressBar_timeRatio->setValue(timeRatio);
+		ui.progressBar_timeRatio->update();
+		QString str_timeRatio = QString::number(currentTime) + "/" + QString::number(timeLimit)  + " Time";
+		ui.label_timeRatio->setText(str_timeRatio);
 	}
 }
 
@@ -510,6 +535,26 @@ void Menu_HUD::onEvent( Event* e )
 	{
 	case EVENT_UPDATE:
 		refresh();
+		break;
+	case EVENT_PLAYER_TARGET_HIT:
+		{
+			// If player hitting a target is THIS player
+			// display hit feedback for a while
+			if(((Event_PlayerTargetHit*)e)->ptr_player == ptr_splitScreen->ptr_player)
+			{
+				crosshair_targetHitFade = 0.1f;
+			}
+		}
+		break;
+	case EVENT_PLAYER_TAKING_DAMAGE:
+		{
+			// If player getting hit is THIS player
+			// display hit feedback for a while
+			if(((Event_PlayerTakingDamage*)e)->ptr_player == ptr_splitScreen->ptr_player)
+			{
+				hitOverlayFade = 0.1f;
+			}
+		}
 		break;
 	default:
 		break;
