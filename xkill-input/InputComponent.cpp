@@ -131,7 +131,7 @@ void InputComponent::handleInput(float delta)
 
 		input->jetpack =	device->getBoolValue(InputAction::ACTION_B_JETPACK);
 
-		if(ptr_player->jetHackActive)
+		if(ptr_player->jetHackPair.first) // if jethack active
 		{
 			if(device->getBoolPressed(InputAction::ACTION_B_JETPACK))
 			{

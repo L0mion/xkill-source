@@ -92,7 +92,235 @@ void GameComponent::onEvent(Event* e)
 
 void GameComponent::onUpdate(float delta)
 {
+	updatePlayerAttributes(delta);
 	//--------------------------------------------------------------------------------------
+	// Handle projectile attributes
+	//--------------------------------------------------------------------------------------
+	while(itrProjectile.hasNext())
+	{
+		AttributePtr<Attribute_Projectile> projectile = itrProjectile.getNext();
+		projectile->currentLifeTimeLeft -= delta; //Update projectile lifetime
+		if(projectile->currentLifeTimeLeft <= 0)
+		{
+			DEBUGPRINT("Projectile entity " << itrProjectile.ownerId() << " has no lifetime left");
+			SEND_EVENT(&Event_RemoveEntity(itrProjectile.ownerId()));
+		}
+
+		/*
+		switch(projectile->ammunitionType) //Handle projectile based on ammunitionType
+		{
+		case XKILL_Enums::AmmunitionType::BULLET:
+			break;
+		case XKILL_Enums::AmmunitionType::EXPLOSIVE:
+			break;
+		case XKILL_Enums::AmmunitionType::SCATTER:
+			if( ((projectile->totalLifeTime - projectile->currentLifeTimeLeft) < (projectile->totalLifeTime-0.1f)) && projectile->scatterDropped == false)
+			{
+				//SEND_EVENT(&Event_ModifyPhysicsObject(XKILL_Enums::ModifyPhysicsObjectData::GRAVITY, static_cast<void*>(&Float3(0.0f, -10.0f, 0.0f)), projectile->ptr_physics));
+
+				//SEND_EVENT(&Event_ModifyPhysicsObject(XKILL_Enums::ModifyPhysicsObjectData::VELOCITY, static_cast<void*>(&Float3(0.0f, 0.0f, 0.0f)), projectile->ptr_physics));
+
+				//SEND_EVENT(&Event_ModifyPhysicsObject(XKILL_Enums::ModifyPhysicsObjectData::VELOCITYPERCENTAGE, static_cast<void*>(&Float3(0.1f, 0.1f, 0.1f)), projectile->ptr_physics));
+				projectile->scatterDropped = true;
+			}
+			break;
+		}
+		*/
+	}
+
+	//--------------------------------------------------------------------------------------
+	// Handle player spawn point attributes
+	//--------------------------------------------------------------------------------------
+	while(itrPlayerSpawnPoint.hasNext())
+	{
+		AttributePtr<Attribute_PlayerSpawnPoint> ptr_spawnPoint	= itrPlayerSpawnPoint.getNext();
+		ptr_spawnPoint->secondsSinceLastSpawn += delta;
+	}
+
+	//--------------------------------------------------------------------------------------
+	// Handle pickupables spawn point attributes
+	//--------------------------------------------------------------------------------------
+	while(itrPickupablesSpawnPoint.hasNext())
+	{
+		AttributePtr<Attribute_PickupablesSpawnPoint> ptr_pickupablesSpawnPoint = itrPickupablesSpawnPoint.getNext();
+
+		//Timer incrementation
+		ptr_pickupablesSpawnPoint->secondsSinceLastPickup += delta;
+		ptr_pickupablesSpawnPoint->secondsSinceLastSpawn += delta;
+
+		//Spawn new pickupable, if secondsSinceLastSpawn and secondsSinceLastPickup are enough incremented
+		if(ptr_pickupablesSpawnPoint->secondsSinceLastSpawn > ptr_pickupablesSpawnPoint->spawnDelayInSeconds && ptr_pickupablesSpawnPoint->secondsSinceLastPickup > ptr_pickupablesSpawnPoint->spawnDelayInSeconds)
+		{
+			if(ptr_pickupablesSpawnPoint->currentNrOfExistingSpawnedPickupables < ptr_pickupablesSpawnPoint->maxNrOfExistingSpawnedPickupables)
+			{
+				AttributePtr<Attribute_Position> pickupablesSpawnPointPosition = ptr_pickupablesSpawnPoint->ptr_position;
+
+				//Each pickupable knows it pickupablesSpawnPoint creator
+				int amount = -1; //Deprecated as of 2013-03-07 15.25 (refer to Attribute_Pickupable)
+				AttributePtr<Attribute_PickupablesSpawnPoint> ptr_creator_pickupablesSpawnPoint = ptr_pickupablesSpawnPoint;
+				SEND_EVENT(&Event_CreatePickupable(pickupablesSpawnPointPosition->position, ptr_pickupablesSpawnPoint->spawnPickupableType, ptr_creator_pickupablesSpawnPoint, amount));
+				ptr_pickupablesSpawnPoint->secondsSinceLastSpawn = 0.0f;
+			}
+		}
+	}
+
+	//check
+	//--------------------------------------------------------------------------------------
+	// Handle pickupable attributes
+	//--------------------------------------------------------------------------------------
+	//while(itrPickupable.hasNext())
+	//{
+	//	Attribute_Pickupable* pickupable = itrPickupable.getNext();
+	//}
+
+	//--------------------------------------------------------------------------------------
+	// Handle weapons stats attributes
+	//--------------------------------------------------------------------------------------
+	while(itrWeaponStats.hasNext())
+	{
+		AttributePtr<Attribute_WeaponStats> weaponStats = itrWeaponStats.getNext();
+		Ammunition* ammo = &weaponStats->ammunition[weaponStats->currentAmmunitionType];
+		FiringMode* firingMode = &weaponStats->firingMode[weaponStats->currentFiringModeType];
+
+		int ammoIndex = ammo->type;
+
+		firingMode->cooldownLeft -= delta; // Weapon cooldown logic
+
+		//--------------------------------------------------------------------------------------
+		// Automatic weapon reload logic
+		//--------------------------------------------------------------------------------------
+		if(ammo->currentTotalNrOfShots > 0 && firingMode->nrOfShotsLeftInClip[ammoIndex] <= 0 && !ammo->isReloading)
+		{
+			ammo->isReloading = true;
+			int nrOfShotsToLoad = firingMode->clipSize;
+			if(firingMode->clipSize > ammo->currentTotalNrOfShots)
+			{
+				nrOfShotsToLoad = ammo->currentTotalNrOfShots;
+			}
+
+			float reloadTimeFraction = (1.0f - (static_cast<float>(firingMode->nrOfShotsLeftInClip[ammoIndex])/static_cast<float>(nrOfShotsToLoad)));
+			firingMode->reloadTimeLeft = reloadTimeFraction * firingMode->reloadTime;
+
+			if(ammo->canShootWhileReloading)
+			{
+				firingMode->reloadTimeLeft += firingMode->reloadTime * 0.1f;
+			}
+		}
+
+		if(ammo->isReloading)
+		{
+			firingMode->reloadTimeLeft -= delta;
+
+			if(firingMode->reloadTimeLeft <= 0)
+			{
+				firingMode->reloadTimeLeft = firingMode->reloadTime;
+				ammo->isReloading = false;
+
+				if(firingMode->clipSize > ammo->currentTotalNrOfShots)
+				{
+					firingMode->nrOfShotsLeftInClip[ammoIndex] = ammo->currentTotalNrOfShots;
+				}
+				else
+				{
+					firingMode->nrOfShotsLeftInClip[ammoIndex] = firingMode->clipSize;
+				}
+			}
+			else if(ammo->canShootWhileReloading)
+			{
+				float reloadTimeFraction	= (1.0f - (firingMode->reloadTimeLeft/firingMode->reloadTime));
+				float clipFraction			= (static_cast<float>(firingMode->nrOfShotsLeftInClip[ammoIndex])/static_cast<float>(firingMode->clipSize));
+
+				int nrOfShotsLeftToLoad = firingMode->clipSize;
+				if(firingMode->clipSize > ammo->currentTotalNrOfShots)
+				{
+					nrOfShotsLeftToLoad = ammo->currentTotalNrOfShots;
+				}
+
+				nrOfShotsLeftToLoad -= firingMode->nrOfShotsLeftInClip[ammoIndex];
+
+				if(reloadTimeFraction > clipFraction && nrOfShotsLeftToLoad > 0)
+				{
+					firingMode->nrOfShotsLeftInClip[ammoIndex]++;
+				}
+			}
+		}
+	}
+
+	//--------------------------------------------------------------------------------------
+	// Handle explosion sphere attributes
+	//--------------------------------------------------------------------------------------
+	while(itrExplosionSphere.hasNext())
+	{
+		AttributePtr<Attribute_ExplosionSphere> ptr_explosionSphere = itrExplosionSphere.getNext();
+		ptr_explosionSphere->currentLifeTimeLeft -= delta;
+		if(ptr_explosionSphere->currentLifeTimeLeft <= 0.0f)
+		{
+			SEND_EVENT(&Event_RemoveEntity(itrExplosionSphere.ownerId()));
+		}
+	}
+
+	//--------------------------------------------------------------------------------------
+	// Drop random world pieces
+	//--------------------------------------------------------------------------------------
+	std::vector<int> worldPiecesIndices;
+	if(nullProcessExecuting)
+	{
+		//--------------------------------------------------------------------------------------
+		// Find all world physics objects
+		//--------------------------------------------------------------------------------------
+		while(itrPhysics.hasNext())
+		{
+			AttributePtr<Attribute_Physics> ptr_physics = itrPhysics.getNext();
+			if(ptr_physics->collisionFilterGroup == XKILL_Enums::PhysicsAttributeType::WORLD)
+			{
+				worldPiecesIndices.push_back(ptr_physics.index());
+			}
+		}
+
+		//--------------------------------------------------------------------------------------
+		// Determine which world physics objects to drop and the drop ratio
+		//--------------------------------------------------------------------------------------
+		float timeInSecondsUntilTheWorldIsCompletelyFallenApart = 30;
+
+		unsigned int nrOfWorldPieces = levelEvents_.size();
+		float makeThisManyWorldPiecesFallEachSecond = nrOfWorldPieces/timeInSecondsUntilTheWorldIsCompletelyFallenApart;
+		float deltaRatio = 1.0f / makeThisManyWorldPiecesFallEachSecond;
+		static float timer = 0;
+		timer += delta;
+		while(timer > deltaRatio)
+		{
+			if(worldPiecesIndices.size() <= 0)
+			{
+				break;
+			}
+
+			int randomWorldPieceIndex = rand()%worldPiecesIndices.size();
+
+			//--------------------------------------------------------------------------------------
+			// Convert world physics object to prop physics object
+			//--------------------------------------------------------------------------------------
+			AttributePtr<Attribute_Physics> ptr_physics;
+			ptr_physics = itrPhysics.at(worldPiecesIndices.at(randomWorldPieceIndex));
+			ptr_physics->collisionFilterGroup = XKILL_Enums::PhysicsAttributeType::PROP;
+			ptr_physics->collisionFilterMask = XKILL_Enums::PhysicsAttributeType::NOTHING;
+			ptr_physics->collisionResponse = false;
+			ptr_physics->gravity = Float3(0.0f, -10.0f, 0.0f);
+			ptr_physics->mass = 1;
+
+			SEND_EVENT(&Event_ReloadPhysicsAttributeDataIntoBulletPhysics(ptr_physics.index()));
+
+			worldPiecesIndices.at(randomWorldPieceIndex) = worldPiecesIndices.back();
+			worldPiecesIndices.pop_back();
+
+			//drop one
+			timer -= deltaRatio;
+		}
+	}
+}
+#include <xkill-utilities/Converter.h>
+void GameComponent::updatePlayerAttributes(float delta)
+{
+//--------------------------------------------------------------------------------------
 	// Handle player attributes
 	//--------------------------------------------------------------------------------------
 	while(itrPlayer.hasNext())
@@ -118,7 +346,7 @@ void GameComponent::onUpdate(float delta)
 		if(ptr_health->health > 0.0f && !ptr_player->detectedAsDead)
 		{
 			//--------------------------------------------------------------------------------------
-			// Ammunition logic: Ammunnition change, firing mode change.
+			// Ammunition logic: Ammunition change, firing mode change.
 			//--------------------------------------------------------------------------------------
 			bool ammunitionSwitchReload = false;
 			if(ptr_input->changeAmmunitionType)
@@ -372,230 +600,6 @@ void GameComponent::onUpdate(float delta)
 			ptr_player->respawnTimer.zeroTimer();
 		}
 	}
-
-	//--------------------------------------------------------------------------------------
-	// Handle projectile attributes
-	//--------------------------------------------------------------------------------------
-	while(itrProjectile.hasNext())
-	{
-		AttributePtr<Attribute_Projectile> projectile = itrProjectile.getNext();
-		projectile->currentLifeTimeLeft -= delta; //Update projectile lifetime
-		if(projectile->currentLifeTimeLeft <= 0)
-		{
-			DEBUGPRINT("Projectile entity " << itrProjectile.ownerId() << " has no lifetime left");
-			SEND_EVENT(&Event_RemoveEntity(itrProjectile.ownerId()));
-		}
-
-		/*
-		switch(projectile->ammunitionType) //Handle projectile based on ammunitionType
-		{
-		case XKILL_Enums::AmmunitionType::BULLET:
-			break;
-		case XKILL_Enums::AmmunitionType::EXPLOSIVE:
-			break;
-		case XKILL_Enums::AmmunitionType::SCATTER:
-			if( ((projectile->totalLifeTime - projectile->currentLifeTimeLeft) < (projectile->totalLifeTime-0.1f)) && projectile->scatterDropped == false)
-			{
-				//SEND_EVENT(&Event_ModifyPhysicsObject(XKILL_Enums::ModifyPhysicsObjectData::GRAVITY, static_cast<void*>(&Float3(0.0f, -10.0f, 0.0f)), projectile->ptr_physics));
-
-				//SEND_EVENT(&Event_ModifyPhysicsObject(XKILL_Enums::ModifyPhysicsObjectData::VELOCITY, static_cast<void*>(&Float3(0.0f, 0.0f, 0.0f)), projectile->ptr_physics));
-
-				//SEND_EVENT(&Event_ModifyPhysicsObject(XKILL_Enums::ModifyPhysicsObjectData::VELOCITYPERCENTAGE, static_cast<void*>(&Float3(0.1f, 0.1f, 0.1f)), projectile->ptr_physics));
-				projectile->scatterDropped = true;
-			}
-			break;
-		}
-		*/
-	}
-
-	//--------------------------------------------------------------------------------------
-	// Handle player spawn point attributes
-	//--------------------------------------------------------------------------------------
-	while(itrPlayerSpawnPoint.hasNext())
-	{
-		AttributePtr<Attribute_PlayerSpawnPoint> ptr_spawnPoint	= itrPlayerSpawnPoint.getNext();
-		ptr_spawnPoint->secondsSinceLastSpawn += delta;
-	}
-
-	//--------------------------------------------------------------------------------------
-	// Handle pickupables spawn point attributes
-	//--------------------------------------------------------------------------------------
-	while(itrPickupablesSpawnPoint.hasNext())
-	{
-		AttributePtr<Attribute_PickupablesSpawnPoint> ptr_pickupablesSpawnPoint = itrPickupablesSpawnPoint.getNext();
-
-		//Timer incrementation
-		ptr_pickupablesSpawnPoint->secondsSinceLastPickup += delta;
-		ptr_pickupablesSpawnPoint->secondsSinceLastSpawn += delta;
-
-		//Spawn new pickupable, if secondsSinceLastSpawn and secondsSinceLastPickup are enough incremented
-		if(ptr_pickupablesSpawnPoint->secondsSinceLastSpawn > ptr_pickupablesSpawnPoint->spawnDelayInSeconds && ptr_pickupablesSpawnPoint->secondsSinceLastPickup > ptr_pickupablesSpawnPoint->spawnDelayInSeconds)
-		{
-			if(ptr_pickupablesSpawnPoint->currentNrOfExistingSpawnedPickupables < ptr_pickupablesSpawnPoint->maxNrOfExistingSpawnedPickupables)
-			{
-				AttributePtr<Attribute_Position> pickupablesSpawnPointPosition = ptr_pickupablesSpawnPoint->ptr_position;
-
-				//Each pickupable knows it pickupablesSpawnPoint creator
-				int amount = -1; //Deprecated as of 2013-03-07 15.25 (refer to Attribute_Pickupable)
-				AttributePtr<Attribute_PickupablesSpawnPoint> ptr_creator_pickupablesSpawnPoint = ptr_pickupablesSpawnPoint;
-				SEND_EVENT(&Event_CreatePickupable(pickupablesSpawnPointPosition->position, ptr_pickupablesSpawnPoint->spawnPickupableType, ptr_creator_pickupablesSpawnPoint, amount));
-				ptr_pickupablesSpawnPoint->secondsSinceLastSpawn = 0.0f;
-			}
-		}
-	}
-
-	//check
-	//--------------------------------------------------------------------------------------
-	// Handle pickupable attributes
-	//--------------------------------------------------------------------------------------
-	//while(itrPickupable.hasNext())
-	//{
-	//	Attribute_Pickupable* pickupable = itrPickupable.getNext();
-	//}
-
-	//--------------------------------------------------------------------------------------
-	// Handle weapons stats attributes
-	//--------------------------------------------------------------------------------------
-	while(itrWeaponStats.hasNext())
-	{
-		AttributePtr<Attribute_WeaponStats> weaponStats = itrWeaponStats.getNext();
-		Ammunition* ammo = &weaponStats->ammunition[weaponStats->currentAmmunitionType];
-		FiringMode* firingMode = &weaponStats->firingMode[weaponStats->currentFiringModeType];
-
-		int ammoIndex = ammo->type;
-
-		firingMode->cooldownLeft -= delta; // Weapon cooldown logic
-
-		//--------------------------------------------------------------------------------------
-		// Automatic weapon reload logic
-		//--------------------------------------------------------------------------------------
-		if(ammo->currentTotalNrOfShots > 0 && firingMode->nrOfShotsLeftInClip[ammoIndex] <= 0 && !ammo->isReloading)
-		{
-			ammo->isReloading = true;
-			int nrOfShotsToLoad = firingMode->clipSize;
-			if(firingMode->clipSize > ammo->currentTotalNrOfShots)
-			{
-				nrOfShotsToLoad = ammo->currentTotalNrOfShots;
-			}
-
-			float reloadTimeFraction = (1.0f - (static_cast<float>(firingMode->nrOfShotsLeftInClip[ammoIndex])/static_cast<float>(nrOfShotsToLoad)));
-			firingMode->reloadTimeLeft = reloadTimeFraction * firingMode->reloadTime;
-
-			if(ammo->canShootWhileReloading)
-			{
-				firingMode->reloadTimeLeft += firingMode->reloadTime * 0.1f;
-			}
-		}
-
-		if(ammo->isReloading)
-		{
-			firingMode->reloadTimeLeft -= delta;
-
-			if(firingMode->reloadTimeLeft <= 0)
-			{
-				firingMode->reloadTimeLeft = firingMode->reloadTime;
-				ammo->isReloading = false;
-
-				if(firingMode->clipSize > ammo->currentTotalNrOfShots)
-				{
-					firingMode->nrOfShotsLeftInClip[ammoIndex] = ammo->currentTotalNrOfShots;
-				}
-				else
-				{
-					firingMode->nrOfShotsLeftInClip[ammoIndex] = firingMode->clipSize;
-				}
-			}
-			else if(ammo->canShootWhileReloading)
-			{
-				float reloadTimeFraction	= (1.0f - (firingMode->reloadTimeLeft/firingMode->reloadTime));
-				float clipFraction			= (static_cast<float>(firingMode->nrOfShotsLeftInClip[ammoIndex])/static_cast<float>(firingMode->clipSize));
-
-				int nrOfShotsLeftToLoad = firingMode->clipSize;
-				if(firingMode->clipSize > ammo->currentTotalNrOfShots)
-				{
-					nrOfShotsLeftToLoad = ammo->currentTotalNrOfShots;
-				}
-
-				nrOfShotsLeftToLoad -= firingMode->nrOfShotsLeftInClip[ammoIndex];
-
-				if(reloadTimeFraction > clipFraction && nrOfShotsLeftToLoad > 0)
-				{
-					firingMode->nrOfShotsLeftInClip[ammoIndex]++;
-				}
-			}
-		}
-	}
-
-	//--------------------------------------------------------------------------------------
-	// Handle explosion sphere attributes
-	//--------------------------------------------------------------------------------------
-	while(itrExplosionSphere.hasNext())
-	{
-		AttributePtr<Attribute_ExplosionSphere> ptr_explosionSphere = itrExplosionSphere.getNext();
-		ptr_explosionSphere->currentLifeTimeLeft -= delta;
-		if(ptr_explosionSphere->currentLifeTimeLeft <= 0.0f)
-		{
-			SEND_EVENT(&Event_RemoveEntity(itrExplosionSphere.ownerId()));
-		}
-	}
-
-	//--------------------------------------------------------------------------------------
-	// Drop random world pieces
-	//--------------------------------------------------------------------------------------
-	std::vector<int> worldPiecesIndices;
-	if(nullProcessExecuting)
-	{
-		//--------------------------------------------------------------------------------------
-		// Find all world physics objects
-		//--------------------------------------------------------------------------------------
-		while(itrPhysics.hasNext())
-		{
-			AttributePtr<Attribute_Physics> ptr_physics = itrPhysics.getNext();
-			if(ptr_physics->collisionFilterGroup == XKILL_Enums::PhysicsAttributeType::WORLD)
-			{
-				worldPiecesIndices.push_back(ptr_physics.index());
-			}
-		}
-
-		//--------------------------------------------------------------------------------------
-		// Determine which world physics objects to drop and the drop ratio
-		//--------------------------------------------------------------------------------------
-		float timeInSecondsUntilTheWorldIsCompletelyFallenApart = 30;
-
-		unsigned int nrOfWorldPieces = levelEvents_.size();
-		float makeThisManyWorldPiecesFallEachSecond = nrOfWorldPieces/timeInSecondsUntilTheWorldIsCompletelyFallenApart;
-		float deltaRatio = 1.0f / makeThisManyWorldPiecesFallEachSecond;
-		static float timer = 0;
-		timer += delta;
-		while(timer > deltaRatio)
-		{
-			if(worldPiecesIndices.size() <= 0)
-			{
-				break;
-			}
-
-			int randomWorldPieceIndex = rand()%worldPiecesIndices.size();
-
-			//--------------------------------------------------------------------------------------
-			// Convert world physics object to prop physics object
-			//--------------------------------------------------------------------------------------
-			AttributePtr<Attribute_Physics> ptr_physics;
-			ptr_physics = itrPhysics.at(worldPiecesIndices.at(randomWorldPieceIndex));
-			ptr_physics->collisionFilterGroup = XKILL_Enums::PhysicsAttributeType::PROP;
-			ptr_physics->collisionFilterMask = XKILL_Enums::PhysicsAttributeType::NOTHING;
-			ptr_physics->collisionResponse = false;
-			ptr_physics->gravity = Float3(0.0f, -10.0f, 0.0f);
-			ptr_physics->mass = 1;
-
-			SEND_EVENT(&Event_ReloadPhysicsAttributeDataIntoBulletPhysics(ptr_physics.index()));
-
-			worldPiecesIndices.at(randomWorldPieceIndex) = worldPiecesIndices.back();
-			worldPiecesIndices.pop_back();
-
-			//drop one
-			timer -= deltaRatio;
-		}
-	}
 }
 
 void GameComponent::event_PhysicsAttributesColliding(Event_PhysicsAttributesColliding* e)
@@ -840,18 +844,18 @@ void GameComponent::event_PlayerDeath(Event_PlayerDeath* e)
 		SEND_EVENT(&Event_StopSound(XKILL_Enums::Sound::SOUND_LASER, itrPlayer.ownerIdAt(e->playerAttributeIndex)));
 		ptr_player->executing = false;
 	}
-	if(ptr_player->jetHackActive)
+	if(ptr_player->jetHackPair.first)
 	{
 		SEND_EVENT(&Event_StopSound(XKILL_Enums::Sound::SOUND_JETPACK, itrPlayer.ownerIdAt(e->playerAttributeIndex)));
-		ptr_player->jetHackActive = false;
+		ptr_player->jetHackPair.first = false;
 	}
-	if(ptr_player->cycleHackActive)
+	if(ptr_player->cycleHackPair.first)
 	{
-		ptr_player->cycleHackActive = false;
+		ptr_player->cycleHackPair.first = false;
 	}
-	if(ptr_player->speedHackActive)
+	if(ptr_player->speedHackPair.first)
 	{
-		ptr_player->speedHackActive = false;
+		ptr_player->speedHackPair.first = false;
 	}
 }
 
@@ -1085,7 +1089,7 @@ void GameComponent::updateAndInterpretLaser(AttributePtr<Attribute_Ray> ptr_ray,
 				AttributePtr<Attribute_Player> hitPlayerAttribute = itrPlayer.at(hitPlayerId.at(i));
 				if(!hitPlayerAttribute->detectedAsDead)
 				{
-					if(ptr_player->cycleHackActive)
+					if(ptr_player->cycleHackPair.first)
 					{
 						ptr_player->cycles++;
 						{Event_PostHudMessage e("", ptr_player); e.setHtmlMessage("You exterminated", hitPlayerAttribute->playerName, "", "+1 cycle"); SEND_EVENT(&e);}

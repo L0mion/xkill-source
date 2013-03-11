@@ -229,10 +229,6 @@ void updateOffset()
 	}
 }
 
-
-
-
-
 void ComponentManager::update(float delta)
 {
 	// Performs necessary per-frame updating of some sub-parts of EventManager.
@@ -275,7 +271,7 @@ void ComponentManager::update(float delta)
 	{
 		sound_->onUpdate(delta);
 		physics_->onUpdate(delta);
-		//input_->onUpdate(delta);
+		//input_->onUpdate(delta); //lock players in place
 		render_->onUpdate(delta);
 
 		if(gameOverDelay_ > 0.0f)
@@ -284,7 +280,6 @@ void ComponentManager::update(float delta)
 		}
 		else
 		{
-
 			//SEND_EVENT(&Event_EndDeathmatch());
 			SEND_EVENT(&Event(EVENT_ENDGAME));
 		}

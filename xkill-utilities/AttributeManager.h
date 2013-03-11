@@ -18,7 +18,10 @@ public:
 	bool showDebugPhysics;
 	std::string currentLevel;
 	float timeLimit;
+	float timeLeft;
 	int cycleLimit;
+	float schedulerTime;
+	float cycleTime;
 	float trueDeltaTime;
 	bool soundMuted;
 	float soundVolume;

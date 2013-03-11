@@ -88,11 +88,13 @@ void HacksComponent::onUpdate(float delta)
 			timer = activeHacks_[i][j]->first;
 
 			if(shouldUpdateTimer(activeHacks_[i][j]->second, static_cast<XKILL_Enums::HackType>(i)))
+			{
 				timer->update(delta);
+			}
 
 			if(timer->hasTimerExpired())
 			{
-				setPlayerAttributeHackFlags(activeHacks_[i][j]->second, static_cast<XKILL_Enums::HackType>(i), false);
+				setPlayerAttributeHackFlags(activeHacks_[i][j]->second, nullptr, static_cast<XKILL_Enums::HackType>(i), false);
 				SEND_EVENT(&Event_StopSound(XKILL_Enums::Sound::SOUND_JETPACK, itrPlayer.ownerIdAt(activeHacks_[i][j]->second.index())));
 				removeIndexFromVector(activeHacks_[i], j);
 
@@ -145,9 +147,9 @@ void HacksComponent::handleHackActivatedEvent(Event_HackActivated* e)
 
 	if(!existed)
 	{
-		Timer* timer = new Timer(e->time); //Convert from s to ms
+		Timer* timer = new Timer(e->time);
 		activeHacks_[e->hackType].push_back(new std::pair<Timer*, AttributePtr<Attribute_Player>>(timer, e->player));
-		setPlayerAttributeHackFlags(e->player, e->hackType, true);
+		setPlayerAttributeHackFlags(e->player, timer, e->hackType, true);
 
 		DEBUGPRINT("Player picked up hack " << Converter::IntToStr(e->hackType) << " with value " << Converter::FloatToStr(e->time));
 	}
@@ -202,18 +204,21 @@ void HacksComponent::removeIndexFromVector(std::vector<std::pair<Timer*, Attribu
 	SAFE_DELETE(vector[vector.size() - 1]);
 	vector.pop_back();
 }
-void HacksComponent::setPlayerAttributeHackFlags(AttributePtr<Attribute_Player> player, XKILL_Enums::HackType hacktype, bool truthValue)
+void HacksComponent::setPlayerAttributeHackFlags(AttributePtr<Attribute_Player> player, Timer* timer, XKILL_Enums::HackType hackType, bool truthValue)
 {
-	switch(hacktype)
+	switch(hackType)
 	{
 	case XKILL_Enums::HackType::JETHACK:
-		player->jetHackActive = truthValue;
+		player->jetHackPair.first = truthValue;
+		player->jetHackPair.second = timer;
 		break;
 	case XKILL_Enums::HackType::SPEEDHACK:
-		player->speedHackActive = truthValue;
+		player->speedHackPair.first = truthValue;
+		player->speedHackPair.second = timer;
 		break;
 	case XKILL_Enums::HackType::CYCLEHACK:
-		player->cycleHackActive = truthValue;
+		player->cycleHackPair.first = truthValue;
+		player->cycleHackPair.second = timer;
 		break;
 	}
 }

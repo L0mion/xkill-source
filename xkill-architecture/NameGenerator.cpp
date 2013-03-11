@@ -881,7 +881,7 @@ void NameGenerator::reset()
 	addName("play anywhere");
 	addName("transmitter");
 	addName("blown to smithereens");
-	addName("stop and execuse");
+	addName("stop and execute");
 	addName("<>|God|<>");
 	addName("Jesus");
 	addName("remarkably plain wrong");
@@ -1105,7 +1105,42 @@ void NameGenerator::reset()
 	addName("solver");
 	addName("raid by night");
 	addName("pinned down");
-	
+	addName("windbreaker");
+	addName("fine leather jackets");
+	addName("hazardous material");
+	addName("new int");
+	addName("guarding guard");
+	addName("bow and arrow");
+	addName("Flyer 1");
+	addName("out of ammo");
+	addName("sense modifiction");
+	addName("treasure map");
+	addName("selection of section");
+	addName("candyland");
+	addName("paper art");
+	addName("reserved vector");
+	addName("all ways");
+	addName("cover-up operation");
+	addName("major breakthrough");
+	addName("commander");
+	addName("make");
+	addName("mixed case");
+	addName("half-eaten birthday cake");
+	addName("burning candles");
+	addName("wreck of Titanic");
+	addName("find me if you can");
+	addName("hit or miss");
+	addName("funny bone");
+	addName("flintstone authority");
+	addName("unauthorized");
+	addName("inside of glass eye");
+	addName("spectrum of pain");
+	addName("low-level");
+	addName("high-level");
+	addName("metro gremlin");
+	addName("keep single");
+	addName("stay put");
+
 	//C++ keywords
 	addName("alignas");
 	addName("alignof");
