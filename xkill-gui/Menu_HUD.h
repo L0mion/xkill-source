@@ -25,10 +25,13 @@ private:
 	ScoreBoard scoreboard;
 	WeaponInfoHud weaponInfoHud;
 
+	float hitOverlayFade;
+	float crosshair_targetHitFade;
 	float scoreboardFade;
 	float healthFade;
 	float ammoFade;
 	float firingModeFade;
+
 	int index_crosshair;
 	int index_firingMode;
 	int prev_ammoRatio;
@@ -38,10 +41,12 @@ public:
 	Menu_HUD(AttributePtr<Attribute_SplitScreen> splitScreen, QWidget* parent);
 	~Menu_HUD();
 
+	void onEvent(Event* e);
+
 	void mapToSplitscreen();
 	void refresh();
 	void initScoreboard();
-	void onEvent(Event* e);
+
 };
 
 class Menu_HUDManager : public QObject , IObserver

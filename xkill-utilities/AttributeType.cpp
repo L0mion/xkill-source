@@ -498,10 +498,12 @@ Attribute_Player::Attribute_Player()
 	canSprint = true;
 	sprintRechargeRate = 0.2f;
 	executing = false;
-	speedHackActive = false;
-	jetHackActive = false;
-	cycleHackActive = false;
-
+	speedHackPair.first		= false;
+	speedHackPair.second	= nullptr;
+	jetHackPair.first		= false;
+	jetHackPair.second		= nullptr;
+	cycleHackPair.first		= false;
+	cycleHackPair.second	= nullptr;
 
 	playerName = "NaN";
 

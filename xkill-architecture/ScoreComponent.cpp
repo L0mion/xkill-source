@@ -36,8 +36,8 @@ bool ScoreComponent::init()
 	SAFE_DELETE(cycleTimer_);
 	SAFE_DELETE(gameTimer_);
 
-	schedulerTimer_ = new Timer(30.0f);
-	cycleTimer_ = new Timer(2.0f);
+	schedulerTimer_ = new Timer(SETTINGS->schedulerTime);
+	cycleTimer_ = new Timer(SETTINGS->cycleTime);
 
 	gameTimer_ = new Timer(SETTINGS->timeLimit);
 
@@ -88,6 +88,7 @@ void ScoreComponent::onUpdate(float delta)
 		//deathMatchScoreCounting(delta);
 
 		gameTimer_->update(delta);
+		SETTINGS->timeLeft = gameTimer_->getTimeLeft();
 		if(gameTimer_->hasTimerExpired())
 		{
 			SEND_EVENT(&Event(EVENT_GAMEOVER));

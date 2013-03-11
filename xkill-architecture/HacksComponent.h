@@ -39,5 +39,5 @@ private:
 	//! Removes the pair at index 'index' from the vector
 	void removeIndexFromVector(std::vector<std::pair<Timer*, AttributePtr<Attribute_Player>>*>& vector, unsigned int index);
 
-	void setPlayerAttributeHackFlags(AttributePtr<Attribute_Player> player, XKILL_Enums::HackType hacktype, bool truthValue);
+	void setPlayerAttributeHackFlags(AttributePtr<Attribute_Player> player, Timer* timer, XKILL_Enums::HackType hackType, bool truthValue);
 };
