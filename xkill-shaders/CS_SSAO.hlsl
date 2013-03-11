@@ -19,23 +19,33 @@ SamplerState ssDepth	: register( s1 );
 SamplerState ssRandom	: register( s2 );
 
 //Shared Memory
-groupshared float depth[SSAO_BLOCK_DIM][SSAO_BLOCK_DIM];
+groupshared float	sharedDepth[SSAO_BLOCK_DIM][SSAO_BLOCK_DIM];
+groupshared float3	sharedPosV[SSAO_BLOCK_DIM][SSAO_BLOCK_DIM];
 
-float occlusionFunc(float2 texGlobal, float2 texOffset, float3 occludee, float3 occludeeNormal)
+float occlusionFunc(float2 texGlobal, float2 texOffset, float3 occludee, float3 occludeeNormal, uint3 blockID)
 {
-	float2 dispatch = (texGlobal + texOffset); 
-	dispatch.x *= ssaoWidth;	dispatch.x -= viewportTopX;
-	dispatch.y *= ssaoHeight;	dispatch.y -= viewportTopY;
-	float2 texLocal = float2(
-			dispatch.x / viewportWidth, 
-			dispatch.y / viewportHeight);
+	//float2 dispatch = (texGlobal + texOffset); 
+	//dispatch.x *= ssaoWidth;	dispatch.x -= viewportTopX;
+	//dispatch.y *= ssaoHeight;	dispatch.y -= viewportTopY;
+	//float2 texLocal = float2(
+	//		dispatch.x / viewportWidth, 
+	//		dispatch.y / viewportHeight);
+	//
+	////Get view-space position of occluder:
+	//float occluderDepth = bufferDepth.SampleLevel(ssDepth, texGlobal + texOffset, 0).x;
+	//float3 occluder = UtilReconstructPositionViewSpace(
+	//	texLocal, //texGlobal + texOffset
+	//	occluderDepth, 
+	//	projectionInverse);
 
-	//Get view-space position of occluder:
-	float occluderDepth = bufferDepth.SampleLevel(ssDepth, texGlobal + texOffset, 0).x;
-	float3 occluder = UtilReconstructPositionViewSpace(
-		texLocal, //texGlobal + texOffset
-		occluderDepth, 
-		projectionInverse);
+	float2 texCoord = texGlobal + texOffset;
+	float2 dispatch = float2(texCoord.x * viewportWidth, texCoord.y * viewportHeight);
+	float2 threadID = float2(
+		min(dispatch.x - blockID.x * SSAO_BLOCK_DIM, SSAO_BLOCK_DIM),
+		min(dispatch.y - blockID.y * SSAO_BLOCK_DIM, SSAO_BLOCK_DIM));
+
+	float occluderDepth = sharedDepth[threadID.x][threadID.y];
+	float3 occluder = sharedPosV[threadID.x][threadID.y];
 
 	//Clip samples with large depth-differences.
 	//if(abs(occludee.z - occluder.z) > occlusionRadius) //Consider putting this condition in a seperate var?
@@ -54,7 +64,9 @@ float occlusionFunc(float2 texGlobal, float2 texOffset, float3 occludee, float3 
 
 [numthreads(SSAO_BLOCK_DIM, SSAO_BLOCK_DIM, 1)]
 void CS_SSAO(
-	uint3 threadIDDispatch	: SV_DispatchThreadID)
+	uint3 threadIDDispatch	: SV_DispatchThreadID,
+	uint3 threadIDBlock		: SV_GroupThreadID,
+	uint3 blockID			: SV_GroupID)
 {
 	//Convert [0-ssaoWidth, 0-ssaoHeight] -> [0, 1]
 	const float2 texCoord = float2(
@@ -69,6 +81,10 @@ void CS_SSAO(
 			(float)threadIDDispatch.y / viewportHeight), //Convert [0-ssaoWidth, 0-ssaoHeight] -> [0, 1]
 		occludeeDepth, 
 		projectionInverse);
+
+	sharedDepth[threadIDBlock.x][threadIDBlock.y] = occludeeDepth;
+	sharedPosV[threadIDBlock.x][threadIDBlock.z] = occludee;
+	GroupMemoryBarrierWithGroupSync();
 
 	//Get view-space normal of occluded point:
 	float3 normal = gBufferNormal.SampleLevel(ssNormal, texCoord, 0).xyz;
@@ -106,10 +122,10 @@ void CS_SSAO(
 		coord1.x * 0.707f - coord1.y * 0.707f,
 		coord1.x * 0.707f + coord1.y * 0.707f);			//...the same coordinates rotated 45 degrees:
 	
-		occlusion += occlusionFunc(texCoord, coord1 * 0.25f, occludee, occludeeNormal);
-		occlusion += occlusionFunc(texCoord, coord2 * 0.5f,	 occludee, occludeeNormal);
-		occlusion += occlusionFunc(texCoord, coord1 * 0.75f, occludee, occludeeNormal);
-		occlusion += occlusionFunc(texCoord, coord2 * 1.0f,	 occludee, occludeeNormal);
+		occlusion += occlusionFunc(texCoord, coord1 * 0.25f, occludee, occludeeNormal, blockID);
+		occlusion += occlusionFunc(texCoord, coord2 * 0.5f,	 occludee, occludeeNormal, blockID);
+		occlusion += occlusionFunc(texCoord, coord1 * 0.75f, occludee, occludeeNormal, blockID);
+		occlusion += occlusionFunc(texCoord, coord2 * 1.0f,	 occludee, occludeeNormal, blockID);
 	}
 	occlusion /= numSamples * 4.0f;
 
