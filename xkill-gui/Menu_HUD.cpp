@@ -51,6 +51,9 @@ void Menu_HUD::mapToSplitscreen()
 	ui.label_deathOverlay->move(0, 0);
 	ui.label_deathOverlay->resize(ptr_splitScreen->ssWidth, ptr_splitScreen->ssHeight);
 	ui.label_deathOverlay->hide();
+	ui.label_hitOverlay->move(0, 0);
+	ui.label_hitOverlay->resize(ptr_splitScreen->ssWidth, ptr_splitScreen->ssHeight);
+	ui.label_hitOverlay->hide();
 
 	// Move center HUD to center
 	ui.label_aim->move(centerPos.x - ui.label_aim->width()* 0.5f, centerPos.y - ui.label_aim->height()* 0.5f);
@@ -213,6 +216,33 @@ void Menu_HUD::refresh()
 	hudMessage_manager.update();
 
 
+	// Show hit effects
+	if(ptr_player->detectedAsDead)
+	{
+		if(ui.label_deathOverlay->isHidden())
+		{
+			ui.label_deathOverlay->show();
+			ui.frame_top->hide();
+			ui.label_aim->hide();
+			ui.label_firingMode->hide();
+			ui.frame_bottom->hide();
+
+			ui.progressBar_health->hide();
+			ui.progressBar_ammo->hide();
+		}
+	}
+	else
+	{
+		if(!ui.label_deathOverlay->isHidden())
+		{
+			ui.label_deathOverlay->hide();
+			ui.frame_top->show();
+			ui.label_aim->show();
+			ui.label_firingMode->show();
+			ui.frame_bottom->show();
+		}
+	}
+
 	// Show death effects
 	if(ptr_player->detectedAsDead)
 	{
@@ -245,7 +275,7 @@ void Menu_HUD::refresh()
 	//
 
 	scoreboard.refresh();
-	if(ptr_player->detectedAsDead || GET_STATE() == STATE_GAMEOVER)
+	if(ptr_player->detectedAsDead || GET_STATE() == STATE_GAMEOVER ||  true)
 	{
 		// Show scoreboard if delay has expired
 		if(scoreboardFade > 0.0f)
@@ -405,6 +435,33 @@ void Menu_HUD::refresh()
 		// Hide progress-bar if shown
 		if(!ui.label_firingMode->isHidden())
 			ui.label_firingMode->hide();
+	}
+
+
+	// Update scoreboard progress bars
+	int highestCycles = scoreboard.maxCycles;
+	if(scoreboard.previousMaxCycles != highestCycles)
+	{
+		scoreboard.previousMaxCycles = highestCycles;
+
+		// Perform update
+		int cyclesLimit = 25;
+		int cycleRatio = (int)((highestCycles/(float)cyclesLimit) * 100);
+		ui.progressBar_cycleRatio->setValue(cycleRatio);
+		QString str_cycleRatio = QString::number(highestCycles) + "/" + QString::number(cyclesLimit)  + " Cycles";
+		ui.label_cycleRatio->setText(str_cycleRatio);
+	}
+	int currentTime = scoreboard.maxCycles;
+	if(scoreboard.previousTime != currentTime)
+	{
+		scoreboard.previousTime = currentTime;
+
+		// Perform update
+		int timeLimit = 25;
+		int timeRatio = (int)((currentTime/(float)timeLimit) * 100);
+		ui.progressBar_cycleRatio->setValue(timeRatio);
+		QString str_cycleRatio = QString::number(currentTime) + "/" + QString::number(timeLimit)  + " Time";
+		ui.label_cycleRatio->setText(str_cycleRatio);
 	}
 }
 

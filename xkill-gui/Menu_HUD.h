@@ -25,6 +25,7 @@ private:
 	ScoreBoard scoreboard;
 	WeaponInfoHud weaponInfoHud;
 
+	float hitOverlayFade;
 	float scoreboardFade;
 	float healthFade;
 	float ammoFade;
