@@ -103,6 +103,8 @@ Renderer::Renderer(HWND windowHandle)
 
 	rayBuffer				= nullptr;
 
+
+	temp_ = 0;
 	//temp
 	//m3dLoader_		= nullptr;
 	//animatedMesh_	= nullptr;
@@ -556,7 +558,7 @@ void Renderer::renderViewportToGBuffer(ViewportData& vpData)
 	std::map<unsigned int, InstancedData*> instancesMap = managementInstance_->getInstancesMap();
 	for(std::map<unsigned int, InstancedData*>::iterator i = instancesMap.begin(); i != instancesMap.end(); i++)
 	{
-		if(i->first == 12)
+		if(managementModel_->getModelD3D(i->first, managementD3D_->getDevice())->hasAnimation())
 			renderAnimation(i->first, vpData.view, vpData.proj);
 		else
 			renderInstance(i->first, i->second, false);
@@ -1417,6 +1419,7 @@ void Renderer::renderAnimation(unsigned int meshID, DirectX::XMFLOAT4X4 view, Di
 {
 	AttributePtr<Attribute_Spatial> ptr_spatial;
 	AttributePtr<Attribute_Position> ptr_position;
+	AttributePtr<Attribute_Animation> ptr_animation;
 	bool done = false;
 	while(itrRender.hasNext() && !done)
 	{
@@ -1425,6 +1428,7 @@ void Renderer::renderAnimation(unsigned int meshID, DirectX::XMFLOAT4X4 view, Di
 		{
 			ptr_spatial = ptr_render->ptr_spatial;
 			ptr_position = ptr_render->ptr_spatial->ptr_position;
+			ptr_animation = ptr_render->ptr_animation;
 			done = true;
 		}
 	}
@@ -1443,12 +1447,12 @@ void Renderer::renderAnimation(unsigned int meshID, DirectX::XMFLOAT4X4 view, Di
 	managementCB_->setCB(CB_TYPE_OBJECT, TypeFX_VS, CB_REGISTER_OBJECT, devcon);
 	managementCB_->updateCBObject(devcon, finalMatrix, worldMatrix, worldMatrixInverse);
 
-	std::string clipName = "Default";
 	std::vector<DirectX::XMFLOAT4X4> finalTransforms;
-	managementAnimation_->update(0.01, clipName, 0);
-	SkinnedData* animation = managementAnimation_->getAnimation(0);
-	if(animation)
-		animation->getFinalTransforms(clipName, managementAnimation_->getTimePosition(), &finalTransforms);
+	
+	ptr_animation->time += delta_;
+	if(ptr_animation->time > modelD3D->getSkinnedData()->getClipEndTime(ptr_animation->activeAnimation))
+		ptr_animation->time = 0.0f;
+	modelD3D->getSkinnedData()->getFinalTransforms(ptr_animation->activeAnimation, ptr_animation->time, &finalTransforms);
 
 	managementCB_->setCB(CB_TYPE_BONE, TypeFX_VS, CB_REGISTER_BONE, devcon);
 	managementCB_->updateCBBone(devcon, finalTransforms);

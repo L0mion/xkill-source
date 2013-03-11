@@ -77,6 +77,15 @@ void Attribute_Spatial::saveTo( DataItemList* list )
 	list->get(&scale);
 }
 
+Attribute_Animation::Attribute_Animation()
+{
+	activeAnimation = "Default";
+	time = 0.0f;
+}
+Attribute_Animation::~Attribute_Animation()
+{
+}
+
 Attribute_Render::Attribute_Render()
 {
 	transparent			= false;
@@ -623,6 +632,12 @@ void Attribute_Mesh::clean()
 	//	delete mesh;
 	//	mesh = nullptr;
 	//}
+
+	if(mesh.skinnedData_)
+	{
+		delete mesh.skinnedData_;
+		mesh.skinnedData_ = nullptr;
+	}
 }
 
 void Attribute_Mesh::saveTo( DataItemList* list )
@@ -987,15 +1002,6 @@ DataItemList* Attribute_Ray::getDataList()
 	list->add(from, "from");
 	list->add(to,	"to");
 	return list;
-}
-
-Attribute_Animation::Attribute_Animation()
-{
-	animationID = -1;
-	time = 0.0f;
-}
-Attribute_Animation::~Attribute_Animation()
-{
 }
 
 void Attribute_Ray::saveTo( DataItemList* list )

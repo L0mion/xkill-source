@@ -29,6 +29,7 @@ ModelD3D::~ModelD3D()
 		if(subsets_[i])
 			delete subsets_[i];
 	}
+//	SAFE_DELETE(skinnedData_);
 }
 
 ID3D11Buffer* ModelD3D::getVertexBuffer()

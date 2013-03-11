@@ -162,7 +162,7 @@ private:
 	ID3D11Buffer* debugLinesVertexBuffer_;		//!< Might want to move this into some manager of some sort.
 	
 	float delta_;
-
+	float temp_;
 	ID3D11Buffer*			rayBuffer;
 
 

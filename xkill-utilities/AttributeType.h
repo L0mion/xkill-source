@@ -180,6 +180,18 @@ struct DLL_U Attribute_Bounding : public IAttribute
 };
 
 
+struct DLL_U Attribute_Animation : public IAttribute
+{
+	Attribute_Animation();
+	~Attribute_Animation();
+
+	std::string activeAnimation;
+	float time;
+
+	AttributeType getType(){return ATTRIBUTE_ANIMATION;}
+	std::string getName(){return "Animation";}
+};
+
 
 /// Stores everything RenderComponent needs to know about an entity
 /** 
@@ -198,6 +210,7 @@ struct DLL_U Attribute_Render : public IAttribute
 
 	AttributePtr<Attribute_Spatial> ptr_spatial;
 	AttributePtr<Attribute_Bounding> ptr_bounding;
+	AttributePtr<Attribute_Animation> ptr_animation;
 	
 	int meshID;
 	int textureID;
@@ -699,16 +712,4 @@ struct DLL_U Attribute_Ray : public IAttribute
 
 	AttributeType getType(){return ATTRIBUTE_RAY;}
 	std::string getName(){return "Ray";}
-};
-
-struct DLL_U Attribute_Animation : public IAttribute
-{
-	Attribute_Animation();
-	~Attribute_Animation();
-
-	int animationID;
-	float time;
-
-	AttributeType getType(){return ATTRIBUTE_ANIMATION;}
-	std::string getName(){return "Animation";}
 };
