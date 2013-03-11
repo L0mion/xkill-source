@@ -57,10 +57,10 @@ void CS_Lighting(
 		tileMaxDepthInt = 0.0f;
 		tileLightNum	= 0.0f;
 		
-		[unroll] for(uint i = 0; i < TILE_MAX_LIGHTS; i++)
-		{
-			tileLightIndices[i] = 0;
-		}
+		//[unroll] for(uint i = 0; i < TILE_MAX_LIGHTS; i++)
+		//{
+		//	tileLightIndices[i] = 0;
+		//}
 	}
 	GroupMemoryBarrierWithGroupSync();
 	
@@ -68,25 +68,17 @@ void CS_Lighting(
 	const float2 texCoord = float2(
 		(float)(threadIDDispatch.x + viewportTopX) / (float)screenWidth,
 		(float)(threadIDDispatch.y + viewportTopY) / (float)screenHeight);
-	const float4	gAlbedo		= gBufferAlbedo		.SampleLevel(ss, texCoord, 0);
-	const float4	gNormal		= gBufferNormal		.SampleLevel(ss, texCoord, 0);
-	const float4	gMaterial	= gBufferMaterial	.SampleLevel(ss, texCoord, 0);
-	const float		gDepth		= bufferDepth.SampleLevel(ss, texCoord, 0).x; 
 	
 	//Reconstruct view-space position from depth.
+	const float	gDepth = bufferDepth.SampleLevel(ss, texCoord, 0).x; //G-BUFFER DEPTH
 	const float3 surfacePosV = UtilReconstructPositionViewSpace(
 		float2(threadIDDispatch.x / viewportWidth, threadIDDispatch.y / viewportHeight), 
 		gDepth, 
 		projectionInverse); 
 	
 	//Get tile depth in view-space.
-	const bool validPixel = surfacePosV.z >= zNear && surfacePosV.z <= zFar;
-	if(validPixel)
-	{
-		//Interlocked functions can only be applied onto ints.
-		InterlockedMin(tileMinDepthInt, asuint(surfacePosV.z)); 
-		InterlockedMax(tileMaxDepthInt, asuint(surfacePosV.z));
-	}
+	InterlockedMin(tileMinDepthInt, asuint(surfacePosV.z)); //Interlocked functions can only be applied onto ints.
+	InterlockedMax(tileMaxDepthInt, asuint(surfacePosV.z)); //If one were to check if pixel is 'valid', one would do something akin to this: const bool validPixel = surfacePosV.z >= zNear && surfacePosV.z <= zFar;
 	GroupMemoryBarrierWithGroupSync();
 
 	//Fetch tile frustum
@@ -131,13 +123,11 @@ void CS_Lighting(
 			lightsPosV[index]		= lightPosV.xyz;
 		}
 	}
-	GroupMemoryBarrierWithGroupSync();
-
-	//Sample depth as quickly as possible to ensure that we do not evualuate irrelevant pixels.
-	if(!validPixel)
-		return;
+	GroupMemoryBarrierWithGroupSync(); //As this is the last sync - it is after this point we may clip pixel if not valid to make sure we do not evaluate irrelevant pixels.
 	
 	//Only apply lighting if valid Specular power.
+	const float4 gAlbedo	= gBufferAlbedo		.SampleLevel(ss, texCoord, 0); //G-BUFFER ALBEDO
+	const float4 gMaterial	= gBufferMaterial	.SampleLevel(ss, texCoord, 0); //G-BUFFER MATERIAL
 	float4 Ambient	= float4(gAlbedo.xyz, 0.0f);
 	float4 Diffuse	= float4(0.0f, 0.0f, 0.0f, 0.0f);
 	float4 Specular	= float4(0.0f, 0.0f, 0.0f, 0.0f);
@@ -146,13 +136,13 @@ void CS_Lighting(
 		Ambient	= float4(0.0f, 0.0f, 0.0f, 0.0f);
 
 		//Establish view-space normal.
-		float3 normal = gNormal.xyz;
-		normal.x *= 2.0f; normal.x -= 1.0f;
-		normal.y *= 2.0f; normal.y -= 1.0f;
-		normal.z *= 2.0f; normal.z -= 1.0f;
+		const float4 gNormal = gBufferNormal.SampleLevel(ss, texCoord, 0); //G-BUFFER NORMAL
+		float3 surfaceNormalV = gNormal.xyz;
+		surfaceNormalV.x *= 2.0f; surfaceNormalV.x -= 1.0f;
+		surfaceNormalV.y *= 2.0f; surfaceNormalV.y -= 1.0f;
+		surfaceNormalV.z *= 2.0f; surfaceNormalV.z -= 1.0f;
 
-		const float3 surfaceNormalV	= normal; //mul(float4(normal, 0.0f), view).xyz;
-		const float3 toEyeV			= normalize(float3(0.0f, 0.0f, 0.0f) - surfacePosV);
+		const float3 toEyeV	= normalize(float3(0.0f, 0.0f, 0.0f) - surfacePosV);
 		
 		//Specify surface material.
 		LightSurfaceMaterial surfaceMaterial =
@@ -174,21 +164,18 @@ void CS_Lighting(
 				surfaceNormalV,
 				ambient, diffuse, specular);
 
-			if(i == 0)
-			{
-				//Apply shadow onto first directional light:
-				float4 surfacePosW = mul(float4(surfacePosV, 1.0f), viewInverse);
-				float4 posH = mul(surfacePosW, shadowMapTransform);
-				float shadow = LightShadow(ssShadow, bufferShadowMap, posH);
-				diffuse		*= shadow;
-				specular	*= shadow;
-			}
+			//! OBS - Shadow ought only be applied onto the first directional light, but as we have no more than one, there is no need for branch. - OBS !//
+			float4 surfacePosW = mul(float4(surfacePosV, 1.0f), viewInverse); //I'm totally ugly, fix me.
+			float4 posH = mul(surfacePosW, shadowMapTransform);
+			float shadow = LightShadow(ssShadow, bufferShadowMap, posH);
+			diffuse		*= shadow;
+			specular	*= shadow;
 
 			Ambient	+= ambient;	
 			Diffuse	+= diffuse; 
 			Specular += specular;
 		}
-		const uint numLights = min(tileLightNum, TILE_MAX_LIGHTS); //tielLightNum may be bigger than allowed lights.
+		const uint numLights = min(tileLightNum, TILE_MAX_LIGHTS); //Clamp tileLightNum as it may be bigger than allowed lights.
 		for(i = 0; i < numLights; i++)
 		{
 			const LightDescPoint descPoint = lightsPoint[tileLightIndices[i]];
