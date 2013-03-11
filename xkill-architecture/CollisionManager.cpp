@@ -269,7 +269,6 @@ void CollisionManager::collision_pickupable(Entity* entity1, Entity* entity2)
 								amount = 10+rand()%20;
 								pickedUp = true;
 								float time = static_cast<float>(amount);
-								time /= 1000.0f;
 								SEND_EVENT(&Event_HackActivated(time, XKILL_Enums::HackType::CYCLEHACK, ptr_player));
 
 								// Post HUD message
