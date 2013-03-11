@@ -80,12 +80,12 @@ void CS_Lighting(
 		projectionInverse); 
 	
 	//Get tile depth in view-space.
-	const uint pixelDepthInt = asuint(surfacePosV.z); //Interlocked functions can only be applied onto ints.
 	const bool validPixel = surfacePosV.z >= zNear && surfacePosV.z <= zFar;
 	if(validPixel)
 	{
-		InterlockedMin(tileMinDepthInt, pixelDepthInt);
-		InterlockedMax(tileMaxDepthInt, pixelDepthInt);
+		//Interlocked functions can only be applied onto ints.
+		InterlockedMin(tileMinDepthInt, asuint(surfacePosV.z)); 
+		InterlockedMax(tileMaxDepthInt, asuint(surfacePosV.z));
 	}
 	GroupMemoryBarrierWithGroupSync();
 
@@ -136,8 +136,6 @@ void CS_Lighting(
 	//Sample depth as quickly as possible to ensure that we do not evualuate irrelevant pixels.
 	if(!validPixel)
 		return;
-
-	const float ssao = bufferSSAO.SampleLevel(ss, texCoord, 0).x;
 	
 	//Only apply lighting if valid Specular power.
 	float4 Ambient	= float4(gAlbedo.xyz, 0.0f);
@@ -152,7 +150,8 @@ void CS_Lighting(
 		normal.x *= 2.0f; normal.x -= 1.0f;
 		normal.y *= 2.0f; normal.y -= 1.0f;
 		normal.z *= 2.0f; normal.z -= 1.0f;
-		const float3 surfaceNormalV	= mul(float4(normal, 0.0f), view).xyz;
+
+		const float3 surfaceNormalV	= normal; //mul(float4(normal, 0.0f), view).xyz;
 		const float3 toEyeV			= normalize(float3(0.0f, 0.0f, 0.0f) - surfacePosV);
 		
 		//Specify surface material.
@@ -207,24 +206,22 @@ void CS_Lighting(
 		}
 
 		//Apply SSAO to ambient lighting only.
-		
-		Ambient *= ssao.r;
+		Ambient *= bufferSSAO.SampleLevel(ss, texCoord, 0).x;
 	}
 	float3 litPixel = Ambient.xyz  + Diffuse.xyz + Specular.xyz;
 
-	//Use additive blending to add glow to the final image.
-	const float3 glowPixel = bufferGlowHigh.SampleLevel(ss, texCoord, 0).xyz;
-	litPixel = min(litPixel + glowPixel, 1.0f); //additive blending
+	//Use additive blending to add glow to the final image using additive blending:
+	litPixel = min(litPixel + bufferGlowHigh.SampleLevel(ss, texCoord, 0).xyz, 1.0f);
+
+	//TILING DEMO:
+	for(i = 0; i < tileLightNum; i++) //Apply culled point-lights.
+	{
+		litPixel.g += 0.01;
+	}
 
 	output[
 		uint2(
 			threadIDDispatch.x + viewportTopX, 
 			threadIDDispatch.y + viewportTopY)] = 
-		float4(ssao.rrr, 1.0f);
+		float4(litPixel, 1.0f);
 }
-
-//TILING DEMO:
-//for(i = 0; i < tileLightNum; i++) //Apply culled point-lights.
-//{
-//	Diffuse.g += 0.1;
-//}

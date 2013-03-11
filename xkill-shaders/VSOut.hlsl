@@ -1,10 +1,10 @@
 #ifndef XKILL_RENDERER_VSOUT_HLSL
 #define XKILL_RENDERER_VSOUT_HLSL
 
-struct VSOutPosNormWTex
+struct VSOutPosNormVTex
 {
 	float4 position		: SV_POSITION;
-	float3 normalW		: NORMAL;
+	float3 normalV		: NORMAL;
 	float2 texcoord		: TEXCOORD;
 };
 
@@ -21,10 +21,10 @@ struct SpriteVSOut
 	float2 texcoord	: TEXCOORD;
 };
 
-struct VSOutPosNormWTexTanW
+struct VSOutPosNormVTexTanW
 {
 	float4 position		: SV_POSITION;
-	float3 normalW		: NORMAL;
+	float3 normalV		: NORMAL;
 	float2 texcoord		: TEXCOORD;
 	float3 tangentW		: TANGENT;
 };

@@ -31,7 +31,7 @@
 
 ATTRIBUTES_DECLARE_ALL;
 
-#define XKILLPROFILING // commment away to skip profiling
+//#define XKILLPROFILING // commment away to skip profiling
 #ifdef XKILLPROFILING
 #include <xkill-utilities\Converter.h>
 #include <time.h>
@@ -61,18 +61,14 @@ static TimerDX dxpresenttimer;
 static TimerDX dxcleartimer;
 static TimerDX dxcbtimer;
 static TimerDX dxssaotimer;
-//#define calccpu(vectorname, call ) {  clock_t deltatimevar = clock();	\
-//							call devcon->Flush();\
-//							vectorname.push_back(((float)(clock()-deltatimevar))/((float)CLOCKS_PER_SEC));} 
 #define calcgpu(vectorname, call ) { dx##vectorname.startTimer(devcon); \
 	call \
 	dx##vectorname.stopTimer(devcon); \
 	vectorname.push_back(dx##vectorname.Time(devcon));} 
-//#define outputcpu(outname, vectorname) {float sum=0; for(unsigned int i=0;i<vectorname.size();i++) { sum += vectorname.at(i);} std::string out = outname;  out +=" "; sum = sum/(float)vectorname.size(); out +=Converter::FloatToStr(sum); out +="\n"; OutputDebugStringA(out.c_str()); }
 #define outputgpu(outname, vectorname) {float sum=0; for(unsigned int i=0;i<vectorname.size();i++) { sum += vectorname.at(i);} std::string out = outname;  out +=" "; sum = sum/(float)vectorname.size()/1000.0f; out +=Converter::FloatToStr(sum); out +="\n"; OutputDebugStringA(out.c_str()); }
 #else
-#define calctime(vectorname, call ) call
-#define outputaverage(outname, vectorname)
+#define calcgpu(vectorname, call ) call
+#define outputgpu(outname, vectorname)
 #endif
 
 Renderer::Renderer(HWND windowHandle)
@@ -431,9 +427,9 @@ void Renderer::update()
 	ID3D11DeviceContext*	devcon = managementD3D_->getDeviceContext();
 
 	//Update lights.
-	lightstimer,managementLight_->update(device, devcon);
+	managementLight_->update(device, devcon);
 	//Update instances.
-	instancetimer,managementInstance_->update(device, devcon);
+	managementInstance_->update(device, devcon);
 }
 void Renderer::render()
 {

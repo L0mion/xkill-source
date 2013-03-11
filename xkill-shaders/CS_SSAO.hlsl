@@ -75,7 +75,8 @@ void CS_SSAO(
 	normal.x *= 2.0f; normal.x -= 1.0f;
 	normal.y *= 2.0f; normal.y -= 1.0f;
 	normal.z *= 2.0f; normal.z -= 1.0f;
-	const float3 occludeeNormal = normalize(mul(float4(normal, 0.0f), view).xyz);
+	//Normal is already in view-space
+	const float3 occludeeNormal = normalize(normal); //mul(float4(normal, 0.0f), view).xyz
 
 	//Random texture contains random normalized vectors.
 	const float2 scaleTile = float2((float)ssaoWidth / (float)RANDOM_DIM, (float)ssaoHeight / (float)RANDOM_DIM); //Move me into a constant buffer.

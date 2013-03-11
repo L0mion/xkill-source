@@ -15,11 +15,11 @@ Texture2D texNormal		: register(t1);
 
 SamplerState ss : register(s0);
 
-PSOut PS_Default(VSOutPosNormWTex pIn)
+PSOut PS_Default(VSOutPosNormVTex pIn)
 {
 	PSOut output;
 
-	float3 normal = normalize(pIn.normalW);
+	float3 normal = normalize(pIn.normalV);
 	normal.x = normal.x * 0.5f + 0.5f;
 	normal.y = normal.y * 0.5f + 0.5f;
 	normal.z = normal.z * 0.5f + 0.5f;
