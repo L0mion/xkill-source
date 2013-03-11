@@ -94,7 +94,7 @@ void CollisionManager::collision_applyDamage(Entity* entity1, Entity* entity2)
 									AttributePtr<Attribute_Player> creatorOfProjectile_ptr_player = itrPlayer.at(creatorOfProjectilePlayerId.at(k));
 									if(entity1->getID() != damage->owner_entityID) //Award player
 									{
-										if(creatorOfProjectile_ptr_player->cycleHackActive)
+										if(creatorOfProjectile_ptr_player->cycleHackPair.first) // If cyclehack is active
 										{
 											creatorOfProjectile_ptr_player->cycles++;
 											{Event_PostHudMessage e("", creatorOfProjectile_ptr_player); e.setHtmlMessage("You terminated", playerThatDied_ptr_player->playerName, "", "+1 cycle"); SEND_EVENT(&e);}

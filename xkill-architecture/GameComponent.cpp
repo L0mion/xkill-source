@@ -317,7 +317,7 @@ void GameComponent::onUpdate(float delta)
 		}
 	}
 }
-
+#include <xkill-utilities/Converter.h>
 void GameComponent::updatePlayerAttributes(float delta)
 {
 //--------------------------------------------------------------------------------------
@@ -844,18 +844,18 @@ void GameComponent::event_PlayerDeath(Event_PlayerDeath* e)
 		SEND_EVENT(&Event_StopSound(XKILL_Enums::Sound::SOUND_LASER, itrPlayer.ownerIdAt(e->playerAttributeIndex)));
 		ptr_player->executing = false;
 	}
-	if(ptr_player->jetHackActive)
+	if(ptr_player->jetHackPair.first)
 	{
 		SEND_EVENT(&Event_StopSound(XKILL_Enums::Sound::SOUND_JETPACK, itrPlayer.ownerIdAt(e->playerAttributeIndex)));
-		ptr_player->jetHackActive = false;
+		ptr_player->jetHackPair.first = false;
 	}
-	if(ptr_player->cycleHackActive)
+	if(ptr_player->cycleHackPair.first)
 	{
-		ptr_player->cycleHackActive = false;
+		ptr_player->cycleHackPair.first = false;
 	}
-	if(ptr_player->speedHackActive)
+	if(ptr_player->speedHackPair.first)
 	{
-		ptr_player->speedHackActive = false;
+		ptr_player->speedHackPair.first = false;
 	}
 }
 
@@ -1089,7 +1089,7 @@ void GameComponent::updateAndInterpretLaser(AttributePtr<Attribute_Ray> ptr_ray,
 				AttributePtr<Attribute_Player> hitPlayerAttribute = itrPlayer.at(hitPlayerId.at(i));
 				if(!hitPlayerAttribute->detectedAsDead)
 				{
-					if(ptr_player->cycleHackActive)
+					if(ptr_player->cycleHackPair.first)
 					{
 						ptr_player->cycles++;
 						{Event_PostHudMessage e("", ptr_player); e.setHtmlMessage("You exterminated", hitPlayerAttribute->playerName, "", "+1 cycle"); SEND_EVENT(&e);}
