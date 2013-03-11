@@ -130,7 +130,9 @@ Menu_Main::Menu_Main( QWidget* parent ) : QMainWindow()
 	SEND_EVENT(&Event_LoadLevel(levelNames[levelCurrent]));
 	SETTINGS->currentLevel = levelNames[levelCurrent];
 	updateLevelSelectionInterface();
-	
+
+	// Init values to standard values
+	SEND_EVENT(&Event_EnableMenu(true));
 }
 
 void Menu_Main::updateLevelSelectionInterface()
@@ -326,6 +328,10 @@ void Menu_Main::onEvent( Event* e )
 			// Refresh additional menu parts
 			ui.horizontalSlider_cycleLimit->setValue(SETTINGS->cycleLimit);
 			ui.horizontalSlider_timeLimit->setValue(SETTINGS->timeLimit);
+			ui.label_cycleLimit->setNum(ui.horizontalSlider_cycleLimit->value());
+			ui.label_timeLimit->setNum(ui.horizontalSlider_timeLimit->value());
+			ui.label_respawnTime->setNum(ui.horizontalSlider_respawnTime->value());
+			
 			//input_Menu->setSettingsMenu();
 			//sound_Menu->setSettingsMenu();
 
