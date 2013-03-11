@@ -9,7 +9,6 @@
 
 #include "UtilSphereMapTransform.hlsl"
 #include "UtilReconstructPosition.hlsl"
-#include "UtilDebug.hlsl"
 
 #include "constantBuffers.hlsl"
 
@@ -38,6 +37,8 @@ groupshared uint tileMinDepthInt;
 groupshared uint tileMaxDepthInt;
 groupshared uint tileLightNum; //Number of lights intersecting tile.
 
+groupshared Frustum tileFrustum;
+
 groupshared float3 lightsPosV[TILE_MAX_LIGHTS];
 groupshared uint tileLightIndices[TILE_MAX_LIGHTS]; //Indices to lights intersecting tile.
 
@@ -48,15 +49,15 @@ void CS_Lighting(
 	uint3	threadIDDispatch	: SV_DispatchThreadID,
 	uint3	threadIDBlock		: SV_GroupThreadID)
 {
-	//Initialize (those necessary to be initialized) shared values once per tile
+	//Once per tile, do
 	if(threadIDBlockIndex == 0)
 	{
+		//Initialize (those necessary to be initialized) shared values
 		tileLightNum = 0;
-
 		tileMinDepthInt = 0xFFFFFFFF;
 		tileMaxDepthInt = 0.0f;
 	}
-	
+
 	const float2 texCoord = float2(
 		(float)(threadIDDispatch.x + viewportTopX) / (float)screenWidth,
 		(float)(threadIDDispatch.y + viewportTopY) / (float)screenHeight);
@@ -73,19 +74,37 @@ void CS_Lighting(
 	InterlockedMax(tileMaxDepthInt, asuint(surfacePosV.z)); //If one were to check if pixel is 'valid', one would do something akin to this: const bool validPixel = surfacePosV.z >= zNear && surfacePosV.z <= zFar;
 	GroupMemoryBarrierWithGroupSync();
 
-	const float tileMinDepthF = asfloat(tileMinDepthInt);
-	const float tileMaxDepthF = asfloat(tileMaxDepthInt);
-	const Frustum tileFrustum = ExtractFrustumPlanes(
-		viewportWidth,
-		viewportHeight, 
-		viewportTopX,
-		viewportTopY,
-		TILE_DIM, 
-		blockID.xy, 
-		projection._11,
-		projection._22,
-		tileMinDepthF, 
-		tileMaxDepthF);;
+	if(threadIDBlockIndex == 0)
+	{
+		const float tileMinDepthF = asfloat(tileMinDepthInt);
+		const float tileMaxDepthF = asfloat(tileMaxDepthInt);
+		tileFrustum = ExtractFrustumPlanes(
+			viewportWidth,
+			viewportHeight, 
+			viewportTopX,
+			viewportTopY,
+			TILE_DIM, 
+			blockID.xy, 
+			projection._11,
+			projection._22,
+			tileMinDepthF, 
+			tileMaxDepthF); //this could be done by one thread and put in shared memory, or be pre-computed on the cpu for each tile and stored in constant buffers.
+	}
+	GroupMemoryBarrierWithGroupSync();
+
+	//const float tileMinDepthF = asfloat(tileMinDepthInt);
+	//const float tileMaxDepthF = asfloat(tileMaxDepthInt);
+	//const Frustum tileFrustum = ExtractFrustumPlanes(
+	//	viewportWidth,
+	//	viewportHeight, 
+	//	viewportTopX,
+	//	viewportTopY,
+	//	TILE_DIM, 
+	//	blockID.xy, 
+	//	projection._11,
+	//	projection._22,
+	//	tileMinDepthF, 
+	//	tileMaxDepthF); //this could be done by one thread and put in shared memory, or be pre-computed on the cpu for each tile and stored in constant buffers.
 	
 	//Cull lights with tile
 	const uint numTileThreads = TILE_DIM * TILE_DIM;
@@ -123,12 +142,15 @@ void CS_Lighting(
 
 		//Establish view-space normal.
 		const float4 gNormal = gBufferNormal.SampleLevel(ss, texCoord, 0); //G-BUFFER NORMAL
-		float3 surfaceNormalV = gNormal.xyz;
-		surfaceNormalV.x *= 2.0f; surfaceNormalV.x -= 1.0f;
-		surfaceNormalV.y *= 2.0f; surfaceNormalV.y -= 1.0f;
-		surfaceNormalV.z *= 2.0f; surfaceNormalV.z -= 1.0f;
+		float3 surfaceNormalV = gNormal.xyz * 2.0f - 1.0f; //uncompress from [0, 1] to [-1, 1]
 
 		const float3 toEyeV	= normalize(float3(0.0f, 0.0f, 0.0f) - surfacePosV);
+
+		//Calculate shadow influence
+		const float shadow = LightShadow(
+				ssShadow, 
+				bufferShadowMap, 
+				mul(float4(surfacePosV, 1.0f), shadowMapTransform));
 
 		float4 ambient, diffuse, specular;
 		for(i = 0; i < numLightsDir; i++)
@@ -144,16 +166,9 @@ void CS_Lighting(
 				/*Normal*/		surfaceNormalV,
 				/*inout*/		ambient, diffuse, specular);
 
-			//! OBS - Shadow ought only be applied onto the first directional light, but as we have no more than one, there is no need for branch. - OBS !//
-			float4 surfacePosW = mul(float4(surfacePosV, 1.0f), viewInverse); //I'm totally ugly, fix me.
-			float4 posH = mul(surfacePosW, shadowMapTransform);
-			float shadow = LightShadow(ssShadow, bufferShadowMap, posH);
-			diffuse		*= shadow;
-			specular	*= shadow;
-
 			Ambient		+= ambient;	
-			Diffuse		+= diffuse; 
-			Specular	+= specular;
+			Diffuse		+= diffuse	* shadow; //Shadow ought only be applied onto the first directional light, but as we have no more than one, there is no need for branch.
+			Specular	+= specular	* shadow;
 		}
 		const uint numLights = min(tileLightNum, TILE_MAX_LIGHTS); //Clamp tileLightNum as it may be bigger than allowed lights.
 		for(i = 0; i < numLights; i++)
@@ -181,16 +196,15 @@ void CS_Lighting(
 
 	//Use additive blending to add glow to the final image using additive blending:
 	Ambient.xyz = min(Ambient.xyz + bufferGlowHigh.SampleLevel(ss, texCoord, 0).xyz, 1.0f);
-
-	//TILING DEMO:
-	//for(i = 0; i < tileLightNum; i++) //Apply culled point-lights.
-	//{
-	//	Ambient.g += 0.1; //0.01
-	//}
-
 	output[
 		uint2(
 			threadIDDispatch.x + viewportTopX, 
 			threadIDDispatch.y + viewportTopY)] = 
 		float4(Ambient.xyz, 1.0f);
 }
+
+//TILING DEMO:
+//for(i = 0; i < tileLightNum; i++) //Apply culled point-lights.
+//{
+//	Ambient.g += 0.1; //0.01
+//}

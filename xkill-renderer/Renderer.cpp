@@ -460,7 +460,6 @@ void Renderer::render()
 		devcon);
 	managementCB_->updateCBFrame(
 		devcon,
-		shadowMapTransform,
 		managementLight_->getLightDirCurCount(),
 		managementLight_->getLightPointCurCount());
 
@@ -519,7 +518,7 @@ void Renderer::render()
 	//Render everything to backbuffer:
 	calcgpu(backbuffertimer,
 	for(unsigned int i = 0; i < vpDatas.size(); i++)
-		renderViewportToBackBuffer(vpDatas[i]);
+		renderViewportToBackBuffer(vpDatas[i], shadowMapTransform);
 	)
 
 	calcgpu(hudtimer,
@@ -578,7 +577,7 @@ void Renderer::renderViewportToGBuffer(ViewportData& vpData)
 	managementSS_->unsetSS(devcon, TypeFX_PS, 0);
 	devcon->RSSetState(nullptr);
 }
-void Renderer::renderViewportToBackBuffer(ViewportData& vpData)
+void Renderer::renderViewportToBackBuffer(ViewportData& vpData, DirectX::XMFLOAT4X4 shadowTransform)
 {
 	ID3D11DeviceContext* devcon = managementD3D_->getDeviceContext();
 
@@ -604,6 +603,14 @@ void Renderer::renderViewportToBackBuffer(ViewportData& vpData)
 		vpData.zFar,
 		vpData.viewportWidth,
 		vpData.viewportHeight);
+	managementCB_->setCB(CB_TYPE_SHADOW, TypeFX_CS, CB_REGISTER_SHADOW, devcon);
+
+	DirectX::XMMATRIX m1 = DirectX::XMLoadFloat4x4(&shadowTransform);
+	DirectX::XMMATRIX m2 = DirectX::XMLoadFloat4x4(&vpData.viewInv);
+	DirectX::XMMATRIX m3 = DirectX::XMMatrixMultiply(m2, m1);
+
+	DirectX::XMFLOAT4X4 m4; DirectX::XMStoreFloat4x4(&m4, m3);
+	managementCB_->updateCBShadow(devcon, m4);
 
 	//Connect g-buffers to shader.
 	managementBuffer_->setBuffersAsCSShaderResources(devcon);
