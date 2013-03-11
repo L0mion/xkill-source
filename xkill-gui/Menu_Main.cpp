@@ -320,9 +320,13 @@ void Menu_Main::onEvent( Event* e )
 		if(((Event_EnableMenu*)e)->enableMenu)
 		{
 			// Refresh menu
-			//input_Menu->setSettingsMenu();
 			ammo_Menu->setSettingsMenu();
 			firingMode_Menu->setSettingsMenu();
+
+			// Refresh additional menu parts
+			ui.horizontalSlider_cycleLimit->setValue(SETTINGS->cycleLimit);
+			ui.horizontalSlider_timeLimit->setValue(SETTINGS->timeLimit);
+			//input_Menu->setSettingsMenu();
 			//sound_Menu->setSettingsMenu();
 
 			// Display menu
