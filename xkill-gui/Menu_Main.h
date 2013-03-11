@@ -63,7 +63,7 @@ private:
 			this->activateWindow();
 		}
 
-		//ui.label_background->show();
+		ui.label_background->show();
 		raise();
 	}
 	void updateLevelSelectionInterface();
