@@ -5,9 +5,10 @@ Buffer_SrvRtv::Buffer_SrvRtv(
 	unsigned int	texWidth,
 	unsigned int	texHeight,
 	unsigned int	texAliasing,
+	unsigned int	texMips,
 	DXGI_FORMAT		texFormat,
 	UINT			texBindFlags,
-	D3D11_USAGE		texUsage) : Buffer_Srv(texWidth, texHeight, texAliasing, texFormat, texBindFlags, texUsage)
+	D3D11_USAGE		texUsage) : Buffer_Srv(texWidth, texHeight, texAliasing, texMips, texFormat, texBindFlags, texUsage)
 {
 	rtv_ = nullptr;
 }

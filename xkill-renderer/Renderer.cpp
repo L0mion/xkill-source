@@ -178,7 +178,7 @@ HRESULT Renderer::resize(unsigned int screenWidth, unsigned int screenHeight)
 	unsigned int numViewports, csDispatchX, csDispatchY;
 	numViewports	= numSS;
 
-	csDispatchX	= (unsigned int)ceil((float)screenWidth	/ (float)CS_TILE_SIZE);
+	csDispatchX	= (unsigned int)ceil((float)screenWidth		/ (float)CS_TILE_SIZE);
 	csDispatchY	= (unsigned int)ceil((float)screenHeight	/ (float)CS_TILE_SIZE);
 	winfo_->init(
 		screenWidth, 
@@ -1120,6 +1120,8 @@ void Renderer::buildSSAOMap(ViewportData& vpData)
 		SET_STAGE_CS, 
 		0); //register 0
 
+	managementD3D_->generateDepthMips();
+
 	//Set depth as srv
 	managementD3D_->setDepthBufferSRV(GBUFFER_SHADER_REGISTER_DEPTH);
 
@@ -1163,7 +1165,7 @@ void Renderer::buildSSAOMap(ViewportData& vpData)
 		/*Occlusion Intensity*/		SETTINGS->occlusionIntensity);	
 	
 	//Dispatch motherfucker
-	unsigned int SSAO_BLOCK_DIM = 16;
+	unsigned int SSAO_BLOCK_DIM = 32;
 	float csDispatchX = ssaoWidth	/ (float)SSAO_BLOCK_DIM;
 	float csDispatchY = ssaoHeight	/ (float)SSAO_BLOCK_DIM;
 	unsigned int dispatchX = (unsigned int)ceil(csDispatchX / (float)managementViewport_->getNumViewportsX());

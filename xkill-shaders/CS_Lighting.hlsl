@@ -40,7 +40,7 @@ groupshared uint tileLightNum; //Number of lights intersecting tile.
 
 groupshared Frustum tileFrustum;
 
-groupshared float4 lightsPosV[TILE_MAX_LIGHTS];
+groupshared float3 lightsPosV[TILE_MAX_LIGHTS];
 groupshared uint tileLightIndices[TILE_MAX_LIGHTS]; //Indices to lights intersecting tile.
 
 [numthreads(TILE_DIM, TILE_DIM, 1)]
@@ -128,7 +128,7 @@ void CS_Lighting(
 
 			index = min(index, TILE_MAX_LIGHTS);	//Prevent writing outside of allocated array.
 			tileLightIndices[index] = lightIndex;	//Last light may be overwritten multiple time if TILE_MAX_LIGHTS is breached.
-			lightsPosV[index]		= lightPosV;
+			lightsPosV[index]		= lightPosV.xyz;
 		}
 	}
 	GroupMemoryBarrierWithGroupSync();
@@ -136,6 +136,8 @@ void CS_Lighting(
 	//Sample depth as quickly as possible to ensure that we do not evualuate irrelevant pixels.
 	if(!validPixel)
 		return;
+
+	const float ssao = bufferSSAO.SampleLevel(ss, texCoord, 0).x;
 	
 	//Only apply lighting if valid Specular power.
 	float4 Ambient	= float4(gAlbedo.xyz, 0.0f);
@@ -194,7 +196,7 @@ void CS_Lighting(
 			LightPoint(
 				toEyeV,
 				descPoint,
-				lightsPosV[i].xyz,
+				lightsPosV[i],
 				surfaceMaterial,
 				surfaceNormalV,
 				surfacePosV,
@@ -205,7 +207,7 @@ void CS_Lighting(
 		}
 
 		//Apply SSAO to ambient lighting only.
-		const float ssao = bufferSSAO.SampleLevel(ss, texCoord, 0).x;
+		
 		Ambient *= ssao.r;
 	}
 	float3 litPixel = Ambient.xyz  + Diffuse.xyz + Specular.xyz;
@@ -218,7 +220,7 @@ void CS_Lighting(
 		uint2(
 			threadIDDispatch.x + viewportTopX, 
 			threadIDDispatch.y + viewportTopY)] = 
-		float4(litPixel, 1.0f);
+		float4(ssao.rrr, 1.0f);
 }
 
 //TILING DEMO:
