@@ -65,6 +65,13 @@ btVector3 PhysicsObject::zeroLocalInertia()
 	return localInertia;
 }
 
+void PhysicsObject::removePhysicsAttributeCorrespondingToThisPhysicsObject()
+{
+	Entity* ownerEntityOfPhysicsAttribute = itrPhysics_.ownerAt(attributeIndex_);
+	int entityOwnerId = ownerEntityOfPhysicsAttribute->getID();
+	SEND_EVENT(&Event_RemoveEntity(entityOwnerId));
+}
+
 void PhysicsObject::hover(float delta, float hoverHeight)
 {
 	btVector3 from = getWorldTransform().getOrigin();
@@ -180,10 +187,18 @@ void PhysicsObject::writeNonSynchronizedPhysicsObjectDataToPhysicsAttribute()
 }
 void PhysicsObject::onUpdate(float delta)
 {	
+	AttributePtr<Attribute_Physics> physicsAttribute = itrPhysics_.at(attributeIndex_);
+	Float3 position = physicsAttribute->ptr_spatial->ptr_position->position;
+	if(position.y < outOfBoundsIfYIsLowerThanThis)
 	if(getWorldTransform().getOrigin().y() < outOfBoundsIfYIsLowerThanThis)
 	{
 		handleOutOfBounds();
 	}
+
+	//if(getWorldTransform().getOrigin().y() < outOfBoundsIfYIsLowerThanThis)
+	//{
+	//	handleOutOfBounds();
+	//}
 }
 
 void PhysicsObject::handleOutOfBounds()

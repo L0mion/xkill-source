@@ -25,7 +25,7 @@ PSOut PS_Default(VSOutPosNormWTex pIn)
 	normal.z = normal.z * 0.5f + 0.5f;
 	
 	//Fill normal RTV
-	output.normal = float4(normal, 0.0f); 
+	output.normal = float4(normal, 0.0f);
 
 //	pIn.texcoord.y	= 1 - pIn.texcoord.y;
 	float3 albedo	= texAlbedo.SampleLevel(ss, pIn.texcoord, 0).xyz;
@@ -34,7 +34,7 @@ PSOut PS_Default(VSOutPosNormWTex pIn)
 	output.albedo = float4(albedo, 0.0f);
 	
 	//Fill material RTV
-	output.material	= float4(specularTerm, 1.0f); //specularPower
+	output.material	= float4(specularTerm, specularPower);
 
 	output.glowHigh = float4(0.0f, 0.0f, 0.0f, 1.0f);
 

@@ -36,8 +36,8 @@ bool ScoreComponent::init()
 	SAFE_DELETE(cycleTimer_);
 	SAFE_DELETE(gameTimer_);
 
-	schedulerTimer_ = new Timer(30.0f);
-	cycleTimer_ = new Timer(1.0f);
+	schedulerTimer_ = new Timer(SETTINGS->schedulerTime);
+	cycleTimer_ = new Timer(SETTINGS->cycleTime);
 
 	gameTimer_ = new Timer(SETTINGS->timeLimit);
 
@@ -88,6 +88,7 @@ void ScoreComponent::onUpdate(float delta)
 		//deathMatchScoreCounting(delta);
 
 		gameTimer_->update(delta);
+		SETTINGS->timeLeft = gameTimer_->getTimeLeft();
 		if(gameTimer_->hasTimerExpired())
 		{
 			SEND_EVENT(&Event(EVENT_GAMEOVER));
@@ -117,6 +118,7 @@ void ScoreComponent::schedulerScoreCounting(float delta)
 		if(itrPlayer.getNext()->cycles >= SETTINGS->cycleLimit)
 		{
 			SEND_EVENT(&Event(EVENT_GAMEOVER));
+			break;
 		}
 	}
 }
@@ -128,6 +130,7 @@ void ScoreComponent::deathMatchScoreCounting(float delta)
 		if(itrPlayer.getNext()->priority >= SETTINGS->cycleLimit)
 		{
 			SEND_EVENT(&Event(EVENT_GAMEOVER));
+			break;
 		}
 	}
 }
@@ -153,6 +156,8 @@ void ScoreComponent::handleExecutionMode(float delta)
 		{
 			AttributePtr<Attribute_Player> player = itrPlayer.at(executingPlayerIndex_);
 			player->executing = false;
+
+			SEND_EVENT(&Event_StopSound(XKILL_Enums::Sound::SOUND_LASER, itrPlayer.ownerIdAt(executingPlayerIndex_)));
 
 			executionMode_ = false;
 			executingPlayerIndex_ = -1;
@@ -249,12 +254,14 @@ void ScoreComponent::activateNullProcess()
 	schedulerTimer_->resetTimer();
 	nullProcessExecuting_ = true;
 	SEND_EVENT(&Event(EVENT_NULL_PROCESS_STARTED_EXECUTING));
+	SEND_EVENT(&Event_PlaySound(XKILL_Enums::Sound::SOUND_RUMBLE));
 }
 
 void ScoreComponent::deactivateNullProcess()
 {
 	nullProcessExecuting_ = false;
 	SEND_EVENT(&Event(EVENT_NULL_PROCESS_STOPPED_EXECUTING));
+	SEND_EVENT(&Event_StopSound(XKILL_Enums::Sound::SOUND_RUMBLE));
 }
 
 void ScoreComponent::executePlayer(int playerIndex)
@@ -271,6 +278,7 @@ void ScoreComponent::executePlayer(int playerIndex)
 
 	// Send event to notify other components that we're entering execution mode
 	SEND_EVENT(&Event_PlayerExecuting(executingPlayerIndex_));
+	SEND_EVENT(&Event_PlaySound(XKILL_Enums::Sound::SOUND_LASER, itrPlayer.ownerIdAt(playerIndex)));
 
 	// Post hud messages
 	{Event_PostHudMessage e("", ptr_player); e.setHtmlMessage("Now running in", "Kernel Mode"); SEND_EVENT(&e);}

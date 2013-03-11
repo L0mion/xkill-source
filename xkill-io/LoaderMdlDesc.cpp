@@ -283,6 +283,14 @@ void LoaderMdlDesc::loadHack(const std::vector<std::string>& params)
 	{
 		events_.push_back( new Event_CreatePickupablesSpawnPoint(position,XKILL_Enums::PickupableType::HACK_JETHACK));
 	}
+	else if( type == "CYC")
+	{
+		events_.push_back( new Event_CreatePickupablesSpawnPoint(position,XKILL_Enums::PickupableType::HACK_CYCLEHACK));
+	}
+	else if( type == "RAN")
+	{
+		events_.push_back( new Event_CreatePickupablesSpawnPoint(position,XKILL_Enums::PickupableType::HACK_RANDOMHACK));
+	}
 }
 void LoaderMdlDesc::loadAmmo(const std::vector<std::string>& params)
 {

@@ -13,6 +13,7 @@ ManagementCB::ManagementCB()
 	cbBone_		= nullptr;
 	cbSprite_	= nullptr;
 	cbBlur_		= nullptr;
+	cbSSAO_		= nullptr;
 }
 ManagementCB::~ManagementCB()
 {
@@ -24,6 +25,7 @@ ManagementCB::~ManagementCB()
 	SAFE_RELEASE(cbBone_);
 	SAFE_RELEASE(cbSprite_);
 	SAFE_RELEASE(cbBlur_);
+	SAFE_RELEASE(cbSSAO_);
 }
 void ManagementCB::reset()
 {
@@ -35,6 +37,7 @@ void ManagementCB::reset()
 	SAFE_RELEASE(cbBone_);
 	SAFE_RELEASE(cbSprite_);
 	SAFE_RELEASE(cbBlur_);
+	SAFE_RELEASE(cbSSAO_);
 }
 
 void ManagementCB::updateCBInstance(ID3D11DeviceContext*	devcon,
@@ -50,14 +53,12 @@ void ManagementCB::updateCBInstance(ID3D11DeviceContext*	devcon,
 void ManagementCB::updateCBFrame(ID3D11DeviceContext* devcon,
 								 DirectX::XMFLOAT4X4 shadowMapTransform,
 								 unsigned int numLightsDir,
-								 unsigned int numLightsPoint,
-								 unsigned int numLightsSpot)
+								 unsigned int numLightsPoint)
 {
 	CBFrameDesc cbDesc;
 	cbDesc.shadowMapTransform_ = shadowMapTransform;
 	cbDesc.numLightsDir		= numLightsDir;
 	cbDesc.numLightsPoint	= numLightsPoint;
-	cbDesc.numLightsSpot	= numLightsSpot;
 
 	devcon->UpdateSubresource(cbFrame_, 0, 0, &cbDesc, 0, 0);
 }
@@ -161,6 +162,25 @@ void ManagementCB::updateCBBlur(
 
 	devcon->UpdateSubresource(cbBlur_, 0, 0, &cbDesc, 0, 0);
 }
+void ManagementCB::updateCBSSAO(
+	ID3D11DeviceContext* devcon,
+	unsigned int ssaoWidth,
+	unsigned int ssaoHeight,
+	float occlusionRadius,
+	float occlusionScale,
+	float occlusionBias,
+	float occlusionIntensity)
+{
+	CBSSAODesc cbDesc;
+	cbDesc.ssaoWidth			= ssaoWidth;
+	cbDesc.ssaoHeight			= ssaoHeight;
+	cbDesc.occlusionRadius		= occlusionRadius;
+	cbDesc.occlusionScale		= occlusionScale;
+	cbDesc.occlusionBias		= occlusionBias;
+	cbDesc.occlusionIntensity	= occlusionIntensity;
+
+	devcon->UpdateSubresource(cbSSAO_, 0, 0, &cbDesc, 0, 0);
+}
 
 void ManagementCB::setCB(
 	CB_TYPE					cbType, 
@@ -195,6 +215,9 @@ void ManagementCB::setCB(
 		break;
 	case CB_TYPE_BLUR:
 		cb = cbBlur_;
+		break;
+	case CB_TYPE_SSAO:
+		cb = cbSSAO_;
 		break;
 	}
 
@@ -241,6 +264,8 @@ HRESULT ManagementCB::init(ID3D11Device* device)
 		hr = initCBSprite(device);
 	if(SUCCEEDED(hr))
 		hr = initCBBlur(device);
+	if(SUCCEEDED(hr))
+		hr = initCBSSAO(device);
 
 	return hr;
 }
@@ -385,6 +410,23 @@ HRESULT ManagementCB::initCBBlur(ID3D11Device* device)
 	hr = device->CreateBuffer(&bufferDesc, NULL, &cbBlur_);
 	if(FAILED(hr))
 		ERROR_MSG(L"CBManagement::initCBBlur | device->CreateBuffer | Failed!");
+
+	return hr;
+}
+HRESULT ManagementCB::initCBSSAO(ID3D11Device* device)
+{
+	HRESULT hr = S_OK;
+
+	D3D11_BUFFER_DESC bufferDesc;
+	ZeroMemory(&bufferDesc, sizeof(bufferDesc));
+	bufferDesc.Usage			= D3D11_USAGE_DEFAULT;
+	bufferDesc.ByteWidth		= CB_SSAO_DESC_SIZE;
+	bufferDesc.BindFlags		= D3D11_BIND_CONSTANT_BUFFER;
+	bufferDesc.CPUAccessFlags	= 0;
+
+	hr = device->CreateBuffer(&bufferDesc, NULL, &cbSSAO_);
+	if(FAILED(hr))
+		ERROR_MSG(L"CBManagement::initCBSSAO | device->CreateBuffer | Failed!");
 
 	return hr;
 }

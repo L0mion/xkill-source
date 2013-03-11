@@ -5,67 +5,32 @@
 #include <QtGui/QMovie>
 ATTRIBUTES_DECLARE_ALL;
 
-Menu_HUDManager::Menu_HUDManager( QWidget* parent ) : QObject(parent)
+
+
+
+Menu_HUD::Menu_HUD( AttributePtr<Attribute_SplitScreen> splitScreen, QWidget* parent ) : QWidget(parent)
 {
-	ATTRIBUTES_INIT_ALL;
+	ui.setupUi(this);
+	ptr_splitScreen = splitScreen;
 
-	this->parent = parent;
-	isEnabled = false;
+	Float2 pos(ptr_splitScreen->ssTopLeftX, ptr_splitScreen->ssTopLeftY);
+	move(ptr_splitScreen->ssTopLeftX, ptr_splitScreen->ssTopLeftY);
+	resize(ptr_splitScreen->ssWidth, ptr_splitScreen->ssHeight);
+	hide();
 
-	// Events
-	SUBSCRIBE_TO_EVENT(this, EVENT_ENABLE_HUD);
-	SUBSCRIBE_TO_EVENT(this, EVENT_SPLITSCREEN_CHANGED);
+	QWidget::setAttribute(Qt::WA_ShowWithoutActivating);
+	QWidget::setAttribute(Qt::WA_TransparentForMouseEvents);
+
+	SUBSCRIBE_TO_EVENT(this, EVENT_UPDATE);
+
+	hudMessage_manager.init(this, ptr_splitScreen);
+	mapToSplitscreen();
+	initScoreboard();
 }
 
-void Menu_HUDManager::onEvent( Event* e )
+Menu_HUD::~Menu_HUD()
 {
-	EventType type = e->getType();
-	switch (type) 
-	{
-	case EVENT_ENABLE_HUD:
-		
-		if(((Event_EnableHud*)e)->enableHud)
-		{
-			isEnabled = true;
-
-			for(int i=0; i<huds.size(); i++)
-				huds[i]->show();
-		}
-		else
-		{
-			isEnabled = false;
-
-			for(int i=0; i<huds.size(); i++)
-				huds[i]->hide();
-		}
-
-	
-		break;
-	case EVENT_SPLITSCREEN_CHANGED:
-		mapHudsToSplitscreen();
-		break;
-	default:
-		break;
-	}
-}
-
-void Menu_HUDManager::mapHudsToSplitscreen()
-{
-	// Delete previous huds
-	for(int i=0; i<huds.size(); i++)
-	{
-		delete huds[i];
-	}
-	huds.clear();
-
-	// Map new HUDs to split screens
-	while(itrSplitScreen.hasNext())
-	{
-		AttributePtr<Attribute_SplitScreen> ptr_splitScreen = itrSplitScreen.getNext();
-		huds.push_back(new Menu_HUD(ptr_splitScreen, parent));
-		if(isEnabled)
-			huds.back()->show();
-	}
+	UNSUBSCRIBE_TO_EVENTS(this);
 }
 
 void Menu_HUD::mapToSplitscreen()
@@ -123,37 +88,14 @@ void Menu_HUD::mapToSplitscreen()
 	// Move HUD messages to center
 	hudMessage_manager.move(centerPos);
 
-	// Create weapon info
-	{
-		const int kIconSize = 32;
-		Float2 weaponInfoPos;
-		weaponInfoPos.x = ui.frame_bottom->pos().x() + ui.frame_bottom->width() - 15;
-		weaponInfoPos.y = ui.frame_bottom->pos().y();
-		
-		{
-			QLabel* l = new QLabel();
-			l->setPixmap(QString(":/xkill/images/icons/cross_hairs/crosshair_bullet.png"));
-			ui.verticalLayout_weaponInfo->addWidget(l);
-		}
-		{
-			QLabel* l = new QLabel();
-			l->setPixmap(QString(":/xkill/images/icons/cross_hairs/crosshair_explosive.png"));
-			ui.verticalLayout_weaponInfo->addWidget(l);
-		}
-		{
-			QLabel* l = new QLabel();
-			l->setPixmap(QString(":/xkill/images/icons/cross_hairs/crosshair_scatter.png"));
-			ui.verticalLayout_weaponInfo->addWidget(l);
-		}
 
-		{
-			ui.groupBox_weaponInfo->resize(ui.groupBox_weaponInfo->sizeHint());
-			ui.groupBox_weaponInfo->move(0, 0);
-			ui.groupBox_weaponInfo->move(weaponInfoPos.x - ui.groupBox_weaponInfo->width(), weaponInfoPos.y - ui.groupBox_weaponInfo->height());
-		}
-	}
-	ui.groupBox_weaponInfo->hide();
+	// Create weapon info
+	weaponInfoHud.init(ui.groupBox_weaponInfo, ui.verticalLayout_weaponInfo, ui.groupBox_weaponInfo_subHud, ui.horizontalLayout_weaponInfo_subHud);
 	ui.groupBox_weaponInfo2->hide();
+	Float2 weaponInfoPos;
+	weaponInfoPos.x = ui.frame_bottom->parentWidget()->width() + 1;
+	weaponInfoPos.y = ui.frame_bottom->pos().y();
+	weaponInfoHud.setPosition(weaponInfoPos);
 }
 
 void Menu_HUD::refresh()
@@ -168,6 +110,11 @@ void Menu_HUD::refresh()
 	int ammoIndex = ammunition->type;
 	float fadeTime = 1.0f;
 
+	//
+	// Update weapon info hud
+	//
+
+	weaponInfoHud.update(firingIndex, ammoIndex);
 
 	//
 	// Show ammunition info
@@ -180,7 +127,7 @@ void Menu_HUD::refresh()
 	int prev_ammoRatio = ui.progressBar_ammo->value();
 	int ammoRatio = (int)((numAmmo / (float)clipSize) * 100);
 	int reloadRatio = (int)((firingMode->reloadTimeLeft / (float)firingMode->reloadTime) * 100);
-	
+
 	// Show menu if health has changed otherwise fade after a few seconds
 	if(reloadRatio == 100 && ammoRatio != prev_ammoRatio)
 	{
@@ -194,7 +141,7 @@ void Menu_HUD::refresh()
 		ammoFade = fadeTime;
 		ui.progressBar_ammo->setValue(100 - reloadRatio);
 	}
-	
+
 	// Hide bar if full
 	if(ammoRatio == 100)
 		ammoFade = 0.0f;
@@ -208,7 +155,7 @@ void Menu_HUD::refresh()
 		if(ui.progressBar_ammo->isHidden())
 			ui.progressBar_ammo->show();
 
-		
+
 		ui.progressBar_ammo->update();
 	}
 	else
@@ -237,7 +184,7 @@ void Menu_HUD::refresh()
 	// Hide bar if dead
 	if(ptr_player->detectedAsDead)
 		healthFade = 0.0f;
-		
+
 	if(healthFade > 0.0f)
 	{
 		healthFade -= SETTINGS->trueDeltaTime;
@@ -296,9 +243,9 @@ void Menu_HUD::refresh()
 	//
 	// Update Scoreboard
 	//
-	
+
 	scoreboard.refresh();
-	if(ptr_player->detectedAsDead)
+	if(ptr_player->detectedAsDead || GET_STATE() == STATE_GAMEOVER)
 	{
 		// Show scoreboard if delay has expired
 		if(scoreboardFade > 0.0f)
@@ -324,7 +271,7 @@ void Menu_HUD::refresh()
 		}
 	}
 
-	
+
 
 
 	//
@@ -345,15 +292,15 @@ void Menu_HUD::refresh()
 			scoreDiff = ptr_player->cycles - scoreboard.maxCycles;
 
 		// Set label
-		
+
 		if(scoreDiff >= 0)
 			ui.label_priority_advantage->setText("+" +QString::number(scoreDiff));
 		else
 			ui.label_priority_advantage->setNum(scoreDiff);
-			
+
 	}
-	
-	
+
+
 	QString str_time = QDateTime::fromTime_t(SETTINGS->timeUntilScheduling).toString("mm:ss");
 	ui.label_schedulingTimer->setText(str_time);
 
@@ -386,26 +333,26 @@ void Menu_HUD::refresh()
 		}
 
 		// Set image to label
-		 ui.label_aim->setPixmap(path);
+		ui.label_aim->setPixmap(path);
 
-		 // EASTER EGG
-		 if(index_crosshair == XKILL_Enums::EXPLOSIVE)
-		 {
-			 // If a specific user
-			 std::string username = getenv( "USERNAME" );
-			 if(username == "FrankensteinsMonster2")
-			 {
-				 QMovie* movie = new QMovie(this);
-				 movie->setCacheMode(QMovie::CacheAll);
-				 movie->setFileName("../../xkill-resources/xkill-gui/images/animations/menu_opening.gif");
-				 ui.label_xAmmo->setMovie(movie);
-				 ui.label_xAmmo->setScaledContents(true);
-				 QSize sizeLimit(100, 100);
-				 ui.label_xAmmo->setMinimumSize(sizeLimit);
-				 ui.label_xAmmo->setMaximumSize(sizeLimit);
-				 movie->start();
-			 }
-		 }
+		// EASTER EGG
+		if(index_crosshair == XKILL_Enums::EXPLOSIVE)
+		{
+			// If a specific user
+			std::string username = getenv( "USERNAME" );
+			if(username == "Professor Membrane")
+			{
+				QMovie* movie = new QMovie(this);
+				movie->setCacheMode(QMovie::CacheAll);
+				movie->setFileName("../../xkill-resources/xkill-gui/images/animations/tmp.gif");
+				ui.label_xAmmo->setMovie(movie);
+				ui.label_xAmmo->setScaledContents(true);
+				QSize sizeLimit(100, 100);
+				ui.label_xAmmo->setMinimumSize(sizeLimit);
+				ui.label_xAmmo->setMaximumSize(sizeLimit);
+				movie->start();
+			}
+		}
 	}
 
 
@@ -499,27 +446,7 @@ void Menu_HUD::initScoreboard()
 	}
 }
 
-Menu_HUD::Menu_HUD( AttributePtr<Attribute_SplitScreen> splitScreen, QWidget* parent ) : QWidget(parent)
-{
-	ui.setupUi(this);
-	ptr_splitScreen = splitScreen;
-
-	Float2 pos(ptr_splitScreen->ssTopLeftX, ptr_splitScreen->ssTopLeftY);
-	move(ptr_splitScreen->ssTopLeftX, ptr_splitScreen->ssTopLeftY);
-	resize(ptr_splitScreen->ssWidth, ptr_splitScreen->ssHeight);
-	hide();
-
-	QWidget::setAttribute(Qt::WA_ShowWithoutActivating);
-	QWidget::setAttribute(Qt::WA_TransparentForMouseEvents);
-
-	SUBSCRIBE_TO_EVENT(this, EVENT_UPDATE);
-	
-	hudMessage_manager.init(this, ptr_splitScreen);
-	mapToSplitscreen();
-	initScoreboard();
-}
-
-void Menu_HUD::onEvent(Event* e)
+void Menu_HUD::onEvent( Event* e )
 {
 	EventType type = e->getType();
 	switch(type) 
@@ -532,191 +459,65 @@ void Menu_HUD::onEvent(Event* e)
 	}
 }
 
-Menu_HUD::~Menu_HUD()
+Menu_HUDManager::Menu_HUDManager( QWidget* parent ) : QObject(parent)
 {
-	UNSUBSCRIBE_TO_EVENTS(this);
+	ATTRIBUTES_INIT_ALL;
+
+	this->parent = parent;
+	isEnabled = false;
+
+	// Events
+	SUBSCRIBE_TO_EVENT(this, EVENT_ENABLE_HUD);
+	SUBSCRIBE_TO_EVENT(this, EVENT_SPLITSCREEN_CHANGED);
 }
 
-
-HudMessage::HudMessage( Event_PostHudMessage* e, QWidget* parent)
+void Menu_HUDManager::mapHudsToSplitscreen()
 {
-	// Create label
-	_label = new QLabel(e->message.c_str());
-	_label->setAlignment(Qt::AlignHCenter);
-	_label->setParent(parent);
-
-	// Apply stylesheet
-	_label->setStyleSheet(e->styleSheet.c_str());
-
-	// Display for a certain time
-	_lifetime = 3.0f;
-
-	// Show label
-	_label->show();
-}
-
-void HudMessage::updatePosition()
-{
-	// Interpolate position
-	Float2 currentPos;
-	currentPos.x = _label->pos().x();
-	currentPos.y = _label->pos().y();
-
-	float factor = 5.0f * SETTINGS->trueDeltaTime;
-	if(factor > 1.0f)
-		factor = 1.0f;
-	Float2 newPos = Float2::lerp(&currentPos, &_targetPosition, factor);
-
-	_label->move(newPos.x, newPos.y);
-}
-
-void HudMessage::setPosition(Float2 position)
-{
-	setTargetPosition(position);
-
-	position = _targetPosition;
-
-	// An additional offset,
-	// creates a cool interpolation
-	// when a new label is created
-	position = position + Float2(_label->width() * 0.0f, -_label->height() * 1.0f);
-
-	// Move
-	_label->move(position.x, position.y);
-}
-
-void HudMessage_Manager::addMessage( Event_PostHudMessage* e )
-{
-	Event_PostHudMessage::Receiver re= e->receiver;
-
-	// Ignore messages aimed at other players
-	if(e->receiver == Event_PostHudMessage::RECEIVER_ONLY_SUBJECT)
+	// Delete previous huds
+	for(int i=0; i<huds.size(); i++)
 	{
-		if(splitScreen->ptr_player != e->ptr_subject_player)
-			return;
+		delete huds[i];
 	}
-	if(e->receiver == Event_PostHudMessage::RECEIVER_ALL_BUT_SUBJECT)
+	huds.clear();
+
+	// Map new HUDs to split screens
+	while(itrSplitScreen.hasNext())
 	{
-		if(splitScreen->ptr_player == e->ptr_subject_player)
-			return;
-	}
-
-	// Limit simultaneous show messages 
-	// to not overwhelm the player
-	const int kMaxMessages = 8;
-	if(stack.count() + 1 > kMaxMessages)
-		removeTopMessage();
-
-	// Add message to stack
-	HudMessage* m = new HudMessage(e, parent);
-	stack.push(m);
-
-	// Show new messages above old messages
-	int numStacks = stack.count();
-	int offset = 20*3.8f;
-	Float2 newPos;
-	newPos.x = position.x;
-	newPos.y = position.y + offset;
-	m->setPosition(newPos);
-	for(int i=numStacks-1; i>=0; i--)
-	{
-		int height = stack.at(i)->getHeight();
-		offset += height;
-
-		Float2 newPos;
-		newPos.x = position.x;
-		newPos.y = position.y + offset - height * 0.5f;
-
-		stack.at(i)->setTargetPosition(newPos);
+		AttributePtr<Attribute_SplitScreen> ptr_splitScreen = itrSplitScreen.getNext();
+		huds.push_back(new Menu_HUD(ptr_splitScreen, parent));
+		if(isEnabled)
+			huds.back()->show();
 	}
 }
 
-void ScoreBoard::syncLabelsWithPlayers()
+void Menu_HUDManager::onEvent( Event* e )
 {
-	for(int i=0; i<entries.size(); i++)
+	EventType type = e->getType();
+	switch (type) 
 	{
-		ScoreboardEntry* e = &entries.at(i);
+	case EVENT_ENABLE_HUD:
 
-		// Detect if label has changed
-		if(e->ptr_player->playerName != e->playerName)
-			e->isChanged = true;
-		if(e->ptr_player->cycles != e->cycles)
-			e->isChanged = true;
-		if(e->ptr_player->priority != e->priority)
-			e->isChanged = true;
-		e->isChanged = true;
-
-		// Update label
-		if(e->isChanged)
+		if(((Event_EnableHud*)e)->enableHud)
 		{
-			e->isChanged = false;
+			isEnabled = true;
 
-			// Set text
-			e->label_process->setText(e->ptr_player->playerName.c_str());
-			e->label_cycles->setNum(e->ptr_player->cycles);
-			e->label_priority->setNum(e->ptr_player->priority);
-
-			// Empty style sheets
-			std::string sheet_process = "";
-			std::string sheet_cycles = "";
-			std::string sheet_priority = "";
-
-			// Apply extra stuff if we're at the current player
-			if(e->ptr_player == ptr_current_player)
-			{
-				sheet_process += "background-color: rgba(255, 255, 255, 100); font-weight: bold;";
-				sheet_cycles += "background-color: rgba(255, 255, 255, 100); font-weight: bold;";
-				sheet_priority += "background-color: rgba(255, 255, 255, 100); font-weight: bold;";
-			}
-
-			// Apply extra stuff if we have most cycles
-			if(e->ptr_player->cycles == maxCycles)
-			{
-				sheet_cycles += "background-color: rgba(0, 255, 0, 100);";
-			}
-
-			// Apply extra stuff if we have most priority
-			if(e->ptr_player->priority == maxPriority)
-			{
-				sheet_priority += "background-color: rgba(0, 255, 0, 100);";
-			}
-
-			// Apply style sheet
-			e->label_process->setStyleSheet(sheet_process.c_str());
-			e->label_cycles->setStyleSheet(sheet_cycles.c_str());
-			e->label_priority->setStyleSheet(sheet_priority.c_str());
-
-
-			// Resize scoreboard to fit long
-			// player names if needed
-			const int kMinLabelSize = 150;
-			int labelSize = e->label_process->sizeHint().width();
-			if(labelSize < kMinLabelSize)
-				labelSize = kMinLabelSize;
-			if(labelSize > maxLabelSize)
-			{
-				maxLabelSize = labelSize;
-
-				const int kPadding = 75;
-				const int kColumnWidth = 100;
-				int new_scoreboardWidth = kPadding;
-				int a = e->label_process->sizeHint().width();
-				a = e->label_process->width();
-
-				new_scoreboardWidth += labelSize;
-				new_scoreboardWidth += kColumnWidth;
-				new_scoreboardWidth += kColumnWidth;
-
-				// Resize scorboard
-				frame_scoreboard->resize(new_scoreboardWidth, frame_scoreboard->height());
-
-				// Reposition scoreboard to center to acommodate change in size
-				QWidget* parent_scoreboard = frame_scoreboard->parentWidget();
-				Float2 centerPos;
-				centerPos.x = parent_scoreboard->width() * 0.5f;
-				centerPos.y = parent_scoreboard->height() * 0.5f;
-				frame_scoreboard->move(centerPos.x - frame_scoreboard->width()* 0.5f, centerPos.y - frame_scoreboard->height()* 0.5f);
-			}
+			for(int i=0; i<huds.size(); i++)
+				huds[i]->show();
 		}
+		else
+		{
+			isEnabled = false;
+
+			for(int i=0; i<huds.size(); i++)
+				huds[i]->hide();
+		}
+
+
+		break;
+	case EVENT_SPLITSCREEN_CHANGED:
+		mapHudsToSplitscreen();
+		break;
+	default:
+		break;
 	}
 }

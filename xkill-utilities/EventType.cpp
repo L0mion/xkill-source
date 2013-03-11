@@ -16,11 +16,18 @@ Event_MouseMove::Event_MouseMove(int dx, int dy) : Event(EVENT_MOUSE_MOVE)
 	this->dy = dy;
 }
 
-Event_PlaySound::Event_PlaySound(int soundId, Float3 position, bool use3DAudio) : Event(EVENT_PLAYSOUND)
+Event_PlaySound::Event_PlaySound(int soundId, int ownerEntityId, Float3 position, bool use3DAudio) : Event(EVENT_PLAYSOUND)
 {
 	this->soundId = soundId;
 	this->position = position;
 	this->use3DAudio = use3DAudio;
+	this->ownerEntityId = ownerEntityId;
+}
+
+Event_StopSound::Event_StopSound(int soundId, int ownerEntityId) : Event(EVENT_STOPSOUND)
+{
+	this->soundId = soundId;
+	this->ownerEntityId = ownerEntityId;
 }
 
 Event_Rumble::Event_Rumble(unsigned int deviceNr,

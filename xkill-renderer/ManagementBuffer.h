@@ -4,6 +4,7 @@
 typedef long HRESULT;
 
 class Winfo;
+class Buffer_Srv;
 class Buffer_SrvRtv;
 class Buffer_SrvDsv;
 class Buffer_SrvRtvUav;
@@ -23,14 +24,18 @@ enum BUFFER_FORMAT
 {
 	R8_G8_B8_A8__UNORM,
 	R16_G16_B16_A16__FLOAT,
-	R32_G32_B32_A32__FLOAT
+	R32_G32_B32_A32__FLOAT,
+	R16__FLOAT,
+	R8__FLOAT
 };
 
-static const BUFFER_FORMAT GBUFFER_FORMAT_ALBEDO	= R8_G8_B8_A8__UNORM;
-static const BUFFER_FORMAT GBUFFER_FORMAT_NORMAL	= R16_G16_B16_A16__FLOAT;
-static const BUFFER_FORMAT GBUFFER_FORMAT_MATERIAL	= R16_G16_B16_A16__FLOAT;
-static const BUFFER_FORMAT GBUFFER_FORMAT_GLOW_HIGH	= R8_G8_B8_A8__UNORM;
-static const BUFFER_FORMAT GBUFFER_FORMAT_GLOW_LOW	= R8_G8_B8_A8__UNORM;
+static const BUFFER_FORMAT BUFFER_FORMAT_ALBEDO		= R8_G8_B8_A8__UNORM;
+static const BUFFER_FORMAT BUFFER_FORMAT_NORMAL		= R16_G16_B16_A16__FLOAT;
+static const BUFFER_FORMAT BUFFER_FORMAT_MATERIAL	= R8_G8_B8_A8__UNORM;
+static const BUFFER_FORMAT BUFFER_FORMAT_GLOW_HIGH	= R8_G8_B8_A8__UNORM;
+static const BUFFER_FORMAT BUFFER_FORMAT_GLOW_LOW	= R8_G8_B8_A8__UNORM;
+static const BUFFER_FORMAT BUFFER_FORMAT_SSAO		= R8__FLOAT;
+static const BUFFER_FORMAT BUFFER_FORMAT_RANDOM		= R8_G8_B8_A8__UNORM;
 
 static const unsigned int SHADER_REGISTER_DOWNSAMPLE_INPUT = 3;
 static const unsigned int SHADER_REGISTER_BLUR_INPUT	= 9;
@@ -41,6 +46,10 @@ static const unsigned int SHADER_REGISTER_SHADOWMAP = 4;
 static const unsigned int DOWNSAMPLE_SCREEN_RES_FACTOR = 4;
 
 static const unsigned int SHADOWMAP_DIM = 1024; //Remember to also set dimensions in CS_Lighting (SHADOWMAP_SIZE)
+
+static const unsigned int SSAO_MAP_SCREEN_RES_FACTOR = 2;
+
+static const unsigned int RANDOM_DIM = 64; //Lower this?
 
 enum SET_TYPE
 {
@@ -59,7 +68,11 @@ enum SET_ID
 	SET_ID_GLOW_HIGH,
 	SET_ID_GLOW_LOW,
 	SET_ID_GLOW_LOW_UTIL,
-	SET_ID_SHADOW
+	SET_ID_SHADOW,
+	SET_ID_NORMAL,
+	SET_ID_RANDOM,
+	SET_ID_SSAO,
+	SET_ID_SSAO_UTIL
 };
 
 class ManagementBuffer
@@ -92,13 +105,25 @@ public:
 
 	D3D11_VIEWPORT getDownSampledViewport();
 	D3D11_VIEWPORT getShadowViewport();
+
+	//temp
+	Buffer_SrvRtvUav* getSSAO() { return ssao_; }
+
+	void setRandomBuf(ID3D11DeviceContext* devcon, unsigned int shaderRegister)
+	{ 
+		ID3D11ShaderResourceView* resourceViews[1];
+		resourceViews[0] = randomSRV_;
+		devcon->CSSetShaderResources(shaderRegister, 1, resourceViews);
+	}
 protected:
 private:
-	HRESULT initAlbedo(ID3D11Device* device);
-	HRESULT initNormal(ID3D11Device* device);
-	HRESULT initMaterial(ID3D11Device* device);
-	HRESULT initGlow(ID3D11Device* device, ID3D11DeviceContext* devcon);
-	HRESULT initShadow(ID3D11Device* device);
+	HRESULT initAlbedo(		ID3D11Device* device);
+	HRESULT initNormal(		ID3D11Device* device);
+	HRESULT initMaterial(	ID3D11Device* device);
+	HRESULT initGlow(		ID3D11Device* device, ID3D11DeviceContext* devcon);
+	HRESULT initShadow(		ID3D11Device* device);
+	HRESULT initSSAO(		ID3D11Device* device);
+	HRESULT initRandom(		ID3D11Device* device);
 
 	DXGI_FORMAT getFormat(BUFFER_FORMAT format);
 	void getDownSampleDim(
@@ -106,6 +131,11 @@ private:
 		unsigned int screenHeight,
 		unsigned int& downSampleWidth, 
 		unsigned int& downSampleHeight);
+	void getSSAODim(
+		unsigned int screenWidth,
+		unsigned int screenHeight,
+		unsigned int& ssaoWidth,
+		unsigned int& ssaoHeight);
 
 	/*desc*/
 	Winfo* winfo_;
@@ -120,8 +150,18 @@ private:
 	Buffer_SrvRtvUav* glowLow_;
 	Buffer_SrvRtvUav* glowLowUtil_;
 
+	//Shadowmap
 	Buffer_SrvDsv* shadowMap_;
 	D3D11_VIEWPORT shadowViewport_;
+
+	//SSAO
+	unsigned int ssaoWidth_;
+	unsigned int ssaoHeight_;
+	Buffer_SrvRtvUav* ssao_;		//this doesnt necesserily need to be an rtv if we don't upscale.
+	Buffer_SrvRtvUav* ssaoUtil_;
+
+	ID3D11Texture2D*			randomTex_;
+	ID3D11ShaderResourceView*	randomSRV_;
 };
 
 #endif //XKILL_RENDERER_MANAGEMENTBUFFER_H

@@ -22,16 +22,15 @@ struct ID3D11Buffer;
 struct ID3D11Device;
 struct ID3D11DeviceContext;
 
-static const unsigned int LIGHT_SRV_REGISTER_DIR	= 6;
-static const unsigned int LIGHT_SRV_REGISTER_POINT	= 7;
-static const unsigned int LIGHT_SRV_REGISTER_SPOT	= 8;
+static const unsigned int LIGHT_SRV_REGISTER_DIR	= 7;
+static const unsigned int LIGHT_SRV_REGISTER_POINT	= 8;
 static const unsigned int LIGHT_SRV_REGISTER_POS	= 9;
 
 enum DLL_U LightBufferType
 { 
 	LIGHTBUFFERTYPE_DIR			= 0, 
 	LIGHTBUFFERTYPE_POINT		= 1, 
-	LIGHTBUFFERTYPE_SPOT		= 2, 
+	//LIGHTBUFFERTYPE_SPOT		= 2, 
 	LIGHTBUFFERTYPE_POS_VIEW	= 3,
 	LIGHTDESCTYPE_NA			= 4
 };
@@ -64,16 +63,13 @@ public:
 
 	unsigned int getLightDirCurCount();
 	unsigned int getLightPointCurCount();
-	unsigned int getLightSpotCurCount();
 private:
 	void updateStreamDirLight();
 	void updateStreamPointLight();
-	void updateStreamSpotLight();
 	//void updateStreamPosLight();
 
 	DataStreamSRV<LightDescDir>*	streamDirLight_;
 	DataStreamSRV<LightDescPoint>*	streamPointLight_;
-	DataStreamSRV<LightDescSpot>*	streamSpotLight_;
 	DataStreamSRV<Float3>*			streamPosLight_;
 };
 

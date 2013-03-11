@@ -55,8 +55,16 @@ Attribute_Settings::Attribute_Settings()
 	trueDeltaTime = 0.0f;
 	currentLevel = "TestArena";
 	timeLimit = 0.0f;
+	timeLeft = 0.0f;
 	cycleLimit = 35;
+	schedulerTime = 30.0f;
+	cycleTime = 2.0f;
 	showDebugPhysics = false;
+
+	occlusionRadius		= 0.2f;
+	occlusionScale		= 0.7f;
+	occlusionBias		= 0.1f;
+	occlusionIntensity	= 2.0f;
 }
 
 DataItemList* Attribute_Settings::getDataList()
@@ -64,6 +72,10 @@ DataItemList* Attribute_Settings::getDataList()
 	DataItemList* list = new DataItemList();
 
 	list->add(soundVolume, "soundVolume");
+	list->add(occlusionRadius, "occlusionRadius");
+	list->add(occlusionScale, "occlusionScale");
+	list->add(occlusionBias, "occlusionBias");
+	list->add(occlusionIntensity, "occlusionIntensity");
 
 	return list;
 }
@@ -71,4 +83,9 @@ DataItemList* Attribute_Settings::getDataList()
 void Attribute_Settings::saveTo( DataItemList* list )
 {
 	list->get(&soundVolume);
+
+	list->get(&occlusionRadius);
+	list->get(&occlusionScale);
+	list->get(&occlusionBias);
+	list->get(&occlusionIntensity);
 }

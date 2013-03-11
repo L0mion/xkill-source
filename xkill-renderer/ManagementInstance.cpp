@@ -2,6 +2,7 @@
 
 #include <xkill-utilities/Util.h>
 
+#include "CameraInstances.h"
 #include "ManagementInstance.h"
 
 ATTRIBUTES_DECLARE_ALL;
@@ -12,7 +13,10 @@ ManagementInstance::ManagementInstance()
 }
 ManagementInstance::~ManagementInstance()
 {
-	for(std::map<unsigned int, InstancedData*>::iterator i = instancesMap_.begin(); i != instancesMap_.end(); i++)
+	for(
+		auto i = cameraInstancesMap_.begin(); 
+		i != cameraInstancesMap_.end(); 
+		i++)
 	{
 		SAFE_DELETE(i->second);
 	}
@@ -20,62 +24,69 @@ ManagementInstance::~ManagementInstance()
 
 void ManagementInstance::update(ID3D11Device* device, ID3D11DeviceContext* devcon)
 {
-	//Reset all buffers.
-	for(std::map<unsigned int, InstancedData*>::iterator i = instancesMap_.begin(); i != instancesMap_.end(); i++)
+	//Clear all buffers.
+	for(
+		auto i = cameraInstancesMap_.begin(); 
+		i != cameraInstancesMap_.end(); 
+		i++)
 	{
-		i->second->resetStream();
+		i->second->reset();
 	}
 
 	//Fill instance-lists with updated data.
 	while(itrRender.hasNext())
 	{
-		AttributePtr<Attribute_Render> ptr_render = itrRender.getNext();
-		if(ptr_render->cull)
+		addInstance(itrRender.getNext());
+	}
+
+	//Update buffers with new data.
+	for(
+		auto i = cameraInstancesMap_.begin(); 
+		i != cameraInstancesMap_.end(); 
+		i++)
+	{
+		i->second->update(device, devcon);
+	}
+}
+
+void ManagementInstance::addInstance(AttributePtr<Attribute_Render> ptr_render)
+{
+	//Establish instance world matrix.
+	AttributePtr<Attribute_Spatial>		ptr_spatial		= ptr_render->ptr_spatial;
+	AttributePtr<Attribute_Position>	ptr_position	= ptr_spatial->ptr_position;
+	
+	VertexInstanced instance;
+	instance.world_ = calculateWorldMatrix(ptr_spatial, ptr_position);
+
+	//Add instance to each valid camera-object.
+	while(itrCamera.hasNext())
+	{
+		AttributePtr<Attribute_Camera> ptr_camera = itrCamera.getNext();
+		if(ptr_render->culling.getBool(ptr_camera.index()))
 		{
-			addRenderAtInstance(ptr_render);
+			addCameraInstance(ptr_camera, ptr_render->meshID, instance);
 		}
 	}
-
-	//Update buffers with new data
-	for(std::map<unsigned int, InstancedData*>::iterator i = instancesMap_.begin(); i != instancesMap_.end(); i++)
-	{
-		i->second->updateDataStream(device, devcon);
-	}
 }
-
-void ManagementInstance::addRenderAtInstance(AttributePtr<Attribute_Render> ptr_render)
+void ManagementInstance::addCameraInstance(
+	AttributePtr<Attribute_Camera> ptr_camera,
+	unsigned int meshID,
+	VertexInstanced instance)
 {
-	AttributePtr<Attribute_Spatial>	ptr_spatial = ptr_render->ptr_spatial;
-	AttributePtr<Attribute_Position> ptr_position = ptr_spatial->ptr_position;
-
-	VertexInstanced newInstance;
-	newInstance.world_ = calculateWorldMatrix(ptr_spatial, ptr_position);
-
-	InstancedData* instancedData = getInstancesFromMeshID(ptr_render->meshID);
-	if(instancedData != nullptr)
-	{ //add new instance to corresponding instance vector.
-		instancedData->pushData(newInstance);
+	CameraInstances* camInstances = getCameraInstancesFromCameraIndex(ptr_camera.index());
+	if(camInstances != nullptr)
+	{ //Add new instance to corresponding CameraInstances-object.
+		camInstances->addInstance(meshID, instance);
 	}
 	else
-	{ //no existing instanced data of mesh id, create new one.
-		instancedData = new InstancedData(D3D11_BIND_VERTEX_BUFFER, 0);
-		instancedData->pushData(newInstance);
-
-		instancesMap_.insert(std::pair<unsigned int, InstancedData*>(ptr_render->meshID, instancedData));
+	{ //No existing CameraInstances-object. Make a new one.
+		camInstances = new CameraInstances();
+		camInstances->addInstance(meshID, instance);
+		cameraInstancesMap_.insert(
+			std::pair<unsigned int, CameraInstances*>(
+			ptr_camera.index(), 
+			camInstances));
 	}
-}
-
-InstancedData* ManagementInstance::getInstancesFromMeshID(unsigned int meshID)
-{
-	InstancedData* instancedData = nullptr;
-
-	std::map<unsigned int, InstancedData*>::iterator it = instancesMap_.find(meshID);
-	if(it != instancesMap_.end())
-	{
-		instancedData = it->second;
-	}
-
-	return instancedData;
 }
 
 DirectX::XMFLOAT4X4 ManagementInstance::calculateWorldMatrix(
@@ -108,9 +119,28 @@ DirectX::XMFLOAT4X4 ManagementInstance::calculateWorldMatrix(
 	return worldMatrix;
 }
 
-std::map<
-	unsigned int,
-	InstancedData*>& ManagementInstance::getInstancesMap()
+CameraInstances* ManagementInstance::getCameraInstancesFromCameraIndex(unsigned int camIndex)
 {
-	return instancesMap_;
+	CameraInstances* cameraInstances = nullptr;
+
+	auto it = cameraInstancesMap_.find(camIndex);
+	if(it != cameraInstancesMap_.end())
+	{
+		cameraInstances = it->second;
+	}
+
+	return cameraInstances;
 }
+
+//InstancedData* ManagementInstance::getInstancesFromMeshID(unsigned int meshID)
+//{
+//	InstancedData* instancedData = nullptr;
+//
+//	std::map<unsigned int, InstancedData*>::iterator it = instancesMap_.find(meshID);
+//	if(it != instancesMap_.end())
+//	{
+//		instancedData = it->second;
+//	}
+//
+//	return instancedData;
+//}

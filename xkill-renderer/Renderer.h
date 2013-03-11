@@ -11,8 +11,9 @@ typedef DataStreamBuffer<VertexInstanced> InstancedData;
 
 namespace DirectX
 {
-	struct XMFLOAT4X4;
 	struct XMFLOAT3;
+	struct XMFLOAT4;
+	struct XMFLOAT4X4;
 };
 
 struct ViewportData;
@@ -37,8 +38,6 @@ class Winfo;
 class TexDesc;
 class MeshMaterial;
 class SubsetD3D;
-
-//#include <vector>
 
 #include "ShadingDesc.h"
 #include "ShadowMapping.h"
@@ -103,15 +102,9 @@ private:
 		MaterialDesc& material,
 		unsigned int numInstances,
 		bool shadowmap);	//!< Renders a subset.
-	void renderDebugShape(
-		AttributePtr<Attribute_DebugShape>	ptr_debugShape, 
-		unsigned int			shapeIndex,
-		DirectX::XMFLOAT4X4		viewMatrix, 
-		DirectX::XMFLOAT4X4		projectionMatrix); //!< Renders a debug shape, such as a bounding sphere.
 
 	//Shadows
-
-	DirectX::XMFLOAT4X4	buildShadows();
+	DirectX::XMFLOAT4X4	buildShadowMap();
 	ShadowMatrices constructShadowMatrices(SceneBounds bounds, Float3 lightDirection);
 
 	//Glow effect
@@ -119,6 +112,9 @@ private:
 	void blurHorizontally();
 	void blurVertically();
 	void upSampleBlur();
+
+	//SSAO
+	void buildSSAOMap(ViewportData& vpData);
 
 	void drawBulletPhysicsDebugLines(
 		DirectX::XMFLOAT4X4		viewMatrix, 
@@ -164,7 +160,6 @@ private:
 	float delta_;
 	float temp_;
 	ID3D11Buffer*			rayBuffer;
-
 
 	//std::vector<int>* attributesRenderOwner_;	//!< Holds owners of render-attributes.
 	//std::vector<int>* attributesCameraOwner_;

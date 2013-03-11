@@ -6,7 +6,6 @@
 
 static const unsigned int LIGHT_DIRECTIONAL = 1;
 static const unsigned int LIGHT_POINT		= 2;
-static const unsigned int LIGHT_SPOT		= 3;
 
 struct DLL_U LightDescDir
 {
@@ -36,6 +35,7 @@ struct DLL_U LightDescPoint
 	float	range;
 };
 
+/*
 struct DLL_U LightDescSpot
 {
 	LightDescSpot();
@@ -50,5 +50,6 @@ struct DLL_U LightDescSpot
 	Float3	attenuation;
 	float	spotPow;
 };
+*/
 
 #endif //XKILL_RENDERER_LIGHTDESC_H

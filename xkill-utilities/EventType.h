@@ -55,7 +55,6 @@ enum DLL_U EventType
 	EVENT_START_DEATHMATCH,
 	EVENT_END_DEATHMATCH,
 	EVENT_GAMERESET,
-	EVENT_INPUT_DEVICE_SEARCH,
 
 	// System
 	EVENT_ATTRIBUTE_UPDATED,
@@ -76,7 +75,9 @@ enum DLL_U EventType
 	EVENT_SPLITSCREEN_CHANGED,
 	EVENT_RUMBLE,
 	EVENT_PLAYSOUND,
+	EVENT_STOPSOUND,
 	EVENT_FOCUS_MAINWINDOW,
+	EVENT_INPUT_DEVICE_SEARCH,
 
 	EVENT_ANIMATION_LOADED,
 
@@ -197,33 +198,32 @@ public:
 };
 
 /**
-If muteSound is true then all sounds will be muted
-
 \ingroup events
 */
 class DLL_U Event_PlaySound : public Event
 {
 public:
-	Event_PlaySound(int soundId, Float3 position = Float3(), bool use3DAudio = false);
+	/**
+	\param ownerPlayerId Set to '-1' if no owner
+	*/
+	Event_PlaySound(int soundId, int ownerEntityId = -1, Float3 position = Float3(), bool use3DAudio = false);
 
 	int soundId;
+	int ownerEntityId;
 	Float3 position;
 	bool use3DAudio;
+};
 
-	enum sounds
-	{
-		SOUND_WALK,
-		SOUND_HIT,
-		SOUND_RESPAWN,
-		SOUND_FIRE,
-		SOUND_DEATH,
-		SOUND_GAME_MUSIC,
-		SOUND_MENU_MUSIC,
-		SOUND_BUTTON_CLICK,
-		SOUND_OPENING_ANIMATION,
+/**
+\ingroup events
+*/
+class DLL_U Event_StopSound : public Event
+{
+public:
+	Event_StopSound(int soundId, int ownerEntityId = -1);
 
-		SOUND_LAST
-	};
+	int soundId;
+	int ownerEntityId;
 };
 
 //! Will trigger rumble in devices[deviceNr]

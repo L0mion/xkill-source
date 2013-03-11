@@ -71,3 +71,12 @@ DirectX::XMFLOAT4X4 ManagementMath::calculateFinalMatrix(
 
 	return finalMatrix;
 }
+
+float ManagementMath::getRandom()
+{
+	return (float)(rand()) / (float)RAND_MAX;
+}
+float ManagementMath::getRandom(float min, float max)
+{
+	return min + getRandom() * (max - min);
+}

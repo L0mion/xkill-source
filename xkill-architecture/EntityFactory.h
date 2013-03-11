@@ -1,6 +1,5 @@
 #pragma once
 
-//#include <xkill-utilities/DebugShape.h>
 #include <xkill-utilities/Entity.h>
 #include <xkill-utilities/AttributeManager.h>
 
@@ -142,7 +141,7 @@ public:
 		CREATE_ATTRIBUTE(ptr_offset, Behavior_Offset, offset, entity);
 		ptr_offset->ptr_spatial = ptr_spatial;
 		ptr_offset->ptr_parent_spatial_position = ptr_parent_spatial;
-		ptr_offset->offset_position = Float3(0.0f, 0.6f, 0.16f);
+		ptr_offset->offset_position = Float3(0.0f, 0.3f, 0.36f);
 
 		// Return
 		return ptr_camera;
@@ -167,7 +166,7 @@ public:
 			ptr_offset->ptr_spatial = ptr_spatial;
 			ptr_offset->ptr_parent_spatial_position = ptr_parent_spatial_position;
 			//ptr_offset->ptr_parent_spatial_rotation = ptr_parent_spatial_rotation;
-			ptr_offset->offset_position = Float3(0.23f, 0.5f, 0.2f);
+			ptr_offset->offset_position = Float3(-0.43f, -0.21f, 0.3f);
 
 			ptr_weapon_spatial = ptr_spatial;
 			ptr_weaponOffset = ptr_offset;
@@ -336,8 +335,26 @@ public:
 		CREATE_ATTRIBUTE(ptr_pickupablesSpawnPoint, Attribute_PickupablesSpawnPoint, pickupablesSpawnPoint, entity);
 		ptr_pickupablesSpawnPoint->ptr_position = ptr_position;
 		ptr_pickupablesSpawnPoint->spawnPickupableType = e->pickupableType;
-		ptr_pickupablesSpawnPoint->spawnDelayInSeconds = 5.0f;
 		ptr_pickupablesSpawnPoint->maxNrOfExistingSpawnedPickupables = 1;
+
+		switch(e->pickupableType)
+		{
+		case XKILL_Enums::PickupableType::HACK_CYCLEHACK:
+			ptr_pickupablesSpawnPoint->spawnDelayInSeconds = 15.0f;
+			break;
+		case XKILL_Enums::PickupableType::HACK_JETHACK:
+			ptr_pickupablesSpawnPoint->spawnDelayInSeconds = 10.0f;
+			break;
+		case XKILL_Enums::PickupableType::HACK_RANDOMHACK:
+			ptr_pickupablesSpawnPoint->spawnDelayInSeconds = 5.0f;
+			break;
+		case XKILL_Enums::PickupableType::HACK_SPEEDHACK:
+			ptr_pickupablesSpawnPoint->spawnDelayInSeconds = 3.5f;
+			break;
+		default:
+			ptr_pickupablesSpawnPoint->spawnDelayInSeconds = 7.5f;
+			break;
+		}
 	}
 
 	void createPickupableEntity(Entity* entity, Event_CreatePickupable* e)
@@ -379,10 +396,10 @@ public:
 			ptr_render->meshID = XKILL_Enums::ModelId::PICKUPABLE_SPEEDHACK;
 			break;
 		case XKILL_Enums::PickupableType::HACK_CYCLEHACK:
-			//ptr_render->meshID = XKILL_Enums::ModelId::PICKUPABLE_CYCLEHACK; //check
+			ptr_render->meshID = XKILL_Enums::ModelId::PICKUPABLE_CYCLEHACK; //check
 			break;
 		case XKILL_Enums::PickupableType::HACK_RANDOMHACK:
-			//ptr_render->meshID = XKILL_Enums::ModelId::PICKUPABLE_RANDOMHACK; //check
+			ptr_render->meshID = XKILL_Enums::ModelId::PICKUPABLE_RANDOMHACK; //check
 			break;
 		default:
 			color = Float4(0.0f, 1.0f, 0.0f, 1.0f);
@@ -402,6 +419,7 @@ public:
 
 		CREATE_ATTRIBUTE(ptr_lightPoint, Attribute_Light_Point, lightPoint, entity);
 		ptr_lightPoint->ptr_position			= ptr_position;
+
 		ptr_lightPoint->lightPoint.ambient		= Float4(0.0f, 0.0f, 0.0f, 1.0f);
 		ptr_lightPoint->lightPoint.diffuse		= color;
 		ptr_lightPoint->lightPoint.specular		= color;
@@ -427,13 +445,6 @@ public:
 
 		CREATE_ATTRIBUTE(ptr_spatial, Attribute_Spatial, spatial, entity);
 		ptr_spatial->ptr_position = ptr_position;
-
-		/*
-		CREATE_ATTRIBUTE(ptr_debugShape, Attribute_DebugShape, debugShape, entity);
-		ptr_debugShape->ptr_spatial = ptr_spatial;
-		ptr_debugShape->shape	= new DebugShapeSphere(e->radius);
-		ptr_debugShape->render	= true;
-		*/
 
 		CREATE_ATTRIBUTE(ptr_physics, Attribute_Physics, physics, entity);
 		ptr_physics->ptr_spatial = ptr_spatial;
@@ -484,17 +495,7 @@ public:
 		}
 		else if(e->type == 3)
 		{
-			CREATE_ATTRIBUTE(ptr_position, Attribute_Position, position, entity);
-			ptr_position->position = e->position;
-			CREATE_ATTRIBUTE(ptr_lightSpot, Attribute_Light_Spot, lightSpot, entity);
-			ptr_lightSpot->ptr_position = ptr_position;
-			ptr_lightSpot->lightSpot.ambient = Float4(e->ambient,1);
-			ptr_lightSpot->lightSpot.diffuse = Float4(e->diffuse,1);
-			ptr_lightSpot->lightSpot.specular = Float4(e->specular,1);
-			ptr_lightSpot->lightSpot.attenuation = e->attenuation;
-			ptr_lightSpot->lightSpot.direction = e->direction;
-			ptr_lightSpot->lightSpot.range = e->range;
-			ptr_lightSpot->lightSpot.spotPow = e->spotPow;
+			ERROR_MESSAGEBOX("Trying to instantiate spot-light. Engine does not support this!");
 		}
 	}
 

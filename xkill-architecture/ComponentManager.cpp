@@ -11,6 +11,7 @@
 #include "GameComponent.h"
 #include "ScoreComponent.h"
 #include "HacksComponent.h"
+#include "CullingComponent.h"
 
 //#include <xkill-utilities/FiniteStateMachine.h>
 //#include <xkill-utilities/FiniteState.h>
@@ -33,6 +34,7 @@ static std::vector<float> soundtimer;
 static std::vector<float> hackstimer;
 static std::vector<float> scoretimer;
 static std::vector<float> rendertimer;
+static std::vector<float> cullingtimer;
 static std::vector<float> totaltimer;
 #define calctime(vectorname, call ) {  clock_t deltatimevar = clock();	\
 							call \
@@ -78,6 +80,7 @@ ComponentManager::~ComponentManager()
 	outputaverage("score",	scoretimer)
 	outputaverage("physics",physicstimer)
 	outputaverage("render",	rendertimer)
+	outputaverage("culling",cullingtimer)
 	outputaverage("total",	totaltimer)
 	std::string out = Converter::FloatToStr(totaltimer.size()*totalAverage);
 	out += "\n";
@@ -94,6 +97,7 @@ ComponentManager::~ComponentManager()
 	SAFE_DELETE(score_);
 	SAFE_DELETE(hacks_);
 	SAFE_DELETE(ioComponent_);
+	SAFE_DELETE(cullingComponent_);
 }
 
 bool ComponentManager::init(HWND windowHandle, HWND parentWindowHandle)
@@ -120,6 +124,7 @@ bool ComponentManager::init(HWND windowHandle, HWND parentWindowHandle)
 	score_ = new ScoreComponent();
 	hacks_ = new HacksComponent();
 	ioComponent_ = new IOComponent();
+	cullingComponent_ = new CullingComponent();
 
 	if(!(render_->init()))
 	{
@@ -174,9 +179,15 @@ bool ComponentManager::init(HWND windowHandle, HWND parentWindowHandle)
 	{
 		ERROR_MESSAGEBOX("BulletPhysicsComponent failed to init.");
 		return false;
-	}	
+	}
 
-	SEND_EVENT(&Event_PlaySound(Event_PlaySound::SOUND_MENU_MUSIC, Float3(), false));
+	if(!cullingComponent_->init())
+	{
+		ERROR_MESSAGEBOX("CullingComponent failed to init.");
+		return false;
+	}
+
+	SEND_EVENT(&Event_PlaySound(XKILL_Enums::Sound::SOUND_MENU_MUSIC));
 	inputDeviceSearchTime_ = 0;
 	// Returns that everything went ok
 	return true;
@@ -218,15 +229,11 @@ void updateOffset()
 	}
 }
 
-
-
-
-
 void ComponentManager::update(float delta)
 {
 	// Performs necessary per-frame updating of some sub-parts of EventManager.
 	EventManager::getInstance()->update(delta);
-
+	SEND_EVENT(&Event(EVENT_UPDATE));
 
 	//// PUT SOMETHING 
 	/// DONT SPAWN PLAYERS FIRST FRAMES
@@ -252,19 +259,19 @@ void ComponentManager::update(float delta)
 		calctime(hackstimer,hacks_->onUpdate(delta);)
 
 		calctime(scoretimer,score_->onUpdate(delta);)
+		calctime(cullingtimer, cullingComponent_->onUpdate(delta);)
 		calctime(rendertimer,render_->onUpdate(delta);)
 	
 #ifdef XKILLPROFILING
 		deltatimevartotal2 = clock();
 		totaltimer.push_back(((float)(deltatimevartotal2-deltatimevartotal))/((float)CLOCKS_PER_SEC));
 #endif
-
-		SEND_EVENT(&Event(EVENT_UPDATE));
 	}
 	else if(GET_STATE() == STATE_GAMEOVER)
 	{
 		sound_->onUpdate(delta);
-		input_->onUpdate(delta);
+		physics_->onUpdate(delta);
+		//input_->onUpdate(delta); //lock players in place
 		render_->onUpdate(delta);
 
 		if(gameOverDelay_ > 0.0f)
@@ -273,7 +280,8 @@ void ComponentManager::update(float delta)
 		}
 		else
 		{
-			SEND_EVENT(&Event_EndDeathmatch());
+			//SEND_EVENT(&Event_EndDeathmatch());
+			SEND_EVENT(&Event(EVENT_ENDGAME));
 		}
 	}
 	else if(GET_STATE() == STATE_MAINMENU)
