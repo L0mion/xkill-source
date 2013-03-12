@@ -36,7 +36,9 @@ void ManagementInstance::update(ID3D11Device* device, ID3D11DeviceContext* devco
 	//Fill instance-lists with updated data.
 	while(itrRender.hasNext())
 	{
-		addInstance(itrRender.getNext());
+		AttributePtr<Attribute_Render> renderAt = itrRender.getNext();
+		if(renderAt->meshID != XKILL_Enums::ModelId::PLAYERCONTROLLEDCHARACTER)
+			addInstance(renderAt);
 	}
 
 	//Update buffers with new data.

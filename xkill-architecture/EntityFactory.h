@@ -54,7 +54,7 @@ public:
 		CREATE_ATTRIBUTE(ptr_render, Attribute_Render, render, entity);
 		ptr_render->ptr_animation = ptr_animation;
 		ptr_render->ptr_spatial = ptr_spatial;
-		ptr_render->meshID =12; //XKILL_Enums::ModelId::PLAYERCONTROLLEDCHARACTER;
+		ptr_render->meshID = XKILL_Enums::ModelId::PLAYERCONTROLLEDCHARACTER;
 		
 		CREATE_ATTRIBUTE(ptr_physics, Attribute_Physics, physics, entity);
 		ptr_physics->ptr_spatial = ptr_spatial;

@@ -557,10 +557,12 @@ void Renderer::renderViewportToGBuffer(ViewportData& vpData)
 	std::map<unsigned int, InstancedData*> instancesMap = cameraInstances->getInstancesMap();
 	for(std::map<unsigned int, InstancedData*>::iterator i = instancesMap.begin(); i != instancesMap.end(); i++)
 	{
-		if(managementModel_->getModelD3D(i->first, managementD3D_->getDevice())->hasAnimation())
-			renderAnimation(i->first, vpData.view, vpData.proj);
-		else
 			renderInstance(i->first, i->second, false);
+	}
+	while(itrPlayer.hasNext())
+	{
+		AttributePtr<Attribute_Player> player = itrPlayer.getNext();
+		renderAnimation(player, vpData.view, vpData.proj);
 	}
 
 	if(SETTINGS->showDebugPhysics)
@@ -1471,29 +1473,23 @@ void Renderer::drawHudElement(int viewportIndex, unsigned int textureId, DirectX
 	devcon->RSSetState(nullptr);
 }
 
-void Renderer::renderAnimation(unsigned int meshID, DirectX::XMFLOAT4X4 view, DirectX::XMFLOAT4X4 projection)
+void Renderer::renderAnimation(AttributePtr<Attribute_Player> playerAt, DirectX::XMFLOAT4X4 view, DirectX::XMFLOAT4X4 projection)
 {
 	AttributePtr<Attribute_Spatial> ptr_spatial;
 	AttributePtr<Attribute_Position> ptr_position;
 	AttributePtr<Attribute_Animation> ptr_animation;
-	bool done = false;
-	while(itrRender.hasNext() && !done)
-	{
-		AttributePtr<Attribute_Render> ptr_render = itrRender.getNext();
-		if(ptr_render->meshID == meshID)
-		{
-			ptr_spatial = ptr_render->ptr_spatial;
-			ptr_position = ptr_render->ptr_spatial->ptr_position;
-			ptr_animation = ptr_render->ptr_animation;
-			done = true;
-		}
-	}
-	itrRender.resetIndex();
+	AttributePtr<Attribute_Render> ptr_render = playerAt->ptr_render;
+
+
+	ptr_spatial = ptr_render->ptr_spatial;
+	ptr_position = ptr_render->ptr_spatial->ptr_position;
+	ptr_animation = ptr_render->ptr_animation;
+
 
 	ID3D11Device*			device = managementD3D_->getDevice();
 	ID3D11DeviceContext*	devcon = managementD3D_->getDeviceContext();
 
-	ModelD3D* modelD3D	= managementModel_->getModelD3D(meshID, device);
+	ModelD3D* modelD3D	= managementModel_->getModelD3D(ptr_render->meshID, device);
 
 	
 	DirectX::XMFLOAT4X4 worldMatrix			= managementMath_->calculateWorldMatrix(ptr_spatial, ptr_position);
