@@ -885,14 +885,14 @@ void NameGenerator::reset()
 	addName("<>|God|<>");
 	addName("Jesus");
 	addName("remarkably plain wrong");
-	addName("cane-wielding forrester");
+	addName("cane-wielding forester");
 	addName("seems right");
 	addName("not so");
 	addName("reanimated skeleton");
 	addName("furniture out, insurance money in");
 	addName("put that thing down, now!");
 	addName("look, run and gun");
-	addName("clottered interface");
+	addName("cluttered interface");
 	addName("merge conflict");
 	addName("compressed");
 	addName("lied and died");
@@ -908,7 +908,7 @@ void NameGenerator::reset()
 	addName("enter");
 	addName("active window");
 	addName("window cleaning");
-	addName("dissappeared loyal follower");
+	addName("disappeared loyal follower");
 	addName("improper use of symbol");
 	addName("a sudden sound");
 	addName("hard to remember");
@@ -1057,7 +1057,7 @@ void NameGenerator::reset()
 	addName("problem arms");
 	addName("fewer suits");
 	addName("framed characters");
-	addName("to whom it may cencern");
+	addName("to whom it may concern");
 	addName("straight up honest truth");
 	addName("stranger danger");
 	addName("ferry ticket");
@@ -1088,7 +1088,7 @@ void NameGenerator::reset()
 	addName("down by the street");
 	addName("last man standing");
 	addName("allocator");
-	addName("rem");
+	addName("REM");
 	addName("right on track");
 	addName("in good standing");
 	addName("by the Gods");
