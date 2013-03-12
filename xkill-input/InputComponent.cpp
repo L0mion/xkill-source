@@ -126,8 +126,9 @@ void InputComponent::handleInput(float delta)
 		input->changeAmmunitionType =	device->getBoolReleased(InputAction::ACTION_B_NEXT_AMMUNITIONTYPE);
 		input->changeFiringMode =		device->getBoolReleased(InputAction::ACTION_B_NEXT_FIRINGMODE);
 
-		input->killPlayer = device->getBoolReleased(InputAction::ACTION_B_KILL_PLAYER);
-		input->jump_jetpack =		device->getBoolValue(InputAction::ACTION_B_JUMP_JETPACK);
+		input->killPlayer =				device->getBoolReleased(InputAction::ACTION_B_KILL_PLAYER);
+		input->jetpack =				device->getBoolValue(InputAction::ACTION_B_JUMP_JETPACK);
+		input->jump =					device->getBoolPressed(InputAction::ACTION_B_JUMP_JETPACK);
 
 		//input->jetpack =	device->getBoolValue(InputAction::ACTION_B_JETPACK);
 

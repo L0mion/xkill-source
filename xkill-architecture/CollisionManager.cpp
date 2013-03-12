@@ -208,7 +208,7 @@ void CollisionManager::collision_pickupable(Entity* entity1, Entity* entity2)
 						{
 							amount = 20;
 							AttributePtr<Attribute_Health> ptr_health = ptr_player->ptr_health;
-							int pickedUpAmount = getPickedUpAmount(ptr_health->health, ptr_health->maxHealth, amount);
+							int pickedUpAmount = getPickedUpAmount(static_cast<int>(ptr_health->health), static_cast<int>(ptr_health->maxHealth), amount);
 							if(pickedUpAmount > 0)
 							{
 								ptr_health->health += pickedUpAmount;
