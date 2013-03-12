@@ -6,12 +6,12 @@ struct PSOut
 	float4 albedo	: SV_TARGET1;
 };
 
-PSOut PS_Animation(VSOutPosNormWTex pIn)
+PSOut PS_Animation(VSOutPosNormVTex pIn)
 {
 	float4 white = float4(0.75f, 0.0f, 0.0f, 1.0f);
 
 	PSOut output;
-	output.normal = float4(pIn.normalW, 1.0f);
+	output.normal = float4(pIn.normalV, 1.0f);
 	output.albedo = white;
 
 	return output;

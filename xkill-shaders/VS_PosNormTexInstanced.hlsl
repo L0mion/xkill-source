@@ -2,9 +2,9 @@
 #include "VSIn.hlsl"
 #include "VSOut.hlsl"
 
-VSOutPosNormWTex VS_PosNormTexInstanced(VSInPosNormTexInstanced vsIn)
+VSOutPosNormVTex VS_PosNormTexInstanced(VSInPosNormTexInstanced vsIn)
 {
-	VSOutPosNormWTex output;
+	VSOutPosNormVTex output;
 
 	float4 pos = float4(vsIn.position, 1.0f);
 	pos = mul(pos, vsIn.world);
@@ -14,8 +14,8 @@ VSOutPosNormWTex VS_PosNormTexInstanced(VSInPosNormTexInstanced vsIn)
 
 	float4 normal = float4(vsIn.normal, 0.0f);
 	normal = mul(normal, vsIn.world);	//world space
-	//normal = mul(normal, view);			//view space
-	output.normalW = normal.xyz;
+	normal = mul(normal, view);			//view space
+	output.normalV = normal.xyz;
 
 	output.texcoord	= vsIn.texcoord;
 

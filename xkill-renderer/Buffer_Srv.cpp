@@ -7,6 +7,7 @@ Buffer_Srv::Buffer_Srv(
 	unsigned int	texWidth,
 	unsigned int	texHeight,
 	unsigned int	texAliasing,
+	unsigned int	texMips,
 	DXGI_FORMAT		texFormat,
 	UINT			texBindFlags,
 	D3D11_USAGE		texUsage)
@@ -14,6 +15,7 @@ Buffer_Srv::Buffer_Srv(
 	texWidth_		= texWidth;
 	texHeight_		= texHeight;
 	texAliasing_	= texAliasing;
+	texMips_		= texMips;
 	texFormat_		= texFormat;
 	texBindFlags_	= texBindFlags;
 	texUsage_		= texUsage;
@@ -28,6 +30,7 @@ Buffer_Srv::Buffer_Srv(
 	unsigned int	texWidth,
 	unsigned int	texHeight,
 	unsigned int	texAliasing,
+	unsigned int	texMips,
 	DXGI_FORMAT		texFormat,
 	UINT			texBindFlags,
 	D3D11_USAGE		texUsage,
@@ -37,6 +40,7 @@ Buffer_Srv::Buffer_Srv(
 	texWidth_		= texWidth;
 	texHeight_		= texHeight;
 	texAliasing_	= texAliasing;
+	texMips_		= texMips;
 	texFormat_		= texFormat;
 	texBindFlags_	= texBindFlags;
 	texUsage_		= texUsage;
@@ -86,7 +90,7 @@ HRESULT Buffer_Srv::initTex(ID3D11Device* device)
 	ZeroMemory(&descTex, sizeof(descTex));
 	descTex.Width				= texWidth_;
 	descTex.Height				= texHeight_;
-	descTex.MipLevels			= 1;
+	descTex.MipLevels			= texMips_;
 	descTex.ArraySize			= 1;
 	descTex.Format				= texFormat_;
 	descTex.SampleDesc.Count	= texAliasing_;

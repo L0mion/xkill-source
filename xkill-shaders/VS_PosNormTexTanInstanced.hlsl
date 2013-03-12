@@ -5,9 +5,9 @@
 #include "VSIn.hlsl"
 #include "VSOut.hlsl"
 
-VSOutPosNormWTexTanW VS_PosNormTexTanInstanced(VSInPosNormTexTanInstanced vsIn)
+VSOutPosNormVTexTanW VS_PosNormTexTanInstanced(VSInPosNormTexTanInstanced vsIn)
 {
-	VSOutPosNormWTexTanW output;
+	VSOutPosNormVTexTanW output;
 
 	float4 pos = float4(vsIn.position, 1.0f);
 	pos = mul(pos, vsIn.world);
@@ -17,8 +17,8 @@ VSOutPosNormWTexTanW VS_PosNormTexTanInstanced(VSInPosNormTexTanInstanced vsIn)
 
 	float4 normal = float4(vsIn.normal, 0.0f);
 	normal = mul(normal, vsIn.world);
-	//normal = mul(normal, view);
-	output.normalW = normal.xyz;
+	normal = mul(normal, view);
+	output.normalV = normal.xyz;
 
 	output.tangentW = mul(vsIn.tangent.xyz, (float3x3)vsIn.world);
 

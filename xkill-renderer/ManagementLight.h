@@ -30,7 +30,6 @@ enum DLL_U LightBufferType
 { 
 	LIGHTBUFFERTYPE_DIR			= 0, 
 	LIGHTBUFFERTYPE_POINT		= 1, 
-	//LIGHTBUFFERTYPE_SPOT		= 2, 
 	LIGHTBUFFERTYPE_POS_VIEW	= 3,
 	LIGHTDESCTYPE_NA			= 4
 };
@@ -66,7 +65,6 @@ public:
 private:
 	void updateStreamDirLight();
 	void updateStreamPointLight();
-	//void updateStreamPosLight();
 
 	DataStreamSRV<LightDescDir>*	streamDirLight_;
 	DataStreamSRV<LightDescPoint>*	streamPointLight_;

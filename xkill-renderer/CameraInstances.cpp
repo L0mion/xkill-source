@@ -27,6 +27,7 @@ void CameraInstances::reset()
 		i->second->resetStream();
 	}
 }
+
 void CameraInstances::update(ID3D11Device* device, ID3D11DeviceContext* devcon)
 {
 	for(
