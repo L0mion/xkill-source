@@ -371,6 +371,7 @@ void NameGenerator::reset()
 	addName("irreversible condition");
 	addName("hardware");
 	addName("software");
+	addName("firmware");
 	addName("shareware");
 	addName("freeware");
 	addName("bloatware");
@@ -1198,6 +1199,17 @@ void NameGenerator::reset()
 	addName("once upon a time");
 	addName("free for all");
 	addName("aerial runner");
+	addName("infinite by default");
+	addName("needle in a stack");
+	addName("levitation");
+	addName("error-prone");
+	addName("DNA repair");
+	addName("cycle steal");
+	addName("simple solution");
+	addName("I think so, definitely");
+	addName("refered to as two");
+	addName("executable");
+	addName("excusable");
 	
 	//C++ keywords
 	addName("alignas");

@@ -165,140 +165,143 @@ void CollisionManager::collision_pickupable(Entity* entity1, Entity* entity2)
 			for(unsigned i=0;i<playerId.size();i++)
 			{
 				AttributePtr<Attribute_Player> ptr_player = itrPlayer.at(playerId.at(i));
-				AttributePtr<Attribute_WeaponStats>	ptr_weaponStats	= ptr_player->ptr_weaponStats;
-
-				Ammunition* ammo = &ptr_weaponStats->ammunition[ptr_weaponStats->currentAmmunitionType];
-				FiringMode* firingMode = &ptr_weaponStats->firingMode[ptr_weaponStats->currentFiringModeType];
-
-				//Retrieve pickupable attribute
-				std::vector<int> pickupablesId = entity1->getAttributes(ATTRIBUTE_PICKUPABLE);
-				for(unsigned i=0;i<pickupablesId.size();i++)
+				if(!ptr_player->detectedAsDead && ptr_player->ptr_health->health > 0) //If the player is alive
 				{
-					ptr_pickupable = itrPickupable.at(pickupablesId.at(i));
+					AttributePtr<Attribute_WeaponStats>	ptr_weaponStats	= ptr_player->ptr_weaponStats;
 
-					//--------------------------------------------------------------------------------------
-					// Random hack
-					//--------------------------------------------------------------------------------------
-					if(ptr_pickupable->pickupableType == XKILL_Enums::PickupableType::HACK_RANDOMHACK)
+					Ammunition* ammo = &ptr_weaponStats->ammunition[ptr_weaponStats->currentAmmunitionType];
+					FiringMode* firingMode = &ptr_weaponStats->firingMode[ptr_weaponStats->currentFiringModeType];
+
+					//Retrieve pickupable attribute
+					std::vector<int> pickupablesId = entity1->getAttributes(ATTRIBUTE_PICKUPABLE);
+					for(unsigned i=0;i<pickupablesId.size();i++)
 					{
-						static int infiniteLoopCounter = 0;
-						bool randomHackPickedUp = false;
-						while(!randomHackPickedUp && infiniteLoopCounter < 250)
-						{
-							int randomPickupableTypeInt = rand()%XKILL_Enums::PickupableType::NROFPICKUPABLETYPES;
-							ptr_pickupable->pickupableType = (XKILL_Enums::PickupableType)randomPickupableTypeInt;
+						ptr_pickupable = itrPickupable.at(pickupablesId.at(i));
 
-							//--------------------------------------------------------------------------------------
-							// List of all hacks retrievable from random hack
-							//--------------------------------------------------------------------------------------
-							if(ptr_pickupable->pickupableType == XKILL_Enums::PickupableType::HACK_SPEEDHACK ||
-							ptr_pickupable->pickupableType == XKILL_Enums::PickupableType::HACK_JETHACK ||
-							ptr_pickupable->pickupableType == XKILL_Enums::PickupableType::HACK_CYCLEHACK)
+						//--------------------------------------------------------------------------------------
+						// Random hack
+						//--------------------------------------------------------------------------------------
+						if(ptr_pickupable->pickupableType == XKILL_Enums::PickupableType::HACK_RANDOMHACK)
+						{
+							static int infiniteLoopCounter = 0;
+							bool randomHackPickedUp = false;
+							while(!randomHackPickedUp && infiniteLoopCounter < 250)
 							{
-								randomHackPickedUp = true;
+								int randomPickupableTypeInt = rand()%XKILL_Enums::PickupableType::NROFPICKUPABLETYPES;
+								ptr_pickupable->pickupableType = (XKILL_Enums::PickupableType)randomPickupableTypeInt;
+
+								//--------------------------------------------------------------------------------------
+								// List of all hacks retrievable from random hack
+								//--------------------------------------------------------------------------------------
+								if(ptr_pickupable->pickupableType == XKILL_Enums::PickupableType::HACK_SPEEDHACK ||
+								ptr_pickupable->pickupableType == XKILL_Enums::PickupableType::HACK_JETHACK ||
+								ptr_pickupable->pickupableType == XKILL_Enums::PickupableType::HACK_CYCLEHACK)
+								{
+									randomHackPickedUp = true;
+								}
+								infiniteLoopCounter++;
 							}
-							infiniteLoopCounter++;
 						}
-					}
 			
-					int amount;
-					switch(ptr_pickupable->pickupableType)
-					{
-					case XKILL_Enums::PickupableType::MEDKIT:
+						int amount;
+						switch(ptr_pickupable->pickupableType)
 						{
-							amount = 20;
-							AttributePtr<Attribute_Health> ptr_health = ptr_player->ptr_health;
-							int pickedUpAmount = getPickedUpAmount(ptr_health->health, ptr_health->maxHealth, amount);
-							if(pickedUpAmount > 0)
+						case XKILL_Enums::PickupableType::MEDKIT:
 							{
-								ptr_health->health += pickedUpAmount;
-								pickedUp = true;
+								amount = 20;
+								AttributePtr<Attribute_Health> ptr_health = ptr_player->ptr_health;
+								int pickedUpAmount = getPickedUpAmount(ptr_health->health, ptr_health->maxHealth, amount);
+								if(pickedUpAmount > 0)
+								{
+									ptr_health->health += pickedUpAmount;
+									pickedUp = true;
 
-								// Post HUD message
-								{Event_PostHudMessage e("", ptr_player); e.setHtmlMessage("Picked up", "HealthPatch", "", "+" + Converter::IntToStr(pickedUpAmount)); SEND_EVENT(&e);}
+									// Post HUD message
+									{Event_PostHudMessage e("", ptr_player); e.setHtmlMessage("Picked up", "HealthPatch", "", "+" + Converter::IntToStr(pickedUpAmount)); SEND_EVENT(&e);}
+								}
+								break;
 							}
-							break;
-						}
-					case XKILL_Enums::PickupableType::AMMUNITION_BULLET:
-						{
-							amount = 20;
-							AttributePtr<Attribute_WeaponStats> weaponStatsAttribute = ptr_player->ptr_weaponStats;
-							Ammunition* ammo = &weaponStatsAttribute->ammunition[XKILL_Enums::AmmunitionType::BULLET];
-							int pickedUpAmount = getPickedUpAmount(ammo->currentTotalNrOfShots, ammo->maxTotalNrOfShots, amount);
-							if(pickedUpAmount > 0)
+						case XKILL_Enums::PickupableType::AMMUNITION_BULLET:
 							{
-								weaponStatsAttribute->ammunition[XKILL_Enums::AmmunitionType::BULLET].currentTotalNrOfShots += pickedUpAmount;
-								pickedUp = true;
+								amount = 20;
+								AttributePtr<Attribute_WeaponStats> weaponStatsAttribute = ptr_player->ptr_weaponStats;
+								Ammunition* ammo = &weaponStatsAttribute->ammunition[XKILL_Enums::AmmunitionType::BULLET];
+								int pickedUpAmount = getPickedUpAmount(ammo->currentTotalNrOfShots, ammo->maxTotalNrOfShots, amount);
+								if(pickedUpAmount > 0)
+								{
+									weaponStatsAttribute->ammunition[XKILL_Enums::AmmunitionType::BULLET].currentTotalNrOfShots += pickedUpAmount;
+									pickedUp = true;
 				
-								// Post HUD message
-								{Event_PostHudMessage e("", ptr_player); e.setHtmlMessage("Picked up", "Bullet Ammunition", "", "+" + Converter::IntToStr(pickedUpAmount)); SEND_EVENT(&e);}
+									// Post HUD message
+									{Event_PostHudMessage e("", ptr_player); e.setHtmlMessage("Picked up", "Bullet Ammunition", "", "+" + Converter::IntToStr(pickedUpAmount)); SEND_EVENT(&e);}
+								}
+								break;
 							}
-							break;
-						}
-					case XKILL_Enums::PickupableType::AMMUNITION_EXPLOSIVE:
-						{
-							amount = 10;
-							AttributePtr<Attribute_WeaponStats> weaponStatsAttribute = ptr_player->ptr_weaponStats;
-							Ammunition* ammo = &weaponStatsAttribute->ammunition[XKILL_Enums::AmmunitionType::EXPLOSIVE];
-							int pickedUpAmount = getPickedUpAmount(ammo->currentTotalNrOfShots, ammo->maxTotalNrOfShots, amount);
-							if(pickedUpAmount > 0)
+						case XKILL_Enums::PickupableType::AMMUNITION_EXPLOSIVE:
 							{
-								weaponStatsAttribute->ammunition[XKILL_Enums::AmmunitionType::EXPLOSIVE].currentTotalNrOfShots += pickedUpAmount;
-								pickedUp = true;
+								amount = 10;
+								AttributePtr<Attribute_WeaponStats> weaponStatsAttribute = ptr_player->ptr_weaponStats;
+								Ammunition* ammo = &weaponStatsAttribute->ammunition[XKILL_Enums::AmmunitionType::EXPLOSIVE];
+								int pickedUpAmount = getPickedUpAmount(ammo->currentTotalNrOfShots, ammo->maxTotalNrOfShots, amount);
+								if(pickedUpAmount > 0)
+								{
+									weaponStatsAttribute->ammunition[XKILL_Enums::AmmunitionType::EXPLOSIVE].currentTotalNrOfShots += pickedUpAmount;
+									pickedUp = true;
 
-								// Post HUD message
-								{Event_PostHudMessage e("", ptr_player); e.setHtmlMessage("Picked up", "Explosive Ammunition", "", "+" + Converter::IntToStr(pickedUpAmount)); SEND_EVENT(&e);}
+									// Post HUD message
+									{Event_PostHudMessage e("", ptr_player); e.setHtmlMessage("Picked up", "Explosive Ammunition", "", "+" + Converter::IntToStr(pickedUpAmount)); SEND_EVENT(&e);}
+								}
+								break;
 							}
-							break;
-						}
-					case XKILL_Enums::PickupableType::AMMUNITION_SCATTER:
-						{
-							amount = 50;
-							AttributePtr<Attribute_WeaponStats> weaponStatsAttribute = ptr_player->ptr_weaponStats;
-							Ammunition* ammo = &weaponStatsAttribute->ammunition[XKILL_Enums::AmmunitionType::SCATTER];
-							int pickedUpAmount = getPickedUpAmount(ammo->currentTotalNrOfShots, ammo->maxTotalNrOfShots, amount);
-							if(pickedUpAmount > 0)
+						case XKILL_Enums::PickupableType::AMMUNITION_SCATTER:
 							{
-								weaponStatsAttribute->ammunition[XKILL_Enums::AmmunitionType::SCATTER].currentTotalNrOfShots += pickedUpAmount;
+								amount = 50;
+								AttributePtr<Attribute_WeaponStats> weaponStatsAttribute = ptr_player->ptr_weaponStats;
+								Ammunition* ammo = &weaponStatsAttribute->ammunition[XKILL_Enums::AmmunitionType::SCATTER];
+								int pickedUpAmount = getPickedUpAmount(ammo->currentTotalNrOfShots, ammo->maxTotalNrOfShots, amount);
+								if(pickedUpAmount > 0)
+								{
+									weaponStatsAttribute->ammunition[XKILL_Enums::AmmunitionType::SCATTER].currentTotalNrOfShots += pickedUpAmount;
+									pickedUp = true;
+
+									// Post HUD message
+									{Event_PostHudMessage e("", ptr_player); e.setHtmlMessage("Picked up", "Scatter Ammunition", "", "+" + Converter::IntToStr(pickedUpAmount)); SEND_EVENT(&e);}
+								}
+								break;
+							}
+						case XKILL_Enums::PickupableType::HACK_SPEEDHACK:
+							{
+								amount = 5+rand()%10;
 								pickedUp = true;
+								float time = static_cast<float>(amount);
+								SEND_EVENT(&Event_HackActivated(time, XKILL_Enums::HackType::SPEEDHACK, ptr_player));
 
 								// Post HUD message
-								{Event_PostHudMessage e("", ptr_player); e.setHtmlMessage("Picked up", "Scatter Ammunition", "", "+" + Converter::IntToStr(pickedUpAmount)); SEND_EVENT(&e);}
+								{Event_PostHudMessage e("", ptr_player); e.setHtmlMessage("Picked up", "Speedhack", "", "+" + Converter::IntToStr(amount) + " seconds"); SEND_EVENT(&e);}
+								break;
 							}
-							break;
-						}
-					case XKILL_Enums::PickupableType::HACK_SPEEDHACK:
-						{
-							amount = 5+rand()%10;
-							pickedUp = true;
-							float time = static_cast<float>(amount);
-							SEND_EVENT(&Event_HackActivated(time, XKILL_Enums::HackType::SPEEDHACK, ptr_player));
+						case XKILL_Enums::PickupableType::HACK_JETHACK:
+							{
+								amount = 10+rand()%20;
+								pickedUp = true;
+								float time = static_cast<float>(amount);
+								SEND_EVENT(&Event_HackActivated(time, XKILL_Enums::HackType::JETHACK, ptr_player));
 
-							// Post HUD message
-							{Event_PostHudMessage e("", ptr_player); e.setHtmlMessage("Picked up", "Speedhack", "", "+" + Converter::IntToStr(amount) + " seconds"); SEND_EVENT(&e);}
-							break;
-						}
-					case XKILL_Enums::PickupableType::HACK_JETHACK:
-						{
-							amount = 10+rand()%20;
-							pickedUp = true;
-							float time = static_cast<float>(amount);
-							SEND_EVENT(&Event_HackActivated(time, XKILL_Enums::HackType::JETHACK, ptr_player));
+								// Post HUD message
+								{Event_PostHudMessage e("", ptr_player); e.setHtmlMessage("Picked up", "Jethack", "", "+" + Converter::IntToStr(amount) + " seconds"); SEND_EVENT(&e);}
+								break;
+							}
+						case XKILL_Enums::PickupableType::HACK_CYCLEHACK:
+							{
+								amount = 5+rand()%15;
+								pickedUp = true;
+								float time = static_cast<float>(amount);
+								SEND_EVENT(&Event_HackActivated(time, XKILL_Enums::HackType::CYCLEHACK, ptr_player));
 
-							// Post HUD message
-							{Event_PostHudMessage e("", ptr_player); e.setHtmlMessage("Picked up", "Jethack", "", "+" + Converter::IntToStr(amount) + " seconds"); SEND_EVENT(&e);}
-							break;
-						}
-					case XKILL_Enums::PickupableType::HACK_CYCLEHACK:
-						{
-							amount = 5+rand()%15;
-							pickedUp = true;
-							float time = static_cast<float>(amount);
-							SEND_EVENT(&Event_HackActivated(time, XKILL_Enums::HackType::CYCLEHACK, ptr_player));
-
-							// Post HUD message
-							{Event_PostHudMessage e("", ptr_player); e.setHtmlMessage("Picked up", "Cyclehack", "", "+" + Converter::IntToStr(amount) + " seconds"); SEND_EVENT(&e);}
-							break;
+								// Post HUD message
+								{Event_PostHudMessage e("", ptr_player); e.setHtmlMessage("Picked up", "Cyclehack", "", "+" + Converter::IntToStr(amount) + " seconds"); SEND_EVENT(&e);}
+								break;
+							}
 						}
 					}
 				}

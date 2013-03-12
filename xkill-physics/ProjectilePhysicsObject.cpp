@@ -36,6 +36,14 @@ bool ProjectilePhysicsObject::subClassSpecificInitHook()
 	setCcdSweptSphereRadius(boundingSphereRadius*0.5f); 
 	setCcdMotionThreshold(boundingSphereRadius);
 
+	//Testing in progress
+
+	//setCcdSweptSphereRadius(SETTINGS->soundVolume); 
+	//setCcdMotionThreshold(SETTINGS->occlusionRadius);
+
+	//setCcdSweptSphereRadius(0.0f); 
+	//setCcdMotionThreshold(0.0f);
+
 	//Involve speed in CCD?
 	//btVector3 velocity = getLinearVelocity();
 	//float speed = velocity.length();
@@ -101,4 +109,8 @@ btCollisionShape* ProjectilePhysicsObject::subClassSpecificCollisionShape()
 void ProjectilePhysicsObject::handleOutOfBounds()
 {
 	removePhysicsAttributeCorrespondingToThisPhysicsObject();
+}
+
+void ProjectilePhysicsObject::onUpdate()
+{
 }

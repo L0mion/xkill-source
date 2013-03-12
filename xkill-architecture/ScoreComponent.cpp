@@ -213,7 +213,7 @@ void ScoreComponent::handleSchedulerMode(float delta)
 				
 				// Post hud message
 				//{Event_PostHudMessage e("<p align='center'><span style='font-size:15pt;'>NullProcess is executing</span><br><span style='color: rgba(255, 0, 0, 255); font-size:35pt;'>Punish them all</span></p>"); e.receiver = Event_PostHudMessage::RECEIVER_ALL; e.setStyle(Event_PostHudMessage::STYLE_SUBTILE); SEND_EVENT(&e);}
-				{Event_PostHudMessage e("Punish them all"); e.receiver = Event_PostHudMessage::RECEIVER_ALL; e.setStyle(Event_PostHudMessage::STYLE_WARNING); SEND_EVENT(&e);}
+				//{Event_PostHudMessage e("Punish them all"); e.receiver = Event_PostHudMessage::RECEIVER_ALL; e.setStyle(Event_PostHudMessage::STYLE_WARNING); SEND_EVENT(&e);}
 				{Event_PostHudMessage e("");  e.receiver = Event_PostHudMessage::RECEIVER_ALL; e.setHtmlMessage("","NullProcess", "is executing"); SEND_EVENT(&e);}
 			}
 			else if(topPriorityIsTied)	// Two or more players are tied for the ammount of priority
@@ -275,13 +275,12 @@ void ScoreComponent::executePlayer(int playerIndex)
 	priorityWhenSelectedForExecution = ptr_player->priority;
 	DEBUGPRINT("Player with attribute index " << executingPlayerIndex_ << " is executing. Beware of his laserous eyes");
 
-
 	// Send event to notify other components that we're entering execution mode
 	SEND_EVENT(&Event_PlayerExecuting(executingPlayerIndex_));
 	SEND_EVENT(&Event_PlaySound(XKILL_Enums::Sound::SOUND_LASER, itrPlayer.ownerIdAt(playerIndex)));
 
 	// Post hud messages
-	{Event_PostHudMessage e("", ptr_player); e.setHtmlMessage("Now running in", "Kernel Mode"); SEND_EVENT(&e);}
-	{Event_PostHudMessage e("", ptr_player); e.setHtmlMessage("Chosen by Scheduler"); SEND_EVENT(&e);}
-	{Event_PostHudMessage e("", ptr_player); e.setHtmlMessage("", ptr_player->playerName, "is executing"); e.receiver = Event_PostHudMessage::RECEIVER_ALL_BUT_SUBJECT; SEND_EVENT(&e);}
+	//{Event_PostHudMessage e("", ptr_player); e.setHtmlMessage("Now running in", "Kernel Mode"); SEND_EVENT(&e);}
+	//{Event_PostHudMessage e("", ptr_player); e.setHtmlMessage("Chosen by Scheduler"); SEND_EVENT(&e);}
+	{Event_PostHudMessage e("", ptr_player); e.setHtmlMessage("", ptr_player->playerName, "is was chosen by the scheduler and is now executing"); e.receiver = Event_PostHudMessage::RECEIVER_ALL_BUT_SUBJECT; SEND_EVENT(&e);}
 }

@@ -72,10 +72,10 @@ DataItemList* Attribute_Settings::getDataList()
 	DataItemList* list = new DataItemList();
 
 	list->add(soundVolume, "soundVolume");
-	list->add(occlusionRadius, "occlusionRadius");
-	list->add(occlusionScale, "occlusionScale");
-	list->add(occlusionBias, "occlusionBias");
-	list->add(occlusionIntensity, "occlusionIntensity");
+	list->add(occlusionRadius, "SSAO_occlusionRadius");
+	list->add(occlusionScale, "SSAO_occlusionScale");
+	list->add(occlusionBias, "SSAO_occlusionBias");
+	list->add(occlusionIntensity, "SSAO_occlusionIntensity");
 
 	return list;
 }
