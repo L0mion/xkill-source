@@ -37,8 +37,6 @@ groupshared uint tileMinDepthInt;
 groupshared uint tileMaxDepthInt;
 groupshared uint tileLightNum; //Number of lights intersecting tile.
 
-groupshared Frustum tileFrustum;
-
 groupshared float3 lightsPosV[TILE_MAX_LIGHTS];
 groupshared uint tileLightIndices[TILE_MAX_LIGHTS]; //Indices to lights intersecting tile.
 
@@ -74,37 +72,19 @@ void CS_Lighting(
 	InterlockedMax(tileMaxDepthInt, asuint(surfacePosV.z)); //If one were to check if pixel is 'valid', one would do something akin to this: const bool validPixel = surfacePosV.z >= zNear && surfacePosV.z <= zFar;
 	GroupMemoryBarrierWithGroupSync();
 
-	if(threadIDBlockIndex == 0)
-	{
-		const float tileMinDepthF = asfloat(tileMinDepthInt);
-		const float tileMaxDepthF = asfloat(tileMaxDepthInt);
-		tileFrustum = ExtractFrustumPlanes(
-			viewportWidth,
-			viewportHeight, 
-			viewportTopX,
-			viewportTopY,
-			TILE_DIM, 
-			blockID.xy, 
-			projection._11,
-			projection._22,
-			tileMinDepthF, 
-			tileMaxDepthF); //this could be done by one thread and put in shared memory, or be pre-computed on the cpu for each tile and stored in constant buffers.
-	}
-	GroupMemoryBarrierWithGroupSync();
-
-	//const float tileMinDepthF = asfloat(tileMinDepthInt);
-	//const float tileMaxDepthF = asfloat(tileMaxDepthInt);
-	//const Frustum tileFrustum = ExtractFrustumPlanes(
-	//	viewportWidth,
-	//	viewportHeight, 
-	//	viewportTopX,
-	//	viewportTopY,
-	//	TILE_DIM, 
-	//	blockID.xy, 
-	//	projection._11,
-	//	projection._22,
-	//	tileMinDepthF, 
-	//	tileMaxDepthF); //this could be done by one thread and put in shared memory, or be pre-computed on the cpu for each tile and stored in constant buffers.
+	const float tileMinDepthF = asfloat(tileMinDepthInt);
+	const float tileMaxDepthF = asfloat(tileMaxDepthInt);
+	Frustum tileFrustum = ExtractFrustumPlanes(
+		viewportWidth,
+		viewportHeight, 
+		viewportTopX,
+		viewportTopY,
+		TILE_DIM, 
+		blockID.xy, 
+		projection._11,
+		projection._22,
+		tileMinDepthF, 
+		tileMaxDepthF); //this could be done by one thread and put in shared memory, or be pre-computed on the cpu for each tile and stored in constant buffers.
 	
 	//Cull lights with tile
 	const uint numTileThreads = TILE_DIM * TILE_DIM;
