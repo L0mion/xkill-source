@@ -12,7 +12,7 @@ float LightShadow(
 {
 	shadowPosH.xyz /= shadowPosH.w; //Complete projection by doing division by w.
 
-	float depth = shadowPosH.z; //Depth in NDC-space.
+	const float depth = shadowPosH.z; //Depth in NDC-space.
 
 	//Prepare PCF-Filtering:
 	const float2 offsets[SHADOWMAP_NUM_PCF_SAMPLES] = 

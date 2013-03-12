@@ -2,9 +2,10 @@
 
 MeshDesc::MeshDesc()
 {
-
+	skinnedData_ = nullptr;
 }
 MeshDesc::~MeshDesc()
 {
-	//Do nothing.
+//	if(skinnedData_)
+//		delete skinnedData_;
 }

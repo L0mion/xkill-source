@@ -123,21 +123,21 @@ void InputComponent::handleInput(float delta)
 
 		input->fire =					device->getBoolValue(InputAction::ACTION_B_FIRE);
 		input->firePressed =			device->getBoolPressed(InputAction::ACTION_B_FIRE);
-		input->changeAmmunitionType =	device->getBoolReleased(InputAction::ACTION_B_CHANGE_AMMUNITIONTYPE);
-		input->changeFiringMode =		device->getBoolReleased(InputAction::ACTION_B_CHANGE_FIRINGMODE);
+		input->changeAmmunitionType =	device->getBoolReleased(InputAction::ACTION_B_NEXT_AMMUNITIONTYPE);
+		input->changeFiringMode =		device->getBoolReleased(InputAction::ACTION_B_NEXT_FIRINGMODE);
 
 		input->killPlayer = device->getBoolReleased(InputAction::ACTION_B_KILL_PLAYER);
-		input->jump =		device->getBoolPressed(InputAction::ACTION_B_JUMP);
+		input->jump_jetpack =		device->getBoolValue(InputAction::ACTION_B_JUMP_JETPACK);
 
-		input->jetpack =	device->getBoolValue(InputAction::ACTION_B_JETPACK);
+		//input->jetpack =	device->getBoolValue(InputAction::ACTION_B_JETPACK);
 
 		if(ptr_player->jetHackPair.first) // if jethack active
 		{
-			if(device->getBoolPressed(InputAction::ACTION_B_JETPACK))
+			if(device->getBoolPressed(InputAction::ACTION_B_JUMP_JETPACK))
 			{
 				SEND_EVENT(&Event_PlaySound(XKILL_Enums::Sound::SOUND_JETPACK, itrPlayer.ownerIdAt(ptr_player.index()), ptr_player->ptr_render->ptr_spatial->ptr_position->position, false));
 			}
-			else if(device->getBoolReleased(InputAction::ACTION_B_JETPACK))
+			else if(device->getBoolReleased(InputAction::ACTION_B_JUMP_JETPACK))
 			{
 				SEND_EVENT(&Event_StopSound(XKILL_Enums::Sound::SOUND_JETPACK, itrPlayer.ownerIdAt(ptr_player.index())));
 			}

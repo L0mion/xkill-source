@@ -58,7 +58,7 @@ void LoaderFbxAnimationDesc::convertToXKillFormat(std::map<std::string, Animatio
 }
 void LoaderFbxAnimationDesc::convertBoneToXKillFormat(LoaderFbxAnimationBone fbxBone, BoneAnimation* bone)
 {
-	int numIndices = 9;
+	//int numIndices = 9;
 	FbxKeyframeIndex keyframeIndices[] = {FBX_KEYFRAME_INDEX_TRANSLATION_X,
 										  FBX_KEYFRAME_INDEX_TRANSLATION_Y,
 										  FBX_KEYFRAME_INDEX_TRANSLATION_Z,
@@ -69,7 +69,7 @@ void LoaderFbxAnimationDesc::convertBoneToXKillFormat(LoaderFbxAnimationBone fbx
 										  FBX_KEYFRAME_INDEX_SCALING_Y,
 										  FBX_KEYFRAME_INDEX_SCALING_Z};
 
-	int numKeyframes = fbxBone.averageNumKeyframes(keyframeIndices, numIndices);
+	int numKeyframes = findMaxNumKeyframes(fbxBone);//fbxBone.averageNumKeyframes(keyframeIndices, numIndices);
 	bone->getKeyframes()->resize(numKeyframes);
 
 	if(numKeyframes > 0)
@@ -91,7 +91,7 @@ void LoaderFbxAnimationDesc::convertBoneToXKillFormat(LoaderFbxAnimationBone fbx
 		Keyframe* keyframe				= new Keyframe();
 		keyframe->translation			= DirectX::XMFLOAT3(0.0f, 0.0f, 0.0f);
 		keyframe->scale					= DirectX::XMFLOAT3(1.0f, 1.0f, 1.0f);
-		keyframe->rotationQuaternion	= DirectX::XMFLOAT4(0.0f, 0.0f, 0.0f, 0.0f);
+		keyframe->rotationQuaternion	= DirectX::XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f);
 		keyframe->timePosition			= 0.0f;
 		bone->getKeyframes()->push_back(keyframe);
 	}
@@ -116,18 +116,23 @@ void LoaderFbxAnimationDesc::createKeyframe(LoaderFbxAnimationBone fbxBone, Keyf
 		scalingZ = 1.0f;
 	}
 	
-	DirectX::XMMATRIX xmRotationX = DirectX::XMMatrixRotationX(rotationX);
-	DirectX::XMMATRIX xmRotationY = DirectX::XMMatrixRotationY(rotationY);
-	DirectX::XMMATRIX xmRotationZ = DirectX::XMMatrixRotationZ(rotationZ);
+	DirectX::XMVECTOR xmTemp = DirectX::XMQuaternionRotationRollPitchYaw(DirectX::XMConvertToRadians(rotationX), DirectX::XMConvertToRadians(rotationY), DirectX::XMConvertToRadians(rotationZ));
+	DirectX::XMFLOAT4 temp;
+	DirectX::XMStoreFloat4(&temp, xmTemp);
+
+	DirectX::XMMATRIX xmRotationX = DirectX::XMMatrixRotationX(DirectX::XMConvertToRadians(rotationX));
+	DirectX::XMMATRIX xmRotationY = DirectX::XMMatrixRotationY(DirectX::XMConvertToRadians(rotationY));
+	DirectX::XMMATRIX xmRotationZ = DirectX::XMMatrixRotationZ(DirectX::XMConvertToRadians(rotationZ));
 	
-	DirectX::XMMATRIX xmRotation = xmRotationX * xmRotationY * xmRotationZ;
+	DirectX::XMMATRIX xmRotation = xmRotationZ * xmRotationY * xmRotationX;
 	DirectX::XMVECTOR xmQuaternion = DirectX::XMQuaternionRotationMatrix(xmRotation);
 	DirectX::XMFLOAT4 quaternion;
+	DirectX::XMQuaternionNormalize(xmQuaternion);
 	DirectX::XMStoreFloat4(&quaternion, xmQuaternion);
 
 	keyframe->translation			= DirectX::XMFLOAT3(translationX, translationY, translationZ);
 	keyframe->scale					= DirectX::XMFLOAT3(scalingX, scalingY, scalingZ);
-	keyframe->rotationQuaternion	= quaternion;
+	keyframe->rotationQuaternion	= temp; //quaternion;
 	keyframe->timePosition			= time;
 }
 

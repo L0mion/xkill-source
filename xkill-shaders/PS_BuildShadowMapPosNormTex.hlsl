@@ -5,7 +5,7 @@
 
 //Pixel shader does not return anything as we only mean to fill up our z-buffer with depth-data.
 //If we later implement transperancy, a check for this would be implemented here - thusly clipping such pixels.
-void PS_BuildShadowMapPosNormTex(VSOutPosNormWTex pIn)
+void PS_BuildShadowMapPosNormTex(VSOutPosNormVTex pIn)
 {
 	//Do nothing.
 }

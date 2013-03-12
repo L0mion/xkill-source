@@ -5,9 +5,10 @@ Buffer_SrvRtvUav::Buffer_SrvRtvUav(
 	unsigned int	texWidth,
 	unsigned int	texHeight,
 	unsigned int	texAliasing,
+	unsigned int	texMips,
 	DXGI_FORMAT		texFormat,
 	UINT			texBindFlags,
-	D3D11_USAGE		texUsage) : Buffer_SrvRtv(texWidth, texHeight, texAliasing, texFormat, texBindFlags, texUsage)
+	D3D11_USAGE		texUsage) : Buffer_SrvRtv(texWidth, texHeight, texAliasing, texMips, texFormat, texBindFlags, texUsage)
 {
 	uav_ = nullptr;
 }

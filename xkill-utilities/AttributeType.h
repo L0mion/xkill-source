@@ -76,6 +76,8 @@ enum DLL_U AttributeType
 	ATTRIBUTE_EXPLOSIONSPHERE,
 	ATTRIBUTE_RAY,
 
+	ATTRIBUTE_ANIMATION,
+
 	// Behaviors are attributes with more logic tied to them,
 	// and be should independent of other attributes (should not have pointer to them)
 	// not sure about this yet
@@ -177,6 +179,18 @@ struct DLL_U Attribute_Bounding : public IAttribute
 };
 
 
+struct DLL_U Attribute_Animation : public IAttribute
+{
+	Attribute_Animation();
+	~Attribute_Animation();
+
+	std::string activeAnimation;
+	float time;
+
+	AttributeType getType(){return ATTRIBUTE_ANIMATION;}
+	std::string getName(){return "Animation";}
+};
+
 
 /// Stores everything RenderComponent needs to know about an entity
 /** 
@@ -195,6 +209,7 @@ struct DLL_U Attribute_Render : public IAttribute
 
 	AttributePtr<Attribute_Spatial> ptr_spatial;
 	AttributePtr<Attribute_Bounding> ptr_bounding;
+	AttributePtr<Attribute_Animation> ptr_animation;
 	
 	int meshID;
 	int textureID;
@@ -312,8 +327,7 @@ struct DLL_U Attribute_Input : public IAttribute
 	Float2 rotation;
 	bool fire;
 	bool firePressed;
-	bool jump;
-	bool jetpack;
+	bool jump_jetpack;
 	bool sprint;
 	bool killPlayer;
 	bool changeAmmunitionType;
@@ -461,21 +475,21 @@ struct DLL_U Attribute_Player : public IAttribute
 	static int nextId;
 
 	std::string playerName;
-	int priority;				//!< Priority of the player process. Higher value means higher priority. The scheduler will choose the process with the highest priority for execution.
-	int cycleSteals;			//!< Total number of cycle steals for the player process. Cycle steals steal priority from other player processes.
-	int cycles;		//!< Total execution time of the player process, used ased final score in the deathmatch. The game session winner is the player with the most total execution time as awarded by the scheduler.
-	float currentSpeed;			//!< Speed used when changing position in "handleInput".
-	float walkSpeed;			//!< Speed when walking.
-	float sprintSpeed;			//!< Speed when sprinting.
-	float currentSprintTime;	//!< Sprinting time left
-	float sprintTime;			//!< Time that can be spent sprinting
-	bool canSprint;				//!< Can the player sprint right now
-	float sprintRechargeRate;	//!< The rate at which the sprint will recharge
-	Timer respawnTimer;			//!< Keeps track of when a dead player should respawn
-	float timeSinceLastDamageTaken;		//!< Incrementing timer. Reset when taking damage.
-	bool jetpack;				//!< Use jetpack		
-	bool detectedAsDead;		//!< The player is dead
-	bool executing;				//!< True if selected by the scheduler (ScoreComponent.cpp)
+	int priority;							//!< Priority of the player process. Higher value means higher priority. The scheduler will choose the process with the highest priority for execution.
+	int cycleSteals;						//!< Total number of cycle steals for the player process. Cycle steals steal priority from other player processes.
+	int cycles;								//!< Total execution time of the player process, used ased final score in the deathmatch. The game session winner is the player with the most total execution time as awarded by the scheduler.
+	float currentSpeed;						//!< Speed used when changing position in "handleInput".
+	float walkSpeed;						//!< Speed when walking.
+	float sprintSpeed;						//!< Speed when sprinting.
+	float currentSprintTime;				//!< Sprinting time left
+	float sprintTime;						//!< Time that can be spent sprinting
+	bool canSprint;							//!< Can the player sprint right now
+	float sprintRechargeRate;				//!< The rate at which the sprint will recharge
+	Timer respawnTimer;						//!< Keeps track of when a dead player should respawn
+	float timeSinceLastDamageTaken;			//!< Incrementing timer. Reset when taking damage.
+	bool jetpack;							//!< Use jetpack		
+	bool detectedAsDead;					//!< The player is dead
+	bool executing;							//!< True if selected by the scheduler (ScoreComponent.cpp)
 	std::pair<bool, Timer*> speedHackPair;	//!< The bool is true if the hack is active, the timer keeps track of time left
 	std::pair<bool, Timer*> jetHackPair;	//!< The bool is true if the hack is active, the timer keeps track of time left
 	std::pair<bool, Timer*> cycleHackPair;	//!< The bool is true if the hack is active, the timer keeps track of time left

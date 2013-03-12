@@ -203,7 +203,8 @@ HRESULT ManagementBuffer::initAlbedo(ID3D11Device* device)
 	gBuffer = new Buffer_SrvRtv(
 		winfo_->getScreenWidth(),
 		winfo_->getScreenHeight(),
-		MULTISAMPLES_GBUFFERS, 
+		MULTISAMPLES_GBUFFERS,
+		1,
 		getFormat(BUFFER_FORMAT_ALBEDO),
 		D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE,
 		D3D11_USAGE_DEFAULT);
@@ -222,6 +223,7 @@ HRESULT ManagementBuffer::initNormal(ID3D11Device* device)
 		winfo_->getScreenWidth(), 
 		winfo_->getScreenHeight(), 
 		MULTISAMPLES_GBUFFERS, 
+		1,
 		getFormat(BUFFER_FORMAT_NORMAL),
 		D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE,
 		D3D11_USAGE_DEFAULT);
@@ -240,6 +242,7 @@ HRESULT ManagementBuffer::initMaterial(ID3D11Device* device)
 		winfo_->getScreenWidth(), 
 		winfo_->getScreenHeight(), 
 		MULTISAMPLES_GBUFFERS, 
+		1,
 		getFormat(BUFFER_FORMAT_MATERIAL),
 		D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE,
 		D3D11_USAGE_DEFAULT);
@@ -257,7 +260,8 @@ HRESULT ManagementBuffer::initGlow(ID3D11Device* device, ID3D11DeviceContext* de
 	glowHigh_ = new Buffer_SrvRtvUav(
 		winfo_->getScreenWidth(), 
 		winfo_->getScreenHeight(),
-		MULTISAMPLES_GBUFFERS, //?
+		1,
+		1,
 		getFormat(BUFFER_FORMAT_GLOW_HIGH),
 		D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE | D3D11_BIND_UNORDERED_ACCESS,
 		D3D11_USAGE_DEFAULT);
@@ -267,7 +271,8 @@ HRESULT ManagementBuffer::initGlow(ID3D11Device* device, ID3D11DeviceContext* de
 	glowLow_ = new Buffer_SrvRtvUav(
 		downSampleWidth_,
 		downSampleHeight_,
-		MULTISAMPLES_GBUFFERS, //?
+		1,
+		1,
 		getFormat(BUFFER_FORMAT_GLOW_LOW),
 		D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE | D3D11_BIND_UNORDERED_ACCESS,
 		D3D11_USAGE_DEFAULT);
@@ -276,7 +281,8 @@ HRESULT ManagementBuffer::initGlow(ID3D11Device* device, ID3D11DeviceContext* de
 	glowLowUtil_ = new Buffer_SrvRtvUav(
 		downSampleWidth_,
 		downSampleHeight_,
-		MULTISAMPLES_GBUFFERS, //?
+		1,
+		1,
 		getFormat(BUFFER_FORMAT_GLOW_LOW),
 		D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE | D3D11_BIND_UNORDERED_ACCESS,
 		D3D11_USAGE_DEFAULT);
@@ -300,6 +306,7 @@ HRESULT ManagementBuffer::initShadow(ID3D11Device* device)
 	shadowMap_ = new Buffer_SrvDsv(
 		SHADOWMAP_DIM,
 		SHADOWMAP_DIM,
+		1,
 		1,
 		DXGI_FORMAT_R24G8_TYPELESS,
 		D3D11_BIND_DEPTH_STENCIL | D3D11_BIND_SHADER_RESOURCE,
@@ -326,6 +333,7 @@ HRESULT ManagementBuffer::initSSAO(ID3D11Device* device)
 		ssaoWidth_,
 		ssaoHeight_,
 		1,
+		1,
 		getFormat(BUFFER_FORMAT_SSAO),
 		D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE | D3D11_BIND_UNORDERED_ACCESS,
 		D3D11_USAGE_DEFAULT);
@@ -336,6 +344,7 @@ HRESULT ManagementBuffer::initSSAO(ID3D11Device* device)
 		ssaoUtil_ = new Buffer_SrvRtvUav(
 			ssaoWidth_,
 			ssaoHeight_,
+			1,
 			1,
 			getFormat(BUFFER_FORMAT_SSAO),
 			D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE | D3D11_BIND_UNORDERED_ACCESS,

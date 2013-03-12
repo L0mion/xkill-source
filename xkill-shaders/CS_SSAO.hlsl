@@ -4,6 +4,9 @@
 #include "constantBuffers.hlsl"
 #include "UtilReconstructPosition.hlsl"
 
+#define SSAO_BLOCK_DIM	32
+#define RANDOM_DIM		64
+
 //Global Memory
 RWTexture2D<float4> ssao : register( u1 );
 
@@ -15,12 +18,12 @@ SamplerState ssNormal	: register( s0 );
 SamplerState ssDepth	: register( s1 );
 SamplerState ssRandom	: register( s2 );
 
-#define SSAO_BLOCK_DIM	16
-#define RANDOM_DIM		64
+//Shared Memory
+groupshared float depth[SSAO_BLOCK_DIM][SSAO_BLOCK_DIM];
 
 float occlusionFunc(float2 texGlobal, float2 texOffset, float3 occludee, float3 occludeeNormal)
 {
-	float2 dispatch = (texGlobal + texOffset);
+	float2 dispatch = (texGlobal + texOffset); 
 	dispatch.x *= ssaoWidth;	dispatch.x -= viewportTopX;
 	dispatch.y *= ssaoHeight;	dispatch.y -= viewportTopY;
 	float2 texLocal = float2(
@@ -50,16 +53,17 @@ float occlusionFunc(float2 texGlobal, float2 texOffset, float3 occludee, float3 
 }
 
 [numthreads(SSAO_BLOCK_DIM, SSAO_BLOCK_DIM, 1)]
-void CS_SSAO(uint3 threadIDDispatch	: SV_DispatchThreadID)
+void CS_SSAO(
+	uint3 threadIDDispatch	: SV_DispatchThreadID)
 {
 	//Convert [0-ssaoWidth, 0-ssaoHeight] -> [0, 1]
-	float2 texCoord = float2(
+	const float2 texCoord = float2(
 		(float)(threadIDDispatch.x + viewportTopX)	/ (float)ssaoWidth,
 		(float)(threadIDDispatch.y + viewportTopY)	/ (float)ssaoHeight);
 
 	//Get view-space position of occluded point:
-	float occludeeDepth = bufferDepth.SampleLevel(ssDepth, texCoord, 0).x;
-	float3 occludee = UtilReconstructPositionViewSpace(
+	const float occludeeDepth = bufferDepth.SampleLevel(ssDepth, texCoord, 0).x;
+	const float3 occludee = UtilReconstructPositionViewSpace(
 		float2(
 			(float)threadIDDispatch.x / viewportWidth,
 			(float)threadIDDispatch.y / viewportHeight), //Convert [0-ssaoWidth, 0-ssaoHeight] -> [0, 1]
@@ -71,10 +75,11 @@ void CS_SSAO(uint3 threadIDDispatch	: SV_DispatchThreadID)
 	normal.x *= 2.0f; normal.x -= 1.0f;
 	normal.y *= 2.0f; normal.y -= 1.0f;
 	normal.z *= 2.0f; normal.z -= 1.0f;
-	float3 occludeeNormal = normalize(mul(float4(normal, 0.0f), view).xyz);
+	//Normal is already in view-space
+	const float3 occludeeNormal = normalize(normal); //mul(float4(normal, 0.0f), view).xyz
 
 	//Random texture contains random normalized vectors.
-	float2 scaleTile = float2((float)ssaoWidth / (float)RANDOM_DIM, (float)ssaoHeight / (float)RANDOM_DIM); //Move me into a constant buffer.
+	const float2 scaleTile = float2((float)ssaoWidth / (float)RANDOM_DIM, (float)ssaoHeight / (float)RANDOM_DIM); //Move me into a constant buffer.
 	float3 random = bufferRandom.SampleLevel(ssRandom, texCoord * scaleTile, 0).rgb; //Tile random-texture using scaleTile.
 	random *= 2.0f; random -= 1.0f; //Map from [0, 1] to [-1, +1]
 	random = normalize(random);
@@ -94,10 +99,10 @@ void CS_SSAO(uint3 threadIDDispatch	: SV_DispatchThreadID)
 		 radius /= occludee.z;
 
 	float occlusion = 0.0f;
-	unsigned int numSamples = 4;
+	const unsigned int numSamples = 4;
 	for(unsigned int i = 0.0f; i < numSamples; i++)
 	{
-		float2 coord1 = reflect(vec[i], random) * radius;	//Original sampling coordinates at 90 degrees.
+		float2 coord1 = reflect(vec[i], random.xy) * radius;	//Original sampling coordinates at 90 degrees.
 		float2 coord2 = float2(
 		coord1.x * 0.707f - coord1.y * 0.707f,
 		coord1.x * 0.707f + coord1.y * 0.707f);			//...the same coordinates rotated 45 degrees:

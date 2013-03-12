@@ -1,5 +1,9 @@
 #include <xkill-utilities/Util.h>
+
+#include <xkill-utilities/SkinnedData.h>
+
 #include <DirectXMath.h>
+
 
 #include "ManagementD3D.h"
 #include "ManagementFX.h"
@@ -15,6 +19,7 @@
 #include "ManagementMath.h"
 #include "ManagementInstance.h"
 #include "ManagementSprites.h"
+#include "ManagementAnimation.h"
 
 #include "Winfo.h"
 #include "ModelD3D.h"
@@ -26,11 +31,20 @@
 #include "TypeFX.h"
 #include "Renderer.h"
 #include "ViewportData.h"
+
+#include "Buffer_SrvRtvUav.h"
+
+//tmep
+#include "Buffer_SrvDsv.h"
+
 #include "CameraInstances.h"
+#include "TimerDX.h"
+
+
 
 ATTRIBUTES_DECLARE_ALL;
 
-#define XKILLPROFILING // commment away to skip profiling
+//#define XKILLPROFILING // commment away to skip profiling
 #ifdef XKILLPROFILING
 #include <xkill-utilities\Converter.h>
 #include <time.h>
@@ -47,13 +61,27 @@ static std::vector<float> hudtimer;
 static std::vector<float> presenttimer;
 static std::vector<float> cleartimer;
 static std::vector<float> cbtimer;
-#define calctime(vectorname, call ) {  clock_t deltatimevar = clock();	\
-							call devcon->Flush();\
-							vectorname.push_back(((float)(clock()-deltatimevar))/((float)CLOCKS_PER_SEC));} 
-#define outputaverage(outname, vectorname) {float sum=0; for(unsigned int i=0;i<vectorname.size();i++) { sum += vectorname.at(i);} std::string out = outname;  out +=" "; sum = sum/(float)vectorname.size(); out +=Converter::FloatToStr(sum); out +="\n"; OutputDebugStringA(out.c_str()); }
+static std::vector<float> ssaotimer;
+
+static TimerDX dxlightstimer;
+static TimerDX dxinstancetimer;
+static TimerDX dxshadowtimer;
+static TimerDX dxgbuffertimer;
+static TimerDX dxbackbuffertimer;
+static TimerDX dxglowtimer;
+static TimerDX dxhudtimer;
+static TimerDX dxpresenttimer;
+static TimerDX dxcleartimer;
+static TimerDX dxcbtimer;
+static TimerDX dxssaotimer;
+#define calcgpu(vectorname, call ) { dx##vectorname.startTimer(devcon); \
+	call \
+	dx##vectorname.stopTimer(devcon); \
+	vectorname.push_back(dx##vectorname.Time(devcon));} 
+#define outputgpu(outname, vectorname) {float sum=0; for(unsigned int i=0;i<vectorname.size();i++) { sum += vectorname.at(i);} std::string out = outname;  out +=" "; sum = sum/(float)vectorname.size()/1000.0f; out +=Converter::FloatToStr(sum); out +="\n"; OutputDebugStringA(out.c_str()); }
 #else
-#define calctime(vectorname, call ) call
-#define outputaverage(outname, vectorname)
+#define calcgpu(vectorname, call ) call
+#define outputgpu(outname, vectorname)
 #endif
 
 Renderer::Renderer(HWND windowHandle)
@@ -78,29 +106,29 @@ Renderer::Renderer(HWND windowHandle)
 	managementSprites_  = nullptr;
 	debugLinesVertexBuffer_ = nullptr;
 
+
 	ATTRIBUTES_INIT_ALL;
 
 	rayBuffer				= nullptr;
 
-	//temp
-	m3dLoader_		= nullptr;
-	animatedMesh_	= nullptr;
+
+	temp_ = 0;
 }
 Renderer::~Renderer()	
 {
 
 #ifdef XKILLPROFILING
-	
-	outputaverage("\nlight",	lightstimer)
-	outputaverage("instance",	instancetimer)
-	outputaverage("clear",	cleartimer)
-	outputaverage("cb",	cbtimer)
-	outputaverage("shadow",	shadowtimer)
-	outputaverage("gbuffer",	gbuffertimer)
-	outputaverage("backbuffer",	backbuffertimer)
-	outputaverage("glow",	glowtimer)
-	outputaverage("hud",hudtimer)
-	outputaverage("present",	presenttimer)
+	//outputgpu("\nlight",	lightstimer)
+	//outputgpu("instance",	instancetimer)
+	//outputgpu("clear",	cleartimer)
+	//outputgpu("cb",	cbtimer)
+	outputgpu("shadow",	shadowtimer)
+	outputgpu("gbuffer",	gbuffertimer)
+	outputgpu("backbuffer",	backbuffertimer)
+	outputgpu("glow",	glowtimer)
+	outputgpu("hud",	hudtimer)
+	outputgpu("present",	presenttimer)
+	outputgpu("ssao", ssaotimer)
 #endif
 
 	SAFE_DELETE(winfo_);
@@ -118,16 +146,13 @@ Renderer::~Renderer()
 	SAFE_DELETE(managementMath_);
 	SAFE_DELETE(managementInstance_);
 	SAFE_DELETE(managementSprites_);
+	SAFE_DELETE(managementAnimation_);
 
 	//d3dDebug_->reportLiveDeviceObjects();
 	SAFE_DELETE(managementDebug_);
 
 	SAFE_RELEASE(debugLinesVertexBuffer_);
 	SAFE_RELEASE(rayBuffer);
-
-	//temp
-//	SAFE_DELETE(m3dLoader_);
-//	SAFE_DELETE(animatedMesh_);
 }
 
 void Renderer::reset()
@@ -142,6 +167,7 @@ void Renderer::reset()
 	SAFE_RESET(managementRS_);
 	SAFE_RESET(managementBuffer_);
 	SAFE_RESET(managementSprites_);
+	SAFE_RESET(managementAnimation_);
 }
 
 void Renderer::unloadModels()
@@ -159,7 +185,7 @@ HRESULT Renderer::resize(unsigned int screenWidth, unsigned int screenHeight)
 	unsigned int numViewports, csDispatchX, csDispatchY;
 	numViewports	= numSS;
 
-	csDispatchX	= (unsigned int)ceil((float)screenWidth	/ (float)CS_TILE_SIZE);
+	csDispatchX	= (unsigned int)ceil((float)screenWidth		/ (float)CS_TILE_SIZE);
 	csDispatchY	= (unsigned int)ceil((float)screenHeight	/ (float)CS_TILE_SIZE);
 	winfo_->init(
 		screenWidth, 
@@ -220,20 +246,22 @@ HRESULT Renderer::init()
 	if(SUCCEEDED(hr))
 		hr = initManagementSprites();
 	initManagementInstance();
+	initManagementAnimation();
 
-	//temp
-	/*
-	m3dLoader_ = new M3DLoader();
-	animatedMesh_ = nullptr;
-	animatedMesh_ = new AnimatedMesh();
-	m3dLoader_->loadM3D("../../xkill-resources/xkill-models/soldier.m3d",
-					   animatedMesh_->getVertices(),
-					   animatedMesh_->getIndices(),
-					   animatedMesh_->getSubsets(),
-					   animatedMesh_->getMaterials(),
-					   animatedMesh_->getSkinInfo());
-	animatedMesh_->init(managementD3D_->getDevice());
-	*/
+#ifdef XKILLPROFILING
+	ID3D11Device* device = managementD3D_->getDevice();
+	dxlightstimer.init(device);
+	dxinstancetimer.init(device);
+	dxshadowtimer.init(device);
+	dxgbuffertimer.init(device);
+	dxbackbuffertimer.init(device);
+	dxglowtimer.init(device);
+	dxhudtimer.init(device);
+	dxpresenttimer.init(device);
+	dxcleartimer.init(device);
+	dxcbtimer.init(device);
+	dxssaotimer.init(device);
+#endif //XKILLPROFILING 
 
 	return hr;
 }
@@ -381,6 +409,7 @@ void Renderer::initManagementMath()
 void Renderer::initManagementInstance()
 {
 	managementInstance_ = new ManagementInstance();
+	managementInstance_->init();
 }
 HRESULT Renderer::initManagementSprites()
 {
@@ -389,29 +418,37 @@ HRESULT Renderer::initManagementSprites()
 	hr = managementSprites_->init(managementD3D_->getDevice());
 	return hr;
 }
-
-void Renderer::update()
+void Renderer::initManagementAnimation()
 {
+	managementAnimation_ = new ManagementAnimation();
+}
+
+void Renderer::update(float delta)
+{
+	delta_ = delta; //Needed by ManagementAnimation::update
+
 	ID3D11Device*			device = managementD3D_->getDevice();
 	ID3D11DeviceContext*	devcon = managementD3D_->getDeviceContext();
 
 	//Update lights.
-	calctime(lightstimer,managementLight_->update(device, devcon);)
+	managementLight_->update(device, devcon);
 	//Update instances.
-	calctime(instancetimer,managementInstance_->update(device, devcon);)
+	managementInstance_->update(device, devcon);
 }
 void Renderer::render()
 {
 	ID3D11DeviceContext* devcon = managementD3D_->getDeviceContext();
 
 	//Clear g-buffers and depth buffer.
-	calctime(cleartimer,
 		managementBuffer_->clearBuffers(devcon);
 		managementD3D_->clearDepthBuffer();
 		managementD3D_->clearBackBuffer();
-	)
+	
 	//Do shadows pre-pass:
-	DirectX::XMFLOAT4X4 shadowMapTransform = buildShadowMap();
+	DirectX::XMFLOAT4X4 shadowMapTransform;
+	calcgpu(shadowtimer,
+	shadowMapTransform = buildShadowMap();
+	)
 
 	//Update per-frame constant buffer.
 	AttributePtr<Attribute_SplitScreen>	ptr_splitScreen;
@@ -420,27 +457,22 @@ void Renderer::render()
 	AttributePtr<Attribute_Position>	ptr_position;
 
 	ViewportData vpData;
-	calctime(cbtimer,
-		managementCB_->setCB(
-			CB_TYPE_FRAME, 
-			TypeFX_VS, 
-			CB_REGISTER_FRAME, 
-			devcon);
-		managementCB_->updateCBFrame(
-			devcon,
-			shadowMapTransform,
-			managementLight_->getLightDirCurCount(),
-			managementLight_->getLightPointCurCount());
+	managementCB_->setCB(
+		CB_TYPE_FRAME, 
+		TypeFX_VS, 
+		CB_REGISTER_FRAME, 
+		devcon);
+	managementCB_->updateCBFrame(
+		devcon,
+		managementLight_->getLightDirCurCount(),
+		managementLight_->getLightPointCurCount());
 
-		
-
-		managementBuffer_->setBuffersAndDepthBufferAsRenderTargets(devcon, managementD3D_->getDepthBuffer());
-	)
+	managementBuffer_->setBuffersAndDepthBufferAsRenderTargets(devcon, managementD3D_->getDepthBuffer());
 
 	//Render each split-screen separately
 	std::vector<SplitScreenViewport>* ssViewports = managementViewport_->getSplitScreenViewports();
 	std::vector<ViewportData> vpDatas(ssViewports->size());
-	calctime(gbuffertimer,
+	calcgpu(gbuffertimer,
 		for(unsigned int i = 0; i < ssViewports->size(); i++)
 		{
 			ptr_splitScreen		= ssViewports->at(i).ptr_splitScreen;
@@ -471,6 +503,7 @@ void Renderer::render()
 	)
 	
 	//Blur glowmap:
+	calcgpu(glowtimer,
 	downSampleBlur();
 	unsigned int numBlurs = 1;
 	for(unsigned int i = 0; i < numBlurs; i++)
@@ -478,18 +511,24 @@ void Renderer::render()
 		blurHorizontally();
 		blurVertically();
 	}
-	upSampleBlur();
+	upSampleBlur();)
 
 	//Compute SSAO for each viewport:
+	calcgpu(ssaotimer,
 	for(unsigned int i = 0; i < vpDatas.size(); i++)
 		buildSSAOMap(vpDatas[i]);
+	)
 
 	//Render everything to backbuffer:
+	calcgpu(backbuffertimer,
 	for(unsigned int i = 0; i < vpDatas.size(); i++)
-		renderViewportToBackBuffer(vpDatas[i]);
+		renderViewportToBackBuffer(vpDatas[i], shadowMapTransform);
+	)
 
+	calcgpu(hudtimer,
 	for(unsigned int i=0; i< vpDatas.size(); i++)
 		renderHudElements(i);
+	)
 
 	managementD3D_->present();
 }
@@ -497,9 +536,6 @@ void Renderer::renderViewportToGBuffer(ViewportData& vpData)
 {
 	ID3D11Device*			device = managementD3D_->getDevice();
 	ID3D11DeviceContext*	devcon = managementD3D_->getDeviceContext();
-
-	if(animatedMesh_)
-		renderAnimatedMesh(vpData.view, vpData.proj);
 
 	managementSS_->setSS(devcon, TypeFX_PS, 0, SS_ID_DEFAULT);
 	managementRS_->setRS(devcon, RS_ID_DEFAULT);
@@ -526,7 +562,12 @@ void Renderer::renderViewportToGBuffer(ViewportData& vpData)
 	std::map<unsigned int, InstancedData*> instancesMap = cameraInstances->getInstancesMap();
 	for(std::map<unsigned int, InstancedData*>::iterator i = instancesMap.begin(); i != instancesMap.end(); i++)
 	{
-		renderInstance(i->first, i->second, false);
+			renderInstance(i->first, i->second, false);
+	}
+	while(itrPlayer.hasNext())
+	{
+		AttributePtr<Attribute_Player> player = itrPlayer.getNext();
+		renderAnimation(player, vpData.view, vpData.proj);
 	}
 
 	if(SETTINGS->showDebugPhysics)
@@ -542,7 +583,7 @@ void Renderer::renderViewportToGBuffer(ViewportData& vpData)
 	managementSS_->unsetSS(devcon, TypeFX_PS, 0);
 	devcon->RSSetState(nullptr);
 }
-void Renderer::renderViewportToBackBuffer(ViewportData& vpData)
+void Renderer::renderViewportToBackBuffer(ViewportData& vpData, DirectX::XMFLOAT4X4 shadowTransform)
 {
 	ID3D11DeviceContext* devcon = managementD3D_->getDeviceContext();
 
@@ -568,6 +609,14 @@ void Renderer::renderViewportToBackBuffer(ViewportData& vpData)
 		vpData.zFar,
 		vpData.viewportWidth,
 		vpData.viewportHeight);
+	managementCB_->setCB(CB_TYPE_SHADOW, TypeFX_CS, CB_REGISTER_SHADOW, devcon);
+
+	DirectX::XMMATRIX m1 = DirectX::XMLoadFloat4x4(&shadowTransform);
+	DirectX::XMMATRIX m2 = DirectX::XMLoadFloat4x4(&vpData.viewInv);
+	DirectX::XMMATRIX m3 = DirectX::XMMatrixMultiply(m2, m1);
+
+	DirectX::XMFLOAT4X4 m4; DirectX::XMStoreFloat4x4(&m4, m3);
+	managementCB_->updateCBShadow(devcon, m4);
 
 	//Connect g-buffers to shader.
 	managementBuffer_->setBuffersAsCSShaderResources(devcon);
@@ -692,6 +741,7 @@ void Renderer::setShadingDesc(ShadingDesc shadingDesc)
 	managementFX_->setLayout(devcon, shadingDesc.layoutID_);
 }
 
+
 void Renderer::renderSubset(
 	SubsetD3D* subset, 
 	MaterialDesc& material, 
@@ -746,12 +796,12 @@ DirectX::XMFLOAT4X4	Renderer::buildShadowMap()
 {
 	ID3D11DeviceContext* devcon = managementD3D_->getDeviceContext();
 
-	//Get shadow transform:
+	//Initialize shadows:
 	SceneBounds bounds;
 	bounds.center = DirectX::XMFLOAT3(0.0f, 0.0f, 0.0f); //Origo.
 	bounds.radius = 38; //Radius of scene really ought to be calculated instead of fixed.
 
-	LightDescDir dirLight = LightDescDir(); //default construct
+	LightDescDir dirLight = LightDescDir();
 	AttributePtr<Attribute_Light_Dir> ptr_lightDir;
 	if(itrLightDir.hasNext())
 	{
@@ -760,8 +810,7 @@ DirectX::XMFLOAT4X4	Renderer::buildShadowMap()
 	}
 	itrLightDir.resetIndex();
 
-	ShadowMatrices shadowMatrices;
-	shadowMatrices = constructShadowMatrices(bounds, dirLight.direction);
+	shadowMatrices_ = constructShadowMatrices(bounds, dirLight.direction);
 
 	//Set viewport to encompass entire map.
 	D3D11_VIEWPORT vp = managementBuffer_->getShadowViewport();
@@ -780,9 +829,9 @@ DirectX::XMFLOAT4X4	Renderer::buildShadowMap()
 	managementCB_->setCB(CB_TYPE_CAMERA, TypeFX_VS, CB_REGISTER_CAMERA, managementD3D_->getDeviceContext());
 	managementCB_->updateCBCamera(
 		managementD3D_->getDeviceContext(),
-		/*View: */			shadowMatrices.view_,
+		/*View: */			shadowMatrices_.view_,
 		/*View Inverse: */	managementMath_->getIdentityMatrix(),
-		/*Proj: */			shadowMatrices.proj_,
+		/*Proj: */			shadowMatrices_.proj_,
 		/*Proj Inverse: */	managementMath_->getIdentityMatrix(),
 		/*EyePos: */		DirectX::XMFLOAT3(0.0f, 0.0f, 0.0f),	//Irrelevant
 		/*ViewportTopX: */	0,										//Irrelevant					
@@ -792,22 +841,19 @@ DirectX::XMFLOAT4X4	Renderer::buildShadowMap()
 		/*ViewportWidth: */ 0.0f,									//Irrelevant
 		/*ViewportHeight: */ 0.0f);									//Irrelevant
 
-	/*TEMP*/ CameraInstances* cameraInstances = managementInstance_->getCameraInstancesFromCameraIndex(0);
-	/*TEMP*/ if(cameraInstances == nullptr)
-	/*TEMP*/ 	return shadowMatrices.shadowMapTransform_; 
-	/*TEMP*/ 
-	/*TEMP*/ std::map<unsigned int, InstancedData*> instancesMap = cameraInstances->getInstancesMap();
-	/*TEMP*/ for(std::map<unsigned int, InstancedData*>::iterator i = instancesMap.begin(); i != instancesMap.end(); i++)
-	/*TEMP*/ {
-	/*TEMP*/ 	//if(i->first == 7 ) //Check for what models ought to cast shadows?
-	/*TEMP*/ 	renderInstance(i->first, i->second, true);
-	/*TEMP*/ }
+	CameraInstances* cameraInstances = managementInstance_->getShadowInstances();
+	std::map<unsigned int, InstancedData*> instancesMap = cameraInstances->getInstancesMap();
+	for(std::map<unsigned int, InstancedData*>::iterator i = instancesMap.begin(); i != instancesMap.end(); i++)
+	{
+		renderInstance(i->first, i->second, true);
+	}
 	
+
 	//Unset shizzle
 	managementBuffer_->unset(devcon, SET_TYPE_DSV, SET_STAGE_CS, 0); //register and stage irrelevant
 	managementRS_->unsetRS(devcon);
 
-	return shadowMatrices.shadowMapTransform_;
+	return shadowMatrices_.shadowMapTransform_;
 }
 ShadowMatrices Renderer::constructShadowMatrices(SceneBounds bounds, Float3 lightDirection)
 {
@@ -1085,6 +1131,8 @@ void Renderer::buildSSAOMap(ViewportData& vpData)
 		SET_STAGE_CS, 
 		0); //register 0
 
+	managementD3D_->generateDepthMips();
+
 	//Set depth as srv
 	managementD3D_->setDepthBufferSRV(GBUFFER_SHADER_REGISTER_DEPTH);
 
@@ -1128,7 +1176,7 @@ void Renderer::buildSSAOMap(ViewportData& vpData)
 		/*Occlusion Intensity*/		SETTINGS->occlusionIntensity);	
 	
 	//Dispatch motherfucker
-	unsigned int SSAO_BLOCK_DIM = 16;
+	unsigned int SSAO_BLOCK_DIM = 32;
 	float csDispatchX = ssaoWidth	/ (float)SSAO_BLOCK_DIM;
 	float csDispatchY = ssaoHeight	/ (float)SSAO_BLOCK_DIM;
 	unsigned int dispatchX = (unsigned int)ceil(csDispatchX / (float)managementViewport_->getNumViewportsX());
@@ -1434,6 +1482,80 @@ void Renderer::drawHudElement(int viewportIndex, unsigned int textureId, DirectX
 	devcon->RSSetState(nullptr);
 }
 
+void Renderer::renderAnimation(AttributePtr<Attribute_Player> playerAt, DirectX::XMFLOAT4X4 view, DirectX::XMFLOAT4X4 projection)
+{
+	AttributePtr<Attribute_Spatial> ptr_spatial;
+	AttributePtr<Attribute_Position> ptr_position;
+	AttributePtr<Attribute_Animation> ptr_animation;
+	AttributePtr<Attribute_Render> ptr_render = playerAt->ptr_render;
+
+
+	ptr_spatial = ptr_render->ptr_spatial;
+	ptr_position = ptr_render->ptr_spatial->ptr_position;
+	ptr_animation = ptr_render->ptr_animation;
+
+
+	ID3D11Device*			device = managementD3D_->getDevice();
+	ID3D11DeviceContext*	devcon = managementD3D_->getDeviceContext();
+
+	ModelD3D* modelD3D	= managementModel_->getModelD3D(ptr_render->meshID, device);
+
+	
+	DirectX::XMFLOAT4X4 worldMatrix			= managementMath_->calculateWorldMatrix(ptr_spatial, ptr_position);
+	DirectX::XMFLOAT4X4 worldMatrixInverse	= managementMath_->calculateMatrixInverse(worldMatrix);
+	DirectX::XMFLOAT4X4 finalMatrix			= managementMath_->calculateFinalMatrix(worldMatrix, view, projection);
+	
+	managementCB_->setCB(CB_TYPE_OBJECT, TypeFX_VS, CB_REGISTER_OBJECT, devcon);
+	managementCB_->updateCBObject(devcon, finalMatrix, worldMatrix, worldMatrixInverse);
+
+	std::vector<DirectX::XMFLOAT4X4> finalTransforms;
+	
+	ptr_animation->time += delta_;
+	if(ptr_animation->time > modelD3D->getSkinnedData()->getClipEndTime(ptr_animation->activeAnimation))
+		ptr_animation->time = 0.0f;
+	modelD3D->getSkinnedData()->getFinalTransforms(ptr_animation->activeAnimation, ptr_animation->time, &finalTransforms);
+
+	managementCB_->setCB(CB_TYPE_BONE, TypeFX_VS, CB_REGISTER_BONE, devcon);
+	managementCB_->updateCBBone(devcon, finalTransforms);
+
+	managementFX_->setShader(devcon, SHADERID_VS_ANIMATION);
+	managementFX_->setShader(devcon, SHADERID_PS_DEFAULT);
+	managementSS_->setSS(devcon, TypeFX_PS, 0, SS_ID_DEFAULT);
+	managementRS_->setRS(devcon, RS_ID_DEFAULT);
+
+	managementBuffer_->setBuffersAndDepthBufferAsRenderTargets(devcon, managementD3D_->getDepthBuffer());
+
+	ID3D11Buffer* vertexBuffer = modelD3D->getVertexBuffer();
+	UINT stride = sizeof(VertexPosNormTexTanSkinned);
+	UINT offset = 0;
+	devcon->IASetVertexBuffers(
+				0, 
+				1, 
+				&vertexBuffer, 
+				&stride, 
+				&offset);
+
+	std::vector<MaterialDesc> materials = modelD3D->getMaterials();
+	std::vector<SubsetD3D*> subsets = modelD3D->getSubsetD3Ds();
+
+	for(unsigned int i=0; i<modelD3D->getSubsetD3Ds().size(); i++)
+	{
+		MaterialDesc material = materials[subsets.at(i)->getMaterialIndex()];
+
+		ID3D11ShaderResourceView* texAlbedo = managementTex_->getTexSrv(material.idAlbedoTex_);
+		ID3D11ShaderResourceView* texNormal = managementTex_->getTexSrv(material.idNormalTex_);
+		devcon->PSSetShaderResources(0, 1, &texAlbedo);
+		devcon->PSSetShaderResources(1, 1, &texNormal);
+
+		devcon->IASetIndexBuffer(subsets.at(i)->getIndexBuffer(), DXGI_FORMAT_R32_UINT, 0);
+		managementFX_->setLayout(devcon, LAYOUTID_POS_NORM_TEX_TAN_SKINNED);
+		devcon->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+		devcon->DrawIndexed(subsets.at(i)->getNumIndices(), 0, 0);
+	}
+
+	managementRS_->setRS(devcon, RS_ID_DEFAULT);
+}
+
 void Renderer::renderAnimatedMesh(DirectX::XMFLOAT4X4 viewMatrix, DirectX::XMFLOAT4X4 projectionMatrix)
 {
 //	ID3D11Device*			device = managementD3D_->getDevice();
@@ -1442,7 +1564,7 @@ void Renderer::renderAnimatedMesh(DirectX::XMFLOAT4X4 viewMatrix, DirectX::XMFLO
 //	DirectX::XMFLOAT4X4 worldMatrix(0.01f, 0.0f, 0.0f, 0.0f,
 //									0.0f, 0.01f, 0.0f, 0.0f,
 //									0.0f, 0.0f, 0.01f, 0.0f,
-//									10.0f, 2.3f, 1.0f, 1.0f);
+//									0.0f, 2.3f, 0.0f, 1.0f);
 //	DirectX::XMFLOAT4X4 worldMatrixInverse	= worldMatrix;
 //	DirectX::XMFLOAT4X4 finalMatrix			= managementMath_->calculateFinalMatrix(worldMatrix, viewMatrix, projectionMatrix);
 //	
@@ -1462,7 +1584,7 @@ void Renderer::renderAnimatedMesh(DirectX::XMFLOAT4X4 viewMatrix, DirectX::XMFLO
 //	managementSS_->setSS(devcon, TypeFX_PS, 0, SS_ID_DEFAULT);
 //	managementRS_->setRS(devcon, RS_ID_DEFAULT);
 //
-//	managementGBuffer_->setGBuffersAndDepthBuffer(devcon, managementD3D_->getDepthBuffer());
+//	managementBuffer_->setGBuffersAndDepthBuffer(devcon, managementD3D_->getDepthBuffer());
 //
 //	managementD3D_->clearDepthBuffer();
 //
@@ -1494,4 +1616,26 @@ void Renderer::renderAnimatedMesh(DirectX::XMFLOAT4X4 viewMatrix, DirectX::XMFLO
 void Renderer::loadTextures(TexDesc* texdesc)
 {
 	managementTex_->handleTexDesc(texdesc, managementD3D_->getDevice());
+}
+void Renderer::addAnimation(SkinnedData* skinnedData)
+{
+	managementAnimation_->addAnimation(skinnedData);
+}
+
+
+void Renderer::initDebugAnimation()
+{
+	//m3dLoader_ = new M3DLoader();
+	//
+	//animatedMesh_ = nullptr;
+	//animatedMesh_ = new AnimatedMesh();
+	//
+	//m3dLoader_->loadM3D("../../xkill-resources/xkill-models/soldier.m3d",
+	//animatedMesh_->getVertices(),
+	//animatedMesh_->getIndices(),
+	//animatedMesh_->getSubsets(),
+	//animatedMesh_->getMaterials(),
+	//animatedMesh_->getSkinInfo());
+	//
+	//animatedMesh_->init(managementD3D_->getDevice());
 }

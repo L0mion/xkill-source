@@ -23,6 +23,7 @@ public:
 		unsigned int	texWidth,
 		unsigned int	texHeight,
 		unsigned int	texAliasing,
+		unsigned int	texMips,
 		DXGI_FORMAT		texFormat,
 		UINT			texBindFlags,
 		D3D11_USAGE		texUsage);

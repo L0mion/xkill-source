@@ -20,6 +20,7 @@ public:
 		unsigned int	texWidth,
 		unsigned int	texHeight,
 		unsigned int	texAliasing,
+		unsigned int	texMips,
 		DXGI_FORMAT		texFormat,
 		UINT			texBindFlags,
 		D3D11_USAGE		texUsage);
@@ -27,6 +28,7 @@ public:
 		unsigned int	texWidth,
 		unsigned int	texHeight,
 		unsigned int	texAliasing,
+		unsigned int	texMips,
 		DXGI_FORMAT		texFormat,
 		UINT			texBindFlags,
 		D3D11_USAGE		texUsage,
@@ -61,6 +63,7 @@ private:
 	unsigned int	texWidth_;		//!< Width of texture.
 	unsigned int	texHeight_;		//!< Height of texture.
 	unsigned int	texAliasing_;	//!< Anti-aliasing samples of texture.
+	unsigned int	texMips_;
 	DXGI_FORMAT		texFormat_;		//!< Format of texture.
 	UINT			texBindFlags_;	//!< Bindflags. Such as D3D11_BIND_DEPTH_STENCIL or D3D11_BIND_SHADER_RESOURCE.
 	D3D11_USAGE		texUsage_;		//!< Usage, defines how memory ought to be handled, essentially.
