@@ -94,7 +94,7 @@ HRESULT ManagementModel::createModelD3D(
 		{
 			pushModelD3D(
 				modelID,
-				new ModelD3D(vertexType, vertexBuffer, subsetD3Ds, model.materials_));
+				new ModelD3D(vertexType, vertexBuffer, subsetD3Ds, model.materials_, model.skinnedData_));
 		}
 	}
 	else
@@ -253,8 +253,14 @@ HRESULT ManagementModel::createIndexBuffer(
 
 	std::vector<unsigned int> indices = subset.indices_;
 	if(indices.size() <= 0)
+	{
+		std::string failed = "Failed to create Index Buffer from MeshModel at index: " + modelID;
+		failed += "\nManagementModel::createIndexBuffer, too few indices when trying to create index buffer.";
+	//	SHOW_MESSAGEBOX(failed);
 		hr = S_FALSE;
-
+		return hr;
+	}
+		
 	D3D11_BUFFER_DESC ibd;
 	ibd.Usage			= D3D11_USAGE_IMMUTABLE;
 	ibd.ByteWidth		= sizeof(unsigned int) * indices.size();

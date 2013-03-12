@@ -35,6 +35,7 @@ public:
 	void set(std::vector<int>*						boneHierarchy,
 			  std::vector<DirectX::XMFLOAT4X4>*		boneOffsets,
 			  std::map<std::string, AnimationClip*>* animations);
+	void unset(); //! Unsets all of SkinnedData's member variables.
 	//! Calculates the final transformation matrix for each bone for a specified animation.
 	/*!
 	\param clipName The name of the animation.
@@ -54,6 +55,8 @@ public:
 	std::vector<DirectX::XMFLOAT4X4>*		getBoneOffsets()	const;
 	std::map<std::string, AnimationClip*>*	getAnimations()		const;
 private:
+	AnimationClip* getAnimationClip(std::string clipName) const;
+
 	std::vector<int>*						boneHierarchy_; //!< Vector containing the skeletons hierarchy.
 	std::vector<DirectX::XMFLOAT4X4>*		boneOffsets_;	//!< Vector containing bone offsets.
 	std::map<std::string, AnimationClip*>*	animations_;	//!< Map that holds AnimationClips and thier corresponding names.

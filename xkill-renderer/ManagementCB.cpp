@@ -14,6 +14,7 @@ ManagementCB::ManagementCB()
 	cbSprite_	= nullptr;
 	cbBlur_		= nullptr;
 	cbSSAO_		= nullptr;
+	cbShadow_	= nullptr;
 }
 ManagementCB::~ManagementCB()
 {
@@ -26,6 +27,7 @@ ManagementCB::~ManagementCB()
 	SAFE_RELEASE(cbSprite_);
 	SAFE_RELEASE(cbBlur_);
 	SAFE_RELEASE(cbSSAO_);
+	SAFE_RELEASE(cbShadow_);
 }
 void ManagementCB::reset()
 {
@@ -38,6 +40,7 @@ void ManagementCB::reset()
 	SAFE_RELEASE(cbSprite_);
 	SAFE_RELEASE(cbBlur_);
 	SAFE_RELEASE(cbSSAO_);
+	SAFE_RELEASE(cbShadow_);
 }
 
 void ManagementCB::updateCBInstance(ID3D11DeviceContext*	devcon,
@@ -51,12 +54,10 @@ void ManagementCB::updateCBInstance(ID3D11DeviceContext*	devcon,
 	devcon->UpdateSubresource(cbInstance_, 0, 0, &cbDesc, 0, 0);
 }
 void ManagementCB::updateCBFrame(ID3D11DeviceContext* devcon,
-								 DirectX::XMFLOAT4X4 shadowMapTransform,
 								 unsigned int numLightsDir,
 								 unsigned int numLightsPoint)
 {
 	CBFrameDesc cbDesc;
-	cbDesc.shadowMapTransform_ = shadowMapTransform;
 	cbDesc.numLightsDir		= numLightsDir;
 	cbDesc.numLightsPoint	= numLightsPoint;
 
@@ -181,6 +182,15 @@ void ManagementCB::updateCBSSAO(
 
 	devcon->UpdateSubresource(cbSSAO_, 0, 0, &cbDesc, 0, 0);
 }
+void ManagementCB::updateCBShadow(
+	ID3D11DeviceContext* devcon,
+	DirectX::XMFLOAT4X4 shadowTransform)
+{
+	CBShadowDesc cbDesc;
+	cbDesc.shadowMapTransform_ = shadowTransform;
+
+	devcon->UpdateSubresource(cbShadow_, 0, 0, &cbDesc, 0, 0);
+}
 
 void ManagementCB::setCB(
 	CB_TYPE					cbType, 
@@ -218,6 +228,9 @@ void ManagementCB::setCB(
 		break;
 	case CB_TYPE_SSAO:
 		cb = cbSSAO_;
+		break;
+	case CB_TYPE_SHADOW:
+		cb = cbShadow_;
 		break;
 	}
 
@@ -266,6 +279,8 @@ HRESULT ManagementCB::init(ID3D11Device* device)
 		hr = initCBBlur(device);
 	if(SUCCEEDED(hr))
 		hr = initCBSSAO(device);
+	if(SUCCEEDED(hr))
+		hr = initCBShadow(device);
 
 	return hr;
 }
@@ -427,6 +442,23 @@ HRESULT ManagementCB::initCBSSAO(ID3D11Device* device)
 	hr = device->CreateBuffer(&bufferDesc, NULL, &cbSSAO_);
 	if(FAILED(hr))
 		ERROR_MSG(L"CBManagement::initCBSSAO | device->CreateBuffer | Failed!");
+
+	return hr;
+}
+HRESULT ManagementCB::initCBShadow(	ID3D11Device* device)
+{
+	HRESULT hr = S_OK;
+
+	D3D11_BUFFER_DESC bufferDesc;
+	ZeroMemory(&bufferDesc, sizeof(bufferDesc));
+	bufferDesc.Usage			= D3D11_USAGE_DEFAULT;
+	bufferDesc.ByteWidth		= CB_SHADOW_DESC_SIZE;
+	bufferDesc.BindFlags		= D3D11_BIND_CONSTANT_BUFFER;
+	bufferDesc.CPUAccessFlags	= 0;
+
+	hr = device->CreateBuffer(&bufferDesc, NULL, &cbShadow_);
+	if(FAILED(hr))
+		ERROR_MSG(L"CBManagement::initCBShadow | device->CreateBuffer | Failed!");
 
 	return hr;
 }

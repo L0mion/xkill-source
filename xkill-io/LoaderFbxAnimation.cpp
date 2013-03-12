@@ -19,6 +19,7 @@ void LoaderFbxAnimation::parseAnimation(FbxScene* scene, std::vector<LoaderFbxAn
 {
 	reset();
 
+	int animationStackCount = scene->GetSrcObjectCount<FbxAnimStack>();
 	for(int i=0; i<scene->GetSrcObjectCount<FbxAnimStack>(); i++)
 	{
 		animationBones_.clear();

@@ -35,21 +35,4 @@ struct DLL_U LightDescPoint
 	float	range;
 };
 
-/*
-struct DLL_U LightDescSpot
-{
-	LightDescSpot();
-	~LightDescSpot();
-
-	Float4 ambient;
-	Float4 diffuse;
-	Float4 specular;
-	
-	Float3	direction;
-	float	range;
-	Float3	attenuation;
-	float	spotPow;
-};
-*/
-
 #endif //XKILL_RENDERER_LIGHTDESC_H

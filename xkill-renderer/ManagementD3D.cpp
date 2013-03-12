@@ -78,6 +78,12 @@ HRESULT ManagementD3D::resize()
 	return hr;
 }
 
+void ManagementD3D::generateDepthMips()
+{
+	ID3D11ShaderResourceView* srv = depthBuffer_->getSRV();
+	devcon_->GenerateMips(srv);
+}
+
 HRESULT ManagementD3D::init()
 {
 	HRESULT hr = S_OK;
@@ -198,6 +204,7 @@ HRESULT ManagementD3D::initDepthBuffer()
 		winfo_->getScreenWidth(),
 		winfo_->getScreenHeight(),
 		MULTISAMPLES_DEPTHBUFFER,
+		1,
 		DXGI_FORMAT_R32_TYPELESS,
 		D3D11_BIND_DEPTH_STENCIL | D3D11_BIND_SHADER_RESOURCE,
 		D3D11_USAGE_DEFAULT,

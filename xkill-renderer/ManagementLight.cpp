@@ -57,7 +57,6 @@ void ManagementLight::update(ID3D11Device* device, ID3D11DeviceContext* devcon)
 	//Send new data into streams.
 	updateStreamDirLight();
 	updateStreamPointLight();
-	//updateStreamPosLight();
 
 	//Map updated streams onto buffers.
 	streamDirLight_		->updateDataStream(device, devcon);

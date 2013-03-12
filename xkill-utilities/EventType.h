@@ -9,6 +9,7 @@
 #include "AttributeType.h"
 #include "MeshDesc.h"
 #include "MeshVertices.h"
+#include "SkinnedData.h"
 
 //
 // Events info
@@ -77,6 +78,8 @@ enum DLL_U EventType
 	EVENT_STOPSOUND,
 	EVENT_FOCUS_MAINWINDOW,
 	EVENT_INPUT_DEVICE_SEARCH,
+
+	EVENT_ANIMATION_LOADED,
 
 	// Get events
 	EVENT_GET_ENTITIES,
@@ -754,6 +757,15 @@ public:
 	Event_LoadLevel(std::string levelName);
 
 	std::string levelName;
+};
+
+class DLL_U Event_AnimationLoaded : public Event
+{
+public:
+	Event_AnimationLoaded(unsigned int meshID, SkinnedData* skinnedData);
+
+	unsigned int meshID;
+	SkinnedData* skinnedData;
 };
 
 class DLL_U Event_ReloadPhysicsAttributeDataIntoBulletPhysics : public Event

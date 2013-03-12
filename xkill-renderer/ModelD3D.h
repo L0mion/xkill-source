@@ -5,6 +5,7 @@
 
 #include <xkill-utilities/MeshVertices.h>
 #include <xkill-utilities/MaterialDesc.h>
+#include <xkill-utilities/SkinnedData.h>
 
 struct ID3D11Buffer;
 
@@ -26,7 +27,8 @@ public:
 		VertexType							vertexType,
 		ID3D11Buffer*						vertexBuffer,
 		const std::vector<SubsetD3D*>		subsets,
-		const std::vector<MaterialDesc>		materials);
+		const std::vector<MaterialDesc>		materials,
+		SkinnedData*						skinnedData);
 	//! Deletes VB-type and vector of IBs.
 	~ModelD3D();
 
@@ -34,12 +36,16 @@ public:
 	std::vector<MaterialDesc>&	getMaterials();
 	ID3D11Buffer*				getVertexBuffer();
 	VertexType					getVertexType();
+	SkinnedData*				getSkinnedData();
+
+	bool hasAnimation();
 protected:
 private:
 	std::vector<SubsetD3D*>		subsets_;		//!< Index buffers.
 	std::vector<MaterialDesc>	materials_;		//!< Materials.
 	ID3D11Buffer*				vertexBuffer_;
 	VertexType					vertexType_;
+	SkinnedData*				skinnedData_;	//!Animations.
 };
 
 /*
