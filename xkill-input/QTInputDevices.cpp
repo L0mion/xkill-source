@@ -55,11 +55,10 @@ void QTInputDevices::setStandardMappings()
 		buttons_[1]->addMapping(InputAction::ACTION_B_WALK_LEFT);
 		buttons_[2]->addMapping(InputAction::ACTION_B_WALK_BACKWARD);
 		buttons_[3]->addMapping(InputAction::ACTION_B_WALK_RIGHT);
-		buttons_[4]->addMapping(InputAction::ACTION_B_JUMP);
-		buttons_[5]->addMapping(InputAction::ACTION_B_CHANGE_AMMUNITIONTYPE);
-		buttons_[6]->addMapping(InputAction::ACTION_B_CHANGE_FIRINGMODE);
+		buttons_[4]->addMapping(InputAction::ACTION_B_JUMP_JETPACK);
+		buttons_[5]->addMapping(InputAction::ACTION_B_NEXT_AMMUNITIONTYPE);
+		buttons_[6]->addMapping(InputAction::ACTION_B_NEXT_FIRINGMODE);
 		buttons_[7]->addMapping(InputAction::ACTION_B_KILL_PLAYER);
-		buttons_[8]->addMapping(InputAction::ACTION_B_JETPACK);
 		buttons_[9]->addMapping(InputAction::ACTION_B_SPRINT);
 
 		buttons_[15]->addMapping(InputAction::ACTION_B_TIME_SPEED_UP);
@@ -67,8 +66,8 @@ void QTInputDevices::setStandardMappings()
 		buttons_[17]->addMapping(InputAction::ACTION_B_RELOAD);
 
 		mouseButtons_[0]->addMapping(InputAction::ACTION_B_FIRE);
-		mouseButtons_[3]->addMapping(InputAction::ACTION_B_CHANGE_FIRINGMODE);
-		mouseButtons_[4]->addMapping(InputAction::ACTION_B_CHANGE_AMMUNITIONTYPE);
+		mouseButtons_[3]->addMapping(InputAction::ACTION_B_NEXT_FIRINGMODE);
+		mouseButtons_[4]->addMapping(InputAction::ACTION_B_NEXT_AMMUNITIONTYPE);
 	}
 }
 

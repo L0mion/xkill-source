@@ -417,8 +417,7 @@ float Attribute_SplitScreen::getAspectRatio()
 
 Attribute_Input::Attribute_Input()
 {
-	jump = false;
-	jetpack = false;
+	jump_jetpack = false;
 	sprint = false;
 	killPlayer = false;
 	fire = false;
