@@ -14,6 +14,18 @@
 #include "Menu_Sound.h"
 #include "Menu_HUD.h"
 
+class DebugBillboard : IObserver
+{
+private:
+	QWidget* _window;
+	QLabel* _template;
+	std::vector<QLabel*> _messages;
+public:
+	void init(QWidget* window, QLabel* labelTemplate);
+
+	void onEvent(Event* e);
+};
+
 
 class Menu_Main : public QMainWindow, IObserver
 {
@@ -30,6 +42,7 @@ private:
 	int levelCurrent;
 	QStandardItemModel* levelListModel;
 	QString filePath;
+	DebugBillboard billboard;
 
 	Menu_Input*			input_Menu;
 	Menu_Ammo*			ammo_Menu;

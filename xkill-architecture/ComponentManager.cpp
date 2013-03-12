@@ -229,8 +229,102 @@ void updateOffset()
 	}
 }
 
+
+#include <ctime>
+#include <xkill-utilities/Converter.h>
+class StopWatch
+{
+private:
+	clock_t _start;
+	clock_t _lastMeasurement;
+
+	clock_t _totalElapsedClocks;
+	int _numSamples;
+
+	int _id;
+	std::string _timerName;
+
+	
+public:
+	StopWatch(std::string timerName)
+	{
+		// Save name to easier identify timer
+		_timerName = timerName;
+
+		// Generate unique ID for each timer created
+		static int id = 0;
+		_id = id;
+		id++;
+
+		reset();
+	}
+
+	void reset()
+	{
+		_totalElapsedClocks = 0;
+		_numSamples = 0;
+		_lastMeasurement = clock();
+		_start = _lastMeasurement;
+	}
+
+	void start()
+	{
+		_start = clock();
+	}
+
+	void stop()
+	{
+		// Save time measured
+		clock_t end = clock();
+		clock_t clocksElapsed = end - _start;
+		_totalElapsedClocks += clocksElapsed;
+		_numSamples++;
+
+		// Check to see if we have run long enough to send our measurement to listeners
+		double elapsedSeconds = double(end - _lastMeasurement) / CLOCKS_PER_SEC;
+		if(elapsedSeconds > 0.5)
+		{
+			// Send event
+			sendMeasurement();
+	
+			// Prepare for next measure
+			reset();
+		}
+	}
+
+	void sendMeasurement()
+	{
+		// Convert time to milliseconds
+		double seconds = double(_totalElapsedClocks / _numSamples) / CLOCKS_PER_SEC;
+		int ms = int(seconds * 1000);
+
+		std::string str_ms = Converter::IntToStr(ms);
+		std::string message = _timerName + ": "+ str_ms +" (ms)";
+		SEND_EVENT(&Event_PostDebugMessage(_id, message));
+	}
+};
+
+// Sends Event to relevant listeners.
+#define PROFILE_SECTION(HUD_NAME, CODE)								\
+{																	\
+	static StopWatch stopWatch(HUD_NAME);							\
+	stopWatch.start();												\
+		CODE														\
+	stopWatch.stop();												\
+}
+
 void ComponentManager::update(float delta)
 {
+	// Measure time
+	static StopWatch timer_total("Total");
+	timer_total.stop();
+	timer_total.start();
+
+	static StopWatch timer_etc("Outside");
+	timer_etc.stop();
+	
+
+
 	// Performs necessary per-frame updating of some sub-parts of EventManager.
 	EventManager::getInstance()->update(delta);
 	
@@ -239,6 +333,11 @@ void ComponentManager::update(float delta)
 	/// DONT SPAWN PLAYERS FIRST FRAMES
 	/// PUT SOMETHING
 
+
+	
+	
+	
+
 	if(GET_STATE() == STATE_DEATHMATCH)
 	{
 #ifdef XKILLPROFILING
@@ -246,21 +345,45 @@ void ComponentManager::update(float delta)
 		clock_t deltatimevartotal = clock();
 		outside += ((float)(deltatimevartotal-deltatimevartotal2))/((float)CLOCKS_PER_SEC);
 #endif
-		calctime(inputtimer,input_->onUpdate(delta);)
-		calctime(physicstimer,physics_->onUpdate(delta);)
-		updateOffset();
-		calctime(cameratimer,camera_->onUpdate(delta);)
-		updateCamera();
-		updateOffset();
+		PROFILE_SECTION("Input", 
+			calctime(inputtimer,input_->onUpdate(delta);)
+		)
 
-		calctime(gametimer,game_->onUpdate(delta);)
+		PROFILE_SECTION("Physics", 
 
-		calctime(soundtimer,sound_->onUpdate(delta);)
-		calctime(hackstimer,hacks_->onUpdate(delta);)
+			calctime(physicstimer,physics_->onUpdate(delta);)
+		)
 
-		calctime(scoretimer,score_->onUpdate(delta);)
-		calctime(cullingtimer, cullingComponent_->onUpdate(delta);)
-		calctime(rendertimer,render_->onUpdate(delta);)
+		PROFILE_SECTION("Camera", 
+			updateOffset();
+			calctime(cameratimer,camera_->onUpdate(delta);)
+			updateCamera();
+			updateOffset();
+		)
+
+		PROFILE_SECTION("GameLogic", 
+			calctime(gametimer,game_->onUpdate(delta);)
+		)
+
+		PROFILE_SECTION("Sound", 
+			calctime(soundtimer,sound_->onUpdate(delta);)
+		)
+
+		PROFILE_SECTION("HacksUpdate", 
+			calctime(hackstimer,hacks_->onUpdate(delta);)
+		)
+
+		PROFILE_SECTION("ScoreUpdate", 
+			calctime(scoretimer,score_->onUpdate(delta);)
+		)
+
+		PROFILE_SECTION("Culling", 
+			calctime(cullingtimer, cullingComponent_->onUpdate(delta);)
+		)
+
+		PROFILE_SECTION("Renderer", 
+			calctime(rendertimer,render_->onUpdate(delta);)
+		)
 	
 #ifdef XKILLPROFILING
 		deltatimevartotal2 = clock();
@@ -302,5 +425,11 @@ void ComponentManager::update(float delta)
 		DEBUGPRINT("ComponentManager::update has no state set");
 	}
 
-	SEND_EVENT(&Event(EVENT_UPDATE));
+	PROFILE_SECTION("Non-Components", 
+		SEND_EVENT(&Event(EVENT_UPDATE));
+	)
+
+
+	// Measure Qt performance
+	timer_etc.start();
 }

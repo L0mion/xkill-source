@@ -47,6 +47,13 @@ Menu_Main::Menu_Main( QWidget* parent ) : QMainWindow()
 
 
 	//
+	// Setup DeubBillboard
+	//
+
+	billboard.init(this, ui.label_debugMessageTemplate);
+
+
+	//
 	// Setup GUI
 	//
 
@@ -390,4 +397,45 @@ void Menu_Main::slot_menu_previous_level()
 	levelCurrent--;
 	levelCurrent %= levelNames.size();
 	updateLevelSelectionInterface();
+}
+
+void DebugBillboard::init( QWidget* window, QLabel* labelTemplate )
+{
+	_window = window;
+	_template = labelTemplate;
+	_template->hide();
+
+	SUBSCRIBE_TO_EVENT(this, EVENT_POST_DEBUG_MESSAGE);
+}
+
+void DebugBillboard::onEvent( Event* e )
+{
+	EventType type = e->getType();
+	switch (type) 
+	{
+	case EVENT_POST_DEBUG_MESSAGE:
+		{
+			Event_PostDebugMessage* debugMessage = (Event_PostDebugMessage*)(e);
+			int index = debugMessage->index;
+
+			//  Create place for more labels if required
+			while(_messages.size() <= index)
+			{
+				QLabel* l = new QLabel(_window);
+				l->setStyleSheet(_template->styleSheet());
+				l->show();
+				_messages.push_back(l);
+			}
+
+			// Add message to label
+			std::string message = debugMessage->message;
+			QLabel* l = _messages[index];
+			l->setText(message.c_str());
+			l->resize(l->sizeHint());
+			l->move(0, l->height() * index * 1.0f);
+		}
+		break;
+	default:
+		break;
+	}
 }
