@@ -1,5 +1,9 @@
 #include <xkill-utilities/Util.h>
+
+#include <xkill-utilities/SkinnedData.h>
+
 #include <DirectXMath.h>
+
 
 #include "ManagementD3D.h"
 #include "ManagementFX.h"
@@ -15,6 +19,7 @@
 #include "ManagementMath.h"
 #include "ManagementInstance.h"
 #include "ManagementSprites.h"
+#include "ManagementAnimation.h"
 
 #include "Winfo.h"
 #include "ModelD3D.h"
@@ -26,8 +31,16 @@
 #include "TypeFX.h"
 #include "Renderer.h"
 #include "ViewportData.h"
+
+#include "Buffer_SrvRtvUav.h"
+
+//tmep
+#include "Buffer_SrvDsv.h"
+
 #include "CameraInstances.h"
 #include "TimerDX.h"
+
+
 
 ATTRIBUTES_DECLARE_ALL;
 
@@ -93,13 +106,13 @@ Renderer::Renderer(HWND windowHandle)
 	managementSprites_  = nullptr;
 	debugLinesVertexBuffer_ = nullptr;
 
+
 	ATTRIBUTES_INIT_ALL;
 
 	rayBuffer				= nullptr;
 
-	//temp
-	m3dLoader_		= nullptr;
-	animatedMesh_	= nullptr;
+
+	temp_ = 0;
 }
 Renderer::~Renderer()	
 {
@@ -133,16 +146,13 @@ Renderer::~Renderer()
 	SAFE_DELETE(managementMath_);
 	SAFE_DELETE(managementInstance_);
 	SAFE_DELETE(managementSprites_);
+	SAFE_DELETE(managementAnimation_);
 
 	//d3dDebug_->reportLiveDeviceObjects();
 	SAFE_DELETE(managementDebug_);
 
 	SAFE_RELEASE(debugLinesVertexBuffer_);
 	SAFE_RELEASE(rayBuffer);
-
-	//temp
-//	SAFE_DELETE(m3dLoader_);
-//	SAFE_DELETE(animatedMesh_);
 }
 
 void Renderer::reset()
@@ -157,6 +167,7 @@ void Renderer::reset()
 	SAFE_RESET(managementRS_);
 	SAFE_RESET(managementBuffer_);
 	SAFE_RESET(managementSprites_);
+	SAFE_RESET(managementAnimation_);
 }
 
 void Renderer::unloadModels()
@@ -235,20 +246,7 @@ HRESULT Renderer::init()
 	if(SUCCEEDED(hr))
 		hr = initManagementSprites();
 	initManagementInstance();
-
-	//temp
-	/*
-	m3dLoader_ = new M3DLoader();
-	animatedMesh_ = nullptr;
-	animatedMesh_ = new AnimatedMesh();
-	m3dLoader_->loadM3D("../../xkill-resources/xkill-models/soldier.m3d",
-					   animatedMesh_->getVertices(),
-					   animatedMesh_->getIndices(),
-					   animatedMesh_->getSubsets(),
-					   animatedMesh_->getMaterials(),
-					   animatedMesh_->getSkinInfo());
-	animatedMesh_->init(managementD3D_->getDevice());
-	*/
+	initManagementAnimation();
 
 #ifdef XKILLPROFILING
 	ID3D11Device* device = managementD3D_->getDevice();
@@ -420,9 +418,15 @@ HRESULT Renderer::initManagementSprites()
 	hr = managementSprites_->init(managementD3D_->getDevice());
 	return hr;
 }
-
-void Renderer::update()
+void Renderer::initManagementAnimation()
 {
+	managementAnimation_ = new ManagementAnimation();
+}
+
+void Renderer::update(float delta)
+{
+	delta_ = delta; //Needed by ManagementAnimation::update
+
 	ID3D11Device*			device = managementD3D_->getDevice();
 	ID3D11DeviceContext*	devcon = managementD3D_->getDeviceContext();
 
@@ -533,9 +537,6 @@ void Renderer::renderViewportToGBuffer(ViewportData& vpData)
 	ID3D11Device*			device = managementD3D_->getDevice();
 	ID3D11DeviceContext*	devcon = managementD3D_->getDeviceContext();
 
-	if(animatedMesh_)
-		renderAnimatedMesh(vpData.view, vpData.proj);
-
 	managementSS_->setSS(devcon, TypeFX_PS, 0, SS_ID_DEFAULT);
 	managementRS_->setRS(devcon, RS_ID_DEFAULT);
 
@@ -561,7 +562,12 @@ void Renderer::renderViewportToGBuffer(ViewportData& vpData)
 	std::map<unsigned int, InstancedData*> instancesMap = cameraInstances->getInstancesMap();
 	for(std::map<unsigned int, InstancedData*>::iterator i = instancesMap.begin(); i != instancesMap.end(); i++)
 	{
-		renderInstance(i->first, i->second, false);
+			renderInstance(i->first, i->second, false);
+	}
+	while(itrPlayer.hasNext())
+	{
+		AttributePtr<Attribute_Player> player = itrPlayer.getNext();
+		renderAnimation(player, vpData.view, vpData.proj);
 	}
 
 	if(SETTINGS->showDebugPhysics)
@@ -735,6 +741,7 @@ void Renderer::setShadingDesc(ShadingDesc shadingDesc)
 	managementFX_->setLayout(devcon, shadingDesc.layoutID_);
 }
 
+
 void Renderer::renderSubset(
 	SubsetD3D* subset, 
 	MaterialDesc& material, 
@@ -841,6 +848,7 @@ DirectX::XMFLOAT4X4	Renderer::buildShadowMap()
 		renderInstance(i->first, i->second, true);
 	}
 	
+
 	//Unset shizzle
 	managementBuffer_->unset(devcon, SET_TYPE_DSV, SET_STAGE_CS, 0); //register and stage irrelevant
 	managementRS_->unsetRS(devcon);
@@ -1474,6 +1482,80 @@ void Renderer::drawHudElement(int viewportIndex, unsigned int textureId, DirectX
 	devcon->RSSetState(nullptr);
 }
 
+void Renderer::renderAnimation(AttributePtr<Attribute_Player> playerAt, DirectX::XMFLOAT4X4 view, DirectX::XMFLOAT4X4 projection)
+{
+	AttributePtr<Attribute_Spatial> ptr_spatial;
+	AttributePtr<Attribute_Position> ptr_position;
+	AttributePtr<Attribute_Animation> ptr_animation;
+	AttributePtr<Attribute_Render> ptr_render = playerAt->ptr_render;
+
+
+	ptr_spatial = ptr_render->ptr_spatial;
+	ptr_position = ptr_render->ptr_spatial->ptr_position;
+	ptr_animation = ptr_render->ptr_animation;
+
+
+	ID3D11Device*			device = managementD3D_->getDevice();
+	ID3D11DeviceContext*	devcon = managementD3D_->getDeviceContext();
+
+	ModelD3D* modelD3D	= managementModel_->getModelD3D(ptr_render->meshID, device);
+
+	
+	DirectX::XMFLOAT4X4 worldMatrix			= managementMath_->calculateWorldMatrix(ptr_spatial, ptr_position);
+	DirectX::XMFLOAT4X4 worldMatrixInverse	= managementMath_->calculateMatrixInverse(worldMatrix);
+	DirectX::XMFLOAT4X4 finalMatrix			= managementMath_->calculateFinalMatrix(worldMatrix, view, projection);
+	
+	managementCB_->setCB(CB_TYPE_OBJECT, TypeFX_VS, CB_REGISTER_OBJECT, devcon);
+	managementCB_->updateCBObject(devcon, finalMatrix, worldMatrix, worldMatrixInverse);
+
+	std::vector<DirectX::XMFLOAT4X4> finalTransforms;
+	
+	ptr_animation->time += delta_;
+	if(ptr_animation->time > modelD3D->getSkinnedData()->getClipEndTime(ptr_animation->activeAnimation))
+		ptr_animation->time = 0.0f;
+	modelD3D->getSkinnedData()->getFinalTransforms(ptr_animation->activeAnimation, ptr_animation->time, &finalTransforms);
+
+	managementCB_->setCB(CB_TYPE_BONE, TypeFX_VS, CB_REGISTER_BONE, devcon);
+	managementCB_->updateCBBone(devcon, finalTransforms);
+
+	managementFX_->setShader(devcon, SHADERID_VS_ANIMATION);
+	managementFX_->setShader(devcon, SHADERID_PS_DEFAULT);
+	managementSS_->setSS(devcon, TypeFX_PS, 0, SS_ID_DEFAULT);
+	managementRS_->setRS(devcon, RS_ID_DEFAULT);
+
+	managementBuffer_->setBuffersAndDepthBufferAsRenderTargets(devcon, managementD3D_->getDepthBuffer());
+
+	ID3D11Buffer* vertexBuffer = modelD3D->getVertexBuffer();
+	UINT stride = sizeof(VertexPosNormTexTanSkinned);
+	UINT offset = 0;
+	devcon->IASetVertexBuffers(
+				0, 
+				1, 
+				&vertexBuffer, 
+				&stride, 
+				&offset);
+
+	std::vector<MaterialDesc> materials = modelD3D->getMaterials();
+	std::vector<SubsetD3D*> subsets = modelD3D->getSubsetD3Ds();
+
+	for(unsigned int i=0; i<modelD3D->getSubsetD3Ds().size(); i++)
+	{
+		MaterialDesc material = materials[subsets.at(i)->getMaterialIndex()];
+
+		ID3D11ShaderResourceView* texAlbedo = managementTex_->getTexSrv(material.idAlbedoTex_);
+		ID3D11ShaderResourceView* texNormal = managementTex_->getTexSrv(material.idNormalTex_);
+		devcon->PSSetShaderResources(0, 1, &texAlbedo);
+		devcon->PSSetShaderResources(1, 1, &texNormal);
+
+		devcon->IASetIndexBuffer(subsets.at(i)->getIndexBuffer(), DXGI_FORMAT_R32_UINT, 0);
+		managementFX_->setLayout(devcon, LAYOUTID_POS_NORM_TEX_TAN_SKINNED);
+		devcon->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+		devcon->DrawIndexed(subsets.at(i)->getNumIndices(), 0, 0);
+	}
+
+	managementRS_->setRS(devcon, RS_ID_DEFAULT);
+}
+
 void Renderer::renderAnimatedMesh(DirectX::XMFLOAT4X4 viewMatrix, DirectX::XMFLOAT4X4 projectionMatrix)
 {
 //	ID3D11Device*			device = managementD3D_->getDevice();
@@ -1482,7 +1564,7 @@ void Renderer::renderAnimatedMesh(DirectX::XMFLOAT4X4 viewMatrix, DirectX::XMFLO
 //	DirectX::XMFLOAT4X4 worldMatrix(0.01f, 0.0f, 0.0f, 0.0f,
 //									0.0f, 0.01f, 0.0f, 0.0f,
 //									0.0f, 0.0f, 0.01f, 0.0f,
-//									10.0f, 2.3f, 1.0f, 1.0f);
+//									0.0f, 2.3f, 0.0f, 1.0f);
 //	DirectX::XMFLOAT4X4 worldMatrixInverse	= worldMatrix;
 //	DirectX::XMFLOAT4X4 finalMatrix			= managementMath_->calculateFinalMatrix(worldMatrix, viewMatrix, projectionMatrix);
 //	
@@ -1502,7 +1584,7 @@ void Renderer::renderAnimatedMesh(DirectX::XMFLOAT4X4 viewMatrix, DirectX::XMFLO
 //	managementSS_->setSS(devcon, TypeFX_PS, 0, SS_ID_DEFAULT);
 //	managementRS_->setRS(devcon, RS_ID_DEFAULT);
 //
-//	managementGBuffer_->setGBuffersAndDepthBuffer(devcon, managementD3D_->getDepthBuffer());
+//	managementBuffer_->setGBuffersAndDepthBuffer(devcon, managementD3D_->getDepthBuffer());
 //
 //	managementD3D_->clearDepthBuffer();
 //
@@ -1534,4 +1616,26 @@ void Renderer::renderAnimatedMesh(DirectX::XMFLOAT4X4 viewMatrix, DirectX::XMFLO
 void Renderer::loadTextures(TexDesc* texdesc)
 {
 	managementTex_->handleTexDesc(texdesc, managementD3D_->getDevice());
+}
+void Renderer::addAnimation(SkinnedData* skinnedData)
+{
+	managementAnimation_->addAnimation(skinnedData);
+}
+
+
+void Renderer::initDebugAnimation()
+{
+	//m3dLoader_ = new M3DLoader();
+	//
+	//animatedMesh_ = nullptr;
+	//animatedMesh_ = new AnimatedMesh();
+	//
+	//m3dLoader_->loadM3D("../../xkill-resources/xkill-models/soldier.m3d",
+	//animatedMesh_->getVertices(),
+	//animatedMesh_->getIndices(),
+	//animatedMesh_->getSubsets(),
+	//animatedMesh_->getMaterials(),
+	//animatedMesh_->getSkinInfo());
+	//
+	//animatedMesh_->init(managementD3D_->getDevice());
 }

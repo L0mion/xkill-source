@@ -16,6 +16,7 @@ LoaderFbxMesh::LoaderFbxMesh()
 LoaderFbxMesh::~LoaderFbxMesh()
 {
 }
+
 void LoaderFbxMesh::reset()
 {
 	polygonGroupIds_.clear();
@@ -27,9 +28,11 @@ void LoaderFbxMesh::reset()
 	vertexBinormals_.clear();
 }
 
-void LoaderFbxMesh::parseMesh(FbxMesh* mesh, LoaderFbxMeshDesc* meshDesc)
+void LoaderFbxMesh::parseMesh(FbxMesh* mesh, FbxPose* fbxPose, LoaderFbxMeshDesc* meshDesc)
 {
 	reset();
+
+	meshDesc->setFbxMesh(mesh);
 
 	int polygonVertexCount = mesh->GetPolygonVertexCount();
 	int polygonCount = mesh->GetPolygonCount();
@@ -60,7 +63,7 @@ void LoaderFbxMesh::parseMesh(FbxMesh* mesh, LoaderFbxMeshDesc* meshDesc)
 	}
 
 
-	transformVertices(mesh);
+//	transformVertices(mesh);
 
 	meshDesc->setPolygonGroupIds(polygonGroupIds_);
 	meshDesc->setVertexPositions(vertexPositions_);
@@ -69,7 +72,7 @@ void LoaderFbxMesh::parseMesh(FbxMesh* mesh, LoaderFbxMeshDesc* meshDesc)
 	meshDesc->setVertexTangents(vertexTangents_);
 	meshDesc->setVertexBinormals(vertexBinormals_);
 
-	parseVertexLinkData(mesh, meshDesc);
+	parseVertexLinkData(mesh, fbxPose, meshDesc);
 	meshDesc->fillBoneData();
 }
 
@@ -104,7 +107,7 @@ void LoaderFbxMesh::parseVertexPositions(FbxMesh* mesh, FbxVector4* controlPoint
 	vertexPositions_.push_back(position);
 }
 
-void LoaderFbxMesh::parseVertexColors(FbxMesh* mesh, int controlPointIndex, int vertexId)
+void	 LoaderFbxMesh::parseVertexColors(FbxMesh* mesh, int controlPointIndex, int vertexId)
 {
 	for(int i=0; i<mesh->GetElementVertexColorCount(); i++)
 	{
@@ -171,7 +174,7 @@ FbxColor LoaderFbxMesh::parseVertexColorsByPolygonVertex(FbxGeometryElementVerte
 	return fbxColor;
 }
 
-void LoaderFbxMesh::parseVertexNormals(FbxMesh* mesh, int controlPointIndex, int vertexId)
+void		LoaderFbxMesh::parseVertexNormals(FbxMesh* mesh, int controlPointIndex, int vertexId)
 {
 	for(int i=0; i<mesh->GetElementNormalCount(); i++)
 	{
@@ -195,7 +198,7 @@ void LoaderFbxMesh::parseVertexNormals(FbxMesh* mesh, int controlPointIndex, int
 		vertexNormals_.push_back(normal);
 	}
 }
-FbxVector4 LoaderFbxMesh::parseVertexNormalsByControlPoint(FbxGeometryElementNormal* normalElement, int controlPointIndex)
+FbxVector4	LoaderFbxMesh::parseVertexNormalsByControlPoint(FbxGeometryElementNormal* normalElement, int controlPointIndex)
 {
 	FbxVector4 fbxNormal(0, 0, 0, 0);
 	int id;
@@ -214,7 +217,7 @@ FbxVector4 LoaderFbxMesh::parseVertexNormalsByControlPoint(FbxGeometryElementNor
 
 	return fbxNormal;
 }
-FbxVector4 LoaderFbxMesh::parseVertexNormalsByPolygonVertex(FbxGeometryElementNormal* normalElement, int vertexId)
+FbxVector4	LoaderFbxMesh::parseVertexNormalsByPolygonVertex(FbxGeometryElementNormal* normalElement, int vertexId)
 {
 	FbxVector4 fbxNormal(0, 0, 0, 0);
 	int id;
@@ -234,7 +237,7 @@ FbxVector4 LoaderFbxMesh::parseVertexNormalsByPolygonVertex(FbxGeometryElementNo
 	return fbxNormal;
 }
 
-void LoaderFbxMesh::parseVertexUVs(FbxMesh* mesh, int polygonIndex, int insidePolygonIndex, int controlPointIndex)
+void		LoaderFbxMesh::parseVertexUVs(FbxMesh* mesh, int polygonIndex, int insidePolygonIndex, int controlPointIndex)
 {
 	for(int i=0; i<mesh->GetElementUVCount(); i++)
 	{
@@ -258,7 +261,7 @@ void LoaderFbxMesh::parseVertexUVs(FbxMesh* mesh, int polygonIndex, int insidePo
 		vertexUVs_.push_back(uv);
 	}
 }
-FbxVector2 LoaderFbxMesh::parseVertexUVsByControlPoint(FbxGeometryElementUV* uvElement, int controlPointIndex)
+FbxVector2	LoaderFbxMesh::parseVertexUVsByControlPoint(FbxGeometryElementUV* uvElement, int controlPointIndex)
 {
 	FbxVector2 fbxUV(0, 0);
 	int id;
@@ -277,7 +280,7 @@ FbxVector2 LoaderFbxMesh::parseVertexUVsByControlPoint(FbxGeometryElementUV* uvE
 
 	return fbxUV;
 }
-FbxVector2 LoaderFbxMesh::parseVertexUVsByPolygonVertex(FbxMesh* mesh, FbxGeometryElementUV* uvElement, int polygonIndex, int insidePolygonIndex)
+FbxVector2	LoaderFbxMesh::parseVertexUVsByPolygonVertex(FbxMesh* mesh, FbxGeometryElementUV* uvElement, int polygonIndex, int insidePolygonIndex)
 {
 	FbxVector2 fbxUV;
 	int uvIndex = mesh->GetTextureUVIndex(polygonIndex, insidePolygonIndex);
@@ -294,7 +297,7 @@ FbxVector2 LoaderFbxMesh::parseVertexUVsByPolygonVertex(FbxMesh* mesh, FbxGeomet
 	return fbxUV;
 }
 
-void LoaderFbxMesh::parseVertexTangents(FbxMesh* mesh, int controlPointIndex, int vertexId)
+void		LoaderFbxMesh::parseVertexTangents(FbxMesh* mesh, int controlPointIndex, int vertexId)
 {
 	for(int i=0; i<mesh->GetElementTangentCount(); i++)
 	{
@@ -320,7 +323,7 @@ void LoaderFbxMesh::parseVertexTangents(FbxMesh* mesh, int controlPointIndex, in
 		vertexTangents_.push_back(tangent);
 	}
 }
-FbxVector4 LoaderFbxMesh::parseVertexTangentsByControlPoint(FbxGeometryElementTangent* tangentElement, int controlPointIndex)
+FbxVector4	LoaderFbxMesh::parseVertexTangentsByControlPoint(FbxGeometryElementTangent* tangentElement, int controlPointIndex)
 {
 	FbxVector4 fbxTangent(0, 0, 0, 0);
 	int id;
@@ -339,7 +342,7 @@ FbxVector4 LoaderFbxMesh::parseVertexTangentsByControlPoint(FbxGeometryElementTa
 
 	return fbxTangent;
 }
-FbxVector4 LoaderFbxMesh::parseVertexTangentsByPolygonVertex(FbxGeometryElementTangent* tangentElement, int vertexId)
+FbxVector4	LoaderFbxMesh::parseVertexTangentsByPolygonVertex(FbxGeometryElementTangent* tangentElement, int vertexId)
 {
 	FbxVector4 fbxTangent(0, 0, 0, 0);
 	int id;
@@ -359,7 +362,7 @@ FbxVector4 LoaderFbxMesh::parseVertexTangentsByPolygonVertex(FbxGeometryElementT
 	return fbxTangent;
 }
 
-void LoaderFbxMesh::parseVertexBinormals(FbxMesh* mesh, int controlPointIndex, int vertexId)
+void		LoaderFbxMesh::parseVertexBinormals(FbxMesh* mesh, int controlPointIndex, int vertexId)
 {
 	for(int i=0; i<mesh->GetElementBinormalCount(); i++)
 	{
@@ -384,7 +387,7 @@ void LoaderFbxMesh::parseVertexBinormals(FbxMesh* mesh, int controlPointIndex, i
 		vertexBinormals_.push_back(binormal);
 	}
 }
-FbxVector4 LoaderFbxMesh::parseVertexBinormalsByControlPoint(FbxGeometryElementBinormal* binormalElement, int controlPointIndex)
+FbxVector4	LoaderFbxMesh::parseVertexBinormalsByControlPoint(FbxGeometryElementBinormal* binormalElement, int controlPointIndex)
 {
 	FbxVector4 fbxBinormal(0, 0, 0, 0);
 	int id;
@@ -403,7 +406,7 @@ FbxVector4 LoaderFbxMesh::parseVertexBinormalsByControlPoint(FbxGeometryElementB
 
 	return fbxBinormal;
 }
-FbxVector4 LoaderFbxMesh::parseVertexBinormalsByPolygonVertex(FbxGeometryElementBinormal* binormalElement, int vertexId)
+FbxVector4	LoaderFbxMesh::parseVertexBinormalsByPolygonVertex(FbxGeometryElementBinormal* binormalElement, int vertexId)
 {
 	FbxVector4 fbxBinormal(0, 0, 0, 0);
 	int id;
@@ -423,7 +426,7 @@ FbxVector4 LoaderFbxMesh::parseVertexBinormalsByPolygonVertex(FbxGeometryElement
 	return fbxBinormal;
 }
 
-void LoaderFbxMesh::parseVertexLinkData(FbxMesh* mesh, LoaderFbxMeshDesc* meshDesc)
+void		LoaderFbxMesh::parseVertexLinkData(FbxMesh* mesh, FbxPose* fbxPose, LoaderFbxMeshDesc* meshDesc)
 {
 	int debug = mesh->GetControlPointsCount();
 	meshDesc->prepareBoneData(mesh->GetControlPointsCount());
@@ -438,12 +441,12 @@ void LoaderFbxMesh::parseVertexLinkData(FbxMesh* mesh, LoaderFbxMeshDesc* meshDe
 		numClusters = static_cast<FbxSkin*>(mesh->GetDeformer(deformerIndex, FbxDeformer::eSkin))->GetClusterCount();
 		if(numClusters > 0)
 		{
-			cluster = static_cast<FbxSkin*>(mesh->GetDeformer(0, FbxDeformer::eSkin))->GetCluster(0);
+			cluster = static_cast<FbxSkin*>(mesh->GetDeformer(deformerIndex, FbxDeformer::eSkin))->GetCluster(0);
 		}
 		if(cluster)
 		{
 			FbxNode* node = cluster->GetLink();
-
+		
 			node = findRoot(node);
 			std::vector<FbxNode*> nodes;
 			std::vector<int> parentIndices;
@@ -460,12 +463,23 @@ void LoaderFbxMesh::parseVertexLinkData(FbxMesh* mesh, LoaderFbxMeshDesc* meshDe
 
 			for(unsigned int i=0; i<nodes.size(); i++)
 			{
+				//FbxAMatrix matrixTransform;
+				//matrixTransform = nodes[i]->EvaluateGlobalTransform(FbxTime(0));
+				//matrixTransform = getGlobalPosition(nodes[i], FbxTime(0), fbxPose, &matrixTransform);
+				//
+				//Float4x4 offsetMatrix;
+				//for(int x=0; x<4; x++)
+				//{
+				//	for(int y=0; y<4; y++)
+				//		offsetMatrix.m[x][y] = static_cast<float>(matrixTransform.mData[x][y]);
+				//}
+
 				meshDesc->addOffsetMatrix(identityMatrix);
 			}
 
 			for(int clusterIndex=0; clusterIndex<numClusters; clusterIndex++)
 			{
-				cluster = static_cast<FbxSkin*>(mesh->GetDeformer(0, FbxDeformer::eSkin))->GetCluster(clusterIndex);
+				cluster = static_cast<FbxSkin*>(mesh->GetDeformer(deformerIndex, FbxDeformer::eSkin))->GetCluster(clusterIndex);
 				unsigned int nodeIndex=0; 
 				bool equal = false;
 				while(!equal && nodeIndex<nodes.size())
@@ -475,54 +489,16 @@ void LoaderFbxMesh::parseVertexLinkData(FbxMesh* mesh, LoaderFbxMeshDesc* meshDe
 					else
 						nodeIndex++;
 				}
-				
-				parseIndicesAndWeights(cluster, meshDesc, nodeIndex);
-				parseTransformMatrix(cluster, meshDesc, nodeIndex);
+				if(equal)
+				{
+					parseIndicesAndWeights(cluster, meshDesc, nodeIndex);
+					parseTransformMatrix(cluster, mesh, fbxPose, meshDesc, nodeIndex);
+				}
 			}
 		}
 	}
 }
-void LoaderFbxMesh::parseLinkHierarchy(FbxNode* rootNode, std::vector<FbxNode*>* nodes, std::vector<int>* parentIndices)
-{
-	nodes->push_back(rootNode);
-	parentIndices->push_back(-1);
-	for(unsigned int nodeIndex=0; nodeIndex<nodes->size(); nodeIndex++)
-	{
-		for(int childIndex=0; childIndex<nodes->at(nodeIndex)->GetChildCount(); childIndex++)
-		{
-			nodes->push_back(nodes->at(nodeIndex)->GetChild(childIndex));
-			parentIndices->push_back(nodeIndex);
-		}
-	}
-}
-void LoaderFbxMesh::parseIndicesAndWeights(FbxCluster* cluster, LoaderFbxMeshDesc* meshDesc, int nodeIndex)
-{
-	int numIndices = cluster->GetControlPointIndicesCount();
-				
-	int* indices = cluster->GetControlPointIndices();
-	double* weights = cluster->GetControlPointWeights();
-	
-	for(int i =0; i<numIndices; i++)
-	{
-		meshDesc->addVertexBoneIndex(indices[i], nodeIndex);
-		meshDesc->addVertexBoneWeight(indices[i], static_cast<float>(weights[i]));
-	}
-}
-void LoaderFbxMesh::parseTransformMatrix(FbxCluster* cluster, LoaderFbxMeshDesc* meshDesc, int index)
-{
-	FbxAMatrix fbxMatrix;
-	cluster->GetTransformLinkMatrix(fbxMatrix);
-	Float4x4 offsetMatrix;
-	
-	for(int x=0; x<4; x++)
-	{
-		for(int y=0; y<4; y++)
-			offsetMatrix.m[x][y] = static_cast<float>(fbxMatrix.mData[x][y]);
-	}
-	meshDesc->setOffsetMatrix(index, offsetMatrix);
-}
-
-FbxNode* LoaderFbxMesh::findRoot(FbxNode* node)
+FbxNode*	LoaderFbxMesh::findRoot(FbxNode* node)
 {
 	bool done = false;
 	while(!done)
@@ -542,17 +518,246 @@ FbxNode* LoaderFbxMesh::findRoot(FbxNode* node)
 	
 	return node;
 }
+void		LoaderFbxMesh::parseLinkHierarchy(FbxNode* rootNode, std::vector<FbxNode*>* nodes, std::vector<int>* parentIndices)
+{
+	nodes->push_back(rootNode);
+	parentIndices->push_back(-1);
+	for(unsigned int nodeIndex=0; nodeIndex<nodes->size(); nodeIndex++)
+	{
+		for(int childIndex=0; childIndex<nodes->at(nodeIndex)->GetChildCount(); childIndex++)
+		{
+			nodes->push_back(nodes->at(nodeIndex)->GetChild(childIndex));
+			parentIndices->push_back(nodeIndex);
+		}
+	}
+}
+void		LoaderFbxMesh::parseIndicesAndWeights(FbxCluster* cluster, LoaderFbxMeshDesc* meshDesc, int nodeIndex)
+{
+	int numIndices = cluster->GetControlPointIndicesCount();
+				
+	int* indices = cluster->GetControlPointIndices();
+	double* weights = cluster->GetControlPointWeights();
+	
+	for(int i =0; i<numIndices; i++)
+	{
+		int index = indices[i];
+		double weight = weights[i];
+		meshDesc->addVertexBoneIndex(indices[i], nodeIndex);
+		meshDesc->addVertexBoneWeight(indices[i], static_cast<float>(weights[i]));
+	}
+}
+void		LoaderFbxMesh::parseTransformMatrix(FbxCluster* cluster, FbxMesh* mesh, FbxPose* fbxPose, LoaderFbxMeshDesc* meshDesc, int index)
+{
+	FbxCluster::ELinkMode clusterMode = cluster->GetLinkMode();
+
+	FbxAMatrix globalPosition = getGlobalPosition(mesh->GetNode(), FbxTime(0), fbxPose, &globalPosition);
+	globalPosition *= getGeometry(mesh->GetNode());
+
+	FbxAMatrix fbxMatrix;
+//	if(clusterMode == FbxCluster::eAdditive && cluster->GetAssociateModel())
+//		fbxMatrix = parseTransformMatrixAssociateModel(cluster, mesh, fbxPose, globalPosition);
+//	else
+//		fbxMatrix = parseTransformMatrixOther(cluster, mesh, fbxPose, globalPosition);
+
+	fbxMatrix = parseTransformMatrix_debug(cluster, mesh, fbxPose, globalPosition);
+
+//	fbxMatrix = convertToLeftHanded(fbxMatrix);
+
+	Float4x4 offsetMatrix = translateMatrixToFloat4x4(fbxMatrix);
+
+	meshDesc->setOffsetMatrix(index, offsetMatrix);
+}
+FbxAMatrix	LoaderFbxMesh::parseTransformMatrixAssociateModel(FbxCluster* cluster, FbxMesh* mesh, FbxPose* fbxPose, FbxAMatrix globalPosition)
+{
+	FbxAMatrix associateGeometry;
+	FbxAMatrix associateGlobalInitPosition;
+	FbxAMatrix associateGlobalCurrentPosition;
+
+	FbxAMatrix referenceGeometry;
+	FbxAMatrix referenceGlobalInitPosition;
+	FbxAMatrix referenceGlobalCurrentPosition;
+
+	FbxAMatrix clusterGeometry;
+	FbxAMatrix clusterGlobalInitPosition;
+	FbxAMatrix clusterGlobalCurrentPosition;
+
+	FbxTime time(0);
+
+	cluster->GetTransformAssociateModelMatrix(associateGlobalInitPosition);
+	associateGeometry = getGeometry(cluster->GetAssociateModel());
+	associateGlobalInitPosition *= associateGeometry;
+	associateGlobalCurrentPosition = getGlobalPosition(cluster->GetAssociateModel(), time, fbxPose, nullptr);
+
+	cluster->GetTransformMatrix(referenceGlobalInitPosition);
+	referenceGeometry = getGeometry(mesh->GetNode());
+	referenceGlobalInitPosition *= referenceGeometry;
+	referenceGlobalCurrentPosition = globalPosition;
+
+	cluster->GetTransformLinkMatrix(clusterGlobalInitPosition);
+	clusterGeometry = getGeometry(cluster->GetLink());
+	clusterGlobalInitPosition *= clusterGeometry;
+	clusterGlobalCurrentPosition = getGlobalPosition(cluster->GetLink(), time, fbxPose, nullptr);
+
+	FbxAMatrix offsetMatrix;
+	offsetMatrix = referenceGlobalInitPosition.Inverse() * associateGlobalInitPosition * associateGlobalCurrentPosition.Inverse() *
+			clusterGlobalCurrentPosition * clusterGlobalInitPosition.Inverse() * referenceGlobalInitPosition;
+
+	return offsetMatrix;
+}
+FbxAMatrix	LoaderFbxMesh::parseTransformMatrixOther(FbxCluster* cluster, FbxMesh* mesh, FbxPose* fbxPose, FbxAMatrix globalPosition)
+{
+	FbxAMatrix referenceGeometry;
+	FbxAMatrix referenceGlobalInitPosition;
+	FbxAMatrix referenceGlobalCurrentPosition;
+
+	FbxAMatrix clusterGeometry;
+	FbxAMatrix clusterGlobalInitPosition;
+	FbxAMatrix clusterGlobalCurrentPosition;
+
+	FbxAMatrix clusterRelativeInitPosition;
+	FbxAMatrix clusterRelativeCurrentPositionInverse;
+
+	FbxTime time(0);
+
+	FbxAMatrix fbxMatrixIdentity;
+	fbxMatrixIdentity.SetIdentity();
+
+	cluster->GetTransformMatrix(referenceGlobalInitPosition);
+	referenceGlobalCurrentPosition = globalPosition;
+	referenceGeometry = getGeometry(mesh->GetNode());
+	referenceGlobalInitPosition *= referenceGeometry;
+
+	cluster->GetTransformLinkMatrix(clusterGlobalInitPosition);
+	clusterGlobalCurrentPosition = getGlobalPosition(cluster->GetLink(), time, fbxPose, nullptr);
+
+	clusterRelativeInitPosition = clusterGlobalInitPosition.Inverse() * referenceGlobalInitPosition;
+	clusterRelativeCurrentPositionInverse = referenceGlobalCurrentPosition.Inverse() * clusterGlobalCurrentPosition;
+	
+	FbxAMatrix offsetMatrix;
+	offsetMatrix = clusterRelativeCurrentPositionInverse * clusterRelativeInitPosition;
+	
+	return offsetMatrix;
+}
+
+FbxAMatrix  LoaderFbxMesh::parseTransformMatrix_debug(FbxCluster* cluster, FbxMesh* mesh, FbxPose* fbxPose, FbxAMatrix globalPosition)
+{
+	FbxAMatrix transform;
+	FbxAMatrix bindPoseTransform;
+	FbxAMatrix bindPoseTransformInverse;
+	FbxAMatrix boneReferenceTransform;
+	FbxAMatrix boneReferenceTransformInverse;
+	FbxAMatrix meshGeometryMatrix;
+
+	cluster->GetTransformLinkMatrix(bindPoseTransform);
+	cluster->GetTransformMatrix(boneReferenceTransform);
+
+	bindPoseTransformInverse		= bindPoseTransform.Inverse();
+	boneReferenceTransformInverse	= boneReferenceTransform.Inverse(); 
+
+	meshGeometryMatrix = getGeometry(mesh->GetNode());
+
+	transform = bindPoseTransformInverse * boneReferenceTransform;
+
+	return transform;
+}
+
+FbxAMatrix	LoaderFbxMesh::getGeometry(FbxNode* node)
+{
+	FbxAMatrix fbxGeometry;
+	FbxVector4 fbxTranslation, fbxRotation, fbxScaling;
+
+	fbxTranslation	= node->GetGeometricTranslation(FbxNode::eSourcePivot);
+	fbxRotation		= node->GetGeometricRotation(FbxNode::eSourcePivot);
+	fbxScaling		= node->GetGeometricScaling(FbxNode::eSourcePivot);
+	fbxGeometry.SetTRS(fbxTranslation, fbxRotation, fbxScaling);
+
+	return fbxGeometry;
+}
+FbxAMatrix	LoaderFbxMesh::getGlobalPosition(FbxNode* node, FbxTime time, FbxPose* pose, FbxAMatrix* parentGlobalPosition)
+{
+	FbxAMatrix globalPosition;
+
+	bool positionFound = false;
+
+	if(pose)
+	{
+		int nodeIndex = pose->Find(node);
+		if(nodeIndex > -1)
+		{
+			if(pose->IsBindPose() || !pose->IsLocalMatrix(nodeIndex))
+				globalPosition = getPoseMatrix(pose, nodeIndex);
+			else
+			{
+				FbxAMatrix localParentGlobalPosition;
+				if(parentGlobalPosition)
+					localParentGlobalPosition = *parentGlobalPosition;
+				else
+				{
+					if(node->GetParent())
+						localParentGlobalPosition = getGlobalPosition(node->GetParent(), time, pose, nullptr);
+				}
+
+				FbxAMatrix localPosition = getPoseMatrix(pose, nodeIndex);
+				globalPosition = localParentGlobalPosition * localPosition;
+			}
+			positionFound = true;
+		}
+	}
+
+	if(!positionFound)
+		globalPosition = node->EvaluateGlobalTransform(time);
+
+	return globalPosition;
+}
+FbxAMatrix	LoaderFbxMesh::getPoseMatrix(FbxPose* pose, int nodeIndex)
+{
+	FbxAMatrix poseMatrix;
+	FbxMatrix matrix = pose->GetMatrix(nodeIndex);
+	
+	memcpy(static_cast<double*>(poseMatrix), static_cast<double*>(matrix), sizeof(matrix.mData));
+
+	return poseMatrix;
+}
+
+FbxAMatrix LoaderFbxMesh::convertToLeftHanded(FbxAMatrix fbxMatrix)
+{
+	FbxAMatrix convertionMatrix;
+	FbxVector4 rowX(1.0, 0.0, 0.0, 0.0);
+	FbxVector4 rowY(0.0, 1.0, 0.0, 0.0);
+	FbxVector4 rowZ(0.0, 0.0, -1.0, 0.0);
+	FbxVector4 rowW(0.0, 0.0, 0.0, 1.0);
+
+	convertionMatrix.SetRow(0, rowX);
+	convertionMatrix.SetRow(1, rowY);
+	convertionMatrix.SetRow(2, rowZ);
+	convertionMatrix.SetRow(3, rowW);
+
+	FbxAMatrix convertedMatrix = fbxMatrix * convertionMatrix;
+	return convertedMatrix;
+}
+Float4x4	LoaderFbxMesh::translateMatrixToFloat4x4(FbxAMatrix fbxMatrix)
+{
+	Float4x4 matrix;
+	for(int x=0; x<4; x++)
+	{
+		for(int y=0; y<4; y++)
+			matrix.m[x][y] = static_cast<float>(fbxMatrix.mData[x][y]);
+	}
+	return matrix;
+}
 
 void LoaderFbxMesh::transformVertices(FbxMesh* mesh)
 {
 	FbxNode*	node		= mesh->GetNode();
-	FbxAMatrix	fbxMatrix	= node->EvaluateLocalTransform();
+	FbxAMatrix	fbxMatrix	= node->EvaluateGlobalTransform(FbxTime(0));
 
 	DirectX::XMMATRIX xmTransform;
 	xmTransform = DirectX::XMMATRIX(static_cast<float>(fbxMatrix.mData[0][0]), static_cast<float>(fbxMatrix.mData[0][1]), static_cast<float>(fbxMatrix.mData[0][2]), static_cast<float>(fbxMatrix.mData[0][3]),
 									static_cast<float>(fbxMatrix.mData[1][0]), static_cast<float>(fbxMatrix.mData[1][1]), static_cast<float>(fbxMatrix.mData[1][2]), static_cast<float>(fbxMatrix.mData[1][3]),
 									static_cast<float>(fbxMatrix.mData[2][0]), static_cast<float>(fbxMatrix.mData[2][1]), static_cast<float>(fbxMatrix.mData[2][2]), static_cast<float>(fbxMatrix.mData[2][3]),
 									static_cast<float>(fbxMatrix.mData[3][0]), static_cast<float>(fbxMatrix.mData[3][1]), static_cast<float>(fbxMatrix.mData[3][2]), static_cast<float>(fbxMatrix.mData[3][3]));
+
+	xmTransform = DirectX::XMMatrixTranspose(xmTransform);
 
 	DirectX::XMFLOAT3 position;
 	DirectX::XMVECTOR xmPosition;
@@ -563,7 +768,7 @@ void LoaderFbxMesh::transformVertices(FbxMesh* mesh)
 		position.z = vertexPositions_[i].z;
 	
 		xmPosition = DirectX::XMLoadFloat3(&position);
-		xmPosition = DirectX::XMVector3Transform(xmPosition, xmTransform);
+		xmPosition = DirectX::XMVector3TransformCoord(xmPosition, xmTransform);
 		
 		DirectX::XMStoreFloat3(&position, xmPosition);
 		vertexPositions_[i].x = position.x;

@@ -49,7 +49,10 @@ public:
 		CREATE_ATTRIBUTE(ptr_spatial, Attribute_Spatial, spatial, entity);
 		ptr_spatial->ptr_position = ptr_position;
 
+		CREATE_ATTRIBUTE(ptr_animation, Attribute_Animation, animation, entity);
+
 		CREATE_ATTRIBUTE(ptr_render, Attribute_Render, render, entity);
+		ptr_render->ptr_animation = ptr_animation;
 		ptr_render->ptr_spatial = ptr_spatial;
 		ptr_render->meshID = XKILL_Enums::ModelId::PLAYERCONTROLLEDCHARACTER;
 		
@@ -505,15 +508,19 @@ public:
 	void createRenderableEntity(Entity* entity)
 	{
 		CREATE_ATTRIBUTE(ptr_position, Attribute_Position, position, entity);
-		ptr_position->position = Float3(0.0f, 2.1f, 0.0f);
+		ptr_position->position = Float3(8.0f, 10.0f, 0.0f);
 
 		CREATE_ATTRIBUTE(ptr_spatial, Attribute_Spatial, spatial, entity);
 		ptr_spatial->ptr_position = ptr_position;
-		ptr_spatial->scale = Float3(0.01f, 0.01f, 0.01f);
+		ptr_spatial->scale = Float3(0.5f, 0.5f, 0.5f);
+		ptr_spatial->rotation = Float4(0, 0.0, 0.0f, 1);
 		
+		CREATE_ATTRIBUTE(ptr_animation, Attribute_Animation, animation, entity);
+
 		CREATE_ATTRIBUTE(ptr_render, Attribute_Render, render, entity);
 		ptr_render->ptr_spatial = ptr_spatial;
 		ptr_render->meshID = 12;
+		ptr_render->ptr_animation = ptr_animation;
 		
 		CREATE_ATTRIBUTE(ptr_physics, Attribute_Physics, physics, entity);
 		ptr_physics->ptr_spatial = ptr_spatial;

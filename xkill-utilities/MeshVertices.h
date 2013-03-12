@@ -130,7 +130,7 @@ struct DLL_U VertexPosNormTexTanSkinned
 		tangent_	= Float4(0.0f, 0.0f, 0.0f, 0.0f);
 		weights_	= Float3(0.0f, 0.0f, 0.0f);
 		for(unsigned int i=0; i<NUM_BONES_PER_VERTEX; i++)
-		boneIndices_[i] = 0;
+			boneIndices_[i] = 0;
 	}
 	//! Constructor setting members to specific values.
 	/*!
@@ -149,7 +149,7 @@ struct DLL_U VertexPosNormTexTanSkinned
 		tangent_	= tangent;
 		weights_	= weights;
 		for(unsigned int i=0; i<NUM_BONES_PER_VERTEX; i++)
-		boneIndices_[i] = boneIndices[i];
+			boneIndices_[i] = boneIndices[i];
 	}
 };
 
