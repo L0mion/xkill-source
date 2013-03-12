@@ -7,7 +7,7 @@ float3 NormalSampleToWorldSpace(
 	float3 tangentW)
 {
 	//Uncompress each component from [0, 1] to [-1, 1].
-	float3 normalT = 2.0f * normalMapSample - 1.0f;
+	float3 normalT = normalMapSample * 2.0f - 1.0f;
 	
 	//Build orthonormal basis.
 	float3 N = unitNormalW;

@@ -7,23 +7,23 @@ struct Frustum
 };
 
 Frustum ExtractFrustumPlanes(
-	uint screenWidth,
-	uint screenHeight,
-	uint viewportTopX,
-	uint viewportTopY,
-	uint tileDim,
-	uint2 blockID,
-	float proj11,
-	float proj22,
-	float minZ,
-	float maxZ)
+	const uint screenWidth,
+	const uint screenHeight,
+	const uint viewportTopX,
+	const uint viewportTopY,
+	const uint tileDim,
+	const uint2 blockID,
+	const float proj11,
+	const float proj22,
+	const float minZ,
+	const float maxZ)
 {
-    float2 tileScale = float2(float(screenWidth), float(screenHeight)) * rcp(float(2 * tileDim));
-    float2 tileBias = tileScale - float2(blockID.xy);
+    const float2 tileScale = float2(float(screenWidth), float(screenHeight)) * rcp(float(2 * tileDim));
+    const float2 tileBias = tileScale - float2(blockID.xy);
 
-    float4 c1 = float4(proj11 * tileScale.x,	0.0f,					tileBias.x, 0.0f);
-    float4 c2 = float4(0.0f,					-proj22 * tileScale.y,	tileBias.y, 0.0f);
-    float4 c4 = float4(0.0f,					0.0f,					1.0f,		0.0f);
+    const float4 c1 = float4(proj11 * tileScale.x,	0.0f,					tileBias.x, 0.0f);
+    const float4 c2 = float4(0.0f,					-proj22 * tileScale.y,	tileBias.y, 0.0f);
+    const float4 c4 = float4(0.0f,					0.0f,					1.0f,		0.0f);
 
     Frustum f;
     f._[0] = c4 - c1;

@@ -10,7 +10,7 @@ struct LightDescDir
 	float3 direction;
 
 	//Padding
-	float pad1; //Is this bit of padding necessary?
+	float pad1; //This bit of padding shouldn't be necessary, but it seemingly is. Get visual errors when not having it.
 };
 
 #endif //XKILL_RENDERER_LIGHTDESCDIR_HLSL

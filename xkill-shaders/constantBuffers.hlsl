@@ -15,8 +15,6 @@ cbuffer cbPerInstance : register (b0)
 
 cbuffer cbPerFrame : register (b1)
 {
-	row_major float4x4 shadowMapTransform;
-
 	uint numLightsDir;
 	uint numLightsPoint;
 	uint pad0;
@@ -107,6 +105,11 @@ cbuffer cbSSAO : register ( b8 )
     occlusionRadius:	the sampling radius.
     occlusionIntensity: the ao intensity.
 	*/
+};
+
+cbuffer cbShadow : register ( b9 )
+{
+	row_major float4x4 shadowMapTransform;
 };
 
 #endif //XKILL_RENDERER_CONSTANTBUFFERS_HLSL
