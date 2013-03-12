@@ -19,7 +19,7 @@ Texture2D texNormal		: register(t1);
 
 SamplerState ss : register(s0);
 
-PSOut PS_NormalMap(VSOutPosNormWTexTanW pIn)
+PSOut PS_NormalMap(VSOutPosNormVTexTanW pIn)
 {
 	PSOut output;
 
@@ -32,7 +32,7 @@ PSOut PS_NormalMap(VSOutPosNormWTexTanW pIn)
 	//Fill normal RTV
 	float3 normal = NormalSampleToWorldSpace(
 		normalSample.xyz,
-		normalize(pIn.normalW),
+		normalize(pIn.normalV),
 		pIn.tangentW);
 	normal.x = normal.x * 0.5f + 0.5f;
 	normal.y = normal.y * 0.5f + 0.5f;

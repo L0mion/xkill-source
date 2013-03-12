@@ -1,9 +1,9 @@
 #include "M3DLoader.h"
-#include "M3DMeshData.h"
-#include "AnimationClip.h"
-#include "BoneAnimation.h"
-#include "SkinnedData.h"
-#include "Keyframe.h"
+#include <xkill-utilities/M3DMeshData.h>
+#include <xkill-utilities/AnimationClip.h>
+#include <xkill-utilities/BoneAnimation.h>
+#include <xkill-utilities/SkinnedData.h>
+#include <xkill-utilities/Keyframe.h>
 
 M3DLoader::M3DLoader()
 {

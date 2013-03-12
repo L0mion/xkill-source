@@ -66,21 +66,9 @@ public:
 
 	void clearBackBuffer();
 
-	//! Initializes D3DManagement's members.
-	/*!	\return First encountered error.
-		\sa initDeviceAndSwapChain
-		\sa initDepthBuffer
-		\sa initBackBuffer
-		\sa initGBuffers
-		\sa initViewport
-		\sa initRSDefault
-		\sa initSSDefault
-		\sa initFXManagement
-		\sa initDebug
-		\sa initConstantBuffers
-		\sa initVertexBuffer
-	*/
 	HRESULT init();
+
+	void generateDepthMips();//temp
 
 	ID3D11Device*				getDevice()				const;
 	ID3D11DeviceContext*		getDeviceContext()		const;

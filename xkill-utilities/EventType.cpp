@@ -300,6 +300,12 @@ Event_LoadLevel::Event_LoadLevel(std::string levelName) : Event(EVENT_LOAD_LEVEL
 	this->levelName = levelName;
 }
 
+Event_AnimationLoaded::Event_AnimationLoaded(unsigned int meshID, SkinnedData* skinnedData) : Event(EVENT_ANIMATION_LOADED)
+{
+	this->meshID = meshID;
+	this->skinnedData = skinnedData;
+}
+
 Event_SetFullscreen::Event_SetFullscreen( bool on ) : Event(EVENT_SHOW_FULLSCREEN)
 {
 	this->on = on;

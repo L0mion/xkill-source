@@ -46,7 +46,7 @@ void LoaderFbxMeshDesc::addVertexBoneIndex(unsigned int vertexIndex, int boneInd
 {
 	if(vertexIndex < vertexBoneIndices_.size())
 	{
-		if(vertexBoneIndices_[vertexIndex].size() < NUM_INFLUENCING_BONES)
+		if(vertexBoneIndices_[vertexIndex].size() < NUM_BONES_PER_VERTEX)
 			vertexBoneIndices_[vertexIndex].push_back(boneIndex);
 		//else
 		//	printf("LoaderFbxMeshDesc::addVertexBoneIndex already at max num bone indices \n");
@@ -174,14 +174,40 @@ std::vector<unsigned int> LoaderFbxMeshDesc::calculateBoneMappingIndices(std::ve
 }
 void LoaderFbxMeshDesc::mapBoneData(std::vector<VertexDesc>* vertices, std::vector<unsigned int> indices)
 {
-	for(unsigned int i=0; i<vertices->size(); i++)
+//	for(unsigned int i=0; i<vertices->size(); i++)
+//	{
+//		vertices->at(i).weights_.x = vertexBoneWeights_[indices[i]][0];
+//		vertices->at(i).weights_.y = vertexBoneWeights_[indices[i]][1];
+//		vertices->at(i).weights_.z = vertexBoneWeights_[indices[i]][2];
+//		for(int boneIndex=0; boneIndex<NUM_BONES_PER_VERTEX; boneIndex++)
+//		{
+//			vertices->at(i).boneIndices_[boneIndex] = vertexBoneIndices_[indices[i]][boneIndex];
+//		}
+//	}
+
+
+
+	int numControlPoints = fbxMesh_->GetControlPointsCount();
+	FbxVector4* controlPoints = fbxMesh_->GetControlPoints();
+	for(unsigned int vertexIndex = 0; vertexIndex<vertices->size(); vertexIndex++)
 	{
-		vertices->at(i).weights_.x = vertexBoneWeights_[indices[i]][0];
-		vertices->at(i).weights_.y = vertexBoneWeights_[indices[i]][1];
-		vertices->at(i).weights_.z = vertexBoneWeights_[indices[i]][2];
-		for(int boneIndex=0; i<NUM_BONES_PER_VERTEX; i++)
+		for(int controlPointIndex=0; controlPointIndex<numControlPoints; controlPointIndex++)
 		{
-			vertices->at(i).boneIndices_[boneIndex] = vertexBoneIndices_[indices[i]][boneIndex];
+			Float3 controlPoint;
+			controlPoint.x = static_cast<float>(controlPoints[controlPointIndex].mData[0]);
+			controlPoint.y = static_cast<float>(controlPoints[controlPointIndex].mData[1]);
+			controlPoint.z = static_cast<float>(controlPoints[controlPointIndex].mData[2]);
+
+			if(float3Equal(controlPoint, vertices->at(vertexIndex).position_))
+			{
+				vertices->at(vertexIndex).weights_.x = vertexBoneWeights_[controlPointIndex][0];
+				vertices->at(vertexIndex).weights_.y = vertexBoneWeights_[controlPointIndex][1];
+				vertices->at(vertexIndex).weights_.z = vertexBoneWeights_[controlPointIndex][2];
+				for(unsigned int i=0; i<NUM_BONES_PER_VERTEX; i++)
+					vertices->at(vertexIndex).boneIndices_[i] = vertexBoneIndices_[controlPointIndex][i];
+
+				break; // <-- FIX THIS SHIT!
+			}
 		}
 	}
 }
@@ -319,4 +345,9 @@ void LoaderFbxMeshDesc::setBoneParentIndices(std::vector<int> boneParentIndices)
 void LoaderFbxMeshDesc::setBoneNodes(std::vector<FbxNode*> boneNodes)
 {
 	boneNodes_ = boneNodes;
+}
+
+void LoaderFbxMeshDesc::setFbxMesh(FbxMesh* fbxMesh)
+{
+	fbxMesh_ = fbxMesh;
 }
