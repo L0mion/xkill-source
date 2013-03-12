@@ -330,12 +330,15 @@ void Menu_Main::onEvent( Event* e )
 			ui.horizontalSlider_timeLimit->setValue(SETTINGS->timeLimit);
 			ui.horizontalSlider_executionFrequency->setValue(SETTINGS->schedulerTime);
 			ui.horizontalSlider_priorityToCycleRate->setValue(SETTINGS->cycleTime);
-
+			ui.horizontalSlider_respawnTime->setValue(SETTINGS->respawnTime);
+			ui.horizontalSlider_nullProcessDuration->setValue(SETTINGS->nullprocessExecutionTime);
+			
 			ui.label_cycleLimit->setNum(ui.horizontalSlider_cycleLimit->value());
 			ui.label_timeLimit->setNum(ui.horizontalSlider_timeLimit->value());
 			ui.label_respawnTime->setNum(ui.horizontalSlider_respawnTime->value());
 			ui.label_executionFrequency->setNum(ui.horizontalSlider_executionFrequency->value());
 			ui.label_priorityToCycleRate->setNum(ui.horizontalSlider_priorityToCycleRate->value());
+			ui.label_nullProcessDuration->setNum(ui.horizontalSlider_nullProcessDuration->value());
 
 			//input_Menu->setSettingsMenu();
 			//sound_Menu->setSettingsMenu();

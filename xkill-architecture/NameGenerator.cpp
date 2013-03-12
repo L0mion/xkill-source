@@ -2,8 +2,12 @@
 
 #include <xkill-utilities\Math.h> //Math::randomInt
 
-void NameGenerator::reset()
+void NameGenerator::resetNames()
 {
+	//
+	// Add names
+	//
+
 	addName("Sprak");
 	addName("Algol");
 	addName("Haskell");
@@ -363,7 +367,7 @@ void NameGenerator::reset()
 	addName("block");
 	addName("free space");
 	addName("BAADF00D");
-	addName("0x");
+	addName("0x0");
 	addName("hexadecimal decimal");
 	addName("hex to the seventh power");
 	addName("power of two");
@@ -754,7 +758,6 @@ void NameGenerator::reset()
 	addName("public meeting");
 	addName("wholegrain and wheat");
 	addName("may I disagree");
-	addName("0x0");
 	addName("tripple x");
 	addName("skinned mesh");
 	addName("lookout tower");
@@ -1207,13 +1210,22 @@ void NameGenerator::reset()
 	addName("cycle steal");
 	addName("simple solution");
 	addName("I think so, definitely");
-	addName("refered to as two");
+	addName("referred to as two");
 	addName("executable");
 	addName("excusable");
 	addName("rethinkably done");
 	addName("possible loss of data");
 	addName("consider it done");
 	addName("c1xx");
+	addName("parameter mayhem");
+	addName("argument sketch");
+	addName("talkactive parrot");
+	addName("keymapper");
+	addName("end of user");
+	addName("frail ladder");
+	addName("[armored tank]");
+	addName("one-ear");
+
 	
 	//C++ keywords
 	addName("alignas");
@@ -1312,7 +1324,7 @@ std::string NameGenerator::getName()
 {
 	// Reset names if all have been picked
 	if(names.size() <= 0)
-		reset();
+		resetNames();
 
 	// Pick random name
 	int numNames = names.size();

@@ -14,6 +14,9 @@ Menu_Ammo::Menu_Ammo(Ui::MainWindow* ui, QMainWindow* window)
 	connect(ui->radioButton_Ammo_Scatter,						SIGNAL(clicked()),			this,	SLOT(setSettingsMenu()));
 	connect(ui->radioButton_Ammo_Explosive,						SIGNAL(clicked()),			this,	SLOT(setSettingsMenu()));
 	
+
+	connect(ui->horizontalSlider_Ammo_Initial,					SIGNAL(valueChanged(int)),	this,	SLOT(settingsMenuUpdated()));
+	connect(ui->horizontalSlider_Ammo_Maximum,					SIGNAL(valueChanged(int)),	this,	SLOT(settingsMenuUpdated()));
 	connect(ui->horizontalSlider_Ammo_Damage,					SIGNAL(valueChanged(int)),	this,	SLOT(settingsMenuUpdated()));
 	connect(ui->horizontalSlider_Ammo_Speed,					SIGNAL(valueChanged(int)),	this,	SLOT(settingsMenuUpdated()));
 	connect(ui->horizontalSlider_Ammo_NrOfProjectiles,			SIGNAL(valueChanged(int)),	this,	SLOT(settingsMenuUpdated()));
@@ -42,6 +45,9 @@ void Menu_Ammo::setSettingsMenu()	// TODO: Set good values for the sliders and m
 	updateLock = true;
 
 	// Update sliders
+	ui->horizontalSlider_Ammo_Initial					->	setValue(ammo->initialTotalNrOfShots);
+	ui->horizontalSlider_Ammo_Maximum					->	setValue(ammo->maxTotalNrOfShots);
+	ui->horizontalSlider_Ammo_Maximum					->  setMinimum(ammo->initialTotalNrOfShots);
 	ui->horizontalSlider_Ammo_Damage					->	setValue(static_cast<int>(ammo->damage));
 	ui->horizontalSlider_Ammo_Speed						->	setValue(static_cast<int>(ammo->speed));
 	ui->horizontalSlider_Ammo_NrOfProjectiles			->	setValue(ammo->nrOfProjectilesPerSalvo);
@@ -82,6 +88,9 @@ void Menu_Ammo::settingsMenuUpdated()
 		}
 
 		// Read from sliders
+		ammo->initialTotalNrOfShots				= ui->horizontalSlider_Ammo_Initial->value();
+		ui->horizontalSlider_Ammo_Maximum		->  setMinimum(ammo->initialTotalNrOfShots);
+		ammo->maxTotalNrOfShots					= ui->horizontalSlider_Ammo_Maximum->value();
 		ammo->damage							= static_cast<float>(ui->horizontalSlider_Ammo_Damage->value());
 		ammo->speed								= static_cast<float>(ui->horizontalSlider_Ammo_Speed->value());
 		ammo->nrOfProjectilesPerSalvo			= ui->horizontalSlider_Ammo_NrOfProjectiles->value();
@@ -95,9 +104,11 @@ void Menu_Ammo::settingsMenuUpdated()
 		ammo->explosionSphereFinalRadius		= static_cast<float>(ui->horizontalSlider_Ammo_ExplosionFinalRadius->value()) * 0.2f;
 
 		// Update labels
+		ui->label_Ammo_Initial					->	setNum(static_cast<int>(ammo->initialTotalNrOfShots));
+		ui->label_Ammo_Maximum					->	setNum(static_cast<int>(ammo->maxTotalNrOfShots));
 		ui->label_Ammo_Damage					->	setNum(ammo->damage);
 		ui->label_Ammo_Speed					->	setNum(ammo->speed);
-		ui->label_Ammo_NrOfProjectiles			->	setNum((int)ammo->nrOfProjectilesPerSalvo);
+		ui->label_Ammo_NrOfProjectiles			->	setNum(static_cast<int>(ammo->nrOfProjectilesPerSalvo));
 		ui->label_Ammo_VelocityVariation		->	setNum(ammo->velocityVariation);
 		ui->label_Ammo_Spread					->	setNum(ammo->spreadConeRadius * 360 / 3.14f);
 

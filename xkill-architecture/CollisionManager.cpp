@@ -138,9 +138,8 @@ void CollisionManager::collision_applyDamage(Entity* entity1, Entity* entity2)
 
 				if(entity2->hasAttribute(ATTRIBUTE_PROJECTILE))
 				{
-					// Disarm projectile
-					entity2->removeAttribute(ATTRIBUTE_DAMAGE);
-
+					SEND_EVENT(&Event_RemoveEntity(entity2->getID()));
+					
 					//
 					// Make projectiles stick to player
 					//
@@ -191,7 +190,7 @@ void CollisionManager::collision_pickupable(Entity* entity1, Entity* entity2)
 								ptr_pickupable->pickupableType = (XKILL_Enums::PickupableType)randomPickupableTypeInt;
 
 								//--------------------------------------------------------------------------------------
-								// List of all hacks retrievable from random hack
+								// List of all pickupables retrievable from random hack
 								//--------------------------------------------------------------------------------------
 								if(ptr_pickupable->pickupableType == XKILL_Enums::PickupableType::HACK_SPEEDHACK ||
 								ptr_pickupable->pickupableType == XKILL_Enums::PickupableType::HACK_JETHACK ||
@@ -334,22 +333,20 @@ void CollisionManager::collision_projectile(Entity* entity1, Entity* entity2)
 				AttributePtr<Attribute_Projectile> ptr_projectile = itrProjectile.at(projectileId.at(i));
 
 				//Determine collision effect based on ammunitionType
-				float deathDelay = 2.0f;
+				float projectileLifeTimeAfterCollision = 1.0f;
 				switch(ptr_projectile->ammunitionType)
 				{
 				case XKILL_Enums::AmmunitionType::BULLET: //Bounce off the wall
-					deathDelay = 5.0f;
-					if(ptr_projectile->currentLifeTimeLeft > deathDelay)
+					if(ptr_projectile->currentLifeTimeLeft > projectileLifeTimeAfterCollision)
 					{
-						ptr_projectile->currentLifeTimeLeft = deathDelay;
+						ptr_projectile->currentLifeTimeLeft = projectileLifeTimeAfterCollision;
 						SEND_EVENT(&Event_ModifyPhysicsObject(XKILL_Enums::ModifyPhysicsObjectData::GRAVITY, static_cast<void*>(&Float3(0.0f, -5.0f, 0.0f)), itrPhysics.at(physicsId.at(j))));
 					}
 					break;
 				case XKILL_Enums::AmmunitionType::SCATTER: //Fall down and roll, also collide with projectiles
-					deathDelay = 5.0f;
-					if(ptr_projectile->currentLifeTimeLeft > deathDelay)
+					if(ptr_projectile->currentLifeTimeLeft > projectileLifeTimeAfterCollision)
 					{
-						ptr_projectile->currentLifeTimeLeft = deathDelay;
+						ptr_projectile->currentLifeTimeLeft = projectileLifeTimeAfterCollision;
 
 						SEND_EVENT(&Event_ModifyPhysicsObject(XKILL_Enums::ModifyPhysicsObjectData::GRAVITY, static_cast<void*>(&Float3(0.0f, -10.0f, 0.0f)), itrPhysics.at(physicsId.at(j))));
 						SEND_EVENT(&Event_ModifyPhysicsObject(XKILL_Enums::ModifyPhysicsObjectData::VELOCITYPERCENTAGE, static_cast<void*>(&Float3(0.1f, 0.1f, 0.1f)), itrPhysics.at(physicsId.at(j))));
@@ -382,7 +379,12 @@ void CollisionManager::collision_projectile(Entity* entity1, Entity* entity2)
 				}
 			}
 		}
-		//SEND_EVENT(&Event_RemoveEntity(entity1->getID())); //Crashes sometimes if removed here
+		//SEND_EVENT(&Event_RemoveEntity(entity1->getID())); //Crashes sometimes if removed here //old comment from late 2012
+
+		if( !(entity2->hasAttribute(ATTRIBUTE_PLAYER)) ) //If the projectile colliding with something that was not a player
+		{
+			entity1->removeAttribute(ATTRIBUTE_DAMAGE); // Disarm projectile			
+		}
 	}
 }
 
