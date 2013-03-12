@@ -87,7 +87,7 @@ void ScoreBoard::syncLabelsWithPlayers()
 		ScoreboardEntry* e = &entries.at(i);
 
 		// Detect if label has changed
-		if(e->ptr_player->playerName != e->playerName)
+		if(e->ptr_player->avatarName != e->playerName)
 			e->isChanged = true;
 		if(e->ptr_player->cycles != e->cycles)
 			e->isChanged = true;
@@ -101,7 +101,7 @@ void ScoreBoard::syncLabelsWithPlayers()
 			e->isChanged = false;
 
 			// Set text
-			e->label_process->setText(e->ptr_player->playerName.c_str());
+			e->label_process->setText(e->ptr_player->avatarName.c_str());
 			e->label_cycles->setNum(e->ptr_player->cycles);
 			e->label_priority->setNum(e->ptr_player->priority);
 
@@ -217,7 +217,7 @@ void ScoreBoard::findMaxValues()
 
 void ScoreBoard::addEntry( ScoreboardEntry entry )
 {
-	entry.playerName = entry.ptr_player->playerName;
+	entry.playerName = entry.ptr_player->avatarName;
 	entry.cycles = entry.ptr_player->cycles;
 	entry.priority = entry.ptr_player->priority;
 

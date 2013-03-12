@@ -1,15 +1,18 @@
-//#pragma once
+#pragma once
+
+#include <xkill-utilities/Util.h>
+#include <QtGui/QLabel>
+
 //
-//#include <xkill-utilities/Util.h>
-//#include <QtGui/QLabel>
-//
-//
-//class HudPowerupMessage
+//class HudScheduling
 //{
 //private:
 //
 //public:
-//	HudPowerupDispayer(Event_PostHudMessage* e, QWidget* parent);
+//	HudScheduling()
+//	{
+//
+//	}
 //};
 //
 //class HudPowerupMessage_Manager : IObserver
@@ -21,7 +24,7 @@
 //	AttributePtr<Attribute_SplitScreen> splitScreen;
 //
 //public:
-//	HudMessage_Manager();
+//	
 //	~HudMessage_Manager();
 //	void init(QWidget* parent, AttributePtr<Attribute_SplitScreen> splitScreen);
 //	void onEvent(Event* e);

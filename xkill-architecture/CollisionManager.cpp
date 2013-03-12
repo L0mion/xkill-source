@@ -109,14 +109,14 @@ void CollisionManager::collision_applyDamage(Entity* entity1, Entity* entity2)
 										if(creatorOfProjectile_ptr_player->cycleHackPair.first) // If cyclehack is active
 										{
 											creatorOfProjectile_ptr_player->cycles++;
-											{Event_PostHudMessage e("", creatorOfProjectile_ptr_player); e.setHtmlMessage("You terminated", playerThatDied_ptr_player->playerName, "", "+1 cycle"); SEND_EVENT(&e);}
+											{Event_PostHudMessage e("", creatorOfProjectile_ptr_player); e.setHtmlMessage("You terminated", playerThatDied_ptr_player->avatarName, "", "+1 cycle"); SEND_EVENT(&e);}
 										}
 										else
 										{
 											creatorOfProjectile_ptr_player->priority++;
-											{Event_PostHudMessage e("", creatorOfProjectile_ptr_player); e.setHtmlMessage("You terminated", playerThatDied_ptr_player->playerName, "", "+1 priority"); SEND_EVENT(&e);}
+											{Event_PostHudMessage e("", creatorOfProjectile_ptr_player); e.setHtmlMessage("You terminated", playerThatDied_ptr_player->avatarName, "", "+1 priority"); SEND_EVENT(&e);}
 										}
-										{Event_PostHudMessage e("", playerThatDied_ptr_player); e.setHtmlMessage("Terminated by", creatorOfProjectile_ptr_player->playerName); SEND_EVENT(&e);}
+										{Event_PostHudMessage e("", playerThatDied_ptr_player); e.setHtmlMessage("Terminated by", creatorOfProjectile_ptr_player->avatarName); SEND_EVENT(&e);}
 									}
 									else //Punish player for blowing himself up
 									{
