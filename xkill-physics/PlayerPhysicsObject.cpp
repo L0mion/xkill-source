@@ -61,7 +61,7 @@ void PlayerPhysicsObject::onUpdate(float delta)
 			handleInput(delta);
 		}
 
-		if( !(ptr_player->jetpack) && !(ptr_player->detectedAsDead) )
+		if( !(ptr_player->jetpack) && !(ptr_player->detectedAsDead) && !(ptr_player->ptr_input->jump))
 		{
 			hover(delta, height);
 		}
@@ -102,6 +102,9 @@ void PlayerPhysicsObject::hover(float delta, float hoverHeight)
 		}
 		debugDrawer_->drawLine(from, to, btVector3(0.2f, 1.0f, 0.2f));
 	}
+
+	bool isHovering = false;
+
 	if(deltaHeightMaximum > 0.0f)
 	{
 		btTransform worldTransform;
@@ -110,6 +113,15 @@ void PlayerPhysicsObject::hover(float delta, float hoverHeight)
 		setWorldTransform(worldTransform);
 
 		setLinearVelocity(getLinearVelocity()+btVector3(0.0f,-getLinearVelocity().y(),0.0f));
+
+		isHovering = true;
+	}
+
+	std::vector<int> playerAttributes = itrPhysics_3.ownerAt(attributeIndex_)->getAttributes(ATTRIBUTE_PLAYER);
+	for(unsigned int i=0;i<playerAttributes.size();i++)
+	{
+		AttributePtr<Attribute_Player> ptr_player = itrPlayer.at(playerAttributes.at(i));
+		ptr_player->hovering = isHovering;
 	}
 }
 
@@ -158,7 +170,7 @@ void PlayerPhysicsObject::handleOutOfBounds()
 		}
 	}
 }
-
+#include <xkill-utilities/Converter.h>
 void PlayerPhysicsObject::handleInput(float delta)
 {
 	std::vector<int> playerAttributes = itrPhysics_3.ownerAt(attributeIndex_)->getAttributes(ATTRIBUTE_PLAYER);
@@ -199,13 +211,6 @@ void PlayerPhysicsObject::handleInput(float delta)
 		world.setRotation(btQuaternion(yaw_,0,0));
 		setWorldTransform(world);
 
-		//Jump, does not work. May not be needed or wanted when the player is already hovering (2013-02-15 11.18)
-		//float jumpPower = 10000.0f;
-		//if(ptr_input->jump)
-		//{
-		//	applyCentralImpulse(btVector3(0.0f, jumpPower, 0.0f));
-		//}
-
 		//Jetpack
 		if(ptr_player->jetpack)
 		{
@@ -216,6 +221,12 @@ void PlayerPhysicsObject::handleInput(float delta)
 			{
 				setLinearVelocity(btVector3(move.x(), velocity.y()+jetpackPower*delta, move.z()));
 			}
+		}
+		else if(ptr_input->jump && ptr_player->hovering) //Jump
+		{
+			float jumpPower = 500.0f;
+			applyCentralImpulse(btVector3(0.0f, jumpPower, 0.0f));
+			//applyCentralForce(btVector3(0.0f, jumpPower, 0.0f));
 		}
 	}
 }

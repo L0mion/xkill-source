@@ -1,4 +1,5 @@
 #include "ScoreBoard.h"
+#include <xkill-utilities/Converter.h>
 
 int ScoreBoard::valueAt( int index )
 {
@@ -87,13 +88,12 @@ void ScoreBoard::syncLabelsWithPlayers()
 		ScoreboardEntry* e = &entries.at(i);
 
 		// Detect if label has changed
-		if(e->ptr_player->playerName != e->playerName)
+		if(e->ptr_player->avatarName != e->playerName)
 			e->isChanged = true;
 		if(e->ptr_player->cycles != e->cycles)
 			e->isChanged = true;
 		if(e->ptr_player->priority != e->priority)
 			e->isChanged = true;
-		e->isChanged = true;
 
 		// Update label
 		if(e->isChanged)
@@ -101,14 +101,20 @@ void ScoreBoard::syncLabelsWithPlayers()
 			e->isChanged = false;
 
 			// Set text
-			e->label_process->setText(e->ptr_player->playerName.c_str());
+			e->label_process->setText(e->ptr_player->avatarName.c_str());
 			e->label_cycles->setNum(e->ptr_player->cycles);
 			e->label_priority->setNum(e->ptr_player->priority);
 
 			// Empty style sheets
-			std::string sheet_process = "";
+			std::string sheet_process = "font-weight: bold;";
 			std::string sheet_cycles = "";
 			std::string sheet_priority = "";
+
+			// Add name color
+			Float3 color = e->ptr_player->avatarColor;
+			std::string str_color = "color: rgba("+Converter::IntToStr((int)(color.x * 255))+", "+Converter::IntToStr((int)(color.y * 255))+", "+ Converter::IntToStr((int)(color.z * 255)) +", 220);";
+			sheet_process += str_color;
+	
 
 			// Apply extra stuff if we're at the current player
 			if(e->ptr_player == ptr_current_player)
@@ -217,7 +223,7 @@ void ScoreBoard::findMaxValues()
 
 void ScoreBoard::addEntry( ScoreboardEntry entry )
 {
-	entry.playerName = entry.ptr_player->playerName;
+	entry.playerName = entry.ptr_player->avatarName;
 	entry.cycles = entry.ptr_player->cycles;
 	entry.priority = entry.ptr_player->priority;
 

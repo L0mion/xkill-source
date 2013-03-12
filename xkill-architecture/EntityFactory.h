@@ -83,7 +83,8 @@ public:
 		ptr_player->ptr_camera = ptr_camera;
 		ptr_player->ptr_health = ptr_health;
 		ptr_player->ptr_weaponStats = ptr_weaponStats;
-		ptr_player->playerName = nameGenerator.getName();
+		ptr_player->avatarName = nameGenerator.getName();
+		ptr_player->avatarColor = nameGenerator.getColor();
 
 		CREATE_ATTRIBUTE(ptr_splitScreen, Attribute_SplitScreen, splitScreen, entity);
 		ptr_splitScreen->ptr_camera = ptr_camera;
@@ -122,6 +123,9 @@ public:
 		CREATE_ATTRIBUTE(ptr_lightPoint, Attribute_Light_Point, lightPoint, entity);
 		ptr_lightPoint->ptr_position			= ptr_light_spatial->ptr_position;
 		Float4 color = Float4(1.0f, 0.0f, 0.0f, 1.0f);
+		color.x = ptr_player->avatarColor.x;
+		color.y = ptr_player->avatarColor.y;
+		color.z = ptr_player->avatarColor.z;
 		ptr_lightPoint->lightPoint.ambient		= Float4(0.0f, 0.0f, 0.0f, 1.0f);
 		ptr_lightPoint->lightPoint.diffuse		= color;
 		ptr_lightPoint->lightPoint.specular		= color;

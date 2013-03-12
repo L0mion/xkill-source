@@ -110,11 +110,13 @@ void InputComponent::handleInput(float delta)
 		if(device == nullptr)
 			continue;
 
-		device->setSensitivityModifier(device->getFloatValue(InputAction::ACTION_B_LOW_SENSITIVITY, delta));
+		device->setSensitivityModifier(device->getFloatValue(InputAction::ACTION_F_LOW_SENSITIVITY, delta));
+		if(device->getBoolValue(InputAction::ACTION_B_LOW_SENSITIVITY))
+			device->setSensitivityModifier(0.5f);
 
 		input->position.x = device->getFloatValue(InputAction::ACTION_F_WALK_LR, delta);
 		input->position.y = device->getFloatValue(InputAction::ACTION_F_WALK_FB, delta);
-		//input->rotation.x = device->getFloatValue(InputAction::ACTION_F_LOOK_LR, delta, tr2ue);
+		//input->rotation.x = device->getFloatValue(InputAction::ACTION_F_LOOK_LR, delta, true);
 		//input->rotation.y = device->getFloatValue(InputAction::ACTION_F_LOOK_UD, delta, true);
 
 		Float2 rot = device->getFormattedFloatPair(InputAction::ACTION_F_LOOK_LR, InputAction::ACTION_F_LOOK_UD, delta, true);
@@ -123,11 +125,22 @@ void InputComponent::handleInput(float delta)
 
 		input->fire =					device->getBoolValue(InputAction::ACTION_B_FIRE);
 		input->firePressed =			device->getBoolPressed(InputAction::ACTION_B_FIRE);
-		input->changeAmmunitionType =	device->getBoolReleased(InputAction::ACTION_B_NEXT_AMMUNITIONTYPE);
-		input->changeFiringMode =		device->getBoolReleased(InputAction::ACTION_B_NEXT_FIRINGMODE);
 
-		input->killPlayer = device->getBoolReleased(InputAction::ACTION_B_KILL_PLAYER);
-		input->jump_jetpack =		device->getBoolValue(InputAction::ACTION_B_JUMP_JETPACK);
+		input->killPlayer =				device->getBoolReleased(InputAction::ACTION_B_KILL_PLAYER);
+		input->jetpack =				device->getBoolValue(InputAction::ACTION_B_JUMP_JETPACK);
+		input->jump =					device->getBoolPressed(InputAction::ACTION_B_JUMP_JETPACK);
+
+		input->changeAmmunitionType = 0;
+		if(device->getBoolReleased(InputAction::ACTION_B_NEXT_AMMUNITIONTYPE))
+			input->changeAmmunitionType++;
+		if(device->getBoolReleased(InputAction::ACTION_B_PREV_AMMUNITIONTYPE))
+			input->changeAmmunitionType--;
+
+		input->changeFiringMode = 0;
+		if(device->getBoolReleased(InputAction::ACTION_B_NEXT_FIRINGMODE))
+			input->changeFiringMode++;
+		if(device->getBoolReleased(InputAction::ACTION_B_PREV_FIRINGMODE))
+			input->changeFiringMode--;
 
 		//input->jetpack =	device->getBoolValue(InputAction::ACTION_B_JETPACK);
 

@@ -327,11 +327,12 @@ struct DLL_U Attribute_Input : public IAttribute
 	Float2 rotation;
 	bool fire;
 	bool firePressed;
-	bool jump_jetpack;
+	bool jump;
+	bool jetpack;
 	bool sprint;
 	bool killPlayer;
-	bool changeAmmunitionType;
-	bool changeFiringMode;
+	int changeAmmunitionType;
+	int changeFiringMode;
 	bool lowSensitivity;
 	bool reload;
 
@@ -474,7 +475,8 @@ struct DLL_U Attribute_Player : public IAttribute
 
 	static int nextId;
 
-	std::string playerName;
+	std::string avatarName;
+	Float3 avatarColor;
 	int priority;							//!< Priority of the player process. Higher value means higher priority. The scheduler will choose the process with the highest priority for execution.
 	int cycleSteals;						//!< Total number of cycle steals for the player process. Cycle steals steal priority from other player processes.
 	int cycles;								//!< Total execution time of the player process, used ased final score in the deathmatch. The game session winner is the player with the most total execution time as awarded by the scheduler.
@@ -490,6 +492,7 @@ struct DLL_U Attribute_Player : public IAttribute
 	bool jetpack;							//!< Use jetpack		
 	bool detectedAsDead;					//!< The player is dead
 	bool executing;							//!< True if selected by the scheduler (ScoreComponent.cpp)
+	bool hovering;							//!< The player is in a stable hover and not falling or jumping or using jetpack
 	std::pair<bool, Timer*> speedHackPair;	//!< The bool is true if the hack is active, the timer keeps track of time left
 	std::pair<bool, Timer*> jetHackPair;	//!< The bool is true if the hack is active, the timer keeps track of time left
 	std::pair<bool, Timer*> cycleHackPair;	//!< The bool is true if the hack is active, the timer keeps track of time left
