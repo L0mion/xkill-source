@@ -202,8 +202,6 @@ void PlayerPhysicsObject::handleInput(float delta)
 
 		//Move player
 		move = move.rotate(btVector3(0,1,0),yaw_);
-		float y = getLinearVelocity().y();
-		DEBUGPRINT("Player y: " + Converter::FloatToStr(y));
 		move = btVector3(move.x(), getLinearVelocity().y(), move.z());
 		setLinearVelocity(move);
 

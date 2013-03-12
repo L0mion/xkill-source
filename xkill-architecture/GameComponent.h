@@ -101,8 +101,8 @@ public:
 	*/
 	AttributePtr<Attribute_PlayerSpawnPoint> findUnoccupiedSpawnPoint();
 
-	bool switchAmmunition(AttributePtr<Attribute_WeaponStats> ptr_weaponStats);
-	bool switchFiringMode(AttributePtr<Attribute_WeaponStats> ptr_weaponStats);
+	bool switchAmmunition(AttributePtr<Attribute_WeaponStats> ptr_weaponStats, int nrOfStepsToSwitch);
+	bool switchFiringMode(AttributePtr<Attribute_WeaponStats> ptr_weaponStats, int nrOfStepsToSwitch);
 
 	/**
 	Creates an aiming ray by sending a ray cast event handled by PhysicsComponent.

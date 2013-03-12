@@ -349,11 +349,10 @@ void GameComponent::updatePlayerAttributes(float delta)
 			// Ammunition logic: Ammunition change, firing mode change.
 			//--------------------------------------------------------------------------------------
 			bool ammunitionSwitchReload = false;
-			if(ptr_input->changeAmmunitionType)
+			if(ptr_input->changeAmmunitionType != 0)
 			{
-				ptr_input->changeAmmunitionType = false;
-				ptr_weaponStats->currentAmmunitionType = static_cast<XKILL_Enums::AmmunitionType>((ptr_weaponStats->currentAmmunitionType + 1) % XKILL_Enums::AmmunitionType::NROFAMMUNITIONTYPES);
-				bool successfullySwitchedAmmunition = switchAmmunition(ptr_weaponStats);
+				//ptr_weaponStats->currentAmmunitionType = static_cast<XKILL_Enums::AmmunitionType>(nextAmmunitonTypeIndex);
+				bool successfullySwitchedAmmunition = switchAmmunition(ptr_weaponStats, ptr_input->changeAmmunitionType);
 				if(successfullySwitchedAmmunition)
 				{
 					ammo = &ptr_weaponStats->ammunition[ptr_weaponStats->currentAmmunitionType];
@@ -365,11 +364,10 @@ void GameComponent::updatePlayerAttributes(float delta)
 				}
 			}
 
-			if(ptr_input->changeFiringMode)
+			if(ptr_input->changeFiringMode != 0)
 			{
-				ptr_input->changeFiringMode = false;
-				ptr_weaponStats->currentFiringModeType = static_cast<XKILL_Enums::FiringModeType>((ptr_weaponStats->currentFiringModeType + 1) % XKILL_Enums::AmmunitionType::NROFAMMUNITIONTYPES);
-				bool successfullySwitcheFiringModeOrAmmunnition = switchFiringMode(ptr_weaponStats);
+				//ptr_weaponStats->currentFiringModeType = static_cast<XKILL_Enums::FiringModeType>(nextFiringModeIndex);
+				bool successfullySwitcheFiringModeOrAmmunnition = switchFiringMode(ptr_weaponStats, ptr_input->changeFiringMode);
 				if(successfullySwitcheFiringModeOrAmmunnition)
 				{
 					firingMode = &ptr_weaponStats->firingMode[ptr_weaponStats->currentFiringModeType];
@@ -800,7 +798,7 @@ void GameComponent::event_StartDeathmatch( Event_StartDeathmatch* e )
 	{
 		AttributePtr<Attribute_Player>			ptr_player		=	itrPlayer		.getNext();
 		AttributePtr<Attribute_WeaponStats>		ptr_weaponStats	=	ptr_player	->	ptr_weaponStats	;
-		switchFiringMode(ptr_weaponStats);	//Ensure ammunition disablement (selected from menu)
+		switchFiringMode(ptr_weaponStats, 0);	//Ensure ammunition disablement (selected from menu)
 		
 		//SEND_EVENT(&Event_HackActivated(5000.0f, XKILL_Enums::HackType::JETHACK, ptr_player)); //check jetpack giveaway
 	}
@@ -875,29 +873,39 @@ void GameComponent::event_UnloadLevel()
 	levelEvents_.clear();
 }
 
-bool GameComponent::switchAmmunition(AttributePtr<Attribute_WeaponStats> weaponStats)
+bool GameComponent::switchAmmunition(AttributePtr<Attribute_WeaponStats> ptr_weaponStats, int nrOfStepsToSwitch)
 {
 	bool switchedAmmunition = false;
-	FiringMode* firingMode = &weaponStats->firingMode[weaponStats->currentFiringModeType];
+	FiringMode* firingMode = &ptr_weaponStats->firingMode[ptr_weaponStats->currentFiringModeType];
 
 	for(int i = 0; i < XKILL_Enums::AmmunitionType::NROFAMMUNITIONTYPES; i++)
 	{
-		weaponStats->currentAmmunitionType = static_cast<XKILL_Enums::AmmunitionType>((weaponStats->currentAmmunitionType + 1) % XKILL_Enums::AmmunitionType::NROFAMMUNITIONTYPES);
+		int nextAmmunitionIndex = (ptr_weaponStats->currentAmmunitionType + nrOfStepsToSwitch);
+		while(nextAmmunitionIndex < 0)
+			nextAmmunitionIndex += XKILL_Enums::AmmunitionType::NROFAMMUNITIONTYPES;
+
+		nextAmmunitionIndex %= XKILL_Enums::AmmunitionType::NROFAMMUNITIONTYPES;
+
+		ptr_weaponStats->currentAmmunitionType = static_cast<XKILL_Enums::AmmunitionType>(nextAmmunitionIndex);
 
 		//Try switching of ammunition
-		if(weaponStats->currentAmmunitionType == XKILL_Enums::AmmunitionType::BULLET && firingMode->canShootBullet || 
-			weaponStats->currentAmmunitionType == XKILL_Enums::AmmunitionType::SCATTER && firingMode->canShootScatter || 
-			weaponStats->currentAmmunitionType == XKILL_Enums::AmmunitionType::EXPLOSIVE && firingMode->canShootExplosive)
+		if(ptr_weaponStats->currentAmmunitionType == XKILL_Enums::AmmunitionType::BULLET && firingMode->canShootBullet || 
+			ptr_weaponStats->currentAmmunitionType == XKILL_Enums::AmmunitionType::SCATTER && firingMode->canShootScatter || 
+			ptr_weaponStats->currentAmmunitionType == XKILL_Enums::AmmunitionType::EXPLOSIVE && firingMode->canShootExplosive)
 		{
 			switchedAmmunition = true;
 			break;
+		}
+		else
+		{
+			nrOfStepsToSwitch = 1; //Couldn't switch that many steps, try next one until we find one that works
 		}
 	}
 
 	return switchedAmmunition;
 }
 
-bool GameComponent::switchFiringMode(AttributePtr<Attribute_WeaponStats> ptr_weaponStats)
+bool GameComponent::switchFiringMode(AttributePtr<Attribute_WeaponStats> ptr_weaponStats, int nrOfStepsToSwitch)
 {
 	bool switchedFiringMode = false;
 
@@ -905,7 +913,13 @@ bool GameComponent::switchFiringMode(AttributePtr<Attribute_WeaponStats> ptr_wea
 
 	for(int i = 0; i < XKILL_Enums::FiringModeType::NROFFIRINGMODETYPES; i++)
 	{
-		ptr_weaponStats->currentFiringModeType = static_cast<XKILL_Enums::FiringModeType>((ptr_weaponStats->currentFiringModeType + 1) % XKILL_Enums::FiringModeType::NROFFIRINGMODETYPES);
+		int nextFiringModeIndex = (ptr_weaponStats->currentFiringModeType + nrOfStepsToSwitch);
+		while(nextFiringModeIndex < 0)
+			nextFiringModeIndex += XKILL_Enums::FiringModeType::NROFFIRINGMODETYPES;
+
+		nextFiringModeIndex %= XKILL_Enums::FiringModeType::NROFFIRINGMODETYPES;
+
+		ptr_weaponStats->currentFiringModeType = static_cast<XKILL_Enums::FiringModeType>(nextFiringModeIndex);
 
 		firingMode = &ptr_weaponStats->firingMode[ptr_weaponStats->currentFiringModeType];
 
@@ -917,10 +931,14 @@ bool GameComponent::switchFiringMode(AttributePtr<Attribute_WeaponStats> ptr_wea
 			switchedFiringMode = true;
 			break;
 		}
-		else if(switchAmmunition(ptr_weaponStats)) //switch firing mode AND ammunition
+		else if(switchAmmunition(ptr_weaponStats, 1)) //switch firing mode AND ammunition
 		{
 			switchedFiringMode = true;
 			break;
+		}
+		else
+		{
+			nrOfStepsToSwitch = 1; //Couldn't switch that many steps, try next one until we find one that works
 		}
 	}
 
