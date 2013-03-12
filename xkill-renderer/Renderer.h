@@ -68,8 +68,8 @@ public:
 		unsigned int screenWidth, 
 		unsigned int screenHeight);			//!< Resizes all management objects that are affected by a change in screen resolution.
 	HRESULT	init();							//!< Initializes members and prepares render.
-	void	update(float delta);
-	void	render();						//!< Renders a frame.
+	std::vector<ViewportData> update(float delta);
+	void	render(std::vector<ViewportData> vpDatas);						//!< Renders a frame.
 	void	loadTextures(TexDesc* texdesc); //!< Forwards information related to what textures Renderer is to load to Renderer-object.
 	void	addAnimation(SkinnedData* skinnedData); //!<Forwards a loaded animation to ManagementAnimation.
 protected:

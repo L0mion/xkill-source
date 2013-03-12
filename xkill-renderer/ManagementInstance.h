@@ -45,7 +45,7 @@ private:
 	std::map<
 		unsigned int,
 		CameraInstances*> cameraInstancesMap_;
-	CameraInstances* shadowInstances_;;
+	CameraInstances* shadowInstances_;
 };
 
 #endif //XKILL_RENDERER_MANAGEMENTRENDERAT_H

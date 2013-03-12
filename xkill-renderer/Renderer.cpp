@@ -422,19 +422,47 @@ void Renderer::initManagementAnimation()
 	managementAnimation_ = new ManagementAnimation();
 }
 
-void Renderer::update(float delta)
+std::vector<ViewportData> Renderer::update(float delta)
 {
 	delta_ = delta; //Needed by ManagementAnimation::update
 
 	ID3D11Device*			device = managementD3D_->getDevice();
 	ID3D11DeviceContext*	devcon = managementD3D_->getDeviceContext();
 
+	//Store all the viewport-specific data for the backbuffer-rendering.
+	std::vector<SplitScreenViewport>* ssViewports = managementViewport_->getSplitScreenViewports();
+	ViewportData vpData;
+	std::vector<ViewportData> vpDatas(ssViewports->size());
+	for(unsigned int i = 0; i < ssViewports->size(); i++)
+	{
+		AttributePtr<Attribute_SplitScreen>	ptr_splitScreen	= ssViewports->at(i).ptr_splitScreen;
+		AttributePtr<Attribute_Camera>		ptr_camera		= ptr_splitScreen->ptr_camera;
+		AttributePtr<Attribute_Spatial>		ptr_spatial		= ptr_camera->ptr_spatial;
+		AttributePtr<Attribute_Position>	ptr_position	= ptr_spatial->ptr_position;
+
+		vpData.camIndex			= ptr_camera.index();
+		vpData.view				= DirectX::XMFLOAT4X4(((float*)&ptr_camera->mat_view));
+		vpData.proj				= DirectX::XMFLOAT4X4(((float*)&ptr_camera->mat_projection));
+		vpData.viewInv			= managementMath_->calculateMatrixInverse(vpData.view);
+		vpData.projInv			= managementMath_->calculateMatrixInverse(vpData.proj);
+		vpData.eyePos			= *(DirectX::XMFLOAT3*)&ptr_position->position;
+		vpData.viewportTopX		= static_cast<unsigned int>(ptr_splitScreen->ssTopLeftX);
+		vpData.viewportTopY		= static_cast<unsigned int>(ptr_splitScreen->ssTopLeftY);
+		vpData.zNear			= ptr_camera->zNear;
+		vpData.zFar				= ptr_camera->zFar;
+		vpData.viewportWidth	= (float)ptr_splitScreen->ssWidth;
+		vpData.viewportHeight	= (float)ptr_splitScreen->ssHeight;
+		vpDatas[i] = vpData;
+	}
+
 	//Update lights.
-	managementLight_->update(device, devcon);
+	managementLight_->update(device, devcon, vpDatas);
 	//Update instances.
 	managementInstance_->update(device, devcon);
+
+	return vpDatas;
 }
-void Renderer::render()
+void Renderer::render(std::vector<ViewportData> vpDatas)
 {
 	ID3D11DeviceContext* devcon = managementD3D_->getDeviceContext();
 
@@ -450,12 +478,6 @@ void Renderer::render()
 	)
 
 	//Update per-frame constant buffer.
-	AttributePtr<Attribute_SplitScreen>	ptr_splitScreen;
-	AttributePtr<Attribute_Camera>		ptr_camera; 
-	AttributePtr<Attribute_Spatial>		ptr_spatial;
-	AttributePtr<Attribute_Position>	ptr_position;
-
-	ViewportData vpData;
 	managementCB_->setCB(
 		CB_TYPE_FRAME, 
 		TypeFX_VS, 
@@ -468,37 +490,21 @@ void Renderer::render()
 
 	managementBuffer_->setBuffersAndDepthBufferAsRenderTargets(devcon, managementD3D_->getDepthBuffer());
 
+	//HERE, WE BUILD HERE
+	AttributePtr<Attribute_SplitScreen>	ptr_splitScreen;
+	AttributePtr<Attribute_Camera>		ptr_camera; 
+	AttributePtr<Attribute_Spatial>		ptr_spatial;
+	AttributePtr<Attribute_Position>	ptr_position;
+
 	//Render each split-screen separately
-	std::vector<SplitScreenViewport>* ssViewports = managementViewport_->getSplitScreenViewports();
-	std::vector<ViewportData> vpDatas(ssViewports->size());
 	calcgpu(gbuffertimer,
-		for(unsigned int i = 0; i < ssViewports->size(); i++)
-		{
-			ptr_splitScreen		= ssViewports->at(i).ptr_splitScreen;
-			ptr_camera			= ptr_splitScreen->ptr_camera;
-			ptr_spatial			= ptr_camera->ptr_spatial;
-			ptr_position		= ptr_spatial->ptr_position;
+	for(unsigned int i = 0; i < vpDatas.size(); i++)
+	{
+		managementViewport_->setViewport(devcon, i);
 
-			managementViewport_->setViewport(devcon, i);
-
-			//Store all the viewport-specific data for the backbuffer-rendering.
-			vpData.camIndex		= ptr_camera.index();
-			vpData.view			= DirectX::XMFLOAT4X4(((float*)&ptr_camera->mat_view));
-			vpData.proj			= DirectX::XMFLOAT4X4(((float*)&ptr_camera->mat_projection));
-			vpData.viewInv		= managementMath_->calculateMatrixInverse(vpData.view);
-			vpData.projInv		= managementMath_->calculateMatrixInverse(vpData.proj);
-			vpData.eyePos		= *(DirectX::XMFLOAT3*)&ptr_position->position;
-			vpData.viewportTopX = static_cast<unsigned int>(ptr_splitScreen->ssTopLeftX);
-			vpData.viewportTopY = static_cast<unsigned int>(ptr_splitScreen->ssTopLeftY);
-			vpData.zNear		= ptr_camera->zNear;
-			vpData.zFar			= ptr_camera->zFar;
-			vpData.viewportWidth	= (float)ptr_splitScreen->ssWidth;
-			vpData.viewportHeight	= (float)ptr_splitScreen->ssHeight;
-			vpDatas[i]			= vpData;
-
-			renderViewportToGBuffer(vpData);
-		}
-		managementBuffer_->unsetBuffersAndDepthBufferAsRenderTargets(devcon);
+		renderViewportToGBuffer(vpDatas[i]);
+	}
+	managementBuffer_->unsetBuffersAndDepthBufferAsRenderTargets(devcon);
 	)
 	
 	//Blur glowmap:
@@ -623,7 +629,7 @@ void Renderer::renderViewportToBackBuffer(ViewportData& vpData, DirectX::XMFLOAT
 	//Set lights.
 	managementLight_->setLightSRVCS(devcon, LIGHTBUFFERTYPE_DIR,		LIGHT_SRV_REGISTER_DIR);
 	managementLight_->setLightSRVCS(devcon, LIGHTBUFFERTYPE_POINT,		LIGHT_SRV_REGISTER_POINT);
-	managementLight_->setLightSRVCS(devcon, LIGHTBUFFERTYPE_POS_VIEW,	LIGHT_SRV_REGISTER_POS);
+	managementLight_->setPosDirSRVCS(devcon, vpData.camIndex, LIGHT_SRV_REGISTER_POS, LIGHT_SRV_REGISTER_DIRECTION);
 	
 	//Set default samplerstate.
 	managementSS_->setSS(devcon, TypeFX_CS, 0, SS_ID_DEFAULT);
@@ -637,7 +643,7 @@ void Renderer::renderViewportToBackBuffer(ViewportData& vpData, DirectX::XMFLOAT
 	//Unset and clean.
 	managementLight_->unsetLightSRVCS(devcon, LIGHTBUFFERTYPE_DIR,		LIGHT_SRV_REGISTER_DIR);
 	managementLight_->unsetLightSRVCS(devcon, LIGHTBUFFERTYPE_POINT,	LIGHT_SRV_REGISTER_POINT);
-	managementLight_->unsetLightSRVCS(devcon, LIGHTBUFFERTYPE_POS_VIEW,	LIGHT_SRV_REGISTER_POS);
+	managementLight_->unsetPosDirSRVCS(devcon, vpData.camIndex, LIGHT_SRV_REGISTER_POS, LIGHT_SRV_REGISTER_DIRECTION);
 
 	managementFX_->unsetShader(devcon, SHADERID_CS_LIGHTING);
 
