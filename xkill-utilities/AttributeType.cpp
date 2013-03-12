@@ -214,7 +214,7 @@ void Attribute_Projectile::saveTo( DataItemList* list )
 
 Attribute_Light_Dir::Attribute_Light_Dir()
 {
-
+	direction = Float3(0.0f, 0.0f, 0.0f);
 }
 Attribute_Light_Dir::~Attribute_Light_Dir()
 {
@@ -228,7 +228,7 @@ DataItemList* Attribute_Light_Dir::getDataList()
 	list->add(lightDir.ambient,		"ambient");
 	list->add(lightDir.diffuse,		"diffuse");
 	list->add(lightDir.specular,	"specular");
-	list->add(lightDir.direction,	"direction");
+	list->add(direction,	"direction");
 
 	return list;
 }
@@ -238,7 +238,7 @@ void Attribute_Light_Dir::saveTo( DataItemList* list )
 	list->get(&lightDir.ambient);
 	list->get(&lightDir.diffuse);
 	list->get(&lightDir.specular);
-	list->get(&lightDir.direction);
+	list->get(&direction);
 }
 
 Attribute_Light_Point::Attribute_Light_Point()

@@ -291,6 +291,8 @@ struct DLL_U Attribute_Light_Dir : public IAttribute
 	Attribute_Light_Dir();
 	~Attribute_Light_Dir(); //!< Does nothing.
 
+	Float3 direction;
+
 	LightDescDir lightDir;
 	DataItemList* getDataList();
 	void saveTo(DataItemList* list);

@@ -491,7 +491,7 @@ public:
 			ptr_lightDir->lightDir.ambient = Float4(e->ambient,1);
 			ptr_lightDir->lightDir.diffuse = Float4(e->diffuse,1);
 			ptr_lightDir->lightDir.specular = Float4(e->specular,1);
-			ptr_lightDir->lightDir.direction = e->direction.normalize();
+			ptr_lightDir->direction = e->direction.normalize();
 		}
 		else if(e->type == 3)
 		{

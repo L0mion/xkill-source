@@ -806,16 +806,16 @@ DirectX::XMFLOAT4X4	Renderer::buildShadowMap()
 	bounds.center = DirectX::XMFLOAT3(0.0f, 0.0f, 0.0f); //Origo.
 	bounds.radius = 38; //Radius of scene really ought to be calculated instead of fixed.
 
-	LightDescDir dirLight = LightDescDir();
+	Float3 direction;
 	AttributePtr<Attribute_Light_Dir> ptr_lightDir;
 	if(itrLightDir.hasNext())
 	{
 		ptr_lightDir = itrLightDir.getNext();
-		dirLight = ptr_lightDir->lightDir;
+		direction = ptr_lightDir->direction;
 	}
 	itrLightDir.resetIndex();
 
-	shadowMatrices_ = constructShadowMatrices(bounds, dirLight.direction);
+	shadowMatrices_ = constructShadowMatrices(bounds, direction);
 
 	//Set viewport to encompass entire map.
 	D3D11_VIEWPORT vp = managementBuffer_->getShadowViewport();

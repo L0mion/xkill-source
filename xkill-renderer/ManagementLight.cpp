@@ -149,7 +149,7 @@ void ManagementLight::updateStreamDirLight(std::vector<ViewportData> vpDatas)
 		ptr_lightDir = itrLightDir.getNext();
 		streamDirLight_->pushData(ptr_lightDir->lightDir);
 
-		Float3 dir = ptr_lightDir->lightDir.direction;
+		Float3 dir = ptr_lightDir->direction;
 		for(unsigned int i = 0; i < vpDatas.size(); i++)
 		{
 			addDirLightDir(
