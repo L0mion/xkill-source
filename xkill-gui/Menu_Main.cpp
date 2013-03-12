@@ -328,6 +328,7 @@ void Menu_Main::onEvent( Event* e )
 			// Refresh additional menu parts
 			ui.horizontalSlider_cycleLimit->setValue(SETTINGS->cycleLimit);
 			ui.horizontalSlider_timeLimit->setValue(SETTINGS->timeLimit);
+			ui.horizontalSlider_respawnTime->setValue(SETTINGS->respawnTime);
 			ui.label_cycleLimit->setNum(ui.horizontalSlider_cycleLimit->value());
 			ui.label_timeLimit->setNum(ui.horizontalSlider_timeLimit->value());
 			ui.label_respawnTime->setNum(ui.horizontalSlider_respawnTime->value());

@@ -331,22 +331,22 @@ void CollisionManager::collision_projectile(Entity* entity1, Entity* entity2)
 				AttributePtr<Attribute_Projectile> ptr_projectile = itrProjectile.at(projectileId.at(i));
 
 				//Determine collision effect based on ammunitionType
-				float deathDelay = 2.0f;
+				float projectileLifeTimeAfterHit = 2.0f;
 				switch(ptr_projectile->ammunitionType)
 				{
 				case XKILL_Enums::AmmunitionType::BULLET: //Bounce off the wall
-					deathDelay = 5.0f;
-					if(ptr_projectile->currentLifeTimeLeft > deathDelay)
+					projectileLifeTimeAfterHit = 5.0f;
+					if(ptr_projectile->currentLifeTimeLeft > projectileLifeTimeAfterHit)
 					{
-						ptr_projectile->currentLifeTimeLeft = deathDelay;
+						ptr_projectile->currentLifeTimeLeft = projectileLifeTimeAfterHit;
 						SEND_EVENT(&Event_ModifyPhysicsObject(XKILL_Enums::ModifyPhysicsObjectData::GRAVITY, static_cast<void*>(&Float3(0.0f, -5.0f, 0.0f)), itrPhysics.at(physicsId.at(j))));
 					}
 					break;
 				case XKILL_Enums::AmmunitionType::SCATTER: //Fall down and roll, also collide with projectiles
-					deathDelay = 5.0f;
-					if(ptr_projectile->currentLifeTimeLeft > deathDelay)
+					projectileLifeTimeAfterHit = 5.0f;
+					if(ptr_projectile->currentLifeTimeLeft > projectileLifeTimeAfterHit)
 					{
-						ptr_projectile->currentLifeTimeLeft = deathDelay;
+						ptr_projectile->currentLifeTimeLeft = projectileLifeTimeAfterHit;
 
 						SEND_EVENT(&Event_ModifyPhysicsObject(XKILL_Enums::ModifyPhysicsObjectData::GRAVITY, static_cast<void*>(&Float3(0.0f, -10.0f, 0.0f)), itrPhysics.at(physicsId.at(j))));
 						SEND_EVENT(&Event_ModifyPhysicsObject(XKILL_Enums::ModifyPhysicsObjectData::VELOCITYPERCENTAGE, static_cast<void*>(&Float3(0.1f, 0.1f, 0.1f)), itrPhysics.at(physicsId.at(j))));

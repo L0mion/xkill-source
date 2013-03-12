@@ -38,6 +38,7 @@ public:
 	void onEvent(Event* e);
 
 	void update();
+	void silenceAllMessages();
 	void move(Float2 position);
 	void addMessage(Event_PostHudMessage* e);
 	void removeTopMessage();

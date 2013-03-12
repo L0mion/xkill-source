@@ -2,8 +2,12 @@
 
 #include <xkill-utilities\Math.h> //Math::randomInt
 
-void NameGenerator::reset()
+void NameGenerator::resetNames()
 {
+	//
+	// Add names
+	//
+
 	addName("Sprak");
 	addName("Algol");
 	addName("Haskell");
@@ -1238,7 +1242,7 @@ std::string NameGenerator::getName()
 {
 	// Reset names if all have been picked
 	if(names.size() <= 0)
-		reset();
+		resetNames();
 
 	// Pick random name
 	int numNames = names.size();
