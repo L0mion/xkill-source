@@ -104,16 +104,17 @@ void XInputDevice::setStandardMappings()
 
 	if(buttons_.size() >= 14)
 	{
-		buttons_[0]->addMapping(InputAction::ACTION_B_JUMP);
-		buttons_[1]->addMapping(InputAction::ACTION_B_CHANGE_AMMUNITIONTYPE);
-		buttons_[2]->addMapping(InputAction::ACTION_B_CHANGE_FIRINGMODE);
-		buttons_[4]->addMapping(InputAction::ACTION_B_JETPACK);
+		buttons_[0]->addMapping(InputAction::ACTION_B_PREV_AMMUNITIONTYPE);
+		buttons_[1]->addMapping(InputAction::ACTION_B_NEXT_AMMUNITIONTYPE);
+		buttons_[2]->addMapping(InputAction::ACTION_B_NEXT_FIRINGMODE);
+		buttons_[3]->addMapping(InputAction::ACTION_B_PREV_FIRINGMODE);
+		buttons_[4]->addMapping(InputAction::ACTION_B_JUMP_JETPACK);
 		buttons_[5]->addMapping(InputAction::ACTION_B_SPRINT);
 		buttons_[7]->addMapping(InputAction::ACTION_B_KILL_PLAYER);
-		buttons_[10]->addMapping(InputAction::ACTION_B_WALK_FORWARD);
-		buttons_[11]->addMapping(InputAction::ACTION_B_WALK_RIGHT);
-		buttons_[12]->addMapping(InputAction::ACTION_B_WALK_BACKWARD);
-		buttons_[13]->addMapping(InputAction::ACTION_B_WALK_RIGHT);
+		buttons_[10]->addMapping(InputAction::ACTION_B_PREV_FIRINGMODE);
+		buttons_[11]->addMapping(InputAction::ACTION_B_NEXT_AMMUNITIONTYPE);
+		buttons_[12]->addMapping(InputAction::ACTION_B_NEXT_FIRINGMODE);
+		buttons_[13]->addMapping(InputAction::ACTION_B_PREV_AMMUNITIONTYPE);
 	}
 
 	if(triggers_.size() >= 2)
@@ -234,10 +235,10 @@ void XInputDevice::createInputObjectsFromLayout()
 		buttons_[1]->setName("B");
 		buttons_[2]->setName("Y");
 		buttons_[3]->setName("X");
-		buttons_[4]->setName("Start");
-		buttons_[5]->setName("Select");
-		buttons_[6]->setName("Left Shoulder");
-		buttons_[7]->setName("Right Shoulder");
+		buttons_[4]->setName("Left Shoulder");
+		buttons_[5]->setName("Right Shoulder");
+		buttons_[6]->setName("Start");
+		buttons_[7]->setName("Select");
 		buttons_[8]->setName("Left Stick Button");
 		buttons_[9]->setName("Right Stick Button");
 		buttons_[10]->setName("DPad Up");

@@ -210,7 +210,7 @@ void PlayerPhysicsObject::handleInput(float delta)
 		if(ptr_player->jetpack)
 		{
 			float jetpackPower = -getGravity().y()*1.5f;
-			world = getWorldTransform();
+   			world = getWorldTransform();
 			btVector3 velocity = getLinearVelocity();
 			if(world.getOrigin().y() < 18.0f)
 			{

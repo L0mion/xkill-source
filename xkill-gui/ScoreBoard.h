@@ -41,7 +41,10 @@ private:
 public:
 	int maxCycles;
 	int maxPriority;
+	int previousMaxCycles;
+	int previousTime;
 	int secondMaxPriority;
+	
 
 	void init(AttributePtr<Attribute_Player> ptr_current_player, QWidget* frame_scoreboard);
 	void findMaxValues();

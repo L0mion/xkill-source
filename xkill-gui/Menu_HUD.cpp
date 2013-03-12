@@ -22,10 +22,19 @@ Menu_HUD::Menu_HUD( AttributePtr<Attribute_SplitScreen> splitScreen, QWidget* pa
 	QWidget::setAttribute(Qt::WA_TransparentForMouseEvents);
 
 	SUBSCRIBE_TO_EVENT(this, EVENT_UPDATE);
+	SUBSCRIBE_TO_EVENT(this, EVENT_PLAYER_TARGET_HIT);
+	SUBSCRIBE_TO_EVENT(this, EVENT_PLAYER_TAKING_DAMAGE);
 
 	hudMessage_manager.init(this, ptr_splitScreen);
 	mapToSplitscreen();
 	initScoreboard();
+
+	hitOverlayFade				= 0.0f;
+	crosshair_targetHitFade		= 0.0f;
+	scoreboardFade				= 0.0f;
+	healthFade					= 0.0f;
+	ammoFade					= 0.0f;
+	firingModeFade				= 0.0f;
 }
 
 Menu_HUD::~Menu_HUD()
@@ -51,10 +60,15 @@ void Menu_HUD::mapToSplitscreen()
 	ui.label_deathOverlay->move(0, 0);
 	ui.label_deathOverlay->resize(ptr_splitScreen->ssWidth, ptr_splitScreen->ssHeight);
 	ui.label_deathOverlay->hide();
+	ui.label_hitOverlay->move(0, 0);
+	ui.label_hitOverlay->resize(ptr_splitScreen->ssWidth, ptr_splitScreen->ssHeight);
+	ui.label_hitOverlay->hide();
 
 	// Move center HUD to center
 	ui.label_aim->move(centerPos.x - ui.label_aim->width()* 0.5f, centerPos.y - ui.label_aim->height()* 0.5f);
+	ui.label_aim_targetHit->move(centerPos.x - ui.label_aim_targetHit->width()* 0.5f, centerPos.y - ui.label_aim_targetHit->height()* 0.5f);
 	ui.label_firingMode->move(centerPos.x - ui.label_firingMode->width()* 0.5f + 10, centerPos.y - ui.label_firingMode->height()* 0.5f);
+
 
 	// Move scoreboard to center
 	ui.frame_scoreboard->hide();
@@ -211,6 +225,43 @@ void Menu_HUD::refresh()
 	//
 
 	hudMessage_manager.update();
+
+
+	// Show hit effects
+
+	// Player is damaged
+	if(hitOverlayFade > 0.0f)
+	{
+		hitOverlayFade -= SETTINGS->trueDeltaTime;
+		if(ui.label_hitOverlay->isHidden())
+		{
+			ui.label_hitOverlay->show();
+		}
+	}
+	else
+	{
+		if(!ui.label_hitOverlay->isHidden())
+		{
+			ui.label_hitOverlay->hide();
+		}
+	}
+
+	// Player damages another player
+	if(crosshair_targetHitFade > 0.0f)
+	{
+		crosshair_targetHitFade -= SETTINGS->trueDeltaTime;
+		if(ui.label_aim_targetHit->isHidden())
+		{
+			ui.label_aim_targetHit->show();
+		}
+	}
+	else
+	{
+		if(!ui.label_aim_targetHit->isHidden())
+		{
+			ui.label_aim_targetHit->hide();
+		}
+	}
 
 
 	// Show death effects
@@ -406,6 +457,37 @@ void Menu_HUD::refresh()
 		if(!ui.label_firingMode->isHidden())
 			ui.label_firingMode->hide();
 	}
+
+	 
+	// Update scoreboard progress bars
+	bool isEnabled_cycleLimit = SETTINGS->cycleLimit != 0;
+	bool isEnabled_timeLimit = SETTINGS->timeLimit != 0;
+	int highestCycles = scoreboard.maxCycles;
+	if(isEnabled_cycleLimit && scoreboard.previousMaxCycles != highestCycles)
+	{
+		scoreboard.previousMaxCycles = highestCycles;
+
+		// Perform update
+		int cyclesLimit = SETTINGS->cycleLimit;
+		int cycleRatio = (int)((highestCycles/(float)cyclesLimit) * 100);
+		ui.progressBar_cycleRatio->setValue(cycleRatio);
+		ui.progressBar_cycleRatio->update();
+		QString str_cycleRatio = QString::number(highestCycles) + "/" + QString::number(cyclesLimit)  + " Cycles";
+		ui.label_cycleRatio->setText(str_cycleRatio);
+	}
+	int currentTime = SETTINGS->timeLimit - SETTINGS->timeLeft;
+	if(isEnabled_timeLimit && scoreboard.previousTime != currentTime)
+	{
+		scoreboard.previousTime = currentTime;
+
+		// Perform update
+		int timeLimit = SETTINGS->timeLimit;
+		int timeRatio = (int)((currentTime/(float)timeLimit) * 100);
+		ui.progressBar_timeRatio->setValue(timeRatio);
+		ui.progressBar_timeRatio->update();
+		QString str_timeRatio = QString::number(currentTime) + "/" + QString::number(timeLimit)  + " Time";
+		ui.label_timeRatio->setText(str_timeRatio);
+	}
 }
 
 void Menu_HUD::initScoreboard()
@@ -453,6 +535,26 @@ void Menu_HUD::onEvent( Event* e )
 	{
 	case EVENT_UPDATE:
 		refresh();
+		break;
+	case EVENT_PLAYER_TARGET_HIT:
+		{
+			// If player hitting a target is THIS player
+			// display hit feedback for a while
+			if(((Event_PlayerTargetHit*)e)->ptr_player == ptr_splitScreen->ptr_player)
+			{
+				crosshair_targetHitFade = 0.1f;
+			}
+		}
+		break;
+	case EVENT_PLAYER_TAKING_DAMAGE:
+		{
+			// If player getting hit is THIS player
+			// display hit feedback for a while
+			if(((Event_PlayerTakingDamage*)e)->ptr_player == ptr_splitScreen->ptr_player)
+			{
+				hitOverlayFade = 0.1f;
+			}
+		}
 		break;
 	default:
 		break;

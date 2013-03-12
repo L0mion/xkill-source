@@ -88,6 +88,8 @@ enum DLL_U EventType
 
 	// Gameplay events
 	EVENT_PLAYERDEATH,
+	EVENT_PLAYER_TARGET_HIT,
+	EVENT_PLAYER_TAKING_DAMAGE,
 	EVENT_PHYSICS_ATTRIBUTES_COLLIDING,
 	EVENT_SYNC_STATE_COMMAND,
 	EVENT_CLOSEST_HIT_RAY_CAST,
@@ -169,6 +171,28 @@ public:
 	Event_SetFullscreen(bool on);
 
 	bool on;
+};
+
+class DLL_U Event_PlayerTargetHit : public Event
+{
+public:
+	Event_PlayerTargetHit(AttributePtr<Attribute_Player> ptr_playern) : Event(EVENT_PLAYER_TARGET_HIT)
+	{
+		this->ptr_player = ptr_playern;
+	}
+
+	AttributePtr<Attribute_Player> ptr_player; // The player that hit another target
+};
+
+class DLL_U Event_PlayerTakingDamage : public Event
+{
+public:
+	Event_PlayerTakingDamage(AttributePtr<Attribute_Player> ptr_playern) : Event(EVENT_PLAYER_TAKING_DAMAGE)
+	{
+		this->ptr_player = ptr_playern;
+	}
+
+	AttributePtr<Attribute_Player> ptr_player; // The player that hit another target
 };
 
 class DLL_U Event_PostHudMessage : public Event
