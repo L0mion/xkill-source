@@ -1,4 +1,5 @@
 #include "ScoreBoard.h"
+#include <xkill-utilities/Converter.h>
 
 int ScoreBoard::valueAt( int index )
 {
@@ -93,7 +94,6 @@ void ScoreBoard::syncLabelsWithPlayers()
 			e->isChanged = true;
 		if(e->ptr_player->priority != e->priority)
 			e->isChanged = true;
-		e->isChanged = true;
 
 		// Update label
 		if(e->isChanged)
@@ -106,9 +106,15 @@ void ScoreBoard::syncLabelsWithPlayers()
 			e->label_priority->setNum(e->ptr_player->priority);
 
 			// Empty style sheets
-			std::string sheet_process = "";
+			std::string sheet_process = "font-weight: bold;";
 			std::string sheet_cycles = "";
 			std::string sheet_priority = "";
+
+			// Add name color
+			Float3 color = e->ptr_player->avatarColor;
+			std::string str_color = "color: rgba("+Converter::IntToStr((int)(color.x * 255))+", "+Converter::IntToStr((int)(color.y * 255))+", "+ Converter::IntToStr((int)(color.z * 255)) +", 220);";
+			sheet_process += str_color;
+	
 
 			// Apply extra stuff if we're at the current player
 			if(e->ptr_player == ptr_current_player)
