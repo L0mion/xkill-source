@@ -328,10 +328,14 @@ void Menu_Main::onEvent( Event* e )
 			// Refresh additional menu parts
 			ui.horizontalSlider_cycleLimit->setValue(SETTINGS->cycleLimit);
 			ui.horizontalSlider_timeLimit->setValue(SETTINGS->timeLimit);
+			//check respawn time
+
 			ui.label_cycleLimit->setNum(ui.horizontalSlider_cycleLimit->value());
 			ui.label_timeLimit->setNum(ui.horizontalSlider_timeLimit->value());
 			ui.label_respawnTime->setNum(ui.horizontalSlider_respawnTime->value());
-			
+			ui.label_executionFrequency->setNum(ui.horizontalSlider_executionFrequency->value());
+			ui.label_priorityToCycleRate->setNum(ui.horizontalSlider_priorityToCycleRate->value());
+
 			//input_Menu->setSettingsMenu();
 			//sound_Menu->setSettingsMenu();
 

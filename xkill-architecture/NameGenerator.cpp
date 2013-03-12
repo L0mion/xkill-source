@@ -158,6 +158,7 @@ void NameGenerator::reset()
 	addName("status");
 	addName("virtual memory");
 	addName("garbage collection");
+	addName("incremental garbage collection");
 	addName("debugger");
 	addName("worker thread");
 	addName("thread pool");
@@ -397,7 +398,7 @@ void NameGenerator::reset()
 	addName("demo");
 	addName("tech demo");
 	addName("scientist with laser");
-	addName("gun runner-gunner");
+	addName("run-and-gun");
 	addName("interrupt");
 	addName("exception handler");
 	addName("unhandled exception");
@@ -785,7 +786,7 @@ void NameGenerator::reset()
 	addName("shine the shoehorn");
 	addName("sledgehammer with nails");
 	addName("closed coffin");
-	addName("smoke particles");
+	addName("smoke particle");
 	addName("plugin");
 	addName("front-side bus");
 	addName("forlorn castles");
@@ -1023,6 +1024,7 @@ void NameGenerator::reset()
 	addName("flower of ipecac");
 	addName("chilling flamethrower");
 	addName("chainsaw and lawn mower");
+	addName("pliers and blowtorch");
 	addName("child-abducting demon");
 	addName("down to earth and back again");
 	addName("for each and every year");
@@ -1166,9 +1168,37 @@ void NameGenerator::reset()
 	addName("King Richard");
 	addName("Ebas Neue");
 	addName("typecast");
-	addName("missing before");
+	addName("missing before, found now");
+	addName("O missing before K");
+	addName("stable but quaint");
+	addName("nefarious deed");
+	addName("grizzly and his buffer");
+	addName("I understand arrows");
+	addName("laid-back backpack");
+	addName("heavy cavalry");
+	addName("alternative operator");
+	addName("modifiable lvalue");
+	addName("yarn and thread");
+	addName("unique constant buffer");
+	addName("exactly the same");
+	addName("not exactly sane");
+	addName("verge of extinction");
+	addName("hammer and nail");
+	addName("to no avail");
+	addName("bitten by snake");
+	addName("deferred context");
+	addName("multi-layered cake");
+	addName("weed indeed");
+	addName("Singkil");
+	addName("list of stuff");
+	addName("stuffed animal");
+	addName("non-renderable interface");
+	addName("Internet access");
+	addName("mushroom iterator");
+	addName("once upon a time");
+	addName("free for all");
+	addName("aerial runner");
 	
-
 	//C++ keywords
 	addName("alignas");
 	addName("alignof");
