@@ -1210,6 +1210,10 @@ void NameGenerator::reset()
 	addName("refered to as two");
 	addName("executable");
 	addName("excusable");
+	addName("rethinkably done");
+	addName("possible loss of data");
+	addName("consider it done");
+	addName("c1xx");
 	
 	//C++ keywords
 	addName("alignas");
