@@ -409,6 +409,7 @@ struct DLL_U Attribute_Camera : public IAttribute
 	~Attribute_Camera();
 
 	AttributePtr<Attribute_Spatial> ptr_spatial;
+	AttributePtr<Behavior_Offset> ptr_offset;
 
 	Float4x4 mat_view;			//!< The view matrix. Used to transform objects to view space.
 	Float4x4 mat_projection;	//!< The projection matrix. Defines the camera's frustum.

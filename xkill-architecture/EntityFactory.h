@@ -114,9 +114,9 @@ public:
 
 			ptr_light_spatial = ptr_spatial;
 
-			CREATE_ATTRIBUTE(ptr_render, Attribute_Render, render, entity);
+			/*CREATE_ATTRIBUTE(ptr_render, Attribute_Render, render, entity);
 			ptr_render->ptr_spatial = ptr_spatial;
-			ptr_render->meshID = XKILL_Enums::ModelId::PROJECTILE_BULLET;
+			ptr_render->meshID = XKILL_Enums::ModelId::PROJECTILE_BULLET;*/
 		}
 
 		CREATE_ATTRIBUTE(ptr_lightPoint, Attribute_Light_Point, lightPoint, entity);
@@ -134,14 +134,17 @@ public:
 		CREATE_ATTRIBUTE(ptr_position, Attribute_Position, position, entity);
 		CREATE_ATTRIBUTE(ptr_spatial, Attribute_Spatial, spatial, entity);
 		ptr_spatial->ptr_position = ptr_position;
-		CREATE_ATTRIBUTE(ptr_camera, Attribute_Camera, camera, entity);
-		ptr_camera->ptr_spatial = ptr_spatial;
+		
 
 		// Add behavior
 		CREATE_ATTRIBUTE(ptr_offset, Behavior_Offset, offset, entity);
 		ptr_offset->ptr_spatial = ptr_spatial;
 		ptr_offset->ptr_parent_spatial_position = ptr_parent_spatial;
 		ptr_offset->offset_position = Float3(0.0f, 0.3f, 0.36f);
+
+		CREATE_ATTRIBUTE(ptr_camera, Attribute_Camera, camera, entity);
+		ptr_camera->ptr_spatial = ptr_spatial;
+		ptr_camera->ptr_offset = ptr_offset;
 
 		// Return
 		return ptr_camera;
