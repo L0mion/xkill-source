@@ -58,8 +58,6 @@ public:
 		LightBufferType			bufferType, 
 		unsigned int			shaderRegister);
 
-	//void transformLightViewSpacePoss(ID3D11DeviceContext* devcon, DirectX::XMFLOAT4X4 view);
-
 	unsigned int getLightDirCurCount();
 	unsigned int getLightPointCurCount();
 private:

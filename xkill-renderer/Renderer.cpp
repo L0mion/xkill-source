@@ -41,10 +41,9 @@
 #include "TimerDX.h"
 
 
-
 ATTRIBUTES_DECLARE_ALL;
 
-//#define XKILLPROFILING // commment away to skip profiling
+#define XKILLPROFILING // commment away to skip profiling
 #ifdef XKILLPROFILING
 #include <xkill-utilities\Converter.h>
 #include <time.h>

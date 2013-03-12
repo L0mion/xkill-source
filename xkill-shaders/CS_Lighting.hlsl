@@ -36,9 +36,10 @@ SamplerComparisonState	ssShadow	: register( s1 );
 groupshared uint tileMinDepthInt;
 groupshared uint tileMaxDepthInt;
 groupshared uint tileLightNum; //Number of lights intersecting tile.
-
-groupshared float3 lightsPosV[TILE_MAX_LIGHTS];
 groupshared uint tileLightIndices[TILE_MAX_LIGHTS]; //Indices to lights intersecting tile.
+
+groupshared float3 dirLightDir;
+groupshared float3 lightsPosV[TILE_MAX_LIGHTS];
 
 [numthreads(TILE_DIM, TILE_DIM, 1)]
 void CS_Lighting(
@@ -54,6 +55,9 @@ void CS_Lighting(
 		tileLightNum = 0;
 		tileMinDepthInt = 0xFFFFFFFF;
 		tileMaxDepthInt = 0.0f;
+
+		//Pre-compute direction. Add more of these if additional dir-lights.
+		dirLightDir = mul(float4(lightsDir[0].direction, 0.0f), view).xyz;
 	}
 
 	const float2 texCoord = float2(
@@ -135,11 +139,12 @@ void CS_Lighting(
 		float4 ambient, diffuse, specular;
 		for(i = 0; i < numLightsDir; i++)
 		{
-			LightDescDir descDir = lightsDir[i];
-			descDir.direction = mul(float4(descDir.direction, 0.0f), view).xyz;
 			LightDir(
-				/*ToEye*/		toEyeV,
-				/*Light*/		descDir,
+				/*ToEye*/			toEyeV,
+				/*LightDir*/		dirLightDir, //Use pre-computed direction.
+				/*LightAmbient*/	lightsDir[i].ambient,
+				/*LightDiffuse*/	lightsDir[i].diffuse,
+				/*LightSpecular*/	lightsDir[i].specular,
 				/*Ambient*/		gAlbedo,
 				/*Diffuse*/		gAlbedo,
 				/*Specular*/	gMaterial,
