@@ -23,7 +23,7 @@ static const unsigned int CB_INSTANCE_DESC_SIZE = 16;
 struct CBFrameDesc
 {
 	unsigned int numLightsDir;
-	unsigned int numLightsPoint;
+	unsigned int pad;
 	unsigned int pad0;
 	unsigned int pad1;
 };
@@ -45,7 +45,7 @@ struct CBCameraDesc
 	float				viewportWidth;
 	
 	float viewportHeight;
-	unsigned int pad2;
+	unsigned int numLightsPoint;
 	unsigned int pad3;
 	unsigned int pad4;
 };

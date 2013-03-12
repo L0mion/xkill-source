@@ -52,8 +52,7 @@ public:
 		 const unsigned int		screenHeight);		//!< Updates the constant buffer cbInstance.
 	void updateCBFrame(
 		ID3D11DeviceContext*	devcon,
-		unsigned int			numLightsDir,
-		unsigned int			numLightsPoint);		//!< Updates the constant buffer cbFrame.
+		unsigned int			numLightsDir);		//!< Updates the constant buffer cbFrame.
 	void updateCBCamera(
 		ID3D11DeviceContext* devcon,
 		DirectX::XMFLOAT4X4	 viewMatrix,
@@ -66,7 +65,8 @@ public:
 		float				zNear,
 		float				zFar,
 		float 				viewportWidth,
-		float 				viewportHeight);	 //!< Updates the constant buffer cbCamera.
+		float 				viewportHeight,
+		unsigned int		numLightsPoint);	 //!< Updates the constant buffer cbCamera.
 	void updateCBObject(
 		ID3D11DeviceContext* devcon,
 		DirectX::XMFLOAT4X4 finalMatrix,
