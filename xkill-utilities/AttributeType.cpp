@@ -515,7 +515,7 @@ Attribute_Player::Attribute_Player()
 	cycleHackPair.first		= false;
 	cycleHackPair.second	= nullptr;
 
-	playerName = "NaN";
+	avatarName = "NaN";
 
 	walkSpeed = 5.0f;
 	sprintSpeed = walkSpeed*2;

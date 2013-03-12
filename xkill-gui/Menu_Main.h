@@ -98,10 +98,12 @@ private slots:
 		SETTINGS->cycleLimit = ui.horizontalSlider_cycleLimit->value();
 		SETTINGS->timeLimit = ui.horizontalSlider_timeLimit->value() * 60.0f;
 		SETTINGS->numPlayers = ui.horizontalSlider_numPlayers->value();
+		SETTINGS->respawnTime = ui.horizontalSlider_respawnTime->value();
+
 		AttributeIterator<Attribute_Player> itrPlayer = ATTRIBUTE_MANAGER->player.getIterator();
 		while(itrPlayer.hasNext())
 		{
-			itrPlayer.getNext()->respawnTimer.setStartTime(static_cast<float>(ui.horizontalSlider_respawnTime->value()));
+			itrPlayer.getNext()->respawnTimer.setStartTime(static_cast<float>(SETTINGS->respawnTime));
 		}
 
 		// Load selected level

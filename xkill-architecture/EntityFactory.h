@@ -83,7 +83,8 @@ public:
 		ptr_player->ptr_camera = ptr_camera;
 		ptr_player->ptr_health = ptr_health;
 		ptr_player->ptr_weaponStats = ptr_weaponStats;
-		ptr_player->playerName = nameGenerator.getName();
+		ptr_player->avatarName = nameGenerator.getName();
+		ptr_player->avatarColor = nameGenerator.getColor();
 
 		CREATE_ATTRIBUTE(ptr_splitScreen, Attribute_SplitScreen, splitScreen, entity);
 		ptr_splitScreen->ptr_camera = ptr_camera;

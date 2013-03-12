@@ -60,6 +60,7 @@ Attribute_Settings::Attribute_Settings()
 	schedulerTime = 30.0f;
 	cycleTime = 2.0f;
 	showDebugPhysics = false;
+	respawnTime = 3;
 
 	occlusionRadius		= 0.2f;
 	occlusionScale		= 0.7f;

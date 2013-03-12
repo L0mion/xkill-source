@@ -253,6 +253,7 @@ void Menu_HUD::refresh()
 		if(ui.label_aim_targetHit->isHidden())
 		{
 			ui.label_aim_targetHit->show();
+			ui.label_firingMode->show();
 		}
 	}
 	else
@@ -260,6 +261,7 @@ void Menu_HUD::refresh()
 		if(!ui.label_aim_targetHit->isHidden())
 		{
 			ui.label_aim_targetHit->hide();
+			ui.label_firingMode->hide();
 		}
 	}
 
@@ -306,6 +308,7 @@ void Menu_HUD::refresh()
 			// Show scoreboard if hidden
 			if(ui.frame_scoreboard->isHidden())
 			{
+				hudMessage_manager.silenceAllMessages();
 				ui.frame_scoreboard->show();
 			}
 		}
@@ -439,24 +442,20 @@ void Menu_HUD::refresh()
 		ui.label_firingMode->setPixmap(path);
 	}
 
-	if(firingModeFade > 0.0f)
-	{
-		firingModeFade -= SETTINGS->trueDeltaTime;
+	//if(firingModeFade > 0.0f)
+	//{
+	//	firingModeFade -= SETTINGS->trueDeltaTime;
 
-		// Show progress bar if hidden
-		if(ui.label_firingMode->isHidden())
-			ui.label_firingMode->show();
-
-		// Update value
-		ui.progressBar_health->setValue(healthRatio);
-		ui.progressBar_health->update();
-	}
-	else
-	{
-		// Hide progress-bar if shown
-		if(!ui.label_firingMode->isHidden())
-			ui.label_firingMode->hide();
-	}
+	//	// Show progress bar if hidden
+	//	if(ui.label_firingMode->isHidden())
+	//		ui.label_firingMode->show();
+	//}
+	//else
+	//{
+	//	// Hide progress-bar if shown
+	//	if(!ui.label_firingMode->isHidden())
+	//		ui.label_firingMode->hide();
+	//}
 
 	 
 	// Update scoreboard progress bars

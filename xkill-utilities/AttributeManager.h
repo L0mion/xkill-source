@@ -20,6 +20,7 @@ public:
 	float timeLimit;
 	float timeLeft;
 	int cycleLimit;
+	int respawnTime;
 	float schedulerTime;
 	float cycleTime;
 	float trueDeltaTime;
