@@ -1510,9 +1510,15 @@ void Renderer::renderAnimation(AttributePtr<Attribute_Player> ptr_player, Direct
 
 	std::vector<DirectX::XMFLOAT4X4> finalTransforms;
 	
-	ptr_animation->time += delta_;
-	if(ptr_animation->time > modelD3D->getSkinnedData()->getClipEndTime(ptr_animation->activeAnimation))
-		ptr_animation->time = 0.0f;
+	if(!ptr_player->detectedAsDead)
+	{
+		ptr_animation->time += delta_;
+		if(ptr_animation->time > modelD3D->getSkinnedData()->getClipEndTime(ptr_animation->activeAnimation))
+		{
+			ptr_animation->time = 0.0f;
+			ptr_animation->activeAnimation = "processHover";
+		}
+	}
 	modelD3D->getSkinnedData()->getFinalTransforms(ptr_animation->activeAnimation, ptr_animation->time, &finalTransforms);
 
 	int boneIndex = 16;

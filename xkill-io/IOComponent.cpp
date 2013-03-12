@@ -402,12 +402,6 @@ bool IOComponent::loadMD5(std::string modelName, std::string modelPath, MdlDescM
 	LoaderMD5ModelDesc md5Model;
 	loaderMD5.loadModel(modelPath+modelName, &md5Model);
 
-	std::string animNames[] = {"processHover", "processRest", "processHit"};
-	std::string extension = "md5anim";
-
-	LoaderMD5AnimationDesc md5Animation;
-	loaderMD5.loadAnimation(modelPath + "processHover.md5anim", &md5Animation);
-
 	std::vector<VertexDesc> vertices;
 	std::vector<SubsetDesc> subsets;
 	std::vector<MaterialDesc> materials;
@@ -418,7 +412,31 @@ bool IOComponent::loadMD5(std::string modelName, std::string modelPath, MdlDescM
 	meshDesc.subsets_	= subsets;
 	meshDesc.materials_ = materials;
 
-	loadMD5AssembleAnimation(skinnedData, &md5Animation, &md5Model);
+	std::vector<int>* boneHierarchy = new std::vector<int>();
+	for(unsigned int i=0; i<md5Model.joints_.size(); i++)
+		boneHierarchy->push_back(md5Model.joints_[i].parentID_);
+
+	std::vector<DirectX::XMFLOAT4X4>* boneOffsets = new std::vector<DirectX::XMFLOAT4X4>();
+	for(unsigned int i=0; i<md5Model.boneOffsets_.size(); i++)
+		boneOffsets->push_back(md5Model.boneOffsets_[i]);
+
+	std::vector<DirectX::XMFLOAT3>* bonePositions = new std::vector<DirectX::XMFLOAT3>();
+	for(unsigned int i=0; i<md5Model.joints_.size(); i++)
+		bonePositions->push_back(md5Model.joints_.at(i).position_);
+
+	unsigned int numAnimations	= 3;
+	std::string animNames[]		= {"processHover", "processRest", "processHit"};
+	std::string extension		= ".md5anim";
+
+	std::map<std::string, AnimationClip*>* animations = new std::map<std::string, AnimationClip*>();
+	for(unsigned int i=0; i<numAnimations; i++)
+	{
+		LoaderMD5AnimationDesc md5Animation;
+		loaderMD5.loadAnimation(modelPath + animNames[i] + extension, &md5Animation);
+		loadMD5AssembleAnimation(animNames[i], animations, &md5Animation, &md5Model);
+	}
+	skinnedData->set(boneHierarchy, boneOffsets, bonePositions, animations);
+	
 
 	return true;
 }
@@ -515,22 +533,10 @@ void IOComponent::loadMD5AssembleMaterials(std::vector<MaterialDesc>* materials,
 		materials->push_back(material);
 	}
 }
-void IOComponent::loadMD5AssembleAnimation(SkinnedData* skinnedData, LoaderMD5AnimationDesc* md5Animation, LoaderMD5ModelDesc* md5Model)
+void IOComponent::loadMD5AssembleAnimation(std::string name, std::map<std::string, AnimationClip*>* animations, LoaderMD5AnimationDesc* md5Animation, LoaderMD5ModelDesc* md5Model)
 {
 	
 	std::vector<LoaderMD5JointInfo> jointInfos = md5Animation->jointInfos_;
-	
-	std::vector<int>* boneHierarchy = new std::vector<int>();
-	for(unsigned int i=0; i<jointInfos.size(); i++)
-		boneHierarchy->push_back(jointInfos[i].parentID_);
-
-	std::vector<DirectX::XMFLOAT4X4>* boneOffsets = new std::vector<DirectX::XMFLOAT4X4>();
-	for(unsigned int i=0; i<md5Model->boneOffsets_.size(); i++)
-		boneOffsets->push_back(md5Model->boneOffsets_[i]);
-
-	std::vector<DirectX::XMFLOAT3>* bonePositions = new std::vector<DirectX::XMFLOAT3>();
-	for(unsigned int i=0; i<md5Model->joints_.size(); i++)
-		bonePositions->push_back(md5Model->joints_.at(i).position_);
 
 	std::vector<LoaderMD5FrameSkeleton> frameSkeletons = md5Animation->skeletons_;
 	AnimationClip* animationClip = new AnimationClip();
@@ -554,11 +560,10 @@ void IOComponent::loadMD5AssembleAnimation(SkinnedData* skinnedData, LoaderMD5An
 		}
 	}
 
-	std::map<std::string, AnimationClip*>* animations = new std::map<std::string, AnimationClip*>();
-	std::pair<std::string, AnimationClip*> animation("Default", animationClip);
+	std::pair<std::string, AnimationClip*> animation(name, animationClip);
 	animations->insert(animation);
 
-	skinnedData->set(boneHierarchy, boneOffsets, bonePositions, animations);
+	
 }
 std::string IOComponent::loadMD5FindAnimationName(std::string modelName)
 {
