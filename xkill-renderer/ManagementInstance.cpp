@@ -15,13 +15,16 @@ ManagementInstance::ManagementInstance()
 }
 ManagementInstance::~ManagementInstance()
 {
-	for(
-		auto i = cameraInstancesMap_.begin(); 
-		i != cameraInstancesMap_.end(); 
-		i++)
-	{
-		SAFE_DELETE(i->second);
-	}
+	//for(
+	//	auto i = cameraInstancesMap_.begin(); 
+	//	i != cameraInstancesMap_.end(); 
+	//	i++)
+	//{
+	//	SAFE_DELETE(i->second);
+	//}
+
+	for(unsigned int i = 0; i < cameraInstances_.size(); i++)
+		SAFE_DELETE(cameraInstances_[i]);
 
 	SAFE_DELETE(shadowInstances_);
 }
@@ -29,12 +32,9 @@ ManagementInstance::~ManagementInstance()
 void ManagementInstance::update(ID3D11Device* device, ID3D11DeviceContext* devcon)
 {
 	//Clear all buffers.
-	for(
-		auto i = cameraInstancesMap_.begin(); 
-		i != cameraInstancesMap_.end(); 
-		i++)
+	for(unsigned int i = 0; i < cameraInstances_.size(); i++)
 	{
-		i->second->reset();
+		cameraInstances_[i]->reset();
 	}
 	shadowInstances_->reset();
 
@@ -47,22 +47,25 @@ void ManagementInstance::update(ID3D11Device* device, ID3D11DeviceContext* devco
 	}
 
 	//Update buffers with new data.
-	for(
-		auto i = cameraInstancesMap_.begin(); 
-		i != cameraInstancesMap_.end(); 
-		i++)
+	for(unsigned int i = 0; i < cameraInstances_.size(); i++)
 	{
-		i->second->update(device, devcon);
+		cameraInstances_[i]->update(device, devcon);
 	}
 	shadowInstances_->update(device, devcon);
 }
 
 void ManagementInstance::init()
 {
+	cameraInstances_.resize(START_NUM_CAMERAS);
+	for(unsigned int i = 0; i < START_NUM_CAMERAS; i++)
+	{
+		cameraInstances_[i] = new CameraInstances();
+	}
+
 	shadowInstances_ = new CameraInstances();
 }
 
-void ManagementInstance::addInstance(AttributePtr<Attribute_Render> ptr_render)
+void ManagementInstance::addInstance(AttributePtr<Attribute_Render>& ptr_render)
 {
 	//Establish instance world matrix.
 	AttributePtr<Attribute_Spatial>		ptr_spatial		= ptr_render->ptr_spatial;
@@ -89,20 +92,8 @@ void ManagementInstance::addCameraInstance(
 	unsigned int meshID,
 	VertexInstanced instance)
 {
-	CameraInstances* camInstances = getCameraInstancesFromCameraIndex(ptr_camera.index());
-	if(camInstances != nullptr)
-	{ //Add new instance to corresponding CameraInstances-object.
-		camInstances->addInstance(meshID, instance);
-	}
-	else
-	{ //No existing CameraInstances-object. Make a new one.
-		camInstances = new CameraInstances();
-		camInstances->addInstance(meshID, instance);
-		cameraInstancesMap_.insert(
-			std::pair<unsigned int, CameraInstances*>(
-			ptr_camera.index(), 
-			camInstances));
-	}
+	CameraInstances* camInstances = cameraInstances_[ptr_camera.index()];
+	camInstances->addInstance(meshID, instance);
 }
 
 DirectX::XMFLOAT4X4 ManagementInstance::calculateWorldMatrix(
@@ -137,15 +128,7 @@ DirectX::XMFLOAT4X4 ManagementInstance::calculateWorldMatrix(
 
 CameraInstances* ManagementInstance::getCameraInstancesFromCameraIndex(unsigned int camIndex)
 {
-	CameraInstances* cameraInstances = nullptr;
-
-	auto it = cameraInstancesMap_.find(camIndex);
-	if(it != cameraInstancesMap_.end())
-	{
-		cameraInstances = it->second;
-	}
-
-	return cameraInstances;
+	return cameraInstances_[camIndex];
 }
 CameraInstances* ManagementInstance::getShadowInstances()
 {

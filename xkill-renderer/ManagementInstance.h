@@ -19,6 +19,8 @@ class CameraInstances;
 
 #include "MeshVerticesInstanced.h"
 
+static const unsigned int START_NUM_CAMERAS = 9;
+
 class ManagementInstance
 {
 public:
@@ -33,7 +35,7 @@ public:
 	CameraInstances* getShadowInstances();
 protected:
 private:
-	void addInstance(AttributePtr<Attribute_Render> ptr_render);
+	void addInstance(AttributePtr<Attribute_Render>& ptr_render);
 	DirectX::XMFLOAT4X4 calculateWorldMatrix(
 		AttributePtr<Attribute_Spatial>	ptr_spatial, 
 		AttributePtr<Attribute_Position> ptr_position);	//!< Calculates the world-matrix of an instance.
@@ -42,10 +44,12 @@ private:
 		unsigned int meshID,
 		VertexInstanced instance);
 
-	std::map<
-		unsigned int,
-		CameraInstances*> cameraInstancesMap_;
+	//std::map<
+	//	unsigned int,
+	//	CameraInstances*> cameraInstancesMap_;
+	
 	CameraInstances* shadowInstances_;
+	std::vector<CameraInstances*> cameraInstances_;
 };
 
 #endif //XKILL_RENDERER_MANAGEMENTRENDERAT_H

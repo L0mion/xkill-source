@@ -564,7 +564,7 @@ void Renderer::renderViewportToGBuffer(ViewportData& vpData)
 	if(cameraInstances == nullptr)
 		return; 
 
-	std::map<unsigned int, InstancedData*> instancesMap = cameraInstances->getInstancesMap();
+	std::map<unsigned int, InstancedData*>& instancesMap = cameraInstances->getInstancesMap();
 	for(std::map<unsigned int, InstancedData*>::iterator i = instancesMap.begin(); i != instancesMap.end(); i++)
 	{
 			renderInstance(i->first, i->second, false);
