@@ -89,11 +89,20 @@ void ScoreBoard::syncLabelsWithPlayers()
 
 		// Detect if label has changed
 		if(e->ptr_player->avatarName != e->playerName)
+		{
 			e->isChanged = true;
+			e->playerName = e->ptr_player->avatarName;
+		}
 		if(e->ptr_player->cycles != e->cycles)
+		{
 			e->isChanged = true;
+			e->cycles = e->ptr_player->cycles;
+		}
 		if(e->ptr_player->priority != e->priority)
+		{
 			e->isChanged = true;
+			e->priority = e->ptr_player->priority;
+		}
 
 		// Update label
 		if(e->isChanged)
