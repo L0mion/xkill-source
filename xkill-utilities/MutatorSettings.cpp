@@ -44,6 +44,7 @@ void MutatorSettings::setupAttribute(Attribute_WeaponStats* attribute)
 void MutatorSettings::setupAttribute(Attribute_WeaponStats* attribute, XKILL_Enums::AmmunitionType ammoType, XKILL_Enums::FiringModeType firingModeType)
 {
 	attribute->ammunition[ammoType] = Ammunition(standardAmmunitions[ammoType]);
+	attribute->ammunition[ammoType].currentTotalNrOfShots = attribute->ammunition[ammoType].initialTotalNrOfShots;
 	attribute->firingMode[firingModeType] = FiringMode(standardFiringModes[firingModeType]);
 }
 
