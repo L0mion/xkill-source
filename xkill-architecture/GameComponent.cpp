@@ -578,7 +578,7 @@ void GameComponent::updatePlayerAttributes(float delta)
 					}
 				}
 
-				ptr_player->ptr_camera->fieldOfView =3.14f/4.0f;
+				ptr_player->ptr_camera->fieldOfView = 3.14f/4.0f;
 				ptr_player->respawnTimer.resetTimer();
 				ptr_player->detectedAsDead = false;
 				SEND_EVENT(&Event_PlaySound(XKILL_Enums::Sound::SOUND_RESPAWN, itrPlayer.ownerIdAt(ptr_player.index()), ptr_position->position, true));
@@ -586,14 +586,14 @@ void GameComponent::updatePlayerAttributes(float delta)
 		}
 
 		//--------------------------------------------------------------------------------------
-		// Instant respawn of player, used for debugging
+		// Respawn player
 		//--------------------------------------------------------------------------------------
-		if(ptr_input->killPlayer)
+		if(ptr_input->firePressed && ptr_player->detectedAsDead)
 		{
-			ptr_health->health = 0.0f;
-			ptr_input->killPlayer = false;
-			ptr_player->detectedAsDead = true;
-			ptr_player->respawnTimer.zeroTimer();
+			if(ptr_player->respawnTimer.getStartTime() - ptr_player->respawnTimer.getTimeLeft() > 1.0f)
+			{
+				ptr_player->respawnTimer.zeroTimer();
+			}
 		}
 	}
 }

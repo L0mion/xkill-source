@@ -429,7 +429,6 @@ Attribute_Input::Attribute_Input()
 	jump = false;
 	jetpack = false;
 	sprint = false;
-	killPlayer = false;
 	fire = false;
 	firePressed = false;
 	changeAmmunitionType = false;

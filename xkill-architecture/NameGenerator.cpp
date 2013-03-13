@@ -1225,7 +1225,21 @@ void NameGenerator::resetNames()
 	addName("frail ladder");
 	addName("[armored tank]");
 	addName("one-ear");
-
+	addName("supposed to know");
+	addName("twitchy");
+	addName("pervertex");
+	addName("sleeping thread");
+	addName("cap the rendering thread");
+	addName("selling snow");
+	addName("freezer");
+	addName("joy");
+	addName("false-positive");
+	addName("Type I and type II errors");
+	addName("buildbot winslave");
+	addName("bootstrapper");
+	addName("gunpowder wagon");
+	addName("bamboo sword");
+	addName("on a tight leash");
 	
 	//C++ keywords
 	addName("alignas");

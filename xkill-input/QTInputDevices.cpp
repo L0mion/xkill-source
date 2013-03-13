@@ -58,7 +58,6 @@ void QTInputDevices::setStandardMappings()
 		buttons_[4]->addMapping(InputAction::ACTION_B_JUMP_JETPACK);
 		buttons_[5]->addMapping(InputAction::ACTION_B_NEXT_AMMUNITIONTYPE);
 		buttons_[6]->addMapping(InputAction::ACTION_B_NEXT_FIRINGMODE);
-		buttons_[7]->addMapping(InputAction::ACTION_B_KILL_PLAYER);
 		buttons_[9]->addMapping(InputAction::ACTION_B_SPRINT);
 
 		buttons_[10]->addMapping(InputAction::ACTION_B_TIME_SPEED_UP);
