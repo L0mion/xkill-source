@@ -4,6 +4,8 @@
 
 void NameGenerator::resetNames()
 {
+	names.clear();
+
 	//
 	// Add names
 	//
@@ -1207,6 +1209,7 @@ void NameGenerator::resetNames()
 	addName("levitation");
 	addName("error-prone");
 	addName("DNA repair");
+	addName("sources of damage");
 	addName("cycle steal");
 	addName("simple solution");
 	addName("I think so, definitely");
@@ -1225,7 +1228,32 @@ void NameGenerator::resetNames()
 	addName("frail ladder");
 	addName("[armored tank]");
 	addName("one-ear");
-
+	addName("supposed to know");
+	addName("twitchy");
+	addName("pervertex");
+	addName("sleeping thread");
+	addName("cap the rendering thread");
+	addName("selling snow");
+	addName("freezer");
+	addName("joy");
+	addName("false-positive");
+	addName("Type I and type II errors");
+	addName("buildbot winslave");
+	addName("bootstrapper");
+	addName("gunpowder wagon");
+	addName("bamboo sword");
+	addName("on a tight leash");
+	addName("call to arms");
+	addName("relaxed andl lazy");
+	addName("peak rate");
+	addName("weapon house");
+	addName("visiting magnetism");
+	addName("went out of control from there");
+	addName("shuffle-face");
+	addName("original origo");
+	addName("juniper berry");
+	addName("spatial suggestion");
+	addName("hidden reference");
 	
 	//C++ keywords
 	addName("alignas");
@@ -1356,4 +1384,50 @@ std::string NameGenerator::getName()
 
 	// Return name
 	return name;
+}
+
+void NameGenerator::reset()
+{
+	resetNames();
+	resetColors();
+}
+
+void NameGenerator::resetColors()
+{
+	colors.clear();
+
+	//
+	// Add colors
+	//
+
+	addColor(Float3(0.0f, 1.0f, 0.0));
+	addColor(Float3(1.0f, 0.0f, 0.0));
+	addColor(Float3(0.0f, 1.0f, 1.0));
+	addColor(Float3(1.0f, 0.4f, 0.0));
+	addColor(Float3(0.7f, 0.0f, 1.0));
+}
+
+void NameGenerator::addColor( Float3 color )
+{
+	colors.push_back(color);
+}
+
+Float3 NameGenerator::getColor()
+{
+	// Reset colors if all have been picked
+	if(colors.size() <= 0)
+		resetColors();
+
+	// Pick random color
+	int numColors = colors.size();
+	int index = Math::randomInt(0, numColors-1);
+	Float3 color = colors.at(index);
+
+	// Remove name using Swap-Trick
+	colors.at(index) = colors.back();
+	colors.pop_back();
+
+
+	// Return name
+	return color;
 }

@@ -429,7 +429,6 @@ Attribute_Input::Attribute_Input()
 	jump = false;
 	jetpack = false;
 	sprint = false;
-	killPlayer = false;
 	fire = false;
 	firePressed = false;
 	changeAmmunitionType = false;
@@ -514,6 +513,7 @@ Attribute_Player::Attribute_Player()
 	jetHackPair.second		= nullptr;
 	cycleHackPair.first		= false;
 	cycleHackPair.second	= nullptr;
+	isScoreBoardVisible = false;
 
 	avatarName = "NaN";
 
