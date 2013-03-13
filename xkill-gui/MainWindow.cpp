@@ -137,6 +137,10 @@ void MainWindow::keyPressEvent( QKeyEvent* e )
 	{
 		SEND_EVENT(&Event(EVENT_TOGGLE_DEBUG_MESSAGES));
 	}
+	if((e->key()==Qt::Key_F6))
+	{
+		SETTINGS->showDebugPhysics = !SETTINGS->showDebugPhysics;
+	}
 
 	if((e->key()==Qt::Key_1))
 	{

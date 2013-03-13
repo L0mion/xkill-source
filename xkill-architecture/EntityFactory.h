@@ -17,12 +17,24 @@ The AttributeFactory can be used to facilitate creation of \ref ATTRIBUTES.
 \ingroup ARCHITECTURE
 */
 
-class EntityFactory
+class EntityFactory : public IObserver
 {
 private:
 	NameGenerator nameGenerator;
 
 public:
+	void onEvent(Event* e)
+	{
+		EventType type = e->getType();
+		switch (type) 
+		{
+		case EVENT_STARTGAME:
+			nameGenerator.reset();
+		default:
+			break;
+		}
+	}
+
 	// Creates an AttributeType (e.g. PositionAttribute) with name AttributeName (e.g. position) owned by Entity OwnerEntity.
 	// IMPORTANT: AttributeName (e.g. position) is used to access attributes from AttributeManager (e.g. positionAttributes_).
 	// if a longer name is used, such as positionAttribute, it will "copy paste" the name when accessing AttributeManager.
@@ -35,6 +47,7 @@ public:
 	EntityFactory()
 	{
 		ATTRIBUTES_INIT_ALL;
+		SUBSCRIBE_TO_EVENT(this, EVENT_STARTGAME);
 	}
 
 	//! A player entity has the following attributes: position attribute, spatial attribute, render attribute, physics attribute, input attribute, camera attribute and player attribute
