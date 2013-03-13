@@ -514,6 +514,7 @@ Attribute_Player::Attribute_Player()
 	jetHackPair.second		= nullptr;
 	cycleHackPair.first		= false;
 	cycleHackPair.second	= nullptr;
+	isScoreBoardVisible = false;
 
 	avatarName = "NaN";
 

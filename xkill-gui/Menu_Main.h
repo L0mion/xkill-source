@@ -20,6 +20,7 @@ private:
 	QWidget* _window;
 	QLabel* _template;
 	std::vector<QLabel*> _messages;
+	bool _isHidden;
 public:
 	void init(QWidget* window, QLabel* labelTemplate);
 
