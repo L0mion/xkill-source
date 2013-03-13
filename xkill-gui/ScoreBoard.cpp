@@ -1,4 +1,5 @@
 #include "ScoreBoard.h"
+#include <xkill-utilities/Converter.h>
 
 int ScoreBoard::valueAt( int index )
 {
@@ -87,13 +88,12 @@ void ScoreBoard::syncLabelsWithPlayers()
 		ScoreboardEntry* e = &entries.at(i);
 
 		// Detect if label has changed
-		if(e->ptr_player->playerName != e->playerName)
+		if(e->ptr_player->avatarName != e->playerName)
 			e->isChanged = true;
 		if(e->ptr_player->cycles != e->cycles)
 			e->isChanged = true;
 		if(e->ptr_player->priority != e->priority)
 			e->isChanged = true;
-		e->isChanged = true;
 
 		// Update label
 		if(e->isChanged)
@@ -101,31 +101,37 @@ void ScoreBoard::syncLabelsWithPlayers()
 			e->isChanged = false;
 
 			// Set text
-			e->label_process->setText(e->ptr_player->playerName.c_str());
+			e->label_process->setText(e->ptr_player->avatarName.c_str());
 			e->label_cycles->setNum(e->ptr_player->cycles);
 			e->label_priority->setNum(e->ptr_player->priority);
 
 			// Empty style sheets
-			std::string sheet_process = "";
+			std::string sheet_process = "font-weight: bold;";
 			std::string sheet_cycles = "";
 			std::string sheet_priority = "";
+
+			// Add name color
+			Float3 color = e->ptr_player->avatarColor;
+			std::string str_color = "color: rgba("+Converter::IntToStr((int)(color.x * 255))+", "+Converter::IntToStr((int)(color.y * 255))+", "+ Converter::IntToStr((int)(color.z * 255)) +", 220);";
+			sheet_process += str_color;
+	
 
 			// Apply extra stuff if we're at the current player
 			if(e->ptr_player == ptr_current_player)
 			{
-				sheet_process += "background-color: rgba(255, 255, 255, 100); font-weight: bold;";
-				sheet_cycles += "background-color: rgba(255, 255, 255, 100); font-weight: bold;";
-				sheet_priority += "background-color: rgba(255, 255, 255, 100); font-weight: bold;";
+				sheet_process += "background-color: rgba(255, 255, 255, 100); ";
+				sheet_cycles += "background-color: rgba(255, 255, 255, 100);";
+				sheet_priority += "background-color: rgba(255, 255, 255, 100);";
 			}
 
 			// Apply extra stuff if we have most cycles
-			if(e->ptr_player->cycles == maxCycles)
+			if(e->ptr_player->cycles == maxCycles && maxCycles > 0)
 			{
 				sheet_cycles += "background-color: rgba(0, 255, 0, 100);";
 			}
 
 			// Apply extra stuff if we have most priority
-			if(e->ptr_player->priority == maxPriority)
+			if(e->ptr_player->priority == maxPriority  && maxPriority > 0)
 			{
 				sheet_priority += "background-color: rgba(0, 255, 0, 100);";
 			}
@@ -156,10 +162,10 @@ void ScoreBoard::syncLabelsWithPlayers()
 				new_scoreboardWidth += kColumnWidth;
 				new_scoreboardWidth += kColumnWidth;
 
-				// Resize scorboard
+				// Resize scoreboard
 				frame_scoreboard->resize(new_scoreboardWidth, frame_scoreboard->height());
 
-				// Reposition scoreboard to center to acommodate change in size
+				// Reposition scoreboard to center to accommodate change in size
 				QWidget* parent_scoreboard = frame_scoreboard->parentWidget();
 				Float2 centerPos;
 				centerPos.x = parent_scoreboard->width() * 0.5f;
@@ -217,7 +223,7 @@ void ScoreBoard::findMaxValues()
 
 void ScoreBoard::addEntry( ScoreboardEntry entry )
 {
-	entry.playerName = entry.ptr_player->playerName;
+	entry.playerName = entry.ptr_player->avatarName;
 	entry.cycles = entry.ptr_player->cycles;
 	entry.priority = entry.ptr_player->priority;
 

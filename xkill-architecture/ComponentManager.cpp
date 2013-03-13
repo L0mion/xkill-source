@@ -233,7 +233,7 @@ void ComponentManager::update(float delta)
 {
 	// Performs necessary per-frame updating of some sub-parts of EventManager.
 	EventManager::getInstance()->update(delta);
-	SEND_EVENT(&Event(EVENT_UPDATE));
+	
 
 	//// PUT SOMETHING 
 	/// DONT SPAWN PLAYERS FIRST FRAMES
@@ -252,7 +252,7 @@ void ComponentManager::update(float delta)
 		calctime(cameratimer,camera_->onUpdate(delta);)
 		updateCamera();
 		updateOffset();
-		
+
 		calctime(gametimer,game_->onUpdate(delta);)
 
 		calctime(soundtimer,sound_->onUpdate(delta);)
@@ -301,4 +301,6 @@ void ComponentManager::update(float delta)
 	{
 		DEBUGPRINT("ComponentManager::update has no state set");
 	}
+
+	SEND_EVENT(&Event(EVENT_UPDATE));
 }

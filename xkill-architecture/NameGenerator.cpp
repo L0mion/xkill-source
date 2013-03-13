@@ -2,8 +2,12 @@
 
 #include <xkill-utilities\Math.h> //Math::randomInt
 
-void NameGenerator::reset()
+void NameGenerator::resetNames()
 {
+	//
+	// Add names
+	//
+
 	addName("Sprak");
 	addName("Algol");
 	addName("Haskell");
@@ -158,6 +162,7 @@ void NameGenerator::reset()
 	addName("status");
 	addName("virtual memory");
 	addName("garbage collection");
+	addName("incremental garbage collection");
 	addName("debugger");
 	addName("worker thread");
 	addName("thread pool");
@@ -362,14 +367,15 @@ void NameGenerator::reset()
 	addName("block");
 	addName("free space");
 	addName("BAADF00D");
-	addName("0x");
+	addName("0x0");
 	addName("hexadecimal decimal");
 	addName("hex to the seventh power");
 	addName("power of two");
-	addName("reversable operation");
+	addName("reversible operation");
 	addName("irreversible condition");
 	addName("hardware");
 	addName("software");
+	addName("firmware");
 	addName("shareware");
 	addName("freeware");
 	addName("bloatware");
@@ -397,7 +403,7 @@ void NameGenerator::reset()
 	addName("demo");
 	addName("tech demo");
 	addName("scientist with laser");
-	addName("gun runner-gunner");
+	addName("run-and-gun");
 	addName("interrupt");
 	addName("exception handler");
 	addName("unhandled exception");
@@ -530,7 +536,7 @@ void NameGenerator::reset()
 	addName("crazy man on the street");
 	addName("index of value");
 	addName("assumption");
-	addName("resume last assumption");
+	addName("resume lastest assumption");
 	addName("xyzzy");
 	addName("clear buffer");
 	addName("week-old branch");
@@ -752,7 +758,6 @@ void NameGenerator::reset()
 	addName("public meeting");
 	addName("wholegrain and wheat");
 	addName("may I disagree");
-	addName("0x0");
 	addName("tripple x");
 	addName("skinned mesh");
 	addName("lookout tower");
@@ -785,7 +790,7 @@ void NameGenerator::reset()
 	addName("shine the shoehorn");
 	addName("sledgehammer with nails");
 	addName("closed coffin");
-	addName("smoke particles");
+	addName("smoke particle");
 	addName("plugin");
 	addName("front-side bus");
 	addName("forlorn castles");
@@ -965,7 +970,7 @@ void NameGenerator::reset()
 	addName("It's O.K. I think");
 	addName("monkey in a négligée");
 	addName("pick another color");
-	addName("plaster duster");
+	addName("plaster apron");
 	addName("pencil sharpener");
 	addName("I wonder");
 	addName("comparision outside set");
@@ -1023,6 +1028,7 @@ void NameGenerator::reset()
 	addName("flower of ipecac");
 	addName("chilling flamethrower");
 	addName("chainsaw and lawn mower");
+	addName("pliers and blowtorch");
 	addName("child-abducting demon");
 	addName("down to earth and back again");
 	addName("for each and every year");
@@ -1140,7 +1146,87 @@ void NameGenerator::reset()
 	addName("metro gremlin");
 	addName("keep single");
 	addName("stay put");
+	addName("kenyan coffee");
+	addName("Kalaydean whah");
+	addName("www.xkill.se");
+	addName("template system");
+	addName("plenty of balloons");
+	addName("thrashing");
+	addName("Deep Blue");
+	addName("HAL 9000");
+	addName("editor's choice");
+	addName("just a tool");
+	addName("run ran crash");
+	addName("cultivating garlic");
+	addName("gas duster");
+	addName("logical reasoning xor");
+	addName("version outdated");
+	addName("seamless integration");
+	addName("unexpected attendance");
+	addName("aforementioned but forgotten");
+	addName("had a lucky start");
+	addName("show the way");
+	addName("implicitly correct");
+	addName("on the right track with wrong ticket");
+	addName("roses in bloom");
+	addName("King Richard");
+	addName("Ebas Neue");
+	addName("typecast");
+	addName("missing before, found now");
+	addName("O missing before K");
+	addName("stable but quaint");
+	addName("nefarious deed");
+	addName("grizzly and his buffer");
+	addName("I understand arrows");
+	addName("laid-back backpack");
+	addName("heavy cavalry");
+	addName("alternative operator");
+	addName("modifiable lvalue");
+	addName("yarn and thread");
+	addName("unique constant buffer");
+	addName("exactly the same");
+	addName("not exactly sane");
+	addName("verge of extinction");
+	addName("hammer and nail");
+	addName("to no avail");
+	addName("bitten by snake");
+	addName("deferred context");
+	addName("multi-layered cake");
+	addName("weed indeed");
+	addName("Singkil");
+	addName("list of stuff");
+	addName("stuffed animal");
+	addName("non-renderable interface");
+	addName("Internet access");
+	addName("mushroom iterator");
+	addName("once upon a time");
+	addName("free for all");
+	addName("aerial runner");
+	addName("infinite by default");
+	addName("needle in a stack");
+	addName("levitation");
+	addName("error-prone");
+	addName("DNA repair");
+	addName("cycle steal");
+	addName("simple solution");
+	addName("I think so, definitely");
+	addName("referred to as two");
+	addName("executable");
+	addName("excusable");
+	addName("rethinkably done");
+	addName("possible loss of data");
+	addName("consider it done");
+	addName("c1xx");
+	addName("parameter mayhem");
+	addName("argument sketch");
+	addName("talkactive parrot");
+	addName("keymapper");
+	addName("end of user");
+	addName("frail ladder");
+	addName("[armored tank]");
+	addName("one-ear");
 
+	
 	//C++ keywords
 	addName("alignas");
 	addName("alignof");
@@ -1238,7 +1324,7 @@ std::string NameGenerator::getName()
 {
 	// Reset names if all have been picked
 	if(names.size() <= 0)
-		reset();
+		resetNames();
 
 	// Pick random name
 	int numNames = names.size();

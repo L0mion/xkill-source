@@ -219,6 +219,7 @@ public:
 	std::string message;
 	AttributePtr<Attribute_Player> ptr_subject_player;
 	std::string styleSheet;
+	Float4 color;
 };
 
 /**

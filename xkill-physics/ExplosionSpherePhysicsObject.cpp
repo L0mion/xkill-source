@@ -53,6 +53,7 @@ bool ExplosionSpherePhysicsObject::subClassSpecificInitHook()
 		}
 
 		explosionSphereExpansionRate_ = (finalRadius-initialRadius)/ammunition.explosionSphereExplosionDuration;
+		int t =5;
 	}
 
 	//Create local collision shape

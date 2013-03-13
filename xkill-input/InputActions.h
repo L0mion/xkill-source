@@ -14,6 +14,7 @@ struct InputAction
 	{
 		ACTION_B_FIRE,
 		ACTION_B_RELOAD,
+		ACTION_F_LOW_SENSITIVITY,
 		ACTION_B_LOW_SENSITIVITY,
 		ACTION_B_JUMP_JETPACK,
 		ACTION_B_SPRINT,
@@ -96,6 +97,7 @@ private:
 		InputActionStrings[ACTION_B_TIME_SPEED_DOWN			] = "Slow Down Time";
 		InputActionStrings[ACTION_B_TIME_SPEED_UP			] = "Speed Up Time";
 		InputActionStrings[ACTION_B_RELOAD					] = "Reload";
+		InputActionStrings[ACTION_F_LOW_SENSITIVITY			] = "Aim [Axis]";
 		InputActionStrings[ACTION_B_LOW_SENSITIVITY			] = "Aim";
 	}
 };

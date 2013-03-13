@@ -182,3 +182,9 @@ void HudMessage_Manager::onEvent( Event* e )
 		break;
 	}
 }
+
+void HudMessage_Manager::silenceAllMessages()
+{
+	for(int i=0; i<stack.count(); i++)
+		removeTopMessage();
+}
