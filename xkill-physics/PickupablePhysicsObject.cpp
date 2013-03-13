@@ -38,7 +38,6 @@ btVector3 PickupablePhysicsObject::subClassCalculateLocalInertiaHook(btScalar ma
 
 void PickupablePhysicsObject::handleOutOfBounds()
 {
-	OUTPUT_WINDOW_PRINT("PickupablePhysicsObject::handleOutOfBounds");
 	Entity* entityOfPhysicsAttributeOwner = itrPhysics.ownerAt(attributeIndex_);
 	std::vector<int> pickupableIds = entityOfPhysicsAttributeOwner->getAttributes(ATTRIBUTE_PICKUPABLE);
 	for(int i=0;i<pickupableIds.size();i++)

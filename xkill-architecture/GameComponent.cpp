@@ -35,6 +35,8 @@ GameComponent::~GameComponent(void)
 		delete levelEvents_.at(i);
 	}
 	levelEvents_.clear();
+
+	delete CollisionManager::Instance();
 }
 
 bool GameComponent::init()
@@ -84,6 +86,13 @@ void GameComponent::onEvent(Event* e)
 		break;
 	case EVENT_NULL_PROCESS_STOPPED_EXECUTING:
 		nullProcessExecuting = false;
+
+		//check lunch
+		while(itrPickupable.hasNext())
+		{
+			AttributePtr<Attribute_Pickupable> ptr_pickupable = itrPickupable.getNext();
+			CollisionManager::Instance()->removePickupable(ptr_pickupable);
+		}
 		break;
 	default:
 		break;
@@ -92,7 +101,11 @@ void GameComponent::onEvent(Event* e)
 #include <xkill-utilities/Converter.h>
 void GameComponent::onUpdate(float delta)
 {
+	//--------------------------------------------------------------------------------------
+	// Handle player attributes
+	//--------------------------------------------------------------------------------------
 	updatePlayerAttributes(delta);
+	
 	//--------------------------------------------------------------------------------------
 	// Handle projectile attributes
 	//--------------------------------------------------------------------------------------
@@ -318,9 +331,6 @@ void GameComponent::onUpdate(float delta)
 #include <xkill-utilities/Converter.h>
 void GameComponent::updatePlayerAttributes(float delta)
 {
-	//--------------------------------------------------------------------------------------
-	// Handle player attributes
-	//--------------------------------------------------------------------------------------
 	while(itrPlayer.hasNext())
 	{
 		//Fetch player-related attributes
@@ -588,12 +598,9 @@ void GameComponent::updatePlayerAttributes(float delta)
 		//--------------------------------------------------------------------------------------
 		// Respawn player
 		//--------------------------------------------------------------------------------------
-		if(ptr_input->firePressed && ptr_player->detectedAsDead)
+		if(ptr_input->firePressed && ptr_player->detectedAsDead && ptr_player->isScoreBoardVisible)
 		{
-			if(ptr_player->respawnTimer.getStartTime() - ptr_player->respawnTimer.getTimeLeft() > 1.0f)
-			{
-				ptr_player->respawnTimer.zeroTimer();
-			}
+			ptr_player->respawnTimer.zeroTimer();
 		}
 	}
 }
@@ -607,12 +614,12 @@ void GameComponent::event_PhysicsAttributesColliding(Event_PhysicsAttributesColl
 	// Handle hit reaction on entity 1
 	// when colliding with entity 2;
 
-	CollisionManager collisionManager;
+	CollisionManager* collisionManager = CollisionManager::Instance();
 
-	collisionManager.collision_applyDamage(entity1, entity2);
-	collisionManager.collision_projectile(entity1, entity2);
-	collisionManager.collision_pickupable(entity1, entity2);
-	collisionManager.collision_playerVsExplosionSphere(entity1, entity2);
+	collisionManager->collision_applyDamage(entity1, entity2);
+	collisionManager->collision_projectile(entity1, entity2);
+	collisionManager->collision_pickupable(entity1, entity2);
+	collisionManager->collision_playerVsExplosionSphere(entity1, entity2);
 }
 
 void GameComponent::event_EndDeathmatch(Event_EndDeathmatch* e)

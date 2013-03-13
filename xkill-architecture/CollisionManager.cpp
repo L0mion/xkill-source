@@ -4,11 +4,22 @@
 #include <xkill-utilities/AttributeManager.h>
 #include <xkill-utilities/Converter.h>
 
+CollisionManager* CollisionManager::instance = nullptr;
 ATTRIBUTES_DECLARE_ALL;
 
 CollisionManager::CollisionManager()
 {
+	instance = nullptr;
 	ATTRIBUTES_INIT_ALL;
+}
+
+CollisionManager* CollisionManager::Instance()
+{
+	if(instance == nullptr)
+	{
+		instance = new CollisionManager();
+	}
+	return instance;
 }
 
 CollisionManager::~CollisionManager()
@@ -307,15 +318,9 @@ void CollisionManager::collision_pickupable(Entity* entity1, Entity* entity2)
 					}
 				}
 			}
-
 			if(pickedUp)
 			{
-				// Decrement number of spawned pickupables for the spawnpoint that spawned the pickupable that the player picked up. Also remove it.
-				AttributePtr<Attribute_PickupablesSpawnPoint> ptr_pickupablesSpawnPoint = ptr_pickupable->ptr_pickupablesSpawnPoint_creator;
-				ptr_pickupablesSpawnPoint->currentNrOfExistingSpawnedPickupables--;
-				ptr_pickupablesSpawnPoint->secondsSinceLastPickup = 0;
-
-				SEND_EVENT(&Event_RemoveEntity(entity1->getID()));
+				removePickupable(ptr_pickupable);
 			}
 		}
 	}
@@ -418,6 +423,16 @@ void CollisionManager::collision_playerVsExplosionSphere(Entity* entity1, Entity
 			}
 		}
 	}
+}
+
+void CollisionManager::removePickupable(AttributePtr<Attribute_Pickupable> ptr_pickupable)
+{
+	// Decrement number of spawned pickupables for the spawnpoint that spawned the pickupable that the player picked up. Also remove it.
+	AttributePtr<Attribute_PickupablesSpawnPoint> ptr_pickupablesSpawnPoint = ptr_pickupable->ptr_pickupablesSpawnPoint_creator;
+	ptr_pickupablesSpawnPoint->currentNrOfExistingSpawnedPickupables--;
+	ptr_pickupablesSpawnPoint->secondsSinceLastPickup = 0;
+
+	SEND_EVENT(&Event_RemoveEntity(itrPickupable.ownerIdAt(ptr_pickupable.index())));
 }
 
 int CollisionManager::getPickedUpAmount(int currentAmount, int maxAmount, int tryPickupAmount)
