@@ -371,6 +371,12 @@ Event_ReloadPhysicsAttributeDataIntoBulletPhysics::Event_ReloadPhysicsAttributeD
 	this->physicsAttributeId = physicsAttributeId;
 }
 
+
+Event_SpawnPlayer::Event_SpawnPlayer(int playerAttributeId) : Event(EVENT_SPAWN_PLAYER)
+{
+	this->playerAttributeId = playerAttributeId;
+}
+
 Event_MouseWheel::Event_MouseWheel( int value ) : Event(EVENT_MOUSE_WHEEL)
 {
 	this->value = value;

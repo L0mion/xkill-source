@@ -102,6 +102,7 @@ enum DLL_U EventType
 	EVENT_POST_HUD_MESSAGE,
 	EVENT_NULL_PROCESS_STARTED_EXECUTING,
 	EVENT_NULL_PROCESS_STOPPED_EXECUTING,
+	EVENT_SPAWN_PLAYER,
 
 	// Creation/Destruction
 	EVENT_TRANSFER_EVENTS_TO_GAME,
@@ -791,4 +792,12 @@ public:
 	Event_ReloadPhysicsAttributeDataIntoBulletPhysics(int physicsAttributeId);
 
 	int physicsAttributeId;
+};
+
+class DLL_U Event_SpawnPlayer : public Event
+{
+public:
+	Event_SpawnPlayer(int playerAttributeId);
+
+	int playerAttributeId;
 };
