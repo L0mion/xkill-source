@@ -485,8 +485,7 @@ void Renderer::render(std::vector<ViewportData> vpDatas)
 		devcon);
 	managementCB_->updateCBFrame(
 		devcon,
-		managementLight_->getLightDirCurCount(),
-		managementLight_->getLightPointCurCount());
+		managementLight_->getLightDirCurCount()); //OBS - not number of dirs
 
 	managementBuffer_->setBuffersAndDepthBufferAsRenderTargets(devcon, managementD3D_->getDepthBuffer());
 
@@ -558,7 +557,8 @@ void Renderer::renderViewportToGBuffer(ViewportData& vpData)
 		vpData.zNear,
 		vpData.zFar,
 		vpData.viewportWidth,
-		vpData.viewportHeight);
+		vpData.viewportHeight,
+		0); //irrelevant
 
 	CameraInstances* cameraInstances = managementInstance_->getCameraInstancesFromCameraIndex(vpData.camIndex);
 	if(cameraInstances == nullptr)
@@ -613,7 +613,8 @@ void Renderer::renderViewportToBackBuffer(ViewportData& vpData, DirectX::XMFLOAT
 		vpData.zNear,
 		vpData.zFar,
 		vpData.viewportWidth,
-		vpData.viewportHeight);
+		vpData.viewportHeight,
+		managementLight_->getNumPos(vpData.camIndex));
 	managementCB_->setCB(CB_TYPE_SHADOW, TypeFX_CS, CB_REGISTER_SHADOW, devcon);
 
 	DirectX::XMMATRIX m1 = DirectX::XMLoadFloat4x4(&shadowTransform);
@@ -844,7 +845,8 @@ DirectX::XMFLOAT4X4	Renderer::buildShadowMap()
 		/*zNear: */			0.0f,									//Irrelevant
 		/*zFar: */			0.0f,									//Irrelevant
 		/*ViewportWidth: */ 0.0f,									//Irrelevant
-		/*ViewportHeight: */ 0.0f);									//Irrelevant
+		/*ViewportHeight: */ 0.0f,									//Irrelevant
+		0);															//Irrelevant
 
 	CameraInstances* cameraInstances = managementInstance_->getShadowInstances();
 	std::map<unsigned int, InstancedData*> instancesMap = cameraInstances->getInstancesMap();
@@ -1165,7 +1167,8 @@ void Renderer::buildSSAOMap(ViewportData& vpData)
 		vpData.viewportWidth,									//Instead used to send original viewport-dimensions.
 		vpData.viewportHeight,									//Instead used to send original viewport-dimensions.
 		(float)viewportWidth,
-		(float)viewportHeight);
+		(float)viewportHeight,
+		0);														//Irrelevant
 	
 	managementCB_->setCB(CB_TYPE_SSAO, TypeFX_CS, CB_REGISTER_SSAO, devcon);
 	float ssaoWidth		= (float)winfo_->getScreenWidth()	/ (float)SSAO_MAP_SCREEN_RES_FACTOR;

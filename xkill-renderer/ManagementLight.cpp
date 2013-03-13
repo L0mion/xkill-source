@@ -180,13 +180,18 @@ void ManagementLight::updateStreamPointLight(std::vector<ViewportData> vpDatas)
 	}
 }
 
-unsigned int ManagementLight::getNumPoints(unsigned int camIndex)
+unsigned int ManagementLight::getNumPos(unsigned int camIndex)
 {
-	usig
+	unsigned int numLights = 0;
 
-	CameraLights* cameraLights = getCameraLightsFromCameraIndex(camIndex);
+	CameraLights* cameraLights = nullptr;
+	cameraLights = getCameraLightsFromCameraIndex(camIndex);
 	if(cameraLights != nullptr)
-		return cameraLights->getNumPoints();
+	{
+		numLights = cameraLights->getNumPos();
+	}
+
+	return numLights;
 }
 
 void ManagementLight::addDirLightDir(unsigned int camIndex, DirectX::XMVECTOR dir, DirectX::XMFLOAT4X4 view)

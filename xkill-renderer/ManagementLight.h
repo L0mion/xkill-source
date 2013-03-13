@@ -72,7 +72,7 @@ public:
 		unsigned int shaderRegisterPos,
 		unsigned int shaderRegisterDir);
 
-	unsigned int getNumPoints(unsigned int camIndex);
+	unsigned int getNumPos(unsigned int camIndex);
 
 	unsigned int getLightDirCurCount();
 	unsigned int getLightPointCurCount();

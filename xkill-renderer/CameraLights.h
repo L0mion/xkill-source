@@ -20,6 +20,9 @@ public:
 
 	void setSRV(ID3D11DeviceContext* devcon, unsigned int shaderRegisterPos, unsigned int shaderRegisterDir);
 	void unsetSRV(ID3D11DeviceContext* devcon, unsigned int shaderRegisterPos, unsigned int shaderRegisterDir);
+
+	unsigned int getNumPos()	{ return streamPosPointLight_->getDataCountCur();	}
+	unsigned int getNumDir()	{ return streamDirDirLight_->getDataCountCur();	}
 protected:
 private:
 	DataStreamSRV<Float3>* streamPosPointLight_;
