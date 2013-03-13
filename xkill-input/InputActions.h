@@ -49,8 +49,6 @@ struct InputAction
 
 		//Temporary debug inputs
 
-		ACTION_B_KILL_PLAYER,
-
 		ACTION_B_RUMBLE_ON,
 		ACTION_B_RUMBLE_OFF,
 
@@ -80,7 +78,6 @@ private:
 		InputActionStrings[ACTION_B_LOOK_DOWN				] = "Look Down";
 		InputActionStrings[ACTION_B_LOOK_LEFT				] = "Look Left";
 		InputActionStrings[ACTION_B_LOOK_RIGHT				] = "Look Right";
-		InputActionStrings[ACTION_B_KILL_PLAYER				] = "Suicide";
 		InputActionStrings[ACTION_B_SPRINT					] = "Sprint";
 		InputActionStrings[ACTION_B_NEXT_AMMUNITIONTYPE		] = "Next Ammo";
 		InputActionStrings[ACTION_B_PREV_AMMUNITIONTYPE		] = "Prev Ammo";

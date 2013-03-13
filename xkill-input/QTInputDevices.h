@@ -32,6 +32,7 @@ public:
 
 	void setAxesToZero();
 	void updateButtons();
+	void updateScroll();
 
 protected:
 	std::vector<InputButtonObject*> mouseButtons_;

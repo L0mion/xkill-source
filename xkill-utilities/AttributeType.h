@@ -330,7 +330,6 @@ struct DLL_U Attribute_Input : public IAttribute
 	bool jump;
 	bool jetpack;
 	bool sprint;
-	bool killPlayer;
 	int changeAmmunitionType;
 	int changeFiringMode;
 	bool lowSensitivity;

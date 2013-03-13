@@ -35,6 +35,8 @@ GameComponent::~GameComponent(void)
 		delete levelEvents_.at(i);
 	}
 	levelEvents_.clear();
+
+	delete CollisionManager::Instance();
 }
 
 bool GameComponent::init()
@@ -84,6 +86,13 @@ void GameComponent::onEvent(Event* e)
 		break;
 	case EVENT_NULL_PROCESS_STOPPED_EXECUTING:
 		nullProcessExecuting = false;
+
+		//check lunch
+		while(itrPickupable.hasNext())
+		{
+			AttributePtr<Attribute_Pickupable> ptr_pickupable = itrPickupable.getNext();
+			CollisionManager::Instance()->removePickupable(ptr_pickupable);
+		}
 		break;
 	default:
 		break;
@@ -92,7 +101,11 @@ void GameComponent::onEvent(Event* e)
 #include <xkill-utilities/Converter.h>
 void GameComponent::onUpdate(float delta)
 {
+	//--------------------------------------------------------------------------------------
+	// Handle player attributes
+	//--------------------------------------------------------------------------------------
 	updatePlayerAttributes(delta);
+	
 	//--------------------------------------------------------------------------------------
 	// Handle projectile attributes
 	//--------------------------------------------------------------------------------------
@@ -318,9 +331,6 @@ void GameComponent::onUpdate(float delta)
 #include <xkill-utilities/Converter.h>
 void GameComponent::updatePlayerAttributes(float delta)
 {
-	//--------------------------------------------------------------------------------------
-	// Handle player attributes
-	//--------------------------------------------------------------------------------------
 	while(itrPlayer.hasNext())
 	{
 		//Fetch player-related attributes
@@ -578,7 +588,7 @@ void GameComponent::updatePlayerAttributes(float delta)
 					}
 				}
 
-				ptr_player->ptr_camera->fieldOfView =3.14f/4.0f;
+				ptr_player->ptr_camera->fieldOfView = 3.14f/4.0f;
 				ptr_player->respawnTimer.resetTimer();
 				ptr_player->detectedAsDead = false;
 				SEND_EVENT(&Event_PlaySound(XKILL_Enums::Sound::SOUND_RESPAWN, itrPlayer.ownerIdAt(ptr_player.index()), ptr_position->position, true));
@@ -586,13 +596,10 @@ void GameComponent::updatePlayerAttributes(float delta)
 		}
 
 		//--------------------------------------------------------------------------------------
-		// Instant respawn of player, used for debugging
+		// Respawn player
 		//--------------------------------------------------------------------------------------
-		if(ptr_input->killPlayer)
+		if(ptr_input->firePressed && ptr_player->detectedAsDead && ptr_player->isScoreBoardVisible)
 		{
-			ptr_health->health = 0.0f;
-			ptr_input->killPlayer = false;
-			ptr_player->detectedAsDead = true;
 			ptr_player->respawnTimer.zeroTimer();
 		}
 	}
@@ -607,12 +614,12 @@ void GameComponent::event_PhysicsAttributesColliding(Event_PhysicsAttributesColl
 	// Handle hit reaction on entity 1
 	// when colliding with entity 2;
 
-	CollisionManager collisionManager;
+	CollisionManager* collisionManager = CollisionManager::Instance();
 
-	collisionManager.collision_applyDamage(entity1, entity2);
-	collisionManager.collision_projectile(entity1, entity2);
-	collisionManager.collision_pickupable(entity1, entity2);
-	collisionManager.collision_playerVsExplosionSphere(entity1, entity2);
+	collisionManager->collision_applyDamage(entity1, entity2);
+	collisionManager->collision_projectile(entity1, entity2);
+	collisionManager->collision_pickupable(entity1, entity2);
+	collisionManager->collision_playerVsExplosionSphere(entity1, entity2);
 }
 
 void GameComponent::event_EndDeathmatch(Event_EndDeathmatch* e)
@@ -1121,6 +1128,9 @@ void GameComponent::updateAndInterpretLaser(AttributePtr<Attribute_Ray> ptr_ray,
 				}
 
 				SEND_EVENT(&Event_ModifyPhysicsObject(XKILL_Enums::ModifyPhysicsObjectData::GIVE_IMPULSE, static_cast<void*>(&(rayVector*20.0f)), hitPlayerAttribute->ptr_input->ptr_physics));
+				
+				//Send event to trigger sound for when the laser hits the player
+				//SEND_EVENT(&Event_PlaySound(XKILL_Enums::Sound::SOUND_LASERPLAYERHIT, itrPlayer.ownerIdAt(ptr_player), hitPlayerAttribute->ptr_render->ptr_spatial->ptr_position->position, true));
 			}
 		}
 	}

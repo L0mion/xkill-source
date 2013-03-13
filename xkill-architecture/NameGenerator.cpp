@@ -1209,6 +1209,7 @@ void NameGenerator::resetNames()
 	addName("levitation");
 	addName("error-prone");
 	addName("DNA repair");
+	addName("sources of damage");
 	addName("cycle steal");
 	addName("simple solution");
 	addName("I think so, definitely");
@@ -1227,7 +1228,32 @@ void NameGenerator::resetNames()
 	addName("frail ladder");
 	addName("[armored tank]");
 	addName("one-ear");
-
+	addName("supposed to know");
+	addName("twitchy");
+	addName("pervertex");
+	addName("sleeping thread");
+	addName("cap the rendering thread");
+	addName("selling snow");
+	addName("freezer");
+	addName("joy");
+	addName("false-positive");
+	addName("Type I and type II errors");
+	addName("buildbot winslave");
+	addName("bootstrapper");
+	addName("gunpowder wagon");
+	addName("bamboo sword");
+	addName("on a tight leash");
+	addName("call to arms");
+	addName("relaxed andl lazy");
+	addName("peak rate");
+	addName("weapon house");
+	addName("visiting magnetism");
+	addName("went out of control from there");
+	addName("shuffle-face");
+	addName("original origo");
+	addName("juniper berry");
+	addName("spatial suggestion");
+	addName("hidden reference");
 	
 	//C++ keywords
 	addName("alignas");
