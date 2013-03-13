@@ -2,41 +2,29 @@
 
 #include <xkill-utilities/Util.h>
 
-#include "CameraInstances.h"
 #include "ManagementInstance.h"
+#include "MeshVerticesInstanced.h"
+#include "renderingUtilities.h"
 
 ATTRIBUTES_DECLARE_ALL;
 
 ManagementInstance::ManagementInstance()
 {
 	ATTRIBUTES_INIT_ALL;
-
-	shadowInstances_ = nullptr;
 }
 ManagementInstance::~ManagementInstance()
 {
-	//for(
-	//	auto i = cameraInstancesMap_.begin(); 
-	//	i != cameraInstancesMap_.end(); 
-	//	i++)
-	//{
-	//	SAFE_DELETE(i->second);
-	//}
-
-	for(unsigned int i = 0; i < cameraInstances_.size(); i++)
-		SAFE_DELETE(cameraInstances_[i]);
-
-	SAFE_DELETE(shadowInstances_);
+	//Do nothing.
 }
 
 void ManagementInstance::update(ID3D11Device* device, ID3D11DeviceContext* devcon)
 {
 	//Clear all buffers.
-	for(unsigned int i = 0; i < cameraInstances_.size(); i++)
+	while(itrMesh.hasNext())
 	{
-		cameraInstances_[i]->reset();
+		unsigned int meshID = itrMesh.getNext()->meshID;
+		instancedDatas_[meshID].resetStream();
 	}
-	shadowInstances_->reset();
 
 	//Fill instance-lists with updated data.
 	while(itrRender.hasNext())
@@ -47,22 +35,15 @@ void ManagementInstance::update(ID3D11Device* device, ID3D11DeviceContext* devco
 	}
 
 	//Update buffers with new data.
-	for(unsigned int i = 0; i < cameraInstances_.size(); i++)
+	while(itrMesh.hasNext())
 	{
-		cameraInstances_[i]->update(device, devcon);
+		unsigned int meshID = itrMesh.getNext()->meshID;
+		instancedDatas_[meshID].updateDataStream(device, devcon);
 	}
-	shadowInstances_->update(device, devcon);
 }
 
 void ManagementInstance::init()
 {
-	cameraInstances_.resize(START_NUM_CAMERAS);
-	for(unsigned int i = 0; i < START_NUM_CAMERAS; i++)
-	{
-		cameraInstances_[i] = new CameraInstances();
-	}
-
-	shadowInstances_ = new CameraInstances();
 }
 
 void ManagementInstance::addInstance(AttributePtr<Attribute_Render>& ptr_render)
@@ -74,27 +55,27 @@ void ManagementInstance::addInstance(AttributePtr<Attribute_Render>& ptr_render)
 	VertexInstanced instance;
 	instance.world_ = calculateWorldMatrix(ptr_spatial, ptr_position);
 
-	//Add instance to each valid camera-object.
-	while(itrCamera.hasNext())
-	{
-		AttributePtr<Attribute_Camera> ptr_camera = itrCamera.getNext();
-		if(ptr_render->culling.getBool(ptr_camera.index()))
-		{
-			addCameraInstance(ptr_camera, ptr_render->meshID, instance);
-		}
-	}
+	InstancedData& instancedData = instancedDatas_[ptr_render->meshID]; //will create element if none exists
+	instancedData.pushData(instance); //HELEVETE
 
-	if(ptr_render->meshID == 200)
-		shadowInstances_->addInstance(ptr_render->meshID, instance);
+	//Add instance to each valid camera-object.
+	//while(itrCamera.hasNext())
+	//{
+	//	AttributePtr<Attribute_Camera> ptr_camera = itrCamera.getNext();
+	//	if(ptr_render->culling.getBool(ptr_camera.index()))
+	//	{
+	//		addCameraInstance(ptr_camera, ptr_render->meshID, instance);
+	//	}
+	//}
 }
-void ManagementInstance::addCameraInstance(
-	AttributePtr<Attribute_Camera> ptr_camera,
-	unsigned int meshID,
-	VertexInstanced instance)
-{
-	CameraInstances* camInstances = cameraInstances_[ptr_camera.index()];
-	camInstances->addInstance(meshID, instance);
-}
+//void ManagementInstance::addCameraInstance(
+//	AttributePtr<Attribute_Camera> ptr_camera,
+//	unsigned int meshID,
+//	VertexInstanced instance)
+//{
+//	CameraInstances* camInstances = cameraInstances_[ptr_camera.index()];
+//	camInstances->addInstance(meshID, instance);
+//}
 
 DirectX::XMFLOAT4X4 ManagementInstance::calculateWorldMatrix(
 	AttributePtr<Attribute_Spatial>	ptr_spatial, 
@@ -125,24 +106,3 @@ DirectX::XMFLOAT4X4 ManagementInstance::calculateWorldMatrix(
 
 	return worldMatrix;
 }
-
-CameraInstances* ManagementInstance::getCameraInstancesFromCameraIndex(unsigned int camIndex)
-{
-	return cameraInstances_[camIndex];
-}
-CameraInstances* ManagementInstance::getShadowInstances()
-{
-	return shadowInstances_;
-}
-//InstancedData* ManagementInstance::getInstancesFromMeshID(unsigned int meshID)
-//{
-//	InstancedData* instancedData = nullptr;
-//
-//	std::map<unsigned int, InstancedData*>::iterator it = instancesMap_.find(meshID);
-//	if(it != instancesMap_.end())
-//	{
-//		instancedData = it->second;
-//	}
-//
-//	return instancedData;
-//}

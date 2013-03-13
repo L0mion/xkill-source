@@ -13,13 +13,11 @@ struct Attribute_Spatial;
 struct Attribute_Position;
 struct Attribute_Render;
 
-class CameraInstances;
-
-#include <map>
-
 #include "MeshVerticesInstanced.h"
+#include "DataStreamBuffer.h"
+typedef DataStreamBuffer<VertexInstanced> InstancedData;
 
-static const unsigned int START_NUM_CAMERAS = 9;
+#include <unordered_map>
 
 class ManagementInstance
 {
@@ -31,25 +29,23 @@ public:
 
 	void update(ID3D11Device* device, ID3D11DeviceContext* devcon); //!< Resets all InstancedData in map. Fills each InstancedData with updated instances. Calls update-method on all InstancedData-objects.
 
-	CameraInstances* getCameraInstancesFromCameraIndex(unsigned int camIndex);
-	CameraInstances* getShadowInstances();
+	std::unordered_map<
+		unsigned int,
+		InstancedData>& getInstancedDatas() { return instancedDatas_; }
 protected:
 private:
 	void addInstance(AttributePtr<Attribute_Render>& ptr_render);
 	DirectX::XMFLOAT4X4 calculateWorldMatrix(
 		AttributePtr<Attribute_Spatial>	ptr_spatial, 
 		AttributePtr<Attribute_Position> ptr_position);	//!< Calculates the world-matrix of an instance.
-	void addCameraInstance(
-		AttributePtr<Attribute_Camera> ptr_camera,
-		unsigned int meshID,
-		VertexInstanced instance);
+	//void addCameraInstance(
+	//	AttributePtr<Attribute_Camera> ptr_camera,
+	//	unsigned int meshID,
+	//	VertexInstanced instance);
 
-	//std::map<
-	//	unsigned int,
-	//	CameraInstances*> cameraInstancesMap_;
-	
-	CameraInstances* shadowInstances_;
-	std::vector<CameraInstances*> cameraInstances_;
+	std::unordered_map<
+		unsigned int,
+		InstancedData> instancedDatas_;
 };
 
 #endif //XKILL_RENDERER_MANAGEMENTRENDERAT_H

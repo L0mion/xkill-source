@@ -12,6 +12,17 @@ template <class Data>
 class DataStreamBuffer
 {
 public:
+	//This bit of ugly default business is only here because of unordered_map in managementInstance.
+	DataStreamBuffer()
+	{
+		bindFlag_ = D3D11_BIND_VERTEX_BUFFER;
+		miscFlag_ = 0;
+
+		dataCountMax_ = 0;
+		dataCountCur_ = 0;
+
+		dataStreamBuffer_ = nullptr;
+	}
 	DataStreamBuffer(unsigned int bindFlag, unsigned int miscFlag)
 	{
 		bindFlag_ = bindFlag;
@@ -20,7 +31,7 @@ public:
 		dataCountMax_ = 0;
 		dataCountCur_ = 0;
 
-		dataStreamBuffer_	= nullptr;
+		dataStreamBuffer_ = nullptr;
 	}
 	virtual ~DataStreamBuffer()
 	{

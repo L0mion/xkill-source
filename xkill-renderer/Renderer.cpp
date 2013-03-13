@@ -489,7 +489,6 @@ void Renderer::render(std::vector<ViewportData> vpDatas)
 
 	managementBuffer_->setBuffersAndDepthBufferAsRenderTargets(devcon, managementD3D_->getDepthBuffer());
 
-	//HERE, WE BUILD HERE
 	AttributePtr<Attribute_SplitScreen>	ptr_splitScreen;
 	AttributePtr<Attribute_Camera>		ptr_camera; 
 	AttributePtr<Attribute_Spatial>		ptr_spatial;
@@ -560,15 +559,16 @@ void Renderer::renderViewportToGBuffer(ViewportData& vpData)
 		vpData.viewportHeight,
 		0); //irrelevant
 
-	CameraInstances* cameraInstances = managementInstance_->getCameraInstancesFromCameraIndex(vpData.camIndex);
-	if(cameraInstances == nullptr)
-		return; 
-
-	std::map<unsigned int, InstancedData*>& instancesMap = cameraInstances->getInstancesMap();
-	for(std::map<unsigned int, InstancedData*>::iterator i = instancesMap.begin(); i != instancesMap.end(); i++)
+	std::unordered_map<unsigned int, InstancedData>& instancedDatas =  managementInstance_->getInstancedDatas();
+	while(itrMesh.hasNext())
 	{
-			renderInstance(i->first, i->second, false);
+		unsigned int meshID = itrMesh.getNext()->meshID;
+		renderInstance(
+			meshID, 
+			instancedDatas[meshID], 
+			false);
 	}
+
 	while(itrPlayer.hasNext())
 	{
 		AttributePtr<Attribute_Player> player = itrPlayer.getNext();
@@ -656,7 +656,7 @@ void Renderer::renderViewportToBackBuffer(ViewportData& vpData, DirectX::XMFLOAT
 	managementSS_->unsetSS(devcon, TypeFX_CS, 1);
 }
 
-void Renderer::renderInstance(unsigned int meshID, InstancedData* instance, bool shadowmap)
+void Renderer::renderInstance(unsigned int meshID, InstancedData& instance, bool shadowmap)
 {
 	ID3D11Device*			device = managementD3D_->getDevice();
 	ID3D11DeviceContext*	devcon = managementD3D_->getDeviceContext();
@@ -674,7 +674,7 @@ void Renderer::renderInstance(unsigned int meshID, InstancedData* instance, bool
 	ID3D11Buffer* vbs[2] = 
 	{ 
 		modelD3D->getVertexBuffer(), 
-		instance->getDataBuffer()
+		instance.getDataBuffer()
 	};
 	devcon->IASetVertexBuffers(0, 2, vbs, shadingDesc.stride_, offset);
 	
@@ -687,7 +687,7 @@ void Renderer::renderInstance(unsigned int meshID, InstancedData* instance, bool
 		renderSubset(
 			subsetD3Ds[i],
 			materials[materialIndex],
-			instance->getDataCountCur(),
+			instance.getDataCountCur(),
 			shadowmap);
 	}
 
@@ -848,13 +848,15 @@ DirectX::XMFLOAT4X4	Renderer::buildShadowMap()
 		/*ViewportHeight: */ 0.0f,									//Irrelevant
 		0);															//Irrelevant
 
-	CameraInstances* cameraInstances = managementInstance_->getShadowInstances();
-	std::map<unsigned int, InstancedData*> instancesMap = cameraInstances->getInstancesMap();
-	for(std::map<unsigned int, InstancedData*>::iterator i = instancesMap.begin(); i != instancesMap.end(); i++)
+	std::unordered_map<unsigned int, InstancedData>& instancedDatas =  managementInstance_->getInstancedDatas();
+	while(itrMesh.hasNext())
 	{
-		renderInstance(i->first, i->second, true);
+		unsigned int meshID = itrMesh.getNext()->meshID;
+		renderInstance(
+			meshID, 
+			instancedDatas[meshID], 
+			true);
 	}
-	
 
 	//Unset shizzle
 	managementBuffer_->unset(devcon, SET_TYPE_DSV, SET_STAGE_CS, 0); //register and stage irrelevant

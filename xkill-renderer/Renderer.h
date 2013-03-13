@@ -94,7 +94,7 @@ private:
 	void renderViewportToGBuffer(
 		ViewportData& vpData);											//!< Renders to g-buffer.
 	void renderViewportToBackBuffer(ViewportData& vpData, DirectX::XMFLOAT4X4 shadowTransform);				//!< Renders to backbuffer.
-	void renderInstance(unsigned int meshID, InstancedData* instance, bool shadowmap);	//!< Renders an instanced model.
+	void renderInstance(unsigned int meshID, InstancedData& instance, bool shadowmap);	//!< Renders an instanced model.
 	ShadingDesc deriveShadingDesc(VertexType vertexType, bool shadowmap);
 	void setShadingDesc(ShadingDesc shadingDesc);
 	void renderSubset(
