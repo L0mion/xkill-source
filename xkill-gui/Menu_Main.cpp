@@ -418,7 +418,7 @@ void DebugBillboard::onEvent( Event* e )
 	case EVENT_POST_DEBUG_MESSAGE:
 		{
 			// Ignore messages if hidden
-			if(!_isHidden)
+			
 			{
 				Event_PostDebugMessage* debugMessage = (Event_PostDebugMessage*)(e);
 				int index = debugMessage->index;
@@ -428,16 +428,21 @@ void DebugBillboard::onEvent( Event* e )
 				{
 					QLabel* l = new QLabel(_window);
 					l->setStyleSheet(_template->styleSheet());
-					l->show();
 					_messages.push_back(l);
+
+					if(!_isHidden)
+						l->show();
 				}
 
 				// Add message to label
-				std::string message = debugMessage->message;
-				QLabel* l = _messages[index];
-				l->setText(message.c_str());
-				l->resize(l->sizeHint());
-				l->move(0, l->height() * index * 1.0f);
+				if(!_isHidden)
+				{
+					std::string message = debugMessage->message;
+					QLabel* l = _messages[index];
+					l->setText(message.c_str());
+					l->resize(l->sizeHint());
+					l->move(0, l->height() * index * 1.0f);
+				}
 			}
 		}
 		break;

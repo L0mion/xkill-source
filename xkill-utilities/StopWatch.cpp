@@ -6,9 +6,7 @@ StopWatch::StopWatch( std::string timerName )
 	_timerName = timerName;
 
 	// Generate unique ID for each timer created
-	static int id = 0;
-	_id = id;
-	id++;
+	_id = getUniqueId();
 
 	reset();
 }
@@ -55,4 +53,13 @@ void StopWatch::sendMeasurement()
 	std::string str_ms = Converter::IntToStr(ms);
 	std::string message = _timerName + ": "+ str_ms +" (ms)";
 	SEND_EVENT(&Event_PostDebugMessage(_id, message));
+}
+
+int StopWatch::getUniqueId()
+{
+	static int numInstances = 0;
+	int id = numInstances;
+	numInstances++;
+
+	return id;
 }

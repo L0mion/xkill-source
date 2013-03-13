@@ -4,6 +4,8 @@
 
 void NameGenerator::resetNames()
 {
+	names.clear();
+
 	//
 	// Add names
 	//
@@ -1467,4 +1469,50 @@ std::string NameGenerator::getName()
 
 	// Return name
 	return name;
+}
+
+void NameGenerator::reset()
+{
+	resetNames();
+	resetColors();
+}
+
+void NameGenerator::resetColors()
+{
+	colors.clear();
+
+	//
+	// Add colors
+	//
+
+	addColor(Float3(0.0f, 1.0f, 0.0));
+	addColor(Float3(1.0f, 0.0f, 0.0));
+	addColor(Float3(0.0f, 1.0f, 1.0));
+	addColor(Float3(1.0f, 0.4f, 0.0));
+	addColor(Float3(0.7f, 0.0f, 1.0));
+}
+
+void NameGenerator::addColor( Float3 color )
+{
+	colors.push_back(color);
+}
+
+Float3 NameGenerator::getColor()
+{
+	// Reset colors if all have been picked
+	if(colors.size() <= 0)
+		resetColors();
+
+	// Pick random color
+	int numColors = colors.size();
+	int index = Math::randomInt(0, numColors-1);
+	Float3 color = colors.at(index);
+
+	// Remove name using Swap-Trick
+	colors.at(index) = colors.back();
+	colors.pop_back();
+
+
+	// Return name
+	return color;
 }
