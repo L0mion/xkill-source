@@ -104,18 +104,18 @@ void XInputDevice::setStandardMappings()
 
 	if(buttons_.size() >= 14)
 	{
-		buttons_[0]->addMapping(InputAction::ACTION_B_PREV_AMMUNITIONTYPE);
-		buttons_[1]->addMapping(InputAction::ACTION_B_NEXT_AMMUNITIONTYPE);
-		buttons_[2]->addMapping(InputAction::ACTION_B_NEXT_FIRINGMODE);
-		buttons_[3]->addMapping(InputAction::ACTION_B_PREV_FIRINGMODE);
+		buttons_[0]->addMapping(InputAction::ACTION_B_NEXT_AMMUNITIONTYPE);
+		buttons_[1]->addMapping(InputAction::ACTION_B_PREV_AMMUNITIONTYPE);
+		buttons_[2]->addMapping(InputAction::ACTION_B_PREV_FIRINGMODE);
+		buttons_[3]->addMapping(InputAction::ACTION_B_NEXT_FIRINGMODE);
 		buttons_[4]->addMapping(InputAction::ACTION_B_JUMP_JETPACK);
 		buttons_[5]->addMapping(InputAction::ACTION_B_SPRINT);
 		buttons_[7]->addMapping(InputAction::ACTION_B_KILL_PLAYER);
 		buttons_[9]->addMapping(InputAction::ACTION_B_RELOAD);
-		buttons_[10]->addMapping(InputAction::ACTION_B_PREV_FIRINGMODE);
-		buttons_[11]->addMapping(InputAction::ACTION_B_NEXT_AMMUNITIONTYPE);
-		buttons_[12]->addMapping(InputAction::ACTION_B_NEXT_FIRINGMODE);
-		buttons_[13]->addMapping(InputAction::ACTION_B_PREV_AMMUNITIONTYPE);
+		buttons_[10]->addMapping(InputAction::ACTION_B_NEXT_FIRINGMODE);
+		buttons_[11]->addMapping(InputAction::ACTION_B_PREV_AMMUNITIONTYPE);
+		buttons_[12]->addMapping(InputAction::ACTION_B_PREV_FIRINGMODE);
+		buttons_[13]->addMapping(InputAction::ACTION_B_NEXT_AMMUNITIONTYPE);
 	}
 
 	if(triggers_.size() >= 2)

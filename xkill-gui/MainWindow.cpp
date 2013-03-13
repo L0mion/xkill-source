@@ -209,7 +209,7 @@ void MainWindow::keyPressEvent( QKeyEvent* e )
 	}
 
 	// Inform about key press
-	SEND_EVENT(&Event_KeyPress(e->key(), true));
+	SEND_EVENT(&Event_KeyPress(e->key(), true, (e->key() == Qt::Key::Key_Shift)));
 }
 
 void MainWindow::showMenu()
@@ -256,7 +256,7 @@ void MainWindow::slot_toggleFullScreen()
 void MainWindow::keyReleaseEvent( QKeyEvent* e )
 {
 	// Inform about key release
-	SEND_EVENT(&Event_KeyPress(e->key(), false));
+	SEND_EVENT(&Event_KeyPress(e->key(), false, (e->key() == Qt::Key::Key_Shift)));
 }
 
 void MainWindow::slot_setTitle( QString title )

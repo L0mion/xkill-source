@@ -1123,6 +1123,9 @@ void GameComponent::updateAndInterpretLaser(AttributePtr<Attribute_Ray> ptr_ray,
 				}
 
 				SEND_EVENT(&Event_ModifyPhysicsObject(XKILL_Enums::ModifyPhysicsObjectData::GIVE_IMPULSE, static_cast<void*>(&(rayVector*20.0f)), hitPlayerAttribute->ptr_input->ptr_physics));
+				
+				//Send event to trigger sound for when the laser hits the player
+				//SEND_EVENT(&Event_PlaySound(XKILL_Enums::Sound::SOUND_LASERPLAYERHIT, itrPlayer.ownerIdAt(ptr_player), hitPlayerAttribute->ptr_render->ptr_spatial->ptr_position->position, true));
 			}
 		}
 	}

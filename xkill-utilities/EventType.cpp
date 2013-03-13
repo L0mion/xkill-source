@@ -124,10 +124,11 @@ Event_RemoveEntity::Event_RemoveEntity(int entityId) : Event(EVENT_REMOVE_ENTITY
 	this->entityId = entityId;
 }
 
-Event_KeyPress::Event_KeyPress(int keyEnum, bool isPressed) : Event(EVENT_KEY_PRESS)
+Event_KeyPress::Event_KeyPress(int keyEnum, bool isPressed, bool shiftModifier) : Event(EVENT_KEY_PRESS)
 {
 	this->keyEnum = keyEnum;
 	this->isPressed = isPressed;
+	this->shiftModifier = shiftModifier;
 }
 
 Event_MousePress::Event_MousePress(int keyEnum, bool isPressed) : Event(EVENT_MOUSE_PRESS)

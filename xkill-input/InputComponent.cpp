@@ -58,8 +58,9 @@ void InputComponent::onEvent(Event* e)
 		Event_KeyPress* ekp = static_cast<Event_KeyPress*>(e);
 		int keyEnum	= ekp->keyEnum;
 		bool isPressed = ekp->isPressed;
+		bool shiftModifier = ekp->shiftModifier;
 
-		handleKeyEvent(keyEnum, isPressed);
+		handleKeyEvent(keyEnum, isPressed, shiftModifier);
 	}
 	if(type == EVENT_MOUSE_PRESS)
 	{
@@ -80,9 +81,22 @@ void InputComponent::onEvent(Event* e)
 	if(type == EVENT_MOUSE_WHEEL)
 	{
 		Event_MouseWheel* emw = static_cast<Event_MouseWheel*>(e);
-		emw->value;
 
-		// TODO: Handle mousewheel
+		QTInputDevices* device = inputManager_->GetMouseAndKeyboard();
+		
+		if(device != nullptr)
+		{
+			if(emw->value >= 0)
+			{
+				//device->setScrollButton(true);
+				handleKeyEvent('â', true, false);
+			}
+			else
+			{
+				//device->setScrollButton(false);
+				handleKeyEvent('ô', true, false);
+			}
+		}
 	}
 }
 
@@ -142,8 +156,6 @@ void InputComponent::handleInput(float delta)
 		if(device->getBoolReleased(InputAction::ACTION_B_PREV_FIRINGMODE))
 			input->changeFiringMode--;
 
-		//input->jetpack =	device->getBoolValue(InputAction::ACTION_B_JETPACK);
-
 		if(ptr_player->jetHackPair.first) // if jethack active
 		{
 			if(device->getBoolPressed(InputAction::ACTION_B_JUMP_JETPACK))
@@ -156,9 +168,9 @@ void InputComponent::handleInput(float delta)
 			}
 		}
 
-		input->sprint =		device->getBoolValue(InputAction::ACTION_B_SPRINT);
+		input->sprint =	device->getBoolValue(InputAction::ACTION_B_SPRINT);
 
-		input->reload =		device->getBoolPressed(InputAction::ACTION_B_RELOAD);
+		input->reload =	device->getBoolPressed(InputAction::ACTION_B_RELOAD);
 
 		if(device->getBoolValue(InputAction::ACTION_B_TIME_SPEED_UP))
 		{
@@ -219,6 +231,7 @@ void InputComponent::handleInput(float delta)
 
 			qtDevice->setAxesToZero();
 			qtDevice->updateButtons();
+			qtDevice->updateScroll();
 		}
 	}
 }
@@ -294,12 +307,15 @@ void InputComponent::handleMousePressedEvent(int nr, bool pressed)
 	}
 }
 
-void InputComponent::handleKeyEvent(char key, bool pressed)
+void InputComponent::handleKeyEvent(char key, bool pressed, bool shiftModifier)
 {
 	QTInputDevices* device = inputManager_->GetMouseAndKeyboard();
 		
 	if(device != nullptr)
 	{
-		device->setButton(key, pressed);
+		if(shiftModifier)
+			device->setButton('é', pressed);
+		else
+			device->setButton(key, pressed);
 	}
 }
