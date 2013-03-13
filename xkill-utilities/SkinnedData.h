@@ -10,6 +10,7 @@
 namespace DirectX
 {
 	struct XMFLOAT4X4;
+	struct XMFLOAT3;
 }
 
 class AnimationClip;
@@ -34,6 +35,7 @@ public:
 	*/
 	void set(std::vector<int>*						boneHierarchy,
 			  std::vector<DirectX::XMFLOAT4X4>*		boneOffsets,
+			  std::vector<DirectX::XMFLOAT3>*		bonePositions_,
 			  std::map<std::string, AnimationClip*>* animations);
 	void unset(); //! Unsets all of SkinnedData's member variables.
 	//! Calculates the final transformation matrix for each bone for a specified animation.
@@ -53,12 +55,14 @@ public:
 
 	std::vector<int>*						getBoneHierarchy()	const;
 	std::vector<DirectX::XMFLOAT4X4>*		getBoneOffsets()	const;
+	std::vector<DirectX::XMFLOAT3>*			getBonePositions()	const;
 	std::map<std::string, AnimationClip*>*	getAnimations()		const;
 private:
 	AnimationClip* getAnimationClip(std::string clipName) const;
 
 	std::vector<int>*						boneHierarchy_; //!< Vector containing the skeletons hierarchy.
 	std::vector<DirectX::XMFLOAT4X4>*		boneOffsets_;	//!< Vector containing bone offsets.
+	std::vector<DirectX::XMFLOAT3>*			bonePositions_; //!< Vector containing the position of each bone.
 	std::map<std::string, AnimationClip*>*	animations_;	//!< Map that holds AnimationClips and thier corresponding names.
 };
 

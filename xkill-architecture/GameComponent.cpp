@@ -280,10 +280,8 @@ void GameComponent::onUpdate(float delta)
 		//--------------------------------------------------------------------------------------
 		// Determine which world physics objects to drop and the drop ratio
 		//--------------------------------------------------------------------------------------
-		float timeInSecondsUntilTheWorldIsCompletelyFallenApart = 30;
-
 		unsigned int nrOfWorldPieces = levelEvents_.size();
-		float makeThisManyWorldPiecesFallEachSecond = nrOfWorldPieces/timeInSecondsUntilTheWorldIsCompletelyFallenApart;
+		float makeThisManyWorldPiecesFallEachSecond = nrOfWorldPieces/SETTINGS->nullprocessExecutionTime;
 		float deltaRatio = 1.0f / makeThisManyWorldPiecesFallEachSecond;
 		static float timer = 0;
 		timer += delta;

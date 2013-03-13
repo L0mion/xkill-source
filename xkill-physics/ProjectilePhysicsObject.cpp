@@ -33,8 +33,11 @@ bool ProjectilePhysicsObject::subClassSpecificInitHook()
 	collisionShape->getBoundingSphere(boundingSphereCenter, boundingSphereRadius);
 
 	//Calculate Continuous Collision Detection (CCD) parameters based on collision shape bounding sphere radius
-	setCcdSweptSphereRadius(boundingSphereRadius*0.5f); 
-	setCcdMotionThreshold(boundingSphereRadius);
+	//setCcdSweptSphereRadius(boundingSphereRadius*0.5f); 
+	//setCcdMotionThreshold(boundingSphereRadius);
+
+	setCcdSweptSphereRadius(0.1);
+	setCcdMotionThreshold(0.1);
 
 	//Involve speed in CCD?
 	//btVector3 velocity = getLinearVelocity();
@@ -88,7 +91,8 @@ btCollisionShape* ProjectilePhysicsObject::subClassSpecificCollisionShape()
 			collisionShape = CollisionShapes::Instance()->scatterProjectileCollisionShape;
 			break;
 		case XKILL_Enums::AmmunitionType::BULLET:
-			return PhysicsObject::subClassSpecificCollisionShape();
+			collisionShape = CollisionShapes::Instance()->scatterProjectileCollisionShape;
+			//return PhysicsObject::subClassSpecificCollisionShape();
 			break;
 		case XKILL_Enums::AmmunitionType::EXPLOSIVE:
 			return PhysicsObject::subClassSpecificCollisionShape();
@@ -101,4 +105,8 @@ btCollisionShape* ProjectilePhysicsObject::subClassSpecificCollisionShape()
 void ProjectilePhysicsObject::handleOutOfBounds()
 {
 	removePhysicsAttributeCorrespondingToThisPhysicsObject();
+}
+
+void ProjectilePhysicsObject::onUpdate()
+{
 }

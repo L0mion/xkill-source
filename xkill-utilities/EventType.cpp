@@ -1,4 +1,5 @@
 #include "EventType.h"
+#include "Converter.h"
 
 Event::Event(EventType type)
 { 
@@ -319,6 +320,16 @@ Event_PostHudMessage::Event_PostHudMessage( std::string message, AttributePtr<At
 	this->receiver = RECEIVER_ONLY_SUBJECT;
 
 	setStyle(STYLE_NORMAL);
+
+
+	// Apply color
+	color = Float4(1.0f, 1.0f, 1.0f, 0.85f);
+	if(ptr_subject_player.isValid())
+	{
+		color.x = ptr_subject_player->avatarColor.x;
+		color.y = ptr_subject_player->avatarColor.y;
+		color.z = ptr_subject_player->avatarColor.z;
+	}
 }
 
 void Event_PostHudMessage::setStyle( Style style )
@@ -340,7 +351,9 @@ void Event_PostHudMessage::setStyle( Style style )
 
 void Event_PostHudMessage::setHtmlMessage( std::string prefex, std::string subject, std::string suffix /*= ""*/, std::string description /*= ""*/ )
 {
-	std::string text_normal = "<span style='color: rgba(255, 255, 255, 240);'>";
+	std::string str_color = "rgba("+Converter::IntToStr((int)(color.x * 255))+", "+Converter::IntToStr((int)(color.y * 255))+", "+ Converter::IntToStr((int)(color.z * 255)) +", "+ Converter::IntToStr((int)(color.w * 255)) +")";
+
+	std::string text_normal = "<span style='color: "+ str_color +";'>";
 	std::string text_subtile = "<span style='color: rgba(255, 255, 255, 100);'>";
 	std::string text_end = "</span>";
 

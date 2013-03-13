@@ -28,6 +28,7 @@ public:
 	float soundVolume;
 	void* overlayWidget;
 	float timeUntilScheduling;
+	float nullprocessExecutionTime;
 
 	//ssao
 	float occlusionRadius;

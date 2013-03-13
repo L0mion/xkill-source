@@ -132,6 +132,12 @@ void MainWindow::keyPressEvent( QKeyEvent* e )
 			ui.actionCap_FPS->setChecked(false);
 	}
 
+	// Show debug out print
+	if((e->key()==Qt::Key_F5))
+	{
+		SEND_EVENT(&Event(EVENT_TOGGLE_DEBUG_MESSAGES));
+	}
+
 	if((e->key()==Qt::Key_1))
 	{
 		{Event_PostHudMessage e("Punish them all"); e.receiver = Event_PostHudMessage::RECEIVER_ALL; e.setStyle(Event_PostHudMessage::STYLE_WARNING); SEND_EVENT(&e);}

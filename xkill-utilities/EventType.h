@@ -57,6 +57,8 @@ enum DLL_U EventType
 	EVENT_GAMERESET,
 
 	// System
+	EVENT_TOGGLE_DEBUG_MESSAGES,
+	EVENT_POST_DEBUG_MESSAGE,
 	EVENT_ATTRIBUTE_UPDATED,
 	EVENT_UPDATESOUNDSETTINGS,
 	EVENT_DRAW_BULLET_PHYSICS_DEBUG_LINES,
@@ -173,6 +175,19 @@ public:
 	bool on;
 };
 
+class DLL_U Event_PostDebugMessage : public Event
+{
+public:
+	Event_PostDebugMessage(int index, std::string message) : Event(EVENT_POST_DEBUG_MESSAGE)
+	{
+		this->index = index;
+		this->message = message;
+	}
+
+	int index;
+	std::string message;
+};
+
 class DLL_U Event_PlayerTargetHit : public Event
 {
 public:
@@ -219,6 +234,7 @@ public:
 	std::string message;
 	AttributePtr<Attribute_Player> ptr_subject_player;
 	std::string styleSheet;
+	Float4 color;
 };
 
 /**

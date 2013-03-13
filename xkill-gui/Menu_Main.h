@@ -14,6 +14,19 @@
 #include "Menu_Sound.h"
 #include "Menu_HUD.h"
 
+class DebugBillboard : IObserver
+{
+private:
+	QWidget* _window;
+	QLabel* _template;
+	std::vector<QLabel*> _messages;
+	bool _isHidden;
+public:
+	void init(QWidget* window, QLabel* labelTemplate);
+
+	void onEvent(Event* e);
+};
+
 
 class Menu_Main : public QMainWindow, IObserver
 {
@@ -30,6 +43,7 @@ private:
 	int levelCurrent;
 	QStandardItemModel* levelListModel;
 	QString filePath;
+	DebugBillboard billboard;
 
 	Menu_Input*			input_Menu;
 	Menu_Ammo*			ammo_Menu;
@@ -98,7 +112,10 @@ private slots:
 		SETTINGS->cycleLimit = ui.horizontalSlider_cycleLimit->value();
 		SETTINGS->timeLimit = ui.horizontalSlider_timeLimit->value() * 60.0f;
 		SETTINGS->numPlayers = ui.horizontalSlider_numPlayers->value();
+		SETTINGS->schedulerTime = ui.horizontalSlider_executionFrequency->value();
+		SETTINGS->cycleTime = ui.horizontalSlider_priorityToCycleRate->value();
 		SETTINGS->respawnTime = ui.horizontalSlider_respawnTime->value();
+		SETTINGS->nullprocessExecutionTime = ui.horizontalSlider_nullProcessDuration->value();
 
 		AttributeIterator<Attribute_Player> itrPlayer = ATTRIBUTE_MANAGER->player.getIterator();
 		while(itrPlayer.hasNext())

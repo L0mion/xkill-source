@@ -14,6 +14,7 @@ private:
 	virtual btVector3 subClassCalculateLocalInertiaHook(btScalar mass);
 	virtual btCollisionShape* subClassSpecificCollisionShape();
 	virtual void handleOutOfBounds();
+	virtual void onUpdate();
 };
 
 #endif
