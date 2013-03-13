@@ -2,6 +2,11 @@
 
 #include "renderingUtilities.h"
 #include "ManagementFX.h"
+#include "ManagementIED.h"
+#include "shaderVS.h"
+#include "ShaderGS.h"
+#include "shaderPS.h"
+#include "shaderCS.h"
 
 ManagementFX::ManagementFX(bool debugShaders)
 {
@@ -16,26 +21,26 @@ ManagementFX::ManagementFX(bool debugShaders)
 	vsPosNormTexTanInstanced_	= nullptr;
 	vsScreenQuad_				= nullptr;
 
-	psDefault_				= nullptr;
-	psAnimation_			= nullptr;
-	psColor_				= nullptr;
-	psSprite_				= nullptr;
-	psNormalMap_			= nullptr;
-	psDownSample_			= nullptr;
+	psDefault_					= nullptr;
+	psAnimation_				= nullptr;
+	psColor_					= nullptr;
+	psSprite_					= nullptr;
+	psNormalMap_				= nullptr;
+	psDownSample_				= nullptr;
 	psBuildShadowMapPosNormTex_	= nullptr;
 
-	csLighting_	= nullptr;
-	csBlurHorz_ = nullptr;
-	csBlurVert_ = nullptr;
-	csBlurBilateralHorz_ = nullptr;
-	csBlurBilateralVert_ = nullptr;
-	csSSAO_		= nullptr;
+	csLighting_				= nullptr;
+	csBlurHorz_				= nullptr;
+	csBlurVert_				= nullptr;
+	csBlurBilateralHorz_	= nullptr;
+	csBlurBilateralVert_	= nullptr;
+	csSSAO_					= nullptr;
 
-	ilPosColor_				= nullptr;
-	ilPosNormTexInstanced_	= nullptr;
-	ilPosNormTexTanSkinned_ = nullptr;
-	ilPosNormTex_			= nullptr;
-	ilPosNormTexTanInstanced_ = nullptr;
+	ilPosColor_					= nullptr;
+	ilPosNormTexInstanced_		= nullptr;
+	ilPosNormTexTanSkinned_		= nullptr;
+	ilPosNormTex_				= nullptr;
+	ilPosNormTexTanInstanced_	= nullptr;
 }
 ManagementFX::~ManagementFX()
 {
@@ -47,6 +52,8 @@ ManagementFX::~ManagementFX()
 	SAFE_DELETE(vsSprite_);
 	SAFE_DELETE(vsPosNormTexTanInstanced_);
 	SAFE_DELETE(vsScreenQuad_);
+
+	SAFE_DELETE(gsCull_);
 	
 	SAFE_DELETE(psDefault_);
 	SAFE_DELETE(psAnimation_);
@@ -79,6 +86,8 @@ void ManagementFX::reset()
 	vsPosNormTexTanInstanced_	->reset();
 	vsScreenQuad_				->reset();
 
+	gsCull_->reset();
+
 	psDefault_					->reset();
 	psAnimation_				->reset();
 	psColor_					->reset();
@@ -87,12 +96,12 @@ void ManagementFX::reset()
 	psDownSample_				->reset();
 	psBuildShadowMapPosNormTex_	->reset();
 
-	csLighting_	->reset();
-	csBlurHorz_	->reset();
-	csBlurVert_	->reset();
+	csLighting_			->reset();
+	csBlurHorz_			->reset();
+	csBlurVert_			->reset();
 	csBlurBilateralHorz_->reset();
 	csBlurBilateralVert_->reset();
-	csSSAO_		->reset();
+	csSSAO_				->reset();
 }
 
 HRESULT ManagementFX::init(ID3D11Device* device)
@@ -112,11 +121,23 @@ void ManagementFX::setShader(ID3D11DeviceContext* devcon, ShaderID shaderID)
 	if(shader)
 		shader->set(devcon);
 }
-void ManagementFX::unsetShader(ID3D11DeviceContext* devcon, ShaderID shaderID)
+void ManagementFX::unsetShader(ID3D11DeviceContext* devcon, TypeFX shaderStage)
 {
-	Shader* shader = getShaderFromID(shaderID);
-	if(shader)
-		shader->unset(devcon);
+	switch(shaderStage)
+	{
+	case TypeFX_VS:
+		devcon->VSSetShader(NULL, NULL, 0);
+		break;
+	case TypeFX_GS:
+		devcon->GSSetShader(NULL, NULL, 0);
+		break;
+	case TypeFX_PS:
+		devcon->PSSetShader(NULL, NULL, 0);
+		break;
+	case TypeFX_CS:
+		devcon->CSSetShader(NULL, NULL, 0);
+		break;
+	}
 }
 void ManagementFX::setLayout(ID3D11DeviceContext* devcon,	LayoutID layoutID)
 {
@@ -179,6 +200,9 @@ HRESULT ManagementFX::initShaders(ID3D11Device* device)
 		hr = initVSPosNormTexTanInstanced(device, shaderPath);
 	if(SUCCEEDED(hr))
 		hr = initVSScreenQuad(device, shaderPath);
+
+	if(SUCCEEDED(hr))
+		hr = initGSCull(device, shaderPath);
 
 	if(SUCCEEDED(hr))
 		hr = initPSDefault(device, shaderPath);
@@ -262,6 +286,17 @@ HRESULT ManagementFX::initVSScreenQuad(							ID3D11Device* device, std::wstring
 	std::wstring completePath = shaderPath + L"VS_ScreenQuad.cso";
 	vsScreenQuad_ = new ShaderVS();
 	hr = vsScreenQuad_->init(device, completePath.c_str());
+
+	return hr;
+}
+
+HRESULT ManagementFX::initGSCull(ID3D11Device* device, std::wstring shaderPath)
+{
+	HRESULT hr = S_OK;
+
+	std::wstring completePath = shaderPath + L"GS_Cull.cso";
+	gsCull_ = new ShaderGS();
+	hr = gsCull_->init(device, completePath.c_str());
 
 	return hr;
 }
@@ -515,6 +550,10 @@ Shader* ManagementFX::getShaderFromID(ShaderID shaderID)
 		break;
 	case SHADERID_VS_SCREENQUAD:
 		shader = vsScreenQuad_;
+		break;
+
+	case SHADERID_GS_CULL:
+		shader = gsCull_;
 		break;
 
 	case SHADERID_PS_DEFAULT:

@@ -37,7 +37,6 @@ public:
 	virtual HRESULT init(ID3D11Device* device, LPCWSTR shaderPath) = 0;
 
 	virtual void set(ID3D11DeviceContext* devcon)	= 0;	//!< Sets corresponding shader.
-	virtual void unset(ID3D11DeviceContext* devcon)	= 0;	//!< Unsets corresponding shader.
 
 	ID3D10Blob* getBlob();
 

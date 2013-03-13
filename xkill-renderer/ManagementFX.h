@@ -5,12 +5,17 @@ typedef long HRESULT;
 
 struct ID3D11Device;
 struct ID3D11DeviceContext;
+struct ID3D11InputLayout;
+
+class ManagementIED;
+class Shader;
+class ShaderVS;
+class ShaderGS;
+class ShaderPS;
+class ShaderCS;
 
 #include "d3dInterface.h"
-#include "ManagementIED.h"
-#include "shaderVS.h"
-#include "shaderPS.h"
-#include "shaderCS.h"
+#include "TypeFX.h"
 
 enum ShaderID
 {
@@ -20,6 +25,10 @@ enum ShaderID
 	SHADERID_VS_SPRITE,
 	SHADERID_VS_POS_NORM_TEX_TAN_INSTANCE,
 	SHADERID_VS_SCREENQUAD,
+	SHADERID_VS_NA,
+
+	SHADERID_GS_CULL,
+	SHADERID_GS_NA,
 
 	SHADERID_PS_DEFAULT,
 	SHADERID_PS_ANIMATION,
@@ -28,13 +37,15 @@ enum ShaderID
 	SHADERID_PS_NORMALMAP,
 	SHADERID_PS_DOWNSAMPLE,
 	SHADERID_PS_BUILD_SHADOWMAP_POS_NORM_TEX,
+	SHADERID_PS_NA,
 
 	SHADERID_CS_LIGHTING,
 	SHADERID_CS_BLUR_HORZ,
 	SHADERID_CS_BLUR_VERT,
 	SHADERID_CS_BLUR_BILATERAL_HORZ,
 	SHADERID_CS_BLUR_BILATERAL_VERT,
-	SHADERID_CS_SSAO
+	SHADERID_CS_SSAO,
+	SHADERID_CS_NA
 };
 
 enum LayoutID
@@ -60,7 +71,7 @@ public:
 	HRESULT init(ID3D11Device* device);	//!< Initializes FXManagement
 
 	void setShader(ID3D11DeviceContext*		devcon,	ShaderID shaderID);
-	void unsetShader(ID3D11DeviceContext*	devcon,	ShaderID shaderID);
+	void unsetShader(ID3D11DeviceContext*	devcon,	TypeFX shaderStage);
 	void setLayout(ID3D11DeviceContext*		devcon,	LayoutID layoutID);
 	void unsetLayout(ID3D11DeviceContext*	devcon);
 
@@ -69,12 +80,14 @@ public:
 private:
 	HRESULT initShaders(ID3D11Device* device); //!< Initializes all shaders handled by FXManagement.
 	
-	HRESULT initVSPosNormTexInstanced(ID3D11Device*		device,	std::wstring shaderPath);	//!< Initializes defaultVS.
-	HRESULT initVSAnimation(ID3D11Device*				device,	std::wstring shaderPath);	//!< Initializes animationVS.
-	HRESULT initVSColor(ID3D11Device*					device,	std::wstring shaderPath);	//!< Initializes color-shaders.
-	HRESULT initVSSprite(ID3D11Device*					device, std::wstring shaderPath);	//!< Initializes sprite vertex shader.
-	HRESULT initVSPosNormTexTanInstanced(ID3D11Device*	device, std::wstring shaderPath);
-	HRESULT initVSScreenQuad(ID3D11Device*				device, std::wstring shaderPath);
+	HRESULT initVSPosNormTexInstanced(		ID3D11Device*	device,	std::wstring shaderPath);	//!< Initializes defaultVS.
+	HRESULT initVSAnimation(				ID3D11Device*	device,	std::wstring shaderPath);	//!< Initializes animationVS.
+	HRESULT initVSColor(					ID3D11Device*	device,	std::wstring shaderPath);	//!< Initializes color-shaders.
+	HRESULT initVSSprite(					ID3D11Device*	device, std::wstring shaderPath);	//!< Initializes sprite vertex shader.
+	HRESULT initVSPosNormTexTanInstanced(	ID3D11Device*	device, std::wstring shaderPath);
+	HRESULT initVSScreenQuad(				ID3D11Device*	device, std::wstring shaderPath);
+
+	HRESULT initGSCull(ID3D11Device* device, std::wstring shaderPath);
 
 	HRESULT initPSDefault(ID3D11Device*				device,	std::wstring shaderPath);	//!< Initializes defaultPS.
 	HRESULT initPSColor(ID3D11Device*				device,	std::wstring shaderPath);	//!< Initializes color-shaders.
@@ -110,6 +123,8 @@ private:
 	ShaderVS*	vsSprite_;			//!< Vertex shader used for sprites.
 	ShaderVS*	vsPosNormTexTanInstanced_;
 	ShaderVS*	vsScreenQuad_;
+
+	ShaderGS*	gsCull_;
 
 	ShaderPS*	psDefault_;			//!< Default pixel shader.
 	ShaderPS*	psAnimation_;		//!< Pixel shader used for animated meshes.

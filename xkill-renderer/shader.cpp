@@ -1,7 +1,6 @@
-#include <d3dcompiler.h> //id3d10blob
+#include <d3dcompiler.h>
 
 #include "renderingUtilities.h"
-
 #include "shader.h"
 
 Shader::Shader()

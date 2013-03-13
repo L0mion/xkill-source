@@ -38,7 +38,7 @@ HRESULT ShaderPS::init(ID3D11Device* device, LPCWSTR shaderPath)
 			nullptr,
 			&pixelShader_);
 		
-		location = L"ShaderVS::init CreateVertexShader ";
+		location = L"ShaderVS::init CreatePixelShader ";
 		errorMsg = location + static_cast<std::wstring>(shaderPath) + failed;
 		if(FAILED(hr))
 			ERROR_MSG(errorMsg.c_str());
@@ -50,10 +50,6 @@ HRESULT ShaderPS::init(ID3D11Device* device, LPCWSTR shaderPath)
 void ShaderPS::set(ID3D11DeviceContext* devcon)
 {
 	devcon->PSSetShader(pixelShader_, nullptr, 0);
-}
-void ShaderPS::unset(ID3D11DeviceContext* devcon)
-{
-	devcon->PSSetShader(nullptr, nullptr, 0);
 }
 
 ID3D11PixelShader* ShaderPS::getPixelShader()

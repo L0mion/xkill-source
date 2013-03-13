@@ -543,6 +543,7 @@ void Renderer::renderViewportToGBuffer(ViewportData& vpData)
 
 	//Update per-viewport constant buffer.
 	managementCB_->setCB(CB_TYPE_CAMERA, TypeFX_VS, CB_REGISTER_CAMERA, managementD3D_->getDeviceContext());
+	managementCB_->setCB(CB_TYPE_CAMERA, TypeFX_GS, CB_REGISTER_CAMERA, managementD3D_->getDeviceContext());
 	managementCB_->updateCBCamera(managementD3D_->getDeviceContext(),
 		vpData.view,
 		vpData.viewInv,
@@ -646,7 +647,7 @@ void Renderer::renderViewportToBackBuffer(ViewportData& vpData, DirectX::XMFLOAT
 	managementLight_->unsetLightSRVCS(devcon, LIGHTBUFFERTYPE_POINT,	LIGHT_SRV_REGISTER_POINT);
 	managementLight_->unsetPosDirSRVCS(devcon, vpData.camIndex, LIGHT_SRV_REGISTER_POS, LIGHT_SRV_REGISTER_DIRECTION);
 
-	managementFX_->unsetShader(devcon, SHADERID_CS_LIGHTING);
+	managementFX_->unsetShader(devcon, TypeFX_CS);
 
 	managementD3D_->unsetUAVBackBufferCS();
 	managementD3D_->unsetDepthBufferSRV(GBUFFER_SHADER_REGISTER_DEPTH);
@@ -709,6 +710,7 @@ ShadingDesc Renderer::deriveShadingDesc(VertexType vertexType, bool shadowmap)
 	case VERTEX_TYPE_POS_NORM_TEX_TAN:
 		{
 			shadingDesc.vsID_ = SHADERID_VS_POS_NORM_TEX_TAN_INSTANCE;
+			shadingDesc.gsID_ = SHADERID_GS_CULL;
 			shadingDesc.psID_ = SHADERID_PS_NORMALMAP;
 
 			shadingDesc.layoutID_ = LAYOUTID_POS_NORM_TEX_TAN_INSTANCED;
@@ -741,6 +743,7 @@ void Renderer::setShadingDesc(ShadingDesc shadingDesc)
 
 	//Set shaders
 	managementFX_->setShader(devcon, shadingDesc.vsID_);
+	managementFX_->setShader(devcon, shadingDesc.gsID_);
 	managementFX_->setShader(devcon, shadingDesc.psID_);
 
 	//Set layout
@@ -1022,7 +1025,7 @@ void Renderer::blurHorizontally()
 		SET_STAGE_CS,
 		SHADER_REGISTER_BLUR_INPUT);
 	
-	managementFX_->unsetShader(devcon, SHADERID_CS_BLUR_HORZ);
+	managementFX_->unsetShader(devcon, TypeFX_CS);
 }
 void Renderer::blurVertically()
 {
@@ -1196,7 +1199,7 @@ void Renderer::buildSSAOMap(ViewportData& vpData)
 	devcon->Dispatch(dispatchX, dispatchY, 1);
 
 	//Unser shader
-	managementFX_->unsetShader(devcon, SHADERID_CS_SSAO);
+	managementFX_->unsetShader(devcon, TypeFX_CS);
 
 	//////////////////////////////////////////////////////////////////////////
 	//Do blur
@@ -1239,7 +1242,7 @@ void Renderer::buildSSAOMap(ViewportData& vpData)
 		nullptr);
 
 	//Unser shader
-	managementFX_->unsetShader(devcon, SHADERID_CS_BLUR_BILATERAL_VERT);
+	managementFX_->unsetShader(devcon, TypeFX_CS);
 
 
 	//////////////////////////////////////////////////////////////////////////

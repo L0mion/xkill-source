@@ -32,11 +32,6 @@ public:
 	\param devcon DirectX Device Context pointer.
 	*/
 	virtual void set(ID3D11DeviceContext* devcon);
-	//! Unsets Compute Shader.
-	/*!
-	\param devcon DirectX Device Context pointer
-	*/
-	virtual void unset(ID3D11DeviceContext* devcon);
 
 	ID3D11ComputeShader* getComputeShader() const;
 private:

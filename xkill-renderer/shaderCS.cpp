@@ -52,10 +52,6 @@ void ShaderCS::set(ID3D11DeviceContext* devcon)
 {
 	devcon->CSSetShader(computeShader_, nullptr, 0);
 }
-void ShaderCS::unset(ID3D11DeviceContext* devcon)
-{
-	devcon->CSSetShader(nullptr, nullptr, 0);
-}
 
 ID3D11ComputeShader* ShaderCS::getComputeShader() const
 {

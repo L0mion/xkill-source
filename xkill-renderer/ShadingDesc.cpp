@@ -3,6 +3,7 @@
 ShadingDesc::ShadingDesc()
 {
 	vsID_ = SHADERID_VS_POS_NORM_TEX_INSTANCE;
+	gsID_ = SHADERID_GS_NA;
 	psID_ = SHADERID_PS_DEFAULT;
 
 	layoutID_ = LAYOUTID_POS_NORM_TEX;
