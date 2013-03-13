@@ -38,7 +38,7 @@ cbuffer cbPerCamera : register (b2)
 
 	float		viewportHeight;
 	uint		numLightsPoint;
-	uint		pad5;
+	uint		camIndex;
 	uint		pad6;
 };
 

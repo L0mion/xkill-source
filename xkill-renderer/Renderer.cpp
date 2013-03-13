@@ -36,8 +36,6 @@
 
 //tmep
 #include "Buffer_SrvDsv.h"
-
-#include "CameraInstances.h"
 #include "TimerDX.h"
 
 
@@ -557,7 +555,8 @@ void Renderer::renderViewportToGBuffer(ViewportData& vpData)
 		vpData.zFar,
 		vpData.viewportWidth,
 		vpData.viewportHeight,
-		0); //irrelevant
+		0,	//Irrelevant
+		vpData.camIndex);
 
 	std::unordered_map<unsigned int, InstancedData>& instancedDatas =  managementInstance_->getInstancedDatas();
 	while(itrMesh.hasNext())
@@ -614,7 +613,8 @@ void Renderer::renderViewportToBackBuffer(ViewportData& vpData, DirectX::XMFLOAT
 		vpData.zFar,
 		vpData.viewportWidth,
 		vpData.viewportHeight,
-		managementLight_->getNumPos(vpData.camIndex));
+		managementLight_->getNumPos(vpData.camIndex),
+		0); //irrelevant
 	managementCB_->setCB(CB_TYPE_SHADOW, TypeFX_CS, CB_REGISTER_SHADOW, devcon);
 
 	DirectX::XMMATRIX m1 = DirectX::XMLoadFloat4x4(&shadowTransform);
@@ -846,7 +846,8 @@ DirectX::XMFLOAT4X4	Renderer::buildShadowMap()
 		/*zFar: */			0.0f,									//Irrelevant
 		/*ViewportWidth: */ 0.0f,									//Irrelevant
 		/*ViewportHeight: */ 0.0f,									//Irrelevant
-		0);															//Irrelevant
+		0,	//Irrelevant
+		0); //Irrelevant
 
 	std::unordered_map<unsigned int, InstancedData>& instancedDatas =  managementInstance_->getInstancedDatas();
 	while(itrMesh.hasNext())
@@ -1170,7 +1171,8 @@ void Renderer::buildSSAOMap(ViewportData& vpData)
 		vpData.viewportHeight,									//Instead used to send original viewport-dimensions.
 		(float)viewportWidth,
 		(float)viewportHeight,
-		0);														//Irrelevant
+		0,	//Irrelevant
+		0);	//Irrelevant
 	
 	managementCB_->setCB(CB_TYPE_SSAO, TypeFX_CS, CB_REGISTER_SSAO, devcon);
 	float ssaoWidth		= (float)winfo_->getScreenWidth()	/ (float)SSAO_MAP_SCREEN_RES_FACTOR;

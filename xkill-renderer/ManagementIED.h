@@ -62,11 +62,12 @@ private:
 	const LPCSTR semanticWeights_;			//!< Defined semantic of WEIGHTS in D3D.
 	const LPCSTR semanticBoneIndices_;		//!< Defined semantic of BONEINDICES in D3D.
 	const LPCSTR semanticWorldTransform_;	//!< Defined semantic of WORLD in D3D.
+	const LPCSTR semanticCull_;
 
 	static const unsigned int iedPosNormTexNumElements_ = 3;			//!< Number of elements in PosNormTex-IED.
 	D3D11_INPUT_ELEMENT_DESC iedPosNormTex_[iedPosNormTexNumElements_];	//!< IED describing PosNormTex-Input-Layout.
 
-	static const unsigned int iedPosNormTexInstancedNumElements_ = 7;
+	static const unsigned int iedPosNormTexInstancedNumElements_ = 8;
 	D3D11_INPUT_ELEMENT_DESC iedPosNormTexInstanced_[iedPosNormTexInstancedNumElements_];
 
 	static const unsigned int iedPosColorNumElements_ = 2;				//!< Number of elements in PosColor-IED.
@@ -75,7 +76,7 @@ private:
 	static const unsigned int iedPosNormTexTanSkinnedNumElements_ = 6;
 	D3D11_INPUT_ELEMENT_DESC iedPosNormTexTanSkinned_[iedPosNormTexTanSkinnedNumElements_];
 
-	static const unsigned int iedPosNormTexTanInstancedNumElements_ = 8;
+	static const unsigned int iedPosNormTexTanInstancedNumElements_ = 9;
 	D3D11_INPUT_ELEMENT_DESC iedPosNormTexTanInstanced_[iedPosNormTexTanInstancedNumElements_];
 };
 

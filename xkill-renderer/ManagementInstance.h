@@ -38,10 +38,6 @@ private:
 	DirectX::XMFLOAT4X4 calculateWorldMatrix(
 		AttributePtr<Attribute_Spatial>	ptr_spatial, 
 		AttributePtr<Attribute_Position> ptr_position);	//!< Calculates the world-matrix of an instance.
-	//void addCameraInstance(
-	//	AttributePtr<Attribute_Camera> ptr_camera,
-	//	unsigned int meshID,
-	//	VertexInstanced instance);
 
 	std::unordered_map<
 		unsigned int,

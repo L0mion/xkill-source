@@ -73,7 +73,8 @@ void ManagementCB::updateCBCamera(ID3D11DeviceContext*	devcon,
 								  float					zFar,
 								  float			viewportWidth,
 								  float			viewportHeight,
-								  unsigned int	numLightsPoint)
+								  unsigned int	numLightsPoint,
+								  unsigned int	camIndex)
 {
 	CBCameraDesc cbDesc;
 	cbDesc.viewMatrix_				= viewMatrix;
@@ -88,6 +89,7 @@ void ManagementCB::updateCBCamera(ID3D11DeviceContext*	devcon,
 	cbDesc.viewportWidth			= viewportWidth;
 	cbDesc.viewportHeight			= viewportHeight;
 	cbDesc.numLightsPoint			= numLightsPoint;
+	cbDesc.camIndex					= camIndex;
 
 	devcon->UpdateSubresource(cbCamera_, 0, 0, &cbDesc, 0, 0);
 }

@@ -8,7 +8,8 @@ ManagementIED::ManagementIED() :
 	semanticTangent_		("TANGENT"),
 	semanticWeights_		("WEIGHTS"),
 	semanticBoneIndices_	("BONEINDICES"),
-	semanticWorldTransform_	("WORLD")
+	semanticWorldTransform_	("WORLD"),
+	semanticCull_			("CULL")
 {
 	ZeroMemory(
 		iedPosNormTex_, 
@@ -58,6 +59,7 @@ void ManagementIED::initIEDPosNormTexInstanced()
 	iedPosNormTexInstanced_[4] = createIED(semanticWorldTransform_,	DXGI_FORMAT_R32G32B32A32_FLOAT, 1, D3D11_INPUT_PER_INSTANCE_DATA,	1);
 	iedPosNormTexInstanced_[5] = createIED(semanticWorldTransform_,	DXGI_FORMAT_R32G32B32A32_FLOAT, 2, D3D11_INPUT_PER_INSTANCE_DATA,	1);
 	iedPosNormTexInstanced_[6] = createIED(semanticWorldTransform_,	DXGI_FORMAT_R32G32B32A32_FLOAT, 3, D3D11_INPUT_PER_INSTANCE_DATA,	1);
+	iedPosNormTexInstanced_[7] = createIED(semanticCull_,			DXGI_FORMAT_R32_SINT,			0, D3D11_INPUT_PER_INSTANCE_DATA,	1);
 }
 void ManagementIED::initIEDPosColor()
 {
@@ -92,6 +94,7 @@ void ManagementIED::initIEDPosNormTexTanInstanced()
 	iedPosNormTexTanInstanced_[5] = createIED(semanticWorldTransform_,	DXGI_FORMAT_R32G32B32A32_FLOAT, 1, D3D11_INPUT_PER_INSTANCE_DATA,	1);
 	iedPosNormTexTanInstanced_[6] = createIED(semanticWorldTransform_,	DXGI_FORMAT_R32G32B32A32_FLOAT, 2, D3D11_INPUT_PER_INSTANCE_DATA,	1);
 	iedPosNormTexTanInstanced_[7] = createIED(semanticWorldTransform_,	DXGI_FORMAT_R32G32B32A32_FLOAT, 3, D3D11_INPUT_PER_INSTANCE_DATA,	1);
+	iedPosNormTexTanInstanced_[8] = createIED(semanticCull_,			DXGI_FORMAT_R32_SINT,			0, D3D11_INPUT_PER_INSTANCE_DATA,	1);
 }
 
 unsigned int ManagementIED::getIEDNumElements(IED_TYPE iedType)

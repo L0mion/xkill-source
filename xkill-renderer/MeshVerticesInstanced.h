@@ -9,7 +9,7 @@ struct VertexInstanced
 	~VertexInstanced();
 
 	DirectX::XMFLOAT4X4 world_;
-	//int cull;
+	int cull_;
 };
 
 #endif //XKILL_RENDERER_INSTANCEDDATADESC_H

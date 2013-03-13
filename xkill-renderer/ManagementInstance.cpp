@@ -55,27 +55,19 @@ void ManagementInstance::addInstance(AttributePtr<Attribute_Render>& ptr_render)
 	VertexInstanced instance;
 	instance.world_ = calculateWorldMatrix(ptr_spatial, ptr_position);
 
-	InstancedData& instancedData = instancedDatas_[ptr_render->meshID]; //will create element if none exists
-	instancedData.pushData(instance); //HELEVETE
+	int cull = 0;
+	while(itrCamera.hasNext())
+	{
+		unsigned int camIndex = itrCamera.getNext().index();
+		
+		if(ptr_render->culling.getBool(camIndex))
+			cull = cull | 1 << camIndex;
+	}
+	instance.cull_ = cull;
 
-	//Add instance to each valid camera-object.
-	//while(itrCamera.hasNext())
-	//{
-	//	AttributePtr<Attribute_Camera> ptr_camera = itrCamera.getNext();
-	//	if(ptr_render->culling.getBool(ptr_camera.index()))
-	//	{
-	//		addCameraInstance(ptr_camera, ptr_render->meshID, instance);
-	//	}
-	//}
+	InstancedData& instancedData = instancedDatas_[ptr_render->meshID];
+	instancedData.pushData(instance);
 }
-//void ManagementInstance::addCameraInstance(
-//	AttributePtr<Attribute_Camera> ptr_camera,
-//	unsigned int meshID,
-//	VertexInstanced instance)
-//{
-//	CameraInstances* camInstances = cameraInstances_[ptr_camera.index()];
-//	camInstances->addInstance(meshID, instance);
-//}
 
 DirectX::XMFLOAT4X4 ManagementInstance::calculateWorldMatrix(
 	AttributePtr<Attribute_Spatial>	ptr_spatial, 

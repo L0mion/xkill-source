@@ -66,7 +66,8 @@ public:
 		float				zFar,
 		float 				viewportWidth,
 		float 				viewportHeight,
-		unsigned int		numLightsPoint);	 //!< Updates the constant buffer cbCamera.
+		unsigned int		numLightsPoint,
+		unsigned int		camIndex);	 //!< Updates the constant buffer cbCamera.
 	void updateCBObject(
 		ID3D11DeviceContext* devcon,
 		DirectX::XMFLOAT4X4 finalMatrix,
