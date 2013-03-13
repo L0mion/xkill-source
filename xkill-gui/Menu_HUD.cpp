@@ -312,6 +312,7 @@ void Menu_HUD::refresh()
 			{
 				hudMessage_manager.silenceAllMessages();
 				ui.frame_scoreboard->show();
+				ptr_player->isScoreBoardVisible = true;
 			}
 		}
 	}
@@ -324,6 +325,7 @@ void Menu_HUD::refresh()
 		if(!ui.frame_scoreboard->isHidden())
 		{
 			ui.frame_scoreboard->hide();
+			ptr_player->isScoreBoardVisible = false;
 		}
 	}
 

@@ -78,7 +78,7 @@ void Attribute_Spatial::saveTo( DataItemList* list )
 
 Attribute_Animation::Attribute_Animation()
 {
-	activeAnimation = "Default";
+	activeAnimation = "processHover";
 	time = 0.0f;
 }
 Attribute_Animation::~Attribute_Animation()
@@ -513,6 +513,7 @@ Attribute_Player::Attribute_Player()
 	jetHackPair.second		= nullptr;
 	cycleHackPair.first		= false;
 	cycleHackPair.second	= nullptr;
+	isScoreBoardVisible = false;
 
 	avatarName = "NaN";
 
