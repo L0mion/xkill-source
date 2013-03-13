@@ -129,8 +129,8 @@ public:
 		ptr_lightPoint->lightPoint.ambient		= Float4(0.0f, 0.0f, 0.0f, 1.0f);
 		ptr_lightPoint->lightPoint.diffuse		= color;
 		ptr_lightPoint->lightPoint.specular		= color;
-		ptr_lightPoint->lightPoint.range		= 4.0f;
-		ptr_lightPoint->lightPoint.attenuation	= Float3(0.0f, 2.0f, 0.0f);
+		ptr_lightPoint->lightPoint.range		= 1.0f;
+		ptr_lightPoint->lightPoint.attenuation	= Float3(0.0f, 10.0f, 0.0f);
 	}
 
 	AttributePtr<Attribute_Camera> createCamera(Entity* entity, AttributePtr<Attribute_Spatial> ptr_parent_spatial)
@@ -144,7 +144,7 @@ public:
 		CREATE_ATTRIBUTE(ptr_offset, Behavior_Offset, offset, entity);
 		ptr_offset->ptr_spatial = ptr_spatial;
 		ptr_offset->ptr_parent_spatial_position = ptr_parent_spatial;
-		ptr_offset->offset_position = Float3(0.0f, 0.3f, 0.36f);
+		ptr_offset->offset_position = Float3(5.0f, 0.3f, 0.36f);
 
 		CREATE_ATTRIBUTE(ptr_camera, Attribute_Camera, camera, entity);
 		ptr_camera->ptr_spatial = ptr_spatial;
