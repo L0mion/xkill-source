@@ -184,6 +184,7 @@ SkinnedData* LoaderPGY::loadAnimations()
 		
 		std::vector<int>* boneHierarchy = new std::vector<int>();
 		std::vector<DirectX::XMFLOAT4X4>* boneOffsets = new std::vector<DirectX::XMFLOAT4X4>();
+		std::vector<DirectX::XMFLOAT3>* bonePositions = new std::vector<DirectX::XMFLOAT3>();
 		
 		for(unsigned int i=0; i<skinnedDataHeader.numBones_; i++)
 		{
@@ -197,12 +198,18 @@ SkinnedData* LoaderPGY::loadAnimations()
 			ifstream_.read((char*)&offsetMatrix, sizeof(offsetMatrix));
 			boneOffsets->push_back(offsetMatrix);
 		}
+		for(unsigned int i=0; i<skinnedDataHeader.numBones_; i++)
+		{
+			DirectX::XMFLOAT3 position;
+			ifstream_.read((char*)&position, sizeof(position));
+			bonePositions->push_back(position);
+		}
 	
 		std::map<std::string, AnimationClip*>* animations = new std::map<std::string, AnimationClip*>();
 		for(unsigned int i=0; i<skinnedDataHeader.numAnimations_; i++)
 			loadAnimation(skinnedDataHeader.numBones_, animations);
 	
-		skinnedData->set(boneHierarchy, boneOffsets, animations);
+		skinnedData->set(boneHierarchy, boneOffsets, bonePositions, animations);
 	}
 
 	return skinnedData;

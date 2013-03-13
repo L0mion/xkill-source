@@ -79,6 +79,8 @@ void CollisionManager::collision_applyDamage(Entity* entity1, Entity* entity2)
 					for(int i=0; i<(int)players_takingDamage.size(); i++)
 					{
 						SEND_EVENT(&Event_PlayerTakingDamage(players_takingDamage[i]));
+						players_takingDamage[i]->ptr_render->ptr_animation->activeAnimation = "processHit";
+						players_takingDamage[i]->ptr_render->ptr_animation->time = 0.0f;
 					}
 					std::vector<AttributePtr<Attribute_Player>> players_hittingTargetas = itrPlayer.getMultiple(itr_entity->at(damage->owner_entityID)->getAttributes(ATTRIBUTE_PLAYER));
 					for(int i=0; i<(int)players_hittingTargetas.size(); i++)
