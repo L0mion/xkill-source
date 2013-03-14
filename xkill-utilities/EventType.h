@@ -473,9 +473,10 @@ class DLL_U Event_KeyPress : public Event
 public:
 	int keyEnum;
 	bool isPressed;
-	bool shiftModifier;
+	bool shiftPressed;
+	bool tabPressed;
 
-	Event_KeyPress(int keyEnum, bool isPressed, bool shiftModifier);
+	Event_KeyPress(int keyEnum, bool isPressed, bool shiftPressed, bool tabPressed);
 };
 
 /// Alerts InputComponent about mouse press

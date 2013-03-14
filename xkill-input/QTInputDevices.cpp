@@ -67,12 +67,13 @@ void QTInputDevices::setStandardMappings()
 		buttons_[14]->addMapping(InputAction::ACTION_B_PREV_FIRINGMODE);
 
 		buttons_[15]->addMapping(InputAction::ACTION_B_FIRE);
-		buttons_[18]->addMapping(InputAction::ACTION_B_NEXT_FIRINGMODE);
-		buttons_[19]->addMapping(InputAction::ACTION_B_PREV_FIRINGMODE);
-		buttons_[20]->addMapping(InputAction::ACTION_B_NEXT_AMMUNITIONTYPE);
-		buttons_[21]->addMapping(InputAction::ACTION_B_PREV_AMMUNITIONTYPE);
+		buttons_[18]->addMapping(InputAction::ACTION_B_NEXT_AMMUNITIONTYPE);
+		buttons_[19]->addMapping(InputAction::ACTION_B_PREV_AMMUNITIONTYPE);
+		buttons_[20]->addMapping(InputAction::ACTION_B_NEXT_FIRINGMODE);
+		buttons_[21]->addMapping(InputAction::ACTION_B_PREV_FIRINGMODE);
 
 		buttons_[22]->addMapping(InputAction::ACTION_B_SPRINT);
+		buttons_[23]->addMapping(InputAction::ACTION_B_SHOW_SCOREBOARD);
 	}
 }
 
@@ -115,7 +116,7 @@ void QTInputDevices::updateState()
 void QTInputDevices::createInputLayout()
 {
 	inputLayout_.nrOfHatSwitches = 0;
-	inputLayout_.nrOfButtons = 16 + 7; // 7 = Mouse buttons
+	inputLayout_.nrOfButtons = 17 + 7; // 7 = Mouse buttons
 	inputLayout_.nrOfTriggers = 0;
 	inputLayout_.nrOfAxes = 2;
 }
@@ -191,6 +192,9 @@ void QTInputDevices::createInputObjectsFromLayout()
 
 		buttons_[22]->setKey('é');
 		buttons_[22]->setName("Shift");
+		
+		buttons_[23]->setKey('ê');
+		buttons_[23]->setName("Tab");
 	}
 }
 
