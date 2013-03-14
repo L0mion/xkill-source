@@ -730,7 +730,7 @@ void GameComponent::spawnPlayer(AttributePtr<Attribute_Player> ptr_player)
 	{
 		AttributePtr<Attribute_Position> ptr_spawnPoint_position = ptr_spawnPoint->ptr_position;
 		ptr_position->position = ptr_spawnPoint_position->position; // set player position attribute
-		DEBUGPRINT("Player entity " << itrPlayer.ownerId() << " spawned at " << ptr_position->position.x << " " << ptr_position->position.y << " " << ptr_position->position.z << std::endl);
+		DEBUGPRINT("Player entity " << itrPlayer.ownerIdAt(ptr_player.index()) << " spawned at " << ptr_position->position.x << " " << ptr_position->position.y << " " << ptr_position->position.z << std::endl);
 	}
 	else //otherwise: spawn at origo.
 	{
