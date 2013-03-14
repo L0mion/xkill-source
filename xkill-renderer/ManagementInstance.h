@@ -33,12 +33,12 @@ public:
 	CameraInstances* getShadowInstances();
 protected:
 private:
-	void addInstance(AttributePtr<Attribute_Render> ptr_render);
+	void addInstance(AttributePtr<Attribute_Render>& ptr_render);
 	DirectX::XMFLOAT4X4 calculateWorldMatrix(
-		AttributePtr<Attribute_Spatial>	ptr_spatial, 
-		AttributePtr<Attribute_Position> ptr_position);	//!< Calculates the world-matrix of an instance.
+		AttributePtr<Attribute_Spatial>&	ptr_spatial, 
+		AttributePtr<Attribute_Position>& ptr_position);	//!< Calculates the world-matrix of an instance.
 	void addCameraInstance(
-		AttributePtr<Attribute_Camera> ptr_camera,
+		AttributePtr<Attribute_Camera>& ptr_camera,
 		unsigned int meshID,
 		VertexInstanced instance);
 

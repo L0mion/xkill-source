@@ -43,7 +43,7 @@
 
 ATTRIBUTES_DECLARE_ALL;
 
-#define XKILLPROFILING // commment away to skip profiling
+//#define XKILLPROFILING // commment away to skip profiling
 #ifdef XKILLPROFILING
 #include <xkill-utilities\Converter.h>
 #include <time.h>
@@ -110,7 +110,7 @@ Renderer::Renderer(HWND windowHandle)
 
 	rayBuffer				= nullptr;
 
-
+	animationTimeOffset_ = 2.0f;
 	temp_ = 0;
 }
 Renderer::~Renderer()	
@@ -455,6 +455,12 @@ std::vector<ViewportData> Renderer::update(float delta)
 		vpDatas[i] = vpData;
 	}
 
+	while(itrPlayer.hasNext()) //Update animations
+	{
+		AttributePtr<Attribute_Player> ptr_player = itrPlayer.getNext();
+		updateAnimation(delta, ptr_player, device);
+	}
+
 	//Update lights.
 	managementLight_->update(device, devcon, vpDatas);
 	//Update instances.
@@ -462,6 +468,50 @@ std::vector<ViewportData> Renderer::update(float delta)
 
 	return vpDatas;
 }
+
+void Renderer::updateAnimation(float delta, AttributePtr<Attribute_Player> ptr_player, ID3D11Device* device)
+{
+	if(!ptr_player->detectedAsDead)
+	{
+		AttributePtr<Attribute_Render> ptr_render		= ptr_player->ptr_render;
+		AttributePtr<Attribute_Animation> ptr_animation = ptr_render->ptr_animation;;
+		ModelD3D* modelD3D	= managementModel_->getModelD3D(ptr_render->meshID, device);
+		ptr_animation->time += delta_ * animationTimeOffset_;
+		if(ptr_animation->time > modelD3D->getSkinnedData()->getClipEndTime(ptr_animation->activeAnimation))
+		{
+			ptr_animation->time = 0.0f;
+			ptr_animation->activeAnimation = "processHover";
+		}
+
+		std::vector<DirectX::XMFLOAT4X4> finalTransforms;
+		modelD3D->getSkinnedData()->getFinalTransforms(ptr_animation->activeAnimation, ptr_animation->time, &finalTransforms);
+
+		int boneIndex = 16;
+		DirectX::XMFLOAT3 bonePosition = modelD3D->getSkinnedData()->getBonePositions()->at(boneIndex);
+		DirectX::XMMATRIX xmMatrix = DirectX::XMLoadFloat4x4(&finalTransforms.at(boneIndex));
+		DirectX::XMVECTOR xmBonePosition = DirectX::XMLoadFloat3(&bonePosition);
+		xmBonePosition = DirectX::XMVector3TransformCoord(xmBonePosition, xmMatrix);
+		DirectX::XMStoreFloat3(&bonePosition, xmBonePosition);
+		ptr_player->ptr_weapon_offset->offset_position.x = bonePosition.x;
+		ptr_player->ptr_weapon_offset->offset_position.y = bonePosition.y;
+		ptr_player->ptr_weapon_offset->offset_position.z = bonePosition.z;
+		ptr_player->ptr_weapon_offset->updateOffset();
+
+		boneIndex = 7;
+		bonePosition = modelD3D->getSkinnedData()->getBonePositions()->at(boneIndex);
+		xmMatrix = DirectX::XMLoadFloat4x4(&finalTransforms.at(boneIndex));
+		xmBonePosition = DirectX::XMLoadFloat3(&bonePosition);
+		xmBonePosition = DirectX::XMVector3TransformCoord(xmBonePosition, xmMatrix);
+		DirectX::XMStoreFloat3(&bonePosition, xmBonePosition);
+		Float3 debug = ptr_player->ptr_camera->ptr_offset->offset_position;
+		ptr_player->ptr_camera->ptr_offset->offset_position.x = bonePosition.x;
+		ptr_player->ptr_camera->ptr_offset->offset_position.y = bonePosition.y;
+		ptr_player->ptr_camera->ptr_offset->offset_position.z = bonePosition.z;
+		ptr_player->ptr_camera->ptr_offset->updateOffset();
+	}
+}
+
+
 void Renderer::render(std::vector<ViewportData> vpDatas)
 {
 	ID3D11DeviceContext* devcon = managementD3D_->getDeviceContext();
@@ -1493,22 +1543,15 @@ void Renderer::drawHudElement(int viewportIndex, unsigned int textureId, DirectX
 
 void Renderer::renderAnimation(AttributePtr<Attribute_Player> ptr_player, DirectX::XMFLOAT4X4 view, DirectX::XMFLOAT4X4 projection)
 {
-	AttributePtr<Attribute_Spatial> ptr_spatial;
-	AttributePtr<Attribute_Position> ptr_position;
-	AttributePtr<Attribute_Animation> ptr_animation;
-	AttributePtr<Attribute_Render> ptr_render = ptr_player->ptr_render;
-
-
-	ptr_spatial = ptr_render->ptr_spatial;
-	ptr_position = ptr_render->ptr_spatial->ptr_position;
-	ptr_animation = ptr_render->ptr_animation;
-
+	AttributePtr<Attribute_Render> ptr_render		= ptr_player->ptr_render;
+	AttributePtr<Attribute_Animation> ptr_animation = ptr_render->ptr_animation;;
+	AttributePtr<Attribute_Spatial> ptr_spatial		= ptr_render->ptr_spatial;
+	AttributePtr<Attribute_Position> ptr_position	= ptr_spatial->ptr_position;
 
 	ID3D11Device*			device = managementD3D_->getDevice();
 	ID3D11DeviceContext*	devcon = managementD3D_->getDeviceContext();
 
 	ModelD3D* modelD3D	= managementModel_->getModelD3D(ptr_render->meshID, device);
-
 	
 	DirectX::XMFLOAT4X4 worldMatrix			= managementMath_->calculateWorldMatrix(ptr_spatial, ptr_position);
 	DirectX::XMFLOAT4X4 worldMatrixInverse	= managementMath_->calculateMatrixInverse(worldMatrix);
@@ -1518,44 +1561,9 @@ void Renderer::renderAnimation(AttributePtr<Attribute_Player> ptr_player, Direct
 	managementCB_->updateCBObject(devcon, finalMatrix, worldMatrix, worldMatrixInverse);
 
 	std::vector<DirectX::XMFLOAT4X4> finalTransforms;
-	
-	if(!ptr_player->detectedAsDead)
-	{
-		ptr_animation->time += delta_;
-		if(ptr_animation->time > modelD3D->getSkinnedData()->getClipEndTime(ptr_animation->activeAnimation))
-		{
-			ptr_animation->time = 0.0f;
-			ptr_animation->activeAnimation = "processHover";
-		}
-	}
 	modelD3D->getSkinnedData()->getFinalTransforms(ptr_animation->activeAnimation, ptr_animation->time, &finalTransforms);
 
-	int boneIndex = 16;
-	DirectX::XMFLOAT3 bonePosition = modelD3D->getSkinnedData()->getBonePositions()->at(boneIndex);
-	DirectX::XMMATRIX xmMatrix = DirectX::XMLoadFloat4x4(&finalTransforms.at(boneIndex));
-	DirectX::XMVECTOR xmBonePosition = DirectX::XMLoadFloat3(&bonePosition);
-	xmBonePosition = DirectX::XMVector3TransformCoord(xmBonePosition, xmMatrix);
-	DirectX::XMStoreFloat3(&bonePosition, xmBonePosition);
-	ptr_player->ptr_weapon_offset->offset_position.x = bonePosition.x;
-	ptr_player->ptr_weapon_offset->offset_position.y = bonePosition.y;
-	ptr_player->ptr_weapon_offset->offset_position.z = bonePosition.z;
-
-	ptr_player->ptr_weapon_offset->updateOffset();
-
-	boneIndex = 7;
-	bonePosition = modelD3D->getSkinnedData()->getBonePositions()->at(boneIndex);
-	xmMatrix = DirectX::XMLoadFloat4x4(&finalTransforms.at(boneIndex));
-	xmBonePosition = DirectX::XMLoadFloat3(&bonePosition);
-	xmBonePosition = DirectX::XMVector3TransformCoord(xmBonePosition, xmMatrix);
-	DirectX::XMStoreFloat3(&bonePosition, xmBonePosition);
-	Float3 debug = ptr_player->ptr_camera->ptr_offset->offset_position;
-	ptr_player->ptr_camera->ptr_offset->offset_position.x = bonePosition.x;
-	ptr_player->ptr_camera->ptr_offset->offset_position.y = bonePosition.y;
-	ptr_player->ptr_camera->ptr_offset->offset_position.z = bonePosition.z;
-
-	ptr_player->ptr_camera->ptr_offset->updateOffset();
-
-	debug = ptr_player->ptr_camera->ptr_spatial->ptr_position->position;
+	
 
 	managementCB_->setCB(CB_TYPE_BONE, TypeFX_VS, CB_REGISTER_BONE, devcon);
 	managementCB_->updateCBBone(devcon, finalTransforms);

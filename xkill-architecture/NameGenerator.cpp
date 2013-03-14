@@ -1343,7 +1343,32 @@ void NameGenerator::resetNames()
 	addName("evil inside");
 	addName("poor Yorick");
 	addName("he's back");
+	addName("the missing link");
+	addName("Dr. Moreau");
+	addName("positronic brain");
+	addName("brain in a jar");
 	addName("Wintermute");
+	addName("polysyllabic moniker");
+	addName("Excelsior");
+	addName("Magnificus");
+	addName("Yuggoth");
+	addName("is this reality?");
+	addName("space monkey");
+	addName("highly trained monkey");
+
+	addName("inexpensive payback time");
+	addName("better safe than gory");
+	addName("open time window");
+	addName("update frequency");
+	addName("translation of incubation");
+	addName("90 degree rotation");
+	addName("falling elevator");
+	addName("Google-glass");
+	addName("phlogiston");
+	addName("picking strawberries");
+	addName("landlord");
+	addName("broken TV");
+	addName("kindergarten gatekeeper");
 	
 	//C++ keywords
 	addName("alignas");

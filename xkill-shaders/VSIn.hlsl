@@ -7,6 +7,7 @@ struct VSInPosNormTexInstanced
 	float3		normal		: NORMAL;
 	float2		texcoord	: TEXCOORD;
 	float4x4	world		: WORLD;
+	float3		glowmod		: GLOWMOD;
 };
 
 struct VSInPosColor
@@ -39,6 +40,7 @@ struct VSInPosNormTexTanInstanced
 	float2		texcoord	: TEXCOORD;
 	float4		tangent		: TANGENT;
 	float4x4	world		: WORLD;
+	float3		glowmod		: GLOWMOD;
 };
 
 #endif //XKILL_RENDERER_VSIN_HLSL

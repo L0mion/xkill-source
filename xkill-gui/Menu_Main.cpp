@@ -10,9 +10,28 @@ struct keyFrame
 
 void Menu_Main::loadOpeningGif()
 {
+	// Load opening
 	openingAnimation = new QMovie(this);
 	openingAnimation->setCacheMode(QMovie::CacheAll);
-	std::string fileName = "../../xkill-resources/xkill-gui/images/animations/menu_opening.gif"; 
+	std::string fileName = "../../xkill-resources/xkill-gui/images/animations/menu_opening.gif";
+
+	// Easter egg
+	const int chance = 15;
+	if(Math::randomInt(0, chance) == 0)
+	{
+		fileName = "../../xkill-resources/xkill-gui/images/animations/tmp.gif";
+	}
+	// Eric easter egg
+	std::string username = getenv( "USERNAME" );
+	if(username == "Eric")
+	{
+		const int chance = 10;
+		if(Math::randomInt(0, chance) == 0)
+		{
+			fileName = "../../xkill-resources/xkill-gui/images/animations/tmp2.gif";
+		}
+	}
+
 	openingAnimation->setFileName(fileName.c_str());
 	if(!openingAnimation->isValid()) // error checking
 		ERROR_MESSAGEBOX("Could not open " + fileName + ". Either the file is missing, or \"imageformats/qgif4.dll\" is missing.");
@@ -21,6 +40,17 @@ void Menu_Main::loadOpeningGif()
 	openingAnimation->start();
 	SEND_EVENT(&Event_PlaySound(XKILL_Enums::Sound::SOUND_OPENING_ANIMATION));
 	connect(openingAnimation, SIGNAL(frameChanged(int)),	this, SLOT(openingAnimation_frameChanged(int)));
+
+	// Load background
+	QMovie* backgroundAnimation = new QMovie(this);
+	backgroundAnimation->setCacheMode(QMovie::CacheAll);
+	fileName = "../../xkill-resources/xkill-gui/images/animations/menu_background.gif";
+	backgroundAnimation->setFileName(fileName.c_str());
+	if(!backgroundAnimation->isValid()) // error checking
+		ERROR_MESSAGEBOX("Could not open " + fileName + ". Either the file is missing, or \"imageformats/qgif4.dll\" is missing.");
+	backgroundAnimation->setParent(this); // prevents memory leaks
+	ui.label_background->setMovie(backgroundAnimation);
+	backgroundAnimation->start();
 }
 
 Menu_Main::Menu_Main( QWidget* parent ) : QMainWindow()

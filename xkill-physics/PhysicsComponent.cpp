@@ -2,7 +2,7 @@
 
 #include <btBulletDynamicsCommon.h>
 #include "Serialize/BulletWorldImporter/btBulletWorldImporter.h"
-#include "BulletCollision/NarrowPhaseCollision/btRaycastCallback.h"//check
+#include "BulletCollision/NarrowPhaseCollision/btRaycastCallback.h"
 
 #include <xkill-utilities/Util.h>
 
@@ -457,7 +457,7 @@ void PhysicsComponent::synchronizeWithAttributes(AttributePtr<Attribute_Physics>
 {
 	//Also refer to PhysicsComponent::onEvent, handling of EVENT_ATTRIBUTE_UPDATED
 
-	//Checks if new physiscs attributes were created since last call to this function
+	//Checks if new physics attributes were created since last call to this function
 	if(physicsAttributeIndex >= physicsObjects_->size())
 	{
 		physicsObjects_->push_back(nullptr);

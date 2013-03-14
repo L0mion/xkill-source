@@ -209,7 +209,7 @@ public:
 			ptr_offset->ptr_spatial = ptr_spatial;
 			ptr_offset->ptr_parent_spatial_position = ptr_weapon_spatial;
 			ptr_offset->ptr_parent_spatial_rotation = ptr_weapon_spatial;
-			ptr_offset->offset_position = Float3(0.0f, 0.06f, 0.6f);
+			ptr_offset->offset_position = Float3(0.0f, 0.01f, 0.7f);
 
 			ptr_fireLocation_spatial = ptr_spatial;
 		}
@@ -240,6 +240,7 @@ public:
 		CREATE_ATTRIBUTE(ptr_render, Attribute_Render, render, entity);
 		ptr_render->ptr_spatial = ptr_spatial;
 		ptr_render->meshID = e->meshID;
+		ptr_render->glowMod_ = Float3((float)(rand() % 255) / 255.0f,(float)(rand() % 255) / 255.0f,(float)(rand() % 255) / 255.0f); //AAAAAAAAAAAAAAAAAAAAAAAAAAA
 		CREATE_ATTRIBUTE(ptr_physics, Attribute_Physics, physics, entity);
 		ptr_physics->ptr_spatial = ptr_spatial;
 		ptr_physics->ptr_render = ptr_render;
@@ -326,6 +327,8 @@ public:
 		ptr_lightPoint->lightPoint.specular		= color;
 		ptr_lightPoint->lightPoint.range		= 1.0f;
 		ptr_lightPoint->lightPoint.attenuation	= Float3(0.0f, 30.0f, 0.0f);
+
+		ptr_render->glowMod_ = Float3((float)(rand() % 255) / 255.0f,(float)(rand() % 255) / 255.0f,(float)(rand() % 255) / 255.0f);
 	}
 
 	void createMesh(Entity* entity, Event_CreateMesh* e)
@@ -416,10 +419,10 @@ public:
 			ptr_render->meshID = XKILL_Enums::ModelId::PICKUPABLE_SPEEDHACK;
 			break;
 		case XKILL_Enums::PickupableType::HACK_CYCLEHACK:
-			ptr_render->meshID = XKILL_Enums::ModelId::PICKUPABLE_CYCLEHACK; //check
+			ptr_render->meshID = XKILL_Enums::ModelId::PICKUPABLE_CYCLEHACK;
 			break;
 		case XKILL_Enums::PickupableType::HACK_RANDOMHACK:
-			ptr_render->meshID = XKILL_Enums::ModelId::PICKUPABLE_RANDOMHACK; //check
+			ptr_render->meshID = XKILL_Enums::ModelId::PICKUPABLE_RANDOMHACK;
 			break;
 		default:
 			color = Float4(0.0f, 1.0f, 0.0f, 1.0f);
@@ -431,7 +434,7 @@ public:
 		ptr_physics->ptr_spatial = ptr_spatial;
 		ptr_physics->ptr_render = ptr_render;
 		ptr_physics->collisionFilterGroup = XKILL_Enums::PhysicsAttributeType::PICKUPABLE;
-		ptr_physics->collisionFilterMask = XKILL_Enums::PhysicsAttributeType::PLAYER | XKILL_Enums::PhysicsAttributeType::FRUSTUM | XKILL_Enums::PhysicsAttributeType::WORLD | XKILL_Enums::PhysicsAttributeType::PICKUPABLE | XKILL_Enums::PhysicsAttributeType::RAY | XKILL_Enums::PhysicsAttributeType::PROJECTILE | XKILL_Enums::PhysicsAttributeType::EXPLOSIONSPHERE;
+		ptr_physics->collisionFilterMask = XKILL_Enums::PhysicsAttributeType::PLAYER | XKILL_Enums::PhysicsAttributeType::FRUSTUM | XKILL_Enums::PhysicsAttributeType::WORLD | XKILL_Enums::PhysicsAttributeType::PICKUPABLE | XKILL_Enums::PhysicsAttributeType::RAY | XKILL_Enums::PhysicsAttributeType::PROJECTILE;
 		ptr_physics->collisionResponse = true;
 		ptr_physics->mass = 10.0f;
 		ptr_physics->gravity = Float3(0.0f, -10.0f, 0.0f);

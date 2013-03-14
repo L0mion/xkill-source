@@ -62,14 +62,15 @@ void ManagementInstance::init()
 	shadowInstances_ = new CameraInstances();
 }
 
-void ManagementInstance::addInstance(AttributePtr<Attribute_Render> ptr_render)
+void ManagementInstance::addInstance(AttributePtr<Attribute_Render>& ptr_render)
 {
 	//Establish instance world matrix.
 	AttributePtr<Attribute_Spatial>		ptr_spatial		= ptr_render->ptr_spatial;
 	AttributePtr<Attribute_Position>	ptr_position	= ptr_spatial->ptr_position;
 	
 	VertexInstanced instance;
-	instance.world_ = calculateWorldMatrix(ptr_spatial, ptr_position);
+	instance.world_		= calculateWorldMatrix(ptr_spatial, ptr_position);
+	instance.glowMod_	= DirectX::XMFLOAT3(ptr_render->glowMod_.asFloat());
 
 	//Add instance to each valid camera-object.
 	while(itrCamera.hasNext())
@@ -85,7 +86,7 @@ void ManagementInstance::addInstance(AttributePtr<Attribute_Render> ptr_render)
 		shadowInstances_->addInstance(ptr_render->meshID, instance);
 }
 void ManagementInstance::addCameraInstance(
-	AttributePtr<Attribute_Camera> ptr_camera,
+	AttributePtr<Attribute_Camera>& ptr_camera,
 	unsigned int meshID,
 	VertexInstanced instance)
 {
@@ -106,8 +107,8 @@ void ManagementInstance::addCameraInstance(
 }
 
 DirectX::XMFLOAT4X4 ManagementInstance::calculateWorldMatrix(
-	AttributePtr<Attribute_Spatial>	ptr_spatial, 
-	AttributePtr<Attribute_Position> ptr_position)
+	AttributePtr<Attribute_Spatial>&	ptr_spatial, 
+	AttributePtr<Attribute_Position>& ptr_position)
 {
 	DirectX::XMMATRIX translation = DirectX::XMMatrixTranslation(
 		ptr_position->position.x,
@@ -151,15 +152,3 @@ CameraInstances* ManagementInstance::getShadowInstances()
 {
 	return shadowInstances_;
 }
-//InstancedData* ManagementInstance::getInstancesFromMeshID(unsigned int meshID)
-//{
-//	InstancedData* instancedData = nullptr;
-//
-//	std::map<unsigned int, InstancedData*>::iterator it = instancesMap_.find(meshID);
-//	if(it != instancesMap_.end())
-//	{
-//		instancedData = it->second;
-//	}
-//
-//	return instancedData;
-//}

@@ -46,11 +46,7 @@ bool PlayerPhysicsObject::subClassSpecificInitHook()
 void PlayerPhysicsObject::onUpdate(float delta)
 {
 	PhysicsObject::onUpdate(delta);
-		
-	//--------------------------------------------------------------------------------------
-	// Hovering
-	//-------------------------------------------------------------------------------------
-	float height = 1.5;
+
 	std::vector<int> playerAttributes = itrPhysics_3.ownerAt(attributeIndex_)->getAttributes(ATTRIBUTE_PLAYER);
 	for(unsigned int i=0;i<playerAttributes.size();i++)
 	{
@@ -63,6 +59,7 @@ void PlayerPhysicsObject::onUpdate(float delta)
 
 		if( !(ptr_player->jetpack) && !(ptr_player->detectedAsDead) && !(ptr_player->ptr_input->jump))
 		{
+			float height = 1.5;
 			hover(delta, height);
 		}
 	}
@@ -164,7 +161,10 @@ void PlayerPhysicsObject::handleOutOfBounds()
 		AttributePtr<Attribute_Health> playerHealthAttribute = ptr_player->ptr_health;
 		if(!ptr_player->detectedAsDead)
 		{
-			ptr_player->priority--;
+			if(!SETTINGS->isNullprocessExecuting)
+			{
+				ptr_player->priority--; //punish players for falling outside of the level, if the null process is not running
+			}
 			DEBUGPRINT("Player entity " << playerEntityIndex << " was out of bounds");
 			SEND_EVENT(&Event_PlayerDeath(playerAttributeIndices[i]));
 		}

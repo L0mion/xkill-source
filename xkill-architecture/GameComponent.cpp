@@ -48,8 +48,6 @@ bool GameComponent::init()
 
 	srand((unsigned)time(NULL));
 
-	nullProcessExecuting = false;
-	
 	return true;
 }
 
@@ -83,10 +81,10 @@ void GameComponent::onEvent(Event* e)
 		event_UnloadLevel();
 		break;
 	case EVENT_NULL_PROCESS_STARTED_EXECUTING:
-		nullProcessExecuting = true;
+		SETTINGS->isNullprocessExecuting = true;
 		break;
 	case EVENT_NULL_PROCESS_STOPPED_EXECUTING:
-		nullProcessExecuting = false;
+		SETTINGS->isNullprocessExecuting = false;
 
 		//Reset pickupables
 		while(itrPickupable.hasNext())
@@ -284,7 +282,7 @@ void GameComponent::onUpdate(float delta)
 	// Drop random world pieces
 	//--------------------------------------------------------------------------------------
 	std::vector<int> worldPiecesIndices;
-	if(nullProcessExecuting)
+	if(SETTINGS->isNullprocessExecuting)
 	{
 		//--------------------------------------------------------------------------------------
 		// Find all world physics objects
@@ -532,14 +530,14 @@ void GameComponent::updatePlayerAttributes(float delta)
 			//--------------------------------------------------------------------------------------
 			// Respawn player
 			//--------------------------------------------------------------------------------------
-			else if(!nullProcessExecuting)
+			else if(!SETTINGS->isNullprocessExecuting)
 			{
 				spawnPlayer(ptr_player);
 			}
 		}
 
 		//--------------------------------------------------------------------------------------
-		// Respawn player
+		// Respawn player when player pressed fire button when dead and the scoreboard is visible
 		//--------------------------------------------------------------------------------------
 		if(ptr_input->firePressed && ptr_player->detectedAsDead && ptr_player->isScoreBoardVisible)
 		{
@@ -597,20 +595,16 @@ void GameComponent::event_EndDeathmatch(Event_EndDeathmatch* e)
 		SEND_EVENT(&Event_RemoveEntity(itrLightPoint.ownerId()));
 	}
 
-	//check
 	while(itrPickupable.hasNext())
 	{
 		itrPickupable.getNext();
 		SEND_EVENT(&Event_RemoveEntity(itrPickupable.ownerId()));
 	}
-	//check
 	while(itrPickupablesSpawnPoint.hasNext())
 	{
 		itrPickupablesSpawnPoint.getNext();
 		SEND_EVENT(&Event_RemoveEntity(itrPickupablesSpawnPoint.ownerId()));
 	}
-
-	
 
 	// Show
 }
@@ -621,7 +615,8 @@ AttributePtr<Attribute_PlayerSpawnPoint> GameComponent::findUnoccupiedSpawnPoint
 	std::vector<AttributePtr<Attribute_PlayerSpawnPoint>> unoccupiedSpawnPoints;
 
 	// Special cases: *no player spawn point, return nullptr.
-	int numSpawnPoints = itrPlayerSpawnPoint.storageSize();
+	AttributeIterator<Attribute_PlayerSpawnPoint> itrPlayerSpawnPoint = ATTRIBUTE_MANAGER->playerSpawnPoint.getIterator();
+	int numSpawnPoints = itrPlayerSpawnPoint.count();
 	if(numSpawnPoints < 1)
 	{
 		DEBUGPRINT("GameComponent::findUnoccupiedSpawnPoint - No spawn point found.");
@@ -632,7 +627,6 @@ AttributePtr<Attribute_PlayerSpawnPoint> GameComponent::findUnoccupiedSpawnPoint
 	// Find all unoccupied player spawn points.
 	//
 
-	AttributeIterator<Attribute_PlayerSpawnPoint> itrPlayerSpawnPoint = ATTRIBUTE_MANAGER->playerSpawnPoint.getIterator();
 	while(itrPlayerSpawnPoint.hasNext())
 	{
 		// Fetch attributes
@@ -672,7 +666,6 @@ AttributePtr<Attribute_PlayerSpawnPoint> GameComponent::findUnoccupiedSpawnPoint
 			unoccupiedSpawnPoints.push_back(ptr_found_spawnPoint); // this vector will be iterated below.
 		}
 	}
-
 
 	// Iterate through all unoccupied player spawn points 
 	// (found in the above loop) to find the player spawn 
@@ -730,18 +723,17 @@ void GameComponent::spawnPlayer(AttributePtr<Attribute_Player> ptr_player)
 	{
 		AttributePtr<Attribute_Position> ptr_spawnPoint_position = ptr_spawnPoint->ptr_position;
 		ptr_position->position = ptr_spawnPoint_position->position; // set player position attribute
-		DEBUGPRINT("Player entity " << itrPlayer.ownerId() << " spawned at " << ptr_position->position.x << " " << ptr_position->position.y << " " << ptr_position->position.z << std::endl);
+		DEBUGPRINT("Player entity " << itrPlayer.ownerIdAt(ptr_player.index()) << " spawned at " << ptr_position->position.x << " " << ptr_position->position.y << " " << ptr_position->position.z << std::endl);
 	}
 	else //otherwise: spawn at origo.
 	{
 		ptr_position->position = Float3(0.0f, 0.0f, 0.0f);
-		DEBUGPRINT("No spawn point was found. Player entity " << itrPlayer.ownerId() << " spawned at " << ptr_position->position.x << " " << ptr_position->position.y << " " << ptr_position->position.z << std::endl);
+		DEBUGPRINT("No spawn point was found. Player entity " << itrPlayer.ownerIdAt(ptr_player.index()) << " spawned at " << ptr_position->position.x << " " << ptr_position->position.y << " " << ptr_position->position.z << std::endl);
 	}
 
 	//--------------------------------------------------------------------------------------
 	// Reset player
 	//--------------------------------------------------------------------------------------
-				
 	//Point camera towards center
 	Float3 pos2d(-ptr_position->position.x, 0.0f, -ptr_position->position.z);
 	if(pos2d.length() > 0.1)
@@ -775,12 +767,15 @@ void GameComponent::spawnPlayer(AttributePtr<Attribute_Player> ptr_player)
 				
 	ptr_health->health = ptr_health->maxHealth; // restores player health
 
-	MutatorSettings ms;
-	for(int i = 0; i < XKILL_Enums::AmmunitionType::NROFAMMUNITIONTYPES; i++)
+	if(ptr_player->detectedAsDead)
 	{
-		for(int j = 0; j < XKILL_Enums::FiringModeType::NROFFIRINGMODETYPES; j++)
+		MutatorSettings ms;
+		for(int i = 0; i < XKILL_Enums::AmmunitionType::NROFAMMUNITIONTYPES; i++)
 		{
-			ms.setupAttribute(ptr_weaponStats, static_cast<XKILL_Enums::AmmunitionType>(i), static_cast<XKILL_Enums::FiringModeType>(j));
+			for(int j = 0; j < XKILL_Enums::FiringModeType::NROFFIRINGMODETYPES; j++)
+			{
+				ms.setupAttribute(ptr_weaponStats, static_cast<XKILL_Enums::AmmunitionType>(i), static_cast<XKILL_Enums::FiringModeType>(j));
+			}
 		}
 	}
 
@@ -827,7 +822,7 @@ void GameComponent::event_StartDeathmatch( Event_StartDeathmatch* e )
 		AttributePtr<Attribute_WeaponStats>		ptr_weaponStats	=	ptr_player	->	ptr_weaponStats	;
 		switchFiringMode(ptr_weaponStats, 0);	//Ensure ammunition disablement (selected from menu)
 		
-		SEND_EVENT(&Event_HackActivated(5000.0f, XKILL_Enums::HackType::JETHACK, ptr_player)); //check jetpack giveaway
+		//SEND_EVENT(&Event_HackActivated(5000.0f, XKILL_Enums::HackType::JETHACK, ptr_player)); //check jetpack giveaway
 	}
 
 	//Create mesh for debugging fbx-loading.
@@ -897,6 +892,7 @@ void GameComponent::event_UnloadLevel()
 	{
 		SAFE_DELETE(*it);
 	}
+
 	/*while(itrMesh.hasNext())
 	{
 		itrMesh.getNext();

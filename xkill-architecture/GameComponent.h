@@ -25,9 +25,8 @@ class GameComponent :
 	public IObserver
 {
 private:
-	std::vector<Entity>* allEntity; //check
+	std::vector<Entity>* allEntity;
 	std::vector<Event*> levelEvents_;
-	bool nullProcessExecuting;
 
 public:
 	GameComponent(void);
