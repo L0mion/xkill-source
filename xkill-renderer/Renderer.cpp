@@ -36,8 +36,6 @@
 
 //tmep
 #include "Buffer_SrvDsv.h"
-
-#include "CameraInstances.h"
 #include "TimerDX.h"
 
 
@@ -560,9 +558,9 @@ void Renderer::renderViewportToGBuffer(ViewportData& vpData)
 		vpData.viewportHeight,
 		0); //irrelevant
 
-	CameraInstances* cameraInstances = managementInstance_->getCameraInstancesFromCameraIndex(vpData.camIndex);
-	if(cameraInstances == nullptr)
-		return; 
+	//CameraInstances* cameraInstances = managementInstance_->getCameraInstancesFromCameraIndex(vpData.camIndex);
+	//if(cameraInstances == nullptr)
+	//	return; 
 
 	while(itrPlayer.hasNext())
 	{
@@ -570,11 +568,19 @@ void Renderer::renderViewportToGBuffer(ViewportData& vpData)
 		renderAnimation(player, vpData.view, vpData.proj);
 	}
 
-	std::map<unsigned int, InstancedData*> instancesMap = cameraInstances->getInstancesMap();
-	for(std::map<unsigned int, InstancedData*>::iterator i = instancesMap.begin(); i != instancesMap.end(); i++)
+	while(itrMesh.hasNext())
 	{
-			renderInstance(i->first, i->second, false);
+		unsigned int meshID = itrMesh.getNext()->meshID;
+		InstancedData* instancedData = managementInstance_->getInstancedData(vpData.camIndex, meshID);
+
+		renderInstance(meshID, instancedData, false);
 	}
+
+	//std::map<unsigned int, InstancedData*> instancesMap = cameraInstances->getInstancesMap();
+	//for(std::map<unsigned int, InstancedData*>::iterator i = instancesMap.begin(); i != instancesMap.end(); i++)
+	//{
+	//		renderInstance(i->first, i->second, false);
+	//}
 
 	if(SETTINGS->showDebugPhysics)
 	{
@@ -860,14 +866,12 @@ DirectX::XMFLOAT4X4	Renderer::buildShadowMap()
 		/*ViewportHeight: */ 0.0f,									//Irrelevant
 		0);															//Irrelevant
 
-	CameraInstances* cameraInstances = managementInstance_->getShadowInstances();
-	std::map<unsigned int, InstancedData*> instancesMap = cameraInstances->getInstancesMap();
-	for(std::map<unsigned int, InstancedData*>::iterator i = instancesMap.begin(); i != instancesMap.end(); i++)
-	{
-		renderInstance(i->first, i->second, true);
-	}
+	//We only want to render boxes - that is meshID 200
+	unsigned int meshID = 200;
+	InstancedData* shadowData = managementInstance_->getShadowData(meshID);
+	if(shadowData != nullptr)
+		renderInstance(meshID, shadowData, true);
 	
-
 	//Unset shizzle
 	managementBuffer_->unset(devcon, SET_TYPE_DSV, SET_STAGE_CS, 0); //register and stage irrelevant
 	managementRS_->unsetRS(devcon);
