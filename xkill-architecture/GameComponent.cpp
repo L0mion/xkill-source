@@ -723,20 +723,17 @@ void GameComponent::spawnPlayer(AttributePtr<Attribute_Player> ptr_player)
 	{
 		AttributePtr<Attribute_Position> ptr_spawnPoint_position = ptr_spawnPoint->ptr_position;
 		ptr_position->position = ptr_spawnPoint_position->position; // set player position attribute
-		//DEBUGPRINT("Player entity " << itrPlayer.ownerId() << " spawned at " << ptr_position->position.x << " " << ptr_position->position.y << " " << ptr_position->position.z << std::endl);
-		//DEBUGPRINT("Player entity spawned at " << ptr_position->position.x << " " << ptr_position->position.y << " " << ptr_position->position.z << std::endl);
+		DEBUGPRINT("Player entity " << itrPlayer.ownerIdAt(ptr_player.index()) << " spawned at " << ptr_position->position.x << " " << ptr_position->position.y << " " << ptr_position->position.z << std::endl);
 	}
 	else //otherwise: spawn at origo.
 	{
 		ptr_position->position = Float3(0.0f, 0.0f, 0.0f);
-		//DEBUGPRINT("No spawn point was found. Player entity " << itrPlayer.ownerId() << " spawned at " << ptr_position->position.x << " " << ptr_position->position.y << " " << ptr_position->position.z << std::endl);
-		//DEBUGPRINT("Player entity spawned at origo" << ptr_position->position.x << " " << ptr_position->position.y << " " << ptr_position->position.z << std::endl);
+		DEBUGPRINT("No spawn point was found. Player entity " << itrPlayer.ownerIdAt(ptr_player.index()) << " spawned at " << ptr_position->position.x << " " << ptr_position->position.y << " " << ptr_position->position.z << std::endl);
 	}
 
 	//--------------------------------------------------------------------------------------
 	// Reset player
 	//--------------------------------------------------------------------------------------
-				
 	//Point camera towards center
 	Float3 pos2d(-ptr_position->position.x, 0.0f, -ptr_position->position.z);
 	if(pos2d.length() > 0.1)
@@ -770,12 +767,15 @@ void GameComponent::spawnPlayer(AttributePtr<Attribute_Player> ptr_player)
 				
 	ptr_health->health = ptr_health->maxHealth; // restores player health
 
-	MutatorSettings ms;
-	for(int i = 0; i < XKILL_Enums::AmmunitionType::NROFAMMUNITIONTYPES; i++)
+	if(ptr_player->detectedAsDead)
 	{
-		for(int j = 0; j < XKILL_Enums::FiringModeType::NROFFIRINGMODETYPES; j++)
+		MutatorSettings ms;
+		for(int i = 0; i < XKILL_Enums::AmmunitionType::NROFAMMUNITIONTYPES; i++)
 		{
-			ms.setupAttribute(ptr_weaponStats, static_cast<XKILL_Enums::AmmunitionType>(i), static_cast<XKILL_Enums::FiringModeType>(j));
+			for(int j = 0; j < XKILL_Enums::FiringModeType::NROFFIRINGMODETYPES; j++)
+			{
+				ms.setupAttribute(ptr_weaponStats, static_cast<XKILL_Enums::AmmunitionType>(i), static_cast<XKILL_Enums::FiringModeType>(j));
+			}
 		}
 	}
 
