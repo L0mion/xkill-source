@@ -3,7 +3,7 @@
 
 Event::Event(EventType type)
 { 
-	this->type = type; 
+	this->type = type;
 }
 
 EventType Event::getType() 
