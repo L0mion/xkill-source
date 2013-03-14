@@ -652,6 +652,7 @@ struct DLL_U Attribute_ExplosionSphere : public IAttribute
 	~Attribute_ExplosionSphere();
 
 	AttributePtr<Attribute_Physics> ptr_physics;
+	float damage;
 	float currentLifeTimeLeft;
 	float currentRadius;							//!< Incremented in ExplosionSpherePhysicsObject::onUpdate
 	XKILL_Enums::AmmunitionType ammunitionType;

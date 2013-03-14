@@ -482,6 +482,7 @@ public:
 
 		CREATE_ATTRIBUTE(ptr_explosionSphere, Attribute_ExplosionSphere, explosionSphere, entity);
 		ptr_explosionSphere->ptr_physics = ptr_physics;
+		ptr_explosionSphere->damage = e->damage;
 		ptr_explosionSphere->ammunitionType = e->ammunitionType;
 		ptr_explosionSphere->firingModeType = e->firingModeType;
 

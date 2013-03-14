@@ -383,7 +383,7 @@ void CollisionManager::collision_projectile(Entity* entity1, Entity* entity2)
 						AttributePtr<Attribute_Position> ptr_projectile_position = ptr_projectile_spatial->ptr_position;
 
 						//Creates an explosion sphere. Init information is taken from the impacting projectile.
-						SEND_EVENT(&Event_CreateExplosionSphere(ptr_projectile_position->position, 1, ptr_projectile->entityIdOfCreator, ptr_projectile->ammunitionType, ptr_projectile->firingModeType));
+						SEND_EVENT(&Event_CreateExplosionSphere(ptr_projectile_position->position, 50, ptr_projectile->entityIdOfCreator, ptr_projectile->ammunitionType, ptr_projectile->firingModeType));
 						break;
 					}
 				default:
@@ -425,6 +425,14 @@ void CollisionManager::collision_playerVsExplosionSphere(Entity* entity1, Entity
 					impulseVector = impulseVector * 3.0f;
 
 					SEND_EVENT(&Event_ModifyPhysicsObject(XKILL_Enums::ModifyPhysicsObjectData::GIVE_IMPULSE, static_cast<void*>(&impulseVector), ptr_player->ptr_input->ptr_physics));
+				}
+
+				std::vector<int> damageID = entity1->getAttributes(ATTRIBUTE_DAMAGE);
+				for(unsigned int i = 0; i < damageID.size(); i++)
+				{
+					AttributePtr<Attribute_Damage> ptr_damage = itrDamage.at(damageID[i]);
+
+					ptr_damage->damage = ptr_explosionSphere->damage * SETTINGS->trueDeltaTime * SETTINGS->timeScale();
 				}
 			}
 		}
