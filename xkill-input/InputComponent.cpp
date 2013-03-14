@@ -172,8 +172,10 @@ void InputComponent::handleInput(float delta)
 
 		input->reload =	device->getBoolPressed(InputAction::ACTION_B_RELOAD);
 
-		//if(!ptr_player->detectedAsDead)
-			//ptr_player-> = device->getBoolValue(InputAction::ACTION_B_SHOW_SCOREBOARD);
+		if(!ptr_player->detectedAsDead)
+		{
+			ptr_player->showScoreboard = device->getBoolValue(InputAction::ACTION_B_SHOW_SCOREBOARD);
+		}
 
 		if(device->getBoolValue(InputAction::ACTION_B_TIME_SPEED_UP))
 		{
