@@ -180,7 +180,6 @@ void ScoreComponent::handleSchedulerMode(float delta)
 
 	while(itrPlayer.hasNext())	// Loop through all players and find if anyone has top priority and if they are alive
 	{
-		//Attribute_Player* player = itrPlayer.getNext();
 		AttributePtr<Attribute_Player> player = itrPlayer.getNext();
 
 		if(player->priority > topPriority)		// Current player had higher priority than last top player

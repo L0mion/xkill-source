@@ -1369,6 +1369,16 @@ void NameGenerator::resetNames()
 	addName("landlord");
 	addName("broken TV");
 	addName("kindergarten gatekeeper");
+	addName("is it just me?");
+	addName("sandsphere");
+	addName("you shoot my banjo");
+	addName("wishbone thundercat");
+	addName("what thundercat?");
+	addName("evening butterfly");
+	addName("jovial reunion");
+	addName("fine printed contract");
+	addName("every other frame");
+	addName("separating axis");
 	
 	//C++ keywords
 	addName("alignas");

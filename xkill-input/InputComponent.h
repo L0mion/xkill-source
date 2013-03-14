@@ -31,6 +31,7 @@ public:
 
 	virtual void onEvent(Event* e);
 	virtual void onUpdate(float delta);
+	void resetMovementInput();
 
 private:
 	InputManager*					inputManager_;
