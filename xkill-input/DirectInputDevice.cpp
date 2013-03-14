@@ -196,10 +196,13 @@ void DirectInputDevice::setStandardMappings()
 	if(buttons_.size() >= 10)
 	{
 		buttons_[0]->addMapping(InputAction::ACTION_B_NEXT_AMMUNITIONTYPE);
-		buttons_[1]->addMapping(InputAction::ACTION_B_NEXT_FIRINGMODE);
-		buttons_[2]->addMapping(InputAction::ACTION_B_JUMP_JETPACK);
-		buttons_[3]->addMapping(InputAction::ACTION_B_KILL_PLAYER);
-		buttons_[8]->addMapping(InputAction::ACTION_B_SPRINT);
+		buttons_[1]->addMapping(InputAction::ACTION_B_PREV_AMMUNITIONTYPE);
+		buttons_[2]->addMapping(InputAction::ACTION_B_RELOAD);
+		buttons_[4]->addMapping(InputAction::ACTION_B_NEXT_FIRINGMODE);
+		buttons_[5]->addMapping(InputAction::ACTION_B_PREV_FIRINGMODE);
+		buttons_[6]->addMapping(InputAction::ACTION_B_JUMP_JETPACK);
+		buttons_[7]->addMapping(InputAction::ACTION_B_SPRINT);
+		buttons_[8]->addMapping(InputAction::ACTION_B_LOW_SENSITIVITY);
 		buttons_[9]->addMapping(InputAction::ACTION_B_FIRE);
 	}
 	else if(buttons_.size() >= 2)
@@ -427,7 +430,7 @@ void DirectInputDevice::createInputObjectsFromLayout(EnumObjectsStruct* eos)
 			button->setName(eos->buttonNames[i]);
 		}
 	}
-
+	 
 	for(int i = 0; i < inputLayout_.nrOfHatSwitches*4; i++)
 	{
 		InputButtonObject* buttons[4];

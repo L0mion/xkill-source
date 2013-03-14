@@ -8,6 +8,7 @@ SkinnedData::SkinnedData()
 {
 	boneHierarchy_	= new std::vector<int>();
 	boneOffsets_	= new std::vector<DirectX::XMFLOAT4X4>();
+	bonePositions_  = new std::vector<DirectX::XMFLOAT3>();
 	animations_		= new std::map<std::string, AnimationClip*>();
 }
 
@@ -18,12 +19,14 @@ SkinnedData::~SkinnedData()
 
 void SkinnedData::set(std::vector<int>*						 boneHierarchy,
 					   std::vector<DirectX::XMFLOAT4X4>*	 boneOffsets,
+					   std::vector<DirectX::XMFLOAT3>*		 bonePositions,
 					   std::map<std::string, AnimationClip*>* animations)
 {
 	unset();
 
 	boneHierarchy_	= boneHierarchy;
 	boneOffsets_	= boneOffsets;
+	bonePositions_	= bonePositions;
 	animations_		= animations;
 }
 
@@ -33,6 +36,8 @@ void SkinnedData::unset()
 		delete boneHierarchy_;
 	if(boneOffsets_)
 		delete boneOffsets_;
+	if(bonePositions_)
+		delete bonePositions_;
 	
 	if(animations_)
 	{
@@ -120,6 +125,10 @@ std::vector<int>* SkinnedData::getBoneHierarchy() const
 std::vector<DirectX::XMFLOAT4X4>* SkinnedData::getBoneOffsets() const
 {
 	return boneOffsets_;
+}
+std::vector<DirectX::XMFLOAT3>* SkinnedData::getBonePositions() const
+{
+	return bonePositions_;
 }
 
 std::map<std::string, AnimationClip*>* SkinnedData::getAnimations() const

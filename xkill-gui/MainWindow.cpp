@@ -132,6 +132,16 @@ void MainWindow::keyPressEvent( QKeyEvent* e )
 			ui.actionCap_FPS->setChecked(false);
 	}
 
+	// Show debug out print
+	if((e->key()==Qt::Key_F5))
+	{
+		SEND_EVENT(&Event(EVENT_TOGGLE_DEBUG_MESSAGES));
+	}
+	if((e->key()==Qt::Key_F6))
+	{
+		SETTINGS->showDebugPhysics = !SETTINGS->showDebugPhysics;
+	}
+
 	if((e->key()==Qt::Key_1))
 	{
 		{Event_PostHudMessage e("Punish them all"); e.receiver = Event_PostHudMessage::RECEIVER_ALL; e.setStyle(Event_PostHudMessage::STYLE_WARNING); SEND_EVENT(&e);}
@@ -209,7 +219,7 @@ void MainWindow::keyPressEvent( QKeyEvent* e )
 	}
 
 	// Inform about key press
-	SEND_EVENT(&Event_KeyPress(e->key(), true));
+	SEND_EVENT(&Event_KeyPress(e->key(), true, (e->key() == Qt::Key::Key_Shift)));
 }
 
 void MainWindow::showMenu()
@@ -256,7 +266,7 @@ void MainWindow::slot_toggleFullScreen()
 void MainWindow::keyReleaseEvent( QKeyEvent* e )
 {
 	// Inform about key release
-	SEND_EVENT(&Event_KeyPress(e->key(), false));
+	SEND_EVENT(&Event_KeyPress(e->key(), false, (e->key() == Qt::Key::Key_Shift)));
 }
 
 void MainWindow::slot_setTitle( QString title )

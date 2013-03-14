@@ -47,6 +47,13 @@ Menu_Main::Menu_Main( QWidget* parent ) : QMainWindow()
 
 
 	//
+	// Setup DeubBillboard
+	//
+
+	billboard.init(this, ui.label_debugMessageTemplate);
+
+
+	//
 	// Setup GUI
 	//
 
@@ -328,10 +335,18 @@ void Menu_Main::onEvent( Event* e )
 			// Refresh additional menu parts
 			ui.horizontalSlider_cycleLimit->setValue(SETTINGS->cycleLimit);
 			ui.horizontalSlider_timeLimit->setValue(SETTINGS->timeLimit);
+			ui.horizontalSlider_executionFrequency->setValue(SETTINGS->schedulerTime);
+			ui.horizontalSlider_priorityToCycleRate->setValue(SETTINGS->cycleTime);
+			ui.horizontalSlider_respawnTime->setValue(SETTINGS->respawnTime);
+			ui.horizontalSlider_nullProcessDuration->setValue(SETTINGS->nullprocessExecutionTime);
+			
 			ui.label_cycleLimit->setNum(ui.horizontalSlider_cycleLimit->value());
 			ui.label_timeLimit->setNum(ui.horizontalSlider_timeLimit->value());
 			ui.label_respawnTime->setNum(ui.horizontalSlider_respawnTime->value());
-			
+			ui.label_executionFrequency->setNum(ui.horizontalSlider_executionFrequency->value());
+			ui.label_priorityToCycleRate->setNum(ui.horizontalSlider_priorityToCycleRate->value());
+			ui.label_nullProcessDuration->setNum(ui.horizontalSlider_nullProcessDuration->value());
+
 			//input_Menu->setSettingsMenu();
 			//sound_Menu->setSettingsMenu();
 
@@ -382,4 +397,75 @@ void Menu_Main::slot_menu_previous_level()
 	levelCurrent--;
 	levelCurrent %= levelNames.size();
 	updateLevelSelectionInterface();
+}
+
+void DebugBillboard::init( QWidget* window, QLabel* labelTemplate )
+{
+	_window = window;
+	_template = labelTemplate;
+	_template->hide();
+	_isHidden = true;
+
+	SUBSCRIBE_TO_EVENT(this, EVENT_POST_DEBUG_MESSAGE);
+	SUBSCRIBE_TO_EVENT(this, EVENT_TOGGLE_DEBUG_MESSAGES);
+}
+
+void DebugBillboard::onEvent( Event* e )
+{
+	EventType type = e->getType();
+	switch (type) 
+	{
+	case EVENT_POST_DEBUG_MESSAGE:
+		{
+			// Ignore messages if hidden
+			
+			{
+				Event_PostDebugMessage* debugMessage = (Event_PostDebugMessage*)(e);
+				int index = debugMessage->index;
+
+				//  Create place for more labels if required
+				while(_messages.size() <= index)
+				{
+					QLabel* l = new QLabel(_window);
+					l->setStyleSheet(_template->styleSheet());
+					_messages.push_back(l);
+
+					if(!_isHidden)
+						l->show();
+				}
+
+				// Add message to label
+				if(!_isHidden)
+				{
+					std::string message = debugMessage->message;
+					QLabel* l = _messages[index];
+					l->setText(message.c_str());
+					l->resize(l->sizeHint());
+					l->move(0, l->height() * index * 1.0f);
+				}
+			}
+		}
+		break;
+	case EVENT_TOGGLE_DEBUG_MESSAGES:
+		{
+			// Toggle
+			_isHidden = !_isHidden;
+
+			// Hide messages
+			if(_isHidden)
+			{
+				for(int i=0; i<_messages.size(); i++)
+					_messages[i]->hide();
+			}
+			// Show messages
+			else
+			{
+				for(int i=0; i<_messages.size(); i++)
+					_messages[i]->show();
+			}
+		}
+		break;
+	default:
+		break;
+	}
 }

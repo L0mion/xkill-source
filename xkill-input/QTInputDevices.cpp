@@ -58,16 +58,21 @@ void QTInputDevices::setStandardMappings()
 		buttons_[4]->addMapping(InputAction::ACTION_B_JUMP_JETPACK);
 		buttons_[5]->addMapping(InputAction::ACTION_B_NEXT_AMMUNITIONTYPE);
 		buttons_[6]->addMapping(InputAction::ACTION_B_NEXT_FIRINGMODE);
-		buttons_[7]->addMapping(InputAction::ACTION_B_KILL_PLAYER);
 		buttons_[9]->addMapping(InputAction::ACTION_B_SPRINT);
 
-		buttons_[15]->addMapping(InputAction::ACTION_B_TIME_SPEED_UP);
-		buttons_[16]->addMapping(InputAction::ACTION_B_TIME_SPEED_DOWN);
-		buttons_[17]->addMapping(InputAction::ACTION_B_RELOAD);
+		buttons_[10]->addMapping(InputAction::ACTION_B_TIME_SPEED_UP);
+		buttons_[11]->addMapping(InputAction::ACTION_B_TIME_SPEED_DOWN);
+		buttons_[12]->addMapping(InputAction::ACTION_B_RELOAD);
+		buttons_[13]->addMapping(InputAction::ACTION_B_PREV_AMMUNITIONTYPE);
+		buttons_[14]->addMapping(InputAction::ACTION_B_PREV_FIRINGMODE);
 
-		mouseButtons_[0]->addMapping(InputAction::ACTION_B_FIRE);
-		mouseButtons_[3]->addMapping(InputAction::ACTION_B_NEXT_FIRINGMODE);
-		mouseButtons_[4]->addMapping(InputAction::ACTION_B_NEXT_AMMUNITIONTYPE);
+		buttons_[15]->addMapping(InputAction::ACTION_B_FIRE);
+		buttons_[18]->addMapping(InputAction::ACTION_B_NEXT_FIRINGMODE);
+		buttons_[19]->addMapping(InputAction::ACTION_B_PREV_FIRINGMODE);
+		buttons_[20]->addMapping(InputAction::ACTION_B_NEXT_AMMUNITIONTYPE);
+		buttons_[21]->addMapping(InputAction::ACTION_B_PREV_AMMUNITIONTYPE);
+
+		buttons_[22]->addMapping(InputAction::ACTION_B_SPRINT);
 	}
 }
 
@@ -110,7 +115,7 @@ void QTInputDevices::updateState()
 void QTInputDevices::createInputLayout()
 {
 	inputLayout_.nrOfHatSwitches = 0;
-	inputLayout_.nrOfButtons = 13 + 5; // 5 = Mouse buttons
+	inputLayout_.nrOfButtons = 16 + 7; // 7 = Mouse buttons
 	inputLayout_.nrOfTriggers = 0;
 	inputLayout_.nrOfAxes = 2;
 }
@@ -150,29 +155,42 @@ void QTInputDevices::createInputObjectsFromLayout()
 		buttons_[7]->setKey('K');
 		buttons_[8]->setKey('F');
 		buttons_[9]->setKey('T');
-		buttons_[15]->setKey(43);
-		buttons_[16]->setKey(45);
-		buttons_[17]->setKey('R');
+		buttons_[10]->setKey(43);
+		buttons_[11]->setKey(45);
+		buttons_[12]->setKey('R');
+		buttons_[13]->setKey('Z');
+		buttons_[14]->setKey('C');
 
-		buttons_[10]->setKey('Ü');	//Fix
-		buttons_[10]->setName("Left mouse button");
-		mouseButtons_.push_back(buttons_[10]);
+		buttons_[15]->setKey('Ü');	//Fix
+		buttons_[15]->setName("Left mouse button");
+		mouseButtons_.push_back(buttons_[15]);
 
-		buttons_[11]->setKey('Û');
-		buttons_[11]->setName("Right mouse button");
-		mouseButtons_.push_back(buttons_[11]);
+		buttons_[16]->setKey('Û');
+		buttons_[16]->setName("Right mouse button");
+		mouseButtons_.push_back(buttons_[16]);
 
-		buttons_[12]->setKey('ÿ');
-		buttons_[12]->setName("Middle mouse button");
-		mouseButtons_.push_back(buttons_[12]);
+		buttons_[17]->setKey('ÿ');
+		buttons_[17]->setName("Middle mouse button");
+		mouseButtons_.push_back(buttons_[17]);
 
-		buttons_[13]->setKey('ï');
-		buttons_[13]->setName("Mouse button 4");
-		mouseButtons_.push_back(buttons_[13]);
+		buttons_[18]->setKey('ï');
+		buttons_[18]->setName("Mouse button 4");
+		mouseButtons_.push_back(buttons_[18]);
 
-		buttons_[14]->setKey('î');
-		buttons_[14]->setName("Mouse button 5");
-		mouseButtons_.push_back(buttons_[14]);
+		buttons_[19]->setKey('î');
+		buttons_[19]->setName("Mouse button 5");
+		mouseButtons_.push_back(buttons_[19]);
+
+		buttons_[20]->setKey('â');
+		buttons_[20]->setName("Mouse scroll up");
+		mouseButtons_.push_back(buttons_[20]);
+
+		buttons_[21]->setKey('ô');
+		buttons_[21]->setName("Mouse scroll down");
+		mouseButtons_.push_back(buttons_[21]);
+
+		buttons_[22]->setKey('é');
+		buttons_[22]->setName("Shift");
 	}
 }
 
@@ -197,7 +215,7 @@ void QTInputDevices::setButton(char key, bool value)
 
 void QTInputDevices::setMouseButton(unsigned int nr, bool value)
 {
-	for(int i = 0; i < 5; i++)
+	for(unsigned int i = 0; i < mouseButtons_.size(); i++)
 	{
 		if(static_cast<int>(std::pow(2, i)) & nr)
 		{
@@ -218,6 +236,14 @@ void QTInputDevices::updateButtons()
 {
 	for(unsigned int i = 0; i < buttons_.size(); i++)
 		buttons_[i]->SetValue(buttons_[i]->isDown());
+}
+
+void QTInputDevices::updateScroll() // Shouldn't hard code the scroll indices
+{
+	if(buttons_[20]->isDown() && !buttons_[20]->isPressed())
+		buttons_[20]->SetValue(false, false);
+	if(buttons_[21]->isDown() && !buttons_[21]->isPressed())
+		buttons_[21]->SetValue(false, false);
 }
 
 InputButtonObject* QTInputDevices::getButtonObject(unsigned int index)

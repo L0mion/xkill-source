@@ -57,6 +57,8 @@ enum DLL_U EventType
 	EVENT_GAMERESET,
 
 	// System
+	EVENT_TOGGLE_DEBUG_MESSAGES,
+	EVENT_POST_DEBUG_MESSAGE,
 	EVENT_ATTRIBUTE_UPDATED,
 	EVENT_UPDATESOUNDSETTINGS,
 	EVENT_DRAW_BULLET_PHYSICS_DEBUG_LINES,
@@ -100,6 +102,7 @@ enum DLL_U EventType
 	EVENT_POST_HUD_MESSAGE,
 	EVENT_NULL_PROCESS_STARTED_EXECUTING,
 	EVENT_NULL_PROCESS_STOPPED_EXECUTING,
+	EVENT_SPAWN_PLAYER,
 
 	// Creation/Destruction
 	EVENT_TRANSFER_EVENTS_TO_GAME,
@@ -173,6 +176,19 @@ public:
 	bool on;
 };
 
+class DLL_U Event_PostDebugMessage : public Event
+{
+public:
+	Event_PostDebugMessage(int index, std::string message) : Event(EVENT_POST_DEBUG_MESSAGE)
+	{
+		this->index = index;
+		this->message = message;
+	}
+
+	int index;
+	std::string message;
+};
+
 class DLL_U Event_PlayerTargetHit : public Event
 {
 public:
@@ -214,11 +230,13 @@ public:
 	Event_PostHudMessage(std::string message, AttributePtr<Attribute_Player> ptr_subject_player = AttributePtr<Attribute_Player>() );
 	void setStyle(Style style);
 	void setHtmlMessage(std::string prefex, std::string subject = "", std::string suffix = "", std::string description = "");
+	void setColor(Float3 color);
 
 	Receiver receiver;
 	std::string message;
 	AttributePtr<Attribute_Player> ptr_subject_player;
 	std::string styleSheet;
+	Float4 color;
 };
 
 /**
@@ -455,8 +473,9 @@ class DLL_U Event_KeyPress : public Event
 public:
 	int keyEnum;
 	bool isPressed;
+	bool shiftModifier;
 
-	Event_KeyPress(int keyEnum, bool isPressed);
+	Event_KeyPress(int keyEnum, bool isPressed, bool shiftModifier);
 };
 
 /// Alerts InputComponent about mouse press
@@ -774,4 +793,12 @@ public:
 	Event_ReloadPhysicsAttributeDataIntoBulletPhysics(int physicsAttributeId);
 
 	int physicsAttributeId;
+};
+
+class DLL_U Event_SpawnPlayer : public Event
+{
+public:
+	Event_SpawnPlayer(int playerAttributeId);
+
+	int playerAttributeId;
 };

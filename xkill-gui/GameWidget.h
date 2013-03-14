@@ -9,6 +9,7 @@
 #include <xkill-architecture/GameManager.h>
 #include <xkill-utilities/IObserver.h>
 #include <xkill-utilities/Util.h>
+#include <xkill-utilities/StopWatch.h>
 
 #include "ui_MainWindow.h"
 #include "GameTimer.h"
@@ -248,6 +249,10 @@ private:
 
 			// send signal
 			emit signal_fpsChanged(stats);
+			static int debugId = StopWatch::getUniqueId();
+			SEND_EVENT(&Event_PostDebugMessage(debugId, "Total: " + Converter::IntToStr(fps) + " (fps)"));
+
+		
 
 			// reset stats for next average.
 			num_frames = 0;

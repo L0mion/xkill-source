@@ -425,13 +425,6 @@ void PhysicsComponent::handleEvent_ClosestRayCast(Event_ClosestHitRayCast* event
 	}
 }
 
-struct sort_mapHitPointToEntityId
-{
-    bool operator()(std::pair<Float3, int> &left, std::pair<Float3, int> &right)
-	{
-        return left.first < right.first;
-    }
-};
 void PhysicsComponent::handleEvent_AllHitsRayCast(Event_AllHitsRayCast* event_AllHitsRayCast)
 {
 	btVector3 from = convert(event_AllHitsRayCast->from);
@@ -458,10 +451,6 @@ void PhysicsComponent::handleEvent_AllHitsRayCast(Event_AllHitsRayCast* event_Al
 
 		event_AllHitsRayCast->mapHitPointToEntityId.push_back(std::pair<Float3, int>(hitPoint, entityId));
 	}
-	//--------------------------------------------------------------------------------------
-	// Sort mapHitPointToEntityId so that the closer hitpoint has lower vector indices
-	//--------------------------------------------------------------------------------------
-	std::sort(event_AllHitsRayCast->mapHitPointToEntityId.begin(), event_AllHitsRayCast->mapHitPointToEntityId.end(), sort_mapHitPointToEntityId());
 }
 
 void PhysicsComponent::synchronizeWithAttributes(AttributePtr<Attribute_Physics> ptr_physics, int physicsAttributeIndex)
