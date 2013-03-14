@@ -492,7 +492,7 @@ struct DLL_U Attribute_Player : public IAttribute
 	float sprintRechargeRate;				//!< The rate at which the sprint will recharge
 	Timer respawnTimer;						//!< Keeps track of when a dead player should respawn
 	float timeSinceLastDamageTaken;			//!< Incrementing timer. Reset when taking damage.
-	bool jetpack;							//!< Use jetpack		
+	bool jetpack;							//!< Use jetpack
 	bool detectedAsDead;					//!< The player is dead
 	bool executing;							//!< True if selected by the scheduler (ScoreComponent.cpp)
 	bool hovering;							//!< The player is in a stable hover and not falling or jumping or using jetpack

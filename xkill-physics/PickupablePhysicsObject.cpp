@@ -1,7 +1,6 @@
 #include "PickupablePhysicsObject.h"
 #include "btBulletDynamicsCommon.h"
 
-//#include <xkill-utilities\Util.h>//check temp
 #include <xkill-utilities/AttributeManager.h>
 #include "physicsUtilities.h"
 
