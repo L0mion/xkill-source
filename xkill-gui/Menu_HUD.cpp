@@ -322,6 +322,13 @@ void Menu_HUD::refresh()
 				hudMessage_manager.silenceAllMessages();
 				ui.frame_scoreboard->show();
 				ptr_player->isScoreBoardVisible = true;
+
+				// Hide aim
+				if(!ui.label_aim->isHidden())
+				{
+					ui.label_aim->hide();
+					ui.label_firingMode->hide();
+				}
 			}
 		}
 	}
@@ -335,6 +342,13 @@ void Menu_HUD::refresh()
 		{
 			ui.frame_scoreboard->hide();
 			ptr_player->isScoreBoardVisible = false;
+
+			// Show aim if it was hidden
+			if(ui.label_aim->isHidden())
+			{
+				ui.label_aim->show();
+				ui.label_firingMode->show();
+			}
 		}
 	}
 
