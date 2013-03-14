@@ -1142,14 +1142,14 @@ void GameComponent::updateAndInterpretLaser(AttributePtr<Attribute_Ray> ptr_ray,
 					if(ptr_player->cycleHackPair.first)
 					{
 						ptr_player->cycles++;
-						{Event_PostHudMessage e("", ptr_player); e.setColor(hitPlayerAttribute->avatarColor); e.setHtmlMessage("You exterminated", hitPlayerAttribute->avatarName, "", "+1 cycle"); SEND_EVENT(&e);}
+						{Event_PostHudMessage e("", ptr_player); e.setColor(hitPlayerAttribute->avatarColor); e.setHtmlMessage("You executed", hitPlayerAttribute->avatarName, "", "+1 cycle"); SEND_EVENT(&e);}
 					}
 					else
 					{
 						ptr_player->priority++;
-						{Event_PostHudMessage e("", ptr_player); e.setColor(hitPlayerAttribute->avatarColor); e.setHtmlMessage("You exterminated", hitPlayerAttribute->avatarName, "", "+1 priority"); SEND_EVENT(&e);}
+						{Event_PostHudMessage e("", ptr_player); e.setColor(hitPlayerAttribute->avatarColor); e.setHtmlMessage("You executed", hitPlayerAttribute->avatarName, "", "+1 priority"); SEND_EVENT(&e);}
 					}
-					{Event_PostHudMessage e("", hitPlayerAttribute); e.setColor(ptr_player->avatarColor); e.setHtmlMessage("Terminated by", ptr_player->avatarName); SEND_EVENT(&e);}
+					{Event_PostHudMessage e("", hitPlayerAttribute); e.setColor(ptr_player->avatarColor); e.setHtmlMessage("Executed by", ptr_player->avatarName); SEND_EVENT(&e);}
 
 					SEND_EVENT(&Event_PlayerDeath(playerHitByRayAttributeId.at(j)));
 				}
