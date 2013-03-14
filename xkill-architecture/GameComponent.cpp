@@ -48,8 +48,6 @@ bool GameComponent::init()
 
 	srand((unsigned)time(NULL));
 
-	nullProcessExecuting = false;
-	
 	return true;
 }
 
@@ -83,10 +81,10 @@ void GameComponent::onEvent(Event* e)
 		event_UnloadLevel();
 		break;
 	case EVENT_NULL_PROCESS_STARTED_EXECUTING:
-		nullProcessExecuting = true;
+		SETTINGS->isNullprocessExecuting = true;
 		break;
 	case EVENT_NULL_PROCESS_STOPPED_EXECUTING:
-		nullProcessExecuting = false;
+		SETTINGS->isNullprocessExecuting = false;
 
 		//Reset pickupables
 		while(itrPickupable.hasNext())
@@ -284,7 +282,7 @@ void GameComponent::onUpdate(float delta)
 	// Drop random world pieces
 	//--------------------------------------------------------------------------------------
 	std::vector<int> worldPiecesIndices;
-	if(nullProcessExecuting)
+	if(SETTINGS->isNullprocessExecuting)
 	{
 		//--------------------------------------------------------------------------------------
 		// Find all world physics objects
@@ -532,14 +530,14 @@ void GameComponent::updatePlayerAttributes(float delta)
 			//--------------------------------------------------------------------------------------
 			// Respawn player
 			//--------------------------------------------------------------------------------------
-			else if(!nullProcessExecuting)
+			else if(!SETTINGS->isNullprocessExecuting)
 			{
 				spawnPlayer(ptr_player);
 			}
 		}
 
 		//--------------------------------------------------------------------------------------
-		// Respawn player
+		// Respawn player when player pressed fire button when dead and the scoreboard is visible
 		//--------------------------------------------------------------------------------------
 		if(ptr_input->firePressed && ptr_player->detectedAsDead && ptr_player->isScoreBoardVisible)
 		{
@@ -897,6 +895,13 @@ void GameComponent::event_UnloadLevel()
 	{
 		SAFE_DELETE(*it);
 	}
+
+	//while(itrPlayerSpawnPoint.hasNext()) //check
+	//{
+	//	AttributePtr<Attribute_PlayerSpawnPoint> ptr_spawnPoint	= itrPlayerSpawnPoint.getNext();
+	//	SEND_EVENT(&Event_RemoveEntity(itrProjectile.ownerId()));
+	//}
+
 	/*while(itrMesh.hasNext())
 	{
 		itrMesh.getNext();

@@ -1343,7 +1343,17 @@ void NameGenerator::resetNames()
 	addName("evil inside");
 	addName("poor Yorick");
 	addName("he's back");
+	addName("the missing link");
+	addName("Dr. Moreau");
+	addName("brain in a jar");
 	addName("Wintermute");
+
+	addName("inexpensive payback time");
+	addName("better safe than gory");
+	addName("open time window");
+	addName("update frequency");
+	addName("translation of incubation");
+	addName("90 degree rotation");
 	
 	//C++ keywords
 	addName("alignas");
