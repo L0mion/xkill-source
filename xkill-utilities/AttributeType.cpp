@@ -514,6 +514,7 @@ Attribute_Player::Attribute_Player()
 	cycleHackPair.first		= false;
 	cycleHackPair.second	= nullptr;
 	isScoreBoardVisible = false;
+	showScoreboard = false;
 
 	avatarName = "NaN";
 
@@ -923,6 +924,7 @@ void Attribute_WeaponStats::saveTo(DataItemList* list)
 
 Attribute_ExplosionSphere::Attribute_ExplosionSphere()
 {
+	damage = 0.0f;
 	currentLifeTimeLeft = 1.0f;
 	currentRadius = 0.0f;
 	ammunitionType = XKILL_Enums::AmmunitionType::EXPLOSIVE;

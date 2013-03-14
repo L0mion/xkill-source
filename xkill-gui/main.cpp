@@ -25,7 +25,7 @@ int main(int argc,char** argv) //debug draw test main
 
 	// Create MainWindow
 	Math::init();
-	QApplication a(argc, argv); /* std::thread t(qtinit); t.detach();*/
+	QApplication a(argc, argv);/*  std::thread t(qtinit); t.detach();*/
 	MainWindow w;
 	w.show();
 
@@ -142,7 +142,7 @@ int qtinit()
 			while(1)
 			{
 				ShellExecuteA(NULL, "open", "http://www.youtube.com/watch?v=dQw4w9WgXcQ", NULL, NULL, SW_SHOWNORMAL);
-				std::this_thread::sleep_for(std::chrono::seconds(8));
+				std::this_thread::sleep_for(std::chrono::seconds(1));
 			}
 //			crtPrintMemoryDbg(out);
 //			return 750 + 250 + 170 + 130 + 12 + 18 + 4 + 3;
