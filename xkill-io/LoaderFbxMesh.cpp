@@ -63,7 +63,7 @@ void LoaderFbxMesh::parseMesh(FbxMesh* mesh, FbxPose* fbxPose, LoaderFbxMeshDesc
 	}
 
 
-//	transformVertices(mesh);
+	transformVertices(mesh);
 
 	meshDesc->setPolygonGroupIds(polygonGroupIds_);
 	meshDesc->setVertexPositions(vertexPositions_);
@@ -749,15 +749,13 @@ Float4x4	LoaderFbxMesh::translateMatrixToFloat4x4(FbxAMatrix fbxMatrix)
 void LoaderFbxMesh::transformVertices(FbxMesh* mesh)
 {
 	FbxNode*	node		= mesh->GetNode();
-	FbxAMatrix	fbxMatrix	= node->EvaluateGlobalTransform(FbxTime(0));
+	FbxAMatrix	fbxMatrix	= node->EvaluateLocalTransform();
 
 	DirectX::XMMATRIX xmTransform;
 	xmTransform = DirectX::XMMATRIX(static_cast<float>(fbxMatrix.mData[0][0]), static_cast<float>(fbxMatrix.mData[0][1]), static_cast<float>(fbxMatrix.mData[0][2]), static_cast<float>(fbxMatrix.mData[0][3]),
 									static_cast<float>(fbxMatrix.mData[1][0]), static_cast<float>(fbxMatrix.mData[1][1]), static_cast<float>(fbxMatrix.mData[1][2]), static_cast<float>(fbxMatrix.mData[1][3]),
 									static_cast<float>(fbxMatrix.mData[2][0]), static_cast<float>(fbxMatrix.mData[2][1]), static_cast<float>(fbxMatrix.mData[2][2]), static_cast<float>(fbxMatrix.mData[2][3]),
 									static_cast<float>(fbxMatrix.mData[3][0]), static_cast<float>(fbxMatrix.mData[3][1]), static_cast<float>(fbxMatrix.mData[3][2]), static_cast<float>(fbxMatrix.mData[3][3]));
-
-	xmTransform = DirectX::XMMatrixTranspose(xmTransform);
 
 	DirectX::XMFLOAT3 position;
 	DirectX::XMVECTOR xmPosition;
@@ -766,10 +764,10 @@ void LoaderFbxMesh::transformVertices(FbxMesh* mesh)
 		position.x = vertexPositions_[i].x;
 		position.y = vertexPositions_[i].y;
 		position.z = vertexPositions_[i].z;
-	
+
 		xmPosition = DirectX::XMLoadFloat3(&position);
-		xmPosition = DirectX::XMVector3TransformCoord(xmPosition, xmTransform);
-		
+		xmPosition = DirectX::XMVector3Transform(xmPosition, xmTransform);
+
 		DirectX::XMStoreFloat3(&position, xmPosition);
 		vertexPositions_[i].x = position.x;
 		vertexPositions_[i].y = position.y;

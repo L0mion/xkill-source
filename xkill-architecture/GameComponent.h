@@ -27,7 +27,6 @@ class GameComponent :
 private:
 	std::vector<Entity>* allEntity; //check
 	std::vector<Event*> levelEvents_;
-	bool nullProcessExecuting;
 
 public:
 	GameComponent(void);
@@ -100,6 +99,7 @@ public:
 	If there exists no player spawn points at all, nullptr is returned.
 	*/
 	AttributePtr<Attribute_PlayerSpawnPoint> findUnoccupiedSpawnPoint();
+	void spawnPlayer(AttributePtr<Attribute_Player> ptr_player);
 
 	bool switchAmmunition(AttributePtr<Attribute_WeaponStats> ptr_weaponStats, int nrOfStepsToSwitch);
 	bool switchFiringMode(AttributePtr<Attribute_WeaponStats> ptr_weaponStats, int nrOfStepsToSwitch);

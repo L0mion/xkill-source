@@ -26,6 +26,7 @@ GameComponent::GameComponent(void)
 	SUBSCRIBE_TO_EVENT(this, EVENT_UNLOAD_LEVEL);
 	SUBSCRIBE_TO_EVENT(this, EVENT_NULL_PROCESS_STARTED_EXECUTING);
 	SUBSCRIBE_TO_EVENT(this, EVENT_NULL_PROCESS_STOPPED_EXECUTING);
+	SUBSCRIBE_TO_EVENT(this, EVENT_SPAWN_PLAYER);
 }
 
 GameComponent::~GameComponent(void)
@@ -47,8 +48,6 @@ bool GameComponent::init()
 
 	srand((unsigned)time(NULL));
 
-	nullProcessExecuting = false;
-	
 	return true;
 }
 
@@ -82,18 +81,25 @@ void GameComponent::onEvent(Event* e)
 		event_UnloadLevel();
 		break;
 	case EVENT_NULL_PROCESS_STARTED_EXECUTING:
-		nullProcessExecuting = true;
+		SETTINGS->isNullprocessExecuting = true;
 		break;
 	case EVENT_NULL_PROCESS_STOPPED_EXECUTING:
-		nullProcessExecuting = false;
+		SETTINGS->isNullprocessExecuting = false;
 
-		//check lunch
+		//Reset pickupables
 		while(itrPickupable.hasNext())
 		{
 			AttributePtr<Attribute_Pickupable> ptr_pickupable = itrPickupable.getNext();
 			CollisionManager::Instance()->removePickupable(ptr_pickupable);
 		}
 		break;
+	case EVENT_SPAWN_PLAYER:
+		{
+			Event_SpawnPlayer* event_SpawnPlayer = static_cast<Event_SpawnPlayer*>(e);
+			int playerAttributeId = event_SpawnPlayer->playerAttributeId;
+			spawnPlayer(itrPlayer.at(playerAttributeId));
+			break;
+		}
 	default:
 		break;
 	}
@@ -276,7 +282,7 @@ void GameComponent::onUpdate(float delta)
 	// Drop random world pieces
 	//--------------------------------------------------------------------------------------
 	std::vector<int> worldPiecesIndices;
-	if(nullProcessExecuting)
+	if(SETTINGS->isNullprocessExecuting)
 	{
 		//--------------------------------------------------------------------------------------
 		// Find all world physics objects
@@ -524,79 +530,14 @@ void GameComponent::updatePlayerAttributes(float delta)
 			//--------------------------------------------------------------------------------------
 			// Respawn player
 			//--------------------------------------------------------------------------------------
-			else if(!nullProcessExecuting)
+			else if(!SETTINGS->isNullprocessExecuting)
 			{
-				//--------------------------------------------------------------------------------------
-				// Spawn point
-				//--------------------------------------------------------------------------------------
-				AttributePtr<Attribute_PlayerSpawnPoint> ptr_spawnPoint = findUnoccupiedSpawnPoint();
-				if(ptr_spawnPoint.isValid()) //If an appropriate spawnpoint was found: spawn at it
-				{
-					AttributePtr<Attribute_Position> ptr_spawnPoint_position = ptr_spawnPoint->ptr_position;
-					ptr_position->position = ptr_spawnPoint_position->position; // set player position attribute
-					DEBUGPRINT("Player entity " << itrPlayer.ownerId() << " spawned at " << ptr_position->position.x << " " << ptr_position->position.y << " " << ptr_position->position.z << std::endl);
-				}
-				else //otherwise: spawn at origo.
-				{
-					ptr_position->position = Float3(0.0f, 0.0f, 0.0f);
-					DEBUGPRINT("No spawn point was found. Player entity " << itrPlayer.ownerId() << " spawned at " << ptr_position->position.x << " " << ptr_position->position.y << " " << ptr_position->position.z << std::endl);
-				}
-
-				//--------------------------------------------------------------------------------------
-				// Reset player
-				//--------------------------------------------------------------------------------------
-				
-				//Point camera towards center
-				Float3 pos2d(-ptr_position->position.x, 0.0f, -ptr_position->position.z);
-				if(pos2d.length() > 0.1)
-				{
-					ptr_camera->up = Float3(0.0f, 1.0f, 0.0f);
-					ptr_camera->look = Float3(-ptr_position->position.x, 0.0f, -ptr_position->position.z).normalize();
-					ptr_camera->right = ptr_camera->up.cross(ptr_camera->look);
-				
-					DirectX::XMVECTOR eye,lookat,up,quat;
-					DirectX::XMMATRIX rotation;
-					DirectX::XMFLOAT4 quaternion;
-				
-					up = DirectX::XMLoadFloat3(&DirectX::XMFLOAT3(0,1,0));
-					eye = DirectX::XMLoadFloat3(&DirectX::XMFLOAT3(ptr_position->position.asFloat()));
-					lookat = DirectX::XMLoadFloat3(&DirectX::XMFLOAT3(0,0,0));
-				
-					rotation = DirectX::XMMatrixLookAtLH(eye,lookat,up);
-					quat = DirectX::XMQuaternionRotationMatrix(rotation);
-					DirectX::XMStoreFloat4(&quaternion,quat);
-
-					ptr_spatial->rotation = Float4(quaternion.x,quaternion.y,quaternion.z,quaternion.w);
-				}
-				else
-				{
-					ptr_spatial->rotation = Float4(0.0f, 0.0f, 0.0f, 1.0f);
-					ptr_camera->up = Float3(0.0f, 1.0f, 0.0f);
-					ptr_camera->right = Float3(1.0f, 0.0f, 0.0f);
-					ptr_camera->look = Float3(0.0f, 0.0f, 1.0f);
-				}
-				ptr_physics->reloadDataIntoBulletPhysics = true;
-				
-				ptr_health->health = ptr_health->maxHealth; // restores player health
-
-				MutatorSettings ms;
-				for(int i = 0; i < XKILL_Enums::AmmunitionType::NROFAMMUNITIONTYPES; i++)
-				{
-					for(int j = 0; j < XKILL_Enums::FiringModeType::NROFFIRINGMODETYPES; j++)
-					{
-						ms.setupAttribute(ptr_weaponStats, static_cast<XKILL_Enums::AmmunitionType>(i), static_cast<XKILL_Enums::FiringModeType>(j));
-					}
-				}
-
-				ptr_player->ptr_camera->fieldOfView = 3.14f/4.0f;
-				ptr_player->respawnTimer.resetTimer();
-				ptr_player->detectedAsDead = false;
-				SEND_EVENT(&Event_PlaySound(XKILL_Enums::Sound::SOUND_RESPAWN, itrPlayer.ownerIdAt(ptr_player.index()), ptr_position->position, true));
+				spawnPlayer(ptr_player);
 			}
 		}
 
 		//--------------------------------------------------------------------------------------
-		// Respawn player
+		// Respawn player when player pressed fire button when dead and the scoreboard is visible
 		//--------------------------------------------------------------------------------------
 		if(ptr_input->firePressed && ptr_player->detectedAsDead && ptr_player->isScoreBoardVisible)
 		{
@@ -768,6 +709,88 @@ AttributePtr<Attribute_PlayerSpawnPoint> GameComponent::findUnoccupiedSpawnPoint
 	return ptr_found_spawnPoint;
 }
 
+void GameComponent::spawnPlayer(AttributePtr<Attribute_Player> ptr_player)
+{
+	AttributePtr<Attribute_Health>			ptr_health		=	ptr_player	->	ptr_health		;
+	AttributePtr<Attribute_Camera>			ptr_camera		=	ptr_player	->	ptr_camera		;
+	AttributePtr<Attribute_Input>			ptr_input		=	ptr_player	->	ptr_input		;
+	AttributePtr<Attribute_Render>			ptr_render		=	ptr_player	->	ptr_render		;
+	AttributePtr<Attribute_WeaponStats>		ptr_weaponStats	=	ptr_player	->	ptr_weaponStats	;
+	AttributePtr<Attribute_Spatial>			ptr_spatial		=	ptr_render	->	ptr_spatial		;
+	AttributePtr<Attribute_Position>		ptr_position	=	ptr_spatial	->	ptr_position	;
+	AttributePtr<Attribute_Physics>			ptr_physics		=	ptr_input	->	ptr_physics		;
+
+	//--------------------------------------------------------------------------------------
+	// Spawn point
+	//--------------------------------------------------------------------------------------
+	AttributePtr<Attribute_PlayerSpawnPoint> ptr_spawnPoint = findUnoccupiedSpawnPoint();
+	if(ptr_spawnPoint.isValid()) //If an appropriate spawnpoint was found: spawn at it
+	{
+		AttributePtr<Attribute_Position> ptr_spawnPoint_position = ptr_spawnPoint->ptr_position;
+		ptr_position->position = ptr_spawnPoint_position->position; // set player position attribute
+		DEBUGPRINT("Player entity " << itrPlayer.ownerIdAt(ptr_player.index()) << " spawned at " << ptr_position->position.x << " " << ptr_position->position.y << " " << ptr_position->position.z << std::endl);
+	}
+	else //otherwise: spawn at origo.
+	{
+		ptr_position->position = Float3(0.0f, 0.0f, 0.0f);
+		DEBUGPRINT("No spawn point was found. Player entity " << itrPlayer.ownerId() << " spawned at " << ptr_position->position.x << " " << ptr_position->position.y << " " << ptr_position->position.z << std::endl);
+	}
+
+	//--------------------------------------------------------------------------------------
+	// Reset player
+	//--------------------------------------------------------------------------------------
+				
+	//Point camera towards center
+	Float3 pos2d(-ptr_position->position.x, 0.0f, -ptr_position->position.z);
+	if(pos2d.length() > 0.1)
+	{
+		ptr_camera->up = Float3(0.0f, 1.0f, 0.0f);
+		ptr_camera->look = Float3(-ptr_position->position.x, 0.0f, -ptr_position->position.z).normalize();
+		ptr_camera->right = ptr_camera->up.cross(ptr_camera->look);
+				
+		DirectX::XMVECTOR eye,lookat,up,quat;
+		DirectX::XMMATRIX rotation;
+		DirectX::XMFLOAT4 quaternion;
+				
+		up = DirectX::XMLoadFloat3(&DirectX::XMFLOAT3(0,1,0));
+		eye = DirectX::XMLoadFloat3(&DirectX::XMFLOAT3(ptr_position->position.asFloat()));
+		lookat = DirectX::XMLoadFloat3(&DirectX::XMFLOAT3(0,0,0));
+				
+		rotation = DirectX::XMMatrixLookAtLH(eye,lookat,up);
+		quat = DirectX::XMQuaternionRotationMatrix(rotation);
+		DirectX::XMStoreFloat4(&quaternion,quat);
+
+		ptr_spatial->rotation = Float4(quaternion.x,quaternion.y,quaternion.z,quaternion.w);
+	}
+	else
+	{
+		ptr_spatial->rotation = Float4(0.0f, 0.0f, 0.0f, 1.0f);
+		ptr_camera->up = Float3(0.0f, 1.0f, 0.0f);
+		ptr_camera->right = Float3(1.0f, 0.0f, 0.0f);
+		ptr_camera->look = Float3(0.0f, 0.0f, 1.0f);
+	}
+	ptr_physics->reloadDataIntoBulletPhysics = true;
+				
+	ptr_health->health = ptr_health->maxHealth; // restores player health
+
+	if(ptr_player->detectedAsDead)
+	{
+		MutatorSettings ms;
+		for(int i = 0; i < XKILL_Enums::AmmunitionType::NROFAMMUNITIONTYPES; i++)
+		{
+			for(int j = 0; j < XKILL_Enums::FiringModeType::NROFFIRINGMODETYPES; j++)
+			{
+				ms.setupAttribute(ptr_weaponStats, static_cast<XKILL_Enums::AmmunitionType>(i), static_cast<XKILL_Enums::FiringModeType>(j));
+			}
+		}
+	}
+
+	ptr_player->ptr_camera->fieldOfView = 3.14f/4.0f;
+	ptr_player->respawnTimer.resetTimer();
+	ptr_player->detectedAsDead = false;
+	SEND_EVENT(&Event_PlaySound(XKILL_Enums::Sound::SOUND_RESPAWN, itrPlayer.ownerIdAt(ptr_player.index()), ptr_position->position, true));
+}
+
 void GameComponent::event_StartDeathmatch( Event_StartDeathmatch* e )
 {
 	//while(itrPickupablesSpawnPoint.hasNext())
@@ -846,6 +869,12 @@ void GameComponent::event_PlayerDeath(Event_PlayerDeath* e)
 	{
 		SEND_EVENT(&Event_StopSound(XKILL_Enums::Sound::SOUND_LASER, itrPlayer.ownerIdAt(e->playerAttributeIndex)));
 		ptr_player->executing = false;
+	
+		std::vector<int> rayId = itrPlayer.ownerAt(ptr_player.index())->getAttributes(ATTRIBUTE_RAY);
+		for(unsigned int i = 0; i < rayId.size(); i++)
+		{
+			itrRay.at(rayId[i])->ptr_render->culling.clear();
+		}
 	}
 	if(ptr_player->jetHackPair.first)
 	{
@@ -869,6 +898,13 @@ void GameComponent::event_UnloadLevel()
 	{
 		SAFE_DELETE(*it);
 	}
+
+	//while(itrPlayerSpawnPoint.hasNext()) //check
+	//{
+	//	AttributePtr<Attribute_PlayerSpawnPoint> ptr_spawnPoint	= itrPlayerSpawnPoint.getNext();
+	//	SEND_EVENT(&Event_RemoveEntity(itrProjectile.ownerId()));
+	//}
+
 	/*while(itrMesh.hasNext())
 	{
 		itrMesh.getNext();
@@ -974,20 +1010,21 @@ void GameComponent::updateAndInterpretAimingRay(Entity* rayCastingPlayerEntity, 
 	int nrOfHits = event_AllHitsRayCast.mapHitPointToEntityId.size();
 	if(nrOfHits > 0) //If ray hit something
 	{
+		Float3 closestHit = rayDestination;
 		int hitEntityId = 0;
 		for(int i=0;i<nrOfHits;i++)
 		{
 			hitEntityId = event_AllHitsRayCast.mapHitPointToEntityId.at(i).second;
-			if(hitEntityId == rayCastingPlayerEntity->getID())
+
+			Float3 v1 = event_AllHitsRayCast.from - event_AllHitsRayCast.mapHitPointToEntityId.at(i).first;
+			Float3 v2 = event_AllHitsRayCast.from - closestHit;
+
+			if(v1.length() < v2.length() && hitEntityId != rayCastingPlayerEntity->getID())
 			{
-				continue; //If player hit himself, take next hit point
+				closestHit = event_AllHitsRayCast.mapHitPointToEntityId.at(i).first;
 			}
-			else
-			{
-				hitPoint = event_AllHitsRayCast.mapHitPointToEntityId.at(i).first;
-				entityHitByRay = &allEntity->at(hitEntityId);
-				break; //Valid hit point found
-			}
+
+			hitPoint = closestHit;
 		}
 	}
 	else //If ray did not hit anything, set hitpoint to camera look far plane z
@@ -1054,6 +1091,7 @@ void GameComponent::updateAndInterpretAimingRay(Entity* rayCastingPlayerEntity, 
 			else
 			{
 				ray->ptr_render->culling.clear();
+
 				//entityHitByRay might be used here (2013-02-28 17.24)
 			}
 		}
@@ -1095,6 +1133,7 @@ void GameComponent::updateAndInterpretLaser(AttributePtr<Attribute_Ray> ptr_ray,
 	laserRotation = laserRotation.quaternionLookAt(closestHitPoint, ptr_ray->from);
 	laserRotation.normalize();
 
+	//ptr_ray->ptr_render->ptr_spatial->rotation = ptr_player->ptr_weapon_offset->ptr_spatial->rotation;
 	ptr_ray->ptr_render->ptr_spatial->rotation = laserRotation.quaternionInverse();
 
 	std::vector<int> playerHitByRayAttributeId = entityHitByRay->getAttributes(ATTRIBUTE_PLAYER);
@@ -1115,14 +1154,14 @@ void GameComponent::updateAndInterpretLaser(AttributePtr<Attribute_Ray> ptr_ray,
 					if(ptr_player->cycleHackPair.first)
 					{
 						ptr_player->cycles++;
-						{Event_PostHudMessage e("", ptr_player); e.setHtmlMessage("You exterminated", hitPlayerAttribute->avatarName, "", "+1 cycle"); SEND_EVENT(&e);}
+						{Event_PostHudMessage e("", ptr_player); e.setColor(hitPlayerAttribute->avatarColor); e.setHtmlMessage("You exterminated", hitPlayerAttribute->avatarName, "", "+1 cycle"); SEND_EVENT(&e);}
 					}
 					else
 					{
 						ptr_player->priority++;
-						{Event_PostHudMessage e("", ptr_player); e.setHtmlMessage("You exterminated", hitPlayerAttribute->avatarName, "", "+1 priority"); SEND_EVENT(&e);}
+						{Event_PostHudMessage e("", ptr_player); e.setColor(hitPlayerAttribute->avatarColor); e.setHtmlMessage("You exterminated", hitPlayerAttribute->avatarName, "", "+1 priority"); SEND_EVENT(&e);}
 					}
-					{Event_PostHudMessage e("", hitPlayerAttribute); e.setHtmlMessage("Terminated by", ptr_player->avatarName); SEND_EVENT(&e);}
+					{Event_PostHudMessage e("", hitPlayerAttribute); e.setColor(ptr_player->avatarColor); e.setHtmlMessage("Terminated by", ptr_player->avatarName); SEND_EVENT(&e);}
 
 					SEND_EVENT(&Event_PlayerDeath(playerHitByRayAttributeId.at(j)));
 				}
@@ -1225,7 +1264,7 @@ void GameComponent::startGame()
 	while(itrPlayer.hasNext())
 	{
 		AttributePtr<Attribute_Player>			ptr_player		=	itrPlayer		.getNext();
-		{Event_PostHudMessage e("", ptr_player); e.setHtmlMessage("Your nickname is", ptr_player->avatarName); SEND_EVENT(&e);}
+		{Event_PostHudMessage e("", ptr_player); e.setColor(ptr_player->avatarColor); e.setHtmlMessage("Your nickname is", ptr_player->avatarName); SEND_EVENT(&e);}
 	}
 }
 

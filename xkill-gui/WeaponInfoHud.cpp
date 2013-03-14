@@ -152,17 +152,16 @@ void WeaponInfoHud::update( int iconIndex, int iconIndex_subHud )
 			factor = 1.0f;
 
 		// Determine new position
-		Float2 currentPos;
-		currentPos.x = _groupBox->pos().x();
-		currentPos.y = _groupBox->pos().y();
+		Float2 currentPos = _currentPosition;
 		Float2 newPos = Float2::lerp(&currentPos, &targetPos, factor);
-		_groupBox->move(newPos.x, newPos.y);
+		_currentPosition = newPos;
+		_groupBox->move(newPos.x + 0.5f, newPos.y + 0.5f);
 
 		// Determine new sub-hud position
-		currentPos.x = _groupBox_subHud->pos().x();
-		currentPos.y = _groupBox_subHud->pos().y();
+		currentPos = _currentPosition_subHud;
 		newPos = Float2::lerp(&currentPos, &targetPos_subHud, factor);
-		_groupBox_subHud->move(newPos.x, newPos.y);
+		_currentPosition_subHud = newPos;
+		_groupBox_subHud->move(newPos.x + 0.5f, newPos.y + 0.5f);
 	}
 }
 

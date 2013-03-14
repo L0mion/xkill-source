@@ -416,10 +416,10 @@ public:
 			ptr_render->meshID = XKILL_Enums::ModelId::PICKUPABLE_SPEEDHACK;
 			break;
 		case XKILL_Enums::PickupableType::HACK_CYCLEHACK:
-			ptr_render->meshID = XKILL_Enums::ModelId::PICKUPABLE_CYCLEHACK; //check
+			ptr_render->meshID = XKILL_Enums::ModelId::PICKUPABLE_CYCLEHACK;
 			break;
 		case XKILL_Enums::PickupableType::HACK_RANDOMHACK:
-			ptr_render->meshID = XKILL_Enums::ModelId::PICKUPABLE_RANDOMHACK; //check
+			ptr_render->meshID = XKILL_Enums::ModelId::PICKUPABLE_RANDOMHACK;
 			break;
 		default:
 			color = Float4(0.0f, 1.0f, 0.0f, 1.0f);
@@ -431,7 +431,7 @@ public:
 		ptr_physics->ptr_spatial = ptr_spatial;
 		ptr_physics->ptr_render = ptr_render;
 		ptr_physics->collisionFilterGroup = XKILL_Enums::PhysicsAttributeType::PICKUPABLE;
-		ptr_physics->collisionFilterMask = XKILL_Enums::PhysicsAttributeType::PLAYER | XKILL_Enums::PhysicsAttributeType::FRUSTUM | XKILL_Enums::PhysicsAttributeType::WORLD | XKILL_Enums::PhysicsAttributeType::PICKUPABLE | XKILL_Enums::PhysicsAttributeType::RAY | XKILL_Enums::PhysicsAttributeType::PROJECTILE | XKILL_Enums::PhysicsAttributeType::EXPLOSIONSPHERE;
+		ptr_physics->collisionFilterMask = XKILL_Enums::PhysicsAttributeType::PLAYER | XKILL_Enums::PhysicsAttributeType::FRUSTUM | XKILL_Enums::PhysicsAttributeType::WORLD | XKILL_Enums::PhysicsAttributeType::PICKUPABLE | XKILL_Enums::PhysicsAttributeType::RAY | XKILL_Enums::PhysicsAttributeType::PROJECTILE;
 		ptr_physics->collisionResponse = true;
 		ptr_physics->mass = 10.0f;
 		ptr_physics->gravity = Float3(0.0f, -10.0f, 0.0f);
