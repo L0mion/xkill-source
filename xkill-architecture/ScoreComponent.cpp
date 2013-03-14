@@ -152,6 +152,8 @@ void ScoreComponent::handleExecutionMode(float delta)
 			priorityWhenSelectedForExecution--;
 			executingPlayer->priority--;
 			executingPlayer->cycles++;
+
+			{Event_PostHudMessage e("", executingPlayer); e.setHtmlMessage("", "priority to cycles", "", "-1 priority +1 cycle"); SEND_EVENT(&e);}
 		}
 		else								// The player doesn't have any priority left so leave execution mode
 		{

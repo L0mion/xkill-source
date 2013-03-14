@@ -1384,6 +1384,9 @@ void NameGenerator::resetNames()
 	addName("fine printed contract");
 	addName("every other frame");
 	addName("separating axis");
+	addName("delta management");
+	addName("reinforcements have arrived");
+	addName("pylon construction");
 	
 	//C++ keywords
 	addName("alignas");
