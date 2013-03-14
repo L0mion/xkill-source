@@ -1485,22 +1485,15 @@ void Renderer::drawHudElement(int viewportIndex, unsigned int textureId, DirectX
 
 void Renderer::renderAnimation(AttributePtr<Attribute_Player> ptr_player, DirectX::XMFLOAT4X4 view, DirectX::XMFLOAT4X4 projection)
 {
-	AttributePtr<Attribute_Spatial> ptr_spatial;
-	AttributePtr<Attribute_Position> ptr_position;
-	AttributePtr<Attribute_Animation> ptr_animation;
-	AttributePtr<Attribute_Render> ptr_render = ptr_player->ptr_render;
-
-
-	ptr_spatial = ptr_render->ptr_spatial;
-	ptr_position = ptr_render->ptr_spatial->ptr_position;
-	ptr_animation = ptr_render->ptr_animation;
-
+	AttributePtr<Attribute_Render> ptr_render		= ptr_player->ptr_render;
+	AttributePtr<Attribute_Animation> ptr_animation = ptr_render->ptr_animation;;
+	AttributePtr<Attribute_Spatial> ptr_spatial		= ptr_render->ptr_spatial;
+	AttributePtr<Attribute_Position> ptr_position	= ptr_spatial->ptr_position;
 
 	ID3D11Device*			device = managementD3D_->getDevice();
 	ID3D11DeviceContext*	devcon = managementD3D_->getDeviceContext();
 
 	ModelD3D* modelD3D	= managementModel_->getModelD3D(ptr_render->meshID, device);
-
 	
 	DirectX::XMFLOAT4X4 worldMatrix			= managementMath_->calculateWorldMatrix(ptr_spatial, ptr_position);
 	DirectX::XMFLOAT4X4 worldMatrixInverse	= managementMath_->calculateMatrixInverse(worldMatrix);
@@ -1513,6 +1506,7 @@ void Renderer::renderAnimation(AttributePtr<Attribute_Player> ptr_player, Direct
 	
 	if(!ptr_player->detectedAsDead)
 	{
+		float time = ptr_animation->time;
 		ptr_animation->time += delta_;
 		if(ptr_animation->time > modelD3D->getSkinnedData()->getClipEndTime(ptr_animation->activeAnimation))
 		{
