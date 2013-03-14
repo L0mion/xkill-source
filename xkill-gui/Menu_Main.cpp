@@ -21,6 +21,16 @@ void Menu_Main::loadOpeningGif()
 	{
 		fileName = "../../xkill-resources/xkill-gui/images/animations/tmp.gif";
 	}
+	// Eric easter egg
+	std::string username = getenv( "USERNAME" );
+	if(username == "Eric")
+	{
+		const int chance = 2;
+		if(Math::randomInt(0, chance) == 0)
+		{
+			fileName = "../../xkill-resources/xkill-gui/images/animations/tmp2.gif";
+		}
+	}
 
 	openingAnimation->setFileName(fileName.c_str());
 	if(!openingAnimation->isValid()) // error checking

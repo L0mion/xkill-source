@@ -48,8 +48,6 @@ bool GameComponent::init()
 
 	srand((unsigned)time(NULL));
 
-	nullProcessExecuting = false;
-	
 	return true;
 }
 
@@ -83,10 +81,10 @@ void GameComponent::onEvent(Event* e)
 		event_UnloadLevel();
 		break;
 	case EVENT_NULL_PROCESS_STARTED_EXECUTING:
-		nullProcessExecuting = true;
+		SETTINGS->isNullprocessExecuting = true;
 		break;
 	case EVENT_NULL_PROCESS_STOPPED_EXECUTING:
-		nullProcessExecuting = false;
+		SETTINGS->isNullprocessExecuting = false;
 
 		//Reset pickupables
 		while(itrPickupable.hasNext())
@@ -284,7 +282,7 @@ void GameComponent::onUpdate(float delta)
 	// Drop random world pieces
 	//--------------------------------------------------------------------------------------
 	std::vector<int> worldPiecesIndices;
-	if(nullProcessExecuting)
+	if(SETTINGS->isNullprocessExecuting)
 	{
 		//--------------------------------------------------------------------------------------
 		// Find all world physics objects
@@ -532,14 +530,14 @@ void GameComponent::updatePlayerAttributes(float delta)
 			//--------------------------------------------------------------------------------------
 			// Respawn player
 			//--------------------------------------------------------------------------------------
-			else if(!nullProcessExecuting)
+			else if(!SETTINGS->isNullprocessExecuting)
 			{
 				spawnPlayer(ptr_player);
 			}
 		}
 
 		//--------------------------------------------------------------------------------------
-		// Respawn player
+		// Respawn player when player pressed fire button when dead and the scoreboard is visible
 		//--------------------------------------------------------------------------------------
 		if(ptr_input->firePressed && ptr_player->detectedAsDead && ptr_player->isScoreBoardVisible)
 		{
@@ -730,7 +728,7 @@ void GameComponent::spawnPlayer(AttributePtr<Attribute_Player> ptr_player)
 	{
 		AttributePtr<Attribute_Position> ptr_spawnPoint_position = ptr_spawnPoint->ptr_position;
 		ptr_position->position = ptr_spawnPoint_position->position; // set player position attribute
-		DEBUGPRINT("Player entity " << itrPlayer.ownerId() << " spawned at " << ptr_position->position.x << " " << ptr_position->position.y << " " << ptr_position->position.z << std::endl);
+		DEBUGPRINT("Player entity " << itrPlayer.ownerIdAt(ptr_player.index()) << " spawned at " << ptr_position->position.x << " " << ptr_position->position.y << " " << ptr_position->position.z << std::endl);
 	}
 	else //otherwise: spawn at origo.
 	{
@@ -775,12 +773,15 @@ void GameComponent::spawnPlayer(AttributePtr<Attribute_Player> ptr_player)
 				
 	ptr_health->health = ptr_health->maxHealth; // restores player health
 
-	MutatorSettings ms;
-	for(int i = 0; i < XKILL_Enums::AmmunitionType::NROFAMMUNITIONTYPES; i++)
+	if(ptr_player->detectedAsDead)
 	{
-		for(int j = 0; j < XKILL_Enums::FiringModeType::NROFFIRINGMODETYPES; j++)
+		MutatorSettings ms;
+		for(int i = 0; i < XKILL_Enums::AmmunitionType::NROFAMMUNITIONTYPES; i++)
 		{
-			ms.setupAttribute(ptr_weaponStats, static_cast<XKILL_Enums::AmmunitionType>(i), static_cast<XKILL_Enums::FiringModeType>(j));
+			for(int j = 0; j < XKILL_Enums::FiringModeType::NROFFIRINGMODETYPES; j++)
+			{
+				ms.setupAttribute(ptr_weaponStats, static_cast<XKILL_Enums::AmmunitionType>(i), static_cast<XKILL_Enums::FiringModeType>(j));
+			}
 		}
 	}
 
@@ -827,7 +828,7 @@ void GameComponent::event_StartDeathmatch( Event_StartDeathmatch* e )
 		AttributePtr<Attribute_WeaponStats>		ptr_weaponStats	=	ptr_player	->	ptr_weaponStats	;
 		switchFiringMode(ptr_weaponStats, 0);	//Ensure ammunition disablement (selected from menu)
 		
-		SEND_EVENT(&Event_HackActivated(5000.0f, XKILL_Enums::HackType::JETHACK, ptr_player)); //check jetpack giveaway
+		//SEND_EVENT(&Event_HackActivated(5000.0f, XKILL_Enums::HackType::JETHACK, ptr_player)); //check jetpack giveaway
 	}
 
 	//Create mesh for debugging fbx-loading.
@@ -897,6 +898,13 @@ void GameComponent::event_UnloadLevel()
 	{
 		SAFE_DELETE(*it);
 	}
+
+	//while(itrPlayerSpawnPoint.hasNext()) //check
+	//{
+	//	AttributePtr<Attribute_PlayerSpawnPoint> ptr_spawnPoint	= itrPlayerSpawnPoint.getNext();
+	//	SEND_EVENT(&Event_RemoveEntity(itrProjectile.ownerId()));
+	//}
+
 	/*while(itrMesh.hasNext())
 	{
 		itrMesh.getNext();

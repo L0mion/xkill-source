@@ -1355,6 +1355,13 @@ void NameGenerator::resetNames()
 	addName("is this reality?");
 	addName("space monkey");
 	addName("highly trained monkey");
+
+	addName("inexpensive payback time");
+	addName("better safe than gory");
+	addName("open time window");
+	addName("update frequency");
+	addName("translation of incubation");
+	addName("90 degree rotation");
 	
 	//C++ keywords
 	addName("alignas");

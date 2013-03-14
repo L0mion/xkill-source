@@ -27,7 +27,6 @@ class GameComponent :
 private:
 	std::vector<Entity>* allEntity; //check
 	std::vector<Event*> levelEvents_;
-	bool nullProcessExecuting;
 
 public:
 	GameComponent(void);

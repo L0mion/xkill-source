@@ -29,6 +29,7 @@ public:
 	void* overlayWidget;
 	float timeUntilScheduling;
 	float nullprocessExecutionTime;
+	bool isNullprocessExecuting;
 
 	//ssao
 	float occlusionRadius;
