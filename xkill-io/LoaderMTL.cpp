@@ -304,7 +304,7 @@ std::string LoaderMTL::loadFilename(const std::vector<std::string>& params)
 void LoaderMTL::loadOptical(const std::vector<std::string>& params)
 {
 	float opticalDensity = (float)::atof(params[MTL_PARAMS_INDEX_OPTICAL_DENSITY].c_str());
-
+	materials_.back().setSpecularPow(opticalDensity); // I FORMALY DECLARE THIS VALUE CLAIMED AS SPECULAR POWER DUE TO NO SUCH VALUE IN .MTL, SIGNED NILS FORSMAN
 	materials_.back().setOpticalDensity(opticalDensity);
 }
 
