@@ -41,7 +41,7 @@
 
 ATTRIBUTES_DECLARE_ALL;
 
-#define XKILLPROFILING // commment away to skip profiling
+//#define XKILLPROFILING // commment away to skip profiling
 #ifdef XKILLPROFILING
 #include <xkill-utilities\Converter.h>
 #include <time.h>
@@ -513,7 +513,7 @@ void Renderer::render(std::vector<ViewportData> vpDatas)
 		blurVertically();
 	}
 	upSampleBlur();)
-
+	
 	//Compute SSAO for each viewport:
 	calcgpu(ssaotimer,
 	for(unsigned int i = 0; i < vpDatas.size(); i++)

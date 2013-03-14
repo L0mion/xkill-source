@@ -55,15 +55,14 @@ void ManagementInstance::addInstance(AttributePtr<Attribute_Render>& ptr_render)
 	VertexInstanced instance;
 	instance.world_ = calculateWorldMatrix(ptr_spatial, ptr_position);
 
-	int cull = 0;
-	while(itrCamera.hasNext())
-	{
-		unsigned int camIndex = itrCamera.getNext().index();
-		
-		if(ptr_render->culling.getBool(camIndex))
-			cull = cull | 1 << camIndex;
-	}
-	instance.cull_ = cull;
+	//int cull = 0;
+	//while(itrCamera.hasNext())
+	//{
+	//	unsigned int camIndex = itrCamera.getNext().index();
+	//	if(ptr_render->culling.getBool(camIndex))
+	//		cull = cull | 1 << camIndex;
+	//}
+	instance.cull_ = ptr_render->culling.values[0]; //cull;
 
 	InstancedData& instancedData = instancedDatas_[ptr_render->meshID];
 	instancedData.pushData(instance);
