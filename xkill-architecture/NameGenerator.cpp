@@ -1345,8 +1345,16 @@ void NameGenerator::resetNames()
 	addName("he's back");
 	addName("the missing link");
 	addName("Dr. Moreau");
+	addName("positronic brain");
 	addName("brain in a jar");
 	addName("Wintermute");
+	addName("polysyllabic moniker");
+	addName("Excelsior");
+	addName("Magnificus");
+	addName("Yuggoth");
+	addName("is this reality?");
+	addName("space monkey");
+	addName("highly trained monkey");
 
 	addName("inexpensive payback time");
 	addName("better safe than gory");
