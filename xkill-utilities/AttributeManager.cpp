@@ -62,6 +62,7 @@ Attribute_Settings::Attribute_Settings()
 	showDebugPhysics = false;
 	respawnTime = 3;
 	nullprocessExecutionTime = 30;
+	isNullprocessExecuting = false;
 
 	occlusionRadius		= 0.2f;
 	occlusionScale		= 0.7f;

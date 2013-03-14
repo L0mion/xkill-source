@@ -1344,6 +1344,13 @@ void NameGenerator::resetNames()
 	addName("poor Yorick");
 	addName("he's back");
 	addName("Wintermute");
+
+	addName("inexpensive payback time");
+	addName("better safe than gory");
+	addName("open time window");
+	addName("update frequency");
+	addName("translation of incubation");
+	addName("90 degree rotation");
 	
 	//C++ keywords
 	addName("alignas");
