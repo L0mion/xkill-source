@@ -158,6 +158,10 @@ void LoaderMD5Model::parseParamNumVerts(LoaderMD5MeshDesc& mesh)
 				>> vertex.texcoord_.x >> vertex.texcoord_.y >> dummy // u v )
 				>> vertex.startWeight_ >> vertex.numWeights_; 
 
+		//Texture coordinates gets fliped in the shader because of obj and fbx texcoord needs that.
+		//Md5 however is correct and must be fliped before the shader to be correct in the shader.
+		vertex.texcoord_.y = 1 - vertex.texcoord_.y;
+
 		MD5Helper::ignoreLine(infile_, fileLength_);
 		mesh.vertices_.push_back(vertex);
 		mesh.texcoords_.push_back(vertex.texcoord_);

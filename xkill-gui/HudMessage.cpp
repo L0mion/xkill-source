@@ -40,7 +40,8 @@ void HudMessage::setPosition( Float2 position )
 	position = position + Float2(-_label->height() * 4.0f, -_label->height() * 0.0f);
 
 	// Move
-	_label->move(position.x, position.y);
+	_position = position;
+	_label->move(_position.x, _position.y);
 }
 
 void HudMessage::setTargetPosition( Float2 position )
@@ -55,16 +56,14 @@ void HudMessage::setTargetPosition( Float2 position )
 void HudMessage::updatePosition()
 {
 	// Interpolate position
-	Float2 currentPos;
-	currentPos.x = _label->pos().x();
-	currentPos.y = _label->pos().y();
+	Float2 currentPos = _position;
 
 	float factor = 5.0f * SETTINGS->trueDeltaTime;
 	if(factor > 1.0f)
 		factor = 1.0f;
 	Float2 newPos = Float2::lerp(&currentPos, &_targetPosition, factor);
-
-	_label->move(newPos.x, newPos.y);
+	_position = newPos;
+	_label->move(_position.x + 0.5f, _position.y + 0.5f);
 }
 
 void HudMessage::update()

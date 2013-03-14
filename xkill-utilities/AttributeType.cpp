@@ -768,6 +768,42 @@ DataItemList* Attribute_Pickupable::getDataList()
 	return list;
 }
 
+Float3 Attribute_Pickupable::getColor()
+{
+	Float3 color;
+
+	switch(pickupableType)
+	{
+	case XKILL_Enums::PickupableType::AMMUNITION_BULLET:
+		color = Float3(1.0f, 1.0f, 0.0f);
+		break;
+	case XKILL_Enums::PickupableType::AMMUNITION_SCATTER:
+		color = Float3(0.0f, 1.0f, 0.0f);
+		break;
+	case XKILL_Enums::PickupableType::AMMUNITION_EXPLOSIVE:
+		color = Float3(1.0f, 0.0f, 0.0f);
+		break;
+	case XKILL_Enums::PickupableType::MEDKIT:
+		color = Float3(1.0f, 0.0f, 0.0f);
+		break;
+	case XKILL_Enums::PickupableType::HACK_JETHACK:
+		color = Float3(0.0f, 1.0f, 1.0f);
+		break;
+	case XKILL_Enums::PickupableType::HACK_SPEEDHACK:
+		color = Float3(1.0f, 0.0f, 1.0f);
+		break;
+	//case XKILL_Enums::PickupableType::HACK_CYCLEHACK:
+	//	break;
+	//case XKILL_Enums::PickupableType::HACK_RANDOMHACK:
+	//	break;
+	default:
+		color = Float3(1.0f, 1.0f, 1.0f);
+		break;
+	}
+
+	return color;
+}
+
 #include "WeaponStructs.h"
 #include "MutatorSettings.h"
 Attribute_WeaponStats::Attribute_WeaponStats()

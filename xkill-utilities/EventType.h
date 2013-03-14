@@ -102,6 +102,7 @@ enum DLL_U EventType
 	EVENT_POST_HUD_MESSAGE,
 	EVENT_NULL_PROCESS_STARTED_EXECUTING,
 	EVENT_NULL_PROCESS_STOPPED_EXECUTING,
+	EVENT_SPAWN_PLAYER,
 
 	// Creation/Destruction
 	EVENT_TRANSFER_EVENTS_TO_GAME,
@@ -229,6 +230,7 @@ public:
 	Event_PostHudMessage(std::string message, AttributePtr<Attribute_Player> ptr_subject_player = AttributePtr<Attribute_Player>() );
 	void setStyle(Style style);
 	void setHtmlMessage(std::string prefex, std::string subject = "", std::string suffix = "", std::string description = "");
+	void setColor(Float3 color);
 
 	Receiver receiver;
 	std::string message;
@@ -791,4 +793,12 @@ public:
 	Event_ReloadPhysicsAttributeDataIntoBulletPhysics(int physicsAttributeId);
 
 	int physicsAttributeId;
+};
+
+class DLL_U Event_SpawnPlayer : public Event
+{
+public:
+	Event_SpawnPlayer(int playerAttributeId);
+
+	int playerAttributeId;
 };
