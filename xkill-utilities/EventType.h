@@ -599,10 +599,9 @@ public:
 class DLL_U Event_CreateExplosionSphere : public Event
 {
 public:
-	Event_CreateExplosionSphere(Float3 position, float damage, int entityIdOfCreator, XKILL_Enums::AmmunitionType ammunitionType, XKILL_Enums::FiringModeType firingModeType);
+	Event_CreateExplosionSphere(Float3 position, int entityIdOfCreator, XKILL_Enums::AmmunitionType ammunitionType, XKILL_Enums::FiringModeType firingModeType);
 
 	Float3 position;
-	float damage;
 	int entityIdOfCreator;
 	XKILL_Enums::AmmunitionType ammunitionType;
 	XKILL_Enums::FiringModeType firingModeType;

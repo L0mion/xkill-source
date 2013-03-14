@@ -383,7 +383,7 @@ void CollisionManager::collision_projectile(Entity* entity1, Entity* entity2)
 						AttributePtr<Attribute_Position> ptr_projectile_position = ptr_projectile_spatial->ptr_position;
 
 						//Creates an explosion sphere. Init information is taken from the impacting projectile.
-						SEND_EVENT(&Event_CreateExplosionSphere(ptr_projectile_position->position, 50, ptr_projectile->entityIdOfCreator, ptr_projectile->ammunitionType, ptr_projectile->firingModeType));
+						SEND_EVENT(&Event_CreateExplosionSphere(ptr_projectile_position->position, ptr_projectile->entityIdOfCreator, ptr_projectile->ammunitionType, ptr_projectile->firingModeType));
 						break;
 					}
 				default:

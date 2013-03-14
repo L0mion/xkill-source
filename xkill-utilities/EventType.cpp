@@ -191,10 +191,9 @@ Event_SyncStateCommand::Event_SyncStateCommand(
 	this->isReplacementState = isReplacementState;
 }
 
-Event_CreateExplosionSphere::Event_CreateExplosionSphere(Float3 position, float damage, int entityIdOfCreator, XKILL_Enums::AmmunitionType ammunitionType, XKILL_Enums::FiringModeType firingModeType) : Event(EVENT_CREATE_EXPLOSIONSPHERE)
+Event_CreateExplosionSphere::Event_CreateExplosionSphere(Float3 position, int entityIdOfCreator, XKILL_Enums::AmmunitionType ammunitionType, XKILL_Enums::FiringModeType firingModeType) : Event(EVENT_CREATE_EXPLOSIONSPHERE)
 {
 	this->position = position;
-	this->damage = damage;
 	this->entityIdOfCreator = entityIdOfCreator;
 	this->ammunitionType = ammunitionType;
 	this->firingModeType = firingModeType;
