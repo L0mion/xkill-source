@@ -16,7 +16,7 @@ void Menu_Main::loadOpeningGif()
 	std::string fileName = "../../xkill-resources/xkill-gui/images/animations/menu_opening.gif";
 
 	// Easter egg
-	const int chance = 25;
+	const int chance = 15;
 	if(Math::randomInt(0, chance) == 0)
 	{
 		fileName = "../../xkill-resources/xkill-gui/images/animations/tmp.gif";
