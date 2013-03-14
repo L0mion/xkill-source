@@ -3,6 +3,7 @@
 #include <xkill-utilities/AttributeManager.h>
 #include <xkill-utilities/EventType.h>
 #include <xkill-utilities/Timer.h>
+#include <xkill-utilities/Converter.h>
 
 ATTRIBUTES_DECLARE_ALL
 
@@ -208,20 +209,15 @@ void ScoreComponent::handleSchedulerMode(float delta)
 		{
 			if(topPlayerIndex == -1)	// All players had zero priority
 			{
-				// Punish them all
-				activateNullProcess();
+				{Event_PostHudMessage e("No players had any priority"); e.receiver = Event_PostHudMessage::RECEIVER_ALL;  e.setStyle(Event_PostHudMessage::STYLE_SUBTILE); SEND_EVENT(&e);}
 				
-				// Post hud message
-				//{Event_PostHudMessage e("<p align='center'><span style='font-size:15pt;'>NullProcess is executing</span><br><span style='color: rgba(255, 0, 0, 255); font-size:35pt;'>Punish them all</span></p>"); e.receiver = Event_PostHudMessage::RECEIVER_ALL; e.setStyle(Event_PostHudMessage::STYLE_SUBTILE); SEND_EVENT(&e);}
-				{Event_PostHudMessage e("Punish them all"); e.receiver = Event_PostHudMessage::RECEIVER_ALL; e.setStyle(Event_PostHudMessage::STYLE_WARNING); SEND_EVENT(&e);}
-				{Event_PostHudMessage e("");  e.receiver = Event_PostHudMessage::RECEIVER_ALL; e.setHtmlMessage("","NullProcess", "is executing"); SEND_EVENT(&e);}
+				activateNullProcess();
 			}
 			else if(topPriorityIsTied)	// Two or more players are tied for the ammount of priority
 			{
+				{Event_PostHudMessage e("Two players had tied priority"); e.receiver = Event_PostHudMessage::RECEIVER_ALL;  e.setStyle(Event_PostHudMessage::STYLE_SUBTILE); SEND_EVENT(&e);}
+				
 				activateNullProcess();
-
-				// Post hud message
-				{Event_PostHudMessage e("Two players have tied priority"); e.receiver = Event_PostHudMessage::RECEIVER_ALL;  e.setStyle(Event_PostHudMessage::STYLE_SUBTILE); SEND_EVENT(&e);}
 			}
 			else						// Execute the player with highest priority
 			{
@@ -235,7 +231,15 @@ void ScoreComponent::handleSchedulerMode(float delta)
 		if(nrOfPlayersAlive == 1)
 		{
 			deactivateNullProcess();
-			executePlayer(lastManStanding);
+
+			AttributePtr<Attribute_Player> ptr_player = itrPlayer.at(lastManStanding);
+			int priorityReward = itrPlayer.count();
+			{Event_PostHudMessage e("", ptr_player); e.setHtmlMessage("You survived the null process execution", "Reward", "", "+" + Converter::IntToStr(priorityReward) + " priority"); SEND_EVENT(&e);}
+			ptr_player->priority += priorityReward;
+
+			SEND_EVENT(&Event_SpawnPlayer(lastManStanding));
+
+			//executePlayer(lastManStanding);
 		}
 		else if(nrOfPlayersAlive <= 0)
 		{
@@ -253,8 +257,14 @@ void ScoreComponent::activateNullProcess()
 {
 	schedulerTimer_->resetTimer();
 	nullProcessExecuting_ = true;
+
 	SEND_EVENT(&Event(EVENT_NULL_PROCESS_STARTED_EXECUTING));
 	SEND_EVENT(&Event_PlaySound(XKILL_Enums::Sound::SOUND_RUMBLE));
+	{Event_PostHudMessage e("");  e.receiver = Event_PostHudMessage::RECEIVER_ALL; e.setHtmlMessage("","NullProcess", "is executing"); SEND_EVENT(&e);}
+				
+	// Post hud message
+	//{Event_PostHudMessage e("<p align='center'><span style='font-size:15pt;'>NullProcess is executing</span><br><span style='color: rgba(255, 0, 0, 255); font-size:35pt;'>Punish them all</span></p>"); e.receiver = Event_PostHudMessage::RECEIVER_ALL; e.setStyle(Event_PostHudMessage::STYLE_SUBTILE); SEND_EVENT(&e);}
+	//{Event_PostHudMessage e("Punish them all"); e.receiver = Event_PostHudMessage::RECEIVER_ALL; e.setStyle(Event_PostHudMessage::STYLE_WARNING); SEND_EVENT(&e);}
 }
 
 void ScoreComponent::deactivateNullProcess()
@@ -275,13 +285,12 @@ void ScoreComponent::executePlayer(int playerIndex)
 	priorityWhenSelectedForExecution = ptr_player->priority;
 	DEBUGPRINT("Player with attribute index " << executingPlayerIndex_ << " is executing. Beware of his laserous eyes");
 
-
 	// Send event to notify other components that we're entering execution mode
 	SEND_EVENT(&Event_PlayerExecuting(executingPlayerIndex_));
 	SEND_EVENT(&Event_PlaySound(XKILL_Enums::Sound::SOUND_LASER, itrPlayer.ownerIdAt(playerIndex)));
 
 	// Post hud messages
-	{Event_PostHudMessage e("", ptr_player); e.setHtmlMessage("Now running in", "Kernel Mode"); SEND_EVENT(&e);}
 	{Event_PostHudMessage e("", ptr_player); e.setHtmlMessage("Chosen by Scheduler"); SEND_EVENT(&e);}
-	{Event_PostHudMessage e("", ptr_player); e.setHtmlMessage("", ptr_player->playerName, "is executing"); e.receiver = Event_PostHudMessage::RECEIVER_ALL_BUT_SUBJECT; SEND_EVENT(&e);}
+	{Event_PostHudMessage e("", ptr_player); e.setHtmlMessage("Now running in", "Kernel Mode"); SEND_EVENT(&e);}
+	{Event_PostHudMessage e("", ptr_player); e.setColor(ptr_player->avatarColor); e.setHtmlMessage("", ptr_player->avatarName, "is executing"); e.receiver = Event_PostHudMessage::RECEIVER_ALL_BUT_SUBJECT; SEND_EVENT(&e);}
 }

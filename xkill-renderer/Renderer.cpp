@@ -564,15 +564,16 @@ void Renderer::renderViewportToGBuffer(ViewportData& vpData)
 	if(cameraInstances == nullptr)
 		return; 
 
-	std::map<unsigned int, InstancedData*> instancesMap = cameraInstances->getInstancesMap();
-	for(std::map<unsigned int, InstancedData*>::iterator i = instancesMap.begin(); i != instancesMap.end(); i++)
-	{
-			renderInstance(i->first, i->second, false);
-	}
 	while(itrPlayer.hasNext())
 	{
 		AttributePtr<Attribute_Player> player = itrPlayer.getNext();
 		renderAnimation(player, vpData.view, vpData.proj);
+	}
+
+	std::map<unsigned int, InstancedData*> instancesMap = cameraInstances->getInstancesMap();
+	for(std::map<unsigned int, InstancedData*>::iterator i = instancesMap.begin(); i != instancesMap.end(); i++)
+	{
+			renderInstance(i->first, i->second, false);
 	}
 
 	if(SETTINGS->showDebugPhysics)
@@ -1503,12 +1504,12 @@ void Renderer::drawHudElement(int viewportIndex, unsigned int textureId, DirectX
 	devcon->RSSetState(nullptr);
 }
 
-void Renderer::renderAnimation(AttributePtr<Attribute_Player> playerAt, DirectX::XMFLOAT4X4 view, DirectX::XMFLOAT4X4 projection)
+void Renderer::renderAnimation(AttributePtr<Attribute_Player> ptr_player, DirectX::XMFLOAT4X4 view, DirectX::XMFLOAT4X4 projection)
 {
 	AttributePtr<Attribute_Spatial> ptr_spatial;
 	AttributePtr<Attribute_Position> ptr_position;
 	AttributePtr<Attribute_Animation> ptr_animation;
-	AttributePtr<Attribute_Render> ptr_render = playerAt->ptr_render;
+	AttributePtr<Attribute_Render> ptr_render = ptr_player->ptr_render;
 
 
 	ptr_spatial = ptr_render->ptr_spatial;
@@ -1535,10 +1536,43 @@ void Renderer::renderAnimation(AttributePtr<Attribute_Player> playerAt, DirectX:
 
 	std::vector<DirectX::XMFLOAT4X4> finalTransforms;
 	
-	ptr_animation->time += delta_;
-	if(ptr_animation->time > modelD3D->getSkinnedData()->getClipEndTime(ptr_animation->activeAnimation))
-		ptr_animation->time = 0.0f;
+	if(!ptr_player->detectedAsDead)
+	{
+		ptr_animation->time += delta_;
+		if(ptr_animation->time > modelD3D->getSkinnedData()->getClipEndTime(ptr_animation->activeAnimation))
+		{
+			ptr_animation->time = 0.0f;
+			ptr_animation->activeAnimation = "processHover";
+		}
+	}
 	modelD3D->getSkinnedData()->getFinalTransforms(ptr_animation->activeAnimation, ptr_animation->time, &finalTransforms);
+
+	int boneIndex = 16;
+	DirectX::XMFLOAT3 bonePosition = modelD3D->getSkinnedData()->getBonePositions()->at(boneIndex);
+	DirectX::XMMATRIX xmMatrix = DirectX::XMLoadFloat4x4(&finalTransforms.at(boneIndex));
+	DirectX::XMVECTOR xmBonePosition = DirectX::XMLoadFloat3(&bonePosition);
+	xmBonePosition = DirectX::XMVector3TransformCoord(xmBonePosition, xmMatrix);
+	DirectX::XMStoreFloat3(&bonePosition, xmBonePosition);
+	ptr_player->ptr_weapon_offset->offset_position.x = bonePosition.x;
+	ptr_player->ptr_weapon_offset->offset_position.y = bonePosition.y;
+	ptr_player->ptr_weapon_offset->offset_position.z = bonePosition.z;
+
+	ptr_player->ptr_weapon_offset->updateOffset();
+
+	boneIndex = 7;
+	bonePosition = modelD3D->getSkinnedData()->getBonePositions()->at(boneIndex);
+	xmMatrix = DirectX::XMLoadFloat4x4(&finalTransforms.at(boneIndex));
+	xmBonePosition = DirectX::XMLoadFloat3(&bonePosition);
+	xmBonePosition = DirectX::XMVector3TransformCoord(xmBonePosition, xmMatrix);
+	DirectX::XMStoreFloat3(&bonePosition, xmBonePosition);
+	Float3 debug = ptr_player->ptr_camera->ptr_offset->offset_position;
+	ptr_player->ptr_camera->ptr_offset->offset_position.x = bonePosition.x;
+	ptr_player->ptr_camera->ptr_offset->offset_position.y = bonePosition.y;
+	ptr_player->ptr_camera->ptr_offset->offset_position.z = bonePosition.z;
+
+	ptr_player->ptr_camera->ptr_offset->updateOffset();
+
+	debug = ptr_player->ptr_camera->ptr_spatial->ptr_position->position;
 
 	managementCB_->setCB(CB_TYPE_BONE, TypeFX_VS, CB_REGISTER_BONE, devcon);
 	managementCB_->updateCBBone(devcon, finalTransforms);

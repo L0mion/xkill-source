@@ -201,6 +201,8 @@ void WriterPGY::writeSkinnedData(PGYHeaderSkinnedData skinnedDataHeader)
 		ofstream_.write(reinterpret_cast<const char*>(&skinnedData_->getBoneHierarchy()->at(i)), sizeof(int));
 	for(unsigned int i=0; i<skinnedDataHeader.numBones_; i++)
 		ofstream_.write(reinterpret_cast<const char*>(&skinnedData_->getBoneOffsets()->at(i)), sizeof(DirectX::XMFLOAT4X4));
+	for(unsigned int i=0; i<skinnedDataHeader.numBones_; i++)
+		ofstream_.write(reinterpret_cast<const char*>(&skinnedData_->getBonePositions()->at(i)), sizeof(DirectX::XMFLOAT3));
 }
 void WriterPGY::writeAnimation(AnimationClip* animationClip, std::string name, PGYHeaderAnimation animationHeader, int numBones)
 {

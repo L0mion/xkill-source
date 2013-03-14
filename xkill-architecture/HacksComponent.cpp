@@ -116,7 +116,7 @@ void HacksComponent::updateHack(AttributePtr<Attribute_Player>& ptr_player, XKIL
 		ptr_player->currentSpeed *= 1.5f;
 		break;
 	case XKILL_Enums::HackType::JETHACK:
-		if(ptr_player->ptr_input->jump_jetpack)
+		if(ptr_player->ptr_input->jetpack)
 		{
 			ptr_player->jetpack = true;
 		}
@@ -164,7 +164,7 @@ bool HacksComponent::shouldUpdateTimer(AttributePtr<Attribute_Player>& ptr_playe
 	switch(hackType)
 	{
 	case XKILL_Enums::HackType::JETHACK:
-		if(ptr_player->ptr_input->jump_jetpack)
+		if(ptr_player->ptr_input->jetpack)
 		{
 			updateTimer = true;
 		}

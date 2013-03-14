@@ -11,6 +11,7 @@
 #include "WeaponInfoHud.h"
 #include "ScoreBoard.h"
 #include "HudMessage.h"
+#include "HudScheduling.h"
 
 #include "ui_Menu_HUD.h"
 
@@ -24,6 +25,7 @@ private:
 	HudMessage_Manager hudMessage_manager;
 	ScoreBoard scoreboard;
 	WeaponInfoHud weaponInfoHud;
+	HudScheduling schedulingHud;
 
 	float hitOverlayFade;
 	float crosshair_targetHitFade;

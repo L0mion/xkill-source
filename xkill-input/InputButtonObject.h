@@ -28,8 +28,10 @@ public:
 
 	//! Returns if the button is down
 	bool isDown();
-	//! Returns if the button was since last update
+	//! Returns if the button was released since last update
 	bool isReleased();
+	//! Returns if the button was pressed since last update
+	bool isPressed();
 
 	char getKey();
 	void setKey(char key);

@@ -331,11 +331,11 @@ struct DLL_U Attribute_Input : public IAttribute
 	Float2 rotation;
 	bool fire;
 	bool firePressed;
-	bool jump_jetpack;
+	bool jump;
+	bool jetpack;
 	bool sprint;
-	bool killPlayer;
-	bool changeAmmunitionType;
-	bool changeFiringMode;
+	int changeAmmunitionType;
+	int changeFiringMode;
 	bool lowSensitivity;
 	bool reload;
 
@@ -413,6 +413,7 @@ struct DLL_U Attribute_Camera : public IAttribute
 	~Attribute_Camera();
 
 	AttributePtr<Attribute_Spatial> ptr_spatial;
+	AttributePtr<Behavior_Offset> ptr_offset;
 
 	Float4x4 mat_view;			//!< The view matrix. Used to transform objects to view space.
 	Float4x4 mat_projection;	//!< The projection matrix. Defines the camera's frustum.
@@ -478,7 +479,11 @@ struct DLL_U Attribute_Player : public IAttribute
 
 	static int nextId;
 
-	std::string playerName;
+	std::string avatarName;
+	Float3 avatarColor;
+
+	bool isScoreBoardVisible;
+
 	int priority;							//!< Priority of the player process. Higher value means higher priority. The scheduler will choose the process with the highest priority for execution.
 	int cycleSteals;						//!< Total number of cycle steals for the player process. Cycle steals steal priority from other player processes.
 	int cycles;								//!< Total execution time of the player process, used ased final score in the deathmatch. The game session winner is the player with the most total execution time as awarded by the scheduler.
@@ -494,6 +499,7 @@ struct DLL_U Attribute_Player : public IAttribute
 	bool jetpack;							//!< Use jetpack		
 	bool detectedAsDead;					//!< The player is dead
 	bool executing;							//!< True if selected by the scheduler (ScoreComponent.cpp)
+	bool hovering;							//!< The player is in a stable hover and not falling or jumping or using jetpack
 	std::pair<bool, Timer*> speedHackPair;	//!< The bool is true if the hack is active, the timer keeps track of time left
 	std::pair<bool, Timer*> jetHackPair;	//!< The bool is true if the hack is active, the timer keeps track of time left
 	std::pair<bool, Timer*> cycleHackPair;	//!< The bool is true if the hack is active, the timer keeps track of time left
@@ -606,6 +612,7 @@ struct DLL_U Attribute_Pickupable : public IAttribute
 
 	XKILL_Enums::PickupableType pickupableType;			//! MEDKIT, AMMUNITION_BULLET, AMMUNITION_SCATTER, AMMUNITION_EXPLOSIVE, etc
 	int amount;											//! Data of pickupable (health, ammo, etc) //Deprecated as of 2013-03-06 15.25. Amount is determined on pickup instead of at spawn time.
+	Float3 getColor();
 
 	DataItemList* getDataList();
 	void saveTo(DataItemList* list);

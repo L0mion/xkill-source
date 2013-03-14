@@ -58,8 +58,9 @@ void InputComponent::onEvent(Event* e)
 		Event_KeyPress* ekp = static_cast<Event_KeyPress*>(e);
 		int keyEnum	= ekp->keyEnum;
 		bool isPressed = ekp->isPressed;
+		bool shiftModifier = ekp->shiftModifier;
 
-		handleKeyEvent(keyEnum, isPressed);
+		handleKeyEvent(keyEnum, isPressed, shiftModifier);
 	}
 	if(type == EVENT_MOUSE_PRESS)
 	{
@@ -80,9 +81,22 @@ void InputComponent::onEvent(Event* e)
 	if(type == EVENT_MOUSE_WHEEL)
 	{
 		Event_MouseWheel* emw = static_cast<Event_MouseWheel*>(e);
-		emw->value;
 
-		// TODO: Handle mousewheel
+		QTInputDevices* device = inputManager_->GetMouseAndKeyboard();
+		
+		if(device != nullptr)
+		{
+			if(emw->value >= 0)
+			{
+				//device->setScrollButton(true);
+				handleKeyEvent('â', true, false);
+			}
+			else
+			{
+				//device->setScrollButton(false);
+				handleKeyEvent('ô', true, false);
+			}
+		}
 	}
 }
 
@@ -110,11 +124,13 @@ void InputComponent::handleInput(float delta)
 		if(device == nullptr)
 			continue;
 
-		device->setSensitivityModifier(device->getFloatValue(InputAction::ACTION_B_LOW_SENSITIVITY, delta));
+		device->setSensitivityModifier(device->getFloatValue(InputAction::ACTION_F_LOW_SENSITIVITY, delta));
+		if(device->getBoolValue(InputAction::ACTION_B_LOW_SENSITIVITY))
+			device->setSensitivityModifier(0.5f);
 
 		input->position.x = device->getFloatValue(InputAction::ACTION_F_WALK_LR, delta);
 		input->position.y = device->getFloatValue(InputAction::ACTION_F_WALK_FB, delta);
-		//input->rotation.x = device->getFloatValue(InputAction::ACTION_F_LOOK_LR, delta, tr2ue);
+		//input->rotation.x = device->getFloatValue(InputAction::ACTION_F_LOOK_LR, delta, true);
 		//input->rotation.y = device->getFloatValue(InputAction::ACTION_F_LOOK_UD, delta, true);
 
 		Float2 rot = device->getFormattedFloatPair(InputAction::ACTION_F_LOOK_LR, InputAction::ACTION_F_LOOK_UD, delta, true);
@@ -123,13 +139,21 @@ void InputComponent::handleInput(float delta)
 
 		input->fire =					device->getBoolValue(InputAction::ACTION_B_FIRE);
 		input->firePressed =			device->getBoolPressed(InputAction::ACTION_B_FIRE);
-		input->changeAmmunitionType =	device->getBoolReleased(InputAction::ACTION_B_NEXT_AMMUNITIONTYPE);
-		input->changeFiringMode =		device->getBoolReleased(InputAction::ACTION_B_NEXT_FIRINGMODE);
 
-		input->killPlayer = device->getBoolReleased(InputAction::ACTION_B_KILL_PLAYER);
-		input->jump_jetpack =		device->getBoolValue(InputAction::ACTION_B_JUMP_JETPACK);
+		input->jetpack =				device->getBoolValue(InputAction::ACTION_B_JUMP_JETPACK);
+		input->jump =					device->getBoolPressed(InputAction::ACTION_B_JUMP_JETPACK);
 
-		//input->jetpack =	device->getBoolValue(InputAction::ACTION_B_JETPACK);
+		input->changeAmmunitionType = 0;
+		if(device->getBoolReleased(InputAction::ACTION_B_NEXT_AMMUNITIONTYPE))
+			input->changeAmmunitionType++;
+		if(device->getBoolReleased(InputAction::ACTION_B_PREV_AMMUNITIONTYPE))
+			input->changeAmmunitionType--;
+
+		input->changeFiringMode = 0;
+		if(device->getBoolReleased(InputAction::ACTION_B_NEXT_FIRINGMODE))
+			input->changeFiringMode++;
+		if(device->getBoolReleased(InputAction::ACTION_B_PREV_FIRINGMODE))
+			input->changeFiringMode--;
 
 		if(ptr_player->jetHackPair.first) // if jethack active
 		{
@@ -143,9 +167,9 @@ void InputComponent::handleInput(float delta)
 			}
 		}
 
-		input->sprint =		device->getBoolValue(InputAction::ACTION_B_SPRINT);
+		input->sprint =	device->getBoolValue(InputAction::ACTION_B_SPRINT);
 
-		input->reload =		device->getBoolPressed(InputAction::ACTION_B_RELOAD);
+		input->reload =	device->getBoolPressed(InputAction::ACTION_B_RELOAD);
 
 		if(device->getBoolValue(InputAction::ACTION_B_TIME_SPEED_UP))
 		{
@@ -206,6 +230,7 @@ void InputComponent::handleInput(float delta)
 
 			qtDevice->setAxesToZero();
 			qtDevice->updateButtons();
+			qtDevice->updateScroll();
 		}
 	}
 }
@@ -281,12 +306,15 @@ void InputComponent::handleMousePressedEvent(int nr, bool pressed)
 	}
 }
 
-void InputComponent::handleKeyEvent(char key, bool pressed)
+void InputComponent::handleKeyEvent(char key, bool pressed, bool shiftModifier)
 {
 	QTInputDevices* device = inputManager_->GetMouseAndKeyboard();
 		
 	if(device != nullptr)
 	{
-		device->setButton(key, pressed);
+		if(shiftModifier)
+			device->setButton('é', pressed);
+		else
+			device->setButton(key, pressed);
 	}
 }

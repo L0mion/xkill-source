@@ -86,7 +86,8 @@ void Menu_HUD::mapToSplitscreen()
 	Float2 bottomPos;
 	ui.frame_bottom->resize(screenSize.x - screenSize.x*0.00f * 2, ui.frame_bottom->height());
 	bottomPos.x = screenSize.x * 0.5f - ui.frame_bottom->width()* 0.5f;
-	bottomPos.y = screenSize.y - screenSize.x*0.005f - ui.frame_bottom->height()* 1.0f;
+	int test = screenSize.x*0.005f;
+	bottomPos.y = screenSize.y - test - ui.frame_bottom->height();
 	ui.frame_bottom->move(bottomPos.x, bottomPos.y);
 	Float2 bottomCenterPos = bottomPos;
 	bottomCenterPos.x = screenSize.x * 0.5f - ui.groupBox_bottomCenter->width()* 0.5f;
@@ -110,6 +111,9 @@ void Menu_HUD::mapToSplitscreen()
 	weaponInfoPos.x = ui.frame_bottom->parentWidget()->width() + 1;
 	weaponInfoPos.y = ui.frame_bottom->pos().y();
 	weaponInfoHud.setPosition(weaponInfoPos);
+
+	// Create scheduling hud
+	schedulingHud.init(&ui, ptr_splitScreen->ptr_player);
 }
 
 void Menu_HUD::refresh()
@@ -124,11 +128,20 @@ void Menu_HUD::refresh()
 	int ammoIndex = ammunition->type;
 	float fadeTime = 1.0f;
 
+
+	//
+	// Update scheduling hud
+	//
+
+	schedulingHud.refresh();
+
+
 	//
 	// Update weapon info hud
 	//
 
 	weaponInfoHud.update(firingIndex, ammoIndex);
+
 
 	//
 	// Show ammunition info
@@ -306,7 +319,9 @@ void Menu_HUD::refresh()
 			// Show scoreboard if hidden
 			if(ui.frame_scoreboard->isHidden())
 			{
+				hudMessage_manager.silenceAllMessages();
 				ui.frame_scoreboard->show();
+				ptr_player->isScoreBoardVisible = true;
 			}
 		}
 	}
@@ -319,6 +334,7 @@ void Menu_HUD::refresh()
 		if(!ui.frame_scoreboard->isHidden())
 		{
 			ui.frame_scoreboard->hide();
+			ptr_player->isScoreBoardVisible = false;
 		}
 	}
 
@@ -439,24 +455,20 @@ void Menu_HUD::refresh()
 		ui.label_firingMode->setPixmap(path);
 	}
 
-	if(firingModeFade > 0.0f)
-	{
-		firingModeFade -= SETTINGS->trueDeltaTime;
+	//if(firingModeFade > 0.0f)
+	//{
+	//	firingModeFade -= SETTINGS->trueDeltaTime;
 
-		// Show progress bar if hidden
-		if(ui.label_firingMode->isHidden())
-			ui.label_firingMode->show();
-
-		// Update value
-		ui.progressBar_health->setValue(healthRatio);
-		ui.progressBar_health->update();
-	}
-	else
-	{
-		// Hide progress-bar if shown
-		if(!ui.label_firingMode->isHidden())
-			ui.label_firingMode->hide();
-	}
+	//	// Show progress bar if hidden
+	//	if(ui.label_firingMode->isHidden())
+	//		ui.label_firingMode->show();
+	//}
+	//else
+	//{
+	//	// Hide progress-bar if shown
+	//	if(!ui.label_firingMode->isHidden())
+	//		ui.label_firingMode->hide();
+	//}
 
 	 
 	// Update scoreboard progress bars

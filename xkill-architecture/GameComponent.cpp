@@ -26,6 +26,7 @@ GameComponent::GameComponent(void)
 	SUBSCRIBE_TO_EVENT(this, EVENT_UNLOAD_LEVEL);
 	SUBSCRIBE_TO_EVENT(this, EVENT_NULL_PROCESS_STARTED_EXECUTING);
 	SUBSCRIBE_TO_EVENT(this, EVENT_NULL_PROCESS_STOPPED_EXECUTING);
+	SUBSCRIBE_TO_EVENT(this, EVENT_SPAWN_PLAYER);
 }
 
 GameComponent::~GameComponent(void)
@@ -35,6 +36,8 @@ GameComponent::~GameComponent(void)
 		delete levelEvents_.at(i);
 	}
 	levelEvents_.clear();
+
+	delete CollisionManager::Instance();
 }
 
 bool GameComponent::init()
@@ -84,7 +87,21 @@ void GameComponent::onEvent(Event* e)
 		break;
 	case EVENT_NULL_PROCESS_STOPPED_EXECUTING:
 		nullProcessExecuting = false;
+
+		//Reset pickupables
+		while(itrPickupable.hasNext())
+		{
+			AttributePtr<Attribute_Pickupable> ptr_pickupable = itrPickupable.getNext();
+			CollisionManager::Instance()->removePickupable(ptr_pickupable);
+		}
 		break;
+	case EVENT_SPAWN_PLAYER:
+		{
+			Event_SpawnPlayer* event_SpawnPlayer = static_cast<Event_SpawnPlayer*>(e);
+			int playerAttributeId = event_SpawnPlayer->playerAttributeId;
+			spawnPlayer(itrPlayer.at(playerAttributeId));
+			break;
+		}
 	default:
 		break;
 	}
@@ -92,7 +109,11 @@ void GameComponent::onEvent(Event* e)
 #include <xkill-utilities/Converter.h>
 void GameComponent::onUpdate(float delta)
 {
+	//--------------------------------------------------------------------------------------
+	// Handle player attributes
+	//--------------------------------------------------------------------------------------
 	updatePlayerAttributes(delta);
+	
 	//--------------------------------------------------------------------------------------
 	// Handle projectile attributes
 	//--------------------------------------------------------------------------------------
@@ -280,10 +301,8 @@ void GameComponent::onUpdate(float delta)
 		//--------------------------------------------------------------------------------------
 		// Determine which world physics objects to drop and the drop ratio
 		//--------------------------------------------------------------------------------------
-		float timeInSecondsUntilTheWorldIsCompletelyFallenApart = 30;
-
 		unsigned int nrOfWorldPieces = levelEvents_.size();
-		float makeThisManyWorldPiecesFallEachSecond = nrOfWorldPieces/timeInSecondsUntilTheWorldIsCompletelyFallenApart;
+		float makeThisManyWorldPiecesFallEachSecond = nrOfWorldPieces/SETTINGS->nullprocessExecutionTime;
 		float deltaRatio = 1.0f / makeThisManyWorldPiecesFallEachSecond;
 		static float timer = 0;
 		timer += delta;
@@ -320,9 +339,6 @@ void GameComponent::onUpdate(float delta)
 #include <xkill-utilities/Converter.h>
 void GameComponent::updatePlayerAttributes(float delta)
 {
-	//--------------------------------------------------------------------------------------
-	// Handle player attributes
-	//--------------------------------------------------------------------------------------
 	while(itrPlayer.hasNext())
 	{
 		//Fetch player-related attributes
@@ -349,11 +365,10 @@ void GameComponent::updatePlayerAttributes(float delta)
 			// Ammunition logic: Ammunition change, firing mode change.
 			//--------------------------------------------------------------------------------------
 			bool ammunitionSwitchReload = false;
-			if(ptr_input->changeAmmunitionType)
+			if(ptr_input->changeAmmunitionType != 0)
 			{
-				ptr_input->changeAmmunitionType = false;
-				ptr_weaponStats->currentAmmunitionType = static_cast<XKILL_Enums::AmmunitionType>((ptr_weaponStats->currentAmmunitionType + 1) % XKILL_Enums::AmmunitionType::NROFAMMUNITIONTYPES);
-				bool successfullySwitchedAmmunition = switchAmmunition(ptr_weaponStats);
+				//ptr_weaponStats->currentAmmunitionType = static_cast<XKILL_Enums::AmmunitionType>(nextAmmunitonTypeIndex);
+				bool successfullySwitchedAmmunition = switchAmmunition(ptr_weaponStats, ptr_input->changeAmmunitionType);
 				if(successfullySwitchedAmmunition)
 				{
 					ammo = &ptr_weaponStats->ammunition[ptr_weaponStats->currentAmmunitionType];
@@ -365,11 +380,10 @@ void GameComponent::updatePlayerAttributes(float delta)
 				}
 			}
 
-			if(ptr_input->changeFiringMode)
+			if(ptr_input->changeFiringMode != 0)
 			{
-				ptr_input->changeFiringMode = false;
-				ptr_weaponStats->currentFiringModeType = static_cast<XKILL_Enums::FiringModeType>((ptr_weaponStats->currentFiringModeType + 1) % XKILL_Enums::AmmunitionType::NROFAMMUNITIONTYPES);
-				bool successfullySwitcheFiringModeOrAmmunnition = switchFiringMode(ptr_weaponStats);
+				//ptr_weaponStats->currentFiringModeType = static_cast<XKILL_Enums::FiringModeType>(nextFiringModeIndex);
+				bool successfullySwitcheFiringModeOrAmmunnition = switchFiringMode(ptr_weaponStats, ptr_input->changeFiringMode);
 				if(successfullySwitcheFiringModeOrAmmunnition)
 				{
 					firingMode = &ptr_weaponStats->firingMode[ptr_weaponStats->currentFiringModeType];
@@ -520,83 +534,15 @@ void GameComponent::updatePlayerAttributes(float delta)
 			//--------------------------------------------------------------------------------------
 			else if(!nullProcessExecuting)
 			{
-				//--------------------------------------------------------------------------------------
-				// Spawn point
-				//--------------------------------------------------------------------------------------
-				AttributePtr<Attribute_PlayerSpawnPoint> ptr_spawnPoint = findUnoccupiedSpawnPoint();
-				if(ptr_spawnPoint.isValid()) //If an appropriate spawnpoint was found: spawn at it
-				{
-					AttributePtr<Attribute_Position> ptr_spawnPoint_position = ptr_spawnPoint->ptr_position;
-					ptr_position->position = ptr_spawnPoint_position->position; // set player position attribute
-					DEBUGPRINT("Player entity " << itrPlayer.ownerId() << " spawned at " << ptr_position->position.x << " " << ptr_position->position.y << " " << ptr_position->position.z << std::endl);
-				}
-				else //otherwise: spawn at origo.
-				{
-					ptr_position->position = Float3(0.0f, 0.0f, 0.0f);
-					DEBUGPRINT("No spawn point was found. Player entity " << itrPlayer.ownerId() << " spawned at " << ptr_position->position.x << " " << ptr_position->position.y << " " << ptr_position->position.z << std::endl);
-				}
-
-				//--------------------------------------------------------------------------------------
-				// Reset player
-				//--------------------------------------------------------------------------------------
-				
-				//Point camera towards center
-				Float3 pos2d(-ptr_position->position.x, 0.0f, -ptr_position->position.z);
-				if(pos2d.length() > 0.1)
-				{
-					ptr_camera->up = Float3(0.0f, 1.0f, 0.0f);
-					ptr_camera->look = Float3(-ptr_position->position.x, 0.0f, -ptr_position->position.z).normalize();
-					ptr_camera->right = ptr_camera->up.cross(ptr_camera->look);
-				
-					DirectX::XMVECTOR eye,lookat,up,quat;
-					DirectX::XMMATRIX rotation;
-					DirectX::XMFLOAT4 quaternion;
-				
-					up = DirectX::XMLoadFloat3(&DirectX::XMFLOAT3(0,1,0));
-					eye = DirectX::XMLoadFloat3(&DirectX::XMFLOAT3(ptr_position->position.asFloat()));
-					lookat = DirectX::XMLoadFloat3(&DirectX::XMFLOAT3(0,0,0));
-				
-					rotation = DirectX::XMMatrixLookAtLH(eye,lookat,up);
-					quat = DirectX::XMQuaternionRotationMatrix(rotation);
-					DirectX::XMStoreFloat4(&quaternion,quat);
-
-					ptr_spatial->rotation = Float4(quaternion.x,quaternion.y,quaternion.z,quaternion.w);
-				}
-				else
-				{
-					ptr_spatial->rotation = Float4(0.0f, 0.0f, 0.0f, 1.0f);
-					ptr_camera->up = Float3(0.0f, 1.0f, 0.0f);
-					ptr_camera->right = Float3(1.0f, 0.0f, 0.0f);
-					ptr_camera->look = Float3(0.0f, 0.0f, 1.0f);
-				}
-				ptr_physics->reloadDataIntoBulletPhysics = true;
-				
-				ptr_health->health = ptr_health->maxHealth; // restores player health
-
-				MutatorSettings ms;
-				for(int i = 0; i < XKILL_Enums::AmmunitionType::NROFAMMUNITIONTYPES; i++)
-				{
-					for(int j = 0; j < XKILL_Enums::FiringModeType::NROFFIRINGMODETYPES; j++)
-					{
-						ms.setupAttribute(ptr_weaponStats, static_cast<XKILL_Enums::AmmunitionType>(i), static_cast<XKILL_Enums::FiringModeType>(j));
-					}
-				}
-
-				ptr_player->ptr_camera->fieldOfView =3.14f/4.0f;
-				ptr_player->respawnTimer.resetTimer();
-				ptr_player->detectedAsDead = false;
-				SEND_EVENT(&Event_PlaySound(XKILL_Enums::Sound::SOUND_RESPAWN, itrPlayer.ownerIdAt(ptr_player.index()), ptr_position->position, true));
+				spawnPlayer(ptr_player);
 			}
 		}
 
 		//--------------------------------------------------------------------------------------
-		// Instant respawn of player, used for debugging
+		// Respawn player
 		//--------------------------------------------------------------------------------------
-		if(ptr_input->killPlayer)
+		if(ptr_input->firePressed && ptr_player->detectedAsDead && ptr_player->isScoreBoardVisible)
 		{
-			ptr_health->health = 0.0f;
-			ptr_input->killPlayer = false;
-			ptr_player->detectedAsDead = true;
 			ptr_player->respawnTimer.zeroTimer();
 		}
 	}
@@ -611,12 +557,12 @@ void GameComponent::event_PhysicsAttributesColliding(Event_PhysicsAttributesColl
 	// Handle hit reaction on entity 1
 	// when colliding with entity 2;
 
-	CollisionManager collisionManager;
+	CollisionManager* collisionManager = CollisionManager::Instance();
 
-	collisionManager.collision_applyDamage(entity1, entity2);
-	collisionManager.collision_projectile(entity1, entity2);
-	collisionManager.collision_pickupable(entity1, entity2);
-	collisionManager.collision_playerVsExplosionSphere(entity1, entity2);
+	collisionManager->collision_applyDamage(entity1, entity2);
+	collisionManager->collision_projectile(entity1, entity2);
+	collisionManager->collision_pickupable(entity1, entity2);
+	collisionManager->collision_playerVsExplosionSphere(entity1, entity2);
 }
 
 void GameComponent::event_EndDeathmatch(Event_EndDeathmatch* e)
@@ -765,6 +711,85 @@ AttributePtr<Attribute_PlayerSpawnPoint> GameComponent::findUnoccupiedSpawnPoint
 	return ptr_found_spawnPoint;
 }
 
+void GameComponent::spawnPlayer(AttributePtr<Attribute_Player> ptr_player)
+{
+	AttributePtr<Attribute_Health>			ptr_health		=	ptr_player	->	ptr_health		;
+	AttributePtr<Attribute_Camera>			ptr_camera		=	ptr_player	->	ptr_camera		;
+	AttributePtr<Attribute_Input>			ptr_input		=	ptr_player	->	ptr_input		;
+	AttributePtr<Attribute_Render>			ptr_render		=	ptr_player	->	ptr_render		;
+	AttributePtr<Attribute_WeaponStats>		ptr_weaponStats	=	ptr_player	->	ptr_weaponStats	;
+	AttributePtr<Attribute_Spatial>			ptr_spatial		=	ptr_render	->	ptr_spatial		;
+	AttributePtr<Attribute_Position>		ptr_position	=	ptr_spatial	->	ptr_position	;
+	AttributePtr<Attribute_Physics>			ptr_physics		=	ptr_input	->	ptr_physics		;
+
+	//--------------------------------------------------------------------------------------
+	// Spawn point
+	//--------------------------------------------------------------------------------------
+	AttributePtr<Attribute_PlayerSpawnPoint> ptr_spawnPoint = findUnoccupiedSpawnPoint();
+	if(ptr_spawnPoint.isValid()) //If an appropriate spawnpoint was found: spawn at it
+	{
+		AttributePtr<Attribute_Position> ptr_spawnPoint_position = ptr_spawnPoint->ptr_position;
+		ptr_position->position = ptr_spawnPoint_position->position; // set player position attribute
+		DEBUGPRINT("Player entity " << itrPlayer.ownerId() << " spawned at " << ptr_position->position.x << " " << ptr_position->position.y << " " << ptr_position->position.z << std::endl);
+	}
+	else //otherwise: spawn at origo.
+	{
+		ptr_position->position = Float3(0.0f, 0.0f, 0.0f);
+		DEBUGPRINT("No spawn point was found. Player entity " << itrPlayer.ownerId() << " spawned at " << ptr_position->position.x << " " << ptr_position->position.y << " " << ptr_position->position.z << std::endl);
+	}
+
+	//--------------------------------------------------------------------------------------
+	// Reset player
+	//--------------------------------------------------------------------------------------
+				
+	//Point camera towards center
+	Float3 pos2d(-ptr_position->position.x, 0.0f, -ptr_position->position.z);
+	if(pos2d.length() > 0.1)
+	{
+		ptr_camera->up = Float3(0.0f, 1.0f, 0.0f);
+		ptr_camera->look = Float3(-ptr_position->position.x, 0.0f, -ptr_position->position.z).normalize();
+		ptr_camera->right = ptr_camera->up.cross(ptr_camera->look);
+				
+		DirectX::XMVECTOR eye,lookat,up,quat;
+		DirectX::XMMATRIX rotation;
+		DirectX::XMFLOAT4 quaternion;
+				
+		up = DirectX::XMLoadFloat3(&DirectX::XMFLOAT3(0,1,0));
+		eye = DirectX::XMLoadFloat3(&DirectX::XMFLOAT3(ptr_position->position.asFloat()));
+		lookat = DirectX::XMLoadFloat3(&DirectX::XMFLOAT3(0,0,0));
+				
+		rotation = DirectX::XMMatrixLookAtLH(eye,lookat,up);
+		quat = DirectX::XMQuaternionRotationMatrix(rotation);
+		DirectX::XMStoreFloat4(&quaternion,quat);
+
+		ptr_spatial->rotation = Float4(quaternion.x,quaternion.y,quaternion.z,quaternion.w);
+	}
+	else
+	{
+		ptr_spatial->rotation = Float4(0.0f, 0.0f, 0.0f, 1.0f);
+		ptr_camera->up = Float3(0.0f, 1.0f, 0.0f);
+		ptr_camera->right = Float3(1.0f, 0.0f, 0.0f);
+		ptr_camera->look = Float3(0.0f, 0.0f, 1.0f);
+	}
+	ptr_physics->reloadDataIntoBulletPhysics = true;
+				
+	ptr_health->health = ptr_health->maxHealth; // restores player health
+
+	MutatorSettings ms;
+	for(int i = 0; i < XKILL_Enums::AmmunitionType::NROFAMMUNITIONTYPES; i++)
+	{
+		for(int j = 0; j < XKILL_Enums::FiringModeType::NROFFIRINGMODETYPES; j++)
+		{
+			ms.setupAttribute(ptr_weaponStats, static_cast<XKILL_Enums::AmmunitionType>(i), static_cast<XKILL_Enums::FiringModeType>(j));
+		}
+	}
+
+	ptr_player->ptr_camera->fieldOfView = 3.14f/4.0f;
+	ptr_player->respawnTimer.resetTimer();
+	ptr_player->detectedAsDead = false;
+	SEND_EVENT(&Event_PlaySound(XKILL_Enums::Sound::SOUND_RESPAWN, itrPlayer.ownerIdAt(ptr_player.index()), ptr_position->position, true));
+}
+
 void GameComponent::event_StartDeathmatch( Event_StartDeathmatch* e )
 {
 	//while(itrPickupablesSpawnPoint.hasNext())
@@ -800,7 +825,7 @@ void GameComponent::event_StartDeathmatch( Event_StartDeathmatch* e )
 	{
 		AttributePtr<Attribute_Player>			ptr_player		=	itrPlayer		.getNext();
 		AttributePtr<Attribute_WeaponStats>		ptr_weaponStats	=	ptr_player	->	ptr_weaponStats	;
-		switchFiringMode(ptr_weaponStats);	//Ensure ammunition disablement (selected from menu)
+		switchFiringMode(ptr_weaponStats, 0);	//Ensure ammunition disablement (selected from menu)
 		
 		SEND_EVENT(&Event_HackActivated(5000.0f, XKILL_Enums::HackType::JETHACK, ptr_player)); //check jetpack giveaway
 	}
@@ -843,6 +868,12 @@ void GameComponent::event_PlayerDeath(Event_PlayerDeath* e)
 	{
 		SEND_EVENT(&Event_StopSound(XKILL_Enums::Sound::SOUND_LASER, itrPlayer.ownerIdAt(e->playerAttributeIndex)));
 		ptr_player->executing = false;
+	
+		std::vector<int> rayId = itrPlayer.ownerAt(ptr_player.index())->getAttributes(ATTRIBUTE_RAY);
+		for(unsigned int i = 0; i < rayId.size(); i++)
+		{
+			itrRay.at(rayId[i])->ptr_render->culling.clear();
+		}
 	}
 	if(ptr_player->jetHackPair.first)
 	{
@@ -875,29 +906,39 @@ void GameComponent::event_UnloadLevel()
 	levelEvents_.clear();
 }
 
-bool GameComponent::switchAmmunition(AttributePtr<Attribute_WeaponStats> weaponStats)
+bool GameComponent::switchAmmunition(AttributePtr<Attribute_WeaponStats> ptr_weaponStats, int nrOfStepsToSwitch)
 {
 	bool switchedAmmunition = false;
-	FiringMode* firingMode = &weaponStats->firingMode[weaponStats->currentFiringModeType];
+	FiringMode* firingMode = &ptr_weaponStats->firingMode[ptr_weaponStats->currentFiringModeType];
 
 	for(int i = 0; i < XKILL_Enums::AmmunitionType::NROFAMMUNITIONTYPES; i++)
 	{
-		weaponStats->currentAmmunitionType = static_cast<XKILL_Enums::AmmunitionType>((weaponStats->currentAmmunitionType + 1) % XKILL_Enums::AmmunitionType::NROFAMMUNITIONTYPES);
+		int nextAmmunitionIndex = (ptr_weaponStats->currentAmmunitionType + nrOfStepsToSwitch);
+		while(nextAmmunitionIndex < 0)
+			nextAmmunitionIndex += XKILL_Enums::AmmunitionType::NROFAMMUNITIONTYPES;
+
+		nextAmmunitionIndex %= XKILL_Enums::AmmunitionType::NROFAMMUNITIONTYPES;
+
+		ptr_weaponStats->currentAmmunitionType = static_cast<XKILL_Enums::AmmunitionType>(nextAmmunitionIndex);
 
 		//Try switching of ammunition
-		if(weaponStats->currentAmmunitionType == XKILL_Enums::AmmunitionType::BULLET && firingMode->canShootBullet || 
-			weaponStats->currentAmmunitionType == XKILL_Enums::AmmunitionType::SCATTER && firingMode->canShootScatter || 
-			weaponStats->currentAmmunitionType == XKILL_Enums::AmmunitionType::EXPLOSIVE && firingMode->canShootExplosive)
+		if(ptr_weaponStats->currentAmmunitionType == XKILL_Enums::AmmunitionType::BULLET && firingMode->canShootBullet || 
+			ptr_weaponStats->currentAmmunitionType == XKILL_Enums::AmmunitionType::SCATTER && firingMode->canShootScatter || 
+			ptr_weaponStats->currentAmmunitionType == XKILL_Enums::AmmunitionType::EXPLOSIVE && firingMode->canShootExplosive)
 		{
 			switchedAmmunition = true;
 			break;
+		}
+		else
+		{
+			nrOfStepsToSwitch = 1; //Couldn't switch that many steps, try next one until we find one that works
 		}
 	}
 
 	return switchedAmmunition;
 }
 
-bool GameComponent::switchFiringMode(AttributePtr<Attribute_WeaponStats> ptr_weaponStats)
+bool GameComponent::switchFiringMode(AttributePtr<Attribute_WeaponStats> ptr_weaponStats, int nrOfStepsToSwitch)
 {
 	bool switchedFiringMode = false;
 
@@ -905,7 +946,13 @@ bool GameComponent::switchFiringMode(AttributePtr<Attribute_WeaponStats> ptr_wea
 
 	for(int i = 0; i < XKILL_Enums::FiringModeType::NROFFIRINGMODETYPES; i++)
 	{
-		ptr_weaponStats->currentFiringModeType = static_cast<XKILL_Enums::FiringModeType>((ptr_weaponStats->currentFiringModeType + 1) % XKILL_Enums::FiringModeType::NROFFIRINGMODETYPES);
+		int nextFiringModeIndex = (ptr_weaponStats->currentFiringModeType + nrOfStepsToSwitch);
+		while(nextFiringModeIndex < 0)
+			nextFiringModeIndex += XKILL_Enums::FiringModeType::NROFFIRINGMODETYPES;
+
+		nextFiringModeIndex %= XKILL_Enums::FiringModeType::NROFFIRINGMODETYPES;
+
+		ptr_weaponStats->currentFiringModeType = static_cast<XKILL_Enums::FiringModeType>(nextFiringModeIndex);
 
 		firingMode = &ptr_weaponStats->firingMode[ptr_weaponStats->currentFiringModeType];
 
@@ -917,10 +964,14 @@ bool GameComponent::switchFiringMode(AttributePtr<Attribute_WeaponStats> ptr_wea
 			switchedFiringMode = true;
 			break;
 		}
-		else if(switchAmmunition(ptr_weaponStats)) //switch firing mode AND ammunition
+		else if(switchAmmunition(ptr_weaponStats, 1)) //switch firing mode AND ammunition
 		{
 			switchedFiringMode = true;
 			break;
+		}
+		else
+		{
+			nrOfStepsToSwitch = 1; //Couldn't switch that many steps, try next one until we find one that works
 		}
 	}
 
@@ -951,20 +1002,21 @@ void GameComponent::updateAndInterpretAimingRay(Entity* rayCastingPlayerEntity, 
 	int nrOfHits = event_AllHitsRayCast.mapHitPointToEntityId.size();
 	if(nrOfHits > 0) //If ray hit something
 	{
+		Float3 closestHit = rayDestination;
 		int hitEntityId = 0;
 		for(int i=0;i<nrOfHits;i++)
 		{
 			hitEntityId = event_AllHitsRayCast.mapHitPointToEntityId.at(i).second;
-			if(hitEntityId == rayCastingPlayerEntity->getID())
+
+			Float3 v1 = event_AllHitsRayCast.from - event_AllHitsRayCast.mapHitPointToEntityId.at(i).first;
+			Float3 v2 = event_AllHitsRayCast.from - closestHit;
+
+			if(v1.length() < v2.length() && hitEntityId != rayCastingPlayerEntity->getID())
 			{
-				continue; //If player hit himself, take next hit point
+				closestHit = event_AllHitsRayCast.mapHitPointToEntityId.at(i).first;
 			}
-			else
-			{
-				hitPoint = event_AllHitsRayCast.mapHitPointToEntityId.at(i).first;
-				entityHitByRay = &allEntity->at(hitEntityId);
-				break; //Valid hit point found
-			}
+
+			hitPoint = closestHit;
 		}
 	}
 	else //If ray did not hit anything, set hitpoint to camera look far plane z
@@ -1031,6 +1083,7 @@ void GameComponent::updateAndInterpretAimingRay(Entity* rayCastingPlayerEntity, 
 			else
 			{
 				ray->ptr_render->culling.clear();
+
 				//entityHitByRay might be used here (2013-02-28 17.24)
 			}
 		}
@@ -1072,6 +1125,7 @@ void GameComponent::updateAndInterpretLaser(AttributePtr<Attribute_Ray> ptr_ray,
 	laserRotation = laserRotation.quaternionLookAt(closestHitPoint, ptr_ray->from);
 	laserRotation.normalize();
 
+	//ptr_ray->ptr_render->ptr_spatial->rotation = ptr_player->ptr_weapon_offset->ptr_spatial->rotation;
 	ptr_ray->ptr_render->ptr_spatial->rotation = laserRotation.quaternionInverse();
 
 	std::vector<int> playerHitByRayAttributeId = entityHitByRay->getAttributes(ATTRIBUTE_PLAYER);
@@ -1092,19 +1146,22 @@ void GameComponent::updateAndInterpretLaser(AttributePtr<Attribute_Ray> ptr_ray,
 					if(ptr_player->cycleHackPair.first)
 					{
 						ptr_player->cycles++;
-						{Event_PostHudMessage e("", ptr_player); e.setHtmlMessage("You exterminated", hitPlayerAttribute->playerName, "", "+1 cycle"); SEND_EVENT(&e);}
+						{Event_PostHudMessage e("", ptr_player); e.setColor(hitPlayerAttribute->avatarColor); e.setHtmlMessage("You exterminated", hitPlayerAttribute->avatarName, "", "+1 cycle"); SEND_EVENT(&e);}
 					}
 					else
 					{
 						ptr_player->priority++;
-						{Event_PostHudMessage e("", ptr_player); e.setHtmlMessage("You exterminated", hitPlayerAttribute->playerName, "", "+1 priority"); SEND_EVENT(&e);}
+						{Event_PostHudMessage e("", ptr_player); e.setColor(hitPlayerAttribute->avatarColor); e.setHtmlMessage("You exterminated", hitPlayerAttribute->avatarName, "", "+1 priority"); SEND_EVENT(&e);}
 					}
-					{Event_PostHudMessage e("", hitPlayerAttribute); e.setHtmlMessage("Terminated by", ptr_player->playerName); SEND_EVENT(&e);}
+					{Event_PostHudMessage e("", hitPlayerAttribute); e.setColor(ptr_player->avatarColor); e.setHtmlMessage("Terminated by", ptr_player->avatarName); SEND_EVENT(&e);}
 
 					SEND_EVENT(&Event_PlayerDeath(playerHitByRayAttributeId.at(j)));
 				}
 
 				SEND_EVENT(&Event_ModifyPhysicsObject(XKILL_Enums::ModifyPhysicsObjectData::GIVE_IMPULSE, static_cast<void*>(&(rayVector*20.0f)), hitPlayerAttribute->ptr_input->ptr_physics));
+				
+				//Send event to trigger sound for when the laser hits the player
+				//SEND_EVENT(&Event_PlaySound(XKILL_Enums::Sound::SOUND_LASERPLAYERHIT, itrPlayer.ownerIdAt(ptr_player), hitPlayerAttribute->ptr_render->ptr_spatial->ptr_position->position, true));
 			}
 		}
 	}
@@ -1199,7 +1256,7 @@ void GameComponent::startGame()
 	while(itrPlayer.hasNext())
 	{
 		AttributePtr<Attribute_Player>			ptr_player		=	itrPlayer		.getNext();
-		{Event_PostHudMessage e("", ptr_player); e.setHtmlMessage("Your nickname is", ptr_player->playerName); SEND_EVENT(&e);}
+		{Event_PostHudMessage e("", ptr_player); e.setColor(ptr_player->avatarColor); e.setHtmlMessage("Your nickname is", ptr_player->avatarName); SEND_EVENT(&e);}
 	}
 }
 

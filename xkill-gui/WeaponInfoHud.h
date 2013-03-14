@@ -22,6 +22,8 @@ private:
 	std::vector<QWidget*> _icons_subHud;
 
 	Float2 _position;
+	Float2 _currentPosition;
+	Float2 _currentPosition_subHud;
 
 public:
 	WeaponInfoHud();

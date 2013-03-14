@@ -1,4 +1,5 @@
 #include "EventType.h"
+#include "Converter.h"
 
 Event::Event(EventType type)
 { 
@@ -124,10 +125,11 @@ Event_RemoveEntity::Event_RemoveEntity(int entityId) : Event(EVENT_REMOVE_ENTITY
 	this->entityId = entityId;
 }
 
-Event_KeyPress::Event_KeyPress(int keyEnum, bool isPressed) : Event(EVENT_KEY_PRESS)
+Event_KeyPress::Event_KeyPress(int keyEnum, bool isPressed, bool shiftModifier) : Event(EVENT_KEY_PRESS)
 {
 	this->keyEnum = keyEnum;
 	this->isPressed = isPressed;
+	this->shiftModifier = shiftModifier;
 }
 
 Event_MousePress::Event_MousePress(int keyEnum, bool isPressed) : Event(EVENT_MOUSE_PRESS)
@@ -318,6 +320,10 @@ Event_PostHudMessage::Event_PostHudMessage( std::string message, AttributePtr<At
 	this->receiver = RECEIVER_ONLY_SUBJECT;
 
 	setStyle(STYLE_NORMAL);
+
+
+	// Apply color
+	setColor(Float3(1.0f, 1.0f, 1.0f));
 }
 
 void Event_PostHudMessage::setStyle( Style style )
@@ -339,7 +345,9 @@ void Event_PostHudMessage::setStyle( Style style )
 
 void Event_PostHudMessage::setHtmlMessage( std::string prefex, std::string subject, std::string suffix /*= ""*/, std::string description /*= ""*/ )
 {
-	std::string text_normal = "<span style='color: rgba(255, 255, 255, 240);'>";
+	std::string str_color = "rgba("+Converter::IntToStr((int)(color.x * 255))+", "+Converter::IntToStr((int)(color.y * 255))+", "+ Converter::IntToStr((int)(color.z * 255)) +", "+ Converter::IntToStr((int)(color.w * 255)) +")";
+
+	std::string text_normal = "<span style='color: "+ str_color +";'>";
 	std::string text_subtile = "<span style='color: rgba(255, 255, 255, 100);'>";
 	std::string text_end = "</span>";
 
@@ -352,9 +360,23 @@ void Event_PostHudMessage::setHtmlMessage( std::string prefex, std::string subje
 	message = prefex + " " + subject + " " + suffix + " " + description ;
 }
 
+void Event_PostHudMessage::setColor( Float3 color )
+{
+	this->color.x = color.x;
+	this->color.y = color.y;
+	this->color.z = color.z;
+	this->color.w = 0.85f;
+}
+
 Event_ReloadPhysicsAttributeDataIntoBulletPhysics::Event_ReloadPhysicsAttributeDataIntoBulletPhysics(int physicsAttributeId) : Event(EVENT_RELOAD_PHYSICS_ATTRIBUTE_DATA_INTO_BULLET_PHYSICS)
 {
 	this->physicsAttributeId = physicsAttributeId;
+}
+
+
+Event_SpawnPlayer::Event_SpawnPlayer(int playerAttributeId) : Event(EVENT_SPAWN_PLAYER)
+{
+	this->playerAttributeId = playerAttributeId;
 }
 
 Event_MouseWheel::Event_MouseWheel( int value ) : Event(EVENT_MOUSE_WHEEL)

@@ -60,6 +60,8 @@ Attribute_Settings::Attribute_Settings()
 	schedulerTime = 30.0f;
 	cycleTime = 2.0f;
 	showDebugPhysics = false;
+	respawnTime = 3;
+	nullprocessExecutionTime = 30;
 
 	occlusionRadius		= 0.2f;
 	occlusionScale		= 0.7f;
@@ -72,10 +74,10 @@ DataItemList* Attribute_Settings::getDataList()
 	DataItemList* list = new DataItemList();
 
 	list->add(soundVolume, "soundVolume");
-	list->add(occlusionRadius, "occlusionRadius");
-	list->add(occlusionScale, "occlusionScale");
-	list->add(occlusionBias, "occlusionBias");
-	list->add(occlusionIntensity, "occlusionIntensity");
+	list->add(occlusionRadius, "SSAO_occlusionRadius");
+	list->add(occlusionScale, "SSAO_occlusionScale");
+	list->add(occlusionBias, "SSAO_occlusionBias");
+	list->add(occlusionIntensity, "SSAO_occlusionIntensity");
 
 	return list;
 }

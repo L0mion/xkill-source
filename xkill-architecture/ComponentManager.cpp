@@ -6,6 +6,7 @@
 #include <xkill-physics/PhysicsComponent.h>
 #include <xkill-sound/SoundComponent.h>
 #include <xkill-input/InputComponent.h>
+#include <xkill-utilities/StopWatch.h>
 
 #include "CameraComponent.h"
 #include "GameComponent.h"
@@ -231,13 +232,28 @@ void updateOffset()
 
 void ComponentManager::update(float delta)
 {
+	// Measure time
+	static StopWatch timer_total("Total");
+	timer_total.stop();
+	timer_total.start();
+
+	static StopWatch timer_etc("Outside");
+	timer_etc.stop();
+	
+
+
 	// Performs necessary per-frame updating of some sub-parts of EventManager.
 	EventManager::getInstance()->update(delta);
-	SEND_EVENT(&Event(EVENT_UPDATE));
+	
 
 	//// PUT SOMETHING 
 	/// DONT SPAWN PLAYERS FIRST FRAMES
 	/// PUT SOMETHING
+
+
+	
+	
+	
 
 	if(GET_STATE() == STATE_DEATHMATCH)
 	{
@@ -246,21 +262,44 @@ void ComponentManager::update(float delta)
 		clock_t deltatimevartotal = clock();
 		outside += ((float)(deltatimevartotal-deltatimevartotal2))/((float)CLOCKS_PER_SEC);
 #endif
-		calctime(inputtimer,input_->onUpdate(delta);)
-		calctime(physicstimer,physics_->onUpdate(delta);)
-		updateOffset();
-		calctime(cameratimer,camera_->onUpdate(delta);)
-		updateCamera();
-		updateOffset();
-		
-		calctime(gametimer,game_->onUpdate(delta);)
+		PROFILE_SECTION("Input", 
+			calctime(inputtimer,input_->onUpdate(delta);)
+		)
 
-		calctime(soundtimer,sound_->onUpdate(delta);)
-		calctime(hackstimer,hacks_->onUpdate(delta);)
+		PROFILE_SECTION("Physics", 
+			calctime(physicstimer,physics_->onUpdate(delta);)
+		)
 
-		calctime(scoretimer,score_->onUpdate(delta);)
-		calctime(cullingtimer, cullingComponent_->onUpdate(delta);)
-		calctime(rendertimer,render_->onUpdate(delta);)
+		PROFILE_SECTION("Camera", 
+			updateOffset();
+			calctime(cameratimer,camera_->onUpdate(delta);)
+			updateCamera();
+			updateOffset();
+		)
+
+		PROFILE_SECTION("GameLogic", 
+			calctime(gametimer,game_->onUpdate(delta);)
+		)
+
+		PROFILE_SECTION("Sound", 
+			calctime(soundtimer,sound_->onUpdate(delta);)
+		)
+
+		PROFILE_SECTION("HacksUpdate", 
+			calctime(hackstimer,hacks_->onUpdate(delta);)
+		)
+
+		PROFILE_SECTION("ScoreUpdate", 
+			calctime(scoretimer,score_->onUpdate(delta);)
+		)
+
+		PROFILE_SECTION("Culling", 
+			calctime(cullingtimer, cullingComponent_->onUpdate(delta);)
+		)
+
+		PROFILE_SECTION("Renderer", 
+			calctime(rendertimer,render_->onUpdate(delta);)
+		)
 	
 #ifdef XKILLPROFILING
 		deltatimevartotal2 = clock();
@@ -301,4 +340,12 @@ void ComponentManager::update(float delta)
 	{
 		DEBUGPRINT("ComponentManager::update has no state set");
 	}
+
+	PROFILE_SECTION("Non-Components", 
+		SEND_EVENT(&Event(EVENT_UPDATE));
+	)
+
+
+	// Measure Qt performance
+	timer_etc.start();
 }

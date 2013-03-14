@@ -14,6 +14,7 @@ struct InputAction
 	{
 		ACTION_B_FIRE,
 		ACTION_B_RELOAD,
+		ACTION_F_LOW_SENSITIVITY,
 		ACTION_B_LOW_SENSITIVITY,
 		ACTION_B_JUMP_JETPACK,
 		ACTION_B_SPRINT,
@@ -48,8 +49,6 @@ struct InputAction
 
 		//Temporary debug inputs
 
-		ACTION_B_KILL_PLAYER,
-
 		ACTION_B_RUMBLE_ON,
 		ACTION_B_RUMBLE_OFF,
 
@@ -79,7 +78,6 @@ private:
 		InputActionStrings[ACTION_B_LOOK_DOWN				] = "Look Down";
 		InputActionStrings[ACTION_B_LOOK_LEFT				] = "Look Left";
 		InputActionStrings[ACTION_B_LOOK_RIGHT				] = "Look Right";
-		InputActionStrings[ACTION_B_KILL_PLAYER				] = "Suicide";
 		InputActionStrings[ACTION_B_SPRINT					] = "Sprint";
 		InputActionStrings[ACTION_B_NEXT_AMMUNITIONTYPE		] = "Next Ammo";
 		InputActionStrings[ACTION_B_PREV_AMMUNITIONTYPE		] = "Prev Ammo";
@@ -96,6 +94,7 @@ private:
 		InputActionStrings[ACTION_B_TIME_SPEED_DOWN			] = "Slow Down Time";
 		InputActionStrings[ACTION_B_TIME_SPEED_UP			] = "Speed Up Time";
 		InputActionStrings[ACTION_B_RELOAD					] = "Reload";
+		InputActionStrings[ACTION_F_LOW_SENSITIVITY			] = "Aim [Axis]";
 		InputActionStrings[ACTION_B_LOW_SENSITIVITY			] = "Aim";
 	}
 };

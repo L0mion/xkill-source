@@ -78,7 +78,7 @@ void Attribute_Spatial::saveTo( DataItemList* list )
 
 Attribute_Animation::Attribute_Animation()
 {
-	activeAnimation = "Default";
+	activeAnimation = "processHover";
 	time = 0.0f;
 }
 Attribute_Animation::~Attribute_Animation()
@@ -429,9 +429,9 @@ float Attribute_SplitScreen::getAspectRatio()
 
 Attribute_Input::Attribute_Input()
 {
-	jump_jetpack = false;
+	jump = false;
+	jetpack = false;
 	sprint = false;
-	killPlayer = false;
 	fire = false;
 	firePressed = false;
 	changeAmmunitionType = false;
@@ -509,14 +509,16 @@ Attribute_Player::Attribute_Player()
 	canSprint = true;
 	sprintRechargeRate = 0.2f;
 	executing = false;
+	hovering = false;
 	speedHackPair.first		= false;
 	speedHackPair.second	= nullptr;
 	jetHackPair.first		= false;
 	jetHackPair.second		= nullptr;
 	cycleHackPair.first		= false;
 	cycleHackPair.second	= nullptr;
+	isScoreBoardVisible = false;
 
-	playerName = "NaN";
+	avatarName = "NaN";
 
 	walkSpeed = 5.0f;
 	sprintSpeed = walkSpeed*2;
@@ -767,6 +769,42 @@ DataItemList* Attribute_Pickupable::getDataList()
 	list->add(amount, "amount");
 
 	return list;
+}
+
+Float3 Attribute_Pickupable::getColor()
+{
+	Float3 color;
+
+	switch(pickupableType)
+	{
+	case XKILL_Enums::PickupableType::AMMUNITION_BULLET:
+		color = Float3(1.0f, 1.0f, 0.0f);
+		break;
+	case XKILL_Enums::PickupableType::AMMUNITION_SCATTER:
+		color = Float3(0.0f, 1.0f, 0.0f);
+		break;
+	case XKILL_Enums::PickupableType::AMMUNITION_EXPLOSIVE:
+		color = Float3(1.0f, 0.0f, 0.0f);
+		break;
+	case XKILL_Enums::PickupableType::MEDKIT:
+		color = Float3(1.0f, 0.0f, 0.0f);
+		break;
+	case XKILL_Enums::PickupableType::HACK_JETHACK:
+		color = Float3(0.0f, 1.0f, 1.0f);
+		break;
+	case XKILL_Enums::PickupableType::HACK_SPEEDHACK:
+		color = Float3(1.0f, 0.0f, 1.0f);
+		break;
+	//case XKILL_Enums::PickupableType::HACK_CYCLEHACK:
+	//	break;
+	//case XKILL_Enums::PickupableType::HACK_RANDOMHACK:
+	//	break;
+	default:
+		color = Float3(1.0f, 1.0f, 1.0f);
+		break;
+	}
+
+	return color;
 }
 
 #include "WeaponStructs.h"
