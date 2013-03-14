@@ -437,6 +437,7 @@ void GameComponent::updatePlayerAttributes(float delta)
 					ammo->currentTotalNrOfShots--;
 					firingMode->nrOfShotsLeftInClip[ammoIndex]--;
 
+					firingMode->reloadTimeLeft = firingMode->reloadTime;
 					ammo->isReloading = false;
 
 					shootProjectile(ptr_player->ptr_weaponFireLocation_spatial, ptr_weaponStats);

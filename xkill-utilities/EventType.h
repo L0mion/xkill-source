@@ -473,9 +473,10 @@ class DLL_U Event_KeyPress : public Event
 public:
 	int keyEnum;
 	bool isPressed;
-	bool shiftModifier;
+	bool shiftPressed;
+	bool tabPressed;
 
-	Event_KeyPress(int keyEnum, bool isPressed, bool shiftModifier);
+	Event_KeyPress(int keyEnum, bool isPressed, bool shiftPressed, bool tabPressed);
 };
 
 /// Alerts InputComponent about mouse press
@@ -599,10 +600,9 @@ public:
 class DLL_U Event_CreateExplosionSphere : public Event
 {
 public:
-	Event_CreateExplosionSphere(Float3 position, float damage, int entityIdOfCreator, XKILL_Enums::AmmunitionType ammunitionType, XKILL_Enums::FiringModeType firingModeType);
+	Event_CreateExplosionSphere(Float3 position, int entityIdOfCreator, XKILL_Enums::AmmunitionType ammunitionType, XKILL_Enums::FiringModeType firingModeType);
 
 	Float3 position;
-	float damage;
 	int entityIdOfCreator;
 	XKILL_Enums::AmmunitionType ammunitionType;
 	XKILL_Enums::FiringModeType firingModeType;
