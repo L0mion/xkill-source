@@ -1343,6 +1343,9 @@ void NameGenerator::resetNames()
 	addName("evil inside");
 	addName("poor Yorick");
 	addName("he's back");
+	addName("the missing link");
+	addName("Dr. Moreau");
+	addName("brain in a jar");
 	addName("Wintermute");
 
 	addName("inexpensive payback time");

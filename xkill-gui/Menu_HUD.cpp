@@ -401,25 +401,6 @@ void Menu_HUD::refresh()
 
 		// Set image to label
 		ui.label_aim->setPixmap(path);
-
-		// EASTER EGG
-		if(index_crosshair == XKILL_Enums::EXPLOSIVE)
-		{
-			// If a specific user
-			std::string username = getenv( "USERNAME" );
-			if(username == "Professor Membrane")
-			{
-				QMovie* movie = new QMovie(this);
-				movie->setCacheMode(QMovie::CacheAll);
-				movie->setFileName("../../xkill-resources/xkill-gui/images/animations/tmp.gif");
-				ui.label_xAmmo->setMovie(movie);
-				ui.label_xAmmo->setScaledContents(true);
-				QSize sizeLimit(100, 100);
-				ui.label_xAmmo->setMinimumSize(sizeLimit);
-				ui.label_xAmmo->setMaximumSize(sizeLimit);
-				movie->start();
-			}
-		}
 	}
 
 
