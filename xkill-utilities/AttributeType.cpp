@@ -514,6 +514,7 @@ Attribute_Player::Attribute_Player()
 	cycleHackPair.first		= false;
 	cycleHackPair.second	= nullptr;
 	isScoreBoardVisible = false;
+	showScoreboard = false;
 
 	avatarName = "NaN";
 
