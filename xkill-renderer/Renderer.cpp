@@ -112,6 +112,7 @@ Renderer::Renderer(HWND windowHandle)
 	rayBuffer				= nullptr;
 
 	animationTimeOffset_ = 2.0f;
+	prevDelta_ = 0.0f;
 	temp_ = 0;
 }
 Renderer::~Renderer()	
@@ -430,6 +431,7 @@ void Renderer::update(float delta)
 	ID3D11Device*			device = managementD3D_->getDevice();
 	ID3D11DeviceContext*	devcon = managementD3D_->getDeviceContext();
 
+	finalTransforms_.clear();
 	while(itrPlayer.hasNext()) //Update animations
 	{
 		AttributePtr<Attribute_Player> ptr_player = itrPlayer.getNext();
@@ -443,44 +445,50 @@ void Renderer::update(float delta)
 }
 void Renderer::updateAnimation(float delta, AttributePtr<Attribute_Player> ptr_player, ID3D11Device* device)
 {
+	if((delta-prevDelta_) > 0.01)
+		delta = prevDelta_;
+
+	AttributePtr<Attribute_Render> ptr_render		= ptr_player->ptr_render;
+	AttributePtr<Attribute_Animation> ptr_animation = ptr_render->ptr_animation;;
+	ModelD3D* modelD3D	= managementModel_->getModelD3D(ptr_render->meshID, device);
+	OUTPUT_WINDOW_PRINT(delta);
 	if(!ptr_player->detectedAsDead)
 	{
-		AttributePtr<Attribute_Render> ptr_render		= ptr_player->ptr_render;
-		AttributePtr<Attribute_Animation> ptr_animation = ptr_render->ptr_animation;;
-		ModelD3D* modelD3D	= managementModel_->getModelD3D(ptr_render->meshID, device);
-		ptr_animation->time += delta_ * animationTimeOffset_;
+		ptr_animation->time += delta; // * animationTimeOffset_;
 		if(ptr_animation->time > modelD3D->getSkinnedData()->getClipEndTime(ptr_animation->activeAnimation))
 		{
 			ptr_animation->time = 0.0f;
 			ptr_animation->activeAnimation = "processHover";
 		}
-
-		std::vector<DirectX::XMFLOAT4X4> finalTransforms;
-		modelD3D->getSkinnedData()->getFinalTransforms(ptr_animation->activeAnimation, ptr_animation->time, &finalTransforms);
-
-		int boneIndex = 16;
-		DirectX::XMFLOAT3 bonePosition = modelD3D->getSkinnedData()->getBonePositions()->at(boneIndex);
-		DirectX::XMMATRIX xmMatrix = DirectX::XMLoadFloat4x4(&finalTransforms.at(boneIndex));
-		DirectX::XMVECTOR xmBonePosition = DirectX::XMLoadFloat3(&bonePosition);
-		xmBonePosition = DirectX::XMVector3TransformCoord(xmBonePosition, xmMatrix);
-		DirectX::XMStoreFloat3(&bonePosition, xmBonePosition);
-		ptr_player->ptr_weapon_offset->offset_position.x = bonePosition.x;
-		ptr_player->ptr_weapon_offset->offset_position.y = bonePosition.y;
-		ptr_player->ptr_weapon_offset->offset_position.z = bonePosition.z;
-		ptr_player->ptr_weapon_offset->updateOffset();
-
-		boneIndex = 7;
-		bonePosition = modelD3D->getSkinnedData()->getBonePositions()->at(boneIndex);
-		xmMatrix = DirectX::XMLoadFloat4x4(&finalTransforms.at(boneIndex));
-		xmBonePosition = DirectX::XMLoadFloat3(&bonePosition);
-		xmBonePosition = DirectX::XMVector3TransformCoord(xmBonePosition, xmMatrix);
-		DirectX::XMStoreFloat3(&bonePosition, xmBonePosition);
-		Float3 debug = ptr_player->ptr_camera->ptr_offset->offset_position;
-		ptr_player->ptr_camera->ptr_offset->offset_position.x = bonePosition.x;
-		ptr_player->ptr_camera->ptr_offset->offset_position.y = bonePosition.y;
-		ptr_player->ptr_camera->ptr_offset->offset_position.z = bonePosition.z;
-		ptr_player->ptr_camera->ptr_offset->updateOffset();
 	}
+	prevDelta_ = delta;
+	std::vector<DirectX::XMFLOAT4X4> finalTransforms;
+	modelD3D->getSkinnedData()->getFinalTransforms(ptr_animation->activeAnimation, ptr_animation->time, &finalTransforms);
+
+	finalTransforms_.push_back(finalTransforms);
+
+	int boneIndex = 16;
+	DirectX::XMFLOAT3 bonePosition = modelD3D->getSkinnedData()->getBonePositions()->at(boneIndex);
+	DirectX::XMMATRIX xmMatrix = DirectX::XMLoadFloat4x4(&finalTransforms.at(boneIndex));
+	DirectX::XMVECTOR xmBonePosition = DirectX::XMLoadFloat3(&bonePosition);
+	xmBonePosition = DirectX::XMVector3TransformCoord(xmBonePosition, xmMatrix);
+	DirectX::XMStoreFloat3(&bonePosition, xmBonePosition);
+	ptr_player->ptr_weapon_offset->offset_position.x = bonePosition.x;
+	ptr_player->ptr_weapon_offset->offset_position.y = bonePosition.y;
+	ptr_player->ptr_weapon_offset->offset_position.z = bonePosition.z;
+	ptr_player->ptr_weapon_offset->updateOffset();
+
+	boneIndex = 7;
+	bonePosition = modelD3D->getSkinnedData()->getBonePositions()->at(boneIndex);
+	xmMatrix = DirectX::XMLoadFloat4x4(&finalTransforms.at(boneIndex));
+	xmBonePosition = DirectX::XMLoadFloat3(&bonePosition);
+	xmBonePosition = DirectX::XMVector3TransformCoord(xmBonePosition, xmMatrix);
+	DirectX::XMStoreFloat3(&bonePosition, xmBonePosition);
+	Float3 debug = ptr_player->ptr_camera->ptr_offset->offset_position;
+	ptr_player->ptr_camera->ptr_offset->offset_position.x = bonePosition.x;
+	ptr_player->ptr_camera->ptr_offset->offset_position.y = bonePosition.y;
+	ptr_player->ptr_camera->ptr_offset->offset_position.z = bonePosition.z;
+	ptr_player->ptr_camera->ptr_offset->updateOffset();
 }
 
 
@@ -608,10 +616,12 @@ void Renderer::renderViewportToGBuffer(ViewportData& vpData)
 	if(cameraInstances == nullptr)
 		return; 
 
+	int playerIndex = 0;
 	while(itrPlayer.hasNext())
 	{
 		AttributePtr<Attribute_Player> player = itrPlayer.getNext();
-		renderAnimation(player, vpData.view, vpData.proj);
+		renderAnimation(playerIndex, player, vpData.view, vpData.proj);
+		playerIndex++;
 	}
 
 	std::map<unsigned int, InstancedData*> instancesMap = cameraInstances->getInstancesMap();
@@ -1532,7 +1542,7 @@ void Renderer::drawHudElement(int viewportIndex, unsigned int textureId, DirectX
 	devcon->RSSetState(nullptr);
 }
 
-void Renderer::renderAnimation(AttributePtr<Attribute_Player> ptr_player, DirectX::XMFLOAT4X4 view, DirectX::XMFLOAT4X4 projection)
+void Renderer::renderAnimation(int playerIndex, AttributePtr<Attribute_Player> ptr_player, DirectX::XMFLOAT4X4 view, DirectX::XMFLOAT4X4 projection)
 {
 	AttributePtr<Attribute_Render> ptr_render		= ptr_player->ptr_render;
 	AttributePtr<Attribute_Animation> ptr_animation = ptr_render->ptr_animation;;
@@ -1552,8 +1562,8 @@ void Renderer::renderAnimation(AttributePtr<Attribute_Player> ptr_player, Direct
 	managementCB_->updateCBObject(devcon, finalMatrix, worldMatrix, worldMatrixInverse);
 
 	std::vector<DirectX::XMFLOAT4X4> finalTransforms;
-	modelD3D->getSkinnedData()->getFinalTransforms(ptr_animation->activeAnimation, ptr_animation->time, &finalTransforms);
-
+	//modelD3D->getSkinnedData()->getFinalTransforms(ptr_animation->activeAnimation, ptr_animation->time, &finalTransforms);
+	finalTransforms = finalTransforms_[playerIndex];
 	
 
 	managementCB_->setCB(CB_TYPE_BONE, TypeFX_VS, CB_REGISTER_BONE, devcon);

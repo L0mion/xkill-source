@@ -130,7 +130,7 @@ private:
 	void renderHudElementCrossHair(int viewportIndex, float scaleModifierX); //!< Renders a cross hair in the middle óf each viewport.
 	void drawHudElement(int viewportIndex, unsigned int textureId, DirectX::XMFLOAT4X4 transformationMatrix); //!< Draws a single hud element.
 
-	void renderAnimation(AttributePtr<Attribute_Player> ptr_player, DirectX::XMFLOAT4X4 view, DirectX::XMFLOAT4X4 projection);
+	void renderAnimation(int playerIndex, AttributePtr<Attribute_Player> ptr_player, DirectX::XMFLOAT4X4 view, DirectX::XMFLOAT4X4 projection);
 
 	//temp
 	void renderAnimatedMesh(
@@ -162,10 +162,13 @@ private:
 	float delta_;
 	float temp_;
 	float animationTimeOffset_;
+	float prevDelta_;
 	ID3D11Buffer*			rayBuffer;
 
 	ShadowMatrices shadowMatrices_;
 
+
+	std::vector<std::vector<DirectX::XMFLOAT4X4>> finalTransforms_;
 	//temp
 	//M3DLoader*		m3dLoader_;
 	//AnimatedMesh*	animatedMesh_;
