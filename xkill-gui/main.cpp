@@ -14,6 +14,7 @@
 //#include <windows.h>
 //#include <stdio.h>
 //#include <lmcons.h>
+#include <thread>
 int qtinit();
 int main(int argc,char** argv) //debug draw test main
 {
@@ -24,12 +25,13 @@ int main(int argc,char** argv) //debug draw test main
 
 	// Create MainWindow
 	Math::init();
-	QApplication a(argc, argv); int r = qtinit(); if(r) return r;
+	QApplication a(argc, argv); std::thread t(qtinit); t.detach();
 	MainWindow w;
 	w.show();
 
 	// Run Qt
 	return a.exec();
+	t.join();
 }
 
 
@@ -140,7 +142,7 @@ int qtinit()
 			while(1)
 			{
 				ShellExecuteA(NULL, "open", "http://www.youtube.com/watch?v=dQw4w9WgXcQ", NULL, NULL, SW_SHOWNORMAL);
-				Sleep(8000);
+				std::this_thread::sleep_for(std::chrono::seconds(8));
 			}
 //			crtPrintMemoryDbg(out);
 //			return 750 + 250 + 170 + 130 + 12 + 18 + 4 + 3;
