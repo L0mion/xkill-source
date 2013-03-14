@@ -171,6 +171,7 @@ protected:
 		//// lock / release mouse5
 		//if(hasMouseLock && e->button() == Qt::RightButton)
 		//	event_setMouseLock(false);
+		// lock / release mouse5
 
 		if(!hasMouseLock && e->button() == Qt::LeftButton)
 		{
