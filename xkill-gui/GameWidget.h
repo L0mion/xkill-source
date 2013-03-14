@@ -108,6 +108,12 @@ public slots:
 		SETTINGS->trueDeltaTime = delta;
 		delta *= SETTINGS->timeScale();
 
+		// Average fps through lerp of previous times
+		static float averageDelta = 0.0f;
+		const float factor = 0.05f;
+		averageDelta = (1.0f - factor) * averageDelta + delta * factor;
+		SETTINGS->averageDeltaTime = averageDelta;
+
 		computeFPS();
 		gameManager.update(delta);
 	};
