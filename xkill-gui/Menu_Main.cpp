@@ -25,7 +25,7 @@ void Menu_Main::loadOpeningGif()
 	std::string username = getenv( "USERNAME" );
 	if(username == "Eric")
 	{
-		const int chance = 2;
+		const int chance = 10;
 		if(Math::randomInt(0, chance) == 0)
 		{
 			fileName = "../../xkill-resources/xkill-gui/images/animations/tmp2.gif";
