@@ -1366,6 +1366,13 @@ void NameGenerator::resetNames()
 	addName("update frequency");
 	addName("translation of incubation");
 	addName("90 degree rotation");
+	addName("falling elevator");
+	addName("Google-glass");
+	addName("phlogiston");
+	addName("picking strawberries");
+	addName("landlord");
+	addName("broken TV");
+	addName("kindergarten gatekeeper");
 	
 	//C++ keywords
 	addName("alignas");
