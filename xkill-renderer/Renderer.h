@@ -162,7 +162,6 @@ private:
 	float delta_;
 	float temp_;
 	float animationTimeOffset_;
-	float prevDelta_;
 	ID3D11Buffer*			rayBuffer;
 
 	ShadowMatrices shadowMatrices_;

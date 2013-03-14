@@ -112,7 +112,6 @@ Renderer::Renderer(HWND windowHandle)
 	rayBuffer				= nullptr;
 
 	animationTimeOffset_ = 2.0f;
-	prevDelta_ = 0.0f;
 	temp_ = 0;
 }
 Renderer::~Renderer()	
@@ -445,9 +444,6 @@ void Renderer::update(float delta)
 }
 void Renderer::updateAnimation(float delta, AttributePtr<Attribute_Player> ptr_player, ID3D11Device* device)
 {
-	if((delta-prevDelta_) > 0.01)
-		delta = prevDelta_;
-
 	AttributePtr<Attribute_Render> ptr_render		= ptr_player->ptr_render;
 	AttributePtr<Attribute_Animation> ptr_animation = ptr_render->ptr_animation;;
 	ModelD3D* modelD3D	= managementModel_->getModelD3D(ptr_render->meshID, device);
@@ -461,7 +457,6 @@ void Renderer::updateAnimation(float delta, AttributePtr<Attribute_Player> ptr_p
 			ptr_animation->activeAnimation = "processHover";
 		}
 	}
-	prevDelta_ = delta;
 	std::vector<DirectX::XMFLOAT4X4> finalTransforms;
 	modelD3D->getSkinnedData()->getFinalTransforms(ptr_animation->activeAnimation, ptr_animation->time, &finalTransforms);
 
