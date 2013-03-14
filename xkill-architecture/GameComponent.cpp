@@ -773,12 +773,15 @@ void GameComponent::spawnPlayer(AttributePtr<Attribute_Player> ptr_player)
 				
 	ptr_health->health = ptr_health->maxHealth; // restores player health
 
-	MutatorSettings ms;
-	for(int i = 0; i < XKILL_Enums::AmmunitionType::NROFAMMUNITIONTYPES; i++)
+	if(ptr_player->detectedAsDead)
 	{
-		for(int j = 0; j < XKILL_Enums::FiringModeType::NROFFIRINGMODETYPES; j++)
+		MutatorSettings ms;
+		for(int i = 0; i < XKILL_Enums::AmmunitionType::NROFAMMUNITIONTYPES; i++)
 		{
-			ms.setupAttribute(ptr_weaponStats, static_cast<XKILL_Enums::AmmunitionType>(i), static_cast<XKILL_Enums::FiringModeType>(j));
+			for(int j = 0; j < XKILL_Enums::FiringModeType::NROFFIRINGMODETYPES; j++)
+			{
+				ms.setupAttribute(ptr_weaponStats, static_cast<XKILL_Enums::AmmunitionType>(i), static_cast<XKILL_Enums::FiringModeType>(j));
+			}
 		}
 	}
 
@@ -825,7 +828,7 @@ void GameComponent::event_StartDeathmatch( Event_StartDeathmatch* e )
 		AttributePtr<Attribute_WeaponStats>		ptr_weaponStats	=	ptr_player	->	ptr_weaponStats	;
 		switchFiringMode(ptr_weaponStats, 0);	//Ensure ammunition disablement (selected from menu)
 		
-		SEND_EVENT(&Event_HackActivated(5000.0f, XKILL_Enums::HackType::JETHACK, ptr_player)); //check jetpack giveaway
+		//SEND_EVENT(&Event_HackActivated(5000.0f, XKILL_Enums::HackType::JETHACK, ptr_player)); //check jetpack giveaway
 	}
 
 	//Create mesh for debugging fbx-loading.
