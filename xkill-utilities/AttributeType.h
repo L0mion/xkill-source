@@ -330,7 +330,6 @@ struct DLL_U Attribute_Input : public IAttribute
 	bool jump;
 	bool jetpack;
 	bool sprint;
-	bool killPlayer;
 	int changeAmmunitionType;
 	int changeFiringMode;
 	bool lowSensitivity;
@@ -609,6 +608,7 @@ struct DLL_U Attribute_Pickupable : public IAttribute
 
 	XKILL_Enums::PickupableType pickupableType;			//! MEDKIT, AMMUNITION_BULLET, AMMUNITION_SCATTER, AMMUNITION_EXPLOSIVE, etc
 	int amount;											//! Data of pickupable (health, ammo, etc) //Deprecated as of 2013-03-06 15.25. Amount is determined on pickup instead of at spawn time.
+	Float3 getColor();
 
 	DataItemList* getDataList();
 	void saveTo(DataItemList* list);

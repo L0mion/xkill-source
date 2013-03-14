@@ -35,6 +35,8 @@ GameComponent::~GameComponent(void)
 		delete levelEvents_.at(i);
 	}
 	levelEvents_.clear();
+
+	delete CollisionManager::Instance();
 }
 
 bool GameComponent::init()
@@ -84,6 +86,13 @@ void GameComponent::onEvent(Event* e)
 		break;
 	case EVENT_NULL_PROCESS_STOPPED_EXECUTING:
 		nullProcessExecuting = false;
+
+		//check lunch
+		while(itrPickupable.hasNext())
+		{
+			AttributePtr<Attribute_Pickupable> ptr_pickupable = itrPickupable.getNext();
+			CollisionManager::Instance()->removePickupable(ptr_pickupable);
+		}
 		break;
 	default:
 		break;
@@ -92,7 +101,11 @@ void GameComponent::onEvent(Event* e)
 #include <xkill-utilities/Converter.h>
 void GameComponent::onUpdate(float delta)
 {
+	//--------------------------------------------------------------------------------------
+	// Handle player attributes
+	//--------------------------------------------------------------------------------------
 	updatePlayerAttributes(delta);
+	
 	//--------------------------------------------------------------------------------------
 	// Handle projectile attributes
 	//--------------------------------------------------------------------------------------
@@ -318,9 +331,6 @@ void GameComponent::onUpdate(float delta)
 #include <xkill-utilities/Converter.h>
 void GameComponent::updatePlayerAttributes(float delta)
 {
-	//--------------------------------------------------------------------------------------
-	// Handle player attributes
-	//--------------------------------------------------------------------------------------
 	while(itrPlayer.hasNext())
 	{
 		//Fetch player-related attributes
@@ -578,7 +588,7 @@ void GameComponent::updatePlayerAttributes(float delta)
 					}
 				}
 
-				ptr_player->ptr_camera->fieldOfView =3.14f/4.0f;
+				ptr_player->ptr_camera->fieldOfView = 3.14f/4.0f;
 				ptr_player->respawnTimer.resetTimer();
 				ptr_player->detectedAsDead = false;
 				SEND_EVENT(&Event_PlaySound(XKILL_Enums::Sound::SOUND_RESPAWN, itrPlayer.ownerIdAt(ptr_player.index()), ptr_position->position, true));
@@ -586,13 +596,10 @@ void GameComponent::updatePlayerAttributes(float delta)
 		}
 
 		//--------------------------------------------------------------------------------------
-		// Instant respawn of player, used for debugging
+		// Respawn player
 		//--------------------------------------------------------------------------------------
-		if(ptr_input->killPlayer)
+		if(ptr_input->firePressed && ptr_player->detectedAsDead && ptr_player->isScoreBoardVisible)
 		{
-			ptr_health->health = 0.0f;
-			ptr_input->killPlayer = false;
-			ptr_player->detectedAsDead = true;
 			ptr_player->respawnTimer.zeroTimer();
 		}
 	}
@@ -607,12 +614,12 @@ void GameComponent::event_PhysicsAttributesColliding(Event_PhysicsAttributesColl
 	// Handle hit reaction on entity 1
 	// when colliding with entity 2;
 
-	CollisionManager collisionManager;
+	CollisionManager* collisionManager = CollisionManager::Instance();
 
-	collisionManager.collision_applyDamage(entity1, entity2);
-	collisionManager.collision_projectile(entity1, entity2);
-	collisionManager.collision_pickupable(entity1, entity2);
-	collisionManager.collision_playerVsExplosionSphere(entity1, entity2);
+	collisionManager->collision_applyDamage(entity1, entity2);
+	collisionManager->collision_projectile(entity1, entity2);
+	collisionManager->collision_pickupable(entity1, entity2);
+	collisionManager->collision_playerVsExplosionSphere(entity1, entity2);
 }
 
 void GameComponent::event_EndDeathmatch(Event_EndDeathmatch* e)
@@ -798,7 +805,7 @@ void GameComponent::event_StartDeathmatch( Event_StartDeathmatch* e )
 		AttributePtr<Attribute_WeaponStats>		ptr_weaponStats	=	ptr_player	->	ptr_weaponStats	;
 		switchFiringMode(ptr_weaponStats, 0);	//Ensure ammunition disablement (selected from menu)
 		
-		//SEND_EVENT(&Event_HackActivated(5000.0f, XKILL_Enums::HackType::JETHACK, ptr_player)); //check jetpack giveaway
+		SEND_EVENT(&Event_HackActivated(5000.0f, XKILL_Enums::HackType::JETHACK, ptr_player)); //check jetpack giveaway
 	}
 
 	//Create mesh for debugging fbx-loading.
@@ -839,6 +846,12 @@ void GameComponent::event_PlayerDeath(Event_PlayerDeath* e)
 	{
 		SEND_EVENT(&Event_StopSound(XKILL_Enums::Sound::SOUND_LASER, itrPlayer.ownerIdAt(e->playerAttributeIndex)));
 		ptr_player->executing = false;
+	
+		std::vector<int> rayId = itrPlayer.ownerAt(ptr_player.index())->getAttributes(ATTRIBUTE_RAY);
+		for(unsigned int i = 0; i < rayId.size(); i++)
+		{
+			itrRay.at(rayId[i])->ptr_render->culling.clear();
+		}
 	}
 	if(ptr_player->jetHackPair.first)
 	{
@@ -1111,14 +1124,14 @@ void GameComponent::updateAndInterpretLaser(AttributePtr<Attribute_Ray> ptr_ray,
 					if(ptr_player->cycleHackPair.first)
 					{
 						ptr_player->cycles++;
-						{Event_PostHudMessage e("", ptr_player); e.setHtmlMessage("You exterminated", hitPlayerAttribute->avatarName, "", "+1 cycle"); SEND_EVENT(&e);}
+						{Event_PostHudMessage e("", ptr_player); e.setColor(hitPlayerAttribute->avatarColor); e.setHtmlMessage("You exterminated", hitPlayerAttribute->avatarName, "", "+1 cycle"); SEND_EVENT(&e);}
 					}
 					else
 					{
 						ptr_player->priority++;
-						{Event_PostHudMessage e("", ptr_player); e.setHtmlMessage("You exterminated", hitPlayerAttribute->avatarName, "", "+1 priority"); SEND_EVENT(&e);}
+						{Event_PostHudMessage e("", ptr_player); e.setColor(hitPlayerAttribute->avatarColor); e.setHtmlMessage("You exterminated", hitPlayerAttribute->avatarName, "", "+1 priority"); SEND_EVENT(&e);}
 					}
-					{Event_PostHudMessage e("", hitPlayerAttribute); e.setHtmlMessage("Terminated by", ptr_player->avatarName); SEND_EVENT(&e);}
+					{Event_PostHudMessage e("", hitPlayerAttribute); e.setColor(ptr_player->avatarColor); e.setHtmlMessage("Terminated by", ptr_player->avatarName); SEND_EVENT(&e);}
 
 					SEND_EVENT(&Event_PlayerDeath(playerHitByRayAttributeId.at(j)));
 				}
@@ -1221,7 +1234,7 @@ void GameComponent::startGame()
 	while(itrPlayer.hasNext())
 	{
 		AttributePtr<Attribute_Player>			ptr_player		=	itrPlayer		.getNext();
-		{Event_PostHudMessage e("", ptr_player); e.setHtmlMessage("Your nickname is", ptr_player->avatarName); SEND_EVENT(&e);}
+		{Event_PostHudMessage e("", ptr_player); e.setColor(ptr_player->avatarColor); e.setHtmlMessage("Your nickname is", ptr_player->avatarName); SEND_EVENT(&e);}
 	}
 }
 

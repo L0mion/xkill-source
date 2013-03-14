@@ -23,6 +23,7 @@ public:
 	void reset();
 	void start();
 	void stop();
+	static int getUniqueId();
 	void sendMeasurement();
 };
 

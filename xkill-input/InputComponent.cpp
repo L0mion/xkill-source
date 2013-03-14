@@ -140,7 +140,6 @@ void InputComponent::handleInput(float delta)
 		input->fire =					device->getBoolValue(InputAction::ACTION_B_FIRE);
 		input->firePressed =			device->getBoolPressed(InputAction::ACTION_B_FIRE);
 
-		input->killPlayer =				device->getBoolReleased(InputAction::ACTION_B_KILL_PLAYER);
 		input->jetpack =				device->getBoolValue(InputAction::ACTION_B_JUMP_JETPACK);
 		input->jump =					device->getBoolPressed(InputAction::ACTION_B_JUMP_JETPACK);
 

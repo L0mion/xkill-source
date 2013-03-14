@@ -559,15 +559,16 @@ void Renderer::renderViewportToGBuffer(ViewportData& vpData)
 	if(cameraInstances == nullptr)
 		return; 
 
-	std::map<unsigned int, InstancedData*> instancesMap = cameraInstances->getInstancesMap();
-	for(std::map<unsigned int, InstancedData*>::iterator i = instancesMap.begin(); i != instancesMap.end(); i++)
-	{
-			renderInstance(i->first, i->second, false);
-	}
 	while(itrPlayer.hasNext())
 	{
 		AttributePtr<Attribute_Player> player = itrPlayer.getNext();
 		renderAnimation(player, vpData.view, vpData.proj);
+	}
+
+	std::map<unsigned int, InstancedData*> instancesMap = cameraInstances->getInstancesMap();
+	for(std::map<unsigned int, InstancedData*>::iterator i = instancesMap.begin(); i != instancesMap.end(); i++)
+	{
+			renderInstance(i->first, i->second, false);
 	}
 
 	if(SETTINGS->showDebugPhysics)
@@ -1531,15 +1532,22 @@ void Renderer::renderAnimation(AttributePtr<Attribute_Player> ptr_player, Direct
 	ptr_player->ptr_weapon_offset->offset_position.y = bonePosition.y;
 	ptr_player->ptr_weapon_offset->offset_position.z = bonePosition.z;
 
+	ptr_player->ptr_weapon_offset->updateOffset();
+
 	boneIndex = 7;
 	bonePosition = modelD3D->getSkinnedData()->getBonePositions()->at(boneIndex);
 	xmMatrix = DirectX::XMLoadFloat4x4(&finalTransforms.at(boneIndex));
 	xmBonePosition = DirectX::XMLoadFloat3(&bonePosition);
 	xmBonePosition = DirectX::XMVector3TransformCoord(xmBonePosition, xmMatrix);
 	DirectX::XMStoreFloat3(&bonePosition, xmBonePosition);
+	Float3 debug = ptr_player->ptr_camera->ptr_offset->offset_position;
 	ptr_player->ptr_camera->ptr_offset->offset_position.x = bonePosition.x;
 	ptr_player->ptr_camera->ptr_offset->offset_position.y = bonePosition.y;
 	ptr_player->ptr_camera->ptr_offset->offset_position.z = bonePosition.z;
+
+	ptr_player->ptr_camera->ptr_offset->updateOffset();
+
+	debug = ptr_player->ptr_camera->ptr_spatial->ptr_position->position;
 
 	managementCB_->setCB(CB_TYPE_BONE, TypeFX_VS, CB_REGISTER_BONE, devcon);
 	managementCB_->updateCBBone(devcon, finalTransforms);

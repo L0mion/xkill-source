@@ -113,7 +113,7 @@ void Menu_HUD::mapToSplitscreen()
 	weaponInfoHud.setPosition(weaponInfoPos);
 
 	// Create scheduling hud
-	schedulingHud.init(&ui);
+	schedulingHud.init(&ui, ptr_splitScreen->ptr_player);
 }
 
 void Menu_HUD::refresh()
@@ -128,11 +128,20 @@ void Menu_HUD::refresh()
 	int ammoIndex = ammunition->type;
 	float fadeTime = 1.0f;
 
+
+	//
+	// Update scheduling hud
+	//
+
+	schedulingHud.refresh();
+
+
 	//
 	// Update weapon info hud
 	//
 
 	weaponInfoHud.update(firingIndex, ammoIndex);
+
 
 	//
 	// Show ammunition info

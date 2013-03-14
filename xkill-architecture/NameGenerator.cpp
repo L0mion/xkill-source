@@ -4,6 +4,8 @@
 
 void NameGenerator::resetNames()
 {
+	names.clear();
+
 	//
 	// Add names
 	//
@@ -39,11 +41,7 @@ void NameGenerator::resetNames()
 	addName("pointer");
 	addName("void pointer");
 	addName("overload");
-	addName("Carmack");
-	addName("Stefan Petersson");
 	addName("string");
-	addName("get");
-	addName("set");
 	addName("semicolon");
 	addName("bracket");
 	addName("exit");
@@ -56,15 +54,12 @@ void NameGenerator::resetNames()
 	addName("bash");
 	addName("crash");
 	addName("git");
-	addName("GitHub");
 	addName("multi-core");
 	addName("shell");
 	addName("printf");
-	addName("cout");
 	addName("debug");
 	addName("release");
 	addName("data stream");
-	addName("fps");
 	addName("frustum");
 	addName("culling");
 	addName("segfault");
@@ -83,7 +78,6 @@ void NameGenerator::resetNames()
 	addName("performance");
 	addName("std");
 	addName("format");
-	addName("DirectX");
 	addName("breakpoint");
 	addName("clear");
 	addName("box");
@@ -93,7 +87,6 @@ void NameGenerator::resetNames()
 	addName("function");
 	addName("entity");
 	addName("master");
-	addName("slave");
 	addName("IDE");
 	addName("operating system");
 	addName("syscall");
@@ -117,14 +110,11 @@ void NameGenerator::resetNames()
 	addName("event");
 	addName("procedure");
 	addName("mode");
-	addName("Visual Studio");
 	addName("G332");
 	addName("G403");
-	addName("Stort spelprojekt");
 	addName("hack");
 	addName("exception");
 	addName("array");
-	addName("disable");
 	addName("activate");
 	addName("enable");
 	addName("heap");
@@ -151,10 +141,8 @@ void NameGenerator::resetNames()
 	addName("polymorphism");
 	addName("dynamic binding");
 	addName("static binding");
-	addName("static binding");
 	addName("swap chain");
 	addName("device");
-	addName("esp");
 	addName("stack pointer");
 	addName("assembler");
 	addName("linker");
@@ -271,7 +259,6 @@ void NameGenerator::resetNames()
 	addName("hardcoded");
 	addName("hard-wired");
 	addName("programmer");
-	addName("pro gamer");
 	addName("unfinished operation");
 	addName("matrix");
 	addName("algebra");
@@ -279,12 +266,8 @@ void NameGenerator::resetNames()
 	addName("root node");
 	addName("export");
 	addName("import");
-	addName("scene");
-	addName("FBX");
 	addName("OBJ");
-	addName("texture");
 	addName("clamp");
-	addName("UV");
 	addName("collision object");
 	addName("step simulation");
 	addName("interpolation");
@@ -317,18 +300,15 @@ void NameGenerator::resetNames()
 	addName("Battle In Operating System (BIOS)");
 	addName("repository");
 	addName("tester");
-	addName("invisble swan");
+	addName("invisible swan");
 	addName("proprietary");
 	addName("illegal operation");
 	addName("try to score");
-	addName("Visual Studio 2012");
-	addName("Qt");
 	addName("not tested");
 	addName("as-is");
 	addName("no guarantee");
 	addName("self-inflicted compile error");
 	addName("boost");
-	addName("library");
 	addName("helper function");
 	addName("wrapper class");
 	addName("not a number");
@@ -344,10 +324,8 @@ void NameGenerator::resetNames()
 	addName("call on fail");
 	addName("railway on ice");
 	addName("injection");
-	addName("call");
 	addName("synchronous");
 	addName("asynchronous");
-	addName("tree");
 	addName("unexpected behavior");
 	addName("tabulator");
 	addName("unstable");
@@ -460,7 +438,6 @@ void NameGenerator::resetNames()
 	addName("terms of agreement");
 	addName("terms of service");
 	addName("terms of use");
-	addName("EULA");
 	addName("swap twice");
 	addName("loader");
 	addName("shader");
@@ -536,7 +513,7 @@ void NameGenerator::resetNames()
 	addName("crazy man on the street");
 	addName("index of value");
 	addName("assumption");
-	addName("resume lastest assumption");
+	addName("resume latest assumption");
 	addName("xyzzy");
 	addName("clear buffer");
 	addName("week-old branch");
@@ -672,7 +649,6 @@ void NameGenerator::resetNames()
 	addName("basket of flowers");
 	addName("underutilized");
 	addName("made the cut");
-	addName("soundsnap");
 	addName("aborted operation");
 	addName("does not compute");
 	addName("recalculation");
@@ -822,7 +798,7 @@ void NameGenerator::resetNames()
 	addName("fried ham");
 	addName("strong typing");
 	addName("weak typing");
-	addName("pop a baloon");
+	addName("pop a balloon");
 	addName("push");
 	addName("pulley");
 	addName("digging a hole");
@@ -928,14 +904,12 @@ void NameGenerator::resetNames()
 	addName("bereaved champion");
 	addName("come to a closure");
 	addName("don't come closer");
-	addName("Hahaha");
 	addName("fisherman's rod");
 	addName("hook, line and sinker");
 	addName("sunken boat aflot");
 	addName("something is not right");
 	addName("dum-dum-dum");
 	addName("bunny-jumper");
-	addName("fragstealer");
 	addName("Rockefeller's torn wallet");
 	addName("system of rice");
 	addName("two thousand of something");
@@ -950,7 +924,7 @@ void NameGenerator::resetNames()
 	addName("enjoying yourself");
 	addName("progress tracker");
 	addName("finally here");
-	addName("won the jackopot");
+	addName("won the jackpot");
 	addName("one in a million");
 	addName("secret nickname");
 	addName("we have a winner");
@@ -962,7 +936,6 @@ void NameGenerator::resetNames()
 	addName("hand cannon");
 	addName("friday");
 	addName("I wonder why it crashes");
-	addName("Lord British");
 	addName("televised appearance");
 	addName("early adopter");
 	addName("testing environment");
@@ -974,7 +947,6 @@ void NameGenerator::resetNames()
 	addName("pencil sharpener");
 	addName("I wonder");
 	addName("comparision outside set");
-	addName("duckling missing a leg");
 	addName("empty-handed");
 	addName("sea you underwater");
 	addName("my view");
@@ -1079,7 +1051,6 @@ void NameGenerator::resetNames()
 	addName("alpha");
 	addName("beta");
 	addName("delta");
-	addName("charlie");
 	addName("Cyrus the Virus");
 	addName("angle grinder");
 	addName("normalized quaternion");
@@ -1207,6 +1178,7 @@ void NameGenerator::resetNames()
 	addName("levitation");
 	addName("error-prone");
 	addName("DNA repair");
+	addName("sources of damage");
 	addName("cycle steal");
 	addName("simple solution");
 	addName("I think so, definitely");
@@ -1225,6 +1197,68 @@ void NameGenerator::resetNames()
 	addName("frail ladder");
 	addName("[armored tank]");
 	addName("one-ear");
+	addName("supposed to know");
+	addName("twitchy");
+	addName("pervertex");
+	addName("sleeping thread");
+	addName("cap the rendering thread");
+	addName("selling snow");
+	addName("freezer");
+	addName("joy");
+	addName("false-positive");
+	addName("Type I and type II errors");
+	addName("buildbot winslave");
+	addName("bootstrapper");
+	addName("gunpowder wagon");
+	addName("bamboo sword");
+	addName("on a tight leash");
+	addName("call to arms");
+	addName("relaxed and lazy");
+	addName("peak rate");
+	addName("weapon house");
+	addName("visiting magnetism");
+	addName("went out of control from there");
+	addName("shuffle-face");
+	addName("original origo");
+	addName("juniper berry");
+	addName("spatial suggestion");
+	addName("hidden reference");
+
+	addName("ERROR_SUCCESS");
+	addName("bytes want to be free");
+	addName("send spike");
+	addName("a hint of madness");
+	addName("a tint of rust");
+	addName("sinister indeed");
+	addName("Neuromancer");
+	addName("sun stealer");
+	addName("devil's pawn");
+	addName("sheer excellence");
+	addName("taste the graphics");
+	addName("Beezow doo-doo");
+	addName("zopittybop-bop-bop");
+	addName("Murder and mayhem");
+	addName("fancy box");
+	addName("knowledge brings fear");
+	addName("incoherent response");
+	addName("memleak");
+	addName("elderberries");
+	addName("spiteful crow");
+	addName("crackpot");
+	addName("graceful feature degradation");
+	addName("nothing but beans");
+	addName("ulterior motives");
+	addName("spam");
+	addName("zero feedback");
+	addName("remove before release");
+	addName("a matter of taste");
+	addName("tastes like chicken");
+	addName("dubious character");
+	addName("mad scientist");
+	addName("evil inside");
+	addName("poor Yorick");
+	addName("he's back");
+	
 
 	
 	//C++ keywords
@@ -1339,13 +1373,14 @@ std::string NameGenerator::getName()
 	// EASTER EGG
 	static bool wasShown = false;
 	static int numStarts = 0;
-	if(numStarts < 3)
+	if(numStarts < 4)
 		numStarts++;
 	else
 	{
 		if(!wasShown)
 		{
-			if(Math::randomInt(0, 10) == 10)
+			const int chance = 25;
+			if(Math::randomInt(0, chance) == chance)
 			{
 				wasShown = true;
 				name = getenv( "USERNAME" );
@@ -1356,4 +1391,50 @@ std::string NameGenerator::getName()
 
 	// Return name
 	return name;
+}
+
+void NameGenerator::reset()
+{
+	resetNames();
+	resetColors();
+}
+
+void NameGenerator::resetColors()
+{
+	colors.clear();
+
+	//
+	// Add colors
+	//
+
+	addColor(Float3(0.0f, 1.0f, 0.0));
+	addColor(Float3(1.0f, 0.0f, 0.0));
+	addColor(Float3(0.0f, 1.0f, 1.0));
+	addColor(Float3(1.0f, 0.4f, 0.0));
+	addColor(Float3(0.7f, 0.0f, 1.0));
+}
+
+void NameGenerator::addColor( Float3 color )
+{
+	colors.push_back(color);
+}
+
+Float3 NameGenerator::getColor()
+{
+	// Reset colors if all have been picked
+	if(colors.size() <= 0)
+		resetColors();
+
+	// Pick random color
+	int numColors = colors.size();
+	int index = Math::randomInt(0, numColors-1);
+	Float3 color = colors.at(index);
+
+	// Remove name using Swap-Trick
+	colors.at(index) = colors.back();
+	colors.pop_back();
+
+
+	// Return name
+	return color;
 }
