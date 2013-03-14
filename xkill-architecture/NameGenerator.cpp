@@ -1359,6 +1359,7 @@ void NameGenerator::resetNames()
 	addName("intelligent life-form");
 	addName("autonomous clay");
 	addName("ambulatory mushroom");
+	addName("magic floppy disk");
 
 	addName("inexpensive payback time");
 	addName("better safe than gory");

@@ -24,6 +24,7 @@ public:
 	float schedulerTime;
 	float cycleTime;
 	float trueDeltaTime;
+	float averageDeltaTime;
 	bool soundMuted;
 	float soundVolume;
 	void* overlayWidget;

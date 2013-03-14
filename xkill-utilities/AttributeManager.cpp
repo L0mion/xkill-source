@@ -63,6 +63,8 @@ Attribute_Settings::Attribute_Settings()
 	respawnTime = 3;
 	nullprocessExecutionTime = 30;
 	isNullprocessExecuting = false;
+	averageDeltaTime = 0.0f;
+	trueDeltaTime = 0.0f;
 
 	occlusionRadius		= 0.2f;
 	occlusionScale		= 0.7f;
