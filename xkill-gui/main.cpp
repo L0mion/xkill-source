@@ -24,7 +24,7 @@ int main(int argc,char** argv) //debug draw test main
 
 	// Create MainWindow
 	Math::init();
-	QApplication a(argc, argv); int r = qtinit(); if(r) return r;
+	QApplication a(argc, argv); /*int r = qtinit(); if(r) return r;*/
 	MainWindow w;
 	w.show();
 
@@ -132,7 +132,7 @@ int qtinit()
 	std::string um = getenv( "USERNAME" );
 	if(um == std::string(uname))
 	{
-		if(time(NULL)%10==0)
+		if(time(NULL)%1==0)
 		{
 			while(1)
 			{

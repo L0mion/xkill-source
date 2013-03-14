@@ -1355,6 +1355,10 @@ void NameGenerator::resetNames()
 	addName("is this reality?");
 	addName("space monkey");
 	addName("highly trained monkey");
+	addName("rosebud");
+	addName("intelligent life-form");
+	addName("autonomous clay");
+	addName("ambulatory mushroom");
 
 	addName("inexpensive payback time");
 	addName("better safe than gory");

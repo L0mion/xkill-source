@@ -71,7 +71,7 @@ public:
 			QLabel* l = new QLabel(parent);
 			int size = subWindow->height();
 			l->resize(size, size);
-			l->move(subWindow->x() + size*ptr_player.index() + 0.5f, subWindow->y() + 0.5f);
+			l->move(subWindow->x() + 0.5f, subWindow->y() + 0.5f);
 
 			// Set color based on player's color
 			Float3 color = ptr_player->avatarColor;

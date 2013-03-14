@@ -349,14 +349,14 @@ void Menu_HUD::refresh()
 	{
 		std::string str_priorityAdvantage = "";
 
-		int scoreDiff = scoreboard.maxCycles - ptr_player->cycles;
+		int scoreDiff = scoreboard.maxPriority - ptr_player->cycles;
 
 		// If first player, show score difference to second closest
 		if(scoreDiff == 0)
-			scoreDiff = scoreboard.maxCycles - scoreboard.secondMaxPriority;
+			scoreDiff = scoreboard.maxPriority - scoreboard.secondMaxPriority;
 		// ELSE: Show score difference to second closest
 		else
-			scoreDiff = ptr_player->cycles - scoreboard.maxCycles;
+			scoreDiff = ptr_player->cycles - scoreboard.maxPriority;
 
 		// Set label
 
