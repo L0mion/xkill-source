@@ -967,20 +967,21 @@ void GameComponent::updateAndInterpretAimingRay(Entity* rayCastingPlayerEntity, 
 	int nrOfHits = event_AllHitsRayCast.mapHitPointToEntityId.size();
 	if(nrOfHits > 0) //If ray hit something
 	{
+		Float3 closestHit = rayDestination;
 		int hitEntityId = 0;
 		for(int i=0;i<nrOfHits;i++)
 		{
 			hitEntityId = event_AllHitsRayCast.mapHitPointToEntityId.at(i).second;
-			if(hitEntityId == rayCastingPlayerEntity->getID())
+
+			Float3 v1 = event_AllHitsRayCast.from - event_AllHitsRayCast.mapHitPointToEntityId.at(i).first;
+			Float3 v2 = event_AllHitsRayCast.from - closestHit;
+
+			if(v1.length() < v2.length() && hitEntityId != rayCastingPlayerEntity->getID())
 			{
-				continue; //If player hit himself, take next hit point
+				closestHit = event_AllHitsRayCast.mapHitPointToEntityId.at(i).first;
 			}
-			else
-			{
-				hitPoint = event_AllHitsRayCast.mapHitPointToEntityId.at(i).first;
-				entityHitByRay = &allEntity->at(hitEntityId);
-				break; //Valid hit point found
-			}
+
+			hitPoint = closestHit;
 		}
 	}
 	else //If ray did not hit anything, set hitpoint to camera look far plane z
@@ -1047,6 +1048,7 @@ void GameComponent::updateAndInterpretAimingRay(Entity* rayCastingPlayerEntity, 
 			else
 			{
 				ray->ptr_render->culling.clear();
+
 				//entityHitByRay might be used here (2013-02-28 17.24)
 			}
 		}
@@ -1088,6 +1090,7 @@ void GameComponent::updateAndInterpretLaser(AttributePtr<Attribute_Ray> ptr_ray,
 	laserRotation = laserRotation.quaternionLookAt(closestHitPoint, ptr_ray->from);
 	laserRotation.normalize();
 
+	//ptr_ray->ptr_render->ptr_spatial->rotation = ptr_player->ptr_weapon_offset->ptr_spatial->rotation;
 	ptr_ray->ptr_render->ptr_spatial->rotation = laserRotation.quaternionInverse();
 
 	std::vector<int> playerHitByRayAttributeId = entityHitByRay->getAttributes(ATTRIBUTE_PLAYER);
