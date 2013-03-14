@@ -67,6 +67,7 @@ void QTInputDevices::setStandardMappings()
 		buttons_[14]->addMapping(InputAction::ACTION_B_PREV_FIRINGMODE);
 
 		buttons_[15]->addMapping(InputAction::ACTION_B_FIRE);
+		buttons_[16]->addMapping(InputAction::ACTION_B_LOW_SENSITIVITY);
 		buttons_[18]->addMapping(InputAction::ACTION_B_NEXT_AMMUNITIONTYPE);
 		buttons_[19]->addMapping(InputAction::ACTION_B_PREV_AMMUNITIONTYPE);
 		buttons_[20]->addMapping(InputAction::ACTION_B_NEXT_FIRINGMODE);
