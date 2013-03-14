@@ -1077,7 +1077,7 @@ void GameComponent::updateAndInterpretAimingRay(Entity* rayCastingPlayerEntity, 
 			//--------------------------------------------------------------------------------------
 			// If the player is executing, interpret the aiming ray as a Laser Automatic Sniper Execution Ray
 			//--------------------------------------------------------------------------------------
-			if(rayCastingPlayerAttribute->executing && !rayCastingPlayerAttribute->detectedAsDead) 
+		//	if(rayCastingPlayerAttribute->executing && !rayCastingPlayerAttribute->detectedAsDead) 
 			{
 				updateAndInterpretLaser(ray, rayCastingPlayerAttribute, ptr_camera);
 				ray->ptr_render->culling.values[0] = INT_MAX;
@@ -1088,9 +1088,9 @@ void GameComponent::updateAndInterpretAimingRay(Entity* rayCastingPlayerEntity, 
 			//--------------------------------------------------------------------------------------
 			// Interpret the ray as what the player is looking at
 			//--------------------------------------------------------------------------------------
-			else
+		//	else
 			{
-				ray->ptr_render->culling.clear();
+		//		ray->ptr_render->culling.clear();
 
 				//entityHitByRay might be used here (2013-02-28 17.24)
 			}
