@@ -43,7 +43,7 @@
 
 ATTRIBUTES_DECLARE_ALL;
 
-#define XKILLPROFILING // commment away to skip profiling
+// #define XKILLPROFILING // commment away to skip profiling
 #ifdef XKILLPROFILING
 #include <xkill-utilities\Converter.h>
 #include <time.h>
@@ -660,6 +660,17 @@ void Renderer::renderInstance(unsigned int meshID, InstancedData* instance, bool
 {
 	ID3D11Device*			device = managementD3D_->getDevice();
 	ID3D11DeviceContext*	devcon = managementD3D_->getDeviceContext();
+
+	managementCB_->setCB(
+		CB_TYPE_OBJECT, 
+		TypeFX_PS, 
+		CB_REGISTER_OBJECT, 
+		devcon);
+	managementCB_->updateCBObject(devcon, 
+		managementMath_->getIdentityMatrix(), 
+		managementMath_->getIdentityMatrix(),
+		managementMath_->getIdentityMatrix(),
+		DirectX::XMFLOAT3(1.0f, 0.0f, 0.0f)); //test, only allow red glow through
 
 	//Fetch renderer representation of model.
 	ModelD3D* modelD3D	= managementModel_->getModelD3D(meshID, device);
@@ -1318,7 +1329,8 @@ void Renderer::drawBulletPhysicsDebugLines(
 			devcon, 
 			finalMatrix, 
 			worldMatrix, 
-			worldMatrixInverse);
+			worldMatrixInverse,
+			DirectX::XMFLOAT3(0.0f, 0.0f, 0.0f)); //irrelevant
 
 		UINT stride = sizeof(VertexPosColor);
 		UINT offset = 0;
@@ -1396,7 +1408,8 @@ void Renderer::drawLaser(DirectX::XMFLOAT4X4 viewMatrix, DirectX::XMFLOAT4X4 pro
 			devcon, 
 			finalMatrix, 
 			worldMatrix, 
-			worldMatrixInverse);
+			worldMatrixInverse,
+			DirectX::XMFLOAT3(1.0f, 1.0f, 1.0f));
 
 		UINT stride = sizeof(VertexPosColor);
 		UINT offset = 0;
@@ -1507,14 +1520,18 @@ void Renderer::renderAnimation(AttributePtr<Attribute_Player> playerAt, DirectX:
 	ID3D11DeviceContext*	devcon = managementD3D_->getDeviceContext();
 
 	ModelD3D* modelD3D	= managementModel_->getModelD3D(ptr_render->meshID, device);
-
 	
 	DirectX::XMFLOAT4X4 worldMatrix			= managementMath_->calculateWorldMatrix(ptr_spatial, ptr_position);
 	DirectX::XMFLOAT4X4 worldMatrixInverse	= managementMath_->calculateMatrixInverse(worldMatrix);
 	DirectX::XMFLOAT4X4 finalMatrix			= managementMath_->calculateFinalMatrix(worldMatrix, view, projection);
 	
 	managementCB_->setCB(CB_TYPE_OBJECT, TypeFX_VS, CB_REGISTER_OBJECT, devcon);
-	managementCB_->updateCBObject(devcon, finalMatrix, worldMatrix, worldMatrixInverse);
+	managementCB_->updateCBObject(
+		devcon, 
+		finalMatrix, 
+		worldMatrix, 
+		worldMatrixInverse,
+		DirectX::XMFLOAT3(ptr_render->glowMod_.asFloat()));
 
 	std::vector<DirectX::XMFLOAT4X4> finalTransforms;
 	

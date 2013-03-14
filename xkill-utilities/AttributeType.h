@@ -214,8 +214,10 @@ struct DLL_U Attribute_Render : public IAttribute
 	int meshID;
 	int textureID;
 
-	bool transparent;
-	bool tessellation;
+	//bool transparent;
+	//bool tessellation;
+
+	Float3 glowMod_;
 
 	BoolField culling;
 	bool cull;

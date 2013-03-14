@@ -151,15 +151,3 @@ CameraInstances* ManagementInstance::getShadowInstances()
 {
 	return shadowInstances_;
 }
-//InstancedData* ManagementInstance::getInstancesFromMeshID(unsigned int meshID)
-//{
-//	InstancedData* instancedData = nullptr;
-//
-//	std::map<unsigned int, InstancedData*>::iterator it = instancesMap_.find(meshID);
-//	if(it != instancesMap_.end())
-//	{
-//		instancedData = it->second;
-//	}
-//
-//	return instancedData;
-//}

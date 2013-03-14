@@ -60,8 +60,11 @@ struct CBObjectDesc
 	DirectX::XMFLOAT4X4 finalMatrix_;
 	DirectX::XMFLOAT4X4 worldMatrix_;
 	DirectX::XMFLOAT4X4 worldMatrixInverse_;
+
+	DirectX::XMFLOAT3 glowMod_;
+	float pad;
 };
-static const unsigned int CB_OBJECT_DESC_SIZE = 192;
+static const unsigned int CB_OBJECT_DESC_SIZE = 208;
 
 //! Struct describing a constant buffer being updated several times per object.
 /*!

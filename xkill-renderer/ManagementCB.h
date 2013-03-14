@@ -71,7 +71,8 @@ public:
 		ID3D11DeviceContext* devcon,
 		DirectX::XMFLOAT4X4 finalMatrix,
 		DirectX::XMFLOAT4X4 worldMatrix,
-		DirectX::XMFLOAT4X4 worldMatrixInverse); //!< Updates the constant buffer cbObject.
+		DirectX::XMFLOAT4X4 worldMatrixInverse,
+		DirectX::XMFLOAT3 glowMod); //!< Updates the constant buffer cbObject.
 	void updateCBBone(
 		ID3D11DeviceContext* devcon,
 		std::vector<DirectX::XMFLOAT4X4> boneTransforms); //!< Updates the constant buffer cbBone.

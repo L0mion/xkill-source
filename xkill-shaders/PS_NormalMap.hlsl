@@ -49,7 +49,7 @@ PSOut PS_NormalMap(VSOutPosNormVTexTanW pIn)
 	output.glowHigh = float4(0.0f, 0.0f, 0.0f, 1.0f);
 	if(normalSample.w > 0.0f)
 	{
-		float3 glowColor = albedoSample.xyz * normalSample.w;
+		float3 glowColor = albedoSample.xyz * normalSample.w * glowMod;
 		output.glowHigh = float4(glowColor, 1.0f);
 	}
 

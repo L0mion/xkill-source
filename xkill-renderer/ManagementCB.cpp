@@ -94,12 +94,14 @@ void ManagementCB::updateCBCamera(ID3D11DeviceContext*	devcon,
 void ManagementCB::updateCBObject(ID3D11DeviceContext* devcon,
 								  DirectX::XMFLOAT4X4 finalMatrix,
 								  DirectX::XMFLOAT4X4 worldMatrix,
-								  DirectX::XMFLOAT4X4 worldMatrixInverse)
+								  DirectX::XMFLOAT4X4 worldMatrixInverse,
+								  DirectX::XMFLOAT3 glowMod)
 {
 	CBObjectDesc cbDesc;
 	cbDesc.finalMatrix_			= finalMatrix;
 	cbDesc.worldMatrix_			= worldMatrix;
 	cbDesc.worldMatrixInverse_	= worldMatrixInverse;
+	cbDesc.glowMod_ = glowMod;
 
 	devcon->UpdateSubresource(cbObject_, 0, 0, &cbDesc, 0, 0);
 }

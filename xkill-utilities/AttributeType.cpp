@@ -87,10 +87,13 @@ Attribute_Animation::~Attribute_Animation()
 
 Attribute_Render::Attribute_Render()
 {
-	transparent			= false;
-	tessellation		= false;
+	//transparent			= false;
+	//tessellation		= false;
+	
 	cull = true;
 	culling.values[0]=culling.values[1]=culling.values[2]=culling.values[3]=INT_MAX;
+
+	glowMod_ = Float3(1.0f, 1.0f, 1.0f);
 
 	meshID			= 0;
 	textureID		= 0;
@@ -106,8 +109,8 @@ DataItemList* Attribute_Render::getDataList()
 	list->add(&ptr_bounding,		"ptr_bounding");
 	list->add(meshID,				"meshID");
 	list->add(textureID,			"textureID");
-	list->add(transparent,			"transparent");
-	list->add(tessellation,			"tessellation");
+	//list->add(transparent,			"transparent");
+	//list->add(tessellation,			"tessellation");
 	list->add(culling.values[0],	"culling1");
 	list->add(culling.values[1],	"culling2");
 	return list;
@@ -119,8 +122,8 @@ void Attribute_Render::saveTo( DataItemList* list )
 	list->get(&ptr_bounding);
 	list->get(&meshID);
 	list->get(&textureID);
-	list->get(&transparent);
-	list->get(&tessellation);
+	//list->get(&transparent);
+	//list->get(&tessellation);
 	list->get(&culling.values[0]);
 	list->get(&culling.values[1]);
 }
@@ -1013,4 +1016,3 @@ DataItemList* Attribute_Bounding::getDataList()
 	list->add_NotSupported("bonvexPoints");
 	return list;
 }
-

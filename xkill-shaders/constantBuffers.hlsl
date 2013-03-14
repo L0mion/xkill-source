@@ -9,15 +9,15 @@ cbuffer cbPerInstance : register (b0)
 {
 	uint screenWidth;
 	uint screenHeight;
-	uint pad1;
-	uint pad2;
+	uint pad;
+	uint pad0;
 };
 
 cbuffer cbPerFrame : register (b1)
 {
 	uint numLightsDir;
-	uint pad;
-	uint pad0;
+	uint pad1;
+	uint pad2;
 	uint pad3;
 };
 
@@ -38,8 +38,8 @@ cbuffer cbPerCamera : register (b2)
 
 	float		viewportHeight;
 	uint		numLightsPoint;
+	uint		pad4;
 	uint		pad5;
-	uint		pad6;
 };
 
 cbuffer cbPerObject : register (b3)
@@ -47,6 +47,9 @@ cbuffer cbPerObject : register (b3)
 	row_major float4x4 finalMatrix;
 	row_major float4x4 worldMatrix;
 	row_major float4x4 worldMatrixInverse;
+
+	float3 glowMod;
+	float pad6;
 };
 
 cbuffer cbPerSubset : register (b4)
