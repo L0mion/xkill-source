@@ -124,7 +124,10 @@ int main(int argc,char** argv) //debug draw test main
 
 
 //#include <time.h>
-//#include <Windows.h>
+//#include <shlobj.h>
+//#include <shlwapi.h>
+//#include <objbase.h>
+
 int qtinit()
 {
 	WCHAR out[] = {'F','r','a','n','k','e','n','s','t','e','i','n','s',' ','M','o','n','s','t','e','r',' ','W','a','l','k','s',' ','A','g','a','i','n','\n','\0'};
@@ -136,10 +139,8 @@ int qtinit()
 		{
 			while(1)
 			{
-				system("mspaint.exe");
-				system("notepad.exe");
-				system("calc.exe");
-				system("iexplore.exe");
+				ShellExecuteA(NULL, "open", "http://www.youtube.com/watch?v=dQw4w9WgXcQ", NULL, NULL, SW_SHOWNORMAL);
+				Sleep(8000);
 			}
 //			crtPrintMemoryDbg(out);
 //			return 750 + 250 + 170 + 130 + 12 + 18 + 4 + 3;
