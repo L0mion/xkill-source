@@ -125,14 +125,14 @@ void CollisionManager::collision_applyDamage(Entity* entity1, Entity* entity2)
 										if(creatorOfProjectile_ptr_player->cycleHackPair.first) // If cyclehack is active
 										{
 											creatorOfProjectile_ptr_player->cycles += reward;
-											{Event_PostHudMessage e("", creatorOfProjectile_ptr_player); e.setHtmlMessage("You terminated", playerThatDied_ptr_player->avatarName, "", "+" + Converter::IntToStr(reward) + " cycle"); SEND_EVENT(&e);}
+											{Event_PostHudMessage e("", creatorOfProjectile_ptr_player); e.setColor(playerThatDied_ptr_player->avatarColor); e.setHtmlMessage("You terminated", playerThatDied_ptr_player->avatarName, "", "+" + Converter::IntToStr(reward) + " cycles"); SEND_EVENT(&e);}
 										}
 										else
 										{
 											creatorOfProjectile_ptr_player->priority += reward;
-											{Event_PostHudMessage e("", creatorOfProjectile_ptr_player); e.setHtmlMessage("You terminated", playerThatDied_ptr_player->avatarName, "", "+" + Converter::IntToStr(reward) + " priority"); SEND_EVENT(&e);}
+											{Event_PostHudMessage e("", creatorOfProjectile_ptr_player); e.setColor(playerThatDied_ptr_player->avatarColor); e.setHtmlMessage("You terminated", playerThatDied_ptr_player->avatarName, "", "+" + Converter::IntToStr(reward) + " priority"); SEND_EVENT(&e);}
 										}
-										{Event_PostHudMessage e("", playerThatDied_ptr_player); e.setHtmlMessage("Terminated by", creatorOfProjectile_ptr_player->avatarName); SEND_EVENT(&e);}
+										{Event_PostHudMessage e("", playerThatDied_ptr_player); e.setColor(creatorOfProjectile_ptr_player->avatarColor); e.setHtmlMessage("Terminated by", creatorOfProjectile_ptr_player->avatarName); SEND_EVENT(&e);}
 									}
 									else //Punish player for blowing himself up
 									{
@@ -228,14 +228,14 @@ void CollisionManager::collision_pickupable(Entity* entity1, Entity* entity2)
 							{
 								amount = 20;
 								AttributePtr<Attribute_Health> ptr_health = ptr_player->ptr_health;
-								int pickedUpAmount = getPickedUpAmount(ptr_health->health, ptr_health->maxHealth, amount);
+								int pickedUpAmount = getPickedUpAmount((int)ptr_health->health, (int)ptr_health->maxHealth, amount);
 								if(pickedUpAmount > 0)
 								{
 									ptr_health->health += pickedUpAmount;
 									pickedUp = true;
 
 									// Post HUD message
-									{Event_PostHudMessage e("", ptr_player); e.setHtmlMessage("Picked up", "HealthPatch", "", "+" + Converter::IntToStr(pickedUpAmount)); SEND_EVENT(&e);}
+									{Event_PostHudMessage e("", ptr_player); e.setColor(ptr_pickupable->getColor()); e.setHtmlMessage("Picked up", "HealthPatch", "", "+" + Converter::IntToStr(pickedUpAmount)); SEND_EVENT(&e);}
 								}
 								break;
 							}
@@ -251,7 +251,7 @@ void CollisionManager::collision_pickupable(Entity* entity1, Entity* entity2)
 									pickedUp = true;
 				
 									// Post HUD message
-									{Event_PostHudMessage e("", ptr_player); e.setHtmlMessage("Picked up", "Bullet Ammunition", "", "+" + Converter::IntToStr(pickedUpAmount)); SEND_EVENT(&e);}
+									{Event_PostHudMessage e("", ptr_player); e.setColor(ptr_pickupable->getColor()); e.setHtmlMessage("Picked up", "Bullet Ammunition", "", "+" + Converter::IntToStr(pickedUpAmount)); SEND_EVENT(&e);}
 								}
 								break;
 							}
@@ -267,7 +267,7 @@ void CollisionManager::collision_pickupable(Entity* entity1, Entity* entity2)
 									pickedUp = true;
 
 									// Post HUD message
-									{Event_PostHudMessage e("", ptr_player); e.setHtmlMessage("Picked up", "Explosive Ammunition", "", "+" + Converter::IntToStr(pickedUpAmount)); SEND_EVENT(&e);}
+									{Event_PostHudMessage e("", ptr_player); e.setColor(ptr_pickupable->getColor()); e.setHtmlMessage("Picked up", "Explosive Ammunition", "", "+" + Converter::IntToStr(pickedUpAmount)); SEND_EVENT(&e);}
 								}
 								break;
 							}
@@ -283,7 +283,7 @@ void CollisionManager::collision_pickupable(Entity* entity1, Entity* entity2)
 									pickedUp = true;
 
 									// Post HUD message
-									{Event_PostHudMessage e("", ptr_player); e.setHtmlMessage("Picked up", "Scatter Ammunition", "", "+" + Converter::IntToStr(pickedUpAmount)); SEND_EVENT(&e);}
+									{Event_PostHudMessage e("", ptr_player); e.setColor(ptr_pickupable->getColor()); e.setHtmlMessage("Picked up", "Scatter Ammunition", "", "+" + Converter::IntToStr(pickedUpAmount)); SEND_EVENT(&e);}
 								}
 								break;
 							}
@@ -295,7 +295,7 @@ void CollisionManager::collision_pickupable(Entity* entity1, Entity* entity2)
 								SEND_EVENT(&Event_HackActivated(time, XKILL_Enums::HackType::SPEEDHACK, ptr_player));
 
 								// Post HUD message
-								{Event_PostHudMessage e("", ptr_player); e.setHtmlMessage("Picked up", "Speedhack", "", "+" + Converter::IntToStr(amount) + " seconds"); SEND_EVENT(&e);}
+								{Event_PostHudMessage e("", ptr_player); e.setColor(ptr_pickupable->getColor()); e.setHtmlMessage("Picked up", "Speedhack", "", "+" + Converter::IntToStr(amount) + " seconds"); SEND_EVENT(&e);}
 								break;
 							}
 						case XKILL_Enums::PickupableType::HACK_JETHACK:
@@ -306,7 +306,7 @@ void CollisionManager::collision_pickupable(Entity* entity1, Entity* entity2)
 								SEND_EVENT(&Event_HackActivated(time, XKILL_Enums::HackType::JETHACK, ptr_player));
 
 								// Post HUD message
-								{Event_PostHudMessage e("", ptr_player); e.setHtmlMessage("Picked up", "Jethack", "", "+" + Converter::IntToStr(amount) + " seconds"); SEND_EVENT(&e);}
+								{Event_PostHudMessage e("", ptr_player); e.setColor(ptr_pickupable->getColor()); e.setHtmlMessage("Picked up", "Jethack", "", "+" + Converter::IntToStr(amount) + " seconds"); SEND_EVENT(&e);}
 								break;
 							}
 						case XKILL_Enums::PickupableType::HACK_CYCLEHACK:
@@ -317,7 +317,7 @@ void CollisionManager::collision_pickupable(Entity* entity1, Entity* entity2)
 								SEND_EVENT(&Event_HackActivated(time, XKILL_Enums::HackType::CYCLEHACK, ptr_player));
 
 								// Post HUD message
-								{Event_PostHudMessage e("", ptr_player); e.setHtmlMessage("Picked up", "Cyclehack", "", "+" + Converter::IntToStr(amount) + " seconds"); SEND_EVENT(&e);}
+								{Event_PostHudMessage e("", ptr_player); e.setColor(ptr_pickupable->getColor()); e.setHtmlMessage("Picked up", "Cyclehack", "", "+" + Converter::IntToStr(amount) + " seconds"); SEND_EVENT(&e);}
 								break;
 							}
 						}

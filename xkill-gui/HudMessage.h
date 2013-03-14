@@ -10,6 +10,7 @@ private:
 	float _lifetime;
 	QLabel* _label;
 	Float2 _targetPosition;
+	Float2 _position;
 
 public:
 	HudMessage(Event_PostHudMessage* e, QWidget* parent);

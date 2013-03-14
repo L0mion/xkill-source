@@ -323,13 +323,7 @@ Event_PostHudMessage::Event_PostHudMessage( std::string message, AttributePtr<At
 
 
 	// Apply color
-	color = Float4(1.0f, 1.0f, 1.0f, 0.85f);
-	if(ptr_subject_player.isValid())
-	{
-		color.x = ptr_subject_player->avatarColor.x;
-		color.y = ptr_subject_player->avatarColor.y;
-		color.z = ptr_subject_player->avatarColor.z;
-	}
+	setColor(Float3(1.0f, 1.0f, 1.0f));
 }
 
 void Event_PostHudMessage::setStyle( Style style )
@@ -364,6 +358,14 @@ void Event_PostHudMessage::setHtmlMessage( std::string prefex, std::string subje
 		description = text_subtile + "(" + text_subtile + description + text_end + text_subtile + ")" + text_end;
 
 	message = prefex + " " + subject + " " + suffix + " " + description ;
+}
+
+void Event_PostHudMessage::setColor( Float3 color )
+{
+	this->color.x = color.x;
+	this->color.y = color.y;
+	this->color.z = color.z;
+	this->color.w = 0.85f;
 }
 
 Event_ReloadPhysicsAttributeDataIntoBulletPhysics::Event_ReloadPhysicsAttributeDataIntoBulletPhysics(int physicsAttributeId) : Event(EVENT_RELOAD_PHYSICS_ATTRIBUTE_DATA_INTO_BULLET_PHYSICS)
