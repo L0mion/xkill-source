@@ -91,6 +91,8 @@ private:
 	HRESULT initManagementSprites();	//!< Initializes ManagementSprites, which manages all sprites.
 	void	initManagementAnimation();	//!< Initialized ManageManagementAnimation, which manages all animations.
 
+	void updateAnimation(float delta, AttributePtr<Attribute_Player> ptr_player, ID3D11Device* device);
+
 	void renderViewportToGBuffer(
 		ViewportData& vpData);											//!< Renders to g-buffer.
 	void renderViewportToBackBuffer(ViewportData& vpData, DirectX::XMFLOAT4X4 shadowTransform);				//!< Renders to backbuffer.
@@ -159,6 +161,7 @@ private:
 	
 	float delta_;
 	float temp_;
+	float animationTimeOffset_;
 	ID3D11Buffer*			rayBuffer;
 
 	ShadowMatrices shadowMatrices_;

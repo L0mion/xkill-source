@@ -209,7 +209,7 @@ public:
 			ptr_offset->ptr_spatial = ptr_spatial;
 			ptr_offset->ptr_parent_spatial_position = ptr_weapon_spatial;
 			ptr_offset->ptr_parent_spatial_rotation = ptr_weapon_spatial;
-			ptr_offset->offset_position = Float3(0.0f, 0.06f, 0.6f);
+			ptr_offset->offset_position = Float3(0.0f, 0.01f, 0.7f);
 
 			ptr_fireLocation_spatial = ptr_spatial;
 		}
