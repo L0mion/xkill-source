@@ -11,6 +11,7 @@
 */
 class CullingComponent : public IObserver
 {
+	Int2 yminmax;
 	Int2 min_,max_;
 	std::vector<std::vector<AttributePtr<Attribute_Render>>> nodes_;
 	void cameraVsNode(Int2 min, Int2 max, AttributePtr<Attribute_Camera> camera);

@@ -92,6 +92,12 @@ void GameComponent::onEvent(Event* e)
 			AttributePtr<Attribute_Pickupable> ptr_pickupable = itrPickupable.getNext();
 			CollisionManager::Instance()->removePickupable(ptr_pickupable);
 		}
+		while(itrPickupablesSpawnPoint.hasNext())
+		{
+			AttributePtr<Attribute_PickupablesSpawnPoint> ptr_pickupableSpawnpoint = itrPickupablesSpawnPoint.getNext();
+			ptr_pickupableSpawnpoint->secondsSinceLastPickup = ptr_pickupableSpawnpoint->spawnDelayInSeconds;
+			ptr_pickupableSpawnpoint->secondsSinceLastSpawn  = ptr_pickupableSpawnpoint->spawnDelayInSeconds;
+		}
 		break;
 	case EVENT_SPAWN_PLAYER:
 		{
