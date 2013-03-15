@@ -60,15 +60,17 @@ void HudScheduling::init( Ui::Menu_HUD* ui, AttributePtr<Attribute_Player> ptr_o
 	while(itrPlayer.hasNext())
 	{
 		AttributePtr<Attribute_Player> ptr_player = itrPlayer.getNext();
-		ptr_player->priority = 1;
+		//ptr_player->priority = 5;
 		QLabel* l = new QLabel(parent);
 		l->resize(itemWidth, standardMargin);
 		l->move(subWindow->x() + 0.5f, subWindow->y() + 0.5f);
 
 		// Set color based on player's color
 		Float3 color = ptr_player->avatarColor;
-		std::string str_color = "background-color: rgba("+Converter::IntToStr((int)(color.x * 255))+", "+Converter::IntToStr((int)(color.y * 255))+", "+ Converter::IntToStr((int)(color.z * 255)) +", 150);";
-		l->setStyleSheet(QString(str_color.c_str()));
+		std::string str_backgroundColor	= "rgba("+Converter::IntToStr((int)(color.x * 255))+", "+Converter::IntToStr((int)(color.y * 255))+", "+ Converter::IntToStr((int)(color.z * 255)) +", 150);";
+		std::string str_borderColor		= "rgba("+Converter::IntToStr((int)(color.x * 255))+", "+Converter::IntToStr((int)(color.y * 255))+", "+ Converter::IntToStr((int)(color.z * 255)) +", 255);";
+		std::string str_sheet = "background: " + str_backgroundColor + "border: 1px solid rgba(0, 0, 0, 30); border-top: 2px solid rgba(255, 255, 255, 30); border-right: 2px solid rgba(255, 255, 255, 30);";
+		l->setStyleSheet(QString(str_sheet.c_str()));
 
 		l->show();
 
@@ -96,14 +98,20 @@ void HudScheduling::refresh()
 
 	// Update progressbar
 	const int kPrecition = 500;
-	int schedulingRatio = kPrecition - (int)(SETTINGS->timeUntilScheduling / SETTINGS->schedulerTime * kPrecition);
-	if(progressbar->value() != schedulingRatio)
+	float timeUntilScheduling = SETTINGS->timeUntilScheduling;
+	if(timeUntilScheduling < 0.0f)
+		timeUntilScheduling = 0.0f;
+	float schedulerTime = SETTINGS->schedulerTime;
+	float schedulingRatio = timeUntilScheduling /schedulerTime;
+	int test = timeUntilScheduling /schedulerTime * kPrecition;
+	int schedulingProgressbarRatio = kPrecition - test;
+	if(progressbar->value() != schedulingProgressbarRatio)
 	{
-		progressbar->setValue(schedulingRatio);
+		progressbar->setValue(schedulingProgressbarRatio);
 		progressbar->update();
 
 		// Turn bar red if at scheduling
-		if(schedulingRatio == kPrecition)
+		if(schedulingProgressbarRatio == kPrecition)
 		{
 			if(!isScheduling)
 			{
@@ -200,4 +208,16 @@ int HudScheduling::findHighestPriority()
 	}
 
 	return highest;
+}
+
+void HudScheduling_Item::update()
+{
+	// Interpolate position
+	float factor = 2.0f * SETTINGS->trueDeltaTime;
+	if(factor > 1.0f)
+		factor = 1.0f;
+	Float2 newPos = Float2::lerp(&position, &targetPosition, factor);
+	newPos.y = targetPosition.y;
+
+	setPosition(newPos);
 }

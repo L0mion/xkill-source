@@ -1363,6 +1363,9 @@ void NameGenerator::resetNames()
 	addName("magic floppy disk");
 	addName("Grumpy Wizard");
 	addName("tinker goblin");
+	addName("severe performance degradation");
+	addName("there can only be one");
+	addName("not responsible");
 
 	addName("inexpensive payback time");
 	addName("better safe than gory");
@@ -1396,6 +1399,8 @@ void NameGenerator::resetNames()
 	addName("historically correct");
 	addName("difficult task");
 	addName("hungry slerp");
+	addName("in a way");
+	addName("extensive research");
 	
 	//C++ keywords
 	addName("alignas");
