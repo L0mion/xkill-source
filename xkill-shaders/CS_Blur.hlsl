@@ -13,13 +13,6 @@ Subtract from weights in blur-kernel to remove lighting from the scene. (darker)
 #define N 256
 #define sharedCacheSize (N + 2 * blurRadius)
 
-//Global memory:
-Texture2D			toBlur	: register ( t9 );
-RWTexture2D<float4>	blurred	: register ( u1 ); 
-
-//Shared memory:
-groupshared float4 sharedCache[sharedCacheSize];
-
 struct BlurKernel
 {
 	float _[NUM_BLUR_KERNEL_ELEMENTS_UNCOMPRESSED];
@@ -37,5 +30,13 @@ const BlurKernel ExtractBlurKernel()
 
 	return blurKernel;
 }
+
+//Global memory:
+Texture2D			toBlur	: register ( t9 );
+RWTexture2D<float4>	blurred	: register ( u1 ); 
+
+//Shared memory:
+groupshared float4 sharedCache[sharedCacheSize];
+groupshared BlurKernel blurKernel;
 
 #endif //XKILL_RENDERER_CS_BLUR_HLSL

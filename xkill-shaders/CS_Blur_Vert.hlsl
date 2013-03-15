@@ -6,10 +6,13 @@
 [numthreads(1, N, 1)]
 void CS_Blur_Vert(
 	int3	threadIDDispatch	: SV_DispatchThreadID,
-	int3	threadIDBlock		: SV_GroupThreadID)
+	int3	threadIDBlock		: SV_GroupThreadID,
+	uint	threadIDBlockIndex	: SV_GroupIndex)
 {
-	//Extract blurring kernel:
-	const BlurKernel blurKernel = ExtractBlurKernel();
+	if(threadIDBlockIndex == 0)
+	{
+		blurKernel = ExtractBlurKernel();
+	}
 
 	//Load texel into shared memory to reduce memory bandwidth:
 	int2 xy = min(
