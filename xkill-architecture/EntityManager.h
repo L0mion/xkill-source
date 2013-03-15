@@ -124,7 +124,7 @@ public:
 	{
 		Entity* entity = createEntity();
 		entityFactory.createProjectileEntity(entity, e);
-		DEBUGPRINT("ENTITYMANAGER: Created projectile entity " << entity->getID());
+		//DEBUGPRINT("ENTITYMANAGER: Created projectile entity " << entity->getID());
 	}
 
 	void event_CreatePlayerSpawnPoint(Event_CreatePlayerSpawnPoint* e)

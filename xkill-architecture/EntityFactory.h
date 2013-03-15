@@ -476,7 +476,6 @@ public:
 		ptr_physics->gravity = Float3(0.0f, 0.0f, 0.0f);
 		ptr_physics->linearVelocity = Float3(0.0f, 0.0f, 0.0f);
 
-
 		CREATE_ATTRIBUTE(ptr_render, Attribute_Render, render, entity);
 		ptr_render->ptr_spatial = ptr_spatial;
 		ptr_render->meshID = XKILL_Enums::ModelId::EXPLOSION;

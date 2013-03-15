@@ -3,6 +3,7 @@
 #include <xkill-utilities/Entity.h>
 #include <xkill-utilities/AttributeManager.h>
 #include <xkill-utilities/Converter.h>
+#include <xkill-utilities/MutatorSettings.h>
 
 CollisionManager* CollisionManager::instance = nullptr;
 ATTRIBUTES_DECLARE_ALL;
@@ -334,8 +335,11 @@ void CollisionManager::collision_pickupable(Entity* entity1, Entity* entity2)
 
 void CollisionManager::collision_projectile(Entity* entity1, Entity* entity2)
 {
-	if(entity1->hasAttribute(ATTRIBUTE_PROJECTILE) && entity2->hasAttribute(ATTRIBUTE_PHYSICS))
+	if(entity1->hasAttribute(ATTRIBUTE_PROJECTILE) && entity2->hasAttribute(ATTRIBUTE_PHYSICS) && !entity2->hasAttribute(ATTRIBUTE_PROJECTILE))
 	{
+		int e1 = entity1->getID();
+		int e2 = entity2->getID();
+
 		// Handle PhysicsAttribute of a projectile colliding with another PhysicsAttribute
 		std::vector<int> physicsId = entity1->getAttributes(ATTRIBUTE_PHYSICS);
 		for(unsigned int i=0;i<physicsId.size();i++)
@@ -377,18 +381,29 @@ void CollisionManager::collision_projectile(Entity* entity1, Entity* entity2)
 					{
 						ptr_projectile->currentLifeTimeLeft = 0.0f; //Kill the projectile that caused the explosion
 
-						//Extract projectile position.
-						AttributePtr<Attribute_Physics> ptr_projectile_physics	 = ptr_projectile->ptr_physics;
-						AttributePtr<Attribute_Spatial> ptr_projectile_spatial	 = ptr_projectile_physics->ptr_spatial;
-						AttributePtr<Attribute_Position> ptr_projectile_position = ptr_projectile_spatial->ptr_position;
-
-						//Creates an explosion sphere. Init information is taken from the impacting projectile.
-						SEND_EVENT(&Event_CreateExplosionSphere(ptr_projectile_position->position, ptr_projectile->entityIdOfCreator, ptr_projectile->ammunitionType, ptr_projectile->firingModeType));
 						break;
 					}
 				default:
 					ERROR_MESSAGEBOX("PhysicsAttribute collision: unknown ammunitionType"); 
 					break;
+				}
+
+				MutatorSettings ms;
+
+				if(ms.getStandardAmmunition(ptr_projectile->ammunitionType).explosive)
+				{
+					//Extract projectile position.
+					AttributePtr<Attribute_Physics>  ptr_projectile_physics	 = ptr_projectile->ptr_physics;
+					AttributePtr<Attribute_Spatial>  ptr_projectile_spatial	 = ptr_projectile_physics->ptr_spatial;
+					AttributePtr<Attribute_Position> ptr_projectile_position = ptr_projectile_spatial->ptr_position;
+
+					ptr_projectile->currentLifeTimeLeft = 0.0f;
+
+					//Creates an explosion sphere. Init information is taken from the impacting projectile.
+					SEND_EVENT(&Event_CreateExplosionSphere(ptr_projectile_position->position, ptr_projectile->entityIdOfCreator, ptr_projectile->ammunitionType, ptr_projectile->firingModeType));
+
+					if(e1 != entity1->getID() || e2 != entity2->getID())
+						DEBUGPRINT("Entity ids not matching.");
 				}
 			}
 		}
