@@ -11,6 +11,8 @@ private:
 	clock_t _lastMeasurement;
 
 	clock_t _totalElapsedClocks;
+	clock_t _minClock;
+	clock_t _maxClock;
 	int _numSamples;
 
 	int _id;

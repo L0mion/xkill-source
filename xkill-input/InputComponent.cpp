@@ -58,9 +58,10 @@ void InputComponent::onEvent(Event* e)
 		Event_KeyPress* ekp = static_cast<Event_KeyPress*>(e);
 		int keyEnum	= ekp->keyEnum;
 		bool isPressed = ekp->isPressed;
-		bool shiftModifier = ekp->shiftModifier;
+		bool shiftPressed = ekp->shiftPressed;
+		bool tabPressed = ekp->tabPressed;
 
-		handleKeyEvent(keyEnum, isPressed, shiftModifier);
+		handleKeyEvent(keyEnum, isPressed, shiftPressed, tabPressed);
 	}
 	if(type == EVENT_MOUSE_PRESS)
 	{
@@ -89,12 +90,12 @@ void InputComponent::onEvent(Event* e)
 			if(emw->value >= 0)
 			{
 				//device->setScrollButton(true);
-				handleKeyEvent('â', true, false);
+				handleKeyEvent('â', true);
 			}
 			else
 			{
 				//device->setScrollButton(false);
-				handleKeyEvent('ô', true, false);
+				handleKeyEvent('ô', true);
 			}
 		}
 	}
@@ -170,6 +171,11 @@ void InputComponent::handleInput(float delta)
 		input->sprint =	device->getBoolValue(InputAction::ACTION_B_SPRINT);
 
 		input->reload =	device->getBoolPressed(InputAction::ACTION_B_RELOAD);
+
+		if(!ptr_player->detectedAsDead)
+		{
+			ptr_player->showScoreboard = device->getBoolValue(InputAction::ACTION_B_SHOW_SCOREBOARD);
+		}
 
 		if(device->getBoolValue(InputAction::ACTION_B_TIME_SPEED_UP))
 		{
@@ -306,15 +312,32 @@ void InputComponent::handleMousePressedEvent(int nr, bool pressed)
 	}
 }
 
-void InputComponent::handleKeyEvent(char key, bool pressed, bool shiftModifier)
+void InputComponent::handleKeyEvent(char key, bool pressed, bool shiftPressed, bool tabPressed)
 {
 	QTInputDevices* device = inputManager_->GetMouseAndKeyboard();
 		
 	if(device != nullptr)
 	{
-		if(shiftModifier)
+		if(shiftPressed)
 			device->setButton('é', pressed);
+		else if(tabPressed)
+			device->setButton('ê', pressed);
 		else
 			device->setButton(key, pressed);
+	}
+}
+
+void InputComponent::resetMovementInput()
+{
+	while(itrPlayer.hasNext())
+	{
+		AttributePtr<Attribute_Player> ptr_player = itrPlayer.getNext();
+
+		if(ptr_player->ptr_inputDevice.isEmpty())
+			continue;
+
+		AttributePtr<Attribute_Input> input = ptr_player->ptr_input;
+		input->position = Float2(0.0f, 0.0f);
+		input->rotation = Float2(0.0f, 0.0f);
 	}
 }

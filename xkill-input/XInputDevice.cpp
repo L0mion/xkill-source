@@ -110,6 +110,7 @@ void XInputDevice::setStandardMappings()
 		buttons_[3]->addMapping(InputAction::ACTION_B_NEXT_FIRINGMODE);
 		buttons_[4]->addMapping(InputAction::ACTION_B_JUMP_JETPACK);
 		buttons_[5]->addMapping(InputAction::ACTION_B_SPRINT);
+		buttons_[7]->addMapping(InputAction::ACTION_B_SHOW_SCOREBOARD);
 		buttons_[9]->addMapping(InputAction::ACTION_B_RELOAD);
 		buttons_[10]->addMapping(InputAction::ACTION_B_NEXT_FIRINGMODE);
 		buttons_[11]->addMapping(InputAction::ACTION_B_PREV_AMMUNITIONTYPE);

@@ -31,6 +31,7 @@ public:
 
 	virtual void onEvent(Event* e);
 	virtual void onUpdate(float delta);
+	void resetMovementInput();
 
 private:
 	InputManager*					inputManager_;
@@ -46,5 +47,5 @@ private:
 	void handleRumbleEvent(Event_Rumble* e);
 	void handleMouseMoveEvent(Event_MouseMove* e);
 	void handleMousePressedEvent(int nr, bool pressed);
-	void handleKeyEvent(char key, bool pressed, bool shiftModifier);
+	void handleKeyEvent(char key, bool pressed, bool shiftPressed = false, bool tabPressed = false);
 };

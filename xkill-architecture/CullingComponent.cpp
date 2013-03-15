@@ -32,7 +32,7 @@ void CullingComponent::onEvent(Event* e)
 	{
 	case EVENT_START_DEATHMATCH:
 		nodes_.clear();
-		min_=max_=Int2(0,0);
+		yminmax=min_=max_=Int2(0,0);
 		while(itrRender.hasNext())
 		{
 			AttributePtr<Attribute_Render> ptr_render = itrRender.getNext();
@@ -47,6 +47,11 @@ void CullingComponent::onEvent(Event* e)
 					max_.x = ((int)position.x);
 				if(max_.y < ((int)position.z))
 					max_.y = ((int)position.z);
+
+				if(yminmax.x > ((int)position.y));
+					yminmax.x = position.y;
+				if(yminmax.y < ((int)position.y));
+					yminmax.y = position.y;
 			}
 		}
 		max_.x++;
@@ -76,6 +81,19 @@ void CullingComponent::cameraVsNode(Int2 min, Int2 max, AttributePtr<Attribute_C
 		float length = sqrt(camera->look.x*camera->look.x+camera->look.z*camera->look.z);
 		Float2 pos(camera->ptr_spatial->ptr_position->position.x,camera->ptr_spatial->ptr_position->position.z);
 		Float2 look(camera->look.x/length,camera->look.z/length);
+
+		float l = camera->look.y; 
+		float f = camera->fieldOfView;
+		float viewbehind = (camera->fieldOfView/2.0f + PI/4 + abs(asin(camera->look.y))) - PI/2; 
+		if(viewbehind > 0)
+		{
+			viewbehind = tan(viewbehind)*max(abs(camera->ptr_spatial->ptr_position->position.y - yminmax.x),abs(camera->ptr_spatial->ptr_position->position.y - yminmax.y));
+			Float2 lb(look.x*viewbehind,look.y*viewbehind);
+			pos = pos - lb;
+		}
+
+		
+		
 		Float2 p[] = {Float2(min.x-0.5f-pos.x,min.y-0.5f-pos.y),
 					  Float2(min.x-0.5f-pos.x,max.y+0.5f-pos.y),
 					  Float2(max.x+0.5f-pos.x,min.y-0.5f-pos.y),
@@ -135,7 +153,7 @@ void CullingComponent::onUpdate(float delta)
 	while(itrRender.hasNext())
 	{
 		AttributePtr<Attribute_Render> ptr_render = itrRender.getNext();
-		if(ptr_render->meshID != XKILL_Enums::ModelId::LASER && ptr_render->meshID != 201)
+		if(ptr_render->meshID != XKILL_Enums::ModelId::LASER && ptr_render->meshID != 201 && !(ptr_render->meshID > 99 && ptr_render->meshID<200))
 		{
 			ptr_render->culling.clear();
 		}
@@ -149,7 +167,7 @@ void CullingComponent::onUpdate(float delta)
 		while(itrRender.hasNext())
 		{
 			AttributePtr<Attribute_Render> ptr_render = itrRender.getNext();
-			if(ptr_render->meshID != XKILL_Enums::ModelId::LASER && ptr_render->meshID != 200 && ptr_render->meshID != 201)
+			if(ptr_render->meshID != XKILL_Enums::ModelId::LASER && ptr_render->meshID != 200 && ptr_render->meshID != 201 && !(ptr_render->meshID > 99 && ptr_render->meshID<200))
 			{
 				Float3 p0 = ptr_render->ptr_spatial->ptr_position->position;
 				Float3 p1 = ptr_camera->ptr_spatial->ptr_position->position;

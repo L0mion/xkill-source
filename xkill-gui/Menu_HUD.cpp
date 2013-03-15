@@ -149,25 +149,33 @@ void Menu_HUD::refresh()
 
 	int numAmmo = firingMode->nrOfShotsLeftInClip[ammoIndex];
 	int clipSize = firingMode->clipSize;
+	int ammoLeft = ammunition->currentTotalNrOfShots;
 	ui.label_ammo->setNum(numAmmo);
 	ui.label_totalAmmo->setNum((int)ptr_weaponStats->ammunition[ammoIndex].currentTotalNrOfShots);
 	int prev_ammoRatio = ui.progressBar_ammo->value();
-	int ammoRatio = (int)((numAmmo / (float)clipSize) * 100);
+	int numFullyReloaded = clipSize;
+	if(clipSize > ammoLeft && ammoLeft > 0)
+		numFullyReloaded = ammoLeft; 
+	int ammoRatio = (int)((numAmmo / (float)numFullyReloaded) * 100);
 	int reloadRatio = (int)((firingMode->reloadTimeLeft / (float)firingMode->reloadTime) * 100);
 
-	// Show menu if health has changed otherwise fade after a few seconds
+	// Show menu if ammo has changed otherwise fade after a few seconds
 	if(reloadRatio == 100 && ammoRatio != prev_ammoRatio)
 	{
 		prev_ammoRatio = ammoRatio;
 		ammoFade = fadeTime;
-		ui.progressBar_ammo->setValue(ammoRatio);
 	}
-	if(reloadRatio != prev_reloadRatio)
+	else if(reloadRatio != prev_reloadRatio)
 	{
 		prev_reloadRatio = reloadRatio;
 		ammoFade = fadeTime;
-		ui.progressBar_ammo->setValue(100 - reloadRatio);
 	}
+
+	int largestRatio = ammoRatio;
+	if(ammoRatio < (100 - reloadRatio))
+		largestRatio = (100 - reloadRatio);
+
+	ui.progressBar_ammo->setValue(largestRatio);
 
 	// Hide bar if full
 	if(ammoRatio == 100)
@@ -287,9 +295,11 @@ void Menu_HUD::refresh()
 			ui.label_aim->hide();
 			ui.label_firingMode->hide();
 			ui.frame_bottom->hide();
+			schedulingHud.hide();
 
 			ui.progressBar_health->hide();
 			ui.progressBar_ammo->hide();
+			
 		}
 	}
 	else
@@ -301,6 +311,7 @@ void Menu_HUD::refresh()
 			ui.label_aim->show();
 			ui.label_firingMode->show();
 			ui.frame_bottom->show();
+			schedulingHud.show();
 		}
 	}
 
@@ -309,8 +320,11 @@ void Menu_HUD::refresh()
 	//
 
 	scoreboard.refresh();
-	if(ptr_player->detectedAsDead || GET_STATE() == STATE_GAMEOVER)
+	if(ptr_player->detectedAsDead || GET_STATE() == STATE_GAMEOVER || ptr_player->showScoreboard)
 	{
+		if(ptr_player->showScoreboard)
+			scoreboardFade = 0.0f;
+
 		// Show scoreboard if delay has expired
 		if(scoreboardFade > 0.0f)
 			scoreboardFade -= SETTINGS->trueDeltaTime;
@@ -322,6 +336,13 @@ void Menu_HUD::refresh()
 				hudMessage_manager.silenceAllMessages();
 				ui.frame_scoreboard->show();
 				ptr_player->isScoreBoardVisible = true;
+
+				// Hide aim
+				if(!ui.label_aim->isHidden())
+				{
+					ui.label_aim->hide();
+					ui.label_firingMode->hide();
+				}
 			}
 		}
 	}
@@ -335,6 +356,13 @@ void Menu_HUD::refresh()
 		{
 			ui.frame_scoreboard->hide();
 			ptr_player->isScoreBoardVisible = false;
+
+			// Show aim if it was hidden
+			if(ui.label_aim->isHidden())
+			{
+				ui.label_aim->show();
+				ui.label_firingMode->show();
+			}
 		}
 	}
 
@@ -349,7 +377,7 @@ void Menu_HUD::refresh()
 	{
 		std::string str_priorityAdvantage = "";
 
-		int scoreDiff = scoreboard.maxPriority - ptr_player->cycles;
+		int scoreDiff = scoreboard.maxPriority - ptr_player->priority;
 
 		// If first player, show score difference to second closest
 		if(scoreDiff == 0)

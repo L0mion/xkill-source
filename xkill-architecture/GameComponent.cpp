@@ -92,6 +92,12 @@ void GameComponent::onEvent(Event* e)
 			AttributePtr<Attribute_Pickupable> ptr_pickupable = itrPickupable.getNext();
 			CollisionManager::Instance()->removePickupable(ptr_pickupable);
 		}
+		while(itrPickupablesSpawnPoint.hasNext())
+		{
+			AttributePtr<Attribute_PickupablesSpawnPoint> ptr_pickupableSpawnpoint = itrPickupablesSpawnPoint.getNext();
+			ptr_pickupableSpawnpoint->secondsSinceLastPickup = ptr_pickupableSpawnpoint->spawnDelayInSeconds;
+			ptr_pickupableSpawnpoint->secondsSinceLastSpawn  = ptr_pickupableSpawnpoint->spawnDelayInSeconds;
+		}
 		break;
 	case EVENT_SPAWN_PLAYER:
 		{
@@ -437,6 +443,7 @@ void GameComponent::updatePlayerAttributes(float delta)
 					ammo->currentTotalNrOfShots--;
 					firingMode->nrOfShotsLeftInClip[ammoIndex]--;
 
+					firingMode->reloadTimeLeft = firingMode->reloadTime;
 					ammo->isReloading = false;
 
 					shootProjectile(ptr_player->ptr_weaponFireLocation_spatial, ptr_weaponStats);
@@ -1142,14 +1149,14 @@ void GameComponent::updateAndInterpretLaser(AttributePtr<Attribute_Ray> ptr_ray,
 					if(ptr_player->cycleHackPair.first)
 					{
 						ptr_player->cycles++;
-						{Event_PostHudMessage e("", ptr_player); e.setColor(hitPlayerAttribute->avatarColor); e.setHtmlMessage("You exterminated", hitPlayerAttribute->avatarName, "", "+1 cycle"); SEND_EVENT(&e);}
+						{Event_PostHudMessage e("", ptr_player); e.setColor(hitPlayerAttribute->avatarColor); e.setHtmlMessage("You executed", hitPlayerAttribute->avatarName, "", "+1 cycle"); SEND_EVENT(&e);}
 					}
 					else
 					{
 						ptr_player->priority++;
-						{Event_PostHudMessage e("", ptr_player); e.setColor(hitPlayerAttribute->avatarColor); e.setHtmlMessage("You exterminated", hitPlayerAttribute->avatarName, "", "+1 priority"); SEND_EVENT(&e);}
+						{Event_PostHudMessage e("", ptr_player); e.setColor(hitPlayerAttribute->avatarColor); e.setHtmlMessage("You executed", hitPlayerAttribute->avatarName, "", "+1 priority"); SEND_EVENT(&e);}
 					}
-					{Event_PostHudMessage e("", hitPlayerAttribute); e.setColor(ptr_player->avatarColor); e.setHtmlMessage("Terminated by", ptr_player->avatarName); SEND_EVENT(&e);}
+					{Event_PostHudMessage e("", hitPlayerAttribute); e.setColor(ptr_player->avatarColor); e.setHtmlMessage("Executed by", ptr_player->avatarName); SEND_EVENT(&e);}
 
 					SEND_EVENT(&Event_PlayerDeath(playerHitByRayAttributeId.at(j)));
 				}

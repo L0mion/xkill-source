@@ -106,6 +106,11 @@ void MainWindow::onEvent( Event* e )
 
 void MainWindow::keyPressEvent( QKeyEvent* e )
 {
+
+	// Toggle mouselock
+	if(e->key() == Qt::Key_Alt)
+		SEND_EVENT(&Event_SetMouseLock(false));
+
 	
 	// Toggle full screen
 	if((e->key()==Qt::Key_Return) && (e->modifiers()==Qt::AltModifier))
@@ -219,7 +224,7 @@ void MainWindow::keyPressEvent( QKeyEvent* e )
 	}
 
 	// Inform about key press
-	SEND_EVENT(&Event_KeyPress(e->key(), true, (e->key() == Qt::Key::Key_Shift)));
+	SEND_EVENT(&Event_KeyPress(e->key(), true, (e->key() == Qt::Key::Key_Shift), (e->key() == Qt::Key::Key_Tab)));
 }
 
 void MainWindow::showMenu()
@@ -266,7 +271,7 @@ void MainWindow::slot_toggleFullScreen()
 void MainWindow::keyReleaseEvent( QKeyEvent* e )
 {
 	// Inform about key release
-	SEND_EVENT(&Event_KeyPress(e->key(), false, (e->key() == Qt::Key::Key_Shift)));
+	SEND_EVENT(&Event_KeyPress(e->key(), false, (e->key() == Qt::Key::Key_Shift), (e->key() == Qt::Key::Key_Tab)));
 }
 
 void MainWindow::slot_setTitle( QString title )
