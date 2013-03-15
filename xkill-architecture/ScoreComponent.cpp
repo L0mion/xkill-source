@@ -239,19 +239,11 @@ void ScoreComponent::handleSchedulerMode(float delta)
 			ptr_player->priority += priorityReward;
 
 			SEND_EVENT(&Event_SpawnPlayer(lastManStanding));
-
-			//executePlayer(lastManStanding);
 		}
 		else if(nrOfPlayersAlive <= 0)
 		{
 			deactivateNullProcess();
 		}
-		//else if(topPlayerIndex != -1 && !topPriorityIsTied)
-		//{
-		//	deactivateNullProcess();
-		//	OUTPUT_WINDOW_PRINT("Here 2")
-		//	executePlayer(topPlayerIndex);
-		//}
 	}
 }
 

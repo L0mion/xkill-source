@@ -42,6 +42,11 @@ bool ExplosionSpherePhysicsObject::subClassSpecificInitHook()
 		
 		float initialRadius = ammunition.explosionSphereInitialRadius * firingMode.explosionSphereModifier;
 		float finalRadius = ammunition.explosionSphereFinalRadius * firingMode.explosionSphereModifier;
+
+		OUTPUT_WINDOW_PRINT("initialRadius: " << initialRadius);
+		OUTPUT_WINDOW_PRINT("finalRadius: " << finalRadius);
+		OUTPUT_WINDOW_PRINT("ammunition.explosionSphereExplosionDuration" << ammunition.explosionSphereExplosionDuration);
+		
 		if(initialRadius > ptr_explosionSphere->currentRadius)
 		{
 			ptr_explosionSphere->currentRadius = initialRadius;
@@ -81,5 +86,8 @@ void ExplosionSpherePhysicsObject::onUpdate(float delta)
 		}
 		itrPhysics.at(attributeIndex_)->ptr_spatial->scale = Float3(ptr_explosionSphere->currentRadius,ptr_explosionSphere->currentRadius,ptr_explosionSphere->currentRadius);
 		localCollisionShape_->setLocalScaling(btVector3(ptr_explosionSphere->currentRadius, ptr_explosionSphere->currentRadius, ptr_explosionSphere->currentRadius));
+
+		//auto
+		//localCollisionShape_->setLocalScaling(btVector3(ptr_explosionSphere->currentRadius*10.0f, ptr_explosionSphere->currentRadius*10.0f, ptr_explosionSphere->currentRadius*10.0f));
 	}
 }
