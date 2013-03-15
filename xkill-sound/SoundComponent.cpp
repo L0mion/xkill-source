@@ -88,7 +88,8 @@ void SoundComponent::onEvent(Event* e)
 		//	mFMODEventSystem->SetVolume(soundSettings->soundVolume);
 		//}
 		mFMODEventSystem->SetMuteSounds(SETTINGS->soundMuted);
-		mFMODEventSystem->SetVolume(SETTINGS->soundVolume_music);
+		mFMODEventSystem->SetVolume(SETTINGS->soundVolume_effects);
+		mFMODEventSystem->SetMusicVolume(SETTINGS->soundVolume_music);
 	}
 	else if(type == EventType::EVENT_START_DEATHMATCH)
 	{
