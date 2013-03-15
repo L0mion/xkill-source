@@ -1482,6 +1482,13 @@ void NameGenerator::resetNames()
 	addName("while");
 	addName("xor");
 	addName("xor_eq");
+
+	addName("void addName(std::string name);");
+	addName("Float4x4");
+	addName("Float4");
+	addName("Float3");
+	addName("Float2");
+	addName("Int2");
 }
 void NameGenerator::addName(std::string name)
 {
