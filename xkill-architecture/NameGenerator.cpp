@@ -1390,6 +1390,12 @@ void NameGenerator::resetNames()
 	addName("delta management");
 	addName("reinforcements have arrived");
 	addName("pylon construction");
+	addName("unapologetically sorry");
+	addName("study of dynamite");
+	addName("honest sacrifice");
+	addName("historically correct");
+	addName("difficult task");
+	addName("hungry slerp");
 	
 	//C++ keywords
 	addName("alignas");
@@ -1542,6 +1548,12 @@ void NameGenerator::resetColors()
 	addColor(Float3(0.0f, 1.0f, 1.0));
 	addColor(Float3(1.0f, 0.4f, 0.0));
 	addColor(Float3(0.7f, 0.0f, 1.0));
+
+	//new colors
+	addColor(Float3(0.3f, 0.2f, 0.8));
+	addColor(Float3(0.7f, 0.5f, 0.5));
+	addColor(Float3(1.0f, 1.0f, 0.5));
+	addColor(Float3(0.75f, 0.75f, 0.75));
 }
 
 void NameGenerator::addColor( Float3 color )

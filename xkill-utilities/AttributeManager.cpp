@@ -57,8 +57,8 @@ Attribute_Settings::Attribute_Settings()
 	timeLimit = 0.0f;
 	timeLeft = 0.0f;
 	cycleLimit = 35;
-	schedulerTime = 5.0f;
-	cycleTime = 2.0f;
+	schedulerTime = 30.0f;
+	cycleTime = 2.5f;
 	showDebugPhysics = false;
 	respawnTime = 3;
 	nullprocessExecutionTime = 30;
