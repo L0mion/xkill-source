@@ -1366,6 +1366,7 @@ void NameGenerator::resetNames()
 	addName("severe performance degradation");
 	addName("there can only be one");
 	addName("not responsible");
+	addName("snakeoil salesman");
 
 	addName("inexpensive payback time");
 	addName("better safe than gory");
@@ -1412,6 +1413,27 @@ void NameGenerator::resetNames()
 	addName("inhabiting uninhabited island");
 	addName("vivisected plant");
 	addName("underestimated power");
+	addName("discovery expedition");
+	addName("map-selling tourist guide");
+	addName("ill-sounding merry-go-round");
+	addName("indexable temp register");
+	addName("signed/unsigned mismatch");
+	addName("carpented wheelbarrow");
+	addName("uninitialized variable");
+	addName("release candidate");
+	addName("proof of concept");
+	addName("booster vanilla");
+	addName("falling timber");
+	addName("creating library");
+	addName("rebuild all started");
+	addName("generating code...");
+	addName("the intent that is this");
+	addName("bug-ridden code");
+	addName("slow implementation of Common Lisp");
+	addName("8 succeeded");
+	addName("colored penguin");
+	addName("trivial matter");
+	addName("cherry pick");
 	
 	//C++ keywords
 	addName("alignas");
@@ -1576,7 +1598,7 @@ void NameGenerator::resetColors()
 	addColor(Float3(0.3f, 0.2f, 0.8f));
 	addColor(Float3(0.7f, 0.5f, 0.5f));
 	addColor(Float3(1.0f, 1.0f, 0.5f));
-	addColor(Float3(0.75f, 0.75f, 0.75f));
+	//addColor(Float3(0.75f, 0.75f, 0.75f));
 }
 
 void NameGenerator::addColor( Float3 color )

@@ -68,8 +68,8 @@ public:
 		unsigned int screenWidth, 
 		unsigned int screenHeight);			//!< Resizes all management objects that are affected by a change in screen resolution.
 	HRESULT	init();							//!< Initializes members and prepares render.
-	void	update(float delta);
-	void	render();						//!< Renders a frame.
+	std::vector<ViewportData> update(float delta);
+	void	render(std::vector<ViewportData> vpDatas);						//!< Renders a frame.
 	void	loadTextures(TexDesc* texdesc); //!< Forwards information related to what textures Renderer is to load to Renderer-object.
 	void	addAnimation(SkinnedData* skinnedData); //!<Forwards a loaded animation to ManagementAnimation.
 protected:
@@ -131,11 +131,6 @@ private:
 	void drawHudElement(int viewportIndex, unsigned int textureId, DirectX::XMFLOAT4X4 transformationMatrix); //!< Draws a single hud element.
 
 	void renderAnimation(int playerIndex, AttributePtr<Attribute_Player> ptr_player, DirectX::XMFLOAT4X4 view, DirectX::XMFLOAT4X4 projection);
-
-	//temp
-	void renderAnimatedMesh(
-		DirectX::XMFLOAT4X4 viewMatrix, 
-		DirectX::XMFLOAT4X4 projectionMatrix);
 	
 	HWND	windowHandle_;	//!< Handle to WinAPI-window.
 	Winfo*	winfo_;			//!< Holds information related to screen dimensions. Object is shared thruought Renderer's members.
@@ -168,11 +163,6 @@ private:
 
 
 	std::vector<std::vector<DirectX::XMFLOAT4X4>> finalTransforms_;
-	//temp
-	//M3DLoader*		m3dLoader_;
-	//AnimatedMesh*	animatedMesh_;
-
-	void initDebugAnimation();
 };			
 			
 #endif //XKILL_RENDERER_RENDERER_H

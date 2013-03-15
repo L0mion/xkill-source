@@ -23,7 +23,7 @@ static const unsigned int CB_INSTANCE_DESC_SIZE = 16;
 struct CBFrameDesc
 {
 	unsigned int numLightsDir;
-	unsigned int numLightsPoint;
+	unsigned int pad;
 	unsigned int pad0;
 	unsigned int pad1;
 };
@@ -45,7 +45,7 @@ struct CBCameraDesc
 	float				viewportWidth;
 	
 	float viewportHeight;
-	unsigned int pad2;
+	unsigned int numLightsPoint;
 	unsigned int pad3;
 	unsigned int pad4;
 };
@@ -123,5 +123,12 @@ struct CBShadowDesc
 	DirectX::XMFLOAT4X4 shadowMapTransform_;
 };
 static const unsigned int CB_SHADOW_DESC_SIZE = 64;
+
+struct CBCharDesc
+{
+	DirectX::XMFLOAT3 glowmod;
+	unsigned int pad9;
+};
+static const unsigned int CB_CHAR_DESC_SIZE = 16;
 
 #endif //XKILL_RENDERER_CBDESC_H

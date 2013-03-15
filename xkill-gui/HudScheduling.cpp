@@ -35,15 +35,20 @@ void HudScheduling::init( Ui::Menu_HUD* ui, AttributePtr<Attribute_Player> ptr_o
 	screenSize.y = window->parentWidget()->height();
 
 	// Compute sizes
-	standardMargin = subWindow->height();
-	itemWidth = standardMargin*0.8f;
+	itemHeight = subWindow->height();
+	itemWidth = itemHeight*0.8f;
+	standardMargin = itemHeight * 0.5f;
+
+	int maxWindowSize = parent->width() - (ui->groupBox_health->width() + ui->groupBox_ammo->width() * 3.0f);
+	if(window->width() > maxWindowSize)
+		window->resize( maxWindowSize , window->height());
 	subWindow->resize(window->width() - 2*standardMargin, subWindow->height());
 	progressbar->resize(window->width() - 2*standardMargin, progressbar->height());
-	int windowHeight = standardMargin*3 + subWindow->height() + progressbar->height();
+	int windowHeight = standardMargin*2 + itemHeight + subWindow->height() + progressbar->height();
 	window->resize(window->width(), windowHeight);
 
 	// Compute positions
-	window->move(screenSize.x*0.5f - window->width()*0.5, screenSize.y - window->height() - standardMargin*1.5f);
+	window->move(screenSize.x*0.5f - window->width()*0.5, ui->frame_bottom->y() + 9);
 	subWindow->move(window->x() + standardMargin, window->y() + standardMargin);
 	progressbar->move(subWindow->x(), subWindow->y() + subWindow->height() + standardMargin);
 	advantageLabel->move(subWindow->x(), subWindow->y());
@@ -158,10 +163,10 @@ void HudScheduling::refresh()
 		if(deltaCycles > 0)
 			cycleRatio = ((float)(cycles - lowestCycles)) / deltaCycles;
 		const float kCycleRatioInfluence = 0.4f;
-		int itemHeight = standardMargin * (1.0f - kCycleRatioInfluence) + standardMargin * kCycleRatioInfluence * cycleRatio;
+		int newItemHeight = itemHeight * (1.0f - kCycleRatioInfluence) + itemHeight * kCycleRatioInfluence * cycleRatio;
 			
-		if(item->label->height() != itemHeight)
-			item->label->resize(itemWidth, itemHeight);
+		if(item->label->height() != newItemHeight)
+			item->label->resize(itemWidth, newItemHeight);
 		
 
 		// Compute location
@@ -179,7 +184,7 @@ void HudScheduling::refresh()
 		int offset = (int)(sectionSize * index + crowdOffset);
 		Float2 target;
 		target.x = subWindow->x() + offset;
-		target.y = subWindow->y() + (standardMargin - itemHeight);
+		target.y = subWindow->y() + (itemHeight - newItemHeight);
 		item->targetPosition = target;
 	}
 

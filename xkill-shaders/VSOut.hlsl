@@ -27,7 +27,7 @@ struct VSOutPosNormVTexTanW
 	float3 normalV		: NORMAL;
 	float2 texcoord		: TEXCOORD;
 	float3 tangentW		: TANGENT;
-};
+};	
 
 struct VSOutPosTex
 {

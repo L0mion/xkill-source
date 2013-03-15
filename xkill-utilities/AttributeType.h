@@ -214,8 +214,8 @@ struct DLL_U Attribute_Render : public IAttribute
 	int meshID;
 	int textureID;
 
-	bool transparent;
-	bool tessellation;
+	//bool transparent;
+	//bool tessellation;
 
 	BoolField culling;
 	bool cull;
@@ -290,6 +290,8 @@ struct DLL_U Attribute_Light_Dir : public IAttribute
 {
 	Attribute_Light_Dir();
 	~Attribute_Light_Dir(); //!< Does nothing.
+
+	Float3 direction;
 
 	LightDescDir lightDir;
 	DataItemList* getDataList();
@@ -444,6 +446,8 @@ struct DLL_U Attribute_SplitScreen : public IAttribute
 	unsigned int ssWidth;
 	unsigned int ssHeight;
 
+	Float3 glowmod;
+
 	float getAspectRatio();
 	DataItemList* getDataList();
 	void saveTo(DataItemList* list);
@@ -471,6 +475,7 @@ struct DLL_U Attribute_Player : public IAttribute
 	AttributePtr<Attribute_Health>			ptr_health;
 	AttributePtr<Attribute_WeaponStats>		ptr_weaponStats;
 	AttributePtr<Behavior_Offset>			ptr_weapon_offset;
+	AttributePtr<Behavior_Offset>			ptr_light_offset;
 	AttributePtr<Attribute_Spatial>			ptr_weaponFireLocation_spatial;
 
 	static int nextId;
@@ -500,6 +505,7 @@ struct DLL_U Attribute_Player : public IAttribute
 	std::pair<bool, Timer*> speedHackPair;	//!< The bool is true if the hack is active, the timer keeps track of time left
 	std::pair<bool, Timer*> jetHackPair;	//!< The bool is true if the hack is active, the timer keeps track of time left
 	std::pair<bool, Timer*> cycleHackPair;	//!< The bool is true if the hack is active, the timer keeps track of time left
+	std::pair<bool, Timer*> powerHackPair;	//!< The bool is true if the hack is active, the timer keeps track of time left
 
 	DataItemList* getDataList();
 	void saveTo(DataItemList* list);

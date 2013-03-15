@@ -49,7 +49,8 @@ Attribute_Settings::Attribute_Settings()
 {
 	timeUntilScheduling = 0.0f;
 	numErrors = 0;
-	soundVolume = 0.1f;
+	soundVolume_music = 0.1f;
+	soundVolume_effects = 0.1f;
 	numPlayers = 1;
 	_timeScale = 1.0f;
 	trueDeltaTime = 0.0f;
@@ -76,7 +77,7 @@ DataItemList* Attribute_Settings::getDataList()
 {
 	DataItemList* list = new DataItemList();
 
-	list->add(soundVolume, "soundVolume");
+	list->add(soundVolume_music, "soundVolume");
 	list->add(occlusionRadius, "SSAO_occlusionRadius");
 	list->add(occlusionScale, "SSAO_occlusionScale");
 	list->add(occlusionBias, "SSAO_occlusionBias");
@@ -87,7 +88,7 @@ DataItemList* Attribute_Settings::getDataList()
 
 void Attribute_Settings::saveTo( DataItemList* list )
 {
-	list->get(&soundVolume);
+	list->get(&soundVolume_music);
 
 	list->get(&occlusionRadius);
 	list->get(&occlusionScale);

@@ -115,13 +115,16 @@ public:
 		createLaserAutomaticSniperExecutionRay(entity, ptr_ray);
 		
 
+		// Attach light
 		AttributePtr<Attribute_Spatial> ptr_light_spatial;
 		AttributePtr<Attribute_Spatial> ptr_spatial_tmp = ptr_spatial;
+		AttributePtr<Behavior_Offset> ptr_light_offset;
 		{
 			CREATE_ATTRIBUTE(ptr_position, Attribute_Position, position, entity);
 			CREATE_ATTRIBUTE(ptr_spatial, Attribute_Spatial, spatial, entity);
 			ptr_spatial->ptr_position = ptr_position;
 			CREATE_ATTRIBUTE(ptr_offset, Behavior_Offset, offset, entity);
+			ptr_light_offset = ptr_offset;
 			ptr_offset->ptr_spatial = ptr_spatial;
 			ptr_offset->ptr_parent_spatial_position = ptr_spatial_tmp;
 			ptr_offset->ptr_parent_spatial_rotation = ptr_spatial_tmp;
@@ -133,6 +136,7 @@ public:
 			ptr_render->ptr_spatial = ptr_spatial;
 			ptr_render->meshID = XKILL_Enums::ModelId::PROJECTILE_BULLET;*/
 		}
+		ptr_player->ptr_light_offset = ptr_light_offset;
 
 		CREATE_ATTRIBUTE(ptr_lightPoint, Attribute_Light_Point, lightPoint, entity);
 		ptr_lightPoint->ptr_position			= ptr_light_spatial->ptr_position;
@@ -241,6 +245,7 @@ public:
 		CREATE_ATTRIBUTE(ptr_render, Attribute_Render, render, entity);
 		ptr_render->ptr_spatial = ptr_spatial;
 		ptr_render->meshID = e->meshID;
+		//ptr_render->glowMod_ = Float3((float)(rand() % 255) / 255.0f,(float)(rand() % 255) / 255.0f,(float)(rand() % 255) / 255.0f); //AAAAAAAAAAAAAAAAAAAAAAAAAAA
 		CREATE_ATTRIBUTE(ptr_physics, Attribute_Physics, physics, entity);
 		ptr_physics->ptr_spatial = ptr_spatial;
 		ptr_physics->ptr_render = ptr_render;
@@ -372,6 +377,9 @@ public:
 		case XKILL_Enums::PickupableType::HACK_SPEEDHACK:
 			ptr_pickupablesSpawnPoint->spawnDelayInSeconds = 3.5f;
 			break;
+		case XKILL_Enums::PickupableType::HACK_POWERHACK:
+			ptr_pickupablesSpawnPoint->spawnDelayInSeconds = 15.0f;
+			break;
 		default:
 			ptr_pickupablesSpawnPoint->spawnDelayInSeconds = 7.5f;
 			break;
@@ -422,6 +430,9 @@ public:
 		case XKILL_Enums::PickupableType::HACK_RANDOMHACK:
 			ptr_render->meshID = XKILL_Enums::ModelId::PICKUPABLE_RANDOMHACK;
 			break;
+		case XKILL_Enums::PickupableType::HACK_POWERHACK:
+			ptr_render->meshID = XKILL_Enums::ModelId::PICKUPABLE_POWERHACK;
+			break;
 		default:
 			color = Float4(0.0f, 1.0f, 0.0f, 1.0f);
 			ptr_render->meshID = XKILL_Enums::ModelId::PICKUPABLE_HEALTHPACK;
@@ -466,7 +477,8 @@ public:
 
 		CREATE_ATTRIBUTE(ptr_spatial, Attribute_Spatial, spatial, entity);
 		ptr_spatial->ptr_position = ptr_position;
-		ptr_spatial->rotation = Float4(rand(),rand(),rand(),rand()).normalize();
+		ptr_spatial->rotation = Float4(rand(), rand(), rand(), rand()).normalize(); //Randomized rotation
+		ptr_spatial->scale = Float3(0.01f, 0.01f, 0.01f); //First frame scaling. Is changed per-frame in "ExplosionSpherePhysicsObject::onUpdate"
 
 		CREATE_ATTRIBUTE(ptr_physics, Attribute_Physics, physics, entity);
 		ptr_physics->ptr_spatial = ptr_spatial;
@@ -487,6 +499,11 @@ public:
 		ptr_explosionSphere->damage = ms.getStandardAmmunition(e->ammunitionType).damage * ms.getStandardFiringMode(e->firingModeType).damageModifier;
 		ptr_explosionSphere->ammunitionType = e->ammunitionType;
 		ptr_explosionSphere->firingModeType = e->firingModeType;
+		
+		MutatorSettings mutatorSettings;
+		Ammunition ammunition;
+		ammunition = mutatorSettings.getStandardAmmunition(ptr_explosionSphere->ammunitionType);
+		ptr_explosionSphere->currentLifeTimeLeft = ammunition.explosionSphereExplosionDuration;
 
 		CREATE_ATTRIBUTE(ptr_damage, Attribute_Damage, damage, entity);
 		ptr_damage->damage = ptr_explosionSphere->damage;
@@ -514,7 +531,7 @@ public:
 			ptr_lightDir->lightDir.ambient = Float4(e->ambient,1);
 			ptr_lightDir->lightDir.diffuse = Float4(e->diffuse,1);
 			ptr_lightDir->lightDir.specular = Float4(e->specular,1);
-			ptr_lightDir->lightDir.direction = e->direction.normalize();
+			ptr_lightDir->direction = e->direction.normalize();
 		}
 		else if(e->type == 3)
 		{
