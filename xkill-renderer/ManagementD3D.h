@@ -68,8 +68,6 @@ public:
 
 	HRESULT init();
 
-	void generateDepthMips();//temp
-
 	ID3D11Device*				getDevice()				const;
 	ID3D11DeviceContext*		getDeviceContext()		const;
 	ID3D11DepthStencilView*		getDepthBuffer()		const;

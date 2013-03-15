@@ -4,7 +4,7 @@
 #include "constantBuffers.hlsl"
 #include "UtilReconstructPosition.hlsl"
 
-#define SSAO_BLOCK_DIM	32
+#define SSAO_BLOCK_DIM	16
 #define RANDOM_DIM		64
 
 //Global Memory
@@ -65,18 +65,17 @@ void CS_SSAO(
 	const float occludeeDepth = bufferDepth.SampleLevel(ssDepth, texCoord, 0).x;
 	const float3 occludee = UtilReconstructPositionViewSpace(
 		float2(
-			(float)threadIDDispatch.x / viewportWidth,
-			(float)threadIDDispatch.y / viewportHeight), //Convert [0-ssaoWidth, 0-ssaoHeight] -> [0, 1]
+			(float)threadIDDispatch.x / (float)viewportWidth,
+			(float)threadIDDispatch.y / (float)viewportHeight), //Convert [0-ssaoWidth, 0-ssaoHeight] -> [0, 1]
 		occludeeDepth, 
 		projectionInverse);
 
 	//Get view-space normal of occluded point:
-	float3 normal = gBufferNormal.SampleLevel(ssNormal, texCoord, 0).xyz;
-	normal.x *= 2.0f; normal.x -= 1.0f;
-	normal.y *= 2.0f; normal.y -= 1.0f;
-	normal.z *= 2.0f; normal.z -= 1.0f;
-	//Normal is already in view-space
-	const float3 occludeeNormal = normalize(normal); //mul(float4(normal, 0.0f), view).xyz
+	float3 occludeeNormal = gBufferNormal.SampleLevel(ssNormal, texCoord, 0).xyz;
+	occludeeNormal.x *= 2.0f; occludeeNormal.x -= 1.0f;
+	occludeeNormal.y *= 2.0f; occludeeNormal.y -= 1.0f;
+	occludeeNormal.z *= 2.0f; occludeeNormal.z -= 1.0f;
+	occludeeNormal = normalize(occludeeNormal);
 
 	//Random texture contains random normalized vectors.
 	const float2 scaleTile = float2((float)ssaoWidth / (float)RANDOM_DIM, (float)ssaoHeight / (float)RANDOM_DIM); //Move me into a constant buffer.

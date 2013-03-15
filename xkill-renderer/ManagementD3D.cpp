@@ -78,12 +78,6 @@ HRESULT ManagementD3D::resize()
 	return hr;
 }
 
-void ManagementD3D::generateDepthMips()
-{
-	ID3D11ShaderResourceView* srv = depthBuffer_->getSRV();
-	devcon_->GenerateMips(srv);
-}
-
 HRESULT ManagementD3D::init()
 {
 	HRESULT hr = S_OK;
