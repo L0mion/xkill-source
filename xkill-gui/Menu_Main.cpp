@@ -101,6 +101,7 @@ Menu_Main::Menu_Main( QWidget* parent ) : QMainWindow()
 	ui.frame_audio->hide();
 	ui.frame_input->hide();
 	ui.frame_credits->hide();
+	ui.pushButton_video->hide();
 	//ui.label_background->hide();
 	show();
 
