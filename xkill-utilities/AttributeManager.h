@@ -26,7 +26,8 @@ public:
 	float trueDeltaTime;
 	float averageDeltaTime;
 	bool soundMuted;
-	float soundVolume;
+	float soundVolume_music;
+	float soundVolume_effects;
 	void* overlayWidget;
 	float timeUntilScheduling;
 	float nullprocessExecutionTime;
