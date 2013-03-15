@@ -272,19 +272,25 @@ void LoaderMD5Model::prepareNormals(LoaderMD5MeshDesc& mesh)
 		
 		normal = MD5Helper::normalizeVector(normal);
 		
+		//normal.x *= -1.0f;
+		//normal.y *= -1.0f;
+		//normal.z *= -1.0f;
+
 		mesh.normals_.push_back(normal);
 
-		vertex.normal_ = DirectX::XMFLOAT3(0.0f, 0.0f, 0.0f);
-		for(int weightIndex=0; weightIndex<vertex.numWeights_; weightIndex++)
-		{
-			const LoaderMD5WeightDesc& weight = mesh.weights_[vertex.startWeight_ + weightIndex];
-			const LoaderMD5JointDesc& joint = joints_[weight.jointID_];
-			normal = MD5Helper::rotateVector(normal, joint.orientationQuaternion_);
+		vertex.normal_ = normal;
 
-			vertex.normal_.x += normal.x * weight.bias_;
-			vertex.normal_.y += normal.y * weight.bias_;
-			vertex.normal_.z += normal.z * weight.bias_;
-		}
+	//	vertex.normal_ = DirectX::XMFLOAT3(0.0f, 0.0f, 0.0f);
+	//	for(int weightIndex=0; weightIndex<vertex.numWeights_; weightIndex++)
+	//	{
+	//		const LoaderMD5WeightDesc& weight = mesh.weights_[vertex.startWeight_ + weightIndex];
+	//		const LoaderMD5JointDesc& joint = joints_[weight.jointID_];
+	//		normal = MD5Helper::rotateVector(normal, joint.orientationQuaternion_);
+	//
+	//		vertex.normal_.x += normal.x * weight.bias_;
+	//		vertex.normal_.y += normal.y * weight.bias_;
+	//		vertex.normal_.z += normal.z * weight.bias_;
+	//	}
 	}
 }
 
