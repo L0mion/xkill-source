@@ -1396,6 +1396,8 @@ void NameGenerator::resetNames()
 	addName("historically correct");
 	addName("difficult task");
 	addName("hungry slerp");
+	addName("in a way");
+	addName("extensive research");
 	
 	//C++ keywords
 	addName("alignas");
