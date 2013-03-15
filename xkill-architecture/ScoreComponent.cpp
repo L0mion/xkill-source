@@ -212,19 +212,16 @@ void ScoreComponent::handleSchedulerMode(float delta)
 			{
 				{Event_PostHudMessage e("No players had any priority"); e.receiver = Event_PostHudMessage::RECEIVER_ALL;  e.setStyle(Event_PostHudMessage::STYLE_SUBTILE); SEND_EVENT(&e);}
 				
-				OUTPUT_WINDOW_PRINT("Here 4")
 				activateNullProcess();
 			}
 			else if(topPriorityIsTied)	// Two or more players are tied for the ammount of priority
 			{
 				{Event_PostHudMessage e("Two players had tied priority"); e.receiver = Event_PostHudMessage::RECEIVER_ALL;  e.setStyle(Event_PostHudMessage::STYLE_SUBTILE); SEND_EVENT(&e);}
 				
-				OUTPUT_WINDOW_PRINT("Here 5")
 				activateNullProcess();
 			}
 			else						// Execute the player with highest priority
 			{
-				OUTPUT_WINDOW_PRINT("Here 1")
 				executePlayer(topPlayerIndex);
 			}
 		}
@@ -234,7 +231,6 @@ void ScoreComponent::handleSchedulerMode(float delta)
 	{
 		if(nrOfPlayersAlive == 1)
 		{
-			OUTPUT_WINDOW_PRINT("Here 2")
 			deactivateNullProcess();
 
 			AttributePtr<Attribute_Player> ptr_player = itrPlayer.at(lastManStanding);
@@ -248,7 +244,6 @@ void ScoreComponent::handleSchedulerMode(float delta)
 		}
 		else if(nrOfPlayersAlive <= 0)
 		{
-			OUTPUT_WINDOW_PRINT("Here 3")
 			deactivateNullProcess();
 		}
 		//else if(topPlayerIndex != -1 && !topPriorityIsTied)
