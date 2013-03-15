@@ -467,6 +467,7 @@ public:
 		CREATE_ATTRIBUTE(ptr_spatial, Attribute_Spatial, spatial, entity);
 		ptr_spatial->ptr_position = ptr_position;
 		ptr_spatial->rotation = Float4(rand(),rand(),rand(),rand()).normalize();
+		ptr_spatial->scale = Float3(0.01f, 0.01f, 0.01f);
 
 		CREATE_ATTRIBUTE(ptr_physics, Attribute_Physics, physics, entity);
 		ptr_physics->ptr_spatial = ptr_spatial;
@@ -476,7 +477,6 @@ public:
 		ptr_physics->mass = 0.0f;
 		ptr_physics->gravity = Float3(0.0f, 0.0f, 0.0f);
 		ptr_physics->linearVelocity = Float3(0.0f, 0.0f, 0.0f);
-
 
 		CREATE_ATTRIBUTE(ptr_render, Attribute_Render, render, entity);
 		ptr_render->ptr_spatial = ptr_spatial;
