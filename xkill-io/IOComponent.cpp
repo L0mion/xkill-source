@@ -245,7 +245,7 @@ bool IOComponent::loadModel(std::string	modelName, std::string	modelPath, MdlDes
 			break;
 		}
 
-	//	writePGY(modelName + ".pgy", modelPath, meshDesc, (VertexType)modelDesc->vertexType_, skinnedData);
+		writePGY(modelName + ".pgy", modelPath, meshDesc, (VertexType)modelDesc->vertexType_, skinnedData);
 	}
 
 	if(skinnedData)
