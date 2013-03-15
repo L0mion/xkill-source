@@ -46,12 +46,8 @@ PSOut PS_NormalMap(VSOutPosNormVTexTanW pIn)
 	output.material	= float4(specularTerm, specularPower);
 	
 	//Fill glow RTV
-	output.glowHigh = float4(0.0f, 0.0f, 0.0f, 1.0f);
-	if(normalSample.w > 0.0f)
-	{
-		float3 glowColor = albedoSample.xyz * normalSample.w;
-		output.glowHigh = float4(glowColor, 1.0f);
-	}
+	float3 glowColor = albedoSample.xyz * normalSample.w;
+	output.glowHigh = float4(glowColor, 1.0f);
 
 	return output;
 }

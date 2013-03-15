@@ -124,4 +124,11 @@ struct CBShadowDesc
 };
 static const unsigned int CB_SHADOW_DESC_SIZE = 64;
 
+struct CBCharDesc
+{
+	DirectX::XMFLOAT3 glowmod;
+	unsigned int pad9;
+};
+static const unsigned int CB_CHAR_DESC_SIZE = 16;
+
 #endif //XKILL_RENDERER_CBDESC_H

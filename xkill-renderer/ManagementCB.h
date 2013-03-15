@@ -19,7 +19,8 @@ enum CB_TYPE
 	CB_TYPE_SPRITE,
 	CB_TYPE_BLUR,
 	CB_TYPE_SSAO,
-	CB_TYPE_SHADOW
+	CB_TYPE_SHADOW,
+	CB_TYPE_CHAR
 };
 
 static const unsigned int CB_REGISTER_INSTANCE	= 0;
@@ -32,6 +33,7 @@ static const unsigned int CB_REGISTER_SPRITE	= 6;
 static const unsigned int CB_REGISTER_BLUR		= 7;
 static const unsigned int CB_REGISTER_SSAO		= 8;
 static const unsigned int CB_REGISTER_SHADOW	= 9;
+static const unsigned int CB_REGISTER_CHAR		= 10;
 
 //static const unsigned int 
 
@@ -96,6 +98,9 @@ public:
 	void updateCBShadow(
 		ID3D11DeviceContext* devcon,
 		DirectX::XMFLOAT4X4 shadowTransform);
+	void updateCBChar(
+		ID3D11DeviceContext* devcon,
+		DirectX::XMFLOAT3 glowMod);
 		
 	void setCB(
 		CB_TYPE					cbType, 
@@ -115,6 +120,7 @@ private:
 	HRESULT initCBSprite(	ID3D11Device* device);
 	HRESULT initCBSSAO(		ID3D11Device* device);
 	HRESULT initCBShadow(	ID3D11Device* device);
+	HRESULT initCBChar(		ID3D11Device* device);
 
 	ID3D11Buffer* cbInstance_;	//!< A constant buffer that will be updated once per instance.
 	ID3D11Buffer* cbFrame_;		//!< A constant buffer that will be updated every frame.
@@ -126,6 +132,7 @@ private:
 	ID3D11Buffer* cbBlur_;
 	ID3D11Buffer* cbSSAO_;
 	ID3D11Buffer* cbShadow_;
+	ID3D11Buffer* cbChar_;
 };
 
 #endif

@@ -15,6 +15,7 @@ ManagementCB::ManagementCB()
 	cbBlur_		= nullptr;
 	cbSSAO_		= nullptr;
 	cbShadow_	= nullptr;
+	cbChar_		= nullptr;
 }
 ManagementCB::~ManagementCB()
 {
@@ -28,6 +29,7 @@ ManagementCB::~ManagementCB()
 	SAFE_RELEASE(cbBlur_);
 	SAFE_RELEASE(cbSSAO_);
 	SAFE_RELEASE(cbShadow_);
+	SAFE_RELEASE(cbChar_);
 }
 void ManagementCB::reset()
 {
@@ -41,6 +43,7 @@ void ManagementCB::reset()
 	SAFE_RELEASE(cbBlur_);
 	SAFE_RELEASE(cbSSAO_);
 	SAFE_RELEASE(cbShadow_);
+	SAFE_RELEASE(cbChar_);
 }
 
 void ManagementCB::updateCBInstance(ID3D11DeviceContext*	devcon,
@@ -191,6 +194,15 @@ void ManagementCB::updateCBShadow(
 
 	devcon->UpdateSubresource(cbShadow_, 0, 0, &cbDesc, 0, 0);
 }
+void ManagementCB::updateCBChar(
+	ID3D11DeviceContext* devcon,
+	DirectX::XMFLOAT3 glowMod)
+{
+	CBCharDesc cbDesc;
+	cbDesc.glowmod = glowMod;
+
+	devcon->UpdateSubresource(cbChar_, 0, 0, &cbDesc, 0, 0);
+}
 
 void ManagementCB::setCB(
 	CB_TYPE					cbType, 
@@ -231,6 +243,9 @@ void ManagementCB::setCB(
 		break;
 	case CB_TYPE_SHADOW:
 		cb = cbShadow_;
+		break;
+	case CB_TYPE_CHAR:
+		cb = cbChar_;
 		break;
 	}
 
@@ -281,6 +296,8 @@ HRESULT ManagementCB::init(ID3D11Device* device)
 		hr = initCBSSAO(device);
 	if(SUCCEEDED(hr))
 		hr = initCBShadow(device);
+	if(SUCCEEDED(hr))
+		hr = initCBChar(device);
 
 	return hr;
 }
@@ -459,6 +476,23 @@ HRESULT ManagementCB::initCBShadow(	ID3D11Device* device)
 	hr = device->CreateBuffer(&bufferDesc, NULL, &cbShadow_);
 	if(FAILED(hr))
 		ERROR_MSG(L"CBManagement::initCBShadow | device->CreateBuffer | Failed!");
+
+	return hr;
+}
+HRESULT ManagementCB::initCBChar(ID3D11Device* device)
+{
+	HRESULT hr = S_OK;
+
+	D3D11_BUFFER_DESC bufferDesc;
+	ZeroMemory(&bufferDesc, sizeof(bufferDesc));
+	bufferDesc.Usage = D3D11_USAGE_DEFAULT;
+	bufferDesc.ByteWidth = CB_CHAR_DESC_SIZE;
+	bufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	bufferDesc.CPUAccessFlags = 0;
+
+	hr = device->CreateBuffer(&bufferDesc, NULL, &cbChar_);
+	if(FAILED(hr))
+		ERROR_MSG(L"CBManagement::initCBChar | device->CreateBuffer | Failed!");
 
 	return hr;
 }

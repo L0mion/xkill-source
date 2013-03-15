@@ -798,7 +798,6 @@ void Renderer::setShadingDesc(ShadingDesc shadingDesc)
 	managementFX_->setLayout(devcon, shadingDesc.layoutID_);
 }
 
-
 void Renderer::renderSubset(
 	SubsetD3D* subset, 
 	MaterialDesc& material, 
@@ -1553,25 +1552,28 @@ void Renderer::renderAnimation(AttributePtr<Attribute_Player> ptr_player, Direct
 
 	ModelD3D* modelD3D	= managementModel_->getModelD3D(ptr_render->meshID, device);
 	
+	managementFX_->setShader(devcon, SHADERID_VS_ANIMATION);
+	managementFX_->setShader(devcon, SHADERID_PS_CHAR);
+	managementSS_->setSS(devcon, TypeFX_PS, 0, SS_ID_DEFAULT);
+	managementRS_->setRS(devcon, RS_ID_DEFAULT);
+
 	DirectX::XMFLOAT4X4 worldMatrix			= managementMath_->calculateWorldMatrix(ptr_spatial, ptr_position);
 	DirectX::XMFLOAT4X4 worldMatrixInverse	= managementMath_->calculateMatrixInverse(worldMatrix);
 	DirectX::XMFLOAT4X4 finalMatrix			= managementMath_->calculateFinalMatrix(worldMatrix, view, projection);
-	
+
 	managementCB_->setCB(CB_TYPE_OBJECT, TypeFX_VS, CB_REGISTER_OBJECT, devcon);
 	managementCB_->updateCBObject(devcon, finalMatrix, worldMatrix, worldMatrixInverse);
+
+	managementCB_->setCB(CB_TYPE_CHAR, TypeFX_PS, CB_REGISTER_CHAR, devcon);
+	managementCB_->updateCBChar(
+		devcon,
+		DirectX::XMFLOAT3(ptr_player->avatarColor.asFloat()));
 
 	std::vector<DirectX::XMFLOAT4X4> finalTransforms;
 	modelD3D->getSkinnedData()->getFinalTransforms(ptr_animation->activeAnimation, ptr_animation->time, &finalTransforms);
 
-	
-
 	managementCB_->setCB(CB_TYPE_BONE, TypeFX_VS, CB_REGISTER_BONE, devcon);
 	managementCB_->updateCBBone(devcon, finalTransforms);
-
-	managementFX_->setShader(devcon, SHADERID_VS_ANIMATION);
-	managementFX_->setShader(devcon, SHADERID_PS_DEFAULT);
-	managementSS_->setSS(devcon, TypeFX_PS, 0, SS_ID_DEFAULT);
-	managementRS_->setRS(devcon, RS_ID_DEFAULT);
 
 	managementBuffer_->setBuffersAndDepthBufferAsRenderTargets(devcon, managementD3D_->getDepthBuffer());
 

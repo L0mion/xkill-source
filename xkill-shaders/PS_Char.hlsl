@@ -1,5 +1,8 @@
-#include "constantBuffers.hlsl"
+#ifndef XKILL_RENDERER_PS_CHAR_HLSL
+#define XKILL_RENDERER_PS_CHAR_HLSL
+
 #include "VSOut.hlsl"
+#include "constantBuffers.hlsl"
 
 struct PSOut
 {
@@ -14,7 +17,7 @@ Texture2D texNormal		: register(t1);
 
 SamplerState ss : register(s0);
 
-PSOut PS_Default(VSOutPosNormVTex pIn)
+PSOut PS_Char(VSOutPosNormVTex pIn)
 {
 	PSOut output;
 
@@ -35,7 +38,11 @@ PSOut PS_Default(VSOutPosNormVTex pIn)
 	//Fill material RTV
 	output.material	= float4(specularTerm, specularPower);
 
-	output.glowHigh = float4(0.0f, 0.0f, 0.0f, 1.0f);
+	float glowIntensity	= texNormal.SampleLevel(ss, pIn.texcoord, 0).w;
+	float3 glowColor = albedo * glowIntensity * glowmod;
+	output.glowHigh = float4(glowColor, 1.0f);
 
 	return output;
 }
+
+#endif //XKILL_RENDERER_PS_CHAR_HLSL

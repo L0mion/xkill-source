@@ -446,6 +446,8 @@ struct DLL_U Attribute_SplitScreen : public IAttribute
 	unsigned int ssWidth;
 	unsigned int ssHeight;
 
+	Float3 glowmod;
+
 	float getAspectRatio();
 	DataItemList* getDataList();
 	void saveTo(DataItemList* list);
