@@ -1433,6 +1433,7 @@ void NameGenerator::resetNames()
 	addName("8 succeeded");
 	addName("colored penguin");
 	addName("trivial matter");
+	addName("cherry pick");
 	
 	//C++ keywords
 	addName("alignas");
