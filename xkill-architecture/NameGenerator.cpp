@@ -1363,6 +1363,9 @@ void NameGenerator::resetNames()
 	addName("magic floppy disk");
 	addName("Grumpy Wizard");
 	addName("tinker goblin");
+	addName("severe performance degradation");
+	addName("there can only be one");
+	addName("not responsible");
 
 	addName("inexpensive payback time");
 	addName("better safe than gory");
@@ -1484,6 +1487,13 @@ void NameGenerator::resetNames()
 	addName("while");
 	addName("xor");
 	addName("xor_eq");
+
+	addName("void addName(std::string name);");
+	addName("Float4x4");
+	addName("Float4");
+	addName("Float3");
+	addName("Float2");
+	addName("Int2");
 }
 void NameGenerator::addName(std::string name)
 {

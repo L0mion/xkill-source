@@ -21,17 +21,7 @@ public:
 		label->move(position.x + 0.5f, position.y + 0.5f);
 	}
 
-	void update()
-	{
-		// Interpolate position
-		float factor = 2.0f * SETTINGS->trueDeltaTime;
-		if(factor > 1.0f)
-			factor = 1.0f;
-		Float2 newPos = Float2::lerp(&position, &targetPosition, factor);
-		newPos.y = targetPosition.y;
-
-		setPosition(newPos);
-	}
+	void update();
 };
 
 class HudScheduling
