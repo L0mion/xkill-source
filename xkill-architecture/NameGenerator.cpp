@@ -1366,6 +1366,7 @@ void NameGenerator::resetNames()
 	addName("severe performance degradation");
 	addName("there can only be one");
 	addName("not responsible");
+	addName("snakeoil salesman");
 
 	addName("inexpensive payback time");
 	addName("better safe than gory");
@@ -1576,7 +1577,7 @@ void NameGenerator::resetColors()
 	addColor(Float3(0.3f, 0.2f, 0.8f));
 	addColor(Float3(0.7f, 0.5f, 0.5f));
 	addColor(Float3(1.0f, 1.0f, 0.5f));
-	addColor(Float3(0.75f, 0.75f, 0.75f));
+	//addColor(Float3(0.75f, 0.75f, 0.75f));
 }
 
 void NameGenerator::addColor( Float3 color )
