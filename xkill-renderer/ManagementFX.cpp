@@ -16,13 +16,14 @@ ManagementFX::ManagementFX(bool debugShaders)
 	vsPosNormTexTanInstanced_	= nullptr;
 	vsScreenQuad_				= nullptr;
 
-	psDefault_				= nullptr;
-	psAnimation_			= nullptr;
-	psColor_				= nullptr;
-	psSprite_				= nullptr;
-	psNormalMap_			= nullptr;
-	psDownSample_			= nullptr;
+	psDefault_					= nullptr;
+	psAnimation_				= nullptr;
+	psColor_					= nullptr;
+	psSprite_					= nullptr;
+	psNormalMap_				= nullptr;
+	psDownSample_				= nullptr;
 	psBuildShadowMapPosNormTex_	= nullptr;
+	psChar_						= nullptr;
 
 	csLighting_	= nullptr;
 	csBlurHorz_ = nullptr;
@@ -55,6 +56,7 @@ ManagementFX::~ManagementFX()
 	SAFE_DELETE(psNormalMap_);
 	SAFE_DELETE(psDownSample_);
 	SAFE_DELETE(psBuildShadowMapPosNormTex_);
+	SAFE_DELETE(psChar_);
 	
 	SAFE_DELETE(csLighting_);
 	SAFE_DELETE(csBlurHorz_);
@@ -86,6 +88,7 @@ void ManagementFX::reset()
 	psNormalMap_				->reset();
 	psDownSample_				->reset();
 	psBuildShadowMapPosNormTex_	->reset();
+	psChar_						->reset();
 
 	csLighting_	->reset();
 	csBlurHorz_	->reset();
@@ -106,19 +109,19 @@ HRESULT ManagementFX::init(ID3D11Device* device)
 	return hr;
 }
 
-void ManagementFX::setShader(ID3D11DeviceContext* devcon, ShaderID shaderID)
+void ManagementFX::setShader(	ID3D11DeviceContext* devcon, ShaderID shaderID)
 {
 	Shader* shader = getShaderFromID(shaderID);
 	if(shader)
 		shader->set(devcon);
 }
-void ManagementFX::unsetShader(ID3D11DeviceContext* devcon, ShaderID shaderID)
+void ManagementFX::unsetShader(	ID3D11DeviceContext* devcon, ShaderID shaderID)
 {
 	Shader* shader = getShaderFromID(shaderID);
 	if(shader)
 		shader->unset(devcon);
 }
-void ManagementFX::setLayout(ID3D11DeviceContext* devcon,	LayoutID layoutID)
+void ManagementFX::setLayout(	ID3D11DeviceContext* devcon, LayoutID layoutID)
 {
 	ID3D11InputLayout* il = nullptr;
 	switch(layoutID)
@@ -143,7 +146,7 @@ void ManagementFX::setLayout(ID3D11DeviceContext* devcon,	LayoutID layoutID)
 	if(il)
 		devcon->IASetInputLayout(il);
 }
-void ManagementFX::unsetLayout(ID3D11DeviceContext* devcon)
+void ManagementFX::unsetLayout(	ID3D11DeviceContext* devcon)
 {
 	devcon->IASetInputLayout(nullptr);
 }
@@ -194,6 +197,8 @@ HRESULT ManagementFX::initShaders(ID3D11Device* device)
 		hr = initPSDownSample(device, shaderPath);
 	if(SUCCEEDED(hr))
 		hr = initPSBuildShadowMapPosNormTex(device, shaderPath);
+	if(SUCCEEDED(hr))
+		hr = initPSChar(device, shaderPath);
 
 	if(SUCCEEDED(hr))
 		hr = initCSLighting(device, shaderPath);
@@ -331,8 +336,18 @@ HRESULT ManagementFX::initPSBuildShadowMapPosNormTex(	ID3D11Device* device,	std:
 
 	return hr;
 }
+HRESULT ManagementFX::initPSChar(						ID3D11Device* device,	std::wstring shaderPath)
+{
+	HRESULT hr = S_OK;
 
-HRESULT ManagementFX::initCSLighting(ID3D11Device* device, std::wstring shaderPath)
+	std::wstring completePath = shaderPath + L"PS_Char.cso";
+	psChar_ = new ShaderPS();
+	hr = psChar_->init(device, completePath.c_str());
+
+	return hr;
+}
+
+HRESULT ManagementFX::initCSLighting(			ID3D11Device* device, std::wstring shaderPath)
 {
 	HRESULT hr = S_OK;
 	std::wstring completePath = shaderPath + L"CS_Lighting.cso";
@@ -341,7 +356,7 @@ HRESULT ManagementFX::initCSLighting(ID3D11Device* device, std::wstring shaderPa
 
 	return hr;
 }
-HRESULT ManagementFX::initCSBlurHorz(ID3D11Device* device, std::wstring shaderPath)
+HRESULT ManagementFX::initCSBlurHorz(			ID3D11Device* device, std::wstring shaderPath)
 {
 	HRESULT hr = S_OK;
 	std::wstring completePath = shaderPath + L"CS_Blur_Horz.cso";
@@ -350,7 +365,7 @@ HRESULT ManagementFX::initCSBlurHorz(ID3D11Device* device, std::wstring shaderPa
 
 	return hr;
 }
-HRESULT ManagementFX::initCSBlurVert(ID3D11Device* device, std::wstring shaderPath)
+HRESULT ManagementFX::initCSBlurVert(			ID3D11Device* device, std::wstring shaderPath)
 {
 	HRESULT hr = S_OK;
 	std::wstring completePath = shaderPath + L"CS_Blur_Vert.cso";
@@ -359,7 +374,7 @@ HRESULT ManagementFX::initCSBlurVert(ID3D11Device* device, std::wstring shaderPa
 
 	return hr;
 }
-HRESULT ManagementFX::initCSBlurBilateralHorz(ID3D11Device* device, std::wstring shaderPath)
+HRESULT ManagementFX::initCSBlurBilateralHorz(	ID3D11Device* device, std::wstring shaderPath)
 {
 	HRESULT hr = S_OK;
 	std::wstring completePath = shaderPath + L"CS_Blur_Bilateral_Horz.cso";
@@ -368,7 +383,7 @@ HRESULT ManagementFX::initCSBlurBilateralHorz(ID3D11Device* device, std::wstring
 
 	return hr;
 }
-HRESULT ManagementFX::initCSBlurBilateralVert(ID3D11Device* device, std::wstring shaderPath)
+HRESULT ManagementFX::initCSBlurBilateralVert(	ID3D11Device* device, std::wstring shaderPath)
 {
 	HRESULT hr = S_OK;
 	std::wstring completePath = shaderPath + L"CS_Blur_Bilateral_Vert.cso";
@@ -377,7 +392,7 @@ HRESULT ManagementFX::initCSBlurBilateralVert(ID3D11Device* device, std::wstring
 
 	return hr;
 }
-HRESULT ManagementFX::initCSSSAO(ID3D11Device* device, std::wstring shaderPath)
+HRESULT ManagementFX::initCSSSAO(				ID3D11Device* device, std::wstring shaderPath)
 {
 	HRESULT hr = S_OK;
 
@@ -537,6 +552,9 @@ Shader* ManagementFX::getShaderFromID(ShaderID shaderID)
 		break;
 	case SHADERID_PS_BUILD_SHADOWMAP_POS_NORM_TEX:
 		shader = psBuildShadowMapPosNormTex_;
+		break;
+	case SHADERID_PS_CHAR:
+		shader = psChar_;
 		break;
 
 	case SHADERID_CS_LIGHTING:

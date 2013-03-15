@@ -28,6 +28,7 @@ enum ShaderID
 	SHADERID_PS_NORMALMAP,
 	SHADERID_PS_DOWNSAMPLE,
 	SHADERID_PS_BUILD_SHADOWMAP_POS_NORM_TEX,
+	SHADERID_PS_CHAR,
 
 	SHADERID_CS_LIGHTING,
 	SHADERID_CS_BLUR_HORZ,
@@ -59,45 +60,46 @@ public:
 	void reset(); //!< Releases all memory and returns FXManagement to defualt state.
 	HRESULT init(ID3D11Device* device);	//!< Initializes FXManagement
 
-	void setShader(ID3D11DeviceContext*		devcon,	ShaderID shaderID);
-	void unsetShader(ID3D11DeviceContext*	devcon,	ShaderID shaderID);
-	void setLayout(ID3D11DeviceContext*		devcon,	LayoutID layoutID);
-	void unsetLayout(ID3D11DeviceContext*	devcon);
+	void setShader(		ID3D11DeviceContext* devcon, ShaderID shaderID);
+	void unsetShader(	ID3D11DeviceContext* devcon, ShaderID shaderID);
+	void setLayout(		ID3D11DeviceContext* devcon, LayoutID layoutID);
+	void unsetLayout(	ID3D11DeviceContext* devcon);
 
 	void unsetAll(ID3D11DeviceContext* devcon);
 
 private:
 	HRESULT initShaders(ID3D11Device* device); //!< Initializes all shaders handled by FXManagement.
 	
-	HRESULT initVSPosNormTexInstanced(ID3D11Device*		device,	std::wstring shaderPath);	//!< Initializes defaultVS.
-	HRESULT initVSAnimation(ID3D11Device*				device,	std::wstring shaderPath);	//!< Initializes animationVS.
-	HRESULT initVSColor(ID3D11Device*					device,	std::wstring shaderPath);	//!< Initializes color-shaders.
-	HRESULT initVSSprite(ID3D11Device*					device, std::wstring shaderPath);	//!< Initializes sprite vertex shader.
-	HRESULT initVSPosNormTexTanInstanced(ID3D11Device*	device, std::wstring shaderPath);
-	HRESULT initVSScreenQuad(ID3D11Device*				device, std::wstring shaderPath);
+	HRESULT initVSPosNormTexInstanced(		ID3D11Device* device, std::wstring shaderPath);	//!< Initializes defaultVS.
+	HRESULT initVSAnimation(				ID3D11Device* device, std::wstring shaderPath);	//!< Initializes animationVS.
+	HRESULT initVSColor(					ID3D11Device* device, std::wstring shaderPath);	//!< Initializes color-shaders.
+	HRESULT initVSSprite(					ID3D11Device* device, std::wstring shaderPath);	//!< Initializes sprite vertex shader.
+	HRESULT initVSPosNormTexTanInstanced(	ID3D11Device* device, std::wstring shaderPath);
+	HRESULT initVSScreenQuad(				ID3D11Device* device, std::wstring shaderPath);
 
-	HRESULT initPSDefault(ID3D11Device*				device,	std::wstring shaderPath);	//!< Initializes defaultPS.
-	HRESULT initPSColor(ID3D11Device*				device,	std::wstring shaderPath);	//!< Initializes color-shaders.
-	HRESULT initPSAnimation(ID3D11Device*			device,	std::wstring shaderPath);	//!< Initializes animationPS.
-	HRESULT initPSSprite(ID3D11Device*				device, std::wstring shaderPath);	//!< Initializes sprite pixel shader.
-	HRESULT initPSNormalMap(ID3D11Device*			device, std::wstring shaderPath);
-	HRESULT initPSDownSample(ID3D11Device*			device, std::wstring shaderPath);
-	HRESULT initPSBuildShadowMapPosNormTex(ID3D11Device*	device, std::wstring shaderPath);
+	HRESULT initPSDefault(					ID3D11Device* device, std::wstring shaderPath);	//!< Initializes defaultPS.
+	HRESULT initPSColor(					ID3D11Device* device, std::wstring shaderPath);	//!< Initializes color-shaders.
+	HRESULT initPSAnimation(				ID3D11Device* device, std::wstring shaderPath);	//!< Initializes animationPS.
+	HRESULT initPSSprite(					ID3D11Device* device, std::wstring shaderPath);	//!< Initializes sprite pixel shader.
+	HRESULT initPSNormalMap(				ID3D11Device* device, std::wstring shaderPath);
+	HRESULT initPSDownSample(				ID3D11Device* device, std::wstring shaderPath);
+	HRESULT initPSBuildShadowMapPosNormTex(	ID3D11Device* device, std::wstring shaderPath);
+	HRESULT initPSChar(						ID3D11Device* device, std::wstring shaderPath);
 
-	HRESULT initCSLighting(	ID3D11Device* device, std::wstring shaderPath);	//!< Initializes defaultCS.
-	HRESULT initCSBlurHorz(	ID3D11Device* device, std::wstring shaderPath);
-	HRESULT initCSBlurVert(	ID3D11Device* device, std::wstring shaderPath);
+	HRESULT initCSLighting(				ID3D11Device* device, std::wstring shaderPath);	//!< Initializes defaultCS.
+	HRESULT initCSBlurHorz(				ID3D11Device* device, std::wstring shaderPath);
+	HRESULT initCSBlurVert(				ID3D11Device* device, std::wstring shaderPath);
 	HRESULT initCSBlurBilateralHorz(	ID3D11Device* device, std::wstring shaderPath);
 	HRESULT initCSBlurBilateralVert(	ID3D11Device* device, std::wstring shaderPath);
-	HRESULT initCSSSAO(		ID3D11Device* device, std::wstring shaderPath);
+	HRESULT initCSSSAO(					ID3D11Device* device, std::wstring shaderPath);
 
-	HRESULT initILs(ID3D11Device* device);						//!< Initializes input-layouts.
-	void initILManagement();									//!< Initializes helper-class IEDManagement.
-	HRESULT initILPosColor(ID3D11Device* device);				//!< Initializes input layout of MeshVertex VertexPosColor.
-	HRESULT initILPosNormTexInstanced(ID3D11Device* device);	//!< Initializes input layout of a standard three-component instanced vertex.
-	HRESULT initILPosNormTexTanSkinned(ID3D11Device* device);	//!< Initializes input layout of MeshVertex VertexPosNormTexTanSkinned.
-	HRESULT initILPosNormTex(ID3D11Device* device);				//!< Initializes input layout of MeshVertex VertexPosNormTex.
-	HRESULT initILPosNormtexTanInstanced(ID3D11Device* device);
+	HRESULT initILs(ID3D11Device* device);							//!< Initializes input-layouts.
+	void initILManagement();										//!< Initializes helper-class IEDManagement.
+	HRESULT initILPosColor(					ID3D11Device* device);	//!< Initializes input layout of MeshVertex VertexPosColor.
+	HRESULT initILPosNormTexInstanced(		ID3D11Device* device);	//!< Initializes input layout of a standard three-component instanced vertex.
+	HRESULT initILPosNormTexTanSkinned(		ID3D11Device* device);	//!< Initializes input layout of MeshVertex VertexPosNormTexTanSkinned.
+	HRESULT initILPosNormTex(				ID3D11Device* device);	//!< Initializes input layout of MeshVertex VertexPosNormTex.
+	HRESULT initILPosNormtexTanInstanced(	ID3D11Device* device);
 
 	Shader* getShaderFromID(ShaderID shaderID);
 
@@ -118,6 +120,7 @@ private:
 	ShaderPS*	psNormalMap_;
 	ShaderPS*	psDownSample_;
 	ShaderPS*	psBuildShadowMapPosNormTex_;
+	ShaderPS*	psChar_;
 
 	ShaderCS* csLighting_; //!< Default compute shader.
 	ShaderCS* csBlurHorz_;

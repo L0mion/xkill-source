@@ -214,8 +214,8 @@ struct DLL_U Attribute_Render : public IAttribute
 	int meshID;
 	int textureID;
 
-	bool transparent;
-	bool tessellation;
+	//bool transparent;
+	//bool tessellation;
 
 	BoolField culling;
 	bool cull;
@@ -290,6 +290,8 @@ struct DLL_U Attribute_Light_Dir : public IAttribute
 {
 	Attribute_Light_Dir();
 	~Attribute_Light_Dir(); //!< Does nothing.
+
+	Float3 direction;
 
 	LightDescDir lightDir;
 	DataItemList* getDataList();
@@ -443,6 +445,8 @@ struct DLL_U Attribute_SplitScreen : public IAttribute
 
 	unsigned int ssWidth;
 	unsigned int ssHeight;
+
+	Float3 glowmod;
 
 	float getAspectRatio();
 	DataItemList* getDataList();

@@ -526,6 +526,7 @@ void IOComponent::loadMD5AssembleMaterials(std::vector<MaterialDesc>* materials,
 		}
 
 		material.idAlbedoTex_ = getTexIDfromName(textureName);
+		material.idNormalTex_ = getTexIDfromName("processNormal.dds");
 
 		material.specularPower_ = 1.0f;
 		material.transperency_	= 0.0f;

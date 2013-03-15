@@ -6,6 +6,7 @@
 #include "Renderer.h"
 #include "renderingUtilities.h"
 #include "renderingComponent.h"
+#include "ViewportData.h"
 
 RenderingComponent::RenderingComponent(HWND windowHandle)
 {
@@ -40,8 +41,8 @@ bool RenderingComponent::init()
 
 void RenderingComponent::onUpdate(float delta)
 {
-	renderer_->update(delta);
-	renderer_->render();
+	std::vector<ViewportData> vpDatas = renderer_->update(delta);
+	renderer_->render(vpDatas);
 }
 
 void RenderingComponent::onEvent( Event* e )

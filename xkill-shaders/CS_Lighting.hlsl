@@ -1,33 +1,30 @@
-#include "LightDescSpot.hlsl"
-
-#include "LightPos.hlsl"
 #include "LightDir.hlsl"
 #include "LightPoint.hlsl"
 #include "LightShadow.hlsl"
-
 #include "TilingFrustum.hlsl"
-
 #include "UtilSphereMapTransform.hlsl"
 #include "UtilReconstructPosition.hlsl"
-
 #include "constantBuffers.hlsl"
 
 #define TILE_DIM		16
 #define TILE_MAX_LIGHTS	40
+#define TILE_MAX_POINT	TILE_MAX_LIGHTS
+#define TILE_MAX_DIR	1
 
 //Global memory
 RWTexture2D<float4> output : register( u0 );
 
-Texture2D gBufferNormal				: register( t0 ); //Register shared in CS_SSAO and CS_Blur_Bilateral
+Texture2D gBufferNormal				: register( t0 ); //Register shared in CS_SSAO and CS_Blur_Bilateral.
 Texture2D gBufferAlbedo				: register( t1 );
 Texture2D gBufferMaterial			: register( t2 );
-Texture2D bufferGlowHigh			: register( t3 ); //Register shared in PS_DownSample
+Texture2D bufferGlowHigh			: register( t3 ); //Register shared in PS_DownSample.
 Texture2D bufferShadowMap			: register( t4 );
 Texture2D bufferSSAO				: register( t5 );
 Texture2D bufferDepth				: register( t6 ); //Register shared in CS_SSAO and CS_Blur_Bilateral. Also, beware of me. Yarr!
-StructuredBuffer<LightDescDir>		lightsDir	: register( t7 );
-StructuredBuffer<LightDescPoint>	lightsPoint	: register( t8 );
-StructuredBuffer<float3>			lightsPos	: register( t9 );
+StructuredBuffer<LightDescDir>		lightsDir		: register( t7	);
+StructuredBuffer<LightDescPoint>	lightsPoint		: register( t8	);
+StructuredBuffer<float3>			lightsPos		: register( t9	);
+StructuredBuffer<float3>			lightsDirection	: register( t10	);
 
 SamplerState			ss			: register( s0 );
 SamplerComparisonState	ssShadow	: register( s1 );
@@ -36,9 +33,10 @@ SamplerComparisonState	ssShadow	: register( s1 );
 groupshared uint tileMinDepthInt;
 groupshared uint tileMaxDepthInt;
 groupshared uint tileLightNum; //Number of lights intersecting tile.
-
-groupshared float3 lightsPosV[TILE_MAX_LIGHTS];
 groupshared uint tileLightIndices[TILE_MAX_LIGHTS]; //Indices to lights intersecting tile.
+
+groupshared float3 tileLightsPos[TILE_MAX_POINT]; //We use these to avoid additional reads from global memory.
+groupshared float3 tileLightsDir[TILE_MAX_DIR];
 
 [numthreads(TILE_DIM, TILE_DIM, 1)]
 void CS_Lighting(
@@ -54,6 +52,13 @@ void CS_Lighting(
 		tileLightNum = 0;
 		tileMinDepthInt = 0xFFFFFFFF;
 		tileMaxDepthInt = 0.0f;
+
+		//Load directions into shared memory
+		for(unsigned int i = 0; i < numLightsDir; i++)
+		{
+			if(i < TILE_MAX_DIR)
+				tileLightsDir[i] = lightsDirection[i];
+		}
 	}
 
 	const float2 texCoord = float2(
@@ -97,15 +102,15 @@ void CS_Lighting(
 		
 		//If given light is 'valid'.
 		//..and intersects that lights' sphere.
-		const float4 lightPosV = mul(float4(lightsPos[lightIndex], 1.0f), view);
-		if(IntersectSphere(tileFrustum, lightPosV, lightsPoint[lightIndex].range))
+		const float3 lightPosV = lightsPos[lightIndex];
+		if(IntersectSphere(tileFrustum, float4(lightPosV, 1.0f), lightsPoint[lightIndex].range))
 		{
 			uint index;
 			InterlockedAdd(tileLightNum, 1, index);
 
-			index = min(index, TILE_MAX_LIGHTS);	//Prevent writing outside of allocated array.
-			tileLightIndices[index] = lightIndex;	//Last light may be overwritten multiple time if TILE_MAX_LIGHTS is breached.
-			lightsPosV[index]		= lightPosV.xyz;
+			index = min(index, TILE_MAX_LIGHTS);		//Prevent writing outside of allocated array.
+			tileLightIndices[index] = lightIndex;		//Last light may be overwritten multiple time if TILE_MAX_LIGHTS is breached.
+			tileLightsPos[index]	= lightPosV.xyz;	//Load into shared memory so that we do not need to read from global memory again.
 		}
 	}
 	GroupMemoryBarrierWithGroupSync(); //As this is the last sync - it is after this point we may clip pixel if not valid to make sure we do not evaluate irrelevant pixels.
@@ -135,17 +140,18 @@ void CS_Lighting(
 		float4 ambient, diffuse, specular;
 		for(i = 0; i < numLightsDir; i++)
 		{
-			LightDescDir descDir = lightsDir[i];
-			descDir.direction = mul(float4(descDir.direction, 0.0f), view).xyz;
 			LightDir(
-				/*ToEye*/		toEyeV,
-				/*Light*/		descDir,
+				/*ToEye*/			toEyeV,
+				/*LightDir*/		tileLightsDir[i],
+				/*LightAmbient*/	lightsDir[i].ambient,
+				/*LightDiffuse*/	lightsDir[i].diffuse,
+				/*LightSpecular*/	lightsDir[i].specular,
 				/*Ambient*/		gAlbedo,
 				/*Diffuse*/		gAlbedo,
 				/*Specular*/	gMaterial,
 				/*Normal*/		surfaceNormalV,
 				/*inout*/		ambient, diffuse, specular);
-
+		
 			Ambient		+= ambient;	
 			Diffuse		+= diffuse	* shadow; //Shadow ought only be applied onto the first directional light, but as we have no more than one, there is no need for branch.
 			Specular	+= specular	* shadow;
@@ -157,7 +163,7 @@ void CS_Lighting(
 			LightPoint(
 				/*ToEye*/			toEyeV,
 				/*Light*/			descPoint,
-				/*LightPos*/		lightsPosV[i],
+				/*LightPos*/		tileLightsPos[i],
 				/*Ambient*/			gAlbedo,
 				/*Diffuse*/			gAlbedo,
 				/*Specular*/		gMaterial,
@@ -187,9 +193,3 @@ void CS_Lighting(
 			threadIDDispatch.y + viewportTopY)] = 
 		float4(Ambient.xyz, 1.0f);
 }
-
-//TILING DEMO:
-//for(i = 0; i < tileLightNum; i++) //Apply culled point-lights.
-//{
-//	Ambient.g += 0.1; //0.01
-//}
