@@ -40,13 +40,6 @@ class FMODEventSystem
 		int eventIndex;
 		int ownerPlayerEntityId;
 		FMOD::Event* FmodEvent;
-
-		//FmodEventStruct& operator=(const FmodEventStruct& rhs)
-		//{
-		//	this->eventIndex = rhs.eventIndex;
-		//	this->ownerPlayerEntityId = rhs.ownerPlayerEntityId;
-		//	this->FmodEvent = rhs.FmodEvent;
-		//}
 	};
 
 public:
@@ -72,6 +65,8 @@ public:
 	void SetMuteSounds(bool mute = true);
 	/** \brief Set volume.*/
 	void SetVolume(float volume);
+	/** \brief Set music volume.*/
+	void SetMusicVolume(float volume);
 
 	void UpdateNrOfListeners();
 

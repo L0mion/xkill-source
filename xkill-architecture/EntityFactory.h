@@ -484,7 +484,7 @@ public:
 		CREATE_ATTRIBUTE(ptr_explosionSphere, Attribute_ExplosionSphere, explosionSphere, entity);
 		ptr_explosionSphere->ptr_physics = ptr_physics;
 		MutatorSettings ms;
-		ptr_explosionSphere->damage = ms.getStandardAmmunition(e->ammunitionType).damage;
+		ptr_explosionSphere->damage = ms.getStandardAmmunition(e->ammunitionType).damage * ms.getStandardFiringMode(e->firingModeType).damageModifier;
 		ptr_explosionSphere->ammunitionType = e->ammunitionType;
 		ptr_explosionSphere->firingModeType = e->firingModeType;
 

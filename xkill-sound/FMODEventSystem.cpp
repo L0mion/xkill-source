@@ -175,6 +175,24 @@ void FMODEventSystem::SetMuteSounds(bool mute)
 
 void FMODEventSystem::SetVolume(float volume)
 {
+	//int nrOfEvents;
+	//FMOD::Event* soundEvent;
+	//if(mEventsystem->getNumEvents(&nrOfEvents) == FMOD_OK)
+	//{
+	//	for(int i = 0; i < nrOfEvents; i++)
+	//	{
+	//		if(mEventsystem->getEventBySystemID(i, FMOD_EVENT_INFOONLY, &soundEvent) == FMOD_OK)
+	//		{
+	//			soundEvent->setVolume(volume);
+	//		}
+	//	}
+	//}
+
+	//for(unsigned int i = 0; i < mEvents.size(); i++)
+	//{
+	//	mEvents[i].FmodEvent->setVolume(volume);
+	//}
+
 	int nrOfEvents;
 	FMOD::Event* soundEvent;
 	if(mEventsystem->getNumEvents(&nrOfEvents) == FMOD_OK)
@@ -183,14 +201,71 @@ void FMODEventSystem::SetVolume(float volume)
 		{
 			if(mEventsystem->getEventBySystemID(i, FMOD_EVENT_INFOONLY, &soundEvent) == FMOD_OK)
 			{
-				soundEvent->setVolume(volume);
+				FMOD::EventGroup* group;
+				soundEvent->getParentGroup(&group);
+				char* groupNameChar;
+				group->getInfo(nullptr, &groupNameChar);
+				std::string groupName(groupNameChar);
+				
+				if(groupName != "Music")
+				{
+					soundEvent->setVolume(volume);
+				}
 			}
 		}
 	}
 
 	for(unsigned int i = 0; i < mEvents.size(); i++)
 	{
-		mEvents[i].FmodEvent->setVolume(volume);
+		FMOD::EventGroup* group;
+		mEvents[i].FmodEvent->getParentGroup(&group);
+		char* groupNameChar;
+		group->getInfo(nullptr, &groupNameChar);
+		std::string groupName(groupNameChar);
+				
+		if(groupName != "Music")
+		{
+			mEvents[i].FmodEvent->setVolume(volume);
+		}
+	}
+}
+
+void FMODEventSystem::SetMusicVolume(float volume)
+{
+	int nrOfEvents;
+	FMOD::Event* soundEvent;
+	if(mEventsystem->getNumEvents(&nrOfEvents) == FMOD_OK)
+	{
+		for(int i = 0; i < nrOfEvents; i++)
+		{
+			if(mEventsystem->getEventBySystemID(i, FMOD_EVENT_INFOONLY, &soundEvent) == FMOD_OK)
+			{
+				FMOD::EventGroup* group;
+				soundEvent->getParentGroup(&group);
+				char* groupNameChar;
+				group->getInfo(nullptr, &groupNameChar);
+				std::string groupName(groupNameChar);
+				
+				if(groupName == "Music")
+				{
+					soundEvent->setVolume(volume);
+				}
+			}
+		}
+	}
+
+	for(unsigned int i = 0; i < mEvents.size(); i++)
+	{
+		FMOD::EventGroup* group;
+		mEvents[i].FmodEvent->getParentGroup(&group);
+		char* groupNameChar;
+		group->getInfo(nullptr, &groupNameChar);
+		std::string groupName(groupNameChar);
+				
+		if(groupName == "Music")
+		{
+			mEvents[i].FmodEvent->setVolume(volume);
+		}
 	}
 }
 

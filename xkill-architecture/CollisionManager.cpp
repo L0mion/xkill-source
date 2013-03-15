@@ -337,9 +337,6 @@ void CollisionManager::collision_projectile(Entity* entity1, Entity* entity2)
 {
 	if(entity1->hasAttribute(ATTRIBUTE_PROJECTILE) && entity2->hasAttribute(ATTRIBUTE_PHYSICS) && !entity2->hasAttribute(ATTRIBUTE_PROJECTILE))
 	{
-		int e1 = entity1->getID();
-		int e2 = entity2->getID();
-
 		// Handle PhysicsAttribute of a projectile colliding with another PhysicsAttribute
 		std::vector<int> physicsId = entity1->getAttributes(ATTRIBUTE_PHYSICS);
 		for(unsigned int i=0;i<physicsId.size();i++)
@@ -374,7 +371,7 @@ void CollisionManager::collision_projectile(Entity* entity1, Entity* entity2)
 					
 						// MATT: This makes the initial collision smoother by adding a delay of one frame.
 						// ON A SECOND NOTE: Not used, because delaying collision makes bullets rain from the sky.
-						//POST_DELAYED_EVENT(new Event_ModifyPhysicsObject(XKILL_Enums::ModifyPhysicsObjectData::COLLISIONFILTERMASK, static_cast<void*>(&collisionFilterMask), itrPhysics.at(physicsId.at(j))), 0.0f);
+						// POST_DELAYED_EVENT(new Event_ModifyPhysicsObject(XKILL_Enums::ModifyPhysicsObjectData::COLLISIONFILTERMASK, static_cast<void*>(&collisionFilterMask), itrPhysics.at(physicsId.at(j))), 0.0f);
 					}
 					break;
 				case XKILL_Enums::AmmunitionType::EXPLOSIVE: //Remove projectile and create an explosion sphere in its place
@@ -401,9 +398,6 @@ void CollisionManager::collision_projectile(Entity* entity1, Entity* entity2)
 
 					//Creates an explosion sphere. Init information is taken from the impacting projectile.
 					SEND_EVENT(&Event_CreateExplosionSphere(ptr_projectile_position->position, ptr_projectile->entityIdOfCreator, ptr_projectile->ammunitionType, ptr_projectile->firingModeType));
-
-					if(e1 != entity1->getID() || e2 != entity2->getID())
-						DEBUGPRINT("Entity ids not matching.");
 				}
 			}
 		}
