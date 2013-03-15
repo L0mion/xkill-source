@@ -446,23 +446,13 @@ void GameComponent::updatePlayerAttributes(float delta)
 					firingMode->reloadTimeLeft = firingMode->reloadTime;
 					ammo->isReloading = false;
 
-					shootProjectile(ptr_player->ptr_weaponFireLocation_spatial, ptr_weaponStats);
+					int damageModifier = 1.0f;
+					if(ptr_player->powerHackPair.first)
+					{
+						damageModifier = 2.0f;
+					}
+					shootProjectile(ptr_player->ptr_weaponFireLocation_spatial, ptr_weaponStats, damageModifier);
 					SEND_EVENT(&Event_PlaySound(XKILL_Enums::Sound::SOUND_FIRE, itrPlayer.ownerIdAt(ptr_player.index()), ptr_position->position, true));
-				}
-				else if(firingMode->nrOfShotsLeftInClip[ammoIndex] <= 0)
-				{
-					//if(ammo->currentTotalNrOfShots <= 0)
-					//{
-					//	DEBUGPRINT("Cannot shoot: Out of ammo.");
-					//}
-					//else
-					//{
-					//	DEBUGPRINT("Cannot shoot: Out of ammo in current clip.");
-					//}
-				}
-				else if(firingMode->cooldownLeft > 0)
-				{
-					//DEBUGPRINT("Cannot shoot: weapon cooldown. Be patient.");
 				}
 			}
 
@@ -1170,7 +1160,7 @@ void GameComponent::updateAndInterpretLaser(AttributePtr<Attribute_Ray> ptr_ray,
 	}
 }
 
-void GameComponent::shootProjectile( AttributePtr<Attribute_Spatial> ptr_spatial, AttributePtr<Attribute_WeaponStats> ptr_weaponStats )
+void GameComponent::shootProjectile( AttributePtr<Attribute_Spatial> ptr_spatial, AttributePtr<Attribute_WeaponStats> ptr_weaponStats, int damageModifier )
 {
 	Ammunition* ammo = &ptr_weaponStats->ammunition[ptr_weaponStats->currentAmmunitionType];
 	FiringMode* firingMode = &ptr_weaponStats->firingMode[ptr_weaponStats->currentFiringModeType];
@@ -1230,7 +1220,7 @@ void GameComponent::shootProjectile( AttributePtr<Attribute_Spatial> ptr_spatial
 		//	scatterPos.z += randomLO + (float)rand()/((float)RAND_MAX/(randomHI-randomLO));
 		//}
 
-		SEND_EVENT(&Event_CreateProjectile(new_pos, velocity, rot, itrPlayer.ownerId(), ammo->type, firingMode->type, ammo->damage));
+		SEND_EVENT(&Event_CreateProjectile(new_pos, velocity, rot, itrPlayer.ownerId(), ammo->type, firingMode->type, ammo->damage*damageModifier));
 	}
 }
 

@@ -514,6 +514,8 @@ Attribute_Player::Attribute_Player()
 	jetHackPair.second		= nullptr;
 	cycleHackPair.first		= false;
 	cycleHackPair.second	= nullptr;
+	powerHackPair.first		= false;
+	powerHackPair.second	= nullptr;
 	isScoreBoardVisible = false;
 	showScoreboard = false;
 
@@ -799,6 +801,9 @@ Float3 Attribute_Pickupable::getColor()
 		break;
 	//case XKILL_Enums::PickupableType::HACK_RANDOMHACK:
 	//	break;
+	case XKILL_Enums::PickupableType::HACK_POWERHACK:
+		color = Float3(1.0f, 0.5f, 0.0f);
+		break;
 	default:
 		color = Float3(1.0f, 1.0f, 1.0f);
 		break;
