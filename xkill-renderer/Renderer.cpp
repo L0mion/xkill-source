@@ -1588,6 +1588,21 @@ void Renderer::renderAnimation(int playerIndex, AttributePtr<Attribute_Player> p
 	{
 		MaterialDesc material = materials[subsets.at(i)->getMaterialIndex()];
 
+		//Set per-subset constant buffer.
+		managementCB_->setCB(
+			CB_TYPE_SUBSET, 
+			TypeFX_PS, 
+			CB_REGISTER_SUBSET, 
+			devcon);
+		DirectX::XMFLOAT3 dxSpec(
+			material.specularTerm_.x, 
+			material.specularTerm_.y, 
+			material.specularTerm_.z);
+		managementCB_->updateCBSubset(
+			devcon,
+			dxSpec,
+			material.specularPower_);
+
 		ID3D11ShaderResourceView* texAlbedo = managementTex_->getTexSrv(material.idAlbedoTex_);
 		ID3D11ShaderResourceView* texNormal = managementTex_->getTexSrv(material.idNormalTex_);
 		devcon->PSSetShaderResources(0, 1, &texAlbedo);

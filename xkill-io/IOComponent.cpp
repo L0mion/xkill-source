@@ -245,7 +245,7 @@ bool IOComponent::loadModel(std::string	modelName, std::string	modelPath, MdlDes
 			break;
 		}
 
-		writePGY(modelName + ".pgy", modelPath, meshDesc, (VertexType)modelDesc->vertexType_, skinnedData);
+	//	writePGY(modelName + ".pgy", modelPath, meshDesc, (VertexType)modelDesc->vertexType_, skinnedData);
 	}
 
 	if(skinnedData)
@@ -525,10 +525,12 @@ void IOComponent::loadMD5AssembleMaterials(std::vector<MaterialDesc>* materials,
 				atExtension = true;
 		}
 
-
 		material.idAlbedoTex_ = getTexIDfromName(textureName);
 
 		material.specularPower_ = 1.0f;
+		material.transperency_	= 0.0f;
+		material.specularTerm_	= Float3(1.0f, 1.0f, 1.0f);
+		material.diffuseTerm_	= Float3(1.0f, 1.0f, 1.0f);
 
 		materials->push_back(material);
 	}
