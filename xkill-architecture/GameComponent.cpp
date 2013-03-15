@@ -127,7 +127,7 @@ void GameComponent::onUpdate(float delta)
 		projectile->currentLifeTimeLeft -= delta; //Update projectile lifetime
 		if(projectile->currentLifeTimeLeft <= 0)
 		{
-			DEBUGPRINT("Projectile entity " << itrProjectile.ownerId() << " has no lifetime left");
+			//DEBUGPRINT("Projectile entity " << itrProjectile.ownerId() << " has no lifetime left");
 			SEND_EVENT(&Event_RemoveEntity(itrProjectile.ownerId()));
 		}
 
@@ -451,18 +451,18 @@ void GameComponent::updatePlayerAttributes(float delta)
 				}
 				else if(firingMode->nrOfShotsLeftInClip[ammoIndex] <= 0)
 				{
-					if(ammo->currentTotalNrOfShots <= 0)
-					{
-						DEBUGPRINT("Cannot shoot: Out of ammo.");
-					}
-					else
-					{
-						DEBUGPRINT("Cannot shoot: Out of ammo in current clip.");
-					}
+					//if(ammo->currentTotalNrOfShots <= 0)
+					//{
+					//	DEBUGPRINT("Cannot shoot: Out of ammo.");
+					//}
+					//else
+					//{
+					//	DEBUGPRINT("Cannot shoot: Out of ammo in current clip.");
+					//}
 				}
 				else if(firingMode->cooldownLeft > 0)
 				{
-					DEBUGPRINT("Cannot shoot: weapon cooldown. Be patient.");
+					//DEBUGPRINT("Cannot shoot: weapon cooldown. Be patient.");
 				}
 			}
 
