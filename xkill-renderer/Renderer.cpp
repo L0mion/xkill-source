@@ -506,11 +506,22 @@ void Renderer::updateAnimation(float delta, AttributePtr<Attribute_Player> ptr_p
 	xmBonePosition = DirectX::XMLoadFloat3(&bonePosition);
 	xmBonePosition = DirectX::XMVector3TransformCoord(xmBonePosition, xmMatrix);
 	DirectX::XMStoreFloat3(&bonePosition, xmBonePosition);
-	Float3 debug = ptr_player->ptr_camera->ptr_offset->offset_position;
 	ptr_player->ptr_camera->ptr_offset->offset_position.x = bonePosition.x;
 	ptr_player->ptr_camera->ptr_offset->offset_position.y = bonePosition.y;
 	ptr_player->ptr_camera->ptr_offset->offset_position.z = bonePosition.z;
 	ptr_player->ptr_camera->ptr_offset->updateOffset();
+
+	boneIndex = 0;
+	bonePosition = modelD3D->getSkinnedData()->getBonePositions()->at(boneIndex);
+	xmMatrix = DirectX::XMLoadFloat4x4(&finalTransforms.at(boneIndex));
+	xmBonePosition = DirectX::XMLoadFloat3(&bonePosition);
+	xmBonePosition = DirectX::XMVector3TransformCoord(xmBonePosition, xmMatrix);
+	DirectX::XMStoreFloat3(&bonePosition, xmBonePosition);
+	ptr_player->ptr_light_offset->offset_position.x = bonePosition.x;
+	ptr_player->ptr_light_offset->offset_position.y = bonePosition.y;
+	ptr_player->ptr_light_offset->offset_position.z = bonePosition.z;
+	ptr_player->ptr_light_offset->updateOffset();
+	
 }
 
 

@@ -59,6 +59,7 @@ void Menu_Ammo::setSettingsMenu()	// TODO: Set good values for the sliders and m
 	ui->horizontalSlider_Ammo_ExplosionDuration			->	setValue(static_cast<int>(ammo->explosionSphereExplosionDuration * 10.0f));
 	ui->horizontalSlider_Ammo_ExplosionInitialRadius	->	setValue(static_cast<int>(ammo->explosionSphereInitialRadius * 5.0f));
 	ui->horizontalSlider_Ammo_ExplosionFinalRadius		->	setValue(static_cast<int>(ammo->explosionSphereFinalRadius * 5.0f));
+	ui->horizontalSlider_Ammo_ExplosionFinalRadius		->  setMinimum(static_cast<int>(ammo->explosionSphereInitialRadius * 5.0f));
 
 	// Release lock
 	updateLock = false;
@@ -114,6 +115,7 @@ void Menu_Ammo::settingsMenuUpdated()
 
 		ui->label_Ammo_ExplosionDuration		->	setNum(ammo->explosionSphereExplosionDuration);
 		ui->label_Ammo_ExplosionInitialRadius	->	setNum(ammo->explosionSphereInitialRadius);
+		ui->horizontalSlider_Ammo_ExplosionFinalRadius		->  setMinimum(static_cast<int>(ammo->explosionSphereInitialRadius * 5.0f));
 		ui->label_Ammo_ExplosionFinalRadius		->	setNum(ammo->explosionSphereFinalRadius);
 	}
 }

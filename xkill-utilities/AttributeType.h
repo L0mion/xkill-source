@@ -475,6 +475,7 @@ struct DLL_U Attribute_Player : public IAttribute
 	AttributePtr<Attribute_Health>			ptr_health;
 	AttributePtr<Attribute_WeaponStats>		ptr_weaponStats;
 	AttributePtr<Behavior_Offset>			ptr_weapon_offset;
+	AttributePtr<Behavior_Offset>			ptr_light_offset;
 	AttributePtr<Attribute_Spatial>			ptr_weaponFireLocation_spatial;
 
 	static int nextId;
