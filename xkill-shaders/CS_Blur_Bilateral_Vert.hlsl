@@ -6,9 +6,14 @@
 [numthreads(1, N, 1)]
 void CS_Blur_Bilateral_Vert(
 	int3	threadIDDispatch	: SV_DispatchThreadID,
-	int3	threadIDBlock		: SV_GroupThreadID)
+	int3	threadIDBlock		: SV_GroupThreadID,
+	uint	threadIDBlockIndex	: SV_GroupIndex)
 {
-	const BlurKernel blurKernel = ExtractBlurKernel();
+	if(threadIDBlockIndex == 0)
+	{
+		blurKernel = ExtractBlurKernel();
+	}
+
 	const int2 dispatch = threadIDDispatch.xy + int2(viewportTopX, viewportTopY);
 
 	//Load texel, depth and view-space normal into shared memory to reduce memory bandwidth:
@@ -38,9 +43,9 @@ void CS_Blur_Bilateral_Vert(
 	}
 	GroupMemoryBarrierWithGroupSync();
 
-	int		center			= threadIDBlock.y + blurRadius;
-	float3	centerNormal	= sharedNormV[center];
-	float	centerDepth		= sharedDepth[center];
+	const int		center			= threadIDBlock.y + blurRadius;
+	const float3	centerNormal	= sharedNormV[center];
+	const float		centerDepth		= sharedDepth[center];
 
 	//Center value always contributes to the sum.
 	float	totalWeight	= blurKernel._[5];
@@ -50,17 +55,13 @@ void CS_Blur_Bilateral_Vert(
 		if(i == 0)
 			continue; //ugly
 
-		int		n		= threadIDBlock.y + blurRadius + i;
-		float	nDepth	= sharedDepth[n];
-		float3	nNormal	= sharedNormV[n];
-		float4	nSample	= sharedCache[n];
-
+		int	n = threadIDBlock.y + blurRadius + i;
 		if(
-			dot(nNormal, centerNormal)	>= 0.8f && 
-			abs(nDepth - centerDepth)	<= 0.2f)
+			dot(sharedNormV[n], centerNormal)	>= 0.8f && 
+			abs(sharedDepth[n] - centerDepth)	<= 0.2f)
 		{
 			float weight = blurKernel._[i + blurRadius];
-			blur		+= weight * nSample;
+			blur		+= weight * sharedCache[n];
 			totalWeight	+= weight;
 		}
 	}

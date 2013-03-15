@@ -6,6 +6,8 @@
 #include <xkill-utilities/AttributeManager.h>
 #include <xkill-utilities/MutatorSettings.h>
 
+#include "physicsUtilities.h"
+
 #include "collisionShapes.h"
 
 ATTRIBUTES_DECLARE_ALL
@@ -13,6 +15,9 @@ ATTRIBUTES_DECLARE_ALL
 ExplosionSpherePhysicsObject::ExplosionSpherePhysicsObject()
 	: PhysicsObject()
 {
+	randomRotation_ = btVector3(rand()-RAND_MAX*0.5f, rand()-RAND_MAX*0.5f, rand()-RAND_MAX*0.5f);
+	randomRotation_.normalize();
+	randomRotation_*= 3;
 	localCollisionShape_ = nullptr;
 	explosionSphereExpansionRate_ = 0.0f;
 	ATTRIBUTES_INIT_ALL
@@ -42,11 +47,6 @@ bool ExplosionSpherePhysicsObject::subClassSpecificInitHook()
 		
 		float initialRadius = ammunition.explosionSphereInitialRadius * firingMode.explosionSphereModifier;
 		float finalRadius = ammunition.explosionSphereFinalRadius * firingMode.explosionSphereModifier;
-
-		OUTPUT_WINDOW_PRINT("initialRadius: " << initialRadius);
-		OUTPUT_WINDOW_PRINT("finalRadius: " << finalRadius);
-		OUTPUT_WINDOW_PRINT("ammunition.explosionSphereExplosionDuration" << ammunition.explosionSphereExplosionDuration);
-		
 		if(initialRadius > ptr_explosionSphere->currentRadius)
 		{
 			ptr_explosionSphere->currentRadius = initialRadius;
@@ -61,7 +61,7 @@ bool ExplosionSpherePhysicsObject::subClassSpecificInitHook()
 	}
 
 	//Create local collision shape
-	localCollisionShape_ = new btSphereShape(ptr_explosionSphere->currentRadius);
+	localCollisionShape_ = new btSphereShape(1.0f);
 	setCollisionShape(localCollisionShape_);
 
 	return true;
@@ -74,7 +74,9 @@ btVector3 ExplosionSpherePhysicsObject::subClassCalculateLocalInertiaHook(btScal
 
 void ExplosionSpherePhysicsObject::onUpdate(float delta)
 {
-	//Expand explosion sphere according to mutator settings retrieved in "subClassSpecificInitHook()"
+	//--------------------------------------------------------------------------------------
+	// Update scaling. Expand explosion sphere according to mutator settings retrieved in "subClassSpecificInitHook()"
+	//--------------------------------------------------------------------------------------
 	std::vector<int> explosionSphereEntityId = itrPhysics.ownerAt(attributeIndex_)->getAttributes(ATTRIBUTE_EXPLOSIONSPHERE);
 	for(unsigned int i = 0; i < explosionSphereEntityId.size(); i++)
 	{
@@ -86,8 +88,13 @@ void ExplosionSpherePhysicsObject::onUpdate(float delta)
 		}
 		itrPhysics.at(attributeIndex_)->ptr_spatial->scale = Float3(ptr_explosionSphere->currentRadius,ptr_explosionSphere->currentRadius,ptr_explosionSphere->currentRadius);
 		localCollisionShape_->setLocalScaling(btVector3(ptr_explosionSphere->currentRadius, ptr_explosionSphere->currentRadius, ptr_explosionSphere->currentRadius));
-
-		//auto
-		//localCollisionShape_->setLocalScaling(btVector3(ptr_explosionSphere->currentRadius*10.0f, ptr_explosionSphere->currentRadius*10.0f, ptr_explosionSphere->currentRadius*10.0f));
 	}
+
+	//--------------------------------------------------------------------------------------
+	// Update rotation
+	//--------------------------------------------------------------------------------------
+	btQuaternion randomRotationQuaternion (randomRotation_.x()*delta,randomRotation_.y()*delta,randomRotation_.z()*delta);
+	btQuaternion rotateWithRandomRotationQuaternion = randomRotationQuaternion*getWorldTransform().getRotation();
+	getWorldTransform().setRotation(rotateWithRandomRotationQuaternion);
+	itrPhysics.at(attributeIndex_)->ptr_spatial->rotation = Float4(rotateWithRandomRotationQuaternion.x(),rotateWithRandomRotationQuaternion.y(),rotateWithRandomRotationQuaternion.z(),rotateWithRandomRotationQuaternion.w());
 }

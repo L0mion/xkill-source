@@ -4,7 +4,6 @@
 
 #include <DirectXMath.h>
 
-
 #include "ManagementD3D.h"
 #include "ManagementFX.h"
 #include "ManagementCB.h"
@@ -39,8 +38,6 @@
 
 #include "CameraInstances.h"
 #include "TimerDX.h"
-
-
 
 ATTRIBUTES_DECLARE_ALL;
 
@@ -423,14 +420,41 @@ void Renderer::initManagementAnimation()
 	managementAnimation_ = new ManagementAnimation();
 }
 
-void Renderer::update(float delta)
+std::vector<ViewportData> Renderer::update(float delta)
 {
 	delta_ = delta; //Needed by ManagementAnimation::update
 
 	ID3D11Device*			device = managementD3D_->getDevice();
 	ID3D11DeviceContext*	devcon = managementD3D_->getDeviceContext();
 
+	//Store all the viewport-specific data for the backbuffer-rendering.
+	std::vector<SplitScreenViewport>* ssViewports = managementViewport_->getSplitScreenViewports();
+	ViewportData vpData;
+	std::vector<ViewportData> vpDatas(ssViewports->size());
+	for(unsigned int i = 0; i < ssViewports->size(); i++)
+	{
+		AttributePtr<Attribute_SplitScreen>	ptr_splitScreen	= ssViewports->at(i).ptr_splitScreen;
+		AttributePtr<Attribute_Camera>		ptr_camera		= ptr_splitScreen->ptr_camera;
+		AttributePtr<Attribute_Spatial>		ptr_spatial		= ptr_camera->ptr_spatial;
+		AttributePtr<Attribute_Position>	ptr_position	= ptr_spatial->ptr_position;
+
+		vpData.camIndex			= ptr_camera.index();
+		vpData.view				= DirectX::XMFLOAT4X4(((float*)&ptr_camera->mat_view));
+		vpData.proj				= DirectX::XMFLOAT4X4(((float*)&ptr_camera->mat_projection));
+		vpData.viewInv			= managementMath_->calculateMatrixInverse(vpData.view);
+		vpData.projInv			= managementMath_->calculateMatrixInverse(vpData.proj);
+		vpData.eyePos			= *(DirectX::XMFLOAT3*)&ptr_position->position;
+		vpData.viewportTopX		= static_cast<unsigned int>(ptr_splitScreen->ssTopLeftX);
+		vpData.viewportTopY		= static_cast<unsigned int>(ptr_splitScreen->ssTopLeftY);
+		vpData.zNear			= ptr_camera->zNear;
+		vpData.zFar				= ptr_camera->zFar;
+		vpData.viewportWidth	= (float)ptr_splitScreen->ssWidth;
+		vpData.viewportHeight	= (float)ptr_splitScreen->ssHeight;
+		vpDatas[i] = vpData;
+	}
+
 	finalTransforms_.clear();
+	
 	while(itrPlayer.hasNext()) //Update animations
 	{
 		AttributePtr<Attribute_Player> ptr_player = itrPlayer.getNext();
@@ -438,10 +462,13 @@ void Renderer::update(float delta)
 	}
 
 	//Update lights.
-	managementLight_->update(device, devcon);
+	managementLight_->update(device, devcon, vpDatas);
 	//Update instances.
 	managementInstance_->update(device, devcon);
+
+	return vpDatas;
 }
+
 void Renderer::updateAnimation(float delta, AttributePtr<Attribute_Player> ptr_player, ID3D11Device* device)
 {
 	AttributePtr<Attribute_Render> ptr_render		= ptr_player->ptr_render;
@@ -479,15 +506,26 @@ void Renderer::updateAnimation(float delta, AttributePtr<Attribute_Player> ptr_p
 	xmBonePosition = DirectX::XMLoadFloat3(&bonePosition);
 	xmBonePosition = DirectX::XMVector3TransformCoord(xmBonePosition, xmMatrix);
 	DirectX::XMStoreFloat3(&bonePosition, xmBonePosition);
-	Float3 debug = ptr_player->ptr_camera->ptr_offset->offset_position;
 	ptr_player->ptr_camera->ptr_offset->offset_position.x = bonePosition.x;
 	ptr_player->ptr_camera->ptr_offset->offset_position.y = bonePosition.y;
 	ptr_player->ptr_camera->ptr_offset->offset_position.z = bonePosition.z;
 	ptr_player->ptr_camera->ptr_offset->updateOffset();
+
+	boneIndex = 0;
+	bonePosition = modelD3D->getSkinnedData()->getBonePositions()->at(boneIndex);
+	xmMatrix = DirectX::XMLoadFloat4x4(&finalTransforms.at(boneIndex));
+	xmBonePosition = DirectX::XMLoadFloat3(&bonePosition);
+	xmBonePosition = DirectX::XMVector3TransformCoord(xmBonePosition, xmMatrix);
+	DirectX::XMStoreFloat3(&bonePosition, xmBonePosition);
+	ptr_player->ptr_light_offset->offset_position.x = bonePosition.x;
+	ptr_player->ptr_light_offset->offset_position.y = bonePosition.y;
+	ptr_player->ptr_light_offset->offset_position.z = bonePosition.z;
+	ptr_player->ptr_light_offset->updateOffset();
+	
 }
 
 
-void Renderer::render()
+void Renderer::render(std::vector<ViewportData> vpDatas)
 {
 	ID3D11DeviceContext* devcon = managementD3D_->getDeviceContext();
 
@@ -503,12 +541,6 @@ void Renderer::render()
 	)
 
 	//Update per-frame constant buffer.
-	AttributePtr<Attribute_SplitScreen>	ptr_splitScreen;
-	AttributePtr<Attribute_Camera>		ptr_camera; 
-	AttributePtr<Attribute_Spatial>		ptr_spatial;
-	AttributePtr<Attribute_Position>	ptr_position;
-
-	ViewportData vpData;
 	managementCB_->setCB(
 		CB_TYPE_FRAME, 
 		TypeFX_VS, 
@@ -516,42 +548,25 @@ void Renderer::render()
 		devcon);
 	managementCB_->updateCBFrame(
 		devcon,
-		managementLight_->getLightDirCurCount(),
-		managementLight_->getLightPointCurCount());
+		managementLight_->getLightDirCurCount()); //OBS - not number of dirs
 
 	managementBuffer_->setBuffersAndDepthBufferAsRenderTargets(devcon, managementD3D_->getDepthBuffer());
 
+	//HERE, WE BUILD HERE
+	AttributePtr<Attribute_SplitScreen>	ptr_splitScreen;
+	AttributePtr<Attribute_Camera>		ptr_camera; 
+	AttributePtr<Attribute_Spatial>		ptr_spatial;
+	AttributePtr<Attribute_Position>	ptr_position;
+
 	//Render each split-screen separately
-	std::vector<SplitScreenViewport>* ssViewports = managementViewport_->getSplitScreenViewports();
-	std::vector<ViewportData> vpDatas(ssViewports->size());
 	calcgpu(gbuffertimer,
-		for(unsigned int i = 0; i < ssViewports->size(); i++)
-		{
-			ptr_splitScreen		= ssViewports->at(i).ptr_splitScreen;
-			ptr_camera			= ptr_splitScreen->ptr_camera;
-			ptr_spatial			= ptr_camera->ptr_spatial;
-			ptr_position		= ptr_spatial->ptr_position;
+	for(unsigned int i = 0; i < vpDatas.size(); i++)
+	{
+		managementViewport_->setViewport(devcon, i);
 
-			managementViewport_->setViewport(devcon, i);
-
-			//Store all the viewport-specific data for the backbuffer-rendering.
-			vpData.camIndex		= ptr_camera.index();
-			vpData.view			= DirectX::XMFLOAT4X4(((float*)&ptr_camera->mat_view));
-			vpData.proj			= DirectX::XMFLOAT4X4(((float*)&ptr_camera->mat_projection));
-			vpData.viewInv		= managementMath_->calculateMatrixInverse(vpData.view);
-			vpData.projInv		= managementMath_->calculateMatrixInverse(vpData.proj);
-			vpData.eyePos		= *(DirectX::XMFLOAT3*)&ptr_position->position;
-			vpData.viewportTopX = static_cast<unsigned int>(ptr_splitScreen->ssTopLeftX);
-			vpData.viewportTopY = static_cast<unsigned int>(ptr_splitScreen->ssTopLeftY);
-			vpData.zNear		= ptr_camera->zNear;
-			vpData.zFar			= ptr_camera->zFar;
-			vpData.viewportWidth	= (float)ptr_splitScreen->ssWidth;
-			vpData.viewportHeight	= (float)ptr_splitScreen->ssHeight;
-			vpDatas[i]			= vpData;
-
-			renderViewportToGBuffer(vpData);
-		}
-		managementBuffer_->unsetBuffersAndDepthBufferAsRenderTargets(devcon);
+		renderViewportToGBuffer(vpDatas[i]);
+	}
+	managementBuffer_->unsetBuffersAndDepthBufferAsRenderTargets(devcon);
 	)
 	
 	//Blur glowmap:
@@ -605,7 +620,8 @@ void Renderer::renderViewportToGBuffer(ViewportData& vpData)
 		vpData.zNear,
 		vpData.zFar,
 		vpData.viewportWidth,
-		vpData.viewportHeight);
+		vpData.viewportHeight,
+		0); //irrelevant
 
 	CameraInstances* cameraInstances = managementInstance_->getCameraInstancesFromCameraIndex(vpData.camIndex);
 	if(cameraInstances == nullptr)
@@ -663,7 +679,8 @@ void Renderer::renderViewportToBackBuffer(ViewportData& vpData, DirectX::XMFLOAT
 		vpData.zNear,
 		vpData.zFar,
 		vpData.viewportWidth,
-		vpData.viewportHeight);
+		vpData.viewportHeight,
+		managementLight_->getNumPos(vpData.camIndex));
 	managementCB_->setCB(CB_TYPE_SHADOW, TypeFX_CS, CB_REGISTER_SHADOW, devcon);
 
 	DirectX::XMMATRIX m1 = DirectX::XMLoadFloat4x4(&shadowTransform);
@@ -679,7 +696,7 @@ void Renderer::renderViewportToBackBuffer(ViewportData& vpData, DirectX::XMFLOAT
 	//Set lights.
 	managementLight_->setLightSRVCS(devcon, LIGHTBUFFERTYPE_DIR,		LIGHT_SRV_REGISTER_DIR);
 	managementLight_->setLightSRVCS(devcon, LIGHTBUFFERTYPE_POINT,		LIGHT_SRV_REGISTER_POINT);
-	managementLight_->setLightSRVCS(devcon, LIGHTBUFFERTYPE_POS_VIEW,	LIGHT_SRV_REGISTER_POS);
+	managementLight_->setPosDirSRVCS(devcon, vpData.camIndex, LIGHT_SRV_REGISTER_POS, LIGHT_SRV_REGISTER_DIRECTION);
 	
 	//Set default samplerstate.
 	managementSS_->setSS(devcon, TypeFX_CS, 0, SS_ID_DEFAULT);
@@ -693,7 +710,7 @@ void Renderer::renderViewportToBackBuffer(ViewportData& vpData, DirectX::XMFLOAT
 	//Unset and clean.
 	managementLight_->unsetLightSRVCS(devcon, LIGHTBUFFERTYPE_DIR,		LIGHT_SRV_REGISTER_DIR);
 	managementLight_->unsetLightSRVCS(devcon, LIGHTBUFFERTYPE_POINT,	LIGHT_SRV_REGISTER_POINT);
-	managementLight_->unsetLightSRVCS(devcon, LIGHTBUFFERTYPE_POS_VIEW,	LIGHT_SRV_REGISTER_POS);
+	managementLight_->unsetPosDirSRVCS(devcon, vpData.camIndex, LIGHT_SRV_REGISTER_POS, LIGHT_SRV_REGISTER_DIRECTION);
 
 	managementFX_->unsetShader(devcon, SHADERID_CS_LIGHTING);
 
@@ -796,7 +813,6 @@ void Renderer::setShadingDesc(ShadingDesc shadingDesc)
 	managementFX_->setLayout(devcon, shadingDesc.layoutID_);
 }
 
-
 void Renderer::renderSubset(
 	SubsetD3D* subset, 
 	MaterialDesc& material, 
@@ -856,16 +872,16 @@ DirectX::XMFLOAT4X4	Renderer::buildShadowMap()
 	bounds.center = DirectX::XMFLOAT3(0.0f, 0.0f, 0.0f); //Origo.
 	bounds.radius = 38; //Radius of scene really ought to be calculated instead of fixed.
 
-	LightDescDir dirLight = LightDescDir();
+	Float3 direction;
 	AttributePtr<Attribute_Light_Dir> ptr_lightDir;
 	if(itrLightDir.hasNext())
 	{
 		ptr_lightDir = itrLightDir.getNext();
-		dirLight = ptr_lightDir->lightDir;
+		direction = ptr_lightDir->direction;
 	}
 	itrLightDir.resetIndex();
 
-	shadowMatrices_ = constructShadowMatrices(bounds, dirLight.direction);
+	shadowMatrices_ = constructShadowMatrices(bounds, direction);
 
 	//Set viewport to encompass entire map.
 	D3D11_VIEWPORT vp = managementBuffer_->getShadowViewport();
@@ -894,7 +910,8 @@ DirectX::XMFLOAT4X4	Renderer::buildShadowMap()
 		/*zNear: */			0.0f,									//Irrelevant
 		/*zFar: */			0.0f,									//Irrelevant
 		/*ViewportWidth: */ 0.0f,									//Irrelevant
-		/*ViewportHeight: */ 0.0f);									//Irrelevant
+		/*ViewportHeight: */ 0.0f,									//Irrelevant
+		0);															//Irrelevant
 
 	CameraInstances* cameraInstances = managementInstance_->getShadowInstances();
 	std::map<unsigned int, InstancedData*> instancesMap = cameraInstances->getInstancesMap();
@@ -1186,8 +1203,6 @@ void Renderer::buildSSAOMap(ViewportData& vpData)
 		SET_STAGE_CS, 
 		0); //register 0
 
-	managementD3D_->generateDepthMips();
-
 	//Set depth as srv
 	managementD3D_->setDepthBufferSRV(GBUFFER_SHADER_REGISTER_DEPTH);
 
@@ -1215,7 +1230,8 @@ void Renderer::buildSSAOMap(ViewportData& vpData)
 		vpData.viewportWidth,									//Instead used to send original viewport-dimensions.
 		vpData.viewportHeight,									//Instead used to send original viewport-dimensions.
 		(float)viewportWidth,
-		(float)viewportHeight);
+		(float)viewportHeight,
+		0);														//Irrelevant
 	
 	managementCB_->setCB(CB_TYPE_SSAO, TypeFX_CS, CB_REGISTER_SSAO, devcon);
 	float ssaoWidth		= (float)winfo_->getScreenWidth()	/ (float)SSAO_MAP_SCREEN_RES_FACTOR;
@@ -1231,7 +1247,7 @@ void Renderer::buildSSAOMap(ViewportData& vpData)
 		/*Occlusion Intensity*/		SETTINGS->occlusionIntensity);	
 	
 	//Dispatch motherfucker
-	unsigned int SSAO_BLOCK_DIM = 32;
+	unsigned int SSAO_BLOCK_DIM = 16;
 	float csDispatchX = ssaoWidth	/ (float)SSAO_BLOCK_DIM;
 	float csDispatchY = ssaoHeight	/ (float)SSAO_BLOCK_DIM;
 	unsigned int dispatchX = (unsigned int)ceil(csDispatchX / (float)managementViewport_->getNumViewportsX());
@@ -1251,28 +1267,28 @@ void Renderer::buildSSAOMap(ViewportData& vpData)
 		1, 
 		uavs, 
 		nullptr);
-
+	
 	//set
 	managementFX_->setShader(devcon, SHADERID_CS_BLUR_BILATERAL_HORZ);
 	managementBuffer_->setBuffer(devcon, SET_ID_SSAO, SET_TYPE_SRV, SET_STAGE_CS, 9);
 	managementBuffer_->setBuffer(devcon, SET_ID_SSAO_UTIL, SET_TYPE_UAV, SET_STAGE_CS, 1);
-
+	
 	managementCB_->setCB(CB_TYPE_BLUR, TypeFX_CS, CB_REGISTER_BLUR, devcon);
-
+	
 	unsigned int numBlocksX = (unsigned int)ceilf(viewportWidth / 256.0f);
 	devcon->Dispatch(numBlocksX, viewportHeight, 1);
-
+	
 	managementBuffer_->unset(devcon, SET_TYPE_UAV, SET_STAGE_CS, 1);
 	managementBuffer_->unset(devcon, SET_TYPE_SRV, SET_STAGE_CS, 9);
-
+	
 	managementFX_->setShader(devcon, SHADERID_CS_BLUR_BILATERAL_VERT);
-
+	
 	managementBuffer_->setBuffer(devcon, SET_ID_SSAO_UTIL, SET_TYPE_SRV, SET_STAGE_CS, 9);
 	managementBuffer_->setBuffer(devcon, SET_ID_SSAO, SET_TYPE_UAV, SET_STAGE_CS, 1);
-
+	
 	unsigned int numBlocksY = (unsigned int)ceilf(viewportHeight / 256.0f);
 	devcon->Dispatch(viewportWidth, numBlocksY, 1);
-
+	
 	//unset
 	managementBuffer_->unset(devcon, SET_TYPE_SRV, SET_STAGE_CS, 9);
 	devcon->CSSetUnorderedAccessViews(
@@ -1280,7 +1296,7 @@ void Renderer::buildSSAOMap(ViewportData& vpData)
 		1, 
 		uavs, 
 		nullptr);
-
+	
 	//Unser shader
 	managementFX_->unsetShader(devcon, SHADERID_CS_BLUR_BILATERAL_VERT);
 
@@ -1549,25 +1565,30 @@ void Renderer::renderAnimation(int playerIndex, AttributePtr<Attribute_Player> p
 
 	ModelD3D* modelD3D	= managementModel_->getModelD3D(ptr_render->meshID, device);
 	
+	managementFX_->setShader(devcon, SHADERID_VS_ANIMATION);
+	managementFX_->setShader(devcon, SHADERID_PS_CHAR);
+	managementSS_->setSS(devcon, TypeFX_PS, 0, SS_ID_DEFAULT);
+	managementRS_->setRS(devcon, RS_ID_DEFAULT);
+
 	DirectX::XMFLOAT4X4 worldMatrix			= managementMath_->calculateWorldMatrix(ptr_spatial, ptr_position);
 	DirectX::XMFLOAT4X4 worldMatrixInverse	= managementMath_->calculateMatrixInverse(worldMatrix);
 	DirectX::XMFLOAT4X4 finalMatrix			= managementMath_->calculateFinalMatrix(worldMatrix, view, projection);
-	
+
 	managementCB_->setCB(CB_TYPE_OBJECT, TypeFX_VS, CB_REGISTER_OBJECT, devcon);
 	managementCB_->updateCBObject(devcon, finalMatrix, worldMatrix, worldMatrixInverse);
 
+	managementCB_->setCB(CB_TYPE_CHAR, TypeFX_PS, CB_REGISTER_CHAR, devcon);
+	managementCB_->updateCBChar(
+		devcon,
+		DirectX::XMFLOAT3(ptr_player->avatarColor.asFloat()));
+
 	std::vector<DirectX::XMFLOAT4X4> finalTransforms;
+	
 	//modelD3D->getSkinnedData()->getFinalTransforms(ptr_animation->activeAnimation, ptr_animation->time, &finalTransforms);
 	finalTransforms = finalTransforms_[playerIndex];
-	
 
 	managementCB_->setCB(CB_TYPE_BONE, TypeFX_VS, CB_REGISTER_BONE, devcon);
 	managementCB_->updateCBBone(devcon, finalTransforms);
-
-	managementFX_->setShader(devcon, SHADERID_VS_ANIMATION);
-	managementFX_->setShader(devcon, SHADERID_PS_DEFAULT);
-	managementSS_->setSS(devcon, TypeFX_PS, 0, SS_ID_DEFAULT);
-	managementRS_->setRS(devcon, RS_ID_DEFAULT);
 
 	managementBuffer_->setBuffersAndDepthBufferAsRenderTargets(devcon, managementD3D_->getDepthBuffer());
 
@@ -1617,63 +1638,6 @@ void Renderer::renderAnimation(int playerIndex, AttributePtr<Attribute_Player> p
 	managementRS_->setRS(devcon, RS_ID_DEFAULT);
 }
 
-void Renderer::renderAnimatedMesh(DirectX::XMFLOAT4X4 viewMatrix, DirectX::XMFLOAT4X4 projectionMatrix)
-{
-//	ID3D11Device*			device = managementD3D_->getDevice();
-//	ID3D11DeviceContext*	devcon = managementD3D_->getDeviceContext();
-//
-//	DirectX::XMFLOAT4X4 worldMatrix(0.01f, 0.0f, 0.0f, 0.0f,
-//									0.0f, 0.01f, 0.0f, 0.0f,
-//									0.0f, 0.0f, 0.01f, 0.0f,
-//									0.0f, 2.3f, 0.0f, 1.0f);
-//	DirectX::XMFLOAT4X4 worldMatrixInverse	= worldMatrix;
-//	DirectX::XMFLOAT4X4 finalMatrix			= managementMath_->calculateFinalMatrix(worldMatrix, viewMatrix, projectionMatrix);
-//	
-//	managementCB_->setCB(CB_TYPE_OBJECT, TypeFX_VS, CB_REGISTER_OBJECT, devcon);
-//	managementCB_->updateCBObject(devcon, finalMatrix, worldMatrix, worldMatrixInverse);
-//	
-//	animatedMesh_->update(0.002f);
-//	std::vector<DirectX::XMFLOAT4X4> finalTransforms;
-//	animatedMesh_->getSkinInfo()->getFinalTransforms("Take1", animatedMesh_->getTimePosition(), &finalTransforms);
-//
-//	managementCB_->setCB(CB_TYPE_BONE, TypeFX_VS, CB_REGISTER_BONE, devcon);
-//	managementCB_->updateCBBone(devcon, finalTransforms);
-//
-//	managementFX_->setShader(devcon, SHADERID_VS_ANIMATION);
-//	managementFX_->setShader(devcon, SHADERID_PS_ANIMATION);
-//
-//	managementSS_->setSS(devcon, TypeFX_PS, 0, SS_ID_DEFAULT);
-//	managementRS_->setRS(devcon, RS_ID_DEFAULT);
-//
-//	managementBuffer_->setGBuffersAndDepthBuffer(devcon, managementD3D_->getDepthBuffer());
-//
-//	managementD3D_->clearDepthBuffer();
-//
-//	ID3D11Buffer* vertexBuffer = animatedMesh_->getVertexBuffer();
-//	UINT stride = sizeof(VertexPosNormTexTanSkinned);
-//	UINT offset = 0;
-//	devcon->IASetVertexBuffers(
-//				0, 
-//				1, 
-//				&vertexBuffer, 
-//				&stride, 
-//				&offset);
-//	devcon->IASetIndexBuffer(animatedMesh_->getIndexBuffer(), DXGI_FORMAT_R32_UINT, 0);
-//	
-//	managementFX_->setLayout(devcon, LAYOUTID_POS_NORM_TEX_TAN_SKINNED);
-//
-//	devcon->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-//	devcon->DrawIndexed(animatedMesh_->getNumIndices(), 0, 0);
-//
-//	managementGBuffer_->unsetGBuffersAndDepthBufferAsRenderTargets(devcon);
-//
-//	managementFX_->unsetAll(devcon);
-//
-//	devcon->PSSetSamplers(0, 0, nullptr);
-//	devcon->IASetInputLayout(nullptr);
-//	devcon->RSSetState(nullptr);
-}
-
 void Renderer::loadTextures(TexDesc* texdesc)
 {
 	managementTex_->handleTexDesc(texdesc, managementD3D_->getDevice());
@@ -1681,22 +1645,4 @@ void Renderer::loadTextures(TexDesc* texdesc)
 void Renderer::addAnimation(SkinnedData* skinnedData)
 {
 	managementAnimation_->addAnimation(skinnedData);
-}
-
-
-void Renderer::initDebugAnimation()
-{
-	//m3dLoader_ = new M3DLoader();
-	//
-	//animatedMesh_ = nullptr;
-	//animatedMesh_ = new AnimatedMesh();
-	//
-	//m3dLoader_->loadM3D("../../xkill-resources/xkill-models/soldier.m3d",
-	//animatedMesh_->getVertices(),
-	//animatedMesh_->getIndices(),
-	//animatedMesh_->getSubsets(),
-	//animatedMesh_->getMaterials(),
-	//animatedMesh_->getSkinInfo());
-	//
-	//animatedMesh_->init(managementD3D_->getDevice());
 }

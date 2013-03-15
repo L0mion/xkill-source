@@ -16,7 +16,7 @@ cbuffer cbPerInstance : register (b0)
 cbuffer cbPerFrame : register (b1)
 {
 	uint numLightsDir;
-	uint numLightsPoint;
+	uint pad;
 	uint pad0;
 	uint pad3;
 };
@@ -37,7 +37,7 @@ cbuffer cbPerCamera : register (b2)
 	float		viewportWidth;
 
 	float		viewportHeight;
-	uint		pad4;
+	uint		numLightsPoint;
 	uint		pad5;
 	uint		pad6;
 };
@@ -111,5 +111,11 @@ cbuffer cbShadow : register ( b9 )
 {
 	row_major float4x4 shadowMapTransform;
 };
+
+cbuffer cbChar : register ( b10 )
+{
+	float3 glowmod;
+	uint pad9;
+}
 
 #endif //XKILL_RENDERER_CONSTANTBUFFERS_HLSL

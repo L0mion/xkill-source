@@ -15,11 +15,6 @@ struct DLL_U LightDescDir
 	Float4 ambient;
 	Float4 diffuse;
 	Float4 specular;
-
-	Float3 direction;
-
-	//Padding
-	float pad1; //remove me?
 };
 
 struct DLL_U LightDescPoint

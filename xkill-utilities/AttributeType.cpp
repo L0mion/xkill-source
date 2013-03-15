@@ -87,8 +87,9 @@ Attribute_Animation::~Attribute_Animation()
 
 Attribute_Render::Attribute_Render()
 {
-	transparent			= false;
-	tessellation		= false;
+	//transparent			= false;
+	//tessellation		= false;
+	
 	cull = true;
 	culling.values[0]=culling.values[1]=culling.values[2]=culling.values[3]=INT_MAX;
 
@@ -106,8 +107,8 @@ DataItemList* Attribute_Render::getDataList()
 	list->add(&ptr_bounding,		"ptr_bounding");
 	list->add(meshID,				"meshID");
 	list->add(textureID,			"textureID");
-	list->add(transparent,			"transparent");
-	list->add(tessellation,			"tessellation");
+	//list->add(transparent,			"transparent");
+	//list->add(tessellation,			"tessellation");
 	list->add(culling.values[0],	"culling1");
 	list->add(culling.values[1],	"culling2");
 	return list;
@@ -119,8 +120,8 @@ void Attribute_Render::saveTo( DataItemList* list )
 	list->get(&ptr_bounding);
 	list->get(&meshID);
 	list->get(&textureID);
-	list->get(&transparent);
-	list->get(&tessellation);
+	//list->get(&transparent);
+	//list->get(&tessellation);
 	list->get(&culling.values[0]);
 	list->get(&culling.values[1]);
 }
@@ -214,7 +215,7 @@ void Attribute_Projectile::saveTo( DataItemList* list )
 
 Attribute_Light_Dir::Attribute_Light_Dir()
 {
-
+	direction = Float3(0.0f, 0.0f, 0.0f);
 }
 Attribute_Light_Dir::~Attribute_Light_Dir()
 {
@@ -228,7 +229,7 @@ DataItemList* Attribute_Light_Dir::getDataList()
 	list->add(lightDir.ambient,		"ambient");
 	list->add(lightDir.diffuse,		"diffuse");
 	list->add(lightDir.specular,	"specular");
-	list->add(lightDir.direction,	"direction");
+	list->add(direction,	"direction");
 
 	return list;
 }
@@ -238,7 +239,7 @@ void Attribute_Light_Dir::saveTo( DataItemList* list )
 	list->get(&lightDir.ambient);
 	list->get(&lightDir.diffuse);
 	list->get(&lightDir.specular);
-	list->get(&lightDir.direction);
+	list->get(&direction);
 }
 
 Attribute_Light_Point::Attribute_Light_Point()
