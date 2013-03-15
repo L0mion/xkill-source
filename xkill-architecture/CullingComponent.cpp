@@ -36,7 +36,7 @@ void CullingComponent::onEvent(Event* e)
 		while(itrRender.hasNext())
 		{
 			AttributePtr<Attribute_Render> ptr_render = itrRender.getNext();
-			if(ptr_render->meshID == 200)
+			if(ptr_render->meshID == 200 || ptr_render->meshID == 250)
 			{
 				Float3 position = ptr_render->ptr_spatial->ptr_position->position;
 				if(min_.x > ((int)position.x))
@@ -63,7 +63,7 @@ void CullingComponent::onEvent(Event* e)
 		while(itrRender.hasNext())
 		{
 			AttributePtr<Attribute_Render> ptr_render = itrRender.getNext();
-			if(ptr_render->meshID == 200)
+			if(ptr_render->meshID == 200 || ptr_render->meshID == 250)
 			{
 				Int2 pos = Int2((int)ptr_render->ptr_spatial->ptr_position->position.x-min_.x,(int)ptr_render->ptr_spatial->ptr_position->position.z-min_.y);
 				nodes_.at((pos.x) + (pos.y) * width).push_back(ptr_render);
@@ -153,7 +153,7 @@ void CullingComponent::onUpdate(float delta)
 	while(itrRender.hasNext())
 	{
 		AttributePtr<Attribute_Render> ptr_render = itrRender.getNext();
-		if(ptr_render->meshID != XKILL_Enums::ModelId::LASER && ptr_render->meshID != 201 && !(ptr_render->meshID > 99 && ptr_render->meshID<200))
+		if(ptr_render->meshID != XKILL_Enums::ModelId::LASER && ptr_render->meshID != 201 && ptr_render->meshID != 251 && !(ptr_render->meshID > 99 && ptr_render->meshID<200))
 		{
 			ptr_render->culling.clear();
 		}
@@ -167,7 +167,7 @@ void CullingComponent::onUpdate(float delta)
 		while(itrRender.hasNext())
 		{
 			AttributePtr<Attribute_Render> ptr_render = itrRender.getNext();
-			if(ptr_render->meshID != XKILL_Enums::ModelId::LASER && ptr_render->meshID != 200 && ptr_render->meshID != 201 && !(ptr_render->meshID > 99 && ptr_render->meshID<200))
+			if(ptr_render->meshID != XKILL_Enums::ModelId::LASER && ptr_render->meshID != 200 && ptr_render->meshID != 250 && ptr_render->meshID != 201 && ptr_render->meshID != 251 && !(ptr_render->meshID > 99 && ptr_render->meshID<200))
 			{
 				Float3 p0 = ptr_render->ptr_spatial->ptr_position->position;
 				Float3 p1 = ptr_camera->ptr_spatial->ptr_position->position;

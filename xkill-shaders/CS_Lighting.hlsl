@@ -180,7 +180,6 @@ void CS_Lighting(
 		Ambient *= bufferSSAO.SampleLevel(ss, texCoord, 0).x;
 	}
 	Ambient.xyz = Ambient.xyz  + Diffuse.xyz + Specular.xyz; //Unecessary to take up another register with a temp-var. We just use Ambient to represent the final colour.
-	//Ambient.xyz *= bufferSSAO.SampleLevel(ss, texCoord, 0).x;
 
 	//Use additive blending to add glow to the final image using additive blending:
 	Ambient.xyz = min(Ambient.xyz + bufferGlowHigh.SampleLevel(ss, texCoord, 0).xyz, 1.0f);
@@ -188,5 +187,5 @@ void CS_Lighting(
 		uint2(
 			threadIDDispatch.x + viewportTopX, 
 			threadIDDispatch.y + viewportTopY)] = 
-		float4(bufferSSAO.SampleLevel(ss, texCoord, 0).xxx, 1.0f);//float4(Ambient.xyz, 1.0f);
+		float4(Ambient.xyz, 1.0f);
 }
