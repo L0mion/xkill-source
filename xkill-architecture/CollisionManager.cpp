@@ -214,7 +214,8 @@ void CollisionManager::collision_pickupable(Entity* entity1, Entity* entity2)
 								//--------------------------------------------------------------------------------------
 								if(ptr_pickupable->pickupableType == XKILL_Enums::PickupableType::HACK_SPEEDHACK ||
 								ptr_pickupable->pickupableType == XKILL_Enums::PickupableType::HACK_JETHACK ||
-								ptr_pickupable->pickupableType == XKILL_Enums::PickupableType::HACK_CYCLEHACK)
+								ptr_pickupable->pickupableType == XKILL_Enums::PickupableType::HACK_CYCLEHACK ||
+								ptr_pickupable->pickupableType == XKILL_Enums::PickupableType::HACK_POWERHACK)
 								{
 									randomHackPickedUp = true;
 								}
