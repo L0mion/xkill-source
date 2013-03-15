@@ -7,7 +7,8 @@
 #include "constantBuffers.hlsl"
 
 #define TILE_DIM		16
-#define TILE_MAX_LIGHTS	40
+#define TILE_NUM_THREADS TILE_DIM * TILE_DIM
+#define TILE_MAX_LIGHTS	60
 #define TILE_MAX_POINT	TILE_MAX_LIGHTS
 #define TILE_MAX_DIR	1
 
@@ -21,6 +22,7 @@ Texture2D bufferGlowHigh			: register( t3 ); //Register shared in PS_DownSample.
 Texture2D bufferShadowMap			: register( t4 );
 Texture2D bufferSSAO				: register( t5 );
 Texture2D bufferDepth				: register( t6 ); //Register shared in CS_SSAO and CS_Blur_Bilateral. Also, beware of me. Yarr!
+
 StructuredBuffer<LightDescDir>		lightsDir		: register( t7	);
 StructuredBuffer<LightDescPoint>	lightsPoint		: register( t8	);
 StructuredBuffer<float3>			lightsPos		: register( t9	);
@@ -92,11 +94,10 @@ void CS_Lighting(
 		tileMaxDepthF); //this could be done by one thread and put in shared memory, or be pre-computed on the cpu for each tile and stored in constant buffers.
 	
 	//Cull lights with tile
-	const uint numTileThreads = TILE_DIM * TILE_DIM;
-	const uint numPasses = (numLightsPoint + numTileThreads - 1) / numTileThreads; //Passes required by tile threads to cover all lights.
+	const uint numPasses = (numLightsPoint + TILE_NUM_THREADS - 1) / TILE_NUM_THREADS; //Passes required by tile threads to cover all lights.
 	for(uint i = 0; i < numPasses; i++)
 	{
-		const uint lightIndex = i * numTileThreads + threadIDBlockIndex;
+		const uint lightIndex = i * TILE_NUM_THREADS + threadIDBlockIndex;
 		if(lightIndex >= numLightsPoint)
 			break;
 		
@@ -191,5 +192,5 @@ void CS_Lighting(
 		uint2(
 			threadIDDispatch.x + viewportTopX, 
 			threadIDDispatch.y + viewportTopY)] = 
-		float4(Ambient.xyz, 1.0f);
+		float4(bufferSSAO.SampleLevel(ss, texCoord, 0).xxx, 1.0f);//float4(Ambient.xyz, 1.0f);
 }
