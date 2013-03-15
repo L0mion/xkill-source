@@ -6,6 +6,8 @@
 #include <xkill-utilities/AttributeManager.h>
 #include <xkill-utilities/MutatorSettings.h>
 
+#include "physicsUtilities.h"
+
 #include "collisionShapes.h"
 
 ATTRIBUTES_DECLARE_ALL
@@ -13,6 +15,9 @@ ATTRIBUTES_DECLARE_ALL
 ExplosionSpherePhysicsObject::ExplosionSpherePhysicsObject()
 	: PhysicsObject()
 {
+	randomRotation_ = btVector3(rand()-RAND_MAX*0.5f, rand()-RAND_MAX*0.5f, rand()-RAND_MAX*0.5f);
+	randomRotation_.normalize();
+	randomRotation_*= 3;
 	localCollisionShape_ = nullptr;
 	explosionSphereExpansionRate_ = 0.0f;
 	ATTRIBUTES_INIT_ALL
@@ -69,7 +74,9 @@ btVector3 ExplosionSpherePhysicsObject::subClassCalculateLocalInertiaHook(btScal
 
 void ExplosionSpherePhysicsObject::onUpdate(float delta)
 {
-	//Expand explosion sphere according to mutator settings retrieved in "subClassSpecificInitHook()"
+	//--------------------------------------------------------------------------------------
+	// Update scaling. Expand explosion sphere according to mutator settings retrieved in "subClassSpecificInitHook()"
+	//--------------------------------------------------------------------------------------
 	std::vector<int> explosionSphereEntityId = itrPhysics.ownerAt(attributeIndex_)->getAttributes(ATTRIBUTE_EXPLOSIONSPHERE);
 	for(unsigned int i = 0; i < explosionSphereEntityId.size(); i++)
 	{
@@ -82,4 +89,12 @@ void ExplosionSpherePhysicsObject::onUpdate(float delta)
 		itrPhysics.at(attributeIndex_)->ptr_spatial->scale = Float3(ptr_explosionSphere->currentRadius,ptr_explosionSphere->currentRadius,ptr_explosionSphere->currentRadius);
 		localCollisionShape_->setLocalScaling(btVector3(ptr_explosionSphere->currentRadius, ptr_explosionSphere->currentRadius, ptr_explosionSphere->currentRadius));
 	}
+
+	//--------------------------------------------------------------------------------------
+	// Update rotation
+	//--------------------------------------------------------------------------------------
+	btQuaternion randomRotationQuaternion (randomRotation_.x()*delta,randomRotation_.y()*delta,randomRotation_.z()*delta);
+	btQuaternion rotateWithRandomRotationQuaternion = randomRotationQuaternion*getWorldTransform().getRotation();
+	getWorldTransform().setRotation(rotateWithRandomRotationQuaternion);
+	itrPhysics.at(attributeIndex_)->ptr_spatial->rotation = Float4(rotateWithRandomRotationQuaternion.x(),rotateWithRandomRotationQuaternion.y(),rotateWithRandomRotationQuaternion.z(),rotateWithRandomRotationQuaternion.w());
 }

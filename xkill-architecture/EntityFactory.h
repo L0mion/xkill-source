@@ -467,8 +467,8 @@ public:
 
 		CREATE_ATTRIBUTE(ptr_spatial, Attribute_Spatial, spatial, entity);
 		ptr_spatial->ptr_position = ptr_position;
-		ptr_spatial->rotation = Float4(rand(),rand(),rand(),rand()).normalize();
-		ptr_spatial->scale = Float3(0.01f, 0.01f, 0.01f);
+		ptr_spatial->rotation = Float4(rand(), rand(), rand(), rand()).normalize(); //Randomized rotation
+		ptr_spatial->scale = Float3(0.01f, 0.01f, 0.01f); //First frame scaling. Is changed per-frame in "ExplosionSpherePhysicsObject::onUpdate"
 
 		CREATE_ATTRIBUTE(ptr_physics, Attribute_Physics, physics, entity);
 		ptr_physics->ptr_spatial = ptr_spatial;
@@ -489,6 +489,11 @@ public:
 		ptr_explosionSphere->damage = ms.getStandardAmmunition(e->ammunitionType).damage;
 		ptr_explosionSphere->ammunitionType = e->ammunitionType;
 		ptr_explosionSphere->firingModeType = e->firingModeType;
+		
+		MutatorSettings mutatorSettings;
+		Ammunition ammunition;
+		ammunition = mutatorSettings.getStandardAmmunition(ptr_explosionSphere->ammunitionType);
+		ptr_explosionSphere->currentLifeTimeLeft = ammunition.explosionSphereExplosionDuration;
 
 		CREATE_ATTRIBUTE(ptr_damage, Attribute_Damage, damage, entity);
 		ptr_damage->damage = ptr_explosionSphere->damage;

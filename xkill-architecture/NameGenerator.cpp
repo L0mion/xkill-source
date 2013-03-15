@@ -1412,6 +1412,24 @@ void NameGenerator::resetNames()
 	addName("inhabiting uninhabited island");
 	addName("vivisected plant");
 	addName("underestimated power");
+	addName("discovery expedition");
+	addName("map-selling tourist guide");
+	addName("ill-sounding merry-go-round");
+	addName("indexable temp register");
+	addName("signed/unsigned mismatch");
+	addName("carpented wheelbarrow");
+	addName("uninitialized variable");
+	addName("release candidate");
+	addName("proof of concept");
+	addName("booster vanilla");
+	addName("falling timber");
+	addName("creating library");
+	addName("rebuild all started");
+	addName("generating code...");
+	addName("the intent that is this");
+	addName("bug-ridden code");
+	addName("slow implementation of Common Lisp");
+	addName("8 succeeded");
 	
 	//C++ keywords
 	addName("alignas");
