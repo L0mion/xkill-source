@@ -70,7 +70,6 @@ void ManagementInstance::addInstance(AttributePtr<Attribute_Render>& ptr_render)
 	
 	VertexInstanced instance;
 	instance.world_		= calculateWorldMatrix(ptr_spatial, ptr_position);
-	instance.glowMod_	= DirectX::XMFLOAT3(ptr_render->glowMod_.asFloat());
 
 	//Add instance to each valid camera-object.
 	while(itrCamera.hasNext())

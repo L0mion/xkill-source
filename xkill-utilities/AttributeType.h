@@ -217,8 +217,6 @@ struct DLL_U Attribute_Render : public IAttribute
 	//bool transparent;
 	//bool tessellation;
 
-	Float3 glowMod_;
-
 	BoolField culling;
 	bool cull;
 

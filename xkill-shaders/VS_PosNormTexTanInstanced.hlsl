@@ -5,9 +5,9 @@
 #include "VSIn.hlsl"
 #include "VSOut.hlsl"
 
-VSOutPosNormVTexTanWGlowMod VS_PosNormTexTanInstanced(VSInPosNormTexTanInstanced vsIn)
+VSOutPosNormVTexTanW VS_PosNormTexTanInstanced(VSInPosNormTexTanInstanced vsIn)
 {
-	VSOutPosNormVTexTanWGlowMod output;
+	VSOutPosNormVTexTanW output;
 
 	float4 pos = float4(vsIn.position, 1.0f);
 	pos = mul(pos, vsIn.world);
@@ -23,8 +23,6 @@ VSOutPosNormVTexTanWGlowMod VS_PosNormTexTanInstanced(VSInPosNormTexTanInstanced
 	output.tangentW = mul(vsIn.tangent.xyz, (float3x3)vsIn.world);
 
 	output.texcoord	= vsIn.texcoord;
-
-	output.glowmod = vsIn.glowmod;
 
 	return output;
 }

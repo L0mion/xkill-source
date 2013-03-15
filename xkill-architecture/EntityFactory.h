@@ -240,7 +240,7 @@ public:
 		CREATE_ATTRIBUTE(ptr_render, Attribute_Render, render, entity);
 		ptr_render->ptr_spatial = ptr_spatial;
 		ptr_render->meshID = e->meshID;
-		ptr_render->glowMod_ = Float3((float)(rand() % 255) / 255.0f,(float)(rand() % 255) / 255.0f,(float)(rand() % 255) / 255.0f); //AAAAAAAAAAAAAAAAAAAAAAAAAAA
+		//ptr_render->glowMod_ = Float3((float)(rand() % 255) / 255.0f,(float)(rand() % 255) / 255.0f,(float)(rand() % 255) / 255.0f); //AAAAAAAAAAAAAAAAAAAAAAAAAAA
 		CREATE_ATTRIBUTE(ptr_physics, Attribute_Physics, physics, entity);
 		ptr_physics->ptr_spatial = ptr_spatial;
 		ptr_physics->ptr_render = ptr_render;
@@ -327,8 +327,6 @@ public:
 		ptr_lightPoint->lightPoint.specular		= color;
 		ptr_lightPoint->lightPoint.range		= 1.0f;
 		ptr_lightPoint->lightPoint.attenuation	= Float3(0.0f, 30.0f, 0.0f);
-
-		ptr_render->glowMod_ = Float3((float)(rand() % 255) / 255.0f,(float)(rand() % 255) / 255.0f,(float)(rand() % 255) / 255.0f);
 	}
 
 	void createMesh(Entity* entity, Event_CreateMesh* e)

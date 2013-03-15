@@ -93,8 +93,6 @@ Attribute_Render::Attribute_Render()
 	cull = true;
 	culling.values[0]=culling.values[1]=culling.values[2]=culling.values[3]=INT_MAX;
 
-	glowMod_ = Float3(1.0f, 1.0f, 1.0f);
-
 	meshID			= 0;
 	textureID		= 0;
 }

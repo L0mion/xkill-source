@@ -27,16 +27,7 @@ struct VSOutPosNormVTexTanW
 	float3 normalV		: NORMAL;
 	float2 texcoord		: TEXCOORD;
 	float3 tangentW		: TANGENT;
-};
-
-struct VSOutPosNormVTexTanWGlowMod
-{
-	float4 position		: SV_POSITION;
-	float3 normalV		: NORMAL;
-	float2 texcoord		: TEXCOORD;
-	float3 tangentW		: TANGENT;
-	float3 glowmod		: GLOWMOD;
-};
+};	
 
 struct VSOutPosTex
 {
