@@ -377,6 +377,9 @@ public:
 		case XKILL_Enums::PickupableType::HACK_SPEEDHACK:
 			ptr_pickupablesSpawnPoint->spawnDelayInSeconds = 3.5f;
 			break;
+		case XKILL_Enums::PickupableType::HACK_POWERHACK:
+			ptr_pickupablesSpawnPoint->spawnDelayInSeconds = 15.0f;
+			break;
 		default:
 			ptr_pickupablesSpawnPoint->spawnDelayInSeconds = 7.5f;
 			break;
@@ -426,6 +429,9 @@ public:
 			break;
 		case XKILL_Enums::PickupableType::HACK_RANDOMHACK:
 			ptr_render->meshID = XKILL_Enums::ModelId::PICKUPABLE_RANDOMHACK;
+			break;
+		case XKILL_Enums::PickupableType::HACK_POWERHACK:
+			ptr_render->meshID = XKILL_Enums::ModelId::PICKUPABLE_POWERHACK;
 			break;
 		default:
 			color = Float4(0.0f, 1.0f, 0.0f, 1.0f);

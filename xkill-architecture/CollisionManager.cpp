@@ -321,6 +321,17 @@ void CollisionManager::collision_pickupable(Entity* entity1, Entity* entity2)
 								{Event_PostHudMessage e("", ptr_player); e.setColor(ptr_pickupable->getColor()); e.setHtmlMessage("Picked up", "Cyclehack", "", "+" + Converter::IntToStr(amount) + " seconds"); SEND_EVENT(&e);}
 								break;
 							}
+						case XKILL_Enums::PickupableType::HACK_POWERHACK:
+							{
+								amount = 10+rand()%30;
+								pickedUp = true;
+								float time = static_cast<float>(amount);
+								SEND_EVENT(&Event_HackActivated(time, XKILL_Enums::HackType::POWERHACK, ptr_player));
+
+								// Post HUD message
+								{Event_PostHudMessage e("", ptr_player); e.setColor(ptr_pickupable->getColor()); e.setHtmlMessage("Picked up", "Powerhack", "", "+" + Converter::IntToStr(amount) + " seconds"); SEND_EVENT(&e);}
+								break;
+							}
 						}
 					}
 				}
