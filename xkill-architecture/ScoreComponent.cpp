@@ -152,6 +152,8 @@ void ScoreComponent::handleExecutionMode(float delta)
 			priorityWhenSelectedForExecution--;
 			executingPlayer->priority--;
 			executingPlayer->cycles++;
+
+			{Event_PostHudMessage e("", executingPlayer); e.setHtmlMessage("", "priority to cycles", "", "-1 priority +1 cycle"); SEND_EVENT(&e);}
 		}
 		else								// The player doesn't have any priority left so leave execution mode
 		{
@@ -180,7 +182,6 @@ void ScoreComponent::handleSchedulerMode(float delta)
 
 	while(itrPlayer.hasNext())	// Loop through all players and find if anyone has top priority and if they are alive
 	{
-		//Attribute_Player* player = itrPlayer.getNext();
 		AttributePtr<Attribute_Player> player = itrPlayer.getNext();
 
 		if(player->priority > topPriority)		// Current player had higher priority than last top player

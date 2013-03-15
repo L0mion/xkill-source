@@ -31,6 +31,7 @@ int main(int argc,char** argv) //debug draw test main
 
 	// Run Qt
 	return a.exec();
+	//t.join();
 }
 
 

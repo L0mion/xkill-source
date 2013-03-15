@@ -106,6 +106,11 @@ void MainWindow::onEvent( Event* e )
 
 void MainWindow::keyPressEvent( QKeyEvent* e )
 {
+
+	// Toggle mouselock
+	if(e->key() == Qt::Key_Alt)
+		SEND_EVENT(&Event_SetMouseLock(false));
+
 	
 	// Toggle full screen
 	if((e->key()==Qt::Key_Return) && (e->modifiers()==Qt::AltModifier))

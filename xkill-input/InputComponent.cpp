@@ -326,3 +326,18 @@ void InputComponent::handleKeyEvent(char key, bool pressed, bool shiftPressed, b
 			device->setButton(key, pressed);
 	}
 }
+
+void InputComponent::resetMovementInput()
+{
+	while(itrPlayer.hasNext())
+	{
+		AttributePtr<Attribute_Player> ptr_player = itrPlayer.getNext();
+
+		if(ptr_player->ptr_inputDevice.isEmpty())
+			continue;
+
+		AttributePtr<Attribute_Input> input = ptr_player->ptr_input;
+		input->position = Float2(0.0f, 0.0f);
+		input->rotation = Float2(0.0f, 0.0f);
+	}
+}
