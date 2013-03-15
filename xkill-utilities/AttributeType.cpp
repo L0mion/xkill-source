@@ -514,6 +514,7 @@ Attribute_Player::Attribute_Player()
 	cycleHackPair.first		= false;
 	cycleHackPair.second	= nullptr;
 	isScoreBoardVisible = false;
+	showScoreboard = false;
 
 	avatarName = "NaN";
 
@@ -792,8 +793,9 @@ Float3 Attribute_Pickupable::getColor()
 	case XKILL_Enums::PickupableType::HACK_SPEEDHACK:
 		color = Float3(1.0f, 0.0f, 1.0f);
 		break;
-	//case XKILL_Enums::PickupableType::HACK_CYCLEHACK:
-	//	break;
+	case XKILL_Enums::PickupableType::HACK_CYCLEHACK:
+		color = Float3(0.0f, 0.0f, 1.0f);
+		break;
 	//case XKILL_Enums::PickupableType::HACK_RANDOMHACK:
 	//	break;
 	default:
@@ -923,6 +925,7 @@ void Attribute_WeaponStats::saveTo(DataItemList* list)
 
 Attribute_ExplosionSphere::Attribute_ExplosionSphere()
 {
+	damage = 0.0f;
 	currentLifeTimeLeft = 1.0f;
 	currentRadius = 0.0f;
 	ammunitionType = XKILL_Enums::AmmunitionType::EXPLOSIVE;

@@ -1355,6 +1355,14 @@ void NameGenerator::resetNames()
 	addName("is this reality?");
 	addName("space monkey");
 	addName("highly trained monkey");
+	addName("rosebud");
+	addName("intelligent life-form");
+	addName("autonomous clay");
+	addName("ambulatory mushroom");
+	addName("walking fungus");
+	addName("magic floppy disk");
+	addName("Grumpy Wizard");
+	addName("tinker goblin");
 
 	addName("inexpensive payback time");
 	addName("better safe than gory");
@@ -1369,6 +1377,19 @@ void NameGenerator::resetNames()
 	addName("landlord");
 	addName("broken TV");
 	addName("kindergarten gatekeeper");
+	addName("is it just me?");
+	addName("sandsphere");
+	addName("you shoot my banjo");
+	addName("wishbone thundercat");
+	addName("what thundercat?");
+	addName("evening butterfly");
+	addName("jovial reunion");
+	addName("fine printed contract");
+	addName("every other frame");
+	addName("separating axis");
+	addName("delta management");
+	addName("reinforcements have arrived");
+	addName("pylon construction");
 	
 	//C++ keywords
 	addName("alignas");
@@ -1488,7 +1509,7 @@ std::string NameGenerator::getName()
 	{
 		if(!wasShown)
 		{
-			const int chance = 25;
+			const int chance = 50;
 			if(Math::randomInt(0, chance) == chance)
 			{
 				wasShown = true;

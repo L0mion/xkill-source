@@ -39,6 +39,8 @@ struct InputAction
 		ACTION_B_LOOK_LEFT,
 		ACTION_B_LOOK_RIGHT,
 
+		ACTION_B_SHOW_SCOREBOARD,
+
 		ACTION_B_AMMUNITION_BULLET,
 		ACTION_B_AMMUNITION_SCATTER,
 		ACTION_B_AMMUNITION_EXPLOSIVE,
@@ -96,5 +98,6 @@ private:
 		InputActionStrings[ACTION_B_RELOAD					] = "Reload";
 		InputActionStrings[ACTION_F_LOW_SENSITIVITY			] = "Aim [Axis]";
 		InputActionStrings[ACTION_B_LOW_SENSITIVITY			] = "Aim";
+		InputActionStrings[ACTION_B_SHOW_SCOREBOARD			] = "Show Scoreboard";
 	}
 };
