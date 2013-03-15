@@ -182,20 +182,20 @@ void ScoreComponent::handleSchedulerMode(float delta)
 
 	while(itrPlayer.hasNext())	// Loop through all players and find if anyone has top priority and if they are alive
 	{
-		AttributePtr<Attribute_Player> player = itrPlayer.getNext();
+		AttributePtr<Attribute_Player> ptr_player = itrPlayer.getNext();
 
-		if(player->priority > topPriority)		// Current player had higher priority than last top player
+		if(ptr_player->priority > topPriority)		// Current player had higher priority than last top player
 		{
 			topPlayerIndex = itrPlayer.storageIndex();
-			topPriority = player->priority;
+			topPriority = ptr_player->priority;
 			topPriorityIsTied = false;
 		}
-		else if(player->priority == topPriority)	// Current player had the same priority as last top player
+		else if(ptr_player->priority == topPriority)	// Current player had the same priority as last top player
 		{
 			topPriorityIsTied = true;
 		}
 
-		if(!player->detectedAsDead)
+		if(!ptr_player->detectedAsDead && ptr_player->ptr_health->health > 0.0f)
 		{
 			nrOfPlayersAlive++;
 			lastManStanding = itrPlayer.storageIndex();
@@ -239,17 +239,10 @@ void ScoreComponent::handleSchedulerMode(float delta)
 			ptr_player->priority += priorityReward;
 
 			SEND_EVENT(&Event_SpawnPlayer(lastManStanding));
-
-			//executePlayer(lastManStanding);
 		}
 		else if(nrOfPlayersAlive <= 0)
 		{
 			deactivateNullProcess();
-		}
-		else if(topPlayerIndex != -1 && !topPriorityIsTied)
-		{
-			deactivateNullProcess();
-			executePlayer(topPlayerIndex);
 		}
 	}
 }

@@ -466,6 +466,7 @@ public:
 
 		CREATE_ATTRIBUTE(ptr_spatial, Attribute_Spatial, spatial, entity);
 		ptr_spatial->ptr_position = ptr_position;
+		ptr_spatial->rotation = Float4(rand(),rand(),rand(),rand()).normalize();
 
 		CREATE_ATTRIBUTE(ptr_physics, Attribute_Physics, physics, entity);
 		ptr_physics->ptr_spatial = ptr_spatial;

@@ -783,7 +783,7 @@ void NameGenerator::resetNames()
 	addName("restore data");
 	addName("graceful recovery");
 	addName("Blender");
-	addName("shredder");
+	addName("document shredder");
 	addName("rebound");
 	addName("weight painting");
 	addName("cabin in the woods");
@@ -1363,6 +1363,9 @@ void NameGenerator::resetNames()
 	addName("magic floppy disk");
 	addName("Grumpy Wizard");
 	addName("tinker goblin");
+	addName("severe performance degradation");
+	addName("there can only be one");
+	addName("not responsible");
 
 	addName("inexpensive payback time");
 	addName("better safe than gory");
@@ -1396,6 +1399,19 @@ void NameGenerator::resetNames()
 	addName("historically correct");
 	addName("difficult task");
 	addName("hungry slerp");
+	addName("in a way");
+	addName("extensive research");
+	addName("torn and washed away");
+	addName("rich man inside treasure chest");
+	addName("multiple identities");
+	addName("oceanic waves");
+	addName("fountain of youth");
+	addName("real people");
+	addName("snake venom antidote");
+	addName("virtue of style");
+	addName("inhabiting uninhabited island");
+	addName("vivisected plant");
+	addName("underestimated power");
 	
 	//C++ keywords
 	addName("alignas");
@@ -1482,6 +1498,13 @@ void NameGenerator::resetNames()
 	addName("while");
 	addName("xor");
 	addName("xor_eq");
+
+	addName("void addName(std::string name);");
+	addName("Float4x4");
+	addName("Float4");
+	addName("Float3");
+	addName("Float2");
+	addName("Int2");
 }
 void NameGenerator::addName(std::string name)
 {
@@ -1550,10 +1573,10 @@ void NameGenerator::resetColors()
 	addColor(Float3(0.7f, 0.0f, 1.0));
 
 	//new colors
-	addColor(Float3(0.3f, 0.2f, 0.8));
-	addColor(Float3(0.7f, 0.5f, 0.5));
-	addColor(Float3(1.0f, 1.0f, 0.5));
-	addColor(Float3(0.75f, 0.75f, 0.75));
+	addColor(Float3(0.3f, 0.2f, 0.8f));
+	addColor(Float3(0.7f, 0.5f, 0.5f));
+	addColor(Float3(1.0f, 1.0f, 0.5f));
+	addColor(Float3(0.75f, 0.75f, 0.75f));
 }
 
 void NameGenerator::addColor( Float3 color )
