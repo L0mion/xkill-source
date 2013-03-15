@@ -205,7 +205,16 @@ void Menu_HUD::refresh()
 	// Show health info
 	//
 
-	ui.label_health->setNum((int)ptr_health->health);
+	if(ptr_health->health < 1.0f && ptr_health->health > 0.0f) //Prevent player health showing as 0 when the player is still alive
+	{
+		ui.label_health->setNum(1);
+	}
+	else
+	{
+		ui.label_health->setNum(static_cast<int>(ptr_health->health));
+	}
+	
+
 	ui.label_priority->setNum(ptr_player->priority);
 	ui.label_cycles->setNum(ptr_player->cycles);
 	int healthRatio = (int)((ptr_health->health / ptr_health->maxHealth) * 100);
