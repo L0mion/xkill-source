@@ -447,10 +447,10 @@ void Renderer::updateAnimation(float delta, AttributePtr<Attribute_Player> ptr_p
 	AttributePtr<Attribute_Render> ptr_render		= ptr_player->ptr_render;
 	AttributePtr<Attribute_Animation> ptr_animation = ptr_render->ptr_animation;;
 	ModelD3D* modelD3D	= managementModel_->getModelD3D(ptr_render->meshID, device);
-	OUTPUT_WINDOW_PRINT(delta);
+	//OUTPUT_WINDOW_PRINT(delta);
 	if(!ptr_player->detectedAsDead)
 	{
-		ptr_animation->time += delta; // * animationTimeOffset_;
+		ptr_animation->time += SETTINGS->averageDeltaTime; //delta; // * animationTimeOffset_;
 		if(ptr_animation->time > modelD3D->getSkinnedData()->getClipEndTime(ptr_animation->activeAnimation))
 		{
 			ptr_animation->time = 0.0f;
