@@ -87,7 +87,8 @@ void Menu_HUD::mapToSplitscreen()
 	ui.frame_bottom->resize(screenSize.x - screenSize.x*0.00f * 2, ui.frame_bottom->height());
 	bottomPos.x = screenSize.x * 0.5f - ui.frame_bottom->width()* 0.5f;
 	int test = screenSize.x*0.005f;
-	bottomPos.y = screenSize.y - test - ui.frame_bottom->height();
+	bottomPos.y = screenSize.y - ui.frame_bottom->height();
+	//bottomPos.y = 0;
 	ui.frame_bottom->move(bottomPos.x, bottomPos.y);
 	Float2 bottomCenterPos = bottomPos;
 	bottomCenterPos.x = screenSize.x * 0.5f - ui.groupBox_bottomCenter->width()* 0.5f;
@@ -114,6 +115,9 @@ void Menu_HUD::mapToSplitscreen()
 
 	// Create scheduling hud
 	schedulingHud.init(&ui, ptr_splitScreen->ptr_player);
+
+	// Create power up displayer
+	hudPowerupDispayer.init(&ui, ptr_splitScreen->ptr_player);
 }
 
 void Menu_HUD::refresh()
