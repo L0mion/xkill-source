@@ -37,6 +37,7 @@ private:
 	std::vector<HudScheduling_Item> items;
 	float standardMargin;
 	float itemWidth;
+	float itemHeight;
 	bool isScheduling;
 public:
 	HudScheduling()

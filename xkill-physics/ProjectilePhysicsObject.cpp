@@ -36,8 +36,8 @@ bool ProjectilePhysicsObject::subClassSpecificInitHook()
 	//setCcdSweptSphereRadius(boundingSphereRadius*0.5f); 
 	//setCcdMotionThreshold(boundingSphereRadius);
 
-	setCcdSweptSphereRadius(0.1);
-	setCcdMotionThreshold(0.1);
+	setCcdSweptSphereRadius(0.1f);
+	setCcdMotionThreshold(0.1f);
 
 	//Involve speed in CCD?
 	//btVector3 velocity = getLinearVelocity();

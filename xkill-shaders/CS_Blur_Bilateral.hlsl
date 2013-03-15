@@ -31,7 +31,7 @@ float2 GetTexCoordGlobal(int2 xy)
 
 void CacheData(int index, int2 xy)
 {
-	float2 xyGlobal = GetTexCoordGlobal(xy);
+	const float2 xyGlobal = GetTexCoordGlobal(xy);
 
 	sharedCache[index] = toBlur[xy];
 	sharedDepth[index] = bufferDepth				.SampleLevel(ssDepth,	xyGlobal,	0).x;

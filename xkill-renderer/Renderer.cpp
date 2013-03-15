@@ -4,7 +4,6 @@
 
 #include <DirectXMath.h>
 
-
 #include "ManagementD3D.h"
 #include "ManagementFX.h"
 #include "ManagementCB.h"
@@ -39,7 +38,6 @@
 
 #include "CameraInstances.h"
 #include "TimerDX.h"
-
 
 ATTRIBUTES_DECLARE_ALL;
 
@@ -508,11 +506,22 @@ void Renderer::updateAnimation(float delta, AttributePtr<Attribute_Player> ptr_p
 	xmBonePosition = DirectX::XMLoadFloat3(&bonePosition);
 	xmBonePosition = DirectX::XMVector3TransformCoord(xmBonePosition, xmMatrix);
 	DirectX::XMStoreFloat3(&bonePosition, xmBonePosition);
-	Float3 debug = ptr_player->ptr_camera->ptr_offset->offset_position;
 	ptr_player->ptr_camera->ptr_offset->offset_position.x = bonePosition.x;
 	ptr_player->ptr_camera->ptr_offset->offset_position.y = bonePosition.y;
 	ptr_player->ptr_camera->ptr_offset->offset_position.z = bonePosition.z;
 	ptr_player->ptr_camera->ptr_offset->updateOffset();
+
+	boneIndex = 0;
+	bonePosition = modelD3D->getSkinnedData()->getBonePositions()->at(boneIndex);
+	xmMatrix = DirectX::XMLoadFloat4x4(&finalTransforms.at(boneIndex));
+	xmBonePosition = DirectX::XMLoadFloat3(&bonePosition);
+	xmBonePosition = DirectX::XMVector3TransformCoord(xmBonePosition, xmMatrix);
+	DirectX::XMStoreFloat3(&bonePosition, xmBonePosition);
+	ptr_player->ptr_light_offset->offset_position.x = bonePosition.x;
+	ptr_player->ptr_light_offset->offset_position.y = bonePosition.y;
+	ptr_player->ptr_light_offset->offset_position.z = bonePosition.z;
+	ptr_player->ptr_light_offset->updateOffset();
+	
 }
 
 
@@ -1194,8 +1203,6 @@ void Renderer::buildSSAOMap(ViewportData& vpData)
 		SET_STAGE_CS, 
 		0); //register 0
 
-	managementD3D_->generateDepthMips();
-
 	//Set depth as srv
 	managementD3D_->setDepthBufferSRV(GBUFFER_SHADER_REGISTER_DEPTH);
 
@@ -1240,7 +1247,7 @@ void Renderer::buildSSAOMap(ViewportData& vpData)
 		/*Occlusion Intensity*/		SETTINGS->occlusionIntensity);	
 	
 	//Dispatch motherfucker
-	unsigned int SSAO_BLOCK_DIM = 32;
+	unsigned int SSAO_BLOCK_DIM = 16;
 	float csDispatchX = ssaoWidth	/ (float)SSAO_BLOCK_DIM;
 	float csDispatchY = ssaoHeight	/ (float)SSAO_BLOCK_DIM;
 	unsigned int dispatchX = (unsigned int)ceil(csDispatchX / (float)managementViewport_->getNumViewportsX());
@@ -1260,28 +1267,28 @@ void Renderer::buildSSAOMap(ViewportData& vpData)
 		1, 
 		uavs, 
 		nullptr);
-
+	
 	//set
 	managementFX_->setShader(devcon, SHADERID_CS_BLUR_BILATERAL_HORZ);
 	managementBuffer_->setBuffer(devcon, SET_ID_SSAO, SET_TYPE_SRV, SET_STAGE_CS, 9);
 	managementBuffer_->setBuffer(devcon, SET_ID_SSAO_UTIL, SET_TYPE_UAV, SET_STAGE_CS, 1);
-
+	
 	managementCB_->setCB(CB_TYPE_BLUR, TypeFX_CS, CB_REGISTER_BLUR, devcon);
-
+	
 	unsigned int numBlocksX = (unsigned int)ceilf(viewportWidth / 256.0f);
 	devcon->Dispatch(numBlocksX, viewportHeight, 1);
-
+	
 	managementBuffer_->unset(devcon, SET_TYPE_UAV, SET_STAGE_CS, 1);
 	managementBuffer_->unset(devcon, SET_TYPE_SRV, SET_STAGE_CS, 9);
-
+	
 	managementFX_->setShader(devcon, SHADERID_CS_BLUR_BILATERAL_VERT);
-
+	
 	managementBuffer_->setBuffer(devcon, SET_ID_SSAO_UTIL, SET_TYPE_SRV, SET_STAGE_CS, 9);
 	managementBuffer_->setBuffer(devcon, SET_ID_SSAO, SET_TYPE_UAV, SET_STAGE_CS, 1);
-
+	
 	unsigned int numBlocksY = (unsigned int)ceilf(viewportHeight / 256.0f);
 	devcon->Dispatch(viewportWidth, numBlocksY, 1);
-
+	
 	//unset
 	managementBuffer_->unset(devcon, SET_TYPE_SRV, SET_STAGE_CS, 9);
 	devcon->CSSetUnorderedAccessViews(
@@ -1289,7 +1296,7 @@ void Renderer::buildSSAOMap(ViewportData& vpData)
 		1, 
 		uavs, 
 		nullptr);
-
+	
 	//Unser shader
 	managementFX_->unsetShader(devcon, SHADERID_CS_BLUR_BILATERAL_VERT);
 
