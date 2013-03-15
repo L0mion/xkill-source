@@ -224,7 +224,7 @@ void PlayerPhysicsObject::handleInput(float delta)
 		}
 		else if(ptr_input->jump && ptr_player->hovering) //Jump
 		{
-			float jumpPower = 500.0f;
+			float jumpPower = 600.0f;
 			applyCentralImpulse(btVector3(0.0f, jumpPower, 0.0f));
 			//applyCentralForce(btVector3(0.0f, jumpPower, 0.0f));
 		}
