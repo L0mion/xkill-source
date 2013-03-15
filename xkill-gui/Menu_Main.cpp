@@ -424,6 +424,9 @@ void Menu_Main::slot_menu_next_level()
 void Menu_Main::slot_menu_previous_level()
 {
 	levelCurrent--;
+	if(levelCurrent < 0)
+		levelCurrent += levelNames.size();
+
 	levelCurrent %= levelNames.size();
 	updateLevelSelectionInterface();
 }

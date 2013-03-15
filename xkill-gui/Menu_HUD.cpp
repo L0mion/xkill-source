@@ -319,6 +319,9 @@ void Menu_HUD::refresh()
 	scoreboard.refresh();
 	if(ptr_player->detectedAsDead || GET_STATE() == STATE_GAMEOVER || ptr_player->showScoreboard)
 	{
+		if(ptr_player->showScoreboard)
+			scoreboardFade = 0.0f;
+
 		// Show scoreboard if delay has expired
 		if(scoreboardFade > 0.0f)
 			scoreboardFade -= SETTINGS->trueDeltaTime;
