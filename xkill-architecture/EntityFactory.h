@@ -2,6 +2,7 @@
 
 #include <xkill-utilities/Entity.h>
 #include <xkill-utilities/AttributeManager.h>
+#include <xkill-utilities/MutatorSettings.h>
 
 #include "NameGenerator.h"
 // Iterators
@@ -466,6 +467,7 @@ public:
 
 		CREATE_ATTRIBUTE(ptr_spatial, Attribute_Spatial, spatial, entity);
 		ptr_spatial->ptr_position = ptr_position;
+		ptr_spatial->rotation = Float4(rand(),rand(),rand(),rand()).normalize();
 
 		CREATE_ATTRIBUTE(ptr_physics, Attribute_Physics, physics, entity);
 		ptr_physics->ptr_spatial = ptr_spatial;
@@ -483,11 +485,13 @@ public:
 
 		CREATE_ATTRIBUTE(ptr_explosionSphere, Attribute_ExplosionSphere, explosionSphere, entity);
 		ptr_explosionSphere->ptr_physics = ptr_physics;
+		MutatorSettings ms;
+		ptr_explosionSphere->damage = ms.getStandardAmmunition(e->ammunitionType).damage;
 		ptr_explosionSphere->ammunitionType = e->ammunitionType;
 		ptr_explosionSphere->firingModeType = e->firingModeType;
 
 		CREATE_ATTRIBUTE(ptr_damage, Attribute_Damage, damage, entity);
-		ptr_damage->damage = e->damage;
+		ptr_damage->damage = ptr_explosionSphere->damage;
 		ptr_damage->owner_entityID = e->entityIdOfCreator;
 	}
 

@@ -108,6 +108,12 @@ public slots:
 		SETTINGS->trueDeltaTime = delta;
 		delta *= SETTINGS->timeScale();
 
+		// Average fps through lerp of previous times
+		static float averageDelta = 0.0f;
+		const float factor = 0.05f;
+		averageDelta = (1.0f - factor) * averageDelta + delta * factor;
+		SETTINGS->averageDeltaTime = averageDelta;
+
 		computeFPS();
 		gameManager.update(delta);
 	};
@@ -162,9 +168,10 @@ protected:
 	// Behavior on mouse press
 	void mousePressEvent(QMouseEvent *e)
 	{
+		//// lock / release mouse5
+		//if(hasMouseLock && e->button() == Qt::RightButton)
+		//	event_setMouseLock(false);
 		// lock / release mouse5
-		if(hasMouseLock && e->button() == Qt::RightButton)
-			event_setMouseLock(false);
 
 		if(!hasMouseLock && e->button() == Qt::LeftButton)
 		{

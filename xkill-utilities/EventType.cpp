@@ -125,11 +125,12 @@ Event_RemoveEntity::Event_RemoveEntity(int entityId) : Event(EVENT_REMOVE_ENTITY
 	this->entityId = entityId;
 }
 
-Event_KeyPress::Event_KeyPress(int keyEnum, bool isPressed, bool shiftModifier) : Event(EVENT_KEY_PRESS)
+Event_KeyPress::Event_KeyPress(int keyEnum, bool isPressed, bool shiftPressed, bool tabPressed) : Event(EVENT_KEY_PRESS)
 {
 	this->keyEnum = keyEnum;
 	this->isPressed = isPressed;
-	this->shiftModifier = shiftModifier;
+	this->shiftPressed = shiftPressed;
+	this->tabPressed = tabPressed;
 }
 
 Event_MousePress::Event_MousePress(int keyEnum, bool isPressed) : Event(EVENT_MOUSE_PRESS)
@@ -191,10 +192,9 @@ Event_SyncStateCommand::Event_SyncStateCommand(
 	this->isReplacementState = isReplacementState;
 }
 
-Event_CreateExplosionSphere::Event_CreateExplosionSphere(Float3 position, float damage, int entityIdOfCreator, XKILL_Enums::AmmunitionType ammunitionType, XKILL_Enums::FiringModeType firingModeType) : Event(EVENT_CREATE_EXPLOSIONSPHERE)
+Event_CreateExplosionSphere::Event_CreateExplosionSphere(Float3 position, int entityIdOfCreator, XKILL_Enums::AmmunitionType ammunitionType, XKILL_Enums::FiringModeType firingModeType) : Event(EVENT_CREATE_EXPLOSIONSPHERE)
 {
 	this->position = position;
-	this->damage = damage;
 	this->entityIdOfCreator = entityIdOfCreator;
 	this->ammunitionType = ammunitionType;
 	this->firingModeType = firingModeType;

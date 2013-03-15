@@ -163,7 +163,6 @@ Menu_Main::Menu_Main( QWidget* parent ) : QMainWindow()
 	}
 
 	// Load level
-	slot_menu_next_level(); // skip to next level
 	SEND_EVENT(&Event_LoadLevel(levelNames[levelCurrent]));
 	SETTINGS->currentLevel = levelNames[levelCurrent];
 	updateLevelSelectionInterface();
@@ -425,6 +424,9 @@ void Menu_Main::slot_menu_next_level()
 void Menu_Main::slot_menu_previous_level()
 {
 	levelCurrent--;
+	if(levelCurrent < 0)
+		levelCurrent += levelNames.size();
+
 	levelCurrent %= levelNames.size();
 	updateLevelSelectionInterface();
 }

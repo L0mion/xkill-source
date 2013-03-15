@@ -525,11 +525,13 @@ void IOComponent::loadMD5AssembleMaterials(std::vector<MaterialDesc>* materials,
 				atExtension = true;
 		}
 
-
 		material.idAlbedoTex_ = getTexIDfromName(textureName);
 		material.idNormalTex_ = getTexIDfromName("processNormal.dds");
 
 		material.specularPower_ = 1.0f;
+		material.transperency_	= 0.0f;
+		material.specularTerm_	= Float3(1.0f, 1.0f, 1.0f);
+		material.diffuseTerm_	= Float3(1.0f, 1.0f, 1.0f);
 
 		materials->push_back(material);
 	}

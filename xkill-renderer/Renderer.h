@@ -130,12 +130,7 @@ private:
 	void renderHudElementCrossHair(int viewportIndex, float scaleModifierX); //!< Renders a cross hair in the middle óf each viewport.
 	void drawHudElement(int viewportIndex, unsigned int textureId, DirectX::XMFLOAT4X4 transformationMatrix); //!< Draws a single hud element.
 
-	void renderAnimation(AttributePtr<Attribute_Player> ptr_player, DirectX::XMFLOAT4X4 view, DirectX::XMFLOAT4X4 projection);
-
-	//temp
-	void renderAnimatedMesh(
-		DirectX::XMFLOAT4X4 viewMatrix, 
-		DirectX::XMFLOAT4X4 projectionMatrix);
+	void renderAnimation(int playerIndex, AttributePtr<Attribute_Player> ptr_player, DirectX::XMFLOAT4X4 view, DirectX::XMFLOAT4X4 projection);
 	
 	HWND	windowHandle_;	//!< Handle to WinAPI-window.
 	Winfo*	winfo_;			//!< Holds information related to screen dimensions. Object is shared thruought Renderer's members.
@@ -166,11 +161,8 @@ private:
 
 	ShadowMatrices shadowMatrices_;
 
-	//temp
-	//M3DLoader*		m3dLoader_;
-	//AnimatedMesh*	animatedMesh_;
 
-	void initDebugAnimation();
+	std::vector<std::vector<DirectX::XMFLOAT4X4>> finalTransforms_;
 };			
 			
 #endif //XKILL_RENDERER_RENDERER_H

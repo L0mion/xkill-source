@@ -483,6 +483,7 @@ struct DLL_U Attribute_Player : public IAttribute
 	Float3 avatarColor;
 
 	bool isScoreBoardVisible;
+	bool showScoreboard;
 
 	int priority;							//!< Priority of the player process. Higher value means higher priority. The scheduler will choose the process with the highest priority for execution.
 	int cycleSteals;						//!< Total number of cycle steals for the player process. Cycle steals steal priority from other player processes.
@@ -656,6 +657,7 @@ struct DLL_U Attribute_ExplosionSphere : public IAttribute
 	~Attribute_ExplosionSphere();
 
 	AttributePtr<Attribute_Physics> ptr_physics;
+	float damage;
 	float currentLifeTimeLeft;
 	float currentRadius;							//!< Incremented in ExplosionSpherePhysicsObject::onUpdate
 	XKILL_Enums::AmmunitionType ammunitionType;
