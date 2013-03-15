@@ -1363,6 +1363,9 @@ void NameGenerator::resetNames()
 	addName("magic floppy disk");
 	addName("Grumpy Wizard");
 	addName("tinker goblin");
+	addName("severe performance degradation");
+	addName("there can only be one");
+	addName("not responsible");
 
 	addName("inexpensive payback time");
 	addName("better safe than gory");
