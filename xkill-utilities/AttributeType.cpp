@@ -793,8 +793,9 @@ Float3 Attribute_Pickupable::getColor()
 	case XKILL_Enums::PickupableType::HACK_SPEEDHACK:
 		color = Float3(1.0f, 0.0f, 1.0f);
 		break;
-	//case XKILL_Enums::PickupableType::HACK_CYCLEHACK:
-	//	break;
+	case XKILL_Enums::PickupableType::HACK_CYCLEHACK:
+		color = Float3(0.0f, 0.0f, 1.0f);
+		break;
 	//case XKILL_Enums::PickupableType::HACK_RANDOMHACK:
 	//	break;
 	default:

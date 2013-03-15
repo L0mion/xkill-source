@@ -295,9 +295,11 @@ void Menu_HUD::refresh()
 			ui.label_aim->hide();
 			ui.label_firingMode->hide();
 			ui.frame_bottom->hide();
+			schedulingHud.hide();
 
 			ui.progressBar_health->hide();
 			ui.progressBar_ammo->hide();
+			
 		}
 	}
 	else
@@ -309,6 +311,7 @@ void Menu_HUD::refresh()
 			ui.label_aim->show();
 			ui.label_firingMode->show();
 			ui.frame_bottom->show();
+			schedulingHud.show();
 		}
 	}
 
