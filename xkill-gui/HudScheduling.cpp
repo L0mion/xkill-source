@@ -49,8 +49,10 @@ void HudScheduling::init( Ui::Menu_HUD* ui, AttributePtr<Attribute_Player> ptr_o
 
 	// Compute positions
 	window->move(screenSize.x*0.5f - window->width()*0.5, ui->frame_bottom->y() + 9);
-	subWindow->move(window->x() + standardMargin, window->y() + standardMargin);
-	progressbar->move(subWindow->x(), subWindow->y() + subWindow->height() + standardMargin);
+	progressbar->move(window->x() + standardMargin, window->y() + standardMargin);
+	subWindow->move(window->x() + standardMargin, progressbar->y() + progressbar->height() + standardMargin);
+	
+	
 	advantageLabel->move(subWindow->x(), subWindow->y());
 	//hide();
 	ui->label_7->hide();
@@ -107,6 +109,7 @@ void HudScheduling::refresh()
 	if(timeUntilScheduling < 0.0f)
 		timeUntilScheduling = 0.0f;
 	float schedulerTime = SETTINGS->schedulerTime;
+
 	float schedulingRatio = timeUntilScheduling /schedulerTime;
 	int test = timeUntilScheduling /schedulerTime * kPrecition;
 	int schedulingProgressbarRatio = kPrecition - test;

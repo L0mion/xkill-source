@@ -117,7 +117,7 @@ void Menu_HUD::mapToSplitscreen()
 	schedulingHud.init(&ui, ptr_splitScreen->ptr_player);
 
 	// Create power up displayer
-	hudPowerupDispayer.init(&ui, ptr_splitScreen->ptr_player);
+	hudPowerupDispayer.init(ui.frame_bottom, ptr_splitScreen->ptr_player);
 }
 
 void Menu_HUD::refresh()
@@ -131,6 +131,13 @@ void Menu_HUD::refresh()
 	int firingIndex = firingMode->type;
 	int ammoIndex = ammunition->type;
 	float fadeTime = 1.0f;
+
+
+	//
+	// Update powerup display
+	//
+
+	hudPowerupDispayer.update();
 
 
 	//

@@ -502,10 +502,11 @@ Attribute_Player::Attribute_Player()
 	timeSinceLastDamageTaken = 100.0f;
 	jetpack = false;
 	detectedAsDead = true;
-	currentSprintTime = 0;
 	sprintTime = 2.0f;
+	currentSprintTime = sprintTime;
+	
 	canSprint = true;
-	sprintRechargeRate = 0.2f;
+	sprintRechargeRate = 0.4f;
 	executing = false;
 	hovering = false;
 	speedHackPair.first		= false;

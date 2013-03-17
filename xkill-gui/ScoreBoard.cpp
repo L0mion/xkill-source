@@ -128,9 +128,12 @@ void ScoreBoard::syncLabelsWithPlayers()
 			// Apply extra stuff if we're at the current player
 			if(e->ptr_player == ptr_current_player)
 			{
-				sheet_process += "background-color: rgba(255, 255, 255, 100); ";
-				sheet_cycles += "background-color: rgba(255, 255, 255, 100);";
-				sheet_priority += "background-color: rgba(255, 255, 255, 100);";
+				int brightness = 150;
+				std::string str_color = "color: rgba("+Converter::IntToStr((int)(color.x * brightness))+", "+Converter::IntToStr((int)(color.y * brightness))+", "+ Converter::IntToStr((int)(color.z * brightness)) +", 220);";
+				std::string sheet ="background-color: rgba(240, 240, 230, 220);";
+				sheet_process += sheet+str_color;
+				sheet_cycles += sheet;
+				sheet_priority += sheet;
 			}
 
 			// Apply extra stuff if we have most cycles
