@@ -74,6 +74,10 @@ void Menu_HUD::mapToSplitscreen()
 	// Move scoreboard to center
 	ui.frame_scoreboard->hide();
 	ui.frame_scoreboard->move(centerPos.x - ui.frame_scoreboard->width()* 0.5f, centerPos.y - ui.frame_scoreboard->height()* 0.5f);
+	/*int test2 = ui.frame_scoreboard->y();
+	if(ui.frame_scoreboard->y() < 0)
+		ui.frame_scoreboard->move(ui.frame_scoreboard->x(), 0);*/
+
 
 	// Place statusbars
 	Float2 barPos;
