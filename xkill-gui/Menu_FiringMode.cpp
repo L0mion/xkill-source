@@ -46,7 +46,12 @@ void Menu_FiringMode::setSettingsMenu()	// TODO: Set good values for the sliders
 
 	ui->horizontalSlider_Weapon_ClipSize->setValue(firingMode->clipSize);
 	ui->horizontalSlider_Weapon_ReloadTime->setValue(static_cast<int>(firingMode->reloadTime * 100.0f));
-	ui->horizontalSlider_Weapon_RateOfFire->setValue(static_cast<int>(1.0f / firingMode->cooldownBetweenShots));
+
+	float cooldownBetweenShots = firingMode->cooldownBetweenShots;
+	if(cooldownBetweenShots < 1.0f)
+		cooldownBetweenShots = 1.0f;
+
+	ui->horizontalSlider_Weapon_RateOfFire->setValue(static_cast<int>(1.0f / cooldownBetweenShots));
 	ui->horizontalSlider_Weapon_DamageModifier->setValue(static_cast<int>(firingMode->damageModifier * 100.0f));
 	ui->horizontalSlider_Weapon_ExplosionSphereModifier->setValue(static_cast<int>(firingMode->explosionSphereModifier * 100.0f));
 	

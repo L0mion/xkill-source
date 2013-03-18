@@ -237,7 +237,6 @@ std::string EventToFModConverter::configMessage()
 	std::vector<std::pair<int, std::string>> table;		
 
 	table.push_back(std::pair<int, std::string>(XKILL_Enums::Sound::SOUND_DEATH,				"Player Death"));
-	table.push_back(std::pair<int, std::string>(XKILL_Enums::Sound::SOUND_FIRE,					"Fire Gun"));
 	table.push_back(std::pair<int, std::string>(XKILL_Enums::Sound::SOUND_GAME_MUSIC,			"Game Music"));
 	table.push_back(std::pair<int, std::string>(XKILL_Enums::Sound::SOUND_HIT,					"Player Hit"));
 	table.push_back(std::pair<int, std::string>(XKILL_Enums::Sound::SOUND_MENU_MUSIC,			"Menu Music"));
@@ -250,6 +249,11 @@ std::string EventToFModConverter::configMessage()
 	table.push_back(std::pair<int, std::string>(XKILL_Enums::Sound::SOUND_JETPACK,				"Jetpack"));
 	table.push_back(std::pair<int, std::string>(XKILL_Enums::Sound::SOUND_EXPLOSION,			"Explosion"));
 	table.push_back(std::pair<int, std::string>(XKILL_Enums::Sound::SOUND_PICKUP,				"Pickup"));
+	table.push_back(std::pair<int, std::string>(XKILL_Enums::Sound::SOUND_ASSAULTRIFLE,			"Assault Rifle"));
+	table.push_back(std::pair<int, std::string>(XKILL_Enums::Sound::SOUND_SNIPER,				"Sniper"));
+	table.push_back(std::pair<int, std::string>(XKILL_Enums::Sound::SOUND_SHOTGUN,				"Shotgun"));
+	table.push_back(std::pair<int, std::string>(XKILL_Enums::Sound::SOUND_ROCKET,				"Rocket"));
+
 	//table.push_back(std::pair<int, std::string>(EVENT_CREATE_PROJECTILE + offset,				"Fire Gun"));
 	//table.push_back(std::pair<int, std::string>(EVENT_PLAYERDEATH + offset,					"Player Death"));
 	//table.push_back(std::pair<int, std::string>(EVENT_CREATE_PICKUPABLE + offset,				"Spawn Pickupable"));
