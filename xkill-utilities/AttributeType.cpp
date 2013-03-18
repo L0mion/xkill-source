@@ -330,6 +330,7 @@ Attribute_Camera::Attribute_Camera()
 
 	aspectRatio = 0.785f;
 	fieldOfView = 0.785f; 
+	fieldOfViewModifier = 1.0f;
 	zFar	= 100.0f;
 	zNear	= 0.01f;
 
@@ -932,7 +933,7 @@ void Attribute_WeaponStats::saveTo(DataItemList* list)
 
 Attribute_ExplosionSphere::Attribute_ExplosionSphere()
 {
-	damage = 0.0f;
+	damage = 1.0f;
 	currentLifeTimeLeft = 1.0f;
 	currentRadius = 0.0f;
 	ammunitionType = XKILL_Enums::AmmunitionType::EXPLOSIVE;

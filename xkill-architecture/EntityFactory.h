@@ -147,8 +147,8 @@ public:
 		ptr_lightPoint->lightPoint.ambient		= Float4(0.0f, 0.0f, 0.0f, 1.0f);
 		ptr_lightPoint->lightPoint.diffuse		= color;
 		ptr_lightPoint->lightPoint.specular		= color;
-		ptr_lightPoint->lightPoint.range		= 1.0f;
-		ptr_lightPoint->lightPoint.attenuation	= Float3(0.0f, 10.0f, 0.0f);
+		ptr_lightPoint->lightPoint.range		= 2.0f;
+		ptr_lightPoint->lightPoint.attenuation	= Float3(0.0f, 0.0f, 10.0f);
 	}
 
 	AttributePtr<Attribute_Camera> createCamera(Entity* entity, AttributePtr<Attribute_Spatial> ptr_parent_spatial)
@@ -496,7 +496,7 @@ public:
 		CREATE_ATTRIBUTE(ptr_explosionSphere, Attribute_ExplosionSphere, explosionSphere, entity);
 		ptr_explosionSphere->ptr_physics = ptr_physics;
 		MutatorSettings ms;
-		ptr_explosionSphere->damage = ms.getStandardAmmunition(e->ammunitionType).damage * ms.getStandardFiringMode(e->firingModeType).damageModifier;
+		ptr_explosionSphere->damage = 30.0f;
 		ptr_explosionSphere->ammunitionType = e->ammunitionType;
 		ptr_explosionSphere->firingModeType = e->firingModeType;
 		

@@ -1675,17 +1675,16 @@ void NameGenerator::resetColors()
 	// Add colors
 	//
 
-	addColor(Float3(1.0f, 0.0f, 0.0)); // Red
-	addColor(Float3(0.25f, 0.75f, 0.20)); // Green
-	addColor(Float3(0.0f, 0.5f, 1.0)); // Blue
-	addColor(Float3(0.0f, 1.0f, 1.0)); // Cyan
-	addColor(Float3(1.0f, 1.0f, 0.0)); // Yellow
-	addColor(Float3(0.5f, 0.5f, 1.0)); // Violet
-	addColor(Float3(1.0f, 0.5f, 0.0)); // Orange
+	addColor(Float3(1.0f, 0.0f, 0.0));		// Red
+	addColor(Float3(0.25f, 0.75f, 0.20));	// Green
+	addColor(Float3(0.0f, 0.5f, 1.0));		// Blue
+	addColor(Float3(0.0f, 1.0f, 1.0));		// Cyan
+	addColor(Float3(1.0f, 1.0f, 0.0));		// Yellow
+	addColor(Float3(0.5f, 0.25f, 1.0));		// Violet
+	addColor(Float3(1.0f, 0.5f, 0.0));		// Orange
+	addColor(Float3(1.0f, 0.5f, 1.0));		// Pink
+	addColor(Float3(1.0f, 1.0f, 1.0));		// White
 	
-	//addColor(Float3(1.0f, 0.5f, 1.0)); // Pink
-	
-
 	//addColor(Float3(1.0f, 0.4f, 0.0));
 	//addColor(Float3(0.7f, 0.0f, 1.0));
 
