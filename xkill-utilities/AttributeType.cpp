@@ -330,6 +330,7 @@ Attribute_Camera::Attribute_Camera()
 
 	aspectRatio = 0.785f;
 	fieldOfView = 0.785f; 
+	fieldOfViewModifier = 1.0f;
 	zFar	= 100.0f;
 	zNear	= 0.01f;
 
