@@ -744,7 +744,7 @@ void GameComponent::spawnPlayer(AttributePtr<Attribute_Player> ptr_player)
 		DirectX::XMFLOAT4 quaternion;
 				
 		up = DirectX::XMLoadFloat3(&DirectX::XMFLOAT3(0,1,0));
-		eye = DirectX::XMLoadFloat3(&DirectX::XMFLOAT3(ptr_position->position.asFloat()));
+		eye = DirectX::XMLoadFloat3((DirectX::XMFLOAT3*)&Float3(ptr_position->position.x, 0.0f, ptr_position->position.z));
 		lookat = DirectX::XMLoadFloat3(&DirectX::XMFLOAT3(0,0,0));
 				
 		rotation = DirectX::XMMatrixLookAtLH(eye,lookat,up);
