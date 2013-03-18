@@ -339,6 +339,7 @@ void CollisionManager::collision_pickupable(Entity* entity1, Entity* entity2)
 			}
 			if(pickedUp)
 			{
+				SEND_EVENT(&Event_PlaySound(XKILL_Enums::Sound::SOUND_PICKUP, entity2->getID(), ptr_pickupable->ptr_position->position, true));
 				removePickupable(ptr_pickupable);
 			}
 		}
