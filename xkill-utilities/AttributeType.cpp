@@ -330,7 +330,7 @@ Attribute_Camera::Attribute_Camera()
 
 	aspectRatio = 0.785f;
 	fieldOfView = 0.785f; 
-	zFar	= 75.0f;
+	zFar	= 100.0f;
 	zNear	= 0.01f;
 
 	up		= Float3(0.0f, 1.0f, 0.0f);
@@ -502,10 +502,11 @@ Attribute_Player::Attribute_Player()
 	timeSinceLastDamageTaken = 100.0f;
 	jetpack = false;
 	detectedAsDead = true;
-	currentSprintTime = 0;
 	sprintTime = 2.0f;
+	currentSprintTime = sprintTime;
+	
 	canSprint = true;
-	sprintRechargeRate = 0.2f;
+	sprintRechargeRate = 0.4f;
 	executing = false;
 	hovering = false;
 	speedHackPair.first		= false;

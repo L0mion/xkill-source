@@ -1367,7 +1367,92 @@ void NameGenerator::resetNames()
 	addName("there can only be one");
 	addName("not responsible");
 	addName("snakeoil salesman");
-
+	addName("not very original");
+	addName("the secret ingredients");
+	addName("Turing Machine");
+	addName("albino alligator");
+	addName("return to sender");
+	addName("sense of accomplishment");
+	addName("rambling lunatic");
+	addName("action-figurine");
+	addName("Action Jesus");
+	addName("genius at work");
+	addName("homeless bum");
+	addName("roadside picnic");
+	addName("the void");
+	addName("the void which binds");
+	addName("haywire");
+	addName("status quo");
+	addName("Nebularium");
+	addName("Kalevala");
+	addName("here be dragons");
+	addName("virulent potion");
+	addName("Captain Spectacular");
+	addName("theirs not to reason why");
+	addName("vile adversary");
+	addName("You cannot escape!");
+	addName("extra dimensional beings");
+	addName("go-getter");
+	addName("the government knows!");
+	addName("turn coffee into code");
+	addName("ultimate cup of coffee");
+	addName("Tau Zero");
+	addName("cheese fragrance");
+	addName("we have the technology!");
+	addName("the one and only");
+	addName("immemorial allegory");
+	addName("inexplicable force");
+	addName("force to be reckoned with");
+	addName("send me flowers");
+	addName("pacifist");
+	addName("Keymaster");
+	addName("Vietnam Flashback");
+	addName("grizzled veteran");
+	addName("one-man army");
+	addName("conspicuous");
+	addName("vegan black metal chef");
+	addName("writ in water");
+	addName("tally-ho!");
+	addName("filament dissipation");
+	addName("mähälium");
+	addName("subquantum possibility");
+	addName("quantum tantum");
+	addName("healthy paranoia");
+	addName("major discrepancy");
+	addName("killer rabbit");
+	addName("incendiary pig");
+	addName("Jolly Roger");
+	addName("how you like them apples?");
+	addName("dancing cucumber");
+	addName("I know kungfu");
+	addName("sunny side up");
+	addName("old fart");
+	addName("struck oil!");
+	addName("knight in shiny armor");
+	addName("master of unlocking");
+	addName("bipolar bitmap");
+	addName("tabasco toothpaste");
+	addName("what have you done!?");
+	addName("Freedom!");
+	addName("astral projection");
+	addName("psychic death beam");
+	addName("special delivery");
+	addName("who is the Milkman?");
+	addName("well, do we exist?");
+	addName("joke's on me");
+	addName("cheap brain tumbler");
+	addName("ultimate warp zone");
+	addName("math magician");
+	addName("pompous fraud");
+	addName("elongated stream");
+	addName("retroactive synapse");
+	addName("didn't see that comming");
+	addName("non-euclidean space");
+	addName("mayday mayday!");
+	addName("deadline dilemma");
+	
+		
+	
 	addName("inexpensive payback time");
 	addName("better safe than gory");
 	addName("open time window");
@@ -1588,16 +1673,24 @@ void NameGenerator::resetColors()
 	// Add colors
 	//
 
-	addColor(Float3(0.0f, 1.0f, 0.0));
-	addColor(Float3(1.0f, 0.0f, 0.0));
-	addColor(Float3(0.0f, 1.0f, 1.0));
-	addColor(Float3(1.0f, 0.4f, 0.0));
-	addColor(Float3(0.7f, 0.0f, 1.0));
+	addColor(Float3(1.0f, 0.0f, 0.0)); // Red
+	addColor(Float3(0.25f, 0.75f, 0.20)); // Green
+	addColor(Float3(0.0f, 0.5f, 1.0)); // Blue
+	addColor(Float3(0.0f, 1.0f, 1.0)); // Cyan
+	addColor(Float3(1.0f, 1.0f, 0.0)); // Yellow
+	addColor(Float3(0.5f, 0.5f, 1.0)); // Violet
+	addColor(Float3(1.0f, 0.5f, 0.0)); // Orange
+	
+	//addColor(Float3(1.0f, 0.5f, 1.0)); // Pink
+	
 
-	//new colors
-	addColor(Float3(0.3f, 0.2f, 0.8f));
-	addColor(Float3(0.7f, 0.5f, 0.5f));
-	addColor(Float3(1.0f, 1.0f, 0.5f));
+	//addColor(Float3(1.0f, 0.4f, 0.0));
+	//addColor(Float3(0.7f, 0.0f, 1.0));
+
+	////new colors
+	//addColor(Float3(0.3f, 0.2f, 0.8f));
+	//addColor(Float3(0.7f, 0.5f, 0.5f));
+	//addColor(Float3(1.0f, 1.0f, 0.5f));
 	//addColor(Float3(0.75f, 0.75f, 0.75f));
 }
 

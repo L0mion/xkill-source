@@ -222,5 +222,9 @@ void HacksComponent::setPlayerAttributeHackFlags(AttributePtr<Attribute_Player> 
 		player->cycleHackPair.first = truthValue;
 		player->cycleHackPair.second = timer;
 		break;
+	case XKILL_Enums::HackType::POWERHACK:
+		player->powerHackPair.first = truthValue;
+		player->powerHackPair.second = timer;
+		break;
 	}
 }

@@ -16,7 +16,7 @@ void Menu_Main::loadOpeningGif()
 	std::string fileName = "../../xkill-resources/xkill-gui/images/animations/menu_opening.gif";
 
 	// Easter egg
-	const int chance = 15;
+	const int chance = 20;
 	if(Math::randomInt(0, chance) == 0)
 	{
 		fileName = "../../xkill-resources/xkill-gui/images/animations/tmp.gif";
@@ -25,7 +25,7 @@ void Menu_Main::loadOpeningGif()
 	std::string username = getenv( "USERNAME" );
 	if(username == "Eric")
 	{
-		const int chance = 10;
+		const int chance = 20;
 		if(Math::randomInt(0, chance) == 0)
 		{
 			fileName = "../../xkill-resources/xkill-gui/images/animations/tmp2.gif";
@@ -219,6 +219,7 @@ void Menu_Main::loadCustomFonts()
 		<< "king_richard.ttf"
 		<< "bebas_neue.otf"
 		<< "kenyan_coffee.ttf"
+		<< "imagine_font.ttf"
 		<< "statix.ttf";
 
 	
