@@ -212,7 +212,7 @@ void PlayerPhysicsObject::handleInput(float delta)
 		setWorldTransform(world);
 
 		//Jetpack
-		if(ptr_player->jetpack)
+		if(ptr_player->jetpack && ptr_player->timeSinceLastDamageTaken > 2.0f)
 		{
 			float jetpackPower = -getGravity().y()*1.5f;
    			world = getWorldTransform();

@@ -85,7 +85,7 @@ void MutatorSettings::initStandardAmmunition()
 
 	ammo->isReloading						= false;
 	ammo->type								= XKILL_Enums::AmmunitionType::SCATTER;
-	ammo->damage							= 3.0f;
+	ammo->damage							= 2.0f;
 	ammo->explosionSphereInitialRadius		= 0.0f;
 	ammo->explosionSphereFinalRadius		= 0.0f;
 	ammo->explosionSphereExplosionDuration	= 0.0f;
@@ -111,7 +111,7 @@ void MutatorSettings::initStandardAmmunition()
 	ammo->explosive							= true;
 	ammo->nrOfProjectilesPerSalvo			= 1;
 	ammo->displacementSphereRadius			= 0.0f;
-	ammo->speed								= 30.0f;
+	ammo->speed								= 10.0f;
 	ammo->spreadConeRadius					= 0.0f;
 	ammo->initialTotalNrOfShots				= 5;
 	ammo->currentTotalNrOfShots				= ammo->initialTotalNrOfShots;
@@ -132,7 +132,7 @@ void MutatorSettings::initStandardFiringModes()
 	firingMode->canShootScatter			= true;
 	firingMode->clipSize				= 1;
 	firingMode->damageModifier			= 5.0f;
-	firingMode->explosionSphereModifier	= 0.30f;
+	firingMode->explosionSphereModifier	= 0.4f;
 	firingMode->cooldownBetweenShots	= 0.0f;
 	firingMode->reloadTime				= 1.0f;
 	firingMode->cooldownLeft			= firingMode->cooldownBetweenShots;
@@ -170,7 +170,7 @@ void MutatorSettings::initStandardFiringModes()
 	firingMode->canShootScatter			= true;
 	firingMode->clipSize				= 20;
 	firingMode->damageModifier			= 1.0f;
-	firingMode->explosionSphereModifier	= 0.3f;
+	firingMode->explosionSphereModifier	= 0.1f;
 	firingMode->cooldownBetweenShots	= 0.1f;
 	firingMode->reloadTime				= 5.0f;
 	firingMode->cooldownLeft			= firingMode->cooldownBetweenShots;
