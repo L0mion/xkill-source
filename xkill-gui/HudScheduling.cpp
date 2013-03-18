@@ -38,7 +38,7 @@ void HudScheduling::init( Ui::Menu_HUD* ui, AttributePtr<Attribute_Player> ptr_o
 	itemWidth = itemHeight*0.8f;
 	standardMargin = itemHeight * 0.5f;
 
-	int maxWindowSize = parent->width() - (ui->groupBox_health->width() + ui->groupBox_ammo->width() * 3.0f);
+	int maxWindowSize = parent->width() - (ui->groupBox_health->width() + ui->groupBox_ammo->width() * 3.3f);
 	if(window->width() > maxWindowSize)
 		window->resize( maxWindowSize , window->height());
 	subWindow->resize(window->width() - 2*standardMargin, subWindow->height());

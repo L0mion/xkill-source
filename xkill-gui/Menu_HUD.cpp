@@ -170,7 +170,34 @@ void Menu_HUD::refresh()
 	if(clipSize > ammoLeft && ammoLeft > 0)
 		numFullyReloaded = ammoLeft; 
 	int ammoRatio = (int)((numAmmo / (float)numFullyReloaded) * 100);
+	float f_reloadRatio =firingMode->reloadTimeLeft / (float)firingMode->reloadTime;
 	int reloadRatio = (int)((firingMode->reloadTimeLeft / (float)firingMode->reloadTime) * 100);
+	
+	// Compute reload feedback size
+	{
+		// Show 
+		if(f_reloadRatio < 1.0f)
+		{
+			if(ui.label_reloadFeedback->isHidden())
+				ui.label_reloadFeedback->show();
+
+			// Hide
+			Float2 size;
+			float sizeModifier = f_reloadRatio;
+			size.x = ptr_splitScreen->ssWidth * 0.4f * sizeModifier;
+			size.y = ptr_splitScreen->ssWidth * 0.03f * sizeModifier;
+			ui.label_reloadFeedback->resize(size.x, size.y);
+			ui.label_reloadFeedback->move((ptr_splitScreen->ssWidth - ui.label_reloadFeedback->width()) * 0.5f, (ptr_splitScreen->ssHeight - ui.label_reloadFeedback->height()) * 0.5f);
+			ui.label_reloadFeedback->update();
+
+		}
+		else
+		{
+			if(!ui.label_reloadFeedback->isHidden())
+				ui.label_reloadFeedback->hide();
+		}
+	}
+	
 
 	// Show menu if ammo has changed otherwise fade after a few seconds
 	if(reloadRatio == 100 && ammoRatio != prev_ammoRatio)
@@ -193,6 +220,7 @@ void Menu_HUD::refresh()
 	// Hide bar if full
 	if(ammoRatio == 100)
 		ammoFade = 0.0f;
+	ammoFade = 1.0f;
 
 	// Perform fade
 	if(ammoFade > 0.0f)

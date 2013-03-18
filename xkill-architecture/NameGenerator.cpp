@@ -1453,7 +1453,13 @@ void NameGenerator::resetNames()
 	addName("take your stinkin' paws off me!");
 	addName("mayday mayday!");
 	addName("deadline dilemma");
-	
+	addName("evil clever dog");
+	addName("most intrepid robot");
+	addName("taste like sweetness and death");
+	addName("Keebosh");
+	addName("Birk");
+	addName("Tornado");
+
 	addName("inexpensive payback time");
 	addName("better safe than gory");
 	addName("open time window");
