@@ -416,6 +416,7 @@ struct DLL_U Attribute_Camera : public IAttribute
 	Float4x4 mat_view;			//!< The view matrix. Used to transform objects to view space.
 	Float4x4 mat_projection;	//!< The projection matrix. Defines the camera's frustum.
 	float fieldOfView;
+	float fieldOfViewModifier;
 	float aspectRatio;
 	float zNear;
 	float zFar;

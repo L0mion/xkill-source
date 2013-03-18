@@ -97,7 +97,7 @@ void updateProj(AttributePtr<Attribute_Camera> camera)
 
 	memset(&projection, 0, sizeof(projection));
 
-	projection(0, 0) = 1/(aspectRatio*(tan(fieldOfView/2)));
+	projection(0, 0) = 1/(aspectRatio*(tan((fieldOfView * camera->fieldOfViewModifier)/2)));
 	projection(1, 1) = 1/(tan(fieldOfView/2));
 	projection(2, 2) = zFar/(zFar - zNear);
 	projection(2, 3) = 1.0f;
