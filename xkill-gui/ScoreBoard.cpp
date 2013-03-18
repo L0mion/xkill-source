@@ -183,6 +183,10 @@ void ScoreBoard::syncLabelsWithPlayers()
 				centerPos.x = parent_scoreboard->width() * 0.5f;
 				centerPos.y = parent_scoreboard->height() * 0.5f;
 				frame_scoreboard->move(centerPos.x - frame_scoreboard->width()* 0.5f, centerPos.y - frame_scoreboard->height()* 0.5f);
+				// Make sure scoreboard is not above the screen
+				/*int test = frame_scoreboard->y();
+				if(frame_scoreboard->y() > 0)
+					frame_scoreboard->move(frame_scoreboard->x(), 0);*/
 			}
 		}
 	}

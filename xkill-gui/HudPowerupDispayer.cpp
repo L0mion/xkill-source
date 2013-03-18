@@ -19,6 +19,7 @@ void HudPowerupDispayer::HudItem::init( HudPowerupDispayer* manager, std::string
 	// Create icon label
 	{
 		icon = new QLabel(parent);
+		icon->hide();
 		icon->setPixmap(QString((str_path + str_icon).c_str()));
 		icon->resize(icon->sizeHint());
 	}
@@ -26,6 +27,7 @@ void HudPowerupDispayer::HudItem::init( HudPowerupDispayer* manager, std::string
 	// Create progressbar
 	{
 		bar = new QProgressBar(parent);
+		bar->hide();
 		bar->setOrientation(Qt::Vertical);
 		bar->setMaximumSize(5, 32);
 		bar->setTextVisible(false);
@@ -43,6 +45,7 @@ void HudPowerupDispayer::HudItem::init( HudPowerupDispayer* manager, std::string
 	if(hasInfo)
 	{
 		info = new QLabel(parent);
+		info->hide();
 		info->setStyleSheet("font-family: 'Arial Black'; background-color: rgb(0, 0, 0, 50); font-size:12pt; padding: 1px 1px;");
 		info->setText(str_info.c_str());
 		info->resize(info->sizeHint());

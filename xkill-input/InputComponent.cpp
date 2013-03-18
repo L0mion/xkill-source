@@ -127,11 +127,20 @@ void InputComponent::handleInput(float delta)
 
 		float sensitivityModifier = device->getFloatValue(InputAction::ACTION_F_LOW_SENSITIVITY, delta);
 		device->setSensitivityModifier(sensitivityModifier);
+
+		ptr_player->ptr_camera->fieldOfViewModifier = 1.0f - sensitivityModifier;
+
 		// MATTIAS: What to do here?
 		// ptr_player->ptr_camera->fieldOfViewModifier = 0.5f;
 
 		if(device->getBoolValue(InputAction::ACTION_B_LOW_SENSITIVITY))
+		{
 			device->setSensitivityModifier(0.7f);
+		}
+		else
+		{
+
+		}
 
 		input->position.x = device->getFloatValue(InputAction::ACTION_F_WALK_LR, delta);
 		input->position.y = device->getFloatValue(InputAction::ACTION_F_WALK_FB, delta);

@@ -452,7 +452,26 @@ void GameComponent::updatePlayerAttributes(float delta)
 						damageModifier = 2.0f;
 					}
 					shootProjectile(ptr_player->ptr_weaponFireLocation_spatial, ptr_weaponStats, damageModifier);
-					SEND_EVENT(&Event_PlaySound(XKILL_Enums::Sound::SOUND_FIRE, itrPlayer.ownerIdAt(ptr_player.index()), ptr_position->position, true));
+
+					switch(ammo->type)
+					{
+					case XKILL_Enums::AmmunitionType::BULLET:
+						if(firingMode->type == XKILL_Enums::FiringModeType::SINGLE)
+						{
+							SEND_EVENT(&Event_PlaySound(XKILL_Enums::Sound::SOUND_SNIPER, itrPlayer.ownerIdAt(ptr_player.index()), ptr_position->position, true));
+						}
+						else
+						{
+							SEND_EVENT(&Event_PlaySound(XKILL_Enums::Sound::SOUND_ASSAULTRIFLE, itrPlayer.ownerIdAt(ptr_player.index()), ptr_position->position, true));
+						}
+						break;
+					case XKILL_Enums::AmmunitionType::SCATTER:
+						SEND_EVENT(&Event_PlaySound(XKILL_Enums::Sound::SOUND_SHOTGUN, itrPlayer.ownerIdAt(ptr_player.index()), ptr_position->position, true));
+						break;
+					case XKILL_Enums::AmmunitionType::EXPLOSIVE:
+						SEND_EVENT(&Event_PlaySound(XKILL_Enums::Sound::SOUND_ROCKET, itrPlayer.ownerIdAt(ptr_player.index()), ptr_position->position, true));
+						break;
+					}
 				}
 			}
 
@@ -785,6 +804,7 @@ void GameComponent::spawnPlayer(AttributePtr<Attribute_Player> ptr_player)
 	ptr_player->ptr_camera->fieldOfView = 3.14f/4.0f;
 	ptr_player->respawnTimer.resetTimer();
 	ptr_player->detectedAsDead = false;
+	ptr_player->currentSprintTime = 0.0f;
 	SEND_EVENT(&Event_PlaySound(XKILL_Enums::Sound::SOUND_RESPAWN, itrPlayer.ownerIdAt(ptr_player.index()), ptr_position->position, true));
 }
 
@@ -855,6 +875,8 @@ void GameComponent::event_PlayerDeath(Event_PlayerDeath* e)
 
 	ptr_player->respawnTimer.resetTimer();
 	ptr_player->detectedAsDead = true;
+
+	ptr_player->currentSprintTime = ptr_player->sprintTime;
 
 	bool recalculateLocalInertia = true;
 	SEND_EVENT(&Event_ModifyPhysicsObject(XKILL_Enums::ModifyPhysicsObjectData::IF_TRUE_RECALCULATE_LOCAL_INERTIA_ELSE_SET_TO_ZERO, static_cast<void*>(&recalculateLocalInertia), ptr_physics));

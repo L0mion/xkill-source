@@ -30,6 +30,7 @@ class HudPowerupDispayer
 
 		HudItem()
 		{
+			_isActive = false;
 		}
 
 		void init(HudPowerupDispayer* manager, std::string str_icon, std::string str_info);
