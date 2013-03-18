@@ -161,9 +161,9 @@ void PlayerPhysicsObject::handleOutOfBounds()
 		AttributePtr<Attribute_Health> playerHealthAttribute = ptr_player->ptr_health;
 		if(!ptr_player->detectedAsDead)
 		{
-			if(!SETTINGS->isNullprocessExecuting)
+			if(!SETTINGS->isNullprocessExecuting && ptr_player->priority > 0)
 			{
-				ptr_player->priority--; //punish players for falling outside of the level, if the null process is not running
+				ptr_player->priority--; //punish players for falling outside of the level, if the null process is not running and if the player has priority
 			}
 			DEBUGPRINT("Player entity " << playerEntityIndex << " was out of bounds");
 			SEND_EVENT(&Event_PlayerDeath(playerAttributeIndices[i]));

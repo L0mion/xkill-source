@@ -733,25 +733,29 @@ void GameComponent::spawnPlayer(AttributePtr<Attribute_Player> ptr_player)
 	//--------------------------------------------------------------------------------------
 	//Point camera towards center
 	Float3 pos2d(-ptr_position->position.x, 0.0f, -ptr_position->position.z);
-	if(pos2d.length() > 0.1)
+	if(pos2d.length() > 0.1f)
 	{
 		ptr_camera->up = Float3(0.0f, 1.0f, 0.0f);
 		ptr_camera->look = Float3(-ptr_position->position.x, 0.0f, -ptr_position->position.z).normalize();
 		ptr_camera->right = ptr_camera->up.cross(ptr_camera->look);
+		ptr_camera->right.normalize();
 				
-		DirectX::XMVECTOR eye,lookat,up,quat;
+		DirectX::XMVECTOR eye,lookAt,up,quat;
 		DirectX::XMMATRIX rotation;
 		DirectX::XMFLOAT4 quaternion;
-				
-		up = DirectX::XMLoadFloat3(&DirectX::XMFLOAT3(0,1,0));
+					
+		up = DirectX::XMLoadFloat3(&DirectX::XMFLOAT3(0.0f,1.0f,0.0f));
 		eye = DirectX::XMLoadFloat3(&DirectX::XMFLOAT3(ptr_position->position.asFloat()));
-		lookat = DirectX::XMLoadFloat3(&DirectX::XMFLOAT3(0,0,0));
+		OUTPUT_WINDOW_PRINT("value: " << *ptr_position->position.asFloat());
+		lookAt = DirectX::XMLoadFloat3(&DirectX::XMFLOAT3(0.0f,0.0f,1.0f));
 				
-		rotation = DirectX::XMMatrixLookAtLH(eye,lookat,up);
+		rotation = DirectX::XMMatrixLookAtLH(eye,lookAt,up);
 		quat = DirectX::XMQuaternionRotationMatrix(rotation);
 		DirectX::XMStoreFloat4(&quaternion,quat);
+		Float4 q = Float4(quaternion.x, quaternion.y, quaternion.z, quaternion.w);
+		q.normalize();
 
-		ptr_spatial->rotation = Float4(quaternion.x,quaternion.y,quaternion.z,quaternion.w);
+		ptr_spatial->rotation = q;
 	}
 	else
 	{
@@ -760,6 +764,8 @@ void GameComponent::spawnPlayer(AttributePtr<Attribute_Player> ptr_player)
 		ptr_camera->right = Float3(1.0f, 0.0f, 0.0f);
 		ptr_camera->look = Float3(0.0f, 0.0f, 1.0f);
 	}
+
+	//SEND_EVENT(&Event_ReloadPhysicsAttributeDataIntoBulletPhysics(ptr_physics.index()));
 	ptr_physics->reloadDataIntoBulletPhysics = true;
 				
 	ptr_health->health = ptr_health->maxHealth; // restores player health
@@ -1138,8 +1144,16 @@ void GameComponent::updateAndInterpretLaser(AttributePtr<Attribute_Ray> ptr_ray,
 				{
 					if(ptr_player->cycleHackPair.first)
 					{
-						ptr_player->cycles++;
-						{Event_PostHudMessage e("", ptr_player); e.setColor(hitPlayerAttribute->avatarColor); e.setHtmlMessage("You executed", hitPlayerAttribute->avatarName, "", "+1 cycle"); SEND_EVENT(&e);}
+						if(hitPlayerAttribute->cycles > 0) //Cycle steal successful
+						{
+							hitPlayerAttribute->cycles--;
+							ptr_player->cycles++;
+							{Event_PostHudMessage e("", ptr_player); e.setColor(hitPlayerAttribute->avatarColor); e.setHtmlMessage("You executed and stole a cycle from", hitPlayerAttribute->avatarName, "", "+1 cycle"); SEND_EVENT(&e);}
+						}
+						else //Cycle steal unsuccessful
+						{
+							{Event_PostHudMessage e("", ptr_player); e.setColor(hitPlayerAttribute->avatarColor); e.setHtmlMessage("You executed and tried to cycle-steal from", hitPlayerAttribute->avatarName, "", "+0 cycle"); SEND_EVENT(&e);}
+						}
 					}
 					else
 					{
