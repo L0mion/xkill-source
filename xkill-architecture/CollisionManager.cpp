@@ -123,17 +123,20 @@ void CollisionManager::collision_applyDamage(Entity* entity1, Entity* entity2)
 										{
 											reward *= itrPlayer.count();
 										}
-										if(creatorOfProjectile_ptr_player->cycleHackPair.first) // If cyclehack is active
+
+										if(creatorOfProjectile_ptr_player->cycleHackPair.first) // Cyclehack active
 										{
-											creatorOfProjectile_ptr_player->cycles += reward;
-											{Event_PostHudMessage e("", creatorOfProjectile_ptr_player); e.setColor(playerThatDied_ptr_player->avatarColor); e.setHtmlMessage("You terminated", playerThatDied_ptr_player->avatarName, "", "+" + Converter::IntToStr(reward) + " cycles"); SEND_EVENT(&e);}
+											playerThatDied_ptr_player->cycles--;	//steal only 1 cycle
+											creatorOfProjectile_ptr_player->cycles++;
+											{Event_PostHudMessage e("", creatorOfProjectile_ptr_player); e.setColor(playerThatDied_ptr_player->avatarColor); e.setHtmlMessage("You terminated and stole a cycle from", playerThatDied_ptr_player->avatarName, "", "+" + Converter::IntToStr(reward) + " cycles"); SEND_EVENT(&e);}
+											{Event_PostHudMessage e("", playerThatDied_ptr_player); e.setColor(creatorOfProjectile_ptr_player->avatarColor); e.setHtmlMessage("Terminated a and cycle stolen by", creatorOfProjectile_ptr_player->avatarName); SEND_EVENT(&e);}
 										}
-										else
+										else //Cycle hack not active
 										{
 											creatorOfProjectile_ptr_player->priority += reward;
 											{Event_PostHudMessage e("", creatorOfProjectile_ptr_player); e.setColor(playerThatDied_ptr_player->avatarColor); e.setHtmlMessage("You terminated", playerThatDied_ptr_player->avatarName, "", "+" + Converter::IntToStr(reward) + " priority"); SEND_EVENT(&e);}
+											{Event_PostHudMessage e("", playerThatDied_ptr_player); e.setColor(creatorOfProjectile_ptr_player->avatarColor); e.setHtmlMessage("Terminated by", creatorOfProjectile_ptr_player->avatarName); SEND_EVENT(&e);}
 										}
-										{Event_PostHudMessage e("", playerThatDied_ptr_player); e.setColor(creatorOfProjectile_ptr_player->avatarColor); e.setHtmlMessage("Terminated by", creatorOfProjectile_ptr_player->avatarName); SEND_EVENT(&e);}
 									}
 									else //Punish player for blowing himself up
 									{
@@ -319,7 +322,7 @@ void CollisionManager::collision_pickupable(Entity* entity1, Entity* entity2)
 								SEND_EVENT(&Event_HackActivated(time, XKILL_Enums::HackType::CYCLEHACK, ptr_player));
 
 								// Post HUD message
-								{Event_PostHudMessage e("", ptr_player); e.setColor(ptr_pickupable->getColor()); e.setHtmlMessage("Picked up", "Cyclehack", "", "+" + Converter::IntToStr(amount) + " seconds"); SEND_EVENT(&e);}
+								{Event_PostHudMessage e("", ptr_player); e.setColor(ptr_pickupable->getColor()); e.setHtmlMessage("Picked up", "Cyclehack (cycle steal)", "", "+" + Converter::IntToStr(amount) + " seconds"); SEND_EVENT(&e);}
 								break;
 							}
 						case XKILL_Enums::PickupableType::HACK_POWERHACK:
@@ -330,7 +333,7 @@ void CollisionManager::collision_pickupable(Entity* entity1, Entity* entity2)
 								SEND_EVENT(&Event_HackActivated(time, XKILL_Enums::HackType::POWERHACK, ptr_player));
 
 								// Post HUD message
-								{Event_PostHudMessage e("", ptr_player); e.setColor(ptr_pickupable->getColor()); e.setHtmlMessage("Picked up", "Powerhack", "", "+" + Converter::IntToStr(amount) + " seconds"); SEND_EVENT(&e);}
+								{Event_PostHudMessage e("", ptr_player); e.setColor(ptr_pickupable->getColor()); e.setHtmlMessage("Picked up", "Powerhack (2x damage)", "", "+" + Converter::IntToStr(amount) + " seconds"); SEND_EVENT(&e);}
 								break;
 							}
 						}
