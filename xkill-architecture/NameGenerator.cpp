@@ -1446,6 +1446,9 @@ void NameGenerator::resetNames()
 	addName("pompous fraud");
 	addName("elongated stream");
 	addName("retroactive synapse");
+	addName("didn't see that comming");
+	addName("non-euclidean space");
+	addName("mayday mayday!");
 	addName("deadline dilemma");
 	
 		
