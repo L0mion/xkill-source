@@ -229,7 +229,7 @@ void ScoreComponent::handleSchedulerMode(float delta)
 
 	if(nullProcessExecuting_)
 	{
-		if(nrOfPlayersAlive == 1)
+		if(nrOfPlayersAlive == 1 && SETTINGS->numPlayers !=1)
 		{
 			deactivateNullProcess();
 
