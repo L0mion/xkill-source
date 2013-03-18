@@ -745,7 +745,7 @@ void GameComponent::spawnPlayer(AttributePtr<Attribute_Player> ptr_player)
 		DirectX::XMFLOAT4 quaternion;
 					
 		up = DirectX::XMLoadFloat3(&DirectX::XMFLOAT3(0.0f,1.0f,0.0f));
-		eye = DirectX::XMLoadFloat3(&DirectX::XMFLOAT3(ptr_position->position.asFloat()));
+		eye = DirectX::XMLoadFloat3((DirectX::XMFLOAT3*)&Float3(ptr_position->position.x, 0.0f, ptr_position->position.z));
 		OUTPUT_WINDOW_PRINT("value: " << *ptr_position->position.asFloat());
 		lookAt = DirectX::XMLoadFloat3(&DirectX::XMFLOAT3(0.0f,0.0f,1.0f));
 				

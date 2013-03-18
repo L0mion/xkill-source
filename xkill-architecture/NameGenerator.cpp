@@ -1448,6 +1448,8 @@ void NameGenerator::resetNames()
 	addName("retroactive synapse");
 	addName("didn't see that comming");
 	addName("non-euclidean space");
+	addName("damn dirty ape");
+	addName("take your stinkin' paws off me!");
 	addName("mayday mayday!");
 	addName("deadline dilemma");
 	

@@ -336,7 +336,7 @@ void CollisionManager::collision_pickupable(Entity* entity1, Entity* entity2)
 								SEND_EVENT(&Event_HackActivated(time, XKILL_Enums::HackType::CYCLEHACK, ptr_player));
 
 								// Post HUD message
-								{Event_PostHudMessage e("", ptr_player); e.setColor(ptr_pickupable->getColor()); e.setHtmlMessage("Picked up", "Cyclehack (cycle steal)", "", "+" + Converter::IntToStr(amount) + " seconds"); SEND_EVENT(&e);}
+								{Event_PostHudMessage e("", ptr_player); e.setColor(ptr_pickupable->getColor()); e.setHtmlMessage("Picked up", "Cyclehack", "", "+" + Converter::IntToStr(amount) + " seconds"); SEND_EVENT(&e);}
 								break;
 							}
 						case XKILL_Enums::PickupableType::HACK_POWERHACK:
@@ -347,7 +347,7 @@ void CollisionManager::collision_pickupable(Entity* entity1, Entity* entity2)
 								SEND_EVENT(&Event_HackActivated(time, XKILL_Enums::HackType::POWERHACK, ptr_player));
 
 								// Post HUD message
-								{Event_PostHudMessage e("", ptr_player); e.setColor(ptr_pickupable->getColor()); e.setHtmlMessage("Picked up", "Powerhack (2x damage)", "", "+" + Converter::IntToStr(amount) + " seconds"); SEND_EVENT(&e);}
+								{Event_PostHudMessage e("", ptr_player); e.setColor(ptr_pickupable->getColor()); e.setHtmlMessage("Picked up", "Powerhack", "", "+" + Converter::IntToStr(amount) + " seconds"); SEND_EVENT(&e);}
 								break;
 							}
 						}
@@ -356,6 +356,7 @@ void CollisionManager::collision_pickupable(Entity* entity1, Entity* entity2)
 			}
 			if(pickedUp)
 			{
+				SEND_EVENT(&Event_PlaySound(XKILL_Enums::Sound::SOUND_PICKUP, entity2->getID(), ptr_pickupable->ptr_position->position, true));
 				removePickupable(ptr_pickupable);
 			}
 		}

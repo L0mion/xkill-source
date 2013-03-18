@@ -59,11 +59,11 @@ void HudPowerupDispayer::init( QWidget* bottomFrame, AttributePtr<Attribute_Play
 	
 	pow_running		.init(this, "state_running.png",		"");
 	pow_speed		.init(this, "hack_speed.png",			"");
-	pow_cycleSteal	.init(this, "hack_cyclesteal.png",		"Kills are turned directly into cycles");
-	pow_power		.init(this, "hack_power.png",			"Increased damage");
+	pow_cycleSteal	.init(this, "hack_cyclesteal.png",		"Steal <span style='color:#40b32b;'>cycles</span> from others");
+	pow_power		.init(this, "hack_power.png",			"<span style='color:#40b32b;'>2x damage</span>");
 	pow_jet			.init(this, "hack_jet.png",				"Press <span style='color:#40b32b;'>Jump</span> to use jethack");
 	//pow_executing	.init(this, "state_executing.png",		"Executing in <span style='color:#40b32b;'>Kernel Mode</span>");
-	pow_executing	.init(this, "state_executing.png",		"");
+	pow_executing	.init(this, "state_executing.png",		"<span style='color:#40b32b;'>KernelMode</span> granted");
 }
 
 void HudPowerupDispayer::update()
@@ -77,7 +77,7 @@ void HudPowerupDispayer::update()
 	}
 	
 
-	if(pow_executing.updateActive(SETTINGS->timeUntilScheduling <= 0.0f))
+	if(pow_executing.updateActive(ptr_player->executing))
 	{
 		// Nothing
 	}
@@ -101,7 +101,11 @@ void HudPowerupDispayer::update()
 		pow_cycleSteal.setProgress(ratio);
 	}
 
-	pow_power.updateActive(false);
+	if(pow_power.updateActive(ptr_player->powerHackPair.first))
+	{
+		float ratio = ptr_player->powerHackPair.second->getTimeLeft() / ptr_player->powerHackPair.second->getStartTime();;
+		pow_cycleSteal.setProgress(ratio);
+	}
 
 
 	// Update labels
