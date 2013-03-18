@@ -26,6 +26,7 @@ Menu_HUD::Menu_HUD( AttributePtr<Attribute_SplitScreen> splitScreen, QWidget* pa
 	SUBSCRIBE_TO_EVENT(this, EVENT_PLAYER_TAKING_DAMAGE);
 
 	hudMessage_manager.init(this, ptr_splitScreen);
+	ui.label_hudMessageTemplate->hide();
 	mapToSplitscreen();
 	initScoreboard();
 
@@ -90,9 +91,6 @@ void Menu_HUD::mapToSplitscreen()
 	bottomPos.y = screenSize.y - ui.frame_bottom->height();
 	//bottomPos.y = 0;
 	ui.frame_bottom->move(bottomPos.x, bottomPos.y);
-	Float2 bottomCenterPos = bottomPos;
-	bottomCenterPos.x = screenSize.x * 0.5f - ui.groupBox_bottomCenter->width()* 0.5f;
-	ui.groupBox_bottomCenter->move(bottomCenterPos.x, bottomCenterPos.y);
 
 	// Move top HUD to top
 	Float2 topPos;
@@ -226,8 +224,6 @@ void Menu_HUD::refresh()
 	}
 	
 
-	ui.label_priority->setNum(ptr_player->priority);
-	ui.label_cycles->setNum(ptr_player->cycles);
 	int healthRatio = (int)((ptr_health->health / ptr_health->maxHealth) * 100);
 
 	// Show menu if health has changed otherwise fade after a few seconds
@@ -369,7 +365,7 @@ void Menu_HUD::refresh()
 	else
 	{
 		// Reset scoreboard timer
-		scoreboardFade = 1.0f;
+		scoreboardFade = 2.0f;
 
 		// Hide scoreboard if shown
 		if(!ui.frame_scoreboard->isHidden())
@@ -393,31 +389,35 @@ void Menu_HUD::refresh()
 	// Scheduling info
 	//
 
+	ui.label_priority_advantage->setNum(ptr_player->priority);
+
 	// Determine priority advantage
-	{
-		std::string str_priorityAdvantage = "";
+	//{
+	//	std::string str_priorityAdvantage = "";
 
-		int scoreDiff = scoreboard.maxPriority - ptr_player->priority;
+	//	int scoreDiff = scoreboard.maxPriority - ptr_player->priority;
 
-		// If first player, show score difference to second closest
-		if(scoreDiff == 0)
-			scoreDiff = scoreboard.maxPriority - scoreboard.secondMaxPriority;
-		// ELSE: Show score difference to second closest
-		else
-			scoreDiff = ptr_player->cycles - scoreboard.maxPriority;
+	//	// If first player, show score difference to second closest
+	//	if(scoreDiff == 0)
+	//		scoreDiff = scoreboard.maxPriority - scoreboard.secondMaxPriority;
+	//	// ELSE: Show score difference to second closest
+	//	else
+	//		scoreDiff = ptr_player->cycles - scoreboard.maxPriority;
 
-		// Set label
+	//	// Set label
+	//	if(scoreDiff >= 0)
+	//		ui.label_priority_advantage->setText("+" +QString::number(scoreDiff));
+	//	else
+	//		ui.label_priority_advantage->setNum(scoreDiff);
 
-		if(scoreDiff >= 0)
-			ui.label_priority_advantage->setText("+" +QString::number(scoreDiff));
-		else
-			ui.label_priority_advantage->setNum(scoreDiff);
-
-	}
+	//}
 
 
-	QString str_time = QDateTime::fromTime_t(SETTINGS->timeUntilScheduling).toString("mm:ss");
-	ui.label_schedulingTimer->setText(str_time);
+
+
+
+	/*QString str_time = QDateTime::fromTime_t(SETTINGS->timeUntilScheduling).toString("mm:ss");
+	ui.label_schedulingTimer->setText(str_time);*/
 
 
 	//

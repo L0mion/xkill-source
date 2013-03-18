@@ -339,7 +339,7 @@ void Event_PostHudMessage::setStyle( Style style )
 
 
 	// Add an additional black background
-	styleSheet += "background-color: rgba(0, 0, 0, 50); padding: 2px 10px; font-size: 15px;";
+	styleSheet += "background-color: rgba(0, 0, 0, 100); padding: 0px 10px; font-family: 'Arial Black'; font-size: 18px;";
 	//styleSheet += "font-size: 30px; font-family: pxll; font-weight: normal;";
 }
 

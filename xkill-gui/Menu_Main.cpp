@@ -219,6 +219,7 @@ void Menu_Main::loadCustomFonts()
 		<< "king_richard.ttf"
 		<< "bebas_neue.otf"
 		<< "kenyan_coffee.ttf"
+		<< "imagine_font.ttf"
 		<< "statix.ttf";
 
 	

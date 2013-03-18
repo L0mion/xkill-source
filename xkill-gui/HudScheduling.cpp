@@ -23,7 +23,6 @@ void HudScheduling::show()
 
 void HudScheduling::init( Ui::Menu_HUD* ui, AttributePtr<Attribute_Player> ptr_owner_player )
 {
-	ui->groupBox_scoreInfo->hide();
 	parent = ui->label_scheduling_background->parentWidget();
 	window = ui->label_scheduling_background;
 	subWindow = ui->label_scheduling_subbackground;
@@ -46,18 +45,19 @@ void HudScheduling::init( Ui::Menu_HUD* ui, AttributePtr<Attribute_Player> ptr_o
 	progressbar->resize(window->width() - 2*standardMargin, progressbar->height());
 	int windowHeight = standardMargin*2 + itemHeight + subWindow->height() + progressbar->height();
 	window->resize(window->width(), windowHeight);
+	advantageLabel->resize(itemWidth, advantageLabel->height());
 
 	// Compute positions
-	window->move(screenSize.x*0.5f - window->width()*0.5, ui->frame_bottom->y() + 9);
+	window->move(screenSize.x*0.5f - window->width()*0.5, screenSize.y - window->height() - 9);
 	progressbar->move(window->x() + standardMargin, window->y() + standardMargin);
 	subWindow->move(window->x() + standardMargin, progressbar->y() + progressbar->height() + standardMargin);
 	
-	
 	advantageLabel->move(subWindow->x(), subWindow->y());
+
+
 	//hide();
 	ui->label_7->hide();
 	ui->label_8->hide();
-	ui->groupBox_bottomCenter->hide();
 	//ui->label_priority_advantage->hide();
 	progressbar->setMaximum(500);
 
@@ -74,7 +74,7 @@ void HudScheduling::init( Ui::Menu_HUD* ui, AttributePtr<Attribute_Player> ptr_o
 
 		// Set color based on player's color
 		Float3 color = ptr_player->avatarColor;
-		std::string str_backgroundColor	= "rgba("+Converter::IntToStr((int)(color.x * 255))+", "+Converter::IntToStr((int)(color.y * 255))+", "+ Converter::IntToStr((int)(color.z * 255)) +", 150);";
+		std::string str_backgroundColor	= "rgba("+Converter::IntToStr((int)(color.x * 255))+", "+Converter::IntToStr((int)(color.y * 255))+", "+ Converter::IntToStr((int)(color.z * 255)) +", 200);";
 		std::string str_borderColor		= "rgba("+Converter::IntToStr((int)(color.x * 255))+", "+Converter::IntToStr((int)(color.y * 255))+", "+ Converter::IntToStr((int)(color.z * 255)) +", 255);";
 		std::string str_sheet = "background: " + str_backgroundColor + "border: 1px solid rgba(0, 0, 0, 30); border-top: 2px solid rgba(255, 255, 255, 30); border-right: 2px solid rgba(255, 255, 255, 30);";
 		l->setStyleSheet(QString(str_sheet.c_str()));
@@ -202,8 +202,8 @@ void HudScheduling::refresh()
 
 	// Update advantage label
 	QLabel* ownerLabel = items[ownerIndex].label;
-	if(advantageLabel->x() !=  ownerLabel->x() || advantageLabel->y() !=  ownerLabel->y())
-		advantageLabel->move(ownerLabel->x(), ownerLabel->y());
+	if(advantageLabel->x() !=  ownerLabel->x() || advantageLabel->y() !=  ownerLabel->y() + ownerLabel->height())
+		advantageLabel->move(ownerLabel->x(), ownerLabel->y() + ownerLabel->height());
 }
 
 int HudScheduling::findHighestPriority()

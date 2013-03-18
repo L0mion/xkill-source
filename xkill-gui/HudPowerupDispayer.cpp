@@ -43,7 +43,7 @@ void HudPowerupDispayer::HudItem::init( HudPowerupDispayer* manager, std::string
 	if(hasInfo)
 	{
 		info = new QLabel(parent);
-		info->setStyleSheet("font-family: 'Arial Black'; background-color: rgb(0, 0, 0, 50); font-size:10pt; padding: 1px 1px;");
+		info->setStyleSheet("font-family: 'Arial Black'; background-color: rgb(0, 0, 0, 50); font-size:12pt; padding: 1px 1px;");
 		info->setText(str_info.c_str());
 		info->resize(info->sizeHint());
 	}
@@ -62,7 +62,8 @@ void HudPowerupDispayer::init( QWidget* bottomFrame, AttributePtr<Attribute_Play
 	pow_cycleSteal	.init(this, "hack_cyclesteal.png",		"Kills are turned directly into cycles");
 	pow_power		.init(this, "hack_power.png",			"Increased damage");
 	pow_jet			.init(this, "hack_jet.png",				"Press <span style='color:#40b32b;'>Jump</span> to use jethack");
-	pow_executing	.init(this, "state_executing.png",		"Executing in <span style='color:#40b32b;'>Kernel Mode</span>");
+	//pow_executing	.init(this, "state_executing.png",		"Executing in <span style='color:#40b32b;'>Kernel Mode</span>");
+	pow_executing	.init(this, "state_executing.png",		"");
 }
 
 void HudPowerupDispayer::update()
