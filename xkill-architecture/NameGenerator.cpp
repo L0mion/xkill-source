@@ -1027,6 +1027,7 @@ void NameGenerator::resetNames()
 	addName("repeat after me");
 	addName("begging the question");
 	addName("objection your honor");
+	addName("projection your honor");
 	addName("golden gecko pelt");
 	addName("utility belt");
 	addName("working box");
@@ -1453,8 +1454,6 @@ void NameGenerator::resetNames()
 	addName("mayday mayday!");
 	addName("deadline dilemma");
 	
-		
-	
 	addName("inexpensive payback time");
 	addName("better safe than gory");
 	addName("open time window");
@@ -1521,6 +1520,13 @@ void NameGenerator::resetNames()
 	addName("colored penguin");
 	addName("trivial matter");
 	addName("cherry pick");
+	addName("my magnum dream");
+	addName("russian roulette");
+	addName("die reroll");
+	addName("where ferries drink");
+	addName("change the plot");
+	addName("output-build.txt");
+	addName("btAssert(0)");
 	
 	//C++ keywords
 	addName("alignas");

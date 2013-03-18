@@ -217,7 +217,7 @@ void PlayerPhysicsObject::handleInput(float delta)
 			float jetpackPower = -getGravity().y()*1.5f;
    			world = getWorldTransform();
 			btVector3 velocity = getLinearVelocity();
-			if(world.getOrigin().y() < 18.0f)
+			if(world.getOrigin().y() < 18.0f)//check
 			{
 				setLinearVelocity(btVector3(move.x(), velocity.y()+jetpackPower*delta, move.z()));
 			}
