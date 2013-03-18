@@ -164,7 +164,7 @@ bool HacksComponent::shouldUpdateTimer(AttributePtr<Attribute_Player>& ptr_playe
 	switch(hackType)
 	{
 	case XKILL_Enums::HackType::JETHACK:
-		if(ptr_player->ptr_input->jetpack)
+		//if(ptr_player->ptr_input->jetpack)
 		{
 			updateTimer = true;
 		}

@@ -933,7 +933,7 @@ void Attribute_WeaponStats::saveTo(DataItemList* list)
 
 Attribute_ExplosionSphere::Attribute_ExplosionSphere()
 {
-	damage = 0.0f;
+	damage = 1.0f;
 	currentLifeTimeLeft = 1.0f;
 	currentRadius = 0.0f;
 	ammunitionType = XKILL_Enums::AmmunitionType::EXPLOSIVE;

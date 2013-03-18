@@ -81,7 +81,7 @@ void ManagementInstance::addInstance(AttributePtr<Attribute_Render>& ptr_render)
 		}
 	}
 
-	if(ptr_render->meshID == 200)
+	if(ptr_render->meshID >= 100)
 		shadowInstances_->addInstance(ptr_render->meshID, instance);
 }
 void ManagementInstance::addCameraInstance(
