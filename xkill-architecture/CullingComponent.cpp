@@ -150,6 +150,7 @@ void CullingComponent::cameraVsNode(Int2 min, Int2 max, AttributePtr<Attribute_C
 
 void CullingComponent::onUpdate(float delta)
 {
+	itrRender.resetIndex();
 	while(itrRender.hasNext())
 	{
 		AttributePtr<Attribute_Render> ptr_render = itrRender.getNext();

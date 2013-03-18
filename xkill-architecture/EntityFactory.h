@@ -508,6 +508,8 @@ public:
 		CREATE_ATTRIBUTE(ptr_damage, Attribute_Damage, damage, entity);
 		ptr_damage->damage = ptr_explosionSphere->damage;
 		ptr_damage->owner_entityID = e->entityIdOfCreator;
+
+		SEND_EVENT(&Event_PlaySound(XKILL_Enums::Sound::SOUND_EXPLOSION, entity->getID(), ptr_position->position, true));
 	}
 
 	void createLightEntity(Entity* entity, Event_CreateLight* e)

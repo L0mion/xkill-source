@@ -138,11 +138,11 @@ void InputComponent::handleInput(float delta)
 		input->rotation.x = rot.x;
 		input->rotation.y = rot.y;
 
-		input->fire =					device->getBoolValue(InputAction::ACTION_B_FIRE);
-		input->firePressed =			device->getBoolPressed(InputAction::ACTION_B_FIRE);
-
-		input->jetpack =				device->getBoolValue(InputAction::ACTION_B_JUMP_JETPACK);
-		input->jump =					device->getBoolPressed(InputAction::ACTION_B_JUMP_JETPACK);
+		input->fire =		 device->getBoolValue(InputAction::ACTION_B_FIRE);
+		input->firePressed = device->getBoolPressed(InputAction::ACTION_B_FIRE);
+							 
+		input->jetpack =	 device->getBoolValue(InputAction::ACTION_B_JUMP_JETPACK);
+		input->jump =		 device->getBoolPressed(InputAction::ACTION_B_JUMP_JETPACK);
 
 		input->changeAmmunitionType = 0;
 		if(device->getBoolReleased(InputAction::ACTION_B_NEXT_AMMUNITIONTYPE))
