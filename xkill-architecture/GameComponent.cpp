@@ -1220,7 +1220,7 @@ void GameComponent::shootProjectile( AttributePtr<Attribute_Spatial> ptr_spatial
 		//	scatterPos.z += randomLO + (float)rand()/((float)RAND_MAX/(randomHI-randomLO));
 		//}
 
-		SEND_EVENT(&Event_CreateProjectile(new_pos, velocity, rot, itrPlayer.ownerId(), ammo->type, firingMode->type, ammo->damage*damageModifier));
+		SEND_EVENT(&Event_CreateProjectile(new_pos, velocity, rot, itrPlayer.ownerId(), ammo->type, firingMode->type, ammo->damage*firingMode->damageModifier*damageModifier));
 	}
 }
 
