@@ -77,7 +77,13 @@ DataItemList* Attribute_Settings::getDataList()
 {
 	DataItemList* list = new DataItemList();
 
-	list->add(soundVolume_music, "soundVolume");
+	list->add(showDebugPhysics, "showDebugPhysics");
+	list->add(soundMuted, "sound_muted");
+	list->add(soundVolume_music, "sound_musicVolume");
+	list->add(soundVolume_effects, "sound_effectsVolume");
+	list->add(timeLimit, "timeLimit");
+	list->add(cycleLimit, "cycleLimit");
+
 	list->add(occlusionRadius, "SSAO_occlusionRadius");
 	list->add(occlusionScale, "SSAO_occlusionScale");
 	list->add(occlusionBias, "SSAO_occlusionBias");
@@ -88,7 +94,12 @@ DataItemList* Attribute_Settings::getDataList()
 
 void Attribute_Settings::saveTo( DataItemList* list )
 {
+	list->get(&showDebugPhysics);
+	list->get(&soundMuted);
 	list->get(&soundVolume_music);
+	list->get(&soundVolume_effects);
+	list->get(&timeLimit);
+	list->get(&cycleLimit);
 
 	list->get(&occlusionRadius);
 	list->get(&occlusionScale);

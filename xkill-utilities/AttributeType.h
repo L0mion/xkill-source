@@ -149,12 +149,15 @@ private:
 	
 
 public:
+	Behavior_Offset();
 	AttributePtr<Attribute_Spatial> ptr_parent_spatial_position;
 	AttributePtr<Attribute_Spatial> ptr_parent_spatial_rotation;
 	AttributePtr<Attribute_Spatial> ptr_spatial;
 
 	Float3 offset_position;
 	Float4 offset_rotation;
+
+	bool isDisabled;
 
 	DataItemList* getDataList();
 	void saveTo(DataItemList* list);
