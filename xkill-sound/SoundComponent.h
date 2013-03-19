@@ -3,6 +3,7 @@
 #include "dllSound.h"
 #include <xkill-utilities/IObserver.h>
 #include <xkill-utilities/EventType.h>
+#include <xkill-utilities/Timer.h>
 
 #include <vector>
 
@@ -23,8 +24,11 @@ class DLL_S SoundComponent : public IObserver
 private:
 	FMODEventSystem* mFMODEventSystem;
 	EventToFModConverter* converter;
-	float timer;
 	bool useSound;
+	Timer musicTransitionTimer_;
+	float musicVolumePretransition_;
+	float musicTransitionRate_;
+	bool playMenuMusic_;
 
 	void fillEventsToFModVector(std::string configFilePath);
 

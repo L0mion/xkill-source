@@ -173,7 +173,7 @@ void InputComponent::handleInput(float delta)
 		{
 			if(device->getBoolPressed(InputAction::ACTION_B_JUMP_JETPACK))
 			{
-				SEND_EVENT(&Event_PlaySound(XKILL_Enums::Sound::SOUND_JETPACK, itrPlayer.ownerIdAt(ptr_player.index()), ptr_player->ptr_render->ptr_spatial->ptr_position->position, false));
+				SEND_EVENT(&Event_PlaySound(XKILL_Enums::Sound::SOUND_JETPACK, itrPlayer.ownerIdAt(ptr_player.index())));//, ptr_player->ptr_render->ptr_spatial->ptr_position->position, true));
 			}
 			else if(device->getBoolReleased(InputAction::ACTION_B_JUMP_JETPACK))
 			{

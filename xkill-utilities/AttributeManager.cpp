@@ -49,8 +49,9 @@ Attribute_Settings::Attribute_Settings()
 {
 	timeUntilScheduling = 0.0f;
 	numErrors = 0;
-	soundVolume_music = 0.1f;
-	soundVolume_effects = 0.1f;
+	soundMuted = false;
+	soundVolume_music = 0.5f;
+	soundVolume_effects = 0.5f;
 	numPlayers = 1;
 	_timeScale = 1.0f;
 	trueDeltaTime = 0.0f;

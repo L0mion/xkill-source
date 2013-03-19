@@ -54,6 +54,10 @@ bool FMODEventSystem::Init(std::string mediaPath, std::string soundEventFileName
 
 	UpdateNrOfListeners();
 
+	SetMuteSounds(SETTINGS->soundMuted);
+	SetVolume(SETTINGS->soundVolume_effects);
+	SetMusicVolume(SETTINGS->soundVolume_music);
+
 	return true;
 }
 
@@ -139,6 +143,31 @@ void FMODEventSystem::StopAllSoundEffects()
 		std::string groupName(charGroupName);
 
 		if(groupName != "Music")
+		{
+			mEvents[i].FmodEvent->stop();
+
+			FMOD::Event* temp = mEvents[mEvents.size() - 1].FmodEvent;
+			mEvents[mEvents.size() - 1].FmodEvent = mEvents[i].FmodEvent;
+			mEvents[i].FmodEvent = temp;
+
+			mEvents.pop_back();
+			i--;
+		}
+	}
+}
+
+void FMODEventSystem::StopAllMusic()
+{
+	for(unsigned int i = 0; i < mEvents.size(); i++)
+	{
+		FMOD::EventGroup* group;
+		mEvents[i].FmodEvent->getParentGroup(&group);
+
+		char* charGroupName;
+		group->getInfo(nullptr, &charGroupName);
+		std::string groupName(charGroupName);
+
+		if(groupName == "Music")
 		{
 			mEvents[i].FmodEvent->stop();
 
