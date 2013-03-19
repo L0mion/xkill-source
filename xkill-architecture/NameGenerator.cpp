@@ -1592,7 +1592,7 @@ void NameGenerator::resetNames()
 	addName("freed mouse pointer");
 	addName("big bank loan");
 	addName("high-risk coordination");
-	addName("deploy anywhere except here");
+	addName("deploy anywhere else");
 	addName("not that place again");
 	addName("xkill the spot");
 	addName("all I got was this T-shirt");
@@ -1603,6 +1603,19 @@ void NameGenerator::resetNames()
 	addName("honest disbeliever");
 	addName("crazy you");
 	addName("pilgrim in foreign land");
+	addName("hale and hearty");
+	addName("still going strong");
+	addName("okay, this is not okay");
+	addName("try to fly");
+	addName("fishing with grenades");
+	addName("working invisibility");
+	addName("lonely rebel");
+	addName("inspector hovercraft");
+	addName("fake helium balloon");
+	addName("governmental agency agent");
+	addName("the ground and its soil");
+	addName("that thing in daylight");
+	addName("locket load");
 
 	//C++ keywords
 	addName("alignas");
