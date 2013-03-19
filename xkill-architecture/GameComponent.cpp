@@ -794,7 +794,6 @@ void GameComponent::spawnPlayer(AttributePtr<Attribute_Player> ptr_player)
 	ptr_player->ptr_camera->fieldOfView = 3.14f/4.0f;
 	ptr_player->respawnTimer.resetTimer();
 	ptr_player->detectedAsDead = false;
-	ptr_player->currentSprintTime = 0.0f;
 	SEND_EVENT(&Event_PlaySound(XKILL_Enums::Sound::SOUND_RESPAWN, itrPlayer.ownerIdAt(ptr_player.index()), ptr_position->position, true));
 }
 
