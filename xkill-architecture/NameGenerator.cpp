@@ -1550,8 +1550,29 @@ void NameGenerator::resetNames()
 	addName("double it");
 	addName("fiction gone wrong");
 	addName("generally forbidden");
-	addName("mind if I borrow this machinery?");
+	addName("mind if I borrow this spinning gadget?");
 	addName("what could possibly go wrong?");
+	addName("butterfly pavillion");
+	addName("the sand dunes are whispering");
+	addName("exceeded storage capacity");
+	addName("unexplainable tasty beverage");
+	addName("nutritious breakfast");
+	addName("the duration of toast");
+	addName("otherwise well-behaved");
+	addName("not a criminal");
+	addName("welded shut");
+	addName("life goes on and on, boom.");
+	addName("disembark from shopping cart");
+	addName("give them my best");
+	addName("week-old sand castle");
+	addName("excavated automobile");
+	addName("of minor usefullness");
+	addName("just a coincidence");
+	addName("justice served you well");
+	addName("reinventor of wheel");
+	addName("you must show them");
+	addName("rate the frame");
+	addName("unknown know-how");
 	
 	//C++ keywords
 	addName("alignas");

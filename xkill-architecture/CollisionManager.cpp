@@ -254,7 +254,7 @@ void CollisionManager::collision_pickupable(Entity* entity1, Entity* entity2)
 									pickedUp = true;
 
 									// Post HUD message
-									{Event_PostHudMessage e("", ptr_player); e.setColor(ptr_pickupable->getColor()); e.setHtmlMessage("Picked up", "HealthPatch", "", "+" + Converter::IntToStr(pickedUpAmount)); SEND_EVENT(&e);}
+									{Event_PostHudMessage e("", ptr_player); e.setColor(ptr_pickupable->getColor()); e.setHtmlMessage("Picked up", "Healthpatch", "", "+" + Converter::IntToStr(pickedUpAmount)); SEND_EVENT(&e);}
 								}
 								break;
 							}
@@ -276,7 +276,7 @@ void CollisionManager::collision_pickupable(Entity* entity1, Entity* entity2)
 							}
 						case XKILL_Enums::PickupableType::AMMUNITION_EXPLOSIVE:
 							{
-								amount = Math::randomInt(2, 6);
+								amount = Math::randomInt(2, 8);
 								AttributePtr<Attribute_WeaponStats> weaponStatsAttribute = ptr_player->ptr_weaponStats;
 								Ammunition* ammo = &weaponStatsAttribute->ammunition[XKILL_Enums::AmmunitionType::EXPLOSIVE];
 								int pickedUpAmount = getPickedUpAmount(ammo->currentTotalNrOfShots, ammo->maxTotalNrOfShots, amount);
