@@ -1536,6 +1536,22 @@ void NameGenerator::resetNames()
 	addName("reap and sow");
 	addName("radiating radix");
 	addName("fueled by anger");
+	addName("who would have known?");
+	addName("sin(k) or float");
+	addName("blind intention");
+	addName("explorer or exploder");
+	addName("limiting factor");
+	addName("use the red button");
+	addName("50 gold peggats");
+	addName("jump when I say ready, ready?");
+	addName("these cubes are falling, aren't they?");
+	addName("simple armageddon machine");
+	addName("are those for sale?");
+	addName("double it");
+	addName("fiction gone wrong");
+	addName("generally forbidden");
+	addName("mind if I borrow this machinery?");
+	addName("what could possibly go wrong?");
 	
 	//C++ keywords
 	addName("alignas");
