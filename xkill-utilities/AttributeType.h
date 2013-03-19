@@ -450,6 +450,16 @@ struct DLL_U Attribute_SplitScreen : public IAttribute
 	unsigned int ssWidth;
 	unsigned int ssHeight;
 
+	// The difference in resolution 
+	// compared to another resolution
+	Float2 deltaFactor;
+	void setDeltaFactor(Float2 factor)
+	{
+		deltaFactor = factor;
+	}
+	Float2 deltaTopLeft();
+	Float2 deltaSize();
+
 	Float3 glowmod;
 
 	float getAspectRatio();

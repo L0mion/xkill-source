@@ -45,6 +45,9 @@ void Attribute_Settings::setTimeScale( float timeScale )
 
 Attribute_Settings::Attribute_Settings()
 {
+	render_width = 800;
+	render_height = 600;
+
 	timeUntilScheduling = 0.0f;
 	numErrors = 0;
 	soundMuted = false;

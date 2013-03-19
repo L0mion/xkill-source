@@ -82,11 +82,12 @@ void RenderingComponent::onEvent( Event* e )
 
 void RenderingComponent::event_WindowResize()
 {
-	// Get new window size
+	//// Get new window size
 	Event_GetWindowResolution windowResolution;
 	SEND_EVENT(&windowResolution);
 	int width = windowResolution.width;
 	int height = windowResolution.height;
+	
 
 	// Resize renderer
 	renderer_->resize(width, height);

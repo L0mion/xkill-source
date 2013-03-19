@@ -13,6 +13,9 @@ private:
 	float _timeScale;
 
 public:
+	int render_width;
+	int render_height;
+
 	int numErrors;
 	int numPlayers;
 	bool showDebugPhysics;

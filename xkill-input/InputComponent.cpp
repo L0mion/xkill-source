@@ -39,6 +39,9 @@ bool InputComponent::init(HWND windowHandle, std::string configFilePath, float s
 
 	setupPlayerControllerConnection();
 
+	zoomTimer_.setActive(true);
+	zoomTimer_.setStartTime(0.25f);
+
 	return true;
 }
 
@@ -128,19 +131,30 @@ void InputComponent::handleInput(float delta)
 		float sensitivityModifier = device->getFloatValue(InputAction::ACTION_F_LOW_SENSITIVITY, delta);
 		device->setSensitivityModifier(sensitivityModifier);
 
+		if(sensitivityModifier < 0.001f)
+		{
+			if(device->getBoolValue(InputAction::ACTION_B_LOW_SENSITIVITY))
+			{
+				device->setSensitivityModifier(0.7f);
+				zoomTimer_.update(delta);
+				if(zoomTimer_.hasTimerExpired())
+				{
+					zoomTimer_.zeroTimer();
+				}
+			}
+			else
+			{
+				zoomTimer_.update(-delta);
+				if(zoomTimer_.getTimeLeft() >= zoomTimer_.getStartTime())
+				{
+					zoomTimer_.resetTimer();
+				}
+			}
+
+			sensitivityModifier = (1.0f - zoomTimer_.getTimeLeft()*4.0f);
+		}
+
 		ptr_player->ptr_camera->fieldOfViewModifier = 1.0f - sensitivityModifier/3;
-
-		// MATTIAS: What to do here?
-		// ptr_player->ptr_camera->fieldOfViewModifier = 0.5f;
-
-		if(device->getBoolValue(InputAction::ACTION_B_LOW_SENSITIVITY))
-		{
-			device->setSensitivityModifier(0.7f);
-		}
-		else
-		{
-
-		}
 
 		input->position.x = device->getFloatValue(InputAction::ACTION_F_WALK_LR, delta);
 		input->position.y = device->getFloatValue(InputAction::ACTION_F_WALK_FB, delta);

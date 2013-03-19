@@ -109,6 +109,8 @@ Menu_Main::Menu_Main( QWidget* parent ) : QMainWindow()
 	push_menu(ui.frame_opening);
 
 	// signals
+	connect(ui.pushButton_applyRes, SIGNAL(clicked()),	this, SLOT(applyVideoRes()));
+	connect(ui.pushButton_applyShaders, SIGNAL(clicked()),	this, SLOT(applyShaders()));
 	connect(ui.pushButton_start, SIGNAL(clicked()),	this, SLOT(slot_menu_start()));
 	connect(ui.pushButton_startgame, SIGNAL(clicked()),	this, SLOT(slot_menu_startgame()));
 	connect(ui.pushButton_customize, SIGNAL(clicked()),	this, SLOT(slot_menu_customize()));
@@ -298,6 +300,22 @@ void Menu_Main::menuResize()
 
 	// Resize current menu
 	topMenu->resize(width(), height());
+
+
+	// Update resolution menu if neccisary
+	{
+		int width = SETTINGS->render_width;
+		int height = SETTINGS->render_height;
+
+		if(ui.spinBox_videoResX->value() != width || ui.spinBox_videoResY->value() != height)
+		{
+			ui.spinBox_videoResX->setValue(width);
+			ui.spinBox_videoResY->setValue(height);
+		}
+	}
+	
+	
+
 }
 
 void Menu_Main::setAlwaysOnTop( bool on )

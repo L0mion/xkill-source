@@ -873,9 +873,11 @@ void GameComponent::event_PlayerDeath(Event_PlayerDeath* e)
 	Float3 position = ptr_player->ptr_render->ptr_spatial->ptr_position->position;
 	SEND_EVENT(&Event_PlaySound(XKILL_Enums::Sound::SOUND_DEATH, itrPlayer.ownerIdAt(e->playerAttributeIndex), position, true));
 
+	SEND_EVENT(&Event_StopSound(XKILL_Enums::Sound::SOUND_LASER, itrPlayer.ownerIdAt(e->playerAttributeIndex)));
+	SEND_EVENT(&Event_StopSound(XKILL_Enums::Sound::SOUND_JETPACK, itrPlayer.ownerIdAt(e->playerAttributeIndex)));
+
 	if(ptr_player->executing)
 	{
-		SEND_EVENT(&Event_StopSound(XKILL_Enums::Sound::SOUND_LASER, itrPlayer.ownerIdAt(e->playerAttributeIndex)));
 		ptr_player->executing = false;
 	
 		std::vector<int> rayId = itrPlayer.ownerAt(ptr_player.index())->getAttributes(ATTRIBUTE_RAY);
@@ -886,7 +888,6 @@ void GameComponent::event_PlayerDeath(Event_PlayerDeath* e)
 	}
 	if(ptr_player->jetHackPair.first)
 	{
-		SEND_EVENT(&Event_StopSound(XKILL_Enums::Sound::SOUND_JETPACK, itrPlayer.ownerIdAt(e->playerAttributeIndex)));
 		ptr_player->jetHackPair.first = false;
 	}
 	if(ptr_player->cycleHackPair.first)
