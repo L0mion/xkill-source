@@ -983,6 +983,10 @@ void Attribute_Ray::saveTo( DataItemList* list )
 
 void Behavior_Offset::updateOffset()
 {
+	// Abort if disabled
+	if(isDisabled)
+		return;
+
 	using namespace DirectX;
 
 	if(!ptr_parent_spatial_rotation.isEmpty())
@@ -1034,13 +1038,12 @@ void Behavior_Offset::updateOffset()
 		pos_offset = parent_pos + pos_offset;
 		ptr_spatial->ptr_position->position = pos_offset;
 	}
-
-	
 }
 
 DataItemList* Behavior_Offset::getDataList()
 {
 	DataItemList* list = new DataItemList();
+	list->add(&isDisabled,							"disabled");
 	list->add(&ptr_parent_spatial_position,			"ptr_parent_spatial_position");
 	list->add(&ptr_parent_spatial_rotation,			"ptr_parent_spatial_rotation");
 	list->add(offset_position,						"offset_position");
@@ -1049,10 +1052,16 @@ DataItemList* Behavior_Offset::getDataList()
 }
 void Behavior_Offset::saveTo( DataItemList* list )
 {
+	list->get(&isDisabled);
 	list->get(&ptr_parent_spatial_position);
 	list->get(&ptr_parent_spatial_rotation);
 	list->get(&offset_position);
 	list->get(&offset_rotation);
+}
+
+Behavior_Offset::Behavior_Offset()
+{
+	isDisabled = false;
 }
 
 DataItemList* Attribute_Bounding::getDataList()

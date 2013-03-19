@@ -106,7 +106,7 @@ void ManagementInstance::addCameraInstance(
 }
 
 DirectX::XMFLOAT4X4 ManagementInstance::calculateWorldMatrix(
-	AttributePtr<Attribute_Spatial>&	ptr_spatial, 
+	AttributePtr<Attribute_Spatial>&	ptr_spatial,
 	AttributePtr<Attribute_Position>& ptr_position)
 {
 	DirectX::XMMATRIX translation = DirectX::XMMatrixTranslation(

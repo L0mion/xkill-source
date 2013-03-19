@@ -2,8 +2,6 @@
 #include "EntityStorage.h"
 #include "DataItem.h"
 
-
-
 AttributeManager::~AttributeManager()
 {
 	delete entities;
@@ -67,6 +65,10 @@ Attribute_Settings::Attribute_Settings()
 	averageDeltaTime = 0.0f;
 	trueDeltaTime = 0.0f;
 
+	ssaoOn		= true;
+	shadowsOn	= true;
+	glowOn		= true;
+
 	occlusionRadius		= 0.2f;
 	occlusionScale		= 0.7f;
 	occlusionBias		= 0.1f;
@@ -77,7 +79,16 @@ DataItemList* Attribute_Settings::getDataList()
 {
 	DataItemList* list = new DataItemList();
 
-	list->add(soundVolume_music, "soundVolume");
+	list->add(showDebugPhysics, "showDebugPhysics");
+	//list->add(soundMuted, "sound_muted");
+	//list->add(soundVolume_music, "sound_musicVolume");
+	//list->add(soundVolume_effects, "sound_effectsVolume");
+	list->add(timeLimit, "timeLimit");
+	list->add(cycleLimit, "cycleLimit");
+
+	list->add(ssaoOn, "SSAO");
+	list->add(shadowsOn, "SHADOWS");
+	list->add(glowOn, "GLOW");
 	list->add(occlusionRadius, "SSAO_occlusionRadius");
 	list->add(occlusionScale, "SSAO_occlusionScale");
 	list->add(occlusionBias, "SSAO_occlusionBias");
@@ -88,8 +99,16 @@ DataItemList* Attribute_Settings::getDataList()
 
 void Attribute_Settings::saveTo( DataItemList* list )
 {
-	list->get(&soundVolume_music);
+	list->get(&showDebugPhysics);
+	//list->get(&soundMuted);
+	//list->get(&soundVolume_music);
+	//list->get(&soundVolume_effects);
+	list->get(&timeLimit);
+	list->get(&cycleLimit);
 
+	list->get(&ssaoOn);
+	list->get(&shadowsOn);
+	list->get(&glowOn);
 	list->get(&occlusionRadius);
 	list->get(&occlusionScale);
 	list->get(&occlusionBias);

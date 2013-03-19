@@ -57,10 +57,16 @@ void ManagementCB::updateCBInstance(ID3D11DeviceContext*	devcon,
 	devcon->UpdateSubresource(cbInstance_, 0, 0, &cbDesc, 0, 0);
 }
 void ManagementCB::updateCBFrame(ID3D11DeviceContext* devcon,
-								 unsigned int numLightsDir)
+								 unsigned int numLightsDir,
+									bool ssaoOn,
+									bool shadowsOn,
+									bool glowOn)
 {
 	CBFrameDesc cbDesc;
 	cbDesc.numLightsDir		= numLightsDir;
+	cbDesc.ssaoOn = ssaoOn;
+	cbDesc.shadowsOn = shadowsOn;
+	cbDesc.glowOn = glowOn;
 
 	devcon->UpdateSubresource(cbFrame_, 0, 0, &cbDesc, 0, 0);
 }

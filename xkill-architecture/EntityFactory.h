@@ -85,20 +85,20 @@ public:
 		ptr_health->maxHealth = 100;
 		
 		CREATE_ATTRIBUTE(ptr_weaponStats, Attribute_WeaponStats, weaponStats, entity);
-		ptr_weaponStats->currentAmmunitionType = XKILL_Enums::AmmunitionType::SCATTER;
-		ptr_weaponStats->currentFiringModeType = XKILL_Enums::FiringModeType::AUTO;
-		
-		// Create camera
-		AttributePtr<Attribute_Camera> ptr_camera = createCamera(entity, ptr_spatial); 
+		ptr_weaponStats->currentAmmunitionType = XKILL_Enums::AmmunitionType::BULLET;
+		ptr_weaponStats->currentFiringModeType = XKILL_Enums::FiringModeType::SEMI;
 		
 		CREATE_ATTRIBUTE(ptr_player, Attribute_Player, player, entity);
 		ptr_player->ptr_render = ptr_render;
 		ptr_player->ptr_input = ptr_input;
-		ptr_player->ptr_camera = ptr_camera;
 		ptr_player->ptr_health = ptr_health;
 		ptr_player->ptr_weaponStats = ptr_weaponStats;
 		ptr_player->avatarName = nameGenerator.getName();
 		ptr_player->avatarColor = nameGenerator.getColor();
+
+
+		// Create camera
+		AttributePtr<Attribute_Camera> ptr_camera = createCamera(entity, ptr_player); 
 
 		CREATE_ATTRIBUTE(ptr_splitScreen, Attribute_SplitScreen, splitScreen, entity);
 		ptr_splitScreen->ptr_camera = ptr_camera;
@@ -151,7 +151,7 @@ public:
 		ptr_lightPoint->lightPoint.attenuation	= Float3(0.0f, 0.0f, 10.0f);
 	}
 
-	AttributePtr<Attribute_Camera> createCamera(Entity* entity, AttributePtr<Attribute_Spatial> ptr_parent_spatial)
+	AttributePtr<Attribute_Camera> createCamera(Entity* entity, AttributePtr<Attribute_Player> ptr_parent_player)
 	{
 		CREATE_ATTRIBUTE(ptr_position, Attribute_Position, position, entity);
 		CREATE_ATTRIBUTE(ptr_spatial, Attribute_Spatial, spatial, entity);
@@ -161,12 +161,15 @@ public:
 		// Add behavior
 		CREATE_ATTRIBUTE(ptr_offset, Behavior_Offset, offset, entity);
 		ptr_offset->ptr_spatial = ptr_spatial;
-		ptr_offset->ptr_parent_spatial_position = ptr_parent_spatial;
+		ptr_offset->ptr_parent_spatial_position = ptr_parent_player->ptr_render->ptr_spatial;
 		ptr_offset->offset_position = Float3(5.0f, 0.3f, 0.36f);
 
 		CREATE_ATTRIBUTE(ptr_camera, Attribute_Camera, camera, entity);
 		ptr_camera->ptr_spatial = ptr_spatial;
 		ptr_camera->ptr_offset = ptr_offset;
+
+		// Attach to player
+		ptr_parent_player->ptr_camera = ptr_camera;
 
 		// Return
 		return ptr_camera;

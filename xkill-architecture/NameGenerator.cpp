@@ -1027,6 +1027,7 @@ void NameGenerator::resetNames()
 	addName("repeat after me");
 	addName("begging the question");
 	addName("objection your honor");
+	addName("projection your honor");
 	addName("golden gecko pelt");
 	addName("utility belt");
 	addName("working box");
@@ -1452,9 +1453,13 @@ void NameGenerator::resetNames()
 	addName("take your stinkin' paws off me!");
 	addName("mayday mayday!");
 	addName("deadline dilemma");
-	
-		
-	
+	addName("evil clever dog");
+	addName("most intrepid robot");
+	addName("taste like sweetness and death");
+	addName("Keebosh");
+	addName("Birk");
+	addName("Tornado");
+
 	addName("inexpensive payback time");
 	addName("better safe than gory");
 	addName("open time window");
@@ -1521,6 +1526,16 @@ void NameGenerator::resetNames()
 	addName("colored penguin");
 	addName("trivial matter");
 	addName("cherry pick");
+	addName("my magnum dream");
+	addName("russian roulette");
+	addName("die reroll");
+	addName("where ferries drink");
+	addName("change the plot");
+	addName("output-build.txt");
+	addName("Stefan Petersson");
+	addName("reap and sow");
+	addName("radiating radix");
+	addName("fueled by anger");
 	
 	//C++ keywords
 	addName("alignas");
@@ -1675,24 +1690,15 @@ void NameGenerator::resetColors()
 	// Add colors
 	//
 
-	addColor(Float3(1.0f, 0.0f, 0.0));		// Red
-	addColor(Float3(0.25f, 0.75f, 0.20));	// Green
-	addColor(Float3(0.0f, 0.5f, 1.0));		// Blue
-	addColor(Float3(0.0f, 1.0f, 1.0));		// Cyan
-	addColor(Float3(1.0f, 1.0f, 0.0));		// Yellow
-	addColor(Float3(0.5f, 0.25f, 1.0));		// Violet
-	addColor(Float3(1.0f, 0.5f, 0.0));		// Orange
-	addColor(Float3(1.0f, 0.5f, 1.0));		// Pink
-	addColor(Float3(1.0f, 1.0f, 1.0));		// White
-	
-	//addColor(Float3(1.0f, 0.4f, 0.0));
-	//addColor(Float3(0.7f, 0.0f, 1.0));
-
-	////new colors
-	//addColor(Float3(0.3f, 0.2f, 0.8f));
-	//addColor(Float3(0.7f, 0.5f, 0.5f));
-	//addColor(Float3(1.0f, 1.0f, 0.5f));
-	//addColor(Float3(0.75f, 0.75f, 0.75f));
+	addColor(Float3(1.0f, 0.0f, 0.0f));		// Red
+	addColor(Float3(0.25f, 0.75f, 0.20f));	// Green
+	addColor(Float3(0.0f, 0.5f, 1.0f));		// Blue
+	addColor(Float3(0.0f, 1.0f, 1.0f));		// Cyan
+	addColor(Float3(1.0f, 1.0f, 0.0f));		// Yellow
+	addColor(Float3(0.5f, 0.25f, 1.0f));	// Violet
+	addColor(Float3(1.0f, 0.5f, 0.0f));		// Orange
+	addColor(Float3(1.0f, 0.5f, 1.0f));		// Pink
+	addColor(Float3(1.0f, 1.0f, 1.0f));		// White
 }
 
 void NameGenerator::addColor( Float3 color )
