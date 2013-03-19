@@ -33,6 +33,10 @@ public:
 	float nullprocessExecutionTime;
 	bool isNullprocessExecuting;
 
+	bool ssaoOn;
+	bool shadowsOn;
+	bool glowOn;
+
 	//ssao
 	float occlusionRadius;
 	float occlusionScale;

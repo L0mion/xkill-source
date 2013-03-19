@@ -23,9 +23,9 @@ static const unsigned int CB_INSTANCE_DESC_SIZE = 16;
 struct CBFrameDesc
 {
 	unsigned int numLightsDir;
-	unsigned int pad;
-	unsigned int pad0;
-	unsigned int pad1;
+	bool ssaoOn;
+	bool shadowsOn;
+	bool glowOn;
 };
 static const unsigned int CB_FRAME_DESC_SIZE = 16;
 

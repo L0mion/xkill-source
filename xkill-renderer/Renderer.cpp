@@ -536,9 +536,12 @@ void Renderer::render(std::vector<ViewportData> vpDatas)
 	
 	//Do shadows pre-pass:
 	DirectX::XMFLOAT4X4 shadowMapTransform;
-	calcgpu(shadowtimer,
-	shadowMapTransform = buildShadowMap();
-	)
+	if(SETTINGS->shadowsOn)
+	{
+		calcgpu(shadowtimer,
+			shadowMapTransform = buildShadowMap();
+		)
+	}
 
 	//Update per-frame constant buffer.
 	managementCB_->setCB(
@@ -548,7 +551,10 @@ void Renderer::render(std::vector<ViewportData> vpDatas)
 		devcon);
 	managementCB_->updateCBFrame(
 		devcon,
-		managementLight_->getLightDirCurCount()); //OBS - not number of dirs
+		managementLight_->getLightDirCurCount(),
+		SETTINGS->ssaoOn,
+		SETTINGS->shadowsOn,
+		SETTINGS->glowOn); //OBS - not number of dirs
 
 	managementBuffer_->setBuffersAndDepthBufferAsRenderTargets(devcon, managementD3D_->getDepthBuffer());
 
@@ -570,21 +576,27 @@ void Renderer::render(std::vector<ViewportData> vpDatas)
 	)
 	
 	//Blur glowmap:
-	calcgpu(glowtimer,
-	downSampleBlur();
-	unsigned int numBlurs = 1;
-	for(unsigned int i = 0; i < numBlurs; i++)
+	if(SETTINGS->glowOn)
 	{
-		blurHorizontally();
-		blurVertically();
+		calcgpu(glowtimer,
+		downSampleBlur();
+		unsigned int numBlurs = 1;
+		for(unsigned int i = 0; i < numBlurs; i++)
+		{
+			blurHorizontally();
+			blurVertically();
+		}
+		upSampleBlur();)
 	}
-	upSampleBlur();)
 
 	//Compute SSAO for each viewport:
-	calcgpu(ssaotimer,
-	for(unsigned int i = 0; i < vpDatas.size(); i++)
-		buildSSAOMap(vpDatas[i]);
-	)
+	if(SETTINGS->ssaoOn)
+	{
+		calcgpu(ssaotimer,
+		for(unsigned int i = 0; i < vpDatas.size(); i++)
+			buildSSAOMap(vpDatas[i]);
+		)
+	}
 
 	//Render everything to backbuffer:
 	calcgpu(backbuffertimer,
