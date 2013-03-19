@@ -16,9 +16,9 @@ cbuffer cbPerInstance : register (b0)
 cbuffer cbPerFrame : register (b1)
 {
 	uint numLightsDir;
-	uint pad;
-	uint pad0;
-	uint pad3;
+	bool ssaoOn;
+	bool shadowsOn;
+	bool glowOn;
 };
 
 cbuffer cbPerCamera : register (b2)
