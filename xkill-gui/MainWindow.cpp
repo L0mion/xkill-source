@@ -43,6 +43,7 @@ MainWindow::MainWindow()
 	SUBSCRIBE_TO_EVENT(this, EVENT_SHOW_FULLSCREEN);
 	SUBSCRIBE_TO_EVENT(this, EVENT_SHOW_MESSAGEBOX);
 	SUBSCRIBE_TO_EVENT(this, EVENT_QUIT_TO_DESKTOP);
+	SUBSCRIBE_TO_EVENT(this, EVENT_TOGGLE_EDITOR);
 
 	// create UI generated from XML file
 	ui.setupUi(this);
@@ -101,6 +102,11 @@ void MainWindow::onEvent( Event* e )
 	case EVENT_SHOW_MESSAGEBOX:
 		event_showMessageBox((Event_ShowMessageBox*)e);
 		break;
+	case EVENT_TOGGLE_EDITOR:
+		{
+			ui.dockWidget->toggleViewAction()->activate(QAction::Trigger);
+		}
+		break;
 	default:
 		break;
 	}
@@ -124,7 +130,7 @@ void MainWindow::keyPressEvent( QKeyEvent* e )
 
 	// Toggle editor
 	if((e->key()==Qt::Key_F1))
-		ui.dockWidget->toggleViewAction()->activate(QAction::Trigger);
+		SEND_EVENT(&Event(EVENT_TOGGLE_EDITOR));
 	
 	// Skip menu
 	if((e->key()==Qt::Key_F2))

@@ -101,7 +101,7 @@ Menu_Main::Menu_Main( QWidget* parent ) : QMainWindow()
 	ui.frame_audio->hide();
 	ui.frame_input->hide();
 	ui.frame_credits->hide();
-	ui.pushButton_video->hide();
+	//ui.pushButton_video->hide();
 	//ui.label_background->hide();
 	show();
 
@@ -116,6 +116,7 @@ Menu_Main::Menu_Main( QWidget* parent ) : QMainWindow()
 	connect(ui.pushButton_video, SIGNAL(clicked()),	this, SLOT(slot_menu_video()));
 	connect(ui.pushButton_audio, SIGNAL(clicked()),	this, SLOT(slot_menu_audio()));
 	connect(ui.pushButton_input, SIGNAL(clicked()),	this, SLOT(slot_menu_input()));
+	connect(ui.pushButton_editor, SIGNAL(clicked()),	this, SLOT(slot_menu_editor()));
 	connect(ui.pushButton_credits, SIGNAL(clicked()),	this, SLOT(slot_menu_credits()));
 	connect(ui.pushButton_quit, SIGNAL(clicked()),	this, SLOT(slot_menu_quit()));
 	connect(ui.horizontalSlider_numPlayers, SIGNAL(valueChanged(int)),	this, SLOT(setNumPlayers(int)));
