@@ -582,6 +582,8 @@ void PhysicsComponent::detectedCollisionsDuringStepSimulation(btScalar timeStep)
 	}
 }
 
+//Refer to CullingComponent.cpp
+/*
 void PhysicsComponent::doCulling(unsigned int frustumAttributeIndex, unsigned int objectAttributeIndex)
 {
 	if(itrPhysics.at(objectAttributeIndex)->ptr_render.isValid())
@@ -633,3 +635,4 @@ void PhysicsComponent::updateCulling()
 		}
 	}
 }
+*/

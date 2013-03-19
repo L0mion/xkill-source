@@ -154,7 +154,8 @@ void CullingComponent::onUpdate(float delta)
 	while(itrRender.hasNext())
 	{
 		AttributePtr<Attribute_Render> ptr_render = itrRender.getNext();
-		if(ptr_render->meshID != XKILL_Enums::ModelId::LASER && ptr_render->meshID != 201 && ptr_render->meshID != 251 && !(ptr_render->meshID > 99 && ptr_render->meshID<200))
+		if(ptr_render->meshID != XKILL_Enums::ModelId::LASER && ptr_render->meshID != 201 && ptr_render->meshID != 251 && !(ptr_render->meshID > 99 && ptr_render->meshID<200)
+			&& !(ptr_render->meshID >= 400 && ptr_render->meshID <= 444))
 		{
 			ptr_render->culling.clear();
 		}
@@ -168,7 +169,14 @@ void CullingComponent::onUpdate(float delta)
 		while(itrRender.hasNext())
 		{
 			AttributePtr<Attribute_Render> ptr_render = itrRender.getNext();
-			if(ptr_render->meshID != XKILL_Enums::ModelId::LASER && ptr_render->meshID != 200 && ptr_render->meshID != 250 && ptr_render->meshID != 201 && ptr_render->meshID != 251 && !(ptr_render->meshID > 99 && ptr_render->meshID<200))
+			if(ptr_render->meshID != XKILL_Enums::ModelId::LASER &&
+				ptr_render->meshID != 200 &&
+				ptr_render->meshID != 250 &&
+				ptr_render->meshID != 201 &&
+				ptr_render->meshID != 251 &&
+				!(ptr_render->meshID > 99 && ptr_render->meshID<200) &&
+				!(ptr_render->meshID >= 400 && ptr_render->meshID <= 444)
+				)
 			{
 				Float3 p0 = ptr_render->ptr_spatial->ptr_position->position;
 				Float3 p1 = ptr_camera->ptr_spatial->ptr_position->position;

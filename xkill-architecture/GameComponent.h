@@ -111,5 +111,5 @@ public:
 	*/
 	void updateAndInterpretAimingRay(Entity* rayCastingPlayerEntity, AttributePtr<Attribute_Camera> ptr_camera);
 	void updateAndInterpretLaser(AttributePtr<Attribute_Ray> ptr_ray, AttributePtr<Attribute_Player> ptr_player, AttributePtr<Attribute_Camera> ptr_camera);
-	void shootProjectile(AttributePtr<Attribute_Spatial> ptr_spatial, AttributePtr<Attribute_WeaponStats> ptr_weaponStats, int damageModifier );
+	void shootProjectile(AttributePtr<Attribute_Spatial> ptr_spatial, AttributePtr<Attribute_WeaponStats> ptr_weaponStats, float damageModifier);
 };

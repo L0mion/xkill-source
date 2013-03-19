@@ -50,6 +50,7 @@ Attribute_Settings::Attribute_Settings()
 
 	timeUntilScheduling = 0.0f;
 	numErrors = 0;
+	soundMuted = false;
 	soundVolume_music = 0.5f;
 	soundVolume_effects = 0.5f;
 	numPlayers = 1;

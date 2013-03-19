@@ -15,8 +15,9 @@ Menu_Sound::Menu_Sound(Ui::MainWindow* ui, QMainWindow* window)
 	ui->horizontalSlider_soundVolume_music->setValue(SETTINGS->soundVolume_music * 100.0f);
 	ui->horizontalSlider_soundVolume_effects->setValue(SETTINGS->soundVolume_effects * 100.0f);
 
-	connect(ui->checkBox_Sound_Mute,			SIGNAL(clicked()),			this, SLOT(settingsMenuUpdated()));
-	connect(ui->horizontalSlider_soundVolume_music,	SIGNAL(valueChanged(int)),	this, SLOT(settingsMenuUpdated()));
+	connect(ui->checkBox_Sound_Mute,				  SIGNAL(clicked()),			this, SLOT(settingsMenuUpdated()));
+	connect(ui->horizontalSlider_soundVolume_music,	  SIGNAL(valueChanged(int)),	this, SLOT(settingsMenuUpdated()));
+	connect(ui->horizontalSlider_soundVolume_effects, SIGNAL(valueChanged(int)),	this, SLOT(settingsMenuUpdated()));
 }
 
 Menu_Sound::~Menu_Sound()
