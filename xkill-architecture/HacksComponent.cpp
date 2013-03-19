@@ -186,7 +186,7 @@ void HacksComponent::removeAllPlayerHacks(AttributePtr<Attribute_Player> playerA
 		{
 			if(playerAttribute == activeHacks_[i][j]->second)
 			{
-				//setPlayerAttributeHackFlags(activeHacks_[i][j]->second, static_cast<XKILL_Enums::HackType>(i), false);
+				setPlayerAttributeHackFlags(activeHacks_[i][j]->second, activeHacks_[i][j]->first, static_cast<XKILL_Enums::HackType>(i), false);
 				removeIndexFromVector(activeHacks_[i], j);
 			}
 		}
