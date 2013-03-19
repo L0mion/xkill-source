@@ -164,6 +164,11 @@ void PlayerPhysicsObject::handleOutOfBounds()
 			if(!SETTINGS->isNullprocessExecuting && ptr_player->priority > 0)
 			{
 				ptr_player->priority--; //punish players for falling outside of the level, if the null process is not running and if the player has priority
+				{Event_PostHudMessage e("", ptr_player); e.setHtmlMessage("You were","out of bounds","", "-1 priority"); SEND_EVENT(&e);}
+			}
+			else
+			{
+				{Event_PostHudMessage e("", ptr_player); e.setHtmlMessage("You were","out of bounds","", ""); SEND_EVENT(&e);}
 			}
 			DEBUGPRINT("Player entity " << playerEntityIndex << " was out of bounds");
 			SEND_EVENT(&Event_PlayerDeath(playerAttributeIndices[i]));

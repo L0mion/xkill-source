@@ -1566,7 +1566,7 @@ void NameGenerator::resetNames()
 	addName("give them my best");
 	addName("week-old sand castle");
 	addName("excavated automobile");
-	addName("of minor usefullness");
+	addName("of minor usefulness");
 	addName("just a coincidence");
 	addName("justice served you well");
 	addName("reinventor of wheel");
@@ -1616,6 +1616,11 @@ void NameGenerator::resetNames()
 	addName("the ground and its soil");
 	addName("that thing in daylight");
 	addName("locket load");
+	addName("transport option 1: falling");
+	addName("only serious offers");
+	addName("by certain standards");
+	addName("quickest way to get out of here");
+	addName("please reconsider");
 
 	//C++ keywords
 	addName("alignas");

@@ -151,10 +151,14 @@ void CollisionManager::collision_applyDamage(Entity* entity1, Entity* entity2)
 									}
 									else //Punish player for blowing himself up
 									{
-										{Event_PostHudMessage e("", creatorOfProjectile_ptr_player); e.setHtmlMessage("You","self-terminated","", "-1 priority"); SEND_EVENT(&e);}
 										if(creatorOfProjectile_ptr_player->priority > 0) //Prevent overpunishment of players
 										{
 											creatorOfProjectile_ptr_player->priority--;
+											{Event_PostHudMessage e("", creatorOfProjectile_ptr_player); e.setHtmlMessage("You","self-terminated","", "-1 priority"); SEND_EVENT(&e);}
+										}
+										else
+										{
+											{Event_PostHudMessage e("", creatorOfProjectile_ptr_player); e.setHtmlMessage("You","self-terminated","", ""); SEND_EVENT(&e);}
 										}
 									}
 									playerThatDied_ptr_player->detectedAsDead = true;
