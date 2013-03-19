@@ -174,13 +174,19 @@ void Renderer::unloadModels()
 
 HRESULT Renderer::resize(unsigned int screenWidth, unsigned int screenHeight)
 {
+	screenWidth = SETTINGS->render_width;
+	screenHeight = SETTINGS->render_height;
+
 	//Get number of split-screens
 	unsigned int numSS = itrSplitScreen.count();
 	
-	//Initialize new windo-type object.
+	//Initialize new window-type object.
 	HRESULT hr = S_OK;
 	unsigned int numViewports, csDispatchX, csDispatchY;
 	numViewports	= numSS;
+
+	//int width = SETTINGS->render_width;
+	//int height = SETTINGS->render_height;
 
 	csDispatchX	= (unsigned int)ceil((float)screenWidth		/ (float)CS_TILE_SIZE);
 	csDispatchY	= (unsigned int)ceil((float)screenHeight	/ (float)CS_TILE_SIZE);

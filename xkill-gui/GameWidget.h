@@ -55,6 +55,7 @@ public:
 	};
 	~GameWidget()
 	{
+		UNSUBSCRIBE_TO_EVENTS(this);
 	};
 	
 	QPaintEngine* paintEngine() const {return 0;}; // overrides Qt:s own paint engine; prevents flicker
@@ -142,6 +143,8 @@ protected:
 		// Inform about resize
 		int width = size().width();
 		int height = size().height();
+		SETTINGS->render_width = width;
+		SETTINGS->render_height = height;
 		SEND_EVENT(&Event_WindowResize(width, height));
 		sendPositionEvent();
 	}

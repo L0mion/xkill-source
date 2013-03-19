@@ -153,6 +153,27 @@ private slots:
 			slot_menu_main();
 		}
 	}
+
+	void applyVideoRes()
+	{
+		SETTINGS->render_width = ui.spinBox_videoResX->value();
+		SETTINGS->render_height = ui.spinBox_videoResY->value();
+
+		// Inform about resize
+		Event_GetWindowResolution e;
+		SEND_EVENT(&e);
+		int width = e.width;
+		int height = e.height;
+		SEND_EVENT(&Event_WindowResize(width, height));
+	}
+	void applyShaders()
+	{
+		SETTINGS->ssaoOn = ui.checkBox_ssao->isChecked();
+		SETTINGS->shadowsOn = ui.checkBox_shadows->isChecked();
+		SETTINGS->glowOn = ui.checkBox_glow->isChecked();
+	}
+
+
 	void setNumPlayers(int numPlayers)
 	{
 		SETTINGS->numPlayers = numPlayers;
