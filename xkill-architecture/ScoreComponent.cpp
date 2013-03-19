@@ -154,6 +154,7 @@ void ScoreComponent::handleExecutionMode(float delta)
 			executingPlayer->cycles++;
 
 			{Event_PostHudMessage e("", executingPlayer); e.setHtmlMessage("", "priority to cycles", "", "-1 priority +1 cycle"); SEND_EVENT(&e);}
+			SEND_EVENT(&Event_PlaySound(XKILL_Enums::Sound::SOUND_CYCLEGAINED));
 		}
 		else								// The player doesn't have any priority left so leave execution mode
 		{
