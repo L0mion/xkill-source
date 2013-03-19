@@ -1407,7 +1407,7 @@ void NameGenerator::resetNames()
 	addName("send me flowers");
 	addName("pacifist");
 	addName("Keymaster");
-	addName("Vietnam Flashback");
+	addName("having a Vietnam flashback");
 	addName("grizzled veteran");
 	addName("one-man army");
 	addName("conspicuous");
