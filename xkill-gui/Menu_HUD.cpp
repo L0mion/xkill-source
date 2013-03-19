@@ -13,10 +13,32 @@ Menu_HUD::Menu_HUD( AttributePtr<Attribute_SplitScreen> splitScreen, QWidget* pa
 	ui.setupUi(this);
 	ptr_splitScreen = splitScreen;
 
-	Float2 pos(ptr_splitScreen->ssTopLeftX, ptr_splitScreen->ssTopLeftY);
-	move(ptr_splitScreen->ssTopLeftX, ptr_splitScreen->ssTopLeftY);
-	resize(ptr_splitScreen->ssWidth, ptr_splitScreen->ssHeight);
+	// Set split screen factor
+	// used to change size of
+	// hud relative to true resolution
+	// and renderer resolution
+	{
+		Float2 deltaFactor;
+		Event_GetWindowResolution e;
+		SEND_EVENT(&e);
+		int renderWidth =  SETTINGS->render_width;
+		deltaFactor.x = ((float)e.width) / renderWidth;
+		int renderHeight =  SETTINGS->render_height;
+		deltaFactor.y = ((float)e.height) / renderHeight;
+		ptr_splitScreen->setDeltaFactor(deltaFactor);
+	}
+	
+
+	position = ptr_splitScreen->deltaTopLeft();
+	move(position.x, position.y);
+	screenSize = ptr_splitScreen->deltaSize();
+	resize(screenSize.x, screenSize.y);
 	hide();
+
+	// Compute resolution factor to compensate if renderer 
+	// runs in different resolution from window
+	
+	
 
 	QWidget::setAttribute(Qt::WA_ShowWithoutActivating);
 	QWidget::setAttribute(Qt::WA_TransparentForMouseEvents);
@@ -45,10 +67,6 @@ Menu_HUD::~Menu_HUD()
 
 void Menu_HUD::mapToSplitscreen()
 {
-	Float2 screenSize;
-	screenSize.x = ptr_splitScreen->ssWidth;
-	screenSize.y = ptr_splitScreen->ssHeight;
-
 	Float2 centerPos;
 	centerPos.x = screenSize.x * 0.5f;
 	centerPos.y = screenSize.y * 0.5f;
@@ -59,10 +77,10 @@ void Menu_HUD::mapToSplitscreen()
 
 	// Move stretch death overlay across screen
 	ui.label_deathOverlay->move(0, 0);
-	ui.label_deathOverlay->resize(ptr_splitScreen->ssWidth, ptr_splitScreen->ssHeight);
+	ui.label_deathOverlay->resize(screenSize.x, screenSize.y);
 	ui.label_deathOverlay->hide();
 	ui.label_hitOverlay->move(0, 0);
-	ui.label_hitOverlay->resize(ptr_splitScreen->ssWidth, ptr_splitScreen->ssHeight);
+	ui.label_hitOverlay->resize(screenSize.x, screenSize.y);
 	ui.label_hitOverlay->hide();
 
 	// Move center HUD to center
@@ -184,10 +202,10 @@ void Menu_HUD::refresh()
 			// Hide
 			Float2 size;
 			float sizeModifier = f_reloadRatio;
-			size.x = ptr_splitScreen->ssWidth * 0.4f * sizeModifier;
-			size.y = ptr_splitScreen->ssWidth * 0.03f * sizeModifier;
+			size.x = screenSize.x * 0.4f * sizeModifier;
+			size.y = screenSize.x * 0.03f * sizeModifier;
 			ui.label_reloadFeedback->resize(size.x, size.y);
-			ui.label_reloadFeedback->move((ptr_splitScreen->ssWidth - ui.label_reloadFeedback->width()) * 0.5f, (ptr_splitScreen->ssHeight - ui.label_reloadFeedback->height()) * 0.5f);
+			ui.label_reloadFeedback->move((screenSize.x - ui.label_reloadFeedback->width()) * 0.5f, (screenSize.y - ui.label_reloadFeedback->height()) * 0.5f);
 			ui.label_reloadFeedback->update();
 
 		}

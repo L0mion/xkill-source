@@ -77,6 +77,15 @@ MainWindow::MainWindow()
 	slot_toggleFullScreen();			//Windowed
 	SEND_EVENT(&Event(EVENT_STARTGAME));//Skips menu in DEBUG
 #endif
+
+	{
+		int width = gameWidget->width();
+		int height = gameWidget->height();
+		
+		SETTINGS->render_width = width;
+		SETTINGS->render_height = height;
+	}
+	
 }
 
 MainWindow::~MainWindow()
@@ -105,6 +114,9 @@ void MainWindow::onEvent( Event* e )
 	case EVENT_TOGGLE_EDITOR:
 		{
 			ui.dockWidget->toggleViewAction()->activate(QAction::Trigger);
+			if(!ui.dockWidget->isHidden())
+				SEND_EVENT(&Event_SetMouseLock(false));
+
 		}
 		break;
 	default:
@@ -347,6 +359,11 @@ bool MainWindow::eventFilter( QObject* object, QEvent* event )
 	{
 		SEND_EVENT(&Event(EVENT_WINDOW_FOCUS_CHANGED));
 		DEBUGPRINT("Event: WindowActivate"); 
+	}
+
+	if(type == QEvent::WindowDeactivate)
+	{
+		SEND_EVENT(&Event_SetMouseLock(false));
 	}
 
 	return false;

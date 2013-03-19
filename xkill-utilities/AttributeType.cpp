@@ -426,6 +426,27 @@ float Attribute_SplitScreen::getAspectRatio()
 	return (float)ssWidth/(float)ssHeight;
 }
 
+
+Float2 Attribute_SplitScreen::deltaSize()
+{
+	Float2 out;
+
+	out.x = deltaFactor.x*ssWidth;
+	out.y = deltaFactor.y*ssHeight;
+
+	return out;
+}
+
+Float2 Attribute_SplitScreen::deltaTopLeft()
+{
+	Float2 out;
+
+	out.x = deltaFactor.x*ssTopLeftX;
+	out.y = deltaFactor.y*ssTopLeftY;
+
+	return out;
+}
+
 Attribute_Input::Attribute_Input()
 {
 	jump = false;

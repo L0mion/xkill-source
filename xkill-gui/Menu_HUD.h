@@ -29,6 +29,9 @@ private:
 	HudScheduling schedulingHud;
 	HudPowerupDispayer hudPowerupDispayer;
 
+	Float2 screenSize;
+	Float2 position;
+
 	float hitOverlayFade;
 	float crosshair_targetHitFade;
 	float scoreboardFade;
