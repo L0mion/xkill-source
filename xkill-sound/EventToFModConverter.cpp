@@ -253,6 +253,7 @@ std::string EventToFModConverter::configMessage()
 	table.push_back(std::pair<int, std::string>(XKILL_Enums::Sound::SOUND_SNIPER,				"Sniper"));
 	table.push_back(std::pair<int, std::string>(XKILL_Enums::Sound::SOUND_SHOTGUN,				"Shotgun"));
 	table.push_back(std::pair<int, std::string>(XKILL_Enums::Sound::SOUND_ROCKET,				"Rocket"));
+	table.push_back(std::pair<int, std::string>(XKILL_Enums::Sound::SOUND_CYCLEGAINED,			"Cycle Gained"));
 
 	//table.push_back(std::pair<int, std::string>(EVENT_CREATE_PROJECTILE + offset,				"Fire Gun"));
 	//table.push_back(std::pair<int, std::string>(EVENT_PLAYERDEATH + offset,					"Player Death"));

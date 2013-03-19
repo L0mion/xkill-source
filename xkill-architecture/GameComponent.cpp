@@ -437,7 +437,7 @@ void GameComponent::updatePlayerAttributes(float delta)
 					firingMode->reloadTimeLeft = firingMode->reloadTime;
 					ammo->isReloading = false;
 
-					int damageModifier = 1.0f;
+					float damageModifier = 1.0f;
 					if(ptr_player->powerHackPair.first)
 					{
 						damageModifier = 2.0f;
@@ -794,7 +794,6 @@ void GameComponent::spawnPlayer(AttributePtr<Attribute_Player> ptr_player)
 	ptr_player->ptr_camera->fieldOfView = 3.14f/4.0f;
 	ptr_player->respawnTimer.resetTimer();
 	ptr_player->detectedAsDead = false;
-	ptr_player->currentSprintTime = 0.0f;
 	SEND_EVENT(&Event_PlaySound(XKILL_Enums::Sound::SOUND_RESPAWN, itrPlayer.ownerIdAt(ptr_player.index()), ptr_position->position, true));
 }
 
@@ -1186,7 +1185,7 @@ void GameComponent::updateAndInterpretLaser(AttributePtr<Attribute_Ray> ptr_ray,
 	}
 }
 
-void GameComponent::shootProjectile( AttributePtr<Attribute_Spatial> ptr_spatial, AttributePtr<Attribute_WeaponStats> ptr_weaponStats, int damageModifier )
+void GameComponent::shootProjectile(AttributePtr<Attribute_Spatial> ptr_spatial, AttributePtr<Attribute_WeaponStats> ptr_weaponStats, float damageModifier)
 {
 	Ammunition* ammo = &ptr_weaponStats->ammunition[ptr_weaponStats->currentAmmunitionType];
 	FiringMode* firingMode = &ptr_weaponStats->firingMode[ptr_weaponStats->currentFiringModeType];

@@ -105,7 +105,7 @@ void MutatorSettings::initStandardAmmunition()
 	ammo->isReloading						= false;
 	ammo->type								= XKILL_Enums::AmmunitionType::EXPLOSIVE;
 	ammo->damage							= 50.0f;
-	ammo->explosionSphereInitialRadius		= 1.0f;
+	ammo->explosionSphereInitialRadius		= 0.0f;
 	ammo->explosionSphereFinalRadius		= 3.0f;
 	ammo->explosionSphereExplosionDuration	= 1.0f;
 	ammo->explosive							= true;

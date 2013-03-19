@@ -61,6 +61,8 @@ public:
 	void StopSoundEventAt(unsigned int index, int ownerPlayerEntityId);
 	/** \brief Stop all sounds except music.*/
 	void StopAllSoundEffects();
+	/** \brief Stop all music. */
+	void StopAllMusic();
 	/** \brief Mutes all sounds.*/
 	void SetMuteSounds(bool mute = true);
 	/** \brief Set volume.*/

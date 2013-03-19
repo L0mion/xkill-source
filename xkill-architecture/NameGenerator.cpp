@@ -1555,7 +1555,7 @@ void NameGenerator::resetNames()
 	addName("butterfly pavillion");
 	addName("the sand dunes are whispering");
 	addName("exceeded storage capacity");
-	addName("unexplainable tasty beverage");
+	addName("unexplainably tasty beverage");
 	addName("nutritious breakfast");
 	addName("the duration of toast");
 	addName("otherwise well-behaved");
@@ -1579,7 +1579,44 @@ void NameGenerator::resetNames()
 	addName("click here for lunch");
 	addName("I think they moved out");
 	addName("3 rules of obedience. Rule 1: obey.");
-	
+	addName("I wouldn't call today foggy");
+	addName("this is not my umbrella");
+	addName("whenever you're ready");
+	addName("zip it");
+	addName("Bertha Ballistics");
+	addName("crossbowed expectation");
+	addName("the act or the state");
+	addName("don't feed the animals");
+	addName("decisive action");
+	addName("interlaced threads");
+	addName("freed mouse pointer");
+	addName("big bank loan");
+	addName("high-risk coordination");
+	addName("deploy anywhere else");
+	addName("not that place again");
+	addName("xkill the spot");
+	addName("all I got was this T-shirt");
+	addName("sham blang roogy");
+	addName("contracted volunteer");
+	addName("obsolete novelty");
+	addName("Dr. Loboto");
+	addName("honest disbeliever");
+	addName("crazy you");
+	addName("pilgrim in foreign land");
+	addName("hale and hearty");
+	addName("still going strong");
+	addName("okay, this is not okay");
+	addName("try to fly");
+	addName("fishing with grenades");
+	addName("working invisibility");
+	addName("lonely rebel");
+	addName("inspector hovercraft");
+	addName("fake helium balloon");
+	addName("governmental agency agent");
+	addName("the ground and its soil");
+	addName("that thing in daylight");
+	addName("locket load");
+
 	//C++ keywords
 	addName("alignas");
 	addName("alignof");

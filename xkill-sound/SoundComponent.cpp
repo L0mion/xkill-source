@@ -19,7 +19,6 @@ SoundComponent::SoundComponent()
 	useSound = false;
 	mFMODEventSystem = NULL;
 	converter = NULL;
-	timer = 0.0f;
 
 	SUBSCRIBE_TO_EVENT(this, EVENT_PLAYSOUND);
 	SUBSCRIBE_TO_EVENT(this, EVENT_STOPSOUND);
@@ -55,6 +54,12 @@ bool SoundComponent::init(std::string configFilePath)
 
 		fillEventsToFModVector(configFilePath);
 	}
+
+	musicTransitionTimer_.setActive(false);
+	musicTransitionTimer_.setStartTime(1.0f);
+	musicTransitionRate_ = 1.0f;
+	musicVolumePretransition_ = SETTINGS->soundVolume_music;
+	playMenuMusic_ = true;
 
 	return true;
 }
@@ -94,6 +99,12 @@ void SoundComponent::onEvent(Event* e)
 	else if(type == EventType::EVENT_START_DEATHMATCH)
 	{
 		mFMODEventSystem->UpdateNrOfListeners();
+
+		musicTransitionTimer_.setActive(true);
+		musicTransitionTimer_.resetTimer();
+		musicTransitionRate_ = SETTINGS->soundVolume_music * musicTransitionTimer_.getStartTime();
+		playMenuMusic_ = false;
+		musicVolumePretransition_ = SETTINGS->soundVolume_music;
 	}
 	else if(type == EventType::EVENT_STOPSOUND)
 	{
@@ -108,6 +119,12 @@ void SoundComponent::onEvent(Event* e)
 	else if(type == EVENT_GAMEOVER || type == EVENT_END_DEATHMATCH || type == EVENT_ENDGAME)
 	{
 		mFMODEventSystem->StopAllSoundEffects();
+	
+		musicTransitionTimer_.setActive(true);
+		musicTransitionTimer_.resetTimer();
+		musicTransitionRate_ = SETTINGS->soundVolume_music * musicTransitionTimer_.getStartTime();
+		playMenuMusic_ = true;
+		musicVolumePretransition_ = SETTINGS->soundVolume_music;
 	}
 }
 
@@ -116,14 +133,31 @@ void SoundComponent::onUpdate(float delta)
 	if(!useSound)
 		return;
 
-	//timer += delta;
-	//if(timer >= 0.5f)
-	//{
-	//	timer = 0.0f;
-	//	int fmodEventIndex = converter->getFModIndex(XKILL_Enums::Sound::SOUND_WALK);
-	//	if(fmodEventIndex >= 0)
-	//		mFMODEventSystem->StartSoundEventAt(fmodEventIndex);
-	//}
+	if(musicTransitionTimer_.isActive())
+	{
+		musicTransitionTimer_.update(delta);
+
+		SETTINGS->soundVolume_music -= musicTransitionRate_*delta;
+		mFMODEventSystem->SetMusicVolume(SETTINGS->soundVolume_music);
+
+		if(musicTransitionTimer_.hasTimerExpired())
+		{
+			musicTransitionTimer_.setActive(false);
+			musicTransitionTimer_.resetTimer();
+
+			mFMODEventSystem->StopAllMusic();
+			SETTINGS->soundVolume_music = musicVolumePretransition_;
+			mFMODEventSystem->SetMusicVolume(SETTINGS->soundVolume_music);
+			if(playMenuMusic_)
+			{
+				SEND_EVENT(&Event_PlaySound(XKILL_Enums::Sound::SOUND_MENU_MUSIC));
+			}
+			else
+			{
+				SEND_EVENT(&Event_PlaySound(XKILL_Enums::Sound::SOUND_GAME_MUSIC));
+			}
+		}
+	}
 
 	mFMODEventSystem->Update();
 }
