@@ -51,8 +51,10 @@ private:
 	btAlignedObjectArray<FrustumPhysicsObject*>* frustumPhysicsObjects_;  //!< List of frustums mapping to cameras wich is used to cull physicsobjects
 
 	void synchronizeWithAttributes(AttributePtr<Attribute_Physics> ptr_physics, int physicsAttributeIndex);  //!< Synronize newly added physicsattributes with physicsobjects
-	void updateCulling();  //!< Update frustums, clear culling data, sync frustums with cameras
-	void doCulling(unsigned int frustumAttributeIndex, unsigned int objectAttributeIndex);  //!< Set culling data based on a collision between frustum and physicsobject
+
+	//Refer to CullingComponent.h
+	//void updateCulling();  //!< Update frustums, clear culling data, sync frustums with cameras
+	//void doCulling(unsigned int frustumAttributeIndex, unsigned int objectAttributeIndex);  //!< Set culling data based on a collision between frustum and physicsobject
 	void razeWorld();
 public:
 	PhysicsComponent();

@@ -289,7 +289,7 @@ void NameGenerator::resetNames()
 	addName("patch");
 	addName("version control");
 	addName("code evaluation");
-	addName("your neighbour");
+	addName("out new neighbour");
 	addName("interpretor");
 	addName("inter-predator");
 	addName("failed to load file");
@@ -1547,7 +1547,7 @@ void NameGenerator::resetNames()
 	addName("these cubes are falling, aren't they?");
 	addName("simple armageddon machine");
 	addName("are those for sale?");
-	addName("double it");
+	addName("double the effort");
 	addName("fiction gone wrong");
 	addName("generally forbidden");
 	addName("mind if I borrow this spinning gadget?");
@@ -1573,6 +1573,12 @@ void NameGenerator::resetNames()
 	addName("you must show them");
 	addName("rate the frame");
 	addName("unknown know-how");
+	addName("deserted unimportantly looking fort");
+	addName("Swedish dish");
+	addName("sergeant in command");
+	addName("click here for lunch");
+	addName("I think they moved out");
+	addName("3 rules of obedience. Rule 1: obey.");
 	
 	//C++ keywords
 	addName("alignas");
