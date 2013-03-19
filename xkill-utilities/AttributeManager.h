@@ -36,6 +36,8 @@ public:
 	float nullprocessExecutionTime;
 	bool isNullprocessExecuting;
 
+	bool freeLookMode;
+
 	bool ssaoOn;
 	bool shadowsOn;
 	bool glowOn;

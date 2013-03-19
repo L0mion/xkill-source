@@ -242,8 +242,18 @@ void CameraComponent::onUpdate(float delta)
 		}
 		else
 		{
-			yaw(ptr_input->rotation.x, ptr_camera);
-			pitch(ptr_input->rotation.y, ptr_camera);
+			// Disable camera for first player
+			// if we are in "freeLookMode"
+			if(SETTINGS->freeLookMode && itrPlayer.orderIndex() == 0)
+			{
+				// Do nothing
+				int debug;
+			}
+			else
+			{
+				yaw(ptr_input->rotation.x, ptr_camera);
+				pitch(ptr_input->rotation.y, ptr_camera);
+			}
 		}
 		
 		//Entity* entity = itrInput.owner();
