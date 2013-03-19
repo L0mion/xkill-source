@@ -23,7 +23,7 @@ MainWindow::MainWindow()
 	gameWidget = NULL;
 
 	// Create console
-//#ifdef XKILL_DEBUG
+#ifdef XKILL_DEBUG
 	AllocConsole();
 	SetConsoleTitle(L"Debug console");
 	int hConHandle;
@@ -34,7 +34,7 @@ MainWindow::MainWindow()
 	fp = _fdopen( hConHandle, "w" );
 	*stdout = *fp;
 	setvbuf( stdout, NULL, _IONBF, 0 );
-//#endif
+#endif
 
 	// Init iterators
 	ATTRIBUTES_INIT_ALL;
