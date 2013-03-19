@@ -1555,7 +1555,7 @@ void NameGenerator::resetNames()
 	addName("butterfly pavillion");
 	addName("the sand dunes are whispering");
 	addName("exceeded storage capacity");
-	addName("unexplainable tasty beverage");
+	addName("unexplainably tasty beverage");
 	addName("nutritious breakfast");
 	addName("the duration of toast");
 	addName("otherwise well-behaved");
@@ -1599,6 +1599,10 @@ void NameGenerator::resetNames()
 	addName("sham blang roogy");
 	addName("contracted volunteer");
 	addName("obsolete novelty");
+	addName("Dr. Loboto");
+	addName("honest disbeliever");
+	addName("crazy you");
+	addName("pilgrim in foreign land");
 
 	//C++ keywords
 	addName("alignas");
