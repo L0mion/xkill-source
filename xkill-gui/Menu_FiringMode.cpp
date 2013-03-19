@@ -47,11 +47,7 @@ void Menu_FiringMode::setSettingsMenu()	// TODO: Set good values for the sliders
 	ui->horizontalSlider_Weapon_ClipSize->setValue(firingMode->clipSize);
 	ui->horizontalSlider_Weapon_ReloadTime->setValue(static_cast<int>(firingMode->reloadTime * 100.0f));
 
-	float cooldownBetweenShots = firingMode->cooldownBetweenShots;
-	if(cooldownBetweenShots < 1.0f)
-		cooldownBetweenShots = 1.0f;
-
-	ui->horizontalSlider_Weapon_RateOfFire->setValue(static_cast<int>(1.0f / cooldownBetweenShots));
+	ui->horizontalSlider_Weapon_RateOfFire->setValue(static_cast<int>(firingMode->cooldownBetweenShots* 100.0f));
 	ui->horizontalSlider_Weapon_DamageModifier->setValue(static_cast<int>(firingMode->damageModifier * 100.0f));
 	ui->horizontalSlider_Weapon_ExplosionSphereModifier->setValue(static_cast<int>(firingMode->explosionSphereModifier * 100.0f));
 	
@@ -74,7 +70,7 @@ void Menu_FiringMode::settingsMenuUpdated()
 		firingMode->canShootScatter = ui->checkBox_Weapon_Scatter->isChecked();
 		firingMode->canShootExplosive = ui->checkBox_Weapon_Explosive->isChecked();
 		firingMode->clipSize = ui->horizontalSlider_Weapon_ClipSize->value();
-		firingMode->cooldownBetweenShots = 1.0f / static_cast<float>(ui->horizontalSlider_Weapon_RateOfFire->value());
+		firingMode->cooldownBetweenShots = static_cast<float>(ui->horizontalSlider_Weapon_RateOfFire->value() * 0.01f);
 		firingMode->damageModifier = static_cast<float>(ui->horizontalSlider_Weapon_DamageModifier->value()) * 0.01f;
 		firingMode->explosionSphereModifier = static_cast<float>(ui->horizontalSlider_Weapon_ExplosionSphereModifier->value()) * 0.01f;
 		firingMode->reloadTime = static_cast<float>(ui->horizontalSlider_Weapon_ReloadTime->value()) * 0.01f;
@@ -82,7 +78,7 @@ void Menu_FiringMode::settingsMenuUpdated()
 		// Update labels
 		ui->label_Weapon_ClipSize->setNum((int)firingMode->clipSize);
 		ui->label_Weapon_ReloadTime->setNum(static_cast<int>(firingMode->reloadTime * 100.0f));
-		ui->label_Weapon_RateOfFire->setNum(static_cast<int>(1.0f / firingMode->cooldownBetweenShots));
+		ui->label_Weapon_RateOfFire->setNum(static_cast<int>(firingMode->cooldownBetweenShots));
 		ui->label_Weapon_DamageModifier->setNum(static_cast<int>(firingMode->damageModifier * 100.0f));
 		ui->label_Weapon_ExplosionSphereModifier->setNum(static_cast<int>(firingMode->explosionSphereModifier * 100.0f));
 	}

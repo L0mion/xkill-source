@@ -128,7 +128,7 @@ void InputComponent::handleInput(float delta)
 		float sensitivityModifier = device->getFloatValue(InputAction::ACTION_F_LOW_SENSITIVITY, delta);
 		device->setSensitivityModifier(sensitivityModifier);
 
-		ptr_player->ptr_camera->fieldOfViewModifier = 1.0f - sensitivityModifier;
+		ptr_player->ptr_camera->fieldOfViewModifier = 1.0f - sensitivityModifier/3;
 
 		// MATTIAS: What to do here?
 		// ptr_player->ptr_camera->fieldOfViewModifier = 0.5f;

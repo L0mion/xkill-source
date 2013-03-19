@@ -185,6 +185,10 @@ private slots:
 	{
 		push_menu(ui.frame_input);
 	}
+	void slot_menu_editor()
+	{
+		SEND_EVENT(&Event(EVENT_TOGGLE_EDITOR));
+	}
 	void slot_menu_credits()
 	{
 		push_menu(ui.frame_credits);

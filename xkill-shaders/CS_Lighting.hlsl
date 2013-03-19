@@ -153,9 +153,15 @@ void CS_Lighting(
 				/*Normal*/		surfaceNormalV,
 				/*inout*/		ambient, diffuse, specular);
 		
+			if(shadowsOn)
+			{
+				diffuse *= shadow;
+				specular *= shadow;
+			}
+
 			Ambient		+= ambient;	
-			Diffuse		+= diffuse	* shadow; //Shadow ought only be applied onto the first directional light, but as we have no more than one, there is no need for branch.
-			Specular	+= specular	* shadow;
+			Diffuse		+= diffuse;
+			Specular	+= specular;
 		}
 		const uint numLights = min(tileLightNum, TILE_MAX_LIGHTS); //Clamp tileLightNum as it may be bigger than allowed lights.
 		for(i = 0; i < numLights; i++)
@@ -177,12 +183,20 @@ void CS_Lighting(
 		}
 
 		//Apply SSAO to ambient lighting only.
-		Ambient *= bufferSSAO.SampleLevel(ss, texCoord, 0).x;
+		if(ssaoOn)
+		{
+			Ambient *= bufferSSAO.SampleLevel(ss, texCoord, 0).x;
+		}
 	}
 	Ambient.xyz = Ambient.xyz  + Diffuse.xyz + Specular.xyz; //Unecessary to take up another register with a temp-var. We just use Ambient to represent the final colour.
 
 	//Use additive blending to add glow to the final image using additive blending:
-	Ambient.xyz = min(Ambient.xyz + bufferGlowHigh.SampleLevel(ss, texCoord, 0).xyz, 1.0f);
+	if(glowOn)
+	{
+		Ambient.xyz += bufferGlowHigh.SampleLevel(ss, texCoord, 0).xyz;
+	}
+
+	Ambient.xyz = min(Ambient.xyz, 1.0f);
 	output[
 		uint2(
 			threadIDDispatch.x + viewportTopX, 

@@ -289,7 +289,7 @@ void NameGenerator::resetNames()
 	addName("patch");
 	addName("version control");
 	addName("code evaluation");
-	addName("your neighbour");
+	addName("out new neighbour");
 	addName("interpretor");
 	addName("inter-predator");
 	addName("failed to load file");
@@ -1532,7 +1532,53 @@ void NameGenerator::resetNames()
 	addName("where ferries drink");
 	addName("change the plot");
 	addName("output-build.txt");
-	addName("btAssert(0)");
+	addName("Stefan Petersson");
+	addName("reap and sow");
+	addName("radiating radix");
+	addName("fueled by anger");
+	addName("who would have known?");
+	addName("sin(k) or float");
+	addName("blind intention");
+	addName("explorer or exploder");
+	addName("limiting factor");
+	addName("use the red button");
+	addName("50 gold peggats");
+	addName("jump when I say ready, ready?");
+	addName("these cubes are falling, aren't they?");
+	addName("simple armageddon machine");
+	addName("are those for sale?");
+	addName("double the effort");
+	addName("fiction gone wrong");
+	addName("generally forbidden");
+	addName("mind if I borrow this spinning gadget?");
+	addName("what could possibly go wrong?");
+	addName("butterfly pavillion");
+	addName("the sand dunes are whispering");
+	addName("exceeded storage capacity");
+	addName("unexplainable tasty beverage");
+	addName("nutritious breakfast");
+	addName("the duration of toast");
+	addName("otherwise well-behaved");
+	addName("not a criminal");
+	addName("welded shut");
+	addName("life goes on and on, boom.");
+	addName("disembark from shopping cart");
+	addName("give them my best");
+	addName("week-old sand castle");
+	addName("excavated automobile");
+	addName("of minor usefullness");
+	addName("just a coincidence");
+	addName("justice served you well");
+	addName("reinventor of wheel");
+	addName("you must show them");
+	addName("rate the frame");
+	addName("unknown know-how");
+	addName("deserted unimportantly looking fort");
+	addName("Swedish dish");
+	addName("sergeant in command");
+	addName("click here for lunch");
+	addName("I think they moved out");
+	addName("3 rules of obedience. Rule 1: obey.");
 	
 	//C++ keywords
 	addName("alignas");
@@ -1687,24 +1733,15 @@ void NameGenerator::resetColors()
 	// Add colors
 	//
 
-	addColor(Float3(1.0f, 0.0f, 0.0));		// Red
-	addColor(Float3(0.25f, 0.75f, 0.20));	// Green
-	addColor(Float3(0.0f, 0.5f, 1.0));		// Blue
-	addColor(Float3(0.0f, 1.0f, 1.0));		// Cyan
-	addColor(Float3(1.0f, 1.0f, 0.0));		// Yellow
-	addColor(Float3(0.5f, 0.25f, 1.0));		// Violet
-	addColor(Float3(1.0f, 0.5f, 0.0));		// Orange
-	addColor(Float3(1.0f, 0.5f, 1.0));		// Pink
-	addColor(Float3(1.0f, 1.0f, 1.0));		// White
-	
-	//addColor(Float3(1.0f, 0.4f, 0.0));
-	//addColor(Float3(0.7f, 0.0f, 1.0));
-
-	////new colors
-	//addColor(Float3(0.3f, 0.2f, 0.8f));
-	//addColor(Float3(0.7f, 0.5f, 0.5f));
-	//addColor(Float3(1.0f, 1.0f, 0.5f));
-	//addColor(Float3(0.75f, 0.75f, 0.75f));
+	addColor(Float3(1.0f, 0.0f, 0.0f));		// Red
+	addColor(Float3(0.25f, 0.75f, 0.20f));	// Green
+	addColor(Float3(0.0f, 0.5f, 1.0f));		// Blue
+	addColor(Float3(0.0f, 1.0f, 1.0f));		// Cyan
+	addColor(Float3(1.0f, 1.0f, 0.0f));		// Yellow
+	addColor(Float3(0.5f, 0.25f, 1.0f));	// Violet
+	addColor(Float3(1.0f, 0.5f, 0.0f));		// Orange
+	addColor(Float3(1.0f, 0.5f, 1.0f));		// Pink
+	addColor(Float3(1.0f, 1.0f, 1.0f));		// White
 }
 
 void NameGenerator::addColor( Float3 color )
