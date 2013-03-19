@@ -1043,6 +1043,7 @@ void Behavior_Offset::updateOffset()
 DataItemList* Behavior_Offset::getDataList()
 {
 	DataItemList* list = new DataItemList();
+	list->add(&isDisabled,							"disabled");
 	list->add(&ptr_parent_spatial_position,			"ptr_parent_spatial_position");
 	list->add(&ptr_parent_spatial_rotation,			"ptr_parent_spatial_rotation");
 	list->add(offset_position,						"offset_position");
@@ -1051,6 +1052,7 @@ DataItemList* Behavior_Offset::getDataList()
 }
 void Behavior_Offset::saveTo( DataItemList* list )
 {
+	list->get(&isDisabled);
 	list->get(&ptr_parent_spatial_position);
 	list->get(&ptr_parent_spatial_rotation);
 	list->get(&offset_position);
