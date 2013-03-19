@@ -189,15 +189,6 @@ void GameComponent::onUpdate(float delta)
 		}
 	}
 
-	//check
-	//--------------------------------------------------------------------------------------
-	// Handle pickupable attributes
-	//--------------------------------------------------------------------------------------
-	//while(itrPickupable.hasNext())
-	//{
-	//	Attribute_Pickupable* pickupable = itrPickupable.getNext();
-	//}
-
 	//--------------------------------------------------------------------------------------
 	// Handle weapons stats attributes
 	//--------------------------------------------------------------------------------------
@@ -765,7 +756,6 @@ void GameComponent::spawnPlayer(AttributePtr<Attribute_Player> ptr_player)
 					
 		up = DirectX::XMLoadFloat3(&DirectX::XMFLOAT3(0.0f,1.0f,0.0f));
 		eye = DirectX::XMLoadFloat3((DirectX::XMFLOAT3*)&Float3(ptr_position->position.x, 0.0f, ptr_position->position.z));
-		OUTPUT_WINDOW_PRINT("value: " << *ptr_position->position.asFloat());
 		lookAt = DirectX::XMLoadFloat3(&DirectX::XMFLOAT3(0.0f,0.0f,1.0f));
 				
 		rotation = DirectX::XMMatrixLookAtLH(eye,lookAt,up);
