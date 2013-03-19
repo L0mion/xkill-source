@@ -437,7 +437,7 @@ void GameComponent::updatePlayerAttributes(float delta)
 					firingMode->reloadTimeLeft = firingMode->reloadTime;
 					ammo->isReloading = false;
 
-					int damageModifier = 1.0f;
+					float damageModifier = 1.0f;
 					if(ptr_player->powerHackPair.first)
 					{
 						damageModifier = 2.0f;
