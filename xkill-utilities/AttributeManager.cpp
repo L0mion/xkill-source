@@ -73,6 +73,7 @@ Attribute_Settings::Attribute_Settings()
 	ssaoOn		= true;
 	shadowsOn	= true;
 	glowOn		= true;
+	hudEnabled = true;
 
 	occlusionRadius		= 0.2f;
 	occlusionScale		= 0.7f;

@@ -1406,7 +1406,7 @@ void NameGenerator::resetNames()
 	addName("force to be reckoned with");
 	addName("send me flowers");
 	addName("pacifist");
-	addName("Keymaster");
+	addName("keymaster");
 	addName("having a Vietnam flashback");
 	addName("grizzled veteran");
 	addName("one-man army");
@@ -1434,12 +1434,11 @@ void NameGenerator::resetNames()
 	addName("bipolar bitmap");
 	addName("tabasco toothpaste");
 	addName("what have you done!?");
-	addName("Freedom!");
+	addName("freedom!");
 	addName("astral projection");
 	addName("psychic death beam");
 	addName("special delivery");
 	addName("who is the Milkman?");
-	addName("well, do we exist?");
 	addName("joke's on me");
 	addName("cheap brain tumbler");
 	addName("ultimate warp zone");
@@ -1447,7 +1446,7 @@ void NameGenerator::resetNames()
 	addName("pompous fraud");
 	addName("elongated stream");
 	addName("retroactive synapse");
-	addName("didn't see that comming");
+	addName("didn't see that coming");
 	addName("non-euclidean space");
 	addName("damn dirty ape");
 	addName("take your stinkin' paws off me!");
@@ -1459,6 +1458,11 @@ void NameGenerator::resetNames()
 	addName("Keebosh");
 	addName("Birk");
 	addName("Tornado");
+	addName("evolution in reverse");
+	addName("code entomologist");
+	addName("a sad excuse");
+	addName("lazy habit of thinking");
+	addName("explained by incompetence");
 
 	addName("inexpensive payback time");
 	addName("better safe than gory");

@@ -85,7 +85,6 @@ MainWindow::MainWindow()
 		SETTINGS->render_width = width;
 		SETTINGS->render_height = height;
 	}
-	
 }
 
 MainWindow::~MainWindow()
@@ -215,8 +214,7 @@ void MainWindow::keyPressEvent( QKeyEvent* e )
 			break;
 		case Qt::Key_F8:
 			{
-				static bool enableMenu = true;
-				enableMenu = !enableMenu;
+				bool enableMenu = !SETTINGS->hudEnabled;
 
 				// Toggle hide menu and enable free look
 				SEND_EVENT(&Event_EnableHud(enableMenu));

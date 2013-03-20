@@ -36,6 +36,7 @@ public:
 	float nullprocessExecutionTime;
 	bool isNullprocessExecuting;
 
+	bool hudEnabled;
 	bool freeLookMode;
 
 	bool ssaoOn;
