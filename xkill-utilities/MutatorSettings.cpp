@@ -132,7 +132,7 @@ void MutatorSettings::initStandardFiringModes()
 	firingMode->canShootScatter			= true;
 	firingMode->clipSize				= 1;
 	firingMode->damageModifier			= 5.0f;
-	firingMode->explosionSphereModifier	= 1.0f;
+	firingMode->explosionSphereModifier	= 1.2f;
 	firingMode->cooldownBetweenShots	= 1.0f;
 	firingMode->reloadTime				= 1.0f;
 	firingMode->cooldownLeft			= firingMode->cooldownBetweenShots;
@@ -151,7 +151,7 @@ void MutatorSettings::initStandardFiringModes()
 	firingMode->canShootScatter			= true;
 	firingMode->clipSize				= 10;
 	firingMode->damageModifier			= 3.0f;
-	firingMode->explosionSphereModifier	= 0.5f;
+	firingMode->explosionSphereModifier	= 0.6f;
 	firingMode->cooldownBetweenShots	= 0.0f;
 	firingMode->reloadTime				= 2.0f;
 	firingMode->cooldownLeft			= firingMode->cooldownBetweenShots;
@@ -170,7 +170,7 @@ void MutatorSettings::initStandardFiringModes()
 	firingMode->canShootScatter			= true;
 	firingMode->clipSize				= 20;
 	firingMode->damageModifier			= 1.0f;
-	firingMode->explosionSphereModifier	= 0.25f;
+	firingMode->explosionSphereModifier	= 0.30f;
 	firingMode->cooldownBetweenShots	= 0.1f;
 	firingMode->reloadTime				= 5.0f;
 	firingMode->cooldownLeft			= firingMode->cooldownBetweenShots;

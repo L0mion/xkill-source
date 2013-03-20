@@ -47,7 +47,7 @@ protected:
 private:
 	DirectInputDevice();
 public:
-	DirectInputDevice(LPDIRECTINPUTDEVICE8 device, GUID deviceGUID, std::string name, unsigned int playerID);
+	DirectInputDevice(LPDIRECTINPUTDEVICE8 device, GUID deviceGUID, std::string name, unsigned int playerID, bool isXInputController = false);
 	virtual ~DirectInputDevice(void);
 
 	//! Initiates the Direct Input device
@@ -87,6 +87,7 @@ protected:
 	int nrOfFFMotors_;
 	float leftFFMotorScale_;
 	float rightFFMotorScale_;
+	bool isXInputController_;
 
 	virtual std::string getStandardMappingsString();
 

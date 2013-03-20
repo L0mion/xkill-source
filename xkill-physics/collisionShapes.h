@@ -9,6 +9,7 @@ template<class T>
 class btAlignedObjectArray;
 class btBulletWorldImporter;
 class btCollisionShape;
+class btCompoundShape;
 class btVector3;
 class btTransform;
 class btTriangleMesh;
@@ -50,7 +51,8 @@ public:
 	static CollisionShapes* instance;
 
 	btCollisionShape* scatterProjectileCollisionShape;
-	btCollisionShape* playerCollisionShape;
+	btCompoundShape* playerCompoundCollisionShape;
+	//btCollisionShape* playerCollisionShapeWhenDead;
 };
 
 #endif //XKILL_PHYSICS_PHYSICSUTILITIES

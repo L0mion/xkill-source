@@ -41,4 +41,5 @@ private:
 	void activateNullProcess();					//! Activate null process
 	void deactivateNullProcess();				//! Deactivate null process
 	void executePlayer(int playerIndex);		//! Enter execution mode and execute the player with index 'playerIndex'
+	void stopExecutingPlayer();					//! Leave execution mode
 };

@@ -121,7 +121,7 @@ void CollisionManager::collision_applyDamage(Entity* entity1, Entity* entity2)
 										int reward = 1;
 										if(playerThatDied_ptr_player->executing) //increase reward after fragging executing player
 										{
-											reward *= itrPlayer.count();
+											reward *= Math::randomInt(2, 5);
 										}
 
 										if(creatorOfProjectile_ptr_player->cycleHackPair.first) // Cyclehack active
@@ -227,6 +227,7 @@ void CollisionManager::collision_pickupable(Entity* entity1, Entity* entity2)
 							bool randomHackPickedUp = false;
 							while(!randomHackPickedUp && infiniteLoopCounter < 250)
 							{
+								OUTPUT_WINDOW_PRINT("infiniteLoopCounter: " << infiniteLoopCounter);
 								int randomPickupableTypeInt = rand()%XKILL_Enums::PickupableType::NROFPICKUPABLETYPES;
 								ptr_pickupable->pickupableType = (XKILL_Enums::PickupableType)randomPickupableTypeInt;
 
@@ -239,6 +240,7 @@ void CollisionManager::collision_pickupable(Entity* entity1, Entity* entity2)
 								ptr_pickupable->pickupableType == XKILL_Enums::PickupableType::HACK_POWERHACK)
 								{
 									randomHackPickedUp = true;
+									infiniteLoopCounter = 0;
 								}
 								infiniteLoopCounter++;
 							}

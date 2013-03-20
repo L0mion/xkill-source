@@ -8,6 +8,8 @@ class PlayerPhysicsObject
 {
 private:
 	float yaw_;
+	float hoverHeight;
+	btCollisionShape* playerCollisionShapeWhenDead;
 public:
 	PlayerPhysicsObject();
 	~PlayerPhysicsObject();

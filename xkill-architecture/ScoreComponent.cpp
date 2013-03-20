@@ -15,6 +15,7 @@ ScoreComponent::ScoreComponent()
 
 	SUBSCRIBE_TO_EVENT(this, EVENT_START_DEATHMATCH);
 	SUBSCRIBE_TO_EVENT(this, EVENT_END_DEATHMATCH);
+	SUBSCRIBE_TO_EVENT(this, EVENT_PLAYERDEATH);
 
 	executingPlayerIndex_ = -1;
 	schedulerTimer_ = nullptr;
@@ -71,6 +72,18 @@ void ScoreComponent::onEvent(Event* e)
 		else if(nullProcessExecuting_)
 		{
 			SEND_EVENT(&Event(EVENT_NULL_PROCESS_STOPPED_EXECUTING));
+		}
+		break;
+	case EVENT_PLAYERDEATH:
+		{
+			Event_PlayerDeath* epd = static_cast<Event_PlayerDeath*>(e);
+			if(epd->playerAttributeIndex == executingPlayerIndex_)
+			{
+				AttributePtr<Attribute_Player> ptr_player = itrPlayer.at(epd->playerAttributeIndex);
+				ptr_player->priority = 0;
+
+				stopExecutingPlayer();
+			}
 		}
 		break;
 	default:
@@ -158,17 +171,7 @@ void ScoreComponent::handleExecutionMode(float delta)
 		}
 		else								// The player doesn't have any priority left so leave execution mode
 		{
-			AttributePtr<Attribute_Player> player = itrPlayer.at(executingPlayerIndex_);
-			player->executing = false;
-
-			SEND_EVENT(&Event_StopSound(XKILL_Enums::Sound::SOUND_LASER, itrPlayer.ownerIdAt(executingPlayerIndex_)));
-
-			executionMode_ = false;
-			executingPlayerIndex_ = -1;
-			schedulerTimer_->resetTimer();
-
-			// Send event to notify other components that we're leaving execution mode
-			SEND_EVENT(&Event(EVENT_PLAYER_DONE_EXECUTING));
+			stopExecutingPlayer();
 		}
 	}
 }
@@ -235,7 +238,7 @@ void ScoreComponent::handleSchedulerMode(float delta)
 			deactivateNullProcess();
 
 			AttributePtr<Attribute_Player> ptr_player = itrPlayer.at(lastManStanding);
-			int priorityReward = itrPlayer.count();
+			int priorityReward = 4;
 			{Event_PostHudMessage e("", ptr_player); e.setHtmlMessage("You ", "survived", " the null process execution.", "+" + Converter::IntToStr(priorityReward) + " priority"); SEND_EVENT(&e);}
 			ptr_player->priority += priorityReward;
 
@@ -277,6 +280,7 @@ void ScoreComponent::executePlayer(int playerIndex)
 
 	AttributePtr<Attribute_Player> ptr_player = itrPlayer.at(executingPlayerIndex_);
 	ptr_player->executing = true;
+	ptr_player->ptr_health->health = ptr_player->ptr_health->maxHealth; //Restore player health
 	priorityWhenSelectedForExecution = ptr_player->priority;
 	DEBUGPRINT("Player with attribute index " << executingPlayerIndex_ << " is executing. Beware of his laserous eyes");
 
@@ -288,4 +292,19 @@ void ScoreComponent::executePlayer(int playerIndex)
 	{Event_PostHudMessage e("", ptr_player); e.setHtmlMessage("Chosen by Scheduler"); SEND_EVENT(&e);}
 	{Event_PostHudMessage e("", ptr_player); e.setHtmlMessage("Now running in", "Kernel Mode"); SEND_EVENT(&e);}
 	{Event_PostHudMessage e("", ptr_player); e.setColor(ptr_player->avatarColor); e.setHtmlMessage("", ptr_player->avatarName, "is executing"); e.receiver = Event_PostHudMessage::RECEIVER_ALL_BUT_SUBJECT; SEND_EVENT(&e);}
+}
+
+void ScoreComponent::stopExecutingPlayer()
+{
+	AttributePtr<Attribute_Player> player = itrPlayer.at(executingPlayerIndex_);
+	player->executing = false;
+
+	SEND_EVENT(&Event_StopSound(XKILL_Enums::Sound::SOUND_LASER, itrPlayer.ownerIdAt(executingPlayerIndex_)));
+
+	executionMode_ = false;
+	executingPlayerIndex_ = -1;
+	schedulerTimer_->resetTimer();
+
+	// Send event to notify other components that we're leaving execution mode
+	SEND_EVENT(&Event(EVENT_PLAYER_DONE_EXECUTING));
 }

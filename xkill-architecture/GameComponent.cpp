@@ -1278,7 +1278,7 @@ void GameComponent::startGame()
 		{Event_PostHudMessage e("", ptr_player); e.setColor(ptr_player->avatarColor); e.setHtmlMessage("Your nickname is", ptr_player->avatarName); SEND_EVENT(&e);}
 	}
 
-	POST_DELAYED_EVENT(new Event(EVENT_FOCUS_MAINWINDOW), 1.0f);
+	//POST_DELAYED_EVENT(new Event(EVENT_FOCUS_MAINWINDOW), 1.0f);
 }
 
 void GameComponent::endGame()

@@ -39,9 +39,6 @@ bool InputComponent::init(HWND windowHandle, std::string configFilePath, float s
 
 	setupPlayerControllerConnection();
 
-	zoomTimer_.setActive(true);
-	zoomTimer_.setStartTime(0.25f);
-
 	return true;
 }
 
@@ -136,22 +133,26 @@ void InputComponent::handleInput(float delta)
 			if(device->getBoolValue(InputAction::ACTION_B_LOW_SENSITIVITY))
 			{
 				device->setSensitivityModifier(0.7f);
-				zoomTimer_.update(delta);
-				if(zoomTimer_.hasTimerExpired())
+				ptr_player->zoomTimer.update(delta);
+				if(ptr_player->zoomTimer.hasTimerExpired())
 				{
-					zoomTimer_.zeroTimer();
+					ptr_player->zoomTimer.zeroTimer();
 				}
 			}
 			else
 			{
-				zoomTimer_.update(-delta);
-				if(zoomTimer_.getTimeLeft() >= zoomTimer_.getStartTime())
+				ptr_player->zoomTimer.update(-delta);
+				if(ptr_player->zoomTimer.getTimeLeft() >= ptr_player->zoomTimer.getStartTime())
 				{
-					zoomTimer_.resetTimer();
+					ptr_player->zoomTimer.resetTimer();
 				}
 			}
 
-			sensitivityModifier = (1.0f - zoomTimer_.getTimeLeft()*4.0f);
+			float scale = 1.0f;
+			if(ptr_player->zoomTimer.getStartTime() > 0.0f)
+				scale = 1.0f / ptr_player->zoomTimer.getStartTime();
+
+			sensitivityModifier = (1.0f - ptr_player->zoomTimer.getTimeLeft()*(scale));
 		}
 
 		ptr_player->ptr_camera->fieldOfViewModifier = 1.0f - sensitivityModifier/3;
