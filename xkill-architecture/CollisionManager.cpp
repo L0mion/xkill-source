@@ -121,7 +121,7 @@ void CollisionManager::collision_applyDamage(Entity* entity1, Entity* entity2)
 										int reward = 1;
 										if(playerThatDied_ptr_player->executing) //increase reward after fragging executing player
 										{
-											reward *= itrPlayer.count();
+											reward *= Math::randomInt(2, 5);
 										}
 
 										if(creatorOfProjectile_ptr_player->cycleHackPair.first) // Cyclehack active
