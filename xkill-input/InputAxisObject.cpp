@@ -38,7 +38,7 @@ void InputAxisObject::SetValue(float value)
 
 void InputAxisObject::SetValue(int value)
 {
-	prevValue_ = static_cast<float>(value);
+	prevValue_ = static_cast<float>(value_);
 	value_ = formatValue(value);
 }
 

@@ -17,12 +17,13 @@ DirectInputDevice::DirectInputDevice() :
 	isFFTurnedOn_ = false;
 }
 
-DirectInputDevice::DirectInputDevice(LPDIRECTINPUTDEVICE8 device, GUID deviceGUID, std::string name, unsigned int playerID) : 
+DirectInputDevice::DirectInputDevice(LPDIRECTINPUTDEVICE8 device, GUID deviceGUID, std::string name, unsigned int playerID, bool isXInputController) : 
 	InputDevice(deviceGUID, name, playerID)
 {
 	device_ = device;
 	hasFF_ = false;
 	isFFTurnedOn_ = false;
+	isXInputController_ = isXInputController;
 }
 
 DirectInputDevice::~DirectInputDevice(void)
@@ -185,32 +186,59 @@ bool DirectInputDevice::Init(HWND hWindow)
 
 void DirectInputDevice::setStandardMappings()
 {
-	if(axes_.size() >= 4)
+	if(!isXInputController_)
 	{
-		axes_[0]->addMapping(InputAction::ACTION_F_WALK_LR);
-		axes_[1]->addMapping(InputAction::ACTION_F_WALK_FB);
-		axes_[2]->addMapping(InputAction::ACTION_F_LOOK_LR);
-		axes_[3]->addMapping(InputAction::ACTION_F_LOOK_UD);
-	}
+		if(axes_.size() >= 4)
+		{
+			axes_[0]->addMapping(InputAction::ACTION_F_WALK_LR);
+			axes_[1]->addMapping(InputAction::ACTION_F_WALK_FB);
+			axes_[2]->addMapping(InputAction::ACTION_F_LOOK_LR);
+			axes_[3]->addMapping(InputAction::ACTION_F_LOOK_UD);
+		}
 
-	if(buttons_.size() >= 10)
-	{
-		buttons_[0]->addMapping(InputAction::ACTION_B_NEXT_AMMUNITIONTYPE);
-		buttons_[1]->addMapping(InputAction::ACTION_B_PREV_AMMUNITIONTYPE);
-		buttons_[2]->addMapping(InputAction::ACTION_B_RELOAD);
-		buttons_[3]->addMapping(InputAction::ACTION_B_SHOW_SCOREBOARD);
-		buttons_[4]->addMapping(InputAction::ACTION_B_NEXT_FIRINGMODE);
-		buttons_[5]->addMapping(InputAction::ACTION_B_PREV_FIRINGMODE);
-		buttons_[6]->addMapping(InputAction::ACTION_B_JUMP_JETPACK);
-		buttons_[7]->addMapping(InputAction::ACTION_B_SPRINT);
-		buttons_[8]->addMapping(InputAction::ACTION_B_LOW_SENSITIVITY);
-		buttons_[9]->addMapping(InputAction::ACTION_B_FIRE);
+		if(buttons_.size() >= 10)
+		{
+			buttons_[0]->addMapping(InputAction::ACTION_B_NEXT_AMMUNITIONTYPE);
+			buttons_[1]->addMapping(InputAction::ACTION_B_PREV_AMMUNITIONTYPE);
+			buttons_[2]->addMapping(InputAction::ACTION_B_RELOAD);
+			buttons_[3]->addMapping(InputAction::ACTION_B_SHOW_SCOREBOARD);
+			buttons_[4]->addMapping(InputAction::ACTION_B_NEXT_FIRINGMODE);
+			buttons_[5]->addMapping(InputAction::ACTION_B_PREV_FIRINGMODE);
+			buttons_[6]->addMapping(InputAction::ACTION_B_JUMP_JETPACK);
+			buttons_[7]->addMapping(InputAction::ACTION_B_SPRINT);
+			buttons_[8]->addMapping(InputAction::ACTION_B_LOW_SENSITIVITY);
+			buttons_[9]->addMapping(InputAction::ACTION_B_FIRE);
+		}
+		else if(buttons_.size() >= 2)
+		{
+			buttons_[0]->addMapping(InputAction::ACTION_B_NEXT_AMMUNITIONTYPE);
+			buttons_[1]->addMapping(InputAction::ACTION_B_NEXT_FIRINGMODE);
+			buttons_[2]->addMapping(InputAction::ACTION_B_FIRE);
+		}
 	}
-	else if(buttons_.size() >= 2)
+	else
 	{
-		buttons_[0]->addMapping(InputAction::ACTION_B_NEXT_AMMUNITIONTYPE);
-		buttons_[1]->addMapping(InputAction::ACTION_B_NEXT_FIRINGMODE);
-		buttons_[2]->addMapping(InputAction::ACTION_B_FIRE);
+		if(axes_.size() >= 5)
+		{
+			axes_[0]->addMapping(InputAction::ACTION_F_WALK_LR);
+			axes_[1]->addMapping(InputAction::ACTION_F_WALK_FB);
+			axes_[2]->addMapping(InputAction::ACTION_B_FIRE);
+			axes_[3]->addMapping(InputAction::ACTION_F_LOOK_LR);
+			axes_[4]->addMapping(InputAction::ACTION_F_LOOK_UD);
+		}
+
+		if(buttons_.size() >= 10)
+		{
+			buttons_[0]->addMapping(InputAction::ACTION_B_NEXT_AMMUNITIONTYPE);
+			buttons_[1]->addMapping(InputAction::ACTION_B_PREV_AMMUNITIONTYPE);
+			buttons_[2]->addMapping(InputAction::ACTION_B_PREV_FIRINGMODE);
+			buttons_[3]->addMapping(InputAction::ACTION_B_NEXT_FIRINGMODE);	
+			buttons_[4]->addMapping(InputAction::ACTION_B_JUMP_JETPACK);
+			buttons_[5]->addMapping(InputAction::ACTION_B_SPRINT);
+			buttons_[6]->addMapping(InputAction::ACTION_B_SHOW_SCOREBOARD);
+			buttons_[8]->addMapping(InputAction::ACTION_B_RELOAD);
+			buttons_[9]->addMapping(InputAction::ACTION_B_LOW_SENSITIVITY);
+		}
 	}
 }
 

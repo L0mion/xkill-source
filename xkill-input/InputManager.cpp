@@ -161,7 +161,7 @@ bool InputManager::addNewDevice(HWND hWindow, GUID instanceGUID, GUID productGUI
 		if(FAILED(result))
 			return false;
 
-		DirectInputDevice* diDevice = new DirectInputDevice(dInputDevice, instanceGUID, name, devices_.size());
+		DirectInputDevice* diDevice = new DirectInputDevice(dInputDevice, instanceGUID, name, devices_.size(), nrOfXInputDevices_ >= XUSER_MAX_COUNT);
 		if(diDevice->Init(hWindow))
 		{
 			devices_.push_back(diDevice);
