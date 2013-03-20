@@ -227,6 +227,7 @@ void CollisionManager::collision_pickupable(Entity* entity1, Entity* entity2)
 							bool randomHackPickedUp = false;
 							while(!randomHackPickedUp && infiniteLoopCounter < 250)
 							{
+								OUTPUT_WINDOW_PRINT("infiniteLoopCounter: " << infiniteLoopCounter);
 								int randomPickupableTypeInt = rand()%XKILL_Enums::PickupableType::NROFPICKUPABLETYPES;
 								ptr_pickupable->pickupableType = (XKILL_Enums::PickupableType)randomPickupableTypeInt;
 
@@ -239,6 +240,7 @@ void CollisionManager::collision_pickupable(Entity* entity1, Entity* entity2)
 								ptr_pickupable->pickupableType == XKILL_Enums::PickupableType::HACK_POWERHACK)
 								{
 									randomHackPickedUp = true;
+									infiniteLoopCounter = 0;
 								}
 								infiniteLoopCounter++;
 							}

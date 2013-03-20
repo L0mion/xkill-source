@@ -78,6 +78,8 @@ void PlayerPhysicsObject::hover(float delta, float hoverHeight)
 		btVector3 to = (from - btVector3(0.0f,hoverHeight*2.0f,0.0f)) + offset[i];
 		from += offset[i];
 		
+		//use player spatatial postion instead (2013-03-20 11.01) //check
+
 		from += getWorldTransform().getOrigin();
 		to   += getWorldTransform().getOrigin();
 
