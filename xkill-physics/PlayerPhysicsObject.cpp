@@ -16,8 +16,6 @@ AttributeIterator<Attribute_Health> itrHealth;
 PlayerPhysicsObject::PlayerPhysicsObject()
 	: PhysicsObject()
 {
-	
-
 	itrInput = ATTRIBUTE_MANAGER->input.getIterator();
 	itrPhysics_3 = ATTRIBUTE_MANAGER->physics.getIterator();
 	itrSpatial = ATTRIBUTE_MANAGER->spatial.getIterator();
@@ -25,12 +23,14 @@ PlayerPhysicsObject::PlayerPhysicsObject()
 	itrHealth = ATTRIBUTE_MANAGER->health.getIterator();
 	//itrRay_PlayerPhysicsObject = ATTRIBUTE_MANAGER->ray.getIterator();
 
-	
-	yaw_ = 0;
+	yaw_ = 0.0f;
+	hoverHeight = 1.5f;
+	playerCollisionShapeWhenDead = new btCapsuleShape(0.75f, 0.25f);
 }
 
 PlayerPhysicsObject::~PlayerPhysicsObject()
 {
+	delete playerCollisionShapeWhenDead;
 }
 
 bool PlayerPhysicsObject::subClassSpecificInitHook()
@@ -59,8 +59,7 @@ void PlayerPhysicsObject::onUpdate(float delta)
 
 		if( !(ptr_player->jetpack) && !(ptr_player->detectedAsDead) && !(ptr_player->ptr_input->jump))
 		{
-			float height = 1.5;
-			hover(delta, height);
+			hover(delta, hoverHeight);
 		}
 	}
 }
@@ -78,6 +77,8 @@ void PlayerPhysicsObject::hover(float delta, float hoverHeight)
 		btVector3 to = (from - btVector3(0.0f,hoverHeight*2.0f,0.0f)) + offset[i];
 		from += offset[i];
 		
+		//use player spatatial postion instead (2013-03-20 11.01) //check
+
 		from += getWorldTransform().getOrigin();
 		to   += getWorldTransform().getOrigin();
 
@@ -128,19 +129,24 @@ btVector3 PlayerPhysicsObject::subClassCalculateLocalInertiaHook(btScalar mass)
 	std::vector<int> playerId = playerEntity->getAttributes(ATTRIBUTE_PLAYER);
 	bool detectedAsDead = false;
 
+	btVector3 localInertia;
 	for(unsigned int i = 0; i < playerId.size(); i++)
 	{
 		detectedAsDead = itrPlayer.at(playerId.at(i))->detectedAsDead;
-	}
 
-	btVector3 localInertia;
-	if(detectedAsDead)
-	{
-		localInertia = localInertiaBasedOnCollisionShapeAndMass(itrPhysics_3.at(attributeIndex_)->mass);
-	}
-	else
-	{
-		localInertia = zeroLocalInertia();
+		if(detectedAsDead)
+		{
+			//setCollisionShape(CollisionShapes::Instance()->playerCollisionShapeWhenDead);
+			//localInertia = localInertiaBasedOnCollisionShapeAndMass(itrPhysics_3.at(attributeIndex_)->mass);
+			//localInertia = localInertiaBasedOnFirstChildShapeOfCompoundCollisionShapeAndMass(itrPhysics_3.at(attributeIndex_)->mass);
+
+			btVector3 localInertia;
+			playerCollisionShapeWhenDead->calculateLocalInertia(mass, localInertia);
+		}
+		else
+		{
+			localInertia = zeroLocalInertia();
+		}
 	}
 
 	return localInertia;
@@ -238,5 +244,5 @@ void PlayerPhysicsObject::handleInput(float delta)
 
 btCollisionShape* PlayerPhysicsObject::subClassSpecificCollisionShape()
 {
-	return CollisionShapes::Instance()->playerCollisionShape;
+	return CollisionShapes::Instance()->playerCompoundCollisionShape;
 }
