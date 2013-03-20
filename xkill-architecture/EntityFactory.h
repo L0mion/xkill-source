@@ -115,9 +115,32 @@ public:
 		createLaserAutomaticSniperExecutionRay(entity, ptr_ray);
 		
 
+		// Attach physics offset
+		AttributePtr<Attribute_Spatial> ptr_spatial_tmp = ptr_spatial;
+		AttributePtr<Attribute_Spatial> ptr_hitbox_spatial;
+		AttributePtr<Behavior_Offset> ptr_hitbox_offset;
+		{
+			CREATE_ATTRIBUTE(ptr_position, Attribute_Position, position, entity);
+			CREATE_ATTRIBUTE(ptr_spatial, Attribute_Spatial, spatial, entity);
+			ptr_spatial->ptr_position = ptr_position;
+			CREATE_ATTRIBUTE(ptr_offset, Behavior_Offset, offset, entity);
+			ptr_hitbox_offset = ptr_offset;
+			ptr_offset->ptr_spatial = ptr_spatial;
+			ptr_offset->ptr_parent_spatial_position = ptr_spatial_tmp;
+			ptr_offset->ptr_parent_spatial_rotation = ptr_spatial_tmp;
+			ptr_offset->offset_position = Float3(0.0f, -0.6f, 0.0f);
+
+			ptr_hitbox_spatial = ptr_spatial;
+
+			CREATE_ATTRIBUTE(ptr_render, Attribute_Render, render, entity);
+			ptr_render->ptr_spatial = ptr_spatial;
+			ptr_render->meshID = XKILL_Enums::ModelId::PROJECTILE_BULLET;
+		}
+		ptr_player->ptr_hitbox_offset = ptr_hitbox_offset;
+
 		// Attach light
 		AttributePtr<Attribute_Spatial> ptr_light_spatial;
-		AttributePtr<Attribute_Spatial> ptr_spatial_tmp = ptr_spatial;
+		ptr_spatial_tmp = ptr_spatial;
 		AttributePtr<Behavior_Offset> ptr_light_offset;
 		{
 			CREATE_ATTRIBUTE(ptr_position, Attribute_Position, position, entity);

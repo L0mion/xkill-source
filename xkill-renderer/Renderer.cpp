@@ -527,7 +527,11 @@ void Renderer::updateAnimation(float delta, AttributePtr<Attribute_Player> ptr_p
 	ptr_player->ptr_light_offset->offset_position.y = bonePosition.y;
 	ptr_player->ptr_light_offset->offset_position.z = bonePosition.z;
 	ptr_player->ptr_light_offset->updateOffset();
-	
+
+	ptr_player->ptr_hitbox_offset->offset_position.x = bonePosition.x;
+	ptr_player->ptr_hitbox_offset->offset_position.y = bonePosition.y;
+	ptr_player->ptr_hitbox_offset->offset_position.z = bonePosition.z;
+	ptr_player->ptr_hitbox_offset->updateOffset();
 }
 
 
