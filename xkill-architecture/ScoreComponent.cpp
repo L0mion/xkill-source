@@ -277,6 +277,7 @@ void ScoreComponent::executePlayer(int playerIndex)
 
 	AttributePtr<Attribute_Player> ptr_player = itrPlayer.at(executingPlayerIndex_);
 	ptr_player->executing = true;
+	ptr_player->ptr_health->health = ptr_player->ptr_health->maxHealth; //Restore player health
 	priorityWhenSelectedForExecution = ptr_player->priority;
 	DEBUGPRINT("Player with attribute index " << executingPlayerIndex_ << " is executing. Beware of his laserous eyes");
 
