@@ -58,6 +58,18 @@ btVector3 PhysicsObject::localInertiaBasedOnCollisionShapeAndMass(btScalar mass)
 	return localInertia;
 }
 
+btVector3 PhysicsObject::localInertiaBasedOnFirstChildShapeOfCompoundCollisionShapeAndMass(btScalar mass)
+{
+	btCollisionShape* collisionShape = getCollisionShape();
+	btCompoundShape* compoundShape = static_cast<btCompoundShape*>(collisionShape); //check error check here
+	btCollisionShape* childCollisionShape = compoundShape->getChildShape(0);
+
+	btVector3 localInertia;
+	childCollisionShape->calculateLocalInertia(mass, localInertia);
+	
+	return localInertia;
+}
+
 btVector3 PhysicsObject::zeroLocalInertia()
 {
 	btVector3 localInertia;

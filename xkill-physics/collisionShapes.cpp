@@ -28,9 +28,26 @@ CollisionShapes::CollisionShapes()
 
 	scatterProjectileCollisionShape = new btSphereShape(0.15f);
 
-	float height = 0.75f;
+	//float height = 0.75f;
+	//float radius = 0.25f;
+	//playerCollisionShapeWhenDead = new btCapsuleShape(radius, height);
+
+	//--------------------------------------------------------------------------------------
+	// Player collision shape: capsule
+	//--------------------------------------------------------------------------------------
+	float height = 1.50f;
 	float radius = 0.25f;
-	playerCollisionShape = new btCapsuleShape(radius, height);
+	btCollisionShape* playerCollisionShape = new btCapsuleShape(radius, height);
+	unusedCollisionShapes_->push_back(playerCollisionShape); //Add this to deallocation list
+
+	//--------------------------------------------------------------------------------------
+	// Insert the player collision shape into a btCompoundShape in order to allow offsetting the collision shape from the player position
+	//--------------------------------------------------------------------------------------
+	playerCompoundCollisionShape = new btCompoundShape();
+	btTransform playerHitBoxCapsuleShapeTransform;
+	playerHitBoxCapsuleShapeTransform.setRotation(btQuaternion(0.0f, 0.0f, 0.0f, 1.0f));//no rotation
+	playerHitBoxCapsuleShapeTransform.setOrigin(btVector3(0.0f, 0.35f, 0.0f));			//offset
+	playerCompoundCollisionShape->addChildShape(playerHitBoxCapsuleShapeTransform, playerCollisionShape);
 }
 
 CollisionShapes::~CollisionShapes()
@@ -55,7 +72,8 @@ CollisionShapes::~CollisionShapes()
 	deallocateImporter();
 
 	delete scatterProjectileCollisionShape;
-	delete playerCollisionShape;
+	delete playerCompoundCollisionShape;
+	//delete playerCollisionShapeWhenDead;
 }
 
 btCollisionShape* CollisionShapes::getCollisionShape(unsigned int meshId)

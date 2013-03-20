@@ -22,6 +22,7 @@ protected:
 		static debugDrawDispatcher*	debugDrawer_;							//!< Gives all physics objects access to the debug drawer. Deallocation is handled in the destructor of PhysicsComponent.
 
 		btVector3 localInertiaBasedOnCollisionShapeAndMass(btScalar mass);	//!< Called from "subClassCalculateLocalInertiaHook" by some subclasses.
+		btVector3 localInertiaBasedOnFirstChildShapeOfCompoundCollisionShapeAndMass(btScalar mass);	//!< Called from "subClassCalculateLocalInertiaHook" by some subclasses.
 		btVector3 zeroLocalInertia();										//!< Called from "subClassCalculateLocalInertiaHook" by some subclasses.
 		void removePhysicsAttributeCorrespondingToThisPhysicsObject();		//!< Called from "handleOutOfBounds" by some subclasses.
 		virtual btCollisionShape* subClassSpecificCollisionShape();			//!< May be overridden by subclasses. Is called from the end of init.
