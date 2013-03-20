@@ -87,6 +87,15 @@ void ScoreBoard::syncLabelsWithPlayers()
 	{
 		ScoreboardEntry* e = &entries.at(i);
 
+		// Update if a player has
+		// started/stopped executing to
+		// apply change in color 
+		if(e->ptr_player->executing != e->wasExecuting)
+		{
+			e->isChanged = true;
+			e->wasExecuting = e->ptr_player->executing;
+		}
+
 		// Detect if label has changed
 		if(e->ptr_player->avatarName != e->playerName)
 		{
@@ -148,6 +157,12 @@ void ScoreBoard::syncLabelsWithPlayers()
 				sheet_priority += "background-color: rgba(0, 255, 0, 100);";
 			}
 
+			// Apply extra stuff if we are executing
+			if(e->ptr_player->executing )
+			{
+				sheet_process += "background-color: rgba(255, 0, 0, 50);";
+			}
+
 			// Apply style sheet
 			e->label_process->setStyleSheet(sheet_process.c_str());
 			e->label_cycles->setStyleSheet(sheet_cycles.c_str());
@@ -182,11 +197,9 @@ void ScoreBoard::syncLabelsWithPlayers()
 				Float2 centerPos;
 				centerPos.x = parent_scoreboard->width() * 0.5f;
 				centerPos.y = parent_scoreboard->height() * 0.5f;
+				float test1 = frame_scoreboard->width()* 0.5f;
+				float test2 = frame_scoreboard->height()* 0.5f;
 				frame_scoreboard->move(centerPos.x - frame_scoreboard->width()* 0.5f, centerPos.y - frame_scoreboard->height()* 0.5f);
-				// Make sure scoreboard is not above the screen
-				/*int test = frame_scoreboard->y();
-				if(frame_scoreboard->y() > 0)
-					frame_scoreboard->move(frame_scoreboard->x(), 0);*/
 			}
 		}
 	}
