@@ -657,7 +657,6 @@ Menu_HUDManager::Menu_HUDManager( QWidget* parent ) : QObject(parent)
 	ATTRIBUTES_INIT_ALL;
 
 	this->parent = parent;
-	isEnabled = false;
 
 	// Events
 	SUBSCRIBE_TO_EVENT(this, EVENT_ENABLE_HUD);
@@ -674,6 +673,7 @@ void Menu_HUDManager::mapHudsToSplitscreen()
 	huds.clear();
 
 	// Map new HUDs to split screens
+	bool isEnabled = SETTINGS->hudEnabled;
 	while(itrSplitScreen.hasNext())
 	{
 		AttributePtr<Attribute_SplitScreen> ptr_splitScreen = itrSplitScreen.getNext();
@@ -692,14 +692,14 @@ void Menu_HUDManager::onEvent( Event* e )
 
 		if(((Event_EnableHud*)e)->enableHud)
 		{
-			isEnabled = true;
+			SETTINGS->hudEnabled = true;
 
 			for(int i=0; i<huds.size(); i++)
 				huds[i]->show();
 		}
 		else
 		{
-			isEnabled = false;
+			SETTINGS->hudEnabled = false;
 
 			for(int i=0; i<huds.size(); i++)
 				huds[i]->hide();

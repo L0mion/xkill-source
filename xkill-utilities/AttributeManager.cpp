@@ -48,6 +48,7 @@ Attribute_Settings::Attribute_Settings()
 	render_width = 800;
 	render_height = 600;
 
+	freeLookMode = false;
 	timeUntilScheduling = 0.0f;
 	numErrors = 0;
 	soundMuted = false;
@@ -72,6 +73,7 @@ Attribute_Settings::Attribute_Settings()
 	ssaoOn		= true;
 	shadowsOn	= true;
 	glowOn		= true;
+	hudEnabled = true;
 
 	occlusionRadius		= 0.2f;
 	occlusionScale		= 0.7f;

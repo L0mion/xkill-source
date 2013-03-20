@@ -63,7 +63,6 @@ class Menu_HUDManager : public QObject , IObserver
 private:
 	std::vector<Menu_HUD*> huds;
 	QWidget* parent;
-	bool isEnabled;
 
 public:
 	Menu_HUDManager(QWidget* parent);

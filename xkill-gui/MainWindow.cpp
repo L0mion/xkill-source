@@ -85,7 +85,6 @@ MainWindow::MainWindow()
 		SETTINGS->render_width = width;
 		SETTINGS->render_height = height;
 	}
-	
 }
 
 MainWindow::~MainWindow()
@@ -127,7 +126,7 @@ void MainWindow::onEvent( Event* e )
 void MainWindow::keyPressEvent( QKeyEvent* e )
 {
 
-	// Toggle mouselock
+	// Toggle mouse lock
 	if(e->key() == Qt::Key_Alt)
 		SEND_EVENT(&Event_SetMouseLock(false));
 
@@ -207,11 +206,28 @@ void MainWindow::keyPressEvent( QKeyEvent* e )
 		case Qt::Key_Escape:
 			SEND_EVENT(&Event(EVENT_ENDGAME));
 			break;
-		case Qt::Key_F11:
+		case Qt::Key_F7:
 			{
-				static bool hideHud = false;
-				hideHud = !hideHud;
-				SEND_EVENT(&Event_EnableHud(!hideHud));
+				// Toggle enable free look
+				SETTINGS->freeLookMode = !SETTINGS->freeLookMode;
+			}
+			break;
+		case Qt::Key_F8:
+			{
+				bool enableMenu = !SETTINGS->hudEnabled;
+
+				// Toggle hide menu and enable free look
+				SEND_EVENT(&Event_EnableHud(enableMenu));
+
+				// Disattach camera position from player to get 
+				// ridd of weapon view
+				AttributeIterator<Attribute_Player> itr_player = ATTRIBUTE_MANAGER->player.getIterator();
+				if(itr_player.hasNext())
+				{
+					AttributePtr<Attribute_Player> ptr_player = itr_player.getNext();
+					bool disableCamera = !enableMenu;
+					ptr_player->ptr_camera->ptr_offset->isDisabled = disableCamera;
+				}
 			}
 			break;
 		default:
