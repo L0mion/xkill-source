@@ -117,7 +117,7 @@ void FMODEventSystem::StopSoundEventAt(unsigned int index, int ownerPlayerEntity
 {
 	for(unsigned int i = 0; i < mEvents.size(); i++)
 	{
-		if(mEvents[i].eventIndex == index && mEvents[i].ownerPlayerEntityId == ownerPlayerEntityId)
+		if(mEvents[i].eventIndex == index && (mEvents[i].ownerPlayerEntityId == ownerPlayerEntityId || ownerPlayerEntityId < 0))
 		{
 			mEvents[i].FmodEvent->stop();
 

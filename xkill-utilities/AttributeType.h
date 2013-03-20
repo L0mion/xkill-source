@@ -516,6 +516,7 @@ struct DLL_U Attribute_Player : public IAttribute
 	bool detectedAsDead;					//!< The player is dead
 	bool executing;							//!< True if selected by the scheduler (ScoreComponent.cpp)
 	bool hovering;							//!< The player is in a stable hover and not falling or jumping or using jetpack
+	Timer zoomTimer;						//!< Timer used when zooming using button
 	std::pair<bool, Timer*> speedHackPair;	//!< The bool is true if the hack is active, the timer keeps track of time left
 	std::pair<bool, Timer*> jetHackPair;	//!< The bool is true if the hack is active, the timer keeps track of time left
 	std::pair<bool, Timer*> cycleHackPair;	//!< The bool is true if the hack is active, the timer keeps track of time left

@@ -27,6 +27,7 @@ SoundComponent::SoundComponent()
 	SUBSCRIBE_TO_EVENT(this, EVENT_END_DEATHMATCH);
 	SUBSCRIBE_TO_EVENT(this, EVENT_ENDGAME);
 	SUBSCRIBE_TO_EVENT(this, EVENT_UPDATESOUNDSETTINGS);
+	SUBSCRIBE_TO_EVENT(this, EVENT_PLAYER_DONE_EXECUTING);
 }
 
 SoundComponent::~SoundComponent()
@@ -125,6 +126,10 @@ void SoundComponent::onEvent(Event* e)
 		musicTransitionRate_ = SETTINGS->soundVolume_music * musicTransitionTimer_.getStartTime();
 		playMenuMusic_ = true;
 		musicVolumePretransition_ = SETTINGS->soundVolume_music;
+	}
+	else if(type == EVENT_PLAYER_DONE_EXECUTING)
+	{
+		mFMODEventSystem->StopSoundEventAt(XKILL_Enums::Sound::SOUND_LASER, -1);
 	}
 }
 

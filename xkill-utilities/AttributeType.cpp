@@ -542,6 +542,9 @@ Attribute_Player::Attribute_Player()
 	isScoreBoardVisible = false;
 	showScoreboard = false;
 
+	zoomTimer.setActive(true);
+	zoomTimer.setStartTime(0.25f);
+
 	avatarName = "NaN";
 
 	walkSpeed = 5.0f;
