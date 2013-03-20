@@ -104,8 +104,8 @@ void XInputDevice::setStandardMappings()
 
 	if(buttons_.size() >= 14)
 	{
-		buttons_[0]->addMapping(InputAction::ACTION_B_NEXT_AMMUNITIONTYPE);
-		buttons_[1]->addMapping(InputAction::ACTION_B_PREV_AMMUNITIONTYPE);
+		buttons_[0]->addMapping(InputAction::ACTION_B_PREV_AMMUNITIONTYPE);
+		buttons_[1]->addMapping(InputAction::ACTION_B_NEXT_AMMUNITIONTYPE);
 		buttons_[2]->addMapping(InputAction::ACTION_B_PREV_FIRINGMODE);
 		buttons_[3]->addMapping(InputAction::ACTION_B_NEXT_FIRINGMODE);
 		buttons_[4]->addMapping(InputAction::ACTION_B_JUMP_JETPACK);
