@@ -238,7 +238,7 @@ void ScoreComponent::handleSchedulerMode(float delta)
 			deactivateNullProcess();
 
 			AttributePtr<Attribute_Player> ptr_player = itrPlayer.at(lastManStanding);
-			int priorityReward = itrPlayer.count();
+			int priorityReward = 4;
 			{Event_PostHudMessage e("", ptr_player); e.setHtmlMessage("You ", "survived", " the null process execution.", "+" + Converter::IntToStr(priorityReward) + " priority"); SEND_EVENT(&e);}
 			ptr_player->priority += priorityReward;
 
