@@ -401,7 +401,11 @@ void GameComponent::updatePlayerAttributes(float delta)
 			//--------------------------------------------------------------------------------------
 			// Non-automatic weapon reload logic (also refer to automatic weapon reload logic)
 			//--------------------------------------------------------------------------------------
-			if(ptr_input->reload && firingMode->nrOfShotsLeftInClip[ammoIndex] < firingMode->clipSize)
+			float numberOfShotToBeLoaded = firingMode->clipSize;
+			if(numberOfShotToBeLoaded > ammo->currentTotalNrOfShots)
+				numberOfShotToBeLoaded = ammo->currentTotalNrOfShots;
+
+			if(ptr_input->reload && firingMode->nrOfShotsLeftInClip[ammoIndex] < numberOfShotToBeLoaded)
 			{
 				ammo->isReloading = true;
 
@@ -415,6 +419,11 @@ void GameComponent::updatePlayerAttributes(float delta)
 
 					float reloadTimeFraction = (1.0f - (static_cast<float>(firingMode->nrOfShotsLeftInClip[ammoIndex])/static_cast<float>(nrOfShotsToLoad)));
 					firingMode->reloadTimeLeft = reloadTimeFraction * firingMode->reloadTime;
+
+					if(ammo->canShootWhileReloading)
+					{
+						firingMode->reloadTimeLeft += firingMode->reloadTime * 0.1f;
+					}
 				}
 			}
 
