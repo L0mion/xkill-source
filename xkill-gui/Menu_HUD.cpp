@@ -432,6 +432,11 @@ void Menu_HUD::refresh()
 		}
 	}
 
+	// Make sure scoreboard is not above the screen
+	// This is complex to compute because the scoreboard is within a Qframe
+	int posY = ui.frame_scoreboard->y() + (ui.frame_scoreboard->height() - ui.groupBox_scoreboard->sizeHint().height())/2;
+	if(posY < 0)
+		ui.frame_scoreboard->move(ui.frame_scoreboard->x(), ui.frame_scoreboard->y() - posY);
 
 
 
@@ -617,6 +622,8 @@ void Menu_HUD::initScoreboard()
 		entry.ptr_player = ptr_player;
 		scoreboard.addEntry(entry);
 	}
+
+	ui.frame_scoreboard->raise();
 }
 
 void Menu_HUD::onEvent( Event* e )

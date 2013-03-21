@@ -11,6 +11,7 @@ public:
 	QLabel* label_priority;
 
 	bool isChanged;
+	bool wasExecuting;
 
 	std::string playerName;
 	int cycles;

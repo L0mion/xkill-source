@@ -107,7 +107,7 @@ void HudPowerupDispayer::update()
 	if(pow_power.updateActive(ptr_player->powerHackPair.first))
 	{
 		float ratio = ptr_player->powerHackPair.second->getTimeLeft() / ptr_player->powerHackPair.second->getStartTime();;
-		pow_cycleSteal.setProgress(ratio);
+		pow_power.setProgress(ratio);
 	}
 
 

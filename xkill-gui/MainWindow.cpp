@@ -156,6 +156,26 @@ void MainWindow::keyPressEvent( QKeyEvent* e )
 			ui.actionCap_FPS->setChecked(false);
 	}
 
+	// Toggle music mute
+	if((e->key()==Qt::Key_F4))
+	{
+		static bool musicMuted = false;
+		static bool prevMusicVolume = 0;
+		musicMuted = !musicMuted;
+
+		if(musicMuted)
+		{
+			prevMusicVolume = SETTINGS->soundVolume_music;
+			SETTINGS->soundVolume_music = 0;
+			SEND_EVENT(&Event(EVENT_UPDATESOUNDSETTINGS));
+		}
+		else
+		{
+			SETTINGS->soundVolume_music = prevMusicVolume;
+			SEND_EVENT(&Event(EVENT_UPDATESOUNDSETTINGS));
+		}
+	}
+
 	// Show debug out print
 	if((e->key()==Qt::Key_F5))
 	{
@@ -228,6 +248,14 @@ void MainWindow::keyPressEvent( QKeyEvent* e )
 					bool disableCamera = !enableMenu;
 					ptr_player->ptr_camera->ptr_offset->isDisabled = disableCamera;
 				}
+			}
+			break;
+		case Qt::Key_F9:
+			{
+				bool enableMenu = !SETTINGS->hudEnabled;
+
+				// Toggle hide menu and enable free look
+				SEND_EVENT(&Event_EnableHud(enableMenu));
 			}
 			break;
 		default:
