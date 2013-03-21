@@ -953,7 +953,7 @@ void NameGenerator::resetNames()
 	addName("sea you underwater");
 	addName("my view");
 	addName("fair enough");
-	addName("as long as its a word");
+	addName("as long as it's a word");
 	addName("name or not");
 	addName("Frank D. Luna");
 	addName("trailing zero");
@@ -1660,6 +1660,12 @@ void NameGenerator::resetNames()
 	addName("candlewick tripwire");
 	addName("bandit on horseback");
 	addName("riddling compiler");
+	addName("holy decorative bowl");
+	addName("quiet room full of silence");
+	addName("a codec of some sort");
+	addName("try it out, I won't hurt you, I think");
+	addName("compelling compulsion");
+	addName("that is out of the question");
 
 	//C++ keywords
 	addName("alignas");
