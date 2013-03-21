@@ -401,7 +401,7 @@ void GameComponent::updatePlayerAttributes(float delta)
 			//--------------------------------------------------------------------------------------
 			// Non-automatic weapon reload logic (also refer to automatic weapon reload logic)
 			//--------------------------------------------------------------------------------------
-			if(ptr_input->reload)
+			if(ptr_input->reload && firingMode->nrOfShotsLeftInClip[ammoIndex] < firingMode->clipSize)
 			{
 				ammo->isReloading = true;
 
@@ -498,7 +498,7 @@ void GameComponent::updatePlayerAttributes(float delta)
 			updateAndInterpretAimingRay(playerEntity, ptr_camera);
 			
 			//--------------------------------------------------------------------------------------
-			// Damage taken bookkeeping (Not tested. Idea was to lower player speed when the player took damage) 
+			// Damage taken bookkeeping. Idea is to lower player speed when the player recently took took damage (refer to PlayerPhysicsObject::handleInput)
 			//-------------------------------------------------------------------------------------
 			if(ptr_health->health < ptr_health->healthFromLastFrame)
 			{
