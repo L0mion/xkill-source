@@ -886,6 +886,7 @@ void GameComponent::event_PlayerDeath(Event_PlayerDeath* e)
 			itrRay.at(rayId[i])->ptr_render->culling.clear();
 		}
 	}
+	// Is perhaps not needed as it is also removed in Hacks Components
 	if(ptr_player->jetHackPair.first)
 	{
 		ptr_player->jetHackPair.first = false;
@@ -897,6 +898,10 @@ void GameComponent::event_PlayerDeath(Event_PlayerDeath* e)
 	if(ptr_player->speedHackPair.first)
 	{
 		ptr_player->speedHackPair.first = false;
+	}
+	if(ptr_player->powerHackPair.first)
+	{
+		ptr_player->powerHackPair.first = false;
 	}
 }
 
