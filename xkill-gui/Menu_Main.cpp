@@ -97,6 +97,7 @@ Menu_Main::Menu_Main( QWidget* parent ) : QMainWindow()
 	ui.frame_start->hide();
 	ui.frame_customize->hide();
 	ui.frame_settings->hide();
+	ui.frame_howto->hide();
 	ui.frame_video->hide();
 	ui.frame_audio->hide();
 	ui.frame_input->hide();
@@ -115,6 +116,7 @@ Menu_Main::Menu_Main( QWidget* parent ) : QMainWindow()
 	connect(ui.pushButton_startgame, SIGNAL(clicked()),	this, SLOT(slot_menu_startgame()));
 	connect(ui.pushButton_customize, SIGNAL(clicked()),	this, SLOT(slot_menu_customize()));
 	connect(ui.pushButton_settings, SIGNAL(clicked()),	this, SLOT(slot_menu_settings()));
+	connect(ui.pushButton_howto, SIGNAL(clicked()),	this, SLOT(slot_menu_howto()));
 	connect(ui.pushButton_video, SIGNAL(clicked()),	this, SLOT(slot_menu_video()));
 	connect(ui.pushButton_audio, SIGNAL(clicked()),	this, SLOT(slot_menu_audio()));
 	connect(ui.pushButton_input, SIGNAL(clicked()),	this, SLOT(slot_menu_input()));

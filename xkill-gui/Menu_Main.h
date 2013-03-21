@@ -190,6 +190,10 @@ private slots:
 	{
 		push_menu(ui.frame_settings);
 	}
+	void slot_menu_howto()
+	{
+		push_menu(ui.frame_howto);
+	}
 	void slot_menu_video()
 	{
 		push_menu(ui.frame_video);
