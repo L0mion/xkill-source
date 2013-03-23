@@ -1,4 +1,4 @@
-#include "NameGenerator.h"
+ï»¿#include "NameGenerator.h"
 
 #include <xkill-utilities\Math.h> //Math::randomInt
 
@@ -675,7 +675,7 @@ void NameGenerator::resetNames()
 	addName("sons of coding");
 	addName("folder");
 	addName("find");
-	addName("¤ SUN-STAR ¤");
+	addName("Â¤ SUN-STAR Â¤");
 	addName("trip and fall");
 	addName("Destination @");
 	addName("division by zero");
@@ -943,7 +943,7 @@ void NameGenerator::resetNames()
 	addName("testing environment");
 	addName("set head to next");
 	addName("It's O.K. I think");
-	addName("monkey in a négligée");
+	addName("monkey in a nÃ©gligÃ©e");
 	addName("pick another color");
 	addName("plaster apron");
 	addName("pencil sharpener");
@@ -958,7 +958,7 @@ void NameGenerator::resetNames()
 	addName("Frank D. Luna");
 	addName("trailing zero");
 	addName("backtrack");
-	addName("Göran Fries");
+	addName("GÃ¶ran Fries");
 	addName("gcc");
 	addName("MSVCP110.dll");
 	addName("digital scrumboard");
@@ -1415,7 +1415,7 @@ void NameGenerator::resetNames()
 	addName("writ in water");
 	addName("tally-ho!");
 	addName("filament dissipation");
-	addName("mähälium");
+	addName("mÃ¤hÃ¤lium");
 	addName("subquantum possibility");
 	addName("quantum tantum");
 	addName("healthy paranoia");
@@ -1454,7 +1454,7 @@ void NameGenerator::resetNames()
 	addName("deadline dilemma");
 	addName("evil clever dog");
 	addName("most intrepid robot");
-	addName("taste like sweetness and death");
+	addName("tastes like sweetness and death");
 	addName("Keebosh");
 	addName("Birk");
 	addName("Tornado");
@@ -1463,7 +1463,7 @@ void NameGenerator::resetNames()
 	addName("a sad excuse");
 	addName("lazy habit of thinking");
 	addName("explained by incompetence");
-	addName("initiate fluff? sequence");
+	addName("initiate fluffï»¿ sequence");
 	addName("my moment of utter triumph");
 
 
