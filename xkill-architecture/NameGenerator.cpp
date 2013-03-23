@@ -1463,6 +1463,9 @@ void NameGenerator::resetNames()
 	addName("a sad excuse");
 	addName("lazy habit of thinking");
 	addName("explained by incompetence");
+	addName("initiate fluff? sequence");
+	addName("my moment of utter triumph");
+
 
 	addName("inexpensive payback time");
 	addName("better safe than gory");
