@@ -1479,7 +1479,7 @@ void NameGenerator::resetNames()
 	addName("kindergarten gatekeeper");
 	addName("is it just me?");
 	addName("sandsphere");
-	addName("you shoot my banjo");
+	addName("you shot my banjo");
 	addName("wishbone thundercat");
 	addName("what thundercat?");
 	addName("evening butterfly");
