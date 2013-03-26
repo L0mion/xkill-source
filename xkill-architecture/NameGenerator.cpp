@@ -1456,15 +1456,23 @@ void NameGenerator::resetNames()
 	addName("most intrepid robot");
 	addName("tastes like sweetness and death");
 	addName("Keebosh");
-	addName("Birk");
 	addName("Tornado");
 	addName("evolution in reverse");
 	addName("code entomologist");
 	addName("a sad excuse");
 	addName("lazy habit of thinking");
 	addName("explained by incompetence");
-	addName("initiate fluff﻿ sequence");
+	addName("initiate fluff sequence");
 	addName("my moment of utter triumph");
+	addName("human error");
+	addName("boot file missing");
+	addName("cpu meltdown");
+	addName("power-on self-test");
+	addName("something shiny");
+	addName("easily distracted by shiny objects");
+	addName("Torbix");
+	addName("blue screen of death");
+	addName("blueprint");
 
 
 	addName("inexpensive payback time");
