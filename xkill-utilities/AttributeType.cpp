@@ -544,6 +544,7 @@ Attribute_Player::Attribute_Player()
 
 	zoomTimer.setActive(true);
 	zoomTimer.setStartTime(0.25f);
+	zoomTimer.resetTimer();
 
 	avatarName = "NaN";
 

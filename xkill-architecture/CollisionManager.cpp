@@ -131,13 +131,13 @@ void CollisionManager::collision_applyDamage(Entity* entity1, Entity* entity2)
 												reward = 1; //steal only 1 cycle
 												playerThatDied_ptr_player->cycles -= reward;	
 												creatorOfProjectile_ptr_player->cycles += reward;
-												{Event_PostHudMessage e("", creatorOfProjectile_ptr_player); e.setColor(playerThatDied_ptr_player->avatarColor); e.setHtmlMessage("You terminated and stole a cycle from", playerThatDied_ptr_player->avatarName, "", "+" + Converter::IntToStr(reward) + " cycles"); SEND_EVENT(&e);}
+												{Event_PostHudMessage e("", creatorOfProjectile_ptr_player); e.setColor(playerThatDied_ptr_player->avatarColor); e.setHtmlMessage("You terminated and stole a cycle from", playerThatDied_ptr_player->avatarName, "", "+" + Converter::IntToStr(reward) + " cycle"); SEND_EVENT(&e);}
 												{Event_PostHudMessage e("", playerThatDied_ptr_player); e.setColor(creatorOfProjectile_ptr_player->avatarColor); e.setHtmlMessage("Terminated and cycle stolen by", creatorOfProjectile_ptr_player->avatarName); SEND_EVENT(&e);}
 											}
 											else //The fragged player did not have cycles to steal
 											{
 												reward = 0; //no cycles stolen
-												{Event_PostHudMessage e("", creatorOfProjectile_ptr_player); e.setColor(playerThatDied_ptr_player->avatarColor); e.setHtmlMessage("You terminated and tried to steal a cycle from", playerThatDied_ptr_player->avatarName, "", "+" + Converter::IntToStr(reward) + " cycles"); SEND_EVENT(&e);}
+												{Event_PostHudMessage e("", creatorOfProjectile_ptr_player); e.setColor(playerThatDied_ptr_player->avatarColor); e.setHtmlMessage("You terminated and tried to steal a cycle from", playerThatDied_ptr_player->avatarName, "", "+" + Converter::IntToStr(reward) + " cycle"); SEND_EVENT(&e);}
 												{Event_PostHudMessage e("", playerThatDied_ptr_player); e.setColor(creatorOfProjectile_ptr_player->avatarColor); e.setHtmlMessage("Terminated and almost cycle-stolen by", creatorOfProjectile_ptr_player->avatarName); SEND_EVENT(&e);}
 											}
 

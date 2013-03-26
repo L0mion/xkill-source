@@ -473,6 +473,15 @@ void GameComponent::updatePlayerAttributes(float delta)
 						break;
 					}
 				}
+				else if(ammo->currentTotalNrOfShots <= 0)
+				{
+					bool successfullySwitchedAmmunition = switchAmmunition(ptr_weaponStats, 1);
+					if(successfullySwitchedAmmunition)
+					{
+						ammo = &ptr_weaponStats->ammunition[ptr_weaponStats->currentAmmunitionType];
+					}
+					ammoIndex = ammo->type;
+				}
 			}
 
 			//--------------------------------------------------------------------------------------
