@@ -45,21 +45,21 @@ When only one process remains, the null process will stop its execution. The las
 * Install Qt (Swedish instructions below)
 glossary:
 men = but
-när = when
+nï¿½r = when
 du = you
 har = have/has
-följande = the following
+fï¿½ljande = the following
 den = it
 och = and
-gör = do/does
-sökväg = path
+gï¿½r = do/does
+sï¿½kvï¿½g = path
 till = to
-lägg till = add
+lï¿½gg till = add
 installerat = installed
-sätt = set
+sï¿½tt = set
 som = as
-[2013-01-10 12:00:22] Mattias A: men när du har den och när du har Qt Add-in installerat så gör du följade i Visual Studio
-QT5 ->QT Options -> (Lägg till sökväg till Qt SDKn, e.g. "C:\Qt\qt-everywhere-opensource-src-4.8.4" och sätt den som "Deafult Qt version")
+[2013-01-10 12:00:22] Mattias A: men nï¿½r du har den och nï¿½r du har Qt Add-in installerat sï¿½ gï¿½r du fï¿½ljade i Visual Studio
+QT5 ->QT Options -> (Lï¿½gg till sï¿½kvï¿½g till Qt SDKn, e.g. "C:\Qt\qt-everywhere-opensource-src-4.8.4" och sï¿½tt den som "Deafult Qt version")
 * Run the file "xkill-project\xkill\xkill.sln" from Visual Studio 2012.
 * The solution should contain 9 projects:
 
@@ -85,8 +85,8 @@ Perhaps through this link: http://www.microsoft.com/en-us/download/details.aspx?
 
 ### Download
 
-[2013-03-21](https://github.com/L0mion/xkill-source/releases)
-[2013-03-26] (https://drive.google.com/file/d/0B6c_718zVy6QZW5EcEpxOUhrSDA/edit?usp=sharing)
+[2013-03-21](https://github.com/L0mion/xkill-source/releases/tag/v1.0)
+[2013-03-26] (https://github.com/L0mion/xkill-source/releases/tag/v1.1)
 
 ### Website
 www.xkill.se
