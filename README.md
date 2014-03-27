@@ -40,6 +40,53 @@ When only one process remains, the null process will stop its execution. The las
 
 [Extra](https://www.youtube.com/watch?v=t3NxIC61-HQ)
 
+### Compile instructions
+* Install Visual Studio 2012 (x86)
+* Install Qt (Swedish instructions below)
+glossary:
+men = but
+när = when
+du = you
+har = have/has
+följande = the following
+den = it
+och = and
+gör = do/does
+sökväg = path
+till = to
+lägg till = add
+installerat = installed
+sätt = set
+som = as
+[2013-01-10 12:00:22] Mattias A: men när du har den och när du har Qt Add-in installerat så gör du följade i Visual Studio
+QT5 ->QT Options -> (Lägg till sökväg till Qt SDKn, e.g. "C:\Qt\qt-everywhere-opensource-src-4.8.4" och sätt den som "Deafult Qt version")
+* Run the file "xkill-project\xkill\xkill.sln" from Visual Studio 2012.
+* The solution should contain 9 projects:
+
+xkill
+xkill-architecture
+xkill-input
+xkill-io
+xkill-physics
+xkill-renderer
+xkill-sound
+xkill-utilities
+xkill-utilities-levelexporter (Visual Studio 2010)
+
+Set "xkill" as startup project (Right click -> "Set as StartUp Project").
+Compile (F5 key).
+
+Tested on Microsoft Windows 7 and Microsoft Windows 8, with the setting "Win32", next to the "Release"-setting.
+Move "xkill-project\xkill-dependencies\DLL move to build" to "xkill-build\bin-Release" (or to "xkill-build\bin-Debug" if compiling with the DEBUG flag set)
+To run XKILL: run the "xkill-build\bin-Release\xkill.exe" file.
+
+If it does not work, try downloading "Visual C++ Redistributable for Visual Studio 2012" ("vcredist_x86.exe" or "vcredist_x64.exe")
+Perhaps through this link: http://www.microsoft.com/en-us/download/details.aspx?id=30679
+
 ### Download
 
 [2013-03-21](https://github.com/L0mion/xkill-source/releases)
+[2013-03-26] (https://drive.google.com/file/d/0B6c_718zVy6QZW5EcEpxOUhrSDA/edit?usp=sharing)
+
+### Website
+www.xkill.se
