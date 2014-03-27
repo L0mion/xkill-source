@@ -39,3 +39,7 @@ When only one process remains, the null process will stop its execution. The las
 [Nine-player split-screen](https://www.youtube.com/watch?v=hhSkEy9xeMQ)
 
 [Extra](https://www.youtube.com/watch?v=t3NxIC61-HQ)
+
+### Download
+
+[2013-03-21](https://github.com/L0mion/xkill-source/releases)
