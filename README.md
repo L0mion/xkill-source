@@ -30,6 +30,15 @@ If no process has the highest priority at the time of the scheduler's selection,
 
 When only one process remains, the null process will stop its execution. The last surviving process will be given a priority reward, all process will respawn, and the world will be reassembled.
 
+### Key Features
+
+* Unique gameplay inspired by process scheduling.
+* Up to 9 players split screen multiplayer (gamepads required).
+* Customizable weaponry.
+* 5 different power ups (referred to as hacks).
+* Close to 2000 unique nicknames! No match will feel the same. 
+
+
 ### Video
 
 [Trailer](https://www.youtube.com/watch?v=b_UdIwGUgd0)
