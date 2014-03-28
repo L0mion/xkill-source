@@ -48,7 +48,6 @@ When only one process remains, the null process will stop its execution. The las
  * Set Qt Version as "Default Qt version"
 * Run the file "xkill-project\xkill\xkill.sln" from Visual Studio 2012.
 * The solution should contain 9 projects:
-
  * xkill
  * xkill-architecture
  * xkill-input
@@ -58,7 +57,6 @@ When only one process remains, the null process will stop its execution. The las
  * xkill-sound
  * xkill-utilities
  * xkill-utilities-levelexporter (Visual Studio 2010)
-
 * Set "xkill" as startup project (Right click -> "Set as StartUp Project").
 Compile (F5 key). Tested on Microsoft Windows 7 and Microsoft Windows 8, with the setting "Win32", next to the "Release"-setting.
 * Move "xkill-project\xkill-dependencies\DLL move to build" to "xkill-build\bin-Release" (or to "xkill-build\bin-Debug" if compiling with the DEBUG flag set).
