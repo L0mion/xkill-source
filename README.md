@@ -5,7 +5,7 @@ xkill
 
 In a forgotten store-room rests an ancient single-core processor. In this harsh landscape, before multicore-technology, fierce gladiator tournaments are fought in digital arenas by processes struggling to be granted processor execution time (cycles) by the scheduler. These tournaments consist of deadly combat as the processes battle to destroy one another. The incentive for battle is that only one process at a time can execute on the processor.
 
-#### Basics
+### Basics
 
 You are playing as one the processes inside a single-core processor. Priority is awarded to a process when it terminates another process. The goal of XKILL is to have as many cycles as possible.
 
