@@ -50,6 +50,9 @@ When only one process remains, the null process will stop its execution. The las
 [Extra](https://www.youtube.com/watch?v=t3NxIC61-HQ)
 
 ### Compile instructions
+* Get environment and assets repositories:
+ * https://github.com/L0mion/xkill-project
+ * https://github.com/CaterHatterPillar/xkill-resources
 * Install Visual Studio 2012 (x86)
 * Install Qt 4.8 (instructions below)
  * In Visual Studio, navigate to Qt Options (QT5 ->QT Options)
@@ -73,6 +76,8 @@ Compile (F5 key). Tested on Microsoft Windows 7 and Microsoft Windows 8, with th
 
 If it does not work, try downloading "Visual C++ Redistributable for Visual Studio 2012" ("vcredist_x86.exe" or "vcredist_x64.exe")
 Perhaps through this link: http://www.microsoft.com/en-us/download/details.aspx?id=30679
+
+---
 
 ### Download
 
