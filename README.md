@@ -36,7 +36,7 @@ When only one process remains, the null process will stop its execution. The las
 * Up to 9 players split screen multiplayer (gamepads required).
 * Customizable weaponry.
 * 5 different power ups (referred to as hacks).
-* Close to 2000 unique nicknames! No match will feel the same. 
+* Ludicrously overkill randomized nickname selector, close to 2000 unique names!
 
 
 ### Video
