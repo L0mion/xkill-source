@@ -32,12 +32,11 @@ When only one process remains, the null process will stop its execution. The las
 
 ### Key Features
 
-* Unique gameplay inspired by process scheduling.
-* Up to 9 players split screen multiplayer (gamepads required).
+* Unique gameplay (invariant enjoyment) inspired by operating system process scheduling.
+* Up to 9 players split screen multiplayer (9 Xbox 360 gamepads (or equivalent) is required. Batteries not included).
 * Customizable weaponry.
 * 5 different power ups (referred to as hacks).
-* Ludicrously overkill randomized nickname selector, close to 2000 unique names!
-
+* Ludicrously over(X)kill randomized nickname selector, close to 2000 unique names! (for example: "Göran Fries")
 
 ### Video
 
@@ -53,12 +52,13 @@ When only one process remains, the null process will stop its execution. The las
 * Get environment and assets repositories:
  * https://github.com/L0mion/xkill-project
  * https://github.com/CaterHatterPillar/xkill-resources
-* Install Visual Studio 2012 (x86)
-* Install Qt 4.8 (instructions below)
+* Install Visual Studio 2012 (tested with "Visual Studio 2012 Ultimate", x86)
+* Install Qt Visual Studio Add-in 1.2.0 (http://download.qt-project.org/official_releases/vsaddin/qt-vs-addin-1.2.0-opensource.exe)
+* Download Qt 4.8.4 SDK (http://download.qt-project.org/archive/qt/4.8/4.8.4/qt-everywhere-opensource-src-4.8.4.zip)
  * In Visual Studio, navigate to Qt Options (QT5 ->QT Options)
  * Add path to downloaded Qt SDKn, e.g. "C:\Qt\qt-everywhere-opensource-src-4.8.4" 
  * Set Qt Version as "Default Qt version"
-* Run the file "xkill-project\xkill\xkill.sln" from Visual Studio 2012.
+* Open the file "xkill-project\xkill\xkill.sln" with Visual Studio 2012.
 * The solution should contain 9 projects:
  * xkill
  * xkill-architecture
@@ -70,9 +70,10 @@ When only one process remains, the null process will stop its execution. The las
  * xkill-utilities
  * xkill-utilities-levelexporter (Visual Studio 2010)
 * Set "xkill" as startup project (Right click -> "Set as StartUp Project").
-Compile (F5 key). Tested on Microsoft Windows 7 and Microsoft Windows 8, with the setting "Win32", next to the "Release"-setting.
+Compile (F7 key). Tested on Microsoft Windows 7 and Microsoft Windows 8, with the setting "Win32" (Solution Platforms), next to the "Release" setting (Solution Configurations).
+* Nota bene: XKILL will crash if compiled with the "Debug" setting, when the in-game null process starts executing. Don't ask.
 * Move "xkill-project\xkill-dependencies\DLL move to build" to "xkill-build\bin-Release" (or to "xkill-build\bin-Debug" if compiling with the DEBUG flag set).
-* To run XKILL: run the "xkill-build\bin-Release\xkill.exe" file.
+* To run XKILL, press F5 from within Visual Studio or run the "xkill-build\bin-Release\xkill.exe" file.
 
 If it does not work, try downloading "Visual C++ Redistributable for Visual Studio 2012" ("vcredist_x86.exe" or "vcredist_x64.exe")
 Perhaps through this link: http://www.microsoft.com/en-us/download/details.aspx?id=30679
